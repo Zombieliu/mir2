@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import {
   getOriginalAudioSettings,
@@ -32,9 +32,49 @@ export function OriginalAudioSettingsControls({
     setSettings(setOriginalAudioSettings(nextSettings));
   }
 
+  const anyEnabled = settings.musicEnabled || settings.effectsEnabled;
+  // A single "master" level reflects the loudest active channel and, when
+  // dragged, scales both channels together — mirroring the original options
+  // screen's combined volume control without needing a separate lib field.
+  const masterVolume = Math.max(
+    settings.musicEnabled ? settings.musicVolume : 0,
+    settings.effectsEnabled ? settings.effectsVolume : 0,
+  );
+
+  function setMasterVolume(value: number) {
+    updateSettings({ musicVolume: value, effectsVolume: value });
+  }
+
+  function toggleMuteAll() {
+    const nextEnabled = !anyEnabled;
+    updateSettings({ musicEnabled: nextEnabled, effectsEnabled: nextEnabled });
+  }
+
   return (
     <section className={controlClassName} aria-label={t("ui.audio", [], "Audio")}>
-      {compact ? null : <div className="audio-settings-title">{t("ui.audio", [], "Audio")}</div>}
+      {compact ? null : (
+        <div className="audio-settings-title" style={TITLE_ROW_STYLE}>
+          <span>{t("ui.audio", [], "Audio")}</span>
+          <button
+            type="button"
+            className="audio-settings-mute"
+            data-audio-enabled={anyEnabled}
+            aria-pressed={!anyEnabled}
+            onClick={toggleMuteAll}
+            style={MUTE_BUTTON_STYLE}
+          >
+            {anyEnabled ? t("ui.muteAll", [], "Mute All") : t("ui.unmuteAll", [], "Unmute All")}
+          </button>
+        </div>
+      )}
+      {compact ? null : (
+        <AudioVolumeSlider
+          label={t("ui.masterVolume", [], "Master Volume")}
+          value={masterVolume}
+          disabled={!anyEnabled}
+          onChange={setMasterVolume}
+        />
+      )}
       <AudioToggleButton
         label={t("ui.music", [], "Music")}
         enabled={settings.musicEnabled}
@@ -63,6 +103,25 @@ export function OriginalAudioSettingsControls({
   );
 }
 
+const TITLE_ROW_STYLE: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 8,
+};
+
+const MUTE_BUTTON_STYLE: CSSProperties = {
+  border: "1px solid rgba(190, 157, 99, 0.5)",
+  background: "rgba(30, 20, 12, 0.86)",
+  color: "#dfc58f",
+  font: "10px Georgia, 'Times New Roman', serif",
+  letterSpacing: 0,
+  textTransform: "uppercase",
+  textShadow: "1px 1px 0 #000",
+  padding: "1px 7px",
+  cursor: "pointer",
+};
+
 type AudioVolumeSliderProps = {
   label: string;
   value: number;
@@ -83,6 +142,7 @@ function AudioVolumeSlider({ label, value, disabled, onChange }: AudioVolumeSlid
         value={percent}
         disabled={disabled}
         aria-label={label}
+        aria-valuetext={`${percent}%`}
         onChange={(event) => onChange(Number(event.target.value) / 100)}
       />
       <strong>{percent}%</strong>

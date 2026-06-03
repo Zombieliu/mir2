@@ -56995,6 +56995,68 @@ fn equipping_dc_range_weapon_produces_damage_spread() {
 }
 
 #[test]
+fn luck_biases_basic_melee_attack_power_toward_max() {
+    // Crystal `PlayerObject.Attack()` rolls melee with `GetAttackPower(MinDC,
+    // MaxDC)`, which is Luck-biased (`MapObject.GetAttackPower`): positive Luck
+    // can force the MaxDC end. The basic melee auto-attack must honor Luck just
+    // like the player's spells do, so high Luck shifts the rolls toward MaxDC.
+    fn rolled_melee_with_luck(luck: i32) -> Vec<i32> {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        // Open a wide DC spread so a Luck max-bias is observable.
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 24);
+        if luck != 0 {
+            equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_LUCK, luck);
+        }
+        assert_eq!(
+            super::player_stats(session.app.world()).luck(),
+            luck,
+            "weapon Luck stat should reach the combat luck channel"
+        );
+        (0..96)
+            .map(|tick| super::crystal_player_rolled_melee_damage(session.app.world(), tick))
+            .collect()
+    }
+
+    let no_luck = rolled_melee_with_luck(0);
+    let lucky = rolled_melee_with_luck(9); // MaxLuck is 10, so 9 forces max ~90%.
+
+    let stats = {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 24);
+        super::player_stats(session.app.world())
+    };
+    let (min, max) = (stats.min_dc(), stats.max_dc());
+
+    // Every roll (with or without Luck, no crit gear) stays in [min, max].
+    for &d in no_luck.iter().chain(lucky.iter()) {
+        assert!(
+            (min..=max).contains(&d),
+            "rolled {d} outside [{min}, {max}]"
+        );
+    }
+
+    let max_rolls = |rolls: &[i32]| rolls.iter().filter(|&&d| d == max).count();
+    let lucky_maxes = max_rolls(&lucky);
+    let plain_maxes = max_rolls(&no_luck);
+
+    // High Luck forces the MaxDC end far more often than an unlucky swing.
+    assert!(
+        lucky_maxes > plain_maxes,
+        "Luck 9 should land MaxDC more often (lucky={lucky_maxes}, plain={plain_maxes})"
+    );
+    let lucky_sum: i64 = lucky.iter().map(|&d| i64::from(d)).sum();
+    let plain_sum: i64 = no_luck.iter().map(|&d| i64::from(d)).sum();
+    assert!(
+        lucky_sum > plain_sum,
+        "Luck should raise average melee damage (lucky_sum={lucky_sum}, plain_sum={plain_sum})"
+    );
+}
+
+#[test]
 fn equipping_hp_gear_raises_max_hp_and_unequip_restores() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -57028,8 +57090,13 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Gear grants crit rate 100 / damage 10, but caps clamp them to 18 / 10
-    // (Crystal RefreshStatCaps). So crits land ~18% of the time and each adds
-    // CriticalDamage*10% = +100% (a doubled blow).
+    // (Crystal RefreshStatCaps). Crystal's crit roll is
+    // `Random(100) < CriticalRate * Settings.CriticalRateWeight` (weight 5,
+    // HumanObject.cs:7156), so a rate of 18 lands a crit 18*5 = 90% of the time.
+    // Each landed crit is amplified by
+    // `Floor(damage * (CriticalDamage / CriticalDamageWeight) * 10)` (weight 50,
+    // HumanObject.cs:7159), i.e. CriticalDamage 10 → `damage + Floor(damage*2)` =
+    // a *tripled* blow.
     equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_RATE, 100);
     equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_DAMAGE, 10);
     let stats = super::player_stats(session.app.world());
@@ -57042,15 +57109,79 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
         let d = super::crystal_player_rolled_melee_damage(session.app.world(), tick);
         if (min..=max).contains(&d) {
             normals += 1;
-        } else if (2 * min..=2 * max).contains(&d) {
-            // crit: Random(MinDC,MaxDC) doubled by CriticalDamage 10.
+        } else if (3 * min..=3 * max).contains(&d) {
+            // crit: Random(MinDC,MaxDC) tripled by CriticalDamage 10 (weight 50).
             crits += 1;
         } else {
             panic!("rolled {d} is neither a normal [{min},{max}] nor crit hit");
         }
     }
-    assert!(crits > 0, "an 18% crit rate should land some crits");
-    assert!(normals > 0, "an 18% crit rate should not crit every swing");
+    assert!(
+        crits > 0,
+        "a 90% effective crit rate should land many crits"
+    );
+    assert!(
+        normals > 0,
+        "a 90% effective crit rate should still leave some normal swings"
+    );
+    // With weight 5 a clamped rate of 18 is a 90% crit chance, so crits must
+    // dominate (this would fail under the retired 1x-weight assumption).
+    assert!(
+        crits > normals,
+        "90% crit chance should produce more crits ({crits}) than normals ({normals})"
+    );
+}
+
+#[test]
+fn critical_amplified_damage_matches_crystal_weight_arithmetic() {
+    // Crystal HumanObject.cs:7159 / MonsterObject.cs:2597:
+    //   damage + Floor(damage * ((CriticalDamage / CriticalDamageWeight) * 10))
+    // with the default Settings.CriticalDamageWeight = 50.
+
+    // CriticalDamage 10: (10/50)*10 = 2.0 → damage + 2*damage = tripled.
+    assert_eq!(super::crystal_critical_amplified_damage(100, 10), 300);
+    assert_eq!(super::crystal_critical_amplified_damage(37, 10), 37 + 74);
+
+    // CriticalDamage 5: (5/50)*10 = 1.0 → doubled.
+    assert_eq!(super::crystal_critical_amplified_damage(100, 5), 200);
+
+    // CriticalDamage 1: (1/50)*10 = 0.2 → +20% (floored).
+    assert_eq!(super::crystal_critical_amplified_damage(100, 1), 120);
+    assert_eq!(super::crystal_critical_amplified_damage(99, 1), 99 + 19); // Floor(19.8)
+
+    // CriticalDamage 0 is treated as a minimal amplifier of 1 (matches the
+    // engine's `.max(1)` floor): (1/50)*10 = 0.2 → +20%.
+    assert_eq!(super::crystal_critical_amplified_damage(100, 0), 120);
+
+    // Zero / negative base damage is unchanged.
+    assert_eq!(super::crystal_critical_amplified_damage(0, 10), 0);
+}
+
+#[test]
+fn magic_get_damage_honors_sub_one_multiplier_and_truncates() {
+    // Crystal `UserMagic.GetDamage(base) = (int)((base + GetPower()) * GetMultiplier())`
+    // (MagicInfo.cs:180). The multiplier is NOT floored at 1.0, and the result is
+    // truncated, not rounded.
+
+    // HalfMoon: power 0/0, mpower 0/0, MultiplierBase 0.3, MultiplierBonus 0.1.
+    let half_moon = mir2_game_data::crystal_magic_by_spell("HalfMoon").expect("HalfMoon");
+    // GetPower() == 0, so GetDamage(base) == (int)(base * multiplier).
+    // Level 0: multiplier 0.3 -> (int)(100*0.3) = 30 (the retired floor gave 100).
+    assert_eq!(super::crystal_magic_get_damage(&half_moon, 0, 100), 30);
+    // Level 3: multiplier 0.3 + 3*0.1 = 0.6 -> (int)(100*0.6) = 60.
+    assert_eq!(super::crystal_magic_get_damage(&half_moon, 3, 100), 60);
+    // Truncation (not rounding): (int)(99*0.3) = (int)(29.7) = 29.
+    assert_eq!(super::crystal_magic_get_damage(&half_moon, 0, 99), 29);
+
+    // Thrusting: MultiplierBase 0.25 -> (int)(100*0.25) = 25.
+    let thrusting = mir2_game_data::crystal_magic_by_spell("Thrusting").expect("Thrusting");
+    assert_eq!(super::crystal_magic_get_damage(&thrusting, 0, 100), 25);
+
+    // FireBall: power 2/0, mpower 8/0, MultiplierBase 1.0. GetPower() level 0 =
+    // Round((8/4)*1 + 2) = 4, GetDamage(100) = (int)((100+4)*1.0) = 104.
+    let fireball = mir2_game_data::crystal_magic_by_spell("FireBall").expect("FireBall");
+    assert_eq!(super::crystal_magic_get_power(&fireball, 0), 4);
+    assert_eq!(super::crystal_magic_get_damage(&fireball, 0, 100), 104);
 }
 
 #[test]
@@ -57285,4 +57416,163 @@ fn zone_player_combat_stats_use_real_engine_ranges() {
         stats.max_ac
     );
     assert!(stats.has_authoritative_damage());
+}
+
+// Crystal `MirConnection.ChangeAMode` (MirConnection.cs:1432) stores
+// `Player.AMode` and echoes `S.ChangeAMode { Mode }`. Mirror that here: the
+// handler persists the attack mode for snapshots and returns the echo packet.
+#[test]
+fn change_a_mode_packet_stores_attack_mode_and_echoes_crystal_packet() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Default attack mode is Peace (0).
+    assert_eq!(session.world_snapshot().stage5_systems.attack_mode, 0);
+
+    // AttackMode.RedBrown == 4 in Crystal (Shared/Enums.cs AttackMode).
+    let packets = session.handle_packet(ClientPacket::ChangeAMode { mode: 4 });
+    assert_eq!(packets, vec![ServerPacket::ChangeAMode { mode: 4 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.attack_mode, 4);
+
+    // A second change overwrites the stored mode and echoes again.
+    let packets = session.handle_packet(ClientPacket::ChangeAMode { mode: 1 });
+    assert_eq!(packets, vec![ServerPacket::ChangeAMode { mode: 1 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.attack_mode, 1);
+}
+
+// Crystal `MirConnection.ChangePMode` (MirConnection.cs:1440) stores
+// `Player.PMode` and echoes `S.ChangePMode { Mode }`.
+#[test]
+fn change_p_mode_packet_stores_pet_mode_and_echoes_crystal_packet() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 0);
+
+    // PetMode.MoveOnly == 1 in Crystal (Shared/Enums.cs PetMode).
+    let packets = session.handle_packet(ClientPacket::ChangePMode { mode: 1 });
+    assert_eq!(packets, vec![ServerPacket::ChangePMode { mode: 1 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 1);
+
+    let packets = session.handle_packet(ClientPacket::ChangePMode { mode: 3 });
+    assert_eq!(packets, vec![ServerPacket::ChangePMode { mode: 3 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 3);
+}
+
+// Crystal `PlayerObject.SetAutoPotValue` (PlayerObject.cs:9639) clamps the
+// trigger percentage to <= 99 and echoes `S.SetAutoPotValue` while the hero is
+// spawned with AutoPot enabled. This drives the same handler the new gateway
+// `SetAutoPotValue` browser command reaches end-to-end.
+#[test]
+fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.handle_packet(ClientPacket::NewHero {
+        name: "Aide".to_string(),
+        gender: MirGender::Female,
+        class: MirClass::Taoist,
+    });
+
+    // Stat byte 0 == HP. 250 clamps to 99 (Crystal Math.Min(99, value)).
+    let packets = session.handle_packet(ClientPacket::SetAutoPotValue {
+        stat: 0,
+        value: 250,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::SetAutoPotValue {
+            stat: 0,
+            value: 250,
+        }]
+    );
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.auto_hp_percent),
+        Some(99)
+    );
+
+    // Any non-zero stat byte targets MP.
+    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 1, value: 40 });
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.auto_mp_percent),
+        Some(40)
+    );
+}
+
+// Crystal `PlayerObject.SetAutoPotItem` (PlayerObject.cs:9651) routes by grid
+// (HeroHPItem/HeroMPItem) and zeroes an unknown item index. Confirms the
+// handler the new gateway `SetAutoPotItem` browser command reaches.
+#[test]
+fn set_auto_pot_item_packet_routes_by_grid_for_spawned_hero() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.handle_packet(ClientPacket::NewHero {
+        name: "Aide".to_string(),
+        gender: MirGender::Female,
+        class: MirClass::Taoist,
+    });
+
+    // An unknown/zero item index resolves to 0 (Crystal GetItemInfo == null).
+    let packets = session.handle_packet(ClientPacket::SetAutoPotItem {
+        grid: MirGridType::HeroHpItem,
+        item_index: 0,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::SetAutoPotItem {
+            grid: MirGridType::HeroHpItem as u8,
+            item_index: 0,
+        }]
+    );
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.hp_item_index),
+        Some(0)
+    );
+
+    // MP grid routes to the MP item slot.
+    session.handle_packet(ClientPacket::SetAutoPotItem {
+        grid: MirGridType::HeroMpItem,
+        item_index: 0,
+    });
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.mp_item_index),
+        Some(0)
+    );
+}
+
+// Without a spawned AutoPot hero, Crystal's SetAutoPot* handlers early-return
+// (PlayerObject.cs:9641 / :9653). The Rust handlers mirror that no-op.
+#[test]
+fn set_auto_pot_packets_no_op_without_spawned_hero() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(session
+        .handle_packet(ClientPacket::SetAutoPotValue { stat: 0, value: 50 })
+        .is_empty());
+    assert!(session
+        .handle_packet(ClientPacket::SetAutoPotItem {
+            grid: MirGridType::HeroHpItem,
+            item_index: 0,
+        })
+        .is_empty());
 }

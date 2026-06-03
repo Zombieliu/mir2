@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import {
   CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX,
   CRYSTAL_GAME_SHOP_ITEMS,
 } from "../../lib/generated/crystal-game-shop-data";
+import type { ItemTooltipGrade } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -400,3 +401,539 @@ function formatGameShopStock(stock: number) {
 function originalItemIconPath(icon: number) {
   return `/original-ui/Items/${icon}.png`;
 }
+
+/* ========================================================================= */
+/* NPC merchant shop (Buy / Sell / Repair / Special)                         */
+/*                                                                           */
+/* Mirrors Crystal's NPCGoodsDialog (buy list) + NPCDropDialog (sell/repair) */
+/* and PanelType { Buy, Sell, Repair, SpecialRepair }. This is a separate,   */
+/* self-contained presentational component from the cash GameShopWindow      */
+/* above; every action callback is optional so unwired buttons render grey   */
+/* and never crash. Wiring happens later in the host.                        */
+/* ========================================================================= */
+
+export type NpcShopTab = "buy" | "sell" | "repair" | "special";
+
+/** An item offered for sale by the merchant. */
+export type NpcShopGood = {
+  /** Stable id the host uses to identify the offer in onBuy. */
+  id: number | string;
+  name: string;
+  icon: number;
+  /** Unit price in gold. */
+  price: number;
+  /** Stack size sold per purchase (>=1). */
+  count?: number;
+  /** Item rarity → colours the name like the original client. */
+  grade?: ItemTooltipGrade;
+  /** Optional remaining stock; undefined / <0 renders as unlimited. */
+  stock?: number;
+  description?: string;
+  /** Marks an offer the player cannot afford / is not allowed to buy. */
+  disabled?: boolean;
+};
+
+/** A player-owned item shown in the Sell / Repair / Special lists. */
+export type NpcShopOwnedItem = {
+  /** Stable id the host uses (uniqueId). */
+  id: number | string;
+  name: string;
+  icon: number;
+  /** Sell value (Sell tab) or repair cost (Repair/Special tabs) in gold. */
+  price: number;
+  count?: number;
+  grade?: ItemTooltipGrade;
+  description?: string;
+  durabilityCurrent?: number;
+  durabilityMax?: number;
+  /** When true the row is shown disabled (e.g. DontSell / DontRepair binds). */
+  disabled?: boolean;
+};
+
+export type NpcShopWindowProps = {
+  t: TranslateFn;
+  /** Merchant name shown in the header. */
+  npcName?: string;
+  /** Player gold, shown in the footer and used to grey unaffordable rows. */
+  gold?: number;
+  /** Initial tab; defaults to "buy". */
+  initialTab?: NpcShopTab;
+  /** Which tabs the merchant supports; defaults to all four. */
+  availableTabs?: NpcShopTab[];
+
+  buyItems?: NpcShopGood[];
+  /** Previously-bought items available to buy back at their sell price. */
+  buyBackItems?: NpcShopGood[];
+  sellItems?: NpcShopOwnedItem[];
+  repairItems?: NpcShopOwnedItem[];
+  specialRepairItems?: NpcShopOwnedItem[];
+
+  onBuy?: (id: number | string, quantity: number) => void;
+  onBuyBack?: (id: number | string, quantity: number) => void;
+  onSell?: (id: number | string, quantity: number) => void;
+  onRepair?: (id: number | string) => void;
+  onSpecialRepair?: (id: number | string) => void;
+  onClose: () => void;
+};
+
+const NPC_SHOP_GRADE_COLOUR: Record<ItemTooltipGrade, string> = {
+  common: "#f4ecd6",
+  rare: "#6fc3ff",
+  heroic: "#7be07a",
+  legendary: "#f0b94a",
+  mythical: "#e07ad0",
+};
+
+function npcShopTabLabel(t: TranslateFn, tab: NpcShopTab): string {
+  switch (tab) {
+    case "sell":
+      return t("ui.shopSell", [], "Sell");
+    case "repair":
+      return t("ui.shopRepair", [], "Repair");
+    case "special":
+      return t("ui.shopSpecialRepair", [], "Special");
+    case "buy":
+    default:
+      return t("ui.shopBuy", [], "Buy");
+  }
+}
+
+function formatGold(value: number) {
+  return Math.max(0, Math.trunc(value)).toLocaleString("en-US");
+}
+
+export function NpcShopWindow({
+  t,
+  npcName,
+  gold,
+  initialTab = "buy",
+  availableTabs = ["buy", "sell", "repair", "special"],
+  buyItems,
+  buyBackItems,
+  sellItems,
+  repairItems,
+  specialRepairItems,
+  onBuy,
+  onBuyBack,
+  onSell,
+  onRepair,
+  onSpecialRepair,
+  onClose,
+}: NpcShopWindowProps) {
+  const tabs = availableTabs.length ? availableTabs : (["buy"] as NpcShopTab[]);
+  const [tab, setTab] = useState<NpcShopTab>(tabs.includes(initialTab) ? initialTab : tabs[0]);
+  const [showBuyBack, setShowBuyBack] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+
+  const rows: Array<NpcShopGood | NpcShopOwnedItem> = useMemo(() => {
+    if (tab === "buy") return showBuyBack ? buyBackItems ?? [] : buyItems ?? [];
+    if (tab === "sell") return sellItems ?? [];
+    if (tab === "repair") return repairItems ?? [];
+    return specialRepairItems ?? [];
+  }, [tab, showBuyBack, buyItems, buyBackItems, sellItems, repairItems, specialRepairItems]);
+
+  const selected = useMemo(
+    () => rows.find((row) => row.id === selectedId) ?? null,
+    [rows, selectedId],
+  );
+
+  // Clamp quantity to the selected stack (sell) — buy quantity is 1..99.
+  const maxQuantity = tab === "sell" ? Math.max(1, (selected as NpcShopOwnedItem | null)?.count ?? 1) : 99;
+  const effectiveQuantity = Math.max(1, Math.min(maxQuantity, quantity));
+  const supportsQuantity = tab === "buy" || tab === "sell";
+
+  const total = selected ? Math.max(0, Math.trunc(selected.price)) * (supportsQuantity ? effectiveQuantity : 1) : 0;
+  const goldKnown = typeof gold === "number";
+  const affordable = !goldKnown || tab !== "buy" || total <= gold!;
+
+  function confirm() {
+    if (!selected) return;
+    switch (tab) {
+      case "buy":
+        if (showBuyBack) onBuyBack?.(selected.id, effectiveQuantity);
+        else onBuy?.(selected.id, effectiveQuantity);
+        break;
+      case "sell":
+        onSell?.(selected.id, effectiveQuantity);
+        break;
+      case "repair":
+        onRepair?.(selected.id);
+        break;
+      case "special":
+        onSpecialRepair?.(selected.id);
+        break;
+    }
+  }
+
+  const actionHandler =
+    tab === "buy"
+      ? showBuyBack
+        ? onBuyBack
+        : onBuy
+      : tab === "sell"
+        ? onSell
+        : tab === "repair"
+          ? onRepair
+          : onSpecialRepair;
+  const actionLabel =
+    tab === "buy"
+      ? showBuyBack
+        ? t("ui.shopBuyBack", [], "Buy Back")
+        : t("ui.shopBuy", [], "Buy")
+      : tab === "sell"
+        ? t("ui.shopSell", [], "Sell")
+        : tab === "repair"
+          ? t("ui.shopRepair", [], "Repair")
+          : t("ui.shopSpecialRepair", [], "Special Repair");
+  const confirmEnabled = Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable;
+
+  return (
+    <section aria-label={t("ui.shopTitle", [], "Shop")} data-shop-tab={tab} style={shopStyle.window}>
+      <div style={shopStyle.header}>
+        <strong style={shopStyle.title}>{npcName?.trim() || t("ui.shopTitle", [], "Shop")}</strong>
+        <div style={shopStyle.close}>
+          <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
+        </div>
+      </div>
+
+      <div style={shopStyle.tabs}>
+        {tabs.map((entry) => (
+          <button
+            key={entry}
+            type="button"
+            style={{ ...shopStyle.tab, ...(entry === tab ? shopStyle.tabOn : null) }}
+            aria-pressed={entry === tab}
+            onClick={() => {
+              setTab(entry);
+              setSelectedId(null);
+              setQuantity(1);
+              if (entry !== "buy") setShowBuyBack(false);
+            }}
+          >
+            {npcShopTabLabel(t, entry)}
+          </button>
+        ))}
+      </div>
+
+      {tab === "buy" && (buyBackItems?.length || showBuyBack) ? (
+        <div style={shopStyle.subTabs}>
+          <button
+            type="button"
+            style={{ ...shopStyle.subTab, ...(!showBuyBack ? shopStyle.subTabOn : null) }}
+            onClick={() => {
+              setShowBuyBack(false);
+              setSelectedId(null);
+            }}
+          >
+            {t("ui.shopStock", [], "Stock")}
+          </button>
+          <button
+            type="button"
+            style={{ ...shopStyle.subTab, ...(showBuyBack ? shopStyle.subTabOn : null) }}
+            onClick={() => {
+              setShowBuyBack(true);
+              setSelectedId(null);
+            }}
+          >
+            {t("ui.shopBuyBack", [], "Buy Back")}
+          </button>
+        </div>
+      ) : null}
+
+      <div style={shopStyle.listHead}>
+        <span style={shopStyle.colItem}>{t("client.Type", [], "Item")}</span>
+        <span style={shopStyle.colPrice}>
+          {tab === "repair" || tab === "special" ? t("client.Repair", [], "Repair: ").replace(/:\s*$/, "") : t("client.Price", [], "Price")}
+        </span>
+      </div>
+
+      <div style={shopStyle.list}>
+        {rows.length ? (
+          rows.map((row) => {
+            const owned = row as NpcShopOwnedItem;
+            const isSelected = row.id === selectedId;
+            const colour = row.grade ? NPC_SHOP_GRADE_COLOUR[row.grade] : "#f4ecd6";
+            const unaffordable = goldKnown && tab === "buy" && !showBuyBack && Math.trunc(row.price) > gold!;
+            const rowDisabled = Boolean(row.disabled);
+            return (
+              <button
+                key={`shop-row-${row.id}`}
+                type="button"
+                style={{
+                  ...shopStyle.row,
+                  ...(isSelected ? shopStyle.rowSelected : null),
+                  ...(rowDisabled ? shopStyle.rowDisabled : null),
+                }}
+                aria-pressed={isSelected}
+                disabled={rowDisabled}
+                onClick={() => {
+                  setSelectedId(row.id);
+                  setQuantity(1);
+                }}
+                onDoubleClick={() => {
+                  setSelectedId(row.id);
+                  if (confirmEnabledFor(row, tab, showBuyBack, gold)) {
+                    if (tab === "buy") (showBuyBack ? onBuyBack : onBuy)?.(row.id, 1);
+                    else if (tab === "sell") onSell?.(row.id, 1);
+                    else if (tab === "repair") onRepair?.(row.id);
+                    else onSpecialRepair?.(row.id);
+                  }
+                }}
+              >
+                <span style={shopStyle.rowIconArea}>
+                  <img style={shopStyle.rowIcon} src={originalItemIconPath(row.icon)} alt="" draggable={false} />
+                  {row.count && row.count > 1 ? <span style={shopStyle.rowCount}>{row.count}</span> : null}
+                </span>
+                <span style={shopStyle.rowName}>
+                  <span style={{ color: colour, fontWeight: 700 }}>{row.name}</span>
+                  {(tab === "repair" || tab === "special") && owned.durabilityMax ? (
+                    <span style={shopStyle.rowDura}>{`${owned.durabilityCurrent ?? 0}/${owned.durabilityMax}`}</span>
+                  ) : null}
+                </span>
+                <span style={{ ...shopStyle.rowPrice, ...(unaffordable ? shopStyle.rowPriceBad : null) }}>
+                  {formatGold(row.price)}
+                </span>
+              </button>
+            );
+          })
+        ) : (
+          <div style={shopStyle.empty}>{t("ui.shopEmpty", [], "Nothing available.")}</div>
+        )}
+      </div>
+
+      {selected ? (
+        <div style={shopStyle.detail}>
+          <div style={shopStyle.detailHead}>
+            <img style={shopStyle.detailIcon} src={originalItemIconPath(selected.icon)} alt="" draggable={false} />
+            <span style={{ color: selected.grade ? NPC_SHOP_GRADE_COLOUR[selected.grade] : "#f4dcaf", fontWeight: 700 }}>
+              {selected.name}
+            </span>
+          </div>
+          {(selected as NpcShopOwnedItem).durabilityMax ? (
+            <div style={shopStyle.detailLine}>
+              {`${t("client.Durability", [], "Durability:")} ${(selected as NpcShopOwnedItem).durabilityCurrent ?? 0}/${(selected as NpcShopOwnedItem).durabilityMax}`}
+            </div>
+          ) : null}
+          {selected.description ? <div style={shopStyle.detailLine}>{selected.description}</div> : null}
+        </div>
+      ) : null}
+
+      <div style={shopStyle.controls}>
+        {supportsQuantity ? (
+          <div style={shopStyle.quantityRow}>
+            <button
+              type="button"
+              style={shopStyle.stepButton}
+              disabled={effectiveQuantity <= 1}
+              aria-label={t("ui.splitDecrease", [], "Less")}
+              onClick={() => setQuantity((current) => Math.max(1, Math.min(maxQuantity, current) - 1))}
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min={1}
+              max={maxQuantity}
+              value={effectiveQuantity}
+              aria-label={t("ui.shopQuantity", [], "Quantity")}
+              style={shopStyle.quantityInput}
+              onChange={(event) => {
+                const parsed = Number.parseInt(event.target.value, 10);
+                setQuantity(Number.isFinite(parsed) ? parsed : 1);
+              }}
+            />
+            <button
+              type="button"
+              style={shopStyle.stepButton}
+              disabled={effectiveQuantity >= maxQuantity}
+              aria-label={t("ui.splitIncrease", [], "More")}
+              onClick={() => setQuantity((current) => Math.min(maxQuantity, Math.max(1, current) + 1))}
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <div style={shopStyle.quantitySpacer} />
+        )}
+
+        <button
+          type="button"
+          style={{ ...shopStyle.confirmButton, ...(!confirmEnabled ? shopStyle.confirmDisabled : null) }}
+          disabled={!confirmEnabled}
+          title={!affordable ? t("client.LowGold", [], "Not enough gold.") : undefined}
+          onClick={confirm}
+        >
+          {actionLabel}
+        </button>
+      </div>
+
+      <div style={shopStyle.footer}>
+        <span style={shopStyle.footerLabel}>{t("ui.shopTotal", [], "Total")}</span>
+        <span style={{ ...shopStyle.footerValue, ...(!affordable ? shopStyle.rowPriceBad : null) }}>{formatGold(total)}</span>
+        <span style={shopStyle.footerSpacer} />
+        <span style={shopStyle.footerLabel}>{t("client.Gold", [], "Gold")}</span>
+        <span style={shopStyle.footerValue}>{goldKnown ? formatGold(gold!) : "—"}</span>
+      </div>
+    </section>
+  );
+}
+
+function confirmEnabledFor(
+  row: NpcShopGood | NpcShopOwnedItem,
+  tab: NpcShopTab,
+  showBuyBack: boolean,
+  gold: number | undefined,
+): boolean {
+  if (row.disabled) return false;
+  if (tab === "buy" && !showBuyBack && typeof gold === "number") {
+    return Math.trunc(row.price) <= gold;
+  }
+  return true;
+}
+
+const shopStyle: Record<string, CSSProperties> = {
+  window: {
+    position: "absolute",
+    left: 24,
+    top: 120,
+    width: 264,
+    height: 392,
+    zIndex: 30,
+    border: "1px solid rgba(190, 157, 99, 0.55)",
+    background: "linear-gradient(180deg, rgba(27, 19, 10, 0.97), rgba(11, 8, 5, 0.97))",
+    color: "#f0eee8",
+    fontSize: 12,
+    textShadow: "1px 1px 0 #000",
+    boxShadow: "0 3px 10px rgba(0,0,0,0.5)",
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "4px 6px",
+    borderBottom: "1px solid rgba(190, 157, 99, 0.35)",
+  },
+  title: { fontSize: 12, color: "#f4dcaf", fontWeight: 700 },
+  close: {},
+  tabs: { display: "flex", gap: 2, padding: "4px 6px 0" },
+  tab: {
+    flex: 1,
+    border: "1px solid rgba(190, 157, 99, 0.5)",
+    borderBottom: "none",
+    background: "linear-gradient(180deg, rgba(40, 27, 15, 0.9), rgba(20, 13, 7, 0.9))",
+    color: "#cbb38a",
+    padding: "3px 0",
+    fontSize: 10,
+    cursor: "pointer",
+  },
+  tabOn: {
+    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
+    color: "#f4dcaf",
+    fontWeight: 700,
+  },
+  subTabs: { display: "flex", gap: 2, padding: "4px 6px 0" },
+  subTab: {
+    flex: 1,
+    border: "1px solid rgba(190, 157, 99, 0.4)",
+    background: "rgba(20, 13, 7, 0.9)",
+    color: "#a89568",
+    padding: "2px 0",
+    fontSize: 9,
+    cursor: "pointer",
+  },
+  subTabOn: { borderColor: "rgba(214, 180, 110, 0.8)", color: "#f4dcaf" },
+  listHead: {
+    display: "flex",
+    margin: "4px 6px 0",
+    fontSize: 9,
+    color: "#a89568",
+    borderBottom: "1px solid rgba(190, 157, 99, 0.3)",
+    paddingBottom: 2,
+  },
+  colItem: { flex: 1 },
+  colPrice: { width: 70, textAlign: "right" },
+  list: {
+    margin: "2px 6px",
+    height: 198,
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+  },
+  empty: { padding: "16px 4px", textAlign: "center", fontSize: 11, color: "#9c8d6f" },
+  row: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "2px 4px",
+    border: "1px solid rgba(190, 157, 99, 0.18)",
+    background: "rgba(11, 8, 5, 0.45)",
+    cursor: "pointer",
+    textAlign: "left",
+  },
+  rowSelected: { borderColor: "rgba(214, 180, 110, 0.85)", background: "rgba(60, 38, 18, 0.7)" },
+  rowDisabled: { opacity: 0.4, cursor: "default" },
+  rowIconArea: { position: "relative", width: 28, height: 28, flex: "0 0 28px" },
+  rowIcon: { width: 28, height: 28, imageRendering: "pixelated" },
+  rowCount: { position: "absolute", right: 0, bottom: 0, fontSize: 9, color: "#f4ecd6", textShadow: "1px 1px 0 #000" },
+  rowName: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden", fontSize: 11 },
+  rowDura: { fontSize: 9, color: "#a89568" },
+  rowPrice: { width: 70, textAlign: "right", color: "#f0d98a", fontSize: 11, fontWeight: 700 },
+  rowPriceBad: { color: "#d98a8a" },
+  detail: {
+    margin: "0 6px 2px",
+    padding: "4px 6px",
+    minHeight: 34,
+    border: "1px solid rgba(190, 157, 99, 0.28)",
+    background: "rgba(11, 8, 5, 0.55)",
+    fontSize: 10,
+    color: "#cbb38a",
+  },
+  detailHead: { display: "flex", alignItems: "center", gap: 6, fontSize: 11 },
+  detailIcon: { width: 20, height: 20, imageRendering: "pixelated" },
+  detailLine: { marginTop: 2, lineHeight: 1.3 },
+  controls: { display: "flex", alignItems: "center", gap: 6, padding: "4px 6px" },
+  quantityRow: { display: "flex", alignItems: "center", gap: 2, flex: "0 0 auto" },
+  quantitySpacer: { flex: 1 },
+  stepButton: {
+    width: 20,
+    height: 22,
+    border: "1px solid rgba(190, 157, 99, 0.56)",
+    background: "rgba(19, 12, 8, 0.92)",
+    color: "#f4dcaf",
+    fontSize: 14,
+    lineHeight: "18px",
+    cursor: "pointer",
+  },
+  quantityInput: {
+    width: 42,
+    border: "1px solid rgba(190, 157, 99, 0.56)",
+    background: "rgba(19, 12, 8, 0.92)",
+    color: "#f4dcaf",
+    padding: "3px 4px",
+    fontSize: 11,
+    textAlign: "center",
+  },
+  confirmButton: {
+    flex: 1,
+    border: "1px solid rgba(214, 180, 110, 0.85)",
+    background: "linear-gradient(180deg, rgba(120, 74, 34, 0.96), rgba(70, 40, 20, 0.96))",
+    color: "#f4dcaf",
+    padding: "5px 0",
+    fontSize: 11,
+    cursor: "pointer",
+  },
+  confirmDisabled: { opacity: 0.45, cursor: "default" },
+  footer: {
+    display: "flex",
+    alignItems: "center",
+    gap: 4,
+    padding: "5px 6px",
+    borderTop: "1px solid rgba(190, 157, 99, 0.35)",
+    fontSize: 11,
+  },
+  footerLabel: { color: "#a89568" },
+  footerValue: { color: "#f4dcaf", fontWeight: 700 },
+  footerSpacer: { flex: 1 },
+};

@@ -131,6 +131,11 @@ pub struct ZonePlayerCombatStats {
     /// +10% on a landed crit). Zero for a player with no crit gear.
     pub critical_rate: i32,
     pub critical_damage: i32,
+    /// Crystal `Luck` stat. Biases the physical attack-power roll
+    /// (`MapObject.GetAttackPower`): positive Luck can force the `MaxDC` end,
+    /// negative Luck the `MinDC` end. Zero (the default) leaves the roll uniform,
+    /// so a player with no Luck gear is unaffected.
+    pub luck: i32,
 }
 
 impl ZonePlayerCombatStats {
