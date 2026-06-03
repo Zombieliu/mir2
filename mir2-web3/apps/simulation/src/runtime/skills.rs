@@ -6893,24 +6893,30 @@ pub(super) fn consume_zone_magic_inventory_components(
     }
 }
 
+/// Crystal `UserMagic.GetDamage(0)` — the spell's intrinsic power (no player
+/// attack base). Identical to `crystal_magic_get_damage(magic, level, 0)` by
+/// construction: `(int)(GetPower() * GetMultiplier())` (MagicInfo.cs:180,190).
+///
+/// Previously this truncated `GetPower` via integer division and floored the
+/// multiplier at 1.0, diverging from Crystal for spells whose power has a
+/// fractional `/4` term or a sub-1.0 multiplier. Delegating keeps the intrinsic
+/// helper bit-identical to the canonical formula so the two never drift.
 pub(super) fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i32 {
-    let level = i32::from(level) + 1;
-    let defence_power = i32::from(magic.power_base) + i32::from(magic.power_bonus) / 2;
-    let magic_power = i32::from(magic.mpower_base) + i32::from(magic.mpower_bonus) / 2;
-    let base = defence_power + (magic_power * level) / 4;
-    let multiplier = magic.multiplier_base + f32::from(level as u16 - 1) * magic.multiplier_bonus;
-    ((base.max(1) as f32) * multiplier.max(1.0)).round() as i32
+    crystal_magic_get_damage(magic, level, 0)
 }
 
-/// Crystal `UserMagic.GetPower()` — the spell's intrinsic power scaling:
-/// `Round((MPower / 4) * (Level + 1) + DefPower)`. The MPower/DefPower ranges are
-/// collapsed to their deterministic mean (matching [`crystal_magic_damage`]) so the
-/// value stays reproducible across replays.
+/// Crystal `UserMagic.GetPower()` (MagicInfo.cs:190) —
+/// `(int)Math.Round((MPower() / 4F) * (Level + 1) + DefPower())`. `MPower()`/`DefPower()`
+/// are uniform rolls (`Random(Base, Base + Bonus)`); we collapse them to their
+/// deterministic mean (matching [`crystal_magic_damage`]) so the value stays
+/// reproducible across replays. The whole expression is then evaluated in f32 and
+/// rounded once, mirroring `Math.Round` (the prior code truncated via integer
+/// division, undercounting by up to ~1 power point).
 pub(super) fn crystal_magic_get_power(magic: &CrystalMagicTemplate, level: u8) -> i32 {
-    let level = i32::from(level) + 1;
-    let defence_power = i32::from(magic.power_base) + i32::from(magic.power_bonus) / 2;
-    let magic_power = i32::from(magic.mpower_base) + i32::from(magic.mpower_bonus) / 2;
-    defence_power + (magic_power * level) / 4
+    let level = f32::from(level) + 1.0;
+    let defence_power = f32::from(magic.power_base) + f32::from(magic.power_bonus) / 2.0;
+    let magic_power = f32::from(magic.mpower_base) + f32::from(magic.mpower_bonus) / 2.0;
+    ((magic_power / 4.0) * level + defence_power).round() as i32
 }
 
 /// Crystal `UserMagic.GetMultiplier()` = `MultiplierBase + Level * MultiplierBonus`.
@@ -6918,21 +6924,28 @@ pub(super) fn crystal_magic_multiplier(magic: &CrystalMagicTemplate, level: u8) 
     magic.multiplier_base + f32::from(level) * magic.multiplier_bonus
 }
 
-/// Crystal `UserMagic.GetDamage(damageBase)` = `(damageBase + GetPower()) * GetMultiplier()`.
+/// Crystal `UserMagic.GetDamage(damageBase)` (MagicInfo.cs:180) =
+/// `(int)((damageBase + GetPower()) * GetMultiplier())`.
 ///
 /// This is the canonical magic damage formula. Unlike the legacy approach of adding the
 /// player's attack power *after* the multiplier, Crystal folds `damageBase` (the player's
 /// MC/SC/DC attack roll) into the value *before* applying the level multiplier, so high-level
 /// spells scale the player's gear contribution too.
+///
+/// Crystal does NOT floor the multiplier or the base: many warrior/assassin skills
+/// (HalfMoon 0.3, CrossHalfMoon 0.4, Thrusting 0.25, DoubleSlash/TwinDrakeBlade 0.8,
+/// Hemorrhage 0.2) carry a `MultiplierBase < 1`, so flooring the multiplier at `1.0`
+/// would inflate their damage several-fold. The cast `(int)(...)` truncates toward
+/// zero, so we truncate here rather than round.
 pub(super) fn crystal_magic_get_damage(
     magic: &CrystalMagicTemplate,
     level: u8,
     damage_base: i32,
 ) -> i32 {
     let power = crystal_magic_get_power(magic, level);
-    let multiplier = crystal_magic_multiplier(magic, level).max(1.0);
-    let base = damage_base.saturating_add(power).max(1);
-    ((base as f32) * multiplier).round() as i32
+    let multiplier = crystal_magic_multiplier(magic, level);
+    let base = damage_base.saturating_add(power);
+    ((base as f32) * multiplier).trunc() as i32
 }
 
 /// The player stat channel a spell's `damageBase` is rolled from. Wizard and archer spells
@@ -7477,8 +7490,9 @@ mod crystal_damage_formula_tests {
 
     #[test]
     fn get_damage_with_zero_base_equals_legacy_intrinsic_damage() {
-        // GetDamage(0) must equal the legacy crystal_magic_damage (the spell's intrinsic power),
-        // proving the new formula is a strict superset that adds the attack-power term.
+        // The legacy intrinsic helper `crystal_magic_damage` is now defined as
+        // `GetDamage(0)`, so the two agree for every spell/level by construction
+        // (Crystal MagicInfo.cs:180 with damageBase = 0).
         let magic = test_magic("Lightning", 5, 4, 12, 6, 1.2, 0.4);
         for level in 0..=3u8 {
             assert_eq!(
@@ -7487,6 +7501,19 @@ mod crystal_damage_formula_tests {
                 "level {level} GetDamage(0) should match legacy intrinsic damage",
             );
         }
+
+        // And both equal the hand-computed Crystal value for a clean-integer
+        // spell: DefPower 4, MPower 8, MultiplierBase 2.0.
+        //   GetPower(0) = Round((8/4)*1 + 4) = 6, GetDamage(0) = (int)(6*2.0) = 12.
+        //   GetPower(2) = Round((8/4)*3 + 4) = 10, GetDamage(0) = (int)(10*2.0) = 20.
+        let clean = test_magic("Lightning", 4, 0, 8, 0, 2.0, 0.0);
+        assert_eq!(crystal_magic_damage(&clean, 0), 12);
+        assert_eq!(crystal_magic_damage(&clean, 2), 20);
+
+        // A sub-1.0 multiplier is honored (no longer floored to 1.0):
+        // GetPower 0, MultiplierBase 0.5 -> the intrinsic is (int)(0 * 0.5) = 0.
+        let weak = test_magic("HalfMoon", 0, 0, 0, 0, 0.5, 0.0);
+        assert_eq!(crystal_magic_damage(&weak, 0), 0);
     }
 
     #[test]

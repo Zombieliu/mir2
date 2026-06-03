@@ -298,6 +298,17 @@ pub(super) const CRYSTAL_STAT_HP_RATE_PERCENT: u8 = 46;
 pub(super) const CRYSTAL_STAT_MP_RATE_PERCENT: u8 = 47;
 /// Crystal `Settings.MagicResistWeight` (miss-chance denominator for magic).
 pub(super) const CRYSTAL_MAGIC_RESIST_WEIGHT: i32 = 10;
+/// Crystal `Settings.CriticalRateWeight` (default 5). The crit roll is
+/// `Random(100) < CriticalRate * CriticalRateWeight` (HumanObject.cs:7156,
+/// MonsterObject.cs:2594), so each point of `CriticalRate` is worth 5% crit
+/// chance, not 1%.
+pub(crate) const CRYSTAL_CRITICAL_RATE_WEIGHT: i32 = 5;
+/// Crystal `Settings.CriticalDamageWeight` (default 50, floored to >= 1 by
+/// `Settings.LoadVersion`). On a landed crit the blow is amplified by
+/// `Floor(damage * ((CriticalDamage / CriticalDamageWeight) * 10))`
+/// (HumanObject.cs:7159, MonsterObject.cs:2597) — i.e. each point of
+/// `CriticalDamage` adds `10/50 = 0.2 = 20%` damage.
+pub(crate) const CRYSTAL_CRITICAL_DAMAGE_WEIGHT: i32 = 50;
 /// Crystal `Settings.HealthRegenWeight` / `ManaRegenWeight`.
 pub(super) const CRYSTAL_HEALTH_REGEN_WEIGHT: i32 = 10;
 pub(super) const CRYSTAL_MANA_REGEN_WEIGHT: i32 = 10;

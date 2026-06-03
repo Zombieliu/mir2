@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 
 import { ORIGINAL_UI, type InventoryTabKey } from "../../lib/original-ui";
 import {
+  InventoryContextMenu,
   InventoryDeletePanel,
   InventoryGoldDropPanel,
   InventorySellPanel,
   InventorySplitPanel,
+  InventoryToolbar,
+  inventoryItemMatchesFilter,
+  type InventoryContextAction,
+  type InventoryItemFilter,
+  type InventorySortKey,
 } from "./original-client-inventory-action-panels";
 import {
   equipmentSlotForItemKey,
@@ -22,6 +28,7 @@ import type {
   DisplayWorld,
   EquipmentSlot,
   ItemActionRef,
+  ItemContainer,
   MergeItemRef,
   MoveItemRef,
   TranslateFn,
@@ -49,6 +56,13 @@ type InventoryWindowProps = {
   onRemoveStoragePassword: (currentPassword: string) => void;
   onSellItem: (item: ItemActionRef, count: number) => void;
   onDropGold: (amount: number) => void;
+  /**
+   * Optional server-side reorder of the active bag. When absent the Sort
+   * button renders disabled (the type filter still works client-side).
+   */
+  onSortBag?: (container: ItemContainer, key: InventorySortKey) => void;
+  /** Optional compaction of the active bag; Arrange button greys out if absent. */
+  onAutoArrangeBag?: (container: ItemContainer) => void;
 };
 
 export function InventoryWindow({
@@ -73,8 +87,13 @@ export function InventoryWindow({
   onRemoveStoragePassword,
   onSellItem,
   onDropGold,
+  onSortBag,
+  onAutoArrangeBag,
 }: InventoryWindowProps) {
   const [deleteMode, setDeleteMode] = useState(false);
+  const [itemFilter, setItemFilter] = useState<InventoryItemFilter>("all");
+  const [contextMenu, setContextMenu] = useState<{ item: DisplayItem; x: number; y: number } | null>(null);
+  const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
   const [sellMode, setSellMode] = useState(false);
   const [storageMode, setStorageMode] = useState<"store" | "takeBack" | null>(null);
   const [storagePageIndex, setStoragePageIndex] = useState<0 | 1>(0);
@@ -481,6 +500,45 @@ export function InventoryWindow({
     setPendingGoldDrop(false);
   }
 
+  function runContextAction(item: DisplayItem, action: InventoryContextAction) {
+    const ref: ItemActionRef = {
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+    };
+    switch (action) {
+      case "equip": {
+        const equipSlot = equipmentSlotForItemKey(item.key);
+        if (equipSlot) {
+          onEquipItem(ref, equipSlot);
+        }
+        break;
+      }
+      case "use":
+        onUseItem(ref);
+        break;
+      case "move":
+        setPendingMoveItem(item);
+        setPendingSplitItem(null);
+        setDeleteFeedback(`${t("ui.moveItem", [], "Move")}: ${item.name}`);
+        break;
+      case "split":
+        setPendingSplitItem(item);
+        setSplitCount("1");
+        setPendingMoveItem(null);
+        break;
+      case "drop":
+        setPendingDeleteItem(item);
+        break;
+      case "sell":
+        setPendingSellItem(item);
+        break;
+    }
+  }
+
+  const activeSortContainer: ItemContainer = activeTab === "quest" ? "bag1" : activeTab;
+
   return (
     <div className={`window-shell inventory-window ${showStorageWindow ? "with-storage" : ""}`}>
       <img className="window-frame" src={ORIGINAL_UI.inventory.frame} alt="" draggable={false} />
@@ -559,11 +617,26 @@ export function InventoryWindow({
         </button>
       </div>
       <div className="inventory-grid">
-        {ORIGINAL_UI.inventory.slots.map((slot, slotIndex) => (
+        {ORIGINAL_UI.inventory.slots.map((slot, slotIndex) => {
+          const isDropTarget = Boolean(pendingMoveItem) && dragOverSlot === slotIndex;
+          return (
           <div
             key={slot.key}
             className={`inventory-slot ${activeTab === "quest" ? "quest" : ""}`}
-            style={{ left: slot.x, top: slot.y }}
+            style={{
+              left: slot.x,
+              top: slot.y,
+              ...(isDropTarget
+                ? { outline: "1px solid rgba(214, 180, 110, 0.9)", background: "rgba(202, 166, 74, 0.18)" }
+                : null),
+            }}
+            data-drop-target={isDropTarget ? "true" : undefined}
+            onMouseEnter={() => {
+              if (pendingMoveItem) setDragOverSlot(slotIndex);
+            }}
+            onMouseLeave={() => {
+              setDragOverSlot((current) => (current === slotIndex ? null : current));
+            }}
 	            title={slot.key}
 	            onClick={() => {
 	              const takeBackItem =
@@ -602,17 +675,20 @@ export function InventoryWindow({
               setPendingMoveItem(null);
             }}
           />
-        ))}
+          );
+        })}
         {visibleItems.map((item) => {
           const slot = ORIGINAL_UI.inventory.slots[item.slot];
           if (!slot) return null;
+          const dimmed = activeTab !== "quest" && !inventoryItemMatchesFilter(item, itemFilter);
 
           return (
             <button
               key={`${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
               type="button"
               className="inventory-item-card"
-              style={{ left: slot.x, top: slot.y }}
+              style={{ left: slot.x, top: slot.y, ...(dimmed ? { opacity: 0.28 } : null) }}
+              data-filtered-out={dimmed ? "true" : undefined}
               aria-label={item.name}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
@@ -637,15 +713,19 @@ export function InventoryWindow({
 	                  setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
 	                  return;
 	                }
-	                if (item.quantity > 1) {
-	                  setPendingSplitItem(item);
-	                  setSplitCount("1");
-                  setPendingMoveItem(null);
-                  return;
-                }
-                setPendingMoveItem(item);
+	                if (deleteMode) {
+	                  setPendingDeleteItem(item);
+	                  return;
+	                }
+	                if (sellMode) {
+	                  setPendingSellItem(item);
+	                  return;
+	                }
+                // Normal mode: open the use/equip/split/drop/sell context menu
+                // anchored beside the slot (clamped inside the window bounds).
+                setContextMenu({ item, x: Math.min(slot.x + 20, 196), y: slot.y + 20 });
+                setPendingMoveItem(null);
                 setPendingSplitItem(null);
-                setDeleteFeedback(`${t("ui.inventory")}: ${item.name}`);
               }}
             >
               <img
@@ -668,6 +748,55 @@ export function InventoryWindow({
           );
         })}
       </div>
+
+      {activeTab !== "quest" ? (
+        <div
+          style={{
+            position: "absolute",
+            left: ORIGINAL_UI.inventory.width + 4,
+            top: 30,
+            width: 150,
+            border: "1px solid rgba(190, 157, 99, 0.4)",
+            background: "linear-gradient(180deg, rgba(27, 19, 10, 0.94), rgba(11, 8, 5, 0.94))",
+            zIndex: 5,
+          }}
+        >
+          <InventoryToolbar
+            t={t}
+            activeFilter={itemFilter}
+            onFilterChange={setItemFilter}
+            weightCurrent={world.currentWeight}
+            weightMax={world.maxWeight}
+            freeBagSlots={world.freeBagSlots}
+            maxBagSlots={world.maxBagSlots}
+            onSort={onSortBag ? (key) => onSortBag(activeSortContainer, key) : undefined}
+            onAutoArrange={onAutoArrangeBag ? () => onAutoArrangeBag(activeSortContainer) : undefined}
+          />
+        </div>
+      ) : null}
+
+      {contextMenu ? (
+        <>
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 55 }}
+            onClick={() => setContextMenu(null)}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              setContextMenu(null);
+            }}
+          />
+          <InventoryContextMenu
+            t={t}
+            item={contextMenu.item}
+            x={contextMenu.x}
+            y={contextMenu.y}
+            canEquip={Boolean(equipmentSlotForItemKey(contextMenu.item.key))}
+            canSplit={contextMenu.item.quantity > 1}
+            onAction={(action) => runContextAction(contextMenu.item, action)}
+            onClose={() => setContextMenu(null)}
+          />
+        </>
+      ) : null}
 
       {activeTab === "quest" ? (
         <div className="inventory-quest-log">
@@ -713,8 +842,8 @@ export function InventoryWindow({
       <button
         type="button"
         className="inventory-gold"
-        aria-label={t("ui.dropGold", [], "Drop Gold")}
-        title={t("ui.dropGold", [], "Drop Gold")}
+        aria-label={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)} — ${t("ui.dropGold", [], "Drop Gold")}`}
+        title={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)}`}
         onClick={() => {
           setPendingGoldDrop(true);
           setDeleteMode(false);
@@ -726,9 +855,14 @@ export function InventoryWindow({
           setDeleteFeedback(null);
         }}
       >
-        {world.gold}
+        {world.gold.toLocaleString(locale)}
       </button>
-      <div className="inventory-weight">{world.freeBagSlots}</div>
+      <div
+        className="inventory-weight"
+        title={`${t("ui.statBagSpace", [], "Bag Space")}: ${world.freeBagSlots}/${world.maxBagSlots}`}
+      >
+        {world.freeBagSlots}
+      </div>
       {deleteMode ? <div className="inventory-delete-hint">{`${t("ui.deleteItem")}...`}</div> : null}
       {showStorageWindow ? (
         <div className="window-shell storage-window">
