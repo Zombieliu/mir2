@@ -378,8 +378,7 @@ pub(crate) fn crystal_critical_amplified_damage(damage: i32, critical_damage: i3
     let bonus_steps = critical_damage.max(1);
     // (CriticalDamage / CriticalDamageWeight) * 10 evaluated as Crystal does in
     // f64, then floored, matching `(int)Math.Floor(...)`.
-    let multiplier =
-        (f64::from(bonus_steps) / f64::from(CRYSTAL_CRITICAL_DAMAGE_WEIGHT)) * 10.0;
+    let multiplier = (f64::from(bonus_steps) / f64::from(CRYSTAL_CRITICAL_DAMAGE_WEIGHT)) * 10.0;
     let bonus = (f64::from(damage) * multiplier).floor();
     let bonus = if bonus > f64::from(i32::MAX) {
         i32::MAX
