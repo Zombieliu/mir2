@@ -518,6 +518,17 @@ type QuestEntry = {
   current: number;
   required: number;
   rewardPreview: string;
+  // B-wave-2 enriched fields (structurally match the quest window's optional props).
+  descriptionLines?: string[];
+  objectives?: Array<{ label: string; current?: number; required?: number; done?: boolean }>;
+  rewards?: {
+    gold?: number;
+    experience?: number;
+    credit?: number;
+    items?: Array<{ name: string; icon?: number; count?: number; selectable?: boolean }>;
+    selectItems?: Array<{ name: string; icon?: number; count?: number; selectable?: boolean }>;
+  };
+  timeLimit?: string;
 };
 
 type NpcDialog = {
@@ -6771,7 +6782,13 @@ export default function HomePage() {
             ...current.stage5Systems,
             trade: {
               ...(current.stage5Systems.trade ?? {}),
-              partnerItemCount: Array.isArray(payload.tradeItems) ? payload.tradeItems.length : 0,
+              partnerItemCount: Array.isArray(payload.partnerItems)
+                ? payload.partnerItems.length
+                : Array.isArray(payload.tradeItems)
+                  ? payload.tradeItems.length
+                  : 0,
+              // B-wave-2: partner's offered item slots (adaptTrade reads these).
+              ...(Array.isArray(payload.partnerItems) ? { partnerItems: payload.partnerItems } : {}),
             },
           },
         }));
@@ -7147,9 +7164,14 @@ export default function HomePage() {
         break;
       }
       case "ChangeQuest": {
-        const questId = numberOrUndefined(payload.questId);
+        const questId = numberOrUndefined(payload.questId) ?? numberOrUndefined(payload.id);
         const completed = payload.completed === true;
         if (typeof questId === "number") {
+          // B-wave-2: thread the live per-task objectives + description.
+          const objectives = parseQuestObjectives(payload.objectives);
+          const descriptionLines = Array.isArray(payload.descriptionLines)
+            ? (payload.descriptionLines as unknown[]).filter((line): line is string => typeof line === "string")
+            : undefined;
           setWorld((current) => ({
             ...current,
             questLog: current.questLog.map((quest) =>
@@ -7161,6 +7183,8 @@ export default function HomePage() {
                       : payload.taken === true
                         ? ("inProgress" as QuestStage)
                         : quest.stage,
+                    ...(objectives ? { objectives } : {}),
+                    ...(descriptionLines && descriptionLines.length > 0 ? { descriptionLines } : {}),
                   }
                 : quest,
             ),
@@ -7432,6 +7456,12 @@ export default function HomePage() {
             if (current.questLog.some((quest) => quest.questId === questId)) {
               return current;
             }
+            // B-wave-2: structured description / objectives / rewards / time limit.
+            const enrichedObjectives = parseQuestObjectives(payload.objectives);
+            const enrichedRewards = parseQuestRewards(payload.rewards);
+            const enrichedDescription = Array.isArray(payload.descriptionLines)
+              ? (payload.descriptionLines as unknown[]).filter((line): line is string => typeof line === "string")
+              : description;
             const nextEntry: QuestEntry = {
               questId,
               title: name,
@@ -7443,6 +7473,10 @@ export default function HomePage() {
               current: 0,
               required: 0,
               rewardPreview: "",
+              ...(enrichedDescription.length > 0 ? { descriptionLines: enrichedDescription } : {}),
+              ...(enrichedObjectives ? { objectives: enrichedObjectives } : {}),
+              ...(enrichedRewards ? { rewards: enrichedRewards } : {}),
+              ...(typeof payload.timeLimit === "string" ? { timeLimit: payload.timeLimit } : {}),
             };
             return { ...current, questLog: [...current.questLog, nextEntry] };
           });
@@ -7609,9 +7643,13 @@ export default function HomePage() {
       // NPC market (consignment auction house) ---------------------------------
       case "NPCMarket":
       case "NPCMarketPage": {
-        const listings = Array.isArray(payload.listings)
-          ? (payload.listings as Array<Record<string, unknown>>)
-          : [];
+        // B-wave-2: prefer the enriched `auctions` (type/level/expiry/auction) when
+        // present, else the legacy `listings`.
+        const listings = Array.isArray(payload.auctions)
+          ? (payload.auctions as Array<Record<string, unknown>>)
+          : Array.isArray(payload.listings)
+            ? (payload.listings as Array<Record<string, unknown>>)
+            : [];
         setWorld((current) => ({
           ...current,
           stage5Systems: { ...current.stage5Systems, auction: listings },
@@ -10189,6 +10227,46 @@ function adaptMailMessages(raw: Array<Record<string, unknown>> | undefined): Mai
       items: itemCount > 0 ? Array.from({ length: itemCount }, (_, index) => `#${index + 1}`) : undefined,
     };
   });
+}
+
+// B-wave-2: parse the enriched quest objectives/rewards the gateway now emits.
+// The backend uses `text` for an objective; the window wants `label`.
+function questNumber(value: unknown): number | undefined {
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function parseQuestObjectives(
+  raw: unknown,
+): Array<{ label: string; current?: number; required?: number }> | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const list = raw.flatMap((entry) => {
+    const record = (entry ?? {}) as Record<string, unknown>;
+    const label =
+      typeof record.text === "string" ? record.text : typeof record.label === "string" ? record.label : "";
+    if (!label) return [];
+    return [{ label, current: questNumber(record.current), required: questNumber(record.required) }];
+  });
+  return list.length > 0 ? list : undefined;
+}
+
+function parseQuestRewards(
+  raw: unknown,
+): { gold?: number; experience?: number; credit?: number; items?: Array<{ name: string; count?: number }> } | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const record = raw as Record<string, unknown>;
+  const items = Array.isArray(record.items)
+    ? (record.items as unknown[]).flatMap((entry) => {
+        const itemRecord = (entry ?? {}) as Record<string, unknown>;
+        const name = typeof itemRecord.name === "string" ? itemRecord.name : "";
+        return name ? [{ name, count: questNumber(itemRecord.count) }] : [];
+      })
+    : undefined;
+  const gold = questNumber(record.gold);
+  const experience = questNumber(record.experience);
+  const credit = questNumber(record.credit);
+  if (gold === undefined && experience === undefined && credit === undefined && !items) return undefined;
+  return { gold, experience, credit, items };
 }
 
 function upsertEntityInList(list: WorldEntity[], nextEntity: WorldEntity) {
