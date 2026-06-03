@@ -12,10 +12,12 @@ use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
+use mir2_game_data::crystal_item_by_index;
 use mir2_protocol::{
     crystal_stat_label, packet_payload_hex, server_packet_display_name,
-    server_packet_raw_display_name, ClientFriend, ClientIntelligentCreature, ClientPacket,
-    MirDirection, MirGridType, Point, ServerPacket, UserItemStat,
+    server_packet_raw_display_name, ClientAuction, ClientFriend, ClientIntelligentCreature,
+    ClientPacket, ClientQuestInfo, MirDirection, MirGridType, Point, QuestItemReward, ServerPacket,
+    UserItem, UserItemStat,
 };
 use mir2_simulation::{
     deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
@@ -3252,6 +3254,208 @@ fn blocked_entry_json(friend: &ClientFriend) -> Value {
     Value::Object(entry)
 }
 
+/// Crystal `RequiredType.Level` (`Crystal/Shared/Enums.cs:1087-1089`). When an
+/// item's `RequiredType` is `Level` the `RequiredAmount` is the level gate the
+/// client renders (`Crystal/Client/MirScenes/Dialogs/NPCDialogs.cs:895-897`).
+const CRYSTAL_REQUIRED_TYPE_LEVEL: u8 = 0;
+
+/// Resolves a wire `UserItem` (which only carries `item_index`) into the
+/// browser-facing `{ name, count?, grade? }` shape used by the trade / market /
+/// quest contracts. The name + grade come from the Crystal item template
+/// (`Crystal` mirrors `UserItem.Info.Name` / `UserItem.Info.Grade`), looked up
+/// by `item_index`. When the index is unknown the name falls back to
+/// `Item #<index>` so the window still renders a row.
+fn user_item_summary_json(item: &UserItem) -> Value {
+    let template = crystal_item_by_index(item.item_index);
+    let name = template
+        .as_ref()
+        .map(|template| template.name.clone())
+        .unwrap_or_else(|| format!("Item #{}", item.item_index));
+    let mut entry = serde_json::Map::new();
+    entry.insert("name".into(), json!(name));
+    entry.insert("count".into(), json!(item.count));
+    if let Some(template) = template.as_ref() {
+        // Crystal `ItemGrade` (0 = Common). Only emit a meaningful grade.
+        if template.grade != 0 {
+            entry.insert("grade".into(), json!(template.grade));
+        }
+    }
+    Value::Object(entry)
+}
+
+/// Maps a `Vec<Option<UserItem>>` trade payload into the contract item array,
+/// skipping the empty trade slots (Crystal `TradeItem` sends a fixed-length
+/// array with `null` holes — see `Crystal/Shared/ServerPackets.cs:1944-1972`).
+fn trade_items_summary_json(items: &[Option<UserItem>]) -> Value {
+    Value::Array(
+        items
+            .iter()
+            .filter_map(|slot| slot.as_ref())
+            .map(user_item_summary_json)
+            .collect(),
+    )
+}
+
+/// Resolves the optional `level` field for an auction/market listing: Crystal
+/// only treats `RequiredAmount` as a level when `RequiredType == Level`
+/// (`Crystal/Client/MirScenes/Dialogs/NPCDialogs.cs:895`).
+fn crystal_item_level_requirement(item_index: i32) -> Option<u32> {
+    let template = crystal_item_by_index(item_index)?;
+    if template.required_type == CRYSTAL_REQUIRED_TYPE_LEVEL && template.required_amount > 0 {
+        Some(u32::from(template.required_amount))
+    } else {
+        None
+    }
+}
+
+/// Crystal `MarketItemType.Auction` (`Crystal/Shared/Enums.cs`). A `ClientAuction`
+/// whose `ItemType` is `Auction` is shown as a live auction; `Consign`/`GameShop`
+/// are fixed-price. Used to fill the contract `auction` flag.
+const CRYSTAL_MARKET_ITEM_TYPE_AUCTION: u8 = 2;
+
+/// Serializes a protocol `ClientAuction` into the browser-facing market listing
+/// contract: `{ id, itemName, seller?, price, type?, level?, expiry?, auction?,
+/// sold? }`. Mirrors `Crystal/Server/MirDatabase/AuctionInfo.cs:104-115`
+/// (`CreateClientAuction`) — the wire struct collapses `CurrentBid`/`Expired`/
+/// `Sold` into the `Seller` label + `Price`, so for own-listings the `Seller`
+/// already encodes the status string ("Sold" / "Expired" / "For Sale" / ...).
+/// `expiry` is the consignment `DateTime.ToBinary()` value Crystal ships
+/// (`ClientAuction.ConsignmentDate`, `Crystal/Shared/Data/ClientData.cs:213`).
+fn client_auction_listing_json(auction: &ClientAuction) -> Value {
+    let item_index = auction.item.item_index;
+    let item_name = crystal_item_by_index(item_index)
+        .map(|template| template.name)
+        .unwrap_or_else(|| format!("Item #{item_index}"));
+    let mut entry = serde_json::Map::new();
+    entry.insert("id".into(), json!(auction.auction_id));
+    entry.insert("itemName".into(), json!(item_name));
+    if !auction.seller.is_empty() {
+        entry.insert("seller".into(), json!(auction.seller));
+    }
+    entry.insert("price".into(), json!(auction.price));
+    entry.insert("type".into(), json!(auction.item_type));
+    if let Some(level) = crystal_item_level_requirement(item_index) {
+        entry.insert("level".into(), json!(level));
+    }
+    if auction.consignment_date_binary_datetime != 0 {
+        entry.insert(
+            "expiry".into(),
+            json!(auction.consignment_date_binary_datetime),
+        );
+    }
+    entry.insert(
+        "auction".into(),
+        json!(auction.item_type == CRYSTAL_MARKET_ITEM_TYPE_AUCTION),
+    );
+    Value::Object(entry)
+}
+
+/// Maps a list of protocol `ClientAuction`s into the contract listing array.
+fn client_auction_listings_json(listings: &[ClientAuction]) -> Value {
+    Value::Array(listings.iter().map(client_auction_listing_json).collect())
+}
+
+/// Parses a Crystal quest task line into a contract `objective`
+/// (`{ text, current?, required? }`). The simulation formats task lines as e.g.
+/// `"Kill ChickyBoo 2/5"` / `"Collect Wool 0/3"`
+/// (`apps/simulation/src/runtime/quests.rs:318-356`), so the trailing
+/// `current/required` fraction is parsed out when present; otherwise just the
+/// text is kept.
+fn quest_objective_json(line: &str) -> Value {
+    let mut entry = serde_json::Map::new();
+    entry.insert("text".into(), json!(line));
+    if let Some((current, required)) = parse_progress_fraction(line) {
+        entry.insert("current".into(), json!(current));
+        entry.insert("required".into(), json!(required));
+    }
+    Value::Object(entry)
+}
+
+/// Extracts the last `current/required` integer fraction from a task line, if
+/// one is present (e.g. `"Kill ChickyBoo 2/5"` -> `(2, 5)`).
+fn parse_progress_fraction(line: &str) -> Option<(u32, u32)> {
+    let token = line.split_whitespace().rev().find(|token| {
+        token
+            .split_once('/')
+            .is_some_and(|(left, right)| !left.is_empty() && !right.is_empty())
+    })?;
+    let (left, right) = token.split_once('/')?;
+    let current: u32 = left.parse().ok()?;
+    let required: u32 = right.parse().ok()?;
+    Some((current, required))
+}
+
+/// Serializes the reward bundle of a `ClientQuestInfo` into the contract
+/// `rewards` object (`{ gold?, experience?, credit?, items? }`). Mirrors the
+/// Crystal `ClientQuestInfo` reward fields
+/// (`Crystal/Shared/Data/ClientData.cs:380-384`); fixed + selectable item
+/// rewards are merged into one `items` list (each `{ name, count? }`) resolved
+/// from the reward `ItemInfo.Name` (`Crystal/Shared/Data/SharedData.cs:75-93`).
+/// Returns `None` when there is nothing to reward so the field can be omitted.
+fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
+    let mut entry = serde_json::Map::new();
+    if info.reward_gold != 0 {
+        entry.insert("gold".into(), json!(info.reward_gold));
+    }
+    if info.reward_exp != 0 {
+        entry.insert("experience".into(), json!(info.reward_exp));
+    }
+    if info.reward_credit != 0 {
+        entry.insert("credit".into(), json!(info.reward_credit));
+    }
+    let items = quest_reward_items_json(
+        info.rewards_fixed_item
+            .iter()
+            .chain(info.rewards_select_item.iter()),
+    );
+    if let Value::Array(ref array) = items {
+        if !array.is_empty() {
+            entry.insert("items".into(), items);
+        }
+    }
+    if entry.is_empty() {
+        None
+    } else {
+        Some(Value::Object(entry))
+    }
+}
+
+/// Maps quest reward items into `[{ name, count? }]` using the reward item's
+/// `ItemInfo.Name` (already carried on the wire, no lookup needed).
+fn quest_reward_items_json<'a>(rewards: impl Iterator<Item = &'a QuestItemReward>) -> Value {
+    Value::Array(
+        rewards
+            .map(|reward| {
+                let mut item = serde_json::Map::new();
+                item.insert("name".into(), json!(reward.item.name));
+                if reward.count != 1 {
+                    item.insert("count".into(), json!(reward.count));
+                }
+                Value::Object(item)
+            })
+            .collect(),
+    )
+}
+
+/// Formats a quest time limit (Crystal `ClientQuestInfo.TimeLimitInSeconds`,
+/// `Crystal/Shared/Data/ClientData.cs:378`) into a human `mm:ss` / `Hh Mm`
+/// string for the contract `timeLimit` field. Returns `None` when the quest has
+/// no time limit (0 seconds), so the field is omitted.
+fn quest_time_limit_label(time_limit_in_seconds: i32) -> Option<String> {
+    if time_limit_in_seconds <= 0 {
+        return None;
+    }
+    let total = time_limit_in_seconds as u32;
+    let hours = total / 3600;
+    let minutes = (total % 3600) / 60;
+    let seconds = total % 60;
+    if hours > 0 {
+        Some(format!("{hours}h {minutes:02}m"))
+    } else {
+        Some(format!("{minutes:02}:{seconds:02}"))
+    }
+}
+
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
         ServerPacket::Raw { packet_id, payload } => {
@@ -3296,6 +3500,16 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "HeroInformation",
             "payload": { "info": info }
         }),
+        // Crystal `GetMarket` enqueues `S.NPCMarket` with the matched
+        // `ClientAuction`s, the page count, and `UserMode`
+        // (`Crystal/Server/MirObjects/PlayerObject.cs:8419`). `auctions` resolves
+        // each `ClientAuction` to the browser market-listing contract
+        // (`{ id, itemName, seller?, price, type?, level?, expiry?, auction?,
+        // sold? }`); the raw `listings` array is kept for backward compatibility.
+        // `highestBid` / `sold` are omitted because the wire `ClientAuction`
+        // collapses `CurrentBid`/`Sold` into `Price` + the `Seller` status label
+        // (`Crystal/Server/MirDatabase/AuctionInfo.cs:104-115`), so they are not
+        // separately recoverable here.
         ServerPacket::NPCMarket {
             listings,
             pages,
@@ -3305,6 +3519,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "NPCMarket",
             "payload": {
                 "listings": listings,
+                "auctions": client_auction_listings_json(listings),
                 "pages": pages,
                 "userMode": user_mode
             }
@@ -3312,7 +3527,10 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
         ServerPacket::NPCMarketPage { listings } => json!({
             "type": "packet",
             "packet": "NPCMarketPage",
-            "payload": { "listings": listings }
+            "payload": {
+                "listings": listings,
+                "auctions": client_auction_listings_json(listings)
+            }
         }),
         ServerPacket::Connected => json!({
             "type": "packet",
@@ -4917,32 +5135,56 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "success": success
             }
         }),
+        // Crystal sends `TradeRequest`/`TradeAccept` to the *partner* carrying the
+        // other player's name (`Crystal/Server/MirObjects/PlayerObject.cs:10705,
+        // 10741-10742`), which the client stores as the guest/partner name
+        // (`Crystal/Client/MirScenes/GameScene.cs:6314`). `partnerName` is the
+        // contract key; `name` is kept for backward compatibility.
         ServerPacket::TradeRequest { name } => json!({
             "type": "packet",
             "packet": "TradeRequest",
             "payload": {
-                "name": name
+                "name": name,
+                "partnerName": name
             }
         }),
         ServerPacket::TradeAccept { name } => json!({
             "type": "packet",
             "packet": "TradeAccept",
             "payload": {
-                "name": name
+                "name": name,
+                "partnerName": name
             }
         }),
+        // `TradeGold` is enqueued to the partner with the *partner's* running gold
+        // offer (`Crystal/Server/MirObjects/PlayerObject.cs:10759`); the client
+        // stores it as `GuestTradeDialog.GuestGold`
+        // (`Crystal/Client/MirScenes/GameScene.cs:6319`). `partnerGold` is the
+        // contract key; `amount` is kept for backward compatibility.
         ServerPacket::TradeGold { amount } => json!({
             "type": "packet",
             "packet": "TradeGold",
             "payload": {
-                "amount": amount
+                "amount": amount,
+                "partnerGold": amount
             }
         }),
+        // `TradeItem` is enqueued to the partner with the *partner's* offered items
+        // (`Crystal/Server/MirObjects/PlayerObject.cs:10776`); the client stores it
+        // as `GuestTradeDialog.GuestItems`
+        // (`Crystal/Client/MirScenes/GameScene.cs:6325`). `partnerItems` resolves
+        // each `UserItem.item_index` to `{ name, count?, grade? }`; the raw
+        // `tradeItems` array is kept for backward compatibility. `myItems` /
+        // `myGold` / `myLocked` / `partnerLocked` are intentionally omitted: the
+        // Crystal trade protocol only pushes the partner's side to each client
+        // (own offer + lock state are tracked client-side), so the simulation
+        // cannot know them here.
         ServerPacket::TradeItem { trade_items } => json!({
             "type": "packet",
             "packet": "TradeItem",
             "payload": {
-                "tradeItems": trade_items
+                "tradeItems": trade_items,
+                "partnerItems": trade_items_summary_json(trade_items)
             }
         }),
         ServerPacket::TradeConfirm => json!({
@@ -5403,6 +5645,15 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "ConfirmItemRental",
             "payload": {}
         }),
+        // Crystal `ChangeQuest` carries the dynamic `ClientQuestProgress`
+        // (`Id` + `TaskList` + `Taken`/`Completed`/`New`) plus the `QuestState`
+        // enum (Add=0/Update=1/Remove=2) and `TrackQuest`
+        // (`Crystal/Shared/ServerPackets.cs:5214-5237`,
+        // `Crystal/Shared/Data/ClientData.cs:524-573`). The static name /
+        // description / rewards / npc / timeLimit live in `NewQuestInfo`, so here
+        // the contract adds only the dynamic fields: `id`, `state` (the
+        // `QuestState` byte), `objectives` (parsed from the `TaskList` progress
+        // lines), and `descriptionLines` (the raw task lines for a fallback view).
         ServerPacket::ChangeQuest {
             quest_id,
             task_list,
@@ -5416,7 +5667,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "ChangeQuest",
             "payload": {
                 "questId": quest_id,
+                "id": quest_id,
                 "taskList": task_list,
+                "state": quest_state,
+                "descriptionLines": task_list,
+                "objectives": Value::Array(
+                    task_list.iter().map(|line| quest_objective_json(line)).collect()
+                ),
                 "taken": taken,
                 "completed": completed,
                 "new": new,
@@ -5442,11 +5699,50 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "sharerName": sharer_name
             }
         }),
-        ServerPacket::NewQuestInfo { info } => json!({
-            "type": "packet",
-            "packet": "NewQuestInfo",
-            "payload": { "info": info }
-        }),
+        // Crystal `NewQuestInfo` carries the static `ClientQuestInfo`
+        // (`Crystal/Shared/ServerPackets.cs:5285-5302`,
+        // `Crystal/Shared/Data/ClientData.cs:360-440`). The raw `info` object is
+        // kept for backward compatibility; the contract-shaped quest fields are
+        // hoisted alongside it: `id`, `name`, `descriptionLines` (the quest
+        // `Description`), `objectives` (the `TaskDescription` lines), `rewards`
+        // (gold/exp/credit/items) and `timeLimit`. `npc` (a *name*) is omitted:
+        // `ClientQuestInfo` only carries `NPCIndex` (a numeric index the Crystal
+        // client resolves against its own NPC list), so the simulation cannot
+        // supply an NPC name from this packet alone.
+        ServerPacket::NewQuestInfo { info } => {
+            let mut payload = serde_json::Map::new();
+            payload.insert("info".into(), json!(info));
+            payload.insert("id".into(), json!(info.index));
+            payload.insert("name".into(), json!(info.name));
+            if !info.group.is_empty() {
+                payload.insert("group".into(), json!(info.group));
+            }
+            if !info.description.is_empty() {
+                payload.insert("descriptionLines".into(), json!(info.description));
+            }
+            if !info.task_description.is_empty() {
+                payload.insert(
+                    "objectives".into(),
+                    Value::Array(
+                        info.task_description
+                            .iter()
+                            .map(|line| quest_objective_json(line))
+                            .collect(),
+                    ),
+                );
+            }
+            if let Some(rewards) = quest_rewards_json(info) {
+                payload.insert("rewards".into(), rewards);
+            }
+            if let Some(time_limit) = quest_time_limit_label(info.time_limit_in_seconds) {
+                payload.insert("timeLimit".into(), json!(time_limit));
+            }
+            json!({
+                "type": "packet",
+                "packet": "NewQuestInfo",
+                "payload": Value::Object(payload)
+            })
+        }
         ServerPacket::NewRecipeInfo { info } => json!({
             "type": "packet",
             "packet": "NewRecipeInfo",
@@ -5607,10 +5903,11 @@ mod tests {
     use axum::extract::State;
     use axum::Json;
     use mir2_protocol::{
-        ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature, ClientMail,
-        ClientMapInfo, ClientPacket, GroupMember, IntelligentCreatureItemFilter,
-        IntelligentCreatureRules, MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo,
-        Point, RankCharacterInfo, ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
+        ClientAuction, ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature,
+        ClientMail, ClientMapInfo, ClientPacket, ClientQuestInfo, GroupMember,
+        IntelligentCreatureItemFilter, IntelligentCreatureRules, MirClass, MirDirection, MirGender,
+        MirGridType, ObjectManaInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId, Spell,
+        UserItem, UserItemStat,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
@@ -6855,6 +7152,18 @@ mod tests {
         assert_eq!(change["packet"], "ChangeQuest");
         assert_eq!(change["payload"]["questId"], 1001);
         assert_eq!(change["payload"]["taskList"][0], "Collect Wasp Stinger 0/1");
+        // Contract: dynamic quest fields are hoisted from the progress payload.
+        assert_eq!(change["payload"]["id"], 1001);
+        assert_eq!(change["payload"]["state"], 0);
+        assert_eq!(
+            change["payload"]["descriptionLines"][0],
+            "Collect Wasp Stinger 0/1"
+        );
+        // The "0/1" progress fraction is parsed into current/required.
+        let objective = &change["payload"]["objectives"][0];
+        assert_eq!(objective["text"], "Collect Wasp Stinger 0/1");
+        assert_eq!(objective["current"], 0);
+        assert_eq!(objective["required"], 1);
 
         let complete = super::server_packet_to_event(&ServerPacket::CompleteQuest {
             completed_quests: vec![1001],
@@ -6868,6 +7177,59 @@ mod tests {
         });
         assert_eq!(share["packet"], "ShareQuest");
         assert_eq!(share["payload"]["sharerName"], "Scout");
+    }
+
+    #[test]
+    fn new_quest_info_exposes_contract_quest_fields() {
+        let info = super::server_packet_to_event(&ServerPacket::NewQuestInfo {
+            info: ClientQuestInfo {
+                index: 1001,
+                npc_index: 1_001,
+                name: "Field Wasp".to_string(),
+                group: "Starter".to_string(),
+                description: vec!["Help the town guard.".to_string()],
+                task_description: vec!["Defeat 3 Wasps 0/3".to_string()],
+                return_description: vec!["Return to the guard.".to_string()],
+                completion_description: vec!["Good work.".to_string()],
+                min_level_needed: 1,
+                max_level_needed: 0,
+                quest_needed: 0,
+                class_needed: 31,
+                quest_type: 0,
+                time_limit_in_seconds: 90,
+                reward_gold: 500,
+                reward_exp: 1_200,
+                reward_credit: 0,
+                rewards_fixed_item: Vec::new(),
+                rewards_select_item: Vec::new(),
+                finish_npc_index: 1_001,
+            },
+        });
+        assert_eq!(info["packet"], "NewQuestInfo");
+        // Raw info retained for backward compatibility.
+        assert_eq!(info["payload"]["info"]["index"], 1001);
+        // Contract-shaped quest fields hoisted alongside it.
+        assert_eq!(info["payload"]["id"], 1001);
+        assert_eq!(info["payload"]["name"], "Field Wasp");
+        assert_eq!(info["payload"]["group"], "Starter");
+        assert_eq!(
+            info["payload"]["descriptionLines"][0],
+            "Help the town guard."
+        );
+        assert_eq!(
+            info["payload"]["objectives"][0]["text"],
+            "Defeat 3 Wasps 0/3"
+        );
+        assert_eq!(info["payload"]["objectives"][0]["current"], 0);
+        assert_eq!(info["payload"]["objectives"][0]["required"], 3);
+        assert_eq!(info["payload"]["rewards"]["gold"], 500);
+        assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
+        // No credit reward -> field omitted.
+        assert!(info["payload"]["rewards"].get("credit").is_none());
+        // 90 seconds -> "01:30".
+        assert_eq!(info["payload"]["timeLimit"], "01:30");
+        // npc (a name) is omitted because only NPCIndex is known here.
+        assert!(info["payload"].get("npc").is_none());
     }
 
     #[test]
@@ -7258,10 +7620,40 @@ mod tests {
         });
         assert_eq!(request["packet"], "TradeRequest");
         assert_eq!(request["payload"]["name"], "Scout");
+        // Contract: partner name is hoisted onto `partnerName`.
+        assert_eq!(request["payload"]["partnerName"], "Scout");
+
+        let accept = super::server_packet_to_event(&ServerPacket::TradeAccept {
+            name: "Scout".to_string(),
+        });
+        assert_eq!(accept["packet"], "TradeAccept");
+        assert_eq!(accept["payload"]["partnerName"], "Scout");
 
         let gold = super::server_packet_to_event(&ServerPacket::TradeGold { amount: 100 });
         assert_eq!(gold["packet"], "TradeGold");
         assert_eq!(gold["payload"]["amount"], 100);
+        // Contract: gold is the partner's running offer.
+        assert_eq!(gold["payload"]["partnerGold"], 100);
+
+        // Contract: `partnerItems` resolves item_index -> { name, count, grade }.
+        // `sample_user_item` uses item_index 321 = "MediumArmour(M)" (grade 2).
+        let trade_item = super::server_packet_to_event(&ServerPacket::TradeItem {
+            trade_items: vec![
+                Some(sample_user_item(7, 3)),
+                None,
+                Some(sample_user_item(8, 1)),
+            ],
+        });
+        assert_eq!(trade_item["packet"], "TradeItem");
+        // Raw array retained for backward compatibility.
+        assert!(trade_item["payload"]["tradeItems"].is_array());
+        let partner_items = &trade_item["payload"]["partnerItems"];
+        assert!(partner_items.is_array());
+        // The empty slot is dropped; only the two real items remain.
+        assert_eq!(partner_items.as_array().unwrap().len(), 2);
+        assert_eq!(partner_items[0]["name"], "MediumArmour(M)");
+        assert_eq!(partner_items[0]["count"], 3);
+        assert_eq!(partner_items[0]["grade"], 2);
 
         let cancel = super::server_packet_to_event(&ServerPacket::TradeCancel { unlock: true });
         assert_eq!(cancel["packet"], "TradeCancel");
@@ -7270,6 +7662,65 @@ mod tests {
         let confirm = super::server_packet_to_event(&ServerPacket::TradeConfirm);
         assert_eq!(confirm["packet"], "TradeConfirm");
         assert!(confirm["payload"].is_object());
+    }
+
+    #[test]
+    fn market_packets_expose_contract_listing_fields() {
+        // Build a ClientAuction whose item is index 321 = "MediumArmour(M)"
+        // (grade 2, RequiredType.Level, RequiredAmount 16).
+        let auction = ClientAuction {
+            auction_id: 42,
+            item: sample_user_item(99, 1),
+            seller: "Merchant".to_string(),
+            price: 1500,
+            consignment_date_binary_datetime: 638_000_000_000_000_000,
+            // MarketItemType.Auction = 2.
+            item_type: 2,
+        };
+        let market = super::server_packet_to_event(&ServerPacket::NPCMarket {
+            listings: vec![auction.clone()],
+            pages: 3,
+            user_mode: true,
+        });
+        assert_eq!(market["packet"], "NPCMarket");
+        // Raw listings + page metadata retained for backward compatibility.
+        assert!(market["payload"]["listings"].is_array());
+        assert_eq!(market["payload"]["pages"], 3);
+        assert_eq!(market["payload"]["userMode"], true);
+        // Contract-shaped listing array.
+        let listing = &market["payload"]["auctions"][0];
+        assert_eq!(listing["id"], 42);
+        assert_eq!(listing["itemName"], "MediumArmour(M)");
+        assert_eq!(listing["seller"], "Merchant");
+        assert_eq!(listing["price"], 1500);
+        assert_eq!(listing["type"], 2);
+        assert_eq!(listing["level"], 16);
+        assert_eq!(listing["auction"], true);
+        assert_eq!(listing["expiry"], 638_000_000_000_000_000i64);
+
+        // The page variant carries the same enriched listing array.
+        let page = super::server_packet_to_event(&ServerPacket::NPCMarketPage {
+            listings: vec![auction],
+        });
+        assert_eq!(page["packet"], "NPCMarketPage");
+        assert_eq!(
+            page["payload"]["auctions"][0]["itemName"],
+            "MediumArmour(M)"
+        );
+        // A non-auction (consign) listing reports auction=false.
+        let consign = super::server_packet_to_event(&ServerPacket::NPCMarketPage {
+            listings: vec![ClientAuction {
+                auction_id: 7,
+                item: sample_user_item(1, 1),
+                seller: "For Sale".to_string(),
+                price: 50,
+                consignment_date_binary_datetime: 0,
+                item_type: 1,
+            }],
+        });
+        assert_eq!(consign["payload"]["auctions"][0]["auction"], false);
+        // A zero consignment date is omitted (Crystal DateTime.MinValue).
+        assert!(consign["payload"]["auctions"][0].get("expiry").is_none());
     }
 
     #[test]
