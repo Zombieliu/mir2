@@ -1889,15 +1889,15 @@ function deriveChatBubbles(
   return bubbles;
 }
 
-const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 96;
+const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 512;
 const SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT = 96;
 const SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE = 64;
 const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 
 function collectVisibleSceneAssetUrls(
   viewportMapSprites: {
-    floor: Array<{ path: string; left: number; top: number; width: number; height: number }>;
-    objects: Array<{ path: string; left: number; top: number; width: number; height: number }>;
+    floor: Array<{ path: string; kind?: string; left: number; top: number; width: number; height: number }>;
+    objects: Array<{ path: string; kind?: string; left: number; top: number; width: number; height: number }>;
   },
   viewportEntitySprites: Array<{
     sprite: {
@@ -1913,8 +1913,16 @@ function collectVisibleSceneAssetUrls(
   const sceneCenterX = ORIGINAL_UI.game.sceneWidth / 2;
   const sceneCenterY = ORIGINAL_UI.game.sceneHeight / 2;
   const rankedMapUrls = [
-    ...viewportMapSprites.floor.map((sprite) => ({ ...sprite, path: sprite.path })),
-    ...viewportMapSprites.objects.map((sprite) => ({ ...sprite, path: mapSpriteRenderPath(sprite.path) })),
+    ...viewportMapSprites.objects.map((sprite) => ({
+      ...sprite,
+      path: mapSpriteRenderPath(sprite.path),
+      preloadPriority: 0,
+    })),
+    ...viewportMapSprites.floor.map((sprite) => ({
+      ...sprite,
+      path: sprite.path,
+      preloadPriority: sceneMapSpritePreloadPriority(sprite.kind),
+    })),
   ]
     .sort((a, b) => {
       const aCenterX = a.left + a.width / 2;
@@ -1922,6 +1930,7 @@ function collectVisibleSceneAssetUrls(
       const bCenterX = b.left + b.width / 2;
       const bCenterY = b.top + b.height / 2;
       return (
+        a.preloadPriority - b.preloadPriority ||
         Math.hypot(aCenterX - sceneCenterX, aCenterY - sceneCenterY) -
         Math.hypot(bCenterX - sceneCenterX, bCenterY - sceneCenterY)
       );
@@ -1980,6 +1989,12 @@ function stableSceneAssetUrlKey(urls: string[]) {
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
   return `${uniqueSorted.length}:${hash.toString(16).padStart(8, "0")}`;
+}
+
+function sceneMapSpritePreloadPriority(kind: string | undefined) {
+  if (kind === "front") return 1;
+  if (kind === "middle" || kind === "tileAnimation") return 2;
+  return 3;
 }
 
 function shouldUseBevyEntityRenderer() {

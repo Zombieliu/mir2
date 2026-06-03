@@ -22,8 +22,16 @@ import {
 } from "./original-client-scene-layout";
 
 type OriginalMapCell = OriginalMapRegion["cells"][number];
+type OriginalMapSpriteKind = OriginalMapRegion["sprites"][string]["kind"];
 
 const mapRegionCellIndexCache = new WeakMap<OriginalMapRegion, Map<string, OriginalMapCell>>();
+const FLOOR_LAYER_Z_STRIDE = 16_384;
+const FLOOR_LAYER_Z_OFFSETS: Record<OriginalMapSpriteKind, number> = {
+  back: 0,
+  middle: FLOOR_LAYER_Z_STRIDE,
+  front: FLOOR_LAYER_Z_STRIDE * 2,
+  tileAnimation: FLOOR_LAYER_Z_STRIDE * 3,
+};
 
 export function GameSceneBackdrop({
   world,
@@ -262,13 +270,17 @@ function appendViewportMapSprite(
   target.push({
     key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
     path: frame.path,
+    kind: sprite.kind,
     cellX: cell.x,
     cellY: cell.y,
     left,
     top,
     width: frame.width,
     height: frame.height,
-    zIndex: viewportDepthForCell(cell.x, cell.y, player, sprite.drawMode === "object" ? 1 : 0),
+    zIndex:
+      sprite.drawMode === "floor"
+        ? viewportDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_Z_OFFSETS[sprite.kind])
+        : viewportDepthForCell(cell.x, cell.y, player, 1),
   });
 }
 
