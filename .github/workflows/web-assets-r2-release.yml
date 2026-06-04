@@ -137,6 +137,14 @@ jobs:
           object_prefix_template="${INPUT_OBJECT_PREFIX:-mir2/v/$version_placeholder}"
           asset_base="${asset_base_template//$version_placeholder/$asset_version}"
           object_prefix="${object_prefix_template//$version_placeholder/$asset_version}"
+          if [[ "$asset_base" == *"{"* || "$asset_base" == *"}"* ]]; then
+            echo "asset_base_url resolved to an invalid value with leftover braces: $asset_base" >&2
+            exit 1
+          fi
+          if [[ "$object_prefix" == *"{"* || "$object_prefix" == *"}"* ]]; then
+            echo "object_prefix resolved to an invalid value with leftover braces: $object_prefix" >&2
+            exit 1
+          fi
 
           {
             echo "MIR2_ASSET_VERSION=$asset_version"
@@ -231,6 +239,7 @@ jobs:
         working-directory: mir2-web3/apps/web
         env:
           MIR2_USE_PREBUILT_BEVY_RUNTIME: "0"
+          MIR2_ORIGINAL_ASSET_MANIFEST_MODE: filesystem
         run: npm run build
 
       - name: Stage remote asset release
