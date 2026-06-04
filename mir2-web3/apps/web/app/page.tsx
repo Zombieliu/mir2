@@ -30,6 +30,12 @@ import {
   normalizeLanguage,
   type Mir2Language,
 } from "../lib/localization";
+import {
+  installDebugCapture,
+  recordDebugEvent,
+  setSnapshotContext,
+  downloadSnapshot,
+} from "../lib/debug-snapshot";
 import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
 import {
   DUBHE_WALLET_URL,
@@ -1276,6 +1282,20 @@ export default function HomePage() {
   const [showHotkeys, setShowHotkeys] = useState(false);
   const [showChatSettings, setShowChatSettings] = useState(false);
   useEffect(() => {
+    installDebugCapture();
+    setSnapshotContext(() => {
+      const snapshotWorld = worldRef.current;
+      const snapshotSelf = Array.isArray(snapshotWorld.entities)
+        ? snapshotWorld.entities.find((entity) => entity.objectId === snapshotWorld.playerObjectId)
+        : undefined;
+      return {
+        map: snapshotWorld.mapFileName ?? null,
+        mapTitle: snapshotWorld.mapTitle ?? null,
+        player: snapshotSelf ? { x: snapshotSelf.x, y: snapshotSelf.y, name: snapshotSelf.name } : null,
+        entityCount: Array.isArray(snapshotWorld.entities) ? snapshotWorld.entities.length : 0,
+        gold: snapshotWorld.gold,
+      };
+    });
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
       const key = event.key.toLowerCase();
@@ -1295,6 +1315,7 @@ export default function HomePage() {
       else if (key === "y") { event.preventDefault(); setShowHotkeys((value) => !value); }
       else if (key === "c") { event.preventDefault(); setShowChatSettings((value) => !value); }
       else if (key === "l") { event.preventDefault(); setShowMail((value) => !value); }
+      else if (key === "d") { event.preventDefault(); downloadSnapshot("manual"); }
     };
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
@@ -3498,6 +3519,9 @@ export default function HomePage() {
         state: captureMovementConsoleState(commandNow),
       });
     }
+    recordDebugEvent("packet-out", "net", {
+      type: typeof command.type === "string" ? command.type : "?",
+    });
     socketRef.current.send(JSON.stringify(command));
     if (isMovementCommand(command)) {
       scheduleMovementConfirmTick();
@@ -5526,6 +5550,7 @@ export default function HomePage() {
       });
     }
 
+    recordDebugEvent("packet-in", "net", { packet: event.packet });
     switch (event.packet) {
       case "Connected":
         setLoginErrorKey(null);
