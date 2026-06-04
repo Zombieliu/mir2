@@ -714,6 +714,13 @@ type ReconnectSnapshot = {
   characterName: string | null;
 };
 
+type DebugSnapshotUploadNotice = {
+  status: "saved" | "uploading" | "uploaded" | "failed";
+  message: string;
+  sessionId?: string;
+  snapshotId?: string | number | null;
+};
+
 const RECONNECT_DELAYS_MS = [1000, 2000, 4000, 8000, 12000];
 const MAX_RECONNECT_ATTEMPTS = 6;
 const CRYSTAL_NPC_SPRITE_BY_OBJECT_ID: ReadonlyMap<number, CrystalNpcSpriteEntry> = new Map(
@@ -1281,6 +1288,25 @@ export default function HomePage() {
   const [showHelp, setShowHelp] = useState(false);
   const [showHotkeys, setShowHotkeys] = useState(false);
   const [showChatSettings, setShowChatSettings] = useState(false);
+  const [debugSnapshotNotice, setDebugSnapshotNotice] = useState<DebugSnapshotUploadNotice | null>(null);
+  useEffect(() => {
+    let clearTimer = 0;
+    const onDebugSnapshotUpload = (event: Event) => {
+      const detail = (event as CustomEvent<DebugSnapshotUploadNotice>).detail;
+      if (!detail || typeof detail.message !== "string") return;
+      setDebugSnapshotNotice(detail);
+      if (clearTimer) window.clearTimeout(clearTimer);
+      const keepMs = detail.status === "uploading" ? 0 : detail.status === "failed" ? 9000 : 6500;
+      if (keepMs > 0) {
+        clearTimer = window.setTimeout(() => setDebugSnapshotNotice(null), keepMs);
+      }
+    };
+    window.addEventListener("mir2:debug-snapshot-upload", onDebugSnapshotUpload);
+    return () => {
+      if (clearTimer) window.clearTimeout(clearTimer);
+      window.removeEventListener("mir2:debug-snapshot-upload", onDebugSnapshotUpload);
+    };
+  }, []);
   useEffect(() => {
     installDebugCapture();
     setSnapshotContext(() => {
@@ -10234,6 +10260,12 @@ export default function HomePage() {
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
+    {debugSnapshotNotice ? (
+      <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
+        <span>{debugSnapshotNotice.message}</span>
+        {debugSnapshotNotice.sessionId ? <code>{debugSnapshotNotice.sessionId}</code> : null}
+      </div>
+    ) : null}
     </>
   );
 }

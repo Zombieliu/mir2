@@ -4683,6 +4683,39 @@ button.character-spell-value:hover {
   transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
 }
 
+.debug-snapshot-toast {
+  position: fixed;
+  left: 16px;
+  bottom: 18px;
+  z-index: 120;
+  display: flex;
+  max-width: min(460px, calc(100vw - 32px));
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid rgba(238, 209, 118, 0.75);
+  background: rgba(8, 8, 8, 0.88);
+  color: #f5efd2;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+}
+
+.debug-snapshot-toast code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #b5d9ff;
+  font-size: 11px;
+}
+
+.debug-snapshot-toast.uploaded {
+  border-color: rgba(127, 215, 132, 0.9);
+}
+
+.debug-snapshot-toast.failed {
+  border-color: rgba(238, 104, 104, 0.9);
+}
+
 @media (orientation: portrait) and (max-width: 900px) {
   .mir-client-page.force-mobile-controls .mir-mobile-rotate-overlay {
     display: flex;
