@@ -36,7 +36,7 @@ on:
       upload_driver:
         description: Upload driver for R2 publish (wrangler, api, worker, r2-s3)
         required: false
-        default: r2-s3
+        default: api
         type: string
       deploy_worker:
         description: Deploy mir2.obelisk.build Worker proxy after R2 verification
@@ -287,7 +287,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
-          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'r2-s3' }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'api' }}
           MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
           MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
           MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
