@@ -1,0 +1,24 @@
+[Unit]
+Description=Mir2 Debug Remote MCP
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mir2
+Group=mir2
+EnvironmentFile=/etc/mir2/debug-mcp.env
+WorkingDirectory=/opt/mir2/debug-mcp
+ExecStart=/opt/mir2/debug-mcp/venv/bin/python /opt/mir2/debug-mcp/mir2_debug_mcp_server.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/log/mir2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -27,6 +27,7 @@ export type DebugEvent = {
 
 export type DiagnosticSnapshot = {
   schema: "mir2-debug-snapshot/1";
+  sessionId: string;
   capturedAt: string;
   subsystem: string;
   url: string;
@@ -39,6 +40,7 @@ export type DiagnosticSnapshot = {
 
 const RING_MAX = 600;
 const SNAPSHOT_EVENTS = 320;
+const DEBUG_SESSION_STORAGE_KEY = "mir2-debug-session-id";
 const ring: DebugEvent[] = [];
 const counts: Record<string, number> = {};
 let installed = false;
@@ -79,6 +81,36 @@ function readWindowGlobal(key: string): unknown {
   }
 }
 
+function createDebugSessionId() {
+  const suffix =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2, 12);
+  return `debug-${Date.now().toString(36)}-${suffix}`;
+}
+
+function debugSessionId() {
+  if (typeof window === "undefined") return createDebugSessionId();
+  try {
+    const existing = window.sessionStorage.getItem(DEBUG_SESSION_STORAGE_KEY);
+    if (existing) return existing;
+    const next = createDebugSessionId();
+    window.sessionStorage.setItem(DEBUG_SESSION_STORAGE_KEY, next);
+    return next;
+  } catch {
+    return createDebugSessionId();
+  }
+}
+
+function dispatchSnapshotUploadStatus(detail: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(new CustomEvent("mir2:debug-snapshot-upload", { detail }));
+  } catch {
+    // Snapshot capture must remain best-effort and never break gameplay.
+  }
+}
+
 export function captureSnapshot(subsystem: string, context?: Record<string, unknown>): DiagnosticSnapshot {
   let ctx: Record<string, unknown>;
   try {
@@ -86,14 +118,16 @@ export function captureSnapshot(subsystem: string, context?: Record<string, unkn
   } catch (error) {
     ctx = { contextError: String(error), ...(context ?? {}) };
   }
+  const sessionId = debugSessionId();
   const movementDiagnostics = readWindowGlobal("__mir2MovementDiagnostics");
   const movementRecent = readWindowGlobal("__mir2MovementConsoleEvents");
   return {
     schema: "mir2-debug-snapshot/1",
+    sessionId,
     capturedAt: new Date().toISOString(),
     subsystem,
     url: typeof location !== "undefined" ? location.href : "",
-    context: ctx,
+    context: { sessionId, ...ctx },
     counts: { ...counts, ringSize: ring.length },
     events: ring.slice(-SNAPSHOT_EVENTS),
     movement:
@@ -102,6 +136,59 @@ export function captureSnapshot(subsystem: string, context?: Record<string, unkn
         : undefined,
     assetCache: readWindowGlobal("__mir2AssetCache"),
   };
+}
+
+async function uploadSnapshot(snapshot: DiagnosticSnapshot): Promise<void> {
+  if (typeof fetch === "undefined") return;
+  dispatchSnapshotUploadStatus({
+    status: "uploading",
+    sessionId: snapshot.sessionId,
+    message: "诊断快照上传中...",
+  });
+
+  try {
+    const response = await fetch("/api/debug-snapshots", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        source: "alt-d",
+        pageUrl: snapshot.url,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+        snapshot,
+      }),
+      cache: "no-store",
+    });
+    const result = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!response.ok || result.ok !== true) {
+      throw new Error(typeof result.error === "string" ? result.error : `upload failed (${response.status})`);
+    }
+    const snapshotId = typeof result.id === "number" || typeof result.id === "string" ? result.id : null;
+    dispatchSnapshotUploadStatus({
+      status: "uploaded",
+      sessionId: snapshot.sessionId,
+      snapshotId,
+      message: snapshotId ? `诊断快照已上传 Debug DB #${snapshotId}` : "诊断快照已上传 Debug DB",
+    });
+    recordDebugEvent("note", "snapshot", {
+      action: "upload",
+      status: "ok",
+      snapshotId,
+      sessionId: snapshot.sessionId,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    dispatchSnapshotUploadStatus({
+      status: "failed",
+      sessionId: snapshot.sessionId,
+      message: `上传失败，仅已保存本地：${message}`,
+    });
+    recordDebugEvent("warn", "snapshot", {
+      action: "upload",
+      status: "failed",
+      message,
+      sessionId: snapshot.sessionId,
+    });
+  }
 }
 
 /** Capture + download a snapshot JSON, and log it to the console for quick copy. */
@@ -122,10 +209,16 @@ export function downloadSnapshot(subsystem: string, context?: Record<string, unk
       anchor.click();
       anchor.remove();
       setTimeout(() => URL.revokeObjectURL(href), 1000);
+      dispatchSnapshotUploadStatus({
+        status: "saved",
+        sessionId: snapshot.sessionId,
+        message: "诊断快照已保存本地",
+      });
     }
   } catch (error) {
     console.warn("[mir2] snapshot download failed", error);
   }
+  void uploadSnapshot(snapshot);
   return snapshot;
 }
 
