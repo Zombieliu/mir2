@@ -45,6 +45,7 @@ button {
 img {
   display: block;
   user-select: none;
+  -webkit-user-drag: none;
 }
 
 .mir-client-page {
@@ -74,6 +75,12 @@ img {
   cursor: var(--mir-cursor-default);
 }
 
+.client-stage-frame,
+.client-stage-frame * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .client-stage-frame button,
 .client-stage-frame input,
 .client-stage-frame [data-ui-interactive="true"] {
@@ -83,6 +90,8 @@ img {
 .client-stage-frame input,
 .client-stage-frame textarea {
   cursor: var(--mir-cursor-text);
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 #mir2-web3-canvas {
@@ -1456,14 +1465,12 @@ img {
 }
 
 .chat-feed-line.system {
-  color: #fff;
-  background: #c00000;
+  color: #c00000;
 }
 
 .chat-feed-line.channel-shout,
 .chat-feed-line.channel-announcement {
-  color: #fff;
-  background: #0000c0;
+  color: #0000c0;
 }
 
 .chat-feed-line.channel-whisper {
