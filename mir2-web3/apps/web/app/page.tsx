@@ -6979,6 +6979,7 @@ export default function HomePage() {
             `[Mode: ${attackModeLabel(numberOrZero(payload.mode))}]`,
           ),
           "system",
+          "hint",
         );
         break;
       case "ChangePMode":
@@ -6989,6 +6990,7 @@ export default function HomePage() {
             `[Pet: ${petModeLabel(numberOrZero(payload.mode))}]`,
           ),
           "system",
+          "hint",
         );
         break;
       case "MarketSuccess":
@@ -7810,6 +7812,7 @@ export default function HomePage() {
           appendLog(
             t("ui.timeOfDay", [lights], `Time of day changed (light ${lights}).`),
             "system",
+            "hint",
           );
         }
         break;
@@ -7822,6 +7825,7 @@ export default function HomePage() {
           appendLog(
             t("ui.gameShopStock", [stockLevel], `Game shop stock: ${stockLevel}.`),
             "system",
+            "hint",
           );
         }
         break;
@@ -7945,6 +7949,7 @@ export default function HomePage() {
             `Game shop stock: ${numberOrZero(payload.stockLevel)}.`,
           ),
           "system",
+          "hint",
         );
         break;
 
@@ -10572,7 +10577,7 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
     case "system2":
       return "system";
     case "hint":
-      return "server";
+      return "hint";
     case "server":
       return "server";
     case "announcement":
