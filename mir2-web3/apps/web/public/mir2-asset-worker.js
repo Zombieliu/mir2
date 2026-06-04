@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "mir2-asset-cache";
-const CACHE_SCHEMA_VERSION = "sw3";
+const CACHE_SCHEMA_VERSION = "sw4";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
@@ -21,6 +21,10 @@ let staticAssetTiers = new Map();
 const NEGATIVE_CACHE_TTL_MS = 10_000;
 const NEGATIVE_CACHE_MAX_ENTRIES = 2000;
 const staticAssetNegativeCache = new Map();
+const staticAssetInflightFetches = new Map();
+const sceneBlueprintInflightFetches = new Map();
+const TRANSIENT_FETCH_RETRY_DELAYS_MS = [120, 350];
+const TRANSIENT_FETCH_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -173,7 +177,7 @@ async function cacheFirst(request, name, maxEntries, event) {
     cache = null;
   }
 
-  const response = await fetchStaticAsset(request);
+  const response = await coalescedStaticAssetFetch(request);
   if (cache && response && response.ok) {
     await putCacheEntry(cache, request, response, maxEntries);
   }
@@ -200,26 +204,20 @@ async function fetchStaticAsset(request) {
   }
 
   let originResponse = null;
-  try {
-    originResponse = await fetch(request);
-    if (originResponse.ok) return originResponse;
-  } catch {
-    originResponse = null;
-  }
+  originResponse = await fetchWithTransientRetries(request);
+  if (originResponse?.ok) return originResponse;
 
   const remoteRequest = createRemoteAssetRequest(request);
   if (remoteRequest) {
-    try {
-      const remoteResponse = await fetch(remoteRequest);
+    const remoteResponse = await fetchWithTransientRetries(remoteRequest);
+    if (remoteResponse) {
       if (remoteResponse.ok) return remoteResponse;
       if (remoteResponse.status === 404 || !originResponse) {
-        if (remoteResponse.status === 404) {
-          rememberNegativeResult(negativeKey, 404);
+        if (remoteResponse.status === 404 || remoteResponse.status === 410) {
+          rememberNegativeResult(negativeKey, remoteResponse.status);
         }
         return remoteResponse;
       }
-    } catch {
-      // Remote asset origin failure should fall back to the app origin result.
     }
   }
 
@@ -234,6 +232,64 @@ async function fetchStaticAsset(request) {
   // aborted). Degrade gracefully for this request, but do not negative-cache
   // transient 504s because the next frame fetch may succeed immediately.
   return syntheticAssetResponse(504, "asset fetch failed");
+}
+
+async function coalescedStaticAssetFetch(request) {
+  return coalescedResponse(staticAssetInflightFetches, request.url, () => fetchStaticAsset(request));
+}
+
+async function coalescedSceneBlueprintFetch(request) {
+  return coalescedResponse(sceneBlueprintInflightFetches, request.url, () =>
+    fetchWithTransientRetries(request),
+  );
+}
+
+async function coalescedResponse(inflightMap, key, fetcher) {
+  let inflight = inflightMap.get(key);
+  if (!inflight) {
+    inflight = fetcher().finally(() => {
+      inflightMap.delete(key);
+    });
+    inflightMap.set(key, inflight);
+  }
+
+  const response = await inflight;
+  if (!response) return null;
+  try {
+    return response.clone();
+  } catch {
+    return response;
+  }
+}
+
+async function fetchWithTransientRetries(request) {
+  let lastResponse = null;
+  for (let attempt = 0; attempt <= TRANSIENT_FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      const response = await fetch(cloneRequestForRetry(request));
+      if (!isTransientFetchStatus(response.status)) return response;
+      lastResponse = response;
+    } catch {
+      lastResponse = null;
+    }
+
+    if (attempt < TRANSIENT_FETCH_RETRY_DELAYS_MS.length) {
+      await delay(TRANSIENT_FETCH_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+  return lastResponse;
+}
+
+function cloneRequestForRetry(request) {
+  return request instanceof Request ? request.clone() : request;
+}
+
+function isTransientFetchStatus(status) {
+  return TRANSIENT_FETCH_STATUSES.has(status);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function syntheticAssetResponse(status, reason) {
@@ -298,11 +354,20 @@ function isRemoteBackedStaticGameAsset(url) {
 }
 
 async function staleWhileRevalidate(request, name, maxEntries, event) {
-  const cache = await caches.open(name);
-  const cached = await cache.match(request);
-  const refresh = fetch(request)
+  let cache = null;
+  let cached = null;
+  try {
+    cache = await caches.open(name);
+    cached = await cache.match(request);
+  } catch {
+    // Scene cache is an optimization. Network retry is still the source of truth.
+  }
+
+  const refresh = coalescedSceneBlueprintFetch(request)
     .then(async (response) => {
-      await putCacheEntry(cache, request, response, maxEntries);
+      if (cache) {
+        await putCacheEntry(cache, request, response, maxEntries);
+      }
       return response;
     })
     .catch(() => null);
