@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "mir2-asset-cache";
-const CACHE_SCHEMA_VERSION = "sw2";
+const CACHE_SCHEMA_VERSION = "sw3";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
@@ -15,8 +15,9 @@ let runtimeConfig = {
 };
 let staticAssetTiers = new Map();
 
-// Short-lived negative cache so a flapping network / 404 storm does not spam
-// the network (and the console) with the same doomed request repeatedly.
+// Short-lived negative cache for confirmed missing assets. Do not cache
+// transient network/abort failures: gameplay prefetch can fan out hundreds of
+// requests, and one momentary 504 must not blacklist a valid animation frame.
 const NEGATIVE_CACHE_TTL_MS = 10_000;
 const NEGATIVE_CACHE_MAX_ENTRIES = 2000;
 const staticAssetNegativeCache = new Map();
@@ -230,9 +231,8 @@ async function fetchStaticAsset(request) {
   }
 
   // Both the app origin and the remote asset origin rejected (offline / DNS /
-  // aborted). Degrade gracefully so the fetch handler never emits an uncaught
-  // "Failed to fetch".
-  rememberNegativeResult(negativeKey, 504);
+  // aborted). Degrade gracefully for this request, but do not negative-cache
+  // transient 504s because the next frame fetch may succeed immediately.
   return syntheticAssetResponse(504, "asset fetch failed");
 }
 
@@ -258,6 +258,7 @@ function getNegativeCacheStatus(key) {
 }
 
 function rememberNegativeResult(key, status) {
+  if (status !== 404 && status !== 410) return;
   staticAssetNegativeCache.set(key, { status, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS });
   if (staticAssetNegativeCache.size > NEGATIVE_CACHE_MAX_ENTRIES) {
     const oldestKey = staticAssetNegativeCache.keys().next().value;
