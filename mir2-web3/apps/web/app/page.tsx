@@ -1325,23 +1325,24 @@ export default function HomePage() {
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
       const key = event.key.toLowerCase();
-      if (key === "q") { event.preventDefault(); setShowQuestLog((value) => !value); }
-      else if (key === "h") { event.preventDefault(); setShowHeroPet((value) => !value); }
-      else if (key === "g") { event.preventDefault(); setShowGuild((value) => !value); }
-      else if (key === "p") { event.preventDefault(); setShowGroup((value) => !value); }
-      else if (key === "f") { event.preventDefault(); setShowFriends((value) => !value); }
-      else if (key === "b") { event.preventDefault(); setShowBonds((value) => !value); }
-      else if (key === "r") { event.preventDefault(); setShowRanking((value) => !value); }
-      else if (key === "m") { event.preventDefault(); setShowMarket((value) => !value); }
-      else if (key === "k") { event.preventDefault(); setShowConquest((value) => !value); }
-      else if (key === "t") { event.preventDefault(); setShowTrade((value) => !value); }
-      else if (key === "u") { event.preventDefault(); setShowBuffs((value) => !value); }
-      else if (key === "n") { event.preventDefault(); setShowWorldMap((value) => !value); }
-      else if (key === "j") { event.preventDefault(); setShowHelp((value) => !value); }
-      else if (key === "y") { event.preventDefault(); setShowHotkeys((value) => !value); }
-      else if (key === "c") { event.preventDefault(); setShowChatSettings((value) => !value); }
-      else if (key === "l") { event.preventDefault(); setShowMail((value) => !value); }
-      else if (key === "d") { event.preventDefault(); downloadSnapshot("manual"); }
+      const matchesKey = (letter: string) => key === letter || event.code === `Key${letter.toUpperCase()}`;
+      if (matchesKey("q")) { event.preventDefault(); setShowQuestLog((value) => !value); }
+      else if (matchesKey("h")) { event.preventDefault(); setShowHeroPet((value) => !value); }
+      else if (matchesKey("g")) { event.preventDefault(); setShowGuild((value) => !value); }
+      else if (matchesKey("p")) { event.preventDefault(); setShowGroup((value) => !value); }
+      else if (matchesKey("f")) { event.preventDefault(); setShowFriends((value) => !value); }
+      else if (matchesKey("b")) { event.preventDefault(); setShowBonds((value) => !value); }
+      else if (matchesKey("r")) { event.preventDefault(); setShowRanking((value) => !value); }
+      else if (matchesKey("m")) { event.preventDefault(); setShowMarket((value) => !value); }
+      else if (matchesKey("k")) { event.preventDefault(); setShowConquest((value) => !value); }
+      else if (matchesKey("t")) { event.preventDefault(); setShowTrade((value) => !value); }
+      else if (matchesKey("u")) { event.preventDefault(); setShowBuffs((value) => !value); }
+      else if (matchesKey("n")) { event.preventDefault(); setShowWorldMap((value) => !value); }
+      else if (matchesKey("j")) { event.preventDefault(); setShowHelp((value) => !value); }
+      else if (matchesKey("y")) { event.preventDefault(); setShowHotkeys((value) => !value); }
+      else if (matchesKey("c")) { event.preventDefault(); setShowChatSettings((value) => !value); }
+      else if (matchesKey("l")) { event.preventDefault(); setShowMail((value) => !value); }
+      else if (matchesKey("d")) { event.preventDefault(); downloadSnapshot("manual"); }
     };
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
