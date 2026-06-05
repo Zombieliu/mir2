@@ -34,8 +34,10 @@ import {
   installDebugCapture,
   recordDebugEvent,
   setSnapshotContext,
+  setRenderStateProvider,
   downloadSnapshot,
 } from "../lib/debug-snapshot";
+import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
 import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
 import {
   DUBHE_WALLET_URL,
@@ -1295,6 +1297,13 @@ export default function HomePage() {
         entityCount: Array.isArray(snapshotWorld.entities) ? snapshotWorld.entities.length : 0,
         gold: snapshotWorld.gold,
       };
+    });
+    setRenderStateProvider(() => {
+      const snapshotWorld = worldRef.current;
+      const snapshotSelf = Array.isArray(snapshotWorld.entities)
+        ? snapshotWorld.entities.find((entity) => entity.objectId === snapshotWorld.playerObjectId) ?? null
+        : null;
+      return buildRenderStateSummary(snapshotWorld, snapshotSelf);
     });
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
