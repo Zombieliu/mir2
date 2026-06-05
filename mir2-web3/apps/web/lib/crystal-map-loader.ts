@@ -1143,7 +1143,11 @@ function tileAnimationLayerForCell(cell: ParsedMapCell) {
   const stride = cell.tileAnimationOffset ^ 0x2000;
   const frames = Array.from({ length: cell.tileAnimationFrames }, (_, index) => cell.tileAnimationImage - 1 + stride * index).filter((index) => index >= 0);
   if (!frames.length) return null;
-  return { libraryKey: mapLibraryKeyForIndex(190), drawMode: "object" as const, frames };
+  // AniTiles (animated water/lava) are FLOOR-level in Crystal (drawn in MapControl.DrawFloor,
+  // beneath object/bridge layers). Routing them as "object" painted them on top of bridges
+  // (water overdrawing the stone bridge). "floor" sends them to the backdrop container behind
+  // all objects and activates the FLOOR_LAYER_Z_OFFSETS.tileAnimation z-offset.
+  return { libraryKey: mapLibraryKeyForIndex(190), drawMode: "floor" as const, frames };
 }
 
 function ensureLibrary(libraryKey: string) {
