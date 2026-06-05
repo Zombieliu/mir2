@@ -157,7 +157,7 @@ export function buildViewportMapSprites(
       cell,
       player,
       animationFrameIndex,
-      false,
+      inFloorBounds,
       true,
     );
   }
