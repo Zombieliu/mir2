@@ -37,6 +37,7 @@
     "assets:r2:dry-run": "node ./scripts/upload-r2-assets.mjs --dryRun true",
     "assets:r2:upload": "node ./scripts/upload-r2-assets.mjs",
     "assets:bevy-entity-atlas:build": "node ./scripts/build-bevy-entity-atlas-pack.mjs",
+    "assets:map-atlas:build": "node ./scripts/build-map-atlas-pack.mjs",
     "vercel:prune-output": "node ./scripts/prune-vercel-output-assets.mjs",
     "vercel:build:prod": "npx vercel@latest build --prod --yes && npm run vercel:prune-output",
     "vercel:deploy:prod": "npx vercel@latest deploy --prebuilt --prod --archive=tgz --yes",

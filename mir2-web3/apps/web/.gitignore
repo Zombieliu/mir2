@@ -1,1 +1,5 @@
 .vercel
+
+# Generated map texture atlases (built by `npm run assets:map-atlas:build`, served from R2).
+# Regenerated before each asset release; kept out of git to avoid ~60MB of derived binaries.
+public/generated/map-atlas/
