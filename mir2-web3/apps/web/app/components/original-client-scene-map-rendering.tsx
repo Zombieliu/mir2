@@ -296,11 +296,27 @@ function mapSpriteIntersectsViewport(left: number, top: number, width: number, h
 }
 
 function crystalMapFrameUsesOffset(frame: OriginalMapSpriteFrame) {
-  return (
-    typeof frame.offsetX === "number" ||
-    typeof frame.offsetY === "number" ||
-    crystalMapFrameHasLegacyOffsetFallback(frame.path)
-  );
+  // Crystal applies the library frame (X,Y) offset (GetOffSet / point.Offset(mi.X,mi.Y))
+  // to map sprites in only two floor/object draw cases:
+  //   - blend overloads: torch/fire frames WemadeMir2/Objects 2723-2732
+  //     (Crystal GameScene.cs:10928 + MLibrary.cs:699, offSet=true)
+  //   - fileIndex==28 (WemadeMir2/Objects27) non-blend with a real offset
+  //     (Crystal GameScene.cs:10932-10933, anchored at drawY - CellHeight)
+  // General front objects (WemadeMir2/Objects = fileIndex 2, e.g. the Bichon shore/cliff
+  // strips Objects/102,103,104,213) draw via the raw Draw(index, drawX, drawY - s.Height)
+  // overload (MLibrary.cs:640-657) with NO offset. The loader stamps offsetX/offsetY onto
+  // EVERY frame (crystal-map-loader.ts), where (7,-44) is a library-wide constant that
+  // Crystal deliberately ignores for fileIndex 2 — so a numeric offset must NOT enable it,
+  // or every tall front object is shoved up 44px/right 7px off its bottom-cell anchor.
+  if (crystalMapFrameHasLegacyOffsetFallback(frame.path)) return true;
+  if (
+    /\/original-map\/WemadeMir2\/Objects27\//i.test(frame.path) &&
+    ((typeof frame.offsetX === "number" && frame.offsetX !== 0) ||
+      (typeof frame.offsetY === "number" && frame.offsetY !== 0))
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function crystalMapFrameOffset(frame: OriginalMapSpriteFrame): ViewportOffset {
