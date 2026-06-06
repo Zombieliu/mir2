@@ -1390,14 +1390,19 @@ export function OriginalClientShell({
     const preloadReadiness =
       sceneAssetPreloadReadiness?.key === sceneAssetReadinessKey ? sceneAssetPreloadReadiness : null;
     if (!urls.length) {
-      notify(
-        createSceneAssetReadiness(
+      // Map + tile libraries are ready and there are no scene tiles to preload, so the
+      // player can interact (move) NOW. entityAtlasPending (the GPU/Bevy entity atlas)
+      // only reflects visual completeness and must NOT gate interaction — otherwise a
+      // hung/slow Bevy runtime keeps interactionReady false and the player can never move.
+      notify({
+        ...createSceneAssetReadiness(
           sceneAssetReadinessKey,
           !entityAtlasPending,
           entityAtlasPending ? "loading" : "ready",
           entityAtlasPendingCount,
         ),
-      );
+        interactionReady: true,
+      });
       return;
     }
 
@@ -1407,10 +1412,15 @@ export function OriginalClientShell({
     }
 
     if (entityAtlasPending) {
+      // Tiles are fully preloaded here, so interaction (movement) is ready even though the
+      // GPU/Bevy entity atlas is still loading. Decoupling interactionReady from the entity
+      // atlas is the fix for the "can't move" lock: a Bevy runtime that never reports ready
+      // (intermittent WebGPU/WebGL boot) used to force interactionReady:false forever.
+      // visualReady/ready still wait on the atlas so the HUD can reflect full readiness.
       notify({
         ...preloadReadiness,
         ready: false,
-        interactionReady: false,
+        interactionReady: true,
         visualReady: preloadReadiness.visualReady ?? preloadReadiness.failed === 0,
         status: "loading",
         pending: preloadReadiness.pending + entityAtlasPendingCount,
