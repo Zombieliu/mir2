@@ -1178,7 +1178,6 @@ export function OriginalClientShell({
   sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites, {
     includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
   });
-  const sceneAssetUrlKey = stableSceneAssetUrlKey(sceneAssetUrlsRef.current);
 
   // Prefetch a ring of static tiles just outside the visible viewport whenever the
   // player's cell changes, so walking does not pop-in cold tiles. Idle-scheduled and
@@ -1226,6 +1225,16 @@ export function OriginalClientShell({
   }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
+  // Key ONLY on the map-region identity. It MUST stay stable while the player stands
+  // still: the tile-preload readiness effect re-runs (and resets preloadStatus to
+  // "loading", disposing the in-flight preload) whenever this key changes. The old key
+  // mixed in sceneAssetUrlKey (which includes per-entity sprite URLs), viewportEntities
+  // .length, and desiredSceneSpriteLibraryKey (derived from world.entities) — all of
+  // which churn every frame in a populated map (BichonProvince guards/archers/monsters).
+  // That churn restarted the 5s preload faster than it could finish, so preloadStatus
+  // was stuck "loading" forever → sceneInteractionReady never became true → MOVEMENT
+  // was permanently gated. Sprite-library readiness is already a separate effect dep
+  // (sceneSpriteLibrariesReady), so dropping the entity-volatile parts is safe.
   const sceneAssetReadinessKey =
     screen === "game" && renderPlayer && world.originalMapRegion
       ? [
@@ -1234,9 +1243,6 @@ export function OriginalClientShell({
           world.originalMapRegion.regionBounds.minY,
           world.originalMapRegion.regionBounds.maxX,
           world.originalMapRegion.regionBounds.maxY,
-          sceneAssetUrlKey,
-          desiredSceneSpriteLibraryKey,
-          viewportEntities.length,
         ].join(":")
       : `idle:${screen}`;
 
