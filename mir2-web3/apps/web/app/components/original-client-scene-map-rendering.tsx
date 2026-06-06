@@ -3,8 +3,10 @@
 import type { SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { type MapAtlasIndex, mapAtlasRectKeyForPath } from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
 import type { DisplayEntity, DisplayWorld } from "./original-client-types";
+import type { MapTileDraw } from "./webgl2-map-atlas-layer";
 import {
   EMPTY_VIEWPORT_MAP_SPRITES,
   EMPTY_VIEWPORT_OFFSET,
@@ -182,6 +184,36 @@ export function buildViewportMapSprites(
     floor,
     objects,
   };
+}
+
+// Map a viewport's DOM map sprites (floor + objects) to a GPU draw list against the packed
+// map atlases. Each sprite's (library, frame) is recovered from its per-tile PNG path and
+// looked up in the atlas index; cameraOffset is folded in so GPU quads align with the DOM /
+// entity layers. Sprites with no atlas rect are dropped here (DOM remains the fallback).
+export function buildMapTileDrawList(
+  mapSprites: ViewportMapSprites,
+  index: MapAtlasIndex,
+  cameraOffset: ViewportOffset,
+): MapTileDraw[] {
+  const out: MapTileDraw[] = [];
+  const add = (sprite: ViewportMapSprite) => {
+    const rectKey = mapAtlasRectKeyForPath(sprite.path);
+    if (!rectKey) return;
+    const atlasKey = index.rectToAtlas.get(rectKey);
+    if (!atlasKey) return;
+    out.push({
+      atlasKey,
+      rectKey,
+      left: sprite.left + cameraOffset.x,
+      top: sprite.top + cameraOffset.y,
+      width: sprite.width,
+      height: sprite.height,
+      z: sprite.zIndex,
+    });
+  };
+  for (const sprite of mapSprites.floor) add(sprite);
+  for (const sprite of mapSprites.objects) add(sprite);
+  return out;
 }
 
 function viewportMapCells(
