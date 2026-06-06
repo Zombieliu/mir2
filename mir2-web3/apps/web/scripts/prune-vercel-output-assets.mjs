@@ -17,6 +17,10 @@ const PRUNE_TARGETS = [
     path: "static/generated/original-map-blend",
     reason: "served from the versioned R2 asset origin through the player-domain proxy",
   },
+  {
+    path: "static/generated/map-atlas",
+    reason: "packed map texture atlases served from the versioned R2 asset origin",
+  },
 ];
 
 const args = parseArgs(process.argv.slice(2));
