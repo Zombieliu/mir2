@@ -1240,6 +1240,41 @@ export function OriginalClientShell({
         ].join(":")
       : `idle:${screen}`;
 
+  // Diagnostic: expose the scene/movement-readiness gate so an Alt+D snapshot reveals
+  // exactly which factor is blocking movement (sceneInteractionReady is the actual gate
+  // checked by the keyboard/click move handlers). No behavior change.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    (window as unknown as Record<string, unknown>).__mir2SceneGate = {
+      screen,
+      sceneInteractionReady,
+      sceneSpriteLibrariesReady,
+      pendingSceneSpriteLibraryCount: pendingSceneSpriteLibraryKeys.length,
+      pendingSceneSpriteLibraryKeys: pendingSceneSpriteLibraryKeys.slice(0, 10),
+      desiredSceneSpriteLibraryCount: desiredSceneSpriteLibraryKeys.length,
+      preloadStatus: sceneAssetPreloadReadiness?.status ?? null,
+      preloadInteractionReady: sceneAssetPreloadReadiness?.interactionReady ?? null,
+      preloadReady: sceneAssetPreloadReadiness?.ready ?? null,
+      preloadFailed: sceneAssetPreloadReadiness?.failed ?? null,
+      hasRenderPlayer: Boolean(renderPlayer),
+      hasMapRegion: Boolean(world.originalMapRegion),
+      gpuEntityRendererRuntimePending,
+      useGpuEntityRenderer,
+    };
+  }, [
+    screen,
+    sceneInteractionReady,
+    sceneSpriteLibrariesReady,
+    pendingSceneSpriteLibraryKeys.length,
+    desiredSceneSpriteLibraryKeys.length,
+    sceneAssetPreloadReadiness?.status,
+    sceneAssetPreloadReadiness?.interactionReady,
+    renderPlayer,
+    world.originalMapRegion,
+    gpuEntityRendererRuntimePending,
+    useGpuEntityRenderer,
+  ]);
+
   useEffect(() => {
     if (!useGpuEntityRenderer || !useBevyEntityAtlas || !entityRenderState.enabled) {
       if (bevyEntityAtlas) {
@@ -1390,14 +1425,19 @@ export function OriginalClientShell({
     const preloadReadiness =
       sceneAssetPreloadReadiness?.key === sceneAssetReadinessKey ? sceneAssetPreloadReadiness : null;
     if (!urls.length) {
-      notify(
-        createSceneAssetReadiness(
+      // Map + tile libraries are ready and there are no scene tiles to preload, so the
+      // player can interact (move) NOW. entityAtlasPending (the GPU/Bevy entity atlas)
+      // only reflects visual completeness and must NOT gate interaction — otherwise a
+      // hung/slow Bevy runtime keeps interactionReady false and the player can never move.
+      notify({
+        ...createSceneAssetReadiness(
           sceneAssetReadinessKey,
           !entityAtlasPending,
           entityAtlasPending ? "loading" : "ready",
           entityAtlasPendingCount,
         ),
-      );
+        interactionReady: true,
+      });
       return;
     }
 
@@ -1407,10 +1447,15 @@ export function OriginalClientShell({
     }
 
     if (entityAtlasPending) {
+      // Tiles are fully preloaded here, so interaction (movement) is ready even though the
+      // GPU/Bevy entity atlas is still loading. Decoupling interactionReady from the entity
+      // atlas is part of the "can't move" fix: a Bevy runtime that never reports ready
+      // (intermittent WebGPU/WebGL boot) used to force interactionReady:false forever.
+      // visualReady/ready still wait on the atlas so the HUD can reflect full readiness.
       notify({
         ...preloadReadiness,
         ready: false,
-        interactionReady: false,
+        interactionReady: true,
         visualReady: preloadReadiness.visualReady ?? preloadReadiness.failed === 0,
         status: "loading",
         pending: preloadReadiness.pending + entityAtlasPendingCount,

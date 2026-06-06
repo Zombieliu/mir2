@@ -1329,7 +1329,21 @@ export default function HomePage() {
       const snapshotSelf = Array.isArray(snapshotWorld.entities)
         ? snapshotWorld.entities.find((entity) => entity.objectId === snapshotWorld.playerObjectId) ?? null
         : null;
-      return buildRenderStateSummary(snapshotWorld, snapshotSelf);
+      const summary = buildRenderStateSummary(snapshotWorld, snapshotSelf);
+      // Movement-lock diagnostic: distinguishes "input gated off" (initialSceneAssetsReady
+      // false) from "input gated ON but send is blocked" (isMovementBusy stuck on an
+      // unconfirmed pending move). Pairs with window.__mir2SceneGate (readiness factors).
+      const movementGate = {
+        initialSceneAssetsReady: initialSceneAssetsReadyRef.current,
+        firstPlayableFrameMarked: firstPlayableFrameMarkedRef.current,
+        isMovementBusy: isMovementBusy(),
+        pendingSelfMove: Boolean(pendingSelfMoveRef.current),
+        queuedMoveIntent: Boolean(queuedMoveIntentRef.current),
+        movementPlan: Boolean(movementPlanRef.current),
+        playerObjectId: snapshotWorld.playerObjectId ?? null,
+        hasSelfEntity: Boolean(snapshotSelf),
+      };
+      return { ...(summary as Record<string, unknown>), movementGate };
     });
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
