@@ -36,6 +36,7 @@ export type DiagnosticSnapshot = {
   events: DebugEvent[];
   movement?: unknown;
   assetCache?: unknown;
+  renderState?: unknown;
 };
 
 const RING_MAX = 600;
@@ -71,6 +72,21 @@ let contextProvider: SnapshotContextProvider = () => ({});
 /** The host (page.tsx) registers a provider returning the current world summary. */
 export function setSnapshotContext(provider: SnapshotContextProvider): void {
   contextProvider = provider;
+}
+
+type SnapshotRenderStateProvider = () => unknown;
+let renderStateProvider: SnapshotRenderStateProvider | null = null;
+
+/**
+ * The host (page.tsx) registers a provider returning a compact summary of what the
+ * scene renderer is currently drawing (per-layer sprite counts, libraries in use, a
+ * small player-centred grid of cell layers, and failed assets). It is computed lazily
+ * at capture time so there is zero per-frame cost. Bounded on purpose — see the
+ * builder in original-client-scene-map-rendering.ts — because the snapshot payload is
+ * already near the MCP read-size limit.
+ */
+export function setRenderStateProvider(provider: SnapshotRenderStateProvider): void {
+  renderStateProvider = provider;
 }
 
 function readWindowGlobal(key: string): unknown {
@@ -121,6 +137,12 @@ export function captureSnapshot(subsystem: string, context?: Record<string, unkn
   const sessionId = debugSessionId();
   const movementDiagnostics = readWindowGlobal("__mir2MovementDiagnostics");
   const movementRecent = readWindowGlobal("__mir2MovementConsoleEvents");
+  let renderState: unknown;
+  try {
+    renderState = renderStateProvider ? renderStateProvider() : undefined;
+  } catch (error) {
+    renderState = { error: String(error) };
+  }
   return {
     schema: "mir2-debug-snapshot/1",
     sessionId,
@@ -135,6 +157,7 @@ export function captureSnapshot(subsystem: string, context?: Record<string, unkn
         ? { diagnostics: movementDiagnostics, recent: movementRecent }
         : undefined,
     assetCache: readWindowGlobal("__mir2AssetCache"),
+    renderState,
   };
 }
 
