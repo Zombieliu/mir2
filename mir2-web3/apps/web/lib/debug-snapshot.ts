@@ -36,6 +36,7 @@ export type DiagnosticSnapshot = {
   movement?: unknown;
   assetCache?: unknown;
   renderState?: unknown;
+  sceneGate?: unknown;
 };
 
 const RING_MAX = 600;
@@ -124,6 +125,7 @@ export function captureSnapshot(subsystem: string, context?: Record<string, unkn
         : undefined,
     assetCache: readWindowGlobal("__mir2AssetCache"),
     renderState,
+    sceneGate: readWindowGlobal("__mir2SceneGate"),
   };
 }
 

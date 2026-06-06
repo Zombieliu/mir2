@@ -1240,6 +1240,41 @@ export function OriginalClientShell({
         ].join(":")
       : `idle:${screen}`;
 
+  // Diagnostic: expose the scene/movement-readiness gate so an Alt+D snapshot reveals
+  // exactly which factor is blocking movement (sceneInteractionReady is the actual gate
+  // checked by the keyboard/click move handlers). No behavior change.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    (window as unknown as Record<string, unknown>).__mir2SceneGate = {
+      screen,
+      sceneInteractionReady,
+      sceneSpriteLibrariesReady,
+      pendingSceneSpriteLibraryCount: pendingSceneSpriteLibraryKeys.length,
+      pendingSceneSpriteLibraryKeys: pendingSceneSpriteLibraryKeys.slice(0, 10),
+      desiredSceneSpriteLibraryCount: desiredSceneSpriteLibraryKeys.length,
+      preloadStatus: sceneAssetPreloadReadiness?.status ?? null,
+      preloadInteractionReady: sceneAssetPreloadReadiness?.interactionReady ?? null,
+      preloadReady: sceneAssetPreloadReadiness?.ready ?? null,
+      preloadFailed: sceneAssetPreloadReadiness?.failed ?? null,
+      hasRenderPlayer: Boolean(renderPlayer),
+      hasMapRegion: Boolean(world.originalMapRegion),
+      gpuEntityRendererRuntimePending,
+      useGpuEntityRenderer,
+    };
+  }, [
+    screen,
+    sceneInteractionReady,
+    sceneSpriteLibrariesReady,
+    pendingSceneSpriteLibraryKeys.length,
+    desiredSceneSpriteLibraryKeys.length,
+    sceneAssetPreloadReadiness?.status,
+    sceneAssetPreloadReadiness?.interactionReady,
+    renderPlayer,
+    world.originalMapRegion,
+    gpuEntityRendererRuntimePending,
+    useGpuEntityRenderer,
+  ]);
+
   useEffect(() => {
     if (!useGpuEntityRenderer || !useBevyEntityAtlas || !entityRenderState.enabled) {
       if (bevyEntityAtlas) {
