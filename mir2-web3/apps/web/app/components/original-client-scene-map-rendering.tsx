@@ -934,3 +934,102 @@ function markStaticSceneAssetFailed(image: HTMLImageElement, originalSrc: string
   image.dataset.mir2LoadFailed = "true";
   image.style.visibility = "hidden";
 }
+
+/** Scene asset paths currently inside the negative-cache window (i.e. recently failed to load). */
+export function listFailedSceneAssets(limit = 60): string[] {
+  const now = Date.now();
+  const out: string[] = [];
+  for (const [key, failedAt] of failedStaticSceneAssetUrls) {
+    if (now - failedAt <= STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS) {
+      out.push(key);
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
+
+/** "/original-map/WemadeMir2/Tiles/901.png" -> { library: "WemadeMir2/Tiles", frame: "901" }. */
+function parseSceneAssetPath(path: string): { library: string; frame: string } {
+  const match = path.match(/\/((?:Wemade|Shanda)Mir[23])\/([^/]+)\/(\d+)\.[a-z0-9]+$/i);
+  if (match) {
+    return { library: `${match[1]}/${match[2]}`, frame: match[3] };
+  }
+  const segments = path.split("/").filter(Boolean);
+  return { library: segments.slice(-2, -1)[0] ?? path, frame: segments.slice(-1)[0] ?? "?" };
+}
+
+export type RenderStateSummary = {
+  available: boolean;
+  reason?: string;
+  viewport?: Record<string, unknown>;
+  layerCounts?: Record<string, number>;
+  librariesInUse?: Record<string, number>;
+  /** Player-centred grid: [x, y, "b:WemadeMir2/Tiles#901 f:WemadeMir2/Objects#256"]. */
+  cells?: Array<[number, number, string]>;
+  failedAssets?: string[];
+};
+
+/**
+ * Compact, bounded summary of what the scene renderer is drawing right now — the data
+ * you would otherwise have to reverse-engineer from the .map binary. Reuses the exact
+ * sprite-build path the renderer uses, so layerCounts/librariesInUse reflect reality
+ * (e.g. layerCounts.tileAnimation === 0 means "no animated tiles here, water is a
+ * back/front tile"). Kept small (player ± RADIUS cells, deduped libraries) because the
+ * snapshot payload already approaches the MCP read-size limit.
+ */
+export function buildRenderStateSummary(world: DisplayWorld, player: DisplayEntity | null): RenderStateSummary {
+  const region = world.originalMapRegion;
+  if (!region) return { available: false, reason: "no-region" };
+  if (!player) return { available: false, reason: "no-player" };
+
+  const { floor, objects } = buildViewportMapSprites(world, player, 0);
+  const layerCounts: Record<string, number> = { back: 0, middle: 0, front: 0, tileAnimation: 0 };
+  const librariesInUse: Record<string, number> = {};
+  for (const sprite of [...floor, ...objects]) {
+    layerCounts[sprite.kind] = (layerCounts[sprite.kind] ?? 0) + 1;
+    const { library } = parseSceneAssetPath(sprite.path);
+    librariesInUse[library] = (librariesInUse[library] ?? 0) + 1;
+  }
+
+  const RADIUS = 5;
+  const cellIndex = mapRegionCellIndex(region);
+  const cells: Array<[number, number, string]> = [];
+  const describeLayer = (code: string, spriteId: string | null | undefined): string | null => {
+    if (!spriteId) return null;
+    const sprite = region.sprites[spriteId];
+    const frame = sprite?.frames[0];
+    if (!frame) return `${code}:?`;
+    const { library, frame: frameIndex } = parseSceneAssetPath(frame.path);
+    return `${code}:${library}#${frameIndex}`;
+  };
+  for (let y = player.y - RADIUS; y <= player.y + RADIUS; y += 1) {
+    for (let x = player.x - RADIUS; x <= player.x + RADIUS; x += 1) {
+      const cell = cellIndex.get(mapCellKey(x, y));
+      if (!cell) continue;
+      const parts = [
+        describeLayer("b", cell.back),
+        describeLayer("m", cell.middle),
+        describeLayer("f", cell.front),
+        describeLayer("a", cell.tileAnimation),
+      ].filter((part): part is string => Boolean(part));
+      if (parts.length) cells.push([x, y, parts.join(" ")]);
+    }
+  }
+
+  return {
+    available: true,
+    viewport: {
+      mapFile: region.mapFileName,
+      mapTitle: world.mapTitle ?? null,
+      playerX: player.x,
+      playerY: player.y,
+      floorSprites: floor.length,
+      objectSprites: objects.length,
+      regionCells: region.cells.length,
+    },
+    layerCounts,
+    librariesInUse,
+    cells,
+    failedAssets: listFailedSceneAssets(60),
+  };
+}
