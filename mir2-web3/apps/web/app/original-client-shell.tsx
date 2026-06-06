@@ -101,6 +101,9 @@ import {
 } from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
+import { WebGl2MapAtlasLayer, type MapTileDraw } from "./components/webgl2-map-atlas-layer";
+import { buildMapTileDrawList } from "./components/original-client-scene-map-rendering";
+import { type MapAtlasIndex, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
 
 type HeldScenePointer = {
   button: 0 | 2;
@@ -1005,6 +1008,33 @@ export function OriginalClientShell({
     }),
     [staticViewportMapSprites, animatedViewportMapSprites],
   );
+
+  // GPU map-atlas rendering (opt-in via ?mapAtlas=1). Loads the packed atlas manifest once;
+  // when present, map tiles render from a few resident atlas textures on the WebGl2MapAtlasLayer
+  // instead of ~450-510 per-frame DOM <img>/R2 GETs. Default OFF -> DOM path unchanged.
+  const mapAtlasRequested = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("mapAtlas") === "1";
+  }, []);
+  const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
+  useEffect(() => {
+    if (!mapAtlasRequested) return;
+    let cancelled = false;
+    void loadMapAtlasIndex().then((index) => {
+      if (!cancelled) setMapAtlasIndex(index);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mapAtlasRequested]);
+  const mapGpuActive = mapAtlasRequested && Boolean(mapAtlasIndex) && screen === "game";
+  const mapTileDrawList = useMemo(
+    () =>
+      mapGpuActive && mapAtlasIndex && renderPlayer
+        ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, playerCameraMotionOffset)
+        : EMPTY_MAP_TILE_DRAW_LIST,
+    [mapGpuActive, mapAtlasIndex, renderPlayer, viewportMapSprites, playerCameraMotionOffset],
+  );
   const viewportProjectiles = renderPlayer
     ? world.projectiles
         .filter((projectile) => projectile.expiresAt > motionNow)
@@ -1683,6 +1713,13 @@ export function OriginalClientShell({
             id="mir2-web3-canvas"
             className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
           />
+          <WebGl2MapAtlasLayer
+            enabled={mapGpuActive}
+            stageWidth={ORIGINAL_UI.game.sceneWidth}
+            stageHeight={ORIGINAL_UI.game.sceneHeight}
+            index={mapAtlasIndex}
+            tiles={mapTileDrawList}
+          />
           <WebGl2EntityAtlasLayer
             enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
             state={entityRenderState}
@@ -1692,7 +1729,7 @@ export function OriginalClientShell({
             <GameSceneBackdrop
               world={world}
               player={player}
-              floorSprites={viewportMapSprites.floor}
+              floorSprites={mapGpuActive ? EMPTY_VIEWPORT_MAP_SPRITES.floor : viewportMapSprites.floor}
               cameraOffset={playerCameraMotionOffset}
             />
           ) : null}
@@ -1764,7 +1801,7 @@ export function OriginalClientShell({
             player={player}
             selectedEntity={selectedEntity}
             viewportGroundDrops={viewportGroundDrops}
-            viewportMapSprites={viewportMapSprites}
+            viewportMapSprites={mapGpuActive ? EMPTY_VIEWPORT_MAP_SPRITES : viewportMapSprites}
             viewportEntitySprites={viewportEntitySprites}
             viewportProjectiles={viewportProjectiles}
             viewportDepthPlayer={viewportDepthPlayer}
@@ -2007,6 +2044,7 @@ const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 512;
 const SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT = 96;
 const SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE = 64;
 const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
+const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
 const SCENE_TILE_PREFETCH_RING_CELLS = 6;
 const SCENE_TILE_PREFETCH_TIMEOUT_MS = 8_000;
