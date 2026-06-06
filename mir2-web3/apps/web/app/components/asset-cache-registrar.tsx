@@ -330,6 +330,11 @@ export function AssetCacheRegistrar() {
           void refreshCacheStorageMetrics(metrics).then(() => {
             if (!disposed && debug) setSnapshot(metrics.snapshot());
           });
+          // Request persistent storage EARLY (before prewarm fills the cache) so the
+          // browser is more likely to grant it and CacheStorage isn't evicted between
+          // loads. Non-blocking + idempotent; the later await inside prewarmAssetPacks
+          // then no-ops instead of stalling prewarm progress at requested:0.
+          void requestPersistentStorage(metrics);
           metrics.markMilestone("serviceWorkerReady", {
             version: manifest.version,
             controlled: Boolean(navigator.serviceWorker.controller),

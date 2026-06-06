@@ -76,6 +76,7 @@ export function GameSceneBackdrop({
           crossOrigin="anonymous"
           alt=""
           draggable={false}
+          decoding="async"
           onError={handleSceneAssetImageError}
           onLoad={handleSceneAssetImageLoad}
           style={{
@@ -91,20 +92,31 @@ export function GameSceneBackdrop({
   );
 }
 
+// Splitting the viewport build by animation cadence keeps the ~500-sprite static
+// layer off the 120ms animation tick: callers memoize "static" on [player.x,y,region]
+// (rebuilt only on movement) and "animated" on the frame index (cheap — only multi-frame
+// sprites do work; single-frame sprites are skipped early). "all" preserves old behavior.
+export type ViewportSpriteAnimationFilter = "all" | "static" | "animated";
+
 export function buildViewportMapSprites(
   world: DisplayWorld,
   player: DisplayEntity,
   animationFrameIndex: number,
+  animationFilter: ViewportSpriteAnimationFilter = "all",
+  rangeExpansion = 0,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
     return EMPTY_VIEWPORT_MAP_SPRITES;
   }
 
-  const floorMinX = player.x - VIEWPORT_RANGE_X;
-  const floorMaxX = player.x + VIEWPORT_RANGE_X;
-  const floorMinY = player.y - VIEWPORT_RANGE_Y;
-  const floorMaxY = player.y + VIEWPORT_RANGE_Y;
+  // rangeExpansion widens the cell window beyond the visible viewport — used by the
+  // off-screen prefetch ring to warm tiles in the player's surroundings before they
+  // scroll into view (eliminates walk-time pop-in). 0 = exact visible viewport.
+  const floorMinX = player.x - VIEWPORT_RANGE_X - rangeExpansion;
+  const floorMaxX = player.x + VIEWPORT_RANGE_X + rangeExpansion;
+  const floorMinY = player.y - VIEWPORT_RANGE_Y - rangeExpansion;
+  const floorMaxY = player.y + VIEWPORT_RANGE_Y + rangeExpansion;
   const objectMinX = floorMinX - 4;
   const objectMaxX = floorMaxX + 4;
   const objectMinY = floorMinY - 4;
@@ -126,6 +138,7 @@ export function buildViewportMapSprites(
       animationFrameIndex,
       inFloorBounds,
       true,
+      animationFilter,
     );
     appendViewportMapSprite(
       floor,
@@ -137,6 +150,7 @@ export function buildViewportMapSprites(
       animationFrameIndex,
       inFloorBounds,
       true,
+      animationFilter,
     );
     appendViewportMapSprite(
       floor,
@@ -148,6 +162,7 @@ export function buildViewportMapSprites(
       animationFrameIndex,
       inFloorBounds,
       true,
+      animationFilter,
     );
     appendViewportMapSprite(
       floor,
@@ -159,6 +174,7 @@ export function buildViewportMapSprites(
       animationFrameIndex,
       inFloorBounds,
       true,
+      animationFilter,
     );
   }
 
@@ -222,6 +238,7 @@ function appendViewportMapSprite(
   animationFrameIndex: number,
   inFloorBounds: boolean,
   inObjectBounds: boolean,
+  animationFilter: ViewportSpriteAnimationFilter = "all",
 ) {
   if (!spriteId) {
     return;
@@ -229,6 +246,18 @@ function appendViewportMapSprite(
 
   const sprite = region.sprites[spriteId];
   if (!sprite || !sprite.frames.length) {
+    return;
+  }
+
+  // Animation-cadence partition: single-frame sprites are static (their output never
+  // changes with animationFrameIndex), multi-frame sprites animate. Skip early — before
+  // any position/frame work — so the per-tick "animated" pass does almost nothing on
+  // maps without animated tiles.
+  const isAnimatedSprite = sprite.frames.length > 1;
+  if (animationFilter === "static" && isAnimatedSprite) {
+    return;
+  }
+  if (animationFilter === "animated" && !isAnimatedSprite) {
     return;
   }
 

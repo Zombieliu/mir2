@@ -980,12 +980,30 @@ export function OriginalClientShell({
           dy: drop.y - (renderPlayer ?? player).y,
         }))
     : [];
-  const viewportMapSprites = useMemo(
+  // Static layer (single-frame sprites = the ~500-tile bulk) rebuilds only when the
+  // player's cell or the map region changes — NOT on the 120ms animation tick.
+  const staticViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex)
+        ? buildViewportMapSprites(world, renderPlayer, 0, "static")
+        : EMPTY_VIEWPORT_MAP_SPRITES,
+    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion],
+  );
+  // Animated layer (multi-frame sprites only) tracks the frame index; the per-tick pass
+  // skips all single-frame sprites early, so on maps without animated tiles it is ~free.
+  const animatedViewportMapSprites = useMemo(
+    () =>
+      renderPlayer
+        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated")
         : EMPTY_VIEWPORT_MAP_SPRITES,
     [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion],
+  );
+  const viewportMapSprites = useMemo(
+    () => ({
+      floor: [...staticViewportMapSprites.floor, ...animatedViewportMapSprites.floor],
+      objects: [...staticViewportMapSprites.objects, ...animatedViewportMapSprites.objects],
+    }),
+    [staticViewportMapSprites, animatedViewportMapSprites],
   );
   const viewportProjectiles = renderPlayer
     ? world.projectiles
@@ -1161,6 +1179,51 @@ export function OriginalClientShell({
     includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
   });
   const sceneAssetUrlKey = stableSceneAssetUrlKey(sceneAssetUrlsRef.current);
+
+  // Prefetch a ring of static tiles just outside the visible viewport whenever the
+  // player's cell changes, so walking does not pop-in cold tiles. Idle-scheduled and
+  // deduped against the currently-visible set; preloadSceneAssetUrls warms the browser
+  // (and SW) cache via Image() with no DOM/render impact.
+  useEffect(() => {
+    if (screen !== "game" || !renderPlayer || !world.originalMapRegion) {
+      return;
+    }
+    let cancelled = false;
+    const warmPrefetchRing = () => {
+      if (cancelled || !renderPlayer) {
+        return;
+      }
+      const ring = buildViewportMapSprites(world, renderPlayer, 0, "static", SCENE_TILE_PREFETCH_RING_CELLS);
+      const visible = new Set(sceneAssetUrlsRef.current);
+      const ringUrls = Array.from(
+        new Set([
+          ...ring.objects.map((sprite) => mapSpriteRenderPath(sprite.path)),
+          ...ring.floor.map((sprite) => sprite.path),
+        ]),
+      ).filter((url) => !visible.has(url));
+      if (ringUrls.length) {
+        void preloadSceneAssetUrls(ringUrls, SCENE_TILE_PREFETCH_TIMEOUT_MS, { allowPartialReady: true });
+      }
+    };
+    const idleWindow = window as typeof window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    const usingIdle = typeof idleWindow.requestIdleCallback === "function";
+    const handle = usingIdle
+      ? idleWindow.requestIdleCallback!(warmPrefetchRing, { timeout: 1200 })
+      : window.setTimeout(warmPrefetchRing, 200);
+    return () => {
+      cancelled = true;
+      if (usingIdle) {
+        idleWindow.cancelIdleCallback?.(handle);
+      } else {
+        window.clearTimeout(handle);
+      }
+    };
+    // Re-run only on player-cell / map / screen change (not every animation tick).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
   const sceneAssetReadinessKey =
@@ -1893,6 +1956,9 @@ const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 512;
 const SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT = 96;
 const SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE = 64;
 const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
+// Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
+const SCENE_TILE_PREFETCH_RING_CELLS = 6;
+const SCENE_TILE_PREFETCH_TIMEOUT_MS = 8_000;
 
 function collectVisibleSceneAssetUrls(
   viewportMapSprites: {
