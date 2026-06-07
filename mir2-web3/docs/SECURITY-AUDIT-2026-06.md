@@ -181,7 +181,7 @@
 | F-12 | ✅ 已修 | 密码比较改常量时间 `constant_time_eq`（随 F-02 落地） | `simulation/src/runtime/save.rs` |
 | F-14 | ✅ 已修 | Passkey origin 校验改为强制（缺 origin/请求 Origin 头即拒） | `web/app/api/passkey/login/route.ts` |
 | F-11 | ☑️ 免修 | 经复核 `config.rs:956` 等均在 `#[cfg(test)]` 内，仅测试连本地库，非生产凭据 | — |
-| F-07 | ⏳ 暂缓 | 交易索引竞态未获复现确认；修复需改动复杂且高覆盖的跨会话交易/经济路径，贸然改动有引入真实掉包/刷物回归的风险。建议先写复现用例再以 `unique_id` 锁定交易物品。**未改动经济代码。** | — |
+| F-07 | ✅ 已修 | 已写复现用例确认漏洞（存入贵重物→`MoveItem` 把廉价物换进同槽→确认时交出廉价物、留下贵重物）。修复：`Stage5TradeState` 增 `offered_unique_ids`(槽→存入时 unique_id)；存入记录、取回清除；确认与跨会话投递(`build_shared_trade_offer`)都校验槽位现物的 unique_id 与存入时一致，不符则中止交易(不动物品/金币)。新增回归测试 `trade_confirm_rejects_offered_item_swapped_after_deposit` | `simulation`: `config.rs`、`packets.rs`、`session.rs`、`stage5.rs`、`tests.rs` |
 | F-13 | 📝 记录 | wrangler 中的网关 IP 本质是客户端要连接的公开端点，非密钥；如需可迁至环境变量，属基础设施侧 | — |
 | F-15 | 📝 建议 | 限流需按路由设阈值并引入共享状态中间件，属独立加固项，建议单独迭代 | — |
 

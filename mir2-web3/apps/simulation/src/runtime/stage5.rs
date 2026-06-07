@@ -780,6 +780,7 @@ impl SimulationSession {
             partner: partner.clone(),
             offered_items: Vec::new(),
             offered_slots: BTreeMap::new(),
+            offered_unique_ids: BTreeMap::new(),
             offered_gold: 0,
             accepted: false,
             locked: false,
