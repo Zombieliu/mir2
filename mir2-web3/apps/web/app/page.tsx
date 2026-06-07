@@ -10315,7 +10315,14 @@ export default function HomePage() {
     {screen === "game" && showTutorial ? (
       <OriginalClientTutorialOverlay
         language={language}
-        windows={{ inventory: showInventory, character: showCharacter, questLog: showQuestLog }}
+        windows={{
+          inventory: showInventory,
+          character: showCharacter,
+          // The quest log is reachable two ways: the standalone Alt+Q window
+          // (showQuestLog) and the HUD quest button, which opens the inventory
+          // on its "quest" tab. Treat either as "quests viewed".
+          questLog: showQuestLog || (showInventory && activeInventoryTab === "quest"),
+        }}
         onClose={() => setShowTutorial(false)}
       />
     ) : null}

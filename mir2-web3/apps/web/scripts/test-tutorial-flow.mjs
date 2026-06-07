@@ -175,6 +175,25 @@ check("every step has English text and a valid trigger; pickText falls back", ()
   }
 });
 
+check("spotlight selectors point only at known stable DOM hooks", () => {
+  // These are the existing class hooks the overlay highlights. Keep this set in
+  // sync with the real anchors in the HUD/scene components so a typo (which would
+  // silently degrade to a card-only step) fails the suite instead.
+  const KNOWN_HOOKS = new Set([
+    ".client-stage-frame",
+    ".hud-button.inventory",
+    ".hud-button.character",
+    ".hud-button.quest",
+    ".belt-dialog",
+  ]);
+  for (const step of TUTORIAL_STEPS) {
+    if (step.spotlight === undefined) continue;
+    assert.equal(typeof step.spotlight, "string");
+    assert.ok(step.spotlight.length > 0, `step ${step.id} spotlight is non-empty`);
+    assert.ok(KNOWN_HOOKS.has(step.spotlight), `step ${step.id} spotlight "${step.spotlight}" is a known hook`);
+  }
+});
+
 check("first and last steps are manual intro/summary cards", () => {
   assert.equal(TUTORIAL_STEPS[0].trigger.kind, "manual");
   assert.equal(TUTORIAL_STEPS[TUTORIAL_STEPS.length - 1].trigger.kind, "manual");

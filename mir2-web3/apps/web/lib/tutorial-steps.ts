@@ -40,9 +40,11 @@ export interface TutorialStep {
   // Short "how" hint (key / mouse gesture). Rendered emphasized on the card.
   hint?: TutorialText;
   trigger: TutorialTrigger;
-  // Optional CSS selector to spotlight. If it doesn't resolve at runtime the
-  // overlay degrades gracefully to a centered card (selectors are best-effort —
-  // wire real anchors via `data-tutorial="…"` attributes in a follow-up).
+  // Optional CSS selector to spotlight. Points at existing, stable class hooks
+  // already present in the HUD/scene (`.client-stage-frame`, `.hud-button.*`,
+  // `.belt-dialog`) so no presentational component needs editing. If a selector
+  // doesn't resolve at runtime the overlay degrades gracefully to a card-only
+  // step (e.g. the belt bar can be toggled off).
   spotlight?: string;
 }
 
@@ -81,6 +83,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Left-click the ground", "zh-CN": "鼠标左键点击地面" },
     trigger: { kind: "action", actionType: "walk", count: 3 },
+    spotlight: ".client-stage-frame",
   },
   {
     id: "run",
@@ -91,6 +94,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Shift + left-click", "zh-CN": "Shift + 左键点击" },
     trigger: { kind: "action", actionType: "run", count: 1 },
+    spotlight: ".client-stage-frame",
   },
   {
     id: "attack",
@@ -101,6 +105,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Click a monster", "zh-CN": "点击怪物" },
     trigger: { kind: "action", actionType: ["attack", "rangeAttack", "magic", "castSkill"], count: 1 },
+    spotlight: ".client-stage-frame",
   },
   {
     id: "pickup",
@@ -111,6 +116,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Click the item / pick-up key", "zh-CN": "点击掉落物 / 拾取键" },
     trigger: { kind: "action", actionType: "pickUpTile", count: 1 },
+    spotlight: ".client-stage-frame",
   },
   {
     id: "inventory",
@@ -121,6 +127,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Press Alt+I", "zh-CN": "按 Alt+I" },
     trigger: { kind: "window", window: "inventory" },
+    spotlight: ".hud-button.inventory",
   },
   {
     id: "equip",
@@ -151,6 +158,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Press Alt+C", "zh-CN": "按 Alt+C" },
     trigger: { kind: "window", window: "character" },
+    spotlight: ".hud-button.character",
   },
   {
     id: "skill",
@@ -161,6 +169,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Skill bar / hotkey", "zh-CN": "技能栏 / 快捷键" },
     trigger: { kind: "action", actionType: ["magic", "castSkill"], count: 1 },
+    spotlight: ".belt-dialog",
   },
   {
     id: "npc",
@@ -171,6 +180,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Click an NPC", "zh-CN": "点击 NPC" },
     trigger: { kind: "action", actionType: "interact", count: 1 },
+    spotlight: ".client-stage-frame",
   },
   {
     id: "quest",
@@ -181,6 +191,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Press Alt+Q", "zh-CN": "按 Alt+Q" },
     trigger: { kind: "window", window: "questLog" },
+    spotlight: ".hud-button.quest",
   },
   {
     id: "done",
