@@ -4067,8 +4067,70 @@ async fn require_authenticated_operator(
     request: axum::extract::Request,
     next: axum::middleware::Next,
 ) -> Result<Response, ApiError> {
+    admin_rate_limit_check(request.headers())?;
     operator_from_headers(request.headers(), state.admin_store.as_ref())?;
     Ok(next.run(request).await)
+}
+
+/// Fixed-window in-memory rate limit applied to every `/admin/*` request,
+/// keyed by the caller's bearer token (or operator id, else "anonymous").
+/// Bounds both data-exfiltration via the read endpoints and brute-force against
+/// the auth check. Limits are overridable via env; disabled when the window or
+/// max is set to 0.
+fn admin_rate_limit_window() -> Duration {
+    let secs = env::var("ADMIN_RATE_LIMIT_WINDOW_SECS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(10);
+    Duration::from_secs(secs)
+}
+
+fn admin_rate_limit_max() -> u32 {
+    env::var("ADMIN_RATE_LIMIT_MAX_REQUESTS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u32>().ok())
+        .unwrap_or(240)
+}
+
+fn admin_rate_limit_check(headers: &HeaderMap) -> Result<(), ApiError> {
+    let window = admin_rate_limit_window();
+    let max = admin_rate_limit_max();
+    if window.is_zero() || max == 0 {
+        return Ok(());
+    }
+    let key = optional_bearer_token(headers)
+        .or_else(|| {
+            headers
+                .get("x-operator-id")
+                .and_then(|value| value.to_str().ok())
+                .map(|value| value.trim().to_string())
+                .filter(|value| !value.is_empty())
+        })
+        .unwrap_or_else(|| "anonymous".to_string());
+
+    static LIMITER: std::sync::OnceLock<Mutex<BTreeMap<String, (Instant, u32)>>> =
+        std::sync::OnceLock::new();
+    let limiter = LIMITER.get_or_init(|| Mutex::new(BTreeMap::new()));
+    let now = Instant::now();
+    let mut map = limiter.lock().map_err(lock_error)?;
+
+    // Opportunistically drop stale buckets so the map stays bounded.
+    if map.len() > 4096 {
+        map.retain(|_, (started, _)| now.duration_since(*started) <= window);
+    }
+
+    let entry = map.entry(key).or_insert((now, 0));
+    if now.duration_since(entry.0) > window {
+        *entry = (now, 0);
+    }
+    entry.1 = entry.1.saturating_add(1);
+    if entry.1 > max {
+        return Err(ApiError {
+            status: StatusCode::TOO_MANY_REQUESTS,
+            message: "rate limit exceeded".into(),
+        });
+    }
+    Ok(())
 }
 
 pub fn admin_router_with_state(state: AdminApiState) -> Router {
@@ -9706,6 +9768,24 @@ fn timeline_matches(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn admin_rate_limit_blocks_after_max_requests() {
+        // Unique key so this test does not interfere with the shared limiter map.
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "authorization",
+            "Bearer rate-limit-unit-test-unique-key-9f3a"
+                .parse()
+                .expect("valid header value"),
+        );
+        // Default window is 10s / 240 requests; the 241st must be rejected.
+        for _ in 0..admin_rate_limit_max() {
+            assert!(admin_rate_limit_check(&headers).is_ok());
+        }
+        let blocked = admin_rate_limit_check(&headers).expect_err("should be rate limited");
+        assert_eq!(blocked.status, StatusCode::TOO_MANY_REQUESTS);
+    }
 
     #[derive(Debug, Default)]
     struct RecordingExecutor {

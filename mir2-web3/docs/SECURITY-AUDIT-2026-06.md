@@ -182,7 +182,7 @@
 | F-14 | ✅ 已修 | Passkey origin 校验改为强制（缺 origin/请求 Origin 头即拒） | `web/app/api/passkey/login/route.ts` |
 | F-11 | ☑️ 免修 | 经复核 `config.rs:956` 等均在 `#[cfg(test)]` 内，仅测试连本地库，非生产凭据 | — |
 | F-07 | ✅ 已修 | 已写复现用例确认漏洞（存入贵重物→`MoveItem` 把廉价物换进同槽→确认时交出廉价物、留下贵重物）。修复：`Stage5TradeState` 增 `offered_unique_ids`(槽→存入时 unique_id)；存入记录、取回清除；确认与跨会话投递(`build_shared_trade_offer`)都校验槽位现物的 unique_id 与存入时一致，不符则中止交易(不动物品/金币)。新增回归测试 `trade_confirm_rejects_offered_item_swapped_after_deposit` | `simulation`: `config.rs`、`packets.rs`、`session.rs`、`stage5.rs`、`tests.rs` |
-| F-13 | 📝 记录 | wrangler 中的网关 IP 本质是客户端要连接的公开端点，非密钥；如需可迁至环境变量，属基础设施侧 | — |
-| F-15 | 📝 建议 | 限流需按路由设阈值并引入共享状态中间件，属独立加固项，建议单独迭代 | — |
+| F-15 | ✅ 已修 | admin-api 全 `/admin/*` 增加进程内定窗限流中间件 `admin_rate_limit_check`（按 bearer/操作员 id 归类，默认 10s/240 次，env 可调，0 即禁用），抑制读接口批量外泄与认证暴力。新增单测 `admin_rate_limit_blocks_after_max_requests`。游戏内买卖沿用 Crystal 既有 `crystal_packet_action_ready` 动作冷却，避免 parity 回归 | `admin-api/src/lib.rs` |
+| F-13 | 📝 记录 | wrangler/page.tsx 中的网关 IP 本质是客户端必须连接的公开端点（非密钥），且已可经 `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` 覆盖；改动部署默认值属基础设施侧（Codex），擅改会断线上客户端，故保持记录 | — |
 
 > 说明：存储密码（游戏内仓库锁，与账号登录密码不同）本轮未改动——它是独立的低风险、1:1 Crystal 行为，不在 F-02 范围内。
