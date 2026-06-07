@@ -180,7 +180,6 @@ check("spotlight selectors point only at known stable DOM hooks", () => {
   // sync with the real anchors in the HUD/scene components so a typo (which would
   // silently degrade to a card-only step) fails the suite instead.
   const KNOWN_HOOKS = new Set([
-    ".client-stage-frame",
     ".hud-button.inventory",
     ".hud-button.character",
     ".hud-button.quest",

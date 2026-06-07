@@ -41,10 +41,13 @@ export interface TutorialStep {
   hint?: TutorialText;
   trigger: TutorialTrigger;
   // Optional CSS selector to spotlight. Points at existing, stable class hooks
-  // already present in the HUD/scene (`.client-stage-frame`, `.hud-button.*`,
-  // `.belt-dialog`) so no presentational component needs editing. If a selector
-  // doesn't resolve at runtime the overlay degrades gracefully to a card-only
-  // step (e.g. the belt bar can be toggled off).
+  // already present in the HUD (`.hud-button.*`, `.belt-dialog`) so no
+  // presentational component needs editing. Only small, specific targets are
+  // spotlit — the play area (`.client-stage-frame`) is the full 1024×768 client,
+  // so ringing it just outlines the whole window and the dim falls on the black
+  // letterbox; those steps rely on the card hint instead. If a selector doesn't
+  // resolve at runtime the overlay degrades gracefully to a card-only step (e.g.
+  // the belt bar can be toggled off).
   spotlight?: string;
 }
 
@@ -83,7 +86,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Left-click the ground", "zh-CN": "鼠标左键点击地面" },
     trigger: { kind: "action", actionType: "walk", count: 3 },
-    spotlight: ".client-stage-frame",
   },
   {
     id: "run",
@@ -94,7 +96,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Shift + left-click", "zh-CN": "Shift + 左键点击" },
     trigger: { kind: "action", actionType: "run", count: 1 },
-    spotlight: ".client-stage-frame",
   },
   {
     id: "attack",
@@ -105,7 +106,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Click a monster", "zh-CN": "点击怪物" },
     trigger: { kind: "action", actionType: ["attack", "rangeAttack", "magic", "castSkill"], count: 1 },
-    spotlight: ".client-stage-frame",
   },
   {
     id: "pickup",
@@ -116,7 +116,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Click the item / pick-up key", "zh-CN": "点击掉落物 / 拾取键" },
     trigger: { kind: "action", actionType: "pickUpTile", count: 1 },
-    spotlight: ".client-stage-frame",
   },
   {
     id: "inventory",
@@ -180,7 +179,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
     hint: { en: "Click an NPC", "zh-CN": "点击 NPC" },
     trigger: { kind: "action", actionType: "interact", count: 1 },
-    spotlight: ".client-stage-frame",
   },
   {
     id: "quest",
