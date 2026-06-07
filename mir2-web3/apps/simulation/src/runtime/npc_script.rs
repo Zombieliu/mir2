@@ -4,7 +4,9 @@ use bevy_ecs::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::config::{ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition};
+use crate::config::{
+    CurrencyKind, ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition,
+};
 use mir2_game_data::{
     crystal_map_respawns_by_file_name, crystal_npc_info_manifest, crystal_npc_script_by_key,
     CrystalNpcInfoTemplate, CrystalNpcScript, CrystalNpcSection,
@@ -1929,6 +1931,14 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_give_gold(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }
+        "GIVECITYCURRENCY" => {
+            crystal_npc_give_city_currency(world, &parts[1..]);
+            CrystalNpcActionControl::Continue
+        }
+        "TAKECITYCURRENCY" => {
+            crystal_npc_take_city_currency(world, &parts[1..]);
+            CrystalNpcActionControl::Continue
+        }
         "GIVESKILL" => {
             crystal_npc_give_skill(world, &parts[1..]);
             CrystalNpcActionControl::Continue
@@ -2353,6 +2363,42 @@ pub(super) fn gain_credit(world: &mut World, amount: u32) -> Option<ServerPacket
 
     player_runtime.credit += gained;
     Some(ServerPacket::GainedCredit { credit: gained })
+}
+
+/// NPC script `GIVECITYCURRENCY <city> <amount>` — credit a per-city reputation
+/// currency wallet (net-new, beyond Crystal). `<city>` accepts the wallet key
+/// (`feitian`/`bichon`) or the Chinese city name; an unrecognised city is
+/// ignored. The new balance reaches the browser via the next world snapshot.
+pub(super) fn crystal_npc_give_city_currency(world: &mut World, parts: &[&str]) {
+    let [city_token, amount_token, ..] = parts else {
+        return;
+    };
+    let Some(key) = CurrencyKind::from_arg(city_token).city_key() else {
+        return;
+    };
+    let Ok(amount) = amount_token.parse::<u32>() else {
+        return;
+    };
+    world
+        .resource_mut::<PlayerRuntimeResource>()
+        .gain_city_currency(key, amount);
+}
+
+/// NPC script `TAKECITYCURRENCY <city> <amount>` — deduct a per-city currency
+/// wallet, saturating at zero (mirrors `TAKEGOLD`).
+pub(super) fn crystal_npc_take_city_currency(world: &mut World, parts: &[&str]) {
+    let [city_token, amount_token, ..] = parts else {
+        return;
+    };
+    let Some(key) = CurrencyKind::from_arg(city_token).city_key() else {
+        return;
+    };
+    let Ok(amount) = amount_token.parse::<u32>() else {
+        return;
+    };
+    let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
+    let current = player_runtime.city_currency_balance(key);
+    player_runtime.spend_city_currency(key, amount.min(current));
 }
 
 pub(super) fn crystal_npc_set_flag(world: &mut World, parts: &[&str]) -> Option<(u32, bool)> {

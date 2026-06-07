@@ -64,6 +64,7 @@ pub(super) fn default_save_for_character(
     save.max_experience = 100;
     save.gold = 0;
     save.credit = 0;
+    save.city_currencies.clear();
     save.inventory_items_json = Vec::new();
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
@@ -146,6 +147,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         max_experience: player_runtime.max_experience.max(1),
         gold: player_runtime.gold,
         credit: player_runtime.credit,
+        city_currencies: player_runtime.city_currencies.clone(),
         pk_points: player_runtime.pk_points,
         chat_banned: player_runtime.chat_banned,
         chat_ban_until_ms: player_runtime.chat_ban_until_ms,
@@ -593,7 +595,11 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
 pub(super) fn normalize_legacy_crystal_new_character_seed_state(
     save: &mut CharacterSaveRecord,
 ) -> bool {
-    if save.character.level != 1 || save.gold != 1280 || save.credit != 0 {
+    if save.character.level != 1
+        || save.gold != 1280
+        || save.credit != 0
+        || save.city_currencies.values().any(|&amount| amount != 0)
+    {
         return false;
     }
     if !encoded_items_match_seed(&save.inventory_items_json, seed_inventory_items)
@@ -715,6 +721,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         player_runtime.max_experience = save.max_experience.max(1);
         player_runtime.gold = save.gold;
         player_runtime.credit = save.credit;
+        player_runtime.city_currencies = save.city_currencies.clone();
         player_runtime.pk_points = save.pk_points;
         player_runtime.chat_banned = save.chat_banned;
         player_runtime.chat_ban_until_ms = save.chat_ban_until_ms;

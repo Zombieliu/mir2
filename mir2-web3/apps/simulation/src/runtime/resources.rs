@@ -456,6 +456,9 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) max_experience: i64,
     pub(super) gold: u32,
     pub(super) credit: u32,
+    /// Net-new per-city reputation currency wallet, keyed by city key
+    /// (`"feitian"`, `"bichon"`). Mirrors `CharacterSaveRecord::city_currencies`.
+    pub(super) city_currencies: BTreeMap<String, u32>,
     pub(super) pk_points: i32,
     pub(super) chat_banned: bool,
     pub(super) chat_ban_until_ms: Option<u64>,
@@ -487,6 +490,7 @@ impl PlayerRuntimeResource {
             max_experience: 100,
             gold: 0,
             credit: 0,
+            city_currencies: BTreeMap::new(),
             pk_points: 0,
             chat_banned: false,
             chat_ban_until_ms: None,
@@ -495,6 +499,37 @@ impl PlayerRuntimeResource {
             last_damaged_tick: 0,
             last_regen_tick: 0,
         }
+    }
+
+    /// Current balance of a city currency (0 if the player has never earned it).
+    pub(super) fn city_currency_balance(&self, key: &str) -> u32 {
+        self.city_currencies.get(key).copied().unwrap_or(0)
+    }
+
+    /// Credit a city currency wallet, saturating at `u32::MAX`. Returns the
+    /// amount actually added (0 if `amount` is 0 or the wallet is already full).
+    pub(super) fn gain_city_currency(&mut self, key: &str, amount: u32) -> u32 {
+        if amount == 0 {
+            return 0;
+        }
+        let entry = self.city_currencies.entry(key.to_string()).or_insert(0);
+        let gained = amount.min(u32::MAX - *entry);
+        *entry += gained;
+        gained
+    }
+
+    /// Deduct a city currency wallet if the balance is sufficient. Returns
+    /// `true` on success, `false` (leaving the balance untouched) if too low.
+    pub(super) fn spend_city_currency(&mut self, key: &str, amount: u32) -> bool {
+        if amount == 0 {
+            return true;
+        }
+        let entry = self.city_currencies.entry(key.to_string()).or_insert(0);
+        if *entry < amount {
+            return false;
+        }
+        *entry -= amount;
+        true
     }
 }
 

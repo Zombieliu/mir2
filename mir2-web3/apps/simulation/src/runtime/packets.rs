@@ -3211,6 +3211,7 @@ fn stage5_consign_item_packet(
             seller,
             item_key: item.key.clone(),
             price,
+            currency: crate::config::CurrencyKind::Gold,
             sold: false,
             cancelled: false,
             expired: false,
@@ -4227,6 +4228,7 @@ pub(super) fn stage5_trade_request_packet(
         offered_items: Vec::new(),
         offered_slots: BTreeMap::new(),
         offered_gold: 0,
+        offered_currency: crate::config::CurrencyKind::Gold,
         accepted: false,
         locked: false,
         completed: false,
@@ -4255,6 +4257,7 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
                 offered_items: Vec::new(),
                 offered_slots: BTreeMap::new(),
                 offered_gold: 0,
+                offered_currency: crate::config::CurrencyKind::Gold,
                 accepted: false,
                 locked: false,
                 completed: false,
@@ -5084,6 +5087,16 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let mut stage5_systems = stage5.stage5_systems.clone();
     stage5_systems.item_rental = item_rental_snapshot(world);
 
+    // Seed every known city to 0 so the HUD renders a stable row set, then
+    // overlay the player's actual balances.
+    let mut city_currencies: BTreeMap<String, u32> = crate::config::CITY_CURRENCY_KEYS
+        .iter()
+        .map(|key| ((*key).to_string(), 0))
+        .collect();
+    for (key, amount) in &player_runtime.city_currencies {
+        city_currencies.insert(key.clone(), *amount);
+    }
+
     WorldSnapshot {
         tick,
         map_title: session
@@ -5106,6 +5119,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         player_max_experience: player_runtime.max_experience,
         gold: player_runtime.gold,
         credit: player_runtime.credit,
+        city_currencies,
         current_weight: current_weight(resources),
         max_weight: super::drops::CRYSTAL_BAG_WEIGHT_LIMIT as u16,
         free_bag_slots: free_bag_slots(resources),

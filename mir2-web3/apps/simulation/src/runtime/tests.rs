@@ -20,7 +20,7 @@ use super::{
     SpawnSlotRef, Stage5SystemsResource, SummonedMonster, WoomaTaurusState, WorldObject,
     YimoogiState, BASE_STORAGE_SLOTS, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
 };
-use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
+use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
@@ -49577,7 +49577,10 @@ fn stage5_trade_shop_and_auction_are_transactional() {
         .inventory_items
         .iter()
         .any(|item| item.key == "training-splinter"));
-    assert_eq!(after_auction.gold, starting_gold - 85);
+    // The buyer is also the seller here, so the 50-gold price is debited from the
+    // buyer and settled back to the seller (net zero); only the earlier 35-gold
+    // shop spend remains.
+    assert_eq!(after_auction.gold, starting_gold - 35);
 }
 
 #[test]
@@ -54369,6 +54372,7 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
             seller: "Merchant".to_string(),
             item_key: "blue-potion".to_string(),
             price: 75,
+            currency: CurrencyKind::Gold,
             sold: false,
             cancelled: false,
             expired: false,
@@ -54432,6 +54436,7 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
             seller: "Scout".to_string(),
             item_key: "red-potion".to_string(),
             price: 55,
+            currency: CurrencyKind::Gold,
             sold: true,
             cancelled: false,
             expired: false,
@@ -57692,4 +57697,207 @@ fn set_auto_pot_packets_no_op_without_spawned_hero() {
             item_index: 0,
         })
         .is_empty());
+}
+
+// ---------------------------------------------------------------------------
+// Net-new per-city reputation currencies (飞天城币 / 比奇城币)
+// ---------------------------------------------------------------------------
+
+/// Reads a city-currency balance off the world snapshot (0 when absent).
+fn city_currency_balance(session: &SimulationSession, key: &str) -> u32 {
+    session
+        .world_snapshot()
+        .city_currencies
+        .get(key)
+        .copied()
+        .unwrap_or(0)
+}
+
+#[test]
+fn city_currency_give_take_npc_commands_update_wallet_and_snapshot() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut packets = Vec::new();
+
+    // The snapshot seeds every known city to 0 so the HUD has a stable row set.
+    assert_eq!(city_currency_balance(&session, "feitian"), 0);
+    assert_eq!(city_currency_balance(&session, "bichon"), 0);
+
+    for line in ["GIVECITYCURRENCY feitian 500", "GIVECITYCURRENCY bichon 50"] {
+        assert_eq!(
+            execute_crystal_npc_action_line(
+                session.app.world_mut(),
+                line,
+                &mut packets,
+                &mut CrystalNpcExecutionState::default(),
+            ),
+            CrystalNpcActionControl::Continue
+        );
+    }
+    // Earning currency emits no Crystal packet — balances ride the next snapshot.
+    assert!(packets.is_empty());
+
+    // TAKE saturates at zero and never underflows.
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "TAKECITYCURRENCY feitian 200",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "TAKECITYCURRENCY bichon 9999",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+
+    assert_eq!(city_currency_balance(&session, "feitian"), 300);
+    assert_eq!(city_currency_balance(&session, "bichon"), 0);
+
+    // An unknown city is ignored rather than minting a stray wallet entry.
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "GIVECITYCURRENCY atlantis 100",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+    assert_eq!(city_currency_balance(&session, "atlantis"), 0);
+}
+
+#[test]
+fn city_currency_persists_across_save_and_reload() {
+    let config = SimulationConfig::default();
+    let mut first = SimulationSession::new(config.clone());
+    first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut packets = Vec::new();
+    execute_crystal_npc_action_line(
+        first.app.world_mut(),
+        "GIVECITYCURRENCY feitian 420",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+    first.save_active_character();
+
+    let mut second = SimulationSession::new(config);
+    second.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(city_currency_balance(&second, "feitian"), 420);
+}
+
+#[test]
+fn trade_offer_and_accept_spends_city_currency_not_gold() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut packets = Vec::new();
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "GIVECITYCURRENCY feitian 500",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+    let gold_before = session.world_snapshot().gold;
+
+    session.stage5_command("trade.start", vec!["Partner".to_string()]);
+    session.stage5_command(
+        "trade.offerGold",
+        vec!["200".to_string(), "feitian".to_string()],
+    );
+    session.stage5_command("trade.accept", Vec::new());
+
+    // The city wallet is debited; gold is untouched.
+    assert_eq!(city_currency_balance(&session, "feitian"), 300);
+    assert_eq!(session.world_snapshot().gold, gold_before);
+}
+
+#[test]
+fn trade_accept_rejects_city_currency_when_balance_too_low() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut packets = Vec::new();
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "GIVECITYCURRENCY bichon 30",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+
+    session.stage5_command("trade.start", vec!["Partner".to_string()]);
+    session.stage5_command(
+        "trade.offerGold",
+        vec!["100".to_string(), "bichon".to_string()],
+    );
+    let accept_packets = session.stage5_command("trade.accept", Vec::new());
+
+    // Insufficient funds: the wallet is left intact and the trade is refused.
+    assert_eq!(city_currency_balance(&session, "bichon"), 30);
+    assert!(accept_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+}
+
+#[test]
+fn auction_buy_spends_city_currency_for_remote_listing() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut packets = Vec::new();
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "GIVECITYCURRENCY feitian 500",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+
+    // A listing owned by another character, priced in a city currency.
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .push(Stage5AuctionListing {
+            id: 1,
+            seller: "OtherPlayer".to_string(),
+            item_key: "red-potion".to_string(),
+            price: 100,
+            currency: CurrencyKind::Feitian,
+            sold: false,
+            cancelled: false,
+            expired: false,
+        });
+
+    session.stage5_command("auction.buy", vec!["1".to_string()]);
+
+    // Buyer is debited in the listing currency; the item is delivered.
+    assert_eq!(city_currency_balance(&session, "feitian"), 400);
+    assert!(session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "red-potion"));
+}
+
+#[test]
+fn auction_buy_settles_own_city_currency_listing() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut packets = Vec::new();
+    execute_crystal_npc_action_line(
+        session.app.world_mut(),
+        "GIVECITYCURRENCY bichon 300",
+        &mut packets,
+        &mut CrystalNpcExecutionState::default(),
+    );
+
+    // Listing my own item for a city currency, then buying it back: the proceeds
+    // are settled to me, so the net wallet change is zero.
+    session.stage5_command(
+        "auction.list",
+        vec![
+            "red-potion".to_string(),
+            "100".to_string(),
+            "bichon".to_string(),
+        ],
+    );
+    session.stage5_command("auction.buy", vec!["1".to_string()]);
+
+    assert_eq!(city_currency_balance(&session, "bichon"), 300);
 }

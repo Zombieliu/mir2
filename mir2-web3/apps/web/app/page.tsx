@@ -380,6 +380,11 @@ type GatewayWorldSnapshot = {
   playerMaxExperience: number;
   gold: number;
   credit: number;
+  /**
+   * Net-new per-city reputation currency balances, keyed by city
+   * (`"feitian"`, `"bichon"`). Optional/additive — older snapshots omit it.
+   */
+  cityCurrencies?: Record<string, number>;
   currentWeight: number;
   maxWeight: number;
   freeBagSlots: number;
@@ -617,6 +622,8 @@ type WorldState = {
   playerMaxExperience: number;
   gold: number;
   credit: number;
+  /** Net-new per-city reputation currency wallet, keyed by city. */
+  cityCurrencies: Record<string, number>;
   currentWeight: number;
   maxWeight: number;
   freeBagSlots: number;
@@ -753,6 +760,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   playerMaxExperience: 100,
   gold: 0,
   credit: 0,
+  cityCurrencies: {},
   currentWeight: 0,
   maxWeight: 0,
   freeBagSlots: 0,
@@ -8967,6 +8975,7 @@ export default function HomePage() {
         playerMaxExperience: Math.max(snapshot.playerMaxExperience, 1),
         gold: snapshot.gold,
         credit: snapshot.credit,
+        cityCurrencies: snapshot.cityCurrencies ?? current.cityCurrencies,
         currentWeight: snapshot.currentWeight,
         maxWeight: snapshot.maxWeight,
         freeBagSlots: snapshot.freeBagSlots,
@@ -10274,7 +10283,7 @@ export default function HomePage() {
       friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
       bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor), onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
-      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
+      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
       trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: adaptBuffs(world.activeBuffs) }}
