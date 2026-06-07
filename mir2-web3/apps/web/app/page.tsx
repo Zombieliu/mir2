@@ -96,6 +96,7 @@ import {
   type QueuedMoveIntent,
 } from "./components/original-client-movement-controller";
 import type { BevyEntityRenderState, SceneAssetReadiness } from "./components/original-client-shell-types";
+import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
 
 const OriginalClientShell = dynamic(
   () => import("./original-client-shell").then((module) => module.OriginalClientShell),
@@ -1275,6 +1276,8 @@ export default function HomePage() {
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
+  // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
+  const [showTutorial, setShowTutorial] = useState(false);
   const [showHeroPet, setShowHeroPet] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
   const [showGroup, setShowGroup] = useState(false);
@@ -1370,6 +1373,19 @@ export default function HomePage() {
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
   }, []);
+  // Auto-start the beginner tutorial the first time a player enters the world.
+  // Persisted in localStorage so it only runs once; reopenable later via Alt+J's
+  // help flow / a future menu entry. Net-new (no Crystal equivalent).
+  useEffect(() => {
+    if (screen !== "game") return;
+    let alreadySeen = false;
+    try {
+      alreadySeen = window.localStorage.getItem("mir2:tutorialCompleted") === "1";
+    } catch {
+      alreadySeen = false;
+    }
+    if (!alreadySeen) setShowTutorial(true);
+  }, [screen]);
   // When the hero/pet window opens, ask the server to start streaming intelligent
   // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).
   useEffect(() => {
@@ -3572,6 +3588,12 @@ export default function HomePage() {
     recordDebugEvent("packet-out", "net", {
       type: typeof command.type === "string" ? command.type : "?",
     });
+    // Feed the beginner-tutorial state machine (additive; the overlay listens for
+    // these and ignores everything it doesn't care about). See
+    // app/components/original-client-tutorial-overlay.tsx.
+    if (typeof command.type === "string" && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("mir2:action", { detail: { type: command.type } }));
+    }
     socketRef.current.send(JSON.stringify(command));
     if (isMovementCommand(command)) {
       scheduleMovementConfirmTick();
@@ -10289,6 +10311,13 @@ export default function HomePage() {
         <span>{debugSnapshotNotice.message}</span>
         {debugSnapshotNotice.sessionId ? <code>{debugSnapshotNotice.sessionId}</code> : null}
       </div>
+    ) : null}
+    {screen === "game" && showTutorial ? (
+      <OriginalClientTutorialOverlay
+        language={language}
+        windows={{ inventory: showInventory, character: showCharacter, questLog: showQuestLog }}
+        onClose={() => setShowTutorial(false)}
+      />
     ) : null}
     </>
   );
