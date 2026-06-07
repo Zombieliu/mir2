@@ -1517,6 +1517,58 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
 }
 
 #[test]
+fn newbie_trainer_lesson_chain_walks_a_recruit_to_level_30() {
+    // A brand-new recruit should be able to reach level 30 purely by walking up
+    // to the Newbie Trainer and clicking through the level-gated lesson chain —
+    // the "click an NPC, step by step, to 30" path. Each lesson is an instant
+    // training quest that pays reward experience through the Crystal level-up
+    // loop, and the next lesson only unlocks once the player is high enough.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Stand beside the Newbie Trainer (scene object 4002).
+    session.force_authoritative_player_transform(Point { x: 328, y: 271 }, MirDirection::Down);
+    let trainer = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Newbie Trainer")
+        .expect("Newbie Trainer should be visible after standing beside it");
+
+    let mut level = 0u16;
+    let mut lessons_cleared = 0;
+    for _ in 0..12 {
+        if level >= 30 {
+            break;
+        }
+        let packets = session.handle_packet(ClientPacket::CallNpc {
+            object_id: trainer.object_id,
+            key: "@Main".to_string(),
+        });
+        if let Some(new_level) = packets.iter().find_map(|packet| match packet {
+            ServerPacket::LevelChanged { level, .. } => Some(*level),
+            _ => None,
+        }) {
+            assert!(
+                new_level >= level,
+                "level must not regress: {level} -> {new_level}"
+            );
+            level = new_level;
+            lessons_cleared += 1;
+        }
+    }
+
+    assert!(
+        lessons_cleared >= 1,
+        "clicking the trainer should complete a lesson and level the player up"
+    );
+    assert!(
+        level >= 30,
+        "the trainer lesson chain should carry the recruit to at least level 30, reached {level}"
+    );
+}
+
+#[test]
 fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops() {
     let mut session = start_original_bichon_intro_session();
 

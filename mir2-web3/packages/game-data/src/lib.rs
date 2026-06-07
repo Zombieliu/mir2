@@ -247,6 +247,13 @@ pub struct QuestTemplate {
     pub stages: QuestStageTextTemplate,
     pub quest_item: ItemTemplate,
     pub completion_rewards: QuestRewardTemplate,
+    /// Minimum player level before an NPC will offer this quest. Crystal gates
+    /// quests with `RequiredMinLevel` (`Server/MirDatabase/QuestInfo.cs:352`);
+    /// the bundled newbie mainline uses it to unlock lessons in level order so
+    /// a fresh character is walked from 1 -> 30 step by step. Optional/default 0
+    /// (no gate) for backward compatibility with existing quest data.
+    #[serde(default)]
+    pub required_min_level: u16,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1823,7 +1830,8 @@ mod tests {
         assert_eq!(scene.decor_objects.len(), 8);
         assert_eq!(scene.visible_players.len(), 1);
         assert_eq!(scene.visible_monsters.len(), 2);
-        assert_eq!(scene.visible_npcs.len(), 1);
+        // Village Guide (1001) + Newbie Trainer (1->30 lesson chain).
+        assert_eq!(scene.visible_npcs.len(), 2);
     }
 
     #[test]
@@ -1833,8 +1841,10 @@ mod tests {
         assert_eq!(data.monster_spawns.len(), 2);
         assert_eq!(data.skills.len(), 7);
         assert_eq!(data.monster_drops.len(), 2);
-        assert_eq!(data.quests.len(), 1);
-        assert_eq!(data.npc_scripts.len(), 1);
+        // Field Wasp Trial (1001) + six newbie trainer lessons (2001-2006).
+        assert_eq!(data.quests.len(), 7);
+        // Village Guide script (4001) + Newbie Trainer script (4002).
+        assert_eq!(data.npc_scripts.len(), 2);
         assert_eq!(data.buffs.len(), 1);
         assert_eq!(data.monster_spawns[0].count, 1);
         assert_eq!(data.skills[0].mana_cost, 6);

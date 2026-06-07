@@ -524,11 +524,30 @@ pub(super) fn resolve_npc_quest_dialog(
     world: &mut World,
     context: &NpcInteractionContext,
 ) -> Option<NpcQuestDialog> {
-    let quest_id = context
-        .quest_ids
-        .iter()
-        .copied()
-        .find(|quest_id| quest_template_by_id(*quest_id).is_some())?;
+    let player_level = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.level)
+        .unwrap_or(0);
+    // Offer the first template quest the NPC carries that the player is still
+    // eligible for: not already completed, and at or above its level gate. This
+    // walks the newbie mainline forward one lesson at a time as the player
+    // levels up (Crystal RequiredMinLevel gating, QuestInfo.cs:352).
+    let quest_id = context.quest_ids.iter().copied().find(|quest_id| {
+        let Some(template) = quest_template_by_id(*quest_id) else {
+            return false;
+        };
+        if player_level < template.required_min_level {
+            return false;
+        }
+        quest_stage(world, *quest_id).unwrap_or(QuestStage::Available) != QuestStage::Completed
+    })?;
+    // A training lesson has no field objective (`required == 0`); it completes
+    // the moment it is accepted, paying out its reward exp (and a level-up).
+    let instant_lesson = quest_template_by_id(quest_id)
+        .map(|template| template.required == 0)
+        .unwrap_or(false);
     let stage_before_action = ensure_runtime_quest(world, quest_id);
     let language = world.resource::<SessionResource>().language;
     let (current, required) = quest_progress(world, quest_id).unwrap_or((0, 1));
@@ -549,9 +568,20 @@ pub(super) fn resolve_npc_quest_dialog(
     )?;
 
     match stage_before_action {
-        QuestStage::Available => set_quest_stage(world, quest_id, QuestStage::InProgress),
+        QuestStage::Available => {
+            if instant_lesson {
+                complete_quest(world, quest_id);
+            } else {
+                set_quest_stage(world, quest_id, QuestStage::InProgress);
+            }
+        }
+        QuestStage::InProgress => {
+            if instant_lesson {
+                complete_quest(world, quest_id);
+            }
+        }
         QuestStage::ReadyToTurnIn => complete_quest(world, quest_id),
-        QuestStage::InProgress | QuestStage::Completed => {}
+        QuestStage::Completed => {}
     }
 
     Some(NpcQuestDialog {

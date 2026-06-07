@@ -172,7 +172,29 @@
         "y": 271
       },
       "direction": "Right",
-      "quest_ids": [1001],
+      "quest_ids": [
+        1001
+      ],
+      "script_key": null
+    },
+    {
+      "object_id": 4002,
+      "name": "Newbie Trainer",
+      "image": 5,
+      "colour_argb": -1,
+      "position": {
+        "x": 328,
+        "y": 272
+      },
+      "direction": "Left",
+      "quest_ids": [
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006
+      ],
       "script_key": null
     }
   ]

@@ -215,6 +215,270 @@
           }
         ]
       }
+    },
+    {
+      "quest_id": 2001,
+      "title": "Trainer's Lesson: Footwork & Guard",
+      "summary": "Train with the Newbie Trainer \u2014 stance, movement, and how to hold a guard.",
+      "reward_preview": "3000 experience (advances your level).",
+      "required": 0,
+      "stages": {
+        "available": {
+          "objective": "Take the lesson: Footwork & Guard.",
+          "progress_label": "Lesson ready",
+          "tracker": "Speak to the Newbie Trainer."
+        },
+        "in_progress": {
+          "objective": "Practising: Footwork & Guard.",
+          "progress_label": "In session",
+          "tracker": "Finish the drill with the Trainer."
+        },
+        "ready_to_turn_in": {
+          "objective": "Lesson complete.",
+          "progress_label": "Ready",
+          "tracker": "Collect your training experience."
+        },
+        "completed": {
+          "objective": "Mastered: Footwork & Guard.",
+          "progress_label": "Done",
+          "tracker": "Lesson complete \u2014 return when you are stronger."
+        }
+      },
+      "quest_item": {
+        "key": "lesson-token-2001",
+        "name": "Training Token",
+        "description": "Records a completed Trainer lesson.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 3000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 1
+    },
+    {
+      "quest_id": 2002,
+      "title": "Trainer's Lesson: Edge & Timing",
+      "summary": "Train with the Newbie Trainer \u2014 reading a swing and striking on the beat.",
+      "reward_preview": "12000 experience (advances your level).",
+      "required": 0,
+      "stages": {
+        "available": {
+          "objective": "Take the lesson: Edge & Timing.",
+          "progress_label": "Lesson ready",
+          "tracker": "Speak to the Newbie Trainer."
+        },
+        "in_progress": {
+          "objective": "Practising: Edge & Timing.",
+          "progress_label": "In session",
+          "tracker": "Finish the drill with the Trainer."
+        },
+        "ready_to_turn_in": {
+          "objective": "Lesson complete.",
+          "progress_label": "Ready",
+          "tracker": "Collect your training experience."
+        },
+        "completed": {
+          "objective": "Mastered: Edge & Timing.",
+          "progress_label": "Done",
+          "tracker": "Lesson complete \u2014 return when you are stronger."
+        }
+      },
+      "quest_item": {
+        "key": "lesson-token-2002",
+        "name": "Training Token",
+        "description": "Records a completed Trainer lesson.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 12000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 6
+    },
+    {
+      "quest_id": 2003,
+      "title": "Trainer's Lesson: Field Survival",
+      "summary": "Train with the Newbie Trainer \u2014 potions, retreat lines, and pacing a fight.",
+      "reward_preview": "24000 experience (advances your level).",
+      "required": 0,
+      "stages": {
+        "available": {
+          "objective": "Take the lesson: Field Survival.",
+          "progress_label": "Lesson ready",
+          "tracker": "Speak to the Newbie Trainer."
+        },
+        "in_progress": {
+          "objective": "Practising: Field Survival.",
+          "progress_label": "In session",
+          "tracker": "Finish the drill with the Trainer."
+        },
+        "ready_to_turn_in": {
+          "objective": "Lesson complete.",
+          "progress_label": "Ready",
+          "tracker": "Collect your training experience."
+        },
+        "completed": {
+          "objective": "Mastered: Field Survival.",
+          "progress_label": "Done",
+          "tracker": "Lesson complete \u2014 return when you are stronger."
+        }
+      },
+      "quest_item": {
+        "key": "lesson-token-2003",
+        "name": "Training Token",
+        "description": "Records a completed Trainer lesson.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 24000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 11
+    },
+    {
+      "quest_id": 2004,
+      "title": "Trainer's Lesson: Pressure & Control",
+      "summary": "Train with the Newbie Trainer \u2014 holding ground against heavier foes.",
+      "reward_preview": "39000 experience (advances your level).",
+      "required": 0,
+      "stages": {
+        "available": {
+          "objective": "Take the lesson: Pressure & Control.",
+          "progress_label": "Lesson ready",
+          "tracker": "Speak to the Newbie Trainer."
+        },
+        "in_progress": {
+          "objective": "Practising: Pressure & Control.",
+          "progress_label": "In session",
+          "tracker": "Finish the drill with the Trainer."
+        },
+        "ready_to_turn_in": {
+          "objective": "Lesson complete.",
+          "progress_label": "Ready",
+          "tracker": "Collect your training experience."
+        },
+        "completed": {
+          "objective": "Mastered: Pressure & Control.",
+          "progress_label": "Done",
+          "tracker": "Lesson complete \u2014 return when you are stronger."
+        }
+      },
+      "quest_item": {
+        "key": "lesson-token-2004",
+        "name": "Training Token",
+        "description": "Records a completed Trainer lesson.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 39000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 16
+    },
+    {
+      "quest_id": 2005,
+      "title": "Trainer's Lesson: Veteran Drills",
+      "summary": "Train with the Newbie Trainer \u2014 the cadence that carries you through the wilds.",
+      "reward_preview": "56000 experience (advances your level).",
+      "required": 0,
+      "stages": {
+        "available": {
+          "objective": "Take the lesson: Veteran Drills.",
+          "progress_label": "Lesson ready",
+          "tracker": "Speak to the Newbie Trainer."
+        },
+        "in_progress": {
+          "objective": "Practising: Veteran Drills.",
+          "progress_label": "In session",
+          "tracker": "Finish the drill with the Trainer."
+        },
+        "ready_to_turn_in": {
+          "objective": "Lesson complete.",
+          "progress_label": "Ready",
+          "tracker": "Collect your training experience."
+        },
+        "completed": {
+          "objective": "Mastered: Veteran Drills.",
+          "progress_label": "Done",
+          "tracker": "Lesson complete \u2014 return when you are stronger."
+        }
+      },
+      "quest_item": {
+        "key": "lesson-token-2005",
+        "name": "Training Token",
+        "description": "Records a completed Trainer lesson.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 56000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 21
+    },
+    {
+      "quest_id": 2006,
+      "title": "Trainer's Lesson: Road-Ready",
+      "summary": "Train with the Newbie Trainer \u2014 the final rites before the open road to 30.",
+      "reward_preview": "60000 experience (advances your level).",
+      "required": 0,
+      "stages": {
+        "available": {
+          "objective": "Take the lesson: Road-Ready.",
+          "progress_label": "Lesson ready",
+          "tracker": "Speak to the Newbie Trainer."
+        },
+        "in_progress": {
+          "objective": "Practising: Road-Ready.",
+          "progress_label": "In session",
+          "tracker": "Finish the drill with the Trainer."
+        },
+        "ready_to_turn_in": {
+          "objective": "Lesson complete.",
+          "progress_label": "Ready",
+          "tracker": "Collect your training experience."
+        },
+        "completed": {
+          "objective": "Mastered: Road-Ready.",
+          "progress_label": "Done",
+          "tracker": "Lesson complete \u2014 return when you are stronger."
+        }
+      },
+      "quest_item": {
+        "key": "lesson-token-2006",
+        "name": "Training Token",
+        "description": "Records a completed Trainer lesson.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 60000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 26
     }
   ],
   "npc_scripts": [
@@ -260,6 +524,52 @@
           ],
           "footer": "More quest branches will be layered on top of this state model.",
           "object_chat": "Training is complete. Review your gear before moving on."
+        }
+      ]
+    },
+    {
+      "npc_object_id": 4002,
+      "stages": [
+        {
+          "quest_stage": "available",
+          "title": "Newbie Trainer",
+          "body": [
+            "Welcome, recruit. I run the training regimen for this province.",
+            "Each lesson you complete sharpens you and raises your level.",
+            "Come back after every lesson \u2014 the next one opens as you grow."
+          ],
+          "footer": "Take the lesson to gain training experience.",
+          "object_chat": "Step up, recruit \u2014 let's run a lesson."
+        },
+        {
+          "quest_stage": "in_progress",
+          "title": "Mid-Lesson",
+          "body": [
+            "Stay with the drill. Progress: {current}/{required}.",
+            "Focus \u2014 we finish what we start."
+          ],
+          "footer": "Finish the drill to earn your experience.",
+          "object_chat": "Eyes up. Finish the drill."
+        },
+        {
+          "quest_stage": "ready_to_turn_in",
+          "title": "Lesson Cleared",
+          "body": [
+            "Good work. That experience is yours.",
+            "Train, grow, and the road to level 30 will open before you."
+          ],
+          "footer": "Training experience awarded.",
+          "object_chat": "Well drilled. Take your experience."
+        },
+        {
+          "quest_stage": "completed",
+          "title": "Between Lessons",
+          "body": [
+            "You've cleared this lesson already.",
+            "Grow a little more and the next lesson will be ready for you."
+          ],
+          "footer": "Return at a higher level for the next lesson.",
+          "object_chat": "Come back when you're a touch stronger."
         }
       ]
     }
