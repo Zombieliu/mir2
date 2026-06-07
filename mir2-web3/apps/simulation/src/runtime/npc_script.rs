@@ -3048,11 +3048,9 @@ pub(super) fn crystal_npc_give_exp(world: &mut World, parts: &[&str]) {
         return;
     };
 
-    let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
-    player_runtime.experience = player_runtime.experience.saturating_add(amount.max(0));
-    if player_runtime.experience > player_runtime.max_experience {
-        player_runtime.experience = player_runtime.max_experience;
-    }
+    // GainExp through the Crystal level-up loop; progression packets are
+    // flushed at the finalize choke point.
+    super::leveling::queue_player_experience_gain(world, amount.max(0));
 }
 
 pub(super) fn crystal_npc_load_value(world: &mut World, line: &str) {

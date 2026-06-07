@@ -1485,6 +1485,18 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
         }),
         "finish packets: {finish_packets:?}"
     );
+    // The guide quest grants reward experience through the Crystal level-up
+    // loop, so a fresh recruit makes real progression from the very first
+    // NPC hand-in (the GainExperience counter reaches the client too).
+    assert!(
+        after_turn_in.player_experience > before_turn_in.player_experience,
+        "guide quest turn-in should award experience: {} -> {}",
+        before_turn_in.player_experience,
+        after_turn_in.player_experience
+    );
+    assert!(finish_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount } if *amount > 0)));
     assert!(after_turn_in
         .quest_log
         .iter()

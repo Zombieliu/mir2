@@ -4693,6 +4693,26 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "amount": amount
             }
         }),
+        ServerPacket::GainExperience { amount } => json!({
+            "type": "packet",
+            "packet": "GainExperience",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::LevelChanged {
+            level,
+            experience,
+            max_experience,
+        } => json!({
+            "type": "packet",
+            "packet": "LevelChanged",
+            "payload": {
+                "level": level,
+                "experience": experience,
+                "maxExperience": max_experience
+            }
+        }),
         ServerPacket::HeroLevelChanged {
             level,
             experience,

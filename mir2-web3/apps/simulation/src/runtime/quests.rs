@@ -715,6 +715,12 @@ pub(super) fn complete_quest_with_selection(
             .retain(|item| item.key != quest.quest_item.key);
     }
     world.resource_mut::<PlayerRuntimeResource>().gold += quest.completion_rewards.gold;
+    // GainExp through the Crystal level-up loop; progression packets flush at
+    // the finalize choke point.
+    super::leveling::queue_player_experience_gain(
+        world,
+        i64::from(quest.completion_rewards.reward_exp),
+    );
     if let Some(quest) = world
         .resource_mut::<QuestResource>()
         .quests
@@ -762,11 +768,10 @@ fn complete_crystal_quest(
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
         player.gold = player.gold.saturating_add(info.reward_gold);
         player.credit = player.credit.saturating_add(info.reward_credit);
-        player.experience = player.experience.saturating_add(i64::from(info.reward_exp));
-        if player.experience > player.max_experience {
-            player.experience = player.max_experience;
-        }
     }
+    // GainExp through the level-up loop; progression packets are flushed at the
+    // finalize choke point.
+    super::leveling::queue_player_experience_gain(world, i64::from(info.reward_exp));
 
     for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
         grant_crystal_quest_reward_item(world, reward);

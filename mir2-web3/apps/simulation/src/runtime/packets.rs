@@ -7594,6 +7594,15 @@ impl SimulationSession {
     }
 
     pub(super) fn finalize_packets(&mut self, packets: Vec<ServerPacket>) -> Vec<ServerPacket> {
+        // Flush any queued self-player progression packets (GainExperience /
+        // LevelChanged / restored ObjectHealth) produced deep inside
+        // combat/quest/NPC handling. Idempotent — empty when nothing levelled.
+        let mut packets = packets;
+        let progression = super::leveling::drain_player_progress_packets(self.app.world_mut());
+        if !progression.is_empty() {
+            packets.splice(0..0, progression);
+        }
+
         if !is_in_world(self.app.world()) {
             self.visible_objects.clear();
             return packets;

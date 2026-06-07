@@ -191,6 +191,7 @@
       },
       "completion_rewards": {
         "gold": 300,
+        "reward_exp": 120,
         "items": [
           {
             "key": "repair-powder",

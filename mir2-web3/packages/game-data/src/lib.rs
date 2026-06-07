@@ -267,6 +267,11 @@ pub struct QuestStageCopy {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct QuestRewardTemplate {
     pub gold: u32,
+    /// Experience granted on turn-in. Fed through the Crystal level-up loop
+    /// (see `mir2_simulation::runtime::leveling`). Optional for backward
+    /// compatibility with existing quest data that predates exp rewards.
+    #[serde(default)]
+    pub reward_exp: u32,
     pub items: Vec<ItemTemplate>,
     pub equipment: Vec<EquipmentTemplate>,
 }

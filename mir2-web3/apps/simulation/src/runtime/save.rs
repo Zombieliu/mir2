@@ -61,7 +61,7 @@ pub(super) fn default_save_for_character(
     save.mp = mp;
     save.max_mp = mp;
     save.experience = 0;
-    save.max_experience = 100;
+    save.max_experience = super::leveling::seed_max_experience(save.character.level);
     save.gold = 0;
     save.credit = 0;
     save.inventory_items_json = Vec::new();
@@ -712,7 +712,9 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
             max_mp: restored_max_mp.max(save.mp.max(0)),
         };
         player_runtime.experience = save.experience.max(0);
-        player_runtime.max_experience = save.max_experience.max(1);
+        // MaxExperience is purely level-derived in Crystal; reseed from the
+        // saved level so any legacy/stale persisted ceiling self-heals on load.
+        player_runtime.max_experience = crate::config::seed_max_experience(save.character.level);
         player_runtime.gold = save.gold;
         player_runtime.credit = save.credit;
         player_runtime.pk_points = save.pk_points;

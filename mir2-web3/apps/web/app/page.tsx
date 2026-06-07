@@ -6423,6 +6423,14 @@ export default function HomePage() {
           ...current,
           playerExperience: numberOrZero(payload.experience),
           playerMaxExperience: Math.max(numberOrZero(payload.maxExperience), 1),
+          // Reflect the new level on the self entity so the HUD level orb
+          // updates immediately on ding (not just on the next full sync).
+          entities: current.playerObjectId
+            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
+                ...entity,
+                level: numberOrZero(payload.level),
+              }))
+            : current.entities,
         }));
         appendLog(
           t("server.LevelUp", [numberOrZero(payload.level)], `You reached level ${numberOrZero(payload.level)}.`),

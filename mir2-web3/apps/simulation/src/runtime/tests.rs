@@ -25569,7 +25569,10 @@ fn crystal_npc_giveexp_updates_runtime_and_user_information() {
 
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.player_experience, 42);
-    assert_eq!(snapshot.player_max_experience, 100);
+    // The bundled demo character is level 7, so its experience ceiling is the
+    // level-derived seed_max_experience(7) (Crystal MaxExperience is purely a
+    // function of level). 42 < 1850, so no level-up here.
+    assert_eq!(snapshot.player_max_experience, 1850);
 
     let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let info = start_packets
@@ -25580,8 +25583,78 @@ fn crystal_npc_giveexp_updates_runtime_and_user_information() {
         })
         .expect("user information should be emitted");
     assert_eq!(info.experience, 42);
-    assert_eq!(info.max_experience, 100);
+    assert_eq!(info.max_experience, 1850);
     assert!(packets.is_empty());
+}
+
+#[test]
+fn player_experience_gain_levels_up_with_crystal_loop() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Pin a deterministic level-1 starting point (the bundled scene fixture
+    // ships a higher-level demo character).
+    {
+        let mut sessions = session.app.world_mut().resource_mut::<SessionResource>();
+        if let Some(character) = sessions.selected_character.as_mut() {
+            character.level = 1;
+        }
+    }
+    {
+        let mut runtime = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        runtime.experience = 0;
+        runtime.max_experience = 100;
+    }
+    let before = session.world_snapshot();
+    assert_eq!(before.player_max_experience, 100);
+
+    // Crystal GainExp: 500 exp from a fresh level-1 character spends 100 (L1->2)
+    // then 280 (L2->3), leaving 120 below the L3 threshold of 520.
+    let packets =
+        super::super::leveling::apply_player_experience_gain(session.app.world_mut(), 500);
+
+    assert!(
+        matches!(
+            packets.first(),
+            Some(ServerPacket::GainExperience { amount: 500 })
+        ),
+        "first packet should be the gain counter: {packets:?}"
+    );
+    let (level, experience, max_experience) = packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::LevelChanged {
+                level,
+                experience,
+                max_experience,
+            } => Some((*level, *experience, *max_experience)),
+            _ => None,
+        })
+        .expect("a multi-level gain should emit a single LevelChanged");
+    assert_eq!(level, 3);
+    assert_eq!(experience, 120);
+    assert_eq!(max_experience, crate::config::level_required_experience(3));
+    assert_eq!(max_experience, 520);
+
+    // RefreshLevelStats + base.LevelUp(): the snapshot reflects the new level's
+    // HP/MP ceiling and full restored vitals.
+    let class = {
+        let sessions = session.app.world().resource::<SessionResource>();
+        sessions
+            .selected_character
+            .as_ref()
+            .expect("active character")
+            .class
+    };
+    let after = session.world_snapshot();
+    assert_eq!(after.player_experience, 120);
+    assert_eq!(after.player_max_experience, 520);
+    let (expected_max_hp, _) = crate::config::crystal_base_vitals(class, 3);
+    assert_eq!(after.player_max_hp, Some(expected_max_hp));
+    assert_eq!(after.player_hp, after.player_max_hp);
+    let _ = before;
 }
 
 #[test]

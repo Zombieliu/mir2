@@ -1,6 +1,8 @@
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{DoorMapCellTemplate, LanguageCode, MapBounds};
-use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point, Spell};
+use mir2_protocol::{
+    IntelligentCreatureRules, MapInformation, MirDirection, Point, ServerPacket, Spell,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{CharacterRecord, SimulationConfig, Stage5SystemsState};
@@ -466,6 +468,11 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) last_damaged_tick: u64,
     /// Tick of the most recent passive regeneration pulse.
     pub(super) last_regen_tick: u64,
+    /// Self-player progression packets (`GainExperience` / `LevelChanged` /
+    /// restored `ObjectHealth`) produced deep inside combat/quest/NPC handling
+    /// and flushed to the client at the `finalize_packets` choke point. See
+    /// [`super::leveling`].
+    pub(super) pending_progress_packets: Vec<ServerPacket>,
 }
 
 impl PlayerRuntimeResource {
@@ -484,7 +491,7 @@ impl PlayerRuntimeResource {
                 max_mp: default_mp,
             },
             experience: 0,
-            max_experience: 100,
+            max_experience: super::leveling::seed_max_experience(config.default_character.level),
             gold: 0,
             credit: 0,
             pk_points: 0,
@@ -494,6 +501,7 @@ impl PlayerRuntimeResource {
             chat_spam_tick: 0,
             last_damaged_tick: 0,
             last_regen_tick: 0,
+            pending_progress_packets: Vec::new(),
         }
     }
 }

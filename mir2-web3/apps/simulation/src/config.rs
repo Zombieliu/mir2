@@ -877,9 +877,44 @@ pub fn crystal_base_vitals(class: MirClass, level: u16) -> (i32, i32) {
     (hp.max(1), mp.max(0))
 }
 
+/// Highest level the bundled progression supports. Crystal allows up to
+/// `ushort::MAX`; the newbie band only needs to comfortably reach 30.
+pub const MAX_PLAYER_LEVEL: u16 = 255;
+
+/// Experience required to advance *from* `level` to `level + 1`.
+///
+/// Same role as Crystal `RefreshMaxExperience`
+/// (`MaxExperience = ExperienceList[Level-1]`,
+/// `Crystal/Server/MirObjects/PlayerObject.cs:9627-9630`). Returns `0` at or
+/// beyond [`MAX_PLAYER_LEVEL`], matching Crystal's "0 = capped" sentinel.
+///
+/// Crystal's real per-level thresholds live in the runtime `ExpList.ini`,
+/// which is not committed to this repo. Per the 2026-06-07 product decision we
+/// use an intentionally accelerated curve (`100 * level^1.5`, snapped to a
+/// tidy multiple of ten) so the bundled 1->30 newbie questline can carry a
+/// fresh character to level 30 by clicking NPCs. Sample thresholds: L1=100,
+/// L5=1120, L10=3160, L20=8940, L29=15620. L1 stays exactly 100, matching the
+/// legacy fixed default. The curve is one formula, so the original table can
+/// be dropped in later without touching the level-up loop.
+pub fn level_required_experience(level: u16) -> i64 {
+    if level == 0 || level >= MAX_PLAYER_LEVEL {
+        return 0;
+    }
+    let raw = 100.0 * f64::from(level).powf(1.5);
+    ((raw / 10.0).round() as i64) * 10
+}
+
+/// Threshold to seed `max_experience` for a character sitting *at* `level`
+/// (never zero, so a freshly created level-1 character shows a real exp bar
+/// and the level-up loop always terminates).
+pub fn seed_max_experience(level: u16) -> i64 {
+    level_required_experience(level).max(1)
+}
+
 impl CharacterSaveRecord {
     pub fn new(character: CharacterRecord) -> Self {
         let (max_hp, mp) = crystal_base_vitals(character.class, character.level);
+        let max_experience = seed_max_experience(character.level);
         Self {
             character,
             map_file_name: String::new(),
@@ -891,7 +926,7 @@ impl CharacterSaveRecord {
             mp,
             max_mp: mp,
             experience: 0,
-            max_experience: default_max_experience(),
+            max_experience,
             gold: 1280,
             credit: 0,
             pk_points: 0,
