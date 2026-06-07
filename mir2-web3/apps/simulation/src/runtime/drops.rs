@@ -31,8 +31,9 @@ use super::monsters::{deterministic_roll, initial_harvest_monster_state};
 use super::movement::{has_blocking_entity, is_blocked_tile, offset_point, point_in_bounds};
 use super::packets::object_movement;
 use super::quests::{
-    advance_crystal_quest_item_task, advance_crystal_quest_kill, crystal_quest_item_task_drop,
-    crystal_quest_update_packet, guide_quest_template, quest_template_by_id,
+    advance_bespoke_quest_kill, advance_crystal_quest_item_task, advance_crystal_quest_kill,
+    crystal_quest_item_task_drop, crystal_quest_update_packet, guide_quest_template,
+    quest_template_by_id,
 };
 use super::resources::{
     GroupResource, InventoryResource, MapRuntimeResource, ObjectIdAllocatorResource,
@@ -2442,6 +2443,7 @@ impl SimulationSession {
         }
 
         let mut packets = advance_crystal_quest_kill(world, monster_name);
+        packets.extend(advance_bespoke_quest_kill(world, monster_name));
         if monster_object_id == FIELD_WASP_ID && !current_map_disallows_monster_drop(world) {
             let quest = guide_quest_template();
             let _ = try_gain_crystal_quest_drop(

@@ -25658,6 +25658,43 @@ fn player_experience_gain_levels_up_with_crystal_loop() {
 }
 
 #[test]
+fn bespoke_hunt_quest_tracks_kills_and_pays_experience() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Accept Hunt Master contract 2101: defeat 3 Field Wasps.
+    let stage = super::super::quests::begin_quest(session.app.world_mut(), 2101);
+    assert_eq!(stage, QuestStage::InProgress);
+
+    // A non-matching kill does nothing; three matching kills clear the count.
+    super::super::quests::advance_bespoke_quest_kill(session.app.world_mut(), "Training Dummy");
+    assert_eq!(
+        super::super::quests::quest_stage(session.app.world(), 2101),
+        Some(QuestStage::InProgress)
+    );
+    for _ in 0..3 {
+        super::super::quests::advance_bespoke_quest_kill(session.app.world_mut(), "Field Wasp");
+    }
+    assert_eq!(
+        super::super::quests::quest_stage(session.app.world(), 2101),
+        Some(QuestStage::ReadyToTurnIn)
+    );
+
+    // Reporting back pays the contract's reward experience through the level-up
+    // loop, and the contract closes.
+    let before = session.world_snapshot().player_experience;
+    super::super::quests::complete_quest(session.app.world_mut(), 2101);
+    assert_eq!(
+        super::super::quests::quest_stage(session.app.world(), 2101),
+        Some(QuestStage::Completed)
+    );
+    assert!(
+        session.world_snapshot().player_experience > before,
+        "hunt turn-in should award experience"
+    );
+}
+
+#[test]
 fn crystal_npc_savevalue_and_loadvalue_persist_across_reload() {
     let temp_dir =
         std::env::temp_dir().join(format!("mir2-npc-values-test-{}", std::process::id()));

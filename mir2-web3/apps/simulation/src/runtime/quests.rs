@@ -1057,6 +1057,52 @@ pub(super) fn advance_crystal_quest_kill(
     packets
 }
 
+/// Advance bundled (non-Crystal) "kill N monsters" quests when a monster dies.
+///
+/// Crystal quests carry their own `kill_tasks`; bundled `QuestTemplate`s instead
+/// declare a single `kill_monster` prefix with `required` as the count. Every
+/// in-progress quest whose target matches the slain monster ticks up by one and
+/// flips to `ReadyToTurnIn` at the cap. Progress reaches the client through the
+/// world snapshot's quest log; we also surface a short progress message.
+pub(super) fn advance_bespoke_quest_kill(
+    world: &mut World,
+    monster_name: &str,
+) -> Vec<ServerPacket> {
+    let mut progressed: Vec<(u32, u32, String)> = Vec::new();
+    {
+        let mut quests = world.resource_mut::<QuestResource>();
+        for quest in quests
+            .quests
+            .iter_mut()
+            .filter(|quest| quest.stage == QuestStage::InProgress && quest.required > 0)
+        {
+            let Some(template) = quest_template_by_id(quest.quest_id) else {
+                continue;
+            };
+            let Some(target) = template.kill_monster.as_deref() else {
+                continue;
+            };
+            if !monster_name.starts_with(target) || quest.current >= quest.required {
+                continue;
+            }
+            quest.current = quest.current.saturating_add(1).min(quest.required);
+            if quest.current >= quest.required {
+                quest.stage = QuestStage::ReadyToTurnIn;
+            }
+            progressed.push((quest.current, quest.required, target.to_string()));
+        }
+    }
+    progressed
+        .into_iter()
+        .map(
+            |(current, required, name)| ServerPacket::SendOutputMessage {
+                message: format!("Quest: {name} {current}/{required}."),
+                output_type: 1,
+            },
+        )
+        .collect()
+}
+
 pub(super) fn advance_crystal_quest_flag(world: &mut World, flag_number: i32) -> Vec<ServerPacket> {
     let mut changed = Vec::new();
     {

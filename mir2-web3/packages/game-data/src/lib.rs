@@ -254,6 +254,14 @@ pub struct QuestTemplate {
     /// (no gate) for backward compatibility with existing quest data.
     #[serde(default)]
     pub required_min_level: u16,
+    /// When set, this is a "kill N monsters" objective: every matching monster
+    /// killed while the quest is in progress advances it by one, and `required`
+    /// is the kill count. The match is a name prefix (Crystal-style), so
+    /// "Field Wasp" also matches tiered variants. `None` leaves the quest as an
+    /// instant lesson (`required == 0`) or an item-drop quest like the guide
+    /// trial. Optional/default `None` for backward compatibility.
+    #[serde(default)]
+    pub kill_monster: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1830,8 +1838,8 @@ mod tests {
         assert_eq!(scene.decor_objects.len(), 8);
         assert_eq!(scene.visible_players.len(), 1);
         assert_eq!(scene.visible_monsters.len(), 2);
-        // Village Guide (1001) + Newbie Trainer (1->30 lesson chain).
-        assert_eq!(scene.visible_npcs.len(), 2);
+        // Village Guide (1001) + Newbie Trainer (lessons) + Hunt Master (hunts).
+        assert_eq!(scene.visible_npcs.len(), 3);
     }
 
     #[test]
@@ -1841,10 +1849,11 @@ mod tests {
         assert_eq!(data.monster_spawns.len(), 2);
         assert_eq!(data.skills.len(), 7);
         assert_eq!(data.monster_drops.len(), 2);
-        // Field Wasp Trial (1001) + six newbie trainer lessons (2001-2006).
-        assert_eq!(data.quests.len(), 7);
-        // Village Guide script (4001) + Newbie Trainer script (4002).
-        assert_eq!(data.npc_scripts.len(), 2);
+        // Field Wasp Trial (1001) + six trainer lessons (2001-2006)
+        // + five Hunt Master contracts (2101-2105).
+        assert_eq!(data.quests.len(), 12);
+        // Village Guide (4001) + Newbie Trainer (4002) + Hunt Master (4003).
+        assert_eq!(data.npc_scripts.len(), 3);
         assert_eq!(data.buffs.len(), 1);
         assert_eq!(data.monster_spawns[0].count, 1);
         assert_eq!(data.skills[0].mana_cost, 6);

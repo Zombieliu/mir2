@@ -479,6 +479,231 @@
         "equipment": []
       },
       "required_min_level": 26
+    },
+    {
+      "quest_id": 2101,
+      "title": "Field Hunt: Cull the Swarm",
+      "summary": "Hunt Master's contract \u2014 the wasps by the lanterns are harassing travellers.",
+      "reward_preview": "1500 experience for clearing 3 Field Wasp.",
+      "required": 3,
+      "stages": {
+        "available": {
+          "objective": "Accept the hunt: defeat 3 Field Wasp.",
+          "progress_label": "Not accepted",
+          "tracker": "Speak to the Hunt Master to take the contract."
+        },
+        "in_progress": {
+          "objective": "Defeat 3 Field Wasp.",
+          "progress_label": "{current}/{required} cleared",
+          "tracker": "Field Wasp {current}/{required} down. Keep hunting."
+        },
+        "ready_to_turn_in": {
+          "objective": "Contract complete \u2014 report back.",
+          "progress_label": "Objective complete",
+          "tracker": "Return to the Hunt Master for your experience."
+        },
+        "completed": {
+          "objective": "Cleared: 3 Field Wasp.",
+          "progress_label": "Turned in",
+          "tracker": "Contract closed. Ask about the next hunt when you're stronger."
+        }
+      },
+      "quest_item": {
+        "key": "hunt-tally-2101",
+        "name": "Hunt Tally",
+        "description": "A Hunt Master contract tally.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 1500,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 3,
+      "kill_monster": "Field Wasp"
+    },
+    {
+      "quest_id": 2102,
+      "title": "Field Hunt: Splinter Drill",
+      "summary": "Hunt Master's contract \u2014 run the dummy line until your strikes land clean.",
+      "reward_preview": "6000 experience for clearing 4 Training Dummy.",
+      "required": 4,
+      "stages": {
+        "available": {
+          "objective": "Accept the hunt: defeat 4 Training Dummy.",
+          "progress_label": "Not accepted",
+          "tracker": "Speak to the Hunt Master to take the contract."
+        },
+        "in_progress": {
+          "objective": "Defeat 4 Training Dummy.",
+          "progress_label": "{current}/{required} cleared",
+          "tracker": "Training Dummy {current}/{required} down. Keep hunting."
+        },
+        "ready_to_turn_in": {
+          "objective": "Contract complete \u2014 report back.",
+          "progress_label": "Objective complete",
+          "tracker": "Return to the Hunt Master for your experience."
+        },
+        "completed": {
+          "objective": "Cleared: 4 Training Dummy.",
+          "progress_label": "Turned in",
+          "tracker": "Contract closed. Ask about the next hunt when you're stronger."
+        }
+      },
+      "quest_item": {
+        "key": "hunt-tally-2102",
+        "name": "Hunt Tally",
+        "description": "A Hunt Master contract tally.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 6000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 8,
+      "kill_monster": "Training Dummy"
+    },
+    {
+      "quest_id": 2103,
+      "title": "Field Hunt: Wasp Season",
+      "summary": "Hunt Master's contract \u2014 a fresh hatch has the road swarming again.",
+      "reward_preview": "15000 experience for clearing 5 Field Wasp.",
+      "required": 5,
+      "stages": {
+        "available": {
+          "objective": "Accept the hunt: defeat 5 Field Wasp.",
+          "progress_label": "Not accepted",
+          "tracker": "Speak to the Hunt Master to take the contract."
+        },
+        "in_progress": {
+          "objective": "Defeat 5 Field Wasp.",
+          "progress_label": "{current}/{required} cleared",
+          "tracker": "Field Wasp {current}/{required} down. Keep hunting."
+        },
+        "ready_to_turn_in": {
+          "objective": "Contract complete \u2014 report back.",
+          "progress_label": "Objective complete",
+          "tracker": "Return to the Hunt Master for your experience."
+        },
+        "completed": {
+          "objective": "Cleared: 5 Field Wasp.",
+          "progress_label": "Turned in",
+          "tracker": "Contract closed. Ask about the next hunt when you're stronger."
+        }
+      },
+      "quest_item": {
+        "key": "hunt-tally-2103",
+        "name": "Hunt Tally",
+        "description": "A Hunt Master contract tally.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 15000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 14,
+      "kill_monster": "Field Wasp"
+    },
+    {
+      "quest_id": 2104,
+      "title": "Field Hunt: Hold the Line",
+      "summary": "Hunt Master's contract \u2014 drill harder \u2014 the wilds ahead hit back.",
+      "reward_preview": "28000 experience for clearing 6 Training Dummy.",
+      "required": 6,
+      "stages": {
+        "available": {
+          "objective": "Accept the hunt: defeat 6 Training Dummy.",
+          "progress_label": "Not accepted",
+          "tracker": "Speak to the Hunt Master to take the contract."
+        },
+        "in_progress": {
+          "objective": "Defeat 6 Training Dummy.",
+          "progress_label": "{current}/{required} cleared",
+          "tracker": "Training Dummy {current}/{required} down. Keep hunting."
+        },
+        "ready_to_turn_in": {
+          "objective": "Contract complete \u2014 report back.",
+          "progress_label": "Objective complete",
+          "tracker": "Return to the Hunt Master for your experience."
+        },
+        "completed": {
+          "objective": "Cleared: 6 Training Dummy.",
+          "progress_label": "Turned in",
+          "tracker": "Contract closed. Ask about the next hunt when you're stronger."
+        }
+      },
+      "quest_item": {
+        "key": "hunt-tally-2104",
+        "name": "Hunt Tally",
+        "description": "A Hunt Master contract tally.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 28000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 20,
+      "kill_monster": "Training Dummy"
+    },
+    {
+      "quest_id": 2105,
+      "title": "Field Hunt: Road Wardens",
+      "summary": "Hunt Master's contract \u2014 clear the road one last time before you ride out.",
+      "reward_preview": "40000 experience for clearing 8 Field Wasp.",
+      "required": 8,
+      "stages": {
+        "available": {
+          "objective": "Accept the hunt: defeat 8 Field Wasp.",
+          "progress_label": "Not accepted",
+          "tracker": "Speak to the Hunt Master to take the contract."
+        },
+        "in_progress": {
+          "objective": "Defeat 8 Field Wasp.",
+          "progress_label": "{current}/{required} cleared",
+          "tracker": "Field Wasp {current}/{required} down. Keep hunting."
+        },
+        "ready_to_turn_in": {
+          "objective": "Contract complete \u2014 report back.",
+          "progress_label": "Objective complete",
+          "tracker": "Return to the Hunt Master for your experience."
+        },
+        "completed": {
+          "objective": "Cleared: 8 Field Wasp.",
+          "progress_label": "Turned in",
+          "tracker": "Contract closed. Ask about the next hunt when you're stronger."
+        }
+      },
+      "quest_item": {
+        "key": "hunt-tally-2105",
+        "name": "Hunt Tally",
+        "description": "A Hunt Master contract tally.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 0,
+        "reward_exp": 40000,
+        "items": [],
+        "equipment": []
+      },
+      "required_min_level": 26,
+      "kill_monster": "Field Wasp"
     }
   ],
   "npc_scripts": [
@@ -570,6 +795,52 @@
           ],
           "footer": "Return at a higher level for the next lesson.",
           "object_chat": "Come back when you're a touch stronger."
+        }
+      ]
+    },
+    {
+      "npc_object_id": 4003,
+      "stages": [
+        {
+          "quest_stage": "available",
+          "title": "Hunt Master",
+          "body": [
+            "The road needs clearing and you look able enough.",
+            "Take a contract, thin the threat, and I'll pay you in experience.",
+            "Tougher contracts open as you grow."
+          ],
+          "footer": "Accept the contract and get hunting.",
+          "object_chat": "Contract's on the board, recruit."
+        },
+        {
+          "quest_stage": "in_progress",
+          "title": "On Contract",
+          "body": [
+            "Still hunting. Progress: {current}/{required}.",
+            "Don't come back until the count is clear."
+          ],
+          "footer": "Clear the count, then report back.",
+          "object_chat": "Finish the count \u2014 {current}/{required}."
+        },
+        {
+          "quest_stage": "ready_to_turn_in",
+          "title": "Contract Cleared",
+          "body": [
+            "Clean work. That's the road a little safer.",
+            "Here's your experience \u2014 spend it growing stronger."
+          ],
+          "footer": "Hunt experience awarded.",
+          "object_chat": "Contract closed. Well hunted."
+        },
+        {
+          "quest_stage": "completed",
+          "title": "Between Contracts",
+          "body": [
+            "That contract's done.",
+            "Grow a little and a harder one will be waiting."
+          ],
+          "footer": "Return at a higher level for the next contract.",
+          "object_chat": "Come back stronger for the next contract."
         }
       ]
     }
