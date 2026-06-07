@@ -160,3 +160,29 @@
 7. **加固**：TCP 读超时、admin-api 与交易限流、内网 IP 核查。
 
 > 后续可在真实环境运行 `cargo audit` / `npm audit` 检查传递依赖漏洞（本次为离线静态审计，未覆盖）。
+
+---
+
+## 8. 修复状态（2026-06-07 已实施）
+
+本轮已落地修复，全部通过 `cargo check --locked`、`cargo fmt --check`、`mir2-simulation` 全量 1028 测试与 `mir2-admin-api`/`mir2-protocol`/`mir2-gateway` 单测。
+
+| 编号 | 状态 | 修复说明 | 主要改动 |
+|---|---|---|---|
+| F-01 | ✅ 已修 | admin-api 增加路由层鉴权中间件 `require_authenticated_operator`，所有 `/admin/*`（除 `/health`）必须携带有效操作员；写接口保留各自细粒度权限校验 | `admin-api/src/lib.rs` |
+| F-02 | ✅ 已修 | 账号密码改为加盐 + 10 万次迭代 SHA-256 存储（`sha256$salt$hash`）；登录/改密走 `account_password_matches`，向后兼容历史明文 | `simulation/src/runtime/save.rs`、`Cargo.toml`(+`sha2`) |
+| F-03 | ✅ 已修 | 协议三处 `Vec::with_capacity` 改为 `.min(reader.remaining())`，杜绝小包声明巨量计数导致的预分配 DoS | `protocol/src/packets.rs` |
+| F-04 | ✅ 已修 | ClickHouse 口令改 `clickhouse_password()`：生产缺配即报错，去除硬编码兜底 | `admin-api/src/lib.rs` |
+| F-05 | ✅ 已修 | Passkey 开发密钥改为 fail-closed：仅当显式 `MIR2_ALLOW_DEV_PASSKEY_SECRET=1` 才使用 | `gateway/src/auth.rs`、`web/app/api/passkey/login/route.ts` |
+| F-06 | ✅ 已修 | 远程攻击新增服务端距离门：目标超出 `CRYSTAL_DATA_RANGE`(16) 直接拒绝 | `simulation/src/runtime/combat.rs` |
+| F-08 | ✅ 已修 | `gatewayWs` 覆盖仅在 localhost 生效，托管环境忽略，防连接劫持 | `web/app/page.tsx` |
+| F-09 | ✅ 已修 | admin-web 生产环境不再下发默认全权限操作员头部，未配置即 fail-closed | `admin-web/lib/admin-api.ts` |
+| F-10 | ✅ 已修 | TCP 帧体读取加 30s 超时，缓解 slowloris | `gateway/src/tcp.rs` |
+| F-12 | ✅ 已修 | 密码比较改常量时间 `constant_time_eq`（随 F-02 落地） | `simulation/src/runtime/save.rs` |
+| F-14 | ✅ 已修 | Passkey origin 校验改为强制（缺 origin/请求 Origin 头即拒） | `web/app/api/passkey/login/route.ts` |
+| F-11 | ☑️ 免修 | 经复核 `config.rs:956` 等均在 `#[cfg(test)]` 内，仅测试连本地库，非生产凭据 | — |
+| F-07 | ⏳ 暂缓 | 交易索引竞态未获复现确认；修复需改动复杂且高覆盖的跨会话交易/经济路径，贸然改动有引入真实掉包/刷物回归的风险。建议先写复现用例再以 `unique_id` 锁定交易物品。**未改动经济代码。** | — |
+| F-13 | 📝 记录 | wrangler 中的网关 IP 本质是客户端要连接的公开端点，非密钥；如需可迁至环境变量，属基础设施侧 | — |
+| F-15 | 📝 建议 | 限流需按路由设阈值并引入共享状态中间件，属独立加固项，建议单独迭代 | — |
+
+> 说明：存储密码（游戏内仓库锁，与账号登录密码不同）本轮未改动——它是独立的低风险、1:1 Crystal 行为，不在 F-02 范围内。

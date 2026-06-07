@@ -4055,9 +4055,34 @@ pub fn admin_router() -> Router {
     admin_router_with_state(AdminApiState::default())
 }
 
+/// Authentication gate for every `/admin/*` route.
+///
+/// Historically the read endpoints (dashboard, accounts, players, economy,
+/// mail, audit, ...) skipped authentication entirely, exposing full
+/// operational data to anyone who could reach the service. This middleware
+/// requires a valid operator on every admin route; write endpoints keep their
+/// own finer-grained `require_operator_permission` checks on top of this.
+async fn require_authenticated_operator(
+    State(state): State<AdminApiState>,
+    request: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Result<Response, ApiError> {
+    operator_from_headers(request.headers(), state.admin_store.as_ref())?;
+    Ok(next.run(request).await)
+}
+
 pub fn admin_router_with_state(state: AdminApiState) -> Router {
+    let protected = admin_protected_router()
+        .route_layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            require_authenticated_operator,
+        ))
+        .with_state(state);
+    Router::new().route("/health", get(health)).merge(protected)
+}
+
+fn admin_protected_router() -> Router<AdminApiState> {
     Router::new()
-        .route("/health", get(health))
         .route("/admin/auth/me", get(auth_me))
         .route("/admin/commands", get(list_commands))
         .route(
@@ -4130,7 +4155,6 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
             post(submit_rollback_content_bundle),
         )
         .route("/admin/commands/console", post(submit_console_command))
-        .with_state(state)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -8264,14 +8288,45 @@ fn parse_permission(value: &str) -> Result<Permission, ApiError> {
     }
 }
 
+/// True when the deployment is flagged as production/staging via env.
+fn admin_is_production_env() -> bool {
+    [
+        "MIR2_RUNTIME_ENV",
+        "MIR2_DEPLOYMENT_ENV",
+        "MIR2_ENV",
+        "ADMIN_RUNTIME_ENV",
+    ]
+    .into_iter()
+    .filter_map(|name| env::var(name).ok())
+    .any(|value| {
+        matches!(
+            value.trim().to_ascii_lowercase().as_str(),
+            "production" | "prod" | "staging"
+        )
+    })
+}
+
+/// Resolve the ClickHouse password. Falls back to the local dev password only
+/// outside production; in production the env var is mandatory (no hardcoded
+/// credential is ever used).
+fn clickhouse_password() -> Result<String, ApiError> {
+    match env::var("ADMIN_CLICKHOUSE_PASSWORD") {
+        Ok(password) if !password.is_empty() => Ok(password),
+        _ if admin_is_production_env() => Err(ApiError {
+            status: StatusCode::SERVICE_UNAVAILABLE,
+            message: "ADMIN_CLICKHOUSE_PASSWORD is required in production".into(),
+        }),
+        _ => Ok("mir2_dev_password".into()),
+    }
+}
+
 fn fetch_clickhouse_admin_events(
     query: &AdminEventQuery,
 ) -> Result<Vec<AdminEventRecord>, ApiError> {
     let base_url =
         env::var("ADMIN_CLICKHOUSE_URL").unwrap_or_else(|_| "http://127.0.0.1:8123".into());
     let user = env::var("ADMIN_CLICKHOUSE_USER").unwrap_or_else(|_| "mir2".into());
-    let password =
-        env::var("ADMIN_CLICKHOUSE_PASSWORD").unwrap_or_else(|_| "mir2_dev_password".into());
+    let password = clickhouse_password()?;
     let database = env::var("ADMIN_CLICKHOUSE_DATABASE").unwrap_or_else(|_| "mir2_events".into());
     let url = ParsedClickHouseUrl::parse(base_url.trim()).map_err(|message| ApiError {
         status: StatusCode::BAD_GATEWAY,
@@ -8301,8 +8356,7 @@ fn fetch_clickhouse_gameplay_events(
     let base_url =
         env::var("ADMIN_CLICKHOUSE_URL").unwrap_or_else(|_| "http://127.0.0.1:8123".into());
     let user = env::var("ADMIN_CLICKHOUSE_USER").unwrap_or_else(|_| "mir2".into());
-    let password =
-        env::var("ADMIN_CLICKHOUSE_PASSWORD").unwrap_or_else(|_| "mir2_dev_password".into());
+    let password = clickhouse_password()?;
     let database = env::var("ADMIN_CLICKHOUSE_DATABASE").unwrap_or_else(|_| "mir2_events".into());
     let url = ParsedClickHouseUrl::parse(base_url.trim()).map_err(|message| ApiError {
         status: StatusCode::BAD_GATEWAY,
@@ -8334,8 +8388,7 @@ fn fetch_clickhouse_gameplay_event_summary(
     let base_url =
         env::var("ADMIN_CLICKHOUSE_URL").unwrap_or_else(|_| "http://127.0.0.1:8123".into());
     let user = env::var("ADMIN_CLICKHOUSE_USER").unwrap_or_else(|_| "mir2".into());
-    let password =
-        env::var("ADMIN_CLICKHOUSE_PASSWORD").unwrap_or_else(|_| "mir2_dev_password".into());
+    let password = clickhouse_password()?;
     let database = env::var("ADMIN_CLICKHOUSE_DATABASE").unwrap_or_else(|_| "mir2_events".into());
     let url = ParsedClickHouseUrl::parse(base_url.trim()).map_err(|message| ApiError {
         status: StatusCode::BAD_GATEWAY,

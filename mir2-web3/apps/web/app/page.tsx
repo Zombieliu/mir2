@@ -873,10 +873,17 @@ function isLocalWebHost(hostname: string) {
 
 function resolveGatewayWebSocketUrl() {
   if (typeof window === "undefined") return CONFIGURED_GATEWAY_WS_URL || LOCAL_GATEWAY_WS_URL;
-  const queryValue = new URLSearchParams(window.location.search).get("gatewayWs");
-  if (queryValue && /^wss?:\/\//.test(queryValue)) return queryValue;
+  const onLocalHost = isLocalWebHost(window.location.hostname);
+  // The `gatewayWs` query override is a local-development convenience only.
+  // Honoring it on a hosted origin would let a crafted link silently redirect a
+  // player's WebSocket — and the login credentials sent over it — to an
+  // attacker-controlled gateway, so it is ignored outside localhost.
+  if (onLocalHost) {
+    const queryValue = new URLSearchParams(window.location.search).get("gatewayWs");
+    if (queryValue && /^wss?:\/\//.test(queryValue)) return queryValue;
+  }
   if (CONFIGURED_GATEWAY_WS_URL) return CONFIGURED_GATEWAY_WS_URL;
-  return isLocalWebHost(window.location.hostname) ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL;
+  return onLocalHost ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL;
 }
 
 function markMir2CacheMilestone(name: string, detail?: Record<string, unknown>) {

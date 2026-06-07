@@ -85,7 +85,12 @@ function validateLoginMessage(
   if (message.expiresAt! - message.issuedAt! > MAX_LOGIN_WINDOW_MS) {
     return "passkey message window is too long";
   }
-  if (requestOrigin && message.origin !== requestOrigin) {
+  // Origin binding is mandatory: the signed message must carry an origin and it
+  // must match the request's Origin header. Browser passkey logins always send
+  // the Origin header, so we fail closed rather than skipping the check when it
+  // is absent.
+  if (!message.origin) return "passkey origin is required";
+  if (!requestOrigin || message.origin !== requestOrigin) {
     return "passkey origin mismatch";
   }
   return null;
@@ -111,7 +116,20 @@ function passkeyGatewaySecret() {
   if (passkeySecretRequiredFromEnv()) {
     throw new Error("MIR2_PASSKEY_AUTH_SECRET is required for production passkey login");
   }
+  // Fail closed by default: only use the insecure local secret when explicitly
+  // opted in, so a misconfigured deployment cannot silently sign tokens with a
+  // publicly known key.
+  if (!devPasskeySecretAllowed()) {
+    throw new Error(
+      "MIR2_PASSKEY_AUTH_SECRET is not set; set it, or set MIR2_ALLOW_DEV_PASSKEY_SECRET=1 to use the insecure local development secret",
+    );
+  }
   return "mir2-web3-local-passkey-auth-secret";
+}
+
+function devPasskeySecretAllowed() {
+  const value = process.env.MIR2_ALLOW_DEV_PASSKEY_SECRET?.trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
 }
 
 function passkeySecretRequiredFromEnv() {
