@@ -50,7 +50,8 @@ function isStaticAssetRequest(url: URL): boolean {
   return (
     url.pathname.startsWith("/original-ui/") ||
     url.pathname.startsWith("/original-map/") ||
-    url.pathname.startsWith("/generated/original-map-blend/")
+    url.pathname.startsWith("/generated/original-map-blend/") ||
+    url.pathname.startsWith("/generated/map-atlas/")
   );
 }
 
