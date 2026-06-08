@@ -70,137 +70,161 @@ export type TutorialEvent =
 export const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: "welcome",
-    title: { en: "Welcome to Mir 2", "zh-CN": "欢迎来到传奇" },
+    title: { en: "Welcome to Mir 2", "zh-CN": "欢迎来到传奇", es: "Bienvenido a Mir 2" },
     body: {
       en: "This quick tour covers the basics: moving, fighting, looting, gear, potions and talking to NPCs. You can skip any step or close the tour at any time.",
       "zh-CN": "这个快速教程会带你过一遍基础操作:移动、战斗、拾取、装备、药水和与 NPC 对话。任意一步都可以跳过,也可以随时关闭。",
+      es: "Este recorrido rápido cubre lo básico: moverte, luchar, recoger objetos, equiparte, usar pociones y hablar con los PNJ. Puedes saltarte cualquier paso o cerrar el recorrido cuando quieras.",
     },
     trigger: { kind: "manual" },
   },
   {
     id: "move",
-    title: { en: "Move around", "zh-CN": "移动" },
+    title: { en: "Move around", "zh-CN": "移动", es: "Moverse" },
     body: {
       en: "Click a nearby tile to walk toward it. Take a few steps.",
       "zh-CN": "点击附近的地面格子向那里走过去。走上几步。",
+      es: "Haz clic en una casilla cercana para caminar hacia ella. Da unos pasos.",
     },
-    hint: { en: "Left-click the ground", "zh-CN": "鼠标左键点击地面" },
+    hint: { en: "Left-click the ground", "zh-CN": "鼠标左键点击地面", es: "Clic izquierdo en el suelo" },
     trigger: { kind: "action", actionType: "walk", count: 3 },
   },
   {
     id: "run",
-    title: { en: "Run", "zh-CN": "跑步" },
+    title: { en: "Run", "zh-CN": "跑步", es: "Correr" },
     body: {
       en: "Hold Shift and click to run instead of walk — much faster for travel.",
       "zh-CN": "按住 Shift 再点击就会跑起来,赶路快得多。",
+      es: "Mantén Shift y haz clic para correr en vez de caminar: mucho más rápido para viajar.",
     },
-    hint: { en: "Shift + left-click", "zh-CN": "Shift + 左键点击" },
+    hint: { en: "Shift + left-click", "zh-CN": "Shift + 左键点击", es: "Shift + clic izquierdo" },
     trigger: { kind: "action", actionType: "run", count: 1 },
   },
   {
     id: "attack",
-    title: { en: "Attack a monster", "zh-CN": "攻击怪物" },
+    title: { en: "Attack a monster", "zh-CN": "攻击怪物", es: "Atacar a un monstruo" },
     body: {
       en: "Click a monster to attack it. Defeat enemies to gain experience and loot.",
       "zh-CN": "点击怪物即可攻击。击败敌人可以获得经验和掉落。",
+      es: "Haz clic en un monstruo para atacarlo. Derrota enemigos para ganar experiencia y botín.",
     },
-    hint: { en: "Click a monster", "zh-CN": "点击怪物" },
+    hint: { en: "Click a monster", "zh-CN": "点击怪物", es: "Haz clic en un monstruo" },
     trigger: { kind: "action", actionType: ["attack", "rangeAttack", "magic", "castSkill"], count: 1 },
   },
   {
     id: "pickup",
-    title: { en: "Pick up loot", "zh-CN": "拾取战利品" },
+    title: { en: "Pick up loot", "zh-CN": "拾取战利品", es: "Recoger botín" },
     body: {
       en: "Stand on a dropped item and pick it up. Gold and items go into your bag.",
       "zh-CN": "站到掉落物上把它捡起来。金币和物品会进入背包。",
+      es: "Colócate sobre un objeto caído y recógelo. El oro y los objetos van a tu mochila.",
     },
-    hint: { en: "Click the item / pick-up key", "zh-CN": "点击掉落物 / 拾取键" },
+    hint: { en: "Click the item / pick-up key", "zh-CN": "点击掉落物 / 拾取键", es: "Clic en el objeto / tecla de recoger" },
     trigger: { kind: "action", actionType: "pickUpTile", count: 1 },
   },
   {
     id: "inventory",
-    title: { en: "Open your bag", "zh-CN": "打开背包" },
+    title: { en: "Open your bag", "zh-CN": "打开背包", es: "Abrir la mochila" },
     body: {
       en: "Open the inventory to see everything you are carrying.",
       "zh-CN": "打开背包,查看你携带的所有物品。",
+      es: "Abre el inventario para ver todo lo que llevas.",
     },
-    hint: { en: "Press Alt+I", "zh-CN": "按 Alt+I" },
+    hint: { en: "Press Alt+I", "zh-CN": "按 Alt+I", es: "Pulsa Alt+I" },
     trigger: { kind: "window", window: "inventory" },
     spotlight: ".hud-button.inventory",
   },
   {
     id: "equip",
-    title: { en: "Equip gear", "zh-CN": "穿戴装备" },
+    title: { en: "Equip gear", "zh-CN": "穿戴装备", es: "Equipar objetos" },
     body: {
       en: "Double-click a weapon or armour in your bag (or drag it onto an equipment slot) to wear it.",
       "zh-CN": "双击背包里的武器或防具(或拖到装备槽)即可穿戴。",
+      es: "Haz doble clic en un arma o armadura de tu mochila (o arrástrala a una ranura de equipo) para ponértela.",
     },
-    hint: { en: "Double-click an item", "zh-CN": "双击物品" },
+    hint: { en: "Double-click an item", "zh-CN": "双击物品", es: "Doble clic en un objeto" },
     trigger: { kind: "action", actionType: "equipItem", count: 1 },
   },
   {
     id: "potion",
-    title: { en: "Drink a potion", "zh-CN": "使用药水" },
+    title: { en: "Drink a potion", "zh-CN": "使用药水", es: "Beber una poción" },
     body: {
       en: "When your HP gets low, use a healing potion from your bag or belt to recover.",
       "zh-CN": "当 HP 偏低时,使用背包或腰带里的治疗药水回血。",
+      es: "Cuando tu HP baje, usa una poción de curación de la mochila o el cinturón para recuperarte.",
     },
-    hint: { en: "Double-click a potion", "zh-CN": "双击药水" },
+    hint: { en: "Double-click a potion", "zh-CN": "双击药水", es: "Doble clic en una poción" },
     trigger: { kind: "action", actionType: "useItem", count: 1 },
   },
   {
     id: "character",
-    title: { en: "Check your stats", "zh-CN": "查看角色属性" },
+    title: { en: "Check your stats", "zh-CN": "查看角色属性", es: "Ver tus estadísticas" },
     body: {
       en: "Open the character window to review HP/MP, level, experience and your attack/defence.",
       "zh-CN": "打开角色面板,查看 HP/MP、等级、经验,以及你的攻击/防御。",
+      es: "Abre la ventana de personaje para ver HP/MP, nivel, experiencia y tu ataque/defensa.",
     },
-    hint: { en: "Press Alt+C", "zh-CN": "按 Alt+C" },
+    hint: { en: "Press Alt+C", "zh-CN": "按 Alt+C", es: "Pulsa Alt+C" },
     trigger: { kind: "window", window: "character" },
     spotlight: ".hud-button.character",
   },
   {
     id: "skill",
-    title: { en: "Cast a skill", "zh-CN": "释放技能" },
+    title: { en: "Cast a skill", "zh-CN": "释放技能", es: "Lanzar una habilidad" },
     body: {
       en: "Use a magic skill from your skill bar. Bind skills to hotkeys so you can cast them in combat.",
       "zh-CN": "从技能栏释放一个法术/技能。把技能绑到快捷键上,战斗中就能快速施放。",
+      es: "Usa una habilidad mágica desde la barra de habilidades. Asigna habilidades a las teclas rápidas para lanzarlas en combate.",
     },
-    hint: { en: "Skill bar / hotkey", "zh-CN": "技能栏 / 快捷键" },
+    hint: { en: "Skill bar / hotkey", "zh-CN": "技能栏 / 快捷键", es: "Barra de habilidades / tecla rápida" },
     trigger: { kind: "action", actionType: ["magic", "castSkill"], count: 1 },
     spotlight: ".belt-dialog",
   },
   {
     id: "npc",
-    title: { en: "Talk to an NPC", "zh-CN": "与 NPC 对话" },
+    title: { en: "Talk to an NPC", "zh-CN": "与 NPC 对话", es: "Hablar con un PNJ" },
     body: {
       en: "Click an NPC to talk. NPCs run shops, repair gear, store items and hand out quests.",
       "zh-CN": "点击 NPC 开始对话。NPC 提供商店、修理、仓库存取和任务。",
+      es: "Haz clic en un PNJ para hablar. Los PNJ tienen tiendas, reparan equipo, guardan objetos y dan misiones.",
     },
-    hint: { en: "Click an NPC", "zh-CN": "点击 NPC" },
+    hint: { en: "Click an NPC", "zh-CN": "点击 NPC", es: "Haz clic en un PNJ" },
     trigger: { kind: "action", actionType: "interact", count: 1 },
   },
   {
     id: "quest",
-    title: { en: "Track your quests", "zh-CN": "查看任务" },
+    title: { en: "Track your quests", "zh-CN": "查看任务", es: "Seguir tus misiones" },
     body: {
       en: "Open the quest log to see active quests and their progress, then return to the NPC to turn them in.",
       "zh-CN": "打开任务日志,查看进行中的任务和进度,完成后回到 NPC 处交付。",
+      es: "Abre el registro de misiones para ver las misiones activas y su progreso; luego vuelve al PNJ para entregarlas.",
     },
-    hint: { en: "Press Alt+Q", "zh-CN": "按 Alt+Q" },
+    hint: { en: "Press Alt+Q", "zh-CN": "按 Alt+Q", es: "Pulsa Alt+Q" },
     trigger: { kind: "window", window: "questLog" },
     spotlight: ".hud-button.quest",
   },
   {
     id: "done",
-    title: { en: "You're ready!", "zh-CN": "你已经准备好了!" },
+    title: { en: "You're ready!", "zh-CN": "你已经准备好了!", es: "¡Estás listo!" },
     body: {
       en: "That's the core loop: explore, fight, loot, gear up and take quests. Press the Help window (Alt+J) any time for the full reference.",
       "zh-CN": "这就是核心循环:探索、战斗、拾取、强化装备、接取任务。随时可按帮助窗口(Alt+J)查看完整说明。",
+      es: "Ese es el bucle principal: explora, lucha, recoge botín, mejora tu equipo y acepta misiones. Pulsa la ventana de Ayuda (Alt+J) cuando quieras para la referencia completa.",
     },
     trigger: { kind: "manual" },
   },
 ];
+
+// Label for the "play the tutorial again" affordance the Help window (Alt+J)
+// surfaces — the `done` step points players there. Localized like the steps so
+// the button that launches the trilingual tour is itself trilingual. The Help
+// window stays language-agnostic: the host resolves this with `pickText(language)`
+// and passes the finished string in.
+export const REPLAY_TUTORIAL_LABEL: TutorialText = {
+  en: "Replay tutorial",
+  "zh-CN": "重新观看教程",
+  es: "Repetir tutorial",
+};
 
 export function pickText(text: TutorialText, lang: TutorialLang): string {
   return text[lang] ?? text.en;

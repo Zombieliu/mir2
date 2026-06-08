@@ -97,6 +97,7 @@ import {
 } from "./components/original-client-movement-controller";
 import type { BevyEntityRenderState, SceneAssetReadiness } from "./components/original-client-shell-types";
 import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
+import { REPLAY_TUTORIAL_LABEL, pickText } from "../lib/tutorial-steps";
 
 const OriginalClientShell = dynamic(
   () => import("./original-client-shell").then((module) => module.OriginalClientShell),
@@ -10325,7 +10326,18 @@ export default function HomePage() {
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: adaptBuffs(world.activeBuffs) }}
       mail={{ open: showMail, onClose: () => setShowMail(false), mail: adaptMailMessages(world.stage5Systems.mail), gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
       worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: adaptWorldMapMarkers(world.mapTransfers) }}
-      help={{ open: showHelp, onClose: () => setShowHelp(false) }}
+      help={{
+        open: showHelp,
+        onClose: () => setShowHelp(false),
+        // Reopen path for the net-new beginner tutorial (it auto-runs once via
+        // localStorage; the tour's final card sends players here). Remounting the
+        // overlay restarts it from step 0.
+        onReplayTutorial: () => {
+          setShowHelp(false);
+          setShowTutorial(true);
+        },
+        replayTutorialLabel: pickText(REPLAY_TUTORIAL_LABEL, language),
+      }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />

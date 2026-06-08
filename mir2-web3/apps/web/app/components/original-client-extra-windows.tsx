@@ -278,8 +278,9 @@ export type ExtraWindowsProps = {
   worldMap?: WindowToggle &
     Pick<WorldMapWindowProps, "currentMap" | "playerPosition" | "markers" | "onTeleport">;
 
-  /** Static help reference overlay (no server data required). */
-  help?: WindowToggle;
+  /** Static help reference overlay (no server data required). Optionally carries
+   * the beginner-tutorial reopen hook + its localized label (see HelpWindow). */
+  help?: WindowToggle & Pick<HelpWindowProps, "onReplayTutorial" | "replayTutorialLabel">;
 
   /** Static keyboard-layout overlay; pass `groups` to show rebound keys. */
   hotkeys?: WindowToggle & Pick<HotkeyWindowProps, "groups">;
@@ -488,7 +489,14 @@ export function ExtraWindows({
         />
       ) : null}
 
-      {help?.open ? <HelpWindow t={t} onClose={help.onClose} /> : null}
+      {help?.open ? (
+        <HelpWindow
+          t={t}
+          onClose={help.onClose}
+          onReplayTutorial={help.onReplayTutorial}
+          replayTutorialLabel={help.replayTutorialLabel}
+        />
+      ) : null}
 
       {hotkeys?.open ? (
         <HotkeyWindow t={t} groups={hotkeys.groups} onClose={hotkeys.onClose} />

@@ -38,6 +38,7 @@ const mod = loadTypeScriptModule(new URL("../lib/tutorial-steps.ts", import.meta
 
 const {
   TUTORIAL_STEPS,
+  REPLAY_TUTORIAL_LABEL,
   createTutorialState,
   currentStep,
   pickText,
@@ -173,6 +174,31 @@ check("every step has English text and a valid trigger; pickText falls back", ()
     assert.equal(pickText(step.title, "zh-CN"), step.title["zh-CN"] ?? step.title.en);
     assert.equal(pickText(step.title, "es"), step.title.es ?? step.title.en);
   }
+});
+
+check("every step is fully localized (en + zh-CN + es for title/body)", () => {
+  for (const step of TUTORIAL_STEPS) {
+    for (const field of ["title", "body"]) {
+      assert.ok(step[field].en, `step ${step.id} ${field} needs en`);
+      assert.ok(step[field]["zh-CN"], `step ${step.id} ${field} needs zh-CN`);
+      assert.ok(step[field].es, `step ${step.id} ${field} needs es`);
+    }
+    // hint is optional, but when present it must carry every locale too.
+    if (step.hint) {
+      assert.ok(step.hint.en, `step ${step.id} hint needs en`);
+      assert.ok(step.hint["zh-CN"], `step ${step.id} hint needs zh-CN`);
+      assert.ok(step.hint.es, `step ${step.id} hint needs es`);
+    }
+  }
+});
+
+check("the replay-tutorial label is fully localized and pickText resolves it", () => {
+  assert.ok(REPLAY_TUTORIAL_LABEL.en, "replay label needs en");
+  assert.ok(REPLAY_TUTORIAL_LABEL["zh-CN"], "replay label needs zh-CN");
+  assert.ok(REPLAY_TUTORIAL_LABEL.es, "replay label needs es");
+  assert.equal(pickText(REPLAY_TUTORIAL_LABEL, "es"), REPLAY_TUTORIAL_LABEL.es);
+  assert.equal(pickText(REPLAY_TUTORIAL_LABEL, "zh-CN"), REPLAY_TUTORIAL_LABEL["zh-CN"]);
+  assert.equal(pickText(REPLAY_TUTORIAL_LABEL, "en"), REPLAY_TUTORIAL_LABEL.en);
 });
 
 check("spotlight selectors point only at known stable DOM hooks", () => {

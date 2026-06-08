@@ -14,6 +14,14 @@ type TranslateFn = (
 export type HelpWindowProps = {
   t: TranslateFn;
   onClose: () => void;
+  // Optional "play the beginner tour again" affordance. The net-new tutorial
+  // overlay (no Crystal equivalent) auto-runs once; this is its documented reopen
+  // path — the tour's final card tells players to come here (Alt+J). When the
+  // host wires this, a button appears in the header. `replayTutorialLabel` is the
+  // already-localized caption (the host resolves it via the tutorial's pickText),
+  // so this window stays language-agnostic.
+  onReplayTutorial?: () => void;
+  replayTutorialLabel?: string;
 };
 
 type HelpTopicKey = "basics" | "combat" | "social" | "economy" | "advanced";
@@ -133,7 +141,7 @@ const HELP_CONTENT: Record<HelpTopicKey, HelpEntry[]> = {
   ],
 };
 
-export function HelpWindow({ t, onClose }: HelpWindowProps) {
+export function HelpWindow({ t, onClose, onReplayTutorial, replayTutorialLabel }: HelpWindowProps) {
   const [tab, setTab] = useState<HelpTopicKey>("basics");
   const entries = HELP_CONTENT[tab];
 
@@ -145,6 +153,12 @@ export function HelpWindow({ t, onClose }: HelpWindowProps) {
       <div style={style.close}>
         <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
       </div>
+
+      {onReplayTutorial ? (
+        <button type="button" style={style.replay} onClick={onReplayTutorial}>
+          ▶ {replayTutorialLabel ?? "Replay tutorial"}
+        </button>
+      ) : null}
 
       <div style={style.tabs} role="tablist" aria-label={t("ui.help", [], "Help")}>
         {HELP_TABS.map((entry) => {
@@ -202,6 +216,19 @@ const style: Record<string, CSSProperties> = {
   },
   subtitle: { position: "absolute", left: 24, top: 32, fontSize: 11, color: "#cbb38a" },
   close: { position: "absolute", left: 724, top: 8 },
+  replay: {
+    position: "absolute",
+    top: 26,
+    right: 56,
+    border: "1px solid rgba(214, 180, 110, 0.85)",
+    borderRadius: 3,
+    background: "linear-gradient(180deg, rgba(120, 74, 34, 0.96), rgba(70, 40, 20, 0.96))",
+    color: "#f8e6bb",
+    padding: "4px 10px",
+    fontSize: 12,
+    cursor: "pointer",
+    textShadow: "1px 1px 0 #000",
+  },
   tabs: { position: "absolute", left: 24, top: 56, display: "flex", gap: 4 },
   tab: {
     minWidth: 96,
