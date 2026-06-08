@@ -73,6 +73,13 @@ pub(super) struct EquipmentState {
     pub(super) socket_slots: u8,
     #[serde(default)]
     pub(super) gem_count: u16,
+    /// Crystal `UserItem.Awake`: the awakening line on this worn item. `awake_type`
+    /// is the [`AwakeType`] byte (0 = none, 1 = DC, …), `awake_values` holds one
+    /// byte per awakened level (length = awake level, sum = awake value).
+    #[serde(default)]
+    pub(super) awake_type: u8,
+    #[serde(default)]
+    pub(super) awake_values: Vec<u8>,
     #[serde(default)]
     pub(super) identified: Option<bool>,
     #[serde(default)]
@@ -380,6 +387,8 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
+        awake_type: 0,
+        awake_values: Vec::new(),
         identified: None,
         soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
@@ -505,6 +514,8 @@ fn seed_equipment(
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
+        awake_type: 0,
+        awake_values: Vec::new(),
         identified: None,
         soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
@@ -637,8 +648,8 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
         slots: vec![None; usize::from(item.socket_slots)],
         gem_count: item.gem_count,
         added_stats,
-        awake_type: 0,
-        awake_values: Vec::new(),
+        awake_type: item.awake_type,
+        awake_values: item.awake_values.clone(),
         refined_value: 0,
         refine_added: 0,
         refine_success_chance: 0,
@@ -743,6 +754,8 @@ pub(super) fn equipment_state_from_item_state(
         cursed: item.cursed,
         socket_slots: item.socket_slots,
         gem_count: item.gem_count,
+        awake_type: 0,
+        awake_values: Vec::new(),
         identified: item.identified,
         soul_bound_id: item.soul_bound_id,
         sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
