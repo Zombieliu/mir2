@@ -22952,6 +22952,60 @@ fn gm_set_timer_emits_client_timer() {
     )));
 }
 
+#[test]
+fn gm_superman_makes_player_invincible() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let hp_before = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals")
+        .hp;
+
+    let _ = gm_chat(&mut session, "@SUPERMAN");
+    let mut packets = Vec::new();
+    let outcome =
+        super::apply_damage_to_current_player(session.app.world_mut(), 100_000, &mut packets);
+    assert!(!outcome.applied);
+    assert!(!outcome.died);
+    let hp_after = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals")
+        .hp;
+    assert_eq!(hp_after, hp_before);
+}
+
+#[test]
+fn gm_ride_toggles_equipped_mount() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_test_mount(&mut session, 12);
+
+    let on = gm_chat(&mut session, "@RIDE");
+    assert!(on.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate {
+            riding_mount: true,
+            ..
+        }
+    )));
+    let off = gm_chat(&mut session, "@RIDE");
+    assert!(off.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate {
+            riding_mount: false,
+            ..
+        }
+    )));
+}
+
 fn monster_entity_count(session: &mut SimulationSession) -> usize {
     session
         .app

@@ -1046,6 +1046,43 @@ pub(super) fn toggle_mount_ride_from_use_item(
     ])
 }
 
+/// Crystal `@RIDE` (`ToggleRide`): mount or dismount the equipped mount. A no-op
+/// when no mount is equipped (Crystal's `ToggleRide` early-returns), and it honours
+/// the same saddle / map-disallows / bridle gates as the use-item ride toggle.
+pub(super) fn gm_toggle_ride(world: &mut World) -> Vec<ServerPacket> {
+    let Some(mount) = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|equipment| equipment.slot == EquipmentSlot::Mount)
+        .cloned()
+    else {
+        return Vec::new();
+    };
+    let mount_type = mount
+        .shape
+        .and_then(|shape| i16::try_from(shape).ok())
+        .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+    let map_disallows_mount = current_map_disallows_mount(world);
+    let map_requires_bridle = current_map_requires_bridle(world);
+    let (riding_mount, mount_type) = {
+        let mut mount_resource = world.resource_mut::<MountResource>();
+        mount_resource.mount_type = mount_type;
+        let wants_ride = !mount_resource.riding_mount;
+        let can_ride = !wants_ride
+            || (mount_resource.has_saddle
+                && !map_disallows_mount
+                && (!map_requires_bridle || mount_resource.has_reins));
+        mount_resource.riding_mount = wants_ride && can_ride;
+        (mount_resource.riding_mount, mount_resource.mount_type)
+    };
+    vec![ServerPacket::MountUpdate {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        mount_type,
+        riding_mount,
+    }]
+}
+
 pub(super) struct EquipItemMutationResult {
     pub(super) refresh_packets: Vec<ServerPacket>,
 }
