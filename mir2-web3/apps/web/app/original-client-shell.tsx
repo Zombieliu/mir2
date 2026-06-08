@@ -1028,13 +1028,18 @@ export function OriginalClientShell({
     };
   }, [mapAtlasRequested]);
   const mapGpuActive = mapAtlasRequested && Boolean(mapAtlasIndex) && screen === "game";
-  const mapTileDrawList = useMemo(
+  const mapDrawPlan = useMemo(
     () =>
       mapGpuActive && mapAtlasIndex && renderPlayer
         ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, playerCameraMotionOffset)
-        : EMPTY_MAP_TILE_DRAW_LIST,
+        : null,
     [mapGpuActive, mapAtlasIndex, renderPlayer, viewportMapSprites, playerCameraMotionOffset],
   );
+  const mapTileDrawList = mapDrawPlan?.tiles ?? EMPTY_MAP_TILE_DRAW_LIST;
+  // When the GPU atlas layer is active it draws the covered tiles; the DOM path renders ONLY the
+  // sprites whose frame the atlas lacks (graceful per-cell fallback — no black holes), and the
+  // full DOM set when GPU is off. Each cell is therefore drawn by exactly one path.
+  const mapDomSprites = mapGpuActive ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES : viewportMapSprites;
   const viewportProjectiles = renderPlayer
     ? world.projectiles
         .filter((projectile) => projectile.expiresAt > motionNow)
@@ -1729,7 +1734,7 @@ export function OriginalClientShell({
             <GameSceneBackdrop
               world={world}
               player={player}
-              floorSprites={mapGpuActive ? EMPTY_VIEWPORT_MAP_SPRITES.floor : viewportMapSprites.floor}
+              floorSprites={mapDomSprites.floor}
               cameraOffset={playerCameraMotionOffset}
             />
           ) : null}
@@ -1801,7 +1806,7 @@ export function OriginalClientShell({
             player={player}
             selectedEntity={selectedEntity}
             viewportGroundDrops={viewportGroundDrops}
-            viewportMapSprites={mapGpuActive ? EMPTY_VIEWPORT_MAP_SPRITES : viewportMapSprites}
+            viewportMapSprites={mapDomSprites}
             viewportEntitySprites={viewportEntitySprites}
             viewportProjectiles={viewportProjectiles}
             viewportDepthPlayer={viewportDepthPlayer}
