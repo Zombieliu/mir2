@@ -1024,14 +1024,22 @@ export function OriginalClientShell({
     [staticViewportMapSprites, animatedViewportMapSprites],
   );
 
-  // GPU map-atlas rendering (opt-in via ?mapAtlas=1). Loads the packed atlas manifest once;
-  // when present, map tiles render from a few resident atlas textures on the WebGl2MapAtlasLayer
-  // instead of ~450-510 per-frame DOM <img>/R2 GETs. Default OFF -> DOM path unchanged.
+  // GPU map-atlas rendering (DEFAULT ON; escape hatch ?mapAtlas=0 or localStorage mir2-map-atlas=0).
+  // Loads the packed atlas manifest once; when present, map tiles render from a few resident atlas
+  // textures on the WebGl2MapAtlasLayer instead of ~450-510 per-frame DOM <img>/R2 GETs. The atlas
+  // pages ship same-origin in the Vercel output (not pruned), so this needs no R2. If the manifest
+  // is absent (404) or WebGL2 can't draw, mapGpuFailed/empty index force the DOM tile path — the map
+  // is never left blank.
   const mapAtlasRequested = useMemo(() => {
     if (typeof window === "undefined") return false;
-    return new URLSearchParams(window.location.search).get("mapAtlas") === "1";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mapAtlas") === "0") return false;
+    if (params.get("mapAtlas") === "1") return true;
+    if (window.localStorage.getItem("mir2-map-atlas") === "0") return false;
+    return true;
   }, []);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
+  const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
     if (!mapAtlasRequested) return;
     let cancelled = false;
@@ -1042,7 +1050,17 @@ export function OriginalClientShell({
       cancelled = true;
     };
   }, [mapAtlasRequested]);
-  const mapGpuActive = mapAtlasRequested && Boolean(mapAtlasIndex) && screen === "game";
+  // Mirror the entity renderer's WebGL2 failure handling: if the atlas layer reports it can't draw
+  // (no WebGL2 context, or a GL/texture error), latch the failure so the DOM tile path takes over
+  // instead of leaving a blank scene on devices without WebGL2.
+  const handleMapAtlasDebug = useCallback((debug: Record<string, unknown>) => {
+    const reason = typeof debug.reason === "string" ? debug.reason : null;
+    if (debug.supported === false || reason === "no-webgl2" || reason === "error") {
+      setMapGpuFailed(true);
+    }
+  }, []);
+  const mapGpuActive =
+    mapAtlasRequested && Boolean(mapAtlasIndex) && !mapGpuFailed && screen === "game";
   const mapDrawPlan = useMemo(
     () =>
       mapGpuActive && mapAtlasIndex && renderPlayer
@@ -1739,6 +1757,7 @@ export function OriginalClientShell({
             stageHeight={ORIGINAL_UI.game.sceneHeight}
             index={mapAtlasIndex}
             tiles={mapTileDrawList}
+            onDebugChange={handleMapAtlasDebug}
           />
           <WebGl2EntityAtlasLayer
             enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}

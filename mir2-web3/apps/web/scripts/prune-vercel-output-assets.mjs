@@ -17,10 +17,10 @@ const PRUNE_TARGETS = [
     path: "static/generated/original-map-blend",
     reason: "served from the versioned R2 asset origin through the player-domain proxy",
   },
-  {
-    path: "static/generated/map-atlas",
-    reason: "packed map texture atlases served from the versioned R2 asset origin",
-  },
+  // NOTE: static/generated/map-atlas is intentionally NOT pruned. The 34 packed map-atlas pages
+  // (~58MB) ship in the Vercel output and are served same-origin from the CDN, so the default GPU
+  // map renderer needs no R2 republish. They replace ~450 per-tile R2 GETs per viewport with a few
+  // immutable atlas-page fetches; the raw original-map tiles stay pruned (DOM fallback only).
 ];
 
 const args = parseArgs(process.argv.slice(2));
