@@ -964,10 +964,10 @@ pub(super) struct GmRuntimeResource {
     pub(super) allow_observe: bool,
     /// `@GIVEPEARLS` — intelligent-creature pearl wallet (`Info.PearlCount`).
     pub(super) pearls: u32,
-    /// `@HAIR` — `Info.Hair`.
-    pub(super) hair: u8,
     /// `@SETLIGHT` — personal `Light` value.
     pub(super) light: u8,
+    /// `@TOGGLETRANSFORM` — whether the active Transform buff is paused.
+    pub(super) transform_paused: bool,
 }
 
 impl GmRuntimeResource {
@@ -985,8 +985,8 @@ impl GmRuntimeResource {
             allow_trade: true,
             allow_observe: false,
             pearls: 0,
-            hair: 0,
             light: 0,
+            transform_paused: false,
         }
     }
 }

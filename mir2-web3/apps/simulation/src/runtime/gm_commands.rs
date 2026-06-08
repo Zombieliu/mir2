@@ -799,26 +799,40 @@ fn gm_clear_buffs(world: &mut World) -> Vec<ServerPacket> {
 }
 
 fn gm_toggle_transform(world: &mut World) -> Vec<ServerPacket> {
-    // Crystal toggles the Transform buff's paused state. Without an active
-    // transform buff there is nothing to toggle (Crystal's no-op `break`).
+    // Crystal `@TOGGLETRANSFORM` pauses/unpauses the active Transform buff (and
+    // RefreshStats). Without a Transform buff there is nothing to toggle (Crystal's
+    // no-op `break`). The paused state is held in GmRuntimeResource and frozen
+    // against expiry by tick_buffs while paused.
     let object_id = current_player_object_id(world).unwrap_or(0);
-    let transform = world
+    let Some(buff_type) = world
         .resource::<BuffResource>()
         .buffs
         .iter()
         .find(|buff| buff.key.contains("transform"))
-        .and_then(|buff| crystal_buff_type_for_key(&buff.key));
-    match transform {
-        Some(buff_type) => vec![
-            ServerPacket::PauseBuff {
-                buff_type,
-                object_id,
-                paused: true,
+        .and_then(|buff| crystal_buff_type_for_key(&buff.key))
+    else {
+        return Vec::new();
+    };
+    let paused = {
+        let mut gm = world.resource_mut::<GmRuntimeResource>();
+        gm.transform_paused = !gm.transform_paused;
+        gm.transform_paused
+    };
+    vec![
+        ServerPacket::PauseBuff {
+            buff_type,
+            object_id,
+            paused,
+        },
+        hint(
+            world,
+            if paused {
+                "Transform Disabled."
+            } else {
+                "Transform Enabled."
             },
-            hint(world, "Transform Disabled."),
-        ],
-        None => Vec::new(),
-    }
+        ),
+    ]
 }
 
 // ---------------------------------------------------------------------------
@@ -1269,12 +1283,18 @@ fn gm_hair(world: &mut World, args: &[&str]) -> Vec<ServerPacket> {
     if !is_gm_or_test(world) {
         return Vec::new();
     }
+    // Crystal `Info.Hair = value` (or `Random.Next(0,9)` with no arg) — set on the
+    // character with no immediate packet; it shows on the next appearance refresh.
     let hair = match args.first() {
         Some(value) => value.parse::<u8>().unwrap_or(0),
         None => (runtime_tick(world) % 9) as u8,
     };
-    world.resource_mut::<GmRuntimeResource>().hair = hair;
-    vec![hint(world, format!("Hair set to {hair}"))]
+    world
+        .resource_mut::<super::resources::Stage5SystemsResource>()
+        .stage5_systems
+        .appearance
+        .hair = hair;
+    Vec::new()
 }
 
 fn gm_deco(world: &mut World, args: &[&str]) -> Vec<ServerPacket> {
@@ -1301,7 +1321,11 @@ fn gm_set_light(world: &mut World, args: &[&str]) -> Vec<ServerPacket> {
         return Vec::new();
     };
     world.resource_mut::<GmRuntimeResource>().light = light;
-    vec![ServerPacket::TimeOfDay { lights: light }]
+    // Crystal `Light = light; Enqueue/Broadcast(GetUpdateInfo())` — a PlayerUpdate
+    // carrying the new personal light radius.
+    super::packets::self_player_update_packet(world, light)
+        .into_iter()
+        .collect()
 }
 
 // ---------------------------------------------------------------------------
