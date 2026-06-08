@@ -201,6 +201,9 @@ type GatewayWorldEntitySprite = {
   altWeaponFrameOffset?: number | null;
   frameCount: number;
   directionStride: number;
+  // Crystal `Libraries.Mounts[MountType]`; present only while riding a mount.
+  mountLibrary?: string | null;
+  mountFrameOffset?: number | null;
 };
 
 type GatewayWorldEntity = {
