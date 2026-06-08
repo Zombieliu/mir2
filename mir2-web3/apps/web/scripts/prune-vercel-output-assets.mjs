@@ -7,7 +7,24 @@ const DEFAULT_REPORT_PATH = "../../docs/generated/remote-assets/latest-vercel-ou
 const PRUNE_TARGETS = [
   {
     path: "static/original-ui",
-    reason: "served from the versioned R2 asset origin through the player-domain proxy",
+    reason: "UI chrome / character-select / minimap art served from R2; entity sprite libraries are kept same-origin so the GPU entity atlas packs them with no R2",
+    // Keep the entity sprite libraries in the Vercel output (same-origin). They feed the runtime
+    // WebGL2 entity atlas (players/monsters/NPCs); shipping them (~33MB) removes the R2 dependency
+    // for actor rendering. Everything else under original-ui (ChrSel ~46MB, MMap ~17MB, HUD chrome)
+    // is still pruned to R2.
+    keepChildren: [
+      "Monster",
+      "CArmour",
+      "CHair",
+      "CWeapon",
+      "AArmour",
+      "AHair",
+      "AWeapon",
+      "ARArmour",
+      "ARHair",
+      "ARWeapon",
+      "NPC",
+    ],
   },
   {
     path: "static/original-map",
@@ -48,6 +65,17 @@ for (const target of PRUNE_TARGETS) {
 if (!dryRun) {
   for (const target of targets) {
     if (!target.exists) continue;
+    if (target.keepChildren?.length) {
+      // Surgical prune: delete every child of this directory EXCEPT the kept ones (e.g. keep the
+      // entity sprite libraries same-origin while still pruning the heavy UI art beside them).
+      const keep = new Set(target.keepChildren);
+      const entries = await fs.readdir(target.absolutePath, { withFileTypes: true }).catch(() => []);
+      for (const entry of entries) {
+        if (keep.has(entry.name)) continue;
+        await fs.rm(path.join(target.absolutePath, entry.name), { force: true, recursive: true });
+      }
+      continue;
+    }
     await fs.rm(target.absolutePath, { force: true, recursive: true });
   }
 }
