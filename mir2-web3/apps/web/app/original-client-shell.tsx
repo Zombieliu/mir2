@@ -814,6 +814,9 @@ export function OriginalClientShell({
       if (entity.sprite?.weaponLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.weaponLibrary));
       }
+      if (entity.sprite?.mountLibrary) {
+        libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.mountLibrary));
+      }
       if (entity.sprite?.altBodyLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.altBodyLibrary));
       }
