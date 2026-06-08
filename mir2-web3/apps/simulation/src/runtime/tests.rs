@@ -3744,6 +3744,87 @@ fn crystal_full_world_zone_collision_expands_bichon_to_full_map() {
 }
 
 #[test]
+fn crystal_world_pools_monsters_and_materializes_only_nearby() {
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // The whole Bichon roster stays pooled (dormant slots retained)...
+    let pool_slots: usize = session
+        .app
+        .world()
+        .resource::<MonsterSpawnTable>()
+        .rules
+        .iter()
+        .map(|rule| rule.slots.len())
+        .sum();
+    assert!(
+        pool_slots >= 500,
+        "the full Bichon roster should be pooled, got {pool_slots}"
+    );
+
+    // ...but only the monsters near the player are live ECS entities, so a
+    // ~1,900-monster map costs a fraction of that in the world.
+    let live = {
+        let mut query = session
+            .app
+            .world_mut()
+            .query_filtered::<Entity, bevy_ecs::query::With<Monster>>();
+        query.iter(session.app.world()).count()
+    };
+    assert!(live > 0, "monsters near the spawn should be materialised");
+    assert!(
+        live.saturating_mul(2) < pool_slots,
+        "on-demand pool should keep far fewer live ({live}) than pooled ({pool_slots})"
+    );
+}
+
+#[test]
+fn crystal_world_activation_respects_pending_respawn_timer() {
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player_pos = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .player_position
+        .clone();
+    let future_tick = super::runtime_tick(session.app.world()) + 100_000;
+
+    // Force slot (0,0) to look like a freshly-killed slot that was despawned
+    // while dormant, sitting right on the player but still on respawn cooldown.
+    {
+        let mut table = session.app.world_mut().resource_mut::<MonsterSpawnTable>();
+        let slot = &mut table.rules[0].slots[0];
+        slot.spawn_position = player_pos.clone();
+        slot.entity = None;
+        slot.next_respawn_tick = Some(future_tick);
+    }
+    super::reconcile_monster_activation(session.app.world_mut());
+    assert!(
+        session.app.world().resource::<MonsterSpawnTable>().rules[0].slots[0]
+            .entity
+            .is_none(),
+        "a slot still on respawn cooldown must not materialise even next to the player"
+    );
+
+    // Clearing the cooldown lets the same nearby slot materialise.
+    {
+        let mut table = session.app.world_mut().resource_mut::<MonsterSpawnTable>();
+        table.rules[0].slots[0].next_respawn_tick = None;
+    }
+    super::reconcile_monster_activation(session.app.world_mut());
+    assert!(
+        session.app.world().resource::<MonsterSpawnTable>().rules[0].slots[0]
+            .entity
+            .is_some(),
+        "a nearby, off-cooldown slot must materialise"
+    );
+}
+
+#[test]
 fn crystal_map_runtime_start_game_excludes_starter_fixture_monsters() {
     let config = SimulationConfig::default().with_crystal_map_runtime();
     let mut session = SimulationSession::new(config);
