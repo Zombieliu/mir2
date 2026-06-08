@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
 import { OriginalItemTooltip, type ItemTooltipGrade } from "./original-client-item-tooltip";
@@ -117,8 +117,14 @@ type CharacterWindowProps = {
   player: DisplayEntity | null;
   world: DisplayWorld;
   onRemoveItem: (item: EquipmentActionRef) => void;
-  onRepairItem: (item: EquipmentActionRef) => void;
-  onSpecialRepairItem: (item: EquipmentActionRef) => void;
+  /**
+   * Retained for host compatibility but no longer surfaced here: Crystal's
+   * CharacterDialog has no in-window repair buttons (repair is NPC-driven via
+   * NPCRepair/NPCSRepair), and the previous buttons overlapped the bottom
+   * equipment row. Kept optional so existing callers keep type-checking.
+   */
+  onRepairItem?: (item: EquipmentActionRef) => void;
+  onSpecialRepairItem?: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
   /** Optional authoritative stat ranges; derived from equipment when absent. */
   stats?: DisplayCharacterStats;
@@ -145,8 +151,6 @@ export function CharacterWindow({
   player,
   world,
   onRemoveItem,
-  onRepairItem,
-  onSpecialRepairItem,
   onCastSkill,
   stats,
   guildName,
@@ -158,13 +162,6 @@ export function CharacterWindow({
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
   const totalDefence = world.equipmentItems.reduce((sum, item) => sum + item.defence, 0);
   const weaponAttack = equipmentBySlot.get("weapon")?.attack ?? 0;
-  const [repairMode, setRepairMode] = useState<"normal" | "special" | null>(null);
-  const repairModeLabel =
-    repairMode === "normal"
-      ? t("ui.repairItem", [], "Repair Item")
-      : repairMode === "special"
-        ? t("ui.specialRepairItem", [], "Special Repair")
-        : "";
 
   // Crystal stats page 1: AC / MAC / DC / MC / SC / Accuracy / Agility / Light /
   // ... then HP / MP at the bottom. We surface what the world payload provides
@@ -245,12 +242,6 @@ export function CharacterWindow({
         </div>
       ) : null}
 
-      {/* Experience bar (mirrors the bottom-of-window XP gauge in Crystal). */}
-      <div style={EXP_BAR_TRACK_STYLE} aria-label={t("ui.experience", [], "Experience")} title={`${t("ui.experience", [], "Experience")}: ${expPercent.toFixed(2)}%`}>
-        <span style={{ ...EXP_BAR_FILL_STYLE, width: `${Math.min(100, Math.max(0, expPercent))}%` }} />
-        <span style={EXP_BAR_TEXT_STYLE}>{`${expPercent.toFixed(1)}%`}</span>
-      </div>
-
       {activeTab === "char" ? (
         <>
           {ORIGINAL_UI.character.equipmentSlots.map((slot) => {
@@ -270,19 +261,7 @@ export function CharacterWindow({
                     type="button"
                     className="character-slot-card"
                     aria-label={item.name}
-                    onClick={() => {
-                      if (repairMode === "normal") {
-                        onRepairItem({ slot: item.slot });
-                        setRepairMode(null);
-                        return;
-                      }
-                      if (repairMode === "special") {
-                        onSpecialRepairItem({ slot: item.slot });
-                        setRepairMode(null);
-                        return;
-                      }
-                      onRemoveItem({ slot: item.slot });
-                    }}
+                    onClick={() => onRemoveItem({ slot: item.slot })}
                   >
                     <img
                       className="original-item-icon character-item-icon"
@@ -309,28 +288,6 @@ export function CharacterWindow({
               </div>
             );
           })}
-        </>
-      ) : null}
-
-      {activeTab === "char" ? (
-        <>
-          {repairModeLabel ? <div className="inventory-delete-hint">{repairModeLabel}</div> : null}
-          <div className="character-repair-actions">
-            <button
-              type="button"
-              className={repairMode === "normal" ? "active" : ""}
-              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
-            >
-              {t("ui.repairItem", [], "Repair Item")}
-            </button>
-            <button
-              type="button"
-              className={repairMode === "special" ? "active" : ""}
-              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
-            >
-              {t("ui.specialRepairItem", [], "Special Repair")}
-            </button>
-          </div>
         </>
       ) : null}
 
@@ -404,37 +361,6 @@ const HEADER_GUILD_STYLE: CSSProperties = {
   overflow: "hidden",
   whiteSpace: "nowrap",
   textOverflow: "ellipsis",
-};
-
-const EXP_BAR_TRACK_STYLE: CSSProperties = {
-  position: "absolute",
-  left: 18,
-  top: 367,
-  width: 228,
-  height: 9,
-  border: "1px solid rgba(190, 157, 99, 0.5)",
-  background: "rgba(11, 8, 5, 0.7)",
-  overflow: "hidden",
-};
-
-const EXP_BAR_FILL_STYLE: CSSProperties = {
-  position: "absolute",
-  left: 0,
-  top: 0,
-  height: "100%",
-  background: "linear-gradient(180deg, #d6b46e, #9c7a32)",
-};
-
-const EXP_BAR_TEXT_STYLE: CSSProperties = {
-  position: "absolute",
-  left: 0,
-  right: 0,
-  top: 0,
-  textAlign: "center",
-  fontSize: 8,
-  lineHeight: "9px",
-  color: "#f4ecd6",
-  textShadow: "1px 1px 0 #000",
 };
 
 function originalItemIconPath(icon: number) {
