@@ -807,6 +807,70 @@ const fn default_storage_size() -> u16 {
     80
 }
 
+/// Net-new (beyond Crystal) per-city reputation currencies.
+///
+/// Each town mints its own token, earned via accept-style bounty quests and
+/// spendable in player trade + the auction house. `Gold` is folded into the
+/// same enum so the trade/auction "currency selector" can name a single value.
+/// City balances live in a `BTreeMap<String, u32>` wallet keyed by
+/// [`CurrencyKind::city_key`] so adding a new city is a config-only change.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum CurrencyKind {
+    #[default]
+    Gold,
+    Feitian,
+    Bichon,
+}
+
+/// Wallet keys for the currently minted city currencies. The browser HUD and
+/// the snapshot default every known city to `0` so the UI can render a stable
+/// row set even before the player earns anything.
+pub const CITY_CURRENCY_KEYS: [&str; 2] = ["feitian", "bichon"];
+
+impl CurrencyKind {
+    /// Parse a trade/auction currency argument (case-insensitive, tolerant of
+    /// the Chinese city names). Anything unrecognised falls back to gold so the
+    /// legacy gold-only commands keep working unchanged.
+    pub fn from_arg(value: &str) -> Self {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "feitian" | "feitiancity" | "feitian_coin" | "飞天城" | "飞天城币" => {
+                Self::Feitian
+            }
+            "bichon" | "bichoncity" | "bichon_coin" | "比奇城" | "比奇城币" => Self::Bichon,
+            _ => Self::Gold,
+        }
+    }
+
+    /// Wallet key for a city currency, or `None` for gold (which is tracked in
+    /// the dedicated `gold` field, not the city wallet).
+    pub fn city_key(self) -> Option<&'static str> {
+        match self {
+            Self::Gold => None,
+            Self::Feitian => Some("feitian"),
+            Self::Bichon => Some("bichon"),
+        }
+    }
+
+    /// Build a [`CurrencyKind`] from a wallet key (`None`/unknown => gold).
+    pub fn from_city_key(key: &str) -> Self {
+        match key {
+            "feitian" => Self::Feitian,
+            "bichon" => Self::Bichon,
+            _ => Self::Gold,
+        }
+    }
+
+    /// Localized-ish display label (Chinese, matching the in-game city names).
+    pub fn display_name(self) -> &'static str {
+        match self {
+            Self::Gold => "金币",
+            Self::Feitian => "飞天城币",
+            Self::Bichon => "比奇城币",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterSaveRecord {
     pub character: CharacterRecord,
@@ -826,6 +890,10 @@ pub struct CharacterSaveRecord {
     pub gold: u32,
     #[serde(default)]
     pub credit: u32,
+    /// Net-new per-city reputation currency wallet, keyed by
+    /// [`CurrencyKind::city_key`] (e.g. `"feitian"`, `"bichon"`).
+    #[serde(default)]
+    pub city_currencies: BTreeMap<String, u32>,
     #[serde(default)]
     pub pk_points: i32,
     #[serde(default)]
@@ -894,6 +962,7 @@ impl CharacterSaveRecord {
             max_experience: default_max_experience(),
             gold: 1280,
             credit: 0,
+            city_currencies: BTreeMap::new(),
             pk_points: 0,
             chat_banned: false,
             chat_ban_until_ms: None,
@@ -1619,6 +1688,7 @@ mod tests {
             seller: owner_name.to_string(),
             item_key: "iron-sword".to_string(),
             price: 999,
+            currency: CurrencyKind::Gold,
             sold: false,
             cancelled: false,
             expired: false,
@@ -1754,6 +1824,7 @@ mod tests {
                 seller: owner_name.clone(),
                 item_key: "iron-sword".to_string(),
                 price: 999,
+                currency: CurrencyKind::Gold,
                 sold: true,
                 cancelled: false,
                 expired: false,
@@ -2915,6 +2986,9 @@ fn upsert_character_save_record(
         .map_err(|error| {
             format!("stage5 systems json decode failed for {account_id}/{character_index}: {error}")
         })?;
+    let city_currencies_json = serde_json::to_value(&save.city_currencies).map_err(|error| {
+        format!("city currencies json encode failed for {account_id}/{character_index}: {error}")
+    })?;
     let row = client
         .query_one(
             "INSERT INTO character_saves (
@@ -2932,9 +3006,10 @@ fn upsert_character_save_record(
                 credit,
                 snapshot_json,
                 stage5_systems_json,
+                city_currencies,
                 save_version,
                 updated_at
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,1,now())
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,1,now())
             ON CONFLICT (account_id, character_index) DO UPDATE SET
                 map_file_name = EXCLUDED.map_file_name,
                 map_title = EXCLUDED.map_title,
@@ -2948,7 +3023,8 @@ fn upsert_character_save_record(
                 credit = EXCLUDED.credit,
                 snapshot_json = EXCLUDED.snapshot_json,
                 stage5_systems_json = EXCLUDED.stage5_systems_json,
-                save_version = CASE WHEN $15 THEN character_saves.save_version + 1 ELSE character_saves.save_version END,
+                city_currencies = EXCLUDED.city_currencies,
+                save_version = CASE WHEN $16 THEN character_saves.save_version + 1 ELSE character_saves.save_version END,
                 updated_at = now()
             RETURNING save_version",
             &[
@@ -2966,6 +3042,7 @@ fn upsert_character_save_record(
                 &(save.credit as i64),
                 &snapshot_json,
                 &stage5_systems_json,
+                &city_currencies_json,
                 &should_increment_version,
             ],
         )
@@ -3814,6 +3891,11 @@ pub struct Stage5TradeState {
     #[serde(default)]
     pub offered_slots: BTreeMap<u8, u8>,
     pub offered_gold: u32,
+    /// Currency the offered amount is denominated in (gold by default; a city
+    /// token when the player picks one in the trade window). Net-new field —
+    /// defaults to gold so existing trade state decodes unchanged.
+    #[serde(default)]
+    pub offered_currency: CurrencyKind,
     pub accepted: bool,
     #[serde(default)]
     pub locked: bool,
@@ -3827,6 +3909,10 @@ pub struct Stage5AuctionListing {
     pub seller: String,
     pub item_key: String,
     pub price: u32,
+    /// Currency the listing is priced in (gold by default; a city token when
+    /// the seller lists for one). Net-new field — defaults to gold.
+    #[serde(default)]
+    pub currency: CurrencyKind,
     pub sold: bool,
     pub cancelled: bool,
     #[serde(default)]
@@ -3986,6 +4072,12 @@ pub struct WorldSnapshot {
     pub player_max_experience: i64,
     pub gold: u32,
     pub credit: u32,
+    /// Net-new per-city reputation currency balances, keyed by city
+    /// (`"feitian"`, `"bichon"`). Every known city is present (defaulting to 0)
+    /// so the HUD can render a stable row set. Browser reads this off the
+    /// `worldSnapshot` payload.
+    #[serde(default)]
+    pub city_currencies: BTreeMap<String, u32>,
     pub current_weight: u16,
     pub max_weight: u16,
     pub free_bag_slots: u16,

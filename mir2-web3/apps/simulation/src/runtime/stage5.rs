@@ -9,7 +9,7 @@ use mir2_game_data::{
 use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
 
 use crate::config::{
-    EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
+    CurrencyKind, EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
     Stage5HeroState, Stage5MailMessage, Stage5TradeState, WorldEntityDisposition,
 };
 
@@ -781,6 +781,7 @@ impl SimulationSession {
             offered_items: Vec::new(),
             offered_slots: BTreeMap::new(),
             offered_gold: 0,
+            offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
             completed: false,
@@ -797,8 +798,19 @@ impl SimulationSession {
                 ["trade.offerGold"],
             ))];
         };
+        // Optional second arg selects the currency (gold by default), so the
+        // legacy `trade.offerGold <amount>` form keeps offering gold unchanged.
+        let currency = args
+            .get(1)
+            .map(|value| CurrencyKind::from_arg(value))
+            .unwrap_or(CurrencyKind::Gold);
         let language = current_language(self.app.world());
-        if self.app.world().resource::<PlayerRuntimeResource>().gold < amount {
+        let player = self.app.world().resource::<PlayerRuntimeResource>();
+        let sufficient = match currency.city_key() {
+            None => player.gold >= amount,
+            Some(key) => player.city_currency_balance(key) >= amount,
+        };
+        if !sufficient {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.LowGold",
@@ -821,6 +833,7 @@ impl SimulationSession {
             ))];
         }
         trade.offered_gold = amount;
+        trade.offered_currency = currency;
         trade.accepted = false;
         trade.locked = false;
         Vec::new()
@@ -875,14 +888,20 @@ impl SimulationSession {
 
     fn stage5_trade_accept(&mut self) -> Vec<ServerPacket> {
         let language = current_language(self.app.world());
-        let Some((offered_gold, offered_items)) = self
+        let Some((offered_gold, offered_currency, offered_items)) = self
             .app
             .world()
             .resource::<Stage5SystemsResource>()
             .stage5_systems
             .trade
             .as_ref()
-            .map(|trade| (trade.offered_gold, trade.offered_items.clone()))
+            .map(|trade| {
+                (
+                    trade.offered_gold,
+                    trade.offered_currency,
+                    trade.offered_items.clone(),
+                )
+            })
         else {
             return vec![system_message(&localized_text_or_fallback(
                 language,
@@ -914,14 +933,27 @@ impl SimulationSession {
             }
         }
         let mut player = self.app.world_mut().resource_mut::<PlayerRuntimeResource>();
-        if player.gold < offered_gold {
-            return vec![system_message(&localized_text_or_fallback(
-                language,
-                "server.LowGold",
-                "server.LowGold",
-            ))];
+        match offered_currency.city_key() {
+            None => {
+                if player.gold < offered_gold {
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.LowGold",
+                        "server.LowGold",
+                    ))];
+                }
+                player.gold -= offered_gold;
+            }
+            Some(key) => {
+                if !player.spend_city_currency(key, offered_gold) {
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.LowGold",
+                        "server.LowGold",
+                    ))];
+                }
+            }
         }
-        player.gold -= offered_gold;
         drop(player);
         if let Some(trade) = self
             .app
@@ -1175,6 +1207,11 @@ impl SimulationSession {
             .get(1)
             .and_then(|value| value.parse::<u32>().ok())
             .unwrap_or(50);
+        // Optional third arg selects the listing currency (gold by default).
+        let currency = args
+            .get(2)
+            .map(|value| CurrencyKind::from_arg(value))
+            .unwrap_or(CurrencyKind::Gold);
         let seller = stage5_player_name(self.app.world());
         let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
         let id = stage5
@@ -1190,6 +1227,7 @@ impl SimulationSession {
             seller,
             item_key,
             price,
+            currency,
             sold: false,
             cancelled: false,
             expired: false,
@@ -1207,7 +1245,7 @@ impl SimulationSession {
             ))];
         };
         let language = current_language(self.app.world());
-        let (index, price, item_key) = {
+        let (index, price, currency, item_key, seller) = {
             let stage5 = self.app.world().resource::<Stage5SystemsResource>();
             let Some(index) = stage5.stage5_systems.auction.iter().position(|listing| {
                 listing.id == id && !listing.sold && !listing.cancelled && !listing.expired
@@ -1218,12 +1256,22 @@ impl SimulationSession {
                     "server.NotFound",
                 ))];
             };
-            let price = stage5.stage5_systems.auction[index].price;
-            let item_key = stage5.stage5_systems.auction[index].item_key.clone();
-            (index, price, item_key)
+            let listing = &stage5.stage5_systems.auction[index];
+            (
+                index,
+                listing.price,
+                listing.currency,
+                listing.item_key.clone(),
+                listing.seller.clone(),
+            )
         };
         {
-            if self.app.world().resource::<PlayerRuntimeResource>().gold < price {
+            let player = self.app.world().resource::<PlayerRuntimeResource>();
+            let affordable = match currency.city_key() {
+                None => player.gold >= price,
+                Some(key) => player.city_currency_balance(key) >= price,
+            };
+            if !affordable {
                 return vec![system_message(&localized_text_or_fallback(
                     language,
                     "server.LowGold",
@@ -1239,10 +1287,32 @@ impl SimulationSession {
                 ))];
             }
         }
-        self.app
-            .world_mut()
-            .resource_mut::<PlayerRuntimeResource>()
-            .gold -= price;
+        // Deduct the buyer in the listing's currency.
+        {
+            let mut player = self.app.world_mut().resource_mut::<PlayerRuntimeResource>();
+            match currency.city_key() {
+                None => player.gold -= price,
+                Some(key) => {
+                    player.spend_city_currency(key, price);
+                }
+            }
+        }
+        // Settle the seller. In this single-session model the only account loaded
+        // is the buyer's, so proceeds can be paid out directly only when the
+        // player is buying back their own listing. Listings owned by another
+        // character (e.g. seeded marketplace entries) have no in-session wallet
+        // to credit, so they are left unsettled (cross-account settlement would
+        // need a global marketplace service, which is out of scope here).
+        let buyer_name = stage5_player_name(self.app.world());
+        if seller == buyer_name {
+            let mut player = self.app.world_mut().resource_mut::<PlayerRuntimeResource>();
+            match currency.city_key() {
+                None => player.gold = player.gold.saturating_add(price),
+                Some(key) => {
+                    player.gain_city_currency(key, price);
+                }
+            }
+        }
         self.app
             .world_mut()
             .resource_mut::<Stage5SystemsResource>()

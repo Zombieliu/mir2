@@ -43,6 +43,14 @@ export type TradeSummary = {
   confirmed?: boolean;
   /** Optional partner item slots, mirroring Crystal's GuestTrade 5x2 grid. */
   partnerItems?: TradeItemSlot[];
+  /**
+   * Currency the partner's offered amount is denominated in: `"gold"`
+   * (default) or a city reputation token key (`"feitian"`, `"bichon"`).
+   * Net-new / optional.
+   */
+  partnerCurrency?: string;
+  /** Human-readable label for the partner's offer currency. */
+  partnerCurrencyLabel?: string;
 };
 
 export type TradeWindowProps = {
