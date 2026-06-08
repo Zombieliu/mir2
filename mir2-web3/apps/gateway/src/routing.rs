@@ -2592,6 +2592,8 @@ fn simple_world_entity_sprite_snapshot(
         alt_weapon_frame_offset: None,
         frame_count: 4,
         direction_stride: 4,
+        mount_library: None,
+        mount_frame_offset: None,
     }
 }
 

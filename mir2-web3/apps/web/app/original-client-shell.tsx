@@ -814,6 +814,9 @@ export function OriginalClientShell({
       if (entity.sprite?.weaponLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.weaponLibrary));
       }
+      if (entity.sprite?.mountLibrary) {
+        libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.mountLibrary));
+      }
       if (entity.sprite?.altBodyLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.altBodyLibrary));
       }
@@ -2311,6 +2314,7 @@ function buildBevyEntityRenderState({
   viewportEntitySprites: Array<{
     entity: DisplayEntity & { dx: number; dy: number };
     sprite: {
+      mount: { path: string; x: number; y: number; width: number; height: number } | null;
       body: { path: string; x: number; y: number; width: number; height: number } | null;
       hair: { path: string; x: number; y: number; width: number; height: number } | null;
       rearWeapons: Array<{ path: string; x: number; y: number; width: number; height: number }>;
@@ -2371,6 +2375,8 @@ function buildBevyEntityRenderState({
       const depth = viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64);
       const layers = sprite
         ? [
+            // Crystal draws the mount first, beneath every other layer (`DrawMount`).
+            ...(sprite.mount ? [{ layer: sprite.mount, role: "mount", index: 0 }] : []),
             ...sprite.rearWeapons.map((layer, index) => ({ layer, role: "rearWeapon", index })),
             ...(sprite.body ? [{ layer: sprite.body, role: "body", index: 0 }] : []),
             ...(sprite.hair ? [{ layer: sprite.hair, role: "hair", index: 0 }] : []),
