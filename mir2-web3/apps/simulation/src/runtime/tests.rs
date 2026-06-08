@@ -1,3 +1,4 @@
+use super::super::resources::GmRuntimeResource;
 use super::super::resources::ObjectIdAllocatorResource;
 use super::{
     bomb_spider_template, bug_bat_template, build_crystal_current_map_full_spawn_table,
@@ -562,6 +563,8 @@ fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot
     resources.equipment_items.push(super::EquipmentState {
         key: key.clone(),
         slot,
+        awake_type: 0,
+        awake_values: Vec::new(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
         shape: u16::try_from(template.shape).ok(),
@@ -599,6 +602,8 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
         .push(super::EquipmentState {
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
+            awake_type: 0,
+            awake_values: Vec::new(),
             name: "Test Mount".to_string(),
             icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
             shape: Some(shape),
@@ -22487,19 +22492,42 @@ fn grant_gm(session: &mut SimulationSession) {
 }
 
 #[test]
-fn non_gm_at_message_is_treated_as_normal_chat() {
+fn non_gm_gm_gated_at_command_is_consumed_silently() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    // No GM rank: an "@" message must NOT be intercepted as a command — it goes
-    // to normal chat, so command existence never leaks to ordinary players.
+    // Crystal consumes every "@" line as a command attempt and never echoes it to
+    // normal chat. A GM-gated command from a non-GM hits Crystal's silent
+    // `return;` — no level change, and crucially no normal-chat echo, so command
+    // existence never leaks to ordinary players.
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "@level 50".to_string(),
         linked_items: Vec::new(),
     });
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat {
+            chat_type: ChatType::Normal,
+            ..
+        }
+    )));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })));
+}
+
+#[test]
+fn non_gm_ungated_at_command_runs_for_any_player() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // `@TIME` carries no IsGM gate in Crystal — any player may run it.
+    let packets = session.handle_packet(ClientPacket::Chat {
+        message: "@TIME".to_string(),
+        linked_items: Vec::new(),
+    });
     assert!(packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::ObjectChat { text, chat_type: ChatType::Normal, .. }
-            if text.contains("@level 50")
+        ServerPacket::ObjectChat { text, chat_type: ChatType::System, .. }
+            if text.contains("The time is")
     )));
 }
 
@@ -22534,16 +22562,20 @@ fn gm_gold_and_move_commands_mutate_runtime() {
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
+    let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+    // Crystal `@GIVEGOLD <amount>` (alias `@GOLD`) *adds* to the wallet and pushes
+    // the new total via the gold-counter packet.
     let gold_packets = session.handle_packet(ClientPacket::Chat {
         message: "@gold 123456".to_string(),
         linked_items: Vec::new(),
     });
-    assert!(gold_packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 123_456 })));
+    let expected_gold = before_gold + 123_456;
+    assert!(gold_packets.iter().any(
+        |packet| matches!(packet, ServerPacket::GainedGold { gold } if *gold == expected_gold)
+    ));
     assert_eq!(
         session.app.world().resource::<PlayerRuntimeResource>().gold,
-        123_456
+        expected_gold
     );
 
     let move_packets = session.handle_packet(ClientPacket::Chat {
@@ -22561,6 +22593,589 @@ fn gm_gold_and_move_commands_mutate_runtime() {
             .player_position,
         Point { x: 350, y: 285 }
     );
+}
+
+fn gm_chat(session: &mut SimulationSession, message: &str) -> Vec<ServerPacket> {
+    session.handle_packet(ClientPacket::Chat {
+        message: message.to_string(),
+        linked_items: Vec::new(),
+    })
+}
+
+#[test]
+fn gm_login_handshake_grants_gm_on_correct_password() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<GmRuntimeResource>()
+        .password = Some("opensesame".to_string());
+
+    let prompt = gm_chat(&mut session, "@LOGIN");
+    assert!(prompt.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("GM Password")
+    )));
+    assert!(!session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .is_gm());
+
+    // The next chat line is the password candidate (not echoed as normal chat).
+    let _ = gm_chat(&mut session, "opensesame");
+    assert!(session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .is_gm());
+}
+
+#[test]
+fn gm_login_handshake_rejects_wrong_password() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<GmRuntimeResource>()
+        .password = Some("opensesame".to_string());
+
+    let _ = gm_chat(&mut session, "@LOGIN");
+    let result = gm_chat(&mut session, "wrong");
+    assert!(result.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("Incorrect login password")
+    )));
+    assert!(!session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .is_gm());
+}
+
+#[test]
+fn gm_superman_toggles_invincibility() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let on = gm_chat(&mut session, "@SUPERMAN");
+    assert!(on.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("Invincible Mode")
+    )));
+    assert!(
+        session
+            .app
+            .world()
+            .resource::<GmRuntimeResource>()
+            .gm_never_die
+    );
+    let off = gm_chat(&mut session, "@SUPERMAN");
+    assert!(off.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("Normal Mode")
+    )));
+}
+
+#[test]
+fn gm_allow_trade_and_allow_observe_toggle() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Ungated commands — usable without GM rank.
+    let trade = gm_chat(&mut session, "@ALLOWTRADE");
+    assert!(trade.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("no longer allowing trade")
+    )));
+    let observe = gm_chat(&mut session, "@ALLOWOBSERVE");
+    assert!(observe
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::AllowObserve { allow: true })));
+}
+
+#[test]
+fn gm_map_and_roll_report_for_any_player() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let map = gm_chat(&mut session, "@MAP");
+    assert!(map.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, chat_type: ChatType::System, .. }
+            if text.contains("Map ID")
+    )));
+    let roll = gm_chat(&mut session, "@ROLL");
+    assert!(roll.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, chat_type: ChatType::Group, .. }
+            if text.contains("has rolled a")
+    )));
+}
+
+#[test]
+fn gm_make_creates_item_and_clearbag_empties_inventory() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let made = gm_chat(&mut session, "@MAKE SpiritBlade");
+    assert!(made
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+    assert!(made.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("SpiritBlade") && text.contains("created")
+    )));
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.name == "SpiritBlade"));
+
+    let cleared = gm_chat(&mut session, "@CLEARBAG");
+    assert!(cleared
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DeleteItem { .. })));
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .is_empty());
+}
+
+#[test]
+fn gm_clearbuffs_removes_all_buffs() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: "haste".to_string(),
+            name: "Haste".to_string(),
+            description: String::new(),
+            expires_at_tick: u64::MAX,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        });
+
+    let cleared = gm_chat(&mut session, "@CLEARBUFFS");
+    assert!(cleared
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RemoveBuff { buff_type: 3, .. })));
+    assert!(session
+        .app
+        .world()
+        .resource::<BuffResource>()
+        .buffs
+        .is_empty());
+}
+
+#[test]
+fn gm_give_credit_and_adjust_pkpoint() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let before = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .credit;
+    let credit = gm_chat(&mut session, "@GIVECREDIT 250");
+    let expected = before + 250;
+    assert!(credit.iter().any(
+        |packet| matches!(packet, ServerPacket::GainedCredit { credit } if *credit == expected)
+    ));
+
+    let _ = gm_chat(&mut session, "@ADJUSTPKPOINT 77");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<PlayerRuntimeResource>()
+            .pk_points,
+        77
+    );
+}
+
+#[test]
+fn gm_cross_player_givegold_reports_not_found() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    // `@GIVEGOLD <player> <amount>` resolves to Crystal's "player not found" with
+    // nobody else online.
+    let result = gm_chat(&mut session, "@GIVEGOLD Bob 100");
+    assert!(result.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("Bob was not found")
+    )));
+}
+
+#[test]
+fn gm_set_flag_list_and_clear() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let _ = gm_chat(&mut session, "@SETFLAG 5");
+    let listed = gm_chat(&mut session, "@LISTFLAGS");
+    assert!(listed.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("Flag 5")
+    )));
+
+    let _ = gm_chat(&mut session, "@CLEARFLAGS");
+    let after = gm_chat(&mut session, "@LISTFLAGS");
+    assert!(!after
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
+}
+
+#[test]
+fn gm_setquest_marks_completed_and_clearquests_empties() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let _ = gm_chat(&mut session, "@SETQUEST 1234 1");
+    assert!(session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .any(|quest| quest.quest_id == 1234 && quest.stage == QuestStage::Completed));
+
+    let _ = gm_chat(&mut session, "@CLEARQUESTS");
+    assert!(session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .is_empty());
+}
+
+#[test]
+fn gm_change_class_and_gender_mutate_character() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let _ = gm_chat(&mut session, "@CHANGECLASS Wizard");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .selected_character
+            .as_ref()
+            .map(|character| character.class),
+        Some(MirClass::Wizard)
+    );
+
+    let before_gender = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.gender);
+    let _ = gm_chat(&mut session, "@CHANGEGENDER");
+    let after_gender = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.gender);
+    assert_ne!(before_gender, after_gender);
+}
+
+#[test]
+fn gm_revive_restores_player_vitals() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let player = player_entity(session.app.world()).expect("player entity");
+    session
+        .app
+        .world_mut()
+        .entity_mut(player)
+        .get_mut::<PlayerVitals>()
+        .map(|mut vitals| vitals.hp = 0);
+
+    let revived = gm_chat(&mut session, "@REVIVE");
+    assert!(revived
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectRevived { .. })));
+    let hp = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .map(|vitals| vitals.hp)
+        .unwrap_or(0);
+    assert!(hp > 0);
+}
+
+#[test]
+fn gm_setlight_emits_personal_light_player_update() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let light = gm_chat(&mut session, "@SETLIGHT 3");
+    assert!(light
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::PlayerUpdate { light: 3, .. })));
+    assert_eq!(session.app.world().resource::<GmRuntimeResource>().light, 3);
+}
+
+#[test]
+fn gm_deco_spawns_decoration() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let deco = gm_chat(&mut session, "@DECO 42");
+    assert!(deco
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectDeco { image: 42, .. })));
+}
+
+#[test]
+fn gm_mob_spawns_and_clearmob_kills_them() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let before = monster_entity_count(&mut session);
+    let spawned = gm_chat(&mut session, "@MOB SnowWolf 2");
+    assert!(spawned.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("SnowWolf") && text.contains("spawned")
+    )));
+    let after = monster_entity_count(&mut session);
+    assert!(
+        after > before,
+        "expected monsters to spawn ({before} -> {after})"
+    );
+
+    let cleared = gm_chat(&mut session, "@CLEARMOB");
+    assert!(cleared
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectDied { .. })));
+}
+
+#[test]
+fn gm_recall_lover_reports_not_married() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let result = gm_chat(&mut session, "@RECALLLOVER");
+    assert!(result.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, .. } if text.contains("not married")
+    )));
+}
+
+#[test]
+fn gm_awakening_fixes_awake_type_on_equipped_weapon() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    equip_crystal_item(&mut session, "WoodenSword", EquipmentSlot::Weapon);
+
+    let packets = gm_chat(&mut session, "@AWAKENING Weapon DC");
+    // Crystal `CheckAwakening` fixes the awake type to DC (1) on a valid weapon
+    // regardless of the success roll, and emits a system line (+ RefreshItem on a
+    // successful roll).
+    let awake_type = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .map(|item| item.awake_type);
+    assert_eq!(awake_type, Some(1));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
+}
+
+#[test]
+fn gm_remove_awakening_pops_a_level_and_refreshes() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    equip_crystal_item(&mut session, "WoodenSword", EquipmentSlot::Weapon);
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("equipped weapon");
+        weapon.awake_type = 1;
+        weapon.awake_values = vec![3];
+    }
+
+    let packets = gm_chat(&mut session, "@REMOVEAWAKENING Weapon");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RefreshItem { .. })));
+    let levels = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .map(|item| item.awake_values.len());
+    assert_eq!(levels, Some(0));
+}
+
+#[test]
+fn gm_set_timer_emits_client_timer() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // `@SETTIMER` is ungated in Crystal.
+    let packets = gm_chat(&mut session, "@SETTIMER boss 60 1");
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::SetTimer { key, seconds: 60, timer_type: 1 } if key == "boss"
+    )));
+}
+
+#[test]
+fn gm_superman_makes_player_invincible() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let hp_before = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals")
+        .hp;
+
+    let _ = gm_chat(&mut session, "@SUPERMAN");
+    let mut packets = Vec::new();
+    let outcome =
+        super::apply_damage_to_current_player(session.app.world_mut(), 100_000, &mut packets);
+    assert!(!outcome.applied);
+    assert!(!outcome.died);
+    let hp_after = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals")
+        .hp;
+    assert_eq!(hp_after, hp_before);
+}
+
+#[test]
+fn gm_ride_toggles_equipped_mount() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_test_mount(&mut session, 12);
+
+    let on = gm_chat(&mut session, "@RIDE");
+    assert!(on.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate {
+            riding_mount: true,
+            ..
+        }
+    )));
+    let off = gm_chat(&mut session, "@RIDE");
+    assert!(off.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate {
+            riding_mount: false,
+            ..
+        }
+    )));
+}
+
+#[test]
+fn gm_hair_sets_character_appearance() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    let _ = gm_chat(&mut session, "@HAIR 7");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .appearance
+            .hair,
+        7
+    );
+}
+
+#[test]
+fn gm_toggle_transform_pauses_and_unpauses_buff() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: "transform".to_string(),
+            name: "Transform".to_string(),
+            description: String::new(),
+            expires_at_tick: u64::MAX,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        });
+
+    let on = gm_chat(&mut session, "@TOGGLETRANSFORM");
+    assert!(on.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::PauseBuff {
+            buff_type: 106,
+            paused: true,
+            ..
+        }
+    )));
+    let off = gm_chat(&mut session, "@TOGGLETRANSFORM");
+    assert!(off.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::PauseBuff {
+            buff_type: 106,
+            paused: false,
+            ..
+        }
+    )));
+}
+
+fn monster_entity_count(session: &mut SimulationSession) -> usize {
+    session
+        .app
+        .world_mut()
+        .query_filtered::<Entity, bevy_ecs::query::With<Monster>>()
+        .iter(session.app.world())
+        .count()
 }
 
 #[test]
@@ -32203,6 +32818,8 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
             .push(super::EquipmentState {
                 key: "test-mount".to_string(),
                 slot: EquipmentSlot::Mount,
+                awake_type: 0,
+                awake_values: Vec::new(),
                 name: "Test Mount".to_string(),
                 icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
                 shape: None,
@@ -32285,6 +32902,8 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
         .push(super::EquipmentState {
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
+            awake_type: 0,
+            awake_values: Vec::new(),
             name: "Test Mount".to_string(),
             icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
             shape: Some(12),
