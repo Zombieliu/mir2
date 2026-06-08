@@ -1257,6 +1257,12 @@ struct AdminErrorResponse {
 }
 
 pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
+    // Activated Crystal world: host every map full-size in the shared zone so
+    // players roam all of Bichon (and reach every transfer), not just the
+    // starter slice. Empty maps stay dormant regardless.
+    if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
+        mir2_simulation::set_crystal_full_world_zone_collision(true);
+    }
     let state = WebState {
         config: Arc::new(config),
         zone_registry: Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(

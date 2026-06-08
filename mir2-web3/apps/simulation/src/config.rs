@@ -2209,6 +2209,22 @@ pub struct MapHazardRecord {
 pub enum MonsterSpawnSource {
     StarterScenario,
     CrystalStarterRegion,
+    /// Activate the full Crystal world: every map a player enters spawns its
+    /// entire Crystal respawn set (not just the collision-bounded starter
+    /// slice), and all maps are reachable via the manifest's movements. Maps
+    /// with no player on them stay dormant — nothing spawns or ticks until a
+    /// player arrives, matching Crystal's "load the world, run what's occupied"
+    /// behaviour without keeping all ~76k monsters alive at once.
+    CrystalWorld,
+}
+
+impl MonsterSpawnSource {
+    /// Both Crystal sources drive the world from the per-map respawn manifest
+    /// (titles, collision, and current-map spawns), unlike the hand-authored
+    /// `StarterScenario`. `CrystalWorld` additionally spawns the whole map.
+    pub(crate) fn uses_crystal_current_map(self) -> bool {
+        matches!(self, Self::CrystalStarterRegion | Self::CrystalWorld)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -2436,6 +2452,24 @@ impl SimulationConfig {
             quest_ids: Vec::new(),
             script_key: Some("BichonProvince/BichonWall/Blacksmith-0103".to_string()),
         });
+        self
+    }
+
+    /// Activate the full Crystal world (every map live when occupied, dormant
+    /// when empty). Unlike [`with_crystal_map_runtime`], this does not fence the
+    /// player into the starter slice: it keeps every manifest movement so all
+    /// ~463 maps are reachable, and entering any map spawns that map's entire
+    /// Crystal respawn set. The starter map keeps its real manifest NPCs/mine
+    /// veins (spawned per-map from the manifest), so no hand-authored starter
+    /// blacksmith/mine overlays are injected here.
+    ///
+    /// [`with_crystal_map_runtime`]: Self::with_crystal_map_runtime
+    pub fn with_crystal_world_runtime(mut self) -> Self {
+        self.monster_spawn_source = MonsterSpawnSource::CrystalWorld;
+        // Keep `map_transfers` as-is: the per-map manifest movements
+        // (`crystal_movement_transfer_records_for_map`) already drive travel
+        // across the whole world, so nothing needs clearing or seeding here.
+        apply_crystal_map_metadata(&mut self.map);
         self
     }
 

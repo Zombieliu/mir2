@@ -13,8 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::{
     apply_crystal_map_metadata, crystal_base_vitals, AccountBanStatus, AccountRecord,
-    CharacterRecord, CharacterSaveRecord, MonsterSpawnSource, SimulationConfig, Stage5MailMessage,
-    Stage5SystemsState,
+    CharacterRecord, CharacterSaveRecord, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
 };
 
 use super::components::{
@@ -799,7 +798,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         if !save.map_title.is_empty() {
             map.current_map.title = save.map_title.clone();
         }
-        if config.monster_spawn_source == MonsterSpawnSource::CrystalStarterRegion {
+        if config.monster_spawn_source.uses_crystal_current_map() {
             apply_crystal_map_metadata(&mut map.current_map);
         }
     }
@@ -1095,6 +1094,7 @@ impl SimulationSession {
             &map.current_map.file_name,
             &player_runtime.player_position,
             &character,
+            config.monster_spawn_source,
         ));
         if resources.storage_size != BASE_STORAGE_SLOTS
             || resources.has_expanded_storage
