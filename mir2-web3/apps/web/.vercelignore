@@ -4,22 +4,15 @@ docs/generated/
 node_modules/
 tsconfig.tsbuildinfo
 
+# Entity sprite libraries (CArmour/CHair/CWeapon, A*/AR* class sets, NPC, Monster) are intentionally
+# NOT ignored: they ship same-origin so the GPU entity atlas packs them at runtime without R2.
+# Only the heavy non-gameplay UI art below (character-select, minimap, HUD chrome) stays R2-served.
 public/original-map/**/*.png
-public/original-ui/AArmour/**/*.png
-public/original-ui/AHair/**/*.png
-public/original-ui/ARArmour/**/*.png
-public/original-ui/ARHair/**/*.png
-public/original-ui/ARWeapon/**/*.png
-public/original-ui/AWeapon/**/*.png
-public/original-ui/CArmour/**/*.png
-public/original-ui/CHair/**/*.png
-public/original-ui/CWeapon/**/*.png
 public/original-ui/ChrSel/**/*.png
 public/original-ui/Cursors/**/*.png
 public/original-ui/Items/**/*.png
 public/original-ui/MMap/**/*.png
 public/original-ui/MapLinkIcon/**/*.png
-public/original-ui/NPC/**/*.png
 public/original-ui/Prguse/**/*.png
 public/original-ui/Prguse2/**/*.png
 public/original-ui/Title/**/*.png
