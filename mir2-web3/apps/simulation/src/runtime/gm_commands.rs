@@ -29,11 +29,16 @@ use super::components::{
     current_player_is_dead, current_player_object_id, entity_name, entity_position, player_entity,
     CharacterBody, Facing, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
+use super::equipment::user_item_from_equipment_state;
 use super::inventory::{
     add_or_increment_item_with_durability_and_stats, expand_storage_rental_impl,
 };
-use super::items::{crystal_item_key_for_template, user_item_from_item_state};
-use super::monsters::{crystal_dynamic_monster_template, spawn_runtime_monster};
+use super::items::{
+    crystal_item_key_for_template, crystal_item_template_for_item_key, user_item_from_item_state,
+};
+use super::monsters::{
+    crystal_dynamic_monster_template, deterministic_roll, spawn_runtime_monster,
+};
 use super::movement::{current_location, offset_point};
 use super::packets::{object_died_info_for_entity, object_health_info_for_entity};
 use super::resources::{
@@ -47,6 +52,15 @@ use super::skills::{
 use bevy_ecs::prelude::{Entity, World};
 use mir2_game_data::crystal_item_by_index;
 use mir2_game_data::crystal_item_by_name;
+use mir2_game_data::CrystalItemTemplate;
+
+/// Crystal awakening constants (`Shared/Data/ItemData.cs`, `Awake`).
+const AWAKE_MAX_LEVEL: usize = 5;
+const AWAKE_SUCCESS_RATE: u64 = 70;
+const AWAKE_HIT_RATE: u64 = 70;
+const AWAKE_CHANCE_MAX: [u8; 5] = [1, 2, 3, 4, 5];
+/// `BindMode.DontUpgrade` (`Shared/Enums.cs`).
+const BIND_DONT_UPGRADE: i16 = 64;
 
 /// Conquest AIs (`siege gate`, `gates`, `archer`, `wall`) that Crystal refuses to
 /// spawn via `@MOB` / `@RECALLMOB` (`PlayerObject.cs:2166`).
@@ -1676,18 +1690,223 @@ fn gm_change_flag_colour(world: &World) -> Vec<ServerPacket> {
 // Awakening (equipment upgrade) — no equipped target in scope
 // ---------------------------------------------------------------------------
 
-fn gm_awakening(world: &World, args: &[&str]) -> Vec<ServerPacket> {
+fn parse_item_type(value: &str) -> Option<u8> {
+    Some(match value.to_ascii_uppercase().as_str() {
+        "WEAPON" => 1,
+        "ARMOUR" | "ARMOR" => 2,
+        "HELMET" => 4,
+        "NECKLACE" => 5,
+        "BRACELET" => 6,
+        "RING" => 7,
+        "AMULET" => 8,
+        "BELT" => 9,
+        "BOOTS" => 10,
+        "STONE" => 11,
+        "TORCH" => 12,
+        "MOUNT" => 19,
+        _ => return None,
+    })
+}
+
+fn parse_awake_type(value: &str) -> Option<u8> {
+    Some(match value.to_ascii_uppercase().as_str() {
+        "DC" => 1,
+        "MC" => 2,
+        "SC" => 3,
+        "AC" => 4,
+        "MAC" => 5,
+        "HPMP" => 6,
+        _ => return None,
+    })
+}
+
+fn awake_key_seed(key: &str) -> usize {
+    key.bytes().fold(0usize, |acc, byte| {
+        acc.wrapping_mul(31).wrapping_add(usize::from(byte))
+    })
+}
+
+/// Crystal `Awake.CheckAwakening` — whether `requested` may be applied to a worn
+/// item of `template` currently at `current_type`/`level`.
+fn awake_check(
+    template: &CrystalItemTemplate,
+    current_type: u8,
+    level: usize,
+    requested: u8,
+) -> bool {
+    if template.bind & BIND_DONT_UPGRADE != 0 {
+        return false;
+    }
+    if !template.can_awakening {
+        return false;
+    }
+    if template.grade == 0 {
+        return false;
+    }
+    if level >= AWAKE_MAX_LEVEL {
+        return false;
+    }
+    if current_type == 0 {
+        match template.item_type {
+            1 => matches!(requested, 1 | 2 | 3), // Weapon: DC/MC/SC
+            4 => matches!(requested, 4 | 5),     // Helmet: AC/MAC
+            2 => requested == 6,                 // Armour: HPMP
+            _ => false,
+        }
+    } else {
+        current_type == requested
+    }
+}
+
+/// Crystal `Awake.Awakening` value roll: `MakeHit` summed over five hits scaled by
+/// the item-type rate (Weapon 1, Armour 5, Helmet 1). Deterministic so GM output
+/// is reproducible.
+fn awake_make_value(tick: u64, template: &CrystalItemTemplate, seed: usize) -> u8 {
+    let grade = template.grade.clamp(1, 5);
+    let max_value = f32::from(AWAKE_CHANCE_MAX[usize::from(grade - 1)].max(1));
+    let step = max_value / 5.0;
+    let mut total = 0.0_f32;
+    for hit in 0..5 {
+        if deterministic_roll(tick, seed, hit, 100) < AWAKE_HIT_RATE {
+            total += step;
+        }
+    }
+    let make = if total <= 1.0 { 1 } else { total as i32 };
+    let rate = match template.item_type {
+        1 => 1,
+        2 => 5,
+        4 => 1,
+        _ => 0,
+    };
+    u8::try_from((make * rate).max(0)).unwrap_or(u8::MAX)
+}
+
+fn gm_awakening(world: &mut World, args: &[&str]) -> Vec<ServerPacket> {
     if !is_gm_or_test(world) || args.len() < 2 {
         return Vec::new();
     }
-    Vec::new()
+    let Some(item_type) = parse_item_type(args[0]) else {
+        return Vec::new();
+    };
+    let Some(awake_type) = parse_awake_type(args[1]) else {
+        return Vec::new();
+    };
+    let tick = runtime_tick(world);
+    let mut packets = Vec::new();
+    let count = world.resource::<InventoryResource>().equipment_items.len();
+    for idx in 0..count {
+        let (key, current_type, level, name) = {
+            let inventory = world.resource::<InventoryResource>();
+            let item = &inventory.equipment_items[idx];
+            (
+                item.key.clone(),
+                item.awake_type,
+                item.awake_values.len(),
+                item.name.clone(),
+            )
+        };
+        let Some(template) = crystal_item_template_for_item_key(&key) else {
+            continue;
+        };
+        if template.item_type != item_type {
+            continue;
+        }
+        if !awake_check(&template, current_type, level, awake_type) {
+            packets.push(system(world, format!("{name} : Condition Error.")));
+            continue;
+        }
+        let success =
+            deterministic_roll(tick, awake_key_seed(&key), level, 100) <= AWAKE_SUCCESS_RATE;
+        if success {
+            let value = awake_make_value(tick, &template, awake_key_seed(&key).wrapping_add(level));
+            {
+                let mut inventory = world.resource_mut::<InventoryResource>();
+                let item = &mut inventory.equipment_items[idx];
+                item.awake_type = awake_type;
+                item.awake_values.push(value);
+            }
+            let (new_level, new_value) = {
+                let inventory = world.resource::<InventoryResource>();
+                let item = &inventory.equipment_items[idx];
+                (
+                    item.awake_values.len(),
+                    item.awake_values
+                        .iter()
+                        .map(|value| u32::from(*value))
+                        .sum::<u32>(),
+                )
+            };
+            packets.push(system(
+                world,
+                format!("{name} : AWAKE Level {new_level}, value {new_value}~{new_value}."),
+            ));
+            if let Some(user_item) = {
+                let inventory = world.resource::<InventoryResource>();
+                user_item_from_equipment_state(&inventory.equipment_items[idx])
+            } {
+                packets.push(ServerPacket::RefreshItem { item: user_item });
+            }
+        } else {
+            // CheckAwakening already fixed the awake type even on a failed roll.
+            world.resource_mut::<InventoryResource>().equipment_items[idx].awake_type = awake_type;
+            packets.push(system(world, format!("{name} : Upgrade Failed.")));
+        }
+    }
+    packets
 }
 
-fn gm_remove_awakening(world: &World, args: &[&str]) -> Vec<ServerPacket> {
+fn gm_remove_awakening(world: &mut World, args: &[&str]) -> Vec<ServerPacket> {
     if !is_gm_or_test(world) || args.is_empty() {
         return Vec::new();
     }
-    Vec::new()
+    let Some(item_type) = parse_item_type(args[0]) else {
+        return Vec::new();
+    };
+    let mut packets = Vec::new();
+    let count = world.resource::<InventoryResource>().equipment_items.len();
+    for idx in 0..count {
+        let (key, name) = {
+            let inventory = world.resource::<InventoryResource>();
+            let item = &inventory.equipment_items[idx];
+            (item.key.clone(), item.name.clone())
+        };
+        let Some(template) = crystal_item_template_for_item_key(&key) else {
+            continue;
+        };
+        if template.item_type != item_type {
+            continue;
+        }
+        // Crystal `Awake.RemoveAwake`: pop the last level; 0 = nothing to remove.
+        let (result, new_level) = {
+            let mut inventory = world.resource_mut::<InventoryResource>();
+            let item = &mut inventory.equipment_items[idx];
+            if item.awake_values.is_empty() {
+                item.awake_type = 0;
+                (0, 0)
+            } else {
+                item.awake_values.pop();
+                if item.awake_values.is_empty() {
+                    item.awake_type = 0;
+                }
+                (1, item.awake_values.len())
+            }
+        };
+        if result == 0 {
+            packets.push(system(world, format!("{name} : Remove failed Level 0")));
+        } else {
+            packets.push(system(
+                world,
+                format!("{name} : Remove success. Level {new_level}"),
+            ));
+            if let Some(user_item) = {
+                let inventory = world.resource::<InventoryResource>();
+                user_item_from_equipment_state(&inventory.equipment_items[idx])
+            } {
+                packets.push(ServerPacket::RefreshItem { item: user_item });
+            }
+        }
+    }
+    packets
 }
 
 // ---------------------------------------------------------------------------
@@ -1723,9 +1942,22 @@ fn gm_trigger(world: &World, args: &[&str]) -> Vec<ServerPacket> {
     Vec::new()
 }
 
-fn gm_set_timer(world: &World, args: &[&str]) -> Vec<ServerPacket> {
-    // `@SETTIMER <key> <seconds> <type>` — ungated in Crystal; needs a client
-    // timer channel the simulation does not yet model.
-    let _ = (world, args);
-    Vec::new()
+fn gm_set_timer(_world: &World, args: &[&str]) -> Vec<ServerPacket> {
+    // `@SETTIMER <key> <seconds> <type>` — ungated in Crystal (`SetTimer`). Sends
+    // the client a named countdown via `S.SetTimer`.
+    if args.len() < 3 {
+        return Vec::new();
+    }
+    let key = args[0].to_string();
+    let Ok(seconds) = args[1].parse::<i32>() else {
+        return Vec::new();
+    };
+    let Ok(timer_type) = args[2].parse::<u8>() else {
+        return Vec::new();
+    };
+    vec![ServerPacket::SetTimer {
+        key,
+        timer_type,
+        seconds,
+    }]
 }

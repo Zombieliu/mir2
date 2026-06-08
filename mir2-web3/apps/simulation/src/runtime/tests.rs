@@ -562,6 +562,8 @@ fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot
     resources.equipment_items.push(super::EquipmentState {
         key: key.clone(),
         slot,
+        awake_type: 0,
+        awake_values: Vec::new(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
         shape: u16::try_from(template.shape).ok(),
@@ -599,6 +601,8 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
         .push(super::EquipmentState {
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
+            awake_type: 0,
+            awake_values: Vec::new(),
             name: "Test Mount".to_string(),
             icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
             shape: Some(shape),
@@ -22879,6 +22883,75 @@ fn gm_recall_lover_reports_not_married() {
     )));
 }
 
+#[test]
+fn gm_awakening_fixes_awake_type_on_equipped_weapon() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    equip_crystal_item(&mut session, "WoodenSword", EquipmentSlot::Weapon);
+
+    let packets = gm_chat(&mut session, "@AWAKENING Weapon DC");
+    // Crystal `CheckAwakening` fixes the awake type to DC (1) on a valid weapon
+    // regardless of the success roll, and emits a system line (+ RefreshItem on a
+    // successful roll).
+    let awake_type = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .map(|item| item.awake_type);
+    assert_eq!(awake_type, Some(1));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
+}
+
+#[test]
+fn gm_remove_awakening_pops_a_level_and_refreshes() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    equip_crystal_item(&mut session, "WoodenSword", EquipmentSlot::Weapon);
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("equipped weapon");
+        weapon.awake_type = 1;
+        weapon.awake_values = vec![3];
+    }
+
+    let packets = gm_chat(&mut session, "@REMOVEAWAKENING Weapon");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RefreshItem { .. })));
+    let levels = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .map(|item| item.awake_values.len());
+    assert_eq!(levels, Some(0));
+}
+
+#[test]
+fn gm_set_timer_emits_client_timer() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // `@SETTIMER` is ungated in Crystal.
+    let packets = gm_chat(&mut session, "@SETTIMER boss 60 1");
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::SetTimer { key, seconds: 60, timer_type: 1 } if key == "boss"
+    )));
+}
+
 fn monster_entity_count(session: &mut SimulationSession) -> usize {
     session
         .app
@@ -32528,6 +32601,8 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
             .push(super::EquipmentState {
                 key: "test-mount".to_string(),
                 slot: EquipmentSlot::Mount,
+                awake_type: 0,
+                awake_values: Vec::new(),
                 name: "Test Mount".to_string(),
                 icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
                 shape: None,
@@ -32610,6 +32685,8 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
         .push(super::EquipmentState {
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
+            awake_type: 0,
+            awake_values: Vec::new(),
             name: "Test Mount".to_string(),
             icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
             shape: Some(12),
