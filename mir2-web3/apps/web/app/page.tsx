@@ -1354,7 +1354,14 @@ export default function HomePage() {
         playerObjectId: snapshotWorld.playerObjectId ?? null,
         hasSelfEntity: Boolean(snapshotSelf),
       };
-      return { ...(summary as Record<string, unknown>), movementGate };
+      // GPU map-atlas renderer status (?mapAtlas=1): enabled/rendered/skipped/tileCount/
+      // atlasPages/reason. Surfaces in Alt+D snapshots so a missing-frame fallback or a
+      // GPU error is diagnosable without opening the console.
+      const mapGpu =
+        typeof window !== "undefined"
+          ? (window as typeof window & { __mir2WebGl2MapRendererDebug?: unknown }).__mir2WebGl2MapRendererDebug ?? null
+          : null;
+      return { ...(summary as Record<string, unknown>), movementGate, mapGpu };
     });
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;

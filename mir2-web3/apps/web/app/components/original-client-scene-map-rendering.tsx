@@ -189,19 +189,26 @@ export function buildViewportMapSprites(
 // Map a viewport's DOM map sprites (floor + objects) to a GPU draw list against the packed
 // map atlases. Each sprite's (library, frame) is recovered from its per-tile PNG path and
 // looked up in the atlas index; cameraOffset is folded in so GPU quads align with the DOM /
-// entity layers. Sprites with no atlas rect are dropped here (DOM remains the fallback).
+// entity layers. Sprites whose frame is NOT in the atlas (e.g. a frame the local export — and
+// thus the packed atlas — happens to lack) are returned in `uncovered` so the caller can still
+// render exactly those cells via the DOM <img> path. This keeps the GPU fast path for the
+// covered majority while guaranteeing no black holes for any frame the atlas is missing.
 export function buildMapTileDrawList(
   mapSprites: ViewportMapSprites,
   index: MapAtlasIndex,
   cameraOffset: ViewportOffset,
-): MapTileDraw[] {
-  const out: MapTileDraw[] = [];
-  const add = (sprite: ViewportMapSprite) => {
+): { tiles: MapTileDraw[]; uncovered: ViewportMapSprites } {
+  const tiles: MapTileDraw[] = [];
+  const uncoveredFloor: ViewportMapSprite[] = [];
+  const uncoveredObjects: ViewportMapSprite[] = [];
+  const add = (sprite: ViewportMapSprite, uncovered: ViewportMapSprite[]) => {
     const rectKey = mapAtlasRectKeyForPath(sprite.path);
-    if (!rectKey) return;
-    const atlasKey = index.rectToAtlas.get(rectKey);
-    if (!atlasKey) return;
-    out.push({
+    const atlasKey = rectKey ? index.rectToAtlas.get(rectKey) : undefined;
+    if (!rectKey || !atlasKey) {
+      uncovered.push(sprite);
+      return;
+    }
+    tiles.push({
       atlasKey,
       rectKey,
       left: sprite.left + cameraOffset.x,
@@ -211,9 +218,9 @@ export function buildMapTileDrawList(
       z: sprite.zIndex,
     });
   };
-  for (const sprite of mapSprites.floor) add(sprite);
-  for (const sprite of mapSprites.objects) add(sprite);
-  return out;
+  for (const sprite of mapSprites.floor) add(sprite, uncoveredFloor);
+  for (const sprite of mapSprites.objects) add(sprite, uncoveredObjects);
+  return { tiles, uncovered: { floor: uncoveredFloor, objects: uncoveredObjects } };
 }
 
 function viewportMapCells(
