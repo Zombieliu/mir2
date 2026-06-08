@@ -23,7 +23,7 @@ use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::monsters::{
     build_crystal_current_map_full_spawn_table, build_crystal_current_map_visible_spawn_table,
     build_spawn_table, initial_general_meow_meow_state, initial_monster_ai_state_for_object,
-    initial_yimoogi_state,
+    initial_yimoogi_state, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable,
 };
 use super::movement::{current_location, point_in_bounds, summon_spawn_position_near, tile_key};
 use super::packets::{
@@ -772,14 +772,170 @@ pub(super) fn should_use_crystal_current_map_world(world: &World) -> bool {
             != normalize_map_file_name(&config.map.file_name)
 }
 
+/// Activation / deactivation radii (Chebyshev tiles from a spawn point) for the
+/// on-demand monster pool. Activation must exceed the client's view/data range
+/// so a monster always exists before it can be seen; deactivation is larger for
+/// hysteresis so a monster pacing the boundary does not flicker in and out.
+const MONSTER_ACTIVATION_RANGE: i32 = 20;
+const MONSTER_DEACTIVATION_RANGE: i32 = 30;
+
+fn chebyshev_tile_distance(a: &Point, b: &Point) -> i32 {
+    (a.x - b.x).abs().max((a.y - b.y).abs())
+}
+
+/// Spawn one spawn-table slot's ECS entity (the standard Crystal monster
+/// bundle). Shared by map-entry spawning and the on-demand activation pass so
+/// every materialised monster is identical regardless of how it entered the
+/// world.
+fn materialize_monster_slot(
+    world: &mut World,
+    rule_index: usize,
+    rule: &MonsterSpawnRule,
+    slot_index: usize,
+    slot: &MonsterSpawnSlot,
+) -> Entity {
+    let entity = world
+        .spawn((
+            WorldObject,
+            Monster,
+            ObjectId(slot.object_id),
+            DisplayName::literal(rule.name.clone()),
+            Position(slot.spawn_position.clone()),
+            Facing(rule.direction),
+            SpawnSlotRef {
+                rule_index,
+                slot_index,
+            },
+            MonsterAgent {
+                image: rule.image,
+                dead: false,
+                patrol_origin: slot.spawn_position.clone(),
+                ai: rule.ai,
+                disposition: rule.disposition,
+                hostile_to_player: rule.hostile_to_player,
+                tracking_player: false,
+                view_range: rule.view_range,
+                can_wander: rule.can_wander,
+                move_interval_ticks: rule.move_interval_ticks,
+                attack_interval_ticks: rule.attack_interval_ticks,
+                next_move_tick: 0,
+                next_attack_tick: 0,
+                route: rule.route.clone(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: 0,
+            },
+            initial_monster_ai_state_for_object(rule.ai, 0, slot.object_id),
+            MonsterVitals {
+                hp: rule.max_hp,
+                max_hp: rule.max_hp,
+            },
+            MonsterCombatStats {
+                agility: rule.agility,
+            },
+        ))
+        .id();
+    if rule.ai == 36 {
+        world.entity_mut(entity).insert(initial_yimoogi_state(0));
+    }
+    if rule.ai == 123 {
+        world
+            .entity_mut(entity)
+            .insert(initial_general_meow_meow_state(0));
+    }
+    entity
+}
+
+/// On-demand monster pool reconciliation for the fully-activated world: keep the
+/// ECS holding only the monsters around the player. Slots within activation
+/// range are materialised (fresh and alive); slots that have drifted beyond the
+/// deactivation range are despawned and returned to the dormant pool. This is
+/// what lets a 1,922-monster map cost ~tens of live entities instead of the full
+/// roster, and it is client-transparent: the activation ring sits outside the
+/// view range, so it only ever adds/removes entities the player cannot see — the
+/// visible-object diff (scene view) is untouched. No-op outside `CrystalWorld`.
+pub(super) fn reconcile_monster_activation(world: &mut World) {
+    if world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source
+        != MonsterSpawnSource::CrystalWorld
+    {
+        return;
+    }
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return;
+    };
+    let tick = super::session::runtime_tick(world);
+    let Some(mut spawn_table) = world.remove_resource::<MonsterSpawnTable>() else {
+        return;
+    };
+
+    // Index iteration keeps the borrow of `spawn_table` (for reading a slot's
+    // rule) scoped tightly so it never overlaps the `&mut World` spawn/despawn.
+    for rule_index in 0..spawn_table.rules.len() {
+        for slot_index in 0..spawn_table.rules[rule_index].slots.len() {
+            let slot = &spawn_table.rules[rule_index].slots[slot_index];
+            let distance = chebyshev_tile_distance(&slot.spawn_position, &player_position);
+            // Preserve respawn timing: a slot still cooling down stays dormant
+            // (no monster) until its respawn tick elapses, so leaving and
+            // returning to a spot can't skip the kill's respawn delay.
+            let respawn_due = slot
+                .next_respawn_tick
+                .map_or(true, |respawn_tick| tick >= respawn_tick);
+            match slot.entity {
+                // Dormant slot: materialise it once the player is near, but only
+                // if it is alive (no timer) or its respawn delay has elapsed.
+                None => {
+                    if distance <= MONSTER_ACTIVATION_RANGE && respawn_due {
+                        let entity = {
+                            let rule = &spawn_table.rules[rule_index];
+                            materialize_monster_slot(
+                                world,
+                                rule_index,
+                                rule,
+                                slot_index,
+                                &rule.slots[slot_index],
+                            )
+                        };
+                        let slot = &mut spawn_table.rules[rule_index].slots[slot_index];
+                        slot.entity = Some(entity);
+                        slot.next_respawn_tick = None;
+                    }
+                }
+                // Slot that has drifted far from the player: despawn its entity
+                // but keep `next_respawn_tick`, so a mid-respawn slot doesn't pop
+                // back alive the instant the player returns.
+                Some(entity) => {
+                    if distance > MONSTER_DEACTIVATION_RANGE {
+                        let _ = world.despawn(entity);
+                        spawn_table.rules[rule_index].slots[slot_index].entity = None;
+                    }
+                }
+            }
+        }
+    }
+
+    world.insert_resource(spawn_table);
+}
+
 pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
+    let is_full_world = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source
+        == MonsterSpawnSource::CrystalWorld;
     let mut spawn_table = {
         let map = world.resource::<MapRuntimeResource>();
         let player_runtime = world.resource::<PlayerRuntimeResource>();
         let config = &world.resource::<RuntimeConfigResource>().config;
-        // `CrystalWorld` activates the whole occupied map; the starter region
-        // only materialises the on-screen slice around the player.
-        if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+        // `CrystalWorld` keeps the whole map's roster as a dormant pool and only
+        // materialises monsters near the player (see below); the starter region
+        // materialises its on-screen slice eagerly.
+        if is_full_world {
             build_crystal_current_map_full_spawn_table(config, &map.current_map.file_name)
         } else {
             build_crystal_current_map_visible_spawn_table(
@@ -790,59 +946,33 @@ pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
         }
     };
 
-    for (rule_index, rule) in spawn_table.rules.iter_mut().enumerate() {
-        for (slot_index, slot) in rule.slots.iter_mut().enumerate() {
-            let entity = world
-                .spawn((
-                    WorldObject,
-                    Monster,
-                    ObjectId(slot.object_id),
-                    DisplayName::literal(rule.name.clone()),
-                    Position(slot.spawn_position.clone()),
-                    Facing(rule.direction),
-                    SpawnSlotRef {
+    // Non-pooled sources spawn every slot up front. `CrystalWorld` leaves slots
+    // dormant and lets the activation pass materialise only the nearby ones.
+    if !is_full_world {
+        for rule_index in 0..spawn_table.rules.len() {
+            for slot_index in 0..spawn_table.rules[rule_index].slots.len() {
+                let entity = {
+                    let rule = &spawn_table.rules[rule_index];
+                    materialize_monster_slot(
+                        world,
                         rule_index,
+                        rule,
                         slot_index,
-                    },
-                    MonsterAgent {
-                        image: rule.image,
-                        dead: false,
-                        patrol_origin: slot.spawn_position.clone(),
-                        ai: rule.ai,
-                        disposition: rule.disposition,
-                        hostile_to_player: rule.hostile_to_player,
-                        tracking_player: false,
-                        view_range: rule.view_range,
-                        can_wander: rule.can_wander,
-                        move_interval_ticks: rule.move_interval_ticks,
-                        attack_interval_ticks: rule.attack_interval_ticks,
-                        next_move_tick: 0,
-                        next_attack_tick: 0,
-                        route: rule.route.clone(),
-                        route_index: 0,
-                        route_waiting: false,
-                        next_route_tick: 0,
-                    },
-                    initial_monster_ai_state_for_object(rule.ai, 0, slot.object_id),
-                    MonsterVitals {
-                        hp: rule.max_hp,
-                        max_hp: rule.max_hp,
-                    },
-                    MonsterCombatStats {
-                        agility: rule.agility,
-                    },
-                ))
-                .id();
-            if rule.ai == 36 {
-                world.entity_mut(entity).insert(initial_yimoogi_state(0));
+                        &rule.slots[slot_index],
+                    )
+                };
+                spawn_table.rules[rule_index].slots[slot_index].entity = Some(entity);
             }
-            slot.entity = Some(entity);
         }
     }
 
     spawn_crystal_current_map_npcs(world);
     spawn_stage5_hero(world);
     world.insert_resource(spawn_table);
+
+    if is_full_world {
+        reconcile_monster_activation(world);
+    }
 }
 
 pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {

@@ -4058,6 +4058,10 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     tick_monster_poisons(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);
     resolve_pending_monster_spawns(world, tick);
+    // On-demand monster pool (CrystalWorld): materialise monsters as the player
+    // approaches and despawn ones left far behind, so the AI pass below only
+    // iterates the live set around the player rather than the whole map roster.
+    super::map::reconcile_monster_activation(world);
     let revived_entities = tick_respawns(world);
     let player = player_entity(world).expect("player should exist");
     let player_position = entity_position(world, player).expect("player position");
