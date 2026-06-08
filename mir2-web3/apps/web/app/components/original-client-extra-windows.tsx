@@ -231,7 +231,15 @@ export type ExtraWindowsProps = {
   market?: WindowToggle &
     Pick<
       MarketWindowProps,
-      "listings" | "gold" | "onBuy" | "onCancel" | "onList" | "onSearch" | "onRefresh" | "onCollect"
+      | "listings"
+      | "gold"
+      | "cityCurrencies"
+      | "onBuy"
+      | "onCancel"
+      | "onList"
+      | "onSearch"
+      | "onRefresh"
+      | "onCollect"
     >;
 
   mail?: WindowToggle &
@@ -406,6 +414,7 @@ export function ExtraWindows({
           t={t}
           listings={market.listings}
           gold={market.gold}
+          cityCurrencies={market.cityCurrencies}
           onBuy={market.onBuy}
           onCancel={market.onCancel}
           onList={market.onList}

@@ -39,6 +39,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0003_zone_owner_leases",
         include_str!("../../../infra/postgres/migrations/0003_zone_owner_leases.sql"),
     ),
+    (
+        "0004_city_currencies",
+        include_str!("../../../infra/postgres/migrations/0004_city_currencies.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order. Safe to call concurrently from
@@ -707,6 +711,7 @@ mod tests {
             seller: "Hero".to_string(),
             item_key: "iron-sword".to_string(),
             price: 1200,
+            currency: crate::config::CurrencyKind::Gold,
             sold: false,
             cancelled: false,
             expired: false,

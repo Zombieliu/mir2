@@ -788,6 +788,26 @@ check("adaptMarketListings keeps fixed-price rows additive (no enriched keys)", 
   }
 });
 
+check("adaptMarketListings surfaces city-currency pricing, omits it for gold", () => {
+  const [cityListing, goldListing] = adaptMarketListings([
+    { id: "c1", itemName: "Bone Ring", seller: "Scout", price: 120, currency: "feitian" },
+    { id: "g1", itemName: "Plain Sword", seller: "Smith", price: 250, currency: "gold" },
+  ]);
+  assert.equal(cityListing.currency, "feitian");
+  assert.equal(cityListing.currencyLabel, "飞天城币");
+  // Gold (the default) must NOT add the optional keys, keeping legacy rows clean.
+  assert.ok(!("currency" in goldListing), "gold listing should omit currency");
+  assert.ok(!("currencyLabel" in goldListing), "gold listing should omit currencyLabel");
+});
+
+check("adaptTrade surfaces the partner's city-currency offer", () => {
+  const trade = adaptTrade({ partner: "Buyer", state: "open", offeredCurrency: "bichon" });
+  assert.equal(trade.partnerCurrency, "bichon");
+  assert.equal(trade.partnerCurrencyLabel, "比奇城币");
+  const goldTrade = adaptTrade({ partner: "Buyer", state: "open", offeredCurrency: "gold" });
+  assert.ok(!("partnerCurrency" in goldTrade), "gold trade should omit partnerCurrency");
+});
+
 check("adaptMarketListings reads alternate enriched keys + drops non-positive bid handling", () => {
   const [listing] = adaptMarketListings([
     { id: "x", itemName: "Robe", seller: "S", price: 5, category: "Robe", requiredLevel: 12 },

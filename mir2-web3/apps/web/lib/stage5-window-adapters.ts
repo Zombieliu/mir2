@@ -39,6 +39,24 @@ type UnknownRecord = Record<string, unknown>;
 type EntityClassKey = NonNullable<HeroSummary["classKey"]>;
 
 /**
+ * Display labels for the net-new per-city reputation currencies (and gold).
+ * Keyed by the wallet/currency key emitted by the simulation
+ * (`CurrencyKind::city_key` / `WorldSnapshot.cityCurrencies` keys). Used by the
+ * trade/market adapters and the HUD so a single source of truth names tokens.
+ */
+export const CITY_CURRENCY_LABELS: Record<string, string> = {
+  gold: "金币",
+  feitian: "飞天城币",
+  bichon: "比奇城币",
+};
+
+/** Human-readable label for a currency key, falling back to the key itself. */
+export function currencyLabel(key: string | null | undefined): string {
+  if (!key) return CITY_CURRENCY_LABELS.gold;
+  return CITY_CURRENCY_LABELS[key] ?? key;
+}
+
+/**
  * The subset of the page's stage-5 state these adapters read from.
  *
  * `group.members` and `social.friends`/`social.blocked` accept BOTH the legacy
@@ -614,6 +632,11 @@ export function adaptMarketListings(
     if (auctionFlag !== undefined) listing.auction = auctionFlag;
     const sold = readBool(record, ["sold"]);
     if (sold !== undefined) listing.sold = sold;
+    const currency = readString(record, ["currency"]);
+    if (currency !== undefined && currency !== "gold") {
+      listing.currency = currency;
+      listing.currencyLabel = currencyLabel(currency);
+    }
 
     return [listing];
   });
@@ -725,6 +748,13 @@ export function adaptTrade(trade: UnknownRecord | null | undefined): TradeSummar
     // Keep the count consistent with the enriched slot list when the server did
     // not also send an explicit partnerItemCount.
     if (summary.partnerItemCount === undefined) summary.partnerItemCount = partnerItems.length;
+  }
+
+  // Net-new currency selector for the partner's offered amount.
+  const currency = readString(record, ["offeredCurrency", "currency", "partnerCurrency"]);
+  if (currency !== undefined && currency !== "gold") {
+    summary.partnerCurrency = currency;
+    summary.partnerCurrencyLabel = currencyLabel(currency);
   }
 
   return summary;

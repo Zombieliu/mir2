@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { CITY_CURRENCY_LABELS } from "../../lib/stage5-window-adapters";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -39,6 +40,14 @@ export type MarketListing = {
   auction?: boolean;
   /** Whether this listing has sold and is awaiting collection (Consign tab). */
   sold?: boolean;
+  /**
+   * Currency the listing is priced in: `"gold"` (default) or a city
+   * reputation token key (`"feitian"`, `"bichon"`). Net-new / optional —
+   * legacy gold listings omit it.
+   */
+  currency?: string;
+  /** Human-readable currency label for the price column (e.g. "飞天城币"). */
+  currencyLabel?: string;
 };
 
 /** Which board the window is showing. */
@@ -52,6 +61,12 @@ export type MarketWindowProps = {
   listings: MarketListing[];
   /** Viewer gold, used to gate the buy button. */
   gold?: number;
+  /**
+   * Viewer's per-city reputation currency wallet, keyed by city
+   * (`"feitian"`, `"bichon"`). Net-new / optional — used to gate the buy
+   * button and display balances for listings priced in city currency.
+   */
+  cityCurrencies?: Record<string, number>;
   /** Distinct item types offered in the type filter (defaults to derived set). */
   itemTypes?: string[];
   onBuy?: (listingId: string) => void;
@@ -81,6 +96,7 @@ export function MarketWindow({
   t,
   listings,
   gold,
+  cityCurrencies,
   itemTypes,
   onBuy,
   onCancel,
@@ -150,7 +166,19 @@ export function MarketWindow({
     }
   }, [page, pageCount]);
 
-  const canAfford = selected != null && typeof gold === "number" ? gold >= selected.price : true;
+  // Affordability is checked against the listing's own currency: gold listings
+  // use the gold balance; city-currency listings use the matching wallet entry.
+  const selectedBalance = (() => {
+    if (selected == null) return undefined;
+    if (selected.currency && selected.currency !== "gold") {
+      return cityCurrencies?.[selected.currency];
+    }
+    return gold;
+  })();
+  const canAfford =
+    selected != null && typeof selectedBalance === "number"
+      ? selectedBalance >= selected.price
+      : true;
   const isAuction = mode === "auction" || selected?.auction === true;
 
   const toggleSort = (key: MarketSortKey) => {
@@ -287,7 +315,10 @@ export function MarketWindow({
                 <span style={{ ...style.colSeller, ...(listing.mine ? style.sellerSelf : null) }}>
                   {listing.mine ? t("ui.marketYou", [], "You") : listing.seller}
                 </span>
-                <span style={style.colPrice}>{formatNumber(priceShown)}</span>
+                <span style={style.colPrice}>
+                  {formatNumber(priceShown)}
+                  {listing.currencyLabel ? <span style={style.countTag}>{listing.currencyLabel}</span> : null}
+                </span>
               </button>
             );
           })
@@ -350,6 +381,14 @@ export function MarketWindow({
                 <span style={style.detailValue}>{formatNumber(gold)}</span>
               </div>
             ) : null}
+            {cityCurrencies
+              ? Object.entries(cityCurrencies).map(([key, amount]) => (
+                  <div key={key} style={style.detailRow}>
+                    <span style={style.detailLabel}>{CITY_CURRENCY_LABELS[key] ?? key}</span>
+                    <span style={style.detailValue}>{formatNumber(amount)}</span>
+                  </div>
+                ))
+              : null}
           </>
         ) : (
           <div style={style.empty}>{t("ui.marketSelectHint", [], "Select a listing.")}</div>
