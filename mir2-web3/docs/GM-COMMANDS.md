@@ -15,9 +15,14 @@ Each command carries Crystal's own permission gate. Satisfy one of:
 
 | Path | How |
 |---|---|
-| **Account GM rank** | The character's account `gm_level > 0` (read at `StartGame`). Primary path on the web port. |
-| **`@LOGIN` password** | Type `@LOGIN`; on the prompt, type the configured GM password on the **next** chat line. A match grants GM rank. |
+| **Account GM rank** | The character's account `gm_level > 0` (read at `StartGame`). Primary path on the web port — set `gm_level` on the account record (JSON store `.mir2-data/accounts.json`, or the Postgres backend). |
+| **`MIR2_GM_ACCOUNTS`** | Comma-separated account allowlist, e.g. `MIR2_GM_ACCOUNTS=demo`. Grants GM for the session at login **without mutating the stored record** (case-insensitive). The zero-config way to make the demo account a GM locally. |
+| **`@LOGIN` password** | Set `MIR2_GM_PASSWORD=<secret>`, then in-game type `@LOGIN` and, on the prompt, the password on the **next** chat line. A match grants GM for the session. With no `MIR2_GM_PASSWORD` set, `@LOGIN` can never succeed. |
 | **TestServer flag** | When the server runs as a test server, the `IsGM \|\| TestServer` tier is open to any player. |
+
+> **Make the `demo` account a GM, the easy way:** start the server with
+> `MIR2_GM_ACCOUNTS=demo` in the environment and log in as `demo` — `@`-commands
+> work immediately, and nothing is written to the account store.
 
 Permission tiers used below: **GM** = requires GM rank · **GM/Test** =
 `IsGM || TestServer` · **Any** = ungated · **Feature** = a feature/state gate
