@@ -1692,8 +1692,11 @@ img {
   text-transform: uppercase;
 }
 
-.overlay-panel-head button,
-.system-menu-actions button {
+/* Text buttons (e.g. the report panel's Close). NOTE: must NOT match the
+   system-menu sprite icons — those are transparent `.sprite-button`s inside
+   `.system-menu-actions`, and adding a border/background/padding here was
+   boxing + squishing the 32x18 icon sprites. */
+.overlay-panel-head button {
   border: 1px solid rgba(190, 157, 99, 0.56);
   background: linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95));
   color: #f4dcaf;
@@ -3199,38 +3202,6 @@ img {
   inset: 0;
   background: transparent;
   overflow: visible;
-}
-
-.character-window .inventory-delete-hint {
-  left: 18px;
-  top: 318px;
-  max-width: 228px;
-}
-
-.character-repair-actions {
-  position: absolute;
-  left: 18px;
-  top: 342px;
-  z-index: 2;
-  display: flex;
-  gap: 6px;
-}
-
-.character-repair-actions button {
-  min-width: 88px;
-  height: 20px;
-  border: 1px solid rgba(183, 154, 99, 0.7);
-  background: linear-gradient(180deg, rgba(63, 45, 24, 0.95), rgba(20, 14, 8, 0.95));
-  color: #d9c59f;
-  font: 11px Georgia, "Times New Roman", serif;
-  text-shadow: 1px 1px 0 #000;
-  cursor: pointer;
-}
-
-.character-repair-actions button.active,
-.character-repair-actions button:hover {
-  color: #fff0be;
-  border-color: rgba(247, 209, 137, 0.9);
 }
 
 .inventory-sell button {
