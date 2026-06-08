@@ -120,17 +120,23 @@ pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
         })
         .map(|object_id| object_id.0)
         .unwrap_or_default();
+    // A `@TOGGLETRANSFORM`-paused Transform buff is frozen: it neither ticks down
+    // nor expires while paused (Crystal `PauseBuff`).
+    let transform_paused = world
+        .resource::<super::resources::GmRuntimeResource>()
+        .transform_paused;
+    let is_frozen = |buff: &BuffState| transform_paused && buff.key.contains("transform");
     let expired_buffs = world
         .resource::<BuffResource>()
         .buffs
         .iter()
-        .filter(|buff| buff.expires_at_tick <= tick)
+        .filter(|buff| buff.expires_at_tick <= tick && !is_frozen(buff))
         .map(|buff| (buff.key.clone(), crystal_buff_type_for_key(&buff.key)))
         .collect::<Vec<_>>();
     world
         .resource_mut::<BuffResource>()
         .buffs
-        .retain(|buff| buff.expires_at_tick > tick);
+        .retain(|buff| buff.expires_at_tick > tick || is_frozen(buff));
     for (key, buff_type) in expired_buffs {
         if let Some(buff_type) = buff_type {
             packets.push(ServerPacket::RemoveBuff {

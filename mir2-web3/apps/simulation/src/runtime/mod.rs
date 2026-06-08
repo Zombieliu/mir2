@@ -35,6 +35,7 @@ pub use drops::{
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
     SharedGroundDropPickupCommit,
 };
+pub use map::set_crystal_full_world_zone_collision;
 pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use session::{

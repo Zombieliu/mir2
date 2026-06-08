@@ -22,9 +22,9 @@ use mir2_protocol::{
 
 use crate::config::{
     CharacterRecord, CharacterSaveRecord, EquipmentSlot, GroundDropLootSnapshot,
-    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, NpcScriptDiagnosticSnapshot,
-    QuestStage, SimulationConfig, Stage5AuctionListing, Stage5HeroState,
-    Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
+    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, MonsterSpawnSource,
+    NpcScriptDiagnosticSnapshot, QuestStage, SimulationConfig, Stage5AuctionListing,
+    Stage5HeroState, Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
     Stage5SystemsState, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
 };
@@ -79,7 +79,8 @@ use super::map::{
 use super::monster_ai::advance_world;
 use super::monsters::{
     crystal_monster_effect_for_name, crystal_respawn_object_id,
-    crystal_respawn_object_monster_packet, point_in_data_range, start_game_visible_respawn_spawns,
+    crystal_respawn_object_monster_packet, crystal_world_respawn_spawns, point_in_data_range,
+    start_game_visible_respawn_spawns,
 };
 use super::movement::current_location;
 use super::npc::{
@@ -4912,9 +4913,18 @@ pub(super) fn handle_chat_packet(
     message: String,
     linked_items: Vec<ChatItem>,
 ) -> Vec<ServerPacket> {
-    // GM `@` commands are intercepted before the normal chat pipeline (and before
-    // the spam guard) so privileged operators can act in-world. Non-GM callers
-    // fall through to normal chat, so command existence never leaks to players.
+    // `@LOGIN` arms a GM-password prompt; the very next chat line is the password
+    // candidate (Crystal `PlayerObject.Chat`, GMLogin branch). It is checked
+    // before everything else and consumed regardless of outcome.
+    if super::gm_commands::gm_login_pending(world) {
+        return super::gm_commands::resolve_gm_login_password(world, &message);
+    }
+
+    // Crystal consumes EVERY `@`-prefixed line as a command attempt — it is never
+    // echoed to normal chat — and gates each command individually (many, like
+    // `@TIME`/`@MAP`/`@DIE`, run for any player). The dispatcher therefore always
+    // claims `@` lines; a non-GM issuing a GM-gated command gets Crystal's silent
+    // `return;`, so command existence still never leaks to ordinary players.
     if super::gm_commands::is_gm_command(&message) {
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
             return packets;
@@ -5625,6 +5635,7 @@ pub(super) fn start_game_static_visible_object_packets(
     map_file_name: &str,
     player_position: &Point,
     character: &CharacterRecord,
+    spawn_source: MonsterSpawnSource,
 ) -> Vec<ServerPacket> {
     let normalized_map = normalize_map_file_name(map_file_name);
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
@@ -5674,8 +5685,17 @@ pub(super) fn start_game_static_visible_object_packets(
 
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
         for respawn in &map.respawns {
-            let visible_spawns =
-                start_game_visible_respawn_spawns(map_file_name, respawn, player_position);
+            // In the fully-activated world the whole map is alive, so the
+            // on-screen subset is the canonical full placement filtered to the
+            // data range — same positions/object-ids the ECS world spawned.
+            let visible_spawns = if spawn_source == MonsterSpawnSource::CrystalWorld {
+                crystal_world_respawn_spawns(map_file_name, respawn)
+                    .into_iter()
+                    .filter(|(_, location, _)| point_in_data_range(location, player_position))
+                    .collect::<Vec<_>>()
+            } else {
+                start_game_visible_respawn_spawns(map_file_name, respawn, player_position)
+            };
             for (slot_index, location, direction) in visible_spawns {
                 let object_id = crystal_respawn_object_id(respawn, slot_index);
                 objects.push((
@@ -5868,6 +5888,36 @@ pub(super) fn collect_map_transfer_snapshots(
 }
 
 #[allow(deprecated)]
+/// Crystal `GetUpdateInfo()` for `@SETLIGHT`: the self player's `S.PlayerUpdate`
+/// carrying the new personal light alongside the real weapon/armour shapes, so the
+/// client refreshes the light radius without blanking the rendered gear.
+pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<ServerPacket> {
+    let object_id = current_player_object_id(world)?;
+    let body = player_entity(world)
+        .and_then(|player| world.entity(player).get::<CharacterBody>().copied());
+    let equipment_items = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .clone();
+    let shape_to_i16 = |shape: Option<u16>| shape.and_then(|s| i16::try_from(s).ok()).unwrap_or(0);
+    let weapon = shape_to_i16(
+        equipment_shape(Some(&equipment_items), EquipmentSlot::Weapon)
+            .or_else(|| body.and_then(|b| b.weapon_shape)),
+    );
+    let armour = shape_to_i16(
+        equipment_shape(Some(&equipment_items), EquipmentSlot::Armour)
+            .or_else(|| body.and_then(|b| b.armour_shape)),
+    );
+    Some(ServerPacket::PlayerUpdate {
+        object_id,
+        light,
+        weapon,
+        weapon_effect: 0,
+        armour,
+        wing_effect: 0,
+    })
+}
+
 pub(super) fn collect_world_entities(
     world: &World,
     scene_view: Option<&mir2_game_data::SceneView>,
@@ -5968,6 +6018,17 @@ pub(super) fn collect_world_entities(
             } else {
                 None
             },
+            // Only the self player's hair is modelled (`@HAIR`); remote players fall
+            // back to 0.
+            if self_marker.is_some() {
+                world
+                    .resource::<Stage5SystemsResource>()
+                    .stage5_systems
+                    .appearance
+                    .hair
+            } else {
+                0
+            },
             if self_marker.is_some() {
                 self_mount
             } else {
@@ -6011,6 +6072,7 @@ pub(super) fn entity_sprite_snapshot(
     monster_agent: Option<&MonsterAgent>,
     npc_agent: Option<&NpcAgent>,
     equipment_items: Option<&[EquipmentState]>,
+    hair: u8,
     // Crystal `MountType` of the rider, present only while actually riding
     // (`RidingMount`). Other entities / dismounted players pass `None`.
     self_mount: Option<i16>,
@@ -6019,7 +6081,7 @@ pub(super) fn entity_sprite_snapshot(
         let armour_shape = equipment_shape(equipment_items, EquipmentSlot::Armour)
             .or(body.armour_shape)
             .unwrap_or(0);
-        let hair_shape = 0;
+        let hair_shape = u16::from(hair);
         let weapon_shape =
             equipment_shape(equipment_items, EquipmentSlot::Weapon).or(body.weapon_shape);
         let uses_assassin_weapon =

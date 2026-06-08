@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, OnceLock};
 
 use bevy_ecs::entity::Entity;
@@ -20,8 +21,9 @@ use super::components::{
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::monsters::{
-    build_crystal_current_map_visible_spawn_table, build_spawn_table,
-    initial_general_meow_meow_state, initial_monster_ai_state_for_object, initial_yimoogi_state,
+    build_crystal_current_map_full_spawn_table, build_crystal_current_map_visible_spawn_table,
+    build_spawn_table, initial_general_meow_meow_state, initial_monster_ai_state_for_object,
+    initial_yimoogi_state,
 };
 use super::movement::{current_location, point_in_bounds, summon_spawn_position_near, tile_key};
 use super::packets::{
@@ -64,9 +66,35 @@ pub(super) fn normalize_map_file_name(file_name: &str) -> String {
         .to_ascii_lowercase()
 }
 
+/// When set, the shared multiplayer zone hosts every map at its *full* size
+/// (the gz map-pack collision), so Bichon "0" is the whole 700×700 province
+/// instead of the collision-bounded starter slice and players can roam all of
+/// it and reach every transfer. Off by default — the starter demo/tests keep
+/// the slice. Enabled once at gateway startup for the activated Crystal world
+/// ([`set_crystal_full_world_zone_collision`]); it is process-wide because the
+/// shared zone is a process-wide singleton created without per-session config.
+static CRYSTAL_FULL_WORLD_ZONE_COLLISION: AtomicBool = AtomicBool::new(false);
+
+/// Enable/disable full-map collision for the shared zone world. Called from the
+/// gateway entry points when `MonsterSpawnSource::CrystalWorld` is active.
+pub fn set_crystal_full_world_zone_collision(enabled: bool) {
+    CRYSTAL_FULL_WORLD_ZONE_COLLISION.store(enabled, Ordering::Relaxed);
+}
+
+fn crystal_full_world_zone_collision_enabled() -> bool {
+    CRYSTAL_FULL_WORLD_ZONE_COLLISION.load(Ordering::Relaxed)
+}
+
 pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapCollisionData> {
-    let collision = runtime_full_map_collision_data(map_file_name)
-        .or_else(|| runtime_map_collision_data(map_file_name))?;
+    // The activated world hosts every map full-size (Bichon "0" included); other
+    // modes keep the prior behaviour where "0" is the starter slice.
+    let collision = if crystal_full_world_zone_collision_enabled() {
+        runtime_world_map_collision_data(map_file_name)
+            .or_else(|| runtime_map_collision_data(map_file_name))?
+    } else {
+        runtime_full_map_collision_data(map_file_name)
+            .or_else(|| runtime_map_collision_data(map_file_name))?
+    };
     let mut blocked_cells = collision.blocked_set;
     blocked_cells.extend(collision.closed_door_set);
     let transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
@@ -734,7 +762,7 @@ pub(super) fn spawn_config_visible_npcs(world: &mut World) {
 pub(super) fn should_use_crystal_current_map_world(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();
     let config = &world.resource::<RuntimeConfigResource>().config;
-    if config.monster_spawn_source == MonsterSpawnSource::CrystalStarterRegion
+    if config.monster_spawn_source.uses_crystal_current_map()
         && crystal_map_respawns_by_file_name(&map.current_map.file_name).is_some()
     {
         return true;
@@ -749,11 +777,17 @@ pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
         let map = world.resource::<MapRuntimeResource>();
         let player_runtime = world.resource::<PlayerRuntimeResource>();
         let config = &world.resource::<RuntimeConfigResource>().config;
-        build_crystal_current_map_visible_spawn_table(
-            config,
-            &map.current_map.file_name,
-            &player_runtime.player_position,
-        )
+        // `CrystalWorld` activates the whole occupied map; the starter region
+        // only materialises the on-screen slice around the player.
+        if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+            build_crystal_current_map_full_spawn_table(config, &map.current_map.file_name)
+        } else {
+            build_crystal_current_map_visible_spawn_table(
+                config,
+                &map.current_map.file_name,
+                &player_runtime.player_position,
+            )
+        }
     };
 
     for (rule_index, rule) in spawn_table.rules.iter_mut().enumerate() {
@@ -1615,9 +1649,57 @@ pub(super) fn runtime_full_map_collision_data(
     parsed
 }
 
+/// Full per-map collision for the activated Crystal world. Prefers an
+/// uncompressed Crystal client install, then falls back to the bundled gzipped
+/// map-pack so it works with no client present. Unlike
+/// [`runtime_map_collision_data`], it returns the *full* Bichon map for "0"
+/// (the pack's `0.map`) instead of the starter slice, so a fully-activated map
+/// spawns across its real walkable cells. Cached per map (the pack is
+/// decompressed at most once per map file).
+pub(super) fn runtime_world_map_collision_data(
+    map_file_name: &str,
+) -> Option<RuntimeMapCollisionData> {
+    let normalized = normalize_map_file_name(map_file_name);
+    static RUNTIME_WORLD_MAP_COLLISION_CACHE: OnceLock<
+        Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>>,
+    > = OnceLock::new();
+    let cache = RUNTIME_WORLD_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
+    if let Some(cached) = cache
+        .lock()
+        .expect("runtime world map collision cache should not be poisoned")
+        .get(&normalized)
+        .cloned()
+    {
+        return cached;
+    }
+
+    let parsed = runtime_full_map_collision_data(&normalized).or_else(|| {
+        read_crystal_map_pack_bytes(&normalized)
+            .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
+            .map(runtime_map_collision_from_template)
+    });
+    cache
+        .lock()
+        .expect("runtime world map collision cache should not be poisoned")
+        .insert(normalized, parsed.clone());
+    parsed
+}
+
 pub(super) fn refresh_runtime_map_collision(world: &mut World) {
     let current_map = world.resource::<MapRuntimeResource>().current_map.clone();
-    let collision = runtime_active_map_collision_data(&current_map).unwrap_or_else(|| {
+    let spawn_source = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source;
+    // The activated world walks the full map everywhere (gz map-pack backed), so
+    // players are never fenced into the Bichon starter slice — they can reach
+    // every transfer and roam all maps. Other sources keep their prior collision.
+    let collision = if spawn_source == MonsterSpawnSource::CrystalWorld {
+        runtime_world_map_collision_data(&current_map.file_name)
+    } else {
+        runtime_active_map_collision_data(&current_map)
+    }
+    .unwrap_or_else(|| {
         let fallback = world
             .resource::<RuntimeConfigResource>()
             .config

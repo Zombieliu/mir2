@@ -200,6 +200,7 @@ impl SimulationSession {
         app.insert_resource(Stage5SystemsResource::new());
         app.insert_resource(GroupResource::new(&config));
         app.insert_resource(PlayerPermissionResource::new());
+        app.insert_resource(super::resources::GmRuntimeResource::new());
         app.insert_resource(PotionRecoveryResource::new());
         app.insert_resource(PlayerActionTimingResource::new());
         app.insert_resource(PlayerMovementTimingResource::new());

@@ -45,9 +45,9 @@ use super::packets::{
 };
 use super::quests::advance_crystal_quest_kill;
 use super::resources::{
-    is_in_world, runtime_tick, BuffResource, ElementalResource, InventoryResource,
-    MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SkillResource,
+    is_in_world, runtime_tick, BuffResource, ElementalResource, GmRuntimeResource,
+    InventoryResource, MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
 };
 use super::session::SimulationSession;
 use super::skills::{
@@ -213,6 +213,16 @@ pub(super) fn apply_damage_to_current_player(
     packets: &mut Vec<ServerPacket>,
 ) -> PlayerDamageOutcome {
     if damage <= 0 {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+        };
+    }
+
+    // Crystal `@SUPERMAN` (`GMNeverDie`): the GM is invincible — incoming damage is
+    // ignored and they cannot die. All player-damage paths (combat, hazards) funnel
+    // through here, so this one guard covers them.
+    if world.resource::<GmRuntimeResource>().gm_never_die {
         return PlayerDamageOutcome {
             applied: false,
             died: false,
