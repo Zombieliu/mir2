@@ -102,7 +102,7 @@ use super::resources::{
     crystal_packet_move_delay_ticks, crystal_packet_spell_delay_ticks,
     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
     queue_crystal_movement_retry, BuffResource, HeroInventoryResource, InventoryResource,
-    ItemRentalResource, MapRuntimeResource, NpcStateResource, PlayerActionKind,
+    ItemRentalResource, MapRuntimeResource, MountResource, NpcStateResource, PlayerActionKind,
     PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource, QuestResource,
     RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
     Stage5SystemsResource,
@@ -5875,6 +5875,13 @@ pub(super) fn collect_world_entities(
     self_equipment_items: &[EquipmentState],
 ) -> Vec<WorldEntitySnapshot> {
     let mut result = Vec::new();
+    // The local player's mount state lives in `MountResource` (Crystal sends
+    // `MountType`/`RidingMount` per player object); carry it only while riding so the
+    // self-entity sprite renders the mount and hides weapons, matching `entity_sprite_snapshot`.
+    let self_mount = world
+        .get_resource::<MountResource>()
+        .filter(|mount| mount.riding_mount)
+        .map(|mount| mount.mount_type);
     for entity in world.iter_entities() {
         let Some(object_id) = entity.get::<ObjectId>() else {
             continue;
@@ -5961,6 +5968,11 @@ pub(super) fn collect_world_entities(
             } else {
                 None
             },
+            if self_marker.is_some() {
+                self_mount
+            } else {
+                None
+            },
         );
         let quest_ids = npc_agent
             .map(|agent| agent.quest_ids.clone())
@@ -5999,6 +6011,9 @@ pub(super) fn entity_sprite_snapshot(
     monster_agent: Option<&MonsterAgent>,
     npc_agent: Option<&NpcAgent>,
     equipment_items: Option<&[EquipmentState]>,
+    // Crystal `MountType` of the rider, present only while actually riding
+    // (`RidingMount`). Other entities / dismounted players pass `None`.
+    self_mount: Option<i16>,
 ) -> Option<WorldEntitySpriteSnapshot> {
     if let Some(body) = body {
         let armour_shape = equipment_shape(equipment_items, EquipmentSlot::Armour)
@@ -6024,10 +6039,10 @@ pub(super) fn entity_sprite_snapshot(
             _ => (None, None),
         };
         let (
-            weapon_library,
-            weapon_library_secondary,
-            alt_weapon_library,
-            alt_weapon_library_secondary,
+            mut weapon_library,
+            mut weapon_library_secondary,
+            mut alt_weapon_library,
+            mut alt_weapon_library_secondary,
         ) = match weapon_shape {
             Some(shape) if (100..200).contains(&shape) => {
                 let index = shape - 100;
@@ -6054,7 +6069,7 @@ pub(super) fn entity_sprite_snapshot(
             MirGender::Male => 0,
             MirGender::Female => 808,
         };
-        let weapon_frame_offset = weapon_library.as_ref().map(|_| match body.gender {
+        let mut weapon_frame_offset = weapon_library.as_ref().map(|_| match body.gender {
             MirGender::Male => 0,
             MirGender::Female => 416,
         });
@@ -6071,6 +6086,24 @@ pub(super) fn entity_sprite_snapshot(
         };
         let alt_weapon_frame_offset = alt_frame_base_offset;
 
+        // Crystal draws the mount as the bottom layer and skips every weapon layer
+        // while `RidingMount` (`PlayerObject.cs` Draw() lines 4884-4923). The mount
+        // library is `Libraries.Mounts[MountType]` (`Data\Mount\NN`, line 604-606).
+        let (mount_library, mount_frame_offset) = match self_mount {
+            Some(mount_type) if mount_type >= 0 => {
+                weapon_library = None;
+                weapon_library_secondary = None;
+                alt_weapon_library = None;
+                alt_weapon_library_secondary = None;
+                weapon_frame_offset = None;
+                (
+                    Some(format!("Mount/{mount_type:02}")),
+                    Some(frame_base_offset),
+                )
+            }
+            _ => (None, None),
+        };
+
         return Some(WorldEntitySpriteSnapshot {
             body_library,
             hair_library,
@@ -6086,6 +6119,8 @@ pub(super) fn entity_sprite_snapshot(
             alt_weapon_frame_offset,
             frame_count: 4,
             direction_stride: 4,
+            mount_library,
+            mount_frame_offset,
         });
     }
 
@@ -6105,6 +6140,8 @@ pub(super) fn entity_sprite_snapshot(
             alt_weapon_frame_offset: None,
             frame_count: 4,
             direction_stride: 4,
+            mount_library: None,
+            mount_frame_offset: None,
         });
     }
 
@@ -6123,6 +6160,8 @@ pub(super) fn entity_sprite_snapshot(
         alt_weapon_frame_offset: None,
         frame_count: 4,
         direction_stride: 4,
+        mount_library: None,
+        mount_frame_offset: None,
     })
 }
 

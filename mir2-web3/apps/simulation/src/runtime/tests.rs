@@ -32444,6 +32444,54 @@ fn transfer_onto_mount_allowed_map_keeps_player_mounted() {
 }
 
 #[test]
+fn entity_sprite_snapshot_riding_renders_mount_and_hides_weapon() {
+    // Crystal `DrawMount` draws `Libraries.Mounts[MountType]` (`Data\Mount\NN`) as the
+    // bottom layer and `Draw()` skips every weapon layer while `RidingMount`
+    // (`PlayerObject.cs:4884-4923, 5084-5090`).
+    let body = super::super::components::CharacterBody {
+        class: MirClass::Warrior,
+        gender: MirGender::Male,
+        level: 7,
+        armour_shape: Some(3),
+        weapon_shape: Some(5),
+    };
+
+    let mounted =
+        super::super::packets::entity_sprite_snapshot(Some(&body), None, None, None, Some(12))
+            .expect("a player body should yield a sprite snapshot");
+    assert_eq!(
+        mounted.mount_library.as_deref(),
+        Some("Mount/12"),
+        "a riding player renders the Mount/NN library"
+    );
+    assert!(
+        mounted.weapon_library.is_none()
+            && mounted.weapon_library_secondary.is_none()
+            && mounted.alt_weapon_library.is_none()
+            && mounted.alt_weapon_library_secondary.is_none(),
+        "weapons must be hidden while riding: {mounted:?}"
+    );
+    assert_eq!(
+        mounted.body_library, "CArmour/03",
+        "the armour/body layer is still drawn while riding"
+    );
+
+    // Dismounted: no mount layer, and the weapon returns.
+    let on_foot =
+        super::super::packets::entity_sprite_snapshot(Some(&body), None, None, None, None)
+            .expect("a player body should yield a sprite snapshot");
+    assert!(
+        on_foot.mount_library.is_none(),
+        "a dismounted player must not render a mount layer"
+    );
+    assert_eq!(
+        on_foot.weapon_library.as_deref(),
+        Some("CWeapon/05"),
+        "the weapon returns once dismounted"
+    );
+}
+
+#[test]
 fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

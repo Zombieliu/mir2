@@ -367,6 +367,23 @@ export function OriginalClientSceneVisualLayers({
                   event.stopPropagation();
                 }}
               />
+              {!useBevyEntityRenderer && sprite?.mount ? (
+                <img
+                  className="entity-sprite-layer mount"
+                  src={sprite.mount.path}
+                  alt=""
+                  draggable={false}
+                  data-mir2-original-src={sprite.mount.path}
+                  onError={handleSceneAssetImageError}
+                  onLoad={handleSceneAssetImageLoad}
+                  style={{
+                    left: sprite.mount.x,
+                    top: sprite.mount.y,
+                    width: sprite.mount.width,
+                    height: sprite.mount.height,
+                  }}
+                />
+              ) : null}
               {!useBevyEntityRenderer && sprite?.rearWeapons.map((weapon, index) => (
                 <img
                   key={`rear-${entity.objectId}-${index}-${weapon.path}`}

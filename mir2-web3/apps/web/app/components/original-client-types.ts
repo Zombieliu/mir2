@@ -41,6 +41,10 @@ export type EntitySprite = {
   altWeaponFrameOffset?: number | null;
   frameCount: number;
   directionStride: number;
+  // Crystal `Libraries.Mounts[MountType]` (`Data\Mount\NN`); present only while the
+  // entity is riding a mount, in which case weapon layers are suppressed.
+  mountLibrary?: string | null;
+  mountFrameOffset?: number | null;
 };
 
 export type EntitySpriteAnimationState =

@@ -97,6 +97,7 @@ type ViewportSpriteLayer = Pick<
 >;
 
 export type ViewportEntitySprite = {
+  mount: ViewportSpriteLayer | null;
   rearWeapons: ViewportSpriteLayer[];
   body: ViewportSpriteLayer | null;
   hair: ViewportSpriteLayer | null;
@@ -221,6 +222,22 @@ export function buildViewportEntitySprite(
       : weaponPlacement === "front"
         ? [primaryWeaponLayer, secondaryWeaponLayer].filter((layer): layer is ViewportSpriteLayer => Boolean(layer))
         : [];
+  // Crystal draws the mount as the bottom layer at `DrawFrame - 416 + MountOffset`
+  // (`PlayerObject.cs:5084-5090`). The server only fills `mountLibrary` while riding
+  // (and suppresses the weapon layers then), so this resolves to null on foot. We key
+  // the mount frame off the rider's body frame so it tracks movement; if the
+  // `Mount/NN` library is not yet in the manifest the layer resolves to null and is
+  // simply skipped (the mount atlas is asset-gated behind the R2 release).
+  const mountLibraryKey = sprite.mountLibrary
+    ? normalizeSceneSpriteLibraryKey(sprite.mountLibrary)
+    : null;
+  const mountFrameIndex =
+    (sprite.mountFrameOffset ?? animation.frameBaseOffset) +
+    directionIndex(entity.direction) * animation.directionStride +
+    frameCycle;
+  const mountFrame = mountLibraryKey
+    ? frameMetaForIndexWithFallback(libraries[mountLibraryKey], mountFrameIndex, fallbackFrameIndex)
+    : null;
   const preloadAnimations = atlasPreloadAnimationsForEntity(entity, sprite, animationState, animation);
   const preloadFrames = animationPreloadFramesForEntity({
     libraries,
@@ -235,6 +252,7 @@ export function buildViewportEntitySprite(
   });
 
   return {
+    mount: viewportSpriteLayer(mountFrame),
     rearWeapons,
     body: viewportSpriteLayer(bodyFrame),
     hair: viewportSpriteLayer(hairFrame),
@@ -388,7 +406,7 @@ function entitySpriteLayers(sprite: ViewportEntitySprite | null): ViewportSprite
     return [];
   }
 
-  return [sprite.body, sprite.hair, ...sprite.rearWeapons, ...sprite.frontWeapons].filter(
+  return [sprite.mount, sprite.body, sprite.hair, ...sprite.rearWeapons, ...sprite.frontWeapons].filter(
     (layer): layer is ViewportSpriteLayer => Boolean(layer),
   );
 }

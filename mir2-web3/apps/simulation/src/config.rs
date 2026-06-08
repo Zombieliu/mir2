@@ -3194,6 +3194,12 @@ pub struct WorldEntitySpriteSnapshot {
     pub alt_weapon_frame_offset: Option<u16>,
     pub frame_count: u8,
     pub direction_stride: u16,
+    /// Crystal `Libraries.Mounts[MountType]` (`Data\Mount\NN`). Present only when
+    /// the entity is riding a mount (Crystal `PlayerObject.SetLibraries` line 604-607).
+    pub mount_library: Option<String>,
+    /// Frame offset for the mount layer, mirroring Crystal `DrawMount` which draws at
+    /// `DrawFrame - 416 + MountOffset` (`PlayerObject.cs:5089`).
+    pub mount_frame_offset: Option<u16>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
