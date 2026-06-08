@@ -1454,11 +1454,9 @@ fn gm_summon_hero(world: &mut World) -> Vec<ServerPacket> {
 }
 
 fn gm_ride(world: &mut World) -> Vec<ServerPacket> {
-    // Crystal `ToggleRide()` swaps the player onto/off a mount. The simulation
-    // exposes mounts through item use; with no mount equipped this is a no-op
-    // (Crystal's `ToggleRide` also early-returns without a mount).
-    let _ = world;
-    Vec::new()
+    // Crystal `ToggleRide()` mounts/dismounts the equipped mount and broadcasts the
+    // new state; a no-op when no mount is equipped.
+    super::equipment::gm_toggle_ride(world)
 }
 
 // ---------------------------------------------------------------------------
