@@ -27,7 +27,7 @@ async fn async_main() -> std::io::Result<()> {
     let account_store_path =
         env::var("MIR2_ACCOUNT_STORE_PATH").unwrap_or_else(|_| DEFAULT_ACCOUNT_STORE_PATH.into());
     let config = GatewayConfig::default()
-        .with_crystal_map_runtime()
+        .with_crystal_world_runtime()
         .with_account_store_environment(PathBuf::from(account_store_path))
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
 

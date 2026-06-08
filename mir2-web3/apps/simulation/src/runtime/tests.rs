@@ -1,10 +1,11 @@
 use super::super::resources::ObjectIdAllocatorResource;
 use super::{
-    bomb_spider_template, bug_bat_template, build_crystal_current_map_spawn_table,
-    build_spawn_table, can_occupy, combat_delay_ticks, crystal_dynamic_monster_template,
-    crystal_local_time_snapshot, crystal_npc_free_bag_slots, crystal_packet_move_delay_ticks,
-    current_location, current_player_object_id, entity_by_object_id, entity_facing,
-    entity_object_id, entity_position, equipment_slot_from_index, equipment_slot_index,
+    bomb_spider_template, bug_bat_template, build_crystal_current_map_full_spawn_table,
+    build_crystal_current_map_spawn_table, build_spawn_table, can_occupy, combat_delay_ticks,
+    crystal_dynamic_monster_template, crystal_local_time_snapshot, crystal_npc_free_bag_slots,
+    crystal_packet_move_delay_ticks, crystal_world_respawn_spawns, current_location,
+    current_player_object_id, entity_by_object_id, entity_facing, entity_object_id,
+    entity_position, equipment_slot_from_index, equipment_slot_index,
     execute_crystal_npc_action_line, initial_monster_ai_state, initial_wooma_taurus_state,
     initial_yimoogi_state, is_safe_zone_point, is_static_spawnable_point,
     mark_crystal_packet_action, offset_point, player_entity, point_in_data_range,
@@ -3630,6 +3631,111 @@ fn crystal_current_map_spawn_table_uses_representative_map_rosters() {
         .rules
         .iter()
         .any(|rule| rule.name == "HellLord" && rule.ai == 98 && rule.slots.len() == 1));
+}
+
+#[test]
+fn crystal_world_source_activates_full_bichon_map() {
+    // `CrystalWorld` spawns Bichon's entire respawn roster, far beyond the
+    // collision-bounded starter slice the starter-region source materialises.
+    let mut starter_config = SimulationConfig::default();
+    starter_config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
+    let starter_slots: usize = build_spawn_table(&starter_config)
+        .rules
+        .iter()
+        .map(|rule| rule.slots.len())
+        .sum();
+
+    let world_config = SimulationConfig::default().with_crystal_world_runtime();
+    let world_table = build_spawn_table(&world_config);
+    let world_slots: usize = world_table.rules.iter().map(|rule| rule.slots.len()).sum();
+
+    assert!(
+        world_slots >= 500,
+        "expected the full Bichon map to activate, got {world_slots} slots"
+    );
+    assert!(
+        world_slots > starter_slots.saturating_mul(5),
+        "full world ({world_slots}) should dwarf the starter slice ({starter_slots})"
+    );
+    assert!(world_table
+        .rules
+        .iter()
+        .any(|rule| rule.name == "Royal_Guard"));
+    assert!(world_table.rules.iter().any(|rule| rule.name == "Deer"));
+}
+
+#[test]
+fn crystal_world_respawn_spawns_place_full_group_roster() {
+    // A real Bichon spread group materialises (up to) its full count on
+    // walkable cells, using the canonical placement shared with the StartGame
+    // bootstrap packets so the ECS world and the packets never disagree.
+    let bichon = crystal_map_respawns_by_file_name("0").expect("Bichon respawns");
+    let group = bichon
+        .respawns
+        .iter()
+        .find(|respawn| respawn.count >= 5 && respawn.spread >= 5)
+        .expect("Bichon should have a spread respawn group");
+
+    let spawns = crystal_world_respawn_spawns("0", group);
+    assert!(
+        !spawns.is_empty(),
+        "expected the full group to place on walkable cells"
+    );
+    assert!(spawns.len() <= usize::from(group.count));
+    for (slot_index, _, _) in &spawns {
+        assert!(*slot_index < usize::from(group.count));
+    }
+}
+
+#[test]
+fn crystal_world_full_spawn_table_is_empty_for_unpopulated_map() {
+    // Dormancy: a map with no respawn data activates nothing. Only the map a
+    // player occupies is ever built, so unpopulated maps never spawn or tick.
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let table = build_crystal_current_map_full_spawn_table(&config, "does-not-exist");
+    assert!(table.rules.is_empty());
+}
+
+#[test]
+fn crystal_world_start_game_activates_bichon_only() {
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.map_title.as_deref(), Some("BichonProvince"));
+    // The occupied map is alive...
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.kind == WorldEntityKind::Monster));
+    // ...and other maps stay dormant — none of their exclusive monsters leak in.
+    assert!(!snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && matches!(
+                entity.name.as_str(),
+                "HellKnight1" | "PKSpirit" | "HellLord"
+            )
+    }));
+}
+
+#[test]
+fn crystal_full_world_zone_collision_expands_bichon_to_full_map() {
+    // Off (starter demo / tests): Bichon "0" is the collision-bounded slice.
+    super::set_crystal_full_world_zone_collision(false);
+    let starter = super::zone_map_collision_data("0").expect("starter zone collision");
+    // On (activated world): Bichon "0" is the full 700×700 province.
+    super::set_crystal_full_world_zone_collision(true);
+    let full = super::zone_map_collision_data("0").expect("full-world zone collision");
+    // Reset before asserting so a failure never leaks the flag to other tests.
+    super::set_crystal_full_world_zone_collision(false);
+
+    let starter_width = starter.bounds.max_x - starter.bounds.min_x;
+    let full_width = full.bounds.max_x - full.bounds.min_x;
+    assert!(
+        full_width > starter_width.saturating_mul(3),
+        "full Bichon ({full_width} wide) should dwarf the starter slice ({starter_width} wide)"
+    );
 }
 
 #[test]

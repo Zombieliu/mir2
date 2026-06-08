@@ -22,9 +22,9 @@ use mir2_protocol::{
 
 use crate::config::{
     CharacterRecord, CharacterSaveRecord, EquipmentSlot, GroundDropLootSnapshot,
-    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, NpcScriptDiagnosticSnapshot,
-    QuestStage, SimulationConfig, Stage5AuctionListing, Stage5HeroState,
-    Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
+    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, MonsterSpawnSource,
+    NpcScriptDiagnosticSnapshot, QuestStage, SimulationConfig, Stage5AuctionListing,
+    Stage5HeroState, Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
     Stage5SystemsState, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
 };
@@ -79,7 +79,8 @@ use super::map::{
 use super::monster_ai::advance_world;
 use super::monsters::{
     crystal_monster_effect_for_name, crystal_respawn_object_id,
-    crystal_respawn_object_monster_packet, point_in_data_range, start_game_visible_respawn_spawns,
+    crystal_respawn_object_monster_packet, crystal_world_respawn_spawns, point_in_data_range,
+    start_game_visible_respawn_spawns,
 };
 use super::movement::current_location;
 use super::npc::{
@@ -5625,6 +5626,7 @@ pub(super) fn start_game_static_visible_object_packets(
     map_file_name: &str,
     player_position: &Point,
     character: &CharacterRecord,
+    spawn_source: MonsterSpawnSource,
 ) -> Vec<ServerPacket> {
     let normalized_map = normalize_map_file_name(map_file_name);
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
@@ -5674,8 +5676,17 @@ pub(super) fn start_game_static_visible_object_packets(
 
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
         for respawn in &map.respawns {
-            let visible_spawns =
-                start_game_visible_respawn_spawns(map_file_name, respawn, player_position);
+            // In the fully-activated world the whole map is alive, so the
+            // on-screen subset is the canonical full placement filtered to the
+            // data range — same positions/object-ids the ECS world spawned.
+            let visible_spawns = if spawn_source == MonsterSpawnSource::CrystalWorld {
+                crystal_world_respawn_spawns(map_file_name, respawn)
+                    .into_iter()
+                    .filter(|(_, location, _)| point_in_data_range(location, player_position))
+                    .collect::<Vec<_>>()
+            } else {
+                start_game_visible_respawn_spawns(map_file_name, respawn, player_position)
+            };
             for (slot_index, location, direction) in visible_spawns {
                 let object_id = crystal_respawn_object_id(respawn, slot_index);
                 objects.push((

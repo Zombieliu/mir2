@@ -28,7 +28,8 @@ use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
 use super::map::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision,
-    runtime_full_map_collision_data, walkable_point_count_in_rect, walkable_points_in_rect,
+    runtime_full_map_collision_data, runtime_world_map_collision_data,
+    walkable_point_count_in_rect, walkable_points_in_rect,
 };
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
 use super::packets::object_movement;
@@ -95,6 +96,9 @@ pub(super) fn build_spawn_table(config: &SimulationConfig) -> MonsterSpawnTable 
         MonsterSpawnSource::StarterScenario => build_starter_spawn_table(config),
         MonsterSpawnSource::CrystalStarterRegion => {
             build_crystal_starter_region_spawn_table(config)
+        }
+        MonsterSpawnSource::CrystalWorld => {
+            build_crystal_current_map_full_spawn_table(config, &config.map.file_name)
         }
     }
 }
@@ -197,6 +201,121 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
                     max_hp: respawn.monster_hp.max(1),
                     agility: respawn.monster_agility,
                     route,
+                    slots: vec![MonsterSpawnSlot {
+                        entity: None,
+                        object_id,
+                        spawn_position,
+                        next_respawn_tick: None,
+                    }],
+                });
+            }
+        }
+    }
+
+    MonsterSpawnTable { rules }
+}
+
+/// Canonical placement for every slot of a respawn group across its *full*
+/// spawn area (Crystal "all maps" world). This is the single source of truth a
+/// fully-activated map uses: the ECS spawn table and the StartGame bootstrap
+/// packets both derive monster positions/object-ids from here, so they never
+/// disagree. It mirrors [`start_game_visible_respawn_spawns`] but places the
+/// entire `count` over the whole spread (no data-range clamp); callers that
+/// only want the on-screen subset filter the result by `point_in_data_range`.
+pub(super) fn crystal_world_respawn_spawns(
+    map_file_name: &str,
+    respawn: &CrystalRespawnTemplate,
+) -> Vec<(usize, Point, MirDirection)> {
+    if respawn.count == 0 {
+        return Vec::new();
+    }
+
+    if respawn.count == 1 && respawn.spread == 0 {
+        return vec![(0, respawn.location.clone(), respawn.direction)];
+    }
+
+    let spread = i32::from(respawn.spread);
+    if spread <= 0 {
+        return Vec::new();
+    }
+
+    let Some(collision) = runtime_world_map_collision_data(map_file_name) else {
+        return Vec::new();
+    };
+    let cells = walkable_points_in_rect(
+        &collision,
+        respawn.location.x - spread,
+        respawn.location.x + spread,
+        respawn.location.y - spread,
+        respawn.location.y + spread,
+    );
+    if cells.is_empty() {
+        return Vec::new();
+    }
+    let cell_count = cells.len();
+
+    let mut used = BTreeSet::new();
+    let mut spawns = Vec::new();
+    for slot_index in 0..usize::from(respawn.count) {
+        let base = deterministic_roll(
+            0,
+            respawn.respawn_index.max(0) as usize,
+            slot_index,
+            cell_count as u64,
+        );
+        let mut cell_index = base as usize % cell_count;
+        for _ in 0..cell_count {
+            let point = cells[cell_index].clone();
+            if used.insert((point.x, point.y)) {
+                let direction = crystal_respawn_dynamic_direction(respawn, slot_index);
+                spawns.push((slot_index, point, direction));
+                break;
+            }
+            cell_index = (cell_index + 1) % cell_count;
+        }
+    }
+
+    spawns
+}
+
+/// Build the spawn table for an *entire* Crystal map (all respawn groups, all
+/// slots), used by `MonsterSpawnSource::CrystalWorld`. Positions and object-ids
+/// come from [`crystal_world_respawn_spawns`] so they match what the bootstrap
+/// packets advertise. Empty maps never reach here — a zone only builds this when
+/// a player occupies it, so unoccupied maps stay dormant.
+pub(super) fn build_crystal_current_map_full_spawn_table(
+    config: &SimulationConfig,
+    map_file_name: &str,
+) -> MonsterSpawnTable {
+    let mut rules = Vec::new();
+
+    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
+        for respawn in map.respawns {
+            let spawns = crystal_world_respawn_spawns(map_file_name, &respawn);
+            if spawns.is_empty() {
+                continue;
+            }
+            let route = normalized_route_steps_for_map(config, map_file_name, &respawn.route);
+            for (slot_index, spawn_position, direction) in spawns {
+                let object_id = crystal_respawn_object_id(&respawn, slot_index);
+                rules.push(MonsterSpawnRule {
+                    name: respawn.monster_name.clone(),
+                    image: respawn.monster_image,
+                    direction,
+                    respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
+                        delay_minutes: respawn.delay_minutes,
+                        random_delay_minutes: respawn.random_delay_minutes,
+                    },
+                    ai: respawn.monster_ai,
+                    disposition: monster_disposition_for_ai(respawn.monster_ai),
+                    hostile_to_player: monster_targets_players(respawn.monster_ai),
+                    view_range: i32::from(respawn.monster_view_range),
+                    can_wander: crystal_respawn_can_wander(respawn.monster_hp),
+                    move_interval_ticks: crystal_speed_to_ticks(respawn.monster_move_speed),
+                    attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
+                    max_hp: respawn.monster_hp.max(1),
+                    agility: respawn.monster_agility,
+                    route: route.clone(),
                     slots: vec![MonsterSpawnSlot {
                         entity: None,
                         object_id,
