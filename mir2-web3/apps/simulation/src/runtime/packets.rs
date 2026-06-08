@@ -4912,9 +4912,18 @@ pub(super) fn handle_chat_packet(
     message: String,
     linked_items: Vec<ChatItem>,
 ) -> Vec<ServerPacket> {
-    // GM `@` commands are intercepted before the normal chat pipeline (and before
-    // the spam guard) so privileged operators can act in-world. Non-GM callers
-    // fall through to normal chat, so command existence never leaks to players.
+    // `@LOGIN` arms a GM-password prompt; the very next chat line is the password
+    // candidate (Crystal `PlayerObject.Chat`, GMLogin branch). It is checked
+    // before everything else and consumed regardless of outcome.
+    if super::gm_commands::gm_login_pending(world) {
+        return super::gm_commands::resolve_gm_login_password(world, &message);
+    }
+
+    // Crystal consumes EVERY `@`-prefixed line as a command attempt — it is never
+    // echoed to normal chat — and gates each command individually (many, like
+    // `@TIME`/`@MAP`/`@DIE`, run for any player). The dispatcher therefore always
+    // claims `@` lines; a non-GM issuing a GM-gated command gets Crystal's silent
+    // `return;`, so command existence still never leaks to ordinary players.
     if super::gm_commands::is_gm_command(&message) {
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
             return packets;
