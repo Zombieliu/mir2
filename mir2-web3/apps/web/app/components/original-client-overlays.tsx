@@ -20,7 +20,7 @@ import {
   type Mir2Language,
 } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
-import { playOriginalSoundId } from "../../lib/original-audio";
+import { playOriginalSoundEvent } from "../../lib/original-audio";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
 import {
   handleSceneAssetImageError,
@@ -733,7 +733,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
           suppressClickRef.current = false;
           return;
         }
-        playOriginalSoundId(10100);
+        playOriginalSoundEvent("uiButtonClick");
         onClick();
       }}
       onPointerDown={(event) => {
@@ -742,7 +742,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         pointerActivatedRef.current = true;
         suppressClickRef.current = true;
         setPressed(true);
-        playOriginalSoundId(10100);
+        playOriginalSoundEvent("uiButtonClick");
         onPointerActivate();
       }}
       onMouseEnter={() => setHovered(true)}
@@ -757,7 +757,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         if (onPointerActivate && !pointerActivatedRef.current) {
           pointerActivatedRef.current = true;
           suppressClickRef.current = true;
-          playOriginalSoundId(10100);
+          playOriginalSoundEvent("uiButtonClick");
           onPointerActivate();
         }
       }}
