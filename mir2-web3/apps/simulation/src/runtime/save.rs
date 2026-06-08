@@ -750,19 +750,26 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         .free_server_shout = false;
     {
         // Source GM rank from the authoritative account record (0 for normal
-        // players). Gates the in-game `@` command dispatcher.
+        // players). Gates the in-game `@` command dispatcher. `MIR2_GM_ACCOUNTS`
+        // can additionally grant GM for the session without mutating the record.
         let gm_level = {
             let config = world.resource::<RuntimeConfigResource>().config.clone();
             let account_id = world.resource::<SessionResource>().account_id.clone();
-            account_id
+            let stored = account_id
+                .as_ref()
                 .and_then(|account_id| {
                     config
                         .account_store
                         .lock()
                         .ok()
-                        .and_then(|store| store.accounts.get(&account_id).map(|a| a.gm_level))
+                        .and_then(|store| store.accounts.get(account_id).map(|a| a.gm_level))
                 })
-                .unwrap_or(0)
+                .unwrap_or(0);
+            let env_gm = account_id
+                .as_deref()
+                .map(crate::config::account_is_env_gm)
+                .unwrap_or(false);
+            stored.max(if env_gm { 1 } else { 0 })
         };
         world.resource_mut::<PlayerPermissionResource>().gm_level = gm_level;
     }
