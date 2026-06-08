@@ -956,23 +956,35 @@ export function OriginalClientShell({
     renderPlayer,
     playerCameraMotionOffset,
   };
-  const viewportEntitySprites = player
-    ? viewportEntities.map((entity) => {
-        const motionSnapshot = entityMotionSnapshotsRef.current[entity.objectId];
-        const animationState = entityAnimationStateForEntity(entity, entityMotionSnapshotsRef.current, sceneNow);
-        return {
+  // Sprite *frame data* (which body/hair/weapon frame to draw) only changes on entity updates from
+  // the server, sprite-library loads, or the 120ms animation tick — NOT on the 60fps motion clock.
+  // Memoising it off `sceneSpriteFrameIndex` instead of `motionNow` stops every monster/NPC sprite
+  // from being rebuilt 60×/sec (the smooth per-frame pixel offset is applied downstream from
+  // `motionNow` on the wrapper element). Transient attack/struck frames quantise to the 120ms tick,
+  // which is imperceptible. This is the bulk of the "running is janky / NPCs flicker" fix: stable
+  // sprite refs let the memoised <EntitySpriteLayers> skip its per-frame DOM restyle.
+  const viewportEntitySprites = useMemo(() => {
+    if (!player) {
+      return [];
+    }
+    const spriteNow = Date.now();
+    const snapshots = entityMotionSnapshotsRef.current;
+    return viewportEntities.map((entity) => {
+      const motionSnapshot = snapshots[entity.objectId];
+      const animationState = entityAnimationStateForEntity(entity, snapshots, spriteNow);
+      return {
+        entity,
+        sprite: buildViewportEntitySprite(
           entity,
-          sprite: buildViewportEntitySprite(
-            entity,
-            sceneSpriteLibraries,
-            sceneSpriteFrameIndex,
-            sceneNow,
-            animationState,
-            motionSnapshot,
-          ),
-        };
-      })
-    : [];
+          sceneSpriteLibraries,
+          sceneSpriteFrameIndex,
+          spriteNow,
+          animationState,
+          motionSnapshot,
+        ),
+      };
+    });
+  }, [player, viewportEntities, sceneSpriteLibraries, sceneSpriteFrameIndex]);
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(
