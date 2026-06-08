@@ -469,18 +469,42 @@ export type AdminRiskReadModel = {
 
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
 
+// Permissive operator identity used ONLY for local development with the
+// header/policy auth backend. In production the operator must be configured
+// explicitly (or, preferably, the postgres bearer-token backend is used); we
+// never grant a default all-powerful operator on a hosted deployment.
+const DEV_DEFAULT_OPERATOR_PERMISSIONS =
+  "account_read,account_write,account_ban,character_read,character_write,character_kick,character_message,inventory_read,inventory_grant_item,currency_grant,mail_send_system,world_broadcast,server_control,market_moderate,guild_moderate,namelist_manage,content_read,content_publish,content_rollback,audit_read,approval_manage,permission_manage";
+
+function isProductionRuntime() {
+  if (process.env.NODE_ENV === "production") return true;
+  return ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV", "VERCEL_ENV"].some((name) => {
+    const value = process.env[name]?.trim().toLowerCase();
+    return value === "production" || value === "prod" || value === "staging";
+  });
+}
+
 export async function operatorHeaders() {
   const cookieStore = await cookies();
   const token =
     cookieStore.get("admin_operator_token")?.value?.trim() ??
     process.env.ADMIN_OPERATOR_TOKEN?.trim();
+  // Fail closed in production: if the operator identity is not explicitly
+  // configured, send empty headers (the admin-api rejects them) instead of
+  // defaulting to a full-permission "local-gm" operator.
+  const devDefaults = isProductionRuntime()
+    ? { id: "", email: "", role: "", permissions: "" }
+    : {
+        id: "local-gm",
+        email: "gm.local@mir2.dev",
+        role: "ops_admin",
+        permissions: DEV_DEFAULT_OPERATOR_PERMISSIONS,
+      };
   const headers: Record<string, string> = {
-    "x-operator-id": process.env.ADMIN_OPERATOR_ID ?? "local-gm",
-    "x-operator-email": process.env.ADMIN_OPERATOR_EMAIL ?? "gm.local@mir2.dev",
-    "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
-    "x-operator-permissions":
-      process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,account_write,account_ban,character_read,character_write,character_kick,character_message,inventory_read,inventory_grant_item,currency_grant,mail_send_system,world_broadcast,server_control,market_moderate,guild_moderate,namelist_manage,content_read,content_publish,content_rollback,audit_read,approval_manage,permission_manage"
+    "x-operator-id": process.env.ADMIN_OPERATOR_ID ?? devDefaults.id,
+    "x-operator-email": process.env.ADMIN_OPERATOR_EMAIL ?? devDefaults.email,
+    "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? devDefaults.role,
+    "x-operator-permissions": process.env.ADMIN_OPERATOR_PERMISSIONS ?? devDefaults.permissions,
   };
   if (token) {
     headers.authorization = `Bearer ${token}`;

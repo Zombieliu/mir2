@@ -4227,6 +4227,7 @@ pub(super) fn stage5_trade_request_packet(
         partner: partner.clone(),
         offered_items: Vec::new(),
         offered_slots: BTreeMap::new(),
+        offered_unique_ids: BTreeMap::new(),
         offered_gold: 0,
         offered_currency: crate::config::CurrencyKind::Gold,
         accepted: false,
@@ -4256,6 +4257,7 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
                 partner: "Trader".to_string(),
                 offered_items: Vec::new(),
                 offered_slots: BTreeMap::new(),
+                offered_unique_ids: BTreeMap::new(),
                 offered_gold: 0,
                 offered_currency: crate::config::CurrencyKind::Gold,
                 accepted: false,
@@ -4292,7 +4294,7 @@ fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Ve
             success: false,
         }];
     };
-    let item_key = {
+    let (item_key, item_unique) = {
         let inventory = world.resource::<InventoryResource>();
         let Some(item) = inventory
             .inventory_items
@@ -4312,7 +4314,7 @@ fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Ve
                 success: false,
             }];
         }
-        item.key.clone()
+        (item.key.clone(), item_unique_id(item))
     };
     {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
@@ -4336,6 +4338,7 @@ fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Ve
             }];
         }
         trade.offered_slots.insert(to_slot, from_slot);
+        trade.offered_unique_ids.insert(to_slot, item_unique);
         push_unique(&mut trade.offered_items, item_key);
         trade.accepted = false;
     }
@@ -4375,6 +4378,7 @@ fn stage5_retrieve_trade_item_packet(world: &mut World, from: i32, to: i32) -> V
                 success: false,
             }];
         }
+        trade.offered_unique_ids.remove(&from_slot);
         trade.accepted = false;
         trade.offered_slots.clone()
     };
@@ -4411,7 +4415,7 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
         return vec![ServerPacket::TradeCancel { unlock: true }];
     }
 
-    let (offered_gold, offered_slots) = {
+    let (offered_gold, offered_slots, offered_unique_ids) = {
         let stage5 = world.resource::<Stage5SystemsResource>();
         let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
             return Vec::new();
@@ -4419,14 +4423,19 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
         if trade.completed {
             return Vec::new();
         }
-        (trade.offered_gold, trade.offered_slots.clone())
+        (
+            trade.offered_gold,
+            trade.offered_slots.clone(),
+            trade.offered_unique_ids.clone(),
+        )
     };
     if world.resource::<PlayerRuntimeResource>().gold < offered_gold {
         return Vec::new();
     }
-    {
+    let offer_tampered = {
         let inventory = world.resource::<InventoryResource>();
-        for inventory_index in offered_slots.values() {
+        let mut tampered = false;
+        for (trade_slot, inventory_index) in offered_slots.iter() {
             let Some(item) = inventory
                 .inventory_items
                 .iter()
@@ -4437,7 +4446,19 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
             if !stage5_trade_item_can_enter(item) {
                 return Vec::new();
             }
+            // Integrity check (F-07): the item still occupying the offered slot's
+            // inventory index must be the exact item deposited there. If a
+            // different item was swapped in afterwards, the offer no longer
+            // matches what the partner agreed to.
+            if offered_unique_ids.get(trade_slot).copied() != Some(item_unique_id(item)) {
+                tampered = true;
+                break;
+            }
         }
+        tampered
+    };
+    if offer_tampered {
+        return stage5_trade_abort_on_tampered_offer(world);
     }
     if offered_gold > 0 {
         world.resource_mut::<PlayerRuntimeResource>().gold -= offered_gold;
@@ -4464,6 +4485,18 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
     }
     packets.push(ServerPacket::TradeConfirm);
     packets
+}
+
+/// Abort a trade whose offered items were tampered with after deposit (F-07).
+/// No items or gold change hands: the trade is unlocked/cancelled so the partner
+/// is never delivered an item that was swapped in behind the agreed offer.
+fn stage5_trade_abort_on_tampered_offer(world: &mut World) -> Vec<ServerPacket> {
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    if let Some(trade) = stage5.stage5_systems.trade.as_mut() {
+        trade.accepted = false;
+        trade.locked = false;
+    }
+    vec![ServerPacket::TradeCancel { unlock: true }]
 }
 
 pub(super) fn stage5_trade_cancel_packet(world: &mut World) -> Vec<ServerPacket> {

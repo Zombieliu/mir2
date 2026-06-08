@@ -1,5 +1,8 @@
 use std::collections::BTreeSet;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
+
+use sha2::{Digest, Sha256};
 
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
@@ -291,6 +294,108 @@ pub(super) fn account_characters(
         .unwrap_or_default()
 }
 
+/// Hashed-password marker. Stored form: `sha256$<salt_hex>$<hash_hex>`.
+const PASSWORD_HASH_PREFIX: &str = "sha256$";
+/// Iteration count for the stretched SHA-256 password hash. Not as strong as
+/// argon2/bcrypt, but removes plaintext-at-rest using only vendored deps and
+/// adds a meaningful work factor.
+const PASSWORD_HASH_ITERATIONS: u32 = 100_000;
+
+/// Derive a unique 16-byte salt. Salts must be unique per account (to defeat
+/// shared rainbow tables) but need not be secret, so a high-resolution clock,
+/// a process-wide counter, and the account id are mixed together.
+fn derive_password_salt(account_id: &str) -> [u8; 16] {
+    static SALT_COUNTER: AtomicU64 = AtomicU64::new(0);
+    let counter = SALT_COUNTER.fetch_add(1, Ordering::Relaxed);
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_nanos())
+        .unwrap_or_default();
+    let mut hasher = Sha256::new();
+    hasher.update(nanos.to_le_bytes());
+    hasher.update(counter.to_le_bytes());
+    hasher.update(account_id.as_bytes());
+    let digest = hasher.finalize();
+    let mut salt = [0_u8; 16];
+    salt.copy_from_slice(&digest[..16]);
+    salt
+}
+
+fn stretch_password(salt: &[u8], password: &str) -> [u8; 32] {
+    let mut digest = [0_u8; 32];
+    let mut hasher = Sha256::new();
+    hasher.update(salt);
+    hasher.update(password.as_bytes());
+    digest.copy_from_slice(&hasher.finalize());
+    for _ in 1..PASSWORD_HASH_ITERATIONS {
+        let mut hasher = Sha256::new();
+        hasher.update(salt);
+        hasher.update(digest);
+        digest.copy_from_slice(&hasher.finalize());
+    }
+    digest
+}
+
+fn hex_encode(bytes: &[u8]) -> String {
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        out.push_str(&format!("{byte:02x}"));
+    }
+    out
+}
+
+fn hex_decode(text: &str) -> Option<Vec<u8>> {
+    if text.len() % 2 != 0 {
+        return None;
+    }
+    (0..text.len())
+        .step_by(2)
+        .map(|index| u8::from_str_radix(&text[index..index + 2], 16).ok())
+        .collect()
+}
+
+/// Hash an account password for storage.
+pub(super) fn hash_account_password(account_id: &str, password: &str) -> String {
+    let salt = derive_password_salt(account_id);
+    let hash = stretch_password(&salt, password);
+    format!(
+        "{PASSWORD_HASH_PREFIX}{}${}",
+        hex_encode(&salt),
+        hex_encode(&hash)
+    )
+}
+
+/// Constant-time byte comparison to avoid leaking match length via timing.
+fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    let mut diff = 0_u8;
+    for (a, b) in left.iter().zip(right.iter()) {
+        diff |= a ^ b;
+    }
+    diff == 0
+}
+
+/// Verify a candidate against a stored password value. Accepts both the hashed
+/// format and legacy plaintext (so pre-existing stores keep working), using a
+/// constant-time comparison in both cases.
+pub(super) fn account_password_matches(stored: &str, candidate: &str) -> bool {
+    if let Some(rest) = stored.strip_prefix(PASSWORD_HASH_PREFIX) {
+        let mut parts = rest.splitn(2, '$');
+        let (Some(salt_hex), Some(hash_hex)) = (parts.next(), parts.next()) else {
+            return false;
+        };
+        let (Some(salt), Some(expected)) = (hex_decode(salt_hex), hex_decode(hash_hex)) else {
+            return false;
+        };
+        let actual = stretch_password(&salt, candidate);
+        constant_time_eq(&expected, &actual)
+    } else {
+        constant_time_eq(stored.as_bytes(), candidate.as_bytes())
+    }
+}
+
 pub(super) fn create_account_with_password(
     config: &SimulationConfig,
     account_id: &str,
@@ -304,7 +409,7 @@ pub(super) fn create_account_with_password(
         return 7;
     }
     let mut account = AccountRecord::empty();
-    account.password = password.to_string();
+    account.password = hash_account_password(account_id, password);
     store.accounts.insert(account_id.to_string(), account);
     drop(store);
     if let Err(error) = config.save_account_store_account(account_id) {
@@ -335,7 +440,7 @@ pub(super) fn login_account(
     if let Some(ban) = account.active_ban(now_ms) {
         return AccountLoginResult::Banned(ban);
     }
-    if account.password == password {
+    if account_password_matches(&account.password, password) {
         AccountLoginResult::Success(account.characters.clone())
     } else {
         AccountLoginResult::InvalidCredentials
@@ -413,11 +518,11 @@ pub(super) fn change_account_password(
     let Some(account) = store.accounts.get_mut(account_id) else {
         return 4;
     };
-    if account.password != current_password {
+    if !account_password_matches(&account.password, current_password) {
         return 5;
     }
 
-    account.password = new_password.to_string();
+    account.password = hash_account_password(account_id, new_password);
     drop(store);
     if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");

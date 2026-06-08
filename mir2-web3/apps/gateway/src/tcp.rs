@@ -100,8 +100,15 @@ fn session_panic_io_error(error: String) -> io::Error {
     io::Error::new(io::ErrorKind::Other, error)
 }
 
+/// Maximum time allowed to receive the remainder of a frame once its header has
+/// arrived. Bounds slowloris-style attacks where a client announces a (up to
+/// 64 KB) frame and then dribbles the body to pin a connection task open.
+const FRAME_BODY_READ_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
+
 async fn read_frame(stream: &mut TcpStream) -> io::Result<Vec<u8>> {
     let mut header = [0_u8; 2];
+    // No timeout on the header read: an idle connection legitimately waits here
+    // for the next frame.
     stream.read_exact(&mut header).await?;
     let len = u16::from_le_bytes(header) as usize;
 
@@ -114,7 +121,15 @@ async fn read_frame(stream: &mut TcpStream) -> io::Result<Vec<u8>> {
 
     let mut frame = vec![0_u8; len];
     frame[..2].copy_from_slice(&header);
-    stream.read_exact(&mut frame[2..]).await?;
+    match tokio::time::timeout(FRAME_BODY_READ_TIMEOUT, stream.read_exact(&mut frame[2..])).await {
+        Ok(result) => result?,
+        Err(_elapsed) => {
+            return Err(io::Error::new(
+                io::ErrorKind::TimedOut,
+                "timed out reading frame body",
+            ))
+        }
+    };
     Ok(frame)
 }
 
