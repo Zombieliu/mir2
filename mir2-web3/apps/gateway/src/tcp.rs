@@ -10,6 +10,11 @@ use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
 pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
+    // Activated Crystal world: host every map full-size in the shared zone (see
+    // `run_web_gateway`). Empty maps stay dormant regardless.
+    if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
+        mir2_simulation::set_crystal_full_world_zone_collision(true);
+    }
     let listener = TcpListener::bind(addr).await?;
     let config = Arc::new(config);
     let zone_registry = Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(
