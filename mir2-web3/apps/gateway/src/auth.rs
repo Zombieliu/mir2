@@ -50,13 +50,27 @@ fn passkey_gateway_secret() -> Result<String, String> {
         _ if passkey_secret_required_from_env() => {
             Err("MIR2_PASSKEY_AUTH_SECRET is required for production passkey login".to_string())
         }
-        _ => {
+        // Fail closed by default: the insecure local secret is only used when a
+        // developer explicitly opts in. This prevents a misconfigured
+        // deployment (one where the env-based production detection happens to
+        // miss) from silently signing tokens with a publicly known key.
+        _ if dev_passkey_secret_allowed() => {
             eprintln!(
-                "MIR2_PASSKEY_AUTH_SECRET is not set; using local development passkey secret"
+                "MIR2_PASSKEY_AUTH_SECRET is not set; using local development passkey secret \
+                 (MIR2_ALLOW_DEV_PASSKEY_SECRET is enabled)"
             );
             Ok("mir2-web3-local-passkey-auth-secret".to_string())
         }
+        _ => Err("MIR2_PASSKEY_AUTH_SECRET is not set; set it, or set \
+                  MIR2_ALLOW_DEV_PASSKEY_SECRET=1 to use the insecure local development secret"
+            .to_string()),
     }
+}
+
+fn dev_passkey_secret_allowed() -> bool {
+    env::var("MIR2_ALLOW_DEV_PASSKEY_SECRET")
+        .map(|value| matches!(value.trim(), "1" | "true" | "yes"))
+        .unwrap_or(false)
 }
 
 fn passkey_secret_required_from_env() -> bool {
@@ -99,11 +113,15 @@ mod tests {
             "MIR2_RUNTIME_ENV",
             "MIR2_DEPLOYMENT_ENV",
             "MIR2_ENV",
+            "MIR2_ALLOW_DEV_PASSKEY_SECRET",
         ];
         let previous = names.map(|name| (name, std::env::var(name).ok()));
         for name in names {
             std::env::remove_var(name);
         }
+        // Tests exercise the local development secret path by default; opt in
+        // unless a specific case overrides it below.
+        std::env::set_var("MIR2_ALLOW_DEV_PASSKEY_SECRET", "1");
         for (name, value) in vars {
             match value {
                 Some(value) => std::env::set_var(name, value),

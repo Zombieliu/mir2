@@ -3142,6 +3142,16 @@ impl SimulationSession {
         let Some(target_position) = entity_position(self.app.world(), target_entity) else {
             return Vec::new();
         };
+        // Server-authoritative range gate: a client may only ranged-attack a
+        // target inside its data window. Beyond that the client cannot
+        // legitimately know the target exists, so reject (anti-cheat / no
+        // cross-map attacks). Uses the visibility range rather than a tight
+        // weapon range to stay parity-safe for all in-view gameplay.
+        if tile_distance(&player_position, &target_position)
+            > super::crystal_compat::CRYSTAL_DATA_RANGE
+        {
+            return Vec::new();
+        }
         let target_entry = self.app.world().entity(target_entity);
         let Some(target_agent) = target_entry.get::<MonsterAgent>() else {
             return Vec::new();

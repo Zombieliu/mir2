@@ -1357,7 +1357,12 @@ impl ClientPacket {
                         value: linked_item_count,
                     });
                 }
-                let mut linked_items = Vec::with_capacity(linked_item_count as usize);
+                // Cap the pre-allocation at the bytes actually remaining in the
+                // frame: a malicious client cannot make us allocate gigabytes by
+                // declaring a huge count in a tiny packet. The loop below still
+                // reads exactly `linked_item_count` items (erroring on EOF).
+                let mut linked_items =
+                    Vec::with_capacity((linked_item_count as usize).min(reader.remaining()));
                 for _ in 0..linked_item_count {
                     linked_items.push(ChatItem::decode(reader)?);
                 }
@@ -1599,7 +1604,8 @@ impl ClientPacket {
                         value: slot_count,
                     });
                 }
-                let mut slots = Vec::with_capacity(slot_count as usize);
+                // Bounded by remaining frame bytes; see Chat decode above.
+                let mut slots = Vec::with_capacity((slot_count as usize).min(reader.remaining()));
                 for _ in 0..slot_count {
                     slots.push(reader.read_i32()?);
                 }
@@ -1716,7 +1722,8 @@ impl ClientPacket {
                         value: line_count,
                     });
                 }
-                let mut notice = Vec::with_capacity(line_count as usize);
+                // Bounded by remaining frame bytes; see Chat decode above.
+                let mut notice = Vec::with_capacity((line_count as usize).min(reader.remaining()));
                 for _ in 0..line_count {
                     notice.push(reader.read_string()?);
                 }

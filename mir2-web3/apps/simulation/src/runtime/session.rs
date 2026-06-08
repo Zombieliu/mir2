@@ -851,11 +851,17 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
 
     let inventory = world.resource::<InventoryResource>();
     let mut items = Vec::new();
-    for inventory_index in trade.offered_slots.values() {
+    for (trade_slot, inventory_index) in trade.offered_slots.iter() {
         let item = inventory
             .inventory_items
             .iter()
             .find(|item| inventory_item_matches_index(item, *inventory_index))?;
+        // Integrity check (F-07): never deliver an item that was swapped into the
+        // offered slot after it was deposited. If the live item's id no longer
+        // matches what was deposited, refuse to build the offer.
+        if trade.offered_unique_ids.get(trade_slot).copied() != Some(item_unique_id(item)) {
+            return None;
+        }
         let item_state_json = serde_json::to_string(item).ok()?;
         items.push(SharedTradeOfferItem {
             item_state_json,

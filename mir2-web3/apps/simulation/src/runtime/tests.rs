@@ -52831,6 +52831,90 @@ fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
 }
 
 #[test]
+fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
+    // Regression guard for the F-07 trade item-swap exploit: a player deposits a
+    // valuable item, then swaps a cheaper item into the same inventory slot
+    // before confirming. The server must detect that the offered slot no longer
+    // holds the deposited item and abort the trade rather than handing the
+    // swapped-in item to the partner (while the attacker keeps the valuable one).
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+
+    // Pick two distinct bag items: A (deposited) and B (swapped in).
+    let (slot_a, key_a, slot_b, key_b, unique_b) = {
+        let snapshot = session.world_snapshot();
+        let mut bag: Vec<(u8, String, u64)> = snapshot
+            .inventory_items
+            .iter()
+            .map(|item| (item.slot, item.key.clone(), item.unique_id))
+            .collect();
+        bag.sort_by_key(|(slot, _, _)| *slot);
+        let (slot_a, key_a, _unique_a) = bag.first().cloned().expect("demo bag has items");
+        let (slot_b, key_b, unique_b) = bag
+            .iter()
+            .find(|(slot, key, _)| *slot != slot_a && *key != key_a)
+            .cloned()
+            .expect("demo bag should have two distinct items");
+        (slot_a, key_a, slot_b, key_b, unique_b)
+    };
+
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeReply {
+        accept_invite: true,
+    });
+
+    let deposit = session.handle_packet(ClientPacket::DepositTradeItem {
+        from: i32::from(slot_a),
+        to: 0,
+    });
+    assert!(deposit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+
+    // Tamper: swap the cheap item B into the offered inventory slot A.
+    let swap = session.handle_packet(ClientPacket::MoveItem {
+        grid: MirGridType::Inventory,
+        from: i32::from(slot_a),
+        to: i32::from(slot_b),
+    });
+    assert!(swap
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MoveItem { success: true, .. })));
+
+    let confirm = session.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert!(
+        !confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeConfirm)),
+        "a tampered trade must not confirm"
+    );
+
+    let after = session.world_snapshot();
+    assert_eq!(after.gold, starting_gold, "gold must be untouched on abort");
+    assert!(
+        after
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == unique_b),
+        "the swapped-in item must not be handed to the partner"
+    );
+    assert!(
+        after.inventory_items.iter().any(|item| item.key == key_a),
+        "the deposited item must remain with its owner"
+    );
+    let _ = key_b;
+    assert!(
+        after
+            .stage5_systems
+            .trade
+            .as_ref()
+            .map_or(true, |trade| !trade.completed),
+        "tampered trade must not be marked completed"
+    );
+}
+
+#[test]
 fn trade_packets_reject_bound_and_rental_items_before_locking() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

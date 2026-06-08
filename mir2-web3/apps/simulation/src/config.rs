@@ -3890,6 +3890,12 @@ pub struct Stage5TradeState {
     pub offered_items: Vec<String>,
     #[serde(default)]
     pub offered_slots: BTreeMap<u8, u8>,
+    /// Unique id of the item deposited into each trade slot, captured at deposit
+    /// time. Confirm/delivery verify the live item at the slot's inventory index
+    /// still has this id, so an item swapped in after depositing cannot be
+    /// handed over in place of the one the partner agreed to (F-07).
+    #[serde(default)]
+    pub offered_unique_ids: BTreeMap<u8, u64>,
     pub offered_gold: u32,
     /// Currency the offered amount is denominated in (gold by default; a city
     /// token when the player picks one in the trade window). Net-new field —
