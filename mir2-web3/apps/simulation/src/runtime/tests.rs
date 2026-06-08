@@ -22824,7 +22824,7 @@ fn gm_revive_restores_player_vitals() {
 }
 
 #[test]
-fn gm_setlight_emits_time_of_day() {
+fn gm_setlight_emits_personal_light_player_update() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
@@ -22832,7 +22832,7 @@ fn gm_setlight_emits_time_of_day() {
     let light = gm_chat(&mut session, "@SETLIGHT 3");
     assert!(light
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::TimeOfDay { lights: 3 })));
+        .any(|packet| matches!(packet, ServerPacket::PlayerUpdate { light: 3, .. })));
     assert_eq!(session.app.world().resource::<GmRuntimeResource>().light, 3);
 }
 
@@ -23001,6 +23001,63 @@ fn gm_ride_toggles_equipped_mount() {
         packet,
         ServerPacket::MountUpdate {
             riding_mount: false,
+            ..
+        }
+    )));
+}
+
+#[test]
+fn gm_hair_sets_character_appearance() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+    let _ = gm_chat(&mut session, "@HAIR 7");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .appearance
+            .hair,
+        7
+    );
+}
+
+#[test]
+fn gm_toggle_transform_pauses_and_unpauses_buff() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: "transform".to_string(),
+            name: "Transform".to_string(),
+            description: String::new(),
+            expires_at_tick: u64::MAX,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        });
+
+    let on = gm_chat(&mut session, "@TOGGLETRANSFORM");
+    assert!(on.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::PauseBuff {
+            buff_type: 106,
+            paused: true,
+            ..
+        }
+    )));
+    let off = gm_chat(&mut session, "@TOGGLETRANSFORM");
+    assert!(off.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::PauseBuff {
+            buff_type: 106,
+            paused: false,
             ..
         }
     )));
