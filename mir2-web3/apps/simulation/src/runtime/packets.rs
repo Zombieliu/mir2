@@ -4913,9 +4913,18 @@ pub(super) fn handle_chat_packet(
     message: String,
     linked_items: Vec<ChatItem>,
 ) -> Vec<ServerPacket> {
-    // GM `@` commands are intercepted before the normal chat pipeline (and before
-    // the spam guard) so privileged operators can act in-world. Non-GM callers
-    // fall through to normal chat, so command existence never leaks to players.
+    // `@LOGIN` arms a GM-password prompt; the very next chat line is the password
+    // candidate (Crystal `PlayerObject.Chat`, GMLogin branch). It is checked
+    // before everything else and consumed regardless of outcome.
+    if super::gm_commands::gm_login_pending(world) {
+        return super::gm_commands::resolve_gm_login_password(world, &message);
+    }
+
+    // Crystal consumes EVERY `@`-prefixed line as a command attempt — it is never
+    // echoed to normal chat — and gates each command individually (many, like
+    // `@TIME`/`@MAP`/`@DIE`, run for any player). The dispatcher therefore always
+    // claims `@` lines; a non-GM issuing a GM-gated command gets Crystal's silent
+    // `return;`, so command existence still never leaks to ordinary players.
     if super::gm_commands::is_gm_command(&message) {
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
             return packets;
@@ -5879,6 +5888,36 @@ pub(super) fn collect_map_transfer_snapshots(
 }
 
 #[allow(deprecated)]
+/// Crystal `GetUpdateInfo()` for `@SETLIGHT`: the self player's `S.PlayerUpdate`
+/// carrying the new personal light alongside the real weapon/armour shapes, so the
+/// client refreshes the light radius without blanking the rendered gear.
+pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<ServerPacket> {
+    let object_id = current_player_object_id(world)?;
+    let body = player_entity(world)
+        .and_then(|player| world.entity(player).get::<CharacterBody>().copied());
+    let equipment_items = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .clone();
+    let shape_to_i16 = |shape: Option<u16>| shape.and_then(|s| i16::try_from(s).ok()).unwrap_or(0);
+    let weapon = shape_to_i16(
+        equipment_shape(Some(&equipment_items), EquipmentSlot::Weapon)
+            .or_else(|| body.and_then(|b| b.weapon_shape)),
+    );
+    let armour = shape_to_i16(
+        equipment_shape(Some(&equipment_items), EquipmentSlot::Armour)
+            .or_else(|| body.and_then(|b| b.armour_shape)),
+    );
+    Some(ServerPacket::PlayerUpdate {
+        object_id,
+        light,
+        weapon,
+        weapon_effect: 0,
+        armour,
+        wing_effect: 0,
+    })
+}
+
 pub(super) fn collect_world_entities(
     world: &World,
     scene_view: Option<&mir2_game_data::SceneView>,
@@ -5972,6 +6011,17 @@ pub(super) fn collect_world_entities(
             } else {
                 None
             },
+            // Only the self player's hair is modelled (`@HAIR`); remote players fall
+            // back to 0.
+            if self_marker.is_some() {
+                world
+                    .resource::<Stage5SystemsResource>()
+                    .stage5_systems
+                    .appearance
+                    .hair
+            } else {
+                0
+            },
         );
         let quest_ids = npc_agent
             .map(|agent| agent.quest_ids.clone())
@@ -6010,12 +6060,13 @@ pub(super) fn entity_sprite_snapshot(
     monster_agent: Option<&MonsterAgent>,
     npc_agent: Option<&NpcAgent>,
     equipment_items: Option<&[EquipmentState]>,
+    hair: u8,
 ) -> Option<WorldEntitySpriteSnapshot> {
     if let Some(body) = body {
         let armour_shape = equipment_shape(equipment_items, EquipmentSlot::Armour)
             .or(body.armour_shape)
             .unwrap_or(0);
-        let hair_shape = 0;
+        let hair_shape = u16::from(hair);
         let weapon_shape =
             equipment_shape(equipment_items, EquipmentSlot::Weapon).or(body.weapon_shape);
         let uses_assassin_weapon =

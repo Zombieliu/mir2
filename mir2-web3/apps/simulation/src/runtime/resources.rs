@@ -932,6 +932,65 @@ impl PlayerPermissionResource {
     }
 }
 
+/// Mutable per-session state backing the Crystal `@` command surface that is not
+/// already modelled by another resource. Mirrors the loose collection of player
+/// fields Crystal toggles from `PlayerObject.Chat` (`GMNeverDie`, `GMGameMaster`,
+/// `Observer`, `EnableGuildInvite`, `EnableGroupRecall`, `AllowTrade`,
+/// `AllowObserve`, `Light`, …) plus the `@LOGIN` password handshake and the
+/// `Settings.TestServer` gate that several commands accept in lieu of GM rank.
+#[derive(Resource, Debug, Clone)]
+pub(super) struct GmRuntimeResource {
+    /// Crystal `Settings.TestServer`: many `@` commands run for any player when
+    /// the server is a test server. Defaults `false` (matching a live server).
+    pub(super) test_server: bool,
+    /// `@LOGIN` armed the GM password prompt; the next chat line is the password.
+    pub(super) login_pending: bool,
+    /// Expected `@LOGIN` password (`Settings.GMPassword`). `None` => login can
+    /// never succeed (server with no GM password configured).
+    pub(super) password: Option<String>,
+    /// `@SUPERMAN` — `GMNeverDie` invincible flag.
+    pub(super) gm_never_die: bool,
+    /// `@GAMEMASTER` — `GMGameMaster` mode flag.
+    pub(super) game_master: bool,
+    /// `@OBSERVER` — `Observer` mode flag.
+    pub(super) observer: bool,
+    /// `@ALLOWGUILD` — `EnableGuildInvite`.
+    pub(super) allow_guild_invite: bool,
+    /// `@ENABLEGROUPRECALL` — `EnableGroupRecall`.
+    pub(super) enable_group_recall: bool,
+    /// `@ALLOWTRADE` — `AllowTrade`.
+    pub(super) allow_trade: bool,
+    /// `@ALLOWOBSERVE` — `AllowObserve`.
+    pub(super) allow_observe: bool,
+    /// `@GIVEPEARLS` — intelligent-creature pearl wallet (`Info.PearlCount`).
+    pub(super) pearls: u32,
+    /// `@SETLIGHT` — personal `Light` value.
+    pub(super) light: u8,
+    /// `@TOGGLETRANSFORM` — whether the active Transform buff is paused.
+    pub(super) transform_paused: bool,
+}
+
+impl GmRuntimeResource {
+    pub(super) fn new() -> Self {
+        Self {
+            test_server: false,
+            login_pending: false,
+            password: None,
+            gm_never_die: false,
+            game_master: false,
+            observer: false,
+            // Crystal defaults: invites + trade allowed, observe/group-recall off.
+            allow_guild_invite: true,
+            enable_group_recall: false,
+            allow_trade: true,
+            allow_observe: false,
+            pearls: 0,
+            light: 0,
+            transform_paused: false,
+        }
+    }
+}
+
 #[derive(Resource, Debug, Clone, Copy)]
 pub(super) struct PotionRecoveryResource {
     pub(super) pending_pot_health_amount: i32,

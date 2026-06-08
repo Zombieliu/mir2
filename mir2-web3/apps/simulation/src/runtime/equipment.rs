@@ -73,6 +73,13 @@ pub(super) struct EquipmentState {
     pub(super) socket_slots: u8,
     #[serde(default)]
     pub(super) gem_count: u16,
+    /// Crystal `UserItem.Awake`: the awakening line on this worn item. `awake_type`
+    /// is the [`AwakeType`] byte (0 = none, 1 = DC, …), `awake_values` holds one
+    /// byte per awakened level (length = awake level, sum = awake value).
+    #[serde(default)]
+    pub(super) awake_type: u8,
+    #[serde(default)]
+    pub(super) awake_values: Vec<u8>,
     #[serde(default)]
     pub(super) identified: Option<bool>,
     #[serde(default)]
@@ -380,6 +387,8 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
+        awake_type: 0,
+        awake_values: Vec::new(),
         identified: None,
         soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
@@ -505,6 +514,8 @@ fn seed_equipment(
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
+        awake_type: 0,
+        awake_values: Vec::new(),
         identified: None,
         soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
@@ -637,8 +648,8 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
         slots: vec![None; usize::from(item.socket_slots)],
         gem_count: item.gem_count,
         added_stats,
-        awake_type: 0,
-        awake_values: Vec::new(),
+        awake_type: item.awake_type,
+        awake_values: item.awake_values.clone(),
         refined_value: 0,
         refine_added: 0,
         refine_success_chance: 0,
@@ -743,6 +754,8 @@ pub(super) fn equipment_state_from_item_state(
         cursed: item.cursed,
         socket_slots: item.socket_slots,
         gem_count: item.gem_count,
+        awake_type: 0,
+        awake_values: Vec::new(),
         identified: item.identified,
         soul_bound_id: item.soul_bound_id,
         sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
@@ -1031,6 +1044,43 @@ pub(super) fn toggle_mount_ride_from_use_item(
             riding_mount,
         },
     ])
+}
+
+/// Crystal `@RIDE` (`ToggleRide`): mount or dismount the equipped mount. A no-op
+/// when no mount is equipped (Crystal's `ToggleRide` early-returns), and it honours
+/// the same saddle / map-disallows / bridle gates as the use-item ride toggle.
+pub(super) fn gm_toggle_ride(world: &mut World) -> Vec<ServerPacket> {
+    let Some(mount) = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|equipment| equipment.slot == EquipmentSlot::Mount)
+        .cloned()
+    else {
+        return Vec::new();
+    };
+    let mount_type = mount
+        .shape
+        .and_then(|shape| i16::try_from(shape).ok())
+        .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+    let map_disallows_mount = current_map_disallows_mount(world);
+    let map_requires_bridle = current_map_requires_bridle(world);
+    let (riding_mount, mount_type) = {
+        let mut mount_resource = world.resource_mut::<MountResource>();
+        mount_resource.mount_type = mount_type;
+        let wants_ride = !mount_resource.riding_mount;
+        let can_ride = !wants_ride
+            || (mount_resource.has_saddle
+                && !map_disallows_mount
+                && (!map_requires_bridle || mount_resource.has_reins));
+        mount_resource.riding_mount = wants_ride && can_ride;
+        (mount_resource.riding_mount, mount_resource.mount_type)
+    };
+    vec![ServerPacket::MountUpdate {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        mount_type,
+        riding_mount,
+    }]
 }
 
 pub(super) struct EquipItemMutationResult {
