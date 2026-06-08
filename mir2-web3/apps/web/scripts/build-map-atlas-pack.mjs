@@ -27,6 +27,17 @@ const outDir = path.resolve(args.outDir ?? DEFAULT_OUT_DIR);
 const onlyLibraries = parseListArg(args.libraries, null);
 
 async function main() {
+  // `--skipIfPresent` (used by the `dev` hook) short-circuits when a manifest already exists, so a
+  // warm `npm run dev` doesn't pay the ~48s repack every start. CI/`build` calls it without the flag
+  // to always produce a fresh atlas from the committed source PNGs.
+  if (args.skipIfPresent) {
+    const existingManifest = path.join(outDir, "manifest.json");
+    if (await exists(existingManifest)) {
+      console.log(JSON.stringify({ ok: true, skipped: true, reason: "manifest already present", manifestPath: existingManifest }));
+      return;
+    }
+  }
+
   const libraries = await discoverLibraries();
   const selected = onlyLibraries
     ? libraries.filter((lib) => onlyLibraries.includes(lib.libraryKey))

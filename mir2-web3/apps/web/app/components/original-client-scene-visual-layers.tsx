@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
 import type { EffectAssets } from "../../lib/crystal-magic-effects";
@@ -67,6 +67,128 @@ type ViewportEntitySpriteEntry = {
   entity: DisplayEntity & { dx: number; dy: number };
   sprite: ViewportEntitySprite | null;
 };
+
+type EntitySpriteLayersProps = {
+  useBevyEntityRenderer: boolean;
+  sprite: ViewportEntitySprite | null;
+  objectId: number | string;
+  isNpc: boolean;
+  questIcon: string | null;
+  questIconLeft: number;
+  questIconTop: number;
+};
+
+// The body/hair/weapon <img> layers for one actor. Memoised so they only re-render when their
+// *sprite frame data* actually changes (direction / animation / the 120ms tick) — NOT on every
+// 60fps motion-clock tick. The smooth per-frame position lives on the parent
+// `.entity-sprite-stack` wrapper, so these inner layers stay byte-identical between frame changes.
+// That removes the per-frame restyle/reconcile churn that made running janky and standing NPCs
+// (a single static frame, redrawn 60×/sec for nothing) visibly flicker.
+const EntitySpriteLayers = memo(function EntitySpriteLayers({
+  useBevyEntityRenderer,
+  sprite,
+  objectId,
+  isNpc,
+  questIcon,
+  questIconLeft,
+  questIconTop,
+}: EntitySpriteLayersProps) {
+  return (
+    <>
+      {!useBevyEntityRenderer && sprite?.mount ? (
+        <img
+          className="entity-sprite-layer mount"
+          src={sprite.mount.path}
+          alt=""
+          draggable={false}
+          data-mir2-original-src={sprite.mount.path}
+          onError={handleSceneAssetImageError}
+          onLoad={handleSceneAssetImageLoad}
+          style={{
+            left: sprite.mount.x,
+            top: sprite.mount.y,
+            width: sprite.mount.width,
+            height: sprite.mount.height,
+          }}
+        />
+      ) : null}
+      {!useBevyEntityRenderer &&
+        sprite?.rearWeapons.map((weapon, index) => (
+          <img
+            key={`rear-${objectId}-${index}-${weapon.path}`}
+            className="entity-sprite-layer weapon rear"
+            src={weapon.path}
+            alt=""
+            draggable={false}
+            data-mir2-original-src={weapon.path}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
+            style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
+          />
+        ))}
+      {!useBevyEntityRenderer && sprite?.body ? (
+        <img
+          className="entity-sprite-layer body"
+          src={sprite.body.path}
+          alt=""
+          draggable={false}
+          data-mir2-original-src={sprite.body.path}
+          onError={handleSceneAssetImageError}
+          onLoad={handleSceneAssetImageLoad}
+          style={{
+            left: sprite.body.x,
+            top: sprite.body.y,
+            width: sprite.body.width,
+            height: sprite.body.height,
+          }}
+        />
+      ) : null}
+      {!useBevyEntityRenderer && sprite?.hair ? (
+        <img
+          className="entity-sprite-layer hair"
+          src={sprite.hair.path}
+          alt=""
+          draggable={false}
+          data-mir2-original-src={sprite.hair.path}
+          onError={handleSceneAssetImageError}
+          onLoad={handleSceneAssetImageLoad}
+          style={{
+            left: sprite.hair.x,
+            top: sprite.hair.y,
+            width: sprite.hair.width,
+            height: sprite.hair.height,
+          }}
+        />
+      ) : null}
+      {!useBevyEntityRenderer &&
+        sprite?.frontWeapons.map((weapon, index) => (
+          <img
+            key={`front-${objectId}-${index}-${weapon.path}`}
+            className="entity-sprite-layer weapon front"
+            src={weapon.path}
+            alt=""
+            draggable={false}
+            data-mir2-original-src={weapon.path}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
+            style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
+          />
+        ))}
+      {isNpc && questIcon ? (
+        <img
+          className="entity-quest-icon"
+          src={questIcon}
+          alt=""
+          draggable={false}
+          data-mir2-original-src={questIcon}
+          onError={handleSceneAssetImageError}
+          onLoad={handleSceneAssetImageLoad}
+          style={{ left: questIconLeft, top: questIconTop }}
+        />
+      ) : null}
+    </>
+  );
+});
 
 // --- Procedural magic / map VFX fallback ----------------------------------
 // The real effect atlases (lib/crystal-magic-effects) are PREFERRED: loadEffectAssets fetches the
@@ -331,6 +453,10 @@ export function OriginalClientSceneVisualLayers({
             event.stopPropagation();
             onActivateEntity(entity.objectId);
           };
+          const questIcon =
+            entity.kind === "npc"
+              ? questIconForEntity(entity, world.questLog, sceneSpriteFrameIndex)
+              : null;
 
           return (
             <div
@@ -367,113 +493,15 @@ export function OriginalClientSceneVisualLayers({
                   event.stopPropagation();
                 }}
               />
-              {!useBevyEntityRenderer && sprite?.mount ? (
-                <img
-                  className="entity-sprite-layer mount"
-                  src={sprite.mount.path}
-                  alt=""
-                  draggable={false}
-                  data-mir2-original-src={sprite.mount.path}
-                  onError={handleSceneAssetImageError}
-                  onLoad={handleSceneAssetImageLoad}
-                  style={{
-                    left: sprite.mount.x,
-                    top: sprite.mount.y,
-                    width: sprite.mount.width,
-                    height: sprite.mount.height,
-                  }}
-                />
-              ) : null}
-              {!useBevyEntityRenderer && sprite?.rearWeapons.map((weapon, index) => (
-                <img
-                  key={`rear-${entity.objectId}-${index}-${weapon.path}`}
-                  className="entity-sprite-layer weapon rear"
-                  src={weapon.path}
-                  alt=""
-                  draggable={false}
-                  data-mir2-original-src={weapon.path}
-                  onError={handleSceneAssetImageError}
-                  onLoad={handleSceneAssetImageLoad}
-                  style={{
-                    left: weapon.x,
-                    top: weapon.y,
-                    width: weapon.width,
-                    height: weapon.height,
-                  }}
-                />
-              ))}
-              {!useBevyEntityRenderer && sprite?.body ? (
-                <img
-                  className="entity-sprite-layer body"
-                  src={sprite.body.path}
-                  alt=""
-                  draggable={false}
-                  data-mir2-original-src={sprite.body.path}
-                  onError={handleSceneAssetImageError}
-                  onLoad={handleSceneAssetImageLoad}
-                  style={{
-                    left: sprite.body.x,
-                    top: sprite.body.y,
-                    width: sprite.body.width,
-                    height: sprite.body.height,
-                  }}
-                />
-              ) : null}
-              {!useBevyEntityRenderer && sprite?.hair ? (
-                <img
-                  className="entity-sprite-layer hair"
-                  src={sprite.hair.path}
-                  alt=""
-                  draggable={false}
-                  data-mir2-original-src={sprite.hair.path}
-                  onError={handleSceneAssetImageError}
-                  onLoad={handleSceneAssetImageLoad}
-                  style={{
-                    left: sprite.hair.x,
-                    top: sprite.hair.y,
-                    width: sprite.hair.width,
-                    height: sprite.hair.height,
-                  }}
-                />
-              ) : null}
-              {!useBevyEntityRenderer && sprite?.frontWeapons.map((weapon, index) => (
-                <img
-                  key={`front-${entity.objectId}-${index}-${weapon.path}`}
-                  className="entity-sprite-layer weapon front"
-                  src={weapon.path}
-                  alt=""
-                  draggable={false}
-                  data-mir2-original-src={weapon.path}
-                  onError={handleSceneAssetImageError}
-                  onLoad={handleSceneAssetImageLoad}
-                  style={{
-                    left: weapon.x,
-                    top: weapon.y,
-                    width: weapon.width,
-                    height: weapon.height,
-                  }}
-                />
-              ))}
-              {entity.kind === "npc" ? (
-                (() => {
-                  const questIcon = questIconForEntity(entity, world.questLog, sceneSpriteFrameIndex);
-                  return questIcon ? (
-                    <img
-                      className="entity-quest-icon"
-                      src={questIcon}
-                      alt=""
-                      draggable={false}
-                      data-mir2-original-src={questIcon}
-                      onError={handleSceneAssetImageError}
-                      onLoad={handleSceneAssetImageLoad}
-                      style={{
-                        left: entityQuestIconLeftOffset(entity, sprite),
-                        top: entityQuestIconTopOffset(sprite),
-                      }}
-                    />
-                  ) : null;
-                })()
-              ) : null}
+              <EntitySpriteLayers
+                useBevyEntityRenderer={useBevyEntityRenderer}
+                sprite={sprite}
+                objectId={entity.objectId}
+                isNpc={entity.kind === "npc"}
+                questIcon={questIcon}
+                questIconLeft={questIcon ? entityQuestIconLeftOffset(entity, sprite) : 0}
+                questIconTop={questIcon ? entityQuestIconTopOffset(sprite) : 0}
+              />
             </div>
           );
         })}
