@@ -200,6 +200,8 @@ M0 Foundation ─▶ M1 Contract-MVP ─▶ ┌─ M2 Off-chain Bridge (WF-2/3) 
 
 ## 6. M3 — Sim/Gateway Inbound（WF-4, WF-5）∥ M2
 
+> **Status（2026-06-09）：✅ WF-4 DONE（WF-5 并入 M4）.** Sim 入站（commit bc0a22fad）：新增 `WorldCommand::GrantOnchainOre` / `CreditGoldFromOre`（= M2 relayer 的归一化命令）→ `apps/simulation/src/runtime/onchain.rs`：矿石入背包（镜像 P0 `give_mine_payout`，`OreKind`→`<Variant>Ore`，ore dura = units×1000）→ `GainedItem`；给金币（`can_gain_gold` 守卫）→ `GainedGold`。**幂等③**：`OnchainCommandLog` 资源记 `idempotency_key`（`tx_digest:event_seq`），重复严格 no-op。**与 P0 并存**（`mining.rs` 未动）；`validate_production_player_command` **拒绝玩家路径注入**（玩家不能凭空造矿/金）= sim 侧鉴权边界。单测 4 个绿（矿落库 dura=5000 / 重放 no-op / 金币幂等 / 玩家路径拒绝）+ **全 sim 套件绿（P0 不回归）** + `cargo fmt --all --check` 绿。**范围决策**：网关 HTTP 注入端点 + operator-token 鉴权 + 会话路由（WF-5）**并入 M4**（relayer↔gateway↔sim 合龙，届时端到端可测）；脱离 relayer 连接，该端点是无法测试的管线。
+
 **Goal**：服务端能接收"链确认事件"并**权威落库**——矿石入背包、卖矿给金币、广播渲染对账——且**与 P0 并存**、**幂等③**。用 mock 注入驱动（不依赖真链，便于与 M2 并行）。
 
 **Tasks**
