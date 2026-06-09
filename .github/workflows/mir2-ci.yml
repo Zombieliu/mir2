@@ -32,6 +32,7 @@ jobs:
     outputs:
       web: ${{ steps.filter.outputs.web }}
       rust: ${{ steps.filter.outputs.rust }}
+      onchain: ${{ steps.filter.outputs.onchain }}
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -48,6 +49,9 @@ jobs:
               - 'mir2-web3/packages/**'
               - 'mir2-web3/Cargo.toml'
               - 'mir2-web3/Cargo.lock'
+            onchain:
+              - 'mir2-web3/onchain/**'
+              - '.github/workflows/mir2-ci.yml'
 
   web-resource-gate:
     needs: changes
@@ -115,3 +119,54 @@ jobs:
         env:
           RUST_BACKTRACE: "1"
           CARGO_TERM_COLOR: always
+
+  # On-chain smart mine (mir2-web3/onchain): a standalone Dubhe/Sui workspace,
+  # isolated from the Rust workspace and the web app. Path-gated so it only runs
+  # for onchain PRs. Gate = TS typecheck (Dubhe SDK) + Move build/test.
+  onchain:
+    needs: changes
+    # Fail-safe: run when onchain paths changed OR when change-detection did not
+    # succeed, so a broken `changes` job can never silently skip this gate.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.onchain == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mir2-web3/onchain
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.15.4"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: mir2-web3/onchain/pnpm-lock.yaml
+      - name: Install TS deps
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck (Dubhe config + scripts)
+        run: pnpm typecheck
+      - name: Install Sui CLI (pinned testnet binary)
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          SUI_TAG=testnet-v1.68.1
+          curl -fsSL -o /tmp/sui.tgz \
+            "https://github.com/MystenLabs/sui/releases/download/${SUI_TAG}/sui-${SUI_TAG}-ubuntu-x86_64.tgz"
+          mkdir -p /tmp/sui-bin
+          tar -xzf /tmp/sui.tgz -C /tmp/sui-bin
+          SUI_BIN="$(find /tmp/sui-bin -maxdepth 2 -type f -name sui | head -1)"
+          sudo install -m 0755 "$SUI_BIN" /usr/local/bin/sui
+          sui --version
+      - name: Configure Sui client (testnet, non-interactive)
+        working-directory: ${{ github.workspace }}
+        # First run creates ~/.sui config and defaults the active env to testnet.
+        # `move build`/`test` resolve framework addresses from the active env.
+        run: printf 'y\n' | sui client envs >/dev/null 2>&1 || true
+      - name: Move build + test
+        run: |
+          sui client switch --env testnet || true
+          pnpm move:test
