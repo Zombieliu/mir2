@@ -285,6 +285,13 @@ impl InProcessWorldRuntime {
             .prepare_chat_packet_for_zone(message, linked_items)
     }
 
+    /// True when the GM `@LOGIN` password prompt is armed for the next chat line.
+    /// The gateway's zone chat router consults this to keep the password line off
+    /// the public broadcast path.
+    pub fn gm_login_pending(&self) -> bool {
+        self.session.gm_login_pending()
+    }
+
     pub fn shared_npc_saved_values(&self) -> Vec<SharedNpcSavedValue> {
         self.session.shared_npc_saved_values()
     }

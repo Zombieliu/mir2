@@ -385,6 +385,14 @@ impl SimulationSession {
         prepare_chat_packet(self.app.world_mut(), message, linked_items)
     }
 
+    /// True when the GM `@LOGIN` password prompt is armed for the next chat line
+    /// (`gm_commands::gm_login_pending`). The active shared-Zone chat router checks
+    /// this so the candidate password line is dispatched on the personal-session
+    /// path instead of being broadcast as public chat.
+    pub fn gm_login_pending(&self) -> bool {
+        super::gm_commands::gm_login_pending(self.app.world())
+    }
+
     pub fn consume_zone_chat_shout_permission(&mut self, map_shout: bool, server_shout: bool) {
         if !map_shout && !server_shout {
             return;
