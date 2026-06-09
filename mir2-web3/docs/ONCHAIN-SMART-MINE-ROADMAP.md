@@ -164,7 +164,7 @@ M0 Foundation ─▶ M1 Contract-MVP ─▶ ┌─ M2 Off-chain Bridge (WF-2/3) 
 - [ ] TS 烟测：成功发 `mine_batch`，链上 `ore_balance` 增加、`mine_state` 递减、`mine_settled` 事件字段正确；`nonce+1` 强制成立（重放被拒）。
 - [ ] **未在合约里硬编码经济初值**（费率/封顶/兑率仅占位 + admin 可调，待 M5）。
 
-**Dependencies**：M0。 **Risks**：`sui::random` 用法（需 `&Random` + 两段式）；Dubhe schemagen 与手写系统的耦合；shared object 测试。
+**Dependencies**：M0。 **Risks**：① **配置 API 漂移（M0 已发现）**——DESIGN §3.1 基于旧 Dubhe API（`schemas`/`data`/`events`/`systems` + `storage()` 助手），但实装 SDK `@0xobelisk/sui-common@1.2.0-pre.96` 的 `DubheConfig` 用 `enums` / `components`(`{fields, keys?}`) / `resources` / `errors`，**无 `events`/`systems` 键**（事件由手写 Move 系统 emit）。**M1 必须把 §3.1 的 mine_config/mine_state/ore_balance/miner_nonce/emitted_this_epoch/treasury + OreKind + mine_settled… 翻译成实装 shape**（已在 `onchain/dubhe.config.ts` 标注）。② `sui::random` 用法（需 `&Random` + 两段式 commit/reveal）。③ schemagen 产物与手写系统耦合。④ shared object 测试。
 
 ---
 
@@ -190,7 +190,7 @@ M0 Foundation ─▶ M1 Contract-MVP ─▶ ┌─ M2 Off-chain Bridge (WF-2/3) 
 - [ ] Relayer 对**重复事件幂等**（同 `(tx_digest,event_seq)` 只产出一次）；断链重连不漏不重。
 - [ ] 归一化命令 schema 与 M3 入站契约一致（联调前先 mock 校验）。
 
-**Dependencies**：M1（要有真实事件）。 **Risks**：GraphQL 订阅断连/回填；事件顺序与 `event_seq` 语义；Relayer 信任边界（它能给玩家发矿 → M5/M6 收紧鉴权）。
+**Dependencies**：M1（要有真实事件）。 **Risks**：① **Indexer 原生依赖（M0 已发现）**——`@0xobelisk/sui-indexer` 传递依赖 `better-sqlite3@8.7.0`，在 **node 22 / darwin 编译失败**（V8 `SetAccessor` 已移除）→ M0 已将 indexer **移出** `onchain` 直装依赖；M2 改用 **Docker / 预编译 `dubhe-indexer` 二进制**，或 `pnpm override` 把 `better-sqlite3` 顶到 ≥11（带预编译产物），**勿作为 npm 原生依赖直接 install**。② GraphQL 订阅断连/回填。③ 事件顺序与 `event_seq` 语义。④ Relayer 信任边界（它能给玩家发矿 → M5/M6 收紧鉴权）。
 
 ---
 
