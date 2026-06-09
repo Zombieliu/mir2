@@ -248,6 +248,7 @@ export type DisplayWorld = {
   playerHp?: number;
   playerMaxHp?: number;
   playerMp?: number;
+  playerMaxMp?: number;
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;

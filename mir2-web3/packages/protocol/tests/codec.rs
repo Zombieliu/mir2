@@ -1106,6 +1106,8 @@ fn user_information_packet_roundtrip() {
             creature_summoned: false,
             allow_observe: false,
             observer: false,
+            max_hp: Some(180),
+            max_mp: Some(100),
         },
     };
 
