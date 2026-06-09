@@ -496,6 +496,30 @@ impl SimulationSession {
         advance_runtime_tick(world);
     }
 
+    /// Land chain-confirmed ore in the active player's bag (M3, WF-4). Injected by the
+    /// trusted relayer/gateway path only (never the raw player path). Idempotent on
+    /// `idempotency_key`; additive — never touches P0 server-mining.
+    pub fn grant_onchain_ore(
+        &mut self,
+        ore_kind: &str,
+        amount: u64,
+        idempotency_key: &str,
+    ) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        super::onchain::grant_onchain_ore(self.app.world_mut(), ore_kind, amount, idempotency_key)
+    }
+
+    /// Credit chain-confirmed gold (from redeeming on-chain ore) to the active player.
+    /// Idempotent on `idempotency_key`.
+    pub fn credit_gold_from_ore(&mut self, gold: u32, idempotency_key: &str) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        super::onchain::credit_gold_from_ore(self.app.world_mut(), gold, idempotency_key)
+    }
+
     pub fn apply_zone_player_damage(&mut self, damage: i32) {
         if damage <= 0 || !is_in_world(self.app.world()) {
             return;

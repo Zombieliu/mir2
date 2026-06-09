@@ -11,21 +11,71 @@ use mir2_protocol::{client_packet_name, ChatItem, ClientPacket, Point, ServerPac
 #[derive(Debug)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
-    PasskeyLogin { account_id: String },
-    MoveTo { position: Point, running: bool },
-    Attack { object_id: u32 },
-    Interact { object_id: u32 },
-    SelectNpcDialog { target: String },
-    SubmitNpcInput { value: String },
-    PickUp { object_id: u32 },
-    UseItem { key: String },
-    DropItem { key: String },
-    DeleteCharacter { character_index: i32 },
-    CastSkill { key: String },
-    TransferMap { key: String },
-    Stage5Command { action: String, args: Vec<String> },
-    ItemRentalRequest { partner_name: String, renting: bool },
-    SetLanguage { language: String },
+    PasskeyLogin {
+        account_id: String,
+    },
+    MoveTo {
+        position: Point,
+        running: bool,
+    },
+    Attack {
+        object_id: u32,
+    },
+    Interact {
+        object_id: u32,
+    },
+    SelectNpcDialog {
+        target: String,
+    },
+    SubmitNpcInput {
+        value: String,
+    },
+    PickUp {
+        object_id: u32,
+    },
+    UseItem {
+        key: String,
+    },
+    DropItem {
+        key: String,
+    },
+    DeleteCharacter {
+        character_index: i32,
+    },
+    CastSkill {
+        key: String,
+    },
+    TransferMap {
+        key: String,
+    },
+    Stage5Command {
+        action: String,
+        args: Vec<String>,
+    },
+    /// Chain-confirmed ore grant from the on-chain mine, injected by the trusted
+    /// relayer/gateway path (M3, WF-4) — never the raw player path.
+    /// `idempotency_key = "tx_digest:event_seq"` (idempotency place #3).
+    GrantOnchainOre {
+        account: String,
+        ore_kind: String,
+        amount: u64,
+        mine_id: u64,
+        stones_left: u32,
+        idempotency_key: String,
+    },
+    /// Chain-confirmed gold credit from redeeming on-chain ore (M3, WF-4).
+    CreditGoldFromOre {
+        account: String,
+        gold: u32,
+        idempotency_key: String,
+    },
+    ItemRentalRequest {
+        partner_name: String,
+        renting: bool,
+    },
+    SetLanguage {
+        language: String,
+    },
     Tick,
 }
 
@@ -43,6 +93,9 @@ pub fn validate_production_player_command(
         WorldCommand::Stage5Command { .. } => {
             Err("Stage5Command is not allowed on the production player path".to_string())
         }
+        WorldCommand::GrantOnchainOre { .. } | WorldCommand::CreditGoldFromOre { .. } => Err(
+            "on-chain command injection is not allowed on the production player path".to_string(),
+        ),
         WorldCommand::TransferMap { key } if is_debug_crystal_transfer_key(key) => {
             Err("debug crystal transfer is not allowed on the production player path".to_string())
         }
@@ -82,6 +135,8 @@ pub enum WorldCommandKind {
     CastSkill,
     TransferMap,
     Stage5Command(String),
+    GrantOnchainOre,
+    CreditGoldFromOre,
     ItemRentalRequest,
     SetLanguage,
     Tick,
@@ -106,6 +161,8 @@ impl WorldCommand {
             Self::CastSkill { .. } => WorldCommandKind::CastSkill,
             Self::TransferMap { .. } => WorldCommandKind::TransferMap,
             Self::Stage5Command { action, .. } => WorldCommandKind::Stage5Command(action.clone()),
+            Self::GrantOnchainOre { .. } => WorldCommandKind::GrantOnchainOre,
+            Self::CreditGoldFromOre { .. } => WorldCommandKind::CreditGoldFromOre,
             Self::ItemRentalRequest { .. } => WorldCommandKind::ItemRentalRequest,
             Self::SetLanguage { .. } => WorldCommandKind::SetLanguage,
             Self::Tick => WorldCommandKind::Tick,
@@ -440,6 +497,19 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::Stage5Command { action, args } => {
                 self.session.stage5_command(&action, args)
             }
+            WorldCommand::GrantOnchainOre {
+                ore_kind,
+                amount,
+                idempotency_key,
+                ..
+            } => self
+                .session
+                .grant_onchain_ore(&ore_kind, amount, &idempotency_key),
+            WorldCommand::CreditGoldFromOre {
+                gold,
+                idempotency_key,
+                ..
+            } => self.session.credit_gold_from_ore(gold, &idempotency_key),
             WorldCommand::ItemRentalRequest {
                 partner_name,
                 renting,
@@ -603,5 +673,95 @@ mod tests {
             .packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    }
+
+    fn started_runtime() -> InProcessWorldRuntime {
+        let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("login should succeed");
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("start game should succeed");
+        runtime
+    }
+
+    fn grant_ore(ore_kind: &str, amount: u64, key: &str) -> WorldCommand {
+        WorldCommand::GrantOnchainOre {
+            account: "sui:0xminer".to_string(),
+            ore_kind: ore_kind.to_string(),
+            amount,
+            mine_id: 1,
+            stones_left: 5,
+            idempotency_key: key.to_string(),
+        }
+    }
+
+    #[test]
+    fn grant_onchain_ore_lands_ore_in_bag() {
+        let mut runtime = started_runtime();
+        let packets = runtime
+            .execute(grant_ore("BlackIron", 5, "TX1:4"))
+            .expect("grant should succeed");
+        // 5 ore units -> one ore item carrying dura = 5 * 1000 (Crystal ore quantity).
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.current_dura == 5_000
+        )));
+    }
+
+    #[test]
+    fn grant_onchain_ore_is_idempotent_on_replay() {
+        let mut runtime = started_runtime();
+        let first = runtime
+            .execute(grant_ore("BlackIron", 5, "TX1:4"))
+            .expect("first grant should succeed");
+        assert!(!first.is_empty());
+        // Replaying the same (tx_digest:event_seq) is a strict no-op (idempotency place #3).
+        let replay = runtime
+            .execute(grant_ore("BlackIron", 5, "TX1:4"))
+            .expect("replay should succeed");
+        assert!(
+            replay.is_empty(),
+            "duplicate on-chain grant must be a no-op"
+        );
+    }
+
+    #[test]
+    fn credit_gold_from_ore_credits_gold_idempotently() {
+        let mut runtime = started_runtime();
+        let credit = || WorldCommand::CreditGoldFromOre {
+            account: "sui:0xminer".to_string(),
+            gold: 100,
+            idempotency_key: "TX2:5".to_string(),
+        };
+        let credited = runtime.execute(credit()).expect("credit should succeed");
+        assert!(credited
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 100 })));
+        let replay = runtime.execute(credit()).expect("replay should succeed");
+        assert!(replay.is_empty(), "duplicate gold credit must be a no-op");
+    }
+
+    #[test]
+    fn onchain_injection_is_rejected_on_the_player_path() {
+        // The trusted relayer/gateway path uses execute() directly; the raw player path
+        // must reject these (they would let a player mint ore/gold).
+        assert!(super::validate_production_player_command(
+            true,
+            &grant_ore("BlackIron", 5, "TX:4")
+        )
+        .is_err());
+        let credit = WorldCommand::CreditGoldFromOre {
+            account: "sui:0xminer".to_string(),
+            gold: 100,
+            idempotency_key: "TX:5".to_string(),
+        };
+        assert!(super::validate_production_player_command(true, &credit).is_err());
     }
 }
