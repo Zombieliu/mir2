@@ -23250,6 +23250,57 @@ fn gm_toggle_transform_pauses_and_unpauses_buff() {
     )));
 }
 
+/// RAII guard that sets a process env var and restores it on drop (the suite runs
+/// single-threaded, so env mutation is contained).
+struct EnvGuard {
+    key: &'static str,
+    previous: Option<String>,
+}
+
+impl EnvGuard {
+    fn set(key: &'static str, value: &str) -> Self {
+        let previous = std::env::var(key).ok();
+        std::env::set_var(key, value);
+        Self { key, previous }
+    }
+}
+
+impl Drop for EnvGuard {
+    fn drop(&mut self) {
+        match &self.previous {
+            Some(value) => std::env::set_var(self.key, value),
+            None => std::env::remove_var(self.key),
+        }
+    }
+}
+
+#[test]
+fn env_gm_accounts_grants_session_gm_for_listed_account() {
+    let _guard = EnvGuard::set("MIR2_GM_ACCOUNTS", "demo");
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.passkey_login("demo");
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .is_gm());
+}
+
+#[test]
+fn env_gm_password_enables_login_handshake() {
+    let _guard = EnvGuard::set("MIR2_GM_PASSWORD", "sesame");
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = gm_chat(&mut session, "@LOGIN");
+    let _ = gm_chat(&mut session, "sesame");
+    assert!(session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .is_gm());
+}
+
 fn monster_entity_count(session: &mut SimulationSession) -> usize {
     session
         .app
