@@ -172,6 +172,8 @@ M0 Foundation ─▶ M1 Contract-MVP ─▶ ┌─ M2 Off-chain Bridge (WF-2/3) 
 
 ## 5. M2 — Off-chain Bridge：Indexer + Relayer（WF-2, WF-3）∥ M3
 
+> **Status（2026-06-09）：✅ DONE.** Dubhe indexer 跑通（WF-2，`pnpm indexer` → sqlite，验证在收 testnet 包事件）；Relayer（`onchain/relayer/`）读链事件 → `(tx_digest,event_seq)` 去重（幂等②，持久化、重启不丢不重）→ 归一化 `GrantOnchainOre` / `MineDepleted` / `CreditGoldFromOre`（`types.ts` = M2↔M3 契约；`miner`→`sui:0x..`；ore→gold 兑率留 M5）→ Log/HTTP sink。单测 **9/9**；**testnet 实测**：12 事件 → 3 命令（2 `GrantOnchainOre` + 1 `MineDepleted`），全量重放 → **0 命令 / 12 去重**（幂等②真数据验证）。**架构微调（已记）**：Relayer 直连 Sui `queryEvents(MoveModule{package, mine_system/redeem_system})` 取事件，而非 Dubhe GraphQL —— 该 SDK 的 indexer GraphQL 端点未文档化（随机端口），直连更稳且精确（只取本包），indexer 内部也是这么做；indexer 仍作 WF-2 保留（sqlite，供未来 GraphQL/前端）。
+
 **Goal**：链上事件可被订阅、去重、归一化为"链确认事件"，并通过一个**注入接口**送达服务端（M3 提供接口；M2 先对 mock/admin-api 打通）。
 
 **Tasks**
