@@ -25,3 +25,9 @@ contracts/**/traces/
 contracts/**/.trace
 contracts/**/.coverage*
 **/Pub.*.toml
+
+# Dubhe indexer local db + relayer state (runtime artifacts)
+*.db
+*.sqlite
+*.sqlite3
+relayer/.state/
