@@ -1,0 +1,34 @@
+{
+  "name": "@mir2/onchain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MIR2 on-chain smart mine — Dubhe/Sui contracts, indexer, relayer and scripts (testnet). Isolated from the Rust workspace and the web app; see docs/ONCHAIN-SMART-MINE-ROADMAP.md.",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "schemagen": "dubhe schemagen",
+    "move:build": "sui move build --path contracts/mir2_mine",
+    "move:test": "sui move test --path contracts/mir2_mine",
+    "wallet:address": "sui client active-address",
+    "wallet:env": "sui client active-env",
+    "wallet:gas": "sui client gas"
+  },
+  "dependencies": {
+    "@0xobelisk/ecs": "1.2.0-pre.96",
+    "@0xobelisk/graphql-client": "1.2.0-pre.96",
+    "@0xobelisk/sui-client": "1.2.0-pre.96",
+    "@0xobelisk/sui-common": "1.2.0-pre.96"
+  },
+  "devDependencies": {
+    "@0xobelisk/sui-cli": "1.2.0-pre.96",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
