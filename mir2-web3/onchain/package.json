@@ -20,13 +20,12 @@
     "wallet:gas": "sui client gas"
   },
   "dependencies": {
-    "@0xobelisk/ecs": "1.2.0-pre.96",
-    "@0xobelisk/graphql-client": "1.2.0-pre.96",
-    "@0xobelisk/sui-client": "1.2.0-pre.96",
-    "@0xobelisk/sui-common": "1.2.0-pre.96"
+    "@0xobelisk/sui-client": "1.1.12",
+    "@0xobelisk/sui-common": "1.1.14",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "@0xobelisk/sui-cli": "1.2.0-pre.96",
+    "@0xobelisk/sui-cli": "1.1.14",
     "@types/node": "^22.10.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"

@@ -1,10 +1,18 @@
 [package]
 name = "mir2_mine"
-edition = "2024"         # edition = "legacy" to use legacy (pre-2024) Move
-# license = ""           # e.g., "MIT", "GPL", "Apache 2.0"
-# authors = ["..."]      # e.g., ["Joe Smith (joesmith@noemail.com)", "John Snow (johnsnow@noemail.com)"]
+version = "1.0.0"
+edition = "2024"
 
+# NOTE: `pnpm dubhe schemagen` regenerates sources/codegen/** but writes a BLANK
+# [dependencies]. Keep this block (re-add if a schemagen run wipes it). `dubhe publish
+# --network X` only swaps the `Dubhe = { ... }` rev per network.
+# Sui is pinned to match the installed CLI (1.68.1) + the `sui move test` runner's stdlib;
+# `override = true` forces this rev over the older one the Dubhe framework pins
+# (mainnet-v1.38.3), which otherwise causes a std::unit_test MISSING_DEPENDENCY at test time.
 [dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.68.1", override = true }
+Dubhe = { git = "https://github.com/0xobelisk/dubhe-framework.git", rev = "dubhe-testnet-v1.1.0" }
 
-# Read more about the package management system options:
-# https://docs.sui.io/guides/developer/sui-101/move-package-management
+[addresses]
+sui = "0x2"
+mir2_mine = "0x0"
