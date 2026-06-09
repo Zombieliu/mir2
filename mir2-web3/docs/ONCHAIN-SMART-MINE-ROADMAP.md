@@ -141,6 +141,8 @@ M0 Foundation ─▶ M1 Contract-MVP ─▶ ┌─ M2 Off-chain Bridge (WF-2/3) 
 
 ## 4. M1 — Contract MVP on testnet（WF-1）
 
+> **Status（2026-06-09）：✅ DONE.** packageId `0xe6c3602e…40dbe5`、shared Schema `0x77138cee…cc698` 上 testnet（`onchain/deployments/testnet.json`）；**Move 单测 13/13**；`mine_batch` 结算/给矿/`mine_settled` 事件、nonce 重放守卫、枯竭 `mine_depleted` 均**链上验证通过**；TS 烟测 `scripts/smoke-mine.ts` 已写（typecheck 绿，未由 agent 运行——需用户把私钥放进 `.env`）。**工具链发现**：必须把 Sui CLI 升到 **1.73.0**（testnet protocol 126），1.68.1 会 `PublishUpgradeMissingDependency`；Move.toml `Sui` override 同步到 `testnet-v1.73.0`，CI 二进制同步。
+
 **Goal**：把 DESIGN §3 的合约写实、Move 单测覆盖核心不变量、部署 testnet、TS 跑通一笔 `mine_batch` + 一笔 `redeem`。
 
 **Tasks**

@@ -6,11 +6,12 @@ edition = "2024"
 # NOTE: `pnpm dubhe schemagen` regenerates sources/codegen/** but writes a BLANK
 # [dependencies]. Keep this block (re-add if a schemagen run wipes it). `dubhe publish
 # --network X` only swaps the `Dubhe = { ... }` rev per network.
-# Sui is pinned to match the installed CLI (1.68.1) + the `sui move test` runner's stdlib;
-# `override = true` forces this rev over the older one the Dubhe framework pins
-# (mainnet-v1.38.3), which otherwise causes a std::unit_test MISSING_DEPENDENCY at test time.
+# Sui is pinned to match the installed CLI (1.73.0) + the `sui move test` runner's stdlib
+# AND the live testnet protocol (126); `override = true` forces this rev over the older one
+# the Dubhe framework pins (mainnet-v1.38.3), which otherwise causes a std::unit_test
+# MISSING_DEPENDENCY at test time and a PublishUpgradeMissingDependency at publish time.
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.68.1", override = true }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.73.0", override = true }
 Dubhe = { git = "https://github.com/0xobelisk/dubhe-framework.git", rev = "dubhe-testnet-v1.1.0" }
 
 [addresses]

@@ -5,6 +5,12 @@
     "moduleResolution": "Bundler",
     "lib": ["ES2022"],
     "types": ["node"],
+    "baseUrl": ".",
+    // @0xobelisk/sui-client's exports map doesn't expose its .d.ts under bundler
+    // resolution (pre-release packaging quirk); point TS at the bundled types directly.
+    "paths": {
+      "@0xobelisk/sui-client": ["node_modules/@0xobelisk/sui-client/dist/index.d.ts"]
+    },
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,

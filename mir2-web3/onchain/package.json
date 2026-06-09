@@ -22,6 +22,7 @@
   "dependencies": {
     "@0xobelisk/sui-client": "1.1.12",
     "@0xobelisk/sui-common": "1.1.14",
+    "@mysten/sui": "1.45.2",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

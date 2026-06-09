@@ -153,7 +153,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
-          SUI_TAG=testnet-v1.68.1
+          SUI_TAG=testnet-v1.73.0
           curl -fsSL -o /tmp/sui.tgz \
             "https://github.com/MystenLabs/sui/releases/download/${SUI_TAG}/sui-${SUI_TAG}-ubuntu-x86_64.tgz"
           mkdir -p /tmp/sui-bin

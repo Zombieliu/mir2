@@ -39,10 +39,19 @@ onchain/
 
 | Tool | Version | Notes |
 |---|---|---|
-| Sui CLI | 1.68.1 (`sui --version`) | Move build/test/publish, wallet, faucet |
-| Dubhe SDK | `@0xobelisk/*` `1.2.0-pre.96` (indexer `1.2.0-pre.51`) | pinned in `package.json` |
-| `dubhe` CLI | `@0xobelisk/sui-cli` `1.2.0-pre.96` | `pnpm dubhe schemagen` (M1) |
+| Sui CLI | **1.73.0** (`sui --version`) | must match the live testnet protocol (126); older CLIs fail to publish |
+| Dubhe SDK | `@0xobelisk/sui-common`/`sui-cli` `1.1.14`, `sui-client` `1.1.12` | **stable 1.1.x** — the API the examples + DESIGN §3.1 use (npm `latest` is a divergent `1.2.0-pre`) |
+| Sui Move framework | `Move.toml` pins `Sui = testnet-v1.73.0` (`override`) | matches the CLI + testnet; overrides the Dubhe framework's `mainnet-v1.38.3` |
+| `@mysten/sui` | `1.45.2` | for the TS smoke PTB (matches `sui-client`'s instance) |
 | Node / pnpm | ≥22 / ≥9 | |
+
+## Testnet deployment (M1)
+
+Live on Sui **testnet** — see [`deployments/testnet.json`](deployments/testnet.json):
+`packageId 0xe6c3602e…40dbe5`, shared `Schema 0x77138cee…cc698`. Verified on-chain:
+`mine_batch` settles + credits ore + emits `mine_settled`, the nonce replay guard aborts,
+and depletion emits `mine_depleted`. Run the TS smoke with your key in `.env`:
+`pnpm tsx scripts/smoke-mine.ts`.
 
 ## Commands
 
