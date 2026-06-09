@@ -4803,24 +4803,40 @@ impl SharedInProcessZoneSessionRuntime {
             ClientPacket::Chat {
                 message,
                 linked_items,
-            } => match self
-                .inner
-                .prepare_chat_packet_for_zone(message.clone(), linked_items.clone())
-            {
-                ChatPacketPreparation::Dispatch(prepared) => {
-                    Some(self.dispatch_zone_player_command(
-                        ZoneCommand::Chat {
-                            session_id,
-                            message: prepared.message,
-                            linked_items: prepared.linked_items,
-                            linked_user_items: prepared.linked_user_items,
-                            now_ms: Self::zone_now_ms(),
-                        },
-                        false,
-                    ))
+            } => {
+                // GM `@` commands and the `@LOGIN` password handshake are dispatched
+                // on the personal-session path (`handle_chat_packet` ->
+                // `dispatch_gm_command`), never broadcast through the shared Zone
+                // (whose `chat()` silently drops `@` lines). Decline those lines here
+                // so the caller falls back to `self.inner.execute(command)`. `@!`
+                // announcements and `@ADDSTORAGE` stay genuine zone chat handled below.
+                let trimmed = message.trim_start();
+                let is_gm_command_line = trimmed.len() > 1
+                    && trimmed.starts_with('@')
+                    && !trimmed.starts_with("@!")
+                    && !trimmed.eq_ignore_ascii_case("@ADDSTORAGE");
+                if is_gm_command_line || self.inner.gm_login_pending() {
+                    return None;
                 }
-                ChatPacketPreparation::Immediate(packets) => Some(packets),
-            },
+                match self
+                    .inner
+                    .prepare_chat_packet_for_zone(message.clone(), linked_items.clone())
+                {
+                    ChatPacketPreparation::Dispatch(prepared) => {
+                        Some(self.dispatch_zone_player_command(
+                            ZoneCommand::Chat {
+                                session_id,
+                                message: prepared.message,
+                                linked_items: prepared.linked_items,
+                                linked_user_items: prepared.linked_user_items,
+                                now_ms: Self::zone_now_ms(),
+                            },
+                            false,
+                        ))
+                    }
+                    ChatPacketPreparation::Immediate(packets) => Some(packets),
+                }
+            }
             ClientPacket::OpenDoor { door_index } => {
                 // Doors are shared world state: route to the zone, which opens
                 // the door for every co-located player, broadcasts it, and
