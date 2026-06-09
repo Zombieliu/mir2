@@ -147,8 +147,10 @@ jobs:
           cache-dependency-path: mir2-web3/onchain/pnpm-lock.yaml
       - name: Install TS deps
         run: pnpm install --frozen-lockfile
-      - name: Typecheck (Dubhe config + scripts)
+      - name: Typecheck (Dubhe config + scripts + relayer)
         run: pnpm typecheck
+      - name: Relayer unit tests (normalize + dedup)
+        run: pnpm test:relayer
       - name: Install Sui CLI (pinned testnet binary)
         working-directory: ${{ github.workspace }}
         run: |
