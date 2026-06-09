@@ -4,6 +4,8 @@
 >
 > 目标读者：游戏服务端（Rust/`bevy_ecs`）、链上合约（Move/Dubhe）、前端（Next.js/Bevy）、经济/产品。
 
+> **端到端实施路线图（全量落地，M0→M8 + 工作流/出口判据/关键路径）见 `docs/ONCHAIN-SMART-MINE-ROADMAP.md`。** 本文负责“设计/为什么”，路线图负责“怎么一路做到完工”。
+
 ---
 
 ## 0. 一句话结论
