@@ -975,7 +975,11 @@ impl GmRuntimeResource {
         Self {
             test_server: false,
             login_pending: false,
-            password: None,
+            // `@LOGIN` password (`Settings.GMPassword`), sourced from
+            // `MIR2_GM_PASSWORD` when set; otherwise login can never succeed.
+            password: std::env::var("MIR2_GM_PASSWORD")
+                .ok()
+                .filter(|password| !password.is_empty()),
             gm_never_die: false,
             game_master: false,
             observer: false,
