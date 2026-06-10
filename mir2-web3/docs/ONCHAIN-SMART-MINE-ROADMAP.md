@@ -230,6 +230,11 @@ M0 Foundation ─▶ M1 Contract-MVP ─▶ ┌─ M2 Off-chain Bridge (WF-2/3) 
 
 ## 7. M4 — End-to-End Vertical Slice（全 WF 合龙）
 
+> **Status（2026-06-10）：◐ 后端脊柱 + 客户端纯逻辑核心 DONE；浏览器接线 + 实链 e2e 待真机。**
+> **WF-5 网关注入脊柱（commit 08aec46be）**：受信 Relayer `POST /onchain/inject`（operator-token 鉴权，常量时间比较，生产 fail-closed）→ `LiveSessionInjector`（account_id→该 socket 任务的 mpsc 发送端，RAII 注册/注销）→ 目标活会话 `execute_with_outcome`（Direct，权威落库）→ 推包。`OnchainInjectCommand`（camelCase，对齐 relayer `types.ts`）：`GrantOnchainOre`/`CreditGoldFromOre`→`WorldCommand`，`MineDepleted`→渲染-only no-op。离线玩家 200 accepted/`connected:false`（持久化留 M6）。**幂等③仍在 Sim**（重复 `idempotency_key` no-op），网关无状态。门禁：`cargo fmt --all --check` 绿；网关 lib 套件 **268 passed / 0 failed**（新 9：3 operator-token + 6 inject）。
+> **WF-6 客户端核心（commit 见 feat/onchain-mine）**：`apps/web/lib/onchain-mine.ts` —— PTB builders（`mine_batch` 从 gas split 出 `fee: Coin<SUI>`、7 参；`redeem` 先造 `OreKind` 再销毁）+ 攒挥批处理器 + 严格递增 nonce 跟踪（链同步不回退）+ 乐观↔链对账（phantom/shortfall delta）+ `stones_left`→矿脉分档（满/裂/空）；`onchain-mine-session.ts` —— 经 Wallet Standard `sui:signAndExecuteTransaction` 签发（复用 `passkey-auth.ts` 的钱包对象），只回 tx digest（矿/金经 Relayer→inject→Sim 权威落库，期间乐观 VFX）。门禁：`tsc --noEmit` 0 错；`test:frontend-logic` 绿（新 `test:onchain-mine` 14 组，builders 用 `Transaction.getData()` 断言，无需网络/钱包）。
+> **待真机（非 headless 可验）**：`page.tsx` 接线（`harvestToward`→批处理器、`GainedItem`/`MineNodeState` case 对账、redeem UI、钱包连接）+ Relayer 真打注入端点的实链端到端冒烟（tx digest→背包→分档→redeem 得金币）。需浏览器 + 充值 testnet 钱包（CLAUDE.md 归 Codex 的部署/实链验证道）。**M4 出口的"端到端 + 三处幂等全生效"须在真机复核后才算闭合。**
+
 **Goal**：DESIGN §4 全链路在 **testnet** 跑通：客户端攒 N 挥 → 1 笔 `mine_batch` → 链结算 → Indexer → Relayer（去重）→ Sim 权威落库 → 背包矿石 + `MineNodeState` 渲染分档；乐观特效与链确认**对账**一致。
 
 **Tasks**
