@@ -1,9 +1,10 @@
-// Behavioral tests for lib/onchain-mine.ts — the client core of the on-chain
-// smart-mine loop (M4, WF-6).
+// Behavioral tests for the on-chain smart-mine client core (M4, WF-6):
+// lib/onchain-mine-config.ts (pure config/helpers, re-exported by lib/onchain-mine.ts),
+// lib/onchain-mine.ts (PTB builders) and lib/onchain-mine-state.ts (page-state machine).
 //
 // Two layers:
-//   1. Pure logic (swing batcher, nonce tracker, ore reconcile, stones->stage,
-//      ore-kind constructor targets) — no external deps.
+//   1. Pure logic (page-state machine, nonce tracker, ore reconcile, stones->stage,
+//      ore-kind constructor targets, nonce persistence) — no external deps.
 //   2. PTB builders (mine_batch / redeem) — asserted by inspecting the built
 //      `Transaction.getData()` (commands + inputs), no network/wallet needed.
 //
@@ -38,9 +39,14 @@ function loadTypeScriptModule(url, requireMap = {}) {
   return module.exports;
 }
 
+const mineConfig = loadTypeScriptModule(
+  new URL("../lib/onchain-mine-config.ts", import.meta.url),
+);
 const mine = loadTypeScriptModule(new URL("../lib/onchain-mine.ts", import.meta.url), {
   "@mysten/sui/transactions": suiTransactions,
+  "./onchain-mine-config": mineConfig,
 });
+const mineState = loadTypeScriptModule(new URL("../lib/onchain-mine-state.ts", import.meta.url));
 
 const {
   TESTNET_MINE_DEPLOYMENT,
@@ -49,7 +55,6 @@ const {
   oreKindConstructorTarget,
   buildMineBatchTransaction,
   buildRedeemTransaction,
-  createSwingBatcher,
   createNonceTracker,
   reconcileOptimisticOre,
   stonesLeftToVeinStage,
@@ -178,31 +183,6 @@ check("buildRedeemTransaction rejects non-positive amounts", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Swing batcher
-// ---------------------------------------------------------------------------
-
-check("createSwingBatcher flushes at batchSize and resets on takeBatch", () => {
-  const batcher = createSwingBatcher({ batchSize: 3 });
-  assert.equal(batcher.recordSwing().shouldFlush, false); // 1
-  assert.equal(batcher.recordSwing().shouldFlush, false); // 2
-  const third = batcher.recordSwing(); // 3
-  assert.equal(third.pending, 3);
-  assert.equal(third.shouldFlush, true);
-  assert.equal(batcher.takeBatch(), 3, "takeBatch returns the accumulated count");
-  assert.equal(batcher.pending(), 0, "pending resets after takeBatch");
-  assert.equal(batcher.recordSwing().shouldFlush, false, "the cycle restarts");
-});
-
-check("createSwingBatcher coerces a bad batchSize to >= 1 and reset drops pending", () => {
-  const batcher = createSwingBatcher({ batchSize: 0 });
-  assert.equal(batcher.recordSwing().shouldFlush, true, "batchSize floored to 1");
-  batcher.recordSwing();
-  batcher.reset();
-  assert.equal(batcher.pending(), 0);
-  assert.equal(batcher.takeBatch(), 0, "takeBatch on empty is a no-op count");
-});
-
-// ---------------------------------------------------------------------------
 // Nonce tracker
 // ---------------------------------------------------------------------------
 
@@ -251,12 +231,151 @@ check("reconcileOptimisticOre reports phantom / shortfall / match", () => {
 // stones_left -> vein render stage
 // ---------------------------------------------------------------------------
 
-check("stonesLeftToVeinStage tiers full / cracked / depleted", () => {
+check("stonesLeftToVeinStage tiers match the sim's mine_stage exactly", () => {
   assert.equal(stonesLeftToVeinStage(0, 10), VEIN_STAGE_DEPLETED);
-  assert.equal(stonesLeftToVeinStage(5, 10), VEIN_STAGE_CRACKED, "<= half is cracked");
-  assert.equal(stonesLeftToVeinStage(6, 10), VEIN_STAGE_FULL, "> half is full");
+  // P0 semantics (mining.rs mine_stage): cracked only while stones*2 < max —
+  // exactly half still renders FULL.
+  assert.equal(stonesLeftToVeinStage(4, 10), VEIN_STAGE_CRACKED, "below half is cracked");
+  assert.equal(stonesLeftToVeinStage(5, 10), VEIN_STAGE_FULL, "exactly half is full (P0 parity)");
+  assert.equal(stonesLeftToVeinStage(6, 10), VEIN_STAGE_FULL);
   assert.equal(stonesLeftToVeinStage(10, 10), VEIN_STAGE_FULL);
   assert.equal(stonesLeftToVeinStage(1, 10), VEIN_STAGE_CRACKED);
+});
+
+// ---------------------------------------------------------------------------
+// Page-state machine (lib/onchain-mine-state.ts)
+// ---------------------------------------------------------------------------
+
+const {
+  abandonInFlightBatch,
+  createOnchainMineState,
+  hasBatchInFlight,
+  canFlushBatch,
+  recordSwing,
+  beginBatch,
+  batchSubmitted,
+  batchFailed,
+  confirmSettlement,
+  resetPendingSwings,
+  oreUnitsFromGainedItem,
+  isOnchainVeinNode,
+  loadPersistedNextNonce,
+  persistNextNonce,
+} = mineState;
+
+check("swing accumulation flushes at batch size, single batch in flight", () => {
+  let state = createOnchainMineState();
+  for (let i = 0; i < 5; i += 1) state = recordSwing(state, 1);
+  assert.equal(state.pendingSwings, 5);
+  assert.equal(state.pendingOptimisticUnits, 5);
+  assert.equal(canFlushBatch(state, 5), true);
+  assert.equal(canFlushBatch(state, 6), false);
+
+  const begun = beginBatch(state, 3);
+  assert.ok(begun);
+  assert.equal(begun.swings, 5);
+  state = begun.state;
+  assert.equal(state.pendingSwings, 0, "pending moved into the in-flight batch");
+  assert.equal(state.inFlightSwings, 5);
+  assert.equal(state.inFlightNonce, 3);
+  assert.equal(hasBatchInFlight(state), true);
+  assert.equal(canFlushBatch(recordSwing(state, 1), 1), false, "no second batch while in flight");
+  assert.equal(beginBatch(state, 4), null, "cannot begin while one is in flight");
+
+  state = batchSubmitted(state, "DIGEST1");
+  assert.equal(state.inFlightDigest, "DIGEST1");
+});
+
+check("batchFailed restores the swings so the player's work is not lost", () => {
+  let state = createOnchainMineState();
+  state = recordSwing(recordSwing(state, 1), 1);
+  state = beginBatch(state, 1).state;
+  state = recordSwing(state, 1); // one more swing accumulated while in flight
+  state = batchFailed(state, "wallet rejected");
+  assert.equal(state.pendingSwings, 3, "2 in-flight + 1 new pending restored");
+  assert.equal(state.inFlightSwings, 0);
+  assert.equal(state.lastError, "wallet rejected");
+  assert.equal(canFlushBatch(state, 3), true);
+});
+
+check("confirmSettlement reconciles optimistic vs chain-confirmed (多退少补)", () => {
+  let state = createOnchainMineState();
+  for (let i = 0; i < 4; i += 1) state = recordSwing(state, 1); // optimistic 4
+  state = beginBatch(state, 1).state;
+  state = batchSubmitted(state, "D");
+  // Chain granted only 3 -> 1 phantom ore was shown.
+  state = confirmSettlement(state, 3);
+  assert.equal(hasBatchInFlight(state), false);
+  assert.equal(state.confirmedUnits, 3);
+  assert.equal(state.settledBatches, 1);
+  assert.deepEqual(state.lastReconcile, { deltaUnits: -1, phantom: true, shortfall: false });
+  // Settlement with unreadable units: settles, no reconcile delta claimed.
+  state = recordSwing(state, 1);
+  state = beginBatch(state, 2).state;
+  const before = state.lastReconcile;
+  state = confirmSettlement(state, null);
+  assert.equal(state.settledBatches, 2);
+  assert.equal(state.lastReconcile, before, "unknown units never claim a delta");
+  // Settling with nothing in flight is a no-op.
+  assert.equal(confirmSettlement(state, 5), state);
+});
+
+check("resetPendingSwings drops accumulation only", () => {
+  let state = recordSwing(createOnchainMineState(), 1);
+  state = resetPendingSwings(state);
+  assert.equal(state.pendingSwings, 0);
+  assert.equal(state.pendingOptimisticUnits, 0);
+});
+
+check("abandonInFlightBatch drops the batch WITHOUT restoring swings (nonce is spent)", () => {
+  let state = recordSwing(recordSwing(createOnchainMineState(), 1), 1);
+  state = beginBatch(state, 1).state;
+  state = batchSubmitted(state, "DIGEST");
+  state = abandonInFlightBatch(state, "settlement timeout");
+  assert.equal(hasBatchInFlight(state), false);
+  assert.equal(state.pendingSwings, 0, "swings are NOT restored — resubmit would double-mine");
+  assert.equal(state.lastError, "settlement timeout");
+  // No-op when nothing is in flight.
+  assert.equal(abandonInFlightBatch(state, "x"), state);
+});
+
+check("oreUnitsFromGainedItem reads fresh chain-grant items only", () => {
+  // Fresh chain grant: count 1, dura == maxDura == units*1000.
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 5000, maxDura: 5000 }), 5);
+  // Incremented stack / partial dura / non-1000 multiples are unreadable.
+  assert.equal(oreUnitsFromGainedItem({ count: 2, currentDura: 5000, maxDura: 5000 }), null);
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 4000, maxDura: 5000 }), null);
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 4500, maxDura: 4500 }), null);
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 0, maxDura: 0 }), null);
+  // The plausibility bound rejects unrelated fresh items with round durabilities
+  // (a 20000-dura shop weapon is NOT a 20-ore grant when the batch was 5 swings).
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 20000, maxDura: 20000 }, 5), null);
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 5000, maxDura: 5000 }, 5), 5);
+  assert.equal(oreUnitsFromGainedItem({ count: 1, currentDura: 5000, maxDura: 5000 }, 4), null);
+});
+
+check("isOnchainVeinNode matches the configured cell only", () => {
+  assert.equal(isOnchainVeinNode({ x: 335, y: 270 }, { x: 335, y: 270 }), true);
+  assert.equal(isOnchainVeinNode({ x: 334, y: 270 }, { x: 335, y: 270 }), false);
+});
+
+check("nonce persistence round-trips per account+package and defaults to 1", () => {
+  const store = new Map();
+  const storage = {
+    getItem: (key) => (store.has(key) ? store.get(key) : null),
+    setItem: (key, value) => store.set(key, value),
+  };
+  assert.equal(loadPersistedNextNonce("sui:0xa", "0xpkg", storage), 1);
+  persistNextNonce("sui:0xa", "0xpkg", 7, storage);
+  assert.equal(loadPersistedNextNonce("sui:0xa", "0xpkg", storage), 7);
+  assert.equal(
+    loadPersistedNextNonce("sui:0xb", "0xpkg", storage),
+    1,
+    "scoped per account",
+  );
+  persistNextNonce("sui:0xa", "0xpkg", 0, storage);
+  assert.equal(loadPersistedNextNonce("sui:0xa", "0xpkg", storage), 1, "floors to 1");
+  assert.equal(loadPersistedNextNonce("sui:0xa", "0xpkg", null), 1, "no storage -> 1");
 });
 
 console.log(`onchain mine client tests passed (${passed} groups)`);

@@ -40,7 +40,9 @@ import {
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
 import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
 import {
+  connectSuiWalletForSigning,
   DUBHE_WALLET_URL,
+  getActiveSuiWalletSession,
   getSuiWalletSummaries,
   requestSuiLoginToken,
   sendBootstrapSequence as sendGatewayBootstrapSequence,
@@ -48,10 +50,37 @@ import {
   sendPasswordLoginCommand,
   sendSuiLoginCommand,
   subscribeToSuiWalletChanges,
+  type ActiveSuiWalletSession,
   type SuiLoginKind,
   type SuiLoginToken,
   type SuiWalletSummary,
 } from "../lib/client-login-runtime";
+// Pure config only — the @mysten/sui PTB builders + wallet session are imported
+// DYNAMICALLY inside the handlers so the SDK stays out of the main bundle.
+import {
+  createNonceTracker,
+  isOreKindName,
+  TESTNET_MINE_DEPLOYMENT,
+  type NonceTracker,
+  type OreKindName,
+} from "../lib/onchain-mine-config";
+import type { MineSessionContext } from "../lib/onchain-mine-session";
+import {
+  abandonInFlightBatch,
+  batchFailed,
+  batchSubmitted,
+  beginBatch,
+  canFlushBatch,
+  confirmSettlement,
+  createOnchainMineState,
+  hasBatchInFlight,
+  isOnchainVeinNode,
+  loadPersistedNextNonce,
+  oreUnitsFromGainedItem,
+  persistNextNonce,
+  recordSwing as recordOnchainSwing,
+} from "../lib/onchain-mine-state";
+import { OnchainMinePanel } from "./components/onchain-mine-panel";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -863,6 +892,36 @@ const CRYSTAL_MOVEMENT_DIRECTIONS = [
 const CONFIGURED_GATEWAY_WS_URL = process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim();
 const LOCAL_GATEWAY_WS_URL = "ws://127.0.0.1:7110/ws";
 const HOSTED_GATEWAY_WS_URL = "wss://165.154.65.136.sslip.io/ws";
+// ── On-chain smart mine (M4, WF-6) — testnet vertical slice, OFF unless the flag is set.
+// Batch size / fee are M4 placeholders pending the M5 economy sign-off (per_swing_fee is
+// 0 on-chain until then); the vein cell matches the sim's seeded OnchainMineNodeRecord.
+const ONCHAIN_MINE_ENABLED = process.env.NEXT_PUBLIC_ONCHAIN_MINE === "1";
+const ONCHAIN_MINE_ID = Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_ID ?? "1");
+const ONCHAIN_MINE_BATCH_SIZE = Math.max(
+  1,
+  Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_BATCH ?? "5"),
+);
+const ONCHAIN_MINE_FEE_PER_SWING_MIST = Math.max(
+  0,
+  Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_FEE_PER_SWING_MIST ?? "0"),
+);
+const ONCHAIN_MINE_VEIN = {
+  x: Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_NODE_X ?? "335"),
+  y: Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_NODE_Y ?? "270"),
+};
+// Optimistic display rate per swing (hit_rate/100 * drop_rate/100); the testnet smoke
+// mine is 100/100 -> 1 ore per swing.
+const ONCHAIN_MINE_EXPECTED_UNITS_PER_SWING = Math.max(
+  0,
+  Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_EXPECTED_UNITS ?? "1"),
+);
+const ONCHAIN_MINE_ORE_KIND_RAW = process.env.NEXT_PUBLIC_ONCHAIN_MINE_ORE ?? "BlackIron";
+// Watchdog for the settlement signal (chain finality ~3s + relayer poll 4s + inject);
+// generous so slow testnets don't false-abandon a batch.
+const ONCHAIN_MINE_SETTLE_TIMEOUT_MS = Math.max(
+  10_000,
+  Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_SETTLE_TIMEOUT_MS ?? "60000"),
+);
 const BEVY_RUNTIME_VERSION =
   [bevyRuntimeVersion.version, process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA]
     .filter((value): value is string => Boolean(value))
@@ -1287,6 +1346,19 @@ export default function HomePage() {
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
+  const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
+  const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
+  const [onchainWalletBusy, setOnchainWalletBusy] = useState(false);
+  const [onchainSubmitBusy, setOnchainSubmitBusy] = useState(false);
+  const [onchainRedeemAmount, setOnchainRedeemAmount] = useState("1");
+  const [onchainNextNonce, setOnchainNextNonce] = useState(1);
+  const onchainNonceRef = useRef<NonceTracker | null>(null);
+  // Sync re-entry guard for the wallet submit (state commits lag the submit effect).
+  const onchainSubmitGuardRef = useRef(false);
+  // Ore units read from the chain-granted GainedItem of the in-flight batch, consumed
+  // when the vein's MineNodeState (the settlement signal) arrives right after it.
+  const onchainConfirmedUnitsRef = useRef<number | null>(null);
   const [characters, setCharacters] = useState<SelectCharacterEntry[]>(() => [fallbackCharacter("en")]);
   const [selectedCharacterIndex, setSelectedCharacterIndex] = useState(0);
   const [wsState, setWsState] = useState("closed");
@@ -1468,6 +1540,79 @@ export default function HomePage() {
       unsubscribe();
     };
   }, []);
+
+  // ── On-chain smart mine effects (M4) — all inert unless the env flag is on.
+  // Adopt the wallet the login flow already connected (no second prompt).
+  useEffect(() => {
+    if (!ONCHAIN_MINE_ENABLED || onchainWallet || screen !== "game") return;
+    const session = getActiveSuiWalletSession();
+    if (session) setOnchainWallet(session);
+  }, [screen, onchainWallet]);
+
+  // The on-chain nonce is per signing address; restore the persisted counter on connect.
+  useEffect(() => {
+    if (!ONCHAIN_MINE_ENABLED || !onchainWallet) return;
+    const next = loadPersistedNextNonce(
+      onchainWallet.account.address,
+      TESTNET_MINE_DEPLOYMENT.packageId,
+    );
+    onchainNonceRef.current = createNonceTracker(next);
+    setOnchainNextNonce(next);
+  }, [onchainWallet]);
+
+  // Mirror the in-flight swing count into a ref so the WS packet handler (a long-lived
+  // closure) can gate settlement detection without reading stale state. The count also
+  // bounds plausible chain-grant units (the contract grants at most 1 ore per swing).
+  const onchainInFlightSwingsRef = useRef(0);
+  useEffect(() => {
+    onchainInFlightSwingsRef.current = onchainMine.inFlightSwings;
+  }, [onchainMine]);
+
+  // Auto-begin: once enough swings accumulate (and nothing is in flight), take them as
+  // ONE batch (DESIGN §4 "攒满 N 次 → 发 1 笔"). Gated on lastError so a failed batch is
+  // NOT auto-retried (it would loop the wallet prompt forever — the player re-flushes
+  // manually via 立即结算, which clears the error). beginBatch runs inside the functional
+  // updater so concurrently queued swings are never clobbered.
+  useEffect(() => {
+    if (!ONCHAIN_MINE_ENABLED || onchainSubmitBusy || !onchainWallet) return;
+    if (onchainMine.lastError !== null) return;
+    if (!canFlushBatch(onchainMine, ONCHAIN_MINE_BATCH_SIZE)) return;
+    const tracker = onchainNonceRef.current;
+    if (!tracker) return;
+    setOnchainMine((current) => beginBatch(current, tracker.peek())?.state ?? current);
+  }, [onchainMine, onchainSubmitBusy, onchainWallet]);
+
+  // Submit: a begun batch (in flight, no digest yet) is signed + sent exactly once;
+  // the sync ref guard inside submitOnchainBatch covers effect double-invocation.
+  useEffect(() => {
+    if (!ONCHAIN_MINE_ENABLED || onchainSubmitBusy || !onchainWallet) return;
+    if (!hasBatchInFlight(onchainMine) || onchainMine.inFlightDigest !== null) return;
+    if (onchainMine.inFlightNonce === null) return;
+    void submitOnchainBatch(onchainMine.inFlightSwings, onchainMine.inFlightNonce);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- submitOnchainBatch is recreated every render
+  }, [onchainMine, onchainSubmitBusy, onchainWallet]);
+
+  // Watchdog: if the settlement signal never arrives (relayer down, or the grant landed
+  // while the player was on another map), abandon the in-flight batch — WITHOUT
+  // restoring the swings: the tx was accepted on-chain (nonce spent) and may well have
+  // settled, so resubmitting would double-mine. Granted ore still lands via GainedItem.
+  useEffect(() => {
+    if (!ONCHAIN_MINE_ENABLED || typeof window === "undefined") return;
+    const digest = onchainMine.inFlightDigest;
+    if (!hasBatchInFlight(onchainMine) || digest === null) return;
+    const timer = window.setTimeout(() => {
+      setOnchainMine((current) =>
+        current.inFlightDigest === digest
+          ? abandonInFlightBatch(
+              current,
+              `settlement signal timed out for ${digest.slice(0, 8)}… (batch IS on-chain; ore arrives via the relayer or on next login)`,
+            )
+          : current,
+      );
+    }, ONCHAIN_MINE_SETTLE_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the digest only
+  }, [onchainMine.inFlightDigest]);
 
   const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
   const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
@@ -4495,6 +4640,140 @@ export default function HomePage() {
     send({ type: "pickUpTile" });
   }
 
+  // ── On-chain smart mine handlers (M4, WF-6 — DESIGN §4). Server stays authoritative:
+  // a swing only plays the directional attack server-side and bumps the OPTIMISTIC
+  // display; real ore lands later via chain -> Relayer -> gateway inject -> Sim.
+
+  /** Wallet+ids context for signing; null until a signing wallet is connected. */
+  function onchainMineContext(): MineSessionContext | null {
+    if (!onchainWallet) return null;
+    return {
+      wallet: onchainWallet.wallet,
+      account: onchainWallet.account,
+      chain: onchainWallet.chain,
+      deployment: TESTNET_MINE_DEPLOYMENT,
+    };
+  }
+
+  async function connectOnchainWallet() {
+    setOnchainWalletBusy(true);
+    try {
+      const session = getActiveSuiWalletSession() ?? (await connectSuiWalletForSigning());
+      setOnchainWallet(session);
+      appendLog(`[on-chain mine] wallet connected: ${session.account.address}`, "system");
+    } catch (error) {
+      appendLog(
+        `[on-chain mine] wallet connect failed: ${error instanceof Error ? error.message : String(error)}`,
+        "system",
+      );
+    } finally {
+      setOnchainWalletBusy(false);
+    }
+  }
+
+  /**
+   * One pick swing at the on-chain vein: play the directional swing server-side
+   * (P0 mining ignores the cell — it is deliberately NOT a P0 mine spot, so no server
+   * payout can double the chain grant) and accumulate toward the next batch.
+   */
+  function onchainSwing() {
+    const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+    const direction = origin
+      ? directionFromPoint(origin, ONCHAIN_MINE_VEIN, "Right")
+      : "Right";
+    send({ type: "attackDirection", direction });
+    setOnchainMine((current) => recordOnchainSwing(current, ONCHAIN_MINE_EXPECTED_UNITS_PER_SWING));
+  }
+
+  /**
+   * Take the pending swings as a batch NOW (the manual 立即结算 button — also the only
+   * way to retry after a failure, since auto-begin is gated on `lastError`). The actual
+   * wallet submit happens in the submit effect once the begun batch lands in state.
+   */
+  function flushOnchainBatch() {
+    const tracker = onchainNonceRef.current;
+    if (!tracker || !onchainWallet || onchainSubmitBusy) return;
+    setOnchainMine((current) => beginBatch(current, tracker.peek())?.state ?? current);
+  }
+
+  /** Sign + submit ONE begun `mine_batch` (DESIGN §4-②). Driven by the submit effect. */
+  async function submitOnchainBatch(swings: number, nonce: number) {
+    const context = onchainMineContext();
+    const tracker = onchainNonceRef.current;
+    // Sync re-entry guard: the submit effect can re-fire before `onchainSubmitBusy`
+    // commits (and StrictMode double-invokes effects in dev).
+    if (!context || !tracker || onchainSubmitGuardRef.current) return;
+    onchainSubmitGuardRef.current = true;
+    setOnchainSubmitBusy(true);
+    onchainConfirmedUnitsRef.current = null;
+    try {
+      const { executeMineBatch } = await import("../lib/onchain-mine-session");
+      const result = await executeMineBatch(context, {
+        mineId: ONCHAIN_MINE_ID,
+        swings,
+        nonce,
+        feeMist: ONCHAIN_MINE_FEE_PER_SWING_MIST * swings,
+      });
+      // Only consume + persist the nonce once the chain accepted the transaction.
+      tracker.next();
+      persistNextNonce(
+        onchainWallet?.account.address ?? "unknown",
+        TESTNET_MINE_DEPLOYMENT.packageId,
+        tracker.peek(),
+      );
+      setOnchainNextNonce(tracker.peek());
+      setOnchainMine((current) => batchSubmitted(current, result.digest));
+      appendLog(`[on-chain mine] mine_batch submitted: ${result.digest}`, "system");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // batchFailed RESTORES the swings (the tx never landed: wallet rejection / RPC
+      // error / contract abort before acceptance). No auto-retry — lastError gates it.
+      setOnchainMine((current) => batchFailed(current, message));
+      appendLog(`[on-chain mine] mine_batch failed: ${message}`, "system");
+    } finally {
+      onchainSubmitGuardRef.current = false;
+      setOnchainSubmitBusy(false);
+    }
+  }
+
+  /** Burn on-chain ore for gold; the Sim credits it after `ore_redeemed` relays back. */
+  async function redeemOnchainOre() {
+    const context = onchainMineContext();
+    if (!context || onchainSubmitBusy) return;
+    const amount = Math.floor(Number(onchainRedeemAmount));
+    if (!Number.isInteger(amount) || amount < 1) {
+      appendLog("[on-chain mine] redeem amount must be >= 1", "system");
+      return;
+    }
+    const oreKind: OreKindName = isOreKindName(ONCHAIN_MINE_ORE_KIND_RAW)
+      ? ONCHAIN_MINE_ORE_KIND_RAW
+      : "BlackIron";
+    setOnchainSubmitBusy(true);
+    try {
+      const { executeRedeem } = await import("../lib/onchain-mine-session");
+      const result = await executeRedeem(context, { oreKind, amount });
+      appendLog(
+        `[on-chain mine] redeem submitted: ${result.digest} (gold arrives via the relayer)`,
+        "system",
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setOnchainMine((current) => ({ ...current, lastError: message }));
+      appendLog(`[on-chain mine] redeem failed: ${message}`, "system");
+    } finally {
+      setOnchainSubmitBusy(false);
+    }
+  }
+
+  /** Manual nonce override (M4 dev tool — e.g. after a BadNonce abort). */
+  function setOnchainNonce(nextNonce: number) {
+    onchainNonceRef.current = createNonceTracker(nextNonce);
+    setOnchainNextNonce(nextNonce);
+    if (onchainWallet) {
+      persistNextNonce(onchainWallet.account.address, TESTNET_MINE_DEPLOYMENT.packageId, nextNonce);
+    }
+  }
+
   function createCharacter(draft: {
     name: string;
     classKey: SelectCharacterEntry["classKey"];
@@ -6143,6 +6422,25 @@ export default function HomePage() {
           ),
           "system",
         );
+        // On-chain settlement signal (M4): the sim re-broadcasts the configured vein
+        // from the chain-confirmed stones_left AFTER the granted items, so a vein
+        // update while a batch is in flight closes that batch and reconciles the
+        // optimistic display against the units read from the grant (多退少补).
+        if (
+          ONCHAIN_MINE_ENABLED &&
+          onchainInFlightSwingsRef.current > 0 &&
+          isOnchainVeinNode({ x: mineX, y: mineY }, ONCHAIN_MINE_VEIN)
+        ) {
+          const confirmedUnits = onchainConfirmedUnitsRef.current;
+          onchainConfirmedUnitsRef.current = null;
+          setOnchainMine((current) => confirmSettlement(current, confirmedUnits));
+          appendLog(
+            confirmedUnits === null
+              ? `[on-chain mine] batch settled (vein stage -> ${mineStageLabel})`
+              : `[on-chain mine] batch settled: +${confirmedUnits} ore confirmed on-chain`,
+            "system",
+          );
+        }
         break;
       }
       case "PlaySound":
@@ -6569,6 +6867,26 @@ export default function HomePage() {
             t("ui.gainedItem", [String(item.itemIndex ?? item.uniqueId)], "You gained an item."),
             "system",
           );
+          // While an on-chain batch is in flight, a fresh chain-granted ore item encodes
+          // the granted units as dura/1000 — stash them for the settlement signal (the
+          // vein MineNodeState that follows in the same flush). Summed across items for
+          // grants split over multiple ore items. Bounded by the in-flight swing count
+          // (the contract grants at most 1 ore per swing) so unrelated fresh items with
+          // round durabilities (shop buys, crafts) are not mistaken for the grant.
+          if (
+            ONCHAIN_MINE_ENABLED &&
+            onchainInFlightSwingsRef.current > 0 &&
+            event.packet === "GainedItem"
+          ) {
+            const alreadyStashed = onchainConfirmedUnitsRef.current ?? 0;
+            const units = oreUnitsFromGainedItem(
+              item,
+              onchainInFlightSwingsRef.current - alreadyStashed,
+            );
+            if (units !== null) {
+              onchainConfirmedUnitsRef.current = alreadyStashed + units;
+            }
+          }
         }
         break;
       }
@@ -10350,6 +10668,34 @@ export default function HomePage() {
           questLog: showQuestLog || (showInventory && activeInventoryTab === "quest"),
         }}
         onClose={() => setShowTutorial(false)}
+      />
+    ) : null}
+    {ONCHAIN_MINE_ENABLED && screen === "game" ? (
+      <OnchainMinePanel
+        walletAddress={onchainWallet?.account.address ?? null}
+        walletBusy={onchainWalletBusy}
+        pendingSwings={onchainMine.pendingSwings}
+        batchSize={ONCHAIN_MINE_BATCH_SIZE}
+        optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
+        inFlightSwings={onchainMine.inFlightSwings}
+        inFlightDigest={onchainMine.inFlightDigest}
+        confirmedUnits={onchainMine.confirmedUnits}
+        settledBatches={onchainMine.settledBatches}
+        lastReconcile={onchainMine.lastReconcile}
+        lastError={onchainMine.lastError}
+        nextNonce={onchainNextNonce}
+        veinStage={
+          world.mineNodes.find((node) => isOnchainVeinNode(node, ONCHAIN_MINE_VEIN))?.stage ?? null
+        }
+        veinLocation={ONCHAIN_MINE_VEIN}
+        submitBusy={onchainSubmitBusy}
+        redeemAmount={onchainRedeemAmount}
+        onRedeemAmountChange={setOnchainRedeemAmount}
+        onConnectWallet={() => void connectOnchainWallet()}
+        onSwing={onchainSwing}
+        onFlushNow={() => void flushOnchainBatch()}
+        onRedeem={() => void redeemOnchainOre()}
+        onNonceChange={setOnchainNonce}
       />
     ) : null}
     </>

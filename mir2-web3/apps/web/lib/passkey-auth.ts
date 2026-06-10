@@ -5,6 +5,7 @@ import {
   isWalletWithRequiredFeatureSet,
   SuiSignPersonalMessage,
   type Wallet,
+  type WalletAccount,
   type SuiSignPersonalMessageFeature,
 } from "@mysten/wallet-standard";
 
@@ -29,6 +30,59 @@ export type SuiLoginToken = {
   token: string;
   expiresAt: number;
 };
+
+/**
+ * The wallet + account a successful wallet login connected, retained so the on-chain
+ * mining flow (lib/onchain-mine-session.ts) can sign transactions with the SAME wallet
+ * without a second connect prompt (M4, WF-6). Module-local, never persisted.
+ */
+export type ActiveSuiWalletSession = {
+  wallet: Wallet;
+  account: WalletAccount;
+  /** e.g. "sui:testnet" — the account's first sui chain. */
+  chain: `sui:${string}`;
+};
+
+let activeWalletSession: ActiveSuiWalletSession | null = null;
+
+/** The wallet session retained by the last wallet login/connect, if any (passkey logins have none). */
+export function getActiveSuiWalletSession(): ActiveSuiWalletSession | null {
+  return activeWalletSession;
+}
+
+/**
+ * Connect (or re-connect) a Sui wallet WITHOUT logging in, retaining it for transaction
+ * signing — used when the game session was authenticated some other way (passkey,
+ * reconnect token) and the player enables on-chain mining afterwards.
+ */
+export async function connectSuiWalletForSigning(walletId?: string): Promise<ActiveSuiWalletSession> {
+  const wallets = discoverSuiWallets();
+  const wallet = selectSuiWallet(wallets, walletId);
+  if (!wallet) {
+    throw new Error("No Sui wallet found");
+  }
+  const connected = await wallet.features["standard:connect"].connect();
+  const account = pickSuiAccount(connected.accounts, wallet.name);
+  return retainWalletSession(wallet, account);
+}
+
+function pickSuiAccount(accounts: readonly WalletAccount[], walletName: string): WalletAccount {
+  const account =
+    accounts.find((entry) => entry.features.includes(SuiSignPersonalMessage)) ??
+    accounts.find((entry) => entry.chains?.some((chain) => chain.startsWith("sui:"))) ??
+    accounts[0];
+  if (!account?.address) {
+    throw new Error(`${walletName} did not return a Sui account`);
+  }
+  return account;
+}
+
+function retainWalletSession(wallet: Wallet, account: WalletAccount): ActiveSuiWalletSession {
+  const chain = (account.chains?.find((entry) => entry.startsWith("sui:")) ??
+    "sui:testnet") as `sui:${string}`;
+  activeWalletSession = { wallet, account, chain };
+  return activeWalletSession;
+}
 
 export async function requestPasskeyLoginToken(): Promise<SuiLoginToken> {
   if (!("credentials" in navigator) || !window.PublicKeyCredential) {
@@ -75,13 +129,9 @@ export async function requestWalletLoginToken(walletId?: string): Promise<SuiLog
   }
 
   const connected = await wallet.features["standard:connect"].connect();
-  const account =
-    connected.accounts.find((entry) => entry.features.includes(SuiSignPersonalMessage)) ??
-    connected.accounts.find((entry) => entry.chains?.some((chain) => chain.startsWith("sui:"))) ??
-    connected.accounts[0];
-  if (!account?.address) {
-    throw new Error(`${wallet.name} did not return a Sui account`);
-  }
+  const account = pickSuiAccount(connected.accounts, wallet.name);
+  // Retain the connected wallet so on-chain mining can sign with it later (M4, WF-6).
+  retainWalletSession(wallet, account);
 
   const message = buildSuiLoginMessage(account.address);
   const chain = account.chains?.find((entry) => entry.startsWith("sui:"));

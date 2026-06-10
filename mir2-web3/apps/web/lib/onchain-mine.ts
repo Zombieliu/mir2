@@ -4,9 +4,8 @@
  * Pure, browser-agnostic building blocks for the client half of the on-chain
  * mining loop (DESIGN §3/§4):
  *   - PTB builders for `mine_system::mine_batch` and `redeem_system::redeem`.
- *   - A swing batcher: accumulate N pick swings, then flush ONE `mine_batch`.
- *   - A monotonic nonce tracker (the contract enforces a strictly-increasing nonce).
- *   - Reconcile helpers: optimistic-vs-chain ore delta + `stones_left` -> vein stage.
+ *   - (re-exported from `onchain-mine-config.ts`): deployment ids, ore kinds, the
+ *     swing-nonce tracker and the optimistic-vs-chain reconcile/vein-stage helpers.
  *
  * Everything here is side-effect-free and unit-tested headlessly. Wallet signing,
  * VFX, and `page.tsx` wiring live in the React layer (see `onchain-mine-session.ts`);
@@ -15,59 +14,37 @@
  * injects the chain-confirmed event into the Sim (apps/gateway/src/inject.rs ->
  * apps/simulation/src/runtime/onchain.rs); before that the client shows only
  * optimistic VFX, which is reconciled against the confirmed grant.
+ *
+ * NOTE: this module statically imports `@mysten/sui` — `page.tsx` must only import it
+ * DYNAMICALLY (the pure bits it needs at render time live in `onchain-mine-config.ts`).
  */
 
 import { Transaction } from "@mysten/sui/transactions";
 
-/** Public on-chain ids for the deployed mine package (onchain/deployments/testnet.json). */
-export type OnchainMineDeployment = {
-  packageId: string;
-  schemaId: string;
-  /** Sui system Random object (always 0x8). */
-  randomId: string;
-  /** Sui system Clock object (always 0x6). */
-  clockId: string;
-};
+import {
+  ORE_KIND_CONSTRUCTOR,
+  type OnchainMineDeployment,
+  type OreKindName,
+} from "./onchain-mine-config";
 
-/** testnet deployment — public ids only (see onchain/deployments/testnet.json). */
-export const TESTNET_MINE_DEPLOYMENT: OnchainMineDeployment = {
-  packageId: "0xe6c3602e4055b76afd82a48745f9cd34daa4a6dce1f420747f0779732640dbe5",
-  schemaId: "0x77138ceee249ef3d328296cb932cbad50916bf062d06cb6d1ee7ea0ea1acc698",
-  randomId: "0x8",
-  clockId: "0x6",
-};
-
-/**
- * OreKind enum variants (`mir2_mine::mir2_mine_ore_kind`), matching the relayer/sim
- * strings (the Move variant names). Order matches the on-chain enum.
- */
-export const ORE_KINDS = [
-  "Amethyst",
-  "BlackIron",
-  "Copper",
-  "Gold",
-  "Nephrite",
-  "Platinum",
-  "Ruby",
-  "Silver",
-] as const;
-export type OreKindName = (typeof ORE_KINDS)[number];
-
-/** OreKind variant -> its `mir2_mine_ore_kind::new_*` constructor function name. */
-const ORE_KIND_CONSTRUCTOR: Record<OreKindName, string> = {
-  Amethyst: "new_amethyst",
-  BlackIron: "new_black_iron",
-  Copper: "new_copper",
-  Gold: "new_gold",
-  Nephrite: "new_nephrite",
-  Platinum: "new_platinum",
-  Ruby: "new_ruby",
-  Silver: "new_silver",
-};
-
-export function isOreKindName(value: string): value is OreKindName {
-  return (ORE_KINDS as readonly string[]).includes(value);
-}
+export {
+  createNonceTracker,
+  isOreKindName,
+  ORE_KINDS,
+  reconcileOptimisticOre,
+  stonesLeftToVeinStage,
+  TESTNET_MINE_DEPLOYMENT,
+  VEIN_STAGE_CRACKED,
+  VEIN_STAGE_DEPLETED,
+  VEIN_STAGE_FULL,
+} from "./onchain-mine-config";
+export type {
+  NonceTracker,
+  OnchainMineDeployment,
+  OreKindName,
+  OreReconcile,
+  OreReconcileInput,
+} from "./onchain-mine-config";
 
 /** Full move-call target for the OreKind constructor of `oreKind`. */
 export function oreKindConstructorTarget(
@@ -157,145 +134,4 @@ export function buildRedeemTransaction(
     arguments: [tx.object(deployment.schemaId), oreKind, tx.pure.u64(amount)],
   });
   return tx;
-}
-
-// ---------------------------------------------------------------------------
-// Swing batcher — accumulate N pick swings, then flush ONE mine_batch (DESIGN §4).
-// ---------------------------------------------------------------------------
-
-export type SwingBatcherOptions = {
-  /** Flush threshold: signal a batch once this many swings have accumulated (>= 1). */
-  batchSize: number;
-};
-
-export type SwingRecord = {
-  /** Swings accumulated since the last flush. */
-  pending: number;
-  /** True once `pending` has reached `batchSize` and a batch should be sent. */
-  shouldFlush: boolean;
-};
-
-export type SwingBatcher = {
-  /** Record one swing; returns the new pending count and whether to flush now. */
-  recordSwing(): SwingRecord;
-  /** Current pending (unflushed) swing count. */
-  pending(): number;
-  /**
-   * Consume the pending swings for a batch: returns the count and resets pending to 0.
-   * Returns 0 when nothing is pending (the caller must not send an empty batch).
-   */
-  takeBatch(): number;
-  /** Drop pending swings without sending (e.g. the player left the vein). */
-  reset(): void;
-};
-
-export function createSwingBatcher(options: SwingBatcherOptions): SwingBatcher {
-  const batchSize = Math.max(1, Math.floor(options.batchSize));
-  let pending = 0;
-  return {
-    recordSwing() {
-      pending += 1;
-      return { pending, shouldFlush: pending >= batchSize };
-    },
-    pending() {
-      return pending;
-    },
-    takeBatch() {
-      const count = pending;
-      pending = 0;
-      return count;
-    },
-    reset() {
-      pending = 0;
-    },
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Nonce tracker — the contract requires a strictly-increasing per-miner nonce.
-// ---------------------------------------------------------------------------
-
-export type NonceTracker = {
-  /** The nonce the NEXT mine_batch should use (without consuming it). */
-  peek(): number;
-  /** Return the next nonce and advance the counter. */
-  next(): number;
-  /**
-   * Reconcile to the authoritative on-chain `miner_nonce` (the last accepted nonce):
-   * the next nonce becomes `onChainNonce + 1`, but never moves backward.
-   */
-  syncFromChain(onChainNonce: number): void;
-};
-
-export function createNonceTracker(startNext = 1): NonceTracker {
-  let nextNonce = Math.max(1, Math.floor(startNext));
-  return {
-    peek() {
-      return nextNonce;
-    },
-    next() {
-      const value = nextNonce;
-      nextNonce += 1;
-      return value;
-    },
-    syncFromChain(onChainNonce) {
-      const candidate = Math.floor(onChainNonce) + 1;
-      if (candidate > nextNonce) {
-        nextNonce = candidate;
-      }
-    },
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Reconcile — optimistic VFX vs chain-confirmed truth (DESIGN §4 ⑤/⑥, "多退少补").
-// ---------------------------------------------------------------------------
-
-export type OreReconcileInput = {
-  /** Ore units the client OPTIMISTICALLY showed for this batch (pre-confirmation). */
-  optimisticUnits: number;
-  /** Ore units the chain actually granted (from the confirmed GrantOnchainOre). */
-  confirmedUnits: number;
-};
-
-export type OreReconcile = {
-  /** confirmed - optimistic. >0 = under-showed (add more); <0 = phantom (remove). */
-  deltaUnits: number;
-  /** The optimistic display over-counted (showed ore the chain did not grant). */
-  phantom: boolean;
-  /** The optimistic display under-counted (chain granted more than shown). */
-  shortfall: boolean;
-};
-
-export function reconcileOptimisticOre(input: OreReconcileInput): OreReconcile {
-  const optimistic = Math.max(0, Math.floor(input.optimisticUnits));
-  const confirmed = Math.max(0, Math.floor(input.confirmedUnits));
-  const deltaUnits = confirmed - optimistic;
-  return {
-    deltaUnits,
-    phantom: deltaUnits < 0,
-    shortfall: deltaUnits > 0,
-  };
-}
-
-/** Vein render stages: 2 = full, 1 = cracked, 0 = depleted (matches MineNodeState.stage). */
-export const VEIN_STAGE_FULL = 2;
-export const VEIN_STAGE_CRACKED = 1;
-export const VEIN_STAGE_DEPLETED = 0;
-
-/**
- * Map an on-chain `stones_left` (0..maxStones) to the 3-tier vein render stage the
- * client already understands (DESIGN §4-⑥, full / cracked / empty). Depleted at 0;
- * cracked at or below half capacity; full otherwise.
- */
-export function stonesLeftToVeinStage(stonesLeft: number, maxStones: number): number {
-  const left = Math.max(0, Math.floor(stonesLeft));
-  if (left <= 0) {
-    return VEIN_STAGE_DEPLETED;
-  }
-  const capacity = Math.max(1, Math.floor(maxStones));
-  if (left * 2 <= capacity) {
-    return VEIN_STAGE_CRACKED;
-  }
-  return VEIN_STAGE_FULL;
 }
