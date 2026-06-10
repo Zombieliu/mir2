@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -54,6 +54,8 @@ struct WebState {
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
+    /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
+    injector: crate::inject::LiveSessionInjector,
 }
 
 #[derive(Debug)]
@@ -1273,6 +1275,7 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
+        injector: crate::inject::LiveSessionInjector::default(),
     };
 
     let app = Router::new()
@@ -1282,6 +1285,7 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         .route("/admin/sessions", get(admin_sessions))
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
+        .route("/onchain/inject", post(onchain_inject))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -1343,6 +1347,87 @@ async fn admin_system_mail(
     )
     .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
     Ok(Json(receipt))
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OnchainInjectReceipt {
+    accepted: bool,
+    connected: bool,
+    packet_count: usize,
+    idempotency_key: String,
+}
+
+/// Extract a `Bearer <token>` from the Authorization header.
+fn bearer_token(headers: &HeaderMap) -> Option<&str> {
+    headers
+        .get(axum::http::header::AUTHORIZATION)?
+        .to_str()
+        .ok()?
+        .strip_prefix("Bearer ")
+}
+
+/// M4 WF-5: the trusted Relayer POSTs chain-confirmed commands here. Operator-token
+/// authenticated; routed to the target account's LIVE session via the injector. Idempotency
+/// place #3 lives in the sim (duplicate `idempotency_key` is a no-op there).
+async fn onchain_inject(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(command): Json<crate::inject::OnchainInjectCommand>,
+) -> Result<Json<OnchainInjectReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let token = bearer_token(&headers).ok_or((
+        StatusCode::UNAUTHORIZED,
+        Json(AdminErrorResponse {
+            error: "missing operator bearer token".to_string(),
+        }),
+    ))?;
+    crate::auth::verify_operator_token(token)
+        .map_err(|error| (StatusCode::UNAUTHORIZED, Json(AdminErrorResponse { error })))?;
+
+    let idempotency_key = command.idempotency_key().to_string();
+    let world_command = command
+        .to_world_command()
+        .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
+    // Render-only (MineDepleted) has no sim WorldCommand — accept + ignore (200) so the
+    // relayer's retry loop stops.
+    let Some(world_command) = world_command else {
+        return Ok(Json(OnchainInjectReceipt {
+            accepted: true,
+            connected: false,
+            packet_count: 0,
+            idempotency_key,
+        }));
+    };
+    let Some(account) = command.account().map(str::to_string) else {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(AdminErrorResponse {
+                error: "command has no target account".to_string(),
+            }),
+        ));
+    };
+    match state.injector.dispatch(&account, world_command).await {
+        Ok(outcome) => Ok(Json(OnchainInjectReceipt {
+            accepted: true,
+            connected: true,
+            packet_count: outcome.packet_count,
+            idempotency_key,
+        })),
+        // Player offline: accept (200) so the relayer stops retrying. NOTE: the grant is NOT
+        // persisted for offline players in M4 — offline delivery (persist/mail) is M6.
+        Err(crate::inject::InjectionError::NotConnected) => Ok(Json(OnchainInjectReceipt {
+            accepted: true,
+            connected: false,
+            packet_count: 0,
+            idempotency_key,
+        })),
+        Err(crate::inject::InjectionError::SessionGone) => Err((
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(AdminErrorResponse {
+                error: "target session became unavailable".to_string(),
+            }),
+        )),
+    }
 }
 
 async fn admin_kick_player(
@@ -1482,6 +1567,7 @@ async fn handle_socket(
         &mut active_session_permit,
         &mut save_queue,
         &mut route_refresh,
+        state.injector.clone(),
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -1560,6 +1646,9 @@ fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
     session
 }
 
+// `_injection_registration` is an RAII Drop-guard; reassigning it (to re-register on
+// re-login or unregister on logout) drops the prior guard intentionally.
+#[allow(unused_assignments)]
 async fn handle_socket_inner(
     socket: WebSocket,
     session: &mut GatewaySession,
@@ -1569,6 +1658,7 @@ async fn handle_socket_inner(
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
+    injector: crate::inject::LiveSessionInjector,
 ) {
     let (mut sender, mut receiver) = socket.split();
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
@@ -1577,6 +1667,12 @@ async fn handle_socket_inner(
     let enforce_player_command_safety = production_player_command_safety_enabled();
     let mut authenticated = false;
     let mut authenticated_account_id: Option<String> = None;
+    // M4 WF-5: this socket task registers an injection channel keyed by its account so the
+    // /onchain/inject HTTP handler can hand chain-confirmed commands to it. The RAII guard
+    // unregisters on every exit path (the loop has many early returns).
+    let (inject_tx, mut inject_rx) =
+        tokio::sync::mpsc::unbounded_channel::<crate::inject::InjectionMessage>();
+    let mut _injection_registration: Option<crate::inject::InjectionRegistration> = None;
     let background_route_refresh_record: SharedBackgroundRouteRefreshRecord =
         Arc::new(Mutex::new(None));
     let _background_route_refresh = spawn_background_route_lease_refresh(
@@ -1758,10 +1854,16 @@ async fn handle_socket_inner(
                 let next_authenticated = update_authenticated_state(authenticated, &responses);
                 if next_authenticated {
                     if let Some(account_id) = login_account_id {
+                        _injection_registration = Some(crate::inject::InjectionRegistration::new(
+                            injector.clone(),
+                            &account_id,
+                            inject_tx.clone(),
+                        ));
                         authenticated_account_id = Some(account_id);
                     }
                 } else if authenticated {
                     authenticated_account_id = None;
+                    _injection_registration = None;
                 }
                 authenticated = next_authenticated;
 
@@ -1791,6 +1893,47 @@ async fn handle_socket_inner(
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
                 }
+            }
+            maybe_injection = inject_rx.recv() => {
+                let Some(crate::inject::InjectionMessage { command, reply }) = maybe_injection else {
+                    continue;
+                };
+                // Apply the chain-confirmed command authoritatively (Direct mode), then push
+                // the resulting packets to this player's socket.
+                let outcome = catch_gateway_panic("web onchain injection", || {
+                    tokio::task::block_in_place(|| session.execute_with_outcome(command))
+                });
+                let responses = match outcome {
+                    Ok(Ok(execution)) => execution.packets,
+                    Ok(Err(error)) => {
+                        eprintln!("web onchain injection rejected: {error}");
+                        let _ = reply.send(crate::inject::InjectionOutcome { packet_count: 0 });
+                        continue;
+                    }
+                    Err(error) => {
+                        let _ = send_error_message(&mut sender, &error).await;
+                        return;
+                    }
+                };
+                let packet_count = responses.len();
+                if let Err(error) = flush_session_updates(
+                    &mut sender,
+                    session,
+                    session_cache.as_ref(),
+                    save_queue,
+                    route_refresh,
+                    responses,
+                    true,
+                    false,
+                    true,
+                    false,
+                )
+                .await
+                {
+                    let _ = send_error_message(&mut sender, &error).await;
+                    return;
+                }
+                let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
             }
             _ = runtime_tick.tick() => {
                 let now = Instant::now();
@@ -6030,6 +6173,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            injector: crate::inject::LiveSessionInjector::default(),
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -6080,6 +6224,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
+            injector: crate::inject::LiveSessionInjector::default(),
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -6143,6 +6288,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            injector: crate::inject::LiveSessionInjector::default(),
         };
 
         let Json(sessions) = super::admin_sessions(State(state)).await;
