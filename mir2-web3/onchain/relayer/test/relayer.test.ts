@@ -40,8 +40,16 @@ test('mine_settled -> GrantOnchainOre with sui: account + idempotency key', () =
   assert.equal(cmd.idempotencyKey, 'TX1:4');
 });
 
-test('dry mine_settled (ore_amount 0) -> null (nothing to grant)', () => {
-  assert.equal(normalize(event('mine_settled_event', { ...settledFields, ore_amount: '0' })), null);
+test('dry mine_settled (ore_amount 0) is STILL forwarded (the client settlement signal)', () => {
+  // M4: the sim re-broadcasts the vein from stones_left even for a zero-ore settlement,
+  // and the client closes its in-flight batch on that packet — dropping dry batches here
+  // would wedge the client's batcher.
+  const cmd = normalize(
+    event('mine_settled_event', { ...settledFields, ore_amount: '0', stones_left: 0 }),
+  );
+  assert.ok(cmd && cmd.kind === 'GrantOnchainOre');
+  assert.equal(cmd.amount, '0');
+  assert.equal(cmd.stonesLeft, 0);
 });
 
 test('mine_settled with flat value (no .fields wrapper) still normalizes', () => {

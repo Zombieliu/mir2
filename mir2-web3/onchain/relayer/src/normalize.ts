@@ -40,10 +40,11 @@ export function normalize(event: ChainEvent): NormalizedCommand | null {
 
   switch (name) {
     case 'mine_settled_event': {
-      // No ore credited (a dry batch) -> nothing to grant; the render hint rides on the
-      // dedicated mine_depleted/regened events.
-      const amount = str(fields.ore_amount);
-      if (amount === '' || amount === '0') return null;
+      // Dry batches (ore_amount=0 — every swing missed, or the mine was empty) are
+      // FORWARDED: the sim still updates the vein from stones_left and re-broadcasts
+      // MineNodeState, which is the client's settlement signal (M4 — dropping these
+      // wedges the client's in-flight batch). The grant itself is a no-item no-op.
+      const amount = str(fields.ore_amount) || '0';
       return {
         kind: 'GrantOnchainOre',
         account: toAccountId(str(fields.miner)),
