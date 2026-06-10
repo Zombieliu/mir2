@@ -500,11 +500,17 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::GrantOnchainOre {
                 ore_kind,
                 amount,
+                mine_id,
+                stones_left,
                 idempotency_key,
                 ..
-            } => self
-                .session
-                .grant_onchain_ore(&ore_kind, amount, &idempotency_key),
+            } => self.session.grant_onchain_ore(
+                &ore_kind,
+                amount,
+                mine_id,
+                stones_left,
+                &idempotency_key,
+            ),
             WorldCommand::CreditGoldFromOre {
                 gold,
                 idempotency_key,
@@ -763,5 +769,131 @@ mod tests {
             idempotency_key: "TX:5".to_string(),
         };
         assert!(super::validate_production_player_command(true, &credit).is_err());
+    }
+
+    /// Runtime whose config maps on-chain mine 1 to a vein cell on the test map, plus the
+    /// packets the StartGame command produced (the map-entry assembly).
+    fn started_runtime_with_onchain_node() -> (InProcessWorldRuntime, Vec<ServerPacket>) {
+        let mut config = SimulationConfig::default();
+        let map_file_name = config.map.file_name.clone();
+        config
+            .onchain_mine_nodes
+            .push(crate::config::OnchainMineNodeRecord {
+                mine_id: 1,
+                map_file_name,
+                x: 335,
+                y: 270,
+                max_stones: 10,
+            });
+        let mut runtime = InProcessWorldRuntime::new(config);
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("login should succeed");
+        let start_packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("start game should succeed");
+        (runtime, start_packets)
+    }
+
+    fn grant_ore_with_stones(stones_left: u32, key: &str) -> WorldCommand {
+        WorldCommand::GrantOnchainOre {
+            account: "sui:0xminer".to_string(),
+            ore_kind: "BlackIron".to_string(),
+            amount: 1,
+            mine_id: 1,
+            stones_left,
+            idempotency_key: key.to_string(),
+        }
+    }
+
+    fn mine_node_stage_at(packets: &[ServerPacket], x: i32, y: i32) -> Option<u8> {
+        packets.iter().rev().find_map(|packet| match packet {
+            ServerPacket::MineNodeState { location, stage }
+                if location.x == x && location.y == y =>
+            {
+                Some(*stage)
+            }
+            _ => None,
+        })
+    }
+
+    #[test]
+    fn onchain_vein_renders_full_on_map_entry_before_any_settlement() {
+        // Map-entry assembly seeds the configured on-chain vein at its full tier until a
+        // chain settlement reports otherwise (M4, DESIGN §4-⑥).
+        let (_runtime, start_packets) = started_runtime_with_onchain_node();
+        assert_eq!(mine_node_stage_at(&start_packets, 335, 270), Some(2));
+    }
+
+    #[test]
+    fn grant_onchain_ore_rebroadcasts_vein_stage_from_chain_stones() {
+        let (mut runtime, _) = started_runtime_with_onchain_node();
+
+        // 4/10 stones left: below half -> cracked (stage 1). Same tiers as P0 mine_stage.
+        let packets = runtime
+            .execute(grant_ore_with_stones(4, "TX10:0"))
+            .expect("grant should succeed");
+        assert_eq!(mine_node_stage_at(&packets, 335, 270), Some(1));
+
+        // Exactly half (5/10) is FULL in Crystal/P0 semantics (stones*2 < max is false).
+        let packets = runtime
+            .execute(grant_ore_with_stones(5, "TX10:1"))
+            .expect("grant should succeed");
+        assert_eq!(mine_node_stage_at(&packets, 335, 270), Some(2));
+
+        // Depleted (0) -> stage 0.
+        let packets = runtime
+            .execute(grant_ore_with_stones(0, "TX10:2"))
+            .expect("grant should succeed");
+        assert_eq!(mine_node_stage_at(&packets, 335, 270), Some(0));
+    }
+
+    #[test]
+    fn zero_amount_settlement_still_rebroadcasts_the_vein() {
+        // A settled batch where every swing missed grants no ore but DID consume stones;
+        // the vein re-render is the client's settlement signal and must still go out.
+        let (mut runtime, _) = started_runtime_with_onchain_node();
+        let packets = runtime
+            .execute(WorldCommand::GrantOnchainOre {
+                account: "sui:0xminer".to_string(),
+                ore_kind: "BlackIron".to_string(),
+                amount: 0,
+                mine_id: 1,
+                stones_left: 6,
+                idempotency_key: "TX12:0".to_string(),
+            })
+            .expect("grant should succeed");
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+        assert_eq!(mine_node_stage_at(&packets, 335, 270), Some(2));
+    }
+
+    #[test]
+    fn unmapped_mine_id_grants_ore_without_a_node_state() {
+        // A grant for a mine with no configured vein still lands ore, but emits no
+        // MineNodeState (nothing to render).
+        let (mut runtime, _) = started_runtime_with_onchain_node();
+        let packets = runtime
+            .execute(WorldCommand::GrantOnchainOre {
+                account: "sui:0xminer".to_string(),
+                ore_kind: "BlackIron".to_string(),
+                amount: 2,
+                mine_id: 99,
+                stones_left: 7,
+                idempotency_key: "TX11:0".to_string(),
+            })
+            .expect("grant should succeed");
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MineNodeState { .. })));
     }
 }

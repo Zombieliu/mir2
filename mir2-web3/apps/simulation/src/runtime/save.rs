@@ -1115,6 +1115,10 @@ impl SimulationSession {
         packets.extend(start_game_post_visible_crystal_bootstrap_packets());
         // Render mineable veins immediately on entry, not just after the first swing.
         packets.extend(super::mining::mine_node_state_packets(self.app.world()));
+        // On-chain veins render on entry too, from the last chain-reported stones (M4).
+        packets.extend(super::onchain::onchain_mine_node_state_packets(
+            self.app.world(),
+        ));
         packets
     }
 }

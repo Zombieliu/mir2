@@ -997,6 +997,36 @@ mod tests {
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
+    #[test]
+    fn parses_onchain_mine_nodes_and_skips_malformed_entries() {
+        let nodes = parse_onchain_mine_nodes("1:0:335:270:10, 2:3:10:-20:80");
+        assert_eq!(
+            nodes,
+            vec![
+                OnchainMineNodeRecord {
+                    mine_id: 1,
+                    map_file_name: "0".to_string(),
+                    x: 335,
+                    y: 270,
+                    max_stones: 10,
+                },
+                OnchainMineNodeRecord {
+                    mine_id: 2,
+                    map_file_name: "3".to_string(),
+                    x: 10,
+                    y: -20,
+                    max_stones: 80,
+                },
+            ]
+        );
+        // Malformed entries (missing fields, junk numbers, trailing fields) are skipped.
+        assert!(parse_onchain_mine_nodes("nope").is_empty());
+        assert!(parse_onchain_mine_nodes("1:0:335:270").is_empty());
+        assert!(parse_onchain_mine_nodes("1:0:x:270:10").is_empty());
+        assert!(parse_onchain_mine_nodes("1:0:335:270:10:extra").is_empty());
+        assert_eq!(parse_onchain_mine_nodes("junk,1:0:1:2:3").len(), 1);
+    }
+
     fn default_character() -> CharacterRecord {
         CharacterRecord {
             index: 0,
@@ -2194,6 +2224,59 @@ pub struct MineZoneRecord {
     pub size: u16,
 }
 
+/// A single ON-CHAIN mine vein rendered in-world (M4, WF-6 — DESIGN §4-⑥). Maps the
+/// Sui contract's `mine_id` to a map cell so chain-confirmed settlements can drive the
+/// vein's `MineNodeState` stage. Deliberately NOT a `MineZoneRecord`: the cell must not
+/// become a P0 mineable spot, or the server would also roll ore there (double payout —
+/// the chain is the only payout source for these veins).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OnchainMineNodeRecord {
+    /// The contract-side mine id (`mir2_mine` schema key).
+    pub mine_id: u64,
+    pub map_file_name: String,
+    pub x: i32,
+    pub y: i32,
+    /// Full stones capacity (mirrors the on-chain `MineConfig.max_stones`) for staging.
+    pub max_stones: u32,
+}
+
+/// Parse `MIR2_ONCHAIN_MINE_NODES` — comma-separated `mine_id:map:x:y:max_stones`
+/// entries (e.g. `1:0:335:270:10`). Env-gated so deployments WITHOUT the on-chain
+/// stack render no ghost veins; the M4 e2e runbook sets it on the local gateway.
+/// Malformed entries are skipped.
+pub(crate) fn onchain_mine_nodes_from_env() -> Vec<OnchainMineNodeRecord> {
+    let Ok(raw) = std::env::var("MIR2_ONCHAIN_MINE_NODES") else {
+        return Vec::new();
+    };
+    parse_onchain_mine_nodes(&raw)
+}
+
+fn parse_onchain_mine_nodes(raw: &str) -> Vec<OnchainMineNodeRecord> {
+    raw.split(',')
+        .filter_map(|entry| {
+            let mut parts = entry.trim().split(':');
+            let mine_id = parts.next()?.trim().parse().ok()?;
+            let map_file_name = parts.next()?.trim();
+            if map_file_name.is_empty() {
+                return None;
+            }
+            let x = parts.next()?.trim().parse().ok()?;
+            let y = parts.next()?.trim().parse().ok()?;
+            let max_stones = parts.next()?.trim().parse().ok()?;
+            if parts.next().is_some() {
+                return None;
+            }
+            Some(OnchainMineNodeRecord {
+                mine_id,
+                map_file_name: map_file_name.to_string(),
+                x,
+                y,
+                max_stones,
+            })
+        })
+        .collect()
+}
+
 /// Environmental hazard flags for a map (Crystal `MapInfo.Lightning/Fire` and
 /// their damage caps). Hazards periodically strike players on the map.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2312,6 +2395,8 @@ pub struct SimulationConfig {
     pub safe_zones: Vec<SafeZoneRecord>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub mine_zones: Vec<MineZoneRecord>,
+    /// On-chain mine veins (M4) — render-only mappings, disjoint from `mine_zones`.
+    pub onchain_mine_nodes: Vec<OnchainMineNodeRecord>,
     pub map_hazards: Vec<MapHazardRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
@@ -2402,6 +2487,7 @@ impl SimulationConfig {
             safe_zones: starter_safe_zones(),
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
+            onchain_mine_nodes: Vec::new(),
             map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
@@ -2440,6 +2526,10 @@ impl SimulationConfig {
             y: 270,
             size: 2,
         });
+        // On-chain smart-mine veins (M4) are env-gated (off by default — no ghost veins
+        // in deployments without the on-chain stack). See `onchain_mine_nodes_from_env`.
+        self.onchain_mine_nodes
+            .extend(onchain_mine_nodes_from_env());
         // Bichon blacksmith whose existing [Trade] list already sells a PickAxe,
         // so players can buy a mining tool without touching the starter inventory.
         self.visible_npcs.push(VisibleNpcRecord {
@@ -2459,9 +2549,11 @@ impl SimulationConfig {
     /// when empty). Unlike [`with_crystal_map_runtime`], this does not fence the
     /// player into the starter slice: it keeps every manifest movement so all
     /// ~463 maps are reachable, and entering any map spawns that map's entire
-    /// Crystal respawn set. The starter map keeps its real manifest NPCs/mine
-    /// veins (spawned per-map from the manifest), so no hand-authored starter
-    /// blacksmith/mine overlays are injected here.
+    /// Crystal respawn set. The starter map keeps its real manifest NPCs
+    /// (spawned per-map from the manifest), so no hand-authored starter
+    /// blacksmith/mine overlays are injected here — NOTE that `mine_zones`
+    /// stays EMPTY on this path (Crystal stores mine zones in the Map DB, not
+    /// the map manifest), so P0 veins only exist where config seeds them.
     ///
     /// [`with_crystal_map_runtime`]: Self::with_crystal_map_runtime
     pub fn with_crystal_world_runtime(mut self) -> Self {
@@ -2470,6 +2562,9 @@ impl SimulationConfig {
         // (`crystal_movement_transfer_records_for_map`) already drive travel
         // across the whole world, so nothing needs clearing or seeding here.
         apply_crystal_map_metadata(&mut self.map);
+        // On-chain smart-mine veins (M4) are env-gated (off by default).
+        self.onchain_mine_nodes
+            .extend(onchain_mine_nodes_from_env());
         self
     }
 
