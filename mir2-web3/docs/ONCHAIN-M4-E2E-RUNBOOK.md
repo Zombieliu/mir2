@@ -32,8 +32,11 @@ echo "OPERATOR_TOKEN=$MIR2_GATEWAY_OPERATOR_TOKEN"   # 抄给 relayer 用
 # 链上矿脉映射是 env 门控的（默认关——没有 on-chain 栈的部署不会出"幽灵矿脉"）。
 # 格式 mine_id:map:x:y:max_stones[,...]；testnet mine 1 放在 Bichon 出生点东侧：
 export MIR2_ONCHAIN_MINE_NODES="1:0:335:270:10"
-# 网关默认 web 端口是 7010，而 web 客户端本地默认连 ws://127.0.0.1:7110/ws —— 对齐到 7110：
-MIR2_GATEWAY_WEB_ADDR=127.0.0.1:7110 cargo +1.89.0 run -p mir2-gateway
+# 钱包/passkey 登录的 token 验签：本地必须显式开 dev 密钥（生产 fail-closed 设计）
+export MIR2_ALLOW_DEV_PASSKEY_SECRET=1
+# 网关默认 web 端口是 7010，而 web 客户端本地默认连 ws://127.0.0.1:7110/ws —— 对齐到 7110。
+# crate 有多个 bin（smoke/packet_trace/...），必须指明 --bin：
+MIR2_GATEWAY_WEB_ADDR=127.0.0.1:7110 cargo +1.89.0 run -p mir2-gateway --bin mir2-gateway
 # （注入端点即 http://127.0.0.1:7110/onchain/inject）
 ```
 
@@ -58,11 +61,21 @@ pnpm relayer
 
 ```bash
 cd mir2-web3/apps/web
-NEXT_PUBLIC_ONCHAIN_MINE=1 npm run dev
+# MIR2_ALLOW_DEV_PASSKEY_SECRET 同样要给 web（/api/passkey/login 用它签登录 token，
+# 与网关验签共用同一个 dev 密钥开关；只给一边会报 "MIR2_PASSKEY_AUTH_SECRET is not set"）
+NEXT_PUBLIC_ONCHAIN_MINE=1 MIR2_ALLOW_DEV_PASSKEY_SECRET=1 npm run dev
 # 可选微调：NEXT_PUBLIC_ONCHAIN_MINE_BATCH=5（攒挥阈值，M5 拍板前的占位）
 #          NEXT_PUBLIC_ONCHAIN_MINE_FEE_PER_SWING_MIST=0（链上 per_swing_fee 同步占位 0）
 #          NEXT_PUBLIC_ONCHAIN_MINE_NODE_X/Y=335/270（须与 sim 配置一致）
 ```
+
+> 真机踩坑（M4 live e2e 实录）：
+> - **旧 service-worker 缓存会喂旧代码**：本应用带 serwist 预缓存（`pages`/`assets-cache`…），
+>   改代码后浏览器里务必 `Cmd+Shift+R` 硬刷新；怀疑不对就 DevTools → Application →
+>   Clear storage。已打开的旧标签页不会自己更新。
+> - **Slush/Suiet 这类钱包只应答 `app-ready`、不主动广播注册**，注入晚于页面初始化就会
+>   永久缺席钱包列表——客户端已在每次枚举前重新广播 `wallet-standard:app-ready` 兜底
+>   （`passkey-auth.ts` `rescanWalletStandard`），列表打开即可见。
 
 ## 4. 冒烟步骤
 
