@@ -1,10 +1,13 @@
 "use client";
 
 /**
- * On-chain smart-mine HUD (M4, WF-6) — the dev-grade control panel for the testnet
- * vertical slice (DESIGN §4). Presentation-only, like the other window components:
- * every value arrives via props and every action goes back through a callback; the
- * mining state machine itself lives in `lib/onchain-mine-state.ts` + `page.tsx`.
+ * On-chain smart-mine HUD (M4, WF-6) — the settlement/wallet control panel for the
+ * testnet vertical slice (DESIGN §4). Mining itself is the in-world gesture (walk to the
+ * vein and attack it); this panel surfaces batch/nonce/ore state and the chain-only
+ * actions (connect wallet, settle, redeem). The Swing button here is just a dev shortcut
+ * for the same swing. Presentation-only, like the other window components: every value
+ * arrives via props and every action goes back through a callback; the mining state
+ * machine itself lives in `lib/onchain-mine-state.ts` + `page.tsx`.
  *
  * Mounted only when `NEXT_PUBLIC_ONCHAIN_MINE=1` — production builds without the flag
  * never render (or even reference) it.
@@ -44,6 +47,7 @@ export type OnchainMinePanelProps = {
   redeemAmount: string;
   onRedeemAmountChange: (value: string) => void;
   onConnectWallet: () => void;
+  /** Dev shortcut for one swing — the real gesture is attacking the vein in the world. */
   onSwing: () => void;
   /** Submit the pending swings now, even below the batch threshold. */
   onFlushNow: () => void;
@@ -217,8 +221,9 @@ export function OnchainMinePanel({
           style={canAct ? buttonStyle : disabledButtonStyle}
           disabled={!canAct}
           onClick={onSwing}
+          title="调试用：正式挖矿请走到矿脉前攻击它 / Dev shortcut — to mine, attack the vein in the world"
         >
-          挥镐 Swing
+          挥镐(调试) Swing
         </button>
         <button
           type="button"

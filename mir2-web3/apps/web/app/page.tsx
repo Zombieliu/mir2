@@ -1264,6 +1264,9 @@ export default function HomePage() {
   });
   const pendingTransferRef = useRef<string | null>(null);
   const pendingNpcInteractRef = useRef<string | null>(null);
+  // Set when the player targets the on-chain vein but is not yet adjacent: the swing
+  // fires on arrival (mirrors pendingNpcInteractRef). Only ever set when ONCHAIN_MINE_ENABLED.
+  const pendingOnchainMineRef = useRef<boolean>(false);
   const npcCallGuardRef = useRef<{ objectId: string; until: number } | null>(null);
   const gameEntryChatSeededRef = useRef(false);
   const movementPlanRef = useRef<MovementPlan | null>(null);
@@ -3666,6 +3669,18 @@ export default function HomePage() {
     }
   }, [screen, wsState, world.entities, world.playerObjectId]);
 
+  // On-chain mine: the player walked up to the vein (clicked it while out of range) —
+  // swing as soon as they're adjacent. Same arrive-then-act shape as the NPC effect.
+  useEffect(() => {
+    if (screen !== "game" || wsState !== "open") return;
+    if (!pendingOnchainMineRef.current) return;
+    const nextSelf = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+    if (nextSelf && pointTileDistance(nextSelf, ONCHAIN_MINE_VEIN) <= 1) {
+      pendingOnchainMineRef.current = false;
+      onchainSwing();
+    }
+  }, [screen, wsState, world.entities, world.playerObjectId]);
+
   function appendLog(
     text: string,
     tone: UiLogTone = "system",
@@ -4409,6 +4424,7 @@ export default function HomePage() {
     pendingSuiLoginRef.current = null;
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
+    pendingOnchainMineRef.current = false;
     npcCallGuardRef.current = null;
     movementPlanRef.current = null;
     movementBlockedStepsRef.current = [];
@@ -4672,9 +4688,11 @@ export default function HomePage() {
   }
 
   /**
-   * One pick swing at the on-chain vein: play the directional swing server-side
-   * (P0 mining ignores the cell — it is deliberately NOT a P0 mine spot, so no server
-   * payout can double the chain grant) and accumulate toward the next batch.
+   * One pick swing at the on-chain vein: face the vein and play the directional swing
+   * server-side (P0 mining ignores the cell — it is deliberately NOT a P0 mine spot, so
+   * no server payout can double the chain grant) and accumulate toward the next batch.
+   * Driven by the in-world mining gesture (`mineOnchainVein`) and by the HUD's dev Swing
+   * button; both funnel here so a swing means the same thing wherever it comes from.
    */
   function onchainSwing() {
     const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
@@ -4683,6 +4701,24 @@ export default function HomePage() {
       : "Right";
     send({ type: "attackDirection", direction });
     setOnchainMine((current) => recordOnchainSwing(current, ONCHAIN_MINE_EXPECTED_UNITS_PER_SWING));
+  }
+
+  /**
+   * The faithful Mir2 mining gesture: the player targeted the vein tile in the world
+   * (clicked it / stepped into it). Adjacent → swing right away; otherwise walk up to a
+   * tile beside the vein and let the arrival effect take the first swing. This — not the
+   * HUD button — is the primary way to mine on-chain ore.
+   */
+  function mineOnchainVein() {
+    const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+    if (origin && pointTileDistance(origin, ONCHAIN_MINE_VEIN) <= 1) {
+      pendingOnchainMineRef.current = false;
+      onchainSwing();
+      return;
+    }
+    pendingOnchainMineRef.current = true;
+    const destination = approachDestination(origin, ONCHAIN_MINE_VEIN);
+    moveToTile(destination.x, destination.y, "run");
   }
 
   /**
@@ -5592,6 +5628,11 @@ export default function HomePage() {
       } else {
         pickGroundDrop(drop.objectId);
       }
+      return;
+    }
+    if (ONCHAIN_MINE_ENABLED && x === ONCHAIN_MINE_VEIN.x && y === ONCHAIN_MINE_VEIN.y) {
+      // Targeting the on-chain vein in the world = mine it (walk up + swing your weapon).
+      mineOnchainVein();
       return;
     }
     const transferKey = transferKeyForTile(x, y);
@@ -11849,9 +11890,9 @@ function directionFromPoint(
   return fallback;
 }
 
-function approachDestination(source: WorldEntity | null, target: WorldEntity) {
+function approachDestination(source: WorldEntity | null, target: { x: number; y: number }) {
   if (!source) return { x: target.x, y: target.y };
-  if (tileDistance(source, target) <= 1) return { x: source.x, y: source.y };
+  if (pointTileDistance(source, target) <= 1) return { x: source.x, y: source.y };
 
   const dx = Math.sign(target.x - source.x);
   const dy = Math.sign(target.y - source.y);

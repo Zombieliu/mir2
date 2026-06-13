@@ -84,9 +84,11 @@ NEXT_PUBLIC_ONCHAIN_MINE=1 MIR2_ALLOW_DEV_PASSKEY_SECRET=1 npm run dev
    （结算按链上 `miner` 地址投递到 `sui:0x..` 会话；不一致时奖励会投给签名地址的会话，
    该地址离线则等 M6 离线持久化——链上 `ore_balance` 仍在，可后续 redeem，不会烧掉）。
 2. 进游戏后右下角出现 **On-chain Mine (testnet)** 面板；矿脉 (335,270) 应显示 `full vein 满`
-   （进图即播种）。走到矿脉旁。
-3. 点 **挥镐 Swing** ×5（或点"立即结算"提前出批）→ 攒满后自动弹钱包签名 **1 笔
+   （进图即播种）。
+3. **挖矿 = 走到矿脉前对它发起攻击**（点矿脉格 (335,270)：离得远会自动走过去，到位即开挖；
+   就是原版"走到矿区用武器敲矿脉"的手感）。挖 5 下 → 攒满后自动弹钱包签名 **1 笔
    `mine_batch`** → 面板出现在途 digest。
+   （面板上的 **挥镐(调试) Swing** 按钮是等价的调试快捷键；**立即结算** 可在非整批时提前出批。）
 4. 等链确认 + relayer 轮询（默认 4s）注入：日志出现
    `[on-chain mine] batch settled: +N ore confirmed on-chain`，背包多出 BlackIronOre
    （dura = N×1000），矿脉分档随链上 `stones_left` 变化。
