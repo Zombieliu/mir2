@@ -10743,6 +10743,37 @@ export default function HomePage() {
       onEnterWorld={startSelectedCharacter}
       targetDistance={selectedEntity ? tileDistance(self, selectedEntity) : null}
       entityKindClassName={entityKindClassName}
+      gameOverlaySlot={
+        ONCHAIN_MINE_ENABLED && screen === "game" ? (
+          <OnchainMinePanel
+            language={language}
+            walletAddress={onchainWallet?.account.address ?? null}
+            walletBusy={onchainWalletBusy}
+            pendingSwings={onchainMine.pendingSwings}
+            batchSize={ONCHAIN_MINE_BATCH_SIZE}
+            optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
+            inFlightSwings={onchainMine.inFlightSwings}
+            inFlightDigest={onchainMine.inFlightDigest}
+            confirmedUnits={onchainMine.confirmedUnits}
+            settledBatches={onchainMine.settledBatches}
+            lastReconcile={onchainMine.lastReconcile}
+            lastError={onchainMine.lastError}
+            nextNonce={onchainNextNonce}
+            veinStage={
+              world.mineNodes.find((node) => isOnchainVeinNode(node, ONCHAIN_MINE_VEIN))?.stage ?? null
+            }
+            veinLocation={ONCHAIN_MINE_VEIN}
+            submitBusy={onchainSubmitBusy}
+            redeemAmount={onchainRedeemAmount}
+            onRedeemAmountChange={setOnchainRedeemAmount}
+            onConnectWallet={() => void connectOnchainWallet()}
+            onSwing={onchainSwing}
+            onFlushNow={() => void flushOnchainBatch()}
+            onRedeem={() => void redeemOnchainOre()}
+            onNonceChange={setOnchainNonce}
+          />
+        ) : null
+      }
     />
     <ExtraWindows
       t={t}
@@ -10781,34 +10812,6 @@ export default function HomePage() {
           questLog: showQuestLog || (showInventory && activeInventoryTab === "quest"),
         }}
         onClose={() => setShowTutorial(false)}
-      />
-    ) : null}
-    {ONCHAIN_MINE_ENABLED && screen === "game" ? (
-      <OnchainMinePanel
-        walletAddress={onchainWallet?.account.address ?? null}
-        walletBusy={onchainWalletBusy}
-        pendingSwings={onchainMine.pendingSwings}
-        batchSize={ONCHAIN_MINE_BATCH_SIZE}
-        optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
-        inFlightSwings={onchainMine.inFlightSwings}
-        inFlightDigest={onchainMine.inFlightDigest}
-        confirmedUnits={onchainMine.confirmedUnits}
-        settledBatches={onchainMine.settledBatches}
-        lastReconcile={onchainMine.lastReconcile}
-        lastError={onchainMine.lastError}
-        nextNonce={onchainNextNonce}
-        veinStage={
-          world.mineNodes.find((node) => isOnchainVeinNode(node, ONCHAIN_MINE_VEIN))?.stage ?? null
-        }
-        veinLocation={ONCHAIN_MINE_VEIN}
-        submitBusy={onchainSubmitBusy}
-        redeemAmount={onchainRedeemAmount}
-        onRedeemAmountChange={setOnchainRedeemAmount}
-        onConnectWallet={() => void connectOnchainWallet()}
-        onSwing={onchainSwing}
-        onFlushNow={() => void flushOnchainBatch()}
-        onRedeem={() => void redeemOnchainOre()}
-        onNonceChange={setOnchainNonce}
       />
     ) : null}
     </>
