@@ -2370,6 +2370,23 @@ fn env_flag_enabled(name: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// `MIR2_GM_ACCOUNTS` — a comma-separated allowlist of account names granted
+/// in-game GM rank for the session. Applied at login (StartGame) on top of the
+/// stored `gm_level` without mutating the persisted record, so it is a safe
+/// local/dev convenience: e.g. `MIR2_GM_ACCOUNTS=demo`. Production should set
+/// `gm_level` on the account record instead. Matching is case-insensitive.
+pub fn account_is_env_gm(account_id: &str) -> bool {
+    env::var("MIR2_GM_ACCOUNTS")
+        .map(|value| {
+            value
+                .split(',')
+                .map(str::trim)
+                .filter(|name| !name.is_empty())
+                .any(|name| name.eq_ignore_ascii_case(account_id))
+        })
+        .unwrap_or(false)
+}
+
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
     pub map: MapInformation,

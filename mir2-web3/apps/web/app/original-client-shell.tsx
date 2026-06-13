@@ -361,6 +361,7 @@ export function OriginalClientShell({
   onEnterWorld,
   targetDistance,
   entityKindClassName,
+  gameOverlaySlot,
 }: OriginalClientShellProps) {
   const t = buildTranslator(language);
   const locale = languageLocale(language);
@@ -1972,6 +1973,8 @@ export function OriginalClientShell({
               <span className="gateway-reconnect-text">{reconnectMessage}</span>
             </div>
           ) : null}
+          {/* Extra HUD overlays anchored to the scaled game stage (e.g. on-chain mine panel). */}
+          {gameOverlaySlot}
         </div>
       </section>
       <OriginalClientMobileControls

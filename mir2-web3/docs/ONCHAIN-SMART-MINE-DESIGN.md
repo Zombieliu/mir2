@@ -4,6 +4,8 @@
 >
 > 目标读者：游戏服务端（Rust/`bevy_ecs`）、链上合约（Move/Dubhe）、前端（Next.js/Bevy）、经济/产品。
 
+> **端到端实施路线图（全量落地，M0→M8 + 工作流/出口判据/关键路径）见 `docs/ONCHAIN-SMART-MINE-ROADMAP.md`。** 本文负责“设计/为什么”，路线图负责“怎么一路做到完工”。
+
 ---
 
 ## 0. 一句话结论
@@ -419,6 +421,51 @@ fee_for_swings(n) = n * PER_SWING_FEE          // PER_SWING_FEE ≈ 0.004 SUI
 | P3 | 卖矿换金币 `redeem` → `CreditGoldFromOre`；协议费/排放上限/兑率做成治理参数；sponsored tx + 批量 | 是 |
 | P4 | 经济小规模放量灰度，盯 treasury/留存/矿石价格曲线调参；热点矿分片压测 | 是 |
 | P5 | 主网；安全审计（合约 + Relayer 信任边界）；风控接 Admin | 是(主网) |
+
+---
+
+## 8.1 实现状态 + P1 落地清单（2026-06-09）
+
+### 实现状态
+
+| 范围 | 状态 | 落点 |
+|---|---|---|
+| P0 服务端「越挖越少」 | ✅ 已实现 | `config.mine_zones`（起始矿 map `0` @333,270，mine_set 1）、`runtime/mining.rs`（`stones_left` / `mine_stage` / `MineNodeState` 广播）、比奇 Blacksmith 卖 PickAxe（`can_mine`）、DeadMine 碰撞地基（PR #43、#13/#27） |
+| P0 客户端贴图分档 | ✅ 广播已发 `MineNodeState{stage}` | 客户端按 stage 切贴图（满/裂/空） |
+| P1 链上合约 + testnet | ❌ 未实现 | 仓库无 `.move` 工程；本文 §3 仅 schema + 伪代码 |
+| P2 Indexer + Relayer | ❌ 未实现 | 无 indexer/relayer；入站 `WorldCommand` 变体待加 |
+| P3–P5 | ❌ 未实现 | redeem→金币、治理参数、主网、审计 |
+
+唯一既有链接触点 = **Sui 钱包/passkey 登录**（`gateway/src/auth.rs`、`@mysten/sui/verify`），不发交易、不读写链上状态。
+
+### P1 落地清单（实现者照此做）
+
+> 工程放 `mir2-web3/onchain/`（Move+TS 独立栈，勿混入 Rust workspace）。Dubhe API 以 `github.com/0xobelisk/Dubhe` 的 examples（`constantinople`/`dms`）/framework/packages 为准。私钥放本地 env，勿提交。
+
+1. **scaffold**：`onchain/mir2-mine/` 起一个 Dubhe 工程；`dubhe.config.ts` 照搬 §3.1（data / schemas / events / errors / systems 全量）。
+2. **schemagen + 合约**：`pnpm dubhe schemagen` 生成 Move，实现
+   - `mine_system::mine_batch`（§3.2：nonce 防重放 → 收 `Coin<SUI>` 入 treasury → `maybe_regen` → 用 `sui::random::Random` 按 hit_rate 25 / drop_rate 10 逐次 roll → epoch 排放封顶 → 落 `mine_state`/`ore_balance`/`miner_nonce` → emit `mine_settled`(+`mine_depleted`)）
+   - `redeem_system::redeem`（销毁链上矿石 → emit `ore_redeemed`）
+   - `admin_system`（初始化起始矿 `mine_config`：map_id 0, mine_set 1, hit_rate 25, drop_rate 10, max_stones/regen_secs 自定）
+3. **部署 testnet**：`sui client` / dubhe publish；记录 packageId、schema/对象 ID、部署 digest。
+4. **TS 烟测**（`@0xobelisk/sui-client`）：admin 建矿 → 一笔 `mine_batch` → 断言 `mine_settled` 事件 + `stones_left` 递减 + `ore_balance` 增加。
+
+### P2 地基（本次铺好、暂不在服务器常驻运行）
+
+5. **indexer 配置** `dubhe.config.json`，保证 `dubhe-indexer --config dubhe.config.json --network testnet --with-graphql` 可起、能订阅到 `mine_settled`。
+6. **Relayer 骨架** `onchain/relayer/`（TS）：`createDubheGraphqlClient` 订阅 `mine_settled`/`ore_redeemed` → 转发到 gateway/admin-api（先 dry-run/日志，不连生产）。
+7. **Rust 入站接缝**：在 `world_runtime.rs` 的 `WorldCommandKind` 加并实现 + 单测：
+   - `GrantOnchainOre { account:"sui:0x..", ore_kind, amount, mine_id, stones_left }` → 写背包 + 广播 `MineNodeState{stage}`
+   - `CreditGoldFromOre { account, gold }` → 加金币
+   服务端保持权威、与 P0 共存；账号映射用 `account_id == "sui:0x.."`。
+
+### 必守决策（§0.9 / §2）
+
+批量结算（非逐挥）、Sui 链上随机、节点可再生 + epoch 排放封顶、nonce 防重放、费入 treasury、**先做纯付费货币（不外部回兑）**、矿区两层（DeadMine/起始图）。
+
+### 验收
+
+testnet packageId + 一笔成功 `mine_batch` digest + `mine_settled` 内容；`onchain/mir2-mine/README.md`（部署步骤 + env，便于后续把 indexer/relayer 部署到服务器）；Rust 改动 `cargo fmt --all --check` + `cargo test -p mir2-simulation` 全绿。
 
 ---
 

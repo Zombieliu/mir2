@@ -71,6 +71,7 @@ type DisplayWorld = {
   playerHp?: number;
   playerMaxHp?: number;
   playerMp?: number;
+  playerMaxMp?: number;
   playerExperience: number;
   playerMaxExperience: number;
   freeBagSlots: number;
@@ -178,7 +179,7 @@ export function CharacterWindow({
     statCell(t("ui.statLuck", [], "Luck"), flatValue(stats?.luck)),
     statCell(t("ui.statAttackSpeed", [], "A.Speed"), flatValue(stats?.attackSpeed)),
     statCell(t("ui.hp", [], "HP"), pairValue(world.playerHp, world.playerMaxHp)),
-    statCell(t("ui.mp", [], "MP"), pairValue(world.playerMp, world.playerMp !== undefined ? Math.max(world.playerMp, 100) : undefined)),
+    statCell(t("ui.mp", [], "MP"), pairValue(world.playerMp, world.playerMaxMp)),
   ];
 
   // Crystal stats page 2: Experience / Weight (bag) / Wear weight / Hand weight /
