@@ -63,7 +63,18 @@ const {
   VEIN_STAGE_DEPLETED,
 } = mine;
 
-const DEPLOYMENT = TESTNET_MINE_DEPLOYMENT;
+// Fixed fixture — TESTNET_MINE_DEPLOYMENT ids are env-driven (empty in tests). Valid
+// 32-byte hex ids (the PTB builder validates object/address ids).
+const DEPLOYMENT = {
+  packageId: `0x${"11".repeat(32)}`,
+  frameworkPackageId: `0x${"22".repeat(32)}`,
+  dappHubId: `0x${"33".repeat(32)}`,
+  dappStorageId: `0x${"44".repeat(32)}`,
+  randomId: "0x8",
+  clockId: "0x6",
+};
+const USER_STORAGE = `0x${"55".repeat(32)}`;
+void TESTNET_MINE_DEPLOYMENT;
 
 let passed = 0;
 function check(label, fn) {
@@ -106,11 +117,11 @@ check("isOreKindName guards relayer/sim ore strings", () => {
 check("oreKindConstructorTarget builds the new_* call target", () => {
   assert.equal(
     oreKindConstructorTarget(DEPLOYMENT, "BlackIron"),
-    `${DEPLOYMENT.packageId}::mir2_mine_ore_kind::new_black_iron`,
+    `${DEPLOYMENT.packageId}::ore_kind::new_blackiron`,
   );
   assert.equal(
     oreKindConstructorTarget(DEPLOYMENT, "Gold"),
-    `${DEPLOYMENT.packageId}::mir2_mine_ore_kind::new_gold`,
+    `${DEPLOYMENT.packageId}::ore_kind::new_gold`,
   );
 });
 
@@ -118,12 +129,13 @@ check("oreKindConstructorTarget builds the new_* call target", () => {
 // mine_batch PTB
 // ---------------------------------------------------------------------------
 
-check("buildMineBatchTransaction splits the fee and calls mine_batch with 7 args", () => {
+check("buildMineBatchTransaction splits the fee and calls mine_batch with 8 args", () => {
   const tx = buildMineBatchTransaction(DEPLOYMENT, {
     mineId: 1,
     swings: 5,
     nonce: 3,
     feeMist: 1000,
+    userStorageId: USER_STORAGE,
   });
   const commands = tx.getData().commands;
   // First command splits the fee from gas; then the mine_batch move call.
@@ -137,17 +149,17 @@ check("buildMineBatchTransaction splits the fee and calls mine_batch with 7 args
   assert.equal(call.package, DEPLOYMENT.packageId);
   assert.equal(call.module, "mine_system");
   assert.equal(call.function, "mine_batch");
-  // schema, mine_id, swings, nonce, fee, random, clock (ctx is injected on-chain).
-  assert.equal(call.arguments.length, 7, "mine_batch takes 7 explicit args");
+  // dapp_storage, user_storage, mine_id, swings, nonce, fee, random, clock.
+  assert.equal(call.arguments.length, 8, "mine_batch takes 8 explicit args");
 });
 
 check("buildMineBatchTransaction rejects empty / negative-fee batches", () => {
   assert.throws(
-    () => buildMineBatchTransaction(DEPLOYMENT, { mineId: 1, swings: 0, nonce: 1, feeMist: 0 }),
+    () => buildMineBatchTransaction(DEPLOYMENT, { mineId: 1, swings: 0, nonce: 1, feeMist: 0, userStorageId: USER_STORAGE }),
     /swings >= 1/,
   );
   assert.throws(
-    () => buildMineBatchTransaction(DEPLOYMENT, { mineId: 1, swings: 1, nonce: 1, feeMist: -1 }),
+    () => buildMineBatchTransaction(DEPLOYMENT, { mineId: 1, swings: 1, nonce: 1, feeMist: -1, userStorageId: USER_STORAGE }),
     /fee must be >= 0/,
   );
 });
@@ -158,6 +170,7 @@ check("buildMineBatchTransaction accepts bigint params (no precision loss)", () 
     swings: 10n,
     nonce: 9_007_199_254_740_993n, // > Number.MAX_SAFE_INTEGER
     feeMist: 5_000n,
+    userStorageId: USER_STORAGE,
   });
   assert.equal(moveCalls(tx)[0].function, "mine_batch");
 });
@@ -167,19 +180,19 @@ check("buildMineBatchTransaction accepts bigint params (no precision loss)", () 
 // ---------------------------------------------------------------------------
 
 check("buildRedeemTransaction constructs the OreKind then burns it", () => {
-  const tx = buildRedeemTransaction(DEPLOYMENT, { oreKind: "BlackIron", amount: 4 });
+  const tx = buildRedeemTransaction(DEPLOYMENT, { oreKind: "BlackIron", amount: 4, userStorageId: USER_STORAGE });
   const calls = moveCalls(tx);
   assert.equal(calls.length, 2, "OreKind constructor + redeem");
-  assert.equal(calls[0].function, "new_black_iron");
-  assert.equal(calls[0].module, "mir2_mine_ore_kind");
+  assert.equal(calls[0].function, "new_blackiron");
+  assert.equal(calls[0].module, "ore_kind");
   assert.equal(calls[1].module, "redeem_system");
   assert.equal(calls[1].function, "redeem");
-  // schema, ore_kind (the constructor result), amount.
-  assert.equal(calls[1].arguments.length, 3);
+  // dapp_storage, user_storage, ore_kind (constructor result), amount.
+  assert.equal(calls[1].arguments.length, 4);
 });
 
 check("buildRedeemTransaction rejects non-positive amounts", () => {
-  assert.throws(() => buildRedeemTransaction(DEPLOYMENT, { oreKind: "Gold", amount: 0 }), /amount >= 1/);
+  assert.throws(() => buildRedeemTransaction(DEPLOYMENT, { oreKind: "Gold", amount: 0, userStorageId: USER_STORAGE }), /amount >= 1/);
 });
 
 // ---------------------------------------------------------------------------

@@ -1363,6 +1363,8 @@ export default function HomePage() {
   const [onchainWalletBusy, setOnchainWalletBusy] = useState(false);
   const [onchainSubmitBusy, setOnchainSubmitBusy] = useState(false);
   const [onchainRedeemAmount, setOnchainRedeemAmount] = useState("1");
+  // SK2: the active session key (popup-free signing), null when none/expired.
+  const [onchainSession, setOnchainSession] = useState<{ address: string; expiresAt: number } | null>(null);
   const [onchainNextNonce, setOnchainNextNonce] = useState(1);
   const onchainNonceRef = useRef<NonceTracker | null>(null);
   // Sync re-entry guard for the wallet submit (state commits lag the submit effect).
@@ -4697,9 +4699,62 @@ export default function HomePage() {
       const session = getActiveSuiWalletSession() ?? (await connectSuiWalletForSigning());
       setOnchainWallet(session);
       appendLog(`[on-chain mine] wallet connected: ${session.account.address}`, "system");
+      // Hydrate any still-valid session key for this account so mining is popup-free.
+      const { getActiveSession } = await import("../lib/onchain-mine-sessionkey");
+      const active = getActiveSession(session.account.address, TESTNET_MINE_DEPLOYMENT.packageId);
+      setOnchainSession(active ? { address: active.sessionAddress, expiresAt: active.expiresAt } : null);
     } catch (error) {
       appendLog(
         `[on-chain mine] wallet connect failed: ${error instanceof Error ? error.message : String(error)}`,
+        "system",
+      );
+    } finally {
+      setOnchainWalletBusy(false);
+    }
+  }
+
+  /**
+   * SK2: authorize an ephemeral session key (ONE wallet popup). After this, every
+   * `mine_batch` signs locally with no popup until the session expires or is revoked.
+   */
+  async function activateOnchainSession() {
+    const context = onchainMineContext();
+    if (!context) {
+      appendLog("[on-chain mine] connect a wallet before activating a session", "system");
+      return;
+    }
+    setOnchainWalletBusy(true);
+    try {
+      const { activateSession } = await import("../lib/onchain-mine-sessionkey");
+      const session = await activateSession(context);
+      setOnchainSession({ address: session.sessionAddress, expiresAt: session.expiresAt });
+      appendLog(
+        `[on-chain mine] session activated: ${session.sessionAddress} — mining is popup-free until ${new Date(session.expiresAt).toLocaleTimeString()} (fund this address with a little SUI for gas)`,
+        "system",
+      );
+    } catch (error) {
+      appendLog(
+        `[on-chain mine] session activate failed: ${error instanceof Error ? error.message : String(error)}`,
+        "system",
+      );
+    } finally {
+      setOnchainWalletBusy(false);
+    }
+  }
+
+  /** Revoke the active session key (ONE wallet popup) — mining falls back to wallet signing. */
+  async function deactivateOnchainSession() {
+    const context = onchainMineContext();
+    if (!context) return;
+    setOnchainWalletBusy(true);
+    try {
+      const { deactivateSession } = await import("../lib/onchain-mine-sessionkey");
+      await deactivateSession(context);
+      setOnchainSession(null);
+      appendLog("[on-chain mine] session deactivated", "system");
+    } catch (error) {
+      appendLog(
+        `[on-chain mine] session deactivate failed: ${error instanceof Error ? error.message : String(error)}`,
         "system",
       );
     } finally {
@@ -4804,23 +4859,37 @@ export default function HomePage() {
     setOnchainSubmitBusy(true);
     onchainConfirmedUnitsRef.current = null;
     try {
-      const { executeMineBatch } = await import("../lib/onchain-mine-session");
-      const result = await executeMineBatch(context, {
+      const account = context.account.address;
+      const packageId = context.deployment.packageId;
+      const batchParams = {
         mineId: ONCHAIN_MINE_ID,
         swings,
         nonce,
         feeMist: ONCHAIN_MINE_FEE_PER_SWING_MIST * swings,
-      });
+      };
+      const sessionMod = await import("../lib/onchain-mine-sessionkey");
+      const session = sessionMod.getActiveSession(account, packageId);
+      let result: { digest: string };
+      if (session) {
+        // SK2: an active session key signs LOCALLY — no wallet popup (the framework
+        // credits the owner because the ore lives in the owner's UserStorage).
+        result = await sessionMod.executeMineBatchWithSession(context.deployment, session, batchParams);
+      } else {
+        // Fallback (M4): the wallet signs each batch. Needs the owner's UserStorage id
+        // (a one-time init popup if absent).
+        const userStorageId = await sessionMod.ensureUserStorage(context);
+        const { executeMineBatch } = await import("../lib/onchain-mine-session");
+        result = await executeMineBatch(context, { ...batchParams, userStorageId });
+      }
       // Only consume + persist the nonce once the chain accepted the transaction.
       tracker.next();
-      persistNextNonce(
-        onchainWallet?.account.address ?? "unknown",
-        TESTNET_MINE_DEPLOYMENT.packageId,
-        tracker.peek(),
-      );
+      persistNextNonce(account, packageId, tracker.peek());
       setOnchainNextNonce(tracker.peek());
       setOnchainMine((current) => batchSubmitted(current, result.digest));
-      appendLog(`[on-chain mine] mine_batch submitted: ${result.digest}`, "system");
+      appendLog(
+        `[on-chain mine] mine_batch ${session ? "(session, no popup)" : "(wallet)"} submitted: ${result.digest}`,
+        "system",
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       // batchFailed RESTORES the swings (the tx never landed: wallet rejection / RPC
@@ -4847,8 +4916,10 @@ export default function HomePage() {
       : "BlackIron";
     setOnchainSubmitBusy(true);
     try {
+      const { ensureUserStorage } = await import("../lib/onchain-mine-sessionkey");
+      const userStorageId = await ensureUserStorage(context);
       const { executeRedeem } = await import("../lib/onchain-mine-session");
-      const result = await executeRedeem(context, { oreKind, amount });
+      const result = await executeRedeem(context, { oreKind, amount, userStorageId });
       appendLog(
         `[on-chain mine] redeem submitted: ${result.digest} (gold arrives via the relayer)`,
         "system",
@@ -10805,6 +10876,10 @@ export default function HomePage() {
         redeemAmount={onchainRedeemAmount}
         onRedeemAmountChange={setOnchainRedeemAmount}
         onConnectWallet={() => void connectOnchainWallet()}
+        sessionAddress={onchainSession?.address ?? null}
+        sessionExpiresAt={onchainSession?.expiresAt ?? null}
+        onActivateSession={() => void activateOnchainSession()}
+        onDeactivateSession={() => void deactivateOnchainSession()}
         onSwing={onchainSwing}
         onFlushNow={() => void flushOnchainBatch()}
         onRedeem={() => void redeemOnchainOre()}

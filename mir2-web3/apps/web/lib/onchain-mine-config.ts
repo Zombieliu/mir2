@@ -8,27 +8,42 @@
  * this, so existing imports keep working.
  */
 
-/** Public on-chain ids for the deployed mine package (onchain/deployments/testnet.json). */
+/**
+ * Public on-chain ids for the deployed mine package (onchain/deployments/testnet.json).
+ * SK1/SK2: the Dubhe 1.2.x dappHub/UserStorage model — global mine state lives in
+ * `dappStorageId`, each miner has a per-user `UserStorage` (resolved at runtime), and the
+ * framework package (`frameworkPackageId`) + `dappHubId` are needed to activate sessions.
+ */
 export type OnchainMineDeployment = {
   packageId: string;
-  schemaId: string;
+  /** Published Dubhe framework package on testnet (activate/deactivate session lives there). */
+  frameworkPackageId: string;
+  /** Shared DappHub object (framework). */
+  dappHubId: string;
+  /** This dapp's shared DappStorage object (global mine state). */
+  dappStorageId: string;
   /** Sui system Random object (always 0x8). */
   randomId: string;
   /** Sui system Clock object (always 0x6). */
   clockId: string;
 };
 
-/** testnet deployment — public ids only (see onchain/deployments/testnet.json). */
+/**
+ * testnet deployment — public ids only. Driven by NEXT_PUBLIC_* so the fresh SK1 publish
+ * (new packageId + DappStorage) is wired without a code change; see onchain/deployments/testnet.json.
+ */
 export const TESTNET_MINE_DEPLOYMENT: OnchainMineDeployment = {
-  packageId: "0xe6c3602e4055b76afd82a48745f9cd34daa4a6dce1f420747f0779732640dbe5",
-  schemaId: "0x77138ceee249ef3d328296cb932cbad50916bf062d06cb6d1ee7ea0ea1acc698",
+  packageId: process.env.NEXT_PUBLIC_ONCHAIN_MINE_PACKAGE_ID ?? "",
+  frameworkPackageId: process.env.NEXT_PUBLIC_ONCHAIN_MINE_FRAMEWORK_PACKAGE_ID ?? "",
+  dappHubId: process.env.NEXT_PUBLIC_ONCHAIN_MINE_DAPP_HUB_ID ?? "",
+  dappStorageId: process.env.NEXT_PUBLIC_ONCHAIN_MINE_DAPP_STORAGE_ID ?? "",
   randomId: "0x8",
   clockId: "0x6",
 };
 
 /**
- * OreKind enum variants (`mir2_mine::mir2_mine_ore_kind`), matching the relayer/sim
- * strings (the Move variant names). Order matches the on-chain enum.
+ * OreKind enum variants (`mir2_mine::ore_kind`), matching the relayer/sim strings (the
+ * Move variant names). Order matches the on-chain enum.
  */
 export const ORE_KINDS = [
   "Amethyst",
@@ -42,10 +57,10 @@ export const ORE_KINDS = [
 ] as const;
 export type OreKindName = (typeof ORE_KINDS)[number];
 
-/** OreKind variant -> its `mir2_mine_ore_kind::new_*` constructor function name. */
+/** OreKind variant -> its `mir2_mine::ore_kind::new_*` constructor function name (1.2.x). */
 export const ORE_KIND_CONSTRUCTOR: Record<OreKindName, string> = {
   Amethyst: "new_amethyst",
-  BlackIron: "new_black_iron",
+  BlackIron: "new_blackiron",
   Copper: "new_copper",
   Gold: "new_gold",
   Nephrite: "new_nephrite",

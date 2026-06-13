@@ -47,6 +47,14 @@ export type OnchainMinePanelProps = {
   redeemAmount: string;
   onRedeemAmountChange: (value: string) => void;
   onConnectWallet: () => void;
+  /** Active session-key address (popup-free signing), null when none/expired. */
+  sessionAddress: string | null;
+  /** Session expiry (epoch ms), null when no active session. */
+  sessionExpiresAt: number | null;
+  /** Authorize an ephemeral session key (one wallet popup) — kills per-batch popups. */
+  onActivateSession: () => void;
+  /** Revoke the active session key. */
+  onDeactivateSession: () => void;
   /** Dev shortcut for one swing — the real gesture is attacking the vein in the world. */
   onSwing: () => void;
   /** Submit the pending swings now, even below the batch threshold. */
@@ -132,6 +140,10 @@ export function OnchainMinePanel({
   redeemAmount,
   onRedeemAmountChange,
   onConnectWallet,
+  sessionAddress,
+  sessionExpiresAt,
+  onActivateSession,
+  onDeactivateSession,
   onSwing,
   onFlushNow,
   onRedeem,
@@ -163,6 +175,36 @@ export function OnchainMinePanel({
           <span title={walletAddress}>{shortAddress(walletAddress)}</span>
         </div>
       )}
+
+      {walletAddress !== null ? (
+        sessionAddress !== null ? (
+          <div style={{ ...rowStyle, marginTop: 4 }}>
+            <span title={sessionAddress}>
+              会话 {shortAddress(sessionAddress)} ✓免弹窗
+              {sessionExpiresAt ? ` 至${new Date(sessionExpiresAt).toLocaleTimeString()}` : ""}
+            </span>
+            <button
+              type="button"
+              style={walletBusy ? disabledButtonStyle : { ...buttonStyle, flex: "0 0 auto", padding: "2px 6px" }}
+              disabled={walletBusy}
+              onClick={onDeactivateSession}
+              title="撤销会话密钥 / revoke session key"
+            >
+              撤销
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            style={walletBusy ? disabledButtonStyle : { ...buttonStyle, marginTop: 4 }}
+            disabled={walletBusy}
+            onClick={onActivateSession}
+            title="授权一个临时会话密钥，之后连续挖矿不再弹钱包 / authorize a session key so continuous mining is popup-free"
+          >
+            {walletBusy ? "…" : "开启免弹窗会话 / Activate session"}
+          </button>
+        )
+      ) : null}
 
       <div style={rowStyle}>
         <span>攒挥 pending</span>

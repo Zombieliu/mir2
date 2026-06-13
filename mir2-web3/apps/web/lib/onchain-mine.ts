@@ -46,12 +46,12 @@ export type {
   OreReconcileInput,
 } from "./onchain-mine-config";
 
-/** Full move-call target for the OreKind constructor of `oreKind`. */
+/** Full move-call target for the OreKind constructor of `oreKind` (1.2.x `ore_kind` module). */
 export function oreKindConstructorTarget(
   deployment: OnchainMineDeployment,
   oreKind: OreKindName,
 ): string {
-  return `${deployment.packageId}::mir2_mine_ore_kind::${ORE_KIND_CONSTRUCTOR[oreKind]}`;
+  return `${deployment.packageId}::ore_kind::${ORE_KIND_CONSTRUCTOR[oreKind]}`;
 }
 
 export type MineBatchParams = {
@@ -62,15 +62,20 @@ export type MineBatchParams = {
   nonce: number | bigint;
   /** Total fee in MIST, split from the gas coin into the `fee: Coin<SUI>` argument. */
   feeMist: number | bigint;
+  /** The miner's `UserStorage` object id (per-user state; the session writes it). */
+  userStorageId: string;
 };
 
 /**
  * Build a `mine_system::mine_batch` PTB. The fee `Coin<SUI>` is split from the gas coin,
- * so the caller only needs a funded wallet. Sender + gas payment are filled in by the
- * wallet at sign time. Returns the unsigned Transaction.
+ * so the caller only needs a funded signer (the wallet OR an ephemeral session key).
+ * Returns the unsigned Transaction.
  *
- * Matches the on-chain signature:
- *   `entry fun mine_batch(schema, mine_id, swings, nonce, fee: Coin<SUI>, random, clock, ctx)`
+ * Matches the SK1 (Dubhe 1.2.x) signature:
+ *   `entry fun mine_batch(dapp_storage, user_storage, mine_id, swings, nonce,
+ *                          fee: Coin<SUI>, random, clock, ctx)`
+ * The effective miner is the UserStorage's canonical owner, so a session wallet signing
+ * this credits the owner (not the signer).
  */
 export function buildMineBatchTransaction(
   deployment: OnchainMineDeployment,
@@ -90,7 +95,8 @@ export function buildMineBatchTransaction(
   tx.moveCall({
     target: `${deployment.packageId}::mine_system::mine_batch`,
     arguments: [
-      tx.object(deployment.schemaId),
+      tx.object(deployment.dappStorageId),
+      tx.object(params.userStorageId),
       tx.pure.u64(BigInt(params.mineId)),
       tx.pure.u64(swings),
       tx.pure.u64(BigInt(params.nonce)),
@@ -106,15 +112,17 @@ export type RedeemParams = {
   oreKind: OreKindName;
   /** Ore units to burn for gold (>= 1). */
   amount: number | bigint;
+  /** The miner's `UserStorage` object id (where the ore balance lives). */
+  userStorageId: string;
 };
 
 /**
  * Build a `redeem_system::redeem` PTB: construct the OreKind value on-chain, then burn
- * `amount` of the caller's balance. The burn emits `ore_redeemed`; the Relayer turns
+ * `amount` of the owner's balance. The burn emits `OreRedeemedEvent`; the Relayer turns
  * that into a `CreditGoldFromOre` command and the Sim authoritatively credits gold
  * (DESIGN §4) — gold is NOT minted client-side. Returns the unsigned Transaction.
  *
- * Matches: `public fun redeem(schema, ore_kind: OreKind, amount, ctx)`.
+ * Matches SK1: `public fun redeem(dapp_storage, user_storage, ore_kind: OreKind, amount, ctx)`.
  */
 export function buildRedeemTransaction(
   deployment: OnchainMineDeployment,
@@ -131,7 +139,7 @@ export function buildRedeemTransaction(
   });
   tx.moveCall({
     target: `${deployment.packageId}::redeem_system::redeem`,
-    arguments: [tx.object(deployment.schemaId), oreKind, tx.pure.u64(amount)],
+    arguments: [tx.object(deployment.dappStorageId), tx.object(params.userStorageId), oreKind, tx.pure.u64(amount)],
   });
   return tx;
 }
