@@ -24,6 +24,11 @@ contracts/**/build/
 contracts/**/traces/
 contracts/**/.trace
 contracts/**/.coverage*
+# 1.2.x `dubhe generate` emits the package under src/<name>/ instead of contracts/.
+src/**/build/
+src/**/traces/
+src/**/.trace
+src/**/.coverage*
 **/Pub.*.toml
 
 # Dubhe indexer local db + relayer state (runtime artifacts)

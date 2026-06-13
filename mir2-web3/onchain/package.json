@@ -24,13 +24,13 @@
     "wallet:gas": "sui client gas"
   },
   "dependencies": {
-    "@0xobelisk/sui-client": "1.1.12",
-    "@0xobelisk/sui-common": "1.1.14",
+    "@0xobelisk/sui-client": "1.2.0-pre.124",
+    "@0xobelisk/sui-common": "1.2.0-pre.124",
     "@mysten/sui": "1.45.2",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "@0xobelisk/sui-cli": "1.1.14",
+    "@0xobelisk/sui-cli": "1.2.0-pre.124",
     "@types/node": "^22.10.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
