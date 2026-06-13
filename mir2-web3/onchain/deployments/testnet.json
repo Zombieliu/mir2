@@ -1,0 +1,42 @@
+{
+  "network": "testnet",
+  "note": "M1 mine contract deployment. Public on-chain ids only — NO secrets. The deployer/admin is the dedicated `mir2-onchain-mine` testnet wallet; its key stays in the local Sui keystore.",
+  "toolchain": {
+    "suiCli": "1.73.0",
+    "suiFrameworkRev": "testnet-v1.73.0",
+    "dubheFrameworkRev": "dubhe-testnet-v1.1.0",
+    "dubheSdk": "1.1.x"
+  },
+  "packageId": "0xe6c3602e4055b76afd82a48745f9cd34daa4a6dce1f420747f0779732640dbe5",
+  "schemaId": "0x77138ceee249ef3d328296cb932cbad50916bf062d06cb6d1ee7ea0ea1acc698",
+  "upgradeCap": "0xfbef3b0f1a26f303c270e096f8d82f7ca0eccb2a499d764c725166e8b9903df0",
+  "deployer": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+  "systemObjects": {
+    "random": "0x8",
+    "clock": "0x6"
+  },
+  "transactions": {
+    "publish": "DtdtZMqWwZWuxPdD9SXcoC8BwTxpzX5cPrN2oLVcqUR6",
+    "genesis": "7EUNbsEMjsNrFRLCYXv9uB17E6c5YCooqn3Ki11aUaVH",
+    "setMine1": "J8nu5ekobA45SLrzE9Aj9AcSuWmG13bDqL7RAUbt1wqV",
+    "mineBatchNonce1": "BtWKnfp2b6M3Z3bUs1sjg4qnhWgmjv5EKDwiY99VSVdy",
+    "mineBatchNonce2Deplete": "see genesis runbook"
+  },
+  "seededMines": {
+    "1": {
+      "mapId": 0,
+      "mineSet": 1,
+      "oreKind": "BlackIron",
+      "maxStones": 10,
+      "regenSecs": 300,
+      "hitRate": 100,
+      "dropRate": 100,
+      "note": "smoke mine — hit/drop 100/100 makes the roll deterministic for verification; real rates (e.g. Crystal 25/10) are admin-settable via admin_system::set_mine"
+    }
+  },
+  "verifiedOnChain": {
+    "mineBatch": "ore_balance[deployer,BlackIron]=5, stones_left[1]=5, miner_nonce=1, emitted_this_epoch=5; mine_settled_event emitted",
+    "replayGuard": "re-sending nonce=1 aborts with BadNonce (Replay or out-of-order nonce)",
+    "depletion": "nonce=2 mined remaining stones -> stones_left=0 + MineDepletedEvent"
+  }
+}

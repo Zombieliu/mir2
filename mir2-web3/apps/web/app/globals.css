@@ -4710,3 +4710,174 @@ button.character-spell-value:hover {
     display: flex;
   }
 }
+
+/* ── On-chain smart-mine HUD (testnet, NEXT_PUBLIC_ONCHAIN_MINE=1) ──────────────
+   Settlement/wallet control panel. Rendered inside `.client-stage-frame` (the scaled
+   1024×768 stage) via the shell's gameOverlaySlot, so it tracks the HUD instead of
+   floating in the viewport letterbox. Game-native gold chrome — the same metallic rail
+   as the beginner tutorial card — sized for a dense HUD widget. */
+.onchain-mine-panel {
+  position: absolute;
+  right: 6px;
+  bottom: 150px;
+  z-index: 19;
+  width: 216px;
+  box-sizing: border-box;
+  padding: 8px 10px 9px;
+  display: grid;
+  gap: 3px;
+  background: linear-gradient(180deg, #221708 0%, #0e0a06 100%);
+  border: 3px solid transparent;
+  border-image: linear-gradient(
+      140deg,
+      #5a431d 0%,
+      #f4dd95 16%,
+      #b07f2e 34%,
+      #f0d089 52%,
+      #7a5e26 70%,
+      #e6c879 86%,
+      #5a431d 100%
+    )
+    1;
+  box-shadow:
+    inset 0 0 0 1px #2b1d0d,
+    inset 0 0 14px rgba(0, 0, 0, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.5);
+  color: #e3d3af;
+  font: 12px/1.45 Georgia, "Times New Roman", serif;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.onchain-mine-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(156, 129, 81, 0.55);
+}
+
+.onchain-mine-title b {
+  color: #ffdf9b;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.onchain-mine-title b small {
+  color: #b9975a;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.onchain-mine-title > span {
+  color: #c9b687;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.onchain-mine-title em {
+  font-style: normal;
+}
+
+.onchain-mine-vein--full {
+  color: #9be08a;
+}
+
+.onchain-mine-vein--cracked {
+  color: #e6b85f;
+}
+
+.onchain-mine-vein--depleted {
+  color: #9a9488;
+}
+
+.onchain-mine-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.onchain-mine-row > span:first-child {
+  color: #b29a68;
+}
+
+.onchain-mine-row > span:last-child {
+  color: #f2e6c4;
+  font-variant-numeric: tabular-nums;
+}
+
+.onchain-mine-row--input {
+  align-items: center;
+}
+
+.onchain-mine-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.onchain-mine-btn {
+  flex: 1;
+  padding: 4px 6px;
+  border: 1px solid #9c8151;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #4a3c22 0%, #2a2010 100%);
+  color: #f0e3c0;
+  font: inherit;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+  cursor: var(--mir-cursor-default);
+  box-shadow: inset 0 1px 0 rgba(212, 193, 141, 0.3);
+}
+
+.onchain-mine-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #5c4b2b 0%, #382b15 100%);
+  border-color: #c2a566;
+}
+
+.onchain-mine-btn:active:not(:disabled) {
+  background: linear-gradient(180deg, #2a2010 0%, #4a3c22 100%);
+}
+
+.onchain-mine-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.onchain-mine-btn--wide {
+  flex: none;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.onchain-mine-input {
+  width: 56px;
+  padding: 2px 5px;
+  border: 1px solid #7a6638;
+  border-radius: 2px;
+  background: #16100a;
+  color: #f0e3c0;
+  font: inherit;
+  text-align: right;
+}
+
+.onchain-mine-input:focus {
+  outline: none;
+  border-color: #c2a566;
+  box-shadow: 0 0 0 1px rgba(194, 165, 102, 0.5);
+}
+
+.onchain-mine-error {
+  margin-top: 6px;
+  padding: 4px 7px;
+  border: 1px solid rgba(176, 74, 58, 0.7);
+  border-radius: 2px;
+  background: rgba(60, 18, 12, 0.5);
+  color: #ffb3a0;
+  font-size: 11px;
+  line-height: 1.35;
+  word-break: break-word;
+  text-shadow: 1px 1px 0 #000;
+}

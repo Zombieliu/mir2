@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
@@ -184,4 +186,11 @@ export type OriginalClientShellProps = {
   onEnterWorld: () => void;
   targetDistance: number | null;
   entityKindClassName: (kind: EntityKind) => string;
+  /**
+   * Optional extra overlay rendered *inside* the scaled 1024×768 `.client-stage-frame`,
+   * on top of the game scene. Used to anchor HUD widgets (e.g. the on-chain mine panel)
+   * to the game stage so they track/scale with it instead of floating in the viewport
+   * letterbox. Additive + optional — existing callers are unaffected.
+   */
+  gameOverlaySlot?: ReactNode;
 };

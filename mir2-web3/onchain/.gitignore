@@ -1,0 +1,33 @@
+# onchain/ — keep secrets and build artifacts out of git.
+# (The repo-root .gitignore already covers node_modules/, dist/, *.tsbuildinfo,
+#  and .env/.env.* — this file adds onchain-specific + secret patterns on top.)
+
+# --- Secrets — NEVER commit (private keys, mnemonics, operator tokens) ---
+.env
+.env.*
+!.env.example
+*.key
+*.keystore
+*.mnemonic
+sui.keystore
+.sui/
+deployments.local.json
+.secrets/
+
+# --- Dependencies / TS build ---
+node_modules/
+dist/
+*.tsbuildinfo
+
+# --- Move build artifacts (also covered by contracts/*/.gitignore) ---
+contracts/**/build/
+contracts/**/traces/
+contracts/**/.trace
+contracts/**/.coverage*
+**/Pub.*.toml
+
+# Dubhe indexer local db + relayer state (runtime artifacts)
+*.db
+*.sqlite
+*.sqlite3
+relayer/.state/

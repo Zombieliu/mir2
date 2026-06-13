@@ -1,17 +1,26 @@
 "use client";
 
 import {
+  connectSuiWalletForSigning,
   DUBHE_WALLET_URL,
+  getActiveSuiWalletSession,
   getSuiWalletSummaries,
   requestPasskeyLoginToken,
   requestWalletLoginToken,
   subscribeToSuiWalletChanges,
+  type ActiveSuiWalletSession,
   type SuiLoginToken,
   type SuiWalletSummary,
 } from "./passkey-auth";
 
-export { DUBHE_WALLET_URL, getSuiWalletSummaries, subscribeToSuiWalletChanges };
-export type { SuiLoginToken, SuiWalletSummary };
+export {
+  connectSuiWalletForSigning,
+  DUBHE_WALLET_URL,
+  getActiveSuiWalletSession,
+  getSuiWalletSummaries,
+  subscribeToSuiWalletChanges,
+};
+export type { ActiveSuiWalletSession, SuiLoginToken, SuiWalletSummary };
 
 export type GatewaySend = (
   command: Record<string, unknown>,
