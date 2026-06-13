@@ -59,6 +59,7 @@ type HudWorldLike = {
   playerHp?: number;
   playerMaxHp?: number;
   playerMp?: number;
+  playerMaxMp?: number;
   playerExperience?: number;
   playerMaxExperience?: number;
   activeBuffs: Array<{ name: string; remainingTicks: number }>;
@@ -626,12 +627,12 @@ export function MainHud({
   onToggleMenu,
 }: MainHudProps) {
   const healthRatio = ratio(world.playerHp, world.playerMaxHp);
-  const manaRatio = ratio(world.playerMp, Math.max(world.playerMp ?? 0, 100));
+  const manaRatio = ratio(world.playerMp, world.playerMaxMp);
   const experienceRatio = ratio(world.playerExperience, world.playerMaxExperience);
   const currentHp = world.playerHp ?? 0;
   const maxHp = world.playerMaxHp ?? 0;
   const currentMp = world.playerMp ?? 0;
-  const maxMp = 100;
+  const maxMp = world.playerMaxMp ?? 0;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs

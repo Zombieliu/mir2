@@ -5775,6 +5775,11 @@ pub(super) fn build_user_information(
         hair,
         hp: vitals.hp,
         mp: vitals.mp,
+        // Crystal's client derives the HP/MP caps from `Stats[Stat.HP/MP]` via
+        // `RefreshStats`; the web client has no such recompute, so push the caps
+        // the simulation already tracks (`PlayerVitals::max_hp`/`max_mp`).
+        max_hp: Some(vitals.max_hp),
+        max_mp: Some(vitals.max_mp),
         experience,
         max_experience,
         level_effects: 0,
