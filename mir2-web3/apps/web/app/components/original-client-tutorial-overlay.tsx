@@ -112,7 +112,12 @@ export function OriginalClientTutorialOverlay({ language, windows, onClose }: Tu
       {spotlightRect ? <div style={spotlightStyle(spotlightRect)} /> : null}
 
       <div style={CARD_STYLE} role="dialog" aria-label="Beginner tutorial">
-        <div style={HEADER_STYLE}>
+        <span style={studStyle("tl")} aria-hidden="true" />
+        <span style={studStyle("tr")} aria-hidden="true" />
+        <span style={studStyle("bl")} aria-hidden="true" />
+        <span style={studStyle("br")} aria-hidden="true" />
+
+        <div style={TITLEBAR_STYLE}>
           <span style={BADGE_STYLE}>
             {stepNumber} / {total}
           </span>
@@ -127,41 +132,57 @@ export function OriginalClientTutorialOverlay({ language, windows, onClose }: Tu
           </button>
         </div>
 
-        <p style={BODY_STYLE}>{pickText(step.body, language)}</p>
+        <div style={CONTENT_STYLE}>
+          <p style={BODY_STYLE}>{pickText(step.body, language)}</p>
 
-        {step.hint ? <div style={HINT_STYLE}>👉 {pickText(step.hint, language)}</div> : null}
-
-        <ProgressBar value={stepNumber} max={total} />
-
-        <div style={ACTIONS_STYLE}>
-          <button
-            type="button"
-            style={GHOST_BUTTON_STYLE}
-            onClick={() => send({ kind: "back" })}
-            disabled={state.stepIndex === 0}
-          >
-            {language === "zh-CN" ? "上一步" : "Back"}
-          </button>
-
-          {!isManual ? (
-            <button type="button" style={GHOST_BUTTON_STYLE} onClick={() => send({ kind: "skipStep" })}>
-              {language === "zh-CN" ? "跳过这步" : "Skip step"}
-            </button>
+          {step.hint ? (
+            <div style={HINT_STYLE}>👉 {pickText(step.hint, language)}</div>
           ) : null}
 
-          <button type="button" style={PRIMARY_BUTTON_STYLE} onClick={() => send({ kind: "next" })}>
-            {isLast
-              ? language === "zh-CN"
-                ? "完成"
-                : "Finish"
-              : isManual
+          <ProgressBar value={stepNumber} max={total} />
+
+          <div style={ACTIONS_STYLE}>
+            <button
+              type="button"
+              style={
+                state.stepIndex === 0
+                  ? { ...GHOST_BUTTON_STYLE, opacity: 0.4, cursor: "default" }
+                  : GHOST_BUTTON_STYLE
+              }
+              onClick={() => send({ kind: "back" })}
+              disabled={state.stepIndex === 0}
+            >
+              {language === "zh-CN" ? "上一步" : "Back"}
+            </button>
+
+            {!isManual ? (
+              <button
+                type="button"
+                style={GHOST_BUTTON_STYLE}
+                onClick={() => send({ kind: "skipStep" })}
+              >
+                {language === "zh-CN" ? "跳过这步" : "Skip step"}
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              style={PRIMARY_BUTTON_STYLE}
+              onClick={() => send({ kind: "next" })}
+            >
+              {isLast
                 ? language === "zh-CN"
-                  ? "下一步"
-                  : "Next"
-                : language === "zh-CN"
-                  ? "知道了,下一步"
-                  : "Got it, next"}
-          </button>
+                  ? "完成"
+                  : "Finish"
+                : isManual
+                  ? language === "zh-CN"
+                    ? "下一步"
+                    : "Next"
+                  : language === "zh-CN"
+                    ? "知道了,下一步"
+                    : "Got it, next"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -186,47 +207,81 @@ const ROOT_STYLE: CSSProperties = {
   pointerEvents: "none", // never block world clicks; only the card opts back in
 };
 
+// The original Crystal client frames its windows with a heavy beveled gold rail over
+// dark parchment, an embossed title band and riveted corners (cf. the inventory /
+// character window sprites + `.npc-dialog-panel` in globals.css). This net-new tutorial
+// card replicates that metalwork in pure CSS — so it reflows with variable step content
+// and needs no bespoke fixed-size sprite: a metallic gradient border (border-image),
+// layered inner bevels, a stamped title band, brass buttons and corner studs.
 const CARD_STYLE: CSSProperties = {
   position: "absolute",
   left: "50%",
   bottom: 24,
   transform: "translateX(-50%)",
-  width: 420,
+  width: 432,
   maxWidth: "calc(100vw - 32px)",
   pointerEvents: "auto",
-  background: "rgba(18, 14, 10, 0.96)",
-  border: "1px solid #b8893a",
-  borderRadius: 8,
-  boxShadow: "0 8px 28px rgba(0, 0, 0, 0.6)",
-  padding: "14px 16px",
-  color: "#f1e6d2",
+  overflow: "hidden",
+  background: "linear-gradient(180deg, #221708 0%, #0e0a06 100%)",
+  border: "3px solid transparent",
+  borderImage:
+    "linear-gradient(140deg, #5a431d 0%, #f4dd95 16%, #b07f2e 34%, #f0d089 52%, #7a5e26 70%, #e6c879 86%, #5a431d 100%) 1",
+  boxShadow:
+    "inset 0 0 0 1px #2b1d0d, inset 0 0 0 4px rgba(212, 193, 141, 0.18), inset 0 0 22px rgba(0, 0, 0, 0.55), 0 12px 30px rgba(0, 0, 0, 0.62)",
+  color: "#e9dcbf",
   fontSize: 13,
-  lineHeight: 1.5,
-  fontFamily: "inherit",
+  lineHeight: 1.55,
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  textShadow: "1px 1px 0 #000",
 };
 
-const HEADER_STYLE: CSSProperties = {
+// Embossed gold title band, like the original window headers.
+const TITLEBAR_STYLE: CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: 8,
-  marginBottom: 8,
+  padding: "7px 12px",
+  background: "linear-gradient(180deg, #4a3a1c 0%, #2a2010 55%, #170f07 100%)",
+  borderBottom: "1px solid #6b5320",
+  boxShadow:
+    "inset 0 1px 0 rgba(244, 221, 149, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.6)",
+};
+
+const CONTENT_STYLE: CSSProperties = {
+  padding: "12px 16px 14px",
+};
+
+// Riveted corner stud — four are pinned just inside the gold rail.
+const STUD_BASE: CSSProperties = {
+  position: "absolute",
+  width: 6,
+  height: 6,
+  borderRadius: "50%",
+  background:
+    "radial-gradient(circle at 35% 30%, #ffe9a8, #b1832f 60%, #5a431d)",
+  boxShadow: "0 0 0 1px #2b1d0d",
+  pointerEvents: "none",
+  zIndex: 2,
 };
 
 const BADGE_STYLE: CSSProperties = {
   flex: "0 0 auto",
   fontSize: 11,
   fontWeight: 700,
-  color: "#1a140c",
-  background: "#d8a44b",
-  borderRadius: 10,
-  padding: "1px 8px",
+  color: "#241708",
+  background: "linear-gradient(180deg, #e6c373, #b98a3c)",
+  border: "1px solid #d4c18d",
+  borderRadius: 2,
+  padding: "1px 7px",
+  boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+  textShadow: "none",
 };
 
 const TITLE_STYLE: CSSProperties = {
   flex: "1 1 auto",
   fontSize: 15,
   fontWeight: 700,
-  color: "#ffd98a",
+  color: "#ffdf9b",
 };
 
 const CLOSE_STYLE: CSSProperties = {
@@ -243,26 +298,28 @@ const CLOSE_STYLE: CSSProperties = {
 const BODY_STYLE: CSSProperties = { margin: "0 0 10px" };
 
 const HINT_STYLE: CSSProperties = {
-  background: "rgba(216, 164, 75, 0.14)",
-  border: "1px solid rgba(216, 164, 75, 0.4)",
-  borderRadius: 6,
+  background: "rgba(156, 129, 81, 0.16)",
+  border: "1px solid rgba(156, 129, 81, 0.5)",
+  borderRadius: 2,
   padding: "6px 10px",
   marginBottom: 10,
-  color: "#ffd98a",
+  color: "#ffdf9b",
   fontWeight: 600,
 };
 
 const PROGRESS_TRACK_STYLE: CSSProperties = {
-  height: 4,
-  borderRadius: 2,
-  background: "rgba(255, 255, 255, 0.12)",
+  height: 6,
+  borderRadius: 0,
+  background: "#0b0805",
+  border: "1px solid #3a2c16",
+  boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.6)",
   marginBottom: 12,
   overflow: "hidden",
 };
 
 const PROGRESS_FILL_STYLE: CSSProperties = {
   height: "100%",
-  background: "#d8a44b",
+  background: "linear-gradient(180deg, #f0d089, #c79a45)",
   transition: "width 0.25s ease",
 };
 
@@ -273,27 +330,37 @@ const ACTIONS_STYLE: CSSProperties = {
 };
 
 const BUTTON_BASE: CSSProperties = {
-  borderRadius: 6,
-  padding: "6px 12px",
+  borderRadius: 2,
+  padding: "5px 12px",
   fontSize: 12,
   fontWeight: 600,
   cursor: "pointer",
-  fontFamily: "inherit",
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  textShadow: "1px 1px 0 rgba(0, 0, 0, 0.5)",
 };
 
 const PRIMARY_BUTTON_STYLE: CSSProperties = {
   ...BUTTON_BASE,
-  background: "#d8a44b",
-  color: "#1a140c",
-  border: "1px solid #e7be6f",
+  background: "linear-gradient(180deg, #e6c373 0%, #b1832f 100%)",
+  color: "#241708",
+  border: "1px solid #d4c18d",
+  boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 0 #2b1d0d",
+  textShadow: "none",
 };
 
 const GHOST_BUTTON_STYLE: CSSProperties = {
   ...BUTTON_BASE,
-  background: "transparent",
-  color: "#e3d6bd",
-  border: "1px solid rgba(216, 164, 75, 0.5)",
+  background: "linear-gradient(180deg, #4a3c22 0%, #2a2010 100%)",
+  color: "#e9dcbf",
+  border: "1px solid #9c8151",
+  boxShadow: "inset 0 1px 0 rgba(212, 193, 141, 0.3)",
 };
+
+function studStyle(corner: "tl" | "tr" | "bl" | "br"): CSSProperties {
+  const vertical = corner[0] === "t" ? { top: 5 } : { bottom: 5 };
+  const horizontal = corner[1] === "l" ? { left: 5 } : { right: 5 };
+  return { ...STUD_BASE, ...vertical, ...horizontal };
+}
 
 function spotlightStyle(rect: DOMRect): CSSProperties {
   const pad = 6;
