@@ -922,6 +922,12 @@ const ONCHAIN_MINE_SETTLE_TIMEOUT_MS = Math.max(
   10_000,
   Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_SETTLE_TIMEOUT_MS ?? "60000"),
 );
+// Continuous-mining cadence: once you start mining the vein, swings auto-repeat at this
+// interval (the original's hold-to-mine feel) until you move away or the vein depletes.
+const ONCHAIN_MINE_SWING_INTERVAL_MS = Math.max(
+  200,
+  Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_SWING_INTERVAL_MS ?? "900"),
+);
 const BEVY_RUNTIME_VERSION =
   [bevyRuntimeVersion.version, process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA]
     .filter((value): value is string => Boolean(value))
@@ -1267,6 +1273,8 @@ export default function HomePage() {
   // Set when the player targets the on-chain vein but is not yet adjacent: the swing
   // fires on arrival (mirrors pendingNpcInteractRef). Only ever set when ONCHAIN_MINE_ENABLED.
   const pendingOnchainMineRef = useRef<boolean>(false);
+  // setInterval id for the continuous (hold-to-mine) swing loop; null when not mining.
+  const onchainMiningTimerRef = useRef<number | null>(null);
   const npcCallGuardRef = useRef<{ objectId: string; until: number } | null>(null);
   const gameEntryChatSeededRef = useRef(false);
   const movementPlanRef = useRef<MovementPlan | null>(null);
@@ -1616,6 +1624,16 @@ export default function HomePage() {
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the digest only
   }, [onchainMine.inFlightDigest]);
+
+  // Tear down the continuous-mining loop if the component unmounts mid-swing.
+  useEffect(() => {
+    return () => {
+      if (onchainMiningTimerRef.current !== null) {
+        window.clearInterval(onchainMiningTimerRef.current);
+        onchainMiningTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
   const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
@@ -3677,7 +3695,7 @@ export default function HomePage() {
     const nextSelf = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
     if (nextSelf && pointTileDistance(nextSelf, ONCHAIN_MINE_VEIN) <= 1) {
       pendingOnchainMineRef.current = false;
-      onchainSwing();
+      startOnchainMiningLoop();
     }
   }, [screen, wsState, world.entities, world.playerObjectId]);
 
@@ -4425,6 +4443,7 @@ export default function HomePage() {
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
     pendingOnchainMineRef.current = false;
+    stopOnchainMining();
     npcCallGuardRef.current = null;
     movementPlanRef.current = null;
     movementBlockedStepsRef.current = [];
@@ -4642,6 +4661,7 @@ export default function HomePage() {
   }
 
   function attackTarget(objectId: string) {
+    stopOnchainMining();
     send({ type: "attack", objectId: Number(objectId) });
   }
 
@@ -4703,17 +4723,58 @@ export default function HomePage() {
     setOnchainMine((current) => recordOnchainSwing(current, ONCHAIN_MINE_EXPECTED_UNITS_PER_SWING));
   }
 
+  /** Stop the continuous-mining loop (player moved, vein depleted, or left the game). */
+  function stopOnchainMining() {
+    if (onchainMiningTimerRef.current !== null) {
+      window.clearInterval(onchainMiningTimerRef.current);
+      onchainMiningTimerRef.current = null;
+    }
+  }
+
+  /**
+   * Start (or restart) continuous mining: swing now, then keep swinging at the mine
+   * cadence while the player stays next to the vein and it isn't depleted — the
+   * hold-to-mine feel of the original. Requires a connected signing wallet; without one
+   * we fall back to a single swing, so unattended mining can't pile up unsettleable
+   * swings or spam the server. The loop self-stops on adjacency loss / depletion /
+   * leaving the game screen.
+   */
+  function startOnchainMiningLoop() {
+    stopOnchainMining();
+    onchainSwing();
+    if (!onchainWallet) return;
+    onchainMiningTimerRef.current = window.setInterval(() => {
+      const liveWorld = worldRef.current;
+      const liveSelf = liveWorld.entities.find((entity) => entity.objectId === liveWorld.playerObjectId) ?? null;
+      const veinStage =
+        liveWorld.mineNodes.find((node) => isOnchainVeinNode(node, ONCHAIN_MINE_VEIN))?.stage ?? null;
+      if (
+        screenRef.current !== "game" ||
+        !liveSelf ||
+        pointTileDistance(liveSelf, ONCHAIN_MINE_VEIN) > 1 ||
+        veinStage === 0
+      ) {
+        stopOnchainMining();
+        return;
+      }
+      // Pause (don't stop) while a batch is mid-signature so we don't stack a second
+      // wallet popup on top of the one the player is still signing.
+      if (onchainSubmitGuardRef.current) return;
+      onchainSwing();
+    }, ONCHAIN_MINE_SWING_INTERVAL_MS);
+  }
+
   /**
    * The faithful Mir2 mining gesture: the player targeted the vein tile in the world
-   * (clicked it / stepped into it). Adjacent → swing right away; otherwise walk up to a
-   * tile beside the vein and let the arrival effect take the first swing. This — not the
-   * HUD button — is the primary way to mine on-chain ore.
+   * (clicked it / stepped into it). Adjacent → start mining right away; otherwise walk up
+   * to a tile beside the vein and let the arrival effect start it. This — not the HUD
+   * button — is the primary way to mine on-chain ore.
    */
   function mineOnchainVein() {
     const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
     if (origin && pointTileDistance(origin, ONCHAIN_MINE_VEIN) <= 1) {
       pendingOnchainMineRef.current = false;
-      onchainSwing();
+      startOnchainMiningLoop();
       return;
     }
     pendingOnchainMineRef.current = true;
@@ -5557,6 +5618,7 @@ export default function HomePage() {
   }
 
   function activateEntity(objectId: string) {
+    stopOnchainMining();
     const entity = world.entities.find((entry) => entry.objectId === objectId);
     setWorld((current) => ({
       ...current,
@@ -5605,6 +5667,8 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
+    // Any new viewport action ends continuous mining; the vein branch below restarts it.
+    stopOnchainMining();
     const groundSkill = pendingGroundSkillRef.current;
     if (groundSkill) {
       pendingGroundSkillRef.current = null;
@@ -5648,6 +5712,7 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
+    stopOnchainMining();
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? self;
     if (!serverSelf) return;
@@ -5682,6 +5747,11 @@ export default function HomePage() {
       pickGroundDrop(drop.objectId);
       return;
     }
+    if (ONCHAIN_MINE_ENABLED && nextPoint.x === ONCHAIN_MINE_VEIN.x && nextPoint.y === ONCHAIN_MINE_VEIN.y) {
+      // Stepping into the vein (keyboard/step) = mine it instead of walking onto it.
+      mineOnchainVein();
+      return;
+    }
     const transferKey = transferKeyForTile(nextPoint.x, nextPoint.y);
     if (transferKey) {
       pendingTransferRef.current = transferKey;
@@ -5693,6 +5763,7 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
+    stopOnchainMining();
     queueCrystalMoveIntent({
       kind: "target",
       targetX: x,
@@ -5711,6 +5782,7 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
+    stopOnchainMining();
     queueCrystalMoveIntent({
       kind: "direction",
       direction,
