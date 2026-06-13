@@ -12,13 +12,13 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit",
-    "schemagen": "dubhe schemagen",
+    "generate": "dubhe generate --network testnet",
     "relayer": "tsx relayer/src/index.ts",
     "relayer:demo": "tsx relayer/src/demo.ts",
     "indexer": "dubhe indexer --network testnet --config-path dubhe.config.ts",
     "test:relayer": "node --import tsx --test relayer/test/*.test.ts",
-    "move:build": "sui move build --path contracts/mir2_mine",
-    "move:test": "sui move test --path contracts/mir2_mine",
+    "move:build": "sui move build --path src/mir2_mine",
+    "move:test": "sui move test --path src/mir2_mine",
     "wallet:address": "sui client active-address",
     "wallet:env": "sui client active-env",
     "wallet:gas": "sui client gas"
@@ -26,7 +26,7 @@
   "dependencies": {
     "@0xobelisk/sui-client": "1.2.0-pre.124",
     "@0xobelisk/sui-common": "1.2.0-pre.124",
-    "@mysten/sui": "1.45.2",
+    "@mysten/sui": "1.35.0",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

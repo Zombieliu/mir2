@@ -7,12 +7,12 @@ import { normalize } from '../src/normalize';
 import { DedupStore } from '../src/dedup';
 import type { ChainEvent } from '../src/types';
 
+// SK1: plain Sui events — the event NAME is in `type` and `parsedJson` is the struct fields.
 function event(name: string, fields: Record<string, unknown>, id = { txDigest: 'TX1', eventSeq: '4' }): ChainEvent {
   return {
     id,
-    type: `0xdubhe::storage_event::SetRecord<0xpkg::${name}::E>`,
-    // Dubhe wraps the business event as value = { type, fields } (the @mysten/sui shape).
-    parsedJson: { name, value: { type: `0xpkg::${name}::E`, fields } },
+    type: `0xpkg::mine_system::${name}`,
+    parsedJson: fields,
   };
 }
 
@@ -27,8 +27,8 @@ const settledFields = {
   nonce: '1',
 };
 
-test('mine_settled -> GrantOnchainOre with sui: account + idempotency key', () => {
-  const cmd = normalize(event('mine_settled_event', settledFields));
+test('MineSettledEvent -> GrantOnchainOre with sui: account + idempotency key', () => {
+  const cmd = normalize(event('MineSettledEvent', settledFields));
   assert.equal(cmd?.kind, 'GrantOnchainOre');
   assert.ok(cmd && cmd.kind === 'GrantOnchainOre');
   assert.equal(cmd.account, 'sui:0xabc');
@@ -45,44 +45,41 @@ test('dry mine_settled (ore_amount 0) is STILL forwarded (the client settlement 
   // and the client closes its in-flight batch on that packet — dropping dry batches here
   // would wedge the client's batcher.
   const cmd = normalize(
-    event('mine_settled_event', { ...settledFields, ore_amount: '0', stones_left: 0 }),
+    event('MineSettledEvent', { ...settledFields, ore_amount: '0', stones_left: 0 }),
   );
   assert.ok(cmd && cmd.kind === 'GrantOnchainOre');
   assert.equal(cmd.amount, '0');
   assert.equal(cmd.stonesLeft, 0);
 });
 
-test('mine_settled with flat value (no .fields wrapper) still normalizes', () => {
-  const ev: ChainEvent = {
-    id: { txDigest: 'TX2', eventSeq: '0' },
-    type: 't',
-    parsedJson: { name: 'mine_settled_event', value: { ...settledFields, ore_kind: 'Gold' } },
-  };
-  const cmd = normalize(ev);
-  assert.ok(cmd && cmd.kind === 'GrantOnchainOre');
-  assert.equal(cmd.oreKind, 'Gold');
-  assert.equal(cmd.idempotencyKey, 'TX2:0');
+test('ore_kind variant forms: plain string and single-key object both parse', () => {
+  const a = normalize(event('MineSettledEvent', { ...settledFields, ore_kind: 'Gold' }));
+  assert.ok(a && a.kind === 'GrantOnchainOre');
+  assert.equal(a.oreKind, 'Gold');
+  const b = normalize(event('MineSettledEvent', { ...settledFields, ore_kind: { Silver: {} } }));
+  assert.ok(b && b.kind === 'GrantOnchainOre');
+  assert.equal(b.oreKind, 'Silver');
 });
 
-test('mine_depleted -> MineDepleted', () => {
-  const cmd = normalize(event('mine_depleted_event', { mine_id: '1' }));
+test('MineDepletedEvent -> MineDepleted', () => {
+  const cmd = normalize(event('MineDepletedEvent', { mine_id: '1' }));
   assert.ok(cmd && cmd.kind === 'MineDepleted');
   assert.equal(cmd.mineId, '1');
 });
 
-test('ore_redeemed -> CreditGoldFromOre (rate applied downstream at M5)', () => {
-  const cmd = normalize(event('ore_redeemed_event', { miner: '0xdef', ore_kind: { variant: 'BlackIron' }, amount: '3' }));
+test('OreRedeemedEvent -> CreditGoldFromOre (rate applied downstream at M5)', () => {
+  const cmd = normalize(event('OreRedeemedEvent', { miner: '0xdef', ore_kind: { variant: 'BlackIron' }, amount: '3' }));
   assert.ok(cmd && cmd.kind === 'CreditGoldFromOre');
   assert.equal(cmd.account, 'sui:0xdef');
   assert.equal(cmd.oreKind, 'BlackIron');
   assert.equal(cmd.oreAmount, '3');
 });
 
-test('internal storage SetRecord (stones_left) -> null', () => {
-  assert.equal(normalize(event('stones_left', { value: 5 })), null);
+test('non-bridged event (MineRegenedEvent) -> null', () => {
+  assert.equal(normalize(event('MineRegenedEvent', { mine_id: '1', stones_left: 10 })), null);
 });
 
-test('event without a name -> null', () => {
+test('event without parsedJson -> null', () => {
   assert.equal(normalize({ id: { txDigest: 'T', eventSeq: '0' }, type: 't', parsedJson: null }), null);
 });
 

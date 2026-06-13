@@ -15,8 +15,8 @@ importers:
         specifier: 1.2.0-pre.124
         version: 1.2.0-pre.124
       '@mysten/sui':
-        specifier: 1.45.2
-        version: 1.45.2(typescript@5.9.3)
+        specifier: 1.35.0
+        version: 1.35.0(typescript@5.9.3)
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
@@ -406,26 +406,12 @@ packages:
   '@mysten/bcs@1.6.3':
     resolution: {integrity: sha512-QQ6u0U7a4+/o6rZ9tALTeGYMdf6V5z/HkRI/mhD5/fSr80DJoGzOWpFszcN/fhJpKb36vBaSQUMpS7yNQ10xBQ==}
 
-  '@mysten/bcs@1.9.2':
-    resolution: {integrity: sha512-kBk5xrxV9OWR7i+JhL/plQrgQ2/KJhB2pB5gj+w6GXhbMQwS3DPpOvi/zN0Tj84jwPvHMllpEl0QHj6ywN7/eQ==}
-
   '@mysten/sui@1.35.0':
     resolution: {integrity: sha512-za0+SiEFtjAjk0sJ8P9Q/X/m2E/YrXQ/UNsotEwb/eCqPyGS8A9Mrxkhm/iIgR1+AAl1OWUWCrqgJVe7u2i61A==}
     engines: {node: '>=18'}
 
-  '@mysten/sui@1.45.2':
-    resolution: {integrity: sha512-gftf7fNpFSiXyfXpbtP2afVEnhc7p2m/MEYc/SO5pov92dacGKOpQIF7etZsGDI1Wvhv+dpph+ulRNpnYSs7Bg==}
-    engines: {node: '>=18'}
-
   '@mysten/utils@0.1.0':
     resolution: {integrity: sha512-nFxqArh4cr629elLsIk7UZmx5dFVshblwrfwaG7Dm2L/ii2C65bhK5tdTs6UiC3K0tCr8q8svrgzXyF9L0CN/A==}
-
-  '@mysten/utils@0.2.0':
-    resolution: {integrity: sha512-CM6kJcJHX365cK6aXfFRLBiuyXc5WSBHQ43t94jqlCAIRw8umgNcTb5EnEA9n31wPAQgLDGgbG/rCUISCTJ66w==}
-
-  '@noble/curves@1.9.4':
-    resolution: {integrity: sha512-2bKONnuM53lINoDrSmK8qP8W271ms7pygDhZt4SiLOoLwBtoHqeCFi6RG42V8zd3mLHuJFhU/Bmaqo4nX0/kBw==}
-    engines: {node: ^14.21.3 || >=16}
 
   '@noble/curves@1.9.7':
     resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
@@ -438,15 +424,6 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
-
-  '@protobuf-ts/grpcweb-transport@2.11.1':
-    resolution: {integrity: sha512-1W4utDdvOB+RHMFQ0soL4JdnxjXV+ddeGIUg08DvZrA8Ms6k5NN6GBFU2oHZdTOcJVpPrDJ02RJlqtaoCMNBtw==}
-
-  '@protobuf-ts/runtime-rpc@2.11.1':
-    resolution: {integrity: sha512-4CqqUmNA+/uMz00+d3CYKgElXO9VrEbucjnBFEjqI4GuDrEQ32MaI3q+9qPBvIGOlL4PmHXrzM32vBPWRhQKWQ==}
-
-  '@protobuf-ts/runtime@2.11.1':
-    resolution: {integrity: sha512-KuDaT1IfHkugM2pyz+FwiY80ejWrkH1pAtOBOZFuR6SXEFTsnb/jiQWQ1rCIrcKx2BtyxnxW6BWwsVSA/Ie+WQ==}
 
   '@scure/base@1.2.6':
     resolution: {integrity: sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==}
@@ -1595,11 +1572,6 @@ snapshots:
       '@mysten/utils': 0.1.0
       '@scure/base': 1.2.6
 
-  '@mysten/bcs@1.9.2':
-    dependencies:
-      '@mysten/utils': 0.2.0
-      '@scure/base': 1.2.6
-
   '@mysten/sui@1.35.0(typescript@5.9.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.2)
@@ -1619,39 +1591,9 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@mysten/sui@1.45.2(typescript@5.9.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.2)
-      '@mysten/bcs': 1.9.2
-      '@mysten/utils': 0.2.0
-      '@noble/curves': 1.9.4
-      '@noble/hashes': 1.8.0
-      '@protobuf-ts/grpcweb-transport': 2.11.1
-      '@protobuf-ts/runtime': 2.11.1
-      '@protobuf-ts/runtime-rpc': 2.11.1
-      '@scure/base': 1.2.6
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      gql.tada: 1.9.2(graphql@16.14.2)(typescript@5.9.3)
-      graphql: 16.14.2
-      poseidon-lite: 0.2.1
-      valibot: 1.4.1(typescript@5.9.3)
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
   '@mysten/utils@0.1.0':
     dependencies:
       '@scure/base': 1.2.6
-
-  '@mysten/utils@0.2.0':
-    dependencies:
-      '@scure/base': 1.2.6
-
-  '@noble/curves@1.9.4':
-    dependencies:
-      '@noble/hashes': 1.8.0
 
   '@noble/curves@1.9.7':
     dependencies:
@@ -1661,17 +1603,6 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
-
-  '@protobuf-ts/grpcweb-transport@2.11.1':
-    dependencies:
-      '@protobuf-ts/runtime': 2.11.1
-      '@protobuf-ts/runtime-rpc': 2.11.1
-
-  '@protobuf-ts/runtime-rpc@2.11.1':
-    dependencies:
-      '@protobuf-ts/runtime': 2.11.1
-
-  '@protobuf-ts/runtime@2.11.1': {}
 
   '@scure/base@1.2.6': {}
 

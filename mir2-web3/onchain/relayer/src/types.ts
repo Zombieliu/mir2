@@ -11,18 +11,15 @@
 /** A Sui event as returned by `SuiClient.queryEvents`, narrowed to what we use. */
 export interface ChainEvent {
   id: { txDigest: string; eventSeq: string };
-  /** Fully-qualified Move type, e.g. `0x..::storage_event::SetRecord<..MineSettledEvent..>`. */
+  /**
+   * Fully-qualified Move event type, e.g. `0x..::mine_system::MineSettledEvent`.
+   * SK1: the systems emit plain Sui events, so the type carries the event name and
+   * `parsedJson` is the struct's fields directly (no Dubhe `{ name, value }` wrapper).
+   */
   type: string;
-  /** Dubhe wraps records as { name, key1, key2, value }. `value` holds the business event. */
-  parsedJson: DubheRecordJson | null;
+  /** The emitted struct's fields; null when unparsable. */
+  parsedJson: Record<string, unknown> | null;
   timestampMs?: string | null;
-}
-
-export interface DubheRecordJson {
-  name?: string;
-  key1?: unknown;
-  key2?: unknown;
-  value?: unknown;
 }
 
 /** `(tx_digest, event_seq)` — the relayer's dedup key (idempotency place #2). */

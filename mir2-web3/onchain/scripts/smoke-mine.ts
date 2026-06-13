@@ -1,28 +1,24 @@
 import 'dotenv/config';
-import { Dubhe, loadMetadata } from '@0xobelisk/sui-client';
+import { Dubhe, loadMetadata, type NetworkType } from '@0xobelisk/sui-client';
 import { Transaction } from '@mysten/sui/transactions';
 
 /**
- * M1 testnet smoke for the on-chain smart mine (@0xobelisk/sui-client).
+ * SK1 testnet smoke for the on-chain smart mine (Dubhe 1.2.x dappHub/UserStorage model).
  *
- * Sends one `mine_batch`, asserts the `mine_settled` event, and reads back `ore_balance`
- * + `stones_left` via `parseState` — the M1 exit's TS smoke (ROADMAP §4). It mirrors the
- * flow already verified on testnet via the Sui CLI (mine_settled / ore credit / replay
- * guard / depletion; see `onchain/deployments/testnet.json`).
+ * Ensures the miner has a `UserStorage`, sends one owner-signed `mine_batch`, asserts the
+ * `MineSettledEvent`, and reads the UserStorage back. The session-signed (popup-free) path
+ * is exercised separately — see `onchain-sk/scripts/session-spike.ts` (SK0) and SK2.
  *
- * Run:
+ * Run (after `dubhe publish` populates the ids):
  *   1. cp onchain/.env.example onchain/.env
- *   2. set PRIVATE_KEY (deployer/miner key — suiprivkey/base64/hex), MINE_PACKAGE_ID,
- *      MINE_SCHEMA_ID (from deployments/testnet.json)
- *   3. ensure mine #1 is seeded (admin_system::set_mine) — already done at deploy
+ *   2. set PRIVATE_KEY (miner key), MINE_PACKAGE_ID, FRAMEWORK_PACKAGE_ID, DAPP_HUB_ID,
+ *      DAPP_STORAGE_ID (from deployments/testnet.json), and NONCE (on-chain miner_nonce + 1).
+ *   3. ensure mine #1 is seeded (admin_system::set_mine) — done at deploy.
  *   4. pnpm tsx scripts/smoke-mine.ts
  *
- * NOTE: this file is type-checked but intentionally NOT executed by the agent — running it
- * needs a funded private key in .env, which by policy never enters the agent transcript.
- * The contract is verified end-to-end on testnet via the CLI instead.
+ * NOTE: type-checked but intentionally NOT executed by the agent — running it needs a
+ * funded private key in .env, which by policy never enters the agent transcript.
  */
-
-type NetworkType = 'testnet' | 'mainnet' | 'devnet' | 'localnet';
 
 const NETWORK = (process.env.SUI_NETWORK ?? 'testnet') as NetworkType;
 const RANDOM_OBJECT_ID = '0x8';
@@ -38,35 +34,47 @@ function requireEnv(name: string): string {
 
 async function main(): Promise<void> {
   const packageId = requireEnv('MINE_PACKAGE_ID');
-  const schemaId = requireEnv('MINE_SCHEMA_ID');
+  const frameworkPackageId = requireEnv('FRAMEWORK_PACKAGE_ID');
+  const dappHubId = requireEnv('DAPP_HUB_ID');
+  const dappStorageId = requireEnv('DAPP_STORAGE_ID');
   const secretKey = requireEnv('PRIVATE_KEY');
+  const dappKey = `${packageId}::dapp_key::DappKey`;
 
   const metadata = await loadMetadata(NETWORK, packageId);
-  const dubhe = new Dubhe({ networkType: NETWORK, packageId, metadata, secretKey });
+  const dubhe = new Dubhe({
+    networkType: NETWORK,
+    packageId,
+    metadata,
+    secretKey,
+    frameworkPackageId,
+    dappHubId,
+    dappKey,
+  });
   const miner = dubhe.getAddress();
   console.log(`miner:   ${miner}`);
   console.log(`package: ${packageId}`);
-  console.log(`schema:  ${schemaId}`);
 
-  // nonce must be (current miner_nonce) + 1; default 0 if this miner never mined.
-  const nonceState = await dubhe.parseState({
-    schema: 'miner_nonce',
-    objectId: schemaId,
-    storageType: 'StorageMap',
-    params: [miner],
-  });
-  const prevNonce = BigInt((nonceState?.[0] as string | number | undefined) ?? 0);
-  const nonce = prevNonce + 1n;
+  // The miner needs a UserStorage before they can hold ore (one-time, idempotent).
+  let userStorageId = await dubhe.getUserStorageId(miner);
+  if (!userStorageId) {
+    await dubhe.initUserStorage({ dappHubId, dappStorageId });
+    userStorageId = await dubhe.getUserStorageId(miner);
+  }
+  if (!userStorageId) throw new Error('UserStorage not found after init');
+  console.log(`userStorage: ${userStorageId}`);
+
+  // nonce must be on-chain miner_nonce + 1 (default 1 for a fresh miner).
+  const nonce = BigInt(process.env.NONCE ?? '1');
   console.log(`nonce:   ${nonce}`);
 
-  // Build the mine_batch PTB (mirrors the verified CLI ptb): split a 0-fee coin from gas,
-  // then call mine_batch(schema, mine_id, swings, nonce, fee, Random=0x8, Clock=0x6).
+  // mine_batch(dapp_storage, user_storage, mine_id, swings, nonce, fee, Random=0x8, Clock=0x6).
   const tx = new Transaction();
   const [fee] = tx.splitCoins(tx.gas, [0]);
   tx.moveCall({
     target: `${packageId}::mine_system::mine_batch`,
     arguments: [
-      tx.object(schemaId),
+      tx.object(dappStorageId),
+      tx.object(userStorageId),
       tx.pure.u64(MINE_ID),
       tx.pure.u64(SWINGS),
       tx.pure.u64(nonce),
@@ -82,31 +90,13 @@ async function main(): Promise<void> {
   };
   console.log(`mine_batch tx: ${res?.digest}`);
 
-  // Assert the mine_settled event was emitted.
-  const settled = (res?.events ?? []).find((e) =>
-    e.type.includes('mine_settled') || e.type.includes('MineSettled'),
-  );
-  if (!settled) throw new Error('mine_settled event not found in tx effects');
-  console.log('mine_settled:', JSON.stringify(settled.parsedJson));
+  const settled = (res?.events ?? []).find((e) => e.type.includes('MineSettledEvent'));
+  if (!settled) throw new Error('MineSettledEvent not found in tx effects');
+  console.log('MineSettledEvent:', JSON.stringify(settled.parsedJson));
 
-  // Read back stones_left + ore_balance via parseState.
-  const stones = await dubhe.parseState({
-    schema: 'stones_left',
-    objectId: schemaId,
-    storageType: 'StorageMap',
-    params: [MINE_ID],
-  });
-  console.log('stones_left[mine 1]:', stones?.[0]);
-
-  // ore_balance is keyed by (miner, OreKind). Mine set 1 credits BlackIron.
-  const oreBalance = await dubhe.parseState({
-    schema: 'ore_balance',
-    objectId: schemaId,
-    storageType: 'StorageDoubleMap',
-    params: [miner, { BlackIron: {} }],
-  });
-  console.log('ore_balance[miner, BlackIron]:', oreBalance?.[0]);
-
+  const us = await dubhe.getUserStorageFields(userStorageId);
+  console.log('canonical_owner:', us.canonical_owner, '(== miner)');
+  console.log('write_count:', us.write_count);
   console.log('✅ smoke ok');
 }
 
