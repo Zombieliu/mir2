@@ -366,6 +366,14 @@ export function OriginalClientShell({
   const locale = languageLocale(language);
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
   const runtimeMessageLabel = formatRuntimeMessage(language, runtimeMessage);
+  // Shown over the (black) stage while the map tiles preload after entering the world. The
+  // condition reuses sceneInteractionReady, which preloadSceneAssetUrls() flips true on
+  // success or within its 5s partial-ready timeout, so this overlay can never stick.
+  const sceneLoadingLabel = t(
+    "scene.loadingMap",
+    [],
+    language === "zh-CN" ? "地图加载中…" : language === "es" ? "Cargando mapa…" : "Loading map…",
+  );
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
   const [selectPortraitFrameIndex, setSelectPortraitFrameIndex] = useState(0);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
@@ -1970,6 +1978,12 @@ export function OriginalClientShell({
             >
               <span className="gateway-reconnect-dot" aria-hidden="true" />
               <span className="gateway-reconnect-text">{reconnectMessage}</span>
+            </div>
+          ) : null}
+          {screen === "game" && !sceneInteractionReady ? (
+            <div className="scene-loading-overlay" role="status" aria-live="polite">
+              <span className="scene-loading-spinner" aria-hidden="true" />
+              <span className="scene-loading-text">{sceneLoadingLabel}</span>
             </div>
           ) : null}
         </div>
