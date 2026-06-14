@@ -32770,6 +32770,77 @@ fn use_item_packet_transform_applies_transform_buff_carrying_shape() {
 }
 
 #[test]
+fn use_item_packet_script_box_grants_rewards_and_consumes() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before = session.world_snapshot().inventory_items.len();
+    // "BlueOctagonalBox" is a Script item (type 21) with shape 7; the default NPC
+    // `[@_UseItem(7)]` segment grants six reward items.
+    add_inventory_crystal_item(&mut session, "BlueOctagonalBox", 31);
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 31,
+            success: true,
+            grid: MirGridType::Inventory,
+        }
+    )));
+    let snapshot = session.world_snapshot();
+    // Box consumed, and the bag now holds more than before the box was even added
+    // (six rewards in, one box out).
+    assert!(!snapshot.inventory_items.iter().any(|item| item.slot == 31));
+    assert!(snapshot.inventory_items.len() > before);
+}
+
+#[test]
+fn use_item_packet_script_sex_change_flips_gender_and_consumes() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // "SexChange" is a Script item (type 21) shape 5 -> default NPC CHANGEGENDER.
+    add_inventory_crystal_item(&mut session, "SexChange", 31);
+    let before_gender = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.gender);
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 31,
+            success: true,
+            grid: MirGridType::Inventory,
+        }
+    )));
+    let after_gender = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.gender);
+    assert_ne!(before_gender, after_gender);
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.slot == 31));
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

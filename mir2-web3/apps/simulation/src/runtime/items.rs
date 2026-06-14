@@ -46,7 +46,7 @@ use super::monsters::deterministic_roll;
 use super::movement::{
     crystal_dungeon_escape_packets, crystal_random_teleport_packets, town_teleport_packets,
 };
-use super::npc_script::gain_credit;
+use super::npc_script::{crystal_npc_give_item, gain_credit};
 use super::packets::{
     object_health_info_for_entity, object_mana_info_for_entity, object_revived_info_for_entity,
     prepend_optional_packet, use_item_ack,
@@ -1747,8 +1747,148 @@ pub(super) fn use_dynamic_crystal_template_item(
                 packets,
             ))
         }
+        (CRYSTAL_ITEM_TYPE_SCRIPT, shape) => {
+            // Crystal `case ItemType.Script: CallDefaultNPC(UseItem, Shape)`
+            // (PlayerObject.cs:6090), then the post-switch code consumes the item
+            // regardless of whether the default-NPC segment did anything.
+            consume_item_at_use_location(world, location);
+            packets.extend(crystal_default_npc_use_item(world, shape));
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
         _ => None,
     }
+}
+
+/// Ports the default NPC `[@_UseItem(<shape>)]` segments
+/// (`00Default/UseItems.txt`) that Crystal runs through
+/// `CallDefaultNPC(DefaultNPCType.UseItem, Shape)`. Returns any feedback packets;
+/// the caller has already consumed the Script item. Shapes with no segment
+/// (e.g. MysteriousScroll1/2 = 3/4) intentionally do nothing — Crystal consumes
+/// them with no effect too.
+pub(super) fn crystal_default_npc_use_item(world: &mut World, shape: i16) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    match shape {
+        2 => reduce_pk_points(world, 100), // PKPointReduction -> REDUCEPKPOINT 100
+        11 => reduce_pk_points(world, 10), // Medicine -> REDUCEPKPOINT 10
+        5 => packets.extend(crystal_script_change_gender(world)), // SexChange
+        6 => {
+            // ExtraDrop20% -> GIVEBUFF Drop 86400 20
+            if let Some(packet) = apply_script_drop_buff(world, 86_400, 20) {
+                packets.push(packet);
+            }
+            packets.push(ServerPacket::Chat {
+                message: "Drop Increased by 20% for 1 Day.".to_string(),
+                chat_type: ChatType::Hint,
+            });
+        }
+        7 => crystal_script_give_items(
+            world,
+            &[
+                ("EXP30%3", 1),
+                ("HealthWine", 1),
+                ("DestructionLiquor", 1),
+                ("DCTorch3", 1),
+                ("GalePotion", 1),
+                ("ResurrectionScroll", 1),
+            ],
+        ),
+        8 => crystal_script_give_items(
+            world,
+            &[
+                ("EXP30%3", 1),
+                ("HealthWine", 1),
+                ("MagicalLiquor", 1),
+                ("MCTorch3", 1),
+                ("ResurrectionScroll", 1),
+            ],
+        ),
+        9 => crystal_script_give_items(
+            world,
+            &[
+                ("EXP30%3", 1),
+                ("HealthWine", 1),
+                ("SoulLiquor", 1),
+                ("SCTorch3", 1),
+                ("ResurrectionScroll", 1),
+            ],
+        ),
+        10 => crystal_script_give_items(world, &[("AMULET", 3000)]), // Amulet(Bundle)
+        12 => crystal_script_give_items(
+            world,
+            &[
+                ("ElixirOfMight[1d]", 1),
+                ("ElixirOfDefensive[1d]", 1),
+                ("ElixirOfGinseng[1d]", 1),
+                ("EXP20%[1d]", 1),
+            ],
+        ),
+        13 => crystal_script_give_items(
+            world,
+            &[
+                ("RedFishingRod[6M]", 1),
+                ("PremiumReel", 1),
+                ("PremiumFloat", 1),
+                ("PremiumFinder", 1),
+                ("PremiumBait", 7200),
+            ],
+        ),
+        _ => {}
+    }
+    packets
+}
+
+fn crystal_script_give_items(world: &mut World, items: &[(&str, u32)]) {
+    for (name, count) in items {
+        crystal_npc_give_item(world, &[name, &count.to_string()]);
+    }
+}
+
+fn reduce_pk_points(world: &mut World, amount: i32) {
+    let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+    runtime.pk_points = (runtime.pk_points - amount).max(0);
+}
+
+fn crystal_script_change_gender(world: &mut World) -> Vec<ServerPacket> {
+    let new_gender = {
+        let mut session = world.resource_mut::<SessionResource>();
+        let Some(character) = session.selected_character.as_mut() else {
+            return Vec::new();
+        };
+        character.gender = match character.gender {
+            MirGender::Male => MirGender::Female,
+            MirGender::Female => MirGender::Male,
+        };
+        character.gender
+    };
+    let message = match new_gender {
+        MirGender::Female => "Gender Changed to Female. Please relog to take effect.",
+        MirGender::Male => "Gender Changed to Male. Please relog to take effect.",
+    };
+    vec![ServerPacket::Chat {
+        message: message.to_string(),
+        chat_type: ChatType::Hint,
+    }]
+}
+
+fn apply_script_drop_buff(world: &mut World, seconds: u64, value: i32) -> Option<ServerPacket> {
+    let tick = runtime_tick(world);
+    let buff = BuffState {
+        key: "drop".to_string(),
+        name: "Drop".to_string(),
+        description: "Crystal drop-rate buff is active.".to_string(),
+        expires_at_tick: tick.saturating_add(seconds),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![UserItemStat {
+            stat: CRYSTAL_STAT_LUCK,
+            value,
+        }],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    client_buff_packet_for_state(world, &buff)
 }
 
 /// Crystal `LotteryTicket` (scroll shape 12, `PlayerObject.cs:6015`). Rolls six

@@ -192,6 +192,7 @@ pub(super) const CRYSTAL_ITEM_TYPE_POTION: u8 = 13;
 pub(super) const CRYSTAL_ITEM_TYPE_SCROLL: u8 = 17;
 pub(super) const CRYSTAL_ITEM_TYPE_MOUNT: u8 = 19;
 pub(super) const CRYSTAL_ITEM_TYPE_BOOK: u8 = 20;
+pub(super) const CRYSTAL_ITEM_TYPE_SCRIPT: u8 = 21;
 pub(super) const CRYSTAL_ITEM_TYPE_GEM: u8 = 18;
 pub(super) const CRYSTAL_ITEM_TYPE_FOOD: u8 = 27;
 pub(super) const CRYSTAL_ITEM_TYPE_TRANSFORM: u8 = 37;
