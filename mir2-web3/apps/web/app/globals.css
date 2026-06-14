@@ -332,6 +332,46 @@ img {
   pointer-events: none;
 }
 
+/* Intentional loading screen over the black stage while map tiles preload (see
+   original-client-shell.tsx). Auto-dismisses when sceneInteractionReady flips true. */
+.scene-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 78;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: radial-gradient(circle at 50% 42%, rgba(28, 22, 14, 0.96), rgba(4, 3, 2, 0.99));
+  color: #f2dfb7;
+  font: 14px/1.3 Arial, Helvetica, sans-serif;
+  text-shadow: 0 1px 0 #000;
+  letter-spacing: 0.04em;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.scene-loading-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(201, 165, 92, 0.25);
+  border-top-color: #d2b35f;
+  box-shadow: 0 0 10px rgba(210, 179, 95, 0.4);
+  animation: scene-loading-spin 800ms linear infinite;
+}
+
+.scene-loading-text {
+  opacity: 0.92;
+}
+
+@keyframes scene-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .viewport-entity-overlay {
   z-index: 6;
   pointer-events: none;
