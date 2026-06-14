@@ -1754,6 +1754,74 @@ pub(super) fn use_dynamic_crystal_template_item(
                 packets,
             ))
         }
+        (CRYSTAL_ITEM_TYPE_PETS, CRYSTAL_PETS_SHAPE_WONDER_DRUG) => {
+            // Crystal `case 26 //Wonderdrug`: reject if a WonderDrug buff is already
+            // active, else apply it for Durability minutes (PlayerObject.cs:6203).
+            if world
+                .resource::<BuffResource>()
+                .buffs
+                .iter()
+                .any(|buff| buff.key == "wonder-drug")
+            {
+                packets.push(system_message_key(world, "server.WonderDrugActive"));
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            }
+            let tick = runtime_tick(world);
+            let buff = BuffState {
+                key: "wonder-drug".to_string(),
+                name: "Wonder Drug".to_string(),
+                description: "Crystal wonder drug is active.".to_string(),
+                expires_at_tick: tick.saturating_add(u64::from(template.durability) * 60),
+                attack_bonus: 0,
+                defence_bonus: 0,
+                stats: template
+                    .stats
+                    .iter()
+                    .map(|stat| UserItemStat {
+                        stat: stat.stat,
+                        value: stat.value,
+                    })
+                    .collect(),
+            };
+            apply_or_refresh_buff(world, buff.clone());
+            consume_item_at_use_location(world, location);
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_PETS, CRYSTAL_PETS_SHAPE_KNAPSACK) => {
+            // Crystal `case 28 //Knapsack`: a BagWeight buff equal to the item's Luck,
+            // for Durability minutes (PlayerObject.cs:6220).
+            let tick = runtime_tick(world);
+            let buff = BuffState {
+                key: "knapsack".to_string(),
+                name: "Knapsack".to_string(),
+                description: "Crystal knapsack bag-weight buff is active.".to_string(),
+                expires_at_tick: tick.saturating_add(u64::from(template.durability) * 60),
+                attack_bonus: 0,
+                defence_bonus: 0,
+                stats: vec![UserItemStat {
+                    stat: CRYSTAL_STAT_BAG_WEIGHT,
+                    value: crystal_item_stat_value(template, CRYSTAL_STAT_LUCK),
+                }],
+            };
+            apply_or_refresh_buff(world, buff.clone());
+            consume_item_at_use_location(world, location);
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
         (CRYSTAL_ITEM_TYPE_SCRIPT, shape) => {
             // Crystal `case ItemType.Script: CallDefaultNPC(UseItem, Shape)`
             // (PlayerObject.cs:6090), then the post-switch code consumes the item

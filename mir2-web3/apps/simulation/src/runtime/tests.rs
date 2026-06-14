@@ -32974,6 +32974,82 @@ fn awakening_packet_rejects_when_gold_insufficient() {
 }
 
 #[test]
+fn use_item_packet_pets_knapsack_applies_bag_weight_buff() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // "Knapsack(S)" is a Pets item (type 36) shape 28, Luck 3 -> BagWeight +3.
+    add_inventory_crystal_item(&mut session, "Knapsack(S)", 31);
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 31,
+            success: true,
+            grid: MirGridType::Inventory,
+        }
+    )));
+    // BuffType.Knapsack = 209, carrying the BagWeight (stat 16) bonus.
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.buff_type == 209
+                && buff.stats.iter().any(|stat| stat.stat == 16 && stat.value == 3)
+    )));
+    let snapshot = session.world_snapshot();
+    assert!(!snapshot.inventory_items.iter().any(|item| item.slot == 31));
+    assert!(snapshot
+        .active_buffs
+        .iter()
+        .any(|buff| buff.buff_type == Some(209)));
+}
+
+#[test]
+fn use_item_packet_pets_wonder_drug_applies_then_rejects_while_active() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    add_inventory_crystal_item(&mut session, "WonderDrug(EXP)", 31);
+    add_inventory_crystal_item(&mut session, "WonderDrug(EXP)", 32);
+
+    // First use applies BuffType.WonderDrug = 208.
+    let first = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+    assert!(first.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff } if buff.buff_type == 208
+    )));
+
+    // Second use is rejected while the buff is active (no second buff).
+    let second = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 32,
+        grid: MirGridType::Inventory,
+    });
+    assert!(second.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 32,
+            success: false,
+            grid: MirGridType::Inventory,
+        }
+    )));
+    assert!(!second
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::AddBuff { .. })));
+    // The second drug is kept (not consumed) on rejection.
+    assert!(session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.slot == 32));
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

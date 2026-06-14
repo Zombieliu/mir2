@@ -195,8 +195,13 @@ pub(super) const CRYSTAL_ITEM_TYPE_BOOK: u8 = 20;
 pub(super) const CRYSTAL_ITEM_TYPE_SCRIPT: u8 = 21;
 pub(super) const CRYSTAL_ITEM_TYPE_GEM: u8 = 18;
 pub(super) const CRYSTAL_ITEM_TYPE_FOOD: u8 = 27;
+pub(super) const CRYSTAL_ITEM_TYPE_PETS: u8 = 36;
 pub(super) const CRYSTAL_ITEM_TYPE_TRANSFORM: u8 = 37;
 pub(super) const CRYSTAL_ITEM_TYPE_SOCKET: u8 = 39;
+/// `ItemType.Pets` shapes whose use is a self-contained buff (no intelligent
+/// creature required): WonderDrug and Knapsack (`PlayerObject.cs:6203`).
+pub(super) const CRYSTAL_PETS_SHAPE_WONDER_DRUG: i16 = 26;
+pub(super) const CRYSTAL_PETS_SHAPE_KNAPSACK: i16 = 28;
 pub(super) const CRYSTAL_ITEM_TYPE_BAIT: u8 = 30;
 pub(super) const CRYSTAL_FISHING_ROD_SHAPES: [i16; 2] = [49, 50];
 pub(super) const CRYSTAL_POTION_SHAPE_NORMAL: i16 = 0;
