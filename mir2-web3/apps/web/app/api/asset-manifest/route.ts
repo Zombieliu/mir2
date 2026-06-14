@@ -233,7 +233,11 @@ function createCacheNamespace(
   const hash = createHash("sha256");
   hash.update("mir2-asset-cache-namespace-v2");
   hash.update(process.env.MIR2_ASSET_CACHE_BUSTER ?? "");
-  hash.update(process.env.VERCEL_GIT_COMMIT_SHA ?? "");
+  // Intentionally NOT keyed on VERCEL_GIT_COMMIT_SHA: that bumped the namespace on EVERY deploy
+  // (incl. code-only ones), so the Service Worker wiped the whole asset cache and the next session
+  // had to re-fetch every tile/sprite from R2 cold — which read as "R2 is incomplete". `version`
+  // already digests the asset manifests AND the SW file, so the cache still busts when assets or the
+  // worker actually change; MIR2_ASSET_CACHE_BUSTER remains the manual force-refresh escape hatch.
   hash.update(version);
   hash.update(remoteAssets.assetBaseUrl ?? "");
   hash.update(remoteAssets.objectPrefix ?? "");
