@@ -8373,7 +8373,7 @@ fn ground_drop_spawn_packet(drop: &GroundDropSnapshot) -> ServerPacket {
                 name: drop.name.clone(),
                 name_colour_argb: drop.name_colour_argb,
                 location,
-                image: 0,
+                image: drop.icon,
                 grade: 0,
             },
         },

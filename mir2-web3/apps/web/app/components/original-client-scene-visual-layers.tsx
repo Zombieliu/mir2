@@ -5,6 +5,7 @@ import { memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent 
 import type { ClientScreen } from "../../lib/original-ui";
 import type { EffectAssets } from "../../lib/crystal-magic-effects";
 import { loadEffectAssets } from "../../lib/crystal-magic-effects";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import {
   collectViewportFallbackVfx,
   fallbackVfxStyle,
@@ -362,6 +363,9 @@ export function OriginalClientSceneVisualLayers({
   // visibly distinct instead of inert. collectViewportFallbackVfx returns [] on idle frames, so
   // this costs nothing when nothing is casting and no projectiles are live.
   const effectAssets = useEffectAssets();
+  // Ground-drop item icons resolve from /original-ui/Items/{icon}.png (same pipeline as the bag).
+  // Any icon index whose PNG fails to load (stale R2 / unmapped item) falls back to the dot marker.
+  const [failedDropIcons, setFailedDropIcons] = useState<ReadonlySet<number>>(() => new Set());
   const fallbackVfx = collectViewportFallbackVfx(
     {
       entities: viewportEntitySprites.map(({ entity }) => ({
@@ -381,26 +385,46 @@ export function OriginalClientSceneVisualLayers({
   return (
     <>
       <div className={`viewport-drop-overlay ${screen !== "game" ? "hidden" : ""}`}>
-        {viewportGroundDrops.map((drop) => (
-          <button
-            key={`drop-${drop.objectId}`}
-            type="button"
-            className="ground-drop-marker"
-            style={{
-              left: `${VIEWPORT_TILE_CENTER_X + drop.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x}px`,
-              top: `${VIEWPORT_TILE_CENTER_Y + drop.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y - 12}px`,
-              zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 16),
-            }}
-            onClick={() => onPickGroundDrop(drop.objectId)}
-            data-ui-interactive="true"
-            title={`${drop.name} x${drop.quantity}`}
-          >
-            <span className="drop-dot" />
-            <span className="drop-label" style={{ color: argbToCssColor(drop.nameColourArgb) }}>
-              {drop.quantity > 1 ? `${drop.name} x${drop.quantity}` : drop.name}
-            </span>
-          </button>
-        ))}
+        {viewportGroundDrops.map((drop) => {
+          const showIcon =
+            typeof drop.icon === "number" && drop.icon > 0 && !failedDropIcons.has(drop.icon);
+          return (
+            <button
+              key={`drop-${drop.objectId}`}
+              type="button"
+              className="ground-drop-marker"
+              style={{
+                left: `${VIEWPORT_TILE_CENTER_X + drop.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x}px`,
+                top: `${VIEWPORT_TILE_CENTER_Y + drop.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y - 12}px`,
+                zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 16),
+              }}
+              onClick={() => onPickGroundDrop(drop.objectId)}
+              data-ui-interactive="true"
+              title={`${drop.name} x${drop.quantity}`}
+            >
+              {showIcon ? (
+                <img
+                  className="drop-icon"
+                  src={originalItemIconPath(drop.icon as number)}
+                  alt=""
+                  draggable={false}
+                  onError={() =>
+                    setFailedDropIcons((prev) => {
+                      const next = new Set(prev);
+                      next.add(drop.icon as number);
+                      return next;
+                    })
+                  }
+                />
+              ) : (
+                <span className="drop-dot" />
+              )}
+              <span className="drop-label" style={{ color: argbToCssColor(drop.nameColourArgb) }}>
+                {drop.quantity > 1 ? `${drop.name} x${drop.quantity}` : drop.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div className={`viewport-sprite-overlay ${screen !== "game" ? "hidden" : ""}`}>
