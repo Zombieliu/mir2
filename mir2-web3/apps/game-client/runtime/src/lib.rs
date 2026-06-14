@@ -1,3 +1,5 @@
+mod interpolation;
+
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
@@ -131,6 +133,13 @@ struct WorldSnapshot {
     entities: Vec<WorldEntity>,
     #[serde(default)]
     mine_nodes: Vec<MineNode>,
+    /// Optional timestamp (milliseconds) supplied by the TypeScript producer.
+    /// Accepted for forward-compatibility; the runtime currently uses the Bevy
+    /// local receipt time as the interpolation clock so browser-clock skew
+    /// cannot distort lerp alpha.
+    #[allow(dead_code)]
+    #[serde(default)]
+    client_time_ms: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -373,6 +382,7 @@ pub fn boot_mir2_runtime() {
         .insert_resource(RuntimeEntityRenderState::default())
         .insert_resource(RuntimeEntityRenderAtlases::default())
         .insert_resource(SceneRegistry::default())
+        .insert_resource(interpolation::SnapshotBuffer::default())
         .add_plugins(
             DefaultPlugins
                 .set(AssetPlugin {
@@ -420,9 +430,33 @@ fn setup_scene(mut commands: Commands) {
     publish_status("scene-ready", "Camera ready");
 }
 
-fn ingest_pending_world_state(mut state: ResMut<RuntimeWorldState>) {
+fn ingest_pending_world_state(
+    mut state: ResMut<RuntimeWorldState>,
+    mut snap_buf: ResMut<interpolation::SnapshotBuffer>,
+    time: Res<Time>,
+) {
     PENDING_WORLD_STATE.with(|pending| {
         if let Some(snapshot) = pending.borrow_mut().take() {
+            // Build a buffered entry for interpolation.  The receipt time is
+            // the Bevy elapsed seconds; if the TS producer supplied
+            // `clientTimeMs` we note it but still use local time as the
+            // authoritative clock so browser-clock skew can't distort lerp.
+            let receipt_secs = time.elapsed_secs_f64();
+            let positions = snapshot
+                .entities
+                .iter()
+                .map(|e| {
+                    (
+                        e.object_id.clone(),
+                        interpolation::EntityPos { x: e.x, y: e.y },
+                    )
+                })
+                .collect();
+            snap_buf.push(interpolation::BufferedSnapshot {
+                receipt_secs,
+                positions,
+            });
+
             state.snapshot = Some(snapshot);
         }
     });
@@ -493,6 +527,8 @@ fn sync_entities(
     mut commands: Commands,
     state: Res<RuntimeWorldState>,
     entity_render_state: Res<RuntimeEntityRenderState>,
+    snap_buf: Res<interpolation::SnapshotBuffer>,
+    time: Res<Time>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
@@ -512,11 +548,47 @@ fn sync_entities(
         return;
     };
 
+    // Compute interpolation parameters once for this frame.
+    //
+    // When the buffer holds two snapshots we lerp entity positions at
+    // `render_time = now – INTERP_DELAY`.  If the buffer isn't ready yet
+    // (first snapshot, or only one received so far) we fall through to the
+    // plain snap path so there is no regression.
+    let interp_params: Option<(f32, &interpolation::BufferedSnapshot)> = if snap_buf.ready() {
+        let prev = snap_buf.prev.as_ref().unwrap();
+        let next = snap_buf.next.as_ref().unwrap();
+        let render_t = time.elapsed_secs_f64() - interpolation::INTERP_DELAY_SECS;
+        let alpha =
+            interpolation::interpolation_alpha(prev.receipt_secs, next.receipt_secs, render_t);
+        Some((alpha, prev))
+    } else {
+        None
+    };
+
     let mut alive = HashSet::new();
 
     for entity_data in &snapshot.entities {
         alive.insert(entity_data.object_id.clone());
-        let position = tile_to_world(entity_data.x, entity_data.y);
+
+        // Compute the render-position for this entity.
+        //
+        // If the buffer is ready AND this entity existed in the previous
+        // snapshot, interpolate between prev and current grid positions.
+        // Otherwise fall back to the grid position in the latest snapshot.
+        let position = match &interp_params {
+            Some((alpha, prev_snap)) => {
+                let target = tile_to_world(entity_data.x, entity_data.y);
+                if let Some(prev_pos) = prev_snap.positions.get(&entity_data.object_id) {
+                    let from = tile_to_world(prev_pos.x, prev_pos.y);
+                    interpolation::lerp_entity_pos(from, target, *alpha)
+                } else {
+                    // New entity — snap it in at the current position.
+                    target
+                }
+            }
+            None => tile_to_world(entity_data.x, entity_data.y),
+        };
+
         let is_selected = snapshot
             .selected_object_id
             .as_ref()
@@ -948,9 +1020,15 @@ fn mine_ore_visual(stage: u8) -> (Color, Vec2) {
     if stage >= 2 {
         (Color::srgba(0.85, 0.66, 0.28, 0.95), Vec2::splat(full)) // full vein: big bright ore
     } else if stage == 1 {
-        (Color::srgba(0.70, 0.52, 0.26, 0.80), Vec2::splat(full * 0.6)) // half-mined: smaller, dimmer
+        (
+            Color::srgba(0.70, 0.52, 0.26, 0.80),
+            Vec2::splat(full * 0.6),
+        ) // half-mined: smaller, dimmer
     } else {
-        (Color::srgba(0.45, 0.40, 0.30, 0.35), Vec2::splat(full * 0.3)) // depleted: tiny, faint
+        (
+            Color::srgba(0.45, 0.40, 0.30, 0.35),
+            Vec2::splat(full * 0.3),
+        ) // depleted: tiny, faint
     }
 }
 
@@ -1002,7 +1080,9 @@ fn sync_mine_nodes(
             })
             .id();
         if let Some(ore) = ore {
-            registry.mine_nodes.insert(cell, MineNodeHandles { root, ore });
+            registry
+                .mine_nodes
+                .insert(cell, MineNodeHandles { root, ore });
         }
     }
 
