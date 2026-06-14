@@ -27794,6 +27794,7 @@ fn shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject() {
         object_id: 88_001,
         name: "Shared Gold".to_string(),
         name_colour_argb: -1,
+        icon: 0,
         x: 330,
         y: 270,
         quantity: 1,

@@ -261,6 +261,7 @@ type GatewayGroundDrop = {
   objectId: number;
   name: string;
   nameColourArgb?: number | null;
+  icon?: number | null;
   x: number;
   y: number;
   quantity: number;
@@ -635,6 +636,8 @@ type GroundDrop = {
   objectId: string;
   name: string;
   nameColourArgb?: number;
+  /** Crystal item image index → `/original-ui/Items/{icon}.png`; 0/undefined = generic marker. */
+  icon?: number;
   x: number;
   y: number;
   quantity: number;
@@ -1272,6 +1275,9 @@ export default function HomePage() {
   });
   const pendingTransferRef = useRef<string | null>(null);
   const pendingNpcInteractRef = useRef<string | null>(null);
+  // Ground-drop object id we're walking toward; PickUp fires on snapshot arrival once the player
+  // is standing on the drop's tile (Crystal requires same-cell pickup). Mirrors pendingNpcInteractRef.
+  const pendingPickupRef = useRef<string | null>(null);
   // Set when the player targets the on-chain vein but is not yet adjacent: the swing
   // fires on arrival (mirrors pendingNpcInteractRef). Only ever set when ONCHAIN_MINE_ENABLED.
   const pendingOnchainMineRef = useRef<boolean>(false);
@@ -3742,6 +3748,26 @@ export default function HomePage() {
     }
   }, [screen, wsState, world.entities, world.playerObjectId]);
 
+  // Ground-drop pickup: the player walked onto a drop they clicked from a distance — fire PickUp
+  // the moment they're standing on its tile. Same arrive-then-act shape as the NPC/mine effects.
+  useEffect(() => {
+    if (screen !== "game" || wsState !== "open") return;
+    const pendingPickupObjectId = pendingPickupRef.current;
+    if (!pendingPickupObjectId) return;
+
+    const pendingDrop = world.groundDrops.find((drop) => drop.objectId === pendingPickupObjectId);
+    if (!pendingDrop) {
+      // Drop vanished (picked up by someone else, expired, or out of view) — stop chasing it.
+      pendingPickupRef.current = null;
+      return;
+    }
+    const nextSelf = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+    if (nextSelf && nextSelf.x === pendingDrop.x && nextSelf.y === pendingDrop.y) {
+      pendingPickupRef.current = null;
+      send({ type: "pickUp", objectId: Number(pendingPickupObjectId) });
+    }
+  }, [screen, wsState, world.entities, world.playerObjectId, world.groundDrops]);
+
   function appendLog(
     text: string,
     tone: UiLogTone = "system",
@@ -4487,6 +4513,7 @@ export default function HomePage() {
     pendingSuiLoginRef.current = null;
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
+    pendingPickupRef.current = null;
     pendingOnchainMineRef.current = false;
     stopOnchainMining();
     npcCallGuardRef.current = null;
@@ -5721,6 +5748,20 @@ export default function HomePage() {
   }
 
   function pickGroundDrop(objectId: string) {
+    // Crystal only picks up an item the player is standing on. If we're not on the drop's tile yet,
+    // walk over and let the snapshot-arrival hook fire PickUp on landing (mirrors NPC approach).
+    const currentWorld = worldRef.current;
+    const drop = currentWorld.groundDrops.find((entry) => entry.objectId === objectId);
+    const serverSelf = currentWorld.entities.find(
+      (entity) => entity.objectId === currentWorld.playerObjectId,
+    );
+    if (drop && serverSelf && (serverSelf.x !== drop.x || serverSelf.y !== drop.y)) {
+      stopOnchainMining();
+      pendingPickupRef.current = objectId;
+      moveToTile(drop.x, drop.y, "run");
+      return;
+    }
+    pendingPickupRef.current = null;
     send({ type: "pickUp", objectId: Number(objectId) });
   }
 
@@ -8764,6 +8805,10 @@ export default function HomePage() {
           objectId,
           name: stringOrFallback(payload.name, fallbackName),
           nameColourArgb: numberOrUndefined(payload.nameColourArgb),
+          // `ObjectItem` carries the Crystal item image index; `ObjectGold` does not (stays a marker).
+          icon:
+            numberOrUndefined(payload.image) ??
+            current.groundDrops.find((drop) => drop.objectId === objectId)?.icon,
           x: numberOrZero(location?.x),
           y: numberOrZero(location?.y),
           quantity: numberOrUndefined(payload.gold) ?? numberOrUndefined(payload.quantity) ?? 1,
@@ -9271,6 +9316,7 @@ export default function HomePage() {
       objectId: String(drop.objectId),
       name: drop.name,
       nameColourArgb: drop.nameColourArgb ?? undefined,
+      icon: drop.icon ?? undefined,
       x: drop.x,
       y: drop.y,
       quantity: drop.quantity,

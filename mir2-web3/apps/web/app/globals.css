@@ -477,6 +477,13 @@ img {
   box-shadow: 0 0 6px rgba(255, 210, 113, 0.32);
 }
 
+.drop-icon {
+  display: block;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+}
+
 .drop-label {
   max-width: 110px;
   color: #f0dc9a;

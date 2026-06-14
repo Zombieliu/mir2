@@ -1880,6 +1880,7 @@ fn shared_multiplayer_presence_movement_chat_and_drop_ownership_are_stable() {
             object_id: 9_001,
             name: "Wasp Gold".to_string(),
             name_colour_argb: -1,
+            icon: 0,
             x: 333,
             y: 270,
             quantity: 8,
