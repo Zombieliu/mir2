@@ -1392,6 +1392,13 @@ export default function HomePage() {
   const [showFriends, setShowFriends] = useState(false);
   const [showBonds, setShowBonds] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
+  // Item awakening dialog (opened by the awakening NPC via NPCAwakening).
+  const [awakeningOpen, setAwakeningOpen] = useState(false);
+  const [awakeningTargetId, setAwakeningTargetId] = useState<number | null>(null);
+  const [awakeningType, setAwakeningType] = useState<number>(1);
+  const [awakeningMaterials, setAwakeningMaterials] = useState<
+    Array<{ name: string; count: number }>
+  >([]);
   const [showMarket, setShowMarket] = useState(false);
   const [showConquest, setShowConquest] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
@@ -5045,6 +5052,20 @@ export default function HomePage() {
     });
   }
 
+  // Item awakening commands (handled by the awakening NPC flow). The server
+  // validates eligibility, materials and the gold fee.
+  function requestAwakeningMaterials(uniqueId: number, awakeType: number) {
+    send({ type: "awakeningNeedMaterials", uniqueId, awakeType });
+  }
+
+  function sendAwakening(uniqueId: number, awakeType: number) {
+    send({ type: "awakening", uniqueId, awakeType, positionIndex: 0 });
+  }
+
+  function sendDowngradeAwakening(uniqueId: number) {
+    send({ type: "downgradeAwakening", uniqueId });
+  }
+
   function removeItem(item: EquipmentCommandRef) {
     const occupiedBagSlots = new Set(
       world.inventoryItems.filter((entry) => entry.container === "bag1").map((entry) => entry.slot),
@@ -8301,6 +8322,12 @@ export default function HomePage() {
         restoreObjectSelection(stringifyId(payload.objectId ?? payload.npcId));
         break;
       case "NPCAwakening":
+        // Open the awakening dialog alongside the bag so the player can pick gear.
+        setShowInventory(true);
+        setActiveInventoryTab("bag1");
+        setAwakeningMaterials([]);
+        setAwakeningOpen(true);
+        break;
       case "NPCDisassemble":
       case "NPCDowngrade":
       case "NPCReset":
@@ -8649,9 +8676,20 @@ export default function HomePage() {
         break;
 
       // Awakening material requirement -----------------------------------------
-      case "AwakeningNeedMaterials":
+      case "AwakeningNeedMaterials": {
+        const rawMaterials = Array.isArray(payload.materials) ? payload.materials : [];
+        const parsed = rawMaterials.flatMap((entry) => {
+          if (entry == null || typeof entry !== "object") return [];
+          const record = entry as Record<string, unknown>;
+          const info = (record.item ?? {}) as Record<string, unknown>;
+          const name = typeof info.name === "string" ? info.name : "Material";
+          const count = numberOrZero(record.count);
+          return [{ name, count }];
+        });
+        setAwakeningMaterials(parsed);
         appendLog(t("ui.awakeningNeedMaterials", [], "Awakening requires materials."), "system");
         break;
+      }
 
       // Guild storage / territory / war ----------------------------------------
       case "GuildStorageList": {
@@ -10930,6 +10968,137 @@ export default function HomePage() {
         onRedeem={() => void redeemOnchainOre()}
         onNonceChange={setOnchainNonce}
       />
+    ) : null}
+    {awakeningOpen ? (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 60,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "rgba(0,0,0,0.5)",
+        }}
+        onClick={() => setAwakeningOpen(false)}
+      >
+        <div
+          style={{
+            width: 360,
+            maxHeight: "80vh",
+            overflowY: "auto",
+            background: "#1c1710",
+            border: "2px solid #6b5836",
+            borderRadius: 6,
+            padding: 16,
+            color: "#e8dcc0",
+            fontSize: 13,
+          }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div
+            style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}
+          >
+            <strong>{t("client.Awakening", [], "Awakening")}</strong>
+            <button type="button" onClick={() => setAwakeningOpen(false)}>
+              ×
+            </button>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            {world.inventoryItems.filter((item) => item.container === "bag1").length === 0 ? (
+              <em>{t("ui.awakeningEmptyBag", [], "No items in bag to awaken.")}</em>
+            ) : (
+              world.inventoryItems
+                .filter((item) => item.container === "bag1")
+                .map((item) => (
+                  <button
+                    key={item.uniqueId}
+                    type="button"
+                    onClick={() => {
+                      setAwakeningTargetId(item.uniqueId);
+                      requestAwakeningMaterials(item.uniqueId, awakeningType);
+                    }}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "4px 6px",
+                      marginBottom: 2,
+                      background:
+                        awakeningTargetId === item.uniqueId ? "#3a2f1c" : "transparent",
+                      border: "1px solid #6b5836",
+                      color: "#e8dcc0",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {item.name}
+                  </button>
+                ))
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
+            {(
+              [
+                [1, "DC"],
+                [2, "MC"],
+                [3, "SC"],
+                [4, "AC"],
+                [5, "MAC"],
+                [6, "HP/MP"],
+              ] as Array<[number, string]>
+            ).map(([typeId, label]) => (
+              <button
+                key={typeId}
+                type="button"
+                onClick={() => {
+                  setAwakeningType(typeId);
+                  if (awakeningTargetId != null)
+                    requestAwakeningMaterials(awakeningTargetId, typeId);
+                }}
+                style={{
+                  padding: "2px 8px",
+                  background: awakeningType === typeId ? "#5a4a2c" : "transparent",
+                  border: "1px solid #6b5836",
+                  color: "#e8dcc0",
+                  cursor: "pointer",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {awakeningMaterials.length > 0 ? (
+            <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.85 }}>
+              {t("ui.awakeningNeedMaterials", [], "Materials")}:
+              {awakeningMaterials.map((material, index) => (
+                <div key={index}>
+                  • {material.name} × {material.count}
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              type="button"
+              disabled={awakeningTargetId == null}
+              onClick={() => {
+                if (awakeningTargetId != null) sendAwakening(awakeningTargetId, awakeningType);
+              }}
+            >
+              {t("client.Awakening", [], "Awaken")}
+            </button>
+            <button
+              type="button"
+              disabled={awakeningTargetId == null}
+              onClick={() => {
+                if (awakeningTargetId != null) sendDowngradeAwakening(awakeningTargetId);
+              }}
+            >
+              {t("ui.awakeningDowngrade", [], "Downgrade")}
+            </button>
+          </div>
+        </div>
+      </div>
     ) : null}
     </>
   );
