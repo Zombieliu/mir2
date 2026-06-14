@@ -66,14 +66,23 @@ CI on PRs: `rust-workspace`, `web-resource-gate`, `local-candidate-gate` (= `car
 - **Parallel sub-agents MUST use isolated git worktrees** and disjoint file domains, or they
   collide in the working tree / blow the disk. Integrate via PR, not shared trees.
 
-## Current state (2026-06)
+## Current state (2026-06-15)
 
-Frontend ≈ **88%** code-capability. Landed: extra UI windows + outbound action wiring,
-and data enrichment for group/friends/buff and trade/market/quest (protocol→sim→adapter→page glue).
-**Remaining gap to ~95% is mostly asset-gated** (VFX atlases, audio, full Bevy sprite fidelity,
-live sprite serving) — those need the **R2 republish + asset extraction on a real machine**, not
-more client code. Code-doable leftovers: NPC-shop flow (window built, unmounted), skill/magic-book
-depth, trade my-side client tracking, conquest gate/tax (no Crystal packet — NPC-script flow).
+ServerPacket handling ≈ **98.6%** (278/282); ClientPacket ≈ 44% literal / **~72.5%**
+via the gateway bridge. Frontend "visual client" ≈ **90%**, "playable game" ≈ **74%**
+(`FRONTEND-COMPLETENESS-AUDIT.md`). June landed the gameplay-*feel* pass — floating
+damage numbers + hit flash (#98), all sound effects wired (#99), real item icons on
+drops (#97), loading overlay (#95) — plus full Crystal world activation (#80),
+on-demand monster pool (#83), Crystal-faithful zone-authoritative combat numerics
+(`Random(MinDC..=MaxDC)` + AC/MAC + crit), mining, the full GM @-command set, security
+remediation (#77), and on-chain mine M1–M4 (#92).
+
+The active R2 release `mir2/v/20260601-fullcrystal-a2f10be0` is a **complete**
+full-Crystal upload (0 missing) — the old "live sprite serving / 404" blocker is
+**closed**. Remaining gaps: **per-monster AI breadth** (~35 handlers vs Crystal's 212 —
+now the largest gameplay-depth gap), VFX real atlases + audio *bytes* (still
+R2/extraction-gated), cross-process Zone sharding + persistence normalization, and a
+few unwirable window actions (conquest gate/tax, hero dismiss/recall — no Crystal packet).
 
 ## Conventions
 

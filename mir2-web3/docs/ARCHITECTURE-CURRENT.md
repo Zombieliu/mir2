@@ -1,6 +1,6 @@
 # Current Architecture
 
-Last updated: 2026-05-18
+Last updated: 2026-06-15
 
 Purpose: describe the architecture that is actually implemented today. This is
 the operational source for current boundaries; 1:1 parity docs remain the source
@@ -80,6 +80,34 @@ Gateway/admin endpoints, account store, Postgres projections, ClickHouse reads
   secret.
 - Browser Passkey and wallet login both resolve to `sui:<address>` account ids
   and enter the existing Gateway `passkeyLogin` command path.
+
+## Recently Activated Subsystems (2026-06)
+
+- **Full Crystal world is live.** All maps activate when occupied and go dormant
+  when empty (`feat(sim): activate full Crystal world` #80); a monster pool
+  materializes only monsters near a player (`perf(sim): on-demand monster pool`
+  #83), so the full map set is affordable in one process.
+- **Combat numerics are Crystal-faithful and zone-authoritative.** Damage rolls
+  `Random(MinDC..=MaxDC)`, subtracts `Random(MinAC..=MaxAC)` / MAC by damage
+  type, applies critical hits (`CriticalRate × weight`, amplified damage) and
+  agility-vs-accuracy dodge — all inside the shared zone tick
+  (`apps/simulation/src/runtime/zone/runtime.rs`, `combat.rs`). Player stat
+  blocks stay fresh on equip/buff/level via `ZoneCommand::UpdatePlayerCombatStats`.
+- **Mining** (`Map.CreateMine`, 1:1) is implemented (`runtime/.../mining.rs`):
+  pickaxe-gated, per-tick ore drop rolls, two ore sets. Dynamic doors open via
+  `ZoneCommand::OpenDoor`.
+- **GM @-command set** (~78 commands) is implemented in the simulation
+  (`gm_commands.rs`, dispatched via `dispatch_gm_command`); zero-config GM
+  provisioning via `MIR2_GM_ACCOUNTS` / `MIR2_GM_PASSWORD`.
+- **Rendering** runs GPU map-tile + entity atlases served same-origin (no hard
+  R2 dependency at first paint; #74/#85), with off-main-thread alpha-keying.
+- **Security remediation** landed (#77): salted password hashing, packet
+  size/DoS bounds, trade-dupe guard, admin auth + rate limiting. Open items in
+  `SECURITY-AUDIT-2026-06.md` (some admin read endpoints, a stronger password
+  KDF) are post-remediation follow-ups, not the pre-#77 gaps.
+- **On-chain mine (Sui/Dubhe)** milestones M1–M4 + session keys SK0–SK2 landed
+  (#92) on the testnet track; the relayer bridges chain-confirmed events into the
+  gateway inject route. Gameplay assets remain off-chain except this opt-in mine.
 
 ## Engineering Gates
 

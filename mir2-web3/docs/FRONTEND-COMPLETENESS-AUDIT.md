@@ -7,7 +7,7 @@ runtime it drives. This audit is about the **client**, not the server-side game
 simulation (that is tracked in `BACKEND-1TO1-PROGRESS.md` /
 `CRYSTAL-SERVER-PARITY.md`).
 
-**Date measured:** 2026-06-01
+**Date measured:** 2026-06-14 (state on `main`, post `fe-integration` merge)
 **Re-runnable metrics:** `apps/web/scripts/measure-frontend-coverage.mjs`
 
 > Every number in the "Measured numbers" table below is produced by the script,
@@ -46,16 +46,16 @@ Client source: `apps/web/app/page.tsx`
 
 ## 2. Measured numbers
 
-Verbatim from `npm run measure:frontend-coverage` on 2026-06-01:
+Verbatim from `npm run measure:frontend-coverage` on 2026-06-14:
 
 ```
 +------------------------------+-------------------------+-------+
 | Signal                       | Numerator / Denominator | %     |
 +------------------------------+-------------------------+-------+
-| ServerPacket handlers        | 80 / 280                | 28.6% |
-| ClientPacket senders         | 34 / 153                | 22.2% |
-| UI dialog/window components  | 11 / 20                 | 55.0% |
-| UI components (total .tsx)   | 20 components           |       |
+| ServerPacket handlers        | 278 / 282               | 98.6% |
+| ClientPacket senders         | 68 / 153                | 44.4% |
+| UI dialog/window components  | 31 / 41                 | 75.6% |
+| UI components (total .tsx)   | 41 components           |       |
 | original-ui asset libraries  | 20 dirs                 |       |
 | original-ui PNG frames       | 6,857 png               |       |
 | original-map asset libraries | 3 dirs                  |       |
@@ -64,9 +64,9 @@ Verbatim from `npm run measure:frontend-coverage` on 2026-06-01:
 +------------------------------+-------------------------+-------+
 
 Summary
-  ServerPacket coverage : 80/280 (28.6%) variants handled by a case branch in page.tsx
-  ClientPacket coverage : 34/153 (22.2%) variants emitted from page.tsx (47 distinct outbound tokens total)
-  UI components         : 20 .tsx files, 11 dialog/window/panel surfaces
+  ServerPacket coverage : 278/282 (98.6%) variants handled by a case branch in page.tsx
+  ClientPacket coverage : 68/153 (44.4%) variants emitted from page.tsx (84 distinct outbound tokens total)
+  UI components         : 41 .tsx files, 31 dialog/window/panel surfaces
   original-ui assets    : 20 libraries, 6,857 committed PNG frames
   original-map assets   : 3 libraries, 8,148 committed PNG frames
   crystal map pack      : 1,620 committed .map.gz tiles
@@ -74,9 +74,10 @@ Summary
 
 **Headline totals**
 
-- **Protocol:** 80/280 ServerPacket kinds handled (28.6%); 34/153 ClientPacket
-  kinds emitted directly (22.2%).
-- **UI:** 20 component modules, 11 of them dialog/window/panel surfaces.
+- **Protocol:** 278/282 ServerPacket kinds handled (98.6%); 68/153 ClientPacket
+  kinds emitted directly from `page.tsx` (44.4%), and **111/153 ≈ 72.5%**
+  reachable via the gateway `browser_command_to_action` bridge (§7).
+- **UI:** 41 component modules, 31 of them dialog/window/panel surfaces.
 - **Assets:** 23 committed Crystal libraries (20 UI + 3 map) totalling **15,005
   committed PNG frames** (6,857 UI + 8,148 map), plus **1,620** committed
   `.map.gz` map tiles.
@@ -90,37 +91,27 @@ Sound coverage is **0.89%** (raw `.wav` bytes are not committed — see §5).
 
 ## 3. Interpreting the protocol percentages
 
-The raw protocol ratios (28.6% / 22.2%) are **floors, not the experienced
-completeness**, for three concrete reasons:
+ServerPacket handling is now near-total (**278/282 = 98.6%**): essentially every
+inbound kind the Crystal protocol defines has a wired `case` branch in
+`page.tsx`. The 4 unhandled kinds are vestigial/duplicate variants outside the
+live wire surface.
 
-1. **The enums are a superset of the live MVP wire surface.** `ServerPacket`
-   (280) and `ClientPacket` (153) enumerate the *entire* historical Mir2
-   protocol — guild war, mentor, hero, awakening, refine, marriage, trade,
-   storage variants, etc. The Crystal MVP the web client targets
-   (`packages/protocol/crystal-mvp-v1.md`) is a much smaller slice. The handled
-   80 server kinds are the **gameplay-critical core**: object lifecycle
-   (`ObjectPlayer/Monster/Npc/Item/Hero`), movement
-   (`ObjectWalk/Run/Turn/Dash/BackStep/Pushed`), combat
-   (`ObjectAttack/RangeAttack/Struck/Died`, `Magic*`), state
-   (`UserInformation/Location`, health/mana/gold, buffs), and login/character
-   flow. The 200 unhandled kinds are overwhelmingly endgame/social systems not
-   in the MVP.
+The ClientPacket ratio (**44.4%** literal) is still a **floor, not the
+experienced completeness**, for two reasons:
 
-2. **Many outbound actions map *indirectly* to ClientPackets.** The script
-   counts only tokens that *literally name* a `ClientPacket` variant. The client
-   also emits **13 higher-level tokens** that are intentionally *not* 1:1 with a
-   variant: `moveTo`, `castSkill`, `interact`, `selectNpcDialog`,
-   `submitNpcInput`, `transferMap`, `specialRepairItem` (UI commands that the
-   movement/skill/NPC layer translates into `walk`/`run`/`magic`/NPC-call
-   packets server-side), plus internal transport messages `clientVersion`'s
-   peers `error`, `packet`, `tick`, `worldSnapshot`, `stage5Command`,
-   `setLanguage`. Counting *behaviour* rather than *literal variant names* would
-   raise the effective client→server coverage well above 22%.
+1. **Many outbound actions map *indirectly* to ClientPackets.** The script
+   counts only the 68 tokens in `page.tsx` that *literally name* a `ClientPacket`
+   variant. The browser also emits higher-level UI tokens (`moveTo`, `castSkill`,
+   `interact`, `selectNpcDialog`, `submitNpcInput`, `transferMap`,
+   `specialRepairItem`, …) that the gateway's `browser_command_to_action` bridge
+   translates into real `walk`/`run`/`magic`/NPC-call packets server-side.
+   Counted at the bridge, **111/153 ≈ 72.5%** of ClientPacket variants are
+   reachable from the browser (see §7). The remaining gap is endgame/social
+   protocol (refine, awakening, marriage, mentor) outside the Crystal MVP.
 
-3. **A handled `case` is a real, wired UI reaction**, not a stub — these branches
-   drive the scene graph, entity store, combat text, buffs, inventory, chat, and
-   minimap. The denominator is inflated by dead protocol; the numerator is all
-   live.
+2. **A handled `case` is a real, wired UI reaction**, not a stub — these branches
+   drive the scene graph, entity store, combat text + floating damage numbers,
+   hit flash, buffs, inventory, chat bubbles, and minimap.
 
 This is why §4 scores the client on weighted *experienced* subsystems, not on
 the bare enum ratio.
@@ -202,19 +193,18 @@ environment — they need original WeMade/Shanda Crystal client bytes, a real GP
 or an out-of-band republish. They are the reason the weighted numbers are not
 higher.
 
-### B1 — R2 map-tile frame republish
+### B1 — R2 map-tile frame republish — ✅ substantially resolved (2026-06-14)
 The browser serves first cache-misses from an R2-backed CDN
-(`NEXT_PUBLIC_MIR2_ASSET_BASE_URL`, production base
-`https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c`), keying the browser
-cache to the local same-origin path. Some active-scene map-object frames (e.g.
-`original-map/WemadeMir2/Objects/2652..2661`, `Objects23/1418..1429`,
-`Objects/289.png`) were missing from earlier immutable R2 prefixes, producing
-console 404 storms until republished. **Blocker:** keeping the R2/CDN object set
-in lockstep with `original-asset-manifest.generated.json` for each immutable
-asset version requires re-running the remote-asset release+upload+HEAD-verify
-workflow (`npm run assets:remote:build` → R2 upload) — an out-of-band publish
-step, not a code change. A few frames (e.g. `Objects/289.png`) are also absent
-from the local source tree, so they need the original `.Lib` export first.
+(`NEXT_PUBLIC_MIR2_ASSET_BASE_URL`). The active immutable release is now
+`https://assets.mir2.obelisk.build/mir2/v/20260601-fullcrystal-a2f10be0`, a
+**full-Crystal release reported complete (0 missing files)** vs the manifest —
+the earlier 404 storms (`Objects/2652..2661`, `Objects23/1418..1429`) are gone.
+PR #100 also stopped wiping the asset cache on every deploy (no more cold-R2 each
+session), and PR #74/#85 serve the GPU map+entity atlases same-origin so first
+paint no longer hard-depends on R2. **Residual:** a few frames may still be absent
+from the *local source tree* (need original `.Lib` export), and any new asset
+version must re-run the remote-asset release+upload+HEAD-verify workflow to stay
+in lockstep — an out-of-band publish step, not a code change.
 
 ### B2 — Effect / entity atlas export (GPU breadth)
 Entity rendering is *functionally* 100% via the hardened DOM fallback, but the
@@ -292,7 +282,7 @@ State after the three consolidation batches (packets / windows / VFX / SW / sim-
 | Core HUD (HP/MP orbs, quick/skill bar, gold) | 85% | quickslot/belt present |
 | Scene / map-tile render (back/mid/front/light) | 88% | 1,620-tile pack, real tiles |
 | Mini-map / big-map | 85% | present |
-| Actor / monster sprite render (Bevy WASM) | ~60% | 8-dir+anim; **name tags / health bars / chat bubbles missing**; sprite frames currently 404 from R2 |
+| Actor / monster sprite render (Bevy WASM) | ~70% | 8-dir+anim; health bars / selection ring / target readout + over-head chat bubbles now rendered (DOM overlay); floating damage numbers + hit flash landed (#98); sprites now served from the complete R2 release. Holdback: GPU multi-atlas breadth + real-device sign-off |
 | Chat (channels / input / log) | 75% | over-head bubbles missing |
 | Inventory / storage | 85% | |
 | Character / stats / equipment | 85% | |
@@ -365,4 +355,31 @@ Branches merged (all verified, disjoint domains): `fe4-ui-polish` (6 components)
 3. **Actor sprite fidelity** — Bevy WASM `wasm-bindgen` rebuild.
 4. **Unwirable window actions** — hero dismiss/recall, conquest gate/tax, market consign (no item/price on button), mail compose (no mail component): each needs a **new protocol packet or sim handler or UI component**, deliberately out of this batch's additive scope.
 5. **Not merged to `main` / not deployed** — `claude/fe-integration` is 34 commits ahead of `origin/main`.
+
+## §8. 2026-06-15 sync — merged to `main` + June gameplay-feel pass
+
+The §6/§7 snapshots were taken on the unmerged `claude/fe-integration` branch.
+That branch is now **merged to `main` and deployed**; the §2 numbers above are the
+current `main` measurement (278/282 ServerPacket, 68/153 ClientPacket, 41
+components). Two §7 "honest gaps" are now closed:
+
+- **§7 gap #1 (live sprite serving / R2 404)** → ✅ closed. The active release
+  `mir2/v/20260601-fullcrystal-a2f10be0` is a complete full-Crystal upload (0
+  missing); PR #85 also serves GPU map+entity rendering same-origin (no hard R2
+  dependency), and PR #100 stopped the per-deploy cache wipe.
+- **§7 gap #5 (not merged / not deployed)** → ✅ closed.
+
+June work that raised the *gameplay-feel* (not just code coverage):
+
+| Landed (PR) | Effect |
+|---|---|
+| Floating damage numbers + hit flash (#98) | Combat juice — closes the "combat felt dead" gap (P3) |
+| All Crystal sound effects wired (#99) | Audio *triggering* now faithful (bytes still R2-gated, B3) |
+| Real item icons on ground drops + walk-to-pick-up (#97) | Loot-loop fidelity |
+| Loading overlay instead of black stage on entry (#95) | First-entry polish |
+| Off-main-thread alpha-keying / movement (#93, #96) | Render perf |
+| GPU map+entity atlas served same-origin (#74, #85) | Removes cold-R2 first-paint dependency |
+
+Still asset/hardware-gated (unchanged): VFX real atlases (B2), audio bytes (B3),
+real-GPU/mobile actor sign-off (B4).
 

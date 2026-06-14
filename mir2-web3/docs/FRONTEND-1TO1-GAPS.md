@@ -1,6 +1,6 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-05-27
+Last updated: 2026-06-15
 
 Purpose: track frontend/client visual, interaction, and human-feel gaps separately from backend/server parity.
 
@@ -13,6 +13,15 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-06-14 gameplay-feel pass (merged to `main`, deployed): floating damage
+  numbers + hit flash (Crystal `DamageIndicator`, #98) close the "combat felt
+  dead" gap; all Crystal sound effects are wired with faithful triggers (#99);
+  ground drops show real item icons with walk-over-to-pick-up (#97); a loading
+  overlay replaces the black stage on first entry (#95); movement + map-object
+  alpha-keying run off the main thread (#93, #96). The active R2 release
+  `mir2/v/20260601-fullcrystal-a2f10be0` is complete (0 missing), so the prior
+  sprite-404 storms are resolved and the per-deploy asset-cache wipe is fixed
+  (#100). Continuous monster-click AutoHit (chase + re-path + swing) also landed.
 - 2026-05-27 NPC input and skill preflight closeout: Player Web now preserves
   server skill cast metadata (`spell`, `castKind`, `offensive`, hotkey/timing)
   from the world snapshot and routes skill clicks by Crystal cast mode instead
