@@ -1663,7 +1663,7 @@ pub(super) fn crystal_respawn_object_monster_packet(
     ServerPacket::ObjectMonster {
         info: MonsterInfo {
             object_id,
-            name: respawn.monster_name.clone(),
+            name: mir2_game_data::brand::monster_name(&respawn.monster_name),
             name_colour_argb: -1,
             location,
             image: respawn.monster_image,

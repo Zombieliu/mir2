@@ -12,14 +12,26 @@
 //! and Crystal parity tests are unaffected. Fill the override maps (slice first,
 //! then in waves) to flip names to the original IP.
 //!
-//! Known display-name populate sites to route through this module (extend as the
-//! reskin progresses):
-//! - monster: `runtime/packets.rs` NewMonsterInfo (wired); `config.rs` (pending)
-//! - npc:     `runtime/packets.rs` NewNpcInfo (wired); `config.rs`,
-//!            `runtime/zone/packets.rs`, `runtime/packets.rs:~5674` (pending)
-//! - item:    `runtime/items.rs::item_info_from_crystal_template` (wired)
-//! - map:     `runtime/npc_script.rs::crystal_npc_move_map_information` (wired)
-//! - text:    NPC dialogue / quest bodies -> [`scrub_text`] (Tier 2, slice-scoped)
+//! Wiring status of display-name populate sites:
+//! - monster: WIRED — `NewMonsterInfo` (`runtime/packets.rs`), scene snapshot
+//!   (`config.rs` `VisibleMonsterRecord`), respawn announce (`runtime/monsters.rs`),
+//!   zone spawns (`runtime/zone/runtime.rs`, x2).
+//! - npc:     WIRED — `NewNpcInfo` + `ObjectNpc` origin (`runtime/packets.rs`),
+//!   scene snapshot (`config.rs` `VisibleNpcRecord`).
+//! - item:    WIRED — `runtime/items.rs::item_info_from_crystal_template`.
+//! - map:     WIRED — `runtime/npc_script.rs::crystal_npc_move_map_information`.
+//! - text:    [`scrub_text`] is provided; wire into NPC dialogue / quest bodies
+//!   per vertical slice (Tier 2).
+//!
+//! DEFERRED to the localization integration: live monster names
+//! (`runtime/packets.rs` `ObjectMonster`) and ground item-drop names
+//! (`runtime/packets.rs` + `runtime/zone/runtime.rs` `ObjectItemInfo`) resolve via
+//! a `DisplayName` component + `.resolve(language)`, and the resolved string is
+//! reused for internal lookups (e.g. `crystal_monster_effect_for_name`). Brand
+//! those at the `DisplayName`/key layer, NOT at the packet site.
+//!
+//! DO NOT brand: `runtime/zone/packets.rs` (object-id rebase forwarders) and
+//! `runtime/monsters.rs` `monster_name` (the internal drop/AI lookup key).
 
 use serde::Deserialize;
 use std::collections::HashMap;

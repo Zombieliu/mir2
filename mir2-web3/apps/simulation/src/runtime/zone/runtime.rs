@@ -8286,7 +8286,7 @@ fn native_monster_spawn_packet(spawn: &ZoneMonsterSpawn, object_id: u32) -> Serv
     ServerPacket::ObjectMonster {
         info: MonsterInfo {
             object_id,
-            name: spawn.name.clone(),
+            name: mir2_game_data::brand::monster_name(&spawn.name),
             name_colour_argb: spawn.name_colour_argb,
             location: spawn.position.clone(),
             image: spawn.image,
@@ -8319,7 +8319,7 @@ fn native_summon_spawn_packet(
     ServerPacket::ObjectMonster {
         info: MonsterInfo {
             object_id,
-            name: spawn.name.clone(),
+            name: mir2_game_data::brand::monster_name(&spawn.name),
             name_colour_argb: spawn.name_colour_argb,
             location: spawn.position.clone(),
             image: spawn.image,

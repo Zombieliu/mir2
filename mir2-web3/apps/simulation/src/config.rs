@@ -2393,7 +2393,7 @@ impl SimulationConfig {
                 .iter()
                 .map(|monster| VisibleMonsterRecord {
                     object_id: monster.object_id,
-                    name: monster.name.clone(),
+                    name: mir2_game_data::brand::monster_name(&monster.name),
                     image: monster.image,
                     position: monster.position.clone(),
                     direction: monster.direction,
@@ -2404,7 +2404,7 @@ impl SimulationConfig {
                 .iter()
                 .map(|npc| VisibleNpcRecord {
                     object_id: npc.object_id,
-                    name: npc.name.clone(),
+                    name: mir2_game_data::brand::npc_name(&npc.name),
                     image: npc.image,
                     colour_argb: npc.colour_argb,
                     position: npc.position.clone(),

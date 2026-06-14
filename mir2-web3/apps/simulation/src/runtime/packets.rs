@@ -5671,7 +5671,7 @@ pub(super) fn start_game_static_visible_object_packets(
             ServerPacket::ObjectNpc {
                 info: NpcInfo {
                     object_id,
-                    name: npc.name,
+                    name: mir2_game_data::brand::npc_name(&npc.name),
                     name_colour_argb: -16_711_936,
                     image: npc.image,
                     colour_argb: 0,
