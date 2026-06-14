@@ -13,7 +13,14 @@
  * never render (or even reference) it.
  */
 
-import type { CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 
 export type OnchainMinePanelReconcile = {
   deltaUnits: number;
@@ -63,18 +70,65 @@ export type OnchainMinePanelProps = {
   onNonceChange: (nextNonce: number) => void;
 };
 
+const PANEL_WIDTH = 252;
+const POSITION_STORAGE_KEY = "mir2.onchainMinePanel.pos.v1";
+const COLLAPSED_STORAGE_KEY = "mir2.onchainMinePanel.collapsed.v1";
+
 const panelStyle: CSSProperties = {
   position: "fixed",
-  right: 12,
-  bottom: 96,
   zIndex: 60,
-  width: 252,
+  width: PANEL_WIDTH,
   padding: "10px 12px",
   borderRadius: 8,
   background: "rgba(12, 16, 24, 0.92)",
   border: "1px solid rgba(120, 150, 200, 0.35)",
   color: "#dce6f5",
   font: "12px/1.5 var(--font-geist-mono, monospace)",
+};
+
+type PanelPosition = { left: number; top: number };
+
+/**
+ * Default the panel to the right gutter just under the minimap — clear of Mir2's
+ * bottom control bar / system-menu cluster, which the old `bottom: 96` anchor used to
+ * sit on top of and swallow clicks for. The player can still drag it anywhere or
+ * collapse it to the title bar; both choices persist.
+ */
+function defaultPosition(): PanelPosition {
+  if (typeof window === "undefined") return { left: 12, top: 372 };
+  return { left: Math.max(12, window.innerWidth - PANEL_WIDTH - 12), top: 372 };
+}
+
+/** Keep the panel on-screen after drags / viewport resizes (leave the title bar reachable). */
+function clampPosition(pos: PanelPosition): PanelPosition {
+  if (typeof window === "undefined") return pos;
+  const maxLeft = Math.max(0, window.innerWidth - PANEL_WIDTH);
+  const maxTop = Math.max(0, window.innerHeight - 40);
+  return {
+    left: Math.min(Math.max(0, pos.left), maxLeft),
+    top: Math.min(Math.max(0, pos.top), maxTop),
+  };
+}
+
+const dragHandleStyle: CSSProperties = {
+  cursor: "move",
+  userSelect: "none",
+  touchAction: "none",
+};
+
+const collapseButtonStyle: CSSProperties = {
+  flex: "0 0 auto",
+  width: 20,
+  height: 18,
+  lineHeight: "16px",
+  textAlign: "center",
+  padding: 0,
+  borderRadius: 4,
+  border: "1px solid rgba(140, 170, 220, 0.5)",
+  background: "rgba(40, 60, 90, 0.8)",
+  color: "#e8f0ff",
+  cursor: "pointer",
+  font: "inherit",
 };
 
 const rowStyle: CSSProperties = {
@@ -151,10 +205,137 @@ export function OnchainMinePanel({
 }: OnchainMinePanelProps) {
   const canAct = walletAddress !== null && !submitBusy;
   const inFlight = inFlightSwings > 0;
+
+  // Draggable + collapsible so the HUD never permanently camps on the game's
+  // bottom-right controls. `position === null` means "use the default anchor" and is
+  // the SSR/first-paint state; the real position/collapsed flag are hydrated from
+  // localStorage after mount to avoid a hydration mismatch.
+  const [position, setPosition] = useState<PanelPosition | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const dragRef = useRef<{ pointerStartX: number; pointerStartY: number; originLeft: number; originTop: number } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    try {
+      const storedPos = window.localStorage.getItem(POSITION_STORAGE_KEY);
+      if (storedPos) {
+        const parsed = JSON.parse(storedPos) as Partial<PanelPosition>;
+        if (typeof parsed?.left === "number" && typeof parsed?.top === "number") {
+          setPosition(clampPosition({ left: parsed.left, top: parsed.top }));
+        } else {
+          setPosition(defaultPosition());
+        }
+      } else {
+        setPosition(defaultPosition());
+      }
+      setCollapsed(window.localStorage.getItem(COLLAPSED_STORAGE_KEY) === "1");
+    } catch {
+      setPosition(defaultPosition());
+    }
+  }, []);
+
+  const persistPosition = useCallback((next: PanelPosition) => {
+    try {
+      window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore storage failures — placement is a convenience, not state we depend on.
+    }
+  }, []);
+
+  const onDragPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0) return;
+      const origin = position ?? defaultPosition();
+      dragRef.current = {
+        pointerStartX: event.clientX,
+        pointerStartY: event.clientY,
+        originLeft: origin.left,
+        originTop: origin.top,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [position],
+  );
+
+  const onDragPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    setPosition(
+      clampPosition({
+        left: drag.originLeft + (event.clientX - drag.pointerStartX),
+        top: drag.originTop + (event.clientY - drag.pointerStartY),
+      }),
+    );
+  }, []);
+
+  const onDragPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!dragRef.current) return;
+      dragRef.current = null;
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // pointer may already be released
+      }
+      setPosition((current) => {
+        if (current) persistPosition(current);
+        return current;
+      });
+    },
+    [persistPosition],
+  );
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem(COLLAPSED_STORAGE_KEY, next ? "1" : "0");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
+
+  const positionedStyle: CSSProperties = position
+    ? { ...panelStyle, left: position.left, top: position.top }
+    : { ...panelStyle, right: 12, top: 372 };
+
   return (
-    <div style={panelStyle} data-testid="onchain-mine-panel">
-      <div style={{ ...rowStyle, marginBottom: 6 }}>
+    <div style={positionedStyle} data-testid="onchain-mine-panel">
+      <div
+        style={{ ...rowStyle, marginBottom: collapsed ? 0 : 6, alignItems: "center", ...dragHandleStyle }}
+        onPointerDown={onDragPointerDown}
+        onPointerMove={onDragPointerMove}
+        onPointerUp={onDragPointerUp}
+        onPointerCancel={onDragPointerUp}
+        title="拖动标题栏移动面板 / drag the title bar to move"
+      >
         <strong>On-chain Mine (testnet)</strong>
+        <button
+          type="button"
+          style={collapseButtonStyle}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "展开 / expand" : "收起 / collapse"}
+          title={collapsed ? "展开 / expand" : "收起 / collapse"}
+        >
+          {collapsed ? "▸" : "▾"}
+        </button>
+      </div>
+
+      {collapsed ? (
+        <div style={{ ...rowStyle, marginTop: 4, opacity: 0.85 }}>
+          <span>
+            ({veinLocation.x},{veinLocation.y})
+          </span>
+          <span>{veinStageLabel(veinStage)}</span>
+        </div>
+      ) : (
+        <>
+      <div style={{ ...rowStyle, marginBottom: 6 }}>
+        <span>矿脉 vein</span>
         <span>
           ({veinLocation.x},{veinLocation.y}) {veinStageLabel(veinStage)}
         </span>
@@ -298,6 +479,8 @@ export function OnchainMinePanel({
       {lastError ? (
         <div style={{ marginTop: 6, color: "#ff9f9f", wordBreak: "break-all" }}>{lastError}</div>
       ) : null}
+        </>
+      )}
     </div>
   );
 }
