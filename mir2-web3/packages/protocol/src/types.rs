@@ -1004,6 +1004,17 @@ pub struct UserInformation {
     pub creature_summoned: bool,
     pub allow_observe: bool,
     pub observer: bool,
+    /// Player's maximum HP — Crystal's `Stats[Stat.HP]` (`Shared/Data/Stat.cs:100`),
+    /// the cap that current `hp` is clamped to. Crystal's `UserInformation`
+    /// carries only current `HP`/`MP` (`Shared/ServerPackets.cs:606`) and the
+    /// client recomputes the cap via `UserObject.RefreshStats()`
+    /// (`Client/MirObjects/UserObject.cs:144`); the web port has no client-side
+    /// stat recompute, so the simulation pushes the cap here. Optional + trailing
+    /// for backward-compatibility; always populated for the local player.
+    pub max_hp: Option<i32>,
+    /// Player's maximum MP — Crystal's `Stats[Stat.MP]` (`Shared/Data/Stat.cs:101`).
+    /// See [`UserInformation::max_hp`].
+    pub max_mp: Option<i32>,
 }
 
 impl UserInformation {
@@ -1047,6 +1058,9 @@ impl UserInformation {
         let creature_summoned = reader.read_bool()?;
         let allow_observe = reader.read_bool()?;
         let observer = reader.read_bool()?;
+        // Trailing optionals (see struct docs) — symmetric with `encode`.
+        let max_hp = read_optional_i32(reader)?;
+        let max_mp = read_optional_i32(reader)?;
 
         Ok(Self {
             object_id,
@@ -1087,6 +1101,8 @@ impl UserInformation {
             creature_summoned,
             allow_observe,
             observer,
+            max_hp,
+            max_mp,
         })
     }
 
@@ -1142,6 +1158,8 @@ impl UserInformation {
         writer.write_bool(self.creature_summoned);
         writer.write_bool(self.allow_observe);
         writer.write_bool(self.observer);
+        write_optional_i32(writer, self.max_hp);
+        write_optional_i32(writer, self.max_mp);
         Ok(())
     }
 }

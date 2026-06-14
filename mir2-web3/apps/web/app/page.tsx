@@ -409,6 +409,7 @@ type GatewayWorldSnapshot = {
   playerHp?: number | null;
   playerMaxHp?: number | null;
   playerMp?: number | null;
+  playerMaxMp?: number | null;
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;
@@ -651,6 +652,7 @@ type WorldState = {
   playerHp?: number;
   playerMaxHp?: number;
   playerMp?: number;
+  playerMaxMp?: number;
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;
@@ -789,6 +791,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   playerHp: undefined,
   playerMaxHp: undefined,
   playerMp: undefined,
+  playerMaxMp: undefined,
   playerExperience: 0,
   playerMaxExperience: 100,
   gold: 0,
@@ -3908,6 +3911,7 @@ export default function HomePage() {
           playerHp: number | undefined;
           playerMaxHp: number | undefined;
           playerMp: number | undefined;
+          playerMaxMp: number | undefined;
           sceneTerrainKinds: string[];
           originalMapRegionSummary: {
             mapFileName: string;
@@ -4038,6 +4042,7 @@ export default function HomePage() {
         playerHp: world.playerHp,
         playerMaxHp: world.playerMaxHp,
         playerMp: world.playerMp,
+        playerMaxMp: world.playerMaxMp,
         sceneTerrainKinds: world.terrainPatches.map((patch) => patch.kind),
         originalMapRegionSummary: world.originalMapRegion
           ? {
@@ -6314,8 +6319,9 @@ export default function HomePage() {
           playerObjectId: objectId,
           playerName: stringOrFallback(payload.name, t("ui.self")),
           playerHp: numberOrUndefined(payload.hp),
-          playerMaxHp: numberOrUndefined(payload.hp),
+          playerMaxHp: numberOrUndefined(payload.maxHp),
           playerMp: numberOrUndefined(payload.mp),
+          playerMaxMp: numberOrUndefined(payload.maxMp),
           playerExperience: numberOrZero(payload.experience),
           playerMaxExperience: Math.max(numberOrZero(payload.maxExperience), 1),
           gold: numberOrZero(payload.gold),
@@ -6339,7 +6345,7 @@ export default function HomePage() {
             genderKey: mapGenderKey(payload.gender),
             level: numberOrUndefined(payload.level),
             hp: numberOrUndefined(payload.hp),
-            maxHp: numberOrUndefined(payload.hp),
+            maxHp: numberOrUndefined(payload.maxHp),
             nameColourArgb: -1,
             disposition: "friendly",
             sprite: playerSpriteFromPacket(payload),
@@ -9512,6 +9518,7 @@ export default function HomePage() {
         playerHp: snapshot.playerHp ?? undefined,
         playerMaxHp: snapshot.playerMaxHp ?? undefined,
         playerMp: snapshot.playerMp ?? undefined,
+        playerMaxMp: snapshot.playerMaxMp ?? undefined,
         playerExperience: snapshot.playerExperience,
         playerMaxExperience: Math.max(snapshot.playerMaxExperience, 1),
         gold: snapshot.gold,

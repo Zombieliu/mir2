@@ -3846,6 +3846,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "hair": info.hair,
                 "hp": info.hp,
                 "mp": info.mp,
+                "maxHp": info.max_hp,
+                "maxMp": info.max_mp,
                 "experience": info.experience,
                 "maxExperience": info.max_experience,
                 "levelEffects": info.level_effects,
