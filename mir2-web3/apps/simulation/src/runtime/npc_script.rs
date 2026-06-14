@@ -901,7 +901,10 @@ pub(super) fn resolve_crystal_npc_runtime_tokens(
 
     let resolved = replace_crystal_npc_output_tokens(world, &resolved);
     let resolved = replace_crystal_npc_named_tokens(world, &resolved);
-    replace_crystal_npc_variable_tokens(world, &resolved)
+    let resolved = replace_crystal_npc_variable_tokens(world, &resolved);
+    // Tier-2 brand pass: rebrand proper nouns embedded in resolved dialogue.
+    // No-op while brand_overrides.json is empty.
+    mir2_game_data::brand::scrub_text(&resolved)
 }
 
 pub(super) fn replace_crystal_npc_variable_tokens(world: &World, input: &str) -> String {

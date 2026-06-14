@@ -20,8 +20,10 @@
 //!   scene snapshot (`config.rs` `VisibleNpcRecord`).
 //! - item:    WIRED — `runtime/items.rs::item_info_from_crystal_template`.
 //! - map:     WIRED — `runtime/npc_script.rs::crystal_npc_move_map_information`.
-//! - text:    [`scrub_text`] is provided; wire into NPC dialogue / quest bodies
-//!   per vertical slice (Tier 2).
+//! - text:    WIRED — NPC dialogue via `resolve_crystal_npc_runtime_tokens`
+//!   (`runtime/npc_script.rs`). Quest / other free text can be wired the same
+//!   way. Note: substring substitution — curate override keys to avoid common
+//!   words (longest-match-first reduces but does not eliminate false hits).
 //!
 //! DisplayName path (WIRED): live `ObjectMonster` and `ObjectNpc` are branded at
 //! the packet field in `runtime/packets.rs` (the resolved `name` var stays
