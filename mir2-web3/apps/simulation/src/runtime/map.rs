@@ -672,6 +672,10 @@ pub(super) fn relocate_player_to_map(
     }
     despawn_stage5_hero_for_no_hero_map(world, &mut packets);
     dismount_for_no_mount_map(world, &mut packets);
+    // On-chain veins re-render on map transfer too (M4): unlike P0 spots — which
+    // re-broadcast their stage on every swing — chain veins only update on a chain
+    // settlement, so entering their map mid-session must seed the last known tier.
+    packets.extend(super::onchain::onchain_mine_node_state_packets(world));
     packets
 }
 

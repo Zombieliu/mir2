@@ -18,6 +18,7 @@ mod monsters;
 mod movement;
 mod npc;
 mod npc_script;
+mod onchain;
 mod packets;
 mod pathfind;
 mod quests;

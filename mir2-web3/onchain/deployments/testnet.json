@@ -1,0 +1,46 @@
+{
+  "network": "testnet",
+  "note": "SK1: migrated to the Dubhe 1.2.x dappHub/UserStorage model (session keys). The 1.1.x deployment under `superseded_1_1_x` is SUPERSEDED — the new storage model needs a FRESH publish (new packageId + DappStorage; per-miner UserStorage), not an upgrade. Public ids only; NO secrets. Deployer/admin = the `mir2-onchain-mine` testnet wallet (key in the local Sui keystore).",
+  "toolchain": {
+    "suiCli": "1.73.0",
+    "suiFrameworkRev": "testnet-v1.73.0",
+    "dubheFrameworkRev": "v1.2.0-pre.124",
+    "dubheSdk": "1.2.0-pre.124",
+    "contractPath": "src/mir2_mine",
+    "note": "Move.toml Sui dep MUST stay override=true at testnet-v1.73.0 (generated default mainnet-v1.46.3 conflicts with the framework's Sui); re-apply after every `dubhe generate`."
+  },
+  "deployment": {
+    "deployedAt": "2026-06-14 (SK1 fresh publish)",
+    "packageId": "0x40c9e7b726cd7ceed83d235fdfda2caa5e1fad02405969b8b2a87b92d76631c9",
+    "dappStorageId": "0x927cb85c5f6110a6b0ec28f4770344f32b8ddc7f0c77108cd2c69bae9cec2eb9",
+    "frameworkPackageId": "0x89302436f6624fb9274ab0126737a599cb154b008687d71f6d8ce9e0d22ec3ce",
+    "dappHubId": "0x12a319387cf2d465d4f4181523d089a368e542fccbdd878e70a4db0df007bb78",
+    "upgradeCap": "0x6aa9f3e6c122c412c328e476a2663a9d02e3faa436440e569d1b662210a75203",
+    "deployer": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+    "publishDigest": "6dbPztz47gtfR78YpnKaxToXC43viAGyqf89bbha3jho",
+    "genesisDigest": "5Csy2eHf9JyoWMj1mhRRhTTdvQkkj23VfNZyJov5J4GJ",
+    "seedMineDigest": "5vtHtnyxKe9iUWNHvRALDL1gioie34FpDLh7dTBwa6pP",
+    "deployedVia": "sui client publish (keystore) + genesis::run(dappHub, clock) + admin_system::set_mine — links the canonical testnet Dubhe framework, no key export needed (dubhe publish would have required PRIVATE_KEY in .env).",
+    "note": "frameworkPackageId + dappHubId = the canonical SHARED testnet Dubhe framework objects. UserStorage is per-miner — each miner calls user_storage_init::init_user_storage once (the web does this automatically on first batch / session activation). Web env: NEXT_PUBLIC_ONCHAIN_MINE_{PACKAGE_ID,FRAMEWORK_PACKAGE_ID,DAPP_HUB_ID,DAPP_STORAGE_ID} (apps/web/.env.local locally; Vercel project env for the hosted site). No indexer URL needed — the relayer reads events directly from the Sui fullnode."
+  },
+  "systemObjects": { "random": "0x8", "clock": "0x6" },
+  "seededMines": {
+    "1": {
+      "mapId": 0,
+      "mineSet": 1,
+      "oreKind": "BlackIron",
+      "maxStones": 10,
+      "regenSecs": 300,
+      "hitRate": 100,
+      "dropRate": 100,
+      "note": "smoke mine — hit/drop 100/100 makes the roll deterministic; real rates (Crystal ~25/10) are admin-settable via admin_system::set_mine"
+    }
+  },
+  "superseded_1_1_x": {
+    "packageId": "0xe6c3602e4055b76afd82a48745f9cd34daa4a6dce1f420747f0779732640dbe5",
+    "schemaId": "0x77138ceee249ef3d328296cb932cbad50916bf062d06cb6d1ee7ea0ea1acc698",
+    "upgradeCap": "0xfbef3b0f1a26f303c270e096f8d82f7ca0eccb2a499d764c725166e8b9903df0",
+    "deployer": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+    "note": "M1 (1.1.x flat-Schema) deployment — superseded by SK1; not session-key capable. Kept for reference."
+  }
+}
