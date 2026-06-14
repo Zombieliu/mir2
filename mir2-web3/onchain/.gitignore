@@ -30,6 +30,8 @@ src/**/traces/
 src/**/.trace
 src/**/.coverage*
 **/Pub.*.toml
+# Sui publish state (the deploy ids live in deployments/testnet.json instead).
+**/Published.toml
 
 # Dubhe indexer local db + relayer state (runtime artifacts)
 *.db
