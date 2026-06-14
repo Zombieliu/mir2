@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import {
   ExtraWindows,
   adaptHero,
@@ -1301,6 +1300,9 @@ export default function HomePage() {
   const predictedPlayerPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const predictedPlayerHoldUntilRef = useRef(0);
   const predictedPlayerUpdateSeqRef = useRef(0);
+  // Throttle world->Bevy pushes to at most one per animation frame (see the [world] effect).
+  const worldPushFrameRef = useRef(0);
+  const worldPushLastJsonRef = useRef<string | null>(null);
   const localMovementAnchorRef = useRef<LocalMovementAnchor | null>(null);
   const lastCrystalSelfRenderPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const lastSelfMovementAckRef = useRef<{ x: number; y: number; direction?: string; at: number } | null>(null);
@@ -1797,14 +1799,21 @@ export default function HomePage() {
       predictedPlayerHoldUntilRef.current = 0;
     }
     predictedPlayerPositionRef.current = position;
+    // NOTE: do NOT wrap this in flushSync. The predicted self position reaches the
+    // renderer every frame via the ref path (getLivePlayerRenderPosition reads
+    // predictedPlayerPositionRef.current, and the shell re-renders on its motionNow
+    // rAF tick), so the live player sprite + camera never depend on this state update
+    // being synchronous. A flushSync here forces a synchronous re-render of the whole
+    // HomePage component (~11k lines / dozens of useState) on every movement step,
+    // blocking the main thread for ~200ms and starving the Bevy render loop. The state
+    // update below only feeds viewportEntities/selection/sort, which do not need to be
+    // same-frame. The seq guard still coalesces a burst of calls into one setState.
     const updateSeq = ++predictedPlayerUpdateSeqRef.current;
     queueMicrotask(() => {
       if (predictedPlayerUpdateSeqRef.current !== updateSeq) {
         return;
       }
-      flushSync(() => {
-        setPredictedPlayerPosition(predictedPlayerPositionRef.current);
-      });
+      setPredictedPlayerPosition(predictedPlayerPositionRef.current);
     });
   }
 
@@ -3485,9 +3494,38 @@ export default function HomePage() {
     };
   }, [self?.x, self?.y, world.mapFileName]);
 
+  // Coalesce world->Bevy pushes to at most one per animation frame. Each `world`
+  // change previously did a full `JSON.stringify(world)` plus a wasm `setMir2WorldState`
+  // (which re-parses the JSON in Rust). Multiple server packets can arrive in a single
+  // frame (each its own message task -> its own render -> its own `world` change), and
+  // Bevy renders on its own rAF and can only display the latest state anyway, so the
+  // intermediate stringify+parse work was wasted. We schedule a single trailing rAF that
+  // reads the latest world from `worldRef` and skips the push when the serialized state
+  // is unchanged. NOTE: this effect intentionally has no cleanup — cancelling on every
+  // `world` change would debounce (starve) the push during continuous play. The pending
+  // frame is cancelled only on unmount by the dedicated effect below.
   useEffect(() => {
-    runtimeRef.current?.setMir2WorldState?.(JSON.stringify(world));
+    if (worldPushFrameRef.current !== 0) return;
+    worldPushFrameRef.current = window.requestAnimationFrame(() => {
+      worldPushFrameRef.current = 0;
+      const runtime = runtimeRef.current;
+      if (!runtime?.setMir2WorldState) return;
+      const json = JSON.stringify(worldRef.current);
+      if (json === worldPushLastJsonRef.current) return;
+      worldPushLastJsonRef.current = json;
+      runtime.setMir2WorldState(json);
+    });
   }, [world]);
+
+  useEffect(
+    () => () => {
+      if (worldPushFrameRef.current !== 0) {
+        window.cancelAnimationFrame(worldPushFrameRef.current);
+        worldPushFrameRef.current = 0;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!world.originalMapRegion) return;
