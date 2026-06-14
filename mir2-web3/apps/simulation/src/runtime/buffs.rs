@@ -151,6 +151,13 @@ pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
                 interrupted: false,
             });
         }
+        if key == "transform" {
+            // The appearance reverts when the Transform buff ends; also drop any
+            // lingering pause so a later transform starts un-paused.
+            let mut gm = world.resource_mut::<super::resources::GmRuntimeResource>();
+            gm.transform_shape = None;
+            gm.transform_paused = false;
+        }
         if matches!(key.as_str(), "hiding" | "moon-light" | "dark-body") {
             let still_hidden = world
                 .resource::<BuffResource>()
@@ -183,6 +190,20 @@ pub(super) fn client_buff_for_state(world: &World, buff: &BuffState) -> Option<C
     let mut stats = buff.stats.clone();
     stats.sort_by_key(|stat| stat.stat);
 
+    // The Transform buff carries its appearance id in `Values[0]` (Crystal client
+    // reads `TransformType = buff.Values[0]`) and reflects the `@TOGGLETRANSFORM`
+    // pause state. Other buffs carry no values and are never paused.
+    let is_transform = buff.key == "transform";
+    let gm = world.resource::<super::resources::GmRuntimeResource>();
+    let values = if is_transform {
+        gm.transform_shape
+            .map(|shape| vec![shape])
+            .unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    let paused = is_transform && gm.transform_paused;
+
     Some(ClientBuff {
         buff_type: crystal_buff_type_for_key(&buff.key)?,
         visible: crystal_buff_visible_for_key(&buff.key),
@@ -193,9 +214,9 @@ pub(super) fn client_buff_for_state(world: &World, buff: &BuffState) -> Option<C
             .saturating_mul(1_000)
             .min(i64::MAX as u64) as i64,
         infinite: false,
-        paused: false,
+        paused,
         stats,
-        values: Vec::new(),
+        values,
     })
 }
 

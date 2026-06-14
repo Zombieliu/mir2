@@ -968,6 +968,10 @@ pub(super) struct GmRuntimeResource {
     pub(super) light: u8,
     /// `@TOGGLETRANSFORM` — whether the active Transform buff is paused.
     pub(super) transform_paused: bool,
+    /// Appearance id of the active Transform buff (Crystal `Buff.Values[0]`,
+    /// set from the Transform item's `Shape`). `None` when not transformed; the
+    /// browser reads it via `ClientBuff.values[0]` to swap the body library.
+    pub(super) transform_shape: Option<i32>,
 }
 
 impl GmRuntimeResource {
@@ -991,6 +995,7 @@ impl GmRuntimeResource {
             pearls: 0,
             light: 0,
             transform_paused: false,
+            transform_shape: None,
         }
     }
 }

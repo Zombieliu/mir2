@@ -194,6 +194,7 @@ pub(super) const CRYSTAL_ITEM_TYPE_MOUNT: u8 = 19;
 pub(super) const CRYSTAL_ITEM_TYPE_BOOK: u8 = 20;
 pub(super) const CRYSTAL_ITEM_TYPE_GEM: u8 = 18;
 pub(super) const CRYSTAL_ITEM_TYPE_FOOD: u8 = 27;
+pub(super) const CRYSTAL_ITEM_TYPE_TRANSFORM: u8 = 37;
 pub(super) const CRYSTAL_ITEM_TYPE_SOCKET: u8 = 39;
 pub(super) const CRYSTAL_ITEM_TYPE_BAIT: u8 = 30;
 pub(super) const CRYSTAL_FISHING_ROD_SHAPES: [i16; 2] = [49, 50];

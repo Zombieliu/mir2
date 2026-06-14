@@ -14,9 +14,9 @@ use mir2_protocol::{
 };
 
 use super::buffs::{
-    apply_crystal_template_consumable_buffs, buff_attack_bonus, buff_defence_bonus,
-    queue_crystal_normal_potion_restore, queue_crystal_normal_potion_restore_amounts,
-    restore_current_player_vitals, BuffState,
+    apply_crystal_template_consumable_buffs, apply_or_refresh_buff, buff_attack_bonus,
+    buff_defence_bonus, client_buff_packet_for_state, queue_crystal_normal_potion_restore,
+    queue_crystal_normal_potion_restore_amounts, restore_current_player_vitals, BuffState,
 };
 use super::combat::deterministic_chance_roll;
 use super::components::{
@@ -52,8 +52,9 @@ use super::packets::{
     prepend_optional_packet, use_item_ack,
 };
 use super::resources::{
-    BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
-    PlayerRuntimeResource, SessionResource, SkillResource, Stage5SystemsResource,
+    BuffResource, GmRuntimeResource, HeroInventoryResource, InventoryResource,
+    PlayerPermissionResource, PlayerRuntimeResource, SessionResource, SkillResource,
+    Stage5SystemsResource,
 };
 use super::session::{
     current_language, hint_chat_key, hint_chat_key_args, is_in_world, runtime_tick,
@@ -1709,6 +1710,37 @@ pub(super) fn use_dynamic_crystal_template_item(
                     }
                 }
                 None => packets.push(hint_chat_key(world, "server.WonNothing")),
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_TRANSFORM, _) => {
+            // Crystal `AddBuff(BuffType.Transform, Second * Durability, {}, values: Shape)`
+            // (`PlayerObject.cs:6250`). One sim tick is one second, so the duration
+            // in ticks is the raw Durability. The Shape rides in the buff's
+            // `Values[0]` (set on GmRuntimeResource and read by client_buff_for_state)
+            // so the browser can swap the body library.
+            let tick = runtime_tick(world);
+            {
+                let mut gm = world.resource_mut::<GmRuntimeResource>();
+                gm.transform_shape = Some(i32::from(template.shape));
+                gm.transform_paused = false;
+            }
+            let buff = BuffState {
+                key: "transform".to_string(),
+                name: "Transform".to_string(),
+                description: "Crystal transform is active.".to_string(),
+                expires_at_tick: tick.saturating_add(u64::from(template.durability)),
+                attack_bonus: 0,
+                defence_bonus: 0,
+                stats: Vec::new(),
+            };
+            apply_or_refresh_buff(world, buff.clone());
+            consume_item_at_use_location(world, location);
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
             }
             Some(prepend_optional_packet(
                 use_item_ack(packet_ack, true),

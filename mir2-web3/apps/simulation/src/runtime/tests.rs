@@ -32727,6 +32727,49 @@ fn crystal_lottery_prize_matches_crystal_tiers() {
 }
 
 #[test]
+fn use_item_packet_transform_applies_transform_buff_carrying_shape() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // "Pirate" is a Transform item (type 37) with shape 1, durability 3600s.
+    add_inventory_crystal_item(&mut session, "Pirate", 31);
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 31,
+            success: true,
+            grid: MirGridType::Inventory,
+        }
+    )));
+    // Crystal `AddBuff(BuffType.Transform, ..., values: Shape)`: buff type 106 with
+    // the appearance id (Pirate -> 1) in Values[0], un-paused, with a live timer.
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.buff_type == 106
+                && buff.values == vec![1]
+                && buff.expire_time > 0
+                && !buff.paused
+    )));
+    // Item consumed and the Transform buff is live in the snapshot.
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.slot == 31));
+    assert!(session
+        .world_snapshot()
+        .active_buffs
+        .iter()
+        .any(|buff| buff.buff_type == Some(106)));
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
