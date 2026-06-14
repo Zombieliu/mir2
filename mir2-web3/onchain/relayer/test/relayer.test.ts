@@ -20,7 +20,8 @@ const settledFields = {
   miner: '0xabc',
   mine_id: '1',
   swings: '5',
-  ore_kind: { variant: 'BlackIron', fields: {}, type: '0xpkg::ore_kind::OreKind' },
+  // The real shape Sui's JSON-RPC emits for a Move enum (verified live on testnet).
+  ore_kind: { '@variant': 'BlackIron' },
   ore_amount: '5',
   stones_left: 5,
   fee_paid: '0',
@@ -52,7 +53,10 @@ test('dry mine_settled (ore_amount 0) is STILL forwarded (the client settlement 
   assert.equal(cmd.stonesLeft, 0);
 });
 
-test('ore_kind variant forms: plain string and single-key object both parse', () => {
+test('ore_kind variant forms: @variant (live), plain string, and single-key object all parse', () => {
+  const live = normalize(event('MineSettledEvent', { ...settledFields, ore_kind: { '@variant': 'Gold' } }));
+  assert.ok(live && live.kind === 'GrantOnchainOre');
+  assert.equal(live.oreKind, 'Gold');
   const a = normalize(event('MineSettledEvent', { ...settledFields, ore_kind: 'Gold' }));
   assert.ok(a && a.kind === 'GrantOnchainOre');
   assert.equal(a.oreKind, 'Gold');

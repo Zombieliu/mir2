@@ -19,13 +19,17 @@ export const toAccountId = (address: string): string => `sui:${address}`;
 const str = (v: unknown): string => (v == null ? '' : String(v));
 const num = (v: unknown): number => Number(v ?? 0);
 
-/** A Move enum in event JSON is a variant string, `{ variant: 'X' }`, or `{ X: {...} }`. */
+/**
+ * A Move enum in event JSON. Sui's JSON-RPC emits `{ '@variant': 'BlackIron' }` (verified
+ * live on testnet); also tolerate `'BlackIron'`, `{ variant: 'X' }`, and `{ X: {...} }`.
+ */
 function readVariant(value: unknown): string {
   if (typeof value === 'string') return value;
   if (value && typeof value === 'object') {
     const v = value as Record<string, unknown>;
+    if (typeof v['@variant'] === 'string') return v['@variant'] as string;
     if (typeof v.variant === 'string') return v.variant;
-    const keys = Object.keys(v).filter((k) => k !== 'fields' && k !== 'type');
+    const keys = Object.keys(v).filter((k) => k !== 'fields' && k !== 'type' && k !== '@variant');
     if (keys.length === 1 && keys[0]) return keys[0];
   }
   return String(value);
