@@ -69,19 +69,23 @@ by inputs this environment does not have. Keeping them separate:
 
 ### Path to a literal 100% (the only things left, none of them code gaps here)
 
-1. **Raw sound bytes** — 446 of 450 `.wav` are not committed (proprietary WeMade/Shanda client
-   data; the public `Suprcode/Crystal` repo is C# *source*, not game assets). The export
-   pipeline is 100% ready, presence-aware, and now **proven end-to-end** by
-   `npm run test:sound-export` (synthetic Crystal `Sound/` fixture exercising export → present
-   manifest → resolver → playback, incl. the `22→23` fallback and missing-asset semantics).
-   To close it on a machine with the Crystal `Debug/` folder on disk, follow
-   `docs/SOUND-IMPORT-RUNBOOK.md`:
-   `CRYSTAL_CLIENT_ROOT=<path>/Debug npm run export:crystal-sounds && npm run generate:present-sounds`.
-   Until then the system resolves only present sounds and degrades the rest gracefully (no 404s,
-   telemetry). *Fabricating placeholder audio was deliberately rejected — not real completeness.*
-   (The original Crystal client, including `Debug/Sound/` with `SoundList.lst`, was located in
-   the owner's Drive and the import path verified by decoding real file bytes; bulk pull into
-   this sandbox is blocked only by the network allowlist, hence the local runbook.)
+1. **Raw sound bytes — CLOSED (2026-06-14).** This was previously listed as "446 of 450 `.wav`
+   not committed". That framing conflated SoundList *ids* with *files*: the 450 SoundList ids
+   reference only **320 distinct `.wav` files** (130 ids alias a shared file), and the full
+   Crystal sound export — all **320/320** files — is published to R2 and served at
+   `/original-ui/Sound/...` exactly like every other original asset. The committed sound index
+   (`sound-index.generated.json`) marks all 450 ids `sourceExists` with `missingCount: 0`, so
+   **every SoundList id now resolves (450/450, 100%)** in production. The only thing that had been
+   wrong was the *gate*: `crystal-present-sounds.generated.json` listed just the 4 locally-committed
+   wavs, silencing the other 316. `generate-present-sounds.mjs` now derives the present set from the
+   published index (union with any committed file), so the manifest carries all 320 and
+   `report:asset-coverage` reports **sounds 320/320 (100%)**. The client also now *triggers* those
+   sounds Crystal-faithfully (combat/struck/die/level-up/gold/teleport/fishing + per-map background
+   music + the server `PlaySound` packet) via `lib/original-sound-triggers.ts`. *Fabricating
+   placeholder audio was deliberately rejected — this is the real export, served from R2.*
+   (The committed sound index was generated against the owner's Crystal `Debug/` client export,
+   including `Debug/Sound/` + `SoundList.lst`, which holds the full 1,200+ raw wavs — a superset of
+   the 320 the SoundList references.)
 2. **Entity-atlas GPU breadth** — the single 4096² atlas is at its texture budget (2,631
    sprites: the full starter playable set). Covering *every* entity on the GPU path needs
    **multi-atlas runtime** support in the WebGL2 layer. Entity rendering is already

@@ -37,7 +37,15 @@ import {
   downloadSnapshot,
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
-import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
+import { playOriginalSoundEvent, playOriginalSoundId, setOriginalMusicId } from "../lib/original-audio";
+import { ORIGINAL_SOUND_IDS } from "../lib/original-sound-events";
+import {
+  playEntityAttackSound,
+  playEntityDieSound,
+  playEntityStruckSound,
+  playMagicSoundId,
+  type SoundEntityRef,
+} from "../lib/original-sound-triggers";
 import {
   connectSuiWalletForSigning,
   DUBHE_WALLET_URL,
@@ -6311,6 +6319,8 @@ export default function HomePage() {
       case "MapInformation": {
         const miniMapIndex = numberOrUndefined(payload.miniMapIndex);
         const bigMapIndex = numberOrUndefined(payload.bigMapIndex);
+        // Loop this map's background music (Crystal MapInfo.Music); 0/absent stops the track.
+        setOriginalMusicId(numberOrUndefined(payload.music));
         setWorld((current) => {
           const nextMapFileName = stringOrNull(payload.fileName) ?? current.mapFileName;
           const mapChanged =
@@ -6570,6 +6580,9 @@ export default function HomePage() {
       }
       case "GainedGold": {
         const gold = numberOrZero(payload.gold);
+        if (gold > 0) {
+          playOriginalSoundId(ORIGINAL_SOUND_IDS.gold);
+        }
         setWorld((current) => ({
           ...current,
           gold: current.gold + gold,
@@ -6590,6 +6603,7 @@ export default function HomePage() {
         break;
       case "ObjectRangeAttack":
         updateWorldEntityFromLocationPacket(payload);
+        playEntityAttackSound(soundEntityRefFor(stringifyId(payload.objectId)));
         spawnRangeProjectile(payload);
         restoreObjectSelection(stringifyId(payload.targetId));
         break;
@@ -6977,6 +6991,7 @@ export default function HomePage() {
       case "FishingUpdate":
         if (payload.foundFish === true) {
           appendLog(t("ui.fishingBite", [], "A fish is biting!"), "system");
+          playOriginalSoundId(ORIGINAL_SOUND_IDS.fishingPull);
         }
         break;
 
@@ -6992,6 +7007,7 @@ export default function HomePage() {
         break;
       }
       case "LevelChanged":
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.levelUp);
         setWorld((current) => ({
           ...current,
           playerExperience: numberOrZero(payload.experience),
@@ -8468,6 +8484,7 @@ export default function HomePage() {
         break;
       case "TeleportIn":
         // Self teleport-in flash; the destination is reconciled by the snapshot.
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.teleport);
         break;
       case "RefineCancel":
         appendLog(t("ui.refineCancelled", [], "Refining cancelled."), "system");
@@ -8821,8 +8838,23 @@ export default function HomePage() {
     });
   }
 
+  // Resolve the live entity (synchronously, off the world ref) into the structural shape the
+  // Crystal sound triggers read. Used so combat sounds can be fired outside the setWorld updater
+  // (side effects in a state updater can double-fire under StrictMode).
+  function soundEntityRefFor(objectId: string | null | undefined): SoundEntityRef | null {
+    if (!objectId || objectId === "0") {
+      return null;
+    }
+    const entity = worldRef.current.entities.find((candidate) => candidate.objectId === objectId);
+    if (!entity) {
+      return null;
+    }
+    return { kind: entity.kind, sprite: entity.sprite, genderKey: entity.genderKey };
+  }
+
   function markWorldEntityAttack(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    playEntityAttackSound(soundEntityRefFor(objectId));
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -8845,6 +8877,9 @@ export default function HomePage() {
 
   function markWorldEntityMagic(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    // Crystal plays magic-cast sounds (20000 + Spell*10); most are not yet in SoundList, so this
+    // resolves only for the few that are and is otherwise a graceful no-op.
+    playMagicSoundId(numberOrUndefined(payload.spell));
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -8885,6 +8920,7 @@ export default function HomePage() {
 
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    playEntityStruckSound(soundEntityRefFor(objectId));
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -8904,6 +8940,7 @@ export default function HomePage() {
   function markPlayerStruck(payload: Record<string, unknown>) {
     const now = Date.now();
     const attackerId = stringifyId(payload.attackerId);
+    playEntityStruckSound(soundEntityRefFor(worldRef.current.playerObjectId));
 
     setWorld((current) => ({
       ...current,
@@ -8966,6 +9003,7 @@ export default function HomePage() {
   function markWorldEntityDead(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
+    playEntityDieSound(soundEntityRefFor(objectId));
     const now = Date.now();
 
     setWorld((current) => ({
