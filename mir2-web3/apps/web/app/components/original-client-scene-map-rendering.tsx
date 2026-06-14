@@ -5,6 +5,11 @@ import type { SyntheticEvent } from "react";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { type MapAtlasIndex, mapAtlasRectKeyForPath } from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
+import {
+  alphaKeyMapObjectPixels,
+  keyMapObjectImageOffThread,
+  offThreadAlphaKeyAvailable,
+} from "../../lib/scene-alpha-key";
 import type { DisplayEntity, DisplayWorld } from "./original-client-types";
 import type { MapTileDraw } from "./webgl2-map-atlas-layer";
 import {
@@ -500,8 +505,6 @@ export function mapSpriteRenderPath(path: string) {
 
 const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
 const SCENE_ASSET_STALLED_RETRY_DELAYS_MS = [2500, 5000, 10000, 15000];
-const MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS = 18;
-const MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS = 72;
 // Once a scene asset has exhausted its retries it is negatively cached briefly. These assets are
 // immutable, but the failure mode we see in production is usually a transient fetch/load miss while
 // a scene asks for hundreds of small PNGs at once, not an actual absent R2 object.
@@ -721,6 +724,17 @@ async function createAlphaKeyedSceneAssetUrl(image: HTMLImageElement): Promise<{
     return null;
   }
 
+  // Preferred path: run the flood-fill + PNG encode in a worker so it never blocks the main
+  // thread (which also drives Bevy's render loop). Falls through to the synchronous path on
+  // unsupported browsers or a worker error/timeout.
+  if (offThreadAlphaKeyAvailable()) {
+    try {
+      return await keyMapObjectImageOffThread(image, width, height);
+    } catch {
+      // fall back to main-thread keying below
+    }
+  }
+
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -731,62 +745,7 @@ async function createAlphaKeyedSceneAssetUrl(image: HTMLImageElement): Promise<{
 
   context.drawImage(image, 0, 0, width, height);
   const imageData = context.getImageData(0, 0, width, height);
-  const pixels = imageData.data;
-  const queued = new Uint8Array(width * height);
-  const stack: number[] = [];
-  let changed = 0;
-
-  const enqueue = (x: number, y: number) => {
-    if (x < 0 || y < 0 || x >= width || y >= height) {
-      return;
-    }
-    const pixelIndex = y * width + x;
-    if (queued[pixelIndex]) {
-      return;
-    }
-    const offset = pixelIndex * 4;
-    if (pixels[offset + 3] === 0 || pixelBrightness(pixels, offset) > MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS) {
-      return;
-    }
-    queued[pixelIndex] = 1;
-    stack.push(pixelIndex);
-  };
-
-  for (let x = 0; x < width; x += 1) {
-    enqueue(x, 0);
-    enqueue(x, height - 1);
-  }
-  for (let y = 1; y < height - 1; y += 1) {
-    enqueue(0, y);
-    enqueue(width - 1, y);
-  }
-
-  while (stack.length) {
-    const pixelIndex = stack.pop()!;
-    const offset = pixelIndex * 4;
-    const brightness = pixelBrightness(pixels, offset);
-    const alpha = pixels[offset + 3];
-    const nextAlpha =
-      brightness <= MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS
-        ? 0
-        : Math.round(
-            alpha *
-              ((brightness - MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS) /
-                (MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS - MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS)),
-          );
-    if (nextAlpha < alpha) {
-      pixels[offset + 3] = Math.max(0, Math.min(alpha, nextAlpha));
-      changed += 1;
-    }
-
-    const x = pixelIndex % width;
-    const y = Math.floor(pixelIndex / width);
-    enqueue(x + 1, y);
-    enqueue(x - 1, y);
-    enqueue(x, y + 1);
-    enqueue(x, y - 1);
-  }
-
+  const changed = alphaKeyMapObjectPixels(imageData.data, width, height);
   if (!changed) {
     return null;
   }
@@ -821,10 +780,6 @@ export function sceneAssetRuntimeStats() {
     alphaKeyedBlobBytes: alphaKeyedSceneAssetBytes,
     failedStaticSceneAssetCount: failedStaticSceneAssetUrls.size,
   };
-}
-
-function pixelBrightness(pixels: Uint8ClampedArray, offset: number) {
-  return Math.max(pixels[offset], pixels[offset + 1], pixels[offset + 2]);
 }
 
 function isBlackKeyedMapObjectPath(path: string) {
