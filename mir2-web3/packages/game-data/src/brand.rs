@@ -77,7 +77,13 @@ fn overrides() -> &'static BrandOverrides {
 }
 
 fn remap(table: &HashMap<String, String>, raw: &str) -> String {
-    table.get(raw).cloned().unwrap_or_else(|| raw.to_string())
+    match table.get(raw) {
+        // An empty override value means "not filled in yet" -> leave the name as
+        // is, so a partially-filled brand_overrides.json (e.g. pasted from the
+        // template worksheet) never blanks a name.
+        Some(branded) if !branded.is_empty() => branded.clone(),
+        _ => raw.to_string(),
+    }
 }
 
 /// Branded display name for a monster (falls back to the Crystal name).
@@ -123,6 +129,7 @@ fn scrub_with(o: &BrandOverrides, input: &str) -> String {
         .chain(o.npc.iter())
         .chain(o.map.iter())
         .chain(o.magic.iter())
+        .filter(|(_, to)| !to.is_empty())
         .collect();
     pairs.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
     let mut out = input.to_string();
@@ -228,5 +235,17 @@ mod tests {
         for k in o.magic.keys() {
             assert!(magics.contains(k), "unknown magic brand key: {k:?}");
         }
+    }
+
+    #[test]
+    fn empty_override_value_is_passthrough() {
+        // A blank value (an unfilled template row) must not blank the name.
+        let mut table = HashMap::new();
+        table.insert("ArcherGuard".to_string(), String::new());
+        assert_eq!(remap(&table, "ArcherGuard"), "ArcherGuard");
+
+        let mut o = BrandOverrides::default();
+        o.map.insert("Zuma".to_string(), String::new());
+        assert_eq!(scrub_with(&o, "Enter Zuma now"), "Enter Zuma now");
     }
 }

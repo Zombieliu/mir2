@@ -263,9 +263,30 @@ they exist:
 
 ## 11. Immediate Next Steps
 
-1. **(eng)** Build the rebrand/override pipeline (§4): `brand_overrides.json` +
-   a generation step emitting branded manifests, wired into
-   `localization_bundle.json`. Additive; Crystal source data stays read-only.
+1. **(eng) ✅ DONE — rebrand/override pipeline built.** `packages/game-data/src/brand.rs`
+   remaps monster/item/npc/map/magic display names and scrubs NPC dialogue, routed
+   through every player-facing display site (info popups, scene snapshots, live
+   objects, ground drops, dialogue). Crystal source data + internal name-keyed
+   lookups are untouched; an empty `data/brand_overrides.json` is byte-identical
+   behaviour (verified: mir2-simulation 1263/0).
+   **Fill workflow:** copy entries from the generated worksheet
+   `data/brand_overrides.template.json` (all ~2,860 Crystal names, blank values)
+   into `data/brand_overrides.json` and fill the values with your original names
+   (blank = leave that name unbranded; start with the starter zone). A test rejects
+   keys that are not real Crystal names; blank values are safe (treated as
+   unbranded). Regenerate the worksheet after manifest changes:
+   ```
+   cd packages/game-data/data/generated && jq -n \
+     --slurpfile mon crystal_monster_manifest.json --slurpfile itm crystal_item_manifest.json \
+     --slurpfile npc crystal_npc_info_manifest.json --slurpfile map crystal_respawn_manifest.json \
+     --slurpfile mag crystal_magic_manifest.json '{
+       monster:([$mon[0].monsters[].name|select(.!=null and .!="")]|unique|map({(.):""})|add//{}),
+       item:([$itm[0].items[].name|select(.!=null and .!="")]|unique|map({(.):""})|add//{}),
+       npc:([$npc[0].npcs[].name|select(.!=null and .!="")]|unique|map({(.):""})|add//{}),
+       map:([$map[0].maps[].map_title|select(.!=null and .!="")]|unique|map({(.):""})|add//{}),
+       magic:([$mag[0].magics[].name|select(.!=null and .!="")]|unique|map({(.):""})|add//{})
+     }' > ../brand_overrides.template.json
+   ```
 2. **(art)** Stand up a separate asset bucket + mirror-structure convention;
    draft the Wave-0 redraw list (starting zone + ~30 monsters + 4 classes + core UI).
 3. **(legal)** Draft the original brand: name + art-direction brief; line up IP
