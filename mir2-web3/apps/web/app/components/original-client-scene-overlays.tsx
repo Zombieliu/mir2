@@ -16,6 +16,7 @@ import {
   type ViewportOffset,
 } from "./original-client-scene-rendering";
 import type {
+  DisplayDamageFloater,
   DisplayEntity,
   EntityKind,
   EntityMotionSnapshot,
@@ -38,6 +39,9 @@ type ViewportEntityEntry = {
 };
 
 const CHAT_BUBBLE_FADE_MS = 600;
+// A short white/red brighten over a struck sprite so a hit reads instantly even when the
+// monster's atlas lacks struck frames (renderer-independent: it overlays the Bevy canvas too).
+const HIT_FLASH_MS = 170;
 
 // Screen-space top-left of an entity's tile origin, reusing the SAME transform the scene visual
 // layers use (origin + tile delta * cell size + camera pan + per-entity motion lerp). Keeping this
@@ -187,6 +191,122 @@ function SceneChatBubbles({
           >
             <span className="scene-chat-bubble-text">{bubble.text}</span>
           </div>
+        );
+      })}
+    </>
+  );
+}
+
+// Floating combat numbers (Crystal `GameScene.DamageIndicator`). Each number is anchored over its
+// object's sprite-top and rises+fades via CSS over its lifetime; this component only positions it so
+// it tracks a moving target. White over monsters, red over players, plus Miss/Crit/heal styling.
+function DamageFloaters({
+  floaters,
+  entryByObjectId,
+  player,
+  playerCameraMotionOffset,
+  entityMotionSnapshots,
+  motionNow,
+}: {
+  floaters: DisplayDamageFloater[];
+  entryByObjectId: Map<string, ViewportEntityEntry>;
+  player: DisplayEntity | null;
+  playerCameraMotionOffset: ViewportOffset;
+  entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
+  motionNow: number;
+}) {
+  return (
+    <>
+      {floaters.map((floater) => {
+        if (floater.expiresAt <= motionNow) {
+          return null;
+        }
+        const entry = entryByObjectId.get(floater.objectId);
+        if (!entry) {
+          return null;
+        }
+        const isPlayer = player?.objectId === floater.objectId;
+        const origin = entityOriginScreenPosition(
+          entry,
+          isPlayer,
+          playerCameraMotionOffset,
+          entityMotionSnapshots,
+          motionNow,
+        );
+        const bounds = entitySpriteHitBounds(entry.sprite);
+        const centerOffset = (bounds.left + bounds.right) / 2;
+        const lifeMs = Math.max(1, floater.expiresAt - floater.startedAt);
+        return (
+          <div
+            key={floater.key}
+            className={`scene-damage-floater variant-${floater.variant} ${floater.isPlayerTarget ? "is-player" : "is-monster"}`}
+            style={{
+              left: `${origin.left + centerOffset}px`,
+              top: `${origin.top + bounds.top - 6}px`,
+              animationDuration: `${lifeMs}ms`,
+              zIndex: viewportDepthForCell(entry.entity.x, entry.entity.y, player ?? entry.entity, 98),
+            }}
+          >
+            {floater.text}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+// Brief brighten over a just-struck sprite. Driven by the entity's `struckStartedAt` (set for both
+// monsters and the player), so the target visibly reacts on every landed hit regardless of which
+// entity renderer (DOM / WebGL / Bevy) is active.
+function HitFlashes({
+  entries,
+  player,
+  playerCameraMotionOffset,
+  entityMotionSnapshots,
+  motionNow,
+}: {
+  entries: ViewportEntityEntry[];
+  player: DisplayEntity | null;
+  playerCameraMotionOffset: ViewportOffset;
+  entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
+  motionNow: number;
+}) {
+  return (
+    <>
+      {entries.map((entry) => {
+        const { entity, sprite } = entry;
+        const struckAt = entity.struckStartedAt;
+        if (typeof struckAt !== "number" || entity.dead) {
+          return null;
+        }
+        const age = motionNow - struckAt;
+        if (age < 0 || age > HIT_FLASH_MS) {
+          return null;
+        }
+        const isPlayer = player?.objectId === entity.objectId;
+        const origin = entityOriginScreenPosition(
+          entry,
+          isPlayer,
+          playerCameraMotionOffset,
+          entityMotionSnapshots,
+          motionNow,
+        );
+        const bounds = entitySpriteHitBounds(sprite);
+        const opacity = Math.max(0, 1 - age / HIT_FLASH_MS) * 0.7;
+        return (
+          <div
+            key={`hit-flash-${entity.objectId}`}
+            className={`scene-hit-flash ${isPlayer ? "is-player" : "is-monster"}`}
+            style={{
+              left: `${origin.left + bounds.left}px`,
+              top: `${origin.top + bounds.top}px`,
+              width: `${Math.max(0, bounds.right - bounds.left)}px`,
+              height: `${Math.max(0, bounds.bottom - bounds.top)}px`,
+              opacity,
+              zIndex: viewportDepthForCell(entity.x, entity.y, player ?? entity, 97),
+            }}
+            aria-hidden="true"
+          />
         );
       })}
     </>
@@ -448,6 +568,53 @@ const OVERLAY_STYLES = `
   font-size: 11px;
   color: #f0dc9a;
 }
+.scene-damage-floater {
+  position: absolute;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: #f4f4f4;
+  text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000;
+  will-change: transform, opacity;
+  animation-name: scene-damage-rise;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+/* Crystal: Hit = white over monsters / red over players; Miss = grey-ish; Crit = dark red. */
+.scene-damage-floater.is-player {
+  color: #ff5a4d;
+}
+.scene-damage-floater.variant-miss {
+  color: #cfcfcf;
+  font-weight: 600;
+  font-size: 13px;
+}
+.scene-damage-floater.variant-miss.is-player {
+  color: #ff9d92;
+}
+.scene-damage-floater.variant-crit {
+  color: #ff3b2f;
+  font-size: 18px;
+}
+.scene-damage-floater.variant-heal {
+  color: #6bff7a;
+}
+@keyframes scene-damage-rise {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.8); }
+  16% { opacity: 1; transform: translate(-50%, -3px) scale(1.08); }
+  30% { transform: translate(-50%, -7px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -30px) scale(1); }
+}
+.scene-hit-flash {
+  position: absolute;
+  border-radius: 42% 42% 38% 38%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3) 65%, transparent);
+  mix-blend-mode: screen;
+}
+.scene-hit-flash.is-player {
+  background: radial-gradient(closest-side, rgba(255, 96, 84, 0.95), rgba(255, 64, 52, 0.28) 65%, transparent);
+}
 `;
 
 export function OriginalClientSceneOverlays({
@@ -460,6 +627,7 @@ export function OriginalClientSceneOverlays({
   entityMotionSnapshots,
   motionNow,
   chatBubbles,
+  damageFloaters,
   targetActionLabel,
   entityKindClassName,
 }: {
@@ -472,6 +640,7 @@ export function OriginalClientSceneOverlays({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   chatBubbles: SceneChatBubble[];
+  damageFloaters: DisplayDamageFloater[];
   targetActionLabel: string | null;
   entityKindClassName: (kind: EntityKind) => string;
 }) {
@@ -485,8 +654,18 @@ export function OriginalClientSceneOverlays({
   }
 
   return (
-    <div className="scene-overlay-layer" aria-hidden={chatBubbles.length === 0 && !selectedEntity}>
+    <div
+      className="scene-overlay-layer"
+      aria-hidden={chatBubbles.length === 0 && damageFloaters.length === 0 && !selectedEntity}
+    >
       <style>{OVERLAY_STYLES}</style>
+      <HitFlashes
+        entries={viewportEntitySprites}
+        player={player}
+        playerCameraMotionOffset={playerCameraMotionOffset}
+        entityMotionSnapshots={entityMotionSnapshots}
+        motionNow={motionNow}
+      />
       <SelectionHighlight
         selectedEntity={selectedEntity}
         entryByObjectId={entryByObjectId}
@@ -506,6 +685,14 @@ export function OriginalClientSceneOverlays({
       />
       <SceneChatBubbles
         bubbles={chatBubbles}
+        entryByObjectId={entryByObjectId}
+        player={player}
+        playerCameraMotionOffset={playerCameraMotionOffset}
+        entityMotionSnapshots={entityMotionSnapshots}
+        motionNow={motionNow}
+      />
+      <DamageFloaters
+        floaters={damageFloaters}
         entryByObjectId={entryByObjectId}
         player={player}
         playerCameraMotionOffset={playerCameraMotionOffset}

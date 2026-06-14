@@ -1871,6 +1871,7 @@ export function OriginalClientShell({
             entityMotionSnapshots={entityMotionSnapshotsRef.current}
             motionNow={motionNow}
             chatBubbles={sceneChatBubbles}
+            damageFloaters={world.damageFloaters}
             targetActionLabel={selectedTargetReadoutLabel}
             entityKindClassName={entityKindClassName}
           />
