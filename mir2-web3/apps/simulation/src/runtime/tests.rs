@@ -32675,6 +32675,58 @@ fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
 }
 
 #[test]
+fn crystal_lottery_prize_matches_crystal_tiers() {
+    // The six Crystal lottery tiers, best prize first (`PlayerObject.cs:6015`).
+    const VALID: [(u32, &str); 6] = [
+        (1_000_000, "server.FirstPrizeGoldReward"),
+        (200_000, "server.WonSecondPrizeGold"),
+        (100_000, "server.WonThirdPrizeGold"),
+        (10_000, "server.WonFourthPrizeGold"),
+        (1_000, "server.WonFifthPrizeGold"),
+        (500, "server.WonSixthPrizeGold"),
+    ];
+
+    // Effect 0 can never win (Crystal's `Random.Next(0)` would throw).
+    for tick in 0..512u64 {
+        assert_eq!(super::crystal_lottery_prize(tick, 7, 0), None);
+    }
+
+    // Deterministic: identical inputs yield identical output.
+    assert_eq!(
+        super::crystal_lottery_prize(123, 7, 100),
+        super::crystal_lottery_prize(123, 7, 100)
+    );
+
+    // Every prize returned across many ticks is a valid Crystal tier, and at
+    // least one win is reachable (the win path is live, not dead code).
+    let mut wins = 0;
+    for tick in 0..4096u64 {
+        if let Some(prize) = super::crystal_lottery_prize(tick, 7, 1) {
+            assert!(VALID.contains(&prize), "unexpected lottery prize {prize:?}");
+            wins += 1;
+        }
+    }
+    assert!(
+        wins > 0,
+        "expected at least one lottery win across sampled ticks"
+    );
+
+    // Effect 1 collapses the 6th-tier denominator to 1; Crystal's `Next(1) == 1`
+    // never fires, so the function must still lose on some ticks rather than
+    // always awarding the consolation prize.
+    let mut losses = 0;
+    for tick in 0..4096u64 {
+        if super::crystal_lottery_prize(tick, 7, 1).is_none() {
+            losses += 1;
+        }
+    }
+    assert!(
+        losses > 0,
+        "effect=1 must not always win (Random.Next(1) == 1 never fires)"
+    );
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

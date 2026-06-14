@@ -14,11 +14,12 @@ use super::map::{
     relocate_player_to_map,
 };
 use super::monster_ai::advance_world;
+use super::monsters::deterministic_roll;
 use super::npc::dismiss_dialog;
 use super::pathfind;
 use super::resources::{
-    crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
-    PlayerRuntimeResource, RuntimeConfigResource,
+    crystal_player_can_run, is_in_world, mark_crystal_player_move, runtime_tick,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
 };
 use super::session::SimulationSession;
 
@@ -212,38 +213,83 @@ pub(super) fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
     }]
 }
 
-pub(super) fn crystal_random_same_map_teleport_packets(
+/// Relocate the player to a uniformly random walkable cell inside `bounds`
+/// (the player's own cell excluded so the teleport always moves them). Shared
+/// by the Random Teleport and Dungeon Escape scrolls. Returns `None` when no
+/// walkable cell exists in `bounds`, so the caller fails the use and keeps the
+/// scroll — mirroring Crystal's `Teleport` returning `false`.
+///
+/// The walkable set is enumerated on demand rather than precomputed (Crystal
+/// keeps a `Map.WalkableCells` list); this is O(area of `bounds`) per use, which
+/// is fine for a player-initiated scroll.
+fn crystal_random_walkable_relocation(
     world: &mut World,
-    max_radius: i32,
+    bounds: MapBounds,
 ) -> Option<Vec<ServerPacket>> {
     let player = player_entity(world)?;
-    let start = entity_position(world, player)?;
+    let current = entity_position(world, player)?;
     let direction = world.resource::<PlayerRuntimeResource>().player_direction;
     let map_info = world.resource::<MapRuntimeResource>().current_map.clone();
 
-    for radius in 1..=max_radius.max(1) {
-        for dx in -radius..=radius {
-            for dy in -radius..=radius {
-                if dx.abs().max(dy.abs()) != radius {
-                    continue;
-                }
-                let candidate = Point {
-                    x: start.x.saturating_add(dx),
-                    y: start.y.saturating_add(dy),
-                };
-                if candidate == start {
-                    continue;
-                }
-                if can_occupy(world, candidate.clone(), Some(player)) {
-                    return Some(relocate_player_to_map(
-                        world, map_info, candidate, direction, None,
-                    ));
-                }
+    let mut walkable = Vec::new();
+    for x in bounds.min_x..=bounds.max_x {
+        for y in bounds.min_y..=bounds.max_y {
+            let candidate = Point { x, y };
+            if candidate == current {
+                continue;
+            }
+            if can_occupy(world, candidate.clone(), Some(player)) {
+                walkable.push(candidate);
             }
         }
     }
+    if walkable.is_empty() {
+        return None;
+    }
 
-    None
+    let tick = runtime_tick(world);
+    let object_id = current_player_object_id(world).unwrap_or(0) as usize;
+    let index = deterministic_roll(tick, object_id, 0, walkable.len() as u64) as usize;
+    let destination = walkable[index.min(walkable.len() - 1)].clone();
+
+    Some(relocate_player_to_map(
+        world,
+        map_info,
+        destination,
+        direction,
+        None,
+    ))
+}
+
+/// Crystal `TeleportRandom` — the Random Teleport scroll (shape 2). Picks a
+/// uniformly random walkable cell anywhere on the current map
+/// (`MapObject.TeleportRandom` ignores its `attempts`/`distance` arguments and
+/// samples `Map.WalkableCells` directly; `PlayerObject.cs:5921`).
+pub(super) fn crystal_random_teleport_packets(world: &mut World) -> Option<Vec<ServerPacket>> {
+    let bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
+    crystal_random_walkable_relocation(world, bounds)
+}
+
+/// Crystal `TeleportEscape(20)` — the Dungeon Escape scroll (shape 0). Scatters
+/// the player to a random walkable cell within ±100 of the bind/recall point
+/// (`PlayerObject.cs:4619`); the web port models the bind point as the
+/// configured spawn. Crystal makes 20 rejection attempts; we sample uniformly
+/// over the bind±100 box (clamped to the map) so the escape can't spuriously
+/// fail when walkable cells exist nearby.
+pub(super) fn crystal_dungeon_escape_packets(world: &mut World) -> Option<Vec<ServerPacket>> {
+    let map_bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
+    let bind = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .spawn
+        .clone();
+    let box_bounds = MapBounds {
+        min_x: bind.x.saturating_sub(100).max(map_bounds.min_x),
+        max_x: bind.x.saturating_add(100).min(map_bounds.max_x),
+        min_y: bind.y.saturating_sub(100).max(map_bounds.min_y),
+        max_y: bind.y.saturating_add(100).min(map_bounds.max_y),
+    };
+    crystal_random_walkable_relocation(world, box_bounds)
 }
 
 pub(super) fn current_movement(world: &World) -> ObjectMovement {

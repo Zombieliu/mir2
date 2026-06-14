@@ -43,7 +43,9 @@ use super::map::{
     current_map_disallows_town_teleport,
 };
 use super::monsters::deterministic_roll;
-use super::movement::{crystal_random_same_map_teleport_packets, town_teleport_packets};
+use super::movement::{
+    crystal_dungeon_escape_packets, crystal_random_teleport_packets, town_teleport_packets,
+};
 use super::npc_script::gain_credit;
 use super::packets::{
     object_health_info_for_entity, object_mana_info_for_entity, object_revived_info_for_entity,
@@ -1560,7 +1562,7 @@ pub(super) fn use_dynamic_crystal_template_item(
                     packets,
                 ));
             }
-            let Some(teleport_packets) = crystal_random_same_map_teleport_packets(world, 20) else {
+            let Some(teleport_packets) = crystal_dungeon_escape_packets(world) else {
                 return Some(prepend_optional_packet(
                     use_item_ack(packet_ack, false),
                     packets,
@@ -1580,8 +1582,7 @@ pub(super) fn use_dynamic_crystal_template_item(
                     packets,
                 ));
             }
-            let Some(teleport_packets) = crystal_random_same_map_teleport_packets(world, 200)
-            else {
+            let Some(teleport_packets) = crystal_random_teleport_packets(world) else {
                 return Some(prepend_optional_packet(
                     use_item_ack(packet_ack, false),
                     packets,
@@ -1695,8 +1696,79 @@ pub(super) fn use_dynamic_crystal_template_item(
                 packets,
             ))
         }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_LOTTERY_TICKET) => {
+            let tick = runtime_tick(world);
+            let object_id = current_player_object_id(world).unwrap_or(0);
+            let prize = crystal_lottery_prize(tick, object_id, template.effect);
+            consume_item_at_use_location(world, location);
+            match prize {
+                Some((gold, message_key)) => {
+                    packets.push(hint_chat_key(world, message_key));
+                    if let Some(packet) = grant_player_gold(world, gold) {
+                        packets.push(packet);
+                    }
+                }
+                None => packets.push(hint_chat_key(world, "server.WonNothing")),
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
         _ => None,
     }
+}
+
+/// Crystal `LotteryTicket` (scroll shape 12, `PlayerObject.cs:6015`). Rolls six
+/// independent `1/(Effect*N)` chances from best prize to worst and returns the
+/// first hit as `(gold, message_key)`, or `None` for no prize. Crystal compares
+/// `Envir.Random.Next(Effect*N) == 1`, so a tier whose denominator is `0` or `1`
+/// can never win (matching `Random.Next(0/1)`); `Effect == 0` always loses.
+pub(super) fn crystal_lottery_prize(
+    tick: u64,
+    object_id: u32,
+    effect: u8,
+) -> Option<(u32, &'static str)> {
+    const TIERS: [(u64, u32, &str); 6] = [
+        (32, 1_000_000, "server.FirstPrizeGoldReward"),
+        (16, 200_000, "server.WonSecondPrizeGold"),
+        (8, 100_000, "server.WonThirdPrizeGold"),
+        (4, 10_000, "server.WonFourthPrizeGold"),
+        (2, 1_000, "server.WonFifthPrizeGold"),
+        (1, 500, "server.WonSixthPrizeGold"),
+    ];
+
+    let effect = u64::from(effect);
+    if effect == 0 {
+        return None;
+    }
+    let object_id = object_id as usize;
+    for (slot, (multiplier, gold, message_key)) in TIERS.iter().enumerate() {
+        let denominator = effect.saturating_mul(*multiplier);
+        // Crystal: `Envir.Random.Next(denominator) == 1`; `deterministic_roll`
+        // returns a value in `[0, denominator)` (0 when denominator is 0/1), so
+        // the `== 1` comparison reproduces the never-win edge cases exactly.
+        if deterministic_roll(tick, object_id, slot, denominator) == 1 {
+            return Some((*gold, message_key));
+        }
+    }
+    None
+}
+
+/// Add `amount` gold to the player (capped at `u32::MAX`) and return the
+/// `GainedGold` packet, or `None` when nothing was credited. Mirrors Crystal's
+/// `GainGold` for item-driven rewards.
+fn grant_player_gold(world: &mut World, amount: u32) -> Option<ServerPacket> {
+    if amount == 0 {
+        return None;
+    }
+    let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
+    let gained = amount.min(u32::MAX.saturating_sub(player_runtime.gold));
+    if gained == 0 {
+        return None;
+    }
+    player_runtime.gold = player_runtime.gold.saturating_add(gained);
+    Some(ServerPacket::GainedGold { gold: gained })
 }
 
 pub(super) fn use_item(
