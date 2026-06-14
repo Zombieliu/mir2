@@ -71,6 +71,14 @@ export function unlockOriginalAudio() {
   setOriginalMusic(pendingMusicSrc);
 }
 
+// Loop the background music for a Crystal SoundList music id (e.g. a map's `music` field). A null
+// / 0 / unresolved id stops the current track, matching maps that declare no music.
+export function setOriginalMusicId(sound: number | string | null | undefined) {
+  const soundId = Number(sound);
+  const path = Number.isFinite(soundId) && soundId > 0 ? crystalSoundPath(soundId) : null;
+  setOriginalMusic(path);
+}
+
 export function stopOriginalAudio() {
   musicAudio?.pause();
   musicAudio = null;

@@ -3819,6 +3819,9 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "title": info.title,
                 "miniMapIndex": info.mini_map,
                 "bigMapIndex": info.big_map,
+                // Crystal SoundList music id for this map (0 = silent); the Web client loops it as
+                // background music, matching MapControl.LoadMap -> SoundManager.PlayMusic(Music).
+                "music": info.music,
                 "spawnFlags": {
                     "lightning": info.has_lightning(),
                     "fire": info.has_fire()
