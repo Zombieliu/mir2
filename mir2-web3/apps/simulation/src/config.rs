@@ -3415,6 +3415,9 @@ pub struct GroundDropSnapshot {
     pub object_id: u32,
     pub name: String,
     pub name_colour_argb: i32,
+    /// Crystal item `Image` index (`/original-ui/Items/{icon}.png`); 0 = no icon (e.g. gold).
+    #[serde(default)]
+    pub icon: u16,
     pub x: i32,
     pub y: i32,
     pub quantity: u32,

@@ -20,8 +20,8 @@ use super::inventory::{
 };
 use super::items::{
     crystal_item_has_bind_flag, crystal_item_key_for_template, crystal_item_template_for_item_key,
-    item_has_crystal_or_rental_bind_flag, localized_drop_name_key, localized_item_name,
-    normalize_crystal_item_key, user_item_from_item_state,
+    item_has_crystal_or_rental_bind_flag, item_icon_for_key, localized_drop_name_key,
+    localized_item_name, normalize_crystal_item_key, user_item_from_item_state,
 };
 use super::map::{
     crystal_movement_transfer_records_for_map, current_map_disallows_monster_drop,
@@ -1206,6 +1206,7 @@ fn zone_ground_drop_snapshot_from_template(
             object_id: 0,
             name,
             name_colour_argb: -1,
+            icon: 0,
             x: 0,
             y: 0,
             quantity,
@@ -1252,6 +1253,7 @@ fn zone_ground_drop_snapshot_from_template(
                 object_id: 0,
                 name: name.clone(),
                 name_colour_argb: crystal_drop_name_colour_argb(&colour_probe),
+                icon: item_icon_for_key(&key),
                 x: 0,
                 y: 0,
                 quantity,

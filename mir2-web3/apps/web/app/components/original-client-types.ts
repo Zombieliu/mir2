@@ -289,6 +289,7 @@ export type DisplayWorld = {
     objectId: string;
     name: string;
     nameColourArgb?: number;
+    icon?: number;
     x: number;
     y: number;
     quantity: number;

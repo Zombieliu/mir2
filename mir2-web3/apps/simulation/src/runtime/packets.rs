@@ -6269,6 +6269,7 @@ pub(super) fn collect_ground_drops(
             object_id,
             name,
             name_colour_argb: crystal_drop_name_colour_argb(&payload.loot),
+            icon: ground_drop_loot_icon(&payload.loot),
             x: position.x,
             y: position.y,
             quantity: payload.quantity,
@@ -6284,6 +6285,15 @@ pub(super) fn collect_ground_drops(
 
     drops.sort_by_key(|drop| drop.object_id);
     drops
+}
+
+/// Crystal item `Image` index for a ground drop, used to render the floor sprite.
+/// Gold piles carry no item image (0); the client falls back to the generic marker.
+fn ground_drop_loot_icon(loot: &DropLoot) -> u16 {
+    match loot {
+        DropLoot::Gold(_) => 0,
+        DropLoot::InventoryItem { key, .. } => item_icon_for_key(key),
+    }
 }
 
 fn ground_drop_loot_snapshot(loot: &DropLoot) -> GroundDropLootSnapshot {
