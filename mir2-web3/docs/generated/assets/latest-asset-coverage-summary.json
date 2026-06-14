@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-31T01:52:28.298Z",
+  "generatedAt": "2026-06-14T14:21:08.113Z",
   "sections": {
     "originalAssets": {
       "available": true,
-      "pngCount": 14963
+      "pngCount": 15005
     },
     "mapSpriteCoverage": {
       "available": true,
@@ -18,19 +18,23 @@
       "neededMiniMaps": 226,
       "exportedMiniMaps": 227,
       "missingMiniMaps": 0,
+      "sourceUnavailableMiniMaps": 0,
       "coveragePercent": 100
     },
     "soundCoverage": {
       "available": true,
-      "presentSounds": 4,
+      "presentSounds": 320,
       "indexedSounds": 450,
-      "coveragePercent": 0.89,
-      "note": "remaining sounds are raw-asset-limited (need the Crystal client)"
+      "requiredFiles": 320,
+      "resolvableIds": 450,
+      "idResolutionPercent": 100,
+      "coveragePercent": 100,
+      "note": "coverage is distinct present .wav files / distinct required files; the 450 SoundList ids resolve via 320 shared files."
     }
   },
   "overall": {
     "available": true,
     "renderCoveragePercent": 99.88,
-    "note": "render coverage = mean of map-sprite + mini-map coverage; excludes sound coverage (raw-asset-limited, tracked separately). Not a measure of total asset completeness."
+    "note": "render coverage = mean of map-sprite + mini-map coverage; sound coverage tracked separately (now complete). Not a measure of total asset completeness."
   }
 }
