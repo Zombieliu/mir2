@@ -191,6 +191,9 @@ fn crystal_player_damage_after_status(world: &World, damage: i32) -> i32 {
 pub(super) struct PlayerDamageOutcome {
     pub(super) applied: bool,
     pub(super) died: bool,
+    /// HP actually subtracted (post-status), so callers can surface a Crystal
+    /// `DamageIndicator(Hit)` floater over the struck player. 0 when no hit landed.
+    pub(super) amount: i32,
 }
 
 /// Crystal protects players standing in a safe zone from monster/PvP combat
@@ -216,6 +219,7 @@ pub(super) fn apply_damage_to_current_player(
         return PlayerDamageOutcome {
             applied: false,
             died: false,
+            amount: 0,
         };
     }
 
@@ -226,6 +230,7 @@ pub(super) fn apply_damage_to_current_player(
         return PlayerDamageOutcome {
             applied: false,
             died: false,
+            amount: 0,
         };
     }
 
@@ -233,6 +238,7 @@ pub(super) fn apply_damage_to_current_player(
         return PlayerDamageOutcome {
             applied: false,
             died: false,
+            amount: 0,
         };
     };
 
@@ -248,6 +254,7 @@ pub(super) fn apply_damage_to_current_player(
         return PlayerDamageOutcome {
             applied: false,
             died: false,
+            amount: 0,
         };
     };
 
@@ -271,6 +278,7 @@ pub(super) fn apply_damage_to_current_player(
     PlayerDamageOutcome {
         applied: was_alive,
         died,
+        amount: adjusted_damage,
     }
 }
 
@@ -1739,6 +1747,18 @@ pub(super) fn resolve_pending_combat_actions(
                 if action.damage > 0 {
                     let outcome = apply_damage_to_current_player(world, action.damage, packets);
                     if outcome.applied {
+                        // Crystal `PlayerObject.Attacked` broadcasts a Hit damage
+                        // indicator (negative HP delta) so the struck player shows a
+                        // red floating number — see Crystal `MonsterObject.cs` pattern.
+                        if outcome.amount > 0 {
+                            if let Some(object_id) = entity_object_id(world, player) {
+                                packets.push(ServerPacket::DamageIndicator {
+                                    damage: outcome.amount.saturating_neg(),
+                                    damage_type: 0, // Crystal DamageType::Hit
+                                    object_id,
+                                });
+                            }
+                        }
                         packets.push(player_struck_packet(action.attacker_id));
                         packets.extend(damage_worn_durability(world, current_tick));
                         if !outcome.died {
@@ -1844,6 +1864,18 @@ pub(super) fn resolve_pending_combat_actions(
                 }
                 if ignores_damage {
                     continue;
+                }
+                // Crystal `MonsterObject.Attacked` broadcasts a Hit damage indicator
+                // (`armour - damage`, i.e. the negative HP delta) on every landed hit so
+                // the struck monster shows a white floating number. Mirror it here.
+                if net_damage > 0 {
+                    if let Some(object_id) = entity_object_id(world, target_entity) {
+                        packets.push(ServerPacket::DamageIndicator {
+                            damage: net_damage.saturating_neg(),
+                            damage_type: 0, // Crystal DamageType::Hit
+                            object_id,
+                        });
+                    }
                 }
                 let monster_dead =
                     damage_monster_entity(world, target_entity, net_damage, current_tick, packets);

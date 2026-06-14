@@ -505,6 +505,18 @@ type ProjectileState = {
   expiresAt: number;
 };
 
+// Floating combat number over a struck object (Crystal `DamageIndicator`). Structurally
+// matches `DisplayDamageFloater` so `WorldState` stays assignable to `DisplayWorld`.
+type DamageFloater = {
+  key: string;
+  objectId: string;
+  text: string;
+  variant: "hit" | "miss" | "crit" | "heal";
+  isPlayerTarget: boolean;
+  startedAt: number;
+  expiresAt: number;
+};
+
 type WorldItem = {
   key: string;
   name: string;
@@ -694,6 +706,7 @@ type WorldState = {
   mapTransfers: MapTransferArea[];
   interactionHints: string[];
   projectiles: ProjectileState[];
+  damageFloaters: DamageFloater[];
 };
 
 type SelectCharacterEntry = {
@@ -832,6 +845,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   mapTransfers: [],
   interactionHints: [],
   projectiles: [],
+  damageFloaters: [],
 };
 
 const VIEWPORT_CELL_WIDTH = 48;
@@ -1261,6 +1275,7 @@ export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  const damageFloaterSeqRef = useRef(0);
   const screenRef = useRef<ClientScreen>("login");
   const pendingLoginRef = useRef(false);
   const pendingNewAccountRef = useRef(false);
@@ -6330,6 +6345,7 @@ export default function HomePage() {
             groundDrops: mapChanged ? [] : current.groundDrops,
             mineNodes: mapChanged ? [] : current.mineNodes,
             projectiles: mapChanged ? [] : current.projectiles,
+            damageFloaters: mapChanged ? [] : current.damageFloaters,
             sceneView: mapChanged ? null : current.sceneView,
             terrainPatches: mapChanged ? [] : current.terrainPatches,
             decorObjects: mapChanged ? [] : current.decorObjects,
@@ -7794,18 +7810,9 @@ export default function HomePage() {
         break;
       }
       case "DamageIndicator": {
-        // Floating combat text; mirror onto the entity HP where it is the self.
-        const objectId = stringifyId(payload.objectId);
-        const damage = numberOrZero(payload.damage);
-        if (objectId !== "0" && objectId === worldRef.current.playerObjectId && damage > 0) {
-          setWorld((current) => ({
-            ...current,
-            playerHp:
-              typeof current.playerHp === "number"
-                ? Math.max(0, current.playerHp - damage)
-                : current.playerHp,
-          }));
-        }
+        // Floating combat number over the struck object (Crystal `GameScene.DamageIndicator`).
+        // Entity HP is authoritative via `ObjectHealth`, so we only spawn the floater here.
+        pushDamageFloater(payload);
         break;
       }
       case "ObjectEffect":
@@ -7906,6 +7913,7 @@ export default function HomePage() {
             entities: mapChanged && movedSelf ? [movedSelf] : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
             projectiles: mapChanged ? [] : current.projectiles,
+            damageFloaters: mapChanged ? [] : current.damageFloaters,
             sceneView: mapChanged ? null : current.sceneView,
             terrainPatches: mapChanged ? [] : current.terrainPatches,
             decorObjects: mapChanged ? [] : current.decorObjects,
@@ -8883,6 +8891,66 @@ export default function HomePage() {
     });
   }
 
+  // Crystal `GameScene.DamageIndicator`: spawn a floating combat number over the struck
+  // object. White over monsters / red over players, plus Miss/Crit/heal variants. The
+  // damage value arrives as a negative HP delta (Crystal `armour - damage`); positives are
+  // heal/regen indicators. Entity HP itself stays authoritative via `ObjectHealth`.
+  function pushDamageFloater(payload: Record<string, unknown>) {
+    const objectId = stringifyId(payload.objectId);
+    if (objectId === "0") {
+      return;
+    }
+    const damage = numberOrZero(payload.damage);
+    const damageType = numberOrZero(payload.damageType); // 0 Hit, 1 Miss, 2 Critical (Crystal DamageType)
+
+    setWorld((current) => {
+      const target = current.entities.find((entity) => entity.objectId === objectId);
+      const isPlayerTarget =
+        objectId === current.playerObjectId ||
+        target?.kind === "player" ||
+        target?.kind === "selfPlayer";
+
+      let variant: DamageFloater["variant"];
+      let text: string;
+      if (damageType === 1) {
+        variant = "miss";
+        text = t("ui.combatMiss", [], "Miss");
+      } else if (damageType === 2) {
+        variant = "crit";
+        const magnitude = Math.abs(damage);
+        text = magnitude > 0 ? magnitude.toLocaleString() : t("ui.combatCrit", [], "Crit");
+      } else if (damage > 0) {
+        variant = "heal";
+        text = `+${damage.toLocaleString()}`;
+      } else {
+        variant = "hit";
+        text = Math.abs(damage).toLocaleString();
+      }
+
+      const now = Date.now();
+      const durationMs = damageType === 1 ? 1200 : 1000;
+      damageFloaterSeqRef.current += 1;
+      const floater: DamageFloater = {
+        key: `dmg-${objectId}-${now}-${damageFloaterSeqRef.current}`,
+        objectId,
+        text,
+        variant,
+        isPlayerTarget,
+        startedAt: now,
+        expiresAt: now + durationMs,
+      };
+
+      // Drop already-expired floaters and cap the live set so an AoE burst can't unbound
+      // the overlay (Crystal caps per-object at 10).
+      const live = current.damageFloaters.filter((entry) => entry.expiresAt > now);
+      const trimmed = live.length >= 48 ? live.slice(live.length - 47) : live;
+      return {
+        ...current,
+        damageFloaters: [...trimmed, floater],
+      };
+    });
+  }
+
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const location = payload.location as { x?: number; y?: number } | undefined;
@@ -9609,6 +9677,7 @@ export default function HomePage() {
         mapTransfers,
         interactionHints: snapshot.interactionHints,
         projectiles: current.projectiles.filter((projectile) => projectile.expiresAt > currentTime),
+        damageFloaters: current.damageFloaters.filter((floater) => floater.expiresAt > currentTime),
       };
       followUpEntities = mergedEntitiesForWorld;
       followUpMapTransfers = mapTransfers;

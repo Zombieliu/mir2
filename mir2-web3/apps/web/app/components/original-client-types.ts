@@ -120,6 +120,20 @@ export type DisplayProjectile = {
   expiresAt: number;
 };
 
+// One floating combat number anchored over a struck object — Crystal's `Damage`
+// (GameScene.DamageIndicator): white over monsters, red over players, plus Miss/Crit.
+// `startedAt`/`expiresAt` use the shell motion clock so the overlay rises+fades it
+// without owning a timer, and the snapshot merge prunes it once expired.
+export type DisplayDamageFloater = {
+  key: string;
+  objectId: string;
+  text: string;
+  variant: "hit" | "miss" | "crit" | "heal";
+  isPlayerTarget: boolean;
+  startedAt: number;
+  expiresAt: number;
+};
+
 export type DisplayRankingEntry = {
   rank: number;
   playerId: number;
@@ -324,6 +338,7 @@ export type DisplayWorld = {
   };
   interactionHints: string[];
   projectiles: DisplayProjectile[];
+  damageFloaters: DisplayDamageFloater[];
 };
 
 export type DisplayMailMessage = {
