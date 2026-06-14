@@ -275,7 +275,7 @@ pub(super) fn crystal_item_index_for_item_state(item: &ItemState) -> i32 {
 pub(super) fn item_info_from_crystal_template(template: CrystalItemTemplate) -> ItemInfo {
     ItemInfo {
         index: template.item_index,
-        name: template.name,
+        name: mir2_game_data::brand::item_name(&template.name),
         item_type: template.item_type,
         grade: template.grade,
         required_type: template.required_type,

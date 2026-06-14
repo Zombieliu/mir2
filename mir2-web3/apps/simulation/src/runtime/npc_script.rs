@@ -2175,7 +2175,7 @@ pub(super) fn crystal_npc_move_map_information(
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
         info.map_index = map.map_index;
         info.file_name = map.map_file_name;
-        info.title = map.map_title;
+        info.title = mir2_game_data::brand::map_title(&map.map_title);
         info.mini_map = map.mini_map;
         info.big_map = map.big_map;
         info.lights = map.light;

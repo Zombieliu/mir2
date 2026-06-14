@@ -3910,7 +3910,7 @@ fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
     vec![ServerPacket::NewMonsterInfo {
         info: MonsterInfo {
             object_id: 0,
-            name: monster.name,
+            name: mir2_game_data::brand::monster_name(&monster.name),
             name_colour_argb: -1,
             location: Point { x: 0, y: 0 },
             image: monster.image,
@@ -3950,7 +3950,7 @@ fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
     vec![ServerPacket::NewNpcInfo {
         info: NpcInfo {
             object_id: npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
-            name: npc.name,
+            name: mir2_game_data::brand::npc_name(&npc.name),
             name_colour_argb: -1,
             image: npc.image,
             colour_argb: -1,
