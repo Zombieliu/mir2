@@ -85,6 +85,13 @@ pub(super) struct ItemState {
     pub(super) added_defence: i32,
     #[serde(default)]
     pub(super) added_stats: Vec<UserItemStat>,
+    /// Crystal `UserItem.Awake` — awakening type (0 = none) and the per-level
+    /// rolled values. Inventory items carry this so they can be awakened at an
+    /// awakening NPC (Crystal awakens the inventory item, not the worn one).
+    #[serde(default)]
+    pub(super) awake_type: u8,
+    #[serde(default)]
+    pub(super) awake_values: Vec<u8>,
     /// Socket items (Crystal `ItemType.Socket`) inserted into this item's
     /// slots; their stats contribute while the item is worn.
     #[serde(default)]

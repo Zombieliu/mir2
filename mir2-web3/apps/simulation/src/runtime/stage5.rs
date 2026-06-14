@@ -1922,6 +1922,8 @@ impl SimulationSession {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            awake_type: 0,
+            awake_values: Vec::new(),
             socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,

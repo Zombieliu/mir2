@@ -1,3 +1,4 @@
+mod awakening;
 mod buffs;
 mod combat;
 mod components;

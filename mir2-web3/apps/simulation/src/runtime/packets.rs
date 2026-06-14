@@ -6950,11 +6950,7 @@ impl SimulationSession {
             | ClientPacket::RequestChatItem { .. }
             | ClientPacket::AcceptReincarnation
             | ClientPacket::CancelReincarnation
-            | ClientPacket::AwakeningNeedMaterials { .. }
-            | ClientPacket::AwakeningLockedItem { .. }
-            | ClientPacket::Awakening { .. }
             | ClientPacket::DisassembleItem { .. }
-            | ClientPacket::DowngradeAwakening { .. }
             | ClientPacket::ResetAddedItem { .. }
             | ClientPacket::GuildBuffUpdate { .. }
             | ClientPacket::GameShopBuy { .. }
@@ -7743,6 +7739,25 @@ impl SimulationSession {
                 id_from,
                 id_to,
             } => combine_item_impl(self.app.world_mut(), grid, id_from, id_to),
+            ClientPacket::Awakening {
+                unique_id,
+                awake_type,
+                ..
+            } => super::awakening::handle_awakening(self.app.world_mut(), unique_id, awake_type),
+            ClientPacket::AwakeningNeedMaterials {
+                unique_id,
+                awake_type,
+            } => super::awakening::handle_awakening_need_materials(
+                self.app.world(),
+                unique_id,
+                awake_type,
+            ),
+            ClientPacket::AwakeningLockedItem { unique_id, locked } => {
+                super::awakening::handle_awakening_locked_item(unique_id, locked)
+            }
+            ClientPacket::DowngradeAwakening { unique_id } => {
+                super::awakening::handle_downgrade_awakening(self.app.world_mut(), unique_id)
+            }
         }
     }
 

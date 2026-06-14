@@ -711,6 +711,8 @@ pub(super) fn item_state_from_equipment_state(
         added_attack: equipment.added_attack,
         added_defence: equipment.added_defence,
         added_stats,
+        awake_type: equipment.awake_type,
+        awake_values: equipment.awake_values,
         socketed: equipment.socketed,
         cursed: equipment.cursed,
         socket_slots: equipment.socket_slots,

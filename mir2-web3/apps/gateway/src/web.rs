@@ -735,6 +735,29 @@ enum BrowserCommand {
         grid: String,
         to: i32,
     },
+    Awakening {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        #[serde(alias = "awakeType")]
+        awake_type: u8,
+        #[serde(alias = "positionIndex", default)]
+        position_index: u32,
+    },
+    AwakeningNeedMaterials {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        #[serde(alias = "awakeType")]
+        awake_type: u8,
+    },
+    AwakeningLockedItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        locked: bool,
+    },
+    DowngradeAwakening {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+    },
     RemoveItem {
         #[serde(alias = "uniqueId")]
         unique_id: u64,
@@ -2749,6 +2772,35 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             unique_id,
             to,
         })),
+        BrowserCommand::Awakening {
+            unique_id,
+            awake_type,
+            position_index,
+        } => Ok(SessionAction::Packet(ClientPacket::Awakening {
+            unique_id,
+            awake_type,
+            position_index,
+        })),
+        BrowserCommand::AwakeningNeedMaterials {
+            unique_id,
+            awake_type,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::AwakeningNeedMaterials {
+                unique_id,
+                awake_type,
+            },
+        )),
+        BrowserCommand::AwakeningLockedItem { unique_id, locked } => {
+            Ok(SessionAction::Packet(ClientPacket::AwakeningLockedItem {
+                unique_id,
+                locked,
+            }))
+        }
+        BrowserCommand::DowngradeAwakening { unique_id } => {
+            Ok(SessionAction::Packet(ClientPacket::DowngradeAwakening {
+                unique_id,
+            }))
+        }
         BrowserCommand::RemoveItem {
             unique_id,
             grid,
@@ -5552,6 +5604,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "payload": {
                 "result": result,
                 "removeId": remove_id
+            }
+        }),
+        ServerPacket::AwakeningNeedMaterials { materials } => json!({
+            "type": "packet",
+            "packet": "AwakeningNeedMaterials",
+            "payload": {
+                "materials": materials
             }
         }),
         ServerPacket::ReceiveMail { mail } => json!({

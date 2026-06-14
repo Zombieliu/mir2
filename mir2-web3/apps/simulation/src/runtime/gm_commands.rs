@@ -55,12 +55,12 @@ use mir2_game_data::crystal_item_by_name;
 use mir2_game_data::CrystalItemTemplate;
 
 /// Crystal awakening constants (`Shared/Data/ItemData.cs`, `Awake`).
-const AWAKE_MAX_LEVEL: usize = 5;
-const AWAKE_SUCCESS_RATE: u64 = 70;
+pub(super) const AWAKE_MAX_LEVEL: usize = 5;
+pub(super) const AWAKE_SUCCESS_RATE: u64 = 70;
 const AWAKE_HIT_RATE: u64 = 70;
 const AWAKE_CHANCE_MAX: [u8; 5] = [1, 2, 3, 4, 5];
 /// `BindMode.DontUpgrade` (`Shared/Enums.cs`).
-const BIND_DONT_UPGRADE: i16 = 64;
+pub(super) const BIND_DONT_UPGRADE: i16 = 64;
 
 /// Conquest AIs (`siege gate`, `gates`, `archer`, `wall`) that Crystal refuses to
 /// spawn via `@MOB` / `@RECALLMOB` (`PlayerObject.cs:2166`).
@@ -1742,7 +1742,7 @@ fn parse_awake_type(value: &str) -> Option<u8> {
     })
 }
 
-fn awake_key_seed(key: &str) -> usize {
+pub(super) fn awake_key_seed(key: &str) -> usize {
     key.bytes().fold(0usize, |acc, byte| {
         acc.wrapping_mul(31).wrapping_add(usize::from(byte))
     })
@@ -1750,7 +1750,7 @@ fn awake_key_seed(key: &str) -> usize {
 
 /// Crystal `Awake.CheckAwakening` — whether `requested` may be applied to a worn
 /// item of `template` currently at `current_type`/`level`.
-fn awake_check(
+pub(super) fn awake_check(
     template: &CrystalItemTemplate,
     current_type: u8,
     level: usize,
@@ -1783,7 +1783,7 @@ fn awake_check(
 /// Crystal `Awake.Awakening` value roll: `MakeHit` summed over five hits scaled by
 /// the item-type rate (Weapon 1, Armour 5, Helmet 1). Deterministic so GM output
 /// is reproducible.
-fn awake_make_value(tick: u64, template: &CrystalItemTemplate, seed: usize) -> u8 {
+pub(super) fn awake_make_value(tick: u64, template: &CrystalItemTemplate, seed: usize) -> u8 {
     let grade = template.grade.clamp(1, 5);
     let max_value = f32::from(AWAKE_CHANCE_MAX[usize::from(grade - 1)].max(1));
     let step = max_value / 5.0;

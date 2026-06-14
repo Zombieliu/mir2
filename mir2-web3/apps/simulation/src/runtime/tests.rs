@@ -174,6 +174,8 @@ fn kill_field_wasp(session: &mut SimulationSession) {
 fn add_repair_powder(session: &mut SimulationSession, quantity: u32) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: "repair-powder".to_string(),
         name: "Repair Powder".to_string(),
         icon: super::item_icon_for_key("repair-powder"),
@@ -213,6 +215,8 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
     let key = format!("credit-token-{token_number}");
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key,
         name: format!("Credit Token {token_number}"),
         icon: super::item_icon_for_key("credit-token-1"),
@@ -251,6 +255,8 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
 fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: "benediction-oil".to_string(),
         name: "Benediction Oil".to_string(),
         icon: super::item_icon_for_key("benediction-oil"),
@@ -289,6 +295,8 @@ fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
 fn add_weapon_oil(session: &mut SimulationSession, key: &str, name: &str, slot: u8) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -334,6 +342,8 @@ fn add_repairable_inventory_item(
 ) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -378,6 +388,8 @@ fn add_inventory_test_item(
 ) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -476,6 +488,8 @@ fn assert_unlocked_storage_open_packets(packets: &[ServerPacket]) {
 fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity: u32) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: "stage5-seal-source".to_string(),
         name: "Stage 5 Seal Source".to_string(),
         icon: super::item_icon_for_key("stage5-seal-source"),
@@ -514,6 +528,8 @@ fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity
 fn add_socket_source_test_item(session: &mut SimulationSession, slot: u8, quantity: u32) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: "stage5-socket-source".to_string(),
         name: "Stage 5 Socket Source".to_string(),
         icon: super::item_icon_for_key("stage5-socket-source"),
@@ -665,6 +681,8 @@ fn add_inventory_crystal_item_with_metadata(
     let key = super::crystal_item_key_for_template(&template);
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.clone(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
@@ -712,6 +730,8 @@ fn fishing_slot_item_state(
     let key = super::crystal_item_key_for_template(&template);
     let default_durability = (template.durability > 0).then_some(template.durability);
     ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.clone(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
@@ -827,6 +847,8 @@ fn equip_bengal_tiger_with_socket_slots(session: &mut SimulationSession, socket_
 fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, slot: u8) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.belt_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -864,6 +886,8 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
 
 fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
     ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: "quest-wasp-stinger".to_string(),
         name: "Wasp Stinger".to_string(),
         icon: super::item_icon_for_key("quest-wasp-stinger"),
@@ -909,6 +933,8 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
             ItemContainer::Bag2
         };
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: format!("full-slot-{index}"),
             name: format!("Full Slot {index}"),
             icon: super::item_icon_for_key("training-manual"),
@@ -956,6 +982,8 @@ fn add_equippable_test_item(
 ) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -25127,6 +25155,8 @@ fn crystal_npc_checkitem_takeitem_and_move_with_coordinates_execute_together() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: "time-stone-piece".to_string(),
             name: "Time Stone Piece".to_string(),
             icon: super::item_icon_for_key("time-stone-piece"),
@@ -25202,6 +25232,8 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: "premiumpass-1d".to_string(),
             name: "PremiumPass[1d]".to_string(),
             icon: super::item_icon_for_key("premiumpass-1d"),
@@ -26625,6 +26657,8 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: "quest-wasp-stinger".to_string(),
             name: "Wasp Stinger".to_string(),
             icon: super::item_icon_for_key("quest-wasp-stinger"),
@@ -29621,6 +29655,8 @@ fn sell_item_packet_removes_item_and_adds_gold_without_duplication() {
             item.slot,
             item.key.clone(),
             super::crystal_sell_value_for_item(&ItemState {
+                awake_type: 0,
+                awake_values: Vec::new(),
                 quantity: 1,
                 ..item.clone()
             }),
@@ -29678,6 +29714,8 @@ fn sell_item_packet_uses_unique_id_when_it_differs_from_slot() {
             .expect("bronze helmet should exist");
         item.unique_id = 9_003;
         let expected_gold = super::crystal_sell_value_for_item(&ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             quantity: 1,
             ..item.clone()
         });
@@ -30685,6 +30723,8 @@ fn pickup_allows_overweight_item_like_crystal() {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.clear();
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: "weight-stone".to_string(),
             name: "Weight Stone".to_string(),
             icon: 1,
@@ -32841,6 +32881,99 @@ fn use_item_packet_script_sex_change_flips_gender_and_consumes() {
 }
 
 #[test]
+fn awakening_packet_consumes_gold_and_orbs_then_upgrades_or_destroys() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 10_000);
+    // WoodenSword (grade 1, awakenable) + the two grade-1 DC materials.
+    add_inventory_crystal_item(&mut session, "WoodenSword", 30);
+    add_inventory_crystal_item(&mut session, "BraveryGlyph0", 31); // DC orb, shape 0
+    add_inventory_crystal_item(&mut session, "AwakeningSoul0", 32); // common orb, shape 100
+
+    let packets = session.handle_packet(ClientPacket::Awakening {
+        unique_id: 30,
+        awake_type: 1, // DC
+        position_index: 0,
+    });
+
+    // Result is either success (1) or the item-destroying failure (0).
+    let result = packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::Awakening { result, .. } => Some(*result),
+            _ => None,
+        })
+        .expect("awakening result packet");
+    assert!(
+        result == 0 || result == 1,
+        "unexpected awakening result {result}"
+    );
+    // Fee = 1500 * (1 + 0) * grade 1; both orbs consumed.
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 1500 })));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DeleteItem { unique_id: 31, .. })));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DeleteItem { unique_id: 32, .. })));
+
+    let level = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item.unique_id == 30)
+        .map(|item| (item.awake_type, item.awake_values.len()));
+    if result == 1 {
+        // Success: item kept, gained one DC awakening level + a refresh.
+        assert_eq!(level, Some((1, 1)));
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::RefreshItem { .. })));
+    } else {
+        // Failure: item destroyed.
+        assert_eq!(level, None);
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::DeleteItem { unique_id: 30, .. })));
+    }
+}
+
+#[test]
+fn awakening_packet_rejects_when_gold_insufficient() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 0);
+    add_inventory_crystal_item(&mut session, "WoodenSword", 30);
+    add_inventory_crystal_item(&mut session, "BraveryGlyph0", 31);
+    add_inventory_crystal_item(&mut session, "AwakeningSoul0", 32);
+
+    let packets = session.handle_packet(ClientPacket::Awakening {
+        unique_id: 30,
+        awake_type: 1,
+        position_index: 0,
+    });
+
+    // result -3 = not enough gold; nothing consumed.
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Awakening {
+            result: -3,
+            remove_id: -1,
+        }
+    )));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { .. })));
+    let snapshot = session.world_snapshot();
+    assert!(snapshot.inventory_items.iter().any(|item| item.slot == 30));
+    assert!(snapshot.inventory_items.iter().any(|item| item.slot == 31));
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -34058,6 +34191,8 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
             continue;
         }
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: format!("split-fill-{slot}"),
             name: format!("Split Fill {slot}"),
             icon: super::item_icon_for_key("training-manual"),
@@ -35184,6 +35319,8 @@ fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_i
 /// `socket_slots`, `cursed`, `equip_slot`) on the returned value.
 fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
     ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.to_string(),
         name: key.to_string(),
         icon: super::item_icon_for_key("repair-powder"),
@@ -35448,6 +35585,8 @@ fn add_recipe_item(session: &mut SimulationSession, item_index: i32, slot: u8, q
     let durability = (template.durability > 0).then_some(template.durability);
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        awake_type: 0,
+        awake_values: Vec::new(),
         key: key.clone(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
@@ -35698,6 +35837,8 @@ fn equipping_same_slot_returns_previous_gear_to_bag() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            awake_type: 0,
+            awake_values: Vec::new(),
             key: "iron-helmet".to_string(),
             name: "Iron Helmet".to_string(),
             icon: super::item_icon_for_key("iron-helmet"),
