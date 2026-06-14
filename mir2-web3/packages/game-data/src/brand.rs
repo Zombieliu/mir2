@@ -175,4 +175,58 @@ mod tests {
             "Enter the Ashgrove Shrine now"
         );
     }
+
+    #[test]
+    fn brand_override_keys_exist_in_their_manifests() {
+        // Guards the data the reskin fills in: every override key must be a real
+        // Crystal name, so a typo cannot silently fail to rebrand. Empty
+        // overrides (the shipped default) pass this trivially.
+        use std::collections::HashSet;
+        let o = overrides();
+
+        let monsters: HashSet<String> = crate::crystal_monster_manifest()
+            .monsters
+            .iter()
+            .map(|m| m.name.clone())
+            .collect();
+        for k in o.monster.keys() {
+            assert!(monsters.contains(k), "unknown monster brand key: {k:?}");
+        }
+
+        let items: HashSet<String> = crate::crystal_item_manifest()
+            .items
+            .iter()
+            .map(|i| i.name.clone())
+            .collect();
+        for k in o.item.keys() {
+            assert!(items.contains(k), "unknown item brand key: {k:?}");
+        }
+
+        let npcs: HashSet<String> = crate::crystal_npc_info_manifest()
+            .npcs
+            .iter()
+            .map(|n| n.name.clone())
+            .collect();
+        for k in o.npc.keys() {
+            assert!(npcs.contains(k), "unknown npc brand key: {k:?}");
+        }
+
+        let maps: HashSet<String> = crate::crystal_respawn_manifest()
+            .maps
+            .iter()
+            .map(|m| m.map_title.clone())
+            .collect();
+        for k in o.map.keys() {
+            assert!(maps.contains(k), "unknown map brand key: {k:?}");
+        }
+
+        let magics: HashSet<String> = crate::crystal_magic_manifest()
+            .magics
+            .iter()
+            .map(|m| m.name.clone())
+            .collect();
+        for k in o.magic.keys() {
+            assert!(magics.contains(k), "unknown magic brand key: {k:?}");
+        }
+    }
 }
