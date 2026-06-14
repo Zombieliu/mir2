@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest gameplay-feel + world-authority roadmap sync: 2026-06-15 records the
+> June `main` landings: combat juice (floating damage numbers + hit flash, #98),
+> all Crystal sound effects wired (#99), real item icons on ground drops +
+> walk-to-pick-up (#97), full Crystal world activation (#80) with an on-demand
+> monster pool (#83), Crystal-faithful zone-authoritative combat numerics
+> (`Random(MinDC..=MaxDC)` + AC/MAC + crit), mining + dynamic doors, the full GM
+> @-command set, the security remediation pass (#77), and on-chain mine M1–M4
+> (#92). The active asset release `mir2/v/20260601-fullcrystal-a2f10be0` is a
+> complete full-Crystal upload (0 missing), so the long-standing sprite-404
+> blocker is closed. Roadmap next: per-monster AI breadth (~35 handlers → toward
+> Crystal's 212 subclasses) is now the single largest gameplay-depth gap, plus
+> cross-process Zone sharding and persistence normalization.
+
 > Latest entity-atlas resource roadmap sync: 2026-06-02 closes a code-side
 > gap where the Bichon starter entity atlas was listed in the critical cache
 > pack but was not part of the remote R2 release roots or service-worker
