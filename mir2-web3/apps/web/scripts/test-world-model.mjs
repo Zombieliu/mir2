@@ -533,6 +533,37 @@ test("emits again after state changes", () => {
   });
 });
 
+test("dedupe holds even as the wall clock advances between ticks", () => {
+  withFakeTimers(({ tick }) => {
+    const realNow = Date.now;
+    let fakeNow = 1000;
+    globalThis.Date.now = () => (fakeNow += 16); // advance on every read
+    try {
+      const store = createWorldStore({ gold: 7 });
+      const snapshots = [];
+      const emitter = createSnapshotEmitter(store, { onSnapshot: (j) => snapshots.push(j) });
+      emitter.start();
+
+      tick(); // emits snapshot 1
+      tick(); // world unchanged (only the clock moved) → must still dedupe
+      tick(); // unchanged → dedupe
+      assert.equal(snapshots.length, 1, "advancing clientTimeMs must not defeat dedupe");
+
+      store.set({ gold: 8 });
+      tick(); // world changed → emits snapshot 2 with a fresh clientTimeMs
+      assert.equal(snapshots.length, 2);
+
+      const a = JSON.parse(snapshots[0]).clientTimeMs;
+      const b = JSON.parse(snapshots[1]).clientTimeMs;
+      assert.ok(b > a, "each real push carries a fresh clientTimeMs");
+
+      emitter.stop();
+    } finally {
+      globalThis.Date.now = realNow;
+    }
+  });
+});
+
 test("snapshot includes clientTimeMs", () => {
   withFakeTimers(({ tick }) => {
     const store = createWorldStore();

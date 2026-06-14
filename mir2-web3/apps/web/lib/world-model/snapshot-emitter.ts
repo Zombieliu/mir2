@@ -59,12 +59,17 @@ export function createSnapshotEmitter(
   let lastJson: string | null = null;
 
   function tick(): void {
-    // Stamp the snapshot — additive field, backward-compatible.
-    const snapshot = { ...store.getSnapshot(), clientTimeMs: Date.now() };
+    // Dedupe on the world state itself — NOT on a timestamped copy, or the
+    // ever-changing clientTimeMs would make every tick look "changed" and the
+    // emitter would push a full serialize + WASM call every interval even when
+    // nothing moved. We stamp clientTimeMs only when we actually push.
+    const snapshot = store.getSnapshot();
     const json = JSON.stringify(snapshot);
     if (json === lastJson) return;
     lastJson = json;
-    onSnapshot(json);
+    // Stamp clientTimeMs on the outbound snapshot — additive field, ignored by
+    // existing consumers; lets Bevy timestamp/interpolate this push.
+    onSnapshot(JSON.stringify({ ...snapshot, clientTimeMs: Date.now() }));
   }
 
   const emitter: SnapshotEmitter = {
