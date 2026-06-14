@@ -85,6 +85,57 @@ fn passkey_secret_required_from_env() -> bool {
         })
 }
 
+/// Verify the operator token presented by the trusted Relayer on the `/onchain/inject`
+/// path (M4, WF-5). Constant-time compare against `MIR2_GATEWAY_OPERATOR_TOKEN`; fail-closed
+/// in production like the passkey secret.
+pub(crate) fn verify_operator_token(provided: &str) -> Result<(), String> {
+    let expected = operator_token_secret()?;
+    if constant_time_eq(provided.as_bytes(), expected.as_bytes()) {
+        Ok(())
+    } else {
+        Err("invalid operator token".to_string())
+    }
+}
+
+fn operator_token_secret() -> Result<String, String> {
+    match env::var("MIR2_GATEWAY_OPERATOR_TOKEN") {
+        Ok(secret) if !secret.is_empty() => Ok(secret),
+        _ if passkey_secret_required_from_env() => Err(
+            "MIR2_GATEWAY_OPERATOR_TOKEN is required for production on-chain injection".to_string(),
+        ),
+        // Fail closed by default; the insecure local token is only used when a developer
+        // explicitly opts in, so a misconfigured deployment cannot accept a public token.
+        _ if dev_operator_token_allowed() => {
+            eprintln!(
+                "MIR2_GATEWAY_OPERATOR_TOKEN is not set; using local development operator token \
+                 (MIR2_ALLOW_DEV_OPERATOR_TOKEN is enabled)"
+            );
+            Ok("mir2-web3-local-operator-token".to_string())
+        }
+        _ => Err("MIR2_GATEWAY_OPERATOR_TOKEN is not set; set it, or set \
+                  MIR2_ALLOW_DEV_OPERATOR_TOKEN=1 to use the insecure local development token"
+            .to_string()),
+    }
+}
+
+fn dev_operator_token_allowed() -> bool {
+    env::var("MIR2_ALLOW_DEV_OPERATOR_TOKEN")
+        .map(|value| matches!(value.trim(), "1" | "true" | "yes"))
+        .unwrap_or(false)
+}
+
+/// Length-checked constant-time byte comparison (avoids leaking the token via timing).
+fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff = 0u8;
+    for (x, y) in a.iter().zip(b.iter()) {
+        diff |= x ^ y;
+    }
+    diff == 0
+}
+
 fn unix_now_ms() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -94,7 +145,10 @@ fn unix_now_ms() -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{passkey_gateway_secret, unix_now_ms, verify_passkey_gateway_token, HmacSha256};
+    use super::{
+        passkey_gateway_secret, unix_now_ms, verify_operator_token, verify_passkey_gateway_token,
+        HmacSha256,
+    };
     use base64::engine::general_purpose::URL_SAFE_NO_PAD;
     use base64::Engine as _;
     use hmac::{KeyInit, Mac};
@@ -187,6 +241,65 @@ mod tests {
             let error = verify_passkey_gateway_token(account_id, &token)
                 .expect_err("production passkey auth should require explicit secret");
             assert!(error.contains("MIR2_PASSKEY_AUTH_SECRET is required"));
+        });
+    }
+
+    fn with_operator_env<T>(vars: &[(&str, Option<&str>)], action: impl FnOnce() -> T) -> T {
+        let _guard = ENV_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("env lock should not be poisoned");
+        let names = [
+            "MIR2_GATEWAY_OPERATOR_TOKEN",
+            "MIR2_ALLOW_DEV_OPERATOR_TOKEN",
+            "MIR2_RUNTIME_ENV",
+            "MIR2_DEPLOYMENT_ENV",
+            "MIR2_ENV",
+        ];
+        let previous = names.map(|name| (name, std::env::var(name).ok()));
+        for name in names {
+            std::env::remove_var(name);
+        }
+        for (name, value) in vars {
+            match value {
+                Some(value) => std::env::set_var(name, value),
+                None => std::env::remove_var(name),
+            }
+        }
+        let result = action();
+        for (name, value) in previous {
+            match value {
+                Some(value) => std::env::set_var(name, value),
+                None => std::env::remove_var(name),
+            }
+        }
+        result
+    }
+
+    #[test]
+    fn operator_token_accepts_match_and_rejects_mismatch() {
+        with_operator_env(&[("MIR2_GATEWAY_OPERATOR_TOKEN", Some("s3cr3t"))], || {
+            assert!(verify_operator_token("s3cr3t").is_ok());
+            assert!(verify_operator_token("wrong-token").is_err());
+            assert!(verify_operator_token("s3cr3").is_err()); // length mismatch
+        });
+    }
+
+    #[test]
+    fn operator_token_dev_fallback_requires_opt_in() {
+        with_operator_env(&[("MIR2_ALLOW_DEV_OPERATOR_TOKEN", Some("1"))], || {
+            assert!(verify_operator_token("mir2-web3-local-operator-token").is_ok());
+        });
+        with_operator_env(&[], || {
+            assert!(verify_operator_token("anything").is_err());
+        });
+    }
+
+    #[test]
+    fn operator_token_required_in_production() {
+        with_operator_env(&[("MIR2_RUNTIME_ENV", Some("production"))], || {
+            let error = verify_operator_token("x").expect_err("production should require a token");
+            assert!(error.contains("MIR2_GATEWAY_OPERATOR_TOKEN is required"));
         });
     }
 }

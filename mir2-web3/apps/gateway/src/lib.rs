@@ -2,6 +2,7 @@ mod auth;
 mod browser_commands;
 pub mod cache;
 pub mod events;
+mod inject;
 pub mod routing;
 mod session;
 pub mod tcp;
