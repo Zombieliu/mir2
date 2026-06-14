@@ -1754,6 +1754,30 @@ pub(super) fn use_dynamic_crystal_template_item(
                 packets,
             ))
         }
+        (CRYSTAL_ITEM_TYPE_PETS, CRYSTAL_PETS_SHAPE_BLACKSTONE) => {
+            // Crystal `case 21 //BlackStone`: consume, then grant the rarest-rolled
+            // awakening orb from BlackstoneDrops (PlayerObject.cs:12323).
+            consume_item_at_use_location(world, location);
+            if let Some(name) = crystal_rarest_rolled_drop(world, CRYSTAL_BLACKSTONE_DROPS, 0) {
+                crystal_npc_give_item(world, &[name, "1"]);
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_PETS, CRYSTAL_PETS_SHAPE_STRONGBOX) => {
+            // Crystal `case 25 //Strongbox`: consume, then grant the rarest-rolled
+            // reward from StrongboxDrops (PlayerObject.cs:12284).
+            consume_item_at_use_location(world, location);
+            if let Some(name) = crystal_rarest_rolled_drop(world, CRYSTAL_STRONGBOX_DROPS, 1) {
+                crystal_npc_give_item(world, &[name, "1"]);
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
         (CRYSTAL_ITEM_TYPE_PETS, CRYSTAL_PETS_SHAPE_WONDER_DRUG) => {
             // Crystal `case 26 //Wonderdrug`: reject if a WonderDrug buff is already
             // active, else apply it for Durability minutes (PlayerObject.cs:6203).
@@ -1919,6 +1943,83 @@ fn crystal_script_give_items(world: &mut World, items: &[(&str, u32)]) {
     for (name, count) in items {
         crystal_npc_give_item(world, &[name, &count.to_string()]);
     }
+}
+
+/// Crystal `BlackstoneDrops` (`Drops/00Awakening.txt`) — every awakening orb at
+/// 1/25. `BlackStone` use gives the rarest-rolled one.
+const CRYSTAL_BLACKSTONE_DROPS: &[(&str, u32)] = &[
+    ("BraveryGlyph0", 25),
+    ("BraveryGlyph1", 25),
+    ("BraveryGlyph2", 25),
+    ("BraveryGlyph3", 25),
+    ("MagicGlyph0", 25),
+    ("MagicGlyph1", 25),
+    ("MagicGlyph2", 25),
+    ("MagicGlyph3", 25),
+    ("SoulGlyph0", 25),
+    ("SoulGlyph1", 25),
+    ("SoulGlyph2", 25),
+    ("SoulGlyph3", 25),
+    ("ProtectionGlyph0", 25),
+    ("ProtectionGlyph1", 25),
+    ("ProtectionGlyph2", 25),
+    ("ProtectionGlyph3", 25),
+    ("EvilSlayerGlyph0", 25),
+    ("EvilSlayerGlyph1", 25),
+    ("EvilSlayerGlyph2", 25),
+    ("EvilSlayerGlyph3", 25),
+    ("BodyGlyph0", 25),
+    ("BodyGlyph1", 25),
+    ("BodyGlyph2", 25),
+    ("BodyGlyph3", 25),
+    ("AwakeningSoul0", 25),
+    ("AwakeningSoul1", 25),
+    ("AwakeningSoul2", 25),
+    ("AwakeningSoul3", 25),
+];
+
+/// Crystal `StrongboxDrops` (`Drops/00Strongbox.txt`). `Strongbox` use gives the
+/// rarest-rolled one. (Crystal's `CreateDynamicWonderDrug` boxtype tuning of a
+/// WonderDrug reward is not modelled — the base item is granted.)
+const CRYSTAL_STRONGBOX_DROPS: &[(&str, u32)] = &[
+    ("WonderDrug(EXP)", 100),
+    ("WonderDrug(DROP)", 100),
+    ("WonderDrug(HP)", 10),
+    ("WonderDrug(MP)", 10),
+    ("WonderDrug(AC)", 10),
+    ("WonderDrug(MAC)", 10),
+    ("WonderDrug(A.SPEED)", 10),
+    ("Knapsack(S)", 100),
+    ("Knapsack(M)", 200),
+    ("Knapsack(L)", 300),
+];
+
+/// Crystal `BlackstoneRewardItem`/`StrongboxRewardItem`: roll `Random.Next(0,
+/// Chance)` for every entry and keep the lowest (rarest) roll. `salt`
+/// distinguishes the two tables so they don't roll identically on one tick.
+fn crystal_rarest_rolled_drop(
+    world: &mut World,
+    drops: &[(&'static str, u32)],
+    salt: usize,
+) -> Option<&'static str> {
+    let tick = runtime_tick(world);
+    let object_id = current_player_object_id(world).unwrap_or(0) as usize;
+    let mut best_rate = u64::MAX;
+    let mut reward = None;
+    for (index, (name, chance)) in drops.iter().enumerate() {
+        let rate = deterministic_roll(
+            tick,
+            object_id,
+            salt.wrapping_mul(1000) + index,
+            u64::from(*chance),
+        )
+        .max(1);
+        if rate < best_rate {
+            best_rate = rate;
+            reward = Some(*name);
+        }
+    }
+    reward
 }
 
 fn reduce_pk_points(world: &mut World, amount: i32) {

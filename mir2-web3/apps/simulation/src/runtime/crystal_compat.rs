@@ -198,8 +198,11 @@ pub(super) const CRYSTAL_ITEM_TYPE_FOOD: u8 = 27;
 pub(super) const CRYSTAL_ITEM_TYPE_PETS: u8 = 36;
 pub(super) const CRYSTAL_ITEM_TYPE_TRANSFORM: u8 = 37;
 pub(super) const CRYSTAL_ITEM_TYPE_SOCKET: u8 = 39;
-/// `ItemType.Pets` shapes whose use is a self-contained buff (no intelligent
-/// creature required): WonderDrug and Knapsack (`PlayerObject.cs:6203`).
+/// `ItemType.Pets` shapes whose use is self-contained (no intelligent creature
+/// required): BlackStone/Strongbox reward boxes and the WonderDrug/Knapsack
+/// buffs (`PlayerObject.cs:6118`).
+pub(super) const CRYSTAL_PETS_SHAPE_BLACKSTONE: i16 = 21;
+pub(super) const CRYSTAL_PETS_SHAPE_STRONGBOX: i16 = 25;
 pub(super) const CRYSTAL_PETS_SHAPE_WONDER_DRUG: i16 = 26;
 pub(super) const CRYSTAL_PETS_SHAPE_KNAPSACK: i16 = 28;
 pub(super) const CRYSTAL_ITEM_TYPE_BAIT: u8 = 30;

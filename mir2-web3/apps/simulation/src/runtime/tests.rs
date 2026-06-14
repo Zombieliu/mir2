@@ -33050,6 +33050,58 @@ fn use_item_packet_pets_wonder_drug_applies_then_rejects_while_active() {
 }
 
 #[test]
+fn use_item_packet_pets_blackstone_grants_reward_and_consumes() {
+    use_item_pets_reward_box("BlackCreatureStone");
+}
+
+#[test]
+fn use_item_packet_pets_strongbox_grants_reward_and_consumes() {
+    use_item_pets_reward_box("WonderBox(S)");
+}
+
+fn use_item_pets_reward_box(box_name: &str) {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    add_inventory_crystal_item(&mut session, box_name, 31);
+    let before: Vec<u64> = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .map(|item| item.unique_id)
+        .collect();
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 31,
+            success: true,
+            grid: MirGridType::Inventory,
+        }
+    )));
+    // The box was consumed and a reward item (a new stack) was granted.
+    let after: Vec<u64> = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .map(|item| item.unique_id)
+        .collect();
+    assert!(!after.contains(&31), "{box_name} should be consumed");
+    assert!(
+        after.iter().any(|id| !before.contains(id)),
+        "{box_name} should grant a reward item"
+    );
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
