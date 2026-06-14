@@ -6475,7 +6475,7 @@ pub(super) fn visible_object_bundle_for_entity(
         let spawn_packet = ServerPacket::ObjectMonster {
             info: MonsterInfo {
                 object_id,
-                name,
+                name: mir2_game_data::brand::monster_name(&name),
                 name_colour_argb: -1,
                 location: position,
                 image: monster.image,
@@ -6523,7 +6523,7 @@ pub(super) fn visible_object_bundle_for_entity(
                 spawn_packet: ServerPacket::ObjectNpc {
                     info: NpcInfo {
                         object_id,
-                        name,
+                        name: mir2_game_data::brand::npc_name(&name),
                         name_colour_argb: -1,
                         image: npc.image,
                         colour_argb: npc.colour_argb,

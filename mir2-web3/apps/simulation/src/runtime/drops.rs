@@ -1864,9 +1864,19 @@ pub(super) fn spawn_ground_drop_with_ownership(
         GroundDrop,
         DropExpiry { expires_at_tick },
         ObjectId(object_id),
-        localized_drop_name_key(&display_name)
-            .map(|key| DisplayName::localized(key, display_name.clone()))
-            .unwrap_or_else(|| DisplayName::literal(display_name)),
+        {
+            // Brand at construction: when an override exists the branded name is an
+            // original-IP literal (the original localization no longer applies);
+            // otherwise keep the original (possibly localized) display name.
+            let branded = mir2_game_data::brand::item_name(&display_name);
+            if branded != display_name {
+                DisplayName::literal(branded)
+            } else {
+                localized_drop_name_key(&display_name)
+                    .map(|key| DisplayName::localized(key, display_name.clone()))
+                    .unwrap_or_else(|| DisplayName::literal(display_name))
+            }
+        },
         Position(position.clone()),
         DropPayload {
             quantity,

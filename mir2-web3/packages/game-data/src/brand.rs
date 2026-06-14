@@ -23,12 +23,18 @@
 //! - text:    [`scrub_text`] is provided; wire into NPC dialogue / quest bodies
 //!   per vertical slice (Tier 2).
 //!
-//! DEFERRED to the localization integration: live monster names
-//! (`runtime/packets.rs` `ObjectMonster`) and ground item-drop names
-//! (`runtime/packets.rs` + `runtime/zone/runtime.rs` `ObjectItemInfo`) resolve via
-//! a `DisplayName` component + `.resolve(language)`, and the resolved string is
-//! reused for internal lookups (e.g. `crystal_monster_effect_for_name`). Brand
-//! those at the `DisplayName`/key layer, NOT at the packet site.
+//! DisplayName path (WIRED): live `ObjectMonster` and `ObjectNpc` are branded at
+//! the packet field in `runtime/packets.rs` (the resolved `name` var stays
+//! unbranded so `crystal_monster_effect_for_name` keeps keying on the Crystal
+//! name); ground item drops are branded at *construction* in `runtime/drops.rs`
+//! (override -> literal), which covers every drop-name read. Player / Hero
+//! `DisplayName`s are intentionally NOT branded.
+//!
+//! Localization interaction: overrides key on Crystal names, so a `localized`
+//! display name only flips when its resolved value still equals the Crystal key.
+//! Add branded localization entries later to translate the original-IP names per
+//! language (the construction-site item path already drops the stale original
+//! localization when an override applies).
 //!
 //! DO NOT brand: `runtime/zone/packets.rs` (object-id rebase forwarders) and
 //! `runtime/monsters.rs` `monster_name` (the internal drop/AI lookup key).
