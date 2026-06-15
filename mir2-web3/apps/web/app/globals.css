@@ -3183,9 +3183,13 @@ img {
   position: absolute;
 }
 
+/* buildInventorySlots() already encodes Crystal's dialog-relative cell origin
+   (x*37+9, y*33+37 — InventoryDialog.cs:161), so this container must sit at the
+   window origin like .storage-grid. A non-zero left/top here double-counts that
+   origin and pushes every item ~1 row down + right off its frame cell. */
 .inventory-grid {
-  left: 9px;
-  top: 37px;
+  left: 0;
+  top: 0;
   width: 300px;
   height: 165px;
 }
@@ -3205,10 +3209,19 @@ img {
   background: transparent;
 }
 
+/* Crystal's inventory cell is 36x32 (MirItemCell.cs:186) on a 37px pitch.
+   The drop target + card must span the full cell so the centred icon lands on
+   the frame cell's centre (a 32px box leaves the icon ~2px left of centre). */
+.inventory-slot {
+  width: 36px;
+}
+
 .inventory-item-card {
   position: absolute;
   z-index: 2;
-  width: 32px;
+  /* 36x32 = Crystal MirItemCell.Size (MirItemCell.cs:186); the icon centres in
+     this box, so it must match the frame cell width (was 32 -> ~2px left). */
+  width: 36px;
   height: 32px;
   border: 0;
   padding: 0;
