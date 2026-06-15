@@ -89,3 +89,28 @@ Continue the RFC Phase 3 track (inventory/mail/economy → Postgres).
 - web: `cd mir2-web3/apps/web && npx tsc --noEmit` (0 errors) + `npm run test:frontend-logic`
 - rust: `cd mir2-web3 && cargo +1.89.0 test -p mir2-simulation -- --test-threads=1`, `cargo fmt --all --check`
 - never run prettier (web has no prettier config)
+
+## Status — 2026-06-15
+
+Merged to `main` (validated: `tsc` 0 + frontend-logic suite + movement-controller + module unit tests, all green on the combined tree):
+
+| Phase | What | PRs |
+|---|---|---|
+| 0 | world-model, game-events, asset-pipeline, bevy-interp modules | #102–#105 |
+| 1 | game-loop decoupling — emitter replaces the React rAF push; Bevy interpolates a 30Hz snapshot feed | #106 |
+| 2 | combat VFX/sound triggers routed through the game-events bus (behavior-preserving; fishingPull/levelUp/teleport/characterCreated left direct — no matching event variant) | #107 |
+| 3 (additive) | asset-residency manager module (`lib/asset-residency/`) + `ADOPTION.md` | #108 |
+
+**Not verifiable in a headless sandbox (need a real dev/CI env + human eyes):**
+- production `next build` — Turbopack rejects the worktree `node_modules` symlink ("points out of filesystem root"); needs a real install.
+- `smoke:bevy-runtime-backends` / `smoke:stage5-ui` — need a running dev server (45s WASM-boot timeout headless).
+- movement smoothness / VFX + audio *feel* after Phases 1–2 — only confirmable by playing.
+
+**Phase 3 — deferred (requires human visual verification, do NOT auto-merge):**
+1. Retire the competing DOM canvas renderers `WebGl2EntityAtlasLayer` + `WebGl2MapAtlasLayer`; make Bevy the single world renderer; keep DOM as overlay-only.
+2. Wire the asset-residency manager into `original-client-shell.tsx` per `lib/asset-residency/ADOPTION.md` (replaces the inline `bevyEntityAtlasCache` / IDB / stats globals).
+3. De-branch the RHI once the DOM fallback layers are gone.
+
+Acceptance: `npm run dev` → log in → world renders via Bevy only, movement smooth, combat VFX/sound fire, atlas pages load/evict via the manager; production `next build` green in a real install.
+
+**Phase 4 (Postgres persistence):** out of scope for the client-engine refactor — it is the separate RFC backend track (`docs/TECH-MODERNIZATION-RFC.md`) touching the highest-risk areas (item unique IDs, save migration) and is not merged here.
