@@ -1469,7 +1469,7 @@ export function OriginalClientShell({
 
     let disposed = false;
     setSceneAssetPreloadReadiness(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length));
-    void preloadSceneAssetUrls(urls, 5_000, { allowPartialReady: true }).then((readiness) => {
+    void preloadSceneAssetUrls(urls, 2_500, { allowPartialReady: true }).then((readiness) => {
       if (disposed) return;
       const visualReady = readiness.failed === 0;
       const interactionReady = readiness.ready;
@@ -3038,27 +3038,59 @@ async function preloadSceneAssetUrls(
   options: SceneAssetPreloadOptions = {},
 ): Promise<SceneAssetReadiness> {
   const startedAt = performance.now();
-  const results = await Promise.all(urls.map((url) => preloadSceneImage(url, timeoutMs)));
-  const loaded = results.filter((result) => result.loaded).length;
-  const failedUrls = results.filter((result) => !result.loaded).map((result) => result.url);
   const minimumLoaded = Math.min(urls.length, options.minLoaded ?? SCENE_INTERACTION_MIN_PRELOADED_URLS);
-  const partialReady = options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
-  const ready = failedUrls.length === 0 || partialReady;
-  const timedOut = performance.now() - startedAt >= timeoutMs - 16 && failedUrls.length > 0;
+  let loaded = 0;
+  let pending = urls.length;
+  const failedUrls: string[] = [];
 
-  return {
-    key: "scene-assets",
-    ready,
-    interactionReady: ready,
-    visualReady: failedUrls.length === 0,
-    status: ready ? "ready" : timedOut ? "timeout" : "loading",
-    total: urls.length,
-    loaded,
-    failed: failedUrls.length,
-    pending: 0,
-    durationMs: Math.round(performance.now() - startedAt),
-    failedUrls: failedUrls.slice(0, 20),
-  };
+  // Resolve as soon as enough tiles are ready for interaction (partialReady)
+  // instead of awaiting every URL: a few slow/failed tiles must NOT hold the
+  // "Loading map…" overlay for the full timeout. The timeout is only the hard
+  // ceiling; remaining tiles keep loading in the background after we resolve.
+  return await new Promise<SceneAssetReadiness>((resolve) => {
+    let settled = false;
+    const build = (timedOut: boolean): SceneAssetReadiness => {
+      const partialReady = options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
+      const ready = failedUrls.length === 0 || partialReady;
+      return {
+        key: "scene-assets",
+        ready,
+        interactionReady: ready,
+        visualReady: pending === 0 && failedUrls.length === 0,
+        status: ready ? "ready" : timedOut ? "timeout" : "loading",
+        total: urls.length,
+        loaded,
+        failed: failedUrls.length,
+        pending,
+        durationMs: Math.round(performance.now() - startedAt),
+        failedUrls: failedUrls.slice(0, 20),
+      };
+    };
+    const finish = (timedOut: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(build(timedOut));
+    };
+    const timer = setTimeout(() => finish(true), timeoutMs);
+    if (urls.length === 0) {
+      finish(false);
+      return;
+    }
+    for (const url of urls) {
+      void preloadSceneImage(url, timeoutMs).then((result) => {
+        if (result.loaded) loaded += 1;
+        else failedUrls.push(result.url);
+        pending -= 1;
+        // Early-out the moment we have enough loaded for interaction, else once all settle.
+        if (options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded) {
+          finish(false);
+        } else if (pending === 0) {
+          finish(false);
+        }
+      });
+    }
+  });
 }
 
 async function preloadSceneImage(url: string, timeoutMs: number): Promise<{ url: string; loaded: boolean }> {
