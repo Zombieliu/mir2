@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CRYSTAL_MOVE_INPUT_INTERVAL_MS } from "./original-client-scene-layout";
 import type {
@@ -62,7 +62,7 @@ type OriginalClientMobileControlsProps = {
   onUseItem: (item: ItemActionRef) => void;
 };
 
-export function OriginalClientMobileControls({
+function OriginalClientMobileControlsInner({
   enabled,
   forceVisible,
   t,
@@ -386,6 +386,11 @@ export function OriginalClientMobileControls({
     </>
   );
 }
+
+// Memoized: OriginalClientMobileControls does not receive motionNow and its props
+// (world, player, selectedEntity, callbacks) only change on server/user events, not
+// on every 30 Hz motion tick. Memo prevents spurious re-renders during gameplay.
+export const OriginalClientMobileControls = memo(OriginalClientMobileControlsInner);
 
 function readNippleMoveData(args: unknown[]): NippleMoveData | null {
   for (const arg of args) {
