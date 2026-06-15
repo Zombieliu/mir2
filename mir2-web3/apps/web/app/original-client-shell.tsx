@@ -405,6 +405,9 @@ export function OriginalClientShell({
             ? t("ui.reconnectFailed", [], "Connection lost. Please log in again.")
             : null;
   const missingSceneSpriteLibrariesRef = useRef<Set<string>>(new Set());
+  // Sprite-library keys whose load is currently in flight — prevents duplicate
+  // fetches when the load effect re-runs (it re-runs on every world.entities change).
+  const sceneSpriteLibraryInFlightRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
   // Over-head chat bubble bookkeeping. Keyed by speaker name (the only entity reference a chat log
   // line carries), each record remembers when the line first appeared so bubbles can expire on the
@@ -887,59 +890,43 @@ export function OriginalClientShell({
         missingSceneSpriteLibrariesRef.current.add(libraryKey);
       }
     }
-    const pendingLibraries = missingLibraries.filter(
+    const toLoad = missingLibraries.filter(
       (libraryKey) =>
         originalSceneSpriteLibraryExists(libraryKey) &&
-        !missingSceneSpriteLibrariesRef.current.has(libraryKey),
+        !missingSceneSpriteLibrariesRef.current.has(libraryKey) &&
+        !sceneSpriteLibraryInFlightRef.current.has(libraryKey),
     );
-    if (!pendingLibraries.length) {
+    if (!toLoad.length) {
       return;
     }
 
-    let disposed = false;
-    void Promise.all(
-      pendingLibraries.map(async (libraryKey) => {
-        try {
-          return [libraryKey, await loadOriginalSceneSpriteLibrary(libraryKey)] as const;
-        } catch {
-          // Return a tuple with null meta so we can track the failed key below.
-          return [libraryKey, null] as const;
-        }
-      }),
-    )
-      .then((loadedLibraries) => {
-        if (disposed) {
-          return;
-        }
-
-        // Record permanently-unavailable libraries before updating state so the
-        // next render's pendingSceneSpriteLibraryKeys calculation excludes them and
-        // does not block sceneSpriteLibrariesReady (and therefore sceneInteractionReady)
-        // forever. Previously failed libraries were silently dropped (return null) and
-        // never added to missingSceneSpriteLibrariesRef, so a source-indexed library
-        // that returns 404 at runtime would permanently stall the loading overlay.
-        for (const [libraryKey, libraryMeta] of loadedLibraries) {
-          if (!libraryMeta) {
-            missingSceneSpriteLibrariesRef.current.add(libraryKey);
-          }
-        }
-
-        setSceneSpriteLibraries((current) => {
-          const next = { ...current };
-          for (const [libraryKey, libraryMeta] of loadedLibraries) {
-            if (libraryMeta) {
-              next[libraryKey] = libraryMeta;
-            }
-          }
-          return next;
+    // Load each library INDEPENDENTLY and ALWAYS cache a completed load. The old
+    // Promise.all + `disposed` guard abandoned in-flight loads whenever this effect
+    // re-ran — and it re-ran on every world.entities change (e.g. an NPC moving),
+    // so on a fast gateway the loads were perpetually dropped before
+    // setSceneSpriteLibraries, sceneSpriteLibrariesReady never flipped, and the
+    // "Loading map…" overlay hung forever. A loaded sprite library is always valid
+    // to cache; the in-flight set prevents duplicate fetches across re-runs.
+    for (const libraryKey of toLoad) {
+      sceneSpriteLibraryInFlightRef.current.add(libraryKey);
+      void loadOriginalSceneSpriteLibrary(libraryKey)
+        .then((libraryMeta) => {
+          setSceneSpriteLibraries((current) =>
+            libraryKey in current ? current : { ...current, [libraryKey]: libraryMeta },
+          );
+        })
+        .catch(() => {
+          // Permanently unavailable at runtime (e.g. 404 for a source-only library):
+          // record it so pendingSceneSpriteLibraryKeys excludes it and readiness can
+          // resolve, then nudge a re-render so the calculation recomputes.
+          missingSceneSpriteLibrariesRef.current.add(libraryKey);
+          setSceneSpriteLibraries((current) => ({ ...current }));
+        })
+        .finally(() => {
+          sceneSpriteLibraryInFlightRef.current.delete(libraryKey);
         });
-      })
-      .catch(() => undefined);
-
-    return () => {
-      disposed = true;
-    };
-  }, [desiredSceneSpriteLibraryKey, desiredSceneSpriteLibraryKeys, sceneSpriteLibraries, screen]);
+    }
+  }, [desiredSceneSpriteLibraryKey, sceneSpriteLibraries, screen]);
 
   const sceneNow = motionNow;
   entityMotionSnapshotsRef.current = refreshEntityMotionSnapshots(
@@ -1319,6 +1306,8 @@ export function OriginalClientShell({
   }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
+  // True once the safety-valve window elapses with the scene up but readiness unresolved.
+  const [readinessSafetyExpired, setReadinessSafetyExpired] = useState(false);
   // Key ONLY on the map-region identity. It MUST stay stable while the player stands
   // still: the tile-preload readiness effect re-runs (and resets preloadStatus to
   // "loading", disposing the in-flight preload) whenever this key changes. The old key
@@ -1469,7 +1458,7 @@ export function OriginalClientShell({
 
     let disposed = false;
     setSceneAssetPreloadReadiness(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length));
-    void preloadSceneAssetUrls(urls, 5_000, { allowPartialReady: true }).then((readiness) => {
+    void preloadSceneAssetUrls(urls, 2_500, { allowPartialReady: true }).then((readiness) => {
       if (disposed) return;
       const visualReady = readiness.failed === 0;
       const interactionReady = readiness.ready;
@@ -1487,6 +1476,18 @@ export function OriginalClientShell({
       disposed = true;
     };
   }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady]);
+
+  // Safety-valve timer: arm when the scene is up; if readiness hasn't cleared the
+  // overlay within SCENE_READINESS_SAFETY_MS, force interaction-ready (see notifier).
+  useEffect(() => {
+    if (screen !== "game" || !renderPlayer || !world.originalMapRegion) {
+      setReadinessSafetyExpired(false);
+      return;
+    }
+    setReadinessSafetyExpired(false);
+    const timer = window.setTimeout(() => setReadinessSafetyExpired(true), SCENE_READINESS_SAFETY_MS);
+    return () => window.clearTimeout(timer);
+  }, [screen, sceneAssetReadinessKey]);
 
   useEffect(() => {
     const notify = (readiness: SceneAssetReadiness) => {
@@ -1507,6 +1508,16 @@ export function OriginalClientShell({
 
     if (!renderPlayer || !world.originalMapRegion) {
       notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", 0));
+      return;
+    }
+
+    if (readinessSafetyExpired) {
+      // Safety valve elapsed — the scene is rendered; let the player interact even if
+      // a sprite library / tile is still resolving (they keep loading in the background).
+      notify({
+        ...createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0),
+        interactionReady: true,
+      });
       return;
     }
 
@@ -1577,6 +1588,7 @@ export function OriginalClientShell({
     bevyEntityAtlasKey,
     activeBevyEntityAtlas?.key,
     webGl2EntityTextureReady,
+    readinessSafetyExpired,
   ]);
 
   useEffect(() => {
@@ -2116,6 +2128,12 @@ const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 512;
 const SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT = 96;
 const SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE = 64;
 const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
+// Safety valve: once the scene is rendered (map + player), the "Loading map…" overlay
+// must clear within this window even if some sprite library / tile is still resolving.
+// In a populated map world.entities streams in continuously, so the "all desired
+// libraries ready" gate may never settle; without this bound the overlay can hang
+// forever while the world is already drawn behind it. Remaining assets keep loading.
+const SCENE_READINESS_SAFETY_MS = 3000;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
 const SCENE_TILE_PREFETCH_RING_CELLS = 6;
@@ -3038,27 +3056,59 @@ async function preloadSceneAssetUrls(
   options: SceneAssetPreloadOptions = {},
 ): Promise<SceneAssetReadiness> {
   const startedAt = performance.now();
-  const results = await Promise.all(urls.map((url) => preloadSceneImage(url, timeoutMs)));
-  const loaded = results.filter((result) => result.loaded).length;
-  const failedUrls = results.filter((result) => !result.loaded).map((result) => result.url);
   const minimumLoaded = Math.min(urls.length, options.minLoaded ?? SCENE_INTERACTION_MIN_PRELOADED_URLS);
-  const partialReady = options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
-  const ready = failedUrls.length === 0 || partialReady;
-  const timedOut = performance.now() - startedAt >= timeoutMs - 16 && failedUrls.length > 0;
+  let loaded = 0;
+  let pending = urls.length;
+  const failedUrls: string[] = [];
 
-  return {
-    key: "scene-assets",
-    ready,
-    interactionReady: ready,
-    visualReady: failedUrls.length === 0,
-    status: ready ? "ready" : timedOut ? "timeout" : "loading",
-    total: urls.length,
-    loaded,
-    failed: failedUrls.length,
-    pending: 0,
-    durationMs: Math.round(performance.now() - startedAt),
-    failedUrls: failedUrls.slice(0, 20),
-  };
+  // Resolve as soon as enough tiles are ready for interaction (partialReady)
+  // instead of awaiting every URL: a few slow/failed tiles must NOT hold the
+  // "Loading map…" overlay for the full timeout. The timeout is only the hard
+  // ceiling; remaining tiles keep loading in the background after we resolve.
+  return await new Promise<SceneAssetReadiness>((resolve) => {
+    let settled = false;
+    const build = (timedOut: boolean): SceneAssetReadiness => {
+      const partialReady = options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
+      const ready = failedUrls.length === 0 || partialReady;
+      return {
+        key: "scene-assets",
+        ready,
+        interactionReady: ready,
+        visualReady: pending === 0 && failedUrls.length === 0,
+        status: ready ? "ready" : timedOut ? "timeout" : "loading",
+        total: urls.length,
+        loaded,
+        failed: failedUrls.length,
+        pending,
+        durationMs: Math.round(performance.now() - startedAt),
+        failedUrls: failedUrls.slice(0, 20),
+      };
+    };
+    const finish = (timedOut: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(build(timedOut));
+    };
+    const timer = setTimeout(() => finish(true), timeoutMs);
+    if (urls.length === 0) {
+      finish(false);
+      return;
+    }
+    for (const url of urls) {
+      void preloadSceneImage(url, timeoutMs).then((result) => {
+        if (result.loaded) loaded += 1;
+        else failedUrls.push(result.url);
+        pending -= 1;
+        // Early-out the moment we have enough loaded for interaction, else once all settle.
+        if (options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded) {
+          finish(false);
+        } else if (pending === 0) {
+          finish(false);
+        }
+      });
+    }
+  });
 }
 
 async function preloadSceneImage(url: string, timeoutMs: number): Promise<{ url: string; loaded: boolean }> {
