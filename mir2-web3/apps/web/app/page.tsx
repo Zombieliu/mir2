@@ -39,6 +39,8 @@ import {
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
 import { playOriginalSoundEvent, playOriginalSoundId, setOriginalMusicId } from "../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../lib/original-sound-events";
+import { createSnapshotEmitter, createWorldStore } from "../lib/world-model";
+import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
 import {
   playEntityAttackSound,
   playEntityDieSound,
@@ -1282,10 +1284,24 @@ function recordMovementConsoleEvent(kind: "send" | "ack" | "correction", payload
   }
 }
 
+/**
+ * How often the snapshot emitter pushes world state to Bevy (ms). ~30 Hz — fast
+ * enough for smooth interpolation, far below the per-packet churn it replaces.
+ */
+const WORLD_SNAPSHOT_INTERVAL_MS = 33;
+
 export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  // The world-model store is the serialization source for Bevy. It is kept in
+  // sync with React `world` state (see the worldRef sync effect) and read by the
+  // fixed-cadence snapshot emitter, decoupling the Bevy push from React renders.
+  const worldStoreRef = useRef<WorldStore | null>(null);
+  if (worldStoreRef.current === null) {
+    worldStoreRef.current = createWorldStore();
+  }
+  const snapshotEmitterRef = useRef<SnapshotEmitter | null>(null);
   const damageFloaterSeqRef = useRef(0);
   const screenRef = useRef<ClientScreen>("login");
   const pendingLoginRef = useRef(false);
@@ -1329,9 +1345,8 @@ export default function HomePage() {
   const predictedPlayerPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const predictedPlayerHoldUntilRef = useRef(0);
   const predictedPlayerUpdateSeqRef = useRef(0);
-  // Throttle world->Bevy pushes to at most one per animation frame (see the [world] effect).
-  const worldPushFrameRef = useRef(0);
-  const worldPushLastJsonRef = useRef<string | null>(null);
+  // world->Bevy snapshot push is driven by the fixed-cadence emitter
+  // (lib/world-model/snapshot-emitter), started in the runtime-ready effect below.
   const localMovementAnchorRef = useRef<LocalMovementAnchor | null>(null);
   const lastCrystalSelfRenderPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const lastSelfMovementAckRef = useRef<{ x: number; y: number; direction?: string; at: number } | null>(null);
@@ -3523,38 +3538,30 @@ export default function HomePage() {
     };
   }, [self?.x, self?.y, world.mapFileName]);
 
-  // Coalesce world->Bevy pushes to at most one per animation frame. Each `world`
-  // change previously did a full `JSON.stringify(world)` plus a wasm `setMir2WorldState`
-  // (which re-parses the JSON in Rust). Multiple server packets can arrive in a single
-  // frame (each its own message task -> its own render -> its own `world` change), and
-  // Bevy renders on its own rAF and can only display the latest state anyway, so the
-  // intermediate stringify+parse work was wasted. We schedule a single trailing rAF that
-  // reads the latest world from `worldRef` and skips the push when the serialized state
-  // is unchanged. NOTE: this effect intentionally has no cleanup — cancelling on every
-  // `world` change would debounce (starve) the push during continuous play. The pending
-  // frame is cancelled only on unmount by the dedicated effect below.
+  // Drive world->Bevy snapshot pushes from a fixed-cadence emitter rather than
+  // React reconciliation. The emitter reads the world-model store (kept in sync
+  // with `world` above), dedupes by serialized state, stamps `clientTimeMs`, and
+  // pushes at a steady interval so Bevy always has two timestamped snapshots to
+  // interpolate between. Decoupling from `[world]` means a burst of packets no
+  // longer forces a stringify+push per render. Started only once the runtime is
+  // "running" so the first emitted snapshot actually reaches Bevy.
   useEffect(() => {
-    if (worldPushFrameRef.current !== 0) return;
-    worldPushFrameRef.current = window.requestAnimationFrame(() => {
-      worldPushFrameRef.current = 0;
-      const runtime = runtimeRef.current;
-      if (!runtime?.setMir2WorldState) return;
-      const json = JSON.stringify(worldRef.current);
-      if (json === worldPushLastJsonRef.current) return;
-      worldPushLastJsonRef.current = json;
-      runtime.setMir2WorldState(json);
+    if (runtimePhase !== "running") return;
+    const store = worldStoreRef.current;
+    if (!store) return;
+    // Ensure the store has the latest world before the first emit.
+    store.set(() => worldRef.current);
+    const emitter = createSnapshotEmitter(store, {
+      intervalMs: WORLD_SNAPSHOT_INTERVAL_MS,
+      onSnapshot: (json) => runtimeRef.current?.setMir2WorldState?.(json),
     });
-  }, [world]);
-
-  useEffect(
-    () => () => {
-      if (worldPushFrameRef.current !== 0) {
-        window.cancelAnimationFrame(worldPushFrameRef.current);
-        worldPushFrameRef.current = 0;
-      }
-    },
-    [],
-  );
+    emitter.start();
+    snapshotEmitterRef.current = emitter;
+    return () => {
+      emitter.stop();
+      snapshotEmitterRef.current = null;
+    };
+  }, [runtimePhase]);
 
   useEffect(() => {
     if (!world.originalMapRegion) return;
@@ -3602,6 +3609,9 @@ export default function HomePage() {
 
   useEffect(() => {
     worldRef.current = world;
+    // Mirror React world state into the world-model store so the snapshot
+    // emitter (below) serializes the latest state on its own cadence.
+    worldStoreRef.current?.set(() => world);
   }, [world]);
 
   useEffect(() => {
