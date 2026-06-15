@@ -1,4 +1,5 @@
 mod interpolation;
+mod motion;
 
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -43,8 +44,8 @@ thread_local! {
 }
 
 #[derive(Resource, Default, Clone)]
-struct RuntimeWorldState {
-    snapshot: Option<WorldSnapshot>,
+pub(crate) struct RuntimeWorldState {
+    pub(crate) snapshot: Option<WorldSnapshot>,
 }
 
 #[derive(Resource, Default, Clone)]
@@ -116,30 +117,30 @@ struct MirEntityRenderLayer;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct WorldSnapshot {
+pub(crate) struct WorldSnapshot {
     #[serde(default)]
-    map_title: Option<String>,
+    pub(crate) map_title: Option<String>,
     #[serde(default)]
-    player_object_id: Option<String>,
+    pub(crate) player_object_id: Option<String>,
     #[serde(default)]
-    selected_object_id: Option<String>,
+    pub(crate) selected_object_id: Option<String>,
     #[serde(default)]
-    scene_view: Option<SceneView>,
+    pub(crate) scene_view: Option<SceneView>,
     #[serde(default)]
-    terrain_patches: Vec<TerrainPatch>,
+    pub(crate) terrain_patches: Vec<TerrainPatch>,
     #[serde(default)]
-    decor_objects: Vec<DecorObject>,
+    pub(crate) decor_objects: Vec<DecorObject>,
     #[serde(default)]
-    entities: Vec<WorldEntity>,
+    pub(crate) entities: Vec<WorldEntity>,
     #[serde(default)]
-    mine_nodes: Vec<MineNode>,
+    pub(crate) mine_nodes: Vec<MineNode>,
     /// Optional timestamp (milliseconds) supplied by the TypeScript producer.
     /// Accepted for forward-compatibility; the runtime currently uses the Bevy
     /// local receipt time as the interpolation clock so browser-clock skew
     /// cannot distort lerp alpha.
     #[allow(dead_code)]
     #[serde(default)]
-    client_time_ms: Option<f64>,
+    pub(crate) client_time_ms: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -199,14 +200,24 @@ enum DecorKind {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct WorldEntity {
-    object_id: String,
-    kind: EntityKind,
-    name: String,
-    x: i32,
-    y: i32,
-    direction: Option<String>,
-    level: Option<u16>,
+pub(crate) struct WorldEntity {
+    pub(crate) object_id: String,
+    pub(crate) kind: EntityKind,
+    pub(crate) name: String,
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) direction: Option<String>,
+    pub(crate) level: Option<u16>,
+    /// Wall-clock `Date.now()` milliseconds at which the movement step began.
+    /// Populated by the TS producer from `entity.movementStartedAt`.
+    /// When absent the motion module uses the snapshot receipt time.
+    #[serde(default)]
+    pub(crate) movement_started_ms: Option<f64>,
+    /// Duration of this movement step in milliseconds.
+    /// Populated by the TS producer as `movementUntil - movementStartedAt`.
+    /// When absent the motion module defaults to `motion::DEFAULT_STEP_DURATION_MS`.
+    #[serde(default)]
+    pub(crate) movement_duration_ms: Option<f64>,
 }
 
 /// A mineable cell's depletion stage, driven by the server `MineNodeState`
@@ -383,6 +394,7 @@ pub fn boot_mir2_runtime() {
         .insert_resource(RuntimeEntityRenderAtlases::default())
         .insert_resource(SceneRegistry::default())
         .insert_resource(interpolation::SnapshotBuffer::default())
+        .insert_resource(motion::EntityMotionTable::default())
         .add_plugins(
             DefaultPlugins
                 .set(AssetPlugin {
@@ -410,6 +422,7 @@ pub fn boot_mir2_runtime() {
             Update,
             (
                 ingest_pending_world_state,
+                motion::update_entity_motion_table,
                 ingest_pending_entity_render_state,
                 ingest_pending_entity_render_atlases,
                 sync_map_scene,
@@ -528,6 +541,7 @@ fn sync_entities(
     state: Res<RuntimeWorldState>,
     entity_render_state: Res<RuntimeEntityRenderState>,
     snap_buf: Res<interpolation::SnapshotBuffer>,
+    motion_table: Res<motion::EntityMotionTable>,
     time: Res<Time>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
@@ -572,21 +586,37 @@ fn sync_entities(
 
         // Compute the render-position for this entity.
         //
-        // If the buffer is ready AND this entity existed in the previous
-        // snapshot, interpolate between prev and current grid positions.
-        // Otherwise fall back to the grid position in the latest snapshot.
-        let position = match &interp_params {
-            Some((alpha, prev_snap)) => {
-                let target = tile_to_world(entity_data.x, entity_data.y);
-                if let Some(prev_pos) = prev_snap.positions.get(&entity_data.object_id) {
-                    let from = tile_to_world(prev_pos.x, prev_pos.y);
-                    interpolation::lerp_entity_pos(from, target, *alpha)
-                } else {
-                    // New entity — snap it in at the current position.
-                    target
+        // Priority 1: wall-clock motion authority (motion.rs).  When the
+        //   EntityMotionTable has an entry for this entity — meaning it received
+        //   movement timing metadata from the TS producer — use that to place
+        //   the entity at its smoothly-interpolated sub-tile position.
+        //
+        // Priority 2: Phase 0.4 snapshot lerp (fallback when motion table has
+        //   no entry, e.g. before the TS producer sends timing metadata).
+        //
+        // Priority 3: snap to the grid cell in the latest snapshot.
+        let position = if let Some(entry) = motion_table.get(&entity_data.object_id) {
+            motion::world_position_with_motion(
+                entity_data.x,
+                entity_data.y,
+                entry,
+                motion_table.now_ms,
+                TILE_SIZE,
+            )
+        } else {
+            match &interp_params {
+                Some((alpha, prev_snap)) => {
+                    let target = tile_to_world(entity_data.x, entity_data.y);
+                    if let Some(prev_pos) = prev_snap.positions.get(&entity_data.object_id) {
+                        let from = tile_to_world(prev_pos.x, prev_pos.y);
+                        interpolation::lerp_entity_pos(from, target, *alpha)
+                    } else {
+                        // New entity — snap it in at the current position.
+                        target
+                    }
                 }
+                None => tile_to_world(entity_data.x, entity_data.y),
             }
-            None => tile_to_world(entity_data.x, entity_data.y),
         };
 
         let is_selected = snapshot
