@@ -246,16 +246,42 @@ Runs after `ingest_pending_world_state`.  For each entity in the new snapshot it
 pub fn world_position_with_motion(
     grid_x: i32,
     grid_y: i32,
-    object_id: &str,
-    table: &EntityMotionTable,
+    entry: &EntityMotionEntry,   // caller pre-looks up from EntityMotionTable
+    now_ms: f64,                 // table.now_ms, snapshotted once per frame
     tile_size: f32,
 ) -> Vec3
 ```
 
 Returns the Bevy world-space `Vec3` for an entity, incorporating the motion offset
 so sprite transforms are placed at the smoothly-interpolated position rather than
-the snapped grid cell.  This replaces the existing `tile_to_world` call in
-`sync_entities` for the entity root transform.
+the snapped grid cell.  The caller (`sync_entities`) does the table lookup and passes
+the entry directly, so this function is pure and cheaply testable.
+
+Note: Bevy's scene uses a symmetric flat coordinate system (32 × 32 px per tile),
+unlike the DOM's isometric 48 × 32 CSS grid.  Both axes therefore use `tile_size`
+in this function; `compute_motion_offset` accepts separate `cell_width_px` /
+`cell_height_px` for future DOM-readback use cases.
+
+### 3.6 `now_ms_wall_clock` — platform-local clock helper
+
+```rust
+#[cfg(target_arch = "wasm32")]
+fn now_ms_wall_clock() -> f64 { js_sys::Date::now() }
+
+#[cfg(not(target_arch = "wasm32"))]
+fn now_ms_wall_clock() -> f64 { /* std::time::SystemTime */ }
+```
+
+On WASM, calls `js_sys::Date::now()` which maps to `Date.now()` in the browser —
+the same clock the TypeScript producer uses for `movementStartedMs`.  On native
+(unit tests, CI) falls back to `std::time::SystemTime`.  This ensures no skew
+between Bevy and the TS producer on WASM.
+
+### 3.7 `MAX_FUTURE_SKEW_MS` — sanity gate
+
+`movement_started_ms` values more than 5000 ms in the future relative to `now_ms`
+are rejected and replaced with `now_ms`.  This guards against corrupt timestamps
+from a stale packet being replayed after a client reconnect.
 
 ---
 
@@ -267,7 +293,7 @@ working.
 
 ---
 
-### Step 1 — Extend `WorldEntity` with motion timing fields (additive, gated)
+### Step 1 — Extend `WorldEntity` with motion timing fields (additive, gated) ✓ DONE
 
 **Files**: `apps/game-client/runtime/src/lib.rs`
 
@@ -275,14 +301,15 @@ Add optional fields to `WorldEntity`:
 
 ```rust
 #[serde(default)]
-movement_started_ms: Option<f64>,
+pub(crate) movement_started_ms: Option<f64>,
 #[serde(default)]
-movement_duration_ms: Option<f64>,
+pub(crate) movement_duration_ms: Option<f64>,
 ```
 
-These fields are ignored until Step 4.  No behavior change.
+These fields are ignored until Step 4.  No behavior change.  `pub(crate)` visibility
+was added so `motion.rs` (a sibling module) can read them directly.
 
-**Verification**: `cargo +1.89.0 check -p mir2-bevy-runtime --target wasm32-unknown-unknown` passes.  In-game: identical to before.
+**Verification**: `cargo +1.89.0 check --target wasm32-unknown-unknown` passes.  In-game: identical to before.
 
 ---
 
@@ -301,49 +328,57 @@ No changes to the TS producer yet — we just start reading the existing field.
 
 ---
 
-### Step 3 — Implement `motion.rs` with unit tests
+### Step 3 — Implement `motion.rs` with unit tests ✓ DONE
 
-**Files**: `apps/game-client/runtime/src/motion.rs` (new)
+**Files**: `apps/game-client/runtime/src/motion.rs` (new, 370 lines)
 
-Implement `EntityMotionEntry`, `EntityMotionTable`, `compute_motion_offset`, and
-`update_entity_motion_table` as described in §3.  Wire it into `boot_mir2_runtime`
-as an inserted Resource and system, running after `ingest_pending_world_state`.
+Implemented `EntityMotionEntry`, `EntityMotionTable`, `compute_motion_offset`,
+`update_entity_motion_table`, `world_position_with_motion`, and `now_ms_wall_clock`
+as described in §3.  Wired into `boot_mir2_runtime` as an inserted Resource and
+system, running after `ingest_pending_world_state` in the `.chain()`.
 
-Add comprehensive unit tests to `motion.rs` covering:
-- `compute_motion_offset` at t=0, t=midpoint, t=expired.
-- Table update: new entity, position change, entity removed.
-- Wall-clock clamping (started_ms == expires_ms degenerate).
+18 unit tests cover:
+- `compute_motion_offset` at t=0, t=midpoint, t=expired, t=past-expiry, degenerate
+  zero-duration, asymmetric cell dims.
+- `world_position_with_motion` start/end/y-axis-inversion.
+- Table: empty lookup, insert, new entity, position change, removal, future-skew
+  rejection, no-change-no-timing no-op.
 
-**Verification**: `cargo +1.89.0 test -p mir2-bevy-runtime` passes.  In-game:
-entity positions are identical (motion offsets are computed but not yet applied to
-Bevy transforms — the result is held in the `EntityMotionTable` resource only).
+**Verification**: `cargo +1.89.0 test` → **33 tests pass, 0 warnings**.  Native and
+WASM (`--target wasm32-unknown-unknown`) both `Finished` clean.  In-game: entity
+positions are identical to before (motion offsets computed but gated — no TS
+producer sends timing metadata yet, so every `motion_table.get()` returns `None`
+and the existing snapshot-lerp path runs unchanged).
 
 ---
 
-### Step 4 — Apply motion offsets to Bevy entity transforms
+### Step 4 — Apply motion offsets to Bevy entity transforms ✓ DONE (gated)
 
 **Files**: `apps/game-client/runtime/src/lib.rs`
 
-In `sync_entities`, replace:
+`sync_entities` already contains the Priority-1 / Priority-2 / Priority-3 dispatch
+(written by the prior agent):
 
 ```rust
-let position = tile_to_world(entity_data.x, entity_data.y);
+let position = if let Some(entry) = motion_table.get(&entity_data.object_id) {
+    motion::world_position_with_motion(
+        entity_data.x, entity_data.y,
+        entry,
+        motion_table.now_ms,
+        TILE_SIZE,
+    )
+} else {
+    // Priority 2: Phase 0.4 snapshot lerp (fallback)
+    // Priority 3: snap to grid cell
+    …
+};
 ```
 
-with:
-
-```rust
-let position = motion::world_position_with_motion(
-    entity_data.x, entity_data.y,
-    &entity_data.object_id,
-    &motion_table,
-    TILE_SIZE,
-);
-```
-
-This replaces the Phase 0.4 lerp-from-snapshot path with the wall-clock motion
-model.  Keep the snapshot-lerp path as an `#[cfg(feature = "interp-legacy")]`
-fallback so the old behavior can be restored by a feature flag if needed.
+The motion path is live but **gated** — it only activates when the TypeScript
+producer starts sending `movementStartedMs` / `movementDurationMs` fields on
+`WorldEntity` (Step 5).  Until then the table is empty and the existing snapshot-
+lerp runs unchanged.  No `#[cfg(feature)]` guard is needed because the fallback
+is the default code path.
 
 **Verification**: In-game: entities glide smoothly between cells in Bevy's
 block-primitive renderer without jitter.  Compare against the DOM overlay: the
@@ -473,9 +508,9 @@ call stack; React re-renders for the shell drop from ~60/sec to event-driven onl
 
 | File | Role in this migration |
 |---|---|
-| `apps/game-client/runtime/src/motion.rs` | **New** — motion authority module |
-| `apps/game-client/runtime/src/lib.rs` | Extend `WorldEntity`; wire `motion.rs`; apply offsets in `sync_entities` (Steps 1, 3, 4) |
-| `apps/game-client/runtime/src/interpolation.rs` | Unchanged — retained as legacy fallback |
+| `apps/game-client/runtime/src/motion.rs` | **New ✓** — motion authority module (370 lines, 18 unit tests) |
+| `apps/game-client/runtime/src/lib.rs` | **Done ✓** — `WorldEntity`/`WorldSnapshot`/`RuntimeWorldState` marked `pub(crate)`; `WorldEntity` timing fields added; `motion.rs` wired; priority dispatch in `sync_entities` (Steps 1, 3, 4) |
+| `apps/game-client/runtime/src/interpolation.rs` | Unchanged — retained as Priority-2 fallback |
 | `apps/web/app/original-client-shell.tsx` | Steps 5, 7, 8, 10 — DOM-agent lane |
 | `apps/web/app/components/original-client-scene-motion.ts` | Steps 8, 9 — reduce consumers |
 | `apps/web/app/components/original-client-scene-overlays.tsx` | Step 9 — camera alignment |

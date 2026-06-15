@@ -44,8 +44,8 @@ thread_local! {
 }
 
 #[derive(Resource, Default, Clone)]
-struct RuntimeWorldState {
-    snapshot: Option<WorldSnapshot>,
+pub(crate) struct RuntimeWorldState {
+    pub(crate) snapshot: Option<WorldSnapshot>,
 }
 
 #[derive(Resource, Default, Clone)]
@@ -117,30 +117,30 @@ struct MirEntityRenderLayer;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct WorldSnapshot {
+pub(crate) struct WorldSnapshot {
     #[serde(default)]
-    map_title: Option<String>,
+    pub(crate) map_title: Option<String>,
     #[serde(default)]
-    player_object_id: Option<String>,
+    pub(crate) player_object_id: Option<String>,
     #[serde(default)]
-    selected_object_id: Option<String>,
+    pub(crate) selected_object_id: Option<String>,
     #[serde(default)]
-    scene_view: Option<SceneView>,
+    pub(crate) scene_view: Option<SceneView>,
     #[serde(default)]
-    terrain_patches: Vec<TerrainPatch>,
+    pub(crate) terrain_patches: Vec<TerrainPatch>,
     #[serde(default)]
-    decor_objects: Vec<DecorObject>,
+    pub(crate) decor_objects: Vec<DecorObject>,
     #[serde(default)]
-    entities: Vec<WorldEntity>,
+    pub(crate) entities: Vec<WorldEntity>,
     #[serde(default)]
-    mine_nodes: Vec<MineNode>,
+    pub(crate) mine_nodes: Vec<MineNode>,
     /// Optional timestamp (milliseconds) supplied by the TypeScript producer.
     /// Accepted for forward-compatibility; the runtime currently uses the Bevy
     /// local receipt time as the interpolation clock so browser-clock skew
     /// cannot distort lerp alpha.
     #[allow(dead_code)]
     #[serde(default)]
-    client_time_ms: Option<f64>,
+    pub(crate) client_time_ms: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -200,24 +200,24 @@ enum DecorKind {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct WorldEntity {
-    object_id: String,
-    kind: EntityKind,
-    name: String,
-    x: i32,
-    y: i32,
-    direction: Option<String>,
-    level: Option<u16>,
+pub(crate) struct WorldEntity {
+    pub(crate) object_id: String,
+    pub(crate) kind: EntityKind,
+    pub(crate) name: String,
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) direction: Option<String>,
+    pub(crate) level: Option<u16>,
     /// Wall-clock `Date.now()` milliseconds at which the movement step began.
     /// Populated by the TS producer from `entity.movementStartedAt`.
     /// When absent the motion module uses the snapshot receipt time.
     #[serde(default)]
-    movement_started_ms: Option<f64>,
+    pub(crate) movement_started_ms: Option<f64>,
     /// Duration of this movement step in milliseconds.
     /// Populated by the TS producer as `movementUntil - movementStartedAt`.
     /// When absent the motion module defaults to `motion::DEFAULT_STEP_DURATION_MS`.
     #[serde(default)]
-    movement_duration_ms: Option<f64>,
+    pub(crate) movement_duration_ms: Option<f64>,
 }
 
 /// A mineable cell's depletion stage, driven by the server `MineNodeState`
