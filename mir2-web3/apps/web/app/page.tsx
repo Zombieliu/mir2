@@ -37,17 +37,15 @@ import {
   downloadSnapshot,
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
-import { playOriginalSoundEvent, playOriginalSoundId, setOriginalMusicId } from "../lib/original-audio";
+import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../lib/original-sound-events";
 import { createSnapshotEmitter, createWorldStore } from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
 import {
-  playEntityAttackSound,
-  playEntityDieSound,
-  playEntityStruckSound,
-  playMagicSoundId,
   type SoundEntityRef,
 } from "../lib/original-sound-triggers";
+import { createGameEventBus, makeRealAudioSink, registerSoundSubscriber, registerVfxSubscriber } from "../lib/game-events";
+import type { GameEventBus } from "../lib/game-events";
 import {
   connectSuiWalletForSigning,
   DUBHE_WALLET_URL,
@@ -1301,6 +1299,10 @@ export default function HomePage() {
   if (worldStoreRef.current === null) {
     worldStoreRef.current = createWorldStore();
   }
+  const gameBusRef = useRef<GameEventBus | null>(null);
+  if (gameBusRef.current === null) {
+    gameBusRef.current = createGameEventBus();
+  }
   const snapshotEmitterRef = useRef<SnapshotEmitter | null>(null);
   const damageFloaterSeqRef = useRef(0);
   const screenRef = useRef<ClientScreen>("login");
@@ -1463,6 +1465,27 @@ export default function HomePage() {
       if (clearTimer) window.clearTimeout(clearTimer);
       window.removeEventListener("mir2:debug-snapshot-upload", onDebugSnapshotUpload);
     };
+  }, []);
+  // Register sound + VFX subscribers on mount; unregister on unmount.
+  // gameBusRef.current is always non-null here (lazily initialised above).
+  useEffect(() => {
+    const bus = gameBusRef.current!;
+    const unsubSound = registerSoundSubscriber(
+      bus,
+      makeRealAudioSink((objectId) => soundEntityRefFor(objectId)),
+    );
+    const unsubVfx = registerVfxSubscriber(bus, {
+      addDamageFloater: (payload) =>
+        pushDamageFloaterFromBus(payload.objectId, payload.damage, payload.damageType),
+      markEntityStruck: (objectId) => markEntityStruckFlash(objectId),
+    });
+    return () => {
+      unsubSound();
+      unsubVfx();
+    };
+    // soundEntityRefFor, pushDamageFloaterFromBus, markEntityStruckFlash are
+    // stable hoisted closures over refs; intentionally excluded from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     installDebugCapture();
@@ -6386,7 +6409,7 @@ export default function HomePage() {
         const miniMapIndex = numberOrUndefined(payload.miniMapIndex);
         const bigMapIndex = numberOrUndefined(payload.bigMapIndex);
         // Loop this map's background music (Crystal MapInfo.Music); 0/absent stops the track.
-        setOriginalMusicId(numberOrUndefined(payload.music));
+        gameBusRef.current!.emit({ type: "mapMusicChanged", musicId: numberOrUndefined(payload.music) });
         setWorld((current) => {
           const nextMapFileName = stringOrNull(payload.fileName) ?? current.mapFileName;
           const mapChanged =
@@ -6647,9 +6670,7 @@ export default function HomePage() {
       }
       case "GainedGold": {
         const gold = numberOrZero(payload.gold);
-        if (gold > 0) {
-          playOriginalSoundId(ORIGINAL_SOUND_IDS.gold);
-        }
+        gameBusRef.current!.emit({ type: "gainedGold", amount: gold });
         setWorld((current) => ({
           ...current,
           gold: current.gold + gold,
@@ -6670,7 +6691,7 @@ export default function HomePage() {
         break;
       case "ObjectRangeAttack":
         updateWorldEntityFromLocationPacket(payload);
-        playEntityAttackSound(soundEntityRefFor(stringifyId(payload.objectId)));
+        gameBusRef.current!.emit({ type: "entityAttack", objectId: stringifyId(payload.objectId) });
         spawnRangeProjectile(payload);
         restoreObjectSelection(stringifyId(payload.targetId));
         break;
@@ -6753,7 +6774,7 @@ export default function HomePage() {
         break;
       }
       case "PlaySound":
-        playOriginalSoundId(numberOrZero(payload.sound));
+        gameBusRef.current!.emit({ type: "playSound", soundId: numberOrZero(payload.sound) });
         break;
       case "AddBuff":
         applyAddBuffPacket(payload);
@@ -7879,7 +7900,13 @@ export default function HomePage() {
       case "DamageIndicator": {
         // Floating combat number over the struck object (Crystal `GameScene.DamageIndicator`).
         // Entity HP is authoritative via `ObjectHealth`, so we only spawn the floater here.
-        pushDamageFloater(payload);
+        // Routed through the bus so vfx-subscriber renders the floater.
+        gameBusRef.current!.emit({
+          type: "damageDealt",
+          objectId: stringifyId(payload.objectId),
+          damage: numberOrZero(payload.damage),
+          damageType: numberOrZero(payload.damageType) as 0 | 1 | 2,
+        });
         break;
       }
       case "ObjectEffect":
@@ -8917,7 +8944,7 @@ export default function HomePage() {
 
   function markWorldEntityAttack(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
-    playEntityAttackSound(soundEntityRefFor(objectId));
+    gameBusRef.current!.emit({ type: "entityAttack", objectId });
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -8942,7 +8969,7 @@ export default function HomePage() {
     const objectId = stringifyId(payload.objectId);
     // Crystal plays magic-cast sounds (20000 + Spell*10); most are not yet in SoundList, so this
     // resolves only for the few that are and is otherwise a graceful no-op.
-    playMagicSoundId(numberOrUndefined(payload.spell));
+    gameBusRef.current!.emit({ type: "magicCast", objectId, spell: numberOrUndefined(payload.spell) });
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -9041,12 +9068,34 @@ export default function HomePage() {
     });
   }
 
+  // Thin adapter for the VFX sink: accepts already-parsed fields from a DamageDealtEvent
+  // and delegates to pushDamageFloater which expects a raw packet payload shape.
+  function pushDamageFloaterFromBus(objectId: string, damage: number, damageType: number) {
+    pushDamageFloater({ objectId, damage, damageType });
+  }
+
+  // Apply only the struck hit-flash animation state for an entity (struckStartedAt / struckUntil).
+  // Called by the VFX subscriber via the bus; the position / direction update is handled
+  // separately by updateWorldEntityFromLocationPacket before the bus event is emitted.
+  function markEntityStruckFlash(objectId: string) {
+    if (!objectId || objectId === "0") return;
+    const now = Date.now();
+    setWorld((current) => ({
+      ...current,
+      entities: patchEntityInList(current.entities, objectId, (entity) => ({
+        ...entity,
+        struckStartedAt: now,
+        struckUntil: now + crystalStruckActionDurationMs(entity),
+      })),
+    }));
+  }
+
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
-    playEntityStruckSound(soundEntityRefFor(objectId));
     const location = payload.location as { x?: number; y?: number } | undefined;
-    const now = Date.now();
-
+    // Sound + hit-flash are handled by bus subscribers (entityStruck -> sound-subscriber
+    // + vfx-subscriber). Only the position / direction update stays inline.
+    gameBusRef.current!.emit({ type: "entityStruck", objectId });
     setWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
@@ -9054,28 +9103,21 @@ export default function HomePage() {
         x: typeof location?.x === "number" ? location.x : entity.x,
         y: typeof location?.y === "number" ? location.y : entity.y,
         direction: stringOrNull(payload.direction) ?? entity.direction,
-        struckStartedAt: now,
-        struckUntil: now + crystalStruckActionDurationMs(entity),
       })),
     }));
   }
 
   function markPlayerStruck(payload: Record<string, unknown>) {
-    const now = Date.now();
     const attackerId = stringifyId(payload.attackerId);
-    playEntityStruckSound(soundEntityRefFor(worldRef.current.playerObjectId));
-
+    const playerObjectId = worldRef.current.playerObjectId;
+    // Sound + hit-flash via bus; selection update stays inline.
+    if (playerObjectId) {
+      gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId });
+    }
     setWorld((current) => ({
       ...current,
       selectedObjectId:
         current.selectedObjectId && current.selectedObjectId !== attackerId ? current.selectedObjectId : attackerId,
-      entities: current.playerObjectId
-        ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
-            ...entity,
-            struckStartedAt: now,
-            struckUntil: now + crystalStruckActionDurationMs(entity),
-          }))
-        : current.entities,
     }));
   }
 
@@ -9126,7 +9168,7 @@ export default function HomePage() {
   function markWorldEntityDead(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
-    playEntityDieSound(soundEntityRefFor(objectId));
+    gameBusRef.current!.emit({ type: "entityDied", objectId });
     const now = Date.now();
 
     setWorld((current) => ({
