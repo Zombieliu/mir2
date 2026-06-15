@@ -313,7 +313,7 @@ export type SelectOverlayProps = {
   characters: SelectCharacterEntryLike[];
   selectedCharacterIndex: number;
   accountId: string;
-  selectedPortraitFrame: SelectPortraitFrame | null;
+  selectedPortraitFrames: SelectPortraitFrame[];
   onLanguageChange: (language: Mir2Language) => void;
   onSelectCharacter: (index: number) => void;
   onEnterWorld: () => void;
@@ -328,7 +328,7 @@ export function SelectOverlay({
   characters,
   selectedCharacterIndex,
   accountId,
-  selectedPortraitFrame,
+  selectedPortraitFrames,
   onLanguageChange,
   onSelectCharacter,
   onEnterWorld,
@@ -345,7 +345,24 @@ export function SelectOverlay({
   const [createGender, setCreateGender] = useState<EntityGenderKey>("male");
   const [createError, setCreateError] = useState<string | null>(null);
   const createPortraitFrame = selectPortraitFrameFor(createClassKey, createGender);
-  const activePortraitFrame = showCreatePanel ? createPortraitFrame : selectedPortraitFrame;
+  // The selected-character portrait idle animation lives HERE (not in the shell)
+  // so its 120ms tick re-renders only this overlay, not the ~3000-line shell.
+  const [portraitFrameIndex, setPortraitFrameIndex] = useState(0);
+  useEffect(() => {
+    setPortraitFrameIndex(0);
+  }, [selectedCharacterIndex, selectedPortraitFrames.length]);
+  useEffect(() => {
+    if (showCreatePanel || selectedPortraitFrames.length <= 1) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setPortraitFrameIndex((current) => (current + 1) % selectedPortraitFrames.length);
+    }, 120);
+    return () => window.clearInterval(timer);
+  }, [showCreatePanel, selectedPortraitFrames.length]);
+  const animatedSelectedFrame =
+    selectedPortraitFrames[portraitFrameIndex % Math.max(selectedPortraitFrames.length, 1)] ?? null;
+  const activePortraitFrame = showCreatePanel ? createPortraitFrame : animatedSelectedFrame;
 
   useEffect(() => {
     if (showCreatePanel) {

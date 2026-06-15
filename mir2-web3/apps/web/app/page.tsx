@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ExtraWindows,
   adaptHero,
@@ -1288,6 +1288,24 @@ function recordMovementConsoleEvent(kind: "send" | "ack" | "correction", payload
  */
 const WORLD_SNAPSHOT_INTERVAL_MS = 33;
 
+// Bevy's WorldSnapshot (apps/game-client/runtime/src/lib.rs) only reads these
+// dynamic fields. Serializing the whole WorldState every tick — especially the
+// large originalMapRegion (map sprite cells) plus all inventory/UI state Bevy
+// ignores — saturated the main thread (~54ms per 33ms tick once a map loaded).
+// Project to Bevy's slice so the push stays cheap; the emitter appends clientTimeMs.
+function toBevyWorldSnapshot(world: WorldState): Record<string, unknown> {
+  return {
+    mapTitle: world.mapTitle,
+    playerObjectId: world.playerObjectId,
+    selectedObjectId: world.selectedObjectId,
+    sceneView: world.sceneView,
+    terrainPatches: world.terrainPatches,
+    decorObjects: world.decorObjects,
+    entities: world.entities,
+    mineNodes: world.mineNodes,
+  };
+}
+
 export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -1299,6 +1317,8 @@ export default function HomePage() {
   if (worldStoreRef.current === null) {
     worldStoreRef.current = createWorldStore();
   }
+  // Pending rAF id for coalescing world->React flushes (see updateWorld below).
+  const worldFlushFrameRef = useRef(0);
   const gameBusRef = useRef<GameEventBus | null>(null);
   if (gameBusRef.current === null) {
     gameBusRef.current = createGameEventBus();
@@ -1400,6 +1420,29 @@ export default function HomePage() {
   const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [screen, setScreen] = useState<ClientScreen>("login");
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
+  // Apply a world mutation to the live worldRef immediately (the synchronous
+  // source of truth, mirrored into the world-model store -> Bevy emitter), and
+  // coalesce the React re-render to at most one per animation frame. Previously
+  // every server packet called setWorld -> a full re-render of this ~12k-line
+  // component; under a packet burst that was the dominant movement-jank source.
+  // Now packets advance worldRef synchronously and React re-renders once a frame.
+  const updateWorld = useCallback(
+    (updater: WorldState | ((current: WorldState) => WorldState)): void => {
+      const next =
+        typeof updater === "function"
+          ? (updater as (current: WorldState) => WorldState)(worldRef.current)
+          : updater;
+      worldRef.current = next;
+      worldStoreRef.current?.set(() => next);
+      if (worldFlushFrameRef.current === 0) {
+        worldFlushFrameRef.current = window.requestAnimationFrame(() => {
+          worldFlushFrameRef.current = 0;
+          setWorld(worldRef.current);
+        });
+      }
+    },
+    [],
+  );
   const [logs, setLogs] = useState<UiLogLine[]>([]);
   const [accountId, setAccountId] = useState("demo");
   const [password, setPassword] = useState("demo");
@@ -3461,7 +3504,7 @@ export default function HomePage() {
           });
           loadedSceneKeyRef.current = sceneKey;
           loadingSceneKeyRef.current = null;
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             mapTitle: blueprint.mapTitle ?? current.mapTitle,
             mapFileName: current.mapFileName ?? normalizedMapFileName,
@@ -3576,6 +3619,7 @@ export default function HomePage() {
     store.set(() => worldRef.current);
     const emitter = createSnapshotEmitter(store, {
       intervalMs: WORLD_SNAPSHOT_INTERVAL_MS,
+      select: toBevyWorldSnapshot,
       onSnapshot: (json) => runtimeRef.current?.setMir2WorldState?.(json),
     });
     emitter.start();
@@ -3630,12 +3674,20 @@ export default function HomePage() {
     world.mapFileName,
   ]);
 
-  useEffect(() => {
-    worldRef.current = world;
-    // Mirror React world state into the world-model store so the snapshot
-    // emitter (below) serializes the latest state on its own cadence.
-    worldStoreRef.current?.set(() => world);
-  }, [world]);
+  // worldRef and the world-model store are now updated synchronously by
+  // updateWorld(); React re-renders are coalesced to one rAF. (The old effect
+  // that copied `world` back into worldRef on every render is gone — it would
+  // clobber the live worldRef with the throttled React value.) Cancel any
+  // pending flush on unmount.
+  useEffect(
+    () => () => {
+      if (worldFlushFrameRef.current !== 0) {
+        window.cancelAnimationFrame(worldFlushFrameRef.current);
+        worldFlushFrameRef.current = 0;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!self || !predictedPlayerPosition) return;
@@ -3694,7 +3746,7 @@ export default function HomePage() {
   useEffect(() => {
     if (!world.selectedObjectId) return;
     if (!world.entities.some((entity) => entity.objectId === world.selectedObjectId)) {
-      setWorld((current) => ({ ...current, selectedObjectId: null }));
+      updateWorld((current) => ({ ...current, selectedObjectId: null }));
     }
   }, [world.entities, world.selectedObjectId]);
 
@@ -4376,7 +4428,7 @@ export default function HomePage() {
     socket.addEventListener("open", () => {
       setWsState("open");
       markMir2CacheMilestone("gatewayConnected");
-      setWorld((current) => ({ ...current, connected: true }));
+      updateWorld((current) => ({ ...current, connected: true }));
       appendLog(t("log.gatewayWsOpen"), "network");
       send({ type: "setLanguage", language }, { quiet: true });
       const reconnectSnapshot = reconnectSnapshotRef.current;
@@ -4426,7 +4478,7 @@ export default function HomePage() {
       setLoginBusy(false);
       setWsState("closed");
       markMir2CacheMilestone("gatewayClosed");
-      setWorld((current) => ({ ...current, connected: false }));
+      updateWorld((current) => ({ ...current, connected: false }));
       appendLog(t("log.gatewayWsClosed"), "network");
       if (isCurrentSocket && !closedManually && reconnectStatusRef.current.mode !== "failed") {
         scheduleGatewayReconnect(reconnectSnapshotRef.current ?? captureGatewayReconnectSnapshot());
@@ -4615,7 +4667,7 @@ export default function HomePage() {
     setActiveCharacterTab("char");
     setCharacters([fallbackCharacter(language, accountId)]);
     setLogs([]);
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...DEFAULT_WORLD_STATE,
         mapTitle: current.mapTitle,
         mapFileName: current.mapFileName,
@@ -5822,7 +5874,7 @@ export default function HomePage() {
   }
 
   function selectEntity(objectId: string) {
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       selectedObjectId: current.selectedObjectId === objectId ? null : objectId,
     }));
@@ -5831,7 +5883,7 @@ export default function HomePage() {
   function activateEntity(objectId: string) {
     stopOnchainMining();
     const entity = world.entities.find((entry) => entry.objectId === objectId);
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       selectedObjectId: objectId,
     }));
@@ -6266,7 +6318,7 @@ export default function HomePage() {
         setLoginBusy(false);
         screenRef.current = "login";
         setScreen("login");
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...DEFAULT_WORLD_STATE,
           connected: false,
           mapTitle: current.mapTitle,
@@ -6410,7 +6462,7 @@ export default function HomePage() {
         const bigMapIndex = numberOrUndefined(payload.bigMapIndex);
         // Loop this map's background music (Crystal MapInfo.Music); 0/absent stops the track.
         gameBusRef.current!.emit({ type: "mapMusicChanged", musicId: numberOrUndefined(payload.music) });
-        setWorld((current) => {
+        updateWorld((current) => {
           const nextMapFileName = stringOrNull(payload.fileName) ?? current.mapFileName;
           const mapChanged =
             normalizeMapFileName(nextMapFileName) !== normalizeMapFileName(current.mapFileName);
@@ -6452,7 +6504,7 @@ export default function HomePage() {
           direction: userDirection,
           at: Date.now(),
         };
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           playerObjectId: objectId,
           playerName: stringOrFallback(payload.name, t("ui.self")),
@@ -6584,7 +6636,7 @@ export default function HomePage() {
             );
           }
         }
-        setWorld((current) => {
+        updateWorld((current) => {
           const nextWorld = {
             ...current,
             entities: current.entities.map((entity) =>
@@ -6662,7 +6714,7 @@ export default function HomePage() {
         break;
       case "LoseGold": {
         const gold = numberOrZero(payload.gold);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           gold: Math.max(0, current.gold - gold),
         }));
@@ -6671,7 +6723,7 @@ export default function HomePage() {
       case "GainedGold": {
         const gold = numberOrZero(payload.gold);
         gameBusRef.current!.emit({ type: "gainedGold", amount: gold });
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           gold: current.gold + gold,
         }));
@@ -6735,7 +6787,7 @@ export default function HomePage() {
         const mineLoc = payload.location as { x?: number; y?: number } | undefined;
         const mineX = numberOrZero(mineLoc?.x);
         const mineY = numberOrZero(mineLoc?.y);
-        setWorld((current) => {
+        updateWorld((current) => {
           const others = current.mineNodes.filter(
             (node) => node.x !== mineX || node.y !== mineY,
           );
@@ -6805,7 +6857,7 @@ export default function HomePage() {
         const uniqueId = numberOrUndefined(payload.uniqueId);
         const grid = stringOrFallback(payload.grid, "Inventory");
         if (payload.success === true && typeof uniqueId === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: consumePacketItem(current.inventoryItems, grid, uniqueId, 1),
             beltItems: consumePacketItem(current.beltItems, grid, uniqueId, 1),
@@ -6818,7 +6870,7 @@ export default function HomePage() {
         const uniqueId = numberOrUndefined(payload.uniqueId);
         const count = numberOrZero(payload.count);
         if (payload.success === true && typeof uniqueId === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: consumePacketItem(current.inventoryItems, "Inventory", uniqueId, Math.max(1, count)),
           }));
@@ -6830,7 +6882,7 @@ export default function HomePage() {
         const currentDura = numberOrUndefined(payload.currentDura);
         if (typeof uniqueId === "number" && typeof currentDura === "number") {
           const equipmentSlot = equipmentSlotFromIndex(uniqueId);
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: current.inventoryItems.map((item) =>
               item.uniqueId === uniqueId ? { ...item, durabilityCurrent: currentDura } : item,
@@ -6867,7 +6919,7 @@ export default function HomePage() {
       case "StorageUnlockResult": {
         const result = numberOrZero(payload.result);
         const hasPassword = payload.hasPassword === true;
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           hasStoragePassword: hasPassword,
           storageSessionUnlocked: result === 0 || result === 4 || !hasPassword,
@@ -6877,7 +6929,7 @@ export default function HomePage() {
       }
       case "UserStorage": {
         const storageEntries = Array.isArray(payload.storage) ? payload.storage : [];
-        setWorld((current) => {
+        updateWorld((current) => {
           const currentBySlot = new Map(current.storageItems.map((item) => [item.slot, item]));
           const storageItems = storageEntries.flatMap((entry, slot) => {
             if (!entry || typeof entry !== "object") {
@@ -6929,7 +6981,7 @@ export default function HomePage() {
         const result = numberOrZero(payload.result);
         const removing = payload.removing === true;
         const hasPassword = payload.hasPassword === true;
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           hasStoragePassword: hasPassword,
           storageSessionUnlocked: removing ? !hasPassword : result === 4 || current.storageSessionUnlocked,
@@ -6942,7 +6994,7 @@ export default function HomePage() {
       case "ResizeStorage": {
         const size = numberOrZero(payload.size);
         const hasExpandedStorage = payload.hasExpandedStorage === true;
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           storageSize: size > 0 ? size : current.storageSize,
           hasExpandedStorage,
@@ -6965,7 +7017,7 @@ export default function HomePage() {
           setCharacters(nextCharacters);
           setSelectedCharacterIndex(0);
         }
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...DEFAULT_WORLD_STATE,
           connected: true,
           mapTitle: current.mapTitle,
@@ -7022,7 +7074,7 @@ export default function HomePage() {
         const objectId = stringifyId(payload.objectId);
         const hidden = payload.hidden === true;
         // Hidden mobs (e.g. sneaking/stealth) stay tracked but lose selection focus.
-        setWorld((current) =>
+        updateWorld((current) =>
           hidden && current.selectedObjectId === objectId
             ? { ...current, selectedObjectId: null }
             : current,
@@ -7035,7 +7087,7 @@ export default function HomePage() {
         break;
       case "RemoveDelayedExplosion": {
         const objectId = stringifyId(payload.objectId);
-        setWorld((current) => {
+        updateWorld((current) => {
           const projectiles = current.projectiles.filter(
             (projectile) => projectile.attackerId !== objectId && projectile.targetId !== objectId,
           );
@@ -7065,7 +7117,7 @@ export default function HomePage() {
         // stale walk/run animation on the affected entity so speed re-syncs.
         {
           const objectId = stringifyId(payload.objectId);
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             entities: patchEntityInList(current.entities, objectId, (entity) => ({
               ...entity,
@@ -7087,7 +7139,7 @@ export default function HomePage() {
       case "GainExperience": {
         const amount = numberOrZero(payload.amount);
         if (amount > 0) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             playerExperience: current.playerExperience + amount,
           }));
@@ -7096,7 +7148,7 @@ export default function HomePage() {
       }
       case "LevelChanged":
         playOriginalSoundId(ORIGINAL_SOUND_IDS.levelUp);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           playerExperience: numberOrZero(payload.experience),
           playerMaxExperience: Math.max(numberOrZero(payload.maxExperience), 1),
@@ -7110,7 +7162,7 @@ export default function HomePage() {
       case "HealthChanged": {
         const hp = numberOrUndefined(payload.hp);
         const mp = numberOrUndefined(payload.mp);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           playerHp: typeof hp === "number" ? Math.max(0, hp) : current.playerHp,
           playerMp: typeof mp === "number" ? Math.max(0, mp) : current.playerMp,
@@ -7128,7 +7180,7 @@ export default function HomePage() {
       case "HeroHealthChanged":
         // Hero (companion) stats are tracked in the stage5 hero slice rather than
         // the primary HUD; mirror them there so panels can read them.
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7150,19 +7202,19 @@ export default function HomePage() {
         break;
       case "GainedCredit": {
         const credit = numberOrZero(payload.credit);
-        setWorld((current) => ({ ...current, credit: current.credit + credit }));
+        updateWorld((current) => ({ ...current, credit: current.credit + credit }));
         break;
       }
       case "LoseCredit": {
         const credit = numberOrZero(payload.credit);
-        setWorld((current) => ({ ...current, credit: Math.max(0, current.credit - credit) }));
+        updateWorld((current) => ({ ...current, credit: Math.max(0, current.credit - credit) }));
         break;
       }
       case "Poisoned":
         appendLog(t("ui.poisoned", [], "You are poisoned."), "system");
         break;
       case "Death":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           playerHp: 0,
           entities: current.playerObjectId
@@ -7175,7 +7227,7 @@ export default function HomePage() {
         }));
         break;
       case "Revived":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           playerHp:
             typeof current.playerMaxHp === "number" ? Math.max(1, current.playerMaxHp) : current.playerHp,
@@ -7226,7 +7278,7 @@ export default function HomePage() {
       case "ItemUpgraded": {
         const item = normalizeUserItem(payload.item);
         if (item) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: patchItemsByUniqueId(current.inventoryItems, {
               uniqueId: item.uniqueId,
@@ -7255,7 +7307,7 @@ export default function HomePage() {
         const uniqueId = numberOrUndefined(payload.uniqueId);
         const count = numberOrZero(payload.count);
         if (typeof uniqueId === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: removeItemByUniqueId(current.inventoryItems, uniqueId, count),
             beltItems: removeItemByUniqueId(current.beltItems, uniqueId, count),
@@ -7268,7 +7320,7 @@ export default function HomePage() {
         const uniqueId = numberOrUndefined(payload.uniqueId);
         const count = numberOrZero(payload.count);
         if (payload.success === true && typeof uniqueId === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: removeItemByUniqueId(current.inventoryItems, uniqueId, Math.max(1, count)),
           }));
@@ -7279,7 +7331,7 @@ export default function HomePage() {
         const destroy = payload.destroy === true;
         const idFrom = numberOrUndefined(payload.idFrom);
         if (payload.success === true && destroy && typeof idFrom === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: removeItemByUniqueId(current.inventoryItems, idFrom, 1),
           }));
@@ -7291,7 +7343,7 @@ export default function HomePage() {
         const currentDura = numberOrUndefined(payload.currentDura);
         const maxDura = numberOrUndefined(payload.maxDura);
         if (typeof uniqueId === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: patchItemsByUniqueId(current.inventoryItems, {
               uniqueId,
@@ -7315,7 +7367,7 @@ export default function HomePage() {
       case "ResizeInventory": {
         const size = numberOrZero(payload.size);
         if (size > 0) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             maxBagSlots: size,
           }));
@@ -7327,7 +7379,7 @@ export default function HomePage() {
       case "RemoveMagic": {
         const placeId = numberOrUndefined(payload.placeId);
         if (typeof placeId === "number") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             knownSkills: current.knownSkills.filter((skill) => skill.hotkey !== placeId),
           }));
@@ -7340,7 +7392,7 @@ export default function HomePage() {
           const spell = stringOrFallback(payload.spell, "");
           const canUse = payload.canUse === true;
           if (spell) {
-            setWorld((current) => ({
+            updateWorld((current) => ({
               ...current,
               knownSkills: current.knownSkills.map((skill) =>
                 skillMatchesCrystalSpell(skill, spell)
@@ -7355,7 +7407,7 @@ export default function HomePage() {
 
       // Group / party ----------------------------------------------------------
       case "SwitchGroup":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7370,7 +7422,7 @@ export default function HomePage() {
       case "DeleteMember": {
         const name = stringOrFallback(payload.name, "");
         if (name) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             stage5Systems: {
               ...current.stage5Systems,
@@ -7408,7 +7460,7 @@ export default function HomePage() {
           ];
         });
         const leaderName = stringOrFallback(payload.leaderName, "");
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7422,7 +7474,7 @@ export default function HomePage() {
         break;
       }
       case "DeleteGroup":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7453,7 +7505,7 @@ export default function HomePage() {
           ? normalizeFriendList(payload.blocked)
           : friendsRaw.filter((friend) => friend.blocked);
         const friendsList = hasBlockedKey ? friendsRaw : friendsRaw.filter((friend) => !friend.blocked);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7471,7 +7523,7 @@ export default function HomePage() {
         break;
       }
       case "MentorUpdate":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7486,7 +7538,7 @@ export default function HomePage() {
         }));
         break;
       case "LoverUpdate":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7517,7 +7569,7 @@ export default function HomePage() {
       case "TradeRequest":
       case "TradeAccept": {
         const name = stringOrFallback(payload.name, "?");
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7536,7 +7588,7 @@ export default function HomePage() {
         break;
       }
       case "TradeGold":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7548,7 +7600,7 @@ export default function HomePage() {
         }));
         break;
       case "TradeItem":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7566,7 +7618,7 @@ export default function HomePage() {
         }));
         break;
       case "TradeConfirm":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7575,7 +7627,7 @@ export default function HomePage() {
         }));
         break;
       case "TradeCancel":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: { ...current.stage5Systems, trade: null },
         }));
@@ -7585,7 +7637,7 @@ export default function HomePage() {
       // Mail -------------------------------------------------------------------
       case "ReceiveMail": {
         const mail = normalizeMailList(payload.mail);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: { ...current.stage5Systems, mail },
         }));
@@ -7610,7 +7662,7 @@ export default function HomePage() {
         appendLog(heroCreateResultMessage(numberOrZero(payload.result)), "system");
         break;
       case "ManageHeroes":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7626,7 +7678,7 @@ export default function HomePage() {
       case "ChangeHero":
       case "SetHeroBehaviour":
       case "UpdateHeroSpawnState":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7649,7 +7701,7 @@ export default function HomePage() {
       // Intelligent creatures (pets) ------------------------------------------
       case "NewIntelligentCreature":
       case "UpdateIntelligentCreatureList":
-        setWorld((current) => {
+        updateWorld((current) => {
           const list = Array.isArray(payload.creatureList)
             ? (payload.creatureList as Array<Record<string, unknown>>)
             : current.stage5Systems.intelligentCreatures ?? [];
@@ -7665,7 +7717,7 @@ export default function HomePage() {
       case "ItemRentalFee":
       case "ItemRentalPeriod":
       case "CancelItemRental":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7774,7 +7826,7 @@ export default function HomePage() {
 
       // Guild subsystem --------------------------------------------------------
       case "GuildStatus":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -7792,7 +7844,7 @@ export default function HomePage() {
         // values (2..5) are rank/option/notice edits that do not alter membership.
         const status = numberOrZero(payload.status);
         if (name && (status === 0 || status === 1)) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             stage5Systems: {
               ...current.stage5Systems,
@@ -7813,7 +7865,7 @@ export default function HomePage() {
           ? (payload.notice as unknown[]).filter((line): line is string => typeof line === "string")
           : [];
         if (notice.length > 0) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             stage5Systems: {
               ...current.stage5Systems,
@@ -7848,7 +7900,7 @@ export default function HomePage() {
 
       // Object appearance / identity sync -------------------------------------
       case "ColourChanged":
-        setWorld((current) =>
+        updateWorld((current) =>
           current.playerObjectId
             ? {
                 ...current,
@@ -7862,7 +7914,7 @@ export default function HomePage() {
         break;
       case "ObjectColourChanged": {
         const objectId = stringifyId(payload.objectId);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           entities: patchEntityInList(current.entities, objectId, (entity) => ({
             ...entity,
@@ -7876,7 +7928,7 @@ export default function HomePage() {
         const objectId = stringifyId(payload.objectId ?? payload.id);
         const name = stringOrFallback(payload.name, "");
         if (name && objectId !== "0") {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             entities: patchEntityInList(current.entities, objectId, (entity) => ({
               ...entity,
@@ -7888,7 +7940,7 @@ export default function HomePage() {
       }
       case "ObjectLeveled": {
         const objectId = stringifyId(payload.objectId);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           entities: patchEntityInList(current.entities, objectId, (entity) => ({
             ...entity,
@@ -7922,7 +7974,7 @@ export default function HomePage() {
             )
           : [];
         if (completed.length > 0) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             questLog: current.questLog.map((quest) =>
               completed.includes(quest.questId)
@@ -7943,7 +7995,7 @@ export default function HomePage() {
           const descriptionLines = Array.isArray(payload.descriptionLines)
             ? (payload.descriptionLines as unknown[]).filter((line): line is string => typeof line === "string")
             : undefined;
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             questLog: current.questLog.map((quest) =>
               quest.questId === questId
@@ -7981,7 +8033,7 @@ export default function HomePage() {
         const miniMap = numberOrUndefined(payload.miniMap);
         const bigMap = numberOrUndefined(payload.bigMap);
         const location = payload.location as { x?: number; y?: number } | undefined;
-        setWorld((current) => {
+        updateWorld((current) => {
           const mapChanged =
             normalizeMapFileName(fileName) !== normalizeMapFileName(current.mapFileName);
           const preservedSelfEntity = current.playerObjectId
@@ -8089,7 +8141,7 @@ export default function HomePage() {
             castTimeMs: numberOrUndefined(magic.cast_time) ?? numberOrUndefined(magic.castTime),
             cooldownRemainingTicks: 0,
           };
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             knownSkills: [
               nextSkill,
@@ -8112,7 +8164,7 @@ export default function HomePage() {
         const uniqueId = numberOrUndefined(payload.uniqueId);
         const count = numberOrZero(payload.count);
         if (payload.success === true && typeof uniqueId === "number" && count > 0) {
-          setWorld((current) => ({
+          updateWorld((current) => ({
             ...current,
             inventoryItems: patchItemsByUniqueId(current.inventoryItems, {
               uniqueId,
@@ -8157,7 +8209,7 @@ export default function HomePage() {
       // Hero (companion) info --------------------------------------------------
       case "HeroInformation":
       case "NewHeroInfo":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8173,7 +8225,7 @@ export default function HomePage() {
       case "UserBackStep": {
         const point = movementPointFromPacketPayload(payload);
         const direction = stringOrNull(payload.direction) ?? undefined;
-        setWorld((current) =>
+        updateWorld((current) =>
           current.playerObjectId
             ? {
                 ...current,
@@ -8197,7 +8249,7 @@ export default function HomePage() {
       // Rental item detail -----------------------------------------------------
       case "UpdateRentalItem": {
         const loanItem = normalizeUserItem(payload.loanItem);
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8224,7 +8276,7 @@ export default function HomePage() {
             : Array.isArray(info.taskDescription)
               ? (info.taskDescription as unknown[]).filter((line): line is string => typeof line === "string")
               : [];
-          setWorld((current) => {
+          updateWorld((current) => {
             if (current.questLog.some((quest) => quest.questId === questId)) {
               return current;
             }
@@ -8290,7 +8342,7 @@ export default function HomePage() {
       // Derived stat sheets ----------------------------------------------------
       case "HeroBaseStatsInfo":
         // Hero (companion) stat sheet -> stored on the stage5 hero slice for panels.
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8330,7 +8382,7 @@ export default function HomePage() {
       // Item rental lock / confirmation flow -----------------------------------
       case "GetRentedItems": {
         const rentedItems = Array.isArray(payload.rentedItems) ? payload.rentedItems : [];
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8343,7 +8395,7 @@ export default function HomePage() {
         break;
       }
       case "ItemRentalLock":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8357,7 +8409,7 @@ export default function HomePage() {
         }));
         break;
       case "ItemRentalPartnerLock":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8370,7 +8422,7 @@ export default function HomePage() {
         }));
         break;
       case "CanConfirmItemRental":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8382,7 +8434,7 @@ export default function HomePage() {
         }));
         break;
       case "ConfirmItemRental":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8422,7 +8474,7 @@ export default function HomePage() {
           : Array.isArray(payload.listings)
             ? (payload.listings as Array<Record<string, unknown>>)
             : [];
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: { ...current.stage5Systems, auction: listings },
         }));
@@ -8479,7 +8531,7 @@ export default function HomePage() {
 
       // Hero management acknowledgements ---------------------------------------
       case "HeroCreateRequest":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8491,7 +8543,7 @@ export default function HomePage() {
         }));
         break;
       case "UnlockHeroAutoPot":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8514,7 +8566,7 @@ export default function HomePage() {
               ? (payload.playerMap as unknown[]).filter((line): line is string => typeof line === "string")
               : undefined;
           if (members && members.length > 0) {
-            setWorld((current) => ({
+            updateWorld((current) => ({
               ...current,
               stage5Systems: {
                 ...current.stage5Systems,
@@ -8727,7 +8779,7 @@ export default function HomePage() {
       // Auto-potion configuration echo -----------------------------------------
       case "SetAutoPotValue":
       case "SetAutoPotItem":
-        setWorld((current) => ({
+        updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
@@ -8817,7 +8869,7 @@ export default function HomePage() {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
     clearPacketRuntimeObjectTombstone(objectId);
-    setWorld((current) => {
+    updateWorld((current) => {
       const previousEntity = current.entities.find((entity) => entity.objectId === objectId);
       const sprite = spriteFromPacketOrExisting(
         payload,
@@ -8860,7 +8912,7 @@ export default function HomePage() {
     const objectId = stringifyId(payload.objectId);
 
     clearPacketRuntimeObjectTombstone(objectId);
-    setWorld((current) => {
+    updateWorld((current) => {
       const nextWorld = {
         ...current,
         groundDrops: upsertGroundDropInList(current.groundDrops, {
@@ -8886,7 +8938,7 @@ export default function HomePage() {
 
   function removeObjectFromWorld(objectId: string) {
     rememberPacketRuntimeObjectRemoved(objectId);
-    setWorld((current) => {
+    updateWorld((current) => {
       const nextWorld = {
         ...current,
         selectedObjectId: current.selectedObjectId === objectId ? null : current.selectedObjectId,
@@ -8902,7 +8954,7 @@ export default function HomePage() {
   function restoreObjectSelection(objectId: string) {
     if (objectId === "0") return;
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       selectedObjectId:
         current.selectedObjectId && current.selectedObjectId !== objectId ? current.selectedObjectId : objectId,
@@ -8913,7 +8965,7 @@ export default function HomePage() {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const nextWorld = {
         ...current,
         entities: patchEntityInList(current.entities, objectId, (entity) => ({
@@ -8948,7 +9000,7 @@ export default function HomePage() {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => {
         const animation = attackAnimationVariant(payload);
@@ -8973,7 +9025,7 @@ export default function HomePage() {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
         ...entity,
@@ -8990,7 +9042,7 @@ export default function HomePage() {
   function markPlayerMagic(payload: Record<string, unknown>) {
     const now = Date.now();
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const playerObjectId = current.playerObjectId;
       if (!playerObjectId) {
         return current;
@@ -9020,7 +9072,7 @@ export default function HomePage() {
     const damage = numberOrZero(payload.damage);
     const damageType = numberOrZero(payload.damageType); // 0 Hit, 1 Miss, 2 Critical (Crystal DamageType)
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const target = current.entities.find((entity) => entity.objectId === objectId);
       const isPlayerTarget =
         objectId === current.playerObjectId ||
@@ -9080,7 +9132,7 @@ export default function HomePage() {
   function markEntityStruckFlash(objectId: string) {
     if (!objectId || objectId === "0") return;
     const now = Date.now();
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
         ...entity,
@@ -9096,7 +9148,7 @@ export default function HomePage() {
     // Sound + hit-flash are handled by bus subscribers (entityStruck -> sound-subscriber
     // + vfx-subscriber). Only the position / direction update stays inline.
     gameBusRef.current!.emit({ type: "entityStruck", objectId });
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
         ...entity,
@@ -9114,7 +9166,7 @@ export default function HomePage() {
     if (playerObjectId) {
       gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId });
     }
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       selectedObjectId:
         current.selectedObjectId && current.selectedObjectId !== attackerId ? current.selectedObjectId : attackerId,
@@ -9128,7 +9180,7 @@ export default function HomePage() {
       return;
     }
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const attacker = current.entities.find((entity) => entity.objectId === attackerId);
       const target = current.entities.find((entity) => entity.objectId === targetId);
       if (!attacker || !target) {
@@ -9171,7 +9223,7 @@ export default function HomePage() {
     gameBusRef.current!.emit({ type: "entityDied", objectId });
     const now = Date.now();
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       playerHp: current.playerObjectId === objectId ? 0 : current.playerHp,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
@@ -9198,7 +9250,7 @@ export default function HomePage() {
     const objectId = stringifyId(payload.objectId);
     const now = Date.now();
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       playerHp:
         current.playerObjectId === objectId && typeof current.playerMaxHp === "number"
@@ -9221,7 +9273,7 @@ export default function HomePage() {
     const delay = numberOrZero(payload.delay);
     if (!spell) return;
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       knownSkills: current.knownSkills.map((skill) =>
         skillMatchesCrystalSpell(skill, spell) ? { ...skill, cooldownRemainingTicks: delay } : skill,
@@ -9234,7 +9286,7 @@ export default function HomePage() {
     const level = numberOrUndefined(payload.level);
     if (!spell || typeof level !== "number") return;
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       knownSkills: current.knownSkills.map((skill) =>
         skillMatchesCrystalSpell(skill, spell)
@@ -9249,7 +9301,7 @@ export default function HomePage() {
     const objectId = stringifyId(payload.objectId);
     if (typeof buffType !== "number" || payload.visible === false) return;
 
-    setWorld((current) => {
+    updateWorld((current) => {
       if (current.playerObjectId && objectId !== "0" && objectId !== current.playerObjectId) {
         return current;
       }
@@ -9288,7 +9340,7 @@ export default function HomePage() {
     if (typeof buffType !== "number") return;
     const key = crystalBuffKey(objectId, buffType);
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       activeBuffs: current.activeBuffs.filter((buff) => buff.key !== key),
     }));
@@ -9301,7 +9353,7 @@ export default function HomePage() {
     if (typeof buffType !== "number") return;
     const key = crystalBuffKey(objectId, buffType);
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       activeBuffs: current.activeBuffs.map((buff) =>
         buff.key === key ? { ...buff, description: paused ? "Paused Crystal buff" : "Crystal buff" } : buff,
@@ -9317,7 +9369,7 @@ export default function HomePage() {
 
     if (typeof percent !== "number") return;
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const isSelf = current.playerObjectId === objectId;
       const selfMaxHp = exactMaxHp ?? current.playerMaxHp;
       const nextPlayerHp =
@@ -9376,7 +9428,7 @@ export default function HomePage() {
 
     if (typeof percent !== "number") return;
 
-    setWorld((current) => ({
+    updateWorld((current) => ({
       ...current,
       playerMp:
         current.playerObjectId === objectId
@@ -9416,7 +9468,7 @@ export default function HomePage() {
     };
     const key = rankingPageKey(rankType, onlineOnly);
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const nextWorld = {
         ...current,
         rankings: {
@@ -9600,7 +9652,7 @@ export default function HomePage() {
     let followUpEntities = entities;
     let followUpMapTransfers = mapTransfers;
 
-    setWorld((current) => {
+    updateWorld((current) => {
       const currentTime = Date.now();
       const transientByObjectId = new Map(
         current.entities.map((entity) => [
