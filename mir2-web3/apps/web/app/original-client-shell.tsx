@@ -1306,6 +1306,8 @@ export function OriginalClientShell({
   }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
+  // True once the safety-valve window elapses with the scene up but readiness unresolved.
+  const [readinessSafetyExpired, setReadinessSafetyExpired] = useState(false);
   // Key ONLY on the map-region identity. It MUST stay stable while the player stands
   // still: the tile-preload readiness effect re-runs (and resets preloadStatus to
   // "loading", disposing the in-flight preload) whenever this key changes. The old key
@@ -1475,6 +1477,18 @@ export function OriginalClientShell({
     };
   }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady]);
 
+  // Safety-valve timer: arm when the scene is up; if readiness hasn't cleared the
+  // overlay within SCENE_READINESS_SAFETY_MS, force interaction-ready (see notifier).
+  useEffect(() => {
+    if (screen !== "game" || !renderPlayer || !world.originalMapRegion) {
+      setReadinessSafetyExpired(false);
+      return;
+    }
+    setReadinessSafetyExpired(false);
+    const timer = window.setTimeout(() => setReadinessSafetyExpired(true), SCENE_READINESS_SAFETY_MS);
+    return () => window.clearTimeout(timer);
+  }, [screen, sceneAssetReadinessKey]);
+
   useEffect(() => {
     const notify = (readiness: SceneAssetReadiness) => {
       sceneAssetReadinessCallbackRef.current(readiness);
@@ -1494,6 +1508,16 @@ export function OriginalClientShell({
 
     if (!renderPlayer || !world.originalMapRegion) {
       notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", 0));
+      return;
+    }
+
+    if (readinessSafetyExpired) {
+      // Safety valve elapsed — the scene is rendered; let the player interact even if
+      // a sprite library / tile is still resolving (they keep loading in the background).
+      notify({
+        ...createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0),
+        interactionReady: true,
+      });
       return;
     }
 
@@ -1564,6 +1588,7 @@ export function OriginalClientShell({
     bevyEntityAtlasKey,
     activeBevyEntityAtlas?.key,
     webGl2EntityTextureReady,
+    readinessSafetyExpired,
   ]);
 
   useEffect(() => {
@@ -2103,6 +2128,12 @@ const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 512;
 const SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT = 96;
 const SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE = 64;
 const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
+// Safety valve: once the scene is rendered (map + player), the "Loading map…" overlay
+// must clear within this window even if some sprite library / tile is still resolving.
+// In a populated map world.entities streams in continuously, so the "all desired
+// libraries ready" gate may never settle; without this bound the overlay can hang
+// forever while the world is already drawn behind it. Remaining assets keep loading.
+const SCENE_READINESS_SAFETY_MS = 3000;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
 const SCENE_TILE_PREFETCH_RING_CELLS = 6;
