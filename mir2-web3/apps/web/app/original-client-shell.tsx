@@ -375,7 +375,6 @@ export function OriginalClientShell({
     language === "zh-CN" ? "地图加载中…" : language === "es" ? "Cargando mapa…" : "Loading map…",
   );
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
-  const [selectPortraitFrameIndex, setSelectPortraitFrameIndex] = useState(0);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
@@ -431,8 +430,6 @@ export function OriginalClientShell({
 
   const selectedCharacter = characters[selectedCharacterIndex] ?? null;
   const selectedPortraitFrames = selectedCharacter ? portraitFramesForCharacter(selectedCharacter) : [];
-  const activeSelectPortraitFrame =
-    selectedPortraitFrames[selectPortraitFrameIndex % Math.max(selectedPortraitFrames.length, 1)] ?? null;
   const loginBackgroundFrame =
     ORIGINAL_UI.login.backgroundFrames[LOGIN_STATIC_BACKGROUND_FRAME] ?? ORIGINAL_UI.login.backgroundFrames[0];
   const loginTransitionBackground =
@@ -534,21 +531,8 @@ export function OriginalClientShell({
     }
   }, [loginTransitionFrame, playLoginEffect]);
 
-  useEffect(() => {
-    setSelectPortraitFrameIndex(0);
-  }, [screen, selectedCharacterIndex, selectedCharacter?.classKey, selectedCharacter?.gender]);
-
-  useEffect(() => {
-    if (screen !== "select" || selectedPortraitFrames.length <= 1) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setSelectPortraitFrameIndex((current) => (current + 1) % selectedPortraitFrames.length);
-    }, 120);
-
-    return () => window.clearInterval(timer);
-  }, [screen, selectedPortraitFrames.length]);
+  // Portrait idle animation moved into SelectOverlay so its 120ms tick re-renders
+  // only that overlay, not this ~3000-line shell.
 
   useEffect(() => {
     if (screen !== "game") {
@@ -1908,7 +1892,7 @@ export function OriginalClientShell({
               characters={characters}
               selectedCharacterIndex={selectedCharacterIndex}
               accountId={accountId}
-              selectedPortraitFrame={activeSelectPortraitFrame}
+              selectedPortraitFrames={selectedPortraitFrames}
               onLanguageChange={onLanguageChange}
               onSelectCharacter={onSelectCharacter}
               onEnterWorld={onEnterWorld}

@@ -14,6 +14,7 @@
  */
 
 import type { WorldStore } from "./store";
+import type { WorldState } from "./types";
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -26,6 +27,14 @@ export type SnapshotEmitterOptions = {
    * at each tick — it does not interpolate.
    */
   intervalMs?: number;
+
+  /**
+   * Optional projection applied before serialization. Use it to push only the
+   * fields the consumer needs — e.g. Bevy ignores the large originalMapRegion /
+   * inventory / UI state, so projecting to its slice keeps the per-tick
+   * stringify cheap instead of re-serializing the whole world 30x/s.
+   */
+  select?: (state: WorldState) => Record<string, unknown>;
 
   /**
    * Called with the serialized JSON string whenever the snapshot has changed
@@ -53,7 +62,7 @@ export function createSnapshotEmitter(
   store: WorldStore,
   options: SnapshotEmitterOptions,
 ): SnapshotEmitter {
-  const { intervalMs = 16, onSnapshot } = options;
+  const { intervalMs = 16, select, onSnapshot } = options;
 
   let timerId: ReturnType<typeof setInterval> | null = null;
   let lastJson: string | null = null;
@@ -64,12 +73,13 @@ export function createSnapshotEmitter(
     // emitter would push a full serialize + WASM call every interval even when
     // nothing moved. We stamp clientTimeMs only when we actually push.
     const snapshot = store.getSnapshot();
-    const json = JSON.stringify(snapshot);
+    const view = select ? select(snapshot) : snapshot;
+    const json = JSON.stringify(view);
     if (json === lastJson) return;
     lastJson = json;
     // Stamp clientTimeMs on the outbound snapshot — additive field, ignored by
     // existing consumers; lets Bevy timestamp/interpolate this push.
-    onSnapshot(JSON.stringify({ ...snapshot, clientTimeMs: Date.now() }));
+    onSnapshot(JSON.stringify({ ...view, clientTimeMs: Date.now() }));
   }
 
   const emitter: SnapshotEmitter = {
