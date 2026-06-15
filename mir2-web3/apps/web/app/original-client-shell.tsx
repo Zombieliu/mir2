@@ -405,6 +405,9 @@ export function OriginalClientShell({
             ? t("ui.reconnectFailed", [], "Connection lost. Please log in again.")
             : null;
   const missingSceneSpriteLibrariesRef = useRef<Set<string>>(new Set());
+  // Sprite-library keys whose load is currently in flight — prevents duplicate
+  // fetches when the load effect re-runs (it re-runs on every world.entities change).
+  const sceneSpriteLibraryInFlightRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
   // Over-head chat bubble bookkeeping. Keyed by speaker name (the only entity reference a chat log
   // line carries), each record remembers when the line first appeared so bubbles can expire on the
@@ -887,59 +890,43 @@ export function OriginalClientShell({
         missingSceneSpriteLibrariesRef.current.add(libraryKey);
       }
     }
-    const pendingLibraries = missingLibraries.filter(
+    const toLoad = missingLibraries.filter(
       (libraryKey) =>
         originalSceneSpriteLibraryExists(libraryKey) &&
-        !missingSceneSpriteLibrariesRef.current.has(libraryKey),
+        !missingSceneSpriteLibrariesRef.current.has(libraryKey) &&
+        !sceneSpriteLibraryInFlightRef.current.has(libraryKey),
     );
-    if (!pendingLibraries.length) {
+    if (!toLoad.length) {
       return;
     }
 
-    let disposed = false;
-    void Promise.all(
-      pendingLibraries.map(async (libraryKey) => {
-        try {
-          return [libraryKey, await loadOriginalSceneSpriteLibrary(libraryKey)] as const;
-        } catch {
-          // Return a tuple with null meta so we can track the failed key below.
-          return [libraryKey, null] as const;
-        }
-      }),
-    )
-      .then((loadedLibraries) => {
-        if (disposed) {
-          return;
-        }
-
-        // Record permanently-unavailable libraries before updating state so the
-        // next render's pendingSceneSpriteLibraryKeys calculation excludes them and
-        // does not block sceneSpriteLibrariesReady (and therefore sceneInteractionReady)
-        // forever. Previously failed libraries were silently dropped (return null) and
-        // never added to missingSceneSpriteLibrariesRef, so a source-indexed library
-        // that returns 404 at runtime would permanently stall the loading overlay.
-        for (const [libraryKey, libraryMeta] of loadedLibraries) {
-          if (!libraryMeta) {
-            missingSceneSpriteLibrariesRef.current.add(libraryKey);
-          }
-        }
-
-        setSceneSpriteLibraries((current) => {
-          const next = { ...current };
-          for (const [libraryKey, libraryMeta] of loadedLibraries) {
-            if (libraryMeta) {
-              next[libraryKey] = libraryMeta;
-            }
-          }
-          return next;
+    // Load each library INDEPENDENTLY and ALWAYS cache a completed load. The old
+    // Promise.all + `disposed` guard abandoned in-flight loads whenever this effect
+    // re-ran — and it re-ran on every world.entities change (e.g. an NPC moving),
+    // so on a fast gateway the loads were perpetually dropped before
+    // setSceneSpriteLibraries, sceneSpriteLibrariesReady never flipped, and the
+    // "Loading map…" overlay hung forever. A loaded sprite library is always valid
+    // to cache; the in-flight set prevents duplicate fetches across re-runs.
+    for (const libraryKey of toLoad) {
+      sceneSpriteLibraryInFlightRef.current.add(libraryKey);
+      void loadOriginalSceneSpriteLibrary(libraryKey)
+        .then((libraryMeta) => {
+          setSceneSpriteLibraries((current) =>
+            libraryKey in current ? current : { ...current, [libraryKey]: libraryMeta },
+          );
+        })
+        .catch(() => {
+          // Permanently unavailable at runtime (e.g. 404 for a source-only library):
+          // record it so pendingSceneSpriteLibraryKeys excludes it and readiness can
+          // resolve, then nudge a re-render so the calculation recomputes.
+          missingSceneSpriteLibrariesRef.current.add(libraryKey);
+          setSceneSpriteLibraries((current) => ({ ...current }));
+        })
+        .finally(() => {
+          sceneSpriteLibraryInFlightRef.current.delete(libraryKey);
         });
-      })
-      .catch(() => undefined);
-
-    return () => {
-      disposed = true;
-    };
-  }, [desiredSceneSpriteLibraryKey, desiredSceneSpriteLibraryKeys, sceneSpriteLibraries, screen]);
+    }
+  }, [desiredSceneSpriteLibraryKey, sceneSpriteLibraries, screen]);
 
   const sceneNow = motionNow;
   entityMotionSnapshotsRef.current = refreshEntityMotionSnapshots(
