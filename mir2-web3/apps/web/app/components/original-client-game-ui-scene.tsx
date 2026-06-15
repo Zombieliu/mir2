@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import type { CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import { MainHud } from "./original-client-overlays";
@@ -89,7 +89,7 @@ type GameUiSceneProps = {
   transferOptions: SystemMenuTransferOption[];
 };
 
-export function GameUiScene({
+function GameUiSceneInner({
   t,
   locale,
   runtimeMessage,
@@ -402,3 +402,8 @@ export function GameUiScene({
     </div>
   );
 }
+
+// Memoized: GameUiScene does not receive motionNow, so it should not re-render on
+// every motion-clock tick (30 Hz in-game). Props change only on server world pushes,
+// user input, or window-open state changes — all far below 30 Hz.
+export const GameUiScene = memo(GameUiSceneInner);
