@@ -1288,6 +1288,24 @@ function recordMovementConsoleEvent(kind: "send" | "ack" | "correction", payload
  */
 const WORLD_SNAPSHOT_INTERVAL_MS = 33;
 
+// Bevy's WorldSnapshot (apps/game-client/runtime/src/lib.rs) only reads these
+// dynamic fields. Serializing the whole WorldState every tick — especially the
+// large originalMapRegion (map sprite cells) plus all inventory/UI state Bevy
+// ignores — saturated the main thread (~54ms per 33ms tick once a map loaded).
+// Project to Bevy's slice so the push stays cheap; the emitter appends clientTimeMs.
+function toBevyWorldSnapshot(world: WorldState): Record<string, unknown> {
+  return {
+    mapTitle: world.mapTitle,
+    playerObjectId: world.playerObjectId,
+    selectedObjectId: world.selectedObjectId,
+    sceneView: world.sceneView,
+    terrainPatches: world.terrainPatches,
+    decorObjects: world.decorObjects,
+    entities: world.entities,
+    mineNodes: world.mineNodes,
+  };
+}
+
 export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -3601,6 +3619,7 @@ export default function HomePage() {
     store.set(() => worldRef.current);
     const emitter = createSnapshotEmitter(store, {
       intervalMs: WORLD_SNAPSHOT_INTERVAL_MS,
+      select: toBevyWorldSnapshot,
       onSnapshot: (json) => runtimeRef.current?.setMir2WorldState?.(json),
     });
     emitter.start();
