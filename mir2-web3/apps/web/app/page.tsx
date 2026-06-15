@@ -3523,7 +3523,6 @@ export default function HomePage() {
             throw new Error(`scene starter route returned ${fallbackResponse.status}`);
           }
           const fallbackBlueprint = (await fallbackResponse.json()) as SceneBlueprint;
-          if (disposed) return;
           if (!fallbackBlueprint?.originalMapRegion) {
             throw new Error("starter scene missing originalMapRegion");
           }
@@ -3583,7 +3582,12 @@ export default function HomePage() {
         }
 
         const blueprint = (await response.json()) as SceneBlueprint;
-        if (disposed) return;
+        // Apply regardless of `disposed`. This effect re-runs on every self-position /
+        // world update (frequent on a fast gateway); dropping the in-flight blueprint
+        // here left world.originalMapRegion null forever — and because loadingSceneKeyRef
+        // stayed set, re-runs skipped re-fetching (line ~3488), so the "Loading map…"
+        // overlay hung permanently. A fetched blueprint for this sceneKey is always valid
+        // to apply; a genuine map change re-triggers a fresh load that supersedes it.
         applySceneBlueprint(blueprint, response.headers.get("x-mir2-scene-cache") ?? "crystal");
       } catch (error) {
         if (!disposed) {
