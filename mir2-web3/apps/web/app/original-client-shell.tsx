@@ -879,7 +879,8 @@ export function OriginalClientShell({
         try {
           return [libraryKey, await loadOriginalSceneSpriteLibrary(libraryKey)] as const;
         } catch {
-          return null;
+          // Return a tuple with null meta so we can track the failed key below.
+          return [libraryKey, null] as const;
         }
       }),
     )
@@ -888,14 +889,24 @@ export function OriginalClientShell({
           return;
         }
 
+        // Record permanently-unavailable libraries before updating state so the
+        // next render's pendingSceneSpriteLibraryKeys calculation excludes them and
+        // does not block sceneSpriteLibrariesReady (and therefore sceneInteractionReady)
+        // forever. Previously failed libraries were silently dropped (return null) and
+        // never added to missingSceneSpriteLibrariesRef, so a source-indexed library
+        // that returns 404 at runtime would permanently stall the loading overlay.
+        for (const [libraryKey, libraryMeta] of loadedLibraries) {
+          if (!libraryMeta) {
+            missingSceneSpriteLibrariesRef.current.add(libraryKey);
+          }
+        }
+
         setSceneSpriteLibraries((current) => {
           const next = { ...current };
-          for (const entry of loadedLibraries) {
-            if (!entry) {
-              continue;
+          for (const [libraryKey, libraryMeta] of loadedLibraries) {
+            if (libraryMeta) {
+              next[libraryKey] = libraryMeta;
             }
-            const [libraryKey, libraryMeta] = entry;
-            next[libraryKey] = libraryMeta;
           }
           return next;
         });
