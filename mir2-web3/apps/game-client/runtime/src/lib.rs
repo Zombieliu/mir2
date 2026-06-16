@@ -26,14 +26,22 @@ const COMPILED_RENDER_BACKEND: &str = "webgl2";
 )))]
 const COMPILED_RENDER_BACKEND: &str = "native";
 
+// Both wasm backends composite transparently over the DOM map/floor/UI layers, so
+// Bevy can be the entity renderer on non-WebGPU too (the webgl2 build was opaque,
+// which forced the DOM WebGl2EntityAtlasLayer to draw entities there).
+//
+// Alpha mode differs by backend: webgpu uses PreMultiplied; the webgl2 (wgpu GL)
+// surface needs Auto — PreMultiplied makes the GL backend composite the drawn
+// sprites to fully transparent (entities vanish while the DOM map still shows
+// through), so Auto is required for visible entities on webgl2.
 #[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
 const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::PreMultiplied;
 #[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
 const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::Auto;
 
-#[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
+#[cfg(target_arch = "wasm32")]
 const WINDOW_TRANSPARENT: bool = true;
-#[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
+#[cfg(not(target_arch = "wasm32"))]
 const WINDOW_TRANSPARENT: bool = false;
 
 thread_local! {
