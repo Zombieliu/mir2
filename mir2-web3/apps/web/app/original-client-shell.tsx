@@ -8,6 +8,9 @@ import {
   type CharacterTabKey,
   type InventoryTabKey,
 } from "../lib/original-ui";
+import { createAssetResidency } from "../lib/asset-residency";
+import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
+import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
 import {
   loadOriginalSceneSpriteLibrary,
   normalizeSceneSpriteLibraryKey,
@@ -164,26 +167,97 @@ const BEVY_ENTITY_ATLAS_IDB_STORE = "atlases";
 const BEVY_ENTITY_ATLAS_IDB_VERSION = 1;
 const BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT = 8;
 const BEVY_ENTITY_ATLAS_CACHE_NAMESPACE = "bevy-entity-atlas-v1";
-const bevyEntityAtlasCache = new Map<string, BevyEntityAtlasSnapshot>();
 const bevyEntityAtlasImageCache = new Map<string, Promise<HTMLImageElement>>();
 const bevyEntityAtlasPrebuiltPixelsCache = new Map<string, Promise<Uint8Array | null>>();
 let bevyEntityAtlasLatestSnapshot: BevyEntityAtlasSnapshot | null = null;
 let bevyEntityAtlasManifestPromise: Promise<BevyEntityAtlasManifest | null> | null = null;
 let bevyEntityAtlasDbPromise: Promise<IDBDatabase | null> | null = null;
-const bevyEntityAtlasStats = {
-  requests: 0,
+
+// Resolve-side stats (prebuilt/persistent/live breakdown + build timing) that
+// the in-memory residency manager cannot see. Merged with bevyAtlasResidency
+// .stats() for the Alt+D debug panel.
+const bevyEntityAtlasResolveStats = {
   builds: 0,
-  cacheHits: 0,
   prebuiltHits: 0,
   persistentHits: 0,
   persistentWrites: 0,
-  failures: 0,
   lastBuildMs: 0,
-  lastKey: null as string | null,
-  lastSource: null as "memory" | "prebuilt" | "persistent" | "live" | null,
+  lastSource: null as "prebuilt" | "persistent" | "live" | null,
   lastPrebuiltKey: null as string | null,
   lastSourceCount: 0,
 };
+
+// The residency fetcher's resolveFn only receives a key; the acquire effect
+// stashes the sources for that key here just before calling acquire(key).
+const bevyEntityAtlasSourcesByKey = new Map<string, BevyEntityAtlasSource[]>();
+
+// AtlasPagePayload (residency manager) <-> BevyEntityAtlasSnapshot (renderer).
+// imageUrl-only prebuilt atlases carry no pixels; round-trip the empty buffer
+// back to `undefined` so the renderer's `pixels?` checks behave as before.
+function payloadToAtlasSnapshot(payload: AtlasPagePayload): BevyEntityAtlasSnapshot {
+  return {
+    key: payload.key,
+    sourceKey: payload.sourceKey,
+    width: payload.width,
+    height: payload.height,
+    imageUrl: payload.imageUrl,
+    rects: bevyEntityAtlasRectMap(payload.rectList),
+    rectList: payload.rectList,
+    pixels: payload.pixels.byteLength > 0 ? payload.pixels : undefined,
+  };
+}
+
+function atlasSnapshotToPayload(atlas: BevyEntityAtlasSnapshot): AtlasPagePayload {
+  return {
+    key: atlas.key,
+    sourceKey: atlas.sourceKey,
+    width: atlas.width,
+    height: atlas.height,
+    imageUrl: atlas.imageUrl,
+    rectList: atlas.rectList,
+    pixels: atlas.pixels ?? new Uint8Array(0),
+  };
+}
+
+// No-op persistent store: the residency manager owns the in-memory (hot) tier +
+// LRU eviction, while resolveBevyEntityAtlasSnapshot keeps its existing IDB
+// persistent tier (prebuilt -> persistent -> live). A real persistent store here
+// would double-cache IDB, so persistence stays in resolve for now.
+function createNullPersistentStore(): PersistentStore {
+  return {
+    get: async () => null,
+    put: async () => {},
+    delete: async () => {},
+    listByAge: async () => [],
+  };
+}
+
+// In-memory atlas residency — replaces the old bevyEntityAtlasCache Map + manual
+// LRU loop. Same budget (24); the cold path stays in the resolve fetcher.
+const bevyAtlasResidency = createAssetResidency({
+  memoryBudget: BEVY_ENTITY_ATLAS_CACHE_LIMIT,
+  persistentBudget: BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT,
+  persistent: createNullPersistentStore(),
+  fetcher: createBrowserAtlasFetcher({
+    resolveFn: async (key: string): Promise<AtlasPagePayload> => {
+      const sources = bevyEntityAtlasSourcesByKey.get(key) ?? [];
+      const startedAt = performance.now();
+      const { atlas, source, prebuiltKey } = await resolveBevyEntityAtlasSnapshot(sources, key);
+      bevyEntityAtlasResolveStats.lastBuildMs = Math.round(performance.now() - startedAt);
+      bevyEntityAtlasResolveStats.lastSource = source;
+      bevyEntityAtlasResolveStats.lastPrebuiltKey = prebuiltKey ?? null;
+      bevyEntityAtlasResolveStats.lastSourceCount = sources.length;
+      if (source === "live") {
+        bevyEntityAtlasResolveStats.builds += 1;
+      } else if (source === "prebuilt") {
+        bevyEntityAtlasResolveStats.prebuiltHits += 1;
+      } else {
+        bevyEntityAtlasResolveStats.persistentHits += 1;
+      }
+      return atlasSnapshotToPayload(atlas);
+    },
+  }),
+});
 
 type BevyEntityAtlasManifest = {
   schemaVersion?: number;
@@ -1136,8 +1210,12 @@ export function OriginalClientShell({
   const bevyEntityAtlasKey = bevyEntityAtlasSources.length
     ? bevyEntityAtlasKeyForSources(bevyEntityAtlasSources)
     : null;
-  const cachedBevyEntityAtlas =
-    bevyEntityAtlasKey ? bevyEntityAtlasCache.get(bevyEntityAtlasKey) ?? null : null;
+  // Synchronous in-memory residency read for the active atlas, so a cached-key
+  // transition shows the packed atlas in the SAME frame (acquire()'s state set
+  // is a microtask later). Conversion to a snapshot only runs in the fallback
+  // branch below (i.e. when the React atlas state does not yet match the key).
+  const peekedBevyEntityAtlasPayload =
+    bevyEntityAtlasKey ? bevyAtlasResidency.peek(bevyEntityAtlasKey) : null;
   const latestBevyEntityAtlas =
     bevyEntityAtlasKey && bevyEntityAtlasLatestSnapshot?.key === bevyEntityAtlasKey
       ? bevyEntityAtlasLatestSnapshot
@@ -1145,7 +1223,8 @@ export function OriginalClientShell({
   const activeBevyEntityAtlas =
     bevyEntityAtlasKey && bevyEntityAtlas?.key === bevyEntityAtlasKey
       ? bevyEntityAtlas
-      : cachedBevyEntityAtlas ?? latestBevyEntityAtlas;
+      : (peekedBevyEntityAtlasPayload ? payloadToAtlasSnapshot(peekedBevyEntityAtlasPayload) : null) ??
+        latestBevyEntityAtlas;
   const webGl2EntityTextureReady =
     !useWebGl2EntityAtlasRenderer ||
     !activeBevyEntityAtlas ||
@@ -1240,15 +1319,15 @@ export function OriginalClientShell({
         0,
       ),
       atlasSourceCount: bevyEntityAtlasSources.length,
-      atlasCacheSize: bevyEntityAtlasCache.size,
+      atlasCacheSize: bevyAtlasResidency.stats().memoryCacheSize,
       atlasCurrentKey: bevyEntityAtlasKey,
       atlasPendingKey: bevyEntityAtlasRequestRef.current?.key ?? null,
-      atlasCachedCurrent: Boolean(cachedBevyEntityAtlas),
+      atlasCachedCurrent: Boolean(peekedBevyEntityAtlasPayload),
       atlasLatestKey: bevyEntityAtlasLatestSnapshot?.key ?? null,
       atlasLatestCurrent: Boolean(latestBevyEntityAtlas),
       domEntityFallback: useBevyEntityRenderer && !hideDomEntitySpritesForBevy,
       canvasHidden: hideBevyCanvasForDomEntityFallback,
-      atlasStats: { ...bevyEntityAtlasStats },
+      atlasStats: { ...bevyAtlasResidency.stats(), ...bevyEntityAtlasResolveStats },
       spriteLibraryCache: originalSceneSpriteLibraryCacheStats(),
       sceneAssetRuntime: sceneAssetRuntimeStats(),
       domImageCount: document.images.length,
@@ -1383,53 +1462,33 @@ export function OriginalClientShell({
       return;
     }
 
-    const cachedAtlas = getCachedBevyEntityAtlas(bevyEntityAtlasKey);
-    if (cachedAtlas) {
-      if (bevyEntityAtlasRequestRef.current?.key === bevyEntityAtlasKey) {
-        bevyEntityAtlasRequestRef.current = null;
-      }
-      bevyEntityAtlasStats.cacheHits += 1;
-      bevyEntityAtlasStats.lastKey = bevyEntityAtlasKey;
-      bevyEntityAtlasStats.lastSource = "memory";
-      bevyEntityAtlasStats.lastPrebuiltKey = null;
-      bevyEntityAtlasStats.lastSourceCount = bevyEntityAtlasSources.length;
-      setBevyEntityAtlas(cachedAtlas);
-      return;
-    }
-
+    // A memory hit is served synchronously by the render-path peek
+    // (peekedBevyEntityAtlasPayload); here we always acquire through the
+    // residency manager (memory -> [null persistent] -> resolve fetcher) and
+    // commit the React atlas state when it resolves. The manager owns the
+    // in-memory tier + LRU; resolve owns the prebuilt/persistent/live cold path
+    // and records its source breakdown into bevyEntityAtlasResolveStats.
     if (bevyEntityAtlasRequestRef.current?.key === bevyEntityAtlasKey) {
       return;
     }
 
     const requestId = (bevyEntityAtlasRequestRef.current?.requestId ?? 0) + 1;
     bevyEntityAtlasRequestRef.current = { key: bevyEntityAtlasKey, requestId };
-    bevyEntityAtlasStats.requests += 1;
-    bevyEntityAtlasStats.lastKey = bevyEntityAtlasKey;
-    bevyEntityAtlasStats.lastSourceCount = bevyEntityAtlasSources.length;
-    const buildStartedAt = performance.now();
+    bevyEntityAtlasSourcesByKey.set(bevyEntityAtlasKey, bevyEntityAtlasSources);
     let disposed = false;
 
-    resolveBevyEntityAtlasSnapshot(bevyEntityAtlasSources, bevyEntityAtlasKey)
-      .then(({ atlas, source, prebuiltKey }) => {
+    bevyAtlasResidency
+      .acquire(bevyEntityAtlasKey)
+      .then((payload) => {
         if (disposed || bevyEntityAtlasRequestRef.current?.requestId !== requestId) {
           return;
         }
-        if (source === "live") {
-          bevyEntityAtlasStats.builds += 1;
-        } else if (source === "prebuilt") {
-          bevyEntityAtlasStats.prebuiltHits += 1;
-        } else {
-          bevyEntityAtlasStats.persistentHits += 1;
-        }
-        bevyEntityAtlasStats.lastBuildMs = Math.round(performance.now() - buildStartedAt);
-        bevyEntityAtlasStats.lastSource = source;
-        bevyEntityAtlasStats.lastPrebuiltKey = prebuiltKey ?? null;
-        cacheBevyEntityAtlas(atlas);
+        const atlas = payloadToAtlasSnapshot(payload);
+        bevyEntityAtlasLatestSnapshot = atlas;
         bevyEntityAtlasRequestRef.current = null;
         setBevyEntityAtlas(atlas);
       })
       .catch(() => {
-        bevyEntityAtlasStats.failures += 1;
         if (bevyEntityAtlasRequestRef.current?.requestId === requestId) {
           bevyEntityAtlasRequestRef.current = null;
         }
@@ -2831,26 +2890,6 @@ function packBevyEntityAtlas(
   throw new Error("Visible entity sprites exceed Bevy atlas size budget");
 }
 
-function cacheBevyEntityAtlas(atlas: BevyEntityAtlasSnapshot) {
-  bevyEntityAtlasLatestSnapshot = atlas;
-  bevyEntityAtlasCache.set(atlas.key, atlas);
-  while (bevyEntityAtlasCache.size > BEVY_ENTITY_ATLAS_CACHE_LIMIT) {
-    const oldest = bevyEntityAtlasCache.keys().next().value;
-    if (!oldest) break;
-    bevyEntityAtlasCache.delete(oldest);
-  }
-}
-
-function getCachedBevyEntityAtlas(key: string) {
-  const cached = bevyEntityAtlasCache.get(key);
-  if (!cached) {
-    return null;
-  }
-  bevyEntityAtlasCache.delete(key);
-  bevyEntityAtlasCache.set(key, cached);
-  return cached;
-}
-
 async function loadPersistedBevyEntityAtlas(key: string): Promise<BevyEntityAtlasSnapshot | null> {
   if (!shouldUsePersistentBevyEntityAtlasCache()) {
     return null;
@@ -2923,7 +2962,7 @@ async function persistBevyEntityAtlas(atlas: BevyEntityAtlasSnapshot) {
       lastUsedAt: now,
     } satisfies PersistedBevyEntityAtlasRecord);
     await idbTransactionDone(transaction);
-    bevyEntityAtlasStats.persistentWrites += 1;
+    bevyEntityAtlasResolveStats.persistentWrites += 1;
     await trimPersistedBevyEntityAtlases(db);
   } catch {
     // Persistent atlas cache is an optimization; live atlas rendering remains the fallback.
