@@ -761,8 +761,12 @@ fn sync_map_render(
     }
 
     let root_translation = Vec3::new(map_camera_offset.x, -map_camera_offset.y, MAP_TILE_Z_BASE);
+    // The root MUST carry Visibility: child sprites have Visibility::Inherited, so
+    // without a visibility ancestor their InheritedVisibility defaults to false and
+    // nothing renders (the entity render layers avoid this by spawning each sprite
+    // top-level). Visibility::Visible makes the whole tile tree render.
     let root = commands
-        .spawn(Transform::from_translation(root_translation))
+        .spawn((Transform::from_translation(root_translation), Visibility::Visible))
         .with_children(|parent| {
             for tile in &snapshot.tiles {
                 let image_binding = map_render_image_binding(tile, &atlas_assets);
