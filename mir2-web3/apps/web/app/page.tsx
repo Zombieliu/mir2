@@ -37,8 +37,6 @@ import {
   downloadSnapshot,
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
-import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
-import { ORIGINAL_SOUND_IDS } from "../lib/original-sound-events";
 import { createSnapshotEmitter, createWorldStore } from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
 import {
@@ -6397,7 +6395,7 @@ export default function HomePage() {
           return visibleCharacters;
         });
         appendLog(t("ui.newCharacterCreated", [], "Character created."), "system");
-        playOriginalSoundEvent("characterCreated");
+        gameBusRef.current!.emit({ type: "uiSound", event: "characterCreated" });
         break;
       case "NewCharacter":
         appendLog(t("ui.newCharacterFailed", [], "Character creation failed."), "system");
@@ -7135,7 +7133,7 @@ export default function HomePage() {
       case "FishingUpdate":
         if (payload.foundFish === true) {
           appendLog(t("ui.fishingBite", [], "A fish is biting!"), "system");
-          playOriginalSoundId(ORIGINAL_SOUND_IDS.fishingPull);
+          gameBusRef.current!.emit({ type: "uiSound", event: "fishingPull" });
         }
         break;
 
@@ -7151,7 +7149,7 @@ export default function HomePage() {
         break;
       }
       case "LevelChanged":
-        playOriginalSoundId(ORIGINAL_SOUND_IDS.levelUp);
+        gameBusRef.current!.emit({ type: "uiSound", event: "levelUp" });
         updateWorld((current) => ({
           ...current,
           playerExperience: numberOrZero(payload.experience),
@@ -8626,7 +8624,7 @@ export default function HomePage() {
         break;
       case "TeleportIn":
         // Self teleport-in flash; the destination is reconciled by the snapshot.
-        playOriginalSoundId(ORIGINAL_SOUND_IDS.teleport);
+        gameBusRef.current!.emit({ type: "uiSound", event: "teleport" });
         break;
       case "RefineCancel":
         appendLog(t("ui.refineCancelled", [], "Refining cancelled."), "system");

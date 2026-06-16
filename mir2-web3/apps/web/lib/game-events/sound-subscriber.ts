@@ -15,7 +15,7 @@
 //     migration is a mechanical substitution.
 
 import type { GameEventBus, Unsubscribe } from "./bus";
-import type { SoundEntityRef } from "./events";
+import type { OriginalSoundEvent, SoundEntityRef } from "./events";
 
 // ---------------------------------------------------------------------------
 // Injected audio interface
@@ -30,6 +30,11 @@ import type { SoundEntityRef } from "./events";
 export type AudioSink = {
   /** Play by raw Crystal SoundList id (original-audio.ts `playOriginalSoundId`). */
   playOriginalSoundId(soundId: number): void;
+  /**
+   * Play a semantically-named sound event with its fallback chain
+   * (original-audio.ts `playOriginalSoundEvent`).
+   */
+  playOriginalSoundEvent(event: OriginalSoundEvent): void;
   /** Loop background music by Crystal SoundList id (original-audio.ts `setOriginalMusicId`). */
   setOriginalMusicId(musicId: number | string | null | undefined): void;
   /** Entity attack sound (original-sound-triggers.ts `playEntityAttackSound`). */
@@ -93,6 +98,13 @@ export function registerSoundSubscriber(bus: GameEventBus, audio: AudioSink): Un
     }),
   );
 
+  // uiSound -> client-initiated, fallback-aware feedback sound
+  unsubs.push(
+    bus.on("uiSound", (event) => {
+      audio.playOriginalSoundEvent(event.event);
+    }),
+  );
+
   // gainedGold -> coin clink
   unsubs.push(
     bus.on("gainedGold", (event) => {
@@ -133,6 +145,7 @@ export function makeRealAudioSink(
   // these modules (node scripts without a browser).
   const {
     playOriginalSoundId,
+    playOriginalSoundEvent,
     setOriginalMusicId,
   } = require("../original-audio") as typeof import("../original-audio");
   const {
@@ -145,6 +158,7 @@ export function makeRealAudioSink(
 
   return {
     playOriginalSoundId,
+    playOriginalSoundEvent,
     setOriginalMusicId,
     playEntityAttackSound,
     playEntityStruckSound,

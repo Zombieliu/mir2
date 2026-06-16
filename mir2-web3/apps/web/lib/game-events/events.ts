@@ -12,6 +12,9 @@
 //     subscriber's injected interface consistent with the real implementation.
 
 export type { SoundEntityRef } from "../original-sound-triggers";
+export type { OriginalSoundEvent } from "../original-sound-events";
+
+import type { OriginalSoundEvent } from "../original-sound-events";
 
 // ---------------------------------------------------------------------------
 // Damage / combat type (mirrors Crystal DamageType enum)
@@ -60,6 +63,17 @@ export type PlaySoundEvent = {
   soundId: number;
 };
 
+/**
+ * Play a semantically-named, client-initiated UI/feedback sound (character
+ * created, fishing pull, level up, teleport). Distinct from `playSound` (a raw
+ * server-driven id): this routes through `playOriginalSoundEvent`, which honours
+ * each event's fallback chain (e.g. characterCreated -> uiButtonClick).
+ */
+export type UiSoundEvent = {
+  type: "uiSound";
+  event: OriginalSoundEvent;
+};
+
 /** The player gained gold (triggers the coin clink sound). */
 export type GainedGoldEvent = {
   type: "gainedGold";
@@ -101,6 +115,7 @@ export type GameEvent =
   | EntityDiedEvent
   | MagicCastEvent
   | PlaySoundEvent
+  | UiSoundEvent
   | GainedGoldEvent
   | MapMusicChangedEvent
   | DamageDealtEvent;
