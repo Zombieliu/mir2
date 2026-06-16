@@ -110,6 +110,7 @@ function makeAudioSink(entityRef = null) {
     calls,
     sink: {
       playOriginalSoundId(soundId) { calls.push({ fn: "playOriginalSoundId", soundId }); },
+      playOriginalSoundEvent(event) { calls.push({ fn: "playOriginalSoundEvent", event }); },
       setOriginalMusicId(musicId) { calls.push({ fn: "setOriginalMusicId", musicId }); },
       playEntityAttackSound(entity) { calls.push({ fn: "playEntityAttackSound", entity }); },
       playEntityStruckSound(entity) { calls.push({ fn: "playEntityStruckSound", entity }); },
@@ -312,6 +313,35 @@ check("playSound -> playOriginalSoundId with correct id", () => {
   assert.equal(calls.length, 1);
   assert.equal(calls[0].fn, "playOriginalSoundId");
   assert.equal(calls[0].soundId, 10110);
+});
+
+check("uiSound -> playOriginalSoundEvent with the semantic event name", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "uiSound", event: "characterCreated" });
+  bus.emit({ type: "uiSound", event: "fishingPull" });
+  bus.emit({ type: "uiSound", event: "levelUp" });
+  bus.emit({ type: "uiSound", event: "teleport" });
+  assert.deepEqual(
+    calls,
+    [
+      { fn: "playOriginalSoundEvent", event: "characterCreated" },
+      { fn: "playOriginalSoundEvent", event: "fishingPull" },
+      { fn: "playOriginalSoundEvent", event: "levelUp" },
+      { fn: "playOriginalSoundEvent", event: "teleport" },
+    ],
+    "uiSound must use the fallback-aware playOriginalSoundEvent path (NOT raw playOriginalSoundId)",
+  );
+});
+
+check("uiSound does NOT route to raw playOriginalSoundId", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "uiSound", event: "levelUp" });
+  assert.equal(calls.length, 1);
+  assert.notEqual(calls[0].fn, "playOriginalSoundId");
 });
 
 check("gainedGold with amount > 0 -> playGoldSound", () => {
