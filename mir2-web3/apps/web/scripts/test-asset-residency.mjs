@@ -470,6 +470,42 @@ await test("memoryHits + persistentHits + fetchHits sum to requests", async () =
   );
 });
 
+console.log("\n[asset-residency/manager] peek (sync in-memory read)");
+
+await test("peek returns null for a key never acquired", async () => {
+  const { manager } = makeManager();
+  assert.equal(manager.peek("nope"), null);
+});
+
+await test("peek returns the in-memory payload after acquire, without counting a request", async () => {
+  const { manager, fakeFetcher } = makeManager();
+  const got = await manager.acquire("k1");
+  const requestsBefore = manager.stats().requests;
+  const fetchesBefore = fakeFetcher.callCount;
+  const peeked = manager.peek("k1");
+  assert.ok(peeked, "peek should hit memory");
+  assert.equal(peeked.key, "k1");
+  assert.equal(peeked, got, "peek returns the same cached payload object");
+  assert.equal(manager.stats().requests, requestsBefore, "peek must not count as a request");
+  assert.equal(fakeFetcher.callCount, fetchesBefore, "peek must not fetch");
+});
+
+await test("peek is memory-only: does NOT pull from the persistent tier", async () => {
+  const store = makeFakeStore(new Map([["warm", makePayload("warm")]]));
+  const { manager } = makeManager({ store });
+  // "warm" exists only in persistent (never acquired into memory).
+  assert.equal(manager.peek("warm"), null, "peek must not see the persistent tier");
+  assert.equal(store.getCount, 0, "peek must not touch the store");
+});
+
+await test("peek returns null after the key is evicted from memory", async () => {
+  const { manager } = makeManager({ memoryBudget: 1 });
+  await manager.acquire("a");
+  await manager.acquire("b"); // evicts "a"
+  assert.equal(manager.peek("a"), null);
+  assert.ok(manager.peek("b"));
+});
+
 // ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
