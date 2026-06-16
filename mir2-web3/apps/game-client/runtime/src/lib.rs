@@ -86,8 +86,10 @@ struct RuntimeMapRenderAtlases {
 
 /// Per-frame sub-tile camera scroll offset (screen-stage pixels). In the
 /// fold-in camera model the map tiles already include the offset in their
-/// `left`/`top`, so this stays (0, 0); the resource + `apply_map_camera_offset`
-/// system exist for the alternative root-offset model.
+/// `left`/`top`, so this stays (0, 0); the resource is still read by
+/// `sync_map_render` and folded into each tile's spawn position, so an
+/// alternative offset-model producer that pushes a non-zero value keeps working
+/// (applied whenever the tile set is respawned).
 #[derive(Resource, Default, Clone, Copy)]
 struct RuntimeMapCameraOffset {
     x: f32,
@@ -110,13 +112,15 @@ struct MapSceneCache {
     spawned: Vec<Entity>,
 }
 
-/// Cache for the Bevy-native map-tile renderer: the single root entity holding
-/// one child sprite per tile, plus the last-applied `MapRenderState` so the
-/// low-cadence tile list (changes only on cell-change/animation) is diffed and
-/// the whole root is despawned + respawned only when the tiles actually change.
+/// Cache for the Bevy-native map-tile renderer: one TOP-LEVEL sprite entity per
+/// tile (mirroring the entity render layers — NOT children of a shared root, so
+/// no hierarchy visibility/transform propagation is needed for them to render),
+/// plus the last-applied `MapRenderState` so the low-cadence tile list (changes
+/// only on cell-change / animation / sub-cell motion) is diffed and the whole
+/// tile set is despawned + respawned only when the tiles actually change.
 #[derive(Default)]
 struct MapRenderSceneCache {
-    root: Option<Entity>,
+    tiles: Vec<Entity>,
     applied: Option<MapRenderState>,
 }
 
@@ -598,7 +602,6 @@ pub fn boot_mir2_runtime() {
                 sync_mine_nodes,
                 sync_entity_render_layers,
                 follow_player,
-                apply_map_camera_offset,
             )
                 .chain(),
         );
@@ -685,7 +688,7 @@ fn ingest_pending_map_render_state(
         }
     });
     // The camera offset is a cheap per-frame scalar pair; pull the latest value
-    // each frame so `apply_map_camera_offset` (root-offset model) stays current.
+    // each frame so `sync_map_render` folds the current value into respawned tiles.
     let (x, y) = PENDING_MAP_CAMERA_OFFSET.with(|cell| cell.get());
     camera_offset.x = x;
     camera_offset.y = y;
@@ -724,10 +727,17 @@ const MAP_TILE_Z_STEP: f32 = 1.0e-7;
 /// Bevy-native map-tile renderer (Stage 1). Builds/refreshes the atlas-page
 /// `TextureAtlasLayout`s (mirrors `sync_entity_render_atlas_layouts`), then
 /// diffs the pushed `MapRenderState` against the last-applied snapshot. The
-/// tile list changes only on cell-change/animation (low cadence), so on change
-/// the whole map root is despawned (recursive) and respawned with one child
-/// `Sprite` per tile — cheap enough for Stage 1 and never per-frame. When map
-/// render is disabled/None this clears any spawned root and returns.
+/// tile list changes only on cell-change / animation / sub-cell motion (the
+/// producer folds the camera offset into each tile's `left`/`top`, exactly like
+/// the entity render layers), so on change the whole tile set is despawned and
+/// respawned as TOP-LEVEL `Sprite` entities — one per tile, mirroring
+/// `sync_entity_render_layers`. Spawning top-level (rather than as children of a
+/// shared root) is deliberate: a child sprite's `InheritedVisibility` /
+/// `GlobalTransform` depend on hierarchy propagation, and an earlier
+/// root+children build rendered nothing (black floor) even with the root marked
+/// `Visibility::Visible`; the entity layers never hit this precisely because
+/// each sprite is its own top-level entity. When map render is disabled/None
+/// this clears any spawned tiles and returns.
 fn sync_map_render(
     mut commands: Commands,
     map_state: Res<RuntimeMapRenderState>,
@@ -741,8 +751,8 @@ fn sync_map_render(
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     if !active {
-        if let Some(root) = registry.map_render.root.take() {
-            commands.entity(root).despawn();
+        for tile in registry.map_render.tiles.drain(..) {
+            commands.entity(tile).despawn();
         }
         registry.map_render.applied = None;
         return;
@@ -756,46 +766,53 @@ fn sync_map_render(
         return;
     }
 
-    if let Some(root) = registry.map_render.root.take() {
-        commands.entity(root).despawn();
+    for tile in registry.map_render.tiles.drain(..) {
+        commands.entity(tile).despawn();
     }
 
-    let root_translation = Vec3::new(map_camera_offset.x, -map_camera_offset.y, MAP_TILE_Z_BASE);
-    // The root MUST carry Visibility: child sprites have Visibility::Inherited, so
-    // without a visibility ancestor their InheritedVisibility defaults to false and
-    // nothing renders (the entity render layers avoid this by spawning each sprite
-    // top-level). Visibility::Visible makes the whole tile tree render.
-    let root = commands
-        .spawn((Transform::from_translation(root_translation), Visibility::Visible))
-        .with_children(|parent| {
-            for tile in &snapshot.tiles {
-                let image_binding = map_render_image_binding(tile, &atlas_assets);
-                let (image, texture_atlas) = match image_binding {
-                    Some(binding) => binding,
-                    None => continue,
-                };
-                let local_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5;
-                let local_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5);
-                let local_z = tile.z * MAP_TILE_Z_STEP;
-                parent.spawn((
-                    Sprite {
-                        image,
-                        texture_atlas: Some(texture_atlas),
-                        custom_size: Some(Vec2::new(tile.width, tile.height)),
-                        color: Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0)),
-                        ..default()
-                    },
-                    Transform::from_xyz(local_x, local_y, local_z),
-                ));
-            }
-        })
-        .id();
+    // The producer uses the fold-in model (`cameraOffset` stays (0, 0); sub-cell
+    // motion is already baked into `left`/`top`), so this offset is normally a
+    // no-op — applied here only so a future offset-model producer still positions
+    // a freshly respawned tile set correctly.
+    let offset_x = map_camera_offset.x;
+    let offset_y = -map_camera_offset.y;
+    let mut spawned: Vec<Entity> = Vec::with_capacity(snapshot.tiles.len());
+    for tile in &snapshot.tiles {
+        let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
+            continue;
+        };
+        // Screen-stage → centred world coords, Y flipped — identical to
+        // `entity_render_layer_position` so tiles share the entities' space.
+        let world_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5 + offset_x;
+        let world_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5) + offset_y;
+        // Absolute z below entities: MAP_TILE_Z_BASE (≈ -50) + the relative
+        // back→object→middle→front→anim ordering, never crossing into entity z.
+        let world_z = MAP_TILE_Z_BASE + tile.z * MAP_TILE_Z_STEP;
+        let entity = commands
+            .spawn((
+                Sprite {
+                    image,
+                    texture_atlas: Some(texture_atlas),
+                    custom_size: Some(Vec2::new(tile.width, tile.height)),
+                    color: Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0)),
+                    ..default()
+                },
+                Transform::from_xyz(world_x, world_y, world_z),
+            ))
+            .id();
+        spawned.push(entity);
+    }
 
-    registry.map_render.root = Some(root);
+    let spawned_count = spawned.len();
+    registry.map_render.tiles = spawned;
     registry.map_render.applied = Some(snapshot.clone());
     publish_status(
         "map-render-synced",
-        &format!("Applied {} map tiles", snapshot.tiles.len()),
+        &format!(
+            "Applied {} map tiles ({} sprites)",
+            snapshot.tiles.len(),
+            spawned_count
+        ),
     );
 }
 
@@ -846,26 +863,6 @@ fn map_render_image_binding(
             index,
         },
     ))
-}
-
-/// Root-offset camera model hook: set the map root's translation from the
-/// per-frame `RuntimeMapCameraOffset` each frame. In the fold-in model the
-/// offset is (0, 0) (tiles already carry it in `left`/`top`), so this leaves
-/// the root at the screen-stage center. Kept additive so the alternative model
-/// is a one-line producer change away.
-fn apply_map_camera_offset(
-    map_camera_offset: Res<RuntimeMapCameraOffset>,
-    registry: Res<SceneRegistry>,
-    mut transform_query: Query<&mut Transform>,
-) {
-    let Some(root) = registry.map_render.root else {
-        return;
-    };
-    if let Ok(mut transform) = transform_query.get_mut(root) {
-        transform.translation.x = map_camera_offset.x;
-        transform.translation.y = -map_camera_offset.y;
-        transform.translation.z = MAP_TILE_Z_BASE;
-    }
 }
 
 fn sync_map_scene(
