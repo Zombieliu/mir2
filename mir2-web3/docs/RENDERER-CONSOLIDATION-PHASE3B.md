@@ -1,79 +1,61 @@
-# Phase 3b — Renderer consolidation (status: GROUNDWORK; full retirement GATED)
+# Phase 3b — Renderer consolidation
 
 Goal: make **Bevy the sole renderer** and retire the competing DOM WebGL2 layers
 (`WebGl2EntityAtlasLayer`, `WebGl2MapAtlasLayer`).
 
-> **Status:** the prerequisite (transparent webgl2 Bevy build) is implemented and
-> the transparent **map passthrough** is verified — but the fold cannot be turned
-> on by default yet because Bevy's **entity sprites do not composite visibly on
-> the wgpu GL backend**. This PR lands the groundwork behind a **default-OFF**
-> flag (zero regression) and documents the remaining gates. **Do not flip the
-> flag on by default or delete the DOM layers until the gates below are cleared.**
+> **Status:**
+> - **Entity renderer — DONE.** Bevy is now the sole entity renderer on **both**
+>   backends. The webgl2 Bevy build composites transparently; the fold is **default-ON**
+>   with a `?bevyFoldWebgl2=0` escape hatch. Verified in a production build on Chrome
+>   (webgpu + webgl2). The DOM `WebGl2EntityAtlasLayer` is now inert by default
+>   (kept as a flag-gated fallback, not deleted).
+> - **Map renderer — DEFERRED.** `WebGl2MapAtlasLayer` is **not** a competing renderer
+>   (Bevy draws no map tiles); retiring it means *porting map-tile rendering into Bevy*,
+>   a separate feature. Kept as-is.
 
-## How rendering works today
+## How entity rendering works now
 
-Two entity-render paths, selected at runtime by the Bevy backend:
+- **WebGPU browsers** (default where `navigator.gpu` exists): Bevy renders entities;
+  the DOM `WebGl2EntityAtlasLayer` is inert. (Unchanged.)
+- **webgl2 browsers** (no WebGPU): the Bevy canvas now stays **visible + transparent**
+  and renders entities; the DOM `WebGl2EntityAtlasLayer` self-disables; the DOM map
+  layer (z1) shows through the transparent Bevy canvas (z2). (Was: Bevy canvas hidden,
+  DOM layer drew entities — because the webgl2 build used to be opaque.)
 
-- **WebGPU browsers** (the default where `navigator.gpu` exists): Bevy renders
-  entities; the DOM `WebGl2EntityAtlasLayer` is inert. Already effectively
-  "Bevy-only" for entities.
-- **Non-WebGPU browsers** (Firefox, older Safari, locked-down Chrome): the Bevy
-  canvas is **hidden** (`bevy-canvas-hidden`, opacity:0) and the DOM
-  `WebGl2EntityAtlasLayer` draws entities. This exists because the webgl2 Bevy
-  build was **opaque** (`WINDOW_TRANSPARENT=false`), so a visible Bevy canvas
-  would paint over the DOM map/floor.
+The **map** is still DOM (`WebGl2MapAtlasLayer`, or per-tile `<img>`) on both backends —
+Bevy draws no map tiles.
 
-The **map** is *always* DOM (`WebGl2MapAtlasLayer`, or per-tile `<img>`). Bevy
-draws **no** map tiles — so `WebGl2MapAtlasLayer` is **not a competing renderer**;
-retiring it means *porting map-tile rendering into Bevy* (new feature), not
-deleting a duplicate.
+## The fix (the crux)
 
-## What this PR does (groundwork, default-off)
+Making the webgl2 build transparent was necessary but not sufficient. With
+`CompositeAlphaMode::PreMultiplied` (the webgpu setting) the wgpu **GL** backend
+composited the drawn entity sprites to **fully transparent** — the DOM map showed
+through but the sprites were invisible. The webgl2 surface needs **`CompositeAlphaMode::Auto`**
+(`runtime/src/lib.rs`); with Auto, sprites render opaquely and the map shows through.
 
-1. **`runtime/src/lib.rs`** — make the webgl2 wasm build composite transparently
-   like the webgpu build (`WINDOW_TRANSPARENT` / `WINDOW_COMPOSITE_ALPHA_MODE`
-   keyed on `target_arch = "wasm32"` rather than the `webgpu` feature).
-2. **`original-client-shell.tsx`** — a **default-OFF** `foldWebgl2ToBevy` flag
-   (`?bevyFoldWebgl2=1` / `localStorage mir2-bevy-fold-webgl2=1`). When on (webgl2
-   backend): the Bevy canvas stays visible+transparent and draws entities, the DOM
-   `WebGl2EntityAtlasLayer` self-disables, and the DOM map (z1) shows through the
-   transparent Bevy canvas (z2).
-
-Rebuild the runtime (`npm run runtime:build:release`) to regenerate the wasm with
-the transparent webgl2 build; this PR keeps the diff to source + this doc.
+- `runtime/src/lib.rs`: `WINDOW_TRANSPARENT = true` for both wasm backends;
+  `WINDOW_COMPOSITE_ALPHA_MODE` = `PreMultiplied` for webgpu, **`Auto` for webgl2**.
+- `original-client-shell.tsx`: `foldWebgl2ToBevy` **default ON** (`?bevyFoldWebgl2=0` /
+  `localStorage mir2-bevy-fold-webgl2=0` to fall back to the DOM layer). On webgl2 it
+  shows the Bevy canvas and disables the DOM `WebGl2EntityAtlasLayer`.
 
 ## Verification (production build, Chrome, release gateway)
 
 | Case | Result |
 |---|---|
-| Default (WebGPU, flag off) | ✅ unchanged — Bevy draws entities, `canvasHidden:false`, `atlasMode:packed` |
-| webgl2, flag **off** | ✅ unchanged — `canvasHidden:true`, DOM `WebGl2EntityAtlasLayer` draws (`reason:"rendered"`, 8 layers); the transparent lib.rs change did **not** break the webgl2 fallback or Bevy webgl2 boot |
-| webgl2, fold **on** | ⚠️ **map shows through (transparency works)** but the Bevy-drawn **entity sprites are INVISIBLE** — only DOM name labels render. No console error: the sprites are silently composited to transparent on the wgpu GL surface. |
+| WebGPU (default) | ✅ unchanged — Bevy draws entities, `canvasHidden:false`, `atlasMode:packed` |
+| webgl2, fold ON (now default) | ✅ Bevy draws entities (`enabled:true`, `canvasHidden:false`, DOM layer `reason:"disabled"`), the **player sprite renders** and the DOM map shows through — visuals match the DOM-layer path |
+| webgl2, `?bevyFoldWebgl2=0` | ✅ falls back to the DOM `WebGl2EntityAtlasLayer` (`reason:"rendered"`) — the escape hatch works |
 
-So: transparent **map passthrough** works on Chrome-webgl2, but Bevy's **entity
-sprite compositing** does not — which is precisely **why the DOM
-`WebGl2EntityAtlasLayer` was built**.
+## Residual / follow-ups
 
-## Gates for full retirement (each a dedicated, verified effort)
-
-1. **Fix webgl2 Bevy transparent sprite compositing.** Investigate the wgpu GL
-   surface alpha path (`CompositeAlphaMode` support on GL, premultiplied-alpha vs
-   the canvas `alpha`/`premultipliedAlpha` context attributes, sprite blend
-   state). May be a wgpu GL-backend limitation. Until sprites composite visibly,
-   the fold produces invisible entities.
-2. **Cross-browser verification.** `?bevyBackend=webgl2` only forces module
-   selection; the real target is genuinely non-WebGPU browsers (Firefox, Safari).
-   Transparent GL compositing must be confirmed there before flipping default-on.
-3. **Map-tile rendering in Bevy.** To retire `WebGl2MapAtlasLayer`, port the
-   map-tile draw (`buildMapTileDrawList`) into the Bevy runtime — Bevy draws no map
-   tiles today. Recommended to defer; it is orthogonal and lower value.
-
-Once (1)+(2) clear: flip `foldWebgl2ToBevy` default-on, remove
-`WebGl2EntityAtlasLayer` + its mount + the QA route + the `shouldUseRawWebGl2…`
-gating. (3) is separate.
-
-## Why default-off is safe
-
-Flag off = today's behavior exactly (verified: WebGPU and webgl2-flag-off paths
-unchanged). The transparent webgl2 build only matters when the canvas is shown,
-which only the (default-off) flag does.
+1. **Cross-browser spot-check.** Verified on Chrome for both backends; recommend a
+   quick check on a genuinely non-WebGPU browser (Firefox / older Safari) since
+   `?bevyBackend=webgl2` only forces module selection. The `?bevyFoldWebgl2=0` escape
+   hatch + the retained DOM layer cover the unlikely case of a browser whose
+   transparent webgl2 compositing differs.
+2. **Delete the DOM `WebGl2EntityAtlasLayer`** once cross-browser confidence is high
+   (it is inert by default now; deletion also removes the QA route +
+   `shouldUseRawWebGl2EntityRenderer` gating).
+3. **Retire `WebGl2MapAtlasLayer`** — requires porting map-tile rendering into the Bevy
+   runtime (Bevy draws no map tiles today). A separate, larger feature; deferred.

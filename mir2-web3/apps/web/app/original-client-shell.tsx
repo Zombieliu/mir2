@@ -1184,19 +1184,21 @@ export function OriginalClientShell({
     ? selectedTargetActionLabel(t, selectedEntity, targetDistance)
     : null;
   const domEntityFallbackRequested = shouldUseDomEntityFallback(forceMobileControls || touchPrimaryDevice);
-  // Phase 3b (renderer consolidation), default OFF. When on (?bevyFoldWebgl2=1 or
-  // localStorage mir2-bevy-fold-webgl2=1) the webgl2 Bevy canvas stays VISIBLE and
-  // transparent (the wasm build is now transparent for both backends) and draws
-  // entities itself, instead of being hidden behind the DOM WebGl2EntityAtlasLayer.
-  // The DOM map layer (z1) shows through the transparent Bevy canvas (z2). Default
-  // OFF preserves the current non-WebGPU behaviour until transparent webgl2
-  // compositing is verified across real non-WebGPU browsers (Firefox/Safari).
+  // Phase 3b (renderer consolidation), default ON. On the webgl2 backend the Bevy
+  // canvas stays VISIBLE and transparent (the wasm build is transparent for both
+  // backends) and draws entities itself; the DOM WebGl2EntityAtlasLayer
+  // self-disables and the DOM map layer (z1) shows through the transparent Bevy
+  // canvas (z2). So Bevy is the sole entity renderer on webgl2 too. Verified in a
+  // production build on Chrome (webgpu + webgl2). The DOM layer is retained as a
+  // fallback: `?bevyFoldWebgl2=0` (or localStorage mir2-bevy-fold-webgl2=0)
+  // restores it — the escape hatch if a non-WebGPU browser's transparent webgl2
+  // compositing misbehaves. (WebGPU is unaffected — the fold only gates webgl2.)
   const foldWebgl2ToBevy = useMemo(() => {
-    if (typeof window === "undefined") return false;
+    if (typeof window === "undefined") return true;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("bevyFoldWebgl2") === "1") return true;
     if (params.get("bevyFoldWebgl2") === "0") return false;
-    return window.localStorage.getItem("mir2-bevy-fold-webgl2") === "1";
+    if (params.get("bevyFoldWebgl2") === "1") return true;
+    return window.localStorage.getItem("mir2-bevy-fold-webgl2") !== "0";
   }, []);
   const hideBevyCanvasForDomEntityFallback =
     screen === "game" &&
