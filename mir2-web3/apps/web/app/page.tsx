@@ -129,7 +129,11 @@ import {
   type PendingSelfMove,
   type QueuedMoveIntent,
 } from "./components/original-client-movement-controller";
-import type { BevyEntityRenderState, SceneAssetReadiness } from "./components/original-client-shell-types";
+import type {
+  BevyEntityRenderState,
+  BevyMapRenderState,
+  SceneAssetReadiness,
+} from "./components/original-client-shell-types";
 import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
 
 const OriginalClientShell = dynamic(
@@ -152,6 +156,9 @@ type RuntimeModule = {
   setMir2WorldState?: (snapshotJson: string) => void;
   setMir2EntityRenderState?: (snapshotJson: string) => void;
   setMir2EntityRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
+  setMir2MapRenderState?: (snapshotJson: string) => void;
+  setMir2MapRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
+  setMir2MapCameraOffset?: (x: number, y: number) => void;
   setMir2StatusSink?: (callback: (payload: RuntimeStatus) => void) => void;
 };
 
@@ -1410,6 +1417,9 @@ export default function HomePage() {
   const selectedCharacterIndexRef = useRef(0);
   const uploadedBevyEntityAtlasKeysRef = useRef<Set<string>>(new Set());
   const lastBevyEntityRenderStateJsonRef = useRef<string | null>(null);
+  const uploadedBevyMapAtlasKeysRef = useRef<Set<string>>(new Set());
+  const lastBevyMapRenderStateJsonRef = useRef<string | null>(null);
+  const lastBevyMapCameraOffsetRef = useRef<{ x: number; y: number } | null>(null);
 
   const [language, setLanguage] = useState<Mir2Language>("en");
   const [runtimePhase, setRuntimePhase] = useState("idle");
@@ -1872,6 +1882,43 @@ export default function HomePage() {
     }
     lastBevyEntityRenderStateJsonRef.current = serializableStateJson;
     runtime.setMir2EntityRenderState?.(serializableStateJson);
+  }
+
+  function handleBevyMapRenderStateChange(state: BevyMapRenderState) {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
+
+    // Upload each atlas page's raw RGBA bytes once per page key (mirrors the
+    // entity atlas upload). The page geometry (rects) travels in the state JSON.
+    for (const atlas of state.atlasImages ?? []) {
+      if (!atlas.pixels) {
+        continue;
+      }
+      if (uploadedBevyMapAtlasKeysRef.current.has(atlas.key)) {
+        continue;
+      }
+      runtime.setMir2MapRenderAtlas?.(atlas.key, atlas.width, atlas.height, atlas.pixels);
+      uploadedBevyMapAtlasKeysRef.current.add(atlas.key);
+    }
+
+    // Fold-in camera model: the offset is already baked into each tile's
+    // left/top by buildMapTileDrawList, so the root stays at (0, 0). The setter
+    // is still pushed (additive) and deduped so a future root-offset model is a
+    // one-line producer change. Skip the call when the value is unchanged.
+    const cameraOffset = state.cameraOffset ?? { x: 0, y: 0 };
+    const lastCameraOffset = lastBevyMapCameraOffsetRef.current;
+    if (!lastCameraOffset || lastCameraOffset.x !== cameraOffset.x || lastCameraOffset.y !== cameraOffset.y) {
+      lastBevyMapCameraOffsetRef.current = cameraOffset;
+      runtime.setMir2MapCameraOffset?.(cameraOffset.x, cameraOffset.y);
+    }
+
+    const { atlasImages: _atlasImages, cameraOffset: _cameraOffset, ...serializableState } = state;
+    const serializableStateJson = JSON.stringify(serializableState);
+    if (serializableStateJson === lastBevyMapRenderStateJsonRef.current) {
+      return;
+    }
+    lastBevyMapRenderStateJsonRef.current = serializableStateJson;
+    runtime.setMir2MapRenderState?.(serializableStateJson);
   }
 
   function sceneInputDeferredForInitialAssets() {
@@ -3367,6 +3414,9 @@ export default function HomePage() {
         if (runtimeWindow.__mir2BevyRuntimeBooted && runtimeWindow.__mir2BevyRuntime) {
           runtimeRef.current = runtimeWindow.__mir2BevyRuntime;
           lastBevyEntityRenderStateJsonRef.current = null;
+          lastBevyMapRenderStateJsonRef.current = null;
+          lastBevyMapCameraOffsetRef.current = null;
+          uploadedBevyMapAtlasKeysRef.current.clear();
           runtimeWindow.__mir2BevyRuntime.setMir2WorldState?.(JSON.stringify(worldRef.current));
           setBevyEntityRendererReady(Boolean(runtimeWindow.__mir2BevyRuntime.setMir2EntityRenderState));
           setBevyRuntimeBackend(runtimeWindow.__mir2BevyRuntimeBackend ?? null);
@@ -3433,6 +3483,9 @@ export default function HomePage() {
         runtime.setMir2WorldState?.(JSON.stringify(DEFAULT_WORLD_STATE));
         runtimeRef.current = runtime;
         lastBevyEntityRenderStateJsonRef.current = null;
+        lastBevyMapRenderStateJsonRef.current = null;
+        lastBevyMapCameraOffsetRef.current = null;
+        uploadedBevyMapAtlasKeysRef.current.clear();
         runtimeWindow.__mir2BevyRuntime = runtime;
         runtimeWindow.__mir2BevyRuntimeBooted = true;
         runtimeWindow.__mir2BevyRuntimeBackend = runtimeBackend;
@@ -11002,6 +11055,7 @@ export default function HomePage() {
       bevyRuntimeBackend={bevyRuntimeBackend}
       onSceneAssetReadinessChange={handleSceneAssetReadinessChange}
       onBevyEntityRenderStateChange={handleBevyEntityRenderStateChange}
+      onBevyMapRenderStateChange={handleBevyMapRenderStateChange}
       getLivePlayerRenderPosition={() => {
         const currentWorld = worldRef.current;
         const currentSelf =

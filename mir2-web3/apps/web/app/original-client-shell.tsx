@@ -39,6 +39,7 @@ import {
 import { GameUiScene } from "./components/original-client-game-ui-scene";
 import type {
   BevyEntityRenderState,
+  BevyMapRenderState,
   OriginalClientShellProps,
   SceneAssetReadiness,
 } from "./components/original-client-shell-types";
@@ -106,7 +107,7 @@ import { OriginalClientMobileControls } from "./components/original-client-mobil
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 import { WebGl2MapAtlasLayer, type MapTileDraw } from "./components/webgl2-map-atlas-layer";
 import { buildMapTileDrawList } from "./components/original-client-scene-map-rendering";
-import { type MapAtlasIndex, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
+import { type MapAtlasIndex, type MapAtlasPage, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
 
 type HeldScenePointer = {
   button: 0 | 2;
@@ -353,6 +354,7 @@ export function OriginalClientShell({
   bevyRuntimeBackend,
   onSceneAssetReadinessChange,
   onBevyEntityRenderStateChange,
+  onBevyMapRenderStateChange,
   logs,
   accountId,
   password,
@@ -1125,10 +1127,22 @@ export function OriginalClientShell({
     if (window.localStorage.getItem("mir2-map-atlas") === "0") return false;
     return true;
   }, []);
+  // Stage 1 Bevy-native map renderer (DEFAULT OFF; escape hatch ?bevyMap=1 or
+  // localStorage mir2-bevy-map=1). When on, the same packed map-atlas tiles that
+  // the DOM WebGl2MapAtlasLayer would draw are pushed into the Bevy runtime and
+  // rendered behind entities; the DOM GPU layer + DOM map sprites are disabled so
+  // the map is never drawn twice. Mirrors the foldWebgl2ToBevy / mapAtlas flags.
+  const bevyMapRequested = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("bevyMap") === "0") return false;
+    if (params.get("bevyMap") === "1") return true;
+    return window.localStorage.getItem("mir2-bevy-map") === "1";
+  }, []);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
-    if (!mapAtlasRequested) return;
+    if (!mapAtlasRequested && !bevyMapRequested) return;
     let cancelled = false;
     void loadMapAtlasIndex().then((index) => {
       if (!cancelled) setMapAtlasIndex(index);
@@ -1136,7 +1150,15 @@ export function OriginalClientShell({
     return () => {
       cancelled = true;
     };
-  }, [mapAtlasRequested]);
+  }, [mapAtlasRequested, bevyMapRequested]);
+  // Decoded RGBA bytes for each map-atlas page consumed by the Bevy-native map
+  // renderer, keyed by page key. Decoded ONCE per page via an offscreen canvas
+  // (drawImage -> getImageData); the requested set dedupes in-flight decodes.
+  const decodedMapAtlasPagesRef = useRef<
+    Map<string, { width: number; height: number; pixels: Uint8Array }>
+  >(new Map());
+  const mapAtlasPageDecodeRequestedRef = useRef<Set<string>>(new Set());
+  const [mapAtlasPagesDecodedVersion, setMapAtlasPagesDecodedVersion] = useState(0);
   // Mirror the entity renderer's WebGL2 failure handling: if the atlas layer reports it can't draw
   // (no WebGL2 context, or a GL/texture error), latch the failure so the DOM tile path takes over
   // instead of leaving a blank scene on devices without WebGL2.
@@ -1146,20 +1168,19 @@ export function OriginalClientShell({
       setMapGpuFailed(true);
     }
   }, []);
-  const mapGpuActive =
+  // The packed atlas is usable (manifest present, WebGL2 not failed, in-game).
+  // This drives BOTH the DOM GPU layer and the Bevy-native map renderer; the
+  // tile draw list is the same for either consumer.
+  const mapAtlasUsable =
     mapAtlasRequested && Boolean(mapAtlasIndex) && !mapGpuFailed && screen === "game";
   const mapDrawPlan = useMemo(
     () =>
-      mapGpuActive && mapAtlasIndex && renderPlayer
+      mapAtlasUsable && mapAtlasIndex && renderPlayer
         ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, playerCameraMotionOffset)
         : null,
-    [mapGpuActive, mapAtlasIndex, renderPlayer, viewportMapSprites, playerCameraMotionOffset],
+    [mapAtlasUsable, mapAtlasIndex, renderPlayer, viewportMapSprites, playerCameraMotionOffset],
   );
   const mapTileDrawList = mapDrawPlan?.tiles ?? EMPTY_MAP_TILE_DRAW_LIST;
-  // When the GPU atlas layer is active it draws the covered tiles; the DOM path renders ONLY the
-  // sprites whose frame the atlas lacks (graceful per-cell fallback — no black holes), and the
-  // full DOM set when GPU is off. Each cell is therefore drawn by exactly one path.
-  const mapDomSprites = mapGpuActive ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES : viewportMapSprites;
   const viewportProjectiles = renderPlayer
     ? world.projectiles
         .filter((projectile) => projectile.expiresAt > motionNow)
@@ -1292,6 +1313,122 @@ export function OriginalClientShell({
     ? entityRenderState
     : disabledEntityRenderState(entityRenderState);
 
+  // Bevy-native map renderer is active only when the flag is on, the Bevy entity
+  // renderer is the active renderer (so the canvas is composited and entities draw
+  // there too), and the packed atlas is usable. It then becomes the SOLE map
+  // renderer; the DOM GPU layer + DOM map sprites are gated off below.
+  const bevyMapActive = bevyMapRequested && useBevyEntityRenderer && mapAtlasUsable;
+  // DOM GPU atlas layer draws only when the Bevy-native map renderer is NOT active.
+  const mapGpuActive = mapAtlasUsable && !bevyMapActive;
+  // Cell ownership: when Bevy owns the map, the DOM draws nothing (covered tiles
+  // go to Bevy; the small uncovered remainder is an accepted Stage 1 gap). When
+  // the DOM GPU layer is active it draws covered tiles and the DOM renders only
+  // the uncovered remainder. When neither is active the DOM draws the full set.
+  const mapDomSprites = bevyMapActive
+    ? EMPTY_VIEWPORT_MAP_SPRITES
+    : mapGpuActive
+      ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES
+      : viewportMapSprites;
+
+  // Decode each atlas page referenced by the current tiles to RGBA bytes once.
+  useEffect(() => {
+    if (!bevyMapActive || !mapAtlasIndex) {
+      return;
+    }
+    const neededPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
+    let cancelled = false;
+    for (const pageKey of neededPageKeys) {
+      if (mapAtlasPageDecodeRequestedRef.current.has(pageKey)) {
+        continue;
+      }
+      const page = mapAtlasIndex.pages.get(pageKey);
+      if (!page) {
+        continue;
+      }
+      mapAtlasPageDecodeRequestedRef.current.add(pageKey);
+      void decodeMapAtlasPagePixels(page)
+        .then((decoded) => {
+          if (cancelled || !decoded) {
+            if (!decoded) {
+              // Allow a later retry if the decode failed (e.g. transient load error).
+              mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
+            }
+            return;
+          }
+          decodedMapAtlasPagesRef.current.set(pageKey, decoded);
+          setMapAtlasPagesDecodedVersion((version) => version + 1);
+        })
+        .catch(() => {
+          mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [bevyMapActive, mapAtlasIndex, mapTileDrawList]);
+
+  const bevyMapRenderState = useMemo<BevyMapRenderState>(() => {
+    if (!bevyMapActive || !mapAtlasIndex) {
+      return {
+        enabled: false,
+        stageWidth: ORIGINAL_UI.game.sceneWidth,
+        stageHeight: ORIGINAL_UI.game.sceneHeight,
+        atlases: [],
+        atlasImages: [],
+        tiles: [],
+        cameraOffset: EMPTY_VIEWPORT_OFFSET,
+      };
+    }
+    const pageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
+    const atlases: NonNullable<BevyMapRenderState["atlases"]> = [];
+    const atlasImages: NonNullable<BevyMapRenderState["atlasImages"]> = [];
+    for (const pageKey of pageKeys) {
+      const page = mapAtlasIndex.pages.get(pageKey);
+      if (!page) {
+        continue;
+      }
+      atlases.push({
+        key: page.key,
+        width: page.width,
+        height: page.height,
+        imageUrl: page.imageUrl,
+        rects: page.rects.map((rect) => ({
+          key: rect.key,
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+        })),
+      });
+      const decoded = decodedMapAtlasPagesRef.current.get(pageKey);
+      if (decoded) {
+        atlasImages.push({
+          key: page.key,
+          width: decoded.width,
+          height: decoded.height,
+          pixels: decoded.pixels,
+        });
+      }
+    }
+    return {
+      enabled: true,
+      stageWidth: ORIGINAL_UI.game.sceneWidth,
+      stageHeight: ORIGINAL_UI.game.sceneHeight,
+      atlases,
+      atlasImages,
+      // EXACTLY buildMapTileDrawList's output (camera offset folded into left/top).
+      tiles: mapTileDrawList,
+      // Fold-in model: offset already baked into the tiles, so the root stays put.
+      cameraOffset: EMPTY_VIEWPORT_OFFSET,
+    };
+    // mapAtlasPagesDecodedVersion forces a rebuild once a page's pixels decode.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bevyMapActive, mapAtlasIndex, mapTileDrawList, mapAtlasPagesDecodedVersion]);
+
+  useEffect(() => {
+    onBevyMapRenderStateChange(bevyMapRenderState);
+  }, [bevyMapRenderState, onBevyMapRenderStateChange]);
+
   useEffect(() => {
     const activeKey = useWebGl2EntityAtlasRenderer ? activeBevyEntityAtlas?.key ?? null : null;
     if (webGl2EntityTextureReadyKey !== activeKey) {
@@ -1350,6 +1487,22 @@ export function OriginalClientShell({
       spriteLibraryCache: originalSceneSpriteLibraryCacheStats(),
       sceneAssetRuntime: sceneAssetRuntimeStats(),
       domImageCount: document.images.length,
+    };
+    (
+      window as typeof window & { __mir2BevyMapRendererDebug?: unknown }
+    ).__mir2BevyMapRendererDebug = {
+      requested: bevyMapRequested,
+      active: bevyMapActive,
+      mapGpuActive,
+      atlasUsable: mapAtlasUsable,
+      atlasIndexReady: Boolean(mapAtlasIndex),
+      enabled: bevyMapRenderState.enabled,
+      tileCount: bevyMapRenderState.tiles.length,
+      atlasPageCount: bevyMapRenderState.atlases?.length ?? 0,
+      atlasImageCount: bevyMapRenderState.atlasImages?.length ?? 0,
+      decodedPageCount: decodedMapAtlasPagesRef.current.size,
+      domSpriteCount: mapDomSprites.floor.length + mapDomSprites.objects.length,
+      cameraOffset: bevyMapRenderState.cameraOffset ?? null,
     };
   }
   const showSyntheticScene = screen === "game" && !world.originalMapRegion;
@@ -2213,6 +2366,64 @@ const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 // forever while the world is already drawn behind it. Remaining assets keep loading.
 const SCENE_READINESS_SAFETY_MS = 3000;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
+
+// Decoded RGBA bytes for a map-atlas page, cached by image URL so a page is only
+// fetched + read back once across the session even if the renderer toggles.
+const mapAtlasPagePixelCache = new Map<
+  string,
+  Promise<{ width: number; height: number; pixels: Uint8Array } | null>
+>();
+
+// Decode a packed map-atlas page PNG to raw RGBA bytes via an offscreen canvas
+// (drawImage -> getImageData), matching set_mir2_map_render_atlas's expectation
+// of width*height*4 bytes. Returns null when running without a DOM or when the
+// image/canvas readback fails (the caller then leaves the page unbound for now).
+function decodeMapAtlasPagePixels(
+  page: MapAtlasPage,
+): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
+  if (typeof document === "undefined") {
+    return Promise.resolve(null);
+  }
+  const cached = mapAtlasPagePixelCache.get(page.imageUrl);
+  if (cached) {
+    return cached;
+  }
+  const promise = new Promise<{ width: number; height: number; pixels: Uint8Array } | null>(
+    (resolve) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.crossOrigin = "anonymous";
+      image.onload = () => {
+        try {
+          const width = image.naturalWidth || page.width;
+          const height = image.naturalHeight || page.height;
+          if (width <= 0 || height <= 0) {
+            resolve(null);
+            return;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext("2d", { willReadFrequently: true });
+          if (!context) {
+            resolve(null);
+            return;
+          }
+          context.drawImage(image, 0, 0, width, height);
+          const imageData = context.getImageData(0, 0, width, height);
+          resolve({ width, height, pixels: new Uint8Array(imageData.data.buffer.slice(0)) });
+        } catch {
+          resolve(null);
+        }
+      };
+      image.onerror = () => resolve(null);
+      image.src = page.imageUrl;
+    },
+  );
+  mapAtlasPagePixelCache.set(page.imageUrl, promise);
+  return promise;
+}
+
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
 const SCENE_TILE_PREFETCH_RING_CELLS = 6;
 const SCENE_TILE_PREFETCH_TIMEOUT_MS = 8_000;
