@@ -26,14 +26,20 @@ const COMPILED_RENDER_BACKEND: &str = "webgl2";
 )))]
 const COMPILED_RENDER_BACKEND: &str = "native";
 
-#[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
+// Both wasm backends composite transparently over the DOM map/floor/UI layers.
+// (Previously only the webgpu build was transparent; the webgl2 build was opaque,
+// which forced the DOM WebGl2EntityAtlasLayer to draw entities on non-WebGPU
+// browsers. Making the webgl2 build transparent lets Bevy be the entity renderer
+// there too — gated client-side behind the default-off ?bevyFoldWebgl2 flag until
+// transparent webgl2 compositing is verified across non-WebGPU browsers.)
+#[cfg(target_arch = "wasm32")]
 const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::PreMultiplied;
-#[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
+#[cfg(not(target_arch = "wasm32"))]
 const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::Auto;
 
-#[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
+#[cfg(target_arch = "wasm32")]
 const WINDOW_TRANSPARENT: bool = true;
-#[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
+#[cfg(not(target_arch = "wasm32"))]
 const WINDOW_TRANSPARENT: bool = false;
 
 thread_local! {

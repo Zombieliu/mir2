@@ -1184,8 +1184,23 @@ export function OriginalClientShell({
     ? selectedTargetActionLabel(t, selectedEntity, targetDistance)
     : null;
   const domEntityFallbackRequested = shouldUseDomEntityFallback(forceMobileControls || touchPrimaryDevice);
+  // Phase 3b (renderer consolidation), default OFF. When on (?bevyFoldWebgl2=1 or
+  // localStorage mir2-bevy-fold-webgl2=1) the webgl2 Bevy canvas stays VISIBLE and
+  // transparent (the wasm build is now transparent for both backends) and draws
+  // entities itself, instead of being hidden behind the DOM WebGl2EntityAtlasLayer.
+  // The DOM map layer (z1) shows through the transparent Bevy canvas (z2). Default
+  // OFF preserves the current non-WebGPU behaviour until transparent webgl2
+  // compositing is verified across real non-WebGPU browsers (Firefox/Safari).
+  const foldWebgl2ToBevy = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("bevyFoldWebgl2") === "1") return true;
+    if (params.get("bevyFoldWebgl2") === "0") return false;
+    return window.localStorage.getItem("mir2-bevy-fold-webgl2") === "1";
+  }, []);
   const hideBevyCanvasForDomEntityFallback =
-    screen === "game" && (bevyRuntimeBackend === "webgl2" || domEntityFallbackRequested);
+    screen === "game" &&
+    ((bevyRuntimeBackend === "webgl2" && !foldWebgl2ToBevy) || domEntityFallbackRequested);
   const bevyEntityRendererSuppressed =
     domEntityFallbackRequested || runtimePhase === "dom-only" || runtimePhase === "boot-error";
   const bevyEntityRendererWanted =
@@ -1198,6 +1213,7 @@ export function OriginalClientShell({
     entityRendererRequested && !hideBevyCanvasForDomEntityFallback;
   const useWebGl2EntityAtlasRenderer =
     entityRendererRequested &&
+    !foldWebgl2ToBevy &&
     bevyRuntimeBackend === "webgl2" &&
     shouldUseBevyEntityAtlas() &&
     shouldUseRawWebGl2EntityRenderer();
@@ -1327,6 +1343,7 @@ export function OriginalClientShell({
       atlasLatestCurrent: Boolean(latestBevyEntityAtlas),
       domEntityFallback: useBevyEntityRenderer && !hideDomEntitySpritesForBevy,
       canvasHidden: hideBevyCanvasForDomEntityFallback,
+      foldWebgl2ToBevy,
       atlasStats: { ...bevyAtlasResidency.stats(), ...bevyEntityAtlasResolveStats },
       spriteLibraryCache: originalSceneSpriteLibraryCacheStats(),
       sceneAssetRuntime: sceneAssetRuntimeStats(),
