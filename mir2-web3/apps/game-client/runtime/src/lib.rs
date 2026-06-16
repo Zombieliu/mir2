@@ -1,7 +1,7 @@
 mod interpolation;
 mod motion;
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 
 use bevy::asset::{AssetMetaCheck, AssetPlugin, RenderAssetUsages};
@@ -49,6 +49,9 @@ thread_local! {
     static PENDING_WORLD_STATE: RefCell<Option<WorldSnapshot>> = const { RefCell::new(None) };
     static PENDING_ENTITY_RENDER_STATE: RefCell<Option<EntityRenderState>> = const { RefCell::new(None) };
     static PENDING_ENTITY_RENDER_ATLASES: RefCell<Vec<PendingEntityRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
+    static PENDING_MAP_RENDER_STATE: RefCell<Option<MapRenderState>> = const { RefCell::new(None) };
+    static PENDING_MAP_RENDER_ATLASES: RefCell<Vec<PendingMapRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
+    static PENDING_MAP_CAMERA_OFFSET: Cell<(f32, f32)> = const { Cell::new((0.0, 0.0)) };
 }
 
 #[derive(Resource, Default, Clone)]
@@ -66,12 +69,38 @@ struct RuntimeEntityRenderAtlases {
     images: HashMap<String, Handle<Image>>,
 }
 
+#[derive(Resource, Default, Clone)]
+struct RuntimeMapRenderState {
+    snapshot: Option<MapRenderState>,
+}
+
+/// Map-tile atlas registry. Deliberately SEPARATE from
+/// `RuntimeEntityRenderAtlases` so the entity render path's atlas-layout
+/// retain logic (which evicts layouts not referenced by the entity snapshot)
+/// cannot evict the map's layouts, and vice versa.
+#[derive(Resource, Default, Clone)]
+struct RuntimeMapRenderAtlases {
+    images: HashMap<String, Handle<Image>>,
+    layouts: HashMap<String, (Handle<TextureAtlasLayout>, HashMap<String, usize>)>,
+}
+
+/// Per-frame sub-tile camera scroll offset (screen-stage pixels). In the
+/// fold-in camera model the map tiles already include the offset in their
+/// `left`/`top`, so this stays (0, 0); the resource + `apply_map_camera_offset`
+/// system exist for the alternative root-offset model.
+#[derive(Resource, Default, Clone, Copy)]
+struct RuntimeMapCameraOffset {
+    x: f32,
+    y: f32,
+}
+
 #[derive(Resource, Default)]
 struct SceneRegistry {
     entities: HashMap<String, SceneEntityHandles>,
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     map: MapSceneCache,
+    map_render: MapRenderSceneCache,
     mine_nodes: HashMap<(i32, i32), MineNodeHandles>,
 }
 
@@ -79,6 +108,16 @@ struct SceneRegistry {
 struct MapSceneCache {
     blueprint: Option<MapSceneBlueprint>,
     spawned: Vec<Entity>,
+}
+
+/// Cache for the Bevy-native map-tile renderer: the single root entity holding
+/// one child sprite per tile, plus the last-applied `MapRenderState` so the
+/// low-cadence tile list (changes only on cell-change/animation) is diffed and
+/// the whole root is despawned + respawned only when the tiles actually change.
+#[derive(Default)]
+struct MapRenderSceneCache {
+    root: Option<Entity>,
+    applied: Option<MapRenderState>,
 }
 
 #[derive(Clone, Copy)]
@@ -309,6 +348,75 @@ enum EntityKind {
     Npc,
 }
 
+/// Snapshot of the current map-tile draw list pushed from the TS producer
+/// (`buildMapTileDrawList`'s output). Mirrors `EntityRenderState` so the map
+/// can be the Bevy-native renderer behind entities, at exact visual parity
+/// with the DOM `WebGl2MapAtlasLayer`. `PartialEq` lets `sync_map_render` diff
+/// against the last-applied snapshot and rebuild only on tile-list change.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MapRenderState {
+    enabled: bool,
+    stage_width: f32,
+    stage_height: f32,
+    /// Atlas page descriptors (key + page dims + the source rects within the
+    /// page). Carries the rect geometry the per-tile `atlas_rect_key` indexes
+    /// into; mirrors `EntityRenderState.atlases` so the same layout-building
+    /// logic applies. Optional/additive — pixels arrive separately via
+    /// `setMir2MapRenderAtlas`.
+    #[serde(default)]
+    atlases: Vec<MapRenderAtlas>,
+    #[serde(default)]
+    tiles: Vec<MapTile>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MapRenderAtlas {
+    key: String,
+    width: u32,
+    height: u32,
+    #[serde(default)]
+    image_url: Option<String>,
+    #[serde(default)]
+    rects: Vec<MapRenderAtlasRect>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MapRenderAtlasRect {
+    key: String,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MapTile {
+    atlas_key: String,
+    // The TS producer feeds `buildMapTileDrawList`'s output verbatim, whose tile
+    // field is `rectKey` (MapTileDraw); accept that wire name while keeping the
+    // descriptive Rust field name.
+    #[serde(rename = "rectKey")]
+    atlas_rect_key: String,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+    z: f32,
+    #[serde(default)]
+    opacity: Option<f32>,
+}
+
+struct PendingMapRenderAtlasImage {
+    key: String,
+    width: u32,
+    height: u32,
+    pixels: Vec<u8>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct MapSceneBlueprint {
     map_title: Option<String>,
@@ -389,6 +497,52 @@ pub fn set_mir2_entity_render_atlas(key: String, width: u32, height: u32, pixels
     });
 }
 
+#[wasm_bindgen(js_name = setMir2MapRenderState)]
+pub fn set_mir2_map_render_state(json: String) {
+    match serde_json::from_str::<MapRenderState>(&json) {
+        Ok(snapshot) => {
+            PENDING_MAP_RENDER_STATE.with(|pending| {
+                *pending.borrow_mut() = Some(snapshot);
+            });
+        }
+        Err(error) => publish_status("map-render-decode-error", &error.to_string()),
+    }
+}
+
+#[wasm_bindgen(js_name = setMir2MapRenderAtlas)]
+pub fn set_mir2_map_render_atlas(key: String, width: u32, height: u32, pixels: Vec<u8>) {
+    if width == 0 || height == 0 {
+        publish_status("map-render-atlas-error", "Ignoring empty map atlas");
+        return;
+    }
+
+    let expected_len = width as usize * height as usize * 4;
+    if pixels.len() != expected_len {
+        publish_status(
+            "map-render-atlas-error",
+            &format!(
+                "Ignoring map atlas {key}: expected {expected_len} RGBA bytes, got {}",
+                pixels.len()
+            ),
+        );
+        return;
+    }
+
+    PENDING_MAP_RENDER_ATLASES.with(|pending| {
+        pending.borrow_mut().push(PendingMapRenderAtlasImage {
+            key,
+            width,
+            height,
+            pixels,
+        });
+    });
+}
+
+#[wasm_bindgen(js_name = setMir2MapCameraOffset)]
+pub fn set_mir2_map_camera_offset(x: f32, y: f32) {
+    PENDING_MAP_CAMERA_OFFSET.with(|cell| cell.set((x, y)));
+}
+
 #[wasm_bindgen(js_name = bootMir2Runtime)]
 pub fn boot_mir2_runtime() {
     console_error_panic_hook::set_once();
@@ -400,6 +554,9 @@ pub fn boot_mir2_runtime() {
         .insert_resource(RuntimeWorldState::default())
         .insert_resource(RuntimeEntityRenderState::default())
         .insert_resource(RuntimeEntityRenderAtlases::default())
+        .insert_resource(RuntimeMapRenderState::default())
+        .insert_resource(RuntimeMapRenderAtlases::default())
+        .insert_resource(RuntimeMapCameraOffset::default())
         .insert_resource(SceneRegistry::default())
         .insert_resource(interpolation::SnapshotBuffer::default())
         .insert_resource(motion::EntityMotionTable::default())
@@ -433,11 +590,15 @@ pub fn boot_mir2_runtime() {
                 motion::update_entity_motion_table,
                 ingest_pending_entity_render_state,
                 ingest_pending_entity_render_atlases,
+                ingest_pending_map_render_state,
+                ingest_pending_map_render_atlases,
+                sync_map_render,
                 sync_map_scene,
                 sync_entities,
                 sync_mine_nodes,
                 sync_entity_render_layers,
                 follow_player,
+                apply_map_camera_offset,
             )
                 .chain(),
         );
@@ -514,11 +675,218 @@ fn ingest_pending_entity_render_atlases(
     });
 }
 
+fn ingest_pending_map_render_state(
+    mut state: ResMut<RuntimeMapRenderState>,
+    mut camera_offset: ResMut<RuntimeMapCameraOffset>,
+) {
+    PENDING_MAP_RENDER_STATE.with(|pending| {
+        if let Some(snapshot) = pending.borrow_mut().take() {
+            state.snapshot = Some(snapshot);
+        }
+    });
+    // The camera offset is a cheap per-frame scalar pair; pull the latest value
+    // each frame so `apply_map_camera_offset` (root-offset model) stays current.
+    let (x, y) = PENDING_MAP_CAMERA_OFFSET.with(|cell| cell.get());
+    camera_offset.x = x;
+    camera_offset.y = y;
+}
+
+fn ingest_pending_map_render_atlases(
+    mut atlas_resource: ResMut<RuntimeMapRenderAtlases>,
+    mut images: ResMut<Assets<Image>>,
+) {
+    PENDING_MAP_RENDER_ATLASES.with(|pending| {
+        for atlas in pending.borrow_mut().drain(..) {
+            let image = Image::new(
+                Extent3d {
+                    width: atlas.width,
+                    height: atlas.height,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                atlas.pixels,
+                TextureFormat::Rgba8UnormSrgb,
+                RenderAssetUsages::default(),
+            );
+            let handle = images.add(image);
+            atlas_resource.images.insert(atlas.key, handle);
+        }
+    });
+}
+
+/// All map tiles render at z ≈ MAP_TILE_Z_BASE, far below entities (entity
+/// layers sit at z ≈ layer.z/100000 ≈ 0.0..0.5, decor 0.3). The per-tile
+/// `z * MAP_TILE_Z_STEP` term preserves the relative back→object→middle→
+/// front→anim ordering among map tiles without ever crossing into entity z.
+const MAP_TILE_Z_BASE: f32 = -50.0;
+const MAP_TILE_Z_STEP: f32 = 1.0e-7;
+
+/// Bevy-native map-tile renderer (Stage 1). Builds/refreshes the atlas-page
+/// `TextureAtlasLayout`s (mirrors `sync_entity_render_atlas_layouts`), then
+/// diffs the pushed `MapRenderState` against the last-applied snapshot. The
+/// tile list changes only on cell-change/animation (low cadence), so on change
+/// the whole map root is despawned (recursive) and respawned with one child
+/// `Sprite` per tile — cheap enough for Stage 1 and never per-frame. When map
+/// render is disabled/None this clears any spawned root and returns.
+fn sync_map_render(
+    mut commands: Commands,
+    map_state: Res<RuntimeMapRenderState>,
+    map_camera_offset: Res<RuntimeMapCameraOffset>,
+    mut atlas_assets: ResMut<RuntimeMapRenderAtlases>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut registry: ResMut<SceneRegistry>,
+) {
+    let active = map_state
+        .snapshot
+        .as_ref()
+        .is_some_and(|snapshot| snapshot.enabled);
+    if !active {
+        if let Some(root) = registry.map_render.root.take() {
+            commands.entity(root).despawn();
+        }
+        registry.map_render.applied = None;
+        return;
+    }
+
+    let snapshot = map_state.snapshot.as_ref().unwrap();
+
+    sync_map_render_atlas_layouts(snapshot, &mut atlas_assets, &mut texture_atlas_layouts);
+
+    if registry.map_render.applied.as_ref() == Some(snapshot) {
+        return;
+    }
+
+    if let Some(root) = registry.map_render.root.take() {
+        commands.entity(root).despawn();
+    }
+
+    let root_translation = Vec3::new(map_camera_offset.x, -map_camera_offset.y, MAP_TILE_Z_BASE);
+    let root = commands
+        .spawn(Transform::from_translation(root_translation))
+        .with_children(|parent| {
+            for tile in &snapshot.tiles {
+                let image_binding = map_render_image_binding(tile, &atlas_assets);
+                let (image, texture_atlas) = match image_binding {
+                    Some(binding) => binding,
+                    None => continue,
+                };
+                let local_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5;
+                let local_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5);
+                let local_z = tile.z * MAP_TILE_Z_STEP;
+                parent.spawn((
+                    Sprite {
+                        image,
+                        texture_atlas: Some(texture_atlas),
+                        custom_size: Some(Vec2::new(tile.width, tile.height)),
+                        color: Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0)),
+                        ..default()
+                    },
+                    Transform::from_xyz(local_x, local_y, local_z),
+                ));
+            }
+        })
+        .id();
+
+    registry.map_render.root = Some(root);
+    registry.map_render.applied = Some(snapshot.clone());
+    publish_status(
+        "map-render-synced",
+        &format!("Applied {} map tiles", snapshot.tiles.len()),
+    );
+}
+
+/// Build the `TextureAtlasLayout` for each map atlas page not already cached.
+/// Copy of `sync_entity_render_atlas_layouts`, writing into the SEPARATE
+/// `RuntimeMapRenderAtlases.layouts` registry so the entity retain logic can't
+/// evict map layouts. Map atlas pages are stable across the session, so no
+/// retain/evict pass is needed here.
+fn sync_map_render_atlas_layouts(
+    snapshot: &MapRenderState,
+    atlas_assets: &mut RuntimeMapRenderAtlases,
+    texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
+) {
+    for atlas in &snapshot.atlases {
+        if atlas_assets.layouts.contains_key(&atlas.key) {
+            continue;
+        }
+        let mut layout = TextureAtlasLayout::new_empty(UVec2::new(atlas.width, atlas.height));
+        let mut rects = HashMap::new();
+        for rect in &atlas.rects {
+            let index = layout.add_texture(URect {
+                min: UVec2::new(rect.x, rect.y),
+                max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+            });
+            rects.insert(rect.key.clone(), index);
+        }
+        let layout = texture_atlas_layouts.add(layout);
+        atlas_assets
+            .layouts
+            .insert(atlas.key.clone(), (layout, rects));
+    }
+}
+
+/// Resolve a tile to its atlas page image + `TextureAtlas` (layout + sub-rect
+/// index). Returns `None` when the page image hasn't been uploaded yet or the
+/// rect key isn't in the page layout, so the tile is simply skipped this build.
+fn map_render_image_binding(
+    tile: &MapTile,
+    atlas_assets: &RuntimeMapRenderAtlases,
+) -> Option<(Handle<Image>, TextureAtlas)> {
+    let (layout, rects) = atlas_assets.layouts.get(&tile.atlas_key)?;
+    let index = *rects.get(&tile.atlas_rect_key)?;
+    let image = atlas_assets.images.get(&tile.atlas_key)?.clone();
+    Some((
+        image,
+        TextureAtlas {
+            layout: layout.clone(),
+            index,
+        },
+    ))
+}
+
+/// Root-offset camera model hook: set the map root's translation from the
+/// per-frame `RuntimeMapCameraOffset` each frame. In the fold-in model the
+/// offset is (0, 0) (tiles already carry it in `left`/`top`), so this leaves
+/// the root at the screen-stage center. Kept additive so the alternative model
+/// is a one-line producer change away.
+fn apply_map_camera_offset(
+    map_camera_offset: Res<RuntimeMapCameraOffset>,
+    registry: Res<SceneRegistry>,
+    mut transform_query: Query<&mut Transform>,
+) {
+    let Some(root) = registry.map_render.root else {
+        return;
+    };
+    if let Ok(mut transform) = transform_query.get_mut(root) {
+        transform.translation.x = map_camera_offset.x;
+        transform.translation.y = -map_camera_offset.y;
+        transform.translation.z = MAP_TILE_Z_BASE;
+    }
+}
+
 fn sync_map_scene(
     mut commands: Commands,
     state: Res<RuntimeWorldState>,
+    map_state: Res<RuntimeMapRenderState>,
     mut registry: ResMut<SceneRegistry>,
 ) {
+    // When the Bevy-native map renderer is active it draws the real map tiles;
+    // the placeholder floor must not also draw (same pattern as `sync_entities`
+    // early-returning when the entity render path is enabled). Despawn any
+    // placeholder floor still spawned and clear the blueprint so it rebuilds
+    // cleanly if map render is later disabled.
+    if map_state
+        .snapshot
+        .as_ref()
+        .is_some_and(|snapshot| snapshot.enabled)
+    {
+        for entity in registry.map.spawned.drain(..) {
+            commands.entity(entity).despawn();
+        }
+        registry.map.blueprint = None;
+        return;
+    }
+
     let Some(snapshot) = &state.snapshot else {
         return;
     };

@@ -2,6 +2,7 @@ import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/o
 import type { Mir2Language } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import type { SystemMenuTransferOption } from "./original-client-system-menu";
+import type { MapTileDraw } from "./webgl2-map-atlas-layer";
 import type {
   DisplayEntity,
   DisplayLogLine,
@@ -78,6 +79,43 @@ export type BevyEntityRenderState = {
   }>;
 };
 
+export type BevyMapRenderState = {
+  enabled: boolean;
+  stageWidth: number;
+  stageHeight: number;
+  // Atlas page descriptors carrying the source-rect geometry each tile's
+  // atlasRectKey indexes into. Mirrors BevyEntityRenderState.atlases.
+  atlases?: Array<{
+    key: string;
+    width: number;
+    height: number;
+    imageUrl?: string;
+    rects: Array<{
+      key: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }>;
+  }>;
+  // Raw RGBA page pixels, uploaded once per page key. Stripped before the state
+  // JSON is serialized to the runtime (mirrors BevyEntityRenderState.atlasImages).
+  atlasImages?: Array<{
+    key: string;
+    width: number;
+    height: number;
+    pixels?: Uint8Array;
+  }>;
+  // EXACTLY buildMapTileDrawList's output (folds projection + crystal offsets +
+  // the sub-tile camera offset into left/top). MapTileDraw uses `rectKey`; the
+  // runtime's MapTile deserializes it via #[serde(rename = "rectKey")].
+  tiles: MapTileDraw[];
+  // Sub-tile camera scroll offset for the root-offset model. In the fold-in
+  // model (the one Stage 1 uses) this is (0, 0) because the offset is already
+  // baked into each tile's left/top.
+  cameraOffset?: { x: number; y: number };
+};
+
 export type OriginalClientShellProps = {
   language: Mir2Language;
   screen: ClientScreen;
@@ -98,6 +136,7 @@ export type OriginalClientShellProps = {
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
   onSceneAssetReadinessChange: (readiness: SceneAssetReadiness) => void;
   onBevyEntityRenderStateChange: (state: BevyEntityRenderState) => void;
+  onBevyMapRenderStateChange: (state: BevyMapRenderState) => void;
   logs: DisplayLogLine[];
   accountId: string;
   password: string;
