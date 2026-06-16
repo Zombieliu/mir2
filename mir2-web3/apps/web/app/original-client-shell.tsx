@@ -1336,7 +1336,6 @@ export function OriginalClientShell({
       return;
     }
     const neededPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
-    let cancelled = false;
     for (const pageKey of neededPageKeys) {
       if (mapAtlasPageDecodeRequestedRef.current.has(pageKey)) {
         continue;
@@ -1346,13 +1345,19 @@ export function OriginalClientShell({
         continue;
       }
       mapAtlasPageDecodeRequestedRef.current.add(pageKey);
+      // NOTE: do NOT gate the decode result on an effect-scoped `cancelled` flag.
+      // This effect re-runs on every mapTileDrawList change (i.e. every move /
+      // animation / camera-offset frame); an effect-cleanup `cancelled=true` would
+      // drop the in-flight decode before it commits, while the requestedRef key
+      // blocks any retry — leaving the Bevy map permanently textureless
+      // (atlasImageCount stuck at 0). The page-pixel cache + decodedMapAtlasPagesRef
+      // are idempotent and module/ref-scoped, so committing the result on resolve
+      // is always safe regardless of how many times the effect re-ran.
       void decodeMapAtlasPagePixels(page)
         .then((decoded) => {
-          if (cancelled || !decoded) {
-            if (!decoded) {
-              // Allow a later retry if the decode failed (e.g. transient load error).
-              mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
-            }
+          if (!decoded) {
+            // Allow a later retry if the decode failed (e.g. transient load error).
+            mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
             return;
           }
           decodedMapAtlasPagesRef.current.set(pageKey, decoded);
@@ -1362,9 +1367,6 @@ export function OriginalClientShell({
           mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
         });
     }
-    return () => {
-      cancelled = true;
-    };
   }, [bevyMapActive, mapAtlasIndex, mapTileDrawList]);
 
   const bevyMapRenderState = useMemo<BevyMapRenderState>(() => {
