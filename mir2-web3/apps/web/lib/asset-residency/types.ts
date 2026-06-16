@@ -175,6 +175,14 @@ export type AssetResidencyManager = {
   has(key: string): boolean;
 
   /**
+   * Synchronously return the in-memory payload for `key`, or null if absent.
+   * Does NOT touch the persistent/source tiers and does NOT reorder the LRU.
+   * For hot-path readers that need a same-tick answer (e.g. a per-frame render
+   * lookup) where awaiting `acquire()`'s microtask would drop a frame.
+   */
+  peek(key: string): AtlasPagePayload | null;
+
+  /**
    * Manually trigger LRU trim of both the in-memory and persistent tiers to
    * their respective budgets.  Called automatically after each acquire, but
    * can also be called directly to shed memory before a large fetch.

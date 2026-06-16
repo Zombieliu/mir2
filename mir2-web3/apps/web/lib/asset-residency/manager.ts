@@ -168,6 +168,14 @@ export function createAssetResidency(config: AssetResidencyConfig): AssetResiden
     return memoryCache.has(key);
   }
 
+  function peek(key: string): AtlasPagePayload | null {
+    // Synchronous, non-promoting in-memory read. Does NOT touch the persistent
+    // or fetcher tiers and does NOT reorder the LRU — for hot-path render reads
+    // that must resolve in the same tick (e.g. the shell's per-frame atlas
+    // lookup), where awaiting acquire()'s microtask would drop a frame.
+    return memoryCache.get(key) ?? null;
+  }
+
   async function evictToBudget(): Promise<void> {
     evictMemoryToBudget();
     await trimPersistentToBudget();
@@ -177,5 +185,5 @@ export function createAssetResidency(config: AssetResidencyConfig): AssetResiden
     return { ..._stats };
   }
 
-  return { acquire, release, has, evictToBudget, stats };
+  return { acquire, release, has, peek, evictToBudget, stats };
 }
