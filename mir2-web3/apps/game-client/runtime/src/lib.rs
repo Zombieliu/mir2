@@ -115,12 +115,15 @@ struct MapSceneCache {
 /// Cache for the Bevy-native map-tile renderer: one TOP-LEVEL sprite entity per
 /// tile (mirroring the entity render layers — NOT children of a shared root, so
 /// no hierarchy visibility/transform propagation is needed for them to render),
-/// plus the last-applied `MapRenderState` so the low-cadence tile list (changes
-/// only on cell-change / animation / sub-cell motion) is diffed and the whole
-/// tile set is despawned + respawned only when the tiles actually change.
+/// keyed by the tile's stable `key` so `sync_map_render` RETAINS entities and
+/// updates their Transform/Sprite IN PLACE across motion frames (only spawning
+/// tiles that entered the viewport + despawning those that left) — exactly like
+/// `sync_entity_render_layers`, instead of despawning + respawning all ~470
+/// tiles every sub-cell-motion frame. `applied` is the last fully-applied
+/// `MapRenderState` so an unchanged (stationary) snapshot skips the diff entirely.
 #[derive(Default)]
 struct MapRenderSceneCache {
-    tiles: Vec<Entity>,
+    tiles: HashMap<String, Entity>,
     applied: Option<MapRenderState>,
 }
 
@@ -399,6 +402,11 @@ struct MapRenderAtlasRect {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MapTile {
+    // Stable per-tile identity (ViewportMapSprite key = spriteId:cellX:cellY:frame);
+    // stable across sub-cell camera motion for static tiles. `sync_map_render` keys
+    // its retained tile entities by this so it updates Transform/Sprite in place
+    // instead of despawning + respawning the whole set every motion frame.
+    key: String,
     atlas_key: String,
     // The TS producer feeds `buildMapTileDrawList`'s output verbatim, whose tile
     // field is `rectKey` (MapTileDraw); accept that wire name while keeping the
@@ -727,20 +735,22 @@ fn ingest_pending_map_render_atlases(
 const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
 const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 
-/// Bevy-native map-tile renderer (Stage 1). Builds/refreshes the atlas-page
+/// Bevy-native map-tile renderer. Builds/refreshes the atlas-page
 /// `TextureAtlasLayout`s (mirrors `sync_entity_render_atlas_layouts`), then
-/// diffs the pushed `MapRenderState` against the last-applied snapshot. The
-/// tile list changes only on cell-change / animation / sub-cell motion (the
-/// producer folds the camera offset into each tile's `left`/`top`, exactly like
-/// the entity render layers), so on change the whole tile set is despawned and
-/// respawned as TOP-LEVEL `Sprite` entities — one per tile, mirroring
-/// `sync_entity_render_layers`. Spawning top-level (rather than as children of a
-/// shared root) is deliberate: a child sprite's `InheritedVisibility` /
-/// `GlobalTransform` depend on hierarchy propagation, and an earlier
-/// root+children build rendered nothing (black floor) even with the root marked
-/// `Visibility::Visible`; the entity layers never hit this precisely because
-/// each sprite is its own top-level entity. When map render is disabled/None
-/// this clears any spawned tiles and returns.
+/// diffs the pushed `MapRenderState` against the last-applied snapshot. The tile
+/// list changes on cell-change / animation / sub-cell motion (the producer folds
+/// the camera offset into each tile's `left`/`top`, like the entity render
+/// layers), and on change the tiles are RETAINED and updated in place — keyed by
+/// `tile.key` (stable across motion for static tiles) the system updates each
+/// surviving tile's Transform/Sprite, spawns tiles that entered the viewport, and
+/// despawns those that left — exactly like `sync_entity_render_layers`, instead of
+/// despawning + respawning all ~470 sprites every motion frame. Tiles are spawned
+/// TOP-LEVEL (not children of a shared root): a child sprite's
+/// `InheritedVisibility`/`GlobalTransform` depend on hierarchy propagation, and an
+/// earlier root+children build rendered nothing (black floor) even with the root
+/// `Visibility::Visible`; the entity layers never hit this because each sprite is
+/// its own top-level entity. When map render is disabled/None this clears all
+/// spawned tiles and returns.
 fn sync_map_render(
     mut commands: Commands,
     map_state: Res<RuntimeMapRenderState>,
@@ -748,14 +758,16 @@ fn sync_map_render(
     mut atlas_assets: ResMut<RuntimeMapRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut registry: ResMut<SceneRegistry>,
+    mut sprite_query: Query<&mut Sprite>,
+    mut transform_query: Query<&mut Transform>,
 ) {
     let active = map_state
         .snapshot
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     if !active {
-        for tile in registry.map_render.tiles.drain(..) {
-            commands.entity(tile).despawn();
+        for (_, entity) in registry.map_render.tiles.drain() {
+            commands.entity(entity).despawn();
         }
         registry.map_render.applied = None;
         return;
@@ -774,13 +786,13 @@ fn sync_map_render(
     // and the page decode is async on the web side — so for the first frame(s) after
     // a snapshot the runtime can hold the tile list before its atlas images are
     // ingested. If we proceeded now, `map_render_image_binding` would return None for
-    // every tile (image missing), spawn 0 sprites, and then mark this snapshot
+    // every tile (image missing), bind 0 sprites, and then mark this snapshot
     // `applied` below — permanently LOCKING IN an empty map (the early-return above
-    // never lets us retry once the images finally arrive). So defer the whole
-    // despawn/respawn until every atlas page this snapshot references has an ingested
-    // image, retrying on later frames WITHOUT marking it applied. (This race — not the
-    // tile z value — was the real cause of the "band-z map vanishes" bug; z=-50 only
-    // ever "worked" when the images happened to be ingested before the first sync.)
+    // never lets us retry once the images finally arrive). So defer until every atlas
+    // page this snapshot references has an ingested image, retrying on later frames
+    // WITHOUT marking it applied. (This race — not the tile z value — was the real
+    // cause of the "band-z map vanishes" bug; z=-50 only ever "worked" when the
+    // images happened to be ingested before the first sync.)
     let atlases_ready = snapshot
         .atlases
         .iter()
@@ -789,17 +801,16 @@ fn sync_map_render(
         return;
     }
 
-    for tile in registry.map_render.tiles.drain(..) {
-        commands.entity(tile).despawn();
-    }
-
     // The producer uses the fold-in model (`cameraOffset` stays (0, 0); sub-cell
     // motion is already baked into `left`/`top`), so this offset is normally a
-    // no-op — applied here only so a future offset-model producer still positions
-    // a freshly respawned tile set correctly.
+    // no-op — folded in here only so a future offset-model producer still positions
+    // tiles correctly.
     let offset_x = map_camera_offset.x;
     let offset_y = -map_camera_offset.y;
-    let mut spawned: Vec<Entity> = Vec::with_capacity(snapshot.tiles.len());
+    // RETAIN-IN-PLACE: update surviving tiles, spawn newcomers, despawn leavers —
+    // mirrors sync_entity_render_layers so sub-cell motion is cheap Transform writes
+    // rather than a full despawn+respawn of every tile each frame.
+    let mut alive: HashSet<String> = HashSet::with_capacity(snapshot.tiles.len());
     for tile in &snapshot.tiles {
         let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
             continue;
@@ -811,30 +822,58 @@ fn sync_map_render(
         // Unified y-sort with entities (Stage 2): same depth→world-z conversion as
         // entity_render_layer_position incl. the entity producer's ×10 gain.
         let world_z = tile.z * MAP_TILE_ENTITY_DEPTH_GAIN / MAP_TILE_Z_DENOM;
-        let entity = commands
-            .spawn((
-                Sprite {
-                    image,
-                    texture_atlas: Some(texture_atlas),
-                    custom_size: Some(Vec2::new(tile.width, tile.height)),
-                    color: Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0)),
-                    ..default()
-                },
-                Transform::from_xyz(world_x, world_y, world_z),
-            ))
-            .id();
-        spawned.push(entity);
+        let custom_size = Some(Vec2::new(tile.width, tile.height));
+        let color = Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0));
+        alive.insert(tile.key.clone());
+        if let Some(&entity) = registry.map_render.tiles.get(&tile.key) {
+            if let Ok(mut sprite) = sprite_query.get_mut(entity) {
+                sprite.image = image;
+                sprite.texture_atlas = Some(texture_atlas);
+                sprite.custom_size = custom_size;
+                sprite.color = color;
+            }
+            if let Ok(mut transform) = transform_query.get_mut(entity) {
+                transform.translation = Vec3::new(world_x, world_y, world_z);
+            }
+        } else {
+            let entity = commands
+                .spawn((
+                    Sprite {
+                        image,
+                        texture_atlas: Some(texture_atlas),
+                        custom_size,
+                        color,
+                        ..default()
+                    },
+                    Transform::from_xyz(world_x, world_y, world_z),
+                ))
+                .id();
+            registry.map_render.tiles.insert(tile.key.clone(), entity);
+        }
     }
 
-    let spawned_count = spawned.len();
-    registry.map_render.tiles = spawned;
+    // Despawn tiles that left the viewport / are no longer in the snapshot.
+    let stale: Vec<String> = registry
+        .map_render
+        .tiles
+        .keys()
+        .filter(|key| !alive.contains(*key))
+        .cloned()
+        .collect();
+    for key in stale {
+        if let Some(entity) = registry.map_render.tiles.remove(&key) {
+            commands.entity(entity).despawn();
+        }
+    }
+
+    let live_count = registry.map_render.tiles.len();
     registry.map_render.applied = Some(snapshot.clone());
     publish_status(
         "map-render-synced",
         &format!(
-            "Applied {} map tiles ({} sprites)",
+            "Applied {} map tiles ({} live)",
             snapshot.tiles.len(),
-            spawned_count
+            live_count
         ),
     );
 }

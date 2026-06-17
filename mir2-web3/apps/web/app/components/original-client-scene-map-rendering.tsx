@@ -214,6 +214,7 @@ export function buildMapTileDrawList(
       return;
     }
     tiles.push({
+      key: sprite.key,
       atlasKey,
       rectKey,
       left: sprite.left + cameraOffset.x,
