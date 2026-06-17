@@ -11,6 +11,12 @@ export function setMir2EntityRenderAtlas(key: string, width: number, height: num
 
 export function setMir2EntityRenderState(snapshot_json: string): void;
 
+export function setMir2MapCameraOffset(x: number, y: number): void;
+
+export function setMir2MapRenderAtlas(key: string, width: number, height: number, pixels: Uint8Array): void;
+
+export function setMir2MapRenderState(json: string): void;
+
 export function setMir2StatusSink(callback: Function): void;
 
 export function setMir2WorldState(snapshot_json: string): void;
@@ -23,7 +29,10 @@ export interface InitOutput {
     readonly setMir2WorldState: (a: number, b: number) => void;
     readonly setMir2EntityRenderState: (a: number, b: number) => void;
     readonly setMir2EntityRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+    readonly setMir2MapRenderState: (a: number, b: number) => void;
+    readonly setMir2MapRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly bootMir2Runtime: () => void;
+    readonly setMir2MapCameraOffset: (a: number, b: number) => void;
     readonly setMir2StatusSink: (a: any) => void;
     readonly clearMir2StatusSink: () => void;
     readonly wasm_bindgen__convert__closures_____invoke__h42bf88799d610114: (a: number, b: number, c: any) => [number, number];
