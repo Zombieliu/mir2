@@ -1127,11 +1127,12 @@ export function OriginalClientShell({
     if (window.localStorage.getItem("mir2-map-atlas") === "0") return false;
     return true;
   }, []);
-  // Stage 1 Bevy-native map renderer (DEFAULT OFF; escape hatch ?bevyMap=1 or
-  // localStorage mir2-bevy-map=1). When on, the same packed map-atlas tiles that
-  // the DOM WebGl2MapAtlasLayer would draw are pushed into the Bevy runtime and
-  // rendered behind entities; the DOM GPU layer + DOM map sprites are disabled so
-  // the map is never drawn twice. Mirrors the foldWebgl2ToBevy / mapAtlas flags.
+  // Bevy-native map renderer (Stages 1-3, DEFAULT ON). The same packed map-atlas
+  // tiles the DOM WebGl2MapAtlasLayer would draw are pushed into the Bevy runtime
+  // and rendered in a UNIFIED y-sort band with the entities (map objects occlude
+  // actors by cell row — Crystal's single sorted band); the DOM GPU layer + DOM
+  // map sprites are disabled so the map is never drawn twice. Mirrors the
+  // foldWebgl2ToBevy / mapAtlas flags.
   const bevyMapRequested = useMemo(() => {
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);

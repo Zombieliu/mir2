@@ -11,6 +11,11 @@ import type { MapAtlasIndex } from "../../lib/map-atlas-manifest";
 // mounted behind the entity/object layers. DOM map sprites are the fallback when this is off.
 
 export type MapTileDraw = {
+  // Stable per-tile identity (the ViewportMapSprite key = spriteId:cellX:cellY:frame),
+  // stable across sub-cell camera motion for static tiles. The Bevy runtime keys its
+  // retained tile entities by this so it updates them in place instead of despawning
+  // + respawning the whole set every motion frame. Unused by the DOM WebGl2 layer.
+  key: string;
   atlasKey: string;
   rectKey: string;
   left: number;
