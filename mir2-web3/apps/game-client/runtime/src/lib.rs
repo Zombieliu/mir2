@@ -717,12 +717,15 @@ fn ingest_pending_map_render_atlases(
     });
 }
 
-/// All map tiles render at z ≈ MAP_TILE_Z_BASE, far below entities (entity
-/// layers sit at z ≈ layer.z/100000 ≈ 0.0..0.5, decor 0.3). The per-tile
-/// `z * MAP_TILE_Z_STEP` term preserves the relative back→object→middle→
-/// front→anim ordering among map tiles without ever crossing into entity z.
-const MAP_TILE_Z_BASE: f32 = -50.0;
-const MAP_TILE_Z_STEP: f32 = 1.0e-7;
+/// Stage 2 (unified y-sort) z scale. Map tiles and entities derive z from the
+/// SAME `viewportDepthForCell`; the entity producer pre-multiplies by
+/// MAP_TILE_ENTITY_DEPTH_GAIN (the `depth*10+order` in buildBevyEntityRenderState)
+/// before the runtime's `/ MAP_TILE_Z_DENOM` (entity_render_layer_position). The
+/// map producer feeds RAW depth, so apply the same ×10 here → map world-z lands on
+/// the IDENTICAL band as entities (floor behind ≈0.2, tall fronts above actors ≈3.9,
+/// objects interleave with actors by cell row) — Crystal's single y-sorted band.
+const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
+const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 
 /// Bevy-native map-tile renderer (Stage 1). Builds/refreshes the atlas-page
 /// `TextureAtlasLayout`s (mirrors `sync_entity_render_atlas_layouts`), then
@@ -766,6 +769,26 @@ fn sync_map_render(
         return;
     }
 
+    // The atlas IMAGES arrive on a SEPARATE async channel (setMir2MapRenderAtlas →
+    // ingest_pending_map_render_atlases) from the state push (setMir2MapRenderState),
+    // and the page decode is async on the web side — so for the first frame(s) after
+    // a snapshot the runtime can hold the tile list before its atlas images are
+    // ingested. If we proceeded now, `map_render_image_binding` would return None for
+    // every tile (image missing), spawn 0 sprites, and then mark this snapshot
+    // `applied` below — permanently LOCKING IN an empty map (the early-return above
+    // never lets us retry once the images finally arrive). So defer the whole
+    // despawn/respawn until every atlas page this snapshot references has an ingested
+    // image, retrying on later frames WITHOUT marking it applied. (This race — not the
+    // tile z value — was the real cause of the "band-z map vanishes" bug; z=-50 only
+    // ever "worked" when the images happened to be ingested before the first sync.)
+    let atlases_ready = snapshot
+        .atlases
+        .iter()
+        .all(|atlas| atlas_assets.images.contains_key(&atlas.key));
+    if !atlases_ready {
+        return;
+    }
+
     for tile in registry.map_render.tiles.drain(..) {
         commands.entity(tile).despawn();
     }
@@ -785,9 +808,9 @@ fn sync_map_render(
         // `entity_render_layer_position` so tiles share the entities' space.
         let world_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5 + offset_x;
         let world_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5) + offset_y;
-        // Absolute z below entities: MAP_TILE_Z_BASE (≈ -50) + the relative
-        // back→object→middle→front→anim ordering, never crossing into entity z.
-        let world_z = MAP_TILE_Z_BASE + tile.z * MAP_TILE_Z_STEP;
+        // Unified y-sort with entities (Stage 2): same depth→world-z conversion as
+        // entity_render_layer_position incl. the entity producer's ×10 gain.
+        let world_z = tile.z * MAP_TILE_ENTITY_DEPTH_GAIN / MAP_TILE_Z_DENOM;
         let entity = commands
             .spawn((
                 Sprite {

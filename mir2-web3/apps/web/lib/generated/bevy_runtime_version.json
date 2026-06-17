@@ -1,5 +1,5 @@
 {
-  "version": "bevy-94c54ad0b11251b3",
+  "version": "bevy-abaa0c33db8ea23e",
   "files": [
     {
       "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
@@ -7,7 +7,7 @@
     },
     {
       "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
-      "sha256": "338f59d4385e37bf92c0119473f1bb2a7c9f46df59b880e45e1f38433f6271f0"
+      "sha256": "8d18839b94dc7f080189220f0f3515de29f1832b9f0d3f6ae9ba628e9e1d5f14"
     },
     {
       "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
@@ -15,7 +15,7 @@
     },
     {
       "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
-      "sha256": "739b0aab9ba63ff09f642463a7ce5a1e1a3b2c5cc7b19e732e4d1e9d15733195"
+      "sha256": "ad0beebeef4d74c1f19ac8f5d4b03ae42e702766c9ea9f52b17d9f981925a713"
     },
     {
       "path": "public/bevy-runtime/pkg/mir2_bevy_runtime.js",
@@ -23,7 +23,7 @@
     },
     {
       "path": "public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm",
-      "sha256": "739b0aab9ba63ff09f642463a7ce5a1e1a3b2c5cc7b19e732e4d1e9d15733195"
+      "sha256": "ad0beebeef4d74c1f19ac8f5d4b03ae42e702766c9ea9f52b17d9f981925a713"
     }
   ]
 }
