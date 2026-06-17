@@ -1135,9 +1135,15 @@ export function OriginalClientShell({
   const bevyMapRequested = useMemo(() => {
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);
+    // Stage 3: Bevy is the DEFAULT map renderer (it is already the default ENTITY
+    // renderer, #119, and the map is the same runtime + sprite path — verified
+    // rendering on both the WebGPU and WebGL2 Bevy backends). The standalone
+    // WebGl2MapAtlasLayer is kept as an inert escape-hatch reachable via
+    // `?bevyMap=0` (or localStorage "mir2-bevy-map"="0"), NOT deleted, pending the
+    // cross-browser (Firefox/Safari) verification a single-Chrome env can't do.
     if (params.get("bevyMap") === "0") return false;
     if (params.get("bevyMap") === "1") return true;
-    return window.localStorage.getItem("mir2-bevy-map") === "1";
+    return window.localStorage.getItem("mir2-bevy-map") !== "0";
   }, []);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
