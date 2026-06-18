@@ -106,8 +106,12 @@ import {
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 import { WebGl2MapAtlasLayer, type MapTileDraw } from "./components/webgl2-map-atlas-layer";
-import { buildMapTileDrawList } from "./components/original-client-scene-map-rendering";
+import { buildMapTileDrawList, buildStandaloneMapTiles } from "./components/original-client-scene-map-rendering";
 import { type MapAtlasIndex, type MapAtlasPage, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
+import {
+  decodeStandaloneTileOffThread,
+  offThreadStandaloneTileDecodeAvailable,
+} from "../lib/standalone-tile-decode";
 
 type HeldScenePointer = {
   button: 0 | 2;
@@ -350,11 +354,14 @@ export function OriginalClientShell({
   viewportEntities,
   viewportTiles,
   sceneInteractionReady,
+  enteringWorld,
   bevyEntityRendererReady,
   bevyRuntimeBackend,
   onSceneAssetReadinessChange,
   onBevyEntityRenderStateChange,
   onBevyMapRenderStateChange,
+  onBevyMapCameraOffsetChange,
+  registerLiveCameraMotionOffset,
   logs,
   accountId,
   password,
@@ -453,6 +460,14 @@ export function OriginalClientShell({
     "scene.loadingMap",
     [],
     language === "zh-CN" ? "地图加载中…" : language === "es" ? "Cargando mapa…" : "Loading map…",
+  );
+  // Shown over the character-select screen from the Start Game click until the server's
+  // `UserInformation` flips `screen` to "game" — bridges the feedbackless round-trip gap,
+  // after which `sceneLoadingLabel` ("Loading map…") takes over seamlessly.
+  const enteringWorldLabel = t(
+    "scene.enteringWorld",
+    [],
+    language === "zh-CN" ? "进入游戏中…" : language === "es" ? "Entrando al mundo…" : "Entering world…",
   );
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
@@ -820,6 +835,23 @@ export function OriginalClientShell({
     };
   }, [screen, sceneInteractionReady, onViewportDirectionIntent, onViewportDirectionStop]);
 
+  // Roadmap #4 (DEFAULT ON): drive the render loop OUT of React. When on, the
+  // motion-clock React state ticks at ~10Hz (vs 30Hz) — ~3× less reconciliation
+  // garbage during walking — and the Bevy map camera offset is pushed from a 60Hz
+  // ref-based rAF loop in page.tsx instead of the per-tick React effect below, so
+  // map scroll stays smooth despite the slower React clock. Chat bubbles, projectile
+  // expiry and the reconnect countdown all tolerate 10Hz (TTLs are seconds; flight
+  // is 300–500ms). Measured: 6-min warm continuous walk = 0/24 >50ms windows (locked
+  // 60fps, flat heap). Escape hatch: `?renderLoopRaf=0` / localStorage
+  // "mir2-render-loop-raf"="0".
+  const renderLoopRafEnabled = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("renderLoopRaf") === "0") return false;
+    if (p.get("renderLoopRaf") === "1") return true;
+    return window.localStorage.getItem("mir2-render-loop-raf") !== "0";
+  }, []);
+
   const lastMotionNowRef = useRef(0);
   useEffect(() => {
     if (screen !== "game") {
@@ -842,7 +874,9 @@ export function OriginalClientShell({
     // so smoothness is retained; the reconnect countdown and chat-bubble expiry both
     // operate on second/multi-second scales. This halves the React re-render rate vs the
     // previous 60 Hz clock, recovering ~9 % of main-thread time during idle gameplay.
-    const MOTION_CLOCK_MIN_INTERVAL_MS = 30;
+    // With renderLoopRafEnabled the camera offset is owned by the 60Hz rAF loop in
+    // page.tsx, so the React clock can drop to ~10Hz (100ms) without stuttering scroll.
+    const MOTION_CLOCK_MIN_INTERVAL_MS = renderLoopRafEnabled ? 100 : 30;
     const updateMotionClock = () => {
       const t = Date.now();
       if (t - lastMotionNowRef.current >= MOTION_CLOCK_MIN_INTERVAL_MS) {
@@ -857,7 +891,7 @@ export function OriginalClientShell({
       window.clearInterval(fallbackTimer);
       window.cancelAnimationFrame(animationFrame);
     };
-  }, [screen]);
+  }, [screen, renderLoopRafEnabled]);
 
   useEffect(() => {
     const updateStageScale = () => {
@@ -1146,6 +1180,31 @@ export function OriginalClientShell({
     if (params.get("bevyMap") === "1") return true;
     return window.localStorage.getItem("mir2-bevy-map") !== "0";
   }, []);
+  // Atlas-MISS tiles (the old DOM `mapDrawPlan.uncovered`) rendered by the Bevy
+  // runtime from per-tile R2 textures (DEFAULT ON). Without this the Bevy map drops
+  // every tile whose (library, frame) isn't in the 27-lib packed atlas — which is
+  // most tiles on most maps. Escape hatch: `?bevyMapTiles=0` / localStorage
+  // "mir2-bevy-map-tiles"="0" reverts to the covered-only behavior.
+  const standaloneMapTilesEnabled = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("bevyMapTiles") === "0") return false;
+    if (params.get("bevyMapTiles") === "1") return true;
+    return window.localStorage.getItem("mir2-bevy-map-tiles") !== "0";
+  }, []);
+  // Move per-entity motion interpolation + camera scroll offset OUT of JS and
+  // INTO the Bevy runtime (DEFAULT ON). When on, buildBevyEntityRenderState stops
+  // folding the per-tick motion/camera offsets into each entity's left/top, so the
+  // entity render state stays STABLE across ~30Hz motion ticks — React no longer
+  // rebuilds + JSON.stringifies it every tick (the per-tick GC churn this removes).
+  // Escape hatch: `?bevyEntityInterp=0` / localStorage "mir2-bevy-entity-interp"="0".
+  const entityInterpInRuntime = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("bevyEntityInterp") === "0") return false;
+    if (p.get("bevyEntityInterp") === "1") return true;
+    return window.localStorage.getItem("mir2-bevy-entity-interp") !== "0";
+  }, []);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
@@ -1166,6 +1225,17 @@ export function OriginalClientShell({
   >(new Map());
   const mapAtlasPageDecodeRequestedRef = useRef<Set<string>>(new Set());
   const [mapAtlasPagesDecodedVersion, setMapAtlasPagesDecodedVersion] = useState(0);
+  // Decoded RGBA bytes for each atlas-MISS (standalone) tile consumed by the Bevy
+  // map renderer, keyed by `library#frame` imageKey (deduped across cells). Mirrors
+  // decodedMapAtlasPagesRef but per-tile; the requested set dedupes in-flight decodes
+  // and the failed set negative-caches misses (TTL) so a 404 tile is dropped from the
+  // snapshot instead of re-fetched forever / leaving the runtime perpetually pending.
+  const decodedMapTilesRef = useRef<
+    Map<string, { width: number; height: number; pixels: Uint8Array }>
+  >(new Map());
+  const mapTileDecodeRequestedRef = useRef<Set<string>>(new Set());
+  const failedMapTileImageKeysRef = useRef<Map<string, number>>(new Map());
+  const [mapStandaloneTilesDecodedVersion, setMapStandaloneTilesDecodedVersion] = useState(0);
   // Mirror the entity renderer's WebGL2 failure handling: if the atlas layer reports it can't draw
   // (no WebGL2 context, or a GL/texture error), latch the failure so the DOM tile path takes over
   // instead of leaving a blank scene on devices without WebGL2.
@@ -1183,9 +1253,9 @@ export function OriginalClientShell({
   const mapDrawPlan = useMemo(
     () =>
       mapAtlasUsable && mapAtlasIndex && renderPlayer
-        ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, playerCameraMotionOffset)
+        ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, EMPTY_VIEWPORT_OFFSET)
         : null,
-    [mapAtlasUsable, mapAtlasIndex, renderPlayer, viewportMapSprites, playerCameraMotionOffset],
+    [mapAtlasUsable, mapAtlasIndex, renderPlayer, viewportMapSprites],
   );
   const mapTileDrawList = mapDrawPlan?.tiles ?? EMPTY_MAP_TILE_DRAW_LIST;
   const viewportProjectiles = renderPlayer
@@ -1306,16 +1376,40 @@ export function OriginalClientShell({
     useGpuEntityRenderer &&
     !webGl2EntityAtlasFailed &&
     (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
-  const entityRenderState = buildBevyEntityRenderState({
-    enabled: useGpuEntityRenderer,
-    player,
-    viewportEntitySprites,
-    viewportDepthPlayer,
-    playerCameraMotionOffset,
-    entityMotionSnapshots: entityMotionSnapshotsRef.current,
-    motionNow,
-    atlas: useBevyEntityAtlas ? activeBevyEntityAtlas : null,
-  });
+  // When runtime interpolation is ON, the entity render state is independent of
+  // motionNow/offsets (Bevy applies them), so it only needs to rebuild on a
+  // player-cell change — NOT every ~30Hz motion tick. The trigger collapses the
+  // relevant inputs into one scalar: player cell when interp is on, motionNow
+  // when off (preserving the old per-tick rebuild for the fold path). The deps
+  // array is FIXED LENGTH either way.
+  const entityMemoTrigger = entityInterpInRuntime
+    ? `${player?.objectId}:${player?.x}:${player?.y}`
+    : motionNow;
+  const entityRenderState = useMemo(
+    () =>
+      buildBevyEntityRenderState({
+        enabled: useGpuEntityRenderer,
+        player,
+        viewportEntitySprites,
+        viewportDepthPlayer,
+        playerCameraMotionOffset,
+        entityMotionSnapshots: entityMotionSnapshotsRef.current,
+        motionNow,
+        atlas: useBevyEntityAtlas ? activeBevyEntityAtlas : null,
+        interpolateInRuntime: entityInterpInRuntime,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      useGpuEntityRenderer,
+      player,
+      viewportEntitySprites,
+      viewportDepthPlayer,
+      useBevyEntityAtlas,
+      activeBevyEntityAtlas,
+      entityInterpInRuntime,
+      entityMemoTrigger,
+    ],
+  );
   const bevyEntityRenderState = useBevyEntityRenderer
     ? entityRenderState
     : disabledEntityRenderState(entityRenderState);
@@ -1336,6 +1430,20 @@ export function OriginalClientShell({
     : mapGpuActive
       ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES
       : viewportMapSprites;
+  // When Bevy owns the map, the atlas-MISS remainder (mapDrawPlan.uncovered) is NOT
+  // dropped: each tile becomes a per-tile R2 texture drawn by the runtime in the same
+  // z-band as covered tiles. ROOT-OFFSET model: tiles are built in cell-space (EMPTY
+  // offset, matching mapDrawPlan) and the sub-tile camera scroll is applied by Bevy via
+  // setMir2MapCameraOffset — so this memo is stable across the 30Hz motion clock and only
+  // rebuilds on a cell/animation change. (A DOM fallback can't be used here — the Bevy
+  // canvas draws map + entities together, so DOM map sprites would paint over actors.)
+  const standaloneTilesPlan = useMemo(
+    () =>
+      bevyMapActive && standaloneMapTilesEnabled && mapDrawPlan
+        ? buildStandaloneMapTiles(mapDrawPlan.uncovered, EMPTY_VIEWPORT_OFFSET)
+        : null,
+    [bevyMapActive, standaloneMapTilesEnabled, mapDrawPlan],
+  );
 
   // Decode each atlas page referenced by the current tiles to RGBA bytes once.
   useEffect(() => {
@@ -1375,6 +1483,63 @@ export function OriginalClientShell({
         });
     }
   }, [bevyMapActive, mapAtlasIndex, mapTileDrawList]);
+
+  // Decode each atlas-MISS tile's PNG (R2-served) to RGBA once, keyed by imageKey.
+  // Same idempotent, no-`cancelled`-flag pattern as the page decode above (the effect
+  // re-runs every motion/animation frame; dropping in-flight work would strand tiles).
+  // A failed decode negative-caches the imageKey (TTL) and bumps the version so the
+  // render state drops that tile (resolving the runtime's per-tile pending retry).
+  useEffect(() => {
+    if (!bevyMapActive || !standaloneMapTilesEnabled || !standaloneTilesPlan) {
+      return;
+    }
+    const now = Date.now();
+    for (const { imageKey, fetchUrl } of standaloneTilesPlan.images) {
+      if (mapTileDecodeRequestedRef.current.has(imageKey)) {
+        continue;
+      }
+      const failedAt = failedMapTileImageKeysRef.current.get(imageKey);
+      if (failedAt !== undefined && now - failedAt <= STANDALONE_TILE_NEGATIVE_CACHE_MS) {
+        continue;
+      }
+      mapTileDecodeRequestedRef.current.add(imageKey);
+      void decodeStandaloneTilePixels(fetchUrl)
+        .then((decoded) => {
+          if (!decoded) {
+            mapTileDecodeRequestedRef.current.delete(imageKey);
+            failedMapTileImageKeysRef.current.set(imageKey, Date.now());
+            setMapStandaloneTilesDecodedVersion((version) => version + 1);
+            return;
+          }
+          failedMapTileImageKeysRef.current.delete(imageKey);
+          decodedMapTilesRef.current.set(imageKey, decoded);
+          setMapStandaloneTilesDecodedVersion((version) => version + 1);
+        })
+        .catch(() => {
+          mapTileDecodeRequestedRef.current.delete(imageKey);
+          failedMapTileImageKeysRef.current.set(imageKey, Date.now());
+          setMapStandaloneTilesDecodedVersion((version) => version + 1);
+        });
+    }
+  }, [bevyMapActive, standaloneMapTilesEnabled, standaloneTilesPlan]);
+
+  // Bound the CPU-side decoded-tile cache: evict oldest (insertion-ordered) entries no
+  // longer in the current viewport's needed set, freeing their RGBA + allowing re-decode
+  // on re-entry. (GPU-side eviction of the uploaded texture is driven separately in
+  // page.tsx from the standaloneTiles keys.)
+  useEffect(() => {
+    const cache = decodedMapTilesRef.current;
+    if (cache.size <= STANDALONE_TILE_DECODE_CACHE_MAX) {
+      return;
+    }
+    const needed = new Set(standaloneTilesPlan?.images.map((image) => image.imageKey) ?? []);
+    for (const key of [...cache.keys()]) {
+      if (cache.size <= STANDALONE_TILE_DECODE_CACHE_MAX) break;
+      if (needed.has(key)) continue;
+      cache.delete(key);
+      mapTileDecodeRequestedRef.current.delete(key);
+    }
+  }, [standaloneTilesPlan]);
 
   const bevyMapRenderState = useMemo<BevyMapRenderState>(() => {
     if (!bevyMapActive || !mapAtlasIndex) {
@@ -1419,6 +1584,27 @@ export function OriginalClientShell({
         });
       }
     }
+    // Atlas-MISS tiles: drop any whose decode permanently failed (negative-cache TTL)
+    // so the runtime isn't held pending on a 404; include the rest (the runtime spawns
+    // each as soon as ITS image lands). Upload one image per imageKey via atlasImages
+    // (deduped) — page.tsx skips already-uploaded keys + GPU-evicts stale ones.
+    const now = Date.now();
+    const standaloneTiles = (standaloneTilesPlan?.tiles ?? []).filter((tile) => {
+      const failedAt = failedMapTileImageKeysRef.current.get(tile.imageKey);
+      return failedAt === undefined || now - failedAt > STANDALONE_TILE_NEGATIVE_CACHE_MS;
+    });
+    const standaloneImageKeys = new Set(standaloneTiles.map((tile) => tile.imageKey));
+    for (const imageKey of standaloneImageKeys) {
+      const decoded = decodedMapTilesRef.current.get(imageKey);
+      if (decoded) {
+        atlasImages.push({
+          key: imageKey,
+          width: decoded.width,
+          height: decoded.height,
+          pixels: decoded.pixels,
+        });
+      }
+    }
     return {
       enabled: true,
       stageWidth: ORIGINAL_UI.game.sceneWidth,
@@ -1427,16 +1613,58 @@ export function OriginalClientShell({
       atlasImages,
       // EXACTLY buildMapTileDrawList's output (camera offset folded into left/top).
       tiles: mapTileDrawList,
+      standaloneTiles,
       // Fold-in model: offset already baked into the tiles, so the root stays put.
       cameraOffset: EMPTY_VIEWPORT_OFFSET,
     };
-    // mapAtlasPagesDecodedVersion forces a rebuild once a page's pixels decode.
+    // The decoded-version counters force a rebuild once a page's / tile's pixels decode.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bevyMapActive, mapAtlasIndex, mapTileDrawList, mapAtlasPagesDecodedVersion]);
+  }, [
+    bevyMapActive,
+    mapAtlasIndex,
+    mapTileDrawList,
+    mapAtlasPagesDecodedVersion,
+    standaloneTilesPlan,
+    mapStandaloneTilesDecodedVersion,
+  ]);
 
   useEffect(() => {
     onBevyMapRenderStateChange(bevyMapRenderState);
   }, [bevyMapRenderState, onBevyMapRenderStateChange]);
+
+  useEffect(() => {
+    // When renderLoopRafEnabled, the 60Hz ref-based rAF loop in page.tsx owns the
+    // Bevy camera-offset push (smoother scroll than this ~10Hz React-effect path).
+    // Skip here so the two paths don't fight over lastBevyMapCameraOffsetRef.
+    if (renderLoopRafEnabled) return;
+    onBevyMapCameraOffsetChange(playerCameraMotionOffset);
+  }, [renderLoopRafEnabled, playerCameraMotionOffset, onBevyMapCameraOffsetChange]);
+
+  // Hand page.tsx a ref-only accessor that recomputes the player camera offset on
+  // demand (per rAF frame) from the SAME inputs the React render uses — the latest
+  // renderPlayer (latestMoveInputRef) and the live entity-motion snapshots — only
+  // with a fresh Date.now() timestamp. This guarantees the rAF loop pushes the same
+  // offset values the React effect would, just sampled at 60Hz. Registered only when
+  // the flag is on; null otherwise so page.tsx leaves the React-effect path in charge.
+  useEffect(() => {
+    if (!registerLiveCameraMotionOffset) return;
+    if (!renderLoopRafEnabled) {
+      registerLiveCameraMotionOffset(null);
+      return;
+    }
+    registerLiveCameraMotionOffset(() => {
+      const latest = latestMoveInputRef.current;
+      if (latest.screen !== "game" || !latest.renderPlayer) return null;
+      return cameraMotionOffsetForEntity(
+        latest.renderPlayer,
+        entityMotionSnapshotsRef.current,
+        Date.now(),
+      );
+    });
+    return () => {
+      registerLiveCameraMotionOffset(null);
+    };
+  }, [renderLoopRafEnabled, registerLiveCameraMotionOffset]);
 
   useEffect(() => {
     const activeKey = useWebGl2EntityAtlasRenderer ? activeBevyEntityAtlas?.key ?? null : null;
@@ -1507,6 +1735,15 @@ export function OriginalClientShell({
       atlasIndexReady: Boolean(mapAtlasIndex),
       enabled: bevyMapRenderState.enabled,
       tileCount: bevyMapRenderState.tiles.length,
+      // Atlas-MISS (standalone) tile metrics: how many the producer wants to draw, how
+      // many distinct frame images that needs, how many have decoded, and how many are
+      // in this snapshot (decoded → uploaded). standaloneTileCount === uncoveredPlanCount
+      // minus negative-cached misses; a gap between decoded and wanted is in-flight decode.
+      standaloneTileCount: bevyMapRenderState.standaloneTiles?.length ?? 0,
+      uncoveredPlanCount: standaloneTilesPlan?.tiles.length ?? 0,
+      uncoveredImageWantCount: standaloneTilesPlan?.images.length ?? 0,
+      decodedTileCount: decodedMapTilesRef.current.size,
+      standaloneTilesEnabled: standaloneMapTilesEnabled,
       atlasPageCount: bevyMapRenderState.atlases?.length ?? 0,
       atlasImageCount: bevyMapRenderState.atlasImages?.length ?? 0,
       decodedPageCount: decodedMapAtlasPagesRef.current.size,
@@ -1533,7 +1770,17 @@ export function OriginalClientShell({
       if (cancelled || !renderPlayer) {
         return;
       }
-      const ring = buildViewportMapSprites(world, renderPlayer, 0, "static", SCENE_TILE_PREFETCH_RING_CELLS);
+      // Distinct poolKey ("prefetch"): the idle-scheduled ring shares the "static" filter but
+      // runs AFTER the static memo's render, so it must not draw from the static memo's pool
+      // (which the just-committed render still references) when ?mapSpritePool=1 is on.
+      const ring = buildViewportMapSprites(
+        world,
+        renderPlayer,
+        0,
+        "static",
+        SCENE_TILE_PREFETCH_RING_CELLS,
+        "prefetch",
+      );
       const visible = new Set(sceneAssetUrlsRef.current);
       const ringUrls = Array.from(
         new Set([
@@ -2035,6 +2282,7 @@ export function OriginalClientShell({
             stageHeight={ORIGINAL_UI.game.sceneHeight}
             index={mapAtlasIndex}
             tiles={mapTileDrawList}
+            cameraOffset={playerCameraMotionOffset}
             onDebugChange={handleMapAtlasDebug}
           />
           <WebGl2EntityAtlasLayer
@@ -2251,10 +2499,12 @@ export function OriginalClientShell({
               <span className="gateway-reconnect-text">{reconnectMessage}</span>
             </div>
           ) : null}
-          {screen === "game" && !sceneInteractionReady ? (
+          {enteringWorld || (screen === "game" && !sceneInteractionReady) ? (
             <div className="scene-loading-overlay" role="status" aria-live="polite">
               <span className="scene-loading-spinner" aria-hidden="true" />
-              <span className="scene-loading-text">{sceneLoadingLabel}</span>
+              <span className="scene-loading-text">
+                {screen === "game" ? sceneLoadingLabel : enteringWorldLabel}
+              </span>
             </div>
           ) : null}
         </div>
@@ -2376,24 +2626,32 @@ const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 const SCENE_READINESS_SAFETY_MS = 3000;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
 
-// Decoded RGBA bytes for a map-atlas page, cached by image URL so a page is only
-// fetched + read back once across the session even if the renderer toggles.
-const mapAtlasPagePixelCache = new Map<
+// Standalone (atlas-MISS) tile decode tuning. A miss is negative-cached for this long so
+// a 404 tile isn't re-fetched every frame (and the runtime isn't held pending on it). The
+// CPU decode cache is bounded; oldest off-screen tiles are evicted + re-decodable on return.
+const STANDALONE_TILE_NEGATIVE_CACHE_MS = 30 * 1000;
+const STANDALONE_TILE_DECODE_CACHE_MAX = 4096;
+
+// Decoded RGBA bytes for a map image (atlas page OR standalone tile), cached by image
+// URL so each is fetched + read back once across the session even if the renderer toggles.
+const mapImagePixelCache = new Map<
   string,
   Promise<{ width: number; height: number; pixels: Uint8Array } | null>
 >();
 
-// Decode a packed map-atlas page PNG to raw RGBA bytes via an offscreen canvas
-// (drawImage -> getImageData), matching set_mir2_map_render_atlas's expectation
-// of width*height*4 bytes. Returns null when running without a DOM or when the
-// image/canvas readback fails (the caller then leaves the page unbound for now).
-function decodeMapAtlasPagePixels(
-  page: MapAtlasPage,
+// Decode any PNG URL to raw RGBA bytes via an offscreen canvas (drawImage ->
+// getImageData), matching set_mir2_map_render_atlas's expectation of width*height*4
+// bytes. Used for both packed atlas pages and per-tile standalone images. Returns null
+// without a DOM or on image/canvas-readback failure (the caller leaves it unbound).
+function decodeImageToRgba(
+  url: string,
+  fallbackWidth = 0,
+  fallbackHeight = 0,
 ): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
   if (typeof document === "undefined") {
     return Promise.resolve(null);
   }
-  const cached = mapAtlasPagePixelCache.get(page.imageUrl);
+  const cached = mapImagePixelCache.get(url);
   if (cached) {
     return cached;
   }
@@ -2404,8 +2662,8 @@ function decodeMapAtlasPagePixels(
       image.crossOrigin = "anonymous";
       image.onload = () => {
         try {
-          const width = image.naturalWidth || page.width;
-          const height = image.naturalHeight || page.height;
+          const width = image.naturalWidth || fallbackWidth;
+          const height = image.naturalHeight || fallbackHeight;
           if (width <= 0 || height <= 0) {
             resolve(null);
             return;
@@ -2426,11 +2684,56 @@ function decodeMapAtlasPagePixels(
         }
       };
       image.onerror = () => resolve(null);
-      image.src = page.imageUrl;
+      image.src = url;
     },
   );
-  mapAtlasPagePixelCache.set(page.imageUrl, promise);
+  mapImagePixelCache.set(url, promise);
   return promise;
+}
+
+function decodeMapAtlasPagePixels(
+  page: MapAtlasPage,
+): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
+  return decodeImageToRgba(page.imageUrl, page.width, page.height);
+}
+
+// Off-thread tile decode escape hatch: `?bevyMapTilesDecode=0` / localStorage
+// "mir2-bevy-map-tiles-decode"="0" forces the main-thread canvas path (the module already
+// auto-falls-back after repeated worker failures; this is a manual override). Read once.
+let offThreadTileDecodeFlag: boolean | null = null;
+function offThreadTileDecodeEnabled(): boolean {
+  if (offThreadTileDecodeFlag !== null) return offThreadTileDecodeFlag;
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  offThreadTileDecodeFlag =
+    params.get("bevyMapTilesDecode") === "0"
+      ? false
+      : params.get("bevyMapTilesDecode") === "1"
+        ? true
+        : window.localStorage.getItem("mir2-bevy-map-tiles-decode") !== "0";
+  return offThreadTileDecodeFlag;
+}
+
+// Decode a standalone (atlas-miss) tile PNG. Unlike the packed atlas pages (which ship
+// same-origin in the Vercel output), per-tile /original-map/ frames are stripped from
+// Vercel and served ONLY from R2 — so we try the same candidate chain the old DOM <img>
+// fallback used (same-origin, then the R2 remote base), returning the first that decodes.
+// The `getImageData` readback is moved OFF the main thread (a worker, like the alpha-key
+// path) so walking into a new region's ~hundreds of uncovered tiles no longer spikes the
+// main thread; the worker module auto-falls-back to `decodeImageToRgba` on any failure.
+async function decodeStandaloneTilePixels(
+  fetchUrl: string,
+): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
+  const useOffThread = offThreadTileDecodeEnabled() && offThreadStandaloneTileDecodeAvailable();
+  for (const candidate of sceneAssetCandidateUrls(fetchUrl)) {
+    const decoded = useOffThread
+      ? (await decodeStandaloneTileOffThread(candidate)) ?? (await decodeImageToRgba(candidate))
+      : await decodeImageToRgba(candidate);
+    if (decoded) {
+      return decoded;
+    }
+  }
+  return null;
 }
 
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
@@ -2693,6 +2996,7 @@ function buildBevyEntityRenderState({
   entityMotionSnapshots,
   motionNow,
   atlas,
+  interpolateInRuntime,
 }: {
   enabled: boolean;
   player: DisplayEntity | null;
@@ -2711,6 +3015,7 @@ function buildBevyEntityRenderState({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   atlas: BevyEntityAtlasSnapshot | null;
+  interpolateInRuntime: boolean;
 }): BevyEntityRenderState {
   if (!enabled || !player) {
     return {
@@ -2726,6 +3031,8 @@ function buildBevyEntityRenderState({
     enabled: true,
     stageWidth: 1024,
     stageHeight: 768,
+    selfObjectId: player.objectId,
+    interpolateInRuntime,
     atlases: atlas
       ? [
           {
@@ -2749,10 +3056,15 @@ function buildBevyEntityRenderState({
       : [],
     entities: viewportEntitySprites.map(({ entity, sprite }) => {
       const isPlayer = player.objectId === entity.objectId;
-      const entityMotionOffset = isPlayer
-        ? EMPTY_VIEWPORT_OFFSET
-        : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
-      const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+      // When the runtime interpolates, it applies the motion glide + camera
+      // scroll itself (keyed by selfObjectId), so we leave both offsets EMPTY and
+      // do NOT fold them into left/top — keeping the render state stable per tick.
+      const entityMotionOffset =
+        interpolateInRuntime || isPlayer
+          ? EMPTY_VIEWPORT_OFFSET
+          : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+      const cameraOffset =
+        interpolateInRuntime || isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
       const rootLeft =
         VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
       const rootTop =

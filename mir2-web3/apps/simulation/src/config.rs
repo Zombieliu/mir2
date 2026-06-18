@@ -13,8 +13,9 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::os::windows::ffi::OsStrExt;
 
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, starter_map_collision, starter_scene, DecorObjectTemplate,
-    MapBounds, SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
+    crystal_map_respawns_by_file_name, starter_map_collision, starter_scene, CrystalRespawnMap,
+    DecorObjectTemplate, MapBounds, SceneBootstrap, SceneView, StarterMapCollision,
+    TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
@@ -2578,6 +2579,11 @@ impl SimulationConfig {
         // Keep `map_transfers` as-is: the per-map manifest movements
         // (`crystal_movement_transfer_records_for_map`) already drive travel
         // across the whole world, so nothing needs clearing or seeding here.
+        // Dev/QA: `MIR2_SPAWN_MAP` overrides the starter spawn map so the renderer can
+        // be verified on maps other than Bichon ("0") in the single-session world
+        // (default-off → unchanged in production). Applied BEFORE metadata so the
+        // overridden map's title/lights are stamped.
+        apply_spawn_map_override(&mut self);
         apply_crystal_map_metadata(&mut self.map);
         // On-chain smart-mine veins (M4) are env-gated (off by default).
         self.onchain_mine_nodes
@@ -2776,6 +2782,59 @@ impl SimulationConfig {
 
         self.save_account_store()
     }
+}
+
+/// Dev/QA spawn-map override. `MIR2_SPAWN_MAP=<map>` (optionally `<map>:<x>:<y>`) loads a
+/// non-default map in the single-session world so the Bevy map renderer can be verified on
+/// maps other than Bichon (the default "0"). Default-off → zero production impact. An
+/// unknown map is ignored (keeps the default spawn rather than dropping the player off-map).
+fn apply_spawn_map_override(config: &mut SimulationConfig) {
+    let Ok(raw) = std::env::var("MIR2_SPAWN_MAP") else {
+        return;
+    };
+    let mut parts = raw.trim().split(':');
+    let map_file_name = parts.next().unwrap_or_default().trim();
+    if map_file_name.is_empty() {
+        return;
+    }
+    let Some(respawn) = crystal_map_respawns_by_file_name(map_file_name) else {
+        return;
+    };
+    let explicit = match (parts.next(), parts.next()) {
+        (Some(x), Some(y)) => match (x.trim().parse::<i32>(), y.trim().parse::<i32>()) {
+            (Ok(x), Ok(y)) => Some(Point { x, y }),
+            _ => None,
+        },
+        _ => None,
+    };
+    config.map.file_name = respawn.map_file_name.clone();
+    if let Some(point) = explicit.or_else(|| crystal_map_default_spawn_point(&respawn)) {
+        config.scene_view.center = point.clone();
+        config.spawn = point;
+    }
+}
+
+/// Pick a reasonable spawn cell for a map from its respawn manifest: a start-point safe
+/// zone, then any safe zone, then a movement source, then a monster-respawn cell.
+fn crystal_map_default_spawn_point(respawn: &CrystalRespawnMap) -> Option<Point> {
+    respawn
+        .safe_zones
+        .iter()
+        .find(|zone| zone.start_point)
+        .or_else(|| respawn.safe_zones.first())
+        .map(|zone| zone.location.clone())
+        .or_else(|| {
+            respawn
+                .movements
+                .first()
+                .map(|movement| movement.source.clone())
+        })
+        .or_else(|| {
+            respawn
+                .respawns
+                .first()
+                .map(|respawn| respawn.location.clone())
+        })
 }
 
 pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {

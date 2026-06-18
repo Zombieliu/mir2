@@ -11,7 +11,7 @@ import {
   offThreadAlphaKeyAvailable,
 } from "../../lib/scene-alpha-key";
 import type { DisplayEntity, DisplayWorld } from "./original-client-types";
-import type { MapTileDraw } from "./webgl2-map-atlas-layer";
+import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import {
   EMPTY_VIEWPORT_MAP_SPRITES,
   EMPTY_VIEWPORT_OFFSET,
@@ -32,6 +32,71 @@ type OriginalMapCell = OriginalMapRegion["cells"][number];
 type OriginalMapSpriteKind = OriginalMapRegion["sprites"][string]["kind"];
 
 const mapRegionCellIndexCache = new WeakMap<OriginalMapRegion, Map<string, OriginalMapCell>>();
+
+// Roadmap RENDER-PERF (B) Stage 1 (object pooling). Flag-gated, DEFAULT OFF. When on,
+// `buildViewportMapSprites` reuses pooled ViewportMapSprite *objects* (mutated in place)
+// instead of allocating ~500 fresh object literals on every cell-cross — cutting the
+// GC-churn that shows up as walk-time jank. Container arrays are STILL freshly allocated
+// every call (cheap), so the memo result's reference identity always changes and the
+// downstream reference-equality memos still re-run. SSR-guarded + memoised once.
+let mapSpritePoolFlag: boolean | null = null;
+function mapSpritePoolEnabled() {
+  if (mapSpritePoolFlag !== null) {
+    return mapSpritePoolFlag;
+  }
+  if (typeof window === "undefined") {
+    // Don't memoise the SSR answer — the client read below must win once hydrated.
+    return false;
+  }
+  // DEFAULT ON: pooled, in-place sprite reuse across viewport rebuilds (fewer per-cell
+  // allocations). Escape hatch: `?mapSpritePool=0` / localStorage "mir2-map-sprite-pool"="0".
+  let enabled = true;
+  try {
+    const param = new URLSearchParams(window.location.search).get("mapSpritePool");
+    if (param === "1") {
+      enabled = true;
+    } else if (param === "0") {
+      enabled = false;
+    } else {
+      enabled = window.localStorage.getItem("mir2-map-sprite-pool") !== "0";
+    }
+  } catch {
+    enabled = true;
+  }
+  mapSpritePoolFlag = enabled;
+  return enabled;
+}
+
+// Per-call-site double-buffered sprite-object pools. Each distinct call site (the static
+// memo, the animated memo, the off-screen prefetch ring, the diagnostic summary) gets its
+// OWN pool set keyed by `poolKey`, so concurrently-live results from different call sites
+// (e.g. `viewportMapSprites = [...static, ...animated]`) never share pooled objects.
+//
+// Within a call site, TWO generations alternate per call: call N draws from generation A,
+// call N+1 from generation B, call N+2 from A again. So the objects a given call hands out
+// are not reused/mutated until TWO calls later — by which point React has committed past
+// the render that consumed call N's result, and no live render/memo still references those
+// objects (`appendViewportMapSprite` always pushes a freshly-built or pool-recycled object
+// into a NEW array, and downstream consumers either read fields synchronously into new
+// objects or hold the refs only until the next memo rebuild = the next same-keyed call).
+type MapSpritePool = {
+  gen: 0 | 1;
+  idx: number;
+  pools: [ViewportMapSprite[], ViewportMapSprite[]];
+};
+const mapSpritePoolsByKey = new Map<string, MapSpritePool>();
+
+function beginMapSpritePool(poolKey: string): MapSpritePool {
+  let pool = mapSpritePoolsByKey.get(poolKey);
+  if (!pool) {
+    pool = { gen: 0, idx: 0, pools: [[], []] };
+    mapSpritePoolsByKey.set(poolKey, pool);
+  }
+  pool.gen = pool.gen === 0 ? 1 : 0;
+  pool.idx = 0;
+  return pool;
+}
+
 const FLOOR_LAYER_Z_STRIDE = 16_384;
 const FLOOR_LAYER_Z_OFFSETS: Record<OriginalMapSpriteKind, number> = {
   back: 0,
@@ -111,11 +176,22 @@ export function buildViewportMapSprites(
   animationFrameIndex: number,
   animationFilter: ViewportSpriteAnimationFilter = "all",
   rangeExpansion = 0,
+  // Distinct call sites pass a distinct `poolKey` so their concurrently-live results never
+  // share pooled sprite objects (see mapSpritePoolsByKey). Defaults to `animationFilter` so
+  // the two memo passes (static/animated) are already separated; explicit keys are passed by
+  // the prefetch ring + diagnostic summary, whose lifetimes differ from the memo passes.
+  poolKey: string = animationFilter,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
     return EMPTY_VIEWPORT_MAP_SPRITES;
   }
+
+  // Object-pooling (flag-gated, default OFF): take pooled sprite objects from the current
+  // generation of this call site's double-buffer and mutate them in place. When OFF, `pool`
+  // is null and `appendViewportMapSprite` keeps the exact object-literal path (no behavior
+  // change). Container arrays below are always freshly allocated regardless.
+  const pool = mapSpritePoolEnabled() ? beginMapSpritePool(poolKey) : null;
 
   // rangeExpansion widens the cell window beyond the visible viewport — used by the
   // off-screen prefetch ring to warm tiles in the player's surroundings before they
@@ -146,6 +222,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      pool,
     );
     appendViewportMapSprite(
       floor,
@@ -158,6 +235,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      pool,
     );
     appendViewportMapSprite(
       floor,
@@ -170,6 +248,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      pool,
     );
     appendViewportMapSprite(
       floor,
@@ -182,6 +261,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      pool,
     );
   }
 
@@ -227,6 +307,42 @@ export function buildMapTileDrawList(
   for (const sprite of mapSprites.floor) add(sprite, uncoveredFloor);
   for (const sprite of mapSprites.objects) add(sprite, uncoveredObjects);
   return { tiles, uncovered: { floor: uncoveredFloor, objects: uncoveredObjects } };
+}
+
+// Turn the atlas-MISS remainder (buildMapTileDrawList's `uncovered`) into the
+// Bevy-runtime standalone-tile draw list + the deduped set of images to decode +
+// upload. Each tile is rendered from its own full-image texture (keyed by the
+// `library#frame` rect key) in the SAME z-band as covered tiles, so atlas-miss
+// frames no longer black-hole under the Bevy map renderer. `cameraOffset` is folded
+// into left/top exactly like buildMapTileDrawList so all map layers stay aligned.
+// `images` is deduped by imageKey (many cells share one frame) — that's the decode
+// + upload work-list; `fetchUrl` applies the torch-blend redirect (mapSpriteRenderPath).
+export function buildStandaloneMapTiles(
+  uncovered: ViewportMapSprites,
+  cameraOffset: ViewportOffset,
+): { tiles: MapStandaloneTileDraw[]; images: Array<{ imageKey: string; fetchUrl: string }> } {
+  const tiles: MapStandaloneTileDraw[] = [];
+  const images: Array<{ imageKey: string; fetchUrl: string }> = [];
+  const seenImages = new Set<string>();
+  const add = (sprite: ViewportMapSprite) => {
+    const imageKey = mapAtlasRectKeyForPath(sprite.path) ?? sprite.path;
+    tiles.push({
+      key: sprite.key,
+      imageKey,
+      left: sprite.left + cameraOffset.x,
+      top: sprite.top + cameraOffset.y,
+      width: sprite.width,
+      height: sprite.height,
+      z: sprite.zIndex,
+    });
+    if (!seenImages.has(imageKey)) {
+      seenImages.add(imageKey);
+      images.push({ imageKey, fetchUrl: mapSpriteRenderPath(sprite.path) });
+    }
+  };
+  for (const sprite of uncovered.floor) add(sprite);
+  for (const sprite of uncovered.objects) add(sprite);
+  return { tiles, images };
 }
 
 function viewportMapCells(
@@ -284,6 +400,7 @@ function appendViewportMapSprite(
   inFloorBounds: boolean,
   inObjectBounds: boolean,
   animationFilter: ViewportSpriteAnimationFilter = "all",
+  pool: MapSpritePool | null = null,
 ) {
   if (!spriteId) {
     return;
@@ -341,8 +458,51 @@ function appendViewportMapSprite(
     return;
   }
 
+  const key = `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`;
+  const zIndex =
+    sprite.drawMode === "floor"
+      ? viewportDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_Z_OFFSETS[sprite.kind])
+      : viewportDepthForCell(cell.x, cell.y, player, 1);
+
+  if (pool) {
+    // Pooled path: recycle (or grow) a sprite object from the current generation and mutate
+    // its fields in place. Because generations alternate per call, this object is not reused
+    // until two same-keyed calls later — React has committed past this render by then.
+    const generation = pool.pools[pool.gen];
+    let pooled = generation[pool.idx];
+    if (pooled) {
+      pooled.key = key;
+      pooled.path = frame.path;
+      pooled.kind = sprite.kind;
+      pooled.cellX = cell.x;
+      pooled.cellY = cell.y;
+      pooled.left = left;
+      pooled.top = top;
+      pooled.width = frame.width;
+      pooled.height = frame.height;
+      pooled.zIndex = zIndex;
+    } else {
+      pooled = {
+        key,
+        path: frame.path,
+        kind: sprite.kind,
+        cellX: cell.x,
+        cellY: cell.y,
+        left,
+        top,
+        width: frame.width,
+        height: frame.height,
+        zIndex,
+      };
+      generation[pool.idx] = pooled;
+    }
+    pool.idx += 1;
+    target.push(pooled);
+    return;
+  }
+
   target.push({
-    key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
+    key,
     path: frame.path,
     kind: sprite.kind,
     cellX: cell.x,
@@ -351,10 +511,7 @@ function appendViewportMapSprite(
     top,
     width: frame.width,
     height: frame.height,
-    zIndex:
-      sprite.drawMode === "floor"
-        ? viewportDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_Z_OFFSETS[sprite.kind])
-        : viewportDepthForCell(cell.x, cell.y, player, 1),
+    zIndex,
   });
 }
 
@@ -1022,7 +1179,7 @@ export function buildRenderStateSummary(world: DisplayWorld, player: DisplayEnti
   if (!region) return { available: false, reason: "no-region" };
   if (!player) return { available: false, reason: "no-player" };
 
-  const { floor, objects } = buildViewportMapSprites(world, player, 0);
+  const { floor, objects } = buildViewportMapSprites(world, player, 0, "all", 0, "summary");
   const layerCounts: Record<string, number> = { back: 0, middle: 0, front: 0, tileAnimation: 0 };
   const librariesInUse: Record<string, number> = {};
   for (const sprite of [...floor, ...objects]) {
