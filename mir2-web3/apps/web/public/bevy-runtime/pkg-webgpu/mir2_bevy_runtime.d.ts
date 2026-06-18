@@ -5,6 +5,15 @@ export function bootMir2Runtime(): void;
 
 export function clearMir2StatusSink(): void;
 
+/**
+ * Drop the runtime's strong handle to one or more standalone-tile images (the web
+ * side's per-tile LRU evicted them). `keys_json` is a JSON array of image keys.
+ * The texture's GPU memory is reclaimed once the (already-despawned) sprite that
+ * referenced it releases its last handle; if a key is re-needed later the web side
+ * re-uploads it via `setMir2MapRenderAtlas`.
+ */
+export function evictMir2MapRenderImages(keys_json: string): void;
+
 export function getMir2RendererBackend(): string;
 
 export function setMir2EntityRenderAtlas(key: string, width: number, height: number, pixels: Uint8Array): void;
@@ -31,6 +40,7 @@ export interface InitOutput {
     readonly setMir2EntityRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly setMir2MapRenderState: (a: number, b: number) => void;
     readonly setMir2MapRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+    readonly evictMir2MapRenderImages: (a: number, b: number) => void;
     readonly bootMir2Runtime: () => void;
     readonly setMir2MapCameraOffset: (a: number, b: number) => void;
     readonly setMir2StatusSink: (a: any) => void;

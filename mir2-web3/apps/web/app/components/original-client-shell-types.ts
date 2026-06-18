@@ -2,7 +2,7 @@ import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/o
 import type { Mir2Language } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import type { SystemMenuTransferOption } from "./original-client-system-menu";
-import type { MapTileDraw } from "./webgl2-map-atlas-layer";
+import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import type {
   DisplayEntity,
   DisplayLogLine,
@@ -42,6 +42,13 @@ export type BevyEntityRenderState = {
   enabled: boolean;
   stageWidth: number;
   stageHeight: number;
+  // Object id of the self player. When `interpolateInRuntime` is true the Bevy
+  // runtime anchors this entity (no camera offset) while others scroll.
+  selfObjectId?: string;
+  // When true, per-entity motion glide + camera scroll are applied inside the
+  // Bevy runtime, so the producer leaves entity left/top stable across motion
+  // ticks (the JS fold is skipped). Escape hatch: `?bevyEntityInterp=0`.
+  interpolateInRuntime?: boolean;
   atlases?: Array<{
     key: string;
     width: number;
@@ -110,6 +117,11 @@ export type BevyMapRenderState = {
   // the sub-tile camera offset into left/top). MapTileDraw uses `rectKey`; the
   // runtime's MapTile deserializes it via #[serde(rename = "rectKey")].
   tiles: MapTileDraw[];
+  // Atlas-MISS tiles (the old DOM `mapDrawPlan.uncovered`): each carries the
+  // `library#frame` rect key as `imageKey` and is rendered from its own full-image
+  // texture (uploaded via atlasImages, keyed by imageKey) in the SAME z-band as
+  // covered tiles. Additive — absent on covered-only producers.
+  standaloneTiles?: MapStandaloneTileDraw[];
   // Sub-tile camera scroll offset for the root-offset model. In the fold-in
   // model (the one Stage 1 uses) this is (0, 0) because the offset is already
   // baked into each tile's left/top.
@@ -132,11 +144,24 @@ export type OriginalClientShellProps = {
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
   viewportTiles: Array<{ x: number; y: number; dx: number; dy: number }>;
   sceneInteractionReady: boolean;
+  // True from the Start Game / Quick Enter click until the world is entered (the
+  // `UserInformation` packet flips `screen` to "game"). Drives the "Entering world…"
+  // overlay that bridges the otherwise-feedbackless gap before the "Loading map…"
+  // overlay (gated on sceneInteractionReady) takes over.
+  enteringWorld: boolean;
   bevyEntityRendererReady: boolean;
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
   onSceneAssetReadinessChange: (readiness: SceneAssetReadiness) => void;
   onBevyEntityRenderStateChange: (state: BevyEntityRenderState) => void;
   onBevyMapRenderStateChange: (state: BevyMapRenderState) => void;
+  onBevyMapCameraOffsetChange: (offset: { x: number; y: number }) => void;
+  // Roadmap #4 (render-loop-rAF flag): the shell registers a ref-only accessor that
+  // recomputes the live player camera offset on demand; page.tsx's 60Hz rAF loop
+  // calls it each frame and pushes the result to the Bevy runtime. Registered with a
+  // getter only when the flag is on, and with null otherwise (and on unmount).
+  registerLiveCameraMotionOffset?: (
+    getter: (() => { x: number; y: number } | null) | null,
+  ) => void;
   logs: DisplayLogLine[];
   accountId: string;
   password: string;

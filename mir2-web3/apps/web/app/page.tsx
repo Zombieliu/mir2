@@ -158,6 +158,7 @@ type RuntimeModule = {
   setMir2EntityRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
   setMir2MapRenderState?: (snapshotJson: string) => void;
   setMir2MapRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
+  evictMir2MapRenderImages?: (keysJson: string) => void;
   setMir2MapCameraOffset?: (x: number, y: number) => void;
   setMir2StatusSink?: (callback: (payload: RuntimeStatus) => void) => void;
 };
@@ -872,6 +873,10 @@ const VIEWPORT_RANGE_X = VIEWPORT_OFFSET_X + 6;
 const VIEWPORT_RANGE_Y = VIEWPORT_OFFSET_Y + 6;
 const SCENE_CHUNK_WIDTH = Math.max(VIEWPORT_RANGE_X, 1);
 const SCENE_CHUNK_HEIGHT = Math.max(VIEWPORT_RANGE_Y, 1);
+// Max resident standalone (atlas-miss) tile textures in the Bevy runtime before LRU
+// eviction. Generous vs a single viewport's few-hundred uncovered tiles so movement
+// doesn't thrash; bounds GPU memory over a long multi-map session.
+const STANDALONE_MAP_IMAGE_MAX = 3072;
 const SCENE_PREFETCH_MARGIN_X = Math.max(8, Math.floor(VIEWPORT_RANGE_X * 0.75));
 const SCENE_PREFETCH_MARGIN_Y = Math.max(10, VIEWPORT_RANGE_Y);
 const SCENE_REQUEST_WIDTH = VIEWPORT_RANGE_X * 2 + SCENE_PREFETCH_MARGIN_X * 2;
@@ -1418,8 +1423,30 @@ export default function HomePage() {
   const uploadedBevyEntityAtlasKeysRef = useRef<Set<string>>(new Set());
   const lastBevyEntityRenderStateJsonRef = useRef<string | null>(null);
   const uploadedBevyMapAtlasKeysRef = useRef<Set<string>>(new Set());
+  // Insertion-ordered LRU of uploaded STANDALONE (atlas-miss) tile image keys. Bounds GPU
+  // memory across a long multi-map session: once over cap, the oldest keys NOT in the
+  // current viewport are evicted from the runtime (evictMir2MapRenderImages) + the upload
+  // dedup set so re-entry re-uploads. Covered atlas-page keys ("map:…") never enter here.
+  const standaloneMapImageLruRef = useRef<Map<string, true>>(new Map());
   const lastBevyMapRenderStateJsonRef = useRef<string | null>(null);
   const lastBevyMapCameraOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  // Roadmap #4 (DEFAULT ON): when on, the shell drops its React motion clock to
+  // ~10Hz and hands us a ref-only accessor (registered into this ref) that recomputes
+  // the live player camera offset on demand. The 60Hz rAF loop below reads it and
+  // pushes the offset to the Bevy runtime, keeping map scroll smooth off the slower
+  // React clock. Must agree with the shell's renderLoopRafEnabled (same flag/default)
+  // or the two camera-offset paths fight. Escape hatch: `?renderLoopRaf=0` /
+  // localStorage "mir2-render-loop-raf"="0".
+  const renderLoopRafEnabled = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("renderLoopRaf") === "0") return false;
+    if (p.get("renderLoopRaf") === "1") return true;
+    return window.localStorage.getItem("mir2-render-loop-raf") !== "0";
+  }, []);
+  const liveCameraMotionOffsetGetterRef = useRef<(() => { x: number; y: number } | null) | null>(
+    null,
+  );
 
   const [language, setLanguage] = useState<Mir2Language>("en");
   const [runtimePhase, setRuntimePhase] = useState("idle");
@@ -1456,6 +1483,22 @@ export default function HomePage() {
   const [password, setPassword] = useState("demo");
   const [chatMessage, setChatMessage] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
+  // True from the Start Game / Quick Enter click until the world is entered (UserInformation
+  // flips screen→"game") or entry fails — drives the "Entering world…" overlay that bridges
+  // the otherwise-feedbackless StartGame round-trip. A safety timer clears it so it can't stick.
+  const [enteringWorld, setEnteringWorld] = useState(false);
+  // Safety valve: if entry never resolves (e.g. the socket dies silently after StartGame
+  // but before UserInformation), force-clear the overlay so the player isn't stuck staring
+  // at a spinner. Success/failure packets clear it well before this fires.
+  useEffect(() => {
+    if (!enteringWorld) return;
+    const timer = window.setTimeout(() => setEnteringWorld(false), 20_000);
+    return () => window.clearTimeout(timer);
+  }, [enteringWorld]);
+  // Any return to the login screen (logout, disconnect, login error) retires the overlay.
+  useEffect(() => {
+    if (screen === "login") setEnteringWorld(false);
+  }, [screen]);
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
@@ -1901,15 +1944,30 @@ export default function HomePage() {
       uploadedBevyMapAtlasKeysRef.current.add(atlas.key);
     }
 
-    // Fold-in camera model: the offset is already baked into each tile's
-    // left/top by buildMapTileDrawList, so the root stays at (0, 0). The setter
-    // is still pushed (additive) and deduped so a future root-offset model is a
-    // one-line producer change. Skip the call when the value is unchanged.
-    const cameraOffset = state.cameraOffset ?? { x: 0, y: 0 };
-    const lastCameraOffset = lastBevyMapCameraOffsetRef.current;
-    if (!lastCameraOffset || lastCameraOffset.x !== cameraOffset.x || lastCameraOffset.y !== cameraOffset.y) {
-      lastBevyMapCameraOffsetRef.current = cameraOffset;
-      runtime.setMir2MapCameraOffset?.(cameraOffset.x, cameraOffset.y);
+    // Bound GPU memory for standalone (atlas-miss) tile textures via an LRU keyed by the
+    // current viewport's standaloneTiles. Touch each in-use key (move to MRU); once over
+    // cap, evict the oldest keys NOT in this frame's set from the runtime + the upload
+    // dedup so re-entry re-uploads. No-op on covered-only states (no standaloneTiles).
+    const standaloneLru = standaloneMapImageLruRef.current;
+    const inUseStandaloneKeys = new Set((state.standaloneTiles ?? []).map((tile) => tile.imageKey));
+    for (const key of inUseStandaloneKeys) {
+      standaloneLru.delete(key);
+      standaloneLru.set(key, true);
+    }
+    if (standaloneLru.size > STANDALONE_MAP_IMAGE_MAX) {
+      const evicted: string[] = [];
+      for (const key of standaloneLru.keys()) {
+        if (standaloneLru.size - evicted.length <= STANDALONE_MAP_IMAGE_MAX) break;
+        if (inUseStandaloneKeys.has(key)) continue;
+        evicted.push(key);
+      }
+      for (const key of evicted) {
+        standaloneLru.delete(key);
+        uploadedBevyMapAtlasKeysRef.current.delete(key);
+      }
+      if (evicted.length) {
+        runtime.evictMir2MapRenderImages?.(JSON.stringify(evicted));
+      }
     }
 
     const { atlasImages: _atlasImages, cameraOffset: _cameraOffset, ...serializableState } = state;
@@ -1919,6 +1977,16 @@ export default function HomePage() {
     }
     lastBevyMapRenderStateJsonRef.current = serializableStateJson;
     runtime.setMir2MapRenderState?.(serializableStateJson);
+  }
+
+  function handleBevyMapCameraOffsetChange(offset: { x: number; y: number }) {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
+    const last = lastBevyMapCameraOffsetRef.current;
+    if (!last || last.x !== offset.x || last.y !== offset.y) {
+      lastBevyMapCameraOffsetRef.current = offset;
+      runtime.setMir2MapCameraOffset?.(offset.x, offset.y);
+    }
   }
 
   function sceneInputDeferredForInitialAssets() {
@@ -3417,6 +3485,7 @@ export default function HomePage() {
           lastBevyMapRenderStateJsonRef.current = null;
           lastBevyMapCameraOffsetRef.current = null;
           uploadedBevyMapAtlasKeysRef.current.clear();
+          standaloneMapImageLruRef.current.clear();
           runtimeWindow.__mir2BevyRuntime.setMir2WorldState?.(JSON.stringify(worldRef.current));
           setBevyEntityRendererReady(Boolean(runtimeWindow.__mir2BevyRuntime.setMir2EntityRenderState));
           setBevyRuntimeBackend(runtimeWindow.__mir2BevyRuntimeBackend ?? null);
@@ -3486,6 +3555,7 @@ export default function HomePage() {
         lastBevyMapRenderStateJsonRef.current = null;
         lastBevyMapCameraOffsetRef.current = null;
         uploadedBevyMapAtlasKeysRef.current.clear();
+        standaloneMapImageLruRef.current.clear();
         runtimeWindow.__mir2BevyRuntime = runtime;
         runtimeWindow.__mir2BevyRuntimeBooted = true;
         runtimeWindow.__mir2BevyRuntimeBackend = runtimeBackend;
@@ -3879,6 +3949,42 @@ export default function HomePage() {
 
     return () => window.cancelAnimationFrame(animationFrame);
   }, [screen, wsState]);
+
+  // Roadmap #4 (DEFAULT OFF — gated on renderLoopRafEnabled): push the Bevy map
+  // camera offset from a 60Hz ref-only rAF loop instead of the shell's ~10Hz React
+  // effect, so map scroll stays smooth while the React clock is throttled. Every
+  // input is read from a ref inside the loop (no captured render values → no stale
+  // closures): the shell's registered offset getter (liveCameraMotionOffsetGetterRef,
+  // which recomputes from the same renderPlayer + entity-motion snapshots the React
+  // render used, just with a fresh Date.now()), the runtime (runtimeRef), and the
+  // current screen (screenRef). Dedup + the actual setMir2MapCameraOffset call go
+  // through handleBevyMapCameraOffsetChange → lastBevyMapCameraOffsetRef, the SAME
+  // path the React effect uses, so the two never fight (the shell skips its push
+  // when the flag is on). Cleanup cancels the frame on screen change / unmount.
+  useEffect(() => {
+    if (!renderLoopRafEnabled || screen !== "game") return;
+
+    let animationFrame = 0;
+    const pushCameraOffset = () => {
+      if (screenRef.current === "game" && runtimeRef.current) {
+        const offset = liveCameraMotionOffsetGetterRef.current?.() ?? null;
+        if (offset) {
+          handleBevyMapCameraOffsetChange(offset);
+        }
+      }
+      animationFrame = window.requestAnimationFrame(pushCameraOffset);
+    };
+    animationFrame = window.requestAnimationFrame(pushCameraOffset);
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [renderLoopRafEnabled, screen]);
+
+  const registerLiveCameraMotionOffset = useCallback(
+    (getter: (() => { x: number; y: number } | null) | null) => {
+      liveCameraMotionOffsetGetterRef.current = getter;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (screen !== "game" || wsState !== "open") return;
@@ -4644,6 +4750,7 @@ export default function HomePage() {
     markMir2CacheMilestone("startGameSubmit", {
       characterIndex: selected?.index ?? 0,
     });
+    setEnteringWorld(true);
     send({ type: "startGame", characterIndex: selected?.index ?? 0 });
   }
 
@@ -4655,6 +4762,7 @@ export default function HomePage() {
       password,
     };
     markMir2CacheMilestone("quickEnterSubmit");
+    setEnteringWorld(true);
     if (socketRef.current?.readyState !== WebSocket.OPEN) {
       connectGateway(true);
       return;
@@ -6499,6 +6607,7 @@ export default function HomePage() {
             failGatewayReconnect();
           }
           setLoginBusy(false);
+          setEnteringWorld(false);
           appendLog(
             t(
               "log.gatewayError",
@@ -6598,6 +6707,9 @@ export default function HomePage() {
         }));
         screenRef.current = "game";
         setScreen("game");
+        // World entered — the "Loading map…" overlay (gated on sceneInteractionReady)
+        // takes over from here, so retire the "Entering world…" bridge overlay.
+        setEnteringWorld(false);
         completeGatewayReconnect();
         markMir2CacheMilestone("userInformationReady", {
           objectId,
@@ -7103,6 +7215,7 @@ export default function HomePage() {
         );
         screenRef.current = "select";
         setScreen("select");
+        setEnteringWorld(false);
         break;
       case "StartGameDelay":
         appendLog(
@@ -7113,6 +7226,7 @@ export default function HomePage() {
           ),
           "system",
         );
+        setEnteringWorld(false);
         break;
       // --- [fe-packets] extended handlers ---
       // Additive gameplay-visible server->client packet handling. Field shapes
@@ -11051,11 +11165,14 @@ export default function HomePage() {
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
+      enteringWorld={enteringWorld}
       bevyEntityRendererReady={bevyEntityRendererReady}
       bevyRuntimeBackend={bevyRuntimeBackend}
       onSceneAssetReadinessChange={handleSceneAssetReadinessChange}
       onBevyEntityRenderStateChange={handleBevyEntityRenderStateChange}
       onBevyMapRenderStateChange={handleBevyMapRenderStateChange}
+      onBevyMapCameraOffsetChange={handleBevyMapCameraOffsetChange}
+      registerLiveCameraMotionOffset={registerLiveCameraMotionOffset}
       getLivePlayerRenderPosition={() => {
         const currentWorld = worldRef.current;
         const currentSelf =

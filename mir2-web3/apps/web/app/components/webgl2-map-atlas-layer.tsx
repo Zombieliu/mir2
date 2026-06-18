@@ -26,12 +26,29 @@ export type MapTileDraw = {
   opacity?: number;
 };
 
+// An atlas-MISS tile drawn by the Bevy runtime from its own full-image texture (no
+// atlas page / sub-rect). `imageKey` is the `library#frame` rect key (stable + deduped
+// across cells sharing the frame); the runtime looks it up in the same image registry
+// the packed atlas pages upload into. Geometry matches MapTileDraw so the projection +
+// unified-band z math is identical. Produced by buildStandaloneMapTiles.
+export type MapStandaloneTileDraw = {
+  key: string;
+  imageKey: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  z: number;
+  opacity?: number;
+};
+
 type WebGl2MapAtlasLayerProps = {
   enabled: boolean;
   stageWidth: number;
   stageHeight: number;
   index: MapAtlasIndex | null;
   tiles: MapTileDraw[];
+  cameraOffset?: { x: number; y: number };
   onDebugChange?: (debug: Record<string, unknown>) => void;
 };
 
@@ -54,6 +71,7 @@ export function WebGl2MapAtlasLayer({
   stageHeight,
   index,
   tiles,
+  cameraOffset = { x: 0, y: 0 },
   onDebugChange,
 }: WebGl2MapAtlasLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -122,7 +140,7 @@ export function WebGl2MapAtlasLayer({
           skipped += 1;
           continue;
         }
-        drawTile(gl, program, texture, page.width, page.height, rect, tile);
+        drawTile(gl, program, texture, page.width, page.height, rect, tile, cameraOffset);
         rendered += 1;
       }
 
@@ -152,7 +170,7 @@ export function WebGl2MapAtlasLayer({
     return () => {
       disposed = true;
     };
-  }, [enabled, stageWidth, stageHeight, index, tiles, onDebugChange]);
+  }, [enabled, stageWidth, stageHeight, index, tiles, cameraOffset, onDebugChange]);
 
   return (
     <canvas
@@ -282,10 +300,11 @@ function drawTile(
   atlasHeight: number,
   rect: { x: number; y: number; width: number; height: number },
   tile: MapTileDraw,
+  cameraOffset: { x: number; y: number },
 ) {
   const ratio = devicePixelRatioForCanvas();
-  const left = tile.left * ratio;
-  const top = tile.top * ratio;
+  const left = (tile.left + (cameraOffset?.x ?? 0)) * ratio;
+  const top = (tile.top + (cameraOffset?.y ?? 0)) * ratio;
   const right = left + tile.width * ratio;
   const bottom = top + tile.height * ratio;
   const u0 = rect.x / atlasWidth;

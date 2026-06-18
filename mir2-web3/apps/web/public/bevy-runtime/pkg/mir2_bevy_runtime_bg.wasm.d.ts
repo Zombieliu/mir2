@@ -7,6 +7,7 @@ export const setMir2EntityRenderState: (a: number, b: number) => void;
 export const setMir2EntityRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
 export const setMir2MapRenderState: (a: number, b: number) => void;
 export const setMir2MapRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+export const evictMir2MapRenderImages: (a: number, b: number) => void;
 export const bootMir2Runtime: () => void;
 export const setMir2MapCameraOffset: (a: number, b: number) => void;
 export const setMir2StatusSink: (a: any) => void;

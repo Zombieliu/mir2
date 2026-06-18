@@ -51,6 +51,11 @@ thread_local! {
     static PENDING_ENTITY_RENDER_ATLASES: RefCell<Vec<PendingEntityRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_RENDER_STATE: RefCell<Option<MapRenderState>> = const { RefCell::new(None) };
     static PENDING_MAP_RENDER_ATLASES: RefCell<Vec<PendingMapRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
+    // Image keys the web side has evicted from its standalone-tile LRU. Drained into
+    // `RuntimeMapRenderAtlases.images.remove(..)` so a long multi-map session's per-tile
+    // textures don't accumulate unbounded; Bevy frees the GPU texture once the (already
+    // despawned) sprite holding the handle drops its last reference.
+    static PENDING_MAP_RENDER_IMAGE_EVICTIONS: RefCell<Vec<String>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_CAMERA_OFFSET: Cell<(f32, f32)> = const { Cell::new((0.0, 0.0)) };
 }
 
@@ -294,6 +299,16 @@ struct EntityRenderState {
     atlases: Vec<EntityRenderAtlas>,
     #[serde(default)]
     entities: Vec<EntityRenderEntry>,
+    /// Object id of the self player. When `interpolate_in_runtime` is on, the
+    /// self player is anchored (no camera offset) while other entities scroll
+    /// with the camera — mirroring the DOM fold where the self gets EMPTY.
+    #[serde(default)]
+    self_object_id: Option<String>,
+    /// When true, the TS producer has stopped folding per-entity motion +
+    /// camera scroll into `left`/`top`; the runtime applies them here instead so
+    /// the render state stays stable across motion ticks.
+    #[serde(default)]
+    interpolate_in_runtime: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -375,6 +390,15 @@ struct MapRenderState {
     atlases: Vec<MapRenderAtlas>,
     #[serde(default)]
     tiles: Vec<MapTile>,
+    /// Atlas-MISS tiles (the old DOM `mapDrawPlan.uncovered`): a frame whose
+    /// `(library, frame)` is not in the packed atlas, so it has no atlas page +
+    /// sub-rect. Its full PNG is decoded on the web side and uploaded as a
+    /// standalone `Image` (via the same `setMir2MapRenderAtlas`, keyed by
+    /// `image_key`); `sync_map_render` draws it as a full-image sprite in the
+    /// SAME unified z-band as covered tiles + entities. Additive/optional so an
+    /// older producer (covered-only) still decodes cleanly.
+    #[serde(default)]
+    standalone_tiles: Vec<MapStandaloneTile>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -413,6 +437,25 @@ struct MapTile {
     // descriptive Rust field name.
     #[serde(rename = "rectKey")]
     atlas_rect_key: String,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+    z: f32,
+    #[serde(default)]
+    opacity: Option<f32>,
+}
+
+/// An atlas-miss tile rendered from its own full-image texture (no atlas
+/// sub-rect). `image_key` is the `library#frame` rect key (stable + deduped
+/// across cells that share a frame), looked up in `RuntimeMapRenderAtlases.images`
+/// — the SAME registry the packed atlas pages upload into. `left/top/width/height/z`
+/// match `MapTile` so the projection + unified-band z math is identical.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MapStandaloneTile {
+    key: String,
+    image_key: String,
     left: f32,
     top: f32,
     width: f32,
@@ -548,6 +591,21 @@ pub fn set_mir2_map_render_atlas(key: String, width: u32, height: u32, pixels: V
             pixels,
         });
     });
+}
+
+/// Drop the runtime's strong handle to one or more standalone-tile images (the web
+/// side's per-tile LRU evicted them). `keys_json` is a JSON array of image keys.
+/// The texture's GPU memory is reclaimed once the (already-despawned) sprite that
+/// referenced it releases its last handle; if a key is re-needed later the web side
+/// re-uploads it via `setMir2MapRenderAtlas`.
+#[wasm_bindgen(js_name = evictMir2MapRenderImages)]
+pub fn evict_mir2_map_render_images(keys_json: String) {
+    match serde_json::from_str::<Vec<String>>(&keys_json) {
+        Ok(keys) => {
+            PENDING_MAP_RENDER_IMAGE_EVICTIONS.with(|pending| pending.borrow_mut().extend(keys))
+        }
+        Err(error) => publish_status("map-render-evict-decode-error", &error.to_string()),
+    }
 }
 
 #[wasm_bindgen(js_name = setMir2MapCameraOffset)]
@@ -723,6 +781,13 @@ fn ingest_pending_map_render_atlases(
             atlas_resource.images.insert(atlas.key, handle);
         }
     });
+    // Apply standalone-tile image evictions AFTER ingesting new uploads, so an
+    // upload + evict pushed in the same frame settles on the upload (re-entry).
+    PENDING_MAP_RENDER_IMAGE_EVICTIONS.with(|pending| {
+        for key in pending.borrow_mut().drain(..) {
+            atlas_resource.images.remove(&key);
+        }
+    });
 }
 
 /// Stage 2 (unified y-sort) z scale. Map tiles and entities derive z from the
@@ -810,7 +875,8 @@ fn sync_map_render(
     // RETAIN-IN-PLACE: update surviving tiles, spawn newcomers, despawn leavers —
     // mirrors sync_entity_render_layers so sub-cell motion is cheap Transform writes
     // rather than a full despawn+respawn of every tile each frame.
-    let mut alive: HashSet<String> = HashSet::with_capacity(snapshot.tiles.len());
+    let mut alive: HashSet<String> =
+        HashSet::with_capacity(snapshot.tiles.len() + snapshot.standalone_tiles.len());
     for tile in &snapshot.tiles {
         let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
             continue;
@@ -852,6 +918,52 @@ fn sync_map_render(
         }
     }
 
+    // Atlas-MISS tiles: bind each to its OWN full-image texture (no atlas sub-rect)
+    // and draw in the SAME unified band as covered tiles. Their images arrive on the
+    // async upload channel just like atlas pages, but there can be hundreds per
+    // viewport and they trickle in — so unlike covered tiles (gated wholesale by
+    // `atlases_ready`) we render each as soon as ITS image lands and skip the rest,
+    // marking the snapshot un-applied (`pending`) so later frames retry the laggards
+    // WITHOUT blocking the covered map. The web LRU drops permanently-failed tiles
+    // out of the next snapshot, so `pending` can't spin forever.
+    let mut pending = false;
+    for tile in &snapshot.standalone_tiles {
+        let Some(image) = atlas_assets.images.get(&tile.image_key).cloned() else {
+            pending = true;
+            continue;
+        };
+        let world_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5 + offset_x;
+        let world_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5) + offset_y;
+        let world_z = tile.z * MAP_TILE_ENTITY_DEPTH_GAIN / MAP_TILE_Z_DENOM;
+        let custom_size = Some(Vec2::new(tile.width, tile.height));
+        let color = Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0));
+        alive.insert(tile.key.clone());
+        if let Some(&entity) = registry.map_render.tiles.get(&tile.key) {
+            if let Ok(mut sprite) = sprite_query.get_mut(entity) {
+                sprite.image = image;
+                sprite.texture_atlas = None;
+                sprite.custom_size = custom_size;
+                sprite.color = color;
+            }
+            if let Ok(mut transform) = transform_query.get_mut(entity) {
+                transform.translation = Vec3::new(world_x, world_y, world_z);
+            }
+        } else {
+            let entity = commands
+                .spawn((
+                    Sprite {
+                        image,
+                        custom_size,
+                        color,
+                        ..default()
+                    },
+                    Transform::from_xyz(world_x, world_y, world_z),
+                ))
+                .id();
+            registry.map_render.tiles.insert(tile.key.clone(), entity);
+        }
+    }
+
     // Despawn tiles that left the viewport / are no longer in the snapshot.
     let stale: Vec<String> = registry
         .map_render
@@ -867,13 +979,25 @@ fn sync_map_render(
     }
 
     let live_count = registry.map_render.tiles.len();
-    registry.map_render.applied = Some(snapshot.clone());
+    // Only LOCK IN the snapshot once every standalone-tile image has bound; while any
+    // is still pending we leave `applied` unchanged so the next frame re-runs this diff
+    // and picks up the laggards (covered tiles already bound, so this is idempotent for
+    // them — the retain pass just re-confirms their Transform/Sprite).
+    if !pending {
+        registry.map_render.applied = Some(snapshot.clone());
+    }
     publish_status(
         "map-render-synced",
         &format!(
-            "Applied {} map tiles ({} live)",
+            "Applied {} covered + {} standalone map tiles ({} live{})",
             snapshot.tiles.len(),
-            live_count
+            snapshot.standalone_tiles.len(),
+            live_count,
+            if pending {
+                ", awaiting tile images"
+            } else {
+                ""
+            }
         ),
     );
 }
@@ -1179,6 +1303,8 @@ fn sync_entity_render_layers(
     atlas_assets: Res<RuntimeEntityRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     entity_render_state: Res<RuntimeEntityRenderState>,
+    motion_table: Res<motion::EntityMotionTable>,
+    map_camera_offset: Res<RuntimeMapCameraOffset>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
@@ -1203,6 +1329,32 @@ fn sync_entity_render_layers(
     );
 
     for entity in &snapshot.entities {
+        // Screen-space offset folded in by the runtime (motion glide + camera
+        // scroll) when `interpolate_in_runtime` is on. When off, the TS producer
+        // already baked these into each layer's `left`/`top`, so we add zero.
+        //
+        // Sign note: this matches the DOM fold which added the offsets to
+        // left/top (SCREEN space, pre-flip). The world y-flip in
+        // `entity_render_layer_position` then handles the screen→world inversion,
+        // so both `motion` and `camera` are added in screen space here. The map
+        // renderer's `offset_y = -y` flip is irrelevant — that path is world
+        // space; this one is not.
+        let entity_offset: Vec2 = if !snapshot.interpolate_in_runtime {
+            Vec2::ZERO
+        } else {
+            let motion = motion_table
+                .get(&entity.object_id)
+                .map(|e| motion::compute_motion_offset(e, motion_table.now_ms, 48.0, 32.0))
+                .unwrap_or(Vec2::ZERO);
+            let is_self = snapshot.self_object_id.as_deref() == Some(entity.object_id.as_str());
+            let camera = if is_self {
+                Vec2::ZERO
+            } else {
+                Vec2::new(map_camera_offset.x, map_camera_offset.y)
+            };
+            motion + camera
+        };
+
         for layer in &entity.layers {
             let layer_key = if layer.key.is_empty() {
                 format!("{}:{}", entity.object_id, layer.path)
@@ -1210,7 +1362,7 @@ fn sync_entity_render_layers(
                 layer.key.clone()
             };
             alive.insert(layer_key.clone());
-            let position = entity_render_layer_position(snapshot, layer);
+            let position = entity_render_layer_position(snapshot, layer, entity_offset);
             let opacity = layer
                 .opacity
                 .unwrap_or(if entity.dead { 0.45 } else { 1.0 });
@@ -1399,9 +1551,13 @@ fn clear_entity_render_layers(commands: &mut Commands, registry: &mut SceneRegis
     registry.entity_render_atlases.clear();
 }
 
-fn entity_render_layer_position(snapshot: &EntityRenderState, layer: &EntityRenderLayer) -> Vec3 {
-    let center_x = layer.left + layer.width * 0.5;
-    let center_y = layer.top + layer.height * 0.5;
+fn entity_render_layer_position(
+    snapshot: &EntityRenderState,
+    layer: &EntityRenderLayer,
+    offset: Vec2,
+) -> Vec3 {
+    let center_x = layer.left + layer.width * 0.5 + offset.x;
+    let center_y = layer.top + layer.height * 0.5 + offset.y;
 
     Vec3::new(
         center_x - snapshot.stage_width * 0.5,
