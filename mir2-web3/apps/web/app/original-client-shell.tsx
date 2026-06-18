@@ -138,6 +138,21 @@ type BevyEntityAtlasRect = {
   y: number;
   width: number;
   height: number;
+  /**
+   * Index of the page (in BevyEntityAtlasSnapshot.pages) this rect lives on.
+   * Absent ⇒ page 0, so single-page snapshots are unchanged.
+   */
+  pageIndex?: number;
+};
+
+/** One texture page of a (possibly multi-page) entity atlas. */
+type BevyEntityAtlasPage = {
+  key: string;
+  width: number;
+  height: number;
+  imageUrl?: string;
+  pixels?: Uint8Array;
+  rectList: BevyEntityAtlasRect[];
 };
 
 type BevyEntityAtlasSnapshot = {
@@ -149,6 +164,12 @@ type BevyEntityAtlasSnapshot = {
   rects: Record<string, BevyEntityAtlasRect>;
   rectList: BevyEntityAtlasRect[];
   pixels?: Uint8Array;
+  /**
+   * Multi-page atlases list every page here; the top-level
+   * width/height/imageUrl/pixels/rectList mirror page 0 for backward
+   * compatibility. Absent or length-1 ⇒ single-page (unchanged behaviour).
+   */
+  pages?: BevyEntityAtlasPage[];
 };
 
 type BevyEntityAtlasSource = {
@@ -205,6 +226,14 @@ function payloadToAtlasSnapshot(payload: AtlasPagePayload): BevyEntityAtlasSnaps
     rects: bevyEntityAtlasRectMap(payload.rectList),
     rectList: payload.rectList,
     pixels: payload.pixels.byteLength > 0 ? payload.pixels : undefined,
+    pages: payload.pages?.map((page) => ({
+      key: page.key,
+      width: page.width,
+      height: page.height,
+      imageUrl: page.imageUrl,
+      pixels: page.pixels && page.pixels.byteLength > 0 ? page.pixels : undefined,
+      rectList: page.rectList,
+    })),
   };
 }
 
@@ -217,6 +246,14 @@ function atlasSnapshotToPayload(atlas: BevyEntityAtlasSnapshot): AtlasPagePayloa
     imageUrl: atlas.imageUrl,
     rectList: atlas.rectList,
     pixels: atlas.pixels ?? new Uint8Array(0),
+    pages: atlas.pages?.map((page) => ({
+      key: page.key,
+      width: page.width,
+      height: page.height,
+      imageUrl: page.imageUrl,
+      pixels: page.pixels ?? new Uint8Array(0),
+      rectList: page.rectList,
+    })),
   };
 }
 
@@ -278,6 +315,16 @@ type PrebuiltBevyEntityAtlasRecord = {
   imageUrl?: string;
   pixelsUrl?: string;
   rects: BevyEntityAtlasRect[];
+  /** Multi-page atlases describe each texture page here (manifest schemaVersion≥2). */
+  pages?: PrebuiltBevyEntityAtlasPage[];
+};
+
+type PrebuiltBevyEntityAtlasPage = {
+  imageFile?: string;
+  imageUrl?: string;
+  width: number;
+  height: number;
+  sha256?: string;
 };
 
 type BevyEntityAtlasResolveResult = {
@@ -2722,31 +2769,51 @@ function buildBevyEntityRenderState({
     };
   }
 
-  return {
-    enabled: true,
-    stageWidth: 1024,
-    stageHeight: 768,
-    atlases: atlas
-      ? [
+  // Normalise to a page list: real multi-page snapshots expose `pages`; single-
+  // page (live / single-page prebuilt) snapshots synthesise one page from the
+  // top-level fields, so the output below is identical to the pre-multi-page form.
+  const atlasPages: BevyEntityAtlasPage[] = atlas
+    ? atlas.pages && atlas.pages.length
+      ? atlas.pages
+      : [
           {
             key: atlas.key,
             width: atlas.width,
             height: atlas.height,
             imageUrl: atlas.imageUrl,
-            rects: atlas.rectList,
-          },
-        ]
-      : [],
-    atlasImages: atlas?.pixels
-      ? [
-          {
-            key: atlas.key,
-            width: atlas.width,
-            height: atlas.height,
             pixels: atlas.pixels,
+            rectList: atlas.rectList,
           },
         ]
-      : [],
+    : [];
+
+  return {
+    enabled: true,
+    stageWidth: 1024,
+    stageHeight: 768,
+    // One render-atlas per texture page; the runtime registers each by key and
+    // resolves each layer to its page via the layer's atlasKey.
+    atlases: atlasPages.map((page) => ({
+      key: page.key,
+      width: page.width,
+      height: page.height,
+      imageUrl: page.imageUrl,
+      rects: page.rectList,
+    })),
+    // Live/persistent pages carry RGBA pixels; prebuilt pages carry an imageUrl
+    // (above) and are loaded by the runtime, so they contribute no atlasImage.
+    atlasImages: atlasPages.flatMap((page) =>
+      page.pixels && page.pixels.byteLength > 0
+        ? [
+            {
+              key: page.key,
+              width: page.width,
+              height: page.height,
+              pixels: page.pixels,
+            },
+          ]
+        : [],
+    ),
     entities: viewportEntitySprites.map(({ entity, sprite }) => {
       const isPlayer = player.objectId === entity.objectId;
       const entityMotionOffset = isPlayer
@@ -2769,12 +2836,15 @@ function buildBevyEntityRenderState({
           ].map(({ layer, role, index }, order) => {
             const atlasRectKey = bevyEntityAtlasRectKey(layer.path, layer.width, layer.height);
             const atlasRect = atlas?.rects[atlasRectKey];
+            // Route the layer to the page its frame lives on (multi-page); for
+            // single-page snapshots pageIndex is 0 ⇒ the sole page.
+            const atlasPageKey = atlasRect ? atlasPages[atlasRect.pageIndex ?? 0]?.key : undefined;
             return {
               key: `${entity.objectId}:${role}:${index}`,
               path: layer.path,
-              ...(atlasRect
+              ...(atlasRect && atlasPageKey
                 ? {
-                    atlasKey: atlas.key,
+                    atlasKey: atlasPageKey,
                     atlasRectKey,
                   }
                 : {}),
@@ -2890,6 +2960,18 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
     }
 
     const rects = bevyEntityAtlasRectMap(candidate.rects);
+
+    // Multi-page candidate (manifest schemaVersion≥2): build one page per
+    // texture page, grouping rects by pageIndex. Each page carries its own
+    // imageUrl so the runtime loads pages independently (no pixel push).
+    if (candidate.pages && candidate.pages.length > 1) {
+      const multiPage = buildMultiPagePrebuiltSnapshot(candidate, key, rects);
+      if (multiPage) {
+        return multiPage;
+      }
+      continue;
+    }
+
     if (candidate.imageUrl) {
       return {
         key,
@@ -2917,6 +2999,67 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
   }
 
   return null;
+}
+
+// Page 0 keeps the atlas key (single-page convention); spill pages get a
+// `#p<i>` suffix so the runtime registers each page under a distinct atlas key.
+function bevyEntityAtlasPageKey(atlasKey: string, pageIndex: number) {
+  return pageIndex === 0 ? atlasKey : `${atlasKey}#p${pageIndex}`;
+}
+
+// Build a multi-page snapshot from a prebuilt manifest candidate: one page per
+// texture page, each rect routed to its page by `pageIndex`. Synchronous — pages
+// carry imageUrls and the runtime loads them, so there is no fetch/decode here.
+function buildMultiPagePrebuiltSnapshot(
+  candidate: PrebuiltBevyEntityAtlasRecord,
+  key: string,
+  rects: Record<string, BevyEntityAtlasRect>,
+): BevyEntityAtlasSnapshot | null {
+  const pageDescriptors = candidate.pages ?? [];
+  if (!pageDescriptors.length) {
+    return null;
+  }
+
+  // Group rects by their pageIndex (absent ⇒ page 0).
+  const rectsByPage = new Map<number, BevyEntityAtlasRect[]>();
+  for (const rect of candidate.rects) {
+    const pageIndex = rect.pageIndex ?? 0;
+    const list = rectsByPage.get(pageIndex);
+    if (list) {
+      list.push(rect);
+    } else {
+      rectsByPage.set(pageIndex, [rect]);
+    }
+  }
+
+  const pages: BevyEntityAtlasPage[] = [];
+  for (let pageIndex = 0; pageIndex < pageDescriptors.length; pageIndex += 1) {
+    const descriptor = pageDescriptors[pageIndex];
+    if (!descriptor?.imageUrl) {
+      // Multi-page prebuilt requires a per-page image URL; bail to the next
+      // candidate / live build rather than render a partial atlas.
+      return null;
+    }
+    pages.push({
+      key: bevyEntityAtlasPageKey(candidate.key, pageIndex),
+      width: descriptor.width,
+      height: descriptor.height,
+      imageUrl: resolveBevyEntityAtlasAssetUrl(descriptor.imageUrl),
+      rectList: rectsByPage.get(pageIndex) ?? [],
+    });
+  }
+
+  const page0 = pages[0];
+  return {
+    key,
+    sourceKey: candidate.key,
+    width: page0.width,
+    height: page0.height,
+    imageUrl: page0.imageUrl,
+    rects,
+    rectList: candidate.rects,
+    pages,
+  };
 }
 
 function loadPrebuiltBevyEntityAtlasCandidatePixels(candidate: PrebuiltBevyEntityAtlasRecord) {
