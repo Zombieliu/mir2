@@ -37,6 +37,15 @@ Original asset hosting (sprites + map tiles):
   `/original-ui/...png` etc. onto that base; if it is unset/empty the requests
   fall back to local paths that have no PNGs and every sprite 404s with
   `[mir2] scene asset missing` (the game still runs — these are warnings).
+- Sounds resolve the same way. Only the few `.wav`s committed under
+  `public/original-ui/Sound` exist locally; the rest of the ~320-file Crystal
+  sound library lives on R2. In local dev, setting
+  `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` (e.g. in `.env.local`) auto-registers the
+  asset Service Worker so its R2 fallback serves those sounds too — otherwise
+  ids such as `/original-ui/Sound/62.wav` 404 locally (harmless; audio degrades
+  gracefully). `?assetCache=1` / `?assetCache=0` force the worker on/off without
+  a base URL. The R2 CORS policy (`cloudflare/r2-cors.public.json`) must allow
+  the dev origin for the cross-origin fetch to succeed.
 - Verify a running deploy at `<url>/api/asset-manifest`:
   `remoteAssets.assetBaseUrl` must be the full release, not `null`. A `null`
   value means the env var is not set on that build — the usual cause of missing
