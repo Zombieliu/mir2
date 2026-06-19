@@ -17,6 +17,15 @@ export function setMir2MapRenderAtlas(key: string, width: number, height: number
 
 export function setMir2MapRenderState(json: string): void;
 
+/**
+ * Push the self-player's current motion window so the runtime can interpolate the
+ * camera scroll at display refresh rate (instead of the ~33Hz React `motionNow`
+ * clock). Opt-in: only the `?bevySelfCamera=1` producer calls this. Mirrors
+ * `EntityMotionSnapshot` (`fromX,fromY,toX,toY,startedAt,expiresAt`). When the step
+ * has elapsed (`now >= expires_ms`) the camera falls back to origin.
+ */
+export function setMir2SelfCameraMotion(from_x: number, from_y: number, to_x: number, to_y: number, started_ms: number, expires_ms: number): void;
+
 export function setMir2StatusSink(callback: Function): void;
 
 export function setMir2WorldState(snapshot_json: string): void;
@@ -32,6 +41,7 @@ export interface InitOutput {
     readonly setMir2MapRenderState: (a: number, b: number) => void;
     readonly setMir2MapRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly bootMir2Runtime: () => void;
+    readonly setMir2SelfCameraMotion: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly setMir2MapCameraOffset: (a: number, b: number) => void;
     readonly setMir2StatusSink: (a: any) => void;
     readonly clearMir2StatusSink: () => void;
