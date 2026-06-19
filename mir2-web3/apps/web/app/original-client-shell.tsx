@@ -2716,6 +2716,18 @@ const BEVY_SELF_CAMERA_ENABLED: boolean =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("bevySelfCamera") === "1";
 
+// Opt-in (?bevyEntityInterp=1): for NON-self entities, stop folding the ~33Hz
+// `motionNow` sub-cell glide into each layer's left/top and instead ship a
+// per-entity motion window (motionFrom*/motionTo*/motionStartedMs/
+// motionDurationMs) so the Bevy runtime interpolates each monster's glide at
+// DISPLAY refresh rate (the monster-judder fix). Orthogonal to bevySelfCamera,
+// which owns the self-camera scroll; both can be enabled together. The self
+// player is unchanged here. Default OFF ⇒ the fold path below is byte-identical
+// to today (no motion window is emitted, so the serialized state is unchanged).
+const BEVY_ENTITY_INTERP_ENABLED: boolean =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("bevyEntityInterp") === "1";
+
 function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRenderState {
   return {
     enabled: false,
@@ -2792,15 +2804,24 @@ function buildBevyEntityRenderState({
       : [],
     entities: viewportEntitySprites.map(({ entity, sprite }) => {
       const isPlayer = player.objectId === entity.objectId;
+      // Bevy-entity-interp path: for a NON-self entity, stop folding its sub-cell
+      // glide here (push cell-space) and instead ship the motion window below so
+      // Bevy interpolates the glide at display Hz. The self player is untouched
+      // (its fold stays governed by BEVY_SELF_CAMERA_ENABLED exactly as before).
+      const interpEntityInBevy = BEVY_ENTITY_INTERP_ENABLED && !isPlayer;
       // Bevy-self-camera path: drop the JS camera fold (Bevy moves the camera at
       // display Hz) and let the self player glide via its own motion. Default path
       // is unchanged (player pinned via EMPTY, others fold playerCameraMotionOffset).
       const entityMotionOffset =
-        isPlayer && !BEVY_SELF_CAMERA_ENABLED
+        (isPlayer && !BEVY_SELF_CAMERA_ENABLED) || interpEntityInBevy
           ? EMPTY_VIEWPORT_OFFSET
           : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
       const cameraOffset =
         BEVY_SELF_CAMERA_ENABLED || isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+      // Step-stable window (changes only at step boundaries, not per motionNow
+      // tick) handed to Bevy for the non-self interpolation. undefined ⇒ no fields
+      // spread ⇒ serialized state byte-identical to today.
+      const interpMotion = interpEntityInBevy ? entityMotionSnapshots[entity.objectId] : undefined;
       const rootLeft =
         VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
       const rootTop =
@@ -2839,6 +2860,16 @@ function buildBevyEntityRenderState({
       return {
         objectId: entity.objectId,
         dead: Boolean(entity.dead),
+        ...(interpMotion
+          ? {
+              motionFromX: interpMotion.fromX,
+              motionFromY: interpMotion.fromY,
+              motionToX: interpMotion.toX,
+              motionToY: interpMotion.toY,
+              motionStartedMs: interpMotion.startedAt,
+              motionDurationMs: interpMotion.expiresAt - interpMotion.startedAt,
+            }
+          : {}),
         layers,
       };
     }),

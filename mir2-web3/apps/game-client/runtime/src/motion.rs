@@ -143,6 +143,57 @@ pub fn compute_motion_offset(
     )
 }
 
+/// Sub-tile pixel offset for a motion window whose `from`/`to` endpoints may be
+/// **fractional** cell coordinates — unlike [`compute_motion_offset`], which
+/// takes integer grid cells.
+///
+/// The entity-interpolation wire path (`?bevyEntityInterp=1`) needs this: when a
+/// move begins while the previous step is still gliding, the TypeScript producer
+/// records a fractional `from` coordinate (`currentMotionCoordinate` in
+/// `original-client-scene-motion.ts`, e.g. `9.5`). Truncating that to the integer
+/// [`EntityMotionEntry`] would mis-place the glide start (a visible jump), and a
+/// fractional value cannot even round-trip through an `i32` serde field. So this
+/// variant keeps the endpoints as `f32`.
+///
+/// Identical formula to [`compute_motion_offset`] and the DOM
+/// `entityMotionOffsetForEntity`:
+///
+/// ```text
+/// remaining = clamp(1 - (now - started) / (expires - started), 0, 1)
+/// offset.x  = (from_x - to_x) * cell_width_px  * remaining
+/// offset.y  = (from_y - to_y) * cell_height_px * remaining
+/// ```
+///
+/// Timestamps stay `f64`: `Date.now()` (~1.7e12 ms) loses millisecond resolution
+/// in `f32`, which would corrupt the `remaining` ratio. The returned offset is in
+/// the same unit as the `cell_*_px` parameters (CSS-px when called with 48 × 32).
+#[allow(clippy::too_many_arguments)]
+pub fn compute_motion_offset_fractional(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    started_ms: f64,
+    expires_ms: f64,
+    now_ms: f64,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    let span = expires_ms - started_ms;
+    // Degenerate / elapsed / inverted span → snap to target (remaining = 0).
+    let remaining = if span <= 0.0 {
+        0.0_f64
+    } else {
+        let elapsed = now_ms - started_ms;
+        (1.0 - elapsed / span).clamp(0.0, 1.0)
+    } as f32;
+
+    Vec2::new(
+        (from_x - to_x) * cell_width_px * remaining,
+        (from_y - to_y) * cell_height_px * remaining,
+    )
+}
+
 // ---------------------------------------------------------------------------
 // Bevy world-space helper
 // ---------------------------------------------------------------------------
@@ -398,6 +449,74 @@ mod tests {
         // from_x - to_x = -1, from_y - to_y = -1, remaining = 1
         assert!((offset.x + 48.0).abs() < 1e-4, "offset.x = {}", offset.x);
         assert!((offset.y + 32.0).abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    // -----------------------------------------------------------------------
+    // compute_motion_offset_fractional
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn fractional_matches_integer_path_for_whole_cells() {
+        // With whole-number endpoints the fractional variant must produce exactly
+        // the same offset as the integer `compute_motion_offset` (48 × 32 CSS-px).
+        let entry = EntityMotionEntry {
+            from_x: 9,
+            from_y: 5,
+            to_x: 11,
+            to_y: 6,
+            started_ms: 1000.0,
+            expires_ms: 1600.0,
+        };
+        let int_offset = compute_motion_offset(&entry, 1300.0, 48.0, 32.0);
+        let frac_offset = compute_motion_offset_fractional(
+            9.0, 5.0, 11.0, 6.0, 1000.0, 1600.0, 1300.0, 48.0, 32.0,
+        );
+        assert!((int_offset.x - frac_offset.x).abs() < 1e-4, "x mismatch");
+        assert!((int_offset.y - frac_offset.y).abs() < 1e-4, "y mismatch");
+    }
+
+    #[test]
+    fn fractional_from_glide_start_is_preserved() {
+        // A move that began mid-glide records from_x = 9.5 (NOT 9 or 10). At t=0
+        // (remaining = 1) the offset must be the full fractional displacement
+        // (9.5 - 11) * 48 = -72 px — truncating from_x to 9 would give -96, to 10
+        // would give -48; both are visibly wrong.
+        let offset =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 0.0, 600.0, 0.0, 48.0, 32.0);
+        assert!((offset.x + 72.0).abs() < 1e-3, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn fractional_downward_move_offset_is_negative_y() {
+        // Moving DOWN (to_y > from_y) at t=0 must yield a negative screen-space y
+        // offset, so when added to `layer.top` the sprite starts at its OLD (higher)
+        // row and glides down — the sign the DOM fold produces. Guards the one axis
+        // that bit prior camera attempts.
+        let offset =
+            compute_motion_offset_fractional(4.0, 3.0, 4.0, 4.0, 0.0, 600.0, 0.0, 48.0, 32.0);
+        assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.y + 32.0).abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn fractional_offset_at_expiry_is_zero() {
+        let offset =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 0.0, 600.0, 600.0, 48.0, 32.0);
+        assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn fractional_offset_inverted_or_zero_span_is_zero() {
+        // expires <= started (e.g. a standing snapshot's {startedAt: now, expiresAt: 0}
+        // → negative span) must clamp to a zero offset, never explode.
+        let zero_span =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 500.0, 500.0, 500.0, 48.0, 32.0);
+        assert!(zero_span.x.abs() < 1e-4 && zero_span.y.abs() < 1e-4);
+        let inverted =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 500.0, 0.0, 500.0, 48.0, 32.0);
+        assert!(inverted.x.abs() < 1e-4 && inverted.y.abs() < 1e-4);
     }
 
     // -----------------------------------------------------------------------
