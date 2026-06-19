@@ -3433,7 +3433,8 @@ export default function HomePage() {
           });
           return;
         }
-        const runtimeSupport = detectBevyRuntimeSupport();
+        const runtimeSupport = await detectBevyRuntimeSupport();
+        if (disposed) return;
         const requestedBackend = params.get("bevyBackend")?.trim().toLowerCase() ?? null;
         const selectedBackend = selectBevyRuntimeBackend(params, runtimeSupport);
         if (!selectedBackend) {
@@ -3462,9 +3463,12 @@ export default function HomePage() {
           if (runtimeBackend === "webgpu" && runtimeSupport.webgl2) {
             fallbackFrom = runtimeBackend;
             runtimeBackend = "webgl2";
+            // A stale persisted preference must not pin the broken backend on reload.
+            safeLocalStorageRemove("mir2-bevy-backend");
             markMir2CacheMilestone("bevyRuntimeFallback", {
               from: fallbackFrom,
               to: runtimeBackend,
+              stage: "module-load",
               message: error instanceof Error ? error.message : String(error),
             });
             runtime = await loadBevyRuntimeModule(runtimeBackend);
@@ -3473,45 +3477,83 @@ export default function HomePage() {
           }
         }
         if (disposed) return;
-        const compiledBackend = runtime.getMir2RendererBackend?.() ?? null;
-        markMir2CacheMilestone("bevyRuntimeModuleReady", {
-          backend: runtimeBackend,
-          compiledBackend,
-          fallbackFrom: fallbackFrom ?? null,
-        });
 
-        runtime.setMir2StatusSink?.((status) => {
-          setRuntimePhase(status.phase);
-          setRuntimeMessage(status.message);
-        });
+        // Wire a loaded runtime module into refs / React state / window globals and hand
+        // off to the Bevy app loop. The bootMir2Runtime() call can panic synchronously when
+        // the chosen GPU backend turns out to be unusable at device-creation time (the
+        // WebGPU adapter probe can pass yet device/surface creation still fail), so the
+        // caller wraps this to recover on WebGL2 instead of surfacing a black boot-error.
+        const wireAndBootRuntime = (
+          loadedRuntime: RuntimeModule,
+          backend: BevyRuntimeBackend,
+          recoveredFrom: BevyRuntimeBackend | undefined,
+        ) => {
+          const compiledBackend = loadedRuntime.getMir2RendererBackend?.() ?? null;
+          markMir2CacheMilestone("bevyRuntimeModuleReady", {
+            backend,
+            compiledBackend,
+            fallbackFrom: recoveredFrom ?? null,
+          });
 
-        runtime.setMir2WorldState?.(JSON.stringify(DEFAULT_WORLD_STATE));
-        runtimeRef.current = runtime;
-        lastBevyEntityRenderStateJsonRef.current = null;
-        lastBevyMapRenderStateJsonRef.current = null;
-        lastBevyMapCameraOffsetRef.current = null;
-        uploadedBevyMapAtlasKeysRef.current.clear();
-        runtimeWindow.__mir2BevyRuntime = runtime;
-        runtimeWindow.__mir2BevyRuntimeBooted = true;
-        runtimeWindow.__mir2BevyRuntimeBackend = runtimeBackend;
-        runtimeWindow.__mir2BevyRuntimeDebug = {
-          requestedBackend,
-          selectedBackend: runtimeBackend,
-          compiledBackend,
-          fallbackFrom,
-          webgpuSupported: runtimeSupport.webgpu,
-          webgl2Supported: runtimeSupport.webgl2,
-          runtimeVersion: BEVY_RUNTIME_VERSION,
+          loadedRuntime.setMir2StatusSink?.((status) => {
+            setRuntimePhase(status.phase);
+            setRuntimeMessage(status.message);
+          });
+
+          loadedRuntime.setMir2WorldState?.(JSON.stringify(DEFAULT_WORLD_STATE));
+          runtimeRef.current = loadedRuntime;
+          lastBevyEntityRenderStateJsonRef.current = null;
+          lastBevyMapRenderStateJsonRef.current = null;
+          lastBevyMapCameraOffsetRef.current = null;
+          uploadedBevyMapAtlasKeysRef.current.clear();
+          runtimeWindow.__mir2BevyRuntime = loadedRuntime;
+          runtimeWindow.__mir2BevyRuntimeBooted = true;
+          runtimeWindow.__mir2BevyRuntimeBackend = backend;
+          runtimeWindow.__mir2BevyRuntimeDebug = {
+            requestedBackend,
+            selectedBackend: backend,
+            compiledBackend,
+            fallbackFrom: recoveredFrom,
+            webgpuSupported: runtimeSupport.webgpu,
+            webgl2Supported: runtimeSupport.webgl2,
+            runtimeVersion: BEVY_RUNTIME_VERSION,
+          };
+          setBevyEntityRendererReady(Boolean(loadedRuntime.setMir2EntityRenderState));
+          setBevyRuntimeBackend(backend);
+          loadedRuntime.bootMir2Runtime?.();
+          markMir2CacheMilestone("bevyRuntimeReady", {
+            reused: false,
+            backend,
+            compiledBackend,
+            fallbackFrom: recoveredFrom ?? null,
+          });
         };
-        setBevyEntityRendererReady(Boolean(runtime.setMir2EntityRenderState));
-        setBevyRuntimeBackend(runtimeBackend);
-        runtime.bootMir2Runtime?.();
-        markMir2CacheMilestone("bevyRuntimeReady", {
-          reused: false,
-          backend: runtimeBackend,
-          compiledBackend,
-          fallbackFrom: fallbackFrom ?? null,
-        });
+
+        try {
+          wireAndBootRuntime(runtime, runtimeBackend, fallbackFrom);
+        } catch (bootError) {
+          // A GPU-init panic inside bootMir2Runtime ("Unable to find a GPU", from
+          // bevy_render) lands here. If we booted WebGPU and WebGL2 is available, recover by
+          // loading + booting the WebGL2 backend rather than black-screening on boot-error.
+          if (runtimeBackend !== "webgpu" || !runtimeSupport.webgl2) {
+            throw bootError;
+          }
+          const bootMessage = bootError instanceof Error ? bootError.message : String(bootError);
+          const recoveredFrom = runtimeBackend;
+          runtimeBackend = "webgl2";
+          // A stale persisted preference must not pin the broken backend on reload.
+          safeLocalStorageRemove("mir2-bevy-backend");
+          markMir2CacheMilestone("bevyRuntimeFallback", {
+            from: recoveredFrom,
+            to: runtimeBackend,
+            stage: "boot",
+            message: bootMessage,
+          });
+          appendLog(t("runtime.loadingModule"), "network");
+          const webgl2Runtime = await loadBevyRuntimeModule(runtimeBackend);
+          if (disposed) return;
+          wireAndBootRuntime(webgl2Runtime, runtimeBackend, recoveredFrom);
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         setRuntimePhase("boot-error");
@@ -11535,17 +11577,28 @@ function normalizeBevyRuntimeBackendOverride(value: string | null): BevyRuntimeB
   return null;
 }
 
-function detectBevyRuntimeSupport(): BevyRuntimeSupport {
+async function detectBevyRuntimeSupport(): Promise<BevyRuntimeSupport> {
   return {
-    webgpu: hasWebGpuSupport(),
+    webgpu: await hasWebGpuSupport(),
     webgl2: hasWebGl2Support(),
   };
 }
 
-function hasWebGpuSupport() {
+async function hasWebGpuSupport(): Promise<boolean> {
   try {
-    const maybeNavigator = navigator as Navigator & { gpu?: unknown };
-    return Boolean(window.isSecureContext && maybeNavigator.gpu);
+    const maybeNavigator = navigator as Navigator & {
+      gpu?: { requestAdapter?: () => Promise<unknown> };
+    };
+    if (!window.isSecureContext || !maybeNavigator.gpu) {
+      return false;
+    }
+    // `navigator.gpu` can exist while no adapter is actually obtainable — older Chrome,
+    // Firefox <128, Safari <18, or Chrome launched with `--disable-gpu`. Booting the
+    // WebGPU backend in that case panics inside bevy_render ("Unable to find a GPU") and
+    // black-screens the client. Probe for a real adapter so we only report WebGPU support
+    // when the runtime can actually create a device.
+    const adapter = await maybeNavigator.gpu.requestAdapter?.();
+    return Boolean(adapter);
   } catch {
     return false;
   }
@@ -11565,6 +11618,14 @@ function safeLocalStorageGet(key: string) {
     return window.localStorage.getItem(key);
   } catch {
     return null;
+  }
+}
+
+function safeLocalStorageRemove(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // Storage may be unavailable (private mode / disabled cookies) — ignore.
   }
 }
 
