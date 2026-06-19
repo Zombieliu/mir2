@@ -45,6 +45,10 @@ type SelectCharacterEntryLike = {
   classKey: EntityClassKey;
   gender: EntityGenderKey;
   lastAccess?: string | null;
+  // Synthesized placeholder for an account with no real character — rendered as
+  // an empty slot, and "Start" routes to character creation instead of a doomed
+  // startGame.
+  synthetic?: boolean;
 };
 
 type HudPlayerLike = {
@@ -336,7 +340,9 @@ export function SelectOverlay({
   onDeleteCharacter,
   onExit,
 }: SelectOverlayProps) {
-  const selected = characters[selectedCharacterIndex] ?? null;
+  const selectedRaw = characters[selectedCharacterIndex] ?? null;
+  // A synthesized placeholder is not a playable character.
+  const selected = selectedRaw && !selectedRaw.synthetic ? selectedRaw : null;
   const [showCreditsPanel, setShowCreditsPanel] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCreatePanel, setShowCreatePanel] = useState(false);
@@ -439,7 +445,9 @@ export function SelectOverlay({
         <div className="select-last-access-value">{selected?.lastAccess ?? t("client.Never", [], "Never")}</div>
 
         {Array.from({ length: 4 }, (_, slotIndex) => {
-          const character = characters[slotIndex] ?? null;
+          const slotEntry = characters[slotIndex] ?? null;
+          // The synthesized placeholder renders as an empty slot (no real character).
+          const character = slotEntry && !slotEntry.synthetic ? slotEntry : null;
           return (
             <button
               key={`select-slot-${slotIndex}`}
@@ -473,7 +481,7 @@ export function SelectOverlay({
           );
         })}
 
-        <div className="select-action start"><SpriteButton sprite={ORIGINAL_UI.select.buttons.start} label={t("ui.startGame")} onClick={onEnterWorld} /></div>
+        <div className="select-action start"><SpriteButton sprite={ORIGINAL_UI.select.buttons.start} label={t("ui.startGame")} onClick={selected ? onEnterWorld : openCreatePanel} /></div>
         <div className="select-action new"><SpriteButton sprite={ORIGINAL_UI.select.buttons.newCharacter} label={t("ui.newCharacter")} onClick={openCreatePanel} /></div>
         <div className="select-action delete">
           <SpriteButton
