@@ -2,9 +2,10 @@
 //
 // Drives the REAL web client over Chrome DevTools Protocol through the full
 // journey — register -> login -> create character -> enter world -> move ->
-// find an NPC -> open dialog -> accept a quest -> travel -> wrap — and records
-// EVERY problem it sees (rendering / movement / quest / network / console) into
-// a structured report under docs/generated/player-qa/.
+// find an NPC -> open dialog -> accept a quest -> cross to a second map ->
+// fight a monster -> open the inventory -> travel -> wrap — and records EVERY
+// problem it sees (rendering / movement / combat / quest / ui / network /
+// console) into a structured report under docs/generated/player-qa/.
 //
 // Why a browser (not a protocol bot): rendering bugs (black canvas, missing
 // sprites, render lag) only exist in a real Bevy canvas. The default renderer is
@@ -20,6 +21,7 @@
 //   node ./scripts/qa-playthrough.mjs --headed [--baseUrl http://127.0.0.1:3001]
 //        [--account NAME --password PW] [--createAccount true]
 //        [--runId my-run] [--startMap 0 --startX 330 --startY 330]
+//        [--cameraAb true]   # A/B the camera fix instead of the normal journey
 //
 // Each beat is best-effort: a failing beat is recorded as an issue and the loop
 // keeps going so it captures as much of the journey as possible.
@@ -56,6 +58,13 @@ const startMap = args.startMap ?? null;
 const startX = numberArg(args.startX, NaN);
 const startY = numberArg(args.startY, NaN);
 
+// Optional mode: instead of the normal journey, A/B the camera fix — run the
+// camera update-rate probe both WITH and WITHOUT ?bevySelfCamera=1 across a few
+// maps and report cameraUpdateHz for each (supports the default-on decision for
+// the Bevy display-Hz self-camera path, ?bevySelfCamera=1 read once at load in
+// apps/web/app/original-client-shell.tsx:2715).
+const cameraAb = booleanArg(args.cameraAb ?? process.env.MIR2_QA_CAMERA_AB, false);
+
 const VIEWPORT = { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false };
 
 // Tunables.
@@ -67,6 +76,24 @@ const QUEST_TIMEOUT_MS = numberArg(args.questTimeoutMs, 8_000);
 const BLACK_LUMA_MEAN = 8; // mean luma below this = effectively black
 const FLAT_LUMA_VARIANCE = 6; // variance below this = near-uniform (blank) frame
 const FROZEN_FRAME_DELTA = 2.5; // visual delta below this across a move = render frozen
+const COMBAT_WINDOW_MS = numberArg(args.combatWindowMs, 12_000); // how long to chase+swing a monster
+
+// Hunting fields the combat beat hops to when the current map has no monster (the
+// Bichon spawn town has none). These are field maps where the on-demand monster
+// pool (#83) spawns wild monsters; the transfer key map token equals mapFileName
+// ("1"/"2") — see QUICK_TRANSFER_OPTIONS in apps/web/app/page.tsx:973.
+const HUNTING_FIELDS = [
+  { map: "1", x: 315, y: 82, label: "Woomyon Woods (1)" },
+  { map: "2", x: 503, y: 483, label: "Serpent Valley (2)" },
+];
+
+// Maps the camera A/B mode walks on to compare cameraUpdateHz (2–3 maps; town +
+// two fields so the tile/entity content differs between samples).
+const CAMERA_AB_MAPS = [
+  { map: "0", x: 330, y: 270, label: "Bichon Province (0)" },
+  { map: "1", x: 315, y: 82, label: "Woomyon Woods (1)" },
+  { map: "2", x: 503, y: 483, label: "Serpent Valley (2)" },
+];
 
 if (!chromePath) {
   throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
@@ -293,6 +320,18 @@ async function readGameState(client) {
         npcCount: npcs.length,
         monsterCount: monsters.length,
         npcs: npcs.slice(0, 40).map((e) => ({ objectId: e.objectId, name: e.name ?? null, x: e.x, y: e.y })),
+        monsters: monsters
+          .slice(0, 40)
+          .map((e) => ({
+            objectId: e.objectId,
+            name: e.name ?? null,
+            x: e.x,
+            y: e.y,
+            hp: e.hp ?? null,
+            maxHp: e.maxHp ?? null,
+            dead: Boolean(e.dead),
+            disposition: e.disposition ?? null,
+          })),
         characters: Array.isArray(state.characters)
           ? state.characters.map((c) => ({ name: c?.name ?? null, index: c?.index ?? null }))
           : [],
@@ -541,6 +580,92 @@ async function openNpcDialog(client, npc) {
   if (await waitUntilSoft(client, mine, NPC_DIALOG_TIMEOUT_MS)) return true;
   await sendCommand(client, { type: "interact", objectId: Number(npc.objectId) });
   return waitUntilSoft(client, mine, 6_000);
+}
+
+// ---------------------------------------------------------------------------
+// Combat primitives — read monsters out of state.entities (WorldEntity carries
+// kind/hp/maxHp/dead/disposition, apps/web/app/page.tsx:464) and chase+swing one.
+// ---------------------------------------------------------------------------
+async function readPlayerPos(client) {
+  return client.evaluate(
+    `(() => { const p = window.__mir2Stage5?.state?.player; return p ? { x: p.x, y: p.y } : null; })()`,
+  );
+}
+
+// Nearest live monster to the player (null if none on the current map).
+async function readNearestMonster(client) {
+  return client.evaluate(`
+    (() => {
+      const s = window.__mir2Stage5?.state ?? {};
+      const ents = Array.isArray(s.entities) ? s.entities : [];
+      const p = s.player ?? { x: 0, y: 0 };
+      const mons = ents.filter((e) => e && e.kind === "monster" && !e.dead);
+      if (!mons.length) return null;
+      mons.sort((a, b) => (Math.abs(a.x - p.x) + Math.abs(a.y - p.y)) - (Math.abs(b.x - p.x) + Math.abs(b.y - p.y)));
+      const m = mons[0];
+      return { objectId: String(m.objectId), name: m.name ?? null, x: m.x, y: m.y, hp: m.hp ?? null, maxHp: m.maxHp ?? null, dead: Boolean(m.dead), disposition: m.disposition ?? null, monsterCount: mons.length };
+    })()
+  `);
+}
+
+// Re-resolve a specific monster by id (it moves; may die/despawn → null).
+async function readMonsterById(client, objectId) {
+  return client.evaluate(`
+    (() => {
+      const s = window.__mir2Stage5?.state ?? {};
+      const ents = Array.isArray(s.entities) ? s.entities : [];
+      const m = ents.find((e) => e && String(e.objectId) === ${JSON.stringify(String(objectId))});
+      if (!m) return null;
+      return { objectId: String(m.objectId), name: m.name ?? null, x: m.x, y: m.y, hp: m.hp ?? null, maxHp: m.maxHp ?? null, dead: Boolean(m.dead) };
+    })()
+  `);
+}
+
+// Count the live floating combat numbers (Crystal DamageIndicator → the DOM
+// ".scene-damage-floater" overlay, apps/web/app/components/original-client-scene-overlays.tsx:242).
+// This is the only damage indicator visible under the Bevy renderer (combat juice
+// lives in the DOM overlay, not sprite tints), so it is the ground-truth "damage
+// happened" signal even when monster HP isn't pushed to the client.
+async function countDamageFloaters(client) {
+  const n = await client.evaluate(`document.querySelectorAll(".scene-damage-floater").length`).catch(() => null);
+  return typeof n === "number" ? n : 0;
+}
+
+async function pollForMonster(client, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let found = null;
+  while (Date.now() < deadline) {
+    found = await readNearestMonster(client).catch(() => null);
+    if (found) return found;
+    await delay(500);
+  }
+  return null;
+}
+
+// The tile one step in front of the monster on the player's side — walk here to
+// get melee-adjacent (clicking the monster's OWN tile attacks, it does not walk;
+// only NPCs auto-approach in activateEntity, apps/web/app/page.tsx:5955).
+function stepTowardTile(player, monster) {
+  const dx = Math.sign(monster.x - player.x);
+  const dy = Math.sign(monster.y - player.y);
+  return { x: monster.x - dx, y: monster.y - dy };
+}
+
+// ---------------------------------------------------------------------------
+// Camera scroll probe action — click a far tile to start a sustained auto-run,
+// then sample the scene-motion debug hook at frame rate. Shared by the in-journey
+// camera probe (beat) and the camera A/B mode.
+// ---------------------------------------------------------------------------
+async function probeCameraScroll(client) {
+  const p = await readPlayerPos(client);
+  if (!p) return null;
+  const tx = p.x + 9;
+  const ty = p.y;
+  if (!(await clickTile(client, tx, ty, "left"))) {
+    await sendCommand(client, { type: "moveTo", x: tx, y: ty, mode: "run" });
+  }
+  await delay(250); // let the run start scrolling before sampling
+  return analyzeCameraMotion(await sampleCameraMotion(client, 2500));
 }
 
 // ---------------------------------------------------------------------------
@@ -808,14 +933,9 @@ async function playthrough(ctx) {
       beat.note = "no player position; skipping camera probe";
       return;
     }
-    // Click a far tile to trigger a sustained auto-run (continuous scroll).
-    const tx = p.player.x + 9;
-    const ty = p.player.y;
-    if (!(await clickTile(client, tx, ty, "left"))) {
-      await sendCommand(client, { type: "moveTo", x: tx, y: ty, mode: "run" });
-    }
-    await delay(250); // let the run start scrolling before sampling
-    const rate = analyzeCameraMotion(await sampleCameraMotion(client, 2500));
+    // Click a far tile to trigger a sustained auto-run (continuous scroll), then
+    // sample the camera offset at frame rate.
+    const rate = await probeCameraScroll(client);
     beat.cameraRate = rate;
 
     if (!rate || rate.offsetRangePx < 2) {
@@ -952,6 +1072,221 @@ async function playthrough(ctx) {
     }
   });
 
+  // Beat (cross-map) — transfer to a SECOND map and assert it actually renders.
+  // The spawn (Bichon "0") is a town; hop to a field via the in-client transferMap
+  // command (transferTo → ClientPacket, apps/web/app/page.tsx:5460) and require the
+  // new map to become interaction-ready with a non-black canvas.
+  await runBeat(ctx, "cross-map: transfer to a second map renders", async (beat) => {
+    const before = await readGameState(client);
+    const fromMap = before.mapFileName;
+    beat.fromMap = fromMap;
+    // Pick a second map distinct from where we are now (mapFileName equals the
+    // transfer key's map token — "0"/"1"/"2", apps/web/app/page.tsx:973).
+    const target = fromMap === "1" ? HUNTING_FIELDS[1] : HUNTING_FIELDS[0];
+    beat.toMap = target.map;
+
+    let transferError = null;
+    await transferTo(client, target.map, target.x, target.y).catch((err) => {
+      transferError = String(err?.message ?? err);
+    });
+    // Independent of transferTo's exact-position wait, assert arrival + readiness.
+    const ready = await waitUntilSoft(
+      client,
+      "window.__mir2Stage5?.state?.sceneInteractionReady === true || window.__mir2Stage5?.state?.sceneAssetReadiness?.ready === true",
+      SCENE_READY_TIMEOUT_MS,
+    );
+    await delay(1000); // let the first frames of the new map settle
+    const after = await readGameState(client);
+    beat.arrived = after.mapFileName === target.map;
+    beat.sceneReady = after.sceneInteractionReady;
+
+    if (!beat.arrived) {
+      ctx.addIssue({
+        category: "render",
+        severity: "high",
+        beat: beat.id,
+        summary: `cross-map transfer to "${target.map}" did not land (still on "${after.mapFileName ?? "?"}")`,
+        detail: { transferError, fromMap, toMap: target.map, loadingMapVisible: after.loadingMapVisible },
+      });
+    } else if (!ready || after.loadingMapVisible) {
+      ctx.addIssue({
+        category: "render",
+        severity: "high",
+        beat: beat.id,
+        summary: `second map "${target.map}" stuck on "Loading map…" / never became interaction-ready`,
+        detail: { sceneReady: after.sceneInteractionReady, loadingMapVisible: after.loadingMapVisible, transferError },
+      });
+    }
+    // assessRenderHealth records black / near-uniform canvas as its own issue.
+    beat.render = await assessRenderHealth(ctx, beat.id, `second map ${target.map}`);
+  });
+
+  // Beat (combat) — find a monster and attack it the way the client does, then
+  // verify it takes damage / dies. Clicking a monster's tile routes through
+  // handleViewportTileAction → activateEntity → attackTarget → send({type:"attack"})
+  // (apps/web/app/page.tsx:6001-6005, 5974-5976, 4903-4906). Monsters do NOT
+  // auto-approach (only NPCs do), so we walk melee-adjacent first, then swing.
+  await runBeat(ctx, "combat: attack a monster", async (beat) => {
+    let monster = await readNearestMonster(client);
+    const visited = [];
+    // If the current map has no monster, hop to a hunting field where the
+    // on-demand monster pool spawns wild monsters and poll for one to appear.
+    for (const field of HUNTING_FIELDS) {
+      if (monster) break;
+      const hereAlready = await client.evaluate(
+        `window.__mir2Stage5?.state?.mapFileName === ${JSON.stringify(field.map)}`,
+      );
+      if (!hereAlready) {
+        await transferTo(client, field.map, field.x, field.y).catch((err) =>
+          ctx.addIssue({
+            category: "flow",
+            severity: "low",
+            beat: beat.id,
+            summary: `combat: transfer to ${field.label} failed`,
+            detail: String(err?.message ?? err),
+          }),
+        );
+        await waitUntilSoft(
+          client,
+          "window.__mir2Stage5?.state?.sceneInteractionReady === true || window.__mir2Stage5?.state?.sceneAssetReadiness?.ready === true",
+          20_000,
+        );
+      }
+      visited.push(field.label);
+      // Best-effort GM spawn of a weak, melee-adjacent monster (a no-op for a
+      // non-GM account; @MOB is GM-gated, apps/simulation/src/runtime/gm_commands.rs:927).
+      // On a GM dev stack this guarantees an adjacent target; otherwise we rely on
+      // the field's on-demand spawns below. "Deer" is a Woomyon native template.
+      await sendCommand(client, { type: "chat", message: "@MOB Deer" }).catch(() => {});
+      monster = await pollForMonster(client, 14_000);
+    }
+    beat.visitedFields = visited;
+
+    if (!monster) {
+      ctx.addIssue({
+        category: "combat",
+        severity: "medium",
+        beat: beat.id,
+        summary: "no monster available to exercise combat (none on the current map; none spawned on the hunting fields)",
+        detail: { visited },
+      });
+      return;
+    }
+    beat.target = { objectId: monster.objectId, name: monster.name, hp: monster.hp, maxHp: monster.maxHp, at: { x: monster.x, y: monster.y } };
+
+    const startHp = typeof monster.hp === "number" ? monster.hp : null;
+    let lastHp = startHp;
+    let damaged = false;
+    let killed = false;
+    let swings = 0;
+    let floaterPeak = 0;
+    const deadline = Date.now() + COMBAT_WINDOW_MS;
+    while (Date.now() < deadline) {
+      const m = await readMonsterById(client, monster.objectId);
+      if (!m || m.dead) {
+        killed = m?.dead === true;
+        break;
+      }
+      const p = await readPlayerPos(client);
+      const chebyshev = p ? Math.max(Math.abs(m.x - p.x), Math.abs(m.y - p.y)) : 99;
+      if (chebyshev <= 1) {
+        // Melee-adjacent → attack via the client's own click path; fall back to
+        // the raw attack command if the tile isn't in the viewport DOM.
+        if (!(await clickTile(client, m.x, m.y, "left"))) {
+          await sendCommand(client, { type: "attack", objectId: Number(monster.objectId) });
+        }
+        swings += 1;
+      } else if (p) {
+        // Close the distance: run to the tile just in front of the monster.
+        const step = stepTowardTile(p, m);
+        if (!(await clickTile(client, step.x, step.y, "left"))) {
+          await sendCommand(client, { type: "moveTo", x: step.x, y: step.y, mode: "run" });
+        }
+      }
+      floaterPeak = Math.max(floaterPeak, await countDamageFloaters(client));
+      if (typeof m.hp === "number" && typeof lastHp === "number" && m.hp < lastHp) damaged = true;
+      if (typeof m.hp === "number") lastHp = m.hp;
+      await delay(400);
+    }
+
+    const finalM = await readMonsterById(client, monster.objectId);
+    if (finalM?.dead) killed = true;
+    if (typeof startHp === "number" && typeof lastHp === "number" && lastHp < startHp) damaged = true;
+    floaterPeak = Math.max(floaterPeak, await countDamageFloaters(client));
+
+    beat.combat = {
+      target: monster.name,
+      startHp,
+      endHp: lastHp,
+      swings,
+      damaged,
+      killed,
+      monsterGone: finalM === null,
+      damageFloaterPeak: floaterPeak,
+    };
+
+    if (!damaged && !killed && floaterPeak === 0) {
+      ctx.addIssue({
+        category: "combat",
+        severity: "high",
+        beat: beat.id,
+        summary: `attacking "${monster.name ?? monster.objectId}" produced no damage, death, or damage indicators`,
+        detail: beat.combat,
+      });
+    }
+    beat.render = await assessRenderHealth(ctx, beat.id, "during combat");
+  });
+
+  // Beat (inventory) — open the inventory window the way a player does and assert
+  // it rendered. The HUD button is ".hud-button.inventory button" → onToggleInventory
+  // → setShowInventory (apps/web/app/components/original-client-overlays.tsx:713,
+  // apps/web/app/page.tsx:11147); the window (".inventory-window") is gated on
+  // showInventory (apps/web/app/components/original-client-game-ui-scene.tsx:363,
+  // root original-client-inventory-window.tsx:543).
+  await runBeat(ctx, "inventory: open inventory window", async (beat) => {
+    // If it is already open, close it first so the click is a real open action
+    // (the HUD button toggles).
+    const alreadyOpen = await client.evaluate(`document.querySelector(".inventory-window") != null`);
+    if (alreadyOpen) {
+      await client.evaluate(
+        `(() => { const b = document.querySelector(".hud-button.inventory button"); if (b) b.click(); })()`,
+      );
+      await delay(300);
+    }
+    // SpriteButtons need a programmatic .click() (they react to it directly — the
+    // inventory button passes no onPointerActivate, original-client-overlays.tsx:714).
+    const clicked = await client.evaluate(
+      `(() => { const b = document.querySelector(".hud-button.inventory button"); if (!b) return false; b.click(); return true; })()`,
+    );
+    beat.clicked = Boolean(clicked);
+    if (!clicked) {
+      ctx.addIssue({
+        category: "ui",
+        severity: "high",
+        beat: beat.id,
+        summary: "inventory HUD button (.hud-button.inventory button) not found",
+        detail: null,
+      });
+      return;
+    }
+
+    const rendered = await waitForSelectorSoft(client, ".inventory-window", 5_000);
+    const gridNodes = await client.evaluate(
+      `document.querySelectorAll(".inventory-grid, .inventory-item-card").length`,
+    );
+    const activeInventoryTab = await client.evaluate(`window.__mir2Stage5?.state?.activeInventoryTab ?? null`);
+    beat.inventory = { rendered, gridNodes, activeInventoryTab };
+    if (!rendered) {
+      ctx.addIssue({
+        category: "ui",
+        severity: "high",
+        beat: beat.id,
+        summary: "clicking the inventory HUD button did not render the inventory window (.inventory-window absent)",
+        detail: beat.inventory,
+      });
+    }
+  });
+
   // Beat 9 — travel along the journey (move again, watch render the whole way).
   await runBeat(ctx, "travel + render stability", async (beat) => {
     const before = await readGameState(client);
@@ -995,6 +1330,114 @@ async function playthrough(ctx) {
   await runBeat(ctx, "wrap + collect diagnostics", async (beat) => {
     beat.final = await readGameState(client);
   });
+}
+
+// ---------------------------------------------------------------------------
+// Camera A/B mode — quantify the PR-#125 self-camera fix by running the camera
+// update-rate probe both WITHOUT and WITH ?bevySelfCamera=1 across a few maps and
+// reporting cameraUpdateHz for each. ?bevySelfCamera=1 is read once at load
+// (apps/web/app/original-client-shell.tsx:2715), so each variant needs a fresh
+// page load → re-login → re-enter the world.
+// ---------------------------------------------------------------------------
+async function runCameraAbMode(ctx) {
+  const client = ctx.client;
+  const variants = [
+    { key: "baseline", flag: false, label: "without ?bevySelfCamera=1" },
+    { key: "bevySelfCamera", flag: true, label: "with ?bevySelfCamera=1" },
+  ];
+  const results = [];
+
+  for (const variant of variants) {
+    const url = variant.flag ? `${RUN_URL}&bevySelfCamera=1` : RUN_URL;
+    await runBeat(ctx, `camera A/B — enter world (${variant.label})`, async (beat) => {
+      await forceNavigate(client, url);
+      await enterWorldQuick(client);
+      beat.note = `variant=${variant.key} url=${url}`;
+    });
+
+    for (const m of CAMERA_AB_MAPS) {
+      await runBeat(ctx, `camera A/B — ${variant.key} · ${m.label}`, async (beat) => {
+        if (!(await client.evaluate("window.__mir2SceneMotionDebug != null"))) {
+          beat.note = "scene-motion debug hook not active (need ?mir2Debug=1)";
+        }
+        await transferTo(client, m.map, m.x, m.y).catch((err) => {
+          beat.transferError = String(err?.message ?? err);
+        });
+        await waitUntilSoft(
+          client,
+          "window.__mir2Stage5?.state?.sceneInteractionReady === true || window.__mir2Stage5?.state?.sceneAssetReadiness?.ready === true",
+          20_000,
+        );
+        const rate = await probeCameraScroll(client);
+        beat.cameraRate = rate;
+        const row = {
+          variant: variant.key,
+          map: m.map,
+          label: m.label,
+          cameraUpdateHz: rate?.cameraUpdateHz ?? null,
+          rafHz: rate?.rafHz ?? null,
+          motionClockHz: rate?.motionClockHz ?? null,
+          offsetRangePx: rate?.offsetRangePx ?? null,
+          judderFactorVsRaf: rate?.judderFactorVsRaf ?? null,
+        };
+        results.push(row);
+        if (!rate || (rate.offsetRangePx ?? 0) < 2) {
+          ctx.addIssue({
+            category: "movement",
+            severity: "low",
+            beat: beat.id,
+            summary: `camera A/B sample invalid on ${m.label} (${variant.key}) — camera did not scroll during the walk`,
+            detail: row,
+          });
+        }
+      });
+    }
+  }
+
+  ctx.cameraAb = results;
+}
+
+// Minimal register→login→character→enter-world sequence (no per-step beats),
+// reusing the journey's primitives. Used by the camera A/B mode, which re-enters
+// the world once per variant. Best-effort: tolerates an already-existing account
+// or character (the second variant logs into what the first created).
+async function enterWorldQuick(client) {
+  await waitUntilSoft(client, "['login', 'select', 'game'].includes(window.__mir2Stage5?.state?.screen)", 25_000);
+  let screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
+
+  if (screen === "login") {
+    await fillInput(client, ".login-input.account", account).catch(() => {});
+    await fillInput(client, ".login-input.password", password).catch(() => {});
+    if (createAccount) {
+      await click(client, ".login-button.account button").catch(() => {});
+      await waitUntilSoft(client, "window.__mir2Stage5?.state?.wsState === 'open'", 15_000);
+      await delay(1500);
+    }
+    await fillInput(client, ".login-input.account", account).catch(() => {});
+    await fillInput(client, ".login-input.password", password).catch(() => {});
+    await click(client, ".login-button.ok button").catch(() => {});
+    await waitUntilSoft(client, "['select', 'game'].includes(window.__mir2Stage5?.state?.screen)", 30_000);
+    screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
+  }
+
+  if (screen !== "game") {
+    const haveOurChar = `(() => { const cs = window.__mir2Stage5?.state?.characters; return Array.isArray(cs) && cs.some((c) => c?.name === ${JSON.stringify(characterName)}); })()`;
+    if (!(await client.evaluate(haveOurChar))) {
+      await sendCommand(client, { type: "newCharacter", name: characterName, gender: "male", class: "warrior" });
+      await waitUntilSoft(client, haveOurChar, 15_000);
+    }
+    const startIndex = await client.evaluate(
+      `(() => { const cs = window.__mir2Stage5?.state?.characters ?? []; const c = cs.find((e) => e?.name === ${JSON.stringify(characterName)}) ?? cs[0]; return c?.index ?? 0; })()`,
+    );
+    await sendCommand(client, { type: "startGame", characterIndex: startIndex });
+    await waitUntilSoft(client, "window.__mir2Stage5?.state?.screen === 'game'", 25_000);
+  }
+
+  await waitUntilSoft(
+    client,
+    "window.__mir2Stage5?.state?.screen === 'game' && (window.__mir2Stage5?.state?.sceneInteractionReady === true || window.__mir2Stage5?.state?.sceneAssetReadiness?.ready === true)",
+    SCENE_READY_TIMEOUT_MS,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1078,6 +1521,9 @@ async function writeReport(ctx) {
     JSON.stringify({ errors: ctx.client.consoleErrors, messages: ctx.client.consoleMessages.slice(-200) }, null, 2),
   );
   await fs.writeFile(path.join(outputDir, "network-failures.json"), JSON.stringify(ctx.client.networkFailures, null, 2));
+  if (ctx.cameraAb) {
+    await fs.writeFile(path.join(outputDir, "camera-ab.json"), JSON.stringify(ctx.cameraAb, null, 2));
+  }
   await fs.writeFile(
     path.join(outputDir, "ws-timeline.json"),
     JSON.stringify(
@@ -1123,9 +1569,26 @@ async function writeReport(ctx) {
       );
     }
     if (b.movement) md.push(`- movement: ${JSON.stringify(b.movement)}`);
+    if (b.combat) md.push(`- combat: ${JSON.stringify(b.combat)}`);
+    if (b.inventory) md.push(`- inventory: ${JSON.stringify(b.inventory)}`);
+    if (b.toMap !== undefined) md.push(`- cross-map: from=${b.fromMap ?? "?"} to=${b.toMap} arrived=${b.arrived}`);
     if (b.cameraRate) md.push(`- cameraRate: ${JSON.stringify(b.cameraRate)}`);
     if (b.render) md.push(`- render: mean=${fmt(b.render.mean)} variance=${fmt(b.render.variance)}`);
     if (b.frame) md.push(`- frame: [\`${b.frame}\`](${b.frame})`);
+    md.push("");
+  }
+  if (ctx.cameraAb && ctx.cameraAb.length) {
+    md.push("## Camera A/B (bevySelfCamera) — cameraUpdateHz per map");
+    md.push("");
+    md.push("Higher `cameraUpdateHz` (closer to `rafHz`) = smoother scroll. Supports the default-on decision for the Bevy display-Hz self-camera (PR #125).");
+    md.push("");
+    md.push("| Map | Variant | cameraUpdateHz | rafHz | motionClockHz | offsetRangePx | judderVsRaf |");
+    md.push("|---|---|---|---|---|---|---|");
+    for (const r of ctx.cameraAb) {
+      md.push(
+        `| ${r.label} | ${r.variant} | ${fmt(r.cameraUpdateHz)} | ${fmt(r.rafHz)} | ${fmt(r.motionClockHz)} | ${fmt(r.offsetRangePx)} | ${fmt(r.judderFactorVsRaf)} |`,
+      );
+    }
     md.push("");
   }
   md.push("## Detailed issue evidence");
@@ -1225,6 +1688,14 @@ async function navigate(client, url) {
     await delay(400);
   }
   throw lastError ?? new Error("Page navigation failed.");
+}
+
+// Force a real reload to `url` (the camera A/B mode loads a different URL per
+// variant; navigate()'s fast-path would otherwise skip re-navigating because the
+// page is already on a valid URL).
+async function forceNavigate(client, url) {
+  targetAlreadyNavigated = false;
+  await navigate(client, url);
 }
 
 async function fillInput(client, selector, value) {
@@ -1396,7 +1867,9 @@ function delay(ms) {
 // ---------------------------------------------------------------------------
 async function main() {
   await fs.mkdir(framesDir, { recursive: true });
-  console.log(`qa-playthrough: target=${baseUrl} account=${account} char=${characterName} headed=${headed}`);
+  console.log(
+    `qa-playthrough: target=${baseUrl} account=${account} char=${characterName} headed=${headed}${cameraAb ? " mode=cameraAb" : ""}`,
+  );
   console.log(`qa-playthrough: output=${outputDir}`);
 
   const chrome = await launchChrome();
@@ -1416,7 +1889,11 @@ async function main() {
     ctx = createContext(client);
     ctx.startedAt = Date.now();
 
-    await playthrough(ctx);
+    if (cameraAb) {
+      await runCameraAbMode(ctx);
+    } else {
+      await playthrough(ctx);
+    }
 
     collectNetworkIssues(ctx);
     collectConsoleIssues(ctx);
