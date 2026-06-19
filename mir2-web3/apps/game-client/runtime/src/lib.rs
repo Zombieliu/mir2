@@ -52,6 +52,11 @@ thread_local! {
     static PENDING_MAP_RENDER_STATE: RefCell<Option<MapRenderState>> = const { RefCell::new(None) };
     static PENDING_MAP_RENDER_ATLASES: RefCell<Vec<PendingMapRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_CAMERA_OFFSET: Cell<(f32, f32)> = const { Cell::new((0.0, 0.0)) };
+    // Optional self-player motion window (from_x, from_y, to_x, to_y, started_ms,
+    // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
+    // (the default) ⇒ `follow_player` keeps the camera pinned at origin = the
+    // current fold-in behaviour.
+    static PENDING_SELF_CAMERA_MOTION: Cell<Option<(i32, i32, i32, i32, f64, f64)>> = const { Cell::new(None) };
 }
 
 #[derive(Resource, Default, Clone)]
@@ -553,6 +558,24 @@ pub fn set_mir2_map_render_atlas(key: String, width: u32, height: u32, pixels: V
 #[wasm_bindgen(js_name = setMir2MapCameraOffset)]
 pub fn set_mir2_map_camera_offset(x: f32, y: f32) {
     PENDING_MAP_CAMERA_OFFSET.with(|cell| cell.set((x, y)));
+}
+
+/// Push the self-player's current motion window so the runtime can interpolate the
+/// camera scroll at display refresh rate (instead of the ~33Hz React `motionNow`
+/// clock). Opt-in: only the `?bevySelfCamera=1` producer calls this. Mirrors
+/// `EntityMotionSnapshot` (`fromX,fromY,toX,toY,startedAt,expiresAt`). When the step
+/// has elapsed (`now >= expires_ms`) the camera falls back to origin.
+#[wasm_bindgen(js_name = setMir2SelfCameraMotion)]
+pub fn set_mir2_self_camera_motion(
+    from_x: i32,
+    from_y: i32,
+    to_x: i32,
+    to_y: i32,
+    started_ms: f64,
+    expires_ms: f64,
+) {
+    PENDING_SELF_CAMERA_MOTION
+        .with(|cell| cell.set(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms))));
 }
 
 #[wasm_bindgen(js_name = bootMir2Runtime)]
@@ -1418,9 +1441,43 @@ fn browser_asset_path(path: &str) -> String {
         .to_owned()
 }
 
+/// Display-Hz camera scroll for the opt-in `?bevySelfCamera=1` path. Reads the
+/// self motion window pushed via `setMir2SelfCameraMotion` and interpolates the
+/// sub-cell offset every frame (so the scroll no longer steps at the ~33Hz React
+/// `motionNow` clock). Returns `Vec2::ZERO` when no window is set (default
+/// fold-in) or the step has elapsed → camera stays pinned at origin.
+///
+/// Units: CSS-px screen space (the entity render layers' coordinate system, 48×32
+/// per cell), Y flipped because `entity_render_layer_position` maps screen-top via
+/// `stage_h/2 - top`. NOTE: the x/y signs are derived from the fold-in math but
+/// have NOT been visually verified on a high-refresh display — if the world
+/// scrolls the wrong way, flip the sign(s) here (this is the one spot).
+fn self_camera_translation(motion_table: &motion::EntityMotionTable) -> Vec2 {
+    let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) =
+        PENDING_SELF_CAMERA_MOTION.with(|cell| cell.get())
+    else {
+        return Vec2::ZERO;
+    };
+    let now = motion_table.now_ms;
+    if now >= expires_ms {
+        return Vec2::ZERO;
+    }
+    let entry = motion::EntityMotionEntry {
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        started_ms,
+        expires_ms,
+    };
+    let offset = motion::compute_motion_offset(&entry, now, 48.0, 32.0);
+    Vec2::new(offset.x, -offset.y)
+}
+
 fn follow_player(
     state: Res<RuntimeWorldState>,
     entity_render_state: Res<RuntimeEntityRenderState>,
+    motion_table: Res<motion::EntityMotionTable>,
     mut camera_query: Query<
         &mut Transform,
         (
@@ -1438,8 +1495,12 @@ fn follow_player(
         let Ok(mut camera_transform) = camera_query.single_mut() else {
             return;
         };
-        camera_transform.translation.x = 0.0;
-        camera_transform.translation.y = 0.0;
+        // Default (no self motion pushed) ⇒ Vec2::ZERO ⇒ camera pinned at origin =
+        // the current fold-in behaviour, byte-identical. Non-zero only under
+        // ?bevySelfCamera=1.
+        let translation = self_camera_translation(&motion_table);
+        camera_transform.translation.x = translation.x;
+        camera_transform.translation.y = translation.y;
         camera_transform.translation.z = 0.0;
         return;
     }

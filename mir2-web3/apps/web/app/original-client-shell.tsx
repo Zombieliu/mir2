@@ -1183,7 +1183,11 @@ export function OriginalClientShell({
   const mapDrawPlan = useMemo(
     () =>
       mapAtlasUsable && mapAtlasIndex && renderPlayer
-        ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, playerCameraMotionOffset)
+        ? buildMapTileDrawList(
+            viewportMapSprites,
+            mapAtlasIndex,
+            BEVY_SELF_CAMERA_ENABLED ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset,
+          )
         : null,
     [mapAtlasUsable, mapAtlasIndex, renderPlayer, viewportMapSprites, playerCameraMotionOffset],
   );
@@ -1437,6 +1441,37 @@ export function OriginalClientShell({
   useEffect(() => {
     onBevyMapRenderStateChange(bevyMapRenderState);
   }, [bevyMapRenderState, onBevyMapRenderStateChange]);
+
+  // Bevy-self-camera path: push the self motion window straight to the runtime each
+  // motion tick so Bevy can interpolate the camera at display Hz. Pushing the
+  // (step-stable) window at 33Hz is cheap (6 numbers into a Cell); Bevy reads it
+  // every frame. When not moving (no snapshot) push an expired window → camera
+  // returns to origin. Flag-gated; the runtime fn is a no-op when absent.
+  useEffect(() => {
+    if (!BEVY_SELF_CAMERA_ENABLED) return;
+    const push = (
+      window as typeof window & {
+        __mir2BevyRuntime?: {
+          setMir2SelfCameraMotion?: (
+            fromX: number,
+            fromY: number,
+            toX: number,
+            toY: number,
+            startedMs: number,
+            expiresMs: number,
+          ) => void;
+        };
+      }
+    ).__mir2BevyRuntime?.setMir2SelfCameraMotion;
+    if (!push) return;
+    const playerObjectId = renderPlayer?.objectId;
+    const snapshot = playerObjectId ? entityMotionSnapshotsRef.current[playerObjectId] : null;
+    if (snapshot) {
+      push(snapshot.fromX, snapshot.fromY, snapshot.toX, snapshot.toY, snapshot.startedAt, snapshot.expiresAt);
+    } else {
+      push(0, 0, 0, 0, 0, 0);
+    }
+  }, [motionNow, renderPlayer]);
 
   useEffect(() => {
     const activeKey = useWebGl2EntityAtlasRenderer ? activeBevyEntityAtlas?.key ?? null : null;
@@ -2673,6 +2708,14 @@ function shouldUseRawWebGl2EntityRenderer() {
 const isSceneMotionDebugMode: boolean =
   typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mir2Debug") === "1";
 
+// Opt-in (?bevySelfCamera=1): push the self-player motion window to the Bevy
+// runtime so it interpolates the camera scroll at DISPLAY refresh rate, instead of
+// folding the ~33Hz `motionNow` offset into every tile/entity position (the judder
+// source). Default OFF ⇒ the fold path below is byte-identical to today.
+const BEVY_SELF_CAMERA_ENABLED: boolean =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("bevySelfCamera") === "1";
+
 function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRenderState {
   return {
     enabled: false,
@@ -2749,10 +2792,15 @@ function buildBevyEntityRenderState({
       : [],
     entities: viewportEntitySprites.map(({ entity, sprite }) => {
       const isPlayer = player.objectId === entity.objectId;
-      const entityMotionOffset = isPlayer
-        ? EMPTY_VIEWPORT_OFFSET
-        : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
-      const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+      // Bevy-self-camera path: drop the JS camera fold (Bevy moves the camera at
+      // display Hz) and let the self player glide via its own motion. Default path
+      // is unchanged (player pinned via EMPTY, others fold playerCameraMotionOffset).
+      const entityMotionOffset =
+        isPlayer && !BEVY_SELF_CAMERA_ENABLED
+          ? EMPTY_VIEWPORT_OFFSET
+          : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+      const cameraOffset =
+        BEVY_SELF_CAMERA_ENABLED || isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
       const rootLeft =
         VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
       const rootTop =
