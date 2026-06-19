@@ -223,8 +223,18 @@ export function AssetCacheRegistrar() {
     const debug = params.get("cacheDebug") === "1";
     const consoleLog = debug || params.get("cacheLog") === "1";
     const metrics = ensureCacheMetrics(debug, consoleLog);
+    // The asset Service Worker — and its R2 fallback for /original-ui, /original-map, … assets
+    // that are NOT committed to the repo — always runs in production. In dev it stays opt-in so a
+    // bytes-less local checkout is never surprised by a Service Worker, but it now turns on
+    // automatically whenever NEXT_PUBLIC_MIR2_ASSET_BASE_URL is configured. That makes sprites AND
+    // sounds (e.g. /original-ui/Sound/62.wav, whose bytes live only on R2) resolve from the release
+    // origin like prod instead of 404ing locally. Explicit ?assetCache=1 still forces it on with no
+    // base URL configured; ?assetCache=0 forces it off for raw-network debugging.
+    const assetCacheParam = params.get("assetCache");
+    const remoteAssetBaseConfigured = Boolean(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL);
     const shouldRegisterServiceWorker =
-      process.env.NODE_ENV === "production" || params.get("assetCache") === "1";
+      process.env.NODE_ENV === "production" ||
+      (assetCacheParam !== "0" && (assetCacheParam === "1" || remoteAssetBaseConfigured));
     const shouldPrewarm =
       params.get("prewarm") !== "0" &&
       (process.env.NODE_ENV === "production" ||
