@@ -1,33 +1,31 @@
 # Render-perf roadmap — "10-min continuous walk, no jank"
 
-## ✅ RESOLVED (2026-06-19) — goal met for sustained continuous walking
+## ⚠️ CORRECTION (2026-06-19) — the earlier "RESOLVED / 0-spike" claim was INVALID
 
-**Measured (release build, in-page rAF-delta + `performance.memory` sampler, synthetic
-keyboard walk, `allVisible:true`):**
+A prior version of this doc claimed the 10-min-walk goal was met (6-min walk = `0/24` >50ms
+windows). **That was wrong.** The benchmark drove movement with **synthetic `KeyboardEvent`s
+dispatched from JS, which the real movement handler ignores** (`handleKeyboardMoveDown` routes
+through the trusted-input path). Confirmed after the fact: over 20s of "walking" the map camera
+scrolled **once** — i.e. the player never moved. So every "0/24 spikes / locked 60fps / 6-min
+smooth" number measured a **static scene**, not walking. The decode-throttle "disproof" stands
+(it was reverted), but the broader perf conclusions do not.
 
-- **6-min warm continuous walk (`?renderLoopRaf=1&mapSpritePool=1`) = `0/24` windows with a
-  >50ms frame, `0/24` >35ms, worst single frame 34.9ms, p95 18.5ms (locked 60fps), heap bounded
-  182–273MB (flat — no sawtooth).**
-- 75s walk crossing **6 scene windows = 0 mid-walk spikes.**
-- DEFAULT config (②-only, no flags) = `1/13` (one 133ms transition spike, then 12 windows locked
-  60fps).
+**What real-user testing (120Hz display) actually showed:**
+- Movement is **constantly choppy** ("一顿一顿"), the same with `renderLoopRaf` on or off.
+- **Bevy renders fine — ~119fps** (measured via `GPUCanvasContext.getCurrentTexture`/`GPUQueue.submit`
+  call rate; the backend is **WebGPU**, not WebGL). So the renderer is NOT the bottleneck.
+- The self-player motion **snapshot is present 100%** during walking and the camera offset reaches
+  ~96px (2 tiles) — so the smooth-scroll *inputs* exist, yet it still feels stepped. Prime suspect:
+  the **root-offset camera model** (this session's change) has a per-step jolt where the sub-cell
+  offset and the cell-space tile rebuild aren't synchronized (offset reaching 2 tiles ⇒ the cell
+  rebuild lags ⇒ periodic snap-back).
 
-**The diagnosis was corrected.** The "130–150ms GC spikes" were **not** continuous-walk jank —
-they are **(a)** the one-time map-**entry mount** (~100ms, hidden behind the "Loading map…"
-overlay) and **(b)** **cold-HTTP-first-fetch** of never-loaded tiles (`createImageBitmap`+decode
-of cold R2 bytes). Both are **fresh-page-reload artifacts**, not in-game walking. Profiled
-decisively: during a spike every Bevy push and every `JSON.stringify` is **<3ms** (longtask
-attributed to `window:unknown` = GC/render class); warm walking keeps pushes <3ms with **0
-spikes**. The real fix was **② (Bevy entity interpolation, already default-on)** removing the
-30Hz `JSON.stringify` churn → heap stopped sawtoothing to ~450MB → the GC-spike source is gone.
-
-**Disproven (do not re-attempt):** `①` off-thread decode (not decode-CPU) and a **decode-
-concurrency throttle** (cap in-flight standalone-tile decodes — implemented, A/B-measured, did
-NOT move the spike; **reverted**). `#4`/`(B)` below are the proven-pristine config (0/24) but
-only **marginal** over the ②-only default; left flag-gated default-OFF pending a ship decision
-(flipping a live-render-path default affects all players). Residual = entry-mount (overlay-hidden)
-+ first-ever-region cold fetch (caches after first visit) — optional future polish: prefetch the
-spawn-area + look-ahead ring during the loading overlay.
+**Status:** `#4` (`renderLoopRaf`) and `(B)` (`mapSpritePool`) were briefly flipped default-ON on
+this invalid basis; **both reverted to default-OFF (opt-in)**. The map **uncovered-tile rendering**
+(the other half of the branch) is independently verified and kept. **Real movement smoothness is
+NOT solved** — it needs a dedicated round, verified by a human actually walking (NOT a synthetic
+benchmark), evaluating fold-in vs root-offset and the per-step sync. **Methodology rule going
+forward: a perf number is only valid if the camera/world actually moved during the sample.**
 
 ## Context / why
 

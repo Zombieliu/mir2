@@ -1430,19 +1430,19 @@ export default function HomePage() {
   const standaloneMapImageLruRef = useRef<Map<string, true>>(new Map());
   const lastBevyMapRenderStateJsonRef = useRef<string | null>(null);
   const lastBevyMapCameraOffsetRef = useRef<{ x: number; y: number } | null>(null);
-  // Roadmap #4 (DEFAULT ON): when on, the shell drops its React motion clock to
-  // ~10Hz and hands us a ref-only accessor (registered into this ref) that recomputes
-  // the live player camera offset on demand. The 60Hz rAF loop below reads it and
-  // pushes the offset to the Bevy runtime, keeping map scroll smooth off the slower
-  // React clock. Must agree with the shell's renderLoopRafEnabled (same flag/default)
-  // or the two camera-offset paths fight. Escape hatch: `?renderLoopRaf=0` /
-  // localStorage "mir2-render-loop-raf"="0".
+  // Roadmap #4 (DEFAULT OFF — opt-in, UNVERIFIED for real-movement smoothness): when
+  // on, the shell drops its React motion clock to ~10Hz and hands us a ref-only
+  // accessor (registered into this ref) that recomputes the live player camera offset
+  // on demand; the rAF loop below reads it and pushes the offset to the Bevy runtime.
+  // Default-on was reverted: the benchmark that justified it never actually moved the
+  // player (see the shell's matching comment). Must agree with the shell's
+  // renderLoopRafEnabled or the two camera-offset paths fight. Opt in: `?renderLoopRaf=1`.
   const renderLoopRafEnabled = useMemo(() => {
     if (typeof window === "undefined") return false;
     const p = new URLSearchParams(window.location.search);
-    if (p.get("renderLoopRaf") === "0") return false;
     if (p.get("renderLoopRaf") === "1") return true;
-    return window.localStorage.getItem("mir2-render-loop-raf") !== "0";
+    if (p.get("renderLoopRaf") === "0") return false;
+    return window.localStorage.getItem("mir2-render-loop-raf") === "1";
   }, []);
   const liveCameraMotionOffsetGetterRef = useRef<(() => { x: number; y: number } | null) | null>(
     null,
