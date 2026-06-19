@@ -64,6 +64,18 @@ export type BevyEntityRenderState = {
   entities: Array<{
     objectId: string;
     dead: boolean;
+    // Opt-in (?bevyEntityInterp=1) per-entity motion window — present only for
+    // NON-self entities under the flag. Lets the Bevy runtime interpolate the
+    // sub-cell glide at display Hz instead of the producer folding it into each
+    // layer's left/top at the ~33Hz motionNow clock. fromX/Y may be fractional
+    // (a move begun mid-glide); motionDurationMs = expiresAt - startedAt of the
+    // EntityMotionSnapshot. Absent ⇒ Bevy applies no offset (byte-identical fold).
+    motionFromX?: number;
+    motionFromY?: number;
+    motionToX?: number;
+    motionToY?: number;
+    motionStartedMs?: number;
+    motionDurationMs?: number;
     layers: Array<{
       key: string;
       path: string;

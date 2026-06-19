@@ -331,6 +331,24 @@ struct EntityRenderEntry {
     dead: bool,
     #[serde(default)]
     layers: Vec<EntityRenderLayer>,
+    // Opt-in (`?bevyEntityInterp=1`) per-entity sub-cell motion window, in CSS-px
+    // cell coordinates (48 × 32). Present only for NON-self entities under the
+    // flag; absent (`None`) on the default path and for the self player ⇒ no
+    // interpolation ⇒ byte-identical to the producer's fold. `from`/`to` are `f32`
+    // because a move that begins mid-glide records a fractional `from` (see
+    // `motion::compute_motion_offset_fractional`); the timestamp stays `f64`.
+    #[serde(default)]
+    motion_from_x: Option<f32>,
+    #[serde(default)]
+    motion_from_y: Option<f32>,
+    #[serde(default)]
+    motion_to_x: Option<f32>,
+    #[serde(default)]
+    motion_to_y: Option<f32>,
+    #[serde(default)]
+    motion_started_ms: Option<f64>,
+    #[serde(default)]
+    motion_duration_ms: Option<f64>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1202,6 +1220,7 @@ fn sync_entity_render_layers(
     atlas_assets: Res<RuntimeEntityRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     entity_render_state: Res<RuntimeEntityRenderState>,
+    motion_table: Res<motion::EntityMotionTable>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
@@ -1226,6 +1245,10 @@ fn sync_entity_render_layers(
     );
 
     for entity in &snapshot.entities {
+        // Sub-cell glide offset for this entity (CSS-px screen space). Default
+        // path / self player ⇒ no motion window ⇒ Vec2::ZERO ⇒ byte-identical to
+        // the producer's fold-in. Computed once per entity, applied to every layer.
+        let motion_offset = entity_interp_offset(entity, motion_table.now_ms);
         for layer in &entity.layers {
             let layer_key = if layer.key.is_empty() {
                 format!("{}:{}", entity.object_id, layer.path)
@@ -1233,7 +1256,7 @@ fn sync_entity_render_layers(
                 layer.key.clone()
             };
             alive.insert(layer_key.clone());
-            let position = entity_render_layer_position(snapshot, layer);
+            let position = entity_render_layer_position(snapshot, layer, motion_offset);
             let opacity = layer
                 .opacity
                 .unwrap_or(if entity.dead { 0.45 } else { 1.0 });
@@ -1422,14 +1445,61 @@ fn clear_entity_render_layers(commands: &mut Commands, registry: &mut SceneRegis
     registry.entity_render_atlases.clear();
 }
 
-fn entity_render_layer_position(snapshot: &EntityRenderState, layer: &EntityRenderLayer) -> Vec3 {
-    let center_x = layer.left + layer.width * 0.5;
-    let center_y = layer.top + layer.height * 0.5;
+/// Screen→world position for one entity layer.
+///
+/// `offset` is an additional CSS-px SCREEN-space translation applied to the
+/// layer's `left`/`top` BEFORE the screen→world conversion. It is `Vec2::ZERO`
+/// on the default path (so the result is byte-identical to the producer's
+/// fold-in). Under `?bevyEntityInterp=1` it carries the per-entity sub-cell glide
+/// (`entity_interp_offset`); because it is added in screen space — i.e. `top`
+/// increases downward and the function then flips Y via `stage_h/2 - center_y` —
+/// the sign matches the DOM fold automatically, with no manual axis flip here.
+fn entity_render_layer_position(
+    snapshot: &EntityRenderState,
+    layer: &EntityRenderLayer,
+    offset: Vec2,
+) -> Vec3 {
+    let center_x = layer.left + offset.x + layer.width * 0.5;
+    let center_y = layer.top + offset.y + layer.height * 0.5;
 
     Vec3::new(
         center_x - snapshot.stage_width * 0.5,
         snapshot.stage_height * 0.5 - center_y,
         layer.z / 100_000.0,
+    )
+}
+
+/// Per-entity sub-cell motion offset (CSS-px SCREEN space) for the opt-in
+/// `?bevyEntityInterp=1` path. Returns `Vec2::ZERO` when the producer attached no
+/// motion window (the default path, and always for the self player) so the
+/// position math stays byte-identical to the fold-in.
+///
+/// When a window is present the runtime interpolates the glide every frame from
+/// the Bevy display clock (`now_ms`, the same `EntityMotionTable.now_ms` PR #125's
+/// self-camera uses) instead of the ~33Hz React `motionNow` fold — this is the
+/// judder fix. `expires_ms = started_ms + duration_ms`.
+fn entity_interp_offset(entity: &EntityRenderEntry, now_ms: f64) -> Vec2 {
+    let (Some(from_x), Some(from_y), Some(to_x), Some(to_y), Some(started_ms), Some(duration_ms)) = (
+        entity.motion_from_x,
+        entity.motion_from_y,
+        entity.motion_to_x,
+        entity.motion_to_y,
+        entity.motion_started_ms,
+        entity.motion_duration_ms,
+    ) else {
+        return Vec2::ZERO;
+    };
+
+    motion::compute_motion_offset_fractional(
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        started_ms,
+        started_ms + duration_ms,
+        now_ms,
+        48.0,
+        32.0,
     )
 }
 
