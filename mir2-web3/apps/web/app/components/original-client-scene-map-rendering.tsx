@@ -48,9 +48,10 @@ function mapSpritePoolEnabled() {
     // Don't memoise the SSR answer — the client read below must win once hydrated.
     return false;
   }
-  // DEFAULT ON: pooled, in-place sprite reuse across viewport rebuilds (fewer per-cell
-  // allocations). Escape hatch: `?mapSpritePool=0` / localStorage "mir2-map-sprite-pool"="0".
-  let enabled = true;
+  // DEFAULT OFF — opt-in: pooled, in-place sprite reuse across viewport rebuilds.
+  // Reverted from default-on (it was flipped on alongside #4 based on the invalid
+  // static-scene benchmark; unverified for real movement). Opt in: `?mapSpritePool=1`.
+  let enabled = false;
   try {
     const param = new URLSearchParams(window.location.search).get("mapSpritePool");
     if (param === "1") {
@@ -58,10 +59,10 @@ function mapSpritePoolEnabled() {
     } else if (param === "0") {
       enabled = false;
     } else {
-      enabled = window.localStorage.getItem("mir2-map-sprite-pool") !== "0";
+      enabled = window.localStorage.getItem("mir2-map-sprite-pool") === "1";
     }
   } catch {
-    enabled = true;
+    enabled = false;
   }
   mapSpritePoolFlag = enabled;
   return enabled;

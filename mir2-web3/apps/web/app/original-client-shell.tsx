@@ -835,21 +835,21 @@ export function OriginalClientShell({
     };
   }, [screen, sceneInteractionReady, onViewportDirectionIntent, onViewportDirectionStop]);
 
-  // Roadmap #4 (DEFAULT ON): drive the render loop OUT of React. When on, the
-  // motion-clock React state ticks at ~10Hz (vs 30Hz) — ~3× less reconciliation
-  // garbage during walking — and the Bevy map camera offset is pushed from a 60Hz
-  // ref-based rAF loop in page.tsx instead of the per-tick React effect below, so
-  // map scroll stays smooth despite the slower React clock. Chat bubbles, projectile
-  // expiry and the reconnect countdown all tolerate 10Hz (TTLs are seconds; flight
-  // is 300–500ms). Measured: 6-min warm continuous walk = 0/24 >50ms windows (locked
-  // 60fps, flat heap). Escape hatch: `?renderLoopRaf=0` / localStorage
-  // "mir2-render-loop-raf"="0".
+  // Roadmap #4 (DEFAULT OFF — opt-in, UNVERIFIED for real-movement smoothness):
+  // drive the render loop OUT of React. When on, the motion-clock React state ticks
+  // at ~10Hz (vs 30Hz) and the Bevy map camera offset is pushed from a per-frame
+  // ref-based rAF loop in page.tsx instead of the per-tick React effect below.
+  // NOTE: an earlier 6-min "0/24 spike" benchmark that motivated default-on was
+  // INVALID — its synthetic KeyboardEvents never actually moved the player (the
+  // camera never scrolled), so it measured a static scene. Under real walking #4
+  // on/off feels the same, so it is back to opt-in until a real fix is verified.
+  // Must stay in sync with page.tsx's renderLoopRafEnabled. Opt in: `?renderLoopRaf=1`.
   const renderLoopRafEnabled = useMemo(() => {
     if (typeof window === "undefined") return false;
     const p = new URLSearchParams(window.location.search);
-    if (p.get("renderLoopRaf") === "0") return false;
     if (p.get("renderLoopRaf") === "1") return true;
-    return window.localStorage.getItem("mir2-render-loop-raf") !== "0";
+    if (p.get("renderLoopRaf") === "0") return false;
+    return window.localStorage.getItem("mir2-render-loop-raf") === "1";
   }, []);
 
   const lastMotionNowRef = useRef(0);
