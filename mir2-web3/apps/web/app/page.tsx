@@ -732,6 +732,11 @@ type SelectCharacterEntry = {
   classKey: "warrior" | "wizard" | "taoist" | "assassin" | "archer";
   gender: "male" | "female";
   lastAccess: string;
+  // True for the synthesized placeholder shown when the account has no real
+  // (server-backed) character yet. Such an entry must never be sent to
+  // `startGame` (the server rejects it with StartGame result 2) and must be
+  // dropped once a real character arrives.
+  synthetic?: boolean;
 };
 
 type RankingEntry = {
@@ -6435,7 +6440,10 @@ export default function HomePage() {
         break;
       case "NewCharacterSuccess":
         setCharacters((current) => {
-          const nextCharacters = parseCharacters({ characters: [...current, payload.character] }, accountId, language);
+          // Drop the synthesized placeholder before appending the real character,
+          // otherwise the account-named phantom lingers alongside real slots.
+          const realCurrent = current.filter((entry) => !entry.synthetic);
+          const nextCharacters = parseCharacters({ characters: [...realCurrent, payload.character] }, accountId, language);
           const visibleCharacters = nextCharacters.slice(0, 4);
           const createdIndex = numberOrUndefined(
             (payload.character as Record<string, unknown> | undefined)?.index ??
@@ -12473,6 +12481,7 @@ function fallbackCharacter(language: Mir2Language, fallbackName = ""): SelectCha
     classKey: "warrior",
     gender: "male",
     lastAccess: translator("client.Never", [], "Never"),
+    synthetic: true,
   };
 }
 
