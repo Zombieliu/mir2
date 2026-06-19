@@ -33,6 +33,9 @@ import path from "node:path";
 const args = parseArgs(process.argv.slice(2));
 
 const baseUrl = args.baseUrl ?? process.env.MIR2_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+// Load with scene-motion diagnostics enabled so the camera update-rate probe can
+// read window.__mir2SceneMotionDebug (motionNow clock + playerCameraMotionOffset).
+const RUN_URL = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}mir2Debug=1`;
 const createAccount = booleanArg(args.createAccount ?? process.env.MIR2_CREATE_ACCOUNT, true);
 const account = args.account ?? process.env.MIR2_QA_ACCOUNT ?? defaultAccountName();
 const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? "Mir2test1";
@@ -59,7 +62,6 @@ const VIEWPORT = { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false
 const SCENE_READY_TIMEOUT_MS = numberArg(args.sceneReadyTimeoutMs, 45_000);
 const MOVE_SAMPLE_MS = 90; // logical-position sampling interval
 const MOVE_WINDOW_MS = numberArg(args.moveWindowMs, 2600);
-const MOVE_SETTLE_BUDGET_MS = 220; // Crystal-feel target; >this = jank (known architectural)
 const NPC_DIALOG_TIMEOUT_MS = numberArg(args.npcDialogTimeoutMs, 14_000);
 const QUEST_TIMEOUT_MS = numberArg(args.questTimeoutMs, 8_000);
 const BLACK_LUMA_MEAN = 8; // mean luma below this = effectively black
@@ -416,6 +418,67 @@ async function assessRenderHealth(ctx, beatId, phase) {
 }
 
 // ---------------------------------------------------------------------------
+// Camera update-rate probe — quantifies the judder cause.
+// ---------------------------------------------------------------------------
+// Sample the scene-motion debug hook (window.__mir2SceneMotionDebug, gated on
+// ?mir2Debug=1) from an IN-PAGE rAF loop. A ~20Hz CDP poll would alias the
+// ~33Hz content rate, so the loop must run inside the browser at frame rate.
+async function sampleCameraMotion(client, durationMs) {
+  await client.evaluate(`
+    (() => {
+      window.__qaCamSamples = [];
+      window.__qaCamStop = false;
+      const tick = () => {
+        const d = window.__mir2SceneMotionDebug;
+        const o = d && d.playerCameraMotionOffset;
+        window.__qaCamSamples.push({ t: performance.now(), m: d ? d.motionNow : null, x: o ? o.x : null, y: o ? o.y : null });
+        if (!window.__qaCamStop) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      return true;
+    })()
+  `);
+  await delay(durationMs);
+  return client.evaluate(
+    `(() => { window.__qaCamStop = true; const s = window.__qaCamSamples || []; window.__qaCamSamples = []; return s; })()`,
+  );
+}
+
+// From per-frame samples, derive the browser frame rate, the motionNow React-clock
+// rate, and the distinct camera-scroll update rate (= the content/judder rate).
+function analyzeCameraMotion(samples) {
+  if (!Array.isArray(samples) || samples.length < 8) return null;
+  const dts = [];
+  for (let i = 1; i < samples.length; i += 1) dts.push(samples[i].t - samples[i - 1].t);
+  dts.sort((a, b) => a - b);
+  const medDt = dts[Math.floor(dts.length / 2)] || 0;
+  const rafHz = medDt > 0 ? 1000 / medDt : null;
+  let motionChanges = 0;
+  let camChanges = 0;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (let i = 0; i < samples.length; i += 1) {
+    const s = samples[i];
+    if (typeof s.x === "number") { minX = Math.min(minX, s.x); maxX = Math.max(maxX, s.x); }
+    if (typeof s.y === "number") { minY = Math.min(minY, s.y); maxY = Math.max(maxY, s.y); }
+    if (i > 0) {
+      if (samples[i].m !== samples[i - 1].m) motionChanges += 1;
+      if (samples[i].x !== samples[i - 1].x || samples[i].y !== samples[i - 1].y) camChanges += 1;
+    }
+  }
+  const windowSec = (samples[samples.length - 1].t - samples[0].t) / 1000;
+  const cameraUpdateHz = windowSec > 0 ? round2(camChanges / windowSec) : null;
+  return {
+    frames: samples.length,
+    windowSec: round2(windowSec),
+    rafHz: rafHz ? round2(rafHz) : null,
+    motionClockHz: windowSec > 0 ? round2(motionChanges / windowSec) : null,
+    cameraUpdateHz,
+    offsetRangePx: round2(Math.max(maxX - minX, maxY - minY)),
+    judderFactorVsRaf: cameraUpdateHz && rafHz ? round2(rafHz / cameraUpdateHz) : null,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Movement + interaction primitives (adapted from the movement harness).
 // ---------------------------------------------------------------------------
 async function sendCommand(client, command) {
@@ -488,7 +551,7 @@ async function playthrough(ctx) {
 
   // Beat 1 — open the client, reach the login screen.
   await runBeat(ctx, "open client + login screen", async () => {
-    await navigate(client, baseUrl);
+    await navigate(client, RUN_URL);
     await waitUntil(
       client,
       "['login', 'select', 'game'].includes(window.__mir2Stage5?.state?.screen)",
@@ -709,7 +772,12 @@ async function playthrough(ctx) {
         maxStep = Math.max(maxStep, step);
       }
       beat.movement.maxTileStep = maxStep;
-      beat.movement.maxGapMs = maxGapMs;
+      // The gap between *logical tile changes* is the walk/run cadence (movement
+      // SPEED), not render jank — recorded for context but never flagged as an
+      // issue. Real movement-feel analysis (prediction staleness, command-queue
+      // latency, camera continuity, visual jumps) is the dedicated job of
+      // `capture-web-movement-jitter.mjs`, which has Crystal-calibrated thresholds.
+      beat.movement.tileCadenceMs = maxGapMs;
       if (maxStep > 2) {
         ctx.addIssue({
           category: "movement",
@@ -719,18 +787,56 @@ async function playthrough(ctx) {
           detail: beat.movement,
         });
       }
-      if (maxGapMs > MOVE_SETTLE_BUDGET_MS * 2) {
-        ctx.addIssue({
-          category: "movement",
-          severity: "low",
-          beat: beat.id,
-          summary: `movement stutter: ${maxGapMs}ms between position updates (Crystal-feel budget ~${MOVE_SETTLE_BUDGET_MS}ms)`,
-          detail: beat.movement,
-        });
-      }
     }
 
     beat.render = await assessRenderHealth(ctx, beat.id, "after movement");
+  });
+
+  // Beat 6.5 — quantify the camera scroll update rate during a sustained walk.
+  // Bevy draws at display Hz, but the camera offset is pushed from the ~33Hz React
+  // motionNow clock; on a high-refresh display that low content rate reads as
+  // "一顿一顿" judder. This turns the judder into a number (a perf number only counts
+  // if the camera actually scrolled — the human-verified rule). The real fix lives
+  // Bevy-side and must still be confirmed by a human walking on a 120Hz display.
+  await runBeat(ctx, "camera update-rate probe", async (beat) => {
+    if (!(await client.evaluate("window.__mir2SceneMotionDebug != null"))) {
+      beat.note = "scene-motion debug hook not active (need ?mir2Debug=1)";
+      return;
+    }
+    const p = await readGameState(client);
+    if (!p.player) {
+      beat.note = "no player position; skipping camera probe";
+      return;
+    }
+    // Click a far tile to trigger a sustained auto-run (continuous scroll).
+    const tx = p.player.x + 9;
+    const ty = p.player.y;
+    if (!(await clickTile(client, tx, ty, "left"))) {
+      await sendCommand(client, { type: "moveTo", x: tx, y: ty, mode: "run" });
+    }
+    await delay(250); // let the run start scrolling before sampling
+    const rate = analyzeCameraMotion(await sampleCameraMotion(client, 2500));
+    beat.cameraRate = rate;
+
+    if (!rate || rate.offsetRangePx < 2) {
+      ctx.addIssue({
+        category: "movement",
+        severity: "low",
+        beat: beat.id,
+        summary: "camera-rate sample invalid — camera did not scroll during the walk (no sustained movement)",
+        detail: rate,
+      });
+      return;
+    }
+    if (rate.cameraUpdateHz && rate.rafHz && rate.cameraUpdateHz < rate.rafHz * 0.7) {
+      ctx.addIssue({
+        category: "movement",
+        severity: "medium",
+        beat: beat.id,
+        summary: `camera scrolls at ~${rate.cameraUpdateHz}Hz while frames render at ~${rate.rafHz}Hz (judder factor ${rate.judderFactorVsRaf}x) — the ~33Hz motionNow clock; worse on high-refresh displays`,
+        detail: rate,
+      });
+    }
   });
 
   // Beats 7–8 — find a quest-giver NPC, open its dialog, accept a quest.
@@ -1017,6 +1123,7 @@ async function writeReport(ctx) {
       );
     }
     if (b.movement) md.push(`- movement: ${JSON.stringify(b.movement)}`);
+    if (b.cameraRate) md.push(`- cameraRate: ${JSON.stringify(b.cameraRate)}`);
     if (b.render) md.push(`- render: mean=${fmt(b.render.mean)} variance=${fmt(b.render.variance)}`);
     if (b.frame) md.push(`- frame: [\`${b.frame}\`](${b.frame})`);
     md.push("");
@@ -1068,7 +1175,7 @@ async function launchChrome() {
 }
 
 async function createPageTarget() {
-  const response = await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(baseUrl)}`, { method: "PUT" });
+  const response = await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(RUN_URL)}`, { method: "PUT" });
   if (!response.ok) throw new Error(`Chrome target creation failed: ${response.status}`);
   const target = await response.json();
   targetAlreadyNavigated = true;

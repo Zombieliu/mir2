@@ -14,10 +14,11 @@ those are blind to rendering, this one sees the actual Bevy canvas.
 4. create a character → start game
 5. enter world → **map renders** (scene-ready + canvas not black + no stuck "Loading map…")
 6. move → **render keeps up** (server moved us but canvas didn't = render bug)
-7. find an NPC → walk to it → open dialog (+ assert `.npc-dialog-panel` rendered)
-8. accept a quest through the dialog (`questLog` grows)
-9. travel several legs → render stays stable
-10. wrap → dump diagnostics
+7. **camera update-rate probe** → quantify the scroll content rate during a sustained walk (judder = low `cameraUpdateHz` vs `rafHz`)
+8. find an NPC → walk to it → open dialog (+ assert `.npc-dialog-panel` rendered)
+9. accept a quest through the dialog (`questLog` grows)
+10. travel several legs → render stays stable
+11. wrap → dump diagnostics
 
 Each beat is best-effort: a failure is recorded and the loop keeps going.
 
@@ -38,7 +39,7 @@ Output lands in `apps/web/docs/generated/player-qa/playthrough-<runId>/`:
 ### Issue categories
 
 - **render** — black/blank canvas (luma), stuck "Loading map…", scene never ready, dialog open in state but not in DOM, render frozen during movement
-- **movement** — server moved but client didn't (desync), teleport/jump, stutter beyond the Crystal-feel budget
+- **movement** — server moved but client didn't (desync), teleport/jump, or low camera scroll rate vs frame rate (judder). Note: the time between *logical tile changes* is the walk/run cadence (movement speed), NOT jank, so it is recorded (`tileCadenceMs`) but never flagged. Fine-grained movement-feel analysis (prediction staleness, command-queue latency, camera continuity) is `capture-web-movement-jitter.mjs`.
 - **quest** — NPC click opened no dialog, no quest added after clicking dialog links, no NPC on map
 - **network** — failed sprite/atlas/UI requests, grouped by kind (a wall of identical 404s = one issue). _If files exist in git, the R2 release is likely stale — see `ASSET-RELEASE-RUNBOOK.md`._
 - **console** — critical console errors/exceptions (deduped)
