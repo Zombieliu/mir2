@@ -82,7 +82,7 @@ use super::monsters::{
     crystal_respawn_object_monster_packet, crystal_world_respawn_spawns, point_in_data_range,
     start_game_visible_respawn_spawns,
 };
-use super::movement::current_location;
+use super::movement::{current_location, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog,
     sell_item_impl,
@@ -5380,6 +5380,18 @@ pub(super) fn object_died_info_for_entity(
     })
 }
 
+/// Crystal `PlayerObject.Die` enqueues `S.Death { Direction, Location }` to the
+/// dying player (PlayerObject.cs:649) — the self-only death signal that drives
+/// the client's revive prompt, sent alongside the `S.ObjectDied` broadcast other
+/// players receive. Derives location/facing exactly like `object_died_info_for_entity`.
+pub(super) fn self_death_packet(world: &World, entity: Entity) -> Option<ServerPacket> {
+    let movement = object_movement(world, entity)?;
+    Some(ServerPacket::Death {
+        location: movement.position,
+        direction: movement.direction,
+    })
+}
+
 pub(super) fn object_revived_info_for_entity(
     world: &World,
     entity: Entity,
@@ -6948,6 +6960,10 @@ impl SimulationSession {
                     .pet_mode = mode;
                 vec![ServerPacket::ChangePMode { mode }]
             }
+            // Crystal `MirConnection.TownRevive` (MirConnection.cs:505 -> 1643):
+            // `Player.TownRevive()` respawns a dead player at their bind/town point
+            // and replies with `S.Revived` + broadcast `S.ObjectRevived`.
+            ClientPacket::TownRevive => town_revive_packets(self.app.world_mut()),
             ClientPacket::ReplaceWedRing { .. }
             | ClientPacket::TeleportToNpc { .. }
             | ClientPacket::SearchMap { .. }
@@ -6955,7 +6971,6 @@ impl SimulationSession {
             | ClientPacket::Observe { .. }
             | ClientPacket::ChangeTrade { .. }
             | ClientPacket::BuyItemBack { .. }
-            | ClientPacket::TownRevive
             | ClientPacket::RequestUserName { .. }
             | ClientPacket::RequestChatItem { .. }
             | ClientPacket::AcceptReincarnation

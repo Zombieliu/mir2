@@ -1212,9 +1212,10 @@ async function combatSurvival(ctx) {
   });
 
   // Beat 4 — death → revive flow. @DIE is ungated (gm_commands.rs:1147) so death is
-  // deterministic; revival is the gap: TownRevive has no gateway BrowserCommand / UI
-  // and @REVIVE is GM-gated. Assert the LOGICAL death, then probe revive and record
-  // whatever path (if any) brings the player back.
+  // deterministic. Revival now has a player-facing path: the `townRevive` command
+  // (BrowserCommand -> ClientPacket::TownRevive -> PlayerObject.TownRevive parity)
+  // restores HP/MP, respawns at the bind/town point, and replies `Revived`. Assert
+  // the LOGICAL death, then drive `townRevive` and confirm the player comes back.
   await runBeat(ctx, "death + revive flow", async (beat) => {
     const before = await readGameState(client);
     beat.before = { playerHp: before.playerHp, selfDead: before.selfDead, map: before.mapFileName, pos: before.player };
@@ -1239,29 +1240,32 @@ async function combatSurvival(ctx) {
     }
     ctx.log(`  · player dead: playerHp=${dead.playerHp} selfDead=${dead.selfDead}`);
 
-    // Attempt revive. There is no player-facing revive control (TownRevive ClientPacket
-    // has no gateway BrowserCommand and no UI; gateway web.rs has no revive command),
-    // so the only client-reachable revive is the GM @REVIVE command.
-    await gmCommand(client, "@REVIVE").catch(() => {});
-    const revived = await waitUntilSoft(
-      client,
-      "(() => { const s = window.__mir2Stage5?.state; if (!s) return false; const self = (s.entities||[]).find((e)=>e && e.objectId===s.playerObjectId); return (typeof s.playerHp === 'number' && s.playerHp > 0) && !self?.dead; })()",
-      REVIVE_WINDOW_MS,
-    );
+    // Drive the player-facing revive: the `townRevive` command is ungated (Crystal's
+    // TownRevive only requires the player be dead), so it works for any account. A
+    // single send can be missed in a packet flood, so resend until the player is alive.
+    const aliveExpr =
+      "(() => { const s = window.__mir2Stage5?.state; if (!s) return false; const self = (s.entities||[]).find((e)=>e && e.objectId===s.playerObjectId); return (typeof s.playerHp === 'number' && s.playerHp > 0) && !self?.dead; })()";
+    let revived = false;
+    for (let attempt = 0; attempt < 3 && !revived; attempt += 1) {
+      await sendCommand(client, { type: "townRevive" }).catch(() => {});
+      revived = await waitUntilSoft(client, aliveExpr, REVIVE_WINDOW_MS);
+    }
     const after = await readGameState(client);
     beat.afterRevive = { playerHp: after.playerHp, selfDead: after.selfDead, map: after.mapFileName, pos: after.player };
+    // Single-map world: revive respawns at the bind/town spawn within the same map,
+    // so record the position change rather than a map change.
     beat.movedToTown = before.mapFileName !== after.mapFileName;
+    beat.respawnPos = after.player;
     if (revived) {
-      ctx.score("deathRevive", "pass", `player revived (playerHp ${dead.playerHp} → ${after.playerHp}, dead → alive) via @REVIVE`);
+      ctx.score("deathRevive", "pass", `player revived in town via townRevive (playerHp ${dead.playerHp} → ${after.playerHp}, dead → alive, respawn @ ${after.player ? `(${after.player.x},${after.player.y})` : "?"})`);
     } else {
-      // Logical death works; the revive flow is the known gap.
-      ctx.score("deathRevive", "gap", "player dies, but no client-reachable revive flow restored HP (TownRevive not wired; @REVIVE GM-gated)");
+      ctx.score("deathRevive", "fail", "townRevive did not restore the player (still dead after the revive window)");
       ctx.addIssue({
         category: "survival",
-        severity: "medium",
+        severity: "high",
         beat: beat.id,
-        summary: "death works but there is no player-facing revive/town control — TownRevive ClientPacket has no gateway BrowserCommand or UI, and @REVIVE is GM-gated, so a dead player cannot revive through the client",
-        detail: { afterDeath: beat.afterDeath, afterRevive: beat.afterRevive, note: "Logical death verified; revive is a wiring gap, not a combat-numerics failure." },
+        summary: "death works but the townRevive command did not bring the player back — the wired revive path failed to restore HP / clear the dead state",
+        detail: { afterDeath: beat.afterDeath, afterRevive: beat.afterRevive },
       });
     }
   });
