@@ -25,6 +25,7 @@
     "verify:crystal-map-pack": "node ./scripts/verify-crystal-map-pack.mjs",
     "qa:capture-map-monsters": "node ./scripts/capture-production-map-monsters.mjs",
     "qa:playthrough": "node ./scripts/qa-playthrough.mjs",
+    "qa:magic": "node ./scripts/qa-magic-skills.mjs",
     "qa:economy": "node ./scripts/qa-economy.mjs",
     "qa:quests": "node ./scripts/qa-quests.mjs",
     "qa:web3": "node ./scripts/qa-web3.mjs",
