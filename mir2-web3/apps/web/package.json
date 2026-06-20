@@ -28,6 +28,7 @@
     "qa:economy": "node ./scripts/qa-economy.mjs",
     "qa:quests": "node ./scripts/qa-quests.mjs",
     "qa:web3": "node ./scripts/qa-web3.mjs",
+    "qa:social": "node ./scripts/qa-social.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
     "smoke:cache-metrics": "node ./scripts/smoke-cache-metrics.mjs",
     "smoke:bevy-runtime-backends": "node ./scripts/smoke-bevy-runtime-backends.mjs",
