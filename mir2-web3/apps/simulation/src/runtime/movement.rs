@@ -6,8 +6,8 @@ use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket, UserLocat
 use super::combat::crystal_player_movement_blocked_by_status;
 use super::components::{
     current_player_is_dead, current_player_object_id, entity_facing, entity_position,
-    player_entity, Facing, GroundDrop, Hero, MonsterAgent, MonsterAiState, Npc, ObjectId, Position,
-    RemotePlayer, SelfPlayer,
+    player_entity, Facing, GroundDrop, Hero, MonsterAgent, MonsterAiState, Npc, ObjectId,
+    PlayerVitals, Position, RemotePlayer, SelfPlayer,
 };
 use super::map::{
     apply_current_player_position_map_transfer, is_current_map_transfer_source,
@@ -15,6 +15,7 @@ use super::map::{
 };
 use super::monster_ai::advance_world;
 use super::npc::dismiss_dialog;
+use super::packets::{object_health_info_for_entity, object_revived_info_for_entity};
 use super::pathfind;
 use super::resources::{
     crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
@@ -210,6 +211,70 @@ pub(super) fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
     vec![ServerPacket::UserLocation {
         location: current_location(world),
     }]
+}
+
+/// Crystal `PlayerObject.TownRevive` (PlayerObject.cs:1392): a dead player
+/// requests respawn at their bind point. The client sends this after the death
+/// prompt (`C.TownRevive`, dispatched from `MirConnection.cs:505`). Crystal moves
+/// the player to `BindMapIndex`/`BindLocation`, restores HP/MP, then enqueues
+/// `S.Revived` to self and broadcasts `S.ObjectRevived { Effect = true }`.
+///
+/// The single-session world binds to the configured spawn (its town/safe zone),
+/// so we restore vitals, teleport to spawn (Crystal's `MapChanged` becomes a
+/// same-map `UserLocation` here), and emit the same revive packets the client
+/// animates. No-op when the player is not dead (mirrors `if (!Dead) return;`).
+pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
+    if !current_player_is_dead(world) {
+        return Vec::new();
+    }
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
+
+    // Crystal restores `Stats[HP]`/`Stats[MP]`; HP floors at 1 so the revived
+    // player is never re-flagged dead by a zero-HP read.
+    let revived_vitals = {
+        let mut entry = world.entity_mut(player);
+        let Some(mut vitals) = entry.get_mut::<PlayerVitals>() else {
+            return Vec::new();
+        };
+        vitals.hp = vitals.max_hp.max(1);
+        vitals.mp = vitals.max_mp;
+        *vitals
+    };
+
+    // Teleport to the bind/town location (the configured spawn point).
+    let spawn = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .spawn
+        .clone();
+    world
+        .entity_mut(player)
+        .insert((Position(spawn.clone()), Facing(MirDirection::Down)));
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = revived_vitals;
+        runtime.player_position = spawn;
+        runtime.player_direction = MirDirection::Down;
+    }
+
+    // Snap the player to the bind location, clear the dead flag (S.Revived), and
+    // play the revive effect (broadcast S.ObjectRevived). ObjectHealth refreshes
+    // the restored HP/MP bar.
+    let mut packets = vec![
+        ServerPacket::UserLocation {
+            location: current_location(world),
+        },
+        ServerPacket::Revived,
+    ];
+    if let Some(info) = object_revived_info_for_entity(world, player, true) {
+        packets.push(ServerPacket::ObjectRevived { info });
+    }
+    if let Some(info) = object_health_info_for_entity(world, player, 0) {
+        packets.push(ServerPacket::ObjectHealth { info });
+    }
+    packets
 }
 
 pub(super) fn crystal_random_same_map_teleport_packets(
