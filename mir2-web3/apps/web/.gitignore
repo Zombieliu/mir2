@@ -7,3 +7,7 @@ public/generated/map-atlas/
 # Player-QA playthrough run artifacts (reports + screenshot timelines from
 # `npm run qa:playthrough`). Run-specific; not source.
 docs/generated/player-qa/
+
+# Economy-QA run artifacts (reports + screenshot timelines from `npm run
+# qa:economy`). Run-specific; not source.
+docs/generated/economy-qa/
