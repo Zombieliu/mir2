@@ -23011,6 +23011,86 @@ fn gm_revive_restores_player_vitals() {
 }
 
 #[test]
+fn gm_die_emits_self_death_and_object_died() {
+    // Crystal `Die()` enqueues `S.Death` to self (the revive-prompt signal) before
+    // broadcasting `S.ObjectDied` (PlayerObject.cs:649-650). @DIE is ungated, so this
+    // is also the death path the combat/survival QA loop exercises.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let packets = gm_chat(&mut session, "@DIE");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Death { .. })));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == player_id
+    )));
+}
+
+#[test]
+fn town_revive_respawns_dead_player_at_bind_point() {
+    // Crystal `PlayerObject.TownRevive` (PlayerObject.cs:1392): a dead player respawns
+    // at the bind/town point with restored vitals, replying `S.Revived` + broadcast
+    // `S.ObjectRevived`. The single-map world binds to the configured spawn.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+    let spawn = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .spawn
+        .clone();
+
+    // Walk away from the bind point, then die.
+    set_player_position(
+        &mut session,
+        Point {
+            x: spawn.x + 4,
+            y: spawn.y + 3,
+        },
+    );
+    set_current_player_hp(&mut session, 0);
+    assert_ne!(player_position(&session), spawn);
+
+    let packets = session.handle_packet(ClientPacket::TownRevive);
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Revived)));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == player_id && info.effect
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+
+    // HP restored, dead flag cleared, respawned back at the bind/town point.
+    let snapshot = session.world_snapshot();
+    assert!(snapshot.player_hp.unwrap_or(0) > 0);
+    assert_eq!(player_position(&session), spawn);
+    let self_entity = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.object_id == player_id)
+        .expect("self entity snapshot");
+    assert!(!self_entity.dead);
+}
+
+#[test]
+fn town_revive_is_noop_for_living_player() {
+    // Crystal `if (!Dead) return;` — a living player's TownRevive does nothing.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let packets = session.handle_packet(ClientPacket::TownRevive);
+    assert!(packets.is_empty());
+}
+
+#[test]
 fn gm_setlight_emits_personal_light_player_update() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });

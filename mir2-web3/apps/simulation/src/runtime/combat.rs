@@ -40,7 +40,7 @@ use super::movement::{
 use super::npc::dismiss_dialog;
 use super::packets::{
     object_died_info_for_entity, object_health_info_for_entity, object_mana_info_for_entity,
-    object_struck_packet, player_struck_packet, system_message_key,
+    object_struck_packet, player_struck_packet, self_death_packet, system_message_key,
     visible_object_bundle_for_entity,
 };
 use super::quests::advance_crystal_quest_kill;
@@ -270,6 +270,11 @@ pub(super) fn apply_damage_to_current_player(
 
     let died = was_alive && updated_vitals.hp <= 0;
     if died {
+        // Crystal `Die()` enqueues `S.Death` to self before broadcasting `S.ObjectDied`
+        // (PlayerObject.cs:649-650); the self packet drives the client revive prompt.
+        if let Some(packet) = self_death_packet(world, player) {
+            packets.push(packet);
+        }
         if let Some(info) = object_died_info_for_entity(world, player, 0) {
             packets.push(ServerPacket::ObjectDied { info });
         }
