@@ -585,6 +585,7 @@ impl ReconnectSessionStore {
 enum BrowserCommand {
     ClientVersion,
     Disconnect,
+    TownRevive,
     Login {
         #[serde(alias = "accountId")]
         account_id: String,
@@ -2572,6 +2573,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             version_hash: Vec::new(),
         })),
         BrowserCommand::Disconnect => Ok(SessionAction::Packet(ClientPacket::Disconnect)),
+        BrowserCommand::TownRevive => Ok(SessionAction::Packet(ClientPacket::TownRevive)),
         BrowserCommand::Login {
             account_id,
             password,
@@ -4840,6 +4842,22 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "kind": info.kind
             }
         }),
+        // Self-death signal (Crystal `S.Death`): the client marks the player dead
+        // and surfaces the revive-in-town prompt. Distinct from `ObjectDied` (others).
+        ServerPacket::Death {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "Death",
+            "payload": {
+                "location": {
+                    "x": location.x,
+                    "y": location.y
+                },
+                "direction": format!("{:?}", direction)
+            }
+        }),
         ServerPacket::GainHeroExperience { amount } => json!({
             "type": "packet",
             "packet": "GainHeroExperience",
@@ -4881,6 +4899,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "objectId": info.object_id,
                 "effect": info.effect
             }
+        }),
+        // Self-revive reply to `TownRevive` (Crystal `S.Revived`): clears the dead
+        // state and dismisses the revive prompt; the player has respawned in town.
+        ServerPacket::Revived => json!({
+            "type": "packet",
+            "packet": "Revived",
+            "payload": {}
         }),
         ServerPacket::ObjectEffect { info } => json!({
             "type": "packet",

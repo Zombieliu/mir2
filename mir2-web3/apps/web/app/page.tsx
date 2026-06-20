@@ -119,6 +119,7 @@ import {
   CRYSTAL_RUN_PRIME_MS,
   MOVEMENT_PENDING_MAX_AGE_MS,
   canSendMovement,
+  clampMovementLeadToCap,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
   movementPointMatches,
@@ -1503,6 +1504,9 @@ export default function HomePage() {
   const [showHelp, setShowHelp] = useState(false);
   const [showHotkeys, setShowHotkeys] = useState(false);
   const [showChatSettings, setShowChatSettings] = useState(false);
+  // Death → town-revive prompt: tracks that we've sent `townRevive` so the overlay
+  // button reads "Reviving…" until the server's `Revived` reply lands and clears it.
+  const [reviveRequested, setReviveRequested] = useState(false);
   const [debugSnapshotNotice, setDebugSnapshotNotice] = useState<DebugSnapshotUploadNotice | null>(null);
   useEffect(() => {
     let clearTimer = 0;
@@ -3321,12 +3325,21 @@ export default function HomePage() {
 
     let next = candidate;
     if (next) {
-      const lead = Math.max(Math.abs(next.x - serverSelf.x), Math.abs(next.y - serverSelf.y));
-      if (
-        lead > MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES ||
-        !crystalMovementCandidateNotBehindServer(serverSelf, next, next.direction ?? serverSelf.direction)
-      ) {
+      if (!crystalMovementCandidateNotBehindServer(serverSelf, next, next.direction ?? serverSelf.direction)) {
+        // The candidate has fallen behind the authoritative tile (stale / wrong
+        // direction) — drop it so the sprite tracks the server.
         next = null;
+      } else {
+        const lead = Math.max(Math.abs(next.x - serverSelf.x), Math.abs(next.y - serverSelf.y));
+        if (lead > MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES) {
+          // The prediction briefly outran the server past the render lead cap (a
+          // long/dropped frame or a run/walk-resolution mismatch advanced the
+          // predicted tile too far). HARD-discarding here would snap the sprite all
+          // the way back to the server tile — the visible "overshoot then snap".
+          // Clamp the rendered tile to the cap along the travel vector instead so it
+          // eases forward and the server catches up under it with no backward jump.
+          next = clampMovementLeadToCap(serverSelf, next, MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES);
+        }
       }
     }
 
@@ -7319,6 +7332,9 @@ export default function HomePage() {
         appendLog(t("ui.poisoned", [], "You are poisoned."), "system");
         break;
       case "Death":
+        // Crystal `S.Death` (self only): mark the player dead and surface the
+        // revive-in-town prompt. Reset any stale request flag so the button is live.
+        setReviveRequested(false);
         updateWorld((current) => ({
           ...current,
           playerHp: 0,
@@ -7332,6 +7348,9 @@ export default function HomePage() {
         }));
         break;
       case "Revived":
+        // Crystal `S.Revived`: the town-revive request succeeded — restore HP and
+        // dismiss the prompt (the overlay clears once the player is no longer dead).
+        setReviveRequested(false);
         updateWorld((current) => ({
           ...current,
           playerHp:
@@ -11294,7 +11313,92 @@ export default function HomePage() {
         onNonceChange={setOnchainNonce}
       />
     ) : null}
+    {screen === "game" && (self?.dead === true || world.playerHp === 0) ? (
+      <DeathReviveOverlay
+        title={t("ui.death.title", [], "You have died")}
+        message={t("ui.death.message", [], "Return to town to continue your journey.")}
+        reviveLabel={t("ui.death.revive", [], "Revive in town")}
+        revivingLabel={t("ui.death.reviving", [], "Reviving…")}
+        busy={reviveRequested}
+        onRevive={() => {
+          if (send({ type: "townRevive" })) setReviveRequested(true);
+        }}
+      />
+    ) : null}
     </>
+  );
+}
+
+// Death → town-revive overlay (mirrors Crystal's `GameScene` DiedTip Yes/No box,
+// GameScene.cs:1271-1287). Shown while the self player is dead; the button sends the
+// `townRevive` command and the server's `Revived` reply dismisses it (HP restored,
+// respawned at the bind/town point). Presentational only — all state lives in page.
+function DeathReviveOverlay({
+  title,
+  message,
+  reviveLabel,
+  revivingLabel,
+  busy,
+  onRevive,
+}: {
+  title: string;
+  message: string;
+  reviveLabel: string;
+  revivingLabel: string;
+  busy: boolean;
+  onRevive: () => void;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 4000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0, 0, 0, 0.62)",
+      }}
+    >
+      <div
+        style={{
+          minWidth: 280,
+          maxWidth: 360,
+          padding: "22px 26px",
+          textAlign: "center",
+          border: "1px solid #5a4326",
+          borderRadius: 6,
+          background: "linear-gradient(180deg, #2a2118, #18120c)",
+          boxShadow: "0 8px 28px rgba(0, 0, 0, 0.6)",
+          color: "#e8d9b5",
+        }}
+      >
+        <div style={{ fontSize: 20, fontWeight: 700, color: "#d9484b", marginBottom: 8 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 18, color: "#c9b890" }}>{message}</div>
+        <button
+          type="button"
+          onClick={onRevive}
+          disabled={busy}
+          data-testid="town-revive-button"
+          style={{
+            width: "100%",
+            padding: "10px 0",
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: busy ? "default" : "pointer",
+            color: busy ? "#9b8a63" : "#1a130b",
+            background: busy ? "#4a3a22" : "linear-gradient(180deg, #e8c873, #c79a3e)",
+            border: "1px solid #5a4326",
+            borderRadius: 4,
+          }}
+        >
+          {busy ? revivingLabel : reviveLabel}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -12319,9 +12423,20 @@ function chooseCrystalSelfRenderPosition(
     .filter(
       (candidate): candidate is PredictedPlayerMotion =>
         candidate !== null &&
-        crystalMovementCandidateNotBehindServer(serverSelf, candidate, candidate.direction) &&
-        Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y)) <=
-          MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES,
+        crystalMovementCandidateNotBehindServer(serverSelf, candidate, candidate.direction),
+    )
+    // Clamp a candidate that has briefly outrun the server past the render lead cap
+    // to the cap boundary (along its travel vector) instead of dropping it. Filtering
+    // every over-cap candidate out makes this return null, and the renderer then falls
+    // back to the authoritative server tile — the visible self-move "overshoot then
+    // snap". Clamping keeps the sprite pinned at the cap so it eases forward as the
+    // server catches up, with no backward jump. In-cap candidates pass through
+    // untouched, so normal movement is unaffected.
+    .map((candidate) =>
+      Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y)) <=
+      MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES
+        ? candidate
+        : clampMovementLeadToCap(serverSelf, candidate, MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES),
     )
     .reduce<PredictedPlayerMotion | null>((best, candidate) => {
       if (!best) return candidate;
