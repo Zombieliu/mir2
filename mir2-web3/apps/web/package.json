@@ -25,6 +25,7 @@
     "verify:crystal-map-pack": "node ./scripts/verify-crystal-map-pack.mjs",
     "qa:capture-map-monsters": "node ./scripts/capture-production-map-monsters.mjs",
     "qa:playthrough": "node ./scripts/qa-playthrough.mjs",
+    "qa:web3": "node ./scripts/qa-web3.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
     "smoke:cache-metrics": "node ./scripts/smoke-cache-metrics.mjs",
     "smoke:bevy-runtime-backends": "node ./scripts/smoke-bevy-runtime-backends.mjs",
