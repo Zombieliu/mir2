@@ -40,7 +40,11 @@
 //   Quest commands are NOT in should_send_world_snapshot_for_action's exclusion
 //   list (apps/gateway/src/web.rs), so the gateway pushes a fresh world snapshot
 //   (with the updated gold + inventory) right after accept/finish — that is how
-//   the reward becomes visible client-side in state.gold / state.inventoryItems.
+//   the reward becomes visible client-side in state.gold / state.inventoryItems /
+//   state.beltItems. NOTE: Crystal auto-routes Potion/Scroll/Amulet rewards into
+//   the belt region of the inventory (AddItem, HumanObject.cs:1596); the web port
+//   surfaces that as the separate state.beltItems, so reward verification here
+//   counts the player's whole carried possession (bag + belt), not just the bag.
 //
 // ENV — needs a COMPLETABLE quest reachable on the local stack:
 //   * Crystal quest #1 (the spawn-town "assistant" -> "craft lady" delivery
@@ -312,10 +316,13 @@ async function readGameState(client) {
       const npcs = entities.filter((e) => e && e.kind === "npc");
       const questLog = Array.isArray(state.questLog) ? state.questLog : [];
       const inv = Array.isArray(state.inventoryItems) ? state.inventoryItems : [];
+      const belt = Array.isArray(state.beltItems) ? state.beltItems : [];
       const dialog = state.activeNpcDialog ?? null;
       const bodyText = document.body?.innerText ?? "";
       let invQty = 0;
       for (const it of inv) invQty += Number(it?.quantity ?? it?.count ?? 1) || 0;
+      let beltQty = 0;
+      for (const it of belt) beltQty += Number(it?.quantity ?? it?.count ?? 1) || 0;
       const questWindow = document.querySelector("[data-quest-stage-filter]");
       return {
         capturedAt: Date.now(),
@@ -334,6 +341,8 @@ async function readGameState(client) {
         npcs: npcs.slice(0, 40).map((e) => ({ objectId: e.objectId, name: e.name ?? null, x: e.x, y: e.y })),
         inventoryCount: inv.length,
         inventoryQty: invQty,
+        beltCount: belt.length,
+        beltQty: beltQty,
         questLogCount: questLog.length,
         questLog: questLog.slice(0, 40).map((q) => ({
           questId: q?.questId ?? null,
@@ -620,11 +629,23 @@ function latestWorldSnapshotSince(client, sinceTs) {
   return latest;
 }
 
+// Crystal stores the belt as the top BeltSize slots of the SINGLE inventory array
+// (Info.Inventory), and GainItem -> AddItem auto-routes Potions/Scrolls/Amulets into
+// that belt region (Crystal/Server/MirObjects/HumanObject.cs:1596). The web port
+// splits that one array into separate `inventoryItems` (bag) + `beltItems` (belt)
+// fields, both rendered for the player (the belt bar is the belt-dialog,
+// original-client-panels.tsx). A reward potion like quest #1's (HP)DrugSmall is
+// ItemType.Potion, so the server auto-routes it into the belt and the snapshot
+// carries it under `beltItems`, NOT `inventoryItems`. "Did the reward land" must
+// therefore look at the player's WHOLE carried possession (bag + belt), or a
+// belt-routed reward false-negatives as "not delivered".
 async function inventorySignature(client) {
   const sig = await client.evaluate(`
     (() => {
-      const inv = window.__mir2Stage5?.state?.inventoryItems;
-      const items = Array.isArray(inv) ? inv : [];
+      const state = window.__mir2Stage5?.state ?? {};
+      const bag = Array.isArray(state.inventoryItems) ? state.inventoryItems : [];
+      const belt = Array.isArray(state.beltItems) ? state.beltItems : [];
+      const items = [...bag, ...belt];
       const byKey = {};
       let totalQty = 0;
       for (const it of items) {
@@ -633,10 +654,10 @@ async function inventorySignature(client) {
         byKey[key] = (byKey[key] ?? 0) + qty;
         totalQty += qty;
       }
-      return { count: items.length, totalQty, byKey };
+      return { count: items.length, bagCount: bag.length, beltCount: belt.length, totalQty, byKey };
     })()
   `);
-  return sig ?? { count: 0, totalQty: 0, byKey: {} };
+  return sig ?? { count: 0, bagCount: 0, beltCount: 0, totalQty: 0, byKey: {} };
 }
 
 // Diff two inventory signatures into a list of newly-gained {key, delta}.
@@ -653,13 +674,36 @@ function inventoryGains(before, after) {
 
 function parseRewardExpectation(rewardPreview) {
   const t = String(rewardPreview ?? "");
+  // crystal_quest_reward_preview (apps/simulation/src/runtime/quests.rs:203)
+  // renders fixed rewards as "{name} x{count}" and select rewards as
+  // "Choose: a / b / c". Pull the item NAMES so we can corroborate the promised
+  // item against the authoritative post-finish snapshot by name.
+  const itemNames = [];
+  for (const m of t.matchAll(/([^,]+?)\s+x\d+/gi)) itemNames.push(m[1].trim());
+  const choose = /choose:\s*(.+)$/i.exec(t);
+  if (choose) for (const name of choose[1].split("/")) itemNames.push(name.trim());
   return {
     text: t,
     gold: /gold/i.test(t),
     exp: /exp/i.test(t),
     credit: /credit/i.test(t),
     item: /\bx\d+\b|choose:/i.test(t),
+    itemNames: itemNames.filter(Boolean),
   };
+}
+
+// Does the authoritative post-finish worldSnapshot (server truth) carry a promised
+// reward item anywhere in the player's carried possession (bag + belt)? Crystal
+// auto-routes Potion/Scroll/Amulet rewards into the belt, so both arrays matter.
+function snapshotContainsRewardItem(snap, reward) {
+  if (!snap || !Array.isArray(reward?.itemNames) || reward.itemNames.length === 0) return false;
+  const items = [
+    ...(Array.isArray(snap.inventoryItems) ? snap.inventoryItems : []),
+    ...(Array.isArray(snap.beltItems) ? snap.beltItems : []),
+  ];
+  return reward.itemNames.some((name) =>
+    items.some((it) => String(it?.name ?? "").toLowerCase() === name.toLowerCase()),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1128,16 +1172,41 @@ async function questJourney(ctx) {
     const creditDelta =
       typeof creditAfter === "number" && typeof creditBefore === "number" ? creditAfter - creditBefore : null;
     // Authoritative server truth for the reward: the post-finish worldSnapshot's
-    // own inventory/gold (independent of the React client state).
+    // own inventory/gold (independent of the React client state). Count bag + belt:
+    // a Potion/Scroll reward auto-routes into the belt (see inventorySignature).
     const snapAfter = latestWorldSnapshotSince(client, wsBefore);
-    const snapInventoryCount =
+    const snapBagCount =
       snapAfter && Array.isArray(snapAfter.inventoryItems) ? snapAfter.inventoryItems.length : null;
+    const snapBeltCount =
+      snapAfter && Array.isArray(snapAfter.beltItems) ? snapAfter.beltItems.length : null;
+    const snapInventoryCount =
+      snapBagCount === null && snapBeltCount === null ? null : (snapBagCount ?? 0) + (snapBeltCount ?? 0);
     const snapGold = snapAfter && typeof snapAfter.gold === "number" ? snapAfter.gold : null;
+    // Authoritative completion + reward truth from the WS layer (CompleteQuest frame
+    // + the post-finish snapshot's own questLog/possession). The React client state
+    // (`after` / `gains`) can lag the snapshot merge — especially right after the
+    // turn-in NPC's map transfer churns snapshots — so a verdict built only on it
+    // false-negatives a reward that the server actually granted. Prefer WS truth and
+    // fall back to client state.
+    const snapStage =
+      snapAfter && Array.isArray(snapAfter.questLog)
+        ? snapAfter.questLog.find((q) => Number(q?.questId) === Number(arc.questId))?.stage ?? null
+        : null;
+    const completedAuthoritative = completeFrame || /completed/i.test(String(snapStage ?? ""));
+    const stillActive = afterCls.active && !completedAuthoritative;
+    const snapHasPromisedItem = snapshotContainsRewardItem(snapAfter, reward);
+    // The reward landed if the client gained it OR the authoritative snapshot shows
+    // it by name, OR the snapshot's total carried possession (bag + belt) grew.
+    const itemLandedAuthoritative =
+      snapHasPromisedItem ||
+      (snapInventoryCount != null && snapInventoryCount > (invBefore?.count ?? 0));
 
     beat.finish = {
       completeQuestFrameSeen: completeFrame,
       stageAfter: after?.stage ?? "(removed)",
-      leftActiveLog: !afterCls.active,
+      snapshotStageAfter: snapStage,
+      completedAuthoritative,
+      leftActiveLog: !stillActive,
       goldBefore,
       goldAfter,
       goldDelta,
@@ -1145,12 +1214,15 @@ async function questJourney(ctx) {
       creditAfter,
       creditDelta,
       inventoryGains: gains,
+      snapshotHasPromisedItem: snapHasPromisedItem,
       snapshotInventoryCount: snapInventoryCount,
+      snapshotBagCount: snapBagCount,
+      snapshotBeltCount: snapBeltCount,
       snapshotGold: snapGold,
       rewardExpectation: reward,
     };
     ctx.log(
-      `  finish: completeFrame=${completeFrame} stage=${after?.stage} goldΔ=${goldDelta ?? "—"} creditΔ=${creditDelta ?? "—"} items+=${gains.length}`,
+      `  finish: completeFrame=${completeFrame} stage=${after?.stage}/snap=${snapStage ?? "—"} goldΔ=${goldDelta ?? "—"} creditΔ=${creditDelta ?? "—"} items+=${gains.length} snapItem=${snapHasPromisedItem}`,
     );
 
     // (1) Authoritative completion.
@@ -1163,23 +1235,25 @@ async function questJourney(ctx) {
         detail: beat.finish,
       });
     }
-    // (2) Left the active log.
-    if (afterCls.active) {
+    // (2) Left the active log — trust the authoritative completion signal (the
+    // CompleteQuest frame / snapshot stage), not the possibly-lagging React state.
+    if (stillActive) {
       ctx.addIssue({
         category: "quest",
         severity: "high",
         beat: beat.id,
-        summary: `quest ${arc.questId} is still active (${after?.stage}) after FinishQuest — did not leave the active log`,
+        summary: `quest ${arc.questId} is still active (client=${after?.stage}, snapshot=${snapStage ?? "—"}) after FinishQuest — did not leave the active log`,
         detail: beat.finish,
       });
     }
     // (3) Reward landed. Use the quest's own reward preview to set expectations:
-    // a Gold/item reward must be visible client-side (the post-finish snapshot
-    // carries it); an EXP-only reward is not client-readable (state omits
-    // playerExperience) so the CompleteQuest frame is the authority there.
-    const goldLanded = (goldDelta ?? 0) > 0;
+    // a Gold/item reward must reach the player (the post-finish snapshot carries it,
+    // in the bag OR the belt); an EXP-only reward is not client-readable (state omits
+    // playerExperience) so the CompleteQuest frame is the authority there. Each
+    // signal also accepts the authoritative WS snapshot to survive client-merge lag.
+    const goldLanded = (goldDelta ?? 0) > 0 || (snapGold != null && snapGold > (goldBefore ?? 0));
     const creditLanded = (creditDelta ?? 0) > 0;
-    const itemLanded = gains.length > 0;
+    const itemLanded = gains.length > 0 || itemLandedAuthoritative;
     const anyClientReward = goldLanded || creditLanded || itemLanded;
     beat.finish.rewardLandedClientSide = anyClientReward;
     if (reward.gold && !goldLanded) {
@@ -1195,7 +1269,7 @@ async function questJourney(ctx) {
         category: "quest",
         severity: "medium",
         beat: beat.id,
-        summary: `quest ${arc.questId} reward preview promised an item ("${reward.text}") but no inventory item appeared after finish`,
+        summary: `quest ${arc.questId} reward preview promised an item ("${reward.text}") but no bag/belt item appeared after finish`,
         detail: beat.finish,
       });
     } else if (!anyClientReward && completeFrame && !reward.gold && !reward.item && reward.exp) {
@@ -1216,8 +1290,13 @@ async function questJourney(ctx) {
         detail: beat.finish,
       });
     } else if (anyClientReward) {
+      const itemNote = itemLanded
+        ? gains.length > 0
+          ? `${gains.length} item(s)`
+          : "item present in post-finish snapshot (belt/bag)"
+        : null;
       ctx.log(
-        `  ✓ reward landed: ${[goldLanded ? `+${goldDelta} gold` : null, creditLanded ? `+${creditDelta} credit` : null, itemLanded ? `${gains.length} item(s)` : null].filter(Boolean).join(", ")}`,
+        `  ✓ reward landed: ${[goldLanded ? `+${goldDelta ?? snapGold} gold` : null, creditLanded ? `+${creditDelta} credit` : null, itemNote].filter(Boolean).join(", ")}`,
       );
     }
   });

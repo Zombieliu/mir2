@@ -27794,6 +27794,76 @@ fn original_crystal_selected_reward_is_granted_on_finish() {
 }
 
 #[test]
+fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
+    // Crystal quest #1 "Assistant's Request" grants a single FIXED item reward,
+    // (HP)DrugSmall, on hand-in (BichonProvince/BorderVillage/1.txt [@FixedRewards]),
+    // plus 10 EXP and NO gold. (HP)DrugSmall is ItemType.Potion (13), so Crystal's
+    // GainItem -> AddItem auto-routes it into the belt region of the inventory
+    // (Crystal/Server/MirObjects/HumanObject.cs:1596). The web port models the belt
+    // as a separate `belt_items` container, so the reward must land in the player's
+    // carried possession (belt OR bag) — never silently vanish.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let info = super::crystal_quest_info_by_id(1).expect("crystal quest #1 loaded");
+    let fixed = info
+        .rewards_fixed_item
+        .first()
+        .cloned()
+        .expect("quest #1 has a fixed item reward");
+    let reward_name = fixed.item.name.clone();
+    assert_eq!(reward_name, "(HP)DrugSmall");
+    assert_eq!(info.reward_gold, 0, "quest #1 grants no gold");
+
+    // Start from an empty bag + belt so the reward is unambiguous (no stacking with
+    // the seeded starter potions / no pre-existing items masking the grant).
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources.inventory_items.clear();
+        resources.belt_items.clear();
+    }
+
+    super::ensure_runtime_quest(session.app.world_mut(), 1);
+    super::set_quest_stage(session.app.world_mut(), 1, QuestStage::ReadyToTurnIn);
+
+    let packets = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: 1,
+        selected_item_index: -1,
+    });
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
+        )),
+        "FinishQuest must complete quest #1",
+    );
+
+    let snapshot = session.world_snapshot();
+    let in_belt = snapshot
+        .belt_items
+        .iter()
+        .any(|item| item.name == reward_name && item.quantity >= 1);
+    let in_bag = snapshot
+        .inventory_items
+        .iter()
+        .any(|item| item.name == reward_name && item.quantity >= 1);
+    assert!(
+        in_belt || in_bag,
+        "fixed-item reward {reward_name} must be granted to the player's possession; \
+         belt={:?} bag={:?}",
+        snapshot.belt_items,
+        snapshot.inventory_items,
+    );
+    // Faithful to Crystal AddItem: a Potion auto-routes into the (empty) belt.
+    assert!(
+        in_belt,
+        "potion reward {reward_name} should auto-route into the belt (Crystal AddItem); \
+         belt={:?} bag={:?}",
+        snapshot.belt_items, snapshot.inventory_items,
+    );
+}
+
+#[test]
 fn drop_gold_packet_silently_rejects_before_start_game() {
     let mut session = SimulationSession::new(SimulationConfig::default());
 
