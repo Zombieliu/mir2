@@ -46,6 +46,27 @@
 // the live entity count. Detectors then flag overshoot/snap events, correlate
 // hitches with movement, and correlate entity count with frame gaps.
 //
+// HELD-KEYBOARD BEAT (added for the "hold a direction → freeze 1-3s → jump 2 tiles"
+// stall, distinct from the overshoot/snap above): before the load phases, the loop
+// holds REAL arrow keys via CDP Input.dispatchKeyEvent (NOT clicks — the click
+// phases below never touch the keyboard held-move → SEND pipeline) in BOTH an open
+// field AND near obstacles (a dynamic swarm, or a cluttered town when GM-spawn is
+// unavailable). It counts move SENDs from ground-truth outbound WS frames and, for a
+// PURE CARDINAL hold, classifies every >= HELD_STALL_FAIL_MS gap by sampling the next
+// tile each ~90ms:
+//   • next tile entity-occupied   → legitimate NPC/monster block (diagnostic)
+//   • correction-block active      → legitimate post-correction / pending settle (diagnostic)
+//   • next tile FREE yet the gap RELEASED into more SENDs → THE BUG (a real wall never
+//     releases; only stale blocked-direction memory frees on its 5.6s TTL timer)
+// Only the last case FAILS, so the guard never cries wolf on a town full of walls and
+// NPCs. The threshold sits above MOVEMENT_PENDING_MAX_AGE_MS (1500ms) and the 400ms
+// correction settle, so a clear-tile freeze that long can only be the memory bug.
+// The stall was sticky blocked-direction route-hint suppression (meant for click-to-
+// TARGET A* detours) bleeding into held DIRECTION intent; the open field stays smooth
+// because nothing there ever seeds that memory — which is exactly why the click loops
+// (which move via clicks, in open fields) missed it. NOTE a reliable POSITIVE catch
+// needs entity transients (the GM swarm); town reproduces it only opportunistically.
+//
 // SCOPE: everything lives in THIS file (no shared edits) so parallel QA sessions
 // never collide. Run on your OWN dev client + the shared gateway:
 //   node ./scripts/qa-load-stress.mjs --headed --baseUrl http://127.0.0.1:3021
@@ -56,6 +77,10 @@
 //   --hog true|false     run the aggressive+hitch phase (default true)
 //   --hogMs 85           base busy-loop length per hog pulse (ms)
 //   --hogPeriodMs 320    gap between hog pulses (ms)
+//   --held true|false    run the held-keyboard movement beat (default true)
+//   --heldHoldMs 5000    per-direction sustained hold (ms)
+//   --heldStallMs 1800   send-gap that counts as a held-direction stall (ms)
+//   --obstacleMap 0      static-obstacle fallback map when GM-spawn is unavailable
 //   --headless           force headless (NOT recommended — SwiftShader false-black)
 //
 // Zero new dependencies; CDP plumbing is the same shape proven in
@@ -126,6 +151,29 @@ const SNAP_BACK_TILES = 2; // render tile jumping backward >= this in one rAF = 
 const HITCH_MS = numberArg(args.hitchMs, 50); // rAF gap >= this = a frame hitch (~3 dropped 60Hz frames)
 const CORRELATION_WINDOW_MS = 250; // a snap within this of a hitch is "explained" by it
 
+// Held-keyboard movement beat (the keyboard SEND pipeline the click phases never
+// touch). A healthy held direction SENDs a walk/run roughly once per
+// CRYSTAL_MOVE_DELAY_MS (=600ms, original-client-movement-controller.ts:38); the
+// 100ms input interval (CRYSTAL_MOVE_INPUT_INTERVAL_MS) just retries until the
+// cadence gate opens. The bug = many seconds of ZERO sends while a key is held
+// even though the path is clear, released as a 2-tile run jump.
+const RUN_HELD_BEAT = booleanArg(args.held, true);
+const HELD_HOLD_MS = numberArg(args.heldHoldMs, 5000); // per-direction sustained hold
+// A gap >= this with the next tile FREE and no correction-block is the bug. 1800ms
+// sits ABOVE MOVEMENT_PENDING_MAX_AGE_MS (1500ms, original-client-movement-
+// controller.ts:41) and the 400ms correction settle, and BELOW the bug's 5.6s
+// blocked-direction TTL — so a clear-tile freeze this long can only be the memory bug.
+const HELD_STALL_FAIL_MS = numberArg(args.heldStallMs, 1800);
+const HELD_OBSTACLE_SPAWN = numberArg(args.heldSpawn, 36); // dynamic-obstacle swarm density (GM @MOB)
+// Static-obstacle fallback when GM-spawn is unavailable: a cluttered town (map 0,
+// Bichon Province) where building edges supply the obstacles the swarm otherwise would.
+const OBSTACLE_FIELD = {
+  map: String(args.obstacleMap ?? "0"),
+  x: numberArg(args.obstacleX, 283),
+  y: numberArg(args.obstacleY, 606),
+  label: "Bichon Province town (0)",
+};
+
 if (!chromePath) throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
 
 let targetAlreadyNavigated = false;
@@ -143,6 +191,10 @@ class CdpClient {
     this.networkFailures = [];
     this.requestUrlById = new Map();
     this.webSocketFramesReceived = [];
+    // Ground-truth SENT frames (the client's outbound BrowserCommands). The held-
+    // keyboard beat counts move SENDs from these — the in-page move-console log is
+    // capped at 100 entries, too small for a multi-second sustained hold.
+    this.webSocketFramesSent = [];
   }
 
   async connect() {
@@ -191,6 +243,9 @@ class CdpClient {
     } else if (m === "Network.webSocketFrameReceived") {
       this.webSocketFramesReceived.push({ payloadData: p.response?.payloadData, at: Date.now() });
       this.webSocketFramesReceived = this.webSocketFramesReceived.slice(-1200);
+    } else if (m === "Network.webSocketFrameSent") {
+      this.webSocketFramesSent.push({ payloadData: p.response?.payloadData, at: Date.now() });
+      this.webSocketFramesSent = this.webSocketFramesSent.slice(-4000);
     }
   }
 
@@ -586,6 +641,283 @@ async function driveGently(client, durationMs, log) {
 }
 
 // ---------------------------------------------------------------------------
+// Held-keyboard movement beat — the keyboard SEND pipeline (original-client-
+// shell.tsx:749/804 → handleViewportDirectionIntent → trySendQueuedCrystalMove),
+// which the click-based phases above NEVER exercise. Drives REAL held arrow keys
+// via CDP Input.dispatchKeyEvent (not clicks) and reads SENDs from ground-truth
+// outbound WS frames. Targets the "hold a direction → freeze 1-3s → jump 2 tiles"
+// stall caused by sticky blocked-direction route-hint suppression bleeding into
+// held-direction intent.
+// ---------------------------------------------------------------------------
+const ARROW_KEYS = {
+  Up: { key: "ArrowUp", code: "ArrowUp", vk: 38 },
+  Right: { key: "ArrowRight", code: "ArrowRight", vk: 39 },
+  Down: { key: "ArrowDown", code: "ArrowDown", vk: 40 },
+  Left: { key: "ArrowLeft", code: "ArrowLeft", vk: 37 },
+};
+
+async function dispatchKey(client, type, k, autoRepeat = false) {
+  await client.send("Input.dispatchKeyEvent", {
+    type, // "keyDown" | "keyUp"
+    key: k.key,
+    code: k.code,
+    windowsVirtualKeyCode: k.vk,
+    nativeVirtualKeyCode: k.vk,
+    autoRepeat,
+    isKeypad: false,
+  });
+}
+
+// Hold ONE arrow key down for holdMs. A single keyDown adds the direction to the
+// shell's held-key set (handleKeyboardMoveDown ignores event.repeat — it relies
+// on the in-page 100ms interval to drive held SENDs), so keeping the key down
+// without a keyUp is a faithful "key held". Periodic autoRepeat keydowns mirror
+// the OS key-repeat the flight recorder captured (no behavioural effect, just
+// realism + a guard if future code ever reads event.repeat). `onSample` is polled
+// during the hold so the caller can watch the server tile advance.
+async function holdArrowKey(client, dirName, holdMs, onSample) {
+  const k = ARROW_KEYS[dirName];
+  if (!k) throw new Error(`unknown arrow direction ${dirName}`);
+  // Keyboard movement is ignored while a text input is focused
+  // (keyboardInputTargetIsEditable, original-client-shell.tsx:750) — make sure none is.
+  await client.evaluate("(() => { const a = document.activeElement; if (a && typeof a.blur === 'function') a.blur(); return true; })()");
+  await dispatchKey(client, "keyDown", k, false);
+  const deadline = Date.now() + holdMs;
+  let nextRepeat = Date.now() + 200;
+  let nextSample = Date.now();
+  try {
+    while (Date.now() < deadline) {
+      const now = Date.now();
+      if (now >= nextRepeat) {
+        // The shell ignores event.repeat (it drives held SENDs from its 100ms
+        // interval), so a single keyDown already counts as "held"; the sparse
+        // repeats just keep the synthetic input shaped like real OS key-repeat.
+        await dispatchKey(client, "keyDown", k, true);
+        nextRepeat = now + 200;
+      }
+      if (onSample && now >= nextSample) {
+        await onSample();
+        nextSample = now + 90; // dense enough to catch an NPC blocking the next tile mid-gap
+      }
+      await delay(15);
+    }
+  } finally {
+    await dispatchKey(client, "keyUp", k, false);
+  }
+}
+
+// Extract the MOVE sends (walk/run/turn BrowserCommands) from the ground-truth
+// outbound WS frames within [tStart, tEnd]. keepAlive/tick/chat frames are ignored.
+function moveSendsInWindow(framesSent, tStart, tEnd) {
+  const sends = [];
+  for (const f of framesSent ?? []) {
+    if (typeof f.at !== "number" || f.at < tStart || f.at > tEnd) continue;
+    let type = null;
+    let direction = null;
+    try {
+      const o = JSON.parse(f.payloadData);
+      type = o?.type;
+      direction = o?.direction ?? null;
+    } catch {
+      continue;
+    }
+    if (type === "walk" || type === "run" || type === "turn") sends.push({ at: f.at, type, direction });
+  }
+  sends.sort((a, b) => a.at - b.at);
+  return sends;
+}
+
+// In-page sampler for one held direction: reads the authoritative server tile
+// (entities[playerObjectId]), whether the NEXT tile in the held direction is
+// occupied by another live entity, and the remaining correction-block. Sampled
+// densely during the hold so each stall can be attributed.
+function heldSampleExpr(dirName) {
+  const D = { Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] }[dirName] ?? [0, 0];
+  return `
+    (() => {
+      const s = window.__mir2Stage5 && window.__mir2Stage5.state;
+      if (!s) return null;
+      const ents = Array.isArray(s.entities) ? s.entities : [];
+      const pid = s.playerObjectId;
+      let srv = null;
+      for (let i = 0; i < ents.length; i++) { if (ents[i] && String(ents[i].objectId) === String(pid)) { srv = ents[i]; break; } }
+      const rnd = s.player || srv;
+      let nextOcc = false;
+      if (srv) {
+        const nx = srv.x + (${D[0]}), ny = srv.y + (${D[1]});
+        for (let i = 0; i < ents.length; i++) { const e = ents[i]; if (e && String(e.objectId) !== String(pid) && !e.dead && e.x === nx && e.y === ny) { nextOcc = true; break; } }
+      }
+      const now = Date.now();
+      return { t: now, sx: srv ? srv.x : null, sy: srv ? srv.y : null, rx: rnd ? rnd.x : null, ry: rnd ? rnd.y : null, nextOcc: nextOcc, blk: Math.max(0, (s.movementInputBlockedUntil || 0) - now) };
+    })()
+  `;
+}
+
+// Classify each SEND gap during a held direction. A "released" gap is one followed
+// by another SEND (the lead gap before the first send, or an internal gap between
+// two sends) — the player froze, then resumed. For a PURE CARDINAL hold this is the
+// clean discriminator, no wall data needed:
+//   • next tile entity-occupied during the gap  → legitimate NPC/monster block
+//   • correction-block active during the gap     → legitimate post-correction settle
+//   • next tile FREE the whole gap, yet it released → THE BUG (a real wall would
+//     never release; only stale blocked-direction memory frees on a TTL timer)
+// The final trailing stand (last send → hold end) is NOT a released gap — it is the
+// legitimate "held into a wall / let go", so a wall at the end never counts as a stall.
+function classifyHeldGaps(sends, trace, tStart, tEnd) {
+  const steps = sends.filter((s) => s.type === "walk" || s.type === "run").length;
+  const turns = sends.filter((s) => s.type === "turn").length;
+  const times = sends.map((s) => s.at);
+  const firstSendMs = times.length ? times[0] - tStart : tEnd - tStart;
+  const trailGapMs = times.length ? tEnd - times[times.length - 1] : tEnd - tStart;
+  const maxInternalGapMs = times.length >= 2 ? Math.max(...times.slice(1).map((t, i) => t - times[i])) : 0;
+
+  const released = [];
+  if (times.length) {
+    released.push({ from: tStart, to: times[0] }); // lead gap (before first send)
+    for (let i = 1; i < times.length; i += 1) released.push({ from: times[i - 1], to: times[i] }); // internal gaps
+  }
+  let bugStallMs = 0;
+  let entityStallMs = 0;
+  let correctionStallMs = 0;
+  let bugStallDetail = null;
+  for (const g of released) {
+    const gapMs = g.to - g.from;
+    if (gapMs < HELD_STALL_FAIL_MS) continue;
+    const inGap = trace.filter((s) => s.t > g.from + 30 && s.t < g.to - 30);
+    if (!inGap.length) continue; // no sampler visibility into this gap → cannot attribute
+    if (inGap.some((s) => s.nextOcc)) {
+      entityStallMs = Math.max(entityStallMs, gapMs);
+    } else if (inGap.some((s) => s.blk > 0)) {
+      correctionStallMs = Math.max(correctionStallMs, gapMs);
+    } else if (gapMs > bugStallMs) {
+      bugStallMs = gapMs;
+      const mid = inGap[Math.floor(inGap.length / 2)];
+      bugStallDetail = { gapMs, atTile: mid ? { x: mid.sx, y: mid.sy } : null };
+    }
+  }
+  return { total: sends.length, steps, turns, firstSendMs, maxInternalGapMs, trailGapMs, bugStallMs, entityStallMs, correctionStallMs, bugStallDetail, traceSamples: trace.length };
+}
+
+// Run a held-key beat: hold each direction in `directions` for holdMs, recording
+// per-direction send cadence + net server-tile progress. Returns the per-direction
+// rows (analysis/verdict is in analyzeHeldBeats).
+async function runHeldKeyBeat(client, { name, env, directions, holdMs }) {
+  console.log(`   · held beat "${name}"${env ? ` [${env}]` : ""}: holding ${directions.join("/")} ${holdMs}ms each`);
+  const rows = [];
+  for (const dir of directions) {
+    await client.evaluate(`window.__mir2LoadProbe?.setPhase(${JSON.stringify(`held:${name}:${dir}`)})`);
+    const startPos = (await readPlayerPos(client)) ?? null;
+    const sampleExpr = heldSampleExpr(dir);
+    const trace = [];
+    let maxSeenProgress = 0;
+    const tStart = Date.now();
+    await holdArrowKey(client, dir, holdMs, async () => {
+      const s = await client.evaluate(sampleExpr).catch(() => null);
+      if (s) {
+        trace.push(s);
+        if (startPos && s.sx != null) maxSeenProgress = Math.max(maxSeenProgress, Math.abs(s.sx - startPos.x), Math.abs(s.sy - startPos.y));
+      }
+    });
+    const tEnd = Date.now();
+    await delay(350); // let the final in-flight send/ack land inside the window
+    const endPos = (await readPlayerPos(client)) ?? null;
+    const sends = moveSendsInWindow(client.webSocketFramesSent, tStart, tEnd + 350);
+    const stats = classifyHeldGaps(sends, trace, tStart, tEnd + 350);
+    const netProgress = startPos && endPos ? Math.max(Math.abs(endPos.x - startPos.x), Math.abs(endPos.y - startPos.y)) : 0;
+    const progressTiles = Math.max(netProgress, maxSeenProgress);
+    rows.push({ dir, holdMs, ...stats, progressTiles, startPos, endPos });
+    console.log(
+      `       ${dir}: steps=${stats.steps} turns=${stats.turns} bugStall=${stats.bugStallMs}ms ` +
+        `entityStall=${stats.entityStallMs}ms corrStall=${stats.correctionStallMs}ms trail=${stats.trailGapMs}ms progress=${progressTiles}t`,
+    );
+    await delay(400); // brief release between directions
+  }
+  return { name, env: env ?? null, directions: rows };
+}
+
+// Both beats over one session: an OPEN field (clean baseline proving the held
+// pipeline emits sends) and a NEAR-OBSTACLE field (the regression target — a
+// dynamic swarm when GM-spawn works, else a cluttered town). Restores the loaded
+// field afterward so the existing overshoot phases run unchanged.
+async function runHeldKeyboardBeats(client, { gmSpawnWorks }) {
+  console.log(`\n▶ held-keyboard movement beats (real CDP arrow keys; the click phases never exercise this path)`);
+  const beats = [];
+
+  // 1) OPEN FIELD — clear the field so every held direction is traversable; the
+  //    held key must emit a continuous cadence of SENDs.
+  await clearMonsters(client);
+  await delay(500);
+  beats.push(await runHeldKeyBeat(client, { name: "open-field", env: field.label, directions: ["Right", "Down"], holdMs: HELD_HOLD_MS }));
+
+  // 2) NEAR OBSTACLES — the bug surfaces only where a held direction passes near
+  //    obstacles, so a transient bump can seed the sticky blocked-direction memory.
+  let env;
+  if (gmSpawnWorks) {
+    const loaded = await ensureMonsterLoad(client, HELD_OBSTACLE_SPAWN, MONSTER_NAME);
+    env = `swarm≈${loaded}`;
+  } else {
+    await transferTo(client, OBSTACLE_FIELD.map, OBSTACLE_FIELD.x, OBSTACLE_FIELD.y);
+    await delay(1500);
+    env = OBSTACLE_FIELD.label;
+  }
+  beats.push(await runHeldKeyBeat(client, { name: "near-obstacles", env, directions: ["Up", "Right", "Down", "Left"], holdMs: HELD_HOLD_MS }));
+
+  // Restore the loaded field for the existing overshoot phases.
+  await clearMonsters(client).catch(() => {});
+  const here = await client.evaluate("window.__mir2Stage5?.state?.mapFileName ?? null").catch(() => null);
+  if (String(here) !== String(field.map)) {
+    await transferTo(client, field.map, field.x, field.y).catch(() => {});
+    await delay(1200);
+  }
+  return analyzeHeldBeats(beats);
+}
+
+// Verdict over the held beats. A FAILURE is a classified BUG stall — a held key
+// that froze >= HELD_STALL_FAIL_MS with the next tile demonstrably FREE (no entity,
+// not correction-blocked) and then RESUMED. Stands attributed to an entity on the
+// next tile, to a server correction, or to a permanent wall (the trailing stand)
+// are legitimate and reported as diagnostics, never failed — so the guard does not
+// cry wolf on a cluttered town. A beat where nothing moved at all is also failed
+// (the held SEND path is dead).
+function analyzeHeldBeats(beats) {
+  const issues = [];
+  const diagnostics = [];
+  for (const beat of beats) {
+    let progressingDirs = 0;
+    for (const r of beat.directions) {
+      if (r.progressTiles >= 1) progressingDirs += 1;
+      if (r.bugStallMs >= HELD_STALL_FAIL_MS) {
+        issues.push(
+          `${beat.name} hold ${r.dir}: held key froze ${r.bugStallMs}ms with the next tile FREE ` +
+            `(no entity, not correction-blocked) then resumed${
+              r.bugStallDetail?.atTile ? ` at (${r.bugStallDetail.atTile.x},${r.bugStallDetail.atTile.y})` : ""
+            } — sticky blocked-direction suppression on held input.`,
+        );
+      }
+      const legit = Math.max(r.entityStallMs, r.correctionStallMs);
+      if (legit >= HELD_STALL_FAIL_MS) {
+        diagnostics.push(
+          `${beat.name} hold ${r.dir}: ${legit}ms stand from ${
+            r.entityStallMs >= r.correctionStallMs ? "an entity blocking the next tile" : "a server correction"
+          } (legitimate — not failed).`,
+        );
+      }
+    }
+    if (progressingDirs === 0) {
+      issues.push(
+        `${beat.name}: held movement made ZERO progress in any of the ${beat.directions.length} direction(s) — ` +
+          `the held-keyboard SEND path drove no movement (regression, or the spot was fully boxed).`,
+      );
+    }
+  }
+  const passed = issues.length === 0;
+  console.log(`   held-keyboard verdict: ${passed ? "PASS ✅" : `FAIL ❌ (${issues.length})`}`);
+  for (const i of issues) console.log(`     - ${i}`);
+  for (const d of diagnostics) console.log(`     · ${d}`);
+  return { passed, issues, diagnostics, beats };
+}
+
+// ---------------------------------------------------------------------------
 // Detectors — run in Node over the drained probe samples + recorder dump.
 // ---------------------------------------------------------------------------
 
@@ -876,7 +1208,7 @@ function buildVerdict(phases) {
 // Report.
 // ---------------------------------------------------------------------------
 async function writeReport(ctx) {
-  const { phases, recording, recorderSource, verdict, allSamples } = ctx;
+  const { phases, recording, recorderSource, verdict, allSamples, heldFindings } = ctx;
   await fs.mkdir(outputDir, { recursive: true });
 
   // Canonical flight-recorder dump (scrubbable in /mir2-replay.html).
@@ -886,10 +1218,11 @@ async function writeReport(ctx) {
     runId,
     capturedAt: new Date().toISOString(),
     field: field.label,
-    config: { totalDurationMs: TOTAL_DURATION_MS, spawnCount: SPAWN_COUNT, monster: MONSTER_NAME, hogPhase: RUN_HOG_PHASE, hogMs: HOG_MS, hogPeriodMs: HOG_PERIOD_MS, hitchMs: HITCH_MS, leadCapTiles: LEAD_CAP_TILES },
+    config: { totalDurationMs: TOTAL_DURATION_MS, spawnCount: SPAWN_COUNT, monster: MONSTER_NAME, hogPhase: RUN_HOG_PHASE, hogMs: HOG_MS, hogPeriodMs: HOG_PERIOD_MS, hitchMs: HITCH_MS, leadCapTiles: LEAD_CAP_TILES, heldBeat: RUN_HELD_BEAT, heldHoldMs: HELD_HOLD_MS, heldStallMs: HELD_STALL_FAIL_MS },
     gmSpawnWorks: ctx.gmSpawnWorks ?? null,
     recorderSource,
     verdict,
+    heldKeyboard: heldFindings ?? null,
     phases,
   };
   await fs.writeFile(path.join(outputDir, "findings.json"), JSON.stringify(findings, null, 2));
@@ -912,6 +1245,35 @@ async function writeReport(ctx) {
   md.push("");
   for (const n of verdict.notes) md.push(`- ${n}`);
   md.push("");
+  if (heldFindings) {
+    md.push(`## Held-keyboard movement (the SEND pipeline the click phases never touch)`);
+    md.push("");
+    md.push(`**Result:** ${heldFindings.passed ? "PASS ✅ — held arrow keys SEND continuously, no multi-second stall" : "FAIL ❌ — held-direction stall detected"}`);
+    md.push("");
+    md.push(`A held direction SENDs a walk/run ~once per ${600}ms (CRYSTAL_MOVE_DELAY_MS); a gap >= ${HELD_STALL_FAIL_MS}ms with no SEND while the path is traversable is the "freeze then jump 2 tiles" stall.`);
+    md.push("");
+    if (heldFindings.issues.length) {
+      for (const i of heldFindings.issues) md.push(`- ⚠️ ${i}`);
+      md.push("");
+    }
+    if (heldFindings.diagnostics?.length) {
+      md.push(`Legitimate stands observed (entity/correction/wall — not failed):`);
+      for (const d of heldFindings.diagnostics) md.push(`- ${d}`);
+      md.push("");
+    }
+    md.push(`A "bug stall" is a freeze with the next tile FREE that then resumes; entity/correction stands and the trailing wall stand are legitimate.`);
+    md.push("");
+    for (const beat of heldFindings.beats) {
+      md.push(`**${beat.name}**${beat.env ? ` — ${beat.env}` : ""}`);
+      md.push("");
+      md.push(`| dir | step SENDs | turn SENDs | bug stall (ms) | entity stall (ms) | corr stall (ms) | trail gap (ms) | progress (tiles) |`);
+      md.push(`|---|---|---|---|---|---|---|---|`);
+      for (const r of beat.directions) {
+        md.push(`| ${r.dir} | ${r.steps} | ${r.turns} | ${r.bugStallMs} | ${r.entityStallMs} | ${r.correctionStallMs} | ${r.trailGapMs} | ${r.progressTiles} |`);
+      }
+      md.push("");
+    }
+  }
   md.push(`## Per-phase`);
   md.push("");
   md.push(`| phase | hog | samples | fps≈ | hitches | snaps | overshoot runs | corrections | maxLead | peakEntities | snap↔hitch | r(ec,dt) |`);
@@ -1258,6 +1620,16 @@ async function main() {
     await client.evaluate("window.__mir2Recorder.start(); window.__mir2LoadProbe.start();");
     console.log(`· recorder armed (${recorderInfo.source}) + probe running`);
 
+    // Held-keyboard movement beats FIRST, on a fresh low-load session — this is the
+    // keyboard SEND pipeline the click-based load phases never exercise. Drain the
+    // probe afterward so these samples do not bleed into the first load phase.
+    let heldFindings = null;
+    let heldSamples = [];
+    if (RUN_HELD_BEAT) {
+      heldFindings = await runHeldKeyboardBeats(client, { gmSpawnWorks });
+      heldSamples = (await client.evaluate("window.__mir2LoadProbe?.drain() ?? []")) ?? [];
+    }
+
     // Load-graded phases over ONE logged-in session — the only thing that
     // changes between them is the load, so a rise in snaps/corrections from one
     // phase to the next names the trigger.
@@ -1268,6 +1640,7 @@ async function main() {
     ];
     const phases = [];
     const allSamples = [];
+    allSamples.push(...heldSamples);
     const phaseMs = Math.floor(TOTAL_DURATION_MS / phaseDefs.length);
     for (const def of phaseDefs) {
       const r = await runPhase(client, def, phaseMs);
@@ -1281,12 +1654,18 @@ async function main() {
     await client.evaluate("window.__mir2Recorder.stop();");
 
     const verdict = buildVerdict(phases);
-    const ctx = { phases, recording, recorderSource: recorderInfo.source, verdict, allSamples, consoleErrors: client.consoleErrors, gmSpawnWorks };
+    const ctx = { phases, recording, recorderSource: recorderInfo.source, verdict, allSamples, consoleErrors: client.consoleErrors, gmSpawnWorks, heldFindings };
     await writeReport(ctx);
 
     console.log(`\n===== VERDICT =====`);
     console.log(`reproduced: ${verdict.reproduced ? "YES" : "no"}  ·  trigger: ${verdict.trigger}`);
     for (const n of verdict.notes) console.log(` - ${n}`);
+    if (heldFindings) {
+      console.log(`held-keyboard movement: ${heldFindings.passed ? "PASS — continuous SENDs, no held-direction stall" : "FAIL — held-direction stall detected"}`);
+      for (const i of heldFindings.issues) console.log(` - ${i}`);
+      // A held-direction stall is a hard regression — surface it via the exit code.
+      if (!heldFindings.passed) process.exitCode = 1;
+    }
     console.log(`\nReport: ${path.join(outputDir, "report.md")}`);
   } catch (error) {
     console.error("qa-load-stress fatal:", error);

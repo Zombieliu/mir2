@@ -910,7 +910,6 @@ const MOVEMENT_DIRECTION_PENDING_MAX = 1;
 const MOVEMENT_ROUTE_REROUTE_AFTER_MS = 900;
 const MOVEMENT_ROUTE_RETRY_DELAY_MS = 120;
 const MOVEMENT_ROUTE_BLOCK_MEMORY_MS = 5600;
-const MOVEMENT_HELD_BLOCKED_DIRECTION_SUPPRESS_MS = 60_000;
 const MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX = 6;
 const MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX_AGE_MS =
   CRYSTAL_ENTITY_MOVE_ACTION_MS * (MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX + 2);
@@ -1389,12 +1388,6 @@ export default function HomePage() {
     direction?: string;
     at: number;
     count: number;
-  } | null>(null);
-  const heldDirectionBlockedUntilRef = useRef<{
-    x: number;
-    y: number;
-    direction: string;
-    until: number;
   } | null>(null);
   const movementPredictionBlockedUntilRef = useRef(0);
   const loadedSceneKeyRef = useRef<string | null>(null);
@@ -3908,7 +3901,6 @@ export default function HomePage() {
       predictedPlayerHoldUntilRef.current = 0;
       movementPredictionBlockedUntilRef.current = 0;
       lastSelfNoProgressAckRef.current = null;
-      heldDirectionBlockedUntilRef.current = null;
       clearCrystalSelfActionFeed();
       clearOutstandingSelfMovementActions();
       clearRecentSelfMovementActionHistory();
@@ -4751,7 +4743,6 @@ export default function HomePage() {
     predictedPlayerHoldUntilRef.current = 0;
     lastSelfMovementAckRef.current = null;
     lastSelfNoProgressAckRef.current = null;
-    heldDirectionBlockedUntilRef.current = null;
     clearCrystalSelfActionFeed();
     clearOutstandingSelfMovementActions();
     clearLocalMovementAnchor();
@@ -4869,12 +4860,18 @@ export default function HomePage() {
       return false;
     }
 
-    const blockedSteps = recentMovementBlockedSteps(movementBlockedStepsRef.current, now);
     const requestedMode = queued.requestedMode;
     const effectiveMode = crystalEffectiveMovementMode(requestedMode, now);
+    // The sticky blocked-direction memory (movementBlockedStepsRef) is route-hint state for
+    // click-to-TARGET A* detours only. A HELD/discrete DIRECTION intent re-attempts the
+    // direct step every input tick (CRYSTAL_MOVE_INPUT_INTERVAL_MS) and must be gated solely
+    // by the LIVE map/entity blockers — never by this memory. Feeding it here let a single
+    // transient bump freeze a held key for the memory's full TTL, then release as a 2-tile
+    // run jump (the "stall then teleport" bug). Click-to-target still consults the memory so
+    // the router steers around recently-rejected tiles.
     const nextAction =
       queued.kind === "direction" && queued.direction
-        ? crystalMovementActionForDirection(serverSelf, queued.direction, effectiveMode, blockedSteps, currentWorld)
+        ? crystalMovementActionForDirection(serverSelf, queued.direction, effectiveMode, [], currentWorld)
         : queued.kind === "target" &&
             queued.targetX !== undefined &&
             queued.targetY !== undefined &&
@@ -4883,7 +4880,7 @@ export default function HomePage() {
               serverSelf,
               { x: queued.targetX, y: queued.targetY },
               effectiveMode,
-              blockedSteps,
+              recentMovementBlockedSteps(movementBlockedStepsRef.current, now),
               currentWorld,
             )
           : null;
@@ -4901,7 +4898,11 @@ export default function HomePage() {
         }
         return sendCrystalTurn(nextAction.direction);
       }
-      if (nextAction.direction) {
+      // Blocked at the source tile by a live wall/entity. A click-to-TARGET intent records
+      // the blocked step so the A* router detours next time; a held DIRECTION intent must
+      // NOT seed that memory — it just stands and re-attempts on the next input tick, and
+      // re-seeding would re-introduce the sticky suppression the held path was freed from.
+      if (queued.kind === "target" && nextAction.direction) {
         rememberBlockedDirectionAtSource(serverSelf.x, serverSelf.y, nextAction.direction, now);
       }
       queuedMoveIntentRef.current = null;
@@ -10525,12 +10526,6 @@ export default function HomePage() {
       }
     }
     movementBlockedStepsRef.current = nextSteps.slice(-MOVEMENT_ROUTE_MAX_BLOCKED_STEPS);
-    heldDirectionBlockedUntilRef.current = {
-      x,
-      y,
-      direction,
-      until: now + MOVEMENT_HELD_BLOCKED_DIRECTION_SUPPRESS_MS,
-    };
   }
 
   function crystalMovementActionTowardWithRouteHints(
