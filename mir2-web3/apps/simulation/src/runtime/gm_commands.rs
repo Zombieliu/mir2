@@ -40,7 +40,9 @@ use super::monsters::{
     crystal_dynamic_monster_template, deterministic_roll, spawn_runtime_monster,
 };
 use super::movement::{current_location, offset_point};
-use super::packets::{object_died_info_for_entity, object_health_info_for_entity};
+use super::packets::{
+    object_died_info_for_entity, object_health_info_for_entity, self_death_packet,
+};
 use super::resources::{
     BuffResource, GmRuntimeResource, InventoryResource, MapRuntimeResource, NpcStateResource,
     PlayerPermissionResource, PlayerRuntimeResource, QuestResource, SessionResource, SkillResource,
@@ -1167,6 +1169,11 @@ fn gm_die(world: &mut World) -> Vec<ServerPacket> {
         world.resource_mut::<PlayerRuntimeResource>().player_vitals = dead;
     }
     let mut packets = Vec::new();
+    // Mirror `Die()`: self `S.Death` (drives the client revive prompt) before the
+    // `S.ObjectDied` broadcast.
+    if let Some(packet) = self_death_packet(world, player) {
+        packets.push(packet);
+    }
     if let Some(info) = object_died_info_for_entity(world, player, 0) {
         packets.push(ServerPacket::ObjectDied { info });
     }
