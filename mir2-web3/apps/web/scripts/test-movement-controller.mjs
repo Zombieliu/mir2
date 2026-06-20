@@ -23,6 +23,7 @@ const {
   CRYSTAL_MOVE_DELAY_MS,
   CRYSTAL_RUN_PRIME_MS,
   canSendMovement,
+  clampMovementLeadToCap,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
   movementTileMatches,
@@ -197,6 +198,71 @@ const initialState = () => ({
 }
 
 {
+  // clampMovementLeadToCap — the lead-cap clamp that replaces the hard discard so
+  // an over-cap self-prediction eases to the cap boundary instead of snapping the
+  // sprite back to the server tile (the "overshoot then snap" drift).
+
+  // In-cap candidates pass through untouched (normal movement is unaffected).
+  assert.deepEqual(
+    clampMovementLeadToCap({ x: 10, y: 10 }, { x: 12, y: 10, direction: "Right" }, 2),
+    { x: 12, y: 10, direction: "Right" },
+    "a candidate already within the cap is returned unchanged",
+  );
+
+  // An axis-aligned over-cap lead (3 tiles) clamps to exactly the cap, preserving direction.
+  assert.deepEqual(
+    clampMovementLeadToCap({ x: 10, y: 10 }, { x: 13, y: 10, direction: "Right" }, 2),
+    { x: 12, y: 10, direction: "Right" },
+    "an over-cap lead clamps to the cap along the travel axis",
+  );
+
+  // Diagonal over-cap lead clamps on both axes (Chebyshev distance == cap).
+  assert.deepEqual(
+    clampMovementLeadToCap({ x: 0, y: 0 }, { x: 3, y: 3, direction: "DownRight" }, 2),
+    { x: 2, y: 2, direction: "DownRight" },
+    "a diagonal over-cap lead clamps on both axes",
+  );
+
+  // Negative direction and a mixed axis (one within, one beyond) both clamp correctly.
+  assert.deepEqual(
+    clampMovementLeadToCap({ x: 0, y: 0 }, { x: -4, y: 0, direction: "Left" }, 2),
+    { x: -2, y: 0, direction: "Left" },
+    "a negative over-cap lead clamps toward the origin",
+  );
+  assert.deepEqual(
+    clampMovementLeadToCap({ x: 0, y: 0 }, { x: 3, y: 1, direction: "Right" }, 2),
+    { x: 2, y: 1, direction: "Right" },
+    "only the over-cap axis is clamped; the in-cap axis is preserved",
+  );
+
+  // The clamped result is never behind the origin (stays between origin and candidate)
+  // and never leads by more than the cap.
+  const clamped = clampMovementLeadToCap({ x: 100, y: 100 }, { x: 109, y: 94, direction: "UpRight" }, 2);
+  const clampedLead = Math.max(Math.abs(clamped.x - 100), Math.abs(clamped.y - 100));
+  assert.equal(clampedLead, 2, "clamped lead equals the cap");
+  assert.equal(Math.sign(clamped.x - 100), 1, "clamp preserves the +x travel direction");
+  assert.equal(Math.sign(clamped.y - 100), -1, "clamp preserves the -y travel direction");
+}
+
+{
+  // page.tsx must clamp the over-cap self-render lead rather than discard it: both
+  // chooseCrystalSelfRenderPosition (the candidate gate) and
+  // preserveCrystalSelfRenderPosition (the final position gate) route an over-cap
+  // lead through clampMovementLeadToCap instead of dropping it to null.
+  const pageSource = readFileSync(pagePath, "utf8");
+  assert.match(
+    pageSource,
+    /clampMovementLeadToCap\(serverSelf,\s*candidate,\s*MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES\)/,
+    "chooseCrystalSelfRenderPosition must clamp over-cap candidates to the render lead cap",
+  );
+  assert.match(
+    pageSource,
+    /clampMovementLeadToCap\(serverSelf,\s*next,\s*MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES\)/,
+    "preserveCrystalSelfRenderPosition must clamp an over-cap lead instead of discarding it",
+  );
+}
+
+{
   const pageSource = readFileSync(pagePath, "utf8");
   assert.equal(
     /send\(\{\s*type:\s*["']moveTo["']/.test(pageSource),
@@ -213,6 +279,77 @@ const initialState = () => ({
       `${functionName} must not send self movement packets`,
     );
   }
+}
+
+{
+  // Replay the qa-load-stress overshoot/snap scenario through faithful models of the
+  // OLD and NEW render-position selection (chooseCrystalSelfRenderPosition) and assert
+  // the metric that harness measures — a backward render jump of >= 2 tiles in one
+  // frame (SNAP_BACK_TILES) — drops from >0 (OLD: hard-discard → snap to server) to 0
+  // (NEW: clamp the over-cap lead to the cap so the sprite eases forward). The clamp
+  // under test is the REAL exported helper; only the tiny selection wrapper is modelled.
+  const CAP = 2;
+  const cheby = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+  // All replay candidates run strictly forward of the server, so "not behind" holds.
+
+  // OLD gate: filter out any candidate leading past the cap → null when all exceed it,
+  // and the renderer then falls back to the authoritative server tile.
+  const chooseOld = (server, candidate) => {
+    if (!candidate || cheby(candidate, server) > CAP) return null;
+    return candidate;
+  };
+  // NEW gate: clamp an over-cap candidate to the cap instead of dropping it.
+  const chooseNew = (server, candidate) => {
+    if (!candidate) return null;
+    return cheby(candidate, server) <= CAP
+      ? candidate
+      : clampMovementLeadToCap(server, candidate, CAP);
+  };
+  const renderTile = (gate, server, candidate) => {
+    const chosen = gate(server, candidate);
+    // The render falls back to the server tile when no prediction survives the gate.
+    return chosen ? { x: chosen.x, y: chosen.y } : { x: server.x, y: server.y };
+  };
+
+  // server tile (lags) + raw prediction tile (leads): a sustained run where a dropped
+  // frame over-advances the prediction to a 3-tile lead (frame 2), then the server
+  // catches up step by step.
+  const frames = [
+    { server: { x: 10, y: 10 }, pred: { x: 11, y: 10, direction: "Right" } }, // lead 1
+    { server: { x: 10, y: 10 }, pred: { x: 12, y: 10, direction: "Right" } }, // lead 2 (cap)
+    { server: { x: 10, y: 10 }, pred: { x: 13, y: 10, direction: "Right" } }, // lead 3 (over-advance)
+    { server: { x: 11, y: 10 }, pred: { x: 13, y: 10, direction: "Right" } }, // server catches up
+    { server: { x: 12, y: 10 }, pred: { x: 13, y: 10, direction: "Right" } },
+    { server: { x: 13, y: 10 }, pred: { x: 13, y: 10, direction: "Right" } }, // settled
+  ];
+
+  const countBackSnaps = (gate) => {
+    let snaps = 0;
+    let prev = null;
+    let maxRenderLead = 0;
+    for (const frame of frames) {
+      const rendered = renderTile(gate, frame.server, frame.pred);
+      maxRenderLead = Math.max(maxRenderLead, cheby(rendered, frame.server));
+      if (prev) {
+        // A backward render jump = the rendered tile moving toward the server by >= 2
+        // tiles in a single frame (the visible snap; forward motion is excluded).
+        const jump = cheby(rendered, prev);
+        const towardServer = cheby(prev, frame.server) > cheby(rendered, frame.server);
+        if (jump >= 2 && towardServer) snaps += 1;
+      }
+      prev = rendered;
+    }
+    return { snaps, maxRenderLead };
+  };
+
+  const oldResult = countBackSnaps(chooseOld);
+  const newResult = countBackSnaps(chooseNew);
+  assert.ok(oldResult.snaps > 0, "baseline (hard-discard) reproduces the overshoot/snap drift");
+  assert.equal(newResult.snaps, 0, "clamping the over-cap lead eliminates the overshoot/snap drift");
+  assert.ok(
+    newResult.maxRenderLead <= CAP,
+    "the clamped render never leads the server by more than the cap",
+  );
 }
 
 console.log("movement controller tests passed");

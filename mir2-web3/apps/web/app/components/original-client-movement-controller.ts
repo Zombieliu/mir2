@@ -94,6 +94,31 @@ export function createPendingSelfMove(input: {
   };
 }
 
+// Clamp a render candidate so it leads `origin` by at most `maxLeadTiles` on each
+// axis (Chebyshev distance), preserving the candidate's travel direction. The
+// locally-predicted self sprite is allowed to render ahead of the authoritative
+// server tile by a fixed lead cap; when a long/dropped frame or a run/walk
+// resolution mismatch briefly pushes the prediction PAST that cap, the renderer
+// would otherwise discard the prediction entirely and snap the sprite back to the
+// server tile (the visible "overshoot then snap"). Clamping instead pins the
+// rendered tile to the cap boundary along the same vector, so the sprite eases
+// forward and the server catches up under it with no backward jump. The clamped
+// tile stays strictly between `origin` and `candidate`, so a candidate that is
+// genuinely ahead of the server remains ahead after clamping.
+export function clampMovementLeadToCap(
+  origin: { x: number; y: number },
+  candidate: MovementPoint,
+  maxLeadTiles: number,
+): MovementPoint {
+  const cap = Math.max(0, maxLeadTiles);
+  const clampAxis = (delta: number) => Math.max(-cap, Math.min(cap, delta));
+  return {
+    ...candidate,
+    x: origin.x + clampAxis(candidate.x - origin.x),
+    y: origin.y + clampAxis(candidate.y - origin.y),
+  };
+}
+
 export function movementTileMatches(left: MovementPoint, right: MovementPoint) {
   return left.x === right.x && left.y === right.y;
 }

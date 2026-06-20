@@ -119,6 +119,7 @@ import {
   CRYSTAL_RUN_PRIME_MS,
   MOVEMENT_PENDING_MAX_AGE_MS,
   canSendMovement,
+  clampMovementLeadToCap,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
   movementPointMatches,
@@ -3321,12 +3322,21 @@ export default function HomePage() {
 
     let next = candidate;
     if (next) {
-      const lead = Math.max(Math.abs(next.x - serverSelf.x), Math.abs(next.y - serverSelf.y));
-      if (
-        lead > MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES ||
-        !crystalMovementCandidateNotBehindServer(serverSelf, next, next.direction ?? serverSelf.direction)
-      ) {
+      if (!crystalMovementCandidateNotBehindServer(serverSelf, next, next.direction ?? serverSelf.direction)) {
+        // The candidate has fallen behind the authoritative tile (stale / wrong
+        // direction) — drop it so the sprite tracks the server.
         next = null;
+      } else {
+        const lead = Math.max(Math.abs(next.x - serverSelf.x), Math.abs(next.y - serverSelf.y));
+        if (lead > MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES) {
+          // The prediction briefly outran the server past the render lead cap (a
+          // long/dropped frame or a run/walk-resolution mismatch advanced the
+          // predicted tile too far). HARD-discarding here would snap the sprite all
+          // the way back to the server tile — the visible "overshoot then snap".
+          // Clamp the rendered tile to the cap along the travel vector instead so it
+          // eases forward and the server catches up under it with no backward jump.
+          next = clampMovementLeadToCap(serverSelf, next, MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES);
+        }
       }
     }
 
@@ -12319,9 +12329,20 @@ function chooseCrystalSelfRenderPosition(
     .filter(
       (candidate): candidate is PredictedPlayerMotion =>
         candidate !== null &&
-        crystalMovementCandidateNotBehindServer(serverSelf, candidate, candidate.direction) &&
-        Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y)) <=
-          MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES,
+        crystalMovementCandidateNotBehindServer(serverSelf, candidate, candidate.direction),
+    )
+    // Clamp a candidate that has briefly outrun the server past the render lead cap
+    // to the cap boundary (along its travel vector) instead of dropping it. Filtering
+    // every over-cap candidate out makes this return null, and the renderer then falls
+    // back to the authoritative server tile — the visible self-move "overshoot then
+    // snap". Clamping keeps the sprite pinned at the cap so it eases forward as the
+    // server catches up, with no backward jump. In-cap candidates pass through
+    // untouched, so normal movement is unaffected.
+    .map((candidate) =>
+      Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y)) <=
+      MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES
+        ? candidate
+        : clampMovementLeadToCap(serverSelf, candidate, MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES),
     )
     .reduce<PredictedPlayerMotion | null>((best, candidate) => {
       if (!best) return candidate;
