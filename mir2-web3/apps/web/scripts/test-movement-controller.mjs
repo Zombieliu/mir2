@@ -24,6 +24,7 @@ const {
   CRYSTAL_RUN_PRIME_MS,
   canSendMovement,
   clampMovementLeadToCap,
+  stepMovementTowardWithinCap,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
   movementTileMatches,
@@ -245,6 +246,52 @@ const initialState = () => ({
 }
 
 {
+  // stepMovementTowardWithinCap — caps the rendered self tile to <=1 tile/frame so
+  // a long/dropped frame (or a direction reversal across the server tile) cannot
+  // collapse several 1-tile transitions into one visible jump (the residual
+  // "overshoot then snap" left after the lead-cap clamp).
+
+  // A <=cap advance passes through untouched (normal movement is fully responsive).
+  assert.deepEqual(
+    stepMovementTowardWithinCap({ x: 5, y: 5 }, { x: 6, y: 5, direction: "Right" }, 1),
+    { x: 6, y: 5, direction: "Right" },
+    "a within-cap advance is returned unchanged",
+  );
+  assert.deepEqual(
+    stepMovementTowardWithinCap({ x: 5, y: 5 }, { x: 6, y: 4, direction: "UpRight" }, 1),
+    { x: 6, y: 4, direction: "UpRight" },
+    "a within-cap diagonal advance is returned unchanged",
+  );
+
+  // A >1-tile single-frame jump eases ONE tile toward the target along the vector.
+  assert.deepEqual(
+    stepMovementTowardWithinCap({ x: 5, y: 5 }, { x: 7, y: 5, direction: "Right" }, 1),
+    { x: 6, y: 5, direction: "Right" },
+    "a 2-tile forward jump eases one tile toward the target",
+  );
+
+  // The reversal-across-server case from the captured snap: render leading at
+  // 303,91 (down-left), new prediction 305,89 (up-right); a single-frame jump would
+  // be 2 tiles. Easing routes it through the server tile 304,90 (one tile), then the
+  // next frame reaches 305,89 — two physical 1-tile steps, no snap.
+  const easedReversal = stepMovementTowardWithinCap({ x: 303, y: 91 }, { x: 305, y: 89, direction: "UpRight" }, 1);
+  assert.deepEqual(
+    easedReversal,
+    { x: 304, y: 90, direction: "UpRight" },
+    "a reversal across the server eases through the in-between (server) tile",
+  );
+  assert.deepEqual(
+    stepMovementTowardWithinCap(easedReversal, { x: 305, y: 89, direction: "UpRight" }, 1),
+    { x: 305, y: 89, direction: "UpRight" },
+    "the following frame reaches the target (delta now within cap)",
+  );
+
+  // No single step ever exceeds the cap, regardless of how far the target is.
+  const farStep = stepMovementTowardWithinCap({ x: 0, y: 0 }, { x: 9, y: -4, direction: "UpRight" }, 1);
+  assert.equal(Math.max(Math.abs(farStep.x), Math.abs(farStep.y)), 1, "a far target still advances at most the cap");
+}
+
+{
   // page.tsx must clamp the over-cap self-render lead rather than discard it: both
   // chooseCrystalSelfRenderPosition (the candidate gate) and
   // preserveCrystalSelfRenderPosition (the final position gate) route an over-cap
@@ -259,6 +306,18 @@ const initialState = () => ({
     pageSource,
     /clampMovementLeadToCap\(serverSelf,\s*next,\s*MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES\)/,
     "preserveCrystalSelfRenderPosition must clamp an over-cap lead instead of discarding it",
+  );
+  // …and must additionally ease a valid leading prediction to <=1 tile/frame so a
+  // dropped-frame collapse / reversal cannot snap (the residual after #136).
+  assert.match(
+    pageSource,
+    /easeSelfRenderTile\(next,\s*serverSelf,\s*now\)/,
+    "preserveCrystalSelfRenderPosition must ease a valid lead via easeSelfRenderTile",
+  );
+  assert.match(
+    pageSource,
+    /stepMovementTowardWithinCap\(base,\s*target,\s*MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME\)/,
+    "easeSelfRenderTile must cap the per-frame render advance",
   );
 }
 

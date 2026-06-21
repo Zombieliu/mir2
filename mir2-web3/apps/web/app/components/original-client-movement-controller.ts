@@ -119,6 +119,37 @@ export function clampMovementLeadToCap(
   };
 }
 
+// Step the rendered self tile AT MOST `maxStepTiles` toward `target` from `base`,
+// along the travel vector (Chebyshev / 8-direction). When `target` is already
+// within the per-step cap it is returned unchanged, so normal movement (a <=1-tile
+// advance per frame) passes straight through and is fully responsive. When a
+// long/dropped frame — or a direction reversal whose old and new predicted leads
+// sit on opposite sides of the server tile — would otherwise move the rendered
+// tile >1 tile in a single frame (several 1-tile transitions collapsed by the
+// dropped frames into one visible jump = the "overshoot then snap"), the tile is
+// instead eased one step toward the target so it routes through the in-between
+// tiles over consecutive frames with no non-physical jump. Stateless and pure;
+// the caller owns the per-frame baseline + commit gating.
+export function stepMovementTowardWithinCap(
+  base: { x: number; y: number },
+  target: MovementPoint,
+  maxStepTiles: number,
+): MovementPoint {
+  const cap = Math.max(0, maxStepTiles);
+  const dx = target.x - base.x;
+  const dy = target.y - base.y;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) <= cap) {
+    return target;
+  }
+  const stepAxis = (delta: number) =>
+    delta === 0 ? 0 : Math.sign(delta) * Math.min(cap, Math.abs(delta));
+  return {
+    ...target,
+    x: base.x + stepAxis(dx),
+    y: base.y + stepAxis(dy),
+  };
+}
+
 export function movementTileMatches(left: MovementPoint, right: MovementPoint) {
   return left.x === right.x && left.y === right.y;
 }
