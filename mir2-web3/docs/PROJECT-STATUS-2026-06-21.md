@@ -63,34 +63,43 @@ below.**
 
 | Gap | Nature | Path to close | Parallelizable? |
 |---|---|---|:---:|
-| **Per-monster AI breadth** — 35 specialized behaviors vs Crystal's **212** | code (Rust) | port from `Crystal/Server/MirObjects/Monsters/*.cs` | **yes, but** see structural note ↓ |
+| **Per-monster AI breadth** — *reassessed 2026-06-21, see note ↓; the dominant gap was one systemic bug, now fixed* | code (Rust) | mostly DONE; low-value long tail remains | n/a |
 | Cross-process Zone sharding / single-owner handoff | design + infra | durable Zone snapshot/log + real RPC | no (serial design) |
 | Persistence normalization (inventory/mail/economy/auction) | code | per-account JSON blobs → normalized tables | partly |
 | VFX real atlases + audio *bytes* | asset-gated | extract Crystal `.Lib`/`Sound` on a real machine → R2 publish | no (hardware/credential) |
 | Real-GPU / mobile actor-render sign-off | hardware-gated | headed device QA (sandbox lacks GPU) | no |
 | A few unwirable window actions (conquest gate/tax, hero dismiss/recall) | protocol-gated | new packet or NPC-script flow | no |
 
-### Structural note on the monster-AI gap (the #1 lane)
+### The monster-AI gap, reassessed (2026-06-21)
 
-The current monster AI is **one file** — `apps/simulation/src/runtime/monster_ai.rs`
-(6,139 lines) — with a **central `match agent.ai { … }`** numeric dispatch
-(20 AI ids handled) calling 35 `update_<monster>_state` functions. Crystal's 212
-monster subclasses each override `ProcessAI`/`Attack`/`MoveTo` etc.
+A parallel-agent investigation (classify → validation-wave → gap-analysis →
+respawn-manifest cross-reference) found the "35 of 212" framing was misleading,
+and that the gap was dominated by **one systemic bug**:
 
-This means a **naive 212-wide parallel fan-out would collide** — every agent
-would edit the same `monster_ai.rs` + the same dispatch. Closing this lane in
-parallel requires one of:
+1. **The sim already covers far more than 35.** Beyond the per-monster modules,
+   `monsters.rs` has data-driven AI-id-keyed tables — `monster_player_attack_damage`
+   (~43 ids), `monster_player_status_effect`, `monster_attack_range`,
+   `monster_can_attack` — plus summon/line branches. Monsters not in any of these
+   run the generic default (chase + melee), which is *faithful* for plain melee mobs.
 
-1. **Per-monster modules first** (serial refactor): split `monster_ai.rs` into
-   `monster_ai/<name>.rs`, each registering its AI id, so agents add *new files*
-   (disjoint write set) + one tiny dispatch edit. Then fan out safely.
-2. **Batched additive ports**: each agent (isolated worktree) owns a disjoint
-   group of monsters, produces additive behavior fns, and integrates via PR with
-   a single owner resolving the central-dispatch merge. Accepts merge friction.
+2. **Only 87 of 212 AI families are actually spawned** (`crystal_respawn_manifest.json`,
+   6,341 spawn groups); the other 125 are data-only. Of the 87 spawned, **64 already
+   have dedicated handlers**. The elaborate boss subclasses (EvilMir, Behemoth, the
+   Oma*/Horned*/Flame* families) are **not in timed respawns** — they're event/quest
+   spawned, an endgame-fidelity long tail.
 
-Either way, the project's parallel rule holds: **isolated git worktrees, disjoint
-file domains, integrate via PR — never shared trees** (`CLAUDE.md`,
-`AGENT-ORCHESTRATION.md`).
+3. **The real bug: `ai = 0` (base `MonsterObject`) — 3,588 of 6,341 spawns / 251
+   distinct monster names — had no arm in `monster_player_attack_damage` and fell
+   through to a `_ => 7` stub.** The bulk of the live world hit the player for a flat
+   7 regardless of its real DC. **Fixed** (catch-all → imported DC, matching the
+   already-correct zone path; +regression test; full suite 1277/0).
+
+**Net:** the high-impact monster-combat gap is closed. The `monster_ai.rs` →
+per-monster-module refactor (committed) makes the remaining low-value long tail
+(event-spawned bosses) safe to port on demand: a new monster = new
+`monster_ai/<name>.rs` + one dispatch arm; workers write disjoint files and only the
+coordinator edits `mod.rs` (no N-way collision), per the project's isolated-worktree /
+integrate-via-PR rule (`CLAUDE.md`, `AGENT-ORCHESTRATION.md`).
 
 ## Verify / reproduce
 
