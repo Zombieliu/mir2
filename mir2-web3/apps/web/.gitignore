@@ -11,3 +11,7 @@ docs/generated/player-qa/
 # Economy-QA run artifacts (reports + screenshot timelines from `npm run
 # qa:economy`). Run-specific; not source.
 docs/generated/economy-qa/
+
+# Soak-QA run artifacts (time-series + report + screenshots from `npm run
+# qa:soak`). Run-specific; not source.
+docs/generated/soak-qa/
