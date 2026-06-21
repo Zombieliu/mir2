@@ -1037,6 +1037,7 @@ pub enum LanguageCode {
     English,
     ChineseSimplified,
     Spanish,
+    Portuguese,
 }
 
 impl LanguageCode {
@@ -1045,6 +1046,7 @@ impl LanguageCode {
             Self::English => "en",
             Self::ChineseSimplified => "zh-CN",
             Self::Spanish => "es",
+            Self::Portuguese => "pt-BR",
         }
     }
 
@@ -1053,6 +1055,7 @@ impl LanguageCode {
             Self::English => "en-US",
             Self::ChineseSimplified => "zh-CN",
             Self::Spanish => "es-ES",
+            Self::Portuguese => "pt-BR",
         }
     }
 
@@ -1063,6 +1066,7 @@ impl LanguageCode {
                 Some(Self::ChineseSimplified)
             }
             "es" | "es-es" | "spanish" => Some(Self::Spanish),
+            "pt" | "pt-br" | "pt-pt" | "portuguese" | "brazilian" => Some(Self::Portuguese),
             _ => None,
         }
     }
@@ -1879,6 +1883,7 @@ mod tests {
         assert_eq!(bundle.default_language, "en");
         assert!(bundle.languages.contains_key("zh-CN"));
         assert!(bundle.languages.contains_key("es"));
+        assert!(bundle.languages.contains_key("pt-BR"));
     }
 
     #[test]
@@ -1887,6 +1892,20 @@ mod tests {
             .expect("client.GameName should exist");
 
         assert!(value.contains("传奇"));
+    }
+
+    #[test]
+    fn portuguese_language_is_wired() {
+        assert_eq!(LanguageCode::Portuguese.code(), "pt-BR");
+        assert_eq!(LanguageCode::parse("pt-BR"), Some(LanguageCode::Portuguese));
+        assert_eq!(LanguageCode::parse("pt"), Some(LanguageCode::Portuguese));
+        // A key present in the pt-BR bundle resolves to a non-English string.
+        let pt = localized_text(LanguageCode::Portuguese, "client.Warrior")
+            .expect("client.Warrior should exist in pt-BR");
+        let en = localized_text(LanguageCode::English, "client.Warrior")
+            .expect("client.Warrior should exist in en");
+        assert!(!pt.is_empty());
+        assert_ne!(pt, en);
     }
 
     #[test]
