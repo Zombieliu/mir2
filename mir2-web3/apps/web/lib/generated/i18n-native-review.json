@@ -1,0 +1,676 @@
+{
+  "_meta": {
+    "purpose": "Human native-speaker review queue for AI-translated localization keys.",
+    "source": "apps/web/docs/generated/i18n-work/flagged.jsonl",
+    "count": 110,
+    "fields": [
+      "key",
+      "lang",
+      "reason",
+      "suggestion"
+    ],
+    "generatedBy": "packages/tooling/scripts/assemble-localization-ptbr.mjs"
+  },
+  "items": [
+    {
+      "key": "client.EvilSlayerGlyph",
+      "lang": "esES",
+      "reason": "Item/proper-noun 'EvilSlayer Glyph'. Rendered 'Glifo Mataimpíos' (slayer-of-the-wicked). No canonical es Mir2 name exists; a native may prefer 'Glifo Antidemonios' or keeping the EN name.",
+      "suggestion": "Glifo Mataimpíos"
+    },
+    {
+      "key": "client.EvilSlayerGlyph",
+      "lang": "ptBR",
+      "reason": "Item/proper-noun 'EvilSlayer Glyph'. Rendered 'Glifo Mata-Demônios'. No canonical pt-BR Mir2 name; native may prefer 'Glifo Caça-Demônios' or keep EN.",
+      "suggestion": "Glifo Mata-Demônios"
+    },
+    {
+      "key": "client.EngagementWindowOpenClose",
+      "lang": "ptBR",
+      "reason": "EN 'Engagement window' but zh source is 婚姻 (marriage). Translated literally as 'noivado' (engagement); if this UI window is actually the marriage/wedding panel, 'casamento' fits better. Confirm against the in-game window.",
+      "suggestion": "Janela de noivado (abrir/fechar)"
+    },
+    {
+      "key": "client.EngagementWindowOpenClose",
+      "lang": "esES",
+      "reason": "EN 'Engagement window' vs zh 婚姻 (marriage). Used 'compromiso' (engagement); if it's the marriage panel, 'matrimonio'/'boda' may be better.",
+      "suggestion": "Ventana de compromiso (abrir/cerrar)"
+    },
+    {
+      "key": "client.FastMoveSkillDescription",
+      "lang": "ptBR",
+      "reason": "EN 'Increase movement with rooted skills' is ambiguous/awkward in the original ('rooted' = root/snare or stationary-cast skills). zh: 利用蓄力技能 (charge/channel skills). Translated as 'habilidades de enraizamento'; meaning should be verified with the actual skill mechanic.",
+      "suggestion": "Aumenta o movimento com habilidades de enraizamento."
+    },
+    {
+      "key": "client.FastMoveSkillDescription",
+      "lang": "esES",
+      "reason": "Same ambiguity as ptBR: EN 'rooted skills' unclear; zh implies charged/channelled. 'habilidades de enraizamento'/'enraizamiento' may misrepresent the mechanic.",
+      "suggestion": "Aumenta el movimiento con habilidades de enraizamiento."
+    },
+    {
+      "key": "client.EntrapmentSkillDescription",
+      "lang": "ptBR",
+      "reason": "Skill name 'Entrapment' (zh 捕蝇剑 = 'fly-catching sword') localized as 'Aprisionamento'. No canonical pt-BR Mir2 skill name; verify against any community-standard spell list.",
+      "suggestion": "Aprisionamento"
+    },
+    {
+      "key": "client.EntrapmentSkillDescription",
+      "lang": "esES",
+      "reason": "Skill name 'Entrapment' localized as 'Atrapamiento'. No canonical es Mir2 name; verify against community skill list.",
+      "suggestion": "Atrapamiento"
+    },
+    {
+      "key": "client.DraperyItems",
+      "lang": "esES",
+      "reason": "'Drapery Items' = cosmetic cloth/cover category. 'Prendas' chosen; could also be 'Telas'/'Cortinajes' depending on what the tab actually holds (clothing vs decorative drapes). Verify category contents.",
+      "suggestion": "Prendas"
+    },
+    {
+      "key": "client.DraperyItems",
+      "lang": "ptBR",
+      "reason": "'Drapery Items' rendered 'Vestuário' (clothing). If the tab is decorative drapes/fabrics rather than wearables, 'Tecidos' may fit better. Verify category contents.",
+      "suggestion": "Vestuário"
+    },
+    {
+      "key": "client.Chat_Lover",
+      "lang": "esES",
+      "reason": "Marriage chat channel. 'Pareja' chosen (matches glossary Lover=Pareja). Some es servers use 'Cónyuge'; pick per the project's marriage terminology.",
+      "suggestion": "Pareja"
+    },
+    {
+      "key": "custom.interaction.targetHelp",
+      "lang": "esES",
+      "reason": "glossary.json localizes NPC -> 'PNJ' for es-ES, but the shipped source.json corpus uses 'NPC' everywhere (never PNJ). Kept 'NPC' for corpus consistency. Confirm whether the project wants the PNJ glossary ideal applied across all es-ES strings or 'NPC' kept as shipped.",
+      "suggestion": "Keep 'NPC' (current) OR switch this + npcDialogLive to 'PNJ' if standardizing on the glossary; do it corpus-wide, not piecemeal."
+    },
+    {
+      "key": "custom.interaction.npcDialogLive",
+      "lang": "esES",
+      "reason": "Same NPC/PNJ glossary-vs-corpus tension as targetHelp. Kept 'NPC' to match shipped corpus.",
+      "suggestion": "El diálogo del NPC está activo; ... (or 'del PNJ' if standardizing on PNJ)."
+    },
+    {
+      "key": "content.npcDialog.villageGuide.completed.title",
+      "lang": "both",
+      "reason": "EN 'After Action' is an odd UI label (military 'after-action' echo). esES 'Después de la acción' / ptBR 'Após a ação' are literal and read flat for a quest-complete header. The completed-state body talks about training cleared, so a warmer header may fit better.",
+      "suggestion": "esES: consider 'Tras la misión' / 'Misión cumplida'. ptBR: consider 'Depois da missão' / 'Missão cumprida'. Confirm intended tone vs the literal EN."
+    },
+    {
+      "key": "server.ArchersRepaired",
+      "lang": "both",
+      "reason": "'Archers' here are the conquest-wall archer TOWERS being repaired, not the Archer class. Literal 'Arqueros/Arqueiros reparados' could read as 'the Archer players were repaired'. Kept literal to match EN, but a clearer noun ('torres de arqueros' / 'torres de arqueiros') may be warranted.",
+      "suggestion": "esES: 'Torres de arqueros reparadas: {0}/{1}'. ptBR: 'Torres de arqueiros reparadas: {0}/{1}'. Verify against the conquest UI's term for these structures."
+    },
+    {
+      "key": "server.AccountBanded",
+      "lang": "ptBR",
+      "reason": "EN '{0} Has logged out. Reason: Account has been Banned!' is a broadcast about another player. ptBR '{0} saiu.' is fine but terse; 'baneada' (esES) is community-standard slang while ptBR uses the dictionary 'banida'. Confirm pt-BR community prefers 'banida' over the anglicism 'banida/banido' agreement and gender (conta = f. -> 'banida' correct).",
+      "suggestion": "ptBR kept 'a conta foi banida!' (gender-correct). No change unless community prefers 'foi bania/baneada'."
+    },
+    {
+      "key": "client.NibbleChance",
+      "lang": "ptBR",
+      "reason": "Fishing mechanic: \"Nibble\" = peixe beliscando a isca. \"Mordida\" is literal; pt-BR fishing UIs often use \"Fisgada\"/\"Beliscada\". Verify against the in-game fishing flow.",
+      "suggestion": "Chance de Fisgada + {0}~{1}%"
+    },
+    {
+      "key": "client.NibbleChance",
+      "lang": "esES",
+      "reason": "Fishing mechanic: \"Nibble\" = pez mordisqueando el cebo. \"Mordisco\" is literal; verify vs the term used in the fishing window (possibly \"Picada\").",
+      "suggestion": "Probabilidad de Picada + {0}~{1}%"
+    },
+    {
+      "key": "client.PetEnhancerSkillDescription",
+      "lang": "ptBR",
+      "reason": "Glossary maps Pet->\"Pet\" (kept here), but sibling keys (NoCreatures, PleaseGiveYourCreatureName) say \"criatura\" per English \"creature\". Confirm whether summons should read \"Pet\" or \"Mascote\"/\"Criatura\" consistently across the pet UI.",
+      "suggestion": "Aprimorar Pet (or \"Aprimorar Mascote\" if UI standardises on Mascote)"
+    },
+    {
+      "key": "client.PetMode_FocusMasterTarget",
+      "lang": "ptBR",
+      "reason": "Same Pet/Mascote/Criatura consistency question as PetEnhancer; \"mestre\" (master) is fine but confirm the pet-owner term used elsewhere (\"dono\" is also common).",
+      "suggestion": "[Pet: Focar no alvo do mestre]"
+    },
+    {
+      "key": "client.PetMode_FocusMasterTarget",
+      "lang": "esES",
+      "reason": "\"amo\" (pet master) is correct but \"dueño\" is also common in es MMO UIs; confirm which the rest of the pet UI uses.",
+      "suggestion": "[Mascota: Centrarse en el objetivo del amo]"
+    },
+    {
+      "key": "client.PlayerRequestedTeachClass",
+      "lang": "esES",
+      "reason": "\"el camino del {2}\" assumes a masculine class name; all current classes (Guerrero/Mago/Taoísta/Asesino/Arquero) are masculine so this is safe, but flag in case a feminine class label is ever added.",
+      "suggestion": "el camino del {2}"
+    },
+    {
+      "key": "client.PlayerRequestedTeachClass",
+      "lang": "ptBR",
+      "reason": "Rewrote the ungrammatical draft (\"você o ensine os caminhos do\") to \"você lhe ensine os caminhos do {2}\". \"do {2}\" assumes masculine class names (all current ones are). Confirm the clitic/preposition reads naturally to a native ear.",
+      "suggestion": "{0} (Nível {1}) pediu que você lhe ensine os caminhos do {2}."
+    },
+    {
+      "key": "client.Mythical",
+      "lang": "ptBR",
+      "reason": "Rarity/grade tier label. \"Mítico\" is correct, but verify it matches the rarity-tier scheme used in other batches (Rare/Mythical/etc.) for internal consistency.",
+      "suggestion": "Mítico"
+    },
+    {
+      "key": "client.Rare",
+      "lang": "ptBR",
+      "reason": "Rarity tier label \"Raro\" — verify consistency with the rarity scheme in other batches.",
+      "suggestion": "Raro"
+    },
+    {
+      "key": "client.RankTitle",
+      "lang": "ptBR",
+      "reason": "Source zh renders this as 职位 (guild \"position/role\"), not a leaderboard rank. I used \"Cargo-{0}\" (role). If this label is actually a leaderboard rank, \"Rank-{0}\"/\"Posição-{0}\" would be better. Verify usage context.",
+      "suggestion": "Cargo-{0}"
+    },
+    {
+      "key": "client.RankTitle",
+      "lang": "esES",
+      "reason": "zh source is 职位 (guild position/role). I used \"Rango-{0}\". Confirm whether this is a guild role or a leaderboard rank; if a role, \"Cargo-{0}\" fits better.",
+      "suggestion": "Rango-{0}"
+    },
+    {
+      "key": "client.PricePearl",
+      "lang": "ptBR",
+      "reason": "EN \"{1}\" is an English plural suffix (\"s\" -> \"pearls\"). pt-BR plural of \"pérola\" is \"pérolas\". If the runtime injects a literal \"s\", \"pérola{1}\" yields \"pérolas\" only by coincidence; confirm {1} carries a localized suffix or drop it and pluralize via count.",
+      "suggestion": "Preço: {0} pérola{1}"
+    },
+    {
+      "key": "client.PricePearl",
+      "lang": "esES",
+      "reason": "EN \"{1}\" is an English plural \"s\". es plural \"perlas\" works if {1}=\"s\", but verify the suffix is localized rather than hardcoded English.",
+      "suggestion": "Precio: {0} perla{1}"
+    },
+    {
+      "key": "client.Item",
+      "lang": "esES",
+      "reason": "EN 'ITEM' is an all-caps UI header; rendered 'OBJETO' to match es term 'objeto'. Some es MMOs keep the English loan 'ÍTEM'/'ITEM' as a column header — confirm preferred header term & casing.",
+      "suggestion": "OBJETO"
+    },
+    {
+      "key": "client.Heroic",
+      "lang": "esES",
+      "reason": "Single-word 'Heroic' with no context (likely an item grade/rarity tier). 'Heroico' assumes adjective; if it's a rarity label a noun-style tier name may read better.",
+      "suggestion": "Heroico"
+    },
+    {
+      "key": "client.Heroic",
+      "lang": "ptBR",
+      "reason": "Single-word grade/rarity 'Heroic' lacks context; 'Heroico' is the adjective. Confirm it is a rarity tier label.",
+      "suggestion": "Heroico"
+    },
+    {
+      "key": "client.GTPrice",
+      "lang": "esES",
+      "reason": "'GT' is an untranslated in-game abbreviation (likely GameGold/Game Token related). Left as-is; confirm whether GT should be localized.",
+      "suggestion": "Precio GT"
+    },
+    {
+      "key": "client.GTStatus",
+      "lang": "esES",
+      "reason": "'GT' abbreviation kept verbatim; confirm meaning/localization.",
+      "suggestion": "Estado GT"
+    },
+    {
+      "key": "client.FinderIncrease",
+      "lang": "esES",
+      "reason": "'Finder' is an obscure stat (item/drop-find). Rendered 'Hallazgo'; community term may differ (e.g. 'Búsqueda de objetos').",
+      "suggestion": "Hallazgo +{0}~{1}%"
+    },
+    {
+      "key": "client.FinderIncrease",
+      "lang": "ptBR",
+      "reason": "'Finder' stat ambiguous; rendered 'Achados'. Confirm against community wording.",
+      "suggestion": "Achados +{0}~{1}%"
+    },
+    {
+      "key": "client.IceThrustSkillDescription",
+      "lang": "ptBR",
+      "reason": "Translated skill NAME 'Ice Thrust' as 'Lança de Gelo' (ice spear, matches 'ice pillar' flavor) rather than literal 'Estocada/Investida de Gelo'. Confirm preferred skill name.",
+      "suggestion": "Lança de Gelo"
+    },
+    {
+      "key": "client.HeroDesummonCountdown",
+      "lang": "ptBR",
+      "reason": "'desummon' rendered as 'dispensá-lo'. Community term for un-summoning a Hero/pet may be 'recolher' or keep 'dessumonar'. Confirm.",
+      "suggestion": "dispensá-lo"
+    },
+    {
+      "key": "client.Guild",
+      "lang": "esES",
+      "reason": "Canonical glossary.json maps Guild->'Hermandad', but existing source drafts used 'Clan' throughout. Normalized ALL Guild* esES strings to 'Hermandad' per glossary — confirm this is the intended canonical term (affects ~10 strings).",
+      "suggestion": "Hermandad"
+    },
+    {
+      "key": "client.TrickShotMinimalDamage",
+      "lang": "ptBR",
+      "reason": "Skill name 'Trick Shot'. Incoming 'Tiro trapaceiro' reads as a cheating/foul shot; changed to 'Tiro Ardiloso' (cunning shot, fits the over-walls trick). No canonical pt-BR Mir2 skill name; verify against any community skill list.",
+      "suggestion": "Tiro Ardiloso (dano mínimo)"
+    },
+    {
+      "key": "client.TrickShotMinimalDamage",
+      "lang": "esES",
+      "reason": "Skill name 'Trick Shot'. Incoming 'Tiro truco' is calque-y; changed to 'Tiro Ingenioso'. No canonical es Mir2 name; verify against community skill list.",
+      "suggestion": "Tiro Ingenioso (daño mínimo)"
+    },
+    {
+      "key": "client.TwinDrakeBladeSkillDescription",
+      "lang": "both",
+      "reason": "Skill name 'Twin Drake Blade' (zh 双龙斩 = 'Twin Dragon Slash'). Rendered literally esES 'Hoja del Dragón Gemelo' / ptBR 'Lâmina do Dragão Gêmeo'. The zh says TWO dragons (gemelo/gêmeo = 'twin' as in identical-twin, slightly off). A native may prefer 'Lâmina dos Dragões Gêmeos' / 'Hoja de los Dragones Gemelos' or a community-standard name.",
+      "suggestion": "ptBR: consider 'Lâmina dos Dragões Gêmeos'; esES: 'Hoja de los Dragones Gemelos'."
+    },
+    {
+      "key": "client.TurnUndeadSkillDescription",
+      "lang": "esES",
+      "reason": "Skill name 'Turn Undead' (zh 圣言术 = 'Holy Word'). Rendered 'Ahuyentar No-Muertos' (D&D-style 'turn undead' = drive away). The skill actually has a chance to instantly KILL the undead, so 'ahuyentar' (drive off) slightly understates it. A native may prefer 'Expulsar No-Muertos' or a holy-word name. Verify against community skill list.",
+      "suggestion": "Ahuyentar No-Muertos"
+    },
+    {
+      "key": "client.TurnUndeadSkillDescription",
+      "lang": "ptBR",
+      "reason": "Skill name 'Turn Undead' (zh 圣言术 = 'Holy Word'). Rendered 'Afastar Mortos-Vivos' (drive away), but the skill can instantly kill. Native may prefer 'Expulsar Mortos-Vivos' or a holy-word name. Verify against community skill list.",
+      "suggestion": "Afastar Mortos-Vivos"
+    },
+    {
+      "key": "client.WarWizTao",
+      "lang": "both",
+      "reason": "zh 战法道 is the Warrior/Wizard/Taoist three-class shorthand (initials). Rendered 'GueMagTao' (Gue+Mag+Tao initials). This invented contraction has no canonical es/pt form; a native/UI owner should confirm the desired abbreviation (or whether to spell out 'Gue/Mag/Tao').",
+      "suggestion": "GueMagTao"
+    },
+    {
+      "key": "client.WeddingRing",
+      "lang": "esES",
+      "reason": "Item name. esES kept 'Anillo de boda'; the more precise band term is 'Alianza' (matches ptBR 'Aliança de casamento'). Some es servers use 'Anillo de boda', others 'Alianza'. Confirm the project's marriage-item terminology.",
+      "suggestion": "Anillo de boda (or 'Alianza de boda')"
+    },
+    {
+      "key": "client.Usrname",
+      "lang": "esES",
+      "reason": "Login field label. EN/source key is 'Username' but esES shipped value is 'Cuenta' (Account), not 'Nombre de usuario'. Kept 'Cuenta' to match the shipped login UI, but it is a label/meaning mismatch with the EN. Confirm whether the field is account-name or display-name.",
+      "suggestion": "Cuenta (kept; consider 'Usuario' if the field is the display name)"
+    },
+    {
+      "key": "client.WhisperLover",
+      "lang": "esES",
+      "reason": "Marriage whisper target. 'Susurrar a tu pareja' uses glossary Lover=Pareja. Some es servers use 'Cónyuge'. Pick per the project's marriage terminology (same tension flagged for Chat_Lover in batch 5).",
+      "suggestion": "Susurrar a tu pareja"
+    },
+    {
+      "key": "server.YouStartedWarWith",
+      "lang": "esES",
+      "reason": "Guild-war declaration. Changed input 'Has iniciado una guerra con {0}' to the more idiomatic 'Has declarado la guerra a {0}'. Confirm the guild-war UI elsewhere uses 'declarar la guerra' consistently.",
+      "suggestion": "Has declarado la guerra a {0}."
+    },
+    {
+      "key": "server.YouWonForGold",
+      "lang": "esES",
+      "reason": "Auction win. Input used generic 'Ganaste {0}'; changed to auction-precise 'Te adjudicaste {0}'. 'Ganaste' is acceptable and simpler; confirm preferred auction register (adjudicar vs ganar).",
+      "suggestion": "Te adjudicaste {0} por {1:#,##0} de Oro."
+    },
+    {
+      "key": "server.YouWonItemForGold",
+      "lang": "esES",
+      "reason": "Same auction-win string as YouWonForGold (identical EN). Used 'Te adjudicaste'; confirm both win strings should share wording.",
+      "suggestion": "Te adjudicaste {0} por {1:#,##0} de Oro."
+    },
+    {
+      "key": "sim.monsterDroppedItem",
+      "lang": "ptBR",
+      "reason": "Kept community gíria 'dropou' (very common in BR MMO chat) for loot drops, and propagated it to monsterDroppedGoldOnGround for consistency. A more formal register would use 'soltou'/'deixou cair'. Confirm the project wants gíria 'dropou' over formal 'soltou'.",
+      "suggestion": "{0} dropou {1}."
+    },
+    {
+      "key": "sim.questProgressWasps",
+      "lang": "ptBR",
+      "reason": "'Field Wasp' rendered as 'Vespa-do-Campo' (hyphenated zoological style). If 'Field Wasp' is a fixed in-game monster name with an established BR translation, match that exact name instead.",
+      "suggestion": "Progresso da missão: {0}/{1} Vespas-do-Campo derrotadas."
+    },
+    {
+      "key": "sim.questProgressWasps",
+      "lang": "esES",
+      "reason": "'Field Wasp' -> 'Avispa de Campo'. If the monster has a fixed in-game name in the es bestiary, use that exact name for consistency.",
+      "suggestion": "Progreso de la misión: {0}/{1} Avispas de Campo derrotadas."
+    },
+    {
+      "key": "sim.townTeleportReturnedToSpawn",
+      "lang": "ptBR",
+      "reason": "EN 'Town Teleport' rendered as item name 'Pergaminho de Retorno' (Town Teleport Scroll). Confirm this matches the item's localized name in the item DB; if the feature is a non-scroll teleport, drop 'Pergaminho'.",
+      "suggestion": "O Pergaminho de Retorno te levou de volta ao ponto de partida inicial."
+    },
+    {
+      "key": "sim.townTeleportReturnedToSpawn",
+      "lang": "esES",
+      "reason": "Same 'Town Teleport' -> 'Pergamino de Regreso' assumption. Verify against the localized item name.",
+      "suggestion": "El Pergamino de Regreso te devolvió al punto de aparición inicial."
+    },
+    {
+      "key": "ui.off",
+      "lang": "esES",
+      "reason": "On/Off toggle pair mapped to 'Sí/No'. Semantically fine for a yes/no setting, but if it labels a device-state toggle (sound on/off) BR-style 'Activado/Desactivado' may read better. Confirm these are yes/no toggles, not on/off switches.",
+      "suggestion": "No"
+    },
+    {
+      "key": "ui.shout",
+      "lang": "esES",
+      "reason": "'Shout' chat channel -> noun 'Grito'. If this is a button that performs the action, 'Gritar' (verb) matches pt 'Gritar' and the other action buttons (Atacar, Hablar). Confirm whether it's a channel label (noun) or an action button (verb).",
+      "suggestion": "Gritar"
+    },
+    {
+      "key": "ui.focus",
+      "lang": "ptBR",
+      "reason": "'Focus' (target focus) -> 'Focar'. Common alt in BR UIs is 'Fixar' (lock-on) matching es 'Fijar'. Confirm whether this focuses the camera/target or locks a target.",
+      "suggestion": "Focar"
+    },
+    {
+      "key": "server.NotFemale",
+      "lang": "both",
+      "reason": "EN capitalizes 'Female' as a gameplay gender attribute. Provided drafts were stiff/literal ('No eres de género femenino' / 'Você não é do gênero feminino'). Rewrote to natural native phrasing ('No eres mujer.' / 'Você não é mulher.'). If the project intends a formal/clinical register for gender-locked items, the longer 'de género femenino' form may be preferred — confirm tone.",
+      "suggestion": "esES: No eres mujer. | ptBR: Você não é mulher."
+    },
+    {
+      "key": "server.NotMale",
+      "lang": "both",
+      "reason": "Same gender-register call as NotFemale: changed literal 'de género masculino' / 'do gênero masculino' to natural 'No eres hombre.' / 'Você não é homem.'. Confirm desired register.",
+      "suggestion": "esES: No eres hombre. | ptBR: Você não é homem."
+    },
+    {
+      "key": "server.PlayerDiedItemReturnedOwner",
+      "lang": "both",
+      "reason": "Source EN has a duplicated-phrase bug ('has been returned to has been returned to it's owner'). Both translations sensibly collapse the duplication and read identically to PlayerDeathItemReturn. Correct for the player, but verify whether the two keys are intentionally distinct strings.",
+      "suggestion": "esES: Has muerto y {0} ha sido devuelto a su dueño. | ptBR: Você morreu e {0} foi devolvido ao seu dono."
+    },
+    {
+      "key": "server.PlayerGenderChangedByGM",
+      "lang": "both",
+      "reason": "EN is awkward ('{0} had gender change to {1} by GM: {2}'). Reworded both to GM-as-subject active voice ('El GM {2} le ha cambiado el género a {0} a {1}' / 'O GM {2} alterou o gênero de {0} para {1}') for consistency with the other ...ByGM log lines. The es version has two 'a' prepositions ('a {0} a {1}') which is grammatical but slightly clunky; a native may prefer 'el género de {0} a {1}'.",
+      "suggestion": "esES: El GM {2} cambió el género de {0} a {1} | ptBR: O GM {2} alterou o gênero de {0} para {1}"
+    },
+    {
+      "key": "server.PlayerArchivedAfterDeletionMonths",
+      "lang": "both",
+      "reason": "EN '{1} month deletion' has no plural handling. Changed singular 'mes'/'mês' to 'mes(es)'/'mês(es)' to cover both, matching how the sibling inactivity keys read. If the codebase guarantees {1}=1 here, revert to singular.",
+      "suggestion": "esES: ...por una eliminación de {1} mes(es). | ptBR: ...devido à exclusão de {1} mês(es)."
+    },
+    {
+      "key": "server.RankNameTooShort",
+      "lang": "both",
+      "reason": "'Rank' here is a GUILD rank/title (RankNotFound/RankNum siblings). esES uses 'rango' (could read as level-rank), ptBR uses 'cargo' (guild position). Verify the rest of the guild UI: if it uses 'cargo'/'posto' (pt) or 'rango'/'cargo' (es) elsewhere, align for consistency.",
+      "suggestion": "esES: ¡El nombre del rango es demasiado corto! | ptBR: O nome do cargo é muito curto!"
+    },
+    {
+      "key": "server.RankNum",
+      "lang": "both",
+      "reason": "'Rank-{0}' guild-position label. Translated es 'Rango-{0}', pt 'Cargo-{0}'. Cross-check against the guild-window term used for ranks/positions so the label matches.",
+      "suggestion": "esES: Rango-{0} | ptBR: Cargo-{0}"
+    },
+    {
+      "key": "server.RecallAttemptWithoutPermission",
+      "lang": "both",
+      "reason": "'Recall' = summon/teleport-to-me (Taoist/hero recall). Chose 'invocar' (es) / 'convocar' (pt). Mir communities sometimes keep 'recall' or use 'teleportar'. Verify the term used by the recall skill/hero strings elsewhere.",
+      "suggestion": "esES: Se intentó invocarte sin tu permiso | ptBR: Tentaram convocá-lo sem a sua permissão"
+    },
+    {
+      "key": "server.RandomTextFileNotExist",
+      "lang": "both",
+      "reason": "Developer/script-debug string referencing the literal identifier 'randomTextFile'. Kept the identifier untranslated. Confirm whether such internal debug strings should be localized at all (may be left in EN by convention).",
+      "suggestion": "esES: El randomTextFile:{0} no existe. | ptBR: O randomTextFile:{0} não existe."
+    },
+    {
+      "key": "server.SecondChanceAtLife",
+      "lang": "both",
+      "reason": "Flavor revive message. Rendered es 'una segunda oportunidad de vida' and pt 'uma segunda chance de viver'. Both natural; a native may prefer es 'una segunda oportunidad en la vida' / pt 'uma segunda chance na vida'. Confirm preferred idiom.",
+      "suggestion": "esES: Se te ha dado una segunda oportunidad de vida | ptBR: Você recebeu uma segunda chance de viver"
+    },
+    {
+      "key": "client.AttackMode_Guild",
+      "lang": "esES",
+      "reason": "Glossary maps Guild->'Hermandad' (note: hermandad/gremio); I used 'Clan' as the common Spain-MMO term. Pick one and apply consistently across all guild strings.",
+      "suggestion": "[Modo: Hermandad]"
+    },
+    {
+      "key": "client.AttackMode_EnemyGuild",
+      "lang": "esES",
+      "reason": "Same guild-term decision (Clan vs Hermandad) — keep consistent with whatever AttackMode_Guild uses.",
+      "suggestion": "[Modo: Hermandad enemiga]"
+    },
+    {
+      "key": "client.CannotUseBackslashInGuildName",
+      "lang": "esES",
+      "reason": "'clan' vs 'hermandad' for guild; align with the chosen guild term project-wide.",
+      "suggestion": "¡No puedes usar el carácter \\ en el nombre de la hermandad!"
+    },
+    {
+      "key": "client.AutoReelChance",
+      "lang": "ptBR",
+      "reason": "Fishing mechanic 'AutoReel' (auto-reel the rod). 'fisgar' = to hook/bite; the actual pt-BR in-game fishing verb (fisgar vs recolher/puxar a linha) should be confirmed against the fishing UI.",
+      "suggestion": "Chance de fisgar automaticamente + {0}%"
+    },
+    {
+      "key": "client.AutoReelChance",
+      "lang": "esES",
+      "reason": "Fishing 'AutoReel' rendered as 'recoger automáticamente' (reel in). Confirm against the in-game fishing vocabulary (recoger vs recoger sedal/caña).",
+      "suggestion": "Probabilidad de recoger automáticamente + {0}%"
+    },
+    {
+      "key": "client.BodyGlyph",
+      "lang": "ptBR",
+      "reason": "'Glyph' is a Crystal item family; translated literally as 'Glifo de Corpo'. Verify whether glyph item names have an established community translation or stay in English.",
+      "suggestion": "Glifo de Corpo"
+    },
+    {
+      "key": "client.BodyGlyph",
+      "lang": "esES",
+      "reason": "Same: 'Body Glyph' as 'Glifo de Cuerpo' — confirm vs an established item-name convention.",
+      "suggestion": "Glifo de Cuerpo"
+    },
+    {
+      "key": "client.BraveryGlyph",
+      "lang": "ptBR",
+      "reason": "'Bravery Glyph' Crystal item; literal 'Glifo de Bravura'. Confirm item-name convention.",
+      "suggestion": "Glifo de Bravura"
+    },
+    {
+      "key": "client.BraveryGlyph",
+      "lang": "esES",
+      "reason": "'Bravery Glyph' -> 'Glifo de Valentía' (or 'de Valor'). Confirm preferred es-ES wording and item-name convention.",
+      "suggestion": "Glifo de Valentía"
+    },
+    {
+      "key": "client.CanProduceBlackStones",
+      "lang": "ptBR",
+      "reason": "'BlackStones' is a specific Mir2 item (proper noun). Translated literally 'Pedras Negras' — verify it isn't kept as a fixed item name elsewhere.",
+      "suggestion": "Pode produzir Pedras Negras."
+    },
+    {
+      "key": "client.CanProduceBlackStones",
+      "lang": "esES",
+      "reason": "'BlackStones' proper-noun item -> 'Piedras Negras'. Confirm consistency with the item name used in inventory/shop strings.",
+      "suggestion": "Puede producir Piedras Negras."
+    },
+    {
+      "key": "client.CanProducePearlsBuyCreatureItems",
+      "lang": "ptBR",
+      "reason": "'Pearls' (Creature-shop currency) and 'Creature items' are Mir2 economy nouns; literal rendering may not match the established item/currency names.",
+      "suggestion": "Pode produzir Pérolas, usadas para comprar itens de Criatura."
+    },
+    {
+      "key": "client.CanProducePearlsBuyCreatureItems",
+      "lang": "esES",
+      "reason": "'Pearls'/'Creature items' economy nouns; confirm against established es-ES names for the Pearl currency and Creature shop.",
+      "suggestion": "Puede producir Perlas, usadas para comprar objetos de Criatura."
+    },
+    {
+      "key": "client.BuffEffect",
+      "lang": "ptBR",
+      "reason": "Template '{0} {1} by: {2}{3}' assembled at runtime (likely {0}=verb e.g. 'Aumentou', {1}=stat, {2}{3}=sign+value). Sentence structure 'em:' is a guess; verify the runtime substitution reads naturally.",
+      "suggestion": "{0} {1} em: {2}{3}.\n"
+    },
+    {
+      "key": "client.BuffEffect",
+      "lang": "esES",
+      "reason": "Runtime-assembled '{0} {1} by: {2}{3}'; 'en:' is a guess at the structure. Confirm the verb/stat substitution forms a grammatical Spanish sentence.",
+      "suggestion": "{0} {1} en: {2}{3}.\n"
+    },
+    {
+      "key": "client.CasterName",
+      "lang": "esES",
+      "reason": "Per glossary cast->es 'Lanzar', so caster->'Lanzador'. As a standalone noun 'Lanzador' can read as thrower/pitcher; confirm 'Lanzador' vs 'Conjurador' for the spell-caster label.",
+      "suggestion": "\nLanzador: {0}"
+    },
+    {
+      "key": "client.AddsDC",
+      "lang": "ptBR",
+      "reason": "Register choice (representative of all 'Adds +{0} X' / 'Concede +{0} X' stat lines): EN/zh use terse tooltip style. 'Concede' is correct but formal; many pt-BR item tooltips prefer the bare '+{0} de DC'. Confirm the preferred tooltip register, then apply uniformly.",
+      "suggestion": "+{0} de DC"
+    },
+    {
+      "key": "server.ChatBanRemainingTimeByDay",
+      "lang": "both",
+      "reason": "Incoming es/pt used 'durante ... más' / 'por mais' for 'banned for ANOTHER N units'. Rewrote to 'Seguirás silenciado ...' / 'Você continuará silenciado ...' which reads more naturally for a remaining-time message, but the literal 'más/mais' (= 'another/more') is also defensible. Confirm preferred phrasing for the whole ChatBanRemainingTime* family (kept consistent across By Day/Hour/Minute/Second).",
+      "suggestion": "esES: 'Seguirás silenciado en el chat durante {0} día(s), ...' ; ptBR: 'Você continuará silenciado no chat por mais {0} dia(s), ...'"
+    },
+    {
+      "key": "server.CreatureDismissed",
+      "lang": "esES",
+      "reason": "EN distinguishes 'dismissed' (CreatureDismissed) from 'released' (CreatureReleased); the incoming es collapsed both onto 'liberada'. I split them: dismissed='despedida', released='liberada'. 'Despedida' for a summon is a judgement call — a native may prefer 'descartada' or also 'liberada' if the game treats the two events identically.",
+      "suggestion": "La criatura {0} ha sido despedida.  (vs released = liberada)"
+    },
+    {
+      "key": "server.ConquestNotFoundOrWarOn",
+      "lang": "both",
+      "reason": "'Conquest' here is the conquest/siege FEATURE (zh 征战). Kept the proper-noun 'Conquista'/'Conquista' for consistency with the other Conquest* keys, but in running prose 'Conquista no encontrada o hay una guerra en curso' / 'ou há uma guerra em andamento' reads slightly stiff. Verify the in-UI name used for the conquest system.",
+      "suggestion": "esES: 'Conquista no encontrada o hay una guerra en curso.' ; ptBR: 'Conquista não encontrada ou há uma guerra em andamento.'"
+    },
+    {
+      "key": "server.GroupRecallDisabled",
+      "lang": "both",
+      "reason": "'Recall' (group teleport-to-leader) localized as es 'Convocatoria'/pt 'Convocação' (summon), consistent with GuildLeaderSummonMembers. Some communities keep 'Recall' or use es 'Reunión'/pt 'Reunir'. Confirm the term used in the group/party UI.",
+      "suggestion": "esES: 'Convocatoria de grupo desactivada.' ; ptBR: 'Convocação de grupo desativada.'"
+    },
+    {
+      "key": "server.FirstPrizeGoldReward",
+      "lang": "both",
+      "reason": "Localized the number to es/pt digit grouping (1.000.000). If the game renders gold values from a single locale-agnostic formatter elsewhere, this hard-coded '1.000.000' could clash with how other gold amounts display. Confirm number formatting policy.",
+      "suggestion": "esES: '¡Ganaste el 1.er premio! Recibiste 1.000.000 de oro.' ; ptBR: 'Você ganhou o 1º prêmio! Recebeu 1.000.000 de ouro.'"
+    },
+    {
+      "key": "server.GuildBuffPurchaseSuccessFree",
+      "lang": "both",
+      "reason": "'guild buff' kept 'buff' (community/dev register, consistent with prior batches). A more localized audience may prefer es 'mejora de gremio' / pt 'aprimoramento de guilda'. Decide buff vs mejora/aprimoramento corpus-wide.",
+      "suggestion": "Keep 'buff de gremio' / 'buff de guilda' OR switch to 'mejora'/'aprimoramento' consistently."
+    },
+    {
+      "key": "server.FaceLoverToDivorce",
+      "lang": "ptBR",
+      "reason": "Glossary Lover term: es uses 'pareja', pt-BR here uses 'cônjuge' (spouse). The marriage strings in this batch (Married/Divorce) treat the partner as a spouse, so 'cônjuge' fits; but if the project standardizes on 'amor'/'parceiro(a)' for the Lover channel, align this. Confirm pt-BR marriage-partner term.",
+      "suggestion": "ptBR kept 'cônjuge'; switch to project's standard partner term if different."
+    },
+    {
+      "key": "server.SiegesRepaired",
+      "lang": "both",
+      "reason": "Conquest 'Sieges' = the siege-engine structures repaired at a Sabuk wall, not the act of besieging. esES 'Máquinas de asedio' / ptBR 'Máquinas de cerco' makes the noun concrete; confirm the conquest UI uses 'máquinas de asedio/cerco' rather than a bare 'Asedios/Cercos'.",
+      "suggestion": "esES: 'Máquinas de asedio reparadas: {0}/{1}'. ptBR: 'Máquinas de cerco reparadas: {0}/{1}'."
+    },
+    {
+      "key": "server.SpawnOnlyDuringConquest",
+      "lang": "both",
+      "reason": "Conquest term: glossary maps Conquest/Siege -> esES 'Asedio' / ptBR 'Cerco', but here the noun is the event 'a conquest'. Used 'conquista' (esES/ptBR) for the event sense. Confirm the project's standing term for the Sabuk conquest EVENT (conquista) vs the siege MECHANIC (asedio/cerco) so the two don't drift.",
+      "suggestion": "Keep 'conquista' for the event; reserve 'asedio'/'cerco' for siege mechanics. Align with whatever the conquest window header uses."
+    },
+    {
+      "key": "server.YouAreMentoredBy",
+      "lang": "ptBR",
+      "reason": "Mentor system verb. Used 'orientado por {0}' (natural pt). Sibling 'YouAreMentorOf' keeps the noun 'Mentor'. Confirm the pt-BR mentorship UI verb is 'orientar/orientado' vs 'tutelado/apadrinhado'.",
+      "suggestion": "Agora você é orientado por {0}. (or 'tutelado por {0}' if the UI standardises on tutela)"
+    },
+    {
+      "key": "server.YouCantStartNewMentorship",
+      "lang": "both",
+      "reason": "'Mentorship' noun. Rendered esES 'relación de mentoría' / ptBR 'relação de mentoria'. Some servers shorten to 'mentoría/mentoria' alone. Confirm preferred noun across the mentor UI (also affects YouHaveMentorshipCooldown).",
+      "suggestion": "esES: 'Aún no puedes iniciar una nueva relación de mentoría.' ptBR: 'Você ainda não pode iniciar uma nova relação de mentoria.'"
+    },
+    {
+      "key": "server.YouCannotRideWithoutBridle",
+      "lang": "both",
+      "reason": "Mount tack vocabulary: EN distinguishes 'bridle' (this key) from 'saddle' (YouMustHaveSaddle). Used esES 'brida' / ptBR 'freio' for bridle and 'silla de montar' / 'sela' for saddle. Confirm the mount-tack item names shipped in the item DB so the message matches the actual item label.",
+      "suggestion": "esES bridle='brida', saddle='silla de montar'. ptBR bridle='freio', saddle='sela'. Verify vs item names."
+    },
+    {
+      "key": "server.YouMustHaveSaddle",
+      "lang": "both",
+      "reason": "Same mount-tack pairing as YouCannotRideWithoutBridle — ensure 'saddle' term ('silla de montar' / 'sela') matches the in-game saddle item name.",
+      "suggestion": "esES 'silla de montar', ptBR 'sela'. Align with the equip-slot/item label."
+    },
+    {
+      "key": "server.WonderDrugActive",
+      "lang": "both",
+      "reason": "Item proper-noun 'WonderDrug'. Rendered 'Poción Milagrosa' / 'Poção Milagrosa' (matches the item name used elsewhere in the corpus). Confirm the WonderDrug consumable is localized with this exact name in the item DB so the buff message matches.",
+      "suggestion": "Keep 'Poción Milagrosa' / 'Poção Milagrosa' if that is the shipped item name; otherwise mirror the item label."
+    },
+    {
+      "key": "server.YouAreWalkingExplosive",
+      "lang": "both",
+      "reason": "Flavour/debuff line ('You are a walking explosive' — Firebomb/explosion debuff). esES 'explosivo andante' / ptBR 'bomba ambulante' are idiomatic but loose. Confirm the intended tone (warning vs joke) for the explosion debuff.",
+      "suggestion": "esES 'Eres un explosivo andante.' ptBR 'Você é uma bomba ambulante.' (idiomatic; adjust if a sterner warning is wanted)"
+    },
+    {
+      "key": "server.LowDC",
+      "lang": "both",
+      "reason": "EN says 'You do not have enough DC.' but the zhCN source mistranslates DC->道术值 (SC/Taoist) — and sibling LowMC/LowSC are also crossed (LowMC zh=魔法值, LowSC zh=精神值). Followed the EN siglas (DC/MC/SC) per glossary. A native + game designer should confirm which stat each line actually gates in the sim, since the EN vs zhCN disagree.",
+      "suggestion": "es 'No tienes suficiente DC.' / pt 'Você não tem DC suficiente.' — verify DC/MC/SC mapping against the actual cast-cost check."
+    },
+    {
+      "key": "server.NoPushingInSafezone",
+      "lang": "both",
+      "reason": "EN 'No pushing in the safezone. tut tut.' has a playful scolding tail ('tut tut'). Rendered es 'Eh, eh.' / pt 'Olha o respeito.' to keep the tone, but this is a taste call — a native may prefer a different interjection (es 'ja, ja' reads as laughter; pt 'tsc tsc' mimics the sound).",
+      "suggestion": "es 'Prohibido empujar en la zona segura. Eh, eh.' / pt 'Proibido empurrar na zona segura. Tsc, tsc.' — confirm tone."
+    },
+    {
+      "key": "server.MentalstateTrickShot",
+      "lang": "both",
+      "reason": "Archer mentalstate 'Trick shot'. No canonical es/pt Mir2 term; used es 'disparo especial' / pt 'tiro especial'. A native familiar with the Archer kit may prefer 'tiro acrobático'/'disparo acrobático' or keeping 'Trick Shot'.",
+      "suggestion": "Verify against the Archer skill UI; 'tiro especial' is a safe generic."
+    },
+    {
+      "key": "server.NeedMarriedForWeddingRing",
+      "lang": "both",
+      "reason": "Casing/term decision for 'Wedding Ring': normalized to es 'Anillo de boda' / pt 'Aliança de casamento' (lowercase noun) to match the corpus MAJORITY, but the corpus is internally inconsistent (es also has 'alianza de boda' and capitalized 'Anillo de Boda'; pt is consistent 'Aliança de casamento'). Applies to all NeedWeddingRing*/NotEnoughGoldForWeddingRing keys. A native should pick ONE canonical form corpus-wide.",
+      "suggestion": "es: standardize on 'Anillo de boda' OR 'Alianza de boda'. pt: 'Aliança de casamento' (already consistent)."
+    },
+    {
+      "key": "server.MentoredBySameClass",
+      "lang": "both",
+      "reason": "EN 'You can only be mentored by someone of the same Class.' Avoided the passive 'ser tutelado/orientado' (stiff) for es 'Solo puede ser tu mentor alguien de tu misma clase.' / pt 'Só pode ser seu mentor alguém da mesma classe.' Note corpus mentorship noun is es 'Tutoría' but the PERSON is 'Mentor' in both langs — verify the agent noun reads naturally here.",
+      "suggestion": "Confirm 'mentor' (person) vs 'Tutoría' (relationship) split is applied consistently."
+    },
+    {
+      "key": "server.NoGTFoundContactGM",
+      "lang": "both",
+      "reason": "'GT' = Guild Territory abbreviation (cf. sibling NoGTMapsContactGM, NoGuildTerritoryAvailable). Expanded to 'territorio(s) de gremio' / 'território de guilda' rather than keeping the opaque 'GT'. Confirm the project doesn't surface 'GT' as a player-facing acronym elsewhere.",
+      "suggestion": "es 'No se encontraron territorios de gremio. ¡Contacta con un GM!' / pt 'Nenhum território de guilda encontrado. Contate um GM!'"
+    },
+    {
+      "key": "server.LosingControlOf",
+      "lang": "both",
+      "reason": "Pet-control message with .NET percent format and REORDERED placeholders: EN 'Losing control of {1} {0:P0}'. Kept the {1} {0:P0} order and the :P0 format specifier verbatim, but a native should verify the rendered string reads naturally (e.g. 'Perdiendo el control de Skeleton 75 %') and that the runtime formatter honors :P0.",
+      "suggestion": "es 'Perdiendo el control de {1} {0:P0}' / pt 'Perdendo o controle de {1} {0:P0}' — verify percent rendering + word order in-game."
+    },
+    {
+      "key": "server.MailCollectFromPostOffice",
+      "lang": "ptBR",
+      "reason": "'post office' -> pt 'correio' (singular). 'Correios' (plural, capitalized) is the BR institution brand; here it's a generic in-game building, so lowercase singular 'correio' was used. A BR native should confirm preference vs 'agência dos Correios'.",
+      "suggestion": "As correspondências devem ser retiradas no correio."
+    },
+    {
+      "key": "server.NoNearbyOwnedCarcasses",
+      "lang": "both",
+      "reason": "'carcasses' = lootable monster corpses (Taoist/skinning context). es 'cadáveres' / pt 'cadáver' chosen; in a hunting context pt 'carcaça' may be more idiomatic for an animal corpse, and es 'restos' is an option. Verify against the skinning/loot UI.",
+      "suggestion": "es 'No hay cadáveres tuyos en las cercanías.' / pt 'Não há nenhum cadáver seu por perto.' — consider 'carcaça' (pt)."
+    }
+  ]
+}

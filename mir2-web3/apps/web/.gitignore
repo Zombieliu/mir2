@@ -15,3 +15,9 @@ docs/generated/economy-qa/
 # Soak-QA run artifacts (time-series + report + screenshots from `npm run
 # qa:soak`). Run-specific; not source.
 docs/generated/soak-qa/
+
+# i18n AI-translation scratch (batch-*.json, _write-batch-*.mjs, source.json,
+# flagged.jsonl, glossary.json). The distilled, reviewed outputs are committed
+# instead: lib/generated/localization_bundle.json, lib/generated/i18n-glossary.json,
+# lib/generated/i18n-native-review.json, and packages/game-data/data/i18n-overrides.json.
+docs/generated/i18n-work/

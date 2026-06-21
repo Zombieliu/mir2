@@ -452,7 +452,13 @@ export function OriginalClientShell({
   const sceneLoadingLabel = t(
     "scene.loadingMap",
     [],
-    language === "zh-CN" ? "地图加载中…" : language === "es" ? "Cargando mapa…" : "Loading map…",
+    language === "zh-CN"
+      ? "地图加载中…"
+      : language === "es"
+        ? "Cargando mapa…"
+        : language === "pt-BR"
+          ? "Carregando mapa…"
+          : "Loading map…",
   );
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
