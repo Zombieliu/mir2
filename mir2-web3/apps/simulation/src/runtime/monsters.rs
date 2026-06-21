@@ -2187,7 +2187,15 @@ pub(super) fn monster_player_attack_damage(
         // (then a separate DC line splash, handled via the line-branch).
         116 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
         116 => crystal_monster_attack_damage(monster_name),
-        _ => 7,
+        // Crystal `MonsterObject.GetMonster` returns the base `MonsterObject`
+        // for `AI == 0` (and any unmodeled AI value), whose `Attack()` deals
+        // `GetAttackPower(MinDC, MaxDC)` physical melee. AI 0 is by far the most
+        // common shipped family — 3588 respawn groups / 251 distinct monsters —
+        // so the old `_ => 7` stub made the bulk of the world hit for a flat 7.
+        // Mirror the zone-authoritative path
+        // (`zone_native_monster_player_attack_damage` already defaults to
+        // `zone_crystal_monster_attack_damage`) and use the imported DC.
+        _ => crystal_monster_attack_damage(monster_name),
     };
     let mitigation = crystal_player_rolled_armour(world);
     if base_damage <= 0 {
