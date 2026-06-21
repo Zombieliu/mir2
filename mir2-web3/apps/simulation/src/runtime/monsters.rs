@@ -1828,7 +1828,23 @@ pub(super) fn monster_in_attack_range(
                 && (dx != 0 || dy != 0)
                 && ((dx <= 1 && dy <= 1) || dx == dy || dx % 2 == dy % 2)
         }
-        4 | 18 | 29 | 61 => {
+        // Crystal `SpittingSpider.InAttackRange` (AI 4): cap 2, then
+        // `(x<=1 && y<=1) || (x==y || x%2==y%2)`. Kept separate from the
+        // 18|29|61 arm below, whose `dx<=max && dy<=max` clause is always true
+        // after the cap check (collapsing to a full box) — that would let AI 4
+        // strike (2,1)/(1,2), which are out of range in Crystal.
+        4 => {
+            let dx = (target.x - source.x).abs();
+            let dy = (target.y - source.y).abs();
+            if dx == 0 && dy == 0 {
+                return false;
+            }
+            if dx > 2 || dy > 2 {
+                return false;
+            }
+            (dx <= 1 && dy <= 1) || dx == dy || dx % 2 == dy % 2
+        }
+        18 | 29 | 61 => {
             let dx = (target.x - source.x).abs();
             let dy = (target.y - source.y).abs();
             if dx == 0 && dy == 0 {

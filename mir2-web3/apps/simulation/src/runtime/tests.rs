@@ -5014,6 +5014,50 @@ fn spitting_spider_ai_attacks_from_two_tiles_with_line_timing() {
 }
 
 #[test]
+fn crystal_ai4_spitting_spider_attack_range_matches_crystal() {
+    // Crystal `SpittingSpider.InAttackRange`: cap 2, then
+    // `(x<=1 && y<=1) || (x==y || x%2==y%2)`. (2,1)/(1,2) are OUT of range in
+    // Crystal but were previously IN (the shared 18|29|61 arm collapsed to a
+    // full 2x2 box because its `dx<=max && dy<=max` clause is always true after
+    // the cap check). This locks in the exact predicate for AI 4.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let spider_position = Point { x: 340, y: 270 };
+    let spider = spawn_crystal_monster_for_test(
+        &mut session,
+        98_904_u32,
+        "SpittingSpider",
+        spider_position.clone(),
+        MirDirection::Left,
+        true,
+    );
+    let entry = session.app.world().entity(spider);
+    let agent = entry.get::<MonsterAgent>().expect("spitting spider agent");
+    assert_eq!(agent.ai, 4, "SpittingSpider should be AI 4");
+
+    let at = |dx: i32, dy: i32| Point {
+        x: spider_position.x + dx,
+        y: spider_position.y + dy,
+    };
+    // In range: adjacent box, diagonal (x==y), and same-parity (x%2==y%2).
+    for (dx, dy) in [(1, 1), (2, 2), (2, 0), (0, 2), (1, 0)] {
+        assert!(
+            super::monster_in_attack_range(agent, &spider_position, &at(dx, dy)),
+            "({dx},{dy}) should be in SpittingSpider attack range"
+        );
+    }
+    // Out of range: (2,1)/(1,2) (the corrected cases), beyond the 2-tile cap,
+    // and the same tile.
+    for (dx, dy) in [(2, 1), (1, 2), (3, 0), (0, 0)] {
+        assert!(
+            !super::monster_in_attack_range(agent, &spider_position, &at(dx, dy)),
+            "({dx},{dy}) should be OUT of SpittingSpider attack range"
+        );
+    }
+}
+
+#[test]
 fn sand_worm_uses_crystal_line_attack_shape_and_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
