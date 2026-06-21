@@ -23,6 +23,11 @@ mod great_fox_spirit;
 mod hell_bomb;
 mod hell_lord;
 mod holy_deva_fear;
+mod horned_archer;
+mod horned_commander;
+mod horned_mage;
+mod horned_sorceror;
+mod horned_warrior;
 mod kirin_ice_thrust;
 mod reviving_zombie;
 mod shinsu;
@@ -59,6 +64,11 @@ pub(super) use self::great_fox_spirit::*;
 pub(super) use self::hell_bomb::*;
 pub(super) use self::hell_lord::*;
 pub(super) use self::holy_deva_fear::*;
+pub(super) use self::horned_archer::*;
+pub(super) use self::horned_commander::*;
+pub(super) use self::horned_mage::*;
+pub(super) use self::horned_sorceror::*;
+pub(super) use self::horned_warrior::*;
 pub(super) use self::kirin_ice_thrust::*;
 pub(super) use self::reviving_zombie::*;
 pub(super) use self::shinsu::*;
@@ -277,6 +287,54 @@ pub(super) fn update_special_monster_state(
         return true;
     }
 
+    // Crystal HornedMage (AI 163): AxeSkeleton fear/kite + MC splash / ranged DC / teleport.
+    if agent.ai == 163
+        && update_horned_mage_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        )
+    {
+        return true;
+    }
+
+    // Crystal HornedArcher (AI 164): ally-buff ProcessTarget (ranged DC is the default path).
+    if agent.ai == 164
+        && update_horned_archer_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        )
+    {
+        return true;
+    }
+
+    // Crystal HornedSorceror (AI 169): stomp/tornado/thrust ProcessAI state machine.
+    if agent.ai == 169
+        && update_horned_sorceror_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        )
+    {
+        return true;
+    }
+
     match agent.ai {
         14 => update_evil_centipede_state(
             world,
@@ -407,6 +465,28 @@ pub(super) fn update_special_monster_state(
         ),
         99 => update_hell_bomb_state(world, entity, agent, ai_state, position, tick, packets),
         255 => update_stone_trap_state(world, entity, agent, position, tick),
+        // Crystal HornedWarrior (AI 165): shield phase + DC melee / wide-line splash.
+        165 => update_horned_warrior_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
+        // Crystal HornedCommander (AI 171): multi-phase boss (summons, shield, AoE).
+        171 => update_horned_commander_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         _ => false,
     }
 }

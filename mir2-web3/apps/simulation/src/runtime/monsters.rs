@@ -1770,6 +1770,10 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         6 | 58 | 113 => agent.view_range.max(1),
         57 => 10,
         8 => 6,
+        // Crystal HornedArcher (AI 164) inherits AxeSkeleton.AttackRange = 6;
+        // HornedSorceror (AI 169) uses range 5.
+        164 => 6,
+        169 => 5,
         _ => 1,
     }
 }
@@ -1867,7 +1871,7 @@ pub(super) fn monster_in_attack_range(
 pub(super) fn monster_uses_ranged_attack(agent: &MonsterAgent) -> bool {
     matches!(
         agent.ai,
-        8 | 26 | 32 | 38 | 45 | 46 | 47 | 48 | 54 | 57 | 61 | 113 | 118 | 181 | 182
+        8 | 26 | 32 | 38 | 45 | 46 | 47 | 48 | 54 | 57 | 61 | 113 | 118 | 164 | 181 | 182
     )
 }
 
@@ -2190,7 +2194,7 @@ pub(super) fn monster_player_attack_damage(
         // `ZumaMonster` (base), `ShamanZombie.Attack`, `BoneSpearman.Attack`,
         // `BlackFoxman.Attack` — all use `GetAttackPower(MinDC, MaxDC)` for
         // the attack damage. Previously these fell through to the default 7.
-        4 | 8 | 15 | 26 | 29 | 44 => crystal_monster_attack_damage(monster_name),
+        4 | 8 | 15 | 26 | 29 | 44 | 164 => crystal_monster_attack_damage(monster_name),
         // Crystal `DigOutZombie` (AI 24) and `RevivingZombie` (AI 25) have
         // no `Attack()` override — they fall through to base
         // `MonsterObject.Attack()`, which uses `GetAttackPower(MinDC, MaxDC)`.
