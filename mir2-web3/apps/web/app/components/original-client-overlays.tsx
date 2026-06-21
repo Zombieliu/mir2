@@ -873,6 +873,17 @@ function createPanelText(language: Mir2Language, key: "name" | "gender" | "class
       nameExists: "A character with this name already exists.",
       slotsFull: "All character slots are full.",
     },
+    "pt-BR": {
+      name: "Nome",
+      gender: "Sexo",
+      class: "Classe",
+      male: "Masculino",
+      female: "Feminino",
+      create: "Criar",
+      nameRequired: "Digite o nome do personagem.",
+      nameExists: "Já existe um personagem com esse nome.",
+      slotsFull: "Todos os espaços de personagem estão cheios.",
+    },
   };
   return dictionary[language]?.[key] ?? dictionary.en[key];
 }
