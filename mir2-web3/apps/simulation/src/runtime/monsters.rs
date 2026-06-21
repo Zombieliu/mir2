@@ -767,6 +767,10 @@ pub(super) fn initial_monster_ai_state(ai: u8, tick: u64) -> MonsterAiState {
     if ai == 99 {
         state.next_state_tick = tick + HELL_BOMB_EXPLOSION_LIFETIME_TICKS;
     }
+    if ai == 70 {
+        // Crystal Hugger: 5-minute fuse before it detonates (mirrors AI 40/99).
+        state.next_state_tick = tick + super::monster_ai::HUGGER_EXPLOSION_LIFETIME_TICKS;
+    }
     state
 }
 
@@ -829,13 +833,13 @@ pub(super) fn initial_yimoogi_state(tick: u64) -> YimoogiState {
 
 pub(super) fn monster_disposition_for_ai(ai: u8) -> WorldEntityDisposition {
     match ai {
-        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113 => WorldEntityDisposition::Neutral,
+        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 68 | 81 | 113 => WorldEntityDisposition::Neutral,
         _ => WorldEntityDisposition::Hostile,
     }
 }
 
 pub(super) fn monster_targets_players(ai: u8) -> bool {
-    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113)
+    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 68 | 81 | 113)
 }
 
 pub(super) fn monster_uses_zuma_stone_state(ai: u8) -> bool {
@@ -874,7 +878,8 @@ pub(super) fn monster_can_attack(agent: &MonsterAgent, ai_state: &MonsterAiState
     match agent.ai {
         18 => ai_state.mode,
         48 => ai_state.mode,
-        1 | 2 | 3 | 56 | 98 | 99 | 128 | 255 => false,
+        // 68 Football, 81 Gate, 170 BoulderSpirit: passive — never melee.
+        1 | 2 | 3 | 56 | 68 | 81 | 98 | 99 | 128 | 170 | 255 => false,
         _ => true,
     }
 }
@@ -1910,6 +1915,8 @@ pub(super) fn monster_broadcasts_attack_on_damage_due(agent: &MonsterAgent) -> b
 }
 
 pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
+    // Immobile/passive structures (52 EvilMir, 68 Football, 81 Gate, 142 TreeQueen,
+    // 170 BoulderSpirit) never follow routes.
     !matches!(
         agent.ai,
         3 | 5
@@ -1923,12 +1930,15 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 47
             | 48
             | 50
+            | 52
             | 54
             | 56
             | 57
             | 58
             | 61
+            | 68
             | 79
+            | 81
             | 98
             | 99
             | 113
@@ -1936,6 +1946,8 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 120
             | 122
             | 128
+            | 142
+            | 170
             | 255
     )
 }
@@ -1954,12 +1966,15 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
+                | 68
                 | 79
+                | 81
                 | 98
                 | 99
                 | 113
@@ -1967,6 +1982,8 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 170
                 | 255
         )
 }
@@ -1986,12 +2003,15 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
+                | 68
                 | 79
+                | 81
                 | 98
                 | 99
                 | 113
@@ -1999,6 +2019,8 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 170
                 | 255
         )
 }

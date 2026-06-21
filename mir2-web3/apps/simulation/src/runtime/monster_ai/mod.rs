@@ -10,14 +10,18 @@ mod armadillo;
 mod axe_skeleton_fear;
 mod bomb_spider;
 mod bone_lord;
+mod boulder_spirit;
 mod cannibal_plant;
 mod common;
 mod deer_run_away;
 mod dig_out_zombie;
 mod dragon_statue_sleep;
 mod evil_centipede;
+mod evil_mir;
+mod football;
 mod foxman_fear;
 mod frost_tiger_sitting;
+mod gate;
 mod general_meow_meow;
 mod great_fox_spirit;
 mod hell_bomb;
@@ -28,7 +32,10 @@ mod horned_commander;
 mod horned_mage;
 mod horned_sorceror;
 mod horned_warrior;
+mod hugger;
 mod kirin_ice_thrust;
+mod mud_zombie;
+mod poison_hugger;
 mod reviving_zombie;
 mod shinsu;
 mod snake_totem;
@@ -39,6 +46,7 @@ mod summoned_monster;
 mod thunder_element;
 mod town_archer;
 mod trap_rock;
+mod tree_queen;
 mod tucson_general;
 mod vampire_spider;
 mod wooma_taurus;
@@ -51,14 +59,18 @@ pub(super) use self::armadillo::*;
 pub(super) use self::axe_skeleton_fear::*;
 pub(super) use self::bomb_spider::*;
 pub(super) use self::bone_lord::*;
+pub(super) use self::boulder_spirit::*;
 pub(super) use self::cannibal_plant::*;
 pub(super) use self::common::*;
 pub(super) use self::deer_run_away::*;
 pub(super) use self::dig_out_zombie::*;
 pub(super) use self::dragon_statue_sleep::*;
 pub(super) use self::evil_centipede::*;
+pub(super) use self::evil_mir::*;
+pub(super) use self::football::*;
 pub(super) use self::foxman_fear::*;
 pub(super) use self::frost_tiger_sitting::*;
+pub(super) use self::gate::*;
 pub(super) use self::general_meow_meow::*;
 pub(super) use self::great_fox_spirit::*;
 pub(super) use self::hell_bomb::*;
@@ -69,7 +81,10 @@ pub(super) use self::horned_commander::*;
 pub(super) use self::horned_mage::*;
 pub(super) use self::horned_sorceror::*;
 pub(super) use self::horned_warrior::*;
+pub(super) use self::hugger::*;
 pub(super) use self::kirin_ice_thrust::*;
+pub(super) use self::mud_zombie::*;
+pub(super) use self::poison_hugger::*;
 pub(super) use self::reviving_zombie::*;
 pub(super) use self::shinsu::*;
 pub(super) use self::snake_totem::*;
@@ -80,6 +95,7 @@ pub(super) use self::summoned_monster::*;
 pub(super) use self::thunder_element::*;
 pub(super) use self::town_archer::*;
 pub(super) use self::trap_rock::*;
+pub(super) use self::tree_queen::*;
 pub(super) use self::tucson_general::*;
 pub(super) use self::vampire_spider::*;
 pub(super) use self::wooma_taurus::*;
@@ -335,6 +351,38 @@ pub(super) fn update_special_monster_state(
         return true;
     }
 
+    // Crystal EvilMir (AI 52): sleeping-immobile boss; ranged / mass attack when awake.
+    if agent.ai == 52
+        && update_evil_mir_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        )
+    {
+        return true;
+    }
+
+    // Crystal TreeQueen (AI 142): immobile field boss; root-bombardment timers.
+    if agent.ai == 142
+        && update_tree_queen_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        )
+    {
+        return true;
+    }
+
     match agent.ai {
         14 => update_evil_centipede_state(
             world,
@@ -478,6 +526,54 @@ pub(super) fn update_special_monster_state(
         ),
         // Crystal HornedCommander (AI 171): multi-phase boss (summons, shield, AoE).
         171 => update_horned_commander_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
+        // Crystal Football (AI 68): passive kickable ball; no self-driven AI.
+        68 => update_football_state(agent, tick),
+        // Crystal PoisonHugger (AI 69): suicide bomber + ranged poison.
+        69 => update_poison_hugger_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
+        // Crystal Hugger (AI 70): timed/melee-kill bomber.
+        70 => update_hugger_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
+        // Crystal Gate (AI 81): passive conquest-gate structure (invulnerable wall).
+        81 => update_gate_state(world, entity, agent, ai_state, position, tick, packets),
+        // Crystal MudZombie (AI 108): line-splash melee / ranged MC, green poison.
+        108 => update_mud_zombie_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
+        // Crystal BoulderSpirit (AI 170): immobile proximity mine.
+        170 => update_boulder_spirit_state(
             world,
             entity,
             agent,
