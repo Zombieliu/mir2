@@ -626,6 +626,8 @@ export function OriginalClientSceneOverlays({
   playerCameraMotionOffset,
   entityMotionSnapshots,
   motionNow,
+  imperativeCamera,
+  registerCameraSurface,
   chatBubbles,
   damageFloaters,
   targetActionLabel,
@@ -639,6 +641,8 @@ export function OriginalClientSceneOverlays({
   playerCameraMotionOffset: ViewportOffset;
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
+  imperativeCamera: boolean;
+  registerCameraSurface: (key: string) => (el: HTMLElement | null) => void;
   chatBubbles: SceneChatBubble[];
   damageFloaters: DisplayDamageFloater[];
   targetActionLabel: string | null;
@@ -659,6 +663,17 @@ export function OriginalClientSceneOverlays({
       aria-hidden={chatBubbles.length === 0 && damageFloaters.length === 0 && !selectedEntity}
     >
       <style>{OVERLAY_STYLES}</style>
+      {/* World-positioned overlays pan with the camera. In the imperative path the
+          motion driver writes this surface's transform at display Hz; the fixed HUD
+          readout below stays OUTSIDE it so it does not pan. */}
+      <div
+        ref={imperativeCamera ? registerCameraSurface("overlays") : undefined}
+        style={
+          imperativeCamera
+            ? { position: "absolute", inset: 0, pointerEvents: "none", willChange: "transform" }
+            : { display: "contents" }
+        }
+      >
       <HitFlashes
         entries={viewportEntitySprites}
         player={player}
@@ -699,6 +714,7 @@ export function OriginalClientSceneOverlays({
         entityMotionSnapshots={entityMotionSnapshots}
         motionNow={motionNow}
       />
+      </div>
       <SelectedTargetReadout t={t} selectedEntity={selectedEntity} targetActionLabel={targetActionLabel} />
     </div>
   );
