@@ -2041,6 +2041,82 @@ export function OriginalClientShell({
     };
   }, [screen, sceneInteractionReady, onViewportDirectionStep, onViewportDirectionStop]);
 
+  // The viewport tile-hit grid is 1,155 (33×35) <button>s, each carrying ~6 inline
+  // handlers. It is purely an input layer (Bevy owns the pixels) and only changes when the
+  // player's cell moves (viewportTiles is memoised on the viewport centre — stable across
+  // the per-frame motion/prediction/packet re-renders, which update predictedPlayer/world
+  // but not the centre). Memoising the ELEMENT keeps React from re-creating all 1,155
+  // buttons on those high-frequency re-renders (the dominant per-render jsxDEV cost); it
+  // rebuilds only on a cell move / screen / readiness change. The handlers read refs
+  // (heldScenePointerRef) + hoisted helpers, and sceneInteractionReady is a dep, so a held
+  // memo never captures stale interaction state. DOM is unchanged (aria-labels + hover
+  // preserved → QA harnesses + the .tile-hit:hover highlight keep working).
+  const tileHitGrid = useMemo(
+    () => (
+      <div className={`viewport-grid-overlay ${screen !== "game" ? "hidden" : ""}`}>
+        {viewportTiles.map((tile) => (
+          <button
+            key={`tile-${tile.x}-${tile.y}`}
+            type="button"
+            className="tile-hit"
+            style={{
+              left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
+              top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
+            }}
+            data-ui-interactive="true"
+            onMouseDown={(event) => {
+              if (event.button !== 0 && event.button !== 2) {
+                return;
+              }
+
+              event.stopPropagation();
+              if (!sceneInteractionReady) {
+                event.preventDefault();
+                return;
+              }
+              const point = scenePointFromMouseEvent(event);
+              const pointer: HeldScenePointer = {
+                button: event.button,
+                sceneX: point.sceneX,
+                sceneY: point.sceneY,
+                startedAt: Date.now(),
+                dispatched: false,
+                tileX: tile.x,
+                tileY: tile.y,
+              };
+              heldScenePointerRef.current = pointer;
+              if (event.button === 2) {
+                event.preventDefault();
+              }
+            }}
+            onMouseMove={(event) => {
+              const held = heldScenePointerRef.current;
+              if (!held) return;
+              const point = scenePointFromMouseEvent(event);
+              heldScenePointerRef.current = {
+                ...held,
+                sceneX: point.sceneX,
+                sceneY: point.sceneY,
+              };
+            }}
+            onMouseUp={stopHeldScenePointer}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            aria-label={`tile ${tile.x}, ${tile.y}`}
+          />
+        ))}
+      </div>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers read refs/hoisted fns; only sceneInteractionReady is dynamic state
+    [viewportTiles, screen, sceneInteractionReady],
+  );
+
   return (
     <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
       <section className="mir-stage">
@@ -2117,65 +2193,7 @@ export function OriginalClientShell({
             />
           ) : null}
 
-          <div className={`viewport-grid-overlay ${screen !== "game" ? "hidden" : ""}`}>
-            {viewportTiles.map((tile) => (
-              <button
-                key={`tile-${tile.x}-${tile.y}`}
-                type="button"
-                className="tile-hit"
-                style={{
-                  left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
-                  top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
-                }}
-                data-ui-interactive="true"
-                onMouseDown={(event) => {
-                  if (event.button !== 0 && event.button !== 2) {
-                    return;
-                  }
-
-                  event.stopPropagation();
-                  if (!sceneInteractionReady) {
-                    event.preventDefault();
-                    return;
-                  }
-                  const point = scenePointFromMouseEvent(event);
-                  const pointer: HeldScenePointer = {
-                    button: event.button,
-                    sceneX: point.sceneX,
-                    sceneY: point.sceneY,
-                    startedAt: Date.now(),
-                    dispatched: false,
-                    tileX: tile.x,
-                    tileY: tile.y,
-                  };
-                  heldScenePointerRef.current = pointer;
-                  if (event.button === 2) {
-                    event.preventDefault();
-                  }
-                }}
-                onMouseMove={(event) => {
-                  const held = heldScenePointerRef.current;
-                  if (!held) return;
-                  const point = scenePointFromMouseEvent(event);
-                  heldScenePointerRef.current = {
-                    ...held,
-                    sceneX: point.sceneX,
-                    sceneY: point.sceneY,
-                  };
-                }}
-                onMouseUp={stopHeldScenePointer}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                aria-label={`tile ${tile.x}, ${tile.y}`}
-              />
-            ))}
-          </div>
+          {tileHitGrid}
 
           <OriginalClientSceneVisualLayers
             screen={screen}
