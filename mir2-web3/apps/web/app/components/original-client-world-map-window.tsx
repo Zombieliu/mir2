@@ -91,11 +91,13 @@ export function WorldMapWindow({
                 ...style.markerDot,
                 left: `${clamp01(marker.x) * 100}%`,
                 top: `${clamp01(marker.y) * 100}%`,
-                ...(marker.teleport ? style.markerTeleport : null),
                 ...(isSelected ? style.markerSelected : null),
               }}
             >
-              <span style={style.markerInner} aria-hidden="true" />
+              {/* Tint the dot green for teleport destinations, matching the
+                  sidebar list (rowDot). markerTeleport must live on the dot,
+                  not the transparent button wrapper, to recolor it. */}
+              <span style={{ ...style.markerInner, ...(marker.teleport ? style.markerTeleport : null) }} aria-hidden="true" />
             </button>
           );
         })}
@@ -216,7 +218,7 @@ const style: Record<string, CSSProperties> = {
     background: "#caa64a",
     boxShadow: "0 0 0 1px rgba(0,0,0,0.7)",
   },
-  markerTeleport: {},
+  markerTeleport: { background: "#8be07a" },
   markerSelected: {
     outline: "2px solid rgba(248, 230, 187, 0.9)",
     borderRadius: "50%",
