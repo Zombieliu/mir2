@@ -317,7 +317,7 @@ function FallbackVfxNode({
   );
 }
 
-export function OriginalClientSceneVisualLayers({
+function OriginalClientSceneVisualLayersInner({
   screen,
   t,
   world,
@@ -644,6 +644,11 @@ export function OriginalClientSceneVisualLayers({
     </>
   );
 }
+
+// Memoised so the 30Hz motion clock (shell motionNow tick) skips this whole DOM scene layer when
+// nothing it reads actually changed. The shell already memoises every prop it passes, so a tick
+// that only advances `motionNow` (no new world/sprite data) re-renders nothing here.
+export const OriginalClientSceneVisualLayers = memo(OriginalClientSceneVisualLayersInner);
 
 function entityDisplayName(entity: DisplayEntity): string {
   return entity.name;
