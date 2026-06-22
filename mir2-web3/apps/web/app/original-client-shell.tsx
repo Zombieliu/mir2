@@ -699,6 +699,26 @@ export function OriginalClientShell({
         }
       }
 
+      // F1–F8 cast the skill in that primary skill-bar slot. Crystal maps
+      // KeybindOptions.Bar1Skill1..8 to Keys.F1..F8 (KeyBindSettings.cs:242) and
+      // stores the slot in each spell's `Magic.Key` (mirrored onto `skill.hotkey`).
+      // Prefer an explicit binding; otherwise fall back to the spell's position in
+      // the known-skills list (the order shown in the character window's spell tab),
+      // so the bar is usable before any slots are explicitly assigned.
+      const skillBarMatch = /^F([1-8])$/.exec(event.key);
+      if (skillBarMatch) {
+        const slot = Number.parseInt(skillBarMatch[1], 10);
+        const skill =
+          world.knownSkills.find((entry) => entry.hotkey === slot) ??
+          world.knownSkills[slot - 1] ??
+          null;
+        if (skill) {
+          event.preventDefault();
+          onCastSkill(skill.key);
+        }
+        return;
+      }
+
       const slotIndex = Number.parseInt(event.key, 10);
       if (!Number.isFinite(slotIndex) || slotIndex < 1 || slotIndex > 6) {
         return;
@@ -720,7 +740,16 @@ export function OriginalClientShell({
 
     window.addEventListener("keydown", handleShortcutKey);
     return () => window.removeEventListener("keydown", handleShortcutKey);
-  }, [screen, selectedEntity, world.beltItems, onApproachTarget, onPrimaryTargetAction, onUseItem]);
+  }, [
+    screen,
+    selectedEntity,
+    world.beltItems,
+    world.knownSkills,
+    onApproachTarget,
+    onPrimaryTargetAction,
+    onCastSkill,
+    onUseItem,
+  ]);
 
   function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
     const latest = latestMoveInputRef.current;

@@ -22637,6 +22637,107 @@ fn gm_level_command_sets_level_and_emits_level_changed() {
     );
 }
 
+fn player_character_level(session: &SimulationSession) -> u16 {
+    session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.level)
+        .unwrap_or(0)
+}
+
+#[test]
+fn experience_gain_auto_levels_through_the_crystal_curve() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // The starter scene spawns a level-7 demo character; normalise to a clean
+    // level 1 first. `@LEVEL 1` runs the shared `apply_level_change`, which points
+    // `max_experience` at the curve's level-1 value (100).
+    grant_gm(&mut session);
+    let _ = session.handle_packet(ClientPacket::Chat {
+        message: "@LEVEL 1".to_string(),
+        linked_items: Vec::new(),
+    });
+
+    // A clean level-1 warrior: the curve needs 100 experience to reach level 2.
+    let before = session.world_snapshot();
+    assert_eq!(player_character_level(&session), 1);
+    assert_eq!(before.player_experience, 0);
+    assert_eq!(before.player_max_experience, 100);
+    let level_1_max_hp = before.player_max_hp.expect("level-1 max hp");
+
+    // Experience under the threshold is banked, with no level-up.
+    let packets = crate::runtime::leveling::apply_experience_gain(session.app.world_mut(), 40);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 40 })));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })));
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.player_experience, 40);
+    assert_eq!(snapshot.player_max_experience, 100);
+    assert_eq!(player_character_level(&session), 1);
+
+    // Crossing the threshold levels once, carries the remainder (40 + 80 - 100 = 20),
+    // repoints `max_experience` at the level-2 curve value (200), and restores HP/MP
+    // to the new, larger maxima (Crystal `LevelUp`).
+    let packets = crate::runtime::leveling::apply_experience_gain(session.app.world_mut(), 80);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LevelChanged {
+            level: 2,
+            experience: 20,
+            max_experience: 200,
+        }
+    )));
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.player_experience, 20);
+    assert_eq!(snapshot.player_max_experience, 200);
+    assert_eq!(player_character_level(&session), 2);
+    let level_2_max_hp = snapshot.player_max_hp.expect("level-2 max hp");
+    assert!(
+        level_2_max_hp > level_1_max_hp,
+        "level-up should grow the HP pool ({level_1_max_hp} -> {level_2_max_hp})"
+    );
+    assert_eq!(
+        snapshot.player_hp,
+        Some(level_2_max_hp),
+        "HP is restored to full on level up"
+    );
+}
+
+#[test]
+fn large_experience_grant_cascades_multiple_levels() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Normalise the level-7 starter character to a clean level 1 (see above).
+    grant_gm(&mut session);
+    let _ = session.handle_packet(ClientPacket::Chat {
+        message: "@LEVEL 1".to_string(),
+        linked_items: Vec::new(),
+    });
+
+    // Curve thresholds for levels 1->2, 2->3, 3->4 are 100, 200, 300. Granting their
+    // exact sum (600) advances a level-1 character to level 4 with no remainder, and
+    // `max_experience` settles on the level-4 value (400).
+    let packets = crate::runtime::leveling::apply_experience_gain(session.app.world_mut(), 600);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LevelChanged {
+            level: 4,
+            experience: 0,
+            max_experience: 400,
+        }
+    )));
+    assert_eq!(player_character_level(&session), 4);
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.player_experience, 0);
+    assert_eq!(snapshot.player_max_experience, 400);
+}
+
 #[test]
 fn gm_gold_and_move_commands_mutate_runtime() {
     let mut session = SimulationSession::new(SimulationConfig::default());
@@ -26655,7 +26756,15 @@ fn crystal_npc_giveskill_maps_runtime_and_crystal_manifest_entries() {
         .expect("magic shield should be recorded from crystal manifest");
     assert_eq!(runtime_skill.level, 3);
     assert_eq!(manifest_skill.level, 2);
-    assert!(packets.is_empty());
+    // Each newly taught spell enqueues a `NewMagic` packet so the client learns it
+    // immediately (matching `@GIVESKILL`), rather than waiting for the next snapshot.
+    assert_eq!(
+        packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::NewMagic { .. }))
+            .count(),
+        2,
+    );
 }
 
 #[test]
