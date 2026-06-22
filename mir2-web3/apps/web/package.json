@@ -32,6 +32,7 @@
     "qa:web3": "node ./scripts/qa-web3.mjs",
     "qa:social": "node ./scripts/qa-social.mjs",
     "qa:soak": "node ./scripts/qa-soak.mjs",
+    "qa:appearance": "node ./scripts/qa-equip-appearance.mjs",
     "qa:audio": "node ./scripts/qa-audio.mjs",
     "qa:vfx": "node ./scripts/qa-vfx.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
