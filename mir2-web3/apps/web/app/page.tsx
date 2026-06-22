@@ -6400,17 +6400,24 @@ export default function HomePage() {
     }
     if (event.type !== "packet" || !event.packet) return;
 
-    appendLog(t("log.recv", [event.packet]), "network");
+    // (perf) Removed a per-packet `appendLog(t("log.recv", …), "network")`: appendLog
+    // early-returns for tone === "network" (it is never shown), so the localization
+    // lookup+format ran on every inbound packet purely to be discarded.
     const payload = event.payload ?? {};
     if (isMovementPacketName(event.packet)) {
-      debugWindow.__mir2MovementReceivedPackets = [
-        {
-          packet: event.packet,
-          payload,
-          at: Date.now(),
-        },
-        ...(debugWindow.__mir2MovementReceivedPackets ?? []),
-      ].slice(0, 50);
+      // The 50-entry movement-packet history is a diagnostic-only buffer (no harness
+      // reads it, unlike __mir2GatewayEventHistory). Only allocate it under
+      // ?movementDiagnostics=1 so normal play does not churn an array per move packet.
+      if (movementDiagnosticsRef.current?.enabled) {
+        debugWindow.__mir2MovementReceivedPackets = [
+          {
+            packet: event.packet,
+            payload,
+            at: Date.now(),
+          },
+          ...(debugWindow.__mir2MovementReceivedPackets ?? []),
+        ].slice(0, 50);
+      }
       recordMovementDiagnostic("rx:movementPacket", {
         packet: event.packet,
         payload,
