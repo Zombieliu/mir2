@@ -3,6 +3,7 @@
 import type { SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import blendFramesManifest from "../../public/generated/original-map-blend/blend-frames.json";
 import { type MapAtlasIndex, mapAtlasRectKeyForPath } from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
 import {
@@ -496,12 +497,12 @@ function sceneTintForTerrain(terrain: string, variation: number) {
 }
 
 export function mapSpriteBlendMode(path: string) {
-  return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path) ? "screen" : undefined;
+  return blendObjectFrameKey(path) ? "screen" : undefined;
 }
 
 export function mapSpriteRenderPath(path: string) {
-  const frame = bichonTorchLightFrame(path);
-  return frame ? `/generated/original-map-blend/WemadeMir2/Objects/${frame}.png` : path;
+  const key = blendObjectFrameKey(path);
+  return key ? `/generated/original-map-blend/${BLEND_MANIFEST_LIB}/${key}.png` : path;
 }
 
 const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
@@ -852,9 +853,26 @@ function sceneAssetDelayedRetryUrl(originalSrc: string, retryCount: number) {
   return retryCandidates[(retryCount - 1) % retryCandidates.length] ?? retryCandidates[0] ?? null;
 }
 
-function bichonTorchLightFrame(path: string) {
-  const match = path.match(/\/original-map\/WemadeMir2\/Objects\/(27(?:2[3-9]|3[0-2]))\.png$/i);
-  return match?.[1] ?? null;
+// Crystal blends glow objects ADDITIVELY (Effect.cs:130, MLibrary.cs:692). On the DOM fallback path we
+// fake additive with a darkness->alpha "cleaned" sprite + mix-blend-mode:screen. The set of glow frames
+// is no longer a hardcoded index range (2723..2732 was the DrawBlend `offSet` argument, GameScene.cs:10928,
+// NOT the blend gate) — it is the data-driven manifest emitted by
+// scripts/generate-crystal-map-blend-assets.mjs (dark-matte/bright-core pixel classification). The ten
+// original Bichon torches remain in that manifest and render byte-identically.
+const BLEND_MANIFEST_LIB = blendFramesManifest.lib;
+const BLEND_OBJECT_FRAMES = new Set<string>(blendFramesManifest.frames);
+
+// Returns the manifest key ("<objLib>/<frame>", e.g. "Objects/2723") if this sprite path is a blend
+// glow frame, else null.
+function blendObjectFrameKey(path: string): string | null {
+  const match = path.match(
+    new RegExp(`/original-map/${BLEND_MANIFEST_LIB}/(Objects[0-9]*/\\d+)\\.png$`, "i"),
+  );
+  if (!match?.[1]) {
+    return null;
+  }
+  const key = match[1];
+  return BLEND_OBJECT_FRAMES.has(key) ? key : null;
 }
 
 type SceneAssetCacheWindow = Window & {
