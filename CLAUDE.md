@@ -99,6 +99,8 @@ few unwirable window actions (conquest gate/tax, hero dismiss/recall — no Crys
 ## Read these (not all 40 docs)
 
 - `docs/ARCHITECTURE-CURRENT.md` — system overview
+- `mir2-web3/apps/web/CLAUDE.md` + `mir2-web3/docs/client/` — **web client subsystem maps +
+  how-to-add-a-feature recipe** (前置铺垫; `apps/web/CLAUDE.md` auto-loads when working under `apps/web/`)
 - `docs/FRONTEND-COMPLETENESS-AUDIT.md` — per-module % + methodology
 - `docs/CRYSTAL-1TO1-ROADMAP.md` — backend parity roadmap
 - `docs/ASSET-RELEASE-RUNBOOK.md` — R2 publish + deploy (the path to visible 95%)
