@@ -16,6 +16,10 @@ docs/generated/economy-qa/
 # qa:soak`). Run-specific; not source.
 docs/generated/soak-qa/
 
+# Equip→appearance QA run artifacts (reports + screenshots from `npm run
+# qa:appearance`). Run-specific; not source.
+docs/generated/equip-appearance-qa/
+
 # Audio-QA run artifacts (audio/music loop report + frames from `npm run
 # qa:audio`). Run-specific; not source.
 docs/generated/audio-qa/

@@ -35844,6 +35844,72 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
     assert_eq!(sprite.alt_weapon_library.as_deref(), None);
 }
 
+// Regression for the equip-from-inventory appearance bug: a worn item's
+// `Looks_Armour`/`Looks_Weapon` must come from the Crystal template `ItemInfo.Shape`
+// for ANY item, not only the six legacy names in `equipment_shape_for_slot_and_name`.
+// These seed REAL Crystal items whose display name ("Crystal Item NNN") is deliberately
+// absent from that table, so before the fix the body stayed `CArmour/00` and no weapon
+// layer rendered. `crystal-item-317` = BaseDress(M) (ItemInfo.Shape 1 → `CArmour/01`);
+// `crystal-item-221` = WoodenSword (ItemInfo.Shape 0 → `CWeapon/00`); both are req-level 1
+// so a freshly created male warrior can equip them.
+#[test]
+fn equipping_real_crystal_gear_updates_self_player_sprite_libraries() {
+    let mut config = SimulationConfig::default();
+    config.visible_players.clear();
+    let mut session = SimulationSession::new(config);
+    let _ = session.handle_packet(ClientPacket::Login {
+        account_id: "equip-shape".to_string(),
+        password: "demo".to_string(),
+    });
+    let _ = session.handle_packet(ClientPacket::NewCharacter {
+        name: "Looks".to_string(),
+        gender: MirGender::Male,
+        class: MirClass::Warrior,
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 1 });
+    add_equippable_test_item(
+        &mut session,
+        "crystal-item-317",
+        "Crystal Item 317",
+        13,
+        EquipmentSlot::Armour,
+        0,
+        2,
+    );
+    add_equippable_test_item(
+        &mut session,
+        "crystal-item-221",
+        "Crystal Item 221",
+        12,
+        EquipmentSlot::Weapon,
+        3,
+        0,
+    );
+
+    let _ = session.use_item("crystal-item-317");
+    let _ = session.use_item("crystal-item-221");
+
+    let snapshot = session.world_snapshot();
+    let player = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)
+        .expect("self player");
+    let sprite = player.sprite.as_ref().expect("self player sprite");
+
+    // Before the fix these were "CArmour/00" and None (the equipped gear's shape
+    // was dropped because the name was not in the legacy table).
+    assert_eq!(
+        sprite.body_library, "CArmour/01",
+        "armour ItemInfo.Shape must drive the rendered body library"
+    );
+    assert_eq!(
+        sprite.weapon_library.as_deref(),
+        Some("CWeapon/00"),
+        "weapon ItemInfo.Shape must add the rendered weapon layer"
+    );
+}
+
 #[test]
 fn assassin_class_weapon_uses_assassin_sprite_libraries() {
     let mut config = SimulationConfig::default();
