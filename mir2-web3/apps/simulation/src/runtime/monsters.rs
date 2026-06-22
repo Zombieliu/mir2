@@ -767,6 +767,10 @@ pub(super) fn initial_monster_ai_state(ai: u8, tick: u64) -> MonsterAiState {
     if ai == 99 {
         state.next_state_tick = tick + HELL_BOMB_EXPLOSION_LIFETIME_TICKS;
     }
+    if ai == 70 {
+        // Crystal Hugger: 5-minute fuse before it detonates (mirrors AI 40/99).
+        state.next_state_tick = tick + super::monster_ai::HUGGER_EXPLOSION_LIFETIME_TICKS;
+    }
     state
 }
 
@@ -829,13 +833,13 @@ pub(super) fn initial_yimoogi_state(tick: u64) -> YimoogiState {
 
 pub(super) fn monster_disposition_for_ai(ai: u8) -> WorldEntityDisposition {
     match ai {
-        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113 => WorldEntityDisposition::Neutral,
+        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 68 | 81 | 113 => WorldEntityDisposition::Neutral,
         _ => WorldEntityDisposition::Hostile,
     }
 }
 
 pub(super) fn monster_targets_players(ai: u8) -> bool {
-    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113)
+    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 68 | 81 | 113)
 }
 
 pub(super) fn monster_uses_zuma_stone_state(ai: u8) -> bool {
@@ -874,7 +878,8 @@ pub(super) fn monster_can_attack(agent: &MonsterAgent, ai_state: &MonsterAiState
     match agent.ai {
         18 => ai_state.mode,
         48 => ai_state.mode,
-        1 | 2 | 3 | 56 | 98 | 99 | 128 | 255 => false,
+        // 68 Football, 81 Gate, 170 BoulderSpirit: passive — never melee.
+        1 | 2 | 3 | 56 | 68 | 81 | 98 | 99 | 128 | 170 | 255 => false,
         _ => true,
     }
 }
@@ -1770,6 +1775,10 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         6 | 58 | 113 => agent.view_range.max(1),
         57 => 10,
         8 => 6,
+        // Crystal HornedArcher (AI 164) inherits AxeSkeleton.AttackRange = 6;
+        // HornedSorceror (AI 169) uses range 5.
+        164 => 6,
+        169 => 5,
         _ => 1,
     }
 }
@@ -1828,7 +1837,23 @@ pub(super) fn monster_in_attack_range(
                 && (dx != 0 || dy != 0)
                 && ((dx <= 1 && dy <= 1) || dx == dy || dx % 2 == dy % 2)
         }
-        4 | 18 | 29 | 61 => {
+        // Crystal `SpittingSpider.InAttackRange` (AI 4): cap 2, then
+        // `(x<=1 && y<=1) || (x==y || x%2==y%2)`. Kept separate from the
+        // 18|29|61 arm below, whose `dx<=max && dy<=max` clause is always true
+        // after the cap check (collapsing to a full box) — that would let AI 4
+        // strike (2,1)/(1,2), which are out of range in Crystal.
+        4 => {
+            let dx = (target.x - source.x).abs();
+            let dy = (target.y - source.y).abs();
+            if dx == 0 && dy == 0 {
+                return false;
+            }
+            if dx > 2 || dy > 2 {
+                return false;
+            }
+            (dx <= 1 && dy <= 1) || dx == dy || dx % 2 == dy % 2
+        }
+        18 | 29 | 61 => {
             let dx = (target.x - source.x).abs();
             let dy = (target.y - source.y).abs();
             if dx == 0 && dy == 0 {
@@ -1851,7 +1876,7 @@ pub(super) fn monster_in_attack_range(
 pub(super) fn monster_uses_ranged_attack(agent: &MonsterAgent) -> bool {
     matches!(
         agent.ai,
-        8 | 26 | 32 | 38 | 45 | 46 | 47 | 48 | 54 | 57 | 61 | 113 | 118 | 181 | 182
+        8 | 26 | 32 | 38 | 45 | 46 | 47 | 48 | 54 | 57 | 61 | 113 | 118 | 164 | 181 | 182
     )
 }
 
@@ -1890,6 +1915,8 @@ pub(super) fn monster_broadcasts_attack_on_damage_due(agent: &MonsterAgent) -> b
 }
 
 pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
+    // Immobile/passive structures (52 EvilMir, 68 Football, 81 Gate, 142 TreeQueen,
+    // 170 BoulderSpirit) never follow routes.
     !matches!(
         agent.ai,
         3 | 5
@@ -1903,12 +1930,15 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 47
             | 48
             | 50
+            | 52
             | 54
             | 56
             | 57
             | 58
             | 61
+            | 68
             | 79
+            | 81
             | 98
             | 99
             | 113
@@ -1916,6 +1946,8 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 120
             | 122
             | 128
+            | 142
+            | 170
             | 255
     )
 }
@@ -1934,12 +1966,15 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
+                | 68
                 | 79
+                | 81
                 | 98
                 | 99
                 | 113
@@ -1947,6 +1982,8 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 170
                 | 255
         )
 }
@@ -1966,12 +2003,15 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
+                | 68
                 | 79
+                | 81
                 | 98
                 | 99
                 | 113
@@ -1979,6 +2019,8 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 170
                 | 255
         )
 }
@@ -2174,7 +2216,7 @@ pub(super) fn monster_player_attack_damage(
         // `ZumaMonster` (base), `ShamanZombie.Attack`, `BoneSpearman.Attack`,
         // `BlackFoxman.Attack` — all use `GetAttackPower(MinDC, MaxDC)` for
         // the attack damage. Previously these fell through to the default 7.
-        4 | 8 | 15 | 26 | 29 | 44 => crystal_monster_attack_damage(monster_name),
+        4 | 8 | 15 | 26 | 29 | 44 | 164 => crystal_monster_attack_damage(monster_name),
         // Crystal `DigOutZombie` (AI 24) and `RevivingZombie` (AI 25) have
         // no `Attack()` override — they fall through to base
         // `MonsterObject.Attack()`, which uses `GetAttackPower(MinDC, MaxDC)`.
@@ -2187,7 +2229,15 @@ pub(super) fn monster_player_attack_damage(
         // (then a separate DC line splash, handled via the line-branch).
         116 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
         116 => crystal_monster_attack_damage(monster_name),
-        _ => 7,
+        // Crystal `MonsterObject.GetMonster` returns the base `MonsterObject`
+        // for `AI == 0` (and any unmodeled AI value), whose `Attack()` deals
+        // `GetAttackPower(MinDC, MaxDC)` physical melee. AI 0 is by far the most
+        // common shipped family — 3588 respawn groups / 251 distinct monsters —
+        // so the old `_ => 7` stub made the bulk of the world hit for a flat 7.
+        // Mirror the zone-authoritative path
+        // (`zone_native_monster_player_attack_damage` already defaults to
+        // `zone_crystal_monster_attack_damage`) and use the imported DC.
+        _ => crystal_monster_attack_damage(monster_name),
     };
     let mitigation = crystal_player_rolled_armour(world);
     if base_damage <= 0 {
