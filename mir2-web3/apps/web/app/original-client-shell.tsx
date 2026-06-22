@@ -99,6 +99,7 @@ import {
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
 import { OriginalClientSceneVisualLayers } from "./components/original-client-scene-visual-layers";
+import { useSceneCameraMotionDriver } from "./components/original-client-scene-camera-motion-driver";
 import {
   OriginalClientSceneOverlays,
   type SceneChatBubble,
@@ -491,6 +492,11 @@ export function OriginalClientShell({
   // fetches when the load effect re-runs (it re-runs on every world.entities change).
   const sceneSpriteLibraryInFlightRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
+  // Motion-clock cadence (ms between setMotionNow). 30 ms (~33 Hz) drives smooth JS
+  // motion on the default/DOM path; in the imperative path (Bevy interpolates motion +
+  // the scene-motion driver tracks DOM overlays) it drops to ~10 Hz — just enough for
+  // the reconnect countdown + bubble/floater/projectile expiry — which is the perf win.
+  const motionClockIntervalMsRef = useRef(30);
   // Over-head chat bubble bookkeeping. Keyed by speaker name (the only entity reference a chat log
   // line carries), each record remembers when the line first appeared so bubbles can expire on the
   // shell's existing motion clock without any dedicated timer.
@@ -843,15 +849,15 @@ export function OriginalClientShell({
       lastMotionNowRef.current = t;
       setMotionNow(t);
     }, 100);
-    // Throttle the rAF to ~30 Hz (one render per ≥30 ms). The shell cannot usefully
-    // process frames faster than 30 Hz — motion offsets are interpolated from timestamps
-    // so smoothness is retained; the reconnect countdown and chat-bubble expiry both
-    // operate on second/multi-second scales. This halves the React re-render rate vs the
-    // previous 60 Hz clock, recovering ~9 % of main-thread time during idle gameplay.
-    const MOTION_CLOCK_MIN_INTERVAL_MS = 30;
+    // Throttle the rAF to an adaptive cadence (motionClockIntervalMsRef): ~33 ms in the
+    // DOM-entity fallback (where this clock drives the JS motion interpolation), or
+    // ~100 ms in the imperative path (Bevy interpolates motion at display Hz + the
+    // scene-motion driver tracks DOM overlays, so this clock only needs to advance the
+    // reconnect countdown + bubble/floater/projectile expiry). Dropping 33→10 Hz there
+    // is the bulk of the scene-render perf win (the React tree stops re-creating 30×/s).
     const updateMotionClock = () => {
       const t = Date.now();
-      if (t - lastMotionNowRef.current >= MOTION_CLOCK_MIN_INTERVAL_MS) {
+      if (t - lastMotionNowRef.current >= motionClockIntervalMsRef.current) {
         lastMotionNowRef.current = t;
         setMotionNow(t);
       }
@@ -1251,6 +1257,25 @@ export function OriginalClientShell({
     bevyEntityRendererWanted && bevyEntityRendererReady && Boolean(bevyRuntimeBackend);
   const useBevyEntityRenderer =
     entityRendererRequested && !hideBevyCanvasForDomEntityFallback;
+  // Imperative scene motion (perf): when Bevy renders entities AND interpolates the
+  // self-camera + monsters at display Hz (both flags on), the ~33 Hz `motionNow` React
+  // fold is redundant — it only re-created the scene tree. In that path the camera/glide
+  // for the residual DOM overlays is driven imperatively (useSceneCameraMotionDriver) and
+  // the React clock drops to ~10 Hz. Escape hatch: ?bevySelfCamera=0 / ?bevyEntityInterp=0.
+  const imperativeSceneMotion =
+    useBevyEntityRenderer && BEVY_SELF_CAMERA_ENABLED && BEVY_ENTITY_INTERP_ENABLED;
+  motionClockIntervalMsRef.current = imperativeSceneMotion ? 100 : 30;
+  // In the imperative path the DOM world layers get a zero camera offset (the driver
+  // pans them via a compositor transform at display Hz); otherwise they fold the React
+  // `motionNow` camera offset exactly as before.
+  const effectiveCameraOffset = imperativeSceneMotion
+    ? EMPTY_VIEWPORT_OFFSET
+    : playerCameraMotionOffset;
+  const sceneMotionDriver = useSceneCameraMotionDriver(
+    imperativeSceneMotion,
+    () => latestMoveInputRef.current.renderPlayer,
+    entityMotionSnapshotsRef,
+  );
   const useWebGl2EntityAtlasRenderer =
     entityRendererRequested &&
     !foldWebgl2ToBevy &&
@@ -2016,6 +2041,82 @@ export function OriginalClientShell({
     };
   }, [screen, sceneInteractionReady, onViewportDirectionStep, onViewportDirectionStop]);
 
+  // The viewport tile-hit grid is 1,155 (33×35) <button>s, each carrying ~6 inline
+  // handlers. It is purely an input layer (Bevy owns the pixels) and only changes when the
+  // player's cell moves (viewportTiles is memoised on the viewport centre — stable across
+  // the per-frame motion/prediction/packet re-renders, which update predictedPlayer/world
+  // but not the centre). Memoising the ELEMENT keeps React from re-creating all 1,155
+  // buttons on those high-frequency re-renders (the dominant per-render jsxDEV cost); it
+  // rebuilds only on a cell move / screen / readiness change. The handlers read refs
+  // (heldScenePointerRef) + hoisted helpers, and sceneInteractionReady is a dep, so a held
+  // memo never captures stale interaction state. DOM is unchanged (aria-labels + hover
+  // preserved → QA harnesses + the .tile-hit:hover highlight keep working).
+  const tileHitGrid = useMemo(
+    () => (
+      <div className={`viewport-grid-overlay ${screen !== "game" ? "hidden" : ""}`}>
+        {viewportTiles.map((tile) => (
+          <button
+            key={`tile-${tile.x}-${tile.y}`}
+            type="button"
+            className="tile-hit"
+            style={{
+              left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
+              top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
+            }}
+            data-ui-interactive="true"
+            onMouseDown={(event) => {
+              if (event.button !== 0 && event.button !== 2) {
+                return;
+              }
+
+              event.stopPropagation();
+              if (!sceneInteractionReady) {
+                event.preventDefault();
+                return;
+              }
+              const point = scenePointFromMouseEvent(event);
+              const pointer: HeldScenePointer = {
+                button: event.button,
+                sceneX: point.sceneX,
+                sceneY: point.sceneY,
+                startedAt: Date.now(),
+                dispatched: false,
+                tileX: tile.x,
+                tileY: tile.y,
+              };
+              heldScenePointerRef.current = pointer;
+              if (event.button === 2) {
+                event.preventDefault();
+              }
+            }}
+            onMouseMove={(event) => {
+              const held = heldScenePointerRef.current;
+              if (!held) return;
+              const point = scenePointFromMouseEvent(event);
+              heldScenePointerRef.current = {
+                ...held,
+                sceneX: point.sceneX,
+                sceneY: point.sceneY,
+              };
+            }}
+            onMouseUp={stopHeldScenePointer}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            aria-label={`tile ${tile.x}, ${tile.y}`}
+          />
+        ))}
+      </div>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers read refs/hoisted fns; only sceneInteractionReady is dynamic state
+    [viewportTiles, screen, sceneInteractionReady],
+  );
+
   return (
     <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
       <section className="mir-stage">
@@ -2088,69 +2189,11 @@ export function OriginalClientShell({
               world={world}
               player={player}
               floorSprites={mapDomSprites.floor}
-              cameraOffset={playerCameraMotionOffset}
+              cameraOffset={effectiveCameraOffset}
             />
           ) : null}
 
-          <div className={`viewport-grid-overlay ${screen !== "game" ? "hidden" : ""}`}>
-            {viewportTiles.map((tile) => (
-              <button
-                key={`tile-${tile.x}-${tile.y}`}
-                type="button"
-                className="tile-hit"
-                style={{
-                  left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
-                  top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
-                }}
-                data-ui-interactive="true"
-                onMouseDown={(event) => {
-                  if (event.button !== 0 && event.button !== 2) {
-                    return;
-                  }
-
-                  event.stopPropagation();
-                  if (!sceneInteractionReady) {
-                    event.preventDefault();
-                    return;
-                  }
-                  const point = scenePointFromMouseEvent(event);
-                  const pointer: HeldScenePointer = {
-                    button: event.button,
-                    sceneX: point.sceneX,
-                    sceneY: point.sceneY,
-                    startedAt: Date.now(),
-                    dispatched: false,
-                    tileX: tile.x,
-                    tileY: tile.y,
-                  };
-                  heldScenePointerRef.current = pointer;
-                  if (event.button === 2) {
-                    event.preventDefault();
-                  }
-                }}
-                onMouseMove={(event) => {
-                  const held = heldScenePointerRef.current;
-                  if (!held) return;
-                  const point = scenePointFromMouseEvent(event);
-                  heldScenePointerRef.current = {
-                    ...held,
-                    sceneX: point.sceneX,
-                    sceneY: point.sceneY,
-                  };
-                }}
-                onMouseUp={stopHeldScenePointer}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                aria-label={`tile ${tile.x}, ${tile.y}`}
-              />
-            ))}
-          </div>
+          {tileHitGrid}
 
           <OriginalClientSceneVisualLayers
             screen={screen}
@@ -2163,9 +2206,12 @@ export function OriginalClientShell({
             viewportEntitySprites={viewportEntitySprites}
             viewportProjectiles={viewportProjectiles}
             viewportDepthPlayer={viewportDepthPlayer}
-            playerCameraMotionOffset={playerCameraMotionOffset}
+            playerCameraMotionOffset={effectiveCameraOffset}
             entityMotionSnapshots={entityMotionSnapshotsRef.current}
             motionNow={motionNow}
+            imperativeCamera={imperativeSceneMotion}
+            registerCameraSurface={sceneMotionDriver.registerCameraSurface}
+            registerEntityEl={sceneMotionDriver.registerEntityEl}
             sceneSpriteFrameIndex={sceneSpriteFrameIndex}
             useBevyEntityRenderer={hideDomEntitySpritesForBevy}
             entityKindClassName={entityKindClassName}
@@ -2178,9 +2224,11 @@ export function OriginalClientShell({
             player={player}
             selectedEntity={selectedEntity}
             viewportEntitySprites={viewportEntitySprites}
-            playerCameraMotionOffset={playerCameraMotionOffset}
+            playerCameraMotionOffset={effectiveCameraOffset}
             entityMotionSnapshots={entityMotionSnapshotsRef.current}
             motionNow={motionNow}
+            imperativeCamera={imperativeSceneMotion}
+            registerCameraSurface={sceneMotionDriver.registerCameraSurface}
             chatBubbles={sceneChatBubbles}
             damageFloaters={world.damageFloaters}
             targetActionLabel={selectedTargetReadoutLabel}
@@ -2714,22 +2762,23 @@ function shouldUseRawWebGl2EntityRenderer() {
 const isSceneMotionDebugMode: boolean =
   typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mir2Debug") === "1";
 
-// Opt-in (?bevySelfCamera=1): push the self-player motion window to the Bevy
-// runtime so it interpolates the camera scroll at DISPLAY refresh rate, instead of
-// folding the ~33Hz `motionNow` offset into every tile/entity position (the judder
-// source). Default OFF ⇒ the fold path below is byte-identical to today.
+// Opt-in (?bevySelfCamera=1): push the self-player motion window to the Bevy runtime
+// so it interpolates the camera scroll at DISPLAY refresh rate, instead of folding the
+// ~33Hz `motionNow` offset into every tile/entity position (the old judder source).
+// When BOTH this and ?bevyEntityInterp=1 are set, the imperative scene-motion driver
+// (useSceneCameraMotionDriver) additionally keeps the residual DOM overlays in lockstep
+// at display Hz, which lets the React `motionNow` clock drop to the slow expiry cadence.
+// Default OFF pending multi-map human verification (mirrors #125's opt-in rollout).
 const BEVY_SELF_CAMERA_ENABLED: boolean =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("bevySelfCamera") === "1";
 
 // Opt-in (?bevyEntityInterp=1): for NON-self entities, stop folding the ~33Hz
-// `motionNow` sub-cell glide into each layer's left/top and instead ship a
-// per-entity motion window (motionFrom*/motionTo*/motionStartedMs/
-// motionDurationMs) so the Bevy runtime interpolates each monster's glide at
-// DISPLAY refresh rate (the monster-judder fix). Orthogonal to bevySelfCamera,
-// which owns the self-camera scroll; both can be enabled together. The self
-// player is unchanged here. Default OFF ⇒ the fold path below is byte-identical
-// to today (no motion window is emitted, so the serialized state is unchanged).
+// `motionNow` sub-cell glide into each layer's left/top and instead ship a per-entity
+// motion window (motionFrom*/motionTo*/motionStartedMs/motionDurationMs) so the Bevy
+// runtime interpolates each monster's glide at DISPLAY refresh rate (the monster-judder
+// fix). Orthogonal to bevySelfCamera, which owns the self-camera scroll; the imperative
+// scene-motion driver engages only when BOTH are on. Default OFF pending multi-map test.
 const BEVY_ENTITY_INTERP_ENABLED: boolean =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("bevyEntityInterp") === "1";
@@ -2810,11 +2859,13 @@ function buildBevyEntityRenderState({
       : [],
     entities: viewportEntitySprites.map(({ entity, sprite }) => {
       const isPlayer = player.objectId === entity.objectId;
-      // Bevy-entity-interp path: for a NON-self entity, stop folding its sub-cell
-      // glide here (push cell-space) and instead ship the motion window below so
-      // Bevy interpolates the glide at display Hz. The self player is untouched
-      // (its fold stays governed by BEVY_SELF_CAMERA_ENABLED exactly as before).
-      const interpEntityInBevy = BEVY_ENTITY_INTERP_ENABLED && !isPlayer;
+      // Bevy-entity-interp path: stop folding the sub-cell glide here (push cell-space)
+      // and ship the motion window below so Bevy interpolates the glide at display Hz.
+      // When the self-camera is on we ALSO interp the self sprite in Bevy (not just the
+      // camera): the camera and the self sprite then share one display-Hz curve so the
+      // player stays pinned to centre, and entityRenderState no longer depends on
+      // `motionNow` — which is what lets the React motion clock drop to ~10 Hz.
+      const interpEntityInBevy = BEVY_ENTITY_INTERP_ENABLED && (!isPlayer || BEVY_SELF_CAMERA_ENABLED);
       // Bevy-self-camera path: drop the JS camera fold (Bevy moves the camera at
       // display Hz) and let the self player glide via its own motion. Default path
       // is unchanged (player pinned via EMPTY, others fold playerCameraMotionOffset).
