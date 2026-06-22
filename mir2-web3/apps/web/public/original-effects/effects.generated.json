@@ -1,7 +1,1021 @@
 {
-  "available": [],
+  "generatedAt": "2026-06-22T06:28:47.478Z",
+  "source": "Crystal/Client/MirObjects/PlayerObject.cs (case MirAction.Spell)",
+  "mode": "assemble-from-r2-meta",
+  "available": [
+    "Magic",
+    "Magic2",
+    "Magic3"
+  ],
   "spell_effect_enum": [],
-  "spell_effects": [],
-  "ground_effects": [],
+  "spell_effects": [
+    {
+      "spell": "FireBall",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 0,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Healing",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 200,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Repulsion",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 900,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ElectricShock",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1560,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Poisoning",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 600,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "GreatFireBall",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 400,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "HellFire",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 920,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ThunderBolt",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 20,
+      "count": 3,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "SummonSkeleton",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1500,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "StormEscape",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 590,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Teleport",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1590,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Blink",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1590,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Hiding",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1520,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Haste",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2140,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Fury",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 200,
+      "count": 8,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ImmortalSkin",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 550,
+      "count": 17,
+      "interval": 140,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FireBang",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1650,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FireWall",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1620,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "HealingCircle",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 620,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "MoonMist",
+      "kind": "ground",
+      "library": "Magic3",
+      "base": 680,
+      "count": 25,
+      "interval": 72,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "TrapHexagon",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1380,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "EnergyRepulsor",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 190,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FireBurst",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2320,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FlameDisruptor",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 130,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "SummonShinsu",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 0,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "UltimateEnhancer",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 160,
+      "count": 15,
+      "interval": 67,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FrostCrunch",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 400,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Purification",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 600,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FlameField",
+      "kind": "ground",
+      "library": "Magic2",
+      "base": 910,
+      "count": 23,
+      "interval": 78,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Trap",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2340,
+      "count": 11,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "MoonLight",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2380,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "SwiftFeet",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2440,
+      "count": 16,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "LightBody",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2470,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "PoisonSword",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2490,
+      "count": 10,
+      "interval": 110,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "DarkBody",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2580,
+      "count": 10,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ThunderStorm",
+      "kind": "ground",
+      "library": "Magic",
+      "base": 1680,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "MassHealing",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 1790,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "IceStorm",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 3840,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "MagicShield",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 3880,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "TurnUndead",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 3920,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "MagicBooster",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 80,
+      "count": 9,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "PetEnhancer",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 200,
+      "count": 8,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Revelation",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 3960,
+      "count": 20,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ProtectionField",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 1520,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Rage",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 1510,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Vampirism",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 1040,
+      "count": 7,
+      "interval": 86,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "LionRoar",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 710,
+      "count": 20,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "BattleCry",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 710,
+      "count": 20,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "TwinDrakeBlade",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 210,
+      "count": 6,
+      "interval": 83,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Entrapment",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 990,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "BladeAvalanche",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 740,
+      "count": 15,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "SlashingBurst",
+      "kind": "ground",
+      "library": "Magic2",
+      "base": 1700,
+      "count": 9,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "CounterAttack",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 3480,
+      "count": 10,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "CrescentSlash",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2620,
+      "count": 20,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Mirroring",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 650,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "Blizzard",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 1540,
+      "count": 8,
+      "interval": 75,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "MeteorStrike",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 1590,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "HeavenlySword",
+      "kind": "cast",
+      "library": "Magic2",
+      "base": 2230,
+      "count": 8,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ElementalBarrier",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 1880,
+      "count": 8,
+      "interval": 75,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "PoisonShot",
+      "kind": "cast",
+      "library": "Magic3",
+      "base": 2300,
+      "count": 8,
+      "interval": 125,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "OneWithNature",
+      "kind": "ground",
+      "library": "Magic3",
+      "base": 2710,
+      "count": 8,
+      "interval": 150,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FireBounce",
+      "kind": "cast",
+      "library": "Magic",
+      "base": 400,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  ],
+  "ground_effects": [
+    {
+      "spell": "MoonMist",
+      "kind": "ground",
+      "library": "Magic3",
+      "base": 680,
+      "count": 25,
+      "interval": 72,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "FlameField",
+      "kind": "ground",
+      "library": "Magic2",
+      "base": 910,
+      "count": 23,
+      "interval": 78,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "ThunderStorm",
+      "kind": "ground",
+      "library": "Magic",
+      "base": 1680,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "SlashingBurst",
+      "kind": "ground",
+      "library": "Magic2",
+      "base": 1700,
+      "count": 9,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "spell": "OneWithNature",
+      "kind": "ground",
+      "library": "Magic3",
+      "base": 2710,
+      "count": 8,
+      "interval": 150,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  ],
   "map_effects": []
 }
