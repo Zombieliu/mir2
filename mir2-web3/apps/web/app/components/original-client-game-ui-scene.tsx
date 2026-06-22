@@ -2,6 +2,8 @@
 
 import { memo, useEffect, useState } from "react";
 
+import { useWorldSelector } from "../../lib/world-model";
+import type { WorldStore } from "../../lib/world-model";
 import type { CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import { MainHud } from "./original-client-overlays";
 import {
@@ -407,3 +409,21 @@ function GameUiSceneInner({
 // every motion-clock tick (30 Hz in-game). Props change only on server world pushes,
 // user input, or window-open state changes — all far below 30 Hz.
 export const GameUiScene = memo(GameUiSceneInner);
+
+// Render-perf Stage 5c (opt-in, flag-gated via `?selectorHud=1`): the store-bound
+// HUD. Instead of receiving `world` as a prop from the parent shell — whose fresh
+// identity busts `memo(GameUiScene)` on every coalesced flush — this wrapper
+// SUBSCRIBES to the world store directly with `useWorldSelector`. The `world` prop
+// then no longer flows through the parent's render, so the parent re-rendering for
+// any other reason cannot force the HUD to re-render; only an actual world-store
+// change does. (A direct whole-world selector is identity-stable per store
+// snapshot, so no `isEqual` is needed; the follow-up — narrowing MainHud to
+// `hp/mp/level/gold/weight` and MiniMap to `entities` — rides on this same store
+// and further cuts renders.) The legacy `world={world}` prop path is left fully
+// intact in the shell behind the OFF-by-default flag for instant rollback.
+type GameUiSceneStoreBoundProps = Omit<GameUiSceneProps, "world"> & { store: WorldStore };
+
+export function GameUiSceneStoreBound({ store, ...rest }: GameUiSceneStoreBoundProps) {
+  const world = useWorldSelector(store, (s) => s) as DisplayWorld;
+  return <GameUiScene world={world} {...rest} />;
+}

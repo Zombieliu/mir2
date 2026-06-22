@@ -36,7 +36,7 @@ import {
   LoginOverlay,
   SelectOverlay,
 } from "./components/original-client-overlays";
-import { GameUiScene } from "./components/original-client-game-ui-scene";
+import { GameUiScene, GameUiSceneStoreBound } from "./components/original-client-game-ui-scene";
 import type {
   BevyEntityRenderState,
   BevyMapRenderState,
@@ -343,6 +343,8 @@ export function OriginalClientShell({
   wsState,
   reconnectStatus,
   world,
+  worldStore,
+  selectorHud,
   player,
   predictedPlayerPosition,
   getLivePlayerRenderPosition,
@@ -2276,59 +2278,71 @@ export function OriginalClientShell({
               onExit={onExitSelect}
             />
           ) : null}
-          {screen === "game" ? (
-            <GameUiScene
-              t={t}
-              locale={locale}
-              runtimeMessage={runtimeMessageLabel}
-              world={world}
-              player={player}
-              logs={logs}
-              chatMessage={chatMessage}
-              showInventory={showInventory}
-              showCharacter={showCharacter}
-              activeInventoryTab={activeInventoryTab}
-              activeCharacterTab={activeCharacterTab}
-              storageServiceOpenVersion={storageServiceOpenVersion}
-              onChatMessageChange={onChatMessageChange}
-              onSendChat={onSendChat}
-              onRequestTrade={onRequestTrade}
-              onRentExpandedStorage={onRentExpandedStorage}
-              onLogout={onLogout}
-              onToggleCharacter={onToggleCharacter}
-              onToggleInventory={onToggleInventory}
-              onCloseCharacter={onCloseCharacter}
-              onCloseInventory={onCloseInventory}
-              onOpenCharacterTab={onOpenCharacterTab}
-              onOpenInventoryTab={onOpenInventoryTab}
-              onSelectNpcDialogTarget={onSelectNpcDialogTarget}
-              onSubmitNpcInput={onSubmitNpcInput}
-              onUseItem={onUseItem}
-              onDropItem={onDropItem}
-              onEquipItem={onEquipItem}
-              onRemoveItem={onRemoveItem}
-              onMoveItem={onMoveItem}
-              onMergeItem={onMergeItem}
-              onSplitItem={onSplitItem}
-              onStoreItem={onStoreItem}
-              onTakeBackItem={onTakeBackItem}
-              onUnlockStorage={onUnlockStorage}
-              onSetStoragePassword={onSetStoragePassword}
-              onRemoveStoragePassword={onRemoveStoragePassword}
-              onSellItem={onSellItem}
-              onDropGold={onDropGold}
-              onRepairItem={onRepairItem}
-              onSpecialRepairItem={onSpecialRepairItem}
-              onCastSkill={onCastSkill}
-              onTransferMap={onTransferMap}
-              onClaimMail={onClaimMail}
-              onDeleteMail={onDeleteMail}
-              onBuyGameShopItem={onBuyGameShopItem}
-              onRunStage5Command={onRunStage5Command}
-              onSendClientCommand={onSendClientCommand}
-              transferOptions={transferOptions}
-            />
-          ) : null}
+          {screen === "game"
+            ? (() => {
+                // Shared HUD props (everything except `world`). Declared once so the
+                // legacy prop path and the Stage-5c store-bound path stay in lockstep.
+                const gameUiSharedProps = {
+                  t,
+                  locale,
+                  runtimeMessage: runtimeMessageLabel,
+                  player,
+                  logs,
+                  chatMessage,
+                  showInventory,
+                  showCharacter,
+                  activeInventoryTab,
+                  activeCharacterTab,
+                  storageServiceOpenVersion,
+                  onChatMessageChange,
+                  onSendChat,
+                  onRequestTrade,
+                  onRentExpandedStorage,
+                  onLogout,
+                  onToggleCharacter,
+                  onToggleInventory,
+                  onCloseCharacter,
+                  onCloseInventory,
+                  onOpenCharacterTab,
+                  onOpenInventoryTab,
+                  onSelectNpcDialogTarget,
+                  onSubmitNpcInput,
+                  onUseItem,
+                  onDropItem,
+                  onEquipItem,
+                  onRemoveItem,
+                  onMoveItem,
+                  onMergeItem,
+                  onSplitItem,
+                  onStoreItem,
+                  onTakeBackItem,
+                  onUnlockStorage,
+                  onSetStoragePassword,
+                  onRemoveStoragePassword,
+                  onSellItem,
+                  onDropGold,
+                  onRepairItem,
+                  onSpecialRepairItem,
+                  onCastSkill,
+                  onTransferMap,
+                  onClaimMail,
+                  onDeleteMail,
+                  onBuyGameShopItem,
+                  onRunStage5Command,
+                  onSendClientCommand,
+                  transferOptions,
+                };
+                // Stage 5c: opt-in store-bound HUD (subscribes to `world` slices via
+                // useWorldSelector). Defaults OFF — when the flag is absent/false (or no
+                // store was threaded) this is byte-identical to the legacy `world={world}`
+                // prop path below.
+                return selectorHud && worldStore ? (
+                  <GameUiSceneStoreBound store={worldStore} {...gameUiSharedProps} />
+                ) : (
+                  <GameUiScene world={world} {...gameUiSharedProps} />
+                );
+              })()
+            : null}
           {screen !== "login" && reconnectMessage ? (
             <div
               className={`gateway-reconnect-overlay ${reconnectStatus.mode}`}

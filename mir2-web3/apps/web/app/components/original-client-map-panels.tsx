@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import {
   createLinearMiniMapTransform,
@@ -305,7 +305,9 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
         onLoad={handleSceneAssetImageLoad}
       />
       <div className={`mini-map-scene-shell ${smallMode ? "hidden" : ""}`}>
-        <MiniMapScene world={world} player={player} />
+        {/* Unmount (return null) when collapsed/small instead of CSS-hiding: a hidden scene still
+            reconciles one <rect> per entity every flush. Skipping the mount removes that cost. */}
+        {smallMode ? null : <MiniMapScene world={world} player={player} />}
       </div>
       {!smallMode ? <div className="mini-map-name">
         <span>{mapTitle}</span>
@@ -338,13 +340,31 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
   );
 }
 
-function MiniMapScene({
-  world,
-  player,
-}: {
+type MiniMapSceneProps = {
   world: DisplayWorld;
   player: DisplayEntity | null;
-}) {
+};
+
+// Re-render only when an input the scene actually reads changes: the radar dots key on
+// `world.entities`, and `bounds` derives from `world.miniMapIndex` / `world.originalMapRegion` /
+// `player`; the fallback SVG keys on `world.terrainPatches`; the transform + debug NPC rows key on
+// `world.mapFileName` / `world.bigMapIndex`. Everything else on `world` (combat fields, the 30Hz
+// motion tick, etc.) is irrelevant here, so a fresh `world` identity alone must NOT re-render.
+function areMiniMapScenePropsEqual(prev: MiniMapSceneProps, next: MiniMapSceneProps): boolean {
+  if (prev.player !== next.player) return false;
+  const a = prev.world;
+  const b = next.world;
+  return (
+    a.entities === b.entities &&
+    a.terrainPatches === b.terrainPatches &&
+    a.originalMapRegion === b.originalMapRegion &&
+    a.miniMapIndex === b.miniMapIndex &&
+    a.bigMapIndex === b.bigMapIndex &&
+    a.mapFileName === b.mapFileName
+  );
+}
+
+const MiniMapScene = memo(function MiniMapScene({ world, player }: MiniMapSceneProps) {
   const mapDebug = useMapDebugEnabled();
   const miniMapAssetPath = originalMiniMapAssetPath(world.miniMapIndex);
   const bounds = miniMapBounds(world, player, miniMapAssetPath);
@@ -439,7 +459,7 @@ function MiniMapScene({
       ) : null}
     </div>
   );
-}
+}, areMiniMapScenePropsEqual);
 
 function originalMapLinkIconPath(icon: number) {
   return ORIGINAL_UI.bigMap.mapLinkIcon(icon);
