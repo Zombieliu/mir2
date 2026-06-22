@@ -1,5 +1,6 @@
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
+import type { WorldStore } from "../../lib/world-model";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import type { SystemMenuTransferOption } from "./original-client-system-menu";
 import type { MapTileDraw } from "./webgl2-map-atlas-layer";
@@ -136,6 +137,13 @@ export type OriginalClientShellProps = {
   wsState: string;
   reconnectStatus: GatewayReconnectStatus;
   world: DisplayWorld;
+  // Render-perf Stage 5c (opt-in, flag-gated): when `selectorHud` is true the
+  // game-screen HUD (GameUiScene) subscribes to this world store via
+  // `useWorldSelector` instead of receiving `world` as a prop, so the memoized
+  // HUD finally holds across coalesced flushes. Both are OPTIONAL and default to
+  // the legacy `world={world}` prop path (byte-identical) when absent/false.
+  worldStore?: WorldStore;
+  selectorHud?: boolean;
   player: DisplayEntity | null;
   predictedPlayerPosition: PredictedPlayerMotion | null;
   getLivePlayerRenderPosition?: () => PredictedPlayerMotion | null;

@@ -34,5 +34,8 @@ export { DEFAULT_WORLD_STATE } from "./types";
 export type { WorldStore } from "./store";
 export { createWorldStore } from "./store";
 
+export type { SelectorMemo } from "./use-world-selector";
+export { createSelectorMemo, useWorldSelector, shallowEqual } from "./use-world-selector";
+
 export type { SnapshotEmitter, SnapshotEmitterOptions } from "./snapshot-emitter";
 export { createSnapshotEmitter } from "./snapshot-emitter";

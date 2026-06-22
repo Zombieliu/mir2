@@ -1,6 +1,6 @@
 "use client";
 
-import type { SyntheticEvent } from "react";
+import { memo, type SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { type MapAtlasIndex, mapAtlasRectKeyForPath } from "../../lib/map-atlas-manifest";
@@ -40,7 +40,7 @@ const FLOOR_LAYER_Z_OFFSETS: Record<OriginalMapSpriteKind, number> = {
   tileAnimation: FLOOR_LAYER_Z_STRIDE * 3,
 };
 
-export function GameSceneBackdrop({
+function GameSceneBackdropInner({
   world,
   player,
   floorSprites,
@@ -98,6 +98,11 @@ export function GameSceneBackdrop({
     </div>
   );
 }
+
+// Memoised so the 30Hz motion tick skips the DOM floor-tile backdrop when neither the world, the
+// floor sprite list, nor the camera offset changed. (Only the DOM fallback path — the GPU map
+// atlas layer is unaffected.)
+export const GameSceneBackdrop = memo(GameSceneBackdropInner);
 
 // Splitting the viewport build by animation cadence keeps the ~500-sprite static
 // layer off the 120ms animation tick: callers memoize "static" on [player.x,y,region]

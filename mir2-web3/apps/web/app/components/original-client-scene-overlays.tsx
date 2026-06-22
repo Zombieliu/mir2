@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import type { ClientScreen } from "../../lib/original-ui";
 import {
   EMPTY_VIEWPORT_OFFSET,
@@ -617,7 +619,7 @@ const OVERLAY_STYLES = `
 }
 `;
 
-export function OriginalClientSceneOverlays({
+function OriginalClientSceneOverlaysInner({
   screen,
   t,
   player,
@@ -719,6 +721,10 @@ export function OriginalClientSceneOverlays({
     </div>
   );
 }
+
+// Memoised so the 30Hz motion tick skips the overlay layer (hit flashes / floaters / chat bubbles /
+// selection / target readout) when none of its shell-memoised inputs changed.
+export const OriginalClientSceneOverlays = memo(OriginalClientSceneOverlaysInner);
 
 // Re-export so consumers needing the bubble shape can import it from one place.
 export type { ViewportEntityEntry as SceneOverlayEntityEntry };

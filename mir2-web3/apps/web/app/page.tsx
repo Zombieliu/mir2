@@ -37,7 +37,7 @@ import {
   downloadSnapshot,
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
-import { createSnapshotEmitter, createWorldStore } from "../lib/world-model";
+import { createSnapshotEmitter, createWorldStore, useWorldSelector } from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
 import {
   type SoundEntityRef,
@@ -86,6 +86,7 @@ import {
   recordSwing as recordOnchainSwing,
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
+import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -144,6 +145,12 @@ const OriginalClientShell = dynamic(
     loading: () => null,
   },
 );
+
+// Stable empty-list sentinel for the closed-window ExtraWindows props (Stage 3). When a window
+// is closed we skip its adapter pass entirely and hand the (unread) list prop this shared
+// frozen array, so the prop value keeps a stable identity flush-to-flush instead of allocating a
+// fresh `[]`. `never[]` is assignable to every concrete `T[]` the windows expect.
+const EMPTY_WINDOW_LIST: never[] = [];
 
 type RuntimeStatus = {
   phase: string;
@@ -1198,6 +1205,106 @@ type MovementConsoleWindow = typeof window & {
   __mir2PendingMovementConsoleCommands?: Array<Record<string, unknown>>;
 };
 
+// ── ?perfDiag=1 render-perf instrumentation (Stage 0, render-perf) ───────────
+// Opt-in only. When the gate is OFF this whole apparatus is inert: the handler
+// hot path reads a single ref boolean and skips everything, so the runtime
+// path is byte-identical to before. Mirrors the ?movementDiag URL gate.
+type PerfDiagPacketStat = {
+  // Bounded ring of recent handler durations (ms) for this packet name, used to
+  // recompute p50/p95 on read. Cap keeps it O(1) per packet, no unbounded growth.
+  samples: number[];
+  count: number;
+  totalMs: number;
+  maxMs: number;
+};
+
+type PerfDiagState = {
+  enabled: boolean;
+  startedAt: number;
+  packets: Map<string, PerfDiagPacketStat>;
+  longTaskCount: number;
+  longTaskTotalMs: number;
+  longTaskMaxMs: number;
+};
+
+type PerfDiagWindow = typeof window & {
+  __mir2PerfDiag?: Record<string, unknown>;
+};
+
+const PERF_DIAG_PACKET_SAMPLE_CAP = 256;
+
+function perfDiagFlagEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("perfDiag") === "1" ||
+    params.get("perfDiagnostics") === "1" ||
+    params.get("renderDiag") === "1"
+  );
+}
+
+// Render-perf Stage 5c opt-in gate. When OFF (the default — flag absent) the
+// game HUD keeps the legacy `world={world}` prop path, byte-identical to before.
+// When `?selectorHud=1` the HUD subscribes to the world store via useWorldSelector
+// (GameUiSceneStoreBound) for instant rollback control. URL-derived, so it is
+// constant for the session; mirrors the ?perfDiag / ?movementDiag URL gates.
+function selectorHudFlagEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("selectorHud") === "1" || params.get("hudSelector") === "1";
+}
+
+function perfDiagPercentile(sortedAsc: number[], fraction: number): number {
+  if (sortedAsc.length === 0) return 0;
+  const idx = Math.min(
+    sortedAsc.length - 1,
+    Math.max(0, Math.ceil(fraction * sortedAsc.length) - 1),
+  );
+  return sortedAsc[idx];
+}
+
+// Build the plain object exposed on window.__mir2PerfDiag for harness/console
+// reads. Computes p50/p95 per packet name from the bounded sample rings on
+// demand (read-time only — never on the hot path).
+function summarizePerfDiag(state: PerfDiagState): Record<string, unknown> {
+  const handlers: Record<string, unknown> = {};
+  for (const [name, stat] of state.packets) {
+    const sorted = stat.samples.slice().sort((a, b) => a - b);
+    handlers[name] = {
+      count: stat.count,
+      p50Ms: Number(perfDiagPercentile(sorted, 0.5).toFixed(3)),
+      p95Ms: Number(perfDiagPercentile(sorted, 0.95).toFixed(3)),
+      maxMs: Number(stat.maxMs.toFixed(3)),
+      meanMs: Number((stat.totalMs / Math.max(1, stat.count)).toFixed(3)),
+    };
+  }
+  return {
+    startedAt: state.startedAt,
+    durationMs: Date.now() - state.startedAt,
+    handlers,
+    longTask: {
+      count: state.longTaskCount,
+      totalMs: Number(state.longTaskTotalMs.toFixed(3)),
+      maxMs: Number(state.longTaskMaxMs.toFixed(3)),
+    },
+  };
+}
+
+function recordPerfDiagHandler(state: PerfDiagState, packet: string, durationMs: number) {
+  let stat = state.packets.get(packet);
+  if (!stat) {
+    stat = { samples: [], count: 0, totalMs: 0, maxMs: 0 };
+    state.packets.set(packet, stat);
+  }
+  stat.count += 1;
+  stat.totalMs += durationMs;
+  if (durationMs > stat.maxMs) stat.maxMs = durationMs;
+  stat.samples.push(durationMs);
+  if (stat.samples.length > PERF_DIAG_PACKET_SAMPLE_CAP) {
+    stat.samples.splice(0, stat.samples.length - PERF_DIAG_PACKET_SAMPLE_CAP);
+  }
+}
+
 const MOVEMENT_LOG_STORAGE_KEY = "mir2-movement-log";
 
 function isMovementLogFlagEnabled(value: string | null) {
@@ -1335,6 +1442,13 @@ export default function HomePage() {
   }
   const snapshotEmitterRef = useRef<SnapshotEmitter | null>(null);
   const damageFloaterSeqRef = useRef(0);
+  // Stage-2 combat-clone collapse: when a combat case handler applies the struck hit-flash
+  // INLINE inside its single updateWorld updater, it sets this true around the synchronous
+  // `entityStruck` bus emit so the VFX subscriber's flash callback (`markEntityStruckFlash`)
+  // early-returns instead of re-entering updateWorld for a redundant {...world} clone. The
+  // bus emit still fires the SOUND subscriber. Other `entityStruck` emitters that do not apply
+  // the flash inline (e.g. markPlayerStruck) leave this false, so the bus flash still works.
+  const suppressStruckFlashRef = useRef(false);
   const screenRef = useRef<ClientScreen>("login");
   const pendingLoginRef = useRef(false);
   const pendingNewAccountRef = useRef(false);
@@ -1398,6 +1512,8 @@ export default function HomePage() {
   const packetRuntimeSnapshotModeRef = useRef<WorldSnapshotRealtimeMode>("bootstrap");
   const packetRuntimeObjectTombstonesRef = useRef<Map<string, number>>(new Map());
   const movementDiagnosticsRef = useRef<MovementDiagnosticState | null>(null);
+  // ?perfDiag=1 only — null (and the .enabled gate) keep the handler hot path inert.
+  const perfDiagRef = useRef<PerfDiagState | null>(null);
   const sceneSpritesReadyKeyRef = useRef<string | null>(null);
   const firstPlayableFrameMarkedRef = useRef(false);
   const initialSceneAssetsReadyRef = useRef(false);
@@ -1427,6 +1543,10 @@ export default function HomePage() {
   const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [screen, setScreen] = useState<ClientScreen>("login");
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
+  // Render-perf Stage 5c opt-in flag (`?selectorHud=1`). Initialized false so SSR
+  // and first client paint always take the legacy `world={world}` HUD path (no
+  // hydration mismatch); flipped on after mount only when the URL asks for it.
+  const [selectorHudEnabled, setSelectorHudEnabled] = useState(false);
   // Apply a world mutation to the live worldRef immediately (the synchronous
   // source of truth, mirrored into the world-model store -> Bevy emitter), and
   // coalesce the React re-render to at most one per animation frame. Previously
@@ -1762,7 +1882,13 @@ export default function HomePage() {
     };
   }, []);
 
-  const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+  // Memoised so the self-entity reference is stable across flushes that don't touch the entity
+  // list (e.g. the 30Hz motion tick / unrelated world fields). `self` feeds 4 subtrees + the
+  // useCallback handlers below; a fresh identity every render would defeat their memo boundaries.
+  const self = useMemo(
+    () => world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null,
+    [world.entities, world.playerObjectId],
+  );
   const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
   const localSelfRenderPosition = preserveCrystalSelfRenderPosition(
     selfPredictionAnchor,
@@ -1810,8 +1936,13 @@ export default function HomePage() {
         : entity,
     );
   }, [predictedSelf, self, world.entities, world.playerObjectId]);
-  const selectedEntity =
-    displayEntities.find((entity) => entity.objectId === world.selectedObjectId) ?? null;
+  // Memoised on (displayEntities, selectedObjectId) so the selected-entity reference is stable
+  // across motion-only flushes — it feeds the scene/overlay/mobile-controls subtrees and the
+  // target-action callbacks, all of which rely on a stable identity to skip re-render.
+  const selectedEntity = useMemo(
+    () => displayEntities.find((entity) => entity.objectId === world.selectedObjectId) ?? null,
+    [displayEntities, world.selectedObjectId],
+  );
 
   useEffect(() => {
     predictedPlayerPositionRef.current = predictedPlayerPosition;
@@ -2035,6 +2166,79 @@ export default function HomePage() {
       flushMovementDiagnostics("unmount", true);
       delete diagnosticWindow.__mir2MovementDiagnostics;
     };
+  }, []);
+
+  // ?perfDiag=1 render-perf instrumentation (Stage 0). Symmetric with the
+  // ?movementDiag effect above: only arms when the URL flag is present, so with
+  // the flag absent perfDiagRef stays null and handleGatewayEvent pays nothing.
+  useEffect(() => {
+    if (!perfDiagFlagEnabled()) {
+      return;
+    }
+
+    const state: PerfDiagState = {
+      enabled: true,
+      startedAt: Date.now(),
+      packets: new Map(),
+      longTaskCount: 0,
+      longTaskTotalMs: 0,
+      longTaskMaxMs: 0,
+    };
+    perfDiagRef.current = state;
+
+    const perfWindow = window as PerfDiagWindow;
+    perfWindow.__mir2PerfDiag = summarizePerfDiag(state);
+    const publish = () => {
+      perfWindow.__mir2PerfDiag = summarizePerfDiag(state);
+    };
+
+    // Standards-based long-task channel (the equivalent of Chrome's [Violation]
+    // "handler took N ms"): totals main-thread long-task time onto __mir2PerfDiag.
+    let observer: PerformanceObserver | null = null;
+    if (typeof PerformanceObserver === "function") {
+      try {
+        observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            state.longTaskCount += 1;
+            state.longTaskTotalMs += entry.duration;
+            if (entry.duration > state.longTaskMaxMs) {
+              state.longTaskMaxMs = entry.duration;
+            }
+          }
+        });
+        observer.observe({ entryTypes: ["longtask"] });
+      } catch {
+        observer = null;
+      }
+    }
+
+    const publishTimer = window.setInterval(publish, 1000);
+    const handlePageHide = () => publish();
+    window.addEventListener("pagehide", handlePageHide);
+
+    appendLog("Render-perf diagnostics enabled (?perfDiag=1)", "system");
+
+    return () => {
+      window.clearInterval(publishTimer);
+      window.removeEventListener("pagehide", handlePageHide);
+      if (observer) {
+        observer.disconnect();
+      }
+      publish();
+      state.enabled = false;
+      perfDiagRef.current = null;
+    };
+  }, []);
+
+  // Stage 5c: arm the opt-in selector-store HUD path after mount when the URL flag
+  // is present. Reading it post-mount (not at SSR) keeps first paint on the legacy
+  // path so hydration stays clean; with the flag absent this is a no-op.
+  useEffect(() => {
+    if (selectorHudFlagEnabled()) {
+      setSelectorHudEnabled(true);
+      appendLog("Selector-store HUD enabled (?selectorHud=1)", "system");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function recordMovementDiagnostic(
@@ -6361,7 +6565,13 @@ export default function HomePage() {
       at: Date.now(),
     };
     debugWindow.__mir2LastGatewayEvent = debugEvent;
-    debugWindow.__mir2GatewayEventHistory = [debugEvent, ...(debugWindow.__mir2GatewayEventHistory ?? [])].slice(0, 50);
+    // In-place bounded ring (newest-first, <=50) instead of [x, ...prev].slice(0,50):
+    // identical read contract for the QA harnesses that read this global, but no
+    // per-event array-container garbage (Stage 1, render-perf).
+    const gatewayHistory = debugWindow.__mir2GatewayEventHistory ?? [];
+    gatewayHistory.unshift(debugEvent);
+    if (gatewayHistory.length > 50) gatewayHistory.length = 50;
+    debugWindow.__mir2GatewayEventHistory = gatewayHistory;
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
       pendingLoginRef.current = false;
@@ -6426,7 +6636,13 @@ export default function HomePage() {
     }
 
     recordDebugEvent("packet-in", "net", { packet: event.packet });
-    switch (event.packet) {
+    // ?perfDiag=1 only: time the switch body per packet name. When the gate is
+    // OFF perfDiagState is null and the only added cost is this ref read + the
+    // `if` in the finally below — the hot path is otherwise unchanged.
+    const perfDiagState = perfDiagRef.current;
+    const perfDiagStart = perfDiagState ? performance.now() : 0;
+    try {
+      switch (event.packet) {
       case "Connected":
         setLoginErrorKey(null);
         break;
@@ -6794,9 +7010,11 @@ export default function HomePage() {
                 : entity,
             ),
           };
-	          worldRef.current = nextWorld;
-	          return nextWorld;
-	        });
+          // Stage-2: updateWorld assigns worldRef.current from the returned value (page.tsx
+          // ~1540) synchronously, so the inner worldRef write here was a double-write. The
+          // post-updater worldRef.current read below still sees the committed value.
+          return nextWorld;
+        });
         if (movementObjectId === worldRef.current.playerObjectId) {
           const outcome = reconcileSelfMovementAck({ x, y, direction }, movementPacket, movementNow);
           if (outcome === "confirmed") {
@@ -6856,7 +7074,9 @@ export default function HomePage() {
         break;
       }
       case "ObjectAttack":
-        updateWorldEntityFromLocationPacket(payload);
+        // Stage-2: markWorldEntityAttack's single updater already applies the location patch
+        // (x/y/direction) alongside the attack-animation fields, so the prior separate
+        // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
         markWorldEntityAttack(payload);
         break;
       case "ObjectHarvest":
@@ -6864,7 +7084,9 @@ export default function HomePage() {
         updateWorldEntityFromLocationPacket(payload);
         break;
       case "ObjectStruck":
-        updateWorldEntityFromLocationPacket(payload);
+        // Stage-2: markWorldEntityStruck now applies location + struck hit-flash in ONE updater
+        // (was 3 clones: location, location-again, and a bus-driven flash re-entry). It emits
+        // `entityStruck` for the SOUND subscriber while suppressing the redundant VFX-flash clone.
         markWorldEntityStruck(payload);
         break;
       case "ObjectRangeAttack":
@@ -6890,7 +7112,10 @@ export default function HomePage() {
         break;
       case "ObjectSpell":
       case "ObjectMagic":
-        updateWorldEntityFromLocationPacket(payload);
+        // Stage-2: markWorldEntityMagic's single updater already applies the location patch
+        // (x/y/direction) alongside the cast/range-attack fields, so the prior separate
+        // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
+        // spawnRangeProjectile stays as-is (it adds the projectile + caster attack pose).
         markWorldEntityMagic(payload);
         if (stringifyId(payload.targetId) !== "0") {
           spawnRangeProjectile(payload);
@@ -8994,6 +9219,15 @@ export default function HomePage() {
         break;
       default:
         break;
+      }
+    } finally {
+      if (perfDiagState) {
+        recordPerfDiagHandler(
+          perfDiagState,
+          event.packet,
+          performance.now() - perfDiagStart,
+        );
+      }
     }
   }
 
@@ -9263,6 +9497,10 @@ export default function HomePage() {
   // separately by updateWorldEntityFromLocationPacket before the bus event is emitted.
   function markEntityStruckFlash(objectId: string) {
     if (!objectId || objectId === "0") return;
+    // Stage-2: when the combat case handler already applied the flash inline (in its single
+    // updater) the same hit's `entityStruck` bus emit must not re-enter updateWorld for a
+    // redundant clone. The sound subscriber still ran on the same emit.
+    if (suppressStruckFlashRef.current) return;
     const now = Date.now();
     updateWorld((current) => ({
       ...current,
@@ -9277,9 +9515,14 @@ export default function HomePage() {
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const location = payload.location as { x?: number; y?: number } | undefined;
-    // Sound + hit-flash are handled by bus subscribers (entityStruck -> sound-subscriber
-    // + vfx-subscriber). Only the position / direction update stays inline.
+    const now = Date.now();
+    // Stage-2: emit `entityStruck` only for the SOUND subscriber; suppress the VFX subscriber's
+    // flash callback (markEntityStruckFlash) so it does not re-enter updateWorld for a redundant
+    // clone — the same struck-flash fields are applied inline in the single updater below. The
+    // bus dispatch is synchronous, so the flag is read + reset within this emit.
+    suppressStruckFlashRef.current = true;
     gameBusRef.current!.emit({ type: "entityStruck", objectId });
+    suppressStruckFlashRef.current = false;
     updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
@@ -9287,6 +9530,9 @@ export default function HomePage() {
         x: typeof location?.x === "number" ? location.x : entity.x,
         y: typeof location?.y === "number" ? location.y : entity.y,
         direction: stringOrNull(payload.direction) ?? entity.direction,
+        // Folds markEntityStruckFlash's body (crystalStruckActionDurationMs) into this one map.
+        struckStartedAt: now,
+        struckUntil: now + crystalStruckActionDurationMs(entity),
       })),
     }));
   }
@@ -11150,6 +11396,54 @@ export default function HomePage() {
     world.mapTransfers,
   ]);
 
+  // ── Stable forwarded handlers ─────────────────────────────────────────────
+  // The shell/mobile-controls/scene forward these to memoised children (and the two
+  // target actions sit in a keydown effect dep list). The underlying logic reads live
+  // state (`world`/`self`/`selectedEntity`) and the `handle*` helpers are re-created
+  // every render, so we keep the latest closure in a ref (updated each render) and expose
+  // an identity-stable `useCallback(…, [])` wrapper. This COMPOSES the existing bodies.
+  const onApproachTargetRef = useRef<() => void>(() => undefined);
+  onApproachTargetRef.current = () => {
+    if (!selectedEntity) return;
+    const destination = approachDestination(self, selectedEntity);
+    moveToTile(destination.x, destination.y, "run");
+  };
+  const onApproachTarget = useCallback(() => onApproachTargetRef.current(), []);
+
+  const onPrimaryTargetActionRef = useRef<() => void>(() => undefined);
+  onPrimaryTargetActionRef.current = () => {
+    if (!selectedEntity) return;
+    if (selectedEntity.kind === "monster") {
+      if (selectedEntity.dead) return harvestToward(directionToward(self, selectedEntity));
+      return attackTarget(selectedEntity.objectId);
+    }
+    if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
+    sendCrystalTurn(directionToward(self, selectedEntity));
+  };
+  const onPrimaryTargetAction = useCallback(() => onPrimaryTargetActionRef.current(), []);
+
+  const onViewportTileClickRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileClickRef.current = (x, y) => handleViewportTileAction(x, y, "walk");
+  const onViewportTileClick = useCallback((x: number, y: number) => onViewportTileClickRef.current(x, y), []);
+
+  const onViewportTileSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileSecondaryActionRef.current = (x, y) => handleViewportTileAction(x, y, "run");
+  const onViewportTileSecondaryAction = useCallback(
+    (x: number, y: number) => onViewportTileSecondaryActionRef.current(x, y),
+    [],
+  );
+
+  const onViewportTileStepClickRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileStepClickRef.current = (x, y) => handleViewportTileStepAction(x, y, "walk");
+  const onViewportTileStepClick = useCallback((x: number, y: number) => onViewportTileStepClickRef.current(x, y), []);
+
+  const onViewportTileStepSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileStepSecondaryActionRef.current = (x, y) => handleViewportTileStepAction(x, y, "run");
+  const onViewportTileStepSecondaryAction = useCallback(
+    (x: number, y: number) => onViewportTileStepSecondaryActionRef.current(x, y),
+    [],
+  );
+
   return (
     !isClientReady ? null :
     <>
@@ -11161,6 +11455,8 @@ export default function HomePage() {
       wsState={wsState}
       reconnectStatus={reconnectStatus}
       world={world}
+      worldStore={worldStoreRef.current ?? undefined}
+      selectorHud={selectorHudEnabled}
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
@@ -11254,31 +11550,18 @@ export default function HomePage() {
       onCloseInventory={() => setShowInventory(false)}
       onOpenCharacterTab={openCharacter}
       onOpenInventoryTab={openInventory}
-      onViewportTileClick={(x, y) => handleViewportTileAction(x, y, "walk")}
-      onViewportTileSecondaryAction={(x, y) => handleViewportTileAction(x, y, "run")}
-      onViewportTileStepClick={(x, y) => handleViewportTileStepAction(x, y, "walk")}
-      onViewportTileStepSecondaryAction={(x, y) => handleViewportTileStepAction(x, y, "run")}
+      onViewportTileClick={onViewportTileClick}
+      onViewportTileSecondaryAction={onViewportTileSecondaryAction}
+      onViewportTileStepClick={onViewportTileStepClick}
+      onViewportTileStepSecondaryAction={onViewportTileStepSecondaryAction}
       onViewportDirectionStep={handleViewportDirectionStep}
       onViewportDirectionIntent={handleViewportDirectionIntent}
       onViewportDirectionStop={handleViewportDirectionStop}
       onPickGroundDrop={pickGroundDrop}
       onSelectEntity={selectEntity}
       onActivateEntity={activateEntity}
-      onApproachTarget={() => {
-        if (!selectedEntity) return;
-        const destination = approachDestination(self, selectedEntity);
-        moveToTile(destination.x, destination.y, "run");
-      }}
-      onPrimaryTargetAction={() => {
-        if (!selectedEntity) return;
-        if (selectedEntity.kind === "monster") {
-          // A dead monster is a harvestable corpse; live ones are attacked.
-          if (selectedEntity.dead) return harvestToward(directionToward(self, selectedEntity));
-          return attackTarget(selectedEntity.objectId);
-        }
-        if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
-        sendCrystalTurn(directionToward(self, selectedEntity));
-      }}
+      onApproachTarget={onApproachTarget}
+      onPrimaryTargetAction={onPrimaryTargetAction}
       onSelectNpcDialogTarget={(target) => send({ type: "selectNpcDialog", target })}
       onSubmitNpcInput={(value) => send({ type: "submitNpcInput", value })}
       onSelectCharacter={setSelectedCharacterIndex}
@@ -11325,8 +11608,9 @@ export default function HomePage() {
         onClose={() => setShowTutorial(false)}
       />
     ) : null}
-    {ONCHAIN_MINE_ENABLED && screen === "game" ? (
-      <OnchainMinePanel
+    {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
+      <OnchainMinePanelWithStore
+        store={worldStoreRef.current}
         walletAddress={onchainWallet?.account.address ?? null}
         walletBusy={onchainWalletBusy}
         pendingSwings={onchainMine.pendingSwings}
@@ -11339,9 +11623,6 @@ export default function HomePage() {
         lastReconcile={onchainMine.lastReconcile}
         lastError={onchainMine.lastError}
         nextNonce={onchainNextNonce}
-        veinStage={
-          world.mineNodes.find((node) => isOnchainVeinNode(node, ONCHAIN_MINE_VEIN))?.stage ?? null
-        }
         veinLocation={ONCHAIN_MINE_VEIN}
         submitBusy={onchainSubmitBusy}
         redeemAmount={onchainRedeemAmount}
@@ -11444,6 +11725,27 @@ function DeathReviveOverlay({
       </div>
     </div>
   );
+}
+
+// Render-perf Stage 5b: store-bound OnchainMinePanel. The panel reads only one
+// low-frequency world slice (`world.mineNodes`, via the derived `veinStage`), yet
+// the old `veinStage={world.mineNodes.find(...)}` callsite recomputed it on every
+// coalesced `setWorld` flush — re-rendering this whole HUD on unrelated combat /
+// movement packets. This wrapper subscribes to the world store directly with
+// `useWorldSelector`, so it re-renders only when the vein's stage actually
+// changes. The selector returns a primitive (`number | null`), so its identity is
+// already stable via `Object.is` — no custom `isEqual` needed. Proves the Stage-5
+// pattern on the safest (lowest-frequency) consumer before any HUD migration.
+function OnchainMinePanelWithStore({
+  store,
+  veinLocation,
+  ...rest
+}: Omit<OnchainMinePanelProps, "veinStage"> & { store: WorldStore }) {
+  const veinStage = useWorldSelector(
+    store,
+    (s) => s.mineNodes.find((node) => isOnchainVeinNode(node, veinLocation))?.stage ?? null,
+  );
+  return <OnchainMinePanel {...rest} veinLocation={veinLocation} veinStage={veinStage} />;
 }
 
 // Maps the normalized mail records (extended-server-packets normalizeMailList)
