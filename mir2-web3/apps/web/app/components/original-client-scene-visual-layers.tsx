@@ -331,6 +331,9 @@ export function OriginalClientSceneVisualLayers({
   playerCameraMotionOffset,
   entityMotionSnapshots,
   motionNow,
+  imperativeCamera,
+  registerCameraSurface,
+  registerEntityEl,
   sceneSpriteFrameIndex,
   useBevyEntityRenderer,
   entityKindClassName,
@@ -350,6 +353,9 @@ export function OriginalClientSceneVisualLayers({
   playerCameraMotionOffset: ViewportOffset;
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
+  imperativeCamera: boolean;
+  registerCameraSurface: (key: string) => (el: HTMLElement | null) => void;
+  registerEntityEl: (key: string, objectId: string) => (el: HTMLElement | null) => void;
   sceneSpriteFrameIndex: number;
   useBevyEntityRenderer: boolean;
   entityKindClassName: (kind: EntityKind) => string;
@@ -384,7 +390,10 @@ export function OriginalClientSceneVisualLayers({
 
   return (
     <>
-      <div className={`viewport-drop-overlay ${screen !== "game" ? "hidden" : ""}`}>
+      <div
+        ref={imperativeCamera ? registerCameraSurface("drops") : undefined}
+        className={`viewport-drop-overlay ${screen !== "game" ? "hidden" : ""}`}
+      >
         {viewportGroundDrops.map((drop) => {
           const showIcon =
             typeof drop.icon === "number" && drop.icon > 0 && !failedDropIcons.has(drop.icon);
@@ -427,7 +436,10 @@ export function OriginalClientSceneVisualLayers({
         })}
       </div>
 
-      <div className={`viewport-sprite-overlay ${screen !== "game" ? "hidden" : ""}`}>
+      <div
+        ref={imperativeCamera ? registerCameraSurface("sprites") : undefined}
+        className={`viewport-sprite-overlay ${screen !== "game" ? "hidden" : ""}`}
+      >
         {viewportMapSprites.objects.map((sprite) => (
           <img
             key={sprite.key}
@@ -454,9 +466,12 @@ export function OriginalClientSceneVisualLayers({
         ))}
         {viewportEntitySprites.map(({ entity, sprite }) => {
           const isPlayer = player?.objectId === entity.objectId;
-          const entityMotionOffset = isPlayer
-            ? EMPTY_VIEWPORT_OFFSET
-            : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+          // In the imperative path the sub-tile glide is written by the motion driver
+          // (display Hz) onto this stack's transform; render at the cell base here.
+          const entityMotionOffset =
+            isPlayer || imperativeCamera
+              ? EMPTY_VIEWPORT_OFFSET
+              : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
           const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
           const label = entityDisplayName(entity);
           const hitBounds = entitySpriteHitBounds(sprite);
@@ -485,6 +500,7 @@ export function OriginalClientSceneVisualLayers({
           return (
             <div
               key={`sprite-${entity.objectId}`}
+              ref={imperativeCamera ? registerEntityEl(`stack:${entity.objectId}`, entity.objectId) : undefined}
               className={`entity-sprite-stack ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""} ${entity.dead ? "dead" : ""} ${isEntityAttacking(entity, motionNow) ? "attacking" : ""} ${isEntityStruck(entity, motionNow) ? "struck" : ""} ${isEntityReviving(entity, motionNow) ? "reviving" : ""}`}
               style={{
                 left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
@@ -568,19 +584,26 @@ export function OriginalClientSceneVisualLayers({
         ))}
       </div>
 
-      <div className={`viewport-entity-overlay ${screen !== "game" ? "hidden" : ""}`}>
+      <div
+        ref={imperativeCamera ? registerCameraSurface("names") : undefined}
+        className={`viewport-entity-overlay ${screen !== "game" ? "hidden" : ""}`}
+      >
         {player
           ? viewportEntitySprites.map(({ entity, sprite }) => {
               const isPlayer = player.objectId === entity.objectId;
-              const entityMotionOffset = isPlayer
-                ? EMPTY_VIEWPORT_OFFSET
-                : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+              // Imperative path: the driver writes the sub-tile glide onto this
+              // nameplate's transform (display Hz); render at the cell base here.
+              const entityMotionOffset =
+                isPlayer || imperativeCamera
+                  ? EMPTY_VIEWPORT_OFFSET
+                  : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
               const labelLines = entityDisplayLabelLines(entity);
 
               return (
                 <button
                   key={`entity-${entity.objectId}`}
+                  ref={imperativeCamera ? registerEntityEl(`name:${entity.objectId}`, entity.objectId) : undefined}
                   type="button"
                   className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
                   style={{
