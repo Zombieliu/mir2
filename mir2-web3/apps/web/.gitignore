@@ -16,6 +16,10 @@ docs/generated/economy-qa/
 # qa:soak`). Run-specific; not source.
 docs/generated/soak-qa/
 
+# Equip→appearance QA run artifacts (reports + screenshots from `npm run
+# qa:appearance`). Run-specific; not source.
+docs/generated/equip-appearance-qa/
+
 # i18n AI-translation scratch (batch-*.json, _write-batch-*.mjs, source.json,
 # flagged.jsonl, glossary.json). The distilled, reviewed outputs are committed
 # instead: lib/generated/localization_bundle.json, lib/generated/i18n-glossary.json,
