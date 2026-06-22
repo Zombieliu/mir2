@@ -31,6 +31,7 @@
     "qa:web3": "node ./scripts/qa-web3.mjs",
     "qa:social": "node ./scripts/qa-social.mjs",
     "qa:soak": "node ./scripts/qa-soak.mjs",
+    "qa:button-sounds": "node ./scripts/qa-button-sounds.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
     "smoke:cache-metrics": "node ./scripts/smoke-cache-metrics.mjs",
     "smoke:bevy-runtime-backends": "node ./scripts/smoke-bevy-runtime-backends.mjs",
