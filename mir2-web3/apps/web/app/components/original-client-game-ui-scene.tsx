@@ -17,6 +17,7 @@ import {
   type ChatOptionFilterKey,
 } from "./original-client-panels";
 import { MailPanel, NpcDialogPanel, ReportPanel } from "./original-client-dialogs";
+import { ObjectiveTracker } from "./original-client-objective-tracker";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
 import { GameShopWindow } from "./original-client-game-shop";
 import { InventoryWindow } from "./original-client-inventory-window";
@@ -212,6 +213,7 @@ function GameUiSceneInner({
 
   return (
     <div className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}>
+      <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />
       <MiniMapPanel
         t={t}
         world={world}
@@ -354,6 +356,7 @@ function GameUiSceneInner({
         <NpcDialogPanel
           t={t}
           dialog={visibleDialog}
+          playerClass={player?.classKey ?? null}
           onClose={() => {
             onSelectNpcDialogTarget("@Exit");
             setDismissedDialogKey(dialogKey);
