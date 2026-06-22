@@ -5014,6 +5014,50 @@ fn spitting_spider_ai_attacks_from_two_tiles_with_line_timing() {
 }
 
 #[test]
+fn crystal_ai4_spitting_spider_attack_range_matches_crystal() {
+    // Crystal `SpittingSpider.InAttackRange`: cap 2, then
+    // `(x<=1 && y<=1) || (x==y || x%2==y%2)`. (2,1)/(1,2) are OUT of range in
+    // Crystal but were previously IN (the shared 18|29|61 arm collapsed to a
+    // full 2x2 box because its `dx<=max && dy<=max` clause is always true after
+    // the cap check). This locks in the exact predicate for AI 4.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let spider_position = Point { x: 340, y: 270 };
+    let spider = spawn_crystal_monster_for_test(
+        &mut session,
+        98_904_u32,
+        "SpittingSpider",
+        spider_position.clone(),
+        MirDirection::Left,
+        true,
+    );
+    let entry = session.app.world().entity(spider);
+    let agent = entry.get::<MonsterAgent>().expect("spitting spider agent");
+    assert_eq!(agent.ai, 4, "SpittingSpider should be AI 4");
+
+    let at = |dx: i32, dy: i32| Point {
+        x: spider_position.x + dx,
+        y: spider_position.y + dy,
+    };
+    // In range: adjacent box, diagonal (x==y), and same-parity (x%2==y%2).
+    for (dx, dy) in [(1, 1), (2, 2), (2, 0), (0, 2), (1, 0)] {
+        assert!(
+            super::monster_in_attack_range(agent, &spider_position, &at(dx, dy)),
+            "({dx},{dy}) should be in SpittingSpider attack range"
+        );
+    }
+    // Out of range: (2,1)/(1,2) (the corrected cases), beyond the 2-tile cap,
+    // and the same tile.
+    for (dx, dy) in [(2, 1), (1, 2), (3, 0), (0, 0)] {
+        assert!(
+            !super::monster_in_attack_range(agent, &spider_position, &at(dx, dy)),
+            "({dx},{dy}) should be OUT of SpittingSpider attack range"
+        );
+    }
+}
+
+#[test]
 fn sand_worm_uses_crystal_line_attack_shape_and_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -57996,6 +58040,56 @@ fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
     assert!(
         dealt > 8,
         "AI-26 ShamanZombie should hit using imported DC damage (max_dc=17), got {dealt} from a {before_hp}->{after_hp} delta"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 0 is the base `MonsterObject` (Crystal `GetMonster` default)
+// and by far the most common shipped family (3588 respawn groups / 251 distinct
+// monsters). Its `Attack()` deals `GetAttackPower(MinDC, MaxDC)`, but the
+// `monster_player_attack_damage` table had no AI-0 arm and fell through to the
+// `_ => 7` stub, so the bulk of the world hit for a flat 7 (the zone path was
+// already correct). This locks in the catch-all DC fix with `DarkDevourer`
+// (manifest min_dc=105, max_dc=127 — far above the old 7).
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai0_base_monster_uses_imported_dc_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let devourer_object_id = 98_900_u32;
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    set_player_position(&mut session, player_origin.clone());
+
+    // DarkDevourer ships with AI 0 (base MonsterObject) and DC 105-127, far
+    // above the default-7 fallback. Spawn adjacent to land a melee hit fast.
+    let _devourer = spawn_crystal_monster_for_test(
+        &mut session,
+        devourer_object_id,
+        "DarkDevourer",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    // A few ticks: launch the swing + land the 300ms scheduled damage.
+    for _ in 0..4 {
+        let _ = session.tick();
+    }
+
+    let after_hp = session.world_snapshot().player_hp.expect("player hp");
+    let dealt = before_hp - after_hp;
+    assert!(
+        dealt > 8,
+        "AI-0 base monster (DarkDevourer DC 105-127) should hit using imported DC, not the old flat 7; got {dealt} from a {before_hp}->{after_hp} delta"
     );
 }
 
