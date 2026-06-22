@@ -155,7 +155,10 @@ export type ExtraWindowsProps = {
   t: TranslateFn;
 
   questLog?: WindowToggle &
-    Pick<QuestLogWindowProps, "quests" | "onTrackQuest" | "onAbandonQuest" | "onShareQuest">;
+    Pick<
+      QuestLogWindowProps,
+      "quests" | "onTrackQuest" | "onAbandonQuest" | "onShareQuest" | "playerClass"
+    >;
 
   heroPet?: WindowToggle &
     Pick<
@@ -314,6 +317,7 @@ function ExtraWindowsInner({
         <QuestLogWindow
           t={t}
           quests={questLog.quests}
+          playerClass={questLog.playerClass}
           onTrackQuest={questLog.onTrackQuest}
           onAbandonQuest={questLog.onAbandonQuest}
           onShareQuest={questLog.onShareQuest}

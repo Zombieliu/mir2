@@ -13,6 +13,7 @@ import {
   type TutorialState,
   type TutorialWindow,
 } from "../../lib/tutorial-steps";
+import { guideQuestAttackHint, type GuideQuestLike } from "../../lib/onboarding-guidance";
 
 // Net-new interactive beginner tutorial (the original Crystal client has none —
 // see lib/tutorial-steps.ts header). Self-contained presentational overlay: it
@@ -28,6 +29,13 @@ export type TutorialOverlayProps = {
   language: TutorialLang;
   // Live open/closed state of the tracked windows (drives window-trigger steps).
   windows: { inventory: boolean; character: boolean; questLog: boolean };
+  // The player's active quest log (drives guide-quest coordination on the
+  // "attack a monster" step so the generic card and the guided first quest name
+  // the same target). Optional + defensive: absent → no coordination line.
+  questLog?: GuideQuestLike[] | null;
+  // Lowercase player class key, used to keep the coordination hint class-aware
+  // (don't tell an Archer to melee the wasp).
+  playerClass?: string | null;
   // Called once when the player finishes or skips the whole flow.
   onClose: () => void;
 };
@@ -37,7 +45,13 @@ const ACTION_EVENT = "mir2:action";
 // Detail shape dispatched by page.tsx send(): { type: <ClientPacket type> }.
 type ActionEventDetail = { type?: unknown };
 
-export function OriginalClientTutorialOverlay({ language, windows, onClose }: TutorialOverlayProps) {
+export function OriginalClientTutorialOverlay({
+  language,
+  windows,
+  questLog,
+  playerClass,
+  onClose,
+}: TutorialOverlayProps) {
   const [state, dispatch] = useReducer(reduceTutorial, undefined, createTutorialState);
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
   const closedRef = useRef(false);
@@ -105,6 +119,13 @@ export function OriginalClientTutorialOverlay({ language, windows, onClose }: Tu
   const isManual = step.trigger.kind === "manual";
   const isLast = state.stepIndex === total - 1;
 
+  // Gap D: on the generic "attack a monster" step, if the player is on the guided
+  // first quest, name the specific target so the card and the quest read as one
+  // coherent next step instead of two unrelated prompts. Class-aware so a ranged
+  // class isn't told to melee.
+  const guideHint =
+    step.id === "attack" ? guideQuestAttackHint(questLog, playerClass) : null;
+
   const send = (event: TutorialEvent) => dispatch(event);
 
   return (
@@ -138,6 +159,8 @@ export function OriginalClientTutorialOverlay({ language, windows, onClose }: Tu
           {step.hint ? (
             <div style={HINT_STYLE}>👉 {pickText(step.hint, language)}</div>
           ) : null}
+
+          {guideHint ? <div style={QUEST_HINT_STYLE}>🎯 {guideHint}</div> : null}
 
           <ProgressBar value={stepNumber} max={total} />
 
@@ -304,6 +327,18 @@ const HINT_STYLE: CSSProperties = {
   padding: "6px 10px",
   marginBottom: 10,
   color: "#ffdf9b",
+  fontWeight: 600,
+};
+
+// Guide-quest coordination line — a distinct green-tinted callout so it reads as
+// "your actual quest" rather than another generic tutorial hint.
+const QUEST_HINT_STYLE: CSSProperties = {
+  background: "rgba(106, 168, 95, 0.16)",
+  border: "1px solid rgba(123, 224, 122, 0.5)",
+  borderRadius: 2,
+  padding: "6px 10px",
+  marginBottom: 10,
+  color: "#bdf0b5",
   fontWeight: 600,
 };
 
