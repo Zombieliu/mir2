@@ -218,10 +218,15 @@ export function CharacterWindow({
         <SpriteButton sprite={ORIGINAL_UI.character.closeButton} label={t("ui.closeCharacter")} onClick={onClose} />
       </div>
 
-      <div className="character-tab char"><button type="button" className="window-tab-button" onClick={() => onTabChange("char")}><img src={ORIGINAL_UI.character.tabs.char} alt={t("ui.character")} draggable={false} /></button></div>
-      <div className="character-tab stats1"><button type="button" className="window-tab-button" onClick={() => onTabChange("stats1")}><img src={ORIGINAL_UI.character.tabs.stats1} alt={t("ui.statsPrimary")} draggable={false} /></button></div>
-      <div className="character-tab stats2"><button type="button" className="window-tab-button" onClick={() => onTabChange("stats2")}><img src={ORIGINAL_UI.character.tabs.stats2} alt={t("ui.statsSecondary")} draggable={false} /></button></div>
-      <div className="character-tab spells"><button type="button" className="window-tab-button" onClick={() => onTabChange("spells")}><img src={ORIGINAL_UI.character.tabs.spells} alt={t("ui.spells")} draggable={false} /></button></div>
+      {/* Crystal CharacterDialog: the frame (Title/504) bakes all four dim tab
+          labels; only the selected tab overlays its bright sprite (500-503),
+          the others draw nothing (Index = -1). Match that: render a tab's
+          <img> only when active; the button stays as the always-clickable
+          hotspot over the frame's dim label. */}
+      <div className="character-tab char"><button type="button" className="window-tab-button" onClick={() => onTabChange("char")}>{activeTab === "char" ? <img src={ORIGINAL_UI.character.tabs.char} alt={t("ui.character")} draggable={false} /> : null}</button></div>
+      <div className="character-tab stats1"><button type="button" className="window-tab-button" onClick={() => onTabChange("stats1")}>{activeTab === "stats1" ? <img src={ORIGINAL_UI.character.tabs.stats1} alt={t("ui.statsPrimary")} draggable={false} /> : null}</button></div>
+      <div className="character-tab stats2"><button type="button" className="window-tab-button" onClick={() => onTabChange("stats2")}>{activeTab === "stats2" ? <img src={ORIGINAL_UI.character.tabs.stats2} alt={t("ui.statsSecondary")} draggable={false} /> : null}</button></div>
+      <div className="character-tab spells"><button type="button" className="window-tab-button" onClick={() => onTabChange("spells")}>{activeTab === "spells" ? <img src={ORIGINAL_UI.character.tabs.spells} alt={t("ui.spells")} draggable={false} /> : null}</button></div>
 
       <div className="character-name">{player?.name ?? ""}</div>
       <div className="character-guild">

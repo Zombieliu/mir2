@@ -312,7 +312,7 @@ export const ORIGINAL_UI = {
     height: 236,
     frame: "/original-ui/Title/196.png",
     tabs: {
-      bag1: { active: "/original-ui/Title/197.png", idle: "/original-ui/Title/738.png" },
+      bag1: { active: "/original-ui/Title/197.png", idle: "/original-ui/Title/737.png" },
       bag2: { active: "/original-ui/Title/168.png", idle: "/original-ui/Title/738.png" },
       quest: { active: "/original-ui/Title/198.png", idle: "/original-ui/Title/739.png" },
     },
