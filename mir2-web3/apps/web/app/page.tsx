@@ -121,6 +121,7 @@ import {
   MOVEMENT_PENDING_MAX_AGE_MS,
   canSendMovement,
   clampMovementLeadToCap,
+  stepMovementTowardWithinCap,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
   movementPointMatches,
@@ -913,6 +914,19 @@ const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS =
   MOVEMENT_PENDING_ACTION_RECOVERY_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 2;
 const MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES = MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
+// The locally-predicted self sprite may lead the server by up to the cap above,
+// but the rendered tile must never ADVANCE more than this many tiles in a single
+// frame: a walk/run step is 1 tile over >=200ms, so any larger single-frame move
+// is non-physical (dropped frames collapsing several 1-tile transitions, e.g. a
+// direction reversal across the server tile) and shows as an "overshoot then snap".
+const MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME = 1;
+// Only advance the eased render baseline once per animation frame. preserveCrystal
+// SelfRenderPosition runs from several call sites per frame (React render, the live
+// position getter, the debug-state getters); without this gate they would each
+// advance the baseline and burst-walk a multi-tile jump to completion in one frame.
+// Sits below the smallest real frame interval (~13ms at the 75fps cap) so a genuine
+// new frame always commits, and above the sub-millisecond intra-frame call cluster.
+const MOVEMENT_RENDER_EASE_MIN_COMMIT_MS = 10;
 const MOVEMENT_DIRECTION_PENDING_MAX = 1;
 const MOVEMENT_ROUTE_REROUTE_AFTER_MS = 900;
 const MOVEMENT_ROUTE_RETRY_DELAY_MS = 120;
@@ -1495,6 +1509,13 @@ export default function HomePage() {
   // (lib/world-model/snapshot-emitter), started in the runtime-ready effect below.
   const localMovementAnchorRef = useRef<LocalMovementAnchor | null>(null);
   const lastCrystalSelfRenderPositionRef = useRef<PredictedPlayerMotion | null>(null);
+  // Per-frame baseline for easing the rendered self tile (<=1 tile/frame). `tile`
+  // is the last committed render tile; `at` is when it committed (the once-per-frame
+  // gate). Reset to the server tile whenever the render falls back to the server.
+  const easedSelfRenderRef = useRef<{ tile: PredictedPlayerMotion | null; at: number }>({
+    tile: null,
+    at: 0,
+  });
   const lastSelfMovementAckRef = useRef<{ x: number; y: number; direction?: string; at: number } | null>(null);
   const lastSelfNoProgressAckRef = useRef<{
     x: number;
@@ -3511,9 +3532,33 @@ export default function HomePage() {
     return hasSelfMovementTransportEvidence(now) ? candidate : null;
   }
 
+  // Ease the rendered self tile toward `target`, advancing at most
+  // MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME tiles per animation frame. The
+  // baseline (last committed render tile + commit time) lives in easedSelfRenderRef
+  // and is advanced at most once per frame, so the several preserveCrystalSelfRender
+  // Position() call sites in a frame all observe the same eased tile instead of
+  // burst-walking a multi-tile jump. A normal <=1-tile advance passes through
+  // untouched (fully responsive); only a >1-tile single-frame jump is eased.
+  function easeSelfRenderTile(
+    target: PredictedPlayerMotion,
+    serverSelf: { x: number; y: number; direction?: string },
+    now: number,
+  ): PredictedPlayerMotion {
+    const state = easedSelfRenderRef.current;
+    if (state.tile && now - state.at < MOVEMENT_RENDER_EASE_MIN_COMMIT_MS) {
+      // Same animation frame as the last commit — hold so repeat calls agree.
+      return state.tile;
+    }
+    const base = state.tile ?? { x: serverSelf.x, y: serverSelf.y };
+    const committed = stepMovementTowardWithinCap(base, target, MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME);
+    easedSelfRenderRef.current = { tile: committed, at: now };
+    return committed;
+  }
+
   function preserveCrystalSelfRenderPosition(
     serverSelf: { x: number; y: number; direction?: string } | null,
     candidate: PredictedPlayerMotion | null,
+    now = Date.now(),
   ) {
     if (!serverSelf) {
       lastCrystalSelfRenderPositionRef.current = candidate;
@@ -3540,13 +3585,33 @@ export default function HomePage() {
       }
     }
 
-    if (next && next.x === serverSelf.x && next.y === serverSelf.y) {
+    // No valid leading prediction: the render tracks the authoritative server tile
+    // (in sync, or a server correction / teleport discarded the prediction). Snap
+    // straight to it — easing a server-driven jump would slow-walk a legitimate
+    // teleport. Reset the ease baseline to the server so the NEXT predicted lead
+    // eases out from the server tile rather than jumping across it.
+    if (!next || (next.x === serverSelf.x && next.y === serverSelf.y)) {
+      easedSelfRenderRef.current = {
+        tile: { x: serverSelf.x, y: serverSelf.y, direction: serverSelf.direction },
+        at: now,
+      };
       lastCrystalSelfRenderPositionRef.current = null;
       return null;
     }
 
-    lastCrystalSelfRenderPositionRef.current = next;
-    return next;
+    // A valid prediction leads the server: cap the rendered advance to <=1 tile per
+    // frame so a long/dropped frame (or a direction reversal across the server tile)
+    // cannot collapse several 1-tile transitions into one visible jump — the
+    // residual "overshoot then snap" left after the lead-cap clamp above. The
+    // baseline advances at most once per frame and routes through the in-between
+    // tiles over consecutive frames.
+    const eased = easeSelfRenderTile(next, serverSelf, now);
+    if (eased.x === serverSelf.x && eased.y === serverSelf.y) {
+      lastCrystalSelfRenderPositionRef.current = null;
+      return null;
+    }
+    lastCrystalSelfRenderPositionRef.current = eased;
+    return eased;
   }
 
   function crystalEffectiveMovementMode(requestedMode: "walk" | "run", now: number): "walk" | "run" {
@@ -4110,6 +4175,7 @@ export default function HomePage() {
       clearRecentSelfMovementActionHistory();
       clearLocalMovementAnchor();
       lastCrystalSelfRenderPositionRef.current = null;
+      easedSelfRenderRef.current = { tile: null, at: 0 };
       clearDirectionStepPendingQueue();
       clearLocalSelfPrediction();
       return;
