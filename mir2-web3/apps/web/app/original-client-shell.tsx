@@ -3117,8 +3117,13 @@ async function loadBevyEntityAtlasManifest() {
     return null;
   }
   if (!bevyEntityAtlasManifestPromise) {
+    // Revalidate the entity-atlas manifest instead of force-caching it: the URL is
+    // constant but the file changes whenever the atlas is regenerated, so
+    // "force-cache" pins a stale manifest and the prebuilt-coverage check runs
+    // against old rects — the atlas silently never matches after a repack. See
+    // docs/MOVEMENT-AND-ATLAS-INVESTIGATION-2026-06-24.md (Finding 1).
     bevyEntityAtlasManifestPromise = fetch(BEVY_ENTITY_ATLAS_MANIFEST_URL, {
-      cache: "force-cache",
+      cache: "no-cache",
     })
       .then(async (response) => {
         if (!response.ok) {
