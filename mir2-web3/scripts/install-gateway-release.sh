@@ -124,6 +124,18 @@ if [ ! -f "$env_path" ]; then
   "${sudo_cmd[@]}" chown root:root "$env_path"
 fi
 
+# Wire the bundled Crystal map pack into the gateway env when it is present on
+# the host, so non-starter maps load on a fresh install too. No-op when the pack
+# directory is absent or MIR2_CRYSTAL_MAP_PACK is already set. Install the pack
+# with scripts/install-crystal-map-pack.sh.
+map_pack_dir="${MIR2_CRYSTAL_MAP_PACK_DIR:-/var/lib/mir2/crystal-map-pack}"
+if [ -d "$map_pack_dir" ] && [ -n "$(find "$map_pack_dir" -maxdepth 1 -name '*.map.gz' -print -quit 2>/dev/null)" ]; then
+  if ! { [ -f "$env_path" ] && "${sudo_cmd[@]}" grep -q '^MIR2_CRYSTAL_MAP_PACK=' "$env_path"; }; then
+    echo "MIR2_CRYSTAL_MAP_PACK=$map_pack_dir" | "${sudo_cmd[@]}" tee -a "$env_path" >/dev/null
+    echo "wired MIR2_CRYSTAL_MAP_PACK=$map_pack_dir into $env_path"
+  fi
+fi
+
 if command -v systemctl >/dev/null 2>&1; then
   "${sudo_cmd[@]}" systemctl daemon-reload
   if [ "$start_service" = "1" ]; then
