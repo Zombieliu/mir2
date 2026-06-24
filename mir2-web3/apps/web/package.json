@@ -79,7 +79,8 @@
     "runtime:build:release": "node ./scripts/build-bevy-runtime.mjs release",
     "dev": "npm run assets:map-atlas:ensure && npm run runtime:build:dev && next dev",
     "build": "npm run runtime:build:release && npm run generate:original-asset-manifest && npm run assets:map-atlas:build && next build",
-    "start": "next start"
+    "start": "next start",
+    "build:item-codex": "node ../../scripts/codex/build-item-codex.mjs"
   },
   "dependencies": {
     "@mysten/sui": "^2.16.2",
