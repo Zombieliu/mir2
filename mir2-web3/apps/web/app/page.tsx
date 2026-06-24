@@ -3861,7 +3861,7 @@ export default function HomePage() {
     if (loadingSceneKeyRef.current === sceneKey) {
       return;
     }
-    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center, sceneKey, loadedSceneKeyRef.current)) {
+    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center)) {
       return;
     }
 
@@ -12694,13 +12694,7 @@ function shouldReloadCrystalScene(
   region: OriginalMapRegion | null,
   mapFileName: string,
   center: { x: number; y: number },
-  sceneKey: string,
-  loadedSceneKey: string | null,
 ) {
-  if (loadedSceneKey !== sceneKey) {
-    return true;
-  }
-
   if (!region) {
     return true;
   }
@@ -12709,6 +12703,16 @@ function shouldReloadCrystalScene(
     return true;
   }
 
+  // Reload ONLY when the player nears the LOADED region's edge — NOT merely
+  // because the chunk index flipped. The fetched region (SCENE_REQUEST_WIDTH/
+  // HEIGHT) is far larger than one chunk (SCENE_CHUNK_*), so a chunk-boundary
+  // crossing normally leaves the player amply inside the current region. The old
+  // `loadedSceneKey !== sceneKey` early-return forced a reload on every chunk
+  // flip, so walking along a chunk boundary re-fetched the scene every step and
+  // re-rendered the whole map → flicker / misalignment + "stutter every few
+  // steps". Measured: 77% of scene fetches were redundant re-fetches of the same
+  // 1–2 chunks (one boundary re-fetched 30×). The margin check below already
+  // covers genuine edge approach and teleports (player outside playBounds).
   return (
     center.x <= region.playBounds.minX + SCENE_RELOAD_MARGIN_X ||
     center.x >= region.playBounds.maxX - SCENE_RELOAD_MARGIN_X ||
