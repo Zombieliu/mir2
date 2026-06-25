@@ -131,10 +131,14 @@ const nextConfig: NextConfig = {
       return [];
     }
     const assetPrefixes = ["original-map", "original-ui", "generated", "bevy-entity-atlases", "Sound"];
+    // Route THROUGH /api/r2-proxy (a Route Handler), NOT straight to R2: a direct
+    // rewrite forwards the browser's `Referer: http://localhost:...` to R2, whose
+    // hotlink protection then 403s it. The handler does its own server-side fetch
+    // (Node fetch sends no Referer) so R2 returns 200.
     return {
       fallback: assetPrefixes.map((prefix) => ({
         source: `/${prefix}/:path*`,
-        destination: `${proxyBase}/${prefix}/:path*`,
+        destination: `/api/r2-proxy/${prefix}/:path*`,
       })),
     };
   },
