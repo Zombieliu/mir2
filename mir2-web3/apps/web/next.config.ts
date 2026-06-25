@@ -117,6 +117,27 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // LOCAL-DEV CONVENIENCE: same-origin R2 proxy. Set `MIR2_R2_PROXY_BASE` (e.g.
+  // https://mir2.obelisk.build) and game assets the local checkout doesn't have
+  // (the ~156k uncovered map tiles, R2-only sprites/sounds) are proxied through
+  // THIS origin — so a localhost build is same-origin with its assets and the
+  // browser never hits a cross-origin CORS wall (R2 sends no Access-Control-
+  // Allow-Origin). `fallback` runs only after the filesystem/public + pages
+  // miss, so committed/downloaded assets are still served locally. Gated on the
+  // env var, so production (assets served same-origin already) is untouched.
+  async rewrites() {
+    const proxyBase = process.env.MIR2_R2_PROXY_BASE?.replace(/\/+$/, "");
+    if (!proxyBase) {
+      return [];
+    }
+    const assetPrefixes = ["original-map", "original-ui", "generated", "bevy-entity-atlases", "Sound"];
+    return {
+      fallback: assetPrefixes.map((prefix) => ({
+        source: `/${prefix}/:path*`,
+        destination: `${proxyBase}/${prefix}/:path*`,
+      })),
+    };
+  },
 };
 
 export default nextConfig;
