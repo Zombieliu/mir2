@@ -2798,12 +2798,30 @@ export default function HomePage() {
     point: { x: number; y: number; direction?: string },
     now: number,
   ) {
+    const stateBefore = readSelfMovementControllerState();
     const result = reconcileMovementSnapshot({
-      state: readSelfMovementControllerState(),
+      state: stateBefore,
       snapshot: point,
       now,
     });
     if (!result.corrected) {
+      return false;
+    }
+    // A periodic worldSnapshot that merely LAGS a still-valid leading prediction is not a
+    // real correction. The authoritative per-move ACK path (reconcileSelfMovementAck —
+    // UserLocation / UserDash / UserDashFail) already handles genuine rejections. During a
+    // RUN the prediction legitimately leads the server by up to MOVEMENT_LOCAL_ACTION_MAX_
+    // LEAD_TILES (2) tiles, so an un-guarded worldSnapshot flags EVERY step as a
+    // "correction" — which resets the run prime + blocks input, collapsing the run into a
+    // walk/standing stutter (measured: a held run advanced SLOWER than a walk, 6 walk + 3
+    // run + 3 standing-stalls over 8 s). If the pending target (or the live prediction) is
+    // still on the predicted path at/ahead of this snapshot, the snapshot is a lagging echo
+    // of a valid lead — keep predicting and let the ACK path own real corrections.
+    const aheadCandidate = stateBefore.pending?.to ?? stateBefore.prediction;
+    if (
+      aheadCandidate &&
+      crystalMovementCandidateNotBehindServer(point, aheadCandidate, aheadCandidate.direction)
+    ) {
       return false;
     }
     applySelfMovementControllerState(result.state);

@@ -197,6 +197,33 @@ export function reconcileMovementAck(input: {
     };
   }
 
+  // Run degraded to a single-tile walk by the server. A run predicts two tiles, but the
+  // server only extends to the second tile when the route keeps going the same way — if
+  // that tile is blocked/bends it advances ONE tile and keeps the player running (Crystal
+  // "a run can degrade to a walk"; see simulation movement.rs `pathfind_next_step`). The
+  // ack then lands on the first tile of the predicted run (from + 1 in the same direction).
+  // Treat that as a CONFIRM at the degraded tile — refresh the run prime and keep
+  // predicting — NOT a hard correction. The old behaviour reset the prime + blocked input
+  // on every blocked second tile, which (running through obstacle-dense town, where the
+  // second tile is frequently a tree/fence/NPC) collapsed a held run into a measured
+  // walk/standing stutter that advanced slower than a plain walk. A genuinely off-path ack
+  // still falls through to the correction below.
+  if (!hardFailure && pending.mode === "run") {
+    const degraded = movementPointInDirection(pending.from, pending.direction, 1);
+    if (movementTileMatches(input.ack, degraded)) {
+      return {
+        outcome: "confirmed",
+        state: {
+          ...input.state,
+          pending: null,
+          prediction: null,
+          nextMoveSendAt: Math.max(input.state.nextMoveSendAt, pending.sentAt + CRYSTAL_MOVE_DELAY_MS),
+          runPrimedUntil: input.now + CRYSTAL_RUN_PRIME_MS,
+        },
+      };
+    }
+  }
+
   return {
     outcome: "correction",
     state: {
