@@ -1266,7 +1266,21 @@ export function OriginalClientShell({
   // the React clock drops to ~10 Hz. Escape hatch: ?bevySelfCamera=0 / ?bevyEntityInterp=0.
   const imperativeSceneMotion =
     useBevyEntityRenderer && BEVY_SELF_CAMERA_ENABLED && BEVY_ENTITY_INTERP_ENABLED;
-  motionClockIntervalMsRef.current = imperativeSceneMotion ? 100 : 30;
+  // In the NON-imperative path (the default — Bevy renders sprites but the self-camera
+  // scroll is folded through this React clock), the ~33 Hz cadence was measured as the
+  // dominant run "judder": the map/camera scroll only advanced every ~30 ms, so on a
+  // 120 Hz display the scroll sat still ~89 % of frames and lurched in 33 Hz steps —
+  // very visible while RUNNING (2 tiles/600 ms = a big per-step displacement), barely
+  // visible while walking. While the self-camera is actually gliding, tighten the clock
+  // to ~60 Hz so the scroll keeps up with the display; fall back to 30 Hz when idle so
+  // the scene tree is not re-created 60×/s during normal standing play (the perf win the
+  // throttle exists for). The imperative path stays at its slow expiry cadence — Bevy
+  // owns the scroll there.
+  const selfCameraGliding =
+    (renderPlayer?.movementUntil ?? 0) > Date.now() ||
+    playerCameraMotionOffset.x !== 0 ||
+    playerCameraMotionOffset.y !== 0;
+  motionClockIntervalMsRef.current = imperativeSceneMotion ? 100 : selfCameraGliding ? 16 : 30;
   // In the imperative path the DOM world layers get a zero camera offset (the driver
   // pans them via a compositor transform at display Hz); otherwise they fold the React
   // `motionNow` camera offset exactly as before.
