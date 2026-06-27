@@ -1433,6 +1433,16 @@ function logCacheProgress(
 function shouldShowCacheProgress(snapshot: CacheMetricsSnapshot) {
   const summary = snapshot.summary;
   if (summary.prewarmRequested <= 0) return false;
+  // The panel is a loading INDICATOR pinned over the HP orb (bottom-left), not a
+  // permanent HUD element — once the prewarm has caught up it must hide, or it sits
+  // on top of the HUD for the whole session reading as "完成 100%" forever (the
+  // gating returned true whenever any prewarm was ever requested). It re-appears if a
+  // later wave requests more, then hides again. Keep it visible while anything failed
+  // so the user still sees the failure count.
+  const completed = summary.prewarmOk + summary.prewarmFailed;
+  if (completed >= summary.prewarmRequested && summary.prewarmFailed === 0) {
+    return false;
+  }
   return true;
 }
 
