@@ -1219,6 +1219,87 @@ type MovementConsoleWindow = typeof window & {
   __mir2PendingMovementConsoleCommands?: Array<Record<string, unknown>>;
 };
 
+// ── ?mir2Debug=1 correction-source counters (run-stutter residual hunt) ──────
+// After PR #165 the held run mostly sustains, but ~3 residual standing stalls
+// ("一顿一顿地停住") remain (docs/RUN-STUTTER-INVESTIGATION.md §5). To pin the
+// remaining stall source WITHOUT guessing, every movement correction increments a
+// cheap window.__corr counter keyed by its source; read it after an 8 s real-key
+// run and whichever counter dominates is the source to fix. The `samples` ring
+// keeps the last few mismatch shapes (ack vs predicted from/to, mode, direction)
+// so the right fix can be chosen from a single run instead of a second rebuild.
+// Gated on ?mir2Debug=1 — the same flag that arms __mir2SceneMotionDebug — so the
+// hot path reads one cached boolean and normal play pays nothing.
+//
+// Counter meaning maps 1:1 to the §5 candidates:
+//   snapshot           worldSnapshot ACTUALLY corrected (reset prime + blocked input)
+//   snapshotSuppressed snapshot guard caught a lagging echo and kept predicting (healthy)
+//   ack                per-move ACK off-path correction, NOT UserDashFail
+//   dashFail           UserDashFail — server refused the run (first tile blocked)
+//   confirm            clean ACK confirm (landed on the predicted tile)
+//   confirmDegraded    run degraded to from+1 but kept primed (PR #165 path — healthy)
+//   legacyInput        legacy direction-step / movement-plan path hard-corrected
+//                      (applyCrystalInputCorrection — a SECOND reconciler that also
+//                      resets the run prime + blocks input, parallel to the controller)
+//   pendingTimeout     a pending self-move aged out with no ACK (>1.5 s) → prime reset
+//                      + input block (server ACK lost/late, not a position mismatch)
+// If all of these correction counters stay LOW yet stalls persist, the residual is a
+// held-direction re-arm gap (candidate 4), provable by cross-checking the
+// __mir2SceneMotionDebug recorder's standing transitions against these totals.
+type CorrectionCounterSource =
+  | "snapshot"
+  | "snapshotSuppressed"
+  | "ack"
+  | "dashFail"
+  | "confirm"
+  | "confirmDegraded"
+  | "legacyInput"
+  | "pendingTimeout";
+
+type CorrectionCounters = Record<CorrectionCounterSource, number> & {
+  samples: Array<Record<string, unknown>>;
+};
+
+type CorrectionCounterWindow = typeof window & { __corr?: CorrectionCounters };
+
+let mir2DebugFlagCache: boolean | null = null;
+function mir2DebugCountersEnabled(): boolean {
+  if (mir2DebugFlagCache !== null) return mir2DebugFlagCache;
+  if (typeof window === "undefined") return false;
+  mir2DebugFlagCache = new URLSearchParams(window.location.search).get("mir2Debug") === "1";
+  return mir2DebugFlagCache;
+}
+
+function bumpCorrectionCounter(source: CorrectionCounterSource, detail?: Record<string, unknown>) {
+  if (!mir2DebugCountersEnabled()) return;
+  const debugWindow = window as CorrectionCounterWindow;
+  const counters =
+    debugWindow.__corr ??
+    (debugWindow.__corr = {
+      snapshot: 0,
+      snapshotSuppressed: 0,
+      ack: 0,
+      dashFail: 0,
+      confirm: 0,
+      confirmDegraded: 0,
+      legacyInput: 0,
+      pendingTimeout: 0,
+      samples: [],
+    });
+  counters[source] += 1;
+  // Keep the mismatch shape only for the correction sources (the stall causes) —
+  // the healthy confirm/suppressed paths fire every step and would flood the ring.
+  if (
+    detail &&
+    (source === "snapshot" ||
+      source === "ack" ||
+      source === "dashFail" ||
+      source === "legacyInput" ||
+      source === "pendingTimeout")
+  ) {
+    counters.samples = [{ source, at: Date.now(), ...detail }, ...counters.samples].slice(0, 24);
+  }
+}
+
 // ── ?perfDiag=1 render-perf instrumentation (Stage 0, render-perf) ───────────
 // Opt-in only. When the gate is OFF this whole apparatus is inert: the handler
 // hot path reads a single ref boolean and skips everything, so the runtime
@@ -2754,7 +2835,8 @@ export default function HomePage() {
     packetName: string,
     now: number,
   ) {
-    const hadPending = pendingSelfMoveRef.current !== null;
+    const pendingBefore = pendingSelfMoveRef.current;
+    const hadPending = pendingBefore !== null;
     const result = reconcileMovementAck({
       state: readSelfMovementControllerState(),
       ack: point,
@@ -2764,6 +2846,14 @@ export default function HomePage() {
     applySelfMovementControllerState(result.state);
     lastSelfMovementAckRef.current = { x: point.x, y: point.y, direction: point.direction, at: now };
     if (result.outcome === "correction") {
+      bumpCorrectionCounter(packetName === "UserDashFail" ? "dashFail" : "ack", {
+        packet: packetName,
+        ack: { x: point.x, y: point.y, direction: point.direction },
+        pendingFrom: pendingBefore ? { ...pendingBefore.from } : null,
+        pendingTo: pendingBefore ? { ...pendingBefore.to } : null,
+        pendingDirection: pendingBefore?.direction ?? null,
+        pendingMode: pendingBefore?.mode ?? null,
+      });
       queuedMoveIntentRef.current = null;
       crystalRunPrimedUntilRef.current = 0;
       movementPredictionBlockedUntilRef.current = Math.max(
@@ -2781,6 +2871,13 @@ export default function HomePage() {
       return result.outcome;
     }
     if (result.outcome === "confirmed") {
+      // A run that landed short of its predicted +2 tile is the Crystal run→walk
+      // degradation the PR #165 keep-prime path now confirms (not a stall). Tag it
+      // separately so a high confirmDegraded count reads as "town obstacles degrade
+      // the run a lot" (healthy) rather than masquerading as clean run frames.
+      const cleanLanding =
+        !!pendingBefore && point.x === pendingBefore.to.x && point.y === pendingBefore.to.y;
+      bumpCorrectionCounter(cleanLanding ? "confirm" : "confirmDegraded");
       crystalRunPrimedUntilRef.current = now + CRYSTAL_RUN_PRIME_MS;
       clearLegacySelfMovementCoordinateSources();
       clearLocalSelfPrediction();
@@ -2822,8 +2919,14 @@ export default function HomePage() {
       aheadCandidate &&
       crystalMovementCandidateNotBehindServer(point, aheadCandidate, aheadCandidate.direction)
     ) {
+      bumpCorrectionCounter("snapshotSuppressed");
       return false;
     }
+    bumpCorrectionCounter("snapshot", {
+      snapshot: { x: point.x, y: point.y, direction: point.direction },
+      pendingTo: stateBefore.pending ? { ...stateBefore.pending.to } : null,
+      prediction: stateBefore.prediction ? { ...stateBefore.prediction } : null,
+    });
     applySelfMovementControllerState(result.state);
     queuedMoveIntentRef.current = null;
     clearLegacySelfMovementCoordinateSources();
@@ -5124,6 +5227,12 @@ export default function HomePage() {
     }
     const pending = pendingSelfMoveRef.current;
     if (pending && now - pending.sentAt > MOVEMENT_PENDING_ACTION_MAX_AGE_MS) {
+      bumpCorrectionCounter("pendingTimeout", {
+        ageMs: Math.round(now - pending.sentAt),
+        pendingFrom: { ...pending.from },
+        pendingTo: { ...pending.to },
+        pendingMode: pending.mode,
+      });
       pendingSelfMoveRef.current = null;
       queuedMoveIntentRef.current = null;
       crystalRunPrimedUntilRef.current = 0;
@@ -10697,6 +10806,16 @@ export default function HomePage() {
     direction?: string,
     visualUntil = directionStepVisualUntilRef.current,
   ) {
+    bumpCorrectionCounter("legacyInput", {
+      server: { x, y, direction: direction ?? null },
+      predicted: predictedPlayerPositionRef.current
+        ? {
+            x: predictedPlayerPositionRef.current.x,
+            y: predictedPlayerPositionRef.current.y,
+            direction: predictedPlayerPositionRef.current.direction ?? null,
+          }
+        : null,
+    });
     movementInputBlockedUntilRef.current = now + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
     crystalRunPrimedUntilRef.current = 0;
     queuedMoveIntentRef.current = null;
