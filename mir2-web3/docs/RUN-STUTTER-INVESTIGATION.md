@@ -1,8 +1,12 @@
 # Run-stutter ("奔跑卡") investigation — continuation brief
 
-> **Status (2026-06-26):** root cause of the *dominant* stutter found and fixed
-> (**PR #165**, on `main`). One residual symptom remains — see **§5 Open root cause**.
-> This doc is the hand-off for a fresh session to finish it.
+> **Status (2026-06-27):** the *dominant* stutter was found+fixed (**PR #165**). The
+> residual "一顿一顿地停住" has now been **instrumented and pinned to the RENDER /
+> main-thread layer — it is NOT a movement correction** (`window.__corr` all-zero across
+> real held-key runs; see **§5**). The whole correction-source class (§5 candidates 1–4)
+> is **ruled out**. Next focus = render frame-pacing (a separate render-perf effort), not
+> the movement pipeline. The `?mir2Debug=1` `window.__corr` counters that proved this are
+> landed (gated, zero prod cost).
 
 ## 1. Symptom (user-reported, verbatim)
 
@@ -98,54 +102,88 @@ speed), running steps **3 → 9**. The run is mostly sustained now.
 - `pctCameraStill` is inflated by legit standing periods — judge camera smoothness on the
   *running* frames only.
 
-## 5. OPEN root cause — what the new session must find
+## 5. ROOT CAUSE FOUND (2026-06-27) — residual is RENDER-perf, NOT a correction
 
-After PR #165, the user's real run still shows **~3 residual `standing` stalls** ("一顿一顿
-地停住"). Distance jumped to 23 tiles (near clean) so it is much better, but the brief
-freezes remain. **The remaining correction source is not yet pinned.** Candidates:
+The §5 candidates below were the hypotheses *before* instrumenting. They are **all wrong** —
+the residual is not in the movement/correction pipeline at all.
 
-1. **Snapshot-guard edge** — the guard only suppresses when the prediction is ≤2 tiles
-   ahead (`MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES`). A snapshot that lags by >2 tiles, or a
-   prediction with a stale `direction`, still corrects.
-2. **ACK off-path / over-degraded** — the degradation guard only matches `from + 1` exactly.
-   If the server lands somewhere else on the path (or the `from` is stale), it still hard-
-   corrects.
-3. **`UserDashFail`** — when the server refuses the run entirely (first tile blocked) it
-   sends `UserDashFail` → `hardFailure` → correction. Running into a wall is *legitimate*,
-   but verify the user's "open" runs are not hitting spurious `UserDashFail`.
-4. **Held-direction re-arm gaps** — the queued-direction intent may lapse between steps
-   (separate from the prime), inserting a standing frame.
+### What was instrumented (landed, `?mir2Debug=1`-gated, zero prod cost)
 
-### Recommended first move (instrument, don't guess)
+`window.__corr` correction-source counters in `app/page.tsx` (`bumpCorrectionCounter`),
+bumped at **every** stall-causing site — not just the two the old brief suggested:
 
-Add cheap correction-source counters and read them after a real run:
+| counter | site | meaning |
+|---|---|---|
+| `snapshot` / `snapshotSuppressed` | `reconcileSelfMovementSnapshot` | worldSnapshot corrected vs guard caught a lagging echo |
+| `ack` / `dashFail` | `reconcileSelfMovementAck` (correction branch) | per-move ACK off-path vs `UserDashFail` |
+| `confirm` / `confirmDegraded` | `reconcileSelfMovementAck` (confirm branch) | clean confirm vs run→from+1 degrade (PR #165 keep-prime path) |
+| `legacyInput` | `applyCrystalInputCorrection` | the **second**, legacy direction-step/movement-plan reconciler |
+| `pendingTimeout` | `trySendQueuedCrystalMove` | a pending move aged out (>1.5 s) with no ACK |
 
-- `reconcileSelfMovementSnapshot`: bump `window.__corr.snapshot` when it *actually* corrects
-  (passes the new guard), and `…snapshotSuppressed` when the guard fires.
-- `reconcileSelfMovementAck`: bump `window.__corr.ack` (correction, `!UserDashFail`) vs
-  `…dashFail` (`packetName === "UserDashFail"`).
+`samples` keeps the last ~24 mismatch shapes (ack vs predicted from/to, mode, direction).
 
-Rebuild, have the **user** run 8 s, read `window.__corr`. Whichever dominates is the
-remaining source → fix that one. (Gate the counters on `?mir2Debug=1` or strip before
-landing.)
+### The verdict (two real held-key runs, prod build, user's own keyboard)
 
-### Deeper option (eliminate the degradation snap-back, the 1:1 way)
+```
+window.__corr  →  snapshot 0 · snapshotSuppressed 0 · ack 0 · dashFail 0
+                  legacyInput 0 · pendingTimeout 0 · confirmDegraded 0 · confirm 11–16
+__mir2MovementSentCommands  →  clean ~600 ms cadence, 46 run / 3 walk
+recorder  →  ~24–31 tiles / 8 s (clean-run speed) BUT user still feels "一顿一顿"
+             frame deltas: avg ~17 ms, max 84 ms, ~4 frames >33 ms / 8 s, ~59 fps
+```
 
-Crystal's client *predicts* the run degradation locally (it knows map collision, so it
-predicts +1 when the 2nd tile is blocked and never mismatches). Our client predicts +2
-unconditionally (`movementPointInDirection(from, dir, 2)` in the controller) — so even with
-the keep-prime fix there is a 1-tile correction each degraded step. Predicting the
-degradation client-side (needs a walkability check the controller currently lacks) would
-remove the residual entirely. Bigger change; measure whether the standing stalls are worth
-it first.
+**ZERO corrections of any kind fired, yet the user still felt the stutter.** Movement sends
+are a clean 600 ms cadence; glide duration == send cadence (`RUN/WALK_STEP_INTERVAL_MS =
+movementCommandDelayMs = 600`, `LEAD = 0`, no inter-step gap); the sub-tile interpolation is
+linear (`original-client-scene-motion.ts` `movementProgressRatio` = `elapsed/duration`). So
+the **movement pipeline is clean**. The only anomaly is **periodic frame hitches** (~4 ×
+33–84 ms per 8 s ≈ one every ~2 s) at **~59 fps on a 120 Hz display**.
 
-### Camera (secondary)
+`?bevySelfCamera=1&bevyEntityInterp=1` (the old "secondary camera" lever, re-tested now the
+run is sustained) **did NOT fix it and regressed**: entity name labels (DOM overlays) drift
+because the imperative path drops the React clock to ~10 Hz while Bevy pans at display Hz.
+Crucially it **still measured ~59 fps** with React at 10 Hz → the fps ceiling is **not** the
+React re-render; it is Bevy/WebGPU/compositor-bound (or the test context is 60 Hz).
 
-`pctCameraStill` was still ~74 % on the user's post-fix run (partly the standings). If, with
-the stalls gone, the user still perceives a choppy *scroll*, the lever is display-Hz camera:
-either push the React clock to ~120 Hz during movement (verify the ~14 ms re-render frames
-don't drop on an 8.3 ms budget) or make `?bevySelfCamera=1` the default now that the run is
-sustained (re-test it — it was rejected while the run was still broken).
+### ⚠️ Test-bed caveat (rule this out FIRST next session)
+
+The local `:3080` prod build was built with `npx next build` directly, which **skips the
+`npm run build` asset-gen steps** (`generate:original-asset-manifest` + `assets:map-atlas:build`).
+Symptom: `/api/asset-manifest` 500s (missing `original-asset-manifest.generated.json`,
+`required` in prod) and the Bevy map-atlas is absent → **black floor**. Fixed this session by
+running both generators + a real rebuild. BUT the resulting asset **version digest ≠ the
+published R2 release prefix**, so the SW's remote-prewarm targets a non-matching prefix. This
+may add main-thread churn/hitches **not present in the deployed client**. Before chasing the
+render-perf residual, re-measure on a clean bed: build via `npm run build` (or disable remote
+prewarm — all assets are on local disk after the generators run) so the local hitch profile
+is trustworthy.
+
+## 5b. Next focus — render frame-pacing (separate effort)
+
+Not a movement fix. Profile a real held run on a clean prod bed (memory
+`client-perf-judge-on-prod-build`, `scripts/qa-cpu-profile.mjs`) and find the source of the
+~84 ms periodic hitch:
+
+- **Periodic heavy `setWorld` re-render** of the ~12.7k-line `page.tsx` monolith (memory
+  `client-render-perf`: "setWorld-per-packet still open"). A periodic full merge → monolith
+  re-render → dropped frame is the leading suspect.
+- **Bevy/WebGPU per-frame cost** (entity/map atlas upload or decode spikes) — `__corr` proved
+  it is not React-clock-bound (10 Hz React still 59 fps).
+- **GC / asset-decode** spikes during play.
+
+Levers already ruled out: `?bevySelfCamera=1` (regresses labels, no fix); pushing the React
+motion clock 60→120 Hz is unviable (per-render already ~17 ms > the 8.3 ms 120 Hz budget).
+The fix likely means making the per-frame render cheaper (decouple movement render from the
+monolith), i.e. the known architectural render-perf work — not a one-line change.
+
+### Measurement note (Chrome-MCP hidden-tab trap)
+
+A CDP/automation tab that is not the foreground window has `document.hidden = true` → rAF (and
+the React `motionNow` clock) throttle to ~0, freezing `renderPlayer`/the armed recorder. But
+`window.__corr` is **packet-driven** (WebSocket `onmessage`) and stays reliable regardless of
+visibility. So: read `__corr` any time; for the rAF recorder / fps, the **user** must run with
+the game window genuinely foreground (their real keyboard — synthetic keys remain unreliable,
+§4).
 
 ## 6. Local repro setup
 
