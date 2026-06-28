@@ -109,6 +109,7 @@ import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./component
 import { WebGl2MapAtlasLayer, type MapTileDraw } from "./components/webgl2-map-atlas-layer";
 import { buildMapTileDrawList } from "./components/original-client-scene-map-rendering";
 import { type MapAtlasIndex, type MapAtlasPage, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
+import { decodeImagePixelsOffThread, offThreadImageDecodeAvailable } from "../lib/map-atlas-decode";
 
 type HeldScenePointer = {
   button: 0 | 2;
@@ -2519,13 +2520,29 @@ function decodeMapAtlasPagePixels(
       const image = new Image();
       image.decoding = "async";
       image.crossOrigin = "anonymous";
-      image.onload = () => {
+      image.onload = async () => {
         try {
           const width = image.naturalWidth || page.width;
           const height = image.naturalHeight || page.height;
           if (width <= 0 || height <= 0) {
             resolve(null);
             return;
+          }
+          // Read the RGBA back off the main thread when possible. A large atlas page is a
+          // ~16 MB getImageData readback that otherwise blocks ~80 ms — the per-new-page hitch
+          // that shows up as the held-run "奔跑两步一卡" stutter (running outruns the resident
+          // page set; ?perfDiag=1 shows the long-task with every packet handler <=0.3 ms). Falls
+          // through to the main-thread readback below if the worker is unavailable/disabled/fails.
+          if (offThreadImageDecodeAvailable()) {
+            try {
+              const offThread = await decodeImagePixelsOffThread(image, width, height);
+              if (offThread) {
+                resolve(offThread);
+                return;
+              }
+            } catch {
+              // fall through to the main-thread readback
+            }
           }
           const canvas = document.createElement("canvas");
           canvas.width = width;
