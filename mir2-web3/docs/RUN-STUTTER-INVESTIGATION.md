@@ -158,23 +158,43 @@ render-perf residual, re-measure on a clean bed: build via `npm run build` (or d
 prewarm — all assets are on local disk after the generators run) so the local hitch profile
 is trustworthy.
 
-## 5b. Next focus — render frame-pacing (separate effort)
+## 5b. CPU-profile attribution (2026-06-28) — it is the asset-streaming pipeline
 
-Not a movement fix. Profile a real held run on a clean prod bed (memory
-`client-perf-judge-on-prod-build`, `scripts/qa-cpu-profile.mjs`) and find the source of the
-~84 ms periodic hitch:
+Built `scripts/qa-cpu-profile.mjs` (CDP V8 Profiler + a REAL held Shift+arrow run over
+`Input.dispatchKeyEvent`; **proves the run actually moved via outbound move-packet count** — an
+earlier draft silently profiled the SELECT screen because the character name `Walk0704` has a
+ZERO, not a letter o, so it fell back to a lease-locked Scout and never entered game). Profiled a
+confirmed 14-tile run on the prod `:3080` build.
 
-- **Periodic heavy `setWorld` re-render** of the ~12.7k-line `page.tsx` monolith (memory
-  `client-render-perf`: "setWorld-per-packet still open"). A periodic full merge → monolith
-  re-render → dropped frame is the leading suspect.
-- **Bevy/WebGPU per-frame cost** (entity/map atlas upload or decode spikes) — `__corr` proved
-  it is not React-clock-bound (10 Hz React still 59 fps).
-- **GC / asset-decode** spikes during play.
+**Verdict — the held-run main thread is ~47 % busy (vs ~13 % standing), with NO single >50 ms
+hitch (`[Violation]` channel empty). The cost is DISTRIBUTED asset-streaming, not one stall:**
 
-Levers already ruled out: `?bevySelfCamera=1` (regresses labels, no fix); pushing the React
-motion clock 60→120 Hz is unviable (per-render already ~17 ms > the 8.3 ms 120 Hz budget).
-The fix likely means making the per-frame render cheaper (decouple movement render from the
-monolith), i.e. the known architectural render-perf work — not a one-line change.
+| self-time | where | what |
+|---|---|---|
+| ~8 % | `751.*.js` (`includeEntityPreloadPaths`, IndexedDB `onsuccess`) | the **asset-residency preload** system streaming assets as you move into new cells |
+| ~5 % | `png::filter::paeth::unfilter` + `fdeflate::decompress` in `mir2_bevy_runtime_bg.wasm` | **Bevy decodes sprite/tile PNGs on the main thread** (WASM is main-thread) — first-encounter decode as new sprites/tiles enter view |
+| ~3.4 % | `onBevyEntityRenderStateChange` + `onBevyMapRenderStateChange` (`page-*.js`) + `serde_json` parse in wasm | the **React→Bevy render-state push** (serialise + hand the entity/map state to the runtime each change) |
+| ~2.4 % | `writeTexture` (native) | GPU texture uploads for the new sprites/tiles |
+
+So the earlier "~84 ms periodic hitch" was **load/prewarm time**, not the steady run; the steady
+run has no single hitch — it's the streaming/decode/push cost spiking past the 8.3 ms (120 Hz)
+frame budget as new map regions + entities stream in (running outruns the resident set faster
+than walking — exactly why walking feels fine). NOT `setWorld`/packet-handling (every handler is
+≤0.4 ms; no React commit frames appear in the profile).
+
+**Levers (each a separate effort, by impact):**
+- **Off-thread the Bevy WASM PNG decode** (the ~5 % `paeth`/`fdeflate`) — the dominant decode is
+  inside the Bevy runtime, not the JS path. Biggest single lever; needs a runtime change.
+- **Throttle / shrink the React→Bevy render-state push** (`onBevy*RenderStateChange` ~3.4 %) —
+  push deltas, not full state, and coalesce per frame.
+- **Defer/spread asset-residency preload during fast movement** (`751.js` ~8 %).
+- This change **already off-threads the JS map-atlas page readback** (`lib/map-atlas-decode.ts`)
+  — a load-time/new-region win (the profiler shows `createImageBitmap` engaging, the JS
+  `getImageData` readback gone) but NOT the dominant run-time decode (which is the WASM path above).
+
+Ruled out: `?bevySelfCamera=1` (regresses labels, no fix); React motion clock 60→120 Hz
+(unviable). The remaining work is the architectural asset-streaming/decode pipeline, not a
+one-liner.
 
 ### Measurement note (Chrome-MCP hidden-tab trap)
 
