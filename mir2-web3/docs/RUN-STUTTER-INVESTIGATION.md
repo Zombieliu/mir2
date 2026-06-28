@@ -184,7 +184,24 @@ than walking — exactly why walking feels fine). NOT `setWorld`/packet-handling
 
 **Levers (each a separate effort, by impact):**
 - **Off-thread the Bevy WASM PNG decode** (the ~5 % `paeth`/`fdeflate`) — the dominant decode is
-  inside the Bevy runtime, not the JS path. Biggest single lever; needs a runtime change.
+  inside the Bevy runtime, not the JS path. Biggest single lever.
+  - **Bevy loads the entity atlas by `imageUrl`** (`runtime/src/lib.rs` `sync_entity_render_atlas_layouts`
+    ~1366 → `asset_server.load`), and `url_image` is preferred over uploaded RGBA (`atlas_assets.images`)
+    at the `if let Some(..) = url_image { .. } else if uploaded` branch (~1370). The web feeds the atlas
+    as `imageUrl` with empty `pixels` (entity `atlasPixelBytes:0`), so Bevy decodes the PNG in wasm.
+    Both `setMir2EntityRenderAtlas` / `setMir2MapRenderAtlas` take raw RGBA — the map already feeds RGBA
+    (no wasm decode); only the entity atlas goes through `imageUrl`.
+  - **TRIED & REVERTED (negative result):** decoding the entity-atlas `imageUrl` → RGBA off-thread and
+    swapping it in (drop `imageUrl` when pixels ready) **made it WORSE** — the CPU profiler showed
+    `createImageBitmap` jump to **~5.1 % main-thread** while `paeth`/`fdeflate` barely moved (2.8→2.5,
+    2.1→1.8) and total busy rose 47→60 %. Cause: the entity atlas is a **per-visible-set packer whose key
+    churns every few frames during a run**, so the async decode never lands before Bevy has already
+    fetched+decoded the next `imageUrl`; you pay the new `createImageBitmap` AND the old wasm decode.
+    The decode-then-swap shape cannot beat a fast-churning atlas.
+  - **Correct fix (deeper):** make the packer emit **RGBA directly** (composite in a worker →
+    `getImageData` → `setMir2EntityRenderAtlas`, never a PNG round-trip) so Bevy never sees an `imageUrl`;
+    OR prefetch/pin atlas pages before they enter view; OR flip the Rust precedence (prefer uploaded) so a
+    one-shot prebuilt-atlas RGBA upload sticks. All are asset-residency-packer changes, not a swap.
 - **Throttle / shrink the React→Bevy render-state push** (`onBevy*RenderStateChange` ~3.4 %) —
   push deltas, not full state, and coalesce per frame.
 - **Defer/spread asset-residency preload during fast movement** (`751.js` ~8 %).
