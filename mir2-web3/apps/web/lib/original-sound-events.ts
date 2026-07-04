@@ -11,11 +11,22 @@
 // original-sound-triggers.ts.
 export const ORIGINAL_SOUND_IDS = {
   // --- UI / system (SoundList.cs) ---
-  /** UI button press — the canonical interface click (100.wav / LoginEffect). */
-  uiButtonClick: 10100,
+  /**
+   * UI button press — the canonical interface click. Crystal's MirButton plays its own `Sound`
+   * on click (MirControl.OnMouseClick); the default is ButtonB but the overwhelming majority of
+   * in-game buttons (328 of 338 explicit assignments) use ButtonA, so ButtonA is the de-facto
+   * interface click. NOTE: this is 10103 (103.wav / ButtonA), NOT 10100 — 10100 is `LoginEffect`
+   * (the login-screen whoosh), which is what every SpriteButton mistakenly played before.
+   */
+  uiButtonClick: 10103,
+  /** ButtonA (103.wav) — the standard interface click; alias of {@link uiButtonClick}. */
   buttonA: 10103,
+  /** ButtonB (104.wav) — Crystal's MirButton/MirCheckBox default click. */
   buttonB: 10104,
+  /** ButtonC (105.wav) — a handful of dialog buttons. */
   buttonC: 10105,
+  /** Login-screen effect (100.wav / SoundList.LoginEffect) — NOT a button click. */
+  loginEffect: 10100,
   /** Gold gained / coin sound (106.wav). */
   gold: 10106,
   eatDrug: 10107,
