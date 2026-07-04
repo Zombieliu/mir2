@@ -5,7 +5,41 @@ small internal test server.
 
 ## Current UCloud Gateway Release
 
-Latest verified Crystal movement-authority release:
+2026-06-23 release `20260623-ad96867dd-monster-ai` (main `ad96867dd`) is the
+current production gateway, built host-native on the UCloud host and installed
+over `onchain-mine-ced41ec1d`:
+
+```text
+tag: 20260623-ad96867dd-monster-ai
+current: /opt/mir2/gateway/current -> /opt/mir2/gateway/releases/20260623-ad96867dd-monster-ai
+binary sha256: bae67a1219723a27ca9563a8ae21b1bcd55d984ea5665530ee25221994e038c0
+previous (rollback target): /opt/mir2/gateway/releases/onchain-mine-ced41ec1d
+env backup: /var/backups/mir2/gateway.env.20260623T093932Z.before-mappack-monsterai
+```
+
+Ships the `ced41ec1d..ad96867dd` backend backlog: base-AI monsters dealing real
+DC + per-monster `monster_ai` modules (#145), equipped-gear avatar shape (#151),
+death->town-revive (#137), floating damage numbers (#98), wired sound effects
+(#99). Build gate: full `mir2-simulation` suite 1111 passing (`--test-threads=1`,
+with the map pack present -- see "Crystal Map Pack" below). Also wires the
+previously dead map-pack fallback (`MIR2_CRYSTAL_MAP_PACK=/var/lib/mir2/crystal-map-pack`),
+taking reachable maps from 465 to 1620.
+
+Post-release verification (2026-06-23):
+
+```text
+http://127.0.0.1:7110/health: OK (http/ws/tcp_stub ready, redis healthy)
+https://165.154.65.136.sslip.io/health: OK
+https://mir2.obelisk.build/health: OK
+journalctl: clean startup, no ERROR/panic
+running process env: CRYSTAL_CLIENT_ROOT + MIR2_CRYSTAL_MAP_PACK both set
+```
+
+> History note: before 2026-06-23 this "Current release" section lagged the live
+> binary -- production ran `onchain-mine-ced41ec1d` (06-14) while the text below
+> still cited the 05-27 movement-authority build.
+
+Earlier release (2026-05-27, predates the live 06-14/06-23 binaries):
 
 ```text
 tag: 20260527T0020CST-crystal-movement-authority
@@ -278,6 +312,45 @@ The installer extracts to `/var/lib/mir2/crystal-client/releases/<tag>`, updates
 `/var/lib/mir2/crystal-client/current`, upserts
 `CRYSTAL_CLIENT_ROOT=/var/lib/mir2/crystal-client/current` in
 `/etc/mir2/gateway.env`, and restarts `mir2-gateway` when systemd is present.
+
+## Crystal Map Pack
+
+The gateway resolves map collision in two tiers
+(`apps/simulation/src/runtime/map.rs`): `CRYSTAL_CLIENT_ROOT/Map/<name>.map`
+first, then a gzipped **map pack** (`<name>.map.gz`) as a fallback for any map the
+client install does not carry. The pack ships in-repo at
+`apps/web/lib/generated/crystal-map-pack/` (1620 maps); the live client root
+carries only 465, so the pack is what makes the other ~1155 maps reachable.
+
+**The fallback was dead in production until 2026-06-23.** The in-repo default path
+is derived from the compile-time `CARGO_MANIFEST_DIR`, which on CI is a sandbox
+path (`/work/...`) that does not exist on the host, and `MIR2_CRYSTAL_MAP_PACK`
+was unset -- so only the 465 client-root maps loaded. Inspect the compiled-in
+path with `strings /opt/mir2/gateway/current/mir2-gateway | grep crystal-map-pack`.
+
+Install the pack to a stable host path and wire the env:
+
+```bash
+# From a checkout that has apps/web/lib/generated/crystal-map-pack (src mode):
+bash scripts/install-crystal-map-pack.sh
+
+# Or from a packaged tarball on a slim host (no apps/web in the checkout):
+#   git archive HEAD mir2-web3/apps/web/lib/generated/crystal-map-pack \
+#     -o /tmp/crystal-map-pack.tar.gz   # build it from a full checkout
+MIR2_CRYSTAL_MAP_PACK_ARCHIVE=/tmp/crystal-map-pack.tar.gz \
+  bash scripts/install-crystal-map-pack.sh
+```
+
+The installer copies `*.map.gz` to `/var/lib/mir2/crystal-map-pack`, makes them
+world-readable, and upserts `MIR2_CRYSTAL_MAP_PACK=/var/lib/mir2/crystal-map-pack`
+in `/etc/mir2/gateway.env`. `install-gateway-release.sh` also auto-wires this env
+when the pack directory is already present, so a fresh gateway install keeps full
+map coverage. Verify:
+
+```bash
+ls /var/lib/mir2/crystal-map-pack/*.map.gz | wc -l   # 1620
+grep MIR2_CRYSTAL_MAP_PACK /etc/mir2/gateway.env
+```
 
 ## First Server Setup
 

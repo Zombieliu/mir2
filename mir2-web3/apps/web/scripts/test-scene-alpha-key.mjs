@@ -1,7 +1,10 @@
-// Behavioral tests for lib/scene-alpha-key.ts (map object black-key + edge feather).
+// Behavioral tests for lib/scene-alpha-key.ts (map object black-key + edge feather +
+// dither-shadow resolve).
 //
 // Covers the pure flood-fill algorithm (edge-connected black -> transparent, interior
-// black preserved, brightness feather) AND the mechanism the off-thread worker depends on:
+// black preserved, brightness feather), the pass-2 dither-shadow resolve (checkerboard ->
+// uniform translucent shadow, while thin/solid dark art is left intact), AND the mechanism
+// the off-thread worker depends on:
 // the algorithm is serialized via `.toString()` and re-evaluated, so we re-evaluate it here
 // and assert it behaves identically to the directly-imported function.
 //
@@ -116,6 +119,62 @@ let groups = 0;
   for (let i = 0; i < w * h * 4; i += 1) {
     assert.equal(viaString[i], direct[i], `pixel byte ${i} must match the reconstructed result`);
   }
+  groups += 1;
+}
+
+// 5) Dithered shadow (a checkerboard of near-black opaque + transparent texels) resolves to a
+//    uniform translucent black: dots AND gaps become rgb 0 / alpha 120, so a crisp canvas shows a
+//    smooth ~50% shadow instead of a hard halftone. The checker sits on a transparent margin so
+//    pass 1 (border black-key) is a no-op and this isolates the pass-2 dither resolve.
+{
+  const w = 9;
+  const h = 9;
+  const inChecker = (x, y) => x >= 2 && x <= 6 && y >= 2 && y <= 6;
+  const px = makePixels(w, h, (x, y) =>
+    inChecker(x, y) && (x + y) % 2 === 0 ? [8, 8, 8, 255] : [0, 0, 0, 0],
+  );
+  const changed = alphaKeyMapObjectPixels(px, w, h);
+  assert.ok(changed > 0, "dithered shadow must be rewritten");
+  const off = (x, y) => (y * w + x) * 4;
+  // a dither dot (was opaque near-black, all four neighbours transparent) -> translucent black
+  assert.equal(alphaAt(px, w, 4, 4), 120, "shadow dot must become translucent (alpha 120)");
+  assert.equal(px[off(4, 4)], 0, "shadow dot must be pure black");
+  // a dither gap (was transparent, ringed by four dots) -> filled with the same translucent black
+  assert.equal(alphaAt(px, w, 4, 5), 120, "shadow gap must be filled to alpha 120");
+  assert.equal(px[off(4, 5)], 0, "filled gap must be pure black");
+  // the transparent margin outside the checker is untouched
+  assert.equal(alphaAt(px, w, 0, 0), 0, "margin must stay transparent");
+  assert.equal(alphaAt(px, w, 8, 8), 0, "margin must stay transparent");
+  groups += 1;
+}
+
+// 6) A 1px-wide near-black vertical line on a transparent field is NOT a dither (its texels keep
+//    dark up/down neighbours), so the all-four rule must leave it untouched — proving thin solid
+//    features are never eroded. The line avoids the image border so pass 1 also leaves it.
+{
+  const w = 5;
+  const h = 7;
+  const px = makePixels(w, h, (x, y) => (x === 2 && y >= 1 && y <= 5 ? [8, 8, 8, 255] : [0, 0, 0, 0]));
+  const changed = alphaKeyMapObjectPixels(px, w, h);
+  assert.equal(changed, 0, "a thin dark line must not be altered");
+  for (let y = 1; y <= 5; y += 1) {
+    assert.equal(alphaAt(px, w, 2, y), 255, "line pixel must stay fully opaque");
+    assert.equal(px[(y * w + 2) * 4], 8, "line pixel colour must be preserved");
+  }
+  groups += 1;
+}
+
+// 7) A solid near-black block on a transparent field keeps dark neighbours on its interior and
+//    edges, so the all-four rule leaves every pixel intact (no 1px translucent halo).
+{
+  const w = 6;
+  const h = 6;
+  const inBlock = (x, y) => x >= 1 && x <= 4 && y >= 1 && y <= 4;
+  const px = makePixels(w, h, (x, y) => (inBlock(x, y) ? [8, 8, 8, 255] : [0, 0, 0, 0]));
+  const changed = alphaKeyMapObjectPixels(px, w, h);
+  assert.equal(changed, 0, "a solid dark block must be preserved");
+  assert.equal(alphaAt(px, w, 2, 2), 255, "block interior stays opaque");
+  assert.equal(alphaAt(px, w, 1, 1), 255, "block corner stays opaque");
   groups += 1;
 }
 

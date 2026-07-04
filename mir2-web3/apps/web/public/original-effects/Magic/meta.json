@@ -1,0 +1,1446 @@
+{
+  "frames": {
+    "0": {
+      "path": "/original-ui/Magic/0.png",
+      "width": 44,
+      "height": 75,
+      "x": 3,
+      "y": -40
+    },
+    "1": {
+      "path": "/original-ui/Magic/1.png",
+      "width": 60,
+      "height": 75,
+      "x": -5,
+      "y": -40
+    },
+    "2": {
+      "path": "/original-ui/Magic/2.png",
+      "width": 76,
+      "height": 78,
+      "x": -14,
+      "y": -40
+    },
+    "3": {
+      "path": "/original-ui/Magic/3.png",
+      "width": 76,
+      "height": 79,
+      "x": -11,
+      "y": -40
+    },
+    "4": {
+      "path": "/original-ui/Magic/4.png",
+      "width": 80,
+      "height": 82,
+      "x": -13,
+      "y": -45
+    },
+    "5": {
+      "path": "/original-ui/Magic/5.png",
+      "width": 80,
+      "height": 78,
+      "x": -15,
+      "y": -47
+    },
+    "6": {
+      "path": "/original-ui/Magic/6.png",
+      "width": 84,
+      "height": 66,
+      "x": -17,
+      "y": -48
+    },
+    "7": {
+      "path": "/original-ui/Magic/7.png",
+      "width": 72,
+      "height": 66,
+      "x": -14,
+      "y": -50
+    },
+    "8": {
+      "path": "/original-ui/Magic/8.png",
+      "width": 72,
+      "height": 71,
+      "x": -12,
+      "y": -50
+    },
+    "9": {
+      "path": "/original-ui/Magic/9.png",
+      "width": 72,
+      "height": 55,
+      "x": -7,
+      "y": -55
+    },
+    "200": {
+      "path": "/original-ui/Magic/200.png",
+      "width": 76,
+      "height": 75,
+      "x": -13,
+      "y": -19
+    },
+    "201": {
+      "path": "/original-ui/Magic/201.png",
+      "width": 80,
+      "height": 79,
+      "x": -14,
+      "y": -24
+    },
+    "202": {
+      "path": "/original-ui/Magic/202.png",
+      "width": 80,
+      "height": 102,
+      "x": -14,
+      "y": -49
+    },
+    "203": {
+      "path": "/original-ui/Magic/203.png",
+      "width": 84,
+      "height": 118,
+      "x": -15,
+      "y": -65
+    },
+    "204": {
+      "path": "/original-ui/Magic/204.png",
+      "width": 84,
+      "height": 137,
+      "x": -15,
+      "y": -83
+    },
+    "205": {
+      "path": "/original-ui/Magic/205.png",
+      "width": 84,
+      "height": 142,
+      "x": -15,
+      "y": -88
+    },
+    "206": {
+      "path": "/original-ui/Magic/206.png",
+      "width": 84,
+      "height": 135,
+      "x": -15,
+      "y": -91
+    },
+    "207": {
+      "path": "/original-ui/Magic/207.png",
+      "width": 84,
+      "height": 122,
+      "x": -16,
+      "y": -95
+    },
+    "208": {
+      "path": "/original-ui/Magic/208.png",
+      "width": 84,
+      "height": 107,
+      "x": -17,
+      "y": -95
+    },
+    "209": {
+      "path": "/original-ui/Magic/209.png",
+      "width": 84,
+      "height": 84,
+      "x": -18,
+      "y": -96
+    },
+    "400": {
+      "path": "/original-ui/Magic/400.png",
+      "width": 108,
+      "height": 93,
+      "x": -30,
+      "y": -29
+    },
+    "401": {
+      "path": "/original-ui/Magic/401.png",
+      "width": 108,
+      "height": 101,
+      "x": -31,
+      "y": -35
+    },
+    "402": {
+      "path": "/original-ui/Magic/402.png",
+      "width": 112,
+      "height": 109,
+      "x": -31,
+      "y": -44
+    },
+    "403": {
+      "path": "/original-ui/Magic/403.png",
+      "width": 104,
+      "height": 110,
+      "x": -28,
+      "y": -50
+    },
+    "404": {
+      "path": "/original-ui/Magic/404.png",
+      "width": 104,
+      "height": 109,
+      "x": -27,
+      "y": -58
+    },
+    "405": {
+      "path": "/original-ui/Magic/405.png",
+      "width": 96,
+      "height": 105,
+      "x": -25,
+      "y": -65
+    },
+    "406": {
+      "path": "/original-ui/Magic/406.png",
+      "width": 92,
+      "height": 98,
+      "x": -24,
+      "y": -70
+    },
+    "407": {
+      "path": "/original-ui/Magic/407.png",
+      "width": 96,
+      "height": 81,
+      "x": -25,
+      "y": -71
+    },
+    "408": {
+      "path": "/original-ui/Magic/408.png",
+      "width": 88,
+      "height": 70,
+      "x": -20,
+      "y": -69
+    },
+    "409": {
+      "path": "/original-ui/Magic/409.png",
+      "width": 88,
+      "height": 73,
+      "x": -20,
+      "y": -68
+    },
+    "600": {
+      "path": "/original-ui/Magic/600.png",
+      "width": 12,
+      "height": 10,
+      "x": 20,
+      "y": 4
+    },
+    "601": {
+      "path": "/original-ui/Magic/601.png",
+      "width": 20,
+      "height": 19,
+      "x": 15,
+      "y": 5
+    },
+    "602": {
+      "path": "/original-ui/Magic/602.png",
+      "width": 28,
+      "height": 28,
+      "x": 11,
+      "y": -4
+    },
+    "603": {
+      "path": "/original-ui/Magic/603.png",
+      "width": 36,
+      "height": 37,
+      "x": 8,
+      "y": -13
+    },
+    "604": {
+      "path": "/original-ui/Magic/604.png",
+      "width": 40,
+      "height": 44,
+      "x": 7,
+      "y": -21
+    },
+    "605": {
+      "path": "/original-ui/Magic/605.png",
+      "width": 40,
+      "height": 47,
+      "x": 6,
+      "y": -28
+    },
+    "606": {
+      "path": "/original-ui/Magic/606.png",
+      "width": 44,
+      "height": 52,
+      "x": 4,
+      "y": -37
+    },
+    "607": {
+      "path": "/original-ui/Magic/607.png",
+      "width": 48,
+      "height": 58,
+      "x": 3,
+      "y": -47
+    },
+    "608": {
+      "path": "/original-ui/Magic/608.png",
+      "width": 48,
+      "height": 58,
+      "x": 3,
+      "y": -52
+    },
+    "609": {
+      "path": "/original-ui/Magic/609.png",
+      "width": 48,
+      "height": 56,
+      "x": 3,
+      "y": -55
+    },
+    "900": {
+      "path": "/original-ui/Magic/900.png",
+      "width": 80,
+      "height": 58,
+      "x": -18,
+      "y": -58
+    },
+    "901": {
+      "path": "/original-ui/Magic/901.png",
+      "width": 108,
+      "height": 77,
+      "x": -32,
+      "y": -67
+    },
+    "902": {
+      "path": "/original-ui/Magic/902.png",
+      "width": 120,
+      "height": 85,
+      "x": -38,
+      "y": -70
+    },
+    "903": {
+      "path": "/original-ui/Magic/903.png",
+      "width": 132,
+      "height": 91,
+      "x": -42,
+      "y": -73
+    },
+    "904": {
+      "path": "/original-ui/Magic/904.png",
+      "width": 140,
+      "height": 98,
+      "x": -47,
+      "y": -76
+    },
+    "905": {
+      "path": "/original-ui/Magic/905.png",
+      "width": 160,
+      "height": 110,
+      "x": -57,
+      "y": -81
+    },
+    "920": {
+      "path": "/original-ui/Magic/920.png",
+      "width": 104,
+      "height": 41,
+      "x": -29,
+      "y": -37
+    },
+    "921": {
+      "path": "/original-ui/Magic/921.png",
+      "width": 116,
+      "height": 63,
+      "x": -35,
+      "y": -48
+    },
+    "922": {
+      "path": "/original-ui/Magic/922.png",
+      "width": 108,
+      "height": 79,
+      "x": -31,
+      "y": -58
+    },
+    "923": {
+      "path": "/original-ui/Magic/923.png",
+      "width": 88,
+      "height": 93,
+      "x": -22,
+      "y": -68
+    },
+    "924": {
+      "path": "/original-ui/Magic/924.png",
+      "width": 84,
+      "height": 97,
+      "x": -18,
+      "y": -74
+    },
+    "925": {
+      "path": "/original-ui/Magic/925.png",
+      "width": 84,
+      "height": 93,
+      "x": -19,
+      "y": -75
+    },
+    "926": {
+      "path": "/original-ui/Magic/926.png",
+      "width": 108,
+      "height": 95,
+      "x": -30,
+      "y": -79
+    },
+    "927": {
+      "path": "/original-ui/Magic/927.png",
+      "width": 116,
+      "height": 98,
+      "x": -35,
+      "y": -84
+    },
+    "928": {
+      "path": "/original-ui/Magic/928.png",
+      "width": 112,
+      "height": 88,
+      "x": -34,
+      "y": -81
+    },
+    "929": {
+      "path": "/original-ui/Magic/929.png",
+      "width": 88,
+      "height": 70,
+      "x": -13,
+      "y": -73
+    },
+    "1380": {
+      "path": "/original-ui/Magic/1380.png",
+      "width": 72,
+      "height": 29,
+      "x": -13,
+      "y": -9
+    },
+    "1381": {
+      "path": "/original-ui/Magic/1381.png",
+      "width": 68,
+      "height": 53,
+      "x": -10,
+      "y": -34
+    },
+    "1382": {
+      "path": "/original-ui/Magic/1382.png",
+      "width": 56,
+      "height": 81,
+      "x": -6,
+      "y": -53
+    },
+    "1383": {
+      "path": "/original-ui/Magic/1383.png",
+      "width": 60,
+      "height": 85,
+      "x": -3,
+      "y": -66
+    },
+    "1384": {
+      "path": "/original-ui/Magic/1384.png",
+      "width": 76,
+      "height": 97,
+      "x": -13,
+      "y": -70
+    },
+    "1385": {
+      "path": "/original-ui/Magic/1385.png",
+      "width": 80,
+      "height": 99,
+      "x": -20,
+      "y": -82
+    },
+    "1386": {
+      "path": "/original-ui/Magic/1386.png",
+      "width": 72,
+      "height": 115,
+      "x": -13,
+      "y": -87
+    },
+    "1387": {
+      "path": "/original-ui/Magic/1387.png",
+      "width": 72,
+      "height": 111,
+      "x": -14,
+      "y": -89
+    },
+    "1388": {
+      "path": "/original-ui/Magic/1388.png",
+      "width": 80,
+      "height": 108,
+      "x": -13,
+      "y": -87
+    },
+    "1389": {
+      "path": "/original-ui/Magic/1389.png",
+      "width": 80,
+      "height": 104,
+      "x": -14,
+      "y": -82
+    },
+    "1500": {
+      "path": "/original-ui/Magic/1500.png",
+      "width": 40,
+      "height": 50,
+      "x": 10,
+      "y": -25
+    },
+    "1501": {
+      "path": "/original-ui/Magic/1501.png",
+      "width": 52,
+      "height": 57,
+      "x": 4,
+      "y": -38
+    },
+    "1502": {
+      "path": "/original-ui/Magic/1502.png",
+      "width": 68,
+      "height": 64,
+      "x": -8,
+      "y": -40
+    },
+    "1503": {
+      "path": "/original-ui/Magic/1503.png",
+      "width": 60,
+      "height": 53,
+      "x": -12,
+      "y": -39
+    },
+    "1504": {
+      "path": "/original-ui/Magic/1504.png",
+      "width": 68,
+      "height": 64,
+      "x": -6,
+      "y": -52
+    },
+    "1505": {
+      "path": "/original-ui/Magic/1505.png",
+      "width": 60,
+      "height": 79,
+      "x": -2,
+      "y": -66
+    },
+    "1506": {
+      "path": "/original-ui/Magic/1506.png",
+      "width": 60,
+      "height": 72,
+      "x": -6,
+      "y": -67
+    },
+    "1507": {
+      "path": "/original-ui/Magic/1507.png",
+      "width": 72,
+      "height": 48,
+      "x": -12,
+      "y": -71
+    },
+    "1508": {
+      "path": "/original-ui/Magic/1508.png",
+      "width": 72,
+      "height": 57,
+      "x": -11,
+      "y": -80
+    },
+    "1509": {
+      "path": "/original-ui/Magic/1509.png",
+      "width": 60,
+      "height": 48,
+      "x": -7,
+      "y": -68
+    },
+    "1520": {
+      "path": "/original-ui/Magic/1520.png",
+      "width": 56,
+      "height": 57,
+      "x": -8,
+      "y": -39
+    },
+    "1521": {
+      "path": "/original-ui/Magic/1521.png",
+      "width": 60,
+      "height": 78,
+      "x": -9,
+      "y": -56
+    },
+    "1522": {
+      "path": "/original-ui/Magic/1522.png",
+      "width": 60,
+      "height": 83,
+      "x": -11,
+      "y": -62
+    },
+    "1523": {
+      "path": "/original-ui/Magic/1523.png",
+      "width": 60,
+      "height": 84,
+      "x": -10,
+      "y": -67
+    },
+    "1524": {
+      "path": "/original-ui/Magic/1524.png",
+      "width": 64,
+      "height": 87,
+      "x": -11,
+      "y": -71
+    },
+    "1525": {
+      "path": "/original-ui/Magic/1525.png",
+      "width": 88,
+      "height": 105,
+      "x": -34,
+      "y": -89
+    },
+    "1526": {
+      "path": "/original-ui/Magic/1526.png",
+      "width": 72,
+      "height": 279,
+      "x": -15,
+      "y": -263
+    },
+    "1527": {
+      "path": "/original-ui/Magic/1527.png",
+      "width": 84,
+      "height": 99,
+      "x": -20,
+      "y": -83
+    },
+    "1528": {
+      "path": "/original-ui/Magic/1528.png",
+      "width": 100,
+      "height": 104,
+      "x": -26,
+      "y": -90
+    },
+    "1529": {
+      "path": "/original-ui/Magic/1529.png",
+      "width": 108,
+      "height": 108,
+      "x": -38,
+      "y": -99
+    },
+    "1560": {
+      "path": "/original-ui/Magic/1560.png",
+      "width": 60,
+      "height": 48,
+      "x": -6,
+      "y": -25
+    },
+    "1561": {
+      "path": "/original-ui/Magic/1561.png",
+      "width": 64,
+      "height": 63,
+      "x": -7,
+      "y": -47
+    },
+    "1562": {
+      "path": "/original-ui/Magic/1562.png",
+      "width": 64,
+      "height": 58,
+      "x": -10,
+      "y": -60
+    },
+    "1563": {
+      "path": "/original-ui/Magic/1563.png",
+      "width": 64,
+      "height": 55,
+      "x": -8,
+      "y": -74
+    },
+    "1564": {
+      "path": "/original-ui/Magic/1564.png",
+      "width": 60,
+      "height": 60,
+      "x": -7,
+      "y": -72
+    },
+    "1565": {
+      "path": "/original-ui/Magic/1565.png",
+      "width": 72,
+      "height": 74,
+      "x": -11,
+      "y": -78
+    },
+    "1566": {
+      "path": "/original-ui/Magic/1566.png",
+      "width": 76,
+      "height": 85,
+      "x": -13,
+      "y": -81
+    },
+    "1567": {
+      "path": "/original-ui/Magic/1567.png",
+      "width": 72,
+      "height": 91,
+      "x": -11,
+      "y": -79
+    },
+    "1568": {
+      "path": "/original-ui/Magic/1568.png",
+      "width": 68,
+      "height": 97,
+      "x": -10,
+      "y": -76
+    },
+    "1569": {
+      "path": "/original-ui/Magic/1569.png",
+      "width": 64,
+      "height": 84,
+      "x": -10,
+      "y": -73
+    },
+    "1590": {
+      "path": "/original-ui/Magic/1590.png",
+      "width": 64,
+      "height": 55,
+      "x": -9,
+      "y": -19
+    },
+    "1591": {
+      "path": "/original-ui/Magic/1591.png",
+      "width": 64,
+      "height": 55,
+      "x": -9,
+      "y": -22
+    },
+    "1592": {
+      "path": "/original-ui/Magic/1592.png",
+      "width": 64,
+      "height": 54,
+      "x": -8,
+      "y": -24
+    },
+    "1593": {
+      "path": "/original-ui/Magic/1593.png",
+      "width": 64,
+      "height": 53,
+      "x": -8,
+      "y": -26
+    },
+    "1594": {
+      "path": "/original-ui/Magic/1594.png",
+      "width": 60,
+      "height": 53,
+      "x": -7,
+      "y": -28
+    },
+    "1595": {
+      "path": "/original-ui/Magic/1595.png",
+      "width": 72,
+      "height": 59,
+      "x": -12,
+      "y": -34
+    },
+    "1596": {
+      "path": "/original-ui/Magic/1596.png",
+      "width": 68,
+      "height": 66,
+      "x": -10,
+      "y": -41
+    },
+    "1597": {
+      "path": "/original-ui/Magic/1597.png",
+      "width": 60,
+      "height": 70,
+      "x": -7,
+      "y": -58
+    },
+    "1598": {
+      "path": "/original-ui/Magic/1598.png",
+      "width": 64,
+      "height": 63,
+      "x": -9,
+      "y": -71
+    },
+    "1599": {
+      "path": "/original-ui/Magic/1599.png",
+      "width": 52,
+      "height": 52,
+      "x": -5,
+      "y": -82
+    },
+    "1620": {
+      "path": "/original-ui/Magic/1620.png",
+      "width": 84,
+      "height": 76,
+      "x": -19,
+      "y": -54
+    },
+    "1621": {
+      "path": "/original-ui/Magic/1621.png",
+      "width": 88,
+      "height": 81,
+      "x": -21,
+      "y": -68
+    },
+    "1622": {
+      "path": "/original-ui/Magic/1622.png",
+      "width": 88,
+      "height": 80,
+      "x": -21,
+      "y": -74
+    },
+    "1623": {
+      "path": "/original-ui/Magic/1623.png",
+      "width": 80,
+      "height": 74,
+      "x": -18,
+      "y": -78
+    },
+    "1624": {
+      "path": "/original-ui/Magic/1624.png",
+      "width": 76,
+      "height": 68,
+      "x": -14,
+      "y": -82
+    },
+    "1625": {
+      "path": "/original-ui/Magic/1625.png",
+      "width": 68,
+      "height": 63,
+      "x": -11,
+      "y": -83
+    },
+    "1626": {
+      "path": "/original-ui/Magic/1626.png",
+      "width": 60,
+      "height": 55,
+      "x": -7,
+      "y": -86
+    },
+    "1627": {
+      "path": "/original-ui/Magic/1627.png",
+      "width": 52,
+      "height": 50,
+      "x": -3,
+      "y": -88
+    },
+    "1628": {
+      "path": "/original-ui/Magic/1628.png",
+      "width": 48,
+      "height": 44,
+      "x": -1,
+      "y": -90
+    },
+    "1629": {
+      "path": "/original-ui/Magic/1629.png",
+      "width": 28,
+      "height": 26,
+      "x": 8,
+      "y": -90
+    },
+    "1650": {
+      "path": "/original-ui/Magic/1650.png",
+      "width": 48,
+      "height": 33,
+      "x": -2,
+      "y": -11
+    },
+    "1651": {
+      "path": "/original-ui/Magic/1651.png",
+      "width": 96,
+      "height": 61,
+      "x": -24,
+      "y": -25
+    },
+    "1652": {
+      "path": "/original-ui/Magic/1652.png",
+      "width": 140,
+      "height": 91,
+      "x": -49,
+      "y": -41
+    },
+    "1653": {
+      "path": "/original-ui/Magic/1653.png",
+      "width": 176,
+      "height": 115,
+      "x": -65,
+      "y": -56
+    },
+    "1654": {
+      "path": "/original-ui/Magic/1654.png",
+      "width": 176,
+      "height": 115,
+      "x": -65,
+      "y": -67
+    },
+    "1655": {
+      "path": "/original-ui/Magic/1655.png",
+      "width": 176,
+      "height": 116,
+      "x": -65,
+      "y": -76
+    },
+    "1656": {
+      "path": "/original-ui/Magic/1656.png",
+      "width": 172,
+      "height": 118,
+      "x": -64,
+      "y": -86
+    },
+    "1657": {
+      "path": "/original-ui/Magic/1657.png",
+      "width": 172,
+      "height": 116,
+      "x": -62,
+      "y": -91
+    },
+    "1658": {
+      "path": "/original-ui/Magic/1658.png",
+      "width": 164,
+      "height": 114,
+      "x": -53,
+      "y": -95
+    },
+    "1659": {
+      "path": "/original-ui/Magic/1659.png",
+      "width": 160,
+      "height": 113,
+      "x": -52,
+      "y": -98
+    },
+    "1680": {
+      "path": "/original-ui/Magic/1680.png",
+      "width": 100,
+      "height": 89,
+      "x": -27,
+      "y": -64
+    },
+    "1681": {
+      "path": "/original-ui/Magic/1681.png",
+      "width": 144,
+      "height": 106,
+      "x": -49,
+      "y": -63
+    },
+    "1682": {
+      "path": "/original-ui/Magic/1682.png",
+      "width": 204,
+      "height": 142,
+      "x": -78,
+      "y": -79
+    },
+    "1683": {
+      "path": "/original-ui/Magic/1683.png",
+      "width": 264,
+      "height": 176,
+      "x": -109,
+      "y": -97
+    },
+    "1684": {
+      "path": "/original-ui/Magic/1684.png",
+      "width": 248,
+      "height": 171,
+      "x": -101,
+      "y": -96
+    },
+    "1685": {
+      "path": "/original-ui/Magic/1685.png",
+      "width": 260,
+      "height": 180,
+      "x": -107,
+      "y": -100
+    },
+    "1686": {
+      "path": "/original-ui/Magic/1686.png",
+      "width": 264,
+      "height": 177,
+      "x": -108,
+      "y": -97
+    },
+    "1687": {
+      "path": "/original-ui/Magic/1687.png",
+      "width": 244,
+      "height": 169,
+      "x": -101,
+      "y": -93
+    },
+    "1688": {
+      "path": "/original-ui/Magic/1688.png",
+      "width": 264,
+      "height": 178,
+      "x": -109,
+      "y": -99
+    },
+    "1689": {
+      "path": "/original-ui/Magic/1689.png",
+      "width": 240,
+      "height": 161,
+      "x": -96,
+      "y": -89
+    },
+    "1790": {
+      "path": "/original-ui/Magic/1790.png",
+      "width": 92,
+      "height": 75,
+      "x": -23,
+      "y": -42
+    },
+    "1791": {
+      "path": "/original-ui/Magic/1791.png",
+      "width": 96,
+      "height": 81,
+      "x": -24,
+      "y": -48
+    },
+    "1792": {
+      "path": "/original-ui/Magic/1792.png",
+      "width": 104,
+      "height": 91,
+      "x": -28,
+      "y": -54
+    },
+    "1793": {
+      "path": "/original-ui/Magic/1793.png",
+      "width": 96,
+      "height": 94,
+      "x": -22,
+      "y": -61
+    },
+    "1794": {
+      "path": "/original-ui/Magic/1794.png",
+      "width": 96,
+      "height": 90,
+      "x": -22,
+      "y": -67
+    },
+    "1795": {
+      "path": "/original-ui/Magic/1795.png",
+      "width": 96,
+      "height": 93,
+      "x": -22,
+      "y": -75
+    },
+    "1796": {
+      "path": "/original-ui/Magic/1796.png",
+      "width": 96,
+      "height": 95,
+      "x": -22,
+      "y": -81
+    },
+    "1797": {
+      "path": "/original-ui/Magic/1797.png",
+      "width": 96,
+      "height": 93,
+      "x": -22,
+      "y": -86
+    },
+    "1798": {
+      "path": "/original-ui/Magic/1798.png",
+      "width": 92,
+      "height": 89,
+      "x": -19,
+      "y": -84
+    },
+    "1799": {
+      "path": "/original-ui/Magic/1799.png",
+      "width": 80,
+      "height": 78,
+      "x": -11,
+      "y": -84
+    },
+    "3480": {
+      "path": "/original-ui/Magic/3480.png",
+      "width": 20,
+      "height": 31,
+      "x": 50,
+      "y": -73
+    },
+    "3481": {
+      "path": "/original-ui/Magic/3481.png",
+      "width": 252,
+      "height": 272,
+      "x": -63,
+      "y": -214
+    },
+    "3482": {
+      "path": "/original-ui/Magic/3482.png",
+      "width": 396,
+      "height": 294,
+      "x": -67,
+      "y": -252
+    },
+    "3483": {
+      "path": "/original-ui/Magic/3483.png",
+      "width": 244,
+      "height": 228,
+      "x": -87,
+      "y": -149
+    },
+    "3484": {
+      "path": "/original-ui/Magic/3484.png",
+      "width": 224,
+      "height": 246,
+      "x": -111,
+      "y": -166
+    },
+    "3485": {
+      "path": "/original-ui/Magic/3485.png",
+      "width": 284,
+      "height": 357,
+      "x": -43,
+      "y": -266
+    },
+    "3486": {
+      "path": "/original-ui/Magic/3486.png",
+      "width": 4,
+      "height": 1,
+      "x": 7,
+      "y": -44
+    },
+    "3487": {
+      "path": "/original-ui/Magic/3487.png",
+      "width": 4,
+      "height": 1,
+      "x": 7,
+      "y": -44
+    },
+    "3488": {
+      "path": "/original-ui/Magic/3488.png",
+      "width": 4,
+      "height": 1,
+      "x": 7,
+      "y": -44
+    },
+    "3489": {
+      "path": "/original-ui/Magic/3489.png",
+      "width": 4,
+      "height": 1,
+      "x": 7,
+      "y": -44
+    },
+    "3840": {
+      "path": "/original-ui/Magic/3840.png",
+      "width": 100,
+      "height": 108,
+      "x": -24,
+      "y": -73
+    },
+    "3841": {
+      "path": "/original-ui/Magic/3841.png",
+      "width": 196,
+      "height": 167,
+      "x": -73,
+      "y": -72
+    },
+    "3842": {
+      "path": "/original-ui/Magic/3842.png",
+      "width": 228,
+      "height": 195,
+      "x": -91,
+      "y": -84
+    },
+    "3843": {
+      "path": "/original-ui/Magic/3843.png",
+      "width": 244,
+      "height": 208,
+      "x": -99,
+      "y": -91
+    },
+    "3844": {
+      "path": "/original-ui/Magic/3844.png",
+      "width": 244,
+      "height": 208,
+      "x": -99,
+      "y": -91
+    },
+    "3845": {
+      "path": "/original-ui/Magic/3845.png",
+      "width": 244,
+      "height": 207,
+      "x": -99,
+      "y": -91
+    },
+    "3846": {
+      "path": "/original-ui/Magic/3846.png",
+      "width": 228,
+      "height": 193,
+      "x": -91,
+      "y": -84
+    },
+    "3847": {
+      "path": "/original-ui/Magic/3847.png",
+      "width": 212,
+      "height": 190,
+      "x": -83,
+      "y": -85
+    },
+    "3848": {
+      "path": "/original-ui/Magic/3848.png",
+      "width": 196,
+      "height": 181,
+      "x": -73,
+      "y": -87
+    },
+    "3849": {
+      "path": "/original-ui/Magic/3849.png",
+      "width": 144,
+      "height": 144,
+      "x": -50,
+      "y": -90
+    },
+    "3880": {
+      "path": "/original-ui/Magic/3880.png",
+      "width": 32,
+      "height": 14,
+      "x": 9,
+      "y": -57
+    },
+    "3881": {
+      "path": "/original-ui/Magic/3881.png",
+      "width": 40,
+      "height": 22,
+      "x": 4,
+      "y": -57
+    },
+    "3882": {
+      "path": "/original-ui/Magic/3882.png",
+      "width": 48,
+      "height": 60,
+      "x": 0,
+      "y": -57
+    },
+    "3883": {
+      "path": "/original-ui/Magic/3883.png",
+      "width": 64,
+      "height": 67,
+      "x": -7,
+      "y": -58
+    },
+    "3884": {
+      "path": "/original-ui/Magic/3884.png",
+      "width": 68,
+      "height": 74,
+      "x": -9,
+      "y": -62
+    },
+    "3885": {
+      "path": "/original-ui/Magic/3885.png",
+      "width": 68,
+      "height": 79,
+      "x": -9,
+      "y": -63
+    },
+    "3886": {
+      "path": "/original-ui/Magic/3886.png",
+      "width": 68,
+      "height": 81,
+      "x": -10,
+      "y": -64
+    },
+    "3887": {
+      "path": "/original-ui/Magic/3887.png",
+      "width": 68,
+      "height": 85,
+      "x": -10,
+      "y": -64
+    },
+    "3888": {
+      "path": "/original-ui/Magic/3888.png",
+      "width": 68,
+      "height": 94,
+      "x": -9,
+      "y": -64
+    },
+    "3889": {
+      "path": "/original-ui/Magic/3889.png",
+      "width": 68,
+      "height": 96,
+      "x": -10,
+      "y": -64
+    },
+    "3920": {
+      "path": "/original-ui/Magic/3920.png",
+      "width": 72,
+      "height": 99,
+      "x": -6,
+      "y": -66
+    },
+    "3921": {
+      "path": "/original-ui/Magic/3921.png",
+      "width": 68,
+      "height": 88,
+      "x": -6,
+      "y": -66
+    },
+    "3922": {
+      "path": "/original-ui/Magic/3922.png",
+      "width": 76,
+      "height": 79,
+      "x": -6,
+      "y": -67
+    },
+    "3923": {
+      "path": "/original-ui/Magic/3923.png",
+      "width": 72,
+      "height": 86,
+      "x": -8,
+      "y": -89
+    },
+    "3924": {
+      "path": "/original-ui/Magic/3924.png",
+      "width": 120,
+      "height": 95,
+      "x": -33,
+      "y": -106
+    },
+    "3925": {
+      "path": "/original-ui/Magic/3925.png",
+      "width": 176,
+      "height": 153,
+      "x": -62,
+      "y": -134
+    },
+    "3926": {
+      "path": "/original-ui/Magic/3926.png",
+      "width": 172,
+      "height": 134,
+      "x": -59,
+      "y": -126
+    },
+    "3927": {
+      "path": "/original-ui/Magic/3927.png",
+      "width": 176,
+      "height": 153,
+      "x": -62,
+      "y": -134
+    },
+    "3928": {
+      "path": "/original-ui/Magic/3928.png",
+      "width": 172,
+      "height": 134,
+      "x": -59,
+      "y": -126
+    },
+    "3929": {
+      "path": "/original-ui/Magic/3929.png",
+      "width": 176,
+      "height": 153,
+      "x": -62,
+      "y": -134
+    },
+    "3960": {
+      "path": "/original-ui/Magic/3960.png",
+      "width": 36,
+      "height": 59,
+      "x": 2,
+      "y": -88
+    },
+    "3961": {
+      "path": "/original-ui/Magic/3961.png",
+      "width": 48,
+      "height": 44,
+      "x": 2,
+      "y": -79
+    },
+    "3962": {
+      "path": "/original-ui/Magic/3962.png",
+      "width": 52,
+      "height": 34,
+      "x": 1,
+      "y": -76
+    },
+    "3963": {
+      "path": "/original-ui/Magic/3963.png",
+      "width": 44,
+      "height": 43,
+      "x": -1,
+      "y": -79
+    },
+    "3964": {
+      "path": "/original-ui/Magic/3964.png",
+      "width": 48,
+      "height": 46,
+      "x": -4,
+      "y": -80
+    },
+    "3965": {
+      "path": "/original-ui/Magic/3965.png",
+      "width": 56,
+      "height": 53,
+      "x": -7,
+      "y": -84
+    },
+    "3966": {
+      "path": "/original-ui/Magic/3966.png",
+      "width": 64,
+      "height": 59,
+      "x": -12,
+      "y": -84
+    },
+    "3967": {
+      "path": "/original-ui/Magic/3967.png",
+      "width": 68,
+      "height": 56,
+      "x": -11,
+      "y": -75
+    },
+    "3968": {
+      "path": "/original-ui/Magic/3968.png",
+      "width": 76,
+      "height": 63,
+      "x": -14,
+      "y": -78
+    },
+    "3969": {
+      "path": "/original-ui/Magic/3969.png",
+      "width": 84,
+      "height": 66,
+      "x": -16,
+      "y": -76
+    },
+    "3970": {
+      "path": "/original-ui/Magic/3970.png",
+      "width": 72,
+      "height": 56,
+      "x": -13,
+      "y": -69
+    },
+    "3971": {
+      "path": "/original-ui/Magic/3971.png",
+      "width": 76,
+      "height": 57,
+      "x": -13,
+      "y": -68
+    },
+    "3972": {
+      "path": "/original-ui/Magic/3972.png",
+      "width": 72,
+      "height": 63,
+      "x": -13,
+      "y": -72
+    },
+    "3973": {
+      "path": "/original-ui/Magic/3973.png",
+      "width": 68,
+      "height": 61,
+      "x": -9,
+      "y": -72
+    },
+    "3974": {
+      "path": "/original-ui/Magic/3974.png",
+      "width": 64,
+      "height": 60,
+      "x": -9,
+      "y": -72
+    },
+    "3975": {
+      "path": "/original-ui/Magic/3975.png",
+      "width": 64,
+      "height": 60,
+      "x": -8,
+      "y": -72
+    },
+    "3976": {
+      "path": "/original-ui/Magic/3976.png",
+      "width": 48,
+      "height": 36,
+      "x": 2,
+      "y": -72
+    },
+    "3977": {
+      "path": "/original-ui/Magic/3977.png",
+      "width": 48,
+      "height": 36,
+      "x": 1,
+      "y": -72
+    },
+    "3978": {
+      "path": "/original-ui/Magic/3978.png",
+      "width": 48,
+      "height": 36,
+      "x": 2,
+      "y": -72
+    },
+    "3979": {
+      "path": "/original-ui/Magic/3979.png",
+      "width": 48,
+      "height": 36,
+      "x": 1,
+      "y": -72
+    }
+  }
+}

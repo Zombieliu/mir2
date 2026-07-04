@@ -37,7 +37,7 @@ import {
   downloadSnapshot,
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
-import { createSnapshotEmitter, createWorldStore } from "../lib/world-model";
+import { createSnapshotEmitter, createWorldStore, useWorldSelector } from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
 import {
   type SoundEntityRef,
@@ -86,6 +86,7 @@ import {
   recordSwing as recordOnchainSwing,
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
+import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -120,6 +121,7 @@ import {
   MOVEMENT_PENDING_MAX_AGE_MS,
   canSendMovement,
   clampMovementLeadToCap,
+  stepMovementTowardWithinCap,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
   movementPointMatches,
@@ -144,6 +146,12 @@ const OriginalClientShell = dynamic(
     loading: () => null,
   },
 );
+
+// Stable empty-list sentinel for the closed-window ExtraWindows props (Stage 3). When a window
+// is closed we skip its adapter pass entirely and hand the (unread) list prop this shared
+// frozen array, so the prop value keeps a stable identity flush-to-flush instead of allocating a
+// fresh `[]`. `never[]` is assignable to every concrete `T[]` the windows expect.
+const EMPTY_WINDOW_LIST: never[] = [];
 
 type RuntimeStatus = {
   phase: string;
@@ -906,6 +914,19 @@ const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS =
   MOVEMENT_PENDING_ACTION_RECOVERY_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 2;
 const MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES = MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
+// The locally-predicted self sprite may lead the server by up to the cap above,
+// but the rendered tile must never ADVANCE more than this many tiles in a single
+// frame: a walk/run step is 1 tile over >=200ms, so any larger single-frame move
+// is non-physical (dropped frames collapsing several 1-tile transitions, e.g. a
+// direction reversal across the server tile) and shows as an "overshoot then snap".
+const MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME = 1;
+// Only advance the eased render baseline once per animation frame. preserveCrystal
+// SelfRenderPosition runs from several call sites per frame (React render, the live
+// position getter, the debug-state getters); without this gate they would each
+// advance the baseline and burst-walk a multi-tile jump to completion in one frame.
+// Sits below the smallest real frame interval (~13ms at the 75fps cap) so a genuine
+// new frame always commits, and above the sub-millisecond intra-frame call cluster.
+const MOVEMENT_RENDER_EASE_MIN_COMMIT_MS = 10;
 const MOVEMENT_DIRECTION_PENDING_MAX = 1;
 const MOVEMENT_ROUTE_REROUTE_AFTER_MS = 900;
 const MOVEMENT_ROUTE_RETRY_DELAY_MS = 120;
@@ -1198,6 +1219,187 @@ type MovementConsoleWindow = typeof window & {
   __mir2PendingMovementConsoleCommands?: Array<Record<string, unknown>>;
 };
 
+// ── ?mir2Debug=1 correction-source counters (run-stutter residual hunt) ──────
+// After PR #165 the held run mostly sustains, but ~3 residual standing stalls
+// ("一顿一顿地停住") remain (docs/RUN-STUTTER-INVESTIGATION.md §5). To pin the
+// remaining stall source WITHOUT guessing, every movement correction increments a
+// cheap window.__corr counter keyed by its source; read it after an 8 s real-key
+// run and whichever counter dominates is the source to fix. The `samples` ring
+// keeps the last few mismatch shapes (ack vs predicted from/to, mode, direction)
+// so the right fix can be chosen from a single run instead of a second rebuild.
+// Gated on ?mir2Debug=1 — the same flag that arms __mir2SceneMotionDebug — so the
+// hot path reads one cached boolean and normal play pays nothing.
+//
+// Counter meaning maps 1:1 to the §5 candidates:
+//   snapshot           worldSnapshot ACTUALLY corrected (reset prime + blocked input)
+//   snapshotSuppressed snapshot guard caught a lagging echo and kept predicting (healthy)
+//   ack                per-move ACK off-path correction, NOT UserDashFail
+//   dashFail           UserDashFail — server refused the run (first tile blocked)
+//   confirm            clean ACK confirm (landed on the predicted tile)
+//   confirmDegraded    run degraded to from+1 but kept primed (PR #165 path — healthy)
+//   legacyInput        legacy direction-step / movement-plan path hard-corrected
+//                      (applyCrystalInputCorrection — a SECOND reconciler that also
+//                      resets the run prime + blocks input, parallel to the controller)
+//   pendingTimeout     a pending self-move aged out with no ACK (>1.5 s) → prime reset
+//                      + input block (server ACK lost/late, not a position mismatch)
+// If all of these correction counters stay LOW yet stalls persist, the residual is a
+// held-direction re-arm gap (candidate 4), provable by cross-checking the
+// __mir2SceneMotionDebug recorder's standing transitions against these totals.
+type CorrectionCounterSource =
+  | "snapshot"
+  | "snapshotSuppressed"
+  | "ack"
+  | "dashFail"
+  | "confirm"
+  | "confirmDegraded"
+  | "legacyInput"
+  | "pendingTimeout";
+
+type CorrectionCounters = Record<CorrectionCounterSource, number> & {
+  samples: Array<Record<string, unknown>>;
+};
+
+type CorrectionCounterWindow = typeof window & { __corr?: CorrectionCounters };
+
+let mir2DebugFlagCache: boolean | null = null;
+function mir2DebugCountersEnabled(): boolean {
+  if (mir2DebugFlagCache !== null) return mir2DebugFlagCache;
+  if (typeof window === "undefined") return false;
+  mir2DebugFlagCache = new URLSearchParams(window.location.search).get("mir2Debug") === "1";
+  return mir2DebugFlagCache;
+}
+
+function bumpCorrectionCounter(source: CorrectionCounterSource, detail?: Record<string, unknown>) {
+  if (!mir2DebugCountersEnabled()) return;
+  const debugWindow = window as CorrectionCounterWindow;
+  const counters =
+    debugWindow.__corr ??
+    (debugWindow.__corr = {
+      snapshot: 0,
+      snapshotSuppressed: 0,
+      ack: 0,
+      dashFail: 0,
+      confirm: 0,
+      confirmDegraded: 0,
+      legacyInput: 0,
+      pendingTimeout: 0,
+      samples: [],
+    });
+  counters[source] += 1;
+  // Keep the mismatch shape only for the correction sources (the stall causes) —
+  // the healthy confirm/suppressed paths fire every step and would flood the ring.
+  if (
+    detail &&
+    (source === "snapshot" ||
+      source === "ack" ||
+      source === "dashFail" ||
+      source === "legacyInput" ||
+      source === "pendingTimeout")
+  ) {
+    counters.samples = [{ source, at: Date.now(), ...detail }, ...counters.samples].slice(0, 24);
+  }
+}
+
+// ── ?perfDiag=1 render-perf instrumentation (Stage 0, render-perf) ───────────
+// Opt-in only. When the gate is OFF this whole apparatus is inert: the handler
+// hot path reads a single ref boolean and skips everything, so the runtime
+// path is byte-identical to before. Mirrors the ?movementDiag URL gate.
+type PerfDiagPacketStat = {
+  // Bounded ring of recent handler durations (ms) for this packet name, used to
+  // recompute p50/p95 on read. Cap keeps it O(1) per packet, no unbounded growth.
+  samples: number[];
+  count: number;
+  totalMs: number;
+  maxMs: number;
+};
+
+type PerfDiagState = {
+  enabled: boolean;
+  startedAt: number;
+  packets: Map<string, PerfDiagPacketStat>;
+  longTaskCount: number;
+  longTaskTotalMs: number;
+  longTaskMaxMs: number;
+};
+
+type PerfDiagWindow = typeof window & {
+  __mir2PerfDiag?: Record<string, unknown>;
+};
+
+const PERF_DIAG_PACKET_SAMPLE_CAP = 256;
+
+function perfDiagFlagEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("perfDiag") === "1" ||
+    params.get("perfDiagnostics") === "1" ||
+    params.get("renderDiag") === "1"
+  );
+}
+
+// Render-perf Stage 5c opt-in gate. When OFF (the default — flag absent) the
+// game HUD keeps the legacy `world={world}` prop path, byte-identical to before.
+// When `?selectorHud=1` the HUD subscribes to the world store via useWorldSelector
+// (GameUiSceneStoreBound) for instant rollback control. URL-derived, so it is
+// constant for the session; mirrors the ?perfDiag / ?movementDiag URL gates.
+function selectorHudFlagEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("selectorHud") === "1" || params.get("hudSelector") === "1";
+}
+
+function perfDiagPercentile(sortedAsc: number[], fraction: number): number {
+  if (sortedAsc.length === 0) return 0;
+  const idx = Math.min(
+    sortedAsc.length - 1,
+    Math.max(0, Math.ceil(fraction * sortedAsc.length) - 1),
+  );
+  return sortedAsc[idx];
+}
+
+// Build the plain object exposed on window.__mir2PerfDiag for harness/console
+// reads. Computes p50/p95 per packet name from the bounded sample rings on
+// demand (read-time only — never on the hot path).
+function summarizePerfDiag(state: PerfDiagState): Record<string, unknown> {
+  const handlers: Record<string, unknown> = {};
+  for (const [name, stat] of state.packets) {
+    const sorted = stat.samples.slice().sort((a, b) => a - b);
+    handlers[name] = {
+      count: stat.count,
+      p50Ms: Number(perfDiagPercentile(sorted, 0.5).toFixed(3)),
+      p95Ms: Number(perfDiagPercentile(sorted, 0.95).toFixed(3)),
+      maxMs: Number(stat.maxMs.toFixed(3)),
+      meanMs: Number((stat.totalMs / Math.max(1, stat.count)).toFixed(3)),
+    };
+  }
+  return {
+    startedAt: state.startedAt,
+    durationMs: Date.now() - state.startedAt,
+    handlers,
+    longTask: {
+      count: state.longTaskCount,
+      totalMs: Number(state.longTaskTotalMs.toFixed(3)),
+      maxMs: Number(state.longTaskMaxMs.toFixed(3)),
+    },
+  };
+}
+
+function recordPerfDiagHandler(state: PerfDiagState, packet: string, durationMs: number) {
+  let stat = state.packets.get(packet);
+  if (!stat) {
+    stat = { samples: [], count: 0, totalMs: 0, maxMs: 0 };
+    state.packets.set(packet, stat);
+  }
+  stat.count += 1;
+  stat.totalMs += durationMs;
+  if (durationMs > stat.maxMs) stat.maxMs = durationMs;
+  stat.samples.push(durationMs);
+  if (stat.samples.length > PERF_DIAG_PACKET_SAMPLE_CAP) {
+    stat.samples.splice(0, stat.samples.length - PERF_DIAG_PACKET_SAMPLE_CAP);
+  }
+}
+
 const MOVEMENT_LOG_STORAGE_KEY = "mir2-movement-log";
 
 function isMovementLogFlagEnabled(value: string | null) {
@@ -1335,6 +1537,13 @@ export default function HomePage() {
   }
   const snapshotEmitterRef = useRef<SnapshotEmitter | null>(null);
   const damageFloaterSeqRef = useRef(0);
+  // Stage-2 combat-clone collapse: when a combat case handler applies the struck hit-flash
+  // INLINE inside its single updateWorld updater, it sets this true around the synchronous
+  // `entityStruck` bus emit so the VFX subscriber's flash callback (`markEntityStruckFlash`)
+  // early-returns instead of re-entering updateWorld for a redundant {...world} clone. The
+  // bus emit still fires the SOUND subscriber. Other `entityStruck` emitters that do not apply
+  // the flash inline (e.g. markPlayerStruck) leave this false, so the bus flash still works.
+  const suppressStruckFlashRef = useRef(false);
   const screenRef = useRef<ClientScreen>("login");
   const pendingLoginRef = useRef(false);
   const pendingNewAccountRef = useRef(false);
@@ -1381,6 +1590,13 @@ export default function HomePage() {
   // (lib/world-model/snapshot-emitter), started in the runtime-ready effect below.
   const localMovementAnchorRef = useRef<LocalMovementAnchor | null>(null);
   const lastCrystalSelfRenderPositionRef = useRef<PredictedPlayerMotion | null>(null);
+  // Per-frame baseline for easing the rendered self tile (<=1 tile/frame). `tile`
+  // is the last committed render tile; `at` is when it committed (the once-per-frame
+  // gate). Reset to the server tile whenever the render falls back to the server.
+  const easedSelfRenderRef = useRef<{ tile: PredictedPlayerMotion | null; at: number }>({
+    tile: null,
+    at: 0,
+  });
   const lastSelfMovementAckRef = useRef<{ x: number; y: number; direction?: string; at: number } | null>(null);
   const lastSelfNoProgressAckRef = useRef<{
     x: number;
@@ -1398,6 +1614,8 @@ export default function HomePage() {
   const packetRuntimeSnapshotModeRef = useRef<WorldSnapshotRealtimeMode>("bootstrap");
   const packetRuntimeObjectTombstonesRef = useRef<Map<string, number>>(new Map());
   const movementDiagnosticsRef = useRef<MovementDiagnosticState | null>(null);
+  // ?perfDiag=1 only — null (and the .enabled gate) keep the handler hot path inert.
+  const perfDiagRef = useRef<PerfDiagState | null>(null);
   const sceneSpritesReadyKeyRef = useRef<string | null>(null);
   const firstPlayableFrameMarkedRef = useRef(false);
   const initialSceneAssetsReadyRef = useRef(false);
@@ -1427,6 +1645,10 @@ export default function HomePage() {
   const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [screen, setScreen] = useState<ClientScreen>("login");
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
+  // Render-perf Stage 5c opt-in flag (`?selectorHud=1`). Initialized false so SSR
+  // and first client paint always take the legacy `world={world}` HUD path (no
+  // hydration mismatch); flipped on after mount only when the URL asks for it.
+  const [selectorHudEnabled, setSelectorHudEnabled] = useState(false);
   // Apply a world mutation to the live worldRef immediately (the synchronous
   // source of truth, mirrored into the world-model store -> Bevy emitter), and
   // coalesce the React re-render to at most one per animation frame. Previously
@@ -1762,7 +1984,13 @@ export default function HomePage() {
     };
   }, []);
 
-  const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+  // Memoised so the self-entity reference is stable across flushes that don't touch the entity
+  // list (e.g. the 30Hz motion tick / unrelated world fields). `self` feeds 4 subtrees + the
+  // useCallback handlers below; a fresh identity every render would defeat their memo boundaries.
+  const self = useMemo(
+    () => world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null,
+    [world.entities, world.playerObjectId],
+  );
   const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
   const localSelfRenderPosition = preserveCrystalSelfRenderPosition(
     selfPredictionAnchor,
@@ -1810,8 +2038,13 @@ export default function HomePage() {
         : entity,
     );
   }, [predictedSelf, self, world.entities, world.playerObjectId]);
-  const selectedEntity =
-    displayEntities.find((entity) => entity.objectId === world.selectedObjectId) ?? null;
+  // Memoised on (displayEntities, selectedObjectId) so the selected-entity reference is stable
+  // across motion-only flushes — it feeds the scene/overlay/mobile-controls subtrees and the
+  // target-action callbacks, all of which rely on a stable identity to skip re-render.
+  const selectedEntity = useMemo(
+    () => displayEntities.find((entity) => entity.objectId === world.selectedObjectId) ?? null,
+    [displayEntities, world.selectedObjectId],
+  );
 
   useEffect(() => {
     predictedPlayerPositionRef.current = predictedPlayerPosition;
@@ -2035,6 +2268,79 @@ export default function HomePage() {
       flushMovementDiagnostics("unmount", true);
       delete diagnosticWindow.__mir2MovementDiagnostics;
     };
+  }, []);
+
+  // ?perfDiag=1 render-perf instrumentation (Stage 0). Symmetric with the
+  // ?movementDiag effect above: only arms when the URL flag is present, so with
+  // the flag absent perfDiagRef stays null and handleGatewayEvent pays nothing.
+  useEffect(() => {
+    if (!perfDiagFlagEnabled()) {
+      return;
+    }
+
+    const state: PerfDiagState = {
+      enabled: true,
+      startedAt: Date.now(),
+      packets: new Map(),
+      longTaskCount: 0,
+      longTaskTotalMs: 0,
+      longTaskMaxMs: 0,
+    };
+    perfDiagRef.current = state;
+
+    const perfWindow = window as PerfDiagWindow;
+    perfWindow.__mir2PerfDiag = summarizePerfDiag(state);
+    const publish = () => {
+      perfWindow.__mir2PerfDiag = summarizePerfDiag(state);
+    };
+
+    // Standards-based long-task channel (the equivalent of Chrome's [Violation]
+    // "handler took N ms"): totals main-thread long-task time onto __mir2PerfDiag.
+    let observer: PerformanceObserver | null = null;
+    if (typeof PerformanceObserver === "function") {
+      try {
+        observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            state.longTaskCount += 1;
+            state.longTaskTotalMs += entry.duration;
+            if (entry.duration > state.longTaskMaxMs) {
+              state.longTaskMaxMs = entry.duration;
+            }
+          }
+        });
+        observer.observe({ entryTypes: ["longtask"] });
+      } catch {
+        observer = null;
+      }
+    }
+
+    const publishTimer = window.setInterval(publish, 1000);
+    const handlePageHide = () => publish();
+    window.addEventListener("pagehide", handlePageHide);
+
+    appendLog("Render-perf diagnostics enabled (?perfDiag=1)", "system");
+
+    return () => {
+      window.clearInterval(publishTimer);
+      window.removeEventListener("pagehide", handlePageHide);
+      if (observer) {
+        observer.disconnect();
+      }
+      publish();
+      state.enabled = false;
+      perfDiagRef.current = null;
+    };
+  }, []);
+
+  // Stage 5c: arm the opt-in selector-store HUD path after mount when the URL flag
+  // is present. Reading it post-mount (not at SSR) keeps first paint on the legacy
+  // path so hydration stays clean; with the flag absent this is a no-op.
+  useEffect(() => {
+    if (selectorHudFlagEnabled()) {
+      setSelectorHudEnabled(true);
+      appendLog("Selector-store HUD enabled (?selectorHud=1)", "system");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function recordMovementDiagnostic(
@@ -2529,7 +2835,8 @@ export default function HomePage() {
     packetName: string,
     now: number,
   ) {
-    const hadPending = pendingSelfMoveRef.current !== null;
+    const pendingBefore = pendingSelfMoveRef.current;
+    const hadPending = pendingBefore !== null;
     const result = reconcileMovementAck({
       state: readSelfMovementControllerState(),
       ack: point,
@@ -2539,6 +2846,14 @@ export default function HomePage() {
     applySelfMovementControllerState(result.state);
     lastSelfMovementAckRef.current = { x: point.x, y: point.y, direction: point.direction, at: now };
     if (result.outcome === "correction") {
+      bumpCorrectionCounter(packetName === "UserDashFail" ? "dashFail" : "ack", {
+        packet: packetName,
+        ack: { x: point.x, y: point.y, direction: point.direction },
+        pendingFrom: pendingBefore ? { ...pendingBefore.from } : null,
+        pendingTo: pendingBefore ? { ...pendingBefore.to } : null,
+        pendingDirection: pendingBefore?.direction ?? null,
+        pendingMode: pendingBefore?.mode ?? null,
+      });
       queuedMoveIntentRef.current = null;
       crystalRunPrimedUntilRef.current = 0;
       movementPredictionBlockedUntilRef.current = Math.max(
@@ -2556,6 +2871,13 @@ export default function HomePage() {
       return result.outcome;
     }
     if (result.outcome === "confirmed") {
+      // A run that landed short of its predicted +2 tile is the Crystal run→walk
+      // degradation the PR #165 keep-prime path now confirms (not a stall). Tag it
+      // separately so a high confirmDegraded count reads as "town obstacles degrade
+      // the run a lot" (healthy) rather than masquerading as clean run frames.
+      const cleanLanding =
+        !!pendingBefore && point.x === pendingBefore.to.x && point.y === pendingBefore.to.y;
+      bumpCorrectionCounter(cleanLanding ? "confirm" : "confirmDegraded");
       crystalRunPrimedUntilRef.current = now + CRYSTAL_RUN_PRIME_MS;
       clearLegacySelfMovementCoordinateSources();
       clearLocalSelfPrediction();
@@ -2573,14 +2895,38 @@ export default function HomePage() {
     point: { x: number; y: number; direction?: string },
     now: number,
   ) {
+    const stateBefore = readSelfMovementControllerState();
     const result = reconcileMovementSnapshot({
-      state: readSelfMovementControllerState(),
+      state: stateBefore,
       snapshot: point,
       now,
     });
     if (!result.corrected) {
       return false;
     }
+    // A periodic worldSnapshot that merely LAGS a still-valid leading prediction is not a
+    // real correction. The authoritative per-move ACK path (reconcileSelfMovementAck —
+    // UserLocation / UserDash / UserDashFail) already handles genuine rejections. During a
+    // RUN the prediction legitimately leads the server by up to MOVEMENT_LOCAL_ACTION_MAX_
+    // LEAD_TILES (2) tiles, so an un-guarded worldSnapshot flags EVERY step as a
+    // "correction" — which resets the run prime + blocks input, collapsing the run into a
+    // walk/standing stutter (measured: a held run advanced SLOWER than a walk, 6 walk + 3
+    // run + 3 standing-stalls over 8 s). If the pending target (or the live prediction) is
+    // still on the predicted path at/ahead of this snapshot, the snapshot is a lagging echo
+    // of a valid lead — keep predicting and let the ACK path own real corrections.
+    const aheadCandidate = stateBefore.pending?.to ?? stateBefore.prediction;
+    if (
+      aheadCandidate &&
+      crystalMovementCandidateNotBehindServer(point, aheadCandidate, aheadCandidate.direction)
+    ) {
+      bumpCorrectionCounter("snapshotSuppressed");
+      return false;
+    }
+    bumpCorrectionCounter("snapshot", {
+      snapshot: { x: point.x, y: point.y, direction: point.direction },
+      pendingTo: stateBefore.pending ? { ...stateBefore.pending.to } : null,
+      prediction: stateBefore.prediction ? { ...stateBefore.prediction } : null,
+    });
     applySelfMovementControllerState(result.state);
     queuedMoveIntentRef.current = null;
     clearLegacySelfMovementCoordinateSources();
@@ -3307,9 +3653,33 @@ export default function HomePage() {
     return hasSelfMovementTransportEvidence(now) ? candidate : null;
   }
 
+  // Ease the rendered self tile toward `target`, advancing at most
+  // MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME tiles per animation frame. The
+  // baseline (last committed render tile + commit time) lives in easedSelfRenderRef
+  // and is advanced at most once per frame, so the several preserveCrystalSelfRender
+  // Position() call sites in a frame all observe the same eased tile instead of
+  // burst-walking a multi-tile jump. A normal <=1-tile advance passes through
+  // untouched (fully responsive); only a >1-tile single-frame jump is eased.
+  function easeSelfRenderTile(
+    target: PredictedPlayerMotion,
+    serverSelf: { x: number; y: number; direction?: string },
+    now: number,
+  ): PredictedPlayerMotion {
+    const state = easedSelfRenderRef.current;
+    if (state.tile && now - state.at < MOVEMENT_RENDER_EASE_MIN_COMMIT_MS) {
+      // Same animation frame as the last commit — hold so repeat calls agree.
+      return state.tile;
+    }
+    const base = state.tile ?? { x: serverSelf.x, y: serverSelf.y };
+    const committed = stepMovementTowardWithinCap(base, target, MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME);
+    easedSelfRenderRef.current = { tile: committed, at: now };
+    return committed;
+  }
+
   function preserveCrystalSelfRenderPosition(
     serverSelf: { x: number; y: number; direction?: string } | null,
     candidate: PredictedPlayerMotion | null,
+    now = Date.now(),
   ) {
     if (!serverSelf) {
       lastCrystalSelfRenderPositionRef.current = candidate;
@@ -3336,13 +3706,33 @@ export default function HomePage() {
       }
     }
 
-    if (next && next.x === serverSelf.x && next.y === serverSelf.y) {
+    // No valid leading prediction: the render tracks the authoritative server tile
+    // (in sync, or a server correction / teleport discarded the prediction). Snap
+    // straight to it — easing a server-driven jump would slow-walk a legitimate
+    // teleport. Reset the ease baseline to the server so the NEXT predicted lead
+    // eases out from the server tile rather than jumping across it.
+    if (!next || (next.x === serverSelf.x && next.y === serverSelf.y)) {
+      easedSelfRenderRef.current = {
+        tile: { x: serverSelf.x, y: serverSelf.y, direction: serverSelf.direction },
+        at: now,
+      };
       lastCrystalSelfRenderPositionRef.current = null;
       return null;
     }
 
-    lastCrystalSelfRenderPositionRef.current = next;
-    return next;
+    // A valid prediction leads the server: cap the rendered advance to <=1 tile per
+    // frame so a long/dropped frame (or a direction reversal across the server tile)
+    // cannot collapse several 1-tile transitions into one visible jump — the
+    // residual "overshoot then snap" left after the lead-cap clamp above. The
+    // baseline advances at most once per frame and routes through the in-between
+    // tiles over consecutive frames.
+    const eased = easeSelfRenderTile(next, serverSelf, now);
+    if (eased.x === serverSelf.x && eased.y === serverSelf.y) {
+      lastCrystalSelfRenderPositionRef.current = null;
+      return null;
+    }
+    lastCrystalSelfRenderPositionRef.current = eased;
+    return eased;
   }
 
   function crystalEffectiveMovementMode(requestedMode: "walk" | "run", now: number): "walk" | "run" {
@@ -3592,7 +3982,7 @@ export default function HomePage() {
     if (loadingSceneKeyRef.current === sceneKey) {
       return;
     }
-    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center, sceneKey, loadedSceneKeyRef.current)) {
+    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center)) {
       return;
     }
 
@@ -3906,6 +4296,7 @@ export default function HomePage() {
       clearRecentSelfMovementActionHistory();
       clearLocalMovementAnchor();
       lastCrystalSelfRenderPositionRef.current = null;
+      easedSelfRenderRef.current = { tile: null, at: 0 };
       clearDirectionStepPendingQueue();
       clearLocalSelfPrediction();
       return;
@@ -4836,6 +5227,12 @@ export default function HomePage() {
     }
     const pending = pendingSelfMoveRef.current;
     if (pending && now - pending.sentAt > MOVEMENT_PENDING_ACTION_MAX_AGE_MS) {
+      bumpCorrectionCounter("pendingTimeout", {
+        ageMs: Math.round(now - pending.sentAt),
+        pendingFrom: { ...pending.from },
+        pendingTo: { ...pending.to },
+        pendingMode: pending.mode,
+      });
       pendingSelfMoveRef.current = null;
       queuedMoveIntentRef.current = null;
       crystalRunPrimedUntilRef.current = 0;
@@ -6361,7 +6758,13 @@ export default function HomePage() {
       at: Date.now(),
     };
     debugWindow.__mir2LastGatewayEvent = debugEvent;
-    debugWindow.__mir2GatewayEventHistory = [debugEvent, ...(debugWindow.__mir2GatewayEventHistory ?? [])].slice(0, 50);
+    // In-place bounded ring (newest-first, <=50) instead of [x, ...prev].slice(0,50):
+    // identical read contract for the QA harnesses that read this global, but no
+    // per-event array-container garbage (Stage 1, render-perf).
+    const gatewayHistory = debugWindow.__mir2GatewayEventHistory ?? [];
+    gatewayHistory.unshift(debugEvent);
+    if (gatewayHistory.length > 50) gatewayHistory.length = 50;
+    debugWindow.__mir2GatewayEventHistory = gatewayHistory;
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
       pendingLoginRef.current = false;
@@ -6400,17 +6803,24 @@ export default function HomePage() {
     }
     if (event.type !== "packet" || !event.packet) return;
 
-    appendLog(t("log.recv", [event.packet]), "network");
+    // (perf) Removed a per-packet `appendLog(t("log.recv", …), "network")`: appendLog
+    // early-returns for tone === "network" (it is never shown), so the localization
+    // lookup+format ran on every inbound packet purely to be discarded.
     const payload = event.payload ?? {};
     if (isMovementPacketName(event.packet)) {
-      debugWindow.__mir2MovementReceivedPackets = [
-        {
-          packet: event.packet,
-          payload,
-          at: Date.now(),
-        },
-        ...(debugWindow.__mir2MovementReceivedPackets ?? []),
-      ].slice(0, 50);
+      // The 50-entry movement-packet history is a diagnostic-only buffer (no harness
+      // reads it, unlike __mir2GatewayEventHistory). Only allocate it under
+      // ?movementDiagnostics=1 so normal play does not churn an array per move packet.
+      if (movementDiagnosticsRef.current?.enabled) {
+        debugWindow.__mir2MovementReceivedPackets = [
+          {
+            packet: event.packet,
+            payload,
+            at: Date.now(),
+          },
+          ...(debugWindow.__mir2MovementReceivedPackets ?? []),
+        ].slice(0, 50);
+      }
       recordMovementDiagnostic("rx:movementPacket", {
         packet: event.packet,
         payload,
@@ -6419,7 +6829,13 @@ export default function HomePage() {
     }
 
     recordDebugEvent("packet-in", "net", { packet: event.packet });
-    switch (event.packet) {
+    // ?perfDiag=1 only: time the switch body per packet name. When the gate is
+    // OFF perfDiagState is null and the only added cost is this ref read + the
+    // `if` in the finally below — the hot path is otherwise unchanged.
+    const perfDiagState = perfDiagRef.current;
+    const perfDiagStart = perfDiagState ? performance.now() : 0;
+    try {
+      switch (event.packet) {
       case "Connected":
         setLoginErrorKey(null);
         break;
@@ -6787,9 +7203,11 @@ export default function HomePage() {
                 : entity,
             ),
           };
-	          worldRef.current = nextWorld;
-	          return nextWorld;
-	        });
+          // Stage-2: updateWorld assigns worldRef.current from the returned value (page.tsx
+          // ~1540) synchronously, so the inner worldRef write here was a double-write. The
+          // post-updater worldRef.current read below still sees the committed value.
+          return nextWorld;
+        });
         if (movementObjectId === worldRef.current.playerObjectId) {
           const outcome = reconcileSelfMovementAck({ x, y, direction }, movementPacket, movementNow);
           if (outcome === "confirmed") {
@@ -6849,7 +7267,9 @@ export default function HomePage() {
         break;
       }
       case "ObjectAttack":
-        updateWorldEntityFromLocationPacket(payload);
+        // Stage-2: markWorldEntityAttack's single updater already applies the location patch
+        // (x/y/direction) alongside the attack-animation fields, so the prior separate
+        // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
         markWorldEntityAttack(payload);
         break;
       case "ObjectHarvest":
@@ -6857,7 +7277,9 @@ export default function HomePage() {
         updateWorldEntityFromLocationPacket(payload);
         break;
       case "ObjectStruck":
-        updateWorldEntityFromLocationPacket(payload);
+        // Stage-2: markWorldEntityStruck now applies location + struck hit-flash in ONE updater
+        // (was 3 clones: location, location-again, and a bus-driven flash re-entry). It emits
+        // `entityStruck` for the SOUND subscriber while suppressing the redundant VFX-flash clone.
         markWorldEntityStruck(payload);
         break;
       case "ObjectRangeAttack":
@@ -6883,7 +7305,10 @@ export default function HomePage() {
         break;
       case "ObjectSpell":
       case "ObjectMagic":
-        updateWorldEntityFromLocationPacket(payload);
+        // Stage-2: markWorldEntityMagic's single updater already applies the location patch
+        // (x/y/direction) alongside the cast/range-attack fields, so the prior separate
+        // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
+        // spawnRangeProjectile stays as-is (it adds the projectile + caster attack pose).
         markWorldEntityMagic(payload);
         if (stringifyId(payload.targetId) !== "0") {
           spawnRangeProjectile(payload);
@@ -8987,6 +9412,15 @@ export default function HomePage() {
         break;
       default:
         break;
+      }
+    } finally {
+      if (perfDiagState) {
+        recordPerfDiagHandler(
+          perfDiagState,
+          event.packet,
+          performance.now() - perfDiagStart,
+        );
+      }
     }
   }
 
@@ -9256,6 +9690,10 @@ export default function HomePage() {
   // separately by updateWorldEntityFromLocationPacket before the bus event is emitted.
   function markEntityStruckFlash(objectId: string) {
     if (!objectId || objectId === "0") return;
+    // Stage-2: when the combat case handler already applied the flash inline (in its single
+    // updater) the same hit's `entityStruck` bus emit must not re-enter updateWorld for a
+    // redundant clone. The sound subscriber still ran on the same emit.
+    if (suppressStruckFlashRef.current) return;
     const now = Date.now();
     updateWorld((current) => ({
       ...current,
@@ -9270,9 +9708,14 @@ export default function HomePage() {
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const location = payload.location as { x?: number; y?: number } | undefined;
-    // Sound + hit-flash are handled by bus subscribers (entityStruck -> sound-subscriber
-    // + vfx-subscriber). Only the position / direction update stays inline.
+    const now = Date.now();
+    // Stage-2: emit `entityStruck` only for the SOUND subscriber; suppress the VFX subscriber's
+    // flash callback (markEntityStruckFlash) so it does not re-enter updateWorld for a redundant
+    // clone — the same struck-flash fields are applied inline in the single updater below. The
+    // bus dispatch is synchronous, so the flag is read + reset within this emit.
+    suppressStruckFlashRef.current = true;
     gameBusRef.current!.emit({ type: "entityStruck", objectId });
+    suppressStruckFlashRef.current = false;
     updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
@@ -9280,6 +9723,9 @@ export default function HomePage() {
         x: typeof location?.x === "number" ? location.x : entity.x,
         y: typeof location?.y === "number" ? location.y : entity.y,
         direction: stringOrNull(payload.direction) ?? entity.direction,
+        // Folds markEntityStruckFlash's body (crystalStruckActionDurationMs) into this one map.
+        struckStartedAt: now,
+        struckUntil: now + crystalStruckActionDurationMs(entity),
       })),
     }));
   }
@@ -10360,6 +10806,16 @@ export default function HomePage() {
     direction?: string,
     visualUntil = directionStepVisualUntilRef.current,
   ) {
+    bumpCorrectionCounter("legacyInput", {
+      server: { x, y, direction: direction ?? null },
+      predicted: predictedPlayerPositionRef.current
+        ? {
+            x: predictedPlayerPositionRef.current.x,
+            y: predictedPlayerPositionRef.current.y,
+            direction: predictedPlayerPositionRef.current.direction ?? null,
+          }
+        : null,
+    });
     movementInputBlockedUntilRef.current = now + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
     crystalRunPrimedUntilRef.current = 0;
     queuedMoveIntentRef.current = null;
@@ -11101,6 +11557,96 @@ export default function HomePage() {
     }
   }
 
+  // (perf) Memoise the stage5 window adapters on their world slices. They were rebuilt on
+  // EVERY render (and adaptActiveRankingPage twice on one line), even though the windows
+  // are usually all closed. The stage5Systems sub-objects are ref-stable across unrelated
+  // flushes (updates spread-preserve siblings), so this skips ~14 adapter walks on the
+  // common busy-map flush. ExtraWindows reads each field only when its window is open.
+  const extraWindowData = useMemo(() => {
+    const ranking = adaptActiveRankingPage(world.rankings, world.rankingCurrentKey);
+    return {
+      hero: adaptHero(world.stage5Systems.hero),
+      creatures: adaptCreatures(world.stage5Systems.intelligentCreatures),
+      group: adaptGroup(world.stage5Systems.group),
+      friends: adaptFriends(world.stage5Systems.social),
+      relationship: adaptRelationship(world.stage5Systems.relationship),
+      mentor: adaptMentor(world.stage5Systems.mentor),
+      rankingTab: ranking.tab,
+      rankingPage: ranking.page,
+      marketListings: adaptMarketListings(world.stage5Systems.auction),
+      conquest: adaptConquest(world.stage5Systems.conquest),
+      guildTerritory: adaptGuildTerritory(world.stage5Systems.guildTerritory),
+      trade: adaptTrade(world.stage5Systems.trade),
+      buffs: adaptBuffs(world.activeBuffs),
+      mail: adaptMailMessages(world.stage5Systems.mail),
+      worldMapMarkers: adaptWorldMapMarkers(world.mapTransfers),
+    };
+  }, [
+    world.stage5Systems.hero,
+    world.stage5Systems.intelligentCreatures,
+    world.stage5Systems.group,
+    world.stage5Systems.social,
+    world.stage5Systems.relationship,
+    world.stage5Systems.mentor,
+    world.rankings,
+    world.rankingCurrentKey,
+    world.stage5Systems.auction,
+    world.stage5Systems.conquest,
+    world.stage5Systems.guildTerritory,
+    world.stage5Systems.trade,
+    world.activeBuffs,
+    world.stage5Systems.mail,
+    world.mapTransfers,
+  ]);
+
+  // ── Stable forwarded handlers ─────────────────────────────────────────────
+  // The shell/mobile-controls/scene forward these to memoised children (and the two
+  // target actions sit in a keydown effect dep list). The underlying logic reads live
+  // state (`world`/`self`/`selectedEntity`) and the `handle*` helpers are re-created
+  // every render, so we keep the latest closure in a ref (updated each render) and expose
+  // an identity-stable `useCallback(…, [])` wrapper. This COMPOSES the existing bodies.
+  const onApproachTargetRef = useRef<() => void>(() => undefined);
+  onApproachTargetRef.current = () => {
+    if (!selectedEntity) return;
+    const destination = approachDestination(self, selectedEntity);
+    moveToTile(destination.x, destination.y, "run");
+  };
+  const onApproachTarget = useCallback(() => onApproachTargetRef.current(), []);
+
+  const onPrimaryTargetActionRef = useRef<() => void>(() => undefined);
+  onPrimaryTargetActionRef.current = () => {
+    if (!selectedEntity) return;
+    if (selectedEntity.kind === "monster") {
+      if (selectedEntity.dead) return harvestToward(directionToward(self, selectedEntity));
+      return attackTarget(selectedEntity.objectId);
+    }
+    if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
+    sendCrystalTurn(directionToward(self, selectedEntity));
+  };
+  const onPrimaryTargetAction = useCallback(() => onPrimaryTargetActionRef.current(), []);
+
+  const onViewportTileClickRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileClickRef.current = (x, y) => handleViewportTileAction(x, y, "walk");
+  const onViewportTileClick = useCallback((x: number, y: number) => onViewportTileClickRef.current(x, y), []);
+
+  const onViewportTileSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileSecondaryActionRef.current = (x, y) => handleViewportTileAction(x, y, "run");
+  const onViewportTileSecondaryAction = useCallback(
+    (x: number, y: number) => onViewportTileSecondaryActionRef.current(x, y),
+    [],
+  );
+
+  const onViewportTileStepClickRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileStepClickRef.current = (x, y) => handleViewportTileStepAction(x, y, "walk");
+  const onViewportTileStepClick = useCallback((x: number, y: number) => onViewportTileStepClickRef.current(x, y), []);
+
+  const onViewportTileStepSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
+  onViewportTileStepSecondaryActionRef.current = (x, y) => handleViewportTileStepAction(x, y, "run");
+  const onViewportTileStepSecondaryAction = useCallback(
+    (x: number, y: number) => onViewportTileStepSecondaryActionRef.current(x, y),
+    [],
+  );
+
   return (
     !isClientReady ? null :
     <>
@@ -11112,6 +11658,8 @@ export default function HomePage() {
       wsState={wsState}
       reconnectStatus={reconnectStatus}
       world={world}
+      worldStore={worldStoreRef.current ?? undefined}
+      selectorHud={selectorHudEnabled}
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
@@ -11205,31 +11753,18 @@ export default function HomePage() {
       onCloseInventory={() => setShowInventory(false)}
       onOpenCharacterTab={openCharacter}
       onOpenInventoryTab={openInventory}
-      onViewportTileClick={(x, y) => handleViewportTileAction(x, y, "walk")}
-      onViewportTileSecondaryAction={(x, y) => handleViewportTileAction(x, y, "run")}
-      onViewportTileStepClick={(x, y) => handleViewportTileStepAction(x, y, "walk")}
-      onViewportTileStepSecondaryAction={(x, y) => handleViewportTileStepAction(x, y, "run")}
+      onViewportTileClick={onViewportTileClick}
+      onViewportTileSecondaryAction={onViewportTileSecondaryAction}
+      onViewportTileStepClick={onViewportTileStepClick}
+      onViewportTileStepSecondaryAction={onViewportTileStepSecondaryAction}
       onViewportDirectionStep={handleViewportDirectionStep}
       onViewportDirectionIntent={handleViewportDirectionIntent}
       onViewportDirectionStop={handleViewportDirectionStop}
       onPickGroundDrop={pickGroundDrop}
       onSelectEntity={selectEntity}
       onActivateEntity={activateEntity}
-      onApproachTarget={() => {
-        if (!selectedEntity) return;
-        const destination = approachDestination(self, selectedEntity);
-        moveToTile(destination.x, destination.y, "run");
-      }}
-      onPrimaryTargetAction={() => {
-        if (!selectedEntity) return;
-        if (selectedEntity.kind === "monster") {
-          // A dead monster is a harvestable corpse; live ones are attacked.
-          if (selectedEntity.dead) return harvestToward(directionToward(self, selectedEntity));
-          return attackTarget(selectedEntity.objectId);
-        }
-        if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
-        sendCrystalTurn(directionToward(self, selectedEntity));
-      }}
+      onApproachTarget={onApproachTarget}
+      onPrimaryTargetAction={onPrimaryTargetAction}
       onSelectNpcDialogTarget={(target) => send({ type: "selectNpcDialog", target })}
       onSubmitNpcInput={(value) => send({ type: "submitNpcInput", value })}
       onSelectCharacter={setSelectedCharacterIndex}
@@ -11239,19 +11774,19 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, onTrackQuest: shareQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
-      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures), onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, playerClass: self?.classKey ?? null, onTrackQuest: shareQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
+      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
-      group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
-      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
-      bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor), onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
-      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
-      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
-      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
-      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
-      buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: adaptBuffs(world.activeBuffs) }}
-      mail={{ open: showMail, onClose: () => setShowMail(false), mail: adaptMailMessages(world.stage5Systems.mail), gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
-      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: adaptWorldMapMarkers(world.mapTransfers) }}
+      group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
+      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
+      bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
+      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: extraWindowData.rankingTab, page: extraWindowData.rankingPage, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
+      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
+      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
+      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
+      buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
+      mail={{ open: showMail, onClose: () => setShowMail(false), mail: extraWindowData.mail, gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
+      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: extraWindowData.worldMapMarkers }}
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
@@ -11273,11 +11808,14 @@ export default function HomePage() {
           // on its "quest" tab. Treat either as "quests viewed".
           questLog: showQuestLog || (showInventory && activeInventoryTab === "quest"),
         }}
+        questLog={world.questLog}
+        playerClass={self?.classKey ?? null}
         onClose={() => setShowTutorial(false)}
       />
     ) : null}
-    {ONCHAIN_MINE_ENABLED && screen === "game" ? (
-      <OnchainMinePanel
+    {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
+      <OnchainMinePanelWithStore
+        store={worldStoreRef.current}
         walletAddress={onchainWallet?.account.address ?? null}
         walletBusy={onchainWalletBusy}
         pendingSwings={onchainMine.pendingSwings}
@@ -11290,9 +11828,6 @@ export default function HomePage() {
         lastReconcile={onchainMine.lastReconcile}
         lastError={onchainMine.lastError}
         nextNonce={onchainNextNonce}
-        veinStage={
-          world.mineNodes.find((node) => isOnchainVeinNode(node, ONCHAIN_MINE_VEIN))?.stage ?? null
-        }
         veinLocation={ONCHAIN_MINE_VEIN}
         submitBusy={onchainSubmitBusy}
         redeemAmount={onchainRedeemAmount}
@@ -11395,6 +11930,27 @@ function DeathReviveOverlay({
       </div>
     </div>
   );
+}
+
+// Render-perf Stage 5b: store-bound OnchainMinePanel. The panel reads only one
+// low-frequency world slice (`world.mineNodes`, via the derived `veinStage`), yet
+// the old `veinStage={world.mineNodes.find(...)}` callsite recomputed it on every
+// coalesced `setWorld` flush — re-rendering this whole HUD on unrelated combat /
+// movement packets. This wrapper subscribes to the world store directly with
+// `useWorldSelector`, so it re-renders only when the vein's stage actually
+// changes. The selector returns a primitive (`number | null`), so its identity is
+// already stable via `Object.is` — no custom `isEqual` needed. Proves the Stage-5
+// pattern on the safest (lowest-frequency) consumer before any HUD migration.
+function OnchainMinePanelWithStore({
+  store,
+  veinLocation,
+  ...rest
+}: Omit<OnchainMinePanelProps, "veinStage"> & { store: WorldStore }) {
+  const veinStage = useWorldSelector(
+    store,
+    (s) => s.mineNodes.find((node) => isOnchainVeinNode(node, veinLocation))?.stage ?? null,
+  );
+  return <OnchainMinePanel {...rest} veinLocation={veinLocation} veinStage={veinStage} />;
 }
 
 // Maps the normalized mail records (extended-server-packets normalizeMailList)
@@ -12275,13 +12831,7 @@ function shouldReloadCrystalScene(
   region: OriginalMapRegion | null,
   mapFileName: string,
   center: { x: number; y: number },
-  sceneKey: string,
-  loadedSceneKey: string | null,
 ) {
-  if (loadedSceneKey !== sceneKey) {
-    return true;
-  }
-
   if (!region) {
     return true;
   }
@@ -12290,6 +12840,16 @@ function shouldReloadCrystalScene(
     return true;
   }
 
+  // Reload ONLY when the player nears the LOADED region's edge — NOT merely
+  // because the chunk index flipped. The fetched region (SCENE_REQUEST_WIDTH/
+  // HEIGHT) is far larger than one chunk (SCENE_CHUNK_*), so a chunk-boundary
+  // crossing normally leaves the player amply inside the current region. The old
+  // `loadedSceneKey !== sceneKey` early-return forced a reload on every chunk
+  // flip, so walking along a chunk boundary re-fetched the scene every step and
+  // re-rendered the whole map → flicker / misalignment + "stutter every few
+  // steps". Measured: 77% of scene fetches were redundant re-fetches of the same
+  // 1–2 chunks (one boundary re-fetched 30×). The margin check below already
+  // covers genuine edge approach and teleports (player outside playBounds).
   return (
     center.x <= region.playBounds.minX + SCENE_RELOAD_MARGIN_X ||
     center.x >= region.playBounds.maxX - SCENE_RELOAD_MARGIN_X ||

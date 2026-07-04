@@ -741,7 +741,15 @@ pub(super) fn equipment_state_from_item_state(
         slot,
         name: item.name.clone(),
         icon: item.icon,
-        shape: equipment_shape_for_slot_and_name(slot, &item.name),
+        // Crystal `Looks_Armour`/`Looks_Weapon` come from the worn item's
+        // `ItemInfo.Shape` (HumanObject.RefreshStats / SetLooks). Read the
+        // authoritative template shape first so equipping any real item changes
+        // the rendered body/weapon (`CArmour/{shape}` / `CWeapon/{shape}` in
+        // `entity_sprite_snapshot`); fall back to the legacy name lookup only for
+        // items whose key does not resolve to a Crystal template.
+        shape: crystal_item_template_for_item_key(&item.key)
+            .map(|template| u16::try_from(template.shape).unwrap_or(0))
+            .or_else(|| equipment_shape_for_slot_and_name(slot, &item.name)),
         description: item.description.clone(),
         durability_current,
         durability_max,

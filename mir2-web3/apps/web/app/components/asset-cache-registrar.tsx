@@ -232,9 +232,16 @@ export function AssetCacheRegistrar() {
     // base URL configured; ?assetCache=0 forces it off for raw-network debugging.
     const assetCacheParam = params.get("assetCache");
     const remoteAssetBaseConfigured = Boolean(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL);
+    // `?assetCache=0` is a universal kill-switch (now honoured in production too):
+    // behind the same-origin local proxy the SW is redundant, and its asset cache
+    // otherwise keeps serving a stale pre-rebuild build (blue/missing tiles that
+    // survive a hard refresh). The disabled branch below also tears down any worker
+    // + mir2 caches a prior load left behind.
     const shouldRegisterServiceWorker =
-      process.env.NODE_ENV === "production" ||
-      (assetCacheParam !== "0" && (assetCacheParam === "1" || remoteAssetBaseConfigured));
+      assetCacheParam !== "0" &&
+      (process.env.NODE_ENV === "production" ||
+        assetCacheParam === "1" ||
+        remoteAssetBaseConfigured);
     const shouldPrewarm =
       params.get("prewarm") !== "0" &&
       (process.env.NODE_ENV === "production" ||
@@ -350,6 +357,18 @@ export function AssetCacheRegistrar() {
             controlled: Boolean(navigator.serviceWorker.controller),
           });
         } else {
+          // Explicit ?assetCache=0: actively tear down any worker + mir2 CacheStorage
+          // a prior load left, so a stale (e.g. pre-proxy-fix) build stops being
+          // served. Takes full effect on the next navigation.
+          if (assetCacheParam === "0" && "serviceWorker" in navigator) {
+            void unregisterMir2AssetWorkers();
+            if ("caches" in window) {
+              void caches
+                .keys()
+                .then((keys) => Promise.all(keys.filter((k) => /mir2/i.test(k)).map((k) => caches.delete(k))))
+                .catch(() => {});
+            }
+          }
           window.__mir2AssetCache = {
             enabled: false,
             status: shouldRegisterServiceWorker ? "unsupported-origin" : "disabled-dev",
@@ -1433,6 +1452,16 @@ function logCacheProgress(
 function shouldShowCacheProgress(snapshot: CacheMetricsSnapshot) {
   const summary = snapshot.summary;
   if (summary.prewarmRequested <= 0) return false;
+  // The panel is a loading INDICATOR pinned over the HP orb (bottom-left), not a
+  // permanent HUD element — once the prewarm has caught up it must hide, or it sits
+  // on top of the HUD for the whole session reading as "完成 100%" forever (the
+  // gating returned true whenever any prewarm was ever requested). It re-appears if a
+  // later wave requests more, then hides again. Keep it visible while anything failed
+  // so the user still sees the failure count.
+  const completed = summary.prewarmOk + summary.prewarmFailed;
+  if (completed >= summary.prewarmRequested && summary.prewarmFailed === 0) {
+    return false;
+  }
   return true;
 }
 

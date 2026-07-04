@@ -3172,6 +3172,12 @@ img {
 .character-tab.stats2 { left: 132px; top: 70px; }
 .character-tab.spells { left: 194px; top: 70px; }
 
+/* Character tabs only overlay their bright sprite while selected (Crystal
+   draws Index = -1 for the others). Pin the clickable hotspot to the Crystal
+   tab size (64x20) so an unselected, img-less tab still switches pages. */
+.character-tab .window-tab-button { width: 64px; height: 20px; }
+.character-tab .window-tab-button img { display: block; }
+
 .inventory-grid,
 .inventory-weight-bar,
 .inventory-gold,
@@ -4094,6 +4100,8 @@ button.character-spell-value:hover {
 .npc-dialog-panel {
   position: absolute;
   z-index: 16;
+  display: flex;
+  flex-direction: column;
   border: 2px solid #9c8151;
   background: #050403;
   box-shadow:
@@ -4121,15 +4129,17 @@ button.character-spell-value:hover {
   left: 2px;
   top: 0;
   width: 432px;
-  min-height: 228px;
+  /* Size to content: the in-flow flex children (head/body/footer) drive the
+     height, so a sparse "Current Objective" dialog no longer reserves a huge
+     empty black box. A small min-height keeps the chrome from looking cramped. */
+  min-height: 64px;
   padding: 4px;
+  gap: 6px;
 }
 
 .npc-dialog-head {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  right: 4px;
+  position: relative;
+  flex: 0 0 auto;
   height: 24px;
   display: flex;
   align-items: center;
@@ -4158,11 +4168,9 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-body {
-  position: absolute;
-  left: 8px;
-  top: 34px;
-  width: 416px;
-  min-height: 156px;
+  position: relative;
+  flex: 0 1 auto;
+  margin: 0 4px;
   padding: 0;
   color: #fff;
 }
@@ -4172,7 +4180,7 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-links {
-  margin-top: 20px;
+  margin-top: 10px;
   display: grid;
   gap: 0;
   justify-items: start;
@@ -4195,10 +4203,8 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-input-form {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
+  flex: 0 0 auto;
+  margin: 0 4px;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -4220,10 +4226,8 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-footer {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 4px;
+  flex: 0 0 auto;
+  margin: 0 4px;
   min-height: 18px;
   color: #d8c28c;
 }

@@ -101,7 +101,9 @@ const args = parseArgs(process.argv.slice(2));
 const baseUrl = args.baseUrl ?? process.env.MIR2_WEB_BASE_URL ?? "http://127.0.0.1:3021";
 // mir2Debug=1 turns on the movement console log (page.tsx:1207-1216) so the
 // recorder captures send/ack/CORRECTION events, plus the scene-motion debug hook.
-const RUN_URL = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}mir2Debug=1`;
+// perfDiag=1 arms the per-packet handleGatewayEvent timing (window.__mir2PerfDiag,
+// Stage 0) — opt-in, zero hot-path cost when the flag is absent.
+const RUN_URL = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}mir2Debug=1&perfDiag=1`;
 
 const createAccount = booleanArg(args.createAccount ?? process.env.MIR2_CREATE_ACCOUNT, true);
 const account = args.account ?? process.env.MIR2_QA_ACCOUNT ?? defaultAccountName();
@@ -182,12 +184,37 @@ let targetAlreadyNavigated = false;
 // CDP client (same shape as qa-playthrough.mjs) — captures console, network
 // failures, and WebSocket frames (the server's authoritative truth).
 // ---------------------------------------------------------------------------
+
+// Map a Chrome [Violation] message to the handler bucket it names. Chrome quotes
+// the handler kind, e.g. "'message' handler took…", "'click' handler took…",
+// "'setInterval' handler took…", "'requestAnimationFrame' handler took…".
+function bucketViolationHandler(text) {
+  const quoted = (text.match(/'([^']+)'\s+handler/i) ?? [])[1];
+  if (quoted) {
+    const k = quoted.toLowerCase();
+    if (k.includes("message")) return "message";
+    if (k.includes("click") || k.includes("pointer") || k.includes("mouse")) return "click";
+    if (k.includes("setinterval")) return "setInterval";
+    if (k.includes("settimeout")) return "setTimeout";
+    if (k.includes("requestanimationframe") || k.includes("raf")) return "requestAnimationFrame";
+    return k;
+  }
+  if (/forced reflow/i.test(text)) return "reflow";
+  return "other";
+}
+
 class CdpClient {
   constructor(wsUrl) {
     this.wsUrl = wsUrl;
     this.nextId = 1;
     this.pending = new Map();
     this.consoleErrors = [];
+    // Chrome [Violation] capture (Stage 0, render-perf): the "handler took N ms"
+    // warnings arrive on the CDP Log domain at verbose level and were silently
+    // dropped (consoleErrors only keeps type==='error'|'warning'). Bucket them by
+    // the handler bucket Chrome names (message / click / setInterval / requestAnimationFrame).
+    this.violations = [];
+    this.violationCounts = {};
     this.networkFailures = [];
     this.requestUrlById = new Map();
     this.webSocketFramesReceived = [];
@@ -246,6 +273,20 @@ class CdpClient {
     } else if (m === "Network.webSocketFrameSent") {
       this.webSocketFramesSent.push({ payloadData: p.response?.payloadData, at: Date.now() });
       this.webSocketFramesSent = this.webSocketFramesSent.slice(-4000);
+    } else if (m === "Log.entryAdded") {
+      // Chrome reports long handlers as a Log entry like
+      // "[Violation] 'message' handler took 197ms" (source 'violation', level 'verbose').
+      const text = String(p.entry?.text ?? "");
+      if (/handler took|\[Violation\]/i.test(text)) {
+        const ms = Number((text.match(/took\s+(\d+(?:\.\d+)?)\s*ms/i) ?? [])[1] ?? 0);
+        const bucket = bucketViolationHandler(text);
+        this.violations.push({ bucket, ms, text: text.slice(0, 200), at: Date.now() });
+        this.violations = this.violations.slice(-2000);
+        const agg = (this.violationCounts[bucket] ??= { count: 0, totalMs: 0, maxMs: 0 });
+        agg.count += 1;
+        agg.totalMs += ms;
+        if (ms > agg.maxMs) agg.maxMs = ms;
+      }
     }
   }
 
@@ -394,6 +435,34 @@ function installMoveProbeSrc() {
   };
   W.__mir2LoadProbe = P;
   return P.status();
+})();
+`;
+}
+
+// In-page PerformanceObserver long-task total (window.__mir2LongTask) — the
+// standards-based equivalent of Chrome's [Violation] "handler took N ms": it
+// totals main-thread long-task time (tasks > 50ms) so the report has a
+// browser-agnostic jank channel even where the [Violation] strings differ.
+// ---------------------------------------------------------------------------
+function installLongTaskObserverSrc() {
+  return `
+(function () {
+  var W = window;
+  if (W.__mir2LongTask && W.__mir2LongTask._obs) { try { W.__mir2LongTask._obs.disconnect(); } catch (e) {} }
+  var L = { count: 0, totalMs: 0, maxMs: 0, _obs: null, startedAt: Date.now(),
+    snapshot: function () { return { count: L.count, totalMs: Math.round(L.totalMs * 100) / 100, maxMs: Math.round(L.maxMs * 100) / 100, durationMs: Date.now() - L.startedAt }; },
+    stop: function () { if (L._obs) { try { L._obs.disconnect(); } catch (e) {} L._obs = null; } return L.snapshot(); } };
+  if (typeof PerformanceObserver === "function") {
+    try {
+      L._obs = new PerformanceObserver(function (list) {
+        var es = list.getEntries();
+        for (var i = 0; i < es.length; i++) { L.count++; L.totalMs += es[i].duration; if (es[i].duration > L.maxMs) L.maxMs = es[i].duration; }
+      });
+      L._obs.observe({ entryTypes: ["longtask"] });
+    } catch (e) { L._obs = null; }
+  }
+  W.__mir2LongTask = L;
+  return L.snapshot();
 })();
 `;
 }
@@ -1223,6 +1292,14 @@ async function writeReport(ctx) {
     recorderSource,
     verdict,
     heldKeyboard: heldFindings ?? null,
+    // Stage-0 render-perf instrumentation: Chrome [Violation] buckets, the
+    // standards-based long-task total, and the per-packet handler p50/p95.
+    renderPerf: {
+      violationCounts: ctx.violationCounts ?? {},
+      violations: (ctx.violations ?? []).slice(0, 50),
+      longTask: ctx.longTask ?? null,
+      perfDiag: ctx.perfDiag ?? null,
+    },
     phases,
   };
   await fs.writeFile(path.join(outputDir, "findings.json"), JSON.stringify(findings, null, 2));
@@ -1309,6 +1386,45 @@ async function writeReport(ctx) {
     }
   }
   md.push("");
+  md.push(`## Render-perf instrumentation (Stage 0)`);
+  md.push("");
+  const vCounts = ctx.violationCounts ?? {};
+  const vKeys = Object.keys(vCounts);
+  if (vKeys.length) {
+    md.push(`**Chrome [Violation] handlers** (CDP Log domain):`);
+    md.push("");
+    md.push(`| handler | count | total ms | max ms |`);
+    md.push(`|---|---|---|---|`);
+    for (const k of vKeys.sort((a, b) => (vCounts[b].totalMs ?? 0) - (vCounts[a].totalMs ?? 0))) {
+      const v = vCounts[k];
+      md.push(`| ${k} | ${v.count} | ${Math.round(v.totalMs)} | ${Math.round(v.maxMs)} |`);
+    }
+  } else {
+    md.push(`_No Chrome [Violation] "handler took N ms" warnings captured this run (browser may not emit them, or none exceeded the threshold)._`);
+  }
+  md.push("");
+  if (ctx.longTask) {
+    md.push(`**Long tasks** (in-page PerformanceObserver, tasks > 50ms): ${ctx.longTask.count} tasks · ${Math.round(ctx.longTask.totalMs)}ms total · ${Math.round(ctx.longTask.maxMs)}ms max over ${Math.round((ctx.longTask.durationMs ?? 0) / 1000)}s`);
+    md.push("");
+  }
+  if (ctx.perfDiag && ctx.perfDiag.handlers && Object.keys(ctx.perfDiag.handlers).length) {
+    md.push(`**Per-packet handler timing** (\`?perfDiag=1\`, top 12 by p95):`);
+    md.push("");
+    md.push(`| packet | count | p50 ms | p95 ms | max ms |`);
+    md.push(`|---|---|---|---|---|`);
+    const entries = Object.entries(ctx.perfDiag.handlers).sort((a, b) => (b[1].p95Ms ?? 0) - (a[1].p95Ms ?? 0));
+    for (const [name, h] of entries.slice(0, 12)) {
+      md.push(`| ${name} | ${h.count} | ${h.p50Ms} | ${h.p95Ms} | ${h.maxMs} |`);
+    }
+    md.push("");
+    if (ctx.perfDiag.longTask) {
+      md.push(`(page-side long-task total via __mir2PerfDiag: ${ctx.perfDiag.longTask.count} tasks · ${Math.round(ctx.perfDiag.longTask.totalMs)}ms)`);
+      md.push("");
+    }
+  } else {
+    md.push(`_No \`?perfDiag=1\` per-packet timings captured (window.__mir2PerfDiag absent — flag not armed or no packets handled)._`);
+    md.push("");
+  }
   md.push(`## Artifacts`);
   md.push(`- \`recording.json\` — flight-recorder dump (mir2-replay/1; open /mir2-replay.html to scrub; markers sit on each snap)`);
   md.push(`- \`findings.json\` — full structured detector output`);
@@ -1594,6 +1710,9 @@ async function main() {
     await client.send("Runtime.enable");
     await client.send("Network.enable");
     await client.send("Page.enable");
+    // Capture Chrome [Violation] warnings ("'message' handler took N ms", etc.) —
+    // they surface on the Log domain at verbose level, not via consoleAPICalled.
+    await client.send("Log.enable").catch(() => {});
     await client.send("Page.bringToFront");
     await setViewport(client, VIEWPORT);
 
@@ -1617,6 +1736,7 @@ async function main() {
     // Arm the flight recorder + the per-frame probe.
     const recorderInfo = await loadRecorder(client);
     await client.evaluate(installMoveProbeSrc());
+    await client.evaluate(installLongTaskObserverSrc());
     await client.evaluate("window.__mir2Recorder.start(); window.__mir2LoadProbe.start();");
     console.log(`· recorder armed (${recorderInfo.source}) + probe running`);
 
@@ -1653,8 +1773,27 @@ async function main() {
     const recording = await client.evaluate("window.__mir2Recorder.dump(false)");
     await client.evaluate("window.__mir2Recorder.stop();");
 
+    // Render-perf channels (Stage 0): the standards-based in-page long-task total
+    // and the per-packet handler timings from the ?perfDiag=1 gate in page.tsx.
+    const longTask = (await client.evaluate("window.__mir2LongTask?.stop() ?? null").catch(() => null)) ?? null;
+    const perfDiag = (await client.evaluate("window.__mir2PerfDiag ?? null").catch(() => null)) ?? null;
+
     const verdict = buildVerdict(phases);
-    const ctx = { phases, recording, recorderSource: recorderInfo.source, verdict, allSamples, consoleErrors: client.consoleErrors, gmSpawnWorks, heldFindings };
+    const ctx = {
+      phases,
+      recording,
+      recorderSource: recorderInfo.source,
+      verdict,
+      allSamples,
+      consoleErrors: client.consoleErrors,
+      gmSpawnWorks,
+      heldFindings,
+      // Stage-0 [Violation]/long-task instrumentation, folded into the report row.
+      violations: client.violations,
+      violationCounts: client.violationCounts,
+      longTask,
+      perfDiag,
+    };
     await writeReport(ctx);
 
     console.log(`\n===== VERDICT =====`);
@@ -1666,6 +1805,16 @@ async function main() {
       // A held-direction stall is a hard regression — surface it via the exit code.
       if (!heldFindings.passed) process.exitCode = 1;
     }
+    // Stage-0 render-perf summary line.
+    const vTotal = Object.values(client.violationCounts ?? {}).reduce((n, v) => n + (v.count ?? 0), 0);
+    const vBuckets = Object.entries(client.violationCounts ?? {})
+      .map(([k, v]) => `${k}=${v.count}(${Math.round(v.maxMs)}ms max)`)
+      .join(" ");
+    console.log(
+      `render-perf: [Violation] ${vTotal}${vBuckets ? ` — ${vBuckets}` : ""}` +
+        (longTask ? ` · longTasks ${longTask.count} (${Math.round(longTask.totalMs)}ms)` : "") +
+        (perfDiag?.handlers ? ` · perfDiag packets=${Object.keys(perfDiag.handlers).length}` : ""),
+    );
     console.log(`\nReport: ${path.join(outputDir, "report.md")}`);
   } catch (error) {
     console.error("qa-load-stress fatal:", error);

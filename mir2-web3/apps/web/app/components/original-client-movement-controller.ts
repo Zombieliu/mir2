@@ -119,6 +119,37 @@ export function clampMovementLeadToCap(
   };
 }
 
+// Step the rendered self tile AT MOST `maxStepTiles` toward `target` from `base`,
+// along the travel vector (Chebyshev / 8-direction). When `target` is already
+// within the per-step cap it is returned unchanged, so normal movement (a <=1-tile
+// advance per frame) passes straight through and is fully responsive. When a
+// long/dropped frame — or a direction reversal whose old and new predicted leads
+// sit on opposite sides of the server tile — would otherwise move the rendered
+// tile >1 tile in a single frame (several 1-tile transitions collapsed by the
+// dropped frames into one visible jump = the "overshoot then snap"), the tile is
+// instead eased one step toward the target so it routes through the in-between
+// tiles over consecutive frames with no non-physical jump. Stateless and pure;
+// the caller owns the per-frame baseline + commit gating.
+export function stepMovementTowardWithinCap(
+  base: { x: number; y: number },
+  target: MovementPoint,
+  maxStepTiles: number,
+): MovementPoint {
+  const cap = Math.max(0, maxStepTiles);
+  const dx = target.x - base.x;
+  const dy = target.y - base.y;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) <= cap) {
+    return target;
+  }
+  const stepAxis = (delta: number) =>
+    delta === 0 ? 0 : Math.sign(delta) * Math.min(cap, Math.abs(delta));
+  return {
+    ...target,
+    x: base.x + stepAxis(dx),
+    y: base.y + stepAxis(dy),
+  };
+}
+
 export function movementTileMatches(left: MovementPoint, right: MovementPoint) {
   return left.x === right.x && left.y === right.y;
 }
@@ -164,6 +195,33 @@ export function reconcileMovementAck(input: {
         runPrimedUntil: input.now + CRYSTAL_RUN_PRIME_MS,
       },
     };
+  }
+
+  // Run degraded to a single-tile walk by the server. A run predicts two tiles, but the
+  // server only extends to the second tile when the route keeps going the same way — if
+  // that tile is blocked/bends it advances ONE tile and keeps the player running (Crystal
+  // "a run can degrade to a walk"; see simulation movement.rs `pathfind_next_step`). The
+  // ack then lands on the first tile of the predicted run (from + 1 in the same direction).
+  // Treat that as a CONFIRM at the degraded tile — refresh the run prime and keep
+  // predicting — NOT a hard correction. The old behaviour reset the prime + blocked input
+  // on every blocked second tile, which (running through obstacle-dense town, where the
+  // second tile is frequently a tree/fence/NPC) collapsed a held run into a measured
+  // walk/standing stutter that advanced slower than a plain walk. A genuinely off-path ack
+  // still falls through to the correction below.
+  if (!hardFailure && pending.mode === "run") {
+    const degraded = movementPointInDirection(pending.from, pending.direction, 1);
+    if (movementTileMatches(input.ack, degraded)) {
+      return {
+        outcome: "confirmed",
+        state: {
+          ...input.state,
+          pending: null,
+          prediction: null,
+          nextMoveSendAt: Math.max(input.state.nextMoveSendAt, pending.sentAt + CRYSTAL_MOVE_DELAY_MS),
+          runPrimedUntil: input.now + CRYSTAL_RUN_PRIME_MS,
+        },
+      };
+    }
   }
 
   return {

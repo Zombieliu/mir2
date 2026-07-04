@@ -24,14 +24,25 @@
  *   --publicBase public URL prefix for imageUrl fields
  *                                         (default: /bevy-entity-atlases)
  *   --padding    inter-frame padding px    (default: 1)
- *   --maxSize    max atlas dimension px    (default: 4096)
+ *   --pageSize   atlas page dimension px   (default: 2048) — frames spill onto a
+ *                                          new page once a page fills up
+ *   --maxSize    absolute page ceiling px  (default: 4096) — a single frame may
+ *                                          not exceed this
  *   --dry-run    print plan, skip writing  (default: false)
+ *
+ * Multi-page
+ * ──────────
+ *   Frames are shelf-packed into fixed `pageSize`×`pageSize` pages; when a page
+ *   fills, packing spills onto a new page.  Page 0 keeps the `<atlasKey>.png`
+ *   name for backward compatibility; spill pages are `<atlasKey>-p<i>.png`.  Each
+ *   rect records its `pageIndex` (absent ⇒ 0).  See schema.ts `AtlasPage`.
  *
  * KTX2/Basis compression
  * ──────────────────────
- *   Not yet wired.  The pipeline emits PNG atlas pages.  Add a post-process
- *   step with `toktx` or `basisu` once the CLI is available in the build
- *   environment.  See README.md § "KTX2 encode (follow-up)".
+ *   Not yet wired.  The pipeline emits PNG atlas pages.  GPU compression
+ *   (UASTC+zstd via bevy_basisu_loader) is a gated follow-up — see
+ *   docs/ASSET-ATLAS-MIGRATION-PLAN.md §4.  Encode the emitted PNG pages with
+ *   `toktx`/`ktx create` once the WebGL2 transcode path is verified.
  */
 
 import { createHash } from "node:crypto";
@@ -91,7 +102,7 @@ const CATEGORY_DEFAULTS = {
 };
 
 const DEFAULT_PADDING = 1;
-const DEFAULT_INITIAL_WIDTH = 512;
+const DEFAULT_PAGE_SIZE = 2048;
 const DEFAULT_MAX_SIZE = 4096;
 
 // ── entry point ──────────────────────────────────────────────────────────────
@@ -117,6 +128,7 @@ async function main(args) {
   const publicBase = String(args.publicBase ?? defaults.publicBase).replace(/\/+$/, "");
   const padding = positiveInteger(args.padding, DEFAULT_PADDING);
   const maxSize = positiveInteger(args.maxSize, DEFAULT_MAX_SIZE);
+  const pageSize = Math.min(positiveInteger(args.pageSize, DEFAULT_PAGE_SIZE), maxSize);
   const dryRun = parseBoolean(args["dry-run"] ?? args.dryRun ?? false);
 
   console.log("asset-pipeline/pack", PIPELINE_VERSION);
@@ -124,6 +136,7 @@ async function main(args) {
   console.log("  atlasKey:", atlasKey);
   console.log("  roots:   ", roots.length ? roots.join(", ") : "(none — will produce empty atlas)");
   console.log("  outDir:  ", outDir);
+  console.log("  pageSize:", pageSize);
   console.log("  dryRun:  ", dryRun);
 
   // 1. Collect source frames (PNGs + optional meta.json offsets).
@@ -134,58 +147,77 @@ async function main(args) {
     console.warn("  Warning: no source frames found — emitting empty manifest.");
   }
 
-  // 2. Pack into atlas pages.
-  const packed = sources.length
-    ? packSources(sources, padding, maxSize)
-    : { width: 1, height: 1, sources: [] };
+  // 2. Pack into atlas pages (multi-page: spill to a new page when one fills).
+  const pages = sources.length
+    ? packSourcesMultiPage(sources, padding, pageSize)
+    : [{ pageIndex: 0, width: 1, height: 1, sources: [] }];
 
-  const imageFileName = `${atlasKey}.png`;
-  const imagePath = path.join(outDir, imageFileName);
+  // Page 0 keeps the `<atlasKey>.png` name (backward-compatible with the
+  // single-page runtime); spill pages get a `-p<i>` suffix.
+  const pageFileName = (i) => (i === 0 ? `${atlasKey}.png` : `${atlasKey}-p${i}.png`);
   const manifestPath = path.join(outDir, "manifest.json");
-  const imageUrl = `${publicBase}/${imageFileName}`;
 
   if (dryRun) {
-    console.log("\n  [dry-run] would write:");
-    console.log("    ", manifestPath);
-    console.log("    ", imagePath);
-    console.log("  atlas dimensions:", packed.width, "x", packed.height);
-    printDryRunTable(packed.sources.slice(0, 8));
-    if (packed.sources.length > 8) {
-      console.log(`    … and ${packed.sources.length - 8} more`);
+    const totalFrames = pages.reduce((n, pg) => n + pg.sources.length, 0);
+    console.log("\n  [dry-run] would write:", manifestPath);
+    console.log(`  ${pages.length} page(s), ${totalFrames} frame(s):`);
+    for (const pg of pages) {
+      console.log(
+        `     ${pageFileName(pg.pageIndex).padEnd(28)} ${pg.width}×${pg.height}  ${pg.sources.length} frames`,
+      );
     }
+    printDryRunTable(pages.flatMap((pg) => pg.sources).slice(0, 8));
     return;
   }
 
-  // 3. Render atlas PNG.
+  // 3. Render one PNG per page.
   await fs.mkdir(outDir, { recursive: true });
   const sharpPath = await resolveSharp();
   const sharp = (await import(sharpPath)).default;
 
-  await sharp({
-    create: {
-      width: packed.width,
-      height: packed.height,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    },
-  })
-    .composite(
-      packed.sources.map((source) => ({
-        input: source.filePath,
-        left: source.x,
-        top: source.y,
-      })),
-    )
-    .png({ compressionLevel: 9, adaptiveFiltering: true })
-    .toFile(imagePath);
+  /** @type {import("./schema.ts").AtlasPage[]} */
+  const pageDescriptors = [];
+  for (const pg of pages) {
+    const imageFileName = pageFileName(pg.pageIndex);
+    const imagePath = path.join(outDir, imageFileName);
+    await sharp({
+      create: {
+        width: pg.width,
+        height: pg.height,
+        channels: 4,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      },
+    })
+      .composite(
+        pg.sources.map((source) => ({
+          input: source.filePath,
+          left: source.x,
+          top: source.y,
+        })),
+      )
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toFile(imagePath);
 
-  // 4. Hash the emitted PNG (content-addressed, cache-busting).
-  const imageBytes = await readFileBytes(imagePath);
-  const imageSha256 = createHash("sha256").update(imageBytes).digest("hex");
-  const imageStat = await fs.stat(imagePath);
+    const bytes = await readFileBytes(imagePath);
+    const sha256 = createHash("sha256").update(bytes).digest("hex");
+    const stat = await fs.stat(imagePath);
+    pageDescriptors.push({
+      imageFile: imageFileName,
+      imageUrl: `${publicBase}/${imageFileName}`,
+      width: pg.width,
+      height: pg.height,
+      sha256,
+      imageBytes: stat.size,
+      rgbaBytes: pg.width * pg.height * 4,
+    });
+  }
 
-  // 5. Build per-frame rect list (with offsets when available).
-  const rects = packed.sources.map((source) => {
+  // 4. Build the flat per-frame rect list (sorted by key for determinism; each
+  //    rect carries its pageIndex when > 0).
+  const allSources = pages
+    .flatMap((pg) => pg.sources)
+    .sort((a, b) => a.key.localeCompare(b.key));
+  const rects = allSources.map((source) => {
     /** @type {import("./schema.ts").AtlasRect} */
     const rect = {
       key: source.key,
@@ -200,46 +232,45 @@ async function main(args) {
     if (source.shadowX !== undefined) rect.shadowX = source.shadowX;
     if (source.shadowY !== undefined) rect.shadowY = source.shadowY;
     if (source.frameIndex !== undefined) rect.frameIndex = source.frameIndex;
+    if (source.pageIndex) rect.pageIndex = source.pageIndex;
     return rect;
   });
 
-  // 6. Compute atlas-level content hash (deterministic over frame keys + image bytes).
-  const contentHash = buildContentHash(atlasKey, rects, imageSha256);
+  // 5. Content hash (deterministic over frame keys/positions + all page hashes).
+  const contentHash = buildContentHash(
+    atlasKey,
+    rects,
+    pageDescriptors.map((p) => p.sha256),
+  );
 
-  // 7. Assemble page descriptor.
-  /** @type {import("./schema.ts").AtlasPage} */
-  const page = {
-    imageFile: imageFileName,
-    imageUrl,
-    width: packed.width,
-    height: packed.height,
-    sha256: imageSha256,
-    imageBytes: imageStat.size,
-    rgbaBytes: packed.width * packed.height * 4,
-  };
+  // 6. Aggregate byte totals; page 0 mirrors the legacy top-level fields.
+  const page0 = pageDescriptors[0];
+  const totalImageBytes = pageDescriptors.reduce((n, p) => n + p.imageBytes, 0);
+  const totalRgbaBytes = pageDescriptors.reduce((n, p) => n + p.rgbaBytes, 0);
 
-  // 8. Assemble atlas entry (backward-compatible with schemaVersion=1).
+  // 7. Assemble atlas entry (backward-compatible: top-level width/height/imageUrl
+  //    describe page 0; full per-page detail lives in pages[]).
   /** @type {import("./schema.ts").AtlasEntry} */
   const atlasEntry = {
-    // ── legacy fields ──
+    // ── legacy fields (mirror page 0) ──
     key: atlasKey,
     label: labelForCategory(category, atlasKey),
-    width: packed.width,
-    height: packed.height,
+    width: page0.width,
+    height: page0.height,
     sourceCount: sources.length,
-    imageBytes: imageStat.size,
-    rgbaBytes: packed.width * packed.height * 4,
+    imageBytes: page0.imageBytes,
+    rgbaBytes: page0.rgbaBytes,
     roots,
-    imageUrl,
+    imageUrl: page0.imageUrl,
     rects,
     // ── new fields ──
-    pages: [page],
+    pages: pageDescriptors,
     contentHash,
     category,
     padding,
   };
 
-  // 9. Assemble top-level manifest.
+  // 8. Assemble top-level manifest.
   const durationMs = Date.now() - t0;
   /** @type {import("./schema.ts").AtlasManifest} */
   const manifest = {
@@ -250,9 +281,9 @@ async function main(args) {
     stats: {
       sourceCount: sources.length,
       roots,
-      imageBytes: imageStat.size,
-      rgbaBytes: packed.width * packed.height * 4,
-      pageCount: 1,
+      imageBytes: totalImageBytes,
+      rgbaBytes: totalRgbaBytes,
+      pageCount: pageDescriptors.length,
       durationMs,
     },
     pipeline: {
@@ -260,6 +291,7 @@ async function main(args) {
       category,
       padding,
       maxSize,
+      pageSize,
       dryRun: false,
       roots,
     },
@@ -274,14 +306,14 @@ async function main(args) {
         ok: true,
         atlasKey,
         sourceCount: sources.length,
-        width: packed.width,
-        height: packed.height,
-        imageBytes: imageStat.size,
-        sha256: imageSha256.slice(0, 12) + "…",
+        pageCount: pageDescriptors.length,
+        page0: `${page0.width}×${page0.height}`,
+        imageBytes: totalImageBytes,
+        sha256: page0.sha256.slice(0, 12) + "…",
         contentHash: contentHash.slice(0, 12) + "…",
         durationMs,
         manifestPath,
-        imagePath,
+        outDir,
       },
       null,
       2,
@@ -400,55 +432,70 @@ function parseFrameIndex(filename) {
   return Number.isInteger(n) && n >= 0 ? n : null;
 }
 
-// ── shelf packer ──────────────────────────────────────────────────────────────
-// Identical algorithm to build-bevy-entity-atlas-pack.mjs: sort by height
-// descending, try to fit into rows at increasing power-of-two widths.
+// ── multi-page shelf packer ─────────────────────────────────────────────────
+// Sort by height descending, then shelf-pack into fixed pageSize×pageSize pages.
+// When a frame won't fit the current page, spill onto a new page.  Each packed
+// source records its pageIndex; each page's height is trimmed to a power of two.
 
 /**
  * @param {SourceFrame[]} sources
  * @param {number} padding
- * @param {number} maxSize
+ * @param {number} pageSize
+ * @returns {{ pageIndex: number, width: number, height: number, sources: any[] }[]}
  */
-function packSources(sources, padding, maxSize) {
+function packSourcesMultiPage(sources, padding, pageSize) {
   const sorted = [...sources].sort(
     (a, b) => b.height - a.height || b.width - a.width || a.key.localeCompare(b.key),
   );
-  const widest = sorted.reduce((max, s) => Math.max(max, s.width + padding * 2), 1);
-  let width = Math.max(DEFAULT_INITIAL_WIDTH, nextPowerOfTwo(widest));
 
-  while (width <= maxSize) {
-    let cursorX = padding;
-    let cursorY = padding;
-    let rowHeight = 0;
-    const packed = [];
-
-    for (const source of sorted) {
-      if (cursorX + source.width + padding > width) {
-        cursorX = padding;
-        cursorY += rowHeight + padding;
-        rowHeight = 0;
-      }
-      packed.push({ ...source, x: cursorX, y: cursorY });
-      cursorX += source.width + padding;
-      rowHeight = Math.max(rowHeight, source.height);
+  for (const s of sorted) {
+    if (s.width + padding * 2 > pageSize || s.height + padding * 2 > pageSize) {
+      throw new Error(
+        `Frame ${s.key} (${s.width}×${s.height}) does not fit a ` +
+          `${pageSize}×${pageSize} page (padding ${padding}); raise --pageSize.`,
+      );
     }
-
-    const height = nextPowerOfTwo(cursorY + rowHeight + padding);
-    if (height <= maxSize) {
-      // Re-sort by key so the rect list in the manifest is deterministic.
-      return {
-        width,
-        height,
-        sources: packed.sort((a, b) => a.key.localeCompare(b.key)),
-      };
-    }
-    width *= 2;
   }
 
-  throw new Error(
-    `Cannot pack ${sources.length} frames into a ${maxSize}×${maxSize} atlas.` +
-      ` Consider splitting into multiple atlases via --atlasKey / --roots.`,
-  );
+  /** @type {{ used: number, sources: any[] }[]} */
+  const pages = [];
+  let cursorX = padding;
+  let cursorY = padding;
+  let rowHeight = 0;
+  let current = [];
+
+  const flush = () => {
+    pages.push({ used: cursorY + rowHeight + padding, sources: current });
+    current = [];
+    cursorX = padding;
+    cursorY = padding;
+    rowHeight = 0;
+  };
+
+  for (const source of sorted) {
+    // Wrap to a new row when the frame overflows the page width.
+    if (cursorX + source.width + padding > pageSize) {
+      cursorX = padding;
+      cursorY += rowHeight + padding;
+      rowHeight = 0;
+    }
+    // Spill to a new page when the row overflows the page height.
+    if (cursorY + source.height + padding > pageSize) {
+      flush();
+    }
+    current.push({ ...source, x: cursorX, y: cursorY, pageIndex: pages.length });
+    cursorX += source.width + padding;
+    rowHeight = Math.max(rowHeight, source.height);
+  }
+  if (current.length) flush();
+
+  // Re-sort each page's frames by key for a deterministic manifest.
+  return pages.map((page, idx) => ({
+    pageIndex: idx,
+    width: pageSize,
+    height: Math.min(pageSize, nextPowerOfTwo(page.used)),
+    sources: page.sources.sort((a, b) => a.key.localeCompare(b.key)),
+  }));
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -509,15 +556,16 @@ async function readFileBytes(filePath) {
   return fs.readFile(filePath);
 }
 
-function buildContentHash(atlasKey, rects, imageSha256) {
+function buildContentHash(atlasKey, rects, pageSha256s) {
   const hash = createHash("sha256");
   hash.update("mir2-atlas-content-v1");
   hash.update(atlasKey);
   for (const rect of rects) {
     hash.update(rect.key);
     hash.update(`${rect.x},${rect.y},${rect.width},${rect.height}`);
+    if (rect.pageIndex) hash.update(`p${rect.pageIndex}`);
   }
-  hash.update(imageSha256);
+  for (const sha of pageSha256s) hash.update(sha);
   return hash.digest("hex");
 }
 
