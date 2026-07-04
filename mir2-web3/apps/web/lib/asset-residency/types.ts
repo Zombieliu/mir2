@@ -37,6 +37,13 @@ export type AtlasPagePayload = {
    * needed, hand the URL straight to WebGL/Bevy).
    */
   imageUrl?: string;
+  /**
+   * Multi-page atlases list every page here; the top-level
+   * width/height/imageUrl/pixels/rectList mirror page 0 for backward
+   * compatibility. Absent or length-1 ⇒ single-page. The manager treats the
+   * payload opaquely, so this is purely additive.
+   */
+  pages?: AtlasPageData[];
 };
 
 export type AtlasRect = {
@@ -45,6 +52,23 @@ export type AtlasRect = {
   y: number;
   width: number;
   height: number;
+  /** Page index (in AtlasPagePayload.pages) this rect lives on. Absent ⇒ 0. */
+  pageIndex?: number;
+};
+
+/** One texture page of a multi-page atlas payload. */
+export type AtlasPageData = {
+  key: string;
+  width: number;
+  height: number;
+  /**
+   * RGBA bytes for this page (live / persistent path). Absent for URL-only
+   * prebuilt pages.
+   */
+  pixels?: Uint8Array;
+  /** Pre-resolved page image URL (prebuilt fast-path). */
+  imageUrl?: string;
+  rectList: AtlasRect[];
 };
 
 // ---------------------------------------------------------------------------
