@@ -21,6 +21,7 @@ import {
 } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import { playOriginalSoundId } from "../../lib/original-audio";
+import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
 import {
   handleSceneAssetImageError,
@@ -759,7 +760,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
           suppressClickRef.current = false;
           return;
         }
-        playOriginalSoundId(10100);
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
         onClick();
       }}
       onPointerDown={(event) => {
@@ -768,7 +769,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         pointerActivatedRef.current = true;
         suppressClickRef.current = true;
         setPressed(true);
-        playOriginalSoundId(10100);
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
         onPointerActivate();
       }}
       onMouseEnter={() => setHovered(true)}
@@ -783,7 +784,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         if (onPointerActivate && !pointerActivatedRef.current) {
           pointerActivatedRef.current = true;
           suppressClickRef.current = true;
-          playOriginalSoundId(10100);
+          playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
           onPointerActivate();
         }
       }}
