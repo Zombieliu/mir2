@@ -7,7 +7,7 @@ use std::sync::{Mutex, OnceLock};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{With, Without, World};
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_npc_info_manifest,
+    crystal_map_respawns_by_index, crystal_map_respawns_ref, crystal_npc_info_manifest,
     localized_text_or_fallback, starter_map_collision, BlockedMapCellTemplate, DecorKind,
     DecorObjectTemplate, DoorMapCellTemplate, FishingCellTemplate, MapBounds, MapCellAttribute,
     SceneView, StarterMapCollision, TerrainKind, TerrainPatchTemplate,
@@ -127,7 +127,7 @@ pub(super) fn is_safe_zone_point(
         return true;
     }
 
-    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+    crystal_map_respawns_ref(&map.current_map.file_name)
         .map(|map| {
             map.safe_zones.iter().any(|zone| {
                 let size = i32::from(zone.size);
@@ -197,7 +197,7 @@ pub(super) fn current_map_disallows_reincarnation(world: &World) -> bool {
 }
 
 pub(super) fn current_map_manifest_disallows_throw_item(map: &MapRuntimeResource) -> bool {
-    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+    crystal_map_respawns_ref(&map.current_map.file_name)
         .map(|map| map.no_throw_item)
         .unwrap_or(false)
 }
@@ -212,7 +212,7 @@ pub(super) fn current_map_disallows_throw_item(world: &World) -> bool {
 }
 
 pub(super) fn current_map_manifest_disallows_monster_drop(map: &MapRuntimeResource) -> bool {
-    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+    crystal_map_respawns_ref(&map.current_map.file_name)
         .map(|map| map.no_drop_monster)
         .unwrap_or(false)
 }
@@ -227,7 +227,7 @@ pub(super) fn current_map_disallows_monster_drop(world: &World) -> bool {
 }
 
 pub(super) fn current_map_manifest_disallows_mount(map: &MapRuntimeResource) -> bool {
-    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+    crystal_map_respawns_ref(&map.current_map.file_name)
         .map(|map| map.no_mount)
         .unwrap_or(false)
 }
@@ -242,7 +242,7 @@ pub(super) fn current_map_disallows_mount(world: &World) -> bool {
 }
 
 pub(super) fn current_map_manifest_disallows_hero(map: &MapRuntimeResource) -> bool {
-    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+    crystal_map_respawns_ref(&map.current_map.file_name)
         .map(|map| map.no_hero)
         .unwrap_or(false)
 }
@@ -257,7 +257,7 @@ pub(super) fn current_map_disallows_hero(world: &World) -> bool {
 }
 
 pub(super) fn current_map_manifest_requires_bridle(map: &MapRuntimeResource) -> bool {
-    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+    crystal_map_respawns_ref(&map.current_map.file_name)
         .map(|map| map.need_bridle)
         .unwrap_or(false)
 }
@@ -335,7 +335,7 @@ pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> V
 pub(super) fn crystal_movement_transfer_records_for_map(
     map_file_name: &str,
 ) -> Vec<MapTransferRecord> {
-    let Some(map) = crystal_map_respawns_by_file_name(map_file_name) else {
+    let Some(map) = crystal_map_respawns_ref(map_file_name) else {
         return Vec::new();
     };
 
@@ -767,7 +767,7 @@ pub(super) fn should_use_crystal_current_map_world(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();
     let config = &world.resource::<RuntimeConfigResource>().config;
     if config.monster_spawn_source.uses_crystal_current_map()
-        && crystal_map_respawns_by_file_name(&map.current_map.file_name).is_some()
+        && crystal_map_respawns_ref(&map.current_map.file_name).is_some()
     {
         return true;
     }
