@@ -762,11 +762,10 @@ fn complete_crystal_quest(
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
         player.gold = player.gold.saturating_add(info.reward_gold);
         player.credit = player.credit.saturating_add(info.reward_credit);
-        player.experience = player.experience.saturating_add(i64::from(info.reward_exp));
-        if player.experience > player.max_experience {
-            player.experience = player.max_experience;
-        }
     }
+    // Crystal `GainExp`: quest experience rolls into levels via the shared curve;
+    // the new level/exp/HP reach the client through the post-completion snapshot.
+    let _ = super::leveling::apply_experience_gain(world, i64::from(info.reward_exp));
 
     for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
         grant_crystal_quest_reward_item(world, reward);

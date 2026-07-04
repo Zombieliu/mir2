@@ -2460,20 +2460,13 @@ impl SimulationSession {
             // Marriage / mentorship / guild membership grant a Crystal-style
             // experience-rate bonus (no-op for an unattached player).
             let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
-            let gained_experience = {
-                let mut player = world.resource_mut::<PlayerRuntimeResource>();
-                let before = player.experience;
-                player.experience = player.experience.saturating_add(i64::from(experience));
-                if player.experience > player.max_experience {
-                    player.experience = player.max_experience;
-                }
-                player.experience.saturating_sub(before).max(0) as u32
-            };
-            if gained_experience > 0 {
-                packets.push(ServerPacket::GainExperience {
-                    amount: gained_experience,
-                });
-            }
+            // Crystal `PlayerObject.GainExp`: bank the experience and auto-level
+            // through every threshold it clears (emits GainExperience +, on a
+            // level gain, LevelChanged + ObjectHealth).
+            packets.extend(super::leveling::apply_experience_gain(
+                world,
+                i64::from(experience),
+            ));
         }
         SharedAccountInventoryTransactionReceipt::monster_kill_award(true, packets)
     }

@@ -1940,7 +1940,7 @@ pub(super) fn execute_crystal_npc_action_line(
             CrystalNpcActionControl::Continue
         }
         "GIVESKILL" => {
-            crystal_npc_give_skill(world, &parts[1..]);
+            packets.extend(crystal_npc_give_skill(world, &parts[1..]));
             CrystalNpcActionControl::Continue
         }
         "GIVEPET" => {
@@ -2468,9 +2468,9 @@ pub(super) fn is_crystal_npc_variable_key(value: &str) -> bool {
     )
 }
 
-pub(super) fn crystal_npc_give_skill(world: &mut World, parts: &[&str]) {
+pub(super) fn crystal_npc_give_skill(world: &mut World, parts: &[&str]) -> Vec<ServerPacket> {
     let [spell_name, level @ ..] = parts else {
-        return;
+        return Vec::new();
     };
     let level = level
         .first()
@@ -2478,7 +2478,7 @@ pub(super) fn crystal_npc_give_skill(world: &mut World, parts: &[&str]) {
         .unwrap_or(0)
         .min(3);
     let Some(skill) = crystal_skill_state(spell_name, level) else {
-        return;
+        return Vec::new();
     };
 
     let mut skills = world.resource_mut::<SkillResource>();
@@ -2500,9 +2500,19 @@ pub(super) fn crystal_npc_give_skill(world: &mut World, parts: &[&str]) {
         if existing.delay_ms == 0 {
             existing.delay_ms = skill.delay_ms;
         }
-        return;
+        return Vec::new();
     }
-    skills.skills.push(skill);
+    skills.skills.push(skill.clone());
+    drop(skills);
+
+    // Crystal enqueues the learned spell (`NewMagic`) so the client adds it to the
+    // spell book immediately — same instant feedback as `@GIVESKILL` — rather than
+    // waiting for the next world snapshot.
+    let mut packets = Vec::new();
+    if let Some(magic) = client_magic_for_skill_state(&skill, runtime_tick(world)) {
+        packets.push(ServerPacket::NewMagic { magic, hero: false });
+    }
+    packets
 }
 
 pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
@@ -3094,11 +3104,10 @@ pub(super) fn crystal_npc_give_exp(world: &mut World, parts: &[&str]) {
         return;
     };
 
-    let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
-    player_runtime.experience = player_runtime.experience.saturating_add(amount.max(0));
-    if player_runtime.experience > player_runtime.max_experience {
-        player_runtime.experience = player_runtime.max_experience;
-    }
+    // Crystal `GainExp`: experience rolls into levels via the shared curve. The
+    // resulting level/exp/HP changes reach the client through the world snapshot
+    // emitted after the NPC interaction, so the level-up packets are discarded.
+    let _ = super::leveling::apply_experience_gain(world, amount.max(0));
 }
 
 pub(super) fn crystal_npc_load_value(world: &mut World, line: &str) {

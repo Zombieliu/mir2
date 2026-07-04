@@ -11,6 +11,7 @@ mod hazard;
 mod hero_ai;
 mod inventory;
 mod items;
+mod leveling;
 mod map;
 mod mining;
 mod monster_ai;
