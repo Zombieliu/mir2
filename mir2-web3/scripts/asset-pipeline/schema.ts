@@ -76,6 +76,14 @@ export type AtlasRect = {
    * Absent when the source frame was not linked to a Crystal library.
    */
   frameIndex?: number;
+
+  /**
+   * Index of the atlas page (in `AtlasEntry.pages`) this rect lives on.
+   * Absent (treated as 0) for single-page atlases, so legacy single-page
+   * manifests stay byte-identical. Present whenever the atlas spilled across
+   * more than one page.
+   */
+  pageIndex?: number;
 };
 
 // ─── per-page ─────────────────────────────────────────────────────────────────
@@ -238,6 +246,8 @@ export type AtlasManifest = {
     padding: number;
     /** Maximum atlas dimension in pixels. */
     maxSize: number;
+    /** Fixed page dimension in pixels for multi-page packing (additive). */
+    pageSize?: number;
     /** Whether this was a dry-run (no files written). */
     dryRun: boolean;
     /** Source frame root directories relative to `public/original-ui/`. */
