@@ -2911,6 +2911,10 @@ fn shared_npc_entity_side_effect_matches(
 const SHARED_DEATH_DROP_RANGE: i32 = 4;
 const SHARED_CRYSTAL_TICK_MS: u64 = 300;
 const SHARED_DROP_EXPIRE_TICKS: u64 = 30 * 60;
+// Keep the WebSocket task free for chained Crystal movement after an ACK.
+// Follow-up input is timed from the browser seeing the ACK, and held-run input
+// can arrive well after the server emitted it; match Crystal's run grace window.
+const SHARED_ZONE_POST_MOVEMENT_INPUT_GRACE_MS: u64 = 1_200;
 
 fn shared_gateway_now_ms() -> u64 {
     SystemTime::now()
@@ -3174,6 +3178,12 @@ fn coalesced_zone_movement_object_id(packet: &ServerPacket) -> Option<u32> {
     }
 }
 
+fn packets_include_user_location(packets: &[ServerPacket]) -> bool {
+    packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. }))
+}
+
 fn shared_entity_target_result_packet_object_id(packet: &ServerPacket) -> Option<u32> {
     match packet {
         ServerPacket::ObjectHealth { info } => Some(info.object_id),
@@ -3248,6 +3258,8 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             npc_world_service: self.npc_world_service.clone(),
             presence_key: None,
             zone_move_seq: 0,
+            pending_zone_player_movement: false,
+            recent_zone_player_movement_until_ms: 0,
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             cached_map_file_name: None,
@@ -3275,6 +3287,8 @@ struct SharedInProcessZoneSessionRuntime {
     npc_world_service: SharedNpcWorldServiceHandle,
     presence_key: Option<ZonePresenceKey>,
     zone_move_seq: u64,
+    pending_zone_player_movement: bool,
+    recent_zone_player_movement_until_ms: u64,
     shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
     cached_map_file_name: Option<String>,
@@ -3296,6 +3310,20 @@ impl fmt::Debug for SharedInProcessZoneSessionRuntime {
 impl SharedInProcessZoneSessionRuntime {
     fn zone_now_ms() -> u64 {
         shared_gateway_now_ms()
+    }
+
+    fn note_zone_player_movement_packets(&mut self, packets: &[ServerPacket], now_ms: u64) -> bool {
+        let includes_user_location = packets_include_user_location(packets);
+        self.pending_zone_player_movement = !includes_user_location;
+        if includes_user_location {
+            self.recent_zone_player_movement_until_ms =
+                now_ms.saturating_add(SHARED_ZONE_POST_MOVEMENT_INPUT_GRACE_MS);
+        }
+        includes_user_location
+    }
+
+    fn recent_zone_player_movement_input_window_active(&self, now_ms: u64) -> bool {
+        self.recent_zone_player_movement_until_ms > now_ms
     }
 
     fn next_shared_skill_item_request_id(&mut self) -> u64 {
@@ -4769,6 +4797,7 @@ impl SharedInProcessZoneSessionRuntime {
                         ZoneCommand::TickPlayerMovement { session_id, now_ms },
                     ]);
                 packets.extend(self.apply_zone_current_position_map_transfer());
+                self.note_zone_player_movement_packets(&packets, now_ms);
                 Some(packets)
             }
             ClientPacket::Run { direction } => {
@@ -4785,6 +4814,7 @@ impl SharedInProcessZoneSessionRuntime {
                         ZoneCommand::TickPlayerMovement { session_id, now_ms },
                     ]);
                 packets.extend(self.apply_zone_current_position_map_transfer());
+                self.note_zone_player_movement_packets(&packets, now_ms);
                 Some(packets)
             }
             ClientPacket::Turn { direction } => {
@@ -4798,6 +4828,7 @@ impl SharedInProcessZoneSessionRuntime {
                         },
                         ZoneCommand::TickPlayerMovement { session_id, now_ms },
                     ]);
+                self.note_zone_player_movement_packets(&packets, now_ms);
                 Some(packets)
             }
             ClientPacket::Chat {
@@ -5554,6 +5585,29 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if ticks_zone {
             packets.extend(self.expire_shared_drops_on_current_map());
         }
+        let zone_tick_now_ms = ticks_zone.then(Self::zone_now_ms);
+        if let Some(now_ms) = zone_tick_now_ms {
+            if let Some(session_id) = self.current_zone_session_id() {
+                let tick_player_packets = self.dispatch_zone_player_command(
+                    ZoneCommand::TickPlayerMovement { session_id, now_ms },
+                    false,
+                );
+                let ticked_player_movement = packets_include_user_location(&tick_player_packets);
+                if ticked_player_movement {
+                    self.pending_zone_player_movement = false;
+                    self.recent_zone_player_movement_until_ms =
+                        now_ms.saturating_add(SHARED_ZONE_POST_MOVEMENT_INPUT_GRACE_MS);
+                }
+                packets.extend(tick_player_packets);
+                if is_world_tick
+                    && (ticked_player_movement
+                        || self.pending_zone_player_movement
+                        || self.recent_zone_player_movement_input_window_active(now_ms))
+                {
+                    return Ok(packets);
+                }
+            }
+        }
         if removes_presence {
             packets.extend(self.cancel_pending_shared_trade_offers());
             self.cancel_pending_shared_rental_offers();
@@ -5690,7 +5744,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if ticks_zone {
             packets.extend(self.dispatch_zone_player_command(
                 ZoneCommand::Tick {
-                    now_ms: Self::zone_now_ms(),
+                    now_ms: zone_tick_now_ms.unwrap_or_else(Self::zone_now_ms),
                 },
                 false,
             ));
@@ -9582,6 +9636,79 @@ mod tests {
     }
 
     #[test]
+    fn shared_in_process_registry_tick_consumes_queued_player_movement() {
+        let registry = ZoneRegistry::in_process();
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        start_demo_character(&mut session);
+        session.transfer_map("crystal:0102:3:7");
+
+        let first_packets = session.handle_packet(ClientPacket::Walk {
+            direction: MirDirection::Right,
+        });
+        assert!(first_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position.x == 4 && location.position.y == 7
+        )));
+
+        let queued_packets = session.handle_packet(ClientPacket::Run {
+            direction: MirDirection::Right,
+        });
+        assert!(
+            !queued_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })),
+            "run sent before the Crystal movement cadence should queue: {queued_packets:?}"
+        );
+
+        thread::sleep(Duration::from_millis(520));
+        let tick_packets = session.tick();
+
+        assert!(
+            tick_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::UserLocation { location }
+                    if location.position.x == 6 && location.position.y == 7
+            )),
+            "runtime tick should consume queued player movement without waiting for the next input: {tick_packets:?}"
+        );
+    }
+
+    #[test]
+    fn shared_in_process_registry_post_movement_grace_yields_world_tick() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+
+        let tick_before_grace = runtime.inner.world_snapshot().tick;
+        runtime.recent_zone_player_movement_until_ms = u64::MAX;
+
+        let grace_packets = runtime
+            .execute(WorldCommand::Tick)
+            .expect("post-movement grace tick should execute");
+
+        assert!(
+            grace_packets.is_empty(),
+            "post-movement grace should yield without heavy world packets: {grace_packets:?}"
+        );
+        assert_eq!(
+            runtime.inner.world_snapshot().tick,
+            tick_before_grace,
+            "post-movement grace should leave the local runtime tick free for follow-up input"
+        );
+
+        runtime.recent_zone_player_movement_until_ms = 0;
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("normal world tick should execute after grace");
+        assert!(
+            runtime.inner.world_snapshot().tick > tick_before_grace,
+            "normal world tick should resume once the post-movement input window closes"
+        );
+    }
+
+    #[test]
     fn shared_in_process_registry_routes_run_through_shared_zone() {
         let (mut first, mut second) = started_shared_zone_sessions();
         first.transfer_map("crystal:0102:3:7");
@@ -9949,6 +10076,8 @@ mod tests {
             npc_world_service: Arc::new(InProcessNpcWorldService),
             presence_key: None,
             zone_move_seq: 0,
+            pending_zone_player_movement: false,
+            recent_zone_player_movement_until_ms: 0,
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             cached_map_file_name: None,
@@ -11532,6 +11661,8 @@ mod tests {
             npc_world_service,
             presence_key: None,
             zone_move_seq: 0,
+            pending_zone_player_movement: false,
+            recent_zone_player_movement_until_ms: 0,
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             cached_map_file_name: None,

@@ -33,6 +33,10 @@ const expectRawWebGl2Renderer = booleanArg(
   args.expectRawWebGl2Renderer ?? process.env.MIR2_EXPECT_RAW_WEBGL2_RENDERER,
   false,
 );
+const expectBevyWebGl2Renderer = booleanArg(
+  args.expectBevyWebGl2Renderer ?? process.env.MIR2_EXPECT_BEVY_WEBGL2_RENDERER,
+  false,
+);
 const sampleMs = numberArg(args.sampleMs, 50);
 const interaction = args.interaction ?? "click";
 const viewport = {
@@ -82,6 +86,10 @@ const allowBlockedResidual = booleanArg(
 const initialSceneReadyTimeoutMs = numberArg(
   args.initialSceneReadyTimeoutMs ?? process.env.MIR2_INITIAL_SCENE_READY_TIMEOUT_MS,
   30_000,
+);
+const gameScreenTimeoutMs = numberArg(
+  args.gameScreenTimeoutMs ?? process.env.MIR2_GAME_SCREEN_TIMEOUT_MS,
+  60_000,
 );
 const finalSceneReadyTimeoutMs = numberArg(
   args.finalSceneReadyTimeoutMs ?? process.env.MIR2_FINAL_SCENE_READY_TIMEOUT_MS,
@@ -658,6 +666,7 @@ async function main() {
     const sceneBlackoutWarnings = detectSceneLayerBlackouts(samples);
     const pendingPlanAtEnd = analyzePendingPlanAtEnd(finalState, settle.capturedAt);
     const rawWebGl2Renderer = latestRawWebGl2Renderer(samples, finalState);
+    const bevyEntityRenderer = latestBevyEntityRenderer(samples, finalState);
     const movementAckLatencyWarnings = detectMovementAckLatency(
       client.movementWebSocketFramesSent,
       client.movementWebSocketFramesReceived,
@@ -681,6 +690,8 @@ async function main() {
       allowBlockedResidual,
       expectRawWebGl2Renderer,
       rawWebGl2Renderer,
+      expectBevyWebGl2Renderer,
+      bevyEntityRenderer,
       jumps,
       routeSpamWarnings,
       logicalRollbackWarnings,
@@ -726,6 +737,7 @@ async function main() {
       settle,
       pendingPlanAtEnd,
       rawWebGl2Renderer,
+      bevyEntityRenderer,
       assertions,
       sampleCount: samples.length,
       actions,
@@ -792,6 +804,7 @@ async function main() {
           cameraOffsetStairStepWarnings: report.cameraOffsetStairStepWarnings,
           sceneBlackoutWarnings: report.sceneBlackoutWarnings,
           rawWebGl2Renderer: report.rawWebGl2Renderer,
+          bevyEntityRenderer: report.bevyEntityRenderer,
           feelMetrics: report.feelMetrics,
           packetRuntimeModes: report.packetRuntimeModes,
           webSocketFramesSentTail: report.webSocketFramesSentTail,
@@ -1175,7 +1188,7 @@ async function login(client) {
     await click(client, ".select-action.start button");
   }
 
-  await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'game'", "game screen", 20_000);
+  await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'game'", "game screen", gameScreenTimeoutMs);
   await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
   await waitUntil(
     client,
@@ -1679,6 +1692,18 @@ function latestRawWebGl2Renderer(samples, finalState) {
   return null;
 }
 
+function latestBevyEntityRenderer(samples, finalState) {
+  if (finalState?.bevyEntityRenderer) {
+    return finalState.bevyEntityRenderer;
+  }
+  for (const sample of [...samples].reverse()) {
+    if (sample?.bevyEntityRenderer) {
+      return sample.bevyEntityRenderer;
+    }
+  }
+  return null;
+}
+
 function detectMovementAckLatency(sentFrames, receivedFrames, maxLatencyMs) {
   const warnings = [];
   let receiveIndex = 0;
@@ -1803,6 +1828,8 @@ function buildAssertions({
   allowBlockedResidual,
   expectRawWebGl2Renderer,
   rawWebGl2Renderer,
+  expectBevyWebGl2Renderer,
+  bevyEntityRenderer,
   jumps,
   routeSpamWarnings,
   logicalRollbackWarnings,
@@ -1898,6 +1925,20 @@ function buildAssertions({
           rawWebGl2Renderer?.reason === "rendered"),
       expected: expectRawWebGl2Renderer,
       renderer: rawWebGl2Renderer ?? null,
+    },
+    {
+      name: "bevyWebGl2RendererDrawsGameplayLayers",
+      pass:
+        !expectBevyWebGl2Renderer ||
+        (bevyEntityRenderer?.ready === true &&
+          bevyEntityRenderer?.enabled === true &&
+          bevyEntityRenderer?.runtime?.selectedBackend === "webgl2" &&
+          bevyEntityRenderer?.canvasHidden !== true &&
+          bevyEntityRenderer?.domEntityFallback !== true &&
+          bevyEntityRenderer?.entityCount > 0 &&
+          bevyEntityRenderer?.layerCount > 0),
+      expected: expectBevyWebGl2Renderer,
+      renderer: bevyEntityRenderer ?? null,
     },
     {
       name: "movementSettledWithoutResidualPlan",

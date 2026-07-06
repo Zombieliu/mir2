@@ -1,5 +1,21 @@
 # Crystal Server Parity
 
+> Latest Gateway movement ACK/input-priority parity sync: 2026-07-06 brings the
+> local shared-Zone movement cadence closer to Crystal by keeping the WebSocket
+> task available for chained movement immediately after a `UserLocation` ACK.
+> A heavy background `WorldCommand::Tick` could previously win that race and
+> delay follow-up Walk/Run input by about 2.5s, producing one-tile run
+> degradation and visible stop/go. Shared in-process Zone runtime now consumes
+> ready `TickPlayerMovement` before heavy ticks and yields heavy world ticks
+> while pending movement or the 1.2s post-ACK Crystal input window is active;
+> Gateway still wakes movement input at 75ms. Verification passed focused
+> Gateway/simulation regressions, Gateway build, raw packetRun latency probing,
+> and full Web click capture
+> `docs/generated/player-qa/startgame-debug-20260706-213036/current-web-jitter-r2-gateway-postackgrace1200-click.json`
+> with `ok=true`, no logical rollback, and a settled Bevy WebGL2 scene.
+> Remaining parity risk: broaden long held/chorded movement sampling in
+> crowded AOI before treating the local feel as fully human-accepted.
+
 > Latest player/monster state parity sync: 2026-05-27 makes lethal player
 > damage authoritative instead of clamping to 1 HP. Player damage now updates
 > ECS vitals and `PlayerRuntimeResource` together, emits health/death packets,

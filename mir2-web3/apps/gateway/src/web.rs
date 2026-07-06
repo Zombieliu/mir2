@@ -1893,6 +1893,7 @@ async fn handle_socket_inner(
                 }
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
+                    runtime_tick.reset_after(duration);
                 }
             }
             maybe_injection = inject_rx.recv() => {
@@ -1986,6 +1987,9 @@ async fn handle_socket_inner(
                     let _ = send_error_message(&mut sender, &error).await;
                     return;
                 }
+                runtime_tick_deferred_until =
+                    Instant::now() + gateway_runtime_tick_input_wake_grace();
+                runtime_tick.reset_after(gateway_runtime_tick_input_wake_grace());
             }
         }
     }
@@ -2049,7 +2053,7 @@ fn schedule_reconnect_session_purge(
 }
 
 const DEFAULT_GATEWAY_RUNTIME_TICK_MS: u64 = 300;
-const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS: u64 = 900;
+const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS: u64 = 75;
 const DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS: u64 = 15_000;
 const DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: u64 = 10_000;
 
@@ -2143,21 +2147,21 @@ fn gateway_runtime_tick_interval() -> Duration {
     )
 }
 
-fn gateway_runtime_tick_input_grace() -> Duration {
-    duration_from_millis_env(
-        "MIR2_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS",
-        DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS,
-        0,
-        5_000,
-    )
-}
-
 fn gateway_runtime_tick_bootstrap_grace() -> Duration {
     duration_from_millis_env(
         "MIR2_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS",
         DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS,
         0,
         30_000,
+    )
+}
+
+fn gateway_runtime_tick_input_wake_grace() -> Duration {
+    duration_from_millis_env(
+        "MIR2_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS",
+        DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS,
+        0,
+        500,
     )
 }
 
@@ -2187,10 +2191,14 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::Packet(ClientPacket::StartGame { .. }) => {
             Some(gateway_runtime_tick_bootstrap_grace())
         }
+        // Active input should wake the runtime tick loop, otherwise a queued
+        // Crystal movement retry can inherit StartGame's bootstrap grace. Keep
+        // a tiny batching window so follow-up input wins races against heavy
+        // world ticks on the same WebSocket task.
         SessionAction::MoveTo { .. }
         | SessionAction::Packet(
             ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
-        ) => Some(gateway_runtime_tick_input_grace()),
+        ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
 }
@@ -8249,7 +8257,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::from_millis(75))
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8257,7 +8265,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::from_millis(75))
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8265,7 +8273,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::from_millis(75))
         );
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(

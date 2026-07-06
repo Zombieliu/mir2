@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> Latest Gateway movement ACK/input-priority sync: 2026-07-06 closes the local
+> Web click repro where chained `Walk -> Walk -> Run -> Walk/Left` could pause
+> because a heavy shared-Zone world tick ran on the WebSocket task just after a
+> `UserLocation` ACK. Shared in-process Zone now drains `TickPlayerMovement`
+> before heavy ticks, yields heavy world ticks while player movement is pending,
+> and keeps a 1.2s post-ACK Crystal input window so follow-up Walk/Run packets
+> are read before background work; Gateway movement input still wakes at 75ms.
+> Verification passed Rust fmt/check, focused Gateway/simulation tests, Gateway
+> build, raw packetRun probing, and full Web click capture
+> `docs/generated/player-qa/startgame-debug-20260706-213036/current-web-jitter-r2-gateway-postackgrace1200-click.json`
+> with `ok=true`, Run ACK about 205ms, no rollback, no residual pending plan,
+> and Bevy WebGL2 packed rendering. Next task: leave PR #123 unmerged for now;
+> port only its solid uncovered-map Bevy slice later on a clean branch/worktree.
+
 > Latest entity-atlas resource hardening: 2026-06-02 adds
 > `/bevy-entity-atlases/` to the remote asset release roots, asset manifest
 > static prefixes, service-worker static/remote-cache handling, release doctor,
