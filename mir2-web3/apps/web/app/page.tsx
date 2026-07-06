@@ -1240,7 +1240,7 @@ type MovementConsoleWindow = typeof window & {
 //   legacyInput        legacy direction-step / movement-plan path hard-corrected
 //                      (applyCrystalInputCorrection — a SECOND reconciler that also
 //                      resets the run prime + blocks input, parallel to the controller)
-//   pendingTimeout     a pending self-move aged out with no ACK (>1.5 s) → prime reset
+//   pendingTimeout     a pending self-move aged out with no ACK (>3.0 s) → prime reset
 //                      + input block (server ACK lost/late, not a position mismatch)
 // If all of these correction counters stay LOW yet stalls persist, the residual is a
 // held-direction re-arm gap (candidate 4), provable by cross-checking the

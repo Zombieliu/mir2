@@ -1,5 +1,18 @@
 # Run-stutter ("奔跑卡") investigation — continuation brief
 
+> **Status (2026-07-06 local Web/Gateway):** the current local click repro is
+> fixed and verified. This was a server scheduling/input-priority race, not a
+> PR #123 merge issue: after a movement `UserLocation` ACK, a heavy
+> shared-Zone `WorldCommand::Tick` could occupy the same WebSocket task before
+> the browser's next chained movement packet arrived, pushing a Run outside
+> Crystal grace and producing stop/go one-tile movement. Shared in-process Zone
+> now drains `TickPlayerMovement` before heavy ticks and yields heavy world
+> ticks during pending movement plus a 1.2s post-ACK input window. The passing
+> evidence is
+> `docs/generated/player-qa/startgame-debug-20260706-213036/current-web-jitter-r2-gateway-postackgrace1200-click.json`
+> with `ok=true`, Run ACK about 205ms, no logical rollback, no residual pending
+> plan, and Bevy WebGL2 packed/no-DOM-fallback rendering.
+
 > **Status (2026-06-27):** the *dominant* stutter was found+fixed (**PR #165**). The
 > residual "一顿一顿地停住" has now been **instrumented and pinned to the RENDER /
 > main-thread layer — it is NOT a movement correction** (`window.__corr` all-zero across
@@ -118,7 +131,7 @@ bumped at **every** stall-causing site — not just the two the old brief sugges
 | `ack` / `dashFail` | `reconcileSelfMovementAck` (correction branch) | per-move ACK off-path vs `UserDashFail` |
 | `confirm` / `confirmDegraded` | `reconcileSelfMovementAck` (confirm branch) | clean confirm vs run→from+1 degrade (PR #165 keep-prime path) |
 | `legacyInput` | `applyCrystalInputCorrection` | the **second**, legacy direction-step/movement-plan reconciler |
-| `pendingTimeout` | `trySendQueuedCrystalMove` | a pending move aged out (>1.5 s) with no ACK |
+| `pendingTimeout` | `trySendQueuedCrystalMove` | a pending move aged out (>3.0 s) with no ACK |
 
 `samples` keeps the last ~24 mismatch shapes (ack vs predicted from/to, mode, direction).
 

@@ -59,7 +59,7 @@
 //   • next tile FREE yet the gap RELEASED into more SENDs → THE BUG (a real wall never
 //     releases; only stale blocked-direction memory frees on its 5.6s TTL timer)
 // Only the last case FAILS, so the guard never cries wolf on a town full of walls and
-// NPCs. The threshold sits above MOVEMENT_PENDING_MAX_AGE_MS (1500ms) and the 400ms
+// NPCs. The threshold sits above MOVEMENT_PENDING_MAX_AGE_MS (3000ms) and the 400ms
 // correction settle, so a clear-tile freeze that long can only be the memory bug.
 // The stall was sticky blocked-direction route-hint suppression (meant for click-to-
 // TARGET A* detours) bleeding into held DIRECTION intent; the open field stays smooth
@@ -162,7 +162,7 @@ const CORRELATION_WINDOW_MS = 250; // a snap within this of a hitch is "explaine
 const RUN_HELD_BEAT = booleanArg(args.held, true);
 const HELD_HOLD_MS = numberArg(args.heldHoldMs, 5000); // per-direction sustained hold
 // A gap >= this with the next tile FREE and no correction-block is the bug. 1800ms
-// sits ABOVE MOVEMENT_PENDING_MAX_AGE_MS (1500ms, original-client-movement-
+// sits ABOVE MOVEMENT_PENDING_MAX_AGE_MS (3000ms, original-client-movement-
 // controller.ts:41) and the 400ms correction settle, and BELOW the bug's 5.6s
 // blocked-direction TTL — so a clear-tile freeze this long can only be the memory bug.
 const HELD_STALL_FAIL_MS = numberArg(args.heldStallMs, 1800);

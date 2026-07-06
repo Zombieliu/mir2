@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Gateway movement ACK/input-priority roadmap sync: 2026-07-06 records
+> the local Web/Gateway fix for the current stop/go movement repro. The issue
+> was not PR #123 or a UI-only regression: a heavy shared in-process Zone world
+> tick could run on the same WebSocket task immediately after a movement ACK,
+> causing the browser's next chained Walk/Run to arrive after Crystal run
+> grace and degrade into a one-tile step. Shared Zone now treats player
+> movement ACKs as an input-priority window: `TickPlayerMovement` is drained
+> before heavy ticks, pending movement blocks heavy world tick work, and a
+> 1.2s post-`UserLocation` window keeps the task free for follow-up Crystal
+> input while Gateway input wake remains 75ms. Evidence:
+> `docs/generated/player-qa/startgame-debug-20260706-213036/current-web-jitter-r2-gateway-postackgrace1200-click.json`
+> passed with `ok=true`, Run ACK about 205ms, no rollback, settled movement,
+> and Bevy WebGL2 packed/no-DOM-fallback rendering. Roadmap next: keep PR
+> #123's uncovered-map Bevy work out of this branch until the movement fix is
+> safely isolated, then continue longer held/chorded/crowded-AOI feel sampling.
+
 > Latest gameplay-feel + world-authority roadmap sync: 2026-06-15 records the
 > June `main` landings: combat juice (floating damage numbers + hit flash, #98),
 > all Crystal sound effects wired (#99), real item icons on ground drops +

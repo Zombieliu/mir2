@@ -127,8 +127,9 @@ use super::npc::process_crystal_npc_goods_expiry;
 use super::packets::*;
 use super::rental::{process_expired_rental_items, return_rented_items_on_player_death};
 use super::resources::{
-    advance_runtime_tick, crystal_packet_move_delay_ticks, current_language, is_in_world,
-    mark_crystal_packet_action, take_crystal_movement_retry_if_ready, PlayerActionKind,
+    advance_runtime_tick, crystal_movement_retry_pending, crystal_packet_move_delay_ticks,
+    current_language, is_in_world, mark_crystal_packet_action,
+    take_crystal_movement_retry_if_ready, PlayerActionKind,
 };
 use super::session::SimulationSession;
 use super::skills::tick_ground_spell_actions;
@@ -2691,6 +2692,19 @@ impl SimulationSession {
             );
             let packets = self.move_player_by_direction(command.direction, command.running);
             return self.finalize_packets(packets);
+        }
+        if crystal_movement_retry_pending(self.app.world()) {
+            advance_runtime_tick(self.app.world_mut());
+            if let Some(command) = take_crystal_movement_retry_if_ready(self.app.world_mut()) {
+                mark_crystal_packet_action(
+                    self.app.world_mut(),
+                    PlayerActionKind::Move,
+                    crystal_packet_move_delay_ticks(command.running),
+                );
+                let packets = self.move_player_by_direction(command.direction, command.running);
+                return self.finalize_packets(packets);
+            }
+            return self.finalize_packets(Vec::new());
         }
         let packets = advance_world(self.app.world_mut());
         self.finalize_packets(packets)

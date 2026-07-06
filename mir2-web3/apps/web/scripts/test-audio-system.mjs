@@ -89,6 +89,21 @@ function loadAudioModule() {
 {
   assert.equal(soundIndexExports.crystalSoundPath(10100), "/original-ui/Sound/100.wav", "present click sound resolves");
   assert.equal(soundIndexExports.crystalSoundPath(10168), "/original-ui/Sound/NewChar.wav", "present NewChar resolves");
+  const previousAssetBaseUrl = process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
+  try {
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL = "https://assets.example.test/mir2/v/demo/";
+    assert.equal(
+      soundIndexExports.crystalSoundPath(10103),
+      "https://assets.example.test/mir2/v/demo/original-ui/Sound/103.wav",
+      "remote-backed sound resolves to the configured release URL",
+    );
+  } finally {
+    if (previousAssetBaseUrl === undefined) {
+      delete process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL = previousAssetBaseUrl;
+    }
+  }
   if (missingIndexedSoundId !== null) {
     assert.equal(soundIndexExports.crystalSoundPath(missingIndexedSoundId), null, "indexed but absent sound bytes resolve to null");
   }

@@ -38,7 +38,7 @@ export type MovementAckOutcome = "confirmed" | "correction" | "accepted";
 export const CRYSTAL_MOVE_DELAY_MS = 600;
 export const CRYSTAL_RUN_PRIME_MS = 1200;
 export const CRYSTAL_CORRECTION_BLOCK_MS = 400;
-export const MOVEMENT_PENDING_MAX_AGE_MS = 1500;
+export const MOVEMENT_PENDING_MAX_AGE_MS = 3000;
 
 export function effectiveCrystalMovementMode(
   requestedMode: CrystalMovementMode,

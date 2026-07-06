@@ -1,5 +1,23 @@
 # Backend 1:1 Progress
 
+> Latest Gateway movement ACK/input-priority parity sync: 2026-07-06 closes the
+> local Web `Walk -> Walk -> Run -> Walk/Left` stutter repro where a heavy
+> shared in-process Zone world tick on the same WebSocket task could start just
+> after a player `UserLocation` ACK and delay the next movement input by about
+> 2.5s. Shared Zone runtime now tracks pending player movement plus a 1.2s
+> post-ACK movement-input window; world ticks drain `TickPlayerMovement` first
+> and yield during that window so chained Crystal inputs are read before heavy
+> personal/world ticks. Gateway movement packets still wake the runtime tick at
+> 75ms, and personal simulation ticks avoid full `advance_world` while Crystal
+> movement retry is pending. Verification passed Rust fmt/check, focused
+> Gateway and simulation regressions, Gateway build, packetRun probing with the
+> first four Run ACKs at <=312ms, and full Web click Bevy evidence
+> `docs/generated/player-qa/startgame-debug-20260706-213036/current-web-jitter-r2-gateway-postackgrace1200-click.json`
+> with `ok=true`, Run ACK about 205ms, no logical rollback, clean settle, and
+> Bevy WebGL2 packed rendering with no DOM fallback. Remaining risk: PR #123's
+> uncovered-map Bevy work is intentionally deferred to a clean branch; longer
+> crowded-AOI human-feel movement sampling remains useful.
+
 > Latest player/monster state parity sync: 2026-05-27 removes the remaining
 > player-damage clamp that kept lethal hits at 1 HP. Pending monster/player
 > combat damage can now drive `PlayerVitals.hp` to 0, synchronizes
