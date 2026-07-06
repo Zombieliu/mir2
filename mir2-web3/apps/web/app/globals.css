@@ -4770,3 +4770,88 @@ button.character-spell-value:hover {
     display: flex;
   }
 }
+
+/* mir2-probe dev overlay — render only via ?probe=1 (see Mir2ProbeOverlay). */
+#mir2-probe-overlay-host {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 2147483000;
+  pointer-events: none;
+}
+.mir2-probe-overlay {
+  pointer-events: auto;
+  background: rgba(8, 12, 18, 0.82);
+  color: #e8ecf3;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono", monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  border-radius: 8px;
+  padding: 8px 10px 6px;
+  width: 230px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  --mir2-probe-c-ok: #7ee29c;
+  --mir2-probe-c-warn: #ffd479;
+  --mir2-probe-c-bad: #ff8d8d;
+  --mir2-probe-c-dim: #8b94a3;
+}
+.mir2-probe-head {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+}
+.mir2-probe-label {
+  color: #b6c7df;
+  font-weight: 400;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mir2-probe-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1px 0;
+  gap: 8px;
+}
+.mir2-probe-row-label {
+  color: #a9b4c4;
+  min-width: 38px;
+}
+.mir2-probe-row-value {
+  color: #f1f4fa;
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mir2-probe-foot {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.mir2-probe-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8ecf3;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 3px 0;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.mir2-probe-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.mir2-probe-btn:active {
+  background: rgba(255, 255, 255, 0.18);
+}

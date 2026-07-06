@@ -63,6 +63,7 @@ export type BevyEntityRenderState = {
   }>;
   entities: Array<{
     objectId: string;
+    isPlayer?: boolean;
     dead: boolean;
     layers: Array<{
       key: string;
@@ -106,13 +107,12 @@ export type BevyMapRenderState = {
     height: number;
     pixels?: Uint8Array;
   }>;
-  // EXACTLY buildMapTileDrawList's output (folds projection + crystal offsets +
-  // the sub-tile camera offset into left/top). MapTileDraw uses `rectKey`; the
+  // EXACTLY buildMapTileDrawList's output (folds projection + crystal offsets,
+  // but not the sub-tile camera offset, into left/top). MapTileDraw uses `rectKey`; the
   // runtime's MapTile deserializes it via #[serde(rename = "rectKey")].
   tiles: MapTileDraw[];
-  // Sub-tile camera scroll offset for the root-offset model. In the fold-in
-  // model (the one Stage 1 uses) this is (0, 0) because the offset is already
-  // baked into each tile's left/top.
+  // Sub-tile camera scroll offset for walking/running. Keeping this separate
+  // lets renderers update smooth movement without rebuilding the full tile list.
   cameraOffset?: { x: number; y: number };
 };
 

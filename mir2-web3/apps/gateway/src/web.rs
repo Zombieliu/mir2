@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use std::env;
 use std::io;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -43,8 +43,119 @@ use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
     SharedGameplayEventSink,
 };
+use crate::routing::shared_tick_probe_metrics;
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
+
+// ---------------------------------------------------------------------------
+// mir2-probe — Gateway-side counters/timers (L5).
+//
+// Pure module-level `static` atomic counters so the shape of `WebState` is
+// unchanged and no locking overhead is added to the hot tick loop. The prober
+// reads them via `GET /metrics` (see `metrics_handler`). Cost per tick: 1
+// `Instant::now()` call + 3 atomic adds. Memory: 8 `AtomicU64` (64 bytes).
+// Reset to 0 at process startup; no per-session reset.
+// ---------------------------------------------------------------------------
+
+static PROBE_TICK_COUNT: AtomicU64 = AtomicU64::new(0);
+static PROBE_TICK_MS_TOTAL: AtomicU64 = AtomicU64::new(0);
+static PROBE_TICK_MS_LAST: AtomicU64 = AtomicU64::new(0);
+static PROBE_TICK_MS_MAX: AtomicU64 = AtomicU64::new(0);
+static PROBE_SAVE_COUNT: AtomicU64 = AtomicU64::new(0);
+static PROBE_SAVE_MS_TOTAL: AtomicU64 = AtomicU64::new(0);
+static PROBE_SAVE_MS_LAST: AtomicU64 = AtomicU64::new(0);
+static PROBE_SAVE_MS_MAX: AtomicU64 = AtomicU64::new(0);
+static PROBE_WORLD_SNAPSHOT_COUNT: AtomicU64 = AtomicU64::new(0);
+static PROBE_STARTED_AT_MS: AtomicU64 = AtomicU64::new(0);
+
+fn probe_mark_started() {
+    if let Ok(now) = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
+        let _ = PROBE_STARTED_AT_MS.compare_exchange(
+            0,
+            now.as_millis() as u64,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        );
+    }
+}
+
+/// Record one tick's wall-time cost (ms). `start` should be the `Instant`
+/// captured just before the tick closure ran.
+fn probe_record_tick(start: Instant) {
+    let ms = start.elapsed().as_millis().min(u64::MAX as u128) as u64;
+    PROBE_TICK_COUNT.fetch_add(1, Ordering::Relaxed);
+    PROBE_TICK_MS_TOTAL.fetch_add(ms, Ordering::Relaxed);
+    PROBE_TICK_MS_LAST.store(ms, Ordering::Relaxed);
+    // Cheap max update: compare-swap loop. Avoids read-modify-write rebuild.
+    let mut current_max = PROBE_TICK_MS_MAX.load(Ordering::Relaxed);
+    while ms > current_max {
+        match PROBE_TICK_MS_MAX.compare_exchange(
+            current_max,
+            ms,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        ) {
+            Ok(_) => break,
+            Err(actual) => current_max = actual,
+        }
+    }
+}
+
+/// Record one save closure's wall-time cost (ms).
+fn probe_record_save(start: Instant) {
+    let ms = start.elapsed().as_millis().min(u64::MAX as u128) as u64;
+    PROBE_SAVE_COUNT.fetch_add(1, Ordering::Relaxed);
+    PROBE_SAVE_MS_TOTAL.fetch_add(ms, Ordering::Relaxed);
+    PROBE_SAVE_MS_LAST.store(ms, Ordering::Relaxed);
+    let mut current_max = PROBE_SAVE_MS_MAX.load(Ordering::Relaxed);
+    while ms > current_max {
+        match PROBE_SAVE_MS_MAX.compare_exchange(
+            current_max,
+            ms,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        ) {
+            Ok(_) => break,
+            Err(actual) => current_max = actual,
+        }
+    }
+}
+
+fn probe_record_world_snapshot() {
+    PROBE_WORLD_SNAPSHOT_COUNT.fetch_add(1, Ordering::Relaxed);
+}
+
+#[derive(Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewayProbeMetrics {
+    started_at_ms: u64,
+    sampled_at_ms: u64,
+    tick: ProbeMetricSummary,
+    shared_tick: crate::routing::SharedTickProbeMetrics,
+    save: ProbeMetricSummary,
+    world_snapshot_count: u64,
+}
+
+#[derive(Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProbeMetricSummary {
+    count: u64,
+    ms_total: u64,
+    ms_last: u64,
+    ms_max: u64,
+    ms_avg: u64,
+}
+
+fn probe_metric_summary(count: u64, total: u64, last: u64, max: u64) -> ProbeMetricSummary {
+    let avg = if count > 0 { total / count } else { 0 };
+    ProbeMetricSummary {
+        count,
+        ms_total: total,
+        ms_last: last,
+        ms_max: max,
+        ms_avg: avg,
+    }
+}
 
 #[derive(Clone)]
 struct WebState {
@@ -1278,9 +1389,12 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         injector: crate::inject::LiveSessionInjector::default(),
     };
 
+    probe_mark_started();
+
     let app = Router::new()
         .route("/", get(manual_ui))
         .route("/health", get(health))
+        .route("/metrics", get(metrics_handler))
         .route("/admin/system-mail", post(admin_system_mail))
         .route("/admin/sessions", get(admin_sessions))
         .route("/admin/kick-player", post(admin_kick_player))
@@ -1326,6 +1440,43 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
     })
+}
+
+/// Gateway probe endpoint — `GET /metrics`. Returns cumulative tick/save
+/// timing and a world-snapshot push count since process startup. The probe
+/// on the web side polls this endpoint (via the L5 layer reader) to surface
+/// gateway-side latency in the dev overlay; it is intentionally **separate**
+/// from `/health` so health-checks stay cheap and unchanged.
+async fn metrics_handler() -> impl IntoResponse {
+    let tick_count = PROBE_TICK_COUNT.load(Ordering::Relaxed);
+    let tick_total = PROBE_TICK_MS_TOTAL.load(Ordering::Relaxed);
+    let tick_last = PROBE_TICK_MS_LAST.load(Ordering::Relaxed);
+    let tick_max = PROBE_TICK_MS_MAX.load(Ordering::Relaxed);
+    let save_count = PROBE_SAVE_COUNT.load(Ordering::Relaxed);
+    let save_total = PROBE_SAVE_MS_TOTAL.load(Ordering::Relaxed);
+    let save_last = PROBE_SAVE_MS_LAST.load(Ordering::Relaxed);
+    let save_max = PROBE_SAVE_MS_MAX.load(Ordering::Relaxed);
+    let world_snapshot_count = PROBE_WORLD_SNAPSHOT_COUNT.load(Ordering::Relaxed);
+    let started_at_ms = PROBE_STARTED_AT_MS.load(Ordering::Relaxed);
+    let sampled_at_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0);
+    (
+        [
+            (header::ACCESS_CONTROL_ALLOW_ORIGIN, "*"),
+            (header::ACCESS_CONTROL_ALLOW_METHODS, "GET"),
+            (header::ACCESS_CONTROL_ALLOW_HEADERS, "accept"),
+        ],
+        Json(GatewayProbeMetrics {
+            started_at_ms,
+            sampled_at_ms,
+            tick: probe_metric_summary(tick_count, tick_total, tick_last, tick_max),
+            shared_tick: shared_tick_probe_metrics(),
+            save: probe_metric_summary(save_count, save_total, save_last, save_max),
+            world_snapshot_count,
+        }),
+    )
 }
 
 async fn admin_system_mail(
@@ -1946,6 +2097,7 @@ async fn handle_socket_inner(
                 if now < runtime_tick_deferred_until {
                     continue;
                 }
+                let tick_start = Instant::now();
                 let responses = match catch_gateway_panic("web session tick", || {
                     tokio::task::block_in_place(|| session.tick())
                 }) {
@@ -1955,16 +2107,32 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
+                probe_record_tick(tick_start);
                 if responses.is_empty() {
-                    if let Err(error) = save_queue.checkpoint(now, || {
+                    // Save timing: we time only when SaveQueue.flush_now actually
+                    // invokes the closure (so dirty-mark-only checkpoints do not
+                    // pollute the metric). We use a Cell<bool> sentinel that the
+                    // closure sets on entry; flush_now's `if !self.dirty` early
+                    // return skips the closure when no flush is needed.
+                    let save_start = Instant::now();
+                    let save_invoked = std::cell::Cell::new(false);
+                    let invoked_ref = &save_invoked;
+                    let session_ref: &mut GatewaySession = session;
+                    let save_closure = move || {
+                        invoked_ref.set(true);
                         tokio::task::block_in_place(|| {
                             catch_gateway_panic("web save_active_character", || {
-                                session.save_active_character()
+                                session_ref.save_active_character()
                             })
-                        })
-                    }) {
+                        })?;
+                        Ok::<(), String>(())
+                    };
+                    if let Err(error) = save_queue.checkpoint(now, save_closure) {
                         let _ = send_error_message(&mut sender, &error).await;
                         return;
+                    }
+                    if save_invoked.get() {
+                        probe_record_save(save_start);
                     }
                     continue;
                 }
@@ -2048,7 +2216,6 @@ fn schedule_reconnect_session_purge(
 }
 
 const DEFAULT_GATEWAY_RUNTIME_TICK_MS: u64 = 300;
-const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS: u64 = 900;
 const DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS: u64 = 15_000;
 const DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: u64 = 10_000;
 
@@ -2083,30 +2250,42 @@ async fn flush_session_updates(
 
     if should_send_snapshot {
         send_world_snapshot(sender, session).await?;
+        probe_record_world_snapshot();
     }
 
-    if !low_latency_action && should_queue_save_by_action && session.active_identity().is_some() {
-        save_queue.request_save(Instant::now(), || {
-            tokio::task::block_in_place(|| {
-                catch_gateway_panic("web save_active_character", || {
-                    session.save_active_character()
-                })
-            })
-        })?;
-    } else {
-        save_queue.checkpoint(Instant::now(), || {
-            tokio::task::block_in_place(|| {
-                catch_gateway_panic("web save_active_character", || {
-                    session.save_active_character()
-                })
-            })
-        })?;
-    }
-
+    // Save timing: same Cell<bool> pattern as in the tick loop — record only
+    // when flush_now actually invokes the closure. Route-lease refresh runs
+    // BEFORE the save closure is built so the borrow of `session` is released
+    // before closure construction moves it.
     if let Err(error) =
         route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
     {
         eprintln!("web session route lease refresh skipped: {error}");
+    }
+
+    let has_active_identity = session.active_identity().is_some();
+    let use_request_save =
+        !low_latency_action && should_queue_save_by_action && has_active_identity;
+    let save_start = Instant::now();
+    let save_invoked = std::cell::Cell::new(false);
+    let invoked_ref = &save_invoked;
+    let session_ref: &mut GatewaySession = session;
+    let save_closure = move || {
+        invoked_ref.set(true);
+        tokio::task::block_in_place(|| {
+            catch_gateway_panic("web save_active_character", || {
+                session_ref.save_active_character()
+            })
+        })?;
+        Ok::<(), String>(())
+    };
+    if use_request_save {
+        save_queue.request_save(Instant::now(), save_closure)?;
+    } else {
+        save_queue.checkpoint(Instant::now(), save_closure)?;
+    }
+    if save_invoked.get() {
+        probe_record_save(save_start);
     }
 
     Ok(())
@@ -2138,15 +2317,6 @@ fn gateway_runtime_tick_interval() -> Duration {
         "MIR2_GATEWAY_RUNTIME_TICK_MS",
         DEFAULT_GATEWAY_RUNTIME_TICK_MS,
         100,
-        5_000,
-    )
-}
-
-fn gateway_runtime_tick_input_grace() -> Duration {
-    duration_from_millis_env(
-        "MIR2_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS",
-        DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS,
-        0,
         5_000,
     )
 }
@@ -2189,7 +2359,7 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::MoveTo { .. }
         | SessionAction::Packet(
             ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
-        ) => Some(gateway_runtime_tick_input_grace()),
+        ) => Some(Duration::ZERO),
         _ => None,
     }
 }
@@ -8224,7 +8394,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::ZERO)
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8232,7 +8402,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::ZERO)
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8240,7 +8410,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::ZERO)
         );
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8281,6 +8451,15 @@ mod tests {
         assert!(start_packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+        assert!(start_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
+        assert!(session.active_identity().is_some());
+        assert!(session
+            .world_snapshot()
+            .entities
+            .iter()
+            .any(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer));
     }
 
     #[test]

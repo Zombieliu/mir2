@@ -201,7 +201,6 @@ export function buildViewportMapSprites(
 export function buildMapTileDrawList(
   mapSprites: ViewportMapSprites,
   index: MapAtlasIndex,
-  cameraOffset: ViewportOffset,
 ): { tiles: MapTileDraw[]; uncovered: ViewportMapSprites } {
   const tiles: MapTileDraw[] = [];
   const uncoveredFloor: ViewportMapSprite[] = [];
@@ -214,10 +213,11 @@ export function buildMapTileDrawList(
       return;
     }
     tiles.push({
+      key: sprite.key,
       atlasKey,
       rectKey,
-      left: sprite.left + cameraOffset.x,
-      top: sprite.top + cameraOffset.y,
+      left: sprite.left,
+      top: sprite.top,
       width: sprite.width,
       height: sprite.height,
       z: sprite.zIndex,

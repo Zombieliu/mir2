@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AssetCacheRegistrar } from "./components/asset-cache-registrar";
+import { Mir2ProbeOverlay } from "../lib/mir2-probe/overlay";
 import { ChunkReloadGuard } from "./lib/chunk-reload-guard";
 import "./globals.css";
 
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body translate="no" className="notranslate" suppressHydrationWarning>
         <ChunkReloadGuard />
         <AssetCacheRegistrar />
+        <Mir2ProbeOverlay />
         {children}
       </body>
     </html>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { AssetCachePack } from "../../lib/asset-cache-packs";
+import { installProbe } from "../../lib/mir2-probe";
 
 type AssetManifest = {
   version?: string;
@@ -238,6 +239,20 @@ export function AssetCacheRegistrar() {
     installPerformanceProbe(metrics);
     const assetCacheReset = installAssetCacheReset(metrics);
 
+    // mir2-probe — cross-layer dev probe. installProbe is idempotent and the
+    // SDK itself has zero per-frame cost; only the passive frame probe (rAF +
+    // longtask observer) turns on when start() is called. Probe auto-starts
+    // when the URL opt-in `?probe=1` or `?probe=<label>` is set; it can also be
+    // started manually from the console (`window.__mir2Probe.start()`).
+    const probeParam = params.get("probe") ?? params.get("probeLabel");
+    const probeRequested =
+      probeParam !== null && probeParam !== "0" && probeParam !== "false" && probeParam !== "off";
+    installProbe();
+    const probeHandle = (window as unknown as { __mir2Probe?: { start: () => void } }).__mir2Probe;
+    if (probeHandle && probeRequested) {
+      probeHandle.start();
+    }
+
     let disposed = false;
     let debugInterval = 0;
 
@@ -402,6 +417,10 @@ export function AssetCacheRegistrar() {
         delete window.__mir2AssetCacheReset;
       }
       if (debugInterval) window.clearInterval(debugInterval);
+      if (probeHandle) {
+        const h = probeHandle as { stop?: () => void };
+        if (typeof h.stop === "function") h.stop();
+      }
     };
   }, []);
 

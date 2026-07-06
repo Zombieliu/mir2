@@ -143,6 +143,17 @@ export type AssetResidencyStats = {
   lastKey: string | null;
   /** Tier that served the most recent acquire. */
   lastTier: "memory" | "persistent" | "fetch" | null;
+  /**
+   * Number of entries evicted from the in-memory tier by LRU throttling
+   * (zero if no eviction has occurred yet). Probe-only metric; not required
+   * by the manager API for correctness.
+   */
+  memoryEvictions: number;
+  /**
+   * Number of entries deleted from the persistent tier by trim-to-budget
+   * (zero if no eviction has occurred yet). Probe-only metric.
+   */
+  persistentEvictions: number;
 };
 
 export type AssetResidencyManager = {

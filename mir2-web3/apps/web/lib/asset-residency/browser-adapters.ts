@@ -22,6 +22,39 @@
 import type { AtlasPagePayload, AtlasRect, PersistentStore, AtlasFetcher } from "./types";
 
 // ---------------------------------------------------------------------------
+// IDB probes (dev-only).  Pure module-local state; zero behaviour change to
+// the actual IDB call.  Read by `apps/web/lib/mir2-probe/bus.ts` via
+// `window.__mir2Residency.idbTimings`.  Kept here (not in the probe folder) so
+// the timing points sit right next to the IDB code they measure — no import
+// cycle, no perf overhead beyond a single object assignment per call.
+// ---------------------------------------------------------------------------
+
+export type ResidencyIdbTimings = {
+  lastGetMs: number | null;
+  lastPutMs: number | null;
+  lastListByAgeMs: number | null;
+  samples: number;
+};
+
+const idbTimings: ResidencyIdbTimings = {
+  lastGetMs: null,
+  lastPutMs: null,
+  lastListByAgeMs: null,
+  samples: 0,
+};
+
+function recordTiming(field: "lastGetMs" | "lastPutMs" | "lastListByAgeMs", start: number): void {
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const delta = Math.max(0, now - start);
+  idbTimings[field] = Math.round(delta * 1000) / 1000;
+  idbTimings.samples += 1;
+}
+
+export function getResidencyIdbTimings(): ResidencyIdbTimings {
+  return { ...idbTimings };
+}
+
+// ---------------------------------------------------------------------------
 // IDB helpers (extracted from original-client-shell.tsx idbRequest /
 // idbTransactionDone — identical logic, no DOM coupling beyond IDBRequest).
 // ---------------------------------------------------------------------------
@@ -124,37 +157,40 @@ export function createBrowserIdbStore(options: BrowserIdbStoreOptions = {}): Per
     const db = await openDb();
     if (!db) return null;
 
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+    let outcome: AtlasPagePayload | null = null;
     try {
       const tx = db.transaction(storeName, "readwrite");
       const store = tx.objectStore(storeName);
       const record = (await idbRequest(store.get(key))) as IdbRecord | undefined;
       if (!record || record.namespace !== namespace) {
         await idbTransactionDone(tx);
-        return null;
+      } else {
+        const pixels = pixelsFromRecord(record.pixels);
+        if (!pixels || pixels.byteLength !== record.width * record.height * 4) {
+          store.delete(key);
+          await idbTransactionDone(tx);
+        } else {
+          record.lastUsedAt = Date.now();
+          store.put(record);
+          await idbTransactionDone(tx);
+          outcome = {
+            key: record.key,
+            sourceKey: record.sourceKey,
+            width: record.width,
+            height: record.height,
+            rectList: record.rectList,
+            pixels,
+          };
+        }
       }
-
-      const pixels = pixelsFromRecord(record.pixels);
-      if (!pixels || pixels.byteLength !== record.width * record.height * 4) {
-        store.delete(key);
-        await idbTransactionDone(tx);
-        return null;
-      }
-
-      record.lastUsedAt = Date.now();
-      store.put(record);
-      await idbTransactionDone(tx);
-
-      return {
-        key: record.key,
-        sourceKey: record.sourceKey,
-        width: record.width,
-        height: record.height,
-        rectList: record.rectList,
-        pixels,
-      };
     } catch {
+      // Treat store errors as a miss; do not record timing on the failure path
+      // so the probe does not pick up transaction-abort noise as "latency".
       return null;
     }
+    recordTiming("lastGetMs", t0);
+    return outcome;
   }
 
   async function put(payload: AtlasPagePayload): Promise<void> {
@@ -163,24 +199,31 @@ export function createBrowserIdbStore(options: BrowserIdbStoreOptions = {}): Per
     if (!db) return;
     if (!payload.pixels) return;
 
-    const now = Date.now();
-    const pixels = new Uint8Array(payload.pixels.byteLength);
-    pixels.set(payload.pixels);
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+    try {
+      const now = Date.now();
+      const pixels = new Uint8Array(payload.pixels.byteLength);
+      pixels.set(payload.pixels);
 
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    store.put({
-      namespace,
-      key: payload.key,
-      sourceKey: payload.sourceKey,
-      width: payload.width,
-      height: payload.height,
-      rectList: payload.rectList,
-      pixels: pixels.buffer,
-      storedAt: now,
-      lastUsedAt: now,
-    } satisfies IdbRecord);
-    await idbTransactionDone(tx);
+      const tx = db.transaction(storeName, "readwrite");
+      const store = tx.objectStore(storeName);
+      store.put({
+        namespace,
+        key: payload.key,
+        sourceKey: payload.sourceKey,
+        width: payload.width,
+        height: payload.height,
+        rectList: payload.rectList,
+        pixels: pixels.buffer,
+        storedAt: now,
+        lastUsedAt: now,
+      } satisfies IdbRecord);
+      await idbTransactionDone(tx);
+      recordTiming("lastPutMs", t0);
+    } catch {
+      // Return-path misses are intentional — failing puts should not pollute
+      // the timing profile.
+    }
   }
 
   async function deleteKey(key: string): Promise<void> {
@@ -199,15 +242,18 @@ export function createBrowserIdbStore(options: BrowserIdbStoreOptions = {}): Per
   async function listByAge(): Promise<string[]> {
     const db = await openDb();
     if (!db) return [];
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
     try {
       const tx = db.transaction(storeName, "readonly");
       const store = tx.objectStore(storeName);
       const records = (await idbRequest(store.getAll())) as IdbRecord[];
       await idbTransactionDone(tx);
-      return records
+      const result = records
         .filter((r) => r.namespace === namespace)
         .sort((a, b) => a.lastUsedAt - b.lastUsedAt)
         .map((r) => r.key);
+      recordTiming("lastListByAgeMs", t0);
+      return result;
     } catch {
       return [];
     }
@@ -243,4 +289,16 @@ export function createBrowserAtlasFetcher(options: BrowserAtlasFetcherOptions): 
       return options.resolveFn(key);
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// Probe wiring — expose IDB timing reader to window.__mir2ResidencyIdbTimingsReader
+// so the shell can pull it through the existing __mir2Residency probe shim
+// without the shell needing a direct import of this module's internals.
+// Idempotent; safe under SSR (window check). Dev-only by intent (timing
+// module-local is always on, but it costs <1us per call).
+// ---------------------------------------------------------------------------
+
+if (typeof window !== "undefined") {
+  (window as unknown as { __mir2ResidencyIdbTimingsReader?: () => ResidencyIdbTimings }).__mir2ResidencyIdbTimingsReader ??= getResidencyIdbTimings;
 }

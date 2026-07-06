@@ -41,6 +41,8 @@ export function createAssetResidency(config: AssetResidencyConfig): AssetResiden
     failures: 0,
     persistentWrites: 0,
     memoryCacheSize: 0,
+    memoryEvictions: 0,
+    persistentEvictions: 0,
     lastKey: null,
     lastTier: null,
   };
@@ -71,6 +73,7 @@ export function createAssetResidency(config: AssetResidencyConfig): AssetResiden
       const oldestKey = memoryCache.keys().next().value;
       if (oldestKey === undefined) break;
       memoryCache.delete(oldestKey);
+      _stats.memoryEvictions += 1;
       // Leave refcount entry; it self-cleans on next release() or acquire().
     }
     _stats.memoryCacheSize = memoryCache.size;
@@ -98,6 +101,7 @@ export function createAssetResidency(config: AssetResidencyConfig): AssetResiden
         const key = keys[i];
         if (key !== undefined) {
           await persistent.delete(key);
+          _stats.persistentEvictions += 1;
         }
       }
     } catch {

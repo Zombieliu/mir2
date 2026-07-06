@@ -1100,10 +1100,12 @@ impl ZoneRuntime {
             }
             player.last_seen_move_seq = seq;
         }
-        if matches!(
-            action.kind,
-            ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
-        ) {
+        if replaces_pending_step
+            && matches!(
+                action.kind,
+                ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
+            )
+        {
             player
                 .movement_actions
                 .retain(|pending| matches!(pending.kind, ZoneMovementActionKind::Turn));

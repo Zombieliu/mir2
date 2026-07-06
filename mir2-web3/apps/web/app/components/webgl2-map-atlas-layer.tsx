@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import type { MapAtlasIndex } from "../../lib/map-atlas-manifest";
 
@@ -11,6 +11,7 @@ import type { MapAtlasIndex } from "../../lib/map-atlas-manifest";
 // mounted behind the entity/object layers. DOM map sprites are the fallback when this is off.
 
 export type MapTileDraw = {
+  key: string;
   atlasKey: string;
   rectKey: string;
   left: number;
@@ -27,6 +28,7 @@ type WebGl2MapAtlasLayerProps = {
   stageHeight: number;
   index: MapAtlasIndex | null;
   tiles: MapTileDraw[];
+  cameraOffset?: { x: number; y: number };
   onDebugChange?: (debug: Record<string, unknown>) => void;
 };
 
@@ -49,12 +51,18 @@ export function WebGl2MapAtlasLayer({
   stageHeight,
   index,
   tiles,
+  cameraOffset = { x: 0, y: 0 },
   onDebugChange,
 }: WebGl2MapAtlasLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const programRef = useRef<ProgramRecord | null>(null);
   const texturesRef = useRef<Map<string, TextureRecord>>(new Map());
+  const sortedTiles = useMemo(
+    () => tiles.slice().sort((a, b) => a.z - b.z || a.rectKey.localeCompare(b.rectKey)),
+    [tiles],
+  );
+  const neededAtlasKeys = useMemo(() => Array.from(new Set(tiles.map((tile) => tile.atlasKey))), [tiles]);
 
   useEffect(() => {
     let disposed = false;
@@ -87,7 +95,6 @@ export function WebGl2MapAtlasLayer({
       gl.disable(gl.DEPTH_TEST);
 
       // Load only the atlas pages actually referenced by the current tiles (a handful).
-      const neededAtlasKeys = new Set(tiles.map((tile) => tile.atlasKey));
       const atlasTextures = new Map<string, TextureRecord>();
       for (const atlasKey of neededAtlasKeys) {
         const page = index.pages.get(atlasKey);
@@ -108,8 +115,7 @@ export function WebGl2MapAtlasLayer({
 
       let rendered = 0;
       let skipped = 0;
-      const sorted = tiles.slice().sort((a, b) => a.z - b.z || a.rectKey.localeCompare(b.rectKey));
-      for (const tile of sorted) {
+      for (const tile of sortedTiles) {
         const page = index.pages.get(tile.atlasKey);
         const texture = atlasTextures.get(tile.atlasKey);
         const rect = index.rect.get(tile.rectKey);
@@ -117,7 +123,7 @@ export function WebGl2MapAtlasLayer({
           skipped += 1;
           continue;
         }
-        drawTile(gl, program, texture, page.width, page.height, rect, tile);
+        drawTile(gl, program, texture, page.width, page.height, rect, tile, cameraOffset);
         rendered += 1;
       }
 
@@ -147,7 +153,18 @@ export function WebGl2MapAtlasLayer({
     return () => {
       disposed = true;
     };
-  }, [enabled, stageWidth, stageHeight, index, tiles, onDebugChange]);
+  }, [
+    enabled,
+    stageWidth,
+    stageHeight,
+    index,
+    tiles.length,
+    sortedTiles,
+    neededAtlasKeys,
+    cameraOffset.x,
+    cameraOffset.y,
+    onDebugChange,
+  ]);
 
   return (
     <canvas
@@ -277,10 +294,11 @@ function drawTile(
   atlasHeight: number,
   rect: { x: number; y: number; width: number; height: number },
   tile: MapTileDraw,
+  cameraOffset: { x: number; y: number },
 ) {
   const ratio = devicePixelRatioForCanvas();
-  const left = tile.left * ratio;
-  const top = tile.top * ratio;
+  const left = (tile.left + cameraOffset.x) * ratio;
+  const top = (tile.top + cameraOffset.y) * ratio;
   const right = left + tile.width * ratio;
   const bottom = top + tile.height * ratio;
   const u0 = rect.x / atlasWidth;

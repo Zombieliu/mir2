@@ -118,6 +118,7 @@ struct MapSceneCache {
 struct MapRenderSceneCache {
     root: Option<Entity>,
     applied: Option<MapRenderState>,
+    tiles: HashMap<String, Entity>,
 }
 
 #[derive(Clone, Copy)]
@@ -316,6 +317,8 @@ struct EntityRenderAtlasRect {
 struct EntityRenderEntry {
     object_id: String,
     #[serde(default)]
+    is_player: bool,
+    #[serde(default)]
     dead: bool,
     #[serde(default)]
     layers: Vec<EntityRenderLayer>,
@@ -395,6 +398,8 @@ struct MapRenderAtlasRect {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MapTile {
+    #[serde(default)]
+    key: String,
     atlas_key: String,
     // The TS producer feeds `buildMapTileDrawList`'s output verbatim, whose tile
     // field is `rectKey` (MapTileDraw); accept that wire name while keeping the
@@ -591,6 +596,7 @@ pub fn boot_mir2_runtime() {
                 ingest_pending_entity_render_state,
                 ingest_pending_entity_render_atlases,
                 ingest_pending_map_render_state,
+                update_runtime_camera_offset,
                 ingest_pending_map_render_atlases,
                 sync_map_render,
                 sync_map_scene,
@@ -691,6 +697,32 @@ fn ingest_pending_map_render_state(
     camera_offset.y = y;
 }
 
+fn update_runtime_camera_offset(
+    state: Res<RuntimeWorldState>,
+    motion_table: Res<motion::EntityMotionTable>,
+    mut camera_offset: ResMut<RuntimeMapCameraOffset>,
+) {
+    let Some(snapshot) = &state.snapshot else {
+        camera_offset.x = 0.0;
+        camera_offset.y = 0.0;
+        return;
+    };
+    let Some(player_object_id) = &snapshot.player_object_id else {
+        camera_offset.x = 0.0;
+        camera_offset.y = 0.0;
+        return;
+    };
+    let Some(entry) = motion_table.get(player_object_id) else {
+        camera_offset.x = 0.0;
+        camera_offset.y = 0.0;
+        return;
+    };
+
+    let entity_offset = motion::compute_motion_offset(entry, motion_table.now_ms, 48.0, 32.0);
+    camera_offset.x = -entity_offset.x;
+    camera_offset.y = -entity_offset.y;
+}
+
 fn ingest_pending_map_render_atlases(
     mut atlas_resource: ResMut<RuntimeMapRenderAtlases>,
     mut images: ResMut<Assets<Image>>,
@@ -735,6 +767,8 @@ fn sync_map_render(
     mut atlas_assets: ResMut<RuntimeMapRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut registry: ResMut<SceneRegistry>,
+    mut transform_query: Query<&mut Transform>,
+    mut sprite_query: Query<&mut Sprite>,
 ) {
     let active = map_state
         .snapshot
@@ -745,6 +779,7 @@ fn sync_map_render(
             commands.entity(root).despawn();
         }
         registry.map_render.applied = None;
+        registry.map_render.tiles.clear();
         return;
     }
 
@@ -752,51 +787,134 @@ fn sync_map_render(
 
     sync_map_render_atlas_layouts(snapshot, &mut atlas_assets, &mut texture_atlas_layouts);
 
-    if registry.map_render.applied.as_ref() == Some(snapshot) {
+    if registry.map_render.applied.as_ref() == Some(snapshot)
+        && registry.map_render.tiles.len() == snapshot.tiles.len()
+    {
         return;
     }
 
-    if let Some(root) = registry.map_render.root.take() {
-        commands.entity(root).despawn();
+    let root_translation = Vec3::new(map_camera_offset.x, -map_camera_offset.y, MAP_TILE_Z_BASE);
+    let root = match registry.map_render.root {
+        Some(root) => {
+            if let Ok(mut transform) = transform_query.get_mut(root) {
+                transform.translation = root_translation;
+            }
+            root
+        }
+        None => {
+            // The root MUST carry Visibility: child sprites have Visibility::Inherited, so
+            // without a visibility ancestor their InheritedVisibility defaults to false.
+            let root = commands
+                .spawn((
+                    Transform::from_translation(root_translation),
+                    Visibility::Visible,
+                ))
+                .id();
+            registry.map_render.root = Some(root);
+            root
+        }
+    };
+
+    let mut live_keys = HashSet::new();
+    let mut spawned_count = 0usize;
+    let mut updated_count = 0usize;
+    let mut skipped_count = 0usize;
+
+    for (index, tile) in snapshot.tiles.iter().enumerate() {
+        let key = map_tile_key(index, tile);
+        live_keys.insert(key.clone());
+        let image_binding = map_render_image_binding(tile, &atlas_assets);
+        let (image, texture_atlas) = match image_binding {
+            Some(binding) => binding,
+            None => {
+                skipped_count += 1;
+                continue;
+            }
+        };
+        let local_transform = map_tile_transform(snapshot, tile);
+        let custom_size = Some(Vec2::new(tile.width, tile.height));
+        let color = Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0));
+
+        if let Some(entity) = registry.map_render.tiles.get(&key).copied() {
+            if let Ok(mut transform) = transform_query.get_mut(entity) {
+                *transform = local_transform;
+            }
+            if let Ok(mut sprite) = sprite_query.get_mut(entity) {
+                sprite.image = image;
+                sprite.texture_atlas = Some(texture_atlas);
+                sprite.custom_size = custom_size;
+                sprite.color = color;
+            }
+            updated_count += 1;
+            continue;
+        }
+
+        let mut spawned_entity = None;
+        commands.entity(root).with_children(|parent| {
+            spawned_entity = Some(
+                parent
+                    .spawn((
+                        Sprite {
+                            image,
+                            texture_atlas: Some(texture_atlas),
+                            custom_size,
+                            color,
+                            ..default()
+                        },
+                        local_transform,
+                    ))
+                    .id(),
+            );
+        });
+        if let Some(entity) = spawned_entity {
+            registry.map_render.tiles.insert(key, entity);
+            spawned_count += 1;
+        }
     }
 
-    let root_translation = Vec3::new(map_camera_offset.x, -map_camera_offset.y, MAP_TILE_Z_BASE);
-    // The root MUST carry Visibility: child sprites have Visibility::Inherited, so
-    // without a visibility ancestor their InheritedVisibility defaults to false and
-    // nothing renders (the entity render layers avoid this by spawning each sprite
-    // top-level). Visibility::Visible makes the whole tile tree render.
-    let root = commands
-        .spawn((Transform::from_translation(root_translation), Visibility::Visible))
-        .with_children(|parent| {
-            for tile in &snapshot.tiles {
-                let image_binding = map_render_image_binding(tile, &atlas_assets);
-                let (image, texture_atlas) = match image_binding {
-                    Some(binding) => binding,
-                    None => continue,
-                };
-                let local_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5;
-                let local_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5);
-                let local_z = tile.z * MAP_TILE_Z_STEP;
-                parent.spawn((
-                    Sprite {
-                        image,
-                        texture_atlas: Some(texture_atlas),
-                        custom_size: Some(Vec2::new(tile.width, tile.height)),
-                        color: Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0)),
-                        ..default()
-                    },
-                    Transform::from_xyz(local_x, local_y, local_z),
-                ));
-            }
-        })
-        .id();
+    let stale_keys: Vec<String> = registry
+        .map_render
+        .tiles
+        .keys()
+        .filter(|key| !live_keys.contains(*key))
+        .cloned()
+        .collect();
+    let removed_count = stale_keys.len();
+    for key in stale_keys {
+        if let Some(entity) = registry.map_render.tiles.remove(&key) {
+            commands.entity(entity).despawn();
+        }
+    }
 
-    registry.map_render.root = Some(root);
     registry.map_render.applied = Some(snapshot.clone());
     publish_status(
         "map-render-synced",
-        &format!("Applied {} map tiles", snapshot.tiles.len()),
+        &format!(
+            "Applied {} map tiles (+{} ~{} -{} skipped {})",
+            snapshot.tiles.len(),
+            spawned_count,
+            updated_count,
+            removed_count,
+            skipped_count,
+        ),
     );
+}
+
+fn map_tile_key(index: usize, tile: &MapTile) -> String {
+    if !tile.key.is_empty() {
+        return tile.key.clone();
+    }
+    format!(
+        "{}:{}:{}:{}:{}",
+        tile.atlas_key, tile.atlas_rect_key, tile.left, tile.top, index
+    )
+}
+
+fn map_tile_transform(snapshot: &MapRenderState, tile: &MapTile) -> Transform {
+    let local_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5;
+    let local_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5);
+    let local_z = tile.z * MAP_TILE_Z_STEP;
+    Transform::from_xyz(local_x, local_y, local_z)
 }
 
 /// Build the `TextureAtlasLayout` for each map atlas page not already cached.
@@ -1120,6 +1238,8 @@ fn sync_entity_render_layers(
     atlas_assets: Res<RuntimeEntityRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     entity_render_state: Res<RuntimeEntityRenderState>,
+    map_camera_offset: Res<RuntimeMapCameraOffset>,
+    motion_table: Res<motion::EntityMotionTable>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
@@ -1151,7 +1271,13 @@ fn sync_entity_render_layers(
                 layer.key.clone()
             };
             alive.insert(layer_key.clone());
-            let position = entity_render_layer_position(snapshot, layer);
+            let position = entity_render_layer_position(
+                snapshot,
+                entity,
+                layer,
+                &map_camera_offset,
+                &motion_table,
+            );
             let opacity = layer
                 .opacity
                 .unwrap_or(if entity.dead { 0.45 } else { 1.0 });
@@ -1340,9 +1466,35 @@ fn clear_entity_render_layers(commands: &mut Commands, registry: &mut SceneRegis
     registry.entity_render_atlases.clear();
 }
 
-fn entity_render_layer_position(snapshot: &EntityRenderState, layer: &EntityRenderLayer) -> Vec3 {
-    let center_x = layer.left + layer.width * 0.5;
-    let center_y = layer.top + layer.height * 0.5;
+fn entity_render_layer_position(
+    snapshot: &EntityRenderState,
+    entity: &EntityRenderEntry,
+    layer: &EntityRenderLayer,
+    map_camera_offset: &RuntimeMapCameraOffset,
+    motion_table: &motion::EntityMotionTable,
+) -> Vec3 {
+    let entity_motion_offset = if entity.is_player {
+        Vec2::ZERO
+    } else {
+        motion_table
+            .get(&entity.object_id)
+            .map(|entry| motion::compute_motion_offset(entry, motion_table.now_ms, 48.0, 32.0))
+            .unwrap_or(Vec2::ZERO)
+    };
+    let camera_x = if entity.is_player {
+        0.0
+    } else {
+        map_camera_offset.x
+    };
+    let camera_y = if entity.is_player {
+        0.0
+    } else {
+        map_camera_offset.y
+    };
+    let left = layer.left + camera_x + entity_motion_offset.x;
+    let top = layer.top + camera_y + entity_motion_offset.y;
+    let center_x = left + layer.width * 0.5;
+    let center_y = top + layer.height * 0.5;
 
     Vec3::new(
         center_x - snapshot.stage_width * 0.5,

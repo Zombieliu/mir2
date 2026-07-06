@@ -1,7 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_game_data::crystal_monster_by_name;
 use mir2_protocol::{
@@ -21,6 +22,165 @@ use mir2_simulation::{
 };
 
 use crate::GatewayConfig;
+
+#[derive(Debug, Clone, Copy, Default, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct SharedTickProbeMetrics {
+    pub(crate) count: u64,
+    pub(crate) pending: SharedTickProbePhaseMetrics,
+    pub(crate) expire: SharedTickProbePhaseMetrics,
+    pub(crate) command: SharedTickProbePhaseMetrics,
+    pub(crate) auto_pickup: SharedTickProbePhaseMetrics,
+    pub(crate) observer: SharedTickProbePhaseMetrics,
+    pub(crate) observer_detail: SharedTickProbeObserverMetrics,
+    pub(crate) zone: SharedTickProbePhaseMetrics,
+}
+
+#[derive(Debug, Clone, Copy, Default, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct SharedTickProbePhaseMetrics {
+    pub(crate) count: u64,
+    pub(crate) ms_total: u64,
+    pub(crate) ms_last: u64,
+    pub(crate) ms_max: u64,
+    pub(crate) ms_avg: u64,
+}
+
+#[derive(Debug, Clone, Copy, Default, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct SharedTickProbeObserverMetrics {
+    pub(crate) npc: SharedTickProbePhaseMetrics,
+    pub(crate) apply: SharedTickProbePhaseMetrics,
+    pub(crate) shared: SharedTickProbePhaseMetrics,
+    pub(crate) drops: SharedTickProbePhaseMetrics,
+    pub(crate) quest: SharedTickProbePhaseMetrics,
+    pub(crate) zone_observer: SharedTickProbePhaseMetrics,
+}
+
+struct SharedTickProbePhase {
+    total: AtomicU64,
+    last: AtomicU64,
+    max: AtomicU64,
+}
+
+impl SharedTickProbePhase {
+    const fn new() -> Self {
+        Self {
+            total: AtomicU64::new(0),
+            last: AtomicU64::new(0),
+            max: AtomicU64::new(0),
+        }
+    }
+
+    fn record(&self, ms: u64) {
+        self.total.fetch_add(ms, Ordering::Relaxed);
+        self.last.store(ms, Ordering::Relaxed);
+        let mut current_max = self.max.load(Ordering::Relaxed);
+        while ms > current_max {
+            match self
+                .max
+                .compare_exchange(current_max, ms, Ordering::Relaxed, Ordering::Relaxed)
+            {
+                Ok(_) => break,
+                Err(actual) => current_max = actual,
+            }
+        }
+    }
+
+    fn summary(&self, count: u64) -> SharedTickProbePhaseMetrics {
+        let total = self.total.load(Ordering::Relaxed);
+        SharedTickProbePhaseMetrics {
+            count,
+            ms_total: total,
+            ms_last: self.last.load(Ordering::Relaxed),
+            ms_max: self.max.load(Ordering::Relaxed),
+            ms_avg: if count > 0 { total / count } else { 0 },
+        }
+    }
+}
+
+static SHARED_TICK_PROBE_COUNT: AtomicU64 = AtomicU64::new(0);
+static SHARED_TICK_PENDING_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_EXPIRE_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_COMMAND_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_AUTO_PICKUP_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_NPC_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_APPLY_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_SHARED_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_DROPS_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_QUEST_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_OBSERVER_ZONE_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+static SHARED_TICK_ZONE_MS: SharedTickProbePhase = SharedTickProbePhase::new();
+
+fn probe_elapsed_ms(start: Instant) -> u64 {
+    start.elapsed().as_millis().min(u64::MAX as u128) as u64
+}
+
+fn shared_tick_probe_phase_sample(ms: u64) -> SharedTickProbePhaseMetrics {
+    SharedTickProbePhaseMetrics {
+        count: 0,
+        ms_total: 0,
+        ms_last: ms,
+        ms_max: 0,
+        ms_avg: 0,
+    }
+}
+
+fn shared_tick_probe_observer_sample(
+    npc_ms: u64,
+    apply_ms: u64,
+    shared_ms: u64,
+    drops_ms: u64,
+    quest_ms: u64,
+    zone_observer_ms: u64,
+) -> SharedTickProbeObserverMetrics {
+    SharedTickProbeObserverMetrics {
+        npc: shared_tick_probe_phase_sample(npc_ms),
+        apply: shared_tick_probe_phase_sample(apply_ms),
+        shared: shared_tick_probe_phase_sample(shared_ms),
+        drops: shared_tick_probe_phase_sample(drops_ms),
+        quest: shared_tick_probe_phase_sample(quest_ms),
+        zone_observer: shared_tick_probe_phase_sample(zone_observer_ms),
+    }
+}
+
+fn record_shared_tick_probe(sample: SharedTickProbeMetrics) {
+    SHARED_TICK_PENDING_MS.record(sample.pending.ms_last);
+    SHARED_TICK_EXPIRE_MS.record(sample.expire.ms_last);
+    SHARED_TICK_COMMAND_MS.record(sample.command.ms_last);
+    SHARED_TICK_AUTO_PICKUP_MS.record(sample.auto_pickup.ms_last);
+    SHARED_TICK_OBSERVER_MS.record(sample.observer.ms_last);
+    SHARED_TICK_OBSERVER_NPC_MS.record(sample.observer_detail.npc.ms_last);
+    SHARED_TICK_OBSERVER_APPLY_MS.record(sample.observer_detail.apply.ms_last);
+    SHARED_TICK_OBSERVER_SHARED_MS.record(sample.observer_detail.shared.ms_last);
+    SHARED_TICK_OBSERVER_DROPS_MS.record(sample.observer_detail.drops.ms_last);
+    SHARED_TICK_OBSERVER_QUEST_MS.record(sample.observer_detail.quest.ms_last);
+    SHARED_TICK_OBSERVER_ZONE_MS.record(sample.observer_detail.zone_observer.ms_last);
+    SHARED_TICK_ZONE_MS.record(sample.zone.ms_last);
+    SHARED_TICK_PROBE_COUNT.fetch_add(1, Ordering::Relaxed);
+}
+
+pub(crate) fn shared_tick_probe_metrics() -> SharedTickProbeMetrics {
+    let count = SHARED_TICK_PROBE_COUNT.load(Ordering::Relaxed);
+    SharedTickProbeMetrics {
+        count,
+        pending: SHARED_TICK_PENDING_MS.summary(count),
+        expire: SHARED_TICK_EXPIRE_MS.summary(count),
+        command: SHARED_TICK_COMMAND_MS.summary(count),
+        auto_pickup: SHARED_TICK_AUTO_PICKUP_MS.summary(count),
+        observer: SHARED_TICK_OBSERVER_MS.summary(count),
+        observer_detail: SharedTickProbeObserverMetrics {
+            npc: SHARED_TICK_OBSERVER_NPC_MS.summary(count),
+            apply: SHARED_TICK_OBSERVER_APPLY_MS.summary(count),
+            shared: SHARED_TICK_OBSERVER_SHARED_MS.summary(count),
+            drops: SHARED_TICK_OBSERVER_DROPS_MS.summary(count),
+            quest: SHARED_TICK_OBSERVER_QUEST_MS.summary(count),
+            zone_observer: SHARED_TICK_OBSERVER_ZONE_MS.summary(count),
+        },
+        zone: SHARED_TICK_ZONE_MS.summary(count),
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ZoneId(String);
@@ -2072,6 +2232,13 @@ impl SharedInProcessZoneState {
         self.maps.get(map_file_name).cloned()
     }
 
+    fn has_ground_drops_for_map(&self, map_file_name: Option<&str>) -> Option<bool> {
+        let map_file_name = map_file_name?;
+        self.maps
+            .get(map_file_name)
+            .map(|map| !map.ground_drops.is_empty())
+    }
+
     #[cfg(test)]
     fn take_pickable_drop(
         &mut self,
@@ -3251,6 +3418,7 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             cached_map_file_name: None,
+            cached_local_self_object_id: None,
             cached_map_transfers: Vec::new(),
             last_shared_entity_ids_by_map: BTreeMap::new(),
             last_shared_drop_ids_by_map: BTreeMap::new(),
@@ -3278,6 +3446,7 @@ struct SharedInProcessZoneSessionRuntime {
     shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
     cached_map_file_name: Option<String>,
+    cached_local_self_object_id: Option<u32>,
     cached_map_transfers: Vec<CachedMapTransfer>,
     last_shared_entity_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
     last_shared_drop_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
@@ -3466,6 +3635,7 @@ impl SharedInProcessZoneSessionRuntime {
             .iter()
             .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
             .map(|entity| entity.object_id);
+        self.cached_local_self_object_id = local_self_object_id;
         if let Some(local_self_object_id) = local_self_object_id {
             for drop in &mut shared_ground_drops {
                 if drop.owner_object_id == Some(local_self_object_id) {
@@ -3620,6 +3790,7 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(key) = self.presence_key.take() else {
             return Vec::new();
         };
+        self.cached_local_self_object_id = None;
         let mut zone_state = self
             .zone_state
             .lock()
@@ -3696,7 +3867,11 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
         };
-        let Some(map_file_name) = self.inner.world_snapshot().map_file_name else {
+        let Some(map_file_name) = self
+            .cached_map_file_name
+            .clone()
+            .or_else(|| self.inner.world_snapshot().map_file_name)
+        else {
             return Vec::new();
         };
         self.zone_state
@@ -3903,6 +4078,9 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn local_self_object_id(&self) -> Option<u32> {
+        if let Some(object_id) = self.cached_local_self_object_id {
+            return Some(object_id);
+        }
         self.inner
             .world_snapshot()
             .entities
@@ -4084,7 +4262,10 @@ impl SharedInProcessZoneSessionRuntime {
         if packets.is_empty() {
             return;
         }
-        let map_file_name = self.inner.world_snapshot().map_file_name;
+        let map_file_name = self
+            .cached_map_file_name
+            .clone()
+            .or_else(|| self.inner.world_snapshot().map_file_name);
         if let Some(map_file_name) = map_file_name.as_deref() {
             let current_key = self.current_presence_key();
             let local_self_object_id = self.local_self_object_id();
@@ -4124,6 +4305,17 @@ impl SharedInProcessZoneSessionRuntime {
         packets: &[ServerPacket],
     ) -> Vec<ServerPacket> {
         if packets.is_empty() {
+            return Vec::new();
+        }
+        if !packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectDied { .. }
+                    | ServerPacket::ObjectHealth {
+                        info: ObjectHealthInfo { percent: 0, .. },
+                    }
+            )
+        }) {
             return Vec::new();
         }
         let snapshot = self.inner.world_snapshot();
@@ -5220,6 +5412,23 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn auto_pick_up_shared_drop_with_intelligent_creature(&mut self) -> Vec<ServerPacket> {
+        if self.presence_key.is_none() {
+            return Vec::new();
+        }
+        let Some(map_file_name) = self.cached_map_file_name.as_deref() else {
+            return Vec::new();
+        };
+        let has_shared_ground_drops = {
+            let zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            zone_state.has_ground_drops_for_map(Some(map_file_name))
+        };
+        if has_shared_ground_drops != Some(true) {
+            return Vec::new();
+        }
+
         let snapshot = self.inner.world_snapshot();
         let Some(self_entity) = snapshot
             .entities
@@ -5543,16 +5752,36 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                         | ClientPacket::Magic { .. }
                 )
         ) && !routes_zone_native_player_attack;
+        let mut tick_probe_pending_ms = 0;
+        let mut tick_probe_expire_ms = 0;
+        let mut tick_probe_command_ms = 0;
+        let mut tick_probe_auto_pickup_ms = 0;
+        let mut tick_probe_observer_ms = 0;
+        let mut tick_probe_observer_npc_ms = 0;
+        let mut tick_probe_observer_apply_ms = 0;
+        let mut tick_probe_observer_shared_ms = 0;
+        let mut tick_probe_observer_drops_ms = 0;
+        let mut tick_probe_observer_quest_ms = 0;
+        let mut tick_probe_observer_zone_ms = 0;
+        let mut tick_probe_zone_ms = 0;
         let mut packets = if is_low_latency_zone_packet {
             Vec::new()
         } else {
+            let probe_start = is_world_tick.then(Instant::now);
             let mut packets = self.apply_pending_zone_packets();
             packets.extend(self.apply_pending_shared_trade_packets());
             packets.extend(self.apply_pending_shared_rental_packets());
+            if let Some(start) = probe_start {
+                tick_probe_pending_ms = probe_elapsed_ms(start);
+            }
             packets
         };
         if ticks_zone {
+            let probe_start = is_world_tick.then(Instant::now);
             packets.extend(self.expire_shared_drops_on_current_map());
+            if let Some(start) = probe_start {
+                tick_probe_expire_ms = probe_elapsed_ms(start);
+            }
         }
         if removes_presence {
             packets.extend(self.cancel_pending_shared_trade_offers());
@@ -5575,6 +5804,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             None
         };
+        let command_probe_start = is_world_tick.then(Instant::now);
         let mut command_packets = if unavailable_shared_target {
             Vec::new()
         } else if let Some(locked) = shared_trade_confirm {
@@ -5610,6 +5840,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        if let Some(start) = command_probe_start {
+            tick_probe_command_ms = probe_elapsed_ms(start);
+        }
         if command_packets.is_empty() {
             if let Some(object_id) = shared_interact_object_id {
                 command_packets = self.execute_shared_npc_interact(object_id);
@@ -5627,12 +5860,16 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 .iter()
                 .any(|packet| matches!(packet, ServerPacket::IntelligentCreaturePickup { .. }))
         {
+            let probe_start = Instant::now();
             command_packets.extend(self.auto_pick_up_shared_drop_with_intelligent_creature());
+            tick_probe_auto_pickup_ms = probe_elapsed_ms(probe_start);
         }
         if is_low_latency_zone_packet {
             packets.extend(command_packets);
             return Ok(packets);
         }
+        let observer_probe_start = is_world_tick.then(Instant::now);
+        let observer_detail_probe_start = is_world_tick.then(Instant::now);
         if let Some(before) = shared_npc_entity_baseline.as_ref() {
             let after = self.inner.world_snapshot();
             let side_effect_packets = shared_npc_entity_side_effect_packets(
@@ -5656,12 +5893,32 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 entity_side_effect,
             ));
         }
+        if let Some(start) = observer_detail_probe_start {
+            tick_probe_observer_npc_ms = probe_elapsed_ms(start);
+        }
+        let observer_detail_probe_start = is_world_tick.then(Instant::now);
         self.apply_shared_entity_packets_to_current_map(&command_packets);
+        if let Some(start) = observer_detail_probe_start {
+            tick_probe_observer_apply_ms = probe_elapsed_ms(start);
+        }
+        let observer_detail_probe_start = is_world_tick.then(Instant::now);
         self.dispatch_shared_entity_observer_packets(&command_packets);
+        if let Some(start) = observer_detail_probe_start {
+            tick_probe_observer_shared_ms = probe_elapsed_ms(start);
+        }
+        let observer_detail_probe_start = is_world_tick.then(Instant::now);
         let committed_death_drop_packets =
             self.commit_shared_death_drops_to_current_map(&command_packets);
         command_packets.extend(committed_death_drop_packets);
+        if let Some(start) = observer_detail_probe_start {
+            tick_probe_observer_drops_ms = probe_elapsed_ms(start);
+        }
+        let observer_detail_probe_start = is_world_tick.then(Instant::now);
         let shared_quest_packets = self.dispatch_shared_quest_share_packets(&command_packets);
+        if let Some(start) = observer_detail_probe_start {
+            tick_probe_observer_quest_ms = probe_elapsed_ms(start);
+        }
+        let observer_detail_probe_start = is_world_tick.then(Instant::now);
         let observer_packets = if let Some(owner_id) = zone_observer_owner_id {
             self.dispatch_zone_observer_packets(owner_id, &command_packets)
         } else if is_world_tick
@@ -5675,7 +5932,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 Vec::new()
             }
         } else if forwards_delayed_player_action_packets {
-            if let Some(owner_id) = self.local_self_object_id() {
+            if command_packets.is_empty() {
+                Vec::new()
+            } else if let Some(owner_id) = self.local_self_object_id() {
                 let delayed_packets = delayed_player_action_packets(owner_id, &command_packets);
                 self.dispatch_zone_observer_packets(owner_id, &delayed_packets)
             } else {
@@ -5684,16 +5943,26 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             Vec::new()
         };
+        if let Some(start) = observer_detail_probe_start {
+            tick_probe_observer_zone_ms = probe_elapsed_ms(start);
+        }
         packets.extend(command_packets);
         packets.extend(shared_quest_packets);
         packets.extend(observer_packets);
+        if let Some(start) = observer_probe_start {
+            tick_probe_observer_ms = probe_elapsed_ms(start);
+        }
         if ticks_zone {
+            let probe_start = is_world_tick.then(Instant::now);
             packets.extend(self.dispatch_zone_player_command(
                 ZoneCommand::Tick {
                     now_ms: Self::zone_now_ms(),
                 },
                 false,
             ));
+            if let Some(start) = probe_start {
+                tick_probe_zone_ms = probe_elapsed_ms(start);
+            }
         }
         let mut packets = packets;
         if is_transfer_map_command {
@@ -5701,6 +5970,25 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }
         if !removes_presence && !skip_tail_zone_snapshot {
             packets.extend(self.sync_zone_snapshot());
+        }
+        if is_world_tick {
+            record_shared_tick_probe(SharedTickProbeMetrics {
+                count: 0,
+                pending: shared_tick_probe_phase_sample(tick_probe_pending_ms),
+                expire: shared_tick_probe_phase_sample(tick_probe_expire_ms),
+                command: shared_tick_probe_phase_sample(tick_probe_command_ms),
+                auto_pickup: shared_tick_probe_phase_sample(tick_probe_auto_pickup_ms),
+                observer: shared_tick_probe_phase_sample(tick_probe_observer_ms),
+                observer_detail: shared_tick_probe_observer_sample(
+                    tick_probe_observer_npc_ms,
+                    tick_probe_observer_apply_ms,
+                    tick_probe_observer_shared_ms,
+                    tick_probe_observer_drops_ms,
+                    tick_probe_observer_quest_ms,
+                    tick_probe_observer_zone_ms,
+                ),
+                zone: shared_tick_probe_phase_sample(tick_probe_zone_ms),
+            });
         }
         Ok(packets)
     }
@@ -9952,6 +10240,7 @@ mod tests {
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             cached_map_file_name: None,
+            cached_local_self_object_id: None,
             cached_map_transfers: Vec::new(),
             last_shared_entity_ids_by_map: Default::default(),
             last_shared_drop_ids_by_map: Default::default(),
@@ -11535,6 +11824,7 @@ mod tests {
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             cached_map_file_name: None,
+            cached_local_self_object_id: None,
             cached_map_transfers: Vec::new(),
             last_shared_entity_ids_by_map: Default::default(),
             last_shared_drop_ids_by_map: Default::default(),

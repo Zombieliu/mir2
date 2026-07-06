@@ -32,6 +32,8 @@
     "smoke:production-original-assets": "node ./scripts/smoke-production-original-assets.mjs",
     "smoke:production-bevy-runtime": "node ./scripts/smoke-production-bevy-runtime.mjs",
     "smoke:production-asset-runtime": "npm run smoke:production-original-assets && npm run smoke:production-bevy-runtime",
+    "probe:run": "node ./scripts/run-probe.mjs",
+    "probe:movement-suite": "node ./scripts/run-probe.mjs --movementSuite true --login true --createAccount true --durationMs 2000 --query \"movementDiag=1&movementLog=1&movementDiagSampleMs=500&assetCache=1\"",
     "release:doctor": "node ./scripts/release-doctor.mjs",
     "assets:remote:build": "node ./scripts/build-remote-asset-release.mjs",
     "assets:r2:dry-run": "node ./scripts/upload-r2-assets.mjs --dryRun true",
