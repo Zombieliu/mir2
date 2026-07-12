@@ -13,7 +13,16 @@ export type PendingSelfMove = {
   mode: CrystalMovementMode;
   sentAt: number;
   visualUntil: number;
+  phaseCount: number;
 };
+
+export type CrystalMovementProfile = Readonly<{
+  mode: CrystalMovementMode;
+  distance: 1 | 2 | 3;
+  phaseCount: 6 | 8;
+  frameIntervalMs: 100;
+  durationMs: 600 | 800;
+}>;
 
 export type QueuedMoveIntent = {
   kind: "direction" | "target";
@@ -36,6 +45,7 @@ export type MovementControllerState = {
 export type MovementAckOutcome = "confirmed" | "correction" | "accepted";
 
 export const CRYSTAL_MOVE_DELAY_MS = 600;
+export const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
 export const CRYSTAL_RUN_PRIME_MS = 1200;
 export const CRYSTAL_CORRECTION_BLOCK_MS = 400;
 export const MOVEMENT_PENDING_MAX_AGE_MS = 3000;
@@ -46,6 +56,25 @@ export function effectiveCrystalMovementMode(
   runPrimedUntil: number,
 ): CrystalMovementMode {
   return requestedMode === "run" && now <= runPrimedUntil ? "run" : "walk";
+}
+
+export function crystalMovementProfile(input: {
+  mode: CrystalMovementMode;
+  mounted?: boolean;
+  swiftFeet?: boolean;
+  sneaking?: boolean;
+}): CrystalMovementProfile {
+  const mounted = Boolean(input.mounted);
+  const threeTileRun = input.mode === "run" && (mounted || (input.swiftFeet && !input.sneaking));
+  const distance = input.mode === "walk" ? 1 : threeTileRun ? 3 : 2;
+  const phaseCount = mounted && input.mode === "walk" ? 8 : 6;
+  return {
+    mode: input.mode,
+    distance,
+    phaseCount,
+    frameIntervalMs: CRYSTAL_MOVE_FRAME_INTERVAL_MS,
+    durationMs: phaseCount === 8 ? 800 : 600,
+  };
 }
 
 export function movementPointInDirection(
@@ -81,16 +110,26 @@ export function createPendingSelfMove(input: {
   requestedMode: CrystalMovementMode;
   now: number;
   runPrimedUntil: number;
+  mounted?: boolean;
+  swiftFeet?: boolean;
+  sneaking?: boolean;
 }): PendingSelfMove {
   const mode = effectiveCrystalMovementMode(input.requestedMode, input.now, input.runPrimedUntil);
-  const to = movementPointInDirection(input.from, input.direction, mode === "run" ? 2 : 1);
+  const profile = crystalMovementProfile({
+    mode,
+    mounted: input.mounted,
+    swiftFeet: input.swiftFeet,
+    sneaking: input.sneaking,
+  });
+  const to = movementPointInDirection(input.from, input.direction, profile.distance);
   return {
     from: input.from,
     to,
     direction: input.direction,
     mode,
     sentAt: input.now,
-    visualUntil: input.now + CRYSTAL_MOVE_DELAY_MS,
+    visualUntil: input.now + profile.durationMs,
+    phaseCount: profile.phaseCount,
   };
 }
 
@@ -166,6 +205,22 @@ export function movementTransformMatches(left: MovementPoint, right: MovementPoi
 
 export const movementPointMatches = movementTileMatches;
 
+export function classifyMovementAckOutcome(input: {
+  pending: PendingSelfMove | null;
+  ack: MovementPoint;
+  packetName: string;
+}): MovementAckOutcome {
+  const pending = input.pending;
+  if (!pending) return "accepted";
+  if (input.packetName === "UserDashFail") return "correction";
+  if (movementTileMatches(input.ack, pending.to)) return "confirmed";
+  if (pending.mode === "run") {
+    const degraded = movementPointInDirection(pending.from, pending.direction, 1);
+    if (movementTileMatches(input.ack, degraded)) return "confirmed";
+  }
+  return "correction";
+}
+
 export function reconcileMovementAck(input: {
   state: MovementControllerState;
   ack: MovementPoint;
@@ -173,9 +228,14 @@ export function reconcileMovementAck(input: {
   now: number;
 }): { state: MovementControllerState; outcome: MovementAckOutcome } {
   const pending = input.state.pending;
-  if (!pending) {
+  const outcome = classifyMovementAckOutcome({
+    pending,
+    ack: input.ack,
+    packetName: input.packetName,
+  });
+  if (outcome === "accepted") {
     return {
-      outcome: "accepted",
+      outcome,
       state: {
         ...input.state,
         prediction: null,
@@ -183,49 +243,23 @@ export function reconcileMovementAck(input: {
     };
   }
 
-  const hardFailure = input.packetName === "UserDashFail";
-  if (!hardFailure && movementTileMatches(input.ack, pending.to)) {
+  if (outcome === "confirmed" && pending) {
     return {
-      outcome: "confirmed",
+      outcome,
       state: {
         ...input.state,
         pending: null,
         prediction: null,
-        nextMoveSendAt: Math.max(input.state.nextMoveSendAt, pending.sentAt + CRYSTAL_MOVE_DELAY_MS),
+        nextMoveSendAt: Math.max(input.state.nextMoveSendAt, pending.visualUntil),
         runPrimedUntil: input.now + CRYSTAL_RUN_PRIME_MS,
       },
     };
   }
 
-  // Run degraded to a single-tile walk by the server. A run predicts two tiles, but the
-  // server only extends to the second tile when the route keeps going the same way — if
-  // that tile is blocked/bends it advances ONE tile and keeps the player running (Crystal
-  // "a run can degrade to a walk"; see simulation movement.rs `pathfind_next_step`). The
-  // ack then lands on the first tile of the predicted run (from + 1 in the same direction).
-  // Treat that as a CONFIRM at the degraded tile — refresh the run prime and keep
-  // predicting — NOT a hard correction. The old behaviour reset the prime + blocked input
-  // on every blocked second tile, which (running through obstacle-dense town, where the
-  // second tile is frequently a tree/fence/NPC) collapsed a held run into a measured
-  // walk/standing stutter that advanced slower than a plain walk. A genuinely off-path ack
-  // still falls through to the correction below.
-  if (!hardFailure && pending.mode === "run") {
-    const degraded = movementPointInDirection(pending.from, pending.direction, 1);
-    if (movementTileMatches(input.ack, degraded)) {
-      return {
-        outcome: "confirmed",
-        state: {
-          ...input.state,
-          pending: null,
-          prediction: null,
-          nextMoveSendAt: Math.max(input.state.nextMoveSendAt, pending.sentAt + CRYSTAL_MOVE_DELAY_MS),
-          runPrimedUntil: input.now + CRYSTAL_RUN_PRIME_MS,
-        },
-      };
-    }
-  }
-
+  // The shared classifier already returned confirmed for an on-path one-tile
+  // run degradation. Anything reaching this branch is a real correction.
   return {
-    outcome: "correction",
+    outcome,
     state: {
       ...input.state,
       pending: null,

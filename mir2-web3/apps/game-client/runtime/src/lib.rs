@@ -1,5 +1,10 @@
+mod additive_material;
 mod interpolation;
+mod local_motion;
 mod motion;
+mod movement_shadow;
+mod presentation_pose;
+mod remote_motion;
 
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
@@ -50,7 +55,7 @@ thread_local! {
     static PENDING_ENTITY_RENDER_STATE: RefCell<Option<EntityRenderState>> = const { RefCell::new(None) };
     static PENDING_ENTITY_RENDER_ATLASES: RefCell<Vec<PendingEntityRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_RENDER_STATE: RefCell<Option<MapRenderState>> = const { RefCell::new(None) };
-    static PENDING_MAP_RENDER_ATLASES: RefCell<Vec<PendingMapRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
+    static PENDING_MAP_RENDER_IMAGE_OPS: RefCell<Vec<PendingMapRenderImageOp>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_CAMERA_OFFSET: Cell<(f32, f32)> = const { Cell::new((0.0, 0.0)) };
     // Optional self-player motion window (from_x, from_y, to_x, to_y, started_ms,
     // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
@@ -87,6 +92,7 @@ struct RuntimeMapRenderState {
 struct RuntimeMapRenderAtlases {
     images: HashMap<String, Handle<Image>>,
     layouts: HashMap<String, (Handle<TextureAtlasLayout>, HashMap<String, usize>)>,
+    revision: u64,
 }
 
 /// Per-frame sub-tile camera scroll offset (screen-stage pixels). In the
@@ -124,12 +130,25 @@ struct MapSceneCache {
 /// updates their Transform/Sprite IN PLACE across motion frames (only spawning
 /// tiles that entered the viewport + despawning those that left) — exactly like
 /// `sync_entity_render_layers`, instead of despawning + respawning all ~470
-/// tiles every sub-cell-motion frame. `applied` is the last fully-applied
-/// `MapRenderState` so an unchanged (stationary) snapshot skips the diff entirely.
+/// tiles every sub-cell-motion frame. `applied` stores only a lightweight
+/// producer/image revision fingerprint, not a clone of the complete draw list.
 #[derive(Default)]
 struct MapRenderSceneCache {
-    tiles: HashMap<String, Entity>,
-    applied: Option<MapRenderState>,
+    tiles: HashMap<String, MapRenderTileHandle>,
+    applied: Option<AppliedMapRenderState>,
+    generation: u64,
+}
+
+#[derive(Clone, Copy)]
+struct MapRenderTileHandle {
+    entity: Entity,
+    last_seen_generation: u64,
+}
+
+#[derive(Clone, Copy)]
+struct AppliedMapRenderState {
+    producer_revision: Option<u64>,
+    image_revision: u64,
 }
 
 #[derive(Clone, Copy)]
@@ -154,6 +173,7 @@ struct EntityRenderLayerHandle {
 struct EntityRenderAtlasHandle {
     layout: Handle<TextureAtlasLayout>,
     rects: HashMap<String, usize>,
+    size: UVec2,
     image_key: Option<String>,
     image: Option<Handle<Image>>,
 }
@@ -296,6 +316,10 @@ struct EntityRenderState {
     stage_width: f32,
     stage_height: f32,
     #[serde(default)]
+    center_x: Option<i32>,
+    #[serde(default)]
+    center_y: Option<i32>,
+    #[serde(default)]
     atlases: Vec<EntityRenderAtlas>,
     #[serde(default)]
     entities: Vec<EntityRenderEntry>,
@@ -329,6 +353,12 @@ struct EntityRenderEntry {
     object_id: String,
     #[serde(default)]
     dead: bool,
+    #[serde(default)]
+    is_self: bool,
+    #[serde(default)]
+    grid_x: Option<i32>,
+    #[serde(default)]
+    grid_y: Option<i32>,
     #[serde(default)]
     layers: Vec<EntityRenderLayer>,
     // Opt-in (`?bevyEntityInterp=1`) per-entity sub-cell motion window, in CSS-px
@@ -381,14 +411,20 @@ enum EntityKind {
 /// Snapshot of the current map-tile draw list pushed from the TS producer
 /// (`buildMapTileDrawList`'s output). Mirrors `EntityRenderState` so the map
 /// can be the Bevy-native renderer behind entities, at exact visual parity
-/// with the DOM `WebGl2MapAtlasLayer`. `PartialEq` lets `sync_map_render` diff
-/// against the last-applied snapshot and rebuild only on tile-list change.
+/// with the DOM `WebGl2MapAtlasLayer`. Producer-side semantic deduplication keeps
+/// revisions tied to real draw-list changes; the runtime retains tiles by key.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MapRenderState {
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
+    #[serde(default)]
+    revision: Option<u64>,
+    #[serde(default)]
+    center_x: Option<i32>,
+    #[serde(default)]
+    center_y: Option<i32>,
     /// Atlas page descriptors (key + page dims + the source rects within the
     /// page). Carries the rect geometry the per-tile `atlas_rect_key` indexes
     /// into; mirrors `EntityRenderState.atlases` so the same layout-building
@@ -398,6 +434,8 @@ struct MapRenderState {
     atlases: Vec<MapRenderAtlas>,
     #[serde(default)]
     tiles: Vec<MapTile>,
+    #[serde(default)]
+    standalone_tiles: Vec<MapStandaloneTile>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -445,11 +483,32 @@ struct MapTile {
     opacity: Option<f32>,
 }
 
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MapStandaloneTile {
+    key: String,
+    image_key: String,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+    z: f32,
+    #[serde(default)]
+    opacity: Option<f32>,
+    #[serde(default)]
+    additive: bool,
+}
+
 struct PendingMapRenderAtlasImage {
     key: String,
     width: u32,
     height: u32,
     pixels: Vec<u8>,
+}
+
+enum PendingMapRenderImageOp {
+    Upload(PendingMapRenderAtlasImage),
+    Evict(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -477,6 +536,58 @@ pub fn clear_mir2_status_sink() {
 #[wasm_bindgen(js_name = getMir2RendererBackend)]
 pub fn get_mir2_renderer_backend() -> String {
     COMPILED_RENDER_BACKEND.to_owned()
+}
+
+#[wasm_bindgen(js_name = pushMir2MovementShadowEvent)]
+pub fn push_mir2_movement_shadow_event(event_json: String) {
+    local_motion::enqueue_local_motion_event_json(event_json.clone());
+    remote_motion::enqueue_remote_motion_event_json(event_json.clone());
+    movement_shadow::enqueue_movement_shadow_event_json(event_json);
+}
+
+#[wasm_bindgen(js_name = getMir2MovementShadowDiagnostics)]
+pub fn get_mir2_movement_shadow_diagnostics() -> String {
+    movement_shadow::get_movement_shadow_diagnostics_json()
+}
+
+#[wasm_bindgen(js_name = setMir2RemoteMotionPresentationEnabled)]
+pub fn set_mir2_remote_motion_presentation_enabled(enabled: bool) {
+    remote_motion::set_remote_motion_presentation_enabled(enabled);
+}
+
+#[wasm_bindgen(js_name = getMir2RemoteMotionPresentationDiagnostics)]
+pub fn get_mir2_remote_motion_presentation_diagnostics() -> String {
+    remote_motion::get_remote_motion_presentation_diagnostics_json()
+}
+
+#[wasm_bindgen(js_name = getMir2LocalMotionDiagnostics)]
+pub fn get_mir2_local_motion_diagnostics() -> String {
+    local_motion::get_local_motion_diagnostics_json()
+}
+
+#[wasm_bindgen(js_name = setMir2LocalMotionPresentationEnabled)]
+pub fn set_mir2_local_motion_presentation_enabled(enabled: bool) {
+    local_motion::set_local_motion_presentation_enabled(enabled);
+}
+
+#[wasm_bindgen(js_name = getMir2PresentationPoses)]
+pub fn get_mir2_presentation_poses() -> String {
+    presentation_pose::get_presentation_pose_json()
+}
+
+#[wasm_bindgen(js_name = setMir2PresentationPoseEnabled)]
+pub fn set_mir2_presentation_pose_enabled(enabled: bool) {
+    presentation_pose::set_presentation_pose_enabled(enabled);
+}
+
+#[wasm_bindgen(js_name = setMir2PresentationPoseSink)]
+pub fn set_mir2_presentation_pose_sink(callback: Function) {
+    presentation_pose::set_presentation_pose_sink(callback);
+}
+
+#[wasm_bindgen(js_name = clearMir2PresentationPoseSink)]
+pub fn clear_mir2_presentation_pose_sink() {
+    presentation_pose::clear_presentation_pose_sink();
 }
 
 #[wasm_bindgen(js_name = setMir2WorldState)]
@@ -563,14 +674,28 @@ pub fn set_mir2_map_render_atlas(key: String, width: u32, height: u32, pixels: V
         return;
     }
 
-    PENDING_MAP_RENDER_ATLASES.with(|pending| {
-        pending.borrow_mut().push(PendingMapRenderAtlasImage {
-            key,
-            width,
-            height,
-            pixels,
-        });
+    PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| {
+        pending.borrow_mut().push(PendingMapRenderImageOp::Upload(
+            PendingMapRenderAtlasImage {
+                key,
+                width,
+                height,
+                pixels,
+            },
+        ));
     });
+}
+
+#[wasm_bindgen(js_name = evictMir2MapRenderImages)]
+pub fn evict_mir2_map_render_images(keys_json: String) {
+    match serde_json::from_str::<Vec<String>>(&keys_json) {
+        Ok(keys) => PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| {
+            pending
+                .borrow_mut()
+                .extend(keys.into_iter().map(PendingMapRenderImageOp::Evict));
+        }),
+        Err(error) => publish_status("map-render-evict-decode-error", &error.to_string()),
+    }
 }
 
 #[wasm_bindgen(js_name = setMir2MapCameraOffset)]
@@ -613,6 +738,7 @@ pub fn boot_mir2_runtime() {
         .insert_resource(SceneRegistry::default())
         .insert_resource(interpolation::SnapshotBuffer::default())
         .insert_resource(motion::EntityMotionTable::default())
+        .insert_resource(presentation_pose::PresentationPoseBuffer::default())
         .add_plugins(
             DefaultPlugins
                 .set(AssetPlugin {
@@ -635,6 +761,13 @@ pub fn boot_mir2_runtime() {
                     ..default()
                 }),
         )
+        .add_plugins((
+            additive_material::CrystalAdditiveMaterialPlugin,
+            motion::CrystalMoveClockPlugin,
+            local_motion::LocalMotionPresentationShadowPlugin,
+            movement_shadow::MovementShadowPlugin,
+            remote_motion::RemoteMotionPresentationPlugin,
+        ))
         .add_systems(Startup, setup_scene)
         .add_systems(
             Update,
@@ -644,13 +777,15 @@ pub fn boot_mir2_runtime() {
                 ingest_pending_entity_render_state,
                 ingest_pending_entity_render_atlases,
                 ingest_pending_map_render_state,
-                ingest_pending_map_render_atlases,
+                ingest_pending_map_render_images,
                 sync_map_render,
                 sync_map_scene,
                 sync_entities,
                 sync_mine_nodes,
+                begin_presentation_pose_frame,
                 sync_entity_render_layers,
                 follow_player,
+                publish_presentation_pose_frame,
             )
                 .chain(),
         );
@@ -743,25 +878,35 @@ fn ingest_pending_map_render_state(
     camera_offset.y = y;
 }
 
-fn ingest_pending_map_render_atlases(
+fn ingest_pending_map_render_images(
     mut atlas_resource: ResMut<RuntimeMapRenderAtlases>,
     mut images: ResMut<Assets<Image>>,
 ) {
-    PENDING_MAP_RENDER_ATLASES.with(|pending| {
-        for atlas in pending.borrow_mut().drain(..) {
-            let image = Image::new(
-                Extent3d {
-                    width: atlas.width,
-                    height: atlas.height,
-                    depth_or_array_layers: 1,
-                },
-                TextureDimension::D2,
-                atlas.pixels,
-                TextureFormat::Rgba8UnormSrgb,
-                RenderAssetUsages::default(),
-            );
-            let handle = images.add(image);
-            atlas_resource.images.insert(atlas.key, handle);
+    PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| {
+        for operation in pending.borrow_mut().drain(..) {
+            match operation {
+                PendingMapRenderImageOp::Upload(atlas) => {
+                    let image = Image::new(
+                        Extent3d {
+                            width: atlas.width,
+                            height: atlas.height,
+                            depth_or_array_layers: 1,
+                        },
+                        TextureDimension::D2,
+                        atlas.pixels,
+                        TextureFormat::Rgba8UnormSrgb,
+                        RenderAssetUsages::default(),
+                    );
+                    let handle = images.add(image);
+                    atlas_resource.images.insert(atlas.key, handle);
+                }
+                PendingMapRenderImageOp::Evict(key) => {
+                    atlas_resource.images.remove(&key);
+                }
+            }
+            // State JSON and image bytes travel over separate JS/WASM calls. Track
+            // image mutations so an unchanged state is rebound after upload/evict.
+            atlas_resource.revision = atlas_resource.revision.wrapping_add(1);
         }
     });
 }
@@ -776,14 +921,13 @@ fn ingest_pending_map_render_atlases(
 const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
 const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 
-/// Bevy-native map-tile renderer. Builds/refreshes the atlas-page
-/// `TextureAtlasLayout`s (mirrors `sync_entity_render_atlas_layouts`), then
-/// diffs the pushed `MapRenderState` against the last-applied snapshot. The tile
-/// list changes on cell-change / animation / sub-cell motion (the producer folds
-/// the camera offset into each tile's `left`/`top`, like the entity render
+/// Bevy-native map-tile renderer. Builds/refreshes atlas-page layouts, then skips
+/// an already-applied producer/image revision. The producer folds the camera
+/// offset into each tile's `left`/`top`, like the entity render
 /// layers), and on change the tiles are RETAINED and updated in place — keyed by
 /// `tile.key` (stable across motion for static tiles) the system updates each
-/// surviving tile's Transform/Sprite, spawns tiles that entered the viewport, and
+/// surviving tile's Transform, rebinds Sprite only when images change, spawns
+/// tiles that entered the viewport, and
 /// despawns those that left — exactly like `sync_entity_render_layers`, instead of
 /// despawning + respawning all ~470 sprites every motion frame. Tiles are spawned
 /// TOP-LEVEL (not children of a shared root): a child sprite's
@@ -795,11 +939,19 @@ const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 fn sync_map_render(
     mut commands: Commands,
     map_state: Res<RuntimeMapRenderState>,
+    entity_render_state: Res<RuntimeEntityRenderState>,
     map_camera_offset: Res<RuntimeMapCameraOffset>,
     mut atlas_assets: ResMut<RuntimeMapRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
+    mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
     mut registry: ResMut<SceneRegistry>,
     mut sprite_query: Query<&mut Sprite>,
+    mut additive_material_query: Query<
+        &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
+    >,
     mut transform_query: Query<&mut Transform>,
 ) {
     let active = map_state
@@ -807,23 +959,46 @@ fn sync_map_render(
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     if !active {
-        for (_, entity) in registry.map_render.tiles.drain() {
-            commands.entity(entity).despawn();
+        for (_, handle) in registry.map_render.tiles.drain() {
+            commands.entity(handle.entity).despawn();
         }
         registry.map_render.applied = None;
+        presentation_poses.set_applied_map_provenance(None, None);
         return;
     }
 
     let snapshot = map_state.snapshot.as_ref().unwrap();
 
+    // Map and entity producers can reach Bevy on adjacent React renders. Keep
+    // the last complete map frame until the entity snapshot names the same
+    // grid center; otherwise the map jumps one cell ahead while actors still
+    // use the old center, forcing the presentation bridge to fall back.
+    let map_center = snapshot
+        .center_x
+        .zip(snapshot.center_y)
+        .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
+    let entity_center = entity_render_state
+        .snapshot
+        .as_ref()
+        .filter(|entity_snapshot| entity_snapshot.enabled)
+        .and_then(|entity_snapshot| entity_snapshot.center_x.zip(entity_snapshot.center_y))
+        .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
+    if matches!((map_center, entity_center), (Some(map), Some(entity)) if map != entity) {
+        return;
+    }
+
     sync_map_render_atlas_layouts(snapshot, &mut atlas_assets, &mut texture_atlas_layouts);
 
-    if registry.map_render.applied.as_ref() == Some(snapshot) {
+    if registry.map_render.applied.as_ref().is_some_and(|applied| {
+        snapshot.revision.is_some()
+            && applied.producer_revision == snapshot.revision
+            && applied.image_revision == atlas_assets.revision
+    }) {
         return;
     }
 
     // The atlas IMAGES arrive on a SEPARATE async channel (setMir2MapRenderAtlas →
-    // ingest_pending_map_render_atlases) from the state push (setMir2MapRenderState),
+    // ingest_pending_map_render_images) from the state push (setMir2MapRenderState),
     // and the page decode is async on the web side — so for the first frame(s) after
     // a snapshot the runtime can hold the tile list before its atlas images are
     // ingested. If we proceeded now, `map_render_image_binding` would return None for
@@ -842,6 +1017,16 @@ fn sync_map_render(
         return;
     }
 
+    // Keep the previous complete frame visible while standalone textures decode.
+    // Mutating only the ready subset would despawn retained tiles and expose holes.
+    let standalone_images_ready = snapshot
+        .standalone_tiles
+        .iter()
+        .all(|tile| atlas_assets.images.contains_key(&tile.image_key));
+    if !standalone_images_ready {
+        return;
+    }
+
     // The producer uses the fold-in model (`cameraOffset` stays (0, 0); sub-cell
     // motion is already baked into `left`/`top`), so this offset is normally a
     // no-op — folded in here only so a future offset-model producer still positions
@@ -851,11 +1036,13 @@ fn sync_map_render(
     // RETAIN-IN-PLACE: update surviving tiles, spawn newcomers, despawn leavers —
     // mirrors sync_entity_render_layers so sub-cell motion is cheap Transform writes
     // rather than a full despawn+respawn of every tile each frame.
-    let mut alive: HashSet<String> = HashSet::with_capacity(snapshot.tiles.len());
+    let rebind_images = registry
+        .map_render
+        .applied
+        .is_none_or(|applied| applied.image_revision != atlas_assets.revision);
+    registry.map_render.generation = registry.map_render.generation.saturating_add(1);
+    let generation = registry.map_render.generation;
     for tile in &snapshot.tiles {
-        let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
-            continue;
-        };
         // Screen-stage → centred world coords, Y flipped — identical to
         // `entity_render_layer_position` so tiles share the entities' space.
         let world_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5 + offset_x;
@@ -863,20 +1050,26 @@ fn sync_map_render(
         // Unified y-sort with entities (Stage 2): same depth→world-z conversion as
         // entity_render_layer_position incl. the entity producer's ×10 gain.
         let world_z = tile.z * MAP_TILE_ENTITY_DEPTH_GAIN / MAP_TILE_Z_DENOM;
-        let custom_size = Some(Vec2::new(tile.width, tile.height));
-        let color = Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0));
-        alive.insert(tile.key.clone());
-        if let Some(&entity) = registry.map_render.tiles.get(&tile.key) {
-            if let Ok(mut sprite) = sprite_query.get_mut(entity) {
-                sprite.image = image;
-                sprite.texture_atlas = Some(texture_atlas);
-                sprite.custom_size = custom_size;
-                sprite.color = color;
+        if let Some(handle) = registry.map_render.tiles.get_mut(&tile.key) {
+            handle.last_seen_generation = generation;
+            if rebind_images {
+                if let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets)
+                {
+                    if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                        sprite.image = image;
+                        sprite.texture_atlas = Some(texture_atlas);
+                    }
+                }
             }
-            if let Ok(mut transform) = transform_query.get_mut(entity) {
+            if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
                 transform.translation = Vec3::new(world_x, world_y, world_z);
             }
         } else {
+            let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
+                continue;
+            };
+            let custom_size = Some(Vec2::new(tile.width, tile.height));
+            let color = Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0));
             let entity = commands
                 .spawn((
                     Sprite {
@@ -889,7 +1082,96 @@ fn sync_map_render(
                     Transform::from_xyz(world_x, world_y, world_z),
                 ))
                 .id();
-            registry.map_render.tiles.insert(tile.key.clone(), entity);
+            registry.map_render.tiles.insert(
+                tile.key.clone(),
+                MapRenderTileHandle {
+                    entity,
+                    last_seen_generation: generation,
+                },
+            );
+        }
+    }
+
+    for tile in &snapshot.standalone_tiles {
+        let world_x = tile.left + tile.width * 0.5 - snapshot.stage_width * 0.5 + offset_x;
+        let world_y = snapshot.stage_height * 0.5 - (tile.top + tile.height * 0.5) + offset_y;
+        let world_z = tile.z * MAP_TILE_ENTITY_DEPTH_GAIN / MAP_TILE_Z_DENOM;
+        if let Some(handle) = registry.map_render.tiles.get_mut(&tile.key) {
+            handle.last_seen_generation = generation;
+            if rebind_images {
+                let image = atlas_assets
+                    .images
+                    .get(&tile.image_key)
+                    .expect("standalone images were preflighted")
+                    .clone();
+                if tile.additive {
+                    let material = additive_cache.material(
+                        &tile.key,
+                        image,
+                        tile.opacity.unwrap_or(1.0),
+                        &mut additive_materials,
+                    );
+                    if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                        *binding = MeshMaterial2d(material);
+                    }
+                } else if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                    sprite.image = image;
+                    sprite.texture_atlas = None;
+                }
+            }
+            if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                transform.translation = Vec3::new(world_x, world_y, world_z);
+                if tile.additive {
+                    transform.scale = Vec3::new(tile.width, tile.height, 1.0);
+                }
+            }
+        } else {
+            let image = atlas_assets
+                .images
+                .get(&tile.image_key)
+                .expect("standalone images were preflighted")
+                .clone();
+            let entity = if tile.additive {
+                let mesh = additive_cache.unit_quad(&mut meshes);
+                let material = additive_cache.material(
+                    &tile.key,
+                    image,
+                    tile.opacity.unwrap_or(1.0),
+                    &mut additive_materials,
+                );
+                commands
+                    .spawn((
+                        Mesh2d(mesh),
+                        MeshMaterial2d(material),
+                        Transform::from_xyz(world_x, world_y, world_z).with_scale(Vec3::new(
+                            tile.width,
+                            tile.height,
+                            1.0,
+                        )),
+                    ))
+                    .id()
+            } else {
+                let custom_size = Some(Vec2::new(tile.width, tile.height));
+                let color = Color::srgba(1.0, 1.0, 1.0, tile.opacity.unwrap_or(1.0));
+                commands
+                    .spawn((
+                        Sprite {
+                            image,
+                            custom_size,
+                            color,
+                            ..default()
+                        },
+                        Transform::from_xyz(world_x, world_y, world_z),
+                    ))
+                    .id()
+            };
+            registry.map_render.tiles.insert(
+                tile.key.clone(),
+                MapRenderTileHandle {
+                    entity,
+                    last_seen_generation: generation,
+                },
+            );
         }
     }
 
@@ -897,24 +1179,42 @@ fn sync_map_render(
     let stale: Vec<String> = registry
         .map_render
         .tiles
-        .keys()
-        .filter(|key| !alive.contains(*key))
-        .cloned()
+        .iter()
+        .filter_map(|(key, handle)| {
+            (handle.last_seen_generation != generation).then(|| key.clone())
+        })
         .collect();
     for key in stale {
-        if let Some(entity) = registry.map_render.tiles.remove(&key) {
-            commands.entity(entity).despawn();
+        if let Some(handle) = registry.map_render.tiles.remove(&key) {
+            commands.entity(handle.entity).despawn();
         }
     }
 
     let live_count = registry.map_render.tiles.len();
-    registry.map_render.applied = Some(snapshot.clone());
+    let additive_count = snapshot
+        .standalone_tiles
+        .iter()
+        .filter(|tile| tile.additive)
+        .count();
+    registry.map_render.applied = Some(AppliedMapRenderState {
+        producer_revision: snapshot.revision,
+        image_revision: atlas_assets.revision,
+    });
+    presentation_poses.set_applied_map_provenance(
+        snapshot
+            .center_x
+            .zip(snapshot.center_y)
+            .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y }),
+        snapshot.revision,
+    );
     publish_status(
         "map-render-synced",
         &format!(
-            "Applied {} map tiles ({} live)",
+            "Applied {} map tiles + {} standalone tiles ({} additive, {} live)",
             snapshot.tiles.len(),
-            live_count
+            snapshot.standalone_tiles.len(),
+            additive_count,
+            live_count,
         ),
     );
 }
@@ -1221,17 +1521,35 @@ fn sync_entity_render_layers(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
+    mut remote_motion: ResMut<remote_motion::RemoteMotionPresentation>,
+    mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
 ) {
     let Some(snapshot) = &entity_render_state.snapshot else {
         clear_entity_render_layers(&mut commands, &mut registry);
+        presentation_poses.set_applied_entity_center(None);
         return;
     };
 
     if !snapshot.enabled {
         clear_entity_render_layers(&mut commands, &mut registry);
+        presentation_poses.set_applied_entity_center(None);
+        return;
+    }
+
+    let entity_center = snapshot
+        .center_x
+        .zip(snapshot.center_y)
+        .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
+    if matches!(
+        (presentation_poses.applied_map_center(), entity_center),
+        (Some(map), Some(entity)) if map != entity
+    ) {
+        // The matching map snapshot has not committed yet. Keep the previous
+        // entity transforms/provenance so the renderer never publishes a
+        // mixed-center frame; this state is retried on the next Bevy tick.
         return;
     }
 
@@ -1248,7 +1566,43 @@ fn sync_entity_render_layers(
         // Sub-cell glide offset for this entity (CSS-px screen space). Default
         // path / self player ⇒ no motion window ⇒ Vec2::ZERO ⇒ byte-identical to
         // the producer's fold-in. Computed once per entity, applied to every layer.
-        let motion_offset = entity_interp_offset(entity, motion_table.now_ms);
+        let remote_offset = (!entity.is_self)
+            .then(|| entity.grid_x.zip(entity.grid_y))
+            .flatten()
+            .and_then(|(x, y)| {
+                remote_motion.presentation_offset(
+                    &entity.object_id,
+                    x,
+                    y,
+                    motion_table.now_ms,
+                    48.0,
+                    32.0,
+                )
+            });
+        let (motion_offset, pose_source) = if entity.is_self {
+            let source = match presentation_poses.camera_source() {
+                presentation_pose::CameraPoseSource::LocalCommand => {
+                    presentation_pose::EntityPoseSource::LocalCommand
+                }
+                presentation_pose::CameraPoseSource::SelfWindow => {
+                    presentation_pose::EntityPoseSource::SnapshotWindow
+                }
+                presentation_pose::CameraPoseSource::Static => {
+                    presentation_pose::EntityPoseSource::Static
+                }
+            };
+            (presentation_poses.self_entity_offset(), source)
+        } else if let Some(offset) = remote_offset {
+            (offset, presentation_pose::EntityPoseSource::RemotePacket)
+        } else {
+            let source = if entity_has_motion_window(entity) {
+                presentation_pose::EntityPoseSource::SnapshotWindow
+            } else {
+                presentation_pose::EntityPoseSource::Static
+            };
+            (entity_interp_offset(entity, motion_table.now_ms), source)
+        };
+        presentation_poses.record_entity(&entity.object_id, motion_offset, pose_source);
         for layer in &entity.layers {
             let layer_key = if layer.key.is_empty() {
                 format!("{}:{}", entity.object_id, layer.path)
@@ -1327,6 +1681,8 @@ fn sync_entity_render_layers(
             commands.entity(handle.entity).despawn();
         }
     }
+
+    presentation_poses.set_applied_entity_center(entity_center);
 }
 
 struct EntityRenderImageBinding {
@@ -1348,20 +1704,7 @@ fn sync_entity_render_atlas_layouts(
 
     for atlas in &snapshot.atlases {
         alive.insert(atlas.key.clone());
-        if registry.entity_render_atlases.contains_key(&atlas.key) {
-            continue;
-        }
-
-        let mut layout = TextureAtlasLayout::new_empty(UVec2::new(atlas.width, atlas.height));
-        let mut rects = HashMap::new();
-        for rect in &atlas.rects {
-            let index = layout.add_texture(URect {
-                min: UVec2::new(rect.x, rect.y),
-                max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
-            });
-            rects.insert(rect.key.clone(), index);
-        }
-        let layout = texture_atlas_layouts.add(layout);
+        let size = UVec2::new(atlas.width, atlas.height);
         let uploaded_image = atlas_assets.images.get(&atlas.key).cloned();
         let url_image = atlas.image_url.as_ref().map(|image_url| {
             let asset_path = browser_asset_path(image_url);
@@ -1374,11 +1717,41 @@ fn sync_entity_render_atlas_layouts(
         } else {
             (None, None)
         };
+
+        // Prebuilt pages keep a stable page key while the web producer sends
+        // only rects used by the current scene. A turn or attack can therefore
+        // add rects under an existing key. Reusing the old layout made those
+        // frames miss the atlas and fall back to asynchronous per-PNG loading,
+        // which presented as disappearing monsters and skipped attacks.
+        let layout_is_current =
+            registry
+                .entity_render_atlases
+                .get(&atlas.key)
+                .is_some_and(|existing| {
+                    existing.size == size
+                        && existing.image_key == image_key
+                        && entity_render_atlas_contains_rects(&existing.rects, &atlas.rects)
+                });
+        if layout_is_current {
+            continue;
+        }
+
+        let mut layout = TextureAtlasLayout::new_empty(size);
+        let mut rects = HashMap::new();
+        for rect in &atlas.rects {
+            let index = layout.add_texture(URect {
+                min: UVec2::new(rect.x, rect.y),
+                max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+            });
+            rects.insert(rect.key.clone(), index);
+        }
+        let layout = texture_atlas_layouts.add(layout);
         registry.entity_render_atlases.insert(
             atlas.key.clone(),
             EntityRenderAtlasHandle {
                 layout,
                 rects,
+                size,
                 image_key,
                 image,
             },
@@ -1388,6 +1761,13 @@ fn sync_entity_render_atlas_layouts(
     registry
         .entity_render_atlases
         .retain(|key, _| alive.contains(key));
+}
+
+fn entity_render_atlas_contains_rects(
+    existing: &HashMap<String, usize>,
+    incoming: &[EntityRenderAtlasRect],
+) -> bool {
+    incoming.iter().all(|rect| existing.contains_key(&rect.key))
 }
 
 fn entity_render_image_binding(
@@ -1503,6 +1883,15 @@ fn entity_interp_offset(entity: &EntityRenderEntry, now_ms: f64) -> Vec2 {
     )
 }
 
+fn entity_has_motion_window(entity: &EntityRenderEntry) -> bool {
+    entity.motion_from_x.is_some()
+        && entity.motion_from_y.is_some()
+        && entity.motion_to_x.is_some()
+        && entity.motion_to_y.is_some()
+        && entity.motion_started_ms.is_some()
+        && entity.motion_duration_ms.is_some()
+}
+
 fn browser_asset_path(path: &str) -> String {
     path.trim_start_matches('/')
         .split('?')
@@ -1522,15 +1911,17 @@ fn browser_asset_path(path: &str) -> String {
 /// `stage_h/2 - top`. NOTE: the x/y signs are derived from the fold-in math but
 /// have NOT been visually verified on a high-refresh display — if the world
 /// scrolls the wrong way, flip the sign(s) here (this is the one spot).
-fn self_camera_translation(motion_table: &motion::EntityMotionTable) -> Vec2 {
+fn self_camera_screen_offset(
+    motion_table: &motion::EntityMotionTable,
+) -> (Vec2, presentation_pose::CameraPoseSource) {
     let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) =
         PENDING_SELF_CAMERA_MOTION.with(|cell| cell.get())
     else {
-        return Vec2::ZERO;
+        return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
     let now = motion_table.now_ms;
-    if now >= expires_ms {
-        return Vec2::ZERO;
+    if expires_ms <= started_ms || now >= expires_ms || (from_x == to_x && from_y == to_y) {
+        return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     }
     let entry = motion::EntityMotionEntry {
         from_x,
@@ -1541,13 +1932,155 @@ fn self_camera_translation(motion_table: &motion::EntityMotionTable) -> Vec2 {
         expires_ms,
     };
     let offset = motion::compute_motion_offset(&entry, now, 48.0, 32.0);
-    Vec2::new(offset.x, -offset.y)
+    (-offset, presentation_pose::CameraPoseSource::SelfWindow)
+}
+
+fn begin_presentation_pose_frame(
+    entity_render_state: Res<RuntimeEntityRenderState>,
+    motion_table: Res<motion::EntityMotionTable>,
+    mut local_motion: ResMut<local_motion::LocalMotionPresentationShadow>,
+    mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
+) {
+    if let Some(enabled) = presentation_pose::take_pending_enabled() {
+        presentation_poses.set_enabled(enabled);
+    }
+    let renderer_enabled = entity_render_state
+        .snapshot
+        .as_ref()
+        .is_some_and(|snapshot| snapshot.enabled);
+    presentation_poses.begin_frame(motion_table.now_ms, renderer_enabled);
+    let (ts_camera_offset, ts_source) = self_camera_screen_offset(&motion_table);
+    let mut selected_camera_offset = ts_camera_offset;
+    let mut selected_source = ts_source;
+    let mut selected_motion = None;
+
+    if let Some((snapshot, self_entity)) =
+        entity_render_state.snapshot.as_ref().and_then(|snapshot| {
+            snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.is_self)
+                .map(|self_entity| (snapshot, self_entity))
+        })
+    {
+        let ts_window = PENDING_SELF_CAMERA_MOTION.with(|cell| {
+            cell.get()
+                .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
+                    local_motion::LocalTsMotionWindow {
+                        from_x,
+                        from_y,
+                        to_x,
+                        to_y,
+                        started_ms,
+                        expires_ms,
+                    }
+                })
+        });
+        let active_ts_window = ts_window.filter(|window| {
+            window.expires_ms > window.started_ms
+                && motion_table.now_ms < window.expires_ms
+                && (window.from_x != window.to_x || window.from_y != window.to_y)
+        });
+        let matching_path =
+            active_ts_window.is_some_and(|window| local_motion.segment_matches_ts_window(window));
+
+        if ts_source == presentation_pose::CameraPoseSource::SelfWindow {
+            if let Some(ts_window) = active_ts_window {
+                if matching_path {
+                    if let Some(candidate) = local_motion.candidate_offset(
+                        &self_entity.object_id,
+                        ts_window.to_x,
+                        ts_window.to_y,
+                        motion_table.now_ms,
+                        48.0,
+                        32.0,
+                    ) {
+                        local_motion.compare_with_actual(
+                            motion_table.now_ms,
+                            &self_entity.object_id,
+                            candidate,
+                            -ts_camera_offset,
+                            ts_window,
+                        );
+                    }
+                } else if local_motion.has_matching_segment_target(
+                    &self_entity.object_id,
+                    ts_window.to_x,
+                    ts_window.to_y,
+                ) {
+                    local_motion.record_ts_window_path_mismatch();
+                } else {
+                    local_motion.record_ts_window_target_mismatch();
+                }
+            }
+        }
+
+        let entity_center = snapshot
+            .center_x
+            .zip(snapshot.center_y)
+            .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
+        let common_applied_center = presentation_poses
+            .applied_map_center()
+            .filter(|center| Some(*center) == entity_center);
+        let ts_allows_command = active_ts_window.is_none() || matching_path;
+        let takeover_candidate = common_applied_center
+            .filter(|_| ts_allows_command)
+            .and_then(|center| {
+                local_motion.candidate_offset_for_applied_center(
+                    &self_entity.object_id,
+                    center.x,
+                    center.y,
+                    motion_table.now_ms,
+                    48.0,
+                    32.0,
+                )
+            });
+
+        if local_motion.presentation_enabled() {
+            if let Some(candidate) = takeover_candidate {
+                // The entity offset is relative to the center that both render
+                // layers actually use. Its inverse camera offset keeps the
+                // composed pose continuous when that center advances a cell.
+                selected_camera_offset = -candidate;
+                selected_source = presentation_pose::CameraPoseSource::LocalCommand;
+                selected_motion = local_motion.presentation_phase().map(|phase| {
+                    presentation_pose::EntityPresentationMotion {
+                        frame_index: phase.frame_index,
+                        phase_count: phase.phase_count,
+                        mode: phase.mode,
+                        direction: phase.direction,
+                    }
+                });
+            } else if ts_source == presentation_pose::CameraPoseSource::Static
+                && self_entity
+                    .grid_x
+                    .zip(self_entity.grid_y)
+                    .is_some_and(|(x, y)| {
+                        local_motion.has_matching_segment_target(&self_entity.object_id, x, y)
+                    })
+            {
+                // Retain ownership of the exact settled zero after a matched
+                // command; corrections clear the segment and stay TS-owned.
+                selected_camera_offset = Vec2::ZERO;
+                selected_source = presentation_pose::CameraPoseSource::LocalCommand;
+            }
+        }
+    }
+
+    presentation_poses.set_local_self_motion(selected_motion);
+    presentation_poses.set_camera(selected_camera_offset, selected_source);
+}
+
+fn publish_presentation_pose_frame(
+    presentation_poses: Res<presentation_pose::PresentationPoseBuffer>,
+) {
+    presentation_poses.publish_with(presentation_pose::push_presentation_pose_json);
 }
 
 fn follow_player(
     state: Res<RuntimeWorldState>,
     entity_render_state: Res<RuntimeEntityRenderState>,
-    motion_table: Res<motion::EntityMotionTable>,
+    presentation_poses: Res<presentation_pose::PresentationPoseBuffer>,
     mut camera_query: Query<
         &mut Transform,
         (
@@ -1568,7 +2101,8 @@ fn follow_player(
         // Default (no self motion pushed) ⇒ Vec2::ZERO ⇒ camera pinned at origin =
         // the current fold-in behaviour, byte-identical. Non-zero only under
         // ?bevySelfCamera=1.
-        let translation = self_camera_translation(&motion_table);
+        let camera_offset = presentation_poses.camera_screen_offset();
+        let translation = Vec2::new(-camera_offset.x, camera_offset.y);
         camera_transform.translation.x = translation.x;
         camera_transform.translation.y = translation.y;
         camera_transform.translation.z = 0.0;
@@ -2164,4 +2698,32 @@ fn publish_status(phase: &str, message: &str) {
         );
         let _ = callback.call1(&JsValue::NULL, &payload.into());
     });
+}
+
+#[cfg(test)]
+mod entity_atlas_tests {
+    use super::*;
+
+    fn rect(key: &str) -> EntityRenderAtlasRect {
+        EntityRenderAtlasRect {
+            key: key.to_string(),
+            x: 0,
+            y: 0,
+            width: 32,
+            height: 48,
+        }
+    }
+
+    #[test]
+    fn cached_layout_must_cover_new_transient_action_rects() {
+        let existing = HashMap::from([("standing".to_string(), 0)]);
+        assert!(entity_render_atlas_contains_rects(
+            &existing,
+            &[rect("standing")]
+        ));
+        assert!(!entity_render_atlas_contains_rects(
+            &existing,
+            &[rect("standing"), rect("attack")]
+        ));
+    }
 }

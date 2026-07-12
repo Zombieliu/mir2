@@ -21,11 +21,17 @@ import type {
   TranslateFn,
 } from "./original-client-types";
 import {
+  crystalObjectLightSpec,
+  crystalSceneLightClassName,
+} from "./original-client-scene-lighting";
+import {
   EMPTY_VIEWPORT_OFFSET,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
   VIEWPORT_ENTITY_LEFT_ORIGIN,
   VIEWPORT_ENTITY_TOP_ORIGIN,
+  VIEWPORT_RANGE_X,
+  VIEWPORT_RANGE_Y,
   VIEWPORT_TILE_CENTER_X,
   VIEWPORT_TILE_CENTER_Y,
   argbToCssColor,
@@ -41,8 +47,8 @@ import {
   isEntityAttacking,
   isEntityReviving,
   isEntityStruck,
-  mapSpriteBlendMode,
   mapSpriteRenderPath,
+  resolvedMapSpriteBlendMode,
   questIconForEntity,
   ratio,
   viewportDepthForCell,
@@ -67,6 +73,17 @@ type ViewportProjectile = DisplayProjectile & {
 type ViewportEntitySpriteEntry = {
   entity: DisplayEntity & { dx: number; dy: number };
   sprite: ViewportEntitySprite | null;
+};
+
+type ViewportMapLight = {
+  key: string;
+  value: number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  tone: "neutral" | "cool" | "warm" | "green";
+  opacity: number;
 };
 
 type EntitySpriteLayersProps = {
@@ -213,6 +230,62 @@ function loadEffectAssetsOnce(): Promise<EffectAssets> {
     );
   }
   return effectAssetsPromise;
+}
+
+function collectViewportMapLights(
+  world: DisplayWorld,
+  player: DisplayEntity | null,
+  cameraOffset: ViewportOffset,
+): ViewportMapLight[] {
+  if (!player || !world.originalMapRegion) return [];
+
+  const lights: ViewportMapLight[] = [];
+  const maxDx = VIEWPORT_RANGE_X + 4;
+  const maxDy = VIEWPORT_RANGE_Y + 8;
+
+  for (const cell of world.originalMapRegion.cells) {
+    const lightValue = typeof cell.light === "number" && Number.isFinite(cell.light) ? Math.trunc(cell.light) : 0;
+    if (lightValue <= 0) continue;
+
+    const dx = cell.x - player.x;
+    const dy = cell.y - player.y;
+    if (Math.abs(dx) > maxDx || Math.abs(dy) > maxDy) continue;
+
+    const intensity = crystalMapLightIntensity(lightValue);
+    lights.push({
+      key: `map-light-${cell.x}-${cell.y}-${lightValue}`,
+      value: lightValue,
+      left: VIEWPORT_TILE_CENTER_X + dx * VIEWPORT_CELL_WIDTH + cameraOffset.x,
+      top: VIEWPORT_TILE_CENTER_Y + dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + 4,
+      width: 110 + intensity * 28,
+      height: 82 + intensity * 22,
+      tone: crystalMapLightTone(lightValue),
+      opacity: Math.min(0.82, 0.36 + intensity * 0.045),
+    });
+
+    if (lights.length >= 80) break;
+  }
+
+  return lights;
+}
+
+function crystalMapLightIntensity(lightValue: number) {
+  const lowDigit = lightValue % 10;
+  if (lowDigit > 0) return Math.min(Math.max(lowDigit, 1), 9);
+  return Math.min(Math.max(Math.trunc(lightValue / 10), 1), 9);
+}
+
+function crystalMapLightTone(lightValue: number): ViewportMapLight["tone"] {
+  switch (Math.trunc(lightValue / 10)) {
+    case 2:
+      return "cool";
+    case 3:
+      return "warm";
+    case 4:
+      return "green";
+    default:
+      return "neutral";
+  }
 }
 
 function useEffectAssets(): EffectAssets | null {
@@ -387,6 +460,16 @@ function OriginalClientSceneVisualLayersInner({
     },
     { now: motionNow, assets: effectAssets },
   );
+  const sceneLightClassName = crystalSceneLightClassName(world.lightSetting);
+  const viewportMapLights = sceneLightClassName
+    ? collectViewportMapLights(world, player, playerCameraMotionOffset)
+    : [];
+  const viewportObjectLights = sceneLightClassName
+    ? viewportEntitySprites.flatMap(({ entity }) => {
+        const spec = crystalObjectLightSpec(entity, entity.objectId === player?.objectId);
+        return spec ? [{ entity, spec }] : [];
+      })
+    : [];
 
   return (
     <>
@@ -440,32 +523,45 @@ function OriginalClientSceneVisualLayersInner({
         ref={imperativeCamera ? registerCameraSurface("sprites") : undefined}
         className={`viewport-sprite-overlay ${screen !== "game" ? "hidden" : ""}`}
       >
-        {viewportMapSprites.objects.map((sprite) => (
-          <img
-            key={sprite.key}
-            className="scene-map-object-sprite"
-            src={mapSpriteRenderPath(sprite.path)}
-            alt=""
-            draggable={false}
-            data-map-sprite-path={sprite.path}
-            data-map-render-path={mapSpriteRenderPath(sprite.path)}
-            data-mir2-original-src={mapSpriteRenderPath(sprite.path)}
-            data-map-cell-x={sprite.cellX}
-            data-map-cell-y={sprite.cellY}
-            onError={handleSceneAssetImageError}
-            onLoad={handleSceneAssetImageLoad}
-            style={{
-              left: sprite.left + playerCameraMotionOffset.x,
-              top: sprite.top + playerCameraMotionOffset.y,
-              width: sprite.width,
-              height: sprite.height,
-              mixBlendMode: mapSpriteBlendMode(sprite.path),
-              zIndex: sprite.zIndex,
-            }}
-          />
-        ))}
+        {viewportMapSprites.objects.map((sprite) => {
+          const blendMode = resolvedMapSpriteBlendMode(sprite);
+          const renderPath = mapSpriteRenderPath(sprite.path);
+          // Tall additive beams need a brighter curve than compact torch glows.
+          const isBlendColumn = Boolean(blendMode && sprite.width <= 64 && sprite.height >= 180);
+          return (
+            <img
+              key={sprite.key}
+              className="scene-map-object-sprite"
+              src={renderPath}
+              alt=""
+              draggable={false}
+              data-map-sprite-path={sprite.path}
+              data-map-render-path={renderPath}
+              data-mir2-original-src={renderPath}
+              data-map-cell-x={sprite.cellX}
+              data-map-cell-y={sprite.cellY}
+              onError={handleSceneAssetImageError}
+              onLoad={handleSceneAssetImageLoad}
+              style={{
+                left: sprite.left + playerCameraMotionOffset.x,
+                top: sprite.top + playerCameraMotionOffset.y,
+                width: sprite.width,
+                height: sprite.height,
+                mixBlendMode: blendMode,
+                opacity: blendMode ? (isBlendColumn ? 1 : 0.78) : undefined,
+                filter: blendMode
+                  ? isBlendColumn
+                    ? "brightness(2.35) saturate(1.08)"
+                    : "brightness(2.25) saturate(0.72)"
+                  : undefined,
+                zIndex: sprite.zIndex,
+              }}
+            />
+          );
+        })}
         {viewportEntitySprites.map(({ entity, sprite }) => {
           const isPlayer = player?.objectId === entity.objectId;
+          const isInteractiveEntity = !isPlayer;
           // In the imperative path the sub-tile glide is written by the motion driver
           // (display Hz) onto this stack's transform; render at the cell base here.
           const entityMotionOffset =
@@ -507,32 +603,35 @@ function OriginalClientSceneVisualLayersInner({
                 top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y}px`,
                 zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64),
               }}
-              data-ui-interactive="true"
-              onMouseDown={handleEntityPointerActivate}
-              onContextMenu={handleEntityContextActivate}
+              data-ui-interactive={isInteractiveEntity ? "true" : "false"}
+              data-object-id={entity.objectId}
+              onMouseDown={isInteractiveEntity ? handleEntityPointerActivate : undefined}
+              onContextMenu={isInteractiveEntity ? handleEntityContextActivate : undefined}
             >
               {healthRatio !== null ? (
                 <div className="entity-health-bar">
                   <span style={{ width: `${healthRatio * 100}%` }} />
                 </div>
               ) : null}
-              <button
-                type="button"
-                className="entity-sprite-hit"
-                style={{
-                  left: `${hitBounds.left}px`,
-                  top: `${hitBounds.top}px`,
-                  width: `${hitWidth}px`,
-                  height: `${hitHeight}px`,
-                }}
-                aria-label={label}
-                onMouseDown={handleEntityPointerActivate}
-                onContextMenu={handleEntityContextActivate}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              />
+              {isInteractiveEntity ? (
+                <button
+                  type="button"
+                  className="entity-sprite-hit"
+                  style={{
+                    left: `${hitBounds.left}px`,
+                    top: `${hitBounds.top}px`,
+                    width: `${hitWidth}px`,
+                    height: `${hitHeight}px`,
+                  }}
+                  aria-label={label}
+                  onMouseDown={handleEntityPointerActivate}
+                  onContextMenu={handleEntityContextActivate}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
+                />
+              ) : null}
               <EntitySpriteLayers
                 useBevyEntityRenderer={useBevyEntityRenderer}
                 sprite={sprite}
@@ -584,6 +683,78 @@ function OriginalClientSceneVisualLayersInner({
         ))}
       </div>
 
+      {screen === "game" && sceneLightClassName ? (
+        <div
+          aria-hidden="true"
+          className={`viewport-crystal-light-overlay ${sceneLightClassName}`}
+          data-light-setting={world.lightSetting ?? ""}
+        >
+          <div
+            ref={imperativeCamera ? registerCameraSurface("map-lights") : undefined}
+            className="viewport-map-light-surface"
+          >
+            {viewportMapLights.map((light) => (
+              <span
+                key={light.key}
+                className={`viewport-map-light ${light.tone}`}
+                data-light-value={light.value}
+                style={{
+                  left: light.left,
+                  top: light.top,
+                  width: light.width,
+                  height: light.height,
+                  opacity: light.opacity,
+                }}
+              />
+            ))}
+            {viewportObjectLights.map(({ entity, spec }) => {
+              const isPlayer = entity.objectId === player?.objectId;
+              const entityMotionOffset =
+                isPlayer || imperativeCamera
+                  ? EMPTY_VIEWPORT_OFFSET
+                  : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+              const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+              const centerX =
+                VIEWPORT_ENTITY_LEFT_ORIGIN +
+                entity.dx * VIEWPORT_CELL_WIDTH +
+                VIEWPORT_CELL_WIDTH / 2 +
+                cameraOffset.x +
+                entityMotionOffset.x;
+              const centerY =
+                VIEWPORT_ENTITY_TOP_ORIGIN +
+                entity.dy * VIEWPORT_CELL_HEIGHT +
+                VIEWPORT_CELL_HEIGHT / 2 +
+                5 +
+                cameraOffset.y +
+                entityMotionOffset.y;
+
+              return (
+                <span
+                  key={`object-light-${entity.objectId}`}
+                  ref={
+                    imperativeCamera
+                      ? registerEntityEl(`light:${entity.objectId}`, entity.objectId)
+                      : undefined
+                  }
+                  className={`viewport-object-light ${spec.tone}`}
+                  data-object-id={entity.objectId}
+                  data-light-value={spec.value}
+                  data-light-range={spec.range}
+                  data-light-strength-bucket={spec.strengthBucket}
+                  style={{
+                    left: centerX - spec.width / 2,
+                    top: centerY - spec.height / 2,
+                    width: spec.width,
+                    height: spec.height,
+                    opacity: spec.opacity,
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       <div
         ref={imperativeCamera ? registerCameraSurface("names") : undefined}
         className={`viewport-entity-overlay ${screen !== "game" ? "hidden" : ""}`}
@@ -591,6 +762,7 @@ function OriginalClientSceneVisualLayersInner({
         {player
           ? viewportEntitySprites.map(({ entity, sprite }) => {
               const isPlayer = player.objectId === entity.objectId;
+              const isInteractiveEntity = !isPlayer;
               // Imperative path: the driver writes the sub-tile glide onto this
               // nameplate's transform (display Hz); render at the cell base here.
               const entityMotionOffset =
@@ -611,19 +783,29 @@ function OriginalClientSceneVisualLayersInner({
                     top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
                     "--entity-name-color": entityNameplateColor(entity),
                   } as CSSProperties}
-                  data-ui-interactive="true"
-                  onMouseDown={(event) => {
-                    if (event.button === 0 || event.button === 2) {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    }
-                  }}
-                  onClick={() => onActivateEntity(entity.objectId)}
-                  onContextMenu={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onActivateEntity(entity.objectId);
-                  }}
+                  data-ui-interactive={isInteractiveEntity ? "true" : "false"}
+                  data-object-id={entity.objectId}
+                  tabIndex={isInteractiveEntity ? undefined : -1}
+                  onMouseDown={
+                    isInteractiveEntity
+                      ? (event) => {
+                          if (event.button === 0 || event.button === 2) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                          }
+                        }
+                      : undefined
+                  }
+                  onClick={isInteractiveEntity ? () => onActivateEntity(entity.objectId) : undefined}
+                  onContextMenu={
+                    isInteractiveEntity
+                      ? (event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          onActivateEntity(entity.objectId);
+                        }
+                      : undefined
+                  }
                 >
                   {labelLines.map((line, index) => (
                     <strong

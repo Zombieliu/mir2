@@ -52,6 +52,8 @@ img {
   height: 100vh;
   background: #000;
   --mir-stage-scale: 1;
+  --mir-stage-left: 0px;
+  --mir-stage-top: 0px;
 }
 
 .mir-stage {
@@ -63,13 +65,13 @@ img {
 
 .client-stage-frame {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: var(--mir-stage-left, 0px);
+  top: var(--mir-stage-top, 0px);
   width: 1024px;
   height: 768px;
   overflow: hidden;
-  transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 1));
-  transform-origin: center center;
+  transform: scale(var(--mir-stage-scale, 1));
+  transform-origin: top left;
   background: #000;
   box-shadow: none;
   cursor: var(--mir-cursor-default);
@@ -328,6 +330,79 @@ img {
   pointer-events: none;
 }
 
+.viewport-crystal-light-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Darkness is screen-fixed. World lights inherit the Bevy presentation camera;
+   the self light cancels that camera through the shared per-entity pose bridge. */
+.viewport-map-light-surface {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.viewport-crystal-light-overlay.night {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.viewport-crystal-light-overlay.evening {
+  background: rgba(0, 0, 0, 0.56);
+}
+
+.viewport-crystal-light-overlay.dawn {
+  background: rgba(0, 0, 0, 0.56);
+}
+
+.viewport-map-light {
+  position: absolute;
+  display: block;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 235, 0.92) 0%, rgba(220, 214, 178, 0.48) 45%, transparent 78%);
+  filter: blur(0.35px);
+}
+
+.viewport-map-light.cool {
+  background: radial-gradient(ellipse at center, rgba(210, 232, 255, 0.92) 0%, rgba(120, 180, 255, 0.48) 45%, transparent 78%);
+}
+
+.viewport-map-light.warm {
+  background: radial-gradient(ellipse at center, rgba(255, 236, 176, 0.96) 0%, rgba(255, 180, 92, 0.54) 45%, transparent 80%);
+}
+
+.viewport-map-light.green {
+  background: radial-gradient(ellipse at center, rgba(190, 255, 170, 0.86) 0%, rgba(42, 190, 42, 0.42) 45%, transparent 78%);
+}
+
+.viewport-object-light {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 245, 0.98) 0%,
+    rgba(236, 232, 205, 0.52) 44%,
+    transparent 78%
+  );
+}
+
+.viewport-object-light.merchant {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(236, 236, 225, 0.94) 0%,
+    rgba(180, 180, 170, 0.48) 44%,
+    transparent 78%
+  );
+}
+
 .client-stage-frame.scene-assets-pending .viewport-grid-overlay {
   pointer-events: none;
 }
@@ -537,6 +612,10 @@ img {
   text-align: center;
   box-shadow: none;
   text-shadow: 1px 1px 0 #000;
+}
+
+.entity-nameplate[data-ui-interactive="false"] {
+  pointer-events: none;
 }
 
 .entity-nameplate strong {
@@ -1512,19 +1591,22 @@ img {
   left: 1px;
   top: 1px;
   width: 614px;
-  display: grid;
-  grid-auto-rows: 13px;
-  gap: 0;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .chat-feed-line {
+  height: 13px;
   min-height: 13px;
+  max-width: 614px;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 11px;
   line-height: 13px;
   color: #000;
   text-shadow: none;
-  background: #fff;
+  background: transparent;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -1554,6 +1636,11 @@ img {
   color: #008000;
 }
 
+.chat-feed-line.channel-line {
+  color: #fff;
+  background: #0000ff;
+}
+
 .chat-feed-line.channel-hint {
   color: #006400;
 }
@@ -1569,6 +1656,11 @@ img {
   background: rgba(72, 72, 72, 0.82);
   color: #101010;
   font-size: 11px;
+}
+
+.chat-textbox[data-chat-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .chat-frame.transparent .chat-frame-bg,
@@ -1650,6 +1742,7 @@ img {
 .belt-item {
   position: absolute;
   inset: 0;
+  z-index: 2;
   border: 0;
   background: transparent;
   overflow: visible;
@@ -1659,13 +1752,15 @@ img {
 
 .belt-slot-label {
   position: absolute;
+  z-index: 3;
   width: 26px;
   height: 14px;
-  color: #ddcfb3;
+  color: #111;
   font-size: 11px;
   line-height: 14px;
   text-align: center;
-  text-shadow: 1px 1px 0 #000;
+  text-shadow: 1px 1px 0 #d8c8a2;
+  pointer-events: none;
 }
 
 .belt-button {
@@ -3302,6 +3397,7 @@ img {
 
 .item-stack-count {
   position: absolute;
+  z-index: 4;
   min-width: 12px;
   color: #ecd5a1;
   font-size: 10px;
@@ -3726,8 +3822,9 @@ img {
 }
 
 .belt-item-count {
-  right: -2px;
-  bottom: -1px;
+  right: 1px;
+  bottom: 1px;
+  color: #ffff00;
 }
 
 .inventory-quest-log {
@@ -3900,11 +3997,12 @@ button.character-spell-value:hover {
 
 .mini-map-panel {
   position: absolute;
-  right: 0;
+  right: -2px;
   top: 0;
   width: 128px;
   height: 154px;
   z-index: 15;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .mini-map-panel.small {
@@ -3950,6 +4048,8 @@ button.character-spell-value:hover {
   left: 46px;
   top: 131px;
   width: 56px;
+  height: 18px;
+  line-height: 18px;
   text-align: center;
   font-size: 11px;
   text-shadow: 1px 1px 0 #000;
@@ -4254,24 +4354,46 @@ button.character-spell-value:hover {
   left: 0;
   top: 616px;
   z-index: 15;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .main-hud {
   position: relative;
+  /* Crystal's captured MainDialog content lands 2px below the shell anchor. */
+  top: 2px;
   width: 1024px;
   height: 152px;
 }
 
 .hud-base,
 .hud-exp-bar,
-.hud-weight-bar,
 .hud-cap {
   position: absolute;
 }
 
 .hud-base { left: 0; top: 0; }
 .hud-exp-bar { left: 9px; top: 143px; }
-.hud-weight-bar { left: 919px; top: 103px; }
+.hud-weight-bar {
+  position: absolute;
+  left: 919px;
+  top: 103px;
+  width: 76px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.hud-weight-bar-clip {
+  height: 12px;
+  overflow: hidden;
+}
+
+.hud-weight-bar-fill {
+  display: block;
+  width: 76px;
+  height: 12px;
+  max-width: none;
+}
+
 .hud-cap { display: none; bottom: 0; }
 .hud-cap.left { left: -67px; }
 .hud-cap.right { right: -72px; }
@@ -4287,6 +4409,10 @@ button.character-spell-value:hover {
 
 .hud-orb-fill.hp {
   left: 0;
+}
+
+.hud-orb-fill.hp-only {
+  width: 101px;
 }
 
 .hud-orb-fill.mp {
@@ -4336,21 +4462,21 @@ button.character-spell-value:hover {
 .hud-map-label { left: 394px; top: 111px; width: 260px; text-align: center; font-size: 11px; color: #cfbb95; }
 .hud-buff-label { left: 356px; top: 94px; width: 336px; text-align: center; font-size: 10px; color: #8ff0af; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .hud-exp-label { left: 492px; top: 133px; width: 60px; text-align: center; font-size: 11px; color: #ddc99c; }
-.hud-gold-label { display: none; }
-.hud-weight-label { left: 930px; top: 119px; width: 56px; text-align: right; font-size: 12px; }
-.hud-space-label { left: 992px; top: 119px; width: 24px; text-align: right; font-size: 12px; }
+.hud-gold-label { left: 919px; top: 119px; width: 99px; height: 13px; font-size: 12px; }
+.hud-weight-label { left: 919px; top: 101px; width: 40px; height: 14px; font-size: 12px; }
+.hud-space-label { left: 994px; top: 101px; width: 26px; height: 14px; font-size: 12px; }
 
 .hud-button {
   position: absolute;
 }
 
-.hud-button.shop { left: 918px; top: 35px; }
-.hud-button.menu { left: 968px; top: 35px; }
-.hud-button.character { left: 904px; top: 76px; }
-.hud-button.inventory { left: 927px; top: 76px; }
-.hud-button.skill { left: 950px; top: 76px; }
-.hud-button.quest { left: 973px; top: 76px; }
-.hud-button.option { left: 996px; top: 76px; }
+.hud-button.shop { left: 919px; top: 35px; }
+.hud-button.menu { left: 969px; top: 35px; }
+.hud-button.character { left: 905px; top: 76px; }
+.hud-button.inventory { left: 928px; top: 76px; }
+.hud-button.skill { left: 951px; top: 76px; }
+.hud-button.quest { left: 974px; top: 76px; }
+.hud-button.option { left: 997px; top: 76px; }
 
 .mir-mobile-controls,
 .mir-mobile-rotate-overlay {
@@ -4589,7 +4715,7 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.78));
+    transform: scale(var(--mir-stage-scale, 0.78));
   }
 
   .mail-row-message,
@@ -4612,13 +4738,13 @@ button.character-spell-value:hover {
 
 @media (max-width: 799px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.72));
+    transform: scale(var(--mir-stage-scale, 0.72));
   }
 }
 
 @media (max-height: 575px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.7));
+    transform: scale(var(--mir-stage-scale, 0.7));
   }
 }
 
@@ -4633,13 +4759,13 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
+    transform: scale(var(--mir-stage-scale, 0.54));
   }
 }
 
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 420px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.49));
+    transform: scale(var(--mir-stage-scale, 0.49));
   }
 
   .mir-mobile-stick-shell {
@@ -4723,7 +4849,7 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.42));
+    transform: scale(var(--mir-stage-scale, 0.42));
     opacity: 0.58;
   }
 }
@@ -4733,7 +4859,7 @@ button.character-spell-value:hover {
 }
 
 .mir-client-page.force-mobile-controls .client-stage-frame {
-  transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
+  transform: scale(var(--mir-stage-scale, 0.54));
 }
 
 .debug-snapshot-toast {

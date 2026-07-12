@@ -52,8 +52,10 @@ type DisplayEntity = {
   objectId: string;
   kind: "selfPlayer" | "player" | "monster" | "npc";
   name: string;
+  ownerName?: string;
   x: number;
   y: number;
+  dead?: boolean;
   bigMapIcon?: number;
   showOnBigMap?: boolean;
   canTeleportTo?: boolean;
@@ -65,6 +67,7 @@ type DisplayWorld = {
   inSafeZone: boolean;
   miniMapIndex: number | null;
   bigMapIndex?: number | null;
+  lightSetting?: number | null;
   originalMapRegion: { mapWidth: number; mapHeight: number } | null;
   entities: DisplayEntity[];
   terrainPatches: Array<{
@@ -286,6 +289,7 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
   const smallMode = collapsed || !hasRasterMiniMap;
   const panelFrame = smallMode ? ORIGINAL_UI.game.miniMapSmall : ORIGINAL_UI.game.miniMap;
   const mapTitle = crystalMiniMapTitle(world.mapTitle, t);
+  const lightIcon = crystalMiniMapLightIcon(world.lightSetting);
 
   useEffect(() => {
     if (hasRasterMiniMap) {
@@ -312,7 +316,7 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
       {!smallMode ? <div className="mini-map-name">
         <span>{mapTitle}</span>
       </div> : null}
-      <div className="mini-map-coords">{player ? `${player.x}:${player.y}` : "--:--"}</div>
+      <div className="mini-map-coords">{player ? `${player.x}, ${player.y}` : "0, 0"}</div>
       <div className="mini-map-button mail">
         <SpriteButton
           sprite={ORIGINAL_UI.game.miniMapButtons.mail}
@@ -329,10 +333,10 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
       </div> : null}
       <img
         className="mini-map-light"
-        src={ORIGINAL_UI.game.miniMapIcons.light}
+        src={lightIcon}
         alt=""
         draggable={false}
-        data-mir2-original-src={ORIGINAL_UI.game.miniMapIcons.light}
+        data-mir2-original-src={lightIcon}
         onError={handleSceneAssetImageError}
         onLoad={handleSceneAssetImageLoad}
       />
@@ -415,16 +419,17 @@ const MiniMapScene = memo(function MiniMapScene({ world, player }: MiniMapSceneP
         </svg>
       )}
       <svg className="mini-map-overlay" viewBox={overlayViewBox} preserveAspectRatio="none">
-        {world.entities.map((entity) => {
+        {world.entities.filter(isMiniMapRadarEntity).map((entity) => {
           const point = miniMapViewportPointForWorldPoint(bounds, entity);
+          const rect = miniMapRadarRect(point, radarDot, rasterMode);
           return (
             <rect
               key={`mini-${entity.objectId}`}
-              x={point.x - radarDot.width / 2}
-              y={point.y - radarDot.height / 2}
+              x={rect.x}
+              y={rect.y}
               width={radarDot.width}
               height={radarDot.height}
-              fill={miniMapEntityColor(entity.kind)}
+              fill={miniMapEntityColor(entity, player)}
             />
           );
         })}
@@ -480,6 +485,21 @@ function crystalMiniMapTitle(mapTitle: string | null, t: TranslateFn) {
     .filter(Boolean)
     .filter((part) => !safeZoneLabels.some((label) => part.toLocaleLowerCase() === label.toLocaleLowerCase()));
   return normalized[0] ?? fallback;
+}
+
+function crystalMiniMapLightIcon(lightSetting: number | null | undefined) {
+  switch (lightSetting) {
+    case 1:
+      return ORIGINAL_UI.game.miniMapIcons.lightDawn;
+    case 3:
+      return ORIGINAL_UI.game.miniMapIcons.lightEvening;
+    case 4:
+      return ORIGINAL_UI.game.miniMapIcons.lightNight;
+    case 0:
+    case 2:
+    default:
+      return ORIGINAL_UI.game.miniMapIcons.light;
+  }
 }
 
 function bigMapNpcKey(mapFileName: string | null | undefined, name: string, x: number, y: number) {
@@ -560,8 +580,8 @@ function miniMapBounds(
           x: (transform.imageMinX + transform.imageMaxX) / 2,
           y: (transform.imageMinY + transform.imageMaxY) / 2,
         };
-    const rasterLeft = clampNumber(Math.round(center.x - viewWidth / 2), 0, Math.max(asset.width - viewWidth, 0));
-    const rasterTop = clampNumber(Math.round(center.y - viewHeight / 2), 0, Math.max(asset.height - viewHeight, 0));
+    const rasterLeft = clampNumber(Math.trunc(center.x) - Math.floor(viewWidth / 2), 0, Math.max(asset.width - viewWidth, 0));
+    const rasterTop = clampNumber(Math.trunc(center.y) - Math.floor(viewHeight / 2), 0, Math.max(asset.height - viewHeight, 0));
 
     return {
       minX: player ? player.x - 12 : mapWidth / 2 - 12,
@@ -719,6 +739,24 @@ function miniMapViewportPointForWorldPoint(
   };
 }
 
+function isMiniMapRadarEntity(entity: DisplayEntity) {
+  return !entity.dead;
+}
+
+function miniMapRadarRect(
+  point: CrystalMiniMapPoint,
+  radarDot: { width: number; height: number },
+  rasterMode: boolean,
+) {
+  if (rasterMode) {
+    return { x: point.x - 0.5, y: point.y - 0.5 };
+  }
+  return {
+    x: point.x - radarDot.width / 2,
+    y: point.y - radarDot.height / 2,
+  };
+}
+
 function useMapDebugEnabled() {
   const [enabled, setEnabled] = useState(false);
   useEffect(() => {
@@ -782,8 +820,15 @@ function miniMapTerrainColor(kind: string) {
   }
 }
 
-function miniMapEntityColor(kind: string) {
-  switch (kind) {
+function miniMapEntityColor(entity: DisplayEntity, player: DisplayEntity | null) {
+  if (player && entity.objectId !== player.objectId) {
+    const ownerName = entity.ownerName?.trim();
+    if ((ownerName && ownerName === player.name) || entity.name.endsWith(`(${player.name})`)) {
+      return "#0000ff";
+    }
+  }
+
+  switch (entity.kind) {
     case "selfPlayer":
     case "player":
       return "#ffffff";

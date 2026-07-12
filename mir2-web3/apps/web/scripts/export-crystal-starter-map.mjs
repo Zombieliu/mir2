@@ -135,7 +135,7 @@ async function main() {
   function registerSprite(layer, kind) {
     const library = ensureLibrary(layer.libraryKey);
     const drawMode = resolveDrawMode(layer, library);
-    const spriteKey = `${kind}|${layer.libraryKey}|${drawMode}|${layer.frames.join(",")}`;
+    const spriteKey = `${kind}|${layer.libraryKey}|${drawMode}|${layer.blendMode}|${layer.frames.join(",")}`;
     const existingId = spriteIds.get(spriteKey);
     if (existingId) {
       return existingId;
@@ -153,6 +153,7 @@ async function main() {
     sprites[id] = {
       kind,
       drawMode,
+      blendMode: layer.blendMode,
       frames,
     };
     spriteIds.set(spriteKey, id);
@@ -569,6 +570,7 @@ function backLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.backIndex),
     drawMode: "floor",
+    blendMode: "normal",
     frames: [frameIndex],
   };
 }
@@ -591,6 +593,7 @@ function middleLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.middleIndex),
     drawMode: "auto",
+    blendMode: crystalMiddleMapBlendMode(cell.middleAnimationFrame),
     frames,
   };
 }
@@ -610,6 +613,7 @@ function frontLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.frontIndex),
     drawMode: "auto",
+    blendMode: crystalFrontMapBlendMode(cell.frontAnimationFrame),
     frames,
   };
 }
@@ -635,8 +639,18 @@ function tileAnimationLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(190),
     drawMode: "object",
+    blendMode: "normal",
     frames,
   };
+}
+
+function crystalMiddleMapBlendMode(animationFrame) {
+  const count = decodeMiddleAnimationCount(animationFrame);
+  return count === 8 || count === 10 ? "additive" : "normal";
+}
+
+function crystalFrontMapBlendMode(animationFrame) {
+  return (animationFrame & 0x80) !== 0 ? "additive" : "normal";
 }
 
 function decodeMiddleAnimationCount(animationFrame) {
@@ -1103,8 +1117,8 @@ function parseType6Map(fileName, bytes) {
     for (let y = 0; y < height; y += 1) {
       if (offset + 20 > bytes.length) break;
       const flag = bytes.readUInt8(offset);
-      let frontAnimationFrame = bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
-      if (frontAnimationFrame > 0x0f) frontAnimationFrame &= 0x0f;
+      const frontAnimationFrame =
+        bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
       let frontIndex = bytes.readUInt8(offset + 3) !== 255 ? bytes.readUInt8(offset + 3) + 300 : -1;
       const baseFrontImage = bytes.readInt16LE(offset + 8) + 1;
       if (baseFrontImage === 1 && frontIndex === 200) frontIndex = -1;

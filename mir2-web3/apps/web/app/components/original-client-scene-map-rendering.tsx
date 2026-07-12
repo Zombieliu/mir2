@@ -4,7 +4,11 @@ import { memo, type SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import blendFramesManifest from "../../public/generated/original-map-blend/blend-frames.json";
-import { type MapAtlasIndex, mapAtlasRectKeyForPath } from "../../lib/map-atlas-manifest";
+import {
+  type MapAtlasIndex,
+  mapAtlasPathRequiresAlphaKey,
+  mapAtlasRectKeyForPath,
+} from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
 import {
   alphaKeyMapObjectPixels,
@@ -12,7 +16,7 @@ import {
   offThreadAlphaKeyAvailable,
 } from "../../lib/scene-alpha-key";
 import type { DisplayEntity, DisplayWorld } from "./original-client-types";
-import type { MapTileDraw } from "./webgl2-map-atlas-layer";
+import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import {
   EMPTY_VIEWPORT_MAP_SPRITES,
   EMPTY_VIEWPORT_OFFSET,
@@ -23,6 +27,7 @@ import {
   VIEWPORT_TILE_LEFT_ORIGIN,
   VIEWPORT_TILE_TOP_ORIGIN,
   viewportDepthForCell,
+  viewportFloorDepthForCell,
   type SceneBackdropTile,
   type ViewportMapSprite,
   type ViewportMapSprites,
@@ -33,12 +38,11 @@ type OriginalMapCell = OriginalMapRegion["cells"][number];
 type OriginalMapSpriteKind = OriginalMapRegion["sprites"][string]["kind"];
 
 const mapRegionCellIndexCache = new WeakMap<OriginalMapRegion, Map<string, OriginalMapCell>>();
-const FLOOR_LAYER_Z_STRIDE = 16_384;
-const FLOOR_LAYER_Z_OFFSETS: Record<OriginalMapSpriteKind, number> = {
+const FLOOR_LAYER_ORDERS: Record<OriginalMapSpriteKind, number> = {
   back: 0,
-  middle: FLOOR_LAYER_Z_STRIDE,
-  front: FLOOR_LAYER_Z_STRIDE * 2,
-  tileAnimation: FLOOR_LAYER_Z_STRIDE * 3,
+  middle: 1,
+  front: 2,
+  tileAnimation: 3,
 };
 
 function GameSceneBackdropInner({
@@ -46,11 +50,15 @@ function GameSceneBackdropInner({
   player,
   floorSprites,
   cameraOffset,
+  imperativeCamera = false,
+  registerCameraSurface,
 }: {
   world: DisplayWorld;
   player: DisplayEntity | null;
   floorSprites: ViewportMapSprite[];
   cameraOffset: ViewportOffset;
+  imperativeCamera?: boolean;
+  registerCameraSurface?: (key: string) => (el: HTMLElement | null) => void;
 }) {
   const tiles = world.originalMapRegion ? [] : buildSceneBackdropTiles(world, player);
 
@@ -61,7 +69,10 @@ function GameSceneBackdropInner({
   const renderOffset = floorSprites.length ? cameraOffset : EMPTY_VIEWPORT_OFFSET;
 
   return (
-    <div className="game-scene-backdrop">
+    <div
+      ref={imperativeCamera ? registerCameraSurface?.("backdrop") : undefined}
+      className="game-scene-backdrop"
+    >
       {tiles.map((tile) => (
         <div
           key={tile.key}
@@ -213,6 +224,12 @@ export function buildMapTileDrawList(
   const uncoveredFloor: ViewportMapSprite[] = [];
   const uncoveredObjects: ViewportMapSprite[] = [];
   const add = (sprite: ViewportMapSprite, uncovered: ViewportMapSprite[]) => {
+    if (resolvedMapSpriteBlendMode(sprite) || mapAtlasPathRequiresAlphaKey(sprite.path)) {
+      // Additive cells need SourceAlpha + One, while legacy object libraries need
+      // Crystal's black-key conversion. Both require the decoded standalone path.
+      uncovered.push(sprite);
+      return;
+    }
     const rectKey = mapAtlasRectKeyForPath(sprite.path);
     const atlasKey = rectKey ? index.rectToAtlas.get(rectKey) : undefined;
     if (!rectKey || !atlasKey) {
@@ -233,6 +250,69 @@ export function buildMapTileDrawList(
   for (const sprite of mapSprites.floor) add(sprite, uncoveredFloor);
   for (const sprite of mapSprites.objects) add(sprite, uncoveredObjects);
   return { tiles, uncovered: { floor: uncoveredFloor, objects: uncoveredObjects } };
+}
+
+export type MapStandaloneTileImageSource = {
+  imageKey: string;
+  fetchUrl: string;
+  alphaKeyMapObject: boolean;
+};
+
+export function buildStandaloneMapTiles(
+  mapSprites: ViewportMapSprites,
+  cameraOffset: ViewportOffset,
+): {
+  tiles: MapStandaloneTileDraw[];
+  images: MapStandaloneTileImageSource[];
+  domFallback: ViewportMapSprites;
+  imageKeyBySpriteKey: Map<string, string>;
+} {
+  const tiles: MapStandaloneTileDraw[] = [];
+  const images = new Map<string, MapStandaloneTileImageSource>();
+  const domFallbackFloor: ViewportMapSprite[] = [];
+  const domFallbackObjects: ViewportMapSprite[] = [];
+  const imageKeyBySpriteKey = new Map<string, string>();
+  const add = (
+    sprite: ViewportMapSprite,
+    domFallback: ViewportMapSprite[],
+  ) => {
+  // Keep every atlas miss in DOM until the shell confirms the decoded image is
+  // resident in the current Bevy runtime. Additive misses use a dedicated
+  // SourceAlpha + One material once that handoff completes.
+    domFallback.push(sprite);
+    const additive = Boolean(resolvedMapSpriteBlendMode(sprite));
+    const rectKey = mapAtlasRectKeyForPath(sprite.path);
+    const imageKey = `${additive ? "standalone-additive" : "standalone"}:${rectKey ?? sprite.path}`;
+    // Additive blending needs the original dark-matte pixels. Black contributes
+    // zero under SourceAlpha + One; the cleaned DOM asset would attenuate twice.
+    const fetchUrl = additive ? sprite.path : mapSpriteRenderPath(sprite.path);
+    const alphaKeyMapObject = !additive && mapAtlasPathRequiresAlphaKey(fetchUrl);
+    tiles.push({
+      key: `${additive ? "standalone-additive" : "standalone"}:${sprite.key}`,
+      imageKey,
+      left: sprite.left + cameraOffset.x,
+      top: sprite.top + cameraOffset.y,
+      width: sprite.width,
+      height: sprite.height,
+      z: sprite.zIndex,
+      additive: additive || undefined,
+    });
+    imageKeyBySpriteKey.set(sprite.key, imageKey);
+    const existing = images.get(imageKey);
+    if (!existing) {
+      images.set(imageKey, { imageKey, fetchUrl, alphaKeyMapObject });
+    } else if (alphaKeyMapObject && !existing.alphaKeyMapObject) {
+      images.set(imageKey, { ...existing, alphaKeyMapObject: true });
+    }
+  };
+  for (const sprite of mapSprites.floor) add(sprite, domFallbackFloor);
+  for (const sprite of mapSprites.objects) add(sprite, domFallbackObjects);
+  return {
+    tiles,
+    images: Array.from(images.values()),
+    domFallback: { floor: domFallbackFloor, objects: domFallbackObjects },
+    imageKeyBySpriteKey,
+  };
 }
 
 function viewportMapCells(
@@ -351,6 +431,7 @@ function appendViewportMapSprite(
     key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
     path: frame.path,
     kind: sprite.kind,
+    blendMode: sprite.blendMode,
     cellX: cell.x,
     cellY: cell.y,
     left,
@@ -359,7 +440,7 @@ function appendViewportMapSprite(
     height: frame.height,
     zIndex:
       sprite.drawMode === "floor"
-        ? viewportDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_Z_OFFSETS[sprite.kind])
+        ? viewportFloorDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_ORDERS[sprite.kind])
         : viewportDepthForCell(cell.x, cell.y, player, 1),
   });
 }
@@ -503,6 +584,14 @@ function sceneTintForTerrain(terrain: string, variation: number) {
 
 export function mapSpriteBlendMode(path: string) {
   return blendObjectFrameKey(path) ? "screen" : undefined;
+}
+
+export function resolvedMapSpriteBlendMode(
+  sprite: Pick<ViewportMapSprite, "path" | "blendMode">,
+) {
+  if (sprite.blendMode === "additive") return "screen";
+  if (sprite.blendMode === "normal") return undefined;
+  return mapSpriteBlendMode(sprite.path);
 }
 
 export function mapSpriteRenderPath(path: string) {
@@ -668,7 +757,7 @@ async function applyMapObjectAlphaKey(image: HTMLImageElement) {
   }
 
   const originalSrc = image.dataset.mir2OriginalSrc ?? image.getAttribute("src") ?? "";
-  if (!isBlackKeyedMapObjectPath(originalSrc)) {
+  if (!mapAtlasPathRequiresAlphaKey(originalSrc)) {
     return;
   }
 
@@ -789,22 +878,11 @@ export function sceneAssetRuntimeStats() {
   };
 }
 
-function isBlackKeyedMapObjectPath(path: string) {
-  const normalized = normalizedSceneAssetPath(path);
-  return (
-    normalized !== null &&
-    normalized.startsWith("/original-map/") &&
-    /\/(?:objects|objects2|smobjects|furnitures|walls|animations)/i.test(normalized)
-  );
-}
-
 function normalizedSceneAssetPath(path: string) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
   try {
-    return new URL(path, window.location.href).pathname;
+    const baseUrl =
+      typeof window === "undefined" ? "https://mir2.invalid/" : window.location.href;
+    return new URL(path, baseUrl).pathname;
   } catch {
     return null;
   }
@@ -858,8 +936,9 @@ function sceneAssetDelayedRetryUrl(originalSrc: string, retryCount: number) {
   return retryCandidates[(retryCount - 1) % retryCandidates.length] ?? retryCandidates[0] ?? null;
 }
 
-// Crystal blends glow objects ADDITIVELY (Effect.cs:130, MLibrary.cs:692). On the DOM fallback path we
-// fake additive with a darkness->alpha "cleaned" sprite + mix-blend-mode:screen. The set of glow frames
+// Crystal blends glow objects ADDITIVELY (DXManager.SetBlend: SourceAlpha + One). On the DOM
+// fallback path we fake additive with a darkness->alpha cleaned sprite plus per-shape
+// opacity/filter-tuned mix-blend-mode:screen. The set of glow frames
 // is no longer a hardcoded index range (2723..2732 was the DrawBlend `offSet` argument, GameScene.cs:10928,
 // NOT the blend gate) — it is the data-driven manifest emitted by
 // scripts/generate-crystal-map-blend-assets.mjs (dark-matte/bright-core pixel classification). The ten

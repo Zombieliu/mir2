@@ -2,7 +2,13 @@ param(
   [double]$DurationHours = 6,
   [int]$IntervalSeconds = 600,
   [int]$MaxSamples = 0,
-  [string]$OutputDir = ""
+  [string]$OutputDir = "",
+  [string]$WebBaseUrl = "http://127.0.0.1:3002",
+  [string]$Account = "",
+  [string]$Password = "",
+  [string]$Map = "0",
+  [int]$X = 287,
+  [int]$Y = 618
 )
 
 $ErrorActionPreference = "Stop"
@@ -121,11 +127,25 @@ function Invoke-WebCapture {
   param([string]$Prefix)
   $arguments = @(
     "apps\web\scripts\capture-crystal-parity.mjs",
+    "--baseUrl",
+    $WebBaseUrl,
+    "--map",
+    $Map,
+    "--x",
+    "$X",
+    "--y",
+    "$Y",
     "--output",
     $OutputDir,
     "--prefix",
     $Prefix
   )
+  if ($Account -ne "") {
+    $arguments += @("--account", $Account)
+  }
+  if ($Password -ne "") {
+    $arguments += @("--password", $Password)
+  }
   $output = & node @arguments 2>&1
   if ($LASTEXITCODE -ne 0) {
     throw ($output -join "`n")

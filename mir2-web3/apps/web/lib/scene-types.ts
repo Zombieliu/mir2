@@ -45,6 +45,7 @@ export type OriginalMapSpriteFrame = {
 export type OriginalMapSprite = {
   kind: "back" | "middle" | "front" | "tileAnimation";
   drawMode: "floor" | "object";
+  blendMode?: "normal" | "additive";
   frames: OriginalMapSpriteFrame[];
 };
 
@@ -55,6 +56,7 @@ export type OriginalMapCell = {
   middle?: string | null;
   front?: string | null;
   tileAnimation?: string | null;
+  light?: number;
   blocked?: boolean;
   closedDoor?: boolean;
 };
