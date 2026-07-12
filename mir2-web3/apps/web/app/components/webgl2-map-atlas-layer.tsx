@@ -26,6 +26,20 @@ export type MapTileDraw = {
   opacity?: number;
 };
 
+export type MapStandaloneTileDraw = {
+  key: string;
+  imageKey: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  z: number;
+  opacity?: number;
+  // Bevy-only: Crystal DrawBlend uses SourceAlpha + One. The legacy WebGL/DOM
+  // fallback never consumes standalone draws and remains unchanged.
+  additive?: boolean;
+};
+
 type WebGl2MapAtlasLayerProps = {
   enabled: boolean;
   stageWidth: number;

@@ -3,7 +3,7 @@ import type { Mir2Language } from "../../lib/localization";
 import type { WorldStore } from "../../lib/world-model";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import type { SystemMenuTransferOption } from "./original-client-system-menu";
-import type { MapTileDraw } from "./webgl2-map-atlas-layer";
+import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import type {
   DisplayEntity,
   DisplayLogLine,
@@ -43,6 +43,11 @@ export type BevyEntityRenderState = {
   enabled: boolean;
   stageWidth: number;
   stageHeight: number;
+  // Viewport center used to derive every entity's dx/dy base. The runtime echoes
+  // the applied values in PresentationPose so DOM overlays never commit against
+  // a different tile center.
+  centerX?: number;
+  centerY?: number;
   atlases?: Array<{
     key: string;
     width: number;
@@ -65,6 +70,11 @@ export type BevyEntityRenderState = {
   entities: Array<{
     objectId: string;
     dead: boolean;
+    isSelf?: boolean;
+    // Authoritative target cell for the packet-driven Bevy presentation
+    // handshake. The runtime only applies a remote segment once these match.
+    gridX?: number;
+    gridY?: number;
     // Opt-in (?bevyEntityInterp=1) per-entity motion window — present only for
     // NON-self entities under the flag. Lets the Bevy runtime interpolate the
     // sub-cell glide at display Hz instead of the producer folding it into each
@@ -96,6 +106,11 @@ export type BevyMapRenderState = {
   enabled: boolean;
   stageWidth: number;
   stageHeight: number;
+  // Monotonic producer revision plus the player tile used to build this draw list.
+  // These are presentation provenance only; movement authority remains server-side.
+  revision?: number;
+  centerX?: number;
+  centerY?: number;
   // Atlas page descriptors carrying the source-rect geometry each tile's
   // atlasRectKey indexes into. Mirrors BevyEntityRenderState.atlases.
   atlases?: Array<{
@@ -123,6 +138,9 @@ export type BevyMapRenderState = {
   // the sub-tile camera offset into left/top). MapTileDraw uses `rectKey`; the
   // runtime's MapTile deserializes it via #[serde(rename = "rectKey")].
   tiles: MapTileDraw[];
+  // Atlas misses are uploaded as standalone images so Bevy can keep ownership
+  // of the world y-sort band instead of handing those cells back to DOM.
+  standaloneTiles?: MapStandaloneTileDraw[];
   // Sub-tile camera scroll offset for the root-offset model. In the fold-in
   // model (the one Stage 1 uses) this is (0, 0) because the offset is already
   // baked into each tile's left/top.
@@ -146,7 +164,9 @@ export type OriginalClientShellProps = {
   selectorHud?: boolean;
   player: DisplayEntity | null;
   predictedPlayerPosition: PredictedPlayerMotion | null;
-  getLivePlayerRenderPosition?: () => PredictedPlayerMotion | null;
+  getLivePlayerRenderPosition?: (options?: {
+    presentationOwnsInterpolation: boolean;
+  }) => PredictedPlayerMotion | null;
   selectedEntity: DisplayEntity | null;
   sortedEntities: DisplayEntity[];
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
@@ -154,9 +174,14 @@ export type OriginalClientShellProps = {
   sceneInteractionReady: boolean;
   bevyEntityRendererReady: boolean;
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
+  bevyMapRuntimeGeneration: number;
+  bevyMapRuntimeReady: boolean;
+  bevyMapPresentedImageKeys: ReadonlySet<string>;
+  bevyMapImageResidencyVersion: number;
   onSceneAssetReadinessChange: (readiness: SceneAssetReadiness) => void;
   onBevyEntityRenderStateChange: (state: BevyEntityRenderState) => void;
-  onBevyMapRenderStateChange: (state: BevyMapRenderState) => void;
+  onBevyMapRenderStateChange: (state: BevyMapRenderState) => readonly string[];
+  onBevyMapImagesEvicted?: (keys: string[]) => void;
   logs: DisplayLogLine[];
   accountId: string;
   password: string;

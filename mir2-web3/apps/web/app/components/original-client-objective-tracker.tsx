@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import {
   activeGuideQuest,
@@ -40,6 +40,8 @@ export type ObjectiveTrackerProps = {
   playerClass?: string | null;
 };
 
+const OBJECTIVE_TRACKER_STORAGE_KEY = "mir2:objectiveTracker";
+
 const STAGE_LABEL: Record<string, string> = {
   available: "New Quest",
   inProgress: "Current Objective",
@@ -47,7 +49,14 @@ const STAGE_LABEL: Record<string, string> = {
 };
 
 export function ObjectiveTracker({ questLog, playerClass }: ObjectiveTrackerProps) {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    setEnabled(objectiveTrackerExplicitlyEnabled());
+  }, []);
+
   const quest = useMemo(() => activeGuideQuest(questLog ?? null), [questLog]);
+  if (!enabled) return null;
   if (!quest) return null;
 
   const stageLabel = STAGE_LABEL[quest.stage] ?? "Current Objective";
@@ -144,3 +153,23 @@ const TRACKER_STYLE: CSSProperties = {
 };
 
 export default ObjectiveTracker;
+
+function objectiveTrackerExplicitlyEnabled() {
+  if (typeof window === "undefined") return false;
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const queryValue = params.get("objectiveTracker") ?? params.get("questTracker");
+    if (isEnabledFlag(queryValue)) return true;
+
+    const storedValue = window.localStorage.getItem(OBJECTIVE_TRACKER_STORAGE_KEY);
+    return isEnabledFlag(storedValue);
+  } catch {
+    return false;
+  }
+}
+
+function isEnabledFlag(value: string | null) {
+  if (!value) return false;
+  return ["1", "true", "yes", "on"].includes(value.trim().toLowerCase());
+}

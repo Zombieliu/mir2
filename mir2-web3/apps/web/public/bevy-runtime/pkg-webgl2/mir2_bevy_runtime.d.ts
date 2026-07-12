@@ -3,19 +3,41 @@
 
 export function bootMir2Runtime(): void;
 
+export function clearMir2PresentationPoseSink(): void;
+
 export function clearMir2StatusSink(): void;
 
+export function evictMir2MapRenderImages(keys_json: string): void;
+
+export function getMir2LocalMotionDiagnostics(): string;
+
+export function getMir2MovementShadowDiagnostics(): string;
+
+export function getMir2PresentationPoses(): string;
+
+export function getMir2RemoteMotionPresentationDiagnostics(): string;
+
 export function getMir2RendererBackend(): string;
+
+export function pushMir2MovementShadowEvent(event_json: string): void;
 
 export function setMir2EntityRenderAtlas(key: string, width: number, height: number, pixels: Uint8Array): void;
 
 export function setMir2EntityRenderState(snapshot_json: string): void;
+
+export function setMir2LocalMotionPresentationEnabled(enabled: boolean): void;
 
 export function setMir2MapCameraOffset(x: number, y: number): void;
 
 export function setMir2MapRenderAtlas(key: string, width: number, height: number, pixels: Uint8Array): void;
 
 export function setMir2MapRenderState(json: string): void;
+
+export function setMir2PresentationPoseEnabled(enabled: boolean): void;
+
+export function setMir2PresentationPoseSink(callback: Function): void;
+
+export function setMir2RemoteMotionPresentationEnabled(enabled: boolean): void;
 
 /**
  * Push the self-player's current motion window so the runtime can interpolate the
@@ -35,27 +57,38 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly getMir2RendererBackend: () => [number, number];
+    readonly pushMir2MovementShadowEvent: (a: number, b: number) => void;
+    readonly getMir2MovementShadowDiagnostics: () => [number, number];
+    readonly setMir2RemoteMotionPresentationEnabled: (a: number) => void;
+    readonly getMir2RemoteMotionPresentationDiagnostics: () => [number, number];
+    readonly getMir2LocalMotionDiagnostics: () => [number, number];
+    readonly setMir2LocalMotionPresentationEnabled: (a: number) => void;
+    readonly getMir2PresentationPoses: () => [number, number];
+    readonly setMir2PresentationPoseEnabled: (a: number) => void;
     readonly setMir2WorldState: (a: number, b: number) => void;
     readonly setMir2EntityRenderState: (a: number, b: number) => void;
     readonly setMir2EntityRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly setMir2MapRenderState: (a: number, b: number) => void;
     readonly setMir2MapRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+    readonly evictMir2MapRenderImages: (a: number, b: number) => void;
     readonly bootMir2Runtime: () => void;
     readonly setMir2SelfCameraMotion: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly setMir2MapCameraOffset: (a: number, b: number) => void;
+    readonly setMir2PresentationPoseSink: (a: any) => void;
     readonly setMir2StatusSink: (a: any) => void;
     readonly clearMir2StatusSink: () => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h42bf88799d610114: (a: number, b: number, c: any) => [number, number];
-    readonly wasm_bindgen__convert__closures_____invoke__hedeb5dba1c5a2e05: (a: number, b: number, c: any, d: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_3: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_4: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_5: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_6: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_7: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_8: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h1156e0773f81c68b_9: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen__convert__closures_____invoke__h28bcdfc0300fcc20: (a: number, b: number) => void;
+    readonly clearMir2PresentationPoseSink: () => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h4a292f8eb4388d53: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen__convert__closures_____invoke__h8f94c947f52443eb: (a: number, b: number, c: any, d: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_3: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_4: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_5: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_6: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_7: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_8: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b_9: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__hcfe12d7fe9aa4faf: (a: number, b: number) => void;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
     readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
     readonly __externref_table_alloc: () => number;

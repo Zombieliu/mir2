@@ -1,5 +1,239 @@
 # Agent Resume Handoff
 
+> Latest map-render handoff: 2026-07-13. The visible Bichon rectangles came from
+> opaque black matte pixels in packed object atlases plus a browser-incompatible
+> additive alpha equation. The runtime now routes all object-like libraries,
+> including floor-sized frames and Mir3 `Dungeonsc`, through decoded black-key
+> images; preserves Crystal's per-cell front high-bit and middle 8/10-frame
+> additive semantics through live and packaged scene data; invalidates old
+> scene blueprints; and uses premultiplied additive RGB with brightness-derived
+> source-over alpha. Floor sprites are kept below the shared object/entity
+> y-sort band. Final WebGPU and WebGL2 captures at Bichon `320,43` have zero DOM
+> map fallbacks, zero console errors, and zero pure-black pixels in the measured
+> crop. Browser is left playable on `http://127.0.0.1:3002/?bevyBackend=webgpu`.
+> Evidence is under `docs/generated/player-qa/map-rendering/`; runtime 101/101,
+> frontend logic, TypeScript, and both release WASM builds pass. Resume with
+> revision/key-aware GPU-ready ownership ACK and bounded additive material
+> residency before final lighting/effect parity, not with another atlas rewrite.
+
+> Latest monster lock/chase acceptance: 2026-07-13. `activateEntity` no longer
+> sends a one-shot attack from arbitrary range. It creates a persistent monster
+> lock, feeds changing adjacent destinations into the existing latest-intent
+> movement pipeline, waits for accepted movement to settle, and then performs
+> Crystal-local melee before sending each in-range attack. Manual movement and
+> all target/session invalidation paths clear the lock. Browser QA chased Royal
+> Archer from `310,51` to `320,43`, observed the first attack after 2.3s at one
+> tile with selection retained, and confirmed a ground click stopped all attack
+> samples for 3.5s. Evidence is
+> `docs/generated/player-qa/combat/web-monster-lock-chase-20260713.{json,png}`;
+> full frontend logic and TypeScript are green. Resume the separate map-render
+> and transparent entity-hitbox gaps next rather than reopening this movement
+> ownership path.
+
+> Latest local-melee acceptance: 2026-07-13. A real browser A/B proved that an
+> adjacent attack applied damage (`11/25 -> 4/25`) while
+> `.entity-sprite-stack.self.attacking` never appeared within 900ms. The owner
+> received `ObjectAttack` for shared Zone object `50001`, but its personal
+> `SelfPlayer` is object `1000`, so the packet updater matched no local entity.
+> Crystal establishes the intended ownership explicitly: mouse input queues the
+> local `Attack1`, `PlayerObject` then sends `C.Attack`, and `S.ObjectAttack` is
+> ignored when it identifies the local user (`GameScene.cs:11506`,
+> `PlayerObject.cs:1416`, `GameScene.cs:3333`). Web now starts the adjacent
+> self-player `melee1` action before sending the attack command, while the rAF
+> packet coalescer commits short combat windows at normal React priority.
+>
+> Post-fix browser verification saw `attacking` in 123ms, captured the visible
+> swing, and observed the class detach after the 600ms action window. Evidence:
+> `docs/generated/player-qa/combat/web-local-melee-attack-20260713.{json,png}`.
+> Full frontend logic and TypeScript pass. The earlier stable all-action atlas,
+> Bevy cached-layout coverage, movement-pose priority, and moving-object AOI
+> fixes remain in place; Bevy is 100/100 and shared Zone 153/153. One separate
+> input gap found during QA remains: large transparent CherryTree sprite bounds
+> can intercept clicks intended for a nearby Deer.
+
+> Latest compact-window flicker investigation: 2026-07-13. NPC/player sprites
+> did not disappear during movement: 264 A/B frames had zero scene blackouts,
+> zero pose-commit warnings, and stable renderer ownership. Crystal source uses
+> the same 100ms movement cadence but keeps `OffSetMove` integer/even and draws
+> directly to its selected backbuffer. Web was fractionally presenting its
+> 1024x768 canvas at `820.02x615.01` with `top=102.49`, so the compositor
+> resampled all detailed sprites while the camera moved. The stage now derives
+> an integer 4:3 display rectangle and integer origin; the 820 regression is
+> `(0,103,820x615)` across 93 frames with no blackout, pose, console, or 404
+> warnings. Evidence is under `docs/generated/player-qa/flicker-ab/`. Do not
+> reopen this as a server/AOI defect without an actual entity-count or blackout
+> trace. Final 1:1 visual acceptance must use a browser content viewport of at
+> least 1024x768; smaller panes remain downsampled by definition.
+
+> Latest bare-root playable runtime fix: 2026-07-13. The running Release
+> Gateway remains on `ws://127.0.0.1:7111/ws`, while the Player Web source
+> fallback is the historical `7110`; opening `http://127.0.0.1:3002/` therefore
+> showed a healthy login screen but could not connect. Local ignored file
+> `apps/web/.env.local` now sets
+> `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=ws://127.0.0.1:7111/ws`, and Web was restarted
+> on listener PID `19692`. Browser verification used the bare URL with no query
+> override: account login reached character `MountQaR19`, Start Game entered
+> BichonProvince, one `D` input moved `333,274 -> 334,274`, Gateway reported one
+> active session, and browser error/warning logs were empty. Preserve or recreate
+> this ignored local env file whenever the local Gateway continues to use 7111.
+
+> Latest movement-presentation handoff: 2026-07-12. The current Web process is
+> PID `19692` on `http://127.0.0.1:3002`; Release Gateway PID `34972` is healthy
+> on TCP `7011` and Web/WS `7111`. Gateway SHA-256 is
+> `B4C4F8744B1CCDF77AF6A3BAD0BEC1F15CBCE379094E0A7C86ABB6CF5ED1BE11`,
+> and both browser backends use `bevy-bd9004a17f2873ea`. Gateway logs are
+> `docs/generated/player-qa/runtime-logs/gateway-actor-light-7111.{out,err}.log`.
+>
+> Resume from WebGPU r12 (33/33) and WebGL2 r16 (33/33), not the older r6
+> presentation gate. The final fixes give Bevy sole local interpolation
+> ownership, atomically submit map/entity centers, retain the last coherent pose
+> until a 250ms watchdog expires, preserve explicit movement targets in the
+> shadow, and give phase 0 a full 100ms from the local command with no catch-up.
+> Exact Crystal composite offsets are Walk `-6..-48px` over eight phases and
+> mounted Run `-24..-144px` over six phases. There are no split/synthetic
+> centers, shadow mismatches, pose warnings, critical console errors, or 404s.
+> Rust runtime 99/99, shared Zone 152/152, frontend logic, TypeScript, focused
+> Gateway tests, and WebGPU/WebGL2 smoke pass. Do not declare whole-game parity:
+> lighting composition, scene effects, extra demo population, and final human
+> feel acceptance remain.
+> The movement capture no longer derives its CDP port from PID modulo 1000.
+> Default runs ask Chrome for an ephemeral port and read `DevToolsActivePort`
+> from the new profile; explicit occupied ports fail fast and launch failures
+> clean up the child/profile. No-port-argument r19 is 33/33 and leaves zero new
+> Chrome profiles.
+>
+> Full Debug Gateway caveat: two `cargo +1.89.0 test -p mir2-gateway --lib
+> -- --test-threads=1` attempts did not reach a normal summary. The first
+> aborted at routing test 43 with `0xc0000409`/BEX64 after an unsafe-precondition
+> report; the second passed that test and later aborted near routing test 72
+> with `0xc0000374 STATUS_HEAP_CORRUPTION`. The two named tests pass in isolation
+> (the latter takes about 184 seconds), and the account-inventory group passes
+> 3/3. A source scan finds only narrow Win32/local-time FFI unsafe blocks, not a
+> trade/inventory unsafe path. Windows records seven WHEA events in seven days,
+> including corrected APIC 32 TLB and internal-parity machine checks. Therefore
+> do not claim Gateway 300/300 on this machine and do not attribute these
+> nondeterministic Debug aborts to movement; focused Gateway, shared Zone,
+> Release browser e2e, and both 33/33 movement reports remain green.
+
+> Latest mounted movement handoff: 2026-07-12. Web remains on
+> `http://127.0.0.1:3002`; rebuilt Release Gateway PID `42688` listens on TCP
+> `7011` and Web/WS `7111`, with `/health` green. Its SHA-256 is
+> `C6B8A25E96BB653D277D435128A74D408AF37A2133B492D99AD7F7894E1ACBAA`.
+> The Bevy runtime is `bevy-78d40eb80133609c` for both WebGPU and WebGL2.
+>
+> The exact mounted baseline is
+> `docs/generated/player-qa/movement-jitter/movement-mounted-walk8-run3-webgpu-20260712-r6.json`
+> plus the matching `.png`. It creates a dedicated level-22 QA character,
+> grants real Crystal item `crystal-item-769` (`RedTiger`, shape 5), equips slot
+> 13, toggles ride through normal `UseItem`, then sends one short keyboard Walk
+> and one short keyboard Run. Results: one-cell Walk, three-cell Run, `(4,0)`
+> final delta, phase counts `8/6`, 2/2 pose coverage, 26ms max sink latency,
+> 27/27 assertions, no critical errors or 404s.
+>
+> The live defect was owner-state propagation: Session emitted `MountUpdate`,
+> but Gateway did not forward that non-combat packet into shared Zone state, so
+> Web predicted three cells while Zone still executed an unmounted two-cell
+> Run. A second defect rejected mounted pose frame indexes 6 and 7 because the
+> TypeScript pose parser hard-coded `frameIndex <= 5`. Both are fixed. Runtime
+> tests pass 96/96, shared Zone 152/152, full frontend logic and dual-backend
+> smoke pass. Logs are under `docs/generated/player-qa/runtime-logs/`.
+
+## Local Runtime Paths
+
+- Native Crystal client executable: `E:\mir2\Crystal\Build\Client\Debug\Client.exe`.
+- Native Crystal client root / `CRYSTAL_CLIENT_ROOT`: `E:\mir2\Crystal\Build\Client\Debug`.
+
+> Latest local runtime and movement handoff: 2026-07-12 Web is healthy at
+> `http://127.0.0.1:3002`; latest Release Gateway is PID `44152` at TCP
+> `127.0.0.1:7011` / WebSocket-health `127.0.0.1:7111`, using
+> `.mir2-data/accounts.json`, QA token `movement-local`, production player
+> command safety, move logging, normal 300ms personal Tick, and a 15s reconnect
+> grace. Final logs are
+> `docs/generated/player-qa/gateway-movement/gateway-release-zone-cadence-final-20260712.{out,err}.log`;
+> event logging is disabled in this user-facing process.
+>
+> Code state: the bounded per-Zone owner now owns both Walk/Run/Turn and one
+> monotonic 300ms global cadence. Late ticks coalesce; personal Session ticks no
+> longer advance global Zone time, per-player movement, or shared-drop expiry.
+> Realtime `UserLocation`, player appearance/removal, Turn, Walk, and Run use a
+> capacity-256 token-fenced live socket channel, while full/closed channels and
+> non-realtime critical side effects retain reliable mailbox fallback. Existing
+> direct KeepAlive, serial RW ordering, owner fencing, ordered fast-path events,
+> authoritative save-transform sync, 5s reply bound, and transfer/CDP guards
+> remain. The Stage5 QA bridge reads live `worldRef` map/entities/tick state so
+> background-page rAF throttling no longer causes false two-client failures.
+>
+> Strict latest Release evidence is
+> `docs/generated/player-qa/two-client-zone/two-client-zone-zone-owned-cadence-tick5000-release-20260712.json`
+> plus matching `-a.png`/`-b.png`. With personal Tick forced to 5000ms and no
+> observer pulse, observer movement latency is 12ms, both clients retain 16
+> entities, Bevy records one remote event and 29 offset matches, and decode
+> errors, queue drops, console errors, and 404s are zero. Focused Gateway
+> cadence/live-outbound/blocked-runtime/fencing/fallback/delayed-combat tests,
+> Simulation shared Zone 148/148, complete frontend logic, TypeScript, fmt/check,
+> and Release build are green.
+> Final normal-port keyboard capture
+> `docs/generated/player-qa/movement-jitter/movement-zone-owned-cadence-final-release-keyboard-20260712.json`
+> is also strict-green: one Walk plus one Run reaches `(331,275)` from
+> `(328,275)`, ACKs are 23/6ms, command-to-pose/sink maxima are 12/12ms, and
+> pose-frame atomicity, continuous camera motion, console, and network checks
+> all pass. The matching `.png` is scene-ready.
+>
+> Do not claim full architecture completion: movement and global cadence are
+> Zone-owned, but all non-movement commands and durable personal side effects
+> are not yet routed through one fully fenced actor. Debug `mir2-gateway.exe`
+> repeatedly hit `0xc0000005`; repository history shows the crash predates this
+> actor, and WHEA event 19 / APIC 32 corrected machine checks plus old Z790
+> BIOS/microcode make this host unsafe for production soak acceptance. Before
+> using Debug failures as code evidence, stabilize BIOS/ME/Intel defaults and
+> require a WHEA-clean repro or collect a full WER dump.
+
+> Latest local scene-light render continuation: 2026-07-09 added the first
+> Web main-scene light overlay for Crystal `LightSetting` parity. Day/Normal
+> stay unchanged; Dawn/Evening/Night mount `.viewport-crystal-light-overlay`
+> after sprites and before nameplates so the world/actors darken while labels
+> and UI stay readable. Evidence
+> `docs/generated/player-qa/visual-parity/scene-light-render-20260709/`
+> was captured through temporary updated Gateway `ws://127.0.0.1:7311/ws`
+> and Web `127.0.0.1:3002`; the clean state records
+> `overlayClass=viewport-crystal-light-overlay night`, `overlayLight=4`,
+> `z-index=6`, `pointer-events=none`, `tutorialOpen=false`, and browser console
+> errors `0`. The same round exports `OriginalMapCell.light` and renders
+> map-cell light nodes inside the non-Day overlay; API evidence
+> `map-light-export-probe-20260709.json` confirms map `0` samples with 127 /
+> 127 / 25 / 26 light cells. A fresh map-light DOM screenshot was not captured
+> because Crystal UTC TimeOfDay had rotated to Day, which correctly suppresses
+> non-Day overlay rendering. Temporary `7311` was stopped after capture; existing
+> Web `3002` and Gateway `7111` were not intentionally stopped. Next work:
+> recapture Night/Evening/Dawn map lights or add a safe QA-only light override,
+> tune intensity against native screenshots, and add object/equipment/effect
+> light sources.
+
+> Latest local dynamic-light continuation: 2026-07-09 verified Crystal source
+> `Envir.Now` / `AdjustLights()` and replaced the Web stack's fixed
+> TimeOfDay bootstrap with Crystal's UTC-hour formula. Simulation StartGame and
+> `WorldSnapshot.lightSetting` now agree, Web applies the snapshot field and
+> exports `window.__mir2Stage5.state.lightSetting`, and live evidence
+> `docs/generated/player-qa/visual-parity/light-setting-snapshot-20260709/`
+> records direct WS `TimeOfDay.lights=4`, `worldSnapshot.lightSetting=4`, and
+> browser state `lightSetting=4` with 0 critical console errors / 0 non-favicon
+> 404s. Verification passed focused Simulation/Gateway tests, Rust fmt,
+> Gateway check/build using isolated `target/light-setting-build`, Web
+> TypeScript, and scoped diff checks. Current next work should implement the
+> actual Crystal-like main-scene light render for Night/Evening/Dawn; light
+> propagation is no longer the blocker.
+
+> Latest local visual-parity continuation: 2026-07-09 used native Crystal
+> account `cdx0708235326` / `Test123` at `0 @ 335,266` and Web/Gateway
+> `127.0.0.1:3002` + `ws://127.0.0.1:7111/ws`. Clean evidence pack:
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0060-minimap-source-panel-viewrect-native335266-clean/`.
+> Follow-up packs 0061-0065 fixed capture-only chat replacement/color inference
+> and Belt quantity/label/count rendering. `npm.cmd exec tsc -- --noEmit`
+> passed. Current next work should target camera/viewport, world lighting
+> render, AOI visible-object alignment, and movement/video evidence; do not
+> spend more time treating dynamic `LineMessage.txt` chat pixels as a stable
+> acceptance metric.
+
 > Latest original-client comparison sync: 2026-04-28-R302 completed. Original Crystal `Server.exe` and visible `Client.exe` were launched locally on Windows. R302 created a retained Crystal QA character using `MIR2_PACKET_TRACE_KEEP_LIFECYCLE_CHARACTER=1`, captured original select/game screenshots plus web Stage 5 comparison screenshots, and archived the pack at `docs/generated/player-qa/r302-original-client/summary.json`. Diagnostic fresh current-live matrix evidence in the same directory confirms Crystal 9/9 reachable but not accepted in the fresh state (`stableDiffCleanCount=2/9`, `packetParityAccepted=false`) because local and Crystal fixtures were not deterministic/state-aligned. Do not replace R300/R298 packet acceptance with R302; whole-project accepted Crystal 1:1 remains roughly 90% until human visual/feel acceptance or explicit accepted differences close.
 
 > Latest frontend/player QA sync: 2026-04-28-R301 completed. Windows refreshed the final automated Candidate acceptance pack after R300 stable-diff packet acceptance. Evidence: `docs/generated/player-qa/r301-summary.json`, map API 18/18 with 0 failures, minimap 0 failures with known 450/451 warning, WS load 64/64 ready with 0 errors and keepalive p95 637 ms, Stage 5 UI 88 screenshots with 0 critical console errors and 32 compact text nodes checked without overflow. Verification passed without Docker: packet-trace bin 15/15, web `tsc --noEmit`, web build, `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674. Temporary gateway/web services were stopped; ports 7000/7110/3002 are closed. Whole-project accepted Crystal 1:1 remains roughly 90% until human visual/feel acceptance closes.

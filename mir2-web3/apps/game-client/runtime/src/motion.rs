@@ -42,16 +42,97 @@ use crate::RuntimeWorldState;
 /// `movementDurationMs` (Steps 1–4 of the migration plan).
 pub const DEFAULT_STEP_DURATION_MS: f64 = 600.0;
 
+/// Crystal walking/running actions use 6 movement frames.
+pub const CRYSTAL_MOVE_FRAME_COUNT: f64 = 6.0;
+
+/// `GameScene.CanMove` advances movement frames on a 100 ms cadence.
+pub const CRYSTAL_MOVE_FRAME_INTERVAL_MS: f64 = 100.0;
+
 /// Wall-clock tolerance (ms) for `started_ms` sanity check.  If the timestamp
 /// supplied by the TS producer is more than this many milliseconds in the future
 /// relative to `now_ms`, we treat the field as absent and fall back to `now_ms`.
 const MAX_FUTURE_SKEW_MS: f64 = 5000.0;
 
+/// Shared `GameScene.CanMove` pulse for every Bevy-owned movement source.
+/// Crystal advances all actors from one scene clock instead of giving each
+/// movement segment an independent 100 ms timer.
+#[derive(Debug, Clone, Resource)]
+pub(crate) struct CrystalMoveClock {
+    now_ms: f64,
+    next_pulse_ms: f64,
+    pulse_id: u64,
+    initialized: bool,
+}
+
+impl Default for CrystalMoveClock {
+    fn default() -> Self {
+        Self {
+            now_ms: 0.0,
+            next_pulse_ms: CRYSTAL_MOVE_FRAME_INTERVAL_MS,
+            pulse_id: 0,
+            initialized: false,
+        }
+    }
+}
+
+impl CrystalMoveClock {
+    pub(crate) fn tick_at(&mut self, now_ms: f64) -> bool {
+        if !now_ms.is_finite() {
+            return false;
+        }
+        self.now_ms = now_ms;
+        if !self.initialized {
+            self.initialized = true;
+            self.next_pulse_ms = now_ms + CRYSTAL_MOVE_FRAME_INTERVAL_MS;
+            return false;
+        }
+        if now_ms < self.next_pulse_ms {
+            return false;
+        }
+
+        // Crystal processes at most one CanMove pulse per display iteration.
+        // A stalled frame extends the action instead of catching up phases.
+        self.pulse_id = self.pulse_id.saturating_add(1);
+        self.next_pulse_ms = now_ms + CRYSTAL_MOVE_FRAME_INTERVAL_MS;
+        true
+    }
+
+    pub(crate) fn now_ms(&self) -> f64 {
+        self.now_ms
+    }
+
+    pub(crate) fn next_pulse_ms(&self) -> f64 {
+        self.next_pulse_ms
+    }
+
+    pub(crate) fn pulse_id(&self) -> u64 {
+        self.pulse_id
+    }
+}
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct CrystalMoveClockSet;
+
+fn tick_crystal_move_clock_system(mut clock: ResMut<CrystalMoveClock>) {
+    clock.tick_at(now_ms_wall_clock());
+}
+
+pub(crate) struct CrystalMoveClockPlugin;
+
+impl Plugin for CrystalMoveClockPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<CrystalMoveClock>().add_systems(
+            PreUpdate,
+            tick_crystal_move_clock_system.in_set(CrystalMoveClockSet),
+        );
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Data types
 // ---------------------------------------------------------------------------
 
-/// The linear motion window for a single entity, expressed in wall-clock
+/// The Crystal-timed motion window for a single entity, expressed in wall-clock
 /// milliseconds.  Mirrors `EntityMotionSnapshot` in
 /// `original-client-scene-motion.ts`.
 #[derive(Debug, Clone, PartialEq)]
@@ -103,11 +184,10 @@ impl EntityMotionTable {
 /// Mirrors `entityMotionOffsetForEntity` in
 /// `apps/web/app/components/original-client-scene-motion.ts:86-105`.
 ///
-/// ```text
-/// remaining = clamp(1 - (now - started) / (expires - started), 0, 1)
-/// offset.x  = (from_x - to_x) * cell_width_px  * remaining
-/// offset.y  = (from_y - to_y) * cell_height_px * remaining
-/// ```
+/// Crystal does not use a free-running linear lerp here: walking/running
+/// offsets advance on the same 6-frame / 100 ms cadence as
+/// `PlayerObject.OffSetMove`, then truncate to Crystal's even-pixel movement
+/// shape.
 ///
 /// The motion goes **from the old cell toward the new cell**: as `remaining`
 /// runs 1→0 the offset shrinks from full-cell displacement to zero.
@@ -127,19 +207,14 @@ pub fn compute_motion_offset(
     cell_width_px: f32,
     cell_height_px: f32,
 ) -> Vec2 {
-    let span = entry.expires_ms - entry.started_ms;
-    // Degenerate: zero-duration step → snap to target (remaining = 0).
-    let remaining = if span <= 0.0 {
-        0.0_f64
-    } else {
-        let elapsed = now_ms - entry.started_ms;
-        (1.0 - elapsed / span).clamp(0.0, 1.0)
-    };
-
-    let remaining = remaining as f32;
+    let remaining = crystal_motion_remaining_ratio(entry.started_ms, entry.expires_ms, now_ms);
     Vec2::new(
-        (entry.from_x - entry.to_x) as f32 * cell_width_px * remaining,
-        (entry.from_y - entry.to_y) as f32 * cell_height_px * remaining,
+        crystal_movement_pixel_offset(
+            (entry.from_x - entry.to_x) as f32 * cell_width_px * remaining,
+        ),
+        crystal_movement_pixel_offset(
+            (entry.from_y - entry.to_y) as f32 * cell_height_px * remaining,
+        ),
     )
 }
 
@@ -155,14 +230,8 @@ pub fn compute_motion_offset(
 /// fractional value cannot even round-trip through an `i32` serde field. So this
 /// variant keeps the endpoints as `f32`.
 ///
-/// Identical formula to [`compute_motion_offset`] and the DOM
-/// `entityMotionOffsetForEntity`:
-///
-/// ```text
-/// remaining = clamp(1 - (now - started) / (expires - started), 0, 1)
-/// offset.x  = (from_x - to_x) * cell_width_px  * remaining
-/// offset.y  = (from_y - to_y) * cell_height_px * remaining
-/// ```
+/// Identical Crystal stepped cadence to [`compute_motion_offset`] and the DOM
+/// `entityMotionOffsetForEntity`.
 ///
 /// Timestamps stay `f64`: `Date.now()` (~1.7e12 ms) loses millisecond resolution
 /// in `f32`, which would corrupt the `remaining` ratio. The returned offset is in
@@ -179,21 +248,138 @@ pub fn compute_motion_offset_fractional(
     cell_width_px: f32,
     cell_height_px: f32,
 ) -> Vec2 {
-    let span = expires_ms - started_ms;
-    // Degenerate / elapsed / inverted span → snap to target (remaining = 0).
-    let remaining = if span <= 0.0 {
-        0.0_f64
-    } else {
-        let elapsed = now_ms - started_ms;
-        (1.0 - elapsed / span).clamp(0.0, 1.0)
-    } as f32;
-
-    Vec2::new(
-        (from_x - to_x) * cell_width_px * remaining,
-        (from_y - to_y) * cell_height_px * remaining,
+    compute_motion_offset_fractional_with_phase_count(
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        started_ms,
+        expires_ms,
+        now_ms,
+        CRYSTAL_MOVE_FRAME_COUNT as u8,
+        cell_width_px,
+        cell_height_px,
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+pub fn compute_motion_offset_fractional_with_phase_count(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    started_ms: f64,
+    expires_ms: f64,
+    now_ms: f64,
+    phase_count: u8,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    let remaining = crystal_motion_remaining_ratio_with_phase_count(
+        started_ms,
+        expires_ms,
+        now_ms,
+        phase_count,
+    );
+
+    Vec2::new(
+        crystal_movement_pixel_offset((from_x - to_x) * cell_width_px * remaining),
+        crystal_movement_pixel_offset((from_y - to_y) * cell_height_px * remaining),
+    )
+}
+
+/// Compute the exact Crystal offset for a latched movement phase. Unlike the
+/// wall-clock helpers, callers own phase advancement and can preserve every
+/// 100 ms phase across a delayed render tick.
+#[allow(dead_code)]
+pub fn compute_motion_offset_fractional_for_phase(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    phase_index: u8,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    compute_motion_offset_fractional_for_phase_count(
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        phase_index,
+        CRYSTAL_MOVE_FRAME_COUNT as u8,
+        cell_width_px,
+        cell_height_px,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn compute_motion_offset_fractional_for_phase_count(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    phase_index: u8,
+    phase_count: u8,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    let phase_count = phase_count.max(1);
+    let phase_index = phase_index.min(phase_count - 1);
+    let progress = (f32::from(phase_index) + 1.0) / f32::from(phase_count);
+    let remaining = (1.0 - progress).clamp(0.0, 1.0);
+
+    Vec2::new(
+        crystal_movement_pixel_offset((from_x - to_x) * cell_width_px * remaining),
+        crystal_movement_pixel_offset((from_y - to_y) * cell_height_px * remaining),
+    )
+}
+
+pub fn crystal_motion_remaining_ratio(started_ms: f64, expires_ms: f64, now_ms: f64) -> f32 {
+    crystal_motion_remaining_ratio_with_phase_count(
+        started_ms,
+        expires_ms,
+        now_ms,
+        CRYSTAL_MOVE_FRAME_COUNT as u8,
+    )
+}
+
+pub fn crystal_motion_remaining_ratio_with_phase_count(
+    started_ms: f64,
+    expires_ms: f64,
+    now_ms: f64,
+    phase_count: u8,
+) -> f32 {
+    let span = expires_ms - started_ms;
+    if span <= 0.0 {
+        return 0.0;
+    }
+
+    let elapsed = (now_ms - started_ms).clamp(0.0, span);
+    if elapsed >= span {
+        return 0.0;
+    }
+
+    let phase_count = f64::from(phase_count.max(1));
+    let frame_index = (elapsed / CRYSTAL_MOVE_FRAME_INTERVAL_MS).floor();
+    // Crystal applies the first movement increment while drawing frame zero.
+    let progress = ((frame_index + 1.0) / phase_count).clamp(0.0, 1.0);
+    (1.0 - progress) as f32
+}
+
+fn crystal_movement_pixel_offset(value: f32) -> f32 {
+    if !value.is_finite() || value.abs() < 0.001 {
+        return 0.0;
+    }
+
+    let crystal_value = value.trunc() as i32;
+    let even_crystal_value = crystal_value + (crystal_value % 2);
+    if even_crystal_value == 0 {
+        0.0
+    } else {
+        even_crystal_value as f32
+    }
+}
 // ---------------------------------------------------------------------------
 // Bevy world-space helper
 // ---------------------------------------------------------------------------
@@ -250,10 +436,11 @@ pub fn world_position_with_motion(
 /// - Entries for entities absent from the snapshot are removed.
 pub fn update_entity_motion_table(
     state: Res<RuntimeWorldState>,
+    clock: Res<CrystalMoveClock>,
     mut table: ResMut<EntityMotionTable>,
 ) {
-    // Update the frame-level wall-clock.
-    table.now_ms = now_ms_wall_clock();
+    // Every renderer path reads the same frame-level clock snapshot.
+    table.now_ms = clock.now_ms();
 
     let Some(snapshot) = &state.snapshot else {
         return;
@@ -351,6 +538,23 @@ fn now_ms_wall_clock() -> f64 {
 mod tests {
     use super::*;
 
+    #[test]
+    fn shared_move_clock_uses_one_pulse_per_display_tick() {
+        let mut clock = CrystalMoveClock::default();
+        assert!(!clock.tick_at(250.0));
+        assert_eq!(clock.pulse_id(), 0);
+        assert_eq!(clock.next_pulse_ms(), 350.0);
+        assert!(!clock.tick_at(349.0));
+        assert!(clock.tick_at(350.0));
+        assert_eq!(clock.pulse_id(), 1);
+        assert_eq!(clock.next_pulse_ms(), 450.0);
+
+        // A delayed display frame advances exactly once, matching CanMove.
+        assert!(clock.tick_at(900.0));
+        assert_eq!(clock.pulse_id(), 2);
+        assert_eq!(clock.next_pulse_ms(), 1000.0);
+    }
+
     // -----------------------------------------------------------------------
     // compute_motion_offset
     // -----------------------------------------------------------------------
@@ -368,20 +572,18 @@ mod tests {
     }
 
     #[test]
-    fn offset_at_t0_is_full_cell() {
+    fn offset_at_t0_has_applied_crystals_first_frame_increment() {
         let entry = entry_x_step();
         let offset = compute_motion_offset(&entry, 0.0, 32.0, 32.0);
-        // remaining = 1.0; from_x - to_x = -1; offset.x = -32.0
-        assert!((offset.x + 32.0).abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.x + 26.0).abs() < 1e-4, "offset.x = {}", offset.x);
         assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
     }
 
     #[test]
-    fn offset_at_midpoint_is_half_cell() {
+    fn offset_at_300ms_has_applied_four_of_six_frames() {
         let entry = entry_x_step();
         let offset = compute_motion_offset(&entry, 300.0, 32.0, 32.0);
-        // remaining = 0.5; offset.x = -16.0
-        assert!((offset.x + 16.0).abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.x + 10.0).abs() < 1e-4, "offset.x = {}", offset.x);
         assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
     }
 
@@ -413,9 +615,8 @@ mod tests {
             expires_ms: 700.0,
         };
         let offset = compute_motion_offset(&entry, 100.0, 32.0, 32.0);
-        // remaining = 1.0; from_y - to_y = -1; offset.y = -32.0
         assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
-        assert!((offset.y + 32.0).abs() < 1e-4, "offset.y = {}", offset.y);
+        assert!((offset.y + 26.0).abs() < 1e-4, "offset.y = {}", offset.y);
     }
 
     #[test]
@@ -447,8 +648,25 @@ mod tests {
         };
         let offset = compute_motion_offset(&entry, 0.0, 48.0, 32.0);
         // from_x - to_x = -1, from_y - to_y = -1, remaining = 1
-        assert!((offset.x + 48.0).abs() < 1e-4, "offset.x = {}", offset.x);
-        assert!((offset.y + 32.0).abs() < 1e-4, "offset.y = {}", offset.y);
+        assert!((offset.x + 40.0).abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.y + 26.0).abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn offset_uses_crystal_100ms_step_cadence() {
+        let entry = entry_x_step();
+
+        let at_99 = compute_motion_offset(&entry, 99.0, 48.0, 32.0);
+        assert!((at_99.x + 40.0).abs() < 1e-4, "at_99.x = {}", at_99.x);
+
+        let at_100 = compute_motion_offset(&entry, 100.0, 48.0, 32.0);
+        assert!((at_100.x + 32.0).abs() < 1e-4, "at_100.x = {}", at_100.x);
+
+        let at_500 = compute_motion_offset(&entry, 500.0, 48.0, 32.0);
+        assert!(at_500.x.abs() < 1e-4, "at_500.x = {}", at_500.x);
+
+        let at_600 = compute_motion_offset(&entry, 600.0, 48.0, 32.0);
+        assert!(at_600.x.abs() < 1e-4, "at_600.x = {}", at_600.x);
     }
 
     // -----------------------------------------------------------------------
@@ -483,7 +701,7 @@ mod tests {
         // would give -48; both are visibly wrong.
         let offset =
             compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 0.0, 600.0, 0.0, 48.0, 32.0);
-        assert!((offset.x + 72.0).abs() < 1e-3, "offset.x = {}", offset.x);
+        assert!((offset.x + 60.0).abs() < 1e-3, "offset.x = {}", offset.x);
         assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
     }
 
@@ -496,7 +714,7 @@ mod tests {
         let offset =
             compute_motion_offset_fractional(4.0, 3.0, 4.0, 4.0, 0.0, 600.0, 0.0, 48.0, 32.0);
         assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
-        assert!((offset.y + 32.0).abs() < 1e-4, "offset.y = {}", offset.y);
+        assert!((offset.y + 26.0).abs() < 1e-4, "offset.y = {}", offset.y);
     }
 
     #[test]
@@ -524,7 +742,7 @@ mod tests {
     // -----------------------------------------------------------------------
 
     #[test]
-    fn world_position_at_t0_is_offset_from_old_cell() {
+    fn world_position_at_t0_has_advanced_one_crystal_frame() {
         // Entity at grid (1, 0) having moved from (0, 0), at t=0 of a 600ms step.
         let entry = EntityMotionEntry {
             from_x: 0,
@@ -538,8 +756,8 @@ mod tests {
         // grid (1,0) → base = (32, 0, 1)
         // offset at t=0: remaining=1; from_x - to_x = -1; offset.x = -32
         // final: (32 + (-32), -0 - (-0), 1) = (0, 0, 1) — entity appears at old cell
-        assert!((pos.x - 0.0).abs() < 1e-4, "pos.x = {}", pos.x);
-        assert!((pos.y - 0.0).abs() < 1e-4, "pos.y = {}", pos.y);
+        assert!((pos.x - 6.0).abs() < 1e-4, "pos.x = {}", pos.x);
+        assert!(pos.y.abs() < 1e-4, "pos.y = {}", pos.y);
         assert!((pos.z - 1.0).abs() < 1e-4);
     }
 
@@ -577,7 +795,7 @@ mod tests {
         // offset: from_y - to_y = -1; offset.y = -32; subtracted: -(-32) = +32
         // result: y = -32 + 32 = 0  → entity at old row 0 in world coords ✓
         assert!((pos.x - 0.0).abs() < 1e-4, "pos.x = {}", pos.x);
-        assert!((pos.y - 0.0).abs() < 1e-4, "pos.y = {}", pos.y);
+        assert!((pos.y + 6.0).abs() < 1e-4, "pos.y = {}", pos.y);
     }
 
     // -----------------------------------------------------------------------

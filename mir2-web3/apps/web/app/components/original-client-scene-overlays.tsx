@@ -44,6 +44,8 @@ const CHAT_BUBBLE_FADE_MS = 600;
 // A short white/red brighten over a struck sprite so a hit reads instantly even when the
 // monster's atlas lacks struck frames (renderer-independent: it overlays the Bevy canvas too).
 const HIT_FLASH_MS = 170;
+const EMPTY_ENTITY_MOTION_SNAPSHOTS: Record<string, EntityMotionSnapshot> = {};
+type RegisterEntityElement = (key: string, objectId: string) => (el: HTMLElement | null) => void;
 
 // Screen-space top-left of an entity's tile origin, reusing the SAME transform the scene visual
 // layers use (origin + tile delta * cell size + camera pan + per-entity motion lerp). Keeping this
@@ -89,6 +91,7 @@ function EntityHealthBars({
   entityMotionSnapshots,
   motionNow,
   entityKindClassName,
+  registerEntityEl,
 }: {
   entries: ViewportEntityEntry[];
   player: DisplayEntity | null;
@@ -97,6 +100,7 @@ function EntityHealthBars({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   entityKindClassName: (kind: EntityKind) => string;
+  registerEntityEl?: RegisterEntityElement;
 }) {
   return (
     <>
@@ -129,6 +133,7 @@ function EntityHealthBars({
         return (
           <div
             key={`overlay-hp-${entity.objectId}`}
+            ref={registerEntityEl?.(`overlay-hp:${entity.objectId}`, entity.objectId)}
             className={`scene-overlay-health ${entityKindClassName(entity.kind)} ${isTarget ? "is-target" : ""}`}
             style={{
               left: `${origin.left + centerOffset}px`,
@@ -153,6 +158,7 @@ function SceneChatBubbles({
   playerCameraMotionOffset,
   entityMotionSnapshots,
   motionNow,
+  registerEntityEl,
 }: {
   bubbles: SceneChatBubble[];
   entryByObjectId: Map<string, ViewportEntityEntry>;
@@ -160,6 +166,7 @@ function SceneChatBubbles({
   playerCameraMotionOffset: ViewportOffset;
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
+  registerEntityEl?: RegisterEntityElement;
 }) {
   return (
     <>
@@ -183,6 +190,7 @@ function SceneChatBubbles({
         return (
           <div
             key={`bubble-${bubble.objectId}`}
+            ref={registerEntityEl?.(`overlay-bubble:${bubble.objectId}`, bubble.objectId)}
             className={`scene-chat-bubble channel-${bubble.channel}`}
             style={{
               left: `${origin.left + centerOffset}px`,
@@ -209,6 +217,7 @@ function DamageFloaters({
   playerCameraMotionOffset,
   entityMotionSnapshots,
   motionNow,
+  registerEntityEl,
 }: {
   floaters: DisplayDamageFloater[];
   entryByObjectId: Map<string, ViewportEntityEntry>;
@@ -216,6 +225,7 @@ function DamageFloaters({
   playerCameraMotionOffset: ViewportOffset;
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
+  registerEntityEl?: RegisterEntityElement;
 }) {
   return (
     <>
@@ -241,6 +251,7 @@ function DamageFloaters({
         return (
           <div
             key={floater.key}
+            ref={registerEntityEl?.(`overlay-damage:${floater.key}`, floater.objectId)}
             className={`scene-damage-floater variant-${floater.variant} ${floater.isPlayerTarget ? "is-player" : "is-monster"}`}
             style={{
               left: `${origin.left + centerOffset}px`,
@@ -266,12 +277,14 @@ function HitFlashes({
   playerCameraMotionOffset,
   entityMotionSnapshots,
   motionNow,
+  registerEntityEl,
 }: {
   entries: ViewportEntityEntry[];
   player: DisplayEntity | null;
   playerCameraMotionOffset: ViewportOffset;
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
+  registerEntityEl?: RegisterEntityElement;
 }) {
   return (
     <>
@@ -298,6 +311,7 @@ function HitFlashes({
         return (
           <div
             key={`hit-flash-${entity.objectId}`}
+            ref={registerEntityEl?.(`overlay-hit:${entity.objectId}`, entity.objectId)}
             className={`scene-hit-flash ${isPlayer ? "is-player" : "is-monster"}`}
             style={{
               left: `${origin.left + bounds.left}px`,
@@ -324,6 +338,7 @@ function SelectionHighlight({
   playerCameraMotionOffset,
   entityMotionSnapshots,
   motionNow,
+  registerEntityEl,
 }: {
   selectedEntity: DisplayEntity | null;
   entryByObjectId: Map<string, ViewportEntityEntry>;
@@ -331,6 +346,7 @@ function SelectionHighlight({
   playerCameraMotionOffset: ViewportOffset;
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
+  registerEntityEl?: RegisterEntityElement;
 }) {
   if (!selectedEntity) {
     return null;
@@ -351,6 +367,7 @@ function SelectionHighlight({
   const centerOffset = (bounds.left + bounds.right) / 2;
   return (
     <div
+      ref={registerEntityEl?.(`overlay-selection:${selectedEntity.objectId}`, selectedEntity.objectId)}
       className={`scene-selection-ring ${selectedEntity.kind === "monster" ? "hostile" : "neutral"}`}
       style={{
         left: `${origin.left + centerOffset}px`,
@@ -630,6 +647,7 @@ function OriginalClientSceneOverlaysInner({
   motionNow,
   imperativeCamera,
   registerCameraSurface,
+  registerEntityEl,
   chatBubbles,
   damageFloaters,
   targetActionLabel,
@@ -645,6 +663,7 @@ function OriginalClientSceneOverlaysInner({
   motionNow: number;
   imperativeCamera: boolean;
   registerCameraSurface: (key: string) => (el: HTMLElement | null) => void;
+  registerEntityEl: RegisterEntityElement;
   chatBubbles: SceneChatBubble[];
   damageFloaters: DisplayDamageFloater[];
   targetActionLabel: string | null;
@@ -658,6 +677,10 @@ function OriginalClientSceneOverlaysInner({
   for (const entry of viewportEntitySprites) {
     entryByObjectId.set(entry.entity.objectId, entry);
   }
+  const overlayMotionSnapshots = imperativeCamera
+    ? EMPTY_ENTITY_MOTION_SNAPSHOTS
+    : entityMotionSnapshots;
+  const overlayEntityRegistration = imperativeCamera ? registerEntityEl : undefined;
 
   return (
     <div
@@ -680,41 +703,46 @@ function OriginalClientSceneOverlaysInner({
         entries={viewportEntitySprites}
         player={player}
         playerCameraMotionOffset={playerCameraMotionOffset}
-        entityMotionSnapshots={entityMotionSnapshots}
+        entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
+        registerEntityEl={overlayEntityRegistration}
       />
       <SelectionHighlight
         selectedEntity={selectedEntity}
         entryByObjectId={entryByObjectId}
         player={player}
         playerCameraMotionOffset={playerCameraMotionOffset}
-        entityMotionSnapshots={entityMotionSnapshots}
+        entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
+        registerEntityEl={overlayEntityRegistration}
       />
       <EntityHealthBars
         entries={viewportEntitySprites}
         player={player}
         selectedEntity={selectedEntity}
         playerCameraMotionOffset={playerCameraMotionOffset}
-        entityMotionSnapshots={entityMotionSnapshots}
+        entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
         entityKindClassName={entityKindClassName}
+        registerEntityEl={overlayEntityRegistration}
       />
       <SceneChatBubbles
         bubbles={chatBubbles}
         entryByObjectId={entryByObjectId}
         player={player}
         playerCameraMotionOffset={playerCameraMotionOffset}
-        entityMotionSnapshots={entityMotionSnapshots}
+        entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
+        registerEntityEl={overlayEntityRegistration}
       />
       <DamageFloaters
         floaters={damageFloaters}
         entryByObjectId={entryByObjectId}
         player={player}
         playerCameraMotionOffset={playerCameraMotionOffset}
-        entityMotionSnapshots={entityMotionSnapshots}
+        entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
+        registerEntityEl={overlayEntityRegistration}
       />
       </div>
       <SelectedTargetReadout t={t} selectedEntity={selectedEntity} targetActionLabel={targetActionLabel} />

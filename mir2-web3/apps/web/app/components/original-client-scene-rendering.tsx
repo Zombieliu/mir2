@@ -10,6 +10,7 @@ import {
 import { SELECT_PORTRAIT_ANIMATIONS, type SelectPortraitKey } from "../../lib/select-portraits";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
 import { transientFrameCycle } from "./original-client-scene-motion";
+import type { BevyPresentationEntityMotion } from "./original-client-presentation-pose";
 export {
   GameSceneBackdrop,
   buildViewportMapSprites,
@@ -17,6 +18,7 @@ export {
   handleSceneAssetImageLoad,
   mapSpriteBlendMode,
   mapSpriteRenderPath,
+  resolvedMapSpriteBlendMode,
   rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
   sceneAssetRuntimeStats,
@@ -29,6 +31,7 @@ export {
   isEntityReviving,
   isEntityStruck,
   projectileProgress,
+  rebaseViewportEntitiesToRenderPlayer,
   refreshEntityMotionSnapshots,
 } from "./original-client-scene-motion";
 import {
@@ -90,6 +93,10 @@ import type {
   EntitySpriteAnimationState,
   SelectCharacterEntry,
 } from "./original-client-types";
+import {
+  crystalPlayerAnimationMeta,
+  type CrystalPlayerActionKey,
+} from "./original-client-player-frames";
 
 type ViewportSpriteLayer = Pick<
   OriginalSceneSpriteFrameMeta,
@@ -121,9 +128,9 @@ type QuestIconKey =
   | "exclamationGreen"
   | "questionGreen";
 
-const SCENE_SPRITE_FRAME_INTERVAL_MS = 120;
+const SCENE_SPRITE_FRAME_INTERVAL_MS = 100;
 const CRYSTAL_QUEST_ICON_FRAME_INTERVAL_MS = 500;
-const PLAYER_ATLAS_PRELOAD_DIRECTIONS = [
+const ENTITY_ATLAS_PRELOAD_DIRECTIONS = [
   "Up",
   "UpRight",
   "Right",
@@ -134,8 +141,21 @@ const PLAYER_ATLAS_PRELOAD_DIRECTIONS = [
   "UpLeft",
 ];
 
+const ENTITY_ATLAS_PRELOAD_STATES: readonly EntitySpriteAnimationState[] = [
+  "standing",
+  "walking",
+  "running",
+  "attackMelee",
+  "attackRange",
+  "struck",
+  "dying",
+  "dead",
+  "reviving",
+];
+
 type ViewportSpriteAnimationMeta = {
   frameBaseOffset: number;
+  mountFrameBaseOffset?: number;
   weaponFrameOffset: number | null;
   frameCount: number;
   directionStride: number;
@@ -150,6 +170,7 @@ export function buildViewportEntitySprite(
   now: number,
   animationState: EntitySpriteAnimationState,
   motionSnapshot?: EntityMotionSnapshot,
+  presentationMotion?: BevyPresentationEntityMotion | null,
 ): ViewportEntitySprite | null {
   const sprite = resolvedEntitySprite(entity, libraries, animationState);
   if (!sprite) {
@@ -168,10 +189,12 @@ export function buildViewportEntitySprite(
     animationState,
     animation,
     motionSnapshot,
+    presentationMotion,
   );
+  const presentationDirection = presentationMotion?.direction ?? entity.direction;
   const frameIndex =
     animation.frameBaseOffset +
-    directionIndex(entity.direction) * animation.directionStride +
+    directionIndex(presentationDirection) * animation.directionStride +
     frameCycle;
   const bodyLibraryKey = normalizeSceneSpriteLibraryKey(sprite.bodyLibrary);
   const hairLibraryKey = sprite.hairLibrary
@@ -185,7 +208,7 @@ export function buildViewportEntitySprite(
     : null;
   const fallbackFrameIndex =
     sprite.frameBaseOffset +
-    directionIndex(entity.direction) * Math.max(sprite.directionStride, 1);
+    directionIndex(presentationDirection) * Math.max(sprite.directionStride, 1);
   const bodyFrame = frameMetaForIndexWithFallback(libraries[bodyLibraryKey], frameIndex, fallbackFrameIndex);
   const hairFrame = hairLibraryKey
     ? frameMetaForIndexWithFallback(libraries[hairLibraryKey], frameIndex, fallbackFrameIndex)
@@ -193,11 +216,11 @@ export function buildViewportEntitySprite(
   const weaponFrameIndex =
     animation.weaponFrameOffset === null
       ? null
-      : animation.weaponFrameOffset + directionIndex(entity.direction) * animation.directionStride + frameCycle;
+      : animation.weaponFrameOffset + directionIndex(presentationDirection) * animation.directionStride + frameCycle;
   const fallbackWeaponFrameIndex =
     sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
       ? null
-      : sprite.weaponFrameOffset + directionIndex(entity.direction) * Math.max(sprite.directionStride, 1);
+      : sprite.weaponFrameOffset + directionIndex(presentationDirection) * Math.max(sprite.directionStride, 1);
   const primaryWeaponFrame =
     weaponLibraryKey && weaponFrameIndex !== null
       ? frameMetaForIndexWithFallback(libraries[weaponLibraryKey], weaponFrameIndex, fallbackWeaponFrameIndex)
@@ -206,37 +229,37 @@ export function buildViewportEntitySprite(
     secondaryWeaponLibraryKey && weaponFrameIndex !== null
       ? frameMetaForIndexWithFallback(libraries[secondaryWeaponLibraryKey], weaponFrameIndex, fallbackWeaponFrameIndex)
       : null;
-  const weaponPlacement = weaponPlacementForDirection(entity.direction);
+  const weaponPlacement = weaponPlacementForDirection(presentationDirection);
   const classKey = entityClassKey(entity);
+  const ridingMount = Boolean(sprite.mountLibrary);
   const primaryWeaponLayer = viewportSpriteLayer(primaryWeaponFrame);
   const secondaryWeaponLayer = viewportSpriteLayer(secondaryWeaponFrame);
-  const rearWeapons =
-    classKey === "assassin"
-      ? assassinRearWeaponsForDirection(entity.direction, primaryWeaponLayer, secondaryWeaponLayer)
+  const rearWeapons = ridingMount
+    ? []
+    : classKey === "assassin"
+      ? assassinRearWeaponsForDirection(presentationDirection, primaryWeaponLayer, secondaryWeaponLayer)
       : weaponPlacement === "rear"
         ? [primaryWeaponLayer, secondaryWeaponLayer].filter((layer): layer is ViewportSpriteLayer => Boolean(layer))
         : [];
-  const frontWeapons =
-    classKey === "assassin"
-      ? assassinFrontWeaponsForDirection(entity.direction, primaryWeaponLayer, secondaryWeaponLayer)
+  const frontWeapons = ridingMount
+    ? []
+    : classKey === "assassin"
+      ? assassinFrontWeaponsForDirection(presentationDirection, primaryWeaponLayer, secondaryWeaponLayer)
       : weaponPlacement === "front"
         ? [primaryWeaponLayer, secondaryWeaponLayer].filter((layer): layer is ViewportSpriteLayer => Boolean(layer))
         : [];
-  // Crystal draws the mount as the bottom layer at `DrawFrame - 416 + MountOffset`
-  // (`PlayerObject.cs:5084-5090`). The server only fills `mountLibrary` while riding
-  // (and suppresses the weapon layers then), so this resolves to null on foot. We key
-  // the mount frame off the rider's body frame so it tracks movement; if the
-  // `Mount/NN` library is not yet in the manifest the layer resolves to null and is
-  // simply skipped (the mount atlas is asset-gated behind the R2 release).
+  // Crystal draws the mount below the rider at `DrawFrame - 416 + MountOffset`.
+  // Mounted body frames start at 416, while mount libraries start at zero.
   const mountLibraryKey = sprite.mountLibrary
     ? normalizeSceneSpriteLibraryKey(sprite.mountLibrary)
     : null;
   const mountFrameIndex =
-    (sprite.mountFrameOffset ?? animation.frameBaseOffset) +
-    directionIndex(entity.direction) * animation.directionStride +
+    (animation.mountFrameBaseOffset ?? sprite.mountFrameOffset ?? 0) +
+    directionIndex(presentationDirection) * animation.directionStride +
     frameCycle;
+  const fallbackMountFrameIndex = directionIndex(presentationDirection) * 4;
   const mountFrame = mountLibraryKey
-    ? frameMetaForIndexWithFallback(libraries[mountLibraryKey], mountFrameIndex, fallbackFrameIndex)
+    ? frameMetaForIndexWithFallback(libraries[mountLibraryKey], mountFrameIndex, fallbackMountFrameIndex)
     : null;
   const preloadAnimations = atlasPreloadAnimationsForEntity(entity, sprite, animationState, animation);
   const preloadFrames = animationPreloadFramesForEntity({
@@ -247,8 +270,10 @@ export function buildViewportEntitySprite(
     hairLibraryKey,
     weaponLibraryKey,
     secondaryWeaponLibraryKey,
+    mountLibraryKey,
     fallbackFrameIndex,
     fallbackWeaponFrameIndex,
+    fallbackMountFrameIndex,
   });
 
   return {
@@ -293,6 +318,12 @@ function resolvedEntitySprite(
   }
 
   if (entity.kind === "monster" || entity.kind === "npc") {
+    return sprite;
+  }
+
+  // Mounted actions live in the common CArmour/CHair frame table. Archer and
+  // assassin alternate atlases do not carry Crystal's 416+ mount actions.
+  if (sprite.mountLibrary) {
     return sprite;
   }
 
@@ -479,8 +510,10 @@ function animationPreloadFramesForEntity({
   hairLibraryKey,
   weaponLibraryKey,
   secondaryWeaponLibraryKey,
+  mountLibraryKey,
   fallbackFrameIndex,
   fallbackWeaponFrameIndex,
+  fallbackMountFrameIndex,
 }: {
   libraries: Record<string, OriginalSceneSpriteLibraryMeta>;
   animations: ViewportSpriteAnimationMeta[];
@@ -489,8 +522,10 @@ function animationPreloadFramesForEntity({
   hairLibraryKey: string | null;
   weaponLibraryKey: string | null;
   secondaryWeaponLibraryKey: string | null;
+  mountLibraryKey: string | null;
   fallbackFrameIndex: number | null;
   fallbackWeaponFrameIndex: number | null;
+  fallbackMountFrameIndex: number | null;
 }) {
   const frames: ViewportSpriteLayer[] = [];
   for (const animation of animations) {
@@ -510,6 +545,15 @@ function animationPreloadFramesForEntity({
               animation.directionStride,
               animation.frameCount,
             );
+      const mountFrameIndices =
+        animation.mountFrameBaseOffset === undefined
+          ? []
+          : animationFrameIndices(
+              animation.mountFrameBaseOffset,
+              preloadDirection,
+              animation.directionStride,
+              animation.frameCount,
+            );
       frames.push(
         ...frameLayersForIndices(libraries[bodyLibraryKey], bodyFrameIndices, fallbackFrameIndex),
         ...(hairLibraryKey
@@ -520,6 +564,9 @@ function animationPreloadFramesForEntity({
           : []),
         ...(secondaryWeaponLibraryKey
           ? frameLayersForIndices(libraries[secondaryWeaponLibraryKey], weaponFrameIndices, fallbackWeaponFrameIndex)
+          : []),
+        ...(mountLibraryKey
+          ? frameLayersForIndices(libraries[mountLibraryKey], mountFrameIndices, fallbackMountFrameIndex)
           : []),
       );
     }
@@ -537,12 +584,11 @@ function atlasPreloadAnimationsForEntity(
   animationState: EntitySpriteAnimationState,
   currentAnimation: ViewportSpriteAnimationMeta,
 ) {
-  const states: EntitySpriteAnimationState[] =
-    entity.kind === "npc"
-      ? [animationState]
-      : entity.kind === "monster"
-        ? ["standing", "walking", animationState]
-        : ["standing", "walking", "running", animationState];
+  // Keep the atlas source set stable across short-lived actions. Building only
+  // the current action made a turn, hit, or attack generate a new atlas key;
+  // the 600 ms attack could finish before that asynchronous swap completed.
+  const states: readonly EntitySpriteAnimationState[] =
+    entity.kind === "npc" ? ["standing"] : ENTITY_ATLAS_PRELOAD_STATES;
   const animations = new Map<string, ViewportSpriteAnimationMeta>();
   const addAnimation = (animation: ViewportSpriteAnimationMeta | null) => {
     if (!animation) {
@@ -563,15 +609,21 @@ function atlasPreloadAnimationsForEntity(
   for (const state of states) {
     addAnimation(spriteAnimationMetaForEntity(entity, sprite, state));
   }
+  if (entity.kind !== "monster" && entity.kind !== "npc" && !sprite.mountLibrary) {
+    // attackMelee selects one variant from the live packet. Preload every
+    // Crystal melee family so attackType changes never mutate atlas residency.
+    for (const action of ["attack1", "attack2", "attack3", "attack4"] as const) {
+      addAnimation(playerAnimationMetaForAction(sprite, action));
+    }
+  }
   addAnimation(currentAnimation);
   return [...animations.values()];
 }
 
-function atlasPreloadDirectionsForEntity(entity: DisplayEntity) {
-  if (entity.kind === "selfPlayer" || entity.kind === "player") {
-    return PLAYER_ATLAS_PRELOAD_DIRECTIONS;
-  }
-  return [entity.direction];
+function atlasPreloadDirectionsForEntity(_entity: DisplayEntity) {
+  // Monsters turn while chasing and NPCs can be redirected by packets. Keeping
+  // all eight directions resident avoids a per-turn atlas-key change.
+  return ENTITY_ATLAS_PRELOAD_DIRECTIONS;
 }
 
 function animationFrameIndices(
@@ -613,6 +665,7 @@ function spriteFrameCycleForEntity(
   animationState: EntitySpriteAnimationState,
   animation: ViewportSpriteAnimationMeta,
   motionSnapshot?: EntityMotionSnapshot,
+  presentationMotion?: BevyPresentationEntityMotion | null,
 ) {
   const frameCount = Math.max(animation.frameCount, 1);
   if (frameCount <= 1) {
@@ -645,12 +698,14 @@ function spriteFrameCycleForEntity(
       break;
     case "walking":
     case "running":
-      cycle = loopingFrameCycle(
-        now,
-        motionSnapshot?.startedAt ?? entity.movementStartedAt ?? now,
-        frameIntervalMs,
-        frameCount,
-      );
+      cycle = presentationMotion
+        ? Math.min(presentationMotion.frameIndex, frameCount - 1)
+        : loopingFrameCycle(
+            now,
+            motionSnapshot?.startedAt ?? entity.movementStartedAt ?? now,
+            frameIntervalMs,
+            frameCount,
+          );
       break;
     case "attackMelee":
     case "attackRange":
@@ -687,6 +742,19 @@ function stableEntityAnimationPhaseMs(entity: DisplayEntity, frameIntervalMs: nu
     ? numericId
     : Array.from(entity.objectId).reduce((total, char) => total + char.charCodeAt(0), 0);
   return (Math.abs(seed) % Math.max(frameCount, 1)) * Math.max(frameIntervalMs, 1);
+}
+
+function playerAnimationMetaForAction(
+  sprite: EntitySprite,
+  action: CrystalPlayerActionKey,
+  includeWeapon = true,
+): ViewportSpriteAnimationMeta {
+  return crystalPlayerAnimationMeta(
+    action,
+    sprite.frameBaseOffset,
+    sprite.weaponFrameOffset,
+    includeWeapon,
+  );
 }
 
 function spriteAnimationMetaForEntity(
@@ -769,123 +837,54 @@ function spriteAnimationMetaForEntity(
     }
   }
 
+  if (sprite.mountLibrary) {
+    switch (animationState) {
+      case "walking":
+        return playerAnimationMetaForAction(sprite, "mountWalking", false);
+      case "running":
+        return playerAnimationMetaForAction(sprite, "mountRunning", false);
+      case "struck":
+        return playerAnimationMetaForAction(sprite, "mountStruck", false);
+      case "attackMelee":
+      case "attackRange":
+        return playerAnimationMetaForAction(sprite, "mountAttack", false);
+      default:
+        return playerAnimationMetaForAction(sprite, "mountStanding", false);
+    }
+  }
+
   const archerAlt =
     Boolean(sprite.bodyLibrary.startsWith("ARArmour/")) &&
     (animationState === "walking" || animationState === "running" || animationState === "attackRange");
 
   switch (animationState) {
     case "walking":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + (archerAlt ? 0 : 32),
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + (archerAlt ? 0 : 32),
-        frameCount: 6,
-        directionStride: 6,
-        frameIntervalMs: 100,
-      };
+      return playerAnimationMetaForAction(sprite, archerAlt ? "archerWalking" : "walking");
     case "running":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + (archerAlt ? 48 : 80),
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + (archerAlt ? 48 : 112),
-        frameCount: 6,
-        directionStride: 6,
-        frameIntervalMs: 100,
-      };
+      return playerAnimationMetaForAction(sprite, archerAlt ? "archerRunning" : "running");
     case "attackMelee":
-      return {
-        frameBaseOffset:
-          entity.attackAnimation === "melee2"
-            ? sprite.frameBaseOffset + 184
-            : entity.attackAnimation === "melee3"
-              ? sprite.frameBaseOffset + 232
-              : entity.attackAnimation === "melee4"
-                ? sprite.frameBaseOffset + 416
-                : sprite.frameBaseOffset + 136,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : entity.attackAnimation === "melee2"
-              ? sprite.weaponFrameOffset + 216
-              : entity.attackAnimation === "melee3"
-                ? sprite.weaponFrameOffset + 264
-                : entity.attackAnimation === "melee4"
-                  ? sprite.weaponFrameOffset + 448
-                  : sprite.weaponFrameOffset + 168,
-        frameCount: entity.attackAnimation === "melee3" ? 8 : 6,
-        directionStride: entity.attackAnimation === "melee3" ? 8 : 6,
-        frameIntervalMs: 100,
-      };
+      return playerAnimationMetaForAction(
+        sprite,
+        entity.attackAnimation === "melee2"
+          ? "attack2"
+          : entity.attackAnimation === "melee3"
+            ? "attack3"
+            : entity.attackAnimation === "melee4"
+              ? "attack4"
+              : "attack1",
+      );
     case "attackRange":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + 96,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + 96,
-        frameCount: 8,
-        directionStride: 8,
-        frameIntervalMs: 100,
-      };
+      return playerAnimationMetaForAction(sprite, "attackRange");
     case "struck":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + 360,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + 392,
-        frameCount: 3,
-        directionStride: 3,
-        frameIntervalMs: 100,
-      };
+      return playerAnimationMetaForAction(sprite, "struck");
     case "dying":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + 384,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + 416,
-        frameCount: 4,
-        directionStride: 4,
-        frameIntervalMs: 100,
-      };
+      return playerAnimationMetaForAction(sprite, "dying");
     case "dead":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + 387,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + 419,
-        frameCount: 1,
-        directionStride: 1,
-      };
+      return playerAnimationMetaForAction(sprite, "dead");
     case "reviving":
-      return {
-        frameBaseOffset: sprite.frameBaseOffset + 384,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset + 416,
-        frameCount: 4,
-        directionStride: 4,
-        frameIntervalMs: 100,
-        reverse: true,
-      };
+      return playerAnimationMetaForAction(sprite, "reviving");
     default:
-      return {
-        frameBaseOffset: sprite.frameBaseOffset,
-        weaponFrameOffset:
-          sprite.weaponFrameOffset === undefined || sprite.weaponFrameOffset === null
-            ? null
-            : sprite.weaponFrameOffset,
-        frameCount: Math.max(sprite.frameCount, 1),
-        directionStride: Math.max(sprite.directionStride, 1),
-        frameIntervalMs: 500,
-      };
+      return playerAnimationMetaForAction(sprite, "standing");
   }
 }
 

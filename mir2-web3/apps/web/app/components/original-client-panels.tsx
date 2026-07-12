@@ -39,6 +39,7 @@ type DisplayLogLineLike = {
     | "system"
     | "hint"
     | "server"
+    | "line"
     | "announcement"
     | "network";
 };
@@ -175,6 +176,7 @@ export function ChatFrame({
   const maxScrollOffset = Math.max(lines.length - visibleLineCount, 0);
   const visibleLines = lines.slice(scrollOffset, scrollOffset + visibleLineCount);
   const knobTop = maxScrollOffset === 0 ? 16 : 16 + Math.round((scrollOffset / maxScrollOffset) * 28);
+  const chatTextBoxVisible = chatMessage.length > 0;
 
   useEffect(() => {
     setScrollOffset((current) => {
@@ -261,6 +263,8 @@ export function ChatFrame({
         className="chat-textbox"
         value={chatMessage}
         data-chat-prefix={activePrefix}
+        data-chat-visible={chatTextBoxVisible}
+        aria-hidden={!chatTextBoxVisible}
         aria-label={t("ui.worldChatPlaceholder")}
         onChange={(event) => onChatMessageChange(event.target.value)}
         onKeyDown={(event) => {
@@ -385,17 +389,29 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
   return (
     <section className={`belt-dialog ${vertical ? "vertical" : "horizontal"}`}>
       <img
-        className="belt-dialog-bg"
-        src={vertical ? ORIGINAL_UI.game.belt.vertical : ORIGINAL_UI.game.belt.horizontal}
-        alt=""
-        draggable={false}
-      />
-      <img
         className="belt-dialog-bg belt-dialog-overlay"
         src={vertical ? ORIGINAL_UI.game.belt.verticalOverlay : ORIGINAL_UI.game.belt.horizontalOverlay}
         alt=""
         draggable={false}
       />
+      <img
+        className="belt-dialog-bg"
+        src={vertical ? ORIGINAL_UI.game.belt.vertical : ORIGINAL_UI.game.belt.horizontal}
+        alt=""
+        draggable={false}
+      />
+      {ORIGINAL_UI.game.belt.slots.map((slot, index) => (
+        <span
+          key={`${slot.key}-label`}
+          className="belt-slot-label"
+          style={{
+            left: vertical ? slot.verticalLabelX : slot.labelX + index * 35,
+            top: vertical ? slot.verticalLabelY + index * 35 : slot.labelY,
+          }}
+        >
+          {index + 1}
+        </span>
+      ))}
       {ORIGINAL_UI.game.belt.slots.map((slot, index) => {
         const item = itemBySlot.get(index) ?? null;
 
@@ -408,15 +424,6 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
               top: vertical ? slot.verticalY : slot.horizontalY,
             }}
           >
-            <span
-              className="belt-slot-label"
-              style={{
-                left: vertical ? slot.verticalLabelX : slot.labelX,
-                top: vertical ? slot.verticalLabelY : slot.labelY,
-              }}
-            >
-              {index + 1}
-            </span>
             {item ? (
               <button
                 type="button"
@@ -438,7 +445,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
                   alt=""
                   draggable={false}
                 />
-                {item.quantity > 1 ? <span className="item-stack-count belt-item-count">{item.quantity}</span> : null}
+                {item.quantity > 0 ? <span className="item-stack-count belt-item-count">{item.quantity}</span> : null}
                 <OriginalItemTooltip
                   t={t}
                   name={item.name}

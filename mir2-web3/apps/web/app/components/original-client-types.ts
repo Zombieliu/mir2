@@ -64,6 +64,7 @@ export type EntityMotionSnapshot = {
   toX: number;
   toY: number;
   animationState: EntitySpriteAnimationState;
+  frameCount?: number;
   startedAt: number;
   expiresAt: number;
 };
@@ -81,8 +82,10 @@ export type DisplayEntity = {
   level?: number;
   hp?: number;
   maxHp?: number;
+  light?: number;
   nameColourArgb?: number;
   dead?: boolean;
+  sneaking?: boolean;
   sprite?: EntitySprite | null;
   questIds?: number[];
   bigMapIcon?: number;
@@ -91,6 +94,7 @@ export type DisplayEntity = {
   movementAnimation?: "walking" | "running";
   movementStartedAt?: number;
   movementUntil?: number;
+  movementFrameCount?: number;
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
   attackStartedAt?: number;
   attackUntil?: number;
@@ -106,6 +110,10 @@ export type PredictedPlayerMotion = {
   x: number;
   y: number;
   direction?: string;
+  movementAnimation?: "walking" | "running";
+  movementStartedAt?: number;
+  movementUntil?: number;
+  movementFrameCount?: number;
 };
 
 export type DisplayProjectile = {
@@ -247,6 +255,7 @@ export type DisplayLogLine = {
     | "system"
     | "hint"
     | "server"
+    | "line"
     | "announcement"
     | "network";
 };
@@ -258,6 +267,7 @@ export type DisplayWorld = {
   inSafeZone: boolean;
   miniMapIndex: number | null;
   bigMapIndex?: number | null;
+  lightSetting?: number | null;
   playerName: string | null;
   playerHp?: number;
   playerMaxHp?: number;

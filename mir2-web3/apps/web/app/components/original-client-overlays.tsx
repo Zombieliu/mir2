@@ -72,10 +72,41 @@ type HudWorldLike = {
   freeBagSlots: number;
   maxBagSlots: number;
   currentWeight: number;
+  maxWeight: number;
+  beltItems?: unknown[];
+  inventoryItems?: unknown[];
 };
 
+const CRYSTAL_MAIN_INVENTORY_SLOT_COUNT = 46;
+const CRYSTAL_MAIN_HUD_WEIGHT_BAR_WIDTH = 76;
 const CREATE_CLASS_OPTIONS: EntityClassKey[] = ["warrior", "wizard", "taoist", "assassin", "archer"];
 const CREATE_GENDER_OPTIONS: EntityGenderKey[] = ["male", "female"];
+
+function crystalMainHudFreeSlots(world: HudWorldLike) {
+  if (!Array.isArray(world.inventoryItems) || !Array.isArray(world.beltItems)) {
+    return world.freeBagSlots;
+  }
+
+  return Math.max(
+    0,
+    CRYSTAL_MAIN_INVENTORY_SLOT_COUNT - world.inventoryItems.length - world.beltItems.length,
+  );
+}
+
+function formatCrystalMainHudGold(gold: number) {
+  const wholeGold = Math.max(0, Math.trunc(Number.isFinite(gold) ? gold : 0));
+  return wholeGold.toLocaleString("en-US");
+}
+
+function crystalMainHudWeightBarFillWidth(weightRatio: number) {
+  return Math.floor((CRYSTAL_MAIN_HUD_WEIGHT_BAR_WIDTH - 2) * Math.max(0, Math.min(1, weightRatio)));
+}
+
+function crystalMainHudWeightBarSprite(weightRatio: number) {
+  if (weightRatio > 0.75) return ORIGINAL_UI.hud.weightBars.danger;
+  if (weightRatio > 0.5) return ORIGINAL_UI.hud.weightBars.warning;
+  return ORIGINAL_UI.hud.weightBars.normal;
+}
 
 export type LanguageSelectorProps = {
   language: Mir2Language;
@@ -665,6 +696,11 @@ export function MainHud({
     .slice(0, 2)
     .map((buff) => `${buff.name}:${buff.remainingTicks}`)
     .join("  ");
+  const remainingBagWeight = Math.max(0, Math.floor(world.maxWeight - world.currentWeight));
+  const crystalFreeSlots = crystalMainHudFreeSlots(world);
+  const bagWeightRatio = ratio(world.currentWeight, world.maxWeight);
+  const weightBarFillWidth = crystalMainHudWeightBarFillWidth(bagWeightRatio);
+  const weightBarSprite = crystalMainHudWeightBarSprite(bagWeightRatio);
 
   return (
     <div className="main-hud-shell">
@@ -673,7 +709,26 @@ export function MainHud({
         <img className="hud-base" src={ORIGINAL_UI.hud.base} alt="" draggable={false} />
         <img className="hud-cap right" src={ORIGINAL_UI.hud.rightCap} alt="" draggable={false} />
         <img className="hud-exp-bar" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
-        <img className="hud-weight-bar" src={ORIGINAL_UI.hud.weightBar} alt="" draggable={false} />
+        <div
+          className="hud-weight-bar"
+          data-weight-ratio={bagWeightRatio.toFixed(4)}
+          data-fill-width={weightBarFillWidth}
+          data-mir2-original-src={weightBarSprite}
+        >
+          <div className="hud-weight-bar-clip" style={{ width: `${weightBarFillWidth}px` }}>
+            {weightBarFillWidth > 0 ? (
+              <img
+                className="hud-weight-bar-fill"
+                src={weightBarSprite}
+                alt=""
+                draggable={false}
+                data-mir2-original-src={weightBarSprite}
+                onError={handleSceneAssetImageError}
+                onLoad={handleSceneAssetImageLoad}
+              />
+            ) : null}
+          </div>
+        </div>
 
         <div className={`hud-orb-fill hp ${hpOnlyOrb ? "hp-only" : ""}`} style={{ height: `${80 * healthRatio}px` }}>
           <img src={hpOnlyOrb ? ORIGINAL_UI.hud.healthOnlyOrb : ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
@@ -698,9 +753,9 @@ export function MainHud({
         </div>
         {buffLabel ? <div className="hud-buff-label">{buffLabel}</div> : null}
         <div className="hud-exp-label">{`${experienceRatio.toFixed(2).replace(/^0/, "") === ".00" ? "0.00" : (experienceRatio * 100).toFixed(2)}%`}</div>
-        <div className="hud-gold-label">{connected ? `${world.gold}` : "0"}</div>
-        <div className="hud-weight-label">{`${world.freeBagSlots}/${world.maxBagSlots}`}</div>
-        <div className="hud-space-label">{`${world.currentWeight}`}</div>
+        <div className="hud-gold-label">{connected ? formatCrystalMainHudGold(world.gold) : "0"}</div>
+        <div className="hud-weight-label">{remainingBagWeight}</div>
+        <div className="hud-space-label">{crystalFreeSlots}</div>
 
         <div className="hud-button shop">
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.gameShop} label={t("ui.gameShop")} onClick={onToggleGameShop} active={showGameShop} />

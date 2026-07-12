@@ -1,0 +1,26 @@
+{
+  "capturedAt": "2026-07-12T20:16:52.298Z",
+  "url": "http://127.0.0.1:3002/",
+  "target": {
+    "objectId": "200323",
+    "name": "Royal Archer"
+  },
+  "start": {
+    "playerX": 310,
+    "playerY": 51,
+    "distance": "far"
+  },
+  "arrival": {
+    "playerX": 320,
+    "playerY": 43,
+    "distanceTiles": 1,
+    "firstAttackObservedMs": 2300
+  },
+  "selectedDuringChase": true,
+  "manualGroundClick": {
+    "observationMs": 3500,
+    "attackingSamples": 0
+  },
+  "unitTest": "npm run test:target-combat",
+  "typecheck": "npx tsc --noEmit"
+}

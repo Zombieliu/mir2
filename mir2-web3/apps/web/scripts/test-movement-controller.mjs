@@ -5,6 +5,7 @@ import ts from "typescript";
 
 const controllerPath = new URL("../app/components/original-client-movement-controller.ts", import.meta.url);
 const pagePath = new URL("../app/page.tsx", import.meta.url);
+const shellPath = new URL("../app/original-client-shell.tsx", import.meta.url);
 const source = readFileSync(controllerPath, "utf8");
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
@@ -23,15 +24,71 @@ const {
   CRYSTAL_MOVE_DELAY_MS,
   CRYSTAL_RUN_PRIME_MS,
   canSendMovement,
+  classifyMovementAckOutcome,
   clampMovementLeadToCap,
   stepMovementTowardWithinCap,
   createPendingSelfMove,
+  crystalMovementProfile,
   effectiveCrystalMovementMode,
   movementTileMatches,
   movementTransformMatches,
   reconcileMovementAck,
   reconcileMovementSnapshot,
 } = module.exports;
+
+{
+  assert.deepEqual(crystalMovementProfile({ mode: "walk" }), {
+    mode: "walk",
+    distance: 1,
+    phaseCount: 6,
+    frameIntervalMs: 100,
+    durationMs: 600,
+  });
+  assert.deepEqual(crystalMovementProfile({ mode: "run" }), {
+    mode: "run",
+    distance: 2,
+    phaseCount: 6,
+    frameIntervalMs: 100,
+    durationMs: 600,
+  });
+  assert.deepEqual(crystalMovementProfile({ mode: "walk", mounted: true }), {
+    mode: "walk",
+    distance: 1,
+    phaseCount: 8,
+    frameIntervalMs: 100,
+    durationMs: 800,
+  });
+  assert.equal(crystalMovementProfile({ mode: "run", mounted: true }).distance, 3);
+  assert.equal(crystalMovementProfile({ mode: "run", swiftFeet: true }).distance, 3);
+  assert.equal(
+    crystalMovementProfile({ mode: "run", swiftFeet: true, sneaking: true }).distance,
+    2,
+  );
+}
+
+{
+  const mountedRun = createPendingSelfMove({
+    from: { x: 10, y: 20, direction: "Right" },
+    direction: "Right",
+    requestedMode: "run",
+    now: 1_000,
+    runPrimedUntil: 2_000,
+    mounted: true,
+  });
+  assert.deepEqual(mountedRun.to, { x: 13, y: 20, direction: "Right" });
+  assert.equal(mountedRun.phaseCount, 6);
+
+  const mountedWalk = createPendingSelfMove({
+    from: { x: 10, y: 20, direction: "Right" },
+    direction: "Right",
+    requestedMode: "walk",
+    now: 1_000,
+    runPrimedUntil: 0,
+    mounted: true,
+  });
+  assert.equal(mountedWalk.phaseCount, 8);
+  assert.equal(mountedWalk.visualUntil, 1_800);
+}
 
 const initialState = () => ({
   pending: null,
@@ -40,6 +97,48 @@ const initialState = () => ({
   runPrimedUntil: 0,
   inputBlockedUntil: 0,
 });
+
+{
+  const pending = createPendingSelfMove({
+    from: { x: 10, y: 20, direction: "Right" },
+    direction: "Right",
+    requestedMode: "run",
+    now: 1_500,
+    runPrimedUntil: 2_000,
+  });
+  assert.equal(
+    classifyMovementAckOutcome({
+      pending,
+      ack: { x: 11, y: 20, direction: "Right" },
+      packetName: "UserLocation",
+    }),
+    "confirmed",
+    "a one-tile landing for a two-tile run is classified as confirmed before rendering",
+  );
+  assert.equal(
+    classifyMovementAckOutcome({
+      pending,
+      ack: { x: 10, y: 21, direction: "Down" },
+      packetName: "UserLocation",
+    }),
+    "correction",
+    "an off-path run ACK remains a correction",
+  );
+  const reconciled = reconcileMovementAck({
+    state: {
+      ...initialState(),
+      pending,
+      prediction: pending.to,
+      nextMoveSendAt: pending.sentAt + CRYSTAL_MOVE_DELAY_MS,
+    },
+    ack: { x: 11, y: 20, direction: "Right" },
+    packetName: "UserLocation",
+    now: 1_650,
+  });
+  assert.equal(reconciled.outcome, "confirmed");
+  assert.equal(reconciled.state.inputBlockedUntil, 0, "degraded run must not arm correction input lock");
+  assert.equal(reconciled.state.runPrimedUntil, 1_650 + CRYSTAL_RUN_PRIME_MS);
+}
 
 {
   const pending = createPendingSelfMove({
@@ -299,6 +398,11 @@ const initialState = () => ({
   const pageSource = readFileSync(pagePath, "utf8");
   assert.match(
     pageSource,
+    /const outcome = classifyMovementAckOutcome\(\{ pending, ack: point, packetName \}\);/,
+    "the pre-render ACK disposition must use the same classifier as controller reconciliation",
+  );
+  assert.match(
+    pageSource,
     /clampMovementLeadToCap\(serverSelf,\s*candidate,\s*MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES\)/,
     "chooseCrystalSelfRenderPosition must clamp over-cap candidates to the render lead cap",
   );
@@ -318,6 +422,42 @@ const initialState = () => ({
     pageSource,
     /stepMovementTowardWithinCap\(base,\s*target,\s*MOVEMENT_RENDER_MAX_STEP_TILES_PER_FRAME\)/,
     "easeSelfRenderTile must cap the per-frame render advance",
+  );
+  assert.match(
+    pageSource,
+    /const currentWorld = worldRef\.current;[\s\S]*?const authoritative = \{\s*x: currentSelf\.x,\s*y: currentSelf\.y,\s*direction: currentSelf\.direction,\s*\};/,
+    "the live render callback must build its fallback from the current authoritative ref",
+  );
+  assert.match(
+    pageSource,
+    /const predicted = presentationOwnsInterpolation\s*\? liveCandidate\s*:\s*preserveCrystalSelfRenderPosition\(currentSelf, liveCandidate\)/,
+    "Bevy-owned interpolation must consume the command endpoint without logical one-tile easing",
+  );
+  const shellSource = readFileSync(shellPath, "utf8");
+  assert.match(
+    shellSource,
+    /getLivePlayerRenderPosition\?\.\(\{\s*presentationOwnsInterpolation: presentationOwnsPlayerInterpolation,\s*\}\)/,
+    "the shell must tell the live player selector when Bevy owns presentation interpolation",
+  );
+  assert.match(
+    pageSource,
+    /Math\.max\(Math\.abs\(predicted\.x - currentSelf\.x\), Math\.abs\(predicted\.y - currentSelf\.y\)\) <=\s*MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES\s*\? predicted\s*:\s*authoritative/,
+    "an absent or invalid live render lead must fall back to the current authoritative ref",
+  );
+  assert.match(
+    pageSource,
+    /return \{\s*\.\.\.renderPosition,\s*\.\.\.localSelfMovementAnimationForPosition\(renderPosition\),\s*\};/,
+    "the live position must retain the command-timestamp animation window",
+  );
+  assert.match(
+    pageSource,
+    /const movementStartedAt = source\.sentAt;/,
+    "local self animation must retain the movement command timestamp",
+  );
+  assert.doesNotMatch(
+    pageSource,
+    /movementStartedAt = Math\.max\(source\.sentAt/,
+    "a delayed React render must not restart the Crystal movement window",
   );
 }
 
