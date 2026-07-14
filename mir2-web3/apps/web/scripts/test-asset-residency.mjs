@@ -56,6 +56,7 @@ const managerModule = loadTsModule(new URL("manager.ts", BASE), {
 });
 
 const { createAssetResidency } = managerModule;
+const { estimateAtlasPagePayloadBytes } = typesModule;
 
 // ---------------------------------------------------------------------------
 // Fake implementations
@@ -94,6 +95,11 @@ function makeFakeStore(initial = new Map()) {
       return [...store.entries()]
         .sort((a, b) => a[1].lastUsedAt - b[1].lastUsedAt)
         .map(([k]) => k);
+    },
+    async listEntriesByAge() {
+      return [...store.entries()]
+        .sort((a, b) => a[1].lastUsedAt - b[1].lastUsedAt)
+        .map(([key, entry]) => ({ key, bytes: estimateAtlasPagePayloadBytes(entry.payload) }));
     },
     // Test introspection
     _store: store,
@@ -134,12 +140,21 @@ function makePayload(key, opts = {}) {
 }
 
 /** Build a manager with given budgets and optional overrides. */
-function makeManager({ memoryBudget = 4, persistentBudget = 3, store, fetcher } = {}) {
+function makeManager({
+  memoryBudget = 4,
+  persistentBudget = 3,
+  memoryBudgetBytes,
+  persistentBudgetBytes,
+  store,
+  fetcher,
+} = {}) {
   const fakeStore = store ?? makeFakeStore();
   const fakeFetcher = fetcher ?? makeFakeFetcher();
   const manager = createAssetResidency({
     memoryBudget,
     persistentBudget,
+    memoryBudgetBytes,
+    persistentBudgetBytes,
     persistent: fakeStore,
     fetcher: fakeFetcher,
   });
@@ -265,7 +280,9 @@ console.log("\n[asset-residency/manager] LRU eviction (memory budget)");
 await test("evicts oldest when memory budget exceeded", async () => {
   const { manager } = makeManager({ memoryBudget: 2 });
   await manager.acquire("k1"); // LRU position 1
+  manager.release("k1");
   await manager.acquire("k2"); // LRU position 2  — cache full
+  manager.release("k2");
   await manager.acquire("k3"); // k1 evicted
   assert.equal(manager.has("k1"), false, "k1 should be evicted");
   assert.equal(manager.has("k2"), true);
@@ -275,9 +292,12 @@ await test("evicts oldest when memory budget exceeded", async () => {
 await test("accessing an entry promotes it (LRU touch)", async () => {
   const { manager } = makeManager({ memoryBudget: 2 });
   await manager.acquire("k1");
+  manager.release("k1");
   await manager.acquire("k2");
+  manager.release("k2");
   // Touch k1 to make it MRU; k2 becomes LRU.
   await manager.acquire("k1");
+  manager.release("k1");
   await manager.acquire("k3"); // k2 should be evicted, not k1
   assert.equal(manager.has("k1"), true, "k1 was touched and should survive eviction");
   assert.equal(manager.has("k2"), false, "k2 is now LRU and should be evicted");
@@ -287,10 +307,13 @@ await test("accessing an entry promotes it (LRU touch)", async () => {
 await test("stats.memoryCacheSize reflects live cache size", async () => {
   const { manager } = makeManager({ memoryBudget: 3 });
   await manager.acquire("k1");
+  manager.release("k1");
   assert.equal(manager.stats().memoryCacheSize, 1);
   await manager.acquire("k2");
+  manager.release("k2");
   assert.equal(manager.stats().memoryCacheSize, 2);
   await manager.acquire("k3");
+  manager.release("k3");
   assert.equal(manager.stats().memoryCacheSize, 3);
   await manager.acquire("k4"); // evicts k1
   assert.equal(manager.stats().memoryCacheSize, 3);
@@ -310,6 +333,21 @@ await test("persistent store is trimmed to budget after writes", async () => {
   // Allow background persist+trim to complete.
   await new Promise((r) => setTimeout(r, 10));
   assert.ok(fakeStore._size() <= 2, `persistent store has ${fakeStore._size()} entries, expected <= 2`);
+});
+
+await test("persistent store is trimmed by byte budget", async () => {
+  const entryBytes = estimateAtlasPagePayloadBytes(makePayload("byte-entry", { width: 16, height: 16 }));
+  const fetcher = { async fetch(key) { return makePayload(key, { width: 16, height: 16 }); } };
+  const { manager, fakeStore } = makeManager({
+    memoryBudget: 10,
+    persistentBudget: 10,
+    persistentBudgetBytes: entryBytes + 64,
+    fetcher,
+  });
+  await manager.acquire("persist-a");
+  await manager.acquire("persist-b");
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(fakeStore._size(), 1, "oldest persistent payload should be deleted by bytes");
 });
 
 // ---------------------------------------------------------------------------
@@ -340,6 +378,50 @@ await test("release() is safe to call multiple times", async () => {
   });
 });
 
+await test("active leases protect entries until release", async () => {
+  const { manager } = makeManager({ memoryBudget: 1 });
+  await manager.acquire("active-a");
+  await manager.acquire("active-b");
+  assert.equal(manager.has("active-a"), true, "pinned oldest entry must remain resident");
+  assert.equal(manager.stats().pinnedEntryCount, 2);
+  manager.release("active-a");
+  assert.equal(manager.has("active-a"), false, "release should retry budget eviction");
+  assert.equal(manager.has("active-b"), true);
+});
+
+await test("byte budget evicts an unpinned decoded atlas", async () => {
+  const sample = makePayload("bytes-a", { width: 16, height: 16 });
+  const perEntryBytes = estimateAtlasPagePayloadBytes(sample);
+  const fetcher = { async fetch(key) { return makePayload(key, { width: 16, height: 16 }); } };
+  const { manager } = makeManager({
+    memoryBudget: 10,
+    memoryBudgetBytes: perEntryBytes + 64,
+    fetcher,
+  });
+  await manager.acquire("bytes-a");
+  manager.release("bytes-a");
+  await manager.acquire("bytes-b");
+  assert.equal(manager.has("bytes-a"), false);
+  assert.equal(manager.has("bytes-b"), true);
+  assert.ok(manager.stats().memoryCacheBytes <= perEntryBytes + 64);
+  assert.equal(manager.stats().memoryEvictions, 1);
+});
+
+await test("multi-page byte estimate does not double-count page zero", () => {
+  const pagePixels = new Uint8Array(8 * 8 * 4);
+  const payload = {
+    ...makePayload("multi", { width: 8, height: 8 }),
+    pixels: pagePixels,
+    pages: [
+      { key: "p0", width: 8, height: 8, pixels: pagePixels, rectList: [] },
+      { key: "p1", width: 8, height: 8, pixels: pagePixels, rectList: [] },
+    ],
+  };
+  const bytes = estimateAtlasPagePayloadBytes(payload);
+  assert.ok(bytes >= pagePixels.byteLength * 2);
+  assert.ok(bytes < pagePixels.byteLength * 3);
+});
+
 // ---------------------------------------------------------------------------
 // 7. evictToBudget()
 // ---------------------------------------------------------------------------
@@ -357,7 +439,9 @@ await test("evictToBudget() trims memory tier", async () => {
   // so we verify via direct eviction using a tighter manager.
   const { manager: tight } = makeManager({ memoryBudget: 1 });
   await tight.acquire("k1");
+  tight.release("k1");
   await tight.acquire("k2");
+  tight.release("k2");
   await tight.acquire("k3");
   // Budget=1, all 3 inserted sequentially so only k3 remains.
   assert.equal(tight.stats().memoryCacheSize, 1);
@@ -451,6 +535,7 @@ console.log("\n[asset-residency/manager] edge cases");
 await test("acquire with budget=1 evicts immediately on second key", async () => {
   const { manager } = makeManager({ memoryBudget: 1 });
   await manager.acquire("first");
+  manager.release("first");
   await manager.acquire("second");
   assert.equal(manager.has("first"), false);
   assert.equal(manager.has("second"), true);
@@ -501,6 +586,7 @@ await test("peek is memory-only: does NOT pull from the persistent tier", async 
 await test("peek returns null after the key is evicted from memory", async () => {
   const { manager } = makeManager({ memoryBudget: 1 });
   await manager.acquire("a");
+  manager.release("a");
   await manager.acquire("b"); // evicts "a"
   assert.equal(manager.peek("a"), null);
   assert.ok(manager.peek("b"));

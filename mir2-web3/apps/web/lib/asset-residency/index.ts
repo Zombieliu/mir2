@@ -21,3 +21,4 @@ export type {
 } from "./types";
 
 export { createAssetResidency } from "./manager";
+export { estimateAtlasPagePayloadBytes } from "./types";

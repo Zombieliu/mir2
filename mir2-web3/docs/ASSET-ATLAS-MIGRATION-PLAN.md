@@ -1,5 +1,13 @@
 # Asset Delivery: Per-Frame PNG → Atlas Migration Plan
 
+> Implementation update (2026-07-14): the lossless PNG/CAS baseline described
+> by this proposal is implemented for all 1,440 Crystal libraries. Runtime
+> entity consumers prefer per-library shards, decoded residency is bounded by
+> adaptive Bevy/WebGL2 LRU caches, and forced-low Bichon QA passes below the
+> 64 MiB decoded target. See `CRYSTAL-FULL-ASSET-PIPELINE.md` for verified
+> counts, commands, rollback, and the Brazil-device release boundary. KTX2 is
+> still optional and must not replace the WebGL2/PNG fallback without evidence.
+
 Status: **proposed** (2026-06-18). Owner: client/runtime + asset-pipeline lanes.
 Supersedes the per-tile-upload direction recorded for the Bevy map uncovered-tile gap
 (see §6). KTX2/GPU-compression status updated per the step-(a) spike (see §4).

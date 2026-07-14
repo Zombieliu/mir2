@@ -401,6 +401,16 @@ async function drivePlayableFlow(client) {
   const screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
   const shouldCreateAccount = createAccount && !createdPlayableAccount;
   if (screen === "login") {
+    await waitUntil(
+      async () =>
+        Boolean(
+          await client.evaluate(
+            "Boolean(document.querySelector('.login-input.account') && document.querySelector('.login-input.password'))",
+          ),
+        ),
+      10_000,
+      "login inputs",
+    );
     await fillInput(client, ".login-input.account", account);
     await fillInput(client, ".login-input.password", password);
     if (shouldCreateAccount) {

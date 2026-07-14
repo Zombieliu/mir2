@@ -1,6 +1,26 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
+
+> 2026-07-14 full-pack/low-tier closure: all 1,440 Crystal libraries now have a
+> deterministic, resumable, hash-verified offline conversion into 1,440 lazy
+> manifest shards and 4,446 unique immutable PNG pages. All 2,143,132 frame
+> slots are classified as 1,869,869 packed frames or 273,263 no-draw frames;
+> the verified content hash is
+> `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`.
+> Entity rendering prefers full-pack shards and retains the legacy path as a
+> rollback. Bevy and raw WebGL2 caches now evict by entry and decoded-byte LRU,
+> preserve active pages, release browser image references, and reject pages
+> larger than the GPU limit. Forced-low WebGL2 Bichon QA held 13 pages and
+> 1,598 rects in 58,379,430 bytes, passed 28/28 movement/render assertions, and
+> used no DOM entity fallback. Low-tier prewarm fell to 403/403 successful
+> requests with background warming off; cold transfer was 18,993,684 bytes and
+> warm transfer 600 bytes, with 69,027,432 CacheStorage bytes. Evidence:
+> `docs/generated/assets/crystal-full-pack-coverage.generated.json` and
+> `docs/generated/player-qa/full-asset-pack-low-tier/`. This closes source-pack
+> completeness and desktop low-tier automation, not all visual parity: maps
+> remain regional, HUD/audio/effect-specific paths remain dedicated, and Brazil
+> still needs CDN plus physical 2/4 GiB Android throttled-network soak.
 
 > 2026-07-13 map-render pipeline closure: the Bichon black rectangles were not
 > missing map data. Raw packed atlases bypassed Crystal black-key conversion,
