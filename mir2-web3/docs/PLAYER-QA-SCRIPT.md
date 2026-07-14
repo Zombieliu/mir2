@@ -1,6 +1,6 @@
 # Player QA Script
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
 
@@ -16,6 +16,31 @@ Purpose: keep final human frontend validation focused. The project can be driven
   one movement input changing coordinates, one active Gateway session, and no
   browser error/warning logs. The 2026-07-13 verification moved
   `MountQaR19` from `333,274` to `334,274` with `D`.
+
+## Full Pack / Low-End Gate
+
+- Force the constrained path with
+  `?renderTier=low&bevyBackend=webgl2&bevyEntities=1&bevyAtlas=1` and keep
+  `?mir2Debug=1` while collecting evidence. The runtime debug snapshot must
+  report tier `low`, atlas mode `packed`, and no DOM entity fallback.
+- Enter Bichon, wait for `sceneInteractionReady`, and move normally through at
+  least four acknowledged tile steps. Require no residual movement plan,
+  visual jump, logical rollback, scene blackout, critical console error, or
+  non-favicon 404.
+- On a 2 GiB low-tier profile, decoded resident entity-atlas bytes must remain
+  below 64 MiB. The accepted local baseline used 13 pages, 1,598 rects, and
+  58,379,430 bytes while passing all 28 movement/render assertions.
+- Low-tier scene prewarm must stay below 1,000 requests with no failures;
+  background prewarm is off by default. CacheStorage must remain below 256 MiB
+  and first playable below 15 seconds in the automated cold and warm runs. The
+  accepted baseline completed 403/403 requests, used 69,027,432 bytes after the
+  warm run, and transferred 18,993,684 cold bytes versus 600 warm bytes.
+- Review
+  `docs/generated/player-qa/full-asset-pack-low-tier/full-pack-low-tier-summary.json`
+  and `full-pack-low-tier-webgl2-clean.png`. This desktop/local-network gate is
+  necessary but not sufficient for Brazil release: repeat it on physical 2 GiB
+  and 4 GiB Android devices with throttled 4G, map transitions, background
+  resume, and memory pressure.
 
 ## Compact-Window Pixel Stability Gate
 

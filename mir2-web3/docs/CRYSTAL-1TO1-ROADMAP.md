@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest full-pack and low-end delivery sync: 2026-07-14 classifies and
+> hash-verifies every frame slot in all 1,440 Crystal libraries, publishing
+> 1,440 lazy library shards backed by 4,446 unique immutable PNG pages. Entity
+> presentation now prefers those shards with legacy fallback and bounded
+> Bevy/WebGL2 residency; it does not load the 62,972,592,128-byte decoded source
+> set at once. Forced-low WebGL2 Bichon QA used 58,379,430 decoded atlas bytes,
+> passed 28/28 movement/render assertions, and completed a reduced 403/403
+> prewarm with zero failures, 404s, or critical console errors. This closes full
+> offline `.Lib` conversion and the local low-tier runtime gate. Maps keep their
+> regional atlas path, while HUD, audio, and effect-specific consumers remain
+> dedicated. Brazil release gates still require CDN publication and physical
+> 2/4 GiB Android throttled-4G soak; optional KTX2/UASTC remains a measured
+> follow-up, not a WebGPU-only requirement. See
+> `docs/CRYSTAL-FULL-ASSET-PIPELINE.md`.
+
 > Latest Gateway movement ACK/input-priority roadmap sync: 2026-07-06 records
 > the local Web/Gateway fix for the current stop/go movement repro. The issue
 > was not PR #123 or a UI-only regression: a heavy shared in-process Zone world

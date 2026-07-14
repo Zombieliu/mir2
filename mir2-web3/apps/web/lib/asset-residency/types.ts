@@ -105,6 +105,8 @@ export type PersistentStore = {
    * Used by the manager to decide which entries to evict when over budget.
    */
   listByAge(): Promise<string[]>;
+  /** Optional byte-aware LRU listing for precise persistent trimming. */
+  listEntriesByAge?(): Promise<Array<{ key: string; bytes: number }>>;
 };
 
 /**
@@ -138,6 +140,10 @@ export type AssetResidencyConfig = {
    * Mirrors BEVY_ENTITY_ATLAS_CACHE_LIMIT = 24 in the shell.
    */
   memoryBudget: number;
+  /** Maximum estimated resident bytes in the hot tier. */
+  memoryBudgetBytes?: number;
+  /** Maximum estimated resident bytes in the persistent tier. */
+  persistentBudgetBytes?: number;
   /** Pluggable persistent store. */
   persistent: PersistentStore;
   /** Pluggable source fetcher. */
@@ -163,6 +169,12 @@ export type AssetResidencyStats = {
   persistentWrites: number;
   /** Current in-memory cache size. */
   memoryCacheSize: number;
+  /** Estimated decoded/GPU footprint owned by hot entries. */
+  memoryCacheBytes: number;
+  /** Entries protected from eviction by one or more active leases. */
+  pinnedEntryCount: number;
+  /** Total hot-tier entries removed under budget pressure. */
+  memoryEvictions: number;
   /** Key of the most recently acquired entry. */
   lastKey: string | null;
   /** Tier that served the most recent acquire. */
@@ -185,9 +197,8 @@ export type AssetResidencyManager = {
   acquire(key: string): Promise<AtlasPagePayload>;
 
   /**
-   * Signal that a caller no longer needs `key` in memory.
-   * Current implementation is a no-op refcount decrement for future use;
-   * LRU eviction happens lazily on the next acquire / evictToBudget call.
+   * Release one lease created by a successful acquire(). Pinned entries are
+   * protected from LRU eviction until every lease is released.
    * Safe to call with an unknown key.
    */
   release(key: string): void;
@@ -219,3 +230,40 @@ export type AssetResidencyManager = {
    */
   stats(): AssetResidencyStats;
 };
+
+const STRING_BYTES_PER_CODE_UNIT = 2;
+const RECT_SCALAR_BYTES = 5 * 8;
+
+function stringBytes(value: string | undefined): number {
+  return (value?.length ?? 0) * STRING_BYTES_PER_CODE_UNIT;
+}
+
+function rectListBytes(rects: AtlasRect[]): number {
+  return rects.reduce((total, rect) => total + RECT_SCALAR_BYTES + stringBytes(rect.key), 0);
+}
+
+/**
+ * Estimate resident footprint. URL-only pages are charged at decoded RGBA
+ * size because their browser/GPU texture still consumes memory. Multi-page
+ * payloads intentionally do not double-count the page-zero compatibility copy.
+ */
+export function estimateAtlasPagePayloadBytes(payload: AtlasPagePayload): number {
+  let bytes = 64 + stringBytes(payload.key) + stringBytes(payload.sourceKey);
+  if (payload.pages?.length) {
+    for (const page of payload.pages) {
+      bytes +=
+        48 +
+        (page.pixels?.byteLength || page.width * page.height * 4) +
+        stringBytes(page.key) +
+        stringBytes(page.imageUrl) +
+        rectListBytes(page.rectList);
+    }
+    return bytes;
+  }
+  return (
+    bytes +
+    (payload.pixels.byteLength || payload.width * payload.height * 4) +
+    stringBytes(payload.imageUrl) +
+    rectListBytes(payload.rectList)
+  );
+}

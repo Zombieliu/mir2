@@ -1,15 +1,67 @@
 // Shared Crystal `.Lib` (WeMade MLibraryV2) reader + PNG encoder.
 //
-// Extracted verbatim from export-crystal-ui.mjs so multiple exporters (UI sprites,
-// magic/spell effects, …) share one parser instead of duplicating the binary format.
-// Pure functions, no side effects — safe to import. The `.Lib` layout (little-endian):
-//   int32 version (>=2) · int32 count · [version>=3: int32 reserved] · int32 frameOffset[count]
-//   per frame @offset: i16 width,height,x,y,shadowX,shadowY · u8 shadow · i32 len · gz(BGRA) · [mask]
-// See Crystal/LibraryEditor/Graphics/MLibraryV2.cs for the authoritative writer.
+// Version 3 stores a FrameSet seek after the frame count. The action records at that seek
+// define original timing, direction stride, effects, reverse playback, and blend behavior.
+// See Crystal/LibraryEditor/Graphics/MLibraryV2.cs and Graphics/Frames.cs.
 
 import { deflateSync, gunzipSync } from "node:zlib";
 
 export const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+
+export const MIR_ACTION_NAMES = Object.freeze([
+  "Standing",
+  "Walking",
+  "Running",
+  "Pushed",
+  "DashL",
+  "DashR",
+  "DashFail",
+  "Stance",
+  "Stance2",
+  "Attack1",
+  "Attack2",
+  "Attack3",
+  "Attack4",
+  "Attack5",
+  "AttackRange1",
+  "AttackRange2",
+  "AttackRange3",
+  "Special",
+  "Struck",
+  "Harvest",
+  "Spell",
+  "Die",
+  "Dead",
+  "Skeleton",
+  "Show",
+  "Hide",
+  "Stoned",
+  "Appear",
+  "Revive",
+  "SitDown",
+  "Mine",
+  "Sneek",
+  "DashAttack",
+  "Lunge",
+  "WalkingBow",
+  "RunningBow",
+  "Jump",
+  "MountStanding",
+  "MountWalking",
+  "MountRunning",
+  "MountStruck",
+  "MountAttack",
+  "FishingCast",
+  "FishingWait",
+  "FishingReel",
+]);
+
+export const CRYSTAL_FRAME_SET_RECORD_BYTES = 35;
+
+const LIBRARY_V2_HEADER_BYTES = 8;
+const LIBRARY_V3_HEADER_BYTES = 12;
+const IMAGE_HEADER_BYTES = 17;
+const MASK_HEADER_BYTES = 12;
 
 export function normalizeLibraryName(libraryName) {
   return String(libraryName)
@@ -26,6 +78,11 @@ export function allPresentFrameIndices(library) {
 }
 
 export function parseLibrary(buffer) {
+  if (!Buffer.isBuffer(buffer)) {
+    throw new TypeError("Crystal library input must be a Buffer");
+  }
+
+  assertBufferRange(buffer, 0, LIBRARY_V2_HEADER_BYTES, "library header");
   let offset = 0;
 
   const version = buffer.readInt32LE(offset);
@@ -38,7 +95,19 @@ export function parseLibrary(buffer) {
   const count = buffer.readInt32LE(offset);
   offset += 4;
 
+  if (count < 0) {
+    throw new Error(`Invalid Crystal library frame count ${count}`);
+  }
+
+  const headerBytes = (version >= 3 ? LIBRARY_V3_HEADER_BYTES : LIBRARY_V2_HEADER_BYTES) + count * 4;
+  if (!Number.isSafeInteger(headerBytes)) {
+    throw new Error(`Crystal library header size is not safe for frame count ${count}`);
+  }
+  assertBufferRange(buffer, 0, headerBytes, "library frame-offset table");
+
+  let frameSeek = null;
   if (version >= 3) {
+    frameSeek = buffer.readInt32LE(offset);
     offset += 4;
   }
 
@@ -54,13 +123,24 @@ export function parseLibrary(buffer) {
     if (frameOffset <= 0 || frameOffset >= buffer.length) {
       continue;
     }
+    if (frameOffset < headerBytes) {
+      throw new Error(`Crystal frame ${index} points inside the library header (${frameOffset} < ${headerBytes})`);
+    }
     frames[index] = parseFrameHeader(buffer, frameOffset, index);
   }
 
-  return { version, count, frames, buffer };
+  if (frameSeek !== null && frameSeek !== 0 && frameSeek < headerBytes) {
+    throw new Error(`Crystal FrameSet points inside the library header (${frameSeek} < ${headerBytes})`);
+  }
+  const frameSet = version >= 3
+    ? parseFrameSet(buffer, frameSeek)
+    : { seek: null, count: 0, actions: [] };
+
+  return { version, count, frames, buffer, frameSeek, frameSet };
 }
 
 export function parseFrameHeader(buffer, offset, index) {
+  assertBufferRange(buffer, offset, IMAGE_HEADER_BYTES, `frame ${index} header`);
   const width = buffer.readInt16LE(offset);
   offset += 2;
   const height = buffer.readInt16LE(offset);
@@ -78,7 +158,12 @@ export function parseFrameHeader(buffer, offset, index) {
   const length = buffer.readInt32LE(offset);
   offset += 4;
 
+  if (length < 0) {
+    throw new Error(`Crystal frame ${index} has a negative data length ${length}`);
+  }
+
   const dataOffset = offset;
+  assertBufferRange(buffer, dataOffset, length, `frame ${index} image data`);
   offset += length;
 
   const hasMask = (shadow >> 7) === 1;
@@ -90,6 +175,7 @@ export function parseFrameHeader(buffer, offset, index) {
   let maskDataOffset;
 
   if (hasMask) {
+    assertBufferRange(buffer, offset, MASK_HEADER_BYTES, `frame ${index} mask header`);
     maskWidth = buffer.readInt16LE(offset);
     offset += 2;
     maskHeight = buffer.readInt16LE(offset);
@@ -100,7 +186,11 @@ export function parseFrameHeader(buffer, offset, index) {
     offset += 2;
     maskLength = buffer.readInt32LE(offset);
     offset += 4;
+    if (maskLength < 0) {
+      throw new Error(`Crystal frame ${index} has a negative mask data length ${maskLength}`);
+    }
     maskDataOffset = offset;
+    assertBufferRange(buffer, maskDataOffset, maskLength, `frame ${index} mask data`);
     offset += maskLength;
   }
 
@@ -125,6 +215,79 @@ export function parseFrameHeader(buffer, offset, index) {
   };
 }
 
+export function parseFrameSet(buffer, frameSeek) {
+  if (frameSeek === 0) {
+    return { seek: 0, count: 0, actions: [] };
+  }
+  if (!Number.isInteger(frameSeek) || frameSeek < 0) {
+    throw new Error(`Invalid Crystal FrameSet seek ${frameSeek}`);
+  }
+
+  assertBufferRange(buffer, frameSeek, 4, "FrameSet count");
+  const count = buffer.readInt32LE(frameSeek);
+  if (count < 0) {
+    throw new Error(`Invalid Crystal FrameSet action count ${count}`);
+  }
+
+  const actions = parseFrameSetRecords(buffer, frameSeek + 4, count);
+  return { seek: frameSeek, count, actions };
+}
+
+export function parseFrameSetRecords(buffer, offset, count) {
+  if (!Number.isInteger(count) || count < 0) {
+    throw new Error(`Invalid Crystal FrameSet action count ${count}`);
+  }
+
+  const byteLength = count * CRYSTAL_FRAME_SET_RECORD_BYTES;
+  if (!Number.isSafeInteger(byteLength)) {
+    throw new Error(`Crystal FrameSet size is not safe for action count ${count}`);
+  }
+  assertBufferRange(buffer, offset, byteLength, "FrameSet action records");
+
+  const actions = [];
+  for (let index = 0; index < count; index += 1) {
+    const actionId = buffer.readUInt8(offset);
+    offset += 1;
+    const start = buffer.readInt32LE(offset);
+    offset += 4;
+    const frameCount = buffer.readInt32LE(offset);
+    offset += 4;
+    const skip = buffer.readInt32LE(offset);
+    offset += 4;
+    const interval = buffer.readInt32LE(offset);
+    offset += 4;
+    const effectStart = buffer.readInt32LE(offset);
+    offset += 4;
+    const effectCount = buffer.readInt32LE(offset);
+    offset += 4;
+    const effectSkip = buffer.readInt32LE(offset);
+    offset += 4;
+    const effectInterval = buffer.readInt32LE(offset);
+    offset += 4;
+    const reverse = buffer.readUInt8(offset) !== 0;
+    offset += 1;
+    const blend = buffer.readUInt8(offset) !== 0;
+    offset += 1;
+
+    actions.push({
+      actionId,
+      actionName: MIR_ACTION_NAMES[actionId] ?? null,
+      start,
+      count: frameCount,
+      skip,
+      interval,
+      effectStart,
+      effectCount,
+      effectSkip,
+      effectInterval,
+      reverse,
+      blend,
+    });
+  }
+
+  return actions;
+}
+
 export function decodeFrameRgba(library, frame) {
   return decodeFrame(
     frame.width,
@@ -142,19 +305,38 @@ export function decodeMaskFrameRgba(library, frame) {
 }
 
 export function decodeFrame(width, height, compressed) {
-  if (!width || !height) {
+  if (width <= 0 || height <= 0) {
     return Buffer.alloc(0);
   }
 
   const bgra = gunzipSync(compressed);
-  const rgba = Buffer.allocUnsafe(width * height * 4);
+  const rowBytes = width * 4;
+  const expectedBytes = rowBytes * height;
+  const sourceStride = bgra.byteLength / height;
+  if (
+    !Number.isSafeInteger(expectedBytes) ||
+    expectedBytes <= 0 ||
+    !Number.isSafeInteger(sourceStride) ||
+    sourceStride < rowBytes ||
+    sourceStride % 4 !== 0
+  ) {
+    throw new Error(
+      `Crystal frame decoded layout mismatch: expected at least ${expectedBytes} bytes for ${width}x${height}, got ${bgra.byteLength}`,
+    );
+  }
+  const rgba = Buffer.allocUnsafe(expectedBytes);
 
-  for (let source = 0; source < bgra.length; source += 4) {
-    const dest = source;
-    rgba[dest] = bgra[source + 2];
-    rgba[dest + 1] = bgra[source + 1];
-    rgba[dest + 2] = bgra[source];
-    rgba[dest + 3] = bgra[source + 3];
+  for (let row = 0; row < height; row += 1) {
+    const sourceRow = row * sourceStride;
+    const destRow = row * rowBytes;
+    for (let columnByte = 0; columnByte < rowBytes; columnByte += 4) {
+      const source = sourceRow + columnByte;
+      const dest = destRow + columnByte;
+      rgba[dest] = bgra[source + 2];
+      rgba[dest + 1] = bgra[source + 1];
+      rgba[dest + 2] = bgra[source];
+      rgba[dest + 3] = bgra[source + 3];
+    }
   }
 
   return rgba;
@@ -207,4 +389,15 @@ function crc32(buffer) {
   }
 
   return (crc ^ 0xffffffff) >>> 0;
+}
+
+function assertBufferRange(buffer, offset, length, label) {
+  if (!Number.isInteger(offset) || !Number.isInteger(length) || offset < 0 || length < 0) {
+    throw new Error(`Invalid ${label} range: offset=${offset}, length=${length}`);
+  }
+  if (offset > buffer.length || length > buffer.length - offset) {
+    throw new Error(
+      `Truncated ${label}: need bytes ${offset}..${offset + length}, buffer length is ${buffer.length}`,
+    );
+  }
 }

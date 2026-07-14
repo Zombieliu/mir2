@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-full-asset-pack-low-tier-acceptance",
+  "generatedAt": "2026-07-14T04:23:51.656Z",
+  "fullPack": {
+    "ok": true,
+    "contentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+    "sourceLibraryCount": 1440,
+    "frameSlotCount": 2143132,
+    "packedFrameCount": 1869869,
+    "noDrawFrameCount": 273263,
+    "verifiedUniquePageCount": 4446,
+    "pageHashesVerified": true
+  },
+  "lowTierMovement": {
+    "ok": true,
+    "baseUrl": "http://127.0.0.1:3002/?renderTier=low&gatewayWs=ws%3A%2F%2F127.0.0.1%3A7110%2Fws&mir2Debug=1&bevyBackend=webgl2&bevyEntities=1&bevyAtlas=1",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "finalPlayer": {
+      "x": 336,
+      "y": 270
+    },
+    "sceneInteractionReady": true,
+    "settle": {
+      "status": "settled",
+      "strictStatus": "settled",
+      "clean": true
+    },
+    "runtime": {
+      "requestedBackend": "webgl2",
+      "selectedBackend": "webgl2",
+      "compiledBackend": "webgl2",
+      "webgpuSupported": true,
+      "webgl2Supported": true,
+      "runtimeVersion": "bevy-a4739f0f28c9770c"
+    },
+    "atlasMode": "packed",
+    "atlasCount": 13,
+    "atlasRectCount": 1598,
+    "atlasBudgetProfile": {
+      "tier": "low",
+      "memoryEntries": 8,
+      "memoryBytes": 100663296,
+      "persistentEntries": 3,
+      "persistentBytes": 134217728,
+      "deviceMemoryGiB": 32
+    },
+    "atlasStats": {
+      "requests": 1,
+      "memoryHits": 0,
+      "persistentHits": 0,
+      "fetchHits": 1,
+      "failures": 0,
+      "persistentWrites": 0,
+      "memoryCacheSize": 1,
+      "memoryCacheBytes": 58379430,
+      "pinnedEntryCount": 1,
+      "memoryEvictions": 0,
+      "lastKey": "entity-atlas-xmwvzr",
+      "lastTier": "fetch",
+      "builds": 0,
+      "prebuiltHits": 1,
+      "lastBuildMs": 279,
+      "lastSource": "prebuilt",
+      "lastPrebuiltKey": "crystal-full:514740e5b08ab8ca70b6636072356b9a2f58552cc96ed3b04b084fa1d69cc84c",
+      "lastSourceCount": 1598
+    },
+    "spriteLibraryCache": {
+      "loadedLibraryCount": 13,
+      "cachedLibraryCount": 13,
+      "cachedLibraryBytes": 2003304
+    },
+    "domEntityFallback": false,
+    "movementFramesSent": 4,
+    "movementFramesReceived": 4,
+    "assertions": [
+      {
+        "name": "frameImagesCapturedWhenRequested",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "frameImageCaptureErrorsZero",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "noVisualJumps",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "noRouteSpamWarnings",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "noLogicalTileRollback",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "directionAnimationWithinCrystalWindow",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "stalePredictedPlayerCleared",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "movementCommandQueueResponsive",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "movementWebSocketAckResponsive",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "localCommandPoseSinkCoverage",
+        "pass": true
+      },
+      {
+        "name": "localCommandPoseSinkResponsive",
+        "pass": true
+      },
+      {
+        "name": "presentationCentersStayAtomic",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "presentationCentersUseMovementEndpoints",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "crystalMovementPhasePixelsExact",
+        "pass": true
+      },
+      {
+        "name": "keyboardSequenceMovementFramesSent",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "cameraOffsetMovesContinuously",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "poseCommitFramesStayAtomic",
+        "pass": true,
+        "count": 0,
+        "strict": true
+      },
+      {
+        "name": "noSceneLayerBlackouts",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "rawWebGl2RendererDrawsGameplayLayers",
+        "pass": true
+      },
+      {
+        "name": "bevyWebGl2RendererDrawsGameplayLayers",
+        "pass": true
+      },
+      {
+        "name": "bevyWebGpuRendererDrawsGameplayLayers",
+        "pass": true
+      },
+      {
+        "name": "movementSettledWithoutResidualPlan",
+        "pass": true,
+        "strict": true
+      },
+      {
+        "name": "noInteractionPollution",
+        "pass": true,
+        "strict": false
+      },
+      {
+        "name": "sceneLightingMatchesWorldMode",
+        "pass": true
+      },
+      {
+        "name": "selfLightUsesCrystalMinimum",
+        "pass": true
+      },
+      {
+        "name": "npcLightsUseCrystalValueTen",
+        "pass": true
+      },
+      {
+        "name": "noConsoleErrors",
+        "pass": true,
+        "count": 0
+      },
+      {
+        "name": "noNonFaviconNetwork404s",
+        "pass": true,
+        "count": 0
+      }
+    ],
+    "nonFaviconNetwork404s": [],
+    "criticalConsoleErrors": []
+  },
+  "lowTierCache": {
+    "ok": true,
+    "mode": "playable",
+    "cold": {
+      "uptimeMs": 9767.399999999907,
+      "firstPlayableMs": 5190.600000000093,
+      "resourceCount": 955,
+      "gameResourceCount": 954,
+      "transferBytes": 18993684,
+      "encodedBytes": 103263735,
+      "cachedLikeCount": 919,
+      "sceneRequests": 2,
+      "sceneHits": 1,
+      "sceneMisses": 1,
+      "latestSceneCacheKey": "2026-07-13-v4-map-blend-0-cx24-cy19-w56-h72-default",
+      "latestOriginalMapSpriteCount": 768,
+      "latestOriginalMapCellCount": 5552,
+      "loadedSpriteLibraryCount": 13,
+      "domImageCount": 118,
+      "bevyAtlasCount": 13,
+      "bevyAtlasPixelBytes": 0,
+      "alphaKeyedBlobCount": 37,
+      "alphaKeyedBlobBytes": 856935,
+      "prewarmRequested": 403,
+      "prewarmOk": 403,
+      "prewarmFailed": 0,
+      "cacheStorageCacheCount": 4,
+      "cacheStorageEntryCount": 722,
+      "storageUsageBytes": 68633960,
+      "storageQuotaBytes": 10806052200,
+      "storagePersisted": false,
+      "storagePersistGranted": false,
+      "slowest": [
+        {
+          "path": "/original-ui/Monster/139/28.png",
+          "kind": "original-ui",
+          "durationMs": 1592,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/27.png",
+          "kind": "original-ui",
+          "durationMs": 1590.6000000000931,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/26.png",
+          "kind": "original-ui",
+          "durationMs": 1589.9000000001397,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/25.png",
+          "kind": "original-ui",
+          "durationMs": 1588.1000000000931,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/21.png",
+          "kind": "original-ui",
+          "durationMs": 1532,
+          "transferSize": 0
+        }
+      ]
+    },
+    "warm": {
+      "uptimeMs": 6525.399999999907,
+      "firstPlayableMs": 6331.699999999953,
+      "resourceCount": 852,
+      "gameResourceCount": 851,
+      "transferBytes": 600,
+      "encodedBytes": 96336910,
+      "cachedLikeCount": 845,
+      "sceneRequests": 2,
+      "sceneHits": 1,
+      "sceneMisses": 1,
+      "latestSceneCacheKey": "2026-07-13-v4-map-blend-0-cx24-cy19-w56-h72-default",
+      "latestOriginalMapSpriteCount": 768,
+      "latestOriginalMapCellCount": 5552,
+      "loadedSpriteLibraryCount": 13,
+      "domImageCount": 173,
+      "bevyAtlasCount": 13,
+      "bevyAtlasPixelBytes": 0,
+      "alphaKeyedBlobCount": 37,
+      "alphaKeyedBlobBytes": 856935,
+      "prewarmRequested": 403,
+      "prewarmOk": 403,
+      "prewarmFailed": 0,
+      "cacheStorageCacheCount": 4,
+      "cacheStorageEntryCount": 725,
+      "storageUsageBytes": 69027432,
+      "storageQuotaBytes": 10806445672,
+      "storagePersisted": false,
+      "storagePersistGranted": false,
+      "slowest": [
+        {
+          "path": "/bevy-entity-atlases/manifest.json",
+          "kind": "bevy-entity-atlas",
+          "durationMs": 480,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/ChrSel/7.png",
+          "kind": "original-ui",
+          "durationMs": 460.69999999995343,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/ChrSel/8.png",
+          "kind": "original-ui",
+          "durationMs": 460.5,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/ChrSel/6.png",
+          "kind": "original-ui",
+          "durationMs": 459.20000000018626,
+          "transferSize": 0
+        },
+        {
+          "path": "/original-ui/ChrSel/3.png",
+          "kind": "original-ui",
+          "durationMs": 444.4000000001397,
+          "transferSize": 0
+        }
+      ]
+    },
+    "comparison": {
+      "elapsedMsDelta": -3245,
+      "transferBytesDelta": -18993084,
+      "encodedBytesDelta": -6926825,
+      "cachedLikeDelta": -74,
+      "sceneHitDelta": 0,
+      "coldSceneHitRate": 0.5,
+      "warmSceneHitRate": 0.5
+    },
+    "assertions": {
+      "coldMetricsPresent": true,
+      "warmMetricsPresent": true,
+      "warmCompletedPrewarm": true,
+      "noPrewarmFailures": true,
+      "warmCacheStoragePresent": true,
+      "warmCacheStorageCachesPresent": true,
+      "prewarmWithinBudget": true,
+      "warmCacheStorageEntriesWithinBudget": true,
+      "warmStorageUsageWithinBudget": true,
+      "noCriticalConsoleErrors": true,
+      "noNonFavicon404s": true,
+      "cacheConsoleLogsPresent": true,
+      "coldFirstPlayablePresent": true,
+      "warmFirstPlayablePresent": true,
+      "coldFirstPlayableWithinBudget": true,
+      "warmFirstPlayableWithinBudget": true
+    },
+    "budgets": {
+      "maxPrewarmRequested": 1000,
+      "maxWarmCacheEntries": 2500,
+      "maxWarmStorageUsageBytes": 268435456
+    },
+    "nonFaviconNetwork404s": [],
+    "criticalConsoleErrors": []
+  },
+  "artifacts": {
+    "screenshot": "docs/generated/player-qa/full-asset-pack-low-tier/full-pack-low-tier-webgl2-clean.png"
+  }
+}

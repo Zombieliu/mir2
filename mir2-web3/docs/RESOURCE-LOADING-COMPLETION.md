@@ -1,5 +1,12 @@
 # Resource Loading System — Production Completion Plan & Scoreboard
 
+> Supersession note (2026-07-14): the raw-source limitation recorded below no
+> longer applies to the current workspace. The complete Crystal Data tree is
+> available and all 1,440 `.Lib` files have been converted and hash-verified by
+> the full-pack pipeline. Preserve the historical scoreboard, but use
+> `CRYSTAL-FULL-ASSET-PIPELINE.md` for the current source, delivery, residency,
+> and low-end acceptance contract.
+
 Goal for this work stream: take the **resource loading system** from the ~85–88% baseline
 recorded in `PARITY-TRUTH-AUDIT.md` / the production-gap assessment to **90%+** production
 readiness, measured against the rubric below.

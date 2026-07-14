@@ -21,6 +21,9 @@ import {
 import { createAssetResidency } from "../lib/asset-residency";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
+import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
+import { loadCrystalFullPackIndex } from "../lib/crystal-full-pack-index";
+import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../lib/render-tier";
 import {
   loadOriginalSceneSpriteLibrary,
   normalizeSceneSpriteLibraryKey,
@@ -232,16 +235,28 @@ type BevyEntityAtlasSource = {
   height: number;
 };
 
+type BevyEntityAtlasBudgetProfile = {
+  tier: "low" | "medium" | "high";
+  memoryEntries: number;
+  memoryBytes: number;
+  persistentEntries: number;
+  persistentBytes: number;
+  deviceMemoryGiB: number | null;
+};
+
 const BEVY_ENTITY_ATLAS_PADDING = 1;
 const BEVY_ENTITY_ATLAS_INITIAL_WIDTH = 512;
 const BEVY_ENTITY_ATLAS_MAX_SIZE = 4096;
-const BEVY_ENTITY_ATLAS_CACHE_LIMIT = 24;
+const BEVY_ENTITY_ATLAS_BUDGET_PROFILE = resolveBevyEntityAtlasBudgetProfile();
+const BEVY_ENTITY_ATLAS_CACHE_LIMIT = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.memoryEntries;
+const BEVY_ENTITY_ATLAS_MEMORY_BUDGET_BYTES = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.memoryBytes;
 const BEVY_ENTITY_ATLAS_MANIFEST_URL = "/bevy-entity-atlases/manifest.json";
 const BEVY_ENTITY_ATLAS_IDB_NAME = "mir2-bevy-entity-atlas-cache";
 const BEVY_ENTITY_ATLAS_IDB_STORE = "atlases";
 const BEVY_ENTITY_ATLAS_IDB_VERSION = 1;
-const BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT = 8;
-const BEVY_ENTITY_ATLAS_CACHE_NAMESPACE = "bevy-entity-atlas-v1";
+const BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.persistentEntries;
+const BEVY_ENTITY_ATLAS_PERSISTENT_BUDGET_BYTES = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.persistentBytes;
+const BEVY_ENTITY_ATLAS_CACHE_NAMESPACE = "bevy-entity-atlas-v2-full-pack";
 const bevyEntityAtlasImageCache = new Map<string, Promise<HTMLImageElement>>();
 const bevyEntityAtlasPrebuiltPixelsCache = new Map<string, Promise<Uint8Array | null>>();
 let bevyEntityAtlasLatestSnapshot: BevyEntityAtlasSnapshot | null = null;
@@ -328,6 +343,8 @@ function createNullPersistentStore(): PersistentStore {
 const bevyAtlasResidency = createAssetResidency({
   memoryBudget: BEVY_ENTITY_ATLAS_CACHE_LIMIT,
   persistentBudget: BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT,
+  memoryBudgetBytes: BEVY_ENTITY_ATLAS_MEMORY_BUDGET_BYTES,
+  persistentBudgetBytes: BEVY_ENTITY_ATLAS_PERSISTENT_BUDGET_BYTES,
   persistent: createNullPersistentStore(),
   fetcher: createBrowserAtlasFetcher({
     resolveFn: async (key: string): Promise<AtlasPagePayload> => {
@@ -2329,6 +2346,7 @@ export function OriginalClientShell({
       ),
       atlasSourceCount: bevyEntityAtlasSources.length,
       atlasCacheSize: bevyAtlasResidency.stats().memoryCacheSize,
+      atlasBudgetProfile: BEVY_ENTITY_ATLAS_BUDGET_PROFILE,
       atlasCurrentKey: bevyEntityAtlasKey,
       atlasPendingKey: bevyEntityAtlasRequestRef.current?.key ?? null,
       atlasCachedCurrent: Boolean(peekedBevyEntityAtlasPayload),
@@ -2494,29 +2512,25 @@ export function OriginalClientShell({
       return;
     }
 
-    if (bevyEntityAtlas?.key === bevyEntityAtlasKey) {
-      return;
-    }
-
     // A memory hit is served synchronously by the render-path peek
     // (peekedBevyEntityAtlasPayload); here we always acquire through the
     // residency manager (memory -> [null persistent] -> resolve fetcher) and
     // commit the React atlas state when it resolves. The manager owns the
     // in-memory tier + LRU; resolve owns the prebuilt/persistent/live cold path
     // and records its source breakdown into bevyEntityAtlasResolveStats.
-    if (bevyEntityAtlasRequestRef.current?.key === bevyEntityAtlasKey) {
-      return;
-    }
-
     const requestId = (bevyEntityAtlasRequestRef.current?.requestId ?? 0) + 1;
     bevyEntityAtlasRequestRef.current = { key: bevyEntityAtlasKey, requestId };
     bevyEntityAtlasSourcesByKey.set(bevyEntityAtlasKey, bevyEntityAtlasSources);
     let disposed = false;
+    let acquired = false;
 
-    bevyAtlasResidency
+    void bevyAtlasResidency
       .acquire(bevyEntityAtlasKey)
       .then((payload) => {
+        acquired = true;
         if (disposed || bevyEntityAtlasRequestRef.current?.requestId !== requestId) {
+          bevyAtlasResidency.release(bevyEntityAtlasKey);
+          acquired = false;
           return;
         }
         const atlas = payloadToAtlasSnapshot(payload);
@@ -2528,12 +2542,21 @@ export function OriginalClientShell({
         if (bevyEntityAtlasRequestRef.current?.requestId === requestId) {
           bevyEntityAtlasRequestRef.current = null;
         }
+      })
+      .finally(() => {
+        if (bevyEntityAtlasSourcesByKey.get(bevyEntityAtlasKey) === bevyEntityAtlasSources) {
+          bevyEntityAtlasSourcesByKey.delete(bevyEntityAtlasKey);
+        }
       });
 
     return () => {
       disposed = true;
+      if (acquired) {
+        bevyAtlasResidency.release(bevyEntityAtlasKey);
+        acquired = false;
+      }
     };
-  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey, bevyEntityAtlas?.key]);
+  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey]);
 
   useEffect(() => {
     if (screen !== "game" || !renderPlayer || !world.originalMapRegion || !sceneSpriteLibrariesReady) {
@@ -3766,6 +3789,56 @@ function clientFeatureFlagEnabled(queryKey: string, storageKey: string, defaultV
   return defaultValue;
 }
 
+function resolveBevyEntityAtlasBudgetProfile(): BevyEntityAtlasBudgetProfile {
+  if (typeof window === "undefined") {
+    return {
+      tier: "medium",
+      memoryEntries: 16,
+      memoryBytes: 160 * 1024 * 1024,
+      persistentEntries: 6,
+      persistentBytes: 256 * 1024 * 1024,
+      deviceMemoryGiB: null,
+    };
+  }
+
+  const forcedTier = new URLSearchParams(window.location.search).get("renderTier");
+  const deviceMemoryGiB = normalizeDeviceMemoryGiB(
+    (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+  );
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const tier = resolveRenderTier({ forcedTier, deviceMemoryGiB, coarsePointer });
+
+  if (tier === "low") {
+    const memoryBytes = deviceMemoryGiB !== null && deviceMemoryGiB <= 2 ? 64 : 96;
+    return {
+      tier,
+      memoryEntries: 8,
+      memoryBytes: memoryBytes * 1024 * 1024,
+      persistentEntries: 3,
+      persistentBytes: 128 * 1024 * 1024,
+      deviceMemoryGiB,
+    };
+  }
+  if (tier === "high") {
+    return {
+      tier,
+      memoryEntries: 24,
+      memoryBytes: 256 * 1024 * 1024,
+      persistentEntries: 8,
+      persistentBytes: 512 * 1024 * 1024,
+      deviceMemoryGiB,
+    };
+  }
+  return {
+    tier,
+    memoryEntries: 16,
+    memoryBytes: 160 * 1024 * 1024,
+    persistentEntries: 6,
+    persistentBytes: 256 * 1024 * 1024,
+    deviceMemoryGiB,
+  };
+}
+
 function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRenderState {
   return {
     enabled: false,
@@ -4037,6 +4110,11 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
   sources: BevyEntityAtlasSource[],
   key: string,
 ): Promise<BevyEntityAtlasSnapshot | null> {
+  const fullPack = await loadCrystalFullPackBevyEntityAtlasSnapshot(sources, key);
+  if (fullPack) {
+    return fullPack;
+  }
+
   const manifest = await loadBevyEntityAtlasManifest();
   if (!manifest?.atlases?.length) {
     return null;
@@ -4093,6 +4171,21 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
   }
 
   return null;
+}
+
+async function loadCrystalFullPackBevyEntityAtlasSnapshot(
+  sources: BevyEntityAtlasSource[],
+  key: string,
+): Promise<BevyEntityAtlasSnapshot | null> {
+  if (typeof window === "undefined") return null;
+  if (new URLSearchParams(window.location.search).get("crystalFullPack") === "0") return null;
+  try {
+    const runtime = await loadCrystalFullPackIndex();
+    return await buildCrystalFullPackAtlasSnapshot(runtime, sources, key);
+  } catch {
+    // Keep the existing starter/live path available during partial deployments.
+    return null;
+  }
 }
 
 // Page 0 keeps the atlas key (single-page convention); spill pages get a
@@ -4178,6 +4271,12 @@ function loadPrebuiltBevyEntityAtlasCandidatePixels(candidate: PrebuiltBevyEntit
     return null;
   })();
   bevyEntityAtlasPrebuiltPixelsCache.set(cacheKey, promise);
+  const release = () => {
+    if (bevyEntityAtlasPrebuiltPixelsCache.get(cacheKey) === promise) {
+      bevyEntityAtlasPrebuiltPixelsCache.delete(cacheKey);
+    }
+  };
+  void promise.then(release, release);
   return promise;
 }
 
@@ -4316,6 +4415,8 @@ async function buildBevyEntityAtlasSnapshot(
 function loadBevyEntityAtlasImage(path: string) {
   const cached = bevyEntityAtlasImageCache.get(path);
   if (cached) {
+    bevyEntityAtlasImageCache.delete(path);
+    bevyEntityAtlasImageCache.set(path, cached);
     return cached;
   }
 
@@ -4328,6 +4429,16 @@ function loadBevyEntityAtlasImage(path: string) {
     image.src = path;
   });
   bevyEntityAtlasImageCache.set(path, promise);
+  while (bevyEntityAtlasImageCache.size > BEVY_ENTITY_ATLAS_CACHE_LIMIT * 4) {
+    const oldest = bevyEntityAtlasImageCache.keys().next().value;
+    if (typeof oldest !== "string") break;
+    bevyEntityAtlasImageCache.delete(oldest);
+  }
+  void promise.catch(() => {
+    if (bevyEntityAtlasImageCache.get(path) === promise) {
+      bevyEntityAtlasImageCache.delete(path);
+    }
+  });
   return promise;
 }
 

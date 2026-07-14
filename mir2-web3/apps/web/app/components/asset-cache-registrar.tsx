@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  resolveAssetPrewarmPolicy,
+  type AssetPrewarmPolicy,
+  type BackgroundPrewarmMode,
+} from "../../lib/asset-prewarm-policy";
 import type { AssetCachePack } from "../../lib/asset-cache-packs";
+import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
 
 type AssetManifest = {
   version?: string;
@@ -191,6 +197,8 @@ declare global {
       };
       remoteAssetBaseUrl?: string | null;
       staticAssetTiers?: Record<string, number> | null;
+      renderTier?: "low" | "medium" | "high";
+      prewarmPolicy?: AssetPrewarmPolicy;
     };
     __mir2AssetCacheReset?: (options?: AssetCacheResetOptions) => Promise<AssetCacheResetResult>;
     __mir2CacheMetrics?: CacheMetricsHandle;
@@ -204,13 +212,9 @@ declare global {
 
 const MAX_RESOURCE_METRICS = 2000;
 const MAX_API_METRICS = 500;
-const CRITICAL_PREWARM_CONCURRENCY = 8;
-const BACKGROUND_PREWARM_CONCURRENCY = 3;
 const BACKGROUND_PREWARM_FIRST_PLAYABLE_TIMEOUT_MS = 90_000;
 const BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS = 20_000;
 const CACHE_NAMESPACE_STORAGE_KEY = "mir2.assetCacheNamespace";
-
-type BackgroundPrewarmMode = "immediate" | "afterPlayable";
 
 export function AssetCacheRegistrar() {
   const [mounted, setMounted] = useState(false);
@@ -247,8 +251,16 @@ export function AssetCacheRegistrar() {
       (process.env.NODE_ENV === "production" ||
         params.get("prewarm") === "1" ||
         params.get("assetCache") === "1");
-    const backgroundPrewarmMode = resolveBackgroundPrewarmMode(params);
-    const backgroundPrewarmDelayMs = resolveBackgroundPrewarmDelayMs(params, backgroundPrewarmMode);
+    const deviceMemoryGiB = normalizeDeviceMemoryGiB(
+      (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+    );
+    const renderTier = resolveRenderTier({
+      forcedTier: params.get("renderTier"),
+      deviceMemoryGiB,
+      coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+    });
+    const prewarmPolicy = resolveAssetPrewarmPolicy(renderTier, resolveBackgroundPrewarmModeOverride(params));
+    const backgroundPrewarmDelayMs = resolveBackgroundPrewarmDelayMs(params, prewarmPolicy.backgroundMode);
 
     setDebugEnabled(debug);
     installFetchProbe();
@@ -335,6 +347,8 @@ export function AssetCacheRegistrar() {
               typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
                 ? (configured.staticAssetTiers as Record<string, number>)
                 : null,
+            renderTier,
+            prewarmPolicy,
           };
           logCacheEvent(metrics, "service-worker", {
             status: window.__mir2AssetCache.status,
@@ -375,6 +389,8 @@ export function AssetCacheRegistrar() {
             version: manifest.version,
             cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            renderTier,
+            prewarmPolicy,
           };
           metrics.markMilestone("serviceWorkerSkipped", {
             status: window.__mir2AssetCache.status,
@@ -388,7 +404,7 @@ export function AssetCacheRegistrar() {
         if (shouldPrewarm) {
           scheduleIdle(() => {
             void prewarmAssetPacks(manifest, metrics, {
-              backgroundMode: backgroundPrewarmMode,
+              ...prewarmPolicy,
               backgroundDelayMs: backgroundPrewarmDelayMs,
             }).then(() => {
               if (disposed) return;
@@ -768,10 +784,14 @@ function writeStorageValue(storage: Storage, key: string, value: string) {
 async function prewarmAssetPacks(
   manifest: AssetManifest,
   metrics: CacheMetricsHandle,
-  options: { backgroundMode: BackgroundPrewarmMode; backgroundDelayMs: number },
+  options: AssetPrewarmPolicy & { backgroundDelayMs: number },
 ) {
   metrics.markMilestone("prewarmStart", {
     packCount: manifest.resourcePacks?.length ?? 0,
+    renderTier: options.tier,
+    criticalConcurrency: options.criticalConcurrency,
+    backgroundConcurrency: options.backgroundConcurrency,
+    maxSceneFrames: options.maxSceneFrames,
     backgroundMode: options.backgroundMode,
     backgroundDelayMs: options.backgroundDelayMs,
   });
@@ -779,7 +799,9 @@ async function prewarmAssetPacks(
   await requestPersistentStorage(metrics);
   const packs = [...(manifest.resourcePacks ?? [])].sort((a, b) => a.priority - b.priority);
   const criticalPacks = packs.filter((pack) => pack.phase !== "background");
-  const backgroundPacks = packs.filter((pack) => pack.phase === "background");
+  const backgroundPacks = options.backgroundMode === "off"
+    ? []
+    : packs.filter((pack) => pack.phase === "background");
   const backgroundMetrics = new Map<string, CachePrewarmMetric>();
 
   for (const pack of backgroundPacks) {
@@ -789,7 +811,7 @@ async function prewarmAssetPacks(
   }
 
   for (const pack of criticalPacks) {
-    await prewarmPack(pack, metrics, CRITICAL_PREWARM_CONCURRENCY);
+    await prewarmPack(pack, metrics, options.criticalConcurrency, options.maxSceneFrames);
   }
   metrics.markMilestone("criticalPrewarmDone", summarizeMetrics(metrics));
 
@@ -806,7 +828,8 @@ async function prewarmAssetPacks(
       await prewarmPack(
         pack,
         metrics,
-        BACKGROUND_PREWARM_CONCURRENCY,
+        options.backgroundConcurrency,
+        options.maxSceneFrames,
         backgroundMetrics.get(pack.name),
       );
     }
@@ -869,6 +892,7 @@ async function prewarmPack(
   pack: AssetCachePack,
   metrics: CacheMetricsHandle,
   concurrency: number,
+  maxSceneFrames: number | null,
   existingMetric?: CachePrewarmMetric,
 ) {
   const startedAt = performance.now();
@@ -904,7 +928,10 @@ async function prewarmPack(
       if (sceneCache === "miss") packMetric.sceneCacheMisses += 1;
 
       const blueprint = await response.json();
-      const frameUrls = extractSceneFrameUrls(blueprint, scene.spriteFrameLimit);
+      const sceneFrameLimit = maxSceneFrames === null
+        ? scene.spriteFrameLimit
+        : Math.min(scene.spriteFrameLimit, maxSceneFrames);
+      const frameUrls = extractSceneFrameUrls(blueprint, sceneFrameLimit);
       packMetric.requested += frameUrls.length;
       publishPrewarmProgress(metrics, "running");
       await hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
@@ -1544,15 +1571,15 @@ function scheduleIdle(callback: () => void) {
   window.setTimeout(callback, 250);
 }
 
-function resolveBackgroundPrewarmMode(params: URLSearchParams): BackgroundPrewarmMode {
+function resolveBackgroundPrewarmModeOverride(params: URLSearchParams): BackgroundPrewarmMode | null {
   const configured = params.get("prewarmBackground");
-  if (configured === "immediate" || configured === "afterPlayable") return configured;
+  if (configured === "off" || configured === "immediate" || configured === "afterPlayable") return configured;
   if (params.get("skipRuntime") === "1") return "immediate";
-  return "afterPlayable";
+  return null;
 }
 
 function resolveBackgroundPrewarmDelayMs(params: URLSearchParams, mode: BackgroundPrewarmMode) {
-  if (mode === "immediate") return 0;
+  if (mode === "off" || mode === "immediate") return 0;
   const configured = params.get("prewarmBackgroundDelayMs");
   if (configured == null) return BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS;
   const parsed = Number(configured);

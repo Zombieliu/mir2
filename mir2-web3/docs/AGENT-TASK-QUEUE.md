@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> Latest full-pack/low-tier delivery closure: 2026-07-14. The offline compiler
+> now converts and verifies all 1,440 Crystal libraries as 1,440 lazy shards and
+> 4,446 unique immutable PNG pages, with every one of 2,143,132 frame slots
+> classified. Entity rendering prefers the full pack with legacy rollback;
+> Bevy and WebGL2 residency are bounded by adaptive byte/entry LRU budgets.
+> Forced-low WebGL2 Bichon stayed at 58,379,430 decoded bytes, passed 28/28
+> movement/render assertions, and completed 403/403 reduced prewarm requests
+> without 404s or critical console errors. Evidence is in
+> `docs/generated/player-qa/full-asset-pack-low-tier/`. Next delivery tasks are
+> CDN/release publication and physical Brazil 2/4 GiB Android throttled-4G soak;
+> optional KTX2/UASTC is gated on WebGL2 pixel/alpha proof. The active visual
+> queue remains deterministic same-scene Crystal/Web full-window delta
+> reduction across camera, population, HUD, lighting, and effects.
+
 > Latest map-render pipeline closure: 2026-07-13. Bichon black blocks were
 > opaque matte texels entering the raw atlas path, not absent resources. Normal
 > object-library frames now bypass the atlas for black-key decode, Mir3
