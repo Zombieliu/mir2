@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::runtime::{
     SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
     SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, ZoneMonsterSpawn,
@@ -197,6 +199,9 @@ pub struct WorldCommandExecution {
 }
 
 pub trait WorldRuntime: Send + Sync {
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
     fn execute_with_outcome(
@@ -469,6 +474,14 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
     fn on_connect(&self) -> Vec<ServerPacket> {
         self.session.on_connect()
     }

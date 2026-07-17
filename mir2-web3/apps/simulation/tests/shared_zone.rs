@@ -379,7 +379,204 @@ fn player_a_runs_player_b_receives_object_run() {
 }
 
 #[test]
-fn run_from_standstill_starts_as_run() {
+fn mounted_player_run_moves_three_tiles_and_broadcasts_object_run() {
+    let mut zone = zone();
+    let rider = session("rider");
+    let observer = session("observer");
+    zone.handle(ZoneCommand::Join(join("rider", 201, "Rider", 330, 270)));
+    zone.handle(ZoneCommand::Join(join(
+        "observer", 202, "Observer", 338, 270,
+    )));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: rider.clone(),
+        owner_local_object_id: 2001,
+        packets: vec![ServerPacket::MountUpdate {
+            object_id: 2001,
+            mount_type: 3,
+            riding_mount: true,
+        }],
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: rider.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+    zone.handle(ZoneCommand::Run {
+        session_id: rider.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 0,
+    });
+    let outbounds = zone.tick(600);
+
+    assert_eq!(zone.player_position(&rider), Some(Point { x: 334, y: 270 }));
+    assert!(has_packet(&outbounds, &observer, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRun { movement }
+            if movement.object_id == 201 && movement.position == (Point { x: 334, y: 270 })
+    )));
+}
+
+#[test]
+fn swift_feet_run_moves_three_tiles_unless_sneaking() {
+    let mut zone = zone();
+    let runner = session("runner");
+    zone.handle(ZoneCommand::Join(join("runner", 201, "Runner", 330, 270)));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: runner.clone(),
+        owner_local_object_id: 2001,
+        packets: vec![ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: 4,
+                visible: true,
+                object_id: 2001,
+                expire_time: 5_000,
+                infinite: false,
+                paused: false,
+                stats: Vec::new(),
+                values: Vec::new(),
+            },
+        }],
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: runner.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+    zone.handle(ZoneCommand::Run {
+        session_id: runner.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 0,
+    });
+    zone.tick(600);
+    assert_eq!(
+        zone.player_position(&runner),
+        Some(Point { x: 334, y: 270 })
+    );
+
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: runner.clone(),
+        owner_local_object_id: 2001,
+        packets: vec![ServerPacket::ObjectSneaking {
+            object_id: 2001,
+            sneaking_active: true,
+        }],
+        now_ms: 600,
+    });
+    zone.handle(ZoneCommand::Run {
+        session_id: runner.clone(),
+        direction: MirDirection::Right,
+        seq: 3,
+        now_ms: 600,
+    });
+    zone.tick(1_200);
+    assert_eq!(
+        zone.player_position(&runner),
+        Some(Point { x: 336, y: 270 })
+    );
+}
+
+#[test]
+fn paused_swift_feet_does_not_extend_run_to_three_tiles() {
+    let mut zone = zone();
+    let runner = session("runner");
+    zone.handle(ZoneCommand::Join(join("runner", 201, "Runner", 330, 270)));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: runner.clone(),
+        owner_local_object_id: 2001,
+        packets: vec![
+            ServerPacket::AddBuff {
+                buff: ClientBuff {
+                    buff_type: 4,
+                    visible: true,
+                    object_id: 2001,
+                    expire_time: 5_000,
+                    infinite: false,
+                    paused: false,
+                    stats: Vec::new(),
+                    values: Vec::new(),
+                },
+            },
+            ServerPacket::PauseBuff {
+                buff_type: 4,
+                object_id: 2001,
+                paused: true,
+            },
+        ],
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: runner.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+    zone.handle(ZoneCommand::Run {
+        session_id: runner.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 0,
+    });
+    zone.tick(600);
+
+    assert_eq!(
+        zone.player_position(&runner),
+        Some(Point { x: 333, y: 270 })
+    );
+}
+
+#[test]
+fn mounted_run_checks_third_tile_before_moving() {
+    let collision = ZoneCollision::unbounded().with_blocked_cells([Point { x: 334, y: 270 }]);
+    let mut zone = ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), collision);
+    let rider = session("rider");
+    zone.handle(ZoneCommand::Join(join("rider", 201, "Rider", 330, 270)));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: rider.clone(),
+        owner_local_object_id: 2001,
+        packets: vec![ServerPacket::MountUpdate {
+            object_id: 2001,
+            mount_type: 3,
+            riding_mount: true,
+        }],
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::Walk {
+        session_id: rider.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+    zone.handle(ZoneCommand::Run {
+        session_id: rider.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 0,
+    });
+    let outbounds = zone.tick(600);
+
+    assert_eq!(zone.player_position(&rider), Some(Point { x: 331, y: 270 }));
+    assert!(has_packet(&outbounds, &rider, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 331, y: 270 })
+    )));
+}
+
+#[test]
+fn run_from_standstill_degrades_to_walk() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
@@ -394,16 +591,20 @@ fn run_from_standstill_starts_as_run() {
     });
     let outbounds = zone.tick(0);
 
-    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
     assert!(has_packet(&outbounds, &first, |packet| matches!(
         packet,
         ServerPacket::UserLocation { location }
-            if location.position == (Point { x: 332, y: 270 })
+            if location.position == (Point { x: 331, y: 270 })
     )));
     assert!(has_packet(&outbounds, &second, |packet| matches!(
         packet,
-        ServerPacket::ObjectRun { movement }
-            if movement.object_id == 101 && movement.position == (Point { x: 332, y: 270 })
+        ServerPacket::ObjectWalk { movement }
+            if movement.object_id == 101 && movement.position == (Point { x: 331, y: 270 })
+    )));
+    assert!(!has_packet(&outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRun { .. }
     )));
 }
 
@@ -422,13 +623,13 @@ fn run_step_expires_after_crystal_celltime_grace() {
         now_ms: 0,
     });
     zone.tick(0);
-    zone.handle(ZoneCommand::Run {
+    let mut outbounds = zone.handle(ZoneCommand::Run {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
         now_ms: 1_500,
     });
-    let outbounds = zone.tick(1_500);
+    outbounds.extend(zone.tick(1_500));
 
     assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
     assert!(has_packet(&outbounds, &first, |packet| matches!(
@@ -448,11 +649,9 @@ fn run_step_expires_after_crystal_celltime_grace() {
 }
 
 #[test]
-fn mounted_player_walks_a_step_sooner_than_an_unmounted_player() {
-    // Two players take an identical first walk at now=0. The walk cadence is
-    // 600ms unmounted and 400ms mounted (600 * 2 / 3). At now=400 the mounted
-    // player's second step is ready while the unmounted player's is not, so the
-    // mount speed boost is observable through the authoritative zone path.
+fn mounted_player_walk_uses_the_same_crystal_server_delay() {
+    // Crystal applies the same 600ms MoveDelay to mounted and unmounted
+    // movement. The mount's travel advantage is its three-tile Run.
     let mut zone = zone();
     let rider = session("rider");
     let walker = session("walker");
@@ -471,8 +670,7 @@ fn mounted_player_walks_a_step_sooner_than_an_unmounted_player() {
         now_ms: 0,
     });
 
-    // First step for both, at the same instant. This sets the rider's next
-    // ready time to 400ms (mounted) and the walker's to 600ms (unmounted).
+    // First step for both, at the same instant.
     for who in [&rider, &walker] {
         zone.handle(ZoneCommand::Walk {
             session_id: who.clone(),
@@ -502,16 +700,15 @@ fn mounted_player_walks_a_step_sooner_than_an_unmounted_player() {
     assert_eq!(
         zone.player_position(&rider),
         Some(Point { x: 321, y: 250 }),
-        "queued step must not consume before the mount cadence elapses"
+        "queued step must not consume before the shared cadence elapses"
     );
 
-    // At now=400 the mounted rider's cadence has elapsed but the walker's has
-    // not: the rider takes its second step, the walker is still on cooldown.
+    // Neither player may move at 400ms.
     zone.tick(400);
     assert_eq!(
         zone.player_position(&rider),
-        Some(Point { x: 322, y: 250 }),
-        "mounted player should step again once 400ms elapses"
+        Some(Point { x: 321, y: 250 }),
+        "mounted movement must retain Crystal's 600ms server delay"
     );
     assert_eq!(
         zone.player_position(&walker),
@@ -519,8 +716,9 @@ fn mounted_player_walks_a_step_sooner_than_an_unmounted_player() {
         "unmounted player should still be on cooldown at 400ms"
     );
 
-    // By now=600 the walker's 600ms cadence elapses and it advances too.
+    // Both players advance once the common 600ms delay elapses.
     zone.tick(600);
+    assert_eq!(zone.player_position(&rider), Some(Point { x: 322, y: 250 }));
     assert_eq!(
         zone.player_position(&walker),
         Some(Point { x: 362, y: 250 }),
@@ -1814,7 +2012,7 @@ fn retained_zone_object_spawn_uses_object_aoi_not_actor_aoi() {
     let outbounds = zone.handle(ZoneCommand::BroadcastPackets {
         session_id: first,
         owner_local_object_id: 1001,
-        packets: vec![monster_spawn_packet(5001, 1001, 350, 270)],
+        packets: vec![monster_spawn_packet(5001, 1001, 352, 270)],
         now_ms: 0,
     });
 
@@ -1822,7 +2020,7 @@ fn retained_zone_object_spawn_uses_object_aoi_not_actor_aoi() {
         packet,
         ServerPacket::ObjectMonster { info }
             if info.object_id == 5001
-                && info.location == (Point { x: 350, y: 270 })
+                && info.location == (Point { x: 352, y: 270 })
     )));
     assert!(!has_packet(&outbounds, &second, |packet| matches!(
         packet,
@@ -1840,7 +2038,7 @@ fn retained_zone_object_remove_uses_object_visibility_not_actor_aoi() {
     zone.handle(ZoneCommand::BroadcastPackets {
         session_id: first.clone(),
         owner_local_object_id: 1001,
-        packets: vec![monster_spawn_packet(5001, 1001, 350, 270)],
+        packets: vec![monster_spawn_packet(5001, 1001, 352, 270)],
         now_ms: 0,
     });
 
@@ -2010,7 +2208,7 @@ fn retained_zone_object_health_updates_when_entering_object_aoi() {
     let first = session("first");
     let second = session("second");
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
-    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 350, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 348, 270)));
     zone.handle(ZoneCommand::BroadcastPackets {
         session_id: first.clone(),
         owner_local_object_id: 1001,
@@ -2735,7 +2933,7 @@ fn player_movement_diffs_retained_zone_object_visibility() {
         now_ms: 0,
     });
 
-    let join_outbounds = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 350, 270)));
+    let join_outbounds = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 348, 270)));
     assert!(!has_packet(&join_outbounds, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectMonster { info } if info.object_id == 5001
@@ -7489,6 +7687,45 @@ fn zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires() {
 }
 
 #[test]
+fn zone_ground_drop_object_id_claim_allows_adjacent_player_tile_only() {
+    let mut zone = zone();
+    let first = session("first");
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8001, 331, 270, None, None)],
+        now_ms: 0,
+    });
+
+    let tile_only = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: None,
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    assert!(!tile_only
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::GroundDropClaimed { .. })));
+    assert!(zone.has_ground_drop(8001));
+
+    let object_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8001),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 1,
+    });
+    assert!(object_claim.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::GroundDropClaimed { session_id, drop }
+            if session_id == &first && drop.object_id == 8001
+    )));
+    assert!(!zone.has_ground_drop(8001));
+}
+
+#[test]
 fn zone_ground_drop_claim_commit_removes_for_late_joiners() {
     let mut zone = zone();
     let first = session("first");
@@ -7650,6 +7887,53 @@ fn high_frequency_input_keeps_latest_crystal_movement_intent() {
             if location.position == (Point { x: 331, y: 270 })
     )));
     assert!(replay.is_empty());
+}
+
+#[test]
+fn movement_input_after_ready_acknowledges_without_waiting_for_world_tick() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    let first_tick = zone.tick(0);
+    assert!(has_packet(&first_tick, &first, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 331, y: 270 })
+    )));
+
+    let late_walk = zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 1_000,
+    });
+
+    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert!(
+        has_packet(&late_walk, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 332, y: 270 })
+                    && location.direction == MirDirection::Right
+        )),
+        "movement that arrives after the ready time should ACK in the command response, not wait for a later world tick: {late_walk:?}"
+    );
+
+    let replay = zone.tick(1_000);
+    assert!(
+        !has_packet(&replay, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { .. }
+        )),
+        "late-ready movement should not leave a delayed duplicate ACK: {replay:?}"
+    );
 }
 
 #[test]
@@ -8785,7 +9069,7 @@ fn zone_recomputes_authoritative_magic_damage_ignoring_supplied_scalar() {
 // These lock the behavior of the spatial-grid visibility path: the grid must
 // never drop a visible peer (it returns a superset that the exact visibility
 // test filters) and must still emit appear/remove as players cross the AOI
-// boundary. AOI range is 18x14 (see zone::aoi).
+// boundary. Crystal's object data range is symmetric at 16 tiles.
 
 #[test]
 fn aoi_grid_players_far_apart_do_not_see_each_other() {
@@ -8794,7 +9078,7 @@ fn aoi_grid_players_far_apart_do_not_see_each_other() {
     let second = session("second");
 
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
-    // 60 tiles away on X — far outside the 18-wide AOI, several grid cells over.
+    // 60 tiles away on X - far outside the 16-tile AOI, several grid cells over.
     let outbounds = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 390, 270)));
 
     assert!(
@@ -8816,12 +9100,12 @@ fn aoi_grid_walking_into_range_triggers_appearance() {
     let first = session("first");
     let second = session("second");
 
-    // Start just outside AOI X-range (19 > 18) so they are mutually invisible,
+    // Start just outside AOI X-range (17 > 16) so they are mutually invisible,
     // then walk the second player one tile left into range. This crosses toward
     // (and possibly across) a grid-cell boundary, exercising the
     // neighbors-union-visible candidate set in diff_visibility_for.
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
-    let join_out = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 349, 270)));
+    let join_out = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 347, 270)));
     assert!(
         !has_packet(&join_out, &first, |packet| matches!(
             packet,
@@ -8856,5 +9140,55 @@ fn aoi_grid_walking_into_range_triggers_appearance() {
     assert!(
         saw_appearance,
         "second player walking into AOI range must appear to the first via the grid path"
+    );
+}
+
+#[test]
+fn aoi_grid_relocates_moving_shared_monster_before_visibility_diff() {
+    let mut zone = zone();
+    let source = session("source");
+    let observer = session("observer");
+    zone.handle(ZoneCommand::Join(join("source", 101, "Source", 0, 0)));
+    zone.handle(ZoneCommand::Join(join("observer", 102, "Observer", 1, 0)));
+
+    let spawned = zone.handle(ZoneCommand::SyncSharedObjects {
+        session_id: source.clone(),
+        packets: vec![monster_spawn_packet(9_001, 0, 2, 0)],
+        now_ms: 0,
+    });
+    assert!(has_packet(&spawned, &observer, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info } if info.object_id == 9_001
+    )));
+
+    let moved = zone.handle(ZoneCommand::BroadcastSharedObjectPackets {
+        session_id: source,
+        local_self_object_id: None,
+        packets: vec![ServerPacket::ObjectWalk {
+            movement: ObjectMovement {
+                object_id: 9_001,
+                position: Point { x: 100, y: 0 },
+                direction: MirDirection::Right,
+            },
+        }],
+        now_ms: 100,
+    });
+    assert!(has_packet(&moved, &observer, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == 9_001
+    )));
+
+    let approached = zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: observer.clone(),
+        position: Point { x: 99, y: 0 },
+        direction: MirDirection::Right,
+    });
+    assert!(
+        has_packet(&approached, &observer, |packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.object_id == 9_001 && info.location == Point { x: 100, y: 0 }
+        )),
+        "a moved monster must be discoverable from its new AOI grid cell"
     );
 }
