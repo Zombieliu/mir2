@@ -19,6 +19,8 @@ const outputDir = path.resolve(args.output ?? process.env.MIR2_TWO_CLIENT_ZONE_O
 const runId = args.runId ?? new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const prefix = args.prefix ?? `two-client-zone-${runId}`;
 const password = args.password ?? process.env.MIR2_TWO_CLIENT_ZONE_PASSWORD ?? "zone-pass";
+const qaControlToken =
+  args.qaControlToken ?? process.env.MIR2_QA_CONTROL_TOKEN ?? null;
 const map = args.map ?? process.env.MIR2_TWO_CLIENT_ZONE_MAP ?? "0";
 const accountA = args.accountA ?? process.env.MIR2_TWO_CLIENT_ZONE_ACCOUNT_A ?? `zonea${runId}`;
 const accountB = args.accountB ?? process.env.MIR2_TWO_CLIENT_ZONE_ACCOUNT_B ?? `zoneb${runId}`;
@@ -29,7 +31,23 @@ const startAy = numberArg(args.ay ?? process.env.MIR2_TWO_CLIENT_ZONE_AY, 270);
 const startBx = numberArg(args.bx ?? process.env.MIR2_TWO_CLIENT_ZONE_BX, 332);
 const startBy = numberArg(args.by ?? process.env.MIR2_TWO_CLIENT_ZONE_BY, 270);
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9700 + (process.pid % 500));
+const cdpCommandTimeoutMs = numberArg(
+  args.cdpCommandTimeoutMs ?? process.env.MIR2_CDP_COMMAND_TIMEOUT_MS,
+  15_000,
+);
+const observerPulseAfterMove = booleanArg(
+  args.observerPulseAfterMove ?? process.env.MIR2_TWO_CLIENT_ZONE_PULSE_AFTER_MOVE,
+  false,
+);
+const maxObserverMovementLatencyMs = numberArg(
+  args.maxObserverMovementLatencyMs ?? process.env.MIR2_TWO_CLIENT_ZONE_MAX_OBSERVER_MOVE_MS,
+  250,
+);
 const headed = booleanArg(args.headed ?? process.env.MIR2_CHROME_HEADED, false);
+const skipTransfers = booleanArg(
+  args.skipTransfers ?? process.env.MIR2_TWO_CLIENT_ZONE_SKIP_TRANSFERS,
+  false,
+);
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 
 if (!chromePath) {
@@ -116,9 +134,28 @@ class CdpClient {
 
   send(method, params = {}) {
     const id = this.nextId++;
-    this.ws.send(JSON.stringify({ id, method, params }));
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timeout = setTimeout(() => {
+        if (!this.pending.delete(id)) return;
+        reject(new Error(`${this.label} CDP ${method} timed out after ${cdpCommandTimeoutMs}ms`));
+      }, cdpCommandTimeoutMs);
+      this.pending.set(id, {
+        resolve: (value) => {
+          clearTimeout(timeout);
+          resolve(value);
+        },
+        reject: (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        },
+      });
+      try {
+        this.ws.send(JSON.stringify({ id, method, params }));
+      } catch (error) {
+        const pending = this.pending.get(id);
+        this.pending.delete(id);
+        pending?.reject(error);
+      }
     });
   }
 
@@ -152,8 +189,18 @@ async function main() {
       { account: accountB, character: characterB, x: startBx, y: startBy },
     ];
 
-    await Promise.all(clients.map((client, index) => loginAndStart(client, accounts[index])));
-    await Promise.all(clients.map((client, index) => transferTo(client, accounts[index].x, accounts[index].y)));
+    // Start sequentially so two fresh characters never contend for the same
+    // bootstrap cell. Park A away from B's default spawn until B has joined.
+    await loginAndStart(clients[0], accounts[0]);
+    if (!skipTransfers) {
+      await transferTo(clients[0], Math.max(0, startAx - 6), startAy);
+    }
+    await pulseBoth([clients[0]], 2);
+    await loginAndStart(clients[1], accounts[1]);
+    if (!skipTransfers) {
+      await transferTo(clients[1], accounts[1].x, accounts[1].y);
+      await transferTo(clients[0], accounts[0].x, accounts[0].y);
+    }
     await pulseBoth(clients, 4);
 
     await waitUntilClient(
@@ -169,14 +216,26 @@ async function main() {
       15_000,
     );
 
+    const movementSentAt = Date.now();
     await sendClientCommand(clients[0], { type: "walk", direction: "Right" }, "A walk right");
-    await pulseBoth(clients, 5);
+    if (observerPulseAfterMove) {
+      await pulseBoth(clients, 5);
+    }
     await waitUntilClient(
       clients[1],
       `(() => (window.__mir2GatewayEventHistory ?? []).some((event) => event?.packet === "ObjectWalk" || event?.packet === "ObjectRun"))()`,
       "B receives A movement broadcast",
       15_000,
     );
+    const observerMovementFrame = clients[1].packetFrames.find(
+      (frame) =>
+        frame.direction === "received" &&
+        frame.at >= movementSentAt &&
+        /ObjectWalk|ObjectRun/.test(frame.payloadData),
+    );
+    const observerMovementLatencyMs = observerMovementFrame
+      ? observerMovementFrame.at - movementSentAt
+      : null;
 
     const chatMessage = `zone smoke ${runId}`;
     await sendClientCommand(clients[1], { type: "chat", message: chatMessage }, "B chat");
@@ -200,6 +259,9 @@ async function main() {
       baseUrl,
       gatewayWsUrl,
       map,
+      observerPulseAfterMove,
+      maxObserverMovementLatencyMs,
+      observerMovementLatencyMs,
       accounts,
       summaries,
       screenshots,
@@ -219,6 +281,19 @@ async function main() {
       aSeesB: summaries[0].entities.some((entity) => entity.name === characterB && entity.kind === "player"),
       bSeesA: summaries[1].entities.some((entity) => entity.name === characterA && entity.kind === "player"),
       bSawMovementBroadcast: clients[1].packetFrames.some((frame) => /ObjectWalk|ObjectRun/.test(frame.payloadData)),
+      bMovementWithoutPulseWithinBudget:
+        observerPulseAfterMove ||
+        (Number.isFinite(observerMovementLatencyMs) &&
+          observerMovementLatencyMs <= maxObserverMovementLatencyMs),
+      bRemotePresentationEnabled:
+        summaries[1].bevyMovementShadow?.presentation?.enabled === true,
+      bRemotePresentationObservedPacket:
+        Number(summaries[1].bevyMovementShadow?.presentation?.remoteMotionEventCount ?? 0) > 0,
+      bRemotePresentationDrovePackedOffset:
+        Number(summaries[1].bevyMovementShadow?.presentation?.offsetMatchCount ?? 0) > 0,
+      bRemotePresentationNoDecodeOrQueueDrops:
+        summaries[1].bevyMovementShadow?.presentation?.decodeErrorCount === 0 &&
+        summaries[1].bevyMovementShadow?.presentation?.pendingEventDropCount === 0,
       aSawChatBroadcast: clients[0].packetFrames.some((frame) => frame.payloadData.includes("ObjectChat") && frame.payloadData.includes(chatMessage)),
       noConsoleErrors: report.consoleErrors.length === 0,
       noNonFavicon404s: report.nonFaviconNetwork404s.length === 0,
@@ -278,6 +353,12 @@ async function makeClient(label) {
 async function loginAndStart(client, accountInfo) {
   const screen = await client.evaluate(`window.__mir2Stage5?.state?.screen ?? null`);
   if (screen === "login") {
+    await waitUntilClient(
+      client,
+      `Boolean(document.querySelector(".login-input.account") && document.querySelector(".login-input.password"))`,
+      `${client.label} login form`,
+      15_000,
+    );
     await fillInput(client, ".login-input.account", accountInfo.account);
     await fillInput(client, ".login-input.password", password);
     await click(client, ".login-button.account button");
@@ -288,6 +369,10 @@ async function loginAndStart(client, accountInfo) {
       15_000,
     );
     await delay(1_000);
+    // Account creation can clear the controlled inputs. Refill before login so
+    // the second click never submits an empty password.
+    await fillInput(client, ".login-input.account", accountInfo.account);
+    await fillInput(client, ".login-input.password", password);
     await click(client, ".login-button.ok button");
     await waitUntilClient(client, `window.__mir2Stage5?.state?.screen === "select"`, `${client.label} select`, 20_000);
   }
@@ -303,36 +388,84 @@ async function loginAndStart(client, accountInfo) {
     `${client.label} character created`,
     15_000,
   );
-  await client.evaluate(`
+  const startGame = await client.evaluate(`
     (() => {
       const character = (window.__mir2Stage5?.state?.characters ?? []).find((entry) => entry?.name === ${JSON.stringify(accountInfo.character)});
-      return window.__mir2Stage5?.send?.({ type: "startGame", characterIndex: character?.index ?? 0 }) === true;
+      const previousSnapshotAt = window.__mir2PacketRuntime?.lastSnapshotAt ?? null;
+      const sent = window.__mir2Stage5?.send?.({ type: "startGame", characterIndex: character?.index ?? 0 }) === true;
+      return { sent, previousSnapshotAt };
     })()
   `);
-  await waitUntilClient(
-    client,
-    `window.__mir2Stage5?.state?.screen === "game" && Boolean(window.__mir2Stage5?.state?.player)`,
-    `${client.label} game`,
-    25_000,
-  );
-}
-
-async function transferTo(client, x, y) {
-  await sendClientCommand(client, { type: "transferMap", key: `crystal:${map}:${x}:${y}` }, `${client.label} transfer`);
+  if (!startGame?.sent) {
+    throw new Error(`${client.label} start game command was not accepted by the Web client.`);
+  }
   await waitUntilClient(
     client,
     `(() => {
       const state = window.__mir2Stage5?.state;
-      return state?.mapFileName === ${JSON.stringify(map)} && state?.player?.x === ${x} && state?.player?.y === ${y};
+      return state?.screen === "game" &&
+        (Boolean(state?.player) || (state?.entities ?? []).some((entity) => entity?.kind === "selfPlayer"));
     })()`,
-    `${client.label} transfer ${x},${y}`,
+    `${client.label} game`,
+    25_000,
+  );
+  await waitUntilClient(
+    client,
+    `(() => {
+      const snapshotAt = window.__mir2PacketRuntime?.lastSnapshotAt;
+      const previousSnapshotAt = ${JSON.stringify(startGame.previousSnapshotAt)};
+      return Number.isFinite(snapshotAt) &&
+        (previousSnapshotAt == null || snapshotAt > previousSnapshotAt);
+    })()`,
+    `${client.label} start game world snapshot`,
+    20_000,
+  );
+}
+
+async function transferTo(client, x, y) {
+  const action = { type: "transferMap", key: `crystal:${map}:${x}:${y}` };
+  const command = qaControlToken ? { type: "qaControl", token: qaControlToken, action } : action;
+  const transfer = await client.evaluate(`
+    (() => {
+      const previousSnapshotAt = window.__mir2PacketRuntime?.lastSnapshotAt ?? null;
+      const sent = window.__mir2Stage5?.send?.(${JSON.stringify(command)}) === true;
+      return { sent, previousSnapshotAt };
+    })()
+  `);
+  if (!transfer?.sent) {
+    throw new Error(`${client.label} transfer command was not accepted by the Web client.`);
+  }
+  await waitUntilClient(
+    client,
+    `(() => {
+      const state = window.__mir2Stage5?.state;
+      const packetRuntime = window.__mir2PacketRuntime;
+      const snapshotAt = packetRuntime?.lastSnapshotAt;
+      const previousSnapshotAt = ${JSON.stringify(transfer.previousSnapshotAt)};
+      const activeMap = packetRuntime?.mapFileName ?? state?.mapFileName;
+      return String(activeMap) === ${JSON.stringify(map)} &&
+        state?.player?.x === ${x} &&
+        state?.player?.y === ${y} &&
+        Number.isFinite(snapshotAt) &&
+        (previousSnapshotAt == null || snapshotAt > previousSnapshotAt);
+    })()`,
+    `${client.label} transfer ${x},${y} world snapshot`,
     20_000,
   );
 }
 
 async function pulseBoth(clients, count) {
   for (let index = 0; index < count; index += 1) {
-    await Promise.all(clients.map((client) => sendClientCommand(client, { type: "tick" }, `${client.label} tick`)));
+    const action = { type: "tick" };
+    await Promise.all(
+      clients.map((client) =>
+        sendClientCommand(
+          client,
+          qaControlToken ? { type: "qaControl", token: qaControlToken, action } : action,
+          `${client.label} tick`,
+        ),
+      ),
+    );
     await delay(450);
   }
 }
@@ -356,6 +489,9 @@ async function readSummary(client) {
         playerObjectId: state.playerObjectId ?? null,
         mapFileName: state.mapFileName ?? null,
         worldTick: state.worldTick ?? null,
+        bevyRuntime: window.__mir2BevyRuntimeDebug ?? null,
+        bevyEntityRenderer: window.__mir2BevyEntityRendererDebug ?? null,
+        bevyMovementShadow: state.bevyMovementShadow ?? null,
         logsTail: (state.logs ?? []).slice(-8).map((line) => line?.text ?? String(line)),
         entities: (state.entities ?? [])
           .map((entity) => ({
@@ -373,6 +509,14 @@ async function readSummary(client) {
 }
 
 async function captureScreenshot(client, fileName) {
+  await client.send("Page.bringToFront");
+  await waitUntilClient(
+    client,
+    `window.__mir2Stage5?.state?.sceneInteractionReady === true`,
+    `${client.label} scene ready for screenshot`,
+    15_000,
+  ).catch(() => undefined);
+  await delay(250);
   const result = await client.send("Page.captureScreenshot", {
     format: "png",
     captureBeyondViewport: false,
@@ -431,17 +575,23 @@ async function waitUntilClient(client, expression, label, timeoutMs) {
         bodyText: document.body?.innerText?.slice(0, 500) ?? "",
         screen: window.__mir2Stage5?.state?.screen ?? null,
         wsState: window.__mir2Stage5?.state?.wsState ?? null,
+        mapFileName: window.__mir2Stage5?.state?.mapFileName ?? null,
         player: window.__mir2Stage5?.state?.player ?? null,
+        packetRuntime: window.__mir2PacketRuntime ?? null,
         entities: (window.__mir2Stage5?.state?.entities ?? []).map((entity) => ({
           kind: entity.kind,
           name: entity.name,
           x: entity.x,
           y: entity.y,
         })),
+        gatewayEvents: (window.__mir2GatewayEventHistory ?? []).slice(-20).map((event) => ({
+          packet: event?.packet ?? null,
+          payload: event?.payload ?? null,
+        })),
       }))()
     `)
     .catch((error) => ({ debugError: String(error) }));
-  throw new Error(`Timed out waiting for ${label}; last=${JSON.stringify(lastValue)}; debug=${JSON.stringify(debug).slice(0, 2_000)}`);
+  throw new Error(`Timed out waiting for ${label}; last=${JSON.stringify(lastValue)}; debug=${JSON.stringify(debug).slice(0, 8_000)}`);
 }
 
 async function launchChrome() {
@@ -517,6 +667,17 @@ function buildBaseUrl(rawBaseUrl, wsUrl) {
   }
   if (!url.searchParams.has("autoTick")) {
     url.searchParams.set("autoTick", "0");
+  }
+  for (const [key, value] of [
+    ["bevyBackend", "webgpu"],
+    ["bevyEntities", "1"],
+    ["bevyMap", "1"],
+    ["bevyEntityInterp", "1"],
+    ["bevyRemoteMotion", "1"],
+  ]) {
+    if (!url.searchParams.has(key)) {
+      url.searchParams.set(key, value);
+    }
   }
   if (!url.searchParams.has("codexBust")) {
     url.searchParams.set("codexBust", String(Date.now()));

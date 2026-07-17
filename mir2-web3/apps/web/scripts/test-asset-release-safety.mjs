@@ -1,0 +1,226 @@
+import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
+import fs from "node:fs/promises";
+import http from "node:http";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
+
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const BUILD_SCRIPT = path.join(SCRIPT_DIR, "build-remote-asset-release.mjs");
+const UPLOAD_SCRIPT = path.join(SCRIPT_DIR, "upload-r2-assets.mjs");
+const CAS_RELEASE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "cas-release.mjs");
+
+await test("map-atlas pages accompany a referenced map-atlas manifest", async () => {
+  await withTempDir(async (root) => {
+    const fixtureScript = path.join(root, "apps", "web", "scripts", path.basename(BUILD_SCRIPT));
+    const publicRoot = path.join(root, "apps", "web", "public");
+    const atlasManifestPath = path.join(publicRoot, "generated", "map-atlas", "manifest.json");
+    await fs.mkdir(path.dirname(fixtureScript), { recursive: true });
+    await fs.mkdir(path.join(path.dirname(fixtureScript), "asset-pipeline"), { recursive: true });
+    await fs.mkdir(path.dirname(atlasManifestPath), { recursive: true });
+    await fs.mkdir(path.join(publicRoot, "original-map"), { recursive: true });
+    await fs.copyFile(BUILD_SCRIPT, fixtureScript);
+    await fs.copyFile(CAS_RELEASE_MODULE, path.join(path.dirname(fixtureScript), "asset-pipeline", "cas-release.mjs"));
+    await fs.writeFile(path.join(publicRoot, "original-map", "fixture.png"), "original");
+    await fs.writeFile(
+      path.join(publicRoot, "original-asset-manifest.generated.json"),
+      JSON.stringify({ schemaVersion: 1, assets: { "/original-map/fixture.png": {} } }),
+    );
+    await fs.writeFile(
+      atlasManifestPath,
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: "mir2-map-atlas-manifest",
+        atlases: [
+          { imageUrl: "/generated/map-atlas/library/p0.png" },
+          { imageUrl: "/generated/map-atlas/library/p1.png" },
+        ],
+      }),
+    );
+    await fs.mkdir(path.join(publicRoot, "generated", "map-atlas", "library"), { recursive: true });
+    await fs.writeFile(path.join(publicRoot, "generated", "map-atlas", "library", "p0.png"), "page-0");
+    await fs.writeFile(path.join(publicRoot, "generated", "map-atlas", "library", "p1.png"), "page-1");
+
+    const server = await listen((request, response) => {
+      if (request.url === "/api/asset-manifest") {
+        response.setHeader("content-type", "application/json");
+        response.end(JSON.stringify({
+          version: "test-atlas-release",
+          resourcePacks: [{
+            name: "map",
+            priority: 1,
+            urls: ["/generated/map-atlas/manifest.json"],
+          }],
+        }));
+        return;
+      }
+      response.statusCode = 404;
+      response.end();
+    });
+
+    try {
+      const outputDir = path.join(root, "release-output");
+      await runNode(fixtureScript, [
+        "--baseUrl", server.url,
+        "--outDir", outputDir,
+        "--stageDir", path.join(root, "stage"),
+        "--stageFileMode", "reference",
+        "--hashMode", "skip",
+        "--cas", "false",
+        "--includeSceneSprites", "false",
+        "--includePublicAssetRoots", "false",
+        "--allowMissing", "true",
+      ]);
+      const release = JSON.parse(await fs.readFile(path.join(outputDir, "remote-asset-release.json"), "utf8"));
+      const files = new Map(release.files.map((file) => [file.path, file]));
+      assert.ok(files.has("/generated/map-atlas/manifest.json"));
+      assert.deepEqual(
+        ["/generated/map-atlas/library/p0.png", "/generated/map-atlas/library/p1.png"].filter((item) => files.has(item)),
+        ["/generated/map-atlas/library/p0.png", "/generated/map-atlas/library/p1.png"],
+      );
+      assert.deepEqual(files.get("/generated/map-atlas/library/p0.png").sources, ["map-atlas-manifest"]);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+await test("release manifest upload starts after every referenced asset upload completes", async () => {
+  await withTempDir(async (root) => {
+    const events = [];
+    const server = await listen((request, response) => {
+      const key = new URL(request.url, server.url).searchParams.get("key");
+      events.push({ type: "start", key });
+      request.resume();
+      request.on("end", () => {
+        const delay = key.endsWith("asset-a.bin") ? 80 : key.endsWith("asset-b.bin") ? 30 : 0;
+        setTimeout(() => {
+          events.push({ type: "complete", key });
+          response.end("ok");
+        }, delay);
+      });
+    });
+
+    try {
+      const assetA = path.join(root, "asset-a.bin");
+      const assetB = path.join(root, "asset-b.bin");
+      const manifestPath = path.join(root, "release.json");
+      await fs.writeFile(assetA, "a");
+      await fs.writeFile(assetB, "b");
+      const files = [
+        {
+          relativePath: "asset-a.bin",
+          stagePath: assetA,
+          size: 1,
+          sha256: createHash("sha256").update("a").digest("hex"),
+          contentType: "application/octet-stream",
+        },
+        {
+          relativePath: "asset-b.bin",
+          stagePath: assetB,
+          size: 1,
+          sha256: createHash("sha256").update("b").digest("hex"),
+          contentType: "application/octet-stream",
+        },
+      ];
+      const cas = await writeCasReleaseArtifacts(
+        createCasRelease(files, { prefix: "release/cas", channel: "candidate" }),
+        root,
+      );
+      await fs.writeFile(manifestPath, JSON.stringify({
+        objectPrefix: "release/v1",
+        files,
+        cas,
+      }));
+
+      await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "worker",
+        "--workerUrl", server.url,
+        "--concurrency", "2",
+        "--maxAttempts", "1",
+      ], { MIR2_R2_UPLOAD_SECRET: "fixture-secret" });
+
+      const manifestKey = "release/v1/remote-asset-release.json";
+      const manifestStart = events.findIndex((event) => event.type === "start" && event.key === manifestKey);
+      assert.ok(manifestStart >= 0, "release manifest was uploaded");
+      for (const assetKey of ["release/v1/asset-a.bin", "release/v1/asset-b.bin"]) {
+        const completion = events.findIndex((event) => event.type === "complete" && event.key === assetKey);
+        assert.ok(completion >= 0, `${assetKey} completed`);
+        assert.ok(completion < manifestStart, `${assetKey} completed before release manifest upload started`);
+      }
+
+      const casManifestKey = cas.manifest.objectKey;
+      const channelKey = cas.channel.objectKey;
+      const casManifestStart = events.findIndex((event) => event.type === "start" && event.key === casManifestKey);
+      const channelStart = events.findIndex((event) => event.type === "start" && event.key === channelKey);
+      assert.ok(casManifestStart > 0, "immutable CAS manifest was uploaded");
+      assert.ok(channelStart > casManifestStart, "mutable channel upload started after immutable CAS manifest");
+      for (const key of [casManifestKey, manifestKey]) {
+        const completion = events.findIndex((event) => event.type === "complete" && event.key === key);
+        assert.ok(completion >= 0, `${key} completed`);
+        assert.ok(completion < channelStart, `${key} completed before mutable channel upload started`);
+      }
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+console.log("asset release safety tests passed (2/2)");
+
+async function test(name, fn) {
+  try {
+    await fn();
+    console.log(`ok - ${name}`);
+  } catch (error) {
+    console.error(`not ok - ${name}`);
+    throw error;
+  }
+}
+
+async function withTempDir(fn) {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-asset-release-safety-"));
+  try {
+    await fn(root);
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+}
+
+async function listen(handler) {
+  const server = http.createServer(handler);
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const address = server.address();
+  return {
+    url: `http://127.0.0.1:${address.port}`,
+    close: () => new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())),
+  };
+}
+
+function runNode(script, args, env = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [script, ...args], {
+      cwd: path.dirname(script),
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve({ stdout, stderr });
+      else reject(new Error(`${path.basename(script)} exited ${code}\n${stdout}\n${stderr}`));
+    });
+  });
+}

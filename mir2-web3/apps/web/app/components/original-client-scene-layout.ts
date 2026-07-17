@@ -31,6 +31,9 @@ export type SceneBackdropTile = {
 export type ViewportMapSprite = {
   key: string;
   path: string;
+  // All source frames for the visible map animation. The standalone renderer
+  // uses this to make additive-family handoff to Bevy atomic.
+  animationFramePaths?: string[];
   kind: "back" | "middle" | "front" | "tileAnimation";
   blendMode?: "normal" | "additive";
   cellX: number;

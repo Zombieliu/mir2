@@ -9,7 +9,7 @@ mod remote_motion;
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 
-use bevy::asset::{AssetMetaCheck, AssetPlugin, RenderAssetUsages};
+use bevy::asset::{AssetMetaCheck, AssetPlugin, LoadState, RenderAssetUsages};
 use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
 use bevy::math::{URect, UVec2};
 use bevy::prelude::*;
@@ -91,6 +91,7 @@ struct RuntimeMapRenderState {
 #[derive(Resource, Default, Clone)]
 struct RuntimeMapRenderAtlases {
     images: HashMap<String, Handle<Image>>,
+    url_image_keys: HashSet<String>,
     layouts: HashMap<String, (Handle<TextureAtlasLayout>, HashMap<String, usize>)>,
     revision: u64,
 }
@@ -420,6 +421,8 @@ struct MapRenderState {
     stage_width: f32,
     stage_height: f32,
     #[serde(default)]
+    ack_key: String,
+    #[serde(default)]
     revision: Option<u64>,
     #[serde(default)]
     center_x: Option<i32>,
@@ -436,6 +439,8 @@ struct MapRenderState {
     tiles: Vec<MapTile>,
     #[serde(default)]
     standalone_tiles: Vec<MapStandaloneTile>,
+    #[serde(default)]
+    retained_image_keys: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -497,6 +502,21 @@ struct MapStandaloneTile {
     opacity: Option<f32>,
     #[serde(default)]
     additive: bool,
+}
+
+fn map_render_active_image_keys(snapshot: &MapRenderState) -> HashSet<String> {
+    snapshot
+        .atlases
+        .iter()
+        .map(|atlas| atlas.key.clone())
+        .chain(
+            snapshot
+                .standalone_tiles
+                .iter()
+                .map(|tile| tile.image_key.clone()),
+        )
+        .chain(snapshot.retained_image_keys.iter().cloned())
+        .collect()
 }
 
 struct PendingMapRenderAtlasImage {
@@ -688,6 +708,15 @@ pub fn set_mir2_map_render_atlas(key: String, width: u32, height: u32, pixels: V
 
 #[wasm_bindgen(js_name = evictMir2MapRenderImages)]
 pub fn evict_mir2_map_render_images(keys_json: String) {
+    queue_mir2_map_render_image_release(keys_json);
+}
+
+#[wasm_bindgen(js_name = releaseMir2MapRenderImages)]
+pub fn release_mir2_map_render_images(keys_json: String) {
+    queue_mir2_map_render_image_release(keys_json);
+}
+
+fn queue_mir2_map_render_image_release(keys_json: String) {
     match serde_json::from_str::<Vec<String>>(&keys_json) {
         Ok(keys) => PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| {
             pending
@@ -898,10 +927,12 @@ fn ingest_pending_map_render_images(
                         RenderAssetUsages::default(),
                     );
                     let handle = images.add(image);
+                    atlas_resource.url_image_keys.remove(&atlas.key);
                     atlas_resource.images.insert(atlas.key, handle);
                 }
                 PendingMapRenderImageOp::Evict(key) => {
                     atlas_resource.images.remove(&key);
+                    atlas_resource.url_image_keys.remove(&key);
                 }
             }
             // State JSON and image bytes travel over separate JS/WASM calls. Track
@@ -938,6 +969,7 @@ const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 /// spawned tiles and returns.
 fn sync_map_render(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     map_state: Res<RuntimeMapRenderState>,
     entity_render_state: Res<RuntimeEntityRenderState>,
     map_camera_offset: Res<RuntimeMapCameraOffset>,
@@ -963,6 +995,12 @@ fn sync_map_render(
             commands.entity(handle.entity).despawn();
         }
         registry.map_render.applied = None;
+        if !atlas_assets.images.is_empty() || !atlas_assets.layouts.is_empty() {
+            atlas_assets.images.clear();
+            atlas_assets.url_image_keys.clear();
+            atlas_assets.layouts.clear();
+            atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
+        }
         presentation_poses.set_applied_map_provenance(None, None);
         return;
     }
@@ -987,7 +1025,12 @@ fn sync_map_render(
         return;
     }
 
-    sync_map_render_atlas_layouts(snapshot, &mut atlas_assets, &mut texture_atlas_layouts);
+    sync_map_render_atlas_layouts(
+        snapshot,
+        &asset_server,
+        &mut atlas_assets,
+        &mut texture_atlas_layouts,
+    );
 
     if registry.map_render.applied.as_ref().is_some_and(|applied| {
         snapshot.revision.is_some()
@@ -1009,10 +1052,32 @@ fn sync_map_render(
     // WITHOUT marking it applied. (This race — not the tile z value — was the real
     // cause of the "band-z map vanishes" bug; z=-50 only ever "worked" when the
     // images happened to be ingested before the first sync.)
-    let atlases_ready = snapshot
-        .atlases
-        .iter()
-        .all(|atlas| atlas_assets.images.contains_key(&atlas.key));
+    let mut failed_url_asset = None;
+    let atlases_ready = snapshot.atlases.iter().all(|atlas| {
+        let Some(image) = atlas_assets.images.get(&atlas.key) else {
+            return false;
+        };
+        if !atlas_assets.url_image_keys.contains(&atlas.key) {
+            return true;
+        }
+        match asset_server.load_state(image.id()) {
+            LoadState::Loaded => asset_server.is_loaded_with_dependencies(image.id()),
+            LoadState::Failed(error) => {
+                failed_url_asset = Some((atlas.key.clone(), error.to_string()));
+                false
+            }
+            _ => false,
+        }
+    });
+    if let Some((key, error)) = failed_url_asset {
+        publish_map_status(
+            "map-render-asset-error",
+            &format!("Failed to load map atlas {key}: {error}"),
+            &snapshot.ack_key,
+            &[key],
+        );
+        return;
+    }
     if !atlases_ready {
         return;
     }
@@ -1024,6 +1089,16 @@ fn sync_map_render(
         .iter()
         .all(|tile| atlas_assets.images.contains_key(&tile.image_key));
     if !standalone_images_ready {
+        return;
+    }
+
+    // Animation-family textures are residency-only: they participate in the
+    // atomic frame handoff but never produce map render entities themselves.
+    let retained_images_ready = snapshot
+        .retained_image_keys
+        .iter()
+        .all(|key| atlas_assets.images.contains_key(key));
+    if !retained_images_ready {
         return;
     }
 
@@ -1190,6 +1265,32 @@ fn sync_map_render(
         }
     }
 
+    // The replacement frame is complete. Release URL/upload handles and atlas
+    // layouts that are no longer referenced only now, after every surviving
+    // sprite has rebound, so async page transitions never expose map holes.
+    let active_atlas_keys: HashSet<String> = snapshot
+        .atlases
+        .iter()
+        .map(|atlas| atlas.key.clone())
+        .collect();
+    let active_image_keys = map_render_active_image_keys(snapshot);
+    let previous_image_count = atlas_assets.images.len();
+    let previous_layout_count = atlas_assets.layouts.len();
+    atlas_assets
+        .images
+        .retain(|key, _| active_image_keys.contains(key));
+    atlas_assets
+        .url_image_keys
+        .retain(|key| active_image_keys.contains(key));
+    atlas_assets
+        .layouts
+        .retain(|key, _| active_atlas_keys.contains(key));
+    if atlas_assets.images.len() != previous_image_count
+        || atlas_assets.layouts.len() != previous_layout_count
+    {
+        atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
+    }
+
     let live_count = registry.map_render.tiles.len();
     let additive_count = snapshot
         .standalone_tiles
@@ -1207,7 +1308,9 @@ fn sync_map_render(
             .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y }),
         snapshot.revision,
     );
-    publish_status(
+    let mut presented_image_keys: Vec<String> = active_image_keys.into_iter().collect();
+    presented_image_keys.sort();
+    publish_map_status(
         "map-render-synced",
         &format!(
             "Applied {} map tiles + {} standalone tiles ({} additive, {} live)",
@@ -1216,6 +1319,8 @@ fn sync_map_render(
             additive_count,
             live_count,
         ),
+        &snapshot.ack_key,
+        &presented_image_keys,
     );
 }
 
@@ -1226,10 +1331,21 @@ fn sync_map_render(
 /// retain/evict pass is needed here.
 fn sync_map_render_atlas_layouts(
     snapshot: &MapRenderState,
+    asset_server: &AssetServer,
     atlas_assets: &mut RuntimeMapRenderAtlases,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
 ) {
     for atlas in &snapshot.atlases {
+        if !atlas_assets.images.contains_key(&atlas.key) {
+            if let Some(image_url) = &atlas.image_url {
+                let asset_path = browser_asset_path(image_url);
+                atlas_assets
+                    .images
+                    .insert(atlas.key.clone(), asset_server.load(asset_path));
+                atlas_assets.url_image_keys.insert(atlas.key.clone());
+                atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
+            }
+        }
         if atlas_assets.layouts.contains_key(&atlas.key) {
             continue;
         }
@@ -1521,6 +1637,7 @@ fn sync_entity_render_layers(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
+    mut local_motion: ResMut<local_motion::LocalMotionPresentationShadow>,
     mut remote_motion: ResMut<remote_motion::RemoteMotionPresentation>,
     mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
     mut registry: ResMut<SceneRegistry>,
@@ -1551,6 +1668,43 @@ fn sync_entity_render_layers(
         // entity transforms/provenance so the renderer never publishes a
         // mixed-center frame; this state is retried on the next Bevy tick.
         return;
+    }
+
+    if local_motion.presentation_enabled()
+        && presentation_poses.camera_source() == presentation_pose::CameraPoseSource::SelfWindow
+    {
+        let self_entity = snapshot.entities.iter().find(|entity| entity.is_self);
+        let active_ts_window = active_self_camera_motion_window(motion_table.now_ms);
+        let ts_allows_command = active_ts_window
+            .map(|window| local_motion.segment_matches_ts_window(window))
+            .unwrap_or(true);
+        let matching_center =
+            entity_center.filter(|center| presentation_poses.applied_map_center() == Some(*center));
+        let takeover_candidate = self_entity
+            .zip(matching_center)
+            .filter(|_| ts_allows_command)
+            .and_then(|(self_entity, center)| {
+                local_motion.candidate_offset_for_applied_center(
+                    &self_entity.object_id,
+                    center.x,
+                    center.y,
+                    motion_table.now_ms,
+                    48.0,
+                    32.0,
+                )
+            });
+
+        if let Some(candidate) = takeover_candidate {
+            let motion = local_motion.presentation_phase().map(|phase| {
+                presentation_pose::EntityPresentationMotion {
+                    frame_index: phase.frame_index,
+                    phase_count: phase.phase_count,
+                    mode: phase.mode,
+                    direction: phase.direction,
+                }
+            });
+            presentation_poses.promote_matching_self_window_to_local_command(candidate, motion);
+        }
     }
 
     let mut alive = HashSet::new();
@@ -1935,6 +2089,27 @@ fn self_camera_screen_offset(
     (-offset, presentation_pose::CameraPoseSource::SelfWindow)
 }
 
+fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTsMotionWindow> {
+    PENDING_SELF_CAMERA_MOTION.with(|cell| {
+        cell.get()
+            .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
+                local_motion::LocalTsMotionWindow {
+                    from_x,
+                    from_y,
+                    to_x,
+                    to_y,
+                    started_ms,
+                    expires_ms,
+                }
+            })
+            .filter(|window| {
+                window.expires_ms > window.started_ms
+                    && now_ms < window.expires_ms
+                    && (window.from_x != window.to_x || window.from_y != window.to_y)
+            })
+    })
+}
+
 fn begin_presentation_pose_frame(
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
@@ -1954,33 +2129,12 @@ fn begin_presentation_pose_frame(
     let mut selected_source = ts_source;
     let mut selected_motion = None;
 
-    if let Some((snapshot, self_entity)) =
-        entity_render_state.snapshot.as_ref().and_then(|snapshot| {
-            snapshot
-                .entities
-                .iter()
-                .find(|entity| entity.is_self)
-                .map(|self_entity| (snapshot, self_entity))
-        })
+    if let Some(self_entity) = entity_render_state
+        .snapshot
+        .as_ref()
+        .and_then(|snapshot| snapshot.entities.iter().find(|entity| entity.is_self))
     {
-        let ts_window = PENDING_SELF_CAMERA_MOTION.with(|cell| {
-            cell.get()
-                .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
-                    local_motion::LocalTsMotionWindow {
-                        from_x,
-                        from_y,
-                        to_x,
-                        to_y,
-                        started_ms,
-                        expires_ms,
-                    }
-                })
-        });
-        let active_ts_window = ts_window.filter(|window| {
-            window.expires_ms > window.started_ms
-                && motion_table.now_ms < window.expires_ms
-                && (window.from_x != window.to_x || window.from_y != window.to_y)
-        });
+        let active_ts_window = active_self_camera_motion_window(motion_table.now_ms);
         let matching_path =
             active_ts_window.is_some_and(|window| local_motion.segment_matches_ts_window(window));
 
@@ -2015,13 +2169,12 @@ fn begin_presentation_pose_frame(
             }
         }
 
-        let entity_center = snapshot
-            .center_x
-            .zip(snapshot.center_y)
-            .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
-        let common_applied_center = presentation_poses
-            .applied_map_center()
-            .filter(|center| Some(*center) == entity_center);
+        // Take over from the center both render layers actually committed, not
+        // from the newly requested authoritative center. ACKs can advance the
+        // snapshot one tile before the map/entity systems apply that center;
+        // comparing requested-to-applied made the first movement phases fall
+        // back to the opposite-signed TypeScript camera window.
+        let common_applied_center = presentation_poses.coherent_applied_center();
         let ts_allows_command = active_ts_window.is_none() || matching_path;
         let takeover_candidate = common_applied_center
             .filter(|_| ts_allows_command)
@@ -2700,6 +2853,38 @@ fn publish_status(phase: &str, message: &str) {
     });
 }
 
+fn publish_map_status(phase: &str, message: &str, ack_key: &str, image_keys: &[String]) {
+    STATUS_SINK.with(|sink| {
+        let callback_ref = sink.borrow();
+        let Some(callback) = callback_ref.as_ref() else {
+            return;
+        };
+
+        let payload = js_sys::Object::new();
+        let _ = js_sys::Reflect::set(
+            &payload,
+            &JsValue::from_str("phase"),
+            &JsValue::from_str(phase),
+        );
+        let _ = js_sys::Reflect::set(
+            &payload,
+            &JsValue::from_str("message"),
+            &JsValue::from_str(message),
+        );
+        let _ = js_sys::Reflect::set(
+            &payload,
+            &JsValue::from_str("ackKey"),
+            &JsValue::from_str(ack_key),
+        );
+        let keys = js_sys::Array::new();
+        for key in image_keys {
+            keys.push(&JsValue::from_str(key));
+        }
+        let _ = js_sys::Reflect::set(&payload, &JsValue::from_str("imageKeys"), &keys);
+        let _ = callback.call1(&JsValue::NULL, &payload.into());
+    });
+}
+
 #[cfg(test)]
 mod entity_atlas_tests {
     use super::*;
@@ -2725,5 +2910,47 @@ mod entity_atlas_tests {
             &existing,
             &[rect("standing"), rect("attack")]
         ));
+    }
+
+    #[test]
+    fn map_render_state_retains_animation_family_keys_without_drawing_them() {
+        let retained: MapRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{"key":"map:atlas","width":512,"height":512}],
+                "standaloneTiles": [{
+                    "key":"effect:draw",
+                    "imageKey":"effect:image",
+                    "left":0,
+                    "top":0,
+                    "width":32,
+                    "height":48,
+                    "z":1
+                }],
+                "retainedImageKeys": ["player:standing", "player:walking"]
+            }"#,
+        )
+        .expect("retainedImageKeys should deserialize");
+        assert_eq!(
+            retained.retained_image_keys,
+            ["player:standing", "player:walking"]
+        );
+        assert_eq!(
+            map_render_active_image_keys(&retained),
+            HashSet::from([
+                "map:atlas".to_string(),
+                "effect:image".to_string(),
+                "player:standing".to_string(),
+                "player:walking".to_string(),
+            ])
+        );
+        assert_eq!(retained.standalone_tiles.len(), 1);
+
+        let defaulted: MapRenderState =
+            serde_json::from_str(r#"{"enabled":true,"stageWidth":1024,"stageHeight":768}"#)
+                .expect("retainedImageKeys should be optional");
+        assert!(defaulted.retained_image_keys.is_empty());
     }
 }

@@ -610,23 +610,34 @@ function buildStateAssertions(state, config, credentialLeakFree) {
       state?.player?.y === config.y,
     transferUsedQaControl: state?.captureControl?.transfer?.mode === "qaControl.transferMap",
     bevyMapRendererPresent: Boolean(mapRenderer),
-    standaloneTileCountPositive: isPositiveNumber(mapRenderer?.standaloneTileCount),
-    additiveStandaloneTileCountPositive: isPositiveNumber(
-      mapRenderer?.standaloneAdditiveTileCount,
-    ),
+    bevyTileCountPositive: isPositiveNumber(mapRenderer?.tileCount),
+    packedAtlasPageCountPositive: isPositiveNumber(mapRenderer?.atlasPageCount),
+    packedPagesUseAssetServerUrl: mapRenderer?.packedPageTransport === "bevy-asset-server-url",
+    standaloneTileCountsValid:
+      isFiniteNumber(mapRenderer?.standaloneTileCount) &&
+      mapRenderer.standaloneTileCount >= 0 &&
+      isFiniteNumber(mapRenderer?.standaloneAdditiveTileCount) &&
+      mapRenderer.standaloneAdditiveTileCount >= 0 &&
+      mapRenderer.standaloneAdditiveTileCount <= mapRenderer.standaloneTileCount,
     standaloneImageSourceCountPositive: isPositiveNumber(mapRenderer?.standaloneImageSourceCount),
     standaloneDecodedImageCountPositive: isPositiveNumber(mapRenderer?.standaloneDecodedImageCount),
     standaloneFailedImageCountZero: mapRenderer?.standaloneFailedImageCount === 0,
-    atlasIncludesStandaloneImages:
+    standaloneUploadsMatchDemand:
       isFiniteNumber(mapRenderer?.atlasImageCount) &&
-      isFiniteNumber(mapRenderer?.atlasPageCount) &&
-      mapRenderer.atlasImageCount > mapRenderer.atlasPageCount,
-    domOnlyContainsAdditiveFallback:
+      (mapRenderer.standaloneTileCount === 0
+        ? mapRenderer.atlasImageCount === 0
+        : mapRenderer.atlasImageCount > 0),
+    domFallbackMatchesUncoveredTiles:
       isFiniteNumber(mapRenderer?.domSpriteCount) &&
+      isFiniteNumber(mapRenderer?.uncoveredFloorCount) &&
+      isFiniteNumber(mapRenderer?.uncoveredObjectCount) &&
+      mapRenderer.domSpriteCount ===
+        mapRenderer.uncoveredFloorCount + mapRenderer.uncoveredObjectCount,
+    additiveFallbackClearedOrNotRequired:
       isFiniteNumber(mapRenderer?.domBlendSpriteCount) &&
-      mapRenderer.domSpriteCount === mapRenderer.domBlendSpriteCount,
-    additiveDomFallbackCleared:
-      mapRenderer?.domSpriteCount === 0 && mapRenderer?.domBlendSpriteCount === 0,
+      (mapRenderer.standaloneAdditiveTileCount === 0
+        ? mapRenderer.domBlendSpriteCount === 0
+        : mapRenderer.domBlendSpriteCount <= mapRenderer.standaloneAdditiveTileCount),
     originalMap404EvidencePresent: Array.isArray(state?.nonFaviconNetwork404s),
     noOriginalMap404s: originalMap404s.length === 0,
     requestedBackendRecorded: runtime?.requestedBackend === config.bevyBackend,
@@ -654,6 +665,10 @@ function buildObservedState(state) {
     standaloneFailedImageCount: mapRenderer?.standaloneFailedImageCount ?? null,
     atlasPageCount: mapRenderer?.atlasPageCount ?? null,
     atlasImageCount: mapRenderer?.atlasImageCount ?? null,
+    tileCount: mapRenderer?.tileCount ?? null,
+    packedPageTransport: mapRenderer?.packedPageTransport ?? null,
+    uncoveredFloorCount: mapRenderer?.uncoveredFloorCount ?? null,
+    uncoveredObjectCount: mapRenderer?.uncoveredObjectCount ?? null,
     domSpriteCount: mapRenderer?.domSpriteCount ?? null,
     domBlendSpriteCount: mapRenderer?.domBlendSpriteCount ?? null,
     originalMap404s: collectOriginalMap404s(state),

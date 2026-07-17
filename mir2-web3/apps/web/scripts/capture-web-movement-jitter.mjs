@@ -69,8 +69,7 @@ const characterName = args.characterName ?? defaultCharacterName();
 const suppressTutorial = args.suppressTutorial !== "false";
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const requestedDebugPort = args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT ?? null;
-let debugPort = await selectChromeDebugPort(requestedDebugPort);
-const chromeChoosesDebugPort = debugPort === 0;
+let debugPort = null;
 const cdpCommandTimeoutMs = numberArg(
   args.cdpCommandTimeoutMs ?? process.env.MIR2_CDP_COMMAND_TIMEOUT_MS,
   15_000,
@@ -202,10 +201,19 @@ const finalSceneReadyTimeoutMs = numberArg(
   args.finalSceneReadyTimeoutMs ?? process.env.MIR2_FINAL_SCENE_READY_TIMEOUT_MS,
   0,
 );
+const initialRendererReadyTimeoutMs = numberArg(
+  args.initialRendererReadyTimeoutMs ?? process.env.MIR2_INITIAL_RENDERER_READY_TIMEOUT_MS,
+  expectBevyWebGl2Renderer || expectBevyWebGpuRenderer ? 30_000 : 0,
+);
 const finalRendererReadyTimeoutMs = numberArg(
   args.finalRendererReadyTimeoutMs ?? process.env.MIR2_FINAL_RENDERER_READY_TIMEOUT_MS,
   expectBevyWebGl2Renderer || expectBevyWebGpuRenderer ? 5_000 : 0,
 );
+const sceneEffectPhaseRequest = normalizeSceneEffectPhaseGate({
+  name: args.sceneEffectName ?? process.env.MIR2_SCENE_EFFECT_NAME,
+  frame: args.sceneEffectFrame ?? process.env.MIR2_SCENE_EFFECT_FRAME,
+  timeoutMs: args.sceneEffectReadyTimeoutMs ?? process.env.MIR2_SCENE_EFFECT_READY_TIMEOUT_MS,
+});
 const settleMs = numberArg(
   args.settleMs ?? process.env.MIR2_MOVEMENT_SETTLE_MS,
   isStrictMovementInteraction(interaction) ? 5200 : 1200,
@@ -240,10 +248,6 @@ const fixedSpriteX = numberArg(args.fixedSpriteX ?? args.x, startX);
 const fixedSpriteY = numberArg(args.fixedSpriteY ?? args.y, startY);
 let targetAlreadyNavigated = false;
 const captureControl = { transfer: null };
-
-if (!chromePath) {
-  throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
-}
 
 class CdpClient {
   constructor(wsUrl) {
@@ -435,8 +439,230 @@ function isMovementWebSocketPayload(payloadData) {
   return /"type":"(?:walk|run|moveTo)"|"packet":"(?:UserLocation|Pushed|UserDash|UserDashFail|UserDashAttack|UserAttackMove|ObjectTurn|ObjectWalk|ObjectRun|ObjectPushed|ObjectDash|ObjectDashFail|ObjectDashAttack|ObjectBackStep|ObjectSitDown)"/.test(payloadData);
 }
 
+async function waitForExpectedBevyRenderer(client, phase, timeoutMs) {
+  if (expectBevyWebGl2Renderer && expectBevyWebGpuRenderer) {
+    throw new Error("Only one expected Bevy renderer backend can be selected per capture.");
+  }
+  const backend = expectBevyWebGpuRenderer
+    ? "webgpu"
+    : expectBevyWebGl2Renderer
+      ? "webgl2"
+      : null;
+  if (!backend || timeoutMs <= 0) return false;
+
+  await waitUntil(
+    client,
+    `
+      window.__mir2BevyEntityRendererDebug?.ready === true
+        && window.__mir2BevyEntityRendererDebug?.enabled === true
+        && window.__mir2BevyEntityRendererDebug?.runtime?.selectedBackend === ${JSON.stringify(backend)}
+        && window.__mir2BevyEntityRendererDebug?.canvasHidden !== true
+        && window.__mir2BevyEntityRendererDebug?.domEntityFallback !== true
+        && window.__mir2BevyEntityRendererDebug?.entityCount > 0
+        && window.__mir2BevyEntityRendererDebug?.layerCount > 0
+    `,
+    `${phase} Bevy ${backend.toUpperCase()} renderer ready`,
+    timeoutMs,
+  );
+  return true;
+}
+
+export function normalizeSceneEffectPhaseGate({ name, frame, timeoutMs } = {}) {
+  const nameProvided = name !== undefined && name !== null;
+  const hasName = name !== undefined && name !== null && String(name).trim() !== "";
+  const hasFrame = frame !== undefined && frame !== null && frame !== "";
+  const hasTimeout = timeoutMs !== undefined && timeoutMs !== null && timeoutMs !== "";
+  if (!hasName && !hasFrame) {
+    if (nameProvided) {
+      throw new Error("sceneEffectName must be a non-empty string.");
+    }
+    if (hasTimeout) {
+      throw new Error("sceneEffectReadyTimeoutMs requires sceneEffectName and sceneEffectFrame.");
+    }
+    return {
+      enabled: false,
+      requested: { name: null, frame: null },
+      timeoutMs: null,
+    };
+  }
+  if (!hasName || !hasFrame) {
+    throw new Error("sceneEffectName and sceneEffectFrame must be provided together.");
+  }
+
+  const requestedFrame = Number(frame);
+  if (!Number.isInteger(requestedFrame) || requestedFrame < 0) {
+    throw new Error(`sceneEffectFrame must be a non-negative integer; received ${JSON.stringify(frame)}.`);
+  }
+  const readyTimeoutMs = hasTimeout ? Number(timeoutMs) : 30_000;
+  if (!Number.isFinite(readyTimeoutMs) || readyTimeoutMs <= 0) {
+    throw new Error(
+      `sceneEffectReadyTimeoutMs must be a positive number; received ${JSON.stringify(timeoutMs)}.`,
+    );
+  }
+  return {
+    enabled: true,
+    requested: { name: String(name).trim(), frame: requestedFrame },
+    timeoutMs: readyTimeoutMs,
+  };
+}
+
+export function sceneEffectFrameFromSrc(src) {
+  if (typeof src !== "string" || !src) return null;
+  let pathname = src;
+  try {
+    pathname = new URL(src, "http://mir2.invalid/").pathname;
+  } catch {
+    // Fall back to parsing the raw attribute value.
+  }
+  let decodedPathname = pathname;
+  try {
+    decodedPathname = decodeURIComponent(pathname);
+  } catch {
+    // A malformed URL cannot match a numeric Crystal frame filename.
+  }
+  const fileName = decodedPathname.split("/").at(-1) ?? "";
+  const match = /^(\d+)(?:\.[^.]+)?$/.exec(fileName);
+  return match ? Number(match[1]) : null;
+}
+
+export function findMatchingSceneEffect(observations, gate) {
+  if (!gate?.enabled) return null;
+  return (Array.isArray(observations) ? observations : []).find((entry) => {
+    const nameMatches =
+      entry?.effectName === gate.requested.name || entry?.effectSource === gate.requested.name;
+    const frame = Number.isInteger(entry?.frame)
+      ? entry.frame
+      : sceneEffectFrameFromSrc(entry?.src);
+    return entry?.visible === true && nameMatches && frame === gate.requested.frame;
+  }) ?? null;
+}
+
+async function readVisibleSceneEffects(client) {
+  return client.evaluate(`
+    (() => {
+      const frameFromSrc = (src) => {
+        if (!src) return null;
+        try {
+          const fileName = decodeURIComponent(new URL(src, location.href).pathname).split("/").at(-1) ?? "";
+          const match = /^(\\d+)(?:\\.[^.]+)?$/.exec(fileName);
+          return match ? Number(match[1]) : null;
+        } catch {
+          return null;
+        }
+      };
+      return [...document.querySelectorAll(".scene-crystal-effect-frame:not(.mask)")].map((node) => {
+        const style = getComputedStyle(node);
+        const bounds = node.getBoundingClientRect();
+        const src = node.currentSrc || node.getAttribute("src") || "";
+        const visible =
+          node.isConnected
+          && node.complete === true
+          && node.naturalWidth > 0
+          && style.display !== "none"
+          && style.visibility !== "hidden"
+          && style.visibility !== "collapse"
+          && Number(style.opacity) > 0
+          && bounds.width > 0
+          && bounds.height > 0
+          && bounds.right > 0
+          && bounds.bottom > 0
+          && bounds.left < innerWidth
+          && bounds.top < innerHeight;
+        return {
+          effectSource: node.getAttribute("data-effect-source"),
+          effectName: node.getAttribute("data-effect-name"),
+          src,
+          frame: frameFromSrc(src),
+          visible,
+          bounds: {
+            left: bounds.left,
+            top: bounds.top,
+            right: bounds.right,
+            bottom: bounds.bottom,
+            width: bounds.width,
+            height: bounds.height,
+          },
+        };
+      });
+    })()
+  `);
+}
+
+export async function waitForSceneEffectPhase(
+  client,
+  gate,
+  { now = Date.now, sleep = delay, pollMs = 16 } = {},
+) {
+  if (!gate?.enabled) {
+    return {
+      enabled: false,
+      requested: gate?.requested ?? { name: null, frame: null },
+      timeoutMs: gate?.timeoutMs ?? null,
+      success: null,
+      waitedMs: 0,
+      matched: null,
+    };
+  }
+
+  const startedAtMs = now();
+  const deadline = startedAtMs + gate.timeoutMs;
+  let lastObserved = [];
+  while (true) {
+    lastObserved = await readVisibleSceneEffects(client);
+    const matched = findMatchingSceneEffect(lastObserved, gate);
+    const observedAtMs = now();
+    if (matched) {
+      const matchedFrame = Number.isInteger(matched.frame)
+        ? matched.frame
+        : sceneEffectFrameFromSrc(matched.src);
+      return {
+        enabled: true,
+        requested: gate.requested,
+        timeoutMs: gate.timeoutMs,
+        success: true,
+        startedAt: new Date(startedAtMs).toISOString(),
+        matchedAt: new Date(observedAtMs).toISOString(),
+        waitedMs: observedAtMs - startedAtMs,
+        matched: {
+          effectSource: matched.effectSource ?? null,
+          effectName: matched.effectName ?? null,
+          src: matched.src ?? null,
+          frame: matchedFrame,
+          bounds: matched.bounds ?? null,
+        },
+      };
+    }
+    if (observedAtMs >= deadline) break;
+    await sleep(Math.min(Math.max(1, pollMs), deadline - observedAtMs));
+  }
+
+  const endedAtMs = now();
+  const evidence = {
+    enabled: true,
+    requested: gate.requested,
+    timeoutMs: gate.timeoutMs,
+    success: false,
+    startedAt: new Date(startedAtMs).toISOString(),
+    matchedAt: null,
+    waitedMs: endedAtMs - startedAtMs,
+    matched: null,
+    lastObserved: lastObserved.slice(0, 20),
+  };
+  const error = new Error(
+    `Timed out waiting for visible scene effect ${gate.requested.name} frame ${gate.requested.frame} after ${evidence.waitedMs}ms.`,
+  );
+  error.sceneEffectPhaseGate = evidence;
+  throw error;
+}
+
 async function main() {
+  if (!chromePath) {
+    throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
+  }
+  debugPort = await selectChromeDebugPort(requestedDebugPort);
   await fs.mkdir(outputDir, { recursive: true });
+  const screenshotPath = path.join(outputDir, `${prefix}.png`);
+  const statePath = path.join(outputDir, `${prefix}.json`);
   if (captureFrameImages) {
     frameImageDir = path.join(outputDir, `${prefix}-frames`);
     await fs.mkdir(frameImageDir, { recursive: true });
@@ -444,6 +670,14 @@ async function main() {
   const chrome = await launchChrome();
   let client;
   let mountedMovementSetup = null;
+  let sceneEffectPhaseGate = {
+    enabled: sceneEffectPhaseRequest.enabled,
+    requested: sceneEffectPhaseRequest.requested,
+    timeoutMs: sceneEffectPhaseRequest.timeoutMs,
+    success: null,
+    waitedMs: 0,
+    matched: null,
+  };
 
   try {
     const wsUrl = await createPageTarget();
@@ -469,7 +703,29 @@ async function main() {
         mountRequiredLevel,
       );
     }
+    await waitForExpectedBevyRenderer(
+      client,
+      "initial",
+      initialRendererReadyTimeoutMs,
+    );
     await delay(preInteractionDelayMs);
+    if (sceneEffectPhaseRequest.enabled) {
+      try {
+        sceneEffectPhaseGate = await waitForSceneEffectPhase(client, sceneEffectPhaseRequest);
+      } catch (error) {
+        sceneEffectPhaseGate = error.sceneEffectPhaseGate ?? sceneEffectPhaseGate;
+        await fs.writeFile(
+          statePath,
+          `${JSON.stringify({
+            ok: false,
+            failure: "sceneEffectPhaseGate",
+            sceneEffectPhaseGate,
+            error: String(error?.message ?? error),
+          }, null, 2)}\n`,
+        );
+        throw error;
+      }
+    }
 
     const start = await readMovementState(client);
     const route = buildRoute(start.player, routeStepMs, routePattern);
@@ -904,21 +1160,7 @@ async function main() {
       );
       settle.finalState = await readMovementState(client);
     }
-    if (finalRendererReadyTimeoutMs > 0 && expectBevyWebGl2Renderer) {
-      await waitUntil(
-        client,
-        `
-          window.__mir2BevyEntityRendererDebug?.ready === true
-            && window.__mir2BevyEntityRendererDebug?.enabled === true
-            && window.__mir2BevyEntityRendererDebug?.runtime?.selectedBackend === "webgl2"
-            && window.__mir2BevyEntityRendererDebug?.canvasHidden !== true
-            && window.__mir2BevyEntityRendererDebug?.domEntityFallback !== true
-            && window.__mir2BevyEntityRendererDebug?.entityCount > 0
-            && window.__mir2BevyEntityRendererDebug?.layerCount > 0
-        `,
-        "final Bevy WebGL2 renderer ready",
-        finalRendererReadyTimeoutMs,
-      );
+    if (await waitForExpectedBevyRenderer(client, "final", finalRendererReadyTimeoutMs)) {
       settle.finalState = await readMovementState(client);
     }
     const finalState = settle.finalState;
@@ -945,8 +1187,6 @@ async function main() {
       localCommandPoseLatencyInput.probe,
       localCommandPoseLatencyMs,
     );
-    const screenshotPath = path.join(outputDir, `${prefix}.png`);
-    const statePath = path.join(outputDir, `${prefix}.json`);
     if (canvasOnlyScreenshot) {
       await client.evaluate(`
         (() => {
@@ -1022,6 +1262,7 @@ async function main() {
       expectRawWebGl2Renderer,
       rawWebGl2Renderer,
       expectBevyWebGl2Renderer,
+      expectBevyWebGpuRenderer,
       bevyEntityRenderer,
       jumps,
       routeSpamWarnings,
@@ -1086,6 +1327,14 @@ async function main() {
         },
       );
     }
+    if (sceneEffectPhaseGate.enabled) {
+      assertions.push({
+        name: "sceneEffectPhaseGateMatched",
+        pass: sceneEffectPhaseGate.success === true && sceneEffectPhaseGate.matched !== null,
+        expected: sceneEffectPhaseGate.requested,
+        observed: sceneEffectPhaseGate.matched,
+      });
+    }
 
     const report = {
       ok: assertions.every((assertion) => assertion.pass),
@@ -1140,7 +1389,9 @@ async function main() {
       holdMs: interaction === "hold" ? holdMs : undefined,
       preHoldMs: interaction === "holdThenSpamClickTarget" ? preHoldMs : undefined,
       preInteractionDelayMs,
+      initialRendererReadyTimeoutMs,
       finalRendererReadyTimeoutMs,
+      sceneEffectPhaseGate,
       settleMs,
       settle,
       pendingPlanAtEnd,
@@ -1231,7 +1482,9 @@ async function main() {
           routePattern: report.routePattern,
           avoidEntityHits: report.avoidEntityHits,
           failOnInteractionPollution: report.failOnInteractionPollution,
+          initialRendererReadyTimeoutMs: report.initialRendererReadyTimeoutMs,
           finalRendererReadyTimeoutMs: report.finalRendererReadyTimeoutMs,
+          sceneEffectPhaseGate: report.sceneEffectPhaseGate,
           frameImageDir: report.frameImageDir,
           frameImageCount: report.frameImageCount,
           packetRuntimeModes: report.packetRuntimeModes,
@@ -2945,6 +3198,30 @@ async function readMovementState(client, { detailed = true } = {}) {
           };
         })
         .slice(0, 128);
+      const mapLights = [...document.querySelectorAll(".viewport-map-light")]
+        .map((node) => {
+          const bounds = node.getBoundingClientRect();
+          return {
+            value: Number(node.getAttribute("data-light-value")),
+            bounds: rect(bounds),
+          };
+        })
+        .slice(0, 256);
+      const sceneEffects = [...document.querySelectorAll(".scene-crystal-effect-frame:not(.mask)")]
+        .map((node) => {
+          const style = getComputedStyle(node);
+          return {
+            key: node.getAttribute("data-effect-key"),
+            source: node.getAttribute("data-effect-source"),
+            name: node.getAttribute("data-effect-name"),
+            blend: node.getAttribute("data-effect-blend"),
+            mixBlendMode: style.mixBlendMode,
+            opacity: style.opacity,
+            src: node.getAttribute("src"),
+            bounds: rect(node.getBoundingClientRect()),
+          };
+        })
+        .slice(0, 256);
       return {
         capturedAt: Date.now(),
         screen: state.screen ?? null,
@@ -2956,6 +3233,7 @@ async function readMovementState(client, { detailed = true } = {}) {
         worldSnapshotRealtimeMode: state.worldSnapshotRealtimeMode ?? packetRuntime?.snapshotMode ?? null,
         packetRuntime,
         bevyRuntime: window.__mir2BevyRuntimeDebug ?? null,
+        bevyMapRenderer: window.__mir2BevyMapRendererDebug ?? null,
         bevyEntityRenderer: window.__mir2BevyEntityRendererDebug ?? null,
         bevyMovementShadow: state.bevyMovementShadow ?? null,
         webgl2EntityRenderer: window.__mir2WebGl2EntityRendererDebug ?? null,
@@ -2970,6 +3248,8 @@ async function readMovementState(client, { detailed = true } = {}) {
         entitySpriteLayers,
         bevyPoseNodes,
         objectLights,
+        mapLights,
+        sceneEffects,
         selfEntity: self
           ? {
               x: self.x,
@@ -3778,6 +4058,7 @@ function buildAssertions({
   expectRawWebGl2Renderer,
   rawWebGl2Renderer,
   expectBevyWebGl2Renderer,
+  expectBevyWebGpuRenderer,
   bevyEntityRenderer,
   jumps,
   routeSpamWarnings,
@@ -3975,6 +4256,20 @@ function buildAssertions({
           bevyEntityRenderer?.entityCount > 0 &&
           bevyEntityRenderer?.layerCount > 0),
       expected: expectBevyWebGl2Renderer,
+      renderer: bevyEntityRenderer ?? null,
+    },
+    {
+      name: "bevyWebGpuRendererDrawsGameplayLayers",
+      pass:
+        !expectBevyWebGpuRenderer ||
+        (bevyEntityRenderer?.ready === true &&
+          bevyEntityRenderer?.enabled === true &&
+          bevyEntityRenderer?.runtime?.selectedBackend === "webgpu" &&
+          bevyEntityRenderer?.canvasHidden !== true &&
+          bevyEntityRenderer?.domEntityFallback !== true &&
+          bevyEntityRenderer?.entityCount > 0 &&
+          bevyEntityRenderer?.layerCount > 0),
+      expected: expectBevyWebGpuRenderer,
       renderer: bevyEntityRenderer ?? null,
     },
     {
@@ -4920,11 +5215,13 @@ function delta(next, previous) {
 
 async function launchChrome() {
   const userDataDir = path.join(os.tmpdir(), `mir2-movement-jitter-${process.pid}-${Date.now()}`);
+  const chromeChoosesDebugPort = debugPort === 0;
   await fs.mkdir(userDataDir, { recursive: true });
   const chrome = spawn(
     chromePath,
     [
       `--remote-debugging-port=${debugPort}`,
+      "--remote-allow-origins=*",
       `--user-data-dir=${userDataDir}`,
       ...(headed ? [] : ["--headless=new"]),
       ...(disableGpu ? ["--disable-gpu"] : ["--ignore-gpu-blocklist", "--enable-webgl"]),
@@ -4948,7 +5245,7 @@ async function launchChrome() {
     chrome.launchError = error;
   });
   try {
-    await waitForChrome(chrome, userDataDir);
+    await waitForChrome(chrome, userDataDir, chromeChoosesDebugPort);
     return chrome;
   } catch (error) {
     await cleanupChrome(chrome, userDataDir);
@@ -4965,7 +5262,7 @@ async function createPageTarget() {
   return target.webSocketDebuggerUrl;
 }
 
-async function waitForChrome(chrome, userDataDir) {
+async function waitForChrome(chrome, userDataDir, chromeChoosesDebugPort) {
   const deadline = Date.now() + 30_000;
   const activePortPath = path.join(userDataDir, "DevToolsActivePort");
   while (Date.now() < deadline) {
@@ -5212,7 +5509,18 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+function isDirectRun() {
+  if (!process.argv[1]) return false;
+  const invokedPath = path.resolve(process.argv[1]);
+  const modulePath = fileURLToPath(import.meta.url);
+  return process.platform === "win32"
+    ? invokedPath.toLowerCase() === modulePath.toLowerCase()
+    : invokedPath === modulePath;
+}
+
+if (isDirectRun()) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

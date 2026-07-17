@@ -99,7 +99,7 @@ export type WorldEntity = {
   movementStartedAt?: number;
   movementUntil?: number;
   movementFrameCount?: number;
-  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
+  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range" | "spell";
   attackStartedAt?: number;
   attackUntil?: number;
   struckStartedAt?: number;
@@ -122,6 +122,19 @@ export type ProjectileState = {
   fromY: number;
   toX: number;
   toY: number;
+  startedAt: number;
+  expiresAt: number;
+};
+
+export type SceneEffectState = {
+  key: string;
+  source: "spell" | "objectSpell" | "map" | "object";
+  spellOrEffect: string | number;
+  objectId?: string;
+  x: number;
+  y: number;
+  direction: number;
+  value: number;
   startedAt: number;
   expiresAt: number;
 };
@@ -411,6 +424,7 @@ export type WorldState = {
   mapTransfers: MapTransferArea[];
   interactionHints: string[];
   projectiles: ProjectileState[];
+  effects: SceneEffectState[];
   damageFloaters: DamageFloater[];
   /**
    * Wall-clock timestamp (ms since epoch) when the snapshot was serialized.
@@ -474,5 +488,6 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   mapTransfers: [],
   interactionHints: [],
   projectiles: [],
+  effects: [],
   damageFloaters: [],
 };

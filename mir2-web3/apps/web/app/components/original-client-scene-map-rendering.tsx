@@ -266,29 +266,51 @@ export function buildStandaloneMapTiles(
   images: MapStandaloneTileImageSource[];
   domFallback: ViewportMapSprites;
   imageKeyBySpriteKey: Map<string, string>;
+  requiredImageKeysBySpriteKey: Map<string, readonly string[]>;
+  requiredImageKeysByTileKey: Map<string, readonly string[]>;
 } {
   const tiles: MapStandaloneTileDraw[] = [];
   const images = new Map<string, MapStandaloneTileImageSource>();
   const domFallbackFloor: ViewportMapSprite[] = [];
   const domFallbackObjects: ViewportMapSprite[] = [];
   const imageKeyBySpriteKey = new Map<string, string>();
+  const requiredImageKeysBySpriteKey = new Map<string, readonly string[]>();
+  const requiredImageKeysByTileKey = new Map<string, readonly string[]>();
+  const addImageSource = (path: string, additive: boolean) => {
+    const rectKey = mapAtlasRectKeyForPath(path);
+    const imageKey = `${additive ? "standalone-additive" : "standalone"}:${rectKey ?? path}`;
+    // Additive blending needs the original dark-matte pixels. Black contributes
+    // zero under SourceAlpha + One; the cleaned DOM asset would attenuate twice.
+    const fetchUrl = additive ? path : mapSpriteRenderPath(path);
+    const alphaKeyMapObject = !additive && mapAtlasPathRequiresAlphaKey(fetchUrl);
+    const existing = images.get(imageKey);
+    if (!existing) {
+      images.set(imageKey, { imageKey, fetchUrl, alphaKeyMapObject });
+    } else if (alphaKeyMapObject && !existing.alphaKeyMapObject) {
+      images.set(imageKey, { ...existing, alphaKeyMapObject: true });
+    }
+    return imageKey;
+  };
   const add = (
     sprite: ViewportMapSprite,
     domFallback: ViewportMapSprite[],
   ) => {
-  // Keep every atlas miss in DOM until the shell confirms the decoded image is
-  // resident in the current Bevy runtime. Additive misses use a dedicated
-  // SourceAlpha + One material once that handoff completes.
+    // Keep every atlas miss in DOM until the shell confirms the decoded image is
+    // resident in the current Bevy runtime. Additive misses use a dedicated
+    // SourceAlpha + One material once that handoff completes.
     domFallback.push(sprite);
     const additive = Boolean(resolvedMapSpriteBlendMode(sprite));
-    const rectKey = mapAtlasRectKeyForPath(sprite.path);
-    const imageKey = `${additive ? "standalone-additive" : "standalone"}:${rectKey ?? sprite.path}`;
-    // Additive blending needs the original dark-matte pixels. Black contributes
-    // zero under SourceAlpha + One; the cleaned DOM asset would attenuate twice.
-    const fetchUrl = additive ? sprite.path : mapSpriteRenderPath(sprite.path);
-    const alphaKeyMapObject = !additive && mapAtlasPathRequiresAlphaKey(fetchUrl);
+    const imageKey = addImageSource(sprite.path, additive);
+    const tileKey = `${additive ? "standalone-additive" : "standalone"}:${sprite.key}`;
+    const familyPaths =
+      additive && sprite.animationFramePaths?.length
+        ? sprite.animationFramePaths
+        : [sprite.path];
+    const requiredImageKeys = Array.from(
+      new Set(familyPaths.map((path) => addImageSource(path, additive))),
+    );
     tiles.push({
-      key: `${additive ? "standalone-additive" : "standalone"}:${sprite.key}`,
+      key: tileKey,
       imageKey,
       left: sprite.left + cameraOffset.x,
       top: sprite.top + cameraOffset.y,
@@ -298,12 +320,8 @@ export function buildStandaloneMapTiles(
       additive: additive || undefined,
     });
     imageKeyBySpriteKey.set(sprite.key, imageKey);
-    const existing = images.get(imageKey);
-    if (!existing) {
-      images.set(imageKey, { imageKey, fetchUrl, alphaKeyMapObject });
-    } else if (alphaKeyMapObject && !existing.alphaKeyMapObject) {
-      images.set(imageKey, { ...existing, alphaKeyMapObject: true });
-    }
+    requiredImageKeysBySpriteKey.set(sprite.key, requiredImageKeys);
+    requiredImageKeysByTileKey.set(tileKey, requiredImageKeys);
   };
   for (const sprite of mapSprites.floor) add(sprite, domFallbackFloor);
   for (const sprite of mapSprites.objects) add(sprite, domFallbackObjects);
@@ -312,6 +330,8 @@ export function buildStandaloneMapTiles(
     images: Array.from(images.values()),
     domFallback: { floor: domFallbackFloor, objects: domFallbackObjects },
     imageKeyBySpriteKey,
+    requiredImageKeysBySpriteKey,
+    requiredImageKeysByTileKey,
   };
 }
 
@@ -430,6 +450,10 @@ function appendViewportMapSprite(
   target.push({
     key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
     path: frame.path,
+    animationFramePaths:
+      sprite.frames.length > 1
+        ? Array.from(new Set(sprite.frames.map((entry) => entry.path)))
+        : undefined,
     kind: sprite.kind,
     blendMode: sprite.blendMode,
     cellX: cell.x,

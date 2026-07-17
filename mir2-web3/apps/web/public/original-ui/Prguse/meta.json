@@ -2551,6 +2551,20 @@
       "maskPath": null
     },
     {
+      "index": 2092,
+      "width": 20,
+      "height": 20,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse/2092.png",
+      "maskPath": null
+    },
+    {
       "index": 2093,
       "width": 20,
       "height": 20,
@@ -2562,6 +2576,34 @@
       "maskWidth": null,
       "maskHeight": null,
       "path": "/original-ui/Prguse/2093.png",
+      "maskPath": null
+    },
+    {
+      "index": 2094,
+      "width": 20,
+      "height": 20,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse/2094.png",
+      "maskPath": null
+    },
+    {
+      "index": 2095,
+      "width": 20,
+      "height": 20,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse/2095.png",
       "maskPath": null
     },
     {

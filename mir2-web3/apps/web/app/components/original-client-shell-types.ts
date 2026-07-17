@@ -106,6 +106,9 @@ export type BevyMapRenderState = {
   enabled: boolean;
   stageWidth: number;
   stageHeight: number;
+  // Exact producer/runtime-generation handshake. Bevy echoes this only after
+  // every URL-backed atlas and standalone upload in this state is committed.
+  ackKey: string;
   // Monotonic producer revision plus the player tile used to build this draw list.
   // These are presentation provenance only; movement authority remains server-side.
   revision?: number;
@@ -141,6 +144,10 @@ export type BevyMapRenderState = {
   // Atlas misses are uploaded as standalone images so Bevy can keep ownership
   // of the world y-sort band instead of handing those cells back to DOM.
   standaloneTiles?: MapStandaloneTileDraw[];
+  // Visible animation-family frames that must stay resident even though only
+  // the current frame appears in standaloneTiles. Rust acknowledges these keys
+  // after an atomic map transaction and never creates draw entities for them.
+  retainedImageKeys?: string[];
   // Sub-tile camera scroll offset for the root-offset model. In the fold-in
   // model (the one Stage 1 uses) this is (0, 0) because the offset is already
   // baked into each tile's left/top.

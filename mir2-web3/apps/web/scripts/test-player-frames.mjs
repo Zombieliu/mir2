@@ -31,6 +31,32 @@ new Function("exports", "module", "require", compiled.outputText)(
 );
 
 const { crystalMountFrameIndex, crystalPlayerAnimationMeta, crystalPlayerFrameIndex } = module.exports;
+const entityFrameModulePath = new URL(
+  "../app/components/original-client-entity-frames.ts",
+  import.meta.url,
+);
+const entityFrameCompiled = ts.transpileModule(readFileSync(entityFrameModulePath, "utf8"), {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    strict: true,
+  },
+  fileName: fileURLToPath(entityFrameModulePath),
+});
+const entityFrameModule = { exports: {} };
+new Function("exports", "module", "require", entityFrameCompiled.outputText)(
+  entityFrameModule.exports,
+  entityFrameModule,
+  () => ({}),
+);
+const { crystalEntityAnimationMeta } = entityFrameModule.exports;
+const frameSetCatalog = JSON.parse(
+  readFileSync(new URL("../public/original-ui/frame-sets.generated.json", import.meta.url), "utf8"),
+);
+const frameSetFor = (libraryKey) => ({
+  count: frameSetCatalog.libraries[libraryKey].actionCount,
+  actions: frameSetCatalog.libraries[libraryKey].actions,
+});
 const right = 2;
 
 assert.deepEqual(crystalPlayerAnimationMeta("running", 0, 0), {
@@ -45,6 +71,15 @@ assert.deepEqual(crystalPlayerAnimationMeta("running", 0, 0), {
 assert.equal(crystalPlayerAnimationMeta("attack1", 0, 0).weaponFrameOffset, 136);
 assert.equal(crystalPlayerAnimationMeta("struck", 0, 0).weaponFrameOffset, 360);
 assert.equal(crystalPlayerAnimationMeta("dead", 0, 0).directionStride, 4);
+assert.deepEqual(crystalPlayerAnimationMeta("spell", 0, 0), {
+  frameBaseOffset: 296,
+  mountFrameBaseOffset: undefined,
+  weaponFrameOffset: 296,
+  frameCount: 6,
+  directionStride: 6,
+  frameIntervalMs: 100,
+  reverse: undefined,
+});
 
 assert.deepEqual(
   Array.from({ length: 8 }, (_, phase) => crystalPlayerFrameIndex("mountWalking", right, phase)),
@@ -79,6 +114,30 @@ assert.deepEqual(
   [392, 393, 394, 395],
 );
 assert.equal(crystalPlayerFrameIndex("dead", right, 0), 395);
+assert.deepEqual(
+  Array.from({ length: 6 }, (_, phase) => crystalPlayerFrameIndex("spell", right, phase)),
+  [308, 309, 310, 311, 312, 313],
+);
+
+assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/000"), "walking"), {
+  frameBaseOffset: 32,
+  frameCount: 6,
+  directionStride: 6,
+  frameIntervalMs: 100,
+  reverse: undefined,
+  blend: undefined,
+});
+assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/003"), "reviving").reverse, true);
+assert.equal(crystalEntityAnimationMeta(frameSetFor("Dragon"), "standing").directionStride, 0);
+assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/182"), "standing").blend, true);
+assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("NPC/155"), "standing").effect, {
+  frameBaseOffset: 2,
+  frameCount: 8,
+  directionStride: 0,
+  frameIntervalMs: 100,
+  reverse: undefined,
+  blend: undefined,
+});
 
 const renderingSource = readFileSync(
   new URL("../app/components/original-client-scene-rendering.tsx", import.meta.url),
@@ -88,10 +147,59 @@ const shellSource = readFileSync(
   new URL("../app/original-client-shell.tsx", import.meta.url),
   "utf8",
 );
+const visualLayersSource = readFileSync(
+  new URL("../app/components/original-client-scene-visual-layers.tsx", import.meta.url),
+  "utf8",
+);
+const globalCssSource = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
 assert.match(
   renderingSource,
   /frameLayersForIndices\(libraries\[mountLibraryKey\], mountFrameIndices, fallbackMountFrameIndex\)/,
   "mounted phases must be included in the preload frame set",
+);
+assert.match(
+  renderingSource,
+  /entity\.kind === "npc" \|\| entity\.kind === "monster" \? 24 : 25/,
+  "nameplates must use Crystal's fixed 48/50px DisplayRectangle centers",
+);
+assert.match(
+  renderingSource,
+  /displayRectangleOffset[\s\S]*\? -18 : -17/,
+  "nameplates must use Crystal's fixed player/NPC vertical formulas",
+);
+assert.match(
+  visualLayersSource,
+  /className="entity-health-bar entity-overlay-health-bar"[\s\S]*\+ 8\}px`[\s\S]*- 64\}px`/,
+  "self HP must remain in the independent overlay at Crystal's X+8, Y-64 anchor",
+);
+assert.match(
+  globalCssSource,
+  /\.entity-nameplate \{[\s\S]*transform: translate\(-50%, 0\);/,
+  "nameplate top coordinates must not receive a second label-height translation",
+);
+assert.match(
+  renderingSource,
+  /crystalEntityAnimationMeta\([\s\S]*bodyLibrary\?\.frameSet/,
+  "NPC and monster actions must prefer their original library FrameSet",
+);
+assert.match(
+  renderingSource,
+  /const stride = Math\.max\(directionStride, 0\)/,
+  "negative Skip must be allowed to produce a zero direction stride",
+);
+assert.match(
+  renderingSource,
+  /animation\.effect\.frameBaseOffset[\s\S]*animation\.effect\.directionStride/,
+  "FrameSet secondary effect tracks must select frames with their own timing and stride",
+);
+const spriteMetaSource = readFileSync(
+  new URL("../lib/original-scene-sprite-meta.ts", import.meta.url),
+  "utf8",
+);
+assert.match(
+  spriteMetaSource,
+  /frame-sets\.generated\.json/,
+  "legacy per-library metadata must be augmented from the generated FrameSet catalog",
 );
 assert.match(
   shellSource,
@@ -107,6 +215,11 @@ assert.match(
   renderingSource,
   /for \(const action of \["attack1", "attack2", "attack3", "attack4"\] as const\)/,
   "all Crystal melee variants must share the stable player atlas source set",
+);
+assert.match(
+  renderingSource,
+  /playerAnimationMetaForAction\(sprite, "spell"\)/,
+  "Crystal Spell frames must already be resident before a cast packet arrives",
 );
 assert.match(
   renderingSource,

@@ -136,8 +136,8 @@ import {
   buildStandaloneMapTiles,
   type MapStandaloneTileImageSource,
 } from "./components/original-client-scene-map-rendering";
-import { type MapAtlasIndex, type MapAtlasPage, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
-import { decodeImagePixelsOffThread, offThreadImageDecodeAvailable } from "../lib/map-atlas-decode";
+import { type MapAtlasIndex, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
+import { isCompleteBevyMapImageFamilyResident } from "../lib/bevy-map-image-residency";
 import {
   decodeStandaloneTilePixels,
   evictStandaloneTilePixels,
@@ -1433,14 +1433,6 @@ export function OriginalClientShell({
       cancelled = true;
     };
   }, [mapAtlasRequested, bevyMapRequested]);
-  // Decoded RGBA bytes for each map-atlas page consumed by the Bevy-native map
-  // renderer, keyed by page key. Decoded ONCE per page via an offscreen canvas
-  // (drawImage -> getImageData); the requested set dedupes in-flight decodes.
-  const decodedMapAtlasPagesRef = useRef<
-    Map<string, { width: number; height: number; pixels: Uint8Array }>
-  >(new Map());
-  const mapAtlasPageDecodeRequestedRef = useRef<Set<string>>(new Set());
-  const [mapAtlasPagesDecodedVersion, setMapAtlasPagesDecodedVersion] = useState(0);
   const decodedStandaloneMapImagesRef = useRef<Map<string, DecodedStandaloneMapImage>>(new Map());
   const standaloneMapImageDecodeRequestedRef = useRef<
     Map<string, StandaloneMapImageDecodeRequest>
@@ -1681,7 +1673,16 @@ export function OriginalClientShell({
     }
     const keepInDom = (sprite: ViewportMapSprites["floor"][number]) => {
       const imageKey = standaloneMapPlan.imageKeyBySpriteKey.get(sprite.key);
-      return !imageKey || !residentStandaloneMapImageKeys.has(imageKey);
+      const requiredImageKeys =
+        standaloneMapPlan.requiredImageKeysBySpriteKey.get(sprite.key) ??
+        (imageKey ? [imageKey] : []);
+      return (
+        requiredImageKeys.length === 0 ||
+        !isCompleteBevyMapImageFamilyResident(
+          residentStandaloneMapImageKeys,
+          requiredImageKeys,
+        )
+      );
     };
     return {
       floor: standaloneMapPlan.domFallback.floor.filter(keepInDom),
@@ -1838,45 +1839,6 @@ export function OriginalClientShell({
       : viewportMapSprites;
   const mapDomBlendSpriteCount = countBlendMapSprites(mapDomSprites);
 
-  // Decode each atlas page referenced by the current tiles to RGBA bytes once.
-  useEffect(() => {
-    if (!bevyMapActive || !mapAtlasIndex) {
-      return;
-    }
-    const neededPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
-    for (const pageKey of neededPageKeys) {
-      if (mapAtlasPageDecodeRequestedRef.current.has(pageKey)) {
-        continue;
-      }
-      const page = mapAtlasIndex.pages.get(pageKey);
-      if (!page) {
-        continue;
-      }
-      mapAtlasPageDecodeRequestedRef.current.add(pageKey);
-      // NOTE: do NOT gate the decode result on an effect-scoped `cancelled` flag.
-      // This effect re-runs on every mapTileDrawList change (i.e. every move /
-      // animation / camera-offset frame); an effect-cleanup `cancelled=true` would
-      // drop the in-flight decode before it commits, while the requestedRef key
-      // blocks any retry — leaving the Bevy map permanently textureless
-      // (atlasImageCount stuck at 0). The page-pixel cache + decodedMapAtlasPagesRef
-      // are idempotent and module/ref-scoped, so committing the result on resolve
-      // is always safe regardless of how many times the effect re-ran.
-      void decodeMapAtlasPagePixels(page)
-        .then((decoded) => {
-          if (!decoded) {
-            // Allow a later retry if the decode failed (e.g. transient load error).
-            mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
-            return;
-          }
-          decodedMapAtlasPagesRef.current.set(pageKey, decoded);
-          setMapAtlasPagesDecodedVersion((version) => version + 1);
-        })
-        .catch(() => {
-          mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
-        });
-    }
-  }, [bevyMapActive, mapAtlasIndex, mapTileDrawList]);
-
   useEffect(() => {
     const generation = standaloneMapDecodeGenerationRef.current + 1;
     standaloneMapDecodeGenerationRef.current = generation;
@@ -2008,31 +1970,41 @@ export function OriginalClientShell({
 
   const bevyMapRenderState = useMemo<BevyMapRenderState>(() => {
     const revision = ++bevyMapRenderRevisionRef.current;
+    const ackKey = `g${bevyMapRuntimeGeneration}:r${revision}`;
     const center = renderPlayer ? { centerX: renderPlayer.x, centerY: renderPlayer.y } : {};
     if (!bevyMapActive || !mapAtlasIndex) {
       return {
         enabled: false,
         stageWidth: ORIGINAL_UI.game.sceneWidth,
         stageHeight: ORIGINAL_UI.game.sceneHeight,
+        ackKey,
         revision,
         ...center,
         atlases: [],
         atlasImages: [],
         tiles: [],
         standaloneTiles: [],
+        retainedImageKeys: [],
         cameraOffset: EMPTY_VIEWPORT_OFFSET,
       };
     }
     const pageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
     const atlases: NonNullable<BevyMapRenderState["atlases"]> = [];
     const atlasImages: NonNullable<BevyMapRenderState["atlasImages"]> = [];
-    const standaloneTiles = standaloneMapTileDrawList.filter((tile) => {
-      const source = standaloneMapImageSourcesByKey.get(tile.imageKey);
-      const decoded = decodedStandaloneMapImagesRef.current.get(tile.imageKey);
+    const imageReady = (imageKey: string) => {
+      const source = standaloneMapImageSourcesByKey.get(imageKey);
+      const decoded = decodedStandaloneMapImagesRef.current.get(imageKey);
       return (
         source !== undefined &&
         decoded?.sourceSignature === standaloneMapImageSourceSignature(source)
       );
+    };
+    const standaloneTiles = standaloneMapTileDrawList.filter((tile) => {
+      const requiredImageKeys =
+        standaloneMapPlan?.requiredImageKeysByTileKey.get(tile.key) ?? [tile.imageKey];
+      // Do not expose a partly decoded animation family to Rust. The current
+      // frame remains in DOM until every family image can be uploaded together.
+      return requiredImageKeys.every(imageReady);
     });
     for (const pageKey of pageKeys) {
       const page = mapAtlasIndex.pages.get(pageKey);
@@ -2052,18 +2024,17 @@ export function OriginalClientShell({
           height: rect.height,
         })),
       });
-      const decoded = decodedMapAtlasPagesRef.current.get(pageKey);
-      if (decoded) {
-        atlasImages.push({
-          key: page.key,
-          width: decoded.width,
-          height: decoded.height,
-          pixels: decoded.pixels,
-        });
-      }
     }
-    const standaloneImageKeys = new Set(standaloneTiles.map((tile) => tile.imageKey));
-    for (const imageKey of standaloneImageKeys) {
+    const retainedImageKeys = Array.from(
+      new Set(
+        standaloneTiles.flatMap((tile) =>
+          Array.from(
+            standaloneMapPlan?.requiredImageKeysByTileKey.get(tile.key) ?? [tile.imageKey],
+          ),
+        ),
+      ),
+    );
+    for (const imageKey of retainedImageKeys) {
       const decoded = decodedStandaloneMapImagesRef.current.get(imageKey);
       if (!decoded) {
         continue;
@@ -2079,6 +2050,7 @@ export function OriginalClientShell({
       enabled: true,
       stageWidth: ORIGINAL_UI.game.sceneWidth,
       stageHeight: ORIGINAL_UI.game.sceneHeight,
+      ackKey,
       revision,
       ...center,
       atlases,
@@ -2086,19 +2058,19 @@ export function OriginalClientShell({
       // EXACTLY buildMapTileDrawList's output (camera offset folded into left/top).
       tiles: mapTileDrawList,
       standaloneTiles,
+      retainedImageKeys,
       // Fold-in model: offset already baked into the tiles, so the root stays put.
       cameraOffset: EMPTY_VIEWPORT_OFFSET,
     };
-    // mapAtlasPagesDecodedVersion forces a rebuild once a page's pixels decode.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bevyMapActive,
     mapAtlasIndex,
     mapTileDrawList,
     standaloneMapTileDrawList,
+    standaloneMapPlan,
     standaloneMapImageSourcesByKey,
-    mapAtlasPagesDecodedVersion,
     standaloneMapImagesDecodedVersion,
+    bevyMapRuntimeGeneration,
     renderPlayer?.x,
     renderPlayer?.y,
   ]);
@@ -2124,6 +2096,9 @@ export function OriginalClientShell({
           const uploadableKeys = new Set(
             (bevyMapRenderState.standaloneTiles ?? []).map((tile) => tile.imageKey),
           );
+          for (const key of bevyMapRenderState.retainedImageKeys ?? []) {
+            uploadableKeys.add(key);
+          }
           const presentedKeys = onBevyMapRenderStateChange(bevyMapRenderState);
           residentKeys = new Set(
             presentedKeys.filter((key) => uploadableKeys.has(key)),
@@ -2376,12 +2351,14 @@ export function OriginalClientShell({
       standaloneTileCount: bevyMapRenderState.standaloneTiles?.length ?? 0,
       standaloneAdditiveTileCount:
         bevyMapRenderState.standaloneTiles?.filter((tile) => tile.additive).length ?? 0,
+      standaloneRetainedImageCount: bevyMapRenderState.retainedImageKeys?.length ?? 0,
       standaloneImageSourceCount: standaloneMapImageSources.length,
       standaloneDecodedImageCount: decodedStandaloneMapImagesRef.current.size,
       standaloneFailedImageCount: failedStandaloneMapImagesRef.current.size,
       atlasPageCount: bevyMapRenderState.atlases?.length ?? 0,
       atlasImageCount: bevyMapRenderState.atlasImages?.length ?? 0,
-      decodedPageCount: decodedMapAtlasPagesRef.current.size,
+      packedPageTransport: "bevy-asset-server-url",
+      ackKey: bevyMapRenderState.ackKey,
       domSpriteCount: mapDomSprites.floor.length + mapDomSprites.objects.length,
       domBlendSpriteCount: mapDomBlendSpriteCount,
       cameraOffset: bevyMapRenderState.cameraOffset ?? null,
@@ -2990,60 +2967,65 @@ export function OriginalClientShell({
               />
             </div>
           ) : null}
-          {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
-          <canvas
-            id="mir2-web3-canvas"
-            className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
-          />
-          <WebGl2MapAtlasLayer
-            enabled={mapGpuActive}
-            stageWidth={ORIGINAL_UI.game.sceneWidth}
-            stageHeight={ORIGINAL_UI.game.sceneHeight}
-            index={mapAtlasIndex}
-            tiles={mapTileDrawList}
-            onDebugChange={handleMapAtlasDebug}
-          />
-          <WebGl2EntityAtlasLayer
-            enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
-            state={entityRenderState}
-            onDebugChange={handleWebGl2EntityAtlasDebug}
-          />
-          {screen === "game" ? (
-            <GameSceneBackdrop
+          <div
+            className={`game-world-composite ${screen === "game" ? "" : "inactive"}`}
+            aria-hidden={screen !== "game"}
+          >
+            {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
+            <canvas
+              id="mir2-web3-canvas"
+              className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
+            />
+            <WebGl2MapAtlasLayer
+              enabled={mapGpuActive}
+              stageWidth={ORIGINAL_UI.game.sceneWidth}
+              stageHeight={ORIGINAL_UI.game.sceneHeight}
+              index={mapAtlasIndex}
+              tiles={mapTileDrawList}
+              onDebugChange={handleMapAtlasDebug}
+            />
+            <WebGl2EntityAtlasLayer
+              enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
+              state={entityRenderState}
+              onDebugChange={handleWebGl2EntityAtlasDebug}
+            />
+            {screen === "game" ? (
+              <GameSceneBackdrop
+                world={world}
+                player={renderPlayer ?? player}
+                floorSprites={mapDomSprites.floor}
+                cameraOffset={effectiveCameraOffset}
+                imperativeCamera={imperativeSceneMotion}
+                registerCameraSurface={sceneMotionDriver.registerCameraSurface}
+              />
+            ) : null}
+
+            {tileHitGrid}
+
+            <OriginalClientSceneVisualLayers
+              screen={screen}
+              t={t}
               world={world}
               player={renderPlayer ?? player}
-              floorSprites={mapDomSprites.floor}
-              cameraOffset={effectiveCameraOffset}
+              selectedEntity={selectedEntity}
+              viewportGroundDrops={viewportGroundDrops}
+              viewportMapSprites={mapDomSprites}
+              viewportEntitySprites={viewportEntitySprites}
+              viewportProjectiles={viewportProjectiles}
+              viewportDepthPlayer={viewportDepthPlayer}
+              playerCameraMotionOffset={effectiveCameraOffset}
+              entityMotionSnapshots={entityMotionSnapshotsRef.current}
+              motionNow={motionNow}
               imperativeCamera={imperativeSceneMotion}
               registerCameraSurface={sceneMotionDriver.registerCameraSurface}
+              registerEntityEl={sceneMotionDriver.registerEntityEl}
+              sceneSpriteFrameIndex={sceneSpriteFrameIndex}
+              useBevyEntityRenderer={hideDomEntitySpritesForBevy}
+              entityKindClassName={entityKindClassName}
+              onPickGroundDrop={onPickGroundDrop}
+              onActivateEntity={onActivateEntity}
             />
-          ) : null}
-
-          {tileHitGrid}
-
-          <OriginalClientSceneVisualLayers
-            screen={screen}
-            t={t}
-            world={world}
-            player={renderPlayer ?? player}
-            selectedEntity={selectedEntity}
-            viewportGroundDrops={viewportGroundDrops}
-            viewportMapSprites={mapDomSprites}
-            viewportEntitySprites={viewportEntitySprites}
-            viewportProjectiles={viewportProjectiles}
-            viewportDepthPlayer={viewportDepthPlayer}
-            playerCameraMotionOffset={effectiveCameraOffset}
-            entityMotionSnapshots={entityMotionSnapshotsRef.current}
-            motionNow={motionNow}
-            imperativeCamera={imperativeSceneMotion}
-            registerCameraSurface={sceneMotionDriver.registerCameraSurface}
-            registerEntityEl={sceneMotionDriver.registerEntityEl}
-            sceneSpriteFrameIndex={sceneSpriteFrameIndex}
-            useBevyEntityRenderer={hideDomEntitySpritesForBevy}
-            entityKindClassName={entityKindClassName}
-            onPickGroundDrop={onPickGroundDrop}
-            onActivateEntity={onActivateEntity}
-          />
+          </div>
           <OriginalClientSceneOverlays
             screen={screen}
             t={t}
@@ -3364,84 +3346,6 @@ function standaloneMapImageSourcesEqual(
       source.alphaKeyMapObject === other.alphaKeyMapObject
     );
   });
-}
-
-// Decoded RGBA bytes for a map-atlas page, cached by image URL so a page is only
-// fetched + read back once across the session even if the renderer toggles.
-const mapAtlasPagePixelCache = new Map<
-  string,
-  Promise<{ width: number; height: number; pixels: Uint8Array } | null>
->();
-
-// Decode a packed map-atlas page PNG to raw RGBA bytes via an offscreen canvas
-// (drawImage -> getImageData), matching set_mir2_map_render_atlas's expectation
-// of width*height*4 bytes. Returns null when running without a DOM or when the
-// image/canvas readback fails (the caller then leaves the page unbound for now).
-function decodeMapAtlasPagePixels(
-  page: MapAtlasPage,
-): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
-  if (typeof document === "undefined") {
-    return Promise.resolve(null);
-  }
-  const cached = mapAtlasPagePixelCache.get(page.imageUrl);
-  if (cached) {
-    return cached;
-  }
-  const promise = new Promise<{ width: number; height: number; pixels: Uint8Array } | null>(
-    (resolve) => {
-      const image = new Image();
-      image.decoding = "async";
-      image.crossOrigin = "anonymous";
-      image.onload = async () => {
-        try {
-          const width = image.naturalWidth || page.width;
-          const height = image.naturalHeight || page.height;
-          if (width <= 0 || height <= 0) {
-            resolve(null);
-            return;
-          }
-          // Read the RGBA back off the main thread when possible. A large atlas page is a
-          // ~16 MB getImageData readback that otherwise blocks ~80 ms — the per-new-page hitch
-          // that shows up as the held-run "奔跑两步一卡" stutter (running outruns the resident
-          // page set; ?perfDiag=1 shows the long-task with every packet handler <=0.3 ms). Falls
-          // through to the main-thread readback below if the worker is unavailable/disabled/fails.
-          if (offThreadImageDecodeAvailable()) {
-            try {
-              const offThread = await decodeImagePixelsOffThread(image, width, height);
-              if (offThread) {
-                resolve(offThread);
-                return;
-              }
-            } catch {
-              // fall through to the main-thread readback
-            }
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const context = canvas.getContext("2d", { willReadFrequently: true });
-          if (!context) {
-            resolve(null);
-            return;
-          }
-          context.drawImage(image, 0, 0, width, height);
-          const imageData = context.getImageData(0, 0, width, height);
-          resolve({ width, height, pixels: new Uint8Array(imageData.data.buffer.slice(0)) });
-        } catch {
-          resolve(null);
-        }
-      };
-      image.onerror = () => resolve(null);
-      image.src = page.imageUrl;
-    },
-  );
-  mapAtlasPagePixelCache.set(page.imageUrl, promise);
-  void promise.then((decoded) => {
-    if (!decoded && mapAtlasPagePixelCache.get(page.imageUrl) === promise) {
-      mapAtlasPagePixelCache.delete(page.imageUrl);
-    }
-  });
-  return promise;
 }
 
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.

@@ -17,6 +17,7 @@ export const CRYSTAL_PLAYER_ACTION_FRAMES = {
   attack3: { start: 232, count: 8, skip: 0, intervalMs: 100 },
   attack4: { start: 416, count: 6, skip: 0, intervalMs: 100 },
   attackRange: { start: 96, count: 8, skip: 0, intervalMs: 100 },
+  spell: { start: 296, count: 6, skip: 0, intervalMs: 100 },
   struck: { start: 360, count: 3, skip: 0, intervalMs: 100 },
   dying: { start: 384, count: 4, skip: 0, intervalMs: 100 },
   dead: { start: 387, count: 1, skip: 3, intervalMs: 1_000 },

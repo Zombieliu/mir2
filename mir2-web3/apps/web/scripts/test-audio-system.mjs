@@ -149,6 +149,7 @@ function loadAudioModule() {
   playedAudios.length = 0;
   const audio = loadAudioModule();
   audio.resetOriginalAudioDiagnosticsForTests();
+  audio.setOriginalAudioSettings({ effectsEnabled: true });
 
   // Fallback: first id is an absent asset, second is present -> the present one plays.
   const missingProbeSoundId = missingIndexedSoundId ?? 999999;

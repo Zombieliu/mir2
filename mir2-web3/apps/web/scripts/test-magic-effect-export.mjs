@@ -1,11 +1,3 @@
-// End-to-end test for the magic/spell effect-atlas pipeline. Proves BOTH producer modes feed the
-// REAL client resolver (lib/crystal-magic-effects.ts loadEffectAssets / resolveSpellEffect) without a
-// real Crystal client and without clobbering committed assets:
-//   • PRIMARY  — assembleMagicEffectsFromMeta: reads the already-extracted /original-ui/<lib>/meta.json
-//     (the full-Crystal R2 release) and emits /original-effects manifest+meta pointing at those frames.
-//   • SECONDARY — runCrystalMagicEffectExport: extracts frames straight from a synthetic Magic*.Lib.
-// Both use REAL frame ranges from SPELL_EFFECTS. Mirrors test-sound-export.mjs / test-audio-system.mjs.
-
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -17,13 +9,18 @@ import ts from "typescript";
 
 import {
   assembleMagicEffectsFromMeta,
+  MAP_EFFECTS,
+  normalizeAdditiveRgba,
+  OBJECT_EFFECTS,
   runCrystalMagicEffectExport,
+  SPELL_EFFECT_ENUM,
   SPELL_EFFECTS,
+  WORLD_SPELL_EFFECTS,
+  validateEffectDefinitions,
 } from "./export-crystal-magic-effects.mjs";
 
 const nodeRequire = createRequire(import.meta.url);
 
-// --- in-memory TS loader (same approach as test-audio-system.mjs) -----------------------------
 function loadTypeScriptModule(url) {
   const source = readFileSync(fileURLToPath(url), "utf8");
   const compiled = ts.transpileModule(source, {
@@ -38,7 +35,6 @@ function loadTypeScriptModule(url) {
 
 const effects = loadTypeScriptModule(new URL("../lib/crystal-magic-effects.ts", import.meta.url));
 
-// fetch stub that serves the assembled /original-effects/* output from a temp dir.
 function effectsFetch(outputDir) {
   return async (url) => {
     const file = path.join(outputDir, String(url).replace(/^\/original-effects\//, ""));
@@ -47,99 +43,131 @@ function effectsFetch(outputDir) {
   };
 }
 
-function specFor(spell) {
-  return SPELL_EFFECTS.find((s) => s.spell === spell);
-}
-function indicesFor(spell) {
-  const s = specFor(spell);
-  return Array.from({ length: s.count }, (_, i) => s.base + i);
+function allRequiredIndices() {
+  const byLibrary = new Map();
+  for (const spec of [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS]) {
+    if (!byLibrary.has(spec.library)) byLibrary.set(spec.library, new Set());
+    for (let value = 0; value < (spec.valueCount ?? 1); value += 1) {
+      for (let direction = 0; direction < (spec.directionCount ?? 1); direction += 1) {
+        const base = spec.base + value * (spec.valueStride ?? 0) + direction * (spec.directionStride ?? 0);
+        for (let frame = 0; frame < spec.count; frame += 1) byLibrary.get(spec.library).add(base + frame);
+      }
+    }
+  }
+  return byLibrary;
 }
 
-// --- synthetic /original-ui/<lib>/meta.json (the R2 array format: frames:[{index,...}]) -------
 function syntheticUiMeta(indices) {
   return {
     count: Math.max(...indices) + 1,
-    frames: indices.map((i) => ({ index: i, width: 4 + (i % 3), height: 5, x: -2, y: -3, path: `/original-ui/lib/${i}.png` })),
+    frames: indices.map((index) => ({ index, width: 4 + (index % 3), height: 5, x: -2, y: -3 })),
   };
 }
 
-// --- synthetic .Lib writer (inverse of crystal-library.mjs parseLibrary, version 2) -----------
 function buildSyntheticLib(frameIndices) {
-  const sorted = [...frameIndices].sort((a, b) => a - b);
+  const sorted = [...frameIndices].sort((left, right) => left - right);
   const count = sorted[sorted.length - 1] + 1;
   const headerSize = 8 + count * 4;
   const offsets = new Array(count).fill(0);
   const blocks = [];
   let cursor = headerSize;
-  const W = 4;
-  const H = 4;
   for (const index of sorted) {
     offsets[index] = cursor;
-    const bgra = Buffer.alloc(W * H * 4);
-    for (let p = 0; p < W * H; p += 1) {
-      bgra[p * 4] = index & 0xff;
-      bgra[p * 4 + 1] = 0x40;
-      bgra[p * 4 + 2] = 0x80;
-      bgra[p * 4 + 3] = 0xff;
+    const bgra = Buffer.alloc(4 * 4 * 4);
+    for (let pixel = 0; pixel < 16; pixel += 1) {
+      bgra[pixel * 4] = index & 0xff;
+      bgra[pixel * 4 + 1] = 0x40;
+      bgra[pixel * 4 + 2] = 0x80;
+      bgra[pixel * 4 + 3] = 0xff;
     }
-    const gz = gzipSync(bgra);
-    const head = Buffer.alloc(17); // 6×i16 (12) + u8 shadow (1) + i32 length (4)
-    let o = 0;
-    head.writeInt16LE(W, o); o += 2;
-    head.writeInt16LE(H, o); o += 2;
-    head.writeInt16LE(-2, o); o += 2;
-    head.writeInt16LE(-3, o); o += 2;
-    head.writeInt16LE(0, o); o += 2;
-    head.writeInt16LE(0, o); o += 2;
-    head.writeUInt8(0, o); o += 1;
-    head.writeInt32LE(gz.length, o); o += 4;
-    blocks.push(Buffer.concat([head, gz]));
-    cursor += head.length + gz.length;
+    const compressed = gzipSync(bgra);
+    const frameHeader = Buffer.alloc(17);
+    let offset = 0;
+    frameHeader.writeInt16LE(4, offset); offset += 2;
+    frameHeader.writeInt16LE(4, offset); offset += 2;
+    frameHeader.writeInt16LE(-2, offset); offset += 2;
+    frameHeader.writeInt16LE(-3, offset); offset += 2;
+    frameHeader.writeInt16LE(0, offset); offset += 2;
+    frameHeader.writeInt16LE(0, offset); offset += 2;
+    frameHeader.writeUInt8(0, offset); offset += 1;
+    frameHeader.writeInt32LE(compressed.length, offset);
+    blocks.push(Buffer.concat([frameHeader, compressed]));
+    cursor += frameHeader.length + compressed.length;
   }
   const header = Buffer.alloc(headerSize);
   header.writeInt32LE(2, 0);
   header.writeInt32LE(count, 4);
-  for (let i = 0; i < count; i += 1) header.writeInt32LE(offsets[i], 8 + i * 4);
+  for (let index = 0; index < count; index += 1) header.writeInt32LE(offsets[index], 8 + index * 4);
   return Buffer.concat([header, ...blocks]);
 }
 
-// =============================================================================================
+function completeMetaFetch() {
+  const metas = Object.fromEntries([...allRequiredIndices()].map(([library, indices]) => [library, syntheticUiMeta([...indices])]));
+  const fetchImpl = async (url) => {
+    const match = String(url).match(/\/original-ui\/([^/]+)\/meta\.json$/);
+    const meta = metas[match?.[1]];
+    return { ok: Boolean(meta), status: meta ? 200 : 404, json: async () => meta ?? {} };
+  };
+  return { metas, fetchImpl };
+}
+
 async function testAssembleMode() {
   const root = mkdtempSync(path.join(tmpdir(), "mir2-fx-assemble-"));
   const outputDir = path.join(root, "original-effects");
-
-  // The R2 source meta for the three effect libs (real frame ranges from SPELL_EFFECTS).
-  const uiMetas = {
-    Magic: syntheticUiMeta(indicesFor("FireBall")), // 0..9
-    Magic2: syntheticUiMeta(indicesFor("ThunderBolt")), // 20..22
-    Magic3: syntheticUiMeta(indicesFor("MagicBooster")), // 80..88
-  };
-  const fetchImpl = async (url) => {
-    const m = String(url).match(/\/original-ui\/(Magic\d?)\/meta\.json$/);
-    return { ok: true, status: 200, json: async () => uiMetas[m?.[1]] ?? { frames: [] } };
-  };
-
+  const { fetchImpl } = completeMetaFetch();
   const summary = await assembleMagicEffectsFromMeta({ assetBaseUrl: "https://r2.example/v/x", outputDir, fetchImpl });
-  assert.deepEqual(summary.available, ["Magic", "Magic2", "Magic3"], "assembled all three libs");
+  assert.deepEqual(summary.available, ["Effect", "Magic", "Magic2", "Magic3"]);
 
-  const manifest = JSON.parse(readFileSync(path.join(outputDir, "effects.generated.json"), "utf8"));
-  assert.equal(manifest.mode, "assemble-from-r2-meta");
-  assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length, "all spells in manifest");
+  const manifestPath = path.join(outputDir, "effects.generated.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  assert.equal(manifest.schemaVersion, 2);
+  assert.equal(manifest.generatedAt, null, "manifest has no clock-dependent data");
+  assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length);
+  const trapWorldSpell = manifest.ground_effects.find(
+    (entry) => entry.spell === "TrapHexagon" && entry.provenance.source.includes("SpellObject.cs"),
+  );
+  assert.deepEqual(
+    { base: trapWorldSpell.base, count: trapWorldSpell.count, interval: trapWorldSpell.interval },
+    { base: 1390, count: 10, interval: 100 },
+  );
+  assert.equal(trapWorldSpell.repeat, true);
+  assert.deepEqual(manifest.spell_effect_enum, SPELL_EFFECT_ENUM.map((entry) => entry.name), "legacy enum array remains compatible");
+  assert.deepEqual(manifest.spell_effect_map, SPELL_EFFECT_ENUM, "explicit numeric map is authoritative");
+  assert.equal(manifest.map_effects.find((entry) => entry.effect === "Mine").effectId, 12);
+  assert.equal(manifest.map_effects.find((entry) => entry.effect === "Mine").valueCount, 8);
+  assert.deepEqual(manifest.map_effects.find((entry) => entry.effect === "Mine").valueRanges[7], { value: 7, base: 56, end: 58 });
+
+  const haste = manifest.spell_effects.find((entry) => entry.spell === "Haste");
+  assert.equal(haste.spellId, 93);
+  assert.equal(haste.directionCount, 8);
+  assert.equal(haste.directionStride, 10);
+  assert.deepEqual(haste.directionRanges[7], { direction: 7, base: 2210, end: 2215 });
+  assert.equal(haste.light, 6);
+  assert.deepEqual(haste.provenance, {
+    source: "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+    symbol: "Spell.Haste",
+  });
 
   const magicMeta = JSON.parse(readFileSync(path.join(outputDir, "Magic", "meta.json"), "utf8"));
-  assert.equal(magicMeta.frames["0"].path, "/original-ui/Magic/0.png", "frame path points at the R2-backfilled UI frame");
-  assert.equal(magicMeta.frames["0"].width, 4, "geometry carried from source meta");
-  assert.equal(magicMeta.frames["0"].x, -2, "offset carried from source meta");
+  assert.equal(magicMeta.frames["0"].path, "/original-ui/Magic/0.png");
+  assert.equal(magicMeta.frames["0"].width, 4);
+  assert.equal(magicMeta.frames["0"].x, -2);
 
   const assets = await effects.loadEffectAssets(effectsFetch(outputDir));
-  const fb = effects.resolveSpellEffect(assets, "FireBall");
-  assert.ok(fb && fb.frames.length === 10, "FireBall resolves to 10 real frames");
-  assert.equal(fb.frames[0].path, "/original-ui/Magic/0.png", "resolved frame reuses the R2 UI path");
-  assert.ok(effects.resolveSpellEffect(assets, "ThunderBolt").frames.length === 3, "ThunderBolt (Magic2) resolves");
-  assert.ok(effects.resolveSpellEffect(assets, "MagicBooster").frames.length === 9, "MagicBooster (Magic3) resolves");
-  // a spell whose frames weren't in the (partial) synthetic source meta → null → procedural fallback.
-  assert.equal(effects.resolveSpellEffect(assets, "IceStorm"), null, "un-sourced spell falls back to null");
+  assert.equal(effects.resolveSpellEffect(assets, "FireBall").frames.length, 10);
+  assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").frames[0].path, "/original-ui/Magic/1390.png");
+  assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").repeat, true);
+  assert.equal(effects.resolveSpellEffect(assets, "Haste", 7).frames[0].path, "/original-ui/Magic2/2210.png");
+  assert.equal(effects.resolveSpellEffect(assets, "Haste", 8), null);
+  assert.equal(effects.effectNameForNumber(assets, 12), "Mine");
+  const mine = effects.resolveMapEffectByNumber(assets, 12, 7);
+  assert.equal(mine.frames[0].path, "/original-ui/Effect/56.png");
+  assert.equal(mine.light, 0);
+  assert.equal(effects.resolveMapEffectByNumber(assets, 12, 8), null);
 
+  const firstManifest = readFileSync(manifestPath, "utf8");
+  await assembleMagicEffectsFromMeta({ assetBaseUrl: "https://r2.example/v/x", outputDir, fetchImpl });
+  assert.equal(readFileSync(manifestPath, "utf8"), firstManifest, "repeated export is byte deterministic");
   rmSync(root, { recursive: true, force: true });
 }
 
@@ -149,31 +177,42 @@ async function testLibMode() {
   const outputDir = path.join(root, "original-effects");
   const fs = nodeRequire("node:fs");
   fs.mkdirSync(dataDir, { recursive: true });
-  fs.writeFileSync(path.join(dataDir, "Magic.Lib"), buildSyntheticLib(indicesFor("FireBall")));
-  fs.writeFileSync(path.join(dataDir, "Magic2.Lib"), buildSyntheticLib(indicesFor("ThunderBolt")));
-  fs.writeFileSync(path.join(dataDir, "Magic3.Lib"), buildSyntheticLib(indicesFor("MagicBooster")));
+  for (const [library, indices] of allRequiredIndices()) fs.writeFileSync(path.join(dataDir, `${library}.Lib`), buildSyntheticLib(indices));
 
   const summary = await runCrystalMagicEffectExport({ dataDir, outputDir, deflateLevel: 0 });
-  assert.deepEqual(summary.available, ["Magic", "Magic2", "Magic3"]);
-  assert.ok(existsSync(path.join(outputDir, "Magic", "0.png")), "frame PNG written");
+  assert.deepEqual(summary.available, ["Effect", "Magic", "Magic2", "Magic3"]);
   const png = readFileSync(path.join(outputDir, "Magic", "0.png"));
-  assert.ok(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])), "valid PNG");
-
+  assert.ok(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])));
   const assets = await effects.loadEffectAssets(effectsFetch(outputDir));
-  const fb = effects.resolveSpellEffect(assets, "FireBall");
-  assert.ok(fb && fb.frames.length === 10, "FireBall resolves from extracted .Lib frames");
-  assert.equal(fb.frames[0].path, "/original-effects/Magic/0.png", "extracted-mode frame path is self-hosted");
-
+  assert.equal(effects.resolveSpellEffect(assets, "FireBall").frames[0].path, "/original-effects/Magic/0.png");
   rmSync(root, { recursive: true, force: true });
 }
 
-async function main() {
-  await testAssembleMode();
-  await testLibMode();
-  console.log(`magic effect export e2e tests passed (${SPELL_EFFECTS.length} spells; assemble-from-R2-meta + extract-from-.Lib both feed resolveSpellEffect)`);
+async function testStrictValidation() {
+  validateEffectDefinitions();
+  const root = mkdtempSync(path.join(tmpdir(), "mir2-fx-invalid-"));
+  const { metas, fetchImpl } = completeMetaFetch();
+  metas.Magic.frames = metas.Magic.frames.filter((frame) => frame.index !== 0);
+  await assert.rejects(
+    assembleMagicEffectsFromMeta({ assetBaseUrl: "https://r2.example/v/x", outputDir: root, fetchImpl }),
+    /Magic is missing 1 required frame\(s\): 0/,
+  );
+  rmSync(root, { recursive: true, force: true });
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+function testAdditiveAlphaNormalization() {
+  assert.deepEqual(
+    [...normalizeAdditiveRgba(Uint8Array.from([64, 128, 32, 255, 0, 0, 0, 255]))],
+    [128, 255, 64, 128, 0, 0, 0, 0],
+  );
+}
+
+async function main() {
+  testAdditiveAlphaNormalization();
+  await testAssembleMode();
+  await testLibMode();
+  await testStrictValidation();
+  console.log(`magic effect export e2e tests passed (${SPELL_EFFECTS.length} spells; deterministic metadata + directional/map numeric resolution + strict validation)`);
+}
+
+main().catch((error) => { console.error(error); process.exitCode = 1; });

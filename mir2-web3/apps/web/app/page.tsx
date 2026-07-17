@@ -37,7 +37,12 @@ import {
   downloadSnapshot,
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
-import { createSnapshotEmitter, createWorldStore, useWorldSelector } from "../lib/world-model";
+import {
+  createSnapshotEmitter,
+  createWorldStore,
+  resetWorldPopulationForStartGame,
+  useWorldSelector,
+} from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
 import {
   createBevyMovementShadowBridge,
@@ -121,6 +126,13 @@ import {
   type CrystalNpcSpriteEntry,
 } from "../lib/generated/crystal-actor-sprite-data";
 import {
+  reconcileBevyMapImageResidency,
+  shouldUploadBevyMapImage,
+} from "../lib/bevy-map-image-residency";
+import crystalFrameSetCatalog from "../public/original-ui/frame-sets.generated.json";
+import type { OriginalSceneFrameSet } from "../lib/original-scene-sprite-meta";
+import { crystalFrameSetActionForState } from "./components/original-client-entity-frames";
+import {
   CRYSTAL_CORRECTION_BLOCK_MS,
   CRYSTAL_MOVE_DELAY_MS,
   CRYSTAL_RUN_PRIME_MS,
@@ -170,6 +182,8 @@ const EMPTY_WINDOW_LIST: never[] = [];
 type RuntimeStatus = {
   phase: string;
   message: string;
+  ackKey?: string;
+  imageKeys?: string[];
 };
 
 type RuntimeModule = {
@@ -181,6 +195,7 @@ type RuntimeModule = {
   setMir2EntityRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
   setMir2MapRenderState?: (snapshotJson: string) => void;
   setMir2MapRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
+  releaseMir2MapRenderImages?: (keysJson: string) => void;
   evictMir2MapRenderImages?: (keysJson: string) => void;
   setMir2MapCameraOffset?: (x: number, y: number) => void;
   setMir2SelfCameraMotion?: (
@@ -539,7 +554,7 @@ type WorldEntity = {
   movementStartedAt?: number;
   movementUntil?: number;
   movementFrameCount?: number;
-  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
+  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range" | "spell";
   attackStartedAt?: number;
   attackUntil?: number;
   struckStartedAt?: number;
@@ -573,6 +588,21 @@ type ProjectileState = {
   startedAt: number;
   expiresAt: number;
 };
+
+type SceneEffectState = {
+  key: string;
+  source: "spell" | "objectSpell" | "map" | "object";
+  spellOrEffect: string | number;
+  objectId?: string;
+  x: number;
+  y: number;
+  direction: number;
+  value: number;
+  startedAt: number;
+  expiresAt: number;
+};
+
+let sceneEffectSequence = 0;
 
 // Floating combat number over a struck object (Crystal `DamageIndicator`). Structurally
 // matches `DisplayDamageFloater` so `WorldState` stays assignable to `DisplayWorld`.
@@ -778,6 +808,7 @@ type WorldState = {
   mapTransfers: MapTransferArea[];
   interactionHints: string[];
   projectiles: ProjectileState[];
+  effects: SceneEffectState[];
   damageFloaters: DamageFloater[];
 };
 
@@ -923,6 +954,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   mapTransfers: [],
   interactionHints: [],
   projectiles: [],
+  effects: [],
   damageFloaters: [],
 };
 
@@ -1697,6 +1729,7 @@ export default function HomePage() {
   const lastBevyEntityRenderStateJsonRef = useRef<string | null>(null);
   const uploadedBevyMapAtlasKeysRef = useRef<Set<string>>(new Set());
   const presentedBevyMapImageKeysRef = useRef<Set<string>>(new Set());
+  const pendingBevyMapAckKeyRef = useRef<string | null>(null);
   const lastBevyMapRenderStateJsonRef = useRef<string | null>(null);
   const lastBevyMapCameraOffsetRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -1717,26 +1750,28 @@ export default function HomePage() {
   const resetBevyMapImageResidency = useCallback(() => {
     uploadedBevyMapAtlasKeysRef.current.clear();
     presentedBevyMapImageKeysRef.current = new Set();
+    pendingBevyMapAckKeyRef.current = null;
     setBevyMapImageResidencyVersion((version) => version + 1);
   }, []);
   const handleBevyRuntimeStatus = useCallback((status: RuntimeStatus) => {
     setRuntimePhase(status.phase);
     setRuntimeMessage(status.message);
-    if (status.phase !== "map-render-synced") {
+    if (
+      status.phase !== "map-render-synced" ||
+      !status.ackKey ||
+      status.ackKey !== pendingBevyMapAckKeyRef.current ||
+      !Array.isArray(status.imageKeys)
+    ) {
       return;
     }
 
-    const presented = presentedBevyMapImageKeysRef.current;
-    let next: Set<string> | null = null;
-    for (const key of uploadedBevyMapAtlasKeysRef.current) {
-      if (presented.has(key)) {
-        continue;
-      }
-      next ??= new Set(presented);
-      next.add(key);
-    }
-    if (next) {
-      presentedBevyMapImageKeysRef.current = next;
+    const residency = reconcileBevyMapImageResidency(
+      uploadedBevyMapAtlasKeysRef.current,
+      presentedBevyMapImageKeysRef.current,
+      status.imageKeys,
+    );
+    if (residency.presentedChanged) {
+      presentedBevyMapImageKeysRef.current = residency.presented;
       setBevyMapImageResidencyVersion((version) => version + 1);
     }
   }, []);
@@ -2239,7 +2274,7 @@ export default function HomePage() {
         if (!atlas.pixels) {
           continue;
         }
-        if (uploadedBevyMapAtlasKeysRef.current.has(atlas.key)) {
+        if (!shouldUploadBevyMapImage(uploadedBevyMapAtlasKeysRef.current, atlas.key)) {
           continue;
         }
         runtime.setMir2MapRenderAtlas(atlas.key, atlas.width, atlas.height, atlas.pixels);
@@ -2262,6 +2297,7 @@ export default function HomePage() {
       const { atlasImages: _atlasImages, cameraOffset: _cameraOffset, ...serializableState } = state;
       const serializableStateJson = JSON.stringify(serializableState);
       if (serializableStateJson !== lastBevyMapRenderStateJsonRef.current) {
+        pendingBevyMapAckKeyRef.current = state.ackKey;
         runtime.setMir2MapRenderState(serializableStateJson);
         lastBevyMapRenderStateJsonRef.current = serializableStateJson;
       }
@@ -2269,6 +2305,9 @@ export default function HomePage() {
       const standaloneImageKeys = new Set(
         (state.standaloneTiles ?? []).map((tile) => tile.imageKey),
       );
+      for (const key of state.retainedImageKeys ?? []) {
+        standaloneImageKeys.add(key);
+      }
       return Array.from(standaloneImageKeys).filter((key) =>
         presentedBevyMapImageKeysRef.current.has(key),
       );
@@ -2292,7 +2331,8 @@ export default function HomePage() {
       setBevyMapImageResidencyVersion((version) => version + 1);
     }
     if (bevyRuntimeStarted) {
-      runtimeRef.current?.evictMir2MapRenderImages?.(JSON.stringify(keys));
+      const runtime = runtimeRef.current;
+      (runtime?.releaseMir2MapRenderImages ?? runtime?.evictMir2MapRenderImages)?.(JSON.stringify(keys));
     }
   }, [bevyRuntimeStarted, bevyRuntimeGeneration]);
 
@@ -7658,6 +7698,11 @@ export default function HomePage() {
             ),
             "system",
           );
+        } else {
+          // StartGame begins a new authoritative object population even when
+          // the pre-auth snapshot and character map are both map 0.
+          packetRuntimeObjectTombstonesRef.current.clear();
+          updateWorld(resetWorldPopulationForStartGame);
         }
         break;
       case "Rankings":
@@ -7687,6 +7732,7 @@ export default function HomePage() {
             groundDrops: mapChanged ? [] : current.groundDrops,
             mineNodes: mapChanged ? [] : current.mineNodes,
             projectiles: mapChanged ? [] : current.projectiles,
+            effects: mapChanged ? [] : current.effects,
             damageFloaters: mapChanged ? [] : current.damageFloaters,
             sceneView: mapChanged ? null : current.sceneView,
             terrainPatches: mapChanged ? [] : current.terrainPatches,
@@ -8032,18 +8078,25 @@ export default function HomePage() {
         applyMagicLeveledPacket(payload);
         break;
       case "ObjectSpell":
+        // ObjectSpell is a world object in Crystal (for example the permanent
+        // TrapHexagon safe-zone border). It loops until ObjectRemove/ObjectHide,
+        // unlike an ObjectMagic cast animation which is intentionally transient.
+        enqueueSceneEffect(payload, "objectSpell");
+        break;
       case "ObjectMagic":
         // Stage-2: markWorldEntityMagic's single updater already applies the location patch
         // (x/y/direction) alongside the cast/range-attack fields, so the prior separate
         // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
         // spawnRangeProjectile stays as-is (it adds the projectile + caster attack pose).
         markWorldEntityMagic(payload);
+        enqueueSceneEffect(payload, "spell");
         if (stringifyId(payload.targetId) !== "0") {
           spawnRangeProjectile(payload);
           restoreObjectSelection(stringifyId(payload.targetId));
         }
         break;
       case "MapEffect":
+        enqueueSceneEffect(payload, "map");
         appendLog(
           t("ui.mapEffect", [String(numberOrZero(payload.effect))], `Map effect ${numberOrZero(payload.effect)}`),
           "system",
@@ -9237,7 +9290,7 @@ export default function HomePage() {
         break;
       }
       case "ObjectEffect":
-        // One-shot visual effect on an object; keep selection sane.
+        enqueueSceneEffect(payload, "object");
         restoreObjectSelection(stringifyId(payload.objectId));
         break;
 
@@ -9334,6 +9387,7 @@ export default function HomePage() {
             entities: mapChanged && movedSelf ? [movedSelf] : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
             projectiles: mapChanged ? [] : current.projectiles,
+            effects: mapChanged ? [] : current.effects,
             damageFloaters: mapChanged ? [] : current.damageFloaters,
             sceneView: mapChanged ? null : current.sceneView,
             terrainPatches: mapChanged ? [] : current.terrainPatches,
@@ -10233,6 +10287,7 @@ export default function HomePage() {
         activeNpcDialog: current.activeNpcDialog?.npcObjectId === objectId ? null : current.activeNpcDialog,
         entities: current.entities.filter((entity) => entity.objectId !== objectId),
         groundDrops: current.groundDrops.filter((drop) => drop.objectId !== objectId),
+        effects: current.effects.filter((effect) => effect.objectId !== objectId),
       };
       worldRef.current = nextWorld;
       return nextWorld;
@@ -10320,9 +10375,9 @@ export default function HomePage() {
         x: typeof location?.x === "number" ? location.x : entity.x,
         y: typeof location?.y === "number" ? location.y : entity.y,
         direction: stringOrNull(payload.direction) ?? entity.direction,
-        attackAnimation: "range",
+        attackAnimation: "spell",
         attackStartedAt: now,
-        attackUntil: now + crystalAttackActionDurationMs(entity, "range"),
+        attackUntil: now + crystalAttackActionDurationMs(entity, "spell"),
       })),
     }));
   }
@@ -10340,9 +10395,9 @@ export default function HomePage() {
         ...current,
         entities: patchEntityInList(current.entities, playerObjectId, (entity) => ({
           ...entity,
-          attackAnimation: "range",
+          attackAnimation: "spell",
           attackStartedAt: now,
-          attackUntil: now + crystalAttackActionDurationMs(entity, "range"),
+          attackUntil: now + crystalAttackActionDurationMs(entity, "spell"),
         })),
       };
     });
@@ -10525,6 +10580,74 @@ export default function HomePage() {
 
   }
 
+  function enqueueSceneEffect(
+    payload: Record<string, unknown>,
+    source: SceneEffectState["source"],
+  ) {
+    const isWorldSpell = source === "objectSpell";
+    const rawId = source === "spell" || isWorldSpell
+      ? payload.spell ?? payload.magic
+      : payload.effect;
+    if (typeof rawId !== "string" && typeof rawId !== "number") return;
+
+    const now = Date.now();
+    const delayMs = Math.max(
+      0,
+      numberOrUndefined(payload.delayTime ?? payload.delay_time) ?? 0,
+    );
+    const explicitTimeMs = Math.max(0, numberOrUndefined(payload.time) ?? 0);
+    const location = payload.location as { x?: number; y?: number } | undefined;
+    const objectId = stringifyId(payload.objectId ?? payload.sourceId);
+    const directionValue = payload.direction;
+    const direction =
+      typeof directionValue === "number"
+        ? Math.max(0, Math.trunc(directionValue)) % 8
+        : Math.max(0, CRYSTAL_MOVEMENT_DIRECTIONS.indexOf(String(directionValue)));
+
+    updateWorld((current) => {
+      const anchor = objectId !== "0"
+        ? current.entities.find((entity) => entity.objectId === objectId)
+        : undefined;
+      const targetId = stringifyId(payload.targetId ?? payload.destinationId);
+      const target = targetId !== "0"
+        ? current.entities.find((entity) => entity.objectId === targetId)
+        : undefined;
+      const x = numberOrUndefined(location?.x) ?? anchor?.x ?? target?.x;
+      const y = numberOrUndefined(location?.y) ?? anchor?.y ?? target?.y;
+      if (x === undefined || y === undefined) return current;
+
+      sceneEffectSequence += 1;
+      const startedAt = now + delayMs;
+      const lifetimeMs = explicitTimeMs > 0 ? explicitTimeMs : 5_000;
+      const effectKey = isWorldSpell && objectId !== "0"
+        ? `crystal-world-spell:${objectId}`
+        : `crystal-fx:${source}:${sceneEffectSequence}:${now}`;
+      const effect: SceneEffectState = {
+        key: effectKey,
+        source,
+        spellOrEffect: rawId,
+        objectId: source !== "map" && objectId !== "0" ? objectId : undefined,
+        x,
+        y,
+        direction,
+        value: Math.max(0, Math.trunc(numberOrUndefined(payload.value ?? payload.param) ?? 0)),
+        startedAt,
+        expiresAt: isWorldSpell
+          ? Number.MAX_SAFE_INTEGER
+          : startedAt + Math.min(Math.max(lifetimeMs, 1), 30_000),
+      };
+      return {
+        ...current,
+        effects: [
+          ...current.effects
+            .filter((entry) => entry.expiresAt > now && entry.key !== effectKey)
+            .slice(-95),
+          effect,
+        ],
+      };
+    });
+  }
+
   function markWorldEntityDead(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
@@ -10571,7 +10694,7 @@ export default function HomePage() {
         dieStartedAt: undefined,
         dieUntil: undefined,
         reviveStartedAt: now,
-        reviveUntil: now + crystalDeathActionDurationMs(entity),
+        reviveUntil: now + crystalReviveActionDurationMs(entity),
       })),
     }));
   }
@@ -10724,7 +10847,7 @@ export default function HomePage() {
             dieStartedAt: died && !entity.dead ? now : entity.dieStartedAt,
             dieUntil: died && !entity.dead ? now + crystalDeathActionDurationMs(entity) : entity.dieUntil,
             reviveStartedAt: revived ? now : entity.reviveStartedAt,
-            reviveUntil: revived ? now + 420 : entity.reviveUntil,
+            reviveUntil: revived ? now + crystalReviveActionDurationMs(entity) : entity.reviveUntil,
           };
         }),
       };
@@ -11179,6 +11302,7 @@ export default function HomePage() {
         mapTransfers,
         interactionHints: snapshot.interactionHints,
         projectiles: current.projectiles.filter((projectile) => projectile.expiresAt > currentTime),
+        effects: current.effects.filter((effect) => effect.expiresAt > currentTime),
         damageFloaters: current.damageFloaters.filter((floater) => floater.expiresAt > currentTime),
       };
       followUpEntities = mergedEntitiesForWorld;
@@ -12848,12 +12972,13 @@ function withPacketMovementAnimation(
   }
 
   const mode = animation === "running" ? "run" : "walk";
-  const movementFrameCount = crystalEntityMovementFrameCount(nextEntity, mode);
+  const movementProfile = crystalEntityMovementAnimationProfile(nextEntity, mode);
+  const movementFrameCount = movementProfile.frameCount;
   return {
     ...nextEntity,
     movementAnimation: animation,
     movementStartedAt: now,
-    movementUntil: now + movementFrameCount * CRYSTAL_MOVE_FRAME_INTERVAL_MS,
+    movementUntil: now + movementFrameCount * movementProfile.frameIntervalMs,
     movementFrameCount,
   };
 }
@@ -13720,6 +13845,13 @@ function crystalAttackActionDurationMs(
   entity: WorldEntity,
   animation: NonNullable<WorldEntity["attackAnimation"]>,
 ) {
+  const frameSetAction = crystalFrameSetActionForState(
+    crystalEntityFrameSet(entity),
+    animation === "range" || animation === "spell" ? "attackRange" : "attackMelee",
+    animation,
+  );
+  if (frameSetAction) return crystalFrameSetActionDurationMs(frameSetAction);
+  if (animation === "spell") return 600;
   if (animation === "range" || animation === "melee3") {
     return 800;
   }
@@ -13728,11 +13860,21 @@ function crystalAttackActionDurationMs(
 }
 
 function crystalStruckActionDurationMs(entity: WorldEntity) {
+  const action = crystalFrameSetActionForState(crystalEntityFrameSet(entity), "struck");
+  if (action) return crystalFrameSetActionDurationMs(action);
   return entity.kind === "monster" ? 400 : 300;
 }
 
 function crystalDeathActionDurationMs(entity: WorldEntity) {
+  const action = crystalFrameSetActionForState(crystalEntityFrameSet(entity), "dying");
+  if (action) return crystalFrameSetActionDurationMs(action);
   return entity.kind === "monster" ? 1000 : 400;
+}
+
+function crystalReviveActionDurationMs(entity: WorldEntity) {
+  const action = crystalFrameSetActionForState(crystalEntityFrameSet(entity), "reviving");
+  if (action) return crystalFrameSetActionDurationMs(action);
+  return crystalDeathActionDurationMs(entity);
 }
 
 function skillMatchesCrystalSpell(skill: KnownSkill, spell: string) {
@@ -13780,7 +13922,44 @@ function crystalEntityMovementFrameCount(
   entity: WorldEntity | null | undefined,
   mode: BevyMovementShadowMode,
 ) {
-  return entity?.sprite?.mountLibrary && mode === "walk" ? 8 : 6;
+  return crystalEntityMovementAnimationProfile(entity, mode).frameCount;
+}
+
+function crystalEntityMovementAnimationProfile(
+  entity: WorldEntity | null | undefined,
+  mode: BevyMovementShadowMode,
+) {
+  const action = entity
+    ? crystalFrameSetActionForState(
+        crystalEntityFrameSet(entity),
+        mode === "run" ? "running" : "walking",
+      )
+    : null;
+  if (action) {
+    return {
+      frameCount: Math.max(action.count, 1),
+      frameIntervalMs: Math.max(action.interval, 1),
+    };
+  }
+  return {
+    frameCount: entity?.sprite?.mountLibrary && mode === "walk" ? 8 : 6,
+    frameIntervalMs: CRYSTAL_MOVE_FRAME_INTERVAL_MS,
+  };
+}
+
+function crystalEntityFrameSet(entity: WorldEntity | null | undefined): OriginalSceneFrameSet | null {
+  if (!entity || (entity.kind !== "monster" && entity.kind !== "npc")) return null;
+  const libraryKey = entity.sprite?.bodyLibrary?.replaceAll("\\", "/");
+  if (!libraryKey) return null;
+  const entry = (crystalFrameSetCatalog.libraries as Record<
+    string,
+    { actionCount: number; actions: OriginalSceneFrameSet["actions"] }
+  >)[libraryKey];
+  return entry ? { count: entry.actionCount, actions: entry.actions } : null;
+}
+
+function crystalFrameSetActionDurationMs(action: OriginalSceneFrameSet["actions"][number]) {
+  return Math.max(action.count, 1) * Math.max(action.interval, 1);
 }
 
 function crystalBuffRemainingTicks(expireTime: number | undefined) {

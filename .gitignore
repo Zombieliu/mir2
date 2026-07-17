@@ -41,6 +41,16 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 **/*.log
 **/tmp_*.txt
 
+# Repository-local recovery and diagnostic worktrees
+/tmp/
+/mir2-web3/tmp/
+/.codex/backups/
+/refactor-pwa/
+
+# The full Crystal sound export is published through R2; keep only files
+# that are already intentionally tracked as local baselines.
+/mir2-web3/apps/web/public/original-ui/Sound/*.wav
+
 # Editors
 **/.idea/
 **/.vscode/

@@ -57,6 +57,8 @@ export type OriginalMapCell = {
   front?: string | null;
   tileAnimation?: string | null;
   light?: number;
+  lightOffsetX?: number;
+  lightOffsetY?: number;
   blocked?: boolean;
   closedDoor?: boolean;
 };

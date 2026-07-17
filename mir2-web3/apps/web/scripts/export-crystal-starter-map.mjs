@@ -182,7 +182,7 @@ async function main() {
     const frameKey = `${normalizedKey}:${frameIndex}`;
     const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
     const pngPath = path.join(exportDir, `${frameIndex}.png`);
-    const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+    const rgba = frame.rgba;
 
     if (!exportedFrames.has(frameKey)) {
       exportedFrames.add(frameKey);
@@ -228,7 +228,7 @@ async function exportExplicitFrames(clientRoot, specs) {
       const normalizedKey = normalizeLibraryName(libraryKey);
       const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
       const pngPath = path.join(exportDir, `${frameIndex}.png`);
-      const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+      const rgba = frame.rgba;
       await mkdir(exportDir, { recursive: true });
       await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
       exported.push({
@@ -336,7 +336,7 @@ async function exportFullMap(clientRoot, mapFileNameArg, options = {}) {
             framesSkipped += 1;
             return;
           }
-          const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+          const rgba = frame.rgba;
           await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
           framesExported += 1;
         }),
@@ -504,7 +504,7 @@ async function exportWantedMapFrames(dataDir, wanted, options = {}) {
             framesSkipped += 1;
             return;
           }
-          const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+          const rgba = frame.rgba;
           await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
           framesExported += 1;
         }),
@@ -840,34 +840,6 @@ function requireValue(values, index, flag) {
   if (!next || next.startsWith("--")) {
     throw new Error(`${flag} requires a value`);
   }
-  return next;
-}
-
-function postProcessFrameRgba(libraryName, frameIndex, rgba) {
-  if (libraryName !== "WemadeMir2/Objects" || frameIndex < 2723 || frameIndex > 2732) {
-    return rgba;
-  }
-
-  const next = Buffer.from(rgba);
-
-  for (let index = 0; index < next.length; index += 4) {
-    const r = next[index];
-    const g = next[index + 1];
-    const b = next[index + 2];
-    const alpha = next[index + 3];
-    const brightness = Math.max(r, g, b);
-
-    if (brightness <= 20) {
-      next[index + 3] = 0;
-      continue;
-    }
-
-    if (brightness < 72) {
-      const scaledAlpha = Math.round(((brightness - 20) / 52) * alpha);
-      next[index + 3] = Math.max(0, Math.min(alpha, scaledAlpha));
-    }
-  }
-
   return next;
 }
 

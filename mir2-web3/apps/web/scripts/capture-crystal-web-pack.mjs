@@ -4,6 +4,18 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
+import {
+  assertPairedCaptureLightSetting,
+  parseCaptureEffectFrame,
+  parseCaptureLightSetting,
+} from "./crystal-capture-visual-state.mjs";
+import {
+  assertCanonicalNativeCaptureReport,
+  assertNativeFrameDimensions,
+  CRYSTAL_NATIVE_CLIENT_HEIGHT,
+  CRYSTAL_NATIVE_CLIENT_WIDTH,
+} from "./crystal-native-capture-state.mjs";
+
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
 const DEFAULT_OUTPUT_ROOT = path.join(REPO_ROOT, "docs", "generated", "player-qa", "visual-parity");
@@ -36,10 +48,23 @@ const windowTitlePattern = args.windowTitlePattern ?? "*Legend of Mir 2*";
 const samplePrefix = args.samplePrefix ?? `${prefix}-same-scene`;
 const nativePreClickClient = args.nativePreClickClient ?? args.nativePreClick ?? "";
 const nativePreKeys = args.nativePreKeys ?? "";
+const nativeSourceImage = args.nativeSourceImage ?? args.originalImage ?? "";
+const expectedNativeWidth = numberArg(args.expectedNativeWidth, CRYSTAL_NATIVE_CLIENT_WIDTH);
+const expectedNativeHeight = numberArg(args.expectedNativeHeight, CRYSTAL_NATIVE_CLIENT_HEIGHT);
 const nativeStatePath = args.nativeState ?? args.nativeAccountState ?? "";
 const syncWebAccountState = booleanArg(
   args.syncWebAccountState ?? process.env.MIR2_SYNC_WEB_ACCOUNT_STATE,
   Boolean(nativeStatePath),
+);
+const captureLightSetting = parseCaptureLightSetting(
+  args.captureLightSetting ?? process.env.MIR2_CAPTURE_LIGHT_SETTING,
+);
+const cleanCaptureOverlays = booleanArg(
+  args.cleanCaptureOverlays ?? process.env.MIR2_CLEAN_CAPTURE_OVERLAYS,
+  true,
+);
+const captureTrapHexagonFrame = parseCaptureEffectFrame(
+  args.captureTrapHexagonFrame ?? process.env.MIR2_CAPTURE_TRAP_HEXAGON_FRAME,
 );
 const accountStorePath = path.resolve(args.accountStore ?? process.env.MIR2_ACCOUNT_STORE_PATH ?? path.join(REPO_ROOT, ".mir2-data", "accounts.json"));
 
@@ -49,14 +74,26 @@ async function main() {
   await fs.mkdir(packDir, { recursive: true });
 
   const accountStateSync = await syncWebAccountStateFromNative();
-  const nativeCapture = await captureNativeWindow();
+  const nativeCapture = nativeSourceImage
+    ? await captureProvidedNativeImage()
+    : await captureNativeWindow();
   const webCapture = await captureWebScene(accountStateSync?.qaStatePath ?? null);
+  const capturedWebState = await readJson(webCapture.statePath);
+  const pairedLightSetting = assertPairedCaptureLightSetting(
+    captureLightSetting,
+    capturedWebState.captureControl?.visualNormalization?.serverLightSetting,
+  );
+  const nativeSelection = await selectNativeCaptureSample({
+    nativeCapture,
+    webScreenshotPath: webCapture.screenshotPath,
+    webState: capturedWebState,
+  });
 
   const originalPath = path.join(packDir, `${samplePrefix}-original.png`);
   const webPath = path.join(packDir, `${samplePrefix}-web.png`);
   const webStatePath = path.join(packDir, `${samplePrefix}-web-state.json`);
 
-  await fs.copyFile(nativeCapture.imagePath, originalPath);
+  await fs.copyFile(nativeSelection.imagePath, originalPath);
   await fs.copyFile(webCapture.screenshotPath, webPath);
   await fs.copyFile(webCapture.statePath, webStatePath);
 
@@ -95,11 +132,14 @@ async function main() {
     generatedAt: new Date().toISOString(),
     packDir,
     target: { map: String(map), x, y },
+    pairedLightSetting,
     native: {
+      sourceMode: nativeCapture.sourceMode,
       jsonPath: nativeCapture.jsonPath,
       imagePath: originalPath,
-      sourceImagePath: nativeCapture.imagePath,
+      sourceImagePath: nativeSelection.imagePath,
       sampleCount: nativeCapture.sampleCount,
+      selection: nativeSelection,
       accountStatePath: accountStateSync?.nativeAccountStatePath ?? null,
     },
     web: {
@@ -108,6 +148,7 @@ async function main() {
       sourceScreenshotPath: webCapture.screenshotPath,
       sourceStatePath: webCapture.statePath,
       accountStateSync,
+      visualNormalization: capturedWebState.captureControl?.visualNormalization ?? null,
     },
     sideBySidePath,
     cropSet,
@@ -134,6 +175,8 @@ async function main() {
 
 async function captureNativeWindow() {
   const rawPrefix = `${samplePrefix}-native-raw`;
+  const effectiveDurationMs =
+    captureTrapHexagonFrame === null ? originalDurationMs : Math.max(originalDurationMs, 1_200);
   const nativeArgs = [
       "-OutputDir",
       packDir,
@@ -142,7 +185,7 @@ async function captureNativeWindow() {
       "-Label",
       "native-static",
       "-DurationMs",
-      String(originalDurationMs),
+      String(effectiveDurationMs),
       "-SampleMs",
       String(originalSampleMs),
       "-ImageFormat",
@@ -150,6 +193,10 @@ async function captureNativeWindow() {
       "-WindowTitlePattern",
       windowTitlePattern,
       "-ActivateWindow",
+      "-ExpectedClientWidth",
+      String(expectedNativeWidth),
+      "-ExpectedClientHeight",
+      String(expectedNativeHeight),
     ];
   if (nativePreClickClient) {
     nativeArgs.push("-PreClickClientPoints", nativePreClickClient);
@@ -164,16 +211,137 @@ async function captureNativeWindow() {
     { timeoutMs: 30_000 },
   );
   const report = await readJson(result.jsonPath);
-  const firstSample = Array.isArray(report.samples) ? report.samples[0] : null;
-  const imagePath = firstSample?.capture?.path;
-  if (!imagePath) {
+  assertCanonicalNativeCaptureReport(report, {
+    expectedWidth: expectedNativeWidth,
+    expectedHeight: expectedNativeHeight,
+  });
+  const samples = (Array.isArray(report.samples) ? report.samples : [])
+    .filter((sample) => sample?.capture?.path)
+    .map((sample) => ({
+      index: sample.index ?? null,
+      elapsedMs: sample.elapsedMs ?? null,
+      imagePath: path.resolve(sample.capture.path),
+    }));
+  if (samples.length === 0) {
     throw new Error(`Native window capture did not produce a frame: ${result.jsonPath}`);
   }
+  await Promise.all(
+    samples.map(async (sample) => {
+      const metadata = await sharp(sample.imagePath).metadata();
+      assertNativeFrameDimensions(metadata, {
+        expectedWidth: expectedNativeWidth,
+        expectedHeight: expectedNativeHeight,
+        label: `native PNG sample ${sample.index ?? "unknown"}`,
+      });
+    }),
+  );
   return {
     ...result,
-    imagePath: path.resolve(imagePath),
+    sourceMode: "live-window-cycle",
+    imagePath: samples[0].imagePath,
+    samples,
     sampleCount: report.sampleCount ?? report.samples?.length ?? 0,
+    durationMs: effectiveDurationMs,
+    sampleMs: originalSampleMs,
   };
+}
+
+async function captureProvidedNativeImage() {
+  const imagePath = path.resolve(nativeSourceImage);
+  const metadata = await sharp(imagePath).metadata();
+  assertNativeFrameDimensions(metadata, {
+    expectedWidth: expectedNativeWidth,
+    expectedHeight: expectedNativeHeight,
+    label: "provided native reference PNG",
+  });
+  return {
+    ok: true,
+    sourceMode: "provided-reference-image",
+    jsonPath: null,
+    imagePath,
+    samples: [{ index: 0, elapsedMs: 0, imagePath }],
+    sampleCount: 1,
+    durationMs: 0,
+    sampleMs: 0,
+  };
+}
+
+async function selectNativeCaptureSample({ nativeCapture, webScreenshotPath, webState }) {
+  const samples = nativeCapture.samples ?? [];
+  if (captureTrapHexagonFrame === null || samples.length === 1) {
+    return {
+      mode: "first-sample",
+      requestedWebTrapHexagonFrame: captureTrapHexagonFrame,
+      imagePath: samples[0]?.imagePath ?? nativeCapture.imagePath,
+      index: samples[0]?.index ?? 0,
+      elapsedMs: samples[0]?.elapsedMs ?? 0,
+      candidateCount: samples.length || 1,
+      region: null,
+      candidates: [],
+    };
+  }
+
+  const [webMetadata, ...nativeMetadata] = await Promise.all([
+    sharp(webScreenshotPath).metadata(),
+    ...samples.map((sample) => sharp(sample.imagePath).metadata()),
+  ]);
+  const maxWidth = Math.min(
+    webMetadata.width ?? 1024,
+    ...nativeMetadata.map((metadata) => metadata.width ?? 1024),
+  );
+  const maxHeight = Math.min(
+    webMetadata.height ?? 768,
+    ...nativeMetadata.map((metadata) => metadata.height ?? 768),
+  );
+  const hudTop = Math.max(1, Math.min(maxHeight, Math.floor(Number(webState?.hud?.top) || 616)));
+  const region = { left: 0, top: 0, width: maxWidth, height: hudTop };
+  const candidates = [];
+  for (const sample of samples) {
+    candidates.push({
+      index: sample.index,
+      elapsedMs: sample.elapsedMs,
+      imagePath: sample.imagePath,
+      meanAbsoluteDelta: await meanAbsoluteRgbDelta(sample.imagePath, webScreenshotPath, region),
+    });
+  }
+  candidates.sort((left, right) =>
+    left.meanAbsoluteDelta - right.meanAbsoluteDelta ||
+    Number(left.elapsedMs ?? 0) - Number(right.elapsedMs ?? 0),
+  );
+  const selected = candidates[0];
+  return {
+    mode: "minimum-world-rgb-delta-across-native-effect-cycle",
+    requestedWebTrapHexagonFrame: captureTrapHexagonFrame,
+    imagePath: selected.imagePath,
+    index: selected.index,
+    elapsedMs: selected.elapsedMs,
+    meanAbsoluteDelta: selected.meanAbsoluteDelta,
+    candidateCount: candidates.length,
+    nativeDurationMs: nativeCapture.durationMs,
+    nativeSampleMs: nativeCapture.sampleMs,
+    region,
+    candidates,
+  };
+}
+
+async function meanAbsoluteRgbDelta(leftPath, rightPath, region) {
+  const [left, right] = await Promise.all([
+    sharp(leftPath).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(rightPath).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  if (
+    left.info.width !== right.info.width ||
+    left.info.height !== right.info.height ||
+    left.info.channels !== right.info.channels ||
+    left.data.length !== right.data.length
+  ) {
+    throw new Error(`Native/Web phase-match geometry mismatch: ${JSON.stringify({ left: left.info, right: right.info })}`);
+  }
+  let absoluteDelta = 0;
+  for (let index = 0; index < left.data.length; index += 1) {
+    absoluteDelta += Math.abs(left.data[index] - right.data[index]);
+  }
+  return absoluteDelta / left.data.length;
 }
 
 async function syncWebAccountStateFromNative() {
@@ -252,8 +420,15 @@ async function captureWebScene(qaCharacterStatePath) {
       ...(qaCharacterStatePath ? ["--qaCharacterState", qaCharacterStatePath] : []),
       ...(args.qaControlToken ? ["--qaControlToken", args.qaControlToken] : []),
       ...(args.debugPort ? ["--debugPort", args.debugPort] : []),
+      ...(args.cdpCommandTimeoutMs ? ["--cdpCommandTimeoutMs", args.cdpCommandTimeoutMs] : []),
       ...(args.visualReadyTimeoutMs ? ["--visualReadyTimeoutMs", args.visualReadyTimeoutMs] : []),
       ...(args.targetTolerance ? ["--targetTolerance", args.targetTolerance] : []),
+      ...(captureLightSetting === null ? [] : ["--captureLightSetting", String(captureLightSetting)]),
+      ...(captureTrapHexagonFrame === null
+        ? []
+        : ["--captureTrapHexagonFrame", String(captureTrapHexagonFrame)]),
+      "--cleanCaptureOverlays",
+      String(cleanCaptureOverlays),
       "--map",
       String(map),
       "--x",
@@ -281,6 +456,9 @@ function buildWebBaseUrl() {
   }
   if (crystalVisibleChatLines && !url.searchParams.has("crystalVisibleChatLines")) {
     url.searchParams.set("crystalVisibleChatLines", crystalVisibleChatLines);
+  }
+  if (!url.searchParams.has("cacheDebug")) {
+    url.searchParams.set("cacheDebug", "0");
   }
   return url.toString();
 }
@@ -481,6 +659,7 @@ Target: map ${summary.target.map} @ ${summary.target.x},${summary.target.y}
 ## Files
 
 - Native Crystal screenshot: ${path.basename(summary.native.imagePath)}
+- Native dynamic-frame selection: ${summary.native.selection?.mode ?? "first-sample"} (${summary.native.selection?.candidateCount ?? 1} candidate(s))
 - Native account state: ${summary.native.accountStatePath ? path.basename(summary.native.accountStatePath) : "not captured"}
 - Web screenshot: ${path.basename(summary.web.screenshotPath)}
 - Web state: ${path.basename(summary.web.statePath)}
@@ -493,7 +672,7 @@ Target: map ${summary.target.map} @ ${summary.target.x},${summary.target.y}
 
 ## Notes
 
-The native Crystal window is captured from the currently running \`Legend of Mir 2\` client. The Web scene is positioned through the token-gated QA control path when \`MIR2_QA_CONTROL_TOKEN\` is configured, then verified by waiting until the Web state reports the target map and coordinate.
+The native Crystal window is captured from the currently running \`Legend of Mir 2\` client. When a TrapHexagon frame is fixed for Web, native capture spans at least one complete effect cycle and selects the lowest world-region RGB delta rather than assuming sample zero has the same animation phase. The Web scene is positioned through the token-gated QA control path when \`MIR2_QA_CONTROL_TOKEN\` is configured, then verified by waiting until the Web state reports the target map and coordinate.
 `;
 }
 

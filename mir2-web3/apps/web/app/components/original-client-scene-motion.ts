@@ -86,7 +86,9 @@ export function entityAnimationStateForEntity(
   }
 
   if (isEntityAttacking(entity, now)) {
-    return entity.attackAnimation === "range" ? "attackRange" : "attackMelee";
+    return entity.attackAnimation === "range" || entity.attackAnimation === "spell"
+      ? "attackRange"
+      : "attackMelee";
   }
 
   if (isEntityMovementAnimationActive(entity, now)) {

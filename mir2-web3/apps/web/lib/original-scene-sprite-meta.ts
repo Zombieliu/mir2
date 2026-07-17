@@ -13,9 +13,30 @@ export type OriginalSceneSpriteFrameMeta = {
   maskPath: string | null;
 };
 
+export type OriginalSceneFrameSetAction = {
+  actionId: number;
+  actionName: string | null;
+  start: number;
+  count: number;
+  skip: number;
+  interval: number;
+  effectStart: number;
+  effectCount: number;
+  effectSkip: number;
+  effectInterval: number;
+  reverse: boolean;
+  blend: boolean;
+};
+
+export type OriginalSceneFrameSet = {
+  count: number;
+  actions: OriginalSceneFrameSetAction[];
+};
+
 type OriginalSceneSpriteLibraryPayload = {
   version: number;
   count: number;
+  frameSet?: OriginalSceneFrameSet | null;
   frames: OriginalSceneSpriteFrameMeta[];
 };
 
@@ -24,12 +45,18 @@ type OriginalSceneSpriteManifestPayload = {
 };
 
 export type OriginalSceneSpriteLibraryMeta = OriginalSceneSpriteLibraryPayload & {
+  frameSet: OriginalSceneFrameSet | null;
   frameMap: Map<number, OriginalSceneSpriteFrameMeta>;
+};
+
+type OriginalSceneFrameSetCatalog = {
+  libraries?: Record<string, { actionCount?: number; actions?: OriginalSceneFrameSetAction[] }>;
 };
 
 const SCENE_SPRITE_LIBRARY_CACHE_MAX_BYTES = 8 * 1024 * 1024;
 const libraryCache = new Map<string, { promise: Promise<OriginalSceneSpriteLibraryMeta>; bytes: number }>();
 let libraryCacheBytes = 0;
+let frameSetCatalogPromise: Promise<OriginalSceneFrameSetCatalog | null> | null = null;
 // Libraries that returned a definitive "not available" (4xx) for this origin —
 // e.g. source-only libraries that were never exported to the asset CDN. The
 // scene renderer requests a library's metadata on every frame that needs it,
@@ -85,8 +112,10 @@ export function loadOriginalSceneSpriteLibrary(
       }
 
       const payload = (await response.json()) as OriginalSceneSpriteLibraryPayload;
+      const frameSet = normalizeFrameSet(payload.frameSet) ?? await loadCatalogFrameSet(normalizedKey);
       const library = {
         ...payload,
+        frameSet,
         frameMap: new Map(payload.frames.map((frame) => [frame.index, frame])),
       };
       updateOriginalSceneSpriteLibraryCacheBytes(normalizedKey, estimateOriginalSceneSpriteLibraryBytes(library));
@@ -151,5 +180,22 @@ function trimOriginalSceneSpriteLibraryCache() {
 }
 
 function estimateOriginalSceneSpriteLibraryBytes(library: OriginalSceneSpriteLibraryMeta) {
-  return 256 + library.frames.length * 220 + JSON.stringify(library.frames).length;
+  return 256 + library.frames.length * 220 + JSON.stringify(library.frames).length + JSON.stringify(library.frameSet).length;
+}
+
+function normalizeFrameSet(frameSet: OriginalSceneFrameSet | null | undefined): OriginalSceneFrameSet | null {
+  if (!frameSet || !Array.isArray(frameSet.actions) || frameSet.actions.length === 0) return null;
+  return { count: frameSet.actions.length, actions: frameSet.actions };
+}
+
+async function loadCatalogFrameSet(normalizedKey: string): Promise<OriginalSceneFrameSet | null> {
+  if (!frameSetCatalogPromise) {
+    frameSetCatalogPromise = fetch("/original-ui/frame-sets.generated.json")
+      .then(async (response) => response.ok ? await response.json() as OriginalSceneFrameSetCatalog : null)
+      .catch(() => null);
+  }
+  const catalog = await frameSetCatalogPromise;
+  const entry = catalog?.libraries?.[normalizedKey];
+  if (!entry || !Array.isArray(entry.actions) || entry.actions.length === 0) return null;
+  return { count: entry.actions.length, actions: entry.actions };
 }

@@ -95,7 +95,7 @@ export type DisplayEntity = {
   movementStartedAt?: number;
   movementUntil?: number;
   movementFrameCount?: number;
-  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
+  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range" | "spell";
   attackStartedAt?: number;
   attackUntil?: number;
   struckStartedAt?: number;
@@ -124,6 +124,19 @@ export type DisplayProjectile = {
   fromY: number;
   toX: number;
   toY: number;
+  startedAt: number;
+  expiresAt: number;
+};
+
+export type DisplaySceneEffect = {
+  key: string;
+  source: "spell" | "objectSpell" | "map" | "object";
+  spellOrEffect: string | number;
+  objectId?: string;
+  x: number;
+  y: number;
+  direction: number;
+  value: number;
   startedAt: number;
   expiresAt: number;
 };
@@ -349,6 +362,7 @@ export type DisplayWorld = {
   };
   interactionHints: string[];
   projectiles: DisplayProjectile[];
+  effects: DisplaySceneEffect[];
   damageFloaters: DisplayDamageFloater[];
 };
 

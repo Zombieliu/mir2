@@ -1,10 +1,14 @@
 "use client";
 
-import { memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
 import type { EffectAssets } from "../../lib/crystal-magic-effects";
 import { loadEffectAssets } from "../../lib/crystal-magic-effects";
+import {
+  collectResolvedSceneEffectFrames,
+  CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
+} from "../../lib/scene-effect-runtime";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import {
   collectViewportFallbackVfx,
@@ -21,8 +25,13 @@ import type {
   TranslateFn,
 } from "./original-client-types";
 import {
+  crystalLightTexturePath,
+  crystalMapLightSpec,
+  crystalMapLightTopLeft,
   crystalObjectLightSpec,
+  crystalObjectLightTopLeft,
   crystalSceneLightClassName,
+  type CrystalMapLightSpec,
 } from "./original-client-scene-lighting";
 import {
   EMPTY_VIEWPORT_OFFSET,
@@ -78,11 +87,12 @@ type ViewportEntitySpriteEntry = {
 type ViewportMapLight = {
   key: string;
   value: number;
+  range: number;
   left: number;
   top: number;
   width: number;
   height: number;
-  tone: "neutral" | "cool" | "warm" | "green";
+  tone: CrystalMapLightSpec["tone"];
   opacity: number;
 };
 
@@ -192,6 +202,51 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
             style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
           />
         ))}
+      {sprite?.effect ? (
+        <>
+          <img
+            className="entity-sprite-layer action-effect"
+            src={sprite.effect.path}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            data-mir2-original-src={sprite.effect.path}
+            data-effect-blend={sprite.effect.blend ? "additive" : "alpha"}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
+            style={{
+              left: sprite.effect.x,
+              top: sprite.effect.y,
+              width: sprite.effect.width,
+              height: sprite.effect.height,
+              mixBlendMode: sprite.effect.blend
+                ? CRYSTAL_ADDITIVE_MIX_BLEND_MODE
+                : "normal",
+              pointerEvents: "none",
+            }}
+          />
+          {sprite.effect.maskPath ? (
+            <img
+              className="entity-sprite-layer action-effect mask"
+              src={sprite.effect.maskPath}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              data-mir2-original-src={sprite.effect.maskPath}
+              onError={handleSceneAssetImageError}
+              onLoad={handleSceneAssetImageLoad}
+              style={{
+                left: sprite.effect.x,
+                top: sprite.effect.y,
+                width: sprite.effect.width,
+                height: sprite.effect.height,
+                mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
+                pointerEvents: "none",
+              }}
+            />
+          ) : null}
+        </>
+      ) : null}
       {isNpc && questIcon ? (
         <img
           className="entity-quest-icon"
@@ -240,52 +295,43 @@ function collectViewportMapLights(
   if (!player || !world.originalMapRegion) return [];
 
   const lights: ViewportMapLight[] = [];
-  const maxDx = VIEWPORT_RANGE_X + 4;
-  const maxDy = VIEWPORT_RANGE_Y + 8;
+  const maxDx = VIEWPORT_RANGE_X + 24;
+  const maxDy = VIEWPORT_RANGE_Y + 24;
 
   for (const cell of world.originalMapRegion.cells) {
     const lightValue = typeof cell.light === "number" && Number.isFinite(cell.light) ? Math.trunc(cell.light) : 0;
-    if (lightValue <= 0) continue;
+    const spec = crystalMapLightSpec(lightValue);
+    if (!spec) continue;
 
     const dx = cell.x - player.x;
     const dy = cell.y - player.y;
     if (Math.abs(dx) > maxDx || Math.abs(dy) > maxDy) continue;
 
-    const intensity = crystalMapLightIntensity(lightValue);
+    const position = crystalMapLightTopLeft(
+      VIEWPORT_ENTITY_LEFT_ORIGIN + dx * VIEWPORT_CELL_WIDTH + cameraOffset.x,
+      VIEWPORT_ENTITY_TOP_ORIGIN + dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y,
+      cell.lightOffsetX ?? 0,
+      cell.lightOffsetY ?? 0,
+      spec,
+      VIEWPORT_CELL_WIDTH,
+      VIEWPORT_CELL_HEIGHT,
+    );
+
     lights.push({
       key: `map-light-${cell.x}-${cell.y}-${lightValue}`,
       value: lightValue,
-      left: VIEWPORT_TILE_CENTER_X + dx * VIEWPORT_CELL_WIDTH + cameraOffset.x,
-      top: VIEWPORT_TILE_CENTER_Y + dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + 4,
-      width: 110 + intensity * 28,
-      height: 82 + intensity * 22,
-      tone: crystalMapLightTone(lightValue),
-      opacity: Math.min(0.82, 0.36 + intensity * 0.045),
+      range: spec.range,
+      left: position.left,
+      top: position.top,
+      width: spec.width,
+      height: spec.height,
+      tone: spec.tone,
+      opacity: spec.opacity,
     });
 
-    if (lights.length >= 80) break;
   }
 
   return lights;
-}
-
-function crystalMapLightIntensity(lightValue: number) {
-  const lowDigit = lightValue % 10;
-  if (lowDigit > 0) return Math.min(Math.max(lowDigit, 1), 9);
-  return Math.min(Math.max(Math.trunc(lightValue / 10), 1), 9);
-}
-
-function crystalMapLightTone(lightValue: number): ViewportMapLight["tone"] {
-  switch (Math.trunc(lightValue / 10)) {
-    case 2:
-      return "cool";
-    case 3:
-      return "warm";
-    case 4:
-      return "green";
-    default:
-      return "neutral";
-  }
 }
 
 function useEffectAssets(): EffectAssets | null {
@@ -442,6 +488,26 @@ function OriginalClientSceneVisualLayersInner({
   // visibly distinct instead of inert. collectViewportFallbackVfx returns [] on idle frames, so
   // this costs nothing when nothing is casting and no projectiles are live.
   const effectAssets = useEffectAssets();
+  const resolvedEffectFrames = collectResolvedSceneEffectFrames(
+    effectAssets,
+    world.effects,
+    motionNow,
+  );
+  const spellByCaster = new Map<string, string>();
+  for (const resolved of resolvedEffectFrames) {
+    if (resolved.effect.source === "spell" && resolved.effect.objectId) {
+      spellByCaster.set(resolved.effect.objectId, resolved.animation.name);
+    }
+  }
+  for (const projectile of viewportProjectiles) {
+    const resolved = resolvedEffectFrames.find(
+      (entry) =>
+        entry.effect.source === "spell" &&
+        entry.effect.objectId === projectile.attackerId &&
+        Math.abs(entry.effect.startedAt - projectile.startedAt) <= 1_000,
+    );
+    if (resolved) spellByCaster.set(projectile.key, resolved.animation.name);
+  }
   // Ground-drop item icons resolve from /original-ui/Items/{icon}.png (same pipeline as the bag).
   // Any icon index whose PNG fails to load (stale R2 / unmapped item) falls back to the dot marker.
   const [failedDropIcons, setFailedDropIcons] = useState<ReadonlySet<number>>(() => new Set());
@@ -458,7 +524,25 @@ function OriginalClientSceneVisualLayersInner({
       })),
       projectiles: viewportProjectiles,
     },
-    { now: motionNow, assets: effectAssets },
+    {
+      now: motionNow,
+      assets: effectAssets,
+      spellByCaster,
+      rendererOwnsEffect: (instance) => {
+        if (instance.kind === "cast") {
+          return resolvedEffectFrames.some(
+            (entry) =>
+              entry.effect.source === "spell" &&
+              entry.effect.objectId === instance.entity.objectId &&
+              entry.animation.name === instance.spell,
+          );
+        }
+        if (instance.kind === "projectile") {
+          return spellByCaster.has(instance.projectile.key);
+        }
+        return false;
+      },
+    },
   );
   const sceneLightClassName = crystalSceneLightClassName(world.lightSetting);
   const viewportMapLights = sceneLightClassName
@@ -573,8 +657,6 @@ function OriginalClientSceneVisualLayersInner({
           const hitBounds = entitySpriteHitBounds(sprite);
           const hitWidth = hitBounds.right - hitBounds.left;
           const hitHeight = hitBounds.bottom - hitBounds.top;
-          const healthRatio =
-            isPlayer && entity.hp !== undefined && entity.maxHp ? ratio(entity.hp, entity.maxHp) : null;
           const handleEntityPointerActivate = (event: MouseEvent<HTMLElement>) => {
             if (event.button !== 0 && event.button !== 2) {
               return;
@@ -608,11 +690,6 @@ function OriginalClientSceneVisualLayersInner({
               onMouseDown={isInteractiveEntity ? handleEntityPointerActivate : undefined}
               onContextMenu={isInteractiveEntity ? handleEntityContextActivate : undefined}
             >
-              {healthRatio !== null ? (
-                <div className="entity-health-bar">
-                  <span style={{ width: `${healthRatio * 100}%` }} />
-                </div>
-              ) : null}
               {isInteractiveEntity ? (
                 <button
                   type="button"
@@ -642,6 +719,106 @@ function OriginalClientSceneVisualLayersInner({
                 questIconTop={questIcon ? entityQuestIconTopOffset(sprite) : 0}
               />
             </div>
+          );
+        })}
+        {resolvedEffectFrames.map(({ effect, animation, frame }) => {
+          const anchor = effect.objectId
+            ? viewportEntitySprites.find(({ entity }) => entity.objectId === effect.objectId)?.entity
+            : undefined;
+          const isPlayerAnchor = anchor?.objectId === player?.objectId;
+          const anchorMotionOffset =
+            anchor && !isPlayerAnchor && !imperativeCamera
+              ? entityMotionOffsetForEntity(anchor, entityMotionSnapshots, motionNow)
+              : EMPTY_VIEWPORT_OFFSET;
+          const cameraOffset = isPlayerAnchor ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+          const worldX = anchor?.x ?? effect.x;
+          const worldY = anchor?.y ?? effect.y;
+          const dx = anchor?.dx ?? worldX - (player?.x ?? worldX);
+          const dy = anchor?.dy ?? worldY - (player?.y ?? worldY);
+          return (
+            <Fragment key={effect.key}>
+            <img
+              className="scene-crystal-effect-frame"
+              src={frame.path}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              data-effect-key={effect.key}
+              data-effect-source={effect.source}
+              data-effect-name={animation.name}
+              data-effect-blend={animation.blend ? "additive" : "alpha"}
+              data-mir2-original-src={frame.path}
+              onError={handleSceneAssetImageError}
+              onLoad={handleSceneAssetImageLoad}
+              style={{
+                position: "absolute",
+                left:
+                  // Crystal passes the tile's top-left DrawLocation to MLibrary;
+                  // the exported frame x/y already contains the library offset.
+                  VIEWPORT_ENTITY_LEFT_ORIGIN +
+                  dx * VIEWPORT_CELL_WIDTH +
+                  cameraOffset.x +
+                  anchorMotionOffset.x +
+                  animation.offset.x +
+                  frame.x,
+                top:
+                  VIEWPORT_ENTITY_TOP_ORIGIN +
+                  dy * VIEWPORT_CELL_HEIGHT +
+                  cameraOffset.y +
+                  anchorMotionOffset.y +
+                  animation.offset.y +
+                  frame.y,
+                width: frame.width,
+                height: frame.height,
+                mixBlendMode: animation.blend
+                  ? CRYSTAL_ADDITIVE_MIX_BLEND_MODE
+                  : "normal",
+                filter: animation.light > 0 ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)` : undefined,
+                pointerEvents: "none",
+                zIndex: viewportDepthForCell(
+                  worldX,
+                  worldY,
+                  viewportDepthPlayer,
+                  effect.source === "map" ? 48 : effect.source === "spell" ? 90 : 72,
+                ),
+              }}
+            />
+            {frame.maskPath ? (
+              <img
+                className="scene-crystal-effect-frame mask"
+                src={frame.maskPath}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                data-effect-key={`${effect.key}:mask`}
+                data-mir2-original-src={frame.maskPath}
+                onError={handleSceneAssetImageError}
+                onLoad={handleSceneAssetImageLoad}
+                style={{
+                  position: "absolute",
+                  left:
+                    VIEWPORT_ENTITY_LEFT_ORIGIN +
+                    dx * VIEWPORT_CELL_WIDTH +
+                    cameraOffset.x +
+                    anchorMotionOffset.x +
+                    animation.offset.x +
+                    (frame.maskX ?? frame.x),
+                  top:
+                    VIEWPORT_ENTITY_TOP_ORIGIN +
+                    dy * VIEWPORT_CELL_HEIGHT +
+                    cameraOffset.y +
+                    anchorMotionOffset.y +
+                    animation.offset.y +
+                    (frame.maskY ?? frame.y),
+                  width: frame.maskWidth ?? frame.width,
+                  height: frame.maskHeight ?? frame.height,
+                  mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
+                  pointerEvents: "none",
+                  zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 91),
+                }}
+              />
+            ) : null}
+            </Fragment>
           );
         })}
         {viewportProjectiles.map((projectile) => {
@@ -694,9 +871,12 @@ function OriginalClientSceneVisualLayersInner({
             className="viewport-map-light-surface"
           >
             {viewportMapLights.map((light) => (
-              <span
+              <img
                 key={light.key}
                 className={`viewport-map-light ${light.tone}`}
+                src={crystalLightTexturePath(light.range)}
+                alt=""
+                draggable={false}
                 data-light-value={light.value}
                 style={{
                   left: light.left,
@@ -714,22 +894,26 @@ function OriginalClientSceneVisualLayersInner({
                   ? EMPTY_VIEWPORT_OFFSET
                   : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
-              const centerX =
+              const drawX =
                 VIEWPORT_ENTITY_LEFT_ORIGIN +
                 entity.dx * VIEWPORT_CELL_WIDTH +
-                VIEWPORT_CELL_WIDTH / 2 +
                 cameraOffset.x +
                 entityMotionOffset.x;
-              const centerY =
+              const drawY =
                 VIEWPORT_ENTITY_TOP_ORIGIN +
                 entity.dy * VIEWPORT_CELL_HEIGHT +
-                VIEWPORT_CELL_HEIGHT / 2 +
-                5 +
                 cameraOffset.y +
                 entityMotionOffset.y;
+              const position = crystalObjectLightTopLeft(
+                drawX,
+                drawY,
+                spec,
+                VIEWPORT_CELL_WIDTH,
+                VIEWPORT_CELL_HEIGHT,
+              );
 
               return (
-                <span
+                <img
                   key={`object-light-${entity.objectId}`}
                   ref={
                     imperativeCamera
@@ -737,13 +921,16 @@ function OriginalClientSceneVisualLayersInner({
                       : undefined
                   }
                   className={`viewport-object-light ${spec.tone}`}
+                  src={crystalLightTexturePath(spec.range)}
+                  alt=""
+                  draggable={false}
                   data-object-id={entity.objectId}
                   data-light-value={spec.value}
                   data-light-range={spec.range}
                   data-light-strength-bucket={spec.strengthBucket}
                   style={{
-                    left: centerX - spec.width / 2,
-                    top: centerY - spec.height / 2,
+                    left: position.left,
+                    top: position.top,
                     width: spec.width,
                     height: spec.height,
                     opacity: spec.opacity,
@@ -771,52 +958,84 @@ function OriginalClientSceneVisualLayersInner({
                   : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
               const labelLines = entityDisplayLabelLines(entity);
+              const healthRatio =
+                isPlayer && entity.hp !== undefined && entity.maxHp
+                  ? ratio(entity.hp, entity.maxHp)
+                  : null;
 
               return (
-                <button
-                  key={`entity-${entity.objectId}`}
-                  ref={imperativeCamera ? registerEntityEl(`name:${entity.objectId}`, entity.objectId) : undefined}
-                  type="button"
-                  className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
-                  style={{
-                    left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityNameplateLeftOffset(entity, sprite)}px`,
-                    top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
-                    "--entity-name-color": entityNameplateColor(entity),
-                  } as CSSProperties}
-                  data-ui-interactive={isInteractiveEntity ? "true" : "false"}
-                  data-object-id={entity.objectId}
-                  tabIndex={isInteractiveEntity ? undefined : -1}
-                  onMouseDown={
-                    isInteractiveEntity
-                      ? (event) => {
-                          if (event.button === 0 || event.button === 2) {
+                <Fragment key={`entity-overlay-${entity.objectId}`}>
+                  {healthRatio !== null ? (
+                    <div
+                      ref={
+                        imperativeCamera
+                          ? registerEntityEl(`health:${entity.objectId}`, entity.objectId)
+                          : undefined
+                      }
+                      className="entity-health-bar entity-overlay-health-bar"
+                      data-object-id={entity.objectId}
+                      style={{
+                        left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + 8}px`,
+                        top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y - 64}px`,
+                      }}
+                    >
+                      <span style={{ width: `${healthRatio * 100}%` }} />
+                    </div>
+                  ) : null}
+                  <button
+                    ref={
+                      imperativeCamera
+                        ? registerEntityEl(`name:${entity.objectId}`, entity.objectId)
+                        : undefined
+                    }
+                    type="button"
+                    className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
+                    style={{
+                      left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityNameplateLeftOffset(entity, sprite)}px`,
+                      top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
+                      "--entity-name-color": entityNameplateColor(entity),
+                    } as CSSProperties}
+                    data-ui-interactive={isInteractiveEntity ? "true" : "false"}
+                    data-object-id={entity.objectId}
+                    tabIndex={isInteractiveEntity ? undefined : -1}
+                    onMouseDown={
+                      isInteractiveEntity
+                        ? (event) => {
+                            if (event.button === 0 || event.button === 2) {
+                              event.preventDefault();
+                              event.stopPropagation();
+                            }
+                          }
+                        : undefined
+                    }
+                    onClick={isInteractiveEntity ? () => onActivateEntity(entity.objectId) : undefined}
+                    onContextMenu={
+                      isInteractiveEntity
+                        ? (event) => {
                             event.preventDefault();
                             event.stopPropagation();
+                            onActivateEntity(entity.objectId);
                           }
+                        : undefined
+                    }
+                  >
+                    {labelLines.map((line, index) => (
+                      <strong
+                        key={`${entity.objectId}-label-${index}`}
+                        className={
+                          line.role === "secondary" && entity.kind === "npc"
+                            ? "entity-subname"
+                            : undefined
                         }
-                      : undefined
-                  }
-                  onClick={isInteractiveEntity ? () => onActivateEntity(entity.objectId) : undefined}
-                  onContextMenu={
-                    isInteractiveEntity
-                      ? (event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          onActivateEntity(entity.objectId);
-                        }
-                      : undefined
-                  }
-                >
-                  {labelLines.map((line, index) => (
-                    <strong
-                      key={`${entity.objectId}-label-${index}`}
-                      className={line.role === "secondary" ? "entity-subname" : undefined}
-                    >
-                      {line.text}
-                    </strong>
-                  ))}
-                  {entity.dead ? <strong className="entity-state-label">{t("ui.dead")}</strong> : null}
-                </button>
+                      >
+                        {line.text}
+                      </strong>
+                    ))}
+                    {entity.dead ? (
+                      <strong className="entity-state-label">{t("ui.dead")}</strong>
+                    ) : null}
+                  </button>
+                </Fragment>
               );
             })
           : null}

@@ -320,6 +320,7 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
           groundDrops: mapChanged ? [] : current.groundDrops,
           mineNodes: mapChanged ? [] : current.mineNodes,
           projectiles: mapChanged ? [] : current.projectiles,
+          effects: mapChanged ? [] : current.effects,
           damageFloaters: mapChanged ? [] : current.damageFloaters,
           sceneView: mapChanged ? null : current.sceneView,
           terrainPatches: mapChanged ? [] : current.terrainPatches,

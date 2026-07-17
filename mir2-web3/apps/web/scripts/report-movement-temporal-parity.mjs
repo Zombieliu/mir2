@@ -3,6 +3,22 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
+const PAIRED_FRAME_HARD_MAX_PAIRS = 32;
+const PAIRED_FRAME_HARD_MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
+const PAIRED_FRAME_HARD_MAX_WIDTH = 2048;
+const PAIRED_FRAME_HARD_MAX_INPUT_PIXELS = 32 * 1024 * 1024;
+const PAIRED_FRAME_HARD_MAX_CANDIDATES = 250_000;
+const PAIRED_FRAME_HARD_MAX_CLIP_ABS_MS = 60 * 60 * 1000;
+const PAIRED_FRAME_REGIONS = [
+  { key: "world", label: "World", x0: 0, y0: 0, x1: 1, y1: 616 / 768 },
+  { key: "worldMain", label: "World main", x0: 0, y0: 0, x1: 900 / 1024, y1: 616 / 768 },
+  { key: "minimap", label: "Minimap", x0: 900 / 1024, y0: 0, x1: 1, y1: 180 / 768 },
+  { key: "worldRight", label: "World right", x0: 900 / 1024, y0: 180 / 768, x1: 1, y1: 616 / 768 },
+  { key: "hudLeft", label: "HUD left", x0: 0, y0: 616 / 768, x1: 230 / 1024, y1: 1 },
+  { key: "hudMid", label: "HUD middle", x0: 230 / 1024, y0: 616 / 768, x1: 860 / 1024, y1: 1 },
+  { key: "hudRight", label: "HUD right", x0: 860 / 1024, y0: 616 / 768, x1: 1, y1: 1 },
+];
+
 const args = parseArgs(process.argv.slice(2));
 const outputDir = path.resolve(args.output ?? path.join("docs", "generated", "player-qa", "movement-jitter"));
 const prefix = args.prefix ?? `movement-temporal-${Date.now()}`;
@@ -16,6 +32,7 @@ const frameAnalysisOptions = {
   preActionMs: numberArg(args.preActionMs, 300),
   postActionMs: numberArg(args.postActionMs, 1200),
 };
+const pairedFrameEvidenceOptions = buildPairedFrameEvidenceOptions(args, frameAnalysisOptions);
 
 if (!args.original || !args.web) {
   throw new Error("Usage: node report-movement-temporal-parity.mjs --original <json> --web <json> [--webBichon <json>] [--output <dir>] [--prefix <name>]");
@@ -38,23 +55,61 @@ const actionAlignmentOk =
   (originalSummary.frameCadence?.actionAlignment?.applied === true &&
     webSummary.frameCadence?.actionAlignment?.applied === true);
 
+await fs.mkdir(outputDir, { recursive: true });
+const pairedFrameEvidence = pairedFrameEvidenceOptions.enabled
+  ? await emitPairedFrameEvidence({
+      original,
+      originalPath,
+      originalSummary,
+      web,
+      webPath,
+      webSummary,
+      outputDir,
+      prefix,
+      frameAnalysisOptions,
+      options: pairedFrameEvidenceOptions,
+    })
+  : disabledPairedFrameEvidence(pairedFrameEvidenceOptions);
+
 const report = {
-  ok: Boolean(originalSummary.ok) && Boolean(webSummary.ok) && actionAlignmentOk,
+  ok:
+    Boolean(originalSummary.ok) &&
+    Boolean(webSummary.ok) &&
+    actionAlignmentOk &&
+    (!pairedFrameEvidence.enabled || pairedFrameEvidence.ok),
   generatedAt: new Date().toISOString(),
   frameAnalysisOptions,
+  pairedFrameEvidenceOptions,
   actionAlignmentOk,
   original: originalSummary,
   web: webSummary,
   webBichon: webBichonSummary,
-  interpretation: buildInterpretation(originalSummary, webSummary, webBichonSummary),
+  pairedFrameEvidence,
+  interpretation: buildInterpretation(
+    originalSummary,
+    webSummary,
+    webBichonSummary,
+    pairedFrameEvidence,
+  ),
 };
 
-await fs.mkdir(outputDir, { recursive: true });
 const jsonPath = path.join(outputDir, `${prefix}.json`);
 const mdPath = path.join(outputDir, `${prefix}.md`);
 await fs.writeFile(jsonPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 await fs.writeFile(mdPath, renderMarkdown(report), "utf8");
-console.log(JSON.stringify({ ok: report.ok, jsonPath, mdPath }, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      ok: report.ok,
+      jsonPath,
+      mdPath,
+      pairedFrameEvidenceDir: pairedFrameEvidence.outputDir,
+      pairedFrameCount: pairedFrameEvidence.emittedPairCount,
+    },
+    null,
+    2,
+  ),
+);
 
 async function readJson(filePath) {
   const raw = await fs.readFile(filePath, "utf8");
@@ -287,7 +342,7 @@ function countMovementCommands(frames) {
   return counts;
 }
 
-function buildInterpretation(original, web, webBichon) {
+function buildInterpretation(original, web, webBichon, pairedFrameEvidence) {
   const notes = [];
   notes.push("Native Crystal temporal capture is automated; current native evidence contains window frame images but no packet telemetry.");
   if (
@@ -341,7 +396,682 @@ function buildInterpretation(original, web, webBichon) {
   if (webBichon?.frameCadence) {
     notes.push(...compareFrameCadence(original.frameCadence, webBichon.frameCadence, "Web Bichon route"));
   }
+  if (pairedFrameEvidence?.enabled) {
+    notes.push(
+      `Action-aligned paired-frame evidence emitted ${pairedFrameEvidence.emittedPairCount}/${pairedFrameEvidence.selectedPairCount} selected nearest pairs (${pairedFrameEvidence.outputBytes}/${pairedFrameEvidence.maxOutputBytes} bounded PNG bytes).`,
+    );
+  }
   return notes;
+}
+
+function buildPairedFrameEvidenceOptions(cliArgs, analysisOptions) {
+  const maxPairs = boundedIntegerArg(
+    cliArgs.pairedFrameMaxPairs ?? cliArgs.maxPairedFramePairs ?? cliArgs.framePairMaxPairs,
+    12,
+    1,
+    PAIRED_FRAME_HARD_MAX_PAIRS,
+    "pairedFrameMaxPairs",
+  );
+  const maxOutputBytes = boundedIntegerArg(
+    cliArgs.pairedFrameMaxOutputBytes ??
+      cliArgs.pairedFrameMaxBytes ??
+      cliArgs.maxPairedFrameBytes,
+    16 * 1024 * 1024,
+    1,
+    PAIRED_FRAME_HARD_MAX_OUTPUT_BYTES,
+    "pairedFrameMaxOutputBytes",
+  );
+  const maxDeltaMs = boundedIntegerArg(
+    cliArgs.pairedFrameMaxDeltaMs ?? cliArgs.framePairMaxDeltaMs,
+    75,
+    0,
+    5000,
+    "pairedFrameMaxDeltaMs",
+  );
+  const width = boundedIntegerArg(
+    cliArgs.pairedFrameWidth ?? cliArgs.framePairWidth,
+    Math.max(1, Math.round(analysisOptions.width)),
+    1,
+    PAIRED_FRAME_HARD_MAX_WIDTH,
+    "pairedFrameWidth",
+  );
+  const clipStartMs = optionalBoundedIntegerArg(
+    cliArgs.pairedFrameClipStartMs,
+    PAIRED_FRAME_HARD_MAX_CLIP_ABS_MS,
+    "pairedFrameClipStartMs",
+  );
+  const clipEndMs = optionalBoundedIntegerArg(
+    cliArgs.pairedFrameClipEndMs,
+    PAIRED_FRAME_HARD_MAX_CLIP_ABS_MS,
+    "pairedFrameClipEndMs",
+  );
+  if (clipStartMs !== null && clipEndMs !== null && clipStartMs > clipEndMs) {
+    throw new Error(
+      `--pairedFrameClipStartMs must be <= --pairedFrameClipEndMs; received ${clipStartMs} > ${clipEndMs}`,
+    );
+  }
+  return {
+    enabled: booleanArg(
+      cliArgs.emitPairedFrameDiffs ??
+        cliArgs.emitPairedFrameDiff ??
+        cliArgs.pairedFrameEvidence ??
+        cliArgs.pairedFrameDiff ??
+        "false",
+      false,
+    ),
+    width: width.value,
+    requestedWidth: width.requested,
+    maxPairs: maxPairs.value,
+    requestedMaxPairs: maxPairs.requested,
+    maxOutputBytes: maxOutputBytes.value,
+    requestedMaxOutputBytes: maxOutputBytes.requested,
+    maxDeltaMs: maxDeltaMs.value,
+    requestedMaxDeltaMs: maxDeltaMs.requested,
+    clipStartMs,
+    clipEndMs,
+    pixelDeltaThreshold: analysisOptions.pixelDeltaThreshold,
+    hardLimitsApplied: [width, maxPairs, maxOutputBytes, maxDeltaMs]
+      .filter((limit) => limit.hardCapped)
+      .map((limit) => limit.name),
+  };
+}
+
+function disabledPairedFrameEvidence(options) {
+  return {
+    enabled: false,
+    ok: true,
+    outputDir: null,
+    maxPairs: options.maxPairs,
+    maxOutputBytes: options.maxOutputBytes,
+    maxDeltaMs: options.maxDeltaMs,
+    clipWindow: {
+      requestedStartMs: options.clipStartMs,
+      requestedEndMs: options.clipEndMs,
+      native: null,
+      web: null,
+    },
+    candidatePairCount: 0,
+    selectedPairCount: 0,
+    emittedPairCount: 0,
+    outputBytes: 0,
+    truncated: false,
+    truncationReasons: [],
+    pairs: [],
+  };
+}
+
+async function emitPairedFrameEvidence({
+  original,
+  originalPath,
+  originalSummary,
+  web,
+  webPath,
+  webSummary,
+  outputDir,
+  prefix,
+  frameAnalysisOptions,
+  options,
+}) {
+  if (!frameAnalysisOptions.alignActions) {
+    throw new Error("Paired frame evidence requires action alignment; --alignActions false is not supported");
+  }
+  const nativeTimeline = originalSummary.actionTimeline;
+  const webTimeline = webSummary.actionTimeline;
+  if (!nativeTimeline?.count || !webTimeline?.count) {
+    throw new Error("Paired frame evidence requires native and Web action timelines");
+  }
+  if (nativeTimeline.count !== webTimeline.count) {
+    throw new Error(
+      `Paired frame evidence action count differs: native=${nativeTimeline.count}, web=${webTimeline.count}`,
+    );
+  }
+
+  const nativeClipWindow = resolvePairedFrameClipWindow(
+    nativeTimeline,
+    frameAnalysisOptions,
+    options,
+  );
+  const webClipWindow = resolvePairedFrameClipWindow(
+    webTimeline,
+    frameAnalysisOptions,
+    options,
+  );
+
+  const nativeFrames = collectActionAlignedFrames(
+    Array.isArray(original.samples) ? original.samples : [],
+    originalPath,
+    original,
+    "original",
+    nativeTimeline,
+    nativeClipWindow,
+  );
+  const webFrames = collectActionAlignedFrames(
+    Array.isArray(web.samples) ? web.samples : [],
+    webPath,
+    web,
+    "web",
+    webTimeline,
+    webClipWindow,
+  );
+  if (nativeFrames.length === 0 || webFrames.length === 0) {
+    throw new Error(
+      `Paired frame evidence requires resolvable aligned frames: native=${nativeFrames.length}, web=${webFrames.length}`,
+    );
+  }
+
+  const nearestPairs = matchNearestAlignedFrames(nativeFrames, webFrames, options.maxDeltaMs);
+  if (nearestPairs.length === 0) {
+    throw new Error(
+      `Paired frame evidence found no native/Web frames within ${options.maxDeltaMs}ms`,
+    );
+  }
+  const selectedPairs = selectBoundedPairs(nearestPairs, options.maxPairs);
+
+  // Validate every selected pair before creating evidence so mismatched captures fail closed.
+  for (const pair of selectedPairs) {
+    const nativeGeometry = await inspectFrameGeometry(pair.native.path);
+    const webGeometry = await inspectFrameGeometry(pair.web.path);
+    if (
+      nativeGeometry.width !== webGeometry.width ||
+      nativeGeometry.height !== webGeometry.height
+    ) {
+      throw new Error(
+        `Paired frame geometry differs at native index ${formatValue(pair.native.index)} / Web index ${formatValue(pair.web.index)}: ` +
+          `${nativeGeometry.width}x${nativeGeometry.height} vs ${webGeometry.width}x${webGeometry.height}`,
+      );
+    }
+    pair.geometry = nativeGeometry;
+  }
+
+  const evidenceDir = path.join(outputDir, `${safeFileStem(prefix)}-paired-frame-diff`);
+  const emittedPairs = [];
+  let outputBytes = 0;
+  let byteLimitReached = false;
+  for (let index = 0; index < selectedPairs.length; index += 1) {
+    const pair = selectedPairs[index];
+    const nativePixels = await loadEvidenceFramePixels(
+      pair.native.path,
+      pair.geometry,
+      options.width,
+    );
+    const webPixels = await loadEvidenceFramePixels(
+      pair.web.path,
+      pair.geometry,
+      options.width,
+    );
+    validateDecodedGeometry(nativePixels.info, webPixels.info, pair);
+    const artifacts = buildPairedFrameArtifacts(
+      nativePixels.data,
+      webPixels.data,
+      nativePixels.info,
+      options.pixelDeltaThreshold,
+    );
+    const [overlayPng, heatmapDiffPng] = await Promise.all([
+      encodeRawPng(artifacts.overlay, nativePixels.info),
+      encodeRawPng(artifacts.heatmapDiff, nativePixels.info),
+    ]);
+    const pairBytes = overlayPng.length + heatmapDiffPng.length;
+    if (outputBytes + pairBytes > options.maxOutputBytes) {
+      byteLimitReached = true;
+      break;
+    }
+
+    await fs.mkdir(evidenceDir, { recursive: true });
+    const pairNumber = emittedPairs.length + 1;
+    const fileNumber = String(pairNumber).padStart(3, "0");
+    const overlayPath = path.join(evidenceDir, `pair-${fileNumber}-overlay.png`);
+    const heatmapDiffPath = path.join(evidenceDir, `pair-${fileNumber}-heatmap-diff.png`);
+    await Promise.all([
+      fs.writeFile(overlayPath, overlayPng),
+      fs.writeFile(heatmapDiffPath, heatmapDiffPng),
+    ]);
+    outputBytes += pairBytes;
+    emittedPairs.push({
+      pairNumber,
+      native: describeAlignedFrame(pair.native, nativeTimeline),
+      web: describeAlignedFrame(pair.web, webTimeline),
+      signedDeltaMs: roundMetric(pair.signedDeltaMs, 3),
+      absoluteDeltaMs: roundMetric(pair.absoluteDeltaMs, 3),
+      geometry: {
+        sourceWidth: pair.geometry.width,
+        sourceHeight: pair.geometry.height,
+        evidenceWidth: nativePixels.info.width,
+        evidenceHeight: nativePixels.info.height,
+        channels: nativePixels.info.channels,
+      },
+      metrics: artifacts.metrics,
+      regionalMetrics: artifacts.regionalMetrics,
+      artifacts: {
+        overlayPng: {
+          path: overlayPath,
+          bytes: overlayPng.length,
+        },
+        heatmapDiffPng: {
+          path: heatmapDiffPath,
+          bytes: heatmapDiffPng.length,
+        },
+        totalBytes: pairBytes,
+      },
+    });
+  }
+
+  const pairLimitReached = nearestPairs.length > selectedPairs.length;
+  const truncationReasons = [];
+  if (pairLimitReached) truncationReasons.push("pair-count-limit");
+  if (byteLimitReached) truncationReasons.push("output-byte-limit");
+  return {
+    enabled: true,
+    ok: emittedPairs.length > 0,
+    outputDir: emittedPairs.length > 0 ? evidenceDir : null,
+    width: options.width,
+    maxPairs: options.maxPairs,
+    maxOutputBytes: options.maxOutputBytes,
+    maxDeltaMs: options.maxDeltaMs,
+    clipWindow: {
+      requestedStartMs: options.clipStartMs,
+      requestedEndMs: options.clipEndMs,
+      native: nativeClipWindow,
+      web: webClipWindow,
+    },
+    pixelDeltaThreshold: options.pixelDeltaThreshold,
+    nativeFrameCount: nativeFrames.length,
+    webFrameCount: webFrames.length,
+    candidatePairCount: nearestPairs.length,
+    selectedPairCount: selectedPairs.length,
+    geometryValidatedPairCount: selectedPairs.length,
+    emittedPairCount: emittedPairs.length,
+    skippedPairCount: nearestPairs.length - emittedPairs.length,
+    outputBytes,
+    truncated: truncationReasons.length > 0,
+    truncationReasons,
+    regionalSummary: summarizePairedFrameRegions(emittedPairs),
+    pairs: emittedPairs,
+  };
+}
+
+function collectActionAlignedFrames(
+  samples,
+  reportPath,
+  report,
+  kind,
+  actionTimeline,
+  clipWindow,
+) {
+  const firstActionMs = Number(actionTimeline.firstActionMs);
+  const clipStartMs = clipWindow.startMs;
+  const clipEndMs = clipWindow.endMs;
+  const frames = [];
+  for (const sample of samples) {
+    const framePath = resolveSampleFramePath(sample, reportPath, report, kind);
+    const captureElapsedMs = sampleElapsedMs(sample);
+    if (!framePath || !Number.isFinite(captureElapsedMs)) continue;
+    const alignedElapsedMs = captureElapsedMs - firstActionMs;
+    if (alignedElapsedMs < clipStartMs || alignedElapsedMs > clipEndMs) continue;
+    frames.push({
+      label: sample?.label ?? "unknown",
+      path: framePath,
+      captureElapsedMs,
+      alignedElapsedMs,
+      index: Number.isFinite(Number(sample?.index)) ? Number(sample.index) : null,
+      capturedAt: Number.isFinite(Number(sample?.capturedAt)) ? Number(sample.capturedAt) : null,
+    });
+  }
+  frames.sort((left, right) =>
+    left.alignedElapsedMs !== right.alignedElapsedMs
+      ? left.alignedElapsedMs - right.alignedElapsedMs
+      : compareFrameSamples(left, right),
+  );
+  return frames.map((frame, ordinal) => ({ ...frame, ordinal }));
+}
+
+function resolvePairedFrameClipWindow(actionTimeline, analysisOptions, evidenceOptions) {
+  const defaultStartMs = -Math.max(0, analysisOptions.preActionMs);
+  const defaultEndMs =
+    Number(actionTimeline.spanMs) + Math.max(0, analysisOptions.postActionMs);
+  const startMs = evidenceOptions.clipStartMs ?? defaultStartMs;
+  const endMs = evidenceOptions.clipEndMs ?? defaultEndMs;
+  if (startMs > endMs) {
+    throw new Error(
+      `Paired frame clip window is empty for action span ${actionTimeline.spanMs}ms: ${startMs}..${endMs}ms`,
+    );
+  }
+  return { startMs, endMs };
+}
+
+function matchNearestAlignedFrames(nativeFrames, webFrames, maxDeltaMs) {
+  const candidates = [];
+  let webStart = 0;
+  for (const native of nativeFrames) {
+    while (
+      webStart < webFrames.length &&
+      webFrames[webStart].alignedElapsedMs < native.alignedElapsedMs - maxDeltaMs
+    ) {
+      webStart += 1;
+    }
+    for (let webIndex = webStart; webIndex < webFrames.length; webIndex += 1) {
+      const web = webFrames[webIndex];
+      const signedDeltaMs = web.alignedElapsedMs - native.alignedElapsedMs;
+      if (signedDeltaMs > maxDeltaMs) break;
+      candidates.push({
+        native,
+        web,
+        signedDeltaMs,
+        absoluteDeltaMs: Math.abs(signedDeltaMs),
+      });
+      if (candidates.length > PAIRED_FRAME_HARD_MAX_CANDIDATES) {
+        throw new Error(
+          `Paired frame candidate count exceeds hard limit ${PAIRED_FRAME_HARD_MAX_CANDIDATES}`,
+        );
+      }
+    }
+  }
+  candidates.sort(
+    (left, right) =>
+      left.absoluteDeltaMs - right.absoluteDeltaMs ||
+      left.native.alignedElapsedMs - right.native.alignedElapsedMs ||
+      left.web.alignedElapsedMs - right.web.alignedElapsedMs,
+  );
+
+  const usedNative = new Set();
+  const usedWeb = new Set();
+  const matched = [];
+  for (const candidate of candidates) {
+    if (
+      usedNative.has(candidate.native.ordinal) ||
+      usedWeb.has(candidate.web.ordinal)
+    ) {
+      continue;
+    }
+    usedNative.add(candidate.native.ordinal);
+    usedWeb.add(candidate.web.ordinal);
+    matched.push(candidate);
+  }
+  matched.sort(
+    (left, right) =>
+      left.native.alignedElapsedMs - right.native.alignedElapsedMs ||
+      left.web.alignedElapsedMs - right.web.alignedElapsedMs,
+  );
+  return matched;
+}
+
+function selectBoundedPairs(pairs, maxPairs) {
+  if (pairs.length <= maxPairs) return pairs.map((pair) => ({ ...pair }));
+  if (maxPairs === 1) return [{ ...pairs[Math.floor(pairs.length / 2)] }];
+  return Array.from({ length: maxPairs }, (_, index) => {
+    const pairIndex = Math.round((index * (pairs.length - 1)) / (maxPairs - 1));
+    return { ...pairs[pairIndex] };
+  });
+}
+
+async function inspectFrameGeometry(filePath) {
+  const metadata = await sharp(toSharpPath(filePath)).metadata();
+  if (Number(metadata.pages ?? 1) !== 1) {
+    throw new Error(`Paired frame must be a single image: ${filePath}`);
+  }
+  const autoOrient =
+    metadata.autoOrient && typeof metadata.autoOrient === "object"
+      ? metadata.autoOrient
+      : null;
+  const swapsAxes = Number(metadata.orientation) >= 5 && Number(metadata.orientation) <= 8;
+  const width = Number(autoOrient?.width ?? (swapsAxes ? metadata.height : metadata.width));
+  const height = Number(autoOrient?.height ?? (swapsAxes ? metadata.width : metadata.height));
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
+    throw new Error(`Paired frame has invalid geometry: ${filePath}`);
+  }
+  if (width * height > PAIRED_FRAME_HARD_MAX_INPUT_PIXELS) {
+    throw new Error(
+      `Paired frame geometry ${width}x${height} exceeds hard pixel limit ${PAIRED_FRAME_HARD_MAX_INPUT_PIXELS}`,
+    );
+  }
+  return { width, height };
+}
+
+async function loadEvidenceFramePixels(filePath, geometry, maxWidth) {
+  const scale = Math.min(1, maxWidth / geometry.width, maxWidth / geometry.height);
+  const width = Math.max(1, Math.round(geometry.width * scale));
+  const height = Math.max(1, Math.round(geometry.height * scale));
+  const { data, info } = await sharp(toSharpPath(filePath))
+    .rotate()
+    .resize({ width, height, fit: "fill" })
+    .toColorspace("srgb")
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  if (info.channels !== 3 || data.length !== info.width * info.height * 3) {
+    throw new Error(
+      `Paired frame did not decode to bounded RGB geometry: ${filePath} (${info.width}x${info.height}x${info.channels})`,
+    );
+  }
+  return { data, info };
+}
+
+function validateDecodedGeometry(nativeInfo, webInfo, pair) {
+  if (
+    nativeInfo.width !== webInfo.width ||
+    nativeInfo.height !== webInfo.height ||
+    nativeInfo.channels !== webInfo.channels
+  ) {
+    throw new Error(
+      `Paired frame decoded geometry differs at native index ${formatValue(pair.native.index)} / Web index ${formatValue(pair.web.index)}: ` +
+        `${nativeInfo.width}x${nativeInfo.height}x${nativeInfo.channels} vs ` +
+        `${webInfo.width}x${webInfo.height}x${webInfo.channels}`,
+    );
+  }
+}
+
+function buildPairedFrameArtifacts(nativeData, webData, info, pixelDeltaThreshold) {
+  const overlay = Buffer.allocUnsafe(nativeData.length);
+  const heatmapDiff = Buffer.allocUnsafe(nativeData.length);
+  const histogram = new Uint32Array(256);
+  const pixelCount = info.width * info.height;
+  let channelAbsSum = 0;
+  let channelSquaredSum = 0;
+  let changedPixelCount = 0;
+  let maxChannelDelta = 0;
+  let maxMeanPixelDelta = 0;
+  for (let offset = 0; offset < nativeData.length; offset += 3) {
+    let pixelDelta = 0;
+    for (let channel = 0; channel < 3; channel += 1) {
+      const nativeValue = nativeData[offset + channel];
+      const webValue = webData[offset + channel];
+      const delta = Math.abs(nativeValue - webValue);
+      overlay[offset + channel] = Math.round((nativeValue + webValue) / 2);
+      pixelDelta += delta;
+      channelAbsSum += delta;
+      channelSquaredSum += delta * delta;
+      maxChannelDelta = Math.max(maxChannelDelta, delta);
+    }
+    const meanPixelDelta = pixelDelta / 3;
+    const roundedPixelDelta = Math.min(255, Math.round(meanPixelDelta));
+    histogram[roundedPixelDelta] += 1;
+    maxMeanPixelDelta = Math.max(maxMeanPixelDelta, meanPixelDelta);
+    if (meanPixelDelta >= pixelDeltaThreshold) changedPixelCount += 1;
+
+    const red = Math.min(255, Math.round(meanPixelDelta * 4));
+    const green = Math.min(255, Math.max(0, Math.round((meanPixelDelta - 32) * 4)));
+    const blue = Math.min(255, Math.max(0, Math.round((meanPixelDelta - 96) * 4)));
+    heatmapDiff[offset] = red;
+    heatmapDiff[offset + 1] = green;
+    heatmapDiff[offset + 2] = blue;
+  }
+  const channelCount = pixelCount * 3;
+  const rmse = Math.sqrt(channelSquaredSum / channelCount);
+  const regionalMetrics = Object.fromEntries(
+    PAIRED_FRAME_REGIONS.map((region) => [
+      region.key,
+      measurePairedFrameRegion(
+        nativeData,
+        webData,
+        info,
+        region,
+        pixelDeltaThreshold,
+        channelAbsSum,
+      ),
+    ]),
+  );
+  return {
+    overlay,
+    heatmapDiff,
+    metrics: {
+      pixelCount,
+      changedPixelCount,
+      changedPixelRatio: roundMetric(changedPixelCount / pixelCount, 6),
+      meanAbsDelta: roundMetric(channelAbsSum / channelCount, 4),
+      rootMeanSquareDelta: roundMetric(rmse, 4),
+      maxChannelDelta,
+      maxMeanPixelDelta: roundMetric(maxMeanPixelDelta, 4),
+      p95MeanPixelDelta: histogramPercentile(histogram, pixelCount, 0.95),
+      pixelDeltaThreshold,
+    },
+    regionalMetrics,
+  };
+}
+
+function measurePairedFrameRegion(
+  nativeData,
+  webData,
+  info,
+  region,
+  pixelDeltaThreshold,
+  fullFrameAbsSum,
+) {
+  const left = Math.min(info.width - 1, Math.max(0, Math.floor(region.x0 * info.width)));
+  const top = Math.min(info.height - 1, Math.max(0, Math.floor(region.y0 * info.height)));
+  const right = Math.min(info.width, Math.max(left + 1, Math.round(region.x1 * info.width)));
+  const bottom = Math.min(info.height, Math.max(top + 1, Math.round(region.y1 * info.height)));
+  let channelAbsSum = 0;
+  let nativeChannelSum = 0;
+  let webChannelSum = 0;
+  let changedPixelCount = 0;
+  let pixelCount = 0;
+
+  for (let y = top; y < bottom; y += 1) {
+    for (let x = left; x < right; x += 1) {
+      const offset = (y * info.width + x) * 3;
+      let pixelDelta = 0;
+      for (let channel = 0; channel < 3; channel += 1) {
+        const nativeValue = nativeData[offset + channel];
+        const webValue = webData[offset + channel];
+        const delta = Math.abs(nativeValue - webValue);
+        channelAbsSum += delta;
+        pixelDelta += delta;
+        nativeChannelSum += nativeValue;
+        webChannelSum += webValue;
+      }
+      if (pixelDelta / 3 >= pixelDeltaThreshold) changedPixelCount += 1;
+      pixelCount += 1;
+    }
+  }
+
+  const channelCount = pixelCount * 3;
+  return {
+    label: region.label,
+    bounds: { left, top, right, bottom },
+    pixelCount,
+    changedPixelCount,
+    changedPixelRatio: roundMetric(changedPixelCount / pixelCount, 6),
+    meanAbsDelta: roundMetric(channelAbsSum / channelCount, 4),
+    nativeMeanChannel: roundMetric(nativeChannelSum / channelCount, 3),
+    webMeanChannel: roundMetric(webChannelSum / channelCount, 3),
+    absoluteDeltaContribution: roundMetric(
+      fullFrameAbsSum > 0 ? channelAbsSum / fullFrameAbsSum : 0,
+      6,
+    ),
+  };
+}
+
+function summarizePairedFrameRegions(pairs) {
+  if (!pairs.length) return {};
+  return Object.fromEntries(
+    PAIRED_FRAME_REGIONS.map((region) => {
+      const samples = pairs
+        .map((pair) => pair.regionalMetrics?.[region.key])
+        .filter(Boolean);
+      return [
+        region.key,
+        {
+          label: region.label,
+          pairCount: samples.length,
+          meanAbsDeltaAverage: averageMetric(samples.map((sample) => sample.meanAbsDelta), 4),
+          changedPixelRatioAverage: averageMetric(
+            samples.map((sample) => sample.changedPixelRatio),
+            6,
+          ),
+          nativeMeanChannelAverage: averageMetric(
+            samples.map((sample) => sample.nativeMeanChannel),
+            3,
+          ),
+          webMeanChannelAverage: averageMetric(
+            samples.map((sample) => sample.webMeanChannel),
+            3,
+          ),
+          absoluteDeltaContributionAverage: averageMetric(
+            samples.map((sample) => sample.absoluteDeltaContribution),
+            6,
+          ),
+        },
+      ];
+    }),
+  );
+}
+
+function histogramPercentile(histogram, count, percentile) {
+  const target = Math.max(1, Math.ceil(count * percentile));
+  let seen = 0;
+  for (let value = 0; value < histogram.length; value += 1) {
+    seen += histogram[value];
+    if (seen >= target) return value;
+  }
+  return histogram.length - 1;
+}
+
+async function encodeRawPng(data, info) {
+  return sharp(data, {
+    raw: {
+      width: info.width,
+      height: info.height,
+      channels: info.channels,
+    },
+  })
+    .png({ compressionLevel: 9, adaptiveFiltering: true })
+    .toBuffer();
+}
+
+function describeAlignedFrame(frame, actionTimeline) {
+  const nearestAction = actionTimeline.entries
+    .map((entry, index) => ({
+      index,
+      label: entry.label,
+      type: entry.type,
+      alignedElapsedMs: entry.elapsedMs - actionTimeline.firstActionMs,
+    }))
+    .reduce((nearest, action) => {
+      const distance = Math.abs(frame.alignedElapsedMs - action.alignedElapsedMs);
+      return !nearest || distance < nearest.distance ? { ...action, distance } : nearest;
+    }, null);
+  return {
+    path: frame.path,
+    label: frame.label,
+    index: frame.index,
+    captureElapsedMs: frame.captureElapsedMs,
+    actionAlignedElapsedMs: frame.alignedElapsedMs,
+    nearestAction: nearestAction
+      ? {
+          index: nearestAction.index,
+          label: nearestAction.label,
+          type: nearestAction.type,
+          offsetMs: roundMetric(frame.alignedElapsedMs - nearestAction.alignedElapsedMs, 3),
+        }
+      : null,
+  };
+}
+
+function safeFileStem(value) {
+  const stem = String(value)
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+  return stem || "movement-temporal";
 }
 
 async function analyzeFrameCadence(
@@ -766,6 +1496,10 @@ function renderMarkdown(report) {
     "## Web Movement Capture",
     "",
     ...renderWebSection(report.web),
+    "",
+    "## Paired Frame Evidence",
+    "",
+    ...renderPairedFrameEvidence(report.pairedFrameEvidence),
   ];
 
   if (report.webBichon) {
@@ -792,6 +1526,45 @@ function renderWebSection(web) {
     "",
     ...renderFrameCadence(web.frameCadence),
   ];
+}
+
+function renderPairedFrameEvidence(evidence) {
+  if (!evidence?.enabled) {
+    return ["- Paired frame evidence: not requested"];
+  }
+  return [
+    `- Status: ${evidence.ok ? "ok" : "no evidence emitted"}`,
+    `- Nearest pairs: candidates=${evidence.candidatePairCount}, selected=${evidence.selectedPairCount}, emitted=${evidence.emittedPairCount}`,
+    `- Bounds: maxPairs=${evidence.maxPairs}, maxDeltaMs=${evidence.maxDeltaMs}, clip=${formatPairedFrameClipWindow(evidence.clipWindow)}, outputBytes=${evidence.outputBytes}/${evidence.maxOutputBytes}`,
+    `- Truncated: ${evidence.truncated ? evidence.truncationReasons.join(", ") : "no"}`,
+    `- Output: \`${evidence.outputDir ?? ""}\``,
+    "",
+    "| Pair | Native/Web aligned ms | Delta ms | Mean abs / RMSE | Changed px | Overlay bytes | Heatmap bytes |",
+    "| ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...evidence.pairs.map(
+      (pair) =>
+        `| ${pair.pairNumber} | ${formatValue(pair.native.actionAlignedElapsedMs)} / ${formatValue(pair.web.actionAlignedElapsedMs)} | ${formatValue(pair.signedDeltaMs)} | ${formatValue(pair.metrics.meanAbsDelta)} / ${formatValue(pair.metrics.rootMeanSquareDelta)} | ${pair.metrics.changedPixelCount}/${pair.metrics.pixelCount} (${formatValue(pair.metrics.changedPixelRatio)}) | ${pair.artifacts.overlayPng.bytes} | ${pair.artifacts.heatmapDiffPng.bytes} |`,
+    ),
+    "",
+    "### Regional Averages",
+    "",
+    "| Region | Pairs | Mean abs | Changed px ratio | Native/Web mean channel | Abs delta contribution |",
+    "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ...Object.values(evidence.regionalSummary ?? {}).map(
+      (region) =>
+        `| ${region.label} | ${region.pairCount} | ${formatValue(region.meanAbsDeltaAverage)} | ${formatValue(region.changedPixelRatioAverage)} | ${formatValue(region.nativeMeanChannelAverage)} / ${formatValue(region.webMeanChannelAverage)} | ${formatValue(region.absoluteDeltaContributionAverage)} |`,
+    ),
+  ];
+}
+
+function formatPairedFrameClipWindow(clipWindow) {
+  const native = clipWindow?.native;
+  const web = clipWindow?.web;
+  if (!native || !web) return "n/a";
+  if (native.startMs === web.startMs && native.endMs === web.endMs) {
+    return `${native.startMs}..${native.endMs}ms`;
+  }
+  return `native ${native.startMs}..${native.endMs}ms / web ${web.startMs}..${web.endMs}ms`;
 }
 
 function renderFrameCadence(cadence) {
@@ -897,6 +1670,32 @@ function formatValue(value) {
 function numberArg(value, fallback) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function boundedIntegerArg(value, fallback, minimum, hardMaximum, name) {
+  const requested = value === undefined || value === null ? fallback : Number(value);
+  if (!Number.isSafeInteger(requested) || requested < minimum) {
+    throw new Error(
+      `--${name} must be a safe integer >= ${minimum}; received ${String(value)}`,
+    );
+  }
+  return {
+    name,
+    requested,
+    value: Math.min(requested, hardMaximum),
+    hardCapped: requested > hardMaximum,
+  };
+}
+
+function optionalBoundedIntegerArg(value, hardMaximumAbsolute, name) {
+  if (value === undefined || value === null) return null;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || Math.abs(parsed) > hardMaximumAbsolute) {
+    throw new Error(
+      `--${name} must be a safe integer between ${-hardMaximumAbsolute} and ${hardMaximumAbsolute}; received ${String(value)}`,
+    );
+  }
+  return parsed;
 }
 
 function booleanArg(value, fallback) {

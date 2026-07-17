@@ -21,6 +21,7 @@ export const setMir2SelfCameraMotion: (a: number, b: number, c: number, d: numbe
 export const setMir2MapCameraOffset: (a: number, b: number) => void;
 export const setMir2PresentationPoseSink: (a: any) => void;
 export const setMir2StatusSink: (a: any) => void;
+export const releaseMir2MapRenderImages: (a: number, b: number) => void;
 export const clearMir2StatusSink: () => void;
 export const clearMir2PresentationPoseSink: () => void;
 export const wasm_bindgen__convert__closures_____invoke__h4a292f8eb4388d53: (a: number, b: number, c: any) => [number, number];

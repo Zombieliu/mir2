@@ -97,11 +97,14 @@ import {
   crystalPlayerAnimationMeta,
   type CrystalPlayerActionKey,
 } from "./original-client-player-frames";
+import { crystalEntityAnimationMeta } from "./original-client-entity-frames";
 
 type ViewportSpriteLayer = Pick<
   OriginalSceneSpriteFrameMeta,
-  "path" | "width" | "height" | "x" | "y"
+  "path" | "width" | "height" | "x" | "y" | "shadowX" | "shadowY" | "maskPath"
 >;
+
+type ViewportEffectLayer = ViewportSpriteLayer & { blend: boolean };
 
 export type ViewportEntitySprite = {
   mount: ViewportSpriteLayer | null;
@@ -109,6 +112,7 @@ export type ViewportEntitySprite = {
   body: ViewportSpriteLayer | null;
   hair: ViewportSpriteLayer | null;
   frontWeapons: ViewportSpriteLayer[];
+  effect: ViewportEffectLayer | null;
   preloadFrames: ViewportSpriteLayer[];
   preloadPaths: string[];
   nameplateTop: number;
@@ -153,14 +157,20 @@ const ENTITY_ATLAS_PRELOAD_STATES: readonly EntitySpriteAnimationState[] = [
   "reviving",
 ];
 
-type ViewportSpriteAnimationMeta = {
+type ViewportEffectAnimationMeta = {
   frameBaseOffset: number;
-  mountFrameBaseOffset?: number;
-  weaponFrameOffset: number | null;
   frameCount: number;
   directionStride: number;
   frameIntervalMs?: number;
   reverse?: boolean;
+  blend?: boolean;
+};
+
+type ViewportSpriteAnimationMeta = ViewportEffectAnimationMeta & {
+  frameBaseOffset: number;
+  mountFrameBaseOffset?: number;
+  weaponFrameOffset: number | null;
+  effect?: ViewportEffectAnimationMeta;
 };
 
 export function buildViewportEntitySprite(
@@ -177,10 +187,14 @@ export function buildViewportEntitySprite(
     return null;
   }
 
-  const animation = spriteAnimationMetaForEntity(entity, sprite, animationState);
-  if (!animation) {
-    return null;
-  }
+  const bodyLibraryKey = normalizeSceneSpriteLibraryKey(sprite.bodyLibrary);
+  const animation = spriteAnimationMetaForEntity(
+    entity,
+    sprite,
+    animationState,
+    libraries[bodyLibraryKey],
+  );
+  if (!animation) return null;
 
   const frameCycle = spriteFrameCycleForEntity(
     entity,
@@ -196,7 +210,6 @@ export function buildViewportEntitySprite(
     animation.frameBaseOffset +
     directionIndex(presentationDirection) * animation.directionStride +
     frameCycle;
-  const bodyLibraryKey = normalizeSceneSpriteLibraryKey(sprite.bodyLibrary);
   const hairLibraryKey = sprite.hairLibrary
     ? normalizeSceneSpriteLibraryKey(sprite.hairLibrary)
     : null;
@@ -210,6 +223,25 @@ export function buildViewportEntitySprite(
     sprite.frameBaseOffset +
     directionIndex(presentationDirection) * Math.max(sprite.directionStride, 1);
   const bodyFrame = frameMetaForIndexWithFallback(libraries[bodyLibraryKey], frameIndex, fallbackFrameIndex);
+  const effectCycle = animation.effect
+    ? spriteFrameCycleForEntity(
+        entity,
+        sceneFrameIndex,
+        now,
+        animationState,
+        { ...animation.effect, weaponFrameOffset: null },
+        motionSnapshot,
+        presentationMotion,
+      )
+    : 0;
+  const effectFrameIndex = animation.effect
+    ? animation.effect.frameBaseOffset +
+      directionIndex(presentationDirection) * animation.effect.directionStride +
+      effectCycle
+    : null;
+  const effectFrame = effectFrameIndex === null
+    ? null
+    : frameMetaForIndexWithFallback(libraries[bodyLibraryKey], effectFrameIndex, null);
   const hairFrame = hairLibraryKey
     ? frameMetaForIndexWithFallback(libraries[hairLibraryKey], frameIndex, fallbackFrameIndex)
     : null;
@@ -261,7 +293,13 @@ export function buildViewportEntitySprite(
   const mountFrame = mountLibraryKey
     ? frameMetaForIndexWithFallback(libraries[mountLibraryKey], mountFrameIndex, fallbackMountFrameIndex)
     : null;
-  const preloadAnimations = atlasPreloadAnimationsForEntity(entity, sprite, animationState, animation);
+  const preloadAnimations = atlasPreloadAnimationsForEntity(
+    entity,
+    sprite,
+    animationState,
+    animation,
+    libraries[bodyLibraryKey],
+  );
   const preloadFrames = animationPreloadFramesForEntity({
     libraries,
     animations: preloadAnimations,
@@ -282,6 +320,10 @@ export function buildViewportEntitySprite(
     body: viewportSpriteLayer(bodyFrame),
     hair: viewportSpriteLayer(hairFrame),
     frontWeapons,
+    effect:
+      effectFrame && animation.effect
+        ? { ...viewportSpriteLayer(effectFrame)!, blend: Boolean(animation.effect.blend) }
+        : null,
     preloadFrames,
     preloadPaths: [...new Set(preloadFrames.map((frame) => frame.path))],
     nameplateTop: computeNameplateTop(bodyFrame, hairFrame, primaryWeaponFrame ?? secondaryWeaponFrame),
@@ -344,7 +386,9 @@ function resolvedEntitySprite(
 
   if (
     isArcherAlt &&
-    (animationState === "walking" || animationState === "running" || animationState === "attackRange")
+    (animationState === "walking" ||
+      animationState === "running" ||
+      (animationState === "attackRange" && entity.attackAnimation !== "spell"))
   ) {
     const altWeaponLibrary =
       spriteAltWeaponLibrary && sceneLibraryExists(libraries, spriteAltWeaponLibrary)
@@ -429,6 +473,9 @@ function viewportSpriteLayer(frame: OriginalSceneSpriteFrameMeta | null): Viewpo
     height: frame.height,
     x: frame.x,
     y: frame.y,
+    shadowX: frame.shadowX,
+    shadowY: frame.shadowY,
+    maskPath: frame.maskPath,
   };
 }
 
@@ -437,7 +484,7 @@ function entitySpriteLayers(sprite: ViewportEntitySprite | null): ViewportSprite
     return [];
   }
 
-  return [sprite.mount, sprite.body, sprite.hair, ...sprite.rearWeapons, ...sprite.frontWeapons].filter(
+  return [sprite.mount, sprite.body, sprite.hair, ...sprite.rearWeapons, ...sprite.frontWeapons, sprite.effect].filter(
     (layer): layer is ViewportSpriteLayer => Boolean(layer),
   );
 }
@@ -554,6 +601,14 @@ function animationPreloadFramesForEntity({
               animation.directionStride,
               animation.frameCount,
             );
+      const effectFrameIndices = animation.effect
+        ? animationFrameIndices(
+            animation.effect.frameBaseOffset,
+            preloadDirection,
+            animation.effect.directionStride,
+            animation.effect.frameCount,
+          )
+        : [];
       frames.push(
         ...frameLayersForIndices(libraries[bodyLibraryKey], bodyFrameIndices, fallbackFrameIndex),
         ...(hairLibraryKey
@@ -568,6 +623,7 @@ function animationPreloadFramesForEntity({
         ...(mountLibraryKey
           ? frameLayersForIndices(libraries[mountLibraryKey], mountFrameIndices, fallbackMountFrameIndex)
           : []),
+        ...frameLayersForIndices(libraries[bodyLibraryKey], effectFrameIndices, null),
       );
     }
   }
@@ -583,6 +639,7 @@ function atlasPreloadAnimationsForEntity(
   sprite: EntitySprite,
   animationState: EntitySpriteAnimationState,
   currentAnimation: ViewportSpriteAnimationMeta,
+  bodyLibrary: OriginalSceneSpriteLibraryMeta | null | undefined,
 ) {
   // Keep the atlas source set stable across short-lived actions. Building only
   // the current action made a turn, hit, or attack generate a new atlas key;
@@ -601,13 +658,17 @@ function atlasPreloadAnimationsForEntity(
         animation.frameCount,
         animation.directionStride,
         animation.reverse ? "reverse" : "forward",
+        animation.blend ? "blend" : "normal",
+        animation.effect
+          ? `${animation.effect.frameBaseOffset}/${animation.effect.frameCount}/${animation.effect.directionStride}`
+          : "no-effect",
       ].join(":"),
       animation,
     );
   };
 
   for (const state of states) {
-    addAnimation(spriteAnimationMetaForEntity(entity, sprite, state));
+    addAnimation(spriteAnimationMetaForEntity(entity, sprite, state, bodyLibrary));
   }
   if (entity.kind !== "monster" && entity.kind !== "npc" && !sprite.mountLibrary) {
     // attackMelee selects one variant from the live packet. Preload every
@@ -615,6 +676,7 @@ function atlasPreloadAnimationsForEntity(
     for (const action of ["attack1", "attack2", "attack3", "attack4"] as const) {
       addAnimation(playerAnimationMetaForAction(sprite, action));
     }
+    addAnimation(playerAnimationMetaForAction(sprite, "spell"));
   }
   addAnimation(currentAnimation);
   return [...animations.values()];
@@ -632,7 +694,7 @@ function animationFrameIndices(
   directionStride: number,
   frameCount: number,
 ) {
-  const stride = Math.max(directionStride, 1);
+  const stride = Math.max(directionStride, 0);
   const count = Math.max(frameCount, 1);
   const base = frameBaseOffset + directionIndex(direction) * stride;
 
@@ -761,7 +823,20 @@ function spriteAnimationMetaForEntity(
   entity: DisplayEntity,
   sprite: EntitySprite,
   animationState: EntitySpriteAnimationState,
+  bodyLibrary?: OriginalSceneSpriteLibraryMeta | null,
 ): ViewportSpriteAnimationMeta | null {
+  if (entity.kind === "monster" || entity.kind === "npc") {
+    const frameSetAnimation = crystalEntityAnimationMeta(
+      bodyLibrary?.frameSet,
+      animationState,
+      sprite.frameBaseOffset,
+      entity.attackAnimation,
+    );
+    if (frameSetAnimation) {
+      return { ...frameSetAnimation, weaponFrameOffset: null };
+    }
+  }
+
   if (entity.kind === "npc") {
     return {
       frameBaseOffset: sprite.frameBaseOffset,
@@ -855,7 +930,9 @@ function spriteAnimationMetaForEntity(
 
   const archerAlt =
     Boolean(sprite.bodyLibrary.startsWith("ARArmour/")) &&
-    (animationState === "walking" || animationState === "running" || animationState === "attackRange");
+    (animationState === "walking" ||
+      animationState === "running" ||
+      (animationState === "attackRange" && entity.attackAnimation !== "spell"));
 
   switch (animationState) {
     case "walking":
@@ -874,7 +951,10 @@ function spriteAnimationMetaForEntity(
               : "attack1",
       );
     case "attackRange":
-      return playerAnimationMetaForAction(sprite, "attackRange");
+      return playerAnimationMetaForAction(
+        sprite,
+        entity.attackAnimation === "spell" ? "spell" : "attackRange",
+      );
     case "struck":
       return playerAnimationMetaForAction(sprite, "struck");
     case "dying":
@@ -949,18 +1029,21 @@ export function entityQuestIconTopOffset(sprite: ViewportEntitySprite | null) {
 }
 
 export function entityNameplateLeftOffset(entity: DisplayEntity, sprite: ViewportEntitySprite | null) {
-  if (entity.kind === "npc") {
-    return entityVisualCenterLeftOffset(entity, sprite);
-  }
-  return 25;
+  // Crystal centers player labels in a fixed 50px DisplayRectangle band and
+  // NPC/monster labels in a fixed 48px band, independent of sprite dimensions.
+  return entity.kind === "npc" || entity.kind === "monster" ? 24 : 25;
 }
 
 export function entityNameplateTopOffset(entity: DisplayEntity, sprite: ViewportEntitySprite | null) {
+  // MirLabel is 12px high in this presentation. These are Crystal's alive
+  // DisplayRectangle formulas after substituting half the label height:
+  // player: -(31 - 6) + 8 = -17; NPC/monster: -(32 - 6) + 8 = -18.
+  const displayRectangleOffset = entity.kind === "npc" || entity.kind === "monster" ? -18 : -17;
   const lineAdjustment =
     (entity.kind === "npc" || entity.kind === "monster") && entity.name.includes("_")
       ? -((entity.name.split("_").filter(Boolean).length - 1) * 10) / 2
       : 0;
-  return nameplateTopOffset(sprite) + lineAdjustment;
+  return displayRectangleOffset + lineAdjustment + (entity.dead ? 35 : 0);
 }
 
 function weaponPlacementForDirection(direction?: string) {

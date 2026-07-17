@@ -12,6 +12,7 @@ use wasm_bindgen::prelude::*;
 
 const PRESENTATION_POSE_VERSION: u8 = 1;
 const MAX_ENTITY_POSES: usize = 256;
+const LOCAL_COMMAND_PROMOTION_TOLERANCE_PX: f32 = 0.001;
 
 thread_local! {
     static LATEST_JSON: RefCell<Option<String>> = const { RefCell::new(None) };
@@ -172,6 +173,15 @@ impl PresentationPoseBuffer {
         self.provenance.map_center
     }
 
+    pub(crate) fn coherent_applied_center(&self) -> Option<PresentationGridCenter> {
+        match (self.provenance.map_center, self.provenance.entity_center) {
+            (Some(map_center), Some(entity_center)) if map_center == entity_center => {
+                Some(map_center)
+            }
+            _ => None,
+        }
+    }
+
     pub(crate) fn record_entity(
         &mut self,
         object_id: &str,
@@ -225,6 +235,30 @@ impl PresentationPoseBuffer {
             y: offset.y,
             source,
         };
+    }
+
+    pub(crate) fn promote_matching_self_window_to_local_command(
+        &mut self,
+        entity_offset: Vec2,
+        motion: Option<EntityPresentationMotion>,
+    ) -> bool {
+        if !self.renderer_enabled
+            || self.camera.source != CameraPoseSource::SelfWindow
+            || !entity_offset.is_finite()
+        {
+            return false;
+        }
+
+        let delta = self.self_entity_offset() - entity_offset;
+        if delta.x.abs() > LOCAL_COMMAND_PROMOTION_TOLERANCE_PX
+            || delta.y.abs() > LOCAL_COMMAND_PROMOTION_TOLERANCE_PX
+        {
+            return false;
+        }
+
+        self.set_local_self_motion(motion);
+        self.set_camera(-entity_offset, CameraPoseSource::LocalCommand);
+        true
     }
 
     pub(crate) fn camera_screen_offset(&self) -> Vec2 {
@@ -396,6 +430,22 @@ mod tests {
     }
 
     #[test]
+    fn coherent_applied_center_tracks_rendered_layers_not_requested_snapshot() {
+        let mut buffer = PresentationPoseBuffer::default();
+        assert_eq!(buffer.coherent_applied_center(), None);
+
+        let rendered_center = PresentationGridCenter { x: 332, y: 275 };
+        buffer.set_applied_map_provenance(Some(rendered_center), Some(17));
+        assert_eq!(buffer.coherent_applied_center(), None);
+
+        buffer.set_applied_entity_center(Some(PresentationGridCenter { x: 331, y: 275 }));
+        assert_eq!(buffer.coherent_applied_center(), None);
+
+        buffer.set_applied_entity_center(Some(rendered_center));
+        assert_eq!(buffer.coherent_applied_center(), Some(rendered_center));
+    }
+
+    #[test]
     fn duplicate_entity_updates_in_place() {
         let mut buffer = PresentationPoseBuffer::default();
         buffer.set_enabled(true);
@@ -432,6 +482,41 @@ mod tests {
         let value: serde_json::Value =
             serde_json::from_str(&buffer.publish()).expect("valid settled pose json");
         assert!(value["entities"][0].get("motion").is_none());
+    }
+
+    #[test]
+    fn matching_self_window_promotes_source_without_moving_pixels() {
+        let mut buffer = PresentationPoseBuffer::default();
+        buffer.set_enabled(true);
+        buffer.begin_frame(10.0, true);
+        buffer.set_camera(Vec2::new(-40.0, 0.0), CameraPoseSource::SelfWindow);
+        let camera_before = buffer.camera_screen_offset();
+        let entity_before = buffer.self_entity_offset();
+        let motion = EntityPresentationMotion {
+            frame_index: 0,
+            phase_count: 6,
+            mode: "walk".to_owned(),
+            direction: "Left".to_owned(),
+        };
+
+        assert!(!buffer.promote_matching_self_window_to_local_command(
+            Vec2::new(39.0, 0.0),
+            Some(motion.clone()),
+        ));
+        assert!(buffer
+            .promote_matching_self_window_to_local_command(Vec2::new(40.0, 0.0), Some(motion),));
+        assert_eq!(buffer.camera_source(), CameraPoseSource::LocalCommand);
+        assert_eq!(buffer.camera_screen_offset(), camera_before);
+        assert_eq!(buffer.self_entity_offset(), entity_before);
+
+        buffer.record_entity("self", entity_before, EntityPoseSource::LocalCommand);
+        assert_eq!(
+            buffer.entities[0]
+                .motion
+                .as_ref()
+                .map(|value| value.frame_index),
+            Some(0)
+        );
     }
 
     #[test]

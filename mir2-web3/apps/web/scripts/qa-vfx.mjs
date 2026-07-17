@@ -38,17 +38,17 @@ const outputDir = path.resolve(args.output ?? path.join(process.cwd(), "docs", "
 const EFFECTS_MANIFEST_URL = "/original-effects/effects.generated.json";
 
 // Crystal Player FrameSet action bases (Crystal/Client/MirObjects/Frames.cs:155-199). `webUse`
-// flags how the web actor renderer reaches the frame (scene-rendering.tsx): magic cast →
-// attackRange(+96); melee → attackMelee(+136). Crystal's real Spell(296) cast pose is NOT used.
+// flags how the web actor renderer reaches the frame (scene-rendering.tsx): magic casts use
+// Spell(+296), physical ranged attacks use AttackRange1(+96), and melee uses Attack1(+136).
 const PLAYER_ACTIONS = [
   { action: "Standing", base: 0, webUse: "idle" },
   { action: "Walking", base: 32, webUse: "move" },
   { action: "Running", base: 80, webUse: "move" },
-  { action: "AttackRange1", base: 96, webUse: "★ magic cast pose (web maps cast→attackRange +96)" },
+  { action: "AttackRange1", base: 96, webUse: "physical ranged attack" },
   { action: "Attack1", base: 136, webUse: "★ melee attack pose (attackMelee +136)" },
   { action: "Attack2", base: 184, webUse: "melee2" },
   { action: "Attack3", base: 232, webUse: "melee3" },
-  { action: "Spell", base: 296, webUse: "Crystal's REAL cast pose — NOT used by web" },
+  { action: "Spell", base: 296, webUse: "magic cast pose" },
   { action: "Struck", base: 360, webUse: "hit reaction" },
   { action: "Die", base: 384, webUse: "death" },
   { action: "Attack4", base: 416, webUse: "melee4" },
@@ -125,8 +125,9 @@ async function main() {
   for (const lib of ACTOR_LIBS) {
     const meta = await fetchJson(`/original-ui/${lib}/meta.json`);
     const frames = (meta.json && (meta.json.frames ?? meta.json)) || {};
+    const frameEntries = Array.isArray(frames) ? frames : Object.values(frames);
     for (const act of PLAYER_ACTIONS) {
-      const metaPresent = Boolean(frames[String(act.base)]);
+      const metaPresent = frameEntries.some((frame) => Number(frame?.index) === act.base);
       const png = await httpStatus(`/original-ui/${lib}/${act.base}.png`);
       grid[act.action] ??= { base: act.base, webUse: act.webUse, libs: {} };
       grid[act.action].libs[lib] = { meta: metaPresent, png: typeof png === "number" ? png : 0 };
@@ -154,11 +155,22 @@ async function main() {
     score("castPoseRenders", castPose || meleePose ? "gap" : "fail", `attackRange(+96)=${castPose ? "ok" : grid.AttackRange1?.libs["CArmour/00"]?.meta ? "no-bytes" : "no-meta"}, attackMelee(+136)=${meleePose ? "ok" : "missing"}`);
   }
 
-  // ④b Crystal's real Spell(296) cast pose — web doesn't map to it AND meta is truncated
+  // ④b Crystal's real Spell(296) cast pose.
   const realPose = renderable("Spell");
-  score("realCastPose", "gap", realPose
-    ? "Spell(296) frames resolve, but the web maps casts to attackRange(+96), so the faithful cast pose is unused"
-    : `Crystal's real cast pose Spell(296) is ${bytesOnly("Spell") ? "byte-present but META-TRUNCATED (no geometry)" : "absent"} AND unused by the web (casts reuse attackRange +96) — not faithful`);
+  const pageSource = await fs.readFile(path.join(process.cwd(), "app", "page.tsx"), "utf8");
+  const playerFrameSource = await fs.readFile(
+    path.join(process.cwd(), "app", "components", "original-client-player-frames.ts"),
+    "utf8",
+  );
+  const realPoseUsed = /attackAnimation:\s*"spell"/.test(pageSource) &&
+    /spell:\s*\{\s*start:\s*296,\s*count:\s*6/.test(playerFrameSource);
+  score(
+    "realCastPose",
+    realPose && realPoseUsed ? "pass" : "gap",
+    realPose && realPoseUsed
+      ? "Spell(296) frames resolve and Magic/ObjectMagic select the dedicated six-frame cast pose"
+      : `Crystal's real cast pose Spell(296) is ${bytesOnly("Spell") ? "byte-present but META-TRUNCATED" : "absent"} or not selected by magic packets`,
+  );
 
   // ④c action-frame meta completeness (the truncation gap)
   const gappedByteOnly = ["Spell", "Struck", "Die", "Attack4"].filter(bytesOnly);
