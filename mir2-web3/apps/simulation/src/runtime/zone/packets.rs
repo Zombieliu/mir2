@@ -95,6 +95,15 @@ pub(crate) fn apply_observer_action_state(
         } if *object_id == owner_local_object_id => {
             player.buffs.remove(buff_type);
         }
+        ServerPacket::PauseBuff {
+            buff_type,
+            object_id,
+            paused,
+        } if *object_id == owner_local_object_id => {
+            if let Some(state) = player.buffs.get_mut(buff_type) {
+                state.buff.paused = *paused;
+            }
+        }
         ServerPacket::PlayerUpdate {
             object_id,
             light,
@@ -156,6 +165,12 @@ pub(crate) fn apply_observer_action_state(
         }
         ServerPacket::ObjectHidden { object_id, hidden } if *object_id == owner_local_object_id => {
             player.hidden = *hidden;
+        }
+        ServerPacket::ObjectSneaking {
+            object_id,
+            sneaking_active,
+        } if *object_id == owner_local_object_id => {
+            player.sneaking = *sneaking_active;
         }
         ServerPacket::ObjectHide { object_id } if *object_id == owner_local_object_id => {
             player.hidden = true;

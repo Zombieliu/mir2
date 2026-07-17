@@ -33,6 +33,9 @@ mod stage5;
 mod stats;
 pub mod zone;
 
+/// Crystal's symmetric object-data/AOI radius around the local player.
+pub const CRYSTAL_OBJECT_DATA_RANGE: i32 = crystal_compat::CRYSTAL_DATA_RANGE;
+
 pub use drops::{
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
     SharedGroundDropPickupCommit,

@@ -10,10 +10,12 @@ use mir2_simulation::{
     ZoneRuntimeHandle,
 };
 
-use crate::events::{GatewayGameplayEvent, SharedGameplayEventSink};
+use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
 use crate::routing::{
-    InProcessZoneOwnerCommandClient, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority,
-    ZoneId, ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
+    shared_zone_movement_ingress, sync_zone_movement_transform, InProcessZoneOwnerCommandClient,
+    SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender, SharedZoneMovementIngress,
+    SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority, ZoneId, ZoneOwnerCommandRequest,
+    ZoneOwnerLease, ZoneRegistry,
 };
 
 pub type GatewayConfig = SimulationConfig;
@@ -43,6 +45,42 @@ fn panic_payload_message(payload: &(dyn Any + Send)) -> String {
     }
 }
 
+#[derive(Clone)]
+pub(crate) struct GatewayZoneMovementIngress {
+    ingress: SharedZoneMovementIngress,
+    zone_owner_lease: ZoneOwnerLease,
+    zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+    gameplay_event_publisher: Option<GatewayGameplayEventPublisher>,
+}
+
+impl GatewayZoneMovementIngress {
+    pub(crate) fn try_execute(
+        &self,
+        packet: ClientPacket,
+    ) -> Result<Option<WorldCommandExecution>, String> {
+        if let Some(authority) = &self.zone_owner_lease_authority {
+            authority.validate_owner_lease(&self.zone_owner_lease)?;
+        }
+        let execution = self.ingress.try_execute(packet)?;
+        if let (Some(publisher), Some(execution)) =
+            (&self.gameplay_event_publisher, execution.as_ref())
+        {
+            publisher.publish(&execution.outcome);
+        }
+        Ok(execution)
+    }
+
+    pub(crate) fn register_live_outbound(
+        &self,
+        sender: SharedZoneLiveOutboundSender,
+    ) -> Result<Option<SharedZoneLiveOutboundRegistration>, String> {
+        if let Some(authority) = &self.zone_owner_lease_authority {
+            authority.validate_owner_lease(&self.zone_owner_lease)?;
+        }
+        self.ingress.register_live_outbound(sender)
+    }
+}
+
 pub struct GatewaySession {
     session_id: String,
     zone_id: ZoneId,
@@ -52,8 +90,7 @@ pub struct GatewaySession {
     zone_owner_heartbeat_interval_ms: Option<u64>,
     next_zone_owner_heartbeat_at_ms: u64,
     runtime: ZoneRuntimeHandle,
-    gameplay_event_sink: Option<SharedGameplayEventSink>,
-    gameplay_event_sequence: u64,
+    gameplay_event_publisher: Option<GatewayGameplayEventPublisher>,
 }
 
 impl fmt::Debug for GatewaySession {
@@ -120,8 +157,7 @@ impl GatewaySession {
             zone_owner_heartbeat_interval_ms: None,
             next_zone_owner_heartbeat_at_ms: 0,
             runtime,
-            gameplay_event_sink: None,
-            gameplay_event_sequence: 0,
+            gameplay_event_publisher: None,
         }
     }
 
@@ -164,6 +200,8 @@ impl GatewaySession {
     ) -> Self {
         let zone_owner_command_client =
             default_zone_owner_command_client(zone_owner_lease_authority.as_ref());
+        let gameplay_event_publisher =
+            GatewayGameplayEventPublisher::new(zone_id.clone(), gameplay_event_sink);
         Self {
             session_id: next_gateway_session_id(),
             zone_id,
@@ -173,8 +211,7 @@ impl GatewaySession {
             zone_owner_heartbeat_interval_ms: None,
             next_zone_owner_heartbeat_at_ms: 0,
             runtime,
-            gameplay_event_sink: Some(gameplay_event_sink),
-            gameplay_event_sequence: 0,
+            gameplay_event_publisher: Some(gameplay_event_publisher),
         }
     }
 
@@ -242,6 +279,15 @@ impl GatewaySession {
 
     pub fn on_connect(&self) -> Vec<ServerPacket> {
         self.runtime.on_connect()
+    }
+
+    pub(crate) fn zone_movement_ingress(&self) -> Option<GatewayZoneMovementIngress> {
+        shared_zone_movement_ingress(&self.runtime).map(|ingress| GatewayZoneMovementIngress {
+            ingress,
+            zone_owner_lease: self.zone_owner_lease.clone(),
+            zone_owner_lease_authority: self.zone_owner_lease_authority.clone(),
+            gameplay_event_publisher: self.gameplay_event_publisher.clone(),
+        })
     }
 
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
@@ -410,7 +456,9 @@ impl GatewaySession {
             .expect("zone owner active identity should not fail")
     }
 
-    pub fn save_active_character(&self) {
+    pub fn save_active_character(&mut self) {
+        sync_zone_movement_transform(&mut self.runtime)
+            .expect("zone movement transform sync should not fail before save");
         self.zone_owner_command_client
             .save_active_character(&self.runtime)
             .expect("zone owner save should not fail");
@@ -448,14 +496,9 @@ impl GatewaySession {
         Ok(execution)
     }
 
-    fn publish_gameplay_event(&mut self, execution: &WorldCommandExecution) {
-        if let Some(sink) = self.gameplay_event_sink.clone() {
-            self.gameplay_event_sequence = self.gameplay_event_sequence.saturating_add(1);
-            sink.publish(GatewayGameplayEvent::from_world_outcome(
-                &self.zone_id,
-                self.gameplay_event_sequence,
-                &execution.outcome,
-            ));
+    fn publish_gameplay_event(&self, execution: &WorldCommandExecution) {
+        if let Some(publisher) = &self.gameplay_event_publisher {
+            publisher.publish(&execution.outcome);
         }
     }
 }
@@ -1213,6 +1256,69 @@ mod tests {
         assert_eq!(events[0].packet_count, packets.len());
         assert_eq!(events[0].snapshot_tick, 0);
         assert_eq!(events[0].event_id, "primary:0:3");
+    }
+
+    #[test]
+    fn gateway_zone_movement_ingress_publishes_gameplay_event_once() {
+        let event_sink = Arc::new(InMemoryGameplayEventSink::default());
+        let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
+        let mut session = GatewaySession::new_with_zone_registry_and_event_sink(
+            GatewayConfig::default(),
+            &crate::ZoneRegistry::in_process(),
+            shared_event_sink,
+        );
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        event_sink.drain();
+
+        let execution = session
+            .zone_movement_ingress()
+            .expect("shared runtime should expose movement ingress")
+            .try_execute(ClientPacket::Walk {
+                direction: MirDirection::Right,
+            })
+            .expect("movement ingress should execute")
+            .expect("safe movement should not fall back");
+        let events = event_sink.list();
+
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].event_id, "primary:0:3");
+        assert_eq!(events[0].command_kind, "client.Walk");
+        assert_eq!(events[0].account_id.as_deref(), Some("demo"));
+        assert_eq!(events[0].character_index, Some(0));
+        assert_eq!(events[0].character_name.as_deref(), Some("Scout"));
+        assert_eq!(events[0].packet_count, execution.packets.len());
+        assert_eq!(events[0].snapshot_tick, 0);
+    }
+
+    #[test]
+    fn gateway_zone_movement_ingress_rejects_stale_owner_lease() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let shared_authority: SharedZoneOwnerLeaseAuthority = authority.clone();
+        let registry = ZoneRegistry::in_process_with_owner_lease_authority(shared_authority);
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let ingress = session
+            .zone_movement_ingress()
+            .expect("shared runtime should expose movement ingress");
+
+        authority.handoff_zone_owner_at(session.zone_id(), "replacement-owner", 1);
+        let error = ingress
+            .try_execute(ClientPacket::Walk {
+                direction: MirDirection::Right,
+            })
+            .expect_err("stale ingress owner lease should be fenced");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner replacement-owner fencing token 2"));
     }
 
     #[test]

@@ -26,8 +26,8 @@ use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSour
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
-    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition,
-    WorldEntityKind,
+    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord,
+    WorldEntityDisposition, WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -1455,6 +1455,10 @@ fn start_game_emits_bootstrap_sequence() {
         .iter()
         .position(|packet| matches!(packet, ServerPacket::GuildBuffList { .. }))
         .expect("bootstrap should include Crystal guild buff list");
+    let time_of_day_index = packets
+        .iter()
+        .position(|packet| matches!(packet, ServerPacket::TimeOfDay { lights: 1..=4 }))
+        .expect("bootstrap should include the current Crystal time-of-day light setting");
     let recipe_index = packets
         .iter()
         .position(|packet| matches!(packet, ServerPacket::NewRecipeInfo { .. }))
@@ -1468,7 +1472,17 @@ fn start_game_emits_bootstrap_sequence() {
     assert!(map_index < user_index);
     assert!(user_index < recipe_index);
     assert!(recipe_index < base_stats_index);
+    assert!(base_stats_index < time_of_day_index);
     assert!(base_stats_index < guild_buff_index);
+}
+
+#[test]
+fn crystal_time_of_day_lights_match_server_utc_hour_formula() {
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(0), 4);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(3), 1);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(4), 2);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(8), 3);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(9), 4);
 }
 
 #[test]
@@ -1577,7 +1591,7 @@ fn start_game_migrates_legacy_level_one_warrior_vitals() {
 }
 
 #[test]
-fn new_crystal_character_starts_without_web_seed_state() {
+fn new_crystal_character_starts_with_crystal_equipment_without_web_seed_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::NewAccount {
         account_id: "crystalempty".to_string(),
@@ -1606,7 +1620,14 @@ fn new_crystal_character_starts_without_web_seed_state() {
     assert!(snapshot.inventory_items.is_empty());
     assert!(snapshot.belt_items.is_empty());
     assert!(snapshot.storage_items.is_empty());
-    assert!(snapshot.equipment_items.is_empty());
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" }));
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| item.slot == EquipmentSlot::Armour));
     assert!(snapshot
         .quest_log
         .iter()
@@ -1666,7 +1687,14 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
     assert!(snapshot.inventory_items.is_empty());
     assert!(snapshot.belt_items.is_empty());
     assert!(snapshot.storage_items.is_empty());
-    assert!(snapshot.equipment_items.is_empty());
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" }));
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| item.slot == EquipmentSlot::Armour));
     assert!(snapshot
         .quest_log
         .iter()
@@ -1687,10 +1715,71 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
         .and_then(|account| account.saves.get(&character.index))
         .expect("migrated save should remain stored");
     assert_eq!(save.gold, 0);
-    assert!(save.equipment_items_explicit_empty);
+    assert!(!save.equipment_items_explicit_empty);
+    assert!(!save.equipment_items_json.is_empty());
     assert!(save.inventory_items_json.is_empty());
     assert!(save.quest_states_json.is_empty());
     assert!(save.skill_states_json.is_empty());
+}
+
+#[test]
+fn start_game_restores_legacy_level_one_empty_starter_equipment() {
+    let config = SimulationConfig::default();
+    let character = CharacterRecord {
+        index: 44,
+        name: "LegacyNaked".to_string(),
+        level: 1,
+        class: MirClass::Warrior,
+        gender: MirGender::Male,
+    };
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let account = store
+            .accounts
+            .get_mut("demo")
+            .expect("default account should exist");
+        account.characters.push(character.clone());
+        let mut save = CharacterSaveRecord::new(character.clone());
+        save.gold = 0;
+        save.inventory_items_json = Vec::new();
+        save.belt_items_json = Vec::new();
+        save.storage_items_json = Vec::new();
+        save.equipment_items_json = Vec::new();
+        save.equipment_items_explicit_empty = true;
+        save.quest_states_json = Vec::new();
+        save.skill_states_json = Vec::new();
+        account.saves.insert(character.index, save);
+    }
+
+    let mut session = SimulationSession::new(config.clone());
+    let _ = session.handle_packet(ClientPacket::StartGame {
+        character_index: character.index,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.gold, 0);
+    assert!(snapshot.inventory_items.is_empty());
+    assert!(snapshot.belt_items.is_empty());
+    assert!(snapshot.storage_items.is_empty());
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" }));
+
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&character.index))
+        .expect("migrated save should remain stored");
+    assert!(!save.equipment_items_explicit_empty);
+    assert!(!save.equipment_items_json.is_empty());
 }
 
 #[test]
@@ -1766,6 +1855,76 @@ fn start_game_emits_visible_object_packets() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectNpc { .. })));
+}
+
+#[test]
+fn world_snapshot_uses_crystal_symmetric_sixteen_tile_object_range() {
+    let mut config = SimulationConfig::default();
+    config.visible_players.clear();
+    config.visible_monsters.clear();
+    config.visible_npcs = vec![
+        VisibleNpcRecord {
+            object_id: 91_001,
+            name: "X Edge".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 346, y: 270 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+        VisibleNpcRecord {
+            object_id: 91_002,
+            name: "Y Edge".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 330, y: 286 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+        VisibleNpcRecord {
+            object_id: 91_003,
+            name: "X Outside".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 347, y: 270 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+        VisibleNpcRecord {
+            object_id: 91_004,
+            name: "Y Outside".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 330, y: 287 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+    ];
+
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let snapshot = session.world_snapshot();
+
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_001));
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_002));
+    assert!(!snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_003));
+    assert!(!snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_004));
 }
 
 #[test]
@@ -3307,6 +3466,20 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
     assert_eq!(assistant.kind, WorldEntityKind::Npc);
     assert_eq!(assistant.name, "Assistant_Jane");
     assert_eq!((assistant.x, assistant.y), (284, 606));
+    assert_eq!(
+        assistant.light, 10,
+        "Crystal merchants always emit light 10"
+    );
+    assert_eq!(
+        snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("self player snapshot")
+            .light,
+        3,
+        "Crystal clamps an unequipped local user to light 3",
+    );
     assert!(snapshot
         .entities
         .iter()
@@ -22563,7 +22736,7 @@ fn moving_out_of_aoi_emits_object_remove_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    set_player_position(&mut session, Point { x: 342, y: 279 });
+    set_player_position(&mut session, Point { x: 351, y: 273 });
     let packets = session.tick();
 
     assert!(packets.iter().any(|packet| matches!(
@@ -23246,6 +23419,16 @@ fn gm_setlight_emits_personal_light_player_update() {
         .iter()
         .any(|packet| matches!(packet, ServerPacket::PlayerUpdate { light: 3, .. })));
     assert_eq!(session.app.world().resource::<GmRuntimeResource>().light, 3);
+    assert_eq!(
+        session
+            .world_snapshot()
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("self player snapshot")
+            .light,
+        3,
+    );
 }
 
 #[test]
@@ -23575,16 +23758,16 @@ fn world_snapshot_filters_outside_player_aoi() {
     let _ = session.interact(4001);
     kill_field_wasp(&mut session);
 
-    set_player_position(&mut session, Point { x: 342, y: 279 });
+    set_player_position(&mut session, Point { x: 351, y: 273 });
     let snapshot = session.world_snapshot();
 
     assert_eq!(
         snapshot.scene_view.as_ref().map(|view| view.center.x),
-        Some(342)
+        Some(351)
     );
     assert_eq!(
         snapshot.scene_view.as_ref().map(|view| view.center.y),
-        Some(279)
+        Some(273)
     );
     assert!(!snapshot
         .entities

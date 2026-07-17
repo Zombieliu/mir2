@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
@@ -6,8 +7,8 @@ use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
     crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_index,
-    crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
-    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
+    crystal_monster_by_name, crystal_npc_info_manifest, crystal_recipe_bootstrap_packets,
+    format_localized_text, localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientAuction, ClientBuff,
@@ -74,7 +75,7 @@ use super::items::{
 use super::map::{
     active_scene_view, crystal_movement_transfer_records_for_map, current_map_disallows_drug,
     current_map_disallows_hero, filter_decor_objects, filter_terrain_patches, is_safe_zone_point,
-    normalize_map_file_name, point_visible, rebuild_world, spawn_stage5_hero,
+    normalize_map_file_name, rebuild_world, spawn_stage5_hero,
 };
 use super::monster_ai::advance_world;
 use super::monsters::{
@@ -102,10 +103,10 @@ use super::resources::{
     crystal_packet_action_ready, crystal_packet_attack_delay_ticks,
     crystal_packet_move_delay_ticks, crystal_packet_spell_delay_ticks,
     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
-    queue_crystal_movement_retry, BuffResource, HeroInventoryResource, InventoryResource,
-    ItemRentalResource, MapRuntimeResource, MountResource, NpcStateResource, PlayerActionKind,
-    PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource, QuestResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
+    queue_crystal_movement_retry, BuffResource, GmRuntimeResource, HeroInventoryResource,
+    InventoryResource, ItemRentalResource, MapRuntimeResource, MountResource, NpcStateResource,
+    PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource,
+    QuestResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
     Stage5SystemsResource,
 };
 use super::save::*;
@@ -5139,6 +5140,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     for (key, amount) in &player_runtime.city_currencies {
         city_currencies.insert(key.clone(), *amount);
     }
+    let player_stats = super::stats::player_stats(world);
+    let max_weight = u16::try_from(player_stats.bag_weight().max(0)).unwrap_or(u16::MAX);
 
     WorldSnapshot {
         tick,
@@ -5154,17 +5157,19 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .and_then(|entity| entity_position(world, entity))
             .map(|position| is_safe_zone_point(config, map, &position))
             .unwrap_or(false),
+        light_setting: current_crystal_time_of_day_lights(),
         player_object_id,
         player_hp: player_vitals.map(|vitals| vitals.hp),
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
+        player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
         player_experience: player_runtime.experience,
         player_max_experience: player_runtime.max_experience,
         gold: player_runtime.gold,
         credit: player_runtime.credit,
         city_currencies,
         current_weight: current_weight(resources),
-        max_weight: super::drops::CRYSTAL_BAG_WEIGHT_LIMIT as u16,
+        max_weight,
         free_bag_slots: free_bag_slots(resources),
         max_bag_slots: 80,
         storage_size: resources.storage_size,
@@ -5619,7 +5624,9 @@ pub(super) fn start_game_base_stats_packet(class: MirClass) -> Vec<ServerPacket>
 
 pub(super) fn start_game_post_visible_crystal_bootstrap_packets() -> Vec<ServerPacket> {
     vec![
-        ServerPacket::TimeOfDay { lights: 4 },
+        ServerPacket::TimeOfDay {
+            lights: current_crystal_time_of_day_lights(),
+        },
         ServerPacket::ChangeAMode { mode: 0 },
         ServerPacket::ChangePMode { mode: 0 },
         ServerPacket::SwitchGroup { allow_group: false },
@@ -5635,6 +5642,29 @@ pub(super) fn start_game_post_visible_crystal_bootstrap_packets() -> Vec<ServerP
         ServerPacket::NPCResponse { page: Vec::new() },
         ServerPacket::NPCResponse { page: Vec::new() },
     ]
+}
+
+pub(super) fn crystal_time_of_day_lights_for_utc_hour(hour: u32) -> u8 {
+    // Crystal Envir.Now is seeded from DateTime.UtcNow, then AdjustLights uses
+    // `Now.Hour * 2 % 24` before broadcasting S.TimeOfDay.
+    let crystal_hour = (hour % 24) * 2 % 24;
+    if crystal_hour == 6 || crystal_hour == 7 {
+        1
+    } else if (8..=15).contains(&crystal_hour) {
+        2
+    } else if crystal_hour == 16 || crystal_hour == 17 {
+        3
+    } else {
+        4
+    }
+}
+
+pub(super) fn current_crystal_time_of_day_lights() -> u8 {
+    let utc_hour = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| ((duration.as_secs() / 3600) % 24) as u32)
+        .unwrap_or(0);
+    crystal_time_of_day_lights_for_utc_hour(utc_hour)
 }
 
 pub(super) fn decode_crystal_payload(packet_id: ServerPacketId, payload: Vec<u8>) -> ServerPacket {
@@ -5942,6 +5972,7 @@ pub(super) fn collect_world_entities(
     self_equipment_items: &[EquipmentState],
 ) -> Vec<WorldEntitySnapshot> {
     let mut result = Vec::new();
+    let self_light = crystal_self_player_light(world, self_equipment_items);
     // The local player's mount state lives in `MountResource` (Crystal sends
     // `MountType`/`RidingMount` per player object); carry it only while riding so the
     // self-entity sprite renders the mount and hides weapons, matching `entity_sprite_snapshot`.
@@ -5973,7 +6004,7 @@ pub(super) fn collect_world_entities(
         let npc_marker = entity.get::<Npc>();
         let npc_agent = entity.get::<NpcAgent>();
 
-        if self_marker.is_none() && !point_visible(scene_view, &position.0) {
+        if self_marker.is_none() && !point_in_scene_data_range(scene_view, &position.0) {
             continue;
         }
 
@@ -6059,6 +6090,15 @@ pub(super) fn collect_world_entities(
             WorldEntityKind::Npc => -16_711_936,
             _ => -1,
         };
+        let light = match kind {
+            WorldEntityKind::SelfPlayer => self_light,
+            // Crystal's NPCObject is a Merchant and assigns Light = 10.
+            WorldEntityKind::Npc => 10,
+            WorldEntityKind::Monster => crystal_monster_by_name(&name.value)
+                .map(|monster| monster.light)
+                .unwrap_or(0),
+            WorldEntityKind::Player => 0,
+        };
 
         result.push(WorldEntitySnapshot {
             object_id: object_id.0,
@@ -6073,6 +6113,7 @@ pub(super) fn collect_world_entities(
             level,
             hp,
             max_hp,
+            light,
             name_colour_argb,
             dead,
             disposition,
@@ -6082,6 +6123,23 @@ pub(super) fn collect_world_entities(
     }
 
     result
+}
+
+fn crystal_self_player_light(world: &World, equipment: &[EquipmentState]) -> u8 {
+    let explicit_light = world.resource::<GmRuntimeResource>().light;
+    if explicit_light > 0 {
+        return explicit_light;
+    }
+
+    equipment
+        .iter()
+        .filter(|item| !item.is_broken())
+        .filter_map(|item| crystal_item_template_for_item_key(&item.key))
+        .map(|template| template.light)
+        .max()
+        // Crystal UserObject.RefreshStats clamps the local user to at least 3.
+        .unwrap_or(0)
+        .max(3)
 }
 
 pub(super) fn entity_sprite_snapshot(
@@ -6265,7 +6323,7 @@ pub(super) fn collect_ground_drops(
             .resolve(language);
         let position = entity.get::<Position>().expect("drop position").0.clone();
         let payload = entity.get::<DropPayload>().expect("drop payload");
-        if !point_visible(scene_view, &position) {
+        if !point_in_scene_data_range(scene_view, &position) {
             continue;
         }
         let ownership = entity.get::<DropOwnership>().and_then(|ownership| {
@@ -6350,7 +6408,7 @@ pub(super) fn collect_visible_objects(world: &World) -> BTreeMap<u32, VisibleObj
     for entity in world.iter_entities() {
         let position = entity.get::<Position>().map(|value| value.0.clone());
         if let Some(position) = position.as_ref() {
-            if !point_visible(scene_view.as_ref(), position) {
+            if !point_in_scene_data_range(scene_view.as_ref(), position) {
                 continue;
             }
         }
@@ -6367,6 +6425,15 @@ pub(super) fn collect_visible_objects(world: &World) -> BTreeMap<u32, VisibleObj
     }
 
     objects
+}
+
+fn point_in_scene_data_range(
+    scene_view: Option<&mir2_game_data::SceneView>,
+    point: &Point,
+) -> bool {
+    scene_view
+        .map(|view| point_in_data_range(point, &view.center))
+        .unwrap_or(true)
 }
 
 pub(super) fn visible_object_bundle_for_entity(

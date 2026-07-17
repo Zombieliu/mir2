@@ -30,7 +30,7 @@ pub use runtime::{
     SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, SimulationSession,
     ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
     ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZonePlayerCombatStats, ZoneRuntime,
+    ZonePlayerCombatStats, ZoneRuntime, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, WorldCommand, WorldCommandExecution,

@@ -1102,6 +1102,18 @@ mod tests {
                 .all(|transfer| transfer.key != "starter-east-field-gate"),
             "Crystal runtime should use generated Crystal movement records, not starter demo transfers"
         );
+
+        let crystal_world_config = SimulationConfig::default().with_crystal_world_runtime();
+        assert!(
+            crystal_world_config
+                .map_transfers
+                .iter()
+                .all(|transfer| transfer.key != "starter-east-field-gate"),
+            "Full Crystal world runtime should not retain starter demo transfers either"
+        );
+        assert!(crystal_world_config.visible_players.is_empty());
+        assert!(crystal_world_config.visible_monsters.is_empty());
+        assert!(crystal_world_config.visible_npcs.is_empty());
     }
 
     fn cleanup_postgres_account(database_url: &str, account_id: &str) {
@@ -2575,9 +2587,12 @@ impl SimulationConfig {
     /// [`with_crystal_map_runtime`]: Self::with_crystal_map_runtime
     pub fn with_crystal_world_runtime(mut self) -> Self {
         self.monster_spawn_source = MonsterSpawnSource::CrystalWorld;
-        // Keep `map_transfers` as-is: the per-map manifest movements
-        // (`crystal_movement_transfer_records_for_map`) already drive travel
-        // across the whole world, so nothing needs clearing or seeding here.
+        // Drop the hand-authored starter gate; manifest movements drive Crystal travel.
+        self.map_transfers.clear();
+        // Full-world entities come from Crystal manifests and shared Zone state.
+        self.visible_players.clear();
+        self.visible_monsters.clear();
+        self.visible_npcs.clear();
         apply_crystal_map_metadata(&mut self.map);
         // On-chain smart-mine veins (M4) are env-gated (off by default).
         self.onchain_mine_nodes
@@ -3363,6 +3378,9 @@ pub struct WorldEntitySnapshot {
     pub level: Option<u16>,
     pub hp: Option<i32>,
     pub max_hp: Option<i32>,
+    /// Crystal object light encoding: radius is `light % 15`; players also use
+    /// `light / 15` as the source-strength bucket.
+    pub light: u8,
     pub name_colour_argb: i32,
     pub dead: bool,
     pub disposition: WorldEntityDisposition,
@@ -4225,10 +4243,12 @@ pub struct WorldSnapshot {
     pub map_title: Option<String>,
     pub map_file_name: Option<String>,
     pub in_safe_zone: bool,
+    pub light_setting: u8,
     pub player_object_id: Option<u32>,
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
+    pub player_max_mp: Option<i32>,
     pub player_experience: i64,
     pub player_max_experience: i64,
     pub gold: u32,

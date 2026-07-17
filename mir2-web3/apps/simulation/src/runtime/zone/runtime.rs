@@ -51,6 +51,7 @@ const ZONE_DOOR_OPEN_MS: u64 = 5_000;
 const ZONE_CRYSTAL_GREEN_POISON_TICK_MS: u64 = 2_000;
 const CRYSTAL_ARROW_BUFF_VAMPIRE_SHOT: u8 = 16;
 const CRYSTAL_ARROW_BUFF_POISON_SHOT: u8 = 17;
+const CRYSTAL_SWIFT_FEET_BUFF_TYPE: u8 = 4;
 const CRYSTAL_POISON_GREEN: u16 = 1;
 const CRYSTAL_POISON_SLOW: u16 = 4;
 const CRYSTAL_POISON_FROZEN: u16 = 8;
@@ -102,8 +103,9 @@ pub struct ZoneRuntime {
     // sync) so visibility diffs scan a local neighborhood instead of all
     // players. See `aoi_grid` and `recompute_player_visibility`.
     player_grid: AoiGrid<SessionId>,
-    // Spatial index of zone-object positions (NPCs, owner-generated objects).
-    // Objects do not move after insert, so this is synced only at insert/remove.
+    // Spatial index of zone-object positions (NPCs, monsters, generated objects).
+    // Native monsters and summons move, so every retained transform update must
+    // relocate the corresponding grid member before visibility is diffed.
     object_grid: AoiGrid<u32>,
     // ECS mirror of player entities (L2 step 1). Additive: the `players` map
     // above is still the source of truth; this World mirrors players at the
@@ -1074,6 +1076,7 @@ impl ZoneRuntime {
         session_id: SessionId,
         action: ZoneMovementAction,
     ) -> Vec<ZoneOutbound> {
+        let received_at_ms = action.received_at_ms;
         let replaces_pending_step =
             self.incoming_replaces_pending_movement_step(&session_id, &action);
         let mut outbounds = if !replaces_pending_step
@@ -1112,8 +1115,10 @@ impl ZoneRuntime {
             player.movement_actions.pop_back();
         }
         player.movement_actions.push_back(action);
-        if let Some(consume_at_ms) =
-            self.buffered_movement_consume_at(&session_id, action.received_at_ms)
+        if self.movement_input_arrived_after_ready(&session_id, received_at_ms) {
+            outbounds.extend(self.tick_player_movement(&session_id, received_at_ms));
+        } else if let Some(consume_at_ms) =
+            self.buffered_movement_consume_at(&session_id, received_at_ms)
         {
             outbounds.extend(self.tick_player_movement(&session_id, consume_at_ms));
         }
@@ -1172,6 +1177,17 @@ impl ZoneRuntime {
             .then_some(ready_at_ms)
     }
 
+    fn movement_input_arrived_after_ready(
+        &self,
+        session_id: &SessionId,
+        received_at_ms: u64,
+    ) -> bool {
+        self.players.get(session_id).is_some_and(|player| {
+            Self::movement_action_ready(player, received_at_ms)
+                && received_at_ms > player.movement_ready_at_ms
+        })
+    }
+
     fn consume_movement_action(
         &mut self,
         session_id: &SessionId,
@@ -1209,8 +1225,8 @@ impl ZoneRuntime {
                 player.position.clone(),
                 !player.dead && !zone_player_status_blocks_movement(player, now_ms),
                 !player.dead
-                    && (player.run_step_until_ms == 0
-                        || player.run_step_until_ms >= now_ms
+                    && player.run_step_until_ms != 0
+                    && (player.run_step_until_ms >= now_ms
                         || player.run_step_until_ms >= action.received_at_ms),
             )
         };
@@ -1219,7 +1235,13 @@ impl ZoneRuntime {
         }
 
         let effective_running = running && can_run;
-        let steps = if effective_running { 2 } else { 1 };
+        let steps = zone_player_movement_distance(
+            self.players
+                .get(session_id)
+                .expect("action owner should still exist"),
+            effective_running,
+            now_ms,
+        );
         let path = (1..=steps)
             .map(|amount| offset_point(&origin, action.direction, amount))
             .collect::<Vec<_>>();
@@ -5792,7 +5814,8 @@ impl ZoneRuntime {
             return Vec::new();
         };
         self.expire_ground_drop_ownerships(now_ms);
-        let Some(object_id) = object_id.or_else(|| {
+        let requested_object_id = object_id;
+        let Some(object_id) = requested_object_id.or_else(|| {
             self.ground_drops
                 .values()
                 .find(|drop| drop.drop.x == target.x && drop.drop.y == target.y)
@@ -5803,7 +5826,16 @@ impl ZoneRuntime {
         let Some(stored) = self.ground_drops.get(&object_id) else {
             return Vec::new();
         };
-        if stored.drop.x != target.x || stored.drop.y != target.y {
+        let drop_location = Point {
+            x: stored.drop.x,
+            y: stored.drop.y,
+        };
+        let in_pickup_range = if requested_object_id.is_some() {
+            zone_tile_distance(target, &drop_location) <= 1
+        } else {
+            stored.drop.x == target.x && stored.drop.y == target.y
+        };
+        if !in_pickup_range {
             return Vec::new();
         }
         if !self.ground_drop_ownership_allows(&stored.drop, player.object_id, group_members) {
@@ -6381,9 +6413,15 @@ impl ZoneRuntime {
                 if self.retained_zone_object_health_is_stale(object_id, packet) {
                     continue;
                 }
-                if let Some(object) = self.objects.get_mut(&object_id) {
+                let updated_position = if let Some(object) = self.objects.get_mut(&object_id) {
                     apply_retained_zone_object_packet(object, packet);
                     track_zone_object_buff_expiry(object, packet, now_ms);
+                    Some(object.position.clone())
+                } else {
+                    None
+                };
+                if let Some(position) = updated_position {
+                    self.object_grid.moved(&object_id, &position);
                 }
             }
         }
@@ -7916,18 +7954,38 @@ fn zone_player_slowed(player: &ZonePlayer, now_ms: u64) -> bool {
             .is_some_and(|expires_at_ms| now_ms < expires_at_ms)
 }
 
-/// Per-step movement delay for a zone player, accounting for being mounted
-/// (faster) and the Slow poison (slower). Mirrors Crystal, where mounts speed
-/// movement up and the Slow debuff roughly halves action speed.
+/// Per-step movement delay for a zone player. Crystal uses the same 600ms
+/// `MoveDelay` for walking and running; mounted speed comes from a three-tile
+/// run, not a shorter server cooldown. Slow doubles that delay.
 fn zone_player_move_delay_ms(player: &ZonePlayer, running: bool, now_ms: u64) -> u64 {
     let mut delay = movement_delay_ms(running);
-    if player.riding_mount && player.mount_type >= 0 {
-        delay = delay.saturating_mul(2) / 3;
-    }
     if zone_player_slowed(player, now_ms) {
         delay = delay.saturating_mul(2);
     }
     delay.max(1)
+}
+
+fn zone_player_movement_distance(player: &ZonePlayer, running: bool, now_ms: u64) -> i32 {
+    if !running {
+        return 1;
+    }
+
+    let mounted = player.riding_mount && player.mount_type >= 0;
+    let swift_feet = !player.sneaking
+        && player
+            .buffs
+            .get(&CRYSTAL_SWIFT_FEET_BUFF_TYPE)
+            .is_some_and(|state| {
+                !state.buff.paused
+                    && state
+                        .expires_at_ms
+                        .is_none_or(|expires_at_ms| now_ms < expires_at_ms)
+            });
+    if mounted || swift_feet {
+        3
+    } else {
+        2
+    }
 }
 
 fn native_monster_control_active(monster: &ZoneNativeMonster, now_ms: u64) -> bool {
@@ -8970,17 +9028,13 @@ mod movement_status_tests {
     }
 
     #[test]
-    fn riding_a_mount_speeds_movement_up() {
+    fn riding_a_mount_keeps_crystal_server_move_delay() {
         let mut player = test_player();
         let base_walk = movement_delay_ms(false);
         player.riding_mount = true;
         player.mount_type = 3;
         let mounted = zone_player_move_delay_ms(&player, false, 0);
-        assert!(
-            mounted < base_walk,
-            "mounted delay {mounted} should be faster than base {base_walk}"
-        );
-        assert_eq!(mounted, base_walk.saturating_mul(2) / 3);
+        assert_eq!(mounted, base_walk);
     }
 
     #[test]

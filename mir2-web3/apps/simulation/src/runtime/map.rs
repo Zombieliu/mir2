@@ -92,8 +92,7 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
         runtime_world_map_collision_data(map_file_name)
             .or_else(|| runtime_map_collision_data(map_file_name))?
     } else {
-        runtime_full_map_collision_data(map_file_name)
-            .or_else(|| runtime_map_collision_data(map_file_name))?
+        runtime_map_collision_data(map_file_name)?
     };
     let mut blocked_cells = collision.blocked_set;
     blocked_cells.extend(collision.closed_door_set);
