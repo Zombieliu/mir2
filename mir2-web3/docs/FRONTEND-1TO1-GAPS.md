@@ -22,6 +22,58 @@ Last updated: 2026-07-14
 > remain regional, HUD/audio/effect-specific paths remain dedicated, and Brazil
 > still needs CDN plus physical 2/4 GiB Android throttled-network soak.
 
+> 2026-07-13 deterministic Crystal/Web temporal acceptance closure: one
+> fail-closed scenario now records the native client and Web at Bichon
+> `0.map @ 332,275`, aligns the same four left-walk actions, validates exact
+> 1024x768 geometry, and emits bounded overlay/heatmap evidence. Two defects
+> were coupled: the pose selector compared an ACK-advanced requested entity
+> center with the still-rendered map center, and Rust pruned inactive standalone
+> animation images while the Web upload set remembered them forever. The
+> runtime now selects motion against the coherent applied map/entity center;
+> each validated `map-render-synced` ACK also reconciles Web upload ownership
+> with Rust's resident keys so a recurring frame is uploaded again. Runtime
+> `bevy-90fb96239f221a47` passes the strict route on WebGPU with 4/4 pose events,
+> 41ms maximum command-to-sink latency, and zero failed assertions; Bevy WebGL2
+> passes the same movement gate at 4/4 and 42ms. Evidence is under
+> `docs/generated/player-qa/movement-jitter/temporal-packs/bichon-332275-left4/`
+> and `.../bichon-332275-left4-webgl2/`. The four native/Web pairs are aligned
+> within 1-13ms, but their full-window changed-pixel ratios remain
+> 75.0%-76.8%. That metric includes different population, lighting, HUD text,
+> and effects, so it is not a movement failure and is not visual acceptance;
+> those visible scene-composition gaps remain open.
+
+> 2026-07-13 first-principles asset/render Candidate closure: the Web client now
+> derives its runtime semantics from the complete Crystal source tree instead
+> of hand-maintained frame guesses. The deterministic snapshot parses all
+> 1,440 libraries (7,638,253,548 source bytes and 2,143,132 frame slots),
+> including 703 non-empty v3 FrameSets and 3,643 actions with start/count/skip,
+> interval, reverse, blend, and secondary-effect tracks. Player/NPC/monster
+> presentation consumes those actions in production; player Spell uses the
+> dedicated Crystal frame range at 296, and the packet-backed scene-effect
+> queue resolves 62 spells, 11 object effects, two map effects, 35 explicit
+> SpellEffect mappings, directional ranges, masks, offsets, light, and blend.
+> Packed map pages now load directly in Bevy through `AssetServer` URLs, retain
+> the previous complete frame until all replacement pages are ready, and use an
+> exact generation/revision ACK before JS releases old image ownership. Unified
+> atlas residency is ref-counted and bounded by decoded byte budgets, while the
+> immutable CAS release/channel layout publishes assets before the mutable
+> channel pointer. Full offline release verification passes with 38,846 assets,
+> map renderability 191,938/192,391 (99.76%, with all references accounted for),
+> minimaps 227/226 with none missing, SoundList 450/450 backed by 320/320 distinct
+> wav files, and headline render coverage 99.88%. WebGPU and WebGL2 map smokes
+> both report no failed assertions or critical console errors; evidence:
+> `docs/generated/assets/crystal-source-snapshot.generated.json`,
+> `docs/generated/assets/latest-asset-coverage-summary.json`,
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-asset-pipeline-final-20260713.json`,
+> `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgpu-20260713001211-8821c193-report.json`,
+> and `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgl2-20260713001238-3c4011f6-report.json`.
+> The final PNGs are fully opaque and have matching cross-screen RGBA samples;
+> a viewer-only black surround was not present in the image bytes. This
+> supersedes the older phase-1 note below
+> that called FrameSet/runtime consumption open. Remaining work is final human
+> Crystal-vs-Web lighting, density, and feel acceptance, not another asset
+> architecture rewrite.
+
 > 2026-07-13 map-render pipeline closure: the Bichon black rectangles were not
 > missing map data. Raw packed atlases bypassed Crystal black-key conversion,
 > including floor-sized frames stored in object libraries, while per-cell
@@ -2243,6 +2295,7 @@ Candidate note: as of R301, all rows above have automated evidence for the avail
 
 ## Recent Frontend Fixes
 
+- 2026-07-13: Crystal asset semantic-source phase 1 now preserves `.Lib` v3 `FrameSet` records instead of skipping the header seek. The shared parser exposes all original action fields (`Start`, `Count`, `Skip`, `Interval`, effect fields, `Reverse`, and `Blend`), validates truncated/corrupt ranges, and the UI exporter now writes this FrameSet into per-library and aggregate metadata while selective exports merge existing libraries instead of erasing the manifest. A deterministic Source Snapshot streams SHA-256 over the full local Crystal Data tree without decoding image payloads. Full-source evidence at `docs/generated/assets/crystal-source-snapshot.generated.json`: 1,440/1,440 libraries parsed, 7,638,253,548 source bytes, 2,143,132 frame slots, 585 v2 plus 855 v3 libraries, 703 non-empty FrameSets, 3,643 actions, and zero parse failures, invalid offsets, unknown actions, duplicate actions, or reported issues; two consecutive full generations produced byte-identical file SHA-256 `C3480F6689CF27C3CECC81ED86787BEBF5283B089B58644529E76E4AA09197F9`. Focused `test:crystal-library`, legacy `test:magic-effect-export`, syntax checks, synthetic selective-export merge, and a real `NPC/00.Lib` export passed. This closes source/metadata preservation only; Bevy runtime consumption of generated FrameSets, masks, and effect recipes remains open.
 - 2026-05-24: Production movement visual closeout deployed as Player Web `dpl_8wQigG43KBLpaZY5oPPWHwNhz3QK`. Rapid discrete keyboard taps now carry a bounded same-direction input debt across server ACK latency, so six quick D taps send six walk packets and receive six ordered `UserLocation` ACKs instead of collapsing to two steps. The original-map renderer now keeps a textured floor fallback under still-loading map tiles and alpha-keys black-background map Object images before showing them, preventing the black rectangle flash that made movement feel broken even after the packet path was correct. Evidence: Web `pnpm --dir apps/web exec tsc --noEmit --pretty false`; scoped diff check; Vercel prebuilt build/prune/deploy; custom-domain `/health`; production `docs/generated/player-qa/movement-jitter/prod-underlay-keyboard-d-20260524T112642.json`; and headed Chrome `docs/generated/player-qa/movement-jitter/prod-underlay-headed-keyboard-d-20260524T112744.json`, both `ok=true` with no visual jumps, no route spam, no logical rollback, no scene blackouts, no console errors, no non-favicon 404s, and screenshot evidence without black map holes.
 - 2026-05-23: Crystal action-queue movement pass landed across Web/Gateway/Simulation and was production-verified. Player Web now treats self `UserLocation` as an ordered ACK/correction surface for local `QueuedAction`/ActionFeed state, not as a fresh walk/run animation; correction snaps clear packet motion, same-tile confirmations preserve the active animation, and server `UserLocation` no longer re-seeds predicted motion when it is only confirming the local queue. Packet Walk/Run rendering now uses one Crystal 600ms action window even for two-tile Run, matching the original sprite cadence instead of stretching Run over two tiles. Backend Zone consumes bounded ordered Walk/Run/Turn actions on Crystal `ActionTime`; the later local rollback correction changes raw standstill Run from an origin correction into an effective one-tile Walk. The production follow-up capped local ActionFeed lead to two tiles and treats non-matching `UserLocation` as correction, closing the residual visual jump found after the first deploy. Evidence: Web `pnpm --dir apps/web exec tsc --noEmit --pretty false`; Web `pnpm --dir apps/web exec next build`; Simulation/Gateway fmt-check; Simulation `shared_zone` 78/78; focused Gateway Walk+Run/Turn regressions; local captures `docs/generated/player-qa/movement-jitter/crystal-action-queue-local-shiftd-20260523.json` and `docs/generated/player-qa/movement-jitter/crystal-action-queue-local-da2-20260523.json`; action-queue verification deployment `dpl_HmHQ4CXfy7d895kHFMfiNLHWespN`; and production captures `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-walk-fix2-20260523T1331.json` plus `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-run-fix2-20260523T1332.json`, both `ok=true` with no visual jumps, logical rollback, scene blackouts, critical console errors, or non-favicon 404s.
 - 2026-05-22: Production movement/layout hardening landed for the user-reported Chrome/DevTools failures. The original 1024x768 client stage now uses a viewport-driven CSS scale so very narrow DevTools layouts keep login/select/game controls inside the visible viewport; `/health` is a no-store Next route instead of a Vercel 404; hydration risk is reduced with deterministic initial motion state plus layout-level hydration suppression; and self movement ACKs now confirm local pending/fed actions even when the optimistic client state already matches the incoming `UserLocation`, pruning `outstandingSelfMovementActions` after visual settlement. A requestAnimationFrame plus 100ms fallback keeps `motionNow` live in headless/throttled Chrome. Production deployment `dpl_Gr9WgZX275rpfDfk9f4SdzAshogb` is live behind `https://mir2.obelisk.build/`; custom-domain `/health` returned 200, and `Monster/000/51.png` returned 200. Evidence: `pnpm --dir apps/web exec tsc --noEmit --pretty false`; `pnpm --dir apps/web exec next build`; `docs/generated/player-qa/movement-jitter/prod-final-narrow-stage-scale-20260522.json` (`ok=true`, 150x647 stage bounds `left=-0.01`, `width=150.02`, no console errors, no non-favicon 404s, no residual movement queues); and `docs/generated/player-qa/movement-jitter/prod-final-movement-ack-prune-skip-transfer-20260522.json` (`ok=true`, strict movement checks green, `directionStepPending=null`, `outstandingSelfMovementActions=[]`, no visual jumps, no route spam, no logical rollback, no camera-offset stair-step warnings). The failed `prod-final-movement-ack-prune-20260522` run is expected evidence that production correctly rejects debug `crystal:<map>:<x>:<y>` transfer commands for normal clients.
