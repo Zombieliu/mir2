@@ -3458,6 +3458,20 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
                 && info.name == "Assistant_Jane"
                 && info.location == (Point { x: 284, y: 606 })
     )));
+    let assistant_packets = packets
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::ObjectNpc { info } if info.object_id == 3 => Some(info),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    assert!(!assistant_packets.is_empty());
+    assert!(
+        assistant_packets
+            .iter()
+            .all(|info| info.name_colour_argb == 0xFF00_FF00u32 as i32),
+        "Crystal NPC spawn paths must agree on the default Lime name colour",
+    );
     let assistant = snapshot
         .entities
         .iter()
@@ -3466,6 +3480,7 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
     assert_eq!(assistant.kind, WorldEntityKind::Npc);
     assert_eq!(assistant.name, "Assistant_Jane");
     assert_eq!((assistant.x, assistant.y), (284, 606));
+    assert_eq!(assistant.name_colour_argb, 0xFF00_FF00u32 as i32);
     assert_eq!(
         assistant.light, 10,
         "Crystal merchants always emit light 10"

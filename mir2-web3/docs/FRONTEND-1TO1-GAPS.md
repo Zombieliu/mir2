@@ -1,6 +1,19 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-07-14
+Last updated: 2026-07-18
+
+> 2026-07-18 deterministic r03/r04 closure: the Web-only same-scene harness now
+> completes Edge 150 CDP `Runtime.enable` through Next's compiled `ws`. r04 at
+> Bichon `0.map @ 332,275`, paired Day setting 2, has 0 critical console errors,
+> 0 404s, 100% runtime/layout/entity/pixel automated gates, a 100% weighted
+> Candidate trend score, and a 93-100% estimated human band. This is not final
+> acceptance: thresholded pixels still differ by 10% full-window and 9% world;
+> chat is 82%, HUD UI 87%, and MiniMap 87%. The only r03 P0 was an Edge
+> extension message-port closure, now narrowly ignored without masking real
+> errors. Nameplate diagnostics confirm ordinary NPC primary lines Lime and
+> secondary underscore lines White. Because the fixed r01 native frame was
+> captured before the Rust duplicate White ObjectNpc path was removed, the next
+> valid color comparison requires a fresh native/Web pair.
 
 > 2026-07-14 full-pack/low-tier closure: all 1,440 Crystal libraries now have a
 > deterministic, resumable, hash-verified offline conversion into 1,440 lazy

@@ -1,5 +1,21 @@
 # Agent Run Log
 
+> Latest deterministic visual/CDP and NPC packet sync: 2026-07-18. Verified
+> remote main remained `c77efb2f`; existing production Web `:3002` and Release
+> Gateway `:7111` were healthy. Edge 150 Web-only r03 closed the compiled-`ws`
+> `Runtime.enable` blocker and produced a complete fixed-native-source pack.
+> r04 then filtered the exact extension-only message-port closure while keeping
+> real console failures critical: automated weighted Candidate trend 100%,
+> runtime/layout/entity/pixel gates 100%, 0 critical errors, 0 404s, with raw
+> 10% full-window and 9% world changed pixels. Rust also unified ordinary NPC
+> primary-name color to Crystal Lime across initial ObjectNpc, snapshot, and
+> visible-object bundle paths; the focused test was red before the fix and green
+> after. Verification passed CDP decode/debug-port/capture-state/report tests,
+> Web TypeScript, Simulation transfer 3/3, bootstrap 1/1, shared Zone 153/153,
+> Rust fmt, Release Gateway build, and live r04 against the rebuilt Gateway.
+> Final human visual/feel acceptance remains open; next is a fresh native/Web
+> pair followed by HUD/chat/effect delta reduction.
+
 > Latest gameplay magic/buff parity sync: 2026-05-06 completed. Added Crystal magic and buff packet IDs/codecs for `MagicKey`, `Magic`, `SpellToggle`, `NewMagic`, `RemoveMagic`, `MagicLeveled`, `MagicDelay`, `MagicCast`, `ObjectMagic`, `ObjectMana`, `AddBuff`, and `RemoveBuff`; expanded `Spell`; wired real `ClientPacket::MagicKey` / `Magic` / `SpellToggle` into simulation; emitted Crystal-shaped mana, magic, buff add/remove, heal, and skill-progress packets; exposed magic level/experience/delay/hotkey state in snapshots; routed manifest-backed spell casts through MP cost, cooldown, target damage, teleport, and MagicShield/Fury buff behavior; and added Gateway Web plus packet-trace coverage for the new surfaces. Verification passed: `cargo +1.89.0 fmt -p mir2-protocol -p mir2-simulation -p mir2-gateway`, `cargo +1.89.0 check --locked -p mir2-protocol -p mir2-simulation -p mir2-gateway`, Player Web `npx tsc --noEmit`, focused Protocol/Simulation/Gateway regressions for magic packets, buff expiry, book learning, packet trace flow names, and Web packet events, `git diff --check`, and full `cargo +1.89.0 test --locked -p mir2-protocol -p mir2-simulation -p mir2-gateway -- --test-threads=1` covering Gateway lib 82/82 plus packet-trace bin 16/16, Protocol lib 5/5 plus codec 32/32, and Simulation 698/698.
 
 > Latest map-resource audit sync: 2026-04-29-R303 completed. Added `audit:crystal-map-coverage`, archived `docs/generated/map/r303-crystal-map-coverage.json`, and recorded the current all-map frontend source baseline: 463/463 manifest maps present, 0 unsupported map types, 0 parse errors, no missing sampled map libraries, 11 sampled maps with out-of-range frame-reference risk, and minimap 450/451 still missing. This is audit evidence, not full-map visual acceptance.

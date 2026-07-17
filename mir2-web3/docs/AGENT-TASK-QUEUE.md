@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> Latest deterministic same-scene/CDP closure: 2026-07-18. The Edge 150
+> `Runtime.enable` blocker is closed end-to-end through Next 16.2.1's compiled
+> `ws`: Web-only r03 produced a complete pack at `0.map @ 332,275`, and r04
+> removes the extension-only `Unchecked runtime.lastError` false positive while
+> retaining real console failures. r04 reports 100% automated weighted
+> Candidate trend, runtime/layout/entity/pixel gates 100%, 0 critical console
+> errors, and 0 404s; raw comparison remains 10% full-window and 9% world
+> changed pixels, so this is not human Accepted. Rust now also uses one Crystal
+> Lime NPC-name constant across initial spawn, snapshot, and visible-object
+> bundle paths; focused transfer 3/3, visible-object bootstrap 1/1, shared Zone
+> 153/153, Rust fmt, Web CDP/report tests, and TypeScript pass. Next: capture a
+> fresh native/Web pair after the NPC packet fix, then reduce the remaining
+> HUD/chat and visible scene-effect deltas before the final human gate.
+
 > Latest full-pack/low-tier delivery closure: 2026-07-14. The offline compiler
 > now converts and verifies all 1,440 Crystal libraries as 1,440 lazy shards and
 > 4,446 unique immutable PNG pages, with every one of 2,143,132 frame slots

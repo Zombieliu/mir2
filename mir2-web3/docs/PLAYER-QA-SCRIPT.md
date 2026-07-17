@@ -1,8 +1,25 @@
 # Player QA Script
 
-Last updated: 2026-07-14
+Last updated: 2026-07-18
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
+
+## Latest Deterministic Same-Scene Gate
+
+- r03/r04 under
+  `docs/generated/player-qa/visual-parity/crystal-web-pack-20260718-same-state-deterministic-r0*/`
+  prove Edge 150 CDP capture works through Next 16.2.1's compiled `ws`.
+- Treat r04's 100% weighted score as an automated Candidate trend only. Its
+  raw thresholded differences remain 10% full-window and 9% world, with HUD UI
+  87%, chat 82%, and MiniMap 87%; human visual/feel acceptance remains open.
+- r04 must have `criticalConsoleErrorCount=0`, zero non-favicon 404s, requested
+  and server `lightSetting=2`, primary NPC labels `rgb(0, 255, 0)`, and
+  underscore-delimited secondary labels `rgb(255, 255, 255)`.
+- Ignore only the exact Edge extension message-port closure classified by the
+  CDP helper. Any JavaScript exception, application error, or other network
+  failure remains critical.
+- Capture a fresh native reference after the 2026-07-18 NPC packet-colour fix;
+  do not use the older native White primary-name pixels as the color baseline.
 
 ## Local Playability Preflight
 

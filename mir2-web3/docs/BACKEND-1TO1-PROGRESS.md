@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> Latest NPC name-colour packet consistency sync: 2026-07-18 removes a
+> duplicate production-path conflict for Crystal NPCs. Initial manifest
+> `ObjectNpc` and `WorldEntitySnapshot` already emitted Crystal Lime
+> (`0xFF00FF00`), while `visible_object_bundle_for_entity` later emitted White
+> and could overwrite a native client's final label. All three paths now share
+> one `CRYSTAL_NPC_NAME_COLOUR_ARGB` constant. The transfer regression asserts
+> every Assistant_Jane ObjectNpc plus the snapshot agree on Lime. Verification:
+> focused transfer 3/3, visible-object bootstrap 1/1, shared Zone 153/153,
+> Release Gateway build, Rust fmt, and live r04 Web login/capture against the
+> rebuilt 7111 Gateway. Crystal's client keeps later underscore-delimited name
+> lines White; this change concerns only the packet-provided primary line.
+
 > Latest retained-object AOI sync: 2026-07-13 fixes the spatial index for
 > authoritative monsters/summons that move after being inserted. Packet state
 > was updating `ZoneObject.position`, but `object_grid` remained at the old
