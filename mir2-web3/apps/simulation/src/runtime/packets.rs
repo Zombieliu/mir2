@@ -120,6 +120,8 @@ use super::social_economy::{
 };
 use super::stage5::{push_unique, push_unique_u8, stage5_item_name, stage5_player_name};
 
+const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
+
 pub(super) fn system_message(message: &str) -> ServerPacket {
     ServerPacket::Chat {
         message: message.to_string(),
@@ -5714,7 +5716,7 @@ pub(super) fn start_game_static_visible_object_packets(
                 info: NpcInfo {
                     object_id,
                     name: npc.name,
-                    name_colour_argb: -16_711_936,
+                    name_colour_argb: CRYSTAL_NPC_NAME_COLOUR_ARGB,
                     image: npc.image,
                     colour_argb: 0,
                     location: npc.location,
@@ -6087,7 +6089,7 @@ pub(super) fn collect_world_entities(
             .map(|agent| agent.quest_ids.clone())
             .unwrap_or_default();
         let name_colour_argb = match kind {
-            WorldEntityKind::Npc => -16_711_936,
+            WorldEntityKind::Npc => CRYSTAL_NPC_NAME_COLOUR_ARGB,
             _ => -1,
         };
         let light = match kind {
@@ -6618,7 +6620,7 @@ pub(super) fn visible_object_bundle_for_entity(
                     info: NpcInfo {
                         object_id,
                         name,
-                        name_colour_argb: -1,
+                        name_colour_argb: CRYSTAL_NPC_NAME_COLOUR_ARGB,
                         image: npc.image,
                         colour_argb: npc.colour_argb,
                         location: position,

@@ -13,3 +13,17 @@ export async function decodeCdpMessage(raw) {
   }
   throw new TypeError(`Unsupported CDP message payload: ${Object.prototype.toString.call(raw)}`);
 }
+
+export function isCriticalConsoleError(error) {
+  const text = String(error?.text ?? "");
+  if (!text.trim()) return false;
+  if (text.includes("net::ERR_FAILED")) return false;
+  if (text.includes("favicon")) return false;
+  if (
+    error?.source === "other" &&
+    text.startsWith("Unchecked runtime.lastError: The message port closed before a response was received.")
+  ) {
+    return false;
+  }
+  return true;
+}

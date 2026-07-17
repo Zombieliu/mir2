@@ -121,46 +121,27 @@ The following passed before the checkpoint:
 The final switch from Node's built-in WebSocket to Next's compiled `ws` client
 is script-only and must receive a runtime capture retry after this checkpoint.
 
-## Open Blocker
+## Closed Blocker - 2026-07-18 Follow-up
 
-The latest day Web-only `r03` pack is empty because Chromium/Edge 150 did not
-complete `Runtime.enable` through the previous CDP WebSocket path. The capture
-script now uses `next/dist/compiled/ws` with compression disabled, but that
-specific runtime fix still needs end-to-end confirmation. Do not interpret the
-missing `r03` result as a rendering regression.
+The compiled-`ws` path is now verified end-to-end with Edge 150. Web-only r03
+completed `Runtime.enable` and produced a valid fixed-native-source pack. Its
+only P0 was the Edge extension message `Unchecked runtime.lastError: The
+message port closed before a response was received.` r04 narrowly filters that
+known browser-level noise while preserving real page errors, and records 0
+critical console errors, 0 404s, and 100% automated weighted Candidate trend.
 
-If the current server light setting matches the fixed native frame, retry with:
-
-```powershell
-$env:MIR2_CHROME_PATH = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
-node apps\web\scripts\capture-crystal-web-pack.mjs `
-  --prefix crystal-web-pack-20260717-same-state-deterministic-r03 `
-  --nativeSourceImage docs\generated\player-qa\visual-parity\crystal-web-pack-20260716-same-state-deterministic-r01\crystal-web-pack-20260716-same-state-deterministic-r01-same-scene-original.png `
-  --account VIS0716A `
-  --characterName VIS0716Hero `
-  --map 0 --x 332 --y 275 `
-  --baseUrl http://127.0.0.1:3002 `
-  --gatewayWs ws://127.0.0.1:7111/ws `
-  --qaControlToken mir2-local-qa-control `
-  --captureLightSetting 2 `
-  --captureTrapHexagonFrame 7 `
-  --cleanCaptureOverlays true `
-  --webSettleMs 1500 `
-  --cdpCommandTimeoutMs 30000
-```
-
-Supply the local QA password through the existing secure/local mechanism. If
-the authoritative server light is no longer 2, capture a matching native
-reference rather than comparing different lighting phases.
+The same follow-up fixed a Rust duplicate NPC packet path that overwrote
+Crystal Lime primary names with White. r04 confirms Web primary/secondary
+labels remain Lime/White. The fixed r01 native image predates the server fix,
+so it remains valid for layout/light trend but not for final name-color pixels.
 
 ## Next Work Order
 
-1. Fetch `origin/main` and inspect the exact ahead/behind set before integrating
-   remote work; preserve the dirty index with explicit-path operations.
-2. Runtime-test the compiled-`ws` CDP path and generate the valid `r03` pack.
-3. Quantify the shared compositor and exact-light changes against the fixed
-   day/day reference.
-4. Address the largest remaining static contributors: belt/HUD, NPC/nameplate
-   colors and population, scene lights, and effects.
-5. Re-run strict movement, map transaction, dual-render-backend, typecheck, and
+1. Capture a fresh native/Web pair after the NPC Lime packet fix so color
+   pixels are compared against the corrected native client state.
+2. Quantify and correct the remaining visible TrapHexagon/effect placement and
+   composition delta using the fresh pair.
+3. Address HUD/chat state and static layout contributors; r04 reports HUD UI
+   87% and chat 82% while the fixed native character state remains different.
+4. Re-run strict movement, map transaction, dual-render-backend, typecheck, and
    production-build gates before requesting human acceptance.

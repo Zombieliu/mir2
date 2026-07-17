@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> Latest NPC name-colour server parity note: 2026-07-18 aligns every ordinary
+> NPC spawn projection with Crystal `Server.MirObjects.NPCObject`, which sets
+> `NameColour = Color.Lime` and copies it into `S.ObjectNPC`. The Rust initial
+> manifest spawn and snapshot were already Lime, but the later visible-object
+> bundle was White. One shared `0xFF00FF00` constant now covers all three, and a
+> focused transfer regression rejects any mixed-color packet sequence. Crystal
+> client behavior remains source-accurate: the first underscore-delimited name
+> line uses the packet colour and subsequent lines use White. Focused transfer
+> 3/3, bootstrap 1/1, shared Zone 153/153, fmt, Release build, and live r04 pass.
+
 > Latest moving-object AOI parity note: 2026-07-13 keeps retained monsters and
 > summons in the spatial cell matching their latest authoritative packet
 > position. Previously the object record moved while `object_grid` stayed at

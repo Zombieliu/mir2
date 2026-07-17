@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest deterministic visual-gate roadmap sync: 2026-07-18 closes the
+> compiled-`ws` Edge 150 CDP runtime blocker with complete r03/r04 Web-only
+> packs at Bichon `0.map @ 332,275`. r04 filters only the known extension
+> message-port closure noise, keeps real JavaScript/network errors critical,
+> and records 100% automated weighted Candidate trend with 0 critical console
+> errors and 0 404s. It still shows 10% full-window and 9% world thresholded
+> pixel change against the fixed r01 native frame, so final human acceptance
+> remains open. The same round removes a Rust packet split where a manifest NPC
+> was first Lime and then overwritten White: initial ObjectNpc, snapshot, and
+> visible-object bundle now share Crystal `Color.Lime`; Web correctly renders
+> the first underscore-delimited line Lime and later lines White. The old fixed
+> native frame predates this packet fix and must be refreshed before name-color
+> pixels are judged. Next: fresh native/Web pair, then HUD/chat/effect deltas.
+
 > Latest full-pack and low-end delivery sync: 2026-07-14 classifies and
 > hash-verifies every frame slot in all 1,440 Crystal libraries, publishing
 > 1,440 lazy library shards backed by 4,446 unique immutable PNG pages. Entity

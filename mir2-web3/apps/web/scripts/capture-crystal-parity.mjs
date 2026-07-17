@@ -11,7 +11,7 @@ import {
   parseCaptureEffectFrame,
   parseCaptureLightSetting,
 } from "./crystal-capture-visual-state.mjs";
-import { decodeCdpMessage } from "./cdp-message.mjs";
+import { decodeCdpMessage, isCriticalConsoleError } from "./cdp-message.mjs";
 
 const require = createRequire(import.meta.url);
 const CdpWebSocket = require("next/dist/compiled/ws");
@@ -1728,14 +1728,6 @@ async function readState(client) {
       }
     })()
   `);
-}
-
-function isCriticalConsoleError(error) {
-  const text = String(error?.text ?? "");
-  if (!text.trim()) return false;
-  if (text.includes("net::ERR_FAILED")) return false;
-  if (text.includes("favicon")) return false;
-  return true;
 }
 
 function parseArgs(argv) {
