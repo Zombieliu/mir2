@@ -42,6 +42,39 @@ Purpose: keep final human frontend validation focused. The project can be driven
   and 4 GiB Android devices with throttled 4G, map transitions, background
   resume, and memory pressure.
 
+## Crystal/Web Temporal Pack
+
+- Use the Codex desktop trusted runner with
+  `capture-crystal-temporal-pack.mjs` for the canonical Bichon `332,275`
+  four-step comparison. `npm run qa:crystal-temporal-pack` is the equivalent
+  CLI entry point, but its native phase requires
+  `MIR2_COMPUTER_USE_CLIENT_MODULE`; a plain shell cannot acquire Computer Use
+  by itself. Supply the existing QA account, password, and control token
+  through `MIR2_QA_ACCOUNT`, `MIR2_QA_PASSWORD`, and
+  `MIR2_QA_CONTROL_TOKEN`; never add them to the scenario JSON. Set
+  `MIR2_WEB_BASE_URL` when the Gateway is not reachable through the Web build's
+  default URL.
+- Run the native client against a Release Gateway. The Debug Gateway's initial
+  world bootstrap can exceed Crystal's five-second handshake timeout. Log the
+  native character into Bichon at `332,275`, keep its game viewport at
+  1024x768, and then run the pack. The Web phase uses CDP screenshots at exact
+  1024x768 rather than OS window bounds.
+- A fresh baseline requires `native`, `web`, and `report` to pass in
+  `manifest.json`. A focused Web repair rerun may leave native `skipped` only
+  when it reuses the unchanged validated native artifact and the report phase
+  verifies that input. The Web artifact must show four eligible and four
+  matched local-command pose events, zero dropped sink events, exact Crystal
+  phase pixels, atomic pose commits, and final delta `(-4,0)`. After rebuilding
+  WASM under `next start`, rebuild and restart `.next` too, then verify the
+  captured runtime version changed.
+- The accepted 2026-07-13 WebGPU baseline is runtime
+  `bevy-90fb96239f221a47`, 4/4 pose coverage, and 41ms maximum sink latency.
+  Its paired artifacts are under
+  `docs/generated/player-qa/movement-jitter/temporal-packs/bichon-332275-left4/`.
+  A report pass proves geometry, timing, and evidence generation. It does not
+  waive the observed 75.0%-76.8% full-window visual delta; inspect the overlay
+  and heatmap PNGs before human acceptance.
+
 ## Compact-Window Pixel Stability Gate
 
 - Crystal updates movement on a 100ms phase lattice, but renders integer/even

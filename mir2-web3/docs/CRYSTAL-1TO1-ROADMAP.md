@@ -15,6 +15,842 @@
 > follow-up, not a WebGPU-only requirement. See
 > `docs/CRYSTAL-FULL-ASSET-PIPELINE.md`.
 
+> Latest temporal-parity roadmap sync: 2026-07-13 adds a repeatable,
+> fail-closed native/Web recording and frame-diff gate for Bichon
+> `0.map @ 332,275`. It exposed an applied-vs-requested scene-center race and a
+> standalone-animation residency split: Rust evicted inactive image frames but
+> TypeScript still suppressed their future uploads, freezing map commits and
+> publishing `ready:false` poses. Pose selection now uses only the coherent
+> applied map/entity center, and a validated map ACK makes Rust's resident image
+> list authoritative for Web upload deduplication. On
+> `bevy-90fb96239f221a47`, WebGPU passes the four-step route at 4/4 pose coverage
+> with a 41ms maximum sink delay; Bevy WebGL2 passes at 4/4 and 42ms. The native
+> and Web evidence emits four overlays plus heatmaps at 1-13ms action-alignment
+> error. Movement/map transaction continuity is closed by automation, while
+> 75.0%-76.8% full-window pixel deltas keep lighting, population, effects, and
+> HUD composition explicitly open for the next visual-parity slice. Evidence:
+> `docs/generated/player-qa/movement-jitter/temporal-packs/bichon-332275-left4/`.
+
+> Latest asset/render Candidate sync: 2026-07-13 completes the first-principles
+> Crystal resource pipeline and its automated dual-backend gate. All 1,440
+> source libraries are deterministically hashed and parsed, v3 FrameSet action
+> and secondary-effect semantics now drive production actor presentation,
+> player Spell uses Crystal frame 296, and real packet effects resolve 62
+> spells plus object/map effect families with directional, mask, light, and
+> blend metadata. Bevy loads packed map atlas pages directly by URL through
+> `AssetServer`, swaps only complete generations under an exact ACK, and shares
+> ref-counted decoded-byte residency with entity atlases. Immutable CAS blobs
+> and releases are uploaded before the mutable channel pointer. The complete
+> offline gate is green at 38,846 assets, 99.76% renderable map references with
+> 100% accounted semantics, zero missing minimaps, 450/450 SoundList entries,
+> and 99.88% headline render coverage. Release WebGPU/WebGL2 browser smokes are
+> green with no failed assertions or critical console errors; evidence is in
+> `docs/generated/assets/latest-asset-coverage-summary.json`,
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-asset-pipeline-final-20260713.json`,
+> `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgpu-20260713001211-8821c193-report.json`,
+> and `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgl2-20260713001238-3c4011f6-report.json`.
+> The automated
+> asset/render Candidate gate is closed. Final Crystal-vs-Web human visual and
+> feel acceptance remains an acceptance activity, not a reason to replace the
+> Web/Bevy architecture.
+
+> Latest combat-presentation Candidate update: 2026-07-13 closes the missing
+> local melee action with Crystal's actual ownership model. The browser owner
+> keeps personal self id `1000`, while shared Zone action broadcasts identify
+> that player as `50001`; waiting for `ObjectAttack` therefore never selected
+> the local entity. Crystal instead queues `Attack1` locally before it sends
+> `C.Attack` and ignores its own server action echo. Web now starts adjacent
+> `melee1` locally, submits its rAF-coalesced world at normal priority, and keeps
+> packet attack/struck/death state authoritative for non-local actors. Browser
+> A/B moved from accepted damage plus a 900ms animation timeout to a visible
+> attack in 123ms with clean 600ms completion. Evidence is
+> `docs/generated/player-qa/combat/web-local-melee-attack-20260713.{json,png}`;
+> frontend logic and TypeScript pass. Stable action atlases, Bevy layout refresh,
+> and shared moving-object AOI relocation remain green (Bevy 100/100, Zone
+> 153/153). Remaining nearby gaps are alpha-aware entity hit bounds and the
+> separate moving-monster visual acceptance pass.
+
+> Latest movement-presentation roadmap sync: 2026-07-12 closes the duplicated
+> renderer-ownership slice left after mounted movement semantics were fixed.
+> Local movement no longer eases once in page state and again in Bevy. Map and
+> entity provenance publish atomically; one rejected frame holds the last valid
+> pose for a bounded 250ms instead of changing clocks; shadow Run distance comes
+> from the explicit intent target; and each local phase receives a full 100ms
+> from command start without global-pulse catch-up.
+>
+> WebGPU r12 is 33/33 and WebGL2 r16 is 33/33 on runtime
+> `bevy-bd9004a17f2873ea`. They reproduce all eight mounted-Walk offsets
+> (`-6..-48px`) and all six three-cell Run offsets (`-24..-144px`) with zero
+> center tearing, synthetic logical centers, shadow mismatches, pose warnings,
+> console errors, or missing movement ACKs. Movement presentation is no longer
+> the reason to consider a PC-only rewrite. Remaining Candidate gates are the
+> multiplicative light/effect compositor, scene population and draw details,
+> broader non-movement ownership, and final human visual/feel acceptance.
+
+> Latest movement roadmap sync: 2026-07-12 completes mounted eight-phase and
+> true three-cell sprint parity. Crystal source establishes six 100ms phases for
+> foot movement, eight for mounted Walk, six for mounted Run, and three-cell Run
+> distance for a mount or active unpaused Swift Feet when not sneaking. These
+> semantics now cross one explicit `phaseCount` contract through Web prediction,
+> Bevy motion, presentation Pose JSON, and frame parsing. Gateway forwards
+> Session-owned mount/sneak/buff state to shared Zone authority before movement.
+>
+> Release report
+> `docs/generated/player-qa/movement-jitter/movement-mounted-walk8-run3-webgpu-20260712-r6.json`
+> is 27/27 green: two real keyboard commands move one then three cells, ACK in
+> 18/22ms, observe 8/6 phases, reach the Pose sink 2/2 within 26ms, and retain
+> zero pose-atomicity, rollback, queue, console, or 404 warnings. Runtime
+> `bevy-78d40eb80133609c`, shared Zone 152/152, frontend logic, TypeScript, and
+> dual WebGPU/WebGL2 smoke pass. Mounted movement is no longer an open roadmap
+> gate. Remaining Candidate work is scene lighting/effects, actor draw details,
+> broader non-movement actor ownership, and final human acceptance.
+
+> Latest Zone cadence/live-outbound roadmap sync: 2026-07-12 completes the next
+> architecture slice named below. The bounded per-Zone owner now combines
+> authenticated Walk/Run/Turn execution with one monotonic 300ms global cadence;
+> late cadence work is coalesced, never replayed as a burst. Personal Session
+> ticks no longer advance the shared Zone, while token-fenced bounded socket
+> channels push realtime owner/AOI movement, appearance, and removal packets
+> independently of an observer's private runtime. Full/closed live queues retain
+> reliable mailbox fallback, and critical personal side effects stay mailbox
+> committed.
+>
+> Strict Release proof deliberately sets personal Tick to 5000ms and disables
+> observer pulses:
+> `docs/generated/player-qa/two-client-zone/two-client-zone-zone-owned-cadence-tick5000-release-20260712.json`
+> passes every assertion with 12ms observer movement latency, 16 entities on
+> both clients, one Bevy remote-motion event, 29 packed-offset matches, and zero
+> decode errors, queue drops, console errors, or 404s. Both screenshots are
+> scene-ready. Focused Gateway cadence/observer/combat regressions, Simulation
+> 148/148, full frontend logic, TypeScript, fmt/check, and Release build pass.
+>
+> This is not total shared-world completion. Movement plus global cadence are
+> Zone-owned, but non-movement commands and some personal side-effect commits
+> still use Session paths into shared state. Full command actorization, mounted
+> eight-phase motion, true three-cell sprint, scene lighting/effects, final
+> human feel acceptance, and host WHEA/BIOS stabilization remain open gates.
+>
+> Latest movement protocol roadmap sync: 2026-07-12 verifies both sides of
+> Crystal's first-run transition. Web ACK classification is now shared between
+> the early page path and the movement controller, and a one-cell Run first-step
+> ACK remains a confirmed degradation rather than a correction. Shared Zone
+> rejects full two-cell running from standstill and emits the effective Walk;
+> `shared_zone` passes 148/148. Release protocol evidence records the expired
+> Walk -> Run case at 16/99ms with one degradation, zero corrections, and delta
+> `(2,0)`, while the normal primed UI chain records 22/28ms ACKs, 17/1ms local
+> pose latency, and exact delta `(3,0)`. This closes the clean/degraded semantic
+> slice but not the scheduling architecture: a private heavy world Tick can
+> still occupy the same WebSocket future. The next milestone is independent,
+> bounded Zone movement ingress plus blocked-private-tick and observer-delivery
+> regressions, followed by mounted eight-phase and three-cell sprint parity.
+> Evidence:
+> `docs/generated/player-qa/movement-jitter/movement-protocol-expired-run-degrades-release-202607120745.json`
+> and
+> `docs/generated/player-qa/movement-jitter/movement-normal-walk-run-chain-release-202607120750.json`.
+>
+> Latest default shared-clock roadmap sync: 2026-07-12 closes the clean local
+> movement presentation gate. Normal URLs now enable Bevy local self/camera
+> ownership and synchronous pose commit by default, with
+> `?bevyLocalMotion=0&bevyPoseCommit=0` retained and end-to-end verified as the
+> legacy rollback. One Crystal-compatible 100ms scene pulse advances six walk
+> phases independently of ACK arrival, while shared Zone continues to own
+> acceptance, collision, occupancy, correction, AOI, cooldown, and persistence.
+> Default continuous and keyboard evidence report 10ms and 15ms maximum
+> command-to-pose delays respectively, zero long tasks/errors, exact final
+> coordinates, and native/Web four-action spans of 2701ms on both sides. The
+> final 25 additive map sprites also moved from DOM fallback to a custom Bevy
+> `SrcAlpha + One` material, with zero DOM world sprites in both WebGPU and
+> WebGL2 smokes. Runtime `bevy-630a77b3535f95bd` passes 94/94 Rust tests and
+> dual-backend coverage. This is a clean-route renderer milestone, not total
+> 1:1 completion: correction/degraded-run capture, mounted eight-frame motion,
+> sprint prediction, native scene population, lighting/ambient effects, and
+> combat VFX remain active roadmap gates. Evidence:
+> `docs/generated/player-qa/movement-jitter/temporal-crystal-native-vs-web-default-shared-clock-horizontal-20260712-001.md`,
+> `docs/generated/player-qa/movement-jitter/movement-explicit-legacy-rollback-202607120623.json`,
+> `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgpu-20260711213830-dee09cfc-report.json`,
+> and
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-default-shared-clock-202607120620.json`.
+>
+> Latest early-presentation/performance roadmap sync: 2026-07-10 makes a clean
+> command eligible for Bevy self/camera/DOM ownership on its first release-WASM
+> frame instead of waiting for a TypeScript motion snapshot. One shared
+> map/entity center and provenance-gated synchronous pose commit keep the frame
+> atomic; correction, degraded-run, target mismatch, and path mismatch retain the
+> old fallback. Shared Zone still owns all acceptance and authoritative state.
+> Both local motion and pose commit remain separately rollback-gated. The map
+> producer now emits only semantic changes, while Rust retains tiles by key,
+> updates transforms in place, rebinds sprites only when images change, and stores
+> a revision fingerprint instead of cloning the full state. The exact four-walk
+> route now has five sampled map states rather than 53 and reaches every accepted
+> pose sink in `14/18/32/16ms` under a hard 75ms budget. Evidence:
+> `docs/generated/player-qa/bevy-movement-shadow/bevy-movement-shadow-webgpu-20260710220403-44ba1f45-report.json`,
+> default-off compatibility
+> `docs/generated/player-qa/bevy-movement-shadow/bevy-movement-shadow-webgpu-20260710221024-ce1066ce-report.json`,
+> and dual backend
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-20260710221430.json`.
+> Runtime `bevy-9ce93936c0841d7e` passes 86/86 Rust tests and all focused Web
+> tests/type checks. The next renderer slice is stable world-space map cells,
+> perimeter/chunk deltas, and one-time atlas metadata. Default promotion still
+> requires exact native clean/correction/degraded-run temporal evidence and human
+> feel acceptance; this milestone is not a claim that total 1:1 parity is done.
+>
+> Latest local-presentation roadmap sync: 2026-07-10 lands the shadow-first,
+> rollback-gated Bevy self/camera slice. The bounded Rust local-motion resource
+> consumes copies of normalized commands and ACKs in `PreUpdate`, then can drive
+> packed self, camera, and DOM overlays through one `localCommand` pose. Shared
+> Zone remains authoritative for movement acceptance, correction, collision,
+> occupancy, cooldown, AOI, and persistence. The feature remains default-off via
+> `?bevyLocalMotion=1` / `mir2-bevy-local-motion`. Takeover requires matching
+> object, target, and from/to path; correction clears the segment and any
+> degraded/rebased path mismatch stays on the previous TypeScript `selfWindow`.
+> Runtime `bevy-e50cfdd1e6c8d229` passes 83/83 Rust tests, 6/6 pose-parser tests,
+> 9/9 movement-bridge tests, TypeScript, and validated WebGPU/WebGL2 releases.
+> Evidence:
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-20260710173210.json`,
+> default-off route
+> `docs/generated/player-qa/bevy-movement-shadow/bevy-movement-shadow-webgpu-20260710173245-17db8e6b-report.json`,
+> forced-on route
+> `docs/generated/player-qa/bevy-movement-shadow/bevy-movement-shadow-webgpu-20260710173356-7b3abddd-report.json`,
+> and map regression
+> `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgpu-20260710173500-ca321fe7-report.json`.
+> Both real routes have 4/4 commands, 4/4 ACKs, 0 jumps and exact geometry
+> (76/76 off and on); forced-on finishes with self and camera owned by
+> `localCommand`. The next acceptance gate is temporal rather than geometry:
+> command timing leads the delayed TS window by as much as 32px / 326ms. Capture
+> exact native Crystal vs Web off/on frame sequences, include correction and
+> degraded-run cases, and only then decide whether to make local takeover the
+> default. Additive Bevy materials and the native Gateway multi-session crash
+> remain separate roadmap lanes.
+>
+> Latest unified-presentation roadmap sync: 2026-07-10 closes the duplicate
+> sprite/camera/DOM interpolation stage. The packed state now identifies self;
+> Rust computes one camera screen pose per frame, derives self as its exact
+> inverse, records each remote sprite's actual selected offset, and publishes a
+> bounded/versioned pose snapshot for DOM overlays. The DOM consumer validates
+> schema, source, bounds, clock domain, and <=250ms freshness before use, then
+> safely falls back to TypeScript. Bridge disable is isolated from Bevy render
+> ownership. A real movement run initially found two 20/22px jumps from the old
+> independently sampled self/camera windows; the unified derivation removed the
+> race and the strengthened rerun passes with 0 jumps. Runtime
+> `bevy-8a40d0bdcf0dc14a` passes 72/72 Rust tests, 5/5 pose-parser tests, 9/9
+> movement-bridge tests, TypeScript, and dual release packages. Evidence:
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-unified-pose-20260710.json`,
+> `docs/generated/player-qa/bevy-movement-shadow/bevy-movement-shadow-webgpu-20260710163125-1a4aff1b-report.json`,
+> and
+> `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgpu-20260710162936-ca18422e-report.json`.
+> The next roadmap slice is a shadow-first, rollback-gated migration of local
+> self prediction and ACK reconciliation into Bevy presentation. Shared Zone
+> remains the sole authority for command acceptance, correction, collision,
+> occupancy, cooldown, AOI, and persistence. The native Gateway two-client crash
+> remains a separate network-evidence blocker, not a renderer result.
+
+> Latest Bevy movement roadmap sync: 2026-07-10 promotes remote packet motion
+> from read-only shadow state into a guarded presentation source. Normalized
+> remote motion/remove events are copied into a bounded `PreUpdate` resource;
+> packed Bevy sprites use its Crystal-stepped offset only when the segment target
+> equals the latest packed grid target, with the previous TypeScript window as a
+> fallback. Connected segments continue from the displayed fractional pose,
+> stale/out-of-order events are ignored, discontinuities snap, remove/disable
+> clears state, and `?bevyRemoteMotion=0` provides a rollback switch. This is
+> presentation-only: shared Zone still owns collision, occupancy, cooldown, AOI,
+> correction, and persistence. Runtime `bevy-63449641a633efc2` passes 67/67 Rust
+> tests (13 focused remote-presentation) and 9/9 TypeScript bridge tests. Real
+> Chrome/WASM backend evidence
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-remote-motion-probe-20260710.json`
+> proves target-mismatch fallback, matched-target Bevy takeover, disable cleanup,
+> and zero decode/event drops in default/forced WebGPU and forced WebGL2. Latest
+> map and shadow regressions are also green. Unified packed sprite, self-camera,
+> and DOM pose is complete in the sync above; local-prediction ownership remains
+> the next guarded migration.
+> Real two-client packet-to-render evidence remains blocked by the separately
+> recorded native Gateway multi-session/reconnect crash at
+> `docs/generated/player-qa/two-client-zone/two-client-zone-native-crash-20260710.json`;
+> renderer-probe success is not being misreported as network proof.
+
+> Latest Bevy/WebGPU architecture sync: 2026-07-10 moves every normal-blend
+> map atlas miss into Bevy standalone textures while retaining only
+> Crystal-additive glows in the DOM. A stable runtime-started state now drives
+> map readiness and world-snapshot emission; diagnostic status phases no longer
+> collapse the running lifecycle. WebGL2/DOM map ownership remains active until
+> Rust acknowledges a complete `map-render-synced` frame for all viewport atlas
+> pages, and standalone tiles use the same acknowledgement before hiding their
+> DOM fallback. Evidence
+> `docs/generated/player-qa/bevy-map-standalone/bevy-map-standalone-webgpu-20260710162936-ca18422e-report.json`
+> passes with 421 atlas tiles, 109 standalone draws, 108 decoded standalone
+> images, 7 atlas pages / 115 images, 0 image failures, 0 map 404s, and 0
+> critical console errors; the 25 remaining DOM world sprites are all additive.
+> `docs/generated/player-qa/bevy-runtime-backends/bevy-runtime-backends-unified-pose-20260710.json`
+> also passes default/forced WebGPU and forced WebGL2 for runtime
+> `bevy-8a40d0bdcf0dc14a`. Remote motion and unified presentation pose are now
+> complete in the syncs above; next comes local self prediction/reconciliation.
+> Shared Zone collision, cooldown, occupancy, AOI, and final transforms remain
+> server-authoritative and are not duplicated into the client renderer.
+
+> Latest main-scene light render roadmap sync: 2026-07-09 converts dynamic
+> `lightSetting` from data into visible world ambience. Web now renders
+> `.viewport-crystal-light-overlay` for Dawn/Evening/Night while leaving
+> Day/Normal untouched, and the layer sits after sprites but before nameplates
+> so scene pixels darken without dimming labels or UI. Evidence
+> `docs/generated/player-qa/visual-parity/scene-light-render-20260709/`
+> records the clean Night screenshot and DOM state:
+> `overlayClass=viewport-crystal-light-overlay night`, `overlayLight=4`,
+> `z-index=6`, `pointer-events=none`, `tutorialOpen=false`, and browser console
+> errors `0`. The same round now carries Crystal map-cell `light` values into
+> `OriginalMapCell.light` and renders map-cell light nodes when non-Day overlays
+> are active; `map-light-export-probe-20260709.json` confirms map `0` samples
+> with 127 / 127 / 25 / 26 light cells. A fresh map-light DOM screenshot remains
+> pending because the real Crystal UTC light window rotated to Day. Roadmap
+> priority now moves to Night/Evening/Dawn recapture or a safe QA-only light
+> override, intensity tuning against native same-time screenshots, and
+> object/equipment/effect light sources.
+
+> Latest dynamic TimeOfDay/lightSetting roadmap sync: 2026-07-09 closes the
+> data/packet side of world light parity. Crystal source seeds `Envir.Now` from
+> `DateTime.UtcNow` and maps `Now.Hour * 2 % 24` to Dawn/Day/Evening/Night in
+> `AdjustLights()` before broadcasting `S.TimeOfDay`. Simulation StartGame and
+> `WorldSnapshot.lightSetting` now follow that same UTC-hour formula, and Web
+> applies the snapshot field plus exposes `window.__mir2Stage5.state.lightSetting`
+> for automated capture. Evidence
+> `docs/generated/player-qa/visual-parity/light-setting-snapshot-20260709/`
+> records direct WS `TimeOfDay.lights=4`, `worldSnapshot.lightSetting=4`, and
+> browser state `lightSetting=4` with 0 critical console errors / 0 non-favicon
+> 404s. The later main-scene light render pass above starts the visual layer;
+> remaining work is object/map light sources and intensity tuning before
+> same-coordinate visual packs measure camera/world/HUD transparent-slot deltas.
+
+> Latest Crystal/Web visual-feel roadmap sync: 2026-07-09 established a newer
+> same-coordinate evidence ladder at `0 @ 335,266`. Pack
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0060-minimap-source-panel-viewrect-native335266-clean/`
+> validates the rebuilt Gateway/native-state path with runtime/layout/entities
+> `100%`, MiniMap `86%`, HUD UI `86%`, and matched Web vitals/items/gold/belt.
+> Web capture now treats `crystalVisibleChatLines` as a replacement snapshot
+> instead of appending over startup logs, and string inference maps Crystal
+> `[Mode: ...]`, `[Pet: ...]`, and `Now in Net:N` to the green/blue ChatDialog
+> styles. Belt parity also advanced: Web now renders belt quantity `1` for
+> consumables and uses Crystal-like black shortcut labels plus yellow counts.
+> Pack 0065 shows the Belt text/data correction is visible, but remaining
+> `hud-belt=78%` is mostly transparent-slot exposure of world camera/light
+> mismatch. Roadmap priority should therefore move from chat/Belt text tweaks to
+> camera viewport alignment, shared visible object/AOI parity, world lighting
+> render, and movement/video feel capture.
+
+> Latest fair-coordinate/MiniMap light roadmap sync: 2026-07-09 improves both
+> the evidence lane and a visible MiniMap mismatch. The capture harness now
+> treats `qa.applyNativeState` as incomplete until Web matches the requested
+> `mapFileName` and `position.x/y`, and the Gateway shared-Zone route now syncs
+> `qa.applyNativeState` transforms back into Zone presence instead of allowing
+> stale authoritative coordinates to overwrite the personal session. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0056-main-hud-fair-visible-coord/`
+> proves the coordinate lock with Web `player` and `authoritativePlayer` both
+> at `334,263`, runtime/layout/entities `100%`, and overall `99.5%`. The next
+> historical pass changed Simulation StartGame's fixed `TimeOfDay` bootstrap
+> from Night (`lights=4`, MiniMap `2092`) to Day (`lights=2`, MiniMap `2093`),
+> matching that Crystal Bichon capture; the dynamic TimeOfDay/lightSetting
+> roadmap sync above now supersedes fixed Day. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0057-minimap-light-day-bootstrap/`
+> records Web `miniMapLight.originalSrc=/original-ui/Prguse/2093.png`, 0
+> network 404s, 0 critical console errors, runtime/layout/entities `100%`, and
+> MiniMap `0.786` / meanAbsDelta `32.545`. Remaining roadmap work in this lane
+> is true MiniMap raster/color/marker parity and world camera/object-frame
+> parity, not coordinate-lock or light-icon drift.
+
+> Latest Main HUD content-y roadmap sync: 2026-07-09 closes the stable
+> main-HUD 2px vertical drift while preserving the stage anchor. Web keeps
+> `.main-hud-shell` at `0,616` for layout parity, but shifts the inner
+> `.main-hud` content by `top: 2px`. 0050/0054 crop analysis showed
+> `hud-left`, `hud-right-controls`, `hud-right-status`, and
+> `hud-bottom-center` all aligned best with that main-HUD-only downward shift,
+> while independent `hud-belt` and `chat` did not. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0055-main-hud-content-y-offset/`
+> records rightControls improving from `0.720/49.436` to `0.986/0.303`,
+> rightStatus from `0.734/42.642` to `0.824/14.189`, bottomCenter from `0.800`
+> to `0.886`, and hudUi from `0.782/34.113` to `0.856/15.453`, with 0 network
+> 404s, 0 critical console errors, and runtime/layout/entities `100%`. 0055 is
+> kept as a HUD-specific proof because dynamic world/minimap/chat state makes
+> it unfair as the new overall baseline (`overall=95.9%`).
+
+> Latest Belt/HUD roadmap sync: 2026-07-09 fixes the Belt panel overlay draw
+> order against Crystal source. Crystal `BeltDialog` draws the half-opacity
+> overlay (`1933` / `1945`) inside `BeltPanel_BeforeDraw`, and
+> `MirControl.Draw()` invokes `BeforeDrawControl()` before `DrawControl()`, so
+> the overlay belongs behind the main Belt frame (`1932` / `1944`). Web had
+> the DOM order reversed, placing the overlay above the base frame and
+> visibly darkening the Belt. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0054-belt-overlay-draw-order/`
+> records `hudBelt` improving from 0050's `0.765` / meanAbsDelta `48.963` to
+> `0.791` / `38.920`, with `hudUi` moving from `0.778` / `35.215` to
+> `0.782` / `34.113`. 0054 is kept as a Belt-specific proof because dynamic
+> chat prevented it from becoming the new overall fair baseline.
+
+> Latest same-scene evidence-tooling roadmap sync: 2026-07-09 makes the visual
+> pack output easier to audit by having `capture-crystal-web-pack.mjs`
+> automatically emit native/Web crop pairs for the exact report regions:
+> `world`, `hud-full`, `hud-left`, `hud-belt`, `hud-right-controls`,
+> `hud-right-status`, `hud-bottom-center`, `minimap`, and `chat`. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0053-auto-region-crops/`
+> records 9 generated crop pairs in `summary.cropSet`. This is not promoted as
+> a new fair visual baseline because native chat state rotated during the run
+> (`chat=67%`, overall `96.9%`), but it preserves the 0050 right-status metric
+> (`hudRightStatus=0.734`) and gives future HUD/MiniMap/world passes immediate
+> side-by-side crop artifacts. 0051/0052 showed that the attempted CSS
+> GDI-outline HUD text variants did not improve over 0050, so that experiment
+> was left as diagnostic evidence only.
+
+> Latest clean visual-baseline roadmap sync: 2026-07-09 adds
+> `crystalVisibleChatLines` support to the same-scene capture lane and records
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0050-chat-visible-slots-current/`
+> as the latest fair automated baseline. This avoids comparing Web against a
+> random native `LineMessage.txt` rotation or stale native chat scroll state
+> while preserving normal client behavior outside explicit capture URLs. 0050
+> reaches overall `98.5%`, pixel trend `96%`, runtime/layout/entities `100%`,
+> chat `83%`, HUD full/UI `78%`, world `83%`, MiniMap `80%`, and keeps the
+> 0046 source-backed weight-bar fill (`fillWidth=16`, `hudRightStatus=0.734`).
+> The remaining roadmap work now points at true visual deltas: HUD
+> asset/color/antialias drift, MiniMap raster/color sampling, world
+> scene/object-frame mismatch, and movement/video feel evidence.
+
+> Latest chat capture roadmap diagnostic: 2026-07-09 makes the same-scene pack
+> less brittle by adding explicit `--gatewayWs` and `--crystalLineMessage`
+> controls to `capture-crystal-web-pack.mjs`. The 0047 evidence pack proves Web
+> can render the intended native startup LineMessage and preserve the 0046
+> weight-bar fix in the same run, with 0 network 404s and 0 critical console
+> errors. The remaining chat gap is now more precise: native Crystal's
+> `ChatDialog` line slots can include an empty/filtered slot before the visible
+> LineMessage, while Web currently renders the seeded startup lines
+> contiguously. Roadmap priority for chat is therefore `History` / `StartIndex`
+> behavior, not only LineMessage text selection.
+
+> Latest HUD weight-bar roadmap sync: 2026-07-09 closes a source-backed
+> rightStatus semantic/render mismatch in the main HUD. Crystal
+> `MainDialogs.cs` sets the `WeightBar` control to `DrawImage=false` and then
+> clips the fill in `WeightBar_BeforeDraw` to
+> `(WeightBar.Size.Width - 2) * CurrentBagWeight / Stats[BagWeight]`, using
+> `Prguse/76` under 50%, `UI_32bit/473` up to 75%, and `UI_32bit/472` above
+> 75%. Web now follows that fill-width and color-resource decision instead of
+> drawing a full green 76px bar, and the missing `UI_32bit` frames are exported.
+> Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0046-weightbar-source-fill/`
+> records `currentWeight=14`, `maxWeight=62`, `weightRatio=0.2258`,
+> `fillWidth=16`, 0 network 404s, 0 critical console errors, and a measured
+> `hudRightStatus` improvement from `0.727/45.137` similarity/meanAbsDelta in
+> 0045 to `0.734/42.642`. Remaining HUD roadmap work is now true
+> asset/color/brightness and antialias parity around the right-status cluster,
+> not the weight-bar fill semantics.
+
+> Latest HUD right-button roadmap sync: 2026-07-09 closes the source-backed
+> 1px coordinate drift in the main-HUD rightControls cluster. Crystal
+> `MainDialogs.cs` positions the 1024px HUD buttons at
+> `Size.Width - 105/55/119/96/73/50/27` (`919`, `969`, `905`, `928`, `951`,
+> `974`, `997`); Web previously rendered the same buttons 1px left of those
+> anchors. Web CSS now uses the Crystal coordinates. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0045-hud-right-button-source-coords/`
+> records 0 network 404s, 0 critical console errors, runtime/layout/entities
+> `100%`, and a modest rightControls metric improvement from 0042's
+> `0.715/51.576` similarity/meanAbsDelta to `0.720/49.436`. Remaining HUD
+> work in this area is now asset/color/brightness parity rather than button
+> coordinate parity.
+
+> Latest Belt/HUD roadmap sync: 2026-07-09 closes a small but visible
+> source-backed Belt mismatch and improves HUD measurement. Crystal
+> `BeltDialog` puts shortcut labels directly on the belt at `(8 + i*35, 2)`
+> and item cells at `(i*35 + 12, 3)`, so labels `1` and `2` remain visible over
+> occupied potion slots. Web now renders those labels as direct belt children
+> with Crystal parent coordinates and a higher z-index instead of nesting them
+> inside slots. The same pass extends visual reports with `hudLeft`, `hudBelt`,
+> `hudRightControls`, `hudRightStatus`, `hudBottomCenter`, and aggregate
+> `hudUi` metrics so HUD fixes can target clean UI areas rather than only the
+> full transparent HUD crop. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0044-belt-key-label-diagnostics/`
+> records label rects `1 @ 238,620 26x14` and `2 @ 273,620 26x14`, 0 network
+> 404s, 0 critical console errors, runtime/layout/entities `100%`, and
+> `hudUi=78%` with subregions `left=79%`, `belt=77%`, `rightControls=72%`,
+> `rightStatus=73%`, and `bottomCenter=80%`. The roadmap priority for HUD now
+> narrows to rightControls/rightStatus asset/color drift, belt background
+> brightness/overlay parity, and chat-line capture stability before broader
+> world/MiniMap/video work.
+
+> Latest MiniMap roadmap sync: 2026-07-09 closes the source-backed MiniMap
+> coordinate-format, label-box, light-icon, and radar-dot mismatches in the
+> native-state same-scene lane. Web now uses Crystal `Functions.PointToString`
+> style coordinates (`335, 262`), pins MiniMap labels to Arial, keeps the
+> coordinate label in Crystal's `56x18` vertically centered box, exports missing
+> `Prguse` light frames `2092`, `2094`, and `2095`, and maps Crystal light
+> states to the same icon indices as native (`Normal/Day=2093`, `Dawn=2095`,
+> `Evening=2094`, `Night=2092`). The radar overlay now draws Crystal-style 2x2
+> `RadarTexture` rects at `(x - 0.5, y - 0.5)`, skips dead entities, and keeps
+> player/NPC/other/owned-object colors aligned where Web state exposes
+> ownership. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0042-minimap-radar-dot-label-welcome/`
+> keeps runtime/layout/entities at `100%`, with overall `98%`, estimated human
+> band `91-100%`, pixel trend `96%`, HUD `78%`, world `83%`, minimap `80%`,
+> chat `83%`, and MiniMap meanAbsDelta `29.535` versus 0039's `29.718`. Roadmap
+> priority remains the larger visible deltas: bottom-panel HUD asset/layout and
+> text placement, true MiniMap raster crop/color sampling parity, world
+> scene/frame mismatch, and then movement/video evidence on this native-state
+> lane.
+
+> Latest HUD text roadmap sync: 2026-07-09 closes the current bottom-right gold
+> text-format mismatch and removes a Web-only serif-font leak from the main HUD.
+> Web now mirrors Crystal `MainDialogs.cs` by formatting `GoldLabel` with the
+> `###,###,##0` grouping pattern, so the native-state character renders
+> `3,457` instead of raw `3457`; the Web main HUD also explicitly uses Arial,
+> matching Crystal `Settings.FontName = "Arial"`. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0036-hud-font-arial-cleanline/`
+> keeps the same-scene pack at overall `98%`, estimated human band `91-100%`,
+> pixel trend `95%`, HUD `77%`, chat `82%`, world `83%`, minimap `79%`, and
+> runtime/layout/entities `100%`, with crop pairs attached. The earlier
+> gold-only pass
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0034-hud-gold-format/`
+> scored HUD `78%`; the Arial step is therefore kept as source-backed visual
+> cleanup while roadmap priority remains the larger visible deltas:
+> bottom-panel HUD asset/layout and text placement, minimap crop/color, world
+> scene/frame mismatch, and then movement/video evidence on this native-state
+> lane.
+
+> Latest ChatDialog/HUD orb roadmap sync: 2026-07-09 closes the current
+> startup chat-panel content/state slice and fixes the most visible left-HUD
+> orb crop defect. Web now keeps Crystal's packet-visible `Welcome` in older
+> history while matching the native visible four-line window with rotating
+> `LineMessage` support through `?crystalLineMessage=...`;
+> `ChatType.LineMessage` uses the Crystal blue/white label style; chat rows
+> render as AutoSize-width labels; the empty input box is hidden until chat text
+> exists, matching `ChatTextBox.Visible=false`; and low-level Warrior HP-only
+> mode uses the full red orb instead of the old half-width HP/MP crop. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0033-chat-and-hp-orb-clean/`
+> keeps the same-scene pack at overall `98%`, estimated human band `91-100%`,
+> pixel trend `96%`, chat similarity `83%`, HUD `78%`, and
+> runtime/layout/entities still `100%`. Roadmap priority now moves to the
+> remaining visible deltas: bottom-panel HUD asset/layout and text placement,
+> minimap crop/color, world scene/frame mismatch, and then movement/video
+> evidence on this same native-state lane.
+
+> Latest bottom-right HUD roadmap sync: 2026-07-09 resolves the most concrete
+> HUD semantic mismatch left by the native-state comparison. Web now mirrors
+> Crystal `MainDialogs.cs` for the right-side main-HUD readouts: remaining bag
+> weight is computed from Crystal player `BagWeight` stats, free space uses the
+> Crystal 46-slot inventory view including belt slots, and the gold row is
+> visible below the readouts. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0027-hud-weight-diagnostics/`
+> records `currentWeight=14`, `maxWeight=62`, HUD `48 / 38`, gold `3457`, and
+> expected HUD `48 / 38` with runtime/layout/entities still `100%`. Roadmap
+> priority remains visual-feel work, but the next HUD slice should focus on
+> chat panel state/overlap and bottom-panel asset drift rather than these
+> bottom-right status numbers.
+
+> Latest native-state/max-MP/EXP same-scene roadmap sync: 2026-07-09 closes the immediate
+> Web-vs-Crystal account-state blocker for automated Candidate scoring. The
+> pack harness now converts native `Server.MirADB` account state into both a
+> Web account-store save and a live QA character payload, then applies that
+> payload through the token-gated local QA-control wrapper without exposing raw
+> debug commands to normal clients. `WorldSnapshot` now also carries
+> `playerMaxMp`, so the Web state remains `MP 32/32` after transfer instead of
+> degrading to `32/?`. The Web upsert path now reads Crystal `ExpList.ini`,
+> giving the native level-6 character EXP `435/900` and HUD `48.33%` instead
+> of the placeholder Web `100.00%`. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0025-exp-debug/`
+> aligns the same character at `0 @ 335,262` with native HP/MP/gold,
+> EXP, inventory, belt, and equipment, clears the missing potion icon 404s, and
+> scores overall `94%` with runtime/layout/entities `100%` and estimated human
+> band `87-100%`. Roadmap priority now moves from "make the comparison fair" to
+> the real client deltas surfaced by that fair comparison: tune HUD assets,
+> align minimap crop/color and chat contents, reduce world scene/frame mismatch,
+> then attach movement/video feel evidence to the same pack family. The
+> bottom-right status semantics called out by this pass are superseded by the
+> 0027 HUD sync above.
+
+> Latest HUD-state roadmap sync: 2026-07-09 adds the missing evidence bridge
+> between native Crystal account state and Web visual scoring. The same-scene
+> report now emits dynamic-state diagnostics, and the new read-only
+> `extract-crystal-account-state.mjs` parser can consume local
+> `Server.MirADB` plus the generated Crystal item manifest to identify the
+> actual native character state used by screenshots. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0019-hud-state-diagnostics/`
+> proves the current HUD/chat penalty is heavily state-polluted: Web captured
+> the same visible character name as a fresh level-1 starter with HP `18/18`,
+> MP `14/?`, gold 0, empty belt/inventory, and starter Web equipment, while
+> native Crystal has level 6, HP 51, MP 32, gold 3457, potion belt slots, and
+> eight equipped Crystal items. Roadmap priority is now to align Web capture
+> state from native account data before spending more time on HUD art tuning;
+> after state is matched, rerun the same-scene pack and then address residual
+> HUD assets, minimap crop/color, and chat content.
+
+> Latest Crystal/Web visual-effect roadmap sync: 2026-07-09 lands the current
+> additive map-effect parity pass and a cleaner same-account evidence lane. The
+> Web renderer now treats Crystal glow frames as a special DOM blend layer over
+> the Bevy map atlas, matching Crystal's `SourceAlpha + One` intent more
+> closely than normal alpha quads. The capture harness can now create/use a Web
+> character with the same visible name as the native client via
+> `--createAccount` / `--characterName`. Evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0017-same-account-native335/`
+> records same-name map `0 @ 335,262` with overall `97%`,
+> runtime/layout/entity health `100%`, pixel trend `92%`,
+> `domBlendSpriteCount=12`, and no 404 or critical console errors. This is
+> still automated Candidate evidence, not final human acceptance: roadmap
+> priority now moves to the remaining visible client deltas called out by the
+> report, especially HUD state/assets, minimap crop/color, chat panel state,
+> and Web HP/MP/equipment/belt state alignment against the native character.
+
+> Latest QA-control roadmap sync: 2026-07-08 lands the safe automation control
+> lane needed for overnight parity work. The gateway now accepts local
+> `qaControl` commands only with `MIR2_GATEWAY_QA_CONTROL_TOKEN`, while normal
+> production clients still reject debug movement, raw Stage5 commands, and debug
+> transfer. Evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-qacontrol2-20260708/report.md`
+> confirms the route can drive Rust `7111` with production safety on and pass
+> incoming damage plus death/revive. Roadmap priority now moves to making that
+> control lane deterministic with explicit ACK/settle semantics, then closing
+> the visible client gaps: DOM damage floaters, seeded pickup movement, and
+> normal kill/XP/drop.
+
+> Latest hostile-retaliation roadmap sync: 2026-07-08 upgrades the combat lane
+> from "incoming damage unproven" to "incoming damage verified, completion
+> evidence blocked by control stability." The attack-trace harness now records
+> target map/object id, sent attack frames, melee approach, delayed server
+> combat packets, and `StartGame` retry attempts. Evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-survivalattacktrace5-20260708/report.md`
+> reached melee with natural `ForestYeti` object `258949`, sent 24 attack
+> frames, observed target `ObjectAttack` / `ObjectStruck` /
+> `DamageIndicator`, and dropped player HP `18 -> 3`. Roadmap priority now
+> shifts to deterministic test control and completion parity: make safe
+> transfer/spawn/death-revive isolation reliable without exposing debug paths to
+> normal clients, then rerun normal attack-kill, `ObjectDied`, XP, and loot
+> evidence from the same Web/Rust route.
+
+> Latest Web/Zone action-parity roadmap sync: 2026-07-08 moves the current
+> default self-camera loop forward from "pickup/death red" to "deterministic
+> pickup and death/revive green, combat completion still open." The Web client
+> now exposes packet-ACK `authoritativePlayer` and uses it for pickup/action
+> gating instead of predicted/render self. The combat QA harness records
+> authoritative self, inventory plus belt carried items, WS frames, pickup
+> attempts, and an opt-in QA Blue Potion seed. Gateway now syncs personal
+> session ground drops into shared Zone pickup and aligns session fallback item
+> commands to the current Zone transform; shared normal chat stays Zone-native
+> while `@DIE` falls back to personal-session GM handling. Evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-authpickupseed7-20260708/report.md`
+> passed pickup (`carried 0 -> 1`, `GainedItem x1`) and death/revive
+> (`playerHp 0 -> 18`, respawn `0:330,270`) on Rust `7111`. Roadmap priority
+> now narrows to unseeded combat progression: make a fresh player reliably
+> find/kill a field monster, receive retaliation or explain neutral monsters,
+> emit `ObjectDied`/XP/drop without QA seed, and clear remaining sound 404s.
+
+> Latest Rust-gateway combat/effect roadmap sync: 2026-07-07 upgrades combat
+> evidence from "attack packets produce no outcomes" to "authoritative damage
+> and visible damage numbers work, but kill/death/loot/XP are still not
+> accepted." The Web client now schedules targeted combat-confirm ticks after
+> attack/range/cast commands, and the combat QA harness can move through normal
+> `walk` packets when the WebGL2 scene has no DOM tile hitbox. Evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-floaterfix30s-20260707/report.md`
+> connected to Rust `7111`, completed 11/11 beats, landed melee damage, drove
+> target HP below 100%, and passed the DOM damage-floater gate (`4`
+> `DamageIndicator` packets, `.scene-damage-floater` peak `1`). Roadmap
+> priority now narrows to gameplay completion parity: make a fresh level-1
+> player reliably kill a field monster within an accepted window, emit
+> `ObjectDied` / XP / loot evidence, and fix the normal-client death/revive
+> lifecycle (`@DIE` currently does not transition to dead). Asset follow-up
+> remains missing original UI sound/monster metadata coverage.
+
+> Latest Rust-gateway combat/effect roadmap sync: 2026-07-07 turns the combat
+> lane from "needs a valid harness" into a concrete Rust `7111` backend parity
+> blocker. The hardened default self-camera harness writes per-beat partial
+> reports, uses atomic report writes, avoids known field safe-zone circles, and
+> now starts combat from Woomyon anchor `1:315,100`. Evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-anchor-20260707/report.md`
+> connected to `ws://127.0.0.1:7111/ws` with `gatewayIsRust=true` and attacked
+> a non-safe-zone `ForestYeti` in melee, but combat outcomes did not advance:
+> no `ObjectStruck`, no `DamageIndicator`, no target `ObjectHealth` drop, no
+> `ObjectDied`, no player HP loss from retaliation, and no dead-state after
+> `@DIE`. Roadmap priority now moves below movement smoothing into the
+> gateway/Zone/server lifecycle: route real client `attack` intents into
+> authoritative damage, surface damage-floater packets to Web, wire player
+> death/revive for normal client commands, then rerun this same anchor evidence
+> until combat/effect survival is green. Asset follow-up from the same run:
+> fill `Sound/103.wav` and Monster `007` original-ui metadata coverage.
+
+> Latest combat/effect roadmap probe: 2026-07-07 opens the next parity lane
+> after movement. `docs/generated/player-qa/combat-survival-default-selfcamera-20260707/report.md`
+> captured 11 default self-camera combat screenshots and completed the harness,
+> but remains red evidence: `7111` Rust gateway was unavailable, the client ran
+> via `7110`, hunting-field transfer/engagement was unreliable, attack-kill and
+> damage-floater checks did not pass, and death/revive failed. The run did prove
+> one useful surface (`playerHp 18 -> 9` during survival), so the next roadmap
+> item is to stabilize Rust-gateway combat/effect automation until
+> attack-kill, damage floaters, death/revive, loot, and XP can be judged from
+> strong same-scene evidence.
+
+> Latest held/chorded roadmap sync: 2026-07-07 promotes default self-camera
+> verification from the four-click Bichon route to keyboard-held and chorded
+> movement. Chorded cardinal evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-keyseq-bichon-cardinal-default-selfcamera-windowfps-content-jpeg-20260707-2000.json`
+> is strict-green with 148 JPEG frames, 8 movement commands, no rollback, and no
+> interaction pollution. Held Shift+Right first found a prediction cleanup gap
+> (`predicted 332,270` briefly fell back to server `331,270` between run ACKs);
+> `apps/web/app/page.tsx` now keeps fresh, unconsumed direction
+> `queuedMoveIntent` state as movement transport evidence. Verified held rerun
+> `docs/generated/player-qa/movement-jitter/web-motion-heldrun-bichon-right-default-selfcamera-windowfps-content-queuedintentfix-jpeg-20260707-2000.json`
+> is `ok=true` with 122 JPEG frames, 8 movement commands, average ACK
+> `198.5ms`, max ACK `439ms`, final `345,270`, no logical rollback, no failed
+> assertions, and no console/network failures. Roadmap next: equal-duration
+> native held/video evidence, then busier combat/effect scenes and HUD/chat
+> temporal polish.
+
+> Latest default self-camera roadmap sync: 2026-07-07 closes the measured
+> equal-cadence movement-intensity gap for the current four-click Bichon route.
+> The Bevy self-camera + per-entity interpolation path is now requested by
+> default and only activates when the Bevy entity/map renderer is live; URL and
+> localStorage escape hatches remain. The residual DOM self overlay now cancels
+> the parent camera transform, eliminating the jump failures seen in the first
+> opt-in self-camera probe. Native evidence
+> `docs/generated/player-qa/movement-jitter/original-motion-computeruse-route-bichon-4click-highfps-20260707-2000.json`
+> is `ok=true`, 104 JPEG frames at `50.17ms` average cadence, and 4 real native
+> clicks. Matching default-URL Web content-only evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-clicksequence-bichon-samedir-4click-windowfps-content-default-selfcamera-jpeg-20260707-2000.json`
+> is strict-green with 105 JPEG frames at ~50ms cadence, 4/4 Walk ACKs
+> averaging `139.25ms` with max `369ms`, no visual jumps, no interaction
+> pollution, and no console/network failures. The temporal report
+> `docs/generated/player-qa/movement-jitter/temporal-native-highfps-route-vs-web-windowfps-content-default-selfcamera-clicksequence-bichon-20260707.md`
+> records normalized delta/sec Crystal `63.7831` vs Web `62` (Web ratio
+> `0.972`) and changed-pixel/sec Crystal `1.718936` vs Web `1.7788` (Web ratio
+> `1.0348`). Roadmap next: broaden default self-camera evidence to held/chorded
+> movement plus combat/effect-heavy scenes, then tune HUD/chat temporal polish
+> and effect-layer motion.
+
+> Latest 4-click temporal-feel roadmap sync: 2026-07-07 upgrades the native
+> real-input evidence from a single click to a four-click Crystal/Web movement
+> route. Native Computer Use evidence
+> `docs/generated/player-qa/movement-jitter/original-motion-computeruse-route-bichon-4click-20260707-2000.json`
+> captured 23 frames and 4 real native clicks. Web evidence now uses the new
+> `clickSequence` harness path; a polluted first sample
+> `docs/generated/player-qa/movement-jitter/web-motion-clicksequence-bichon-4click-left-jpeg-20260707-2000.json`
+> correctly failed after hitting `Teleport_Gilbert`, while the clean accepted
+> sample
+> `docs/generated/player-qa/movement-jitter/web-motion-clicksequence-bichon-leftclean-4click-jpeg-20260707-2000.json`
+> passed with 29 JPEG frames, 4/4 ACKs, average ACK `204.25ms`, max `590ms`,
+> and no interaction pollution. Report
+> `docs/generated/player-qa/movement-jitter/temporal-native-computeruse-route-vs-web-clicksequence-bichon-leftclean-20260707.md`
+> records Crystal visual delta `11.42` vs Web `10.11` (ratio `0.8853`).
+> Roadmap next: video/higher-cadence native capture and exact clean-route
+> replay, then tune render/camera/HUD temporal polish from measured deltas.
+
+> Latest native temporal-feel roadmap sync: 2026-07-07 promotes the smoothness
+> work from "need native real input" to repeatable same-scene Crystal/Web click
+> evidence. `capture-original-computer-use.mjs` drives and captures the native
+> Crystal window through Computer Use, producing real movement frames in
+> `docs/generated/player-qa/movement-jitter/original-motion-computeruse-click-620-520-20260707-2000.json`.
+> Web same-scene `clickTarget` evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-clicktarget-bichon-287-611-plus1-left-jpeg-1800ms-20260707-2000.json`
+> reached `288,612` with one clean `walk DownRight`, 0 failures, and 10 JPEG
+> frames. The aligned temporal report
+> `docs/generated/player-qa/movement-jitter/temporal-native-computeruse-click-vs-web-clicktarget-bichon-1800ms-20260707.md`
+> reports native mean visual delta `7.09` vs Web `4.51` and native changed-pixel
+> ratio `0.16855` vs Web `0.108783`. Roadmap next: expand from a one-step
+> click to longer Crystal/Web run routes and/or video-derived frames so the
+> remaining "Crystal is smoother" claim is judged on equivalent temporal
+> evidence, not screenshots.
+
+> Latest temporal-feel roadmap sync: 2026-07-07 adds the first reusable
+> frame-cadence scoring pass for the Crystal-vs-Web smoothness gap. Web held
+> keyboard capture now has valid full-stage JPEG frame evidence:
+> `docs/generated/player-qa/movement-jitter/web-motion-keyhold-right-jpeg-cadence-20260707-2000.json`
+> is `ok=true`, records 23 frames at about 98ms average spacing, sends
+> `Walk, Run, Run`, reaches `335,270`, and records no ACK/capture/assertion
+> failures. The temporal report
+> `docs/generated/player-qa/movement-jitter/temporal-keyhold-native-static-vs-webjpeg-cadence-20260707.md`
+> compares those frames against the current native Crystal synthetic-input
+> capture and reports aggregate visual delta `Crystal 0.37` vs `Web 7.09`.
+> This is a measurement milestone, not visual acceptance: the native Crystal
+> Win32 keyboard/click samples did not reliably move the real client, so the
+> roadmap next item is native real-input/video automation before claiming
+> Crystal animation-cadence parity. Follow-up SendInput scan-code keyboard,
+> right-click target, and left-click target probes still produced near-static
+> Crystal deltas (`0.43`, `0.33`, `0.46`), which rules out the current
+> synthetic input path as accepted evidence.
+
+> Latest held/chorded movement roadmap sync: 2026-07-07 advances the
+> "Crystal feels smoother" work from click-route cleanup into longer keyboard
+> runs. The red WebGL2 held Shift+Right repro was not a Bevy/Web rendering
+> hitch: Gateway move logging showed the fifth run to `0:339,270` returning a
+> six-packet batch with transfer/reset traffic, because `with_crystal_world_runtime`
+> still retained the starter demo `starter-east-field-gate` same-map transfer.
+> Full Crystal world runtime now clears starter demo map transfers and keeps
+> world travel source-of-truth in generated Crystal movement records. Before
+> evidence:
+> `docs/generated/player-qa/movement-jitter/web-motion-heldrun-bichon-right-webgl2-movelog-20260707.json`
+> showed `ok=false`, rollback, and ACK warnings `7481/4066ms`; after evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-heldrun-bichon-right-worldtransferfix-20260707.json`
+> is `ok=true`, 8/8 movement ACKs at
+> `359/152/200/247/91/57/92/146ms`, final `345,270`, no rollback, no stale
+> prediction, no command queue warnings, and Bevy WebGL2 packed rendering.
+> The cardinal chorded sequence
+> `docs/generated/player-qa/movement-jitter/web-motion-keyseq-bichon-cardinal-worldtransferfix-rerun-20260707.json`
+> is also `ok=true` with all eight ACKs under 300ms. Roadmap next: native
+> Crystal held/chorded frame recording and animation-cadence scoring, because
+> the server-side long-run rollback class is now covered by automated evidence.
+
+> Latest crowded-town movement sync: 2026-07-07 closes the local Bichon
+> click-route ACK/pollution gap that remained after the first temporal pass.
+> The harness now produces clean same-scene mouse-route evidence with route
+> patterns, entity-hit avoidance, interaction-pollution assertions, and Bevy
+> WebGL2 readiness waits. The self entity no longer steals ground clicks, shared
+> Zone movement consumes late-ready input immediately, and the post-ACK
+> input-priority window is now Crystal run grace plus one Crystal tick (1.5s)
+> so heavy world ticks do not block the next chained Walk/Run. Evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-clickroute-bichon-leftclean-postgrace1500-20260707.json`
+> is `ok=true`, clean settle, 4/4 ACKs at `490/164/33/5ms`, no entity-hit or
+> non-movement pollution, Bevy WebGL2 packed/no DOM fallback. Temporal summary:
+> `docs/generated/player-qa/movement-jitter/temporal-clickroute-postgrace1500-20260707.md`.
+> Repeat evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-clickroute-bichon-leftclean-postgrace1500-rerun-20260707.json`
+> also passed with ACKs `582/78/109/7ms`.
+> Roadmap next: longer held/chorded movement and animation-frame cadence versus
+> Crystal, because the single crowded-town click-route repro is now green.
+
+> Latest Crystal/Web temporal movement sync: 2026-07-07 adds the first
+> repeatable native-vs-Web short-sequence movement evidence loop. Native
+> Crystal Win32 capture
+> `docs/generated/player-qa/movement-jitter/original-motion-frames-20260707-183007.json`
+> records 16 frame images for the four-step mouse route, while Web capture now
+> supports per-sample frame images, route-step timing, click-hold timing, and
+> self-only movement ACK latency matching. A Web input-semantics gap is fixed:
+> right-click target movement now primes run immediately instead of letting the
+> first target route degrade into all-walk packets. Evidence summary
+> `docs/generated/player-qa/movement-jitter/temporal-clickroute-runfix-20260707-183748.md`
+> reports WoomyonWoods(S) click-route strict-green with `ok=true`, 8/8 self
+> ACKs, average ACK 164.75ms, max ACK 301ms, Bevy WebGL2 drawn, and no console
+> errors or non-favicon 404s. Remaining roadmap risk: Bichon crowded
+> click-route evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-clickroute-runfix-clean-20260707-183601.json`
+> still fails strict ACK responsiveness after the first run because of
+> crowded-AOI / blocked-route conditions, so town mouse-route feel is the next
+> movement target rather than static screenshot parity.
+
+> Latest Crystal/Web movement evidence sync: 2026-07-07 cleans the local Bichon
+> `0:286,610` Web movement sample after expanding exported Crystal UI resources
+> with `NPC/09`, `Monster/011`, and `Monster/013`. The new capture
+> `docs/generated/player-qa/movement-jitter/local-crystal-visual-baseline-keyseq-clean-20260707-181953.json`
+> passes with `ok=true`, `strictStatus="settled"`, 4/4 movement packets ACKed,
+> all 15 movement assertions green, Bevy WebGL2 gameplay layers drawn, 0
+> critical console errors, and 0 non-favicon 404s. This separates real
+> Crystal/Web smoothness work from the earlier polluted 367-resource-404 run.
+> Roadmap next: record/compare temporal animation cadence and remove Web-only
+> overlay/UI silhouette gaps rather than treating resource noise as movement
+> feel.
+
+> Latest Crystal/Web static visual parity sync: 2026-07-07 adds the repeatable
+> `qa:visual-parity` report over Windows Crystal + Web same-scene screenshot
+> pairs. The capture path now waits for visual scene readiness, suppresses the
+> Web-only beginner tutorial during parity capture, emits Bevy map/entity
+> renderer diagnostics, and filters transient headless `net::ERR_FAILED` noise
+> out of critical console health. The Web-only objective tracker now defaults
+> off unless explicitly enabled with `?objectiveTracker=1` or
+> `localStorage["mir2:objectiveTracker"]="1"`, closing the previous automated
+> P1 silhouette gap. Current local Bichon `0:286,610` evidence
+> `docs/generated/player-qa/visual-parity/current-20260707-181734-report.md`
+> reports weighted 95%, runtime/layout/entities 100%, pixel trend 86%, estimated
+> human visual/feel parity band 88-100%, and no recurring automated top gaps.
+> Roadmap next: compare temporal animation cadence, Crystal lighting/shadow
+> timing, and live HUD/chat state because Crystal's "smooth" feel is a temporal
+> problem, not a static screenshot problem.
+
 > Latest Gateway movement ACK/input-priority roadmap sync: 2026-07-06 records
 > the local Web/Gateway fix for the current stop/go movement repro. The issue
 > was not PR #123 or a UI-only regression: a heavy shared in-process Zone world
