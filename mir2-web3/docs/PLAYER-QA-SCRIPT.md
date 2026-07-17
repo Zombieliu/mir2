@@ -6,6 +6,21 @@ Purpose: keep final human frontend validation focused. The project can be driven
 
 ## Latest Deterministic Same-Scene Gate
 
+- Prefer live r16 under
+  `docs/generated/player-qa/visual-parity/cwp-20260718-r16-live-clean/` for the
+  current post-NPC-fix layout/effect trend. It records `live-window-cycle`, 24
+  native candidates, Day setting 2, target `0 @ 332,275`, 0 critical errors,
+  0 404s, 7.1% full-window / 6.0% world changed pixels, world MAE 4.499, and
+  Belt MAE 10.765. Its native top-left includes a Codex Computer Use status
+  bubble; exclude that area from product conclusions and recapture without the
+  external overlay before final human acceptance.
+- A locked-effect capture must include `effectPixelContribution` with at least
+  100 changed pixels. r16 records 28 visible TrapHexagon nodes and 57,282
+  changed pixels; forced WebGL2 r09 records 55,462. The paired hidden-effects
+  PNG must remove the cross without black compositor tiles.
+- Long native raw paths are supported by Buffer-based decode. r15 validates a
+  271-character source path and 24-candidate phase selection; do not shorten
+  evidence prefixes merely to work around `MAX_PATH`.
 - r03/r04 under
   `docs/generated/player-qa/visual-parity/crystal-web-pack-20260718-same-state-deterministic-r0*/`
   prove Edge 150 CDP capture works through Next 16.2.1's compiled `ws`.

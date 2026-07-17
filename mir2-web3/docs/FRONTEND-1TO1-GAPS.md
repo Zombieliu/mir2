@@ -2,6 +2,25 @@
 
 Last updated: 2026-07-18
 
+> 2026-07-18 fresh-native TrapHexagon/Belt closure: live r05 captured the
+> post-Rust-fix Crystal client with ordinary NPC primary names Lime and
+> secondary underscore lines White at `0 @ 332,275`, Day setting 2. It exposed
+> two deterministic Web regressions: `viewport-sprite-overlay` received
+> `translate: 0px 0px`, creating an auto-level stacking context below the GPU
+> entity canvas, and CSS rendered the nearly opaque Belt overlay at opacity
+> 0.5. Correctly positioned Magic/1397 TrapHexagon nodes were therefore hidden,
+> while six transparent Belt slots were darkened. Effects now live under an
+> untransformed pass-through parent with per-node camera translation, and the
+> non-equivalent Belt overlay is transparent. Final live r16 improves from the
+> r05 15.0%/14.8% full/world changed ratios to 7.1%/6.0%, with world similarity
+> 91.4%, world MAE 4.499, HUD UI 88.4%, Belt similarity 89.7% / MAE 10.765,
+> chat 82.1%, and MiniMap 87.2%. The capture now fails if locked effects do not
+> alter pixels: r16 sees 28 visible nodes and 57,282 changed pixels; forced
+> WebGL2 r09 sees 55,462, both with 0 critical errors and 0 404s. Long native
+> raw paths are read as Buffers, proven by r15 at 271 characters. The native
+> top-left is still contaminated by the Codex Computer Use status bubble, so
+> final clean pixel/human acceptance remains open.
+
 > 2026-07-18 deterministic r03/r04 closure: the Web-only same-scene harness now
 > completes Edge 150 CDP `Runtime.enable` through Next's compiled `ws`. r04 at
 > Bichon `0.map @ 332,275`, paired Day setting 2, has 0 critical console errors,

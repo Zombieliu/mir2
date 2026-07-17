@@ -721,106 +721,6 @@ function OriginalClientSceneVisualLayersInner({
             </div>
           );
         })}
-        {resolvedEffectFrames.map(({ effect, animation, frame }) => {
-          const anchor = effect.objectId
-            ? viewportEntitySprites.find(({ entity }) => entity.objectId === effect.objectId)?.entity
-            : undefined;
-          const isPlayerAnchor = anchor?.objectId === player?.objectId;
-          const anchorMotionOffset =
-            anchor && !isPlayerAnchor && !imperativeCamera
-              ? entityMotionOffsetForEntity(anchor, entityMotionSnapshots, motionNow)
-              : EMPTY_VIEWPORT_OFFSET;
-          const cameraOffset = isPlayerAnchor ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
-          const worldX = anchor?.x ?? effect.x;
-          const worldY = anchor?.y ?? effect.y;
-          const dx = anchor?.dx ?? worldX - (player?.x ?? worldX);
-          const dy = anchor?.dy ?? worldY - (player?.y ?? worldY);
-          return (
-            <Fragment key={effect.key}>
-            <img
-              className="scene-crystal-effect-frame"
-              src={frame.path}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              data-effect-key={effect.key}
-              data-effect-source={effect.source}
-              data-effect-name={animation.name}
-              data-effect-blend={animation.blend ? "additive" : "alpha"}
-              data-mir2-original-src={frame.path}
-              onError={handleSceneAssetImageError}
-              onLoad={handleSceneAssetImageLoad}
-              style={{
-                position: "absolute",
-                left:
-                  // Crystal passes the tile's top-left DrawLocation to MLibrary;
-                  // the exported frame x/y already contains the library offset.
-                  VIEWPORT_ENTITY_LEFT_ORIGIN +
-                  dx * VIEWPORT_CELL_WIDTH +
-                  cameraOffset.x +
-                  anchorMotionOffset.x +
-                  animation.offset.x +
-                  frame.x,
-                top:
-                  VIEWPORT_ENTITY_TOP_ORIGIN +
-                  dy * VIEWPORT_CELL_HEIGHT +
-                  cameraOffset.y +
-                  anchorMotionOffset.y +
-                  animation.offset.y +
-                  frame.y,
-                width: frame.width,
-                height: frame.height,
-                mixBlendMode: animation.blend
-                  ? CRYSTAL_ADDITIVE_MIX_BLEND_MODE
-                  : "normal",
-                filter: animation.light > 0 ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)` : undefined,
-                pointerEvents: "none",
-                zIndex: viewportDepthForCell(
-                  worldX,
-                  worldY,
-                  viewportDepthPlayer,
-                  effect.source === "map" ? 48 : effect.source === "spell" ? 90 : 72,
-                ),
-              }}
-            />
-            {frame.maskPath ? (
-              <img
-                className="scene-crystal-effect-frame mask"
-                src={frame.maskPath}
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                data-effect-key={`${effect.key}:mask`}
-                data-mir2-original-src={frame.maskPath}
-                onError={handleSceneAssetImageError}
-                onLoad={handleSceneAssetImageLoad}
-                style={{
-                  position: "absolute",
-                  left:
-                    VIEWPORT_ENTITY_LEFT_ORIGIN +
-                    dx * VIEWPORT_CELL_WIDTH +
-                    cameraOffset.x +
-                    anchorMotionOffset.x +
-                    animation.offset.x +
-                    (frame.maskX ?? frame.x),
-                  top:
-                    VIEWPORT_ENTITY_TOP_ORIGIN +
-                    dy * VIEWPORT_CELL_HEIGHT +
-                    cameraOffset.y +
-                    anchorMotionOffset.y +
-                    animation.offset.y +
-                    (frame.maskY ?? frame.y),
-                  width: frame.maskWidth ?? frame.width,
-                  height: frame.maskHeight ?? frame.height,
-                  mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
-                  pointerEvents: "none",
-                  zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 91),
-                }}
-              />
-            ) : null}
-            </Fragment>
-          );
-        })}
         {viewportProjectiles.map((projectile) => {
           const currentLeft =
             VIEWPORT_TILE_CENTER_X +
@@ -858,6 +758,125 @@ function OriginalClientSceneVisualLayersInner({
             viewportDepthPlayer={viewportDepthPlayer}
           />
         ))}
+      </div>
+
+      <div
+        className={`viewport-effect-overlay ${screen !== "game" ? "hidden" : ""}`}
+        aria-hidden="true"
+      >
+        {resolvedEffectFrames.map(({ effect, animation, frame }) => {
+          const anchor = effect.objectId
+            ? viewportEntitySprites.find(({ entity }) => entity.objectId === effect.objectId)?.entity
+            : undefined;
+          const isPlayerAnchor = anchor?.objectId === player?.objectId;
+          const anchorMotionOffset =
+            anchor && !isPlayerAnchor && !imperativeCamera
+              ? entityMotionOffsetForEntity(anchor, entityMotionSnapshots, motionNow)
+              : EMPTY_VIEWPORT_OFFSET;
+          const cameraOffset = isPlayerAnchor ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+          const worldX = anchor?.x ?? effect.x;
+          const worldY = anchor?.y ?? effect.y;
+          const dx = anchor?.dx ?? worldX - (player?.x ?? worldX);
+          const dy = anchor?.dy ?? worldY - (player?.y ?? worldY);
+          return (
+            <Fragment key={effect.key}>
+              <img
+                ref={
+                  imperativeCamera
+                    ? registerCameraSurface(`effect:${effect.key}`)
+                    : undefined
+                }
+                className="scene-crystal-effect-frame"
+                src={frame.path}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                data-effect-key={effect.key}
+                data-effect-source={effect.source}
+                data-effect-name={animation.name}
+                data-effect-blend={animation.blend ? "additive" : "alpha"}
+                data-mir2-original-src={frame.path}
+                onError={handleSceneAssetImageError}
+                onLoad={handleSceneAssetImageLoad}
+                style={{
+                  position: "absolute",
+                  left:
+                    // Crystal passes the tile's top-left DrawLocation to MLibrary;
+                    // the exported frame x/y already contains the library offset.
+                    VIEWPORT_ENTITY_LEFT_ORIGIN +
+                    dx * VIEWPORT_CELL_WIDTH +
+                    cameraOffset.x +
+                    anchorMotionOffset.x +
+                    animation.offset.x +
+                    frame.x,
+                  top:
+                    VIEWPORT_ENTITY_TOP_ORIGIN +
+                    dy * VIEWPORT_CELL_HEIGHT +
+                    cameraOffset.y +
+                    anchorMotionOffset.y +
+                    animation.offset.y +
+                    frame.y,
+                  width: frame.width,
+                  height: frame.height,
+                  mixBlendMode: animation.blend
+                    ? CRYSTAL_ADDITIVE_MIX_BLEND_MODE
+                    : "normal",
+                  filter:
+                    animation.light > 0
+                      ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
+                      : undefined,
+                  pointerEvents: "none",
+                  zIndex: viewportDepthForCell(
+                    worldX,
+                    worldY,
+                    viewportDepthPlayer,
+                    effect.source === "map" ? 48 : effect.source === "spell" ? 90 : 72,
+                  ),
+                }}
+              />
+              {frame.maskPath ? (
+                <img
+                  ref={
+                    imperativeCamera
+                      ? registerCameraSurface(`effect:${effect.key}:mask`)
+                      : undefined
+                  }
+                  className="scene-crystal-effect-frame mask"
+                  src={frame.maskPath}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  data-effect-key={`${effect.key}:mask`}
+                  data-mir2-original-src={frame.maskPath}
+                  onError={handleSceneAssetImageError}
+                  onLoad={handleSceneAssetImageLoad}
+                  style={{
+                    position: "absolute",
+                    left:
+                      VIEWPORT_ENTITY_LEFT_ORIGIN +
+                      dx * VIEWPORT_CELL_WIDTH +
+                      cameraOffset.x +
+                      anchorMotionOffset.x +
+                      animation.offset.x +
+                      (frame.maskX ?? frame.x),
+                    top:
+                      VIEWPORT_ENTITY_TOP_ORIGIN +
+                      dy * VIEWPORT_CELL_HEIGHT +
+                      cameraOffset.y +
+                      anchorMotionOffset.y +
+                      animation.offset.y +
+                      (frame.maskY ?? frame.y),
+                    width: frame.maskWidth ?? frame.width,
+                    height: frame.maskHeight ?? frame.height,
+                    mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
+                    pointerEvents: "none",
+                    zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 91),
+                  }}
+                />
+              ) : null}
+            </Fragment>
+          );
+        })}
       </div>
 
       {screen === "game" && sceneLightClassName ? (

@@ -58,7 +58,11 @@ assert.equal(iconMatchesExpected("/original-ui/Prguse/2092.png", "/original-ui/P
 assert.equal(
   additiveEffectHasDirectWorldBackdrop({
     blend: "additive",
-    spriteOverlayZIndex: "auto",
+    effectOverlayZIndex: "auto",
+    effectOverlayTranslate: "none",
+    effectOverlayTransform: "none",
+    effectNodeZIndex: "4090",
+    worldRendererZIndex: "2",
     worldCompositeIsolation: "isolate",
     worldCompositeVisible: true,
   }),
@@ -67,7 +71,24 @@ assert.equal(
 assert.equal(
   additiveEffectHasDirectWorldBackdrop({
     blend: "additive",
-    spriteOverlayZIndex: "5",
+    effectOverlayZIndex: "auto",
+    effectOverlayTranslate: "0px 0px",
+    effectOverlayTransform: "none",
+    effectNodeZIndex: "4090",
+    worldRendererZIndex: "2",
+    worldCompositeIsolation: "isolate",
+    worldCompositeVisible: true,
+  }),
+  false,
+);
+assert.equal(
+  additiveEffectHasDirectWorldBackdrop({
+    blend: "additive",
+    effectOverlayZIndex: "auto",
+    effectOverlayTranslate: "none",
+    effectOverlayTransform: "none",
+    effectNodeZIndex: "1",
+    worldRendererZIndex: "2",
     worldCompositeIsolation: "isolate",
     worldCompositeVisible: true,
   }),

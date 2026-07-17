@@ -135,13 +135,32 @@ Crystal Lime primary names with White. r04 confirms Web primary/secondary
 labels remain Lime/White. The fixed r01 native image predates the server fix,
 so it remains valid for layout/light trend but not for final name-color pixels.
 
+## Fresh Native Effect/Belt Closure - 2026-07-18
+
+Live r05 established the post-NPC-fix native baseline at Bichon `0 @ 332,275`,
+Day setting 2. It measured 15.0% full-window / 14.8% world changed pixels and
+Belt MAE 38.05. TrapHexagon packet/resource/frame/coordinate data was already
+correct; the translated auto-level sprite parent sat below the GPU canvas and
+hid every effect child. The effect frames now use a pass-through parent and
+receive camera translation individually. The CSS Belt overlay is also disabled
+because its nearly opaque source-over frame did not match Crystal's D3D blend.
+
+Live r16 records 7.1% full-window / 6.0% world changed pixels, world similarity
+91.4%, world MAE 4.499, HUD UI 88.4%, Belt similarity 89.7% / MAE 10.765,
+0 critical errors, and 0 404s. A normal/hidden effect A/B proves 28 visible
+nodes contribute 57,282 pixels. Forced WebGL2 r09 proves the same path with
+55,462 changed pixels. r15 additionally proves 24-candidate selection from a
+271-character raw path after native samples were switched to Buffer decode.
+
+The Codex Computer Use status bubble remains visible in the native top-left of
+the live packs. Treat it as external evidence contamination, not a product UI
+gap, and acquire one overlay-free native pair before final human acceptance.
+
 ## Next Work Order
 
-1. Capture a fresh native/Web pair after the NPC Lime packet fix so color
-   pixels are compared against the corrected native client state.
-2. Quantify and correct the remaining visible TrapHexagon/effect placement and
-   composition delta using the fresh pair.
-3. Address HUD/chat state and static layout contributors; r04 reports HUD UI
-   87% and chat 82% while the fixed native character state remains different.
-4. Re-run strict movement, map transaction, dual-render-backend, typecheck, and
+1. Align deterministic native/Web chat content, then address residual HUD and
+   minimap typography; r16 reports chat 82.1%, HUD UI 88.4%, MiniMap 87.2%.
+2. Acquire an overlay-free native pair after the current Codex task ends so the
+   external top-left status bubble does not pollute full/world metrics.
+3. Re-run strict movement, map transaction, dual-render-backend, typecheck, and
    production-build gates before requesting human acceptance.
