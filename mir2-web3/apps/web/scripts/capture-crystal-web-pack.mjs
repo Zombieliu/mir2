@@ -225,16 +225,15 @@ async function captureNativeWindow() {
   if (samples.length === 0) {
     throw new Error(`Native window capture did not produce a frame: ${result.jsonPath}`);
   }
-  await Promise.all(
-    samples.map(async (sample) => {
-      const metadata = await sharp(sample.imagePath).metadata();
-      assertNativeFrameDimensions(metadata, {
-        expectedWidth: expectedNativeWidth,
-        expectedHeight: expectedNativeHeight,
-        label: `native PNG sample ${sample.index ?? "unknown"}`,
-      });
-    }),
-  );
+  await waitForNativeSampleFiles(samples);
+  for (const sample of samples) {
+    const metadata = await readNativeMetadataAfterCapture(sample.imagePath);
+    assertNativeFrameDimensions(metadata, {
+      expectedWidth: expectedNativeWidth,
+      expectedHeight: expectedNativeHeight,
+      label: `native PNG sample ${sample.index ?? "unknown"}`,
+    });
+  }
   return {
     ...result,
     sourceMode: "live-window-cycle",
@@ -244,6 +243,52 @@ async function captureNativeWindow() {
     durationMs: effectiveDurationMs,
     sampleMs: originalSampleMs,
   };
+}
+
+async function waitForNativeSampleFiles(samples) {
+  const deadline = Date.now() + 30_000;
+  let stableSignature = null;
+  while (Date.now() < deadline) {
+    const stats = await Promise.all(
+      samples.map((sample) => fs.stat(sample.imagePath).catch(() => null)),
+    );
+    const ready = stats.every((entry) => entry?.isFile() && entry.size > 0);
+    const signature = ready ? stats.map((entry) => entry.size).join(":") : null;
+    if (signature && signature === stableSignature) return;
+    stableSignature = signature;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  const missing = [];
+  for (const sample of samples) {
+    const stat = await fs.stat(sample.imagePath).catch(() => null);
+    if (!stat?.isFile() || stat.size <= 0) missing.push(sample.imagePath);
+  }
+  throw new Error(`Native PNG samples did not finish writing: ${JSON.stringify(missing)}`);
+}
+
+async function readNativeMetadataAfterCapture(imagePath) {
+  let lastError = null;
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    try {
+      const imageBytes = await fs.readFile(imagePath);
+      return await sharp(imageBytes).metadata();
+    } catch (error) {
+      lastError = error;
+      const message = String(error?.message ?? error);
+      const captureStillFlushing =
+        error?.code === "ENOENT" ||
+        error?.code === "EBUSY" ||
+        error?.code === "EPERM" ||
+        message.includes("Input file is missing") ||
+        message.includes("Input file contains unsupported image format");
+      if (!captureStillFlushing) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  throw lastError;
 }
 
 async function captureProvidedNativeImage() {
@@ -283,7 +328,7 @@ async function selectNativeCaptureSample({ nativeCapture, webScreenshotPath, web
 
   const [webMetadata, ...nativeMetadata] = await Promise.all([
     sharp(webScreenshotPath).metadata(),
-    ...samples.map((sample) => sharp(sample.imagePath).metadata()),
+    ...samples.map((sample) => readNativeMetadataAfterCapture(sample.imagePath)),
   ]);
   const maxWidth = Math.min(
     webMetadata.width ?? 1024,
@@ -325,9 +370,13 @@ async function selectNativeCaptureSample({ nativeCapture, webScreenshotPath, web
 }
 
 async function meanAbsoluteRgbDelta(leftPath, rightPath, region) {
+  const [leftBytes, rightBytes] = await Promise.all([
+    fs.readFile(leftPath),
+    fs.readFile(rightPath),
+  ]);
   const [left, right] = await Promise.all([
-    sharp(leftPath).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
-    sharp(rightPath).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(leftBytes).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(rightBytes).extract(region).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
   ]);
   if (
     left.info.width !== right.info.width ||

@@ -73,11 +73,29 @@ export function iconMatchesExpected(actual, expectedPath) {
 
 export function additiveEffectHasDirectWorldBackdrop(effect) {
   if (effect?.blend !== "additive") return true;
+  const effectZIndex = numericZIndex(effect.effectNodeZIndex);
+  const rendererZIndex = numericZIndex(effect.worldRendererZIndex);
   return (
-    effect.spriteOverlayZIndex === "auto" &&
+    effect.effectOverlayZIndex === "auto" &&
+    noVisualTransform(effect.effectOverlayTranslate) &&
+    noVisualTransform(effect.effectOverlayTransform) &&
+    Number.isFinite(effectZIndex) &&
+    Number.isFinite(rendererZIndex) &&
+    effectZIndex > rendererZIndex &&
     effect.worldCompositeIsolation === "isolate" &&
     effect.worldCompositeVisible === true
   );
+}
+
+function numericZIndex(value) {
+  if (value === null || value === undefined || value === "" || value === "auto") {
+    return Number.NaN;
+  }
+  return Number(value);
+}
+
+function noVisualTransform(value) {
+  return value === null || value === undefined || value === "" || value === "none";
 }
 
 function displayLightSetting(value) {

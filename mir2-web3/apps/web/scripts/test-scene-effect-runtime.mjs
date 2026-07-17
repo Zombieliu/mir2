@@ -52,9 +52,10 @@ const visualLayersSource = readFileSync(
 );
 const shellSource = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
 const globalCssSource = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+const resolvedEffectLayerStart = visualLayersSource.indexOf("resolvedEffectFrames.map");
 const resolvedEffectLayerSource = visualLayersSource.slice(
-  visualLayersSource.indexOf("resolvedEffectFrames.map"),
-  visualLayersSource.indexOf("viewportProjectiles.map"),
+  resolvedEffectLayerStart,
+  visualLayersSource.indexOf('{screen === "game" && sceneLightClassName', resolvedEffectLayerStart),
 );
 assert.match(
   resolvedEffectLayerSource,
@@ -77,6 +78,21 @@ assert.match(
   globalCssSource,
   /\.viewport-sprite-overlay\s*\{[^}]*z-index:\s*auto;/s,
   "the sprite overlay must not isolate additive effects from the map backdrop",
+);
+assert.match(
+  globalCssSource,
+  /\.viewport-effect-overlay\s*\{[^}]*z-index:\s*auto;/s,
+  "the effect overlay must remain a pass-through world-stacking layer",
+);
+assert.match(
+  resolvedEffectLayerSource,
+  /registerCameraSurface\(`effect:\$\{effect\.key\}`\)/,
+  "each Crystal effect must follow camera motion without transforming its pass-through parent",
+);
+assert.match(
+  globalCssSource,
+  /\.belt-dialog-overlay\s*\{[^}]*opacity:\s*0;/s,
+  "the opaque Crystal belt overlay must not darken the transparent item slots",
 );
 const base = {
   key: "fx-1",

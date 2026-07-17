@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
+import sharp from "sharp";
 
 import {
   additiveEffectHasDirectWorldBackdrop,
@@ -301,7 +302,24 @@ async function main() {
       visualNormalizationEvidence,
     );
     const screenshot = await client.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
-    await fs.writeFile(screenshotPath, Buffer.from(screenshot.data, "base64"));
+    const screenshotBuffer = Buffer.from(screenshot.data, "base64");
+    const effectPixelContribution =
+      effectLocks.length > 0
+        ? await captureEffectPixelContribution(client, screenshotBuffer)
+        : null;
+    let effectHiddenScreenshot = null;
+    if (effectPixelContribution) {
+      if (effectPixelContribution.changedPixelCount < 100) {
+        throw new Error(
+          `Locked Crystal effects did not contribute visible pixels: ${JSON.stringify(effectPixelContribution)}`,
+        );
+      }
+      const effectHiddenScreenshotPath = path.join(outputDir, `${prefix}-effects-hidden.png`);
+      await fs.writeFile(effectHiddenScreenshotPath, effectPixelContribution.hiddenBuffer);
+      effectHiddenScreenshot = path.relative(process.cwd(), effectHiddenScreenshotPath).replaceAll("\\", "/");
+      delete effectPixelContribution.hiddenBuffer;
+    }
+    await fs.writeFile(screenshotPath, screenshotBuffer);
     const captureEvidence = redactCaptureSecrets({
       ...state,
       network404Count: client.network404s.length,
@@ -318,9 +336,11 @@ async function main() {
           ...visualNormalizationEvidence,
           settled: settledCaptureVisualState,
           final: finalCaptureVisualState,
+          effectPixelContribution,
         },
       },
       screenshot: path.relative(process.cwd(), screenshotPath).replaceAll("\\", "/"),
+      effectHiddenScreenshot,
     });
     await fs.writeFile(
       statePath,
@@ -960,6 +980,93 @@ async function assertCaptureVisualStateStable(client, evidence) {
   return current;
 }
 
+async function captureEffectPixelContribution(client, normalBuffer) {
+  const prepared = await client.evaluate(`
+    (() => {
+      const nodes = Array.from(document.querySelectorAll(".scene-crystal-effect-frame"))
+        .filter((node) => {
+          const style = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) > 0 &&
+            rect.right > 0 && rect.bottom > 0 && rect.left < innerWidth && rect.top < innerHeight;
+        });
+      if (nodes.length === 0) return null;
+      const rects = nodes.map((node) => node.getBoundingClientRect());
+      const left = Math.max(0, Math.floor(Math.min(...rects.map((rect) => rect.left))));
+      const top = Math.max(0, Math.floor(Math.min(...rects.map((rect) => rect.top))));
+      const right = Math.min(innerWidth, Math.ceil(Math.max(...rects.map((rect) => rect.right))));
+      const bottom = Math.min(innerHeight, Math.ceil(Math.max(...rects.map((rect) => rect.bottom))));
+      window.__mir2EffectPixelOpacity = nodes.map((node) => ({
+        node,
+        value: node.style.getPropertyValue("opacity"),
+        priority: node.style.getPropertyPriority("opacity"),
+      }));
+      for (const node of nodes) node.style.setProperty("opacity", "0", "important");
+      return { nodeCount: nodes.length, rect: { left, top, width: right - left, height: bottom - top } };
+    })()
+  `);
+  if (!prepared?.rect?.width || !prepared?.rect?.height) {
+    throw new Error(`No visible Crystal effect pixels were available to measure: ${JSON.stringify(prepared)}`);
+  }
+
+  let hiddenBuffer;
+  try {
+    await waitForAnimationFrames(client, 2);
+    await delay(100);
+    const hidden = await client.send("Page.captureScreenshot", {
+      format: "png",
+      captureBeyondViewport: false,
+    });
+    hiddenBuffer = Buffer.from(hidden.data, "base64");
+  } finally {
+    await client.evaluate(`
+      (() => {
+        for (const entry of window.__mir2EffectPixelOpacity ?? []) {
+          if (!entry.node?.isConnected) continue;
+          if (entry.value) entry.node.style.setProperty("opacity", entry.value, entry.priority);
+          else entry.node.style.removeProperty("opacity");
+        }
+        delete window.__mir2EffectPixelOpacity;
+      })()
+    `).catch(() => undefined);
+  }
+
+  const rect = prepared.rect;
+  const [normal, hidden] = await Promise.all([
+    sharp(normalBuffer).extract(rect).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(hiddenBuffer).extract(rect).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  const channels = Math.min(normal.info.channels, hidden.info.channels, 3);
+  const pixelCount = rect.width * rect.height;
+  const pixelDeltaThreshold = 4;
+  let changedPixelCount = 0;
+  let absoluteDeltaTotal = 0;
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    const normalOffset = pixel * normal.info.channels;
+    const hiddenOffset = pixel * hidden.info.channels;
+    let maximumDelta = 0;
+    let pixelDelta = 0;
+    for (let channel = 0; channel < channels; channel += 1) {
+      const delta = Math.abs(normal.data[normalOffset + channel] - hidden.data[hiddenOffset + channel]);
+      maximumDelta = Math.max(maximumDelta, delta);
+      pixelDelta += delta;
+    }
+    if (maximumDelta >= pixelDeltaThreshold) changedPixelCount += 1;
+    absoluteDeltaTotal += pixelDelta / channels;
+  }
+
+  return {
+    nodeCount: prepared.nodeCount,
+    rect,
+    pixelCount,
+    pixelDeltaThreshold,
+    changedPixelCount,
+    changedPixelRatio: changedPixelCount / pixelCount,
+    meanAbsDelta: absoluteDeltaTotal / pixelCount,
+    hiddenBuffer,
+  };
+}
+
 async function readCaptureVisualState(client) {
   return client.evaluate(`
     (() => {
@@ -995,9 +1102,14 @@ async function readCaptureVisualState(client) {
         resourceOverlayCount: resourceOverlays.length,
         visibleResourceOverlayCount: resourceOverlays.filter(visible).length,
         sceneEffects: Array.from(document.querySelectorAll(".scene-crystal-effect-frame:not(.mask)")).map((node) => {
-          const spriteOverlay = node.closest(".viewport-sprite-overlay");
+          const effectOverlay = node.closest(".viewport-effect-overlay");
           const worldComposite = node.closest(".game-world-composite");
           const worldStyle = worldComposite ? getComputedStyle(worldComposite) : null;
+          const effectOverlayStyle = effectOverlay ? getComputedStyle(effectOverlay) : null;
+          const effectStyle = getComputedStyle(node);
+          const worldRenderer =
+            worldComposite?.querySelector("#mir2-web3-canvas:not(.bevy-canvas-hidden), .webgl2-entity-atlas-canvas:not(.hidden)") ??
+            worldComposite?.querySelector("#mir2-web3-canvas, .webgl2-entity-atlas-canvas");
           return {
             effectName: node.getAttribute("data-effect-name"),
             effectKey: node.getAttribute("data-effect-key"),
@@ -1012,7 +1124,11 @@ async function readCaptureVisualState(client) {
             top: node.style.top,
             width: node.style.width,
             height: node.style.height,
-            spriteOverlayZIndex: spriteOverlay ? getComputedStyle(spriteOverlay).zIndex : null,
+            effectOverlayZIndex: effectOverlayStyle?.zIndex ?? null,
+            effectOverlayTranslate: effectOverlayStyle?.translate ?? null,
+            effectOverlayTransform: effectOverlayStyle?.transform ?? null,
+            effectNodeZIndex: effectStyle.zIndex,
+            worldRendererZIndex: worldRenderer ? getComputedStyle(worldRenderer).zIndex : null,
             worldCompositeIsolation: worldStyle?.isolation ?? null,
             worldCompositeVisible:
               Boolean(worldComposite) &&

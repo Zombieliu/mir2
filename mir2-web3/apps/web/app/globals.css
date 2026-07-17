@@ -316,6 +316,7 @@ img {
 .viewport-grid-overlay,
 .viewport-drop-overlay,
 .viewport-sprite-overlay,
+.viewport-effect-overlay,
 .viewport-entity-overlay {
   position: absolute;
   inset: 0;
@@ -340,6 +341,13 @@ img {
 .viewport-sprite-overlay {
   /* Keep depth-sorted children in the world stacking context so additive
      sprites blend against the map instead of an isolated transparent layer. */
+  z-index: auto;
+  pointer-events: none;
+}
+
+.viewport-effect-overlay {
+  /* The parent must stay pass-through. Each effect receives the imperative
+     camera translation directly so its depth can still clear the GPU canvas. */
   z-index: auto;
   pointer-events: none;
 }
@@ -1712,7 +1720,9 @@ img {
 }
 
 .belt-dialog-overlay {
-  opacity: 0.5;
+  /* Crystal's D3D half-blend path does not source-over this nearly opaque dark
+     frame. CSS opacity did, dimming the six transparent slots by roughly 50%. */
+  opacity: 0;
   pointer-events: none;
 }
 

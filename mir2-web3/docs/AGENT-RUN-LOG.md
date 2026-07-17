@@ -1,5 +1,24 @@
 # Agent Run Log
 
+> Latest fresh-native visual parity sync: 2026-07-18. Logged the local Crystal
+> QA character into Bichon `0 @ 332,275` through the rebuilt Release Gateway,
+> confirmed Day setting 2 plus Lime/White NPC labels, and captured live r05
+> before the frontend repair. Root cause was a translated sprite overlay at
+> stack level auto below the z-index 2 GPU canvas; its effect children could
+> not escape that stacking context. Resolved Crystal frames now use a
+> pass-through effect parent with per-frame camera surfaces, and the opaque
+> Belt overlay no longer applies an incorrect CSS 0.5 source-over. Live r16
+> records full/world similarity 90.1%/91.4%, changed pixels 7.1%/6.0%, world
+> MAE 4.499, HUD UI 88.4%, Belt similarity 89.7% / MAE 10.765, 0 critical
+> errors, and 0 404s. The new normal-vs-opacity-zero effect proof records 28
+> nodes and 57,282 changed pixels; forced WebGL2 r09 records 55,462. Web build,
+> TypeScript, capture-state, scene-effect, scene-motion, CDP/report checks, and
+> both capture backends pass. Native sample selection also handles Windows
+> MAX_PATH by reading raw PNGs into Buffers; r15 succeeded with a
+> 271-character source path and 24 phase candidates. The native top-left still
+> contains a Codex Computer Use status bubble, so these packs are Candidate
+> trend/effect proof, not final clean human acceptance.
+
 > Latest deterministic visual/CDP and NPC packet sync: 2026-07-18. Verified
 > remote main remained `c77efb2f`; existing production Web `:3002` and Release
 > Gateway `:7111` were healthy. Edge 150 Web-only r03 closed the compiled-`ws`

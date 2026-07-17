@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest fresh-native visual roadmap sync: 2026-07-18 closes the visible
+> TrapHexagon and Belt-compositing regressions against the post-NPC-fix Crystal
+> client. r05 first established a live Lime-name baseline at `0 @ 332,275`:
+> 15.0% full-window / 14.8% world changed pixels and Belt MAE 38.05. The Web
+> effect nodes had correct packets, Magic/1397 frame, coordinates, and blend
+> metadata but were below the z-index 2 GPU renderer inside a translated
+> auto-level sprite stacking context. Effects now participate through an
+> untransformed parent and receive imperative camera translation individually;
+> the Belt's nearly opaque overlay frame no longer darkens transparent slots.
+> Live r16 reaches 7.1% / 6.0% changed pixels, 90.1% / 91.4% similarity, world
+> MAE 4.499, and Belt MAE 10.765. WebGPU and forced WebGL2 both pass a new
+> effect-pixel A/B guard with 0 critical errors / 0 404s. Automated Candidate
+> remains green; Accepted remains open for clean native recapture without the
+> external Computer Use status bubble, chat-state alignment, residual HUD and
+> minimap text, and human visual/feel review.
+
 > Latest deterministic visual-gate roadmap sync: 2026-07-18 closes the
 > compiled-`ws` Edge 150 CDP runtime blocker with complete r03/r04 Web-only
 > packs at Bichon `0.map @ 332,275`. r04 filters only the known extension

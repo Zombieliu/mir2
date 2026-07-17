@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> Latest fresh-native effect/HUD closure: 2026-07-18. A live Crystal/Web pair
+> now uses the corrected Lime NPC packet state at Bichon `0.map @ 332,275`, Day
+> setting 2. The pre-fix r05 baseline measured 15.0% full-window and 14.8%
+> world changed pixels with Belt MAE 38.05. TrapHexagon frames were present in
+> the DOM but trapped below the GPU canvas because a translated `z-index:auto`
+> sprite parent formed a stacking context. Crystal effects now render in a
+> pass-through layer and receive camera translation per effect; the incorrect
+> CSS half-opacity Belt overlay is disabled. Final live r16 improves to 7.1%
+> full-window / 6.0% world changed pixels, world MAE 4.499, and Belt MAE 10.765
+> with 0 critical console errors and 0 404s. A locked-effect A/B gate proves 28
+> visible nodes change 57,282 pixels inside their union; forced WebGL2 r09 also
+> passes. The wrapper now waits for native files and reads long raw paths as
+> Buffers; r15 completed with a 271-character raw path. Next: normalize chat
+> content and remaining HUD/minimap typography, recapture without the Codex
+> Computer Use status bubble in the native top-left, then run final strict
+> movement/map and human visual/feel acceptance.
+
 > Latest deterministic same-scene/CDP closure: 2026-07-18. The Edge 150
 > `Runtime.enable` blocker is closed end-to-end through Next 16.2.1's compiled
 > `ws`: Web-only r03 produced a complete pack at `0.map @ 332,275`, and r04
