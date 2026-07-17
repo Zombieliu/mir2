@@ -14,6 +14,7 @@ const DEFAULT_INPUT_DIR = path.resolve(
 );
 const DEFAULT_OUTPUT_DIR = path.resolve(REPO_ROOT, "docs", "generated", "player-qa", "visual-parity");
 const DEFAULT_MAX_SAMPLES = 12;
+const DEFAULT_PIXEL_DELTA_THRESHOLD = 12;
 const TARGET_STAGE = { width: 1024, height: 768 };
 const DEFAULT_HUD_TOP = 616;
 
@@ -22,6 +23,10 @@ const inputDir = path.resolve(args.input ?? args.inputDir ?? DEFAULT_INPUT_DIR);
 const outputDir = path.resolve(args.output ?? args.outputDir ?? DEFAULT_OUTPUT_DIR);
 const prefix = args.prefix ?? `visual-parity-${timestamp()}`;
 const maxSamples = numberArg(args.maxSamples ?? args.limit, DEFAULT_MAX_SAMPLES);
+const pixelDeltaThreshold = numberArg(
+  args.pixelDeltaThreshold ?? args.changedPixelThreshold,
+  DEFAULT_PIXEL_DELTA_THRESHOLD,
+);
 
 await main();
 
@@ -42,6 +47,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     inputDir,
     sampleCount: samples.length,
+    pixelDeltaThreshold,
     aggregate,
     samples,
   };
@@ -236,6 +242,7 @@ async function compareRegion(originalPath, webPath, dimensions, rect) {
   let sumLumAbs = 0;
   let channelCount = 0;
   let pixelCount = 0;
+  let changedPixelCount = 0;
 
   for (let index = 0; index < length; index += 4) {
     const dr = original.data[index] - web.data[index];
@@ -245,6 +252,8 @@ async function compareRegion(originalPath, webPath, dimensions, rect) {
     const webLum = 0.2126 * web.data[index] + 0.7152 * web.data[index + 1] + 0.0722 * web.data[index + 2];
     sumSq += dr * dr + dg * dg + db * db;
     sumAbs += Math.abs(dr) + Math.abs(dg) + Math.abs(db);
+    const meanPixelDelta = (Math.abs(dr) + Math.abs(dg) + Math.abs(db)) / 3;
+    if (meanPixelDelta >= pixelDeltaThreshold) changedPixelCount += 1;
     sumLumAbs += Math.abs(originalLum - webLum);
     channelCount += 3;
     pixelCount += 1;
@@ -259,6 +268,9 @@ async function compareRegion(originalPath, webPath, dimensions, rect) {
   return {
     rect,
     pixelCount,
+    changedPixelCount,
+    changedPixelRatio: roundMetric(pixelCount > 0 ? changedPixelCount / pixelCount : 0, 6),
+    pixelDeltaThreshold,
     similarity: roundMetric(similarity),
     rmseNormalized: roundMetric(rmseNormalized),
     meanAbsDelta: roundMetric(meanAbsDelta),
@@ -272,9 +284,13 @@ function aggregateRegionMetrics(metrics) {
   const pixelCount = valid.reduce((sum, metric) => sum + metric.pixelCount, 0);
   const weighted = (key) =>
     valid.reduce((sum, metric) => sum + (Number(metric[key]) || 0) * metric.pixelCount, 0) / pixelCount;
+  const changedPixelCount = valid.reduce((sum, metric) => sum + (Number(metric.changedPixelCount) || 0), 0);
   return {
     rect: null,
     pixelCount,
+    changedPixelCount,
+    changedPixelRatio: roundMetric(changedPixelCount / pixelCount, 6),
+    pixelDeltaThreshold,
     similarity: roundMetric(weighted("similarity")),
     rmseNormalized: roundMetric(weighted("rmseNormalized")),
     meanAbsDelta: roundMetric(weighted("meanAbsDelta")),
@@ -681,11 +697,13 @@ function renderMarkdown(report) {
   }
   lines.push("## Samples");
   lines.push("");
-  lines.push("| Sample | Overall | Runtime | Layout | Entities | Pixels | World | HUD Full | HUD UI | Chat | MiniMap |");
-  lines.push("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+  lines.push(`- Changed-pixel threshold: RGB mean absolute delta >= ${report.pixelDeltaThreshold}/255`);
+  lines.push("");
+  lines.push("| Sample | Overall | Runtime | Layout | Entities | Pixels | World | Full changed | World changed | HUD Full | HUD UI | Chat | MiniMap |");
+  lines.push("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
   for (const sample of report.samples) {
     lines.push(
-      `| \`${sample.prefix}\` | ${formatPercent(sample.scores.overall)} | ${formatPercent(sample.scores.runtime)} | ${formatPercent(sample.scores.layout)} | ${formatPercent(sample.scores.entities)} | ${formatPercent(sample.scores.pixels)} | ${formatPercent(sample.regionMetrics.world?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.hud?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.hudUi?.similarity ?? sample.regionMetrics.hud?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.chat?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.minimap?.similarity ?? 0)} |`,
+      `| \`${sample.prefix}\` | ${formatPercent(sample.scores.overall)} | ${formatPercent(sample.scores.runtime)} | ${formatPercent(sample.scores.layout)} | ${formatPercent(sample.scores.entities)} | ${formatPercent(sample.scores.pixels)} | ${formatPercent(sample.regionMetrics.world?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.full?.changedPixelRatio ?? 0)} | ${formatPercent(sample.regionMetrics.world?.changedPixelRatio ?? 0)} | ${formatPercent(sample.regionMetrics.hud?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.hudUi?.similarity ?? sample.regionMetrics.hud?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.chat?.similarity ?? 0)} | ${formatPercent(sample.regionMetrics.minimap?.similarity ?? 0)} |`,
     );
   }
   lines.push("");
@@ -710,6 +728,7 @@ function regionMetricDetail(name, metric) {
   if (!metric) return `${name}=missing`;
   return [
     `${name} similarity=${formatPercent(metric.similarity ?? 0)}`,
+    `changedPixels>=${metric.pixelDeltaThreshold ?? pixelDeltaThreshold}=${formatPercent(metric.changedPixelRatio ?? 0)}`,
     `meanAbsDelta=${roundMetric(metric.meanAbsDelta ?? 0)}`,
     `meanLumDelta=${roundMetric(metric.meanLumDelta ?? 0)}`,
   ].join("; ");

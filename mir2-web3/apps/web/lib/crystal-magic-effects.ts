@@ -13,6 +13,13 @@ export type EffectFrameMeta = {
   height: number;
   x: number;
   y: number;
+  shadowX?: number;
+  shadowY?: number;
+  maskPath?: string | null;
+  maskWidth?: number;
+  maskHeight?: number;
+  maskX?: number;
+  maskY?: number;
 };
 
 export type EffectSubSpec = {
@@ -24,16 +31,25 @@ export type EffectSubSpec = {
 
 export type EffectSpec = {
   spell?: string;
+  spellId?: number;
   effect?: string;
-  kind?: "cast" | "projectile" | "impact" | "target";
+  effectId?: number;
+  kind?: "cast" | "projectile" | "impact" | "target" | "ground";
   library: string;
   base: number;
   count: number;
   interval: number;
+  directionCount?: number;
+  directionStride?: number;
+  directionRanges?: Array<{ direction: number; base: number; end: number }>;
+  valueCount?: number;
+  valueStride?: number;
+  valueRanges?: Array<{ value: number; base: number; end: number }>;
   light?: number;
   blend?: boolean;
   repeat?: boolean;
   offset?: { x: number; y: number };
+  provenance?: { source: string; symbol: string };
   impact?: EffectSubSpec;
   returnEffect?: EffectSubSpec;
 };
@@ -52,6 +68,7 @@ export type EffectAnimation = {
 };
 
 type LibraryMeta = { frames: Record<string, EffectFrameMeta> };
+type NumericEffectName = { id: number; name: string };
 
 export type EffectAssets = {
   available: Set<string>;
@@ -88,9 +105,11 @@ export async function loadEffectAssets(
   };
   let manifest: {
     available?: string[];
-    spell_effect_enum?: string[];
+    spell_effect_enum?: Array<string | NumericEffectName>;
+    spell_effect_map?: NumericEffectName[];
     spell_effects?: EffectSpec[];
     ground_effects?: EffectSpec[];
+    object_effects?: EffectSpec[];
     map_effects?: EffectSpec[];
   };
   try {
@@ -127,12 +146,22 @@ export async function loadEffectAssets(
     if (entry.spell) groundBySpell.set(entry.spell, entry);
   }
   const mapByName = new Map<string, EffectSpec>();
+  for (const entry of manifest.object_effects ?? []) {
+    if (entry.effect) mapByName.set(entry.effect, entry);
+  }
   for (const entry of manifest.map_effects ?? []) {
     if (entry.effect) mapByName.set(entry.effect, entry);
   }
   const effectNameByNumber = new Map<number, string>();
-  (manifest.spell_effect_enum ?? []).forEach((name, index) => {
-    effectNameByNumber.set(index, name);
+  const numericEffectNames = manifest.spell_effect_map?.length
+    ? manifest.spell_effect_map
+    : (manifest.spell_effect_enum ?? []);
+  numericEffectNames.forEach((entry: string | NumericEffectName, index) => {
+    if (typeof entry === "string") {
+      effectNameByNumber.set(index, entry);
+    } else if (Number.isInteger(entry?.id) && typeof entry?.name === "string") {
+      effectNameByNumber.set(entry.id, entry.name);
+    }
   });
 
   return { available, libraries, spellByName, mapByName, groundBySpell, effectNameByNumber };
@@ -155,7 +184,7 @@ function resolveFrames(
       frames.push(frame);
     }
   }
-  return frames;
+  return frames.length === count ? frames : [];
 }
 
 function resolveSub(assets: EffectAssets, sub: EffectSubSpec): EffectAnimation | undefined {
@@ -181,8 +210,23 @@ function resolveSub(assets: EffectAssets, sub: EffectSubSpec): EffectAnimation |
 export function resolveAnimation(
   assets: EffectAssets,
   entry: EffectSpec,
+  direction = 0,
+  value = 0,
 ): EffectAnimation | null {
-  const frames = resolveFrames(assets, entry.library, entry.base, entry.count);
+  if (!Number.isInteger(direction) || !Number.isInteger(value) || direction < 0 || value < 0) {
+    return null;
+  }
+  if (entry.directionCount !== undefined && direction >= entry.directionCount) {
+    return null;
+  }
+  if (entry.valueCount !== undefined && value >= entry.valueCount) {
+    return null;
+  }
+  const base =
+    entry.base +
+    direction * (entry.directionStride ?? 0) +
+    value * (entry.valueStride ?? 0);
+  const frames = resolveFrames(assets, entry.library, base, entry.count);
   if (frames.length === 0) {
     return null;
   }
@@ -192,7 +236,7 @@ export function resolveAnimation(
     frames,
     interval: entry.interval,
     blend: entry.blend ?? true,
-    light: entry.light ?? 0,
+    light: entry.light ?? 6,
     repeat: entry.repeat ?? false,
     offset: entry.offset ?? { x: 0, y: 0 },
     impact: entry.impact ? resolveSub(assets, entry.impact) : undefined,
@@ -203,17 +247,19 @@ export function resolveAnimation(
 export function resolveSpellEffect(
   assets: EffectAssets,
   spell: string,
+  direction = 0,
 ): EffectAnimation | null {
   const entry = assets.spellByName.get(spell);
-  return entry ? resolveAnimation(assets, entry) : null;
+  return entry ? resolveAnimation(assets, entry, direction) : null;
 }
 
 export function resolveMapEffect(
   assets: EffectAssets,
   effect: string,
+  value = 0,
 ): EffectAnimation | null {
   const entry = assets.mapByName.get(effect) ?? assets.groundBySpell.get(effect);
-  return entry ? resolveAnimation(assets, entry) : null;
+  return entry ? resolveAnimation(assets, entry, 0, value) : null;
 }
 
 // Built-in numeric id -> Spell enum name map, mirroring packages/protocol `Spell` (types.rs). The
@@ -363,9 +409,10 @@ const SPELL_NAME_BY_ID: Record<number, string> = {
 export function resolveMapEffectByNumber(
   assets: EffectAssets,
   effect: number,
+  value = 0,
 ): EffectAnimation | null {
   const name = effectNameForNumber(assets, effect);
-  return name ? resolveMapEffect(assets, name) : null;
+  return name ? resolveMapEffect(assets, name, value) : null;
 }
 
 /**

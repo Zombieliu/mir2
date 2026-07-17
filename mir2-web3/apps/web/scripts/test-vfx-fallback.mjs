@@ -7,8 +7,8 @@
 //      (opacity 0..1, scale finite > 0) across an entire effect lifetime, for
 //      every render kind; idle/expired frames return null.
 //   3. Collectors: idle frames return [], casts/projectiles synthesise the
-//      expected descriptors, and the atlas path suppresses the fallback when a
-//      real animation resolves.
+//      expected descriptors, and suppression requires both successful atlas
+//      resolution and explicit renderer ownership of the effect instance.
 //
 // vfx-fallback imports { resolveSpellEffect, resolveMapEffectByNumber } from
 // ./crystal-magic-effects at runtime. We stub that module via the loader's
@@ -418,23 +418,32 @@ check("collectMapEffectFallbacks excludes effects outside their lifetime", () =>
   assert.deepEqual(collectMapEffectFallbacks(spawns, { origin: ORIGIN, now: 1000 + 5000 }), []);
 });
 
-check("collectMapEffectFallbacks: atlas path suppresses the fallback", () => {
+check("collectMapEffectFallbacks: resolver success without an owner keeps the fallback", () => {
   const spawns = [{ effect: 555, x: 100, y: 100, startedAt: 0, name: "AtlasOnly" }];
-  // Without assets the fallback is produced.
-  assert.equal(collectMapEffectFallbacks(spawns, { origin: ORIGIN, now: 10 }).length, 1);
-  // With assets where the atlas resolves effect 555, the fallback is suppressed.
+  ATLAS_EFFECTS.add(555);
+  try {
+    assert.equal(
+      collectMapEffectFallbacks(spawns, { origin: ORIGIN, now: 10, assets: FAKE_ASSETS }).length,
+      1,
+      "resolution alone must not suppress the procedural fallback",
+    );
+  } finally {
+    ATLAS_EFFECTS.delete(555);
+  }
+});
+
+check("collectMapEffectFallbacks: an explicit renderer owner suppresses the fallback", () => {
+  const spawn = { effect: 555, x: 100, y: 100, startedAt: 0, name: "AtlasOnly" };
   ATLAS_EFFECTS.add(555);
   try {
     assert.deepEqual(
-      collectMapEffectFallbacks(spawns, { origin: ORIGIN, now: 10, assets: FAKE_ASSETS }),
+      collectMapEffectFallbacks([spawn], {
+        origin: ORIGIN,
+        now: 10,
+        assets: FAKE_ASSETS,
+        rendererOwnsEffect: (instance) => instance.kind === "map" && instance.spawn === spawn,
+      }),
       [],
-      "atlas-resolved map effect suppresses procedural fallback",
-    );
-    // A different, unresolved effect still falls back even when assets are present.
-    const other = [{ effect: 556, x: 100, y: 100, startedAt: 0, name: "NotInAtlas" }];
-    assert.equal(
-      collectMapEffectFallbacks(other, { origin: ORIGIN, now: 10, assets: FAKE_ASSETS }).length,
-      1,
     );
   } finally {
     ATLAS_EFFECTS.delete(555);
@@ -500,18 +509,28 @@ check("collectViewportCastFallbacks excludes casts past their shaped duration", 
   );
 });
 
-check("collectViewportCastFallbacks: atlas path suppresses the cast fallback", () => {
+check("collectViewportCastFallbacks requires explicit ownership to suppress a resolved cast", () => {
   const spellByCaster = new Map([["mob-1", "AtlasSpell"]]);
   ATLAS_SPELLS.add("AtlasSpell");
   try {
+    assert.equal(
+      collectViewportCastFallbacks([caster()], {
+        now: 1100,
+        spellByCaster,
+        assets: FAKE_ASSETS,
+      }).length,
+      1,
+      "resolver success without an owner keeps the cast fallback",
+    );
     assert.deepEqual(
       collectViewportCastFallbacks([caster()], {
         now: 1100,
         spellByCaster,
         assets: FAKE_ASSETS,
+        rendererOwnsEffect: (instance) => instance.kind === "cast",
       }),
       [],
-      "atlas-resolved spell suppresses the procedural cast",
+      "an owning renderer suppresses the procedural cast",
     );
   } finally {
     ATLAS_SPELLS.delete("AtlasSpell");
@@ -595,18 +614,28 @@ check("collectViewportProjectileFallbacks excludes projectiles outside life wind
   );
 });
 
-check("collectViewportProjectileFallbacks: atlas path suppresses streak + impact", () => {
+check("collectViewportProjectileFallbacks requires explicit ownership to suppress a resolved projectile", () => {
   const spellByCaster = new Map([["proj-1", "AtlasBolt"]]);
   ATLAS_SPELLS.add("AtlasBolt");
   try {
+    assert.equal(
+      collectViewportProjectileFallbacks([projectile()], {
+        now: 1250,
+        spellByCaster,
+        assets: FAKE_ASSETS,
+      }).length,
+      2,
+      "resolver success without an owner keeps streak + impact",
+    );
     assert.deepEqual(
       collectViewportProjectileFallbacks([projectile()], {
         now: 1250,
         spellByCaster,
         assets: FAKE_ASSETS,
+        rendererOwnsEffect: (instance) => instance.kind === "projectile",
       }),
       [],
-      "atlas-resolved projectile suppresses the procedural streak/impact",
+      "an owning renderer suppresses the procedural streak/impact",
     );
   } finally {
     ATLAS_SPELLS.delete("AtlasBolt");

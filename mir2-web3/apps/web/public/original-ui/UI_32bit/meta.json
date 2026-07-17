@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "count": 474,
+  "frames": [
+    {
+      "index": 472,
+      "width": 76,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/UI_32bit/472.png",
+      "maskPath": null
+    },
+    {
+      "index": 473,
+      "width": 76,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/UI_32bit/473.png",
+      "maskPath": null
+    }
+  ]
+}

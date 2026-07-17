@@ -39,3 +39,5 @@ export { createSelectorMemo, useWorldSelector, shallowEqual } from "./use-world-
 
 export type { SnapshotEmitter, SnapshotEmitterOptions } from "./snapshot-emitter";
 export { createSnapshotEmitter } from "./snapshot-emitter";
+
+export { resetWorldPopulationForStartGame } from "./start-game-boundary";

@@ -3587,6 +3587,34 @@
       "maskPath": null
     },
     {
+      "index": 394,
+      "width": 20,
+      "height": 30,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Items/394.png",
+      "maskPath": null
+    },
+    {
+      "index": 398,
+      "width": 20,
+      "height": 30,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Items/398.png",
+      "maskPath": null
+    },
+    {
       "index": 1693,
       "width": 36,
       "height": 32,

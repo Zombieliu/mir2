@@ -1,7 +1,20 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
+
+import {
+  additiveEffectHasDirectWorldBackdrop,
+  crystalCaptureLightState,
+  isDayCaptureLight,
+  parseCaptureEffectFrame,
+  parseCaptureLightSetting,
+} from "./crystal-capture-visual-state.mjs";
+import { decodeCdpMessage } from "./cdp-message.mjs";
+
+const require = createRequire(import.meta.url);
+const CdpWebSocket = require("next/dist/compiled/ws");
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:3002";
 const DEFAULT_OUTPUT_DIR = path.resolve(process.cwd(), "..", "..", "docs", "generated", "player-qa");
@@ -31,6 +44,16 @@ const visualReadyTimeoutMs = numberArg(
   args.visualReadyTimeoutMs ?? process.env.MIR2_CAPTURE_VISUAL_READY_TIMEOUT_MS,
   DEFAULT_VISUAL_READY_TIMEOUT_MS,
 );
+const captureLightSetting = parseCaptureLightSetting(
+  args.captureLightSetting ?? process.env.MIR2_CAPTURE_LIGHT_SETTING,
+);
+const cleanCaptureOverlays = booleanArg(
+  args.cleanCaptureOverlays ?? process.env.MIR2_CLEAN_CAPTURE_OVERLAYS,
+  true,
+);
+const captureTrapHexagonFrame = parseCaptureEffectFrame(
+  args.captureTrapHexagonFrame ?? process.env.MIR2_CAPTURE_TRAP_HEXAGON_FRAME,
+);
 const suppressTutorial = args.suppressTutorial !== "false";
 const qaControlToken = args.qaControlToken ?? process.env.MIR2_QA_CONTROL_TOKEN ?? null;
 const qaCharacterStatePath = args.qaCharacterState ?? args.qaState ?? process.env.MIR2_QA_CHARACTER_STATE ?? null;
@@ -57,16 +80,24 @@ class CdpClient {
   }
 
   async connect() {
-    this.ws = new WebSocket(this.wsUrl);
-    this.ws.addEventListener("message", (event) => this.handleMessage(event.data));
+    this.ws = new CdpWebSocket(this.wsUrl, { perMessageDeflate: false });
+    this.ws.binaryType = "arraybuffer";
+    this.ws.addEventListener("message", (event) => {
+      void this.handleMessage(event.data).catch((error) => this.rejectPending(error));
+    });
+    this.ws.addEventListener("close", (event) => {
+      this.rejectPending(
+        new Error(`CDP WebSocket closed (${event.code}): ${event.reason || "no reason"}`),
+      );
+    });
     await new Promise((resolve, reject) => {
       this.ws.addEventListener("open", resolve, { once: true });
       this.ws.addEventListener("error", reject, { once: true });
     });
   }
 
-  handleMessage(raw) {
-    const message = JSON.parse(raw);
+  async handleMessage(raw) {
+    const message = await decodeCdpMessage(raw);
     if (message.id && this.pending.has(message.id)) {
       const { resolve, reject } = this.pending.get(message.id);
       this.pending.delete(message.id);
@@ -126,6 +157,12 @@ class CdpClient {
     }
   }
 
+  rejectPending(error) {
+    const failure = error instanceof Error ? error : new Error(String(error));
+    for (const { reject } of this.pending.values()) reject(failure);
+    this.pending.clear();
+  }
+
   send(method, params = {}) {
     const id = this.nextId++;
     this.ws.send(JSON.stringify({ id, method, params }));
@@ -174,6 +211,7 @@ async function main() {
   await fs.mkdir(outputDir, { recursive: true });
   const chrome = await launchChrome();
   let client;
+  let captureVisualStateInstalled = false;
 
   try {
     const wsUrl = await createPageTarget();
@@ -210,8 +248,19 @@ async function main() {
     const transferEvidence = await transferIfNeeded(client, map, x, y);
     await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
     await waitForGameVisualReadiness(client, visualReadyTimeoutMs);
+    const effectLocks = await loadCaptureEffectLocks({ trapHexagonFrame: captureTrapHexagonFrame });
+    const visualNormalizationEvidence = await installCaptureVisualState(client, {
+      lightSetting: captureLightSetting,
+      cleanOverlays: cleanCaptureOverlays,
+      effectLocks,
+    });
+    captureVisualStateInstalled = true;
     await waitForAnimationFrames(client, 2);
     await delay(settleMs);
+    const settledCaptureVisualState = await assertCaptureVisualStateStable(
+      client,
+      visualNormalizationEvidence,
+    );
     if (args.openGameShop === "true") {
       await installCommandProbe(client);
       await click(client, ".hud-button.shop button");
@@ -247,6 +296,10 @@ async function main() {
     const state = await readState(client);
     const screenshotPath = path.join(outputDir, `${prefix}.png`);
     const statePath = path.join(outputDir, `${prefix}-state.json`);
+    const finalCaptureVisualState = await assertCaptureVisualStateStable(
+      client,
+      visualNormalizationEvidence,
+    );
     const screenshot = await client.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     await fs.writeFile(screenshotPath, Buffer.from(screenshot.data, "base64"));
     const captureEvidence = redactCaptureSecrets({
@@ -261,6 +314,11 @@ async function main() {
         login: loginEvidence,
         stateAlignment: stateAlignmentEvidence,
         transfer: transferEvidence,
+        visualNormalization: {
+          ...visualNormalizationEvidence,
+          settled: settledCaptureVisualState,
+          final: finalCaptureVisualState,
+        },
       },
       screenshot: path.relative(process.cwd(), screenshotPath).replaceAll("\\", "/"),
     });
@@ -271,6 +329,9 @@ async function main() {
 
     console.log(JSON.stringify({ ok: true, screenshotPath, statePath }, null, 2));
   } finally {
+    if (client && captureVisualStateInstalled) {
+      await cleanupCaptureVisualState(client).catch(() => undefined);
+    }
     client?.close();
     await stopChrome(chrome);
     await fs.rm(chrome.userDataDir, { recursive: true, force: true }).catch(() => undefined);
@@ -284,6 +345,7 @@ async function launchChrome() {
     chromePath,
     [
       `--remote-debugging-port=${debugPort}`,
+      "--remote-allow-origins=*",
       `--user-data-dir=${userDataDir}`,
       "--headless=new",
       "--ignore-gpu-blocklist",
@@ -662,6 +724,366 @@ async function waitForAnimationFrames(client, frameCount) {
       requestAnimationFrame(tick);
     })
   `);
+}
+
+async function loadCaptureEffectLocks({ trapHexagonFrame }) {
+  if (trapHexagonFrame === null) return [];
+  const meta = JSON.parse(
+    await fs.readFile(new URL("../public/original-effects/Magic/meta.json", import.meta.url), "utf8"),
+  );
+  const base = 1390;
+  const frames = {};
+  for (let offset = 0; offset < 10; offset += 1) {
+    const index = base + offset;
+    const frame = meta.frames?.[String(index)];
+    if (!frame) throw new Error(`Magic frame metadata is missing index ${index}`);
+    frames[`/original-effects/Magic/${index}.png`] = {
+      path: `/original-effects/Magic/${index}.png`,
+      width: frame.width,
+      height: frame.height,
+      x: frame.x,
+      y: frame.y,
+    };
+  }
+  return [
+    {
+      effectName: "TrapHexagon",
+      frameOffset: trapHexagonFrame,
+      desired: frames[`/original-effects/Magic/${base + trapHexagonFrame}.png`],
+      frames,
+    },
+  ];
+}
+
+async function installCaptureVisualState(client, { lightSetting, cleanOverlays, effectLocks }) {
+  const requested = lightSetting === null ? null : crystalCaptureLightState(lightSetting);
+  const serverLightSetting = await client.evaluate(`
+    (() => {
+      const state = window.__mir2Stage5?.state;
+      return state?.world?.lightSetting ?? state?.lightSetting ?? null;
+    })()
+  `);
+
+  if (requested && !isDayCaptureLight(requested.setting) && serverLightSetting !== requested.setting) {
+    throw new Error(
+      `Cannot synthesize ${requested.label} lighting: server lightSetting is ${serverLightSetting}, requested ${requested.setting}`,
+    );
+  }
+
+  const expected = requested
+    ? {
+        setting: requested.setting,
+        label: requested.label,
+        overlayClass: requested.overlayClass,
+        miniMapIcon: requested.miniMapIcon,
+      }
+    : null;
+  const installed = await client.evaluate(`
+    (() => {
+      const expected = ${JSON.stringify(expected)};
+      const effectLocks = ${JSON.stringify(effectLocks)};
+      const cleanOverlays = ${JSON.stringify(cleanOverlays)};
+      window.__mir2CaptureVisualStateCleanup?.();
+      const root = document.documentElement;
+      const styleId = "mir2-capture-visual-state";
+      let style = document.getElementById(styleId);
+      const styleWasPresent = Boolean(style);
+      const originalStyleText = style?.textContent ?? "";
+      const originalRootAttributes = {
+        clean: root.getAttribute("data-mir2-capture-clean"),
+        light: root.getAttribute("data-mir2-capture-light-setting"),
+      };
+      const touchedNodes = new Map();
+      const rememberNode = (node) => {
+        if (touchedNodes.has(node)) return;
+        touchedNodes.set(node, {
+          src: node.getAttribute("src"),
+          originalSrc: node.getAttribute("data-mir2-original-src"),
+          captureFrame: node.getAttribute("data-mir2-capture-effect-frame"),
+          captureBaseLeft: node.getAttribute("data-mir2-capture-effect-base-left"),
+          captureBaseTop: node.getAttribute("data-mir2-capture-effect-base-top"),
+          style: {
+            left: node.style.left,
+            top: node.style.top,
+            width: node.style.width,
+            height: node.style.height,
+          },
+        });
+      };
+      const restoreAttribute = (node, name, value) => {
+        if (value === null) node.removeAttribute(name);
+        else node.setAttribute(name, value);
+      };
+      if (!style) {
+        style = document.createElement("style");
+        style.id = styleId;
+        document.head.appendChild(style);
+      }
+      style.textContent = [
+        cleanOverlays
+          ? '[aria-label="Mir2 resource loading status"], [aria-label="Mir2 cache debug status"] { display: none !important; }'
+          : '',
+        expected?.label === "day"
+          ? '.viewport-crystal-light-overlay { display: none !important; }'
+          : '',
+      ].filter(Boolean).join("\\n");
+      root.dataset.mir2CaptureClean = cleanOverlays ? "1" : "0";
+      if (expected) root.dataset.mir2CaptureLightSetting = String(expected.setting);
+      else delete root.dataset.mir2CaptureLightSetting;
+
+      window.__mir2CaptureVisualStateObserver?.disconnect?.();
+      const apply = () => {
+        if (expected) {
+          const icon = document.querySelector(".mini-map-light");
+          if (icon && new URL(icon.src, location.href).pathname !== expected.miniMapIcon) {
+            rememberNode(icon);
+            icon.src = expected.miniMapIcon;
+            icon.setAttribute("data-mir2-original-src", expected.miniMapIcon);
+          }
+        }
+        for (const lock of effectLocks) {
+          const nodes = document.querySelectorAll(
+            '.scene-crystal-effect-frame[data-effect-name="' + lock.effectName + '"]:not(.mask)',
+          );
+          for (const node of nodes) {
+            rememberNode(node);
+            const currentPath = new URL(
+              node.getAttribute("data-mir2-original-src") || node.src,
+              location.href,
+            ).pathname;
+            const currentFrame = lock.frames[currentPath] || lock.desired;
+            const style = node.style;
+            if (!node.dataset.mir2CaptureEffectBaseLeft) {
+              node.dataset.mir2CaptureEffectBaseLeft = String((Number.parseFloat(style.left) || 0) - currentFrame.x);
+              node.dataset.mir2CaptureEffectBaseTop = String((Number.parseFloat(style.top) || 0) - currentFrame.y);
+            }
+            const desiredLeft = Number(node.dataset.mir2CaptureEffectBaseLeft) + lock.desired.x;
+            const desiredTop = Number(node.dataset.mir2CaptureEffectBaseTop) + lock.desired.y;
+            const desiredStyles = {
+              left: String(desiredLeft) + "px",
+              top: String(desiredTop) + "px",
+              width: String(lock.desired.width) + "px",
+              height: String(lock.desired.height) + "px",
+            };
+            for (const [property, value] of Object.entries(desiredStyles)) {
+              if (style[property] !== value) style[property] = value;
+            }
+            if (new URL(node.src, location.href).pathname !== lock.desired.path) node.src = lock.desired.path;
+            if (node.getAttribute("data-mir2-original-src") !== lock.desired.path) {
+              node.setAttribute("data-mir2-original-src", lock.desired.path);
+            }
+            node.dataset.mir2CaptureEffectFrame = String(lock.frameOffset);
+          }
+        }
+      };
+      apply();
+      let observer = null;
+      if (expected || effectLocks.length > 0) {
+        observer = new MutationObserver(apply);
+        observer.observe(document.documentElement, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeFilter: ["src", "style", "data-mir2-original-src"],
+        });
+        window.__mir2CaptureVisualStateObserver = observer;
+      }
+      window.__mir2CaptureVisualStateCleanup = () => {
+        observer?.disconnect();
+        for (const [node, snapshot] of touchedNodes) {
+          if (!node?.isConnected) continue;
+          restoreAttribute(node, "src", snapshot.src);
+          restoreAttribute(node, "data-mir2-original-src", snapshot.originalSrc);
+          restoreAttribute(node, "data-mir2-capture-effect-frame", snapshot.captureFrame);
+          restoreAttribute(node, "data-mir2-capture-effect-base-left", snapshot.captureBaseLeft);
+          restoreAttribute(node, "data-mir2-capture-effect-base-top", snapshot.captureBaseTop);
+          Object.assign(node.style, snapshot.style);
+        }
+        if (styleWasPresent) style.textContent = originalStyleText;
+        else style.remove();
+        restoreAttribute(root, "data-mir2-capture-clean", originalRootAttributes.clean);
+        restoreAttribute(root, "data-mir2-capture-light-setting", originalRootAttributes.light);
+        delete window.__mir2CaptureVisualStateObserver;
+        delete window.__mir2CaptureVisualStateCleanup;
+      };
+      return { styleInstalled: style.isConnected, observerInstalled: Boolean(expected || effectLocks.length > 0) };
+    })()
+  `);
+
+  const stabilitySamples = [];
+  await waitForAnimationFrames(client, 2);
+  stabilitySamples.push(await readCaptureVisualState(client));
+  assertCaptureVisualState(stabilitySamples.at(-1), expected, cleanOverlays, effectLocks);
+  const stabilityDelaysMs = effectLocks.length > 0 ? [137, 173, 211] : [34];
+  for (const stabilityDelayMs of stabilityDelaysMs) {
+    await delay(stabilityDelayMs);
+    stabilitySamples.push(await readCaptureVisualState(client));
+    assertCaptureVisualState(stabilitySamples.at(-1), expected, cleanOverlays, effectLocks);
+  }
+
+  return {
+    mode: requested && isDayCaptureLight(requested.setting) ? "presentation-only-day-normalization" : "assert-only",
+    requested: expected,
+    serverLightSetting,
+    cleanOverlays,
+    effectLocks: effectLocks.map(({ frames: _frames, ...lock }) => lock),
+    installed,
+    stableAcrossAnimationFrames: true,
+    stabilityDelaysMs,
+    stabilitySamples,
+    first: stabilitySamples[0],
+    second: stabilitySamples[1],
+  };
+}
+
+async function cleanupCaptureVisualState(client) {
+  await client.evaluate(`
+    (() => {
+      window.__mir2CaptureVisualStateCleanup?.();
+      return {
+        observerPresent: Boolean(window.__mir2CaptureVisualStateObserver),
+        cleanupPresent: Boolean(window.__mir2CaptureVisualStateCleanup),
+        stylePresent: Boolean(document.getElementById("mir2-capture-visual-state")),
+      };
+    })()
+  `);
+}
+
+async function assertCaptureVisualStateStable(client, evidence) {
+  const current = await readCaptureVisualState(client);
+  assertCaptureVisualState(
+    current,
+    evidence.requested,
+    evidence.cleanOverlays,
+    evidence.effectLocks ?? [],
+  );
+  return current;
+}
+
+async function readCaptureVisualState(client) {
+  return client.evaluate(`
+    (() => {
+      const overlay = document.querySelector(".viewport-crystal-light-overlay");
+      const icon = document.querySelector(".mini-map-light");
+      const resourceOverlays = Array.from(document.querySelectorAll(
+        '[aria-label="Mir2 resource loading status"], [aria-label="Mir2 cache debug status"]'
+      ));
+      const visible = (node) => {
+        if (!node) return false;
+        const style = getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) > 0 && rect.width > 0 && rect.height > 0;
+      };
+      return {
+        rootLightSetting: document.documentElement.dataset.mir2CaptureLightSetting ?? null,
+        overlay: overlay
+          ? {
+              className: overlay.className,
+              dataLightSetting: overlay.getAttribute("data-light-setting"),
+              display: getComputedStyle(overlay).display,
+              backgroundColor: getComputedStyle(overlay).backgroundColor,
+              visible: visible(overlay),
+            }
+          : null,
+        miniMapIcon: icon
+          ? {
+              src: icon.getAttribute("src"),
+              resolvedSrc: icon.src,
+              originalSrc: icon.getAttribute("data-mir2-original-src"),
+            }
+          : null,
+        resourceOverlayCount: resourceOverlays.length,
+        visibleResourceOverlayCount: resourceOverlays.filter(visible).length,
+        sceneEffects: Array.from(document.querySelectorAll(".scene-crystal-effect-frame:not(.mask)")).map((node) => {
+          const spriteOverlay = node.closest(".viewport-sprite-overlay");
+          const worldComposite = node.closest(".game-world-composite");
+          const worldStyle = worldComposite ? getComputedStyle(worldComposite) : null;
+          return {
+            effectName: node.getAttribute("data-effect-name"),
+            effectKey: node.getAttribute("data-effect-key"),
+            blend: node.getAttribute("data-effect-blend"),
+            src: node.getAttribute("src"),
+            resolvedSrc: node.src,
+            originalSrc: node.getAttribute("data-mir2-original-src"),
+            captureFrame: node.getAttribute("data-mir2-capture-effect-frame"),
+            captureBaseLeft: node.getAttribute("data-mir2-capture-effect-base-left"),
+            captureBaseTop: node.getAttribute("data-mir2-capture-effect-base-top"),
+            left: node.style.left,
+            top: node.style.top,
+            width: node.style.width,
+            height: node.style.height,
+            spriteOverlayZIndex: spriteOverlay ? getComputedStyle(spriteOverlay).zIndex : null,
+            worldCompositeIsolation: worldStyle?.isolation ?? null,
+            worldCompositeVisible:
+              Boolean(worldComposite) &&
+              worldStyle?.display !== "none" &&
+              worldStyle?.visibility !== "hidden",
+          };
+        }),
+      };
+    })()
+  `);
+}
+
+function assertCaptureVisualState(actual, expected, cleanOverlays, effectLocks = []) {
+  if (cleanOverlays && actual.visibleResourceOverlayCount !== 0) {
+    throw new Error(`Capture resource overlay remained visible: ${JSON.stringify(actual)}`);
+  }
+  if (expected) {
+    if (actual.rootLightSetting !== String(expected.setting)) {
+      throw new Error(`Capture light marker drifted: ${JSON.stringify(actual)}`);
+    }
+    const iconPath = actual.miniMapIcon?.resolvedSrc
+      ? new URL(actual.miniMapIcon.resolvedSrc).pathname
+      : null;
+    if (iconPath !== expected.miniMapIcon) {
+      throw new Error(`Capture minimap light icon mismatch: expected ${expected.miniMapIcon}, observed ${iconPath}`);
+    }
+    if (expected.label === "day") {
+      if (actual.overlay?.visible === true) {
+        throw new Error(`Day capture still has a visible Crystal light overlay: ${JSON.stringify(actual.overlay)}`);
+      }
+    } else if (
+      !actual.overlay?.visible ||
+      !String(actual.overlay.className).split(/\s+/).includes(expected.overlayClass)
+    ) {
+      throw new Error(`Capture light overlay mismatch: ${JSON.stringify(actual.overlay)}`);
+    }
+  }
+  for (const effect of actual.sceneEffects) {
+    if (!additiveEffectHasDirectWorldBackdrop(effect)) {
+      throw new Error(`Capture additive effect lacks a direct world backdrop: ${JSON.stringify(effect)}`);
+    }
+  }
+  for (const lock of effectLocks) {
+    const matching = actual.sceneEffects.filter((effect) => effect.effectName === lock.effectName);
+    if (matching.length === 0) {
+      throw new Error(`Capture effect ${lock.effectName} was not present`);
+    }
+    for (const effect of matching) {
+      const pathName = effect.resolvedSrc ? new URL(effect.resolvedSrc).pathname : null;
+      const baseLeft = Number(effect.captureBaseLeft);
+      const baseTop = Number(effect.captureBaseTop);
+      const actualLeft = Number.parseFloat(effect.left);
+      const actualTop = Number.parseFloat(effect.top);
+      const expectedLeft = baseLeft + lock.desired.x;
+      const expectedTop = baseTop + lock.desired.y;
+      if (
+        pathName !== lock.desired.path ||
+        effect.width !== `${lock.desired.width}px` ||
+        effect.height !== `${lock.desired.height}px` ||
+        effect.captureFrame !== String(lock.frameOffset) ||
+        !Number.isFinite(baseLeft) ||
+        !Number.isFinite(baseTop) ||
+        !Number.isFinite(actualLeft) ||
+        !Number.isFinite(actualTop) ||
+        Math.abs(actualLeft - expectedLeft) > 0.01 ||
+        Math.abs(actualTop - expectedTop) > 0.01
+      ) {
+        throw new Error(`Capture effect lock drifted: ${JSON.stringify({ lock, effect })}`);
+      }
+    }
+  }
 }
 
 async function installCommandProbe(client) {

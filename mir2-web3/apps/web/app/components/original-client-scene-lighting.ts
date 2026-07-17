@@ -8,13 +8,27 @@ export type CrystalObjectLightSpec = {
   strengthBucket: number;
   width: number;
   height: number;
+  placementWidth: number;
+  placementHeight: number;
   opacity: number;
   tone: "neutral" | "merchant";
 };
 
-// Crystal DXManager.LightSizes. The client creates ten textures and clamps the
-// decoded `light % 15` index to the final available texture.
-const CRYSTAL_LIGHT_SIZES: ReadonlyArray<readonly [number, number]> = [
+export type CrystalMapLightSpec = {
+  value: number;
+  range: number;
+  width: number;
+  height: number;
+  placementWidth: number;
+  placementHeight: number;
+  opacity: number;
+  tone: "neutral";
+};
+
+// DrawLights positions Lights[range] with LightSizes[range], but CreateLights
+// built that texture from LightSizes[range + 1]. Preserve that native index
+// mismatch: it is visible near the right and bottom edges of large lights.
+const CRYSTAL_LIGHT_PLACEMENT_SIZES: ReadonlyArray<readonly [number, number]> = [
   [125, 95],
   [205, 156],
   [285, 217],
@@ -27,11 +41,25 @@ const CRYSTAL_LIGHT_SIZES: ReadonlyArray<readonly [number, number]> = [
   [845, 642],
 ];
 
-// Crystal adds grayscale light into an offscreen mask and multiplies the scene.
-// CSS `screen` is only the temporary bridge, so feeding it the raw 0..255 mask
-// energy over-brightens overlapping merchant lights. This factor matches the
-// single-source reveal without turning dense NPC scenes white.
-const CSS_SCREEN_LIGHT_ENERGY = 0.28;
+const CRYSTAL_LIGHT_TEXTURE_SIZES: ReadonlyArray<readonly [number, number]> = [
+  [205, 156],
+  [285, 217],
+  [365, 277],
+  [445, 338],
+  [525, 399],
+  [605, 460],
+  [685, 521],
+  [765, 581],
+  [845, 642],
+  [925, 703],
+];
+
+export function crystalLightTexturePath(range: number): string {
+  if (!Number.isInteger(range) || range < 0 || range >= CRYSTAL_LIGHT_TEXTURE_SIZES.length) {
+    throw new Error(`Crystal light texture range must be 0..${CRYSTAL_LIGHT_TEXTURE_SIZES.length - 1}.`);
+  }
+  return `/original-effects/Lighting/${range}.png`;
+}
 
 export function crystalSceneLightClassName(
   lightSetting: number | null | undefined,
@@ -59,8 +87,9 @@ export function crystalObjectLightSpec(
   if (!Number.isFinite(rawValue) || rawValue <= 0) return null;
 
   const value = Math.trunc(rawValue);
-  const range = Math.min(value % 15, CRYSTAL_LIGHT_SIZES.length - 1);
-  const [width, height] = CRYSTAL_LIGHT_SIZES[range];
+  const range = Math.min(value % 15, CRYSTAL_LIGHT_TEXTURE_SIZES.length - 1);
+  const [width, height] = CRYSTAL_LIGHT_TEXTURE_SIZES[range];
+  const [placementWidth, placementHeight] = CRYSTAL_LIGHT_PLACEMENT_SIZES[range];
   const strengthBucket = Math.trunc(value / 15);
   const strength =
     entity.kind === "selfPlayer" || entity.kind === "player"
@@ -75,7 +104,71 @@ export function crystalObjectLightSpec(
     strengthBucket,
     width,
     height,
-    opacity: (strength / 255) * CSS_SCREEN_LIGHT_ENERGY,
+    placementWidth,
+    placementHeight,
+    opacity: strength / 255,
     tone: entity.kind === "npc" ? "merchant" : "neutral",
+  };
+}
+
+export function crystalMapLightSpec(lightValue: number): CrystalMapLightSpec | null {
+  if (!Number.isFinite(lightValue)) return null;
+
+  const value = Math.trunc(lightValue);
+  // This deliberately mirrors the current Crystal DrawLights guard. Values
+  // carrying the legacy colour bucket (10+) are skipped by the native client.
+  if (value <= 0 || value >= 10) return null;
+
+  const range = Math.min((value % 10) * 3, CRYSTAL_LIGHT_TEXTURE_SIZES.length - 1);
+  const [width, height] = CRYSTAL_LIGHT_TEXTURE_SIZES[range];
+  const [placementWidth, placementHeight] = CRYSTAL_LIGHT_PLACEMENT_SIZES[range];
+  return {
+    value,
+    range,
+    width,
+    height,
+    placementWidth,
+    placementHeight,
+    opacity: 1,
+    tone: "neutral",
+  };
+}
+
+export function crystalObjectLightTopLeft(
+  drawX: number,
+  drawY: number,
+  spec: Pick<CrystalObjectLightSpec, "placementWidth" | "placementHeight">,
+  cellWidth = 48,
+  cellHeight = 32,
+) {
+  return {
+    left: drawX - Math.floor(spec.placementWidth / 2) - Math.floor(cellWidth / 2),
+    top: drawY - Math.floor(spec.placementHeight / 2) - Math.floor(cellHeight / 2) - 5,
+  };
+}
+
+export function crystalMapLightTopLeft(
+  drawX: number,
+  drawY: number,
+  offsetX: number,
+  offsetY: number,
+  spec: Pick<CrystalMapLightSpec, "placementWidth" | "placementHeight">,
+  cellWidth = 48,
+  cellHeight = 32,
+) {
+  return {
+    left:
+      drawX +
+      offsetX -
+      Math.floor(spec.placementWidth / 2) -
+      Math.floor(cellWidth / 2) +
+      10,
+    top:
+      drawY +
+      cellHeight +
+      offsetY -
+      Math.floor(spec.placementHeight / 2) -
+      Math.floor(cellHeight / 2) -
+      5,
   };
 }

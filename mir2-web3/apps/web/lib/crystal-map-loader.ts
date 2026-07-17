@@ -824,7 +824,16 @@ async function exportMapRegion(
       if (middleLayer) outputCell.middle = registerSprite(middleLayer, "middle");
 
       const frontLayer = frontLayerForCell(cell);
-      if (frontLayer) outputCell.front = registerSprite(frontLayer, "front");
+      if (frontLayer) {
+        outputCell.front = registerSprite(frontLayer, "front");
+        if (cell.frontAnimationFrame > 0 && outputCell.front) {
+          const lightFrame = sprites[outputCell.front]?.frames[0];
+          if (lightFrame) {
+            outputCell.lightOffsetX = lightFrame.offsetX ?? 0;
+            outputCell.lightOffsetY = lightFrame.offsetY ?? 0;
+          }
+        }
+      }
 
       const tileAnimationLayer = tileAnimationLayerForCell(cell);
       if (tileAnimationLayer) outputCell.tileAnimation = registerSprite(tileAnimationLayer, "tileAnimation");
@@ -977,9 +986,10 @@ function exportFrame(
     exportedFrames.add(frameKey);
     const decoded = decodeLibraryFrameRgba(library, frameIndex);
     if (!decoded) return null;
-    const rgba = postProcessFrameRgba(normalizedKey, frameIndex, decoded);
     pendingWrites.push(
-      mkdir(exportDir, { recursive: true }).then(() => writeFile(pngPath, encodePng(frame.width, frame.height, rgba))),
+      mkdir(exportDir, { recursive: true }).then(() =>
+        writeFile(pngPath, encodePng(frame.width, frame.height, decoded)),
+      ),
     );
   }
 
@@ -1726,21 +1736,6 @@ function normalizeMapFileName(mapFileName: string) {
 
 function packagedMapFileStem(mapFileName: string) {
   return encodeURIComponent(normalizeMapFileName(mapFileName).toLowerCase());
-}
-
-function postProcessFrameRgba(libraryName: string, frameIndex: number, rgba: Buffer) {
-  if (libraryName !== "WemadeMir2/Objects" || frameIndex < 2723 || frameIndex > 2732) return rgba;
-  const next = Buffer.from(rgba);
-  for (let index = 0; index < next.length; index += 4) {
-    const brightness = Math.max(next[index], next[index + 1], next[index + 2]);
-    const alpha = next[index + 3];
-    if (brightness <= 20) {
-      next[index + 3] = 0;
-    } else if (brightness < 72) {
-      next[index + 3] = Math.max(0, Math.min(alpha, Math.round(((brightness - 20) / 52) * alpha)));
-    }
-  }
-  return next;
 }
 
 function decodeFrame(width: number, height: number, compressed: Buffer) {

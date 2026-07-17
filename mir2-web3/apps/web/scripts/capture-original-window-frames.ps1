@@ -21,7 +21,9 @@ param(
   [int]$CropLeft = 0,
   [int]$CropTop = 0,
   [int]$CropWidth = 0,
-  [int]$CropHeight = 0
+  [int]$CropHeight = 0,
+  [int]$ExpectedClientWidth = 0,
+  [int]$ExpectedClientHeight = 0
 )
 
 $ErrorActionPreference = "Stop"
@@ -172,6 +174,17 @@ function Get-CaptureArea {
   }
 }
 
+function Assert-ExpectedClientSize {
+  param([hashtable]$Window)
+
+  if ($ExpectedClientWidth -gt 0 -and $Window.width -ne $ExpectedClientWidth) {
+    throw "Expected client width $ExpectedClientWidth but captured $($Window.width) for '$($Window.title)'."
+  }
+  if ($ExpectedClientHeight -gt 0 -and $Window.height -ne $ExpectedClientHeight) {
+    throw "Expected client height $ExpectedClientHeight but captured $($Window.height) for '$($Window.title)'."
+  }
+}
+
 function Invoke-PreClickClientPoints {
   param(
     [hashtable]$Window,
@@ -295,6 +308,10 @@ function Safe-Label {
 $window = Get-OriginalWindow
 $minimizedWindows = Minimize-MatchingWindows $MinimizeWindowTitlePatterns $window.hwnd
 if ($ActivateWindow) {
+  # A minimized WinForms window reports its compact taskbar geometry. Restore it
+  # before reading the client rect so a bad 160x28 capture cannot look valid.
+  [Mir2OriginalWindowFramesWin32]::ShowWindowAsync([IntPtr]$window.hwnd, 9) | Out-Null
+  Start-Sleep -Milliseconds 300
   [Mir2OriginalWindowFramesWin32]::SetForegroundWindow([IntPtr]$window.hwnd) | Out-Null
   Start-Sleep -Milliseconds 200
   $window = Get-OriginalWindow
@@ -307,6 +324,7 @@ if ($PreKeys.Count -gt 0) {
   Invoke-PreKeys $PreKeys $PreKeyDelayMs
   $window = Get-OriginalWindow
 }
+Assert-ExpectedClientSize $window
 $captureArea = Get-CaptureArea $window
 $samples = New-Object "System.Collections.Generic.List[object]"
 $safeLabel = Safe-Label $Label

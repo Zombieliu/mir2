@@ -639,11 +639,14 @@ export type CollectFallbackOptions = {
   /** Render player tile, used to convert world tiles into tile-delta space. */
   origin: { x: number; y: number };
   now: number;
-  /**
-   * Optional atlas asset set. When the real atlas resolves a map effect, the procedural fallback is
-   * suppressed for it so the atlas path stays authoritative.
-   */
+  /** Optional atlas asset set used to determine whether the Crystal effect can be resolved. */
   assets?: EffectAssets | null;
+  /**
+   * Explicit renderer ownership check. Resolution only proves that frames exist; the fallback is
+   * suppressed only when a renderer also confirms that it owns this particular effect instance.
+   * Omitted predicates safely default to no ownership.
+   */
+  rendererOwnsEffect?: (effect: RendererEffectInstance) => boolean;
 };
 
 export type MapEffectSpawn = {
@@ -655,12 +658,18 @@ export type MapEffectSpawn = {
   name?: string | null;
 };
 
+export type RendererEffectInstance =
+  | { kind: "map"; spawn: MapEffectSpawn }
+  | { kind: "cast"; entity: ViewportCasterLike; spell: string }
+  | { kind: "projectile"; projectile: ViewportProjectileLike; spell: string };
+
 /**
  * Map-effect fallbacks: a procedural ground effect per active map effect, shaped by the effect's
  * archetype (area nova / lingering cloud / summon eruption / ...). Map effects do not yet have a
  * place in the scene world snapshot (the MapEffect packet only logs today), so callers pass any
  * collected spawns explicitly; this resolves their element/archetype/lifetime. The atlas path wins
- * when it can resolve the numeric effect. Returns [] for an empty / undefined list.
+ * only when it resolves the effect and a renderer explicitly owns the instance. Returns [] for an
+ * empty / undefined list.
  */
 export function collectMapEffectFallbacks(
   spawns: readonly MapEffectSpawn[] | null | undefined,
@@ -669,11 +678,15 @@ export function collectMapEffectFallbacks(
   if (!spawns || spawns.length === 0) {
     return [];
   }
-  const { origin, now, assets } = options;
+  const { origin, now, assets, rendererOwnsEffect } = options;
   const out: FallbackVfx[] = [];
   for (const spawn of spawns) {
-    if (assets && resolveMapEffectByNumber(assets, spawn.effect)) {
-      continue; // atlas path is authoritative for this effect
+    if (
+      assets &&
+      resolveMapEffectByNumber(assets, spawn.effect) &&
+      rendererOwnsEffect?.({ kind: "map", spawn }) === true
+    ) {
+      continue;
     }
     const element = spawn.name ? elementForName(spawn.name) : elementForNumber(spawn.effect);
     const archetype = spawn.name ? archetypeForName(spawn.name) : archetypeForNumber(spawn.effect);
@@ -738,6 +751,8 @@ export type CollectViewportFallbackOptions = {
   assets?: EffectAssets | null;
   /** Spell name per caster objectId (cast flashes) and per projectile key (streak/impact). */
   spellByCaster?: Map<string, string> | null;
+  /** See CollectFallbackOptions.rendererOwnsEffect. Omitted means no renderer ownership. */
+  rendererOwnsEffect?: (effect: RendererEffectInstance) => boolean;
 };
 
 /** Cast flashes from viewport entity sprites (tile-delta space), shaped by spell archetype. */
@@ -745,15 +760,22 @@ export function collectViewportCastFallbacks(
   entities: readonly ViewportCasterLike[],
   options: CollectViewportFallbackOptions,
 ): FallbackVfx[] {
-  const { now, assets, spellByCaster } = options;
+  const { now, assets, spellByCaster, rendererOwnsEffect } = options;
   const out: FallbackVfx[] = [];
   for (const entity of entities) {
-    if (entity.attackAnimation !== "range" || typeof entity.attackStartedAt !== "number") {
+    if (
+      (entity.attackAnimation !== "range" && entity.attackAnimation !== "spell") ||
+      typeof entity.attackStartedAt !== "number"
+    ) {
       continue;
     }
     const spell = spellByCaster?.get(entity.objectId) ?? null;
-    // Atlas path wins: if a real spell-cast animation resolves, skip the procedural fallback.
-    if (spell && assets && resolveSpellEffect(assets, spell)) {
+    if (
+      spell &&
+      assets &&
+      resolveSpellEffect(assets, spell) &&
+      rendererOwnsEffect?.({ kind: "cast", entity, spell }) === true
+    ) {
       continue;
     }
     const element = elementForName(spell);
@@ -786,15 +808,19 @@ export function collectViewportProjectileFallbacks(
   projectiles: readonly ViewportProjectileLike[],
   options: CollectViewportFallbackOptions,
 ): FallbackVfx[] {
-  const { now, assets, spellByCaster } = options;
+  const { now, assets, spellByCaster, rendererOwnsEffect } = options;
   const out: FallbackVfx[] = [];
   for (const projectile of projectiles) {
     if (now < projectile.startedAt || now >= projectile.expiresAt) {
       continue;
     }
     const spell = spellByCaster?.get(projectile.key) ?? null;
-    // Atlas path wins for the projectile/impact animation too.
-    if (spell && assets && resolveSpellEffect(assets, spell)) {
+    if (
+      spell &&
+      assets &&
+      resolveSpellEffect(assets, spell) &&
+      rendererOwnsEffect?.({ kind: "projectile", projectile, spell }) === true
+    ) {
       continue;
     }
     const element = elementForName(spell);

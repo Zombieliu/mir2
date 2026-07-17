@@ -48,7 +48,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 // We import sharp from the web app's node_modules because the pipeline lives
 // inside the monorepo and doesn't have its own node_modules yet.
@@ -173,7 +173,7 @@ async function main(args) {
   // 3. Render one PNG per page.
   await fs.mkdir(outDir, { recursive: true });
   const sharpPath = await resolveSharp();
-  const sharp = (await import(sharpPath)).default;
+  const sharp = (await import(pathToFileURL(sharpPath).href)).default;
 
   /** @type {import("./schema.ts").AtlasPage[]} */
   const pageDescriptors = [];

@@ -191,6 +191,18 @@ img {
   image-rendering: pixelated;
 }
 
+.game-world-composite {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.game-world-composite.inactive {
+  visibility: hidden;
+}
+
 .game-scene-backdrop {
   position: absolute;
   inset: 0;
@@ -326,81 +338,54 @@ img {
 }
 
 .viewport-sprite-overlay {
-  z-index: 5;
+  /* Keep depth-sorted children in the world stacking context so additive
+     sprites blend against the map instead of an isolated transparent layer. */
+  z-index: auto;
   pointer-events: none;
 }
 
 .viewport-crystal-light-overlay {
   position: absolute;
   inset: 0;
-  z-index: 6;
+  z-index: 32760;
   pointer-events: none;
+  isolation: isolate;
+  mix-blend-mode: multiply;
 }
 
-/* Darkness is screen-fixed. World lights inherit the Bevy presentation camera;
-   the self light cancels that camera through the shared per-entity pose bridge. */
+/* Crystal builds an opaque light buffer, adds procedural light textures into it,
+   then multiplies the completed buffer over the world. */
 .viewport-map-light-surface {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  isolation: isolate;
 }
 
 .viewport-crystal-light-overlay.night {
-  background: rgba(0, 0, 0, 0.72);
+  background: rgb(0, 0, 0);
 }
 
 .viewport-crystal-light-overlay.evening {
-  background: rgba(0, 0, 0, 0.56);
+  background: rgb(50, 50, 50);
 }
 
 .viewport-crystal-light-overlay.dawn {
-  background: rgba(0, 0, 0, 0.56);
+  background: rgb(50, 50, 50);
 }
 
-.viewport-map-light {
-  position: absolute;
-  display: block;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 235, 0.92) 0%, rgba(220, 214, 178, 0.48) 45%, transparent 78%);
-  filter: blur(0.35px);
-}
-
-.viewport-map-light.cool {
-  background: radial-gradient(ellipse at center, rgba(210, 232, 255, 0.92) 0%, rgba(120, 180, 255, 0.48) 45%, transparent 78%);
-}
-
-.viewport-map-light.warm {
-  background: radial-gradient(ellipse at center, rgba(255, 236, 176, 0.96) 0%, rgba(255, 180, 92, 0.54) 45%, transparent 80%);
-}
-
-.viewport-map-light.green {
-  background: radial-gradient(ellipse at center, rgba(190, 255, 170, 0.86) 0%, rgba(42, 190, 42, 0.42) 45%, transparent 78%);
-}
-
+.viewport-map-light,
 .viewport-object-light {
   position: absolute;
   display: block;
-  border-radius: 50%;
   pointer-events: none;
-  mix-blend-mode: screen;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 245, 0.98) 0%,
-    rgba(236, 232, 205, 0.52) 44%,
-    transparent 78%
-  );
+  mix-blend-mode: plus-lighter;
+  max-width: none;
+  object-fit: fill;
 }
 
 .viewport-object-light.merchant {
-  background: radial-gradient(
-    ellipse at center,
-    rgba(236, 236, 225, 0.94) 0%,
-    rgba(180, 180, 170, 0.48) 44%,
-    transparent 78%
-  );
+  color: inherit;
 }
 
 .client-stage-frame.scene-assets-pending .viewport-grid-overlay {
@@ -448,7 +433,7 @@ img {
 }
 
 .viewport-entity-overlay {
-  z-index: 6;
+  z-index: 32761;
   pointer-events: none;
 }
 
@@ -601,14 +586,14 @@ img {
 
 .entity-nameplate {
   position: absolute;
-  transform: translate(-50%, -100%);
+  transform: translate(-50%, 0);
   min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
   pointer-events: auto;
   display: grid;
-  gap: 1px;
+  gap: 0;
   text-align: center;
   box-shadow: none;
   text-shadow: 1px 1px 0 #000;
@@ -626,7 +611,7 @@ img {
 }
 
 .entity-nameplate strong + strong {
-  margin-top: 1px;
+  margin-top: 0;
 }
 
 .entity-nameplate .entity-subname,

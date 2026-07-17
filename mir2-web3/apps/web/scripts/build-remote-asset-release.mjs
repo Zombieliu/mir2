@@ -3,6 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
+
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(WEB_ROOT, "..", "..");
@@ -94,6 +96,9 @@ const stageConcurrency = positiveIntegerArg(
 const stageFileMode = String(args.stageFileMode ?? process.env.MIR2_REMOTE_ASSET_STAGE_FILE_MODE ?? "copy").toLowerCase();
 const hashMode = String(args.hashMode ?? process.env.MIR2_REMOTE_ASSET_HASH_MODE ?? "sha256").toLowerCase();
 const compactFiles = booleanArg(args.compactFiles ?? process.env.MIR2_REMOTE_ASSET_COMPACT_FILES, false);
+const casEnabled = booleanArg(args.cas ?? process.env.MIR2_REMOTE_ASSET_CAS, true);
+const casPrefix = args.casPrefix ?? process.env.MIR2_REMOTE_ASSET_CAS_PREFIX ?? "mir2/cas";
+const releaseChannel = args.channel ?? process.env.MIR2_REMOTE_ASSET_CHANNEL ?? "production";
 
 async function main() {
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);
@@ -185,6 +190,13 @@ async function main() {
   }
 
   await fs.mkdir(outputDir, { recursive: true });
+  if (casEnabled) {
+    if (hashMode !== "sha256") throw new Error("CAS releases require MIR2_REMOTE_ASSET_HASH_MODE=sha256.");
+    release.cas = await writeCasReleaseArtifacts(
+      createCasRelease(staged.files, { prefix: casPrefix, channel: releaseChannel }),
+      outputDir,
+    );
+  }
   const releasePath = path.join(outputDir, "remote-asset-release.json");
   const latestPath = path.join(DEFAULT_OUTPUT_ROOT, "latest-remote-asset-release.json");
   await fs.writeFile(releasePath, `${stringifyRelease(release)}\n`, "utf8");
@@ -204,6 +216,9 @@ async function main() {
         totalBytes: release.stats.totalBytes,
         missingCount: release.stats.missingCount,
         stageDir,
+        casManifestHash: release.cas?.manifest.sha256 ?? null,
+        casManifestObjectKey: release.cas?.manifest.objectKey ?? null,
+        channelObjectKey: release.cas?.channel.objectKey ?? null,
       },
       null,
       2,
@@ -215,6 +230,7 @@ function compactReleaseFile(file) {
   return {
     p: file.relativePath,
     s: file.size,
+    h: file.sha256,
     c: file.contentType,
   };
 }
@@ -306,6 +322,8 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     publicAssetRootRecords.push(...(await collectPublicAssetRootStaticUrls(staticUrls, publicAssetRoots)));
   }
 
+  await collectMapAtlasPageStaticUrls(staticUrls);
+
   return {
     staticUrls,
     packs,
@@ -314,6 +332,24 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     sceneSpriteRoots: sceneSpriteRootRecords,
     publicAssetRoots: publicAssetRootRecords,
   };
+}
+
+async function collectMapAtlasPageStaticUrls(staticUrls) {
+  const manifestPath = "/generated/map-atlas/manifest.json";
+  if (!staticUrls.has(manifestPath)) return;
+
+  const localManifestPath = path.join(WEB_ROOT, "public", "generated", "map-atlas", "manifest.json");
+  let manifest;
+  try {
+    manifest = JSON.parse(await fs.readFile(localManifestPath, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    throw error;
+  }
+
+  for (const atlas of Array.isArray(manifest.atlases) ? manifest.atlases : []) {
+    addStaticUrl(staticUrls, atlas?.imageUrl, "map-atlas-manifest");
+  }
 }
 
 async function collectOriginalAssetManifestStaticUrls(staticUrls) {
@@ -602,6 +638,7 @@ function normalizeStaticAssetPath(value) {
     !url.pathname.startsWith("/original-ui/") &&
     !url.pathname.startsWith("/original-map/") &&
     !url.pathname.startsWith("/generated/original-map-blend/") &&
+    !url.pathname.startsWith("/generated/map-atlas/") &&
     !url.pathname.startsWith("/bevy-entity-atlases/")
   ) {
     return "";

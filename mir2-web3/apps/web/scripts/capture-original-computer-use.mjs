@@ -37,6 +37,8 @@ export async function captureOriginalComputerUse(options = {}) {
   let targetWindow = await sky.get_window(target.window);
   await sky.activate_window({ window: targetWindow });
   await delay(warmupMs);
+  const initialState = await sky.get_window_state({ window: targetWindow });
+  targetWindow = initialState.window;
 
   if (frameCaptureMode === "powershell") {
     return await captureWithPowerShellFrames({
