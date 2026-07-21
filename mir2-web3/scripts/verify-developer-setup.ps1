@@ -133,8 +133,8 @@ try {
                 --assetBaseUrl $AssetBaseUrl
         }
     }
-    Invoke-Checked "TypeScript" {
-        .\node_modules\.bin\tsc.cmd --noEmit --pretty false
+    Invoke-Checked "Player Web TypeScript" {
+        & npm.cmd run typecheck
     }
     if (-not $SkipBuild) {
         $PreviousPrebuilt = $env:MIR2_USE_PREBUILT_BEVY_RUNTIME

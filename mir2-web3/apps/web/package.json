@@ -118,6 +118,7 @@
     "test:frontend-logic": "npm run test:stage5-adapters && npm run test:vfx-fallback && npm run test:scene-effect-runtime && npm run test:extended-packets && npm run test:tutorial-flow && npm run test:onboarding-guidance && npm run test:onchain-mine && npm run test:scene-alpha-key && npm run test:map-render-routing && npm run test:game-events && npm run test:asset-residency && npm run test:world-store-hook && npm run test:start-game-boundary && npm run test:movement-controller && npm run test:target-combat && npm run test:scene-motion && npm run test:crystal-lighting && npm run test:player-frames && npm run test:bevy-movement-shadow && npm run test:bevy-presentation-pose && npm run test:local-command-pose-latency && npm run test:cdp-debug-port",
     "runtime:build:dev": "node ./scripts/build-bevy-runtime.mjs dev",
     "runtime:build:release": "node ./scripts/build-bevy-runtime.mjs release",
+    "typecheck": "next typegen && tsc --noEmit --pretty false",
     "dev": "npm run assets:map-atlas:ensure && npm run runtime:build:release && next dev",
     "dev:debug-runtime": "npm run assets:map-atlas:ensure && npm run runtime:build:dev && next dev",
     "build": "npm run runtime:build:release && npm run assets:bevy-entity-atlas:build && npm run generate:original-asset-manifest && npm run assets:map-atlas:build && next build --webpack",

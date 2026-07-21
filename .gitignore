@@ -11,6 +11,7 @@ tools/procmon/
 # JavaScript / frontend
 **/node_modules/
 **/.next/
+**/next-env.d.ts
 **/dist/
 **/out/
 **/*.tsbuildinfo

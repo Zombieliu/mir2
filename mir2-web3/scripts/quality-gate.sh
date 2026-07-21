@@ -16,13 +16,13 @@ cargo +1.89.0 check --locked \
 
 (
   cd apps/web
-  npx tsc --noEmit
+  npm run typecheck
 )
 
 if [ -d apps/admin-web/node_modules ]; then
   (
     cd apps/admin-web
-    npx tsc --noEmit
+    npm run typecheck
   )
 fi
 
