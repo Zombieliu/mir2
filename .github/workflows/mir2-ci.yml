@@ -75,8 +75,10 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npm run typecheck
-      # Verify committed assets plus temp-fixture sound export. Do not regenerate
-      # from the ignored Crystal client tree, which clean runners do not contain.
+      # Verify committed assets, the locally installed sound subset, and the
+      # temp-fixture sound exporter. Clean runners do not contain the ignored
+      # full Crystal sound library; strict local closure is enabled separately
+      # when producing an authorized audio release.
       - name: Offline resource/audio gate
         run: npm run assets:verify:offline
       - name: Verify committed generated artifacts are in sync

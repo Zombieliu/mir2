@@ -1,7 +1,8 @@
 // Offline "release readiness" preflight for the resource-loading assets. Validates the things
 // that can be checked without a running server or the raw Crystal client, so regressions are
 // caught before an asset release/upload instead of in production:
-//   1. present-sound manifest <-> committed .wav files are consistent
+//   1. locally installed .wav files are a consistent subset of the published
+//      present-sound manifest (strict local closure is opt-in)
 //   2. the Bevy entity atlas manifest is internally consistent (image exists, rects in bounds)
 //   3. a sample of the original-asset manifest's sha256 hashes match the bytes on disk
 //   4. render-coverage thresholds (map sprite + mini-map) hold
@@ -16,6 +17,9 @@ const docsDir = [path.join(repoRoot, "docs"), path.join(webRoot, "docs")].find((
 
 const MIN_RENDER_COVERAGE_PERCENT = Number.parseFloat(process.env.MIR2_MIN_RENDER_COVERAGE_PERCENT ?? "95");
 const ORIGINAL_ASSET_HASH_SAMPLE = Number.parseInt(process.env.MIR2_ASSET_HASH_SAMPLE ?? "48", 10);
+const REQUIRE_LOCAL_SOUND_CLOSURE = /^(1|true|yes)$/i.test(
+  process.env.MIR2_REQUIRE_LOCAL_SOUND_CLOSURE ?? "",
+);
 
 const failures = [];
 const warnings = [];
@@ -62,12 +66,19 @@ function checkPresentSounds() {
   const missing = manifest.files.filter((file) => !onDisk.has(file));
   const untracked = [...onDisk].filter((file) => !manifest.files.includes(file));
   if (missing.length > 0) {
-    failures.push(`present-sound manifest lists ${missing.length} file(s) not on disk: ${missing.slice(0, 5).join(", ")}`);
+    const detail = `present-sound manifest lists ${missing.length} release-only file(s) not installed locally: ${missing.slice(0, 5).join(", ")}`;
+    if (REQUIRE_LOCAL_SOUND_CLOSURE) {
+      failures.push(detail);
+    } else {
+      warnings.push(`${detail}; set MIR2_REQUIRE_LOCAL_SOUND_CLOSURE=1 for a strict local audio release check`);
+    }
   }
   if (untracked.length > 0) {
     failures.push(`sound dir has ${untracked.length} .wav not in manifest (run generate:present-sounds): ${untracked.slice(0, 5).join(", ")}`);
   }
-  return pass(`${manifest.files.length} present sound(s) consistent`);
+  return pass(
+    `${manifest.files.length} published sound(s), ${onDisk.size} local file(s), ${missing.length} release-only`,
+  );
 }
 
 function checkEntityAtlas() {

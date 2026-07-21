@@ -110,6 +110,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 当前固定版本为 [`developer-assets-f71b89aa3850`](https://github.com/Zombieliu/mir2/releases/tag/developer-assets-f71b89aa3850)。目标目录固定为 `apps/web/public/generated/crystal-packs/full`，该目录被 Git 忽略。默认分片缓存和已安装图集各约 9.08 GiB；安装期间还会创建总 tar 与 staging，所以开始前至少准备 40 GiB 空闲，完整开发环境建议 50 GiB 以上。安装后正常运行 `start-developer.ps1`，无需传 `-AssetBaseUrl`。
 
+这个 Release 是完整转换视觉图集，不是原生客户端或全声音库。Git 只提供 4 个 Starter WAV；另外 316 个发布态声音文件必须由所有者按授权边界单独交付本地源，或等待受控音频发布。没有这些音频不会阻止 Gateway、Player Web 和图集开发启动，但不能签署全音频验收。
+
 ### R2 CDN
 
 当前 R2 只保留发布工具和维护者模板，尚无可供开发者使用的已验收 URL。未来发布必须使用不可变版本目录，由 Service Worker 按需回源，并提供已通过发布清单校验以及全部 5,887 个 full-pack 对象并发 HEAD 探测的 URL：

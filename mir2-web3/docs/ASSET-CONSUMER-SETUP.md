@@ -7,7 +7,7 @@
 | 模式 | 本地全量目录 | 网络 | 推荐用途 |
 | --- | --- | --- | --- |
 | Starter | 不存在 | 可离线 | Gateway/Simulation、普通 UI、新手流程 |
-| GitHub 私有开发素材包 | 存在 | 仅安装时需要，可离线开发 | 全素材开发、调试和离线验收 |
+| GitHub 私有开发素材包 | 存在 | 仅安装时需要，可离线开发 | 全图集开发、调试和离线视觉验收 |
 | R2 CDN | 不需要 | 游戏时按需请求 | 维护者模板；当前尚未发布可用 URL |
 
 运行时全量图集路径固定为：
@@ -60,6 +60,18 @@ http://127.0.0.1:3002/?crystalFullPack=0
 `install-developer-assets.ps1` 默认读取仓库跟踪的 `config/developer-assets.json`。该文件是当前认可素材版本的唯一入口；升级素材时先发布新的私有 Release，再在同一提交中替换清单。
 
 当前认可版本是 `developer-assets-f71b89aa3850`，内容哈希为 `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`。它包含 1,440 个 library shards 和 4,446 张唯一 PNG pages；总归档是确定性 USTAR，并拆成 7 个 Release 分卷。
+
+该 Release 只安装转换后的完整视觉图集，不包含原始 `.Lib`、原生客户端、可执行文件或完整声音库。仓库只跟踪 4 个 Starter WAV；其余 316 个声音文件必须来自项目所有者单独提供且允许使用的本地数据源，或未来经过验收的受控音频发布。不要因为 `crystal-present-sounds.generated.json` 列出了 320 个发布态文件，就推定干净克隆已经拥有这些音频字节。
+
+维护者在具有合法本地声音源时可执行严格闭包检查：
+
+```powershell
+$env:CRYSTAL_CLIENT_ROOT = "<authorized-client-root>"
+npm --prefix apps/web run export:crystal-sounds
+npm --prefix apps/web run generate:present-sounds
+$env:MIR2_REQUIRE_LOCAL_SOUND_CLOSURE = "1"
+npm --prefix apps/web run preflight:asset-release
+```
 
 ### 在线安装
 
