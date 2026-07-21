@@ -1591,6 +1591,9 @@ img {
 }
 
 .chat-feed-line {
+  position: relative;
+  left: 3px;
+  top: 1px;
   height: 13px;
   min-height: 13px;
   max-width: 614px;

@@ -20,7 +20,6 @@ use super::drops::{
     HarvestTargetSelection,
 };
 use super::equipment::{damage_weapon_durability, damage_worn_durability};
-use super::items::crystal_equipment_added_stat_total;
 use super::map::is_safe_zone_point;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
@@ -43,11 +42,10 @@ use super::packets::{
     object_struck_packet, player_struck_packet, self_death_packet, system_message_key,
     visible_object_bundle_for_entity,
 };
-use super::quests::advance_crystal_quest_kill;
 use super::resources::{
     is_in_world, runtime_tick, BuffResource, ElementalResource, GmRuntimeResource,
-    InventoryResource, MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, SkillResource,
 };
 use super::session::SimulationSession;
 use super::skills::{
@@ -325,8 +323,9 @@ fn crystal_skill_accuracy_bonus(world: &World) -> i32 {
     fencing.saturating_add(slaying).saturating_add(spirit_sword)
 }
 
-fn crystal_player_accuracy(world: &World) -> i32 {
-    crystal_equipment_added_stat_total(world.resource::<InventoryResource>(), CRYSTAL_STAT_ACCURACY)
+pub(super) fn crystal_player_accuracy(world: &World) -> i32 {
+    player_stats(world)
+        .accuracy()
         .saturating_add(crystal_skill_accuracy_bonus(world))
 }
 
@@ -486,8 +485,8 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         max_mc: stats.max_mc(),
         min_sc: stats.min_sc(),
         max_sc: stats.max_sc(),
-        // Hit roll uses the same accuracy as the session path (equipment + skills,
-        // no class base) so zone and session hit/miss agree.
+        // Hit roll uses Crystal's complete Accuracy stat (class base, equipment,
+        // buffs, and passive skills), so zone and session hit/miss agree.
         accuracy: crystal_player_accuracy(world),
         agility: stats.agility(),
         min_ac: stats.min_ac(),
@@ -1137,7 +1136,35 @@ pub(super) fn apply_monster_poison(
         green_damage: green_damage.max(0),
         next_damage_tick: current_tick.saturating_add(2),
         expires_at_tick: current_tick.saturating_add(duration_ticks),
+        player_owned: false,
     });
+}
+
+pub(super) fn apply_player_monster_poison(
+    world: &mut World,
+    monster_entity: Entity,
+    poison: u16,
+    green_damage: i32,
+    current_tick: u64,
+    duration_ticks: u64,
+) {
+    if poison == 0 || duration_ticks == 0 {
+        return;
+    }
+    apply_monster_poison(
+        world,
+        monster_entity,
+        poison,
+        green_damage,
+        current_tick,
+        duration_ticks,
+    );
+    if let Some(mut state) = world
+        .entity_mut(monster_entity)
+        .get_mut::<MonsterPoisonState>()
+    {
+        state.player_owned = true;
+    }
 }
 
 pub(super) fn tick_monster_poisons(
@@ -1180,8 +1207,17 @@ pub(super) fn tick_monster_poisons(
             && state.green_damage > 0
             && current_tick >= state.next_damage_tick
         {
-            let died =
-                damage_monster_entity(world, entity, state.green_damage, current_tick, packets);
+            let died = if state.player_owned {
+                damage_player_owned_monster_entity(
+                    world,
+                    entity,
+                    state.green_damage,
+                    current_tick,
+                    packets,
+                )
+            } else {
+                damage_monster_entity(world, entity, state.green_damage, current_tick, packets)
+            };
             if died {
                 world.entity_mut(entity).remove::<MonsterPoisonState>();
                 continue;
@@ -2167,9 +2203,6 @@ pub(super) fn damage_monster_entity(
         if let Some(info) = object_died_info_for_entity(world, monster_entity, 0) {
             packets.push(ServerPacket::ObjectDied { info });
         }
-        if let Some(monster_name) = name.as_deref() {
-            packets.extend(advance_crystal_quest_kill(world, monster_name));
-        }
     }
 
     if monster_dead && dead_ai == 60 {
@@ -2220,6 +2253,23 @@ pub(super) fn damage_monster_entity(
 
     let _ = name;
     monster_dead
+}
+
+pub(super) fn damage_player_owned_monster_entity(
+    world: &mut World,
+    monster_entity: Entity,
+    damage: i32,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    let defeat = entity_object_id(world, monster_entity).zip(entity_name(world, monster_entity));
+    let died = damage_monster_entity(world, monster_entity, damage, current_tick, packets);
+    if died {
+        if let Some((object_id, name)) = defeat {
+            handle_monster_defeat(world, object_id, &name, packets);
+        }
+    }
+    died
 }
 
 pub(super) fn crystal_jar1_slave_template(

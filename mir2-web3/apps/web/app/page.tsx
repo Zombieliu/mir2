@@ -107,6 +107,7 @@ import type {
 } from "../lib/scene-types";
 import type { ClientScreen } from "../lib/original-ui";
 import {
+  attackModeChatMessage,
   attackModeLabel,
   groupMembersAfterChange,
   heroCreateResultMessage,
@@ -115,6 +116,7 @@ import {
   normalizeMailList,
   normalizeUserItem,
   patchItemsByUniqueId,
+  petModeChatMessage,
   petModeLabel,
   removeItemByUniqueId,
 } from "../lib/extended-server-packets";
@@ -675,6 +677,7 @@ type QuestEntry = {
   current: number;
   required: number;
   rewardPreview: string;
+  tracked?: boolean;
   // B-wave-2 enriched fields (structurally match the quest window's optional props).
   descriptionLines?: string[];
   objectives?: Array<{ label: string; current?: number; required?: number; done?: boolean }>;
@@ -682,8 +685,15 @@ type QuestEntry = {
     gold?: number;
     experience?: number;
     credit?: number;
-    items?: Array<{ name: string; icon?: number; count?: number; selectable?: boolean }>;
-    selectItems?: Array<{ name: string; icon?: number; count?: number; selectable?: boolean }>;
+    items?: Array<{ name: string; icon?: number; count?: number; itemIndex?: number; selectable?: boolean }>;
+    selectItems?: Array<{
+      name: string;
+      icon?: number;
+      count?: number;
+      itemIndex?: number;
+      selectionIndex?: number;
+      selectable?: boolean;
+    }>;
   };
   timeLimit?: string;
 };
@@ -1655,6 +1665,7 @@ export default function HomePage() {
   const onchainMiningTimerRef = useRef<number | null>(null);
   const npcCallGuardRef = useRef<{ objectId: string; until: number } | null>(null);
   const gameEntryChatSeededRef = useRef(false);
+  const gameEntryChatOverrideActiveRef = useRef(false);
   const movementPlanRef = useRef<MovementPlan | null>(null);
   const movementBlockedStepsRef = useRef<MovementBlockedStep[]>([]);
   const directionStepNextAtRef = useRef(0);
@@ -4706,49 +4717,16 @@ export default function HomePage() {
     const onlinePlayersLine = t("server.OnlinePlayers", [1], "Online Players: 1");
     const lineMessage = crystalBootstrapLineMessage();
     const overrideLines = crystalBootstrapVisibleChatLines(onlinePlayersLine, lineMessage);
-    const lines = overrideLines ?? [
-      {
-        text: onlinePlayersLine,
-        tone: "system" as const,
-        channel: "hint" as const,
-      },
-      {
-        text: lineMessage,
-        tone: "chat" as const,
-        channel: "line" as const,
-      },
-      {
-        text: onlinePlayersLine,
-        tone: "system" as const,
-        channel: "hint" as const,
-      },
-      {
-        text: onlinePlayersLine,
-        tone: "system" as const,
-        channel: "hint" as const,
-      },
-    ];
+    gameEntryChatOverrideActiveRef.current = overrideLines !== null;
+    if (!overrideLines) return;
 
     setLogs((current) => {
-      if (overrideLines) {
-        const seeded = [...overrideLines]
-          .reverse()
-          .map((line) => createLogLine(line.text, line.tone, line.channel, locale));
-        // Capture-only parity mode: the URL parameter is a snapshot of Crystal's
-        // visible chat slots, so mixing in startup packets creates false diffs.
-        return seeded.slice(0, 24);
-      }
-
-      const existing = new Set(current.map((line) => trimLogTimestamp(line.text)));
-      const missing = lines.filter((line) => !existing.has(line.text));
-      if (!missing.length) {
-        return current;
-      }
-
-      const seeded = [...missing]
+      const seeded = [...overrideLines]
         .reverse()
         .map((line) => createLogLine(line.text, line.tone, line.channel, locale));
-      return [...seeded, ...current].slice(0, 24);
+      // Capture-only parity mode: the URL parameter is a snapshot of Crystal's
+      // visible chat slots, so mixing in startup packets creates false diffs.
+      return seeded.slice(0, 24);
     });
   }
 
@@ -5672,6 +5650,7 @@ export default function HomePage() {
       combatConfirmTickTimerRef.current = null;
     }
     gameEntryChatSeededRef.current = false;
+    gameEntryChatOverrideActiveRef.current = false;
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       send({ type: "disconnect" });
     }
@@ -6869,6 +6848,16 @@ export default function HomePage() {
     send({ type: "shareQuest", questIndex: questId });
   }
 
+  function trackQuest(questId: number) {
+    updateWorld((current) => ({
+      ...current,
+      questLog: current.questLog.map((quest) => ({
+        ...quest,
+        tracked: quest.questId === questId,
+      })),
+    }));
+  }
+
   function abandonQuest(questId: number) {
     send({ type: "abandonQuest", questIndex: questId });
   }
@@ -7157,6 +7146,12 @@ export default function HomePage() {
     }
     const occupant = world.entities.find(
       (entity) => entity.objectId !== world.playerObjectId && !entity.dead && entity.x === x && entity.y === y,
+    ) ?? world.entities.find(
+      (entity) => entity.objectId !== world.playerObjectId
+        && entity.kind === "monster"
+        && entity.dead
+        && entity.x === x
+        && entity.y === y,
     );
     if (occupant) {
       activateEntity(occupant.objectId);
@@ -9142,13 +9137,20 @@ export default function HomePage() {
         }
         break;
       }
-      case "ChangeAMode":
-        // Crystal updates the HUD mode label on packet sync; chat text is only
-        // emitted for player-initiated mode toggles.
+      case "ChangeAMode": {
+        const message = attackModeChatMessage(numberOrUndefined(payload.mode) ?? Number.NaN);
+        if (message && !gameEntryChatOverrideActiveRef.current) {
+          appendLog(t(message.localizationKey, [], message.fallback), "system", "hint");
+        }
         break;
-      case "ChangePMode":
-        // Same as AMode: do not pollute the startup ChatDialog with state sync.
+      }
+      case "ChangePMode": {
+        const message = petModeChatMessage(numberOrUndefined(payload.mode) ?? Number.NaN);
+        if (message && !gameEntryChatOverrideActiveRef.current) {
+          appendLog(t(message.localizationKey, [], message.fallback), "system", "hint");
+        }
         break;
+      }
       case "MarketSuccess":
         appendLog(stringOrFallback(payload.message, t("ui.marketSuccess", [], "Market action succeeded.")), "system");
         break;
@@ -9306,7 +9308,7 @@ export default function HomePage() {
             ...current,
             questLog: current.questLog.map((quest) =>
               completed.includes(quest.questId)
-                ? { ...quest, stage: "completed" as QuestStage }
+                ? { ...quest, stage: "completed" as QuestStage, tracked: false }
                 : quest,
             ),
           }));
@@ -9334,6 +9336,9 @@ export default function HomePage() {
                       : payload.taken === true
                         ? ("inProgress" as QuestStage)
                         : quest.stage,
+                    ...(typeof payload.trackQuest === "boolean"
+                      ? { tracked: payload.trackQuest }
+                      : {}),
                     ...(objectives ? { objectives } : {}),
                     ...(descriptionLines && descriptionLines.length > 0 ? { descriptionLines } : {}),
                   }
@@ -9606,9 +9611,6 @@ export default function HomePage() {
               ? (info.taskDescription as unknown[]).filter((line): line is string => typeof line === "string")
               : [];
           updateWorld((current) => {
-            if (current.questLog.some((quest) => quest.questId === questId)) {
-              return current;
-            }
             // B-wave-2: structured description / objectives / rewards / time limit.
             const enrichedObjectives = parseQuestObjectives(payload.objectives);
             const enrichedRewards = parseQuestRewards(payload.rewards);
@@ -9631,6 +9633,26 @@ export default function HomePage() {
               ...(enrichedRewards ? { rewards: enrichedRewards } : {}),
               ...(typeof payload.timeLimit === "string" ? { timeLimit: payload.timeLimit } : {}),
             };
+            if (current.questLog.some((quest) => quest.questId === questId)) {
+              return {
+                ...current,
+                questLog: current.questLog.map((quest) =>
+                  quest.questId === questId
+                    ? {
+                        ...quest,
+                        title: nextEntry.title,
+                        summary: nextEntry.summary,
+                        objective: nextEntry.objective,
+                        tracker: nextEntry.tracker,
+                        ...(nextEntry.descriptionLines ? { descriptionLines: nextEntry.descriptionLines } : {}),
+                        ...(nextEntry.objectives ? { objectives: nextEntry.objectives } : {}),
+                        ...(nextEntry.rewards ? { rewards: nextEntry.rewards } : {}),
+                        ...(nextEntry.timeLimit ? { timeLimit: nextEntry.timeLimit } : {}),
+                      }
+                    : quest,
+                ),
+              };
+            }
             return { ...current, questLog: [...current.questLog, nextEntry] };
           });
         }
@@ -11015,7 +11037,11 @@ export default function HomePage() {
       attack: item.attack,
       defence: item.defence,
     }));
-    const questLog = snapshot.questLog.map((quest) => ({
+    const previousQuestById = new Map(
+      worldRef.current.questLog.map((quest) => [quest.questId, quest]),
+    );
+    const questLog: QuestEntry[] = snapshot.questLog.map((quest) => ({
+      ...(previousQuestById.get(quest.questId) ?? {}),
       questId: quest.questId,
       title: quest.title,
       summary: quest.summary,
@@ -12673,7 +12699,7 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, playerClass: self?.classKey ?? null, onTrackQuest: shareQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
@@ -12896,21 +12922,43 @@ function parseQuestObjectives(
 
 function parseQuestRewards(
   raw: unknown,
-): { gold?: number; experience?: number; credit?: number; items?: Array<{ name: string; count?: number }> } | undefined {
+): QuestEntry["rewards"] | undefined {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
   const record = raw as Record<string, unknown>;
-  const items = Array.isArray(record.items)
-    ? (record.items as unknown[]).flatMap((entry) => {
-        const itemRecord = (entry ?? {}) as Record<string, unknown>;
-        const name = typeof itemRecord.name === "string" ? itemRecord.name : "";
-        return name ? [{ name, count: questNumber(itemRecord.count) }] : [];
-      })
-    : undefined;
+  const parseItems = (value: unknown, selectable: boolean) => {
+    if (!Array.isArray(value)) return undefined;
+    const parsed = value.flatMap((entry) => {
+      const itemRecord = (entry ?? {}) as Record<string, unknown>;
+      const name = typeof itemRecord.name === "string" ? itemRecord.name : "";
+      if (!name) return [];
+      return [{
+        name,
+        count: questNumber(itemRecord.count),
+        icon: questNumber(itemRecord.icon),
+        itemIndex: questNumber(itemRecord.itemIndex),
+        ...(selectable
+          ? {
+              selectable: true,
+              selectionIndex: questNumber(itemRecord.selectionIndex),
+            }
+          : {}),
+      }];
+    });
+    return parsed.length > 0 ? parsed : undefined;
+  };
+  const items = parseItems(record.items, false);
+  const selectItems = parseItems(record.selectItems, true);
   const gold = questNumber(record.gold);
   const experience = questNumber(record.experience);
   const credit = questNumber(record.credit);
-  if (gold === undefined && experience === undefined && credit === undefined && !items) return undefined;
-  return { gold, experience, credit, items };
+  if (
+    gold === undefined
+    && experience === undefined
+    && credit === undefined
+    && !items
+    && !selectItems
+  ) return undefined;
+  return { gold, experience, credit, items, selectItems };
 }
 
 function upsertEntityInList(list: WorldEntity[], nextEntity: WorldEntity) {

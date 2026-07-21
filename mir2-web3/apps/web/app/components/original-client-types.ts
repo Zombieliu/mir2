@@ -213,6 +213,7 @@ export type DisplayQuest = {
   current: number;
   required: number;
   rewardPreview: string;
+  tracked?: boolean;
 };
 
 export type DisplayKnownSkill = {

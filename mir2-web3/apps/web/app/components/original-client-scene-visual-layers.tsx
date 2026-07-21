@@ -3,11 +3,13 @@
 import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
-import type { EffectAssets } from "../../lib/crystal-magic-effects";
+import type { EffectAnimation, EffectAssets } from "../../lib/crystal-magic-effects";
 import { loadEffectAssets } from "../../lib/crystal-magic-effects";
 import {
   collectResolvedSceneEffectFrames,
   CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
+  crystalSceneEffectLayerOffset,
+  sceneEffectAnimationAssetUrls,
 } from "../../lib/scene-effect-runtime";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import {
@@ -270,6 +272,53 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
 // the data-driven CSS fallback (lib/vfx-fallback) instead — so casting / skills are visibly
 // reactive rather than inert. The loader is memoised at module scope so it never refetches.
 let effectAssetsPromise: Promise<EffectAssets> | null = null;
+const decodedSceneEffectFrameUrls = new Set<string>();
+const sceneEffectFrameDecodePromises = new Map<string, Promise<boolean>>();
+const SCENE_EFFECT_FRAME_DECODE_CACHE_LIMIT = 256;
+
+function decodeSceneEffectFrame(url: string): Promise<boolean> {
+  if (decodedSceneEffectFrameUrls.has(url)) return Promise.resolve(true);
+  const cached = sceneEffectFrameDecodePromises.get(url);
+  if (cached) return cached;
+
+  const promise = new Promise<boolean>((resolve) => {
+    const image = new Image();
+    let settled = false;
+    const finish = (loaded: boolean) => {
+      if (settled) return;
+      settled = true;
+      if (loaded) decodedSceneEffectFrameUrls.add(url);
+      resolve(loaded);
+    };
+    const finishLoaded = () => {
+      if (typeof image.decode !== "function") {
+        finish(image.naturalWidth > 0);
+        return;
+      }
+      void image
+        .decode()
+        .then(() => finish(image.naturalWidth > 0))
+        .catch(() => finish(image.naturalWidth > 0));
+    };
+    image.onload = finishLoaded;
+    image.onerror = () => finish(false);
+    image.decoding = "async";
+    image.src = url;
+    if (image.complete) finishLoaded();
+  });
+
+  sceneEffectFrameDecodePromises.set(url, promise);
+  void promise.then((loaded) => {
+    if (!loaded) sceneEffectFrameDecodePromises.delete(url);
+  });
+  while (sceneEffectFrameDecodePromises.size > SCENE_EFFECT_FRAME_DECODE_CACHE_LIMIT) {
+    const oldest = sceneEffectFrameDecodePromises.keys().next().value as string | undefined;
+    if (!oldest) break;
+    sceneEffectFrameDecodePromises.delete(oldest);
+  }
+  return promise;
+}
+
 function loadEffectAssetsOnce(): Promise<EffectAssets> {
   if (!effectAssetsPromise) {
     effectAssetsPromise = loadEffectAssets().catch(
@@ -493,6 +542,40 @@ function OriginalClientSceneVisualLayersInner({
     world.effects,
     motionNow,
   );
+  const persistentEffectAssetUrls = Array.from(
+    new Set(
+      resolvedEffectFrames.flatMap(({ effect, animation }) =>
+        effect.source === "spell" ? [] : sceneEffectAnimationAssetUrls(animation),
+      ),
+    ),
+  );
+  const persistentEffectAssetKey = persistentEffectAssetUrls.slice().sort().join("\n");
+  const [readyPersistentEffectAssetKey, setReadyPersistentEffectAssetKey] = useState("");
+  useEffect(() => {
+    if (!persistentEffectAssetKey) {
+      setReadyPersistentEffectAssetKey("");
+      return;
+    }
+    if (persistentEffectAssetUrls.every((url) => decodedSceneEffectFrameUrls.has(url))) {
+      setReadyPersistentEffectAssetKey(persistentEffectAssetKey);
+      return;
+    }
+
+    let cancelled = false;
+    void Promise.all(persistentEffectAssetUrls.map(decodeSceneEffectFrame)).then(() => {
+      if (!cancelled) setReadyPersistentEffectAssetKey(persistentEffectAssetKey);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // The sorted key is a complete value signature for the captured URL list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persistentEffectAssetKey]);
+  const persistentEffectsReady =
+    !persistentEffectAssetKey || readyPersistentEffectAssetKey === persistentEffectAssetKey;
+  const displayResolvedEffectFrames = persistentEffectsReady
+    ? resolvedEffectFrames
+    : resolvedEffectFrames.filter(({ effect }) => effect.source === "spell");
   const spellByCaster = new Map<string, string>();
   for (const resolved of resolvedEffectFrames) {
     if (resolved.effect.source === "spell" && resolved.effect.objectId) {
@@ -764,7 +847,7 @@ function OriginalClientSceneVisualLayersInner({
         className={`viewport-effect-overlay ${screen !== "game" ? "hidden" : ""}`}
         aria-hidden="true"
       >
-        {resolvedEffectFrames.map(({ effect, animation, frame }) => {
+        {displayResolvedEffectFrames.map(({ effect, animation, frame }) => {
           const anchor = effect.objectId
             ? viewportEntitySprites.find(({ entity }) => entity.objectId === effect.objectId)?.entity
             : undefined;
@@ -830,7 +913,7 @@ function OriginalClientSceneVisualLayersInner({
                     worldX,
                     worldY,
                     viewportDepthPlayer,
-                    effect.source === "map" ? 48 : effect.source === "spell" ? 90 : 72,
+                    crystalSceneEffectLayerOffset(effect.source),
                   ),
                 }}
               />
@@ -870,7 +953,12 @@ function OriginalClientSceneVisualLayersInner({
                     height: frame.maskHeight ?? frame.height,
                     mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
                     pointerEvents: "none",
-                    zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 91),
+                    zIndex: viewportDepthForCell(
+                      worldX,
+                      worldY,
+                      viewportDepthPlayer,
+                      crystalSceneEffectLayerOffset(effect.source, true),
+                    ),
                   }}
                 />
               ) : null}

@@ -1,8 +1,8 @@
 use bevy_ecs::{component::Component, entity::Entity, prelude::World, query::With};
 use mir2_game_data::{
-    crystal_drop_table_for_monster_name, crystal_item_by_name, format_localized_text,
-    starter_server_data, CrystalDropEntry, CrystalItemTemplate, CrystalRandomItemStatProfile,
-    CrystalRandomStatRoll, DropTemplate, QuestTemplate,
+    crystal_drop_table_for_monster_name, crystal_item_by_name, crystal_monster_by_name,
+    format_localized_text, starter_server_data, CrystalDropEntry, CrystalItemTemplate,
+    CrystalRandomItemStatProfile, CrystalRandomStatRoll, DropTemplate, QuestTemplate,
 };
 use mir2_protocol::{ChatType, MirDirection, ObjectGoldInfo, Point, ServerPacket, UserItemStat};
 
@@ -422,12 +422,56 @@ pub(super) fn deterministic_drop_ratio_roll(
         return true;
     }
 
-    deterministic_roll(
-        current_tick,
-        usize::try_from(object_id).expect("object id should fit usize"),
-        usize::try_from(salt).expect("drop salt should fit usize"),
-        u64::from(denominator),
-    ) < u64::from(numerator)
+    deterministic_drop_roll(current_tick, object_id, salt, u64::from(denominator))
+        < u64::from(numerator)
+}
+
+fn deterministic_drop_roll(current_tick: u64, object_id: u32, salt: u64, modulo: u64) -> u64 {
+    if modulo == 0 {
+        return 0;
+    }
+
+    // Avalanche the replay-stable inputs before reducing them. The previous linear
+    // expression preserved low-bit parity, so fixed-cadence harvest loops could make
+    // every 1/2 quest drop fail even though each individual roll looked valid.
+    let mut value = current_tick
+        .wrapping_add(u64::from(object_id).wrapping_mul(0x9E37_79B9_7F4A_7C15))
+        .wrapping_add(salt.wrapping_mul(0xBF58_476D_1CE4_E5B9));
+    value = (value ^ (value >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    (value ^ (value >> 31)) % modulo
+}
+
+#[cfg(test)]
+mod deterministic_drop_tests {
+    use super::{deterministic_drop_ratio_roll, deterministic_drop_roll};
+
+    #[test]
+    fn half_chance_roll_does_not_lock_to_fixed_tick_object_parity() {
+        let outcomes = (0_u64..128)
+            .map(|step| {
+                deterministic_drop_ratio_roll(
+                    step * 8,
+                    200_000 + u32::try_from(step * 2).expect("test id should fit u32"),
+                    1,
+                    1,
+                    2,
+                )
+            })
+            .collect::<Vec<_>>();
+        let successes = outcomes.iter().filter(|outcome| **outcome).count();
+
+        assert!(successes > 32, "successes={successes}");
+        assert!(successes < 96, "successes={successes}");
+    }
+
+    #[test]
+    fn deterministic_drop_roll_is_stable_and_bounded() {
+        let first = deterministic_drop_roll(42, 9_001, 7, 13);
+        assert_eq!(first, deterministic_drop_roll(42, 9_001, 7, 13));
+        assert!(first < 13);
+        assert_eq!(deterministic_drop_roll(42, 9_001, 7, 0), 0);
+    }
 }
 
 pub(super) fn crystal_drop_gold_amount(
@@ -1624,6 +1668,24 @@ pub(super) fn handle_monster_defeat(
     let suppress_drops = yimoogi_has_living_sister(world, entity);
     let map_disallows_monster_drop = current_map_disallows_monster_drop(world);
     let position = entity_position(world, entity).expect("monster position");
+
+    // This handler is only reached for a player-owned defeat action. Generic
+    // monster death must not advance the local player's quest (nearby NPC or
+    // monster combat can kill the same species without player ownership).
+    packets.extend(advance_crystal_quest_kill(world, monster_name));
+
+    // Shared-zone combat awards experience through the gateway transaction. This
+    // handler is the equivalent ownership boundary for personal-session combat.
+    if let Some(experience) = crystal_monster_by_name(monster_name)
+        .map(|monster| monster.experience)
+        .filter(|experience| *experience > 0)
+    {
+        let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
+        packets.extend(super::leveling::apply_experience_gain(
+            world,
+            i64::from(experience),
+        ));
+    }
 
     if harvests_drops {
         if let Some(player) = player_entity(world) {

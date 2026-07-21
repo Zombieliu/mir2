@@ -31,6 +31,7 @@ export type ObjectiveTrackerQuest = GuideQuestLike & {
   progressLabel?: string;
   current?: number;
   required?: number;
+  tracked?: boolean;
 };
 
 export type ObjectiveTrackerProps = {
@@ -55,8 +56,14 @@ export function ObjectiveTracker({ questLog, playerClass }: ObjectiveTrackerProp
     setEnabled(objectiveTrackerExplicitlyEnabled());
   }, []);
 
-  const quest = useMemo(() => activeGuideQuest(questLog ?? null), [questLog]);
-  if (!enabled) return null;
+  const quest = useMemo(
+    () => questLog?.find((entry) => entry.tracked && entry.stage !== "completed")
+      ?? activeGuideQuest(questLog ?? null)
+      ?? questLog?.find((entry) => entry.stage === "inProgress" || entry.stage === "readyToTurnIn")
+      ?? null,
+    [questLog],
+  );
+  if (!enabled && !quest?.tracked) return null;
   if (!quest) return null;
 
   const stageLabel = STAGE_LABEL[quest.stage] ?? "Current Objective";

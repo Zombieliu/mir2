@@ -8907,7 +8907,7 @@ fn zone_update_player_combat_stats_promotes_to_authoritative_damage() {
 #[test]
 fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
     // A monster present in the Crystal combat manifest deals its authoritative
-    // melee damage (CaveMaggot max_dc = 8), not the old fixed placeholder.
+    // melee damage (CaveMaggot DC = 6..=8), not the old fixed placeholder.
     let mut zone = zone();
     let first = session("first");
     let mut spawn = native_monster_spawn(9300, 331, 270);
@@ -8929,7 +8929,7 @@ fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
     assert!(hit.iter().any(|outbound| matches!(
         outbound,
         ZoneOutbound::PlayerDamaged { session_id, damage }
-            if session_id == &first && *damage == 8
+            if session_id == &first && (6..=8).contains(damage)
     )));
 }
 
@@ -8966,6 +8966,41 @@ fn zone_player_base_armour_mitigates_incoming_monster_melee() {
         packet,
         ServerPacket::DamageIndicator { object_id, damage, .. }
             if *object_id == 101 && *damage == 2
+    )));
+}
+
+#[test]
+fn zone_starter_armour_can_fully_block_scarecrow_damage() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_ac: 2,
+            max_ac: 2,
+            ..Default::default()
+        },
+    )));
+    let mut scarecrow = native_monster_spawn(9301, 331, 270);
+    scarecrow.name = "Scarecrow".to_string();
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: scarecrow,
+        now_ms: 0,
+    });
+
+    assert!(has_packet(&zone.tick(0), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 9301
+    )));
+    let hit = zone.tick(600);
+    assert!(!hit.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::PlayerDamaged { session_id, .. } if session_id == &first
     )));
 }
 

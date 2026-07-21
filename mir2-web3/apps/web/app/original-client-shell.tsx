@@ -855,14 +855,14 @@ export function OriginalClientShell({
         return;
       }
 
-      if (selectedEntity && !selectedEntity.dead) {
+      if (selectedEntity) {
         if (event.key === " " || event.key === "Enter") {
           event.preventDefault();
           onPrimaryTargetAction();
           return;
         }
 
-        if (event.key.toLowerCase() === "f") {
+        if (!selectedEntity.dead && event.key.toLowerCase() === "f") {
           event.preventDefault();
           onApproachTarget();
           return;

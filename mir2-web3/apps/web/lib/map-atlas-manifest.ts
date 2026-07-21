@@ -68,7 +68,9 @@ export function loadMapAtlasIndex(): Promise<MapAtlasIndex | null> {
   }
   manifestPromise = (async () => {
     try {
-      const response = await fetch(MAP_ATLAS_MANIFEST_URL, { cache: "force-cache" });
+      // The URL is stable while atlas coordinates change whenever the pack is
+      // regenerated. Revalidate it so rects cannot outlive their matching PNG.
+      const response = await fetch(MAP_ATLAS_MANIFEST_URL, { cache: "no-cache" });
       if (!response.ok) {
         return null;
       }

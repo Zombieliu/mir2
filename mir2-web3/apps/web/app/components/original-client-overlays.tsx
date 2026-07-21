@@ -20,6 +20,7 @@ import {
   type Mir2Language,
 } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import { formatCrystalExperiencePercent } from "../../lib/extended-server-packets";
 import { playOriginalSoundId } from "../../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
@@ -752,7 +753,7 @@ export function MainHud({
           {world.inSafeZone ? ` ${t("ui.safeZone", [], "Safe Zone")}` : ""}
         </div>
         {buffLabel ? <div className="hud-buff-label">{buffLabel}</div> : null}
-        <div className="hud-exp-label">{`${experienceRatio.toFixed(2).replace(/^0/, "") === ".00" ? "0.00" : (experienceRatio * 100).toFixed(2)}%`}</div>
+        <div className="hud-exp-label">{formatCrystalExperiencePercent(experienceRatio)}</div>
         <div className="hud-gold-label">{connected ? formatCrystalMainHudGold(world.gold) : "0"}</div>
         <div className="hud-weight-label">{remainingBagWeight}</div>
         <div className="hud-space-label">{crystalFreeSlots}</div>

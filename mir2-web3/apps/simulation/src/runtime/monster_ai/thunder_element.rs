@@ -83,6 +83,7 @@ pub(in crate::runtime) fn update_thunder_element_state(
 
     let damage = monster_player_attack_damage(
         world,
+        attacker_id,
         &monster_name,
         agent,
         &attack_position,

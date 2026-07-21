@@ -1,5 +1,19 @@
 # Backend 1:1 Progress
 
+> Latest original Bichon q1-q9 backend sync: 2026-07-18 completes an exact
+> fresh-Warrior route from Assistant Jane through MirGuide Peter and naturally
+> reaches level 6. The runtime now matches Crystal's task counts, prerequisites,
+> q1-q9 XP/gold, fixed items, q3/q6 mandatory class reward selection, Q-drop
+> semantics, monster EXP, and real equipment template stats. Quest progression
+> is attached to the player-owned death boundary, including direct skills and
+> player poison, so ambient/NPC damage cannot grant kill credit or EXP. The
+> release integration test proves all nine quests complete, level 6 with the
+> next 900 EXP band active, exact reward retention, and exact gold after its
+> declared potion purchases. Focused ownership, reward-parser, equipment,
+> combat, harvest, Gateway reward-contract, and Web packet/UI suites pass;
+> `cargo check --workspace` and the Next production build also pass. This
+> supersedes the older q1-q4/q5-available backend checkpoint below.
+
 > Latest NPC name-colour packet consistency sync: 2026-07-18 removes a
 > duplicate production-path conflict for Crystal NPCs. Initial manifest
 > `ObjectNpc` and `WorldEntitySnapshot` already emitted Crystal Lime

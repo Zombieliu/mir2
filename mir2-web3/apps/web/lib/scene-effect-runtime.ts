@@ -14,6 +14,34 @@ import type { DisplaySceneEffect } from "../app/components/original-client-types
 // direct bounded equivalent once additive source texels are alpha-normalized.
 export const CRYSTAL_ADDITIVE_MIX_BLEND_MODE = "plus-lighter" as const;
 
+const CRYSTAL_GROUND_EFFECT_LAYER_OFFSET = 48;
+const CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET = 90;
+
+/**
+ * Crystal sorts persistent ObjectSpell instances before actors in each map
+ * cell. Keep their optional mask adjacent to the body without lifting either
+ * above the entity layer (64).
+ */
+export function crystalSceneEffectLayerOffset(
+  source: DisplaySceneEffect["source"],
+  mask = false,
+): number {
+  const base = source === "spell"
+    ? CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET
+    : CRYSTAL_GROUND_EFFECT_LAYER_OFFSET;
+  return base + (mask ? 1 : 0);
+}
+
+export function sceneEffectAnimationAssetUrls(animation: EffectAnimation): string[] {
+  return Array.from(
+    new Set(
+      animation.frames.flatMap((frame) =>
+        frame.maskPath ? [frame.path, frame.maskPath] : [frame.path],
+      ),
+    ),
+  );
+}
+
 export type ResolvedSceneEffectFrame = {
   effect: DisplaySceneEffect;
   animation: EffectAnimation;

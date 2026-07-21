@@ -1,5 +1,6 @@
 use mir2_protocol::{
-    ChatType, ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket, Spell,
+    ChatType, ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point, ServerPacket,
+    Spell,
 };
 use mir2_simulation::{
     AccountRecord, CharacterRecord, CharacterSaveRecord, EquipmentSlot, GroundDropLootSnapshot,
@@ -64,6 +65,39 @@ fn start_character(
                 } if *resolution > 0
             )
         }),
+        "start packets: {packets:?}"
+    );
+    session
+}
+
+fn start_character_with_config(
+    account_id: &str,
+    config: SimulationConfig,
+    character: CharacterRecord,
+    save: CharacterSaveRecord,
+) -> SimulationSession {
+    let character_index = character.index;
+    let mut account = AccountRecord::empty();
+    account.characters.push(character.clone());
+    account.saves.insert(character.index, save);
+    config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .insert(account_id.to_string(), account);
+
+    let mut session = SimulationSession::new(config);
+    login(&mut session, account_id);
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index });
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::StartGame {
+                result: 4,
+                resolution
+            } if *resolution > 0
+        )),
         "start packets: {packets:?}"
     );
     session
@@ -285,16 +319,41 @@ fn position_player_left_of_target(
 }
 
 fn start_original_bichon_intro_session() -> SimulationSession {
-    let (character, mut save) =
-        combat_save_at_level(MirClass::Wizard, MirGender::Female, 7, &["FireBall"], &[]);
-    save.map_file_name = "0".to_string();
-    save.map_title = "BichonProvince".to_string();
-    save.position = Point { x: 283, y: 606 };
-    save.direction = MirDirection::DownRight;
-    save.max_hp = save.max_hp.max(120);
-    save.hp = save.max_hp;
-    save.mp = save.mp.max(500);
-    start_character("slice-bichon-original-intro", character, save)
+    let account_id = "slice-bichon-original-intro";
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .insert(account_id.to_string(), AccountRecord::empty());
+
+    let mut session = SimulationSession::new(config);
+    login(&mut session, account_id);
+    let create_packets = session.handle_packet(ClientPacket::NewCharacter {
+        name: "NewBlade".to_string(),
+        gender: MirGender::Male,
+        class: MirClass::Warrior,
+    });
+    let character_index = create_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+            _ => None,
+        })
+        .unwrap_or_else(|| panic!("fresh warrior should be created: {create_packets:?}"));
+    let start_packets = session.handle_packet(ClientPacket::StartGame { character_index });
+    assert!(
+        start_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::StartGame {
+                result: 4,
+                resolution
+            } if *resolution > 0
+        )),
+        "fresh warrior should enter the Crystal world: {start_packets:?}"
+    );
+    session
 }
 
 fn quest_snapshot(
@@ -344,24 +403,26 @@ fn visible_alive_monster_named(
     session: &SimulationSession,
     monster_name_prefix: &str,
 ) -> Option<mir2_simulation::WorldEntitySnapshot> {
-    session
-        .world_snapshot()
+    let snapshot = session.world_snapshot();
+    let (player_x, player_y) = snapshot
         .entities
-        .into_iter()
-        .find(|entity| {
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .map(|entity| (entity.x, entity.y))?;
+
+    let hostiles = snapshot
+        .entities
+        .iter()
+        .filter(|entity| {
             entity.kind == WorldEntityKind::Monster
+                && entity.disposition == mir2_simulation::WorldEntityDisposition::Hostile
                 && !entity.dead
-                && entity.name.starts_with(monster_name_prefix)
                 && entity.hp.unwrap_or(1) > 0
         })
-}
+        .map(|entity| (entity.object_id, entity.x, entity.y))
+        .collect::<Vec<_>>();
 
-fn visible_alive_monsters_named(
-    session: &SimulationSession,
-    monster_name_prefix: &str,
-) -> Vec<mir2_simulation::WorldEntitySnapshot> {
-    session
-        .world_snapshot()
+    snapshot
         .entities
         .into_iter()
         .filter(|entity| {
@@ -370,31 +431,16 @@ fn visible_alive_monsters_named(
                 && entity.name.starts_with(monster_name_prefix)
                 && entity.hp.unwrap_or(1) > 0
         })
-        .collect()
-}
-
-fn visible_original_q_drop_candidate(
-    session: &SimulationSession,
-    monster_name_prefix: &str,
-    drop_entry_salt: u32,
-    denominator: u32,
-) -> Option<mir2_simulation::WorldEntitySnapshot> {
-    visible_alive_monsters_named(session, monster_name_prefix)
-        .into_iter()
-        .find(|entity| {
-            deterministic_drop_ratio_for_test(entity.object_id, drop_entry_salt, denominator) == 0
+        .max_by_key(|entity| {
+            let nearest_hostile = hostiles
+                .iter()
+                .filter(|(object_id, _, _)| *object_id != entity.object_id)
+                .map(|(_, x, y)| (x - entity.x).abs().max((y - entity.y).abs()))
+                .min()
+                .unwrap_or(i32::MAX);
+            let player_distance = (entity.x - player_x).abs().max((entity.y - player_y).abs());
+            (nearest_hostile, -player_distance)
         })
-}
-
-fn deterministic_drop_ratio_for_test(object_id: u32, entry_salt: u32, denominator: u32) -> u32 {
-    if denominator == 0 {
-        return 0;
-    }
-    let salt = u64::from(object_id)
-        .wrapping_mul(97_651)
-        .wrapping_add(u64::from(entry_salt).wrapping_mul(12_347))
-        .wrapping_add(0x9E37_79B9);
-    (salt % u64::from(denominator)) as u32
 }
 
 fn attack_monster_until_dead(
@@ -404,6 +450,7 @@ fn attack_monster_until_dead(
     let mut packets = Vec::new();
 
     for _ in 0..48 {
+        packets.extend(use_newcomer_hp_drug_if_needed(session));
         let Some(current_monster) = session
             .world_snapshot()
             .entities
@@ -428,10 +475,249 @@ fn attack_monster_until_dead(
         let direction = direction_from_to(player_position.clone(), monster_position);
         session.force_authoritative_player_transform(player_position, direction);
 
-        packets.extend(session.attack(current_monster.object_id));
-        packets.extend(tick_many(session, 6));
+        let attack_packets = session.attack(current_monster.object_id);
+        let defeated = attack_packets.iter().any(|packet| {
+            matches!(packet, ServerPacket::ObjectDied { info } if info.object_id == monster.object_id)
+        });
+        packets.extend(attack_packets);
+        if defeated {
+            break;
+        }
     }
 
+    packets.extend(session.tick());
+
+    packets
+}
+
+fn use_newcomer_hp_drug_if_needed(session: &mut SimulationSession) -> Vec<ServerPacket> {
+    let snapshot = session.world_snapshot();
+    let (Some(hp), Some(max_hp)) = (snapshot.player_hp, snapshot.player_max_hp) else {
+        return Vec::new();
+    };
+    if hp <= 0 || hp.saturating_mul(2) > max_hp {
+        return Vec::new();
+    }
+    let potion = snapshot
+        .inventory_items
+        .iter()
+        .find(|item| item.name.starts_with("(HP)Drug"))
+        .map(|item| (item, MirGridType::Inventory))
+        .or_else(|| {
+            snapshot
+                .belt_items
+                .iter()
+                .find(|item| item.name.starts_with("(HP)Drug"))
+                .map(|item| (item, MirGridType::Belt))
+        });
+    let Some((potion, grid)) = potion else {
+        return Vec::new();
+    };
+
+    let mut packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: potion.unique_id,
+        grid,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UseItem { success: true, .. })));
+    packets.extend(tick_many(session, 3));
+    packets
+}
+
+fn assert_newcomer_alive(session: &SimulationSession, context: &str) {
+    let snapshot = session.world_snapshot();
+    let player = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer);
+    assert!(
+        snapshot.player_hp.is_some_and(|hp| hp > 0),
+        "newcomer died while {context}: hp={:?}/{:?}, player={player:?}",
+        snapshot.player_hp,
+        snapshot.player_max_hp,
+    );
+}
+
+fn assert_crystal_monster_experience(monster_name: &str, packets: &[ServerPacket]) {
+    let expected = mir2_game_data::crystal_monster_by_name(monster_name)
+        .unwrap_or_else(|| panic!("Crystal monster {monster_name} should exist"))
+        .experience;
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainExperience { amount } if *amount == expected
+        )),
+        "defeating {monster_name} should grant {expected} EXP: {packets:?}"
+    );
+}
+
+fn newcomer_cumulative_experience(session: &SimulationSession) -> i64 {
+    const THRESHOLDS: [i64; 6] = [100, 200, 300, 400, 600, 900];
+    let snapshot = session.world_snapshot();
+    let level = self_player(session).level.unwrap_or(1).max(1);
+    THRESHOLDS
+        .iter()
+        .take(usize::from(level.saturating_sub(1)))
+        .sum::<i64>()
+        .saturating_add(snapshot.player_experience)
+}
+
+fn kill_original_monsters(
+    session: &mut SimulationSession,
+    field_key: &str,
+    field_centers: &[Point],
+    monster_name_prefix: &str,
+    count: usize,
+) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    if let Some(field_center) = field_centers.first() {
+        packets.extend(session.transfer_map(&format!(
+            "crystal:{field_key}:{}:{}",
+            field_center.x, field_center.y
+        )));
+    }
+
+    for kill_index in 0..count {
+        packets.extend(use_newcomer_hp_drug_if_needed(session));
+        assert_newcomer_alive(
+            session,
+            &format!("hunting {monster_name_prefix} #{kill_index}"),
+        );
+        let mut monster = visible_alive_monster_named(session, monster_name_prefix);
+        if monster.is_none() {
+            for field_center in field_centers {
+                packets.extend(session.transfer_map(&format!(
+                    "crystal:{field_key}:{}:{}",
+                    field_center.x, field_center.y
+                )));
+                monster = visible_alive_monster_named(session, monster_name_prefix);
+                if monster.is_some() {
+                    break;
+                }
+            }
+        }
+        let monster = monster.unwrap_or_else(|| {
+            panic!("{monster_name_prefix} #{kill_index} should spawn near {field_centers:?}")
+        });
+        let before = session.world_snapshot();
+        let nearby = before
+            .entities
+            .iter()
+            .filter(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && !entity.dead
+                    && (entity.x - monster.x)
+                        .abs()
+                        .max((entity.y - monster.y).abs())
+                        <= 8
+            })
+            .map(|entity| {
+                format!(
+                    "{}#{}@{},{} hp={:?}",
+                    entity.name, entity.object_id, entity.x, entity.y, entity.hp
+                )
+            })
+            .collect::<Vec<_>>();
+        let object_id = monster.object_id;
+        let kill_packets = attack_monster_until_dead(session, &monster);
+        assert!(
+            kill_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectDied { info } if info.object_id == object_id
+            )) || session
+                .world_snapshot()
+                .entities
+                .iter()
+                .any(|entity| entity.object_id == object_id && entity.dead),
+            "{monster_name_prefix} #{kill_index} should die: {kill_packets:?}"
+        );
+        assert_crystal_monster_experience(&monster.name, &kill_packets);
+        packets.extend(kill_packets);
+        assert_newcomer_alive(
+            session,
+            &format!(
+                "after hunting {monster_name_prefix} #{kill_index}; target={}@{},{}; before_hp={:?}/{:?}; nearby={nearby:?}",
+                monster.object_id,
+                monster.x,
+                monster.y,
+                before.player_hp,
+                before.player_max_hp
+            ),
+        );
+    }
+
+    packets
+}
+
+fn equip_inventory_item_by_name(session: &mut SimulationSession, name: &str, to: i32) {
+    let item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.name == name)
+        .unwrap_or_else(|| panic!("{name} should be in inventory before equip"));
+    let packets = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: item.unique_id,
+        to,
+    });
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. })),
+        "equipping {name} should succeed: {packets:?}"
+    );
+}
+
+fn buy_original_small_hp_drugs(session: &mut SimulationSession, count: u16) -> Vec<ServerPacket> {
+    let mut packets = session.transfer_map("crystal:0:323:291");
+    packets.extend(open_original_npc_dialog(
+        session,
+        20,
+        Point { x: 323, y: 291 },
+        MirDirection::Right,
+        "@BuySell",
+    ));
+    let goods_packets = session.select_npc_dialog_target("@BuySell");
+    let shop_unique_id = goods_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NPCGoods { list, .. } => list
+                .iter()
+                .find(|item| item.item_index == 658 && item.count == 1)
+                .map(|item| item.unique_id),
+            _ => None,
+        })
+        .expect("Bichon potion shop should sell one-count (HP)DrugSmall");
+    packets.extend(goods_packets);
+
+    let buy_packets = session.handle_packet(ClientPacket::BuyItem {
+        item_index: shop_unique_id,
+        count,
+        panel_type: 0,
+    });
+    assert!(buy_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { gold } if *gold == u32::from(count) * 40
+    )));
+    assert!(buy_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { item } if item.item_index == 658 && item.count == count
+    )));
+    packets.extend(buy_packets);
+    let snapshot = session.world_snapshot();
+    let carried = snapshot
+        .belt_items
+        .into_iter()
+        .chain(snapshot.inventory_items)
+        .filter(|item| item.name == "(HP)DrugSmall")
+        .map(|item| item.quantity)
+        .sum::<u32>();
+    assert!(
+        carried >= u32::from(count),
+        "purchased HP drugs must remain in belt or bag: carried={carried}, count={count}"
+    );
     packets
 }
 
@@ -441,11 +727,15 @@ fn progress_original_item_quest_from_monster(
     field_key: &str,
     field_centers: &[Point],
     monster_name_prefix: &str,
-    drop_entry_salt: u32,
-    drop_denominator: u32,
     max_kills: usize,
 ) -> Vec<ServerPacket> {
     let mut packets = Vec::new();
+    if let Some(field_center) = field_centers.first() {
+        packets.extend(session.transfer_map(&format!(
+            "crystal:{field_key}:{}:{}",
+            field_center.x, field_center.y
+        )));
+    }
 
     for _ in 0..max_kills {
         if quest_snapshot(session, quest_id).is_some_and(|quest| {
@@ -457,34 +747,27 @@ fn progress_original_item_quest_from_monster(
             break;
         }
 
-        let mut monster = visible_original_q_drop_candidate(
-            session,
-            monster_name_prefix,
-            drop_entry_salt,
-            drop_denominator,
-        );
+        packets.extend(use_newcomer_hp_drug_if_needed(session));
+        assert_newcomer_alive(session, &format!("hunting {monster_name_prefix}"));
+        let mut monster = visible_alive_monster_named(session, monster_name_prefix);
         if monster.is_none() {
             for field_center in field_centers {
                 packets.extend(session.transfer_map(&format!(
                     "crystal:{field_key}:{}:{}",
                     field_center.x, field_center.y
                 )));
-                monster = visible_original_q_drop_candidate(
-                    session,
-                    monster_name_prefix,
-                    drop_entry_salt,
-                    drop_denominator,
-                );
+                monster = visible_alive_monster_named(session, monster_name_prefix);
                 if monster.is_some() {
                     break;
                 }
             }
         }
         let monster = monster
-            .or_else(|| visible_alive_monster_named(session, monster_name_prefix))
             .unwrap_or_else(|| panic!("{monster_name_prefix} should spawn near {field_centers:?}"));
-        packets.extend(attack_monster_until_dead(session, &monster));
-        packets.extend(tick_many(session, 4));
+        let kill_packets = attack_monster_until_dead(session, &monster);
+        assert_crystal_monster_experience(&monster.name, &kill_packets);
+        packets.extend(kill_packets);
+        assert_newcomer_alive(session, &format!("after hunting {monster_name_prefix}"));
     }
 
     packets
@@ -515,7 +798,6 @@ fn harvest_monster_corpse_for_original_drop(
     let mut packets = Vec::new();
     for _ in 0..8 {
         packets.extend(session.handle_packet(ClientPacket::Harvest { direction }));
-        packets.extend(tick_many(session, 1));
     }
     packets
 }
@@ -526,11 +808,15 @@ fn progress_original_item_quest_from_harvest_monster(
     field_key: &str,
     field_centers: &[Point],
     monster_name_prefix: &str,
-    drop_entry_salt: u32,
-    drop_denominator: u32,
     max_kills: usize,
 ) -> Vec<ServerPacket> {
     let mut packets = Vec::new();
+    if let Some(field_center) = field_centers.first() {
+        packets.extend(session.transfer_map(&format!(
+            "crystal:{field_key}:{}:{}",
+            field_center.x, field_center.y
+        )));
+    }
 
     for _ in 0..max_kills {
         if quest_snapshot(session, quest_id).is_some_and(|quest| {
@@ -542,43 +828,36 @@ fn progress_original_item_quest_from_harvest_monster(
             break;
         }
 
-        let mut monster = visible_original_q_drop_candidate(
-            session,
-            monster_name_prefix,
-            drop_entry_salt,
-            drop_denominator,
-        );
+        packets.extend(use_newcomer_hp_drug_if_needed(session));
+        assert_newcomer_alive(session, &format!("hunting {monster_name_prefix}"));
+        let mut monster = visible_alive_monster_named(session, monster_name_prefix);
         if monster.is_none() {
             for field_center in field_centers {
                 packets.extend(session.transfer_map(&format!(
                     "crystal:{field_key}:{}:{}",
                     field_center.x, field_center.y
                 )));
-                monster = visible_original_q_drop_candidate(
-                    session,
-                    monster_name_prefix,
-                    drop_entry_salt,
-                    drop_denominator,
-                );
+                monster = visible_alive_monster_named(session, monster_name_prefix);
                 if monster.is_some() {
                     break;
                 }
             }
         }
         let monster = monster
-            .or_else(|| visible_alive_monster_named(session, monster_name_prefix))
             .unwrap_or_else(|| panic!("{monster_name_prefix} should spawn near {field_centers:?}"));
         let monster_position = Point {
             x: monster.x,
             y: monster.y,
         };
-        packets.extend(attack_monster_until_dead(session, &monster));
+        let kill_packets = attack_monster_until_dead(session, &monster);
+        assert_crystal_monster_experience(&monster.name, &kill_packets);
+        packets.extend(kill_packets);
+        assert_newcomer_alive(session, &format!("after hunting {monster_name_prefix}"));
         packets.extend(harvest_monster_corpse_for_original_drop(
             session,
             monster.object_id,
             monster_position,
         ));
-        packets.extend(tick_many(session, 2));
     }
 
     packets
@@ -778,7 +1057,15 @@ fn all_five_classes_create_into_crystal_empty_initial_state() {
         assert!(snapshot.inventory_items.is_empty());
         assert!(snapshot.belt_items.is_empty());
         assert!(snapshot.storage_items.is_empty());
-        assert!(snapshot.equipment_items.is_empty());
+        assert_eq!(snapshot.equipment_items.len(), 2);
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Armour));
         assert!(snapshot.quest_log.iter().all(|quest| {
             quest.stage == QuestStage::Available
                 && quest.current == 0
@@ -1505,8 +1792,98 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
 }
 
 #[test]
-fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops() {
+fn original_fresh_warrior_can_hunt_a_deer_with_starter_stats() {
     let mut session = start_original_bichon_intro_session();
+    let packets = kill_original_monsters(
+        &mut session,
+        "0",
+        &[Point { x: 247, y: 565 }, Point { x: 270, y: 625 }],
+        "Deer",
+        1,
+    );
+
+    assert_newcomer_alive(&session, "after first Deer hunt");
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id != 1_000
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 18 })));
+    assert!(session.world_snapshot().player_experience >= 18);
+}
+
+#[test]
+fn original_deer_harvest_q_drop_advances_quest_four() {
+    let (character, mut save) = combat_save_at_level(
+        MirClass::Warrior,
+        MirGender::Male,
+        45,
+        &[],
+        &[("SpiritBlade", EquipmentSlot::Weapon)],
+    );
+    save.map_file_name = "0".to_string();
+    save.map_title = "BichonProvince".to_string();
+    save.position = Point { x: 0, y: 0 };
+    save.quest_states_json = vec![json!({
+        "quest_id": 4,
+        "title": "Hunt for the Butcher",
+        "summary": "Collect DeerMeat by hunting Deer.",
+        "reward_preview": "EXP 80, Gold 20, OldCopperRing x1",
+        "required": 5,
+        "current": 0,
+        "stage": "inProgress",
+        "task_progress": {}
+    })
+    .to_string()];
+    let mut session = start_character_with_config(
+        "slice-bichon-deer-q-drop",
+        SimulationConfig::default().with_crystal_world_runtime(),
+        character,
+        save,
+    );
+    assert_quest_stage(&session, 4, QuestStage::InProgress);
+
+    let packets = progress_original_item_quest_from_harvest_monster(
+        &mut session,
+        4,
+        "0",
+        &[
+            Point { x: 210, y: 185 },
+            Point { x: 265, y: 125 },
+            Point { x: 310, y: 95 },
+            Point { x: 205, y: 325 },
+            Point { x: 260, y: 380 },
+            Point { x: 295, y: 625 },
+        ],
+        "Deer",
+        18,
+    );
+
+    assert_quest_stage(&session, 4, QuestStage::ReadyToTurnIn);
+    assert!(packets.iter().any(|packet| {
+        matches!(packet, ServerPacket::GainedItem { item } if item.item_index == 856)
+    }));
+    assert_eq!(
+        session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .filter(|item| item.name == "DeerMeat")
+            .map(|item| item.quantity)
+            .sum::<u32>(),
+        5
+    );
+}
+
+#[test]
+fn original_bichon_fresh_warrior_reaches_level_six_through_quests_1_to_9() {
+    let mut session = start_original_bichon_intro_session();
+    let initial_player = self_player(&session);
+    assert_eq!(initial_player.level, Some(1));
+    assert_eq!((initial_player.x, initial_player.y), (288, 616));
+    assert_eq!(session.world_snapshot().player_experience, 0);
+    assert_eq!(session.world_snapshot().player_max_experience, 100);
 
     assert_quest_stage(&session, 1, QuestStage::Available);
     open_original_npc_dialog(
@@ -1540,6 +1917,7 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         MirDirection::Right,
         "@quest:finish:1",
     );
+    let before_q1_reward_exp = newcomer_cumulative_experience(&session);
     let finish_q1 = session.select_npc_dialog_target("@quest:finish:1");
     assert!(
         finish_q1.iter().any(|packet| {
@@ -1550,6 +1928,11 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
             )
         }),
         "q1 finish packets: {finish_q1:?}"
+    );
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q1_reward_exp,
+        10,
+        "q1 hand-in must grant its original 10 EXP"
     );
     assert_quest_stage(&session, 1, QuestStage::Completed);
     assert_quest_stage(&session, 2, QuestStage::Available);
@@ -1578,24 +1961,49 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
     );
     assert_quest_stage(&session, 2, QuestStage::InProgress);
 
+    open_original_npc_dialog(
+        &mut session,
+        5,
+        Point { x: 295, y: 613 },
+        MirDirection::Right,
+        "@quest:accept:5",
+    );
+    let accept_q5 = session.select_npc_dialog_target("@quest:accept:5");
+    assert!(
+        accept_q5.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 5,
+                taken: true,
+                completed: false,
+                ..
+            }
+        )),
+        "q5 must be independently available at level 1: {accept_q5:?}"
+    );
+    assert_quest_stage(&session, 5, QuestStage::InProgress);
+    let q5_initial = quest_snapshot(&session, 5).expect("q5 should be tracked");
+    assert_eq!(
+        (q5_initial.current, q5_initial.required),
+        (0, 20),
+        "q5 must require 10 Deer plus 10 Scarecrow"
+    );
+
     let drop_packets = progress_original_item_quest_from_monster(
         &mut session,
         2,
         "0",
         &[
+            Point { x: 270, y: 625 },
+            Point { x: 293, y: 619 },
+            Point { x: 330, y: 530 },
             Point { x: 110, y: 60 },
             Point { x: 220, y: 60 },
             Point { x: 200, y: 400 },
             Point { x: 500, y: 400 },
             Point { x: 540, y: 530 },
-            Point { x: 283, y: 606 },
-            Point { x: 293, y: 619 },
-            Point { x: 270, y: 625 },
-            Point { x: 330, y: 530 },
         ],
         "Scarecrow",
-        18,
-        5,
         30,
     );
     let q2_ready = quest_snapshot(&session, 2).expect("q2 should stay visible");
@@ -1639,6 +2047,7 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         MirDirection::Right,
         "@quest:finish:2",
     );
+    let before_q2_reward_exp = newcomer_cumulative_experience(&session);
     let finish_q2 = session.select_npc_dialog_target("@quest:finish:2");
     assert!(
         finish_q2.iter().any(|packet| {
@@ -1649,6 +2058,11 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
             )
         }),
         "q2 finish packets: {finish_q2:?}"
+    );
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q2_reward_exp,
+        30,
+        "q2 hand-in must grant its original 30 EXP"
     );
     assert_quest_stage(&session, 2, QuestStage::Completed);
     assert_quest_stage(&session, 3, QuestStage::Available);
@@ -1684,7 +2098,32 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         MirDirection::Right,
         "@quest:finish:3",
     );
-    let finish_q3 = session.select_npc_dialog_target("@quest:finish:3");
+    let choose_q3_reward = session.select_npc_dialog_target("@quest:finish:3");
+    assert!(
+        !choose_q3_reward
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::CompleteQuest { .. })),
+        "q3 must not finish before a starter weapon is selected"
+    );
+    assert_quest_stage(&session, 3, QuestStage::ReadyToTurnIn);
+    let q3_reward_dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("q3 reward selection dialog");
+    assert!(q3_reward_dialog
+        .links
+        .iter()
+        .any(|link| link.target == "@quest:finish:3:0" && link.text.contains("SharpDagger")));
+    assert!(q3_reward_dialog
+        .links
+        .iter()
+        .any(|link| link.target == "@quest:finish:3:1" && link.text.contains("ToughHoaSword")));
+    assert!(q3_reward_dialog
+        .links
+        .iter()
+        .any(|link| link.target == "@quest:finish:3:2" && link.text.contains("StiffWoodenBow")));
+    let before_q3_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q3 = session.select_npc_dialog_target("@quest:finish:3:0");
     assert!(
         finish_q3.iter().any(|packet| {
             matches!(
@@ -1695,7 +2134,20 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         }),
         "q3 finish packets: {finish_q3:?}"
     );
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q3_reward_exp,
+        10,
+        "q3 hand-in must grant its original 10 EXP"
+    );
     assert_quest_stage(&session, 3, QuestStage::Completed);
+    assert!(session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.name == "SharpDagger"));
+    if self_player(&session).level.is_some_and(|level| level >= 2) {
+        equip_inventory_item_by_name(&mut session, "SharpDagger", 0);
+    }
     assert_quest_stage(&session, 4, QuestStage::Available);
 
     open_original_npc_dialog(
@@ -1727,29 +2179,27 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         4,
         "0",
         &[
+            Point { x: 273, y: 614 },
+            Point { x: 247, y: 565 },
+            Point { x: 270, y: 625 },
+            Point { x: 295, y: 625 },
+            Point { x: 340, y: 550 },
             Point { x: 210, y: 185 },
             Point { x: 265, y: 125 },
             Point { x: 310, y: 95 },
             Point { x: 205, y: 325 },
             Point { x: 260, y: 380 },
-            Point { x: 295, y: 625 },
         ],
         "Deer",
-        1,
-        2,
         18,
     );
     let q4_ready = quest_snapshot(&session, 4).expect("q4 should stay visible");
-    if q4_ready.stage != QuestStage::ReadyToTurnIn {
-        assert!(
-            deer_packets
-                .iter()
-                .any(|packet| matches!(packet, ServerPacket::ObjectDied { .. })),
-            "Deer harvest loop should at least defeat deer while Q harvest drops are incomplete: {q4_ready:?}; packets={}",
-            deer_packets.len()
-        );
-        return;
-    }
+    assert_eq!(
+        q4_ready.stage,
+        QuestStage::ReadyToTurnIn,
+        "Deer harvest must produce all five DeerMeat items: {q4_ready:?}; packets={}",
+        deer_packets.len()
+    );
     assert!(
         deer_packets.iter().any(|packet| {
             matches!(
@@ -1770,6 +2220,7 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         MirDirection::Right,
         "@quest:finish:4",
     );
+    let before_q4_reward_exp = newcomer_cumulative_experience(&session);
     let finish_q4 = session.select_npc_dialog_target("@quest:finish:4");
     assert!(
         finish_q4.iter().any(|packet| {
@@ -1781,8 +2232,335 @@ fn original_bichon_level_1_to_10_intro_quest_chain_uses_npc_scripts_and_q_drops(
         }),
         "q4 finish packets: {finish_q4:?}"
     );
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q4_reward_exp,
+        80,
+        "q4 hand-in must grant its original 80 EXP"
+    );
     assert_quest_stage(&session, 4, QuestStage::Completed);
-    assert_quest_stage(&session, 5, QuestStage::Available);
+
+    const DEER_FIELDS: [Point; 6] = [
+        Point { x: 273, y: 614 },
+        Point { x: 210, y: 185 },
+        Point { x: 265, y: 125 },
+        Point { x: 205, y: 325 },
+        Point { x: 260, y: 380 },
+        Point { x: 295, y: 625 },
+    ];
+    const SCARECROW_FIELDS: [Point; 6] = [
+        Point { x: 110, y: 60 },
+        Point { x: 220, y: 60 },
+        Point { x: 200, y: 400 },
+        Point { x: 500, y: 400 },
+        Point { x: 330, y: 530 },
+        Point { x: 270, y: 625 },
+    ];
+    let mut q5_hunt_packets = Vec::new();
+    for _ in 0..20 {
+        if quest_snapshot(&session, 5).is_some_and(|quest| quest.stage == QuestStage::ReadyToTurnIn)
+        {
+            break;
+        }
+        q5_hunt_packets.extend(kill_original_monsters(
+            &mut session,
+            "0",
+            &DEER_FIELDS,
+            "Deer",
+            1,
+        ));
+        if quest_snapshot(&session, 5).is_some_and(|quest| quest.stage == QuestStage::ReadyToTurnIn)
+        {
+            break;
+        }
+        q5_hunt_packets.extend(kill_original_monsters(
+            &mut session,
+            "0",
+            &SCARECROW_FIELDS,
+            "Scarecrow",
+            1,
+        ));
+    }
+    assert_quest_stage(&session, 5, QuestStage::ReadyToTurnIn);
+    let deer_kills = deer_packets
+        .iter()
+        .chain(q5_hunt_packets.iter())
+        .filter(|packet| matches!(packet, ServerPacket::GainExperience { amount: 18 }))
+        .count();
+    let scarecrow_kills = drop_packets
+        .iter()
+        .chain(q5_hunt_packets.iter())
+        .filter(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 }))
+        .count();
+    assert!(
+        deer_kills >= 10 && scarecrow_kills >= 10,
+        "q5 cannot complete before 10 real kills of each target: Deer={deer_kills}, Scarecrow={scarecrow_kills}"
+    );
+
+    let _ = session.transfer_map("crystal:0:295:613");
+    open_original_npc_dialog(
+        &mut session,
+        5,
+        Point { x: 295, y: 613 },
+        MirDirection::Right,
+        "@quest:finish:5",
+    );
+    let before_q5_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q5 = session.select_npc_dialog_target("@quest:finish:5");
+    assert!(finish_q5.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&5)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q5_reward_exp,
+        120,
+        "q5 hand-in must grant its original 120 EXP"
+    );
+    assert_quest_stage(&session, 5, QuestStage::Completed);
+    assert_quest_stage(&session, 6, QuestStage::Available);
+
+    equip_inventory_item_by_name(&mut session, "GoldenPendant", 4);
+    equip_inventory_item_by_name(&mut session, "WornIronBracelet", 5);
+    equip_inventory_item_by_name(&mut session, "CopperRing", 7);
+    equip_inventory_item_by_name(&mut session, "OldCopperRing", 8);
+
+    let _ = buy_original_small_hp_drugs(&mut session, 6);
+
+    open_original_npc_dialog(
+        &mut session,
+        5,
+        Point { x: 295, y: 613 },
+        MirDirection::Right,
+        "@quest:accept:6",
+    );
+    let accept_q6 = session.select_npc_dialog_target("@quest:accept:6");
+    assert!(accept_q6.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 6,
+            taken: true,
+            completed: false,
+            ..
+        }
+    )));
+    const CAT_FIELDS: [Point; 5] = [
+        Point { x: 180, y: 420 },
+        Point { x: 110, y: 80 },
+        Point { x: 150, y: 130 },
+        Point { x: 340, y: 550 },
+        Point { x: 510, y: 410 },
+    ];
+    let _ = kill_original_monsters(&mut session, "0", &CAT_FIELDS, "HookingCat", 10);
+    assert_quest_stage(&session, 6, QuestStage::ReadyToTurnIn);
+
+    let _ = session.transfer_map("crystal:0:295:613");
+    open_original_npc_dialog(
+        &mut session,
+        5,
+        Point { x: 295, y: 613 },
+        MirDirection::Right,
+        "@quest:finish:6",
+    );
+    let choose_q6_reward = session.select_npc_dialog_target("@quest:finish:6");
+    assert!(!choose_q6_reward
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::CompleteQuest { .. })));
+    assert_quest_stage(&session, 6, QuestStage::ReadyToTurnIn);
+    let q6_reward_dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("q6 reward selection dialog");
+    assert!(q6_reward_dialog.links.iter().any(|link| {
+        link.target == "@quest:finish:6:0" && link.text.contains("BronzeWarriorSword")
+    }));
+    let before_q6_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q6 = session.select_npc_dialog_target("@quest:finish:6:0");
+    assert!(finish_q6.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&6)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q6_reward_exp,
+        150,
+        "q6 hand-in must grant its original 150 EXP"
+    );
+    assert_quest_stage(&session, 6, QuestStage::Completed);
+    assert!(session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.name == "BronzeWarriorSword"));
+    assert!(self_player(&session).level.is_some_and(|level| level >= 4));
+
+    let _ = session.transfer_map("crystal:0:283:606");
+    open_original_npc_dialog(
+        &mut session,
+        3,
+        Point { x: 283, y: 606 },
+        MirDirection::Right,
+        "@quest:accept:7",
+    );
+    let accept_q7 = session.select_npc_dialog_target("@quest:accept:7");
+    assert!(accept_q7.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 7,
+            taken: true,
+            completed: true,
+            ..
+        }
+    )));
+    assert_quest_stage(&session, 7, QuestStage::ReadyToTurnIn);
+
+    let _ = session.transfer_map("crystal:0:109:317");
+    open_original_npc_dialog(
+        &mut session,
+        10,
+        Point { x: 109, y: 317 },
+        MirDirection::Right,
+        "@quest:finish:7",
+    );
+    let before_q7_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q7 = session.select_npc_dialog_target("@quest:finish:7");
+    assert!(finish_q7.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&7)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q7_reward_exp,
+        48,
+        "q7 hand-in must grant its original 48 EXP"
+    );
+    let q7_snapshot = session.world_snapshot();
+    assert!(
+        self_player(&session).level.is_some_and(|level| level >= 5),
+        "q7 should unlock the level-5 BronzeWarriorSword: level={:?}, exp={}, next={}",
+        self_player(&session).level,
+        q7_snapshot.player_experience,
+        q7_snapshot.player_max_experience,
+    );
+    equip_inventory_item_by_name(&mut session, "BronzeWarriorSword", 0);
+
+    let _ = buy_original_small_hp_drugs(&mut session, 2);
+    let _ = session.transfer_map("crystal:0:109:317");
+
+    open_original_npc_dialog(
+        &mut session,
+        10,
+        Point { x: 109, y: 317 },
+        MirDirection::Right,
+        "@quest:accept:8",
+    );
+    let accept_q8 = session.select_npc_dialog_target("@quest:accept:8");
+    assert!(accept_q8.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 8,
+            taken: true,
+            completed: false,
+            ..
+        }
+    )));
+    const OMA_FIELDS: [Point; 5] = [
+        Point { x: 220, y: 470 },
+        Point { x: 180, y: 420 },
+        Point { x: 90, y: 240 },
+        Point { x: 110, y: 440 },
+        Point { x: 140, y: 500 },
+    ];
+    const RAKING_CAT_FIELDS: [Point; 4] = [
+        Point { x: 140, y: 100 },
+        Point { x: 180, y: 420 },
+        Point { x: 340, y: 550 },
+        Point { x: 510, y: 410 },
+    ];
+    let _ = kill_original_monsters(&mut session, "0", &OMA_FIELDS, "Oma", 10);
+    let _ = kill_original_monsters(&mut session, "0", &RAKING_CAT_FIELDS, "RakingCat", 10);
+    assert_quest_stage(&session, 8, QuestStage::ReadyToTurnIn);
+
+    let _ = session.transfer_map("crystal:0:109:317");
+    open_original_npc_dialog(
+        &mut session,
+        10,
+        Point { x: 109, y: 317 },
+        MirDirection::Right,
+        "@quest:finish:8",
+    );
+    let before_q8_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q8 = session.select_npc_dialog_target("@quest:finish:8");
+    assert!(finish_q8.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&8)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q8_reward_exp,
+        180,
+        "q8 hand-in must grant its original 180 EXP"
+    );
+    assert_quest_stage(&session, 8, QuestStage::Completed);
+
+    open_original_npc_dialog(
+        &mut session,
+        10,
+        Point { x: 109, y: 317 },
+        MirDirection::Right,
+        "@quest:accept:9",
+    );
+    let accept_q9 = session.select_npc_dialog_target("@quest:accept:9");
+    assert!(accept_q9.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 9,
+            taken: true,
+            completed: true,
+            ..
+        }
+    )));
+
+    let _ = session.transfer_map("crystal:0:327:258");
+    open_original_npc_dialog(
+        &mut session,
+        26,
+        Point { x: 327, y: 258 },
+        MirDirection::Right,
+        "@quest:finish:9",
+    );
+    let before_q9_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q9 = session.select_npc_dialog_target("@quest:finish:9");
+    assert!(finish_q9.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&9)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q9_reward_exp,
+        48,
+        "q9 hand-in must grant its original 48 EXP"
+    );
+
+    for quest_id in 1..=9 {
+        assert_quest_stage(&session, quest_id, QuestStage::Completed);
+    }
+    let final_snapshot = session.world_snapshot();
+    assert_eq!(self_player(&session).level, Some(6));
+    assert_eq!(final_snapshot.player_max_experience, 900);
+    assert_eq!(
+        final_snapshot.gold,
+        453 - (8 * 40),
+        "all nine quests grant 453 gold before the eight original small-HP-drug purchases"
+    );
+    for reward_name in ["WornIronBracelet", "OldLoafer", "Fencing"] {
+        assert!(
+            final_snapshot
+                .inventory_items
+                .iter()
+                .chain(final_snapshot.belt_items.iter())
+                .any(|item| item.name == reward_name)
+                || final_snapshot
+                    .equipment_items
+                    .iter()
+                    .any(|item| item.name == reward_name),
+            "{reward_name} should be retained at the end of the newcomer arc"
+        );
+    }
 }
 
 #[test]

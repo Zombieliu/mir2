@@ -79,8 +79,14 @@ pub(in crate::runtime) fn update_town_archer_state(
         packets.push(packet);
     }
 
-    let damage =
-        monster_player_attack_damage(world, &monster_name, agent, position, player_position);
+    let damage = monster_player_attack_damage(
+        world,
+        attacker_id,
+        &monster_name,
+        agent,
+        position,
+        player_position,
+    );
     if damage > 0 {
         schedule_damage_to_player(
             world,

@@ -29,6 +29,10 @@ export type QuestRewardItem = {
   /** Icon index into `/original-ui/Items/<icon>.png`. */
   icon?: number;
   count?: number;
+  /** Crystal ItemInfo.Index, retained for tooltips and protocol actions. */
+  itemIndex?: number;
+  /** Zero-based index expected by Crystal FinishQuest.SelectedItemIndex. */
+  selectionIndex?: number;
   /** True for player-selected rewards (Crystal RewardsSelectItem). */
   selectable?: boolean;
 };

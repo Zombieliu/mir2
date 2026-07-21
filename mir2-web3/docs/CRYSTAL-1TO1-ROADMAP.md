@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest original Bichon level-6 quest-chain roadmap sync: 2026-07-18 closes
+> q1-q9 as one deterministic fresh-Warrior Candidate route, superseding the
+> earlier q1-q4/q5-available checkpoint below. Tasks, prerequisite links,
+> hand-in XP/gold, fixed rewards, q3/q6 class reward selection, Scarecrow
+> `GingerTea` Q drops, Deer harvest `DeerMeat` Q drops, and Crystal template
+> equipment stats now follow the original server scripts. Monster EXP and
+> quest kill credit are emitted only from player-owned melee, skill, or poison
+> deaths; ambient and NPC damage cannot advance the route. The release
+> vertical slice completes all nine quests with exact hand-in totals and
+> reaches level 6 naturally. Gateway reward metadata, tracked objectives, and
+> selectable reward UI contracts are covered by focused Rust and Web tests.
+> Remaining acceptance is a human dialog/route/feel pass, then expansion from
+> q10 into the broader level 1-45 route; q1-q9 backend completion is no longer
+> an open roadmap item.
+
 > Latest fresh-native visual roadmap sync: 2026-07-18 closes the visible
 > TrapHexagon and Belt-compositing regressions against the post-NPC-fix Crystal
 > client. r05 first established a live Lime-name baseline at `0 @ 332,275`:

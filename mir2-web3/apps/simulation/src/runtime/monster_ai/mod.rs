@@ -1334,6 +1334,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     } else {
                         monster_player_attack_damage(
                             world,
+                            attacker_id,
                             &monster_name,
                             &agent,
                             &position,

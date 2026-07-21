@@ -139,7 +139,21 @@ impl EquipmentState {
         if self.is_broken() {
             0
         } else {
-            self.attack + self.added_attack + self.socketed_attack()
+            let base = if self.attack != 0 {
+                self.attack
+            } else {
+                crystal_item_template_for_item_key(&self.key)
+                    .as_ref()
+                    .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC))
+                    .unwrap_or_default()
+            };
+            let added = self
+                .added_stats
+                .iter()
+                .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_DC)
+                .map(|entry| entry.value)
+                .sum::<i32>();
+            base + if added != 0 { added } else { self.added_attack } + self.socketed_attack()
         }
     }
 
@@ -147,7 +161,25 @@ impl EquipmentState {
         if self.is_broken() {
             0
         } else {
-            self.defence + self.added_defence + self.socketed_defence()
+            let base = if self.defence != 0 {
+                self.defence
+            } else {
+                crystal_item_template_for_item_key(&self.key)
+                    .as_ref()
+                    .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC))
+                    .unwrap_or_default()
+            };
+            let added = self
+                .added_stats
+                .iter()
+                .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_AC)
+                .map(|entry| entry.value)
+                .sum::<i32>();
+            base + if added != 0 {
+                added
+            } else {
+                self.added_defence
+            } + self.socketed_defence()
         }
     }
 
@@ -156,7 +188,23 @@ impl EquipmentState {
     fn socketed_attack(&self) -> i32 {
         self.socketed
             .iter()
-            .map(|gem| gem.attack + gem.added_attack)
+            .map(|gem| {
+                let base = if gem.attack != 0 {
+                    gem.attack
+                } else {
+                    crystal_item_template_for_item_key(&gem.key)
+                        .as_ref()
+                        .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC))
+                        .unwrap_or_default()
+                };
+                let added = gem
+                    .added_stats
+                    .iter()
+                    .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_DC)
+                    .map(|entry| entry.value)
+                    .sum::<i32>();
+                base + if added != 0 { added } else { gem.added_attack }
+            })
             .sum()
     }
 
@@ -164,7 +212,23 @@ impl EquipmentState {
     fn socketed_defence(&self) -> i32 {
         self.socketed
             .iter()
-            .map(|gem| gem.defence + gem.added_defence)
+            .map(|gem| {
+                let base = if gem.defence != 0 {
+                    gem.defence
+                } else {
+                    crystal_item_template_for_item_key(&gem.key)
+                        .as_ref()
+                        .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC))
+                        .unwrap_or_default()
+                };
+                let added = gem
+                    .added_stats
+                    .iter()
+                    .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_AC)
+                    .map(|entry| entry.value)
+                    .sum::<i32>();
+                base + if added != 0 { added } else { gem.added_defence }
+            })
             .sum()
     }
 

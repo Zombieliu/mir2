@@ -211,8 +211,14 @@ pub(in crate::runtime) fn update_evil_mir_state(
     // Crystal `GetAttackPower(MinDC, MaxDC)` vs `DefenceType.MAC`. We reuse the
     // shared player-damage roller (DC spread + player armour/magic mitigation)
     // for the player-facing number, and the raw DC for opposing monsters.
-    let base_player_damage =
-        monster_player_attack_damage(world, "EvilMir", agent, position, player_position);
+    let base_player_damage = monster_player_attack_damage(
+        world,
+        attacker_id,
+        "EvilMir",
+        agent,
+        position,
+        player_position,
+    );
     let base_monster_damage = crystal_monster_attack_damage("EvilMir");
 
     if mass_attack {

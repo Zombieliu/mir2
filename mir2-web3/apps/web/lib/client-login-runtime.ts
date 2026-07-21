@@ -29,6 +29,11 @@ export type GatewaySend = (
 
 export type SuiLoginKind = "passkey" | "wallet";
 
+/**
+ * Development/demo shortcut that enters the first character immediately.
+ * The normal login screen deliberately uses `sendPasswordLoginCommand` so the
+ * character-list response remains the authority for the next transition.
+ */
 export function sendBootstrapSequence(
   send: GatewaySend,
   accountId: string,
@@ -54,6 +59,8 @@ export function sendNewAccountCommand(
   accountId: string,
   password: string,
 ) {
+  // Crystal's account packet has required profile fields even though this UI
+  // only asks for credentials. Preserve the wire shape with neutral values.
   send({ type: "clientVersion" }, { quiet: true });
   send({
     type: "newAccount",
@@ -72,6 +79,8 @@ export function sendSuiLoginCommand(
   accountId: string,
   token: string,
 ) {
+  // Wallet and WebAuthn proofs share the gateway's authenticated-token path;
+  // `accountId` is an asserted identity, not a raw client-side login bypass.
   send({ type: "clientVersion" }, { quiet: true });
   send({ type: "passkeyLogin", accountId, token });
 }

@@ -5291,7 +5291,8 @@ impl ZoneRuntime {
         // Roll the monster's melee damage from its Crystal stats (matching the
         // ranged path) instead of a fixed placeholder of 1, so monster→player
         // damage is the zone's authoritative, data-driven value.
-        let (damage, magic) = zone_native_monster_player_attack_damage(monster, &target.position);
+        let (damage, magic) =
+            zone_native_monster_player_attack_damage(monster, &target.position, now_ms, object_id);
         let attacker_ai = monster.ai;
         if damage > 0 {
             self.pending_native_player_hits
@@ -5351,7 +5352,12 @@ impl ZoneRuntime {
                     &monster.position,
                     &target.position,
                 ),
-                zone_native_monster_player_attack_damage(monster, &target.position),
+                zone_native_monster_player_attack_damage(
+                    monster,
+                    &target.position,
+                    now_ms,
+                    object_id,
+                ),
                 monster.ai,
             ))
         }) else {
@@ -7411,35 +7417,58 @@ fn zone_native_monster_range_attack_type(ai: u8, source: &Point, target: &Point)
 fn zone_native_monster_player_attack_damage(
     monster: &ZoneNativeMonster,
     target: &Point,
+    now_ms: u64,
+    attacker_object_id: u32,
 ) -> (i32, bool) {
     let distance = zone_tile_distance(&monster.position, target);
+    let (attack_damage, raw_attack_damage, magic_damage, raw_magic_damage, spell_damage) =
+        crystal_monster_by_name(&monster.name)
+            .map(|template| {
+                let dc = zone_roll_stat_range(
+                    template.min_dc,
+                    template.max_dc,
+                    now_ms,
+                    attacker_object_id,
+                    0x51DC,
+                );
+                let mc = zone_roll_stat_range(
+                    template.min_mc,
+                    template.max_mc,
+                    now_ms,
+                    attacker_object_id,
+                    0x51CC,
+                );
+                let sc = zone_roll_stat_range(
+                    template.min_sc,
+                    template.max_sc,
+                    now_ms,
+                    attacker_object_id,
+                    0x515C,
+                );
+                (dc.max(0), dc.max(0), mc.max(1), mc.max(0), sc.max(1))
+            })
+            .unwrap_or((7, 7, 7, 0, 7));
     match monster.ai {
-        19 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        20 if distance > 1 => (zone_crystal_monster_attack_damage(&monster.name) * 3, false),
-        43 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        120 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        121 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        122 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        123 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        102 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        86 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        88 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        126 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        127 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        188 if distance > 1 => (
-            zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
-            false,
-        ),
-        189 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        192 if distance > 1 => (
-            zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
-            false,
-        ),
-        130 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        131 if distance > 2 => (zone_crystal_monster_spell_damage(&monster.name), true),
-        118 | 181 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        182 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        _ => (zone_crystal_monster_attack_damage(&monster.name), false),
+        19 if distance > 1 => (magic_damage, true),
+        20 if distance > 1 => (attack_damage * 3, false),
+        43 if distance > 2 => (magic_damage, true),
+        120 if distance > 1 => (raw_magic_damage, true),
+        121 if distance > 1 => (magic_damage, true),
+        122 if distance > 1 => (raw_magic_damage, true),
+        123 if distance > 2 => (magic_damage, true),
+        102 if distance > 1 => (raw_magic_damage, true),
+        86 if distance > 2 => (magic_damage, true),
+        88 => (magic_damage, true),
+        126 if distance > 1 => (raw_magic_damage, true),
+        127 if distance > 1 => (magic_damage, true),
+        188 if distance > 1 => (raw_attack_damage * 2, false),
+        189 if distance > 1 => (raw_magic_damage, true),
+        192 if distance > 1 => (raw_attack_damage * 3, false),
+        130 if distance > 1 => (magic_damage, true),
+        131 if distance > 2 => (spell_damage, true),
+        118 | 181 if distance > 1 => (raw_magic_damage, true),
+        182 if distance > 1 => (raw_magic_damage, true),
+        _ => (attack_damage, false),
     }
 }
 
@@ -7502,30 +7531,6 @@ fn zone_crystal_monster_attack_damage(name: &str) -> i32 {
     crystal_monster_by_name(name)
         .map(|monster| monster.max_dc.max(monster.min_dc).max(1))
         .unwrap_or(7)
-}
-
-fn zone_crystal_monster_magic_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_mc.max(monster.min_mc).max(1))
-        .unwrap_or(7)
-}
-
-fn zone_crystal_monster_spell_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_sc.max(monster.min_sc).max(1))
-        .unwrap_or(7)
-}
-
-fn zone_crystal_monster_raw_magic_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_mc.max(monster.min_mc))
-        .unwrap_or(0)
-}
-
-fn zone_crystal_monster_raw_attack_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_dc.max(monster.min_dc))
-        .unwrap_or(0)
 }
 
 fn zone_mana_percent(mp: i32) -> u8 {
