@@ -39,6 +39,19 @@ function Assert-SafeFileName {
     }
 }
 
+function Test-AssetPart {
+    param([string]$Path, [object]$Part)
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $false
+    }
+    if ((Get-Item -LiteralPath $Path).Length -ne [long]$Part.size) {
+        return $false
+    }
+    $Hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
+    return $Hash -eq [string]$Part.sha256
+}
+
 if (-not $ManifestPath) {
     $ManifestPath = Join-Path $ProjectRoot "config\developer-assets.json"
 }
@@ -126,15 +139,28 @@ if ($Download) {
     }
     foreach ($Part in $Manifest.parts) {
         $Target = Join-Path $CacheDirectory ([string]$Part.name)
-        if (Test-Path -LiteralPath $Target -PathType Leaf) {
+        if (Test-AssetPart -Path $Target -Part $Part) {
+            Write-Host "[assets] verified cached part: $($Part.name)"
             continue
         }
+        if (Test-Path -LiteralPath $Target -PathType Leaf) {
+            $SafeTarget = Assert-SafeChildPath `
+                -Path $Target `
+                -Parent $CacheDirectory `
+                -Label "Corrupt cached part"
+            Write-Warning "Removing incomplete or corrupt cached part: $($Part.name)"
+            Remove-Item -LiteralPath $SafeTarget -Force
+        }
+        Write-Host "[assets] downloading: $($Part.name)"
         & gh release download ([string]$Manifest.releaseTag) `
             --repo ([string]$Manifest.repository) `
             --pattern ([string]$Part.name) `
             --dir $CacheDirectory
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to download $($Part.name) from GitHub Release."
+        }
+        if (-not (Test-AssetPart -Path $Target -Part $Part)) {
+            throw "Downloaded asset bundle part failed size or SHA-256 verification: $Target"
         }
     }
     $PartsDirectory = $CacheDirectory

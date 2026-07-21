@@ -8,9 +8,12 @@
 > exact, page-hash-verified closure of 1,440 shards and 4,446 unique pages,
 > packaged as deterministic USTAR with safe transactional installation. The
 > remote release manifest independently covers 45,398 objects with zero local
-> misses and exactly 5,887 full-pack objects. Private Release and clean-clone
-> acceptance are the final gates for this handoff round; credentialed R2
-> publication and physical Brazil low-end testing remain separate open work.
+> misses and exactly 5,887 full-pack objects. The private Release now contains
+> all seven parts plus its manifest, and a filtered clean clone has downloaded,
+> reconstructed, extracted, and page-hash-verified all 5,887 full-pack files.
+> Final clean-clone Web/Gateway startup is the remaining local acceptance step;
+> credentialed R2 publication, Crystal-fork rights/visibility resolution, and
+> physical Brazil low-end testing remain separate open work.
 
 > Latest original Bichon level-6 quest-chain roadmap sync: 2026-07-18 closes
 > q1-q9 as one deterministic fresh-Warrior Candidate route, superseding the

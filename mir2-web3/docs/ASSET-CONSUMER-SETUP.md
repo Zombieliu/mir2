@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | Starter | 不存在 | 可离线 | Gateway/Simulation、普通 UI、新手流程 |
 | GitHub 私有开发素材包 | 存在 | 仅安装时需要，可离线开发 | 全素材开发、调试和离线验收 |
-| R2 CDN | 不需要 | 游戏时按需请求 | 远程验收、缓存/CDN、低端设备测试 |
+| R2 CDN | 不需要 | 游戏时按需请求 | 维护者模板；当前尚未发布可用 URL |
 
 运行时全量图集路径固定为：
 
@@ -63,12 +63,34 @@ http://127.0.0.1:3002/?crystalFullPack=0
 
 ### 在线安装
 
+先确认仓库所有者已授予私有仓库和 Release 的读取权限：
+
 ```powershell
 gh auth login
+gh auth status
+gh auth setup-git
+gh release view developer-assets-f71b89aa3850 --repo Zombieliu/mir2
 .\scripts\install-developer-assets.ps1 -Download
 ```
 
-安装器会从 manifest 指定的 Release 下载缺失分卷、逐一校验大小和 SHA-256、重组总归档、再次校验总哈希，然后解压。默认会删除重组出来的临时 tar；使用 `-KeepArchive` 可保留。
+安装器会从 manifest 指定的 Release 下载缺失分卷、逐一校验大小和 SHA-256、重组总归档、再次校验总哈希，然后解压。下载中断后直接重新运行；脚本会保留有效分片，并删除后重下不完整或损坏的缓存分片。默认会删除重组出来的临时 tar；使用 `-KeepArchive` 可保留。
+
+磁盘预算：
+
+- 7 个缓存分片合计约 9.08 GiB。
+- 安装后的完整图集约 9.08 GiB。
+- 安装时重组 tar 和 staging 各可能再占约 9.08 GiB。
+- 新装至少准备 40 GiB 空闲；连同 Git、Node、Rust 和构建缓存，建议为完整开发环境预留 50 GiB 以上。
+
+缓存可改到其他磁盘：
+
+```powershell
+.\scripts\install-developer-assets.ps1 `
+  -Download `
+  -CacheDirectory F:\mir2-asset-cache\developer-assets-f71b89aa3850
+```
+
+默认缓存位于 `.mir2-data/developer-assets/developer-assets-f71b89aa3850`。确认安装和 `verify-developer-setup.ps1` 均通过后，可以删除这一精确 tag 的缓存目录来释放约 9.08 GiB；以后重装需要重新下载。不要对不确定路径执行递归删除。
 
 ### 离线安装
 
@@ -93,9 +115,13 @@ $Index.contentHash
 .\scripts\verify-developer-setup.ps1 -SkipBuild
 ```
 
+安装器会逐页校验 SHA-256；后续 `verify-developer-setup.ps1` 会执行较快的本地闭包检查，确认固定 `contentHash`、所有 shard/page 引用和零孤儿文件，而不会在每次日常验证时重复读取整套 9.08 GiB 页面内容。
+
 ## R2 CDN
 
-R2 适合不需要把约 10GB 全量包永久放在本机的开发者。素材放在不可变版本目录，例如：
+**状态：当前 R2 完整素材尚未发布。以下为维护者模板，不是新开发者可直接使用的地址。**
+
+未来 R2 适合不需要把约 9.08 GiB 全量包永久放在本机的开发者。素材必须放在不可变版本目录，例如：
 
 ```text
 https://assets.example.com/mir2/v/<version>
@@ -228,6 +254,8 @@ cd ..\..
 - 可用 `?cacheDebug=1` 查看缓存状态，用 `window.__mir2AssetCacheReset()` 清理 Mir2 CacheStorage。
 
 ## 法律与访问控制
+
+完整权利清单见 `docs/LEGAL-AND-ASSET-RIGHTS.md`。仓库或 Release 的技术访问权不等于公开、商业或再分发许可。
 
 Crystal/Wemade 素材只能在获得相应权利或授权的范围内分发。授权未明确时：
 

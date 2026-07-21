@@ -7,7 +7,9 @@ on:
       - "README.md"
       - "CONTRIBUTING.md"
       - "mir2-web3/apps/web/**"
+      - "mir2-web3/apps/admin-web/**"
       - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/admin-api/**"
       - "mir2-web3/apps/simulation/**"
       - "mir2-web3/config/developer-assets.json"
       - "mir2-web3/infra/cloudflare/mir2-domain-proxy/**"
@@ -51,17 +53,26 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+          cache-dependency-path: |
+            mir2-web3/apps/web/package-lock.json
+            mir2-web3/apps/admin-web/package-lock.json
 
       - name: Install Rust 1.89
         run: rustup toolchain install 1.89.0 --profile minimal
 
       - name: Install Web dependencies
-        run: npm ci --prefix mir2-web3/apps/web
+        run: |
+          npm ci --prefix mir2-web3/apps/web
+          npm ci --prefix mir2-web3/apps/admin-web
 
-      - name: Check Gateway
+      - name: Audit Web dependencies
+        run: |
+          npm audit --audit-level=high --prefix mir2-web3/apps/web
+          npm audit --audit-level=high --prefix mir2-web3/apps/admin-web
+
+      - name: Check Gateway and Admin API
         working-directory: mir2-web3
-        run: cargo +1.89.0 check --locked -p mir2-gateway
+        run: cargo +1.89.0 check --locked -p mir2-gateway -p mir2-admin-api
 
       - name: Test asset release safety
         working-directory: mir2-web3/apps/web
@@ -72,11 +83,15 @@ jobs:
         working-directory: mir2-web3
         run: ./scripts/test-developer-asset-installer.ps1
 
-      - name: Build Web with tracked runtime
+      - name: Build Player Web with tracked runtime
         working-directory: mir2-web3/apps/web
         env:
           MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
         run: npm run build
+
+      - name: Typecheck and build Admin Web
+        working-directory: mir2-web3/apps/admin-web
+        run: npm run typecheck && npm run build
 
       - name: Probe published full asset pack
         if: ${{ vars.MIR2_FULL_ASSET_BASE_URL != '' }}
