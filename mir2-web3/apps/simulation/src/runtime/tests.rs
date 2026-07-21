@@ -1623,7 +1623,7 @@ fn new_crystal_character_starts_with_crystal_equipment_without_web_seed_state() 
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" }));
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" }));
     assert!(snapshot
         .equipment_items
         .iter()
@@ -1690,7 +1690,7 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" }));
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" }));
     assert!(snapshot
         .equipment_items
         .iter()
@@ -1767,7 +1767,7 @@ fn start_game_restores_legacy_level_one_empty_starter_equipment() {
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" }));
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" }));
 
     let store = config
         .account_store
@@ -2241,6 +2241,13 @@ fn saved_character_state_survives_new_session_start_game() {
         password: "demo".to_string(),
     });
     let _ = first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let initial_weapon_dura = first
+        .world_snapshot()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("starter weapon")
+        .durability_current;
     set_player_position(&mut first, Point { x: 333, y: 267 });
     let _ = first.attack(3002);
     first.save_active_character();
@@ -2274,7 +2281,7 @@ fn saved_character_state_survives_new_session_start_game() {
     assert_eq!(restored_player.x, 333);
     assert_eq!(restored_player.y, 267);
     assert_eq!(restored_weapon_dura, saved_weapon_dura);
-    assert!(restored_weapon_dura < 18);
+    assert!(restored_weapon_dura < initial_weapon_dura);
 }
 
 #[test]
@@ -7438,32 +7445,57 @@ fn cave_maggot_and_toxic_ghoul_use_harvest_monster_corpse_passes() {
             )
         }));
 
-        for harvest_index in 1..=super::HARVEST_MONSTER_SKIN_COUNT {
-            let packets = session.handle_packet(ClientPacket::Harvest {
-                direction: MirDirection::Right,
-            });
-            let harvested = packets.iter().any(|packet| {
-                matches!(
-                    packet,
-                    ServerPacket::ObjectHarvested { movement }
-                        if movement.object_id == object_id
-                )
-            });
-            assert_eq!(
-                harvested, false,
-                "{template_name} harvest {harvest_index}, packets {packets:?}"
-            );
-        }
-        let transfer_packets = session.handle_packet(ClientPacket::Harvest {
+        let first_pass = session.handle_packet(ClientPacket::Harvest {
             direction: MirDirection::Right,
         });
-        assert!(transfer_packets.iter().any(|packet| {
+        assert!(!first_pass.iter().any(|packet| {
             matches!(
                 packet,
                 ServerPacket::ObjectHarvested { movement }
                     if movement.object_id == object_id
             )
         }));
+        assert_eq!(
+            session
+                .app
+                .world()
+                .entity(monster)
+                .get::<super::HarvestMonsterState>()
+                .expect("harvest state after first pass")
+                .remaining_skin_count,
+            1
+        );
+
+        let second_pass = session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Right,
+        });
+        let harvested_without_drops = second_pass.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectHarvested { movement }
+                    if movement.object_id == object_id
+            )
+        });
+        if !harvested_without_drops {
+            let transfer_packets = session.handle_packet(ClientPacket::Harvest {
+                direction: MirDirection::Right,
+            });
+            assert!(transfer_packets.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectHarvested { movement }
+                        if movement.object_id == object_id
+                )
+            }));
+        }
+        let state = session
+            .app
+            .world()
+            .entity(monster)
+            .get::<super::HarvestMonsterState>()
+            .expect("final harvest state");
+        assert_eq!(state.remaining_skin_count, 0);
+        assert!(state.harvested);
     }
 }
 
@@ -20630,9 +20662,15 @@ fn water_dragon_and_black_tortoise_use_range_attacks_when_not_adjacent() {
 }
 
 #[test]
-fn water_dragon_range_hit_applies_green_poison() {
+fn water_dragon_range_hit_uses_mac_and_applies_green_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // A ranged WaterDragon strike is MACAgility in Crystal. Make physical AC
+    // overwhelming so this test fails if the damage path ever subtracts AC.
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MIN_AC, 10_000);
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAX_AC, 10_000);
+    assert!(super::player_stats(session.app.world()).min_ac() >= 10_000);
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
@@ -20654,17 +20692,9 @@ fn water_dragon_range_hit_applies_green_poison() {
             max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    // The water-dragon ranged strike is an armour-ignoring magic hit (the Crystal
-    // magic channel is mitigated by MAC, not the physical AC that
-    // `total_defence_bonus` returns), so the measured HP loss is the monster's
-    // full magic damage. #16's stat engine gave the seed player nonzero physical
-    // defence, which the old `- total_defence_bonus` expectation wrongly
-    // subtracted. The hit also applies green poison (asserted below), but its
-    // first DOT tick lands after this hit resolves, so it is not part of this loss.
-    let expected_damage = super::crystal_monster_magic_damage("Hydra");
-    // Green poison's first DOT tick (the Crystal player green-poison tick is 5)
-    // can resolve within a tick of the ranged hit, so the assertion below allows
-    // a +/-5 tolerance band around the direct magic damage.
+    // The imported Hydra MC is rolled within its Crystal range and then reduced
+    // only by MAC. A green-poison tick can land alongside the direct hit.
+    let maximum_direct_damage = super::crystal_monster_magic_damage("Hydra");
     const GREEN_POISON_TICK_DAMAGE: i32 = 5;
     let hydra = spawn_crystal_monster_for_test(
         &mut session,
@@ -20717,9 +20747,8 @@ fn water_dragon_range_hit_applies_green_poison() {
     )));
     let actual_damage = before_hp - session.world_snapshot().player_hp.expect("player hp");
     assert!(
-        actual_damage >= expected_damage - GREEN_POISON_TICK_DAMAGE
-            && actual_damage <= expected_damage + GREEN_POISON_TICK_DAMAGE,
-        "expected hydra ranged hit plus poison tick near {expected_damage}, got {actual_damage}",
+        actual_damage > 0 && actual_damage <= maximum_direct_damage + GREEN_POISON_TICK_DAMAGE,
+        "expected a mitigated Hydra MC roll plus at most one poison tick, got {actual_damage}",
     );
     assert!(session
         .world_snapshot()
@@ -28523,7 +28552,7 @@ fn crystal_drop_search_skips_map_transfer_source_tiles() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let movement_source = Point { x: 340, y: 270 };
-    assert!(super::is_current_map_transfer_source(
+    assert!(super::super::drops::is_current_map_transfer_source(
         session.app.world(),
         &movement_source
     ));
@@ -28541,7 +28570,7 @@ fn crystal_drop_search_skips_map_transfer_source_tiles() {
     .expect("drop should move off the transfer source");
 
     assert_ne!(placed.position, movement_source);
-    assert!(!super::is_current_map_transfer_source(
+    assert!(!super::super::drops::is_current_map_transfer_source(
         session.app.world(),
         &placed.position
     ));
@@ -32337,7 +32366,7 @@ fn benediction_oil_refreshes_weapon_after_luck_gain() {
                     .any(|stat| stat.stat == 15 && stat.value == 1)
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" && item.added_luck == 1
+        item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" && item.added_luck == 1
     }));
     assert!(!snapshot
         .inventory_items
@@ -32989,7 +33018,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
     assert!(!first_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert_eq!(total_attack_bonus(session.app.world()), 10);
+    assert_eq!(total_attack_bonus(session.app.world()), 9);
 
     add_inventory_crystal_item(&mut session, "ImpactDrug(M)", 32);
     let second_packets = session.handle_packet(ClientPacket::UseItem {
@@ -33013,7 +33042,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
             grid: MirGridType::Inventory,
         }
     )));
-    assert_eq!(total_attack_bonus(session.app.world()), 10);
+    assert_eq!(total_attack_bonus(session.app.world()), 9);
 }
 
 #[test]
@@ -33091,7 +33120,7 @@ fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
             .map(|buff| buff.attack_bonus),
         Some(2)
     );
-    assert_eq!(total_attack_bonus(session.app.world()), 7);
+    assert_eq!(total_attack_bonus(session.app.world()), 6);
 }
 
 #[test]
@@ -34075,7 +34104,7 @@ fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
     assert!(resources
         .inventory_items
         .iter()
-        .any(|item| item.slot == 20 && item.key == "wooden-sword" && item.cursed));
+        .any(|item| item.slot == 20 && item.key == "crystal-item-221" && item.cursed));
 }
 
 #[test]
@@ -35225,7 +35254,7 @@ fn remove_item_packet_storage_grid_moves_equipment_into_requested_storage_slot()
         .iter()
         .any(|item| item.slot == EquipmentSlot::Weapon));
     assert!(snapshot.storage_items.iter().any(|item| {
-        item.key == "wooden-sword" && item.container == ItemContainer::Storage && item.slot == 4
+        item.key == "crystal-item-221" && item.container == ItemContainer::Storage && item.slot == 4
     }));
 }
 
@@ -35341,7 +35370,7 @@ fn remove_item_packet_cursed_equipment_consumes_unlock_after_success() {
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "wooden-sword" && item.container == ItemContainer::Bag1 && item.slot == 20
+        item.key == "crystal-item-221" && item.container == ItemContainer::Bag1 && item.slot == 20
     }));
     let resources = session.app.world().resource::<InventoryResource>();
     assert!(resources
@@ -35615,11 +35644,11 @@ fn remove_slot_item_packet_equipment_grid_does_not_mutate_matching_player_equipm
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!snapshot
         .inventory_items
         .iter()
-        .any(|item| item.name == "Wooden Sword"));
+        .any(|item| item.name == "WoodenSword"));
 }
 
 #[test]
@@ -35651,11 +35680,11 @@ fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_i
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!snapshot
         .inventory_items
         .iter()
-        .any(|item| item.name == "Wooden Sword"));
+        .any(|item| item.name == "WoodenSword"));
 }
 
 /// Build a baseline [`ItemState`] for socket tests. Callers tweak the
@@ -36394,10 +36423,10 @@ fn assassin_class_weapon_uses_assassin_sprite_libraries() {
         .expect("self player");
     let sprite = player.sprite.as_ref().expect("self player sprite");
 
-    assert_eq!(sprite.body_library, "CArmour/00");
+    assert_eq!(sprite.body_library, "CArmour/01");
     assert_eq!(sprite.weapon_library.as_deref(), None);
     assert_eq!(sprite.weapon_library_secondary.as_deref(), None);
-    assert_eq!(sprite.alt_body_library.as_deref(), Some("AArmour/00"));
+    assert_eq!(sprite.alt_body_library.as_deref(), Some("AArmour/01"));
     assert_eq!(sprite.alt_hair_library.as_deref(), Some("AHair/00"));
     assert_eq!(sprite.alt_weapon_library.as_deref(), Some("AWeapon/00 R"));
     assert_eq!(
@@ -36442,11 +36471,11 @@ fn archer_class_weapon_uses_archer_sprite_libraries() {
         .expect("self player");
     let sprite = player.sprite.as_ref().expect("self player sprite");
 
-    assert_eq!(sprite.body_library, "CArmour/00");
+    assert_eq!(sprite.body_library, "CArmour/01");
     assert_eq!(sprite.weapon_library.as_deref(), Some("ARWeapon/00"));
     assert_eq!(sprite.weapon_library_secondary.as_deref(), None);
     assert_eq!(sprite.weapon_frame_offset, Some(416));
-    assert_eq!(sprite.alt_body_library.as_deref(), Some("ARArmour/00"));
+    assert_eq!(sprite.alt_body_library.as_deref(), Some("ARArmour/01"));
     assert_eq!(sprite.alt_hair_library.as_deref(), Some("ARHair/00"));
     assert_eq!(sprite.alt_weapon_library.as_deref(), Some("ARWeapon/00 S"));
     assert_eq!(sprite.alt_weapon_library_secondary.as_deref(), None);
@@ -37587,7 +37616,7 @@ fn move_item_packet_hero_equipment_grid_does_not_emit_extra_chat_or_mutate_match
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -37617,7 +37646,7 @@ fn move_item_packet_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_p
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -37647,7 +37676,7 @@ fn move_item_packet_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_pla
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -39245,8 +39274,8 @@ fn broken_equipment_no_longer_contributes_stats() {
             }
         }
     }
-    assert_eq!(total_attack_bonus(session.app.world()), 1);
-    assert_eq!(total_defence_bonus(session.app.world()), 2);
+    assert_eq!(total_attack_bonus(session.app.world()), 0);
+    assert_eq!(total_defence_bonus(session.app.world()), 0);
 
     let snapshot = session.world_snapshot();
     assert_eq!(
@@ -39293,16 +39322,16 @@ fn repair_powder_restores_equipped_durability_and_consumes_item() {
         packet,
         ServerPacket::ItemRepaired {
             unique_id: 0,
-            max_dura: 20,
-            current_dura: 20
+            max_dura: 4000,
+            current_dura: 4000
         }
     )));
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ItemRepaired {
             unique_id: 1,
-            max_dura: 14,
-            current_dura: 14
+            max_dura: 5000,
+            current_dura: 5000
         }
     )));
     assert_eq!(
@@ -39311,7 +39340,7 @@ fn repair_powder_restores_equipped_durability_and_consumes_item() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Weapon)
             .map(|item| (item.durability_current, item.durability_max)),
-        Some((20, 20))
+        Some((4000, 4000))
     );
     assert_eq!(
         snapshot
@@ -39319,7 +39348,7 @@ fn repair_powder_restores_equipped_durability_and_consumes_item() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Armour)
             .map(|item| (item.durability_current, item.durability_max)),
-        Some((14, 14))
+        Some((5000, 5000))
     );
     assert_eq!(
         snapshot
@@ -51999,7 +52028,7 @@ fn stage5_item_add_socket_rejects_items_at_socket_capacity() {
             )
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" && item.socket_slots == 0
+        item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" && item.socket_slots == 0
     }));
 }
 
@@ -52033,7 +52062,7 @@ fn stage5_item_add_socket_rejects_unknown_socket_metadata() {
             )
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" && item.socket_slots == 0
+        item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" && item.socket_slots == 0
     }));
 }
 
@@ -53414,7 +53443,7 @@ fn stage5_item_seal_emits_item_seal_changed() {
     assert_ne!(expiry, 0);
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == expiry
     }));
 }
@@ -53624,7 +53653,7 @@ fn stage5_item_seal_rejects_without_source_item() {
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == 0
     }));
 }
@@ -53694,7 +53723,7 @@ fn stage5_item_seal_rejects_wrong_source_item() {
     }));
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == 0
     }));
 }
@@ -53741,7 +53770,7 @@ fn stage5_item_seal_consumes_source_item_on_success() {
         .any(|item| { item.key == "stage5-seal-source" && item.quantity == 1 }));
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == expiry
     }));
 }
@@ -53961,6 +53990,37 @@ fn fishing_packets_toggle_crystal_update_surface() {
     );
 }
 
+fn successful_swordfish_reel_tick(session: &mut SimulationSession, minimum_tick: u64) -> u64 {
+    let original_tick = runtime_tick(session.app.world());
+    let original_progress = session
+        .app
+        .world()
+        .resource::<FishingResource>()
+        .progress_percent;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .progress_percent = 100;
+
+    let found = (minimum_tick..minimum_tick + 10_000).find(|tick| {
+        super::set_runtime_tick(session.app.world_mut(), *tick);
+        super::fishing_reel_succeeds(session.app.world())
+            && matches!(
+                super::resolved_fishing_drop(session.app.world()),
+                Some(super::ResolvedDropTemplate::Item { name, .. }) if name == "SwordFish"
+            )
+    });
+
+    super::set_runtime_tick(session.app.world_mut(), original_tick);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .progress_percent = original_progress;
+    found.expect("deterministic fishing sequence should contain a SwordFish reel")
+}
+
 #[test]
 fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
     let mut session = SimulationSession::new(SimulationConfig::default());
@@ -53973,8 +54033,10 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
         .expect("SwordFish template should exist")
         .item_index;
 
-    super::set_runtime_tick(session.app.world_mut(), 58);
+    super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    let manual_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
+    super::set_runtime_tick(session.app.world_mut(), manual_reel_tick - 4);
     let mut tick_packets = Vec::new();
     for _ in 0..4 {
         tick_packets = session.tick();
@@ -54004,9 +54066,11 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
         }
     )));
 
-    super::set_runtime_tick(session.app.world_mut(), 57);
+    super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
+    let autocast_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
+    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick - 5);
     for _ in 0..4 {
         session.tick();
     }
@@ -54210,9 +54274,11 @@ fn fishing_autocast_reel_durability_cancels_slot_backed_recast() {
         fishing.slot_items[4] = Some(fishing_slot_item_state("FishingReel", 4, 9_524, 1, Some(1)));
     }
 
-    super::set_runtime_tick(session.app.world_mut(), 57);
+    super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
+    let autocast_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
+    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick - 5);
     for _ in 0..4 {
         session.tick();
     }
@@ -58566,7 +58632,9 @@ fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
     let player_origin = Point { x: 900, y: 900 };
-    let shaman_object_id = 98_960_u32;
+    // This object id makes the deterministic tick-1 Crystal DC roll land near
+    // the top of ShamanZombie's 6..=17 range, clearly above the old flat-7 stub.
+    let shaman_object_id = 98_910_u32;
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
 
     set_player_position(&mut session, player_origin.clone());

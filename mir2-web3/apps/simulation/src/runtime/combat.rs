@@ -333,6 +333,7 @@ const CRYSTAL_SALT_MELEE_DC_ROLL: usize = 41_001;
 const CRYSTAL_SALT_CRITICAL: u64 = 41_002;
 const CRYSTAL_SALT_MAGIC_RESIST: usize = 41_003;
 const CRYSTAL_SALT_ARMOUR_AC: usize = 41_004;
+const CRYSTAL_SALT_ARMOUR_MAC: usize = 41_005;
 
 /// Crystal `GetArmour` physical armour roll: `Random(MinAC, MaxAC)` from the
 /// player's stat block (which now carries the real item Min/Max AC). Resolved
@@ -347,6 +348,21 @@ pub(super) fn crystal_player_rolled_armour(world: &World) -> i32 {
         CRYSTAL_SALT_ARMOUR_AC,
         stats.min_ac(),
         stats.max_ac(),
+    )
+}
+
+/// Crystal `GetArmour` magic-armour roll: `Random(MinMAC, MaxMAC)` from the
+/// player's authoritative stat block. A separate salt keeps AC and MAC rolls
+/// deterministic without coupling the two defence channels.
+pub(super) fn crystal_player_rolled_magic_armour(world: &World) -> i32 {
+    let stats = player_stats(world);
+    let actor_id = current_player_object_id(world).unwrap_or(0);
+    deterministic_range_roll(
+        runtime_tick(world),
+        actor_id,
+        CRYSTAL_SALT_ARMOUR_MAC,
+        stats.min_mac(),
+        stats.max_mac(),
     )
 }
 
