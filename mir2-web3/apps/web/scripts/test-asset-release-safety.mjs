@@ -13,6 +13,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const BUILD_SCRIPT = path.join(SCRIPT_DIR, "build-remote-asset-release.mjs");
 const UPLOAD_SCRIPT = path.join(SCRIPT_DIR, "upload-r2-assets.mjs");
 const CAS_RELEASE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "cas-release.mjs");
+const FULL_PACK_CLOSURE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "full-pack-closure.mjs");
 
 await test("map-atlas pages accompany a referenced map-atlas manifest", async () => {
   await withTempDir(async (root) => {
@@ -25,6 +26,10 @@ await test("map-atlas pages accompany a referenced map-atlas manifest", async ()
     await fs.mkdir(path.join(publicRoot, "original-map"), { recursive: true });
     await fs.copyFile(BUILD_SCRIPT, fixtureScript);
     await fs.copyFile(CAS_RELEASE_MODULE, path.join(path.dirname(fixtureScript), "asset-pipeline", "cas-release.mjs"));
+    await fs.copyFile(
+      FULL_PACK_CLOSURE_MODULE,
+      path.join(path.dirname(fixtureScript), "asset-pipeline", "full-pack-closure.mjs"),
+    );
     await fs.writeFile(path.join(publicRoot, "original-map", "fixture.png"), "original");
     await fs.writeFile(
       path.join(publicRoot, "original-asset-manifest.generated.json"),
@@ -86,6 +91,156 @@ await test("map-atlas pages accompany a referenced map-atlas manifest", async ()
     } finally {
       await server.close();
     }
+  });
+});
+
+await test("verified full Crystal pack files are included only when explicitly requested", async () => {
+  await withTempDir(async (root) => {
+    const fixtureScript = path.join(root, "apps", "web", "scripts", path.basename(BUILD_SCRIPT));
+    const publicRoot = path.join(root, "apps", "web", "public");
+    const fullRoot = path.join(publicRoot, "generated", "crystal-packs", "full");
+    const coveragePath = path.join(
+      root,
+      "docs",
+      "generated",
+      "assets",
+      "crystal-full-pack-coverage.generated.json",
+    );
+    await fs.mkdir(path.dirname(fixtureScript), { recursive: true });
+    await fs.mkdir(path.join(path.dirname(fixtureScript), "asset-pipeline"), { recursive: true });
+    await fs.mkdir(path.join(publicRoot, "original-map"), { recursive: true });
+    await fs.mkdir(path.join(fullRoot, "libraries", "entities"), { recursive: true });
+    await fs.mkdir(path.join(fullRoot, "libraries", "ui"), { recursive: true });
+    await fs.mkdir(path.dirname(coveragePath), { recursive: true });
+    await fs.copyFile(BUILD_SCRIPT, fixtureScript);
+    await fs.copyFile(CAS_RELEASE_MODULE, path.join(path.dirname(fixtureScript), "asset-pipeline", "cas-release.mjs"));
+    await fs.copyFile(
+      FULL_PACK_CLOSURE_MODULE,
+      path.join(path.dirname(fixtureScript), "asset-pipeline", "full-pack-closure.mjs"),
+    );
+    await fs.writeFile(path.join(publicRoot, "original-map", "fixture.png"), "original");
+    await fs.writeFile(
+      path.join(publicRoot, "original-asset-manifest.generated.json"),
+      JSON.stringify({ schemaVersion: 1, assets: { "/original-map/fixture.png": {} } }),
+    );
+    const contentHash = "f".repeat(64);
+    const sourceContentHash = "e".repeat(64);
+    const pageABytes = Buffer.from("page-a");
+    const pageBBytes = Buffer.from("page-b");
+    const pageAHash = createHash("sha256").update(pageABytes).digest("hex");
+    const pageBHash = createHash("sha256").update(pageBBytes).digest("hex");
+    const pageAUrl = `/generated/crystal-packs/full/pages/${pageAHash.slice(0, 2)}/${pageAHash}.png`;
+    const pageBUrl = `/generated/crystal-packs/full/pages/${pageBHash.slice(0, 2)}/${pageBHash}.png`;
+    const npcUrl = "/generated/crystal-packs/full/libraries/entities/npc.json";
+    const prguseUrl = "/generated/crystal-packs/full/libraries/ui/prguse.json";
+    const npcManifest = JSON.stringify({
+      libraryKey: "NPC/00",
+      pages: [{
+        key: `sha256:${pageAHash}`,
+        sha256: pageAHash,
+        imageUrl: pageAUrl,
+        networkBytes: pageABytes.byteLength,
+      }],
+    });
+    const prguseManifest = JSON.stringify({
+      libraryKey: "Prguse",
+      pages: [{
+        key: `sha256:${pageBHash}`,
+        sha256: pageBHash,
+        imageUrl: pageBUrl,
+        networkBytes: pageBBytes.byteLength,
+      }],
+    });
+    const npcManifestHash = createHash("sha256").update(npcManifest).digest("hex");
+    const prguseManifestHash = createHash("sha256").update(prguseManifest).digest("hex");
+    await fs.writeFile(path.join(fullRoot, "index.json"), JSON.stringify({
+      schemaVersion: 1,
+      kind: "mir2-crystal-full-pack-index",
+      contentHash,
+      sourceContentHash,
+      summary: { libraryCount: 2 },
+      libraries: [
+        { key: "NPC/00", pageCount: 1, manifestUrl: npcUrl, shardUrl: npcUrl, manifestSha256: npcManifestHash },
+        { key: "Prguse", pageCount: 1, manifestUrl: prguseUrl, shardUrl: prguseUrl, manifestSha256: prguseManifestHash },
+      ],
+    }));
+    await fs.writeFile(
+      coveragePath,
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: "mir2-crystal-full-pack-coverage",
+        mode: "verify",
+        evidence: {
+          contentHash,
+          pageHashesVerified: true,
+          verifiedLibraryCount: 2,
+          verifiedUniquePageCount: 2,
+        },
+      }),
+    );
+    await fs.writeFile(path.join(fullRoot, "libraries", "entities", "npc.json"), npcManifest);
+    await fs.writeFile(path.join(fullRoot, "libraries", "ui", "prguse.json"), prguseManifest);
+    await fs.mkdir(path.join(fullRoot, "pages", pageAHash.slice(0, 2)), { recursive: true });
+    await fs.mkdir(path.join(fullRoot, "pages", pageBHash.slice(0, 2)), { recursive: true });
+    await fs.writeFile(path.join(fullRoot, pageAUrl.split("/full/")[1]), pageABytes);
+    await fs.writeFile(path.join(fullRoot, pageBUrl.split("/full/")[1]), pageBBytes);
+
+    const outputDir = path.join(root, "release-output");
+    await runNode(fixtureScript, [
+      "--offlineManifest", "true",
+      "--assetVersion", "full-pack-fixture",
+      "--outDir", outputDir,
+      "--stageDir", path.join(root, "stage"),
+      "--stageFileMode", "reference",
+      "--hashMode", "sha256",
+      "--cas", "false",
+      "--includeSceneSprites", "false",
+      "--includePublicAssetRoots", "false",
+      "--includeFullCrystalPack", "true",
+      "--allowMissing", "true",
+    ]);
+
+    const release = JSON.parse(await fs.readFile(path.join(outputDir, "remote-asset-release.json"), "utf8"));
+    const files = new Map(release.files.map((file) => [file.path, file]));
+    assert.deepEqual(release.fullCrystalPack, {
+      enabled: true,
+      verified: true,
+      path: "/generated/crystal-packs/full/index.json",
+      contentHash,
+      sourceContentHash,
+      libraryCount: 2,
+      pageCount: 2,
+      fileCount: 5,
+    });
+    assert.ok(files.has("/generated/crystal-packs/full/index.json"));
+    assert.ok(files.has("/generated/crystal-packs/full/libraries/entities/npc.json"));
+    assert.ok(files.has("/generated/crystal-packs/full/libraries/ui/prguse.json"));
+    assert.ok(files.has(pageAUrl));
+    assert.ok(files.has(pageBUrl));
+    assert.deepEqual(
+      files.get(pageAUrl).sources,
+      ["full-crystal-pack:page"],
+    );
+
+    const orphanDir = path.join(fullRoot, "pages", "ff");
+    await fs.mkdir(orphanDir, { recursive: true });
+    await fs.writeFile(path.join(orphanDir, "orphan.png"), "orphan");
+    await assert.rejects(
+      runNode(fixtureScript, [
+        "--offlineManifest", "true",
+        "--assetVersion", "full-pack-orphan-fixture",
+        "--outDir", path.join(root, "release-output-orphan"),
+        "--stageDir", path.join(root, "stage-orphan"),
+        "--stageFileMode", "reference",
+        "--hashMode", "sha256",
+        "--cas", "false",
+        "--includeSceneSprites", "false",
+        "--includePublicAssetRoots", "false",
+        "--includeFullCrystalPack", "true",
+        "--allowMissing", "true",
+      ]),
+      /closure mismatch/,
+    );
   });
 });
 
@@ -172,7 +327,7 @@ await test("release manifest upload starts after every referenced asset upload c
   });
 });
 
-console.log("asset release safety tests passed (2/2)");
+console.log("asset release safety tests passed (3/3)");
 
 async function test(name, fn) {
   try {

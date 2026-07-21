@@ -64,6 +64,11 @@ let s3Client;
 
 async function main() {
   const release = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+  if (release.fullCrystalPack?.enabled === true && uploadDriver !== "s3") {
+    throw new Error(
+      "Verified full Crystal packs must use MIR2_R2_UPLOAD_DRIVER=r2-s3 so large shards are streamed directly to R2.",
+    );
+  }
   const legacyAssetUploads = await buildUploadList(release);
   const legacyUploadByPath = new Map(legacyAssetUploads.map((upload) => [upload.relativePath, upload]));
   const casUploads = release.cas
@@ -280,6 +285,7 @@ async function buildUploadList(release) {
       contentType: file.contentType ?? file.c ?? "application/octet-stream",
       cacheControl: file.cacheControl || "public, max-age=31536000, immutable",
       sources: file.sources ?? file.src ?? [],
+      sha256: file.sha256 ?? file.h ?? null,
     });
   }
   return uploads;
@@ -358,8 +364,10 @@ async function uploadViaS3(upload) {
       Bucket: bucket,
       Key: upload.objectKey,
       Body: body,
+      ContentLength: upload.size,
       ContentType: upload.contentType,
       CacheControl: upload.cacheControl,
+      Metadata: upload.sha256 ? { sha256: upload.sha256 } : undefined,
     }),
   );
 }

@@ -4,6 +4,7 @@ node_modules/
 dist/
 out/
 .mir2-remote-assets/
+docs/generated/remote-assets/
 apps/web/public/original-asset-manifest.generated.json
 # Full Crystal conversion is reproducible from the local client. Do not commit
 # multi-gigabyte CAS pages or per-library manifests.

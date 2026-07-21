@@ -33,6 +33,8 @@ const heavyPublicMediaTracingExcludes = [
   "**/public/**/*.wav",
   "**/public/**/*.wasm",
   "**/public/**/*.CUR",
+  "./public/generated/crystal-packs/full/**",
+  "**/public/generated/crystal-packs/full/**",
 ];
 
 const nextConfig: NextConfig = {
@@ -88,6 +90,14 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Cache-Control", value: immutableGameAssetCache },
           { key: "X-Mir2-Asset-Cache", value: "original-map-blend" },
+          clearAltSvcHeader,
+        ],
+      },
+      {
+        source: "/generated/crystal-packs/full/:path*",
+        headers: [
+          { key: "Cache-Control", value: immutableGameAssetCache },
+          { key: "X-Mir2-Asset-Cache", value: "crystal-full-pack" },
           clearAltSvcHeader,
         ],
       },

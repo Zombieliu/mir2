@@ -1,98 +1,116 @@
 # mir2-web3
 
-Mir2/Crystal-compatible MMORPG foundation evolving into a modern custom MMORPG stack.
+Crystal / Legend of Mir 2 compatible Web MMORPG implementation.
+
+For a new Windows checkout, start with the repository-level
+[`README.md`](../README.md), then use:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\bootstrap-developer.ps1
+.\scripts\start-developer.ps1 -OpenBrowser
+```
+
+The supported default is Player Web on `http://127.0.0.1:3002/`, Gateway
+HTTP/WebSocket on `127.0.0.1:7110`, and Crystal TCP on `127.0.0.1:7000`.
+The start script aligns these ports and uses the tracked prebuilt WebGPU/WebGL2
+Bevy runtimes.
+
+## Developer Documentation
+
+- [Developer handoff](docs/DEVELOPER-HANDOFF.md)
+- [Windows local development](docs/LOCAL-DEVELOPMENT-WINDOWS.md)
+- [Asset consumer setup](docs/ASSET-CONSUMER-SETUP.md)
+- [Agent orchestration](docs/AGENT-ORCHESTRATION.md)
+- [Crystal 1:1 roadmap](docs/CRYSTAL-1TO1-ROADMAP.md)
+- [Backend progress](docs/BACKEND-1TO1-PROGRESS.md)
+- [Crystal server parity](docs/CRYSTAL-SERVER-PARITY.md)
 
 ## Layout
 
-- `apps/web`
-  - Next.js app for wallet login, account portal, marketplace, admin tools.
-- `apps/game-client`
-  - Bevy WASM game client.
-- `apps/gateway`
-  - Rust gateway for auth, sessions, websocket traffic, Sui integration.
-- `apps/simulation`
-  - Bevy headless or `bevy_ecs` authority simulation.
-- `packages/protocol`
-  - Shared protocol definitions and generated artifacts.
-- `packages/game-data`
-  - Exported data converted from Crystal resources/configs.
-- `packages/tooling`
-  - Importers, converters, generators, and migration scripts.
-- `docs`
-  - Architecture notes, migration plan, and milestones.
-- `infra`
-  - Optional local Postgres, Redis, NATS, Redpanda, ClickHouse, Meilisearch, Loki, and Grafana development services.
+| Path | Responsibility |
+| --- | --- |
+| `apps/web` | Next.js Player Web, browser input, HUD, asset cache, and QA |
+| `apps/game-client/runtime` | Bevy WebGPU/WebGL2 WASM renderer |
+| `apps/gateway` | Rust TCP/HTTP/WebSocket gateway, auth, sessions, and Zone routing |
+| `apps/simulation` | Authoritative personal sessions and shared Zone simulation |
+| `apps/admin-api` | Audited administration API |
+| `apps/admin-web` | Operations console |
+| `packages/protocol` | Crystal-compatible packet definitions and codecs |
+| `packages/game-data` | Converted game data that is safe to track |
+| `packages/tooling` | Import, conversion, and migration tools |
+| `scripts` | Developer bootstrap, start, verification, and asset packaging |
+| `docs` | Architecture, parity status, runbooks, and generated evidence |
 
-## Source Of Truth
+## Runtime Architecture
 
-The existing Crystal project remains the reference implementation for:
+- Rust Gateway and Simulation are the authoritative gameplay core.
+- A personal `SimulationSession` owns login, character, inventory, equipment,
+  and save/load state.
+- A shared `ZoneRuntime` owns online world position, movement validation,
+  occupancy, AOI, and object broadcasts.
+- Player Web projects Gateway state into the Bevy WASM renderer and Crystal-style
+  DOM HUD.
+- Postgres, Redis, NATS, Redpanda, ClickHouse, Meilisearch, Loki, and Grafana are
+  optional local infrastructure. They are not required for the basic file-store
+  Player Web flow.
 
-- gameplay rules
-- packet flow
-- map and asset formats
-- server-side data behavior
+## Crystal Reference
 
-The new project should not modify Crystal directly. Use Crystal as a reference and migration source.
+The sibling `Crystal` Git submodule is the reference implementation for gameplay
+rules, packet flow, map/asset formats, and server behavior. It also contains the
+handoff parity tools needed by the verification script.
 
-## Current Architecture Direction
+Initialize it through the repository bootstrap or manually:
 
-Primary references:
+```powershell
+git -C .. submodule sync --recursive
+git -C .. submodule update --init --recursive
+```
 
-- `docs/ARCHITECTURE-CURRENT.md`
-- `docs/PARITY-TRUTH-AUDIT.md`
-- `docs/TECH-MODERNIZATION-RFC.md`
-- `docs/ARCHITECTURE-ADOPTION-PLAN.md`
-- `docs/POST-1TO1-EVOLUTION-PLAN.md`
-- `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
-- `docs/ADMIN-STAGING-RUNBOOK.md`
-- `docs/WINDOWS-HOME-STAGING-SERVER.md`
+Do not switch the submodule to an unrelated upstream commit. Any intentional
+Crystal change must first be pushed to the configured handoff branch before the
+root repository pointer is updated.
 
-Immediate product architecture additions:
+## Asset Modes
 
-- Rust gateway and Rust authoritative simulation stay as the core.
-- NextJS + Bevy remain the client direction.
-- Postgres is the authoritative database target.
-- Redis is the non-authoritative cache/session/routing target.
-- NATS is the early internal command/notification bus candidate.
-- Redpanda and ClickHouse back the current Admin event analytics projection.
-- Meilisearch, Loki, and Grafana remain optional local profiles.
+The project deliberately separates code from the multi-gigabyte full Crystal
+pack:
 
-Start core local infrastructure:
+| Mode | Command | Use |
+| --- | --- | --- |
+| Starter | `.\scripts\start-developer.ps1` | First run and ordinary gameplay/backend development |
+| Private GitHub bundle | `.\scripts\install-developer-assets.ps1 -Download` | Full offline developer assets |
+| R2 CDN | `.\scripts\start-developer.ps1 -AssetBaseUrl <url>` | Remote acceptance and CDN/cache testing |
 
-```bash
+The full pack belongs at
+`apps/web/public/generated/crystal-packs/full` and is intentionally ignored by
+Git. Do not commit Crystal client builds, original `.Lib` files, the full pack,
+account stores, or asset credentials.
+
+## Verification
+
+```powershell
+.\scripts\verify-developer-setup.ps1
+```
+
+For a faster iteration that skips only the production Web build:
+
+```powershell
+.\scripts\verify-developer-setup.ps1 -SkipBuild
+```
+
+The complete verification checks the Crystal handoff branch, tracked Starter
+assets, Gateway compilation, asset-release safety tests, TypeScript, and the
+production Web build.
+
+## Optional Infrastructure
+
+Only start the development infrastructure when the task requires Postgres,
+Redis, event analytics, Admin services, or production-like policy:
+
+```powershell
 docker compose -f infra/docker-compose.dev.yml up -d postgres redis nats redpanda clickhouse
 ```
 
-## Legacy MVP Goal
-
-Phase 1 should only target:
-
-1. wallet/account binding
-2. character selection
-3. map entry
-4. movement
-5. chat
-6. basic entity visibility
-
-## Next Steps
-
-Current implemented checkpoint:
-
-1. `packages/protocol` now has typed packet support for login/select/start-game, `MapInformation`, `UserInformation`, movement, chat, `ObjectPlayer`, `NewMonsterInfo`, and `NewNpcInfo`.
-2. `apps/simulation` emits a deterministic bootstrap scene with the player, one remote player, one monster, and one NPC for local testing.
-3. `apps/gateway` exposes TCP, HTTP health, WebSocket bridge, browser manual smoke UI, and a TCP smoke binary.
-4. `apps/admin-api` exposes an Axum Admin API with Postgres-backed operator auth, audited GM commands, peer approval, live gateway delivery, persistent receipts, Postgres command/audit/outbox adapters, and Redpanda/ClickHouse event reads.
-5. `apps/admin-web` is a separate NextJS operations console with login, dashboard, players, economy, activities, servers, risk, GM tools, approvals, operators, audit, timeline, and English/Simplified Chinese UI copy.
-6. `apps/simulation`, `apps/gateway`, and `apps/admin-api` share the same account-store environment policy: local file store by default, Postgres source of truth when explicitly selected or when the runtime is production/staging.
-7. `apps/web` supports password, Sui Passkey, and Sui wallet login through the Gateway WebSocket flow, and can be pointed at a staging Gateway through `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` while preserving the local default gateway websocket.
-8. `scripts/quality-gate.sh` provides a lightweight repo gate for the current Rust/Web engineering boundary.
-9. `apps/web` has game-grade cache instrumentation for static Crystal assets,
-   scene blueprints, critical prewarm packs, cold/warm cache smoke, and real
-   first-playable timing through `smoke:cache-metrics` and
-   `smoke:playable-metrics`.
-
-Immediate next steps:
-
-1. Deploy a shared staging stack using `infra/staging.env.example`.
-2. Run `docs/ADMIN-STAGING-RUNBOOK.md` smoke checks.
-3. Close production blockers before marking the operations center production-grade.
+The default local account store remains `.mir2-data/accounts.json`.

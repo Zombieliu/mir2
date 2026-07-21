@@ -1,6 +1,20 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-07-18
+Last updated: 2026-07-22
+
+> 2026-07-22 reproducible developer-handoff closure: the root repository now
+> pins the maintained Crystal fork/branch, includes Windows bootstrap/start/
+> verification entry points, and tracks an immutable private developer-bundle
+> manifest instead of requiring an undocumented local asset tree. The full
+> bundle contains the exact verified closure of one index, 1,440 library
+> shards, and 4,446 unique PNG pages; its content hash is
+> `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`.
+> Packaging is deterministic USTAR, installation rejects unsafe entries and
+> performs a transactional swap, and remote release generation retains a
+> source path plus SHA-256 for all 45,398 objects. Local release-doctor and R2
+> upload-plan checks pass with exactly 5,887 full-pack objects. This closes the
+> undocumented-code/assets handoff gap; it does not close the remaining human
+> Crystal visual/feel acceptance or the not-yet-published full R2 endpoint.
 
 > 2026-07-18 original q1-q9 frontend contract closure: quest dialogs now keep
 > fixed rewards separate from mandatory q3/q6 selectable rewards and preserve

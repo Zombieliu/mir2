@@ -1,252 +1,193 @@
-# apps/web
+# mir2 Player Web
 
-Next.js host shell for the first visual client checkpoint.
+`apps/web` is the Next.js host for the browser client. It connects to the Rust
+Gateway, projects server packets into the Bevy WASM runtime, and provides the
+login, character selection, HUD, audio, asset-cache, and diagnostics surfaces.
 
-Responsibilities in this slice:
+Use the repository-level PowerShell scripts for normal Windows development.
+The lower-level `npm` commands in this document are diagnostic escape hatches,
+not a second onboarding path.
 
-- open a WebSocket session to the local gateway
-- send password, Sui Passkey, Sui wallet, account creation, and start-game commands
-- project packet payloads into a small world snapshot
-- feed that snapshot into the Bevy WASM runtime
-- render HUD, event log, and quick controls around the canvas
+## Supported Windows Start
 
-Login boundaries:
+Run from `E:\mir2\mir2-web3` (or the equivalent clone directory):
 
-- `lib/client-login-runtime.ts` owns Gateway login command sequencing.
-- `lib/passkey-auth.ts` owns Sui Passkey and wallet personal-message signing
-  plus `/api/passkey/login` token exchange.
-- `app/api/passkey/login/route.ts` verifies Sui personal-message signatures and
-  issues short-lived Gateway auth tokens.
-- production/staging deployments must set `MIR2_PASSKEY_AUTH_SECRET` to the
-  same value used by the Gateway.
+```powershell
+.\scripts\bootstrap-developer.ps1
+.\scripts\start-developer.ps1 -OpenBrowser
+```
 
-Gateway WebSocket configuration:
+The standard endpoints are:
 
-- local default: `ws://127.0.0.1:7110/ws`
-- staging/hosted override: set `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL`
-- if unset outside localhost, the client uses the production Gateway WSS
-  default `wss://165.154.65.136.sslip.io/ws`
+| Service | Address |
+| --- | --- |
+| Player Web | `http://127.0.0.1:3002/` |
+| Gateway WebSocket | `ws://127.0.0.1:7110/ws` |
+| Gateway health | `http://127.0.0.1:7110/health` |
+| Crystal TCP | `127.0.0.1:7000` |
 
-Original asset hosting (sprites + map tiles):
+`start-developer.ps1` builds and starts the Gateway, waits for its health
+endpoint, selects the tracked prebuilt Bevy runtime, injects the matching
+WebSocket URL, and then runs the Web dev server. Press `Ctrl+C` in that terminal
+to stop the Web server and the Gateway process started by the script.
 
-- The original Crystal art (`/original-ui/**` sprites — NPC, Monster, CArmour,
-  CHair — and `/original-map/**` tiles) is served from a remote asset release
-  (R2). The repo ships only each asset's `meta.json`, not the PNGs.
-- Set `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` (server route also accepts
-  `MIR2_ASSET_BASE_URL`) to the full asset-release base URL. The client rewrites
-  `/original-ui/...png` etc. onto that base; if it is unset/empty the requests
-  fall back to local paths that have no PNGs and every sprite 404s with
-  `[mir2] scene asset missing` (the game still runs — these are warnings).
-- Sounds resolve the same way. Only the few `.wav`s committed under
-  `public/original-ui/Sound` exist locally; the rest of the ~320-file Crystal
-  sound library lives on R2. In local dev, setting
-  `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` (e.g. in `.env.local`) auto-registers the
-  asset Service Worker so its R2 fallback serves those sounds too — otherwise
-  ids such as `/original-ui/Sound/62.wav` 404 locally (harmless; audio degrades
-  gracefully). `?assetCache=1` / `?assetCache=0` force the worker on/off without
-  a base URL. The R2 CORS policy (`cloudflare/r2-cors.public.json`) must allow
-  the dev origin for the cross-origin fetch to succeed.
-- Verify a running deploy at `<url>/api/asset-manifest`:
-  `remoteAssets.assetBaseUrl` must be the full release, not `null`. A `null`
-  value means the env var is not set on that build — the usual cause of missing
-  sprites in an otherwise-working game.
-- See `.env.example` for the variable.
+For the complete setup and troubleshooting flow, see:
 
-Local flow:
+- [Windows local development](../../docs/LOCAL-DEVELOPMENT-WINDOWS.md)
+- [Developer handoff](../../docs/DEVELOPER-HANDOFF.md)
+- [Asset consumer setup](../../docs/ASSET-CONSUMER-SETUP.md)
 
-1. build the WASM runtime with `npm run runtime:build:dev`
-2. start the web shell with `npm run dev`
-3. open the local page and choose password, Passkey, wallet, or `Quick Enter`
+## Login Flow
 
-Shared Zone browser smoke:
+For a clean local data directory:
 
-- Start a Gateway, for example with `MIR2_GATEWAY_WEB_ADDR=127.0.0.1:7210`.
-- Start Web on `127.0.0.1:13010`.
-- Run `MIR2_GATEWAY_WS_URL=ws://127.0.0.1:7210/ws npm run smoke:two-client-zone`.
-- The smoke opens two isolated browser pages, creates throwaway accounts, joins
-  both characters into the same Zone, verifies mutual `ObjectPlayer`
-  visibility, verifies movement/chat broadcast delivery, and writes JSON plus
-  screenshots under `docs/generated/player-qa/two-client-zone/`.
+1. Enter a unique account name and password.
+2. Choose `New Account`.
+3. Choose `Login` with the same credentials.
+4. Create a character.
+5. Choose `Start Game`.
 
-Crystal asset pipeline:
+Account creation does not log the account in automatically. Reusing an
+existing account can surface the protocol message `creation disabled`; use a
+new account name or log in with the existing password.
 
-- The local full-client source default is
-  `/Users/henryliu/obelisk/ai/numeron/mir2/downloads/crystal-client-full`; set
-  `CRYSTAL_CLIENT_ROOT` to override it.
-- `npm run generate:crystal-asset-index` scans full `Data/*.Lib`, `Map/*.map`,
-  and `Sound/*.wav`, then writes the public source-library index and the docs
-  full-client manifest.
-- `npm run export:crystal-sounds` parses Crystal `Sound/SoundList.lst`, copies
-  available referenced wavs into `public/original-ui/Sound`, and writes the
-  runtime sound index. Missing source wavs are recorded in the generated JSON.
-- `npm run assets:prepare` refreshes the source index, SoundList audio, and the
-  curated static sprite export. It is the local/dev preparation path.
-- `npm run smoke:crystal-assets`, `npm run smoke:crystal-minimap-assets`, and
-  `npm run audit:crystal-map-coverage` are the resource verification path.
-- Missing sprite libraries that are present in the full-client index must be
-  generated by `npm run assets:prepare`, `npm run export:crystal-ui`, or a
-  focused R2 repair before testing. `GET /api/original-ui-meta?library=<key>`
-  only reads already deployed/static metadata from the app domain or configured
-  R2/CDN base; it does not request-time export Crystal libraries.
+## Asset Modes
 
-Game-grade asset cache:
+Do not treat "repository assets", "private developer bundle", and "R2 CDN" as
+the same distribution.
 
-- Production serves `/original-ui`, `/original-map`, and
-  `/generated/original-map-blend` with
-  `Cache-Control: public, max-age=31536000, immutable`.
-- `/bevy-runtime/...` uses a short revalidation path plus a JS/WASM content
-  hash query. Do not put it in the long-lived Service Worker static cache:
-  the wasm-bindgen JS glue and `.wasm` must always come from the same runtime
-  build.
-- `/api/asset-manifest` returns a short-lived version manifest derived from the
-  generated Crystal indexes. The browser Service Worker uses that version to
-  partition runtime caches for static assets, scene blueprints, and metadata.
-- The manifest also declares critical prewarm packs: `login`,
-  `character-select`, `hud-core`, and `bichon-spawn`. Prewarm fetches scene
-  blueprints and the first visible scene sprite frames, not the full 7-8 GB
-  Crystal source tree.
-- The Service Worker is registered automatically in production. In local dev,
-  opt in with `?assetCache=1`; otherwise it stays disabled to avoid hiding
-  asset-generation changes during iteration.
-- In local dev, `?assetCache=1` also opts into prewarm. Use `?prewarm=1` to run
-  prewarm without relying on production mode, or `?prewarm=0` to suppress it.
-- Normal production prewarm shows a compact player-facing resource status strip
-  after the critical packs start loading. The strip aggregates logical pack
-  progress, local cache entries, remote transfer bytes, and failures, and stays
-  visible after completion so testers can keep reading cache state in-game.
-- Add `?cacheLog=1` for frontend test logging. It prints structured
-  `[mir2-cache]` and `[mir2-cache-progress]` console entries for the manifest,
-  Service Worker state, active pack, percent, local CacheStorage counts, remote
-  transfer bytes, and failures. `?cacheDebug=1` enables the same console stream
-  plus the detailed overlay.
-- `?cacheDebug=1` shows a small QA-only overlay and exposes
-  `window.__mir2CacheMetrics` with resource timing, scene cache hit/miss, and
-  prewarm summaries, plus navigation milestones such as login, StartGame,
-  scene readiness, first playable frame, CacheStorage cache/entry counts, and
-  browser storage usage/quota/persistence state.
-- When prewarm starts, the cache layer asks `navigator.storage.persist()` where
-  the browser supports it. The result is diagnostic only: Chromium may decline
-  persistence in fresh/headless profiles, but the metric records both current
-  persisted state and the grant result.
-- QA can call `window.__mir2AssetCacheReset({ reload: false })` to delete all
-  Mir2 CacheStorage buckets and unregister the asset Service Worker without
-  adding any player-facing controls. Omitting `reload: false` reloads the page
-  after the reset.
-- `npm run smoke:cache-metrics` launches a fresh Chrome profile, runs cold and
-  warm cache passes, reads `window.__mir2CacheMetrics`, and writes JSON evidence
-  to `docs/generated/player-qa/cache-metrics/`.
-- `npm run smoke:cache-maintenance` additionally seeds a fake legacy Mir2 cache,
-  reloads to prove the active manifest version cleans stale buckets, then calls
-  the QA reset API with `reload: false` to prove all Mir2 caches are cleared and
-  the Service Worker is unregistered. The smoke also enforces cache-budget
-  guardrails so a future manifest change cannot accidentally prewarm the full
-  Crystal source tree: default budgets are at most 1000 prewarm requests, 2500
-  warm CacheStorage entries, and 256 MB warm browser storage usage. Override
-  with `MIR2_CACHE_MAX_PREWARM_REQUESTS`, `MIR2_CACHE_MAX_WARM_ENTRIES`, or
-  `MIR2_CACHE_MAX_WARM_STORAGE_USAGE_BYTES` when intentionally changing the
-  startup pack shape.
-- `npm run smoke:playable-metrics` uses the same cold/warm profile flow, then
-  drives `demo/demo` through login, character select, `StartGame`, and the
-  first playable scene before asserting first-playable budgets and cache
-  prewarm completion. Both smoke modes assert that the warm run has populated
-  Mir2 CacheStorage entries. Set `MIR2_GATEWAY_WS_URL` when the Gateway is not
-  on the default WebSocket URL.
-- `GET /api/scene/crystal` uses a server-side memory plus disk blueprint cache
-  under `.next/cache/mir2-scene-blueprints`. Set
-  `MIR2_SCENE_BLUEPRINT_CACHE=0` to bypass it, or set
-  `MIR2_SCENE_CACHE_BUSTER` when changing scene-cache semantics.
-- Set `MIR2_ASSET_CACHE_BUSTER` when a deployment must rotate the browser asset
-  manifest version even if generated index files have not changed.
+| Mode | What it uses | Intended use |
+| --- | --- | --- |
+| Starter | Git-tracked UI/map PNGs, starter Crystal pack, and prebuilt Bevy WASM | Clone-and-run onboarding and ordinary gameplay work |
+| Private GitHub bundle | A checksummed private Release installed into `public/generated/crystal-packs/full` | Full offline parity development |
+| R2 CDN | An immutable, versioned remote release selected by an asset base URL | Hosted acceptance, cache, and low-storage testing |
 
-Remote R2/CDN asset release:
+### Starter
 
-- The app can serve the first cache miss from an R2-backed CDN while keeping
-  the browser cache key as the local same-origin path. Set
-  `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` (or server-only `MIR2_ASSET_BASE_URL`) to
-  the public CDN prefix. The value may include `{version}`, for example
-  `https://assets.example.com/mir2/v/{version}`. The current production base is
-  `https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c`.
-- `/api/asset-manifest` exposes `remoteAssets` with the resolved CDN base URL,
-  object prefix, and path mode. The Service Worker maps
-  `/original-ui/...`, `/original-map/...`, and
-  `/generated/original-map-blend/...` to `${assetBaseUrl}/...` on a cache miss,
-  caches the successful response under the original local request, and falls
-  back to the app origin if the CDN request fails. `/bevy-runtime/...` remains
-  same-origin because the JS/WASM pair must match each Vercel build. The build
-  writes `lib/generated/bevy_runtime_version.json` from the WebGPU and WebGL2
-  runtime JS/WASM hashes, and the page appends that version to runtime URLs.
-- Object keys mirror the public asset path under
-  `MIR2_ASSET_OBJECT_PREFIX`, which defaults to `mir2/v/{version}`. With the
-  example above, `/original-ui/Prguse/4.png` uploads to
-  `mir2/v/<version>/original-ui/Prguse/4.png`.
-- Generate the uploadable release from a running Web server:
-  `npm run assets:remote:build -- --baseUrl http://127.0.0.1:13014 --assetBaseUrl https://assets.example.com/mir2/v/{version}`.
-  The script stages the manifest-declared critical packs, scene frames, and
-  generated scene sprite roots (`CArmour`, `CHair`, `CWeapon`, `AArmour`,
-  `AHair`, `AWeapon`, `ARArmour`, `ARHair`, `ARWeapon`, `NPC`, and `Monster`),
-  writes `docs/generated/remote-assets/latest-remote-asset-release.json`, and
-  keeps staged files under `.mir2-remote-assets/`. Pass
-  `--includeSceneSprites false` only for a tiny manifest smoke that should not
-  represent production gameplay coverage.
-- Dry-run the R2 upload:
-  `npm run assets:r2:dry-run -- --manifest ../../docs/generated/remote-assets/latest-remote-asset-release.json`.
-  Upload for real with `MIR2_R2_BUCKET=<bucket> npm run assets:r2:upload`.
-  The upload command defaults to `MIR2_R2_UPLOAD_DRIVER=r2-s3` using
-  Cloudflare R2 S3 credentials (`MIR2_R2_ACCESS_KEY_ID` and
-  `MIR2_R2_SECRET_ACCESS_KEY`); pass
-  `--remote false` only for local Wrangler storage tests.
-  Add `--ensureBucket true` only when the logged-in Cloudflare account already
-  has R2 enabled and you want Wrangler to create the bucket if missing.
-- For thousands of small generated files, deploy
-  `infra/cloudflare/mir2-r2-bulk-upload` and upload with
-  `MIR2_R2_UPLOAD_DRIVER=worker`, `MIR2_R2_UPLOAD_WORKER_URL`, and
-  `MIR2_R2_UPLOAD_SECRET`. This keeps R2 writes behind an authenticated Worker
-  binding and avoids one Wrangler process per object.
-- Public R2 objects need CORS for the Service Worker remote fetch. A public
-  GET/HEAD template is checked in at `cloudflare/r2-cors.public.json`; apply it
-  through the Cloudflare dashboard or Wrangler before pointing production at
-  the CDN/custom domain.
-- `infra/cloudflare/mir2-r2-asset-cache` is the production edge-cache Worker
-  for `assets.mir2.obelisk.build/*`. It serves the R2 bucket through a binding,
-  returns CORS headers, and caches immutable GET responses at Cloudflare's edge
-  so repeat player/resource requests do not keep hitting R2.
-- Current verified R2 production release:
-  `NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c`
-  with bucket `mir2-web3-assets` and prefix `mir2/v/37596e16d64fde7c`. The
-  current published manifest has 7,329 asset files, including 6,807 scene
-  sprite files plus the generated Bichon torch blend frames, and production
-  playable smoke records no non-favicon 404s.
+No asset environment variable is required:
 
-CDN-first Vercel deploy:
+```powershell
+.\scripts\start-developer.ps1 -OpenBrowser
+```
 
-- `npm run vercel:build:prod` runs a production Vercel prebuild and then
-  prunes R2-backed static asset directories from `.vercel/output`. It removes
-  only generated deployment output for `static/original-ui`,
-  `static/original-map`, and `static/generated/original-map-blend`; it does not
-  modify `public/`.
-- `npm run vercel:deploy:prod` deploys that prebuilt output with
-  `vercel deploy --prebuilt --prod --archive=tgz --yes`.
-- Keep `static/debug` in the deployment until the playable smoke proves the app
-  no longer requests `/debug/map-samples/*.png`. The 2026-05-21 CDN-first
-  production pass retained those files and uploaded 15.7MB, while the prune
-  report showed `.vercel/output` dropping from 420.96MB to 43.48MB.
-- After deployment, run both `smoke:cache-maintenance` and
-  `smoke:playable-metrics` against `https://mir2.obelisk.build`; the first
-  validates resource/cache behavior, and the second validates login,
-  StartGame, first playable, and runtime asset coverage.
+The repository contains real Starter PNGs. It is not metadata-only. A request
+for `/generated/crystal-packs/full/index.json` may return 404 when no private
+full pack is installed; the client then falls back to Starter assets. Append
+`?crystalFullPack=0` when intentionally testing only that fallback.
 
-Vercel preview deployment notes:
+### Private GitHub Developer Bundle
 
-- The current Vercel project is rooted at `apps/web`, so its deployment archive
-  does not include sibling Rust runtime sources. `scripts/vercel-build.sh` uses
-  the prebuilt `public/bevy-runtime/pkg-webgpu` and
-  `public/bevy-runtime/pkg-webgl2` packages when those sources are absent.
-- Keep static PNG/WAV game media out of Serverless Function traces. The current
-  `next.config.ts` excludes `/original-ui` and `/original-map` media from the
-  API routes that only need metadata or URL paths.
-- The first R2-backed preview is
-  `https://mir2-web3-jv7m1fbai-obelisk-labs.vercel.app`.
-- The current Cloudflare-hosted player domain is `https://mir2.obelisk.build`.
-  It is served by `infra/cloudflare/mir2-domain-proxy`, which forwards to the
-  current Vercel preview and injects the Vercel automation bypass secret from a
-  Cloudflare Worker secret.
+The repository pins the approved private Release in
+`config/developer-assets.json`. After authenticating an account that can read
+the private repository, let the installer download and verify every split part:
+
+```powershell
+gh auth login
+.\scripts\install-developer-assets.ps1 -Download
+.\scripts\start-developer.ps1 -OpenBrowser
+```
+
+The installer validates part sizes and SHA-256 values, reconstructs the
+archive, validates the final archive, and extracts it to:
+
+```text
+apps/web/public/generated/crystal-packs/full
+```
+
+That directory is intentionally ignored by Git. Once installed, leave
+`NEXT_PUBLIC_MIR2_ASSET_BASE_URL` empty so the Web app uses the local pack.
+
+Maintainers create the private payload with:
+
+```powershell
+.\scripts\package-developer-assets.ps1
+```
+
+The packaging and release procedure is documented in
+[Asset consumer setup](../../docs/ASSET-CONSUMER-SETUP.md).
+
+### R2 CDN
+
+Use the immutable release root supplied by the maintainer. Do not copy an old
+hash from documentation:
+
+```powershell
+$AssetBaseUrl = "https://assets.example.com/mir2/v/<version>"
+.\scripts\verify-developer-setup.ps1 -AssetBaseUrl $AssetBaseUrl -SkipBuild
+.\scripts\start-developer.ps1 -AssetBaseUrl $AssetBaseUrl -OpenBrowser
+```
+
+The release root must expose the same public path layout as the Web app,
+including `original-ui/`, `original-map/`,
+`generated/original-map-blend/`, and
+`generated/crystal-packs/full/index.json`. The Bevy JS/WASM pair remains
+same-origin because both files must come from the same build.
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` only when a persistent override is useful.
+The normal start script injects local values without requiring this file.
+
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` | Browser-visible Gateway WebSocket override |
+| `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` | Browser-visible immutable R2/CDN release root |
+| `MIR2_ASSET_BASE_URL` | Server-side alias for the asset release root |
+| `MIR2_R2_PROXY_BASE` | Optional same-origin development proxy target |
+| `MIR2_PASSKEY_AUTH_SECRET` | Production/staging token secret; must match Gateway |
+
+Do not put credentials, GitHub tokens, R2 access keys, or upload secrets in a
+tracked env file.
+
+## Verification
+
+Run the repository verifier after onboarding or before handoff:
+
+```powershell
+.\scripts\verify-developer-setup.ps1
+```
+
+For a faster iteration that skips the production Web build:
+
+```powershell
+.\scripts\verify-developer-setup.ps1 -SkipBuild
+```
+
+The verifier checks the Crystal submodule handoff branch, tracked Starter and
+prebuilt runtime files, Gateway compilation, asset-release safety tests,
+TypeScript, and (unless skipped) a production Web build. With
+`-AssetBaseUrl` it also probes the remote full-pack index.
+
+## Manual Web Start
+
+Use this only when the Gateway is already running and the standard script is
+not suitable for a focused Web diagnosis:
+
+```powershell
+$env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL = "ws://127.0.0.1:7110/ws"
+npm ci
+npm run dev -- --hostname 127.0.0.1 --port 3002
+```
+
+The supported package manager for clean onboarding is `npm` with the committed
+`package-lock.json`. Node.js 22 or newer is required.
+
+## Common Diagnostics
+
+- Gateway unavailable: open `http://127.0.0.1:7110/health` and inspect
+  `.mir2-data/developer-logs/gateway.out.log` and `gateway.err.log`.
+- Wrong Gateway port: use `7110` for the standard WebSocket endpoint; historical
+  QA commands may use a different port.
+- Stale browser assets: test with `?assetCache=0` or run
+  `window.__mir2AssetCacheReset({ reload: false })` in DevTools.
+- Missing local full index: this is expected in Starter mode; reinstall the
+  private bundle only when full offline coverage is required.
+- Missing remote full index: verify the immutable R2 root with
+  `verify-developer-setup.ps1 -AssetBaseUrl <url> -SkipBuild`.
+- First playable frame: a clean start can take roughly 35-60 seconds while the
+  Gateway, Atlas, WASM, and initial scene assets warm up.
+
+For cache debugging, `?cacheLog=1` enables structured console events and
+`?cacheDebug=1` adds the QA overlay. The service worker is normally disabled
+in local development unless an asset base URL is supplied or `?assetCache=1`
+is used.
