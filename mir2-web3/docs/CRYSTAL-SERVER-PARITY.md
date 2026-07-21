@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> Latest monster defence-type parity note: 2026-07-22 follows the original
+> ShamanZombie and WaterDragon server classes instead of inferring every defence
+> channel from range. AI 26 uses `MACAgility` even beside the player; AI 181 uses
+> AC for its adjacent DC strike and MAC plus MagicResist for its ranged MC
+> strike. Rust now has a deterministic authoritative Min/Max MAC roll alongside
+> AC, and a regression gives the player more than 10,000 physical AC to prove a
+> ranged Hydra hit is not accidentally reduced by that stat while Green poison
+> still applies. Core verification is green at 1,126 Simulation unit tests,
+> shared Zone 154/154, all package integrations and vertical slice 8/8. This is
+> not a claim that every Crystal monster defence type is imported: the remaining
+> AI-specific table is explicit parity debt and must be source-verified.
+
 > Latest original beginner-route server parity note: 2026-07-18 closes the
 > Crystal q1-q9 fresh-Warrior path through level 6. The imported quest chain
 > now preserves the original NPC hand-offs, task quantities, prerequisites,

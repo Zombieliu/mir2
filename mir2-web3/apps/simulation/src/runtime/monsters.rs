@@ -13,11 +13,11 @@ use mir2_protocol::{
 
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
-use super::combat::crystal_player_rolled_armour;
 use super::combat::{
     combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
     ranged_attack_delay_ticks, PendingPlayerStatusEffect,
 };
+use super::combat::{crystal_player_rolled_armour, crystal_player_rolled_magic_armour};
 use super::components::{
     entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
     HarvestMonsterState, HarvestOwnership, Monster, MonsterAgent, MonsterAiState,
@@ -2147,6 +2147,7 @@ pub(super) fn monster_player_attack_damage(
     target: &Point,
 ) -> i32 {
     let current_tick = super::resources::runtime_tick(world);
+    let distance = tile_distance(source, target);
     let (attack_damage, raw_attack_damage, magic_damage, raw_magic_damage, spell_damage) =
         crystal_monster_by_name(monster_name)
             .map(|monster| {
@@ -2265,15 +2266,26 @@ pub(super) fn monster_player_attack_damage(
         // `zone_crystal_monster_attack_damage`) and use the imported DC.
         _ => attack_damage,
     };
-    let mitigation = crystal_player_rolled_armour(world);
     if base_damage <= 0 {
         return 0;
     }
+
+    // Crystal ShamanZombie.LineAttack always uses MACAgility, including an
+    // adjacent target. WaterDragon uses ACAgility in melee and MACAgility for
+    // its ranged MC branch. These explicit channels must not subtract AC from
+    // magic attacks (ShamanZombie.cs and WaterDragon.cs).
+    let uses_magic_armour = agent.ai == 26 || (agent.ai == 181 && distance > 1);
+    let mitigation = if uses_magic_armour {
+        crystal_player_rolled_magic_armour(world)
+    } else {
+        crystal_player_rolled_armour(world)
+    };
     let mitigated = base_damage.saturating_sub(mitigation.max(0));
-    // Ranged monster strikes are the magic-school attacks in Crystal; the
-    // player's MagicResist further shrugs part of the blow. Inert (no change)
-    // for a player without magic resistance.
-    if tile_distance(source, target) > 1 {
+    // MAC channels include Crystal's full-shrug MagicResist check. Preserve the
+    // existing ranged-branch check for AIs whose DefenceType has not yet been
+    // imported explicitly; the two source-verified branches above no longer
+    // depend on distance to select their magic defence behavior.
+    if uses_magic_armour || distance > 1 {
         super::combat::crystal_player_magic_mitigated(world, mitigated)
     } else {
         mitigated

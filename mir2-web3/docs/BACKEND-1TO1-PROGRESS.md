@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> Latest source-verified monster-defence sync: 2026-07-22 corrects the player
+> mitigation channel for Crystal AI 26 ShamanZombie and AI 181 WaterDragon /
+> Hydra. ShamanZombie `LineAttack` always uses `MACAgility`; WaterDragon uses
+> physical AC for its adjacent branch and MAC for its ranged MC branch. The
+> runtime now rolls authoritative Min/Max MAC with an independent deterministic
+> salt and applies MagicResist on those magic channels instead of subtracting
+> physical AC. A high-AC Hydra regression proves the ranged hit still damages
+> and applies Green poison through MAC. Verification passes all 1,126 Simulation
+> unit tests, 154 shared-Zone tests, all integration suites including 8/8
+> vertical slices, and the focused strengthened Hydra test. A complete imported
+> per-AI `DefenceType` table remains open; unverified AIs still retain the older
+> distance fallback and must be migrated from Crystal source rather than guessed.
+
 > Latest original Bichon q1-q9 backend sync: 2026-07-18 completes an exact
 > fresh-Warrior route from Assistant Jane through MirGuide Peter and naturally
 > reaches level 6. The runtime now matches Crystal's task counts, prerequisites,

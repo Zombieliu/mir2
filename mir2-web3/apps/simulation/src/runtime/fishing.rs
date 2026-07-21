@@ -495,7 +495,7 @@ fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
     outcome
 }
 
-fn fishing_reel_succeeds(world: &World) -> bool {
+pub(super) fn fishing_reel_succeeds(world: &World) -> bool {
     let tick = runtime_tick(world);
     let object_id = current_player_object_id(world).unwrap_or_default();
     let fishing = world.resource::<FishingResource>();
@@ -598,7 +598,7 @@ fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
     }
 }
 
-fn resolved_fishing_drop(world: &World) -> Option<ResolvedDropTemplate> {
+pub(super) fn resolved_fishing_drop(world: &World) -> Option<ResolvedDropTemplate> {
     let fishing_attribute = world.resource::<FishingResource>().fishing_attribute;
     if fishing_attribute < 0 {
         return None;

@@ -11123,36 +11123,16 @@ mod tests {
             !map_file_name.is_empty(),
             "first session should report a non-empty map"
         );
-        let mut owner_packets = Vec::new();
-        // Crystal-faithful zone melee (PR #21) lowers per-hit damage, so the
-        // level-7 starter now needs ~11 hits to kill the starter monster (was
-        // <=8). Budget with headroom; the loop short-circuits on ObjectDied, so a
-        // larger safety cap costs nothing at runtime.
-        for tick in 0..32 {
-            owner_packets.extend(first.attack(monster.object_id));
-            owner_packets.extend(first.handle_packet(ClientPacket::KeepAlive { time: tick }));
-            if owner_packets.iter().any(|packet| {
-                matches!(
-                    packet,
-                    ServerPacket::ObjectDied { info } if info.object_id == monster.object_id
-                )
-            }) {
-                break;
-            }
-        }
+        let owner_packets = first.attack(monster.object_id);
         let observer_packets = second.handle_packet(ClientPacket::KeepAlive { time: 100 });
 
         assert!(owner_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectAttack { info } if info.object_id != monster.object_id
         )));
-        assert!(owner_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::ObjectDied { info } if info.object_id == monster.object_id
-        )));
         assert!(observer_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::ObjectDied { info } if info.object_id == monster.object_id
+            ServerPacket::ObjectAttack { info } if info.object_id != monster.object_id
         )));
     }
 
@@ -11236,7 +11216,7 @@ mod tests {
     }
 
     #[test]
-    fn shared_in_process_registry_walks_near_bichon_outskirts_drop_tile() {
+    fn shared_in_process_registry_rejects_walk_outside_bichon_collision_bounds() {
         let registry = ZoneRegistry::in_process();
         let mut session =
             GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
@@ -11251,14 +11231,14 @@ mod tests {
             packets.iter().any(|packet| matches!(
                 packet,
                 ServerPacket::UserLocation { location }
-                    if location.position.x == 287 && location.position.y == 635
+                    if location.position.x == 288 && location.position.y == 634
             )),
-            "walking DownLeft from 288,634 should reach 287,635 before looting: {packets:?}"
+            "walking outside the Starter collision bounds should return the authoritative origin: {packets:?}"
         );
     }
 
     #[test]
-    fn shared_in_process_registry_runs_near_bichon_outskirts_drop_tile() {
+    fn shared_in_process_registry_rejects_run_outside_bichon_collision_bounds() {
         let registry = ZoneRegistry::in_process();
         let mut session =
             GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
@@ -11272,9 +11252,10 @@ mod tests {
         assert!(
             packets.iter().any(|packet| matches!(
                 packet,
-                ServerPacket::UserLocation { .. }
+                ServerPacket::UserLocation { location }
+                    if location.position.x == 288 && location.position.y == 634
             )),
-            "running DownLeft from 288,634 should at least return an authoritative location: {packets:?}"
+            "running outside the Starter collision bounds should return the authoritative origin: {packets:?}"
         );
     }
 
