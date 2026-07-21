@@ -149,6 +149,8 @@ mir2-web3/.mir2-data/accounts.json
 - `bootstrap-developer.ps1` 的 Rust check 以及 Player/Admin npm install 取决于网络与本机缓存。
 - `start-developer.ps1` 首次会增量构建 Gateway，最长等待 health 60 秒。
 - Web `npm run dev` 会确保地图 Atlas 存在，并验证预编译 Bevy Runtime。
+- Player/Admin 的 `npm run typecheck` 会先执行 `next typegen`；Next 管理的
+  `next-env.d.ts` 已被 Git 忽略，不要手工编辑或提交。
 - 干净环境首次 `Start Game` 到可玩画面通常需要 35-60 秒；不要使用 15 秒测试超时判断启动失败。
 - Gateway 日志写入 `.mir2-data/developer-logs/gateway.out.log` 和 `gateway.err.log`。
 

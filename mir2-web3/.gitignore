@@ -1,6 +1,7 @@
 # Node
 node_modules/
 .next/
+next-env.d.ts
 dist/
 out/
 .mir2-remote-assets/
