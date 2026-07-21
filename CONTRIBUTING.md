@@ -8,7 +8,8 @@
 2. 阅读 [`mir2-web3/docs/DEVELOPER-HANDOFF.md`](mir2-web3/docs/DEVELOPER-HANDOFF.md)。
 3. Windows 开发使用 [`mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md`](mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md)。
 4. 涉及素材时阅读 [`mir2-web3/docs/ASSET-CONSUMER-SETUP.md`](mir2-web3/docs/ASSET-CONSUMER-SETUP.md)。
-5. Agent 或多人并行开发必须遵守 [`mir2-web3/docs/AGENT-ORCHESTRATION.md`](mir2-web3/docs/AGENT-ORCHESTRATION.md)。
+5. 外部协作和素材授权阅读 [`mir2-web3/docs/LEGAL-AND-ASSET-RIGHTS.md`](mir2-web3/docs/LEGAL-AND-ASSET-RIGHTS.md)。
+6. Agent 或多人并行开发必须遵守 [`mir2-web3/docs/AGENT-ORCHESTRATION.md`](mir2-web3/docs/AGENT-ORCHESTRATION.md)。
 
 ## 初始化
 
@@ -32,6 +33,7 @@ Get-Help .\scripts\bootstrap-developer.ps1 -Detailed
 | 任务 | 推荐模式 |
 | --- | --- |
 | 协议、Gateway、Simulation、普通 UI | Starter |
+| 运营后台界面与管理 API | Starter |
 | 角色、怪物、装备、特效和全地图视觉开发 | GitHub 私有开发素材包 |
 | 远程验收、缓存、低端设备和 CDN 行为 | R2 CDN |
 | 重建原始 Crystal 图集 | 本地合法取得的 Crystal Client 数据源 |
@@ -64,8 +66,10 @@ cd mir2-web3
 提交前完整验证：
 
 ```powershell
-.\scripts\verify-developer-setup.ps1
+.\scripts\verify-developer-setup.ps1 -RunCoreTests
 ```
+
+依赖已就绪但无网络时，可用 `-Offline -RunCoreTests`；它不会跳过本地构建和测试。
 
 R2 素材变更还应执行：
 

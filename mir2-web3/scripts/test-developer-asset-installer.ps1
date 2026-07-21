@@ -197,6 +197,68 @@ try {
         throw "Fixture install left a backup directory behind."
     }
 
+    # Exercise interrupted-download recovery with a deterministic local gh shim.
+    $FirstInstall = Join-Path $TestRoot "first-install"
+    Move-Item -LiteralPath $ExistingPack -Destination $FirstInstall
+    $CorruptCachedPart = Join-Path $FixtureCache $PartName
+    [System.IO.File]::WriteAllText($CorruptCachedPart, "partial-download")
+
+    $FakeBin = Join-Path $TestRoot "fake-bin"
+    New-Item -ItemType Directory -Path $FakeBin -Force | Out-Null
+    $FakeGhPath = Join-Path $FakeBin "gh.cmd"
+    $FakeGh = @'
+@echo off
+setlocal EnableDelayedExpansion
+set "pattern="
+set "destination="
+:parse
+if "%~1"=="" goto download
+if "%~1"=="--pattern" (
+  set "pattern=%~2"
+  shift
+  shift
+  goto parse
+)
+if "%~1"=="--dir" (
+  set "destination=%~2"
+  shift
+  shift
+  goto parse
+)
+shift
+goto parse
+:download
+if not defined pattern exit /b 2
+if not defined destination exit /b 3
+copy /Y "%MIR2_TEST_GH_SOURCE%\!pattern!" "!destination!\!pattern!" >nul
+exit /b %errorlevel%
+'@
+    [System.IO.File]::WriteAllText($FakeGhPath, $FakeGh, [System.Text.Encoding]::ASCII)
+
+    $PreviousPath = $env:PATH
+    $PreviousFakeSource = $env:MIR2_TEST_GH_SOURCE
+    try {
+        $env:PATH = "$FakeBin;$PreviousPath"
+        $env:MIR2_TEST_GH_SOURCE = $FixtureParts
+        & (Join-Path $FixtureScripts "install-developer-assets.ps1") `
+            -ManifestPath $ManifestPath `
+            -CacheDirectory $FixtureCache `
+            -Download
+    }
+    finally {
+        $env:PATH = $PreviousPath
+        $env:MIR2_TEST_GH_SOURCE = $PreviousFakeSource
+    }
+
+    if (-not (Test-Path -LiteralPath (Join-Path $ExistingPack $PageRelativePath) -PathType Leaf)) {
+        throw "Recovered fixture install page is missing."
+    }
+    $ExpectedRecoveredHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $PartPath).Hash
+    $ActualRecoveredHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $CorruptCachedPart).Hash
+    if ($ActualRecoveredHash -ne $ExpectedRecoveredHash) {
+        throw "Interrupted-download recovery did not replace the corrupt cached part."
+    }
+
     Write-Host "Developer asset installer fixture passed."
 }
 finally {

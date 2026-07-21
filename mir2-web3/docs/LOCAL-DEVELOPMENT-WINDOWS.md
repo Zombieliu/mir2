@@ -13,6 +13,7 @@
 | Rust | Rustup，脚本安装/使用 `1.89.0` |
 | MSVC | Visual Studio C++ Build Tools + Windows SDK |
 | 浏览器 | Chrome 或 Edge，启用硬件加速；WebGPU 不可用时可回退 WebGL2 |
+| GitHub CLI | 私有仓库和完整素材安装需要；必须具有仓库及 Release 读取权限 |
 
 检查：
 
@@ -22,14 +23,30 @@ node --version
 npm --version
 rustup --version
 cargo --version
+gh --version
 ```
 
 ## 克隆
 
+私有仓库首次接手先执行：
+
 ```powershell
-git clone --recurse-submodules https://github.com/Zombieliu/mir2.git
+gh auth login
+gh auth status
+gh auth setup-git
+gh release view developer-assets-f71b89aa3850 --repo Zombieliu/mir2
+git ls-remote https://github.com/Zombieliu/Crystal.git `
+  refs/heads/codex/handoff-parity-tools
+```
+
+确认仓库和私有素材 Release 均可读后再克隆：
+
+```powershell
+git clone --filter=blob:none --recurse-submodules --also-filter-submodules https://github.com/Zombieliu/mir2.git
 cd mir2\mir2-web3
 ```
+
+推荐使用过滤克隆：它仍会完整检出当前代码和 Crystal 固定提交，但不会预先下载历史版本里的旧 WASM 与 QA 大文件。旧版 Git 不支持 `--also-filter-submodules` 时，去掉两个过滤参数即可。
 
 已有 checkout：
 
@@ -55,7 +72,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 1. 检查 Git、Node.js 22+、npm、Rustup 和 Cargo。
 2. 初始化并校验 Crystal 子模块。
 3. 安装 Rust `1.89.0`（如缺失）。
-4. 在 `apps/web` 执行 `npm ci`。
+4. 在 `apps/web` 和 `apps/admin-web` 分别执行锁定的 `npm ci`。
 5. 执行 `cargo +1.89.0 check --locked -p mir2-gateway`。
 6. 确认预编译 WebGPU WASM 存在。
 
@@ -101,9 +118,31 @@ Starter 模式：
 - 在前台启动 Next dev server。
 - `Ctrl+C` 后清理由脚本启动的 Gateway。
 
+默认不会静默复用已运行的 Gateway，避免新开发者误连到旧代码或不同账户库。只有确认进程兼容时才使用：
+
+```powershell
+.\scripts\start-developer.ps1 -ReuseGateway -OpenBrowser
+```
+
 浏览器可能先于 Next dev server 完成编译而打开；看到暂时无法访问时，等待 Web 终端显示 ready 后刷新。
 
+## 原生 Crystal 对照客户端（可选）
+
+日常 Web 开发不需要原生客户端。只有进行 Crystal-vs-Web 视觉、移动时序或玩法对照时，才使用由项目所有者合法提供、未提交进 Git 的原生运行目录。当前工作区惯例是：
+
+```text
+<repo>\Crystal\Build\Client\Debug\Client.exe
+```
+
+源代码子模块不保证包含可运行二进制和完整 `Data`。缺少该文件不会阻止 `bootstrap-developer.ps1`、Gateway 或 Web 启动；需要对照验收时应联系项目所有者确认授权和本地交付方式，不要从不明来源下载 `.Lib` 或客户端安装包。
+
 ## 完整素材模式
+
+开始安装前，同一磁盘至少保留 40 GiB 空闲，完整开发环境建议 50 GiB 以上。默认缓存分片约 9.08 GiB，安装后的图集约 9.08 GiB，重组 tar 和 staging 还会带来临时峰值。
+
+```powershell
+.\scripts\install-developer-assets.ps1 -Download
+```
 
 本地已经安装 GitHub 私有素材包时，仍使用普通启动命令：
 
@@ -111,7 +150,7 @@ Starter 模式：
 .\scripts\start-developer.ps1 -OpenBrowser
 ```
 
-使用 R2：
+R2 当前尚未发布可用 URL。维护者完成不可变版本发布和全对象验收后才使用：
 
 ```powershell
 $AssetBaseUrl = "https://assets.example.com/mir2/v/<version>"
@@ -149,10 +188,22 @@ $env:MIR2_ACCOUNT_STORE_PATH = ".mir2-data/accounts-local-dev.json"
 .\scripts\verify-developer-setup.ps1
 ```
 
-快速验证，不执行生产 Web build：
+快速验证，不执行 Player/Admin 生产 build：
 
 ```powershell
 .\scripts\verify-developer-setup.ps1 -SkipBuild
+```
+
+交接或核心代码提交前运行 Rust 全回归：
+
+```powershell
+.\scripts\verify-developer-setup.ps1 -RunCoreTests
+```
+
+依赖已安装但没有网络时：
+
+```powershell
+.\scripts\verify-developer-setup.ps1 -Offline -RunCoreTests
 ```
 
 R2：
@@ -164,7 +215,7 @@ R2：
 
 ## 首次启动性能
 
-- `npm ci` 和第一次 Gateway 编译受网络、CPU 与磁盘影响，可能需要数分钟。
+- 两个 Web 应用的 `npm ci` 和第一次 Gateway 编译受网络、CPU 与磁盘影响，可能需要数分钟。
 - 首次 Web 启动会生成被 Git 忽略的 `public/generated/map-atlas`。
 - 干净账户首次进入世界可能需要 35-60 秒。
 - 自动化脚本若只等待 15 秒可能误报；负载脚本可设置：

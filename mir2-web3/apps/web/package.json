@@ -16,7 +16,7 @@
     "assets:prepare": "npm run generate:crystal-source-snapshot && npm run generate:crystal-pack-catalog && npm run generate:crystal-asset-index && npm run export:crystal-sounds && npm run export:crystal-magic-effects && npm run export:crystal-ui && npm run export:crystal-map && npm run generate:present-sounds && npm run generate:original-asset-manifest",
     "assets:prepare:offline": "npm run generate:present-sounds && npm run generate:crystal-map-blend && npm run generate:original-asset-manifest",
     "assets:verify": "npm run generate:crystal-asset-index && npm run generate:original-asset-manifest && npm run smoke:crystal-minimap-assets && npm run audit:crystal-map-coverage && npm run audit:crystal-map-gameplay",
-    "assets:verify:offline": "npm run export:crystal-sounds && npm run smoke:crystal-minimap-assets && npm run generate:original-asset-manifest && npm run report:asset-coverage && npm run preflight:asset-release && npm run test:resource-loading && npm run test:audio-system && npm run test:sound-export && npm run test:crystal-library && npm run test:pack-catalog && npm run test:entity-pack && npm run test:cas-release && npm run test:asset-release-safety && npm run test:magic-effect-export",
+    "assets:verify:offline": "npm run smoke:crystal-minimap-assets && npm run generate:original-asset-manifest && npm run report:asset-coverage && npm run preflight:asset-release && npm run test:resource-loading && npm run test:audio-system && npm run test:sound-export && npm run test:crystal-library && npm run test:pack-catalog && npm run test:entity-pack && npm run test:cas-release && npm run test:asset-release-safety && npm run test:magic-effect-export",
     "report:asset-coverage": "node ./scripts/report-asset-coverage.mjs",
     "measure:frontend-coverage": "node ./scripts/measure-frontend-coverage.mjs",
     "preflight:asset-release": "node ./scripts/preflight-asset-release.mjs",
@@ -126,7 +126,7 @@
   "dependencies": {
     "@mysten/sui": "^2.16.2",
     "@mysten/wallet-standard": "^0.20.3",
-    "next": "16.2.1",
+    "next": "16.2.11",
     "nipplejs": "^1.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -142,5 +142,8 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "npm@11.13.0"
+  "packageManager": "npm@11.13.0",
+  "overrides": {
+    "postcss": "8.5.21"
+  }
 }

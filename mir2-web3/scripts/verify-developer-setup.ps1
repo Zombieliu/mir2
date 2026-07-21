@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
     [string]$AssetBaseUrl = "",
-    [switch]$SkipBuild
+    [switch]$SkipBuild,
+    [switch]$Offline,
+    [switch]$RunCoreTests
 )
 
 $ErrorActionPreference = "Stop"
@@ -10,8 +12,17 @@ Set-StrictMode -Version Latest
 $ProjectRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $RepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot ".."))
 $WebRoot = Join-Path $ProjectRoot "apps\web"
+$AdminWebRoot = Join-Path $ProjectRoot "apps\admin-web"
 $CrystalRoot = Join-Path $RepositoryRoot "Crystal"
 $RemoteReleaseManifestPath = ""
+$DeveloperAssetManifestPath = Join-Path $ProjectRoot "config\developer-assets.json"
+$LocalFullPackRoot = Join-Path $WebRoot "public\generated\crystal-packs\full"
+$LocalFullPackIndex = Join-Path $LocalFullPackRoot "index.json"
+$FullPackClosureVerifier = Join-Path $WebRoot "scripts\asset-pipeline\verify-full-pack-closure.mjs"
+
+if ($Offline -and $AssetBaseUrl) {
+    throw "-Offline cannot verify an -AssetBaseUrl. Remove one of the two parameters."
+}
 
 function Invoke-Checked {
     param([string]$Label, [scriptblock]$Command)
@@ -28,9 +39,14 @@ if ($ExpectedCrystalCommit -ne $ActualCrystalCommit) {
     throw "Crystal submodule mismatch: expected $ExpectedCrystalCommit, found $ActualCrystalCommit."
 }
 
-$RemoteCrystalCommit = (& git -C $CrystalRoot ls-remote origin "refs/heads/codex/handoff-parity-tools" | Out-String)
-if ($RemoteCrystalCommit -notmatch [regex]::Escape($ExpectedCrystalCommit)) {
-    throw "Crystal commit $ExpectedCrystalCommit is not reachable from the handoff branch on the configured origin."
+if ($Offline) {
+    Write-Host "[verify] offline mode: skipping Crystal remote reachability"
+}
+else {
+    $RemoteCrystalCommit = (& git -C $CrystalRoot ls-remote origin "refs/heads/codex/handoff-parity-tools" | Out-String)
+    if ($LASTEXITCODE -ne 0 -or $RemoteCrystalCommit -notmatch [regex]::Escape($ExpectedCrystalCommit)) {
+        throw "Crystal commit $ExpectedCrystalCommit is not reachable from the handoff branch on the configured origin."
+    }
 }
 
 foreach ($RelativePath in @(
@@ -44,6 +60,19 @@ foreach ($RelativePath in @(
     if (-not (Test-Path -LiteralPath $FullPath -PathType Leaf)) {
         throw "Required tracked runtime asset is missing: $FullPath"
     }
+}
+
+if (Test-Path -LiteralPath $LocalFullPackIndex -PathType Leaf) {
+    $DeveloperAssetManifest = Get-Content -LiteralPath $DeveloperAssetManifestPath -Raw | ConvertFrom-Json
+    Invoke-Checked "local full-pack closure" {
+        & node.exe $FullPackClosureVerifier `
+            --root $LocalFullPackRoot `
+            --expectedContentHash ([string]$DeveloperAssetManifest.contentHash) `
+            --verifyPages false
+    }
+}
+else {
+    Write-Host "[verify] local full pack is not installed; validating Starter mode"
 }
 
 if ($AssetBaseUrl) {
@@ -63,6 +92,16 @@ Push-Location $ProjectRoot
 try {
     Invoke-Checked "Gateway check" {
         cargo +1.89.0 check --locked -p mir2-gateway
+    }
+    if ($RunCoreTests) {
+        Invoke-Checked "core Rust tests" {
+            cargo +1.89.0 test --locked `
+                -p mir2-simulation `
+                -p mir2-protocol `
+                -p mir2-game-data `
+                -- `
+                --test-threads=1
+        }
     }
 }
 finally {
@@ -107,6 +146,21 @@ try {
         }
         finally {
             $env:MIR2_USE_PREBUILT_BEVY_RUNTIME = $PreviousPrebuilt
+        }
+    }
+}
+finally {
+    Pop-Location
+}
+
+Push-Location $AdminWebRoot
+try {
+    Invoke-Checked "Admin Web TypeScript" {
+        & npm.cmd run typecheck
+    }
+    if (-not $SkipBuild) {
+        Invoke-Checked "production Admin Web build" {
+            & npm.cmd run build
         }
     }
 }

@@ -12,7 +12,8 @@ param(
     [string]$AssetBaseUrl = "",
 
     [switch]$OpenBrowser,
-    [switch]$SkipGatewayBuild
+    [switch]$SkipGatewayBuild,
+    [switch]$ReuseGateway
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +53,12 @@ if (Test-ListeningPort $WebPort) {
     throw "Web port $WebPort is already in use. Stop that process or pass -WebPort with another port."
 }
 
-if (-not (Test-HttpOk $GatewayHealthUrl)) {
+$GatewayHealthy = Test-HttpOk $GatewayHealthUrl
+if ($GatewayHealthy -and -not $ReuseGateway) {
+    throw "A healthy service is already using Gateway port $GatewayWebPort. Stop it, choose other ports, or explicitly pass -ReuseGateway."
+}
+
+if (-not $GatewayHealthy) {
     if (Test-ListeningPort $GatewayWebPort) {
         throw "Gateway port $GatewayWebPort is occupied by a service that does not answer $GatewayHealthUrl."
     }
@@ -118,7 +124,7 @@ if (-not (Test-HttpOk $GatewayHealthUrl)) {
     }
 }
 else {
-    Write-Host "[start] reusing healthy Gateway at $GatewayHealthUrl"
+    Write-Host "[start] explicitly reusing healthy Gateway at $GatewayHealthUrl"
 }
 
 $PreviousPrebuilt = $env:MIR2_USE_PREBUILT_BEVY_RUNTIME

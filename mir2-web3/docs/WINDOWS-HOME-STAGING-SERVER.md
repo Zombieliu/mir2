@@ -68,7 +68,7 @@ Install:
 - WSL2 Ubuntu.
 - Docker Desktop with WSL2 backend.
 - Git inside WSL2.
-- Node 20+ inside WSL2.
+- Node 22+ inside WSL2.
 - Rust toolchain with `+1.89.0`.
 - Tailscale on Windows or inside WSL2.
 - Optional: `cloudflared` on Windows or inside WSL2 for Cloudflare Tunnel.

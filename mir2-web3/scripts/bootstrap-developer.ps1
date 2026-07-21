@@ -10,6 +10,7 @@ Set-StrictMode -Version Latest
 $ProjectRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $RepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot ".."))
 $WebRoot = Join-Path $ProjectRoot "apps\web"
+$AdminWebRoot = Join-Path $ProjectRoot "apps\admin-web"
 
 function Require-Command {
     param([string]$Name, [string]$InstallHint)
@@ -65,8 +66,11 @@ if (-not $SkipRustCheck) {
 }
 
 if (-not $SkipWebInstall) {
-    Invoke-Checked "install Web dependencies" {
+    Invoke-Checked "install Player Web dependencies" {
         & npm.cmd ci --prefix $WebRoot
+    }
+    Invoke-Checked "install Admin Web dependencies" {
+        & npm.cmd ci --prefix $AdminWebRoot
     }
 }
 
