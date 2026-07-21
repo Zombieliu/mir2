@@ -107,6 +107,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 当前包为 [`developer-assets-f71b89aa3850`](https://github.com/Zombieliu/mir2/releases/tag/developer-assets-f71b89aa3850)，包含 7 个分卷、1,440 个 library shards 和 4,446 张唯一 PNG pages。安装器会校验每个分卷和总归档的 SHA-256，再解压到 `apps/web/public/generated/crystal-packs/full`；中断后重新运行会验证缓存并自动重下损坏分片。该目录被 Git 忽略。
 
+这个私有包是完整的**转换后视觉图集**，不是原生客户端备份，也不包含完整 Crystal 声音库。Git 只携带 4 个 Starter WAV；需要全量音频时，必须由项目所有者另行提供合法授权的数据源或未来经过验收的私有/CDN 音频发布，具体边界见 `mir2-web3/docs/ASSET-CONSUMER-SETUP.md`。
+
 ### R2 CDN
 
 当前没有已发布并通过全对象验收的 R2 URL。以下命令只供维护者完成未来发布后使用，不能把示例域名用于验收：

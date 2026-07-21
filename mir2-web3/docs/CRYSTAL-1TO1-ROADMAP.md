@@ -13,7 +13,9 @@
 > reconstructed, extracted, and page-hash-verified all 5,887 full-pack files.
 > That same clone passes both frontend production builds, starts Gateway and
 > Player Web, serves health/index/shard/page probes with HTTP 200, and releases
-> all ports after shutdown. Credentialed R2 publication, Crystal-fork
+> all ports after shutdown. This bundle is the complete converted visual atlas,
+> not the native client or the separate 316-file full sound library.
+> Credentialed R2 publication, Crystal-fork
 > rights/visibility resolution, and physical Brazil low-end testing remain
 > separate open work.
 
