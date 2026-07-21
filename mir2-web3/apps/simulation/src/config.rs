@@ -1114,6 +1114,7 @@ mod tests {
         assert!(crystal_world_config.visible_players.is_empty());
         assert!(crystal_world_config.visible_monsters.is_empty());
         assert!(crystal_world_config.visible_npcs.is_empty());
+        assert_eq!(crystal_world_config.spawn, Point { x: 288, y: 616 });
     }
 
     fn cleanup_postgres_account(database_url: &str, account_id: &str) {
@@ -2594,6 +2595,11 @@ impl SimulationConfig {
         self.visible_monsters.clear();
         self.visible_npcs.clear();
         apply_crystal_map_metadata(&mut self.map);
+        if let Some(start_point) = crystal_map_respawns_by_file_name(&self.map.file_name)
+            .and_then(|map| map.safe_zones.into_iter().find(|zone| zone.start_point))
+        {
+            self.spawn = start_point.location;
+        }
         // On-chain smart-mine veins (M4) are env-gated (off by default).
         self.onchain_mine_nodes
             .extend(onchain_mine_nodes_from_env());

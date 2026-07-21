@@ -31,6 +31,11 @@ function loadTypeScriptModule(url) {
 }
 
 const atlasPath = new URL("../lib/map-atlas-manifest.ts", import.meta.url);
+const assetWorkerPath = new URL("../public/mir2-asset-worker.js", import.meta.url);
+const assetCacheRegistrarPath = new URL(
+  "../app/components/asset-cache-registrar.tsx",
+  import.meta.url,
+);
 const blendPath = new URL("../lib/crystal-map-blend.ts", import.meta.url);
 const mapRenderingPath = new URL("../app/components/original-client-scene-map-rendering.tsx", import.meta.url);
 const mapLoaderPath = new URL("../lib/crystal-map-loader.ts", import.meta.url);
@@ -41,6 +46,39 @@ const mapExporterPath = new URL("./export-crystal-starter-map.mjs", import.meta.
 const shellPath = new URL("../app/original-client-shell.tsx", import.meta.url);
 const pagePath = new URL("../app/page.tsx", import.meta.url);
 const bevyRuntimePath = new URL("../../game-client/runtime/src/lib.rs", import.meta.url);
+
+const atlasSource = readFileSync(atlasPath, "utf8");
+assert.match(
+  atlasSource,
+  /MAP_ATLAS_MANIFEST_URL,\s*\{\s*cache:\s*"no-cache"\s*\}/,
+  "the atlas coordinate manifest must revalidate against regenerated PNG pages",
+);
+
+const assetWorkerSource = readFileSync(assetWorkerPath, "utf8");
+assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw5"/);
+assert.match(
+  assetWorkerSource,
+  /new Request\(source,\s*\{\s*cache:\s*"reload"\s*\}\)/,
+  "a new asset cache namespace must bypass stale HTTP-cache bytes",
+);
+assert.match(
+  assetWorkerSource,
+  /fetchWithTransientRetries\(freshStaticAssetRequest\(request\)\)/,
+  "origin atlas assets must be fetched through the fresh-cache policy",
+);
+assert.match(
+  assetWorkerSource,
+  /data\.type === "MIR2_ASSET_WORKER_ACTIVATE"[\s\S]{0,160}self\.skipWaiting\(\)/,
+  "a waiting cache worker must support explicit activation",
+);
+
+const assetCacheRegistrarSource = readFileSync(assetCacheRegistrarPath, "utf8");
+assert.match(
+  assetCacheRegistrarSource,
+  /registration\.waiting\.postMessage\(\{ type: "MIR2_ASSET_WORKER_ACTIVATE" \}\)/,
+  "the cache registrar must promote a waiting worker before prewarming assets",
+);
+assert.match(assetCacheRegistrarSource, /waitForServiceWorkerActivation\(registration\.waiting, 3000\)/);
 
 const { mapAtlasPathRequiresAlphaKey } = loadTypeScriptModule(atlasPath);
 const {

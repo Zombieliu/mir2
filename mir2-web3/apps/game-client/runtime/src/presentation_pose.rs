@@ -261,6 +261,31 @@ impl PresentationPoseBuffer {
         true
     }
 
+    /// Reconcile a local-command pose after map/entity layers commit a new center.
+    ///
+    /// `begin_frame` can only see the previous entity provenance while the map
+    /// system is applying the next center. In that mixed-center tick it keeps a
+    /// settled local/static camera. Once the entity system confirms the same
+    /// center, replace that stale camera before transforms and the pose snapshot
+    /// are published. A live TypeScript window still uses the stricter pixel-
+    /// matching promotion guard so this cannot introduce a takeover jump.
+    pub(crate) fn reconcile_local_command_for_applied_center(
+        &mut self,
+        entity_offset: Vec2,
+        motion: Option<EntityPresentationMotion>,
+    ) -> bool {
+        if self.camera.source == CameraPoseSource::SelfWindow {
+            return self.promote_matching_self_window_to_local_command(entity_offset, motion);
+        }
+        if !self.renderer_enabled || !entity_offset.is_finite() {
+            return false;
+        }
+
+        self.set_local_self_motion(motion);
+        self.set_camera(-entity_offset, CameraPoseSource::LocalCommand);
+        true
+    }
+
     pub(crate) fn camera_screen_offset(&self) -> Vec2 {
         Vec2::new(self.camera.x, self.camera.y)
     }
@@ -517,6 +542,40 @@ mod tests {
                 .map(|value| value.frame_index),
             Some(0)
         );
+    }
+
+    #[test]
+    fn committed_center_reconciles_settled_camera_before_publish() {
+        let mut buffer = PresentationPoseBuffer::default();
+        buffer.set_enabled(true);
+        buffer.begin_frame(10.0, true);
+        // This is the transient state selected while map and entity provenance
+        // still name different centers during a two-cell run handoff.
+        buffer.set_camera(Vec2::ZERO, CameraPoseSource::LocalCommand);
+
+        let motion = EntityPresentationMotion {
+            frame_index: 0,
+            phase_count: 6,
+            mode: "run".to_owned(),
+            direction: "Right".to_owned(),
+        };
+        assert!(
+            buffer.reconcile_local_command_for_applied_center(Vec2::new(-80.0, 0.0), Some(motion),)
+        );
+        assert_eq!(buffer.camera_screen_offset(), Vec2::new(80.0, 0.0));
+        assert_eq!(buffer.self_entity_offset(), Vec2::new(-80.0, 0.0));
+
+        buffer.record_entity(
+            "self",
+            buffer.self_entity_offset(),
+            EntityPoseSource::LocalCommand,
+        );
+        let value: serde_json::Value =
+            serde_json::from_str(&buffer.publish()).expect("valid reconciled pose json");
+        assert_eq!(value["camera"]["x"], 80.0);
+        assert_eq!(value["camera"]["source"], "localCommand");
+        assert_eq!(value["entities"][0]["x"], -80.0);
+        assert_eq!(value["entities"][0]["motion"]["mode"], "run");
     }
 
     #[test]

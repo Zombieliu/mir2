@@ -2,6 +2,57 @@
 
 Last updated: 2026-07-18
 
+> 2026-07-18 original q1-q9 frontend contract closure: quest dialogs now keep
+> fixed rewards separate from mandatory q3/q6 selectable rewards and preserve
+> item icon, template index, and selection index through Gateway JSON. The Web
+> packet adapter, quest window, overlays, and objective tracker expose the
+> original task progress and selected reward path instead of treating every
+> reward as an automatic grant. Extended-packet 28/28, tutorial-flow 14/14,
+> onboarding-guidance 17/17, stage5-adapter 68/68, TypeScript, and the Next
+> production build pass against the completed simulation q1-q9 route. Final
+> human dialog layout and route-feel acceptance remains open. Automated visual
+> recapture was not claimed in this round because the in-app Browser rejected
+> navigation from its post-restart error page when the existing tab URL
+> contained a nested `ws://` query; the rebuilt local Web and Gateway health
+> endpoints are green and the existing play tab can be refreshed manually.
+
+> 2026-07-18 safe-zone TrapHexagon depth closure: persistent `ObjectSpell`
+> effects were rendered at layer offset 72, above the entity offset 64, while
+> Crystal sorts world spells before actors inside each map cell. Ground and
+> world-spell bodies now use offset 48 and optional masks use 49; transient
+> combat spells remain at 90. The live Bichon `0 @ 287,618` WebGPU scene kept
+> all 52 visible TrapHexagon nodes on the exact Magic `1390-1399` loop with
+> `plus-lighter` blending while restoring actor/NPC occlusion. The persistent
+> effect path now decodes its deduplicated body/mask frame set before first
+> display without adding per-frame DOM nodes; transient combat spells remain
+> ungated. A cache-cleared first-entry MutationObserver measured all 52 beams
+> with zero undecoded images at insertion, the next paint, and 100ms later.
+> Unobstructed native/Web beam pixels were already matched, so opacity and
+> source frames were intentionally left unchanged. `test:scene-effect-runtime`
+> passes 10/10, `tsc --noEmit` passes, and the in-app 960x720 game capture has
+> no missing beams or HUD blend leakage.
+
+> 2026-07-18 Bevy run-camera transaction closure: the visible full-scene
+> tremor was not a server rollback. Map/entity snapshots could commit a new
+> center one Bevy frame before the local-command camera compensation, producing
+> a zero-offset whole-cell flash. Consecutive commands could also rebase from a
+> fractional prior pose while the TypeScript camera window used a neighboring
+> phase, causing per-frame ownership to switch between `localCommand` and
+> `selfWindow`. The runtime now reconciles camera/entity offsets in the same
+> committed-center frame, preserves fractional motion-window coordinates across
+> the JS/WASM boundary, and latches local presentation ownership across connected
+> commands until a correction clears the segment. A live WebGPU run sampled 462
+> display frames and five center changes with zero uncompensated center frames,
+> zero active `selfWindow`/`static` samples, zero active source switches, and
+> 5/5 matching command plus ACK diagnostics with no rollback. Evidence:
+> `docs/generated/player-qa/movement-jitter/bevy-run-camera-transaction-20260718.json`
+> and `.png`; the optimized `bevy-97470d40cbe1b310` smoke independently sampled
+> 551 frames and six center changes with the same zero-failure result. Rust
+> 107/107 plus the presentation-pose, local-command latency, scene-motion, and
+> movement-controller web suites passed. Crystal's intentional
+> six-phase 100ms stepped cadence remains; this closes the extra one-frame
+> shake, not that original cadence.
+
 > 2026-07-18 fresh-native TrapHexagon/Belt closure: live r05 captured the
 > post-Rust-fix Crystal client with ordinary NPC primary names Lime and
 > secondary underscore lines White at `0 @ 332,275`, Day setting 2. It exposed

@@ -4,8 +4,41 @@ Last updated: 2026-07-18
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
 
+## Original Bichon Q1-Q9 Level-6 Route
+
+- Create a fresh Warrior and begin on Bichon map `0` near Assistant Jane. Do
+  not use QA EXP, teleport, inventory, or quest-completion commands.
+- Complete q1 from Assistant Jane to CraftsLady Jude while carrying five
+  `CannibalLeaves`; expect 10 EXP and one `(HP)DrugSmall`.
+- Complete q2 from Jude back to Jane. Kill Scarecrows until the quest owns one
+  `GingerTea`; expect 30 EXP, 200 gold, `GoldenPendant`, and `CopperRing`.
+- Complete q3 from Jane to Merchant John and explicitly choose one of
+  `SharpDagger`, `ToughHoaSword`, or `StiffWoodenBow`; expect 10 EXP.
+- Complete q4 at John by killing and harvesting Deer until five `DeerMeat`
+  quest items are owned; expect 80 EXP, 20 gold, and `OldCopperRing`.
+- Complete q5 at Blacksmith Smith by killing 10 Deer and 10 Scarecrows; expect
+  120 EXP, 30 gold, and `WornIronBracelet`.
+- Complete q6 at Smith by killing 10 HookingCats and explicitly choose one of
+  `BronzeWarriorSword`, `StrongHoaSword`, or `StrongWoodenBow`; expect 150 EXP
+  and 38 gold.
+- Complete q7 by returning from Assistant Jane to Master Wa; expect 48 EXP and
+  60 gold.
+- Complete q8 at Master Wa by killing 10 Omas and 10 RakingCats; expect 180
+  EXP, 45 gold, `OldLoafer`, and `Fencing`.
+- Complete q9 from Master Wa to MirGuide Peter; expect 48 EXP and 60 gold.
+- Acceptance: all q1-q9 entries are complete, the player has naturally reached
+  level 6, the next EXP band is 900, no ambient/NPC kill counted toward an
+  objective, and all unconsumed rewards remain in inventory, belt, or equipped
+  slots. With no shop spending, quest gold totals 453.
+
 ## Latest Deterministic Same-Scene Gate
 
+- The 2026-07-18 Bevy run-camera capture at
+  `docs/generated/player-qa/movement-jitter/bevy-run-camera-transaction-20260718.json`
+  is the current local movement transaction gate. It must retain zero
+  uncompensated center changes, zero active `selfWindow`/`static` samples, zero
+  active source switches, and zero ACK/command mismatches. The companion PNG
+  records the final optimized playable Bichon frame at `333,271`.
 - Prefer live r16 under
   `docs/generated/player-qa/visual-parity/cwp-20260718-r16-live-clean/` for the
   current post-NPC-fix layout/effect trend. It records `live-window-cycle`, 24

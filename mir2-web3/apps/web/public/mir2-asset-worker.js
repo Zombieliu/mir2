@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "mir2-asset-cache";
-const CACHE_SCHEMA_VERSION = "sw4";
+const CACHE_SCHEMA_VERSION = "sw5";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
@@ -36,6 +36,11 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("message", (event) => {
   const data = event.data || {};
+  if (data.type === "MIR2_ASSET_WORKER_ACTIVATE") {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
+
   if (data.type === "MIR2_ASSET_CACHE_RESET") {
     event.waitUntil(
       deleteAllMir2Caches()
@@ -205,12 +210,12 @@ async function fetchStaticAsset(request) {
   }
 
   let originResponse = null;
-  originResponse = await fetchWithTransientRetries(request);
+  originResponse = await fetchWithTransientRetries(freshStaticAssetRequest(request));
   if (originResponse?.ok) return originResponse;
 
   const remoteRequest = createRemoteAssetRequest(request);
   if (remoteRequest) {
-    const remoteResponse = await fetchWithTransientRetries(remoteRequest);
+    const remoteResponse = await fetchWithTransientRetries(freshStaticAssetRequest(remoteRequest));
     if (remoteResponse) {
       if (remoteResponse.ok) return remoteResponse;
       if (remoteResponse.status === 404 || !originResponse) {
@@ -233,6 +238,13 @@ async function fetchStaticAsset(request) {
   // aborted). Degrade gracefully for this request, but do not negative-cache
   // transient 504s because the next frame fetch may succeed immediately.
   return syntheticAssetResponse(504, "asset fetch failed");
+}
+
+function freshStaticAssetRequest(request) {
+  const source = request instanceof Request ? request : new Request(request);
+  // A versioned CacheStorage must never be repopulated from stale HTTP-cache
+  // bytes. Atlas manifests and their PNG pages have to advance atomically.
+  return new Request(source, { cache: "reload" });
 }
 
 async function coalescedStaticAssetFetch(request) {

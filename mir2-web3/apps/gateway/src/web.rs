@@ -4001,11 +4001,11 @@ fn parse_progress_fraction(line: &str) -> Option<(u32, u32)> {
 }
 
 /// Serializes the reward bundle of a `ClientQuestInfo` into the contract
-/// `rewards` object (`{ gold?, experience?, credit?, items? }`). Mirrors the
+/// `rewards` object (`{ gold?, experience?, credit?, items?, selectItems? }`). Mirrors the
 /// Crystal `ClientQuestInfo` reward fields
-/// (`Crystal/Shared/Data/ClientData.cs:380-384`); fixed + selectable item
-/// rewards are merged into one `items` list (each `{ name, count? }`) resolved
-/// from the reward `ItemInfo.Name` (`Crystal/Shared/Data/SharedData.cs:75-93`).
+/// (`Crystal/Shared/Data/ClientData.cs:380-384`). Fixed and selectable rewards
+/// stay separate because the Crystal client requires an explicit choice before
+/// turn-in. Each item also carries its original icon and item index.
 /// Returns `None` when there is nothing to reward so the field can be omitted.
 fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
     let mut entry = serde_json::Map::new();
@@ -4018,14 +4018,16 @@ fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
     if info.reward_credit != 0 {
         entry.insert("credit".into(), json!(info.reward_credit));
     }
-    let items = quest_reward_items_json(
-        info.rewards_fixed_item
-            .iter()
-            .chain(info.rewards_select_item.iter()),
-    );
+    let items = quest_reward_items_json(info.rewards_fixed_item.iter(), false);
     if let Value::Array(ref array) = items {
         if !array.is_empty() {
             entry.insert("items".into(), items);
+        }
+    }
+    let select_items = quest_reward_items_json(info.rewards_select_item.iter(), true);
+    if let Value::Array(ref array) = select_items {
+        if !array.is_empty() {
+            entry.insert("selectItems".into(), select_items);
         }
     }
     if entry.is_empty() {
@@ -4035,16 +4037,26 @@ fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
     }
 }
 
-/// Maps quest reward items into `[{ name, count? }]` using the reward item's
-/// `ItemInfo.Name` (already carried on the wire, no lookup needed).
-fn quest_reward_items_json<'a>(rewards: impl Iterator<Item = &'a QuestItemReward>) -> Value {
+/// Maps quest reward items into the browser contract using fields already
+/// carried by `ItemInfo` on the Crystal wire payload.
+fn quest_reward_items_json<'a>(
+    rewards: impl Iterator<Item = &'a QuestItemReward>,
+    selectable: bool,
+) -> Value {
     Value::Array(
         rewards
-            .map(|reward| {
+            .enumerate()
+            .map(|(selection_index, reward)| {
                 let mut item = serde_json::Map::new();
                 item.insert("name".into(), json!(reward.item.name));
+                item.insert("icon".into(), json!(reward.item.image));
+                item.insert("itemIndex".into(), json!(reward.item.index));
                 if reward.count != 1 {
                     item.insert("count".into(), json!(reward.count));
+                }
+                if selectable {
+                    item.insert("selectable".into(), json!(true));
+                    item.insert("selectionIndex".into(), json!(selection_index));
                 }
                 Value::Object(item)
             })
@@ -7847,6 +7859,40 @@ mod tests {
 
     #[test]
     fn new_quest_info_exposes_contract_quest_fields() {
+        let reward_item = |index: i32, name: &str, image: u16| mir2_protocol::ItemInfo {
+            index,
+            name: name.to_string(),
+            item_type: 0,
+            grade: 0,
+            required_type: 0,
+            required_class: 0,
+            required_gender: 0,
+            item_set: 0,
+            shape: 1,
+            weight: 1,
+            light: 0,
+            required_amount: 0,
+            image,
+            durability: 1_000,
+            stack_size: 1,
+            price: 10,
+            start_item: false,
+            effect: 0,
+            need_identify: false,
+            show_group_pickup: false,
+            class_based: false,
+            level_based: false,
+            can_mine: false,
+            global_drop_notify: false,
+            bind: 0,
+            unique: 0,
+            random_stats_id: 0,
+            can_fast_run: false,
+            can_awakening: false,
+            slots: 0,
+            stats: Vec::new(),
+            tooltip: None,
+        };
         let info = super::server_packet_to_event(&ServerPacket::NewQuestInfo {
             info: ClientQuestInfo {
                 index: 1001,
@@ -7866,8 +7912,20 @@ mod tests {
                 reward_gold: 500,
                 reward_exp: 1_200,
                 reward_credit: 0,
-                rewards_fixed_item: Vec::new(),
-                rewards_select_item: Vec::new(),
+                rewards_fixed_item: vec![mir2_protocol::QuestItemReward {
+                    item: reward_item(658, "(HP)DrugSmall", 532),
+                    count: 2,
+                }],
+                rewards_select_item: vec![
+                    mir2_protocol::QuestItemReward {
+                        item: reward_item(1_172, "SharpDagger", 1_169),
+                        count: 1,
+                    },
+                    mir2_protocol::QuestItemReward {
+                        item: reward_item(1_173, "ToughHoaSword", 1_170),
+                        count: 1,
+                    },
+                ],
                 finish_npc_index: 1_001,
             },
         });
@@ -7890,6 +7948,29 @@ mod tests {
         assert_eq!(info["payload"]["objectives"][0]["required"], 3);
         assert_eq!(info["payload"]["rewards"]["gold"], 500);
         assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
+        assert_eq!(
+            info["payload"]["rewards"]["items"][0]["name"],
+            "(HP)DrugSmall"
+        );
+        assert_eq!(info["payload"]["rewards"]["items"][0]["count"], 2);
+        assert_eq!(info["payload"]["rewards"]["items"][0]["icon"], 532);
+        assert_eq!(info["payload"]["rewards"]["items"][0]["itemIndex"], 658);
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][0]["name"],
+            "SharpDagger"
+        );
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][0]["selectionIndex"],
+            0
+        );
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][1]["selectionIndex"],
+            1
+        );
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][0]["selectable"],
+            true
+        );
         // No credit reward -> field omitted.
         assert!(info["payload"]["rewards"].get("credit").is_none());
         // 90 seconds -> "01:30".

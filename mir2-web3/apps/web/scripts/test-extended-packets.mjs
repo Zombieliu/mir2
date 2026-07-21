@@ -48,8 +48,11 @@ const {
   removeItemByUniqueId,
   normalizeFriendList,
   normalizeMailList,
+  attackModeChatMessage,
   attackModeLabel,
+  petModeChatMessage,
   petModeLabel,
+  formatCrystalExperiencePercent,
   mailResultMessage,
   heroCreateResultMessage,
   groupMembersAfterChange,
@@ -308,17 +311,54 @@ check("normalizeMailList drops rows without a numeric mailId / non-arrays", () =
 check("attackModeLabel covers ChangeAMode values + fallback", () => {
   assert.deepEqual(
     [0, 1, 2, 3, 4, 5].map(attackModeLabel),
-    ["Peaceful", "Group", "Guild", "RedOnly", "All", "PeaceAttack"],
+    ["Peaceful", "Group", "Guild", "EnemyGuild", "RedBrown", "All"],
   );
   assert.equal(attackModeLabel(42), "Mode 42");
 });
 
 check("petModeLabel covers ChangePMode values + fallback", () => {
   assert.deepEqual(
-    [0, 1, 2, 3, 4, 5].map(petModeLabel),
-    ["Both", "Group", "Guild", "None", "AttackOnly", "MoveOnly"],
+    [0, 1, 2, 3, 4].map(petModeLabel),
+    ["Both", "MoveOnly", "AttackOnly", "None", "FocusMasterTarget"],
   );
   assert.equal(petModeLabel(42), "Pet Mode 42");
+});
+
+check("mode chat messages mirror Crystal startup packet handlers", () => {
+  assert.deepEqual(
+    [0, 1, 2, 3, 4, 5].map((mode) => attackModeChatMessage(mode)?.localizationKey),
+    [
+      "client.AttackMode_Peace",
+      "client.AttackMode_Group",
+      "client.AttackMode_Guild",
+      "client.AttackMode_EnemyGuild",
+      "client.AttackMode_RedBrown",
+      "client.AttackMode_All",
+    ],
+  );
+  assert.deepEqual(
+    [0, 1, 2, 3, 4].map((mode) => petModeChatMessage(mode)?.localizationKey),
+    [
+      "client.PetMode_Both",
+      "client.PetMode_MoveOnly",
+      "client.PetMode_AttackOnly",
+      "client.PetMode_None",
+      "client.PetMode_FocusMasterTarget",
+    ],
+  );
+  assert.equal(attackModeChatMessage(6), null);
+  assert.equal(petModeChatMessage(5), null);
+});
+
+check("main HUD experience uses Crystal #0.##% formatting", () => {
+  assert.equal(formatCrystalExperiencePercent(0), "0%");
+  assert.equal(formatCrystalExperiencePercent(0.0001), "0.01%");
+  assert.equal(formatCrystalExperiencePercent(0.1), "10%");
+  assert.equal(formatCrystalExperiencePercent(0.105), "10.5%");
+  assert.equal(formatCrystalExperiencePercent(0.4833), "48.33%");
+  assert.equal(formatCrystalExperiencePercent(1), "100%");
+  assert.equal(formatCrystalExperiencePercent(Number.NaN), "0%");
+  assert.equal(formatCrystalExperiencePercent(-1), "0%");
 });
 
 check("mailResultMessage distinguishes mail vs parcel + error codes", () => {

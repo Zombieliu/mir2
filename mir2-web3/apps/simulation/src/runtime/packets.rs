@@ -90,8 +90,8 @@ use super::npc::{
 };
 use super::quests::{
     begin_quest, can_accept_quest, complete_quest_with_selection, completed_quest_ids,
-    crystal_quest_task_list, ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
-    quest_template_by_id,
+    crystal_quest_reward_selection_missing, crystal_quest_task_list, ensure_runtime_quest,
+    quest_definition_exists, quest_log_snapshots, quest_template_by_id,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -2947,6 +2947,9 @@ fn stage5_finish_quest_packet(
     }
     if ensure_runtime_quest(world, quest_id) != QuestStage::ReadyToTurnIn {
         return Vec::new();
+    }
+    if crystal_quest_reward_selection_missing(quest_id, selected_item_index) {
+        return vec![system_message_key(world, "client.YouMustSelectRewardItem")];
     }
     complete_quest_with_selection(world, quest_id, selected_item_index);
     if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {

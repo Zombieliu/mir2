@@ -1,0 +1,223 @@
+{
+  "capturedAt": "2026-07-18",
+  "url": "http://127.0.0.1:3002/?gatewayWs=ws://127.0.0.1:7111/ws&bevyMap=1",
+  "runtimeVersion": "bevy-97470d40cbe1b310",
+  "fullFrameVerification": {
+    "activeSelfWindowSamples": 0,
+    "activeSourceSwitches": [],
+    "activeStaticSamples": 0,
+    "centerChanges": [
+      {
+        "after": [
+          "localCommand",
+          40,
+          0
+        ],
+        "before": [
+          "localCommand",
+          -8,
+          0
+        ],
+        "from": [
+          335,
+          271
+        ],
+        "mode": "walk",
+        "next": [
+          "localCommand",
+          40,
+          0
+        ],
+        "segmentFrom": [
+          335,
+          271
+        ],
+        "segmentTo": [
+          336,
+          271
+        ],
+        "t": 44.1,
+        "to": [
+          336,
+          271
+        ]
+      },
+      {
+        "after": [
+          "localCommand",
+          80,
+          0
+        ],
+        "before": [
+          "localCommand",
+          -16,
+          0
+        ],
+        "from": [
+          336,
+          271
+        ],
+        "mode": "run",
+        "next": [
+          "localCommand",
+          80,
+          0
+        ],
+        "segmentFrom": [
+          336,
+          271
+        ],
+        "segmentTo": [
+          338,
+          271
+        ],
+        "t": 626.6,
+        "to": [
+          338,
+          271
+        ]
+      },
+      {
+        "after": [
+          "localCommand",
+          94,
+          0
+        ],
+        "before": [
+          "localCommand",
+          -2,
+          0
+        ],
+        "from": [
+          338,
+          271
+        ],
+        "mode": "run",
+        "next": [
+          "localCommand",
+          94,
+          0
+        ],
+        "segmentFrom": [
+          337.66666,
+          271
+        ],
+        "segmentTo": [
+          340,
+          271
+        ],
+        "t": 1251,
+        "to": [
+          340,
+          271
+        ]
+      },
+      {
+        "after": [
+          "localCommand",
+          80,
+          0
+        ],
+        "before": [
+          "localCommand",
+          -16,
+          0
+        ],
+        "from": [
+          340,
+          271
+        ],
+        "mode": "run",
+        "next": [
+          "localCommand",
+          80,
+          0
+        ],
+        "segmentFrom": [
+          340,
+          271
+        ],
+        "segmentTo": [
+          342,
+          271
+        ],
+        "t": 1838.8,
+        "to": [
+          342,
+          271
+        ]
+      },
+      {
+        "after": [
+          "localCommand",
+          80,
+          0
+        ],
+        "before": [
+          "localCommand",
+          -16,
+          0
+        ],
+        "from": [
+          342,
+          271
+        ],
+        "mode": "run",
+        "next": [
+          "localCommand",
+          80,
+          0
+        ],
+        "segmentFrom": [
+          342,
+          271
+        ],
+        "segmentTo": [
+          344,
+          271
+        ],
+        "t": 2441.6,
+        "to": [
+          344,
+          271
+        ]
+      }
+    ],
+    "final": {
+      "ackMatch": 5,
+      "ackMismatch": 0,
+      "commandMatch": 5,
+      "commandMismatch": 0,
+      "position": {
+        "atMs": 1784340205876,
+        "direction": "Right",
+        "x": 344,
+        "y": 271
+      },
+      "presentationCommitted": true
+    },
+    "maxStableCenterCameraStep": 20,
+    "sampleCount": 462,
+    "tsPathMismatchDelta": 69,
+    "zeroCompensationCenterChanges": 0
+  },
+  "optimizedReleaseSmoke": {
+    "ackMatch": 6,
+    "ackMismatch": 0,
+    "activeSelfWindowSamples": 0,
+    "activeSourceSwitches": 0,
+    "activeStaticSamples": 0,
+    "centerChanges": 6,
+    "commandMatch": 6,
+    "commandMismatch": 0,
+    "position": {
+      "atMs": 1784340585991,
+      "direction": "Left",
+      "x": 333,
+      "y": 271
+    },
+    "runtime": "bevy-97470d40cbe1b310",
+    "samples": 551,
+    "zeroCompensation": 0
+  }
+}

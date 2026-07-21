@@ -1,0 +1,505 @@
+{
+    "startedAtMs":  1784313921789,
+    "frameImageFormat":  "png",
+    "captureMs":  1200,
+    "window":  {
+                   "screenY":  143,
+                   "width":  1024,
+                   "pid":  14032,
+                   "screenX":  3008,
+                   "height":  768,
+                   "title":  "Legend of Mir 2",
+                   "hwnd":  13304714
+               },
+    "samples":  [
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0000-native-static-00001ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  1,
+                        "index":  0
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0001-native-static-00070ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  70,
+                        "index":  1
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0002-native-static-00118ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  118,
+                        "index":  2
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0003-native-static-00165ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  165,
+                        "index":  3
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0004-native-static-00212ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  212,
+                        "index":  4
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0005-native-static-00259ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  259,
+                        "index":  5
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0006-native-static-00307ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  307,
+                        "index":  6
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0007-native-static-00354ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  354,
+                        "index":  7
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0008-native-static-00401ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  401,
+                        "index":  8
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0009-native-static-00464ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  464,
+                        "index":  9
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0010-native-static-00510ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  510,
+                        "index":  10
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0011-native-static-00556ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  556,
+                        "index":  11
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0012-native-static-00604ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  604,
+                        "index":  12
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0013-native-static-00651ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  651,
+                        "index":  13
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0014-native-static-00713ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  713,
+                        "index":  14
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0015-native-static-00760ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  760,
+                        "index":  15
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0016-native-static-00806ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  806,
+                        "index":  16
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0017-native-static-00854ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  854,
+                        "index":  17
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0018-native-static-00901ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  901,
+                        "index":  18
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0019-native-static-00963ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  963,
+                        "index":  19
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0020-native-static-01010ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  1010,
+                        "index":  20
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0021-native-static-01057ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  1057,
+                        "index":  21
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0022-native-static-01103ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  1103,
+                        "index":  22
+                    },
+                    {
+                        "label":  "native-static",
+                        "capture":  {
+                                        "mimeType":  "image/png",
+                                        "width":  1024,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-native-raw-0023-native-static-01151ms.png",
+                                        "screenX":  3008,
+                                        "crop":  {
+                                                     "left":  0,
+                                                     "width":  1024,
+                                                     "top":  0,
+                                                     "height":  768
+                                                 },
+                                        "screenY":  143,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  1151,
+                        "index":  23
+                    }
+                ],
+    "ok":  true,
+    "startedAt":  "2026-07-17T18:45:21.7892943+00:00",
+    "minimizedWindows":  {
+
+                         },
+    "frameImageQuality":  null,
+    "interaction":  "windowFrameCapture",
+    "sampleCount":  24,
+    "captureArea":  {
+                        "width":  1024,
+                        "height":  768,
+                        "hwnd":  13304714,
+                        "sourceWindow":  {
+                                             "screenY":  143,
+                                             "width":  1024,
+                                             "pid":  14032,
+                                             "screenX":  3008,
+                                             "height":  768,
+                                             "title":  "Legend of Mir 2",
+                                             "hwnd":  13304714
+                                         },
+                        "screenY":  143,
+                        "crop":  {
+                                     "left":  0,
+                                     "width":  1024,
+                                     "top":  0,
+                                     "height":  768
+                                 },
+                        "screenX":  3008,
+                        "pid":  14032,
+                        "title":  "Legend of Mir 2"
+                    },
+    "sampleMs":  50
+}

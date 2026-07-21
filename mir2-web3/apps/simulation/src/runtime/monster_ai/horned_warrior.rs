@@ -145,8 +145,14 @@ pub(in crate::runtime) fn update_horned_warrior_state(
     // (`HornedWarrior.cs:68`). `monster_player_attack_damage` rolls DC for AI 165
     // (the default arm) and applies the player's AC mitigation = `ACAgility`.
     let monster_name = entity_name(world, entity).unwrap_or_else(|| "HornedWarrior".to_string());
-    let damage =
-        monster_player_attack_damage(world, &monster_name, agent, position, player_position);
+    let damage = monster_player_attack_damage(
+        world,
+        attacker_id,
+        &monster_name,
+        agent,
+        position,
+        player_position,
+    );
     if damage <= 0 {
         // Crystal `if (damage == 0) return;` (`HornedWarrior.cs:69`).
         return true;

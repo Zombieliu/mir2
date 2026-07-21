@@ -1099,11 +1099,16 @@ export function questIconForEntity(
     return null;
   }
 
-  const activeQuest = questLog.find((quest) => quest.stage !== "completed") ?? null;
+  const markerPriority: Record<DisplayQuest["stage"], number> = {
+    readyToTurnIn: 0,
+    available: 1,
+    inProgress: 2,
+    completed: 3,
+  };
+  const activeQuest = questLog
+    .filter((quest) => quest.stage !== "completed" && entity.questIds?.includes(quest.questId))
+    .sort((left, right) => markerPriority[left.stage] - markerPriority[right.stage])[0] ?? null;
   if (!activeQuest) {
-    return null;
-  }
-  if (!entity.questIds?.includes(activeQuest.questId)) {
     return null;
   }
 

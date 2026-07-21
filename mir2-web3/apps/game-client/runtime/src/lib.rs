@@ -61,7 +61,7 @@ thread_local! {
     // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
     // (the default) ⇒ `follow_player` keeps the camera pinned at origin = the
     // current fold-in behaviour.
-    static PENDING_SELF_CAMERA_MOTION: Cell<Option<(i32, i32, i32, i32, f64, f64)>> = const { Cell::new(None) };
+    static PENDING_SELF_CAMERA_MOTION: Cell<Option<(f32, f32, f32, f32, f64, f64)>> = const { Cell::new(None) };
 }
 
 #[derive(Resource, Default, Clone)]
@@ -739,10 +739,10 @@ pub fn set_mir2_map_camera_offset(x: f32, y: f32) {
 /// has elapsed (`now >= expires_ms`) the camera falls back to origin.
 #[wasm_bindgen(js_name = setMir2SelfCameraMotion)]
 pub fn set_mir2_self_camera_motion(
-    from_x: i32,
-    from_y: i32,
-    to_x: i32,
-    to_y: i32,
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
     started_ms: f64,
     expires_ms: f64,
 ) {
@@ -1670,13 +1670,14 @@ fn sync_entity_render_layers(
         return;
     }
 
-    if local_motion.presentation_enabled()
-        && presentation_poses.camera_source() == presentation_pose::CameraPoseSource::SelfWindow
-    {
+    if local_motion.presentation_enabled() {
         let self_entity = snapshot.entities.iter().find(|entity| entity.is_self);
         let active_ts_window = active_self_camera_motion_window(motion_table.now_ms);
         let ts_allows_command = active_ts_window
-            .map(|window| local_motion.segment_matches_ts_window(window))
+            .map(|window| {
+                local_motion.segment_matches_ts_window(window)
+                    || local_motion.committed_segment_matches_ts_target(window)
+            })
             .unwrap_or(true);
         let matching_center =
             entity_center.filter(|center| presentation_poses.applied_map_center() == Some(*center));
@@ -1695,6 +1696,7 @@ fn sync_entity_render_layers(
             });
 
         if let Some(candidate) = takeover_candidate {
+            local_motion.mark_presentation_committed();
             let motion = local_motion.presentation_phase().map(|phase| {
                 presentation_pose::EntityPresentationMotion {
                     frame_index: phase.frame_index,
@@ -1703,7 +1705,7 @@ fn sync_entity_render_layers(
                     direction: phase.direction,
                 }
             });
-            presentation_poses.promote_matching_self_window_to_local_command(candidate, motion);
+            presentation_poses.reconcile_local_command_for_applied_center(candidate, motion);
         }
     }
 
@@ -2077,15 +2079,12 @@ fn self_camera_screen_offset(
     if expires_ms <= started_ms || now >= expires_ms || (from_x == to_x && from_y == to_y) {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     }
-    let entry = motion::EntityMotionEntry {
-        from_x,
-        from_y,
-        to_x,
-        to_y,
-        started_ms,
-        expires_ms,
-    };
-    let offset = motion::compute_motion_offset(&entry, now, 48.0, 32.0);
+    // Successive movement windows can start from the fractional pose of the
+    // previous step. Preserve that value across the JS/WASM boundary; coercing
+    // it to i32 makes the fallback camera disagree with the local-command pose.
+    let offset = motion::compute_motion_offset_fractional(
+        from_x, from_y, to_x, to_y, started_ms, expires_ms, now, 48.0, 32.0,
+    );
     (-offset, presentation_pose::CameraPoseSource::SelfWindow)
 }
 
@@ -2137,14 +2136,16 @@ fn begin_presentation_pose_frame(
         let active_ts_window = active_self_camera_motion_window(motion_table.now_ms);
         let matching_path =
             active_ts_window.is_some_and(|window| local_motion.segment_matches_ts_window(window));
+        let committed_target = active_ts_window
+            .is_some_and(|window| local_motion.committed_segment_matches_ts_target(window));
 
         if ts_source == presentation_pose::CameraPoseSource::SelfWindow {
             if let Some(ts_window) = active_ts_window {
                 if matching_path {
                     if let Some(candidate) = local_motion.candidate_offset(
                         &self_entity.object_id,
-                        ts_window.to_x,
-                        ts_window.to_y,
+                        ts_window.to_x.round() as i32,
+                        ts_window.to_y.round() as i32,
                         motion_table.now_ms,
                         48.0,
                         32.0,
@@ -2159,8 +2160,8 @@ fn begin_presentation_pose_frame(
                     }
                 } else if local_motion.has_matching_segment_target(
                     &self_entity.object_id,
-                    ts_window.to_x,
-                    ts_window.to_y,
+                    ts_window.to_x.round() as i32,
+                    ts_window.to_y.round() as i32,
                 ) {
                     local_motion.record_ts_window_path_mismatch();
                 } else {
@@ -2175,7 +2176,7 @@ fn begin_presentation_pose_frame(
         // comparing requested-to-applied made the first movement phases fall
         // back to the opposite-signed TypeScript camera window.
         let common_applied_center = presentation_poses.coherent_applied_center();
-        let ts_allows_command = active_ts_window.is_none() || matching_path;
+        let ts_allows_command = active_ts_window.is_none() || matching_path || committed_target;
         let takeover_candidate = common_applied_center
             .filter(|_| ts_allows_command)
             .and_then(|center| {
@@ -2191,6 +2192,7 @@ fn begin_presentation_pose_frame(
 
         if local_motion.presentation_enabled() {
             if let Some(candidate) = takeover_candidate {
+                local_motion.mark_presentation_committed();
                 // The entity offset is relative to the center that both render
                 // layers actually use. Its inverse camera offset keeps the
                 // composed pose continuous when that center advances a cell.

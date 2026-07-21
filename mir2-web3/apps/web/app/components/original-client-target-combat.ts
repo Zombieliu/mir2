@@ -25,6 +25,7 @@ export type LockedMonsterAttackDecision =
   | { kind: "approach"; lock: LockedMonsterAttack; destination: TargetPoint }
   | { kind: "attack"; lock: LockedMonsterAttack };
 
+/** Creates the client-side pursuit lock; the server remains authoritative. */
 export function createLockedMonsterAttack(
   objectId: string,
   target: TargetPoint,
@@ -68,6 +69,8 @@ export function decideLockedMonsterAttack(input: {
     target.dead ||
     selectedObjectId !== lock.objectId
   ) {
+    // Selection is part of the lock contract: a ground click or a different
+    // target must stop auto-pursuit instead of silently retargeting.
     return { kind: "clear" };
   }
 
@@ -80,6 +83,8 @@ export function decideLockedMonsterAttack(input: {
   const distance = Math.max(Math.abs(self.x - target.x), Math.abs(self.y - target.y));
 
   if (distance <= 1) {
+    // Do not overlap a movement acknowledgement with an attack intent. This
+    // prevents a late movement correction from snapping an attacking player.
     if (movementPending || now < nextAttackAt) {
       return { kind: "wait", lock: nextLock };
     }
@@ -93,6 +98,8 @@ export function decideLockedMonsterAttack(input: {
   const queuedApproachMatches =
     queuedApproach?.x === approachDestination.x && queuedApproach?.y === approachDestination.y;
   if (queuedApproachMatches || (movementPending && !targetMoved)) {
+    // A moving target invalidates the old approach destination; a stationary
+    // target can reuse the in-flight movement and avoid command spam.
     return { kind: "wait", lock: nextLock };
   }
   if (!targetMoved && now < lock.nextApproachAt) {

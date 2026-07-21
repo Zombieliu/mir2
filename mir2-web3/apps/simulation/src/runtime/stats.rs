@@ -6,14 +6,8 @@
 //! (see `crystal_compat::CRYSTAL_STAT_*`). Combat, defence, regeneration, and
 //! weight systems read from this block instead of recomputing ad-hoc totals.
 //!
-//! ## Compatibility contract
-//!
-//! The values that already drove combat before this engine existed
-//! (`MaxDC` melee, `MaxAC`/defence mitigation, accuracy) are reproduced exactly
-//! so the established behaviour/tests are preserved: for seed equipment the
-//! `Min*`/`Max*` ranges collapse (`min == max`), crit-rate is `0`, and the
-//! resistances/recovery/weight fields are inert. The new dimensions only become
-//! active once gear or buffs actually supply the relevant Crystal stat indices.
+//! Equipment follows Crystal's `RefreshEquipmentStats`: template stats are
+//! applied first, followed by user-added stats, socket stats, and awakening.
 
 use std::collections::BTreeMap;
 
@@ -22,6 +16,7 @@ use mir2_protocol::MirClass;
 
 use super::crystal_compat::*;
 use super::equipment::EquipmentState;
+use super::items::{crystal_item_template_for_item_key, ItemState};
 use super::resources::{BuffResource, InventoryResource, SessionResource, Stage5SystemsResource};
 
 /// Crystal social experience-rate bonuses. Marriage, mentorship, and guild
@@ -295,36 +290,6 @@ fn class_stat_caps() -> &'static [(u8, i32)] {
     ]
 }
 
-/// Sum of an equipped item's explicit `added_stats` for a single Crystal stat
-/// index (scalar attack/defence/luck are handled separately by the caller).
-fn item_added_stat_sum(item: &EquipmentState, stat: u8) -> i32 {
-    item.added_stats
-        .iter()
-        .filter(|entry| entry.stat == stat)
-        .map(|entry| entry.value)
-        .sum()
-}
-
-/// A single equipped item's contribution to a `(Min*, Max*)` combat range.
-///
-/// `scalar` is the item's legacy primary value for that stat (weapon attack for
-/// DC, armour defence for AC, `0` otherwise). The max contribution is
-/// `scalar + added_stats[max_stat]`; the min collapses to that same value
-/// unless the item carries an explicit `added_stats[min_stat]`. For seed
-/// equipment this yields `min == max`, so deterministic combat rolls land on
-/// the historical flat number.
-fn item_range_contribution(
-    item: &EquipmentState,
-    scalar: i32,
-    min_stat: u8,
-    max_stat: u8,
-) -> (i32, i32) {
-    let max = scalar.saturating_add(item_added_stat_sum(item, max_stat));
-    let explicit_min = item_added_stat_sum(item, min_stat);
-    let min = if explicit_min > 0 { explicit_min } else { max };
-    (min, max)
-}
-
 /// Recompute the authoritative stat block, publish it as a snapshot resource,
 /// and reconcile the derived `max_hp`/`max_mp` onto the player's vitals — the
 /// Crystal `RefreshStats` behaviour where gear/level changes resize the HP/MP
@@ -473,81 +438,147 @@ fn apply_stat_caps(stats: &mut PlayerStats) {
     }
 }
 
+fn accumulate_template_or_legacy_stats(
+    stats: &mut PlayerStats,
+    key: &str,
+    attack: i32,
+    defence: i32,
+) {
+    if let Some(template) = crystal_item_template_for_item_key(key) {
+        let mut has_max_dc = false;
+        let mut has_max_ac = false;
+        for entry in &template.stats {
+            let value = match entry.stat {
+                CRYSTAL_STAT_MAX_DC if attack != 0 => {
+                    has_max_dc = true;
+                    attack
+                }
+                CRYSTAL_STAT_MAX_AC if defence != 0 => {
+                    has_max_ac = true;
+                    defence
+                }
+                CRYSTAL_STAT_MAX_DC => {
+                    has_max_dc = true;
+                    entry.value
+                }
+                CRYSTAL_STAT_MAX_AC => {
+                    has_max_ac = true;
+                    entry.value
+                }
+                _ => entry.value,
+            };
+            stats.add(entry.stat, value);
+        }
+        if attack != 0 && !has_max_dc {
+            stats.add(CRYSTAL_STAT_MAX_DC, attack);
+        }
+        if defence != 0 && !has_max_ac {
+            stats.add(CRYSTAL_STAT_MAX_AC, defence);
+        }
+        return;
+    }
+
+    // Legacy non-Crystal templates only expose one scalar bound.
+    if attack != 0 {
+        stats.add(CRYSTAL_STAT_MIN_DC, attack);
+        stats.add(CRYSTAL_STAT_MAX_DC, attack);
+    }
+    if defence != 0 {
+        stats.add(CRYSTAL_STAT_MIN_AC, defence);
+        stats.add(CRYSTAL_STAT_MAX_AC, defence);
+    }
+}
+
+fn accumulate_added_stats(
+    stats: &mut PlayerStats,
+    added_stats: &[mir2_protocol::UserItemStat],
+    added_attack: i32,
+    added_defence: i32,
+    added_luck: i32,
+) {
+    let mut has_max_dc = false;
+    let mut has_max_ac = false;
+    let mut has_luck = false;
+    for entry in added_stats {
+        has_max_dc |= entry.stat == CRYSTAL_STAT_MAX_DC;
+        has_max_ac |= entry.stat == CRYSTAL_STAT_MAX_AC;
+        has_luck |= entry.stat == CRYSTAL_STAT_LUCK;
+        stats.add(entry.stat, entry.value);
+    }
+    // Older saves kept these three values in scalar compatibility fields.
+    if !has_max_dc {
+        stats.add(CRYSTAL_STAT_MAX_DC, added_attack);
+    }
+    if !has_max_ac {
+        stats.add(CRYSTAL_STAT_MAX_AC, added_defence);
+    }
+    if !has_luck {
+        stats.add(CRYSTAL_STAT_LUCK, added_luck);
+    }
+}
+
+fn accumulate_socket(stats: &mut PlayerStats, item: &ItemState) {
+    if item.durability_max.unwrap_or_default() > 0
+        && item.durability_current.unwrap_or_default() == 0
+    {
+        return;
+    }
+    accumulate_template_or_legacy_stats(stats, &item.key, item.attack, item.defence);
+    accumulate_added_stats(
+        stats,
+        &item.added_stats,
+        item.added_attack,
+        item.added_defence,
+        0,
+    );
+}
+
+fn accumulate_awakening(stats: &mut PlayerStats, item: &EquipmentState) {
+    let value = item
+        .awake_values
+        .iter()
+        .map(|value| i32::from(*value))
+        .sum();
+    if value == 0 {
+        return;
+    }
+    let range = match item.awake_type {
+        1 => Some((CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MAX_DC)),
+        2 => Some((CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MAX_MC)),
+        3 => Some((CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MAX_SC)),
+        4 => Some((CRYSTAL_STAT_MIN_AC, CRYSTAL_STAT_MAX_AC)),
+        5 => Some((CRYSTAL_STAT_MIN_MAC, CRYSTAL_STAT_MAX_MAC)),
+        6 => {
+            stats.add(CRYSTAL_STAT_HP, value);
+            stats.add(CRYSTAL_STAT_MP, value);
+            None
+        }
+        _ => None,
+    };
+    if let Some((min_stat, max_stat)) = range {
+        stats.add(min_stat, value);
+        stats.add(max_stat, value);
+    }
+}
+
 fn accumulate_equipment(stats: &mut PlayerStats, inventory: &InventoryResource) {
     for item in inventory
         .equipment_items
         .iter()
         .filter(|item| !item.is_broken())
     {
-        // DC: weapon base attack + added attack (via total_attack) + explicit
-        // Min/Max DC added stats.
-        let (min_dc, max_dc) = item_range_contribution(
-            item,
-            item.total_attack(),
-            CRYSTAL_STAT_MIN_DC,
-            CRYSTAL_STAT_MAX_DC,
+        accumulate_template_or_legacy_stats(stats, &item.key, item.attack, item.defence);
+        accumulate_added_stats(
+            stats,
+            &item.added_stats,
+            item.added_attack,
+            item.added_defence,
+            item.added_luck,
         );
-        stats.add(CRYSTAL_STAT_MAX_DC, max_dc);
-        stats.add(CRYSTAL_STAT_MIN_DC, min_dc);
-
-        // AC: armour base defence + added defence (via total_defence) + explicit
-        // Min/Max AC added stats.
-        let (min_ac, max_ac) = item_range_contribution(
-            item,
-            item.total_defence(),
-            CRYSTAL_STAT_MIN_AC,
-            CRYSTAL_STAT_MAX_AC,
-        );
-        stats.add(CRYSTAL_STAT_MAX_AC, max_ac);
-        stats.add(CRYSTAL_STAT_MIN_AC, min_ac);
-
-        // MAC / MC / SC ranges (purely from explicit added stats).
-        for (min_stat, max_stat) in [
-            (CRYSTAL_STAT_MIN_MAC, CRYSTAL_STAT_MAX_MAC),
-            (CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MAX_MC),
-            (CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MAX_SC),
-        ] {
-            let (min_value, max_value) = item_range_contribution(item, 0, min_stat, max_stat);
-            stats.add(max_stat, max_value);
-            stats.add(min_stat, min_value);
+        for socket in &item.socketed {
+            accumulate_socket(stats, socket);
         }
-
-        // Scalar stats carried directly on the item's added-stat list.
-        for stat in [
-            CRYSTAL_STAT_ACCURACY,
-            CRYSTAL_STAT_AGILITY,
-            CRYSTAL_STAT_HP,
-            CRYSTAL_STAT_MP,
-            CRYSTAL_STAT_ATTACK_SPEED,
-            CRYSTAL_STAT_LUCK,
-            CRYSTAL_STAT_MAGIC_RESIST,
-            CRYSTAL_STAT_POISON_RESIST,
-            CRYSTAL_STAT_HEALTH_RECOVERY,
-            CRYSTAL_STAT_SPELL_RECOVERY,
-            CRYSTAL_STAT_POISON_RECOVERY,
-            CRYSTAL_STAT_CRITICAL_RATE,
-            CRYSTAL_STAT_CRITICAL_DAMAGE,
-            CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT,
-            CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
-            CRYSTAL_STAT_ENERGY_SHIELD_PERCENT,
-            CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN,
-            CRYSTAL_STAT_MANA_PENALTY_PERCENT,
-            CRYSTAL_STAT_MAX_DC_RATE_PERCENT,
-            CRYSTAL_STAT_MAX_MC_RATE_PERCENT,
-            CRYSTAL_STAT_MAX_SC_RATE_PERCENT,
-            CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT,
-        ] {
-            let value: i32 = item
-                .added_stats
-                .iter()
-                .filter(|entry| entry.stat == stat)
-                .map(|entry| entry.value)
-                .sum();
-            stats.add(stat, value);
-        }
-
-        // Equipment luck scalar (stored separately from added_stats).
-        stats.add(CRYSTAL_STAT_LUCK, item.added_luck);
+        accumulate_awakening(stats, item);
     }
 }
 

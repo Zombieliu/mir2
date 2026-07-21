@@ -26,6 +26,8 @@ function dateFromBinaryDateTime(value: number) {
     return null;
   }
 
+  // Crystal serializes .NET DateTime ticks (100 ns since 0001-01-01), whereas
+  // JavaScript Date expects milliseconds since the Unix epoch.
   const ticksFromUnixEpoch = value - 621355968000000000;
   if (ticksFromUnixEpoch <= 0) {
     return null;
@@ -35,6 +37,8 @@ function dateFromBinaryDateTime(value: number) {
 }
 
 export function equipmentSlotForItemKey(key: string): EquipmentSlot | null {
+  // This is presentation fallback metadata for legacy/string-only items. Live
+  // server equipment-slot data should take precedence whenever it is present.
   if (/Sword|Dagger|Blade|Axe|Staff|Wand|Bow|Crossbow|Mace/i.test(key)) return "weapon";
   if (/Helmet|Helm/i.test(key)) return "helmet";
   if (/Armour|Armor|Robe|Dress/i.test(key)) return "armour";

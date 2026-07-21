@@ -52,7 +52,7 @@ const visualLayersSource = readFileSync(
 );
 const shellSource = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
 const globalCssSource = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
-const resolvedEffectLayerStart = visualLayersSource.indexOf("resolvedEffectFrames.map");
+const resolvedEffectLayerStart = visualLayersSource.indexOf("displayResolvedEffectFrames.map");
 const resolvedEffectLayerSource = visualLayersSource.slice(
   resolvedEffectLayerStart,
   visualLayersSource.indexOf('{screen === "game" && sceneLightClassName', resolvedEffectLayerStart),
@@ -68,6 +68,32 @@ assert.doesNotMatch(
   "effect metadata offsets must not receive a second half-cell center offset",
 );
 assert.equal(runtime.CRYSTAL_ADDITIVE_MIX_BLEND_MODE, "plus-lighter");
+assert.equal(
+  runtime.crystalSceneEffectLayerOffset("objectSpell"),
+  48,
+  "persistent world spells render before the entity layer",
+);
+assert.equal(
+  runtime.crystalSceneEffectLayerOffset("objectSpell", true),
+  49,
+  "a world-spell mask remains below the entity layer",
+);
+assert.equal(
+  runtime.crystalSceneEffectLayerOffset("spell"),
+  90,
+  "transient combat spells remain above actors",
+);
+assert.deepEqual(
+  runtime.sceneEffectAnimationAssetUrls({
+    ...animation,
+    frames: [
+      { ...animation.frames[0], maskPath: "/fx/mask.png" },
+      { ...animation.frames[1], maskPath: "/fx/mask.png" },
+    ],
+  }),
+  ["/fx/0.png", "/fx/mask.png", "/fx/1.png"],
+  "persistent effects preload every body and mask frame exactly once",
+);
 assert.match(shellSource, /className={`game-world-composite/, "world renderers share one compositing root");
 assert.match(
   globalCssSource,
@@ -129,4 +155,4 @@ assert.equal(
   "ObjectSpell resolves the repeating ground animation after the cast animation would end",
 );
 
-console.log("scene effect runtime: 6 passed");
+console.log("scene effect runtime: 10 passed");

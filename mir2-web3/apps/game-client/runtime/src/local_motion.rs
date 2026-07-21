@@ -20,6 +20,7 @@ const MAX_DECODE_ERROR_CHARS: usize = 512;
 const MOVE_PHASE_INTERVAL_MS: f64 = 100.0;
 const MAX_SMOOTH_TILE_DISTANCE: f32 = 3.0;
 const PIXEL_MATCH_EPSILON: f32 = 0.01;
+const PATH_MATCH_EPSILON_TILES: f32 = 0.001;
 
 thread_local! {
     static PENDING_EVENT_JSON: RefCell<VecDeque<String>> = const { RefCell::new(VecDeque::new()) };
@@ -58,6 +59,7 @@ pub(crate) struct LocalMotionSegment {
     pub(crate) phase_index: u8,
     pub(crate) next_phase_ms: f64,
     pub(crate) authoritative_confirmed: bool,
+    pub(crate) presentation_committed: bool,
     pub(crate) completed: bool,
 }
 
@@ -149,10 +151,10 @@ pub(crate) struct LocalMotionComparison {
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct LocalTsMotionWindow {
-    pub(crate) from_x: i32,
-    pub(crate) from_y: i32,
-    pub(crate) to_x: i32,
-    pub(crate) to_y: i32,
+    pub(crate) from_x: f32,
+    pub(crate) from_y: f32,
+    pub(crate) to_x: f32,
+    pub(crate) to_y: f32,
     pub(crate) started_ms: f64,
     pub(crate) expires_ms: f64,
 }
@@ -386,8 +388,10 @@ impl LocalMotionPresentationShadow {
         let target = Vec2::new(command.to_x as f32, command.to_y as f32);
         let provided_from = Vec2::new(command.from_x as f32, command.from_y as f32);
         let mut effective_from = provided_from;
+        let mut presentation_committed = false;
         if let Some(previous) = &self.segment {
             if previous.to_x == provided_from.x && previous.to_y == provided_from.y {
+                presentation_committed = previous.presentation_committed;
                 let current = previous.current_pose();
                 if chebyshev_distance(current, target) <= MAX_SMOOTH_TILE_DISTANCE {
                     effective_from = current;
@@ -414,6 +418,7 @@ impl LocalMotionPresentationShadow {
             phase_index: 0,
             next_phase_ms: next_pulse_ms,
             authoritative_confirmed: false,
+            presentation_committed,
             completed: false,
         });
     }
@@ -469,7 +474,9 @@ impl LocalMotionPresentationShadow {
         }
         let segment = self.segment.as_mut()?;
         self.candidate_query_count = self.candidate_query_count.saturating_add(1);
-        if segment.to_x != target_x as f32 || segment.to_y != target_y as f32 {
+        if !coordinates_match(segment.to_x, target_x as f32)
+            || !coordinates_match(segment.to_y, target_y as f32)
+        {
             self.target_mismatch_count = self.target_mismatch_count.saturating_add(1);
             return None;
         }
@@ -495,17 +502,34 @@ impl LocalMotionPresentationShadow {
             return false;
         }
         self.segment.as_ref().is_some_and(|segment| {
-            segment.to_x == target_x as f32 && segment.to_y == target_y as f32
+            coordinates_match(segment.to_x, target_x as f32)
+                && coordinates_match(segment.to_y, target_y as f32)
         })
     }
 
     pub(crate) fn segment_matches_ts_window(&self, window: LocalTsMotionWindow) -> bool {
         self.segment.as_ref().is_some_and(|segment| {
-            (segment.from_x - window.from_x as f32).abs() <= f32::EPSILON
-                && (segment.from_y - window.from_y as f32).abs() <= f32::EPSILON
-                && (segment.to_x - window.to_x as f32).abs() <= f32::EPSILON
-                && (segment.to_y - window.to_y as f32).abs() <= f32::EPSILON
+            coordinates_match(segment.from_x, window.from_x)
+                && coordinates_match(segment.from_y, window.from_y)
+                && coordinates_match(segment.to_x, window.to_x)
+                && coordinates_match(segment.to_y, window.to_y)
         })
+    }
+
+    pub(crate) fn committed_segment_matches_ts_target(&self, window: LocalTsMotionWindow) -> bool {
+        self.segment.as_ref().is_some_and(|segment| {
+            segment.presentation_committed
+                && coordinates_match(segment.to_x, window.to_x)
+                && coordinates_match(segment.to_y, window.to_y)
+        })
+    }
+
+    pub(crate) fn mark_presentation_committed(&mut self) {
+        if let Some(segment) = &mut self.segment {
+            if segment.is_presenting() {
+                segment.presentation_committed = true;
+            }
+        }
     }
 
     pub(crate) fn presentation_phase(&self) -> Option<LocalMotionPresentationPhase> {
@@ -701,6 +725,10 @@ impl LocalMotionPresentationShadow {
 
 fn chebyshev_distance(left: Vec2, right: Vec2) -> f32 {
     (left.x - right.x).abs().max((left.y - right.y).abs())
+}
+
+fn coordinates_match(left: f32, right: f32) -> bool {
+    (left - right).abs() <= PATH_MATCH_EPSILON_TILES
 }
 
 pub(crate) fn enqueue_local_motion_event_json(json: String) {
@@ -1100,10 +1128,10 @@ mod tests {
         shadow.apply_event(reset_event());
         shadow.apply_event(walk_command(0.0));
         let ts_window = LocalTsMotionWindow {
-            from_x: 10,
-            from_y: 10,
-            to_x: 11,
-            to_y: 10,
+            from_x: 10.0,
+            from_y: 10.0,
+            to_x: 11.0,
+            to_y: 10.0,
             started_ms: 50.0,
             expires_ms: 650.0,
         };
@@ -1150,21 +1178,112 @@ mod tests {
         shadow.apply_event(reset_event());
         shadow.apply_event(walk_command(0.0));
         assert!(shadow.segment_matches_ts_window(LocalTsMotionWindow {
-            from_x: 10,
-            from_y: 10,
-            to_x: 11,
-            to_y: 10,
+            from_x: 10.0,
+            from_y: 10.0,
+            to_x: 11.0,
+            to_y: 10.0,
             started_ms: 5.0,
             expires_ms: 605.0,
         }));
         assert!(!shadow.segment_matches_ts_window(LocalTsMotionWindow {
-            from_x: 9,
-            from_y: 10,
-            to_x: 11,
-            to_y: 10,
+            from_x: 9.0,
+            from_y: 10.0,
+            to_x: 11.0,
+            to_y: 10.0,
             started_ms: 5.0,
             expires_ms: 605.0,
         }));
+    }
+
+    #[test]
+    fn overlapping_command_matches_fractional_typescript_window() {
+        let mut shadow = LocalMotionPresentationShadow::default();
+        let mut clock = motion::CrystalMoveClock::default();
+        sync_clock_at(&mut shadow, &mut clock, 0.0);
+        shadow.apply_event(reset_event());
+        shadow.apply_event(MovementShadowEvent::CommandSent {
+            at_ms: 0.0,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x: 10,
+            from_y: 10,
+            to_x: 12,
+            to_y: 10,
+            phase_count: None,
+        });
+        for at_ms in [100.0, 200.0, 300.0, 400.0] {
+            sync_clock_at(&mut shadow, &mut clock, at_ms);
+        }
+        let fractional_from = shadow
+            .segment
+            .as_ref()
+            .expect("first segment")
+            .current_pose();
+
+        shadow.apply_event(MovementShadowEvent::CommandSent {
+            at_ms: 400.0,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x: 12,
+            from_y: 10,
+            to_x: 14,
+            to_y: 10,
+            phase_count: None,
+        });
+
+        assert!(fractional_from.x.fract().abs() > f32::EPSILON);
+        assert!(shadow.segment_matches_ts_window(LocalTsMotionWindow {
+            from_x: fractional_from.x,
+            from_y: fractional_from.y,
+            to_x: 14.0,
+            to_y: 10.0,
+            started_ms: 400.0,
+            expires_ms: 1_000.0,
+        }));
+        assert!(!shadow.segment_matches_ts_window(LocalTsMotionWindow {
+            from_x: fractional_from.x.trunc(),
+            from_y: fractional_from.y,
+            to_x: 14.0,
+            to_y: 10.0,
+            started_ms: 400.0,
+            expires_ms: 1_000.0,
+        }));
+    }
+
+    #[test]
+    fn connected_commands_retain_committed_local_presentation_ownership() {
+        let mut shadow = LocalMotionPresentationShadow::default();
+        shadow.apply_event(reset_event());
+        shadow.apply_event(walk_command(0.0));
+        shadow.mark_presentation_committed();
+
+        shadow.apply_event(MovementShadowEvent::CommandSent {
+            at_ms: 100.0,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x: 11,
+            from_y: 10,
+            to_x: 13,
+            to_y: 10,
+            phase_count: None,
+        });
+        let rebased_window = LocalTsMotionWindow {
+            from_x: 11.0,
+            from_y: 10.0,
+            to_x: 13.0,
+            to_y: 10.0,
+            started_ms: 100.0,
+            expires_ms: 700.0,
+        };
+
+        assert!(
+            shadow
+                .segment
+                .as_ref()
+                .expect("connected segment")
+                .presentation_committed
+        );
+        assert!(shadow.committed_segment_matches_ts_target(rebased_window));
     }
 
     #[test]

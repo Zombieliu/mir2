@@ -311,6 +311,10 @@ export function AssetCacheRegistrar() {
           } catch {
             // The active worker can still serve from cache if the update check is transiently unavailable.
           }
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: "MIR2_ASSET_WORKER_ACTIVATE" });
+            await waitForServiceWorkerActivation(registration.waiting, 3000);
+          }
           const readyRegistration = await navigator.serviceWorker.ready;
 
           if (disposed) return;
@@ -746,6 +750,30 @@ function waitForServiceWorkerMessage(type: string, timeoutMs: number) {
       resolve(null);
     }, timeoutMs);
     navigator.serviceWorker.addEventListener("message", onMessage);
+  });
+}
+
+function waitForServiceWorkerActivation(worker: ServiceWorker, timeoutMs: number) {
+  if (worker.state === "activated" || worker.state === "redundant") {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    let timeout = 0;
+    const cleanup = () => {
+      worker.removeEventListener("statechange", onStateChange);
+      if (timeout) window.clearTimeout(timeout);
+    };
+    const finish = () => {
+      cleanup();
+      resolve();
+    };
+    const onStateChange = () => {
+      if (worker.state === "activated" || worker.state === "redundant") finish();
+    };
+
+    timeout = window.setTimeout(finish, timeoutMs);
+    worker.addEventListener("statechange", onStateChange);
   });
 }
 

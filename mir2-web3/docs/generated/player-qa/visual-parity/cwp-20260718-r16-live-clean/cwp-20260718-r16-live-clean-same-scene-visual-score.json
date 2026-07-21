@@ -1,0 +1,473 @@
+{
+  "generatedAt": "2026-07-17T18:45:33.034Z",
+  "inputDir": "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean",
+  "sampleCount": 1,
+  "pixelDeltaThreshold": 12,
+  "aggregate": {
+    "latestPrefix": "cwp-20260718-r16-live-clean-same-scene",
+    "latestScore": 1,
+    "averageScores": {
+      "overall": 1,
+      "runtime": 1,
+      "layout": 1,
+      "entities": 1,
+      "pixels": 1
+    },
+    "estimatedHumanParityBand": "93-100%",
+    "topGaps": [
+      {
+        "priority": "P1",
+        "title": "HUD score is polluted by dynamic character state",
+        "detail": "name=VIS0716Hero; level=1; health=HP 18/18; mp=14/14; gold=0; weight=0/50; hudWeightSpace=50/46; beltItems=0; inventoryItems=0; equipment=WoodenSword, BaseDress(M); signals=level=1, hp=HP 18/18, gold=0, belt=empty, inventory=empty",
+        "count": 1
+      },
+      {
+        "priority": "P2",
+        "title": "Chat panel content/state differs",
+        "detail": "chat similarity=82%; changedPixels>=12=7%; meanAbsDelta=10.087; meanLumDelta=9.817",
+        "count": 1
+      }
+    ]
+  },
+  "samples": [
+    {
+      "prefix": "cwp-20260718-r16-live-clean-same-scene",
+      "paths": {
+        "original": "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-original.png",
+        "web": "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-web.png",
+        "webState": "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\visual-parity\\cwp-20260718-r16-live-clean\\cwp-20260718-r16-live-clean-same-scene-web-state.json",
+        "nativeState": null
+      },
+      "dimensions": {
+        "original": {
+          "width": 1024,
+          "height": 768
+        },
+        "web": {
+          "width": 1024,
+          "height": 768
+        },
+        "compared": {
+          "width": 1024,
+          "height": 768
+        }
+      },
+      "scores": {
+        "overall": 1,
+        "runtime": 1,
+        "layout": 1,
+        "entities": 1,
+        "pixels": 1
+      },
+      "diagnostics": {
+        "runtime": [
+          {
+            "name": "screen.game",
+            "ok": true,
+            "detail": "screen=game"
+          },
+          {
+            "name": "map.bichon",
+            "ok": true,
+            "detail": "BichonProvince/0"
+          },
+          {
+            "name": "transition.clear",
+            "ok": true,
+            "detail": "transitionOverlayVisible=false"
+          },
+          {
+            "name": "console.clean",
+            "ok": true,
+            "detail": "criticalConsoleErrorCount=0; raw=1"
+          },
+          {
+            "name": "network.clean",
+            "ok": true,
+            "detail": "network404Count=0"
+          },
+          {
+            "name": "next.dev.hidden",
+            "ok": true,
+            "detail": "nextDevIndicatorVisible=false"
+          }
+        ],
+        "layout": [
+          {
+            "name": "stage.1024x768",
+            "ok": true,
+            "detail": "0,0 1024x768"
+          },
+          {
+            "name": "capture.1024x768",
+            "ok": true,
+            "detail": "1024x768"
+          },
+          {
+            "name": "hud.anchor",
+            "ok": true,
+            "detail": "0,616 1024x152"
+          },
+          {
+            "name": "minimap.anchor",
+            "ok": true,
+            "detail": "898,0 128x154"
+          },
+          {
+            "name": "chat.bounds",
+            "ok": true,
+            "detail": "230,671 632x68"
+          }
+        ],
+        "entities": [
+          {
+            "name": "player.present",
+            "ok": true,
+            "detail": "{\"x\":332,\"y\":275}"
+          },
+          {
+            "name": "entities.present",
+            "ok": true,
+            "detail": "entityCount=11"
+          },
+          {
+            "name": "npc.present",
+            "ok": true,
+            "detail": "npcCount=5"
+          },
+          {
+            "name": "nameplates.present",
+            "ok": true,
+            "detail": "nameplates=11"
+          },
+          {
+            "name": "quest.markers.scoped",
+            "ok": true,
+            "detail": "questMarkerCount=0"
+          }
+        ],
+        "pixels": [
+          {
+            "name": "world.pixel",
+            "ok": true,
+            "detail": "similarity=91%"
+          },
+          {
+            "name": "hud.pixel",
+            "ok": true,
+            "detail": "full=86%; ui=88%"
+          },
+          {
+            "name": "minimap.pixel",
+            "ok": true,
+            "detail": "similarity=87%"
+          },
+          {
+            "name": "chat.pixel",
+            "ok": true,
+            "detail": "similarity=82%"
+          }
+        ],
+        "state": {
+          "statePollutionRisk": true,
+          "summary": "name=VIS0716Hero; level=1; health=HP 18/18; mp=14/14; gold=0; weight=0/50; hudWeightSpace=50/46; beltItems=0; inventoryItems=0; equipment=WoodenSword, BaseDress(M)",
+          "signals": [
+            "level=1",
+            "hp=HP 18/18",
+            "gold=0",
+            "belt=empty",
+            "inventory=empty"
+          ],
+          "nativeSummary": null,
+          "comparisons": [],
+          "mismatches": [],
+          "hud": {
+            "nameText": "VIS0716Hero",
+            "levelText": "1",
+            "healthText": "HP 18/18",
+            "expText": "0.00%",
+            "goldText": "0",
+            "weightText": "50",
+            "spaceText": "46",
+            "expectedHudWeight": "50",
+            "expectedHudSpace": "46"
+          },
+          "items": {
+            "beltItems": [],
+            "inventoryItems": [],
+            "equipmentItems": [
+              {
+                "name": "WoodenSword",
+                "slot": "weapon",
+                "quantity": null,
+                "icon": 30,
+                "durabilityCurrent": 4000,
+                "durabilityMax": 4000
+              },
+              {
+                "name": "BaseDress(M)",
+                "slot": "armour",
+                "quantity": null,
+                "icon": 60,
+                "durabilityCurrent": 5000,
+                "durabilityMax": 5000
+              }
+            ]
+          }
+        },
+        "gapHints": [
+          {
+            "priority": "P1",
+            "title": "HUD score is polluted by dynamic character state",
+            "detail": "name=VIS0716Hero; level=1; health=HP 18/18; mp=14/14; gold=0; weight=0/50; hudWeightSpace=50/46; beltItems=0; inventoryItems=0; equipment=WoodenSword, BaseDress(M); signals=level=1, hp=HP 18/18, gold=0, belt=empty, inventory=empty"
+          },
+          {
+            "priority": "P2",
+            "title": "Chat panel content/state differs",
+            "detail": "chat similarity=82%; changedPixels>=12=7%; meanAbsDelta=10.087; meanLumDelta=9.817"
+          }
+        ]
+      },
+      "regionMetrics": {
+        "full": {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 1024,
+            "height": 768
+          },
+          "pixelCount": 786432,
+          "changedPixelCount": 55916,
+          "changedPixelRatio": 0.071,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.901,
+          "rmseNormalized": 0.099,
+          "meanAbsDelta": 5.454,
+          "meanLumDelta": 5.627
+        },
+        "world": {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 1024,
+            "height": 616
+          },
+          "pixelCount": 630784,
+          "changedPixelCount": 38027,
+          "changedPixelRatio": 0.06,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.914,
+          "rmseNormalized": 0.086,
+          "meanAbsDelta": 4.499,
+          "meanLumDelta": 4.541
+        },
+        "hud": {
+          "rect": {
+            "left": 0,
+            "top": 616,
+            "width": 1024,
+            "height": 152
+          },
+          "pixelCount": 155648,
+          "changedPixelCount": 17889,
+          "changedPixelRatio": 0.115,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.863,
+          "rmseNormalized": 0.137,
+          "meanAbsDelta": 9.324,
+          "meanLumDelta": 10.03
+        },
+        "hudLeft": {
+          "rect": {
+            "left": 0,
+            "top": 616,
+            "width": 230,
+            "height": 152
+          },
+          "pixelCount": 34960,
+          "changedPixelCount": 5319,
+          "changedPixelRatio": 0.152,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.865,
+          "rmseNormalized": 0.135,
+          "meanAbsDelta": 10.563,
+          "meanLumDelta": 11.403
+        },
+        "hudBelt": {
+          "rect": {
+            "left": 230,
+            "top": 616,
+            "width": 240,
+            "height": 40
+          },
+          "pixelCount": 9600,
+          "changedPixelCount": 1955,
+          "changedPixelRatio": 0.204,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.897,
+          "rmseNormalized": 0.103,
+          "meanAbsDelta": 10.765,
+          "meanLumDelta": 10.927
+        },
+        "hudRightControls": {
+          "rect": {
+            "left": 900,
+            "top": 650,
+            "width": 124,
+            "height": 68
+          },
+          "pixelCount": 8432,
+          "changedPixelCount": 0,
+          "changedPixelRatio": 0,
+          "pixelDeltaThreshold": 12,
+          "similarity": 1,
+          "rmseNormalized": 0,
+          "meanAbsDelta": 0,
+          "meanLumDelta": 0
+        },
+        "hudRightStatus": {
+          "rect": {
+            "left": 900,
+            "top": 712,
+            "width": 124,
+            "height": 56
+          },
+          "pixelCount": 6944,
+          "changedPixelCount": 951,
+          "changedPixelRatio": 0.137,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.847,
+          "rmseNormalized": 0.153,
+          "meanAbsDelta": 11.437,
+          "meanLumDelta": 13.092
+        },
+        "hudBottomCenter": {
+          "rect": {
+            "left": 230,
+            "top": 724,
+            "width": 670,
+            "height": 44
+          },
+          "pixelCount": 29480,
+          "changedPixelCount": 4425,
+          "changedPixelRatio": 0.15,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.879,
+          "rmseNormalized": 0.121,
+          "meanAbsDelta": 10.281,
+          "meanLumDelta": 12.619
+        },
+        "minimap": {
+          "rect": {
+            "left": 898,
+            "top": 0,
+            "width": 126,
+            "height": 154
+          },
+          "pixelCount": 19404,
+          "changedPixelCount": 764,
+          "changedPixelRatio": 0.039,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.872,
+          "rmseNormalized": 0.128,
+          "meanAbsDelta": 5.81,
+          "meanLumDelta": 5.741
+        },
+        "chat": {
+          "rect": {
+            "left": 230,
+            "top": 671,
+            "width": 632,
+            "height": 68
+          },
+          "pixelCount": 42976,
+          "changedPixelCount": 2972,
+          "changedPixelRatio": 0.069,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.821,
+          "rmseNormalized": 0.179,
+          "meanAbsDelta": 10.087,
+          "meanLumDelta": 9.817
+        },
+        "hudUi": {
+          "rect": null,
+          "pixelCount": 89416,
+          "changedPixelCount": 12650,
+          "changedPixelRatio": 0.141,
+          "pixelDeltaThreshold": 12,
+          "similarity": 0.884,
+          "rmseNormalized": 0.116,
+          "meanAbsDelta": 9.563,
+          "meanLumDelta": 10.809,
+          "subregions": 5
+        }
+      },
+      "webStateSummary": {
+        "screen": "game",
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "player": {
+          "x": 332,
+          "y": 275
+        },
+        "playerHp": 18,
+        "playerMaxHp": 18,
+        "playerMp": 14,
+        "playerMaxMp": 14,
+        "playerExperience": 0,
+        "playerMaxExperience": 100,
+        "gold": 0,
+        "credit": 0,
+        "currentWeight": 0,
+        "maxWeight": 50,
+        "freeBagSlots": 80,
+        "maxBagSlots": 80,
+        "inventoryItemCount": 0,
+        "beltItemCount": 0,
+        "equipmentItemCount": 2,
+        "hudTexts": {
+          "healthOnly": "HP 18/18",
+          "top": null,
+          "bottom": null,
+          "level": "1",
+          "name": "VIS0716Hero",
+          "map": "BichonProvince",
+          "exp": "0.00%",
+          "gold": "0",
+          "weight": "50",
+          "space": "46",
+          "buff": null
+        },
+        "beltItems": [],
+        "equipmentItems": [
+          {
+            "name": "WoodenSword",
+            "slot": "weapon",
+            "quantity": null,
+            "icon": 30,
+            "durabilityCurrent": 4000,
+            "durabilityMax": 4000
+          },
+          {
+            "name": "BaseDress(M)",
+            "slot": "armour",
+            "quantity": null,
+            "icon": 60,
+            "durabilityCurrent": 5000,
+            "durabilityMax": 5000
+          }
+        ],
+        "entityCount": 11,
+        "npcCount": 5,
+        "monsterCount": 5,
+        "questMarkerCount": 0,
+        "transitionOverlayVisible": false,
+        "network404Count": 0,
+        "consoleErrorCount": 1,
+        "criticalConsoleErrorCount": 0,
+        "tutorialOverlayVisible": false,
+        "objectiveTrackerVisible": false
+      }
+    }
+  ]
+}

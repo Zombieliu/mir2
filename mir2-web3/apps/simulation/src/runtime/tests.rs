@@ -28215,6 +28215,149 @@ fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
 }
 
 #[test]
+fn original_bichon_newcomer_quest_rewards_match_scripts() {
+    let expected = [
+        (1, 10, 0),
+        (2, 30, 200),
+        (3, 10, 0),
+        (4, 80, 20),
+        (5, 120, 30),
+        (6, 150, 38),
+        (7, 48, 60),
+        (8, 180, 45),
+        (9, 48, 60),
+    ];
+    for (quest_id, reward_exp, reward_gold) in expected {
+        let info = super::crystal_quest_info_by_id(quest_id)
+            .unwrap_or_else(|| panic!("Crystal newcomer quest {quest_id} should load"));
+        assert_eq!(info.reward_exp, reward_exp, "quest {quest_id} EXP");
+        assert_eq!(info.reward_gold, reward_gold, "quest {quest_id} gold");
+    }
+}
+
+#[test]
+fn ambient_monster_death_does_not_credit_player_newcomer_quest() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 5),
+        QuestStage::InProgress
+    );
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((0, 20)));
+
+    let object_id = 880_005;
+    let monster = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Scarecrow",
+        Point { x: 12, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    let mut packets = Vec::new();
+    let tick = runtime_tick(session.app.world());
+    assert!(super::damage_monster_entity(
+        session.app.world_mut(),
+        monster,
+        i32::MAX,
+        tick,
+        &mut packets,
+    ));
+    assert_eq!(
+        super::quest_progress(session.app.world(), 5),
+        Some((0, 20)),
+        "generic/environment monster deaths must not count as player kills"
+    );
+
+    super::handle_monster_defeat(
+        session.app.world_mut(),
+        object_id,
+        "Scarecrow",
+        &mut packets,
+    );
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((1, 20)));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 })));
+}
+
+#[test]
+fn player_owned_direct_and_poison_damage_credit_newcomer_quest() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 5),
+        QuestStage::InProgress
+    );
+
+    let direct = spawn_crystal_monster_for_test(
+        &mut session,
+        880_006,
+        "Scarecrow",
+        Point { x: 14, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    let tick = runtime_tick(session.app.world());
+    let mut direct_packets = Vec::new();
+    assert!(super::damage_player_owned_monster_entity(
+        session.app.world_mut(),
+        direct,
+        i32::MAX,
+        tick,
+        &mut direct_packets,
+    ));
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((1, 20)));
+    assert!(direct_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 })));
+
+    let poisoned = spawn_crystal_monster_for_test(
+        &mut session,
+        880_007,
+        "Scarecrow",
+        Point { x: 16, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    super::apply_player_monster_poison(session.app.world_mut(), poisoned, 1, i32::MAX, tick, 4);
+    let mut poison_packets = Vec::new();
+    super::tick_monster_poisons(session.app.world_mut(), tick + 2, &mut poison_packets);
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((2, 20)));
+    assert!(poison_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 })));
+
+    let ambient_poisoned = spawn_crystal_monster_for_test(
+        &mut session,
+        880_008,
+        "Scarecrow",
+        Point { x: 18, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    super::apply_monster_poison(
+        session.app.world_mut(),
+        ambient_poisoned,
+        1,
+        i32::MAX,
+        tick,
+        4,
+    );
+    let mut ambient_packets = Vec::new();
+    super::tick_monster_poisons(session.app.world_mut(), tick + 2, &mut ambient_packets);
+    assert_eq!(
+        super::quest_progress(session.app.world(), 5),
+        Some((2, 20)),
+        "environment-owned poison must not count as a player kill"
+    );
+    assert!(!ambient_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { .. })));
+    assert_eq!(session.world_snapshot().player_experience, 30);
+}
+
+#[test]
 fn drop_gold_packet_silently_rejects_before_start_game() {
     let mut session = SimulationSession::new(SimulationConfig::default());
 
@@ -36102,13 +36245,13 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Armour)
             .map(|item| (item.grade, item.added_defence, item.defence)),
-        Some((ItemGrade::Common, 0, 5))
+        Some((ItemGrade::Common, 0, 2))
     );
 
-    // WoodenSword MaxDC 4 (+ Copper Necklace 1); LightLeatherArmour MaxAC 5
-    // (+ bracelet/sandals 1 each).
-    assert_eq!(total_attack_bonus(session.app.world()), 5);
-    assert_eq!(total_defence_bonus(session.app.world()), 7);
+    // Crystal fresh characters start with WoodenSword (MaxDC 4) and BaseDress
+    // (MaxAC 2); no legacy demo necklace/bracelet/sandals are pre-equipped.
+    assert_eq!(total_attack_bonus(session.app.world()), 4);
+    assert_eq!(total_defence_bonus(session.app.world()), 2);
 }
 
 #[test]
@@ -58329,6 +58472,43 @@ fn crystal_ai41_yin_devil_node_is_immobile_like_ai42() {
 // ---------------------------------------------------------------------------
 
 #[test]
+fn crystal_starter_armour_can_fully_block_scarecrow_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let scarecrow_object_id = 98_930_u32;
+    set_player_position(&mut session, player_origin.clone());
+    spawn_crystal_monster_for_test(
+        &mut session,
+        scarecrow_object_id,
+        "Scarecrow",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+    let packets = (0..8)
+        .flat_map(|_| session.tick())
+        .collect::<Vec<ServerPacket>>();
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == scarecrow_object_id
+    )));
+    assert_eq!(
+        session.world_snapshot().player_hp,
+        Some(before_hp),
+        "BaseDress 2 AC should fully block Scarecrow's 1..=2 DC roll"
+    );
+}
+
+#[test]
 fn crystal_ai31_right_guard_uses_imported_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -58612,6 +58792,16 @@ fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i
 }
 
 #[test]
+fn player_hit_accuracy_includes_crystal_class_base_stat() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.accuracy(), 5);
+    assert_eq!(super::crystal_player_accuracy(session.app.world()), 5);
+}
+
+#[test]
 fn player_stats_seed_reflects_real_weapon_dc_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -58634,6 +58824,49 @@ fn player_stats_seed_reflects_real_weapon_dc_range() {
     // Level-1 melee is now single digits (Crystal newbie damage), not the old
     // ~24 floor.
     assert!(stats.max_dc() < 12, "no inflated melee floor remains");
+}
+
+#[test]
+fn dynamically_granted_crystal_weapon_keeps_template_stats_when_equipped() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before = super::player_stats(session.app.world());
+
+    let dagger = super::add_or_increment_item(
+        session.app.world_mut(),
+        ItemContainer::Bag1,
+        "crystal-item-1172",
+        "SharpDagger",
+        "Original Crystal quest reward.",
+        0,
+        1,
+        5,
+    );
+    assert_eq!(dagger.attack, 6);
+    assert_eq!(dagger.durability_current, Some(5_000));
+    assert_eq!(dagger.durability_max, Some(5_000));
+
+    let packets = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: dagger.unique_id,
+        to: 0,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. })));
+
+    let weapon = session
+        .world_snapshot()
+        .equipment_items
+        .into_iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("SharpDagger should be equipped");
+    assert_eq!(weapon.name, "SharpDagger");
+    assert_eq!(weapon.attack, 6);
+
+    let after = super::player_stats(session.app.world());
+    assert_eq!(after.min_dc(), before.min_dc() + 2);
+    assert_eq!(after.max_dc(), before.max_dc() + 2);
 }
 
 #[test]

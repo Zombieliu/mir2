@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> Latest original beginner-route server parity note: 2026-07-18 closes the
+> Crystal q1-q9 fresh-Warrior path through level 6. The imported quest chain
+> now preserves the original NPC hand-offs, task quantities, prerequisites,
+> hand-in XP/gold, fixed rewards, q3/q6 mandatory choices, Scarecrow
+> `GingerTea` Q drops, Deer corpse-harvest `DeerMeat` Q drops, and equipment
+> template stats. Player melee, skills, and player-owned poison feed one
+> authoritative defeat path that grants Crystal monster EXP and quest credit;
+> environmental/NPC deaths do neither. A release vertical slice finishes all
+> nine quests with exact rewards and reaches level 6 naturally, while focused
+> regressions cover ownership, drops, harvest, combat stats, Gateway reward
+> projection, and Web parsing. This supersedes the older q1-q4/q5-unlocked
+> note below; remaining work is client-side dialog/route feel acceptance and
+> later quest bands, not q1-q9 server progression.
+
 > Latest NPC name-colour server parity note: 2026-07-18 aligns every ordinary
 > NPC spawn projection with Crystal `Server.MirObjects.NPCObject`, which sets
 > `NameColour = Color.Lime` and copies it into `S.ObjectNPC`. The Rust initial
