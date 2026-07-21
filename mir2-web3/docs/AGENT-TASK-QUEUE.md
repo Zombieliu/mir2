@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> Latest reproducible developer-handoff sync: 2026-07-22. The root clone path,
+> maintained Crystal fork/branch, Node 22/Rust 1.89 bootstrap, Gateway/Web
+> startup, verification suite, and private full-asset installation are now
+> documented and scripted. The private bundle is content-addressed by
+> `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`
+> and contains the exact 1,440-shard/4,446-page closure. Deterministic USTAR,
+> per-part/archive/page hashing, safe-entry inspection, transactional install,
+> exact remote-release closure, streaming R2 upload, and all-object remote
+> probes form the handoff gate. Remaining delivery work after private Release
+> and clean-clone proof is the credentialed R2 upload plus Brazil physical
+> device acceptance; visual parity work below remains independently open.
+
 > Latest fresh-native effect/HUD closure: 2026-07-18. A live Crystal/Web pair
 > now uses the corrected Lime NPC packet state at Bichon `0.map @ 332,275`, Day
 > setting 2. The pre-fix r05 baseline measured 15.0% full-window and 14.8%

@@ -1,7 +1,7 @@
 # Crystal Full Asset Pipeline
 
-Status: lossless PNG/CAS baseline implemented and locally accepted on
-2026-07-14.
+Status: lossless PNG/CAS baseline implemented, locally accepted on
+2026-07-14, and packaged for reproducible developer handoff on 2026-07-22.
 
 ## Decision
 
@@ -57,6 +57,32 @@ The generated payload is intentionally ignored by Git. Production should build
 it in an asset job and publish pages before manifests and the mutable release
 pointer. JSON should be Brotli-compressed; CAS pages should use immutable cache
 headers.
+
+## Developer Distribution And Integrity Gate
+
+The approved developer bundle is pinned by
+`config/developer-assets.json` and published as a private GitHub Release. The
+current bundle has these immutable identifiers:
+
+- Release tag: `developer-assets-f71b89aa3850`
+- Full-pack content hash: `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`
+- Deterministic USTAR SHA-256: `d8dd209e47a5f03eb41b1b03758383b102a9a25d11fedc32bb1d71ec700b0fd9`
+- Archive bytes: `9,751,758,336`, split into seven verified Release assets
+
+`scripts/package-developer-assets.ps1` accepts only the exact index closure:
+one index, 1,440 library shards, and 4,446 unique PNG pages. It verifies every
+page hash before writing a deterministic USTAR archive. The installer verifies
+every part, the reconstructed archive, safe USTAR entry types and paths, and
+the extracted full-pack closure before an atomic directory swap.
+
+The R2 release path is separate from the private developer bundle. A full-pack
+release manifest must contain exactly 5,887 full-pack objects with source size
+and SHA-256, must use the streaming `r2-s3` uploader, and must publish pages and
+shards before the mutable pointer. `release-doctor.mjs` probes all 5,887 remote
+objects when `--requireFullCrystalPack true` is enabled. The hosted workflow
+intentionally refuses to upload this ignored 10 GB input; publish from an
+authorized local machine, then use the workflow's existing-release verification
+path. Do not describe R2 as live until that full remote probe passes.
 
 ## Runtime Adoption
 

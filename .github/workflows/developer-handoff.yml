@@ -1,0 +1,109 @@
+name: Developer Handoff Smoke
+
+on:
+  pull_request:
+    paths:
+      - ".gitmodules"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "mir2-web3/apps/web/**"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/config/developer-assets.json"
+      - "mir2-web3/infra/cloudflare/mir2-domain-proxy/**"
+      - "mir2-web3/packages/**"
+      - "mir2-web3/scripts/*developer*.ps1"
+      - "mir2-web3/docs/*DEVELOPER*"
+      - "mir2-web3/docs/*ASSET*"
+      - ".github/workflows/developer-handoff.yml"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-checkout-and-build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout with Crystal
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Verify pinned Crystal commit
+        shell: pwsh
+        run: |
+          $expected = (git ls-tree HEAD Crystal).Split()[2]
+          $actual = (git -C Crystal rev-parse HEAD).Trim()
+          if ($expected -ne $actual) {
+            throw "Crystal mismatch: expected $expected, found $actual"
+          }
+          $remote = git -C Crystal ls-remote origin refs/heads/codex/handoff-parity-tools | Out-String
+          if ($LASTEXITCODE -ne 0 -or $remote -notmatch [regex]::Escape($expected)) {
+            throw "Crystal commit $expected is not reachable from the configured handoff branch"
+          }
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+
+      - name: Install Rust 1.89
+        run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Install Web dependencies
+        run: npm ci --prefix mir2-web3/apps/web
+
+      - name: Check Gateway
+        working-directory: mir2-web3
+        run: cargo +1.89.0 check --locked -p mir2-gateway
+
+      - name: Test asset release safety
+        working-directory: mir2-web3/apps/web
+        run: npm run test:asset-release-safety && npm run test:domain-proxy-routing
+
+      - name: Test developer asset installer
+        shell: pwsh
+        working-directory: mir2-web3
+        run: ./scripts/test-developer-asset-installer.ps1
+
+      - name: Build Web with tracked runtime
+        working-directory: mir2-web3/apps/web
+        env:
+          MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
+        run: npm run build
+
+      - name: Probe published full asset pack
+        if: ${{ vars.MIR2_FULL_ASSET_BASE_URL != '' }}
+        shell: pwsh
+        run: |
+          $baseUrl = "${{ vars.MIR2_FULL_ASSET_BASE_URL }}".TrimEnd('/')
+          $manifestPath = Join-Path $env:RUNNER_TEMP "mir2-remote-asset-release.json"
+          Invoke-WebRequest `
+            -UseBasicParsing `
+            -Uri "$baseUrl/remote-asset-release.json" `
+            -OutFile $manifestPath `
+            -TimeoutSec 30
+          Push-Location mir2-web3/apps/web
+          try {
+            node ./scripts/release-doctor.mjs `
+              --manifest $manifestPath `
+              --checkManifest true `
+              --checkR2 true `
+              --checkWorker false `
+              --checkBevyRuntime false `
+              --requireFullCrystalPack true `
+              --probeConcurrency 32 `
+              --assetBaseUrl $baseUrl
+            if ($LASTEXITCODE -ne 0) {
+              throw "Published full asset pack verification failed with exit code $LASTEXITCODE"
+            }
+          }
+          finally {
+            Pop-Location
+          }

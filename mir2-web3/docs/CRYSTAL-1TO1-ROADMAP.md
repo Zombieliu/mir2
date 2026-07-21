@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest developer-handoff roadmap sync: 2026-07-22 establishes a reproducible
+> code-and-assets entry point for another developer. A recursive clone resolves
+> the maintained Crystal handoff branch, Windows scripts bootstrap Node 22 and
+> Rust 1.89 dependencies and start Gateway/Web on the documented ports, and a
+> tracked manifest pins the private full-asset Release. The full pack is an
+> exact, page-hash-verified closure of 1,440 shards and 4,446 unique pages,
+> packaged as deterministic USTAR with safe transactional installation. The
+> remote release manifest independently covers 45,398 objects with zero local
+> misses and exactly 5,887 full-pack objects. Private Release and clean-clone
+> acceptance are the final gates for this handoff round; credentialed R2
+> publication and physical Brazil low-end testing remain separate open work.
+
 > Latest original Bichon level-6 quest-chain roadmap sync: 2026-07-18 closes
 > q1-q9 as one deterministic fresh-Warrior Candidate route, superseding the
 > earlier q1-q4/q5-available checkpoint below. Tasks, prerequisite links,

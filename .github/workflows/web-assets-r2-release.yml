@@ -38,6 +38,11 @@ on:
         required: false
         default: r2-s3
         type: string
+      require_full_crystal_pack:
+        description: Require an existing release to contain the verified full Crystal pack
+        required: false
+        default: false
+        type: boolean
       deploy_worker:
         description: Deploy mir2.obelisk.build Worker proxy after R2 verification
         required: false
@@ -154,11 +159,20 @@ jobs:
           set -euo pipefail
           publish_r2="${{ inputs.publish_r2 }}"
           use_existing_release="${{ inputs.use_existing_release }}"
+          require_full_crystal_pack="${{ inputs.require_full_crystal_pack }}"
           deploy_worker="${{ inputs.deploy_worker }}"
           deploy_vercel="${{ inputs.deploy_vercel }}"
 
           if [ "$publish_r2" = "true" ] && [ "$use_existing_release" = "true" ]; then
             echo "publish_r2 and use_existing_release are mutually exclusive." >&2
+            exit 1
+          fi
+          if [ "$require_full_crystal_pack" = "true" ] && [ "$publish_r2" = "true" ]; then
+            echo "The hosted workflow does not contain the ignored 10GB full pack. Publish it locally with the verified r2-s3 path, then rerun with use_existing_release=true." >&2
+            exit 1
+          fi
+          if [ "$require_full_crystal_pack" = "true" ] && [ "$use_existing_release" != "true" ]; then
+            echo "require_full_crystal_pack requires use_existing_release=true in this hosted workflow." >&2
             exit 1
           fi
           if [ "$deploy_worker" = "true" ] && [ "$publish_r2" != "true" ] && [ "$use_existing_release" != "true" ]; then
@@ -178,6 +192,8 @@ jobs:
         if: ${{ inputs.use_existing_release }}
         env:
           INPUT_REMOTE_RELEASE_MANIFEST_URL: ${{ inputs.remote_release_manifest_url }}
+          REQUIRE_FULL_CRYSTAL_PACK: ${{ inputs.require_full_crystal_pack }}
+          EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
         run: |
           set -euo pipefail
           remote_release_url="${INPUT_REMOTE_RELEASE_MANIFEST_URL:-${NEXT_PUBLIC_MIR2_ASSET_BASE_URL%/}/remote-asset-release.json}"
@@ -192,6 +208,7 @@ jobs:
               throw new Error(`remote asset release fetch failed: HTTP ${response.status} ${remoteReleaseUrl}`);
             }
             const release = await response.json();
+            const fs = await import("node:fs/promises");
             if (release.version !== expectedVersion) {
               throw new Error(`remote release version mismatch: expected ${expectedVersion}, got ${release.version}`);
             }
@@ -209,10 +226,35 @@ jobs:
               "original-map/WemadeMir2/Tiles/1504.png",
               "original-ui/Sound/Login2.wav",
             ];
+            if (String(process.env.REQUIRE_FULL_CRYSTAL_PACK).toLowerCase() === "true") {
+              required.push("generated/crystal-packs/full/index.json");
+              if (release.fullCrystalPack?.enabled !== true || release.fullCrystalPack?.verified !== true) {
+                throw new Error("remote release does not declare a verified full Crystal pack");
+              }
+              const fullPaths = files
+                .map((file) => String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""))
+                .filter((value) => value.startsWith("generated/crystal-packs/full/"));
+              if (fullPaths.length !== Number(release.fullCrystalPack.fileCount ?? 0)) {
+                throw new Error(
+                  `remote release full-pack file count mismatch: declared ${release.fullCrystalPack.fileCount}, found ${fullPaths.length}`,
+                );
+              }
+              if (!fullPaths.some((value) => value.includes("/libraries/") && value.endsWith(".json"))) {
+                throw new Error("remote release has no full-pack library shard");
+              }
+              if (!fullPaths.some((value) => value.includes("/pages/") && value.endsWith(".png"))) {
+                throw new Error("remote release has no full-pack page");
+              }
+            }
             const missing = required.filter((path) => !hasPath(path));
             if (missing.length > 0) {
               throw new Error(`remote release is missing required full-crystal paths: ${missing.join(", ")}`);
             }
+            await fs.writeFile(
+              process.env.EXISTING_RELEASE_MANIFEST_PATH,
+              `${JSON.stringify(release)}\n`,
+              "utf8",
+            );
             console.log(JSON.stringify({
               ok: true,
               version: release.version,
@@ -225,7 +267,6 @@ jobs:
             process.exit(1);
           });
           NODE
-
       - name: Build Web for asset manifest staging
         if: ${{ inputs.publish_r2 }}
         working-directory: mir2-web3/apps/web
@@ -308,6 +349,7 @@ jobs:
             --checkR2 true \
             --checkWorker false \
             --checkBevyRuntime false \
+            --requireFullCrystalPack "${{ inputs.require_full_crystal_pack }}" \
             --assetBaseUrl "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL}"
 
       - name: Deploy same-origin asset Worker proxy
@@ -345,7 +387,7 @@ jobs:
           }
           fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
           NODE
-          npx wrangler@latest deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
+          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
 
       - name: Smoke same-origin original assets after worker deploy
         if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
@@ -353,6 +395,22 @@ jobs:
           set -euo pipefail
           npm run --prefix mir2-web3/apps/web smoke:production-original-assets -- \
             --targets web \
+            --webBaseUrl "https://mir2.obelisk.build"
+
+      - name: Verify full-pack closure through same-origin Worker
+        if: ${{ inputs.use_existing_release && inputs.deploy_worker && inputs.require_full_crystal_pack }}
+        working-directory: mir2-web3/apps/web
+        env:
+          EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
+        run: |
+          npm run release:doctor -- \
+            --manifest "$EXISTING_RELEASE_MANIFEST_PATH" \
+            --checkManifest true \
+            --checkR2 false \
+            --checkWorker true \
+            --checkBevyRuntime false \
+            --requireFullCrystalPack true \
+            --probeConcurrency 32 \
             --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Deploy Player Web to Vercel
@@ -392,15 +450,15 @@ jobs:
             )
             (
               cd "$GITHUB_WORKSPACE"
-              npx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
-              npx vercel@latest deploy . --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
+              npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
+              npx vercel@56.4.1 deploy . --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
             )
             exit 0
           fi
-          npx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
-          npx vercel@latest build --prod --yes --token "$VERCEL_TOKEN"
+          npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
+          npx vercel@56.4.1 build --prod --yes --token "$VERCEL_TOKEN"
           npm run vercel:prune-output
-          npx vercel@latest deploy --prebuilt --prod --archive=tgz --yes --token "$VERCEL_TOKEN"
+          npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes --token "$VERCEL_TOKEN"
 
       - name: Smoke app manifest after deploy
         if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}

@@ -15,7 +15,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 type ManifestInput = {
   name: string;
   absolutePath: string;
-  digestMode?: "originalAssetHash" | "stableJson" | "raw";
+  digestMode?: "originalAssetHash" | "fullPackContentHash" | "stableJson" | "raw";
   required?: boolean;
 };
 
@@ -25,7 +25,7 @@ type ManifestInputState = {
   size: number | null;
   assetHash?: string;
   contentSha256?: string;
-  digestSource?: "assetHash" | "stableJson" | "raw";
+  digestSource?: "assetHash" | "contentHash" | "stableJson" | "raw";
   mtimeMs?: number | null;
 };
 
@@ -84,6 +84,13 @@ const manifestInputs: ManifestInput[] = [
     digestMode: "stableJson",
   },
   {
+    // The multi-gigabyte payload remains outside Git, but its compact root index
+    // participates in cache versioning whenever a local publisher has built it.
+    name: "crystal-full-pack-index",
+    absolutePath: path.join(webRoot, "public/generated/crystal-packs/full/index.json"),
+    digestMode: "fullPackContentHash",
+  },
+  {
     name: "full-crystal-client-index",
     absolutePath: path.join(projectRoot, "docs/generated/assets/full-crystal-client-index.json"),
     digestMode: "stableJson",
@@ -124,6 +131,7 @@ export async function GET() {
       "/original-map/",
       "/generated/original-map-blend/",
       "/generated/map-atlas/",
+      "/generated/crystal-packs/full/",
       "/bevy-entity-atlases/",
     ],
     apiPrefixes: ["/api/scene/crystal", "/api/original-ui-meta"],
@@ -169,6 +177,14 @@ async function readInputState(input: ManifestInput): Promise<ManifestInputState>
         }
         state.assetHash = assetHash;
         state.digestSource = "assetHash";
+      } else if (input.digestMode === "fullPackContentHash") {
+        const payload = JSON.parse(contents.toString("utf8")) as { contentHash?: unknown };
+        const contentHash = typeof payload.contentHash === "string" ? payload.contentHash : "";
+        if (!/^[a-f0-9]{64}$/i.test(contentHash)) {
+          throw new Error(`Full Crystal pack index has an invalid contentHash: ${input.absolutePath}`);
+        }
+        state.contentSha256 = contentHash.toLowerCase();
+        state.digestSource = "contentHash";
       } else if (input.digestMode === "stableJson") {
         state.contentSha256 = createHash("sha256")
           .update(stableJsonDigestInput(contents.toString("utf8")))

@@ -54,6 +54,7 @@
     "smoke:production-asset-runtime": "npm run smoke:production-original-assets && npm run smoke:production-bevy-runtime",
     "release:doctor": "node ./scripts/release-doctor.mjs",
     "assets:remote:build": "node ./scripts/build-remote-asset-release.mjs",
+    "assets:full-release:build": "node ./scripts/build-remote-asset-release.mjs --offlineManifest true --includeFullCrystalPack true --stageFileMode reference --compactFiles true --cas false",
     "assets:r2:dry-run": "node ./scripts/upload-r2-assets.mjs --dryRun true",
     "assets:r2:upload": "node ./scripts/upload-r2-assets.mjs",
     "assets:bevy-entity-atlas:build": "node ../../scripts/asset-pipeline/pack.mjs --category entities",
@@ -65,8 +66,8 @@
     "assets:map-atlas:build": "node ./scripts/build-map-atlas-pack.mjs",
     "assets:map-atlas:ensure": "node ./scripts/build-map-atlas-pack.mjs --skipIfPresent",
     "vercel:prune-output": "node ./scripts/prune-vercel-output-assets.mjs",
-    "vercel:build:prod": "npx vercel@latest build --prod --yes && npm run vercel:prune-output",
-    "vercel:deploy:prod": "npx vercel@latest deploy --prebuilt --prod --archive=tgz --yes",
+    "vercel:build:prod": "npx vercel@56.4.1 build --prod --yes && npm run vercel:prune-output",
+    "vercel:deploy:prod": "npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes",
     "smoke:reconnect-resume": "node ./scripts/smoke-reconnect-resume.mjs",
     "smoke:two-client-zone": "node ./scripts/smoke-two-client-zone.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
@@ -94,6 +95,7 @@
     "test:asset-prewarm-policy": "node --test ./scripts/test-asset-prewarm-policy.mjs",
     "test:cas-release": "node --test ./scripts/asset-pipeline/test-cas-release.mjs",
     "test:asset-release-safety": "node ./scripts/test-asset-release-safety.mjs",
+    "test:domain-proxy-routing": "node ./scripts/test-domain-proxy-routing.mjs",
     "test:crystal-temporal-pack": "node --test ./scripts/test-crystal-temporal-pack.mjs",
     "test:movement-paired-frame-diff": "node --test ./scripts/test-movement-paired-frame-diff.mjs",
     "test:crystal-native-capture-state": "node ./scripts/test-crystal-native-capture-state.mjs",
@@ -140,5 +142,5 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+  "packageManager": "npm@11.13.0"
 }

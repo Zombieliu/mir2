@@ -1,0 +1,165 @@
+# Developer Handoff
+
+本文面向接手 `mir2-web3` 的开发者和主协调者，描述当前可运行边界、代码入口、素材交付方式及交接验收。首次安装请先执行 `scripts/bootstrap-developer.ps1`，不要从历史 QA 命令反推本地端口和环境变量。
+
+## 当前产品边界
+
+`mir2-web3` 是 Crystal / Legend of Mir 2 的现代 Web 实现：
+
+- Player Web 使用 Next.js 承载登录、选角、HUD 和浏览器输入层。
+- Bevy WASM 提供 WebGPU 与 WebGL2 地图、角色和特效呈现。
+- Rust Gateway 提供 Crystal TCP、HTTP health、浏览器 WebSocket 和会话路由。
+- Rust Simulation 与共享 Zone Runtime 负责权威玩法、移动、AOI、战斗和持久化。
+- `../Crystal` 子模块是行为、数据格式和视觉比对基准，不是 Web 的生产运行时。
+
+自动化 Candidate 不等于最终视觉验收。当前路线图、进度和证据以以下文件为准：
+
+- `docs/AGENT-TASK-QUEUE.md`
+- `docs/CRYSTAL-1TO1-ROADMAP.md`
+- `docs/BACKEND-1TO1-PROGRESS.md`
+- `docs/CRYSTAL-SERVER-PARITY.md`
+
+## 仓库结构
+
+| 路径 | 所有权 |
+| --- | --- |
+| `apps/web` | Player Web、素材 URL、Service Worker、前端 QA |
+| `apps/game-client/runtime` | Bevy WebGPU/WebGL2 WASM Runtime |
+| `apps/gateway` | 网络入口、认证、WebSocket/TCP 和 Zone 路由 |
+| `apps/simulation` | 权威会话、共享 Zone、战斗和持久化 |
+| `packages/protocol` | Crystal 兼容协议与编解码 |
+| `packages/game-data` | 已转换并允许进入仓库的游戏数据 |
+| `packages/tooling` | Crystal 数据导入和生成工具 |
+| `scripts` | 新开发者初始化、启动、验证和素材包脚本 |
+| `docs/generated` | 自动化证据；不要把它当手写源文件 |
+| `../Crystal` | 配置在 `codex/handoff-parity-tools` 的参考子模块 |
+
+## 标准脚本
+
+| 脚本 | 作用 | 关键参数 |
+| --- | --- | --- |
+| `scripts/bootstrap-developer.ps1` | 检查工具、初始化子模块、安装 Rust 1.89 和 npm 依赖、检查 Gateway | `-SkipRustCheck`, `-SkipWebInstall` |
+| `scripts/start-developer.ps1` | 对齐端口、构建/启动 Gateway、使用预编译 Bevy Runtime 并启动 Web | `-WebPort`, `-GatewayWebPort`, `-GatewayTcpPort`, `-AssetBaseUrl`, `-OpenBrowser`, `-SkipGatewayBuild` |
+| `scripts/verify-developer-setup.ps1` | 校验子模块远程可达性、Starter 素材、Rust、素材安全测试、TypeScript 和 Web build | `-AssetBaseUrl`, `-SkipBuild` |
+| `scripts/install-developer-assets.ps1` | 下载或读取私有 Release 分卷，校验 SHA-256 并安装本地全量图集 | `-ManifestPath`, `-PartsDirectory`, `-Download`, `-Force`, `-KeepArchive` |
+| `scripts/package-developer-assets.ps1` | 验证并确定性打包本地全量图集，生成 GitHub Release 分卷和 manifest | `-OutputDirectory`, `-PartSizeBytes`, `-KeepArchive` |
+
+这些脚本是新开发者命令的 source of truth。调整默认端口、依赖、素材目录或验证门禁时，必须同时更新脚本和本组文档。
+
+## 首次接手流程
+
+```powershell
+git clone --recurse-submodules https://github.com/Zombieliu/mir2.git
+cd mir2\mir2-web3
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\bootstrap-developer.ps1
+.\scripts\start-developer.ps1 -OpenBrowser
+```
+
+默认端口：
+
+| Surface | 地址 |
+| --- | --- |
+| Player Web | `http://127.0.0.1:3002/` |
+| Gateway HTTP/WS | `127.0.0.1:7110` |
+| Gateway WebSocket | `ws://127.0.0.1:7110/ws` |
+| Gateway health | `http://127.0.0.1:7110/health` |
+| Gateway Crystal TCP | `127.0.0.1:7000` |
+
+`start-developer.ps1` 显式设置 WebSocket URL，因此不依赖开发者个人的、被 Git 忽略的 `.env.local`。如果目标端口已占用，脚本会在启动前失败并给出替代参数提示。
+
+## 素材交付模型
+
+### Starter
+
+仓库跟踪登录、选角、HUD、关键 NPC/Monster/角色帧、原始地图图块、Starter Entity Atlas 以及预编译 WebGPU/WebGL2 Runtime。它支持首次启动和新手流程，但不能代表全职业、全怪物、全装备和全地图的完整视觉验收。
+
+```powershell
+.\scripts\start-developer.ps1 -OpenBrowser
+```
+
+### GitHub 私有开发素材包
+
+完整图集保存在私有 GitHub Release，仓库跟踪的 `config/developer-assets.json` 固定 repository、releaseTag、分卷大小和 SHA-256。拥有仓库权限的开发者直接下载并安装：
+
+```powershell
+gh auth login
+.\scripts\install-developer-assets.ps1 -Download
+```
+
+目标目录固定为 `apps/web/public/generated/crystal-packs/full`，该目录被 Git 忽略。安装后正常运行 `start-developer.ps1`，无需传 `-AssetBaseUrl`。
+
+### R2 CDN
+
+R2 使用不可变版本目录，并由 Service Worker 按需回源。维护者必须提供已通过发布清单校验以及全部 5,887 个 full-pack 对象并发 HEAD 探测的 URL：
+
+```powershell
+$AssetBaseUrl = "https://assets.example.com/mir2/v/<version>"
+.\scripts\verify-developer-setup.ps1 -AssetBaseUrl $AssetBaseUrl -SkipBuild
+.\scripts\start-developer.ps1 -AssetBaseUrl $AssetBaseUrl -OpenBrowser
+```
+
+完整素材消费和发布步骤见 `docs/ASSET-CONSUMER-SETUP.md`。
+
+## 账号与数据
+
+本地默认使用文件账户库：
+
+```text
+mir2-web3/.mir2-data/accounts.json
+```
+
+新账号流程为 `New Account -> Login -> New Character -> Start Game`。注册成功不会自动登录。重复账号目前可能显示通用“禁止创建账号”文案，应先尝试直接登录或使用新账号。
+
+本地基础运行使用文件账户库和进程内缓存，不需要 Docker。只有显式启用 Postgres、Redis、Admin 或生产/预发布策略时才需要 `infra/docker-compose.dev.yml`。
+
+## 首次运行时序
+
+- `bootstrap-developer.ps1` 的 Rust check 和 npm install 取决于网络与本机缓存。
+- `start-developer.ps1` 首次会增量构建 Gateway，最长等待 health 60 秒。
+- Web `npm run dev` 会确保地图 Atlas 存在，并验证预编译 Bevy Runtime。
+- 干净环境首次 `Start Game` 到可玩画面通常需要 35-60 秒；不要使用 15 秒测试超时判断启动失败。
+- Gateway 日志写入 `.mir2-data/developer-logs/gateway.out.log` 和 `gateway.err.log`。
+
+## 验收门禁
+
+日常快速检查：
+
+```powershell
+.\scripts\verify-developer-setup.ps1 -SkipBuild
+```
+
+交接或提交前：
+
+```powershell
+.\scripts\verify-developer-setup.ps1
+git diff --check
+git status --short
+```
+
+R2 交接还必须提供：
+
+- 不可变素材根 URL。
+- `/generated/crystal-packs/full/index.json` 的 HTTP 200 结果。
+- full pack `contentHash`。
+- R2 上传报告和素材发布清单。
+
+## 继续开发时的规则
+
+- Session 是个人登录/角色状态，Zone 才是共享世界；不要把远端玩家重新塞回每个个人 Session。
+- 不要向普通客户端暴露 `MoveTo`、Stage5/debug teleport、裸 passkey account id 或 QA/admin 命令。
+- 不要回滚其他开发者或 Agent 的并发改动。
+- `apps/simulation/src/runtime.rs` 等高冲突文件同一轮只允许一个写入者。
+- 后端改动在测试通过后更新 roadmap/progress/parity 文档；前端改动更新 Player QA/视觉差距证据。
+- 发生上下文丢失或重启时，先读 `docs/AGENT-RESUME-HANDOFF.md`。
+
+## 交接完成清单
+
+- 根仓库目标提交已推送。
+- Crystal 子模块提交可从配置的 handoff 分支获取。
+- `bootstrap-developer.ps1` 在干净 Windows 环境通过。
+- Starter 能注册、创建角色并进入游戏。
+- 私有素材 Release 的 manifest 和所有分卷可下载并通过 SHA-256。
+- R2 模式使用不可变版本 URL，且发布清单中的全部 5,887 个 full-pack 对象返回成功状态。
+- `verify-developer-setup.ps1` 完整通过。
+- README、已知限制、测试结果和剩余任务与代码一致。

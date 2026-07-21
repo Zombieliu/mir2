@@ -1,3 +1,4 @@
 [submodule "Crystal"]
 	path = Crystal
-	url = https://github.com/Suprcode/Crystal.git
+	url = https://github.com/Zombieliu/Crystal.git
+	branch = codex/handoff-parity-tools
