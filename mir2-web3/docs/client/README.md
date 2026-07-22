@@ -28,6 +28,7 @@ in [`apps/web/CLAUDE.md`](../../apps/web/CLAUDE.md) (auto-loaded by Claude Code 
 | [`onchain-mine.md`](onchain-mine.md) | the `NEXT_PUBLIC_ONCHAIN_MINE`-gated Sui on-chain mine (web3) subsystem |
 | [`GATE5-DETERMINISTIC-ZONE-REPLAY.md`](GATE5-DETERMINISTIC-ZONE-REPLAY.md) | Gate 5.1 deterministic Zone input log, state root, checkpoint and replay acceptance |
 | [`GATE5-REMOTE-ZONE-HOST.md`](GATE5-REMOTE-ZONE-HOST.md) | Gate 5.2 separate Zone Host process, bounded TCP RPC, fencing and reconnect acceptance |
+| [`GATE5-RELIABLE-ZONE-FAILOVER.md`](GATE5-RELIABLE-ZONE-FAILOVER.md) | Gate 5.3 reliable live outbounds, host checkpoints, standby replication and endpoint failover |
 
 ## Keeping these honest
 

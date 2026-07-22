@@ -6,6 +6,7 @@ mod manager;
 mod movement;
 mod packets;
 mod replay;
+mod replication;
 mod runtime;
 mod types;
 
@@ -16,6 +17,7 @@ pub use replay::{
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
     ZoneReplayScenario,
 };
+pub use replication::{ZoneReplicaCheckpoint, ZoneStandbyReplica};
 pub use runtime::ZoneRuntime;
 pub use types::{
     PlayerId, SessionId, ZoneChatItem, ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneKey,

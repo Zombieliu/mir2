@@ -22,7 +22,7 @@ state stays isolated while map/zone resources are shared by sessions in the same
 
 ## Protocol and safety boundaries
 
-- Protocol version: `1`.
+- Protocol version: `1` for this historical gate; Gate 5.3 upgrades the running protocol to `2`.
 - Framing: four-byte big-endian payload length followed by JSON.
 - Default maximum frame: 16 MiB.
 - Default maximum concurrent connections: 64.
@@ -85,7 +85,6 @@ The Zone RPC suite verifies:
 
 ## Gate boundary
 
-This gate deliberately keeps one configured Zone Host address and request/response delivery.
-Asynchronous live-outbound streaming, discovery, multi-host placement, checkpoint-driven migration
-and lease-aware automatic rerouting are later gates. The RPC surface and fencing boundary added
-here are the substrate for those features.
+This gate deliberately kept one configured Zone Host address and request/response delivery.
+Gate 5.3 adds reliable live outbounds, checkpoint replication and lease-aware endpoint rerouting.
+Discovery and scheduler-driven multi-host placement remain later gates.

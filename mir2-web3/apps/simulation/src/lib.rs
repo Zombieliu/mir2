@@ -31,8 +31,8 @@ pub use runtime::{
     SimulationSession, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
     ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward,
     ZoneMonsterSpawn, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats,
-    ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport, ZoneReplayScenario, ZoneRuntime,
-    CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport, ZoneReplayScenario,
+    ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, WorldCommand, WorldCommandExecution,
