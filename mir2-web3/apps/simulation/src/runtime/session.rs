@@ -2,6 +2,8 @@
 
 use std::collections::BTreeSet;
 
+use serde::{Deserialize, Serialize};
+
 use super::combat::combat_delay_ticks;
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
@@ -98,7 +100,7 @@ pub struct SimulationSession {
     pub(super) visible_objects: BTreeSet<u32>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ActiveSessionIdentity {
     pub account_id: String,
     pub character_index: i32,

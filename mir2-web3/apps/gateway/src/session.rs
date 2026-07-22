@@ -13,9 +13,9 @@ use mir2_simulation::{
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
 use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, InProcessZoneOwnerCommandClient,
-    SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender, SharedZoneMovementIngress,
-    SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority, ZoneId, ZoneOwnerCommandRequest,
-    ZoneOwnerLease, ZoneRegistry,
+    RpcZoneOwnerCommandClient, SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender,
+    SharedZoneMovementIngress, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority, ZoneId,
+    ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
 };
 
 pub type GatewayConfig = SimulationConfig;
@@ -147,7 +147,7 @@ impl GatewaySession {
         runtime: ZoneRuntimeHandle,
     ) -> Self {
         let zone_owner_command_client =
-            default_zone_owner_command_client(zone_owner_lease_authority.as_ref());
+            default_zone_owner_command_client(&zone_id, zone_owner_lease_authority.as_ref());
         Self {
             session_id: next_gateway_session_id(),
             zone_id,
@@ -199,7 +199,7 @@ impl GatewaySession {
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
         let zone_owner_command_client =
-            default_zone_owner_command_client(zone_owner_lease_authority.as_ref());
+            default_zone_owner_command_client(&zone_id, zone_owner_lease_authority.as_ref());
         let gameplay_event_publisher =
             GatewayGameplayEventPublisher::new(zone_id.clone(), gameplay_event_sink);
         Self {
@@ -278,7 +278,9 @@ impl GatewaySession {
     }
 
     pub fn on_connect(&self) -> Vec<ServerPacket> {
-        self.runtime.on_connect()
+        self.zone_owner_command_client
+            .on_connect(&self.runtime)
+            .unwrap_or_else(|error| panic!("zone owner on_connect failed: {error}"))
     }
 
     pub(crate) fn zone_movement_ingress(&self) -> Option<GatewayZoneMovementIngress> {
@@ -504,8 +506,14 @@ impl GatewaySession {
 }
 
 fn default_zone_owner_command_client(
+    zone_id: &ZoneId,
     zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,
 ) -> SharedZoneOwnerCommandClient {
+    if let Some(transport) = crate::zone_rpc::TcpZoneOwnerRpcTransport::from_env(zone_id.clone()) {
+        return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(std::sync::Arc::new(
+            transport,
+        )));
+    }
     let client = if let Some(authority) = zone_owner_lease_authority {
         InProcessZoneOwnerCommandClient::with_owner_lease_authority(authority.clone())
     } else {

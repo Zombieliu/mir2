@@ -26,6 +26,8 @@ in [`apps/web/CLAUDE.md`](../../apps/web/CLAUDE.md) (auto-loaded by Claude Code 
 | [`audio-vfx.md`](audio-vfx.md) | sound-id → wav pipeline (prod allowlist / R2 fallback) + the magic-effect atlas + procedural fallback |
 | [`chat-system.md`](chat-system.md) | the chat / system-message log: the flat `logs` state, channel/tone classification, the outbound prefix→`chat` command |
 | [`onchain-mine.md`](onchain-mine.md) | the `NEXT_PUBLIC_ONCHAIN_MINE`-gated Sui on-chain mine (web3) subsystem |
+| [`GATE5-DETERMINISTIC-ZONE-REPLAY.md`](GATE5-DETERMINISTIC-ZONE-REPLAY.md) | Gate 5.1 deterministic Zone input log, state root, checkpoint and replay acceptance |
+| [`GATE5-REMOTE-ZONE-HOST.md`](GATE5-REMOTE-ZONE-HOST.md) | Gate 5.2 separate Zone Host process, bounded TCP RPC, fencing and reconnect acceptance |
 
 ## Keeping these honest
 
