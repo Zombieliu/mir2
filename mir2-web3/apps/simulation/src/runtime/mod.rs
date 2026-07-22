@@ -48,9 +48,11 @@ pub use session::{
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer, SimulationSession,
 };
 pub use zone::{
-    PlayerId, SessionId, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
+    ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin,
+    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneReplayReport, ZoneReplayScenario, ZoneRuntime,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

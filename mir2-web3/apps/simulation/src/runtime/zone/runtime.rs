@@ -9,6 +9,9 @@ use mir2_protocol::{
     ObjectMovement, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
     Point, ServerPacket, Spell, UserItem, UserItemStat,
 };
+use serde::Serialize;
+
+mod checkpoint;
 
 use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 use super::aoi_grid::AoiGrid;
@@ -115,7 +118,7 @@ pub struct ZoneRuntime {
     next_object_id: u32,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 struct ZoneHazardState {
     lightning: bool,
     fire: bool,
@@ -127,13 +130,13 @@ struct ZoneHazardState {
     fire_strikes: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct ZoneObjectDeadState {
     position: Option<Point>,
     direction: Option<MirDirection>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct PendingNativeMonsterHit {
     ready_at_ms: u64,
     session_id: SessionId,
@@ -142,7 +145,7 @@ struct PendingNativeMonsterHit {
     damage: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct PendingNativeProjectile {
     ready_at_ms: u64,
     session_id: SessionId,
@@ -151,7 +154,7 @@ struct PendingNativeProjectile {
     destination_id: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct PendingNativePlayerHit {
     ready_at_ms: u64,
     attacker_object_id: u32,
@@ -163,14 +166,14 @@ struct PendingNativePlayerHit {
     magic: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct PendingNativePlayerHeal {
     ready_at_ms: u64,
     session_id: SessionId,
     amount: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct PendingNativeSummon {
     ready_at_ms: u64,
     owner_session_id: SessionId,
@@ -184,7 +187,7 @@ struct PendingNativeSummon {
     direction: MirDirection,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct PendingNativeGroundSpellAction {
     spell: Spell,
     caster_session_id: SessionId,
@@ -201,13 +204,13 @@ struct PendingNativeGroundSpellAction {
     tick_interval_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 struct ZoneNativeMonsterPlayerStatus {
     poison: u16,
     duration_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 enum NativeSummonLimitScope {
     SameMonster,
     AllOwned,
