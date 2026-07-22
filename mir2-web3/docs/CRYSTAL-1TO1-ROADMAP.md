@@ -3791,3 +3791,20 @@ Entries:
 - Keep UI debug controls useful but isolated from normal gameplay where needed.
 - Update this document after each completed task, not only at the end of a stage.
 - Update `docs/BACKEND-1TO1-PROGRESS.md` and `docs/CRYSTAL-SERVER-PARITY.md` when backend parity meaningfully changes.
+
+## 2026-07-23 Deterministic Visual-Parity Milestone
+
+The camera/HUD/light/effect normalization slice is complete. Final Dawn r33
+reduces full/world changed pixels from r29 `36.4%/40.2%` to `24.2%/26.1%` and
+world MAE from `18.845` to `11.987`. Final Night r32 remains at
+`12.5%/12.6%`, matching r26 and proving the Dawn/Evening compositor correction
+does not regress the Night path. Both pairs are same-account, same-coordinate,
+fixed-light, overlay-free, and zero-error.
+
+The milestone also closes the capture handshake race, stale-socket event race,
+secret redaction, cursor parking verification, Crystal minimap quantization,
+AI 6 radar propagation, and HUD experience/HP clipping. Movement/map
+transaction unit gates and WebGPU/WebGL runtime smokes remain green. The next
+visual milestone is intentionally narrower: GDI text rasterization,
+deterministic chat content, roaming entity/animation phase, and final human
+visual/feel acceptance.

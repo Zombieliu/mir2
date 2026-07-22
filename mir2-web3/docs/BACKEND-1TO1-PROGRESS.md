@@ -1984,3 +1984,17 @@ Remaining to full 1:1: Stage 4/5 depth work, especially broad AI, full skill/buf
 ## Rule For Updates
 
 Every time backend parity meaningfully moves, this file should be updated together with `docs/CRYSTAL-SERVER-PARITY.md`.
+
+## 2026-07-23 Visual Capture Support Sync
+
+- `WorldEntitySnapshot` now carries the Crystal monster AI id; simulation
+  snapshots, shared-state merge, zone spawn packets, and observer re-seeding
+  preserve it so AI 6 neutral guards stay green on the native minimap.
+- `MIR2_SIMULATION_FIXED_LIGHT_SETTING=1..4` provides a server-only,
+  process-start QA override for deterministic native/Web light pairing. Invalid
+  or absent values retain the existing UTC Crystal light formula.
+- Focused Gateway regressions cover template neutral-AI restoration, NPC side
+  effect spawn packets, and shared observer movement re-seeding. Simulation
+  regressions cover override resolution and visible current-map AI snapshots.
+- This is deterministic QA/snapshot parity, not a production gameplay rule or
+  a substitute for the remaining backend expansion queue.

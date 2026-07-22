@@ -3,9 +3,11 @@
 import { memo, useEffect, useState } from "react";
 
 import {
+  crystalMiniMapRadarColor,
   createLinearMiniMapTransform,
   findCrystalMiniMapTransform,
   miniMapImagePointToViewportPoint,
+  worldToCrystalMiniMapRadarPoint,
   worldToMiniMapImagePoint,
   type CrystalMiniMapPoint,
   type CrystalMiniMapTransform,
@@ -53,6 +55,7 @@ type DisplayEntity = {
   kind: "selfPlayer" | "player" | "monster" | "npc";
   name: string;
   ownerName?: string;
+  ai?: number;
   x: number;
   y: number;
   dead?: boolean;
@@ -728,10 +731,7 @@ function miniMapViewportPointForWorldPoint(
   point: CrystalMiniMapPoint,
 ) {
   if (bounds.transform && bounds.imageViewport) {
-    return miniMapImagePointToViewportPoint(
-      worldToMiniMapImagePoint(bounds.transform, point),
-      bounds.imageViewport,
-    );
+    return worldToCrystalMiniMapRadarPoint(bounds.transform, bounds.imageViewport, point);
   }
   return {
     x: point.x - bounds.minX,
@@ -821,23 +821,14 @@ function miniMapTerrainColor(kind: string) {
 }
 
 function miniMapEntityColor(entity: DisplayEntity, player: DisplayEntity | null) {
+  let ownedByPlayer = false;
   if (player && entity.objectId !== player.objectId) {
     const ownerName = entity.ownerName?.trim();
     if ((ownerName && ownerName === player.name) || entity.name.endsWith(`(${player.name})`)) {
-      return "#0000ff";
+      ownedByPlayer = true;
     }
   }
-
-  switch (entity.kind) {
-    case "selfPlayer":
-    case "player":
-      return "#ffffff";
-    case "npc":
-      return "#00ff32";
-    case "monster":
-    default:
-      return "#ff0000";
-  }
+  return crystalMiniMapRadarColor({ kind: entity.kind, ai: entity.ai, ownedByPlayer });
 }
 
 function clampNumber(value: number, min: number, max: number) {

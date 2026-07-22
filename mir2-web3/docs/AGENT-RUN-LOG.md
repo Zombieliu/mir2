@@ -5947,3 +5947,48 @@ Outcome:
 - 11 sampled maps still have out-of-range frame-reference risk.
 - Minimap 450/451 remain missing for `DogYoArena2` / `DogYoHyun`.
 - This is source-resource audit evidence only; full-map visual 1:1 and human visual/feel acceptance remain open.
+
+## 2026-07-23 - Deterministic same-scene visual normalization
+
+Scope:
+
+- Rebuilt the Crystal/Web pair around one native account state at Bichon
+  `0 @ 328,275`, with overlay-free cursor capture and explicit server light.
+- Fixed pre-`Connected` login/bootstrap races, stale WebSocket callbacks,
+  capture-secret leakage, HUD experience/HP crops, chat scrollbar geometry,
+  minimap reverse quantization, and AI 6 radar colour propagation.
+- Added a QA-only fixed Crystal light resolver and scoped the measured map-light
+  compositor correction to Dawn/Evening after rejected Night r31 exposed a
+  global-rule regression.
+- Added 555 deterministic Crystal map source PNGs (`3,082,712` bytes) required
+  by the captured Bichon scene. The generated map atlas remains ignored.
+
+Evidence:
+
+- r29 Dawn baseline: full/world `36.4%/40.2%`, world MAE `18.845`.
+- r33 final Dawn: full/world `24.2%/26.1%`, world MAE `11.987`.
+- r26 Night baseline: full/world `12.4%/12.6%`, world MAE `6.985`.
+- r32 final Night: full/world `12.5%/12.6%`, world MAE `7.074`.
+- r32/r33: exact map/coordinate and light pairing, zero critical errors, zero
+  non-favicon 404s.
+- `bevy-runtime-backends-20260723-r30.json`: all default, forced WebGPU,
+  forced WebGL2, raw WebGL2, movement shadow, and presentation assertions pass.
+- Final headed WebGPU and WebGL2 movement reports each pass 28/28 strict
+  assertions with four ordered request/ack pairs, final `328,275`, no pending
+  transaction, no critical console errors, and no non-favicon 404s.
+
+Verification:
+
+- Web typecheck, complete `test:frontend-logic`, minimap transform, and native
+  capture-state tests pass.
+- Rust fmt/check plus fixed-light, visible-respawn, neutral-AI, spawn-packet,
+  and shared observer movement tests pass.
+- Production Web build publishes 8,228 entity frames, 12,015 map source PNGs,
+  40 map atlas pages, and 39,401 manifest assets.
+- Asset release preflight and resource-loading tests pass with 99.76% map-frame
+  renderability and all 39,401 manifest assets hashable from the filesystem.
+
+Remaining:
+
+- GDI font rasterization, deterministic chat text, roaming entity phase, and
+  final human visual/feel acceptance.

@@ -20,6 +20,7 @@ import {
   type Mir2Language,
 } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import { crystalMainHudExperienceBarFillWidth } from "../../lib/crystal-hud-metrics";
 import { formatCrystalExperiencePercent } from "../../lib/extended-server-packets";
 import { playOriginalSoundId } from "../../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
@@ -699,6 +700,7 @@ export function MainHud({
     .join("  ");
   const remainingBagWeight = Math.max(0, Math.floor(world.maxWeight - world.currentWeight));
   const crystalFreeSlots = crystalMainHudFreeSlots(world);
+  const experienceBarFillWidth = crystalMainHudExperienceBarFillWidth(experienceRatio);
   const bagWeightRatio = ratio(world.currentWeight, world.maxWeight);
   const weightBarFillWidth = crystalMainHudWeightBarFillWidth(bagWeightRatio);
   const weightBarSprite = crystalMainHudWeightBarSprite(bagWeightRatio);
@@ -709,7 +711,21 @@ export function MainHud({
         <img className="hud-cap left" src={ORIGINAL_UI.hud.leftCap} alt="" draggable={false} />
         <img className="hud-base" src={ORIGINAL_UI.hud.base} alt="" draggable={false} />
         <img className="hud-cap right" src={ORIGINAL_UI.hud.rightCap} alt="" draggable={false} />
-        <img className="hud-exp-bar" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
+        <div
+          className="hud-exp-bar"
+          data-experience-ratio={experienceRatio.toFixed(4)}
+          data-fill-width={experienceBarFillWidth}
+          style={{ width: `${experienceBarFillWidth}px` }}
+        >
+          {experienceBarFillWidth > 0 ? (
+            <img
+              className="hud-exp-bar-fill"
+              src={ORIGINAL_UI.hud.experienceBar}
+              alt=""
+              draggable={false}
+            />
+          ) : null}
+        </div>
         <div
           className="hud-weight-bar"
           data-weight-ratio={bagWeightRatio.toFixed(4)}

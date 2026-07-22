@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 
 import {
   assertCanonicalNativeCaptureReport,
+  assertNativeCursorParking,
   assertNativeFrameDimensions,
 } from "./crystal-native-capture-state.mjs";
 
 const validReport = {
   ok: true,
   captureArea: { width: 1024, height: 768 },
+  cursorParking: { requestedScreenX: 12, requestedScreenY: 384, succeeded: true },
   sampleCount: 2,
   samples: [
     { capture: { width: 1024, height: 768, path: "frame-0.png" } },
@@ -23,6 +25,10 @@ assert.deepEqual(assertCanonicalNativeCaptureReport(validReport), {
 assert.deepEqual(assertNativeFrameDimensions({ width: 1024, height: 768 }), {
   width: 1024,
   height: 768,
+});
+assert.deepEqual(assertNativeCursorParking(validReport), {
+  requestedScreenX: 12,
+  requestedScreenY: 384,
 });
 
 assert.throws(
@@ -49,6 +55,10 @@ assert.throws(
 assert.throws(
   () => assertNativeFrameDimensions({ width: 1024 }),
   /got 1024xmissing/,
+);
+assert.throws(
+  () => assertNativeCursorParking({ ...validReport, cursorParking: { succeeded: false } }),
+  /did not confirm that the cursor was parked/,
 );
 
 console.log("crystal-native-capture-state assertions passed");
