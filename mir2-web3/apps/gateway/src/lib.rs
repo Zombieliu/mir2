@@ -6,6 +6,7 @@ mod inject;
 pub mod routing;
 mod session;
 pub mod tcp;
+pub mod topology;
 pub mod web;
 pub mod zone_lease;
 pub mod zone_rpc;
@@ -42,6 +43,7 @@ pub use routing::{
     ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
+pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
     ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,

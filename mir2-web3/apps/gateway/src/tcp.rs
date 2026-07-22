@@ -9,7 +9,7 @@ use tokio::sync::mpsc;
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::catch_gateway_panic;
-use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
 
@@ -21,9 +21,11 @@ pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
     }
     let listener = TcpListener::bind(addr).await?;
     let config = Arc::new(config);
-    let zone_registry = Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(
-        crate::zone_lease::default_zone_owner_lease_authority_from_env(),
-    ));
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let zone_registry = Arc::new(
+        topology.zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
+    );
     let gameplay_event_sink = default_gameplay_event_sink_from_env();
 
     eprintln!("mir2-gateway tcp listening on {addr}");

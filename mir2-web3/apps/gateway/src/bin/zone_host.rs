@@ -5,7 +5,9 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env;
-use mir2_gateway::{validate_zone_host_bind, GatewayConfig, ZoneHostServer};
+use mir2_gateway::{
+    validate_zone_host_bind, GatewayConfig, ZoneHostServer, ZoneRpcLimits, ZoneTopology,
+};
 
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
 
@@ -36,9 +38,14 @@ fn main() -> io::Result<()> {
         std::process::id(),
         auth_token.is_some()
     );
-    Arc::new(ZoneHostServer::new(
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    Arc::new(ZoneHostServer::with_options_and_factory(
         config,
         default_zone_owner_lease_authority_from_env(),
+        auth_token,
+        ZoneRpcLimits::from_env(),
+        topology.runtime_factory(),
     ))
     .serve(listener)
 }

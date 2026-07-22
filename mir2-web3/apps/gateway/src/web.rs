@@ -46,7 +46,7 @@ use crate::events::{
 };
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
-use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
 type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
@@ -1398,11 +1398,14 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
         mir2_simulation::set_crystal_full_world_zone_collision(true);
     }
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let state = WebState {
         config: Arc::new(config),
-        zone_registry: Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(
-            crate::zone_lease::default_zone_owner_lease_authority_from_env(),
-        )),
+        zone_registry: Arc::new(
+            topology
+                .zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
+        ),
         session_cache: gateway_session_cache_from_env()
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),

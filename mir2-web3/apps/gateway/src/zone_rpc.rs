@@ -766,9 +766,25 @@ impl ZoneHostServer {
         auth_token: Option<String>,
         limits: ZoneRpcLimits,
     ) -> Self {
+        Self::with_options_and_factory(
+            config,
+            owner_lease_authority,
+            auth_token,
+            limits,
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()),
+        )
+    }
+
+    pub fn with_options_and_factory(
+        config: GatewayConfig,
+        owner_lease_authority: SharedZoneOwnerLeaseAuthority,
+        auth_token: Option<String>,
+        limits: ZoneRpcLimits,
+        runtime_factory: Arc<SharedInProcessZoneRuntimeFactory>,
+    ) -> Self {
         Self {
             config,
-            runtime_factory: Mutex::new(Arc::new(SharedInProcessZoneRuntimeFactory::new())),
+            runtime_factory: Mutex::new(runtime_factory),
             owner_lease_authority,
             sessions: Mutex::new(BTreeMap::new()),
             operation_gate: Mutex::new(()),
@@ -1105,7 +1121,12 @@ impl ZoneHostServer {
             )
         })?;
 
-        let factory = Arc::new(SharedInProcessZoneRuntimeFactory::new());
+        let factory = Arc::new(
+            self.runtime_factory
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+                .fresh(),
+        );
         let mut sessions = BTreeMap::<(String, String), Arc<ZoneHostSession>>::new();
         for (expected_sequence, entry) in checkpoint.entries.iter().enumerate() {
             if entry.sequence != expected_sequence as u64 {
