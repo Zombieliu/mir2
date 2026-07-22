@@ -6,6 +6,7 @@ pub mod control_plane;
 pub mod events;
 mod inject;
 pub mod node_security;
+pub mod rewards;
 pub mod routing;
 mod session;
 pub mod tcp;
@@ -42,7 +43,11 @@ pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;
 pub use node_security::{
     GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
-    VerifiedGuildNode, VerifiedGuildZoneTransport,
+    VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
+};
+pub use rewards::{
+    GameRewardPolicy, MultiGameRewardLedger, RewardAllocation, RewardClaimProof,
+    RewardSettlementBatch, SettlementStatus, VerifiedWorkReceipt,
 };
 pub use routing::{
     HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
