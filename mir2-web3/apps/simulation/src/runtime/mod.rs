@@ -52,7 +52,7 @@ pub use zone::{
     ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin,
     ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
     ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
-    ZoneReplayReport, ZoneReplayScenario, ZoneRuntime,
+    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

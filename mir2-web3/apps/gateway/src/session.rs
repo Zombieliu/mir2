@@ -15,7 +15,7 @@ use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, InProcessZoneOwnerCommandClient,
     RpcZoneOwnerCommandClient, SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender,
     SharedZoneMovementIngress, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority, ZoneId,
-    ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
+    ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
 };
 
 pub type GatewayConfig = SimulationConfig;
@@ -70,6 +70,7 @@ impl GatewayZoneMovementIngress {
         Ok(execution)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn register_live_outbound(
         &self,
         sender: SharedZoneLiveOutboundSender,
@@ -290,6 +291,14 @@ impl GatewaySession {
             zone_owner_lease_authority: self.zone_owner_lease_authority.clone(),
             gameplay_event_publisher: self.gameplay_event_publisher.clone(),
         })
+    }
+
+    pub(crate) fn register_zone_live_outbound(
+        &self,
+        sender: SharedZoneLiveOutboundSender,
+    ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
+        self.zone_owner_command_client
+            .register_live_outbound(&self.runtime, sender)
     }
 
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {

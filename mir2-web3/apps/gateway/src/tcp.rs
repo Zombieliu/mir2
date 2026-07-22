@@ -7,7 +7,7 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc;
 
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
-use crate::routing::{SharedZoneLiveOutbound, SharedZoneLiveOutboundRegistration};
+use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
@@ -81,7 +81,7 @@ async fn handle_client_inner(
     let (zone_outbound_tx, mut zone_outbound_rx) =
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
     let mut active_zone_outbound_registration_id = 0;
-    let mut _zone_live_outbound_registration: Option<SharedZoneLiveOutboundRegistration> = None;
+    let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
 
     loop {
         let frame = {
@@ -119,15 +119,15 @@ async fn handle_client_inner(
                     catch_gateway_panic("tcp handle_packet", || session.handle_packet(packet))
                         .map_err(session_panic_io_error)?;
                 let next_registration = session
-                    .zone_movement_ingress()
-                    .map(|ingress| ingress.register_live_outbound(zone_outbound_tx.clone()))
-                    .transpose()
-                    .map_err(session_panic_io_error)?
-                    .flatten();
+                    .register_zone_live_outbound(zone_outbound_tx.clone())
+                    .map_err(session_panic_io_error)?;
                 active_zone_outbound_registration_id = next_registration
                     .as_ref()
-                    .map(SharedZoneLiveOutboundRegistration::registration_id)
+                    .map(|registration| registration.registration_id())
                     .unwrap_or(0);
+                if let Some(registration) = next_registration.as_ref() {
+                    registration.activate();
+                }
                 _zone_live_outbound_registration = next_registration;
                 for response in responses {
                     send_packet(&mut writer, &response).await?;

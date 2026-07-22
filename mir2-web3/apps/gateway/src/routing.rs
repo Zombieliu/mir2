@@ -210,6 +210,20 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
     ) -> Result<bool, String> {
         Ok(runtime.refresh_active_external_mail())
     }
+
+    fn register_live_outbound(
+        &self,
+        runtime: &ZoneRuntimeHandle,
+        sender: SharedZoneLiveOutboundSender,
+    ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
+        let Some(ingress) = shared_zone_movement_ingress(runtime) else {
+            return Ok(None);
+        };
+        ingress.register_live_outbound(sender).map(|registration| {
+            registration
+                .map(|registration| Box::new(registration) as Box<dyn ZoneLiveOutboundRegistration>)
+        })
+    }
 }
 
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
@@ -228,6 +242,13 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
     fn save_active_character(&self) -> Result<(), String>;
 
     fn refresh_active_external_mail(&self) -> Result<bool, String>;
+
+    fn register_live_outbound(
+        &self,
+        _sender: SharedZoneLiveOutboundSender,
+    ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
+        Ok(None)
+    }
 }
 
 pub type SharedZoneOwnerRpcTransport = Arc<dyn ZoneOwnerRpcTransport>;
@@ -285,6 +306,14 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
         _runtime: &mut ZoneRuntimeHandle,
     ) -> Result<bool, String> {
         self.transport.refresh_active_external_mail()
+    }
+
+    fn register_live_outbound(
+        &self,
+        _runtime: &ZoneRuntimeHandle,
+        sender: SharedZoneLiveOutboundSender,
+    ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
+        self.transport.register_live_outbound(sender)
     }
 }
 
@@ -466,6 +495,23 @@ impl HostedZoneOwnerCommandClient {
                 runtime.execute_production_player_command(authenticated, command)
             }
         }
+    }
+
+    pub(crate) fn register_live_outbound(
+        &self,
+        sender: SharedZoneLiveOutboundSender,
+    ) -> Result<Option<SharedZoneLiveOutboundRegistration>, String> {
+        let runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_ref()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        let Some(ingress) = shared_zone_movement_ingress(runtime) else {
+            return Ok(None);
+        };
+        ingress.register_live_outbound(sender)
     }
 }
 
@@ -1071,23 +1117,32 @@ impl Ord for ZonePresenceKey {
     }
 }
 
+#[doc(hidden)]
 #[derive(Debug)]
-pub(crate) struct SharedZoneLiveOutbound {
+pub struct SharedZoneLiveOutbound {
     registration_id: u64,
     packet: ServerPacket,
 }
 
 impl SharedZoneLiveOutbound {
-    pub(crate) fn registration_id(&self) -> u64 {
+    pub fn new(registration_id: u64, packet: ServerPacket) -> Self {
+        Self {
+            registration_id,
+            packet,
+        }
+    }
+
+    pub fn registration_id(&self) -> u64 {
         self.registration_id
     }
 
-    pub(crate) fn into_packet(self) -> ServerPacket {
+    pub fn into_packet(self) -> ServerPacket {
         self.packet
     }
 }
 
-pub(crate) type SharedZoneLiveOutboundSender = TokioMpscSender<SharedZoneLiveOutbound>;
+#[doc(hidden)]
+pub type SharedZoneLiveOutboundSender = TokioMpscSender<SharedZoneLiveOutbound>;
 
 #[derive(Debug)]
 struct SharedZoneLiveOutboundRecord {
@@ -1099,6 +1154,19 @@ pub(crate) struct SharedZoneLiveOutboundRegistration {
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     key: ZonePresenceKey,
     registration_id: u64,
+}
+
+#[doc(hidden)]
+pub trait ZoneLiveOutboundRegistration: fmt::Debug + Send {
+    fn registration_id(&self) -> u64;
+
+    fn activate(&self) {}
+}
+
+impl ZoneLiveOutboundRegistration for SharedZoneLiveOutboundRegistration {
+    fn registration_id(&self) -> u64 {
+        self.registration_id()
+    }
 }
 
 impl SharedZoneLiveOutboundRegistration {

@@ -44,7 +44,7 @@ use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
     SharedGameplayEventSink,
 };
-use crate::routing::{SharedZoneLiveOutbound, SharedZoneLiveOutboundRegistration};
+use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
@@ -1844,22 +1844,22 @@ fn spawn_zone_outbound_sender(
 }
 
 fn register_zone_live_outbound(
-    ingress: Option<&GatewayZoneMovementIngress>,
+    session: &GatewaySession,
     sender: &mpsc::Sender<SharedZoneLiveOutbound>,
     active_registration_id: &AtomicU64,
-) -> Result<Option<SharedZoneLiveOutboundRegistration>, String> {
+) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
     active_registration_id.store(0, Ordering::Release);
-    let registration = match ingress {
-        Some(ingress) => ingress.register_live_outbound(sender.clone())?,
-        None => None,
-    };
+    let registration = session.register_zone_live_outbound(sender.clone())?;
     active_registration_id.store(
         registration
             .as_ref()
-            .map(SharedZoneLiveOutboundRegistration::registration_id)
+            .map(|registration| registration.registration_id())
             .unwrap_or(0),
         Ordering::Release,
     );
+    if let Some(registration) = registration.as_ref() {
+        registration.activate();
+    }
     Ok(registration)
 }
 
@@ -2061,7 +2061,7 @@ async fn handle_socket_inner(
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
     );
-    let mut _zone_live_outbound_registration: Option<SharedZoneLiveOutboundRegistration> = None;
+    let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let (mut socket_inputs, _socket_reader_task, pending_socket_actions) = spawn_socket_reader(
         receiver,
         Arc::clone(&sender),
@@ -2238,7 +2238,7 @@ async fn handle_socket_inner(
                     next_movement_ingress.clone();
                 let next_zone_live_outbound_registration = if authenticated {
                     match register_zone_live_outbound(
-                        next_movement_ingress.as_ref(),
+                        session,
                         &zone_outbound_tx,
                         active_zone_outbound_registration_id.as_ref(),
                     ) {

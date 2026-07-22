@@ -471,6 +471,26 @@ impl ZoneReplayEngine {
         Ok(engine)
     }
 
+    /// Start a new fenced ownership epoch from the exact restored state. Input
+    /// sequence and rolling commitment restart at zero for the new owner while
+    /// the canonical state root remains unchanged.
+    pub fn rebase_epoch(mut self, new_epoch: u64) -> Result<Self, String> {
+        if new_epoch <= self.epoch {
+            return Err(format!(
+                "new zone replay epoch {new_epoch} must exceed current epoch {}",
+                self.epoch
+            ));
+        }
+        self.epoch = new_epoch;
+        self.next_sequence = 0;
+        self.last_logical_time_ms = 0;
+        self.inputs.clear();
+        self.outbound_count = 0;
+        self.tick_count = 0;
+        self.checkpoint_hash = genesis_commitment(&self.zone_id, new_epoch, &self.state_root);
+        Ok(self)
+    }
+
     fn validate_input(&self, input: &ZoneInput) -> Result<(), String> {
         if input.zone_id != self.zone_id {
             return Err(format!(
