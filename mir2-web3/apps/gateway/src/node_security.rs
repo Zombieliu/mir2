@@ -8,6 +8,7 @@ use mir2_simulation::{ActiveSessionIdentity, WorldCommandExecution, WorldSnapsho
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use crate::rewards::VerifiedWorkReceipt;
 use crate::routing::{
     SharedZoneLiveOutboundSender, SharedZoneOwnerRpcTransport, ZoneLiveOutboundRegistration,
     ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport,
@@ -182,6 +183,15 @@ pub struct VerifiedGuildNode {
     pub transport: SharedZoneOwnerRpcTransport,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VerifiedWorkMeterContext {
+    pub game_id: String,
+    pub epoch: u64,
+    pub finalized_control_height: u64,
+    pub placement_generation: u64,
+    pub availability_bps: u16,
+}
+
 impl fmt::Debug for VerifiedGuildNode {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
@@ -198,6 +208,9 @@ pub struct VerifiedGuildZoneTransport {
     nodes: Vec<VerifiedGuildNode>,
     threshold: usize,
     registry: Arc<GuildNodeSecurityRegistry>,
+    work_meter: Option<VerifiedWorkMeterContext>,
+    verified_work_receipts: Mutex<Vec<VerifiedWorkReceipt>>,
+    receipt_sequence: Mutex<u64>,
 }
 
 impl VerifiedGuildZoneTransport {
@@ -226,7 +239,26 @@ impl VerifiedGuildZoneTransport {
             nodes,
             threshold,
             registry,
+            work_meter: None,
+            verified_work_receipts: Mutex::new(Vec::new()),
+            receipt_sequence: Mutex::new(0),
         })
+    }
+
+    pub fn with_work_meter(mut self, context: VerifiedWorkMeterContext) -> Result<Self, String> {
+        validate_identity("game id", &context.game_id)?;
+        if context.availability_bps > 10_000 {
+            return Err("guild work-meter availability exceeds 10000 bps".to_string());
+        }
+        self.work_meter = Some(context);
+        Ok(self)
+    }
+
+    pub fn drain_verified_work_receipts(&self) -> Vec<VerifiedWorkReceipt> {
+        self.verified_work_receipts
+            .lock()
+            .map(|mut receipts| receipts.drain(..).collect())
+            .unwrap_or_default()
     }
 
     fn eligible_nodes(&self, now_ms: u64) -> Vec<&VerifiedGuildNode> {
@@ -258,6 +290,17 @@ impl VerifiedGuildZoneTransport {
         now_ms: u64,
         operation: &str,
     ) -> Result<T, String> {
+        self.select_quorum_with_attestors(responses, failed_nodes, now_ms, operation)
+            .map(|(value, _, _)| value)
+    }
+
+    fn select_quorum_with_attestors<T>(
+        &self,
+        responses: Vec<(String, String, T)>,
+        failed_nodes: Vec<String>,
+        now_ms: u64,
+        operation: &str,
+    ) -> Result<(T, Vec<String>, String), String> {
         let mut groups: BTreeMap<String, Vec<(String, T)>> = BTreeMap::new();
         for (node_id, digest, value) in responses {
             groups.entry(digest).or_default().push((node_id, value));
@@ -286,10 +329,12 @@ impl VerifiedGuildZoneTransport {
             ));
         };
         let mut winner = None;
+        let mut attestors = Vec::new();
         for (digest, values) in groups {
             for (node_id, value) in values {
                 if digest == winning_digest {
                     self.registry.record_agreement(&node_id);
+                    attestors.push(node_id);
                     if winner.is_none() {
                         winner = Some(value);
                     }
@@ -301,7 +346,55 @@ impl VerifiedGuildZoneTransport {
         for node_id in failed_nodes {
             self.registry.record_disagreement(&node_id, now_ms);
         }
-        winner.ok_or_else(|| format!("guild Zone {operation} quorum produced no value"))
+        attestors.sort();
+        winner
+            .map(|value| (value, attestors, winning_digest))
+            .ok_or_else(|| format!("guild Zone {operation} quorum produced no value"))
+    }
+
+    fn record_verified_execution(
+        &self,
+        request: &ZoneOwnerCommandRequest,
+        execution: &WorldCommandExecution,
+        attestors: Vec<String>,
+        commitment: String,
+        observed_at_ms: u64,
+    ) -> Result<(), String> {
+        let Some(context) = self.work_meter.as_ref() else {
+            return Ok(());
+        };
+        let mut sequence = self
+            .receipt_sequence
+            .lock()
+            .map_err(|_| "guild reward receipt sequence mutex poisoned".to_string())?;
+        *sequence = sequence.saturating_add(1);
+        let receipt_id = verified_work_receipt_id(
+            &context.game_id,
+            context.epoch,
+            request.owner_lease().zone_id().as_str(),
+            request.owner_lease().fencing_token(),
+            *sequence,
+            &commitment,
+        );
+        let receipt = VerifiedWorkReceipt {
+            receipt_id,
+            game_id: context.game_id.clone(),
+            epoch: context.epoch,
+            zone_id: request.owner_lease().zone_id().as_str().to_string(),
+            control_height: context.finalized_control_height,
+            placement_generation: context.placement_generation,
+            work_units: (execution.outcome.packet_count as u64).saturating_add(1),
+            availability_bps: context.availability_bps,
+            quorum_node_ids: attestors,
+            execution_commitment: commitment,
+            observed_at_ms,
+        };
+        receipt.validate()?;
+        self.verified_work_receipts
+            .lock()
+            .map_err(|_| "guild reward receipt buffer mutex poisoned".to_string())?
+            .push(receipt);
+        Ok(())
     }
 }
 
@@ -311,6 +404,7 @@ impl fmt::Debug for VerifiedGuildZoneTransport {
             .debug_struct("VerifiedGuildZoneTransport")
             .field("nodes", &self.nodes)
             .field("threshold", &self.threshold)
+            .field("work_meter", &self.work_meter)
             .finish_non_exhaustive()
     }
 }
@@ -348,7 +442,10 @@ impl ZoneOwnerRpcTransport for VerifiedGuildZoneTransport {
                 Err(_) => failed.push(node.node_id.clone()),
             }
         }
-        self.select_quorum(responses, failed, now_ms, "execute")
+        let (execution, attestors, commitment) =
+            self.select_quorum_with_attestors(responses, failed, now_ms, "execute")?;
+        self.record_verified_execution(&request, &execution, attestors, commitment, now_ms)?;
+        Ok(execution)
     }
 
     fn world_snapshot(&self) -> Result<WorldSnapshot, String> {
@@ -471,6 +568,27 @@ fn execution_commitment(
     hash.update(json_commitment(&execution.outcome.active_identity)?.as_bytes());
     hash.update(snapshot_commitment(snapshot)?.as_bytes());
     Ok(hex_digest(hash.finalize().as_slice()))
+}
+
+fn verified_work_receipt_id(
+    game_id: &str,
+    epoch: u64,
+    zone_id: &str,
+    fencing_token: u64,
+    sequence: u64,
+    commitment: &str,
+) -> String {
+    let mut hash = Sha256::new();
+    hash.update(b"obelisk.shared-compute.verified-work.v1\0");
+    hash.update((game_id.len() as u64).to_be_bytes());
+    hash.update(game_id.as_bytes());
+    hash.update(epoch.to_be_bytes());
+    hash.update((zone_id.len() as u64).to_be_bytes());
+    hash.update(zone_id.as_bytes());
+    hash.update(fencing_token.to_be_bytes());
+    hash.update(sequence.to_be_bytes());
+    hash.update(commitment.as_bytes());
+    hex_digest(hash.finalize().as_slice())
 }
 
 fn packet_commitment(packets: &[ServerPacket]) -> Result<String, String> {
@@ -661,5 +779,47 @@ mod tests {
             ))
             .expect_err("expired admission must fail closed");
         assert!(error.contains("quorum unavailable"));
+    }
+
+    #[test]
+    fn verified_execution_emits_rewardable_receipt_for_agreeing_nodes_only() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let shared: SharedZoneOwnerLeaseAuthority = authority.clone();
+        let registry = admitted_registry(&["guild-a", "guild-b"]);
+        let transport = VerifiedGuildZoneTransport::new(
+            vec![
+                honest_node("guild-a", shared.clone()),
+                honest_node("guild-b", shared),
+            ],
+            2,
+            registry,
+        )
+        .unwrap()
+        .with_work_meter(VerifiedWorkMeterContext {
+            game_id: "mir2".to_string(),
+            epoch: 9,
+            finalized_control_height: 27,
+            placement_generation: 4,
+            availability_bps: 9_950,
+        })
+        .unwrap();
+        transport
+            .execute(ZoneOwnerCommandRequest::direct(
+                authority.owner_lease(&ZoneId::primary()),
+                WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 5 }),
+            ))
+            .unwrap();
+
+        let receipts = transport.drain_verified_work_receipts();
+        assert_eq!(receipts.len(), 1);
+        let receipt = &receipts[0];
+        assert_eq!(receipt.game_id, "mir2");
+        assert_eq!(receipt.epoch, 9);
+        assert_eq!(receipt.control_height, 27);
+        assert_eq!(receipt.placement_generation, 4);
+        assert_eq!(receipt.quorum_node_ids, ["guild-a", "guild-b"]);
+        assert!(receipt.work_units > 0);
+        receipt.validate().unwrap();
+        assert!(transport.drain_verified_work_receipts().is_empty());
     }
 }

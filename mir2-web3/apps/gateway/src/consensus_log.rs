@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    GuildNodeAdmission, GuildNodeSecurityRegistry, ZoneHostControlPlane, ZoneHostHeartbeat,
-    ZoneHostRegistration, ZoneId, ZonePlacementLease, ZoneRebalanceMove,
+    GameRewardPolicy, GuildNodeAdmission, GuildNodeSecurityRegistry, MultiGameRewardLedger,
+    RewardSettlementBatch, ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostRegistration, ZoneId,
+    ZonePlacementLease, ZoneRebalanceMove,
 };
 
 const CONTROL_BLOCK_DOMAIN: &[u8] = b"obelisk.mir2.control-block.v1\0";
@@ -165,6 +166,13 @@ pub enum ReplicatedControlCommand {
     RevokeGuildNode {
         node_id: String,
     },
+    RegisterGameRewardPolicy {
+        policy: GameRewardPolicy,
+    },
+    FinalizeGameRewardEpoch {
+        game_id: String,
+        epoch: u64,
+    },
 }
 
 impl ReplicatedControlCommand {
@@ -185,12 +193,15 @@ pub enum ProjectedControlEffect {
     ZoneHostDrainFinished(String),
     GuildNodeAdmitted(String),
     GuildNodeRevoked { node_id: String, existed: bool },
+    RewardPolicyRegistered { game_id: String, epoch: u64 },
+    RewardEpochFinalized(RewardSettlementBatch),
 }
 
 #[derive(Debug)]
 pub struct FinalizedControlProjector {
     scheduler: Arc<ZoneHostControlPlane>,
     guild_security: Arc<GuildNodeSecurityRegistry>,
+    reward_ledger: Option<Arc<Mutex<MultiGameRewardLedger>>>,
     last_height: Mutex<u64>,
 }
 
@@ -202,8 +213,14 @@ impl FinalizedControlProjector {
         Self {
             scheduler,
             guild_security,
+            reward_ledger: None,
             last_height: Mutex::new(0),
         }
+    }
+
+    pub fn with_reward_ledger(mut self, reward_ledger: Arc<Mutex<MultiGameRewardLedger>>) -> Self {
+        self.reward_ledger = Some(reward_ledger);
+        self
     }
 
     pub fn last_height(&self) -> u64 {
@@ -238,7 +255,7 @@ impl FinalizedControlProjector {
             }
             let command: ReplicatedControlCommand = serde_json::from_slice(&envelope.payload)
                 .map_err(|error| format!("finalized control command decode failed: {error}"))?;
-            effects.push(self.apply_command(command)?);
+            effects.push(self.apply_command(command, finalized.block.height)?);
         }
         *last_height = finalized.block.height;
         Ok(effects)
@@ -247,6 +264,7 @@ impl FinalizedControlProjector {
     fn apply_command(
         &self,
         command: ReplicatedControlCommand,
+        finalized_height: u64,
     ) -> Result<ProjectedControlEffect, String> {
         match command {
             ReplicatedControlCommand::RegisterZoneHost {
@@ -282,7 +300,30 @@ impl FinalizedControlProjector {
                 let existed = self.guild_security.revoke(&node_id);
                 Ok(ProjectedControlEffect::GuildNodeRevoked { node_id, existed })
             }
+            ReplicatedControlCommand::RegisterGameRewardPolicy { policy } => {
+                let game_id = policy.game_id.clone();
+                let epoch = policy.epoch;
+                self.reward_ledger()?
+                    .lock()
+                    .map_err(|_| "reward ledger mutex poisoned".to_string())?
+                    .register_policy(policy)?;
+                Ok(ProjectedControlEffect::RewardPolicyRegistered { game_id, epoch })
+            }
+            ReplicatedControlCommand::FinalizeGameRewardEpoch { game_id, epoch } => {
+                let batch = self
+                    .reward_ledger()?
+                    .lock()
+                    .map_err(|_| "reward ledger mutex poisoned".to_string())?
+                    .finalize_epoch(&game_id, epoch, finalized_height)?;
+                Ok(ProjectedControlEffect::RewardEpochFinalized(batch))
+            }
         }
+    }
+
+    fn reward_ledger(&self) -> Result<&Arc<Mutex<MultiGameRewardLedger>>, String> {
+        self.reward_ledger
+            .as_ref()
+            .ok_or_else(|| "finalized control projector has no reward ledger".to_string())
     }
 }
 
@@ -829,6 +870,108 @@ mod tests {
                 .host_id,
             "host-a"
         );
+    }
+
+    #[test]
+    fn reward_policy_and_epoch_close_take_effect_only_after_commonware_finality() {
+        let log = CommonwareControlLog::new(committee()).unwrap();
+        let reward_ledger = Arc::new(Mutex::new(MultiGameRewardLedger::default()));
+        let projector = FinalizedControlProjector::new(
+            Arc::new(ZoneHostControlPlane::new(100, 1_000, 0)),
+            Arc::new(GuildNodeSecurityRegistry::default()),
+        )
+        .with_reward_ledger(reward_ledger.clone());
+        let policy = GameRewardPolicy {
+            game_id: "mir2".to_string(),
+            epoch: 5,
+            reward_budget: 1_000,
+            reward_per_work_unit: 10,
+            max_reward_per_node: 1_000,
+            minimum_availability_bps: 9_000,
+            minimum_quorum: 2,
+            settlement_coin_type: "0x2::sui::SUI".to_string(),
+        };
+        let policy_block = log
+            .propose(
+                "validator-a",
+                vec![
+                    ReplicatedControlCommand::RegisterGameRewardPolicy { policy }
+                        .envelope("mir2-reward-policy-5")
+                        .unwrap(),
+                ],
+            )
+            .unwrap();
+        assert!(log
+            .vote("validator-a", &policy_block.digest)
+            .unwrap()
+            .is_none());
+        assert!(log
+            .vote("validator-b", &policy_block.digest)
+            .unwrap()
+            .is_none());
+        assert!(reward_ledger
+            .lock()
+            .unwrap()
+            .ingest_verified(crate::VerifiedWorkReceipt {
+                receipt_id: "receipt-before-finality".to_string(),
+                game_id: "mir2".to_string(),
+                epoch: 5,
+                zone_id: "map:0".to_string(),
+                control_height: 1,
+                placement_generation: 1,
+                work_units: 10,
+                availability_bps: 10_000,
+                quorum_node_ids: vec!["guild-a".to_string(), "guild-b".to_string()],
+                execution_commitment: "ab".repeat(32),
+                observed_at_ms: 10,
+            })
+            .is_err());
+        let policy_finalized = log
+            .vote("validator-c", &policy_block.digest)
+            .unwrap()
+            .unwrap();
+        assert!(matches!(
+            projector.apply(&policy_finalized).unwrap().as_slice(),
+            [ProjectedControlEffect::RewardPolicyRegistered { .. }]
+        ));
+
+        reward_ledger
+            .lock()
+            .unwrap()
+            .ingest_verified(crate::VerifiedWorkReceipt {
+                receipt_id: "receipt-1".to_string(),
+                game_id: "mir2".to_string(),
+                epoch: 5,
+                zone_id: "map:0".to_string(),
+                control_height: 1,
+                placement_generation: 1,
+                work_units: 10,
+                availability_bps: 10_000,
+                quorum_node_ids: vec!["guild-a".to_string(), "guild-b".to_string()],
+                execution_commitment: "ab".repeat(32),
+                observed_at_ms: 10,
+            })
+            .unwrap();
+        let close = log
+            .propose(
+                "validator-b",
+                vec![ReplicatedControlCommand::FinalizeGameRewardEpoch {
+                    game_id: "mir2".to_string(),
+                    epoch: 5,
+                }
+                .envelope("mir2-reward-close-5")
+                .unwrap()],
+            )
+            .unwrap();
+        assert!(log.vote("validator-a", &close.digest).unwrap().is_none());
+        assert!(log.vote("validator-b", &close.digest).unwrap().is_none());
+        let close = log.vote("validator-c", &close.digest).unwrap().unwrap();
+        let effects = projector.apply(&close).unwrap();
+        assert!(matches!(
+            effects.as_slice(),
+            [ProjectedControlEffect::RewardEpochFinalized(batch)]
+                if batch.game_id == "mir2" && batch.finalized_control_height == 2
+        ));
     }
 
     #[cfg(feature = "commonware-2026-2")]

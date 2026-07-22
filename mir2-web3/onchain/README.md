@@ -1,7 +1,11 @@
 # mir2-web3 / onchain
 
-On-chain **smart mine** for the Legend of Mir 2 (Crystal) web port — Dubhe/Sui
-contracts, the Dubhe indexer, the relayer bridge, and TS scripts.
+On-chain **smart mine** plus shared-compute reward settlement for the Legend of Mir 2
+(Crystal) web port — Dubhe/Sui contracts, the Dubhe indexer, the relayer bridge, and TS scripts.
+
+`reward_settlement` is the Gate 9 shared-compute treasury: Commonware-finalized reward batches are
+published per game/epoch, and an isolated operator capability pays proof-checked guild-node claims.
+See `docs/client/GATE9-SHARED-COMPUTE-REWARDS.md`.
 
 > **Spec**: [`docs/ONCHAIN-SMART-MINE-ROADMAP.md`](../docs/ONCHAIN-SMART-MINE-ROADMAP.md)
 > (M0→M8 execution plan) and [`docs/ONCHAIN-SMART-MINE-DESIGN.md`](../docs/ONCHAIN-SMART-MINE-DESIGN.md)
