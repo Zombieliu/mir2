@@ -4,6 +4,7 @@ pub mod cache;
 pub mod control_plane;
 pub mod events;
 mod inject;
+pub mod node_security;
 pub mod routing;
 mod session;
 pub mod tcp;
@@ -33,6 +34,10 @@ pub use events::{
 };
 pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;
+pub use node_security::{
+    GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
+    VerifiedGuildNode, VerifiedGuildZoneTransport,
+};
 pub use routing::{
     HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
     InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneOwnerCommandClient,

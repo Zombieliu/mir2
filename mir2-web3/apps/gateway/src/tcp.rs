@@ -111,7 +111,16 @@ async fn handle_client_inner(
         };
         let frame = match frame {
             Ok(frame) => frame,
-            Err(error) if error.kind() == io::ErrorKind::UnexpectedEof => return Ok(()),
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    io::ErrorKind::UnexpectedEof
+                        | io::ErrorKind::ConnectionReset
+                        | io::ErrorKind::BrokenPipe
+                ) =>
+            {
+                return Ok(())
+            }
             Err(error) => return Err(error),
         };
 

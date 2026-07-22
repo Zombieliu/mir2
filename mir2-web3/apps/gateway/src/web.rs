@@ -8768,6 +8768,13 @@ mod tests {
     fn stage5_damage_equipment_browser_command_returns_dura_changed_event() {
         let mut session = crate::GatewaySession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let initial_dura = session
+            .world_snapshot()
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == mir2_simulation::EquipmentSlot::Weapon)
+            .expect("fixture should equip a weapon")
+            .durability_current;
         let command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"stage5Command","action":"qa.damageEquipment","args":["weapon","2500"]}"#,
         )
@@ -8785,7 +8792,10 @@ mod tests {
 
         assert_eq!(event["packet"], "DuraChanged");
         assert_eq!(event["payload"]["uniqueId"], 0);
-        assert_eq!(event["payload"]["currentDura"], 0);
+        assert_eq!(
+            event["payload"]["currentDura"],
+            initial_dura.saturating_sub(2_500)
+        );
     }
 
     #[test]

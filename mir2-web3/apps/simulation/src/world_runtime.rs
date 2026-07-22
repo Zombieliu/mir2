@@ -12,7 +12,7 @@ use mir2_protocol::{
     client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
     PasskeyLogin {
@@ -97,9 +97,12 @@ pub fn validate_production_player_command(
         WorldCommand::PasskeyLogin { .. } => {
             Err("raw passkey login is not allowed on the production player path".to_string())
         }
-        WorldCommand::MoveTo { .. } | WorldCommand::ApplyHandoffTransform { .. } => Err(
-            "debug or handoff transform is not allowed on the production player path".to_string(),
-        ),
+        WorldCommand::MoveTo { .. } => {
+            Err("debug MoveTo is not allowed on the production player path".to_string())
+        }
+        WorldCommand::ApplyHandoffTransform { .. } => {
+            Err("handoff transform is not allowed on the production player path".to_string())
+        }
         WorldCommand::Stage5Command { .. } => {
             Err("Stage5Command is not allowed on the production player path".to_string())
         }

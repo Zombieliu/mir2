@@ -23,10 +23,10 @@ prepare or source close fails, the target is closed and the source is transferre
 pre-command map/position. The player connection receives an error instead of continuing with a map
 owned by the wrong Zone. `GatewaySession::handoff_generation()` exposes successful commits.
 
-Route-aware WebSocket sessions deliberately use the serialized session command path for movement.
-This prevents the earlier movement fast path from completing a gate transfer without giving the
-Gateway a chance to rebind. A route-aware owner-side fast path can be restored after Gate 6
-placement metadata is available.
+Route-aware sessions initially used only the serialized movement path. Gate 6 restores the
+owner-cadence fast path for safe movement: the shared-Zone ingress detects transfer boundaries and
+falls back to the serialized session command, so topology-changing movement still commits the
+Gateway rebind before the next packet.
 
 ## Remote lifecycle and checkpoint replay
 

@@ -346,12 +346,10 @@ impl GatewaySession {
     }
 
     pub(crate) fn zone_movement_ingress(&self) -> Option<GatewayZoneMovementIngress> {
-        // Route-aware sessions must observe the post-command map before the next
-        // packet so a movement-triggered transfer cannot remain bound to the old
-        // Zone. Gate 6 can re-enable the fast ingress through a route-aware owner.
-        if self.routing_context.is_some() {
-            return None;
-        }
+        // The shared-Zone ingress rejects movement near a transfer boundary and
+        // returns control to the serialized session path. Safe movement can stay
+        // on the owner cadence; topology-changing movement still runs the atomic
+        // rebind transaction before the next command.
         shared_zone_movement_ingress(&self.runtime).map(|ingress| GatewayZoneMovementIngress {
             ingress,
             zone_owner_lease: self.zone_owner_lease.clone(),

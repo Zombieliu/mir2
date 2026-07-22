@@ -105,7 +105,7 @@ pub enum ZoneOwnerCommandMode {
     ProductionPlayer { authenticated: bool },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ZoneOwnerCommandRequest {
     owner_lease: ZoneOwnerLease,
     mode: ZoneOwnerCommandMode,

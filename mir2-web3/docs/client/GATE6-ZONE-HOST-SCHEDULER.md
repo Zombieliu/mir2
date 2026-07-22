@@ -56,3 +56,5 @@ cargo +1.89.0 check -p mir2-gateway --all-targets
 The integration test starts three real TCP Zone Hosts, registers their live health, places a Zone
 across failure domains, executes on the scheduled primary, drains it, proves a new session falls
 through to the replica, and verifies the scheduler emits a new fenced generation.
+
+Gate 7 continues in [`GATE7-UNTRUSTED-GUILD-NODES.md`](GATE7-UNTRUSTED-GUILD-NODES.md).
