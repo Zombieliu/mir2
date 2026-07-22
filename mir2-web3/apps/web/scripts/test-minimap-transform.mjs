@@ -32,8 +32,10 @@ const generatedExports = loadTypeScriptModule(
 
 const {
   createLinearMiniMapTransform,
+  crystalMiniMapRadarColor,
   findCrystalMiniMapTransform,
   normalizeCrystalMiniMapFileName,
+  worldToCrystalMiniMapRadarPoint,
   worldToMiniMapImagePoint,
 } = helperExports;
 const { CRYSTAL_MINI_MAP_TRANSFORMS } = generatedExports;
@@ -151,13 +153,13 @@ const closeTo = (actual, expected, tolerance, label) => {
 
   const miniViewWidth = 120;
   const miniViewHeight = 108;
-  const miniRasterLeft = Math.max(Math.min(Math.round(playerImagePoint.x - miniViewWidth / 2), 1052 - miniViewWidth), 0);
-  const miniRasterTop = Math.max(Math.min(Math.round(playerImagePoint.y - miniViewHeight / 2), 700 - miniViewHeight), 0);
+  const miniRasterLeft = Math.max(Math.min(Math.trunc(playerImagePoint.x) - Math.floor(miniViewWidth / 2), 1052 - miniViewWidth), 0);
+  const miniRasterTop = Math.max(Math.min(Math.trunc(playerImagePoint.y) - Math.floor(miniViewHeight / 2), 700 - miniViewHeight), 0);
   const miniViewportPoint = {
     x: playerImagePoint.x - miniRasterLeft,
     y: playerImagePoint.y - miniRasterTop,
   };
-  closeTo(miniViewportPoint.x, 59.94285714285718, 0.0001, "map 0 mini viewport x should stay centered on player");
+  closeTo(miniViewportPoint.x, 60.94285714285718, 0.0001, "map 0 mini viewport x should use Crystal's truncated source rectangle");
   closeTo(miniViewportPoint.y, 54, 0.0001, "map 0 mini viewport y should stay centered on player");
 
   const bigTransform = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
@@ -194,6 +196,34 @@ const closeTo = (actual, expected, tolerance, label) => {
 
   closeTo((bigViewportPoint.x - bigViewport.left) / bigViewport.scale, playerImagePoint.x, 0.0001, "big viewport X should decode back to image space");
   closeTo((bigViewportPoint.y - bigViewport.top) / bigViewport.scale, playerImagePoint.y, 0.0001, "big viewport Y should decode back to image space");
+}
+
+{
+  const transform = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
+    mapFileName: "0",
+    miniMapIndex: 101,
+    bigMapIndex: 101,
+    kind: "mini",
+  });
+  assert.ok(transform, "Bichon mini transform should exist for native radar projection");
+  const point = worldToCrystalMiniMapRadarPoint(
+    transform,
+    { imageLeft: 438, imageTop: 221 },
+    { x: 332, y: 275 },
+  );
+  closeTo(point.x, 61.61714285714285, 0.0001, "native radar X should re-project from world start 291");
+  closeTo(point.y, 54, 0.0001, "native radar Y should re-project from world start 221");
+  assert.equal(Math.floor(point.x - 0.5) + 3, 64, "player radar rectangle should start at panel X 64");
+  assert.equal(Math.floor(point.y - 0.5) + 22, 75, "player radar rectangle should start at panel Y 75");
+
+  assert.equal(crystalMiniMapRadarColor({ kind: "selfPlayer" }), "#ffffff");
+  assert.equal(crystalMiniMapRadarColor({ kind: "npc" }), "#00ff32");
+  assert.equal(crystalMiniMapRadarColor({ kind: "monster", ai: 6 }), "#00ff32");
+  assert.equal(crystalMiniMapRadarColor({ kind: "monster", ai: 57 }), "#ff0000");
+  assert.equal(
+    crystalMiniMapRadarColor({ kind: "monster", ai: 57, ownedByPlayer: true }),
+    "#0000ff",
+  );
 }
 
 console.log("minimap transform tests passed");

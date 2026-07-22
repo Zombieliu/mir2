@@ -4197,3 +4197,13 @@ R248 completed the previously blocked R39 data-import follow-up on Windows. The 
 | [~] | Stage screenshot comparison harness | Stage 5 smoke archives route screenshots plus named desktop/compact viewport metadata; R303 adds all-map source-resource coverage evidence; true baseline diffing against Crystal/reference images remains open. |
 | [x] | 100% Candidate gate command bundle | `infra/check-candidate-gate.sh` now provides `local`, `full`, and `live` scopes, and `.github/workflows/mir2-candidate-gate.yml` runs the local scope in CI. `MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh` passed on 2026-05-06, covering the architecture gate, `mir2-game-data` 27/27, `packet_trace` bin 16/16, Admin Web typecheck, Player Web typecheck, and `git diff --check`. `full` and `live` are the explicit command bundle for build/static smoke and running Gateway/Web evidence refreshes. |
 | [ ] | Final human QA route | Keep under 40 hours by batching checks and evidence. |
+
+## 2026-07-23 Visual-Parity Queue Sync
+
+| Status | Task | Notes |
+| --- | --- | --- |
+| [x] | Deterministic same-account pair | r32 Night and r33 Dawn are overlay-free, same state/map/coordinate, fixed-light, zero-error pairs. |
+| [x] | Camera/HUD/light/minimap normalization slice | Dawn full/world changed pixels fell from `36.4%/40.2%` to `24.2%/26.1%`; Night remains `12.5%/12.6%`. |
+| [x] | Visual parity regression gates | Connected-handshake, stale-socket, secret-redaction, cursor-parking, HUD metric, minimap, Rust AI/light, and dual-backend tests are green. Final headed WebGPU and WebGL2 runs each pass 28/28 strict movement/map assertions. |
+| [x] | Captured Bichon source-frame closure | Commit the 555 deterministic missing map PNGs; generated map-atlas output stays ignored. |
+| [ ] | GDI text and deterministic dynamic-state pass | Replace browser typography where pixel-level value justifies it; normalize chat fixture and roaming entity phase before final human review. |

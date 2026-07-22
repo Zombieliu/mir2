@@ -74,6 +74,7 @@ export type DisplayEntity = {
   kind: EntityKind;
   name: string;
   ownerName?: string;
+  ai?: number;
   x: number;
   y: number;
   direction?: string;

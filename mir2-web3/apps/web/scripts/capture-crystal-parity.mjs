@@ -13,6 +13,7 @@ import {
   parseCaptureLightSetting,
 } from "./crystal-capture-visual-state.mjs";
 import { decodeCdpMessage, isCriticalConsoleError } from "./cdp-message.mjs";
+import { redactCaptureSecrets } from "./capture-secret-redaction.mjs";
 
 const require = createRequire(import.meta.url);
 const CdpWebSocket = require("next/dist/compiled/ws");
@@ -230,12 +231,14 @@ async function main() {
     await waitUntil(client, "document.querySelector('.login-input.account') && document.querySelector('.login-input.password')", "login inputs", 10_000);
     await fillInput(client, ".login-input.account", account);
     await fillInput(client, ".login-input.password", password);
+    let protocolReadyEvidence = null;
     if (createAccount) {
       await click(client, ".login-button.account button");
-      await waitUntil(client, "window.__mir2Stage5?.state?.wsState === 'open'", "account creation socket", 15_000);
+      protocolReadyEvidence = await waitForGatewayProtocolReady(client);
       await delay(2_000);
     }
     const loginEvidence = await loginWithPassword(client, account, password);
+    protocolReadyEvidence ??= await waitForGatewayProtocolReady(client);
     await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'select'", "select screen", 15_000);
     await waitUntil(client, "window.__mir2Stage5?.state?.wsState === 'open'", "select socket open", 15_000);
     if (createAccount) {
@@ -329,6 +332,7 @@ async function main() {
       consoleErrors: client.consoleErrors,
       criticalConsoleErrors: client.criticalConsoleErrors(),
       captureControl: {
+        protocolReady: protocolReadyEvidence,
         login: loginEvidence,
         stateAlignment: stateAlignmentEvidence,
         transfer: transferEvidence,
@@ -1317,6 +1321,38 @@ async function fillInput(client, selector, value) {
   if (!ok) throw new Error(`Could not fill ${selector}`);
 }
 
+async function waitForGatewayProtocolReady(client) {
+  const startedAt = Date.now();
+  await waitUntil(
+    client,
+    "window.__mir2Stage5?.state?.wsState === 'open'",
+    "login socket open",
+    30_000,
+  );
+  await waitUntil(
+    client,
+    `window.__mir2Stage5?.state?.gatewayProtocolReady === true &&
+      (window.__mir2GatewayEventHistory ?? []).some(
+        (event) => event?.type === "packet" && event?.packet === "Connected"
+      )`,
+    "Crystal Connected handshake",
+    30_000,
+  );
+  const evidence = await client.evaluate(`
+    (() => {
+      const connected = (window.__mir2GatewayEventHistory ?? []).find(
+        (event) => event?.type === "packet" && event?.packet === "Connected"
+      );
+      return {
+        wsState: window.__mir2Stage5?.state?.wsState ?? null,
+        gatewayProtocolReady: window.__mir2Stage5?.state?.gatewayProtocolReady ?? false,
+        connectedAt: connected?.at ?? null,
+      };
+    })()
+  `);
+  return { ...evidence, waitMs: Date.now() - startedAt };
+}
+
 async function loginWithPassword(client, accountId, password) {
   const evidence = await client.evaluate(`
     (() => {
@@ -1461,6 +1497,7 @@ async function waitUntil(client, expression, label, timeoutMs) {
         title: document.title,
         stageScreen: window.__mir2Stage5?.state?.screen ?? null,
         wsState: window.__mir2Stage5?.state?.wsState ?? null,
+        gatewayProtocolReady: window.__mir2Stage5?.state?.gatewayProtocolReady ?? null,
         loginBusy: window.__mir2Stage5?.state?.loginBusy ?? null,
         stageKeys: window.__mir2Stage5?.state ? Object.keys(window.__mir2Stage5.state).slice(0, 20) : [],
         loginInputs: {
@@ -1472,6 +1509,7 @@ async function waitUntil(client, expression, label, timeoutMs) {
         transitionOverlay: Boolean(document.querySelector(".login-transition-overlay")),
         lastCommand: window.__mir2LastCommand ?? null,
         commandHistory: (window.__mir2CommandHistory ?? []).slice(0, 8),
+        gatewayEventHistory: (window.__mir2GatewayEventHistory ?? []).slice(0, 8),
         visibleLogs: Array.from(document.querySelectorAll(".chat-feed-line"))
           .map((node) => node.textContent?.trim() ?? "")
           .filter(Boolean)
@@ -1485,23 +1523,7 @@ async function waitUntil(client, expression, label, timeoutMs) {
     `)
     .catch((error) => ({ debugError: String(error) }));
   throw new Error(
-    `Timed out waiting for ${label}; last=${JSON.stringify(lastValue)}; debug=${JSON.stringify(redactCaptureSecrets(debug))}`,
-  );
-}
-
-function redactCaptureSecrets(value) {
-  if (Array.isArray(value)) {
-    return value.map(redactCaptureSecrets);
-  }
-  if (!value || typeof value !== "object") {
-    return value;
-  }
-
-  return Object.fromEntries(
-    Object.entries(value).map(([key, nested]) => [
-      key,
-      /(?:password|passkey|secret|token)/i.test(key) ? "[redacted]" : redactCaptureSecrets(nested),
-    ]),
+    `Timed out waiting for ${label}; last=${JSON.stringify(redactCaptureSecrets(lastValue))}; debug=${JSON.stringify(redactCaptureSecrets(debug))}`,
   );
 }
 
@@ -1703,6 +1725,7 @@ async function readState(client) {
           y: entity.y ?? null,
           direction: entity.direction ?? null,
           image: entity.image ?? null,
+          ai: entity.ai ?? null,
           frame: entity.frame ?? null,
           visible: entity.visible ?? null,
         })),

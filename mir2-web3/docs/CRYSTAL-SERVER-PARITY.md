@@ -1784,3 +1784,14 @@ The Rust backend is considered "done" only when these areas are functionally ali
 ## Working Rule
 
 When behaviour differs, Crystal is the source of truth. Rust structure does not need to mirror Crystal classes, but gameplay results and packet-visible state eventually must.
+
+## 2026-07-23 Snapshot/Light Parity Note
+
+Crystal monster `AI` now survives the full simulation snapshot -> shared zone
+merge -> `ObjectMonster` observer-seed path instead of falling back to zero.
+This fixes packet-visible minimap disposition for AI 6 guards without changing
+authoritative monster movement or combat. A server-only fixed light setting
+(`MIR2_SIMULATION_FIXED_LIGHT_SETTING=1..4`) was added for deterministic QA;
+normal servers continue to use the Crystal UTC time-of-day formula when the
+override is absent or invalid. Focused AI/light regressions and locked
+Simulation/Gateway checks pass.

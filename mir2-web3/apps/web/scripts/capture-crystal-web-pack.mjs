@@ -11,10 +11,12 @@ import {
 } from "./crystal-capture-visual-state.mjs";
 import {
   assertCanonicalNativeCaptureReport,
+  assertNativeCursorParking,
   assertNativeFrameDimensions,
   CRYSTAL_NATIVE_CLIENT_HEIGHT,
   CRYSTAL_NATIVE_CLIENT_WIDTH,
 } from "./crystal-native-capture-state.mjs";
+import { redactCaptureSecrets, redactCommandArgs } from "./capture-secret-redaction.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
@@ -193,6 +195,7 @@ async function captureNativeWindow() {
       "-WindowTitlePattern",
       windowTitlePattern,
       "-ActivateWindow",
+      "-ParkCursorOutsideClient",
       "-ExpectedClientWidth",
       String(expectedNativeWidth),
       "-ExpectedClientHeight",
@@ -215,6 +218,7 @@ async function captureNativeWindow() {
     expectedWidth: expectedNativeWidth,
     expectedHeight: expectedNativeHeight,
   });
+  assertNativeCursorParking(report);
   const samples = (Array.isArray(report.samples) ? report.samples : [])
     .filter((sample) => sample?.capture?.path)
     .map((sample) => ({
@@ -559,11 +563,13 @@ async function runJsonCommand(command, commandArgs, options = {}) {
     child.on("close", resolve);
   });
   if (timer) clearTimeout(timer);
+  const displayCommand = `${command} ${redactCommandArgs(commandArgs).join(" ")}`;
+  const diagnosticOutput = redactCaptureSecrets(stderr || stdout);
   if (timedOut) {
-    throw new Error(`${command} ${commandArgs.join(" ")} timed out after ${timeoutMs}ms\n${stderr || stdout}`);
+    throw new Error(`${displayCommand} timed out after ${timeoutMs}ms\n${diagnosticOutput}`);
   }
   if (code !== 0) {
-    throw new Error(`${command} ${commandArgs.join(" ")} failed with code ${code}\n${stderr || stdout}`);
+    throw new Error(`${displayCommand} failed with code ${code}\n${diagnosticOutput}`);
   }
   const trimmed = stdout.trim();
   const start = trimmed.lastIndexOf("\n{") >= 0 ? trimmed.lastIndexOf("\n{") + 1 : trimmed.indexOf("{");

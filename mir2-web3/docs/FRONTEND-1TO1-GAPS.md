@@ -2473,3 +2473,29 @@ Human acceptance is still required for:
 - whether mouse targeting and item interaction feel right;
 - whether combat feedback, animation pacing, and panel layering are acceptable;
 - whether small visual differences should be fixed or accepted.
+
+## 2026-07-23 Deterministic Visual-Parity Closeout
+
+- The current same-account gate uses overlay-free Crystal/Web `1024x768`
+  captures at Bichon `0 @ 328,275` with explicit server light pairing.
+- Dawn improved from r29 full/world changed pixels `36.4%/40.2%` to final r33
+  `24.2%/26.1%`; world MAE fell from `18.845` to `11.987`.
+- Final Night r32 remains at full/world `12.5%/12.6%`, matching the r26
+  `12.4%/12.6%` baseline and proving the Dawn/Evening correction is scoped.
+- HUD experience fill now follows Crystal's `(1004 - 3) * ratio` clipping,
+  HP uses the native source crop, chat scrollbar rows match native geometry,
+  minimap projection follows Crystal's reverse quantization, and AI 6 monsters
+  retain the native green radar colour through observer re-seeding.
+- The capture/login path now waits for `Connected`, retains one latest pending
+  action, ignores stale-socket events, verifies cursor parking, and redacts
+  serialized secrets. r33 records zero critical errors and zero 404s.
+- Final strict headed captures pass 28/28 assertions on both selected WebGPU
+  and forced WebGL2. Each sends and acknowledges four ordered moves, settles
+  at `328,275`, and leaves no pending movement/map transaction or browser
+  error. The dual-backend runtime smoke also remains fully green.
+- The captured Bichon source closure adds 555 deterministic Crystal map PNGs.
+  Release preflight sees 39,401 manifest assets, 12,015 original map PNGs,
+  8,228 packed entity sprites, and 99.76% renderable map-frame coverage.
+- Remaining visual gaps are GDI typography, deterministic chat content, and
+  independently moving entity/animation phases. They are no longer classified
+  as movement, camera, or map-transaction failures.
