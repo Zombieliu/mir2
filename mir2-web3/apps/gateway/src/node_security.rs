@@ -5,6 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{encode_server_packet, ServerPacket};
 use mir2_simulation::{ActiveSessionIdentity, WorldCommandExecution, WorldSnapshot};
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::routing::{
@@ -12,13 +13,15 @@ use crate::routing::{
     ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum GuildNodeCapability {
     ExecuteZone,
     ReplicateCheckpoint,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GuildNodeAdmission {
     pub node_id: String,
     pub operator_id: String,

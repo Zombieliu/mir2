@@ -33,6 +33,7 @@ in [`apps/web/CLAUDE.md`](../../apps/web/CLAUDE.md) (auto-loaded by Claude Code 
 | [`GATE5-ATOMIC-ZONE-HANDOFF.md`](GATE5-ATOMIC-ZONE-HANDOFF.md) | Gate 5.5 atomic local/remote map handoff, rollback, fenced close and cross-Zone messages |
 | [`GATE6-ZONE-HOST-SCHEDULER.md`](GATE6-ZONE-HOST-SCHEDULER.md) | Gate 6 host registration, capacity-aware replicated placement leases, drain and rebalance |
 | [`GATE7-UNTRUSTED-GUILD-NODES.md`](GATE7-UNTRUSTED-GUILD-NODES.md) | Gate 7 expiring node admission, deterministic execution quorum, strikes and quarantine |
+| [`GATE8-COMMONWARE-CONTROL-LOG.md`](GATE8-COMMONWARE-CONTROL-LOG.md) | Gate 8 pinned Commonware v2026.2.0 finality log, event blocks, replay and live projections |
 
 ## Keeping these honest
 

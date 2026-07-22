@@ -5,9 +5,14 @@ edition = "2021"
 description = "Local Crystal-wire gateway stub for the Mir2 web3 rewrite"
 license = "MIT"
 
+[features]
+default = []
+commonware-2026-2 = ["dep:commonware-consensus"]
+
 [dependencies]
 axum = { version = "0.8", features = ["http1", "json", "tokio", "ws"] }
 base64 = "0.22"
+commonware-consensus = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
 futures-util = "0.3"
 hmac = "0.13"
 mir2-game-data = { path = "../../packages/game-data" }

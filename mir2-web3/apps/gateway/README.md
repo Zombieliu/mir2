@@ -95,6 +95,9 @@ Account-store runtime policy:
 - Guild-operated hosts can be wrapped by a threshold verifier: admissions expire and
   carry narrow capabilities, every command compares canonical packet plus post-state
   commitments, and divergent/unavailable nodes accumulate strikes and quarantine.
+- The `commonware-2026-2` feature pins Commonware's `v2026.2.0` release and maps
+  finalized epoch/height/view blocks into the Zone scheduler and guild admission
+  registry. Control blocks are event-driven; idle periods do not emit empty blocks.
 
 Admin runtime read endpoints:
 
