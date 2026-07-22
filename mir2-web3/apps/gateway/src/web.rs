@@ -46,6 +46,9 @@ use crate::events::{
 };
 use crate::routing::{SharedZoneLiveOutbound, SharedZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
+use crate::tcp::chat_broadcast::{
+    recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
+};
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
@@ -127,6 +130,7 @@ impl Drop for ZoneOutboundSenderTask {
 struct WebState {
     config: Arc<GatewayConfig>,
     zone_registry: Arc<ZoneRegistry>,
+    chat_hub: ChatBroadcastHub,
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
@@ -1391,7 +1395,11 @@ struct AdminErrorResponse {
     error: String,
 }
 
-pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
+pub async fn run_web_gateway(
+    addr: &str,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.
@@ -1403,6 +1411,7 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         zone_registry: Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(
             crate::zone_lease::default_zone_owner_lease_authority_from_env(),
         )),
+        chat_hub,
         session_cache: gateway_session_cache_from_env()
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
@@ -1701,6 +1710,7 @@ async fn handle_socket(
         &mut save_queue,
         &mut route_refresh,
         state.injector.clone(),
+        state.chat_hub.clone(),
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -2006,6 +2016,7 @@ async fn handle_socket_inner(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     injector: crate::inject::LiveSessionInjector,
+    chat_hub: ChatBroadcastHub,
 ) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
@@ -2062,6 +2073,7 @@ async fn handle_socket_inner(
         Arc::clone(&active_zone_outbound_registration_id),
     );
     let mut _zone_live_outbound_registration: Option<SharedZoneLiveOutboundRegistration> = None;
+    let mut chat_presence: Option<ChatPresence> = None;
     let (mut socket_inputs, _socket_reader_task, pending_socket_actions) = spawn_socket_reader(
         receiver,
         Arc::clone(&sender),
@@ -2093,6 +2105,14 @@ async fn handle_socket_inner(
                         continue;
                     }
                 };
+                let starts_game = matches!(
+                    &action,
+                    SessionAction::Packet(ClientPacket::StartGame { .. })
+                );
+                let leaves_world = matches!(
+                    &action,
+                    SessionAction::Packet(ClientPacket::Disconnect | ClientPacket::LogOut)
+                );
 
                 let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
                 let low_latency_action = is_low_latency_action(&action);
@@ -2205,6 +2225,9 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
+                if leaves_world || session.active_identity().is_none() {
+                    chat_presence = None;
+                }
                 drop(action_capacity_permit);
                 release_unclaimed_start_game_route_lease(
                     session_cache.as_ref(),
@@ -2271,6 +2294,13 @@ async fn handle_socket_inner(
                     let _ = send_error_message(&sender, &error).await;
                     return;
                 }
+                if starts_game
+                    && chat_presence.is_none()
+                    && session.active_identity().is_some()
+                    && session.zone_movement_ingress().is_some()
+                {
+                    chat_presence = Some(chat_hub.register(ChatProtocol::WebSocket));
+                }
                 if force_route_refresh || !low_latency_action {
                     update_background_route_refresh_record(
                         &background_route_refresh_record,
@@ -2280,6 +2310,19 @@ async fn handle_socket_inner(
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
                     runtime_tick.reset_after(duration);
+                }
+            }
+            broadcast = recv_optional_chat(&mut chat_presence) => {
+                match broadcast {
+                    Ok(packet) => {
+                        if send_server_packet(&sender, &packet).await.is_err() {
+                            return;
+                        }
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                        chat_presence = None;
+                    }
                 }
             }
             maybe_injection = inject_rx.recv() => {
@@ -6695,6 +6738,7 @@ mod tests {
         let state = super::WebState {
             config: Arc::new(config),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
@@ -6746,6 +6790,7 @@ mod tests {
         let state = super::WebState {
             config: Arc::new(crate::GatewayConfig::default()),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
@@ -6810,6 +6855,7 @@ mod tests {
         let state = super::WebState {
             config: Arc::new(crate::GatewayConfig::default()),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: cache,
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
@@ -8765,6 +8811,13 @@ mod tests {
     fn stage5_damage_equipment_browser_command_returns_dura_changed_event() {
         let mut session = crate::GatewaySession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let before_current_dura = session
+            .world_snapshot()
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == mir2_simulation::EquipmentSlot::Weapon)
+            .expect("starter weapon should be equipped")
+            .durability_current;
         let command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"stage5Command","action":"qa.damageEquipment","args":["weapon","2500"]}"#,
         )
@@ -8782,7 +8835,10 @@ mod tests {
 
         assert_eq!(event["packet"], "DuraChanged");
         assert_eq!(event["payload"]["uniqueId"], 0);
-        assert_eq!(event["payload"]["currentDura"], 0);
+        assert_eq!(
+            event["payload"]["currentDura"].as_u64(),
+            Some(u64::from(before_current_dura.saturating_sub(2_500)))
+        );
     }
 
     #[test]

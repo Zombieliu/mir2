@@ -30,6 +30,10 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import {
+  CrystalChatType,
+  type CrystalChatType as CrystalChatTypeValue,
+} from "../lib/crystal-chat-history";
+import {
   installDebugCapture,
   recordDebugEvent,
   setSnapshotContext,
@@ -194,6 +198,8 @@ type RuntimeModule = {
   getMir2RendererBackend?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
   setMir2EntityRenderState?: (snapshotJson: string) => void;
+  resolveMir2EntityAnimationPoses?: (snapshotJson: string) => string;
+  resetMir2EntityAnimations?: () => void;
   setMir2EntityRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
   setMir2MapRenderState?: (snapshotJson: string) => void;
   setMir2MapRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
@@ -259,6 +265,7 @@ type UiLogLine = {
   text: string;
   tone: UiLogTone;
   channel: UiLogChannel;
+  crystalChatType?: number;
 };
 
 type CrystalBootstrapChatLine = {
@@ -4706,14 +4713,15 @@ export default function HomePage() {
     text: string,
     tone: UiLogTone = "system",
     channel: UiLogChannel = defaultLogChannel(tone),
+    crystalChatType: CrystalChatTypeValue = crystalChatTypeForUiLog(tone, channel),
   ) {
     if (tone === "network") return;
 
     setLogs((current) =>
       [
-        createLogLine(text, tone, channel, locale),
+        createLogLine(text, tone, channel, crystalChatType),
         ...current,
-      ].slice(0, 24),
+      ].slice(0, 2048),
     );
   }
 
@@ -4730,10 +4738,10 @@ export default function HomePage() {
     setLogs((current) => {
       const seeded = [...overrideLines]
         .reverse()
-        .map((line) => createLogLine(line.text, line.tone, line.channel, locale));
+        .map((line) => createLogLine(line.text, line.tone, line.channel));
       // Capture-only parity mode: the URL parameter is a snapshot of Crystal's
       // visible chat slots, so mixing in startup packets creates false diffs.
-      return seeded.slice(0, 24);
+      return seeded.slice(0, 2048);
     });
   }
 
@@ -8249,6 +8257,7 @@ export default function HomePage() {
           stringOrFallback(payload.message, ""),
           gatewayChatTone(payload.chatType),
           gatewayChatChannel(payload.chatType),
+          gatewayCrystalChatType(payload.chatType),
         );
         break;
       case "ObjectChat":
@@ -8256,6 +8265,7 @@ export default function HomePage() {
           stringOrFallback(payload.text, ""),
           gatewayChatTone(payload.chatType),
           gatewayChatChannel(payload.chatType),
+          gatewayCrystalChatType(payload.chatType),
         );
         break;
       case "StorageUnlockResult": {
@@ -13290,17 +13300,14 @@ function createLogLine(
   text: string,
   tone: UiLogTone,
   channel: UiLogChannel,
-  locale: string,
+  crystalChatType: CrystalChatTypeValue = crystalChatTypeForUiLog(tone, channel),
 ): UiLogLine {
   return {
-    text: `[${new Date().toLocaleTimeString(locale)}] ${text}`,
+    text,
     tone,
     channel,
+    crystalChatType,
   };
-}
-
-function trimLogTimestamp(text: string) {
-  return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
 }
 
 function defaultLogChannel(tone: UiLogTone): UiLogChannel {
@@ -13354,6 +13361,75 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
 function gatewayChatTone(value: unknown): UiLogTone {
   const channel = gatewayChatChannel(value);
   return channel === "system" || channel === "hint" || channel === "announcement" ? "system" : "chat";
+}
+
+function gatewayCrystalChatType(value: unknown): CrystalChatTypeValue {
+  if (typeof value !== "string") return CrystalChatType.Normal;
+
+  switch (value.toLowerCase()) {
+    case "shout":
+      return CrystalChatType.Shout;
+    case "system":
+      return CrystalChatType.System;
+    case "hint":
+      return CrystalChatType.Hint;
+    case "announcement":
+      return CrystalChatType.Announcement;
+    case "group":
+      return CrystalChatType.Group;
+    case "whisperin":
+      return CrystalChatType.WhisperIn;
+    case "whisperout":
+      return CrystalChatType.WhisperOut;
+    case "guild":
+      return CrystalChatType.Guild;
+    case "trainer":
+      return CrystalChatType.Trainer;
+    case "levelup":
+      return CrystalChatType.LevelUp;
+    case "system2":
+      return CrystalChatType.System2;
+    case "relationship":
+      return CrystalChatType.Relationship;
+    case "mentor":
+      return CrystalChatType.Mentor;
+    case "shout2":
+      return CrystalChatType.Shout2;
+    case "shout3":
+      return CrystalChatType.Shout3;
+    case "linemessage":
+      return CrystalChatType.LineMessage;
+    default:
+      return CrystalChatType.Normal;
+  }
+}
+
+function crystalChatTypeForUiLog(tone: UiLogTone, channel: UiLogChannel): CrystalChatTypeValue {
+  switch (channel) {
+    case "shout":
+      return CrystalChatType.Shout;
+    case "whisper":
+      return CrystalChatType.WhisperIn;
+    case "group":
+      return CrystalChatType.Group;
+    case "guild":
+      return CrystalChatType.Guild;
+    case "mentor":
+      return CrystalChatType.Mentor;
+    case "relationship":
+      return CrystalChatType.Relationship;
+    case "hint":
+      return CrystalChatType.Hint;
+    case "line":
+      return CrystalChatType.LineMessage;
+    case "announcement":
+      return CrystalChatType.Announcement;
+    case "system":
+    case "server":
+      return CrystalChatType.System;
+    default:
+      return tone === "system" ? CrystalChatType.System : CrystalChatType.Normal;
+  }
 }
 
 function storageUnlockResultMessage(result: number, hasPassword: boolean) {

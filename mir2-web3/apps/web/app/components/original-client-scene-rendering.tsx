@@ -82,6 +82,8 @@ export {
   type ViewportOffset,
 } from "./original-client-scene-layout";
 import type {
+  CrystalEntityAnimationAction,
+  CrystalEntityAnimationPose,
   DisplayEntity,
   DisplayProjectile,
   DisplayQuest,
@@ -147,6 +149,7 @@ const ENTITY_ATLAS_PRELOAD_DIRECTIONS = [
 
 const ENTITY_ATLAS_PRELOAD_STATES: readonly EntitySpriteAnimationState[] = [
   "standing",
+  "harvesting",
   "walking",
   "running",
   "attackMelee",
@@ -181,8 +184,9 @@ export function buildViewportEntitySprite(
   animationState: EntitySpriteAnimationState,
   motionSnapshot?: EntityMotionSnapshot,
   presentationMotion?: BevyPresentationEntityMotion | null,
+  animationPose?: CrystalEntityAnimationPose | null,
 ): ViewportEntitySprite | null {
-  const sprite = resolvedEntitySprite(entity, libraries, animationState);
+  const sprite = resolvedEntitySprite(entity, libraries, animationState, animationPose?.action);
   if (!sprite) {
     return null;
   }
@@ -193,6 +197,7 @@ export function buildViewportEntitySprite(
     sprite,
     animationState,
     libraries[bodyLibraryKey],
+    animationPose?.action,
   );
   if (!animation) return null;
 
@@ -204,8 +209,10 @@ export function buildViewportEntitySprite(
     animation,
     motionSnapshot,
     presentationMotion,
+    animationPose,
   );
-  const presentationDirection = presentationMotion?.direction ?? entity.direction;
+  const presentationDirection =
+    animationPose?.direction ?? presentationMotion?.direction ?? entity.direction;
   const frameIndex =
     animation.frameBaseOffset +
     directionIndex(presentationDirection) * animation.directionStride +
@@ -232,6 +239,7 @@ export function buildViewportEntitySprite(
         { ...animation.effect, weaponFrameOffset: null },
         motionSnapshot,
         presentationMotion,
+        animationPose,
       )
     : 0;
   const effectFrameIndex = animation.effect
@@ -353,6 +361,7 @@ function resolvedEntitySprite(
   entity: DisplayEntity,
   libraries: Record<string, OriginalSceneSpriteLibraryMeta>,
   animationState: EntitySpriteAnimationState,
+  animationAction?: CrystalEntityAnimationAction,
 ): EntitySprite | null {
   const sprite = entity.sprite;
   if (!sprite) {
@@ -383,12 +392,13 @@ function resolvedEntitySprite(
   const spriteAltWeaponLibrarySecondary = sprite.altWeaponLibrarySecondary;
   const isArcherAlt = Boolean(spriteAltBodyLibrary?.startsWith("ARArmour/"));
   const isAssassinAlt = Boolean(spriteAltBodyLibrary?.startsWith("AArmour/"));
+  const attackAnimation = attackAnimationForCrystalAction(animationAction) ?? entity.attackAnimation;
 
   if (
     isArcherAlt &&
     (animationState === "walking" ||
       animationState === "running" ||
-      (animationState === "attackRange" && entity.attackAnimation !== "spell"))
+      (animationState === "attackRange" && attackAnimation !== "spell"))
   ) {
     const altWeaponLibrary =
       spriteAltWeaponLibrary && sceneLibraryExists(libraries, spriteAltWeaponLibrary)
@@ -645,7 +655,7 @@ function atlasPreloadAnimationsForEntity(
   // the current action made a turn, hit, or attack generate a new atlas key;
   // the 600 ms attack could finish before that asynchronous swap completed.
   const states: readonly EntitySpriteAnimationState[] =
-    entity.kind === "npc" ? ["standing"] : ENTITY_ATLAS_PRELOAD_STATES;
+    entity.kind === "npc" ? ["standing", "harvesting"] : ENTITY_ATLAS_PRELOAD_STATES;
   const animations = new Map<string, ViewportSpriteAnimationMeta>();
   const addAnimation = (animation: ViewportSpriteAnimationMeta | null) => {
     if (!animation) {
@@ -728,6 +738,7 @@ function spriteFrameCycleForEntity(
   animation: ViewportSpriteAnimationMeta,
   motionSnapshot?: EntityMotionSnapshot,
   presentationMotion?: BevyPresentationEntityMotion | null,
+  animationPose?: CrystalEntityAnimationPose | null,
 ) {
   const frameCount = Math.max(animation.frameCount, 1);
   if (frameCount <= 1) {
@@ -735,6 +746,13 @@ function spriteFrameCycleForEntity(
   }
 
   const frameIntervalMs = animation.frameIntervalMs ?? 100;
+  if (animationPose) {
+    const poseFrame = Math.min(
+      Math.max(Math.trunc(animationPose.logicalFrameIndex), 0),
+      frameCount - 1,
+    );
+    return animation.reverse ? frameCount - 1 - poseFrame : poseFrame;
+  }
   let cycle = sceneFrameIndex % frameCount;
 
   switch (animationState) {
@@ -824,13 +842,15 @@ function spriteAnimationMetaForEntity(
   sprite: EntitySprite,
   animationState: EntitySpriteAnimationState,
   bodyLibrary?: OriginalSceneSpriteLibraryMeta | null,
+  animationAction?: CrystalEntityAnimationAction,
 ): ViewportSpriteAnimationMeta | null {
+  const attackAnimation = attackAnimationForCrystalAction(animationAction) ?? entity.attackAnimation;
   if (entity.kind === "monster" || entity.kind === "npc") {
     const frameSetAnimation = crystalEntityAnimationMeta(
       bodyLibrary?.frameSet,
       animationState,
       sprite.frameBaseOffset,
-      entity.attackAnimation,
+      attackAnimation,
     );
     if (frameSetAnimation) {
       return { ...frameSetAnimation, weaponFrameOffset: null };
@@ -838,6 +858,15 @@ function spriteAnimationMetaForEntity(
   }
 
   if (entity.kind === "npc") {
+    if (animationState === "harvesting") {
+      return {
+        frameBaseOffset: sprite.frameBaseOffset + 12,
+        weaponFrameOffset: null,
+        frameCount: 10,
+        directionStride: 10,
+        frameIntervalMs: 200,
+      };
+    }
     return {
       frameBaseOffset: sprite.frameBaseOffset,
       weaponFrameOffset:
@@ -932,7 +961,7 @@ function spriteAnimationMetaForEntity(
     Boolean(sprite.bodyLibrary.startsWith("ARArmour/")) &&
     (animationState === "walking" ||
       animationState === "running" ||
-      (animationState === "attackRange" && entity.attackAnimation !== "spell"));
+      (animationState === "attackRange" && attackAnimation !== "spell"));
 
   switch (animationState) {
     case "walking":
@@ -942,18 +971,18 @@ function spriteAnimationMetaForEntity(
     case "attackMelee":
       return playerAnimationMetaForAction(
         sprite,
-        entity.attackAnimation === "melee2"
+        attackAnimation === "melee2"
           ? "attack2"
-          : entity.attackAnimation === "melee3"
+          : attackAnimation === "melee3"
             ? "attack3"
-            : entity.attackAnimation === "melee4"
+            : attackAnimation === "melee4"
               ? "attack4"
               : "attack1",
       );
     case "attackRange":
       return playerAnimationMetaForAction(
         sprite,
-        entity.attackAnimation === "spell" ? "spell" : "attackRange",
+        attackAnimation === "spell" ? "spell" : "attackRange",
       );
     case "struck":
       return playerAnimationMetaForAction(sprite, "struck");
@@ -965,6 +994,27 @@ function spriteAnimationMetaForEntity(
       return playerAnimationMetaForAction(sprite, "reviving");
     default:
       return playerAnimationMetaForAction(sprite, "standing");
+  }
+}
+
+function attackAnimationForCrystalAction(
+  action?: CrystalEntityAnimationAction,
+): DisplayEntity["attackAnimation"] | undefined {
+  switch (action) {
+    case "attack2":
+      return "melee2";
+    case "attack3":
+      return "melee3";
+    case "attack4":
+      return "melee4";
+    case "attackRange1":
+      return "range";
+    case "spell":
+      return "spell";
+    case "attack1":
+      return "melee1";
+    default:
+      return undefined;
   }
 }
 
@@ -1029,9 +1079,9 @@ export function entityQuestIconTopOffset(sprite: ViewportEntitySprite | null) {
 }
 
 export function entityNameplateLeftOffset(entity: DisplayEntity, sprite: ViewportEntitySprite | null) {
-  // Crystal centers player labels in a fixed 50px DisplayRectangle band and
-  // NPC/monster labels in a fixed 48px band, independent of sprite dimensions.
-  return entity.kind === "npc" || entity.kind === "monster" ? 24 : 25;
+  // The DOM node owns Crystal's fixed 48/50px DisplayRectangle. Keeping its
+  // left edge on the integer cell origin avoids percentage-centering at .5px.
+  return 0;
 }
 
 export function entityNameplateTopOffset(entity: DisplayEntity, sprite: ViewportEntitySprite | null) {

@@ -25,6 +25,7 @@ import { formatCrystalExperiencePercent } from "../../lib/extended-server-packet
 import { playOriginalSoundId } from "../../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import {
   handleSceneAssetImageError,
   handleSceneAssetImageLoad,
@@ -693,6 +694,12 @@ export function MainHud({
   const currentMp = world.playerMp ?? 0;
   const maxMp = world.playerMaxMp ?? 0;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+  const hpOnlyText = `HP ${currentHp}/${maxHp}`;
+  const hpOnlyGdiText = findCrystalGdiTextAsset({
+    text: hpOnlyText,
+    foreground: "#ffffff",
+    outline: true,
+  });
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs
     .slice(0, 2)
@@ -755,7 +762,11 @@ export function MainHud({
         </div>
 
         {hpOnlyOrb ? (
-          <div className="hud-health-only-label">{`HP ${currentHp}/${maxHp}`}</div>
+          <div className="hud-health-only-label">
+            {hpOnlyGdiText ? (
+              <CrystalGdiTextImage asset={hpOnlyGdiText} accessibleText={hpOnlyText} />
+            ) : hpOnlyText}
+          </div>
         ) : (
           <>
             <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>

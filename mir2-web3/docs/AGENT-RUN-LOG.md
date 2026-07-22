@@ -5992,3 +5992,55 @@ Remaining:
 
 - GDI font rasterization, deterministic chat text, roaming entity phase, and
   final human visual/feel acceptance.
+
+## 2026-07-23 - Final deterministic GDI/chat/animation Candidate
+
+Goal: close the final fixed-font, chat-state, and per-object animation-phase
+gaps while preserving movement, map transaction, combat, dual-backend, and
+full-resource gates.
+
+Implementation:
+
+- Added a reproducible Windows TextRenderer exporter with strict ARGB/hash
+  manifests and eight exact full-string Crystal acceptance assets. Exact keys
+  use the bitmap; arbitrary text remains accessible CSS fallback.
+- Replaced browser timestamp logs with Crystal's 17 chat types, colour table,
+  614px wrapping, four-line history, channel filters, and scroll semantics.
+- Added one shared Gateway TCP/WebSocket system-chat presence and scheduler for
+  five-minute online counts and ten-minute LineMessage announcements. All
+  capture overrides require a non-empty process QA control token.
+- Added a persistent Rust per-object animation state machine and WASM bridge for
+  seeded idle/harvest phases, FIFO actions, incarnation reuse, death, and revive.
+  Every renderer consumes the same resulting action/frame pose. Entering or
+  leaving the game screen resets the bridge so a same-character relog cannot
+  inherit an earlier session's action queue; in-game reconnects retain continuity.
+
+Evidence:
+
+- `cwp-20260723-r40-gdi-chat-final`: Bichon `0 @ 328,275`, light 1,
+  `bevy-e9d354eada933661`, automated Candidate 100%, world 89%, HUD UI 91%,
+  chat 84%, MiniMap 87%, 0 critical errors, and 0 non-favicon 404s.
+- `final-parity-r40` WebGPU and WebGL2 strict captures: four commands and four
+  authoritative ACKs, exact final positions, no jumps, rollback, route spam,
+  blackouts, failed assets, critical errors, or 404s.
+- `native-vs-current-r40`: four native/Web actions aligned over a 2700/2702ms
+  span, 4/4 bounded paired-frame artifacts emitted, automated status `ok`.
+- Full frontend logic and TypeScript pass; Bevy runtime tests pass 126/126;
+  focused Gateway system-chat tests pass 5/5; both runtime backend smoke paths
+  pass all assertions.
+- Full Gateway library regression passes 307/307 in 1679.68s. The first run
+  exposed one stale hard-coded durability expectation; the test now derives its
+  expected result from the equipped weapon's pre-command durability while the
+  production saturating-subtraction behavior remains unchanged.
+- Windows GDI self-test passes eight exact assets across two byte-identical
+  exports and rejects all eight invalid/path-safety fixtures.
+- Resource loading hashes 39,409 public assets. Full-pack verification passes
+  1,440 libraries, 4,446 unique pages, 1,869,869 drawable frames, and content
+  hash `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`.
+
+Outcome:
+
+- The implementation is 100% automated Candidate for the deterministic scene.
+  The only remaining gate is explicit human `Accepted`; independent actor,
+  random animation/effect, and compositor phases prevent an honest bit-perfect
+  raw full-window claim.

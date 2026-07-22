@@ -27,6 +27,7 @@ const DEFAULT_PASSWORD = "Mir2test1";
 const DEFAULT_MAP = "0";
 const DEFAULT_X = 149;
 const DEFAULT_Y = 411;
+const DEFAULT_CRYSTAL_ANIMATION_SEED = 0x4352_5953;
 
 const args = parseArgs(process.argv.slice(2));
 const prefix = args.prefix ?? `crystal-web-pack-${timestamp()}`;
@@ -44,6 +45,10 @@ const characterName = args.characterName ?? account;
 const map = args.map ?? DEFAULT_MAP;
 const x = numberArg(args.x, DEFAULT_X);
 const y = numberArg(args.y, DEFAULT_Y);
+const crystalAnimationSeed = numberArg(
+  args.crystalAnimationSeed ?? process.env.MIR2_CRYSTAL_ANIMATION_SEED,
+  DEFAULT_CRYSTAL_ANIMATION_SEED,
+);
 const originalDurationMs = numberArg(args.originalDurationMs, 250);
 const originalSampleMs = numberArg(args.originalSampleMs, 50);
 const windowTitlePattern = args.windowTitlePattern ?? "*Legend of Mir 2*";
@@ -512,6 +517,9 @@ function buildWebBaseUrl() {
   }
   if (!url.searchParams.has("cacheDebug")) {
     url.searchParams.set("cacheDebug", "0");
+  }
+  if (!url.searchParams.has("crystalAnimationSeed")) {
+    url.searchParams.set("crystalAnimationSeed", String(crystalAnimationSeed >>> 0));
   }
   return url.toString();
 }

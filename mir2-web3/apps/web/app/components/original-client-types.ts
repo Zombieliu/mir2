@@ -49,6 +49,7 @@ export type EntitySprite = {
 
 export type EntitySpriteAnimationState =
   | "standing"
+  | "harvesting"
   | "walking"
   | "running"
   | "attackMelee"
@@ -57,6 +58,32 @@ export type EntitySpriteAnimationState =
   | "dying"
   | "dead"
   | "reviving";
+
+export type CrystalEntityAnimationAction =
+  | "standing"
+  | "harvest"
+  | "walking"
+  | "running"
+  | "attack1"
+  | "attack2"
+  | "attack3"
+  | "attack4"
+  | "attackRange1"
+  | "spell"
+  | "struck"
+  | "die"
+  | "dead"
+  | "revive";
+
+export type CrystalEntityAnimationPose = {
+  objectId: string;
+  incarnation: number;
+  animationState: EntitySpriteAnimationState;
+  action: CrystalEntityAnimationAction;
+  direction: string;
+  logicalFrameIndex: number;
+  queueDepth: number;
+};
 
 export type EntityMotionSnapshot = {
   fromX: number;
@@ -258,6 +285,7 @@ export type DisplayNpcDialog = {
 export type DisplayLogLine = {
   text: string;
   tone: "chat" | "system" | "network";
+  crystalChatType?: number;
   channel:
     | "normal"
     | "shout"

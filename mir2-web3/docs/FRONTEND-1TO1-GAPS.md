@@ -1,6 +1,33 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
+
+> 2026-07-23 final deterministic frontend Candidate closure: the remaining
+> fixed-font, chat-history, and actor-phase work is implemented. Eight exact
+> Crystal acceptance strings are exported through Windows TextRenderer at Arial
+> 8pt/96 DPI with source-accurate outline/background semantics and verified ARGB
+> hashes; dynamic text uses the normal accessible renderer unless its complete
+> key matches. Chat renders the original 17 types/colours, 614px wrapping,
+> four-line history, filters and scroll position with no timestamps, driven by
+> real shared Gateway broadcasts instead of capture-only startup strings.
+> Persistent Rust animation state now owns each object's incarnation, seeded
+> idle/harvest phase, FIFO action queue, death and revive lifecycle, and supplies
+> one pose to the Bevy/WebGL2/DOM presentation paths. Game-screen lifecycle
+> transitions reset the bridge so relogging cannot reuse a prior action queue,
+> while an in-game network reconnect preserves visual continuity.
+>
+> Evidence `cwp-20260723-r40-gdi-chat-final` at Bichon `0 @ 328,275`, light 1,
+> runtime `bevy-e9d354eada933661`, is 100% automated Candidate with 0 critical
+> console errors and 0 non-favicon 404s. It records 6 exact GDI nodes, 12 Rust
+> animation poses, the real `Online/LineMessage/Online/Online` four-line state,
+> 89% world similarity, 88% full HUD, 91% HUD UI, 84% chat, and 87% MiniMap.
+> Strict current WebGPU and WebGL2 movement captures remain clean, and the
+> native/current-Web four-action report aligns all actions and emits 4/4 frame
+> pairs. No automated P0/P1 frontend gap remains for this scene. The only open
+> item is final human **Accepted** visual/feel review; 24% full-window and 26%
+> world thresholded pixel change still includes different roaming actor
+> positions, idle/effect sampling, and compositor output, so it is not described
+> as bit-for-bit identity or as a movement defect.
 
 > 2026-07-22 reproducible developer-handoff closure: the root repository now
 > pins the maintained Crystal fork/branch, includes Windows bootstrap/start/
