@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "key": "entity-assistant-jane",
+      "text": "Assistant Jane",
+      "foreground": "#FF00FF00",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["HorizontalCenter"],
+      "size": { "width": 50, "height": 15 }
+    },
+    {
+      "key": "entity-merchant-ruben-multiline",
+      "text": "Merchant\r\nRuben",
+      "foreground": "#FF00FF00",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["HorizontalCenter", "WordBreak"],
+      "size": { "width": 54, "height": 32 }
+    },
+    {
+      "key": "hud-hp",
+      "text": "HP 51/51",
+      "foreground": "#FFFFFFFF",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["WordBreak"],
+      "size": "auto"
+    },
+    {
+      "key": "minimap-coordinate",
+      "text": "328, 275",
+      "foreground": "#FFFFFFFF",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["HorizontalCenter", "VerticalCenter"],
+      "size": { "width": 55, "height": 15 }
+    },
+    {
+      "key": "chat-online-players",
+      "text": "Online Players: 1",
+      "foreground": "#FF006400",
+      "background": "#FFFFFFFF",
+      "outline": false,
+      "drawFormat": ["WordBreak"],
+      "size": "auto"
+    },
+    {
+      "key": "chat-line-message-net-8",
+      "text": "Now in Net.8",
+      "foreground": "#FFFFFFFF",
+      "background": "#FF0000FF",
+      "outline": false,
+      "drawFormat": ["WordBreak"],
+      "size": "auto"
+    },
+    {
+      "key": "chat-system-error",
+      "text": "Connection failed.",
+      "foreground": "#FFFFFFFF",
+      "background": "#FFFF0000",
+      "outline": false,
+      "drawFormat": ["WordBreak"],
+      "size": "auto"
+    },
+    {
+      "key": "pt-br-accents",
+      "text": "Poção, bênção, ação, coração, missão, você",
+      "foreground": "#FFFFFF00",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["WordBreak", "NoPrefix"],
+      "size": "auto"
+    }
+  ]
+}

@@ -1666,6 +1666,10 @@ async function readState(client) {
           iconSrc: node.querySelector(".belt-item-icon")?.getAttribute("src") ?? null,
         };
       });
+      const gdiTextNodes = Array.from(document.querySelectorAll("[data-crystal-gdi-text]"));
+      const animationPoseNodes = Array.from(
+        document.querySelectorAll("[data-object-id][data-animation-action]"),
+      );
       return {
         screen: state.screen ?? null,
         mapFileName: state.mapFileName ?? null,
@@ -1707,6 +1711,26 @@ async function readState(client) {
         bevyMapRenderer,
         bevyEntityRenderer,
         bevyRuntime,
+        crystalGdiText: {
+          count: gdiTextNodes.length,
+          assets: gdiTextNodes.slice(0, 64).map((node) => ({
+            key: node.getAttribute("data-crystal-gdi-text"),
+            text: node.textContent?.trim() ?? "",
+            imageSrc: node.querySelector("img")?.getAttribute("src") ?? null,
+            rect: rect(node.getBoundingClientRect()),
+          })),
+        },
+        entityAnimationRuntime: {
+          resolverAvailable:
+            typeof window.__mir2BevyRuntime?.resolveMir2EntityAnimationPoses === "function",
+          poseCount: animationPoseNodes.length,
+          poses: animationPoseNodes.slice(0, 64).map((node) => ({
+            objectId: node.getAttribute("data-object-id"),
+            action: node.getAttribute("data-animation-action"),
+            frame: node.getAttribute("data-animation-frame"),
+            incarnation: node.getAttribute("data-animation-incarnation"),
+          })),
+        },
         hudHealthOnlyLabel: hudHealthOnlyLabel?.textContent ?? null,
         logs: state.logs ?? [],
         transitionOverlayVisible: Boolean(document.querySelector(".login-transition-overlay")),

@@ -17,6 +17,7 @@ import { ORIGINAL_UI } from "../../lib/original-ui";
 import { CRYSTAL_BIG_MAP_NPCS } from "../../lib/generated/crystal-npc-info-data";
 import miniMapMeta from "../../public/original-ui/MMap/meta.json";
 import { SpriteButton } from "./original-client-overlays";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import {
   handleSceneAssetImageError,
   handleSceneAssetImageLoad,
@@ -293,6 +294,14 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
   const panelFrame = smallMode ? ORIGINAL_UI.game.miniMapSmall : ORIGINAL_UI.game.miniMap;
   const mapTitle = crystalMiniMapTitle(world.mapTitle, t);
   const lightIcon = crystalMiniMapLightIcon(world.lightSetting);
+  const coordinateText = player ? `${player.x}, ${player.y}` : "0, 0";
+  const coordinateGdiText = findCrystalGdiTextAsset({
+    text: coordinateText,
+    foreground: "#ffffff",
+    outline: true,
+    width: 55,
+    height: 15,
+  });
 
   useEffect(() => {
     if (hasRasterMiniMap) {
@@ -319,7 +328,11 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
       {!smallMode ? <div className="mini-map-name">
         <span>{mapTitle}</span>
       </div> : null}
-      <div className="mini-map-coords">{player ? `${player.x}, ${player.y}` : "0, 0"}</div>
+      <div className="mini-map-coords">
+        {coordinateGdiText ? (
+          <CrystalGdiTextImage asset={coordinateGdiText} accessibleText={coordinateText} />
+        ) : coordinateText}
+      </div>
       <div className="mini-map-button mail">
         <SpriteButton
           sprite={ORIGINAL_UI.game.miniMapButtons.mail}

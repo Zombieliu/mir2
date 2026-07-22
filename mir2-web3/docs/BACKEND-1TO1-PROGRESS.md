@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> Latest Crystal system-chat parity sync: 2026-07-23 adds one shared Gateway
+> scheduler for native TCP and WebSocket sessions. Presence begins only after a
+> successful StartGame/Zone join and is removed by LogOut, Disconnect, socket
+> close, or RAII drop. Production emits `ChatType::Hint` online-count packets
+> every five minutes and `ChatType::LineMessage` announcements every ten
+> minutes, loading the original `LineMessage.txt` when available with a bounded
+> built-in fallback. Accelerated intervals, a fixed line, and packet limits are
+> ignored unless the Gateway process has a non-empty QA control token, so normal
+> clients cannot activate capture behavior. Focused scheduler, shared TCP/WS,
+> lifecycle, and fail-closed configuration tests pass 5/5, and the complete
+> Gateway library regression passes 307/307; Web packet rendering consumes the
+> resulting real chat types. This closes the final deterministic
+> chat-state dependency for visual Candidate without changing Zone movement,
+> combat, save, or account authority.
+
 > Latest source-verified monster-defence sync: 2026-07-22 corrects the player
 > mitigation channel for Crystal AI 26 ShamanZombie and AI 181 WaterDragon /
 > Hydra. ShamanZombie `LineAttack` always uses `MACAgility`; WaterDragon uses

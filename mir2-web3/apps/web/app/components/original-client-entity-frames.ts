@@ -73,6 +73,8 @@ function actionNamesForState(
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range" | "spell",
 ) {
   switch (animationState) {
+    case "harvesting":
+      return ["Harvest", "Standing"];
     case "walking":
       return ["Walking", "Standing"];
     case "running":

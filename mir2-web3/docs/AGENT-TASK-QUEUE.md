@@ -1,5 +1,33 @@
 # Agent Task Queue
 
+> Latest final deterministic presentation closure: 2026-07-23. The maintained
+> Web client now has a Rust-owned per-object animation state machine with
+> persistent incarnation, FIFO action, death/revive, seeded idle, and Crystal
+> NPC harvest phases; TypeScript consumes one pose result for every entity
+> renderer instead of restarting animation from React snapshots. Chat now keeps
+> Crystal's 17 channel types, colours, 614px wrapping, four-line history and
+> scroll/filter semantics without browser timestamps. TCP and WebSocket clients
+> share the production 5-minute `Online Players` and 10-minute `LineMessage`
+> scheduler; all accelerated/fixed capture controls fail closed unless the
+> Gateway has a non-empty QA control token. Eight fixed acceptance strings use
+> reproducible Windows GDI raster assets, while arbitrary runtime text retains
+> an accessible CSS fallback rather than pretending to be exact GDI.
+>
+> Same-scene r40 at Bichon `0 @ 328,275`, light 1, runtime
+> `bevy-e9d354eada933661` is automated **100% Candidate**: runtime/layout/entity/
+> pixel gates are 100%, world similarity is 89%, HUD UI 91%, chat 84%, MiniMap
+> 87%, with zero critical console errors and zero non-favicon 404s. The current
+> four-left-step WebGPU capture has 4/4 commands and ACKs, exact final delta
+> `(-4,0)`, 320/320 local-pose comparisons, and no jump, rollback, route spam,
+> or interaction pollution; the native/Web temporal report aligns all four
+> actions and emits four bounded frame pairs. Forced WebGPU and WebGL2 runtime
+> gates pass, all 1,440 full-pack libraries / 4,446 unique pages verify, and the
+> final Gateway library regression passes 307/307.
+> There is no remaining automated P0/P1 implementation item in this final
+> deterministic scene. The sole queue item is a human **Accepted** visual/feel
+> decision; roaming actor composition and sampled animation/effect phase mean
+> raw full-window pixels are intentionally not claimed as bit-identical.
+
 > Latest reproducible developer-handoff sync: 2026-07-22. The root clone path,
 > maintained Crystal fork/branch, Node 22/Rust 1.89 bootstrap, Gateway/Web
 > startup, verification suite, and private full-asset installation are now
@@ -4206,4 +4234,5 @@ R248 completed the previously blocked R39 data-import follow-up on Windows. The 
 | [x] | Camera/HUD/light/minimap normalization slice | Dawn full/world changed pixels fell from `36.4%/40.2%` to `24.2%/26.1%`; Night remains `12.5%/12.6%`. |
 | [x] | Visual parity regression gates | Connected-handshake, stale-socket, secret-redaction, cursor-parking, HUD metric, minimap, Rust AI/light, and dual-backend tests are green. Final headed WebGPU and WebGL2 runs each pass 28/28 strict movement/map assertions. |
 | [x] | Captured Bichon source-frame closure | Commit the 555 deterministic missing map PNGs; generated map-atlas output stays ignored. |
-| [ ] | GDI text and deterministic dynamic-state pass | Replace browser typography where pixel-level value justifies it; normalize chat fixture and roaming entity phase before final human review. |
+| [x] | GDI text and deterministic dynamic-state pass | r40 adds exact-key Windows GDI assets, Crystal four-line chat state, shared TCP/Web system-chat scheduling, and persistent seeded per-object animation phases; WebGPU/WebGL2 and temporal gates are green. |
+| [ ] | Final human visual/feel Accepted decision | Automated status is 100% Candidate. Compare the r40 native/Web pair and live windowed clients; do not reinterpret independent roaming actors, random particles, or compositor sampling as a deterministic implementation defect. |

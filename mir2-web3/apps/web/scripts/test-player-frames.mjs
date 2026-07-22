@@ -159,8 +159,8 @@ assert.match(
 );
 assert.match(
   renderingSource,
-  /entity\.kind === "npc" \|\| entity\.kind === "monster" \? 24 : 25/,
-  "nameplates must use Crystal's fixed 48/50px DisplayRectangle centers",
+  /entityNameplateLeftOffset[\s\S]*?return 0;/,
+  "nameplates must anchor Crystal's fixed DisplayRectangle on an integer cell origin",
 );
 assert.match(
   renderingSource,
@@ -174,8 +174,13 @@ assert.match(
 );
 assert.match(
   globalCssSource,
-  /\.entity-nameplate \{[\s\S]*transform: translate\(-50%, 0\);/,
-  "nameplate top coordinates must not receive a second label-height translation",
+  /\.entity-nameplate \{[\s\S]*?width: 50px;[\s\S]*?transform: none;/,
+  "player nameplates must own Crystal's fixed 50px DisplayRectangle without fractional transforms",
+);
+assert.match(
+  globalCssSource,
+  /\.entity-nameplate\.npc,[\s\S]*?\.entity-nameplate\.monster \{[\s\S]*?width: 48px;/,
+  "NPC and monster nameplates must own Crystal's fixed 48px DisplayRectangle",
 );
 assert.match(
   renderingSource,
@@ -205,6 +210,11 @@ assert.match(
   shellSource,
   /addLayer\(sprite\.mount\)/,
   "the current mount frame must enter the packed Bevy atlas",
+);
+assert.match(
+  shellSource,
+  /previousScreen === "game" \|\| screen === "game"[\s\S]*?resetMir2EntityAnimations/,
+  "entering or leaving the game screen must discard animation state from the prior session",
 );
 assert.match(
   renderingSource,

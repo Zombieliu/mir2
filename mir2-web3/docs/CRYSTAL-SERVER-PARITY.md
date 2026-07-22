@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> Latest timed system-chat server parity note: 2026-07-23 models Crystal's
+> process-wide `Online Players` and `LineMessage` cadence in Gateway rather than
+> synthesizing fixed browser text. TCP and WebSocket players share one online
+> count, register only after StartGame reaches an active Zone, and unregister on
+> every world/socket exit path. The scheduler emits Hint at five-minute and
+> LineMessage at ten-minute production intervals, reads the original line file
+> when present, and uses deterministic tests for ordering and lifecycle. QA-only
+> interval/fixed-line/packet-limit overrides fail closed without a configured
+> control token. Five focused tests and the full Gateway 307/307 regression pass.
+> This is presentation/system-message
+> parity only; it does not bypass the existing authenticated Session and shared
+> Zone command boundaries.
+
 > Latest monster defence-type parity note: 2026-07-22 follows the original
 > ShamanZombie and WaterDragon server classes instead of inferring every defence
 > channel from range. AI 26 uses `MACAgility` even beside the player; AI 181 uses

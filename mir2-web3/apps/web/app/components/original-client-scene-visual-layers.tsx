@@ -12,6 +12,7 @@ import {
   sceneEffectAnimationAssetUrls,
 } from "../../lib/scene-effect-runtime";
 import { originalItemIconPath } from "./original-client-inventory-utils";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import {
   collectViewportFallbackVfx,
   fallbackVfxStyle,
@@ -19,6 +20,7 @@ import {
   type FallbackVfx,
 } from "../../lib/vfx-fallback";
 import type {
+  CrystalEntityAnimationPose,
   DisplayEntity,
   DisplayProjectile,
   DisplayWorld,
@@ -83,6 +85,7 @@ type ViewportProjectile = DisplayProjectile & {
 
 type ViewportEntitySpriteEntry = {
   entity: DisplayEntity & { dx: number; dy: number };
+  animationPose?: CrystalEntityAnimationPose | null;
   sprite: ViewportEntitySprite | null;
 };
 
@@ -1054,7 +1057,7 @@ function OriginalClientSceneVisualLayersInner({
         className={`viewport-entity-overlay ${screen !== "game" ? "hidden" : ""}`}
       >
         {player
-          ? viewportEntitySprites.map(({ entity, sprite }) => {
+          ? viewportEntitySprites.map(({ entity, animationPose, sprite }) => {
               const isPlayer = player.objectId === entity.objectId;
               const isInteractiveEntity = !isPlayer;
               // Imperative path: the driver writes the sub-tile glide onto this
@@ -1065,6 +1068,24 @@ function OriginalClientSceneVisualLayersInner({
                   : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
               const labelLines = entityDisplayLabelLines(entity);
+              const labelText = labelLines.map((line) => line.text).join("\r\n");
+              const labelColour = entityNameplateColor(entity);
+              const entityGdiText = entity.dead
+                ? null
+                : findCrystalGdiTextAsset({
+                    text: labelText,
+                    foreground: labelColour,
+                    outline: true,
+                    width: labelLines.length > 1 ? 54 : 50,
+                    height: labelLines.length > 1 ? 32 : 15,
+                  }) ??
+                  findCrystalGdiTextAsset({
+                    text: entity.name.replace(/_/g, " "),
+                    foreground: labelColour,
+                    outline: true,
+                    width: 50,
+                    height: 15,
+                  });
               const healthRatio =
                 isPlayer && entity.hp !== undefined && entity.maxHp
                   ? ratio(entity.hp, entity.maxHp)
@@ -1100,10 +1121,13 @@ function OriginalClientSceneVisualLayersInner({
                     style={{
                       left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityNameplateLeftOffset(entity, sprite)}px`,
                       top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
-                      "--entity-name-color": entityNameplateColor(entity),
+                      "--entity-name-color": labelColour,
                     } as CSSProperties}
                     data-ui-interactive={isInteractiveEntity ? "true" : "false"}
                     data-object-id={entity.objectId}
+                    data-animation-action={animationPose?.action}
+                    data-animation-frame={animationPose?.logicalFrameIndex}
+                    data-animation-incarnation={animationPose?.incarnation}
                     tabIndex={isInteractiveEntity ? undefined : -1}
                     onMouseDown={
                       isInteractiveEntity
@@ -1126,18 +1150,24 @@ function OriginalClientSceneVisualLayersInner({
                         : undefined
                     }
                   >
-                    {labelLines.map((line, index) => (
-                      <strong
-                        key={`${entity.objectId}-label-${index}`}
-                        className={
-                          line.role === "secondary" && entity.kind === "npc"
-                            ? "entity-subname"
-                            : undefined
-                        }
-                      >
-                        {line.text}
-                      </strong>
-                    ))}
+                    {entityGdiText ? (
+                      <CrystalGdiTextImage
+                        asset={entityGdiText}
+                        className="entity-nameplate-gdi"
+                        accessibleText={labelLines.map((line) => line.text).join(" ")}
+                      />
+                    ) : labelLines.map((line, index) => (
+                        <strong
+                          key={`${entity.objectId}-label-${index}`}
+                          className={
+                            line.role === "secondary" && entity.kind === "npc"
+                              ? "entity-subname"
+                              : undefined
+                          }
+                        >
+                          {line.text}
+                        </strong>
+                      ))}
                     {entity.dead ? (
                       <strong className="entity-state-label">{t("ui.dead")}</strong>
                     ) : null}
