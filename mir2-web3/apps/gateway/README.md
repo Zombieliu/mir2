@@ -81,6 +81,10 @@ Account-store runtime policy:
   simulation steps can be isolated from lightweight HTTP health scheduling.
 - production/staging Passkey and wallet login also requires
   `MIR2_PASSKEY_AUTH_SECRET`.
+- Zone placement can be loaded from `MIR2_ZONE_TOPOLOGY_FILE` or
+  `MIR2_ZONE_TOPOLOGY_JSON`; see `config/zone-topology.example.json`. Explicit
+  groups share quiet maps, while unlisted maps receive a dedicated Zone and
+  every Zone owns its configured tick cadence.
 
 Admin runtime read endpoints:
 

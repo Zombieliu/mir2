@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{
     mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TrySendError},
     Arc, Mutex,
@@ -2765,6 +2766,8 @@ pub struct SharedInProcessZoneRuntimeFactory {
     zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
+    default_tick_cadence: Duration,
+    tick_cadences: Arc<BTreeMap<ZoneId, Duration>>,
 }
 
 impl SharedInProcessZoneRuntimeFactory {
@@ -2773,6 +2776,31 @@ impl SharedInProcessZoneRuntimeFactory {
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service: Arc::new(InProcessAccountInventoryService::new()),
             npc_world_service: Arc::new(InProcessNpcWorldService),
+            default_tick_cadence: Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
+            tick_cadences: Arc::new(BTreeMap::new()),
+        }
+    }
+
+    pub fn with_tick_cadences(
+        default_tick_cadence: Duration,
+        tick_cadences: BTreeMap<ZoneId, Duration>,
+    ) -> Self {
+        Self {
+            zones: Arc::new(Mutex::new(BTreeMap::new())),
+            account_inventory_service: Arc::new(InProcessAccountInventoryService::new()),
+            npc_world_service: Arc::new(InProcessNpcWorldService),
+            default_tick_cadence: default_tick_cadence.max(Duration::from_millis(1)),
+            tick_cadences: Arc::new(tick_cadences),
+        }
+    }
+
+    pub fn fresh(&self) -> Self {
+        Self {
+            zones: Arc::new(Mutex::new(BTreeMap::new())),
+            account_inventory_service: self.account_inventory_service.clone(),
+            npc_world_service: self.npc_world_service.clone(),
+            default_tick_cadence: self.default_tick_cadence,
+            tick_cadences: self.tick_cadences.clone(),
         }
     }
 
@@ -2783,6 +2811,8 @@ impl SharedInProcessZoneRuntimeFactory {
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service,
             npc_world_service: Arc::new(InProcessNpcWorldService),
+            default_tick_cadence: Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
+            tick_cadences: Arc::new(BTreeMap::new()),
         }
     }
 
@@ -2794,16 +2824,39 @@ impl SharedInProcessZoneRuntimeFactory {
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service,
             npc_world_service,
+            default_tick_cadence: Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
+            tick_cadences: Arc::new(BTreeMap::new()),
         }
     }
 
     fn resources_for_zone(&self, zone_id: &ZoneId) -> SharedInProcessZoneResources {
+        let cadence = self
+            .tick_cadences
+            .get(zone_id)
+            .copied()
+            .unwrap_or(self.default_tick_cadence);
         self.zones
             .lock()
             .expect("shared zone factory mutex should not be poisoned")
             .entry(zone_id.clone())
-            .or_insert_with(|| SharedInProcessZoneResources::new(zone_id))
+            .or_insert_with(|| SharedInProcessZoneResources::new(zone_id, cadence))
             .clone()
+    }
+
+    pub fn active_zone_count(&self) -> usize {
+        self.zones
+            .lock()
+            .map(|zones| zones.len())
+            .unwrap_or_default()
+    }
+
+    pub fn zone_tick_count(&self, zone_id: &ZoneId) -> u64 {
+        self.zones
+            .lock()
+            .ok()
+            .and_then(|zones| zones.get(zone_id).cloned())
+            .map(|resources| resources.tick_count.load(Ordering::Acquire))
+            .unwrap_or_default()
     }
 }
 
@@ -3937,15 +3990,23 @@ impl fmt::Debug for SharedZoneMovementIngress {
 struct SharedInProcessZoneResources {
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     movement_sender: SyncSender<SharedZoneMovementRequest>,
+    tick_count: Arc<AtomicU64>,
 }
 
 impl SharedInProcessZoneResources {
-    fn new(zone_id: &ZoneId) -> Self {
+    fn new(zone_id: &ZoneId, cadence: Duration) -> Self {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
-        let movement_sender = spawn_shared_zone_owner(zone_id, zone_state.clone());
+        let tick_count = Arc::new(AtomicU64::new(0));
+        let movement_sender = spawn_shared_zone_owner_with_cadence_and_counter(
+            zone_id,
+            zone_state.clone(),
+            cadence,
+            tick_count.clone(),
+        );
         Self {
             zone_state,
             movement_sender,
+            tick_count,
         }
     }
 }
@@ -3956,6 +4017,7 @@ impl fmt::Debug for SharedInProcessZoneResources {
             .debug_struct("SharedInProcessZoneResources")
             .field("zone_state", &"SharedInProcessZoneState")
             .field("movement_sender", &"SyncSender")
+            .field("tick_count", &self.tick_count.load(Ordering::Relaxed))
             .finish()
     }
 }
@@ -3967,26 +4029,30 @@ struct SharedZoneMovementExecution {
     outcome: WorldCommandOutcome,
 }
 
-fn spawn_shared_zone_owner(
-    zone_id: &ZoneId,
-    zone_state: Arc<Mutex<SharedInProcessZoneState>>,
-) -> SyncSender<SharedZoneMovementRequest> {
-    spawn_shared_zone_owner_with_cadence(
-        zone_id,
-        zone_state,
-        Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
-    )
-}
-
+#[cfg(test)]
 fn spawn_shared_zone_owner_with_cadence(
     zone_id: &ZoneId,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     cadence: Duration,
 ) -> SyncSender<SharedZoneMovementRequest> {
+    spawn_shared_zone_owner_with_cadence_and_counter(
+        zone_id,
+        zone_state,
+        cadence,
+        Arc::new(AtomicU64::new(0)),
+    )
+}
+
+fn spawn_shared_zone_owner_with_cadence_and_counter(
+    zone_id: &ZoneId,
+    zone_state: Arc<Mutex<SharedInProcessZoneState>>,
+    cadence: Duration,
+    tick_count: Arc<AtomicU64>,
+) -> SyncSender<SharedZoneMovementRequest> {
     let (movement_sender, movement_receiver) = sync_channel(SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY);
     thread::Builder::new()
         .name(format!("mir2-zone-owner-{}", zone_id.as_str()))
-        .spawn(move || shared_zone_owner_loop(zone_state, movement_receiver, cadence))
+        .spawn(move || shared_zone_owner_loop(zone_state, movement_receiver, cadence, tick_count))
         .expect("shared zone owner thread should start");
     movement_sender
 }
@@ -3995,6 +4061,7 @@ fn shared_zone_owner_loop(
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     movement_receiver: Receiver<SharedZoneMovementRequest>,
     cadence: Duration,
+    tick_count: Arc<AtomicU64>,
 ) {
     let cadence = cadence.max(Duration::from_millis(1));
     let mut next_tick = Instant::now() + cadence;
@@ -4005,6 +4072,7 @@ fn shared_zone_owner_loop(
                 eprintln!("shared zone cadence stopped: {error}");
                 return;
             }
+            tick_count.fetch_add(1, Ordering::Release);
             // Coalesce a late tick instead of replaying a burst of stale ticks.
             next_tick = Instant::now() + cadence;
             continue;
@@ -10752,6 +10820,7 @@ mod tests {
                 super::SharedInProcessZoneResources {
                     zone_state,
                     movement_sender,
+                    tick_count: Arc::new(std::sync::atomic::AtomicU64::new(0)),
                 },
             );
         let resources = factory.resources_for_zone(&zone_id);
