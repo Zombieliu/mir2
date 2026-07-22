@@ -47,6 +47,7 @@
 
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -601,6 +602,14 @@ function printDryRunTable(sources) {
  *   - Worktrees without a local node_modules (main checkout has the modules)
  */
 async function resolveSharp() {
+  // Sharp 0.35 moved its public entry point from lib/index.js to dist/index.cjs.
+  // Resolve through the package exports map first so both layouts work.
+  try {
+    return createRequire(path.join(WEB_ROOT, "package.json")).resolve("sharp");
+  } catch {
+    // Keep the ancestor walk for hoisted/worktree installations that do not expose
+    // a resolver-visible package from the web app's package boundary.
+  }
   let dir = WEB_ROOT;
   // eslint-disable-next-line no-constant-condition
   while (true) {
