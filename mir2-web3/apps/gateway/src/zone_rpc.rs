@@ -25,8 +25,9 @@ use crate::routing::{
     ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport, ZoneRuntimeFactory,
 };
 use crate::GatewayConfig;
+use crate::ZonePlacementLease;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 3;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 4;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -86,8 +87,14 @@ impl ZoneRpcLimits {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ZoneHostHealth {
+    pub host_id: String,
     pub process_id: u32,
     pub session_count: usize,
+    pub active_connections: usize,
+    pub session_capacity: usize,
+    pub zone_count: usize,
+    pub zone_capacity: usize,
+    pub draining: bool,
     pub protocol_version: u16,
 }
 
@@ -220,6 +227,21 @@ impl TcpZoneOwnerRpcTransport {
         })
     }
 
+    pub fn with_placement(
+        placement: &ZonePlacementLease,
+        session_id: impl Into<String>,
+        auth_token: Option<String>,
+        limits: ZoneRpcLimits,
+    ) -> Result<Self, String> {
+        Self::with_endpoints(
+            placement.endpoints(),
+            placement.zone_id.clone(),
+            session_id,
+            auth_token,
+            limits,
+        )
+    }
+
     pub fn from_env(zone_id: ZoneId) -> Option<Self> {
         let addresses = std::env::var("MIR2_ZONE_HOST_ADDRS")
             .ok()
@@ -257,12 +279,24 @@ impl TcpZoneOwnerRpcTransport {
     pub fn health(&self) -> Result<ZoneHostHealth, String> {
         match self.call(ZoneRpcRequest::Health)? {
             ZoneRpcPayload::Health {
+                host_id,
                 process_id,
                 session_count,
+                active_connections,
+                session_capacity,
+                zone_count,
+                zone_capacity,
+                draining,
                 protocol_version,
             } => Ok(ZoneHostHealth {
+                host_id,
                 process_id,
                 session_count,
+                active_connections,
+                session_capacity,
+                zone_count,
+                zone_capacity,
+                draining,
                 protocol_version,
             }),
             payload => Err(unexpected_payload("health", &payload)),
@@ -372,6 +406,11 @@ impl TcpZoneOwnerRpcTransport {
                 Ok(ZoneRpcResponse::Ok { payload }) => {
                     self.active_endpoint.store(index, Ordering::Release);
                     return Ok(*payload);
+                }
+                Ok(ZoneRpcResponse::Error { code, message })
+                    if code == "host_draining" || code == "capacity" =>
+                {
+                    failures.push(format!("{address}: zone RPC {code}: {message}"));
                 }
                 Ok(ZoneRpcResponse::Error { code, message }) => {
                     return Err(format!("zone RPC {code}: {message}"));
@@ -732,6 +771,7 @@ impl ZoneHostOutbox {
 }
 
 pub struct ZoneHostServer {
+    host_id: String,
     config: GatewayConfig,
     runtime_factory: Mutex<Arc<SharedInProcessZoneRuntimeFactory>>,
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
@@ -740,6 +780,8 @@ pub struct ZoneHostServer {
     journal: Mutex<Vec<WireHostJournalEntry>>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
+    zone_capacity: usize,
+    draining: AtomicBool,
     active_connections: AtomicUsize,
 }
 
@@ -747,7 +789,9 @@ impl fmt::Debug for ZoneHostServer {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
             .debug_struct("ZoneHostServer")
+            .field("host_id", &self.host_id)
             .field("authenticated", &self.auth_token.is_some())
+            .field("draining", &self.draining.load(Ordering::Acquire))
             .field("limits", &self.limits)
             .field("session_count", &self.session_count())
             .finish()
@@ -791,7 +835,33 @@ impl ZoneHostServer {
         limits: ZoneRpcLimits,
         runtime_factory: Arc<SharedInProcessZoneRuntimeFactory>,
     ) -> Self {
+        let host_id = std::env::var("MIR2_ZONE_HOST_ID")
+            .ok()
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| format!("zone-host-{}", std::process::id()));
+        let zone_capacity = positive_usize_env("MIR2_ZONE_HOST_MAX_ZONES").unwrap_or(128);
+        Self::with_identity_and_factory(
+            host_id,
+            zone_capacity,
+            config,
+            owner_lease_authority,
+            auth_token,
+            limits,
+            runtime_factory,
+        )
+    }
+
+    pub fn with_identity_and_factory(
+        host_id: impl Into<String>,
+        zone_capacity: usize,
+        config: GatewayConfig,
+        owner_lease_authority: SharedZoneOwnerLeaseAuthority,
+        auth_token: Option<String>,
+        limits: ZoneRpcLimits,
+        runtime_factory: Arc<SharedInProcessZoneRuntimeFactory>,
+    ) -> Self {
         Self {
+            host_id: host_id.into(),
             config,
             runtime_factory: Mutex::new(runtime_factory),
             owner_lease_authority,
@@ -800,6 +870,8 @@ impl ZoneHostServer {
             journal: Mutex::new(Vec::new()),
             auth_token,
             limits,
+            zone_capacity: zone_capacity.max(1),
+            draining: AtomicBool::new(false),
             active_connections: AtomicUsize::new(0),
         }
     }
@@ -809,6 +881,27 @@ impl ZoneHostServer {
             .lock()
             .map(|sessions| sessions.len())
             .unwrap_or(0)
+    }
+
+    pub fn zone_count(&self) -> usize {
+        self.sessions
+            .lock()
+            .map(|sessions| {
+                sessions
+                    .keys()
+                    .map(|(_, zone_id)| zone_id.as_str())
+                    .collect::<std::collections::BTreeSet<_>>()
+                    .len()
+            })
+            .unwrap_or(0)
+    }
+
+    pub fn set_draining(&self, draining: bool) {
+        self.draining.store(draining, Ordering::Release);
+    }
+
+    pub fn is_draining(&self) -> bool {
+        self.draining.load(Ordering::Acquire)
     }
 
     pub fn serve(self: Arc<Self>, listener: TcpListener) -> io::Result<()> {
@@ -895,8 +988,14 @@ impl ZoneHostServer {
 
         if matches!(envelope.request, ZoneRpcRequest::Health) {
             return Ok(ZoneRpcPayload::Health {
+                host_id: self.host_id.clone(),
                 process_id: std::process::id(),
                 session_count: self.session_count(),
+                active_connections: self.active_connections.load(Ordering::Acquire),
+                session_capacity: self.limits.max_sessions,
+                zone_count: self.zone_count(),
+                zone_capacity: self.zone_capacity,
+                draining: self.is_draining(),
                 protocol_version: ZONE_RPC_PROTOCOL_VERSION,
             });
         }
@@ -1067,6 +1166,24 @@ impl ZoneHostServer {
             .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?;
         if let Some(hosted) = sessions.get(&key) {
             return Ok(Arc::clone(hosted));
+        }
+        if self.is_draining() {
+            return Err(ZoneRpcFault::new(
+                "host_draining",
+                format!("zone host {} is draining", self.host_id),
+            ));
+        }
+        let zone_already_present = sessions.keys().any(|(_, existing)| existing == zone_id);
+        let current_zone_count = sessions
+            .keys()
+            .map(|(_, existing)| existing)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len();
+        if !zone_already_present && current_zone_count >= self.zone_capacity {
+            return Err(ZoneRpcFault::new(
+                "capacity",
+                format!("zone host Zone capacity {} reached", self.zone_capacity),
+            ));
         }
         if sessions.len() >= self.limits.max_sessions {
             return Err(ZoneRpcFault::new(
@@ -1304,8 +1421,14 @@ enum ZoneRpcResponse {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum ZoneRpcPayload {
     Health {
+        host_id: String,
         process_id: u32,
         session_count: usize,
+        active_connections: usize,
+        session_capacity: usize,
+        zone_count: usize,
+        zone_capacity: usize,
+        draining: bool,
         protocol_version: u16,
     },
     Packets {

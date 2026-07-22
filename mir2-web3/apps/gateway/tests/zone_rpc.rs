@@ -9,9 +9,9 @@ use mir2_gateway::routing::PerMapSessionRouter;
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
-    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostServer, ZoneId,
-    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry,
-    ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
+    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostControlPlane, ZoneHostHeartbeat,
+    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority,
+    ZoneOwnerRpcTransport, ZoneRegistry, ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::WorldCommand;
@@ -29,6 +29,8 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     let health = first.health().expect("zone host health should respond");
     assert_eq!(health.protocol_version, ZONE_RPC_PROTOCOL_VERSION);
     assert_eq!(health.process_id, std::process::id());
+    assert_eq!(health.session_capacity, test_limits().max_sessions);
+    assert!(!health.draining);
     assert_eq!(health.session_count, 0);
 
     let connect_packets = first.on_connect().expect("on_connect should use RPC");
@@ -71,6 +73,98 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     assert_eq!(server.session_count(), 2);
 
     stop_server(address, stop, handle);
+}
+
+#[test]
+fn scheduler_places_across_hosts_and_draining_primary_rejects_new_sessions() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address_a, server_a, stop_a, handle_a) =
+        start_named_server(authority.clone(), "host-a", 8);
+    let (address_b, server_b, stop_b, handle_b) =
+        start_named_server(authority.clone(), "host-b", 8);
+    let (address_c, server_c, stop_c, handle_c) =
+        start_named_server(authority.clone(), "host-c", 8);
+    let control = ZoneHostControlPlane::new(1_000, 5_000, 1);
+
+    for (host_id, domain, address) in [
+        ("host-a", "az-a", address_a),
+        ("host-b", "az-b", address_b),
+        ("host-c", "az-c", address_c),
+    ] {
+        let probe = test_transport(address, ZoneId::primary(), &format!("probe-{host_id}"));
+        let health = probe.health().expect("named Zone Host should be healthy");
+        assert_eq!(health.host_id, host_id);
+        control
+            .register_host(
+                ZoneHostRegistration::from_health(address.to_string(), domain, 100, &health),
+                ZoneHostHeartbeat::from_health(&health, 10),
+            )
+            .expect("healthy Zone Host should register");
+    }
+
+    let zone_id = ZoneId::new("map:0");
+    let placement = control
+        .place_zone(zone_id.clone(), 10)
+        .expect("Zone should receive primary and replica");
+    assert_ne!(
+        placement.primary.failure_domain,
+        placement.replicas[0].failure_domain
+    );
+    let server_for = |host_id: &str| match host_id {
+        "host-a" => &server_a,
+        "host-b" => &server_b,
+        "host-c" => &server_c,
+        other => panic!("unexpected scheduled host {other}"),
+    };
+    let active_server = server_for(&placement.primary.host_id);
+    let replica_server = server_for(&placement.replicas[0].host_id);
+
+    let first = TcpZoneOwnerRpcTransport::with_placement(
+        &placement,
+        "scheduled-first",
+        None,
+        test_limits(),
+    )
+    .expect("placement should produce a transport");
+    let lease = authority.owner_lease(&zone_id);
+    first
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 1 }),
+        ))
+        .expect("scheduled primary should execute");
+    assert_eq!(active_server.session_count(), 1);
+
+    active_server.set_draining(true);
+    let second = TcpZoneOwnerRpcTransport::with_placement(
+        &placement,
+        "scheduled-during-drain",
+        None,
+        test_limits(),
+    )
+    .expect("placement should preserve the replica endpoint");
+    second
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 2 }),
+        ))
+        .expect("new session should skip the draining primary and use the replica");
+    assert_eq!(active_server.session_count(), 1);
+    assert_eq!(replica_server.session_count(), 1);
+
+    let moves = control
+        .begin_drain(&placement.primary.host_id, 20)
+        .expect("scheduler should move placement away from draining primary");
+    assert_eq!(moves.len(), 1);
+    assert_eq!(moves[0].next.generation, placement.generation + 1);
+    assert!(!moves[0]
+        .next
+        .host_ids()
+        .any(|host_id| host_id == placement.primary.host_id));
+
+    stop_server(address_a, stop_a, handle_a);
+    stop_server(address_b, stop_b, handle_b);
+    stop_server(address_c, stop_c, handle_c);
 }
 
 #[test]
@@ -714,6 +808,39 @@ fn start_server(
         running_server
             .serve_until(listener, server_stop)
             .expect("test zone host should run");
+    });
+    (address, server, stop, handle)
+}
+
+fn start_named_server(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    host_id: &str,
+    zone_capacity: usize,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind named test Zone Host");
+    let address = listener.local_addr().expect("named Zone Host address");
+    let stop = Arc::new(AtomicBool::new(false));
+    let shared: SharedZoneOwnerLeaseAuthority = authority;
+    let server = Arc::new(ZoneHostServer::with_identity_and_factory(
+        host_id,
+        zone_capacity,
+        GatewayConfig::default(),
+        shared,
+        None,
+        test_limits(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::new()),
+    ));
+    let running_server = Arc::clone(&server);
+    let server_stop = Arc::clone(&stop);
+    let handle = thread::spawn(move || {
+        running_server
+            .serve_until(listener, server_stop)
+            .expect("named test Zone Host should run");
     });
     (address, server, stop, handle)
 }

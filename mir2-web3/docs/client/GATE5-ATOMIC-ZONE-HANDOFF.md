@@ -30,7 +30,8 @@ placement metadata is available.
 
 ## Remote lifecycle and checkpoint replay
 
-Zone RPC protocol version 3 adds fenced `CloseSession`. A close is journaled as a tombstone, so a
+Zone RPC protocol version 3 introduced fenced `CloseSession` (the current protocol is version 4
+after Gate 6 health/drain metadata). A close is journaled as a tombstone, so a
 replicated checkpoint replays the source commands and the later removal in the same global order.
 This prevents remote handoffs and ordinary disconnects from leaving ghost players or consuming
 Zone Host session capacity.
@@ -71,3 +72,5 @@ cargo +1.89.0 check -p mir2-gateway --all-targets
 The RPC suite includes an actual remote `primary -> map:0 -> map:1` Gateway handoff, asserts that
 the host always contains one live session, closes it on disconnect, and verifies close tombstones
 survive checkpoint replay.
+
+Gate 6 continues in [`GATE6-ZONE-HOST-SCHEDULER.md`](GATE6-ZONE-HOST-SCHEDULER.md).

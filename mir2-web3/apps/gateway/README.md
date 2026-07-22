@@ -88,6 +88,10 @@ Account-store runtime policy:
 - Active characters atomically rebind after a topology-changing map transfer.
   Remote close is owner-fenced and checkpointed, while server shouts and GM
   announcements use the bounded cross-Zone live message bus.
+- `ZoneHostControlPlane` registers multiple Zone Hosts, schedules primary/replica
+  placement leases by capacity and failure domain, fences rebalances by generation,
+  and drains hosts without accepting new sessions. Zone RPC v4 health advertises
+  host identity, load, capacity, active connections, and drain state.
 
 Admin runtime read endpoints:
 
