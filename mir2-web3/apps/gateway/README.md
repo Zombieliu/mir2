@@ -98,6 +98,12 @@ Account-store runtime policy:
 - The `commonware-2026-2` feature pins Commonware's `v2026.2.0` release and maps
   finalized epoch/height/view blocks into the Zone scheduler and guild admission
   registry. Control blocks are event-driven; idle periods do not emit empty blocks.
+- Verified guild execution can emit reward receipts into a per-game, Commonware-governed
+  budget ledger. Gate 9 produces deterministic Merkle batches and an unsigned Sui/Dubhe
+  settlement transaction; guild hosts never receive settlement keys.
+- `cargo run -p mir2-gateway --bin gate10_acceptance` executes the no-secret production-beta
+  path and prints fail-closed readiness JSON plus Prometheus gauges. Set
+  `GATE10_ACCEPTANCE_ITERATIONS` for a bounded deterministic soak.
 
 Admin runtime read endpoints:
 
