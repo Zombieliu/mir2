@@ -92,6 +92,9 @@ Account-store runtime policy:
   placement leases by capacity and failure domain, fences rebalances by generation,
   and drains hosts without accepting new sessions. Zone RPC v4 health advertises
   host identity, load, capacity, active connections, and drain state.
+- Guild-operated hosts can be wrapped by a threshold verifier: admissions expire and
+  carry narrow capabilities, every command compares canonical packet plus post-state
+  commitments, and divergent/unavailable nodes accumulate strikes and quarantine.
 
 Admin runtime read endpoints:
 
