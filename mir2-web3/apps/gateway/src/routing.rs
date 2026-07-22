@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{
@@ -141,6 +141,10 @@ impl ZoneOwnerCommandRequest {
         self.mode
     }
 
+    pub fn command(&self) -> &WorldCommand {
+        &self.command
+    }
+
     pub fn into_command(self) -> WorldCommand {
         self.command
     }
@@ -212,6 +216,14 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         Ok(runtime.refresh_active_external_mail())
     }
 
+    fn close_session(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        _owner_lease: &ZoneOwnerLease,
+    ) -> Result<(), String> {
+        Ok(())
+    }
+
     fn register_live_outbound(
         &self,
         runtime: &ZoneRuntimeHandle,
@@ -243,6 +255,10 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
     fn save_active_character(&self) -> Result<(), String>;
 
     fn refresh_active_external_mail(&self) -> Result<bool, String>;
+
+    fn close_session(&self, _owner_lease: &ZoneOwnerLease) -> Result<(), String> {
+        Ok(())
+    }
 
     fn register_live_outbound(
         &self,
@@ -307,6 +323,14 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
         _runtime: &mut ZoneRuntimeHandle,
     ) -> Result<bool, String> {
         self.transport.refresh_active_external_mail()
+    }
+
+    fn close_session(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<(), String> {
+        self.transport.close_session(owner_lease)
     }
 
     fn register_live_outbound(
@@ -1353,6 +1377,7 @@ impl SharedInProcessZoneState {
         }
     }
 
+    #[cfg(test)]
     fn upsert_player(
         &mut self,
         key: ZonePresenceKey,
@@ -1360,6 +1385,25 @@ impl SharedInProcessZoneState {
         map_file_name: String,
         self_entity: WorldEntitySnapshot,
         free_bag_slots: u16,
+    ) -> u32 {
+        self.upsert_player_with_transform_policy(
+            key,
+            character_name,
+            map_file_name,
+            self_entity,
+            free_bag_slots,
+            true,
+        )
+    }
+
+    fn upsert_player_with_transform_policy(
+        &mut self,
+        key: ZonePresenceKey,
+        character_name: &str,
+        map_file_name: String,
+        self_entity: WorldEntitySnapshot,
+        free_bag_slots: u16,
+        preserve_existing_transform: bool,
     ) -> u32 {
         let existing_presence = self.players.get(&key).cloned();
         let zone_object_id = self
@@ -1379,7 +1423,7 @@ impl SharedInProcessZoneState {
         entity.max_hp = None;
         entity.disposition = WorldEntityDisposition::Friendly;
         if let Some(existing) = existing_presence.as_ref() {
-            if existing.map_file_name == map_file_name {
+            if preserve_existing_transform && existing.map_file_name == map_file_name {
                 entity.x = existing.entity.x;
                 entity.y = existing.entity.y;
                 entity.direction = existing.entity.direction;
@@ -4322,6 +4366,10 @@ impl SharedInProcessZoneSessionRuntime {
             .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
             .take_pending_zone_transform(&key);
         self.apply_zone_transform(transform);
+        // A presence can already be authoritative even when its one-shot pending
+        // transform was consumed by an earlier packet. Persist from the current
+        // shared-Zone position, never from a stale private-runtime coordinate.
+        self.force_inner_to_current_zone_transform();
         Ok(())
     }
 
@@ -4493,12 +4541,13 @@ impl SharedInProcessZoneSessionRuntime {
                 .unwrap_or_else(|| identity.character_name.clone());
             zone_state.remove_owned_shared_entities(&owner_name, previous_map_name, Some(&key));
         }
-        let zone_object_id = zone_state.upsert_player(
+        let zone_object_id = zone_state.upsert_player_with_transform_policy(
             key.clone(),
             &identity.character_name,
             map_file_name.clone(),
             self_entity,
             snapshot.free_bag_slots,
+            !allow_transform_sync,
         );
         let local_self_object_id = snapshot
             .entities
@@ -6500,6 +6549,8 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let is_low_latency_zone_packet =
             is_low_latency_zone_player_packet || is_low_latency_zone_chat_packet;
         let is_transfer_map_command = matches!(&command, WorldCommand::TransferMap { .. });
+        let is_authoritative_move_to = matches!(&command, WorldCommand::MoveTo { .. });
+        let is_handoff_transform = matches!(&command, WorldCommand::ApplyHandoffTransform { .. });
         let applies_native_state = matches!(
             &command,
             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
@@ -6812,7 +6863,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         packets.extend(shared_quest_packets);
         packets.extend(observer_packets);
         let mut packets = packets;
-        if is_transfer_map_command || applies_native_state {
+        if is_transfer_map_command
+            || is_authoritative_move_to
+            || is_handoff_transform
+            || applies_native_state
+        {
             self.force_next_zone_transform_sync = true;
             self.owner_dead_entity_ids.clear();
         }
@@ -6904,6 +6959,230 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 }
 
+const GLOBAL_ZONE_MESSAGE_BACKLOG: usize = 256;
+
+#[derive(Debug, Default)]
+pub(crate) struct GlobalZoneMessageBus {
+    endpoints: Mutex<BTreeMap<String, GlobalZoneMessageEndpoint>>,
+    next_registration_id: AtomicU64,
+}
+
+#[derive(Debug)]
+struct GlobalZoneMessageEndpoint {
+    zone_id: ZoneId,
+    active_identity: bool,
+    pending: VecDeque<ServerPacket>,
+    live: Option<GlobalZoneMessageLiveSender>,
+}
+
+#[derive(Debug)]
+struct GlobalZoneMessageLiveSender {
+    registration_id: u64,
+    sender: SharedZoneLiveOutboundSender,
+    active: bool,
+}
+
+impl GlobalZoneMessageBus {
+    pub(crate) fn register_session(&self, session_id: &str, zone_id: ZoneId) {
+        if let Ok(mut endpoints) = self.endpoints.lock() {
+            endpoints
+                .entry(session_id.to_string())
+                .and_modify(|endpoint| endpoint.zone_id = zone_id.clone())
+                .or_insert_with(|| GlobalZoneMessageEndpoint {
+                    zone_id,
+                    active_identity: false,
+                    pending: VecDeque::new(),
+                    live: None,
+                });
+        }
+    }
+
+    pub(crate) fn update_session(&self, session_id: &str, zone_id: ZoneId, active_identity: bool) {
+        if let Ok(mut endpoints) = self.endpoints.lock() {
+            let endpoint = endpoints.entry(session_id.to_string()).or_insert_with(|| {
+                GlobalZoneMessageEndpoint {
+                    zone_id: zone_id.clone(),
+                    active_identity,
+                    pending: VecDeque::new(),
+                    live: None,
+                }
+            });
+            endpoint.zone_id = zone_id;
+            endpoint.active_identity = active_identity;
+        }
+    }
+
+    pub(crate) fn unregister_session(&self, session_id: &str) {
+        if let Ok(mut endpoints) = self.endpoints.lock() {
+            endpoints.remove(session_id);
+        }
+    }
+
+    pub(crate) fn register_live(
+        self: &Arc<Self>,
+        session_id: &str,
+        registration_id: Option<u64>,
+        sender: SharedZoneLiveOutboundSender,
+    ) -> GlobalZoneMessageRegistration {
+        let registration_id = registration_id.unwrap_or_else(|| {
+            self.next_registration_id
+                .fetch_add(1, Ordering::Relaxed)
+                .saturating_add(1)
+                .max(1)
+        });
+        if let Ok(mut endpoints) = self.endpoints.lock() {
+            if let Some(endpoint) = endpoints.get_mut(session_id) {
+                endpoint.live = Some(GlobalZoneMessageLiveSender {
+                    registration_id,
+                    sender,
+                    active: false,
+                });
+            }
+        }
+        GlobalZoneMessageRegistration {
+            bus: Arc::clone(self),
+            session_id: session_id.to_string(),
+            registration_id,
+        }
+    }
+
+    fn activate_live(&self, session_id: &str, registration_id: u64) {
+        let Ok(mut endpoints) = self.endpoints.lock() else {
+            return;
+        };
+        let Some(endpoint) = endpoints.get_mut(session_id) else {
+            return;
+        };
+        let Some(live) = endpoint.live.as_mut() else {
+            return;
+        };
+        if live.registration_id != registration_id {
+            return;
+        }
+        live.active = true;
+        while let Some(packet) = endpoint.pending.pop_front() {
+            match live
+                .sender
+                .try_send(SharedZoneLiveOutbound::new(registration_id, packet))
+            {
+                Ok(()) => {}
+                Err(TokioTrySendError::Full(outbound)) => {
+                    endpoint.pending.push_front(outbound.into_packet());
+                    break;
+                }
+                Err(TokioTrySendError::Closed(outbound)) => {
+                    endpoint.pending.push_front(outbound.into_packet());
+                    endpoint.live = None;
+                    break;
+                }
+            }
+        }
+    }
+
+    fn unregister_live(&self, session_id: &str, registration_id: u64) {
+        if let Ok(mut endpoints) = self.endpoints.lock() {
+            if let Some(endpoint) = endpoints.get_mut(session_id) {
+                if endpoint
+                    .live
+                    .as_ref()
+                    .is_some_and(|live| live.registration_id == registration_id)
+                {
+                    endpoint.live = None;
+                }
+            }
+        }
+    }
+
+    pub(crate) fn publish_to_other_zones(
+        &self,
+        source_session_id: &str,
+        source_zone_id: &ZoneId,
+        packets: &[ServerPacket],
+    ) {
+        if packets.is_empty() {
+            return;
+        }
+        let Ok(mut endpoints) = self.endpoints.lock() else {
+            return;
+        };
+        for (session_id, endpoint) in endpoints.iter_mut() {
+            if session_id == source_session_id
+                || &endpoint.zone_id == source_zone_id
+                || !endpoint.active_identity
+            {
+                continue;
+            }
+            for packet in packets.iter().cloned() {
+                let packet = match endpoint.live.as_mut() {
+                    Some(live) if live.active => match live
+                        .sender
+                        .try_send(SharedZoneLiveOutbound::new(live.registration_id, packet))
+                    {
+                        Ok(()) => continue,
+                        Err(TokioTrySendError::Full(outbound)) => outbound.into_packet(),
+                        Err(TokioTrySendError::Closed(outbound)) => {
+                            let packet = outbound.into_packet();
+                            endpoint.live = None;
+                            packet
+                        }
+                    },
+                    _ => packet,
+                };
+                if endpoint.pending.len() >= GLOBAL_ZONE_MESSAGE_BACKLOG {
+                    endpoint.pending.pop_front();
+                }
+                endpoint.pending.push_back(packet);
+            }
+        }
+    }
+
+    pub(crate) fn drain(&self, session_id: &str) -> Vec<ServerPacket> {
+        self.endpoints
+            .lock()
+            .ok()
+            .and_then(|mut endpoints| {
+                endpoints
+                    .get_mut(session_id)
+                    .map(|endpoint| endpoint.pending.drain(..).collect())
+            })
+            .unwrap_or_default()
+    }
+}
+
+pub(crate) struct GlobalZoneMessageRegistration {
+    bus: Arc<GlobalZoneMessageBus>,
+    session_id: String,
+    registration_id: u64,
+}
+
+impl GlobalZoneMessageRegistration {
+    pub(crate) fn registration_id(&self) -> u64 {
+        self.registration_id
+    }
+
+    pub(crate) fn activate(&self) {
+        self.bus
+            .activate_live(&self.session_id, self.registration_id);
+    }
+}
+
+impl fmt::Debug for GlobalZoneMessageRegistration {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("GlobalZoneMessageRegistration")
+            .field("session_id", &self.session_id)
+            .field("registration_id", &self.registration_id)
+            .finish_non_exhaustive()
+    }
+}
+
+impl Drop for GlobalZoneMessageRegistration {
+    fn drop(&mut self) {
+        self.bus
+            .unregister_live(&self.session_id, self.registration_id);
+    }
+}
+
 pub struct RoutedZoneRuntime {
     pub zone_id: ZoneId,
     pub owner_lease: ZoneOwnerLease,
@@ -6929,6 +7208,7 @@ pub struct ZoneRegistry {
     runtime_factory: SharedZoneRuntimeFactory,
     session_router: SharedSessionRouter,
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
+    global_message_bus: Arc<GlobalZoneMessageBus>,
 }
 
 impl ZoneRegistry {
@@ -6985,6 +7265,7 @@ impl ZoneRegistry {
             runtime_factory,
             session_router,
             owner_lease_authority,
+            global_message_bus: Arc::new(GlobalZoneMessageBus::default()),
         }
     }
 
@@ -7001,9 +7282,7 @@ impl ZoneRegistry {
         config: GatewayConfig,
         route_request: SessionRouteRequest,
     ) -> RoutedZoneRuntime {
-        let zone_id = self
-            .session_router
-            .route_session(&route_request, &self.default_zone_id);
+        let zone_id = self.route_session(&route_request);
         let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
         RoutedZoneRuntime {
             runtime: self.runtime_factory.create_runtime(config, &zone_id),
@@ -7011,6 +7290,15 @@ impl ZoneRegistry {
             owner_lease_authority: self.owner_lease_authority.clone(),
             zone_id,
         }
+    }
+
+    pub fn route_session(&self, route_request: &SessionRouteRequest) -> ZoneId {
+        self.session_router
+            .route_session(route_request, &self.default_zone_id)
+    }
+
+    pub(crate) fn global_message_bus(&self) -> Arc<GlobalZoneMessageBus> {
+        Arc::clone(&self.global_message_bus)
     }
 }
 
@@ -7266,19 +7554,17 @@ mod tests {
     }
 
     #[test]
-    fn map_zone_transfer_changes_map_but_not_zone_today() {
-        // Characterizes the handoff GAP: a map transfer moves the player's map but
-        // leaves the session bound to its original zone. The map=zone handoff step
-        // will flip the zone assertion; locking the current behavior makes that
-        // change visible (and guards against an accidental partial handoff).
+    fn map_zone_transfer_atomically_rebinds_to_the_destination_zone() {
         let registry = ZoneRegistry::with_router(
             ZoneId::primary(),
             Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
             Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
         );
-        let mut session = open_per_map_session(&registry, "0", "wanderer");
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
         start_new_character(&mut session, "wanderer", "Wanderer");
         assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
+        assert_eq!(session.handoff_generation(), 1);
 
         // Debug crystal-transfer key relocates the player to map "0102"; mirror
         // the working transfer test (transfer + a step) to commit it.
@@ -7295,9 +7581,175 @@ mod tests {
         );
         assert_eq!(
             session.zone_id(),
-            &ZoneId::new("map:0"),
-            "GAP: a map transfer does NOT yet re-route the zone (map=zone handoff closes this)"
+            &ZoneId::new("map:0102"),
+            "the committed map and bound Zone must move together"
         );
+        assert_eq!(session.handoff_generation(), 2);
+    }
+
+    #[test]
+    fn failed_target_prepare_rolls_the_source_back_without_rebinding() {
+        #[derive(Debug)]
+        struct RejectPasskeyRuntime {
+            inner: InProcessWorldRuntime,
+        }
+
+        impl WorldRuntime for RejectPasskeyRuntime {
+            fn as_any(&self) -> &dyn std::any::Any {
+                self
+            }
+
+            fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+                self
+            }
+
+            fn on_connect(&self) -> Vec<ServerPacket> {
+                self.inner.on_connect()
+            }
+
+            fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+                if matches!(&command, WorldCommand::PasskeyLogin { .. }) {
+                    return Err("injected target prepare failure".to_string());
+                }
+                self.inner.execute(command)
+            }
+
+            fn world_snapshot(&self) -> mir2_simulation::WorldSnapshot {
+                self.inner.world_snapshot()
+            }
+
+            fn active_identity(&self) -> Option<mir2_simulation::ActiveSessionIdentity> {
+                self.inner.active_identity()
+            }
+
+            fn save_active_character(&self) {
+                self.inner.save_active_character();
+            }
+
+            fn refresh_active_external_mail(&mut self) -> bool {
+                self.inner.refresh_active_external_mail()
+            }
+        }
+
+        #[derive(Debug)]
+        struct FailMapOneFactory {
+            inner: SharedInProcessZoneRuntimeFactory,
+        }
+
+        impl ZoneRuntimeFactory for FailMapOneFactory {
+            fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
+                if zone_id == &ZoneId::new("map:1") {
+                    return Box::new(RejectPasskeyRuntime {
+                        inner: InProcessWorldRuntime::new(config),
+                    });
+                }
+                self.inner.create_runtime(config, zone_id)
+            }
+        }
+
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(FailMapOneFactory {
+                inner: SharedInProcessZoneRuntimeFactory::new(),
+            }) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        start_new_character(&mut session, "handoff-rollback", "Rollback");
+        assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
+
+        let error = session
+            .execute_with_outcome(WorldCommand::TransferMap {
+                key: "crystal:1:100:100".to_string(),
+            })
+            .expect_err("injected target prepare failure must abort handoff");
+
+        assert!(error.contains("injected target prepare failure"));
+        assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
+        assert_eq!(session.handoff_generation(), 1);
+        assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some("0"));
+    }
+
+    #[test]
+    fn server_shout_crosses_zone_boundaries_through_the_global_bus() {
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let mut speaker =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let mut listener =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        start_new_character(&mut speaker, "global-speaker", "Speaker");
+        start_new_character(&mut listener, "global-listener", "Listener");
+        listener.transfer_map("crystal:1:100:100");
+
+        assert_eq!(speaker.zone_id(), &ZoneId::new("map:0"));
+        assert_eq!(listener.zone_id(), &ZoneId::new("map:1"));
+        let (sender, mut receiver) = tokio::sync::mpsc::channel(8);
+        let registration = listener
+            .register_zone_live_outbound(sender)
+            .expect("listener live registration should succeed")
+            .expect("active listener should register");
+        registration.activate();
+        let live_packets = vec![ServerPacket::Chat {
+            message: "(!)Speaker:live cross-zone".to_string(),
+            chat_type: mir2_protocol::ChatType::Shout3,
+        }];
+        registry.global_message_bus().publish_to_other_zones(
+            speaker.session_id(),
+            speaker.zone_id(),
+            &live_packets,
+        );
+        let live = receiver
+            .try_recv()
+            .expect("cross-Zone message should use the active socket channel");
+        assert_eq!(live.registration_id(), registration.registration_id());
+        assert!(matches!(
+            live.into_packet(),
+            ServerPacket::Chat { message, .. } if message.contains("live cross-zone")
+        ));
+        drop(registration);
+
+        let owner_packets = vec![ServerPacket::Chat {
+            message: "(!)Speaker:cross-zone hello".to_string(),
+            chat_type: mir2_protocol::ChatType::Shout3,
+        }];
+        registry.global_message_bus().publish_to_other_zones(
+            speaker.session_id(),
+            speaker.zone_id(),
+            &owner_packets,
+        );
+        let is_cross_zone_shout = |packet: &ServerPacket| match packet {
+            ServerPacket::Chat { message, chat_type }
+                if matches!(
+                    chat_type,
+                    mir2_protocol::ChatType::Shout
+                        | mir2_protocol::ChatType::Shout2
+                        | mir2_protocol::ChatType::Shout3
+                ) =>
+            {
+                message.contains("cross-zone hello")
+            }
+            ServerPacket::ObjectChat {
+                text, chat_type, ..
+            } if matches!(
+                chat_type,
+                mir2_protocol::ChatType::Shout
+                    | mir2_protocol::ChatType::Shout2
+                    | mir2_protocol::ChatType::Shout3
+            ) =>
+            {
+                text.contains("cross-zone hello")
+            }
+            _ => false,
+        };
+        assert!(owner_packets.iter().any(is_cross_zone_shout));
+
+        let remote_packets = listener.handle_packet(ClientPacket::KeepAlive { time: 55 });
+        assert!(remote_packets.iter().any(is_cross_zone_shout));
     }
 
     #[test]

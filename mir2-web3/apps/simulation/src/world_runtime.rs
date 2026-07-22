@@ -8,7 +8,9 @@ use crate::{
     ActiveSessionIdentity, ChatPacketPreparation, GroundDropSnapshot, SharedGroundDropPickupCommit,
     SimulationConfig, SimulationSession, WorldEntitySnapshot, WorldSnapshot,
 };
-use mir2_protocol::{client_packet_name, ChatItem, ClientPacket, Point, ServerPacket, Spell};
+use mir2_protocol::{
+    client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
+};
 
 #[derive(Debug)]
 pub enum WorldCommand {
@@ -50,6 +52,12 @@ pub enum WorldCommand {
     TransferMap {
         key: String,
     },
+    /// Trusted Gateway-to-Zone handoff reconciliation. This is never accepted
+    /// on the raw production-player path.
+    ApplyHandoffTransform {
+        position: Point,
+        direction: MirDirection,
+    },
     Stage5Command {
         action: String,
         args: Vec<String>,
@@ -89,9 +97,9 @@ pub fn validate_production_player_command(
         WorldCommand::PasskeyLogin { .. } => {
             Err("raw passkey login is not allowed on the production player path".to_string())
         }
-        WorldCommand::MoveTo { .. } => {
-            Err("debug MoveTo is not allowed on the production player path".to_string())
-        }
+        WorldCommand::MoveTo { .. } | WorldCommand::ApplyHandoffTransform { .. } => Err(
+            "debug or handoff transform is not allowed on the production player path".to_string(),
+        ),
         WorldCommand::Stage5Command { .. } => {
             Err("Stage5Command is not allowed on the production player path".to_string())
         }
@@ -136,6 +144,7 @@ pub enum WorldCommandKind {
     DeleteCharacter,
     CastSkill,
     TransferMap,
+    ApplyHandoffTransform,
     Stage5Command(String),
     GrantOnchainOre,
     CreditGoldFromOre,
@@ -162,6 +171,7 @@ impl WorldCommand {
             Self::DeleteCharacter { .. } => WorldCommandKind::DeleteCharacter,
             Self::CastSkill { .. } => WorldCommandKind::CastSkill,
             Self::TransferMap { .. } => WorldCommandKind::TransferMap,
+            Self::ApplyHandoffTransform { .. } => WorldCommandKind::ApplyHandoffTransform,
             Self::Stage5Command { action, .. } => WorldCommandKind::Stage5Command(action.clone()),
             Self::GrantOnchainOre { .. } => WorldCommandKind::GrantOnchainOre,
             Self::CreditGoldFromOre { .. } => WorldCommandKind::CreditGoldFromOre,
@@ -507,6 +517,14 @@ impl WorldRuntime for InProcessWorldRuntime {
             }
             WorldCommand::CastSkill { key } => self.session.cast_skill(&key),
             WorldCommand::TransferMap { key } => self.session.transfer_map(&key),
+            WorldCommand::ApplyHandoffTransform {
+                position,
+                direction,
+            } => {
+                self.session
+                    .force_authoritative_player_transform(position, direction);
+                Vec::new()
+            }
             WorldCommand::Stage5Command { action, args } => {
                 self.session.stage5_command(&action, args)
             }

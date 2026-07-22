@@ -66,7 +66,7 @@ The topology tests prove explicit grouping, isolated unknown maps, duplicate rej
 hot/cold tick rates, and separate owner leases. Zone RPC acceptance proves a standalone host keeps
 the configured runtime factory across checkpoint install.
 
-## Gate 5.5 boundary
+## Gate 5.5
 
-Gate 5.4 determines where a map belongs when a session is opened. Atomic live rebind after
-`StartGame` or `TransferMap`, cross-Zone handoff, rollback, and global chat are Gate 5.5.
+Atomic live rebind after `StartGame` or `TransferMap`, rollback, fenced remote close, and global
+messages are implemented in [`GATE5-ATOMIC-ZONE-HANDOFF.md`](GATE5-ATOMIC-ZONE-HANDOFF.md).

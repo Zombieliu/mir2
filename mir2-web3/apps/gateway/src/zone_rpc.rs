@@ -26,14 +26,14 @@ use crate::routing::{
 };
 use crate::GatewayConfig;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 2;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 3;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
-const ZONE_HOST_CHECKPOINT_VERSION: u32 = 1;
-const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v1\0";
+const ZONE_HOST_CHECKPOINT_VERSION: u32 = 2;
+const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v2\0";
 
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
@@ -458,6 +458,15 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         }
     }
 
+    fn close_session(&self, owner_lease: &ZoneOwnerLease) -> Result<(), String> {
+        match self.call(ZoneRpcRequest::CloseSession {
+            owner_lease: WireZoneOwnerLease::from(owner_lease),
+        })? {
+            ZoneRpcPayload::Unit => Ok(()),
+            payload => Err(unexpected_payload("close_session", &payload)),
+        }
+    }
+
     fn register_live_outbound(
         &self,
         sender: SharedZoneLiveOutboundSender,
@@ -843,6 +852,10 @@ impl ZoneHostServer {
     }
 
     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
+        // `serve_until` uses a non-blocking listener so it can observe the stop
+        // flag.  Some platforms propagate that mode to accepted sockets; the
+        // framed request handler is deliberately blocking with bounded timeouts.
+        stream.set_nonblocking(false)?;
         stream.set_read_timeout(Some(self.limits.io_timeout))?;
         stream.set_write_timeout(Some(self.limits.io_timeout))?;
         let bytes = read_frame(&mut stream, self.limits.max_frame_bytes)?;
@@ -899,6 +912,13 @@ impl ZoneHostServer {
                 self.install_host_checkpoint(&bytes)?;
                 return Ok(ZoneRpcPayload::Unit);
             }
+            ZoneRpcRequest::CloseSession { owner_lease } => {
+                return self.close_hosted_session(
+                    &envelope.session_id,
+                    &envelope.zone_id,
+                    owner_lease,
+                );
+            }
             request => {
                 let session = self.hosted_session(&envelope.session_id, &envelope.zone_id)?;
                 return self.handle_session_request(
@@ -923,6 +943,7 @@ impl ZoneHostServer {
             ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
             }
+            ZoneRpcRequest::CloseSession { .. } => unreachable!(),
             ZoneRpcRequest::OnConnect => Ok(ZoneRpcPayload::Packets {
                 frames: encode_server_frames(session.hosted.on_connect()?)?,
             }),
@@ -943,7 +964,8 @@ impl ZoneHostServer {
                     zone_id: zone_id.to_string(),
                     owner_lease: owner_lease.clone(),
                     mode: mode.clone(),
-                    command: command.clone(),
+                    command: Some(command.clone()),
+                    closed: false,
                 };
                 let request = match mode.into_mode() {
                     ZoneOwnerCommandMode::Direct => ZoneOwnerCommandRequest::direct(
@@ -996,6 +1018,41 @@ impl ZoneHostServer {
                     .map_err(classify_runtime_error)?,
             }),
         }
+    }
+
+    fn close_hosted_session(
+        &self,
+        session_id: &str,
+        zone_id: &str,
+        owner_lease: WireZoneOwnerLease,
+    ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        if owner_lease.zone_id != zone_id {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                "lease zone id does not match envelope zone id",
+            ));
+        }
+        let lease = owner_lease.clone().into_lease()?;
+        self.owner_lease_authority
+            .validate_owner_lease(&lease)
+            .map_err(classify_runtime_error)?;
+        let removed = self
+            .sessions
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?
+            .remove(&(session_id.to_string(), zone_id.to_string()));
+        if removed.is_some() {
+            self.append_journal(WireHostJournalEntry {
+                sequence: 0,
+                session_id: session_id.to_string(),
+                zone_id: zone_id.to_string(),
+                owner_lease,
+                mode: WireZoneOwnerCommandMode::Direct,
+                command: None,
+                closed: true,
+            })?;
+        }
+        Ok(ZoneRpcPayload::Unit)
     }
 
     fn hosted_session(
@@ -1145,6 +1202,16 @@ impl ZoneHostServer {
                 ));
             }
             let key = (entry.session_id.clone(), entry.zone_id.clone());
+            if entry.closed {
+                if entry.command.is_some() {
+                    return Err(ZoneRpcFault::new(
+                        "checkpoint_command",
+                        "journal close entry unexpectedly contains a command",
+                    ));
+                }
+                sessions.remove(&key);
+                continue;
+            }
             let session = sessions
                 .entry(key)
                 .or_insert_with(|| self.create_hosted_session(&factory, &entry.zone_id))
@@ -1217,6 +1284,9 @@ enum ZoneRpcRequest {
     ActiveIdentity,
     SaveActiveCharacter,
     RefreshActiveExternalMail,
+    CloseSession {
+        owner_lease: WireZoneOwnerLease,
+    },
     ExportHostCheckpoint,
     InstallHostCheckpoint {
         bytes: Vec<u8>,
@@ -1386,6 +1456,10 @@ enum WireWorldCommand {
     TransferMap {
         key: String,
     },
+    ApplyHandoffTransform {
+        position: Point,
+        direction: mir2_protocol::MirDirection,
+    },
     Stage5Command {
         action: String,
         args: Vec<String>,
@@ -1434,6 +1508,13 @@ impl WireWorldCommand {
             }
             WorldCommand::CastSkill { key } => Self::CastSkill { key },
             WorldCommand::TransferMap { key } => Self::TransferMap { key },
+            WorldCommand::ApplyHandoffTransform {
+                position,
+                direction,
+            } => Self::ApplyHandoffTransform {
+                position,
+                direction,
+            },
             WorldCommand::Stage5Command { action, args } => Self::Stage5Command { action, args },
             WorldCommand::GrantOnchainOre {
                 account,
@@ -1495,6 +1576,13 @@ impl WireWorldCommand {
             }
             Self::CastSkill { key } => WorldCommand::CastSkill { key },
             Self::TransferMap { key } => WorldCommand::TransferMap { key },
+            Self::ApplyHandoffTransform {
+                position,
+                direction,
+            } => WorldCommand::ApplyHandoffTransform {
+                position,
+                direction,
+            },
             Self::Stage5Command { action, args } => WorldCommand::Stage5Command { action, args },
             Self::GrantOnchainOre {
                 account,
@@ -1541,13 +1629,18 @@ struct WireHostJournalEntry {
     zone_id: String,
     owner_lease: WireZoneOwnerLease,
     mode: WireZoneOwnerCommandMode,
-    command: WireWorldCommand,
+    command: Option<WireWorldCommand>,
+    #[serde(default)]
+    closed: bool,
 }
 
 impl WireHostJournalEntry {
     fn into_request(self) -> Result<ZoneOwnerCommandRequest, ZoneRpcFault> {
         let lease = self.owner_lease.into_lease()?;
-        let command = self.command.into_world()?;
+        let command = self.command.ok_or_else(|| {
+            ZoneRpcFault::new("checkpoint_command", "journal execute entry has no command")
+        })?;
+        let command = command.into_world()?;
         Ok(match self.mode.into_mode() {
             ZoneOwnerCommandMode::Direct => ZoneOwnerCommandRequest::direct(lease, command),
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {

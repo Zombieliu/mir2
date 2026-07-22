@@ -30,6 +30,7 @@ in [`apps/web/CLAUDE.md`](../../apps/web/CLAUDE.md) (auto-loaded by Claude Code 
 | [`GATE5-REMOTE-ZONE-HOST.md`](GATE5-REMOTE-ZONE-HOST.md) | Gate 5.2 separate Zone Host process, bounded TCP RPC, fencing and reconnect acceptance |
 | [`GATE5-RELIABLE-ZONE-FAILOVER.md`](GATE5-RELIABLE-ZONE-FAILOVER.md) | Gate 5.3 reliable live outbounds, host checkpoints, standby replication and endpoint failover |
 | [`GATE5-MAP-ZONE-TOPOLOGY.md`](GATE5-MAP-ZONE-TOPOLOGY.md) | Gate 5.4 versioned Map-to-Zone topology, hot/cold grouping and independent Zone ticks |
+| [`GATE5-ATOMIC-ZONE-HANDOFF.md`](GATE5-ATOMIC-ZONE-HANDOFF.md) | Gate 5.5 atomic local/remote map handoff, rollback, fenced close and cross-Zone messages |
 
 ## Keeping these honest
 

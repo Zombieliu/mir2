@@ -366,6 +366,10 @@ impl SimulationSession {
         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
         session.account_id = Some(account_id.to_string());
         session.characters = characters;
+        // A runtime starts with demo fixtures. Passkey login must not carry that
+        // selected character into another account: StartGame persists any active
+        // character before loading the requested slot.
+        session.selected_character = None;
         vec![ServerPacket::LoginSuccess {
             characters: session
                 .characters
