@@ -85,6 +85,9 @@ Account-store runtime policy:
   `MIR2_ZONE_TOPOLOGY_JSON`; see `config/zone-topology.example.json`. Explicit
   groups share quiet maps, while unlisted maps receive a dedicated Zone and
   every Zone owns its configured tick cadence.
+- Active characters atomically rebind after a topology-changing map transfer.
+  Remote close is owner-fenced and checkpointed, while server shouts and GM
+  announcements use the bounded cross-Zone live message bus.
 
 Admin runtime read endpoints:
 

@@ -1,18 +1,22 @@
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use mir2_gateway::routing::PerMapSessionRouter;
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
-    SharedZoneOwnerLeaseAuthority, TcpZoneOwnerRpcTransport, ZoneHostServer, ZoneId,
-    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRpcLimits,
-    ZONE_RPC_PROTOCOL_VERSION,
+    SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
+    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostServer, ZoneId,
+    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry,
+    ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::WorldCommand;
+
+static ENVIRONMENT_TEST_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
@@ -67,6 +71,41 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     assert_eq!(server.session_count(), 2);
 
     stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_close_session_is_fenced_and_replays_as_a_checkpoint_tombstone() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::primary();
+    let active = test_transport(active_address, zone_id.clone(), "closed-session");
+    let lease = authority.owner_lease(&zone_id);
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 1 }),
+        ))
+        .expect("session should exist before close");
+    assert_eq!(active_server.session_count(), 1);
+
+    ZoneOwnerRpcTransport::close_session(&active, &lease)
+        .expect("current owner fence should close the remote session");
+    assert_eq!(active_server.session_count(), 0);
+    let checkpoint = active
+        .export_host_checkpoint()
+        .expect("closed-session checkpoint should export");
+
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let standby = test_transport(standby_address, zone_id, "checkpoint-installer");
+    standby
+        .install_host_checkpoint(&checkpoint)
+        .expect("close tombstone should replay on a fresh host");
+    assert_eq!(standby_server.session_count(), 0);
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
 }
 
 #[test]
@@ -598,6 +637,7 @@ fn zone_replicator_copies_checkpoint_between_separate_host_processes() {
 
 #[test]
 fn gateway_session_uses_zone_host_from_environment() {
+    let _environment_lock = ENVIRONMENT_TEST_LOCK.lock().expect("environment test lock");
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (address, server, stop, handle) = start_server(authority);
     let _environment = EnvironmentGuard::set("MIR2_ZONE_HOST_ADDR", &address.to_string());
@@ -619,6 +659,40 @@ fn gateway_session_uses_zone_host_from_environment() {
     );
     assert_eq!(server.session_count(), 1);
 
+    drop(session);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn gateway_session_handoffs_between_remote_map_zones_without_leaking_host_sessions() {
+    let _environment_lock = ENVIRONMENT_TEST_LOCK.lock().expect("environment test lock");
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority);
+    let _environment = EnvironmentGuard::set("MIR2_ZONE_HOST_ADDR", &address.to_string());
+    let _token_environment = EnvironmentGuard::set("MIR2_ZONE_HOST_TOKEN", "");
+    let registry = ZoneRegistry::with_router(
+        ZoneId::primary(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+        Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+    );
+
+    let mut session = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
+    assert_eq!(session.handoff_generation(), 1);
+    assert_eq!(server.session_count(), 1);
+
+    session.transfer_map("crystal:1:100:100");
+    assert_eq!(session.zone_id(), &ZoneId::new("map:1"));
+    assert_eq!(session.handoff_generation(), 2);
+    assert_eq!(server.session_count(), 1);
+
+    drop(session);
+    assert_eq!(server.session_count(), 0);
     stop_server(address, stop, handle);
 }
 

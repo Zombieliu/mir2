@@ -1,19 +1,22 @@
 use std::any::Any;
 use std::fmt;
+use std::mem;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use mir2_protocol::{ClientPacket, Point, ServerPacket};
+use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
 use mir2_simulation::{
-    ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldCommandExecution, WorldSnapshot,
-    ZoneRuntimeHandle,
+    ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
+    WorldSnapshot, ZoneRuntimeHandle,
 };
 
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
 use crate::routing::{
-    shared_zone_movement_ingress, sync_zone_movement_transform, InProcessZoneOwnerCommandClient,
-    RpcZoneOwnerCommandClient, SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender,
+    shared_zone_movement_ingress, sync_zone_movement_transform, GlobalZoneMessageBus,
+    GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, RpcZoneOwnerCommandClient,
+    SessionRouteRequest, SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender,
     SharedZoneMovementIngress, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority, ZoneId,
     ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
 };
@@ -92,6 +95,43 @@ pub struct GatewaySession {
     next_zone_owner_heartbeat_at_ms: u64,
     runtime: ZoneRuntimeHandle,
     gameplay_event_publisher: Option<GatewayGameplayEventPublisher>,
+    routing_context: Option<GatewaySessionRoutingContext>,
+    global_message_bus: Option<Arc<GlobalZoneMessageBus>>,
+    handoff_generation: u64,
+}
+
+#[derive(Clone)]
+struct GatewaySessionRoutingContext {
+    config: GatewayConfig,
+    registry: ZoneRegistry,
+}
+
+struct GatewayLiveOutboundRegistration {
+    zone: Option<Box<dyn ZoneLiveOutboundRegistration>>,
+    global: GlobalZoneMessageRegistration,
+}
+
+impl fmt::Debug for GatewayLiveOutboundRegistration {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("GatewayLiveOutboundRegistration")
+            .field("registration_id", &self.global.registration_id())
+            .field("has_zone_registration", &self.zone.is_some())
+            .finish_non_exhaustive()
+    }
+}
+
+impl ZoneLiveOutboundRegistration for GatewayLiveOutboundRegistration {
+    fn registration_id(&self) -> u64 {
+        self.global.registration_id()
+    }
+
+    fn activate(&self) {
+        if let Some(zone) = self.zone.as_ref() {
+            zone.activate();
+        }
+        self.global.activate();
+    }
 }
 
 impl fmt::Debug for GatewaySession {
@@ -103,6 +143,7 @@ impl fmt::Debug for GatewaySession {
             .field("zone_owner_lease", &self.zone_owner_lease)
             .field("zone_owner_lease_authority", &"ZoneOwnerLeaseAuthority")
             .field("zone_owner_command_client", &"ZoneOwnerCommandClient")
+            .field("handoff_generation", &self.handoff_generation)
             .field("runtime", &"WorldRuntime")
             .finish()
     }
@@ -114,13 +155,14 @@ impl GatewaySession {
     }
 
     pub fn new_with_zone_registry(config: GatewayConfig, registry: &ZoneRegistry) -> Self {
-        let routed = registry.open_session(config);
+        let routed = registry.open_session(config.clone());
         Self::with_routed_world_runtime_and_owner_authority(
             routed.zone_id,
             routed.owner_lease,
             Some(routed.owner_lease_authority),
             routed.runtime,
         )
+        .with_routing_context(config, registry.clone())
     }
 
     pub fn with_routed_world_runtime(zone_id: ZoneId, runtime: ZoneRuntimeHandle) -> Self {
@@ -159,6 +201,9 @@ impl GatewaySession {
             next_zone_owner_heartbeat_at_ms: 0,
             runtime,
             gameplay_event_publisher: None,
+            routing_context: None,
+            global_message_bus: None,
+            handoff_generation: 0,
         }
     }
 
@@ -213,6 +258,9 @@ impl GatewaySession {
             next_zone_owner_heartbeat_at_ms: 0,
             runtime,
             gameplay_event_publisher: Some(gameplay_event_publisher),
+            routing_context: None,
+            global_message_bus: None,
+            handoff_generation: 0,
         }
     }
 
@@ -221,7 +269,7 @@ impl GatewaySession {
         registry: &ZoneRegistry,
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
-        let routed = registry.open_session(config);
+        let routed = registry.open_session(config.clone());
         Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
             routed.zone_id,
             routed.owner_lease,
@@ -229,6 +277,15 @@ impl GatewaySession {
             routed.runtime,
             gameplay_event_sink,
         )
+        .with_routing_context(config, registry.clone())
+    }
+
+    fn with_routing_context(mut self, config: GatewayConfig, registry: ZoneRegistry) -> Self {
+        let global_message_bus = registry.global_message_bus();
+        global_message_bus.register_session(&self.session_id, self.zone_id.clone());
+        self.routing_context = Some(GatewaySessionRoutingContext { config, registry });
+        self.global_message_bus = Some(global_message_bus);
+        self
     }
 
     pub fn zone_id(&self) -> &ZoneId {
@@ -237,6 +294,10 @@ impl GatewaySession {
 
     pub fn zone_owner_lease(&self) -> &ZoneOwnerLease {
         &self.zone_owner_lease
+    }
+
+    pub fn handoff_generation(&self) -> u64 {
+        self.handoff_generation
     }
 
     pub fn renew_zone_owner_lease(&mut self) -> Result<&ZoneOwnerLease, String> {
@@ -285,6 +346,12 @@ impl GatewaySession {
     }
 
     pub(crate) fn zone_movement_ingress(&self) -> Option<GatewayZoneMovementIngress> {
+        // Route-aware sessions must observe the post-command map before the next
+        // packet so a movement-triggered transfer cannot remain bound to the old
+        // Zone. Gate 6 can re-enable the fast ingress through a route-aware owner.
+        if self.routing_context.is_some() {
+            return None;
+        }
         shared_zone_movement_ingress(&self.runtime).map(|ingress| GatewayZoneMovementIngress {
             ingress,
             zone_owner_lease: self.zone_owner_lease.clone(),
@@ -297,8 +364,22 @@ impl GatewaySession {
         &self,
         sender: SharedZoneLiveOutboundSender,
     ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
-        self.zone_owner_command_client
-            .register_live_outbound(&self.runtime, sender)
+        let zone = self
+            .zone_owner_command_client
+            .register_live_outbound(&self.runtime, sender.clone())?;
+        let Some(bus) = self.global_message_bus.as_ref() else {
+            return Ok(zone);
+        };
+        let global = bus.register_live(
+            &self.session_id,
+            zone.as_ref()
+                .map(|registration| registration.registration_id()),
+            sender,
+        );
+        Ok(Some(Box::new(GatewayLiveOutboundRegistration {
+            zone,
+            global,
+        })))
     }
 
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
@@ -500,17 +581,334 @@ impl GatewaySession {
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
         self.validate_zone_owner_lease(request.owner_lease())?;
-        let execution = self
+        let may_change_map = command_may_change_map(request.command());
+        let previous_snapshot = if may_change_map && self.active_identity().is_some() {
+            Some(self.world_snapshot())
+        } else {
+            None
+        };
+        let mut execution = self
             .zone_owner_command_client
             .execute(&mut self.runtime, request)?;
         self.publish_gameplay_event(&execution);
+        self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
+        if may_change_map {
+            self.rebind_after_map_change(previous_snapshot.as_ref())?;
+        }
+        if is_global_message_execution(&execution.packets) {
+            if let Some(bus) = self.global_message_bus.as_ref() {
+                bus.publish_to_other_zones(&self.session_id, &self.zone_id, &execution.packets);
+            }
+        }
+        if let Some(bus) = self.global_message_bus.as_ref() {
+            execution.packets.extend(bus.drain(&self.session_id));
+            execution.outcome.packet_count = execution.packets.len();
+        }
         Ok(execution)
+    }
+
+    fn refresh_global_message_identity(&self, identity: Option<&ActiveSessionIdentity>) {
+        if let Some(bus) = self.global_message_bus.as_ref() {
+            bus.update_session(&self.session_id, self.zone_id.clone(), identity.is_some());
+        }
+    }
+
+    fn rebind_after_map_change(
+        &mut self,
+        previous_snapshot: Option<&WorldSnapshot>,
+    ) -> Result<(), String> {
+        let Some(routing) = self.routing_context.clone() else {
+            return Ok(());
+        };
+        let Some(identity) = self.active_identity() else {
+            return Ok(());
+        };
+        let mut source_snapshot = self.world_snapshot();
+        let Some(map_file_name) = source_snapshot.map_file_name.clone() else {
+            return Ok(());
+        };
+        let route_request = SessionRouteRequest {
+            account_id: Some(identity.account_id.clone()),
+            character_index: Some(identity.character_index),
+            map_file_name: Some(map_file_name),
+        };
+        let target_zone_id = routing.registry.route_session(&route_request);
+        if target_zone_id == self.zone_id {
+            self.refresh_global_message_identity(Some(&identity));
+            return Ok(());
+        }
+
+        sync_zone_movement_transform(&mut self.runtime)
+            .map_err(|error| format!("Zone handoff source transform sync failed: {error}"))?;
+        self.zone_owner_command_client
+            .save_active_character(&self.runtime)
+            .map_err(|error| format!("Zone handoff source save failed: {error}"))?;
+        source_snapshot = self
+            .zone_owner_command_client
+            .world_snapshot(&self.runtime)
+            .map_err(|error| format!("Zone handoff source snapshot failed: {error}"))?;
+
+        let routed = routing
+            .registry
+            .open_session_for(routing.config.clone(), route_request);
+        let target_client =
+            default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
+        let mut target_runtime = routed.runtime;
+        let prepare_result = (|| -> Result<(), String> {
+            target_client.execute(
+                &mut target_runtime,
+                ZoneOwnerCommandRequest::direct(
+                    routed.owner_lease.clone(),
+                    WorldCommand::PasskeyLogin {
+                        account_id: identity.account_id.clone(),
+                    },
+                ),
+            )?;
+            target_client.execute(
+                &mut target_runtime,
+                ZoneOwnerCommandRequest::direct(
+                    routed.owner_lease.clone(),
+                    WorldCommand::ClientPacket(ClientPacket::StartGame {
+                        character_index: identity.character_index,
+                    }),
+                ),
+            )?;
+            if let Some(key) = snapshot_transfer_key(&source_snapshot) {
+                target_client.execute(
+                    &mut target_runtime,
+                    ZoneOwnerCommandRequest::direct(
+                        routed.owner_lease.clone(),
+                        WorldCommand::TransferMap { key },
+                    ),
+                )?;
+            }
+            if let (Some(position), Some(direction)) = (
+                snapshot_player_position(&source_snapshot),
+                snapshot_player_direction(&source_snapshot),
+            ) {
+                target_client.execute(
+                    &mut target_runtime,
+                    ZoneOwnerCommandRequest::direct(
+                        routed.owner_lease.clone(),
+                        WorldCommand::ApplyHandoffTransform {
+                            position,
+                            direction,
+                        },
+                    ),
+                )?;
+            }
+            let target_identity = target_client.active_identity(&target_runtime)?;
+            if target_identity.as_ref() != Some(&identity) {
+                return Err(format!(
+                    "target identity mismatch: expected {identity:?}, got {target_identity:?}"
+                ));
+            }
+            let target_snapshot = target_client.world_snapshot(&target_runtime)?;
+            let source_commitment = normalized_handoff_snapshot(source_snapshot.clone());
+            let target_commitment = normalized_handoff_snapshot(target_snapshot);
+            if source_commitment != target_commitment {
+                let source_json = serde_json::to_value(&source_commitment).ok();
+                let target_json = serde_json::to_value(&target_commitment).ok();
+                let difference = source_json
+                    .as_ref()
+                    .zip(target_json.as_ref())
+                    .and_then(|(source, target)| first_json_difference(source, target, "$"))
+                    .unwrap_or_else(|| "unknown field".to_string());
+                return Err(format!(
+                    "target player-state commitment mismatch at {difference}"
+                ));
+            }
+            Ok(())
+        })();
+
+        if let Err(error) = prepare_result {
+            let _ = target_client.close_session(&mut target_runtime, &routed.owner_lease);
+            self.rollback_failed_handoff(previous_snapshot);
+            return Err(format!(
+                "Zone handoff {} -> {} prepare failed: {error}",
+                self.zone_id, routed.zone_id
+            ));
+        }
+
+        if let Err(error) = self
+            .zone_owner_command_client
+            .close_session(&mut self.runtime, &self.zone_owner_lease)
+        {
+            let _ = target_client.close_session(&mut target_runtime, &routed.owner_lease);
+            self.rollback_failed_handoff(previous_snapshot);
+            return Err(format!(
+                "Zone handoff {} -> {} source close failed: {error}",
+                self.zone_id, routed.zone_id
+            ));
+        }
+
+        let old_runtime = mem::replace(&mut self.runtime, target_runtime);
+        self.zone_id = routed.zone_id;
+        self.zone_owner_lease = routed.owner_lease;
+        self.zone_owner_lease_authority = Some(routed.owner_lease_authority);
+        self.zone_owner_command_client = target_client;
+        self.handoff_generation = self.handoff_generation.saturating_add(1);
+        if let Some(publisher) = self.gameplay_event_publisher.as_ref() {
+            publisher.rebind_zone(self.zone_id.clone());
+        }
+        self.refresh_global_message_identity(Some(&identity));
+        drop(old_runtime);
+        Ok(())
+    }
+
+    fn rollback_failed_handoff(&mut self, previous_snapshot: Option<&WorldSnapshot>) {
+        let Some(key) = previous_snapshot.and_then(snapshot_transfer_key) else {
+            return;
+        };
+        let request = ZoneOwnerCommandRequest::direct(
+            self.zone_owner_lease.clone(),
+            WorldCommand::TransferMap { key },
+        );
+        if self
+            .zone_owner_command_client
+            .execute(&mut self.runtime, request)
+            .is_ok()
+        {
+            let _ = sync_zone_movement_transform(&mut self.runtime);
+            let _ = self
+                .zone_owner_command_client
+                .save_active_character(&self.runtime);
+        }
     }
 
     fn publish_gameplay_event(&self, execution: &WorldCommandExecution) {
         if let Some(publisher) = &self.gameplay_event_publisher {
             publisher.publish(&execution.outcome);
         }
+    }
+}
+
+impl Drop for GatewaySession {
+    fn drop(&mut self) {
+        if let Some(bus) = self.global_message_bus.as_ref() {
+            bus.unregister_session(&self.session_id);
+        }
+        let _ = self
+            .zone_owner_command_client
+            .close_session(&mut self.runtime, &self.zone_owner_lease);
+    }
+}
+
+fn command_may_change_map(command: &WorldCommand) -> bool {
+    matches!(
+        command,
+        WorldCommand::TransferMap { .. }
+            | WorldCommand::MoveTo { .. }
+            | WorldCommand::Stage5Command { .. }
+            | WorldCommand::ClientPacket(
+                ClientPacket::StartGame { .. }
+                    | ClientPacket::Walk { .. }
+                    | ClientPacket::Run { .. }
+                    | ClientPacket::Turn { .. }
+                    | ClientPacket::TownRevive
+                    | ClientPacket::GuildWarReturn { .. }
+            )
+    )
+}
+
+fn snapshot_transfer_key(snapshot: &WorldSnapshot) -> Option<String> {
+    let map = snapshot.map_file_name.as_deref()?;
+    let player = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)?;
+    Some(format!("crystal:{map}:{}:{}", player.x, player.y))
+}
+
+fn snapshot_player_direction(snapshot: &WorldSnapshot) -> Option<mir2_protocol::MirDirection> {
+    snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .map(|entity| entity.direction)
+}
+
+fn snapshot_player_position(snapshot: &WorldSnapshot) -> Option<Point> {
+    snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .map(|entity| Point {
+            x: entity.x,
+            y: entity.y,
+        })
+}
+
+fn normalized_handoff_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
+    snapshot.tick = 0;
+    snapshot.map_title = None;
+    snapshot.player_object_id = None;
+    snapshot
+        .entities
+        .retain(|entity| entity.kind == WorldEntityKind::SelfPlayer);
+    for entity in &mut snapshot.entities {
+        entity.object_id = 0;
+    }
+    snapshot.ground_drops.clear();
+    snapshot
+}
+
+fn is_global_message_execution(packets: &[ServerPacket]) -> bool {
+    packets.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Shout
+                    | ChatType::Shout2
+                    | ChatType::Shout3
+                    | ChatType::Announcement,
+                ..
+            } | ServerPacket::ObjectChat {
+                chat_type: ChatType::Shout
+                    | ChatType::Shout2
+                    | ChatType::Shout3
+                    | ChatType::Announcement,
+                ..
+            }
+        )
+    })
+}
+
+fn first_json_difference(
+    source: &serde_json::Value,
+    target: &serde_json::Value,
+    path: &str,
+) -> Option<String> {
+    match (source, target) {
+        (serde_json::Value::Object(source), serde_json::Value::Object(target)) => {
+            for key in source.keys().chain(target.keys()) {
+                let next = format!("{path}.{key}");
+                match (source.get(key), target.get(key)) {
+                    (Some(source), Some(target)) => {
+                        if let Some(difference) = first_json_difference(source, target, &next) {
+                            return Some(difference);
+                        }
+                    }
+                    _ => return Some(next),
+                }
+            }
+            None
+        }
+        (serde_json::Value::Array(source), serde_json::Value::Array(target)) => {
+            if source.len() != target.len() {
+                return Some(format!("{path}.length({}!={})", source.len(), target.len()));
+            }
+            for (index, (source, target)) in source.iter().zip(target).enumerate() {
+                if let Some(difference) =
+                    first_json_difference(source, target, &format!("{path}[{index}]"))
+                {
+                    return Some(difference);
+                }
+            }
+            None
+        }
+        _ if source != target => Some(format!("{path} ({source}!={target})")),
+        _ => None,
     }
 }
 
@@ -1279,11 +1677,16 @@ mod tests {
     fn gateway_zone_movement_ingress_publishes_gameplay_event_once() {
         let event_sink = Arc::new(InMemoryGameplayEventSink::default());
         let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
-        let mut session = GatewaySession::new_with_zone_registry_and_event_sink(
-            GatewayConfig::default(),
-            &crate::ZoneRegistry::in_process(),
-            shared_event_sink,
-        );
+        let registry = ZoneRegistry::in_process();
+        let routed = registry.open_session(GatewayConfig::default());
+        let mut session =
+            GatewaySession::with_routed_world_runtime_and_owner_authority_and_event_sink(
+                routed.zone_id,
+                routed.owner_lease,
+                Some(routed.owner_lease_authority),
+                routed.runtime,
+                shared_event_sink,
+            );
         session.handle_packet(ClientPacket::Login {
             account_id: "demo".to_string(),
             password: "demo".to_string(),
@@ -1316,8 +1719,13 @@ mod tests {
         let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
         let shared_authority: SharedZoneOwnerLeaseAuthority = authority.clone();
         let registry = ZoneRegistry::in_process_with_owner_lease_authority(shared_authority);
-        let mut session =
-            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let routed = registry.open_session(GatewayConfig::default());
+        let mut session = GatewaySession::with_routed_world_runtime_and_owner_authority(
+            routed.zone_id,
+            routed.owner_lease,
+            Some(routed.owner_lease_authority),
+            routed.runtime,
+        );
         session.handle_packet(ClientPacket::Login {
             account_id: "demo".to_string(),
             password: "demo".to_string(),
