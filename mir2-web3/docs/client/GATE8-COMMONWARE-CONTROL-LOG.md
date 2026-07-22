@@ -42,6 +42,9 @@ finalized commands to the Gate 6 scheduler and Gate 7 guild security registry. I
 applied height and rejects gaps. No unfinalized proposal can change a placement or admit a guild
 node.
 
+Gate 9 also projects reward-policy registration and epoch closure through this same ordered
+boundary. A close command uses its finalized height to fence every included verified-work receipt.
+
 ## Acceptance
 
 ```bash

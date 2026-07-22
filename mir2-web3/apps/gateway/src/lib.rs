@@ -1,4 +1,5 @@
 mod auth;
+pub mod beta;
 mod browser_commands;
 pub mod cache;
 pub mod consensus_log;
@@ -15,6 +16,10 @@ pub mod web;
 pub mod zone_lease;
 pub mod zone_rpc;
 
+pub use beta::{
+    run_gate10_acceptance, BetaReadinessCheck, BetaReadinessReport, BetaReadinessRequirements,
+    Gate10AcceptanceEvidence, ProductionBetaReadinessProbe,
+};
 pub use cache::{
     default_gateway_session_cache_from_env, fresh_route_request_for_character,
     gateway_session_cache_from_env, gateway_session_cache_requires_redis_from_env,
