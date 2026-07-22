@@ -1,17 +1,20 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
 
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::{ZoneHostHealth, ZoneId};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum ZoneHostLifecycle {
     Active,
     Draining,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZoneHostRegistration {
     pub host_id: String,
     pub endpoint: String,
@@ -55,7 +58,8 @@ impl ZoneHostRegistration {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZoneHostHeartbeat {
     pub session_count: usize,
     pub active_connections: usize,
@@ -72,14 +76,16 @@ impl ZoneHostHeartbeat {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZonePlacementEndpoint {
     pub host_id: String,
     pub endpoint: String,
     pub failure_domain: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZonePlacementLease {
     pub zone_id: ZoneId,
     pub generation: u64,

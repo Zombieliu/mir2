@@ -1,6 +1,7 @@
 mod auth;
 mod browser_commands;
 pub mod cache;
+pub mod consensus_log;
 pub mod control_plane;
 pub mod events;
 mod inject;
@@ -22,6 +23,11 @@ pub use cache::{
     GatewaySessionCache, GatewaySessionCacheKey, GatewaySessionCacheRecord,
     GatewaySessionCacheRuntimeBackend, GatewaySessionCacheStatus, GatewaySessionRoute,
     InMemoryGatewaySessionCache, RedisGatewaySessionCache, SharedGatewaySessionCache,
+};
+pub use consensus_log::{
+    CommonwareControlLog, ConsensusEquivocationEvidence, ControlBlock, ControlCommandEnvelope,
+    FinalizedControlBlock, FinalizedControlProjector, ProjectedControlEffect,
+    ReplicatedControlCommand,
 };
 pub use control_plane::{
     ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostLifecycle, ZoneHostRegistration,

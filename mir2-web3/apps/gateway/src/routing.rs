@@ -24,11 +24,13 @@ use mir2_simulation::{
     ZoneCommand, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
     ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
+use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
 
 use crate::GatewayConfig;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct ZoneId(String);
 
 impl ZoneId {

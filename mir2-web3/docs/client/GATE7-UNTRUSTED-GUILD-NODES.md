@@ -52,3 +52,5 @@ cargo +1.89.0 check -p mir2-gateway --all-targets
 The acceptance test runs two honest deterministic runtimes and one response-tampering runtime. The
 2-of-3 result exactly matches the honest packet, the divergent node is quarantined, and an expired
 admission fails closed before execution.
+
+Gate 8 continues in [`GATE8-COMMONWARE-CONTROL-LOG.md`](GATE8-COMMONWARE-CONTROL-LOG.md).
