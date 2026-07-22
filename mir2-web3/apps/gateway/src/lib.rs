@@ -8,6 +8,7 @@ mod session;
 pub mod tcp;
 pub mod web;
 pub mod zone_lease;
+pub mod zone_rpc;
 
 pub use cache::{
     default_gateway_session_cache_from_env, fresh_route_request_for_character,
@@ -41,3 +42,7 @@ pub use routing::{
     ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
+pub use zone_rpc::{
+    validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
+    ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
+};

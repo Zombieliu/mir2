@@ -143,6 +143,10 @@ impl ZoneOwnerCommandRequest {
     pub fn into_command(self) -> WorldCommand {
         self.command
     }
+
+    pub fn into_parts(self) -> (ZoneOwnerLease, ZoneOwnerCommandMode, WorldCommand) {
+        (self.owner_lease, self.mode, self.command)
+    }
 }
 
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
@@ -174,6 +178,10 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
+    fn on_connect(&self, runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
+        Ok(runtime.on_connect())
+    }
+
     fn execute(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -207,6 +215,10 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
 
 pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
+    fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
+        Err("zone owner RPC transport does not implement on_connect".to_string())
+    }
+
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String>;
 
     fn world_snapshot(&self) -> Result<WorldSnapshot, String>;
@@ -241,6 +253,10 @@ impl RpcZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
+    fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
+        self.transport.on_connect()
+    }
+
     fn execute(
         &self,
         _runtime: &mut ZoneRuntimeHandle,
@@ -406,6 +422,17 @@ impl HostedZoneOwnerCommandClient {
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
     }
 
+    pub fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
+        let runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        runtime
+            .as_ref()
+            .map(|runtime| runtime.on_connect())
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
+    }
+
     pub fn active_identity(&self) -> Result<Option<ActiveSessionIdentity>, String> {
         let runtime = self
             .runtime
@@ -443,6 +470,10 @@ impl HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
+    fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
+        HostedZoneOwnerCommandClient::on_connect(self)
+    }
+
     fn execute(
         &self,
         _runtime: &mut ZoneRuntimeHandle,
@@ -489,6 +520,10 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
+    fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
+        HostedZoneOwnerCommandClient::on_connect(self)
+    }
+
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
         self.execute_request(request)
     }
