@@ -23,7 +23,8 @@ param(
   [int]$CropWidth = 0,
   [int]$CropHeight = 0,
   [int]$ExpectedClientWidth = 0,
-  [int]$ExpectedClientHeight = 0
+  [int]$ExpectedClientHeight = 0,
+  [switch]$ParkCursorOutsideClient
 )
 
 $ErrorActionPreference = "Stop"
@@ -325,6 +326,19 @@ if ($PreKeys.Count -gt 0) {
   $window = Get-OriginalWindow
 }
 Assert-ExpectedClientSize $window
+$parkedCursor = $null
+if ($ParkCursorOutsideClient) {
+  $outsideScreenX = $window.screenX - 16
+  $outsideScreenY = $window.screenY + [Math]::Floor($window.height / 2)
+  if ($outsideScreenX -lt 0) {
+    $outsideScreenX = $window.screenX + $window.width + 16
+  }
+  $parkedCursor = @{
+    requestedScreenX = $outsideScreenX
+    requestedScreenY = $outsideScreenY
+    succeeded = $false
+  }
+}
 $captureArea = Get-CaptureArea $window
 $samples = New-Object "System.Collections.Generic.List[object]"
 $safeLabel = Safe-Label $Label
@@ -358,6 +372,19 @@ if (-not [string]::IsNullOrWhiteSpace($StartSignalFile)) {
     }
     Start-Sleep -Milliseconds 10
   }
+}
+
+if ($ParkCursorOutsideClient) {
+  # Park immediately before the first frame; capture coordinators may move the
+  # system cursor while this process is waiting for its start signal.
+  $parkedCursor.succeeded = [Mir2OriginalWindowFramesWin32]::SetCursorPos(
+    $parkedCursor.requestedScreenX,
+    $parkedCursor.requestedScreenY
+  )
+  if (-not $parkedCursor.succeeded) {
+    throw "Could not park the system cursor outside the Crystal client."
+  }
+  Start-Sleep -Milliseconds 60
 }
 
 $captureStartedAt = [DateTimeOffset]::UtcNow
@@ -421,6 +448,7 @@ $report = @{
   frameImageFormat = $ImageFormat
   frameImageQuality = if ($ImageFormat -eq "jpeg") { $JpegQuality } else { $null }
   minimizedWindows = $minimizedWindows
+  cursorParking = $parkedCursor
   sampleCount = $samples.Count
   samples = $samples
 }

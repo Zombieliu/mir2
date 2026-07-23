@@ -3202,6 +3202,9 @@ fn merge_shared_entity_state(
     if incoming.owner_name.is_none() {
         incoming.owner_name = existing.owner_name.clone();
     }
+    if incoming.ai.is_none() {
+        incoming.ai = existing.ai;
+    }
     if existing.dead {
         incoming.dead = true;
         incoming.hp = Some(0);
@@ -3265,6 +3268,7 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         kind: WorldEntityKind::Monster,
         name: info.name.clone(),
         owner_name: None,
+        ai: Some(info.ai),
         x: info.location.x,
         y: info.location.y,
         direction: info.direction,
@@ -3339,7 +3343,10 @@ fn zone_monster_spawn_from_shared_entity(
             })
             .or_else(|| template_ref.map(|monster| monster.image))
             .unwrap_or_default(),
-        ai: zone_monster_ai_for_shared_entity(entity, template_ref.map(|monster| monster.ai)),
+        ai: zone_monster_ai_for_shared_entity(
+            entity,
+            entity.ai.or_else(|| template_ref.map(|monster| monster.ai)),
+        ),
         level: entity
             .level
             .or_else(|| template_ref.map(|monster| monster.level))
@@ -3372,6 +3379,7 @@ fn world_entity_from_object_player_info(
         kind: WorldEntityKind::Player,
         name: info.name.clone(),
         owner_name,
+        ai: None,
         x: info.location.x,
         y: info.location.y,
         direction: info.direction,
@@ -3395,6 +3403,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         kind: WorldEntityKind::Npc,
         name: info.name.clone(),
         owner_name: None,
+        ai: None,
         x: info.location.x,
         y: info.location.y,
         direction: info.direction,
@@ -3427,7 +3436,12 @@ fn shared_entity_spawn_packet(entity: &WorldEntitySnapshot) -> Option<ServerPack
                 image: sprite_image_from_shared_entity(entity, "Monster"),
                 direction: entity.direction,
                 effect: 0,
-                ai: 0,
+                ai: zone_monster_ai_for_shared_entity(
+                    entity,
+                    entity.ai.or_else(|| {
+                        crystal_monster_by_name(&entity.name).map(|monster| monster.ai)
+                    }),
+                ),
                 light: entity.light,
                 dead: entity.dead || entity.hp.is_some_and(|hp| hp <= 0),
                 skeleton: false,
@@ -8195,6 +8209,7 @@ mod tests {
     fn zone_monster_spawn_from_shared_entity_restores_crystal_neutral_ai() {
         let mut guard = shared_monster_entity(9001);
         guard.name = "Royal_Guard".to_string();
+        guard.ai = None;
         guard.disposition = WorldEntityDisposition::Hostile;
         guard.hp = None;
         guard.max_hp = None;
@@ -8209,6 +8224,7 @@ mod tests {
 
         let mut archer = shared_monster_entity(9002);
         archer.name = "Royal_Archer".to_string();
+        archer.ai = None;
         archer.disposition = WorldEntityDisposition::Hostile;
         archer.hp = None;
         archer.max_hp = None;
@@ -8273,6 +8289,7 @@ mod tests {
         let mut after = before.clone();
         let mut monster = shared_monster_entity(98_917);
         monster.name = "Royal_Guard".to_string();
+        monster.ai = None;
         monster.disposition = WorldEntityDisposition::Hostile;
         monster.hp = None;
         monster.max_hp = None;
@@ -13217,6 +13234,11 @@ mod tests {
 
         assert!(observer_packets.iter().any(|packet| matches!(
             packet,
+            ServerPacket::ObjectMonster { info }
+                if info.object_id == movement.object_id && info.ai == 1
+        )));
+        assert!(observer_packets.iter().any(|packet| matches!(
+            packet,
             ServerPacket::ObjectWalk { movement: observed }
                 if observed.object_id == movement.object_id
                     && observed.position == movement.position
@@ -15009,6 +15031,7 @@ mod tests {
             kind: WorldEntityKind::Monster,
             name: "Deer".to_string(),
             owner_name: None,
+            ai: Some(1),
             x: 329,
             y: 269,
             direction: MirDirection::Down,
@@ -15092,6 +15115,7 @@ mod tests {
             kind: WorldEntityKind::SelfPlayer,
             name: "Picker".to_string(),
             owner_name: None,
+            ai: None,
             x,
             y,
             direction: MirDirection::Down,

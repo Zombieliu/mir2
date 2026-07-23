@@ -3,9 +3,11 @@
 import { memo, useEffect, useState } from "react";
 
 import {
+  crystalMiniMapRadarColor,
   createLinearMiniMapTransform,
   findCrystalMiniMapTransform,
   miniMapImagePointToViewportPoint,
+  worldToCrystalMiniMapRadarPoint,
   worldToMiniMapImagePoint,
   type CrystalMiniMapPoint,
   type CrystalMiniMapTransform,
@@ -15,6 +17,7 @@ import { ORIGINAL_UI } from "../../lib/original-ui";
 import { CRYSTAL_BIG_MAP_NPCS } from "../../lib/generated/crystal-npc-info-data";
 import miniMapMeta from "../../public/original-ui/MMap/meta.json";
 import { SpriteButton } from "./original-client-overlays";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import {
   handleSceneAssetImageError,
   handleSceneAssetImageLoad,
@@ -53,6 +56,7 @@ type DisplayEntity = {
   kind: "selfPlayer" | "player" | "monster" | "npc";
   name: string;
   ownerName?: string;
+  ai?: number;
   x: number;
   y: number;
   dead?: boolean;
@@ -290,6 +294,14 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
   const panelFrame = smallMode ? ORIGINAL_UI.game.miniMapSmall : ORIGINAL_UI.game.miniMap;
   const mapTitle = crystalMiniMapTitle(world.mapTitle, t);
   const lightIcon = crystalMiniMapLightIcon(world.lightSetting);
+  const coordinateText = player ? `${player.x}, ${player.y}` : "0, 0";
+  const coordinateGdiText = findCrystalGdiTextAsset({
+    text: coordinateText,
+    foreground: "#ffffff",
+    outline: true,
+    width: 55,
+    height: 15,
+  });
 
   useEffect(() => {
     if (hasRasterMiniMap) {
@@ -316,7 +328,11 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
       {!smallMode ? <div className="mini-map-name">
         <span>{mapTitle}</span>
       </div> : null}
-      <div className="mini-map-coords">{player ? `${player.x}, ${player.y}` : "0, 0"}</div>
+      <div className="mini-map-coords">
+        {coordinateGdiText ? (
+          <CrystalGdiTextImage asset={coordinateGdiText} accessibleText={coordinateText} />
+        ) : coordinateText}
+      </div>
       <div className="mini-map-button mail">
         <SpriteButton
           sprite={ORIGINAL_UI.game.miniMapButtons.mail}
@@ -728,10 +744,7 @@ function miniMapViewportPointForWorldPoint(
   point: CrystalMiniMapPoint,
 ) {
   if (bounds.transform && bounds.imageViewport) {
-    return miniMapImagePointToViewportPoint(
-      worldToMiniMapImagePoint(bounds.transform, point),
-      bounds.imageViewport,
-    );
+    return worldToCrystalMiniMapRadarPoint(bounds.transform, bounds.imageViewport, point);
   }
   return {
     x: point.x - bounds.minX,
@@ -821,23 +834,14 @@ function miniMapTerrainColor(kind: string) {
 }
 
 function miniMapEntityColor(entity: DisplayEntity, player: DisplayEntity | null) {
+  let ownedByPlayer = false;
   if (player && entity.objectId !== player.objectId) {
     const ownerName = entity.ownerName?.trim();
     if ((ownerName && ownerName === player.name) || entity.name.endsWith(`(${player.name})`)) {
-      return "#0000ff";
+      ownedByPlayer = true;
     }
   }
-
-  switch (entity.kind) {
-    case "selfPlayer":
-    case "player":
-      return "#ffffff";
-    case "npc":
-      return "#00ff32";
-    case "monster":
-    default:
-      return "#ff0000";
-  }
+  return crystalMiniMapRadarColor({ kind: entity.kind, ai: entity.ai, ownedByPlayer });
 }
 
 function clampNumber(value: number, min: number, max: number) {

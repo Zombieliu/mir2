@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "key": "unknown",
+      "text": "must fail",
+      "foreground": "#FFFFFFFF",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["WordBreak"],
+      "size": "auto",
+      "fontSize": 12
+    }
+  ]
+}

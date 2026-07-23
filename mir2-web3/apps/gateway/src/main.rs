@@ -2,6 +2,7 @@ use std::env;
 use std::io;
 use std::path::PathBuf;
 
+use mir2_gateway::tcp::chat_broadcast::ChatBroadcastHub;
 use mir2_gateway::tcp::run_tcp_gateway;
 use mir2_gateway::web::run_web_gateway;
 use mir2_gateway::GatewayConfig;
@@ -30,10 +31,12 @@ async fn async_main() -> std::io::Result<()> {
         .with_crystal_world_runtime()
         .with_account_store_environment(PathBuf::from(account_store_path))
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let chat_hub = ChatBroadcastHub::from_env()?;
+    let _chat_broadcast_task = chat_hub.spawn();
 
     tokio::try_join!(
-        run_tcp_gateway(&tcp_addr, config.clone()),
-        run_web_gateway(&web_addr, config),
+        run_tcp_gateway(&tcp_addr, config.clone(), chat_hub.clone()),
+        run_web_gateway(&web_addr, config, chat_hub),
     )?;
 
     Ok(())

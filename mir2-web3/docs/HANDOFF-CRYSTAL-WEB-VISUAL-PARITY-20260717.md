@@ -162,5 +162,46 @@ gap, and acquire one overlay-free native pair before final human acceptance.
    minimap typography; r16 reports chat 82.1%, HUD UI 88.4%, MiniMap 87.2%.
 2. Acquire an overlay-free native pair after the current Codex task ends so the
    external top-left status bubble does not pollute full/world metrics.
-3. Re-run strict movement, map transaction, dual-render-backend, typecheck, and
-   production-build gates before requesting human acceptance.
+3. After future rendering changes, re-run strict movement, map transaction,
+   dual-render-backend, typecheck, and production-build gates. The current
+   closeout pass is recorded below.
+
+## Deterministic Normalization Closeout - 2026-07-23
+
+The overlay-free, same-account, same-coordinate capture path is now repeatable.
+It waits for Crystal `Connected` before sending login/bootstrap, keeps only the
+latest pending login intent, rejects late events from stale WebSockets, parks
+the Windows cursor outside the native client, and redacts secrets from both
+structured diagnostics and serialized WebSocket frames.
+
+Final paired evidence:
+
+- Dawn baseline r29: full `36.4%`, world `40.2%`, world MAE `18.845`.
+- Final fixed-Dawn r33: full `24.2%`, world `26.1%`, world MAE `11.987`.
+- Night baseline r26: full `12.4%`, world `12.6%`, world MAE `6.985`.
+- Final fixed-Night r32: full `12.5%`, world `12.6%`, world MAE `7.074`.
+- r33 and r32 both report exact map `0 @ 328,275`, paired server light,
+  zero critical console errors, and zero non-favicon 404s.
+
+Dawn/Evening map lights use the measured `brightness(1.9)` and `+24px Y`
+browser-compositor correction. Night intentionally does not: applying the same
+correction to the black Night light buffer regressed world changed pixels to
+`43.3%` in rejected r31. The server-only
+`MIR2_SIMULATION_FIXED_LIGHT_SETTING=1..4` override makes QA captures stable;
+unset or invalid values retain Crystal's UTC light cycle.
+
+This closes the deterministic normalization goal, not final human visual
+acceptance. Remaining pixel energy is dominated by GDI text rasterization,
+chat content/state, and independently moving NPC/monster animation positions.
+Raw r32/r33 evidence remains under `docs/generated/player-qa/visual-parity/`
+and is intentionally excluded from Git.
+
+Final regression evidence is also green on both runtime tiers. The WebGPU and
+WebGL2 reports under `docs/generated/player-qa/movement-jitter/` are named
+`movement-visual-parity-final-webgpu-20260723.json` and
+`movement-visual-parity-final-webgl2-20260723.json`; each records `ok=true`,
+28/28 assertions, four ordered movement requests and acknowledgements, final
+position `328,275`, no pending plan, no critical console errors, and no
+non-favicon 404s. The release asset preflight verifies 39,401 manifest assets,
+8,228 packed entity sprites, 99.76% renderable map-frame coverage, and zero
+source-unavailable map frames.

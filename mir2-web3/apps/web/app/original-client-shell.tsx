@@ -125,6 +125,11 @@ import {
   type SceneChatBubble,
 } from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
+import {
+  createCrystalAnimationWorldSeed,
+  entityAnimationRuntimeFromWindow,
+  resolveCrystalEntityAnimationPoses,
+} from "./components/original-client-entity-animation-runtime";
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 import {
   WebGl2MapAtlasLayer,
@@ -585,6 +590,7 @@ export function OriginalClientShell({
           : "Loading map…",
   );
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
+  const [entityAnimationWorldSeed] = useState(createCrystalAnimationWorldSeed);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
@@ -750,6 +756,13 @@ export function OriginalClientShell({
   useEffect(() => {
     const previousScreen = previousScreenRef.current;
     previousScreenRef.current = screen;
+
+    if (
+      previousScreen !== screen &&
+      (previousScreen === "game" || screen === "game")
+    ) {
+      entityAnimationRuntimeFromWindow()?.resetMir2EntityAnimations?.();
+    }
 
     if (previousScreen === "login" && screen === "select") {
       setLoginTransitionFrame(0);
@@ -1316,7 +1329,7 @@ export function OriginalClientShell({
     }
     const spriteNow = Date.now();
     const snapshots = entityMotionSnapshotsRef.current;
-    return viewportEntities.map((entity) => {
+    const animationInputs = viewportEntities.map((entity) => {
       const motionSnapshot = snapshots[entity.objectId];
       const presentationMotion = entity.objectId === player.objectId ? bevyLocalSelfMotion : null;
       const packetAnimationState = entityAnimationStateForEntity(entity, snapshots, spriteNow);
@@ -1330,13 +1343,41 @@ export function OriginalClientShell({
           packetAnimationState === "running")
           ? presentationMotion
           : null;
-      const animationState = activePresentationMotion
+      const legacyAnimationState = activePresentationMotion
         ? activePresentationMotion.mode === "run"
           ? "running"
           : "walking"
         : packetAnimationState;
       return {
         entity,
+        motionSnapshot,
+        activePresentationMotion,
+        legacyAnimationState,
+      };
+    });
+    const animationPoses = resolveCrystalEntityAnimationPoses({
+      runtime: entityAnimationRuntimeFromWindow(),
+      worldKey: `${world.mapFileName ?? "none"}:${player.objectId}`,
+      worldSeed: entityAnimationWorldSeed,
+      now: spriteNow,
+      entities: animationInputs.map(({ entity, legacyAnimationState, motionSnapshot }) => ({
+        entity,
+        state: legacyAnimationState,
+        motionSnapshot,
+      })),
+    });
+
+    return animationInputs.map(({
+      entity,
+      motionSnapshot,
+      activePresentationMotion,
+      legacyAnimationState,
+    }) => {
+      const animationPose = animationPoses[entity.objectId] ?? null;
+      const animationState = animationPose?.animationState ?? legacyAnimationState;
+      return {
+        entity,
+        animationPose,
         sprite: buildViewportEntitySprite(
           entity,
           sceneSpriteLibraries,
@@ -1345,10 +1386,20 @@ export function OriginalClientShell({
           animationState,
           motionSnapshot,
           activePresentationMotion,
+          animationPose,
         ),
       };
     });
-  }, [bevyLocalSelfMotion, player, viewportEntities, sceneSpriteLibraries, sceneSpriteFrameIndex]);
+  }, [
+    bevyLocalSelfMotion,
+    bevyMapRuntimeGeneration,
+    entityAnimationWorldSeed,
+    player,
+    sceneSpriteFrameIndex,
+    sceneSpriteLibraries,
+    viewportEntities,
+    world.mapFileName,
+  ]);
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(

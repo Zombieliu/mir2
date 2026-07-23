@@ -1486,6 +1486,24 @@ fn crystal_time_of_day_lights_match_server_utc_hour_formula() {
 }
 
 #[test]
+fn fixed_crystal_light_setting_accepts_only_crystal_runtime_values() {
+    assert_eq!(super::parse_fixed_crystal_light_setting(" 1 "), Some(1));
+    assert_eq!(super::parse_fixed_crystal_light_setting("4"), Some(4));
+    assert_eq!(super::parse_fixed_crystal_light_setting("0"), None);
+    assert_eq!(super::parse_fixed_crystal_light_setting("5"), None);
+    assert_eq!(super::parse_fixed_crystal_light_setting("night"), None);
+    assert_eq!(
+        super::crystal_time_of_day_lights_with_override(Some("1"), 4),
+        1
+    );
+    assert_eq!(
+        super::crystal_time_of_day_lights_with_override(Some("invalid"), 4),
+        2
+    );
+    assert_eq!(super::crystal_time_of_day_lights_with_override(None, 8), 3);
+}
+
+#[test]
 fn start_game_uses_crystal_default_warrior_vitals() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -3528,10 +3546,11 @@ fn crystal_current_map_transfer_spawns_visible_respawns_into_world() {
         .entities
         .iter()
         .any(|entity| { entity.kind == WorldEntityKind::Monster && entity.name == "Deer" }));
-    assert!(snapshot
-        .entities
-        .iter()
-        .any(|entity| { entity.kind == WorldEntityKind::Monster && entity.name == "Royal_Guard" }));
+    assert!(snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && entity.name == "Royal_Guard"
+            && entity.ai == Some(6)
+    }));
 }
 
 #[test]

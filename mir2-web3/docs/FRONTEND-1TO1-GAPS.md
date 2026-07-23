@@ -1,6 +1,33 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
+
+> 2026-07-23 final deterministic frontend Candidate closure: the remaining
+> fixed-font, chat-history, and actor-phase work is implemented. Eight exact
+> Crystal acceptance strings are exported through Windows TextRenderer at Arial
+> 8pt/96 DPI with source-accurate outline/background semantics and verified ARGB
+> hashes; dynamic text uses the normal accessible renderer unless its complete
+> key matches. Chat renders the original 17 types/colours, 614px wrapping,
+> four-line history, filters and scroll position with no timestamps, driven by
+> real shared Gateway broadcasts instead of capture-only startup strings.
+> Persistent Rust animation state now owns each object's incarnation, seeded
+> idle/harvest phase, FIFO action queue, death and revive lifecycle, and supplies
+> one pose to the Bevy/WebGL2/DOM presentation paths. Game-screen lifecycle
+> transitions reset the bridge so relogging cannot reuse a prior action queue,
+> while an in-game network reconnect preserves visual continuity.
+>
+> Evidence `cwp-20260723-r40-gdi-chat-final` at Bichon `0 @ 328,275`, light 1,
+> runtime `bevy-e9d354eada933661`, is 100% automated Candidate with 0 critical
+> console errors and 0 non-favicon 404s. It records 6 exact GDI nodes, 12 Rust
+> animation poses, the real `Online/LineMessage/Online/Online` four-line state,
+> 89% world similarity, 88% full HUD, 91% HUD UI, 84% chat, and 87% MiniMap.
+> Strict current WebGPU and WebGL2 movement captures remain clean, and the
+> native/current-Web four-action report aligns all actions and emits 4/4 frame
+> pairs. No automated P0/P1 frontend gap remains for this scene. The only open
+> item is final human **Accepted** visual/feel review; 24% full-window and 26%
+> world thresholded pixel change still includes different roaming actor
+> positions, idle/effect sampling, and compositor output, so it is not described
+> as bit-for-bit identity or as a movement defect.
 
 > 2026-07-22 reproducible developer-handoff closure: the root repository now
 > pins the maintained Crystal fork/branch, includes Windows bootstrap/start/
@@ -2473,3 +2500,53 @@ Human acceptance is still required for:
 - whether mouse targeting and item interaction feel right;
 - whether combat feedback, animation pacing, and panel layering are acceptable;
 - whether small visual differences should be fixed or accepted.
+
+## 2026-07-23 Deterministic Visual-Parity Closeout
+
+- The current same-account gate uses overlay-free Crystal/Web `1024x768`
+  captures at Bichon `0 @ 328,275` with explicit server light pairing.
+- Dawn improved from r29 full/world changed pixels `36.4%/40.2%` to final r33
+  `24.2%/26.1%`; world MAE fell from `18.845` to `11.987`.
+- Final Night r32 remains at full/world `12.5%/12.6%`, matching the r26
+  `12.4%/12.6%` baseline and proving the Dawn/Evening correction is scoped.
+- HUD experience fill now follows Crystal's `(1004 - 3) * ratio` clipping,
+  HP uses the native source crop, chat scrollbar rows match native geometry,
+  minimap projection follows Crystal's reverse quantization, and AI 6 monsters
+  retain the native green radar colour through observer re-seeding.
+- The capture/login path now waits for `Connected`, retains one latest pending
+  action, ignores stale-socket events, verifies cursor parking, and redacts
+  serialized secrets. r33 records zero critical errors and zero 404s.
+- Final strict headed captures pass 28/28 assertions on both selected WebGPU
+  and forced WebGL2. Each sends and acknowledges four ordered moves, settles
+  at `328,275`, and leaves no pending movement/map transaction or browser
+  error. The dual-backend runtime smoke also remains fully green.
+- The captured Bichon source closure adds 555 deterministic Crystal map PNGs.
+  Release preflight sees 39,401 manifest assets, 12,015 original map PNGs,
+  8,228 packed entity sprites, and 99.76% renderable map-frame coverage.
+- Remaining visual gaps are GDI typography, deterministic chat content, and
+  independently moving entity/animation phases. They are no longer classified
+  as movement, camera, or map-transaction failures.
+
+## 2026-07-23 Quest Marker GPU Occlusion Regression
+
+- Live inspection confirmed that all four nearby Scarecrow entities resolve
+  through `Monster/005`; the full pack contains 234 drawable frames and the
+  separated one-tile capture shows the native thin straw/skeletal body. The
+  reported invisibility was player overlap and low contrast, not a missing
+  atlas or failed entity render.
+- NPC quest markers were still mounted inside `viewport-sprite-overlay`.
+  With the Bevy entity renderer active, the GPU canvas at z-index 2 covered
+  that DOM layer even though the quest state and marker image were present.
+- Quest markers now live in the independent `viewport-entity-overlay`, share
+  the imperative entity-motion registry, retain Crystal sprite offsets and
+  NPC activation, and carry the NPC object id for deterministic QA lookup.
+- The live account currently has the available stage, so Crystal correctly
+  shows yellow exclamation markers. Accepted/in-progress and ready-to-turn-in
+  stages continue to select white and yellow question markers respectively.
+- Evidence:
+  `docs/generated/player-qa/r41-quest-marker-overlay/r41-quest-marker-overlay-final.jpg`
+  shows three visible yellow exclamation markers above the WebGPU scene.
+  `elementsFromPoint` reports the marker above the drop overlay and canvas.
+- Verification passed:
+  `node apps/web/scripts/test-player-frames.mjs`,
+  `npm run typecheck --prefix apps/web`, and `git diff --check`.
