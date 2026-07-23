@@ -6,10 +6,17 @@ use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use mir2_gateway::{SignedZoneHostHeartbeat, ZoneHostTelemetrySnapshot};
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use base64::Engine;
+use mir2_gateway::{
+    CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, SignedZoneHostHeartbeat,
+    ZoneHostTelemetrySnapshot,
+};
 use mir2_protocol::{
     decode_server_packet, encode_client_packet, ClientPacket, MirDirection, ServerPacket,
 };
+use rand::rngs::OsRng;
+use rand::RngCore;
 use serde::Serialize;
 
 const DEFAULT_GATEWAY_ADDR: &str = "gateway:7000";
@@ -30,6 +37,8 @@ struct Gate12AcceptanceEvidence {
     standby_session_count_after_failure: usize,
     primary_heartbeat_verified: bool,
     standby_heartbeat_verified: bool,
+    primary_remote_capacity_verified: bool,
+    standby_remote_capacity_verified: bool,
     prometheus_metric_verified: bool,
     post_failure_user_location_observed: bool,
     post_failure_packet_count: usize,
@@ -52,7 +61,9 @@ fn run() -> Result<(), String> {
         .unwrap_or_else(|_| DEFAULT_PRIMARY_OPERATOR_ADDR.to_string());
     let standby_operator = env::var("GATE12_STANDBY_OPERATOR_ADDR")
         .unwrap_or_else(|_| DEFAULT_STANDBY_OPERATOR_ADDR.to_string());
-    let heartbeat_secret = required_env("MIR2_ZONE_HOST_HEARTBEAT_SECRET")?;
+    let heartbeat_secret = env::var("MIR2_ZONE_HOST_HEARTBEAT_SECRET")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
     let evidence_dir =
         PathBuf::from(env::var("GATE12_EVIDENCE_DIR").unwrap_or_else(|_| "/evidence".to_string()));
     fs::create_dir_all(&evidence_dir)
@@ -64,8 +75,12 @@ fn run() -> Result<(), String> {
         |snapshot| snapshot.health.session_count == 0,
         Duration::from_secs(60),
     )?;
-    let primary_heartbeat = fetch_heartbeat(&primary_operator, heartbeat_secret.as_bytes())?;
-    let standby_heartbeat = fetch_heartbeat(&standby_operator, heartbeat_secret.as_bytes())?;
+    let primary_heartbeat = fetch_heartbeat(&primary_operator, heartbeat_secret.as_deref())?;
+    let standby_heartbeat = fetch_heartbeat(&standby_operator, heartbeat_secret.as_deref())?;
+    let primary_capacity =
+        run_capacity_challenge(&primary_operator, &primary_heartbeat.payload.host_id)?;
+    let standby_capacity =
+        run_capacity_challenge(&standby_operator, &standby_heartbeat.payload.host_id)?;
     let metrics = http_get(&primary_operator, "/metrics")?;
     let metric_verified = metrics.status == 200
         && metrics
@@ -179,8 +194,10 @@ fn run() -> Result<(), String> {
         primary_session_count_before_failure: primary_ready.health.session_count,
         standby_session_count_before_failure: standby_ready.health.session_count,
         standby_session_count_after_failure: standby_after.health.session_count,
-        primary_heartbeat_verified: primary_heartbeat,
-        standby_heartbeat_verified: standby_heartbeat,
+        primary_heartbeat_verified: true,
+        standby_heartbeat_verified: true,
+        primary_remote_capacity_verified: primary_capacity,
+        standby_remote_capacity_verified: standby_capacity,
         prometheus_metric_verified: metric_verified,
         post_failure_user_location_observed: user_location_observed,
         post_failure_packet_count: post_failure_packets.len(),
@@ -272,7 +289,10 @@ fn wait_for_health(
     ))
 }
 
-fn fetch_heartbeat(address: &str, secret: &[u8]) -> Result<bool, String> {
+fn fetch_heartbeat(
+    address: &str,
+    legacy_secret: Option<&str>,
+) -> Result<SignedZoneHostHeartbeat, String> {
     let response = http_get(address, "/v1/heartbeat")?;
     if response.status != 200 {
         return Err(format!(
@@ -282,7 +302,53 @@ fn fetch_heartbeat(address: &str, secret: &[u8]) -> Result<bool, String> {
     }
     let heartbeat: SignedZoneHostHeartbeat = serde_json::from_str(&response.body)
         .map_err(|error| format!("invalid heartbeat JSON from {address}: {error}"))?;
-    heartbeat.verify(secret)?;
+    match heartbeat.signature_algorithm.as_str() {
+        "ed25519-zip215" => heartbeat.verify_ed25519()?,
+        "hmac-sha256" => heartbeat.verify(
+            legacy_secret
+                .ok_or_else(|| "legacy HMAC heartbeat needs a verification secret".to_string())?
+                .as_bytes(),
+        )?,
+        algorithm => {
+            return Err(format!(
+                "unsupported heartbeat signature algorithm {algorithm}"
+            ))
+        }
+    }
+    Ok(heartbeat)
+}
+
+fn run_capacity_challenge(address: &str, node_id: &str) -> Result<bool, String> {
+    let issued_at_ms = now_ms();
+    let mut nonce = [0_u8; 32];
+    OsRng.fill_bytes(&mut nonce);
+    let challenge = CapacityChallenge {
+        challenge_id: format!("gate12-remote-{issued_at_ms}"),
+        node_id: node_id.to_string(),
+        nonce: URL_SAFE_NO_PAD.encode(nonce),
+        issued_at_ms,
+        expires_at_ms: issued_at_ms.saturating_add(30_000),
+        workload: CapacityWorkload {
+            concurrent_sessions: 4,
+            max_sessions_per_zone: 2,
+            zone_count: 2,
+            command_count: 1_000,
+            maximum_p95_latency_ms: 100,
+            minimum_success_bps: 10_000,
+        },
+    };
+    let body = serde_json::to_vec(&challenge)
+        .map_err(|error| format!("failed to encode capacity challenge: {error}"))?;
+    let response = http_post(address, "/v1/capacity-challenge", &body)?;
+    if response.status != 200 {
+        return Err(format!(
+            "capacity challenge at {address} returned HTTP {}: {}",
+            response.status, response.body
+        ));
+    }
+    let response: CapacityChallengeResponse = serde_json::from_str(&response.body)
+        .map_err(|error| format!("invalid capacity response from {address}: {error}"))?;
+    response.verify_node_claim(now_ms())?;
     Ok(true)
 }
 
@@ -321,6 +387,44 @@ fn http_get(address: &str, path: &str) -> Result<HttpResponse, String> {
     })
 }
 
+fn http_post(address: &str, path: &str, body: &[u8]) -> Result<HttpResponse, String> {
+    let mut stream = TcpStream::connect(address)
+        .map_err(|error| format!("failed to connect operator endpoint {address}: {error}"))?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(10)))
+        .map_err(|error| format!("failed to set operator read timeout: {error}"))?;
+    write!(
+        stream,
+        "POST {path} HTTP/1.1\r\nHost: {address}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        body.len()
+    )
+    .map_err(|error| format!("failed to write operator request: {error}"))?;
+    stream
+        .write_all(body)
+        .map_err(|error| format!("failed to write operator request body: {error}"))?;
+    let mut response = String::new();
+    stream
+        .read_to_string(&mut response)
+        .map_err(|error| format!("failed to read operator response: {error}"))?;
+    parse_http_response(response)
+}
+
+fn parse_http_response(response: String) -> Result<HttpResponse, String> {
+    let (head, body) = response
+        .split_once("\r\n\r\n")
+        .ok_or_else(|| "operator returned malformed HTTP".to_string())?;
+    let status = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|value| value.parse::<u16>().ok())
+        .ok_or_else(|| "operator returned malformed HTTP status".to_string())?;
+    Ok(HttpResponse {
+        status,
+        body: body.to_string(),
+    })
+}
+
 fn wait_for_file(path: &Path, timeout: Duration) -> Result<(), String> {
     let deadline = Instant::now() + timeout;
     while Instant::now() < deadline {
@@ -330,13 +434,6 @@ fn wait_for_file(path: &Path, timeout: Duration) -> Result<(), String> {
         thread::sleep(Duration::from_millis(100));
     }
     Err(format!("timed out waiting for {}", path.display()))
-}
-
-fn required_env(name: &str) -> Result<String, String> {
-    env::var(name)
-        .ok()
-        .filter(|value| !value.trim().is_empty())
-        .ok_or_else(|| format!("{name} is required"))
 }
 
 fn now_ms() -> u64 {

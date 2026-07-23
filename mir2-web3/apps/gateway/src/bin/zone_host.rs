@@ -6,13 +6,14 @@ use std::sync::Arc;
 
 use mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env;
 use mir2_gateway::{
-    serve_zone_host_operator, validate_zone_host_bind, GatewayConfig, ZoneHostOperatorConfig,
-    ZoneHostServer, ZoneRpcLimits, ZoneTopology,
+    serve_zone_host_operator, validate_zone_host_bind, GatewayConfig, NodeSigningIdentity,
+    ZoneHostOperatorConfig, ZoneHostServer, ZoneRpcLimits, ZoneTopology,
 };
 
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
 
 fn main() -> io::Result<()> {
+    use_signing_identity_as_default_host_id()?;
     let address = env::var("MIR2_ZONE_HOST_ADDR")
         .unwrap_or_else(|_| DEFAULT_ZONE_HOST_ADDR.to_string())
         .parse::<SocketAddr>()
@@ -43,7 +44,7 @@ fn main() -> io::Result<()> {
         ZoneRpcLimits::from_env(),
         topology.runtime_factory(),
     ));
-    let operator_config = ZoneHostOperatorConfig::from_env(bound_address)
+    let operator_config = ZoneHostOperatorConfig::from_env(bound_address, &server.health().host_id)
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let operator_listener = TcpListener::bind(operator_config.address)?;
     let operator_address = operator_listener.local_addr()?;
@@ -63,6 +64,23 @@ fn main() -> io::Result<()> {
         env::var("MIR2_ZONE_HOST_TOKEN").is_ok()
     );
     server.serve(listener)
+}
+
+fn use_signing_identity_as_default_host_id() -> io::Result<()> {
+    if env::var("MIR2_ZONE_HOST_ID")
+        .ok()
+        .is_some_and(|value| !value.trim().is_empty())
+    {
+        return Ok(());
+    }
+    if let Some(identity) = NodeSigningIdentity::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?
+    {
+        // This runs before the server or operator threads start. Both surfaces
+        // therefore bind to the same stable key-derived identity.
+        env::set_var("MIR2_ZONE_HOST_ID", identity.node_id());
+    }
+    Ok(())
 }
 
 fn env_flag(name: &str, default: bool) -> bool {

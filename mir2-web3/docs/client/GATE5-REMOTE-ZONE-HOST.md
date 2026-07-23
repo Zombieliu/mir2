@@ -27,6 +27,7 @@ state stays isolated while map/zone resources are shared by sessions in the same
 - Default maximum frame: 16 MiB.
 - Default maximum concurrent connections: 64.
 - Default maximum hosted sessions: 4096.
+- Default maximum hosted sessions in one Zone: 4096.
 - Crystal `ClientPacket` and `ServerPacket` values cross the boundary using the existing binary
   codec, rather than a second hand-maintained packet schema.
 - Every execute request includes `zone_id`, owner id and fencing token. The Zone Host validates the
@@ -38,8 +39,11 @@ state stays isolated while map/zone resources are shared by sessions in the same
   later calls reconnect without replacing the Gateway session object.
 
 The bounds can be overridden with `MIR2_ZONE_RPC_MAX_FRAME_BYTES`,
-`MIR2_ZONE_HOST_MAX_CONNECTIONS`, `MIR2_ZONE_HOST_MAX_SESSIONS` and
-`MIR2_ZONE_RPC_TIMEOUT_MS`.
+`MIR2_ZONE_HOST_MAX_CONNECTIONS`, `MIR2_ZONE_HOST_MAX_SESSIONS`,
+`MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE` and `MIR2_ZONE_RPC_TIMEOUT_MS`.
+If the per-Zone value is omitted, it follows the global session limit; if it is
+configured above the global limit, the effective value is capped at the global
+limit.
 
 ## Run locally
 
@@ -82,6 +86,8 @@ The Zone RPC suite verifies:
 6. Oversized frames are rejected before network I/O.
 7. The `zone_host` binary has a different PID and executes the authoritative login/start-game
    commands in that process.
+8. A full Zone rejects new sessions without blocking admission to other Zones, and closing a
+   session releases its per-Zone capacity.
 
 ## Gate boundary
 
