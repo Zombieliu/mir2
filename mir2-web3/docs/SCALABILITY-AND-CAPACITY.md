@@ -99,17 +99,19 @@ payloads, and a 3.5 Mbps safe network budget:
 
 | players/zone | p95 ms | modeled payload Mbps | decision |
 | ---: | ---: | ---: | --- |
-| **100** | **4.53** | **2.02** | compute + network pass |
-| 200 | 17.60 | 6.31 | network fails |
-| 400 | 56.74 | 16.59 | network fails |
-| 600 | 101.15 | 27.71 | compute + network fail |
+| **125** | **6.97** | **2.98** | compute + network pass |
+| 150 | 10.05 | 4.05 | network fails |
+| 400 | 54.33 | 16.59 | network fails |
+| 600 | 100.49 | 27.71 | compute + network fail |
 
 The dense compute boundary is between 400 and 600 players, but the 5 Mbps link
-becomes the limiting resource first. The conservative combined limit is 100
-sessions in one dense Zone. A distribution-aware scheduler can place 200
-sessions as either 4 x 50 or 8 x 25 while remaining inside the measured safe
-budget. See `infra/capacity/README.md` and the committed JSON evidence for the
-full methodology, matrix, RSS samples, and exclusions.
+becomes the limiting resource first. The conservative combined limit is 125
+sessions in one dense Zone. A distribution-aware scheduler can place 300
+sessions as 6 x 50 while remaining inside the measured safe budget. The
+multi-profile matrix also shows why adding cores without bandwidth does not
+scale the current serial command path. See `infra/capacity/README.md` and the
+committed JSON evidence for the full methodology, matrix, RSS samples, and
+exclusions.
 
 ### Earlier evidence was connections-only
 
