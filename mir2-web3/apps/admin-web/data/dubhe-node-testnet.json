@@ -1,0 +1,43 @@
+{
+  "source": {
+    "deployment": "onchain/deployments/obelisk-node-registry-testnet.json",
+    "registration": "docs/generated/gate13/testnet/active-registration.json",
+    "acceptance": "docs/generated/gate13/docker/gate13-acceptance.json"
+  },
+  "deployment": {
+    "network": "testnet",
+    "packageId": "0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e",
+    "registryId": "0x7622e3ec2b5664e584a147d530aaab8084d6e793325b8d71f1ae386da9a266a7",
+    "publishTransaction": "GxxvU7FpBKH1ud2ukmXAR98BbNsTE7o15GZYn391fhm",
+    "registeredNodeCount": 1,
+    "retiredNodeCount": 1
+  },
+  "registration": {
+    "nodeId": "ed25519:e5b4574f4c34f6c53adb1ec87fd980199b403bfaf653492602298e16f1108482",
+    "operatorSuiAddress": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+    "publicKey": "8Z09Uhpp5xpvtdO5fT8xHEu4LKLPmT07gn5vml4u2xc",
+    "endpoint": "node-active.test:7020",
+    "failureDomain": "testnet-az-b",
+    "stakeMist": 2000000,
+    "maxSessions": 128,
+    "maxZones": 8,
+    "keyGeneration": 1,
+    "status": "active",
+    "transactionDigest": "FuvLLhCaNJswJcZCj2uRYdSC2YbHN79SZ8nEgdaEBVYH",
+    "checkpoint": 363531316
+  },
+  "acceptance": {
+    "generatedAtMs": 1784818088508,
+    "capacityCompletedCommands": 2000,
+    "capacityP95LatencyMs": 1,
+    "capacityCertificateId": "a83ea5ccc3dd7abcf0ac61ba54632f9d53d69da9a9d754e299ed579405a63e9c",
+    "capacityCertificateIssuer": "Jk1nYVMYs_pb_nnnZ5e2veL_XKrHIP-e3i8_Y6qrk2M",
+    "capacityCertificateExpiresAtMs": 1784821688508,
+    "commonwareQuorum": 3,
+    "commonwareFinalizedHeight": 3,
+    "membershipEligible": true,
+    "rewardBatchId": "138895c25d479d1f3038d81c082c46525ce3003a6704a971aec8827005383050",
+    "rewardMerkleRoot": "643d1b73f7835ee81e32acf7acb4ef042b301258aedc6cd511888ae797f5be3e",
+    "rewardTotal": 2000
+  }
+}
