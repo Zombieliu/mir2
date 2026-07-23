@@ -138,18 +138,8 @@ async function main() {
     { stdio: "ignore" },
   );
 
-  let client;
   try {
     await waitForChrome(debugPort);
-    const target = await createTarget(debugPort, "about:blank");
-    client = new CdpClient(target.webSocketDebuggerUrl);
-    await client.connect();
-    await client.send("Page.enable");
-    await client.send("Runtime.enable");
-    await client.send("Log.enable");
-    await client.send("Network.enable");
-    await setViewport(client, DEFAULT_VIEWPORT);
-
     const scenarios = [
       { name: "default", query: "" },
       { name: "force-webgl2", query: "bevyBackend=webgl2&bevyEntities=1&bevyAtlas=1" },
@@ -158,7 +148,7 @@ async function main() {
     ];
     const results = [];
     for (const scenario of scenarios) {
-      results.push(await runScenario(client, scenario));
+      results.push(await runScenarioInFreshTarget(debugPort, scenario));
     }
 
     const allConsoleErrors = results.flatMap((result) => result.consoleErrors);
@@ -184,6 +174,27 @@ async function main() {
       defaultPrefersWebGpuOrFallsBack: Boolean(results.find((result) => result.name === "default")?.assertions.prefersWebGpuOrFallsBack),
       forcedWebGl2UsesWebGl2Package: Boolean(results.find((result) => result.name === "force-webgl2")?.assertions.usesRequestedWebGl2),
       forcedWebGpuUsesWebGpuOrFallsBack: Boolean(results.find((result) => result.name === "force-webgpu")?.assertions.usesRequestedWebGpuOrFallsBack),
+      movementShadowApiAvailable: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.movementShadowApiAvailable),
+      presentationPoseSinkDeliveredMonotonicFrames: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.presentationPoseSinkDeliveredMonotonicFrames),
+      remoteMotionPresentationDrovePackedOffsets: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.remoteMotionPresentationDrovePackedOffset),
+      unifiedPresentationPoseDroveDomContract: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.unifiedPresentationPoseDroveDomContract),
+      localMotionShadowMatchesCurrentPose: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.localMotionShadowMatchesCurrentPose),
+      localMotionPresentationOwnsSelfPose: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.localMotionPresentationOwnsSelfPose),
+      localMotionPathMismatchFallsBack: results
+        .filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.localMotionPathMismatchFallsBack),
       rawWebGl2ProbeRendered: Boolean(results.find((result) => result.name === "raw-webgl2-probe")?.assertions.rawWebGl2ProbeRendered),
       noCriticalConsoleErrors: report.criticalConsoleErrors.length === 0,
     };
@@ -197,9 +208,25 @@ async function main() {
     console.log(JSON.stringify({ ok: report.ok, reportPath, latestPath, assertions: report.assertions }, null, 2));
     process.exitCode = report.ok ? 0 : 1;
   } finally {
-    client?.close();
     chrome.kill("SIGTERM");
     await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+async function runScenarioInFreshTarget(debugPort, scenario) {
+  const target = await createTarget(debugPort, "about:blank");
+  const client = new CdpClient(target.webSocketDebuggerUrl);
+  try {
+    await client.connect();
+    await client.send("Page.enable");
+    await client.send("Runtime.enable");
+    await client.send("Log.enable");
+    await client.send("Network.enable");
+    await setViewport(client, DEFAULT_VIEWPORT);
+    return await runScenario(client, scenario);
+  } finally {
+    client.close();
+    await closeTarget(debugPort, target.id).catch(() => {});
   }
 }
 
@@ -207,7 +234,7 @@ async function runScenario(client, scenario) {
   client.consoleErrors.length = 0;
   client.consoleWarnings.length = 0;
   client.responses.length = 0;
-  const scenarioUrl = new URL(scenario.path ?? "/", baseUrl).toString();
+  const scenarioUrl = scenarioUrlWithBaseQuery(scenario.path ?? "/", baseUrl);
   const url = withQuery(scenarioUrl, scenario.query);
   await client.send("Page.navigate", { url });
   if (scenario.rawWebGl2Probe) {
@@ -216,16 +243,43 @@ async function runScenario(client, scenario) {
     await waitForRuntime(client, waitTimeoutMs);
   }
   await sleep(1_500);
+  const remoteMotionProbe = scenario.rawWebGl2Probe
+    ? null
+    : await runRemoteMotionPresentationProbe(client);
   const snapshot = await client.evaluate(`(() => {
     const canvas = document.querySelector("#mir2-web3-canvas");
     const canvasStyle = canvas ? window.getComputedStyle(canvas) : null;
     const runtime = window.__mir2BevyRuntimeDebug ?? null;
+    const runtimeModule = window.__mir2BevyRuntime ?? null;
     const renderer = window.__mir2BevyEntityRendererDebug ?? null;
+    const mapRenderer = window.__mir2BevyMapRendererDebug ?? null;
     const webgl2Renderer = window.__mir2WebGl2EntityRendererDebug ?? null;
     return {
       href: window.location.href,
       runtime,
+      runtimeApi: {
+        movementShadowPush: typeof runtimeModule?.pushMir2MovementShadowEvent === "function",
+        movementShadowDiagnostics:
+          typeof runtimeModule?.getMir2MovementShadowDiagnostics === "function",
+        remoteMotionPresentationEnable:
+          typeof runtimeModule?.setMir2RemoteMotionPresentationEnabled === "function",
+        remoteMotionPresentationDiagnostics:
+          typeof runtimeModule?.getMir2RemoteMotionPresentationDiagnostics === "function",
+        presentationPoseEnable:
+          typeof runtimeModule?.setMir2PresentationPoseEnabled === "function",
+        presentationPoses:
+          typeof runtimeModule?.getMir2PresentationPoses === "function",
+        presentationPoseSink:
+          typeof runtimeModule?.setMir2PresentationPoseSink === "function",
+        presentationPoseSinkClear:
+          typeof runtimeModule?.clearMir2PresentationPoseSink === "function",
+        localMotionDiagnostics:
+          typeof runtimeModule?.getMir2LocalMotionDiagnostics === "function",
+        localMotionPresentationEnable:
+          typeof runtimeModule?.setMir2LocalMotionPresentationEnabled === "function",
+      },
       renderer,
+      mapRenderer,
       webgl2Renderer,
       canvas: canvas ? {
         exists: true,
@@ -246,10 +300,15 @@ async function runScenario(client, scenario) {
     name: scenario.name,
     url,
     ...snapshot,
+    remoteMotionProbe,
     consoleErrors: client.consoleErrors,
     consoleWarnings: client.consoleWarnings,
     runtimeResponses: client.responses,
-    assertions: scenarioAssertions(scenario.name, snapshot, client),
+    assertions: scenarioAssertions(
+      scenario.name,
+      { ...snapshot, remoteMotionProbe },
+      client,
+    ),
   };
 }
 
@@ -272,6 +331,70 @@ function scenarioAssertions(name, snapshot, client) {
     compiledMatchesSelected,
     packageFetchSucceeded,
     noCriticalConsoleErrors,
+    movementShadowApiAvailable:
+      name === "raw-webgl2-probe" ||
+      (snapshot.runtimeApi?.movementShadowPush === true &&
+        snapshot.runtimeApi?.movementShadowDiagnostics === true &&
+        snapshot.runtimeApi?.remoteMotionPresentationEnable === true &&
+        snapshot.runtimeApi?.remoteMotionPresentationDiagnostics === true &&
+        snapshot.runtimeApi?.presentationPoseEnable === true &&
+        snapshot.runtimeApi?.presentationPoses === true &&
+        snapshot.runtimeApi?.presentationPoseSink === true &&
+        snapshot.runtimeApi?.presentationPoseSinkClear === true &&
+        snapshot.runtimeApi?.localMotionDiagnostics === true &&
+        snapshot.runtimeApi?.localMotionPresentationEnable === true),
+    presentationPoseSinkDeliveredMonotonicFrames:
+      name === "raw-webgl2-probe" ||
+      (snapshot.remoteMotionProbe?.poseSink?.count > 0 &&
+        snapshot.remoteMotionProbe?.poseSink?.strictlyIncreasing === true &&
+        snapshot.remoteMotionProbe?.poseSink?.parseErrorCount === 0),
+    remoteMotionPresentationDrovePackedOffset:
+      name === "raw-webgl2-probe" ||
+      (snapshot.remoteMotionProbe?.mismatch?.targetMismatchCount > 0 &&
+        snapshot.remoteMotionProbe?.matched?.offsetMatchCount > 0 &&
+        snapshot.remoteMotionProbe?.matched?.decodeErrorCount === 0 &&
+        snapshot.remoteMotionProbe?.matched?.pendingEventDropCount === 0 &&
+        snapshot.remoteMotionProbe?.disabled?.enabled === false &&
+        snapshot.remoteMotionProbe?.disabled?.entryCount === 0),
+    unifiedPresentationPoseDroveDomContract:
+      name === "raw-webgl2-probe" ||
+      (snapshot.remoteMotionProbe?.matchedPoses?.bridgeEnabled === true &&
+        snapshot.remoteMotionProbe?.matchedPoses?.rendererEnabled === true &&
+        snapshot.remoteMotionProbe?.matchedPoses?.camera?.source === "localCommand" &&
+        Math.abs(snapshot.remoteMotionProbe?.matchedPoses?.camera?.x ?? 0) > 0 &&
+        snapshot.remoteMotionProbe?.matchedPoses?.entities?.some(
+          (entry) => entry.objectId === "remote-motion-probe" && entry.source === "remotePacket",
+        ) &&
+        snapshot.remoteMotionProbe?.disabledPoses?.bridgeEnabled === false &&
+        snapshot.remoteMotionProbe?.disabledPoses?.rendererEnabled === true &&
+        snapshot.remoteMotionProbe?.disabledPoses?.camera?.source === "static" &&
+        snapshot.remoteMotionProbe?.disabledPoses?.entities?.length === 0),
+    localMotionShadowMatchesCurrentPose:
+      name === "raw-webgl2-probe" ||
+      (snapshot.remoteMotionProbe?.localMotion?.commandEventCount === 1 &&
+        snapshot.remoteMotionProbe?.localMotion?.candidateMatchCount > 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.comparisonSampleCount > 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.comparisonMismatchCount === 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.maxAbsDeltaX === 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.maxAbsDeltaY === 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.pendingEventDropCount === 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.pendingCommandDropCount === 0 &&
+        snapshot.remoteMotionProbe?.localMotion?.decodeErrorCount === 0),
+    localMotionPresentationOwnsSelfPose:
+      name === "raw-webgl2-probe" ||
+      (snapshot.remoteMotionProbe?.localMotion?.presentationEnabled === true &&
+        snapshot.remoteMotionProbe?.matchedPoses?.camera?.source === "localCommand" &&
+        snapshot.remoteMotionProbe?.matchedPoses?.entities?.some(
+          (entry) => entry.objectId === "local-motion-probe" && entry.source === "localCommand",
+        )),
+    localMotionPathMismatchFallsBack:
+      name === "raw-webgl2-probe" ||
+      (snapshot.remoteMotionProbe?.pathMismatchLocalMotion?.tsWindowPathMismatchCount > 0 &&
+        snapshot.remoteMotionProbe?.pathMismatchPoses?.camera?.source === "selfWindow" &&
+        snapshot.remoteMotionProbe?.pathMismatchPoses?.entities?.some(
+          (entry) =>
+            entry.objectId === "local-motion-probe" && entry.source === "snapshotWindow",
+        )),
     prefersWebGpuOrFallsBack:
       name !== "default" ||
       !runtimeDebugPresent ||
@@ -305,14 +428,175 @@ function scenarioAssertions(name, snapshot, client) {
   };
 }
 
+async function runRemoteMotionPresentationProbe(client) {
+  return client.evaluate(`(async () => {
+    const runtime = window.__mir2BevyRuntime;
+    if (!runtime ||
+        typeof runtime.setMir2EntityRenderState !== "function" ||
+        typeof runtime.setMir2MapRenderState !== "function" ||
+        typeof runtime.pushMir2MovementShadowEvent !== "function" ||
+        typeof runtime.setMir2RemoteMotionPresentationEnabled !== "function" ||
+        typeof runtime.getMir2RemoteMotionPresentationDiagnostics !== "function" ||
+        typeof runtime.setMir2PresentationPoseEnabled !== "function" ||
+        typeof runtime.getMir2PresentationPoses !== "function" ||
+        typeof runtime.setMir2PresentationPoseSink !== "function" ||
+        typeof runtime.clearMir2PresentationPoseSink !== "function" ||
+        typeof runtime.getMir2LocalMotionDiagnostics !== "function" ||
+        typeof runtime.setMir2LocalMotionPresentationEnabled !== "function" ||
+        typeof runtime.setMir2SelfCameraMotion !== "function") {
+      return { unsupported: true };
+    }
+
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const read = () => JSON.parse(runtime.getMir2RemoteMotionPresentationDiagnostics());
+    const readPoses = () => JSON.parse(runtime.getMir2PresentationPoses());
+    const readLocalMotion = () => JSON.parse(runtime.getMir2LocalMotionDiagnostics());
+    const sinkFrameIds = [];
+    let sinkParseErrorCount = 0;
+    runtime.setMir2PresentationPoseSink((json) => {
+      try {
+        const frameId = JSON.parse(json)?.frameId;
+        if (Number.isSafeInteger(frameId)) sinkFrameIds.push(frameId);
+        else sinkParseErrorCount += 1;
+      } catch {
+        sinkParseErrorCount += 1;
+      }
+    });
+    const state = (gridX) => JSON.stringify({
+      enabled: true,
+      stageWidth: 1024,
+      stageHeight: 768,
+      centerX: 11,
+      centerY: 20,
+      atlases: [],
+      entities: [
+        {
+          objectId: "remote-motion-probe",
+          dead: false,
+          gridX,
+          gridY: 10,
+          layers: [],
+        },
+        {
+          objectId: "local-motion-probe",
+          dead: false,
+          isSelf: true,
+          gridX: 11,
+          gridY: 20,
+          layers: [],
+        },
+      ],
+    });
+    const mapState = JSON.stringify({
+      enabled: true,
+      stageWidth: 1024,
+      stageHeight: 768,
+      revision: 1,
+      centerX: 11,
+      centerY: 20,
+      atlases: [],
+      tiles: [],
+      standaloneTiles: [],
+    });
+
+    runtime.setMir2RemoteMotionPresentationEnabled(true);
+    runtime.setMir2PresentationPoseEnabled(true);
+    runtime.setMir2LocalMotionPresentationEnabled(true);
+    runtime.setMir2MapRenderState(mapState);
+    const startedAt = Date.now();
+    runtime.setMir2SelfCameraMotion(9, 20, 11, 20, startedAt, startedAt + 600);
+    runtime.pushMir2MovementShadowEvent(JSON.stringify({
+      type: "reset",
+      atMs: startedAt,
+      objectId: "local-motion-probe",
+      x: 10,
+      y: 20,
+      direction: "Right",
+    }));
+    runtime.pushMir2MovementShadowEvent(JSON.stringify({
+      type: "commandSent",
+      atMs: startedAt,
+      direction: "Right",
+      mode: "walk",
+      fromX: 10,
+      fromY: 20,
+      toX: 11,
+      toY: 20,
+    }));
+    runtime.setMir2EntityRenderState(state(10));
+    runtime.pushMir2MovementShadowEvent(JSON.stringify({
+      type: "remoteMotion",
+      atMs: Date.now(),
+      packet: "ObjectWalk",
+      objectId: "remote-motion-probe",
+      fromX: 10,
+      fromY: 10,
+      toX: 11,
+      toY: 10,
+      direction: "Right",
+      mode: "walk",
+    }));
+    await wait(120);
+    const mismatch = read();
+    runtime.setMir2EntityRenderState(state(11));
+    await wait(35);
+    const pathMismatchPoses = readPoses();
+    const pathMismatchLocalMotion = readLocalMotion();
+
+    runtime.setMir2SelfCameraMotion(10, 20, 11, 20, startedAt, startedAt + 600);
+
+    for (let index = 0; index < 6; index += 1) {
+      runtime.setMir2EntityRenderState(state(11));
+      await wait(35);
+    }
+    const matched = read();
+    const matchedPoses = readPoses();
+    const localMotion = readLocalMotion();
+    runtime.setMir2RemoteMotionPresentationEnabled(false);
+    runtime.setMir2LocalMotionPresentationEnabled(false);
+    runtime.setMir2PresentationPoseEnabled(false);
+    runtime.setMir2SelfCameraMotion(0, 0, 0, 0, 0, 0);
+    await wait(70);
+    const disabled = read();
+    const disabledPoses = readPoses();
+    runtime.clearMir2PresentationPoseSink();
+    const poseSink = {
+      count: sinkFrameIds.length,
+      strictlyIncreasing: sinkFrameIds.every(
+        (frameId, index) => index === 0 || frameId > sinkFrameIds[index - 1],
+      ),
+      parseErrorCount: sinkParseErrorCount,
+      firstFrameId: sinkFrameIds[0] ?? null,
+      lastFrameId: sinkFrameIds.at(-1) ?? null,
+    };
+    return {
+      unsupported: false,
+      mismatch,
+      matched,
+      disabled,
+      matchedPoses,
+      disabledPoses,
+      localMotion,
+      pathMismatchPoses,
+      pathMismatchLocalMotion,
+      poseSink,
+    };
+  })()`);
+}
+
 async function waitForRuntime(client, timeoutMs) {
   const startedAt = Date.now();
+  let lastState = null;
   while (Date.now() - startedAt < timeoutMs) {
     const state = await client.evaluate(`(() => ({
       runtime: window.__mir2BevyRuntimeDebug ?? null,
       phaseText: document.body?.innerText ?? "",
-      readyState: document.readyState
+      readyState: document.readyState,
+      hasCanvas: Boolean(document.querySelector("#mir2-web3-canvas")),
+      overlayText: (document.querySelector("[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-server-client-overlay")?.textContent ?? "").slice(0, 1200),
+      href: location.href
     }))()`);
+    lastState = state;
     if (state.runtime) {
       return;
     }
@@ -321,7 +605,15 @@ async function waitForRuntime(client, timeoutMs) {
     }
     await sleep(250);
   }
-  throw new Error(`Timed out waiting ${timeoutMs}ms for Bevy runtime debug state`);
+  throw new Error(
+    `Timed out waiting ${timeoutMs}ms for Bevy runtime debug state: ${JSON.stringify({
+      href: lastState?.href ?? null,
+      readyState: lastState?.readyState ?? null,
+      hasCanvas: lastState?.hasCanvas ?? null,
+      overlayText: lastState?.overlayText ?? "",
+      phaseText: String(lastState?.phaseText ?? "").slice(0, 1200),
+    })}`,
+  );
 }
 
 async function waitForRawWebGl2Probe(client, timeoutMs) {
@@ -365,11 +657,27 @@ async function createTarget(port, url) {
   return response.json();
 }
 
+async function closeTarget(port, targetId) {
+  if (!targetId) return;
+  await fetch(`http://127.0.0.1:${port}/json/close/${encodeURIComponent(targetId)}`);
+}
+
 function withQuery(url, query) {
   const parsed = new URL(url);
   if (query) {
     const params = new URLSearchParams(query);
     for (const [key, value] of params) {
+      parsed.searchParams.set(key, value);
+    }
+  }
+  return parsed.toString();
+}
+
+function scenarioUrlWithBaseQuery(scenarioPath, base) {
+  const baseParsed = new URL(base);
+  const parsed = new URL(scenarioPath, baseParsed);
+  for (const [key, value] of baseParsed.searchParams) {
+    if (!parsed.searchParams.has(key)) {
       parsed.searchParams.set(key, value);
     }
   }
@@ -383,6 +691,10 @@ function isCriticalConsoleError(entry) {
 
 function findChromePath() {
   const candidates = [
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
     "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",

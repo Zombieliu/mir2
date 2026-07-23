@@ -46,12 +46,13 @@ function isGatewayRequest(url: URL): boolean {
   return url.pathname === "/ws" || url.pathname.startsWith("/ws/");
 }
 
-function isStaticAssetRequest(url: URL): boolean {
+export function isStaticAssetRequest(url: URL): boolean {
   return (
     url.pathname.startsWith("/original-ui/") ||
     url.pathname.startsWith("/original-map/") ||
     url.pathname.startsWith("/generated/original-map-blend/") ||
-    url.pathname.startsWith("/generated/map-atlas/")
+    url.pathname.startsWith("/generated/map-atlas/") ||
+    url.pathname.startsWith("/generated/crystal-packs/full/")
   );
 }
 
@@ -312,6 +313,10 @@ function assetObjectHeaders(
   headers.set("x-mir2-asset-version", assetVersion);
   headers.set("x-mir2-domain-proxy", "r2-asset");
   headers.set("x-mir2-edge-cache", cacheState);
+  const sha256 = object.customMetadata?.sha256;
+  if (sha256 && /^[a-f0-9]{64}$/i.test(sha256)) {
+    headers.set("x-mir2-sha256", sha256.toLowerCase());
+  }
   disableHttp3AltSvc(headers);
   return headers;
 }

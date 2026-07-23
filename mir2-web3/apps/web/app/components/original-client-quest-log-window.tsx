@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -28,6 +29,10 @@ export type QuestRewardItem = {
   /** Icon index into `/original-ui/Items/<icon>.png`. */
   icon?: number;
   count?: number;
+  /** Crystal ItemInfo.Index, retained for tooltips and protocol actions. */
+  itemIndex?: number;
+  /** Zero-based index expected by Crystal FinishQuest.SelectedItemIndex. */
+  selectionIndex?: number;
   /** True for player-selected rewards (Crystal RewardsSelectItem). */
   selectable?: boolean;
 };
@@ -82,6 +87,12 @@ export type QuestLogWindowProps = {
   onShareQuest?: (questId: number) => void;
   onAbandonQuest?: (questId: number) => void;
   onClose: () => void;
+  /**
+   * Lowercase class key of the local player. Rewrites class-blind onboarding copy
+   * (e.g. the guide quest's "Stay in melee range" objective) so ranged classes
+   * aren't told to melee. Optional + defensive: absent → objective shown verbatim.
+   */
+  playerClass?: string | null;
 };
 
 type QuestStageFilter = "all" | QuestStage;
@@ -107,6 +118,7 @@ export function QuestLogWindow({
   onShareQuest,
   onAbandonQuest,
   onClose,
+  playerClass,
 }: QuestLogWindowProps) {
   const [stageFilter, setStageFilter] = useState<QuestStageFilter>("all");
   const [page, setPage] = useState(0);
@@ -260,7 +272,7 @@ export function QuestLogWindow({
                         {done ? "✔" : "•"}
                       </span>
                       <span style={{ ...style.objectiveText, ...(done ? style.objectiveTextDone : null) }}>
-                        {objective.label}
+                        {classAwareObjectiveLine(objective.label, playerClass)}
                       </span>
                       {objective.required !== undefined ? (
                         <span style={style.objectiveCount}>
@@ -273,7 +285,7 @@ export function QuestLogWindow({
               </ul>
             ) : (
               <>
-                <p style={style.detailObjective}>{selected.objective}</p>
+                <p style={style.detailObjective}>{classAwareObjectiveLine(selected.objective, playerClass)}</p>
                 <div style={style.progressRow}>
                   <span>{selected.progressLabel}</span>
                   <span>{progressPercentLabel(selected.current, selected.required)}</span>

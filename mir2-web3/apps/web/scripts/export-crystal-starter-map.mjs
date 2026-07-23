@@ -135,7 +135,7 @@ async function main() {
   function registerSprite(layer, kind) {
     const library = ensureLibrary(layer.libraryKey);
     const drawMode = resolveDrawMode(layer, library);
-    const spriteKey = `${kind}|${layer.libraryKey}|${drawMode}|${layer.frames.join(",")}`;
+    const spriteKey = `${kind}|${layer.libraryKey}|${drawMode}|${layer.blendMode}|${layer.frames.join(",")}`;
     const existingId = spriteIds.get(spriteKey);
     if (existingId) {
       return existingId;
@@ -153,6 +153,7 @@ async function main() {
     sprites[id] = {
       kind,
       drawMode,
+      blendMode: layer.blendMode,
       frames,
     };
     spriteIds.set(spriteKey, id);
@@ -181,7 +182,7 @@ async function main() {
     const frameKey = `${normalizedKey}:${frameIndex}`;
     const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
     const pngPath = path.join(exportDir, `${frameIndex}.png`);
-    const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+    const rgba = frame.rgba;
 
     if (!exportedFrames.has(frameKey)) {
       exportedFrames.add(frameKey);
@@ -227,7 +228,7 @@ async function exportExplicitFrames(clientRoot, specs) {
       const normalizedKey = normalizeLibraryName(libraryKey);
       const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
       const pngPath = path.join(exportDir, `${frameIndex}.png`);
-      const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+      const rgba = frame.rgba;
       await mkdir(exportDir, { recursive: true });
       await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
       exported.push({
@@ -335,7 +336,7 @@ async function exportFullMap(clientRoot, mapFileNameArg, options = {}) {
             framesSkipped += 1;
             return;
           }
-          const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+          const rgba = frame.rgba;
           await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
           framesExported += 1;
         }),
@@ -503,7 +504,7 @@ async function exportWantedMapFrames(dataDir, wanted, options = {}) {
             framesSkipped += 1;
             return;
           }
-          const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+          const rgba = frame.rgba;
           await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
           framesExported += 1;
         }),
@@ -569,6 +570,7 @@ function backLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.backIndex),
     drawMode: "floor",
+    blendMode: "normal",
     frames: [frameIndex],
   };
 }
@@ -591,6 +593,7 @@ function middleLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.middleIndex),
     drawMode: "auto",
+    blendMode: crystalMiddleMapBlendMode(cell.middleAnimationFrame),
     frames,
   };
 }
@@ -610,6 +613,7 @@ function frontLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.frontIndex),
     drawMode: "auto",
+    blendMode: crystalFrontMapBlendMode(cell.frontAnimationFrame),
     frames,
   };
 }
@@ -635,8 +639,18 @@ function tileAnimationLayerForCell(cell) {
   return {
     libraryKey: mapLibraryKeyForIndex(190),
     drawMode: "object",
+    blendMode: "normal",
     frames,
   };
+}
+
+function crystalMiddleMapBlendMode(animationFrame) {
+  const count = decodeMiddleAnimationCount(animationFrame);
+  return count === 8 || count === 10 ? "additive" : "normal";
+}
+
+function crystalFrontMapBlendMode(animationFrame) {
+  return (animationFrame & 0x80) !== 0 ? "additive" : "normal";
 }
 
 function decodeMiddleAnimationCount(animationFrame) {
@@ -826,34 +840,6 @@ function requireValue(values, index, flag) {
   if (!next || next.startsWith("--")) {
     throw new Error(`${flag} requires a value`);
   }
-  return next;
-}
-
-function postProcessFrameRgba(libraryName, frameIndex, rgba) {
-  if (libraryName !== "WemadeMir2/Objects" || frameIndex < 2723 || frameIndex > 2732) {
-    return rgba;
-  }
-
-  const next = Buffer.from(rgba);
-
-  for (let index = 0; index < next.length; index += 4) {
-    const r = next[index];
-    const g = next[index + 1];
-    const b = next[index + 2];
-    const alpha = next[index + 3];
-    const brightness = Math.max(r, g, b);
-
-    if (brightness <= 20) {
-      next[index + 3] = 0;
-      continue;
-    }
-
-    if (brightness < 72) {
-      const scaledAlpha = Math.round(((brightness - 20) / 52) * alpha);
-      next[index + 3] = Math.max(0, Math.min(alpha, scaledAlpha));
-    }
-  }
-
   return next;
 }
 
@@ -1103,8 +1089,8 @@ function parseType6Map(fileName, bytes) {
     for (let y = 0; y < height; y += 1) {
       if (offset + 20 > bytes.length) break;
       const flag = bytes.readUInt8(offset);
-      let frontAnimationFrame = bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
-      if (frontAnimationFrame > 0x0f) frontAnimationFrame &= 0x0f;
+      const frontAnimationFrame =
+        bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
       let frontIndex = bytes.readUInt8(offset + 3) !== 255 ? bytes.readUInt8(offset + 3) + 300 : -1;
       const baseFrontImage = bytes.readInt16LE(offset + 8) + 1;
       if (baseFrontImage === 1 && frontIndex === 200) frontIndex = -1;

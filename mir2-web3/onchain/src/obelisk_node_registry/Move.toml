@@ -1,0 +1,11 @@
+[package]
+name = "obelisk_node_registry"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33", override = true }
+
+[addresses]
+sui = "0x2"
+obelisk_node_registry = "0x0"

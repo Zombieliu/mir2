@@ -68,15 +68,17 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: mir2-web3/apps/web/package-lock.json
       - name: Install dependencies
         run: npm ci
       - name: Typecheck
-        run: npx tsc --noEmit
-      # generate manifests + minimap smoke + coverage report + release preflight +
-      # resource/audio/sound-export tests. Pure offline: no server, no CRYSTAL_CLIENT_ROOT.
+        run: npm run typecheck
+      # Verify committed assets, the locally installed sound subset, and the
+      # temp-fixture sound exporter. Clean runners do not contain the ignored
+      # full Crystal sound library; strict local closure is enabled separately
+      # when producing an authorized audio release.
       - name: Offline resource/audio gate
         run: npm run assets:verify:offline
       - name: Verify committed generated artifacts are in sync
@@ -97,7 +99,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.89.0
       - name: Cache cargo registry and build
         uses: actions/cache@v4
         with:

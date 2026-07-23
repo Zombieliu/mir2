@@ -6,10 +6,11 @@
     "dev": "next dev -p 3020",
     "build": "next build",
     "start": "next start -p 3020",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit --pretty false",
+    "check:dubhe-node-snapshot": "node scripts/check-dubhe-node-snapshot.mjs"
   },
   "dependencies": {
-    "next": "^16.2.4",
+    "next": "16.2.11",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
@@ -20,6 +21,10 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
+  },
+  "overrides": {
+    "postcss": "8.5.21",
+    "sharp": "0.35.3"
   }
 }

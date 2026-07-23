@@ -20,8 +20,12 @@ import {
   type Mir2Language,
 } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import { crystalMainHudExperienceBarFillWidth } from "../../lib/crystal-hud-metrics";
+import { formatCrystalExperiencePercent } from "../../lib/extended-server-packets";
 import { playOriginalSoundId } from "../../lib/original-audio";
+import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import {
   handleSceneAssetImageError,
   handleSceneAssetImageLoad,
@@ -45,6 +49,10 @@ type SelectCharacterEntryLike = {
   classKey: EntityClassKey;
   gender: EntityGenderKey;
   lastAccess?: string | null;
+  // Synthesized placeholder for an account with no real character — rendered as
+  // an empty slot, and "Start" routes to character creation instead of a doomed
+  // startGame.
+  synthetic?: boolean;
 };
 
 type HudPlayerLike = {
@@ -67,10 +75,41 @@ type HudWorldLike = {
   freeBagSlots: number;
   maxBagSlots: number;
   currentWeight: number;
+  maxWeight: number;
+  beltItems?: unknown[];
+  inventoryItems?: unknown[];
 };
 
+const CRYSTAL_MAIN_INVENTORY_SLOT_COUNT = 46;
+const CRYSTAL_MAIN_HUD_WEIGHT_BAR_WIDTH = 76;
 const CREATE_CLASS_OPTIONS: EntityClassKey[] = ["warrior", "wizard", "taoist", "assassin", "archer"];
 const CREATE_GENDER_OPTIONS: EntityGenderKey[] = ["male", "female"];
+
+function crystalMainHudFreeSlots(world: HudWorldLike) {
+  if (!Array.isArray(world.inventoryItems) || !Array.isArray(world.beltItems)) {
+    return world.freeBagSlots;
+  }
+
+  return Math.max(
+    0,
+    CRYSTAL_MAIN_INVENTORY_SLOT_COUNT - world.inventoryItems.length - world.beltItems.length,
+  );
+}
+
+function formatCrystalMainHudGold(gold: number) {
+  const wholeGold = Math.max(0, Math.trunc(Number.isFinite(gold) ? gold : 0));
+  return wholeGold.toLocaleString("en-US");
+}
+
+function crystalMainHudWeightBarFillWidth(weightRatio: number) {
+  return Math.floor((CRYSTAL_MAIN_HUD_WEIGHT_BAR_WIDTH - 2) * Math.max(0, Math.min(1, weightRatio)));
+}
+
+function crystalMainHudWeightBarSprite(weightRatio: number) {
+  if (weightRatio > 0.75) return ORIGINAL_UI.hud.weightBars.danger;
+  if (weightRatio > 0.5) return ORIGINAL_UI.hud.weightBars.warning;
+  return ORIGINAL_UI.hud.weightBars.normal;
+}
 
 export type LanguageSelectorProps = {
   language: Mir2Language;
@@ -336,7 +375,9 @@ export function SelectOverlay({
   onDeleteCharacter,
   onExit,
 }: SelectOverlayProps) {
-  const selected = characters[selectedCharacterIndex] ?? null;
+  const selectedRaw = characters[selectedCharacterIndex] ?? null;
+  // A synthesized placeholder is not a playable character.
+  const selected = selectedRaw && !selectedRaw.synthetic ? selectedRaw : null;
   const [showCreditsPanel, setShowCreditsPanel] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCreatePanel, setShowCreatePanel] = useState(false);
@@ -439,7 +480,9 @@ export function SelectOverlay({
         <div className="select-last-access-value">{selected?.lastAccess ?? t("client.Never", [], "Never")}</div>
 
         {Array.from({ length: 4 }, (_, slotIndex) => {
-          const character = characters[slotIndex] ?? null;
+          const slotEntry = characters[slotIndex] ?? null;
+          // The synthesized placeholder renders as an empty slot (no real character).
+          const character = slotEntry && !slotEntry.synthetic ? slotEntry : null;
           return (
             <button
               key={`select-slot-${slotIndex}`}
@@ -473,7 +516,7 @@ export function SelectOverlay({
           );
         })}
 
-        <div className="select-action start"><SpriteButton sprite={ORIGINAL_UI.select.buttons.start} label={t("ui.startGame")} onClick={onEnterWorld} /></div>
+        <div className="select-action start"><SpriteButton sprite={ORIGINAL_UI.select.buttons.start} label={t("ui.startGame")} onClick={selected ? onEnterWorld : openCreatePanel} /></div>
         <div className="select-action new"><SpriteButton sprite={ORIGINAL_UI.select.buttons.newCharacter} label={t("ui.newCharacter")} onClick={openCreatePanel} /></div>
         <div className="select-action delete">
           <SpriteButton
@@ -651,11 +694,23 @@ export function MainHud({
   const currentMp = world.playerMp ?? 0;
   const maxMp = world.playerMaxMp ?? 0;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+  const hpOnlyText = `HP ${currentHp}/${maxHp}`;
+  const hpOnlyGdiText = findCrystalGdiTextAsset({
+    text: hpOnlyText,
+    foreground: "#ffffff",
+    outline: true,
+  });
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs
     .slice(0, 2)
     .map((buff) => `${buff.name}:${buff.remainingTicks}`)
     .join("  ");
+  const remainingBagWeight = Math.max(0, Math.floor(world.maxWeight - world.currentWeight));
+  const crystalFreeSlots = crystalMainHudFreeSlots(world);
+  const experienceBarFillWidth = crystalMainHudExperienceBarFillWidth(experienceRatio);
+  const bagWeightRatio = ratio(world.currentWeight, world.maxWeight);
+  const weightBarFillWidth = crystalMainHudWeightBarFillWidth(bagWeightRatio);
+  const weightBarSprite = crystalMainHudWeightBarSprite(bagWeightRatio);
 
   return (
     <div className="main-hud-shell">
@@ -663,8 +718,41 @@ export function MainHud({
         <img className="hud-cap left" src={ORIGINAL_UI.hud.leftCap} alt="" draggable={false} />
         <img className="hud-base" src={ORIGINAL_UI.hud.base} alt="" draggable={false} />
         <img className="hud-cap right" src={ORIGINAL_UI.hud.rightCap} alt="" draggable={false} />
-        <img className="hud-exp-bar" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
-        <img className="hud-weight-bar" src={ORIGINAL_UI.hud.weightBar} alt="" draggable={false} />
+        <div
+          className="hud-exp-bar"
+          data-experience-ratio={experienceRatio.toFixed(4)}
+          data-fill-width={experienceBarFillWidth}
+          style={{ width: `${experienceBarFillWidth}px` }}
+        >
+          {experienceBarFillWidth > 0 ? (
+            <img
+              className="hud-exp-bar-fill"
+              src={ORIGINAL_UI.hud.experienceBar}
+              alt=""
+              draggable={false}
+            />
+          ) : null}
+        </div>
+        <div
+          className="hud-weight-bar"
+          data-weight-ratio={bagWeightRatio.toFixed(4)}
+          data-fill-width={weightBarFillWidth}
+          data-mir2-original-src={weightBarSprite}
+        >
+          <div className="hud-weight-bar-clip" style={{ width: `${weightBarFillWidth}px` }}>
+            {weightBarFillWidth > 0 ? (
+              <img
+                className="hud-weight-bar-fill"
+                src={weightBarSprite}
+                alt=""
+                draggable={false}
+                data-mir2-original-src={weightBarSprite}
+                onError={handleSceneAssetImageError}
+                onLoad={handleSceneAssetImageLoad}
+              />
+            ) : null}
+          </div>
+        </div>
 
         <div className={`hud-orb-fill hp ${hpOnlyOrb ? "hp-only" : ""}`} style={{ height: `${80 * healthRatio}px` }}>
           <img src={hpOnlyOrb ? ORIGINAL_UI.hud.healthOnlyOrb : ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
@@ -674,7 +762,11 @@ export function MainHud({
         </div>
 
         {hpOnlyOrb ? (
-          <div className="hud-health-only-label">{`HP ${currentHp}/${maxHp}`}</div>
+          <div className="hud-health-only-label">
+            {hpOnlyGdiText ? (
+              <CrystalGdiTextImage asset={hpOnlyGdiText} accessibleText={hpOnlyText} />
+            ) : hpOnlyText}
+          </div>
         ) : (
           <>
             <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>
@@ -688,10 +780,10 @@ export function MainHud({
           {world.inSafeZone ? ` ${t("ui.safeZone", [], "Safe Zone")}` : ""}
         </div>
         {buffLabel ? <div className="hud-buff-label">{buffLabel}</div> : null}
-        <div className="hud-exp-label">{`${experienceRatio.toFixed(2).replace(/^0/, "") === ".00" ? "0.00" : (experienceRatio * 100).toFixed(2)}%`}</div>
-        <div className="hud-gold-label">{connected ? `${world.gold}` : "0"}</div>
-        <div className="hud-weight-label">{`${world.freeBagSlots}/${world.maxBagSlots}`}</div>
-        <div className="hud-space-label">{`${world.currentWeight}`}</div>
+        <div className="hud-exp-label">{formatCrystalExperiencePercent(experienceRatio)}</div>
+        <div className="hud-gold-label">{connected ? formatCrystalMainHudGold(world.gold) : "0"}</div>
+        <div className="hud-weight-label">{remainingBagWeight}</div>
+        <div className="hud-space-label">{crystalFreeSlots}</div>
 
         <div className="hud-button shop">
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.gameShop} label={t("ui.gameShop")} onClick={onToggleGameShop} active={showGameShop} />
@@ -751,7 +843,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
           suppressClickRef.current = false;
           return;
         }
-        playOriginalSoundId(10100);
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
         onClick();
       }}
       onPointerDown={(event) => {
@@ -760,7 +852,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         pointerActivatedRef.current = true;
         suppressClickRef.current = true;
         setPressed(true);
-        playOriginalSoundId(10100);
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
         onPointerActivate();
       }}
       onMouseEnter={() => setHovered(true)}
@@ -775,7 +867,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         if (onPointerActivate && !pointerActivatedRef.current) {
           pointerActivatedRef.current = true;
           suppressClickRef.current = true;
-          playOriginalSoundId(10100);
+          playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
           onPointerActivate();
         }
       }}
@@ -864,6 +956,17 @@ function createPanelText(language: Mir2Language, key: "name" | "gender" | "class
       nameRequired: "Enter a character name.",
       nameExists: "A character with this name already exists.",
       slotsFull: "All character slots are full.",
+    },
+    "pt-BR": {
+      name: "Nome",
+      gender: "Sexo",
+      class: "Classe",
+      male: "Masculino",
+      female: "Feminino",
+      create: "Criar",
+      nameRequired: "Digite o nome do personagem.",
+      nameExists: "Já existe um personagem com esse nome.",
+      slotsFull: "Todos os espaços de personagem estão cheios.",
     },
   };
   return dictionary[language]?.[key] ?? dictionary.en[key];

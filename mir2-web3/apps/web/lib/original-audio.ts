@@ -19,8 +19,8 @@ export type OriginalAudioSettings = {
 };
 
 const DEFAULT_ORIGINAL_AUDIO_SETTINGS: OriginalAudioSettings = {
-  musicEnabled: true,
-  effectsEnabled: true,
+  musicEnabled: false,
+  effectsEnabled: false,
   musicVolume: DEFAULT_MUSIC_VOLUME,
   effectsVolume: DEFAULT_EFFECT_VOLUME,
 };

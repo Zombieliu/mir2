@@ -7,7 +7,8 @@ use mir2_game_data::{
     CrystalItemTemplate, EquipmentTemplate, LanguageCode,
 };
 use mir2_protocol::{
-    ChatType, MirGridType, ServerPacket, UserItem, UserItemSealedInfo, UserItemStat,
+    ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemSealedInfo,
+    UserItemStat,
 };
 
 use super::buffs::{buff_attack_bonus, buff_defence_bonus};
@@ -17,7 +18,7 @@ use super::components::{
 };
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_REPAIR, CRYSTAL_BIND_DONT_STORE, CRYSTAL_BIND_NO_SREPAIR,
-    CRYSTAL_BIND_ON_EQUIP,
+    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
 };
 use super::inventory::{
     collection_slot_occupied, equipment_index_for_client_reference,
@@ -26,7 +27,7 @@ use super::inventory::{
 };
 use super::items::{
     crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
-    crystal_item_needs_identify, crystal_item_requirement_rejection_key,
+    crystal_item_needs_identify, crystal_item_requirement_rejection_key, crystal_item_stat_value,
     crystal_item_template_for_dynamic_key, crystal_item_template_for_item_key,
     default_item_unique_id, equipment_has_crystal_or_rental_bind_flag, item_is_socket_type,
     item_state_can_equip_to_slot, item_state_identified, item_state_soul_bound_id,
@@ -138,7 +139,21 @@ impl EquipmentState {
         if self.is_broken() {
             0
         } else {
-            self.attack + self.added_attack + self.socketed_attack()
+            let base = if self.attack != 0 {
+                self.attack
+            } else {
+                crystal_item_template_for_item_key(&self.key)
+                    .as_ref()
+                    .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC))
+                    .unwrap_or_default()
+            };
+            let added = self
+                .added_stats
+                .iter()
+                .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_DC)
+                .map(|entry| entry.value)
+                .sum::<i32>();
+            base + if added != 0 { added } else { self.added_attack } + self.socketed_attack()
         }
     }
 
@@ -146,7 +161,25 @@ impl EquipmentState {
         if self.is_broken() {
             0
         } else {
-            self.defence + self.added_defence + self.socketed_defence()
+            let base = if self.defence != 0 {
+                self.defence
+            } else {
+                crystal_item_template_for_item_key(&self.key)
+                    .as_ref()
+                    .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC))
+                    .unwrap_or_default()
+            };
+            let added = self
+                .added_stats
+                .iter()
+                .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_AC)
+                .map(|entry| entry.value)
+                .sum::<i32>();
+            base + if added != 0 {
+                added
+            } else {
+                self.added_defence
+            } + self.socketed_defence()
         }
     }
 
@@ -155,7 +188,23 @@ impl EquipmentState {
     fn socketed_attack(&self) -> i32 {
         self.socketed
             .iter()
-            .map(|gem| gem.attack + gem.added_attack)
+            .map(|gem| {
+                let base = if gem.attack != 0 {
+                    gem.attack
+                } else {
+                    crystal_item_template_for_item_key(&gem.key)
+                        .as_ref()
+                        .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC))
+                        .unwrap_or_default()
+                };
+                let added = gem
+                    .added_stats
+                    .iter()
+                    .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_DC)
+                    .map(|entry| entry.value)
+                    .sum::<i32>();
+                base + if added != 0 { added } else { gem.added_attack }
+            })
             .sum()
     }
 
@@ -163,7 +212,23 @@ impl EquipmentState {
     fn socketed_defence(&self) -> i32 {
         self.socketed
             .iter()
-            .map(|gem| gem.defence + gem.added_defence)
+            .map(|gem| {
+                let base = if gem.defence != 0 {
+                    gem.defence
+                } else {
+                    crystal_item_template_for_item_key(&gem.key)
+                        .as_ref()
+                        .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC))
+                        .unwrap_or_default()
+                };
+                let added = gem
+                    .added_stats
+                    .iter()
+                    .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_AC)
+                    .map(|entry| entry.value)
+                    .sum::<i32>();
+                base + if added != 0 { added } else { gem.added_defence }
+            })
             .sum()
     }
 
@@ -482,32 +547,34 @@ pub(super) fn total_defence_bonus(resources: &InventoryResource, buffs: &BuffRes
         + buffs.buffs.iter().map(buff_defence_bonus).sum::<i32>()
 }
 
-#[allow(clippy::too_many_arguments)]
-fn seed_equipment(
-    key: &str,
-    slot: EquipmentSlot,
-    name: &str,
-    description: &str,
-    durability_current: u16,
-    durability_max: u16,
-    grade: ItemGrade,
-    added_attack: i32,
-    added_defence: i32,
-    attack: i32,
-    defence: i32,
-) -> EquipmentState {
+fn item_grade_from_crystal(grade: u8) -> ItemGrade {
+    match grade {
+        1 => ItemGrade::Common,
+        2 => ItemGrade::Rare,
+        3 => ItemGrade::Legendary,
+        _ => ItemGrade::None,
+    }
+}
+
+fn crystal_start_equipment(item_index: i32, slot: EquipmentSlot) -> EquipmentState {
+    let key = format!("crystal-item-{item_index}");
+    let template = crystal_item_template_for_item_key(&key)
+        .unwrap_or_else(|| panic!("Crystal start item {item_index} must exist in the manifest"));
+    let attack = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_DC);
+    let defence = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_AC);
+
     EquipmentState {
-        key: key.to_string(),
+        key,
         slot,
-        name: name.to_string(),
-        icon: equipment_icon_for_slot_and_name(slot, name),
-        shape: equipment_shape_for_slot_and_name(slot, name),
-        description: description.to_string(),
-        durability_current,
-        durability_max,
-        grade,
-        added_attack,
-        added_defence,
+        name: template.name.clone(),
+        icon: template.image,
+        shape: u16::try_from(template.shape).ok(),
+        description: format!("Crystal start item: {}.", template.name),
+        durability_current: template.durability,
+        durability_max: template.durability,
+        grade: item_grade_from_crystal(template.grade),
+        added_attack: 0,
+        added_defence: 0,
         added_luck: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
@@ -529,104 +596,32 @@ fn seed_equipment(
     }
 }
 
-pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
-    // Starter gear carries Crystal-accurate stat ranges (from the item manifest):
-    // WoodenSword MinDC 2/MaxDC 4, LightLeatherArmour MinAC 3/MaxAC 5 +
-    // MinMAC 3/MaxMAC 4. Combat stats live in `added_stats` (the Crystal shape),
-    // so the scalar attack/defence are 0.
-    let mut items = vec![
-        seed_equipment(
-            "wooden-sword",
-            EquipmentSlot::Weapon,
-            "Wooden Sword",
-            "Starter weapon issued before the first field assignment.",
-            18,
-            20,
-            ItemGrade::Common,
-            0,
-            0,
-            4,
-            0,
-        ),
-        seed_equipment(
-            "cloth-armour",
-            EquipmentSlot::Armour,
-            "Cloth Armour",
-            "Basic cloth set used for test durability and equipment wiring.",
-            12,
-            14,
-            ItemGrade::Common,
-            0,
-            0,
-            0,
-            5,
-        ),
-        seed_equipment(
-            "copper-necklace",
-            EquipmentSlot::Necklace,
-            "Copper Necklace",
-            "Small stat necklace for the starter layout.",
-            8,
-            10,
-            ItemGrade::None,
-            0,
-            0,
-            1,
-            0,
-        ),
-        seed_equipment(
-            "wood-bracelet-left",
-            EquipmentSlot::BraceletLeft,
-            "Wood Bracelet",
-            "Starter bracelet seeded for panel rendering.",
-            9,
-            10,
-            ItemGrade::None,
-            0,
-            0,
-            0,
-            1,
-        ),
-        seed_equipment(
-            "straw-sandals",
-            EquipmentSlot::Boots,
-            "Straw Sandals",
-            "Light movement gear for the early field scene.",
-            5,
-            8,
-            ItemGrade::None,
-            0,
-            0,
-            0,
-            1,
-        ),
-        seed_equipment(
-            "rope-belt",
-            EquipmentSlot::Belt,
-            "Rope Belt",
-            "Starter belt backing the bottom shortcut bar.",
-            6,
-            8,
-            ItemGrade::None,
-            0,
-            0,
-            0,
-            0,
-        ),
-    ];
+pub(super) fn seed_equipment_items_for_character(
+    class: MirClass,
+    gender: MirGender,
+) -> Vec<EquipmentState> {
+    let weapon_index = match class {
+        MirClass::Assassin => 281, // HoaSword
+        MirClass::Archer => 298,   // WoodenBow
+        _ => 221,                  // WoodenSword
+    };
+    let armour_index = match gender {
+        MirGender::Female => 318, // BaseDress(F)
+        _ => 317,                 // BaseDress(M)
+    };
 
-    // WoodenSword (slot 0): MaxDC 4 (scalar) + MinDC 2.
-    items[0].added_stats = vec![UserItemStat { stat: 4, value: 2 }];
-    // LightLeatherArmour (slot 1): MaxAC 5 (scalar) + MinAC 3, MinMAC 3, MaxMAC 4.
-    items[1].added_stats = vec![
-        UserItemStat { stat: 0, value: 3 },
-        UserItemStat { stat: 2, value: 3 },
-        UserItemStat { stat: 3, value: 4 },
-    ];
-    items
+    vec![
+        crystal_start_equipment(weapon_index, EquipmentSlot::Weapon),
+        crystal_start_equipment(armour_index, EquipmentSlot::Armour),
+    ]
+}
+
+pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
+    seed_equipment_items_for_character(MirClass::Warrior, MirGender::Male)
 }
 
 pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
+    let template = crystal_item_template_for_item_key(&item.key)?;
     let added_stats = merged_user_item_stats(
         &item.added_stats,
         item.added_defence,
@@ -636,9 +631,7 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
 
     Some(UserItem {
         unique_id: equipment_slot_unique_id(item.slot)?,
-        item_index: crystal_item_template_for_item_key(&item.key)
-            .map(|template| template.item_index)
-            .unwrap_or_else(|| i32::from(item.icon)),
+        item_index: template.item_index,
         current_dura: item.durability_current,
         max_dura: item.durability_max,
         count: 1,
@@ -741,7 +734,15 @@ pub(super) fn equipment_state_from_item_state(
         slot,
         name: item.name.clone(),
         icon: item.icon,
-        shape: equipment_shape_for_slot_and_name(slot, &item.name),
+        // Crystal `Looks_Armour`/`Looks_Weapon` come from the worn item's
+        // `ItemInfo.Shape` (HumanObject.RefreshStats / SetLooks). Read the
+        // authoritative template shape first so equipping any real item changes
+        // the rendered body/weapon (`CArmour/{shape}` / `CWeapon/{shape}` in
+        // `entity_sprite_snapshot`); fall back to the legacy name lookup only for
+        // items whose key does not resolve to a Crystal template.
+        shape: crystal_item_template_for_item_key(&item.key)
+            .map(|template| u16::try_from(template.shape).unwrap_or(0))
+            .or_else(|| equipment_shape_for_slot_and_name(slot, &item.name)),
         description: item.description.clone(),
         durability_current,
         durability_max,
@@ -1717,6 +1718,45 @@ pub(super) fn crystal_item_current_price(
     }
     crystal_apply_added_stat_price_factor(price, added_stat_count)
         .saturating_mul(item.quantity.max(1))
+}
+
+#[cfg(test)]
+mod native_start_equipment_tests {
+    use super::*;
+
+    #[test]
+    fn every_character_start_equipment_item_has_native_item_info() {
+        let classes = [
+            MirClass::Warrior,
+            MirClass::Wizard,
+            MirClass::Taoist,
+            MirClass::Assassin,
+            MirClass::Archer,
+        ];
+        let genders = [MirGender::Male, MirGender::Female];
+
+        for class in classes {
+            for gender in genders {
+                let equipment = seed_equipment_items_for_character(class, gender);
+                assert_eq!(equipment.len(), 2);
+                for item in &equipment {
+                    let template = crystal_item_template_for_item_key(&item.key)
+                        .expect("starter equipment must resolve to Crystal ItemInfo");
+                    let user_item = user_item_from_equipment_state(item)
+                        .expect("starter equipment must serialize for Crystal");
+                    assert_eq!(user_item.item_index, template.item_index);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn unresolved_equipment_never_emits_a_dangling_native_user_item() {
+        let mut item = seed_equipment_items()[0].clone();
+        item.key = "web-only-equipment-without-crystal-item-info".to_string();
+
+        assert!(user_item_from_equipment_state(&item).is_none());
+    }
 }
 
 pub(super) fn crystal_apply_added_stat_price_factor(price: f32, added_stat_count: usize) -> u32 {

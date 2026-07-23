@@ -6,6 +6,8 @@ import type {
   EntitySpriteAnimationState,
 } from "./original-client-types";
 import {
+  CRYSTAL_MOVE_FRAME_COUNT,
+  CRYSTAL_MOVE_FRAME_INTERVAL_MS,
   EMPTY_VIEWPORT_OFFSET,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
@@ -32,11 +34,27 @@ function animationStateForMovement(
   return tileDistance > 1 ? "running" : "walking";
 }
 
-function animationStateLifetimeMs(animationState: EntitySpriteAnimationState, tileDistance: number) {
+function movementFrameCountForEntity(
+  entity: DisplayEntity,
+  animationState: EntitySpriteAnimationState,
+) {
+  if (entity.movementFrameCount && entity.movementFrameCount > 0) {
+    return entity.movementFrameCount;
+  }
+  return entity.sprite?.mountLibrary && animationState === "walking" ? 8 : CRYSTAL_MOVE_FRAME_COUNT;
+}
+
+function animationStateLifetimeMs(
+  entity: DisplayEntity,
+  animationState: EntitySpriteAnimationState,
+  tileDistance: number,
+) {
   switch (animationState) {
     case "running":
     case "walking":
-      return tileDistance > 0 ? 600 : 0;
+      return tileDistance > 0
+        ? movementFrameCountForEntity(entity, animationState) * CRYSTAL_MOVE_FRAME_INTERVAL_MS
+        : 0;
     default:
       return 0;
   }
@@ -68,7 +86,9 @@ export function entityAnimationStateForEntity(
   }
 
   if (isEntityAttacking(entity, now)) {
-    return entity.attackAnimation === "range" ? "attackRange" : "attackMelee";
+    return entity.attackAnimation === "range" || entity.attackAnimation === "spell"
+      ? "attackRange"
+      : "attackMelee";
   }
 
   if (isEntityMovementAnimationActive(entity, now)) {
@@ -104,6 +124,28 @@ export function entityMotionOffsetForEntity(
   };
 }
 
+export function rebaseViewportEntitiesToRenderPlayer(
+  entities: Array<DisplayEntity & { dx: number; dy: number }>,
+  renderPlayer: DisplayEntity | null,
+): Array<DisplayEntity & { dx: number; dy: number }> {
+  if (!renderPlayer) {
+    return entities;
+  }
+
+  return entities.map((entity) => {
+    const renderEntity =
+      entity.objectId === renderPlayer.objectId
+        ? { ...entity, ...renderPlayer }
+        : entity;
+    const dx = renderEntity.x - renderPlayer.x;
+    const dy = renderEntity.y - renderPlayer.y;
+    if (renderEntity === entity && entity.dx === dx && entity.dy === dy) {
+      return entity;
+    }
+    return { ...renderEntity, dx, dy };
+  });
+}
+
 export function refreshEntityMotionSnapshots(
   screen: ClientScreen,
   entities: DisplayEntity[],
@@ -129,6 +171,10 @@ export function refreshEntityMotionSnapshots(
       nextSnapshots[entity.objectId] = previous;
       continue;
     }
+    if (isRenderPlayer && previous && isStaleSelfSourceEcho(entity, previous)) {
+      nextSnapshots[entity.objectId] = previous;
+      continue;
+    }
 
     let previousX = previous ? currentMotionCoordinate(previous.fromX, previous.toX, previous, now) : entity.x;
     let previousY = previous ? currentMotionCoordinate(previous.fromY, previous.toY, previous, now) : entity.y;
@@ -150,7 +196,7 @@ export function refreshEntityMotionSnapshots(
       }
     }
 
-    const maxSmoothTileDistance = isRenderPlayer ? 2 : 3;
+    const maxSmoothTileDistance = 3;
     if (tileDistance > maxSmoothTileDistance) {
       nextSnapshots[entity.objectId] = {
         fromX: entity.x,
@@ -166,6 +212,7 @@ export function refreshEntityMotionSnapshots(
 
     if (tileDistance > 0.001) {
       const animationState = animationStateForMovement(entity, tileDistance, now);
+      const frameCount = movementFrameCountForEntity(entity, animationState);
       const packetStartedAt =
         entity.movementStartedAt !== undefined &&
         entity.movementStartedAt <= now &&
@@ -176,13 +223,14 @@ export function refreshEntityMotionSnapshots(
       const packetExpiresAt =
         entity.movementUntil !== undefined && entity.movementUntil > now
           ? entity.movementUntil
-          : now + animationStateLifetimeMs(animationState, tileDistance);
+          : now + animationStateLifetimeMs(entity, animationState, tileDistance);
       nextSnapshots[entity.objectId] = {
         fromX: previousX,
         fromY: previousY,
         toX: entity.x,
         toY: entity.y,
         animationState,
+        frameCount,
         startedAt: packetStartedAt,
         expiresAt: packetExpiresAt,
       };
@@ -250,7 +298,21 @@ function movementProgressRatio(snapshot: EntityMotionSnapshot, now: number) {
     return elapsed / duration;
   }
 
-  return elapsed / duration;
+  return crystalSteppedMovementProgressRatio(elapsed, snapshot.frameCount);
+}
+
+export function crystalSteppedMovementProgressRatio(
+  elapsedMs: number,
+  frameCount = CRYSTAL_MOVE_FRAME_COUNT,
+) {
+  if (!Number.isFinite(elapsedMs)) {
+    return 0;
+  }
+
+  const normalizedFrameCount = Math.max(1, Math.trunc(frameCount));
+  const frameIndex = Math.floor(Math.max(elapsedMs, 0) / CRYSTAL_MOVE_FRAME_INTERVAL_MS);
+  // Crystal couples sprite frame p with movement progress (p + 1) / frameCount.
+  return Math.min(1, (frameIndex + 1) / normalizedFrameCount);
 }
 
 function crystalMovementPixelOffset(value: number) {
@@ -258,7 +320,9 @@ function crystalMovementPixelOffset(value: number) {
     return 0;
   }
 
-  return Object.is(value, -0) ? 0 : value;
+  const crystalValue = Math.trunc(value);
+  const evenCrystalValue = crystalValue + (crystalValue % 2);
+  return Object.is(evenCrystalValue, -0) ? 0 : evenCrystalValue;
 }
 
 function currentMotionCoordinate(from: number, to: number, snapshot: EntityMotionSnapshot, now: number) {
@@ -268,6 +332,39 @@ function currentMotionCoordinate(from: number, to: number, snapshot: EntityMotio
   }
 
   return to + (from - to) * remaining;
+}
+
+function isStaleSelfSourceEcho(entity: DisplayEntity, previous: EntityMotionSnapshot) {
+  const sourceDistance = Math.max(
+    Math.abs(entity.x - previous.fromX),
+    Math.abs(entity.y - previous.fromY),
+  );
+  const targetDistance = Math.max(
+    Math.abs(entity.x - previous.toX),
+    Math.abs(entity.y - previous.toY),
+  );
+  if (sourceDistance >= 0.125 || targetDistance < 0.125) {
+    return false;
+  }
+
+  return entity.direction === directionForMotionDelta(
+    previous.toX - previous.fromX,
+    previous.toY - previous.fromY,
+  );
+}
+
+function directionForMotionDelta(dx: number, dy: number) {
+  const horizontal = Math.sign(dx);
+  const vertical = Math.sign(dy);
+  if (horizontal === 0 && vertical < 0) return "Up";
+  if (horizontal > 0 && vertical < 0) return "UpRight";
+  if (horizontal > 0 && vertical === 0) return "Right";
+  if (horizontal > 0 && vertical > 0) return "DownRight";
+  if (horizontal === 0 && vertical > 0) return "Down";
+  if (horizontal < 0 && vertical > 0) return "DownLeft";
+  if (horizontal < 0 && vertical === 0) return "Left";
+  if (horizontal < 0 && vertical < 0) return "UpLeft";
+  return null;
 }
 
 export function projectileProgress(projectile: DisplayProjectile, now: number) {

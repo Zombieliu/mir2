@@ -105,6 +105,16 @@ export type WorldStore = {
   subscribe<S>(selector: (state: WorldState) => S, listener: Listener): () => void;
 
   /**
+   * Subscribe to EVERY state change (no selector / no slice gate). The listener
+   * fires whenever `set` produces a new state reference. Additive companion to
+   * `subscribe` — intended as the `useSyncExternalStore` subscribe arg for the
+   * React `useWorldSelector` hook, which then does selector-level memoization on
+   * its own side (the `useSyncExternalStoreWithSelector` cache). Returns an
+   * unsubscribe function.
+   */
+  subscribeFull(listener: Listener): () => void;
+
+  /**
    * Generic updater — accepts an updater function (like React's setState) or
    * a partial patch object.
    */
@@ -199,6 +209,9 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
   // value, and listener so we can do shallow (reference) comparison.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subscriptions: SelectorSubscription<any>[] = [];
+  // Full (unfiltered) listeners — fire on every state change. Used by the React
+  // `useWorldSelector` hook, which memoizes per-selector on its own side.
+  const fullListeners: Listener[] = [];
 
   function notify(prev: WorldState, next: WorldState): void {
     if (prev === next) return;
@@ -208,6 +221,10 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
         sub.lastValue = nextValue;
         sub.listener();
       }
+    }
+    // Snapshot the list so an unsubscribe during dispatch can't skip a sibling.
+    for (const listener of fullListeners.slice()) {
+      listener();
     }
   }
 
@@ -238,6 +255,14 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
       return () => {
         const idx = subscriptions.indexOf(entry);
         if (idx !== -1) subscriptions.splice(idx, 1);
+      };
+    },
+
+    subscribeFull(listener: Listener): () => void {
+      fullListeners.push(listener);
+      return () => {
+        const idx = fullListeners.indexOf(listener);
+        if (idx !== -1) fullListeners.splice(idx, 1);
       };
     },
 
@@ -295,6 +320,7 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
           groundDrops: mapChanged ? [] : current.groundDrops,
           mineNodes: mapChanged ? [] : current.mineNodes,
           projectiles: mapChanged ? [] : current.projectiles,
+          effects: mapChanged ? [] : current.effects,
           damageFloaters: mapChanged ? [] : current.damageFloaters,
           sceneView: mapChanged ? null : current.sceneView,
           terrainPatches: mapChanged ? [] : current.terrainPatches,

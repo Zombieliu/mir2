@@ -11,6 +11,7 @@ tools/procmon/
 # JavaScript / frontend
 **/node_modules/
 **/.next/
+**/next-env.d.ts
 **/dist/
 **/out/
 **/*.tsbuildinfo
@@ -23,6 +24,8 @@ tools/procmon/
 **/bin/
 !mir2-web3/apps/gateway/src/bin/
 !mir2-web3/apps/gateway/src/bin/**
+!mir2-web3/apps/simulation/src/bin/
+!mir2-web3/apps/simulation/src/bin/**
 **/obj/
 
 # Browser automation profiles and transient UI captures
@@ -40,6 +43,16 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 # Logs and temporary notes
 **/*.log
 **/tmp_*.txt
+
+# Repository-local recovery and diagnostic worktrees
+/tmp/
+/mir2-web3/tmp/
+/.codex/backups/
+/refactor-pwa/
+
+# The full Crystal sound export is published through R2; keep only files
+# that are already intentionally tracked as local baselines.
+/mir2-web3/apps/web/public/original-ui/Sound/*.wav
 
 # Editors
 **/.idea/

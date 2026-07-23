@@ -4,6 +4,8 @@ import { createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { loadCasUploadPlan } from "./asset-pipeline/cas-release.mjs";
+
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
@@ -62,10 +64,24 @@ let s3Client;
 
 async function main() {
   const release = JSON.parse(await fs.readFile(manifestPath, "utf8"));
-  const uploads = await buildUploadList(release);
+  if (release.fullCrystalPack?.enabled === true && uploadDriver !== "s3") {
+    throw new Error(
+      "Verified full Crystal packs must use MIR2_R2_UPLOAD_DRIVER=r2-s3 so large shards are streamed directly to R2.",
+    );
+  }
+  const legacyAssetUploads = await buildUploadList(release);
+  const legacyUploadByPath = new Map(legacyAssetUploads.map((upload) => [upload.relativePath, upload]));
+  const casUploads = release.cas
+    ? await loadCasUploadPlan(release, {
+        resolveStagePath: (relativePath) => legacyUploadByPath.get(relativePath)?.stagePath,
+      })
+    : null;
+  const assetUploads = casUploads ? [...legacyAssetUploads, ...casUploads.assets] : legacyAssetUploads;
+  const immutableManifestUploads = casUploads ? [casUploads.manifest] : [];
+  let releaseManifestUpload = null;
 
   if (includeReleaseManifest) {
-    uploads.push({
+    releaseManifestUpload = {
       path: "/remote-asset-release.json",
       relativePath: "remote-asset-release.json",
       stagePath: manifestPath,
@@ -74,8 +90,14 @@ async function main() {
       contentType: "application/json; charset=utf-8",
       cacheControl: "public, max-age=60, stale-while-revalidate=300",
       sources: ["release-manifest"],
-    });
+    };
   }
+  const uploads = [
+    ...assetUploads,
+    ...immutableManifestUploads,
+    ...(releaseManifestUpload ? [releaseManifestUpload] : []),
+    ...(casUploads ? [casUploads.channel] : []),
+  ];
 
   const totalBytes = uploads.reduce((sum, upload) => sum + upload.size, 0);
   if (dryRun) {
@@ -92,6 +114,12 @@ async function main() {
           uploadCount: uploads.length,
           totalBytes,
           verifyOriginalAssets,
+          publishOrder: {
+            assets: assetUploads.length,
+            immutableManifests: immutableManifestUploads.length,
+            legacyReleaseManifest: releaseManifestUpload ? 1 : 0,
+            mutableChannelLast: casUploads?.channel.objectKey ?? null,
+          },
           sample: uploads.slice(0, 8).map((upload) => ({
             objectKey: upload.objectKey,
             size: upload.size,
@@ -154,16 +182,30 @@ async function main() {
   }
 
   let completed = 0;
-  await runPool(uploads, concurrency, async (upload) => {
+  const uploadOne = async (upload) => {
     await uploadWithRetry(upload);
     completed += 1;
     if (completed % progressEvery === 0 || completed === uploads.length) {
       console.log(`[mir2-r2] uploaded ${completed}/${uploads.length}`);
     }
-  });
+  };
+  await runPool(assetUploads, concurrency, uploadOne);
 
   if (verifyOriginalAssets) {
-    await verifyUploadedOriginalAssets(release, uploads);
+    await verifyUploadedOriginalAssets(release, legacyAssetUploads);
+  }
+
+  for (const immutableManifestUpload of immutableManifestUploads) {
+    await uploadOne(immutableManifestUpload);
+  }
+
+  if (releaseManifestUpload) {
+    await uploadOne(releaseManifestUpload);
+  }
+
+  // The channel is the only mutable CAS object and must become visible last.
+  if (casUploads) {
+    await uploadOne(casUploads.channel);
   }
 
   console.log(
@@ -179,8 +221,10 @@ async function main() {
         uploadCount: uploads.length,
         totalBytes,
         verifiedOriginalAssetCount: verifyOriginalAssets
-          ? uploads.filter((upload) => upload.sources?.includes("original-asset-manifest")).length
+          ? legacyAssetUploads.filter((upload) => upload.sources?.includes("original-asset-manifest")).length
           : 0,
+        casManifestObjectKey: casUploads?.manifest.objectKey ?? null,
+        channelObjectKey: casUploads?.channel.objectKey ?? null,
       },
       null,
       2,
@@ -241,6 +285,7 @@ async function buildUploadList(release) {
       contentType: file.contentType ?? file.c ?? "application/octet-stream",
       cacheControl: file.cacheControl || "public, max-age=31536000, immutable",
       sources: file.sources ?? file.src ?? [],
+      sha256: file.sha256 ?? file.h ?? null,
     });
   }
   return uploads;
@@ -319,8 +364,10 @@ async function uploadViaS3(upload) {
       Bucket: bucket,
       Key: upload.objectKey,
       Body: body,
+      ContentLength: upload.size,
       ContentType: upload.contentType,
       CacheControl: upload.cacheControl,
+      Metadata: upload.sha256 ? { sha256: upload.sha256 } : undefined,
     }),
   );
 }

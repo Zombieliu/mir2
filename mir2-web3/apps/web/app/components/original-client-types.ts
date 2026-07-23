@@ -49,6 +49,7 @@ export type EntitySprite = {
 
 export type EntitySpriteAnimationState =
   | "standing"
+  | "harvesting"
   | "walking"
   | "running"
   | "attackMelee"
@@ -58,12 +59,39 @@ export type EntitySpriteAnimationState =
   | "dead"
   | "reviving";
 
+export type CrystalEntityAnimationAction =
+  | "standing"
+  | "harvest"
+  | "walking"
+  | "running"
+  | "attack1"
+  | "attack2"
+  | "attack3"
+  | "attack4"
+  | "attackRange1"
+  | "spell"
+  | "struck"
+  | "die"
+  | "dead"
+  | "revive";
+
+export type CrystalEntityAnimationPose = {
+  objectId: string;
+  incarnation: number;
+  animationState: EntitySpriteAnimationState;
+  action: CrystalEntityAnimationAction;
+  direction: string;
+  logicalFrameIndex: number;
+  queueDepth: number;
+};
+
 export type EntityMotionSnapshot = {
   fromX: number;
   fromY: number;
   toX: number;
   toY: number;
   animationState: EntitySpriteAnimationState;
+  frameCount?: number;
   startedAt: number;
   expiresAt: number;
 };
@@ -73,6 +101,7 @@ export type DisplayEntity = {
   kind: EntityKind;
   name: string;
   ownerName?: string;
+  ai?: number;
   x: number;
   y: number;
   direction?: string;
@@ -81,8 +110,10 @@ export type DisplayEntity = {
   level?: number;
   hp?: number;
   maxHp?: number;
+  light?: number;
   nameColourArgb?: number;
   dead?: boolean;
+  sneaking?: boolean;
   sprite?: EntitySprite | null;
   questIds?: number[];
   bigMapIcon?: number;
@@ -91,7 +122,8 @@ export type DisplayEntity = {
   movementAnimation?: "walking" | "running";
   movementStartedAt?: number;
   movementUntil?: number;
-  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
+  movementFrameCount?: number;
+  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range" | "spell";
   attackStartedAt?: number;
   attackUntil?: number;
   struckStartedAt?: number;
@@ -106,6 +138,10 @@ export type PredictedPlayerMotion = {
   x: number;
   y: number;
   direction?: string;
+  movementAnimation?: "walking" | "running";
+  movementStartedAt?: number;
+  movementUntil?: number;
+  movementFrameCount?: number;
 };
 
 export type DisplayProjectile = {
@@ -116,6 +152,19 @@ export type DisplayProjectile = {
   fromY: number;
   toX: number;
   toY: number;
+  startedAt: number;
+  expiresAt: number;
+};
+
+export type DisplaySceneEffect = {
+  key: string;
+  source: "spell" | "objectSpell" | "map" | "object";
+  spellOrEffect: string | number;
+  objectId?: string;
+  x: number;
+  y: number;
+  direction: number;
+  value: number;
   startedAt: number;
   expiresAt: number;
 };
@@ -192,6 +241,7 @@ export type DisplayQuest = {
   current: number;
   required: number;
   rewardPreview: string;
+  tracked?: boolean;
 };
 
 export type DisplayKnownSkill = {
@@ -235,6 +285,7 @@ export type DisplayNpcDialog = {
 export type DisplayLogLine = {
   text: string;
   tone: "chat" | "system" | "network";
+  crystalChatType?: number;
   channel:
     | "normal"
     | "shout"
@@ -247,6 +298,7 @@ export type DisplayLogLine = {
     | "system"
     | "hint"
     | "server"
+    | "line"
     | "announcement"
     | "network";
 };
@@ -258,6 +310,7 @@ export type DisplayWorld = {
   inSafeZone: boolean;
   miniMapIndex: number | null;
   bigMapIndex?: number | null;
+  lightSetting?: number | null;
   playerName: string | null;
   playerHp?: number;
   playerMaxHp?: number;
@@ -339,6 +392,7 @@ export type DisplayWorld = {
   };
   interactionHints: string[];
   projectiles: DisplayProjectile[];
+  effects: DisplaySceneEffect[];
   damageFloaters: DisplayDamageFloater[];
 };
 

@@ -8,14 +8,14 @@ use mir2_protocol::{ChatType, MirGridType, ServerPacket, UserItemStat};
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
-    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, DOTNET_DATETIME_KIND_LOCAL,
-    DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
+    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
+    DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
 };
 use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
-    crystal_item_has_bind_flag, crystal_stack_size_for_item_key, default_item_unique_id,
-    item_has_rental_bind_flag, item_icon_for_key, item_unique_id, user_item_from_item_state,
-    ItemState,
+    crystal_item_has_bind_flag, crystal_item_stat_value, crystal_item_template_for_item_key,
+    crystal_stack_size_for_item_key, default_item_unique_id, item_has_rental_bind_flag,
+    item_icon_for_key, item_unique_id, user_item_from_item_state, ItemState,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
@@ -1399,6 +1399,34 @@ pub(super) fn add_or_increment_item_with_random_metadata(
     cursed: bool,
     socket_slots: u8,
 ) -> ItemState {
+    let crystal_template = crystal_item_template_for_item_key(key);
+    let template_durability = crystal_template
+        .as_ref()
+        .map(|template| template.durability)
+        .filter(|durability| *durability > 0);
+    let durability_current = durability_current.or(template_durability);
+    let durability_max = durability_max.or(template_durability);
+    let grade = crystal_template
+        .as_ref()
+        .map(|template| match template.grade {
+            1 => ItemGrade::Common,
+            2 => ItemGrade::Rare,
+            3 => ItemGrade::Legendary,
+            _ => ItemGrade::None,
+        })
+        .unwrap_or(ItemGrade::None);
+    let attack = crystal_template
+        .as_ref()
+        .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC))
+        .unwrap_or_default();
+    let defence = crystal_template
+        .as_ref()
+        .map(|template| crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC))
+        .unwrap_or_default();
+    let socket_slots = crystal_template
+        .as_ref()
+        .map(|template| socket_slots.max(template.slots))
+        .unwrap_or(socket_slots);
     let max_stack = crystal_stack_size_for_item_key(key);
     let mut remaining = quantity.max(1);
     let mut resources = world.resource_mut::<InventoryResource>();
@@ -1474,7 +1502,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             durability_max,
             weight,
             equip_slot: crystal_equipment_slot_for_item_key(key),
-            grade: ItemGrade::None,
+            grade,
             added_attack,
             added_defence,
             added_stats: added_stats.clone(),
@@ -1490,8 +1518,8 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             rental_owner_name: String::new(),
             rental_expiry_binary_datetime: 0,
             rental_locked: false,
-            attack: 0,
-            defence: 0,
+            attack,
+            defence,
             heal_hp: 0,
             heal_mp: 0,
         };

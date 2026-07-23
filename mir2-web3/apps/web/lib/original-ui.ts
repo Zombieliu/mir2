@@ -72,6 +72,9 @@ export const ORIGINAL_UI = {
     duraBg: "/original-ui/Prguse/2162.png",
     miniMapIcons: {
       light: "/original-ui/Prguse/2093.png",
+      lightNight: "/original-ui/Prguse/2092.png",
+      lightEvening: "/original-ui/Prguse/2094.png",
+      lightDawn: "/original-ui/Prguse/2095.png",
       newMail: "/original-ui/Prguse/544.png",
     },
     questIcons: {
@@ -200,6 +203,11 @@ export const ORIGINAL_UI = {
     rightCap: "/original-ui/Prguse/13.png",
     experienceBar: "/original-ui/Prguse/8.png",
     weightBar: "/original-ui/Prguse/76.png",
+    weightBars: {
+      normal: "/original-ui/Prguse/76.png",
+      warning: "/original-ui/UI_32bit/473.png",
+      danger: "/original-ui/UI_32bit/472.png",
+    },
     skillStrip: "/original-ui/Prguse/2034.png",
     buttons: {
       gameShop: sprite("/original-ui/Prguse/826.png", "/original-ui/Prguse/827.png", "/original-ui/Prguse/828.png"),
@@ -312,7 +320,7 @@ export const ORIGINAL_UI = {
     height: 236,
     frame: "/original-ui/Title/196.png",
     tabs: {
-      bag1: { active: "/original-ui/Title/197.png", idle: "/original-ui/Title/738.png" },
+      bag1: { active: "/original-ui/Title/197.png", idle: "/original-ui/Title/737.png" },
       bag2: { active: "/original-ui/Title/168.png", idle: "/original-ui/Title/738.png" },
       quest: { active: "/original-ui/Title/198.png", idle: "/original-ui/Title/739.png" },
     },

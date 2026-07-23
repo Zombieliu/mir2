@@ -60,9 +60,9 @@ jobs:
           src="dist/gateway-releases/$archive"
           sum="$src.sha256"
 
-          npx wrangler@latest r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz" --file "$src"
-          npx wrangler@latest r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz.sha256" --file "$sum"
-          npx wrangler@latest r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/latest-mir2-gateway-release.json" --file "$meta"
+          npx wrangler@4.112.0 r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz" --file "$src"
+          npx wrangler@4.112.0 r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz.sha256" --file "$sum"
+          npx wrangler@4.112.0 r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/latest-mir2-gateway-release.json" --file "$meta"
 
       - name: Upload Gateway package
         uses: actions/upload-artifact@v4

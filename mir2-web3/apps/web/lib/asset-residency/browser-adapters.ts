@@ -19,7 +19,13 @@
  *   });
  */
 
-import type { AtlasPagePayload, AtlasRect, PersistentStore, AtlasFetcher } from "./types";
+import {
+  estimateAtlasPagePayloadBytes,
+  type AtlasPagePayload,
+  type AtlasRect,
+  type PersistentStore,
+  type AtlasFetcher,
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // IDB helpers (extracted from original-client-shell.tsx idbRequest /
@@ -55,6 +61,7 @@ type IdbRecord = {
   pixels: ArrayBuffer;
   storedAt: number;
   lastUsedAt: number;
+  byteLength?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -161,7 +168,7 @@ export function createBrowserIdbStore(options: BrowserIdbStoreOptions = {}): Per
     if (typeof window === "undefined" || !("indexedDB" in window)) return;
     const db = await openDb();
     if (!db) return;
-    if (!payload.pixels) return;
+    if (!payload.pixels?.byteLength) return;
 
     const now = Date.now();
     const pixels = new Uint8Array(payload.pixels.byteLength);
@@ -179,6 +186,7 @@ export function createBrowserIdbStore(options: BrowserIdbStoreOptions = {}): Per
       pixels: pixels.buffer,
       storedAt: now,
       lastUsedAt: now,
+      byteLength: estimateAtlasPagePayloadBytes(payload),
     } satisfies IdbRecord);
     await idbTransactionDone(tx);
   }
@@ -213,7 +221,27 @@ export function createBrowserIdbStore(options: BrowserIdbStoreOptions = {}): Per
     }
   }
 
-  return { get, put, delete: deleteKey, listByAge };
+  async function listEntriesByAge(): Promise<Array<{ key: string; bytes: number }>> {
+    const db = await openDb();
+    if (!db) return [];
+    try {
+      const tx = db.transaction(storeName, "readonly");
+      const store = tx.objectStore(storeName);
+      const records = (await idbRequest(store.getAll())) as IdbRecord[];
+      await idbTransactionDone(tx);
+      return records
+        .filter((record) => record.namespace === namespace)
+        .sort((a, b) => a.lastUsedAt - b.lastUsedAt)
+        .map((record) => ({
+          key: record.key,
+          bytes: record.byteLength ?? record.pixels?.byteLength ?? record.width * record.height * 4,
+        }));
+    } catch {
+      return [];
+    }
+  }
+
+  return { get, put, delete: deleteKey, listByAge, listEntriesByAge };
 }
 
 // ---------------------------------------------------------------------------

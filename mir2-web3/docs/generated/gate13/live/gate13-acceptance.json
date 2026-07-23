@@ -1,0 +1,23 @@
+{
+  "gate": "13-permissionless-guild-node-foundation",
+  "accepted": true,
+  "generatedAtMs": 1784817047044,
+  "nodeId": "ed25519:e5b4574f4c34f6c53adb1ec87fd980199b403bfaf653492602298e16f1108482",
+  "operatorAddress": "127.0.0.1:29100",
+  "suiNetwork": "testnet",
+  "suiPackageId": "0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e",
+  "suiRegistrationTransaction": "FuvLLhCaNJswJcZCj2uRYdSC2YbHN79SZ8nEgdaEBVYH",
+  "suiRegistrationCheckpoint": 363531316,
+  "capacityChallengeId": "gate13-testnet-363531316-1784817047028",
+  "capacityCompletedCommands": 2000,
+  "capacityP95LatencyMs": 1,
+  "capacityCertificateId": "3898f8333e217cb35b8e696718a56ebeb4e545a7255419f9406be62b485cb858",
+  "capacityCertificateIssuer": "Jk1nYVMYs_pb_nnnZ5e2veL_XKrHIP-e3i8_Y6qrk2M",
+  "capacityCertificateExpiresAtMs": 1784820647042,
+  "commonwareQuorum": 3,
+  "commonwareFinalizedHeight": 3,
+  "membershipEligible": true,
+  "rewardBatchId": "138895c25d479d1f3038d81c082c46525ce3003a6704a971aec8827005383050",
+  "rewardMerkleRoot": "643d1b73f7835ee81e32acf7acb4ef042b301258aedc6cd511888ae797f5be3e",
+  "rewardTotal": 2000
+}

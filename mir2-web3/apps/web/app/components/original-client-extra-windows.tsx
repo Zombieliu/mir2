@@ -16,6 +16,8 @@
  * `lib/stage5-window-adapters.ts`, which this module also re-exports.
  */
 
+import { memo } from "react";
+
 import { BondsWindow, type BondsWindowProps, type MentorSummary, type RelationshipSummary } from "./original-client-bonds-window";
 import { BuffWindow, type BuffEntry, type BuffWindowProps } from "./original-client-buff-window";
 import {
@@ -153,7 +155,10 @@ export type ExtraWindowsProps = {
   t: TranslateFn;
 
   questLog?: WindowToggle &
-    Pick<QuestLogWindowProps, "quests" | "onTrackQuest" | "onAbandonQuest" | "onShareQuest">;
+    Pick<
+      QuestLogWindowProps,
+      "quests" | "onTrackQuest" | "onAbandonQuest" | "onShareQuest" | "playerClass"
+    >;
 
   heroPet?: WindowToggle &
     Pick<
@@ -287,7 +292,7 @@ export type ExtraWindowsProps = {
   chatSettings?: WindowToggle & Pick<ChatSettingsWindowProps, "settings" | "onApply">;
 };
 
-export function ExtraWindows({
+function ExtraWindowsInner({
   t,
   questLog,
   heroPet,
@@ -312,6 +317,7 @@ export function ExtraWindows({
         <QuestLogWindow
           t={t}
           quests={questLog.quests}
+          playerClass={questLog.playerClass}
           onTrackQuest={questLog.onTrackQuest}
           onAbandonQuest={questLog.onAbandonQuest}
           onShareQuest={questLog.onShareQuest}
@@ -505,3 +511,10 @@ export function ExtraWindows({
     </>
   );
 }
+
+// Memoised so a host flush that doesn't change any window prop bag skips re-rendering the whole
+// window registry. With shallow-equal props this is inert-but-safe today (the host still rebuilds
+// the per-window prop objects each render); it begins to hold once those prop bags stop changing
+// identity (Stage 5 selector migration). Skipping is never a correctness risk: `open` gates every
+// window, so a closed registry renders only empty fragments regardless.
+export const ExtraWindows = memo(ExtraWindowsInner);

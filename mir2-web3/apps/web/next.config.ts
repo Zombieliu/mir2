@@ -33,6 +33,8 @@ const heavyPublicMediaTracingExcludes = [
   "**/public/**/*.wav",
   "**/public/**/*.wasm",
   "**/public/**/*.CUR",
+  "./public/generated/crystal-packs/full/**",
+  "**/public/generated/crystal-packs/full/**",
 ];
 
 const nextConfig: NextConfig = {
@@ -92,6 +94,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/generated/crystal-packs/full/:path*",
+        headers: [
+          { key: "Cache-Control", value: immutableGameAssetCache },
+          { key: "X-Mir2-Asset-Cache", value: "crystal-full-pack" },
+          clearAltSvcHeader,
+        ],
+      },
+      {
         source: "/bevy-runtime/:path*",
         headers: [
           { key: "Cache-Control", value: shortRuntimeCache },
@@ -116,6 +126,31 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  // LOCAL-DEV CONVENIENCE: same-origin R2 proxy. Set `MIR2_R2_PROXY_BASE` (e.g.
+  // https://mir2.obelisk.build) and game assets the local checkout doesn't have
+  // (the ~156k uncovered map tiles, R2-only sprites/sounds) are proxied through
+  // THIS origin — so a localhost build is same-origin with its assets and the
+  // browser never hits a cross-origin CORS wall (R2 sends no Access-Control-
+  // Allow-Origin). `fallback` runs only after the filesystem/public + pages
+  // miss, so committed/downloaded assets are still served locally. Gated on the
+  // env var, so production (assets served same-origin already) is untouched.
+  async rewrites() {
+    const proxyBase = process.env.MIR2_R2_PROXY_BASE?.replace(/\/+$/, "");
+    if (!proxyBase) {
+      return [];
+    }
+    const assetPrefixes = ["original-map", "original-ui", "generated", "bevy-entity-atlases", "Sound"];
+    // Route THROUGH /api/r2-proxy (a Route Handler), NOT straight to R2: a direct
+    // rewrite forwards the browser's `Referer: http://localhost:...` to R2, whose
+    // hotlink protection then 403s it. The handler does its own server-side fetch
+    // (Node fetch sends no Referer) so R2 returns 200.
+    return {
+      fallback: assetPrefixes.map((prefix) => ({
+        source: `/${prefix}/:path*`,
+        destination: `/api/r2-proxy/${prefix}/:path*`,
+      })),
+    };
   },
 };
 

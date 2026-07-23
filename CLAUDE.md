@@ -66,7 +66,12 @@ CI on PRs: `rust-workspace`, `web-resource-gate`, `local-candidate-gate` (= `car
 - **Parallel sub-agents MUST use isolated git worktrees** and disjoint file domains, or they
   collide in the working tree / blow the disk. Integrate via PR, not shared trees.
 
-## Current state (2026-06-15)
+## Current state (2026-06-21)
+
+> Full snapshot: `docs/PROJECT-STATUS-2026-06-21.md`. The 06-15 → 06-21 window was a
+> **verification pass** — a full CDP QA-loop suite over the built surfaces
+> (`apps/web/scripts/qa-*.mjs`, 11 loops) + death→town-revive (#137) + overshoot/snap
+> clamp (#136). Completion numbers below are unchanged, now better-verified.
 
 ServerPacket handling ≈ **98.6%** (278/282); ClientPacket ≈ 44% literal / **~72.5%**
 via the gateway bridge. Frontend "visual client" ≈ **90%**, "playable game" ≈ **74%**
@@ -94,6 +99,8 @@ few unwirable window actions (conquest gate/tax, hero dismiss/recall — no Crys
 ## Read these (not all 40 docs)
 
 - `docs/ARCHITECTURE-CURRENT.md` — system overview
+- `mir2-web3/apps/web/CLAUDE.md` + `mir2-web3/docs/client/` — **web client subsystem maps +
+  how-to-add-a-feature recipe** (前置铺垫; `apps/web/CLAUDE.md` auto-loads when working under `apps/web/`)
 - `docs/FRONTEND-COMPLETENESS-AUDIT.md` — per-module % + methodology
 - `docs/CRYSTAL-1TO1-ROADMAP.md` — backend parity roadmap
 - `docs/ASSET-RELEASE-RUNBOOK.md` — R2 publish + deploy (the path to visible 95%)

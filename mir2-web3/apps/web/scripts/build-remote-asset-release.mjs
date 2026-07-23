@@ -3,10 +3,22 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
+import { inspectFullPackClosure, sha256File } from "./asset-pipeline/full-pack-closure.mjs";
+
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(WEB_ROOT, "..", "..");
 const ORIGINAL_ASSET_MANIFEST_PATH = path.join(WEB_ROOT, "public", "original-asset-manifest.generated.json");
+const FULL_CRYSTAL_PACK_ROOT = path.join(WEB_ROOT, "public", "generated", "crystal-packs", "full");
+const FULL_CRYSTAL_PACK_INDEX_PATH = "/generated/crystal-packs/full/index.json";
+const FULL_CRYSTAL_PACK_COVERAGE_PATH = path.join(
+  REPO_ROOT,
+  "docs",
+  "generated",
+  "assets",
+  "crystal-full-pack-coverage.generated.json",
+);
 const DEFAULT_BASE_URL = "http://127.0.0.1:13010";
 const DEFAULT_OUTPUT_ROOT = path.resolve(REPO_ROOT, "docs", "generated", "remote-assets");
 const DEFAULT_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -83,6 +95,10 @@ const includePublicAssetRoots = booleanArg(
   args.includePublicAssetRoots ?? process.env.MIR2_REMOTE_ASSET_INCLUDE_PUBLIC_ROOTS,
   true,
 );
+const includeFullCrystalPack = booleanArg(
+  args.includeFullCrystalPack ?? process.env.MIR2_REMOTE_ASSET_INCLUDE_FULL_CRYSTAL_PACK,
+  false,
+);
 const publicAssetRoots = parseListArg(
   args.publicAssetRoots ?? process.env.MIR2_REMOTE_ASSET_PUBLIC_ROOTS,
   DEFAULT_PUBLIC_ASSET_ROOTS,
@@ -94,6 +110,9 @@ const stageConcurrency = positiveIntegerArg(
 const stageFileMode = String(args.stageFileMode ?? process.env.MIR2_REMOTE_ASSET_STAGE_FILE_MODE ?? "copy").toLowerCase();
 const hashMode = String(args.hashMode ?? process.env.MIR2_REMOTE_ASSET_HASH_MODE ?? "sha256").toLowerCase();
 const compactFiles = booleanArg(args.compactFiles ?? process.env.MIR2_REMOTE_ASSET_COMPACT_FILES, false);
+const casEnabled = booleanArg(args.cas ?? process.env.MIR2_REMOTE_ASSET_CAS, true);
+const casPrefix = args.casPrefix ?? process.env.MIR2_REMOTE_ASSET_CAS_PREFIX ?? "mir2/cas";
+const releaseChannel = args.channel ?? process.env.MIR2_REMOTE_ASSET_CHANNEL ?? "production";
 
 async function main() {
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);
@@ -130,10 +149,13 @@ async function main() {
     allowMissing,
     concurrency: stageConcurrency,
   });
-  const requiredReleasePaths = REQUIRED_MANIFEST_PATHS.filter((requiredPath) =>
+  const requiredManifestPaths = includeFullCrystalPack
+    ? [...REQUIRED_MANIFEST_PATHS, FULL_CRYSTAL_PACK_INDEX_PATH]
+    : REQUIRED_MANIFEST_PATHS;
+  const requiredReleasePaths = requiredManifestPaths.filter((requiredPath) =>
     staged.files.some((file) => file.path === requiredPath),
   );
-  const missingRequiredManifestPaths = REQUIRED_MANIFEST_PATHS.filter((requiredPath) =>
+  const missingRequiredManifestPaths = requiredManifestPaths.filter((requiredPath) =>
     !requiredReleasePaths.includes(requiredPath),
   );
 
@@ -164,6 +186,9 @@ async function main() {
       sceneSpriteFileCount: collected.sceneSpriteRoots.reduce((sum, root) => sum + root.fileCount, 0),
       publicAssetRootCount: collected.publicAssetRoots.length,
       publicAssetFileCount: collected.publicAssetRoots.reduce((sum, root) => sum + root.fileCount, 0),
+      fullCrystalPackFileCount: collected.fullCrystalPack.fileCount,
+      fullCrystalPackLibraryCount: collected.fullCrystalPack.libraryCount,
+      fullCrystalPackPageCount: collected.fullCrystalPack.pageCount,
       fileCount: staged.files.length,
       missingCount: staged.missing.length,
       totalBytes: staged.files.reduce((sum, file) => sum + file.size, 0),
@@ -174,9 +199,10 @@ async function main() {
     originalAssetManifest: collected.originalAssetManifest,
     sceneSpriteRoots: collected.sceneSpriteRoots,
     publicAssetRoots: collected.publicAssetRoots,
+    fullCrystalPack: collected.fullCrystalPack,
     files: compactFiles ? staged.files.map(compactReleaseFile) : staged.files,
     missing: staged.missing,
-    requiredManifestPaths: REQUIRED_MANIFEST_PATHS,
+    requiredManifestPaths,
     missingRequiredManifestPaths,
   };
 
@@ -185,6 +211,13 @@ async function main() {
   }
 
   await fs.mkdir(outputDir, { recursive: true });
+  if (casEnabled) {
+    if (hashMode !== "sha256") throw new Error("CAS releases require MIR2_REMOTE_ASSET_HASH_MODE=sha256.");
+    release.cas = await writeCasReleaseArtifacts(
+      createCasRelease(staged.files, { prefix: casPrefix, channel: releaseChannel }),
+      outputDir,
+    );
+  }
   const releasePath = path.join(outputDir, "remote-asset-release.json");
   const latestPath = path.join(DEFAULT_OUTPUT_ROOT, "latest-remote-asset-release.json");
   await fs.writeFile(releasePath, `${stringifyRelease(release)}\n`, "utf8");
@@ -204,6 +237,9 @@ async function main() {
         totalBytes: release.stats.totalBytes,
         missingCount: release.stats.missingCount,
         stageDir,
+        casManifestHash: release.cas?.manifest.sha256 ?? null,
+        casManifestObjectKey: release.cas?.manifest.objectKey ?? null,
+        channelObjectKey: release.cas?.channel.objectKey ?? null,
       },
       null,
       2,
@@ -215,7 +251,9 @@ function compactReleaseFile(file) {
   return {
     p: file.relativePath,
     s: file.size,
+    h: file.sha256,
     c: file.contentType,
+    src: file.sources,
   };
 }
 
@@ -248,6 +286,7 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
   const scenes = [];
   const sceneSpriteRootRecords = [];
   const publicAssetRootRecords = [];
+  let fullCrystalPackRecord = disabledFullCrystalPackRecord();
   const originalAssetManifestRecord = await collectOriginalAssetManifestStaticUrls(staticUrls);
   const resourcePacks = Array.isArray(assetManifest.resourcePacks) ? assetManifest.resourcePacks : [];
 
@@ -306,6 +345,12 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     publicAssetRootRecords.push(...(await collectPublicAssetRootStaticUrls(staticUrls, publicAssetRoots)));
   }
 
+  if (includeFullCrystalPack) {
+    fullCrystalPackRecord = await collectFullCrystalPackStaticUrls(staticUrls);
+  }
+
+  await collectMapAtlasPageStaticUrls(staticUrls);
+
   return {
     staticUrls,
     packs,
@@ -313,7 +358,103 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     originalAssetManifest: originalAssetManifestRecord,
     sceneSpriteRoots: sceneSpriteRootRecords,
     publicAssetRoots: publicAssetRootRecords,
+    fullCrystalPack: fullCrystalPackRecord,
   };
+}
+
+function disabledFullCrystalPackRecord() {
+  return {
+    enabled: false,
+    verified: false,
+    path: FULL_CRYSTAL_PACK_INDEX_PATH,
+    contentHash: null,
+    libraryCount: 0,
+    pageCount: 0,
+    fileCount: 0,
+  };
+}
+
+async function collectFullCrystalPackStaticUrls(staticUrls) {
+  let coverage;
+  try {
+    coverage = await readJsonFile(FULL_CRYSTAL_PACK_COVERAGE_PATH);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error(
+        "Full Crystal pack publication requires a built and verified pack. Run assets:full-pack:build and assets:full-pack:verify first.",
+      );
+    }
+    throw error;
+  }
+
+  const closure = await inspectFullPackClosure({
+    fullPackRoot: FULL_CRYSTAL_PACK_ROOT,
+    publicRoot: path.posix.dirname(FULL_CRYSTAL_PACK_INDEX_PATH),
+    expectedContentHash: coverage?.evidence?.contentHash ?? "",
+    verifyPageHashes: false,
+    rejectOrphans: true,
+  });
+  if (
+    coverage?.kind !== "mir2-crystal-full-pack-coverage" ||
+    coverage?.mode !== "verify" ||
+    coverage?.evidence?.pageHashesVerified !== true ||
+    coverage?.evidence?.contentHash !== closure.contentHash ||
+    Number(coverage?.evidence?.verifiedLibraryCount ?? 0) !== closure.libraryCount ||
+    Number(coverage?.evidence?.verifiedUniquePageCount ?? 0) !== closure.pageCount
+  ) {
+    throw new Error(
+      "Full Crystal pack coverage evidence is missing, stale, or not hash-verified. Run assets:full-pack:verify.",
+    );
+  }
+
+  addStaticUrl(staticUrls, closure.indexFile.publicPath, "full-crystal-pack:index", {
+    expectedSize: closure.indexFile.size,
+  });
+  for (const file of closure.libraryFiles) {
+    addStaticUrl(staticUrls, file.publicPath, "full-crystal-pack:library", {
+      expectedSha256: file.sha256,
+      expectedSize: file.size,
+    });
+  }
+  for (const file of closure.pageFiles) {
+    addStaticUrl(staticUrls, file.publicPath, "full-crystal-pack:page", {
+      expectedSha256: file.sha256,
+      expectedSize: file.size,
+    });
+  }
+
+  return {
+    enabled: true,
+    verified: true,
+    path: FULL_CRYSTAL_PACK_INDEX_PATH,
+    contentHash: closure.contentHash,
+    sourceContentHash: closure.sourceContentHash,
+    libraryCount: closure.libraryCount,
+    pageCount: closure.pageCount,
+    fileCount: closure.fileCount,
+  };
+}
+
+async function readJsonFile(filePath) {
+  return JSON.parse(await fs.readFile(filePath, "utf8"));
+}
+
+async function collectMapAtlasPageStaticUrls(staticUrls) {
+  const manifestPath = "/generated/map-atlas/manifest.json";
+  if (!staticUrls.has(manifestPath)) return;
+
+  const localManifestPath = path.join(WEB_ROOT, "public", "generated", "map-atlas", "manifest.json");
+  let manifest;
+  try {
+    manifest = JSON.parse(await fs.readFile(localManifestPath, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    throw error;
+  }
+
+  for (const atlas of Array.isArray(manifest.atlases) ? manifest.atlases : []) {
+    addStaticUrl(staticUrls, atlas?.imageUrl, "map-atlas-manifest");
+  }
 }
 
 async function collectOriginalAssetManifestStaticUrls(staticUrls) {
@@ -365,16 +506,32 @@ function normalizeOriginalAssetManifestPath(value) {
   return assetPath;
 }
 
-function addStaticUrl(staticUrls, value, source) {
+function addStaticUrl(staticUrls, value, source, integrity = {}) {
   const assetPath = normalizeStaticAssetPath(value);
   if (!assetPath) return false;
   const existing = staticUrls.get(assetPath);
   if (existing) {
+    assertCompatibleIntegrity(existing, integrity, assetPath);
     existing.sources.add(source);
     return false;
   }
-  staticUrls.set(assetPath, { path: assetPath, sources: new Set([source]) });
+  staticUrls.set(assetPath, {
+    path: assetPath,
+    sources: new Set([source]),
+    expectedSha256: integrity.expectedSha256 ?? null,
+    expectedSize: integrity.expectedSize ?? null,
+  });
   return true;
+}
+
+function assertCompatibleIntegrity(existing, integrity, assetPath) {
+  for (const key of ["expectedSha256", "expectedSize"]) {
+    const next = integrity[key] ?? null;
+    if (next !== null && existing[key] !== null && existing[key] !== next) {
+      throw new Error(`Conflicting ${key} for release asset ${assetPath}`);
+    }
+    if (existing[key] === null && next !== null) existing[key] = next;
+  }
 }
 
 async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissing, concurrency }) {
@@ -440,10 +597,19 @@ async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
     throw new Error(`Unsupported MIR2_REMOTE_ASSET_HASH_MODE: ${hashMode}; expected "sha256" or "skip".`);
   }
 
-  const contents = hashMode === "sha256" ? await fs.readFile(localPath) : null;
+  if (entry.expectedSize !== null && stats.size !== entry.expectedSize) {
+    throw new Error(`Release asset size mismatch: ${entry.path} expected ${entry.expectedSize}, found ${stats.size}`);
+  }
+  if (entry.expectedSha256 && hashMode !== "sha256") {
+    throw new Error(`MIR2_REMOTE_ASSET_HASH_MODE=sha256 is required for integrity-bound asset ${entry.path}`);
+  }
+  const digest = hashMode === "sha256" ? await sha256File(localPath) : null;
+  if (entry.expectedSha256 && digest !== entry.expectedSha256) {
+    throw new Error(`Release asset hash mismatch: ${entry.path} expected ${entry.expectedSha256}, found ${digest}`);
+  }
   if (stageFileMode !== "reference") {
     await fs.mkdir(path.dirname(stagePath), { recursive: true });
-    await stageFile(localPath, stagePath, contents);
+    await stageFile(localPath, stagePath);
   }
 
   return {
@@ -454,7 +620,7 @@ async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
       stagePath,
       objectKey: joinObjectKey(objectPrefix, relativePath),
       size: stats.size,
-      sha256: contents ? createHash("sha256").update(contents).digest("hex") : null,
+      sha256: digest,
       contentType: contentTypeForPath(relativePath),
       cacheControl: DEFAULT_CACHE_CONTROL,
       sources: [...entry.sources].sort(),
@@ -462,7 +628,7 @@ async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
   };
 }
 
-async function stageFile(localPath, stagePath, contents) {
+async function stageFile(localPath, stagePath) {
   if (stageFileMode === "link") {
     try {
       await fs.rm(stagePath, { force: true });
@@ -476,11 +642,7 @@ async function stageFile(localPath, stagePath, contents) {
   }
 
   if (stageFileMode === "copy") {
-    if (contents) {
-      await fs.writeFile(stagePath, contents);
-    } else {
-      await fs.copyFile(localPath, stagePath);
-    }
+    await fs.copyFile(localPath, stagePath);
     return;
   }
 
@@ -602,6 +764,8 @@ function normalizeStaticAssetPath(value) {
     !url.pathname.startsWith("/original-ui/") &&
     !url.pathname.startsWith("/original-map/") &&
     !url.pathname.startsWith("/generated/original-map-blend/") &&
+    !url.pathname.startsWith("/generated/map-atlas/") &&
+    !url.pathname.startsWith("/generated/crystal-packs/full/") &&
     !url.pathname.startsWith("/bevy-entity-atlases/")
   ) {
     return "";

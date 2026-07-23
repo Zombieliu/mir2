@@ -6,6 +6,12 @@ import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
 
 import { normalizeCrystalMiniMapFileName } from "./crystal-minimap-transform";
+import {
+  crystalFrontMapBlendMode,
+  crystalMiddleMapBlendMode,
+  decodeCrystalFrontAnimationCount,
+  decodeCrystalMiddleAnimationCount,
+} from "./crystal-map-blend";
 import { CRYSTAL_MINI_MAP_TRANSFORMS } from "./generated/crystal-minimap-transforms";
 import type {
   OriginalMapMissingAsset,
@@ -636,8 +642,7 @@ function parseType6Map(fileName: string, bytes: Buffer): ParsedMap {
     for (let y = 0; y < height; y += 1) {
       if (offset + 20 > bytes.length) break;
       const flag = bytes.readUInt8(offset);
-      let frontAnimationFrame = bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
-      if (frontAnimationFrame > 0x0f) frontAnimationFrame &= 0x0f;
+      const frontAnimationFrame = bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
       let frontIndex = bytes.readUInt8(offset + 3) !== 255 ? bytes.readUInt8(offset + 3) + 300 : -1;
       const baseFrontImage = bytes.readInt16LE(offset + 8) + 1;
       if (baseFrontImage === 1 && frontIndex === 200) frontIndex = -1;
@@ -807,6 +812,9 @@ async function exportMapRegion(
       if (parsedCellBlocksMovement(cell)) {
         outputCell.blocked = true;
       }
+      if (cell.light > 0) {
+        outputCell.light = cell.light;
+      }
       if (cell.x % 2 === 0 && cell.y % 2 === 0) {
         const backLayer = backLayerForCell(cell);
         if (backLayer) outputCell.back = registerSprite(backLayer, "back");
@@ -816,7 +824,16 @@ async function exportMapRegion(
       if (middleLayer) outputCell.middle = registerSprite(middleLayer, "middle");
 
       const frontLayer = frontLayerForCell(cell);
-      if (frontLayer) outputCell.front = registerSprite(frontLayer, "front");
+      if (frontLayer) {
+        outputCell.front = registerSprite(frontLayer, "front");
+        if (cell.frontAnimationFrame > 0 && outputCell.front) {
+          const lightFrame = sprites[outputCell.front]?.frames[0];
+          if (lightFrame) {
+            outputCell.lightOffsetX = lightFrame.offsetX ?? 0;
+            outputCell.lightOffsetY = lightFrame.offsetY ?? 0;
+          }
+        }
+      }
 
       const tileAnimationLayer = tileAnimationLayerForCell(cell);
       if (tileAnimationLayer) outputCell.tileAnimation = registerSprite(tileAnimationLayer, "tileAnimation");
@@ -844,7 +861,15 @@ async function exportMapRegion(
   }
   return region;
 
-  function registerSprite(layer: { libraryKey: string; drawMode: "auto" | "floor" | "object"; frames: number[] }, kind: "back" | "middle" | "front" | "tileAnimation") {
+  function registerSprite(
+    layer: {
+      libraryKey: string;
+      drawMode: "auto" | "floor" | "object";
+      blendMode: "normal" | "additive";
+      frames: number[];
+    },
+    kind: "back" | "middle" | "front" | "tileAnimation",
+  ) {
     let library: ParsedLibrary | null;
     try {
       library = ensureLibrary(layer.libraryKey);
@@ -855,7 +880,7 @@ async function exportMapRegion(
     if (!library) return null;
 
     const drawMode = resolveDrawMode(layer, library);
-    const spriteKey = `${kind}|${layer.libraryKey}|${drawMode}|${layer.frames.join(",")}`;
+    const spriteKey = `${kind}|${layer.libraryKey}|${drawMode}|${layer.blendMode}|${layer.frames.join(",")}`;
     const existingId = spriteIds.get(spriteKey);
     if (existingId) return existingId;
 
@@ -863,7 +888,7 @@ async function exportMapRegion(
     if (!frames.length) return null;
 
     const id = `sprite-${spriteIds.size + 1}`;
-    sprites[id] = { kind, drawMode, frames };
+    sprites[id] = { kind, drawMode, blendMode: layer.blendMode, frames };
     spriteIds.set(spriteKey, id);
     return id;
   }
@@ -961,9 +986,10 @@ function exportFrame(
     exportedFrames.add(frameKey);
     const decoded = decodeLibraryFrameRgba(library, frameIndex);
     if (!decoded) return null;
-    const rgba = postProcessFrameRgba(normalizedKey, frameIndex, decoded);
     pendingWrites.push(
-      mkdir(exportDir, { recursive: true }).then(() => writeFile(pngPath, encodePng(frame.width, frame.height, rgba))),
+      mkdir(exportDir, { recursive: true }).then(() =>
+        writeFile(pngPath, encodePng(frame.width, frame.height, decoded)),
+      ),
     );
   }
 
@@ -1105,7 +1131,12 @@ function backLayerForCell(cell: ParsedMapCell) {
   if (cell.backIndex < 0 || cell.backImage === 0) return null;
   const frameIndex = (cell.backImage & 0x1fffffff) - 1;
   if (frameIndex < 0) return null;
-  return { libraryKey: mapLibraryKeyForIndex(cell.backIndex), drawMode: "floor" as const, frames: [frameIndex] };
+  return {
+    libraryKey: mapLibraryKeyForIndex(cell.backIndex),
+    drawMode: "floor" as const,
+    blendMode: "normal" as const,
+    frames: [frameIndex],
+  };
 }
 
 function parsedCellBlocksMovement(cell: ParsedMapCell) {
@@ -1116,12 +1147,14 @@ function middleLayerForCell(cell: ParsedMapCell) {
   if (cell.middleIndex < 0) return null;
   const baseFrameIndex = cell.middleImage - 1;
   if (baseFrameIndex < 0) return null;
+  const animationCount = decodeCrystalMiddleAnimationCount(cell.middleAnimationFrame);
   return {
     libraryKey: mapLibraryKeyForIndex(cell.middleIndex),
     drawMode: "auto" as const,
+    blendMode: crystalMiddleMapBlendMode(cell.middleAnimationFrame),
     frames: repeatedAnimationFrames(
       baseFrameIndex,
-      decodeMiddleAnimationCount(cell.middleAnimationFrame),
+      animationCount,
       cell.middleAnimationTick,
     ),
   };
@@ -1134,7 +1167,12 @@ function frontLayerForCell(cell: ParsedMapCell) {
   return {
     libraryKey: mapLibraryKeyForIndex(cell.frontIndex),
     drawMode: "auto" as const,
-    frames: repeatedAnimationFrames(baseFrameIndex, decodeFrontAnimationCount(cell.frontAnimationFrame), cell.frontAnimationTick),
+    blendMode: crystalFrontMapBlendMode(cell.frontAnimationFrame),
+    frames: repeatedAnimationFrames(
+      baseFrameIndex,
+      decodeCrystalFrontAnimationCount(cell.frontAnimationFrame),
+      cell.frontAnimationTick,
+    ),
   };
 }
 
@@ -1147,7 +1185,12 @@ function tileAnimationLayerForCell(cell: ParsedMapCell) {
   // beneath object/bridge layers). Routing them as "object" painted them on top of bridges
   // (water overdrawing the stone bridge). "floor" sends them to the backdrop container behind
   // all objects and activates the FLOOR_LAYER_Z_OFFSETS.tileAnimation z-offset.
-  return { libraryKey: mapLibraryKeyForIndex(190), drawMode: "floor" as const, frames };
+  return {
+    libraryKey: mapLibraryKeyForIndex(190),
+    drawMode: "floor" as const,
+    blendMode: "normal" as const,
+    frames,
+  };
 }
 
 function ensureLibrary(libraryKey: string) {
@@ -1466,14 +1509,6 @@ function playBoundsForScene(
   };
 }
 
-function decodeMiddleAnimationCount(animationFrame: number) {
-  return animationFrame <= 0 || animationFrame >= 255 ? 0 : animationFrame & 0x0f;
-}
-
-function decodeFrontAnimationCount(animationFrame: number) {
-  return animationFrame > 0 ? animationFrame & 0x7f : 0;
-}
-
 function repeatedAnimationFrames(baseFrameIndex: number, animationCount: number, animationTick: number) {
   if (animationCount <= 0) return [baseFrameIndex];
   const repeat = 1 + Math.max(animationTick, 0);
@@ -1701,21 +1736,6 @@ function normalizeMapFileName(mapFileName: string) {
 
 function packagedMapFileStem(mapFileName: string) {
   return encodeURIComponent(normalizeMapFileName(mapFileName).toLowerCase());
-}
-
-function postProcessFrameRgba(libraryName: string, frameIndex: number, rgba: Buffer) {
-  if (libraryName !== "WemadeMir2/Objects" || frameIndex < 2723 || frameIndex > 2732) return rgba;
-  const next = Buffer.from(rgba);
-  for (let index = 0; index < next.length; index += 4) {
-    const brightness = Math.max(next[index], next[index + 1], next[index + 2]);
-    const alpha = next[index + 3];
-    if (brightness <= 20) {
-      next[index + 3] = 0;
-    } else if (brightness < 72) {
-      next[index + 3] = Math.max(0, Math.min(alpha, Math.round(((brightness - 20) / 52) * alpha)));
-    }
-  }
-  return next;
 }
 
 function decodeFrame(width: number, height: number, compressed: Buffer) {

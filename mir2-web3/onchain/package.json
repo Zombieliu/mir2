@@ -15,6 +15,7 @@
     "generate": "dubhe generate --network testnet",
     "relayer": "tsx relayer/src/index.ts",
     "relayer:demo": "tsx relayer/src/demo.ts",
+    "node-registry:snapshot": "tsx relayer/src/node-registry-snapshot.ts",
     "indexer": "dubhe indexer --network testnet --config-path dubhe.config.ts",
     "test:relayer": "node --import tsx --test relayer/test/*.test.ts",
     "move:build": "sui move build --path src/mir2_mine",

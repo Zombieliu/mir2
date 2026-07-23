@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const repoRoot = resolve(import.meta.dirname, "..", "..", "..");
@@ -7,15 +7,30 @@ const outputDir = resolve(repoRoot, "packages", "game-data", "data", "generated"
 const outputPath = resolve(outputDir, "localization_bundle.json");
 const webOutputDir = resolve(repoRoot, "apps", "web", "lib", "generated");
 const webOutputPath = resolve(webOutputDir, "localization_bundle.json");
+// Committed native-translation overrides (see assemble-localization-ptbr.mjs). esES
+// overlays the English-derived Spanish baseline; ptBR defines the pt-BR language.
+// Regenerating MUST preserve these, so they are read here rather than re-derived.
+const overridesPath = resolve(repoRoot, "packages", "game-data", "data", "i18n-overrides.json");
 
 const clientEnglish = readCrystalJson("Client", "English.json");
 const clientChinese = readCrystalJson("Client", "Chinese.json");
 const serverEnglish = readCrystalJson("Build/Server/Debug", "English.json");
 const serverChinese = readCrystalJson("Build/Server/Debug", "Chinese.json");
 
+const i18nOverrides = readI18nOverrides();
+
 function readCrystalJson(rootRelative, fileName) {
   const filePath = resolve(crystalRoot, rootRelative, "Localization", fileName);
   return JSON.parse(readFileSync(filePath, "utf8"));
+}
+
+function readI18nOverrides() {
+  if (!existsSync(overridesPath)) {
+    console.warn(`i18n-overrides.json not found at ${overridesPath}; pt-BR + es overrides skipped`);
+    return { esES: {}, ptBR: {} };
+  }
+  const doc = JSON.parse(readFileSync(overridesPath, "utf8"));
+  return { esES: doc.esES ?? {}, ptBR: doc.ptBR ?? {} };
 }
 
 function prefixKeys(entries, prefix) {
@@ -844,6 +859,17 @@ const spanishTexts = {
   ...SPANISH_CRYSTAL_OVERRIDES,
   ...CUSTOM_TEXTS.es,
   ...ADDITIONAL_CUSTOM_TEXTS.es,
+  // Native es-ES translations win over the English-derived baseline (only where given).
+  ...i18nOverrides.esES,
+};
+
+// pt-BR: English baseline (incl. CUSTOM_TEXTS) overlaid by native pt-BR translations.
+const portugueseTexts = {
+  ...prefixKeys(clientEnglish.Text, "client."),
+  ...prefixKeys(serverEnglish.Text, "server."),
+  ...CUSTOM_TEXTS.en,
+  ...ADDITIONAL_CUSTOM_TEXTS.en,
+  ...i18nOverrides.ptBR,
 };
 
 const bundle = {
@@ -884,6 +910,11 @@ const bundle = {
       nativeName: "Espa\u00f1ol",
       locale: "es-ES",
       texts: sortEntries(spanishTexts),
+    },
+    "pt-BR": {
+      nativeName: "Portugu\u00eas (Brasil)",
+      locale: "pt-BR",
+      texts: sortEntries(portugueseTexts),
     },
   },
 };

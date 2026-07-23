@@ -11,6 +11,7 @@ mod hazard;
 mod hero_ai;
 mod inventory;
 mod items;
+mod leveling;
 mod map;
 mod mining;
 mod monster_ai;
@@ -32,6 +33,9 @@ mod stage5;
 mod stats;
 pub mod zone;
 
+/// Crystal's symmetric object-data/AOI radius around the local player.
+pub const CRYSTAL_OBJECT_DATA_RANGE: i32 = crystal_compat::CRYSTAL_DATA_RANGE;
+
 pub use drops::{
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
     SharedGroundDropPickupCommit,
@@ -44,9 +48,11 @@ pub use session::{
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer, SimulationSession,
 };
 pub use zone::{
-    PlayerId, SessionId, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
+    ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin,
+    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

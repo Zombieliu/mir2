@@ -2,8 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import {
+  CrystalChatHistory,
+  CrystalChatType,
+  type CrystalChatType as CrystalChatTypeValue,
+} from "../../lib/crystal-chat-history";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -27,6 +33,7 @@ export type ChatOptionFilterKey =
 type DisplayLogLineLike = {
   text: string;
   tone: "chat" | "system" | "network";
+  crystalChatType?: number;
   channel:
     | "normal"
     | "shout"
@@ -39,6 +46,7 @@ type DisplayLogLineLike = {
     | "system"
     | "hint"
     | "server"
+    | "line"
     | "announcement"
     | "network";
 };
@@ -175,6 +183,7 @@ export function ChatFrame({
   const maxScrollOffset = Math.max(lines.length - visibleLineCount, 0);
   const visibleLines = lines.slice(scrollOffset, scrollOffset + visibleLineCount);
   const knobTop = maxScrollOffset === 0 ? 16 : 16 + Math.round((scrollOffset / maxScrollOffset) * 28);
+  const chatTextBoxVisible = chatMessage.length > 0;
 
   useEffect(() => {
     setScrollOffset((current) => {
@@ -207,14 +216,25 @@ export function ChatFrame({
         <img src={ORIGINAL_UI.game.chatScrollButtons.knob.base} alt="" draggable={false} />
       </div>
       <div className={`chat-feed ${expanded ? "" : "hidden"}`}>
-        {visibleLines.map((line, index) => (
-          <div
-            key={`chat-line-${activeFilter}-${index}`}
-            className={`chat-feed-line ${line.tone === "system" ? "system" : ""} channel-${line.channel}`}
-          >
-            {line.text}
-          </div>
-        ))}
+        {visibleLines.map((line, index) => {
+          const gdiText = findCrystalGdiTextAsset({
+            text: line.text,
+            foreground: line.foreground,
+            background: line.background,
+            outline: false,
+          });
+          return (
+            <div
+              key={`chat-line-${activeFilter}-${scrollOffset + index}-${line.text}`}
+              className={`chat-feed-line ${line.tone === "system" ? "system" : ""} channel-${line.channel}`}
+              style={{ color: line.foreground, backgroundColor: line.background }}
+            >
+              {gdiText ? (
+                <CrystalGdiTextImage asset={gdiText} accessibleText={line.text} />
+              ) : line.text}
+            </div>
+          );
+        })}
       </div>
       {showSettings ? (
         <div className="chat-settings-panel">
@@ -261,6 +281,8 @@ export function ChatFrame({
         className="chat-textbox"
         value={chatMessage}
         data-chat-prefix={activePrefix}
+        data-chat-visible={chatTextBoxVisible}
+        aria-hidden={!chatTextBoxVisible}
         aria-label={t("ui.worldChatPlaceholder")}
         onChange={(event) => onChatMessageChange(event.target.value)}
         onKeyDown={(event) => {
@@ -385,17 +407,29 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
   return (
     <section className={`belt-dialog ${vertical ? "vertical" : "horizontal"}`}>
       <img
-        className="belt-dialog-bg"
-        src={vertical ? ORIGINAL_UI.game.belt.vertical : ORIGINAL_UI.game.belt.horizontal}
-        alt=""
-        draggable={false}
-      />
-      <img
         className="belt-dialog-bg belt-dialog-overlay"
         src={vertical ? ORIGINAL_UI.game.belt.verticalOverlay : ORIGINAL_UI.game.belt.horizontalOverlay}
         alt=""
         draggable={false}
       />
+      <img
+        className="belt-dialog-bg"
+        src={vertical ? ORIGINAL_UI.game.belt.vertical : ORIGINAL_UI.game.belt.horizontal}
+        alt=""
+        draggable={false}
+      />
+      {ORIGINAL_UI.game.belt.slots.map((slot, index) => (
+        <span
+          key={`${slot.key}-label`}
+          className="belt-slot-label"
+          style={{
+            left: vertical ? slot.verticalLabelX : slot.labelX + index * 35,
+            top: vertical ? slot.verticalLabelY + index * 35 : slot.labelY,
+          }}
+        >
+          {index + 1}
+        </span>
+      ))}
       {ORIGINAL_UI.game.belt.slots.map((slot, index) => {
         const item = itemBySlot.get(index) ?? null;
 
@@ -408,15 +442,6 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
               top: vertical ? slot.verticalY : slot.horizontalY,
             }}
           >
-            <span
-              className="belt-slot-label"
-              style={{
-                left: vertical ? slot.verticalLabelX : slot.labelX,
-                top: vertical ? slot.verticalLabelY : slot.labelY,
-              }}
-            >
-              {index + 1}
-            </span>
             {item ? (
               <button
                 type="button"
@@ -438,7 +463,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
                   alt=""
                   draggable={false}
                 />
-                {item.quantity > 1 ? <span className="item-stack-count belt-item-count">{item.quantity}</span> : null}
+                {item.quantity > 0 ? <span className="item-stack-count belt-item-count">{item.quantity}</span> : null}
                 <OriginalItemTooltip
                   t={t}
                   name={item.name}
@@ -529,16 +554,27 @@ export function DuraPanel({ t, visible, equipmentItems, onToggle }: DuraPanelPro
 }
 
 function playerFacingChatLines(logs: DisplayLogLineLike[], hiddenFilters: ChatOptionFilterKey[]) {
-  const lines = logs
-    .filter((line) => line.tone !== "network")
-    .filter((line) => matchesChatVisibility(line, hiddenFilters))
-    .map((line) => ({
-      text: trimLogTimestamp(line.text),
-      tone: line.tone === "chat" ? ("chat" as const) : ("system" as const),
-      channel: line.channel,
-    }))
-    .slice(0, 24)
-    .reverse();
+  const history = new CrystalChatHistory(measureCrystalChatText, {
+    FilterNormalChat: hiddenFilters.includes("normal"),
+    FilterWhisperChat: hiddenFilters.includes("whisper"),
+    FilterShoutChat: hiddenFilters.includes("shout"),
+    FilterSystemChat: hiddenFilters.includes("system"),
+    FilterGroupChat: hiddenFilters.includes("group"),
+    FilterGuildChat: hiddenFilters.includes("guild"),
+  });
+
+  for (const line of [...logs].reverse()) {
+    if (line.tone === "network" || !matchesChatVisibility(line, hiddenFilters)) continue;
+    history.receiveChat(trimLogTimestamp(line.text), crystalChatTypeForDisplayLine(line));
+  }
+
+  const lines = history.History.map((line) => ({
+    text: line.Text,
+    tone: line.Type === CrystalChatType.Normal ? ("chat" as const) : ("system" as const),
+    channel: line.Channel,
+    foreground: argbToCss(line.ForeColour),
+    background: argbToCss(line.BackColour),
+  }));
 
   return lines.length
     ? lines
@@ -546,7 +582,66 @@ function playerFacingChatLines(logs: DisplayLogLineLike[], hiddenFilters: ChatOp
         text: "",
         tone: "chat" as const,
         channel: "normal" as const,
+        foreground: "rgba(0, 0, 0, 1)",
+        background: "rgba(255, 255, 255, 1)",
       }));
+}
+
+function crystalChatTypeForDisplayLine(line: DisplayLogLineLike): CrystalChatTypeValue {
+  if (
+    Number.isInteger(line.crystalChatType) &&
+    line.crystalChatType! >= CrystalChatType.Normal &&
+    line.crystalChatType! <= CrystalChatType.LineMessage
+  ) {
+    return line.crystalChatType as CrystalChatTypeValue;
+  }
+
+  switch (line.channel) {
+    case "shout":
+      return CrystalChatType.Shout;
+    case "whisper":
+      return CrystalChatType.WhisperIn;
+    case "group":
+      return CrystalChatType.Group;
+    case "guild":
+      return CrystalChatType.Guild;
+    case "mentor":
+      return CrystalChatType.Mentor;
+    case "relationship":
+      return CrystalChatType.Relationship;
+    case "hint":
+      return CrystalChatType.Hint;
+    case "line":
+      return CrystalChatType.LineMessage;
+    case "announcement":
+      return CrystalChatType.Announcement;
+    case "system":
+    case "server":
+      return CrystalChatType.System;
+    default:
+      return line.tone === "system" ? CrystalChatType.System : CrystalChatType.Normal;
+  }
+}
+
+let crystalChatMeasureContext: CanvasRenderingContext2D | null | undefined;
+
+function measureCrystalChatText(text: string) {
+  if (crystalChatMeasureContext === undefined) {
+    const canvas = typeof document === "undefined" ? null : document.createElement("canvas");
+    crystalChatMeasureContext = canvas?.getContext("2d") ?? null;
+    if (crystalChatMeasureContext) crystalChatMeasureContext.font = "11px Arial";
+  }
+  return Math.ceil(crystalChatMeasureContext?.measureText(text).width ?? text.length * 6);
+}
+
+function argbToCss(argb: string) {
+  const value = argb.replace(/^#/, "");
+  if (value.length !== 8) return argb;
+  const alpha = Number.parseInt(value.slice(0, 2), 16) / 255;
+  const red = Number.parseInt(value.slice(2, 4), 16);
+  const green = Number.parseInt(value.slice(4, 6), 16);
+  const blue = Number.parseInt(value.slice(6, 8), 16);
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
 function trimLogTimestamp(text: string) {

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::env;
 use std::io;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
@@ -25,6 +25,7 @@ use mir2_simulation::{
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
+use tokio::sync::{mpsc, Mutex as AsyncMutex, RwLock as AsyncRwLock};
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
@@ -43,13 +44,93 @@ use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
     SharedGameplayEventSink,
 };
-use crate::session::catch_gateway_panic;
-use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
+use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
+use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
+use crate::tcp::chat_broadcast::{
+    recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
+};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
+
+type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
+type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
+type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
+type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
+type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
+const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
+
+enum ParsedSocketInput {
+    Action(SessionAction),
+    ProtocolError(String),
+}
+
+struct PendingSerialAction {
+    pending_count: Arc<AtomicUsize>,
+}
+
+impl PendingSerialAction {
+    fn new(pending_count: Arc<AtomicUsize>) -> Self {
+        pending_count.fetch_add(1, Ordering::AcqRel);
+        Self { pending_count }
+    }
+}
+
+impl Drop for PendingSerialAction {
+    fn drop(&mut self) {
+        self.pending_count.fetch_sub(1, Ordering::AcqRel);
+    }
+}
+
+struct QueuedSocketInput {
+    input: Option<ParsedSocketInput>,
+    _pending: PendingSerialAction,
+}
+
+impl QueuedSocketInput {
+    fn new(input: ParsedSocketInput, pending_count: Arc<AtomicUsize>) -> Self {
+        Self {
+            input: Some(input),
+            _pending: PendingSerialAction::new(pending_count),
+        }
+    }
+
+    fn take_input(&mut self) -> ParsedSocketInput {
+        self.input
+            .take()
+            .expect("queued socket input should only be consumed once")
+    }
+}
+
+enum SocketInbound {
+    Queued(QueuedSocketInput),
+    Closed,
+    ReadError(String),
+}
+
+struct SocketReaderTask {
+    handle: JoinHandle<()>,
+}
+
+impl Drop for SocketReaderTask {
+    fn drop(&mut self) {
+        self.handle.abort();
+    }
+}
+
+struct ZoneOutboundSenderTask {
+    handle: JoinHandle<()>,
+}
+
+impl Drop for ZoneOutboundSenderTask {
+    fn drop(&mut self) {
+        self.handle.abort();
+    }
+}
 
 #[derive(Clone)]
 struct WebState {
     config: Arc<GatewayConfig>,
     zone_registry: Arc<ZoneRegistry>,
+    chat_hub: ChatBroadcastHub,
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
@@ -585,6 +666,7 @@ impl ReconnectSessionStore {
 enum BrowserCommand {
     ClientVersion,
     Disconnect,
+    TownRevive,
     Login {
         #[serde(alias = "accountId")]
         account_id: String,
@@ -1155,6 +1237,10 @@ enum BrowserCommand {
         #[serde(default)]
         args: Vec<String>,
     },
+    QaControl {
+        token: String,
+        action: QaControlAction,
+    },
     SetLanguage {
         language: String,
     },
@@ -1162,22 +1248,73 @@ enum BrowserCommand {
     LogOut,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+enum QaControlAction {
+    TransferMap {
+        key: String,
+    },
+    Stage5Command {
+        action: String,
+        #[serde(default)]
+        args: Vec<String>,
+    },
+    Chat {
+        message: String,
+    },
+    Tick,
+}
+
+#[derive(Debug, Clone)]
 enum SessionAction {
     Packet(ClientPacket),
-    PasskeyLogin { account_id: String, token: String },
-    MoveTo { x: i32, y: i32, running: bool },
-    Attack { object_id: u32 },
-    Interact { object_id: u32 },
-    SelectNpcDialog { target: String },
-    SubmitNpcInput { value: String },
-    PickUp { object_id: u32 },
-    UseItem { key: String },
-    DropItem { key: String },
-    CastSkill { key: String },
-    TransferMap { key: String },
-    Stage5Command { action: String, args: Vec<String> },
-    SetLanguage { language: String },
+    PasskeyLogin {
+        account_id: String,
+        token: String,
+    },
+    MoveTo {
+        x: i32,
+        y: i32,
+        running: bool,
+    },
+    Attack {
+        object_id: u32,
+    },
+    Interact {
+        object_id: u32,
+    },
+    SelectNpcDialog {
+        target: String,
+    },
+    SubmitNpcInput {
+        value: String,
+    },
+    PickUp {
+        object_id: u32,
+    },
+    UseItem {
+        key: String,
+    },
+    DropItem {
+        key: String,
+    },
+    CastSkill {
+        key: String,
+    },
+    TransferMap {
+        key: String,
+    },
+    Stage5Command {
+        action: String,
+        args: Vec<String>,
+    },
+    QaControl {
+        token: String,
+        action: QaControlAction,
+    },
+    SetLanguage {
+        language: String,
+    },
     Tick,
 }
 
@@ -1258,18 +1395,26 @@ struct AdminErrorResponse {
     error: String,
 }
 
-pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
+pub async fn run_web_gateway(
+    addr: &str,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
         mir2_simulation::set_crystal_full_world_zone_collision(true);
     }
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let state = WebState {
         config: Arc::new(config),
-        zone_registry: Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(
-            crate::zone_lease::default_zone_owner_lease_authority_from_env(),
-        )),
+        zone_registry: Arc::new(
+            topology
+                .zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
+        ),
+        chat_hub,
         session_cache: gateway_session_cache_from_env()
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
@@ -1568,6 +1713,7 @@ async fn handle_socket(
         &mut save_queue,
         &mut route_refresh,
         state.injector.clone(),
+        state.chat_hub.clone(),
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -1631,6 +1777,220 @@ async fn handle_socket(
     let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
 }
 
+fn zone_movement_packet_for_action(action: &SessionAction) -> Option<ClientPacket> {
+    match action {
+        SessionAction::Packet(
+            packet @ (ClientPacket::Walk { .. }
+            | ClientPacket::Run { .. }
+            | ClientPacket::Turn { .. }),
+        ) => Some(packet.clone()),
+        _ => None,
+    }
+}
+
+async fn try_handle_zone_movement_from_reader(
+    action: &SessionAction,
+    sender: &SharedWebSocketSender,
+    movement_ingress: &SharedZoneMovementIngressSlot,
+    serial_execution_gate: &SharedSerialExecutionGate,
+    authenticated: bool,
+    pending_serial_actions: usize,
+) -> Result<bool, String> {
+    if !authenticated || pending_serial_actions != 0 {
+        return Ok(false);
+    }
+    let Some(packet) = zone_movement_packet_for_action(action) else {
+        return Ok(false);
+    };
+    let Ok(_execution_guard) = serial_execution_gate.try_read() else {
+        return Ok(false);
+    };
+    let ingress = movement_ingress
+        .read()
+        .map_err(|_| "zone movement ingress slot was poisoned".to_string())?
+        .clone();
+    let Some(ingress) = ingress else {
+        return Ok(false);
+    };
+    let move_log = move_log_for_action(action);
+    let execution = tokio::task::spawn_blocking(move || ingress.try_execute(packet))
+        .await
+        .map_err(|error| format!("zone movement ingress task failed: {error}"))??;
+    let Some(execution) = execution else {
+        return Ok(false);
+    };
+    let responses = execution.packets;
+    log_move_action(move_log, &responses);
+    for packet in responses {
+        send_server_packet(sender, &packet)
+            .await
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(true)
+}
+
+fn spawn_zone_outbound_sender(
+    mut receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    sender: SharedWebSocketSender,
+    serial_execution_gate: SharedSerialExecutionGate,
+    active_registration_id: Arc<AtomicU64>,
+) -> ZoneOutboundSenderTask {
+    let handle = tokio::spawn(async move {
+        while let Some(outbound) = receiver.recv().await {
+            let registration_id = outbound.registration_id();
+            if active_registration_id.load(Ordering::Acquire) != registration_id {
+                continue;
+            }
+            let _serial_execution = serial_execution_gate.read().await;
+            if active_registration_id.load(Ordering::Acquire) != registration_id {
+                continue;
+            }
+            if send_server_packet(&sender, &outbound.into_packet())
+                .await
+                .is_err()
+            {
+                return;
+            }
+        }
+    });
+    ZoneOutboundSenderTask { handle }
+}
+
+fn register_zone_live_outbound(
+    session: &GatewaySession,
+    sender: &mpsc::Sender<SharedZoneLiveOutbound>,
+    active_registration_id: &AtomicU64,
+) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
+    active_registration_id.store(0, Ordering::Release);
+    let registration = session.register_zone_live_outbound(sender.clone())?;
+    active_registration_id.store(
+        registration
+            .as_ref()
+            .map(|registration| registration.registration_id())
+            .unwrap_or(0),
+        Ordering::Release,
+    );
+    if let Some(registration) = registration.as_ref() {
+        registration.activate();
+    }
+    Ok(registration)
+}
+
+fn spawn_socket_reader(
+    mut receiver: WebSocketReceiver,
+    sender: SharedWebSocketSender,
+    movement_ingress: SharedZoneMovementIngressSlot,
+    serial_execution_gate: SharedSerialExecutionGate,
+    authenticated: Arc<AtomicBool>,
+) -> (
+    mpsc::Receiver<SocketInbound>,
+    SocketReaderTask,
+    Arc<AtomicUsize>,
+) {
+    const SOCKET_INPUT_CAPACITY: usize = 256;
+
+    let (input_tx, input_rx) = mpsc::channel(SOCKET_INPUT_CAPACITY);
+    let pending_count = Arc::new(AtomicUsize::new(0));
+    let reader_pending_count = Arc::clone(&pending_count);
+    let handle = tokio::spawn(async move {
+        loop {
+            let message = match receiver.next().await {
+                Some(Ok(Message::Text(text))) => text,
+                Some(Ok(Message::Close(_))) | None => {
+                    let _ = input_tx.send(SocketInbound::Closed).await;
+                    return;
+                }
+                Some(Ok(_)) => continue,
+                Some(Err(error)) => {
+                    let _ = input_tx
+                        .send(SocketInbound::ReadError(error.to_string()))
+                        .await;
+                    return;
+                }
+            };
+
+            let command = match serde_json::from_str::<BrowserCommand>(&message) {
+                Ok(command) => command,
+                Err(error) => {
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            ParsedSocketInput::ProtocolError(format!("invalid command: {error}")),
+                            Arc::clone(&reader_pending_count),
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
+            };
+            let action = match browser_command_to_action(command) {
+                Ok(action) => action,
+                Err(error) => {
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            ParsedSocketInput::ProtocolError(error),
+                            Arc::clone(&reader_pending_count),
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
+            };
+            if let Some(time) = keep_alive_time_for_action(&action) {
+                if send_server_packet(&sender, &ServerPacket::KeepAlive { time })
+                    .await
+                    .is_err()
+                {
+                    return;
+                }
+                continue;
+            }
+            match try_handle_zone_movement_from_reader(
+                &action,
+                &sender,
+                &movement_ingress,
+                &serial_execution_gate,
+                authenticated.load(Ordering::Acquire),
+                reader_pending_count.load(Ordering::Acquire),
+            )
+            .await
+            {
+                Ok(true) => continue,
+                Ok(false) => {}
+                Err(error) => {
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            ParsedSocketInput::ProtocolError(error),
+                            Arc::clone(&reader_pending_count),
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
+            }
+            if input_tx
+                .send(SocketInbound::Queued(QueuedSocketInput::new(
+                    ParsedSocketInput::Action(action),
+                    Arc::clone(&reader_pending_count),
+                )))
+                .await
+                .is_err()
+            {
+                return;
+            }
+        }
+    });
+    (input_rx, SocketReaderTask { handle }, pending_count)
+}
+
 fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
     let mut session = match &state.gameplay_event_sink {
         Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
@@ -1659,8 +2019,10 @@ async fn handle_socket_inner(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     injector: crate::inject::LiveSessionInjector,
+    chat_hub: ChatBroadcastHub,
 ) {
-    let (mut sender, mut receiver) = socket.split();
+    let (sender, receiver) = socket.split();
+    let sender = Arc::new(AsyncMutex::new(sender));
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
     runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let mut runtime_tick_deferred_until = Instant::now();
@@ -1684,51 +2046,76 @@ async fn handle_socket_inner(
     let connect_packets = match catch_gateway_panic("web on_connect", || session.on_connect()) {
         Ok(packets) => packets,
         Err(error) => {
-            let _ = send_error_message(&mut sender, &error).await;
+            let _ = send_error_message(&sender, &error).await;
             return;
         }
     };
 
     for packet in connect_packets {
-        if send_server_packet(&mut sender, &packet).await.is_err() {
+        if send_server_packet(&sender, &packet).await.is_err() {
             return;
         }
     }
     if let Err(error) = tokio::task::block_in_place(|| refresh_external_session_state(session)) {
-        let _ = send_error_message(&mut sender, &error).await;
+        let _ = send_error_message(&sender, &error).await;
         return;
     }
-    if send_world_snapshot(&mut sender, &session).await.is_err() {
+    if send_world_snapshot(&sender, &session).await.is_err() {
         return;
     }
+    let initial_movement_ingress = session.zone_movement_ingress();
+    let movement_ingress = Arc::new(RwLock::new(initial_movement_ingress));
+    let serial_execution_gate = Arc::new(AsyncRwLock::new(()));
+    let socket_authenticated = Arc::new(AtomicBool::new(authenticated));
+    let (zone_outbound_tx, zone_outbound_rx) = mpsc::channel(LIVE_ZONE_OUTBOUND_CAPACITY);
+    let active_zone_outbound_registration_id = Arc::new(AtomicU64::new(0));
+    let _zone_outbound_sender_task = spawn_zone_outbound_sender(
+        zone_outbound_rx,
+        Arc::clone(&sender),
+        Arc::clone(&serial_execution_gate),
+        Arc::clone(&active_zone_outbound_registration_id),
+    );
+    let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
+    let mut chat_presence: Option<ChatPresence> = None;
+    let (mut socket_inputs, _socket_reader_task, pending_socket_actions) = spawn_socket_reader(
+        receiver,
+        Arc::clone(&sender),
+        Arc::clone(&movement_ingress),
+        Arc::clone(&serial_execution_gate),
+        Arc::clone(&socket_authenticated),
+    );
 
     loop {
         tokio::select! {
             biased;
 
-            message_result = receiver.next() => {
-                let message = match message_result {
-                    Some(Ok(Message::Text(text))) => text,
-                    Some(Ok(Message::Close(_))) | None => return,
-                    Some(Ok(_)) => continue,
-                    Some(Err(_)) => return,
+            socket_input = socket_inputs.recv() => {
+                let mut queued_input = match socket_input {
+                    Some(SocketInbound::Queued(input)) => input,
+                    Some(SocketInbound::Closed) | None => return,
+                    Some(SocketInbound::ReadError(error)) => {
+                        eprintln!("web receive error: {error}");
+                        return;
+                    }
                 };
-
-                let command = match serde_json::from_str::<BrowserCommand>(&message) {
-                    Ok(command) => command,
-                    Err(error) => {
-                        let _ = send_error_message(&mut sender, &format!("invalid command: {error}")).await;
+                let _serial_execution = serial_execution_gate.write().await;
+                let action = match queued_input.take_input() {
+                    ParsedSocketInput::Action(action) => action,
+                    ParsedSocketInput::ProtocolError(error) => {
+                        if send_error_message(&sender, &error).await.is_err() {
+                            return;
+                        }
                         continue;
                     }
                 };
-
-                let action = match browser_command_to_action(command) {
-                    Ok(action) => action,
-                    Err(error) => {
-                        let _ = send_error_message(&mut sender, &error).await;
-                        continue;
-                    }
-                };
+                let starts_game = matches!(
+                    &action,
+                    SessionAction::Packet(ClientPacket::StartGame { .. })
+                );
+                let leaves_world = matches!(
+                    &action,
+                    SessionAction::Packet(ClientPacket::Disconnect | ClientPacket::LogOut)
+                );
 
                 let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
                 let low_latency_action = is_low_latency_action(&action);
@@ -1737,7 +2124,7 @@ async fn handle_socket_inner(
                 let login_account_id = login_account_id_for_action(&action).map(str::to_string);
                 let keep_alive_time = keep_alive_time_for_action(&action);
                 if let Some(time) = keep_alive_time {
-                    if send_server_packet(&mut sender, &ServerPacket::KeepAlive { time })
+                    if send_server_packet(&sender, &ServerPacket::KeepAlive { time })
                         .await
                         .is_err()
                     {
@@ -1774,7 +2161,7 @@ async fn handle_socket_inner(
                 ) {
                     Ok(key) => key,
                     Err(error) => {
-                        let _ = send_error_message(&mut sender, &error).await;
+                        let _ = send_error_message(&sender, &error).await;
                         continue;
                     }
                 };
@@ -1787,7 +2174,7 @@ async fn handle_socket_inner(
                                 session,
                                 pending_start_game_route_lease.as_ref(),
                             );
-                            let _ = send_error_message(&mut sender, &error).await;
+                            let _ = send_error_message(&sender, &error).await;
                             continue;
                         }
                     },
@@ -1806,7 +2193,7 @@ async fn handle_socket_inner(
                                 session,
                                 pending_start_game_route_lease.as_ref(),
                             );
-                            let _ = send_error_message(&mut sender, &error).await;
+                            let _ = send_error_message(&sender, &error).await;
                             continue;
                         }
                     }
@@ -1828,7 +2215,7 @@ async fn handle_socket_inner(
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
-                        let _ = send_error_message(&mut sender, &error).await;
+                        let _ = send_error_message(&sender, &error).await;
                         continue;
                     }
                     Err(error) => {
@@ -1837,10 +2224,13 @@ async fn handle_socket_inner(
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
-                        let _ = send_error_message(&mut sender, &error).await;
+                        let _ = send_error_message(&sender, &error).await;
                         return;
                     }
                 };
+                if leaves_world || session.active_identity().is_none() {
+                    chat_presence = None;
+                }
                 drop(action_capacity_permit);
                 release_unclaimed_start_game_route_lease(
                     session_cache.as_ref(),
@@ -1866,9 +2256,32 @@ async fn handle_socket_inner(
                     _injection_registration = None;
                 }
                 authenticated = next_authenticated;
+                socket_authenticated.store(authenticated, Ordering::Release);
+                let next_movement_ingress = session.zone_movement_ingress();
+                *movement_ingress
+                    .write()
+                    .expect("zone movement ingress slot should not be poisoned") =
+                    next_movement_ingress.clone();
+                let next_zone_live_outbound_registration = if authenticated {
+                    match register_zone_live_outbound(
+                        session,
+                        &zone_outbound_tx,
+                        active_zone_outbound_registration_id.as_ref(),
+                    ) {
+                        Ok(registration) => registration,
+                        Err(error) => {
+                            let _ = send_error_message(&sender, &error).await;
+                            return;
+                        }
+                    }
+                } else {
+                    active_zone_outbound_registration_id.store(0, Ordering::Release);
+                    None
+                };
+                _zone_live_outbound_registration = next_zone_live_outbound_registration;
 
                 if let Err(error) = flush_session_updates(
-                    &mut sender,
+                    &sender,
                     session,
                     session_cache.as_ref(),
                     save_queue,
@@ -1881,8 +2294,15 @@ async fn handle_socket_inner(
                 )
                 .await
                 {
-                    let _ = send_error_message(&mut sender, &error).await;
+                    let _ = send_error_message(&sender, &error).await;
                     return;
+                }
+                if starts_game
+                    && chat_presence.is_none()
+                    && session.active_identity().is_some()
+                    && session.zone_movement_ingress().is_some()
+                {
+                    chat_presence = Some(chat_hub.register(ChatProtocol::WebSocket));
                 }
                 if force_route_refresh || !low_latency_action {
                     update_background_route_refresh_record(
@@ -1892,12 +2312,29 @@ async fn handle_socket_inner(
                 }
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
+                    runtime_tick.reset_after(duration);
+                }
+            }
+            broadcast = recv_optional_chat(&mut chat_presence) => {
+                match broadcast {
+                    Ok(packet) => {
+                        if send_server_packet(&sender, &packet).await.is_err() {
+                            return;
+                        }
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                        chat_presence = None;
+                    }
                 }
             }
             maybe_injection = inject_rx.recv() => {
                 let Some(crate::inject::InjectionMessage { command, reply }) = maybe_injection else {
                     continue;
                 };
+                let _serial_execution = serial_execution_gate.write().await;
+                let _serial_action =
+                    PendingSerialAction::new(Arc::clone(&pending_socket_actions));
                 // Apply the chain-confirmed command authoritatively (Direct mode), then push
                 // the resulting packets to this player's socket.
                 let outcome = catch_gateway_panic("web onchain injection", || {
@@ -1911,13 +2348,13 @@ async fn handle_socket_inner(
                         continue;
                     }
                     Err(error) => {
-                        let _ = send_error_message(&mut sender, &error).await;
+                        let _ = send_error_message(&sender, &error).await;
                         return;
                     }
                 };
                 let packet_count = responses.len();
                 if let Err(error) = flush_session_updates(
-                    &mut sender,
+                    &sender,
                     session,
                     session_cache.as_ref(),
                     save_queue,
@@ -1930,7 +2367,7 @@ async fn handle_socket_inner(
                 )
                 .await
                 {
-                    let _ = send_error_message(&mut sender, &error).await;
+                    let _ = send_error_message(&sender, &error).await;
                     return;
                 }
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
@@ -1940,7 +2377,7 @@ async fn handle_socket_inner(
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
-                    let _ = send_error_message(&mut sender, &error).await;
+                    let _ = send_error_message(&sender, &error).await;
                     return;
                 }
                 if now < runtime_tick_deferred_until {
@@ -1951,7 +2388,7 @@ async fn handle_socket_inner(
                 }) {
                     Ok(responses) => responses,
                     Err(error) => {
-                        let _ = send_error_message(&mut sender, &error).await;
+                        let _ = send_error_message(&sender, &error).await;
                         return;
                     }
                 };
@@ -1963,13 +2400,13 @@ async fn handle_socket_inner(
                             })
                         })
                     }) {
-                        let _ = send_error_message(&mut sender, &error).await;
+                        let _ = send_error_message(&sender, &error).await;
                         return;
                     }
                     continue;
                 }
                 if let Err(error) = flush_session_updates(
-                    &mut sender,
+                    &sender,
                     session,
                     session_cache.as_ref(),
                     save_queue,
@@ -1982,9 +2419,12 @@ async fn handle_socket_inner(
                 )
                 .await
                 {
-                    let _ = send_error_message(&mut sender, &error).await;
+                    let _ = send_error_message(&sender, &error).await;
                     return;
                 }
+                runtime_tick_deferred_until =
+                    Instant::now() + gateway_runtime_tick_input_wake_grace();
+                runtime_tick.reset_after(gateway_runtime_tick_input_wake_grace());
             }
         }
     }
@@ -2048,12 +2488,12 @@ fn schedule_reconnect_session_purge(
 }
 
 const DEFAULT_GATEWAY_RUNTIME_TICK_MS: u64 = 300;
-const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS: u64 = 900;
+const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS: u64 = 75;
 const DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS: u64 = 15_000;
 const DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: u64 = 10_000;
 
 async fn flush_session_updates(
-    sender: &mut futures_util::stream::SplitSink<WebSocket, Message>,
+    sender: &SharedWebSocketSender,
     session: &mut GatewaySession,
     session_cache: &dyn crate::cache::GatewaySessionCache,
     save_queue: &mut WebSessionSaveQueue,
@@ -2142,21 +2582,21 @@ fn gateway_runtime_tick_interval() -> Duration {
     )
 }
 
-fn gateway_runtime_tick_input_grace() -> Duration {
-    duration_from_millis_env(
-        "MIR2_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS",
-        DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS,
-        0,
-        5_000,
-    )
-}
-
 fn gateway_runtime_tick_bootstrap_grace() -> Duration {
     duration_from_millis_env(
         "MIR2_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS",
         DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS,
         0,
         30_000,
+    )
+}
+
+fn gateway_runtime_tick_input_wake_grace() -> Duration {
+    duration_from_millis_env(
+        "MIR2_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS",
+        DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS,
+        0,
+        500,
     )
 }
 
@@ -2186,10 +2626,14 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::Packet(ClientPacket::StartGame { .. }) => {
             Some(gateway_runtime_tick_bootstrap_grace())
         }
+        // Active input should wake the runtime tick loop, otherwise a queued
+        // Crystal movement retry can inherit StartGame's bootstrap grace. Keep
+        // a tiny batching window so follow-up input wins races against heavy
+        // world ticks on the same WebSocket task.
         SessionAction::MoveTo { .. }
         | SessionAction::Packet(
             ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
-        ) => Some(gateway_runtime_tick_input_grace()),
+        ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
 }
@@ -2331,6 +2775,9 @@ fn execute_session_action(
     enforce_player_command_safety: bool,
 ) -> Result<Vec<ServerPacket>, String> {
     let move_log = move_log_for_action(&action);
+    if let SessionAction::QaControl { token, action } = action {
+        return execute_qa_control_action(session, &token, action);
+    }
     if enforce_player_command_safety {
         return execute_production_session_action(session, action, authenticated, move_log);
     }
@@ -2359,6 +2806,9 @@ fn execute_session_action(
         SessionAction::CastSkill { key } => Ok(session.cast_skill(&key)),
         SessionAction::TransferMap { key } => Ok(session.transfer_map(&key)),
         SessionAction::Stage5Command { action, args } => Ok(session.stage5_command(&action, args)),
+        SessionAction::QaControl { token, action } => {
+            execute_qa_control_action(session, &token, action)
+        }
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
@@ -2451,6 +2901,9 @@ fn execute_production_session_action(
                 authenticated,
                 WorldCommand::Stage5Command { action, args },
             )?,
+        SessionAction::QaControl { token, action } => {
+            return execute_qa_control_action(session, &token, action);
+        }
         SessionAction::SetLanguage { language } => session
             .execute_production_player_command_with_zone_owner_lease(
                 &zone_owner_lease,
@@ -2465,6 +2918,49 @@ fn execute_production_session_action(
     };
     log_move_action(move_log, &execution.packets);
     Ok(execution.packets)
+}
+
+fn execute_qa_control_action(
+    session: &mut GatewaySession,
+    token: &str,
+    action: QaControlAction,
+) -> Result<Vec<ServerPacket>, String> {
+    verify_qa_control_token(token)?;
+    match action {
+        QaControlAction::TransferMap { key } => Ok(session.transfer_map(&key)),
+        QaControlAction::Stage5Command { action, args } => {
+            Ok(session.stage5_command(&action, args))
+        }
+        QaControlAction::Chat { message } => Ok(session.handle_packet(ClientPacket::Chat {
+            message,
+            linked_items: Vec::new(),
+        })),
+        QaControlAction::Tick => Ok(session.tick()),
+    }
+}
+
+fn verify_qa_control_token(provided: &str) -> Result<(), String> {
+    let expected = env::var("MIR2_GATEWAY_QA_CONTROL_TOKEN")
+        .map_err(|_| "QA control is disabled; set MIR2_GATEWAY_QA_CONTROL_TOKEN".to_string())?;
+    if expected.trim().is_empty() {
+        return Err("QA control is disabled; MIR2_GATEWAY_QA_CONTROL_TOKEN is empty".to_string());
+    }
+    if constant_time_eq(expected.as_bytes(), provided.as_bytes()) {
+        Ok(())
+    } else {
+        Err("invalid QA control token".to_string())
+    }
+}
+
+fn constant_time_eq(expected: &[u8], provided: &[u8]) -> bool {
+    if expected.len() != provided.len() {
+        return false;
+    }
+    expected
+        .iter()
+        .zip(provided.iter())
+        .fold(0_u8, |diff, (left, right)| diff | (left ^ right))
+        == 0
 }
 
 fn update_authenticated_state(current: bool, responses: &[ServerPacket]) -> bool {
@@ -2572,6 +3068,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             version_hash: Vec::new(),
         })),
         BrowserCommand::Disconnect => Ok(SessionAction::Packet(ClientPacket::Disconnect)),
+        BrowserCommand::TownRevive => Ok(SessionAction::Packet(ClientPacket::TownRevive)),
         BrowserCommand::Login {
             account_id,
             password,
@@ -3268,6 +3765,9 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::Stage5Command { action, args } => {
             Ok(SessionAction::Stage5Command { action, args })
         }
+        BrowserCommand::QaControl { token, action } => {
+            Ok(SessionAction::QaControl { token, action })
+        }
         BrowserCommand::SetLanguage { language } => Ok(SessionAction::SetLanguage { language }),
         BrowserCommand::Tick => Ok(SessionAction::Tick),
         BrowserCommand::LogOut => Ok(SessionAction::Packet(ClientPacket::LogOut)),
@@ -3317,19 +3817,27 @@ fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
     responses.iter().any(|packet| {
         matches!(
             packet,
-            ServerPacket::ObjectHide { .. } | ServerPacket::ObjectShow { .. }
+            ServerPacket::StartGame { .. }
+                | ServerPacket::MapInformation { .. }
+                | ServerPacket::UserInformation { .. }
+                | ServerPacket::UserLocation { .. }
+                | ServerPacket::ObjectHealth { .. }
+                | ServerPacket::ObjectHide { .. }
+                | ServerPacket::ObjectShow { .. }
         )
     })
 }
 
 async fn send_world_snapshot(
-    sender: &mut futures_util::stream::SplitSink<WebSocket, Message>,
+    sender: &SharedWebSocketSender,
     session: &GatewaySession,
 ) -> Result<(), String> {
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
     sender
+        .lock()
+        .await
         .send(Message::Text(
             json!({
                 "type": "worldSnapshot",
@@ -3343,10 +3851,12 @@ async fn send_world_snapshot(
 }
 
 async fn send_server_packet(
-    sender: &mut futures_util::stream::SplitSink<WebSocket, Message>,
+    sender: &SharedWebSocketSender,
     packet: &ServerPacket,
 ) -> Result<(), axum::Error> {
     sender
+        .lock()
+        .await
         .send(Message::Text(
             server_packet_to_event(packet).to_string().into(),
         ))
@@ -3354,10 +3864,12 @@ async fn send_server_packet(
 }
 
 async fn send_error_message(
-    sender: &mut futures_util::stream::SplitSink<WebSocket, Message>,
+    sender: &SharedWebSocketSender,
     message: &str,
 ) -> Result<(), axum::Error> {
     sender
+        .lock()
+        .await
         .send(Message::Text(
             json!({
                 "type": "error",
@@ -3535,11 +4047,11 @@ fn parse_progress_fraction(line: &str) -> Option<(u32, u32)> {
 }
 
 /// Serializes the reward bundle of a `ClientQuestInfo` into the contract
-/// `rewards` object (`{ gold?, experience?, credit?, items? }`). Mirrors the
+/// `rewards` object (`{ gold?, experience?, credit?, items?, selectItems? }`). Mirrors the
 /// Crystal `ClientQuestInfo` reward fields
-/// (`Crystal/Shared/Data/ClientData.cs:380-384`); fixed + selectable item
-/// rewards are merged into one `items` list (each `{ name, count? }`) resolved
-/// from the reward `ItemInfo.Name` (`Crystal/Shared/Data/SharedData.cs:75-93`).
+/// (`Crystal/Shared/Data/ClientData.cs:380-384`). Fixed and selectable rewards
+/// stay separate because the Crystal client requires an explicit choice before
+/// turn-in. Each item also carries its original icon and item index.
 /// Returns `None` when there is nothing to reward so the field can be omitted.
 fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
     let mut entry = serde_json::Map::new();
@@ -3552,14 +4064,16 @@ fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
     if info.reward_credit != 0 {
         entry.insert("credit".into(), json!(info.reward_credit));
     }
-    let items = quest_reward_items_json(
-        info.rewards_fixed_item
-            .iter()
-            .chain(info.rewards_select_item.iter()),
-    );
+    let items = quest_reward_items_json(info.rewards_fixed_item.iter(), false);
     if let Value::Array(ref array) = items {
         if !array.is_empty() {
             entry.insert("items".into(), items);
+        }
+    }
+    let select_items = quest_reward_items_json(info.rewards_select_item.iter(), true);
+    if let Value::Array(ref array) = select_items {
+        if !array.is_empty() {
+            entry.insert("selectItems".into(), select_items);
         }
     }
     if entry.is_empty() {
@@ -3569,16 +4083,26 @@ fn quest_rewards_json(info: &ClientQuestInfo) -> Option<Value> {
     }
 }
 
-/// Maps quest reward items into `[{ name, count? }]` using the reward item's
-/// `ItemInfo.Name` (already carried on the wire, no lookup needed).
-fn quest_reward_items_json<'a>(rewards: impl Iterator<Item = &'a QuestItemReward>) -> Value {
+/// Maps quest reward items into the browser contract using fields already
+/// carried by `ItemInfo` on the Crystal wire payload.
+fn quest_reward_items_json<'a>(
+    rewards: impl Iterator<Item = &'a QuestItemReward>,
+    selectable: bool,
+) -> Value {
     Value::Array(
         rewards
-            .map(|reward| {
+            .enumerate()
+            .map(|(selection_index, reward)| {
                 let mut item = serde_json::Map::new();
                 item.insert("name".into(), json!(reward.item.name));
+                item.insert("icon".into(), json!(reward.item.image));
+                item.insert("itemIndex".into(), json!(reward.item.index));
                 if reward.count != 1 {
                     item.insert("count".into(), json!(reward.count));
+                }
+                if selectable {
+                    item.insert("selectable".into(), json!(true));
+                    item.insert("selectionIndex".into(), json!(selection_index));
                 }
                 Value::Object(item)
             })
@@ -4840,6 +5364,22 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "kind": info.kind
             }
         }),
+        // Self-death signal (Crystal `S.Death`): the client marks the player dead
+        // and surfaces the revive-in-town prompt. Distinct from `ObjectDied` (others).
+        ServerPacket::Death {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "Death",
+            "payload": {
+                "location": {
+                    "x": location.x,
+                    "y": location.y
+                },
+                "direction": format!("{:?}", direction)
+            }
+        }),
         ServerPacket::GainHeroExperience { amount } => json!({
             "type": "packet",
             "packet": "GainHeroExperience",
@@ -4881,6 +5421,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "objectId": info.object_id,
                 "effect": info.effect
             }
+        }),
+        // Self-revive reply to `TownRevive` (Crystal `S.Revived`): clears the dead
+        // state and dismisses the revive prompt; the player has respawned in town.
+        ServerPacket::Revived => json!({
+            "type": "packet",
+            "packet": "Revived",
+            "payload": {}
         }),
         ServerPacket::ObjectEffect { info } => json!({
             "type": "packet",
@@ -6052,7 +6599,7 @@ fn movement_json(
 mod tests {
     use super::{
         responses_require_world_snapshot, should_send_world_snapshot_for_action, BrowserCommand,
-        SessionAction,
+        QaControlAction, SessionAction,
     };
     use axum::extract::State;
     use axum::Json;
@@ -6061,14 +6608,16 @@ mod tests {
         ClientMail, ClientMapInfo, ClientPacket, ClientQuestInfo, GroupMember,
         IntelligentCreatureItemFilter, IntelligentCreatureRules, MirClass, MirDirection, MirGender,
         MirGridType, ObjectManaInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId, Spell,
-        UserItem, UserItemStat,
+        UserItem, UserItemStat, UserLocation,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
     };
     use serde_json::json;
-    use std::sync::Arc;
+    use std::sync::{Arc, Mutex, OnceLock};
     use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
+    static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
         UserItem {
@@ -6095,6 +6644,24 @@ mod tests {
             sealed_info: None,
             gm_made: false,
         }
+    }
+
+    fn with_env_var<T>(name: &str, value: Option<&str>, action: impl FnOnce() -> T) -> T {
+        let _guard = ENV_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("test env mutex should not be poisoned");
+        let previous = std::env::var(name).ok();
+        match value {
+            Some(value) => std::env::set_var(name, value),
+            None => std::env::remove_var(name),
+        }
+        let result = action();
+        match previous {
+            Some(value) => std::env::set_var(name, value),
+            None => std::env::remove_var(name),
+        }
+        result
     }
 
     fn sample_intelligent_creature(slot_index: i32) -> ClientIntelligentCreature {
@@ -6174,6 +6741,7 @@ mod tests {
         let state = super::WebState {
             config: Arc::new(config),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
@@ -6225,6 +6793,7 @@ mod tests {
         let state = super::WebState {
             config: Arc::new(crate::GatewayConfig::default()),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
@@ -6289,6 +6858,7 @@ mod tests {
         let state = super::WebState {
             config: Arc::new(crate::GatewayConfig::default()),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: cache,
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
@@ -7338,6 +7908,40 @@ mod tests {
 
     #[test]
     fn new_quest_info_exposes_contract_quest_fields() {
+        let reward_item = |index: i32, name: &str, image: u16| mir2_protocol::ItemInfo {
+            index,
+            name: name.to_string(),
+            item_type: 0,
+            grade: 0,
+            required_type: 0,
+            required_class: 0,
+            required_gender: 0,
+            item_set: 0,
+            shape: 1,
+            weight: 1,
+            light: 0,
+            required_amount: 0,
+            image,
+            durability: 1_000,
+            stack_size: 1,
+            price: 10,
+            start_item: false,
+            effect: 0,
+            need_identify: false,
+            show_group_pickup: false,
+            class_based: false,
+            level_based: false,
+            can_mine: false,
+            global_drop_notify: false,
+            bind: 0,
+            unique: 0,
+            random_stats_id: 0,
+            can_fast_run: false,
+            can_awakening: false,
+            slots: 0,
+            stats: Vec::new(),
+            tooltip: None,
+        };
         let info = super::server_packet_to_event(&ServerPacket::NewQuestInfo {
             info: ClientQuestInfo {
                 index: 1001,
@@ -7357,8 +7961,20 @@ mod tests {
                 reward_gold: 500,
                 reward_exp: 1_200,
                 reward_credit: 0,
-                rewards_fixed_item: Vec::new(),
-                rewards_select_item: Vec::new(),
+                rewards_fixed_item: vec![mir2_protocol::QuestItemReward {
+                    item: reward_item(658, "(HP)DrugSmall", 532),
+                    count: 2,
+                }],
+                rewards_select_item: vec![
+                    mir2_protocol::QuestItemReward {
+                        item: reward_item(1_172, "SharpDagger", 1_169),
+                        count: 1,
+                    },
+                    mir2_protocol::QuestItemReward {
+                        item: reward_item(1_173, "ToughHoaSword", 1_170),
+                        count: 1,
+                    },
+                ],
                 finish_npc_index: 1_001,
             },
         });
@@ -7381,6 +7997,29 @@ mod tests {
         assert_eq!(info["payload"]["objectives"][0]["required"], 3);
         assert_eq!(info["payload"]["rewards"]["gold"], 500);
         assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
+        assert_eq!(
+            info["payload"]["rewards"]["items"][0]["name"],
+            "(HP)DrugSmall"
+        );
+        assert_eq!(info["payload"]["rewards"]["items"][0]["count"], 2);
+        assert_eq!(info["payload"]["rewards"]["items"][0]["icon"], 532);
+        assert_eq!(info["payload"]["rewards"]["items"][0]["itemIndex"], 658);
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][0]["name"],
+            "SharpDagger"
+        );
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][0]["selectionIndex"],
+            0
+        );
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][1]["selectionIndex"],
+            1
+        );
+        assert_eq!(
+            info["payload"]["rewards"]["selectItems"][0]["selectable"],
+            true
+        );
         // No credit reward -> field omitted.
         assert!(info["payload"]["rewards"].get("credit").is_none());
         // 90 seconds -> "01:30".
@@ -8175,6 +8814,13 @@ mod tests {
     fn stage5_damage_equipment_browser_command_returns_dura_changed_event() {
         let mut session = crate::GatewaySession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let before_current_dura = session
+            .world_snapshot()
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == mir2_simulation::EquipmentSlot::Weapon)
+            .expect("starter weapon should be equipped")
+            .durability_current;
         let command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"stage5Command","action":"qa.damageEquipment","args":["weapon","2500"]}"#,
         )
@@ -8192,7 +8838,10 @@ mod tests {
 
         assert_eq!(event["packet"], "DuraChanged");
         assert_eq!(event["payload"]["uniqueId"], 0);
-        assert_eq!(event["payload"]["currentDura"], 0);
+        assert_eq!(
+            event["payload"]["currentDura"].as_u64(),
+            Some(u64::from(before_current_dura.saturating_sub(2_500)))
+        );
     }
 
     #[test]
@@ -8211,6 +8860,50 @@ mod tests {
     }
 
     #[test]
+    fn socket_serial_guard_blocks_zone_bypass_until_action_finishes() {
+        let pending = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        {
+            let mut queued = super::QueuedSocketInput::new(
+                super::ParsedSocketInput::Action(SessionAction::Tick),
+                std::sync::Arc::clone(&pending),
+            );
+            assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
+            assert!(matches!(
+                queued.take_input(),
+                super::ParsedSocketInput::Action(SessionAction::Tick)
+            ));
+            assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
+        }
+        assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 0);
+    }
+
+    #[test]
+    fn zone_movement_reader_bypass_only_accepts_walk_run_and_turn_packets() {
+        for action in [
+            SessionAction::Packet(ClientPacket::Walk {
+                direction: MirDirection::Right,
+            }),
+            SessionAction::Packet(ClientPacket::Run {
+                direction: MirDirection::Right,
+            }),
+            SessionAction::Packet(ClientPacket::Turn {
+                direction: MirDirection::Right,
+            }),
+        ] {
+            assert!(super::zone_movement_packet_for_action(&action).is_some());
+        }
+        assert!(
+            super::zone_movement_packet_for_action(&SessionAction::MoveTo {
+                x: 330,
+                y: 270,
+                running: false,
+            })
+            .is_none()
+        );
+        assert!(super::zone_movement_packet_for_action(&SessionAction::Tick).is_none());
+    }
+
+    #[test]
     fn runtime_tick_defers_after_bootstrap_but_not_player_movement() {
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8224,7 +8917,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::from_millis(75))
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8232,7 +8925,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::from_millis(75))
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8240,7 +8933,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::from_millis(900))
+            Some(std::time::Duration::from_millis(75))
         );
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -8731,6 +9424,191 @@ mod tests {
     }
 
     #[test]
+    fn qa_control_requires_configured_token() {
+        with_env_var("MIR2_GATEWAY_QA_CONTROL_TOKEN", None, || {
+            let mut session = crate::GatewaySession::new(SimulationConfig::default());
+            let error = super::execute_session_action(
+                &mut session,
+                SessionAction::QaControl {
+                    token: "missing".to_string(),
+                    action: QaControlAction::TransferMap {
+                        key: "crystal:0:330:270".to_string(),
+                    },
+                },
+                true,
+                true,
+            )
+            .expect_err("QA control should fail closed when no token is configured");
+
+            assert!(error.contains("QA control is disabled"));
+        });
+    }
+
+    #[test]
+    fn qa_control_token_bypasses_only_the_authorized_control_wrapper() {
+        with_env_var("MIR2_GATEWAY_QA_CONTROL_TOKEN", Some("qa-secret"), || {
+            let mut session = crate::GatewaySession::new(SimulationConfig::default());
+            session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+            let normal_transfer_error = super::execute_session_action(
+                &mut session,
+                SessionAction::TransferMap {
+                    key: "crystal:0:330:270".to_string(),
+                },
+                true,
+                true,
+            )
+            .expect_err("normal production path should still reject debug transfer");
+            assert!(normal_transfer_error.contains("debug crystal transfer"));
+
+            let packets = super::execute_session_action(
+                &mut session,
+                SessionAction::QaControl {
+                    token: "qa-secret".to_string(),
+                    action: QaControlAction::TransferMap {
+                        key: "crystal:0:330:270".to_string(),
+                    },
+                },
+                true,
+                true,
+            )
+            .expect("authorized QA control should execute transfer with safety enabled");
+
+            assert!(packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::MapInformation { .. } | ServerPacket::UserLocation { .. }
+            )));
+        });
+    }
+
+    #[test]
+    fn qa_control_apply_native_state_updates_live_session_snapshot() {
+        with_env_var("MIR2_GATEWAY_QA_CONTROL_TOKEN", Some("qa-secret"), || {
+            let mut session = crate::GatewaySession::new(SimulationConfig::default());
+            session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+            let belt_item = json!({
+                "key": "crystal-item-658",
+                "name": "(HP)DrugSmall",
+                "icon": 398,
+                "slot": 0,
+                "unique_id": 59,
+                "container": "belt",
+                "quantity": 1,
+                "description": "Crystal native account item: (HP)DrugSmall.",
+                "durability_current": null,
+                "durability_max": null,
+                "weight": 1,
+                "equip_slot": null,
+                "grade": "none",
+                "added_attack": 0,
+                "added_defence": 0,
+                "added_stats": [],
+                "socketed": [],
+                "cursed": false,
+                "socket_slots": 0,
+                "gem_count": 0,
+                "identified": true,
+                "soul_bound_id": null,
+                "sealed_expiry_time_binary_datetime": 0,
+                "sealed_next_time_binary_datetime": 0,
+                "rental_binding_flags": 0,
+                "rental_owner_name": "",
+                "rental_expiry_binary_datetime": 0,
+                "rental_locked": false,
+                "attack": 0,
+                "defence": 0,
+                "heal_hp": 30,
+                "heal_mp": 0
+            })
+            .to_string();
+            let payload = json!({
+                "character": {
+                    "name": "NativeScout",
+                    "level": 6,
+                    "class": "Warrior",
+                    "gender": "Male"
+                },
+                "mapFileName": "0",
+                "mapTitle": "BichonProvince",
+                "position": { "x": 335, "y": 262 },
+                "direction": "UpRight",
+                "hp": 51,
+                "maxHp": 51,
+                "mp": 32,
+                "maxMp": 32,
+                "experience": 435,
+                "maxExperience": 900,
+                "gold": 3457,
+                "credit": 0,
+                "inventoryItemsJson": [],
+                "beltItemsJson": [belt_item],
+                "storageItemsJson": [],
+                "equipmentItemsJson": []
+            })
+            .to_string();
+
+            let packets = super::execute_session_action(
+                &mut session,
+                SessionAction::QaControl {
+                    token: "qa-secret".to_string(),
+                    action: QaControlAction::Stage5Command {
+                        action: "qa.applyNativeState".to_string(),
+                        args: vec![payload],
+                    },
+                },
+                true,
+                true,
+            )
+            .expect("authorized QA native state apply should execute with safety enabled");
+
+            assert!(packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
+            let snapshot = session.world_snapshot();
+            assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
+            assert_eq!(snapshot.map_title.as_deref(), Some("BichonProvince"));
+            assert_eq!(snapshot.player_hp, Some(51));
+            assert_eq!(snapshot.player_max_hp, Some(51));
+            assert_eq!(snapshot.player_mp, Some(32));
+            assert_eq!(snapshot.player_max_mp, Some(32));
+            assert_eq!(snapshot.player_experience, 435);
+            assert_eq!(snapshot.player_max_experience, 900);
+            assert_eq!(snapshot.gold, 3457);
+            assert_eq!(snapshot.current_weight, 1);
+            assert_eq!(snapshot.max_weight, 62);
+            assert!((1..=4).contains(&snapshot.light_setting));
+            let snapshot_json =
+                serde_json::to_value(&snapshot).expect("snapshot should serialize to JSON");
+            assert!(snapshot_json["lightSetting"]
+                .as_u64()
+                .is_some_and(|lights| (1..=4).contains(&lights)));
+            assert_eq!(snapshot.belt_items.len(), 1);
+            assert_eq!(snapshot.belt_items[0].key, "crystal-item-658");
+            assert_eq!(snapshot.equipment_items.len(), 0);
+        });
+    }
+
+    #[test]
+    fn qa_control_rejects_wrong_token() {
+        with_env_var("MIR2_GATEWAY_QA_CONTROL_TOKEN", Some("qa-secret"), || {
+            let mut session = crate::GatewaySession::new(SimulationConfig::default());
+            let error = super::execute_session_action(
+                &mut session,
+                SessionAction::QaControl {
+                    token: "not-secret".to_string(),
+                    action: QaControlAction::Tick,
+                },
+                true,
+                true,
+            )
+            .expect_err("wrong QA control token should be rejected");
+
+            assert!(error.contains("invalid QA control token"));
+        });
+    }
+
+    #[test]
     fn stage5_damage_equipment_still_works_after_storage_password_flow() {
         let mut session = crate::GatewaySession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -8811,6 +9689,24 @@ mod tests {
     #[test]
     fn visibility_packets_force_snapshot() {
         let responses = vec![ServerPacket::ObjectShow { object_id: 42 }];
+
+        assert!(responses_require_world_snapshot(&responses));
+    }
+
+    #[test]
+    fn bootstrap_state_packets_force_snapshot() {
+        let responses = vec![
+            ServerPacket::StartGame {
+                result: 4,
+                resolution: 1920,
+            },
+            ServerPacket::UserLocation {
+                location: UserLocation {
+                    position: Point { x: 335, y: 262 },
+                    direction: MirDirection::UpRight,
+                },
+            },
+        ];
 
         assert!(responses_require_world_snapshot(&responses));
     }

@@ -9,6 +9,9 @@ use mir2_protocol::{
     ObjectMovement, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
     Point, ServerPacket, Spell, UserItem, UserItemStat,
 };
+use serde::{Deserialize, Serialize};
+
+mod checkpoint;
 
 use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 use super::aoi_grid::AoiGrid;
@@ -51,6 +54,7 @@ const ZONE_DOOR_OPEN_MS: u64 = 5_000;
 const ZONE_CRYSTAL_GREEN_POISON_TICK_MS: u64 = 2_000;
 const CRYSTAL_ARROW_BUFF_VAMPIRE_SHOT: u8 = 16;
 const CRYSTAL_ARROW_BUFF_POISON_SHOT: u8 = 17;
+const CRYSTAL_SWIFT_FEET_BUFF_TYPE: u8 = 4;
 const CRYSTAL_POISON_GREEN: u16 = 1;
 const CRYSTAL_POISON_SLOW: u16 = 4;
 const CRYSTAL_POISON_FROZEN: u16 = 8;
@@ -102,8 +106,9 @@ pub struct ZoneRuntime {
     // sync) so visibility diffs scan a local neighborhood instead of all
     // players. See `aoi_grid` and `recompute_player_visibility`.
     player_grid: AoiGrid<SessionId>,
-    // Spatial index of zone-object positions (NPCs, owner-generated objects).
-    // Objects do not move after insert, so this is synced only at insert/remove.
+    // Spatial index of zone-object positions (NPCs, monsters, generated objects).
+    // Native monsters and summons move, so every retained transform update must
+    // relocate the corresponding grid member before visibility is diffed.
     object_grid: AoiGrid<u32>,
     // ECS mirror of player entities (L2 step 1). Additive: the `players` map
     // above is still the source of truth; this World mirrors players at the
@@ -113,7 +118,7 @@ pub struct ZoneRuntime {
     next_object_id: u32,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct ZoneHazardState {
     lightning: bool,
     fire: bool,
@@ -125,13 +130,13 @@ struct ZoneHazardState {
     fire_strikes: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct ZoneObjectDeadState {
     position: Option<Point>,
     direction: Option<MirDirection>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeMonsterHit {
     ready_at_ms: u64,
     session_id: SessionId,
@@ -140,7 +145,7 @@ struct PendingNativeMonsterHit {
     damage: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeProjectile {
     ready_at_ms: u64,
     session_id: SessionId,
@@ -149,7 +154,7 @@ struct PendingNativeProjectile {
     destination_id: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativePlayerHit {
     ready_at_ms: u64,
     attacker_object_id: u32,
@@ -161,19 +166,19 @@ struct PendingNativePlayerHit {
     magic: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativePlayerHeal {
     ready_at_ms: u64,
     session_id: SessionId,
     amount: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeSummon {
     ready_at_ms: u64,
     owner_session_id: SessionId,
     owner_object_id: u32,
-    monster_name: &'static str,
+    monster_name: String,
     max_summons: usize,
     limit_scope: NativeSummonLimitScope,
     expires_at_ms: Option<u64>,
@@ -182,7 +187,7 @@ struct PendingNativeSummon {
     direction: MirDirection,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeGroundSpellAction {
     spell: Spell,
     caster_session_id: SessionId,
@@ -199,13 +204,13 @@ struct PendingNativeGroundSpellAction {
     tick_interval_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 struct ZoneNativeMonsterPlayerStatus {
     poison: u16,
     duration_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 enum NativeSummonLimitScope {
     SameMonster,
     AllOwned,
@@ -341,6 +346,12 @@ impl ZoneRuntime {
         self.players.get(session_id).map(|player| player.direction)
     }
 
+    pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
+        self.players
+            .get(session_id)
+            .map(|player| (player.hp, player.max_hp, player.mp))
+    }
+
     pub fn player_identity(&self, session_id: &SessionId) -> Option<(SessionId, String, i32)> {
         self.players.get(session_id).map(|player| {
             (
@@ -349,6 +360,23 @@ impl ZoneRuntime {
                 player.character_index,
             )
         })
+    }
+
+    fn sync_player_vitals(
+        &mut self,
+        session_id: &SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        player.max_hp = max_hp.max(1);
+        player.hp = hp.clamp(0, player.max_hp);
+        player.mp = mp.max(0);
+        player.dead = player.hp == 0;
+        Vec::new()
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -408,6 +436,12 @@ impl ZoneRuntime {
                 position,
                 direction,
             } => self.sync_player_transform(&session_id, position, direction),
+            ZoneCommand::SyncPlayerVitals {
+                session_id,
+                hp,
+                max_hp,
+                mp,
+            } => self.sync_player_vitals(&session_id, hp, max_hp, mp),
             ZoneCommand::Chat {
                 session_id,
                 message,
@@ -1074,6 +1108,7 @@ impl ZoneRuntime {
         session_id: SessionId,
         action: ZoneMovementAction,
     ) -> Vec<ZoneOutbound> {
+        let received_at_ms = action.received_at_ms;
         let replaces_pending_step =
             self.incoming_replaces_pending_movement_step(&session_id, &action);
         let mut outbounds = if !replaces_pending_step
@@ -1112,8 +1147,10 @@ impl ZoneRuntime {
             player.movement_actions.pop_back();
         }
         player.movement_actions.push_back(action);
-        if let Some(consume_at_ms) =
-            self.buffered_movement_consume_at(&session_id, action.received_at_ms)
+        if self.movement_input_arrived_after_ready(&session_id, received_at_ms) {
+            outbounds.extend(self.tick_player_movement(&session_id, received_at_ms));
+        } else if let Some(consume_at_ms) =
+            self.buffered_movement_consume_at(&session_id, received_at_ms)
         {
             outbounds.extend(self.tick_player_movement(&session_id, consume_at_ms));
         }
@@ -1172,6 +1209,17 @@ impl ZoneRuntime {
             .then_some(ready_at_ms)
     }
 
+    fn movement_input_arrived_after_ready(
+        &self,
+        session_id: &SessionId,
+        received_at_ms: u64,
+    ) -> bool {
+        self.players.get(session_id).is_some_and(|player| {
+            Self::movement_action_ready(player, received_at_ms)
+                && received_at_ms > player.movement_ready_at_ms
+        })
+    }
+
     fn consume_movement_action(
         &mut self,
         session_id: &SessionId,
@@ -1209,8 +1257,8 @@ impl ZoneRuntime {
                 player.position.clone(),
                 !player.dead && !zone_player_status_blocks_movement(player, now_ms),
                 !player.dead
-                    && (player.run_step_until_ms == 0
-                        || player.run_step_until_ms >= now_ms
+                    && player.run_step_until_ms != 0
+                    && (player.run_step_until_ms >= now_ms
                         || player.run_step_until_ms >= action.received_at_ms),
             )
         };
@@ -1219,7 +1267,13 @@ impl ZoneRuntime {
         }
 
         let effective_running = running && can_run;
-        let steps = if effective_running { 2 } else { 1 };
+        let steps = zone_player_movement_distance(
+            self.players
+                .get(session_id)
+                .expect("action owner should still exist"),
+            effective_running,
+            now_ms,
+        );
         let path = (1..=steps)
             .map(|amount| offset_point(&origin, action.direction, amount))
             .collect::<Vec<_>>();
@@ -2350,7 +2404,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms.saturating_add(delay_ms),
                         owner_session_id: session_id.clone(),
                         owner_object_id: player.object_id,
-                        monster_name: profile.monster_name,
+                        monster_name: profile.monster_name.to_string(),
                         max_summons: profile.max_summons,
                         limit_scope: profile.limit_scope,
                         expires_at_ms,
@@ -4392,13 +4446,13 @@ impl ZoneRuntime {
         if !owner_present
             || self.active_native_summon_count_for_scope(
                 summon.owner_object_id,
-                summon.monster_name,
+                &summon.monster_name,
                 summon.limit_scope,
             ) >= summon.max_summons
         {
             return Vec::new();
         }
-        let Some(template) = crystal_monster_by_name(summon.monster_name) else {
+        let Some(template) = crystal_monster_by_name(&summon.monster_name) else {
             return Vec::new();
         };
         let object_id = self.unique_object_id(0);
@@ -5269,7 +5323,8 @@ impl ZoneRuntime {
         // Roll the monster's melee damage from its Crystal stats (matching the
         // ranged path) instead of a fixed placeholder of 1, so monster→player
         // damage is the zone's authoritative, data-driven value.
-        let (damage, magic) = zone_native_monster_player_attack_damage(monster, &target.position);
+        let (damage, magic) =
+            zone_native_monster_player_attack_damage(monster, &target.position, now_ms, object_id);
         let attacker_ai = monster.ai;
         if damage > 0 {
             self.pending_native_player_hits
@@ -5329,7 +5384,12 @@ impl ZoneRuntime {
                     &monster.position,
                     &target.position,
                 ),
-                zone_native_monster_player_attack_damage(monster, &target.position),
+                zone_native_monster_player_attack_damage(
+                    monster,
+                    &target.position,
+                    now_ms,
+                    object_id,
+                ),
                 monster.ai,
             ))
         }) else {
@@ -5792,7 +5852,8 @@ impl ZoneRuntime {
             return Vec::new();
         };
         self.expire_ground_drop_ownerships(now_ms);
-        let Some(object_id) = object_id.or_else(|| {
+        let requested_object_id = object_id;
+        let Some(object_id) = requested_object_id.or_else(|| {
             self.ground_drops
                 .values()
                 .find(|drop| drop.drop.x == target.x && drop.drop.y == target.y)
@@ -5803,7 +5864,16 @@ impl ZoneRuntime {
         let Some(stored) = self.ground_drops.get(&object_id) else {
             return Vec::new();
         };
-        if stored.drop.x != target.x || stored.drop.y != target.y {
+        let drop_location = Point {
+            x: stored.drop.x,
+            y: stored.drop.y,
+        };
+        let in_pickup_range = if requested_object_id.is_some() {
+            zone_tile_distance(target, &drop_location) <= 1
+        } else {
+            stored.drop.x == target.x && stored.drop.y == target.y
+        };
+        if !in_pickup_range {
             return Vec::new();
         }
         if !self.ground_drop_ownership_allows(&stored.drop, player.object_id, group_members) {
@@ -6381,9 +6451,15 @@ impl ZoneRuntime {
                 if self.retained_zone_object_health_is_stale(object_id, packet) {
                     continue;
                 }
-                if let Some(object) = self.objects.get_mut(&object_id) {
+                let updated_position = if let Some(object) = self.objects.get_mut(&object_id) {
                     apply_retained_zone_object_packet(object, packet);
                     track_zone_object_buff_expiry(object, packet, now_ms);
+                    Some(object.position.clone())
+                } else {
+                    None
+                };
+                if let Some(position) = updated_position {
+                    self.object_grid.moved(&object_id, &position);
                 }
             }
         }
@@ -7373,35 +7449,58 @@ fn zone_native_monster_range_attack_type(ai: u8, source: &Point, target: &Point)
 fn zone_native_monster_player_attack_damage(
     monster: &ZoneNativeMonster,
     target: &Point,
+    now_ms: u64,
+    attacker_object_id: u32,
 ) -> (i32, bool) {
     let distance = zone_tile_distance(&monster.position, target);
+    let (attack_damage, raw_attack_damage, magic_damage, raw_magic_damage, spell_damage) =
+        crystal_monster_by_name(&monster.name)
+            .map(|template| {
+                let dc = zone_roll_stat_range(
+                    template.min_dc,
+                    template.max_dc,
+                    now_ms,
+                    attacker_object_id,
+                    0x51DC,
+                );
+                let mc = zone_roll_stat_range(
+                    template.min_mc,
+                    template.max_mc,
+                    now_ms,
+                    attacker_object_id,
+                    0x51CC,
+                );
+                let sc = zone_roll_stat_range(
+                    template.min_sc,
+                    template.max_sc,
+                    now_ms,
+                    attacker_object_id,
+                    0x515C,
+                );
+                (dc.max(0), dc.max(0), mc.max(1), mc.max(0), sc.max(1))
+            })
+            .unwrap_or((7, 7, 7, 0, 7));
     match monster.ai {
-        19 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        20 if distance > 1 => (zone_crystal_monster_attack_damage(&monster.name) * 3, false),
-        43 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        120 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        121 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        122 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        123 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        102 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        86 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        88 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        126 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        127 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        188 if distance > 1 => (
-            zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
-            false,
-        ),
-        189 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        192 if distance > 1 => (
-            zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
-            false,
-        ),
-        130 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        131 if distance > 2 => (zone_crystal_monster_spell_damage(&monster.name), true),
-        118 | 181 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        182 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        _ => (zone_crystal_monster_attack_damage(&monster.name), false),
+        19 if distance > 1 => (magic_damage, true),
+        20 if distance > 1 => (attack_damage * 3, false),
+        43 if distance > 2 => (magic_damage, true),
+        120 if distance > 1 => (raw_magic_damage, true),
+        121 if distance > 1 => (magic_damage, true),
+        122 if distance > 1 => (raw_magic_damage, true),
+        123 if distance > 2 => (magic_damage, true),
+        102 if distance > 1 => (raw_magic_damage, true),
+        86 if distance > 2 => (magic_damage, true),
+        88 => (magic_damage, true),
+        126 if distance > 1 => (raw_magic_damage, true),
+        127 if distance > 1 => (magic_damage, true),
+        188 if distance > 1 => (raw_attack_damage * 2, false),
+        189 if distance > 1 => (raw_magic_damage, true),
+        192 if distance > 1 => (raw_attack_damage * 3, false),
+        130 if distance > 1 => (magic_damage, true),
+        131 if distance > 2 => (spell_damage, true),
+        118 | 181 if distance > 1 => (raw_magic_damage, true),
+        182 if distance > 1 => (raw_magic_damage, true),
+        _ => (attack_damage, false),
     }
 }
 
@@ -7464,30 +7563,6 @@ fn zone_crystal_monster_attack_damage(name: &str) -> i32 {
     crystal_monster_by_name(name)
         .map(|monster| monster.max_dc.max(monster.min_dc).max(1))
         .unwrap_or(7)
-}
-
-fn zone_crystal_monster_magic_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_mc.max(monster.min_mc).max(1))
-        .unwrap_or(7)
-}
-
-fn zone_crystal_monster_spell_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_sc.max(monster.min_sc).max(1))
-        .unwrap_or(7)
-}
-
-fn zone_crystal_monster_raw_magic_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_mc.max(monster.min_mc))
-        .unwrap_or(0)
-}
-
-fn zone_crystal_monster_raw_attack_damage(name: &str) -> i32 {
-    crystal_monster_by_name(name)
-        .map(|monster| monster.max_dc.max(monster.min_dc))
-        .unwrap_or(0)
 }
 
 fn zone_mana_percent(mp: i32) -> u8 {
@@ -7916,18 +7991,38 @@ fn zone_player_slowed(player: &ZonePlayer, now_ms: u64) -> bool {
             .is_some_and(|expires_at_ms| now_ms < expires_at_ms)
 }
 
-/// Per-step movement delay for a zone player, accounting for being mounted
-/// (faster) and the Slow poison (slower). Mirrors Crystal, where mounts speed
-/// movement up and the Slow debuff roughly halves action speed.
+/// Per-step movement delay for a zone player. Crystal uses the same 600ms
+/// `MoveDelay` for walking and running; mounted speed comes from a three-tile
+/// run, not a shorter server cooldown. Slow doubles that delay.
 fn zone_player_move_delay_ms(player: &ZonePlayer, running: bool, now_ms: u64) -> u64 {
     let mut delay = movement_delay_ms(running);
-    if player.riding_mount && player.mount_type >= 0 {
-        delay = delay.saturating_mul(2) / 3;
-    }
     if zone_player_slowed(player, now_ms) {
         delay = delay.saturating_mul(2);
     }
     delay.max(1)
+}
+
+fn zone_player_movement_distance(player: &ZonePlayer, running: bool, now_ms: u64) -> i32 {
+    if !running {
+        return 1;
+    }
+
+    let mounted = player.riding_mount && player.mount_type >= 0;
+    let swift_feet = !player.sneaking
+        && player
+            .buffs
+            .get(&CRYSTAL_SWIFT_FEET_BUFF_TYPE)
+            .is_some_and(|state| {
+                !state.buff.paused
+                    && state
+                        .expires_at_ms
+                        .is_none_or(|expires_at_ms| now_ms < expires_at_ms)
+            });
+    if mounted || swift_feet {
+        3
+    } else {
+        2
+    }
 }
 
 fn native_monster_control_active(monster: &ZoneNativeMonster, now_ms: u64) -> bool {
@@ -8970,17 +9065,13 @@ mod movement_status_tests {
     }
 
     #[test]
-    fn riding_a_mount_speeds_movement_up() {
+    fn riding_a_mount_keeps_crystal_server_move_delay() {
         let mut player = test_player();
         let base_walk = movement_delay_ms(false);
         player.riding_mount = true;
         player.mount_type = 3;
         let mounted = zone_player_move_delay_ms(&player, false, 0);
-        assert!(
-            mounted < base_walk,
-            "mounted delay {mounted} should be faster than base {base_walk}"
-        );
-        assert_eq!(mounted, base_walk.saturating_mul(2) / 3);
+        assert_eq!(mounted, base_walk);
     }
 
     #[test]

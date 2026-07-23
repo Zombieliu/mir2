@@ -174,7 +174,7 @@ export function SocialSystemPanel({
             const selected = index === safeRowIndex;
             return (
               <button
-                key={`${panel}-${activeTab.key}-${row.name}`}
+                key={`${panel}-${activeTab.key}-${index}-${row.name}`}
                 type="button"
                 className={`system-social-entry ${selected ? "selected" : ""}`}
                 data-social-entry-name={resolvedRowName}

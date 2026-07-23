@@ -1,7 +1,16 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { deflateSync, gunzipSync } from "node:zlib";
+
+import {
+  PNG_SIGNATURE,
+  allPresentFrameIndices,
+  decodeFrameRgba,
+  decodeMaskFrameRgba,
+  encodePng,
+  normalizeLibraryName,
+  parseLibrary as parseLibraryBuffer,
+} from "./crystal-library.mjs";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
@@ -21,8 +30,6 @@ const RESPAWN_MANIFEST_PATH = path.join(
 );
 const DEFAULT_DATA_DIR = "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Data";
 const PNG_DEFLATE_LEVEL = clampInt(process.env.MIR2_CRYSTAL_UI_PNG_DEFLATE_LEVEL ?? "1", 0, 9);
-
-const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
 main().catch((error) => {
   console.error(error);
@@ -53,10 +60,14 @@ async function main() {
 
   await mkdir(publicDir, { recursive: true });
 
+  const summaryPath = path.join(publicDir, "manifest.generated.json");
+  const existingSummary = onlyLibraries && !exportAllLibraries
+    ? await loadJsonIfPresent(summaryPath)
+    : null;
   const summary = {
     dataDir,
     exportedAt: new Date().toISOString(),
-    libraries: {},
+    libraries: existingSummary?.libraries ?? {},
   };
   const crystalMiniMapIndices = await loadCrystalMiniMapIndices();
 
@@ -108,6 +119,7 @@ async function main() {
         library.count,
         frames.reduce((maxIndex, frame) => Math.max(maxIndex, Number(frame.index)), -1) + 1,
       ),
+      frameSet: library.frameSet,
       frames,
     };
 
@@ -129,7 +141,10 @@ async function main() {
       const pngPath = path.join(exportDir, `${basename}.png`);
       const pngExists = skipExisting && existsSync(pngPath);
       if (!pngExists) {
-        await writeFile(pngPath, encodePng(frame.width, frame.height, decodeFrameRgba(library, frame)));
+        await writeFile(
+          pngPath,
+          encodePng(frame.width, frame.height, decodeFrameRgba(library, frame), PNG_DEFLATE_LEVEL),
+        );
         written += 1;
       } else {
         reused += 1;
@@ -138,7 +153,15 @@ async function main() {
       if (frame.maskRgba) {
         const maskPath = path.join(exportDir, `${basename}.mask.png`);
         if (!skipExisting || !existsSync(maskPath)) {
-          await writeFile(maskPath, encodePng(frame.maskWidth, frame.maskHeight, decodeMaskFrameRgba(library, frame)));
+          await writeFile(
+            maskPath,
+            encodePng(
+              frame.maskWidth,
+              frame.maskHeight,
+              decodeMaskFrameRgba(library, frame),
+              PNG_DEFLATE_LEVEL,
+            ),
+          );
         }
       }
 
@@ -160,7 +183,7 @@ async function main() {
   }
 
   await writeFile(
-    path.join(publicDir, "manifest.generated.json"),
+    summaryPath,
     `${JSON.stringify(summary, null, 2)}\n`,
     "utf8",
   );
@@ -254,14 +277,6 @@ function dataDirFromClientRoot(clientRoot) {
   return path.basename(root).toLowerCase() === "data" ? root : path.join(root, "Data");
 }
 
-function normalizeLibraryName(libraryName) {
-  return String(libraryName)
-    .replaceAll("\\", "/")
-    .split("/")
-    .filter(Boolean)
-    .join("/");
-}
-
 function expandIndices(config, extraIndices = []) {
   const indices = new Set();
 
@@ -288,12 +303,6 @@ function expandIndices(config, extraIndices = []) {
   }
 
   return [...indices].sort((left, right) => left - right);
-}
-
-function allPresentFrameIndices(library) {
-  return library.frames
-    .map((frame, index) => (frame ? index : null))
-    .filter((index) => index !== null);
 }
 
 async function loadExistingPngFrame(exportDir, normalizedLibraryName, index) {
@@ -341,188 +350,21 @@ async function loadCrystalMiniMapIndices() {
   }
 }
 
+async function loadJsonIfPresent(filePath) {
+  try {
+    return JSON.parse(await readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
 async function parseLibrary(filePath) {
   const buffer = await readFile(filePath);
-  let offset = 0;
-
-  const version = buffer.readInt32LE(offset);
-  offset += 4;
-
-  if (version < 2) {
-    throw new Error(`Unsupported lib version ${version}: ${filePath}`);
+  try {
+    return parseLibraryBuffer(buffer);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse Crystal library ${filePath}: ${message}`, { cause: error });
   }
-
-  const count = buffer.readInt32LE(offset);
-  offset += 4;
-
-  if (version >= 3) {
-    offset += 4;
-  }
-
-  const frameOffsets = [];
-  for (let index = 0; index < count; index += 1) {
-    frameOffsets.push(buffer.readInt32LE(offset));
-    offset += 4;
-  }
-
-  const frames = new Array(count).fill(null);
-  for (let index = 0; index < frameOffsets.length; index += 1) {
-    const frameOffset = frameOffsets[index];
-    if (frameOffset <= 0 || frameOffset >= buffer.length) {
-      continue;
-    }
-
-    frames[index] = parseFrameHeader(buffer, frameOffset, index);
-  }
-
-  return { version, count, frames, buffer };
-}
-
-function parseFrameHeader(buffer, offset, index) {
-  const width = buffer.readInt16LE(offset);
-  offset += 2;
-  const height = buffer.readInt16LE(offset);
-  offset += 2;
-  const x = buffer.readInt16LE(offset);
-  offset += 2;
-  const y = buffer.readInt16LE(offset);
-  offset += 2;
-  const shadowX = buffer.readInt16LE(offset);
-  offset += 2;
-  const shadowY = buffer.readInt16LE(offset);
-  offset += 2;
-  const shadow = buffer.readUInt8(offset);
-  offset += 1;
-  const length = buffer.readInt32LE(offset);
-  offset += 4;
-
-  const dataOffset = offset;
-  offset += length;
-
-  const hasMask = (shadow >> 7) === 1;
-  let maskWidth;
-  let maskHeight;
-  let maskX;
-  let maskY;
-  let maskLength;
-  let maskDataOffset;
-
-  if (hasMask) {
-    maskWidth = buffer.readInt16LE(offset);
-    offset += 2;
-    maskHeight = buffer.readInt16LE(offset);
-    offset += 2;
-    maskX = buffer.readInt16LE(offset);
-    offset += 2;
-    maskY = buffer.readInt16LE(offset);
-    offset += 2;
-    maskLength = buffer.readInt32LE(offset);
-    offset += 4;
-    maskDataOffset = offset;
-    offset += maskLength;
-  }
-
-  return {
-    index,
-    width,
-    height,
-    x,
-    y,
-    shadowX,
-    shadowY,
-    shadow,
-    dataOffset,
-    dataLength: length,
-    maskWidth,
-    maskHeight,
-    maskX,
-    maskY,
-    maskLength,
-    maskDataOffset,
-    maskRgba: hasMask,
-  };
-}
-
-function decodeFrameRgba(library, frame) {
-  return decodeFrame(
-    frame.width,
-    frame.height,
-    library.buffer.subarray(frame.dataOffset, frame.dataOffset + frame.dataLength),
-  );
-}
-
-function decodeMaskFrameRgba(library, frame) {
-  return decodeFrame(
-    frame.maskWidth,
-    frame.maskHeight,
-    library.buffer.subarray(frame.maskDataOffset, frame.maskDataOffset + frame.maskLength),
-  );
-}
-
-function decodeFrame(width, height, compressed) {
-  if (!width || !height) {
-    return Buffer.alloc(0);
-  }
-
-  const bgra = gunzipSync(compressed);
-  const rgba = Buffer.allocUnsafe(width * height * 4);
-
-  for (let source = 0; source < bgra.length; source += 4) {
-    const dest = source;
-    rgba[dest] = bgra[source + 2];
-    rgba[dest + 1] = bgra[source + 1];
-    rgba[dest + 2] = bgra[source];
-    rgba[dest + 3] = bgra[source + 3];
-  }
-
-  return rgba;
-}
-
-function encodePng(width, height, rgba) {
-  const raw = Buffer.allocUnsafe((width * 4 + 1) * height);
-
-  for (let row = 0; row < height; row += 1) {
-    const rawOffset = row * (width * 4 + 1);
-    raw[rawOffset] = 0;
-    rgba.copy(raw, rawOffset + 1, row * width * 4, (row + 1) * width * 4);
-  }
-
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 6;
-  ihdr[10] = 0;
-  ihdr[11] = 0;
-  ihdr[12] = 0;
-
-  const idat = deflateSync(raw, { level: PNG_DEFLATE_LEVEL });
-  return Buffer.concat([PNG_SIGNATURE, chunk("IHDR", ihdr), chunk("IDAT", idat), chunk("IEND", Buffer.alloc(0))]);
-}
-
-function chunk(type, data) {
-  const typeBuffer = Buffer.from(type, "ascii");
-  const lengthBuffer = Buffer.alloc(4);
-  lengthBuffer.writeUInt32BE(data.length, 0);
-
-  const crcBuffer = Buffer.concat([typeBuffer, data]);
-  const checksum = crc32(crcBuffer);
-  const crcOutput = Buffer.alloc(4);
-  crcOutput.writeUInt32BE(checksum >>> 0, 0);
-
-  return Buffer.concat([lengthBuffer, typeBuffer, data, crcOutput]);
-}
-
-function crc32(buffer) {
-  let crc = 0xffffffff;
-
-  for (let index = 0; index < buffer.length; index += 1) {
-    crc ^= buffer[index];
-
-    for (let bit = 0; bit < 8; bit += 1) {
-      crc = (crc & 1) === 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
-    }
-  }
-
-  return (crc ^ 0xffffffff) >>> 0;
 }

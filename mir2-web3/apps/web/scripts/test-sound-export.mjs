@@ -172,6 +172,7 @@ try {
     "./original-sound-events": loadTs(new URL("../lib/original-sound-events.ts", import.meta.url)),
   });
   audioExports.resetOriginalAudioDiagnosticsForTests();
+  audioExports.setOriginalAudioSettings({ effectsEnabled: true });
   assert.equal(audioExports.playOriginalSoundId(10100), true, "present sound plays");
   assert.equal(globalThis.__mir2PlayedAudios.at(-1)?.src, "/original-ui/Sound/100.wav");
   assert.equal(audioExports.playOriginalSoundId(19999), false, "missing sound is skipped");

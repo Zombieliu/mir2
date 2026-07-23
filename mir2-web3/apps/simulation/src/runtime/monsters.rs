@@ -13,11 +13,11 @@ use mir2_protocol::{
 
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
-use super::combat::crystal_player_rolled_armour;
 use super::combat::{
     combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
     ranged_attack_delay_ticks, PendingPlayerStatusEffect,
 };
+use super::combat::{crystal_player_rolled_armour, crystal_player_rolled_magic_armour};
 use super::components::{
     entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
     HarvestMonsterState, HarvestOwnership, Monster, MonsterAgent, MonsterAiState,
@@ -36,6 +36,7 @@ use super::packets::object_movement;
 use super::resources::{
     MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource, RuntimeQueueResource,
 };
+use super::stats::deterministic_range_roll;
 
 #[derive(Debug, Clone)]
 pub(super) struct PendingMonsterSpawnAction {
@@ -767,6 +768,10 @@ pub(super) fn initial_monster_ai_state(ai: u8, tick: u64) -> MonsterAiState {
     if ai == 99 {
         state.next_state_tick = tick + HELL_BOMB_EXPLOSION_LIFETIME_TICKS;
     }
+    if ai == 70 {
+        // Crystal Hugger: 5-minute fuse before it detonates (mirrors AI 40/99).
+        state.next_state_tick = tick + super::monster_ai::HUGGER_EXPLOSION_LIFETIME_TICKS;
+    }
     state
 }
 
@@ -829,13 +834,13 @@ pub(super) fn initial_yimoogi_state(tick: u64) -> YimoogiState {
 
 pub(super) fn monster_disposition_for_ai(ai: u8) -> WorldEntityDisposition {
     match ai {
-        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113 => WorldEntityDisposition::Neutral,
+        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 68 | 81 | 113 => WorldEntityDisposition::Neutral,
         _ => WorldEntityDisposition::Hostile,
     }
 }
 
 pub(super) fn monster_targets_players(ai: u8) -> bool {
-    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113)
+    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 68 | 81 | 113)
 }
 
 pub(super) fn monster_uses_zuma_stone_state(ai: u8) -> bool {
@@ -874,7 +879,8 @@ pub(super) fn monster_can_attack(agent: &MonsterAgent, ai_state: &MonsterAiState
     match agent.ai {
         18 => ai_state.mode,
         48 => ai_state.mode,
-        1 | 2 | 3 | 56 | 98 | 99 | 128 | 255 => false,
+        // 68 Football, 81 Gate, 170 BoulderSpirit: passive — never melee.
+        1 | 2 | 3 | 56 | 68 | 81 | 98 | 99 | 128 | 170 | 255 => false,
         _ => true,
     }
 }
@@ -1770,6 +1776,10 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         6 | 58 | 113 => agent.view_range.max(1),
         57 => 10,
         8 => 6,
+        // Crystal HornedArcher (AI 164) inherits AxeSkeleton.AttackRange = 6;
+        // HornedSorceror (AI 169) uses range 5.
+        164 => 6,
+        169 => 5,
         _ => 1,
     }
 }
@@ -1828,7 +1838,23 @@ pub(super) fn monster_in_attack_range(
                 && (dx != 0 || dy != 0)
                 && ((dx <= 1 && dy <= 1) || dx == dy || dx % 2 == dy % 2)
         }
-        4 | 18 | 29 | 61 => {
+        // Crystal `SpittingSpider.InAttackRange` (AI 4): cap 2, then
+        // `(x<=1 && y<=1) || (x==y || x%2==y%2)`. Kept separate from the
+        // 18|29|61 arm below, whose `dx<=max && dy<=max` clause is always true
+        // after the cap check (collapsing to a full box) — that would let AI 4
+        // strike (2,1)/(1,2), which are out of range in Crystal.
+        4 => {
+            let dx = (target.x - source.x).abs();
+            let dy = (target.y - source.y).abs();
+            if dx == 0 && dy == 0 {
+                return false;
+            }
+            if dx > 2 || dy > 2 {
+                return false;
+            }
+            (dx <= 1 && dy <= 1) || dx == dy || dx % 2 == dy % 2
+        }
+        18 | 29 | 61 => {
             let dx = (target.x - source.x).abs();
             let dy = (target.y - source.y).abs();
             if dx == 0 && dy == 0 {
@@ -1851,7 +1877,7 @@ pub(super) fn monster_in_attack_range(
 pub(super) fn monster_uses_ranged_attack(agent: &MonsterAgent) -> bool {
     matches!(
         agent.ai,
-        8 | 26 | 32 | 38 | 45 | 46 | 47 | 48 | 54 | 57 | 61 | 113 | 118 | 181 | 182
+        8 | 26 | 32 | 38 | 45 | 46 | 47 | 48 | 54 | 57 | 61 | 113 | 118 | 164 | 181 | 182
     )
 }
 
@@ -1890,6 +1916,8 @@ pub(super) fn monster_broadcasts_attack_on_damage_due(agent: &MonsterAgent) -> b
 }
 
 pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
+    // Immobile/passive structures (52 EvilMir, 68 Football, 81 Gate, 142 TreeQueen,
+    // 170 BoulderSpirit) never follow routes.
     !matches!(
         agent.ai,
         3 | 5
@@ -1903,12 +1931,15 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 47
             | 48
             | 50
+            | 52
             | 54
             | 56
             | 57
             | 58
             | 61
+            | 68
             | 79
+            | 81
             | 98
             | 99
             | 113
@@ -1916,6 +1947,8 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 120
             | 122
             | 128
+            | 142
+            | 170
             | 255
     )
 }
@@ -1934,12 +1967,15 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
+                | 68
                 | 79
+                | 81
                 | 98
                 | 99
                 | 113
@@ -1947,6 +1983,8 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 170
                 | 255
         )
 }
@@ -1966,12 +2004,15 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
+                | 68
                 | 79
+                | 81
                 | 98
                 | 99
                 | 113
@@ -1979,6 +2020,8 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 170
                 | 255
         )
 }
@@ -2097,107 +2140,152 @@ pub(super) fn monster_attack_delay_ticks(
 
 pub(super) fn monster_player_attack_damage(
     world: &World,
+    attacker_id: u32,
     monster_name: &str,
     agent: &MonsterAgent,
     source: &Point,
     target: &Point,
 ) -> i32 {
+    let current_tick = super::resources::runtime_tick(world);
+    let distance = tile_distance(source, target);
+    let (attack_damage, raw_attack_damage, magic_damage, raw_magic_damage, spell_damage) =
+        crystal_monster_by_name(monster_name)
+            .map(|monster| {
+                let dc = deterministic_range_roll(
+                    current_tick,
+                    attacker_id,
+                    51_001,
+                    monster.min_dc,
+                    monster.max_dc,
+                );
+                let mc = deterministic_range_roll(
+                    current_tick,
+                    attacker_id,
+                    51_002,
+                    monster.min_mc,
+                    monster.max_mc,
+                );
+                let sc = deterministic_range_roll(
+                    current_tick,
+                    attacker_id,
+                    51_003,
+                    monster.min_sc,
+                    monster.max_sc,
+                );
+                (dc.max(0), dc.max(0), mc.max(1), mc.max(0), sc.max(1))
+            })
+            .unwrap_or((7, 7, 7, 0, 7));
     let base_damage = match agent.ai {
         7 | 10 | 11 | 13 | 14 | 17 | 22 | 28 | 30 | 33 | 35 | 36 | 37 | 38 | 49 | 51 | 54 | 79
-        | 112 | 115 | 173 => crystal_monster_attack_damage(monster_name),
+        | 112 | 115 | 173 => attack_damage,
         48 => 0,
-        16 => crystal_monster_raw_attack_damage(monster_name),
-        19 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        19 => crystal_monster_attack_damage(monster_name),
-        20 if tile_distance(source, target) > 1 => crystal_monster_attack_damage(monster_name) * 3,
-        20 => crystal_monster_attack_damage(monster_name),
-        43 if tile_distance(source, target) > 2 => crystal_monster_magic_damage(monster_name),
-        43 => crystal_monster_attack_damage(monster_name),
+        16 => raw_attack_damage,
+        19 if tile_distance(source, target) > 1 => magic_damage,
+        19 => attack_damage,
+        20 if tile_distance(source, target) > 1 => attack_damage * 3,
+        20 => attack_damage,
+        43 if tile_distance(source, target) > 2 => magic_damage,
+        43 => attack_damage,
         47 => 0,
-        50 => crystal_monster_attack_damage(monster_name),
+        50 => attack_damage,
         27 if tile_distance(source, target) > 1 => 0,
-        27 => crystal_monster_attack_damage(monster_name),
-        34 => crystal_monster_raw_attack_damage(monster_name),
-        174 => crystal_monster_raw_attack_damage(monster_name),
-        179 => crystal_monster_raw_attack_damage(monster_name),
-        180 => crystal_monster_attack_damage(monster_name),
-        186 => crystal_monster_attack_damage(monster_name),
-        120 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        119 | 120 => crystal_monster_attack_damage(monster_name),
-        121 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        121 => crystal_monster_attack_damage(monster_name),
-        122 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        122 => crystal_monster_attack_damage(monster_name),
-        123 if tile_distance(source, target) > 2 => crystal_monster_magic_damage(monster_name),
-        123 => crystal_monster_attack_damage(monster_name),
-        124 => crystal_monster_attack_damage(monster_name),
-        125 => crystal_monster_attack_damage(monster_name) * 2,
-        102 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        102 => crystal_monster_raw_attack_damage(monster_name),
-        86 if tile_distance(source, target) > 2 => crystal_monster_magic_damage(monster_name),
-        86 => crystal_monster_attack_damage(monster_name),
-        88 => crystal_monster_magic_damage(monster_name),
-        126 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        126 => crystal_monster_raw_attack_damage(monster_name),
-        127 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        127 => crystal_monster_attack_damage(monster_name),
-        187 => crystal_monster_raw_attack_damage(monster_name),
-        188 if tile_distance(source, target) > 1 => {
-            crystal_monster_raw_attack_damage(monster_name) * 2
-        }
-        188 => crystal_monster_raw_attack_damage(monster_name),
-        189 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        189 => crystal_monster_raw_attack_damage(monster_name),
-        190 => crystal_monster_raw_attack_damage(monster_name),
-        192 if tile_distance(source, target) > 1 => {
-            crystal_monster_raw_attack_damage(monster_name) * 3
-        }
-        192 => crystal_monster_raw_attack_damage(monster_name),
-        130 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        130 => crystal_monster_attack_damage(monster_name),
-        131 if tile_distance(source, target) > 2 => crystal_monster_spell_damage(monster_name),
-        131 => crystal_monster_attack_damage(monster_name),
-        118 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        118 => crystal_monster_attack_damage(monster_name),
-        181 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        181 => crystal_monster_attack_damage(monster_name),
-        182 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        182 => crystal_monster_attack_damage(monster_name),
-        45 | 46 => crystal_monster_attack_damage(monster_name),
-        117 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        117 => crystal_monster_attack_damage(monster_name),
-        57 => crystal_monster_attack_damage(monster_name),
+        27 => attack_damage,
+        34 => raw_attack_damage,
+        174 => raw_attack_damage,
+        179 => raw_attack_damage,
+        180 => attack_damage,
+        186 => attack_damage,
+        120 if tile_distance(source, target) > 1 => raw_magic_damage,
+        119 | 120 => attack_damage,
+        121 if tile_distance(source, target) > 1 => magic_damage,
+        121 => attack_damage,
+        122 if tile_distance(source, target) > 1 => raw_magic_damage,
+        122 => attack_damage,
+        123 if tile_distance(source, target) > 2 => magic_damage,
+        123 => attack_damage,
+        124 => attack_damage,
+        125 => attack_damage * 2,
+        102 if tile_distance(source, target) > 1 => raw_magic_damage,
+        102 => raw_attack_damage,
+        86 if tile_distance(source, target) > 2 => magic_damage,
+        86 => attack_damage,
+        88 => magic_damage,
+        126 if tile_distance(source, target) > 1 => raw_magic_damage,
+        126 => raw_attack_damage,
+        127 if tile_distance(source, target) > 1 => magic_damage,
+        127 => attack_damage,
+        187 => raw_attack_damage,
+        188 if tile_distance(source, target) > 1 => raw_attack_damage * 2,
+        188 => raw_attack_damage,
+        189 if tile_distance(source, target) > 1 => raw_magic_damage,
+        189 => raw_attack_damage,
+        190 => raw_attack_damage,
+        192 if tile_distance(source, target) > 1 => raw_attack_damage * 3,
+        192 => raw_attack_damage,
+        130 if tile_distance(source, target) > 1 => magic_damage,
+        130 => attack_damage,
+        131 if tile_distance(source, target) > 2 => spell_damage,
+        131 => attack_damage,
+        118 if tile_distance(source, target) > 1 => raw_magic_damage,
+        118 => attack_damage,
+        181 if tile_distance(source, target) > 1 => magic_damage,
+        181 => attack_damage,
+        182 if tile_distance(source, target) > 1 => raw_magic_damage,
+        182 => attack_damage,
+        45 | 46 => attack_damage,
+        117 if tile_distance(source, target) > 1 => raw_magic_damage,
+        117 => attack_damage,
+        57 => attack_damage,
         // Crystal `RightGuard.Attack` / `LeftGuard.Attack`: both
         // `GetAttackPower(MinDC, MaxDC)` for melee and ranged.
-        31 | 32 => crystal_monster_attack_damage(monster_name),
+        31 | 32 => attack_damage,
         // Crystal `SpittingSpider.Attack`, `AxeSkeleton.Attack`,
         // `ZumaMonster` (base), `ShamanZombie.Attack`, `BoneSpearman.Attack`,
         // `BlackFoxman.Attack` — all use `GetAttackPower(MinDC, MaxDC)` for
         // the attack damage. Previously these fell through to the default 7.
-        4 | 8 | 15 | 26 | 29 | 44 => crystal_monster_attack_damage(monster_name),
+        4 | 8 | 15 | 26 | 29 | 44 | 164 => attack_damage,
         // Crystal `DigOutZombie` (AI 24) and `RevivingZombie` (AI 25) have
         // no `Attack()` override — they fall through to base
         // `MonsterObject.Attack()`, which uses `GetAttackPower(MinDC, MaxDC)`.
-        24 | 25 => crystal_monster_attack_damage(monster_name),
+        24 | 25 => attack_damage,
         // Crystal `HellKnight` (AI 97): no `Attack()` override — base
         // `MonsterObject.Attack()` → `GetAttackPower(MinDC, MaxDC)`.
-        97 => crystal_monster_attack_damage(monster_name),
+        97 => attack_damage,
         // Crystal `BlackHammerCat.Attack` (AI 116): adjacent + 2/3 chance →
         // Type 0 + DC. Otherwise → Type 1 + MC damage on the direct hit
         // (then a separate DC line splash, handled via the line-branch).
-        116 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        116 => crystal_monster_attack_damage(monster_name),
-        _ => 7,
+        116 if tile_distance(source, target) > 1 => magic_damage,
+        116 => attack_damage,
+        // Crystal `MonsterObject.GetMonster` returns the base `MonsterObject`
+        // for `AI == 0` (and any unmodeled AI value), whose `Attack()` deals
+        // `GetAttackPower(MinDC, MaxDC)` physical melee. AI 0 is by far the most
+        // common shipped family — 3588 respawn groups / 251 distinct monsters —
+        // so the old `_ => 7` stub made the bulk of the world hit for a flat 7.
+        // Mirror the zone-authoritative path
+        // (`zone_native_monster_player_attack_damage` already defaults to
+        // `zone_crystal_monster_attack_damage`) and use the imported DC.
+        _ => attack_damage,
     };
-    let mitigation = crystal_player_rolled_armour(world);
     if base_damage <= 0 {
         return 0;
     }
-    let mitigated = (base_damage - mitigation).max(1);
-    // Ranged monster strikes are the magic-school attacks in Crystal; the
-    // player's MagicResist further shrugs part of the blow. Inert (no change)
-    // for a player without magic resistance.
-    if tile_distance(source, target) > 1 {
+
+    // Crystal ShamanZombie.LineAttack always uses MACAgility, including an
+    // adjacent target. WaterDragon uses ACAgility in melee and MACAgility for
+    // its ranged MC branch. These explicit channels must not subtract AC from
+    // magic attacks (ShamanZombie.cs and WaterDragon.cs).
+    let uses_magic_armour = agent.ai == 26 || (agent.ai == 181 && distance > 1);
+    let mitigation = if uses_magic_armour {
+        crystal_player_rolled_magic_armour(world)
+    } else {
+        crystal_player_rolled_armour(world)
+    };
+    let mitigated = base_damage.saturating_sub(mitigation.max(0));
+    // MAC channels include Crystal's full-shrug MagicResist check. Preserve the
+    // existing ranged-branch check for AIs whose DefenceType has not yet been
+    // imported explicitly; the two source-verified branches above no longer
+    // depend on distance to select their magic defence behavior.
+    if uses_magic_armour || distance > 1 {
         super::combat::crystal_player_magic_mitigated(world, mitigated)
     } else {
         mitigated

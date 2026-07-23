@@ -19,9 +19,10 @@ use super::buffs::{
     BuffState,
 };
 use super::combat::{
-    apply_monster_poison, combat_delay_ticks, damage_monster_entity, queue_due_packet,
-    queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
-    schedule_heal_to_player, set_cast_defence, CrystalDefence, PendingMonsterDefeatAction,
+    apply_player_monster_poison, combat_delay_ticks, damage_player_owned_monster_entity,
+    queue_due_packet, queued_before_world_tick_due_tick, ranged_attack_delay_ticks,
+    schedule_damage_to_monster, schedule_heal_to_player, set_cast_defence, CrystalDefence,
+    PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
@@ -390,7 +391,7 @@ fn crystal_spell_is_offensive(spell: Spell) -> bool {
             | Spell::BackStep
             | Spell::FlashDash
             | Spell::StormEscape
-            // Cleanse cast on self/allies (Crystal Purification) — Target-kind
+            // Cleanse cast on self/allies (Crystal Purification) 鈥?Target-kind
             // but not offensive, so it must not require a hostile target.
             | Spell::Purification
     )
@@ -2201,7 +2202,7 @@ fn apply_crystal_warrior_area_control_spell(
                 agent.next_move_tick = agent.next_move_tick.max(release_tick);
                 agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
             }
-            apply_monster_poison(
+            apply_player_monster_poison(
                 world,
                 target_entity,
                 CRYSTAL_LION_ROAR_PARALYSIS,
@@ -2609,7 +2610,7 @@ fn apply_crystal_shoulder_dash_spell(
         if let Some(packet) = object_struck_packet(world, target_entity, object_id) {
             packets.push(packet);
         }
-        damage_monster_entity(
+        damage_player_owned_monster_entity(
             world,
             target_entity,
             crystal_spell_damage(world, tick, magic, skill.level),
@@ -2759,7 +2760,7 @@ fn apply_crystal_flash_dash_spell(
                     name: target_name,
                 }),
             );
-            apply_monster_poison(
+            apply_player_monster_poison(
                 world,
                 target_entity,
                 CRYSTAL_STUN_POISON,
@@ -3804,7 +3805,7 @@ fn apply_crystal_ice_thrust_spell(
                 );
                 if monster_level(world, target_entity) <= crystal_player_level(world, player) + 10 {
                     if let Some(object_id) = entity_object_id(world, target_entity) {
-                        apply_monster_poison(
+                        apply_player_monster_poison(
                             world,
                             target_entity,
                             CRYSTAL_POISON_FROZEN,
@@ -4205,7 +4206,7 @@ fn apply_crystal_delayed_explosion_spell(
         .saturating_mul(2)
         .saturating_add((i32::from(skill.level) + 1).saturating_mul(7))
         .max(1);
-    apply_monster_poison(
+    apply_player_monster_poison(
         world,
         target_entity,
         CRYSTAL_POISON_DELAYED_EXPLOSION,
@@ -4318,10 +4319,16 @@ pub(super) fn tick_ground_spell_actions(
                         {
                             packets.push(packet);
                         }
-                        damage_monster_entity(world, target_entity, action.damage, tick, packets);
+                        damage_player_owned_monster_entity(
+                            world,
+                            target_entity,
+                            action.damage,
+                            tick,
+                            packets,
+                        );
                         if action.spell == Spell::PoisonCloud {
                             if let Some(object_id) = entity_object_id(world, target_entity) {
-                                apply_monster_poison(
+                                apply_player_monster_poison(
                                     world,
                                     target_entity,
                                     1,
@@ -4346,7 +4353,7 @@ pub(super) fn tick_ground_spell_actions(
                             if let Some(object_id) = entity_object_id(world, target_entity) {
                                 // Crystal Blizzard: 1/8 chance per tick to apply Slow (type 4,
                                 // ~5 ticks at 2s each = 10s for the common Freezing=0 case).
-                                apply_monster_poison(
+                                apply_player_monster_poison(
                                     world,
                                     target_entity,
                                     4,
@@ -4709,7 +4716,7 @@ fn apply_crystal_poisoning_spell(
         RED_POISON
     };
 
-    apply_monster_poison(
+    apply_player_monster_poison(
         world,
         target_entity,
         poison,
@@ -4872,7 +4879,7 @@ fn apply_crystal_plague_spell(
             } else {
                 0
             };
-            apply_monster_poison(
+            apply_player_monster_poison(
                 world,
                 target_entity,
                 poison,
@@ -5223,7 +5230,7 @@ fn apply_crystal_poison_sword_spell(
             let Some(object_id) = entity_object_id(world, target_entity) else {
                 continue;
             };
-            apply_monster_poison(
+            apply_player_monster_poison(
                 world,
                 target_entity,
                 GREEN_POISON,
@@ -5681,7 +5688,7 @@ fn apply_crystal_twin_drake_blade_spell(
             .saturating_add(2)
             .saturating_mul(1_000),
     );
-    apply_monster_poison(
+    apply_player_monster_poison(
         world,
         target_entity,
         CRYSTAL_POISON_STUN,
@@ -5794,7 +5801,7 @@ fn apply_crystal_entrapment_spell(
             .saturating_add(1)
             .saturating_mul(1_000),
     );
-    apply_monster_poison(
+    apply_player_monster_poison(
         world,
         target_entity,
         CRYSTAL_POISON_PARALYSIS,
@@ -5999,7 +6006,7 @@ fn apply_crystal_moon_mist_spell(
         );
         if monster_is_undead(world, target_entity) {
             if let Some(object_id) = entity_object_id(world, target_entity) {
-                apply_monster_poison(
+                apply_player_monster_poison(
                     world,
                     target_entity,
                     CRYSTAL_POISON_STUN,
@@ -6295,7 +6302,7 @@ fn apply_crystal_control_poison(
     due_tick: u64,
 ) {
     let duration_ms = (u64::from(skill_level) + 1).saturating_mul(3_000);
-    apply_monster_poison(
+    apply_player_monster_poison(
         world,
         target_entity,
         poison,
@@ -6680,7 +6687,7 @@ fn apply_crystal_arrow_green_poison(
         .saturating_add((i32::from(skill_level) + 1).saturating_mul(7))
         .max(1);
 
-    apply_monster_poison(
+    apply_player_monster_poison(
         world,
         target_entity,
         GREEN_POISON,
@@ -6893,7 +6900,7 @@ pub(super) fn consume_zone_magic_inventory_components(
     }
 }
 
-/// Crystal `UserMagic.GetDamage(0)` — the spell's intrinsic power (no player
+/// Crystal `UserMagic.GetDamage(0)` 鈥?the spell's intrinsic power (no player
 /// attack base). Identical to `crystal_magic_get_damage(magic, level, 0)` by
 /// construction: `(int)(GetPower() * GetMultiplier())` (MagicInfo.cs:180,190).
 ///
@@ -6905,8 +6912,7 @@ pub(super) fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i
     crystal_magic_get_damage(magic, level, 0)
 }
 
-/// Crystal `UserMagic.GetPower()` (MagicInfo.cs:190) —
-/// `(int)Math.Round((MPower() / 4F) * (Level + 1) + DefPower())`. `MPower()`/`DefPower()`
+/// Crystal `UserMagic.GetPower()` (MagicInfo.cs:190) 鈥?/// `(int)Math.Round((MPower() / 4F) * (Level + 1) + DefPower())`. `MPower()`/`DefPower()`
 /// are uniform rolls (`Random(Base, Base + Bonus)`); we collapse them to their
 /// deterministic mean (matching [`crystal_magic_damage`]) so the value stays
 /// reproducible across replays. The whole expression is then evaluated in f32 and
@@ -7011,7 +7017,7 @@ fn crystal_spell_salt(spell: &str) -> u64 {
         })
 }
 
-/// Crystal `MapObject.GetAttackPower(min, max)` — deterministic roll in `[min, max]` honoring
+/// Crystal `MapObject.GetAttackPower(min, max)` 鈥?deterministic roll in `[min, max]` honoring
 /// the Luck stat (positive Luck can force the maximum, negative Luck the minimum). Uses the
 /// shared deterministic RNG so a given cast is reproducible across replays.
 pub(super) fn crystal_attack_power_roll(
@@ -7063,7 +7069,7 @@ pub(super) fn crystal_spell_attack_power(
     crystal_attack_power_roll(world, tick, crystal_spell_salt(&magic.spell), min, max)
 }
 
-/// Crystal `magic.GetDamage(GetAttackPower(MinXX, MaxXX))` — the full per-cast damage for a
+/// Crystal `magic.GetDamage(GetAttackPower(MinXX, MaxXX))` 鈥?the full per-cast damage for a
 /// spell, including the player's gear-scaled attack power folded inside the level multiplier.
 pub(super) fn crystal_spell_damage(
     world: &World,
@@ -7076,7 +7082,7 @@ pub(super) fn crystal_spell_damage(
 }
 
 /// Like [`crystal_spell_damage`] but with a critical-hit chance (out of 100) that *doubles the
-/// rolled attack power* before applying `GetDamage` — Crystal's melee skill crit behaviour
+/// rolled attack power* before applying `GetDamage` 鈥?Crystal's melee skill crit behaviour
 /// (`if Random(0,100) <= chance) damageBase += damageBase`). Only the gear-scaled attack power
 /// doubles, not the whole damage, matching Crystal's intent.
 pub(super) fn crystal_spell_damage_with_crit(
@@ -7107,7 +7113,7 @@ fn crystal_luck_crit_chance(world: &World) -> i32 {
     1 + current_player_crystal_stat(world, CRYSTAL_STAT_LUCK)
 }
 
-/// Crystal `GetRangeAttackPower(min, max, range)` — applies the bow falloff penalty
+/// Crystal `GetRangeAttackPower(min, max, range)` 鈥?applies the bow falloff penalty
 /// (`min -= floor(min / MaxAttackRange * (MaxAttackRange - range))`) before rolling. Archer
 /// shots use this so distant targets take less damage.
 /// Crystal `Globals.MaxAttackRange`.

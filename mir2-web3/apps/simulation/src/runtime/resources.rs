@@ -426,6 +426,13 @@ pub(super) fn take_crystal_movement_retry_if_ready(
         .take()
 }
 
+pub(super) fn crystal_movement_retry_pending(world: &World) -> bool {
+    world
+        .resource::<RuntimeQueueResource>()
+        .pending_movement_command
+        .is_some()
+}
+
 #[derive(Resource, Debug, Clone)]
 pub(super) struct SessionResource {
     pub(super) language: LanguageCode,

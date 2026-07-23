@@ -20,7 +20,7 @@ use super::components::{
     entity_facing, entity_player_vitals, entity_position, player_entity, PlayerVitals,
 };
 use super::crystal_compat::BASE_STORAGE_SLOTS;
-use super::equipment::seed_equipment_items;
+use super::equipment::{seed_equipment_items_for_character, EquipmentState};
 use super::inventory::{
     normalize_inventory_known_item_metadata, normalize_inventory_unique_ids,
     refresh_storage_password_state, seed_belt_items, seed_inventory_items, seed_storage_items,
@@ -33,10 +33,11 @@ use super::map::{
 use super::packets::*;
 use super::quests::QuestState;
 use super::resources::{
-    current_language, BuffResource, HeroInventoryResource, InventoryResource, ItemRentalResource,
-    MapRuntimeResource, NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource,
-    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
+    current_language, runtime_tick, set_runtime_tick, BuffResource, HeroInventoryResource,
+    InventoryResource, ItemRentalResource, MapRuntimeResource, NpcStateResource,
+    ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
+    PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
+    SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 use super::skills::seed_skills;
@@ -52,6 +53,7 @@ pub(super) fn default_save_for_character(
     config: &SimulationConfig,
     character: CharacterRecord,
 ) -> CharacterSaveRecord {
+    let starter_equipment = seed_equipment_items_for_character(character.class, character.gender);
     let mut save = CharacterSaveRecord::new(character);
     let (max_hp, mp) = crystal_base_vitals(save.character.class, save.character.level);
     save.position = config.spawn.clone();
@@ -70,8 +72,8 @@ pub(super) fn default_save_for_character(
     save.inventory_items_json = Vec::new();
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
-    save.equipment_items_json = Vec::new();
-    save.equipment_items_explicit_empty = true;
+    save.equipment_items_json = encode_state_vec(&starter_equipment);
+    save.equipment_items_explicit_empty = false;
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
     save.npc_flag_states_json = Vec::new();
@@ -184,6 +186,54 @@ pub(super) fn persist_active_character_save(world: &World) {
         .clone()
         .unwrap_or_else(|| "demo".to_string());
     persist_character_save(world, &account_id, save);
+}
+
+impl SimulationSession {
+    /// Capture the exact durable private state for the active character without
+    /// mutating the configured account store.
+    pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        snapshot_active_character_save(self.app.world())
+    }
+
+    /// Restore the active character's durable private state after journal
+    /// replay. Shared Zone state is restored separately by the Gateway and
+    /// remains authoritative for map entities, position, and vitals.
+    pub fn restore_active_character_checkpoint(
+        &mut self,
+        save: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let identity = self
+            .active_identity()
+            .ok_or_else(|| "active character checkpoint requires an active identity".to_string())?;
+        if identity.character_index != save.character.index
+            || identity.character_name != save.character.name
+        {
+            return Err(format!(
+                "active character checkpoint identity mismatch: runtime={}/{}, checkpoint={}/{}",
+                identity.character_index,
+                identity.character_name,
+                save.character.index,
+                save.character.name
+            ));
+        }
+
+        let replay_tick = runtime_tick(self.app.world());
+        apply_character_save(self.app.world_mut(), save);
+        refresh_runtime_map_collision(self.app.world_mut());
+        refresh_storage_password_state(self.app.world_mut());
+        rebuild_world(self.app.world_mut());
+        if should_use_crystal_current_map_world(self.app.world()) {
+            clear_non_player_world_entities(self.app.world_mut());
+            spawn_visible_world_for_current_map(self.app.world_mut());
+            spawn_config_visible_npcs(self.app.world_mut());
+        }
+        self.visible_objects = collect_visible_objects(self.app.world())
+            .keys()
+            .copied()
+            .collect();
+        set_runtime_tick(self.app.world_mut(), replay_tick);
+        Ok(())
+    }
 }
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
@@ -613,8 +663,10 @@ pub(super) fn character_save_for_start(
         .or_insert_with(|| default_save_for_character(config, character.clone()));
     let mut changed = false;
     changed |= normalize_legacy_default_vitals(save);
+    changed |= normalize_legacy_synthetic_starter_equipment(save);
     changed |= normalize_legacy_default_account_demo_seed_state(save);
     changed |= normalize_legacy_crystal_new_character_seed_state(save);
+    changed |= normalize_legacy_crystal_level_one_empty_equipment(save);
     let save = save.clone();
     drop(store);
     if changed {
@@ -626,13 +678,14 @@ pub(super) fn character_save_for_start(
 }
 
 pub(super) fn crystal_new_character_save(character: CharacterRecord) -> CharacterSaveRecord {
+    let starter_equipment = seed_equipment_items_for_character(character.class, character.gender);
     let mut save = CharacterSaveRecord::new(character);
     save.gold = 0;
     save.inventory_items_json = Vec::new();
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
-    save.equipment_items_json = Vec::new();
-    save.equipment_items_explicit_empty = true;
+    save.equipment_items_json = encode_state_vec(&starter_equipment);
+    save.equipment_items_explicit_empty = false;
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
     save.item_rental_records_json = Vec::new();
@@ -682,7 +735,10 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
         changed = true;
     }
     if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
-        save.equipment_items_json = encode_state_vec(&seed_equipment_items());
+        save.equipment_items_json = encode_state_vec(&seed_equipment_items_for_character(
+            save.character.class,
+            save.character.gender,
+        ));
         changed = true;
     }
     if save.quest_states_json.is_empty() {
@@ -699,6 +755,8 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
 pub(super) fn normalize_legacy_crystal_new_character_seed_state(
     save: &mut CharacterSaveRecord,
 ) -> bool {
+    let starter_equipment =
+        seed_equipment_items_for_character(save.character.class, save.character.gender);
     if save.character.level != 1
         || save.gold != 1280
         || save.credit != 0
@@ -709,7 +767,7 @@ pub(super) fn normalize_legacy_crystal_new_character_seed_state(
     if !encoded_items_match_seed(&save.inventory_items_json, seed_inventory_items)
         || !encoded_items_match_seed(&save.belt_items_json, seed_belt_items)
         || !encoded_items_match_seed(&save.storage_items_json, seed_storage_items)
-        || !encoded_items_match_seed(&save.equipment_items_json, seed_equipment_items)
+        || save.equipment_items_json != encode_state_vec(&starter_equipment)
         || !encoded_items_match_seed(&save.quest_states_json, || {
             vec![QuestState::guide_training()]
         })
@@ -722,10 +780,72 @@ pub(super) fn normalize_legacy_crystal_new_character_seed_state(
     save.inventory_items_json = Vec::new();
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
-    save.equipment_items_json = Vec::new();
-    save.equipment_items_explicit_empty = true;
+    save.equipment_items_json = encode_state_vec(&starter_equipment);
+    save.equipment_items_explicit_empty = false;
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
+    true
+}
+
+pub(super) fn normalize_legacy_crystal_level_one_empty_equipment(
+    save: &mut CharacterSaveRecord,
+) -> bool {
+    if save.character.level != 1
+        || save.gold != 0
+        || !save.equipment_items_explicit_empty
+        || !save.equipment_items_json.is_empty()
+        || !save.inventory_items_json.is_empty()
+        || !save.belt_items_json.is_empty()
+        || !save.storage_items_json.is_empty()
+        || !save.skill_states_json.is_empty()
+    {
+        return false;
+    }
+
+    save.equipment_items_json = encode_state_vec(&seed_equipment_items_for_character(
+        save.character.class,
+        save.character.gender,
+    ));
+    save.equipment_items_explicit_empty = false;
+    true
+}
+
+pub(super) fn normalize_legacy_synthetic_starter_equipment(save: &mut CharacterSaveRecord) -> bool {
+    const LEGACY_INVALID_KEYS: [&str; 5] = [
+        "cloth-armour",
+        "copper-necklace",
+        "wood-bracelet-left",
+        "straw-sandals",
+        "rope-belt",
+    ];
+    const LEGACY_STARTER_KEYS: [&str; 6] = [
+        "wooden-sword",
+        "cloth-armour",
+        "copper-necklace",
+        "wood-bracelet-left",
+        "straw-sandals",
+        "rope-belt",
+    ];
+
+    let Some(mut equipment) = decode_state_vec::<EquipmentState>(&save.equipment_items_json) else {
+        return false;
+    };
+    if !equipment
+        .iter()
+        .any(|item| LEGACY_INVALID_KEYS.contains(&item.key.as_str()))
+    {
+        return false;
+    }
+
+    equipment.retain(|item| !LEGACY_STARTER_KEYS.contains(&item.key.as_str()));
+    for starter in seed_equipment_items_for_character(save.character.class, save.character.gender) {
+        if equipment.iter().all(|item| item.slot != starter.slot) {
+            equipment.push(starter);
+        }
+    }
+    equipment.sort_by_key(|item| item.slot as u8);
+    save.equipment_items_json = encode_state_vec(&equipment);
+    save.equipment_items_explicit_empty = equipment.is_empty();
     true
 }
 
@@ -845,7 +965,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     resources.storage_items = decode_state_vec(&save.storage_items_json).unwrap_or_default();
     resources.equipment_items =
         if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
-            seed_equipment_items()
+            seed_equipment_items_for_character(save.character.class, save.character.gender)
         } else {
             decode_state_vec(&save.equipment_items_json).unwrap_or_default()
         };

@@ -23,7 +23,7 @@ export function resolveSystemMenuShellText(value: string, playerName: string | n
   return value.replace(/\{player\}/g, playerName ?? "-");
 }
 
-
+/** Maps a system-menu panel to its localized shell heading. */
 export function featureTitleForSocialPanel(t: TranslateFn, panel: SystemMenuSocialPanel) {
   switch (panel) {
     case "ranking":
@@ -56,6 +56,8 @@ export function systemMenuSocialPanelDefinition(
   playerName: string | null,
   world: SocialDisplayWorld,
 ): SystemMenuSocialPanelDefinition {
+  // This function is a read model only: it normalizes sparse runtime snapshots
+  // into stable tabs/rows and never mutates authoritative social state.
   const systems = world.stage5Systems ?? {};
   const player = playerName ?? "{player}";
   const emptyRow = (name: string, meta = "Empty") =>
@@ -351,6 +353,8 @@ const RANKING_TABS = [
 ] as const;
 
 export function rankingRequestForSocialTab(tab: string): Record<string, unknown> {
+  // Unknown tabs intentionally fall back to Overall so stale UI state still
+  // produces a valid Crystal ranking request.
   const definition = RANKING_TABS.find((entry) => entry.key === tab) ?? RANKING_TABS[0];
   return {
     type: "getRanking",
@@ -433,6 +437,8 @@ function rankingClassLabel(classKey: SocialRankingState["entries"][number]["clas
 }
 
 function stringRecordValue(record: Record<string, unknown> | null | undefined, keys: string[]) {
+  // Runtime snapshots have evolved across packet and Stage 5 representations;
+  // ordered aliases keep the panel compatible without leaking `unknown` values.
   if (!record) return null;
   for (const key of keys) {
     const value = record[key];
@@ -470,6 +476,8 @@ export function clientCommandForSocialAction(
   action: string,
   rowName: string,
 ): Record<string, unknown> | null {
+  // Prefer real client packets for supported production flows. Returning null
+  // means the caller must not send an invented or partially specified packet.
   const normalized = action.toLowerCase();
   if (panel === "friend" && normalized === "refresh") {
     return { type: "refreshFriends" };
@@ -550,6 +558,8 @@ export function stage5CommandForSocialAction(
   action: string,
   rowName: string,
 ): { action: string; args: string[] } | null {
+  // Legacy Stage 5 commands exist for QA-era panels that have no complete wire
+  // packet yet. Production callers must keep these behind their existing gate.
   const normalized = action.toLowerCase();
   if (panel === "friend" && normalized === "add" && rowName !== "No friends") {
     return { action: "social.friend", args: [rowName] };

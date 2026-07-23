@@ -750,6 +750,9 @@ fn complete_crystal_quest(
 ) -> bool {
     let fixed_rewards = info.rewards_fixed_item.clone();
     let selected_reward = selected_crystal_quest_reward(info, selected_item_index);
+    if !info.rewards_select_item.is_empty() && selected_reward.is_none() {
+        return false;
+    }
     let needed_slots = crystal_quest_reward_slots_needed(
         world,
         fixed_rewards.iter().chain(selected_reward.iter()),
@@ -762,11 +765,10 @@ fn complete_crystal_quest(
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
         player.gold = player.gold.saturating_add(info.reward_gold);
         player.credit = player.credit.saturating_add(info.reward_credit);
-        player.experience = player.experience.saturating_add(i64::from(info.reward_exp));
-        if player.experience > player.max_experience {
-            player.experience = player.max_experience;
-        }
     }
+    // Crystal `GainExp`: quest experience rolls into levels via the shared curve;
+    // the new level/exp/HP reach the client through the post-completion snapshot.
+    let _ = super::leveling::apply_experience_gain(world, i64::from(info.reward_exp));
 
     for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
         grant_crystal_quest_reward_item(world, reward);
@@ -804,6 +806,16 @@ fn selected_crystal_quest_reward(
                 .find(|reward| reward.item.index == selected)
                 .cloned()
         })
+}
+
+pub(super) fn crystal_quest_reward_selection_missing(
+    quest_id: i32,
+    selected_item_index: Option<i32>,
+) -> bool {
+    crystal_quest_info_by_id(quest_id).is_some_and(|info| {
+        !info.rewards_select_item.is_empty()
+            && selected_crystal_quest_reward(&info, selected_item_index).is_none()
+    })
 }
 
 fn crystal_quest_reward_slots_needed<'a>(
@@ -1277,10 +1289,16 @@ pub(super) fn crystal_quest_dialog_for_target(
     }
     let action = parts.next()?;
     let quest_id = parts.next()?.parse::<i32>().ok()?;
+    let selected_item_index = parts.next().and_then(|value| value.parse::<i32>().ok());
     let info = crystal_quest_info_by_id(quest_id)?;
     match action.to_ascii_lowercase().as_str() {
         "accept" => Some(accept_crystal_quest_from_npc(world, npc_object_id, &info)),
-        "finish" => Some(finish_crystal_quest_from_npc(world, npc_object_id, &info)),
+        "finish" => Some(finish_crystal_quest_from_npc(
+            world,
+            npc_object_id,
+            &info,
+            selected_item_index,
+        )),
         "show" => Some(show_crystal_quest_dialog(world, npc_object_id, &info)),
         _ => None,
     }
@@ -1331,6 +1349,7 @@ fn finish_crystal_quest_from_npc(
     world: &mut World,
     npc_object_id: u32,
     info: &ClientQuestInfo,
+    selected_item_index: Option<i32>,
 ) -> (ActiveCrystalQuestDialog, Vec<ServerPacket>) {
     let mut packets = Vec::new();
     if !crystal_quest_finish_npc_matches(info, npc_object_id) {
@@ -1347,7 +1366,10 @@ fn finish_crystal_quest_from_npc(
             chat_type: ChatType::System,
         });
     } else if stage == QuestStage::ReadyToTurnIn {
-        if complete_quest_with_selection(world, info.index, None) {
+        if crystal_quest_reward_selection_missing(info.index, selected_item_index) {
+            return (crystal_quest_reward_selection_dialog(info, stage), packets);
+        }
+        if complete_quest_with_selection(world, info.index, selected_item_index) {
             packets.push(ServerPacket::ChangeQuest {
                 quest_id: info.index,
                 task_list: Vec::new(),
@@ -1371,6 +1393,34 @@ fn finish_crystal_quest_from_npc(
         crystal_quest_dialog_copy(info, quest_stage(world, info.index).unwrap_or(stage), false),
         packets,
     )
+}
+
+fn crystal_quest_reward_selection_dialog(
+    info: &ClientQuestInfo,
+    stage: QuestStage,
+) -> ActiveCrystalQuestDialog {
+    let mut dialog = crystal_quest_dialog_copy(info, stage, false);
+    dialog.links = info
+        .rewards_select_item
+        .iter()
+        .enumerate()
+        .map(|(index, reward)| {
+            let count = if reward.count > 1 {
+                format!(" x{}", reward.count)
+            } else {
+                String::new()
+            };
+            NpcDialogLinkState {
+                text: format!("Choose {}{}", reward.item.name, count),
+                target: format!("@quest:finish:{}:{index}", info.index),
+            }
+        })
+        .collect();
+    dialog.links.push(NpcDialogLinkState {
+        text: "Exit".to_string(),
+        target: "@Exit".to_string(),
+    });
+    dialog
 }
 
 fn show_crystal_quest_dialog(

@@ -1,7 +1,17 @@
 # mir2-web3 / onchain
 
-On-chain **smart mine** for the Legend of Mir 2 (Crystal) web port — Dubhe/Sui
-contracts, the Dubhe indexer, the relayer bridge, and TS scripts.
+On-chain **smart mine** plus shared-compute reward settlement for the Legend of Mir 2
+(Crystal) web port — Dubhe/Sui contracts, the Dubhe indexer, the relayer bridge, and TS scripts.
+
+`reward_settlement` is the Gate 9 shared-compute treasury: Commonware-finalized reward batches are
+published per game/epoch, and an isolated operator capability pays proof-checked guild-node claims.
+See `docs/client/GATE9-SHARED-COMPUTE-REWARDS.md`.
+
+`obelisk_node_registry` is the Gate 13 permissionless guild-node foundation. It registers an
+Ed25519 identity with SUI stake and capacity metadata, supports owner-controlled key rotation and
+revocation/refund, and permanently tombstones retired stable node IDs. Its verified deployment is
+on Sui **testnet**, not mainnet; see
+`docs/client/GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md`.
 
 > **Spec**: [`docs/ONCHAIN-SMART-MINE-ROADMAP.md`](../docs/ONCHAIN-SMART-MINE-ROADMAP.md)
 > (M0→M8 execution plan) and [`docs/ONCHAIN-SMART-MINE-DESIGN.md`](../docs/ONCHAIN-SMART-MINE-DESIGN.md)
@@ -52,6 +62,26 @@ Live on Sui **testnet** — see [`deployments/testnet.json`](deployments/testnet
 `mine_batch` settles + credits ore + emits `mine_settled`, the nonce replay guard aborts,
 and depletion emits `mine_depleted`. Run the TS smoke with your key in `.env`:
 `pnpm tsx scripts/smoke-mine.ts`.
+
+## Gate 13 node registry (testnet)
+
+The package manifest pins the Sui framework to exact commit
+`3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33`. Deployment IDs, lifecycle
+transactions, checkpoints, and the one active acceptance node are recorded in
+[`deployments/obelisk-node-registry-testnet.json`](deployments/obelisk-node-registry-testnet.json).
+
+```bash
+sui move test --path src/obelisk_node_registry
+
+NODE_REGISTRY_NETWORK=testnet \
+NODE_REGISTRY_PACKAGE_ID=0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e \
+EXPECT_ACTIVE_NODE_ID=ed25519:e5b4574f4c34f6c53adb1ec87fd980199b403bfaf653492602298e16f1108482 \
+pnpm node-registry:snapshot
+```
+
+The snapshot source reads finalized Sui events through GraphQL and projects
+them deterministically into Rust-compatible registration JSON. It does not
+possess an owner capability and cannot register, rotate, or revoke a node.
 
 ## Commands
 

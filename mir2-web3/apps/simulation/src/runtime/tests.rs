@@ -26,8 +26,8 @@ use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSour
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
-    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition,
-    WorldEntityKind,
+    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord,
+    WorldEntityDisposition, WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -1455,6 +1455,10 @@ fn start_game_emits_bootstrap_sequence() {
         .iter()
         .position(|packet| matches!(packet, ServerPacket::GuildBuffList { .. }))
         .expect("bootstrap should include Crystal guild buff list");
+    let time_of_day_index = packets
+        .iter()
+        .position(|packet| matches!(packet, ServerPacket::TimeOfDay { lights: 1..=4 }))
+        .expect("bootstrap should include the current Crystal time-of-day light setting");
     let recipe_index = packets
         .iter()
         .position(|packet| matches!(packet, ServerPacket::NewRecipeInfo { .. }))
@@ -1468,7 +1472,35 @@ fn start_game_emits_bootstrap_sequence() {
     assert!(map_index < user_index);
     assert!(user_index < recipe_index);
     assert!(recipe_index < base_stats_index);
+    assert!(base_stats_index < time_of_day_index);
     assert!(base_stats_index < guild_buff_index);
+}
+
+#[test]
+fn crystal_time_of_day_lights_match_server_utc_hour_formula() {
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(0), 4);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(3), 1);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(4), 2);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(8), 3);
+    assert_eq!(super::crystal_time_of_day_lights_for_utc_hour(9), 4);
+}
+
+#[test]
+fn fixed_crystal_light_setting_accepts_only_crystal_runtime_values() {
+    assert_eq!(super::parse_fixed_crystal_light_setting(" 1 "), Some(1));
+    assert_eq!(super::parse_fixed_crystal_light_setting("4"), Some(4));
+    assert_eq!(super::parse_fixed_crystal_light_setting("0"), None);
+    assert_eq!(super::parse_fixed_crystal_light_setting("5"), None);
+    assert_eq!(super::parse_fixed_crystal_light_setting("night"), None);
+    assert_eq!(
+        super::crystal_time_of_day_lights_with_override(Some("1"), 4),
+        1
+    );
+    assert_eq!(
+        super::crystal_time_of_day_lights_with_override(Some("invalid"), 4),
+        2
+    );
+    assert_eq!(super::crystal_time_of_day_lights_with_override(None, 8), 3);
 }
 
 #[test]
@@ -1577,7 +1609,7 @@ fn start_game_migrates_legacy_level_one_warrior_vitals() {
 }
 
 #[test]
-fn new_crystal_character_starts_without_web_seed_state() {
+fn new_crystal_character_starts_with_crystal_equipment_without_web_seed_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::NewAccount {
         account_id: "crystalempty".to_string(),
@@ -1606,7 +1638,14 @@ fn new_crystal_character_starts_without_web_seed_state() {
     assert!(snapshot.inventory_items.is_empty());
     assert!(snapshot.belt_items.is_empty());
     assert!(snapshot.storage_items.is_empty());
-    assert!(snapshot.equipment_items.is_empty());
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" }));
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| item.slot == EquipmentSlot::Armour));
     assert!(snapshot
         .quest_log
         .iter()
@@ -1666,7 +1705,14 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
     assert!(snapshot.inventory_items.is_empty());
     assert!(snapshot.belt_items.is_empty());
     assert!(snapshot.storage_items.is_empty());
-    assert!(snapshot.equipment_items.is_empty());
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" }));
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| item.slot == EquipmentSlot::Armour));
     assert!(snapshot
         .quest_log
         .iter()
@@ -1687,10 +1733,71 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
         .and_then(|account| account.saves.get(&character.index))
         .expect("migrated save should remain stored");
     assert_eq!(save.gold, 0);
-    assert!(save.equipment_items_explicit_empty);
+    assert!(!save.equipment_items_explicit_empty);
+    assert!(!save.equipment_items_json.is_empty());
     assert!(save.inventory_items_json.is_empty());
     assert!(save.quest_states_json.is_empty());
     assert!(save.skill_states_json.is_empty());
+}
+
+#[test]
+fn start_game_restores_legacy_level_one_empty_starter_equipment() {
+    let config = SimulationConfig::default();
+    let character = CharacterRecord {
+        index: 44,
+        name: "LegacyNaked".to_string(),
+        level: 1,
+        class: MirClass::Warrior,
+        gender: MirGender::Male,
+    };
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let account = store
+            .accounts
+            .get_mut("demo")
+            .expect("default account should exist");
+        account.characters.push(character.clone());
+        let mut save = CharacterSaveRecord::new(character.clone());
+        save.gold = 0;
+        save.inventory_items_json = Vec::new();
+        save.belt_items_json = Vec::new();
+        save.storage_items_json = Vec::new();
+        save.equipment_items_json = Vec::new();
+        save.equipment_items_explicit_empty = true;
+        save.quest_states_json = Vec::new();
+        save.skill_states_json = Vec::new();
+        account.saves.insert(character.index, save);
+    }
+
+    let mut session = SimulationSession::new(config.clone());
+    let _ = session.handle_packet(ClientPacket::StartGame {
+        character_index: character.index,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.gold, 0);
+    assert!(snapshot.inventory_items.is_empty());
+    assert!(snapshot.belt_items.is_empty());
+    assert!(snapshot.storage_items.is_empty());
+    assert!(snapshot
+        .equipment_items
+        .iter()
+        .any(|item| { item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" }));
+
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&character.index))
+        .expect("migrated save should remain stored");
+    assert!(!save.equipment_items_explicit_empty);
+    assert!(!save.equipment_items_json.is_empty());
 }
 
 #[test]
@@ -1766,6 +1873,76 @@ fn start_game_emits_visible_object_packets() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectNpc { .. })));
+}
+
+#[test]
+fn world_snapshot_uses_crystal_symmetric_sixteen_tile_object_range() {
+    let mut config = SimulationConfig::default();
+    config.visible_players.clear();
+    config.visible_monsters.clear();
+    config.visible_npcs = vec![
+        VisibleNpcRecord {
+            object_id: 91_001,
+            name: "X Edge".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 346, y: 270 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+        VisibleNpcRecord {
+            object_id: 91_002,
+            name: "Y Edge".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 330, y: 286 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+        VisibleNpcRecord {
+            object_id: 91_003,
+            name: "X Outside".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 347, y: 270 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+        VisibleNpcRecord {
+            object_id: 91_004,
+            name: "Y Outside".to_string(),
+            image: 0,
+            colour_argb: -1,
+            position: Point { x: 330, y: 287 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: None,
+        },
+    ];
+
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let snapshot = session.world_snapshot();
+
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_001));
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_002));
+    assert!(!snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_003));
+    assert!(!snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == 91_004));
 }
 
 #[test]
@@ -2082,6 +2259,13 @@ fn saved_character_state_survives_new_session_start_game() {
         password: "demo".to_string(),
     });
     let _ = first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let initial_weapon_dura = first
+        .world_snapshot()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("starter weapon")
+        .durability_current;
     set_player_position(&mut first, Point { x: 333, y: 267 });
     let _ = first.attack(3002);
     first.save_active_character();
@@ -2115,7 +2299,7 @@ fn saved_character_state_survives_new_session_start_game() {
     assert_eq!(restored_player.x, 333);
     assert_eq!(restored_player.y, 267);
     assert_eq!(restored_weapon_dura, saved_weapon_dura);
-    assert!(restored_weapon_dura < 18);
+    assert!(restored_weapon_dura < initial_weapon_dura);
 }
 
 #[test]
@@ -3299,6 +3483,20 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
                 && info.name == "Assistant_Jane"
                 && info.location == (Point { x: 284, y: 606 })
     )));
+    let assistant_packets = packets
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::ObjectNpc { info } if info.object_id == 3 => Some(info),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    assert!(!assistant_packets.is_empty());
+    assert!(
+        assistant_packets
+            .iter()
+            .all(|info| info.name_colour_argb == 0xFF00_FF00u32 as i32),
+        "Crystal NPC spawn paths must agree on the default Lime name colour",
+    );
     let assistant = snapshot
         .entities
         .iter()
@@ -3307,6 +3505,21 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
     assert_eq!(assistant.kind, WorldEntityKind::Npc);
     assert_eq!(assistant.name, "Assistant_Jane");
     assert_eq!((assistant.x, assistant.y), (284, 606));
+    assert_eq!(assistant.name_colour_argb, 0xFF00_FF00u32 as i32);
+    assert_eq!(
+        assistant.light, 10,
+        "Crystal merchants always emit light 10"
+    );
+    assert_eq!(
+        snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("self player snapshot")
+            .light,
+        3,
+        "Crystal clamps an unequipped local user to light 3",
+    );
     assert!(snapshot
         .entities
         .iter()
@@ -3333,10 +3546,11 @@ fn crystal_current_map_transfer_spawns_visible_respawns_into_world() {
         .entities
         .iter()
         .any(|entity| { entity.kind == WorldEntityKind::Monster && entity.name == "Deer" }));
-    assert!(snapshot
-        .entities
-        .iter()
-        .any(|entity| { entity.kind == WorldEntityKind::Monster && entity.name == "Royal_Guard" }));
+    assert!(snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && entity.name == "Royal_Guard"
+            && entity.ai == Some(6)
+    }));
 }
 
 #[test]
@@ -5011,6 +5225,50 @@ fn spitting_spider_ai_attacks_from_two_tiles_with_line_timing() {
         ServerPacket::Struck { info } if info.attacker_id == monster_object_id
     )));
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
+}
+
+#[test]
+fn crystal_ai4_spitting_spider_attack_range_matches_crystal() {
+    // Crystal `SpittingSpider.InAttackRange`: cap 2, then
+    // `(x<=1 && y<=1) || (x==y || x%2==y%2)`. (2,1)/(1,2) are OUT of range in
+    // Crystal but were previously IN (the shared 18|29|61 arm collapsed to a
+    // full 2x2 box because its `dx<=max && dy<=max` clause is always true after
+    // the cap check). This locks in the exact predicate for AI 4.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let spider_position = Point { x: 340, y: 270 };
+    let spider = spawn_crystal_monster_for_test(
+        &mut session,
+        98_904_u32,
+        "SpittingSpider",
+        spider_position.clone(),
+        MirDirection::Left,
+        true,
+    );
+    let entry = session.app.world().entity(spider);
+    let agent = entry.get::<MonsterAgent>().expect("spitting spider agent");
+    assert_eq!(agent.ai, 4, "SpittingSpider should be AI 4");
+
+    let at = |dx: i32, dy: i32| Point {
+        x: spider_position.x + dx,
+        y: spider_position.y + dy,
+    };
+    // In range: adjacent box, diagonal (x==y), and same-parity (x%2==y%2).
+    for (dx, dy) in [(1, 1), (2, 2), (2, 0), (0, 2), (1, 0)] {
+        assert!(
+            super::monster_in_attack_range(agent, &spider_position, &at(dx, dy)),
+            "({dx},{dy}) should be in SpittingSpider attack range"
+        );
+    }
+    // Out of range: (2,1)/(1,2) (the corrected cases), beyond the 2-tile cap,
+    // and the same tile.
+    for (dx, dy) in [(2, 1), (1, 2), (3, 0), (0, 0)] {
+        assert!(
+            !super::monster_in_attack_range(agent, &spider_position, &at(dx, dy)),
+            "({dx},{dy}) should be OUT of SpittingSpider attack range"
+        );
+    }
 }
 
 #[test]
@@ -7206,32 +7464,57 @@ fn cave_maggot_and_toxic_ghoul_use_harvest_monster_corpse_passes() {
             )
         }));
 
-        for harvest_index in 1..=super::HARVEST_MONSTER_SKIN_COUNT {
-            let packets = session.handle_packet(ClientPacket::Harvest {
-                direction: MirDirection::Right,
-            });
-            let harvested = packets.iter().any(|packet| {
-                matches!(
-                    packet,
-                    ServerPacket::ObjectHarvested { movement }
-                        if movement.object_id == object_id
-                )
-            });
-            assert_eq!(
-                harvested, false,
-                "{template_name} harvest {harvest_index}, packets {packets:?}"
-            );
-        }
-        let transfer_packets = session.handle_packet(ClientPacket::Harvest {
+        let first_pass = session.handle_packet(ClientPacket::Harvest {
             direction: MirDirection::Right,
         });
-        assert!(transfer_packets.iter().any(|packet| {
+        assert!(!first_pass.iter().any(|packet| {
             matches!(
                 packet,
                 ServerPacket::ObjectHarvested { movement }
                     if movement.object_id == object_id
             )
         }));
+        assert_eq!(
+            session
+                .app
+                .world()
+                .entity(monster)
+                .get::<super::HarvestMonsterState>()
+                .expect("harvest state after first pass")
+                .remaining_skin_count,
+            1
+        );
+
+        let second_pass = session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Right,
+        });
+        let harvested_without_drops = second_pass.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectHarvested { movement }
+                    if movement.object_id == object_id
+            )
+        });
+        if !harvested_without_drops {
+            let transfer_packets = session.handle_packet(ClientPacket::Harvest {
+                direction: MirDirection::Right,
+            });
+            assert!(transfer_packets.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectHarvested { movement }
+                        if movement.object_id == object_id
+                )
+            }));
+        }
+        let state = session
+            .app
+            .world()
+            .entity(monster)
+            .get::<super::HarvestMonsterState>()
+            .expect("final harvest state");
+        assert_eq!(state.remaining_skin_count, 0);
+        assert!(state.harvested);
     }
 }
 
@@ -20398,9 +20681,15 @@ fn water_dragon_and_black_tortoise_use_range_attacks_when_not_adjacent() {
 }
 
 #[test]
-fn water_dragon_range_hit_applies_green_poison() {
+fn water_dragon_range_hit_uses_mac_and_applies_green_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // A ranged WaterDragon strike is MACAgility in Crystal. Make physical AC
+    // overwhelming so this test fails if the damage path ever subtracts AC.
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MIN_AC, 10_000);
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAX_AC, 10_000);
+    assert!(super::player_stats(session.app.world()).min_ac() >= 10_000);
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
@@ -20422,17 +20711,9 @@ fn water_dragon_range_hit_applies_green_poison() {
             max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    // The water-dragon ranged strike is an armour-ignoring magic hit (the Crystal
-    // magic channel is mitigated by MAC, not the physical AC that
-    // `total_defence_bonus` returns), so the measured HP loss is the monster's
-    // full magic damage. #16's stat engine gave the seed player nonzero physical
-    // defence, which the old `- total_defence_bonus` expectation wrongly
-    // subtracted. The hit also applies green poison (asserted below), but its
-    // first DOT tick lands after this hit resolves, so it is not part of this loss.
-    let expected_damage = super::crystal_monster_magic_damage("Hydra");
-    // Green poison's first DOT tick (the Crystal player green-poison tick is 5)
-    // can resolve within a tick of the ranged hit, so the assertion below allows
-    // a +/-5 tolerance band around the direct magic damage.
+    // The imported Hydra MC is rolled within its Crystal range and then reduced
+    // only by MAC. A green-poison tick can land alongside the direct hit.
+    let maximum_direct_damage = super::crystal_monster_magic_damage("Hydra");
     const GREEN_POISON_TICK_DAMAGE: i32 = 5;
     let hydra = spawn_crystal_monster_for_test(
         &mut session,
@@ -20485,9 +20766,8 @@ fn water_dragon_range_hit_applies_green_poison() {
     )));
     let actual_damage = before_hp - session.world_snapshot().player_hp.expect("player hp");
     assert!(
-        actual_damage >= expected_damage - GREEN_POISON_TICK_DAMAGE
-            && actual_damage <= expected_damage + GREEN_POISON_TICK_DAMAGE,
-        "expected hydra ranged hit plus poison tick near {expected_damage}, got {actual_damage}",
+        actual_damage > 0 && actual_damage <= maximum_direct_damage + GREEN_POISON_TICK_DAMAGE,
+        "expected a mitigated Hydra MC roll plus at most one poison tick, got {actual_damage}",
     );
     assert!(session
         .world_snapshot()
@@ -22519,7 +22799,7 @@ fn moving_out_of_aoi_emits_object_remove_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    set_player_position(&mut session, Point { x: 342, y: 279 });
+    set_player_position(&mut session, Point { x: 351, y: 273 });
     let packets = session.tick();
 
     assert!(packets.iter().any(|packet| matches!(
@@ -22635,6 +22915,107 @@ fn gm_level_command_sets_level_and_emits_level_changed() {
             .map(|character| character.level),
         Some(42)
     );
+}
+
+fn player_character_level(session: &SimulationSession) -> u16 {
+    session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.level)
+        .unwrap_or(0)
+}
+
+#[test]
+fn experience_gain_auto_levels_through_the_crystal_curve() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // The starter scene spawns a level-7 demo character; normalise to a clean
+    // level 1 first. `@LEVEL 1` runs the shared `apply_level_change`, which points
+    // `max_experience` at the curve's level-1 value (100).
+    grant_gm(&mut session);
+    let _ = session.handle_packet(ClientPacket::Chat {
+        message: "@LEVEL 1".to_string(),
+        linked_items: Vec::new(),
+    });
+
+    // A clean level-1 warrior: the curve needs 100 experience to reach level 2.
+    let before = session.world_snapshot();
+    assert_eq!(player_character_level(&session), 1);
+    assert_eq!(before.player_experience, 0);
+    assert_eq!(before.player_max_experience, 100);
+    let level_1_max_hp = before.player_max_hp.expect("level-1 max hp");
+
+    // Experience under the threshold is banked, with no level-up.
+    let packets = crate::runtime::leveling::apply_experience_gain(session.app.world_mut(), 40);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 40 })));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })));
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.player_experience, 40);
+    assert_eq!(snapshot.player_max_experience, 100);
+    assert_eq!(player_character_level(&session), 1);
+
+    // Crossing the threshold levels once, carries the remainder (40 + 80 - 100 = 20),
+    // repoints `max_experience` at the level-2 curve value (200), and restores HP/MP
+    // to the new, larger maxima (Crystal `LevelUp`).
+    let packets = crate::runtime::leveling::apply_experience_gain(session.app.world_mut(), 80);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LevelChanged {
+            level: 2,
+            experience: 20,
+            max_experience: 200,
+        }
+    )));
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.player_experience, 20);
+    assert_eq!(snapshot.player_max_experience, 200);
+    assert_eq!(player_character_level(&session), 2);
+    let level_2_max_hp = snapshot.player_max_hp.expect("level-2 max hp");
+    assert!(
+        level_2_max_hp > level_1_max_hp,
+        "level-up should grow the HP pool ({level_1_max_hp} -> {level_2_max_hp})"
+    );
+    assert_eq!(
+        snapshot.player_hp,
+        Some(level_2_max_hp),
+        "HP is restored to full on level up"
+    );
+}
+
+#[test]
+fn large_experience_grant_cascades_multiple_levels() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Normalise the level-7 starter character to a clean level 1 (see above).
+    grant_gm(&mut session);
+    let _ = session.handle_packet(ClientPacket::Chat {
+        message: "@LEVEL 1".to_string(),
+        linked_items: Vec::new(),
+    });
+
+    // Curve thresholds for levels 1->2, 2->3, 3->4 are 100, 200, 300. Granting their
+    // exact sum (600) advances a level-1 character to level 4 with no remainder, and
+    // `max_experience` settles on the level-4 value (400).
+    let packets = crate::runtime::leveling::apply_experience_gain(session.app.world_mut(), 600);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LevelChanged {
+            level: 4,
+            experience: 0,
+            max_experience: 400,
+        }
+    )));
+    assert_eq!(player_character_level(&session), 4);
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.player_experience, 0);
+    assert_eq!(snapshot.player_max_experience, 400);
 }
 
 #[test]
@@ -23011,6 +23392,86 @@ fn gm_revive_restores_player_vitals() {
 }
 
 #[test]
+fn gm_die_emits_self_death_and_object_died() {
+    // Crystal `Die()` enqueues `S.Death` to self (the revive-prompt signal) before
+    // broadcasting `S.ObjectDied` (PlayerObject.cs:649-650). @DIE is ungated, so this
+    // is also the death path the combat/survival QA loop exercises.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let packets = gm_chat(&mut session, "@DIE");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Death { .. })));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == player_id
+    )));
+}
+
+#[test]
+fn town_revive_respawns_dead_player_at_bind_point() {
+    // Crystal `PlayerObject.TownRevive` (PlayerObject.cs:1392): a dead player respawns
+    // at the bind/town point with restored vitals, replying `S.Revived` + broadcast
+    // `S.ObjectRevived`. The single-map world binds to the configured spawn.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+    let spawn = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .spawn
+        .clone();
+
+    // Walk away from the bind point, then die.
+    set_player_position(
+        &mut session,
+        Point {
+            x: spawn.x + 4,
+            y: spawn.y + 3,
+        },
+    );
+    set_current_player_hp(&mut session, 0);
+    assert_ne!(player_position(&session), spawn);
+
+    let packets = session.handle_packet(ClientPacket::TownRevive);
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Revived)));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == player_id && info.effect
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+
+    // HP restored, dead flag cleared, respawned back at the bind/town point.
+    let snapshot = session.world_snapshot();
+    assert!(snapshot.player_hp.unwrap_or(0) > 0);
+    assert_eq!(player_position(&session), spawn);
+    let self_entity = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.object_id == player_id)
+        .expect("self entity snapshot");
+    assert!(!self_entity.dead);
+}
+
+#[test]
+fn town_revive_is_noop_for_living_player() {
+    // Crystal `if (!Dead) return;` — a living player's TownRevive does nothing.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let packets = session.handle_packet(ClientPacket::TownRevive);
+    assert!(packets.is_empty());
+}
+
+#[test]
 fn gm_setlight_emits_personal_light_player_update() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -23021,6 +23482,16 @@ fn gm_setlight_emits_personal_light_player_update() {
         .iter()
         .any(|packet| matches!(packet, ServerPacket::PlayerUpdate { light: 3, .. })));
     assert_eq!(session.app.world().resource::<GmRuntimeResource>().light, 3);
+    assert_eq!(
+        session
+            .world_snapshot()
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("self player snapshot")
+            .light,
+        3,
+    );
 }
 
 #[test]
@@ -23350,16 +23821,16 @@ fn world_snapshot_filters_outside_player_aoi() {
     let _ = session.interact(4001);
     kill_field_wasp(&mut session);
 
-    set_player_position(&mut session, Point { x: 342, y: 279 });
+    set_player_position(&mut session, Point { x: 351, y: 273 });
     let snapshot = session.world_snapshot();
 
     assert_eq!(
         snapshot.scene_view.as_ref().map(|view| view.center.x),
-        Some(342)
+        Some(351)
     );
     assert_eq!(
         snapshot.scene_view.as_ref().map(|view| view.center.y),
-        Some(279)
+        Some(273)
     );
     assert!(!snapshot
         .entities
@@ -26575,7 +27046,15 @@ fn crystal_npc_giveskill_maps_runtime_and_crystal_manifest_entries() {
         .expect("magic shield should be recorded from crystal manifest");
     assert_eq!(runtime_skill.level, 3);
     assert_eq!(manifest_skill.level, 2);
-    assert!(packets.is_empty());
+    // Each newly taught spell enqueues a `NewMagic` packet so the client learns it
+    // immediately (matching `@GIVESKILL`), rather than waiting for the next snapshot.
+    assert_eq!(
+        packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::NewMagic { .. }))
+            .count(),
+        2,
+    );
 }
 
 #[test]
@@ -27714,6 +28193,219 @@ fn original_crystal_selected_reward_is_granted_on_finish() {
 }
 
 #[test]
+fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
+    // Crystal quest #1 "Assistant's Request" grants a single FIXED item reward,
+    // (HP)DrugSmall, on hand-in (BichonProvince/BorderVillage/1.txt [@FixedRewards]),
+    // plus 10 EXP and NO gold. (HP)DrugSmall is ItemType.Potion (13), so Crystal's
+    // GainItem -> AddItem auto-routes it into the belt region of the inventory
+    // (Crystal/Server/MirObjects/HumanObject.cs:1596). The web port models the belt
+    // as a separate `belt_items` container, so the reward must land in the player's
+    // carried possession (belt OR bag) — never silently vanish.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let info = super::crystal_quest_info_by_id(1).expect("crystal quest #1 loaded");
+    let fixed = info
+        .rewards_fixed_item
+        .first()
+        .cloned()
+        .expect("quest #1 has a fixed item reward");
+    let reward_name = fixed.item.name.clone();
+    assert_eq!(reward_name, "(HP)DrugSmall");
+    assert_eq!(info.reward_gold, 0, "quest #1 grants no gold");
+
+    // Start from an empty bag + belt so the reward is unambiguous (no stacking with
+    // the seeded starter potions / no pre-existing items masking the grant).
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources.inventory_items.clear();
+        resources.belt_items.clear();
+    }
+
+    super::ensure_runtime_quest(session.app.world_mut(), 1);
+    super::set_quest_stage(session.app.world_mut(), 1, QuestStage::ReadyToTurnIn);
+
+    let packets = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: 1,
+        selected_item_index: -1,
+    });
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
+        )),
+        "FinishQuest must complete quest #1",
+    );
+
+    let snapshot = session.world_snapshot();
+    let in_belt = snapshot
+        .belt_items
+        .iter()
+        .any(|item| item.name == reward_name && item.quantity >= 1);
+    let in_bag = snapshot
+        .inventory_items
+        .iter()
+        .any(|item| item.name == reward_name && item.quantity >= 1);
+    assert!(
+        in_belt || in_bag,
+        "fixed-item reward {reward_name} must be granted to the player's possession; \
+         belt={:?} bag={:?}",
+        snapshot.belt_items,
+        snapshot.inventory_items,
+    );
+    // Faithful to Crystal AddItem: a Potion auto-routes into the (empty) belt.
+    assert!(
+        in_belt,
+        "potion reward {reward_name} should auto-route into the belt (Crystal AddItem); \
+         belt={:?} bag={:?}",
+        snapshot.belt_items, snapshot.inventory_items,
+    );
+}
+
+#[test]
+fn original_bichon_newcomer_quest_rewards_match_scripts() {
+    let expected = [
+        (1, 10, 0),
+        (2, 30, 200),
+        (3, 10, 0),
+        (4, 80, 20),
+        (5, 120, 30),
+        (6, 150, 38),
+        (7, 48, 60),
+        (8, 180, 45),
+        (9, 48, 60),
+    ];
+    for (quest_id, reward_exp, reward_gold) in expected {
+        let info = super::crystal_quest_info_by_id(quest_id)
+            .unwrap_or_else(|| panic!("Crystal newcomer quest {quest_id} should load"));
+        assert_eq!(info.reward_exp, reward_exp, "quest {quest_id} EXP");
+        assert_eq!(info.reward_gold, reward_gold, "quest {quest_id} gold");
+    }
+}
+
+#[test]
+fn ambient_monster_death_does_not_credit_player_newcomer_quest() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 5),
+        QuestStage::InProgress
+    );
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((0, 20)));
+
+    let object_id = 880_005;
+    let monster = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Scarecrow",
+        Point { x: 12, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    let mut packets = Vec::new();
+    let tick = runtime_tick(session.app.world());
+    assert!(super::damage_monster_entity(
+        session.app.world_mut(),
+        monster,
+        i32::MAX,
+        tick,
+        &mut packets,
+    ));
+    assert_eq!(
+        super::quest_progress(session.app.world(), 5),
+        Some((0, 20)),
+        "generic/environment monster deaths must not count as player kills"
+    );
+
+    super::handle_monster_defeat(
+        session.app.world_mut(),
+        object_id,
+        "Scarecrow",
+        &mut packets,
+    );
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((1, 20)));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 })));
+}
+
+#[test]
+fn player_owned_direct_and_poison_damage_credit_newcomer_quest() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 5),
+        QuestStage::InProgress
+    );
+
+    let direct = spawn_crystal_monster_for_test(
+        &mut session,
+        880_006,
+        "Scarecrow",
+        Point { x: 14, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    let tick = runtime_tick(session.app.world());
+    let mut direct_packets = Vec::new();
+    assert!(super::damage_player_owned_monster_entity(
+        session.app.world_mut(),
+        direct,
+        i32::MAX,
+        tick,
+        &mut direct_packets,
+    ));
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((1, 20)));
+    assert!(direct_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 })));
+
+    let poisoned = spawn_crystal_monster_for_test(
+        &mut session,
+        880_007,
+        "Scarecrow",
+        Point { x: 16, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    super::apply_player_monster_poison(session.app.world_mut(), poisoned, 1, i32::MAX, tick, 4);
+    let mut poison_packets = Vec::new();
+    super::tick_monster_poisons(session.app.world_mut(), tick + 2, &mut poison_packets);
+    assert_eq!(super::quest_progress(session.app.world(), 5), Some((2, 20)));
+    assert!(poison_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { amount: 15 })));
+
+    let ambient_poisoned = spawn_crystal_monster_for_test(
+        &mut session,
+        880_008,
+        "Scarecrow",
+        Point { x: 18, y: 12 },
+        MirDirection::Down,
+        true,
+    );
+    super::apply_monster_poison(
+        session.app.world_mut(),
+        ambient_poisoned,
+        1,
+        i32::MAX,
+        tick,
+        4,
+    );
+    let mut ambient_packets = Vec::new();
+    super::tick_monster_poisons(session.app.world_mut(), tick + 2, &mut ambient_packets);
+    assert_eq!(
+        super::quest_progress(session.app.world(), 5),
+        Some((2, 20)),
+        "environment-owned poison must not count as a player kill"
+    );
+    assert!(!ambient_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { .. })));
+    assert_eq!(session.world_snapshot().player_experience, 30);
+}
+
+#[test]
 fn drop_gold_packet_silently_rejects_before_start_game() {
     let mut session = SimulationSession::new(SimulationConfig::default());
 
@@ -27879,7 +28571,7 @@ fn crystal_drop_search_skips_map_transfer_source_tiles() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let movement_source = Point { x: 340, y: 270 };
-    assert!(super::is_current_map_transfer_source(
+    assert!(super::super::drops::is_current_map_transfer_source(
         session.app.world(),
         &movement_source
     ));
@@ -27897,7 +28589,7 @@ fn crystal_drop_search_skips_map_transfer_source_tiles() {
     .expect("drop should move off the transfer source");
 
     assert_ne!(placed.position, movement_source);
-    assert!(!super::is_current_map_transfer_source(
+    assert!(!super::super::drops::is_current_map_transfer_source(
         session.app.world(),
         &placed.position
     ));
@@ -31693,7 +32385,7 @@ fn benediction_oil_refreshes_weapon_after_luck_gain() {
                     .any(|stat| stat.stat == 15 && stat.value == 1)
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" && item.added_luck == 1
+        item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" && item.added_luck == 1
     }));
     assert!(!snapshot
         .inventory_items
@@ -32345,7 +33037,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
     assert!(!first_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert_eq!(total_attack_bonus(session.app.world()), 10);
+    assert_eq!(total_attack_bonus(session.app.world()), 9);
 
     add_inventory_crystal_item(&mut session, "ImpactDrug(M)", 32);
     let second_packets = session.handle_packet(ClientPacket::UseItem {
@@ -32369,7 +33061,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
             grid: MirGridType::Inventory,
         }
     )));
-    assert_eq!(total_attack_bonus(session.app.world()), 10);
+    assert_eq!(total_attack_bonus(session.app.world()), 9);
 }
 
 #[test]
@@ -32447,7 +33139,7 @@ fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
             .map(|buff| buff.attack_bonus),
         Some(2)
     );
-    assert_eq!(total_attack_bonus(session.app.world()), 7);
+    assert_eq!(total_attack_bonus(session.app.world()), 6);
 }
 
 #[test]
@@ -33431,7 +34123,7 @@ fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
     assert!(resources
         .inventory_items
         .iter()
-        .any(|item| item.slot == 20 && item.key == "wooden-sword" && item.cursed));
+        .any(|item| item.slot == 20 && item.key == "crystal-item-221" && item.cursed));
 }
 
 #[test]
@@ -34581,7 +35273,7 @@ fn remove_item_packet_storage_grid_moves_equipment_into_requested_storage_slot()
         .iter()
         .any(|item| item.slot == EquipmentSlot::Weapon));
     assert!(snapshot.storage_items.iter().any(|item| {
-        item.key == "wooden-sword" && item.container == ItemContainer::Storage && item.slot == 4
+        item.key == "crystal-item-221" && item.container == ItemContainer::Storage && item.slot == 4
     }));
 }
 
@@ -34697,7 +35389,7 @@ fn remove_item_packet_cursed_equipment_consumes_unlock_after_success() {
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "wooden-sword" && item.container == ItemContainer::Bag1 && item.slot == 20
+        item.key == "crystal-item-221" && item.container == ItemContainer::Bag1 && item.slot == 20
     }));
     let resources = session.app.world().resource::<InventoryResource>();
     assert!(resources
@@ -34971,11 +35663,11 @@ fn remove_slot_item_packet_equipment_grid_does_not_mutate_matching_player_equipm
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!snapshot
         .inventory_items
         .iter()
-        .any(|item| item.name == "Wooden Sword"));
+        .any(|item| item.name == "WoodenSword"));
 }
 
 #[test]
@@ -35007,11 +35699,11 @@ fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_i
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!snapshot
         .inventory_items
         .iter()
-        .any(|item| item.name == "Wooden Sword"));
+        .any(|item| item.name == "WoodenSword"));
 }
 
 /// Build a baseline [`ItemState`] for socket tests. Callers tweak the
@@ -35601,13 +36293,13 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Armour)
             .map(|item| (item.grade, item.added_defence, item.defence)),
-        Some((ItemGrade::Common, 0, 5))
+        Some((ItemGrade::Common, 0, 2))
     );
 
-    // WoodenSword MaxDC 4 (+ Copper Necklace 1); LightLeatherArmour MaxAC 5
-    // (+ bracelet/sandals 1 each).
-    assert_eq!(total_attack_bonus(session.app.world()), 5);
-    assert_eq!(total_defence_bonus(session.app.world()), 7);
+    // Crystal fresh characters start with WoodenSword (MaxDC 4) and BaseDress
+    // (MaxAC 2); no legacy demo necklace/bracelet/sandals are pre-equipped.
+    assert_eq!(total_attack_bonus(session.app.world()), 4);
+    assert_eq!(total_defence_bonus(session.app.world()), 2);
 }
 
 #[test]
@@ -35650,6 +36342,72 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
     assert_eq!(sprite.alt_weapon_library.as_deref(), None);
 }
 
+// Regression for the equip-from-inventory appearance bug: a worn item's
+// `Looks_Armour`/`Looks_Weapon` must come from the Crystal template `ItemInfo.Shape`
+// for ANY item, not only the six legacy names in `equipment_shape_for_slot_and_name`.
+// These seed REAL Crystal items whose display name ("Crystal Item NNN") is deliberately
+// absent from that table, so before the fix the body stayed `CArmour/00` and no weapon
+// layer rendered. `crystal-item-317` = BaseDress(M) (ItemInfo.Shape 1 → `CArmour/01`);
+// `crystal-item-221` = WoodenSword (ItemInfo.Shape 0 → `CWeapon/00`); both are req-level 1
+// so a freshly created male warrior can equip them.
+#[test]
+fn equipping_real_crystal_gear_updates_self_player_sprite_libraries() {
+    let mut config = SimulationConfig::default();
+    config.visible_players.clear();
+    let mut session = SimulationSession::new(config);
+    let _ = session.handle_packet(ClientPacket::Login {
+        account_id: "equip-shape".to_string(),
+        password: "demo".to_string(),
+    });
+    let _ = session.handle_packet(ClientPacket::NewCharacter {
+        name: "Looks".to_string(),
+        gender: MirGender::Male,
+        class: MirClass::Warrior,
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 1 });
+    add_equippable_test_item(
+        &mut session,
+        "crystal-item-317",
+        "Crystal Item 317",
+        13,
+        EquipmentSlot::Armour,
+        0,
+        2,
+    );
+    add_equippable_test_item(
+        &mut session,
+        "crystal-item-221",
+        "Crystal Item 221",
+        12,
+        EquipmentSlot::Weapon,
+        3,
+        0,
+    );
+
+    let _ = session.use_item("crystal-item-317");
+    let _ = session.use_item("crystal-item-221");
+
+    let snapshot = session.world_snapshot();
+    let player = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)
+        .expect("self player");
+    let sprite = player.sprite.as_ref().expect("self player sprite");
+
+    // Before the fix these were "CArmour/00" and None (the equipped gear's shape
+    // was dropped because the name was not in the legacy table).
+    assert_eq!(
+        sprite.body_library, "CArmour/01",
+        "armour ItemInfo.Shape must drive the rendered body library"
+    );
+    assert_eq!(
+        sprite.weapon_library.as_deref(),
+        Some("CWeapon/00"),
+        "weapon ItemInfo.Shape must add the rendered weapon layer"
+    );
+}
+
 #[test]
 fn assassin_class_weapon_uses_assassin_sprite_libraries() {
     let mut config = SimulationConfig::default();
@@ -35684,10 +36442,10 @@ fn assassin_class_weapon_uses_assassin_sprite_libraries() {
         .expect("self player");
     let sprite = player.sprite.as_ref().expect("self player sprite");
 
-    assert_eq!(sprite.body_library, "CArmour/00");
+    assert_eq!(sprite.body_library, "CArmour/01");
     assert_eq!(sprite.weapon_library.as_deref(), None);
     assert_eq!(sprite.weapon_library_secondary.as_deref(), None);
-    assert_eq!(sprite.alt_body_library.as_deref(), Some("AArmour/00"));
+    assert_eq!(sprite.alt_body_library.as_deref(), Some("AArmour/01"));
     assert_eq!(sprite.alt_hair_library.as_deref(), Some("AHair/00"));
     assert_eq!(sprite.alt_weapon_library.as_deref(), Some("AWeapon/00 R"));
     assert_eq!(
@@ -35732,11 +36490,11 @@ fn archer_class_weapon_uses_archer_sprite_libraries() {
         .expect("self player");
     let sprite = player.sprite.as_ref().expect("self player sprite");
 
-    assert_eq!(sprite.body_library, "CArmour/00");
+    assert_eq!(sprite.body_library, "CArmour/01");
     assert_eq!(sprite.weapon_library.as_deref(), Some("ARWeapon/00"));
     assert_eq!(sprite.weapon_library_secondary.as_deref(), None);
     assert_eq!(sprite.weapon_frame_offset, Some(416));
-    assert_eq!(sprite.alt_body_library.as_deref(), Some("ARArmour/00"));
+    assert_eq!(sprite.alt_body_library.as_deref(), Some("ARArmour/01"));
     assert_eq!(sprite.alt_hair_library.as_deref(), Some("ARHair/00"));
     assert_eq!(sprite.alt_weapon_library.as_deref(), Some("ARWeapon/00 S"));
     assert_eq!(sprite.alt_weapon_library_secondary.as_deref(), None);
@@ -36877,7 +37635,7 @@ fn move_item_packet_hero_equipment_grid_does_not_emit_extra_chat_or_mutate_match
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -36907,7 +37665,7 @@ fn move_item_packet_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_p
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -36937,7 +37695,7 @@ fn move_item_packet_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_pla
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -38535,8 +39293,8 @@ fn broken_equipment_no_longer_contributes_stats() {
             }
         }
     }
-    assert_eq!(total_attack_bonus(session.app.world()), 1);
-    assert_eq!(total_defence_bonus(session.app.world()), 2);
+    assert_eq!(total_attack_bonus(session.app.world()), 0);
+    assert_eq!(total_defence_bonus(session.app.world()), 0);
 
     let snapshot = session.world_snapshot();
     assert_eq!(
@@ -38583,16 +39341,16 @@ fn repair_powder_restores_equipped_durability_and_consumes_item() {
         packet,
         ServerPacket::ItemRepaired {
             unique_id: 0,
-            max_dura: 20,
-            current_dura: 20
+            max_dura: 4000,
+            current_dura: 4000
         }
     )));
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ItemRepaired {
             unique_id: 1,
-            max_dura: 14,
-            current_dura: 14
+            max_dura: 5000,
+            current_dura: 5000
         }
     )));
     assert_eq!(
@@ -38601,7 +39359,7 @@ fn repair_powder_restores_equipped_durability_and_consumes_item() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Weapon)
             .map(|item| (item.durability_current, item.durability_max)),
-        Some((20, 20))
+        Some((4000, 4000))
     );
     assert_eq!(
         snapshot
@@ -38609,7 +39367,7 @@ fn repair_powder_restores_equipped_durability_and_consumes_item() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Armour)
             .map(|item| (item.durability_current, item.durability_max)),
-        Some((14, 14))
+        Some((5000, 5000))
     );
     assert_eq!(
         snapshot
@@ -51289,7 +52047,7 @@ fn stage5_item_add_socket_rejects_items_at_socket_capacity() {
             )
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" && item.socket_slots == 0
+        item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" && item.socket_slots == 0
     }));
 }
 
@@ -51323,7 +52081,7 @@ fn stage5_item_add_socket_rejects_unknown_socket_metadata() {
             )
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword" && item.socket_slots == 0
+        item.slot == EquipmentSlot::Weapon && item.name == "WoodenSword" && item.socket_slots == 0
     }));
 }
 
@@ -52704,7 +53462,7 @@ fn stage5_item_seal_emits_item_seal_changed() {
     assert_ne!(expiry, 0);
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == expiry
     }));
 }
@@ -52914,7 +53672,7 @@ fn stage5_item_seal_rejects_without_source_item() {
     )));
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == 0
     }));
 }
@@ -52984,7 +53742,7 @@ fn stage5_item_seal_rejects_wrong_source_item() {
     }));
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == 0
     }));
 }
@@ -53031,7 +53789,7 @@ fn stage5_item_seal_consumes_source_item_on_success() {
         .any(|item| { item.key == "stage5-seal-source" && item.quantity == 1 }));
     assert!(snapshot.equipment_items.iter().any(|item| {
         item.slot == EquipmentSlot::Weapon
-            && item.name == "Wooden Sword"
+            && item.name == "WoodenSword"
             && item.sealed_expiry_time_binary_datetime == expiry
     }));
 }
@@ -53251,6 +54009,37 @@ fn fishing_packets_toggle_crystal_update_surface() {
     );
 }
 
+fn successful_swordfish_reel_tick(session: &mut SimulationSession, minimum_tick: u64) -> u64 {
+    let original_tick = runtime_tick(session.app.world());
+    let original_progress = session
+        .app
+        .world()
+        .resource::<FishingResource>()
+        .progress_percent;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .progress_percent = 100;
+
+    let found = (minimum_tick..minimum_tick + 10_000).find(|tick| {
+        super::set_runtime_tick(session.app.world_mut(), *tick);
+        super::fishing_reel_succeeds(session.app.world())
+            && matches!(
+                super::resolved_fishing_drop(session.app.world()),
+                Some(super::ResolvedDropTemplate::Item { name, .. }) if name == "SwordFish"
+            )
+    });
+
+    super::set_runtime_tick(session.app.world_mut(), original_tick);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .progress_percent = original_progress;
+    found.expect("deterministic fishing sequence should contain a SwordFish reel")
+}
+
 #[test]
 fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
     let mut session = SimulationSession::new(SimulationConfig::default());
@@ -53263,8 +54052,10 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
         .expect("SwordFish template should exist")
         .item_index;
 
-    super::set_runtime_tick(session.app.world_mut(), 58);
+    super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    let manual_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
+    super::set_runtime_tick(session.app.world_mut(), manual_reel_tick - 4);
     let mut tick_packets = Vec::new();
     for _ in 0..4 {
         tick_packets = session.tick();
@@ -53294,9 +54085,11 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
         }
     )));
 
-    super::set_runtime_tick(session.app.world_mut(), 57);
+    super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
+    let autocast_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
+    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick - 5);
     for _ in 0..4 {
         session.tick();
     }
@@ -53500,9 +54293,11 @@ fn fishing_autocast_reel_durability_cancels_slot_backed_recast() {
         fishing.slot_items[4] = Some(fishing_slot_item_state("FishingReel", 4, 9_524, 1, Some(1)));
     }
 
-    super::set_runtime_tick(session.app.world_mut(), 57);
+    super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
+    let autocast_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
+    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick - 5);
     for _ in 0..4 {
         session.tick();
     }
@@ -57762,6 +58557,43 @@ fn crystal_ai41_yin_devil_node_is_immobile_like_ai42() {
 // ---------------------------------------------------------------------------
 
 #[test]
+fn crystal_starter_armour_can_fully_block_scarecrow_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let scarecrow_object_id = 98_930_u32;
+    set_player_position(&mut session, player_origin.clone());
+    spawn_crystal_monster_for_test(
+        &mut session,
+        scarecrow_object_id,
+        "Scarecrow",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+    let packets = (0..8)
+        .flat_map(|_| session.tick())
+        .collect::<Vec<ServerPacket>>();
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == scarecrow_object_id
+    )));
+    assert_eq!(
+        session.world_snapshot().player_hp,
+        Some(before_hp),
+        "BaseDress 2 AC should fully block Scarecrow's 1..=2 DC roll"
+    );
+}
+
+#[test]
 fn crystal_ai31_right_guard_uses_imported_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -57819,7 +58651,9 @@ fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
     let player_origin = Point { x: 900, y: 900 };
-    let shaman_object_id = 98_960_u32;
+    // This object id makes the deterministic tick-1 Crystal DC roll land near
+    // the top of ShamanZombie's 6..=17 range, clearly above the old flat-7 stub.
+    let shaman_object_id = 98_910_u32;
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
 
     set_player_position(&mut session, player_origin.clone());
@@ -57846,6 +58680,56 @@ fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
     assert!(
         dealt > 8,
         "AI-26 ShamanZombie should hit using imported DC damage (max_dc=17), got {dealt} from a {before_hp}->{after_hp} delta"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 0 is the base `MonsterObject` (Crystal `GetMonster` default)
+// and by far the most common shipped family (3588 respawn groups / 251 distinct
+// monsters). Its `Attack()` deals `GetAttackPower(MinDC, MaxDC)`, but the
+// `monster_player_attack_damage` table had no AI-0 arm and fell through to the
+// `_ => 7` stub, so the bulk of the world hit for a flat 7 (the zone path was
+// already correct). This locks in the catch-all DC fix with `DarkDevourer`
+// (manifest min_dc=105, max_dc=127 — far above the old 7).
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai0_base_monster_uses_imported_dc_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let devourer_object_id = 98_900_u32;
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    set_player_position(&mut session, player_origin.clone());
+
+    // DarkDevourer ships with AI 0 (base MonsterObject) and DC 105-127, far
+    // above the default-7 fallback. Spawn adjacent to land a melee hit fast.
+    let _devourer = spawn_crystal_monster_for_test(
+        &mut session,
+        devourer_object_id,
+        "DarkDevourer",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    // A few ticks: launch the swing + land the 300ms scheduled damage.
+    for _ in 0..4 {
+        let _ = session.tick();
+    }
+
+    let after_hp = session.world_snapshot().player_hp.expect("player hp");
+    let dealt = before_hp - after_hp;
+    assert!(
+        dealt > 8,
+        "AI-0 base monster (DarkDevourer DC 105-127) should hit using imported DC, not the old flat 7; got {dealt} from a {before_hp}->{after_hp} delta"
     );
 }
 
@@ -57995,6 +58879,16 @@ fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i
 }
 
 #[test]
+fn player_hit_accuracy_includes_crystal_class_base_stat() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.accuracy(), 5);
+    assert_eq!(super::crystal_player_accuracy(session.app.world()), 5);
+}
+
+#[test]
 fn player_stats_seed_reflects_real_weapon_dc_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -58017,6 +58911,49 @@ fn player_stats_seed_reflects_real_weapon_dc_range() {
     // Level-1 melee is now single digits (Crystal newbie damage), not the old
     // ~24 floor.
     assert!(stats.max_dc() < 12, "no inflated melee floor remains");
+}
+
+#[test]
+fn dynamically_granted_crystal_weapon_keeps_template_stats_when_equipped() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before = super::player_stats(session.app.world());
+
+    let dagger = super::add_or_increment_item(
+        session.app.world_mut(),
+        ItemContainer::Bag1,
+        "crystal-item-1172",
+        "SharpDagger",
+        "Original Crystal quest reward.",
+        0,
+        1,
+        5,
+    );
+    assert_eq!(dagger.attack, 6);
+    assert_eq!(dagger.durability_current, Some(5_000));
+    assert_eq!(dagger.durability_max, Some(5_000));
+
+    let packets = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: dagger.unique_id,
+        to: 0,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. })));
+
+    let weapon = session
+        .world_snapshot()
+        .equipment_items
+        .into_iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("SharpDagger should be equipped");
+    assert_eq!(weapon.name, "SharpDagger");
+    assert_eq!(weapon.attack, 6);
+
+    let after = super::player_stats(session.app.world());
+    assert_eq!(after.min_dc(), before.min_dc() + 2);
+    assert_eq!(after.max_dc(), before.max_dc() + 2);
 }
 
 #[test]

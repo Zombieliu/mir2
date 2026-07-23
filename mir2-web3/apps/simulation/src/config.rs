@@ -13,9 +13,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::os::windows::ffi::OsStrExt;
 
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, starter_map_collision, starter_scene, CrystalRespawnMap,
-    DecorObjectTemplate, MapBounds, SceneBootstrap, SceneView, StarterMapCollision,
-    TerrainPatchTemplate,
+    crystal_map_respawns_by_file_name, starter_map_collision, starter_scene, DecorObjectTemplate,
+    MapBounds, SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
@@ -1103,6 +1102,19 @@ mod tests {
                 .all(|transfer| transfer.key != "starter-east-field-gate"),
             "Crystal runtime should use generated Crystal movement records, not starter demo transfers"
         );
+
+        let crystal_world_config = SimulationConfig::default().with_crystal_world_runtime();
+        assert!(
+            crystal_world_config
+                .map_transfers
+                .iter()
+                .all(|transfer| transfer.key != "starter-east-field-gate"),
+            "Full Crystal world runtime should not retain starter demo transfers either"
+        );
+        assert!(crystal_world_config.visible_players.is_empty());
+        assert!(crystal_world_config.visible_monsters.is_empty());
+        assert!(crystal_world_config.visible_npcs.is_empty());
+        assert_eq!(crystal_world_config.spawn, Point { x: 288, y: 616 });
     }
 
     fn cleanup_postgres_account(database_url: &str, account_id: &str) {
@@ -2576,15 +2588,18 @@ impl SimulationConfig {
     /// [`with_crystal_map_runtime`]: Self::with_crystal_map_runtime
     pub fn with_crystal_world_runtime(mut self) -> Self {
         self.monster_spawn_source = MonsterSpawnSource::CrystalWorld;
-        // Keep `map_transfers` as-is: the per-map manifest movements
-        // (`crystal_movement_transfer_records_for_map`) already drive travel
-        // across the whole world, so nothing needs clearing or seeding here.
-        // Dev/QA: `MIR2_SPAWN_MAP` overrides the starter spawn map so the renderer can
-        // be verified on maps other than Bichon ("0") in the single-session world
-        // (default-off → unchanged in production). Applied BEFORE metadata so the
-        // overridden map's title/lights are stamped.
-        apply_spawn_map_override(&mut self);
+        // Drop the hand-authored starter gate; manifest movements drive Crystal travel.
+        self.map_transfers.clear();
+        // Full-world entities come from Crystal manifests and shared Zone state.
+        self.visible_players.clear();
+        self.visible_monsters.clear();
+        self.visible_npcs.clear();
         apply_crystal_map_metadata(&mut self.map);
+        if let Some(start_point) = crystal_map_respawns_by_file_name(&self.map.file_name)
+            .and_then(|map| map.safe_zones.into_iter().find(|zone| zone.start_point))
+        {
+            self.spawn = start_point.location;
+        }
         // On-chain smart-mine veins (M4) are env-gated (off by default).
         self.onchain_mine_nodes
             .extend(onchain_mine_nodes_from_env());
@@ -2782,59 +2797,6 @@ impl SimulationConfig {
 
         self.save_account_store()
     }
-}
-
-/// Dev/QA spawn-map override. `MIR2_SPAWN_MAP=<map>` (optionally `<map>:<x>:<y>`) loads a
-/// non-default map in the single-session world so the Bevy map renderer can be verified on
-/// maps other than Bichon (the default "0"). Default-off → zero production impact. An
-/// unknown map is ignored (keeps the default spawn rather than dropping the player off-map).
-fn apply_spawn_map_override(config: &mut SimulationConfig) {
-    let Ok(raw) = std::env::var("MIR2_SPAWN_MAP") else {
-        return;
-    };
-    let mut parts = raw.trim().split(':');
-    let map_file_name = parts.next().unwrap_or_default().trim();
-    if map_file_name.is_empty() {
-        return;
-    }
-    let Some(respawn) = crystal_map_respawns_by_file_name(map_file_name) else {
-        return;
-    };
-    let explicit = match (parts.next(), parts.next()) {
-        (Some(x), Some(y)) => match (x.trim().parse::<i32>(), y.trim().parse::<i32>()) {
-            (Ok(x), Ok(y)) => Some(Point { x, y }),
-            _ => None,
-        },
-        _ => None,
-    };
-    config.map.file_name = respawn.map_file_name.clone();
-    if let Some(point) = explicit.or_else(|| crystal_map_default_spawn_point(&respawn)) {
-        config.scene_view.center = point.clone();
-        config.spawn = point;
-    }
-}
-
-/// Pick a reasonable spawn cell for a map from its respawn manifest: a start-point safe
-/// zone, then any safe zone, then a movement source, then a monster-respawn cell.
-fn crystal_map_default_spawn_point(respawn: &CrystalRespawnMap) -> Option<Point> {
-    respawn
-        .safe_zones
-        .iter()
-        .find(|zone| zone.start_point)
-        .or_else(|| respawn.safe_zones.first())
-        .map(|zone| zone.location.clone())
-        .or_else(|| {
-            respawn
-                .movements
-                .first()
-                .map(|movement| movement.source.clone())
-        })
-        .or_else(|| {
-            respawn
-                .respawns
-                .first()
-                .map(|respawn| respawn.location.clone())
-        })
 }
 
 pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {
@@ -3327,7 +3289,7 @@ fn starter_safe_zones() -> Vec<SafeZoneRecord> {
     }]
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum WorldEntityKind {
     SelfPlayer,
@@ -3336,7 +3298,7 @@ pub enum WorldEntityKind {
     Npc,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum WorldEntityDisposition {
     Friendly,
@@ -3382,7 +3344,7 @@ pub enum QuestStage {
     Completed,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldEntitySpriteSnapshot {
     pub body_library: String,
@@ -3407,13 +3369,16 @@ pub struct WorldEntitySpriteSnapshot {
     pub mount_frame_offset: Option<u16>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldEntitySnapshot {
     pub object_id: u32,
     pub kind: WorldEntityKind,
     pub name: String,
     pub owner_name: Option<String>,
+    /// Crystal monster AI id. The client needs AI 6 to reproduce the native
+    /// green minimap radar colour; non-monster entities leave this unset.
+    pub ai: Option<u8>,
     pub x: i32,
     pub y: i32,
     pub direction: MirDirection,
@@ -3422,6 +3387,9 @@ pub struct WorldEntitySnapshot {
     pub level: Option<u16>,
     pub hp: Option<i32>,
     pub max_hp: Option<i32>,
+    /// Crystal object light encoding: radius is `light % 15`; players also use
+    /// `light / 15` as the source-strength bucket.
+    pub light: u8,
     pub name_colour_argb: i32,
     pub dead: bool,
     pub disposition: WorldEntityDisposition,
@@ -3429,7 +3397,7 @@ pub struct WorldEntitySnapshot {
     pub quest_ids: Vec<i32>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldItemSnapshot {
     pub key: String,
@@ -3447,7 +3415,7 @@ pub struct WorldItemSnapshot {
     pub added_defence: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EquipmentItemSnapshot {
     pub slot: EquipmentSlot,
@@ -3468,7 +3436,7 @@ pub struct EquipmentItemSnapshot {
     pub sealed_next_time_binary_datetime: i64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GroundDropSnapshot {
     pub object_id: u32,
@@ -3488,7 +3456,7 @@ pub struct GroundDropSnapshot {
     pub loot: GroundDropLootSnapshot,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum GroundDropLootSnapshot {
     Gold {
@@ -3510,7 +3478,7 @@ pub enum GroundDropLootSnapshot {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuestSnapshot {
     pub quest_id: i32,
@@ -3525,7 +3493,7 @@ pub struct QuestSnapshot {
     pub reward_preview: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcDialogSnapshot {
     pub npc_object_id: u32,
@@ -3537,21 +3505,21 @@ pub struct NpcDialogSnapshot {
     pub input: Option<NpcDialogInputSnapshot>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcDialogLinkSnapshot {
     pub text: String,
     pub target: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcDialogInputSnapshot {
     pub target: String,
     pub prompt: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillSnapshot {
     pub key: String,
@@ -3568,7 +3536,7 @@ pub struct SkillSnapshot {
     pub cooldown_remaining_ticks: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcScriptDiagnosticSnapshot {
     pub script_key: String,
@@ -3581,7 +3549,7 @@ pub struct NpcScriptDiagnosticSnapshot {
 /// A buff stat rendered for the browser buff window: keeps Crystal's raw `stat`
 /// byte (backward compatible) and adds the `label` (Crystal `Stat` enum name,
 /// `Crystal/Shared/Data/Stat.cs`) so the window can show `{label, value}`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BuffStatSnapshot {
     pub stat: u8,
@@ -3589,7 +3557,7 @@ pub struct BuffStatSnapshot {
     pub value: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BuffSnapshot {
     pub key: String,
@@ -4265,7 +4233,7 @@ pub struct Stage5ProfessionState {
     pub crafted_items: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MapTransferSnapshot {
     pub key: String,
@@ -4277,17 +4245,19 @@ pub struct MapTransferSnapshot {
     pub to_direction: MirDirection,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
     pub tick: u64,
     pub map_title: Option<String>,
     pub map_file_name: Option<String>,
     pub in_safe_zone: bool,
+    pub light_setting: u8,
     pub player_object_id: Option<u32>,
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
+    pub player_max_mp: Option<i32>,
     pub player_experience: i64,
     pub player_max_experience: i64,
     pub gold: u32,

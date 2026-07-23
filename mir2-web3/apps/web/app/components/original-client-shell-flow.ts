@@ -11,6 +11,7 @@ export const ORIGINAL_AUDIO = {
 export const ORIGINAL_MUSIC_VOLUME = 0.72;
 export const ORIGINAL_EFFECT_VOLUME = 0.86;
 
+/** Builds the compact target prompt without owning target-selection state. */
 export function selectedTargetActionLabel(
   t: TranslateFn,
   entity: DisplayEntity,
@@ -31,6 +32,8 @@ export function selectedTargetActionLabel(
 }
 
 export function desiredMusicForScreen(screen: ClientScreen, loginTransitionActive: boolean) {
+  // The transition retains Login2.wav until the select screen is actually
+  // visible, matching the original client's audio boundary.
   if (loginTransitionActive) {
     return ORIGINAL_AUDIO.loginMusic;
   }
@@ -47,6 +50,8 @@ export function desiredMusicForScreen(screen: ClientScreen, loginTransitionActiv
 }
 
 export function entityKindLabelKey(kind: EntityKind) {
+  // Keep this exhaustive: adding an EntityKind should fail type checking until
+  // its original-client label is intentionally selected.
   switch (kind) {
     case "selfPlayer":
       return "ui.self";

@@ -1037,6 +1037,7 @@ pub enum LanguageCode {
     English,
     ChineseSimplified,
     Spanish,
+    Portuguese,
 }
 
 impl LanguageCode {
@@ -1045,6 +1046,7 @@ impl LanguageCode {
             Self::English => "en",
             Self::ChineseSimplified => "zh-CN",
             Self::Spanish => "es",
+            Self::Portuguese => "pt-BR",
         }
     }
 
@@ -1053,6 +1055,7 @@ impl LanguageCode {
             Self::English => "en-US",
             Self::ChineseSimplified => "zh-CN",
             Self::Spanish => "es-ES",
+            Self::Portuguese => "pt-BR",
         }
     }
 
@@ -1063,6 +1066,7 @@ impl LanguageCode {
                 Some(Self::ChineseSimplified)
             }
             "es" | "es-es" | "spanish" => Some(Self::Spanish),
+            "pt" | "pt-br" | "pt-pt" | "portuguese" | "brazilian" => Some(Self::Portuguese),
             _ => None,
         }
     }
@@ -1169,16 +1173,22 @@ pub fn starter_scene() -> SceneBootstrap {
         .clone()
 }
 
-pub fn starter_map_collision() -> StarterMapCollision {
+/// Borrow the process-wide starter-map collision template without cloning it.
+/// Prefer this over [`starter_map_collision`] on hot paths — the owned variant
+/// deep-clones the whole `StarterMapCollision` (large blocked-cell vectors) on
+/// every call.
+pub fn starter_map_collision_ref() -> &'static StarterMapCollision {
     static STARTER_MAP_COLLISION: OnceLock<StarterMapCollision> = OnceLock::new();
-    STARTER_MAP_COLLISION
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_starter_map_collision.json"
-            ))
-            .expect("starter map collision json should be valid")
-        })
-        .clone()
+    STARTER_MAP_COLLISION.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_starter_map_collision.json"
+        ))
+        .expect("starter map collision json should be valid")
+    })
+}
+
+pub fn starter_map_collision() -> StarterMapCollision {
+    starter_map_collision_ref().clone()
 }
 
 pub fn starter_server_data() -> StarterServerData {
@@ -1629,16 +1639,21 @@ pub fn crystal_monster_ai_summary() -> CrystalMonsterAiSummary {
         .clone()
 }
 
-pub fn crystal_respawn_manifest() -> CrystalRespawnManifest {
+/// Borrow the process-wide respawn manifest without cloning it. The owned
+/// [`crystal_respawn_manifest`] deep-clones every map's respawn list on each
+/// call, so single-map lookups and per-tick safe-zone checks must use this.
+pub fn crystal_respawn_manifest_ref() -> &'static CrystalRespawnManifest {
     static CRYSTAL_RESPAWN_MANIFEST: OnceLock<CrystalRespawnManifest> = OnceLock::new();
-    CRYSTAL_RESPAWN_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_respawn_manifest.json"
-            ))
-            .expect("crystal respawn manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_RESPAWN_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_respawn_manifest.json"
+        ))
+        .expect("crystal respawn manifest json should be valid")
+    })
+}
+
+pub fn crystal_respawn_manifest() -> CrystalRespawnManifest {
+    crystal_respawn_manifest_ref().clone()
 }
 
 pub fn crystal_magic_by_spell(spell: &str) -> Option<CrystalMagicTemplate> {
@@ -1718,30 +1733,40 @@ pub fn crystal_monster_by_index(monster_index: i32) -> Option<CrystalMonsterTemp
         .find(|monster| monster.monster_index == monster_index)
 }
 
-pub fn crystal_map_respawns_by_file_name(file_name: &str) -> Option<CrystalRespawnMap> {
+/// Borrow the respawn record for `file_name` from the process-wide manifest
+/// without cloning anything. Read-only hot paths (safe-zone checks run per
+/// incoming hit, per-map flag lookups) must use this; the owned
+/// [`crystal_map_respawns_by_file_name`] clones the matched map.
+pub fn crystal_map_respawns_ref(file_name: &str) -> Option<&'static CrystalRespawnMap> {
     let normalized = normalize_crystal_map_file_name(file_name);
-    crystal_respawn_manifest()
+    crystal_respawn_manifest_ref()
         .maps
-        .into_iter()
+        .iter()
         .find(|map| normalize_crystal_map_file_name(&map.map_file_name) == normalized)
 }
 
+pub fn crystal_map_respawns_by_file_name(file_name: &str) -> Option<CrystalRespawnMap> {
+    crystal_map_respawns_ref(file_name).cloned()
+}
+
 pub fn crystal_map_respawns_by_index(map_index: i32) -> Option<CrystalRespawnMap> {
-    crystal_respawn_manifest()
+    crystal_respawn_manifest_ref()
         .maps
-        .into_iter()
+        .iter()
         .find(|map| map.map_index == map_index)
+        .cloned()
 }
 
 pub fn crystal_starter_region_respawns() -> Vec<CrystalRespawnTemplate> {
-    let collision = starter_map_collision();
+    let collision = starter_map_collision_ref();
     let map_file_name = normalize_crystal_map_file_name(&collision.map_file_name);
 
-    crystal_map_respawns_by_file_name(&map_file_name)
+    crystal_map_respawns_ref(&map_file_name)
         .map(|map| {
             map.respawns
-                .into_iter()
+                .iter()
                 .filter(|respawn| respawn_overlaps_bounds(respawn, collision.region_bounds))
+                .cloned()
                 .collect()
         })
         .unwrap_or_default()
@@ -1879,6 +1904,7 @@ mod tests {
         assert_eq!(bundle.default_language, "en");
         assert!(bundle.languages.contains_key("zh-CN"));
         assert!(bundle.languages.contains_key("es"));
+        assert!(bundle.languages.contains_key("pt-BR"));
     }
 
     #[test]
@@ -1887,6 +1913,20 @@ mod tests {
             .expect("client.GameName should exist");
 
         assert!(value.contains("传奇"));
+    }
+
+    #[test]
+    fn portuguese_language_is_wired() {
+        assert_eq!(LanguageCode::Portuguese.code(), "pt-BR");
+        assert_eq!(LanguageCode::parse("pt-BR"), Some(LanguageCode::Portuguese));
+        assert_eq!(LanguageCode::parse("pt"), Some(LanguageCode::Portuguese));
+        // A key present in the pt-BR bundle resolves to a non-English string.
+        let pt = localized_text(LanguageCode::Portuguese, "client.Warrior")
+            .expect("client.Warrior should exist in pt-BR");
+        let en = localized_text(LanguageCode::English, "client.Warrior")
+            .expect("client.Warrior should exist in en");
+        assert!(!pt.is_empty());
+        assert_ne!(pt, en);
     }
 
     #[test]

@@ -122,3 +122,47 @@ export function miniMapImagePointToViewportPoint(
     y: imagePoint.y - viewport.imageTop,
   };
 }
+
+export function worldToCrystalMiniMapRadarPoint(
+  transform: CrystalMiniMapTransform,
+  viewport: { imageLeft: number; imageTop: number },
+  point: CrystalMiniMapPoint,
+): CrystalMiniMapPoint {
+  if (transform.projection === "isometric") {
+    return miniMapImagePointToViewportPoint(worldToMiniMapImagePoint(transform, point), viewport);
+  }
+
+  const worldWidth = Math.max(transform.worldMaxX - transform.worldMinX, 1);
+  const worldHeight = Math.max(transform.worldMaxY - transform.worldMinY, 1);
+  const scaleX = (transform.imageMaxX - transform.imageMinX) / worldWidth;
+  const scaleY = (transform.imageMaxY - transform.imageMinY) / worldHeight;
+  const startWorldX = Math.trunc(
+    transform.worldMinX + (viewport.imageLeft - transform.imageMinX) / scaleX,
+  );
+  const startWorldY = Math.trunc(
+    transform.worldMinY + (viewport.imageTop - transform.imageMinY) / scaleY,
+  );
+
+  // Crystal quantizes the source rectangle back into a world-space start point
+  // before projecting radar objects. Projecting directly from image coordinates
+  // shifts Bichon's non-integral X scale one pixel to the left.
+  return {
+    x: (point.x - startWorldX) * scaleX,
+    y: (point.y - startWorldY) * scaleY,
+  };
+}
+
+export function crystalMiniMapRadarColor({
+  kind,
+  ai,
+  ownedByPlayer = false,
+}: {
+  kind: "selfPlayer" | "player" | "monster" | "npc";
+  ai?: number;
+  ownedByPlayer?: boolean;
+}) {
+  if (ownedByPlayer) return "#0000ff";
+  if (kind === "selfPlayer" || kind === "player") return "#ffffff";
+  if (kind === "npc" || (kind === "monster" && ai === 6)) return "#00ff32";
+  return "#ff0000";
+}

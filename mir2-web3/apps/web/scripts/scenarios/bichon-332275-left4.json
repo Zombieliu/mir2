@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "bichon-332275-left4",
+  "description": "Action-aligned Crystal and Web four-step left-click walk from Bichon 0 @ 332,275.",
+  "outputDir": "docs/generated/player-qa/movement-jitter/temporal-packs/bichon-332275-left4",
+  "phases": {
+    "native": {
+      "enabled": true,
+      "timeoutMs": 120000,
+      "args": {
+        "windowTitlePattern": "Legend of Mir 2",
+        "powershellWindowTitlePattern": "*Legend of Mir 2*",
+        "route": "400,370,left,700,step1;400,370,left,1600,step2;400,370,left,2500,step3;400,370,left,3400,step4",
+        "captureMs": 5600,
+        "sampleMs": 50,
+        "warmupMs": 250,
+        "label": "crystal-bichon-332275-left4",
+        "frameCaptureMode": "computerUse",
+        "frameImageFormat": "jpeg",
+        "frameImageQuality": 82
+      }
+    },
+    "web": {
+      "enabled": true,
+      "timeoutMs": 180000,
+      "args": {
+        "baseUrl": "http://127.0.0.1:3002/?prewarm=0&gatewayWs=ws%3A%2F%2F127.0.0.1%3A7110%2Fws",
+        "bevyBackend": "webgpu",
+        "characterName": "TemporalWebHero",
+        "headed": true,
+        "interaction": "clickSequence",
+        "map": "0",
+        "x": 332,
+        "y": 275,
+        "clickSequence": "-1,0,left,0,step1;-2,0,left,900,step2;-3,0,left,1800,step3;-4,0,left,2700,step4",
+        "clickSequencePostMs": 1800,
+        "expectFinalDelta": "-4,0",
+        "sampleMs": 50,
+        "captureFrameImages": true,
+        "frameCaptureMode": "screenshot",
+        "frameImageFormat": "jpeg",
+        "frameImageQuality": 82,
+        "windowFrameCropMode": "content",
+        "avoidEntityHits": true,
+        "failOnInteractionPollution": true,
+        "strictMovementChecks": true,
+        "expectBevyWebGpuRenderer": true,
+        "initialRendererReadyTimeoutMs": 90000,
+        "finalRendererReadyTimeoutMs": 60000,
+        "preInteractionDelayMs": 1000,
+        "settleMs": 3000
+      }
+    },
+    "report": {
+      "enabled": true,
+      "timeoutMs": 120000,
+      "args": {
+        "analyzeFrames": true,
+        "alignActions": true,
+        "emitPairedFrameDiffs": true,
+        "pairedFrameMaxPairs": 4,
+        "pairedFrameMaxDeltaMs": 250,
+        "pairedFrameMaxOutputBytes": 16777216,
+        "pairedFrameWidth": 512,
+        "frameDiffWidth": 256,
+        "frameDiffMeanThreshold": 0.75,
+        "frameDiffPixelThreshold": 12,
+        "frameDiffChangedRatioThreshold": 0.003,
+        "preActionMs": 300,
+        "postActionMs": 1200
+      }
+    }
+  }
+}
