@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   DubheNodeConsoleSnapshot,
-  DubheNodeRecord
+  DubheNodeRecord,
+  DubheNodeZoneRecord
 } from "../lib/dubhe-node";
 
 const REFRESH_INTERVAL_MS = 10_000;
@@ -46,6 +47,14 @@ const copy = {
     sessionsLabel: "Sessions",
     busiestZoneLabel: "Busiest Zone",
     zonesLabel: "Zones",
+    hostedMaps: "Hosted map workloads",
+    signedRuntime: "Signed runtime",
+    allMaps: "All game maps",
+    mapFiles: "Map files",
+    activeRuntime: "Active runtime",
+    noActiveZones: "No active Zone workloads on this node.",
+    zoneDetailsUnavailable: "This node reports active Zones but has not published signed map details.",
+    zoneSessions: "sessions",
     rpc: "RPC requests",
     errors: "Errors",
     uptime: "Uptime",
@@ -124,6 +133,14 @@ const copy = {
     sessionsLabel: "会话",
     busiestZoneLabel: "最拥挤 Zone",
     zonesLabel: "Zone",
+    hostedMaps: "正在承载的地图",
+    signedRuntime: "签名运行态",
+    allMaps: "全部游戏地图",
+    mapFiles: "地图文件",
+    activeRuntime: "活跃运行实例",
+    noActiveZones: "该节点当前没有活跃 Zone 工作负载。",
+    zoneDetailsUnavailable: "该节点报告了活跃 Zone，但尚未发布签名地图明细。",
+    zoneSessions: "个会话",
     rpc: "RPC 请求",
     errors: "错误",
     uptime: "运行时间",
@@ -604,6 +621,31 @@ function NodeCard({
         <CapacityBar label={labels.zonesLabel} max={node.zoneCapacity} value={node.zones} />
       </div>
 
+      <div className="dubhe-zone-workloads">
+        <div className="dubhe-zone-workloads-head">
+          <div>
+            <small>{labels.hostedMaps}</small>
+            <strong>
+              {node.zoneDetailsVerified ? node.activeZones.length : node.zones}
+            </strong>
+          </div>
+          <span className={node.zoneDetailsVerified ? "verified" : "unverified"}>
+            {node.zoneDetailsVerified ? `✓ ${labels.signedRuntime}` : labels.notVerified}
+          </span>
+        </div>
+        {node.activeZones.length > 0 ? (
+          <div className="dubhe-zone-list">
+            {node.activeZones.map((zone) => (
+              <ZoneWorkload key={zone.zoneId} labels={labels} zone={zone} />
+            ))}
+          </div>
+        ) : (
+          <p className="dubhe-zone-empty">
+            {node.zones > 0 ? labels.zoneDetailsUnavailable : labels.noActiveZones}
+          </p>
+        )}
+      </div>
+
       <div className="dubhe-node-stats">
         <NodeStat label={labels.rpc} value={node.rpcRequestsTotal.toLocaleString()} />
         <NodeStat label={labels.errors} value={node.rpcErrorsTotal.toLocaleString()} />
@@ -629,6 +671,42 @@ function NodeCard({
       </div>
       {node.error ? <p className="dubhe-node-error">{node.error}</p> : null}
     </article>
+  );
+}
+
+function ZoneWorkload({
+  labels,
+  zone
+}: {
+  labels: Copy;
+  zone: DubheNodeZoneRecord;
+}) {
+  const visibleMaps = zone.mapFileNames.slice(0, 4);
+  const remainingMaps = zone.mapFileNames.length - visibleMaps.length;
+  const title =
+    zone.mapScope === "all"
+      ? labels.allMaps
+      : visibleMaps.length > 0
+        ? visibleMaps.join(" · ")
+        : labels.activeRuntime;
+  return (
+    <div className="dubhe-zone-row">
+      <span className="dubhe-zone-pulse" aria-hidden="true" />
+      <div className="dubhe-zone-copy">
+        <strong>
+          {title}
+          {remainingMaps > 0 ? ` +${remainingMaps}` : ""}
+        </strong>
+        <span>
+          <code>{zone.zoneId}</code>
+          {zone.mapScope === "explicit" ? ` · ${labels.mapFiles}` : ""}
+        </span>
+      </div>
+      <span className="dubhe-zone-sessions">
+        <strong>{zone.sessionCount}</strong>
+        <small>{labels.zoneSessions}</small>
+      </span>
+    </div>
   );
 }
 

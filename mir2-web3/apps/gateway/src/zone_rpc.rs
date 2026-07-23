@@ -114,11 +114,35 @@ pub struct ZoneHostHealth {
 #[serde(rename_all = "camelCase")]
 pub struct ZoneHostTelemetrySnapshot {
     pub health: ZoneHostHealth,
+    pub zones: Vec<ZoneHostZoneTelemetry>,
     pub started_at_ms: u64,
     pub uptime_seconds: u64,
     pub accepted_connections_total: u64,
     pub rpc_requests_total: u64,
     pub rpc_errors_total: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneMapScope {
+    All,
+    Explicit,
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneHostZoneTelemetry {
+    pub zone_id: String,
+    pub map_scope: ZoneMapScope,
+    pub map_file_names: Vec<String>,
+    pub session_count: usize,
+}
+
+#[derive(Debug, Default)]
+struct ZoneMapCatalog {
+    maps_by_zone: BTreeMap<String, Vec<String>>,
+    all_maps_zone_ids: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -807,6 +831,7 @@ pub struct ZoneHostServer {
     runtime_factory: Mutex<Arc<SharedInProcessZoneRuntimeFactory>>,
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
     sessions: Mutex<BTreeMap<(String, String), Arc<ZoneHostSession>>>,
+    zone_map_catalog: Mutex<ZoneMapCatalog>,
     operation_gate: Mutex<()>,
     journal: Mutex<Vec<WireHostJournalEntry>>,
     auth_token: Option<String>,
@@ -901,6 +926,7 @@ impl ZoneHostServer {
             runtime_factory: Mutex::new(runtime_factory),
             owner_lease_authority,
             sessions: Mutex::new(BTreeMap::new()),
+            zone_map_catalog: Mutex::new(ZoneMapCatalog::default()),
             operation_gate: Mutex::new(()),
             journal: Mutex::new(Vec::new()),
             auth_token,
@@ -934,6 +960,7 @@ impl ZoneHostServer {
     pub fn telemetry_snapshot(&self) -> ZoneHostTelemetrySnapshot {
         ZoneHostTelemetrySnapshot {
             health: self.health(),
+            zones: self.active_zones(),
             started_at_ms: self.started_at_ms,
             uptime_seconds: unix_now_ms().saturating_sub(self.started_at_ms) / 1_000,
             accepted_connections_total: self.accepted_connections_total.load(Ordering::Acquire),
@@ -947,6 +974,67 @@ impl ZoneHostServer {
             .lock()
             .map(|sessions| sessions.len())
             .unwrap_or(0)
+    }
+
+    pub fn configure_zone_map_catalog(
+        &self,
+        maps_by_zone: BTreeMap<String, Vec<String>>,
+        all_maps_zone_ids: BTreeSet<String>,
+    ) {
+        if let Ok(mut catalog) = self.zone_map_catalog.lock() {
+            catalog.maps_by_zone = maps_by_zone;
+            catalog.all_maps_zone_ids = all_maps_zone_ids;
+        }
+    }
+
+    pub fn active_zones(&self) -> Vec<ZoneHostZoneTelemetry> {
+        let counts = self
+            .sessions
+            .lock()
+            .map(|sessions| {
+                let mut counts = BTreeMap::<String, usize>::new();
+                for (_, zone_id) in sessions.keys() {
+                    *counts.entry(zone_id.clone()).or_default() += 1;
+                }
+                counts
+            })
+            .unwrap_or_default();
+        let Ok(catalog) = self.zone_map_catalog.lock() else {
+            return counts
+                .into_iter()
+                .map(|(zone_id, session_count)| unknown_zone_telemetry(zone_id, session_count))
+                .collect();
+        };
+        counts
+            .into_iter()
+            .map(|(zone_id, session_count)| {
+                if catalog.all_maps_zone_ids.contains(&zone_id) {
+                    return ZoneHostZoneTelemetry {
+                        zone_id,
+                        map_scope: ZoneMapScope::All,
+                        map_file_names: Vec::new(),
+                        session_count,
+                    };
+                }
+                if let Some(map_file_names) = catalog.maps_by_zone.get(&zone_id) {
+                    return ZoneHostZoneTelemetry {
+                        zone_id,
+                        map_scope: ZoneMapScope::Explicit,
+                        map_file_names: map_file_names.clone(),
+                        session_count,
+                    };
+                }
+                if let Some(map_file_name) = dynamic_map_file_name(&zone_id) {
+                    return ZoneHostZoneTelemetry {
+                        zone_id,
+                        map_scope: ZoneMapScope::Explicit,
+                        map_file_names: vec![map_file_name],
+                        session_count,
+                    };
+                }
+                unknown_zone_telemetry(zone_id, session_count)
+            })
+            .collect()
     }
 
     pub fn zone_count(&self) -> usize {
@@ -2447,6 +2535,28 @@ fn positive_u64_env(name: &str) -> Option<u64> {
         .ok()
         .and_then(|value| value.trim().parse::<u64>().ok())
         .filter(|value| *value > 0)
+}
+
+fn unknown_zone_telemetry(zone_id: String, session_count: usize) -> ZoneHostZoneTelemetry {
+    ZoneHostZoneTelemetry {
+        zone_id,
+        map_scope: ZoneMapScope::Unknown,
+        map_file_names: Vec::new(),
+        session_count,
+    }
+}
+
+fn dynamic_map_file_name(zone_id: &str) -> Option<String> {
+    let raw = zone_id
+        .strip_prefix("map:")
+        .or_else(|| zone_id.strip_prefix("mir2/map/"))?;
+    let map_file_name = raw
+        .split_once("/shard/")
+        .map(|(map, _)| map)
+        .or_else(|| raw.split_once(":shard:").map(|(map, _)| map))
+        .unwrap_or(raw)
+        .trim();
+    (!map_file_name.is_empty()).then(|| map_file_name.to_string())
 }
 
 fn unexpected_payload(operation: &str, payload: &ZoneRpcPayload) -> String {
