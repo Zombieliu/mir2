@@ -64,6 +64,29 @@ Gateway WebSocket load evidence.
 The GitHub Actions workflow `.github/workflows/mir2-candidate-gate.yml` runs
 the `local` Candidate gate on pushes to `main` and pull requests.
 
+## Gate 12 operator network
+
+The operator-facing Docker network is separate from the broad development
+dependency stack above. It builds the Rust applications as minimal non-root
+images and runs two Zone Hosts, Gateway, checkpoint replicator, PostgreSQL,
+Prometheus, and Grafana:
+
+```bash
+cp infra/gate12/.env.example infra/gate12/.env
+docker compose --env-file infra/gate12/.env \
+  -f infra/gate12/docker-compose.yml up --build -d
+```
+
+Run the automated live-primary failure acceptance:
+
+```bash
+infra/gate12/run-acceptance.sh
+```
+
+The acceptance keeps one Mir2 client online, waits for the standby checkpoint,
+stops the primary container, and requires authoritative gameplay output from
+the standby. See `docs/client/GATE12-DISTRIBUTION-NODE-TELEMETRY.md`.
+
 Local default endpoints:
 
 | Service | Endpoint | Purpose |

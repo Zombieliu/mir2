@@ -1,0 +1,70 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Zone Hosts Up",
+      "id": 1,
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(obelisk_zone_host_up)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Hosted Sessions",
+      "id": 2,
+      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "sum(obelisk_zone_host_sessions)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Hosted Zones",
+      "id": 3,
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "sum(obelisk_zone_host_zones)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "RPC Errors",
+      "id": 4,
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "sum(rate(obelisk_zone_host_rpc_errors_total[5m]))", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "RPC Request Rate",
+      "id": 5,
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {
+          "expr": "rate(obelisk_zone_host_rpc_requests_total[1m])",
+          "legendFormat": "{{host_id}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Session Utilization",
+      "id": 6,
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8},
+      "targets": [
+        {
+          "expr": "obelisk_zone_host_sessions / obelisk_zone_host_session_capacity",
+          "legendFormat": "{{host_id}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": ["obelisk", "zone-host", "gate12"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timezone": "browser",
+  "title": "Obelisk Zone Hosts",
+  "uid": "obelisk-zone-hosts",
+  "version": 1
+}

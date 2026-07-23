@@ -86,7 +86,8 @@ impl ZoneRpcLimits {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZoneHostHealth {
     pub host_id: String,
     pub process_id: u32,
@@ -97,6 +98,17 @@ pub struct ZoneHostHealth {
     pub zone_capacity: usize,
     pub draining: bool,
     pub protocol_version: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneHostTelemetrySnapshot {
+    pub health: ZoneHostHealth,
+    pub started_at_ms: u64,
+    pub uptime_seconds: u64,
+    pub accepted_connections_total: u64,
+    pub rpc_requests_total: u64,
+    pub rpc_errors_total: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -788,6 +800,10 @@ pub struct ZoneHostServer {
     zone_capacity: usize,
     draining: AtomicBool,
     active_connections: AtomicUsize,
+    started_at_ms: u64,
+    accepted_connections_total: AtomicU64,
+    rpc_requests_total: AtomicU64,
+    rpc_errors_total: AtomicU64,
 }
 
 impl fmt::Debug for ZoneHostServer {
@@ -878,6 +894,35 @@ impl ZoneHostServer {
             zone_capacity: zone_capacity.max(1),
             draining: AtomicBool::new(false),
             active_connections: AtomicUsize::new(0),
+            started_at_ms: unix_now_ms(),
+            accepted_connections_total: AtomicU64::new(0),
+            rpc_requests_total: AtomicU64::new(0),
+            rpc_errors_total: AtomicU64::new(0),
+        }
+    }
+
+    pub fn health(&self) -> ZoneHostHealth {
+        ZoneHostHealth {
+            host_id: self.host_id.clone(),
+            process_id: std::process::id(),
+            session_count: self.session_count(),
+            active_connections: self.active_connections.load(Ordering::Acquire),
+            session_capacity: self.limits.max_sessions,
+            zone_count: self.zone_count(),
+            zone_capacity: self.zone_capacity,
+            draining: self.is_draining(),
+            protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+        }
+    }
+
+    pub fn telemetry_snapshot(&self) -> ZoneHostTelemetrySnapshot {
+        ZoneHostTelemetrySnapshot {
+            health: self.health(),
+            started_at_ms: self.started_at_ms,
+            uptime_seconds: unix_now_ms().saturating_sub(self.started_at_ms) / 1_000,
+            accepted_connections_total: self.accepted_connections_total.load(Ordering::Acquire),
+            rpc_requests_total: self.rpc_requests_total.load(Ordering::Acquire),
+            rpc_errors_total: self.rpc_errors_total.load(Ordering::Acquire),
         }
     }
 
@@ -940,6 +985,8 @@ impl ZoneHostServer {
             self.active_connections.fetch_sub(1, Ordering::AcqRel);
             return;
         }
+        self.accepted_connections_total
+            .fetch_add(1, Ordering::Relaxed);
         let server = Arc::clone(self);
         thread::spawn(move || {
             let _guard = ActiveConnectionGuard(&server.active_connections);
@@ -950,6 +997,7 @@ impl ZoneHostServer {
     }
 
     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
+        self.rpc_requests_total.fetch_add(1, Ordering::Relaxed);
         // `serve_until` uses a non-blocking listener so it can observe the stop
         // flag.  Some platforms propagate that mode to accepted sockets; the
         // framed request handler is deliberately blocking with bounded timeouts.
@@ -969,6 +1017,9 @@ impl ZoneHostServer {
                 message: format!("invalid JSON request: {error}"),
             },
         };
+        if matches!(response, ZoneRpcResponse::Error { .. }) {
+            self.rpc_errors_total.fetch_add(1, Ordering::Relaxed);
+        }
         let bytes = serde_json::to_vec(&response).map_err(io::Error::other)?;
         write_frame(&mut stream, &bytes, self.limits.max_frame_bytes)
     }
@@ -992,16 +1043,17 @@ impl ZoneHostServer {
             .map_err(|message| ZoneRpcFault::new("invalid_request", message))?;
 
         if matches!(envelope.request, ZoneRpcRequest::Health) {
+            let health = self.health();
             return Ok(ZoneRpcPayload::Health {
-                host_id: self.host_id.clone(),
-                process_id: std::process::id(),
-                session_count: self.session_count(),
-                active_connections: self.active_connections.load(Ordering::Acquire),
-                session_capacity: self.limits.max_sessions,
-                zone_count: self.zone_count(),
-                zone_capacity: self.zone_capacity,
-                draining: self.is_draining(),
-                protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+                host_id: health.host_id,
+                process_id: health.process_id,
+                session_count: health.session_count,
+                active_connections: health.active_connections,
+                session_capacity: health.session_capacity,
+                zone_count: health.zone_count,
+                zone_capacity: health.zone_capacity,
+                draining: health.draining,
+                protocol_version: health.protocol_version,
             });
         }
 
@@ -2128,6 +2180,13 @@ fn next_rpc_session_id() -> String {
         .unwrap_or_default()
         .as_nanos();
     format!("gateway-{}-{now}-{sequence}", std::process::id())
+}
+
+fn unix_now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
 }
 
 fn next_outbound_stream_id() -> String {

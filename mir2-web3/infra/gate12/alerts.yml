@@ -1,0 +1,34 @@
+groups:
+  - name: obelisk-zone-hosts
+    rules:
+      - alert: ObeliskZoneHostDown
+        expr: up{job="obelisk-zone-host"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Obelisk Zone Host {{ $labels.instance }} is unavailable"
+
+      - alert: ObeliskZoneHostDraining
+        expr: obelisk_zone_host_draining == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} remains in draining state"
+
+      - alert: ObeliskZoneHostSessionSaturation
+        expr: obelisk_zone_host_sessions / obelisk_zone_host_session_capacity > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} session capacity is above 85%"
+
+      - alert: ObeliskZoneHostRpcErrors
+        expr: increase(obelisk_zone_host_rpc_errors_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} is returning repeated RPC errors"
