@@ -173,6 +173,16 @@ assert.match(
   "self HP must remain in the independent overlay at Crystal's X+8, Y-64 anchor",
 );
 assert.match(
+  visualLayersSource,
+  /className=\{`viewport-entity-overlay[\s\S]*?className="entity-quest-icon"/,
+  "quest markers must share the independent UI overlay so the GPU world canvas cannot occlude them",
+);
+assert.doesNotMatch(
+  visualLayersSource,
+  /const EntitySpriteLayers[\s\S]*?className="entity-quest-icon"[\s\S]*?\n\}\);/,
+  "quest markers must not remain inside the GPU-owned world sprite stack",
+);
+assert.match(
   globalCssSource,
   /\.entity-nameplate \{[\s\S]*?width: 50px;[\s\S]*?transform: none;/,
   "player nameplates must own Crystal's fixed 50px DisplayRectangle without fractional transforms",

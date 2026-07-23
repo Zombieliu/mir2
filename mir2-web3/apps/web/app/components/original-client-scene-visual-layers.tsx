@@ -105,10 +105,6 @@ type EntitySpriteLayersProps = {
   useBevyEntityRenderer: boolean;
   sprite: ViewportEntitySprite | null;
   objectId: number | string;
-  isNpc: boolean;
-  questIcon: string | null;
-  questIconLeft: number;
-  questIconTop: number;
 };
 
 // The body/hair/weapon <img> layers for one actor. Memoised so they only re-render when their
@@ -121,10 +117,6 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
   useBevyEntityRenderer,
   sprite,
   objectId,
-  isNpc,
-  questIcon,
-  questIconLeft,
-  questIconTop,
 }: EntitySpriteLayersProps) {
   return (
     <>
@@ -251,18 +243,6 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
             />
           ) : null}
         </>
-      ) : null}
-      {isNpc && questIcon ? (
-        <img
-          className="entity-quest-icon"
-          src={questIcon}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={questIcon}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{ left: questIconLeft, top: questIconTop }}
-        />
       ) : null}
     </>
   );
@@ -756,11 +736,6 @@ function OriginalClientSceneVisualLayersInner({
             event.stopPropagation();
             onActivateEntity(entity.objectId);
           };
-          const questIcon =
-            entity.kind === "npc"
-              ? questIconForEntity(entity, world.questLog, sceneSpriteFrameIndex)
-              : null;
-
           return (
             <div
               key={`sprite-${entity.objectId}`}
@@ -799,10 +774,6 @@ function OriginalClientSceneVisualLayersInner({
                 useBevyEntityRenderer={useBevyEntityRenderer}
                 sprite={sprite}
                 objectId={entity.objectId}
-                isNpc={entity.kind === "npc"}
-                questIcon={questIcon}
-                questIconLeft={questIcon ? entityQuestIconLeftOffset(entity, sprite) : 0}
-                questIconTop={questIcon ? entityQuestIconTopOffset(sprite) : 0}
               />
             </div>
           );
@@ -1070,6 +1041,10 @@ function OriginalClientSceneVisualLayersInner({
               const labelLines = entityDisplayLabelLines(entity);
               const labelText = labelLines.map((line) => line.text).join("\r\n");
               const labelColour = entityNameplateColor(entity);
+              const questIcon =
+                entity.kind === "npc"
+                  ? questIconForEntity(entity, world.questLog, sceneSpriteFrameIndex)
+                  : null;
               const entityGdiText = entity.dead
                 ? null
                 : findCrystalGdiTextAsset({
@@ -1093,6 +1068,40 @@ function OriginalClientSceneVisualLayersInner({
 
               return (
                 <Fragment key={`entity-overlay-${entity.objectId}`}>
+                  {questIcon ? (
+                    <img
+                      ref={
+                        imperativeCamera
+                          ? registerEntityEl(`quest:${entity.objectId}`, entity.objectId)
+                          : undefined
+                      }
+                      className="entity-quest-icon"
+                      src={questIcon}
+                      alt=""
+                      draggable={false}
+                      data-object-id={entity.objectId}
+                      data-mir2-original-src={questIcon}
+                      onError={handleSceneAssetImageError}
+                      onLoad={handleSceneAssetImageLoad}
+                      onMouseDown={(event) => {
+                        if (event.button === 0 || event.button === 2) {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          onActivateEntity(entity.objectId);
+                        }
+                      }}
+                      onContextMenu={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onActivateEntity(entity.objectId);
+                      }}
+                      style={{
+                        left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityQuestIconLeftOffset(entity, sprite)}px`,
+                        top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityQuestIconTopOffset(sprite)}px`,
+                        zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 96),
+                      }}
+                    />
+                  ) : null}
                   {healthRatio !== null ? (
                     <div
                       ref={

@@ -2526,3 +2526,27 @@ Human acceptance is still required for:
 - Remaining visual gaps are GDI typography, deterministic chat content, and
   independently moving entity/animation phases. They are no longer classified
   as movement, camera, or map-transaction failures.
+
+## 2026-07-23 Quest Marker GPU Occlusion Regression
+
+- Live inspection confirmed that all four nearby Scarecrow entities resolve
+  through `Monster/005`; the full pack contains 234 drawable frames and the
+  separated one-tile capture shows the native thin straw/skeletal body. The
+  reported invisibility was player overlap and low contrast, not a missing
+  atlas or failed entity render.
+- NPC quest markers were still mounted inside `viewport-sprite-overlay`.
+  With the Bevy entity renderer active, the GPU canvas at z-index 2 covered
+  that DOM layer even though the quest state and marker image were present.
+- Quest markers now live in the independent `viewport-entity-overlay`, share
+  the imperative entity-motion registry, retain Crystal sprite offsets and
+  NPC activation, and carry the NPC object id for deterministic QA lookup.
+- The live account currently has the available stage, so Crystal correctly
+  shows yellow exclamation markers. Accepted/in-progress and ready-to-turn-in
+  stages continue to select white and yellow question markers respectively.
+- Evidence:
+  `docs/generated/player-qa/r41-quest-marker-overlay/r41-quest-marker-overlay-final.jpg`
+  shows three visible yellow exclamation markers above the WebGPU scene.
+  `elementsFromPoint` reports the marker above the drop overlay and canvas.
+- Verification passed:
+  `node apps/web/scripts/test-player-frames.mjs`,
+  `npm run typecheck --prefix apps/web`, and `git diff --check`.
