@@ -39,6 +39,7 @@ assert.deepEqual(snapshot.registration, {
 assert.deepEqual(snapshot.acceptance, {
   generatedAtMs: acceptance.generatedAtMs,
   capacityCompletedCommands: acceptance.capacityCompletedCommands,
+  capacityMaxSessionsPerZone: acceptance.capacityMaxSessionsPerZone,
   capacityP95LatencyMs: acceptance.capacityP95LatencyMs,
   capacityCertificateId: acceptance.capacityCertificateId,
   capacityCertificateIssuer: acceptance.capacityCertificateIssuer,

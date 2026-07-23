@@ -126,10 +126,10 @@ configured Commonware quorum.
 
 The Zone Host exposes `POST /v1/capacity-challenge` on its operator listener.
 The request body is capped at 8 KiB, only one challenge runs at a time, command
-count is capped by `MIR2_ZONE_HOST_CAPACITY_MAX_COMMANDS`, and requested
-sessions/Zones cannot exceed configured capacity. The response commits the
-nonce-bound workload transcript, measured success count and p95 latency, then
-signs it with the registered Ed25519 node key.
+count is capped by `MIR2_ZONE_HOST_CAPACITY_MAX_COMMANDS`, and requested total
+sessions, sessions per Zone, and Zone count cannot exceed configured capacity.
+The response commits the nonce-bound workload transcript, measured success
+count and p95 latency, then signs it with the registered Ed25519 node key.
 
 The trusted verifier checks the node identity, finalized registration,
 generation, challenge window, workload accounting, latency/SLO, and signature.
@@ -138,7 +138,8 @@ projections require all of:
 
 1. active finalized Sui registration;
 2. a valid certificate from a trusted issuer;
-3. certificate capacity no greater than the on-chain registration;
+3. certificate global and per-Zone capacity no greater than the on-chain
+   registration and the challenged node limits;
 4. non-expired eligibility at placement and reward-finalization time;
 5. verified work receipts finalized at the required quorum.
 

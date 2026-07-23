@@ -8,8 +8,8 @@ use crate::{
     NodeSigningIdentity,
 };
 
-const CHALLENGE_RESPONSE_DOMAIN: &[u8] = b"obelisk.capacity-response.v1\0";
-const CAPACITY_CERTIFICATE_DOMAIN: &[u8] = b"obelisk.capacity-certificate.v1\0";
+const CHALLENGE_RESPONSE_DOMAIN: &[u8] = b"obelisk.capacity-response.v2\0";
+const CAPACITY_CERTIFICATE_DOMAIN: &[u8] = b"obelisk.capacity-certificate.v2\0";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -98,6 +98,7 @@ impl FinalizedGuildNodeRegistration {
 #[serde(rename_all = "camelCase")]
 pub struct CapacityWorkload {
     pub concurrent_sessions: usize,
+    pub max_sessions_per_zone: usize,
     pub zone_count: usize,
     pub command_count: u64,
     pub maximum_p95_latency_ms: u64,
@@ -106,8 +107,23 @@ pub struct CapacityWorkload {
 
 impl CapacityWorkload {
     pub fn validate(&self) -> Result<(), String> {
-        if self.concurrent_sessions == 0 || self.zone_count == 0 || self.command_count == 0 {
+        if self.concurrent_sessions == 0
+            || self.max_sessions_per_zone == 0
+            || self.zone_count == 0
+            || self.command_count == 0
+        {
             return Err("capacity workload dimensions must be positive".to_string());
+        }
+        if self.max_sessions_per_zone > self.concurrent_sessions {
+            return Err(
+                "capacity workload per-Zone sessions cannot exceed total sessions".to_string(),
+            );
+        }
+        if self.concurrent_sessions > self.max_sessions_per_zone.saturating_mul(self.zone_count) {
+            return Err(
+                "capacity workload total sessions do not fit the declared per-Zone bound"
+                    .to_string(),
+            );
         }
         if self.maximum_p95_latency_ms == 0 {
             return Err("capacity workload latency bound must be positive".to_string());
@@ -274,6 +290,7 @@ pub struct NodeCapacityCertificate {
     pub key_generation: u64,
     pub challenge_id: String,
     pub max_sessions: usize,
+    pub max_sessions_per_zone: usize,
     pub max_zones: usize,
     pub measured_p95_latency_ms: u64,
     pub success_bps: u16,
@@ -313,6 +330,11 @@ impl NodeCapacityCertificate {
                 .workload
                 .concurrent_sessions
                 .min(registration.max_sessions),
+            max_sessions_per_zone: response
+                .challenge
+                .workload
+                .max_sessions_per_zone
+                .min(registration.max_sessions),
             max_zones: response
                 .challenge
                 .workload
@@ -341,10 +363,14 @@ impl NodeCapacityCertificate {
         }
         if self.key_generation == 0
             || self.max_sessions == 0
+            || self.max_sessions_per_zone == 0
             || self.max_zones == 0
             || self.finalized_control_height == 0
         {
             return Err("capacity certificate contains an invalid zero field".to_string());
+        }
+        if self.max_sessions_per_zone > self.max_sessions {
+            return Err("capacity certificate per-Zone sessions exceed total sessions".to_string());
         }
         if self.expires_at_ms <= self.issued_at_ms || now_ms > self.expires_at_ms {
             return Err("capacity certificate is expired or has an invalid window".to_string());
@@ -451,6 +477,7 @@ mod tests {
             expires_at_ms: 10_000,
             workload: CapacityWorkload {
                 concurrent_sessions: 128,
+                max_sessions_per_zone: 16,
                 zone_count: 8,
                 command_count: 1_000,
                 maximum_p95_latency_ms: 50,
@@ -481,6 +508,7 @@ mod tests {
                 .unwrap();
         certificate.verify(issuer.public_key(), 3_000).unwrap();
         assert_eq!(certificate.max_sessions, 128);
+        assert_eq!(certificate.max_sessions_per_zone, 16);
         assert_eq!(certificate.success_bps, 9_950);
         assert!(certificate.verify(issuer.public_key(), 70_000).is_err());
     }
@@ -509,5 +537,25 @@ mod tests {
         let node = NodeSigningIdentity::from_seed([7; 32]);
         assert!(challenge(node.node_id()).validate(999).is_err());
         challenge(node.node_id()).validate(1_000).unwrap();
+    }
+
+    #[test]
+    fn capacity_workload_rejects_an_impossible_per_zone_distribution() {
+        let workload = CapacityWorkload {
+            concurrent_sessions: 100,
+            max_sessions_per_zone: 10,
+            zone_count: 8,
+            command_count: 1_000,
+            maximum_p95_latency_ms: 50,
+            minimum_success_bps: 9_900,
+        };
+        assert!(workload.validate().is_err());
+
+        CapacityWorkload {
+            zone_count: 10,
+            ..workload
+        }
+        .validate()
+        .expect("ten Zones can contain one hundred sessions at ten per Zone");
     }
 }

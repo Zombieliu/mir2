@@ -194,6 +194,8 @@ impl MultiGameRewardLedger {
             );
         }
         if certificate.max_sessions > registration.max_sessions
+            || certificate.max_sessions_per_zone > certificate.max_sessions
+            || certificate.max_sessions_per_zone > registration.max_sessions
             || certificate.max_zones > registration.max_zones
         {
             return Err(
@@ -605,6 +607,7 @@ mod tests {
             expires_at_ms: 5_000,
             workload: CapacityWorkload {
                 concurrent_sessions: 64,
+                max_sessions_per_zone: 16,
                 zone_count: 4,
                 command_count: 100,
                 maximum_p95_latency_ms: 50,
