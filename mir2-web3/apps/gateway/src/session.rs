@@ -304,6 +304,18 @@ impl GatewaySession {
         self.renew_zone_owner_lease_at(gateway_now_ms())
     }
 
+    /// Adopt the authority's currently finalized owner generation after a
+    /// scheduler-controlled failover. Normal heartbeats use `renew_*`, which
+    /// deliberately rejects a stale fence; only the recovery path refreshes.
+    pub fn refresh_zone_owner_lease(&mut self) -> Result<&ZoneOwnerLease, String> {
+        let authority = self
+            .zone_owner_lease_authority
+            .as_ref()
+            .ok_or_else(|| "Zone owner lease authority is not configured".to_string())?;
+        self.zone_owner_lease = authority.owner_lease(&self.zone_id);
+        Ok(&self.zone_owner_lease)
+    }
+
     pub fn renew_zone_owner_lease_at(&mut self, now_ms: u64) -> Result<&ZoneOwnerLease, String> {
         if let Some(authority) = &self.zone_owner_lease_authority {
             self.zone_owner_lease =
@@ -691,6 +703,8 @@ impl GatewaySession {
                         WorldCommand::ApplyHandoffTransform {
                             position,
                             direction,
+                            hp: source_snapshot.player_hp,
+                            mp: source_snapshot.player_mp,
                         },
                     ),
                 )?;
@@ -844,8 +858,16 @@ fn normalized_handoff_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
     snapshot
         .entities
         .retain(|entity| entity.kind == WorldEntityKind::SelfPlayer);
+    let player_hp = snapshot.player_hp;
+    let player_max_hp = snapshot.player_max_hp;
     for entity in &mut snapshot.entities {
         entity.object_id = 0;
+        // `player_hp` is the persisted authority. During delayed shared-Zone
+        // combat the scene projection can still carry the pre-damage HP until
+        // the next projection pass, so comparing that duplicate field would
+        // reject an otherwise identical target runtime after reload.
+        entity.hp = player_hp;
+        entity.max_hp = player_max_hp;
     }
     snapshot.ground_drops.clear();
     snapshot
@@ -944,7 +966,7 @@ fn gateway_now_ms() -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{GatewayConfig, GatewaySession};
+    use super::{normalized_handoff_snapshot, GatewayConfig, GatewaySession};
     use crate::{
         CharacterRecord, HostedZoneOwnerCommandClient, InMemoryGameplayEventSink,
         InMemoryZoneOwnerLeaseAuthority, InProcessZoneOwnerCommandClient,
@@ -999,6 +1021,37 @@ mod tests {
         assert_eq!(
             result.expect_err("panic should be caught"),
             "gateway session panic during unit-test: boom"
+        );
+    }
+
+    #[test]
+    fn handoff_commitment_uses_persisted_player_hp_over_stale_scene_projection() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let mut source = session.world_snapshot();
+        let mut target = source.clone();
+        source.player_hp = Some(13);
+        target.player_hp = Some(13);
+        source
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
+            .expect("source should contain self player")
+            .hp = Some(60);
+        target
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
+            .expect("target should contain self player")
+            .hp = Some(13);
+
+        assert_eq!(
+            normalized_handoff_snapshot(source),
+            normalized_handoff_snapshot(target)
         );
     }
 
@@ -1550,6 +1603,28 @@ mod tests {
 
         assert!(error.contains("stale zone owner lease for zone primary"));
         assert!(error.contains("current owner zone-owner:next fencing token 2"));
+    }
+
+    #[test]
+    fn gateway_session_refreshes_finalized_zone_owner_after_handoff() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let registry = ZoneRegistry::with_router_and_owner_lease_authority(
+            ZoneId::primary(),
+            Arc::new(InProcessZoneRuntimeFactory) as SharedZoneRuntimeFactory,
+            Arc::new(SingleZoneSessionRouter) as SharedSessionRouter,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        );
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let promoted = authority.handoff_zone_owner(&ZoneId::primary(), "zone-owner:next");
+
+        let refreshed = session
+            .refresh_zone_owner_lease()
+            .expect("finalized failover should refresh the owner fence")
+            .clone();
+
+        assert_eq!(refreshed, promoted);
+        assert_eq!(session.zone_owner_lease(), &promoted);
     }
 
     #[test]

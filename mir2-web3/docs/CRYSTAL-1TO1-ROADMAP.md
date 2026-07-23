@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest distributed Mir2 workload roadmap sync: 2026-07-23 completes Gate
+> 11.1-11.4. Checkpoint v4 combines the journal with a canonical complete Zone
+> image and rebuilds derived occupancy/AOI/ECS state on restore. Real Crystal
+> combat, item drop/pickup, cross-map handoff, monster HP, retained drops, and
+> player vitals survive takeover. Four sessions on two maps then survive two
+> consecutive host failures with old generations rejected. A unified operations
+> binary writes atomic, versioned JSON release evidence including size and RTO.
+
 > Final 100% Candidate roadmap sync: 2026-07-23 closes the deterministic GDI,
 > chat-state, and per-object animation-phase slice. A source-audited Windows
 > exporter records exact Arial 8pt/96-DPI TextRenderer output and ARGB hashes for

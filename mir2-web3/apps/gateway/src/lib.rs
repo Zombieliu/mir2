@@ -5,8 +5,12 @@ pub mod cache;
 pub mod consensus_log;
 pub mod control_plane;
 pub mod events;
+pub mod guild_node_foundation;
 mod inject;
+pub mod mir2_workload;
+pub mod node_identity;
 pub mod node_security;
+pub mod operator;
 pub mod rewards;
 pub mod routing;
 mod session;
@@ -44,15 +48,31 @@ pub use events::{
     GameplayEventSinkStatus, GatewayGameplayEvent, InMemoryGameplayEventSink,
     LoggingGameplayEventSink, RedpandaGameplayEventSink, SharedGameplayEventSink,
 };
+pub use guild_node_foundation::{
+    CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
+    GuildNodeStatus, NodeCapacityCertificate, SuiFinalityProof,
+};
 pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;
+pub use mir2_workload::{
+    run_gate11_acceptance, run_gate11_full_acceptance, run_gate11_scale_acceptance,
+    Gate11AcceptanceEvidence, Gate11FinalAcceptanceEvidence, Gate11ScaleEvidence,
+};
+pub use node_identity::{
+    node_id_from_public_key, validate_ed25519_public_key, verify_ed25519_signature,
+    NodeHeartbeatReplayGuard, NodeSigningIdentity,
+};
 pub use node_security::{
     GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
     VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
 };
+pub use operator::{
+    serve_zone_host_operator, SignedZoneHostHeartbeat, ZoneHostHeartbeatPayload,
+    ZoneHostOperatorConfig,
+};
 pub use rewards::{
     GameRewardPolicy, MultiGameRewardLedger, RewardAllocation, RewardClaimProof,
-    RewardSettlementBatch, SettlementStatus, VerifiedWorkReceipt,
+    RewardNodeEligibility, RewardSettlementBatch, SettlementStatus, VerifiedWorkReceipt,
 };
 pub use routing::{
     HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
@@ -72,5 +92,6 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
-    ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneHostTelemetrySnapshot, ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION,
+    ZONE_RPC_PROTOCOL_VERSION,
 };

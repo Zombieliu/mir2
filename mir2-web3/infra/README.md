@@ -64,6 +64,62 @@ Gateway WebSocket load evidence.
 The GitHub Actions workflow `.github/workflows/mir2-candidate-gate.yml` runs
 the `local` Candidate gate on pushes to `main` and pull requests.
 
+## Gate 12 operator network
+
+The operator-facing Docker network is separate from the broad development
+dependency stack above. It builds the Rust applications as minimal non-root
+images and runs two Zone Hosts, Gateway, checkpoint replicator, PostgreSQL,
+Prometheus, and Grafana:
+
+```bash
+cp infra/gate12/.env.example infra/gate12/.env
+cargo +1.89.0 run -p mir2-gateway --bin node_identity -- \
+  generate /secure/path/gate12-zone-a.key
+cargo +1.89.0 run -p mir2-gateway --bin node_identity -- \
+  generate /secure/path/gate12-zone-b.key
+export GATE12_ZONE_A_SIGNING_KEY_FILE=/secure/path/gate12-zone-a.key
+export GATE12_ZONE_B_SIGNING_KEY_FILE=/secure/path/gate12-zone-b.key
+docker compose --env-file infra/gate12/.env \
+  -f infra/gate12/docker-compose.yml up --build -d
+```
+
+Run the automated live-primary failure acceptance:
+
+```bash
+infra/gate12/run-acceptance.sh
+```
+
+The acceptance keeps one Mir2 client online, waits for the standby checkpoint,
+stops the primary container, and requires authoritative gameplay output from
+the standby. See `docs/client/GATE12-DISTRIBUTION-NODE-TELEMETRY.md`.
+
+## Gate 13 permissionless guild-node foundation
+
+Gate 13 binds a real Sui testnet node registration to an Ed25519 Zone Host,
+runs a remote nonce-bound capacity challenge, admits the resulting short-lived
+capacity certificate only after Commonware quorum finality, and settles one
+verified-work reward batch.
+
+Generate the two private seeds outside the repository, register the node public
+key on Sui testnet, then run:
+
+```bash
+export GATE13_NODE_SIGNING_KEY_FILE=/secure/path/active-testnet-node.key
+export GATE13_CAPACITY_ISSUER_KEY_FILE=/secure/path/capacity-issuer.key
+GATE13_EVIDENCE_DIR="$PWD/docs/generated/gate13/docker" \
+  infra/gate13/run-acceptance.sh
+```
+
+The active key must match
+`docs/generated/gate13/testnet/active-registration.json`; the issuer public key
+must match the deployment manifest. Private seeds are never committed. See
+`docs/client/GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md`.
+
+To measure a node instead of relying on its declared capacity, run the
+container-constrained profiles in [`infra/capacity/README.md`](capacity/README.md).
+The first committed profile covers a 2 vCPU / 2 GiB / 5 Mbps / 100 GB offer and
+keeps benchmark capacity separate from production certification.
+
 Local default endpoints:
 
 | Service | Endpoint | Purpose |

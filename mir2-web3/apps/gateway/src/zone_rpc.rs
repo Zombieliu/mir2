@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
@@ -12,7 +12,8 @@ use mir2_protocol::{
     ServerPacket,
 };
 use mir2_simulation::{
-    ActiveSessionIdentity, WorldCommand, WorldCommandExecution, WorldCommandOutcome, WorldSnapshot,
+    ActiveSessionIdentity, CharacterSaveRecord, WorldCommand, WorldCommandExecution,
+    WorldCommandOutcome, WorldSnapshot,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -27,14 +28,15 @@ use crate::routing::{
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 4;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 6;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
+pub const DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
-const ZONE_HOST_CHECKPOINT_VERSION: u32 = 2;
-const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v2\0";
+pub const ZONE_HOST_CHECKPOINT_VERSION: u32 = 4;
+const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v4\0";
 
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
@@ -45,6 +47,7 @@ pub struct ZoneRpcLimits {
     pub max_frame_bytes: usize,
     pub max_connections: usize,
     pub max_sessions: usize,
+    pub max_sessions_per_zone: usize,
     pub max_outbound_messages: usize,
     pub outbound_poll_limit: usize,
     pub io_timeout: Duration,
@@ -56,6 +59,7 @@ impl Default for ZoneRpcLimits {
             max_frame_bytes: DEFAULT_ZONE_RPC_MAX_FRAME_BYTES,
             max_connections: DEFAULT_ZONE_RPC_MAX_CONNECTIONS,
             max_sessions: DEFAULT_ZONE_RPC_MAX_SESSIONS,
+            max_sessions_per_zone: DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE,
             max_outbound_messages: DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES,
             outbound_poll_limit: DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT,
             io_timeout: Duration::from_secs(5),
@@ -66,13 +70,18 @@ impl Default for ZoneRpcLimits {
 impl ZoneRpcLimits {
     pub fn from_env() -> Self {
         let defaults = Self::default();
+        let max_sessions =
+            positive_usize_env("MIR2_ZONE_HOST_MAX_SESSIONS").unwrap_or(defaults.max_sessions);
+        let max_sessions_per_zone = positive_usize_env("MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE")
+            .unwrap_or(max_sessions)
+            .min(max_sessions);
         Self {
             max_frame_bytes: positive_usize_env("MIR2_ZONE_RPC_MAX_FRAME_BYTES")
                 .unwrap_or(defaults.max_frame_bytes),
             max_connections: positive_usize_env("MIR2_ZONE_HOST_MAX_CONNECTIONS")
                 .unwrap_or(defaults.max_connections),
-            max_sessions: positive_usize_env("MIR2_ZONE_HOST_MAX_SESSIONS")
-                .unwrap_or(defaults.max_sessions),
+            max_sessions,
+            max_sessions_per_zone,
             max_outbound_messages: positive_usize_env("MIR2_ZONE_RPC_MAX_OUTBOUND_MESSAGES")
                 .unwrap_or(defaults.max_outbound_messages),
             outbound_poll_limit: positive_usize_env("MIR2_ZONE_RPC_OUTBOUND_POLL_LIMIT")
@@ -85,17 +94,31 @@ impl ZoneRpcLimits {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZoneHostHealth {
     pub host_id: String,
     pub process_id: u32,
     pub session_count: usize,
     pub active_connections: usize,
     pub session_capacity: usize,
+    pub session_capacity_per_zone: usize,
+    pub busiest_zone_session_count: usize,
     pub zone_count: usize,
     pub zone_capacity: usize,
     pub draining: bool,
     pub protocol_version: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneHostTelemetrySnapshot {
+    pub health: ZoneHostHealth,
+    pub started_at_ms: u64,
+    pub uptime_seconds: u64,
+    pub accepted_connections_total: u64,
+    pub rpc_requests_total: u64,
+    pub rpc_errors_total: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -118,6 +141,8 @@ pub struct ZoneHostCheckpoint {
     bytes: Vec<u8>,
     pub entry_count: usize,
     pub session_count: usize,
+    pub zone_count: usize,
+    pub zone_state_bytes: usize,
     pub checksum: String,
 }
 
@@ -129,6 +154,8 @@ impl ZoneHostCheckpoint {
         Ok(Self {
             entry_count: checkpoint.entries.len(),
             session_count: checkpoint.sessions.len(),
+            zone_count: checkpoint.zone_count,
+            zone_state_bytes: checkpoint.zone_state_bytes.len(),
             checksum: checkpoint.checksum,
             bytes,
         })
@@ -284,6 +311,8 @@ impl TcpZoneOwnerRpcTransport {
                 session_count,
                 active_connections,
                 session_capacity,
+                session_capacity_per_zone,
+                busiest_zone_session_count,
                 zone_count,
                 zone_capacity,
                 draining,
@@ -294,6 +323,8 @@ impl TcpZoneOwnerRpcTransport {
                 session_count,
                 active_connections,
                 session_capacity,
+                session_capacity_per_zone,
+                busiest_zone_session_count,
                 zone_count,
                 zone_capacity,
                 draining,
@@ -783,6 +814,10 @@ pub struct ZoneHostServer {
     zone_capacity: usize,
     draining: AtomicBool,
     active_connections: AtomicUsize,
+    started_at_ms: u64,
+    accepted_connections_total: AtomicU64,
+    rpc_requests_total: AtomicU64,
+    rpc_errors_total: AtomicU64,
 }
 
 impl fmt::Debug for ZoneHostServer {
@@ -873,6 +908,37 @@ impl ZoneHostServer {
             zone_capacity: zone_capacity.max(1),
             draining: AtomicBool::new(false),
             active_connections: AtomicUsize::new(0),
+            started_at_ms: unix_now_ms(),
+            accepted_connections_total: AtomicU64::new(0),
+            rpc_requests_total: AtomicU64::new(0),
+            rpc_errors_total: AtomicU64::new(0),
+        }
+    }
+
+    pub fn health(&self) -> ZoneHostHealth {
+        ZoneHostHealth {
+            host_id: self.host_id.clone(),
+            process_id: std::process::id(),
+            session_count: self.session_count(),
+            active_connections: self.active_connections.load(Ordering::Acquire),
+            session_capacity: self.limits.max_sessions,
+            session_capacity_per_zone: self.limits.max_sessions_per_zone,
+            busiest_zone_session_count: self.busiest_zone_session_count(),
+            zone_count: self.zone_count(),
+            zone_capacity: self.zone_capacity,
+            draining: self.is_draining(),
+            protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+        }
+    }
+
+    pub fn telemetry_snapshot(&self) -> ZoneHostTelemetrySnapshot {
+        ZoneHostTelemetrySnapshot {
+            health: self.health(),
+            started_at_ms: self.started_at_ms,
+            uptime_seconds: unix_now_ms().saturating_sub(self.started_at_ms) / 1_000,
+            accepted_connections_total: self.accepted_connections_total.load(Ordering::Acquire),
+            rpc_requests_total: self.rpc_requests_total.load(Ordering::Acquire),
+            rpc_errors_total: self.rpc_errors_total.load(Ordering::Acquire),
         }
     }
 
@@ -892,6 +958,19 @@ impl ZoneHostServer {
                     .map(|(_, zone_id)| zone_id.as_str())
                     .collect::<std::collections::BTreeSet<_>>()
                     .len()
+            })
+            .unwrap_or(0)
+    }
+
+    pub fn busiest_zone_session_count(&self) -> usize {
+        self.sessions
+            .lock()
+            .map(|sessions| {
+                let mut counts = BTreeMap::<&str, usize>::new();
+                for (_, zone_id) in sessions.keys() {
+                    *counts.entry(zone_id.as_str()).or_default() += 1;
+                }
+                counts.into_values().max().unwrap_or(0)
             })
             .unwrap_or(0)
     }
@@ -935,6 +1014,8 @@ impl ZoneHostServer {
             self.active_connections.fetch_sub(1, Ordering::AcqRel);
             return;
         }
+        self.accepted_connections_total
+            .fetch_add(1, Ordering::Relaxed);
         let server = Arc::clone(self);
         thread::spawn(move || {
             let _guard = ActiveConnectionGuard(&server.active_connections);
@@ -945,6 +1026,7 @@ impl ZoneHostServer {
     }
 
     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
+        self.rpc_requests_total.fetch_add(1, Ordering::Relaxed);
         // `serve_until` uses a non-blocking listener so it can observe the stop
         // flag.  Some platforms propagate that mode to accepted sockets; the
         // framed request handler is deliberately blocking with bounded timeouts.
@@ -964,6 +1046,9 @@ impl ZoneHostServer {
                 message: format!("invalid JSON request: {error}"),
             },
         };
+        if matches!(response, ZoneRpcResponse::Error { .. }) {
+            self.rpc_errors_total.fetch_add(1, Ordering::Relaxed);
+        }
         let bytes = serde_json::to_vec(&response).map_err(io::Error::other)?;
         write_frame(&mut stream, &bytes, self.limits.max_frame_bytes)
     }
@@ -987,16 +1072,19 @@ impl ZoneHostServer {
             .map_err(|message| ZoneRpcFault::new("invalid_request", message))?;
 
         if matches!(envelope.request, ZoneRpcRequest::Health) {
+            let health = self.health();
             return Ok(ZoneRpcPayload::Health {
-                host_id: self.host_id.clone(),
-                process_id: std::process::id(),
-                session_count: self.session_count(),
-                active_connections: self.active_connections.load(Ordering::Acquire),
-                session_capacity: self.limits.max_sessions,
-                zone_count: self.zone_count(),
-                zone_capacity: self.zone_capacity,
-                draining: self.is_draining(),
-                protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+                host_id: health.host_id,
+                process_id: health.process_id,
+                session_count: health.session_count,
+                active_connections: health.active_connections,
+                session_capacity: health.session_capacity,
+                session_capacity_per_zone: health.session_capacity_per_zone,
+                busiest_zone_session_count: health.busiest_zone_session_count,
+                zone_count: health.zone_count,
+                zone_capacity: health.zone_capacity,
+                draining: health.draining,
+                protocol_version: health.protocol_version,
             });
         }
 
@@ -1194,6 +1282,19 @@ impl ZoneHostServer {
                 ),
             ));
         }
+        let zone_session_count = sessions
+            .keys()
+            .filter(|(_, existing)| existing == zone_id)
+            .count();
+        if zone_session_count >= self.limits.max_sessions_per_zone {
+            return Err(ZoneRpcFault::new(
+                "capacity",
+                format!(
+                    "Zone {zone_id} session capacity {} reached",
+                    self.limits.max_sessions_per_zone
+                ),
+            ));
+        }
         let factory = self
             .runtime_factory
             .lock()
@@ -1220,6 +1321,23 @@ impl ZoneHostServer {
             self.limits.max_outbound_messages,
         ));
         session
+    }
+
+    fn create_replay_session(
+        &self,
+        factory: &Arc<SharedInProcessZoneRuntimeFactory>,
+        zone_id: &str,
+    ) -> Arc<ZoneHostSession> {
+        let zone_id = ZoneId::new(zone_id);
+        let runtime = factory.create_runtime(self.config.clone(), &zone_id);
+        // Journal entries were accepted under historical fencing tokens. Replay
+        // verifies their checkpoint checksum and sequence, but must not compare
+        // those historical leases with today's finalized owner.
+        let hosted = Arc::new(HostedZoneOwnerCommandClient::new(runtime));
+        Arc::new(ZoneHostSession::new(
+            hosted,
+            self.limits.max_outbound_messages,
+        ))
     }
 
     fn append_journal(&self, mut entry: WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
@@ -1251,17 +1369,43 @@ impl ZoneHostServer {
                 .hosted
                 .world_snapshot()
                 .map_err(classify_runtime_error)?;
+            let durable_snapshot = durable_session_snapshot(snapshot);
+            let active_character_bytes = session
+                .hosted
+                .active_character_checkpoint()
+                .map_err(classify_runtime_error)?
+                .map(|checkpoint| serde_json::to_vec(&checkpoint))
+                .transpose()
+                .map_err(|error| {
+                    ZoneRpcFault::new(
+                        "checkpoint_encode",
+                        format!("active character checkpoint encode failed: {error}"),
+                    )
+                })?;
             commitments.push(WireSessionCommitment {
                 session_id: session_id.clone(),
                 zone_id: zone_id.clone(),
-                snapshot_digest: snapshot_digest(&snapshot)?,
+                snapshot_digest: snapshot_digest(&durable_snapshot)?,
+                durable_snapshot: Box::new(durable_snapshot),
+                active_character_bytes,
                 active_identity: session
                     .hosted
                     .active_identity()
                     .map_err(classify_runtime_error)?,
             });
         }
-        let checkpoint = WireZoneHostCheckpoint::new(entries, commitments)?;
+        let factory = self
+            .runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .clone();
+        let zone_state_bytes = factory.checkpoint_bytes().map_err(classify_runtime_error)?;
+        let checkpoint = WireZoneHostCheckpoint::new(
+            entries,
+            commitments,
+            factory.active_zone_count(),
+            zone_state_bytes,
+        )?;
         let bytes = serde_json::to_vec(&checkpoint).map_err(|error| {
             ZoneRpcFault::new(
                 "checkpoint_encode",
@@ -1331,18 +1475,82 @@ impl ZoneHostServer {
             }
             let session = sessions
                 .entry(key)
-                .or_insert_with(|| self.create_hosted_session(&factory, &entry.zone_id))
+                .or_insert_with(|| self.create_replay_session(&factory, &entry.zone_id))
                 .clone();
             let request = entry.clone().into_request()?;
             session.execute_request(request)?;
+        }
+
+        let installed_zone_count = factory
+            .install_checkpoint_bytes(&checkpoint.zone_state_bytes)
+            .map_err(classify_runtime_error)?;
+        if installed_zone_count != checkpoint.zone_count {
+            return Err(ZoneRpcFault::new(
+                "checkpoint_zone_count",
+                format!(
+                    "zone host checkpoint restored {installed_zone_count} Zones, expected {}",
+                    checkpoint.zone_count
+                ),
+            ));
+        }
+
+        for commitment in &checkpoint.sessions {
+            let Some(active_character_bytes) = commitment.active_character_bytes.as_ref() else {
+                continue;
+            };
+            let key = (commitment.session_id.clone(), commitment.zone_id.clone());
+            let session = sessions.get(&key).ok_or_else(|| {
+                ZoneRpcFault::new(
+                    "checkpoint_session",
+                    format!(
+                        "active character checkpoint has no replayed session {}/{}",
+                        commitment.session_id, commitment.zone_id
+                    ),
+                )
+            })?;
+            let active_character: CharacterSaveRecord =
+                serde_json::from_slice(active_character_bytes).map_err(|error| {
+                    ZoneRpcFault::new(
+                        "checkpoint_decode",
+                        format!("active character checkpoint decode failed: {error}"),
+                    )
+                })?;
+            session
+                .hosted
+                .restore_active_character_checkpoint(&active_character)
+                .map_err(classify_runtime_error)?;
         }
 
         let actual = session_commitments(&sessions)?;
         if actual != checkpoint.sessions {
             return Err(ZoneRpcFault::new(
                 "checkpoint_commitment",
-                "zone host checkpoint replay commitment mismatch",
+                format!(
+                    "zone host checkpoint replay commitment mismatch: {}",
+                    commitment_mismatch_details(&checkpoint.sessions, &actual)
+                ),
             ));
+        }
+
+        let mut live_sessions = BTreeMap::new();
+        for (key, replay_session) in sessions {
+            let runtime = replay_session
+                .hosted
+                .take_runtime_for_handoff()
+                .map_err(classify_runtime_error)?;
+            let hosted = Arc::new(
+                HostedZoneOwnerCommandClient::from_handoff_with_owner_lease_authority(
+                    runtime,
+                    Arc::clone(&self.owner_lease_authority),
+                ),
+            );
+            live_sessions.insert(
+                key,
+                Arc::new(ZoneHostSession::new(
+                    hosted,
+                    self.limits.max_outbound_messages,
+                )),
+            );
         }
 
         *self
@@ -1354,7 +1562,7 @@ impl ZoneHostServer {
             .sessions
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))? =
-            sessions;
+            live_sessions;
         *self
             .journal
             .lock()
@@ -1426,6 +1634,8 @@ enum ZoneRpcPayload {
         session_count: usize,
         active_connections: usize,
         session_capacity: usize,
+        session_capacity_per_zone: usize,
+        busiest_zone_session_count: usize,
         zone_count: usize,
         zone_capacity: usize,
         draining: bool,
@@ -1582,6 +1792,10 @@ enum WireWorldCommand {
     ApplyHandoffTransform {
         position: Point,
         direction: mir2_protocol::MirDirection,
+        #[serde(default)]
+        hp: Option<i32>,
+        #[serde(default)]
+        mp: Option<i32>,
     },
     Stage5Command {
         action: String,
@@ -1634,9 +1848,13 @@ impl WireWorldCommand {
             WorldCommand::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             } => Self::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             },
             WorldCommand::Stage5Command { action, args } => Self::Stage5Command { action, args },
             WorldCommand::GrantOnchainOre {
@@ -1702,9 +1920,13 @@ impl WireWorldCommand {
             Self::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             } => WorldCommand::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             },
             Self::Stage5Command { action, args } => WorldCommand::Stage5Command { action, args },
             Self::GrantOnchainOre {
@@ -1779,6 +2001,8 @@ struct WireSessionCommitment {
     session_id: String,
     zone_id: String,
     snapshot_digest: String,
+    durable_snapshot: Box<WorldSnapshot>,
+    active_character_bytes: Option<Vec<u8>>,
     active_identity: Option<ActiveSessionIdentity>,
 }
 
@@ -1788,6 +2012,8 @@ struct WireZoneHostCheckpoint {
     version: u32,
     entries: Vec<WireHostJournalEntry>,
     sessions: Vec<WireSessionCommitment>,
+    zone_count: usize,
+    zone_state_bytes: Vec<u8>,
     checksum: String,
 }
 
@@ -1795,13 +2021,22 @@ impl WireZoneHostCheckpoint {
     fn new(
         entries: Vec<WireHostJournalEntry>,
         sessions: Vec<WireSessionCommitment>,
+        zone_count: usize,
+        zone_state_bytes: Vec<u8>,
     ) -> Result<Self, ZoneRpcFault> {
-        let checksum =
-            zone_host_checkpoint_checksum(ZONE_HOST_CHECKPOINT_VERSION, &entries, &sessions)?;
+        let checksum = zone_host_checkpoint_checksum(
+            ZONE_HOST_CHECKPOINT_VERSION,
+            &entries,
+            &sessions,
+            zone_count,
+            &zone_state_bytes,
+        )?;
         Ok(Self {
             version: ZONE_HOST_CHECKPOINT_VERSION,
             entries,
             sessions,
+            zone_count,
+            zone_state_bytes,
             checksum,
         })
     }
@@ -1813,8 +2048,13 @@ impl WireZoneHostCheckpoint {
                 self.version, ZONE_HOST_CHECKPOINT_VERSION
             ));
         }
-        let expected =
-            zone_host_checkpoint_checksum_bytes(self.version, &self.entries, &self.sessions)?;
+        let expected = zone_host_checkpoint_checksum_bytes(
+            self.version,
+            &self.entries,
+            &self.sessions,
+            self.zone_count,
+            &self.zone_state_bytes,
+        )?;
         if !constant_time_bytes_equal(expected.as_bytes(), self.checksum.as_bytes()) {
             return Err("checksum mismatch".to_string());
         }
@@ -1988,6 +2228,13 @@ fn next_rpc_session_id() -> String {
     format!("gateway-{}-{now}-{sequence}", std::process::id())
 }
 
+fn unix_now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
+}
+
 fn next_outbound_stream_id() -> String {
     let sequence = NEXT_OUTBOUND_STREAM_ID.fetch_add(1, Ordering::Relaxed);
     let now = SystemTime::now()
@@ -2006,10 +2253,25 @@ fn session_commitments(
             .hosted
             .world_snapshot()
             .map_err(classify_runtime_error)?;
+        let durable_snapshot = durable_session_snapshot(snapshot);
+        let active_character_bytes = session
+            .hosted
+            .active_character_checkpoint()
+            .map_err(classify_runtime_error)?
+            .map(|checkpoint| serde_json::to_vec(&checkpoint))
+            .transpose()
+            .map_err(|error| {
+                ZoneRpcFault::new(
+                    "checkpoint_encode",
+                    format!("active character checkpoint encode failed: {error}"),
+                )
+            })?;
         commitments.push(WireSessionCommitment {
             session_id: session_id.clone(),
             zone_id: zone_id.clone(),
-            snapshot_digest: snapshot_digest(&snapshot)?,
+            snapshot_digest: snapshot_digest(&durable_snapshot)?,
+            durable_snapshot: Box::new(durable_snapshot),
+            active_character_bytes,
             active_identity: session
                 .hosted
                 .active_identity()
@@ -2019,8 +2281,8 @@ fn session_commitments(
     Ok(commitments)
 }
 
-fn snapshot_digest(snapshot: &WorldSnapshot) -> Result<String, ZoneRpcFault> {
-    let bytes = serde_json::to_vec(snapshot).map_err(|error| {
+fn snapshot_digest(durable_snapshot: &WorldSnapshot) -> Result<String, ZoneRpcFault> {
+    let bytes = serde_json::to_vec(durable_snapshot).map_err(|error| {
         ZoneRpcFault::new(
             "checkpoint_encode",
             format!("zone host snapshot encode failed: {error}"),
@@ -2033,26 +2295,119 @@ fn snapshot_digest(snapshot: &WorldSnapshot) -> Result<String, ZoneRpcFault> {
     Ok(hex_lower_bytes(&hasher.finalize()))
 }
 
+fn commitment_mismatch_details(
+    expected: &[WireSessionCommitment],
+    actual: &[WireSessionCommitment],
+) -> String {
+    if expected.len() != actual.len() {
+        return format!(
+            "session count differs: expected={}, actual={}",
+            expected.len(),
+            actual.len()
+        );
+    }
+    for (expected, actual) in expected.iter().zip(actual) {
+        if expected == actual {
+            continue;
+        }
+        let expected_snapshot =
+            serde_json::to_value(expected.durable_snapshot.as_ref()).unwrap_or_default();
+        let actual_snapshot =
+            serde_json::to_value(actual.durable_snapshot.as_ref()).unwrap_or_default();
+        let differing_fields = match (expected_snapshot.as_object(), actual_snapshot.as_object()) {
+            (Some(expected), Some(actual)) => expected
+                .keys()
+                .chain(actual.keys())
+                .collect::<BTreeSet<_>>()
+                .into_iter()
+                .filter(|key| expected.get(*key) != actual.get(*key))
+                .map(|key| {
+                    format!(
+                        "{key}: expected={}, actual={}",
+                        expected.get(key).unwrap_or(&serde_json::Value::Null),
+                        actual.get(key).unwrap_or(&serde_json::Value::Null)
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("; "),
+            _ => "durable snapshot JSON shape differs".to_string(),
+        };
+        return format!(
+            "session={}/{}, expected_digest={}, actual_digest={}, identity_expected={:?}, identity_actual={:?}, fields=[{}]",
+            expected.session_id,
+            expected.zone_id,
+            expected.snapshot_digest,
+            actual.snapshot_digest,
+            expected.active_identity,
+            actual.active_identity,
+            differing_fields
+        );
+    }
+    "commitment ordering differs".to_string()
+}
+
+fn durable_session_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
+    snapshot.tick = 0;
+    snapshot.map_title = None;
+    snapshot.light_setting = 0;
+    snapshot.player_object_id = None;
+    // The complete Zone image owns live player vitals. Do not commit them a
+    // second time from a session snapshot taken on the other side of an
+    // autonomous Zone tick; private persisted vitals are independently
+    // committed by `active_character_bytes`.
+    snapshot.player_hp = None;
+    snapshot.player_max_hp = None;
+    snapshot.player_mp = None;
+    snapshot.player_max_mp = None;
+    snapshot
+        .entities
+        .retain(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer);
+    for entity in &mut snapshot.entities {
+        entity.object_id = 0;
+        // Checkpoint v4 makes the shared Zone state authoritative for the
+        // player's transform. The per-session commitment must not duplicate
+        // that transform: journal replay can allocate a different shared
+        // presence before the exact Zone image is installed.
+        entity.x = 0;
+        entity.y = 0;
+        entity.direction = mir2_protocol::MirDirection::Up;
+        entity.hp = None;
+        entity.max_hp = None;
+        entity.dead = false;
+    }
+    // Shared map actors, player transforms, and ground drops are committed by
+    // the separate Zone state image. Keep this digest scoped to the private
+    // durable player/session projection.
+    snapshot.ground_drops.clear();
+    snapshot
+}
+
 fn zone_host_checkpoint_checksum(
     version: u32,
     entries: &[WireHostJournalEntry],
     sessions: &[WireSessionCommitment],
+    zone_count: usize,
+    zone_state_bytes: &[u8],
 ) -> Result<String, ZoneRpcFault> {
-    zone_host_checkpoint_checksum_bytes(version, entries, sessions).map_err(|error| {
-        ZoneRpcFault::new(
-            "checkpoint_encode",
-            format!("zone host checkpoint checksum failed: {error}"),
-        )
-    })
+    zone_host_checkpoint_checksum_bytes(version, entries, sessions, zone_count, zone_state_bytes)
+        .map_err(|error| {
+            ZoneRpcFault::new(
+                "checkpoint_encode",
+                format!("zone host checkpoint checksum failed: {error}"),
+            )
+        })
 }
 
 fn zone_host_checkpoint_checksum_bytes(
     version: u32,
     entries: &[WireHostJournalEntry],
     sessions: &[WireSessionCommitment],
+    zone_count: usize,
+    zone_state_bytes: &[u8],
 ) -> Result<String, String> {
-    let payload = serde_json::to_vec(&(version, entries, sessions))
-        .map_err(|error| format!("failed to encode checkpoint checksum payload: {error}"))?;
+    let payload =
+        serde_json::to_vec(&(version, entries, sessions, zone_count, zone_state_bytes))
+            .map_err(|error| format!("failed to encode checkpoint checksum payload: {error}"))?;
     let mut hasher = Sha256::new();
     hasher.update(ZONE_HOST_CHECKPOINT_DOMAIN);
     hasher.update(payload);

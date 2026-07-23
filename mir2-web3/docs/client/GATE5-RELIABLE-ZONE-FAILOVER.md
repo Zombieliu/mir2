@@ -55,9 +55,9 @@ host is rejected at the authoritative execution boundary once the lease changes.
 
 ## Protocol
 
-Gate 5.3 uses Zone RPC protocol version 2. It retains the bounded length-prefixed JSON envelope and
-Crystal binary packet codec from Gate 5.2, adding live-outbound cursor operations and checkpoint
-export/install operations.
+Gate 5.3 introduced Zone RPC protocol version 2. The current protocol is v5 and retains the bounded
+length-prefixed JSON envelope and Crystal binary packet codec. Gate 11 checkpoint v4 adds a complete
+shared-Zone image and versioned per-session commitments to the original export/install operations.
 
 ## Acceptance
 
@@ -71,8 +71,8 @@ The suites prove unacknowledged redelivery, registered Gateway live delivery, tw
 checkpoint replay, corrupted/stale checkpoint rejection, independent-process replication,
 multi-endpoint rerouting, standby promotion under a newer fence, and rejection of the stale active.
 
-## Deliberate next boundary
+## Current boundary
 
-The checkpoint is event-sourced and therefore grows with the command journal. Gate 10 compaction
-will combine a versioned compact state snapshot with a short journal tail. Per-zone placement and
-independent tick ownership begin in Gate 5.4.
+Checkpoint v4 combines a versioned full Zone state image with the replay journal and is accepted by
+the Gate 11 real-workload and repeated-failure suites. Journal-tail compaction remains an operations
+optimization; it is no longer a whole-map recovery correctness blocker.

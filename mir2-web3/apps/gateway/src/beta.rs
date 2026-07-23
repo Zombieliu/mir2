@@ -309,11 +309,13 @@ pub fn run_gate10_acceptance() -> Result<Gate10AcceptanceEvidence, String> {
                     endpoint: format!("127.0.0.1:{port}"),
                     failure_domain: domain.to_string(),
                     max_sessions: 1_000,
+                    max_sessions_per_zone: 100,
                     max_zones: 100,
                     weight: 100,
                 },
                 heartbeat: ZoneHostHeartbeat {
                     session_count: 0,
+                    busiest_zone_session_count: 0,
                     active_connections: 0,
                     observed_at_ms: NOW_MS,
                 },
