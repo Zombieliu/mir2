@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Latest remote-Zone workload sync: 2026-07-23 introduces Gate 11.1 acceptance
+> over two real TCP Zone Hosts. The same Gateway session performs Crystal
+> login/StartGame, client melee with authoritative monster HP loss, client item
+> drop/pickup, and `map:0 -> map:1` atomic handoff; the active host checkpoint
+> is installed on standby, the active listener is stopped, a higher owner fence
+> is finalized, and KeepAlive plus durable player state continue on standby.
+> Zone RPC is now v5 and trusted handoff transfers HP/MP. Checkpoint v3 covers
+> durable player/session state, not a complete autonomous live-map image.
+
 > Latest source-verified monster-defence sync: 2026-07-22 corrects the player
 > mitigation channel for Crystal AI 26 ShamanZombie and AI 181 WaterDragon /
 > Hydra. ShamanZombie `LineAttack` always uses `MACAgility`; WaterDragon uses

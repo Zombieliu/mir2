@@ -22,8 +22,9 @@ commands, every replica produces the same placement decisions.
 
 ## Data-plane enforcement
 
-Zone RPC protocol version 4 expands health with host identity, session/Zone capacity, current load,
-active connections and drain state. `ZoneHostServer::set_draining(true)` preserves existing
+Zone RPC protocol version 4 expanded health with host identity, session/Zone capacity, current
+load, active connections and drain state. The current protocol is version 5 after Gate 11 added
+authoritative handoff vitals. `ZoneHostServer::set_draining(true)` preserves existing
 sessions but rejects new sessions. A multi-endpoint client treats `host_draining` and `capacity` as
 retryable placement failures and tries the next replica.
 

@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest distributed Mir2 workload roadmap sync: 2026-07-23 adds Gate 11.1,
+> which drives a real Crystal login/map join, monster melee damage, inventory
+> drop/pickup, atomic cross-map Zone handoff, checkpoint replication, active
+> host loss, and fenced standby continuation as one TCP-hosted acceptance
+> chain. Player/session state is preserved across takeover. Full autonomous
+> monster/timer/public-drop map-image recovery remains the explicit Gate 11.2
+> item; v3 checkpoints must not yet be represented as whole-map-state failover.
+
 > Latest developer-handoff roadmap sync: 2026-07-22 establishes a reproducible
 > code-and-assets entry point for another developer. A recursive clone resolves
 > the maintained Crystal handoff branch, Windows scripts bootstrap Node 22 and

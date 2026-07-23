@@ -6,6 +6,7 @@ pub mod consensus_log;
 pub mod control_plane;
 pub mod events;
 mod inject;
+pub mod mir2_workload;
 pub mod node_security;
 pub mod rewards;
 pub mod routing;
@@ -46,6 +47,7 @@ pub use events::{
 };
 pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;
+pub use mir2_workload::{run_gate11_acceptance, Gate11AcceptanceEvidence};
 pub use node_security::{
     GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
     VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
