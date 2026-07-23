@@ -20,10 +20,12 @@ import {
   type Mir2Language,
 } from "../../lib/localization";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import { crystalMainHudExperienceBarFillWidth } from "../../lib/crystal-hud-metrics";
 import { formatCrystalExperiencePercent } from "../../lib/extended-server-packets";
 import { playOriginalSoundId } from "../../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import {
   handleSceneAssetImageError,
   handleSceneAssetImageLoad,
@@ -692,6 +694,12 @@ export function MainHud({
   const currentMp = world.playerMp ?? 0;
   const maxMp = world.playerMaxMp ?? 0;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+  const hpOnlyText = `HP ${currentHp}/${maxHp}`;
+  const hpOnlyGdiText = findCrystalGdiTextAsset({
+    text: hpOnlyText,
+    foreground: "#ffffff",
+    outline: true,
+  });
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs
     .slice(0, 2)
@@ -699,6 +707,7 @@ export function MainHud({
     .join("  ");
   const remainingBagWeight = Math.max(0, Math.floor(world.maxWeight - world.currentWeight));
   const crystalFreeSlots = crystalMainHudFreeSlots(world);
+  const experienceBarFillWidth = crystalMainHudExperienceBarFillWidth(experienceRatio);
   const bagWeightRatio = ratio(world.currentWeight, world.maxWeight);
   const weightBarFillWidth = crystalMainHudWeightBarFillWidth(bagWeightRatio);
   const weightBarSprite = crystalMainHudWeightBarSprite(bagWeightRatio);
@@ -709,7 +718,21 @@ export function MainHud({
         <img className="hud-cap left" src={ORIGINAL_UI.hud.leftCap} alt="" draggable={false} />
         <img className="hud-base" src={ORIGINAL_UI.hud.base} alt="" draggable={false} />
         <img className="hud-cap right" src={ORIGINAL_UI.hud.rightCap} alt="" draggable={false} />
-        <img className="hud-exp-bar" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
+        <div
+          className="hud-exp-bar"
+          data-experience-ratio={experienceRatio.toFixed(4)}
+          data-fill-width={experienceBarFillWidth}
+          style={{ width: `${experienceBarFillWidth}px` }}
+        >
+          {experienceBarFillWidth > 0 ? (
+            <img
+              className="hud-exp-bar-fill"
+              src={ORIGINAL_UI.hud.experienceBar}
+              alt=""
+              draggable={false}
+            />
+          ) : null}
+        </div>
         <div
           className="hud-weight-bar"
           data-weight-ratio={bagWeightRatio.toFixed(4)}
@@ -739,7 +762,11 @@ export function MainHud({
         </div>
 
         {hpOnlyOrb ? (
-          <div className="hud-health-only-label">{`HP ${currentHp}/${maxHp}`}</div>
+          <div className="hud-health-only-label">
+            {hpOnlyGdiText ? (
+              <CrystalGdiTextImage asset={hpOnlyGdiText} accessibleText={hpOnlyText} />
+            ) : hpOnlyText}
+          </div>
         ) : (
           <>
             <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>

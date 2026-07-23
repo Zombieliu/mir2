@@ -2,6 +2,7 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export const getMir2RendererBackend: () => [number, number];
+export const resolveMir2EntityAnimationPoses: (a: number, b: number) => [number, number];
 export const pushMir2MovementShadowEvent: (a: number, b: number) => void;
 export const getMir2MovementShadowDiagnostics: () => [number, number];
 export const setMir2RemoteMotionPresentationEnabled: (a: number) => void;
@@ -18,12 +19,13 @@ export const setMir2MapRenderAtlas: (a: number, b: number, c: number, d: number,
 export const evictMir2MapRenderImages: (a: number, b: number) => void;
 export const bootMir2Runtime: () => void;
 export const setMir2SelfCameraMotion: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-export const setMir2PresentationPoseSink: (a: any) => void;
 export const setMir2MapCameraOffset: (a: number, b: number) => void;
+export const setMir2PresentationPoseSink: (a: any) => void;
 export const setMir2StatusSink: (a: any) => void;
 export const releaseMir2MapRenderImages: (a: number, b: number) => void;
 export const clearMir2StatusSink: () => void;
 export const clearMir2PresentationPoseSink: () => void;
+export const resetMir2EntityAnimations: () => void;
 export const wasm_bindgen__convert__closures_____invoke__h4a292f8eb4388d53: (a: number, b: number, c: any) => [number, number];
 export const wasm_bindgen__convert__closures_____invoke__h8f94c947f52443eb: (a: number, b: number, c: any, d: any) => void;
 export const wasm_bindgen__convert__closures_____invoke__h32082366a76e6c6b: (a: number, b: number, c: any) => void;

@@ -1,4 +1,6 @@
 mod additive_material;
+pub mod entity_animation;
+mod entity_animation_bridge;
 mod interpolation;
 mod local_motion;
 mod motion;
@@ -556,6 +558,16 @@ pub fn clear_mir2_status_sink() {
 #[wasm_bindgen(js_name = getMir2RendererBackend)]
 pub fn get_mir2_renderer_backend() -> String {
     COMPILED_RENDER_BACKEND.to_owned()
+}
+
+#[wasm_bindgen(js_name = resolveMir2EntityAnimationPoses)]
+pub fn resolve_mir2_entity_animation_poses(snapshot_json: String) -> String {
+    entity_animation_bridge::resolve_json(&snapshot_json)
+}
+
+#[wasm_bindgen(js_name = resetMir2EntityAnimations)]
+pub fn reset_mir2_entity_animations() {
+    entity_animation_bridge::reset();
 }
 
 #[wasm_bindgen(js_name = pushMir2MovementShadowEvent)]
