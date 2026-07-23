@@ -1,9 +1,14 @@
 "use client";
 
-import type { SyntheticEvent } from "react";
+import { memo, type SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
-import { type MapAtlasIndex, mapAtlasRectKeyForPath } from "../../lib/map-atlas-manifest";
+import blendFramesManifest from "../../public/generated/original-map-blend/blend-frames.json";
+import {
+  type MapAtlasIndex,
+  mapAtlasPathRequiresAlphaKey,
+  mapAtlasRectKeyForPath,
+} from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
 import {
   alphaKeyMapObjectPixels,
@@ -22,6 +27,7 @@ import {
   VIEWPORT_TILE_LEFT_ORIGIN,
   VIEWPORT_TILE_TOP_ORIGIN,
   viewportDepthForCell,
+  viewportFloorDepthForCell,
   type SceneBackdropTile,
   type ViewportMapSprite,
   type ViewportMapSprites,
@@ -32,90 +38,27 @@ type OriginalMapCell = OriginalMapRegion["cells"][number];
 type OriginalMapSpriteKind = OriginalMapRegion["sprites"][string]["kind"];
 
 const mapRegionCellIndexCache = new WeakMap<OriginalMapRegion, Map<string, OriginalMapCell>>();
-
-// Roadmap RENDER-PERF (B) Stage 1 (object pooling). Flag-gated, DEFAULT OFF. When on,
-// `buildViewportMapSprites` reuses pooled ViewportMapSprite *objects* (mutated in place)
-// instead of allocating ~500 fresh object literals on every cell-cross — cutting the
-// GC-churn that shows up as walk-time jank. Container arrays are STILL freshly allocated
-// every call (cheap), so the memo result's reference identity always changes and the
-// downstream reference-equality memos still re-run. SSR-guarded + memoised once.
-let mapSpritePoolFlag: boolean | null = null;
-function mapSpritePoolEnabled() {
-  if (mapSpritePoolFlag !== null) {
-    return mapSpritePoolFlag;
-  }
-  if (typeof window === "undefined") {
-    // Don't memoise the SSR answer — the client read below must win once hydrated.
-    return false;
-  }
-  // DEFAULT OFF — opt-in: pooled, in-place sprite reuse across viewport rebuilds.
-  // Reverted from default-on (it was flipped on alongside #4 based on the invalid
-  // static-scene benchmark; unverified for real movement). Opt in: `?mapSpritePool=1`.
-  let enabled = false;
-  try {
-    const param = new URLSearchParams(window.location.search).get("mapSpritePool");
-    if (param === "1") {
-      enabled = true;
-    } else if (param === "0") {
-      enabled = false;
-    } else {
-      enabled = window.localStorage.getItem("mir2-map-sprite-pool") === "1";
-    }
-  } catch {
-    enabled = false;
-  }
-  mapSpritePoolFlag = enabled;
-  return enabled;
-}
-
-// Per-call-site double-buffered sprite-object pools. Each distinct call site (the static
-// memo, the animated memo, the off-screen prefetch ring, the diagnostic summary) gets its
-// OWN pool set keyed by `poolKey`, so concurrently-live results from different call sites
-// (e.g. `viewportMapSprites = [...static, ...animated]`) never share pooled objects.
-//
-// Within a call site, TWO generations alternate per call: call N draws from generation A,
-// call N+1 from generation B, call N+2 from A again. So the objects a given call hands out
-// are not reused/mutated until TWO calls later — by which point React has committed past
-// the render that consumed call N's result, and no live render/memo still references those
-// objects (`appendViewportMapSprite` always pushes a freshly-built or pool-recycled object
-// into a NEW array, and downstream consumers either read fields synchronously into new
-// objects or hold the refs only until the next memo rebuild = the next same-keyed call).
-type MapSpritePool = {
-  gen: 0 | 1;
-  idx: number;
-  pools: [ViewportMapSprite[], ViewportMapSprite[]];
-};
-const mapSpritePoolsByKey = new Map<string, MapSpritePool>();
-
-function beginMapSpritePool(poolKey: string): MapSpritePool {
-  let pool = mapSpritePoolsByKey.get(poolKey);
-  if (!pool) {
-    pool = { gen: 0, idx: 0, pools: [[], []] };
-    mapSpritePoolsByKey.set(poolKey, pool);
-  }
-  pool.gen = pool.gen === 0 ? 1 : 0;
-  pool.idx = 0;
-  return pool;
-}
-
-const FLOOR_LAYER_Z_STRIDE = 16_384;
-const FLOOR_LAYER_Z_OFFSETS: Record<OriginalMapSpriteKind, number> = {
+const FLOOR_LAYER_ORDERS: Record<OriginalMapSpriteKind, number> = {
   back: 0,
-  middle: FLOOR_LAYER_Z_STRIDE,
-  front: FLOOR_LAYER_Z_STRIDE * 2,
-  tileAnimation: FLOOR_LAYER_Z_STRIDE * 3,
+  middle: 1,
+  front: 2,
+  tileAnimation: 3,
 };
 
-export function GameSceneBackdrop({
+function GameSceneBackdropInner({
   world,
   player,
   floorSprites,
   cameraOffset,
+  imperativeCamera = false,
+  registerCameraSurface,
 }: {
   world: DisplayWorld;
   player: DisplayEntity | null;
   floorSprites: ViewportMapSprite[];
   cameraOffset: ViewportOffset;
+  imperativeCamera?: boolean;
+  registerCameraSurface?: (key: string) => (el: HTMLElement | null) => void;
 }) {
   const tiles = world.originalMapRegion ? [] : buildSceneBackdropTiles(world, player);
 
@@ -126,7 +69,10 @@ export function GameSceneBackdrop({
   const renderOffset = floorSprites.length ? cameraOffset : EMPTY_VIEWPORT_OFFSET;
 
   return (
-    <div className="game-scene-backdrop">
+    <div
+      ref={imperativeCamera ? registerCameraSurface?.("backdrop") : undefined}
+      className="game-scene-backdrop"
+    >
       {tiles.map((tile) => (
         <div
           key={tile.key}
@@ -165,6 +111,11 @@ export function GameSceneBackdrop({
   );
 }
 
+// Memoised so the 30Hz motion tick skips the DOM floor-tile backdrop when neither the world, the
+// floor sprite list, nor the camera offset changed. (Only the DOM fallback path — the GPU map
+// atlas layer is unaffected.)
+export const GameSceneBackdrop = memo(GameSceneBackdropInner);
+
 // Splitting the viewport build by animation cadence keeps the ~500-sprite static
 // layer off the 120ms animation tick: callers memoize "static" on [player.x,y,region]
 // (rebuilt only on movement) and "animated" on the frame index (cheap — only multi-frame
@@ -177,22 +128,11 @@ export function buildViewportMapSprites(
   animationFrameIndex: number,
   animationFilter: ViewportSpriteAnimationFilter = "all",
   rangeExpansion = 0,
-  // Distinct call sites pass a distinct `poolKey` so their concurrently-live results never
-  // share pooled sprite objects (see mapSpritePoolsByKey). Defaults to `animationFilter` so
-  // the two memo passes (static/animated) are already separated; explicit keys are passed by
-  // the prefetch ring + diagnostic summary, whose lifetimes differ from the memo passes.
-  poolKey: string = animationFilter,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
     return EMPTY_VIEWPORT_MAP_SPRITES;
   }
-
-  // Object-pooling (flag-gated, default OFF): take pooled sprite objects from the current
-  // generation of this call site's double-buffer and mutate them in place. When OFF, `pool`
-  // is null and `appendViewportMapSprite` keeps the exact object-literal path (no behavior
-  // change). Container arrays below are always freshly allocated regardless.
-  const pool = mapSpritePoolEnabled() ? beginMapSpritePool(poolKey) : null;
 
   // rangeExpansion widens the cell window beyond the visible viewport — used by the
   // off-screen prefetch ring to warm tiles in the player's surroundings before they
@@ -223,7 +163,6 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
-      pool,
     );
     appendViewportMapSprite(
       floor,
@@ -236,7 +175,6 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
-      pool,
     );
     appendViewportMapSprite(
       floor,
@@ -249,7 +187,6 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
-      pool,
     );
     appendViewportMapSprite(
       floor,
@@ -262,7 +199,6 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
-      pool,
     );
   }
 
@@ -288,6 +224,12 @@ export function buildMapTileDrawList(
   const uncoveredFloor: ViewportMapSprite[] = [];
   const uncoveredObjects: ViewportMapSprite[] = [];
   const add = (sprite: ViewportMapSprite, uncovered: ViewportMapSprite[]) => {
+    if (resolvedMapSpriteBlendMode(sprite) || mapAtlasPathRequiresAlphaKey(sprite.path)) {
+      // Additive cells need SourceAlpha + One, while legacy object libraries need
+      // Crystal's black-key conversion. Both require the decoded standalone path.
+      uncovered.push(sprite);
+      return;
+    }
     const rectKey = mapAtlasRectKeyForPath(sprite.path);
     const atlasKey = rectKey ? index.rectToAtlas.get(rectKey) : undefined;
     if (!rectKey || !atlasKey) {
@@ -310,40 +252,87 @@ export function buildMapTileDrawList(
   return { tiles, uncovered: { floor: uncoveredFloor, objects: uncoveredObjects } };
 }
 
-// Turn the atlas-MISS remainder (buildMapTileDrawList's `uncovered`) into the
-// Bevy-runtime standalone-tile draw list + the deduped set of images to decode +
-// upload. Each tile is rendered from its own full-image texture (keyed by the
-// `library#frame` rect key) in the SAME z-band as covered tiles, so atlas-miss
-// frames no longer black-hole under the Bevy map renderer. `cameraOffset` is folded
-// into left/top exactly like buildMapTileDrawList so all map layers stay aligned.
-// `images` is deduped by imageKey (many cells share one frame) — that's the decode
-// + upload work-list; `fetchUrl` applies the torch-blend redirect (mapSpriteRenderPath).
+export type MapStandaloneTileImageSource = {
+  imageKey: string;
+  fetchUrl: string;
+  alphaKeyMapObject: boolean;
+};
+
 export function buildStandaloneMapTiles(
-  uncovered: ViewportMapSprites,
+  mapSprites: ViewportMapSprites,
   cameraOffset: ViewportOffset,
-): { tiles: MapStandaloneTileDraw[]; images: Array<{ imageKey: string; fetchUrl: string }> } {
+): {
+  tiles: MapStandaloneTileDraw[];
+  images: MapStandaloneTileImageSource[];
+  domFallback: ViewportMapSprites;
+  imageKeyBySpriteKey: Map<string, string>;
+  requiredImageKeysBySpriteKey: Map<string, readonly string[]>;
+  requiredImageKeysByTileKey: Map<string, readonly string[]>;
+} {
   const tiles: MapStandaloneTileDraw[] = [];
-  const images: Array<{ imageKey: string; fetchUrl: string }> = [];
-  const seenImages = new Set<string>();
-  const add = (sprite: ViewportMapSprite) => {
-    const imageKey = mapAtlasRectKeyForPath(sprite.path) ?? sprite.path;
+  const images = new Map<string, MapStandaloneTileImageSource>();
+  const domFallbackFloor: ViewportMapSprite[] = [];
+  const domFallbackObjects: ViewportMapSprite[] = [];
+  const imageKeyBySpriteKey = new Map<string, string>();
+  const requiredImageKeysBySpriteKey = new Map<string, readonly string[]>();
+  const requiredImageKeysByTileKey = new Map<string, readonly string[]>();
+  const addImageSource = (path: string, additive: boolean) => {
+    const rectKey = mapAtlasRectKeyForPath(path);
+    const imageKey = `${additive ? "standalone-additive" : "standalone"}:${rectKey ?? path}`;
+    // Additive blending needs the original dark-matte pixels. Black contributes
+    // zero under SourceAlpha + One; the cleaned DOM asset would attenuate twice.
+    const fetchUrl = additive ? path : mapSpriteRenderPath(path);
+    const alphaKeyMapObject = !additive && mapAtlasPathRequiresAlphaKey(fetchUrl);
+    const existing = images.get(imageKey);
+    if (!existing) {
+      images.set(imageKey, { imageKey, fetchUrl, alphaKeyMapObject });
+    } else if (alphaKeyMapObject && !existing.alphaKeyMapObject) {
+      images.set(imageKey, { ...existing, alphaKeyMapObject: true });
+    }
+    return imageKey;
+  };
+  const add = (
+    sprite: ViewportMapSprite,
+    domFallback: ViewportMapSprite[],
+  ) => {
+    // Keep every atlas miss in DOM until the shell confirms the decoded image is
+    // resident in the current Bevy runtime. Additive misses use a dedicated
+    // SourceAlpha + One material once that handoff completes.
+    domFallback.push(sprite);
+    const additive = Boolean(resolvedMapSpriteBlendMode(sprite));
+    const imageKey = addImageSource(sprite.path, additive);
+    const tileKey = `${additive ? "standalone-additive" : "standalone"}:${sprite.key}`;
+    const familyPaths =
+      additive && sprite.animationFramePaths?.length
+        ? sprite.animationFramePaths
+        : [sprite.path];
+    const requiredImageKeys = Array.from(
+      new Set(familyPaths.map((path) => addImageSource(path, additive))),
+    );
     tiles.push({
-      key: sprite.key,
+      key: tileKey,
       imageKey,
       left: sprite.left + cameraOffset.x,
       top: sprite.top + cameraOffset.y,
       width: sprite.width,
       height: sprite.height,
       z: sprite.zIndex,
+      additive: additive || undefined,
     });
-    if (!seenImages.has(imageKey)) {
-      seenImages.add(imageKey);
-      images.push({ imageKey, fetchUrl: mapSpriteRenderPath(sprite.path) });
-    }
+    imageKeyBySpriteKey.set(sprite.key, imageKey);
+    requiredImageKeysBySpriteKey.set(sprite.key, requiredImageKeys);
+    requiredImageKeysByTileKey.set(tileKey, requiredImageKeys);
   };
-  for (const sprite of uncovered.floor) add(sprite);
-  for (const sprite of uncovered.objects) add(sprite);
-  return { tiles, images };
+  for (const sprite of mapSprites.floor) add(sprite, domFallbackFloor);
+  for (const sprite of mapSprites.objects) add(sprite, domFallbackObjects);
+  return {
+    tiles,
+    images: Array.from(images.values()),
+    domFallback: { floor: domFallbackFloor, objects: domFallbackObjects },
+    imageKeyBySpriteKey,
+    requiredImageKeysBySpriteKey,
+    requiredImageKeysByTileKey,
+  };
 }
 
 function viewportMapCells(
@@ -401,7 +390,6 @@ function appendViewportMapSprite(
   inFloorBounds: boolean,
   inObjectBounds: boolean,
   animationFilter: ViewportSpriteAnimationFilter = "all",
-  pool: MapSpritePool | null = null,
 ) {
   if (!spriteId) {
     return;
@@ -459,60 +447,25 @@ function appendViewportMapSprite(
     return;
   }
 
-  const key = `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`;
-  const zIndex =
-    sprite.drawMode === "floor"
-      ? viewportDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_Z_OFFSETS[sprite.kind])
-      : viewportDepthForCell(cell.x, cell.y, player, 1);
-
-  if (pool) {
-    // Pooled path: recycle (or grow) a sprite object from the current generation and mutate
-    // its fields in place. Because generations alternate per call, this object is not reused
-    // until two same-keyed calls later — React has committed past this render by then.
-    const generation = pool.pools[pool.gen];
-    let pooled = generation[pool.idx];
-    if (pooled) {
-      pooled.key = key;
-      pooled.path = frame.path;
-      pooled.kind = sprite.kind;
-      pooled.cellX = cell.x;
-      pooled.cellY = cell.y;
-      pooled.left = left;
-      pooled.top = top;
-      pooled.width = frame.width;
-      pooled.height = frame.height;
-      pooled.zIndex = zIndex;
-    } else {
-      pooled = {
-        key,
-        path: frame.path,
-        kind: sprite.kind,
-        cellX: cell.x,
-        cellY: cell.y,
-        left,
-        top,
-        width: frame.width,
-        height: frame.height,
-        zIndex,
-      };
-      generation[pool.idx] = pooled;
-    }
-    pool.idx += 1;
-    target.push(pooled);
-    return;
-  }
-
   target.push({
-    key,
+    key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
     path: frame.path,
+    animationFramePaths:
+      sprite.frames.length > 1
+        ? Array.from(new Set(sprite.frames.map((entry) => entry.path)))
+        : undefined,
     kind: sprite.kind,
+    blendMode: sprite.blendMode,
     cellX: cell.x,
     cellY: cell.y,
     left,
     top,
     width: frame.width,
     height: frame.height,
-    zIndex,
+    zIndex:
+      sprite.drawMode === "floor"
+        ? viewportFloorDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_ORDERS[sprite.kind])
+        : viewportDepthForCell(cell.x, cell.y, player, 1),
   });
 }
 
@@ -654,12 +607,20 @@ function sceneTintForTerrain(terrain: string, variation: number) {
 }
 
 export function mapSpriteBlendMode(path: string) {
-  return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path) ? "screen" : undefined;
+  return blendObjectFrameKey(path) ? "screen" : undefined;
+}
+
+export function resolvedMapSpriteBlendMode(
+  sprite: Pick<ViewportMapSprite, "path" | "blendMode">,
+) {
+  if (sprite.blendMode === "additive") return "screen";
+  if (sprite.blendMode === "normal") return undefined;
+  return mapSpriteBlendMode(sprite.path);
 }
 
 export function mapSpriteRenderPath(path: string) {
-  const frame = bichonTorchLightFrame(path);
-  return frame ? `/generated/original-map-blend/WemadeMir2/Objects/${frame}.png` : path;
+  const key = blendObjectFrameKey(path);
+  return key ? `/generated/original-map-blend/${BLEND_MANIFEST_LIB}/${key}.png` : path;
 }
 
 const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
@@ -820,7 +781,7 @@ async function applyMapObjectAlphaKey(image: HTMLImageElement) {
   }
 
   const originalSrc = image.dataset.mir2OriginalSrc ?? image.getAttribute("src") ?? "";
-  if (!isBlackKeyedMapObjectPath(originalSrc)) {
+  if (!mapAtlasPathRequiresAlphaKey(originalSrc)) {
     return;
   }
 
@@ -941,22 +902,11 @@ export function sceneAssetRuntimeStats() {
   };
 }
 
-function isBlackKeyedMapObjectPath(path: string) {
-  const normalized = normalizedSceneAssetPath(path);
-  return (
-    normalized !== null &&
-    normalized.startsWith("/original-map/") &&
-    /\/(?:objects|objects2|smobjects|furnitures|walls|animations)/i.test(normalized)
-  );
-}
-
 function normalizedSceneAssetPath(path: string) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
   try {
-    return new URL(path, window.location.href).pathname;
+    const baseUrl =
+      typeof window === "undefined" ? "https://mir2.invalid/" : window.location.href;
+    return new URL(path, baseUrl).pathname;
   } catch {
     return null;
   }
@@ -1010,9 +960,27 @@ function sceneAssetDelayedRetryUrl(originalSrc: string, retryCount: number) {
   return retryCandidates[(retryCount - 1) % retryCandidates.length] ?? retryCandidates[0] ?? null;
 }
 
-function bichonTorchLightFrame(path: string) {
-  const match = path.match(/\/original-map\/WemadeMir2\/Objects\/(27(?:2[3-9]|3[0-2]))\.png$/i);
-  return match?.[1] ?? null;
+// Crystal blends glow objects ADDITIVELY (DXManager.SetBlend: SourceAlpha + One). On the DOM
+// fallback path we fake additive with a darkness->alpha cleaned sprite plus per-shape
+// opacity/filter-tuned mix-blend-mode:screen. The set of glow frames
+// is no longer a hardcoded index range (2723..2732 was the DrawBlend `offSet` argument, GameScene.cs:10928,
+// NOT the blend gate) — it is the data-driven manifest emitted by
+// scripts/generate-crystal-map-blend-assets.mjs (dark-matte/bright-core pixel classification). The ten
+// original Bichon torches remain in that manifest and render byte-identically.
+const BLEND_MANIFEST_LIB = blendFramesManifest.lib;
+const BLEND_OBJECT_FRAMES = new Set<string>(blendFramesManifest.frames);
+
+// Returns the manifest key ("<objLib>/<frame>", e.g. "Objects/2723") if this sprite path is a blend
+// glow frame, else null.
+function blendObjectFrameKey(path: string): string | null {
+  const match = path.match(
+    new RegExp(`/original-map/${BLEND_MANIFEST_LIB}/(Objects[0-9]*/\\d+)\\.png$`, "i"),
+  );
+  if (!match?.[1]) {
+    return null;
+  }
+  const key = match[1];
+  return BLEND_OBJECT_FRAMES.has(key) ? key : null;
 }
 
 type SceneAssetCacheWindow = Window & {
@@ -1180,7 +1148,7 @@ export function buildRenderStateSummary(world: DisplayWorld, player: DisplayEnti
   if (!region) return { available: false, reason: "no-region" };
   if (!player) return { available: false, reason: "no-player" };
 
-  const { floor, objects } = buildViewportMapSprites(world, player, 0, "all", 0, "summary");
+  const { floor, objects } = buildViewportMapSprites(world, player, 0);
   const layerCounts: Record<string, number> = { back: 0, middle: 0, front: 0, tileAnimation: 0 };
   const librariesInUse: Record<string, number> = {};
   for (const sprite of [...floor, ...objects]) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -252,6 +253,12 @@ export type NpcDialogPanelProps = {
   onSubmitInput: (value: string) => void;
   /** Optional NPC portrait image URL, shown in the header. */
   portrait?: string | null;
+  /**
+   * Lowercase class key of the local player. Used to rewrite class-blind
+   * onboarding copy (e.g. the guide quest's "Stay in melee range" line) so a
+   * ranged class isn't told to melee. Optional + defensive: absent → no rewrite.
+   */
+  playerClass?: string | null;
 };
 
 /** Classify a dialog option for icon hinting (matches Crystal @-targets). */
@@ -303,9 +310,13 @@ export function NpcDialogPanel({
   onSelectTarget,
   onSubmitInput,
   portrait,
+  playerClass,
 }: NpcDialogPanelProps) {
   const [inputValue, setInputValue] = useState("");
-  const bodyLines = dialog.body.map(stripCrystalDialogMarkup).filter((line) => line.trim().length > 0);
+  const bodyLines = dialog.body
+    .map(stripCrystalDialogMarkup)
+    .map((line) => classAwareObjectiveLine(line, playerClass))
+    .filter((line) => line.trim().length > 0);
   const title = stripCrystalDialogMarkup(dialog.title || dialog.npcName);
   const footer = stripCrystalDialogMarkup(dialog.footer);
 

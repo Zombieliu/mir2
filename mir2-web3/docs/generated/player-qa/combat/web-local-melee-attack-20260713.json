@@ -1,0 +1,37 @@
+﻿{
+    "schema":  "mir2-combat-animation-evidence/1",
+    "capturedAt":  "2026-07-13T03:54:26.9942909+08:00",
+    "issue":  "accepted melee damage without a visible local-player attack action",
+    "before":  {
+                   "trigger":  "Space against adjacent live Deer",
+                   "targetHp":  "11/25 -\u003e 4/25",
+                   "attackingSelector":  ".entity-sprite-stack.self.attacking",
+                   "result":  "timeout",
+                   "timeoutMs":  900
+               },
+    "diagnosis":  {
+                      "localPlayerObjectId":  1000,
+                      "receivedObjectAttackObjectId":  50001,
+                      "packetEntityMatch":  false,
+                      "explanation":  "Shared Zone broadcasts the observer-facing player id, while the owner world keeps its personal-session self id. Crystal does not use S.ObjectAttack to animate self."
+                  },
+    "crystal":  {
+                    "localQueue":  "Crystal/Client/MirScenes/GameScene.cs:11506",
+                    "commandSend":  "Crystal/Client/MirObjects/PlayerObject.cs:1416",
+                    "selfEchoIgnored":  "Crystal/Client/MirScenes/GameScene.cs:3333"
+                },
+    "after":  {
+                  "trigger":  "Space against adjacent CherryTree",
+                  "distanceTiles":  1,
+                  "attackingSelector":  ".entity-sprite-stack.self.attacking",
+                  "result":  "seen",
+                  "observedAfterMs":  123,
+                  "endResult":  "detached",
+                  "endTimeoutMs":  1200,
+                  "screenshot":  "web-local-melee-attack-20260713.png"
+              },
+    "verification":  [
+                         "npm run test:frontend-logic",
+                         "npx tsc --noEmit --pretty false"
+                     ]
+}

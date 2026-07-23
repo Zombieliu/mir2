@@ -6,7 +6,11 @@ import { fileURLToPath } from "node:url";
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
 const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
-const DEFAULT_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
+const LOCAL_CRYSTAL_BUILD_ROOT = path.join(MIR2_ROOT, "Crystal", "Build", "Client", "Debug");
+const DOWNLOADED_CRYSTAL_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
+const DEFAULT_CLIENT_ROOT = existsSync(LOCAL_CRYSTAL_BUILD_ROOT)
+  ? LOCAL_CRYSTAL_BUILD_ROOT
+  : DOWNLOADED_CRYSTAL_ROOT;
 const PUBLIC_SOUND_DIR = path.join(WORKSPACE_ROOT, "public", "original-ui", "Sound");
 const PUBLIC_SOUND_INDEX_PATH = path.join(WORKSPACE_ROOT, "public", "original-ui", "sound-index.generated.json");
 const DOC_SOUND_INDEX_PATH = path.join(REPO_ROOT, "docs", "generated", "assets", "latest-sound-assets.json");

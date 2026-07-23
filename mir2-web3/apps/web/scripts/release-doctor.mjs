@@ -54,6 +54,14 @@ const checkManifest = booleanArg(args.checkManifest ?? process.env.RELEASE_DOCTO
 const checkR2 = booleanArg(args.checkR2 ?? process.env.RELEASE_DOCTOR_CHECK_R2, true);
 const checkWorker = booleanArg(args.checkWorker ?? process.env.RELEASE_DOCTOR_CHECK_WORKER, false);
 const checkBevyRuntime = booleanArg(args.checkBevyRuntime ?? process.env.RELEASE_DOCTOR_CHECK_BEVY_RUNTIME, true);
+const requireFullCrystalPack = booleanArg(
+  args.requireFullCrystalPack ?? process.env.RELEASE_DOCTOR_REQUIRE_FULL_CRYSTAL_PACK,
+  false,
+);
+const probeConcurrency = positiveIntegerArg(
+  args.probeConcurrency ?? process.env.RELEASE_DOCTOR_PROBE_CONCURRENCY,
+  32,
+);
 const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
 const assetBaseUrlInput = normalizeOptionalUrl(
   args.assetBaseUrl ??
@@ -72,25 +80,43 @@ async function main() {
       .map((file) => normalizePath(file?.path ?? file?.p ?? file?.relativePath))
       .filter(Boolean),
   );
+  const fullPackPaths = [...manifestPathSet]
+    .filter((assetPath) => assetPath.startsWith("/generated/crystal-packs/full/"))
+    .sort();
+  const fullPackSamples = [
+    "/generated/crystal-packs/full/index.json",
+    fullPackPaths.find((assetPath) => assetPath.includes("/libraries/") && assetPath.endsWith(".json")),
+    fullPackPaths.find((assetPath) => assetPath.includes("/pages/") && assetPath.endsWith(".png")),
+  ].filter(Boolean);
+  const requiredAssets = requireFullCrystalPack
+    ? [...new Set([...REQUIRED_ASSETS, ...fullPackPaths])]
+    : REQUIRED_ASSETS;
 
   let failed = false;
   const report = {
     manifestPath,
     releaseVersion,
     checks: {
-      manifest: { ok: true, missing: [], requiredCount: REQUIRED_ASSETS.length },
+      manifest: { ok: true, missing: [], requiredCount: requiredAssets.length },
       r2: { ok: true, results: [] },
       worker: { ok: true, results: [] },
-    bevyRuntime: {
-      ok: true,
-      paths: [],
-      message: "",
-    },
+      fullCrystalPack: {
+        required: requireFullCrystalPack,
+        ok: true,
+        fileCount: fullPackPaths.length,
+        expectedFileCount: Number(release.fullCrystalPack?.fileCount ?? 0),
+        samples: fullPackSamples,
+      },
+      bevyRuntime: {
+        ok: true,
+        paths: [],
+        message: "",
+      },
     },
   };
 
   if (checkManifest) {
-    const missingManifestPaths = REQUIRED_ASSETS.filter((assetPath) => !manifestPathSet.has(assetPath));
+    const missingManifestPaths = requiredAssets.filter((assetPath) => !manifestPathSet.has(assetPath));
     report.checks.manifest.missing = missingManifestPaths;
     if (missingManifestPaths.length > 0) {
       report.checks.manifest.ok = false;
@@ -101,6 +127,29 @@ async function main() {
       }
     } else {
       console.log("[release-doctor] manifest required assets present.");
+    }
+  }
+
+  if (requireFullCrystalPack) {
+    const fullPack = release.fullCrystalPack ?? {};
+    const expectedFileCount = Number(fullPack.fileCount ?? 0);
+    const hasAllSampleKinds = fullPackSamples.length === 3;
+    if (
+      fullPack.enabled !== true ||
+      fullPack.verified !== true ||
+      !expectedFileCount ||
+      fullPackPaths.length !== expectedFileCount ||
+      !hasAllSampleKinds
+    ) {
+      report.checks.fullCrystalPack.ok = false;
+      failed = true;
+      console.error(
+        `[release-doctor] full Crystal pack invalid: enabled=${fullPack.enabled} verified=${fullPack.verified} expectedFiles=${expectedFileCount} manifestFiles=${fullPackPaths.length} sampleKinds=${fullPackSamples.length}/3`,
+      );
+    } else {
+      console.log(
+        `[release-doctor] full Crystal pack manifest passed (${fullPack.libraryCount} libraries, ${fullPack.pageCount} pages).`,
+      );
     }
   }
 
@@ -116,16 +165,10 @@ async function main() {
       report.checks.r2.ok = false;
       console.error("[release-doctor] assetBaseUrl is missing. Set ASSET_ORIGIN_URL, NEXT_PUBLIC_MIR2_ASSET_BASE_URL, or release.assetBaseUrl.");
     } else {
-      for (const required of REQUIRED_ASSETS) {
-        const url = `${requiredForR2.assetBaseUrl}/${required.replace(/^\/+/, "")}`;
-        const result = await probe(url);
-        report.checks.r2.results.push({ path: required, ...result });
-        if (!result.ok) {
-          report.checks.r2.ok = false;
-          failed = true;
-          console.error(`[release-doctor] R2 miss: ${url} -> ${result.error ?? `HTTP ${result.status}`}`);
-        }
-      }
+      const outcome = await probeAssets(requiredAssets, requiredForR2.assetBaseUrl, "R2");
+      report.checks.r2.results = outcome.results;
+      report.checks.r2.ok = outcome.ok;
+      if (!outcome.ok) failed = true;
     }
     if (report.checks.r2.ok) {
       console.log("[release-doctor] R2 asset presence check passed.");
@@ -133,16 +176,10 @@ async function main() {
   }
 
   if (checkWorker) {
-    for (const required of REQUIRED_ASSETS) {
-      const url = `${webBaseUrl}/${required.replace(/^\/+/, "")}`;
-      const result = await probe(url);
-      report.checks.worker.results.push({ path: required, ...result });
-      if (!result.ok) {
-        report.checks.worker.ok = false;
-        failed = true;
-        console.error(`[release-doctor] worker miss: ${url} -> ${result.error ?? `HTTP ${result.status}`}`);
-      }
-    }
+    const outcome = await probeAssets(requiredAssets, webBaseUrl, "worker");
+    report.checks.worker.results = outcome.results;
+    report.checks.worker.ok = outcome.ok;
+    if (!outcome.ok) failed = true;
     if (report.checks.worker.ok) {
       console.log("[release-doctor] worker same-origin smoke passed.");
     }
@@ -189,6 +226,21 @@ async function main() {
   }
 }
 
+async function probeAssets(assetPaths, baseUrl, label) {
+  const results = new Array(assetPaths.length);
+  let ok = true;
+  await runPool(assetPaths, probeConcurrency, async (assetPath, index) => {
+    const url = `${baseUrl}/${assetPath.replace(/^\/+/, "")}`;
+    const result = await probe(url);
+    results[index] = { path: assetPath, ...result };
+    if (!result.ok) {
+      ok = false;
+      console.error(`[release-doctor] ${label} miss: ${url} -> ${result.error ?? `HTTP ${result.status}`}`);
+    }
+  });
+  return { ok, results };
+}
+
 async function probe(url) {
   const startedAt = Date.now();
   let response;
@@ -230,6 +282,26 @@ function normalizeObjectPrefix(value) {
   return String(value || "")
     .trim()
     .replace(/^\/+|\/+$/g, "");
+}
+
+async function runPool(items, concurrency, worker) {
+  let nextIndex = 0;
+  async function next() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      await worker(items[index], index);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length || 1) }, next));
+}
+
+function positiveIntegerArg(value, fallback) {
+  const number = Number(value ?? fallback);
+  if (!Number.isSafeInteger(number) || number <= 0) {
+    throw new Error(`Expected a positive integer, received ${value}`);
+  }
+  return number;
 }
 
 function normalizePath(value) {

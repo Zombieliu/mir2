@@ -1,222 +1,269 @@
-// Off-main-thread PNG -> RGBA decoder for the Bevy "standalone" (atlas-miss) map tiles.
-//
-// The Bevy map renderer only batches tiles whose source PNG lives in one of the prebuilt
-// library atlases. Tiles that miss every atlas ("standalone" tiles) must be decoded
-// individually before they can be uploaded as one-off textures. That decode — fetch +
-// ImageBitmap draw + getImageData readback — is what this module moves off the main thread
-// (which also drives Bevy's render loop) so a burst of atlas-miss tiles never stalls a frame.
-//
-// `decodeBitmapToRgba` is intentionally SELF-CONTAINED: it is serialized via `.toString()`
-// into the off-thread worker below. It MUST NOT reference any module-scope binding (constants,
-// helpers, imports) — everything it needs is declared inside its own body or is a JS global
-// (OffscreenCanvas, Uint8Array…). If you change the decode, the worker updates automatically;
-// do not reintroduce closures.
+import {
+  decodeImagePixelsOffThread,
+  offThreadImageDecodeAvailable,
+  type DecodedPixels,
+} from "./map-atlas-decode";
+import { alphaKeyMapObjectPixels } from "./scene-alpha-key";
 
-export type StandaloneTilePixels = { width: number; height: number; pixels: Uint8Array };
-
-// ---------------------------------------------------------------------------
-// Off-thread driver: runs the ImageBitmap draw + getImageData readback in a Web Worker so the
-// per-tile decode never blocks the main thread. The worker is built from a Blob URL with the
-// decode injected via .toString(), so it needs no bundler worker support. The fetch +
-// createImageBitmap stays on the main thread (createImageBitmap is cheap and decodes off-thread
-// internally), then the ImageBitmap is *transferred* into the worker so no pixel copy happens.
-// ---------------------------------------------------------------------------
-
-const OFF_THREAD_MAX_FAILURES = 3;
-const OFF_THREAD_TIMEOUT_MS = 15_000;
-
-let offThreadSupported: boolean | null = null;
-let offThreadFailures = 0;
-let workerBlobUrl: string | null = null;
-let workerPool: Worker[] | null = null;
-let nextWorkerIndex = 0;
-let nextRequestId = 1;
-
-type PendingRequest = {
-  resolve: (result: StandaloneTilePixels | null) => void;
-  reject: (error: unknown) => void;
-  timer: ReturnType<typeof setTimeout>;
+export type StandaloneTileDecodeSource = {
+  imageKey: string;
+  fetchUrl: string;
+  alphaKeyMapObject: boolean;
 };
-const pendingRequests = new Map<number, PendingRequest>();
 
-// Each URL decodes at most once: the in-flight (and resolved) promise is memoized so concurrent
-// callers for the same tile share a single fetch + worker round-trip. Mirrors `mapImagePixelCache`.
-const mapImagePixelCache = new Map<string, Promise<StandaloneTilePixels | null>>();
+export type StandaloneTilePixels = DecodedPixels & {
+  imageKey: string;
+};
 
-export function offThreadStandaloneTileDecodeAvailable(): boolean {
-  if (offThreadSupported !== null) {
-    return offThreadSupported && offThreadFailures < OFF_THREAD_MAX_FAILURES;
-  }
-  offThreadSupported =
-    typeof window !== "undefined" &&
-    typeof Worker !== "undefined" &&
-    typeof OffscreenCanvas !== "undefined" &&
-    typeof createImageBitmap === "function" &&
-    typeof fetch === "function" &&
-    typeof Blob !== "undefined" &&
-    typeof URL !== "undefined" &&
-    typeof URL.createObjectURL === "function";
-  return offThreadSupported && offThreadFailures < OFF_THREAD_MAX_FAILURES;
-}
+type ResolvedStandaloneTile = {
+  source: StandaloneTileDecodeSource;
+  pixels: StandaloneTilePixels;
+};
 
-function workerSource(): string {
-  // `decodeBitmapToRgba` is self-contained, so its .toString() is valid standalone JS.
-  return `const decodeBitmapToRgba = ${decodeBitmapToRgba.toString()};
-self.onmessage = (event) => {
-  const { id, bitmap } = event.data;
-  try {
-    const result = decodeBitmapToRgba(bitmap);
-    if (bitmap.close) bitmap.close();
-    if (!result) {
-      self.postMessage({ id, width: 0, height: 0, buffer: null });
-      return;
-    }
-    self.postMessage(
-      { id, width: result.width, height: result.height, buffer: result.buffer },
-      [result.buffer],
-    );
-  } catch (err) {
-    if (bitmap.close) bitmap.close();
-    self.postMessage({ id, error: String((err && err.message) || err) });
-  }
-};`;
-}
+type StandaloneTileDecodeJob = {
+  source: StandaloneTileDecodeSource;
+  promise: Promise<StandaloneTilePixels | null>;
+  resolve: (pixels: StandaloneTilePixels | null) => void;
+  state: "queued" | "running";
+  cancelled: boolean;
+  settled: boolean;
+  abort?: () => void;
+};
 
-// Self-contained: draws a transferred ImageBitmap onto an OffscreenCanvas and reads back the
-// RGBA bytes. Returns the pixel data over a detached ArrayBuffer so it can be transferred back
-// to the main thread with zero copy. MUST stay closure-free (see the module header note).
-function decodeBitmapToRgba(
-  bitmap: ImageBitmap,
-): { width: number; height: number; buffer: ArrayBuffer } | null {
-  const width = bitmap.width;
-  const height = bitmap.height;
-  if (width <= 0 || height <= 0) {
-    return null;
-  }
-  const canvas = new OffscreenCanvas(width, height);
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) {
-    return null;
-  }
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const imageData = ctx.getImageData(0, 0, width, height);
-  // imageData.data is a Uint8ClampedArray view over a fresh ArrayBuffer; hand that buffer back
-  // so the main thread can wrap it as a Uint8Array without re-copying the pixels.
-  return { width, height, buffer: imageData.data.buffer };
-}
+const STANDALONE_TILE_DECODE_CONCURRENCY = 6;
+const STANDALONE_TILE_RESOLVED_CACHE_LIMIT = 192;
+const STANDALONE_TILE_LOAD_TIMEOUT_MS = 15_000;
 
-function buildWorker(): Worker {
-  if (!workerBlobUrl) {
-    workerBlobUrl = URL.createObjectURL(new Blob([workerSource()], { type: "application/javascript" }));
-  }
-  const worker = new Worker(workerBlobUrl);
-  worker.onmessage = (event: MessageEvent) => {
-    const { id, width, height, buffer, error } = (event.data ?? {}) as {
-      id: number;
-      width?: number;
-      height?: number;
-      buffer?: ArrayBuffer | null;
-      error?: string;
-    };
-    const entry = pendingRequests.get(id);
-    if (!entry) {
-      return;
-    }
-    pendingRequests.delete(id);
-    clearTimeout(entry.timer);
-    if (error) {
-      offThreadFailures += 1;
-      entry.reject(new Error(error));
-      return;
-    }
-    if (!buffer || !width || !height) {
-      entry.resolve(null);
-      return;
-    }
-    entry.resolve({ width, height, pixels: new Uint8Array(buffer) });
-  };
-  worker.onerror = () => {
-    // A worker-level error means the (blob) worker script is unusable — every worker in the
-    // pool shares the same source, so disable off-thread entirely and fail any in-flight
-    // requests immediately so they fall back to main-thread decoding instead of waiting out
-    // the per-request timeout.
-    offThreadFailures = OFF_THREAD_MAX_FAILURES;
-    for (const [id, entry] of pendingRequests) {
-      pendingRequests.delete(id);
-      clearTimeout(entry.timer);
-      entry.reject(new Error("standalone tile decode worker error"));
-    }
-  };
-  return worker;
-}
+const resolvedStandaloneTiles = new Map<string, ResolvedStandaloneTile>();
+const inFlightStandaloneTiles = new Map<string, StandaloneTileDecodeJob>();
+const standaloneTileDecodeQueue: StandaloneTileDecodeJob[] = [];
+let activeStandaloneTileDecodes = 0;
 
-function nextWorker(): Worker {
-  if (!workerPool) {
-    const cores = globalThis.navigator?.hardwareConcurrency ?? 4;
-    const size = Math.max(1, Math.min(3, cores - 1));
-    workerPool = Array.from({ length: size }, () => buildWorker());
+export function decodeStandaloneTilePixels(
+  source: StandaloneTileDecodeSource,
+): Promise<StandaloneTilePixels | null> {
+  if (typeof document === "undefined") {
+    return Promise.resolve(null);
   }
-  const worker = workerPool[nextWorkerIndex % workerPool.length];
-  nextWorkerIndex += 1;
-  return worker;
-}
 
-async function decodeStandaloneTileUncached(url: string): Promise<StandaloneTilePixels | null> {
-  if (!offThreadStandaloneTileDecodeAvailable()) {
-    return null;
+  const resolved = resolvedStandaloneTiles.get(source.imageKey);
+  if (resolved && sameStandaloneTileSource(resolved.source, source)) {
+    // Refresh insertion order so the bounded resolved cache behaves as an LRU.
+    resolvedStandaloneTiles.delete(source.imageKey);
+    resolvedStandaloneTiles.set(source.imageKey, resolved);
+    return Promise.resolve(resolved.pixels);
   }
-  let bitmap: ImageBitmap;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      return null;
-    }
-    bitmap = await createImageBitmap(await response.blob());
-  } catch {
-    return null;
+  if (resolved) {
+    resolvedStandaloneTiles.delete(source.imageKey);
   }
-  const worker = nextWorker();
-  const id = nextRequestId++;
-  try {
-    return await new Promise<StandaloneTilePixels | null>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        if (pendingRequests.delete(id)) {
-          offThreadFailures += 1;
-          // Graceful: a timed-out decode resolves null (caller falls back to a main-thread
-          // decode) rather than rejecting — but still counts toward the failure ceiling.
-          resolve(null);
-        }
-      }, OFF_THREAD_TIMEOUT_MS);
-      pendingRequests.set(id, { resolve, reject, timer });
-      try {
-        worker.postMessage({ id, bitmap }, [bitmap]);
-      } catch (err) {
-        pendingRequests.delete(id);
-        clearTimeout(timer);
-        if (typeof bitmap.close === "function") {
-          bitmap.close();
-        }
-        reject(err);
-      }
-    });
-  } catch {
-    // Any worker/transfer failure degrades to null so the caller decodes on the main thread.
-    return null;
-  }
-}
 
-export function decodeStandaloneTileOffThread(url: string): Promise<StandaloneTilePixels | null> {
-  const inFlight = mapImagePixelCache.get(url);
+  const inFlight = inFlightStandaloneTiles.get(source.imageKey);
+  if (inFlight && sameStandaloneTileSource(inFlight.source, source)) {
+    return inFlight.promise;
+  }
   if (inFlight) {
-    return inFlight;
+    evictStandaloneTilePixels([source.imageKey]);
   }
-  // Dedup only CONCURRENT requests for the same URL — evict on settle so the
-  // decoded RGBA isn't retained here (the caller, original-client-shell.tsx, owns
-  // the LRU-bounded `decodedMapTilesRef`). Retaining every decoded tile's pixels in
-  // this module-scope map would leak unboundedly over a long cross-map walk.
-  const pending = decodeStandaloneTileUncached(url).finally(() => {
-    mapImagePixelCache.delete(url);
+
+  let resolveJob: (pixels: StandaloneTilePixels | null) => void = () => undefined;
+  const promise = new Promise<StandaloneTilePixels | null>((resolve) => {
+    resolveJob = resolve;
   });
-  mapImagePixelCache.set(url, pending);
-  return pending;
+  const job: StandaloneTileDecodeJob = {
+    source: { ...source },
+    promise,
+    resolve: resolveJob,
+    state: "queued",
+    cancelled: false,
+    settled: false,
+  };
+  inFlightStandaloneTiles.set(source.imageKey, job);
+  standaloneTileDecodeQueue.push(job);
+  pumpStandaloneTileDecodeQueue();
+  return promise;
+}
+
+export function evictStandaloneTilePixels(imageKeys: Iterable<string>) {
+  for (const imageKey of imageKeys) {
+    resolvedStandaloneTiles.delete(imageKey);
+    const job = inFlightStandaloneTiles.get(imageKey);
+    if (!job) {
+      continue;
+    }
+    inFlightStandaloneTiles.delete(imageKey);
+    job.cancelled = true;
+    job.abort?.();
+    settleStandaloneTileDecodeJob(job, null);
+  }
+}
+
+function pumpStandaloneTileDecodeQueue() {
+  while (
+    activeStandaloneTileDecodes < STANDALONE_TILE_DECODE_CONCURRENCY &&
+    standaloneTileDecodeQueue.length > 0
+  ) {
+    const job = standaloneTileDecodeQueue.shift();
+    if (
+      !job ||
+      job.cancelled ||
+      job.settled ||
+      inFlightStandaloneTiles.get(job.source.imageKey) !== job
+    ) {
+      continue;
+    }
+
+    job.state = "running";
+    activeStandaloneTileDecodes += 1;
+    void loadStandaloneTilePixels(job)
+      .then((decoded) => finishStandaloneTileDecodeJob(job, decoded))
+      .catch(() => finishStandaloneTileDecodeJob(job, null));
+  }
+}
+
+function finishStandaloneTileDecodeJob(
+  job: StandaloneTileDecodeJob,
+  decoded: DecodedPixels | null,
+) {
+  if (job.state === "running") {
+    activeStandaloneTileDecodes = Math.max(0, activeStandaloneTileDecodes - 1);
+  }
+  if (inFlightStandaloneTiles.get(job.source.imageKey) === job) {
+    inFlightStandaloneTiles.delete(job.source.imageKey);
+  }
+
+  let result: StandaloneTilePixels | null = null;
+  if (!job.cancelled && decoded) {
+    if (job.source.alphaKeyMapObject) {
+      alphaKeyMapObjectPixels(
+        new Uint8ClampedArray(
+          decoded.pixels.buffer,
+          decoded.pixels.byteOffset,
+          decoded.pixels.byteLength,
+        ),
+        decoded.width,
+        decoded.height,
+      );
+    }
+    result = { imageKey: job.source.imageKey, ...decoded };
+    resolvedStandaloneTiles.set(job.source.imageKey, {
+      source: job.source,
+      pixels: result,
+    });
+    trimResolvedStandaloneTiles();
+  }
+
+  settleStandaloneTileDecodeJob(job, result);
+  pumpStandaloneTileDecodeQueue();
+}
+
+function settleStandaloneTileDecodeJob(
+  job: StandaloneTileDecodeJob,
+  result: StandaloneTilePixels | null,
+) {
+  if (job.settled) {
+    return;
+  }
+  job.settled = true;
+  job.resolve(result);
+}
+
+function trimResolvedStandaloneTiles() {
+  while (resolvedStandaloneTiles.size > STANDALONE_TILE_RESOLVED_CACHE_LIMIT) {
+    const oldestKey = resolvedStandaloneTiles.keys().next().value as string | undefined;
+    if (!oldestKey) {
+      break;
+    }
+    resolvedStandaloneTiles.delete(oldestKey);
+  }
+}
+
+function sameStandaloneTileSource(
+  left: StandaloneTileDecodeSource,
+  right: StandaloneTileDecodeSource,
+) {
+  return (
+    left.imageKey === right.imageKey &&
+    left.fetchUrl === right.fetchUrl &&
+    left.alphaKeyMapObject === right.alphaKeyMapObject
+  );
+}
+
+function loadStandaloneTilePixels(job: StandaloneTileDecodeJob): Promise<DecodedPixels | null> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    let finished = false;
+    let timeout: number | null = null;
+    const finish = (result: DecodedPixels | null) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+      image.onload = null;
+      image.onerror = null;
+      resolve(result);
+    };
+    timeout = window.setTimeout(() => finish(null), STANDALONE_TILE_LOAD_TIMEOUT_MS);
+
+    job.abort = () => {
+      try {
+        image.src = "";
+      } catch {
+        // Resolving null is sufficient when a browser rejects clearing the URL.
+      }
+      finish(null);
+    };
+    image.decoding = "async";
+    image.crossOrigin = "anonymous";
+    image.onload = async () => {
+      try {
+        const width = image.naturalWidth;
+        const height = image.naturalHeight;
+        if (job.cancelled || width <= 0 || height <= 0) {
+          finish(null);
+          return;
+        }
+        if (offThreadImageDecodeAvailable()) {
+          try {
+            const decoded = await decodeImagePixelsOffThread(image, width, height);
+            if (job.cancelled) {
+              finish(null);
+              return;
+            }
+            if (decoded) {
+              finish(decoded);
+              return;
+            }
+          } catch {
+            // Fall through to main-thread canvas readback.
+          }
+        }
+        if (job.cancelled) {
+          finish(null);
+          return;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) {
+          finish(null);
+          return;
+        }
+        context.drawImage(image, 0, 0, width, height);
+        const imageData = context.getImageData(0, 0, width, height);
+        finish({
+          width,
+          height,
+          pixels: new Uint8Array(imageData.data.buffer.slice(0)),
+        });
+      } catch {
+        finish(null);
+      }
+    };
+    image.onerror = () => finish(null);
+    image.src = job.source.fetchUrl;
+  });
 }

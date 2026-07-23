@@ -1,0 +1,19 @@
+{
+  "gate": "12-distribution-node-telemetry",
+  "accepted": true,
+  "generatedAtMs": 1784810871400,
+  "gatewayAddress": "gateway:7000",
+  "primaryHostId": "gate12-zone-a",
+  "standbyHostId": "gate12-zone-b",
+  "primarySessionCountBeforeFailure": 1,
+  "standbySessionCountBeforeFailure": 1,
+  "standbySessionCountAfterFailure": 1,
+  "primaryHeartbeatVerified": true,
+  "standbyHeartbeatVerified": true,
+  "prometheusMetricVerified": true,
+  "postFailureUserLocationObserved": true,
+  "postFailurePacketCount": 2,
+  "standbyRpcRequestsBeforeFailure": 10,
+  "standbyRpcRequestsAfterFailure": 73,
+  "failoverObservedMs": 778
+}

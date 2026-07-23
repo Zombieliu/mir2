@@ -1,0 +1,16 @@
+.git
+.github
+.codegraph
+.next
+node_modules
+target
+docs/generated
+apps/web/public/assets
+apps/web/.next
+apps/admin-web/.next
+apps/web
+apps/admin-web
+apps/game-client
+onchain
+*.log
+.DS_Store

@@ -1,10 +1,18 @@
 # Node
 node_modules/
 .next/
+next-env.d.ts
 dist/
 out/
 .mir2-remote-assets/
+docs/generated/remote-assets/
 apps/web/public/original-asset-manifest.generated.json
+# Full Crystal conversion is reproducible from the local client. Do not commit
+# multi-gigabyte CAS pages or per-library manifests.
+apps/web/public/generated/crystal-packs/full/
+.tmp-full-pack-*
+apps/web/.tmp-low-tier-qa-account.txt
+apps/web/.tmp-next-build-*.pid
 
 # Rust
 target/
@@ -22,6 +30,8 @@ Desktop.ini
 .env.local
 .env.*
 !.env.example
+infra/gate12/.secrets/
+infra/gate13/.secrets/
 
 # Logs
 *.log

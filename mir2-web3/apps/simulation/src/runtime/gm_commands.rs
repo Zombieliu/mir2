@@ -27,7 +27,7 @@ use crate::config::{ItemContainer, QuestStage, WorldEntityDisposition};
 use super::buffs::crystal_buff_type_for_key;
 use super::components::{
     current_player_is_dead, current_player_object_id, entity_name, entity_position, player_entity,
-    CharacterBody, Facing, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
+    Facing, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
 use super::equipment::user_item_from_equipment_state;
 use super::inventory::{
@@ -40,7 +40,9 @@ use super::monsters::{
     crystal_dynamic_monster_template, deterministic_roll, spawn_runtime_monster,
 };
 use super::movement::{current_location, offset_point};
-use super::packets::{object_died_info_for_entity, object_health_info_for_entity};
+use super::packets::{
+    object_died_info_for_entity, object_health_info_for_entity, self_death_packet,
+};
 use super::resources::{
     BuffResource, GmRuntimeResource, InventoryResource, MapRuntimeResource, NpcStateResource,
     PlayerPermissionResource, PlayerRuntimeResource, QuestResource, SessionResource, SkillResource,
@@ -380,68 +382,25 @@ fn gm_level(world: &mut World, args: &[&str]) -> Vec<ServerPacket> {
         return vec![system(world, "Could not level player")];
     }
 
-    let old = {
-        let mut session = world.resource_mut::<SessionResource>();
-        match session.selected_character.as_mut() {
-            Some(character) => {
-                let old = character.level;
-                character.level = level;
-                old
-            }
-            None => return Vec::new(),
-        }
+    let old = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.level);
+    let Some(old) = old else {
+        return Vec::new();
     };
-    apply_level_up(world, level);
-    let mut packets = level_changed_packets(world, level);
+    // Shared progression routine: sets the session + body level, repoints
+    // `max_experience` at the curve, recomputes the stat block / HP-MP pools,
+    // and restores HP/MP to full (Crystal `LevelUp`).
+    super::leveling::apply_level_change(world, level);
+    let mut packets = super::leveling::level_changed_packets(world, level);
     packets.push(system(
         world,
         format!(
             "Congratulations! You have leveled up. Your HP and MP have been restored. {old} -> {level}."
         ),
     ));
-    packets
-}
-
-/// Shared level-application: mirror the body-component level and Crystal's
-/// `LevelUp()` HP/MP restore.
-fn apply_level_up(world: &mut World, level: u16) {
-    let Some(player) = player_entity(world) else {
-        return;
-    };
-    let restored = {
-        let mut entity = world.entity_mut(player);
-        if let Some(mut body) = entity.get_mut::<CharacterBody>() {
-            body.level = level;
-        }
-        match entity.get_mut::<PlayerVitals>() {
-            Some(mut vitals) => {
-                vitals.hp = vitals.max_hp;
-                vitals.mp = vitals.max_mp;
-                Some(*vitals)
-            }
-            None => None,
-        }
-    };
-    if let Some(restored) = restored {
-        world.resource_mut::<PlayerRuntimeResource>().player_vitals = restored;
-    }
-}
-
-fn level_changed_packets(world: &World, level: u16) -> Vec<ServerPacket> {
-    let (experience, max_experience) = {
-        let runtime = world.resource::<PlayerRuntimeResource>();
-        (runtime.experience, runtime.max_experience)
-    };
-    let mut packets = vec![ServerPacket::LevelChanged {
-        level,
-        experience,
-        max_experience,
-    }];
-    if let Some(player) = player_entity(world) {
-        if let Some(info) = object_health_info_for_entity(world, player, 0) {
-            packets.push(ServerPacket::ObjectHealth { info });
-        }
-    }
     packets
 }
 
@@ -1167,6 +1126,11 @@ fn gm_die(world: &mut World) -> Vec<ServerPacket> {
         world.resource_mut::<PlayerRuntimeResource>().player_vitals = dead;
     }
     let mut packets = Vec::new();
+    // Mirror `Die()`: self `S.Death` (drives the client revive prompt) before the
+    // `S.ObjectDied` broadcast.
+    if let Some(packet) = self_death_packet(world, player) {
+        packets.push(packet);
+    }
     if let Some(info) = object_died_info_for_entity(world, player, 0) {
         packets.push(ServerPacket::ObjectDied { info });
     }

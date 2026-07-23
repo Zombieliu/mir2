@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  resolveAssetPrewarmPolicy,
+  type AssetPrewarmPolicy,
+  type BackgroundPrewarmMode,
+} from "../../lib/asset-prewarm-policy";
 import type { AssetCachePack } from "../../lib/asset-cache-packs";
+import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
 
 type AssetManifest = {
   version?: string;
@@ -191,6 +197,8 @@ declare global {
       };
       remoteAssetBaseUrl?: string | null;
       staticAssetTiers?: Record<string, number> | null;
+      renderTier?: "low" | "medium" | "high";
+      prewarmPolicy?: AssetPrewarmPolicy;
     };
     __mir2AssetCacheReset?: (options?: AssetCacheResetOptions) => Promise<AssetCacheResetResult>;
     __mir2CacheMetrics?: CacheMetricsHandle;
@@ -204,13 +212,9 @@ declare global {
 
 const MAX_RESOURCE_METRICS = 2000;
 const MAX_API_METRICS = 500;
-const CRITICAL_PREWARM_CONCURRENCY = 8;
-const BACKGROUND_PREWARM_CONCURRENCY = 3;
 const BACKGROUND_PREWARM_FIRST_PLAYABLE_TIMEOUT_MS = 90_000;
 const BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS = 20_000;
 const CACHE_NAMESPACE_STORAGE_KEY = "mir2.assetCacheNamespace";
-
-type BackgroundPrewarmMode = "immediate" | "afterPlayable";
 
 export function AssetCacheRegistrar() {
   const [mounted, setMounted] = useState(false);
@@ -223,15 +227,40 @@ export function AssetCacheRegistrar() {
     const debug = params.get("cacheDebug") === "1";
     const consoleLog = debug || params.get("cacheLog") === "1";
     const metrics = ensureCacheMetrics(debug, consoleLog);
+    // The asset Service Worker — and its R2 fallback for /original-ui, /original-map, … assets
+    // that are NOT committed to the repo — always runs in production. In dev it stays opt-in so a
+    // bytes-less local checkout is never surprised by a Service Worker, but it now turns on
+    // automatically whenever NEXT_PUBLIC_MIR2_ASSET_BASE_URL is configured. That makes sprites AND
+    // sounds (e.g. /original-ui/Sound/62.wav, whose bytes live only on R2) resolve from the release
+    // origin like prod instead of 404ing locally. Explicit ?assetCache=1 still forces it on with no
+    // base URL configured; ?assetCache=0 forces it off for raw-network debugging.
+    const assetCacheParam = params.get("assetCache");
+    const remoteAssetBaseConfigured = Boolean(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL);
+    // `?assetCache=0` is a universal kill-switch (now honoured in production too):
+    // behind the same-origin local proxy the SW is redundant, and its asset cache
+    // otherwise keeps serving a stale pre-rebuild build (blue/missing tiles that
+    // survive a hard refresh). The disabled branch below also tears down any worker
+    // + mir2 caches a prior load left behind.
     const shouldRegisterServiceWorker =
-      process.env.NODE_ENV === "production" || params.get("assetCache") === "1";
+      assetCacheParam !== "0" &&
+      (process.env.NODE_ENV === "production" ||
+        assetCacheParam === "1" ||
+        remoteAssetBaseConfigured);
     const shouldPrewarm =
       params.get("prewarm") !== "0" &&
       (process.env.NODE_ENV === "production" ||
         params.get("prewarm") === "1" ||
         params.get("assetCache") === "1");
-    const backgroundPrewarmMode = resolveBackgroundPrewarmMode(params);
-    const backgroundPrewarmDelayMs = resolveBackgroundPrewarmDelayMs(params, backgroundPrewarmMode);
+    const deviceMemoryGiB = normalizeDeviceMemoryGiB(
+      (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+    );
+    const renderTier = resolveRenderTier({
+      forcedTier: params.get("renderTier"),
+      deviceMemoryGiB,
+      coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+    });
+    const prewarmPolicy = resolveAssetPrewarmPolicy(renderTier, resolveBackgroundPrewarmModeOverride(params));
+    const backgroundPrewarmDelayMs = resolveBackgroundPrewarmDelayMs(params, prewarmPolicy.backgroundMode);
 
     setDebugEnabled(debug);
     installFetchProbe();
@@ -282,6 +311,10 @@ export function AssetCacheRegistrar() {
           } catch {
             // The active worker can still serve from cache if the update check is transiently unavailable.
           }
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: "MIR2_ASSET_WORKER_ACTIVATE" });
+            await waitForServiceWorkerActivation(registration.waiting, 3000);
+          }
           const readyRegistration = await navigator.serviceWorker.ready;
 
           if (disposed) return;
@@ -318,6 +351,8 @@ export function AssetCacheRegistrar() {
               typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
                 ? (configured.staticAssetTiers as Record<string, number>)
                 : null,
+            renderTier,
+            prewarmPolicy,
           };
           logCacheEvent(metrics, "service-worker", {
             status: window.__mir2AssetCache.status,
@@ -340,12 +375,26 @@ export function AssetCacheRegistrar() {
             controlled: Boolean(navigator.serviceWorker.controller),
           });
         } else {
+          // Explicit ?assetCache=0: actively tear down any worker + mir2 CacheStorage
+          // a prior load left, so a stale (e.g. pre-proxy-fix) build stops being
+          // served. Takes full effect on the next navigation.
+          if (assetCacheParam === "0" && "serviceWorker" in navigator) {
+            void unregisterMir2AssetWorkers();
+            if ("caches" in window) {
+              void caches
+                .keys()
+                .then((keys) => Promise.all(keys.filter((k) => /mir2/i.test(k)).map((k) => caches.delete(k))))
+                .catch(() => {});
+            }
+          }
           window.__mir2AssetCache = {
             enabled: false,
             status: shouldRegisterServiceWorker ? "unsupported-origin" : "disabled-dev",
             version: manifest.version,
             cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            renderTier,
+            prewarmPolicy,
           };
           metrics.markMilestone("serviceWorkerSkipped", {
             status: window.__mir2AssetCache.status,
@@ -359,7 +408,7 @@ export function AssetCacheRegistrar() {
         if (shouldPrewarm) {
           scheduleIdle(() => {
             void prewarmAssetPacks(manifest, metrics, {
-              backgroundMode: backgroundPrewarmMode,
+              ...prewarmPolicy,
               backgroundDelayMs: backgroundPrewarmDelayMs,
             }).then(() => {
               if (disposed) return;
@@ -704,6 +753,30 @@ function waitForServiceWorkerMessage(type: string, timeoutMs: number) {
   });
 }
 
+function waitForServiceWorkerActivation(worker: ServiceWorker, timeoutMs: number) {
+  if (worker.state === "activated" || worker.state === "redundant") {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    let timeout = 0;
+    const cleanup = () => {
+      worker.removeEventListener("statechange", onStateChange);
+      if (timeout) window.clearTimeout(timeout);
+    };
+    const finish = () => {
+      cleanup();
+      resolve();
+    };
+    const onStateChange = () => {
+      if (worker.state === "activated" || worker.state === "redundant") finish();
+    };
+
+    timeout = window.setTimeout(finish, timeoutMs);
+    worker.addEventListener("statechange", onStateChange);
+  });
+}
+
 function maybeReloadAfterCacheNamespaceChange(cacheNamespace: string, deletedCaches: string[]) {
   if (!cacheNamespace || deletedCaches.length === 0) return;
 
@@ -739,10 +812,14 @@ function writeStorageValue(storage: Storage, key: string, value: string) {
 async function prewarmAssetPacks(
   manifest: AssetManifest,
   metrics: CacheMetricsHandle,
-  options: { backgroundMode: BackgroundPrewarmMode; backgroundDelayMs: number },
+  options: AssetPrewarmPolicy & { backgroundDelayMs: number },
 ) {
   metrics.markMilestone("prewarmStart", {
     packCount: manifest.resourcePacks?.length ?? 0,
+    renderTier: options.tier,
+    criticalConcurrency: options.criticalConcurrency,
+    backgroundConcurrency: options.backgroundConcurrency,
+    maxSceneFrames: options.maxSceneFrames,
     backgroundMode: options.backgroundMode,
     backgroundDelayMs: options.backgroundDelayMs,
   });
@@ -750,7 +827,9 @@ async function prewarmAssetPacks(
   await requestPersistentStorage(metrics);
   const packs = [...(manifest.resourcePacks ?? [])].sort((a, b) => a.priority - b.priority);
   const criticalPacks = packs.filter((pack) => pack.phase !== "background");
-  const backgroundPacks = packs.filter((pack) => pack.phase === "background");
+  const backgroundPacks = options.backgroundMode === "off"
+    ? []
+    : packs.filter((pack) => pack.phase === "background");
   const backgroundMetrics = new Map<string, CachePrewarmMetric>();
 
   for (const pack of backgroundPacks) {
@@ -760,7 +839,7 @@ async function prewarmAssetPacks(
   }
 
   for (const pack of criticalPacks) {
-    await prewarmPack(pack, metrics, CRITICAL_PREWARM_CONCURRENCY);
+    await prewarmPack(pack, metrics, options.criticalConcurrency, options.maxSceneFrames);
   }
   metrics.markMilestone("criticalPrewarmDone", summarizeMetrics(metrics));
 
@@ -777,7 +856,8 @@ async function prewarmAssetPacks(
       await prewarmPack(
         pack,
         metrics,
-        BACKGROUND_PREWARM_CONCURRENCY,
+        options.backgroundConcurrency,
+        options.maxSceneFrames,
         backgroundMetrics.get(pack.name),
       );
     }
@@ -840,6 +920,7 @@ async function prewarmPack(
   pack: AssetCachePack,
   metrics: CacheMetricsHandle,
   concurrency: number,
+  maxSceneFrames: number | null,
   existingMetric?: CachePrewarmMetric,
 ) {
   const startedAt = performance.now();
@@ -875,7 +956,10 @@ async function prewarmPack(
       if (sceneCache === "miss") packMetric.sceneCacheMisses += 1;
 
       const blueprint = await response.json();
-      const frameUrls = extractSceneFrameUrls(blueprint, scene.spriteFrameLimit);
+      const sceneFrameLimit = maxSceneFrames === null
+        ? scene.spriteFrameLimit
+        : Math.min(scene.spriteFrameLimit, maxSceneFrames);
+      const frameUrls = extractSceneFrameUrls(blueprint, sceneFrameLimit);
       packMetric.requested += frameUrls.length;
       publishPrewarmProgress(metrics, "running");
       await hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
@@ -1423,6 +1507,16 @@ function logCacheProgress(
 function shouldShowCacheProgress(snapshot: CacheMetricsSnapshot) {
   const summary = snapshot.summary;
   if (summary.prewarmRequested <= 0) return false;
+  // The panel is a loading INDICATOR pinned over the HP orb (bottom-left), not a
+  // permanent HUD element — once the prewarm has caught up it must hide, or it sits
+  // on top of the HUD for the whole session reading as "完成 100%" forever (the
+  // gating returned true whenever any prewarm was ever requested). It re-appears if a
+  // later wave requests more, then hides again. Keep it visible while anything failed
+  // so the user still sees the failure count.
+  const completed = summary.prewarmOk + summary.prewarmFailed;
+  if (completed >= summary.prewarmRequested && summary.prewarmFailed === 0) {
+    return false;
+  }
   return true;
 }
 
@@ -1505,15 +1599,15 @@ function scheduleIdle(callback: () => void) {
   window.setTimeout(callback, 250);
 }
 
-function resolveBackgroundPrewarmMode(params: URLSearchParams): BackgroundPrewarmMode {
+function resolveBackgroundPrewarmModeOverride(params: URLSearchParams): BackgroundPrewarmMode | null {
   const configured = params.get("prewarmBackground");
-  if (configured === "immediate" || configured === "afterPlayable") return configured;
+  if (configured === "off" || configured === "immediate" || configured === "afterPlayable") return configured;
   if (params.get("skipRuntime") === "1") return "immediate";
-  return "afterPlayable";
+  return null;
 }
 
 function resolveBackgroundPrewarmDelayMs(params: URLSearchParams, mode: BackgroundPrewarmMode) {
-  if (mode === "immediate") return 0;
+  if (mode === "off" || mode === "immediate") return 0;
   const configured = params.get("prewarmBackgroundDelayMs");
   if (configured == null) return BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS;
   const parsed = Number(configured);

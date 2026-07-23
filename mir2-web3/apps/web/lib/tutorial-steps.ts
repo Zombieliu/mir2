@@ -14,7 +14,7 @@
 // wires DOM events to this reducer; the reducer itself is plain data so it can be
 // unit-tested with `node` (see scripts/test-tutorial-flow.mjs).
 
-export type TutorialLang = "en" | "zh-CN" | "es";
+export type TutorialLang = "en" | "zh-CN" | "es" | "pt-BR";
 
 export type TutorialWindow = "inventory" | "character" | "questLog";
 
@@ -23,6 +23,7 @@ export interface TutorialText {
   en: string;
   "zh-CN"?: string;
   es?: string;
+  "pt-BR"?: string;
 }
 
 export type TutorialTrigger =

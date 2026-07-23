@@ -6,21 +6,23 @@ use mir2_game_data::{
     crystal_game_shop_packet_manifest, crystal_item_by_index, format_localized_text,
     localized_text_or_fallback,
 };
-use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
+use mir2_protocol::{ChatType, MirClass, MirDirection, MirGender, Point, ServerPacket};
+use serde::Deserialize;
 
 use crate::config::{
-    CurrencyKind, EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
-    Stage5HeroState, Stage5MailMessage, Stage5TradeState, WorldEntityDisposition,
+    crystal_base_vitals, CharacterRecord, CurrencyKind, EquipmentSlot, ItemContainer, ItemGrade,
+    Stage5AuctionListing, Stage5GuildState, Stage5HeroState, Stage5MailMessage, Stage5TradeState,
+    WorldEntityDisposition,
 };
 
 use super::components::{
-    entity_by_object_id, entity_position, player_entity, DisplayName, Npc, NpcAgent, ObjectId,
-    PlayerVitals, Position, WorldObject,
+    entity_by_object_id, entity_position, player_entity, DisplayName, Facing, Npc, NpcAgent,
+    ObjectId, PlayerVitals, Position, WorldObject,
 };
 use super::crystal_compat::CRYSTAL_ITEM_SEAL_DELAY_MINUTES;
 use super::equipment::{
     damage_equipment_item, equipment_slot_from_stage5_arg, equipment_slot_unique_id,
-    equipment_uses_durability,
+    equipment_uses_durability, EquipmentState,
 };
 use super::inventory::{
     add_minutes_to_binary_datetime, add_or_increment_item, allocate_item_unique_id,
@@ -43,6 +45,7 @@ use super::resources::{
     InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     RuntimeConfigResource, SessionResource, Stage5SystemsResource,
 };
+use super::save::{apply_character_save, decode_state_vec, snapshot_active_character_save};
 use super::session::{current_language, system_message, SimulationSession};
 use super::social_economy::{
     stage5_mail_exact_item_slots, stage5_social_add_friend_entry, stage5_trade_item_can_enter,
@@ -221,6 +224,51 @@ pub(super) fn now_unix_ms() -> u128 {
         .unwrap_or_default()
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct QaApplyNativeCharacterState {
+    character: QaApplyNativeCharacterRecord,
+    #[serde(alias = "map_file_name")]
+    map_file_name: String,
+    #[serde(default, alias = "map_title")]
+    map_title: String,
+    position: Point,
+    direction: MirDirection,
+    hp: i32,
+    #[serde(default, alias = "max_hp")]
+    max_hp: Option<i32>,
+    mp: i32,
+    #[serde(default, alias = "max_mp")]
+    max_mp: Option<i32>,
+    #[serde(default)]
+    experience: Option<i64>,
+    #[serde(default, alias = "max_experience")]
+    max_experience: Option<i64>,
+    #[serde(default)]
+    gold: Option<u32>,
+    #[serde(default)]
+    credit: Option<u32>,
+    #[serde(default, alias = "city_currencies")]
+    city_currencies: Option<BTreeMap<String, u32>>,
+    #[serde(default, alias = "inventory_items_json")]
+    inventory_items_json: Vec<String>,
+    #[serde(default, alias = "belt_items_json")]
+    belt_items_json: Vec<String>,
+    #[serde(default, alias = "storage_items_json")]
+    storage_items_json: Vec<String>,
+    #[serde(default, alias = "equipment_items_json")]
+    equipment_items_json: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct QaApplyNativeCharacterRecord {
+    name: String,
+    level: u16,
+    class: MirClass,
+    gender: MirGender,
+}
+
 impl SimulationSession {
     pub fn stage5_command(&mut self, action: &str, args: Vec<String>) -> Vec<ServerPacket> {
         let packets = self.stage5_command_impl(action, args);
@@ -270,6 +318,7 @@ impl SimulationSession {
             "qa.damageEquipment" => self.stage5_qa_damage_equipment(args),
             "qa.damagePlayer" => self.stage5_qa_damage_player(args),
             "qa.giveItem" => self.stage5_qa_give_item(args),
+            "qa.applyNativeState" => self.stage5_qa_apply_native_state(args),
             "qa.openNpcDialog" => self.stage5_qa_open_npc_dialog(),
             "qa.openStorage" => self.stage5_qa_open_storage(),
             other => {
@@ -1940,6 +1989,114 @@ impl SimulationSession {
             heal_mp,
         });
         Vec::new()
+    }
+
+    fn stage5_qa_apply_native_state(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let language = current_language(self.app.world());
+        let Some(payload_json) = args.first() else {
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["qa.applyNativeState".to_string()],
+            ))];
+        };
+        let Ok(state) = serde_json::from_str::<QaApplyNativeCharacterState>(payload_json) else {
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["qa.applyNativeState payload".to_string()],
+            ))];
+        };
+        if decode_state_vec::<ItemState>(&state.inventory_items_json).is_none()
+            || decode_state_vec::<ItemState>(&state.belt_items_json).is_none()
+            || decode_state_vec::<ItemState>(&state.storage_items_json).is_none()
+            || decode_state_vec::<EquipmentState>(&state.equipment_items_json).is_none()
+        {
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["qa.applyNativeState item state".to_string()],
+            ))];
+        }
+
+        let Some(selected_character) = self
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .selected_character
+            .clone()
+        else {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
+        };
+        let Some(mut save) = snapshot_active_character_save(self.app.world()) else {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
+        };
+
+        let character = CharacterRecord {
+            index: selected_character.index,
+            name: if state.character.name.trim().is_empty() {
+                selected_character.name
+            } else {
+                state.character.name
+            },
+            level: state.character.level.max(1),
+            class: state.character.class,
+            gender: state.character.gender,
+        };
+        let (base_max_hp, base_max_mp) = crystal_base_vitals(character.class, character.level);
+
+        save.character = character.clone();
+        save.map_file_name = state.map_file_name;
+        save.map_title = state.map_title;
+        save.position = state.position;
+        save.direction = state.direction;
+        save.max_hp = state.max_hp.unwrap_or(base_max_hp).max(1);
+        save.hp = state.hp.clamp(1, save.max_hp);
+        save.max_mp = state.max_mp.unwrap_or(base_max_mp).max(0);
+        save.mp = state.mp.clamp(0, save.max_mp);
+        if let Some(experience) = state.experience {
+            save.experience = experience.max(0);
+        }
+        if let Some(max_experience) = state.max_experience {
+            save.max_experience = max_experience.max(1);
+        }
+        if let Some(gold) = state.gold {
+            save.gold = gold;
+        }
+        if let Some(credit) = state.credit {
+            save.credit = credit;
+        }
+        if let Some(city_currencies) = state.city_currencies {
+            save.city_currencies = city_currencies;
+        }
+        save.inventory_items_json = state.inventory_items_json;
+        save.belt_items_json = state.belt_items_json;
+        save.storage_items_json = state.storage_items_json;
+        save.equipment_items_json = state.equipment_items_json;
+        save.equipment_items_explicit_empty = true;
+
+        apply_character_save(self.app.world_mut(), &save);
+        if let Some(player) = player_entity(self.app.world()) {
+            self.app.world_mut().entity_mut(player).insert((
+                Position(save.position),
+                Facing(save.direction),
+                PlayerVitals {
+                    hp: save.hp,
+                    max_hp: save.max_hp,
+                    mp: save.mp,
+                    max_mp: save.max_mp,
+                },
+            ));
+        }
+        self.start_game(character.index)
     }
 
     fn stage5_qa_open_npc_dialog(&mut self) -> Vec<ServerPacket> {

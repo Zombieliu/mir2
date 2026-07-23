@@ -1,0 +1,889 @@
+{
+  "_meta": {
+    "title": "Legend of Mir 2 (传奇/Mir2) canonical localization glossary",
+    "purpose": "Native-idiomatic terminology for en / zh-CN / es-ES / pt-BR. NOT literal: zh-CN uses 传奇老玩家黑话 (veteran-player slang), pt-BR uses Brazilian MMO register (Mago not Bruxo, 'upar' for level-up).",
+    "languages": [
+      "en",
+      "zhCN",
+      "esES",
+      "ptBR"
+    ],
+    "convention_notes": {
+      "zhCN": "传奇黑话: HP=血/血量, MP=蓝, DC=攻击, MC=魔法, SC=道术, AC=物防, MAC=魔防; 喝药, 衣服=身体护甲, 升级/冲级, 红名/PK, 摆摊, 打怪, 爆装. Stat abbreviations stay as Chinese game-common words, not the textbook 防御力.",
+      "esES": "Registro MMO español de España: Guerrero/Mago/Taoísta, Oro, poción, subir de nivel. Abreviaturas de stats (HP/MP/DC...) se conservan tal cual, como en la comunidad.",
+      "ptBR": "Registro MMO brasileiro (estilo Mu Online/Tibia/Ragnarök): Mago (NUNCA Bruxo), Guerreiro, Taoísta; Ouro; poção; 'upar' = subir de nível (gíria), 'dropar' = soltar item, 'PK'. Siglas HP/MP/DC/MC/SC/CA mantidas em inglês como na comunidade."
+    },
+    "term_count": 124,
+    "generated": "2026-06-21"
+  },
+  "terms": [
+    {
+      "en": "Warrior",
+      "zhCN": "战士",
+      "esES": "Guerrero",
+      "ptBR": "Guerreiro",
+      "note": "Class. zh 玩家口语 战士/战; pt-BR Guerreiro is the standard MMO term."
+    },
+    {
+      "en": "Wizard",
+      "zhCN": "法师",
+      "esES": "Mago",
+      "ptBR": "Mago",
+      "note": "Class. pt-BR ALWAYS Mago, never Bruxo. es Mago."
+    },
+    {
+      "en": "Taoist",
+      "zhCN": "道士",
+      "esES": "Taoísta",
+      "ptBR": "Taoísta",
+      "note": "Class. Support/healer-summoner. Keep transliterated Taoísta in es/pt (franchise-established)."
+    },
+    {
+      "en": "Assassin",
+      "zhCN": "刺客",
+      "esES": "Asesino",
+      "ptBR": "Assassino",
+      "note": "Class (stealth)."
+    },
+    {
+      "en": "Archer",
+      "zhCN": "弓箭手",
+      "esES": "Arquero",
+      "ptBR": "Arqueiro",
+      "note": "Class (ranged)."
+    },
+    {
+      "en": "Class",
+      "zhCN": "职业",
+      "esES": "Clase",
+      "ptBR": "Classe",
+      "note": "Character class."
+    },
+    {
+      "en": "Level",
+      "zhCN": "等级",
+      "esES": "Nivel",
+      "ptBR": "Nível",
+      "note": "Character/skill level."
+    },
+    {
+      "en": "Level up",
+      "zhCN": "升级",
+      "esES": "Subir de nivel",
+      "ptBR": "Upar",
+      "note": "pt-BR gíria 'upar' is THE community verb (also 'subir de nível'). zh 升级/冲级 for grinding."
+    },
+    {
+      "en": "Experience (EXP)",
+      "zhCN": "经验",
+      "esES": "Experiencia (EXP)",
+      "ptBR": "Experiência (EXP)",
+      "note": "zh 经验/经验值. Keep EXP abbr in es/pt."
+    },
+    {
+      "en": "HP",
+      "zhCN": "血",
+      "esES": "HP",
+      "ptBR": "HP",
+      "note": "Health points. zh slang 血/血量 (not the formal 生命值). es/pt keep HP."
+    },
+    {
+      "en": "MP",
+      "zhCN": "蓝",
+      "esES": "MP",
+      "ptBR": "MP",
+      "note": "Mana points. zh老玩家 say 蓝 (blue bar) or 魔; formal source uses 法力. es/pt keep MP."
+    },
+    {
+      "en": "Health",
+      "zhCN": "血量",
+      "esES": "Vida",
+      "ptBR": "Vida",
+      "note": "Full word form of HP (tooltips). es/pt 'Vida' when spelled out."
+    },
+    {
+      "en": "Mana",
+      "zhCN": "魔法值",
+      "esES": "Maná",
+      "ptBR": "Mana",
+      "note": "Full word form of MP. es 'Maná', pt 'Mana'."
+    },
+    {
+      "en": "DC (Damage/Attack)",
+      "zhCN": "攻击",
+      "esES": "DC (Ataque)",
+      "ptBR": "DC (Ataque)",
+      "note": "Physical attack power. zh传奇 = 攻击 (or 物攻). Keep DC sigla in es/pt as community does."
+    },
+    {
+      "en": "MC (Magic)",
+      "zhCN": "魔法",
+      "esES": "MC (Magia)",
+      "ptBR": "MC (Magia)",
+      "note": "Spell power (Wizard). zh = 魔法. Keep MC sigla es/pt."
+    },
+    {
+      "en": "SC (Taoist/Holy)",
+      "zhCN": "道术",
+      "esES": "SC (Taoísmo)",
+      "ptBR": "SC (Taoísmo)",
+      "note": "Taoist power. zh = 道术 (Taoist arts). Keep SC sigla es/pt."
+    },
+    {
+      "en": "AC (Armour/Defence)",
+      "zhCN": "物防",
+      "esES": "CA (Defensa)",
+      "ptBR": "CA (Defesa)",
+      "note": "Physical defence. zh传奇 = 物防 (not the textbook 护甲/防御力). es/pt commonly 'CA' (clase de armadura) or keep AC."
+    },
+    {
+      "en": "MAC (Magic Defence)",
+      "zhCN": "魔防",
+      "esES": "CAM (Def. Mágica)",
+      "ptBR": "CAM (Def. Mágica)",
+      "note": "Magic defence. zh = 魔防. es/pt 'CAM' or keep MAC/AMC."
+    },
+    {
+      "en": "Accuracy",
+      "zhCN": "准确",
+      "esES": "Precisión",
+      "ptBR": "Precisão",
+      "note": "Hit chance stat. zh 准确/准确度."
+    },
+    {
+      "en": "Agility",
+      "zhCN": "敏捷",
+      "esES": "Agilidad",
+      "ptBR": "Agilidade",
+      "note": "Dodge stat."
+    },
+    {
+      "en": "Luck",
+      "zhCN": "幸运",
+      "esES": "Suerte",
+      "ptBR": "Sorte",
+      "note": "Crit/luck stat."
+    },
+    {
+      "en": "Holy",
+      "zhCN": "神圣",
+      "esES": "Sagrado",
+      "ptBR": "Sagrado",
+      "note": "Holy attribute (vs undead)."
+    },
+    {
+      "en": "Attack Speed (A.Speed)",
+      "zhCN": "攻速",
+      "esES": "Vel. Ataque",
+      "ptBR": "Vel. Ataque",
+      "note": "zh传奇缩写 攻速."
+    },
+    {
+      "en": "Bag Weight",
+      "zhCN": "负重",
+      "esES": "Peso de mochila",
+      "ptBR": "Peso da mochila",
+      "note": "Carry capacity. zh老玩家 = 负重."
+    },
+    {
+      "en": "Strength",
+      "zhCN": "力量",
+      "esES": "Fuerza",
+      "ptBR": "Força",
+      "note": "Wear/hand weight strength stat."
+    },
+    {
+      "en": "Poison Resist",
+      "zhCN": "毒抗",
+      "esES": "Res. veneno",
+      "ptBR": "Res. veneno",
+      "note": "zh缩写 毒抗."
+    },
+    {
+      "en": "Magic Resist",
+      "zhCN": "魔抗",
+      "esES": "Res. mágica",
+      "ptBR": "Res. mágica",
+      "note": "zh缩写 魔抗."
+    },
+    {
+      "en": "Gold",
+      "zhCN": "金币",
+      "esES": "Oro",
+      "ptBR": "Ouro",
+      "note": "Currency. zh 金币 (or 钱)."
+    },
+    {
+      "en": "Credits",
+      "zhCN": "点券",
+      "esES": "Créditos",
+      "ptBR": "Créditos",
+      "note": "Cash-shop currency. zh 点券/元宝."
+    },
+    {
+      "en": "GameGold",
+      "zhCN": "元宝",
+      "esES": "Oro de tienda",
+      "ptBR": "Ouro da loja",
+      "note": "Premium shop gold. zh = 元宝."
+    },
+    {
+      "en": "Weapon",
+      "zhCN": "武器",
+      "esES": "Arma",
+      "ptBR": "Arma",
+      "note": "Equip slot."
+    },
+    {
+      "en": "Armour (body)",
+      "zhCN": "衣服",
+      "esES": "Armadura",
+      "ptBR": "Armadura",
+      "note": "Body armour slot. zh老玩家叫 衣服 (the chest piece), not 护甲. pt 'Armadura' / casual 'roupa'."
+    },
+    {
+      "en": "Helmet",
+      "zhCN": "头盔",
+      "esES": "Casco",
+      "ptBR": "Capacete",
+      "note": "Head slot."
+    },
+    {
+      "en": "Necklace",
+      "zhCN": "项链",
+      "esES": "Collar",
+      "ptBR": "Colar",
+      "note": "Neck slot."
+    },
+    {
+      "en": "Bracelet",
+      "zhCN": "手镯",
+      "esES": "Brazalete",
+      "ptBR": "Bracelete",
+      "note": "Wrist slot (two slots)."
+    },
+    {
+      "en": "Ring",
+      "zhCN": "戒指",
+      "esES": "Anillo",
+      "ptBR": "Anel",
+      "note": "Ring slot (two slots)."
+    },
+    {
+      "en": "Belt",
+      "zhCN": "腰带",
+      "esES": "Cinturón",
+      "ptBR": "Cinto",
+      "note": "Belt/quick-slot."
+    },
+    {
+      "en": "Boots",
+      "zhCN": "靴子",
+      "esES": "Botas",
+      "ptBR": "Botas",
+      "note": "Feet slot."
+    },
+    {
+      "en": "Stone (gem)",
+      "zhCN": "宝石",
+      "esES": "Gema",
+      "ptBR": "Gema",
+      "note": "Stone/socket slot. zh 宝石."
+    },
+    {
+      "en": "Amulet",
+      "zhCN": "护身符",
+      "esES": "Amuleto",
+      "ptBR": "Amuleto",
+      "note": "Taoist/Wizard reagent slot (ammo-like)."
+    },
+    {
+      "en": "Torch",
+      "zhCN": "火把",
+      "esES": "Antorcha",
+      "ptBR": "Tocha",
+      "note": "Light-source slot."
+    },
+    {
+      "en": "Mount",
+      "zhCN": "坐骑",
+      "esES": "Montura",
+      "ptBR": "Montaria",
+      "note": "Rideable creature."
+    },
+    {
+      "en": "Equipment",
+      "zhCN": "装备",
+      "esES": "Equipo",
+      "ptBR": "Equipamento",
+      "note": "Worn gear / equip window. zh 装备."
+    },
+    {
+      "en": "Inventory",
+      "zhCN": "背包",
+      "esES": "Inventario",
+      "ptBR": "Inventário",
+      "note": "Bag. zh 背包/包裹."
+    },
+    {
+      "en": "Slot",
+      "zhCN": "格子",
+      "esES": "Casilla",
+      "ptBR": "Espaço",
+      "note": "Inventory cell. zh 格子/格."
+    },
+    {
+      "en": "Durability (Dura)",
+      "zhCN": "耐久",
+      "esES": "Durabilidad",
+      "ptBR": "Durabilidade",
+      "note": "zh 耐久/耐久度."
+    },
+    {
+      "en": "Weight",
+      "zhCN": "重量",
+      "esES": "Peso",
+      "ptBR": "Peso",
+      "note": "Item weight."
+    },
+    {
+      "en": "Stack",
+      "zhCN": "堆叠",
+      "esES": "Pila",
+      "ptBR": "Pilha",
+      "note": "Stacked quantity. zh 堆叠."
+    },
+    {
+      "en": "Potion",
+      "zhCN": "药水",
+      "esES": "Poción",
+      "ptBR": "Poção",
+      "note": "Consumable. zh 药水/药."
+    },
+    {
+      "en": "Drink potion / heal",
+      "zhCN": "喝药",
+      "esES": "Beber poción",
+      "ptBR": "Beber poção",
+      "note": "传奇核心黑话: 喝药 (quaff HP/MP pots). pt 'beber poção' / casual 'tomar poção'."
+    },
+    {
+      "en": "HP Potion",
+      "zhCN": "红药",
+      "esES": "Poción de HP",
+      "ptBR": "Poção de HP",
+      "note": "zh玩家叫 红药 (red potion) for HP recovery."
+    },
+    {
+      "en": "MP Potion",
+      "zhCN": "蓝药",
+      "esES": "Poción de MP",
+      "ptBR": "Poção de MP",
+      "note": "zh玩家叫 蓝药 (blue potion) for MP recovery."
+    },
+    {
+      "en": "Buff Potion",
+      "zhCN": "增益药水",
+      "esES": "Poción de mejora",
+      "ptBR": "Poção de buff",
+      "note": "pt-BR community keeps 'buff'."
+    },
+    {
+      "en": "Scroll",
+      "zhCN": "卷轴",
+      "esES": "Pergamino",
+      "ptBR": "Pergaminho",
+      "note": "zh 卷轴/卷."
+    },
+    {
+      "en": "Town Teleport (scroll)",
+      "zhCN": "回城卷",
+      "esES": "Pergamino de regreso",
+      "ptBR": "Pergaminho de retorno",
+      "note": "zh传奇 = 回城卷 (recall-to-town scroll)."
+    },
+    {
+      "en": "Crafting Material",
+      "zhCN": "材料",
+      "esES": "Material",
+      "ptBR": "Material",
+      "note": "zh 材料/制作材料."
+    },
+    {
+      "en": "Quest Item",
+      "zhCN": "任务物品",
+      "esES": "Objeto de misión",
+      "ptBR": "Item de missão",
+      "note": ""
+    },
+    {
+      "en": "Book (skill book)",
+      "zhCN": "技能书",
+      "esES": "Libro de habilidad",
+      "ptBR": "Livro de habilidade",
+      "note": "zh 技能书/秘籍."
+    },
+    {
+      "en": "Skill / Spell",
+      "zhCN": "技能",
+      "esES": "Habilidad",
+      "ptBR": "Habilidade",
+      "note": "Generic. zh 技能 (active) / 法术 (magic). Magic spell -> es 'Hechizo', pt 'Magia'."
+    },
+    {
+      "en": "Magic (spell)",
+      "zhCN": "法术",
+      "esES": "Hechizo",
+      "ptBR": "Magia",
+      "note": "Castable magic specifically."
+    },
+    {
+      "en": "Skill Bar",
+      "zhCN": "技能栏",
+      "esES": "Barra de habilidades",
+      "ptBR": "Barra de habilidades",
+      "note": "Hotbar. zh 技能栏/快捷栏."
+    },
+    {
+      "en": "Cast (a spell)",
+      "zhCN": "施法",
+      "esES": "Lanzar",
+      "ptBR": "Conjurar",
+      "note": "zh 施法/放技能. es 'lanzar (hechizo)', pt 'conjurar/lançar'."
+    },
+    {
+      "en": "Cooldown",
+      "zhCN": "冷却",
+      "esES": "Enfriamiento",
+      "ptBR": "Recarga",
+      "note": "zh 冷却/CD. pt community also 'cooldown/CD'."
+    },
+    {
+      "en": "Buff",
+      "zhCN": "增益",
+      "esES": "Mejora",
+      "ptBR": "Buff",
+      "note": "zh 增益/buff. pt-BR keeps 'buff'."
+    },
+    {
+      "en": "Debuff",
+      "zhCN": "减益",
+      "esES": "Perjuicio",
+      "ptBR": "Debuff",
+      "note": "pt-BR keeps 'debuff'."
+    },
+    {
+      "en": "Poison",
+      "zhCN": "中毒",
+      "esES": "Veneno",
+      "ptBR": "Veneno",
+      "note": "Status. zh 中毒/毒."
+    },
+    {
+      "en": "Poisoned",
+      "zhCN": "中毒",
+      "esES": "Envenenado",
+      "ptBR": "Envenenado",
+      "note": "Afflicted state."
+    },
+    {
+      "en": "Invisible / Hiding",
+      "zhCN": "隐身",
+      "esES": "Invisible",
+      "ptBR": "Invisível",
+      "note": "zh 隐身."
+    },
+    {
+      "en": "Blindness",
+      "zhCN": "失明",
+      "esES": "Ceguera",
+      "ptBR": "Cegueira",
+      "note": "Status."
+    },
+    {
+      "en": "HP Drain / Life steal",
+      "zhCN": "吸血",
+      "esES": "Robo de vida",
+      "ptBR": "Roubo de vida",
+      "note": "zh传奇 = 吸血. pt 'roubo de vida'."
+    },
+    {
+      "en": "MP Eater",
+      "zhCN": "吸气",
+      "esES": "Devorador de maná",
+      "ptBR": "Devorador de mana",
+      "note": "Taoist passive. zh官方 = 吸气 (absorb MP)."
+    },
+    {
+      "en": "Equip",
+      "zhCN": "装备",
+      "esES": "Equipar",
+      "ptBR": "Equipar",
+      "note": "Verb. zh 装备/穿戴."
+    },
+    {
+      "en": "Unequip",
+      "zhCN": "卸下",
+      "esES": "Quitar",
+      "ptBR": "Desequipar",
+      "note": "zh 卸下/脱下."
+    },
+    {
+      "en": "Use",
+      "zhCN": "使用",
+      "esES": "Usar",
+      "ptBR": "Usar",
+      "note": "zh 使用/用."
+    },
+    {
+      "en": "Drop",
+      "zhCN": "丢弃",
+      "esES": "Tirar",
+      "ptBR": "Largar",
+      "note": "Drop FROM bag (discard). zh 丢弃/扔. es 'tirar/soltar', pt 'largar/soltar'."
+    },
+    {
+      "en": "Drop (loot from monster)",
+      "zhCN": "爆装",
+      "esES": "Soltar (botín)",
+      "ptBR": "Dropar",
+      "note": "Monster loot drop. zh玩家 = 爆/爆装/掉装. pt-BR gíria = 'dropar'."
+    },
+    {
+      "en": "Pick up",
+      "zhCN": "拾取",
+      "esES": "Recoger",
+      "ptBR": "Pegar",
+      "note": "zh 拾取/捡."
+    },
+    {
+      "en": "Repair",
+      "zhCN": "修理",
+      "esES": "Reparar",
+      "ptBR": "Reparar",
+      "note": "zh 修理/修."
+    },
+    {
+      "en": "Special Repair",
+      "zhCN": "特修",
+      "esES": "Rep. especial",
+      "ptBR": "Rep. especial",
+      "note": "zh传奇缩写 特修 (raises max dura)."
+    },
+    {
+      "en": "Sell",
+      "zhCN": "出售",
+      "esES": "Vender",
+      "ptBR": "Vender",
+      "note": "zh 出售/卖."
+    },
+    {
+      "en": "Buy",
+      "zhCN": "购买",
+      "esES": "Comprar",
+      "ptBR": "Comprar",
+      "note": "zh 购买/买."
+    },
+    {
+      "en": "Store / Deposit",
+      "zhCN": "存放",
+      "esES": "Guardar",
+      "ptBR": "Guardar",
+      "note": "Put into storage. zh 存放/存."
+    },
+    {
+      "en": "Withdraw / Retrieve",
+      "zhCN": "取出",
+      "esES": "Retirar",
+      "ptBR": "Retirar",
+      "note": "Take from storage. zh 取出/取."
+    },
+    {
+      "en": "Split (stack)",
+      "zhCN": "拆分",
+      "esES": "Dividir",
+      "ptBR": "Dividir",
+      "note": "zh 拆分/分."
+    },
+    {
+      "en": "Storage / Warehouse",
+      "zhCN": "仓库",
+      "esES": "Almacén",
+      "ptBR": "Armazém",
+      "note": "zh 仓库."
+    },
+    {
+      "en": "Trade",
+      "zhCN": "交易",
+      "esES": "Intercambio",
+      "ptBR": "Troca",
+      "note": "Player trade. zh 交易. es 'comerciar/intercambio', pt 'trocar/negociar'."
+    },
+    {
+      "en": "Stall / Personal shop",
+      "zhCN": "摆摊",
+      "esES": "Puesto",
+      "ptBR": "Barraca",
+      "note": "zh传奇 = 摆摊 (set up street vendor). pt 'barraca/vender na barraca'."
+    },
+    {
+      "en": "Auction / Market",
+      "zhCN": "拍卖行",
+      "esES": "Subasta",
+      "ptBR": "Leilão",
+      "note": "zh 拍卖行/市场."
+    },
+    {
+      "en": "Game Shop",
+      "zhCN": "商城",
+      "esES": "Tienda",
+      "ptBR": "Loja",
+      "note": "Cash shop. zh 商城/游戏商店."
+    },
+    {
+      "en": "Mail",
+      "zhCN": "邮件",
+      "esES": "Correo",
+      "ptBR": "Correio",
+      "note": "In-game mail. zh 邮件."
+    },
+    {
+      "en": "Upgrade",
+      "zhCN": "升级",
+      "esES": "Mejorar",
+      "ptBR": "Melhorar",
+      "note": "Item upgrade. zh 升级 (item context). pt 'melhorar/upar item'."
+    },
+    {
+      "en": "Refine / Enhance",
+      "zhCN": "强化",
+      "esES": "Refinar",
+      "ptBR": "Refinar",
+      "note": "zh 强化/精炼. Stat-boosting item process."
+    },
+    {
+      "en": "Awakening",
+      "zhCN": "觉醒",
+      "esES": "Despertar",
+      "ptBR": "Despertar",
+      "note": "zh 觉醒 (item awakening system)."
+    },
+    {
+      "en": "Craft",
+      "zhCN": "制作",
+      "esES": "Fabricar",
+      "ptBR": "Fabricar",
+      "note": "zh 制作/打造. pt 'fabricar/craftar'."
+    },
+    {
+      "en": "Bind (soulbound)",
+      "zhCN": "绑定",
+      "esES": "Vincular",
+      "ptBR": "Vincular",
+      "note": "Soulbind on equip. zh 绑定/灵魂绑定."
+    },
+    {
+      "en": "Monster",
+      "zhCN": "怪物",
+      "esES": "Monstruo",
+      "ptBR": "Monstro",
+      "note": "zh 怪物/怪."
+    },
+    {
+      "en": "Grind / Kill monsters",
+      "zhCN": "打怪",
+      "esES": "Farmear",
+      "ptBR": "Farmar",
+      "note": "zh核心黑话 = 打怪/刷怪. es/pt community = 'farmear/farmar'."
+    },
+    {
+      "en": "Boss",
+      "zhCN": "Boss",
+      "esES": "Jefe",
+      "ptBR": "Chefe",
+      "note": "zh 玩家保留 Boss (or BOSS); es 'jefe', pt 'chefe' / often kept 'boss'."
+    },
+    {
+      "en": "Pet / Summon",
+      "zhCN": "宝宝",
+      "esES": "Mascota",
+      "ptBR": "Pet",
+      "note": "Summoned creature. zh传奇 = 宝宝 (Taoist summon) / 召唤兽. pt-BR keeps 'pet'."
+    },
+    {
+      "en": "Hero (companion)",
+      "zhCN": "英雄",
+      "esES": "Héroe",
+      "ptBR": "Herói",
+      "note": "Crystal 'Hero' companion. zh 英雄."
+    },
+    {
+      "en": "Party / Group",
+      "zhCN": "队伍",
+      "esES": "Grupo",
+      "ptBR": "Grupo",
+      "note": "zh 队伍/组队. pt 'grupo/party'."
+    },
+    {
+      "en": "Guild",
+      "zhCN": "行会",
+      "esES": "Hermandad",
+      "ptBR": "Guilda",
+      "note": "zh传奇 = 行会 (Mir-specific; modern 公会). pt-BR = 'guilda', es 'hermandad/gremio'."
+    },
+    {
+      "en": "Guild Leader",
+      "zhCN": "会长",
+      "esES": "Líder de hermandad",
+      "ptBR": "Líder da guilda",
+      "note": "zh传奇 = 掌门/会长."
+    },
+    {
+      "en": "Friend",
+      "zhCN": "好友",
+      "esES": "Amigo",
+      "ptBR": "Amigo",
+      "note": "Friends list. zh 好友."
+    },
+    {
+      "en": "Whisper",
+      "zhCN": "私聊",
+      "esES": "Susurro",
+      "ptBR": "Sussurro",
+      "note": "zh 私聊/密语. es 'susurro/privado', pt 'sussurro/privado'."
+    },
+    {
+      "en": "Shout",
+      "zhCN": "喊话",
+      "esES": "Gritar",
+      "ptBR": "Gritar",
+      "note": "Local shout chat. zh 喊话."
+    },
+    {
+      "en": "Lover / Marriage",
+      "zhCN": "情侣",
+      "esES": "Pareja",
+      "ptBR": "Casal",
+      "note": "zh传奇 = 情侣/夫妻 (marriage system). es 'pareja', pt 'casal/cônjuge'."
+    },
+    {
+      "en": "Mentor",
+      "zhCN": "师傅",
+      "esES": "Mentor",
+      "ptBR": "Mentor",
+      "note": "zh传奇 = 师傅 (mentor/apprentice system)."
+    },
+    {
+      "en": "Apprentice",
+      "zhCN": "徒弟",
+      "esES": "Aprendiz",
+      "ptBR": "Aprendiz",
+      "note": "zh = 徒弟."
+    },
+    {
+      "en": "PK (Player Kill)",
+      "zhCN": "PK",
+      "esES": "PK",
+      "ptBR": "PK",
+      "note": "All keep 'PK'; zh玩家 = PK/红名 context."
+    },
+    {
+      "en": "Red Name (PKer)",
+      "zhCN": "红名",
+      "esES": "Nombre rojo",
+      "ptBR": "Nome vermelho",
+      "note": "传奇核心黑话: 红名 (player-killer flagged red)."
+    },
+    {
+      "en": "Brown Name",
+      "zhCN": "灰名",
+      "esES": "Nombre marrón",
+      "ptBR": "Nome marrom",
+      "note": "zh玩家常说 灰名/棕名 (recently aggressive). source uses 棕名."
+    },
+    {
+      "en": "Peace Mode",
+      "zhCN": "和平模式",
+      "esES": "Modo pacífico",
+      "ptBR": "Modo pacífico",
+      "note": "Attack mode. zh 和平模式."
+    },
+    {
+      "en": "Safe Zone",
+      "zhCN": "安全区",
+      "esES": "Zona segura",
+      "ptBR": "Zona segura",
+      "note": "zh 安全区 (no-PK town area)."
+    },
+    {
+      "en": "Recall",
+      "zhCN": "召回",
+      "esES": "Convocar",
+      "ptBR": "Convocar",
+      "note": "Recall party/lover to you. zh 召回. (Town recall scroll = 回城.)"
+    },
+    {
+      "en": "Teleport",
+      "zhCN": "传送",
+      "esES": "Teletransporte",
+      "ptBR": "Teleporte",
+      "note": "zh 传送/瞬移."
+    },
+    {
+      "en": "Revive / Resurrect",
+      "zhCN": "复活",
+      "esES": "Revivir",
+      "ptBR": "Reviver",
+      "note": "zh 复活. After death."
+    },
+    {
+      "en": "Mining",
+      "zhCN": "挖矿",
+      "esES": "Minería",
+      "ptBR": "Mineração",
+      "note": "zh 挖矿/采矿."
+    },
+    {
+      "en": "Conquest / Siege (Sabuk)",
+      "zhCN": "攻城战",
+      "esES": "Asedio",
+      "ptBR": "Cerco",
+      "note": "zh传奇 = 攻城/攻沙 (Sabuk Wall siege)."
+    },
+    {
+      "en": "Conquest Gate",
+      "zhCN": "城门",
+      "esES": "Puerta del castillo",
+      "ptBR": "Portão do castelo",
+      "note": "zh 城门."
+    },
+    {
+      "en": "Map / Minimap",
+      "zhCN": "地图",
+      "esES": "Mapa",
+      "ptBR": "Mapa",
+      "note": "zh 地图; BigMap=大地图, MiniMap=小地图."
+    },
+    {
+      "en": "Town",
+      "zhCN": "城镇",
+      "esES": "Ciudad",
+      "ptBR": "Cidade",
+      "note": "zh 城/城镇. Return to town = 回城."
+    },
+    {
+      "en": "NPC",
+      "zhCN": "NPC",
+      "esES": "PNJ",
+      "ptBR": "NPC",
+      "note": "es localizes to 'PNJ'; zh/pt keep NPC."
+    },
+    {
+      "en": "Dungeon",
+      "zhCN": "副本",
+      "esES": "Mazmorra",
+      "ptBR": "Masmorra",
+      "note": "zh 副本/地下城."
+    }
+  ]
+}

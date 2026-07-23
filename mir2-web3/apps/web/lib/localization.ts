@@ -1,6 +1,6 @@
 import localizationBundle from "./generated/localization_bundle.json";
 
-export type Mir2Language = "en" | "zh-CN" | "es";
+export type Mir2Language = "en" | "zh-CN" | "es" | "pt-BR";
 
 type LocalizationTexts = Record<string, string>;
 
@@ -34,6 +34,9 @@ export function normalizeLanguage(value: string | null | undefined): Mir2Languag
   }
   if (normalized === "es" || normalized === "es-es") {
     return "es";
+  }
+  if (normalized === "pt" || normalized === "pt-br" || normalized === "pt-pt") {
+    return "pt-BR";
   }
   return SUPPORTED_LANGUAGES.includes(value as Mir2Language) ? (value as Mir2Language) : "en";
 }

@@ -1,5 +1,349 @@
 # Backend 1:1 Progress
 
+> Latest remote-Zone workload sync: 2026-07-23 completes Gate 11.1-11.4.
+> Checkpoint v4 restores the durable session projection plus complete shared
+> Zone state: player vitals, monsters/AI timers, pending combat/effects, drops
+> and claims, doors, hazards, map layers, trades/rentals, and NPC state. One
+> real Crystal combat/drop/map-handoff workload survives active loss, while a
+> separate four-session/two-map harness survives two consecutive host failures;
+> both old generations are fenced at tokens 2 and 3. The full operations binary
+> writes one fail-closed, versioned JSON evidence manifest atomically.
+
+> Latest Crystal system-chat parity sync: 2026-07-23 adds one shared Gateway
+> scheduler for native TCP and WebSocket sessions. Presence begins only after a
+> successful StartGame/Zone join and is removed by LogOut, Disconnect, socket
+> close, or RAII drop. Production emits `ChatType::Hint` online-count packets
+> every five minutes and `ChatType::LineMessage` announcements every ten
+> minutes, loading the original `LineMessage.txt` when available with a bounded
+> built-in fallback. Accelerated intervals, a fixed line, and packet limits are
+> ignored unless the Gateway process has a non-empty QA control token, so normal
+> clients cannot activate capture behavior. Focused scheduler, shared TCP/WS,
+> lifecycle, and fail-closed configuration tests pass 5/5, and the complete
+> Gateway library regression passes 307/307; Web packet rendering consumes the
+> resulting real chat types. This closes the final deterministic
+> chat-state dependency for visual Candidate without changing Zone movement,
+> combat, save, or account authority.
+
+> Latest source-verified monster-defence sync: 2026-07-22 corrects the player
+> mitigation channel for Crystal AI 26 ShamanZombie and AI 181 WaterDragon /
+> Hydra. ShamanZombie `LineAttack` always uses `MACAgility`; WaterDragon uses
+> physical AC for its adjacent branch and MAC for its ranged MC branch. The
+> runtime now rolls authoritative Min/Max MAC with an independent deterministic
+> salt and applies MagicResist on those magic channels instead of subtracting
+> physical AC. A high-AC Hydra regression proves the ranged hit still damages
+> and applies Green poison through MAC. Verification passes all 1,126 Simulation
+> unit tests, 154 shared-Zone tests, all integration suites including 8/8
+> vertical slices, and the focused strengthened Hydra test. A complete imported
+> per-AI `DefenceType` table remains open; unverified AIs still retain the older
+> distance fallback and must be migrated from Crystal source rather than guessed.
+
+> Latest original Bichon q1-q9 backend sync: 2026-07-18 completes an exact
+> fresh-Warrior route from Assistant Jane through MirGuide Peter and naturally
+> reaches level 6. The runtime now matches Crystal's task counts, prerequisites,
+> q1-q9 XP/gold, fixed items, q3/q6 mandatory class reward selection, Q-drop
+> semantics, monster EXP, and real equipment template stats. Quest progression
+> is attached to the player-owned death boundary, including direct skills and
+> player poison, so ambient/NPC damage cannot grant kill credit or EXP. The
+> release integration test proves all nine quests complete, level 6 with the
+> next 900 EXP band active, exact reward retention, and exact gold after its
+> declared potion purchases. Focused ownership, reward-parser, equipment,
+> combat, harvest, Gateway reward-contract, and Web packet/UI suites pass;
+> `cargo check --workspace` and the Next production build also pass. This
+> supersedes the older q1-q4/q5-available backend checkpoint below.
+
+> Latest NPC name-colour packet consistency sync: 2026-07-18 removes a
+> duplicate production-path conflict for Crystal NPCs. Initial manifest
+> `ObjectNpc` and `WorldEntitySnapshot` already emitted Crystal Lime
+> (`0xFF00FF00`), while `visible_object_bundle_for_entity` later emitted White
+> and could overwrite a native client's final label. All three paths now share
+> one `CRYSTAL_NPC_NAME_COLOUR_ARGB` constant. The transfer regression asserts
+> every Assistant_Jane ObjectNpc plus the snapshot agree on Lime. Verification:
+> focused transfer 3/3, visible-object bootstrap 1/1, shared Zone 153/153,
+> Release Gateway build, Rust fmt, and live r04 Web login/capture against the
+> rebuilt 7111 Gateway. Crystal's client keeps later underscore-delimited name
+> lines White; this change concerns only the packet-provided primary line.
+
+> Latest retained-object AOI sync: 2026-07-13 fixes the spatial index for
+> authoritative monsters/summons that move after being inserted. Packet state
+> was updating `ZoneObject.position`, but `object_grid` remained at the old
+> cell, which could produce incorrect ObjectRemove/ObjectMonster visibility
+> transitions. Every retained-object packet now relocates the grid entry before
+> the next visibility diff. The dedicated leave-and-reenter regression passes,
+> and the full shared Zone suite is 153/153.
+
+> Latest actor-light transport sync: 2026-07-12 preserves Crystal entity light
+> values through the shared snapshot and AOI spawn path. `WorldEntitySnapshot`
+> now carries `light`; player/monster packet projection retains the packet
+> value, seeded NPC projection uses the Crystal-compatible light value, and
+> shared/Zone monster spawn packets no longer overwrite it with zero. This is a
+> data-contract fix only; browser light blending remains frontend work.
+> `cargo +1.89.0 check -p mir2-simulation -p mir2-gateway`, shared Zone 152/152,
+> and focused Gateway snapshot/movement/routing tests pass. Live r12/r16 scene
+> evidence observes Dawn mode plus 15/14 object-light nodes without movement or
+> pose regressions.
+> The complete Debug Gateway process remains a host-stability exception, not a
+> passed gate: two single-thread runs aborted at different tests with
+> `0xc0000409` and `0xc0000374`, while each reported test passes alone. Seven
+> recent WHEA records include corrected TLB/internal-parity machine checks.
+> Focused Gateway and live Release evidence are green, but full Debug 300/300
+> must be rerun after BIOS/CPU/RAM stabilization.
+
+> Latest mounted/Swift Feet backend sync: 2026-07-12 closes the movement-state
+> split between personal Session and shared Zone. Non-combat owner-state packets
+> that affect shared behavior, including `MountUpdate`, `ObjectSneaking`, and
+> Add/Remove/Pause Buff state, are now sent through `ZoneCommand::BroadcastPackets`
+> before subsequent movement. Zone stores PauseBuff changes, validates every
+> intermediate tile, and resolves Run distance as 3 for a mounted player or an
+> active unpaused Swift Feet player who is not sneaking, otherwise 2. Server
+> movement delay remains Crystal's 600ms; the mounted client's eight visual
+> phases remain an 800ms presentation gate rather than a false server cooldown.
+>
+> Focused Gateway real-item equip/use/run coverage passes, shared Zone is
+> 152/152, and live Release evidence
+> `docs/generated/player-qa/movement-jitter/movement-mounted-walk8-run3-webgpu-20260712-r6.json`
+> records one-cell Walk plus one three-cell Run with 18/22ms ACKs, no correction
+> or degradation, and exact `(4,0)` delta. This closes mounted movement semantics;
+> full non-movement command actorization and durable side-effect ownership remain.
+
+> Latest Zone-owned cadence/live-outbound backend sync: 2026-07-12 extends the
+> bounded movement owner into the single shared-world clock. Each Zone owner now
+> advances one monotonic 300ms global cadence and coalesces late work rather than
+> replaying catch-up bursts. Personal `WorldCommand::Tick` no longer invokes
+> global Zone Tick, per-player movement Tick, or shared-drop expiry, eliminating
+> player-count-dependent world speed. Realtime owner/AOI `UserLocation`, player
+> appearance/removal, Turn, Walk, and Run packets use a capacity-256 token-fenced
+> socket path independent of private Session draining; full/closed channels
+> retain mailbox fallback. The existing capacity-64 ingress, serial RW gate,
+> owner fencing, ordered events, save-transform sync, and 5s reply bound remain.
+>
+> Latest strict Release evidence is
+> `docs/generated/player-qa/two-client-zone/two-client-zone-zone-owned-cadence-tick5000-release-20260712.json`.
+> Personal Tick is intentionally 5000ms and observer pulses are off, yet movement
+> reaches B in 12ms, both clients retain 16 entities, Bevy records one remote
+> motion event and 29 offset matches, and all drop/error/404 counters are zero.
+> Focused unique-cadence, queued movement without Session Tick, blocked runtime,
+> fencing/fallback, and delayed combat tests pass; Simulation `shared_zone` is
+> 148/148, complete Web frontend logic and TypeScript pass, and Release builds.
+> Remaining backend architecture work is full non-movement command actorization
+> and fenced durable side-effect/save ownership. Windows Debug crashes remain a
+> separate host WHEA/BIOS stability gate, not evidence of a new safe-Rust actor
+> memory fault.
+
+> Latest dynamic TimeOfDay snapshot parity sync: 2026-07-09 supersedes the
+> earlier fixed-Day bootstrap. Crystal `Envir.Now` is seeded from
+> `DateTime.UtcNow`, and `AdjustLights()` maps `Now.Hour * 2 % 24` to
+> Dawn/Day/Evening/Night before broadcasting `S.TimeOfDay`. Simulation
+> StartGame and `WorldSnapshot.lightSetting` now use the same UTC-hour formula,
+> while Web applies `snapshot.lightSetting` and exposes it through
+> `window.__mir2Stage5.state` for QA evidence. Verification passed Rust fmt,
+> focused Simulation/Gateway tests, Gateway check/build in an isolated target
+> dir, Web TypeScript, and scoped diff checks. Live evidence
+> `docs/generated/player-qa/visual-parity/light-setting-snapshot-20260709/`
+> records direct WS `TimeOfDay.lights=4`, `worldSnapshot.lightSetting=4`, and
+> browser state `lightSetting=4` with 0 critical console errors and 0
+> non-favicon 404s. The light lane is now dynamic; the next frontend task is
+> rendering Crystal night/evening/dawn ambience in the main scene.
+
+> Latest movement ACK semantics sync: 2026-07-12 unifies the Web early-ACK path
+> and movement-controller reconciliation on the same
+> `classifyMovementAckOutcome` classifier. A requested Run's one-tile first-cell
+> `UserLocation` ACK is therefore `confirmed`, not `correction`, matching Zone
+> authority where an originally stationary Run degrades to a one-tile Walk.
+> Simulation `shared_zone` passed 148/148. Release raw `packetSequence` evidence
+> `docs/generated/player-qa/movement-jitter/movement-protocol-expired-run-degrades-release-202607120745.json`
+> records Walk followed by an expired Run with ACKs at `16ms/99ms`,
+> `degradedRunCount=1`, `correctionCount=0`, and final delta `(2,0)`. Release
+> normal UI Walk -> Run evidence
+> `docs/generated/player-qa/movement-jitter/movement-normal-walk-run-chain-release-202607120750.json`
+> records ACKs at `22ms/28ms`, command-to-pose latency `17ms/1ms`,
+> `degradedRunCount=0`, `correctionCount=0`, and final delta `(3,0)`. Remaining
+> architecture risk is unchanged: private `SimulationSession` heavy `Tick` work
+> and movement ingress still serialize on the same WebSocket task. Release mode
+> reduces that risk but does not eliminate it. The next architecture step is a
+> Gateway-owned single-writer Zone ingress/loop; it is not implemented yet.
+
+> Previous QA evidence/TimeOfDay parity sync: 2026-07-09 closes a shared-Zone
+> evidence bug and a visible MiniMap bootstrap mismatch. `qa.applyNativeState`
+> now forces the shared Zone transform sync path after applying native
+> character state, so Web `world_snapshot()` no longer reverts to stale Zone
+> presence coordinates; the capture harness also verifies `mapFileName` and
+> `position.x/y` before accepting native-state alignment. Focused Gateway
+> regression
+> `shared_in_process_registry_qa_apply_native_state_syncs_zone_transform`
+> passed, and 0056 live evidence records Web `player` and `authoritativePlayer`
+> both at `334,263`. That earlier Simulation StartGame pass emitted the
+> then-current Crystal-like Day/Normal `TimeOfDay` (`lights=2`) instead of
+> fixed Night (`lights=4`), matching the native Bichon MiniMap `Prguse/2093`
+> light icon; the dynamic TimeOfDay sync above now supersedes fixed Day.
+> Focused simulation `start_game_emits_bootstrap_sequence` passed. Live 0057
+> evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0057-minimap-light-day-bootstrap/`
+> is runtime-clean with 0 network 404s and 0 critical console errors.
+
+> Latest HUD weight snapshot parity sync: 2026-07-09 replaces the Web-facing
+> fixed bag-weight cap with Crystal player stat data. `WorldSnapshot.maxWeight`
+> now comes from `player_stats(world).bag_weight()` instead of the old constant
+> `100`, letting the frontend reproduce Crystal's main-HUD remaining-weight
+> readout. The focused QA-control regression now asserts a level-6 Warrior
+> native-state apply yields `current_weight=1` and `max_weight=62`, and live
+> evidence
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0027-hud-weight-diagnostics/`
+> shows the full native character state with `currentWeight=14`,
+> `maxWeight=62`, HUD `48 / 38`, and gold `3457` through the real Web gateway.
+> Remaining work in this lane is frontend-facing asset/chat/minimap/world visual
+> parity; full Crystal inventory-capacity modeling is still a separate broader
+> slice.
+
+> Latest native-state QA-control/max-MP/EXP sync: 2026-07-09 adds a bounded backend bridge
+> for fair Crystal/Web same-scene evidence. `qa.applyNativeState` runs only
+> behind the existing local token-gated `qaControl` wrapper and reuses typed
+> item/equipment state decoding before updating the active character save, ECS
+> `SelfPlayer` transform/facing, and runtime vitals. Gateway snapshot forcing
+> now treats bootstrap/state packets (`StartGame`, `MapInformation`,
+> `UserInformation`, `UserLocation`, `ObjectHealth`) as snapshot-worthy so the
+> browser sees the freshly applied native state instead of stale pre-apply
+> state. `WorldSnapshot` now includes `player_max_mp`, matching the existing
+> Web `playerMaxMp` field and keeping max MP visible after later snapshots.
+> The Web account sync now derives max EXP from Crystal `ExpList.ini`, and the
+> QA-control regression asserts EXP `435/900` survives apply/start/snapshot.
+> Verification passed focused Gateway QA-control and snapshot tests plus
+> the live pack
+> `docs/generated/player-qa/visual-parity/crystal-web-pack-20260709-0025-exp-debug/`,
+> where Web aligned to native level `6`, `HP 51/51`, `MP 32/32`, EXP `435/900`,
+> gold `3457`, 6 inventory items, 2 belt items, and 8 equipment items with 0
+> critical console errors. Remaining work in this lane is frontend-facing:
+> bottom-right HUD status semantics, chat state, minimap crop/color, and
+> world-frame mismatch.
+
+> Latest QA-control backend safety sync: 2026-07-08 adds a local-only,
+> token-gated `qaControl` WebSocket wrapper for automation while preserving the
+> production player-path rejection of debug `MoveTo`, raw `Stage5Command`, and
+> debug crystal transfer. Focused tests passed with production command safety
+> enabled (`cargo test -p mir2-gateway qa_control -- --nocapture`). Live Rust
+> `7111` evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-qacontrol2-20260708/report.md`
+> passed hostile incoming damage and death/revive through the browser. Remaining
+> backend/control work: add an explicit QA-control acknowledgement or stricter
+> settle probe because transfer/spawn side effects can arrive late, then use the
+> stable control lane to rerun normal kill/XP/drop.
+
+> Latest Rust `7111` hostile-retaliation evidence: 2026-07-08 moves incoming
+> monster damage from open blocker to real-client verified evidence. The
+> attack-trace harness now captures target map/object id, sent attack frames,
+> melee approach, delayed combat packets, and `StartGame` retry attempts.
+> Evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-survivalattacktrace5-20260708/report.md`
+> reached melee with natural `ForestYeti` object `258949`, sent 24 attack
+> frames, observed 7 target `ObjectAttack` frames plus `ObjectStruck` /
+> `DamageIndicator`, and dropped player HP `18 -> 3`. The remaining backend
+> parity gap has shifted: QA/admin controls are not reliable enough for
+> isolated reruns (`transferMap` returns sent but does not move the player,
+> `event.spawn RakingCat0` produces `0x`, and `@DIE`/`townRevive` can fail
+> beside a live hostile), and normal kill/XP/drop evidence still needs a green
+> route after that control lane is repaired or replaced.
+
+> Latest Rust `7111` combat-survival follow-up: 2026-07-08 keeps pickup and
+> death/revive green while narrowing the remaining hostile-retaliation gap.
+> Gateway regressions now cover explicit hostile passive-template AI override
+> (`zone_monster_spawn_from_shared_entity_preserves_explicit_hostile_passive_override`)
+> and Stage5 `event.spawn` synchronization into the shared Zone
+> (`shared_in_process_registry_syncs_stage5_event_spawn_to_zone`). The live
+> targeted report
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-pickupwait5s-20260708/report.md`
+> passed QA-seeded pickup (`GainedItem x1`) and `@DIE`/`townRevive`. The
+> follow-up `survivaltick` run proves the harness no longer mistakes passive
+> Deer for a retaliation target, but incoming monster damage is still not
+> accepted because the live trace did not produce a clean adjacent
+> attack/object-attack/player-damage sequence before timeout. Next backend task:
+> stabilize hostile encounter routing/AI tick evidence, then rerun a normal
+> kill/XP/drop plus incoming-damage window.
+
+> Latest shared Zone pickup/death lifecycle sync: 2026-07-08 closes the
+> Web-observed split between personal session item state and shared Zone
+> movement authority for the current pickup lane. Gateway shared runtime now
+> merges current personal-session ground drops into Zone `SyncGroundDrops`
+> before `ClaimGroundDrop`, and position-sensitive personal commands
+> (`PickUp`, `DropItem`, `DropGold`) force the inner session transform to the
+> current Zone authoritative position before falling back to session execution.
+> A new Gateway regression keeps shared-Zone `@DIE` GM chat commands routed to
+> the personal session while normal chat remains Zone-broadcasted, and the
+> existing pickup regression still verifies packet-spawned drops use Zone
+> authoritative position. Verification passed Web script syntax, Web
+> TypeScript, `shared_in_process_runtime_pickup_uses_zone_authoritative_position_for_packet_drop`,
+> `shared_in_process_registry_routes_gm_chat_commands_to_personal_session`,
+> and live Rust `7111` evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-authpickupseed7-20260708/report.md`
+> with pickup and death/revive green. Remaining backend parity work: monster
+> retaliation did not reduce player HP in the same run, and unseeded kill/XP
+> evidence still needs a green route.
+
+> Latest Rust-gateway combat tick parity sync: 2026-07-07 verifies that real
+> Web attack commands can now reach the shared Zone damage path when followed
+> by gameplay ticks. Gateway regression
+> `shared_in_process_runtime_level_one_field_melee_resolves_damage_on_tick`
+> covers a level-1 field melee attack and asserts `ObjectAttack` on attack plus
+> `ObjectStruck` and `DamageIndicator` on the next tick. End-to-end Web
+> evidence
+> `docs/generated/player-qa/combat-survival-default-selfcamera-rust7111-floaterfix30s-20260707/report.md`
+> connected to Rust `7111`, landed melee damage, dropped target HP, and passed
+> the client damage-floater gate. Remaining backend parity work: kill cadence
+> is still too weak/slow for the 30s acceptance window (`ObjectDied`, XP, and
+> loot are unproven), and normal-client death/revive lifecycle is still red
+> (`@DIE` does not enter a dead state).
+
+> Latest Crystal world transfer parity sync: 2026-07-07 removes the last
+> starter-demo transfer from full Crystal world runtime. Local held Shift+Right
+> evidence showed a server-side rollback at Bichon `0:339,270`: the fifth run
+> ACK was delayed `7481ms`, included transfer/reset traffic, and the player
+> snapped back toward `0:330,270`. Root cause was
+> `SimulationConfig::with_crystal_world_runtime()` preserving the hand-authored
+> `starter-east-field-gate` transfer while the Gateway uses full Crystal world
+> runtime. The config now clears starter `map_transfers` for full Crystal world
+> mode, matching `with_crystal_map_runtime()` and leaving generated Crystal
+> movement records as the only world-travel source. Regression coverage:
+> `crystal_map_runtime_drops_starter_demo_transfer` now asserts both map and
+> world runtime cleanup, and Gateway
+> `shared_in_process_crystal_world_runtime_does_not_apply_starter_demo_gate_transfer`
+> asserts walking right from `338,270` stays normal movement with no
+> `MapInformation`. Post-fix Web evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-heldrun-bichon-right-worldtransferfix-20260707.json`
+> is `ok=true` with 8/8 ACKs under 359ms, no logical rollback, no ACK warnings,
+> and final `345,270`; the cardinal keyboard rerun
+> `docs/generated/player-qa/movement-jitter/web-motion-keyseq-bichon-cardinal-worldtransferfix-rerun-20260707.json`
+> also passed strict movement checks.
+
+> Latest crowded-AOI movement ACK sync: 2026-07-07 follows up the 2026-07-06
+> Gateway input-priority fix with the Bichon crowded click-route repro. Shared
+> Zone now consumes movement that arrives after `movement_ready_at_ms` in the
+> command response instead of waiting for a later world tick, while preserving
+> same-instant input replacement semantics. Gateway post-movement input grace is
+> widened from Crystal run grace alone to run grace plus one Crystal tick
+> (1.5s), preventing heavy world ticks from winning the race just before the
+> browser's next ACK-driven Walk/Run. Verification passed focused shared-Zone
+> movement tests, focused Gateway runtime/post-movement tests, Gateway build,
+> and live Web Bichon evidence
+> `docs/generated/player-qa/movement-jitter/web-motion-clickroute-bichon-leftclean-postgrace1500-20260707.json`
+> with `ok=true`, clean settle, 4/4 ACKs at `490/164/33/5ms`, no interaction
+> pollution, and Bevy WebGL2 packed/no DOM fallback.
+
+> Latest Gateway movement ACK/input-priority parity sync: 2026-07-06 closes the
+> local Web `Walk -> Walk -> Run -> Walk/Left` stutter repro where a heavy
+> shared in-process Zone world tick on the same WebSocket task could start just
+> after a player `UserLocation` ACK and delay the next movement input by about
+> 2.5s. Shared Zone runtime now tracks pending player movement plus a 1.2s
+> post-ACK movement-input window; world ticks drain `TickPlayerMovement` first
+> and yield during that window so chained Crystal inputs are read before heavy
+> personal/world ticks. Gateway movement packets still wake the runtime tick at
+> 75ms, and personal simulation ticks avoid full `advance_world` while Crystal
+> movement retry is pending. Verification passed Rust fmt/check, focused
+> Gateway and simulation regressions, Gateway build, packetRun probing with the
+> first four Run ACKs at <=312ms, and full Web click Bevy evidence
+> `docs/generated/player-qa/startgame-debug-20260706-213036/current-web-jitter-r2-gateway-postackgrace1200-click.json`
+> with `ok=true`, Run ACK about 205ms, no logical rollback, clean settle, and
+> Bevy WebGL2 packed rendering with no DOM fallback. Remaining risk: PR #123's
+> uncovered-map Bevy work is intentionally deferred to a clean branch; longer
+> crowded-AOI human-feel movement sampling remains useful.
+
 > Latest player/monster state parity sync: 2026-05-27 removes the remaining
 > player-damage clamp that kept lethal hits at 1 HP. Pending monster/player
 > combat damage can now drive `PlayerVitals.hp` to 0, synchronizes
@@ -1664,3 +2008,17 @@ Remaining to full 1:1: Stage 4/5 depth work, especially broad AI, full skill/buf
 ## Rule For Updates
 
 Every time backend parity meaningfully moves, this file should be updated together with `docs/CRYSTAL-SERVER-PARITY.md`.
+
+## 2026-07-23 Visual Capture Support Sync
+
+- `WorldEntitySnapshot` now carries the Crystal monster AI id; simulation
+  snapshots, shared-state merge, zone spawn packets, and observer re-seeding
+  preserve it so AI 6 neutral guards stay green on the native minimap.
+- `MIR2_SIMULATION_FIXED_LIGHT_SETTING=1..4` provides a server-only,
+  process-start QA override for deterministic native/Web light pairing. Invalid
+  or absent values retain the existing UTC Crystal light formula.
+- Focused Gateway regressions cover template neutral-AI restoration, NPC side
+  effect spawn packets, and shared observer movement re-seeding. Simulation
+  regressions cover override resolution and visible current-map AI snapshots.
+- This is deterministic QA/snapshot parity, not a production gameplay rule or
+  a substitute for the remaining backend expansion queue.

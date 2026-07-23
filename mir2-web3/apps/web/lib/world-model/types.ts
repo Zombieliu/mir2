@@ -85,8 +85,10 @@ export type WorldEntity = {
   level?: number;
   hp?: number;
   maxHp?: number;
+  light?: number;
   nameColourArgb?: number;
   dead?: boolean;
+  sneaking?: boolean;
   disposition?: EntityDisposition;
   sprite?: WorldEntitySprite | null;
   questIds?: number[];
@@ -96,7 +98,8 @@ export type WorldEntity = {
   movementAnimation?: "walking" | "running";
   movementStartedAt?: number;
   movementUntil?: number;
-  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
+  movementFrameCount?: number;
+  attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range" | "spell";
   attackStartedAt?: number;
   attackUntil?: number;
   struckStartedAt?: number;
@@ -119,6 +122,19 @@ export type ProjectileState = {
   fromY: number;
   toX: number;
   toY: number;
+  startedAt: number;
+  expiresAt: number;
+};
+
+export type SceneEffectState = {
+  key: string;
+  source: "spell" | "objectSpell" | "map" | "object";
+  spellOrEffect: string | number;
+  objectId?: string;
+  x: number;
+  y: number;
+  direction: number;
+  value: number;
   startedAt: number;
   expiresAt: number;
 };
@@ -386,6 +402,7 @@ export type WorldState = {
   selectedObjectId: string | null;
   miniMapIndex: number | null;
   bigMapIndex: number | null;
+  lightSetting: number | null;
   sceneView: import("../scene-types").SceneView | null;
   terrainPatches: import("../scene-types").TerrainPatch[];
   decorObjects: import("../scene-types").DecorObject[];
@@ -407,6 +424,7 @@ export type WorldState = {
   mapTransfers: MapTransferArea[];
   interactionHints: string[];
   projectiles: ProjectileState[];
+  effects: SceneEffectState[];
   damageFloaters: DamageFloater[];
   /**
    * Wall-clock timestamp (ms since epoch) when the snapshot was serialized.
@@ -448,6 +466,7 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   selectedObjectId: null,
   miniMapIndex: null,
   bigMapIndex: null,
+  lightSetting: null,
   sceneView: null,
   terrainPatches: [],
   decorObjects: [],
@@ -469,5 +488,6 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   mapTransfers: [],
   interactionHints: [],
   projectiles: [],
+  effects: [],
   damageFloaters: [],
 };

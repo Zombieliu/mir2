@@ -34,6 +34,10 @@ const PRUNE_TARGETS = [
     path: "static/generated/original-map-blend",
     reason: "served from the versioned R2 asset origin through the player-domain proxy",
   },
+  {
+    path: "static/generated/crystal-packs/full",
+    reason: "multi-gigabyte full Crystal pack is published separately to R2 and must never enter Vercel output",
+  },
   // NOTE: static/generated/map-atlas is intentionally NOT pruned. The 34 packed map-atlas pages
   // (~58MB) ship in the Vercel output and are served same-origin from the CDN, so the default GPU
   // map renderer needs no R2 republish. They replace ~450 per-tile R2 GETs per viewport with a few

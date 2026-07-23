@@ -1,6 +1,16 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 
 import {
   ORIGINAL_UI,
@@ -11,6 +21,9 @@ import {
 import { createAssetResidency } from "../lib/asset-residency";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
+import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
+import { loadCrystalFullPackIndex } from "../lib/crystal-full-pack-index";
+import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../lib/render-tier";
 import {
   loadOriginalSceneSpriteLibrary,
   normalizeSceneSpriteLibraryKey,
@@ -36,7 +49,7 @@ import {
   LoginOverlay,
   SelectOverlay,
 } from "./components/original-client-overlays";
-import { GameUiScene } from "./components/original-client-game-ui-scene";
+import { GameUiScene, GameUiSceneStoreBound } from "./components/original-client-game-ui-scene";
 import type {
   BevyEntityRenderState,
   BevyMapRenderState,
@@ -91,26 +104,48 @@ import {
   mapSpriteRenderPath,
   portraitFramesForCharacter,
   projectileProgress,
+  rebaseViewportEntitiesToRenderPlayer,
+  resolvedMapSpriteBlendMode,
   refreshEntityMotionSnapshots,
   rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
   sceneAssetRuntimeStats,
   viewportDepthForCell,
+  type ViewportMapSprites,
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
 import { OriginalClientSceneVisualLayers } from "./components/original-client-scene-visual-layers";
+import {
+  useSceneCameraMotionDriver,
+  type ScenePresentationContext,
+} from "./components/original-client-scene-camera-motion-driver";
+import type { BevyPresentationEntityMotion } from "./components/original-client-presentation-pose";
 import {
   OriginalClientSceneOverlays,
   type SceneChatBubble,
 } from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
-import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
-import { WebGl2MapAtlasLayer, type MapTileDraw } from "./components/webgl2-map-atlas-layer";
-import { buildMapTileDrawList, buildStandaloneMapTiles } from "./components/original-client-scene-map-rendering";
-import { type MapAtlasIndex, type MapAtlasPage, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
 import {
-  decodeStandaloneTileOffThread,
-  offThreadStandaloneTileDecodeAvailable,
+  createCrystalAnimationWorldSeed,
+  entityAnimationRuntimeFromWindow,
+  resolveCrystalEntityAnimationPoses,
+} from "./components/original-client-entity-animation-runtime";
+import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
+import {
+  WebGl2MapAtlasLayer,
+  type MapStandaloneTileDraw,
+  type MapTileDraw,
+} from "./components/webgl2-map-atlas-layer";
+import {
+  buildMapTileDrawList,
+  buildStandaloneMapTiles,
+  type MapStandaloneTileImageSource,
+} from "./components/original-client-scene-map-rendering";
+import { type MapAtlasIndex, loadMapAtlasIndex } from "../lib/map-atlas-manifest";
+import { isCompleteBevyMapImageFamilyResident } from "../lib/bevy-map-image-residency";
+import {
+  decodeStandaloneTilePixels,
+  evictStandaloneTilePixels,
 } from "../lib/standalone-tile-decode";
 
 type HeldScenePointer = {
@@ -130,6 +165,28 @@ type ChatBubbleRecord = {
   firstSeenAt: number;
 };
 
+type DecodedStandaloneMapImage = {
+  width: number;
+  height: number;
+  pixels: Uint8Array;
+  sourceSignature: string;
+};
+
+type StandaloneMapImageDecodeRequest = {
+  sourceSignature: string;
+  generation: number;
+};
+
+type FailedStandaloneMapImage = {
+  sourceSignature: string;
+  retryAt: number;
+};
+
+type StandaloneMapImageResidency = {
+  runtimeGeneration: number;
+  keys: ReadonlySet<string>;
+};
+
 // How long a freshly-seen chat line floats over its speaker before it is dropped.
 const CHAT_BUBBLE_TTL_MS = 6_000;
 // Channels worth surfacing as over-head speech (local say-style chatter). Global/system channels
@@ -142,6 +199,21 @@ type BevyEntityAtlasRect = {
   y: number;
   width: number;
   height: number;
+  /**
+   * Index of the page (in BevyEntityAtlasSnapshot.pages) this rect lives on.
+   * Absent ⇒ page 0, so single-page snapshots are unchanged.
+   */
+  pageIndex?: number;
+};
+
+/** One texture page of a (possibly multi-page) entity atlas. */
+type BevyEntityAtlasPage = {
+  key: string;
+  width: number;
+  height: number;
+  imageUrl?: string;
+  pixels?: Uint8Array;
+  rectList: BevyEntityAtlasRect[];
 };
 
 type BevyEntityAtlasSnapshot = {
@@ -153,6 +225,12 @@ type BevyEntityAtlasSnapshot = {
   rects: Record<string, BevyEntityAtlasRect>;
   rectList: BevyEntityAtlasRect[];
   pixels?: Uint8Array;
+  /**
+   * Multi-page atlases list every page here; the top-level
+   * width/height/imageUrl/pixels/rectList mirror page 0 for backward
+   * compatibility. Absent or length-1 ⇒ single-page (unchanged behaviour).
+   */
+  pages?: BevyEntityAtlasPage[];
 };
 
 type BevyEntityAtlasSource = {
@@ -162,16 +240,28 @@ type BevyEntityAtlasSource = {
   height: number;
 };
 
+type BevyEntityAtlasBudgetProfile = {
+  tier: "low" | "medium" | "high";
+  memoryEntries: number;
+  memoryBytes: number;
+  persistentEntries: number;
+  persistentBytes: number;
+  deviceMemoryGiB: number | null;
+};
+
 const BEVY_ENTITY_ATLAS_PADDING = 1;
 const BEVY_ENTITY_ATLAS_INITIAL_WIDTH = 512;
 const BEVY_ENTITY_ATLAS_MAX_SIZE = 4096;
-const BEVY_ENTITY_ATLAS_CACHE_LIMIT = 24;
+const BEVY_ENTITY_ATLAS_BUDGET_PROFILE = resolveBevyEntityAtlasBudgetProfile();
+const BEVY_ENTITY_ATLAS_CACHE_LIMIT = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.memoryEntries;
+const BEVY_ENTITY_ATLAS_MEMORY_BUDGET_BYTES = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.memoryBytes;
 const BEVY_ENTITY_ATLAS_MANIFEST_URL = "/bevy-entity-atlases/manifest.json";
 const BEVY_ENTITY_ATLAS_IDB_NAME = "mir2-bevy-entity-atlas-cache";
 const BEVY_ENTITY_ATLAS_IDB_STORE = "atlases";
 const BEVY_ENTITY_ATLAS_IDB_VERSION = 1;
-const BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT = 8;
-const BEVY_ENTITY_ATLAS_CACHE_NAMESPACE = "bevy-entity-atlas-v1";
+const BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.persistentEntries;
+const BEVY_ENTITY_ATLAS_PERSISTENT_BUDGET_BYTES = BEVY_ENTITY_ATLAS_BUDGET_PROFILE.persistentBytes;
+const BEVY_ENTITY_ATLAS_CACHE_NAMESPACE = "bevy-entity-atlas-v2-full-pack";
 const bevyEntityAtlasImageCache = new Map<string, Promise<HTMLImageElement>>();
 const bevyEntityAtlasPrebuiltPixelsCache = new Map<string, Promise<Uint8Array | null>>();
 let bevyEntityAtlasLatestSnapshot: BevyEntityAtlasSnapshot | null = null;
@@ -209,6 +299,14 @@ function payloadToAtlasSnapshot(payload: AtlasPagePayload): BevyEntityAtlasSnaps
     rects: bevyEntityAtlasRectMap(payload.rectList),
     rectList: payload.rectList,
     pixels: payload.pixels.byteLength > 0 ? payload.pixels : undefined,
+    pages: payload.pages?.map((page) => ({
+      key: page.key,
+      width: page.width,
+      height: page.height,
+      imageUrl: page.imageUrl,
+      pixels: page.pixels && page.pixels.byteLength > 0 ? page.pixels : undefined,
+      rectList: page.rectList,
+    })),
   };
 }
 
@@ -221,6 +319,14 @@ function atlasSnapshotToPayload(atlas: BevyEntityAtlasSnapshot): AtlasPagePayloa
     imageUrl: atlas.imageUrl,
     rectList: atlas.rectList,
     pixels: atlas.pixels ?? new Uint8Array(0),
+    pages: atlas.pages?.map((page) => ({
+      key: page.key,
+      width: page.width,
+      height: page.height,
+      imageUrl: page.imageUrl,
+      pixels: page.pixels ?? new Uint8Array(0),
+      rectList: page.rectList,
+    })),
   };
 }
 
@@ -242,6 +348,8 @@ function createNullPersistentStore(): PersistentStore {
 const bevyAtlasResidency = createAssetResidency({
   memoryBudget: BEVY_ENTITY_ATLAS_CACHE_LIMIT,
   persistentBudget: BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT,
+  memoryBudgetBytes: BEVY_ENTITY_ATLAS_MEMORY_BUDGET_BYTES,
+  persistentBudgetBytes: BEVY_ENTITY_ATLAS_PERSISTENT_BUDGET_BYTES,
   persistent: createNullPersistentStore(),
   fetcher: createBrowserAtlasFetcher({
     resolveFn: async (key: string): Promise<AtlasPagePayload> => {
@@ -282,6 +390,16 @@ type PrebuiltBevyEntityAtlasRecord = {
   imageUrl?: string;
   pixelsUrl?: string;
   rects: BevyEntityAtlasRect[];
+  /** Multi-page atlases describe each texture page here (manifest schemaVersion≥2). */
+  pages?: PrebuiltBevyEntityAtlasPage[];
+};
+
+type PrebuiltBevyEntityAtlasPage = {
+  imageFile?: string;
+  imageUrl?: string;
+  width: number;
+  height: number;
+  sha256?: string;
 };
 
 type BevyEntityAtlasResolveResult = {
@@ -346,22 +464,26 @@ export function OriginalClientShell({
   wsState,
   reconnectStatus,
   world,
+  worldStore,
+  selectorHud,
   player,
   predictedPlayerPosition,
   getLivePlayerRenderPosition,
   selectedEntity,
   sortedEntities,
-  viewportEntities,
+  viewportEntities: sourceViewportEntities,
   viewportTiles,
   sceneInteractionReady,
-  enteringWorld,
   bevyEntityRendererReady,
   bevyRuntimeBackend,
+  bevyMapRuntimeGeneration,
+  bevyMapRuntimeReady,
+  bevyMapPresentedImageKeys,
+  bevyMapImageResidencyVersion,
   onSceneAssetReadinessChange,
   onBevyEntityRenderStateChange,
   onBevyMapRenderStateChange,
-  onBevyMapCameraOffsetChange,
-  registerLiveCameraMotionOffset,
+  onBevyMapImagesEvicted,
   logs,
   accountId,
   password,
@@ -459,24 +581,29 @@ export function OriginalClientShell({
   const sceneLoadingLabel = t(
     "scene.loadingMap",
     [],
-    language === "zh-CN" ? "地图加载中…" : language === "es" ? "Cargando mapa…" : "Loading map…",
-  );
-  // Shown over the character-select screen from the Start Game click until the server's
-  // `UserInformation` flips `screen` to "game" — bridges the feedbackless round-trip gap,
-  // after which `sceneLoadingLabel` ("Loading map…") takes over seamlessly.
-  const enteringWorldLabel = t(
-    "scene.enteringWorld",
-    [],
-    language === "zh-CN" ? "进入游戏中…" : language === "es" ? "Entrando al mundo…" : "Entering world…",
+    language === "zh-CN"
+      ? "地图加载中…"
+      : language === "es"
+        ? "Cargando mapa…"
+        : language === "pt-BR"
+          ? "Carregando mapa…"
+          : "Loading map…",
   );
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
+  const [entityAnimationWorldSeed] = useState(createCrystalAnimationWorldSeed);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
   const [forceMobileControls, setForceMobileControls] = useState(false);
   const [touchPrimaryDevice, setTouchPrimaryDevice] = useState(false);
-  const [stageScale, setStageScale] = useState(1);
+  const [stagePresentation, setStagePresentation] = useState({
+    scale: 1,
+    left: 0,
+    top: 0,
+  });
   const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
+  const [bevyLocalSelfMotion, setBevyLocalSelfMotion] =
+    useState<BevyPresentationEntityMotion | null>(null);
   const [webGl2EntityTextureReadyKey, setWebGl2EntityTextureReadyKey] = useState<string | null>(null);
   const [webGl2EntityAtlasFailedKey, setWebGl2EntityAtlasFailedKey] = useState<string | null>(null);
   const previousScreenRef = useRef<ClientScreen>(screen);
@@ -500,6 +627,41 @@ export function OriginalClientShell({
   // fetches when the load effect re-runs (it re-runs on every world.entities change).
   const sceneSpriteLibraryInFlightRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
+  const bevyMapRenderRevisionRef = useRef(0);
+  const submittedPresentationContextRef = useRef<ScenePresentationContext>({
+    mapRevision: null,
+    mapCenter: null,
+    entityCenter: null,
+  });
+  const lastSceneMapSubmissionRef = useRef<{
+    state: BevyMapRenderState | null;
+    imageResidencyVersion: number;
+    runtimeGeneration: number;
+    runtimeReady: boolean;
+    submitted: boolean;
+    revision: number | null;
+    center: { x: number; y: number } | null;
+  }>({
+    state: null,
+    imageResidencyVersion: -1,
+    runtimeGeneration: -1,
+    runtimeReady: false,
+    submitted: false,
+    revision: null,
+    center: null,
+  });
+  useEffect(() => {
+    submittedPresentationContextRef.current = {
+      mapRevision: null,
+      mapCenter: null,
+      entityCenter: null,
+    };
+  }, [bevyMapRuntimeGeneration]);
+  // Motion-clock cadence (ms between setMotionNow). 30 ms (~33 Hz) drives smooth JS
+  // motion on the default/DOM path; in the imperative path (Bevy interpolates motion +
+  // the scene-motion driver tracks DOM overlays) it drops to ~10 Hz — just enough for
+  // the reconnect countdown + bubble/floater/projectile expiry — which is the perf win.
+  const motionClockIntervalMsRef = useRef(30);
   // Over-head chat bubble bookkeeping. Keyed by speaker name (the only entity reference a chat log
   // line carries), each record remembers when the line first appeared so bubbles can expire on the
   // shell's existing motion clock without any dedicated timer.
@@ -520,8 +682,13 @@ export function OriginalClientShell({
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
   });
   const stageScaleStyle = useMemo(
-    () => ({ "--mir-stage-scale": stageScale }) as CSSProperties,
-    [stageScale],
+    () =>
+      ({
+        "--mir-stage-scale": stagePresentation.scale,
+        "--mir-stage-left": `${stagePresentation.left}px`,
+        "--mir-stage-top": `${stagePresentation.top}px`,
+      }) as CSSProperties,
+    [stagePresentation],
   );
   const sceneAssetReadinessCallbackRef = useRef(onSceneAssetReadinessChange);
   sceneAssetReadinessCallbackRef.current = onSceneAssetReadinessChange;
@@ -590,6 +757,13 @@ export function OriginalClientShell({
     const previousScreen = previousScreenRef.current;
     previousScreenRef.current = screen;
 
+    if (
+      previousScreen !== screen &&
+      (previousScreen === "game" || screen === "game")
+    ) {
+      entityAnimationRuntimeFromWindow()?.resetMir2EntityAnimations?.();
+    }
+
     if (previousScreen === "login" && screen === "select") {
       setLoginTransitionFrame(0);
       return;
@@ -639,7 +813,7 @@ export function OriginalClientShell({
 
     const timer = window.setInterval(() => {
       setSceneSpriteFrameIndex((current) => current + 1);
-    }, 120);
+    }, 100);
 
     return () => window.clearInterval(timer);
   }, [screen]);
@@ -694,18 +868,38 @@ export function OriginalClientShell({
         return;
       }
 
-      if (selectedEntity && !selectedEntity.dead) {
+      if (selectedEntity) {
         if (event.key === " " || event.key === "Enter") {
           event.preventDefault();
           onPrimaryTargetAction();
           return;
         }
 
-        if (event.key.toLowerCase() === "f") {
+        if (!selectedEntity.dead && event.key.toLowerCase() === "f") {
           event.preventDefault();
           onApproachTarget();
           return;
         }
+      }
+
+      // F1–F8 cast the skill in that primary skill-bar slot. Crystal maps
+      // KeybindOptions.Bar1Skill1..8 to Keys.F1..F8 (KeyBindSettings.cs:242) and
+      // stores the slot in each spell's `Magic.Key` (mirrored onto `skill.hotkey`).
+      // Prefer an explicit binding; otherwise fall back to the spell's position in
+      // the known-skills list (the order shown in the character window's spell tab),
+      // so the bar is usable before any slots are explicitly assigned.
+      const skillBarMatch = /^F([1-8])$/.exec(event.key);
+      if (skillBarMatch) {
+        const slot = Number.parseInt(skillBarMatch[1], 10);
+        const skill =
+          world.knownSkills.find((entry) => entry.hotkey === slot) ??
+          world.knownSkills[slot - 1] ??
+          null;
+        if (skill) {
+          event.preventDefault();
+          onCastSkill(skill.key);
+        }
+        return;
       }
 
       const slotIndex = Number.parseInt(event.key, 10);
@@ -729,7 +923,16 @@ export function OriginalClientShell({
 
     window.addEventListener("keydown", handleShortcutKey);
     return () => window.removeEventListener("keydown", handleShortcutKey);
-  }, [screen, selectedEntity, world.beltItems, onApproachTarget, onPrimaryTargetAction, onUseItem]);
+  }, [
+    screen,
+    selectedEntity,
+    world.beltItems,
+    world.knownSkills,
+    onApproachTarget,
+    onPrimaryTargetAction,
+    onCastSkill,
+    onUseItem,
+  ]);
 
   function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
     const latest = latestMoveInputRef.current;
@@ -835,23 +1038,6 @@ export function OriginalClientShell({
     };
   }, [screen, sceneInteractionReady, onViewportDirectionIntent, onViewportDirectionStop]);
 
-  // Roadmap #4 (DEFAULT OFF — opt-in, UNVERIFIED for real-movement smoothness):
-  // drive the render loop OUT of React. When on, the motion-clock React state ticks
-  // at ~10Hz (vs 30Hz) and the Bevy map camera offset is pushed from a per-frame
-  // ref-based rAF loop in page.tsx instead of the per-tick React effect below.
-  // NOTE: an earlier 6-min "0/24 spike" benchmark that motivated default-on was
-  // INVALID — its synthetic KeyboardEvents never actually moved the player (the
-  // camera never scrolled), so it measured a static scene. Under real walking #4
-  // on/off feels the same, so it is back to opt-in until a real fix is verified.
-  // Must stay in sync with page.tsx's renderLoopRafEnabled. Opt in: `?renderLoopRaf=1`.
-  const renderLoopRafEnabled = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    const p = new URLSearchParams(window.location.search);
-    if (p.get("renderLoopRaf") === "1") return true;
-    if (p.get("renderLoopRaf") === "0") return false;
-    return window.localStorage.getItem("mir2-render-loop-raf") === "1";
-  }, []);
-
   const lastMotionNowRef = useRef(0);
   useEffect(() => {
     if (screen !== "game") {
@@ -869,17 +1055,15 @@ export function OriginalClientShell({
       lastMotionNowRef.current = t;
       setMotionNow(t);
     }, 100);
-    // Throttle the rAF to ~30 Hz (one render per ≥30 ms). The shell cannot usefully
-    // process frames faster than 30 Hz — motion offsets are interpolated from timestamps
-    // so smoothness is retained; the reconnect countdown and chat-bubble expiry both
-    // operate on second/multi-second scales. This halves the React re-render rate vs the
-    // previous 60 Hz clock, recovering ~9 % of main-thread time during idle gameplay.
-    // With renderLoopRafEnabled the camera offset is owned by the 60Hz rAF loop in
-    // page.tsx, so the React clock can drop to ~10Hz (100ms) without stuttering scroll.
-    const MOTION_CLOCK_MIN_INTERVAL_MS = renderLoopRafEnabled ? 100 : 30;
+    // Throttle the rAF to an adaptive cadence (motionClockIntervalMsRef): ~33 ms in the
+    // DOM-entity fallback (where this clock drives the JS motion interpolation), or
+    // ~100 ms in the imperative path (Bevy interpolates motion at display Hz + the
+    // scene-motion driver tracks DOM overlays, so this clock only needs to advance the
+    // reconnect countdown + bubble/floater/projectile expiry). Dropping 33→10 Hz there
+    // is the bulk of the scene-render perf win (the React tree stops re-creating 30×/s).
     const updateMotionClock = () => {
       const t = Date.now();
-      if (t - lastMotionNowRef.current >= MOTION_CLOCK_MIN_INTERVAL_MS) {
+      if (t - lastMotionNowRef.current >= motionClockIntervalMsRef.current) {
         lastMotionNowRef.current = t;
         setMotionNow(t);
       }
@@ -891,15 +1075,37 @@ export function OriginalClientShell({
       window.clearInterval(fallbackTimer);
       window.cancelAnimationFrame(animationFrame);
     };
-  }, [screen, renderLoopRafEnabled]);
+  }, [screen]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateStageScale = () => {
       const viewport = window.visualViewport;
-      const width = Math.max(1, Math.floor(viewport?.width ?? window.innerWidth));
-      const height = Math.max(1, Math.floor(viewport?.height ?? window.innerHeight));
-      const nextScale = Math.min(1, width / 1024, height / 768);
-      setStageScale(Number(nextScale.toFixed(4)));
+      const cssWidth = Math.max(1, viewport?.width ?? window.innerWidth);
+      const cssHeight = Math.max(1, viewport?.height ?? window.innerHeight);
+      const deviceScale = Math.max(0.25, window.devicePixelRatio || 1);
+      const deviceWidth = Math.max(1, Math.floor(cssWidth * deviceScale));
+      const deviceHeight = Math.max(1, Math.floor(cssHeight * deviceScale));
+      // Keep the transformed 4:3 stage on whole device pixels. Rounding the
+      // CSS scale itself (the old toFixed(4) path) produced fractional bounds,
+      // so the compositor resampled the complete pixel-art canvas on every move.
+      const nativeDeviceWidth = Math.floor(1024 * deviceScale);
+      const fittedDeviceWidth = Math.min(
+        nativeDeviceWidth,
+        deviceWidth,
+        Math.floor((deviceHeight * 4) / 3),
+      );
+      const displayDeviceWidth = Math.max(4, Math.floor(fittedDeviceWidth / 4) * 4);
+      const displayDeviceHeight = (displayDeviceWidth * 3) / 4;
+      const next = {
+        scale: displayDeviceWidth / deviceScale / 1024,
+        left: Math.round((deviceWidth - displayDeviceWidth) / 2) / deviceScale,
+        top: Math.round((deviceHeight - displayDeviceHeight) / 2) / deviceScale,
+      };
+      setStagePresentation((current) =>
+        current.scale === next.scale && current.left === next.left && current.top === next.top
+          ? current
+          : next,
+      );
     };
 
     updateStageScale();
@@ -912,7 +1118,22 @@ export function OriginalClientShell({
     };
   }, []);
 
-  const livePlayerRenderPosition = getLivePlayerRenderPosition?.() ?? predictedPlayerPosition;
+  const presentationOwnsPlayerInterpolation =
+    screen === "game" &&
+    bevyEntityRendererReady &&
+    bevyMapRuntimeReady &&
+    Boolean(bevyRuntimeBackend) &&
+    runtimePhase !== "dom-only" &&
+    runtimePhase !== "boot-error" &&
+    shouldUseBevyEntityRenderer() &&
+    BEVY_SELF_CAMERA_REQUESTED &&
+    BEVY_ENTITY_INTERP_REQUESTED &&
+    BEVY_PRESENTATION_POSE_REQUESTED &&
+    BEVY_LOCAL_MOTION_REQUESTED;
+  const livePlayerRenderPosition =
+    getLivePlayerRenderPosition?.({
+      presentationOwnsInterpolation: presentationOwnsPlayerInterpolation,
+    }) ?? predictedPlayerPosition;
   const renderPlayer =
     player &&
     livePlayerRenderPosition &&
@@ -920,11 +1141,23 @@ export function OriginalClientShell({
       MAX_PREDICTED_PLAYER_LEAD_TILES
       ? {
           ...player,
-          x: livePlayerRenderPosition.x,
-          y: livePlayerRenderPosition.y,
+          ...livePlayerRenderPosition,
           direction: livePlayerRenderPosition.direction ?? player.direction,
         }
       : player;
+  const viewportEntities = useMemo(
+    () => rebaseViewportEntitiesToRenderPlayer(sourceViewportEntities, renderPlayer),
+    [
+      sourceViewportEntities,
+      renderPlayer?.objectId,
+      renderPlayer?.x,
+      renderPlayer?.y,
+      renderPlayer?.direction,
+      renderPlayer?.movementAnimation,
+      renderPlayer?.movementStartedAt,
+      renderPlayer?.movementUntil,
+    ],
+  );
 
   const desiredSceneSpriteLibraryKeys = useMemo(() => {
     const libraries = new Set<string>();
@@ -1073,12 +1306,16 @@ export function OriginalClientShell({
         : null,
     };
   }
-  latestMoveInputRef.current = {
-    screen,
-    player,
-    renderPlayer,
-    playerCameraMotionOffset,
-  };
+  useLayoutEffect(() => {
+    // Input must observe the same player/camera state that React has committed.
+    // Writing this ref during render can expose an uncommitted concurrent tree.
+    latestMoveInputRef.current = {
+      screen,
+      player,
+      renderPlayer,
+      playerCameraMotionOffset,
+    };
+  }, [screen, player, renderPlayer, playerCameraMotionOffset]);
   // Sprite *frame data* (which body/hair/weapon frame to draw) only changes on entity updates from
   // the server, sprite-library loads, or the 120ms animation tick — NOT on the 60fps motion clock.
   // Memoising it off `sceneSpriteFrameIndex` instead of `motionNow` stops every monster/NPC sprite
@@ -1092,11 +1329,55 @@ export function OriginalClientShell({
     }
     const spriteNow = Date.now();
     const snapshots = entityMotionSnapshotsRef.current;
-    return viewportEntities.map((entity) => {
+    const animationInputs = viewportEntities.map((entity) => {
       const motionSnapshot = snapshots[entity.objectId];
-      const animationState = entityAnimationStateForEntity(entity, snapshots, spriteNow);
+      const presentationMotion = entity.objectId === player.objectId ? bevyLocalSelfMotion : null;
+      const packetAnimationState = entityAnimationStateForEntity(entity, snapshots, spriteNow);
+      // A latched local movement pose must not mask a newer attack/struck/death
+      // packet. It only owns the sprite phase while the semantic state is still
+      // standing or moving.
+      const activePresentationMotion =
+        presentationMotion &&
+        (packetAnimationState === "standing" ||
+          packetAnimationState === "walking" ||
+          packetAnimationState === "running")
+          ? presentationMotion
+          : null;
+      const legacyAnimationState = activePresentationMotion
+        ? activePresentationMotion.mode === "run"
+          ? "running"
+          : "walking"
+        : packetAnimationState;
       return {
         entity,
+        motionSnapshot,
+        activePresentationMotion,
+        legacyAnimationState,
+      };
+    });
+    const animationPoses = resolveCrystalEntityAnimationPoses({
+      runtime: entityAnimationRuntimeFromWindow(),
+      worldKey: `${world.mapFileName ?? "none"}:${player.objectId}`,
+      worldSeed: entityAnimationWorldSeed,
+      now: spriteNow,
+      entities: animationInputs.map(({ entity, legacyAnimationState, motionSnapshot }) => ({
+        entity,
+        state: legacyAnimationState,
+        motionSnapshot,
+      })),
+    });
+
+    return animationInputs.map(({
+      entity,
+      motionSnapshot,
+      activePresentationMotion,
+      legacyAnimationState,
+    }) => {
+      const animationPose = animationPoses[entity.objectId] ?? null;
+      const animationState = animationPose?.animationState ?? legacyAnimationState;
+      return {
+        entity,
+        animationPose,
         sprite: buildViewportEntitySprite(
           entity,
           sceneSpriteLibraries,
@@ -1104,10 +1385,21 @@ export function OriginalClientShell({
           spriteNow,
           animationState,
           motionSnapshot,
+          activePresentationMotion,
+          animationPose,
         ),
       };
     });
-  }, [player, viewportEntities, sceneSpriteLibraries, sceneSpriteFrameIndex]);
+  }, [
+    bevyLocalSelfMotion,
+    bevyMapRuntimeGeneration,
+    entityAnimationWorldSeed,
+    player,
+    sceneSpriteFrameIndex,
+    sceneSpriteLibraries,
+    viewportEntities,
+    world.mapFileName,
+  ]);
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(
@@ -1180,31 +1472,6 @@ export function OriginalClientShell({
     if (params.get("bevyMap") === "1") return true;
     return window.localStorage.getItem("mir2-bevy-map") !== "0";
   }, []);
-  // Atlas-MISS tiles (the old DOM `mapDrawPlan.uncovered`) rendered by the Bevy
-  // runtime from per-tile R2 textures (DEFAULT ON). Without this the Bevy map drops
-  // every tile whose (library, frame) isn't in the 27-lib packed atlas — which is
-  // most tiles on most maps. Escape hatch: `?bevyMapTiles=0` / localStorage
-  // "mir2-bevy-map-tiles"="0" reverts to the covered-only behavior.
-  const standaloneMapTilesEnabled = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("bevyMapTiles") === "0") return false;
-    if (params.get("bevyMapTiles") === "1") return true;
-    return window.localStorage.getItem("mir2-bevy-map-tiles") !== "0";
-  }, []);
-  // Move per-entity motion interpolation + camera scroll offset OUT of JS and
-  // INTO the Bevy runtime (DEFAULT ON). When on, buildBevyEntityRenderState stops
-  // folding the per-tick motion/camera offsets into each entity's left/top, so the
-  // entity render state stays STABLE across ~30Hz motion ticks — React no longer
-  // rebuilds + JSON.stringifies it every tick (the per-tick GC churn this removes).
-  // Escape hatch: `?bevyEntityInterp=0` / localStorage "mir2-bevy-entity-interp"="0".
-  const entityInterpInRuntime = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    const p = new URLSearchParams(window.location.search);
-    if (p.get("bevyEntityInterp") === "0") return false;
-    if (p.get("bevyEntityInterp") === "1") return true;
-    return window.localStorage.getItem("mir2-bevy-entity-interp") !== "0";
-  }, []);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
@@ -1217,25 +1484,101 @@ export function OriginalClientShell({
       cancelled = true;
     };
   }, [mapAtlasRequested, bevyMapRequested]);
-  // Decoded RGBA bytes for each map-atlas page consumed by the Bevy-native map
-  // renderer, keyed by page key. Decoded ONCE per page via an offscreen canvas
-  // (drawImage -> getImageData); the requested set dedupes in-flight decodes.
-  const decodedMapAtlasPagesRef = useRef<
-    Map<string, { width: number; height: number; pixels: Uint8Array }>
+  const decodedStandaloneMapImagesRef = useRef<Map<string, DecodedStandaloneMapImage>>(new Map());
+  const standaloneMapImageDecodeRequestedRef = useRef<
+    Map<string, StandaloneMapImageDecodeRequest>
   >(new Map());
-  const mapAtlasPageDecodeRequestedRef = useRef<Set<string>>(new Set());
-  const [mapAtlasPagesDecodedVersion, setMapAtlasPagesDecodedVersion] = useState(0);
-  // Decoded RGBA bytes for each atlas-MISS (standalone) tile consumed by the Bevy
-  // map renderer, keyed by `library#frame` imageKey (deduped across cells). Mirrors
-  // decodedMapAtlasPagesRef but per-tile; the requested set dedupes in-flight decodes
-  // and the failed set negative-caches misses (TTL) so a 404 tile is dropped from the
-  // snapshot instead of re-fetched forever / leaving the runtime perpetually pending.
-  const decodedMapTilesRef = useRef<
-    Map<string, { width: number; height: number; pixels: Uint8Array }>
-  >(new Map());
-  const mapTileDecodeRequestedRef = useRef<Set<string>>(new Set());
-  const failedMapTileImageKeysRef = useRef<Map<string, number>>(new Map());
-  const [mapStandaloneTilesDecodedVersion, setMapStandaloneTilesDecodedVersion] = useState(0);
+  const failedStandaloneMapImagesRef = useRef<Map<string, FailedStandaloneMapImage>>(new Map());
+  const latestStandaloneMapImageSourcesRef = useRef<Map<string, MapStandaloneTileImageSource>>(
+    new Map(),
+  );
+  const latestBevyMapActiveRef = useRef(false);
+  const standaloneMapDecodeGenerationRef = useRef(0);
+  const standaloneMapImagesFlushFrameRef = useRef<number | null>(null);
+  const standaloneMapResidencyFlushFrameRef = useRef<number | null>(null);
+  const pendingStandaloneMapImageResidencyRef = useRef<StandaloneMapImageResidency | null>(null);
+  const onBevyMapImagesEvictedRef = useRef(onBevyMapImagesEvicted);
+  onBevyMapImagesEvictedRef.current = onBevyMapImagesEvicted;
+  const [standaloneMapImagesDecodedVersion, setStandaloneMapImagesDecodedVersion] = useState(0);
+  const [standaloneMapImageResidency, setStandaloneMapImageResidency] =
+    useState<StandaloneMapImageResidency>({
+      runtimeGeneration: -1,
+      keys: EMPTY_STRING_SET,
+    });
+  const scheduleStandaloneMapImagesFlush = useCallback(() => {
+    if (standaloneMapImagesFlushFrameRef.current !== null) {
+      return;
+    }
+    standaloneMapImagesFlushFrameRef.current = window.requestAnimationFrame(() => {
+      standaloneMapImagesFlushFrameRef.current = null;
+      setStandaloneMapImagesDecodedVersion((version) => version + 1);
+    });
+  }, []);
+  const releaseStandaloneMapImages = useCallback((imageKeys: string[]) => {
+    if (imageKeys.length === 0) {
+      return;
+    }
+    evictStandaloneTilePixels(imageKeys);
+    onBevyMapImagesEvictedRef.current?.(imageKeys);
+    const releasedKeys = new Set(imageKeys);
+    const pendingResidency = pendingStandaloneMapImageResidencyRef.current;
+    if (pendingResidency && setIntersects(pendingResidency.keys, releasedKeys)) {
+      pendingStandaloneMapImageResidencyRef.current = {
+        runtimeGeneration: pendingResidency.runtimeGeneration,
+        keys: new Set(
+          Array.from(pendingResidency.keys).filter((key) => !releasedKeys.has(key)),
+        ),
+      };
+    }
+    setStandaloneMapImageResidency((current) => {
+      if (!setIntersects(current.keys, releasedKeys)) {
+        return current;
+      }
+      return {
+        runtimeGeneration: current.runtimeGeneration,
+        keys: new Set(Array.from(current.keys).filter((key) => !releasedKeys.has(key))),
+      };
+    });
+  }, []);
+  const scheduleStandaloneMapImageResidency = useCallback((residency: StandaloneMapImageResidency) => {
+    pendingStandaloneMapImageResidencyRef.current = residency;
+    if (standaloneMapResidencyFlushFrameRef.current !== null) {
+      return;
+    }
+    standaloneMapResidencyFlushFrameRef.current = window.requestAnimationFrame(() => {
+      standaloneMapResidencyFlushFrameRef.current = null;
+      const pending = pendingStandaloneMapImageResidencyRef.current;
+      pendingStandaloneMapImageResidencyRef.current = null;
+      if (!pending) {
+        return;
+      }
+      setStandaloneMapImageResidency((current) =>
+        current.runtimeGeneration === pending.runtimeGeneration &&
+        setsEqual(current.keys, pending.keys)
+          ? current
+          : pending,
+      );
+    });
+  }, []);
+  useEffect(
+    () => () => {
+      if (standaloneMapImagesFlushFrameRef.current !== null) {
+        window.cancelAnimationFrame(standaloneMapImagesFlushFrameRef.current);
+        standaloneMapImagesFlushFrameRef.current = null;
+      }
+      if (standaloneMapResidencyFlushFrameRef.current !== null) {
+        window.cancelAnimationFrame(standaloneMapResidencyFlushFrameRef.current);
+        standaloneMapResidencyFlushFrameRef.current = null;
+      }
+      pendingStandaloneMapImageResidencyRef.current = null;
+      latestBevyMapActiveRef.current = false;
+      standaloneMapDecodeGenerationRef.current += 1;
+      const pendingDecodeKeys = Array.from(standaloneMapImageDecodeRequestedRef.current.keys());
+      standaloneMapImageDecodeRequestedRef.current.clear();
+      evictStandaloneTilePixels(pendingDecodeKeys);
+    },
+    [],
+  );
   // Mirror the entity renderer's WebGL2 failure handling: if the atlas layer reports it can't draw
   // (no WebGL2 context, or a GL/texture error), latch the failure so the DOM tile path takes over
   // instead of leaving a blank scene on devices without WebGL2.
@@ -1250,14 +1593,6 @@ export function OriginalClientShell({
   // tile draw list is the same for either consumer.
   const mapAtlasUsable =
     mapAtlasRequested && Boolean(mapAtlasIndex) && !mapGpuFailed && screen === "game";
-  const mapDrawPlan = useMemo(
-    () =>
-      mapAtlasUsable && mapAtlasIndex && renderPlayer
-        ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, EMPTY_VIEWPORT_OFFSET)
-        : null,
-    [mapAtlasUsable, mapAtlasIndex, renderPlayer, viewportMapSprites],
-  );
-  const mapTileDrawList = mapDrawPlan?.tiles ?? EMPTY_MAP_TILE_DRAW_LIST;
   const viewportProjectiles = renderPlayer
     ? world.projectiles
         .filter((projectile) => projectile.expiresAt > motionNow)
@@ -1311,6 +1646,143 @@ export function OriginalClientShell({
     bevyEntityRendererWanted && bevyEntityRendererReady && Boolean(bevyRuntimeBackend);
   const useBevyEntityRenderer =
     entityRendererRequested && !hideBevyCanvasForDomEntityFallback;
+  const bevySelfCameraActive =
+    BEVY_SELF_CAMERA_REQUESTED &&
+    useBevyEntityRenderer &&
+    bevyMapRequested &&
+    mapAtlasUsable &&
+    bevyMapRuntimeReady;
+  const bevyEntityInterpActive = BEVY_ENTITY_INTERP_REQUESTED && useBevyEntityRenderer;
+  const bevyRemoteMotionActive =
+    BEVY_REMOTE_MOTION_REQUESTED && bevyEntityInterpActive;
+  const mapTileCameraOffset = bevySelfCameraActive ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+  const hasRenderPlayer = Boolean(renderPlayer);
+  const mapDrawPlan = useMemo(
+    () =>
+      mapAtlasUsable && mapAtlasIndex && hasRenderPlayer
+        ? buildMapTileDrawList(viewportMapSprites, mapAtlasIndex, mapTileCameraOffset)
+        : null,
+    [
+      mapAtlasUsable,
+      mapAtlasIndex,
+      hasRenderPlayer,
+      viewportMapSprites,
+      mapTileCameraOffset.x,
+      mapTileCameraOffset.y,
+    ],
+  );
+  const mapTileDrawListCandidate = mapDrawPlan?.tiles ?? EMPTY_MAP_TILE_DRAW_LIST;
+  const retainedMapTileDrawListRef = useRef<MapTileDraw[]>(EMPTY_MAP_TILE_DRAW_LIST);
+  if (!mapTileDrawListsEqual(retainedMapTileDrawListRef.current, mapTileDrawListCandidate)) {
+    retainedMapTileDrawListRef.current = mapTileDrawListCandidate;
+  }
+  const mapTileDrawList = retainedMapTileDrawListRef.current;
+  const standaloneMapPlan = useMemo(
+    () => (mapDrawPlan ? buildStandaloneMapTiles(mapDrawPlan.uncovered, mapTileCameraOffset) : null),
+    [mapDrawPlan, mapTileCameraOffset.x, mapTileCameraOffset.y],
+  );
+  const standaloneMapTileDrawListCandidate =
+    standaloneMapPlan?.tiles ?? EMPTY_STANDALONE_MAP_TILE_DRAW_LIST;
+  const retainedStandaloneMapTileDrawListRef = useRef<MapStandaloneTileDraw[]>(
+    EMPTY_STANDALONE_MAP_TILE_DRAW_LIST,
+  );
+  if (
+    !standaloneMapTileDrawListsEqual(
+      retainedStandaloneMapTileDrawListRef.current,
+      standaloneMapTileDrawListCandidate,
+    )
+  ) {
+    retainedStandaloneMapTileDrawListRef.current = standaloneMapTileDrawListCandidate;
+  }
+  const standaloneMapTileDrawList = retainedStandaloneMapTileDrawListRef.current;
+  const standaloneMapImageSourcesCandidate =
+    standaloneMapPlan?.images ?? EMPTY_STANDALONE_MAP_IMAGE_SOURCES;
+  const retainedStandaloneMapImageSourcesRef = useRef<MapStandaloneTileImageSource[]>(
+    EMPTY_STANDALONE_MAP_IMAGE_SOURCES,
+  );
+  if (
+    !standaloneMapImageSourcesEqual(
+      retainedStandaloneMapImageSourcesRef.current,
+      standaloneMapImageSourcesCandidate,
+    )
+  ) {
+    retainedStandaloneMapImageSourcesRef.current = standaloneMapImageSourcesCandidate;
+  }
+  const standaloneMapImageSources = retainedStandaloneMapImageSourcesRef.current;
+  const standaloneMapImageSourcesByKey = useMemo(
+    () => new Map(standaloneMapImageSources.map((source) => [source.imageKey, source])),
+    [standaloneMapImageSources],
+  );
+  const residentStandaloneMapImageKeys =
+    bevyMapRuntimeReady &&
+    standaloneMapImageResidency.runtimeGeneration === bevyMapRuntimeGeneration
+      ? standaloneMapImageResidency.keys
+      : EMPTY_STRING_SET;
+  const standaloneDomFallbackSprites = useMemo(() => {
+    if (!standaloneMapPlan) {
+      return EMPTY_VIEWPORT_MAP_SPRITES;
+    }
+    const keepInDom = (sprite: ViewportMapSprites["floor"][number]) => {
+      const imageKey = standaloneMapPlan.imageKeyBySpriteKey.get(sprite.key);
+      const requiredImageKeys =
+        standaloneMapPlan.requiredImageKeysBySpriteKey.get(sprite.key) ??
+        (imageKey ? [imageKey] : []);
+      return (
+        requiredImageKeys.length === 0 ||
+        !isCompleteBevyMapImageFamilyResident(
+          residentStandaloneMapImageKeys,
+          requiredImageKeys,
+        )
+      );
+    };
+    return {
+      floor: standaloneMapPlan.domFallback.floor.filter(keepInDom),
+      objects: standaloneMapPlan.domFallback.objects.filter(keepInDom),
+    };
+  }, [residentStandaloneMapImageKeys, standaloneMapPlan]);
+  // Imperative scene motion (perf): when Bevy renders entities AND interpolates the
+  // self-camera + monsters at display Hz (both flags on), the ~33 Hz `motionNow` React
+  // fold is redundant — it only re-created the scene tree. In that path the camera/glide
+  // for the residual DOM overlays is driven imperatively (useSceneCameraMotionDriver) and
+  // the React clock drops to ~10 Hz. Escape hatch: ?bevySelfCamera=0 / ?bevyEntityInterp=0.
+  const imperativeSceneMotion = bevySelfCameraActive && bevyEntityInterpActive;
+  const bevyPresentationPoseActive =
+    BEVY_PRESENTATION_POSE_REQUESTED && imperativeSceneMotion;
+  const bevyLocalMotionActive =
+    BEVY_LOCAL_MOTION_REQUESTED && bevyPresentationPoseActive;
+  const bevyPoseCommitActive =
+    BEVY_POSE_COMMIT_REQUESTED && bevyPresentationPoseActive;
+  // In the NON-imperative path (the default — Bevy renders sprites but the self-camera
+  // scroll is folded through this React clock), the ~33 Hz cadence was measured as the
+  // dominant run "judder": the map/camera scroll only advanced every ~30 ms, so on a
+  // 120 Hz display the scroll sat still ~89 % of frames and lurched in 33 Hz steps —
+  // very visible while RUNNING (2 tiles/600 ms = a big per-step displacement), barely
+  // visible while walking. While the self-camera is actually gliding, tighten the clock
+  // to ~60 Hz so the scroll keeps up with the display; fall back to 30 Hz when idle so
+  // the scene tree is not re-created 60×/s during normal standing play (the perf win the
+  // throttle exists for). The imperative path stays at its slow expiry cadence — Bevy
+  // owns the scroll there.
+  const selfCameraGliding =
+    (renderPlayer?.movementUntil ?? 0) > Date.now() ||
+    playerCameraMotionOffset.x !== 0 ||
+    playerCameraMotionOffset.y !== 0;
+  motionClockIntervalMsRef.current = imperativeSceneMotion ? 100 : selfCameraGliding ? 16 : 30;
+  // In the imperative path the DOM world layers get a zero camera offset (the driver
+  // pans them via a compositor transform at display Hz); otherwise they fold the React
+  // `motionNow` camera offset exactly as before.
+  const effectiveCameraOffset = imperativeSceneMotion
+    ? EMPTY_VIEWPORT_OFFSET
+    : playerCameraMotionOffset;
+  const sceneMotionDriver = useSceneCameraMotionDriver(
+    imperativeSceneMotion,
+    () => latestMoveInputRef.current.renderPlayer,
+    entityMotionSnapshotsRef,
+    bevyPresentationPoseActive,
+    bevyPoseCommitActive,
+    bevyMapRuntimeGeneration,
+    () => submittedPresentationContextRef.current,
+    setBevyLocalSelfMotion,
+  );
   const useWebGl2EntityAtlasRenderer =
     entityRendererRequested &&
     !foldWebgl2ToBevy &&
@@ -1376,186 +1848,215 @@ export function OriginalClientShell({
     useGpuEntityRenderer &&
     !webGl2EntityAtlasFailed &&
     (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
-  // When runtime interpolation is ON, the entity render state is independent of
-  // motionNow/offsets (Bevy applies them), so it only needs to rebuild on a
-  // player-cell change — NOT every ~30Hz motion tick. The trigger collapses the
-  // relevant inputs into one scalar: player cell when interp is on, motionNow
-  // when off (preserving the old per-tick rebuild for the fold path). The deps
-  // array is FIXED LENGTH either way.
-  const entityMemoTrigger = entityInterpInRuntime
-    ? `${player?.objectId}:${player?.x}:${player?.y}`
-    : motionNow;
-  const entityRenderState = useMemo(
-    () =>
-      buildBevyEntityRenderState({
-        enabled: useGpuEntityRenderer,
-        player,
-        viewportEntitySprites,
-        viewportDepthPlayer,
-        playerCameraMotionOffset,
-        entityMotionSnapshots: entityMotionSnapshotsRef.current,
-        motionNow,
-        atlas: useBevyEntityAtlas ? activeBevyEntityAtlas : null,
-        interpolateInRuntime: entityInterpInRuntime,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      useGpuEntityRenderer,
-      player,
-      viewportEntitySprites,
-      viewportDepthPlayer,
-      useBevyEntityAtlas,
-      activeBevyEntityAtlas,
-      entityInterpInRuntime,
-      entityMemoTrigger,
-    ],
-  );
+  const entityRenderState = buildBevyEntityRenderState({
+    enabled: useGpuEntityRenderer,
+    player,
+    viewportEntitySprites,
+    viewportDepthPlayer,
+    playerCameraMotionOffset,
+    entityMotionSnapshots: entityMotionSnapshotsRef.current,
+    motionNow,
+    atlas: useBevyEntityAtlas ? activeBevyEntityAtlas : null,
+    bevySelfCameraActive,
+    bevyEntityInterpActive,
+  });
   const bevyEntityRenderState = useBevyEntityRenderer
     ? entityRenderState
     : disabledEntityRenderState(entityRenderState);
 
-  // Bevy-native map renderer is active only when the flag is on, the Bevy entity
-  // renderer is the active renderer (so the canvas is composited and entities draw
-  // there too), and the packed atlas is usable. It then becomes the SOLE map
-  // renderer; the DOM GPU layer + DOM map sprites are gated off below.
-  const bevyMapActive = bevyMapRequested && useBevyEntityRenderer && mapAtlasUsable;
-  // DOM GPU atlas layer draws only when the Bevy-native map renderer is NOT active.
-  const mapGpuActive = mapAtlasUsable && !bevyMapActive;
-  // Cell ownership: when Bevy owns the map, the DOM draws nothing (covered tiles
-  // go to Bevy; the small uncovered remainder is an accepted Stage 1 gap). When
-  // the DOM GPU layer is active it draws covered tiles and the DOM renders only
-  // the uncovered remainder. When neither is active the DOM draws the full set.
-  const mapDomSprites = bevyMapActive
-    ? EMPTY_VIEWPORT_MAP_SPRITES
+  // Start the Bevy map pipeline as soon as the runtime and packed atlas are usable,
+  // but keep WebGL2/DOM ownership until Rust confirms a complete map sync for every
+  // atlas page required by this viewport. This overlap avoids a cold-start clear-color
+  // frame while page pixels cross the async decode -> WASM -> Bevy asset boundary.
+  const bevyMapActive =
+    bevyMapRequested && useBevyEntityRenderer && mapAtlasUsable && bevyMapRuntimeReady;
+  const requiredBevyMapAtlasPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
+  const bevyMapOwnershipActive =
+    bevyMapActive &&
+    Array.from(requiredBevyMapAtlasPageKeys).every((key) => bevyMapPresentedImageKeys.has(key));
+  useEffect(() => {
+    latestStandaloneMapImageSourcesRef.current = standaloneMapImageSourcesByKey;
+    latestBevyMapActiveRef.current = bevyMapActive;
+  }, [bevyMapActive, standaloneMapImageSourcesByKey]);
+  // DOM GPU atlas layer draws until Bevy has acknowledged the complete viewport.
+  const mapGpuActive = mapAtlasUsable && !bevyMapOwnershipActive;
+  // Cell ownership: covered atlas tiles go to Bevy/WebGL2. Atlas misses,
+  // including additive glows, stay in DOM until their standalone Bevy image is
+  // decoded and acknowledged; when Bevy is disabled the legacy fallbacks stay intact.
+  const mapDomSprites = bevyMapOwnershipActive
+    ? standaloneDomFallbackSprites
     : mapGpuActive
       ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES
       : viewportMapSprites;
-  // When Bevy owns the map, the atlas-MISS remainder (mapDrawPlan.uncovered) is NOT
-  // dropped: each tile becomes a per-tile R2 texture drawn by the runtime in the same
-  // z-band as covered tiles. ROOT-OFFSET model: tiles are built in cell-space (EMPTY
-  // offset, matching mapDrawPlan) and the sub-tile camera scroll is applied by Bevy via
-  // setMir2MapCameraOffset — so this memo is stable across the 30Hz motion clock and only
-  // rebuilds on a cell/animation change. (A DOM fallback can't be used here — the Bevy
-  // canvas draws map + entities together, so DOM map sprites would paint over actors.)
-  const standaloneTilesPlan = useMemo(
-    () =>
-      bevyMapActive && standaloneMapTilesEnabled && mapDrawPlan
-        ? buildStandaloneMapTiles(mapDrawPlan.uncovered, EMPTY_VIEWPORT_OFFSET)
-        : null,
-    [bevyMapActive, standaloneMapTilesEnabled, mapDrawPlan],
-  );
+  const mapDomBlendSpriteCount = countBlendMapSprites(mapDomSprites);
 
-  // Decode each atlas page referenced by the current tiles to RGBA bytes once.
   useEffect(() => {
-    if (!bevyMapActive || !mapAtlasIndex) {
-      return;
+    const generation = standaloneMapDecodeGenerationRef.current + 1;
+    standaloneMapDecodeGenerationRef.current = generation;
+    const invalidateGeneration = () => {
+      if (standaloneMapDecodeGenerationRef.current === generation) {
+        standaloneMapDecodeGenerationRef.current = generation + 1;
+      }
+    };
+    if (!bevyMapActive) {
+      return invalidateGeneration;
     }
-    const neededPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
-    for (const pageKey of neededPageKeys) {
-      if (mapAtlasPageDecodeRequestedRef.current.has(pageKey)) {
+
+    const latestSources = latestStandaloneMapImageSourcesRef.current;
+    for (const [imageKey] of standaloneMapImageDecodeRequestedRef.current) {
+      if (latestSources.has(imageKey)) {
         continue;
       }
-      const page = mapAtlasIndex.pages.get(pageKey);
-      if (!page) {
-        continue;
-      }
-      mapAtlasPageDecodeRequestedRef.current.add(pageKey);
-      // NOTE: do NOT gate the decode result on an effect-scoped `cancelled` flag.
-      // This effect re-runs on every mapTileDrawList change (i.e. every move /
-      // animation / camera-offset frame); an effect-cleanup `cancelled=true` would
-      // drop the in-flight decode before it commits, while the requestedRef key
-      // blocks any retry — leaving the Bevy map permanently textureless
-      // (atlasImageCount stuck at 0). The page-pixel cache + decodedMapAtlasPagesRef
-      // are idempotent and module/ref-scoped, so committing the result on resolve
-      // is always safe regardless of how many times the effect re-ran.
-      void decodeMapAtlasPagePixels(page)
-        .then((decoded) => {
-          if (!decoded) {
-            // Allow a later retry if the decode failed (e.g. transient load error).
-            mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
-            return;
-          }
-          decodedMapAtlasPagesRef.current.set(pageKey, decoded);
-          setMapAtlasPagesDecodedVersion((version) => version + 1);
-        })
-        .catch(() => {
-          mapAtlasPageDecodeRequestedRef.current.delete(pageKey);
-        });
+      standaloneMapImageDecodeRequestedRef.current.delete(imageKey);
+      evictStandaloneTilePixels([imageKey]);
     }
-  }, [bevyMapActive, mapAtlasIndex, mapTileDrawList]);
 
-  // Decode each atlas-MISS tile's PNG (R2-served) to RGBA once, keyed by imageKey.
-  // Same idempotent, no-`cancelled`-flag pattern as the page decode above (the effect
-  // re-runs every motion/animation frame; dropping in-flight work would strand tiles).
-  // A failed decode negative-caches the imageKey (TTL) and bumps the version so the
-  // render state drops that tile (resolving the runtime's per-tile pending retry).
-  useEffect(() => {
-    if (!bevyMapActive || !standaloneMapTilesEnabled || !standaloneTilesPlan) {
-      return;
-    }
     const now = Date.now();
-    for (const { imageKey, fetchUrl } of standaloneTilesPlan.images) {
-      if (mapTileDecodeRequestedRef.current.has(imageKey)) {
+    for (const source of standaloneMapImageSources) {
+      const sourceSignature = standaloneMapImageSourceSignature(source);
+      const failed = failedStandaloneMapImagesRef.current.get(source.imageKey);
+      if (failed) {
+        if (failed.sourceSignature === sourceSignature && failed.retryAt > now) {
+          continue;
+        }
+        failedStandaloneMapImagesRef.current.delete(source.imageKey);
+      }
+
+      const decodedImage = decodedStandaloneMapImagesRef.current.get(source.imageKey);
+      if (decodedImage?.sourceSignature === sourceSignature) {
         continue;
       }
-      const failedAt = failedMapTileImageKeysRef.current.get(imageKey);
-      if (failedAt !== undefined && now - failedAt <= STANDALONE_TILE_NEGATIVE_CACHE_MS) {
+      if (decodedImage) {
+        decodedStandaloneMapImagesRef.current.delete(source.imageKey);
+        releaseStandaloneMapImages([source.imageKey]);
+      }
+
+      const existingRequest = standaloneMapImageDecodeRequestedRef.current.get(source.imageKey);
+      if (existingRequest?.sourceSignature === sourceSignature) {
+        // Re-associate a still-relevant in-flight decode with this newest effect
+        // generation. Its completion reads the latest source/keep set via refs.
+        existingRequest.generation = generation;
         continue;
       }
-      mapTileDecodeRequestedRef.current.add(imageKey);
-      void decodeStandaloneTilePixels(fetchUrl)
+      if (existingRequest) {
+        standaloneMapImageDecodeRequestedRef.current.delete(source.imageKey);
+        evictStandaloneTilePixels([source.imageKey]);
+      }
+
+      const request: StandaloneMapImageDecodeRequest = { sourceSignature, generation };
+      standaloneMapImageDecodeRequestedRef.current.set(source.imageKey, request);
+      void decodeStandaloneTilePixels(source)
         .then((decoded) => {
-          if (!decoded) {
-            mapTileDecodeRequestedRef.current.delete(imageKey);
-            failedMapTileImageKeysRef.current.set(imageKey, Date.now());
-            setMapStandaloneTilesDecodedVersion((version) => version + 1);
+          if (standaloneMapImageDecodeRequestedRef.current.get(source.imageKey) !== request) {
             return;
           }
-          failedMapTileImageKeysRef.current.delete(imageKey);
-          decodedMapTilesRef.current.set(imageKey, decoded);
-          setMapStandaloneTilesDecodedVersion((version) => version + 1);
+          standaloneMapImageDecodeRequestedRef.current.delete(source.imageKey);
+          const latestSource = latestStandaloneMapImageSourcesRef.current.get(source.imageKey);
+          const requestIsCurrent =
+            request.generation === standaloneMapDecodeGenerationRef.current &&
+            latestBevyMapActiveRef.current &&
+            latestSource !== undefined &&
+            standaloneMapImageSourceSignature(latestSource) === request.sourceSignature;
+          if (!requestIsCurrent) {
+            return;
+          }
+          if (!decoded) {
+            failedStandaloneMapImagesRef.current.set(
+              source.imageKey,
+              {
+                sourceSignature: request.sourceSignature,
+                retryAt: Date.now() + STANDALONE_MAP_IMAGE_NEGATIVE_CACHE_MS,
+              },
+            );
+            scheduleStandaloneMapImagesFlush();
+            return;
+          }
+          failedStandaloneMapImagesRef.current.delete(source.imageKey);
+          decodedStandaloneMapImagesRef.current.set(source.imageKey, {
+            width: decoded.width,
+            height: decoded.height,
+            pixels: decoded.pixels,
+            sourceSignature: request.sourceSignature,
+          });
+          const evicted = trimStandaloneMapImageCache(
+            decodedStandaloneMapImagesRef.current,
+            new Set(latestStandaloneMapImageSourcesRef.current.keys()),
+          );
+          if (evicted.length > 0) {
+            releaseStandaloneMapImages(evicted);
+          }
+          scheduleStandaloneMapImagesFlush();
         })
         .catch(() => {
-          mapTileDecodeRequestedRef.current.delete(imageKey);
-          failedMapTileImageKeysRef.current.set(imageKey, Date.now());
-          setMapStandaloneTilesDecodedVersion((version) => version + 1);
+          if (standaloneMapImageDecodeRequestedRef.current.get(source.imageKey) !== request) {
+            return;
+          }
+          standaloneMapImageDecodeRequestedRef.current.delete(source.imageKey);
+          const latestSource = latestStandaloneMapImageSourcesRef.current.get(source.imageKey);
+          if (
+            request.generation !== standaloneMapDecodeGenerationRef.current ||
+            !latestBevyMapActiveRef.current ||
+            !latestSource ||
+            standaloneMapImageSourceSignature(latestSource) !== request.sourceSignature
+          ) {
+            return;
+          }
+          failedStandaloneMapImagesRef.current.set(
+            source.imageKey,
+            {
+              sourceSignature: request.sourceSignature,
+              retryAt: Date.now() + STANDALONE_MAP_IMAGE_NEGATIVE_CACHE_MS,
+            },
+          );
+          scheduleStandaloneMapImagesFlush();
         });
     }
-  }, [bevyMapActive, standaloneMapTilesEnabled, standaloneTilesPlan]);
-
-  // Bound the CPU-side decoded-tile cache: evict oldest (insertion-ordered) entries no
-  // longer in the current viewport's needed set, freeing their RGBA + allowing re-decode
-  // on re-entry. (GPU-side eviction of the uploaded texture is driven separately in
-  // page.tsx from the standaloneTiles keys.)
-  useEffect(() => {
-    const cache = decodedMapTilesRef.current;
-    if (cache.size <= STANDALONE_TILE_DECODE_CACHE_MAX) {
-      return;
-    }
-    const needed = new Set(standaloneTilesPlan?.images.map((image) => image.imageKey) ?? []);
-    for (const key of [...cache.keys()]) {
-      if (cache.size <= STANDALONE_TILE_DECODE_CACHE_MAX) break;
-      if (needed.has(key)) continue;
-      cache.delete(key);
-      mapTileDecodeRequestedRef.current.delete(key);
-    }
-  }, [standaloneTilesPlan]);
+    return invalidateGeneration;
+  }, [
+    bevyMapActive,
+    releaseStandaloneMapImages,
+    scheduleStandaloneMapImagesFlush,
+    standaloneMapImageSources,
+  ]);
 
   const bevyMapRenderState = useMemo<BevyMapRenderState>(() => {
+    const revision = ++bevyMapRenderRevisionRef.current;
+    const ackKey = `g${bevyMapRuntimeGeneration}:r${revision}`;
+    const center = renderPlayer ? { centerX: renderPlayer.x, centerY: renderPlayer.y } : {};
     if (!bevyMapActive || !mapAtlasIndex) {
       return {
         enabled: false,
         stageWidth: ORIGINAL_UI.game.sceneWidth,
         stageHeight: ORIGINAL_UI.game.sceneHeight,
+        ackKey,
+        revision,
+        ...center,
         atlases: [],
         atlasImages: [],
         tiles: [],
+        standaloneTiles: [],
+        retainedImageKeys: [],
         cameraOffset: EMPTY_VIEWPORT_OFFSET,
       };
     }
     const pageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
     const atlases: NonNullable<BevyMapRenderState["atlases"]> = [];
     const atlasImages: NonNullable<BevyMapRenderState["atlasImages"]> = [];
+    const imageReady = (imageKey: string) => {
+      const source = standaloneMapImageSourcesByKey.get(imageKey);
+      const decoded = decodedStandaloneMapImagesRef.current.get(imageKey);
+      return (
+        source !== undefined &&
+        decoded?.sourceSignature === standaloneMapImageSourceSignature(source)
+      );
+    };
+    const standaloneTiles = standaloneMapTileDrawList.filter((tile) => {
+      const requiredImageKeys =
+        standaloneMapPlan?.requiredImageKeysByTileKey.get(tile.key) ?? [tile.imageKey];
+      // Do not expose a partly decoded animation family to Rust. The current
+      // frame remains in DOM until every family image can be uploaded together.
+      return requiredImageKeys.every(imageReady);
+    });
     for (const pageKey of pageKeys) {
       const page = mapAtlasIndex.pages.get(pageKey);
       if (!page) {
@@ -1574,97 +2075,242 @@ export function OriginalClientShell({
           height: rect.height,
         })),
       });
-      const decoded = decodedMapAtlasPagesRef.current.get(pageKey);
-      if (decoded) {
-        atlasImages.push({
-          key: page.key,
-          width: decoded.width,
-          height: decoded.height,
-          pixels: decoded.pixels,
-        });
-      }
     }
-    // Atlas-MISS tiles: drop any whose decode permanently failed (negative-cache TTL)
-    // so the runtime isn't held pending on a 404; include the rest (the runtime spawns
-    // each as soon as ITS image lands). Upload one image per imageKey via atlasImages
-    // (deduped) — page.tsx skips already-uploaded keys + GPU-evicts stale ones.
-    const now = Date.now();
-    const standaloneTiles = (standaloneTilesPlan?.tiles ?? []).filter((tile) => {
-      const failedAt = failedMapTileImageKeysRef.current.get(tile.imageKey);
-      return failedAt === undefined || now - failedAt > STANDALONE_TILE_NEGATIVE_CACHE_MS;
-    });
-    const standaloneImageKeys = new Set(standaloneTiles.map((tile) => tile.imageKey));
-    for (const imageKey of standaloneImageKeys) {
-      const decoded = decodedMapTilesRef.current.get(imageKey);
-      if (decoded) {
-        atlasImages.push({
-          key: imageKey,
-          width: decoded.width,
-          height: decoded.height,
-          pixels: decoded.pixels,
-        });
+    const retainedImageKeys = Array.from(
+      new Set(
+        standaloneTiles.flatMap((tile) =>
+          Array.from(
+            standaloneMapPlan?.requiredImageKeysByTileKey.get(tile.key) ?? [tile.imageKey],
+          ),
+        ),
+      ),
+    );
+    for (const imageKey of retainedImageKeys) {
+      const decoded = decodedStandaloneMapImagesRef.current.get(imageKey);
+      if (!decoded) {
+        continue;
       }
+      atlasImages.push({
+        key: imageKey,
+        width: decoded.width,
+        height: decoded.height,
+        pixels: decoded.pixels,
+      });
     }
     return {
       enabled: true,
       stageWidth: ORIGINAL_UI.game.sceneWidth,
       stageHeight: ORIGINAL_UI.game.sceneHeight,
+      ackKey,
+      revision,
+      ...center,
       atlases,
       atlasImages,
       // EXACTLY buildMapTileDrawList's output (camera offset folded into left/top).
       tiles: mapTileDrawList,
       standaloneTiles,
+      retainedImageKeys,
       // Fold-in model: offset already baked into the tiles, so the root stays put.
       cameraOffset: EMPTY_VIEWPORT_OFFSET,
     };
-    // The decoded-version counters force a rebuild once a page's / tile's pixels decode.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bevyMapActive,
     mapAtlasIndex,
     mapTileDrawList,
-    mapAtlasPagesDecodedVersion,
-    standaloneTilesPlan,
-    mapStandaloneTilesDecodedVersion,
+    standaloneMapTileDrawList,
+    standaloneMapPlan,
+    standaloneMapImageSourcesByKey,
+    standaloneMapImagesDecodedVersion,
+    bevyMapRuntimeGeneration,
+    renderPlayer?.x,
+    renderPlayer?.y,
   ]);
 
-  useEffect(() => {
-    onBevyMapRenderStateChange(bevyMapRenderState);
-  }, [bevyMapRenderState, onBevyMapRenderStateChange]);
+  useLayoutEffect(() => {
+    const previousMap = lastSceneMapSubmissionRef.current;
+    const mapSubmissionChanged =
+      previousMap.state !== bevyMapRenderState ||
+      previousMap.imageResidencyVersion !== bevyMapImageResidencyVersion ||
+      previousMap.runtimeGeneration !== bevyMapRuntimeGeneration ||
+      previousMap.runtimeReady !== bevyMapRuntimeReady;
+    let mapSubmitted = previousMap.submitted;
+    let mapRevision = previousMap.revision;
+    let mapCenter = previousMap.center;
+    let entitySubmitted = false;
+    if (mapSubmissionChanged) {
+      let residentKeys: ReadonlySet<string> = EMPTY_STRING_SET;
+      mapSubmitted = false;
+      mapRevision = null;
+      mapCenter = null;
+      if (bevyMapRuntimeReady) {
+        try {
+          const uploadableKeys = new Set(
+            (bevyMapRenderState.standaloneTiles ?? []).map((tile) => tile.imageKey),
+          );
+          for (const key of bevyMapRenderState.retainedImageKeys ?? []) {
+            uploadableKeys.add(key);
+          }
+          const presentedKeys = onBevyMapRenderStateChange(bevyMapRenderState);
+          residentKeys = new Set(
+            presentedKeys.filter((key) => uploadableKeys.has(key)),
+          );
+          mapSubmitted = true;
+          mapRevision = bevyMapRenderState.enabled
+            ? bevyMapRenderState.revision ?? null
+            : null;
+          mapCenter =
+            bevyMapRenderState.enabled &&
+            bevyMapRenderState.centerX !== undefined &&
+            bevyMapRenderState.centerY !== undefined
+              ? { x: bevyMapRenderState.centerX, y: bevyMapRenderState.centerY }
+              : null;
+        } catch {
+          // Keep the DOM fallback visible and retry on the next state/runtime generation.
+        }
+      }
+      lastSceneMapSubmissionRef.current = {
+        state: bevyMapRenderState,
+        imageResidencyVersion: bevyMapImageResidencyVersion,
+        runtimeGeneration: bevyMapRuntimeGeneration,
+        runtimeReady: bevyMapRuntimeReady,
+        submitted: mapSubmitted,
+        revision: mapRevision,
+        center: mapCenter,
+      };
+      // The page returns only keys acknowledged by a completed Rust map sync.
+      // Batch the resulting DOM handoff onto one animation frame.
+      scheduleStandaloneMapImageResidency({
+        runtimeGeneration: bevyMapRuntimeGeneration,
+        keys: residentKeys,
+      });
+    }
+    if (bevyEntityRendererReady) {
+      try {
+        onBevyEntityRenderStateChange(bevyEntityRenderState);
+        entitySubmitted = true;
+      } catch {
+        // Keep the last complete scene until both producers can commit together.
+      }
+    }
 
-  useEffect(() => {
-    // When renderLoopRafEnabled, the 60Hz ref-based rAF loop in page.tsx owns the
-    // Bevy camera-offset push (smoother scroll than this ~10Hz React-effect path).
-    // Skip here so the two paths don't fight over lastBevyMapCameraOffsetRef.
-    if (renderLoopRafEnabled) return;
-    onBevyMapCameraOffsetChange(playerCameraMotionOffset);
-  }, [renderLoopRafEnabled, playerCameraMotionOffset, onBevyMapCameraOffsetChange]);
+    const entityCenter =
+      entitySubmitted &&
+      bevyEntityRenderState.enabled &&
+      bevyEntityRenderState.centerX !== undefined &&
+      bevyEntityRenderState.centerY !== undefined
+        ? { x: bevyEntityRenderState.centerX, y: bevyEntityRenderState.centerY }
+        : null;
+    const bothDisabled =
+      mapSubmitted &&
+      entitySubmitted &&
+      !bevyMapRenderState.enabled &&
+      !bevyEntityRenderState.enabled;
+    const completeScene =
+      mapRevision !== null &&
+      mapCenter !== null &&
+      entityCenter !== null &&
+      mapCenter.x === entityCenter.x &&
+      mapCenter.y === entityCenter.y;
+    if (completeScene) {
+      submittedPresentationContextRef.current = {
+        mapRevision,
+        mapCenter,
+        entityCenter,
+      };
+    } else if (bothDisabled) {
+      submittedPresentationContextRef.current = {
+        mapRevision: null,
+        mapCenter: null,
+        entityCenter: null,
+      };
+    }
+  }, [
+    bevyMapRenderState,
+    bevyMapImageResidencyVersion,
+    bevyMapRuntimeGeneration,
+    bevyMapRuntimeReady,
+    onBevyMapRenderStateChange,
+    scheduleStandaloneMapImageResidency,
+    bevyEntityRenderState,
+    bevyEntityRendererReady,
+    onBevyEntityRenderStateChange,
+  ]);
 
-  // Hand page.tsx a ref-only accessor that recomputes the player camera offset on
-  // demand (per rAF frame) from the SAME inputs the React render uses — the latest
-  // renderPlayer (latestMoveInputRef) and the live entity-motion snapshots — only
-  // with a fresh Date.now() timestamp. This guarantees the rAF loop pushes the same
-  // offset values the React effect would, just sampled at 60Hz. Registered only when
-  // the flag is on; null otherwise so page.tsx leaves the React-effect path in charge.
+  // Bevy-self-camera path: push the self motion window straight to the runtime each
+  // motion tick so Bevy can interpolate the camera at display Hz. Pushing the
+  // (step-stable) window at 33Hz is cheap (6 numbers into a Cell); Bevy reads it
+  // every frame. When not moving (no snapshot) push an expired window → camera
+  // returns to origin. Active-gated; the runtime fn is a no-op when absent.
   useEffect(() => {
-    if (!registerLiveCameraMotionOffset) return;
-    if (!renderLoopRafEnabled) {
-      registerLiveCameraMotionOffset(null);
+    const push = (
+      window as typeof window & {
+        __mir2BevyRuntime?: {
+          setMir2SelfCameraMotion?: (
+            fromX: number,
+            fromY: number,
+            toX: number,
+            toY: number,
+            startedMs: number,
+            expiresMs: number,
+          ) => void;
+        };
+      }
+    ).__mir2BevyRuntime?.setMir2SelfCameraMotion;
+    if (!push) return;
+    if (!bevySelfCameraActive) {
+      push(0, 0, 0, 0, 0, 0);
       return;
     }
-    registerLiveCameraMotionOffset(() => {
-      const latest = latestMoveInputRef.current;
-      if (latest.screen !== "game" || !latest.renderPlayer) return null;
-      return cameraMotionOffsetForEntity(
-        latest.renderPlayer,
-        entityMotionSnapshotsRef.current,
-        Date.now(),
-      );
-    });
-    return () => {
-      registerLiveCameraMotionOffset(null);
-    };
-  }, [renderLoopRafEnabled, registerLiveCameraMotionOffset]);
+    const playerObjectId = renderPlayer?.objectId;
+    const snapshot = playerObjectId ? entityMotionSnapshotsRef.current[playerObjectId] : null;
+    if (snapshot) {
+      push(snapshot.fromX, snapshot.fromY, snapshot.toX, snapshot.toY, snapshot.startedAt, snapshot.expiresAt);
+    } else {
+      push(0, 0, 0, 0, 0, 0);
+    }
+  }, [bevySelfCameraActive, motionNow, renderPlayer]);
+
+  // Packet-driven remote presentation is additive: Rust uses it only when the
+  // segment target matches the latest packed entity snapshot. Any mismatch,
+  // missing API, or disabled flag falls back to the existing TS motion window.
+  useEffect(() => {
+    const setEnabled = (
+      window as typeof window & {
+        __mir2BevyRuntime?: {
+          setMir2RemoteMotionPresentationEnabled?: (enabled: boolean) => void;
+        };
+      }
+    ).__mir2BevyRuntime?.setMir2RemoteMotionPresentationEnabled;
+    if (!setEnabled) return;
+    setEnabled(bevyRemoteMotionActive);
+    return () => setEnabled(false);
+  }, [bevyMapRuntimeGeneration, bevyRemoteMotionActive]);
+
+  useEffect(() => {
+    const setEnabled = (
+      window as typeof window & {
+        __mir2BevyRuntime?: {
+          setMir2PresentationPoseEnabled?: (enabled: boolean) => void;
+        };
+      }
+    ).__mir2BevyRuntime?.setMir2PresentationPoseEnabled;
+    if (!setEnabled) return;
+    setEnabled(bevyPresentationPoseActive);
+    return () => setEnabled(false);
+  }, [bevyMapRuntimeGeneration, bevyPresentationPoseActive]);
+
+  useEffect(() => {
+    const setEnabled = (
+      window as typeof window & {
+        __mir2BevyRuntime?: {
+          setMir2LocalMotionPresentationEnabled?: (enabled: boolean) => void;
+        };
+      }
+    ).__mir2BevyRuntime?.setMir2LocalMotionPresentationEnabled;
+    if (!setEnabled) return;
+    setEnabled(bevyLocalMotionActive);
+    return () => setEnabled(false);
+  }, [bevyMapRuntimeGeneration, bevyLocalMotionActive]);
 
   useEffect(() => {
     const activeKey = useWebGl2EntityAtlasRenderer ? activeBevyEntityAtlas?.key ?? null : null;
@@ -1690,6 +2336,16 @@ export function OriginalClientShell({
       ready: bevyEntityRendererReady,
       runtime: (window as typeof window & { __mir2BevyRuntimeDebug?: unknown }).__mir2BevyRuntimeDebug ?? null,
       enabled: bevyEntityRenderState.enabled,
+      remoteMotionRequested: BEVY_REMOTE_MOTION_REQUESTED,
+      remoteMotionActive: bevyRemoteMotionActive,
+      presentationPoseRequested: BEVY_PRESENTATION_POSE_REQUESTED,
+      presentationPoseActive: bevyPresentationPoseActive,
+      localMotionRequested: BEVY_LOCAL_MOTION_REQUESTED,
+      localMotionActive: bevyLocalMotionActive,
+      poseCommitRequested: BEVY_POSE_COMMIT_REQUESTED,
+      poseCommitActive: bevyPoseCommitActive,
+      submittedPresentationContext: submittedPresentationContextRef.current,
+      presentationPoseBridge: sceneMotionDriver.getDiagnostics(),
       rawWebGl2Enabled: useWebGl2EntityAtlasRenderer && entityRenderState.enabled,
       rawWebGl2TextureReady: webGl2EntityTextureReady,
       rawWebGl2TextureReadyKey: webGl2EntityTextureReadyKey,
@@ -1706,12 +2362,17 @@ export function OriginalClientShell({
         : "single-image",
       atlasKey: entityRenderState.atlases?.[0]?.key ?? null,
       atlasCount: entityRenderState.atlases?.length ?? 0,
+      atlasRectCount: (entityRenderState.atlases ?? []).reduce(
+        (count, atlas) => count + atlas.rects.length,
+        0,
+      ),
       atlasPixelBytes: (entityRenderState.atlasImages ?? []).reduce(
         (sum, atlas) => sum + (atlas.pixels?.byteLength ?? atlas.width * atlas.height * 4),
         0,
       ),
       atlasSourceCount: bevyEntityAtlasSources.length,
       atlasCacheSize: bevyAtlasResidency.stats().memoryCacheSize,
+      atlasBudgetProfile: BEVY_ENTITY_ATLAS_BUDGET_PROFILE,
       atlasCurrentKey: bevyEntityAtlasKey,
       atlasPendingKey: bevyEntityAtlasRequestRef.current?.key ?? null,
       atlasCachedCurrent: Boolean(peekedBevyEntityAtlasPayload),
@@ -1729,25 +2390,28 @@ export function OriginalClientShell({
       window as typeof window & { __mir2BevyMapRendererDebug?: unknown }
     ).__mir2BevyMapRendererDebug = {
       requested: bevyMapRequested,
-      active: bevyMapActive,
+      active: bevyMapOwnershipActive,
+      pipelineActive: bevyMapActive,
       mapGpuActive,
       atlasUsable: mapAtlasUsable,
       atlasIndexReady: Boolean(mapAtlasIndex),
       enabled: bevyMapRenderState.enabled,
       tileCount: bevyMapRenderState.tiles.length,
-      // Atlas-MISS (standalone) tile metrics: how many the producer wants to draw, how
-      // many distinct frame images that needs, how many have decoded, and how many are
-      // in this snapshot (decoded → uploaded). standaloneTileCount === uncoveredPlanCount
-      // minus negative-cached misses; a gap between decoded and wanted is in-flight decode.
+      uncoveredFloorCount: mapDrawPlan?.uncovered.floor.length ?? 0,
+      uncoveredObjectCount: mapDrawPlan?.uncovered.objects.length ?? 0,
       standaloneTileCount: bevyMapRenderState.standaloneTiles?.length ?? 0,
-      uncoveredPlanCount: standaloneTilesPlan?.tiles.length ?? 0,
-      uncoveredImageWantCount: standaloneTilesPlan?.images.length ?? 0,
-      decodedTileCount: decodedMapTilesRef.current.size,
-      standaloneTilesEnabled: standaloneMapTilesEnabled,
+      standaloneAdditiveTileCount:
+        bevyMapRenderState.standaloneTiles?.filter((tile) => tile.additive).length ?? 0,
+      standaloneRetainedImageCount: bevyMapRenderState.retainedImageKeys?.length ?? 0,
+      standaloneImageSourceCount: standaloneMapImageSources.length,
+      standaloneDecodedImageCount: decodedStandaloneMapImagesRef.current.size,
+      standaloneFailedImageCount: failedStandaloneMapImagesRef.current.size,
       atlasPageCount: bevyMapRenderState.atlases?.length ?? 0,
       atlasImageCount: bevyMapRenderState.atlasImages?.length ?? 0,
-      decodedPageCount: decodedMapAtlasPagesRef.current.size,
+      packedPageTransport: "bevy-asset-server-url",
+      ackKey: bevyMapRenderState.ackKey,
       domSpriteCount: mapDomSprites.floor.length + mapDomSprites.objects.length,
+      domBlendSpriteCount: mapDomBlendSpriteCount,
       cameraOffset: bevyMapRenderState.cameraOffset ?? null,
     };
   }
@@ -1770,17 +2434,7 @@ export function OriginalClientShell({
       if (cancelled || !renderPlayer) {
         return;
       }
-      // Distinct poolKey ("prefetch"): the idle-scheduled ring shares the "static" filter but
-      // runs AFTER the static memo's render, so it must not draw from the static memo's pool
-      // (which the just-committed render still references) when ?mapSpritePool=1 is on.
-      const ring = buildViewportMapSprites(
-        world,
-        renderPlayer,
-        0,
-        "static",
-        SCENE_TILE_PREFETCH_RING_CELLS,
-        "prefetch",
-      );
+      const ring = buildViewportMapSprites(world, renderPlayer, 0, "static", SCENE_TILE_PREFETCH_RING_CELLS);
       const visible = new Set(sceneAssetUrlsRef.current);
       const ringUrls = Array.from(
         new Set([
@@ -1886,29 +2540,25 @@ export function OriginalClientShell({
       return;
     }
 
-    if (bevyEntityAtlas?.key === bevyEntityAtlasKey) {
-      return;
-    }
-
     // A memory hit is served synchronously by the render-path peek
     // (peekedBevyEntityAtlasPayload); here we always acquire through the
     // residency manager (memory -> [null persistent] -> resolve fetcher) and
     // commit the React atlas state when it resolves. The manager owns the
     // in-memory tier + LRU; resolve owns the prebuilt/persistent/live cold path
     // and records its source breakdown into bevyEntityAtlasResolveStats.
-    if (bevyEntityAtlasRequestRef.current?.key === bevyEntityAtlasKey) {
-      return;
-    }
-
     const requestId = (bevyEntityAtlasRequestRef.current?.requestId ?? 0) + 1;
     bevyEntityAtlasRequestRef.current = { key: bevyEntityAtlasKey, requestId };
     bevyEntityAtlasSourcesByKey.set(bevyEntityAtlasKey, bevyEntityAtlasSources);
     let disposed = false;
+    let acquired = false;
 
-    bevyAtlasResidency
+    void bevyAtlasResidency
       .acquire(bevyEntityAtlasKey)
       .then((payload) => {
+        acquired = true;
         if (disposed || bevyEntityAtlasRequestRef.current?.requestId !== requestId) {
+          bevyAtlasResidency.release(bevyEntityAtlasKey);
+          acquired = false;
           return;
         }
         const atlas = payloadToAtlasSnapshot(payload);
@@ -1920,16 +2570,21 @@ export function OriginalClientShell({
         if (bevyEntityAtlasRequestRef.current?.requestId === requestId) {
           bevyEntityAtlasRequestRef.current = null;
         }
+      })
+      .finally(() => {
+        if (bevyEntityAtlasSourcesByKey.get(bevyEntityAtlasKey) === bevyEntityAtlasSources) {
+          bevyEntityAtlasSourcesByKey.delete(bevyEntityAtlasKey);
+        }
       });
 
     return () => {
       disposed = true;
+      if (acquired) {
+        bevyAtlasResidency.release(bevyEntityAtlasKey);
+        acquired = false;
+      }
     };
-  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey, bevyEntityAtlas?.key]);
-
-  useEffect(() => {
-    onBevyEntityRenderStateChange(bevyEntityRenderState);
-  }, [bevyEntityRenderState, onBevyEntityRenderStateChange]);
+  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey]);
 
   useEffect(() => {
     if (screen !== "game" || !renderPlayer || !world.originalMapRegion || !sceneSpriteLibrariesReady) {
@@ -2103,9 +2758,20 @@ export function OriginalClientShell({
     };
   }
 
+  function committedViewportPlayerPosition() {
+    const stage = stageFrameRef.current;
+    if (!stage) return null;
+    const x = Number(stage.dataset.viewportPlayerX);
+    const y = Number(stage.dataset.viewportPlayerY);
+    return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+  }
+
   function tileFromScenePoint(sceneX: number, sceneY: number) {
     const latest = latestMoveInputRef.current;
-    const basePlayer = latest.renderPlayer ?? latest.player;
+    // Interpret the pointer against the same committed camera position the
+    // player can see. A concurrent React render may update latestMoveInputRef
+    // before its DOM commit, which otherwise turns horizontal clicks diagonal.
+    const basePlayer = committedViewportPlayerPosition() ?? latest.renderPlayer ?? latest.player;
     if (!basePlayer) return null;
     return {
       x: basePlayer.x + Math.floor(sceneX / VIEWPORT_CELL_WIDTH) - VIEWPORT_OFFSET_X,
@@ -2222,12 +2888,93 @@ export function OriginalClientShell({
     };
   }, [screen, sceneInteractionReady, onViewportDirectionStep, onViewportDirectionStop]);
 
+  // Normal play uses the stage-level coordinate handlers. Keep the 1,155-button
+  // hit grid only for legacy QA scripts that still query per-tile aria labels.
+  const legacyTileHitGridEnabled = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const explicit = params.get("legacyTileGrid");
+    return explicit === null ? params.get("mir2Debug") === "1" : explicit === "1";
+  }, []);
+  const tileHitGrid = useMemo(
+    () => legacyTileHitGridEnabled ? (
+      <div className={`viewport-grid-overlay ${screen !== "game" ? "hidden" : ""}`}>
+        {viewportTiles.map((tile) => (
+          <button
+            key={`tile-${tile.x}-${tile.y}`}
+            type="button"
+            className="tile-hit"
+            style={{
+              left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
+              top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
+            }}
+            data-ui-interactive="true"
+            onMouseDown={(event) => {
+              if (event.button !== 0 && event.button !== 2) {
+                return;
+              }
+
+              event.stopPropagation();
+              if (!sceneInteractionReady) {
+                event.preventDefault();
+                return;
+              }
+              const point = scenePointFromMouseEvent(event);
+              const pointer: HeldScenePointer = {
+                button: event.button,
+                sceneX: point.sceneX,
+                sceneY: point.sceneY,
+                startedAt: Date.now(),
+                dispatched: false,
+                tileX: tile.x,
+                tileY: tile.y,
+              };
+              heldScenePointerRef.current = pointer;
+              if (event.button === 2) {
+                event.preventDefault();
+              }
+            }}
+            onMouseMove={(event) => {
+              const held = heldScenePointerRef.current;
+              if (!held) return;
+              const point = scenePointFromMouseEvent(event);
+              heldScenePointerRef.current = {
+                ...held,
+                sceneX: point.sceneX,
+                sceneY: point.sceneY,
+              };
+            }}
+            onMouseUp={stopHeldScenePointer}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            aria-label={`tile ${tile.x}, ${tile.y}`}
+          />
+        ))}
+      </div>
+    ) : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers read refs/hoisted fns; only sceneInteractionReady is dynamic state
+    [legacyTileHitGridEnabled, viewportTiles, screen, sceneInteractionReady],
+  );
+
   return (
     <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
       <section className="mir-stage">
         <div
           ref={stageFrameRef}
           className={`client-stage-frame ${screen === "game" && !sceneInteractionReady ? "scene-assets-pending" : ""}`}
+          data-viewport-player-x={(renderPlayer ?? player)?.x}
+          data-viewport-player-y={(renderPlayer ?? player)?.y}
+          data-viewport-tile-center-x={VIEWPORT_MOUSE_TILE_CENTER_X}
+          data-viewport-tile-center-y={VIEWPORT_MOUSE_TILE_CENTER_Y}
+          data-viewport-cell-width={VIEWPORT_CELL_WIDTH}
+          data-viewport-cell-height={VIEWPORT_CELL_HEIGHT}
+          data-viewport-scene-width={ORIGINAL_UI.game.sceneWidth}
+          data-viewport-scene-height={ORIGINAL_UI.game.sceneHeight}
           tabIndex={-1}
           onMouseDownCapture={(event) => {
             if (screen === "game") {
@@ -2271,123 +3018,77 @@ export function OriginalClientShell({
               />
             </div>
           ) : null}
-          {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
-          <canvas
-            id="mir2-web3-canvas"
-            className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
-          />
-          <WebGl2MapAtlasLayer
-            enabled={mapGpuActive}
-            stageWidth={ORIGINAL_UI.game.sceneWidth}
-            stageHeight={ORIGINAL_UI.game.sceneHeight}
-            index={mapAtlasIndex}
-            tiles={mapTileDrawList}
-            cameraOffset={playerCameraMotionOffset}
-            onDebugChange={handleMapAtlasDebug}
-          />
-          <WebGl2EntityAtlasLayer
-            enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
-            state={entityRenderState}
-            onDebugChange={handleWebGl2EntityAtlasDebug}
-          />
-          {screen === "game" ? (
-            <GameSceneBackdrop
-              world={world}
-              player={player}
-              floorSprites={mapDomSprites.floor}
-              cameraOffset={playerCameraMotionOffset}
+          <div
+            className={`game-world-composite ${screen === "game" ? "" : "inactive"}`}
+            aria-hidden={screen !== "game"}
+          >
+            {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
+            <canvas
+              id="mir2-web3-canvas"
+              className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
             />
-          ) : null}
-
-          <div className={`viewport-grid-overlay ${screen !== "game" ? "hidden" : ""}`}>
-            {viewportTiles.map((tile) => (
-              <button
-                key={`tile-${tile.x}-${tile.y}`}
-                type="button"
-                className="tile-hit"
-                style={{
-                  left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
-                  top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
-                }}
-                data-ui-interactive="true"
-                onMouseDown={(event) => {
-                  if (event.button !== 0 && event.button !== 2) {
-                    return;
-                  }
-
-                  event.stopPropagation();
-                  if (!sceneInteractionReady) {
-                    event.preventDefault();
-                    return;
-                  }
-                  const point = scenePointFromMouseEvent(event);
-                  const pointer: HeldScenePointer = {
-                    button: event.button,
-                    sceneX: point.sceneX,
-                    sceneY: point.sceneY,
-                    startedAt: Date.now(),
-                    dispatched: false,
-                    tileX: tile.x,
-                    tileY: tile.y,
-                  };
-                  heldScenePointerRef.current = pointer;
-                  if (event.button === 2) {
-                    event.preventDefault();
-                  }
-                }}
-                onMouseMove={(event) => {
-                  const held = heldScenePointerRef.current;
-                  if (!held) return;
-                  const point = scenePointFromMouseEvent(event);
-                  heldScenePointerRef.current = {
-                    ...held,
-                    sceneX: point.sceneX,
-                    sceneY: point.sceneY,
-                  };
-                }}
-                onMouseUp={stopHeldScenePointer}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                aria-label={`tile ${tile.x}, ${tile.y}`}
+            <WebGl2MapAtlasLayer
+              enabled={mapGpuActive}
+              stageWidth={ORIGINAL_UI.game.sceneWidth}
+              stageHeight={ORIGINAL_UI.game.sceneHeight}
+              index={mapAtlasIndex}
+              tiles={mapTileDrawList}
+              onDebugChange={handleMapAtlasDebug}
+            />
+            <WebGl2EntityAtlasLayer
+              enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
+              state={entityRenderState}
+              onDebugChange={handleWebGl2EntityAtlasDebug}
+            />
+            {screen === "game" ? (
+              <GameSceneBackdrop
+                world={world}
+                player={renderPlayer ?? player}
+                floorSprites={mapDomSprites.floor}
+                cameraOffset={effectiveCameraOffset}
+                imperativeCamera={imperativeSceneMotion}
+                registerCameraSurface={sceneMotionDriver.registerCameraSurface}
               />
-            ))}
-          </div>
+            ) : null}
 
-          <OriginalClientSceneVisualLayers
-            screen={screen}
-            t={t}
-            world={world}
-            player={player}
-            selectedEntity={selectedEntity}
-            viewportGroundDrops={viewportGroundDrops}
-            viewportMapSprites={mapDomSprites}
-            viewportEntitySprites={viewportEntitySprites}
-            viewportProjectiles={viewportProjectiles}
-            viewportDepthPlayer={viewportDepthPlayer}
-            playerCameraMotionOffset={playerCameraMotionOffset}
-            entityMotionSnapshots={entityMotionSnapshotsRef.current}
-            motionNow={motionNow}
-            sceneSpriteFrameIndex={sceneSpriteFrameIndex}
-            useBevyEntityRenderer={hideDomEntitySpritesForBevy}
-            entityKindClassName={entityKindClassName}
-            onPickGroundDrop={onPickGroundDrop}
-            onActivateEntity={onActivateEntity}
-          />
+            {tileHitGrid}
+
+            <OriginalClientSceneVisualLayers
+              screen={screen}
+              t={t}
+              world={world}
+              player={renderPlayer ?? player}
+              selectedEntity={selectedEntity}
+              viewportGroundDrops={viewportGroundDrops}
+              viewportMapSprites={mapDomSprites}
+              viewportEntitySprites={viewportEntitySprites}
+              viewportProjectiles={viewportProjectiles}
+              viewportDepthPlayer={viewportDepthPlayer}
+              playerCameraMotionOffset={effectiveCameraOffset}
+              entityMotionSnapshots={entityMotionSnapshotsRef.current}
+              motionNow={motionNow}
+              imperativeCamera={imperativeSceneMotion}
+              registerCameraSurface={sceneMotionDriver.registerCameraSurface}
+              registerEntityEl={sceneMotionDriver.registerEntityEl}
+              sceneSpriteFrameIndex={sceneSpriteFrameIndex}
+              useBevyEntityRenderer={hideDomEntitySpritesForBevy}
+              entityKindClassName={entityKindClassName}
+              onPickGroundDrop={onPickGroundDrop}
+              onActivateEntity={onActivateEntity}
+            />
+          </div>
           <OriginalClientSceneOverlays
             screen={screen}
             t={t}
-            player={player}
+            player={renderPlayer ?? player}
             selectedEntity={selectedEntity}
             viewportEntitySprites={viewportEntitySprites}
-            playerCameraMotionOffset={playerCameraMotionOffset}
+            playerCameraMotionOffset={effectiveCameraOffset}
             entityMotionSnapshots={entityMotionSnapshotsRef.current}
             motionNow={motionNow}
+            imperativeCamera={imperativeSceneMotion}
+            registerCameraSurface={sceneMotionDriver.registerCameraSurface}
+            registerEntityEl={sceneMotionDriver.registerEntityEl}
             chatBubbles={sceneChatBubbles}
             damageFloaters={world.damageFloaters}
             targetActionLabel={selectedTargetReadoutLabel}
@@ -2435,59 +3136,71 @@ export function OriginalClientShell({
               onExit={onExitSelect}
             />
           ) : null}
-          {screen === "game" ? (
-            <GameUiScene
-              t={t}
-              locale={locale}
-              runtimeMessage={runtimeMessageLabel}
-              world={world}
-              player={player}
-              logs={logs}
-              chatMessage={chatMessage}
-              showInventory={showInventory}
-              showCharacter={showCharacter}
-              activeInventoryTab={activeInventoryTab}
-              activeCharacterTab={activeCharacterTab}
-              storageServiceOpenVersion={storageServiceOpenVersion}
-              onChatMessageChange={onChatMessageChange}
-              onSendChat={onSendChat}
-              onRequestTrade={onRequestTrade}
-              onRentExpandedStorage={onRentExpandedStorage}
-              onLogout={onLogout}
-              onToggleCharacter={onToggleCharacter}
-              onToggleInventory={onToggleInventory}
-              onCloseCharacter={onCloseCharacter}
-              onCloseInventory={onCloseInventory}
-              onOpenCharacterTab={onOpenCharacterTab}
-              onOpenInventoryTab={onOpenInventoryTab}
-              onSelectNpcDialogTarget={onSelectNpcDialogTarget}
-              onSubmitNpcInput={onSubmitNpcInput}
-              onUseItem={onUseItem}
-              onDropItem={onDropItem}
-              onEquipItem={onEquipItem}
-              onRemoveItem={onRemoveItem}
-              onMoveItem={onMoveItem}
-              onMergeItem={onMergeItem}
-              onSplitItem={onSplitItem}
-              onStoreItem={onStoreItem}
-              onTakeBackItem={onTakeBackItem}
-              onUnlockStorage={onUnlockStorage}
-              onSetStoragePassword={onSetStoragePassword}
-              onRemoveStoragePassword={onRemoveStoragePassword}
-              onSellItem={onSellItem}
-              onDropGold={onDropGold}
-              onRepairItem={onRepairItem}
-              onSpecialRepairItem={onSpecialRepairItem}
-              onCastSkill={onCastSkill}
-              onTransferMap={onTransferMap}
-              onClaimMail={onClaimMail}
-              onDeleteMail={onDeleteMail}
-              onBuyGameShopItem={onBuyGameShopItem}
-              onRunStage5Command={onRunStage5Command}
-              onSendClientCommand={onSendClientCommand}
-              transferOptions={transferOptions}
-            />
-          ) : null}
+          {screen === "game"
+            ? (() => {
+                // Shared HUD props (everything except `world`). Declared once so the
+                // legacy prop path and the Stage-5c store-bound path stay in lockstep.
+                const gameUiSharedProps = {
+                  t,
+                  locale,
+                  runtimeMessage: runtimeMessageLabel,
+                  player,
+                  logs,
+                  chatMessage,
+                  showInventory,
+                  showCharacter,
+                  activeInventoryTab,
+                  activeCharacterTab,
+                  storageServiceOpenVersion,
+                  onChatMessageChange,
+                  onSendChat,
+                  onRequestTrade,
+                  onRentExpandedStorage,
+                  onLogout,
+                  onToggleCharacter,
+                  onToggleInventory,
+                  onCloseCharacter,
+                  onCloseInventory,
+                  onOpenCharacterTab,
+                  onOpenInventoryTab,
+                  onSelectNpcDialogTarget,
+                  onSubmitNpcInput,
+                  onUseItem,
+                  onDropItem,
+                  onEquipItem,
+                  onRemoveItem,
+                  onMoveItem,
+                  onMergeItem,
+                  onSplitItem,
+                  onStoreItem,
+                  onTakeBackItem,
+                  onUnlockStorage,
+                  onSetStoragePassword,
+                  onRemoveStoragePassword,
+                  onSellItem,
+                  onDropGold,
+                  onRepairItem,
+                  onSpecialRepairItem,
+                  onCastSkill,
+                  onTransferMap,
+                  onClaimMail,
+                  onDeleteMail,
+                  onBuyGameShopItem,
+                  onRunStage5Command,
+                  onSendClientCommand,
+                  transferOptions,
+                };
+                // Stage 5c: opt-in store-bound HUD (subscribes to `world` slices via
+                // useWorldSelector). Defaults OFF — when the flag is absent/false (or no
+                // store was threaded) this is byte-identical to the legacy `world={world}`
+                // prop path below.
+                return selectorHud && worldStore ? (
+                  <GameUiSceneStoreBound store={worldStore} {...gameUiSharedProps} />
+                ) : (
+                  <GameUiScene world={world} {...gameUiSharedProps} />
+                );
+              })()
+            : null}
           {screen !== "login" && reconnectMessage ? (
             <div
               className={`gateway-reconnect-overlay ${reconnectStatus.mode}`}
@@ -2499,12 +3212,10 @@ export function OriginalClientShell({
               <span className="gateway-reconnect-text">{reconnectMessage}</span>
             </div>
           ) : null}
-          {enteringWorld || (screen === "game" && !sceneInteractionReady) ? (
+          {screen === "game" && !sceneInteractionReady ? (
             <div className="scene-loading-overlay" role="status" aria-live="polite">
               <span className="scene-loading-spinner" aria-hidden="true" />
-              <span className="scene-loading-text">
-                {screen === "game" ? sceneLoadingLabel : enteringWorldLabel}
-              </span>
+              <span className="scene-loading-text">{sceneLoadingLabel}</span>
             </div>
           ) : null}
         </div>
@@ -2625,120 +3336,125 @@ const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 // forever while the world is already drawn behind it. Remaining assets keep loading.
 const SCENE_READINESS_SAFETY_MS = 3000;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
+const EMPTY_STANDALONE_MAP_TILE_DRAW_LIST: MapStandaloneTileDraw[] = [];
+const EMPTY_STANDALONE_MAP_IMAGE_SOURCES: MapStandaloneTileImageSource[] = [];
+const EMPTY_STRING_SET: ReadonlySet<string> = new Set();
+const STANDALONE_MAP_IMAGE_NEGATIVE_CACHE_MS = 30 * 1000;
+const STANDALONE_MAP_IMAGE_CACHE_LIMIT = 192;
 
-// Standalone (atlas-MISS) tile decode tuning. A miss is negative-cached for this long so
-// a 404 tile isn't re-fetched every frame (and the runtime isn't held pending on it). The
-// CPU decode cache is bounded; oldest off-screen tiles are evicted + re-decodable on return.
-const STANDALONE_TILE_NEGATIVE_CACHE_MS = 30 * 1000;
-const STANDALONE_TILE_DECODE_CACHE_MAX = 4096;
-
-// Decoded RGBA bytes for a map image (atlas page OR standalone tile), cached by image
-// URL so each is fetched + read back once across the session even if the renderer toggles.
-const mapImagePixelCache = new Map<
-  string,
-  Promise<{ width: number; height: number; pixels: Uint8Array } | null>
->();
-
-// Decode any PNG URL to raw RGBA bytes via an offscreen canvas (drawImage ->
-// getImageData), matching set_mir2_map_render_atlas's expectation of width*height*4
-// bytes. Used for both packed atlas pages and per-tile standalone images. Returns null
-// without a DOM or on image/canvas-readback failure (the caller leaves it unbound).
-function decodeImageToRgba(
-  url: string,
-  fallbackWidth = 0,
-  fallbackHeight = 0,
-): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
-  if (typeof document === "undefined") {
-    return Promise.resolve(null);
-  }
-  const cached = mapImagePixelCache.get(url);
-  if (cached) {
-    return cached;
-  }
-  const promise = new Promise<{ width: number; height: number; pixels: Uint8Array } | null>(
-    (resolve) => {
-      const image = new Image();
-      image.decoding = "async";
-      image.crossOrigin = "anonymous";
-      image.onload = () => {
-        try {
-          const width = image.naturalWidth || fallbackWidth;
-          const height = image.naturalHeight || fallbackHeight;
-          if (width <= 0 || height <= 0) {
-            resolve(null);
-            return;
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const context = canvas.getContext("2d", { willReadFrequently: true });
-          if (!context) {
-            resolve(null);
-            return;
-          }
-          context.drawImage(image, 0, 0, width, height);
-          const imageData = context.getImageData(0, 0, width, height);
-          resolve({ width, height, pixels: new Uint8Array(imageData.data.buffer.slice(0)) });
-        } catch {
-          resolve(null);
-        }
-      };
-      image.onerror = () => resolve(null);
-      image.src = url;
-    },
-  );
-  mapImagePixelCache.set(url, promise);
-  return promise;
+function mapTileDrawListsEqual(left: MapTileDraw[], right: MapTileDraw[]) {
+  if (left === right) return true;
+  if (left.length !== right.length) return false;
+  return left.every((tile, index) => {
+    const other = right[index];
+    return (
+      tile.key === other.key &&
+      tile.atlasKey === other.atlasKey &&
+      tile.rectKey === other.rectKey &&
+      tile.left === other.left &&
+      tile.top === other.top &&
+      tile.width === other.width &&
+      tile.height === other.height &&
+      tile.z === other.z &&
+      tile.opacity === other.opacity
+    );
+  });
 }
 
-function decodeMapAtlasPagePixels(
-  page: MapAtlasPage,
-): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
-  return decodeImageToRgba(page.imageUrl, page.width, page.height);
+function standaloneMapTileDrawListsEqual(
+  left: MapStandaloneTileDraw[],
+  right: MapStandaloneTileDraw[],
+) {
+  if (left === right) return true;
+  if (left.length !== right.length) return false;
+  return left.every((tile, index) => {
+    const other = right[index];
+    return (
+      tile.key === other.key &&
+      tile.imageKey === other.imageKey &&
+      tile.left === other.left &&
+      tile.top === other.top &&
+      tile.width === other.width &&
+      tile.height === other.height &&
+      tile.z === other.z &&
+      tile.opacity === other.opacity &&
+      tile.additive === other.additive
+    );
+  });
 }
 
-// Off-thread tile decode escape hatch: `?bevyMapTilesDecode=0` / localStorage
-// "mir2-bevy-map-tiles-decode"="0" forces the main-thread canvas path (the module already
-// auto-falls-back after repeated worker failures; this is a manual override). Read once.
-let offThreadTileDecodeFlag: boolean | null = null;
-function offThreadTileDecodeEnabled(): boolean {
-  if (offThreadTileDecodeFlag !== null) return offThreadTileDecodeFlag;
-  if (typeof window === "undefined") return false;
-  const params = new URLSearchParams(window.location.search);
-  offThreadTileDecodeFlag =
-    params.get("bevyMapTilesDecode") === "0"
-      ? false
-      : params.get("bevyMapTilesDecode") === "1"
-        ? true
-        : window.localStorage.getItem("mir2-bevy-map-tiles-decode") !== "0";
-  return offThreadTileDecodeFlag;
-}
-
-// Decode a standalone (atlas-miss) tile PNG. Unlike the packed atlas pages (which ship
-// same-origin in the Vercel output), per-tile /original-map/ frames are stripped from
-// Vercel and served ONLY from R2 — so we try the same candidate chain the old DOM <img>
-// fallback used (same-origin, then the R2 remote base), returning the first that decodes.
-// The `getImageData` readback is moved OFF the main thread (a worker, like the alpha-key
-// path) so walking into a new region's ~hundreds of uncovered tiles no longer spikes the
-// main thread; the worker module auto-falls-back to `decodeImageToRgba` on any failure.
-async function decodeStandaloneTilePixels(
-  fetchUrl: string,
-): Promise<{ width: number; height: number; pixels: Uint8Array } | null> {
-  const useOffThread = offThreadTileDecodeEnabled() && offThreadStandaloneTileDecodeAvailable();
-  for (const candidate of sceneAssetCandidateUrls(fetchUrl)) {
-    const decoded = useOffThread
-      ? (await decodeStandaloneTileOffThread(candidate)) ?? (await decodeImageToRgba(candidate))
-      : await decodeImageToRgba(candidate);
-    if (decoded) {
-      return decoded;
-    }
-  }
-  return null;
+function standaloneMapImageSourcesEqual(
+  left: MapStandaloneTileImageSource[],
+  right: MapStandaloneTileImageSource[],
+) {
+  if (left === right) return true;
+  if (left.length !== right.length) return false;
+  return left.every((source, index) => {
+    const other = right[index];
+    return (
+      source.imageKey === other.imageKey &&
+      source.fetchUrl === other.fetchUrl &&
+      source.alphaKeyMapObject === other.alphaKeyMapObject
+    );
+  });
 }
 
 // Off-screen tile prefetch ring: how many cells beyond the visible viewport to warm.
 const SCENE_TILE_PREFETCH_RING_CELLS = 6;
 const SCENE_TILE_PREFETCH_TIMEOUT_MS = 8_000;
+
+function trimStandaloneMapImageCache(
+  cache: Map<string, DecodedStandaloneMapImage>,
+  keepKeys: Set<string>,
+) {
+  if (cache.size <= STANDALONE_MAP_IMAGE_CACHE_LIMIT) {
+    return [];
+  }
+  const evicted: string[] = [];
+  for (const key of cache.keys()) {
+    if (cache.size <= STANDALONE_MAP_IMAGE_CACHE_LIMIT) {
+      break;
+    }
+    if (keepKeys.has(key)) {
+      continue;
+    }
+    cache.delete(key);
+    evicted.push(key);
+  }
+  return evicted;
+}
+
+function standaloneMapImageSourceSignature(source: MapStandaloneTileImageSource) {
+  return `${source.fetchUrl}\0${source.alphaKeyMapObject ? "alpha-key" : "raw"}`;
+}
+
+function setsEqual(left: ReadonlySet<string>, right: ReadonlySet<string>) {
+  if (left.size !== right.size) {
+    return false;
+  }
+  for (const value of left) {
+    if (!right.has(value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function setIntersects(left: ReadonlySet<string>, right: ReadonlySet<string>) {
+  for (const value of left) {
+    if (right.has(value)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function countBlendMapSprites(sprites: ViewportMapSprites) {
+  return (
+    sprites.floor.reduce((count, sprite) => count + (resolvedMapSpriteBlendMode(sprite) ? 1 : 0), 0) +
+    sprites.objects.reduce((count, sprite) => count + (resolvedMapSpriteBlendMode(sprite) ? 1 : 0), 0)
+  );
+}
 
 function collectVisibleSceneAssetUrls(
   viewportMapSprites: {
@@ -2976,6 +3692,108 @@ function shouldUseRawWebGl2EntityRenderer() {
 const isSceneMotionDebugMode: boolean =
   typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mir2Debug") === "1";
 
+// Default-on Crystal feel path: request Bevy self-camera + per-entity interpolation,
+// but activate it only when the Bevy entity/map renderer is actually live. Escape
+// hatches: ?bevySelfCamera=0 and ?bevyEntityInterp=0, or matching localStorage keys.
+const BEVY_SELF_CAMERA_REQUESTED: boolean = clientFeatureFlagEnabled(
+  "bevySelfCamera",
+  "mir2-bevy-self-camera",
+  true,
+);
+const BEVY_ENTITY_INTERP_REQUESTED: boolean = clientFeatureFlagEnabled(
+  "bevyEntityInterp",
+  "mir2-bevy-entity-interp",
+  true,
+);
+const BEVY_REMOTE_MOTION_REQUESTED: boolean = clientFeatureFlagEnabled(
+  "bevyRemoteMotion",
+  "mir2-bevy-remote-motion",
+  true,
+);
+const BEVY_PRESENTATION_POSE_REQUESTED: boolean = clientFeatureFlagEnabled(
+  "bevyPresentationPose",
+  "mir2-bevy-presentation-pose",
+  true,
+);
+// Native-temporal parity candidate: matched local commands now use the same
+// shared 100 ms Bevy scene pulse by default. Corrections, degraded runs and
+// path/target mismatches remain TypeScript-owned, and both switches retain
+// explicit query/localStorage rollback values.
+const BEVY_LOCAL_MOTION_REQUESTED: boolean = clientFeatureFlagEnabled(
+  "bevyLocalMotion",
+  "mir2-bevy-local-motion",
+  true,
+);
+const BEVY_POSE_COMMIT_REQUESTED: boolean = clientFeatureFlagEnabled(
+  "bevyPoseCommit",
+  "mir2-bevy-pose-commit",
+  true,
+);
+
+function clientFeatureFlagEnabled(queryKey: string, storageKey: string, defaultValue: boolean) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const queryValue = params.get(queryKey);
+  if (queryValue === "0") return false;
+  if (queryValue === "1") return true;
+  const storedValue = window.localStorage.getItem(storageKey);
+  if (storedValue === "0") return false;
+  if (storedValue === "1") return true;
+  return defaultValue;
+}
+
+function resolveBevyEntityAtlasBudgetProfile(): BevyEntityAtlasBudgetProfile {
+  if (typeof window === "undefined") {
+    return {
+      tier: "medium",
+      memoryEntries: 16,
+      memoryBytes: 160 * 1024 * 1024,
+      persistentEntries: 6,
+      persistentBytes: 256 * 1024 * 1024,
+      deviceMemoryGiB: null,
+    };
+  }
+
+  const forcedTier = new URLSearchParams(window.location.search).get("renderTier");
+  const deviceMemoryGiB = normalizeDeviceMemoryGiB(
+    (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+  );
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const tier = resolveRenderTier({ forcedTier, deviceMemoryGiB, coarsePointer });
+
+  if (tier === "low") {
+    const memoryBytes = deviceMemoryGiB !== null && deviceMemoryGiB <= 2 ? 64 : 96;
+    return {
+      tier,
+      memoryEntries: 8,
+      memoryBytes: memoryBytes * 1024 * 1024,
+      persistentEntries: 3,
+      persistentBytes: 128 * 1024 * 1024,
+      deviceMemoryGiB,
+    };
+  }
+  if (tier === "high") {
+    return {
+      tier,
+      memoryEntries: 24,
+      memoryBytes: 256 * 1024 * 1024,
+      persistentEntries: 8,
+      persistentBytes: 512 * 1024 * 1024,
+      deviceMemoryGiB,
+    };
+  }
+  return {
+    tier,
+    memoryEntries: 16,
+    memoryBytes: 160 * 1024 * 1024,
+    persistentEntries: 6,
+    persistentBytes: 256 * 1024 * 1024,
+    deviceMemoryGiB,
+  };
+}
+
 function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRenderState {
   return {
     enabled: false,
@@ -2996,7 +3814,8 @@ function buildBevyEntityRenderState({
   entityMotionSnapshots,
   motionNow,
   atlas,
-  interpolateInRuntime,
+  bevySelfCameraActive,
+  bevyEntityInterpActive,
 }: {
   enabled: boolean;
   player: DisplayEntity | null;
@@ -3015,7 +3834,8 @@ function buildBevyEntityRenderState({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   atlas: BevyEntityAtlasSnapshot | null;
-  interpolateInRuntime: boolean;
+  bevySelfCameraActive: boolean;
+  bevyEntityInterpActive: boolean;
 }): BevyEntityRenderState {
   if (!enabled || !player) {
     return {
@@ -3027,44 +3847,81 @@ function buildBevyEntityRenderState({
     };
   }
 
-  return {
-    enabled: true,
-    stageWidth: 1024,
-    stageHeight: 768,
-    selfObjectId: player.objectId,
-    interpolateInRuntime,
-    atlases: atlas
-      ? [
+  const centerAnchor =
+    viewportEntitySprites.find(({ entity }) => entity.objectId === player.objectId)?.entity ??
+    viewportEntitySprites[0]?.entity;
+  const centerX = centerAnchor ? centerAnchor.x - centerAnchor.dx : player.x;
+  const centerY = centerAnchor ? centerAnchor.y - centerAnchor.dy : player.y;
+
+  // Normalise to a page list: real multi-page snapshots expose `pages`; single-
+  // page (live / single-page prebuilt) snapshots synthesise one page from the
+  // top-level fields, so the output below is identical to the pre-multi-page form.
+  const atlasPages: BevyEntityAtlasPage[] = atlas
+    ? atlas.pages && atlas.pages.length
+      ? atlas.pages
+      : [
           {
             key: atlas.key,
             width: atlas.width,
             height: atlas.height,
             imageUrl: atlas.imageUrl,
-            rects: atlas.rectList,
-          },
-        ]
-      : [],
-    atlasImages: atlas?.pixels
-      ? [
-          {
-            key: atlas.key,
-            width: atlas.width,
-            height: atlas.height,
             pixels: atlas.pixels,
+            rectList: atlas.rectList,
           },
         ]
-      : [],
+    : [];
+
+  return {
+    enabled: true,
+    stageWidth: 1024,
+    stageHeight: 768,
+    centerX,
+    centerY,
+    // One render-atlas per texture page; the runtime registers each by key and
+    // resolves each layer to its page via the layer's atlasKey.
+    atlases: atlasPages.map((page) => ({
+      key: page.key,
+      width: page.width,
+      height: page.height,
+      imageUrl: page.imageUrl,
+      rects: page.rectList,
+    })),
+    // Live/persistent pages carry RGBA pixels; prebuilt pages carry an imageUrl
+    // (above) and are loaded by the runtime, so they contribute no atlasImage.
+    atlasImages: atlasPages.flatMap((page) =>
+      page.pixels && page.pixels.byteLength > 0
+        ? [
+            {
+              key: page.key,
+              width: page.width,
+              height: page.height,
+              pixels: page.pixels,
+            },
+          ]
+        : [],
+    ),
     entities: viewportEntitySprites.map(({ entity, sprite }) => {
       const isPlayer = player.objectId === entity.objectId;
-      // When the runtime interpolates, it applies the motion glide + camera
-      // scroll itself (keyed by selfObjectId), so we leave both offsets EMPTY and
-      // do NOT fold them into left/top — keeping the render state stable per tick.
+      // Bevy-entity-interp path: stop folding the sub-cell glide here (push cell-space)
+      // and ship the motion window below so Bevy interpolates the glide at display Hz.
+      // When the self-camera is on we ALSO interp the self sprite in Bevy (not just the
+      // camera): the camera and the self sprite then share one display-Hz curve so the
+      // player stays pinned to centre, and entityRenderState no longer depends on
+      // `motionNow` — which is what lets the React motion clock drop to ~10 Hz.
+      const interpEntityInBevy = bevyEntityInterpActive && (!isPlayer || bevySelfCameraActive);
+      // Bevy-self-camera path: drop the JS camera fold (Bevy moves the camera at
+      // display Hz) and let the self player glide via its own motion. Default path
+      // is unchanged (player pinned via EMPTY, others fold playerCameraMotionOffset).
       const entityMotionOffset =
-        interpolateInRuntime || isPlayer
+        (isPlayer && !bevySelfCameraActive) || interpEntityInBevy
           ? EMPTY_VIEWPORT_OFFSET
           : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
       const cameraOffset =
-        interpolateInRuntime || isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+        bevySelfCameraActive || isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+      // Step-stable window (changes only at step boundaries, not per motionNow
+      // tick) handed to Bevy for the non-self interpolation. undefined ⇒ no fields
+      // spread ⇒ serialized state byte-identical to today.
+      const interpMotion = interpEntityInBevy ? entityMotionSnapshots[entity.objectId] : undefined;
       const rootLeft =
         VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
       const rootTop =
@@ -3081,12 +3938,15 @@ function buildBevyEntityRenderState({
           ].map(({ layer, role, index }, order) => {
             const atlasRectKey = bevyEntityAtlasRectKey(layer.path, layer.width, layer.height);
             const atlasRect = atlas?.rects[atlasRectKey];
+            // Route the layer to the page its frame lives on (multi-page); for
+            // single-page snapshots pageIndex is 0 ⇒ the sole page.
+            const atlasPageKey = atlasRect ? atlasPages[atlasRect.pageIndex ?? 0]?.key : undefined;
             return {
               key: `${entity.objectId}:${role}:${index}`,
               path: layer.path,
-              ...(atlasRect
+              ...(atlasRect && atlasPageKey
                 ? {
-                    atlasKey: atlas.key,
+                    atlasKey: atlasPageKey,
                     atlasRectKey,
                   }
                 : {}),
@@ -3103,6 +3963,19 @@ function buildBevyEntityRenderState({
       return {
         objectId: entity.objectId,
         dead: Boolean(entity.dead),
+        isSelf: isPlayer,
+        gridX: entity.x,
+        gridY: entity.y,
+        ...(interpMotion
+          ? {
+              motionFromX: interpMotion.fromX,
+              motionFromY: interpMotion.fromY,
+              motionToX: interpMotion.toX,
+              motionToY: interpMotion.toY,
+              motionStartedMs: interpMotion.startedAt,
+              motionDurationMs: interpMotion.expiresAt - interpMotion.startedAt,
+            }
+          : {}),
         layers,
       };
     }),
@@ -3112,6 +3985,7 @@ function buildBevyEntityRenderState({
 function collectBevyEntityAtlasSources(
   viewportEntitySprites: Array<{
     sprite: {
+      mount: { path: string; width: number; height: number } | null;
       body: { path: string; width: number; height: number } | null;
       hair: { path: string; width: number; height: number } | null;
       rearWeapons: Array<{ path: string; width: number; height: number }>;
@@ -3138,6 +4012,7 @@ function collectBevyEntityAtlasSources(
 
   for (const { sprite } of viewportEntitySprites) {
     if (!sprite) continue;
+    addLayer(sprite.mount);
     sprite.rearWeapons.forEach(addLayer);
     addLayer(sprite.body);
     addLayer(sprite.hair);
@@ -3190,6 +4065,11 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
   sources: BevyEntityAtlasSource[],
   key: string,
 ): Promise<BevyEntityAtlasSnapshot | null> {
+  const fullPack = await loadCrystalFullPackBevyEntityAtlasSnapshot(sources, key);
+  if (fullPack) {
+    return fullPack;
+  }
+
   const manifest = await loadBevyEntityAtlasManifest();
   if (!manifest?.atlases?.length) {
     return null;
@@ -3201,7 +4081,24 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
       continue;
     }
 
-    const rects = bevyEntityAtlasRectMap(candidate.rects);
+    // The prebuilt image can cover thousands of frames, but a render-state update
+    // only needs metadata for the frames referenced by this scene snapshot. Keeping
+    // the full manifest here made every animation phase stringify and deserialize
+    // nearly 1 MB of immutable rect data on the main thread.
+    const rectList = candidate.rects.filter((rect) => sourceKeys.has(rect.key));
+    const rects = bevyEntityAtlasRectMap(rectList);
+
+    // Multi-page candidate (manifest schemaVersion≥2): build one page per
+    // texture page, grouping rects by pageIndex. Each page carries its own
+    // imageUrl so the runtime loads pages independently (no pixel push).
+    if (candidate.pages && candidate.pages.length > 1) {
+      const multiPage = buildMultiPagePrebuiltSnapshot(candidate, key, rects, rectList);
+      if (multiPage) {
+        return multiPage;
+      }
+      continue;
+    }
+
     if (candidate.imageUrl) {
       return {
         key,
@@ -3210,7 +4107,7 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
         height: candidate.height,
         imageUrl: resolveBevyEntityAtlasAssetUrl(candidate.imageUrl),
         rects,
-        rectList: candidate.rects,
+        rectList,
       };
     }
 
@@ -3222,13 +4119,90 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
         width: candidate.width,
         height: candidate.height,
         rects,
-        rectList: candidate.rects,
+        rectList,
         pixels,
       };
     }
   }
 
   return null;
+}
+
+async function loadCrystalFullPackBevyEntityAtlasSnapshot(
+  sources: BevyEntityAtlasSource[],
+  key: string,
+): Promise<BevyEntityAtlasSnapshot | null> {
+  if (typeof window === "undefined") return null;
+  if (new URLSearchParams(window.location.search).get("crystalFullPack") === "0") return null;
+  try {
+    const runtime = await loadCrystalFullPackIndex();
+    return await buildCrystalFullPackAtlasSnapshot(runtime, sources, key);
+  } catch {
+    // Keep the existing starter/live path available during partial deployments.
+    return null;
+  }
+}
+
+// Page 0 keeps the atlas key (single-page convention); spill pages get a
+// `#p<i>` suffix so the runtime registers each page under a distinct atlas key.
+function bevyEntityAtlasPageKey(atlasKey: string, pageIndex: number) {
+  return pageIndex === 0 ? atlasKey : `${atlasKey}#p${pageIndex}`;
+}
+
+// Build a multi-page snapshot from a prebuilt manifest candidate: one page per
+// texture page, each rect routed to its page by `pageIndex`. Synchronous — pages
+// carry imageUrls and the runtime loads them, so there is no fetch/decode here.
+function buildMultiPagePrebuiltSnapshot(
+  candidate: PrebuiltBevyEntityAtlasRecord,
+  key: string,
+  rects: Record<string, BevyEntityAtlasRect>,
+  rectList: BevyEntityAtlasRect[],
+): BevyEntityAtlasSnapshot | null {
+  const pageDescriptors = candidate.pages ?? [];
+  if (!pageDescriptors.length) {
+    return null;
+  }
+
+  // Group rects by their pageIndex (absent ⇒ page 0).
+  const rectsByPage = new Map<number, BevyEntityAtlasRect[]>();
+  for (const rect of rectList) {
+    const pageIndex = rect.pageIndex ?? 0;
+    const list = rectsByPage.get(pageIndex);
+    if (list) {
+      list.push(rect);
+    } else {
+      rectsByPage.set(pageIndex, [rect]);
+    }
+  }
+
+  const pages: BevyEntityAtlasPage[] = [];
+  for (let pageIndex = 0; pageIndex < pageDescriptors.length; pageIndex += 1) {
+    const descriptor = pageDescriptors[pageIndex];
+    if (!descriptor?.imageUrl) {
+      // Multi-page prebuilt requires a per-page image URL; bail to the next
+      // candidate / live build rather than render a partial atlas.
+      return null;
+    }
+    pages.push({
+      key: bevyEntityAtlasPageKey(candidate.key, pageIndex),
+      width: descriptor.width,
+      height: descriptor.height,
+      imageUrl: resolveBevyEntityAtlasAssetUrl(descriptor.imageUrl),
+      rectList: rectsByPage.get(pageIndex) ?? [],
+    });
+  }
+
+  const page0 = pages[0];
+  return {
+    key,
+    sourceKey: candidate.key,
+    width: page0.width,
+    height: page0.height,
+    imageUrl: page0.imageUrl,
+    rects,
+    rectList,
+    pages,
+  };
 }
 
 function loadPrebuiltBevyEntityAtlasCandidatePixels(candidate: PrebuiltBevyEntityAtlasRecord) {
@@ -3252,6 +4226,12 @@ function loadPrebuiltBevyEntityAtlasCandidatePixels(candidate: PrebuiltBevyEntit
     return null;
   })();
   bevyEntityAtlasPrebuiltPixelsCache.set(cacheKey, promise);
+  const release = () => {
+    if (bevyEntityAtlasPrebuiltPixelsCache.get(cacheKey) === promise) {
+      bevyEntityAtlasPrebuiltPixelsCache.delete(cacheKey);
+    }
+  };
+  void promise.then(release, release);
   return promise;
 }
 
@@ -3279,8 +4259,13 @@ async function loadBevyEntityAtlasManifest() {
     return null;
   }
   if (!bevyEntityAtlasManifestPromise) {
+    // Revalidate the entity-atlas manifest instead of force-caching it: the URL is
+    // constant but the file changes whenever the atlas is regenerated, so
+    // "force-cache" pins a stale manifest and the prebuilt-coverage check runs
+    // against old rects — the atlas silently never matches after a repack. See
+    // docs/MOVEMENT-AND-ATLAS-INVESTIGATION-2026-06-24.md (Finding 1).
     bevyEntityAtlasManifestPromise = fetch(BEVY_ENTITY_ATLAS_MANIFEST_URL, {
-      cache: "force-cache",
+      cache: "no-cache",
     })
       .then(async (response) => {
         if (!response.ok) {
@@ -3385,6 +4370,8 @@ async function buildBevyEntityAtlasSnapshot(
 function loadBevyEntityAtlasImage(path: string) {
   const cached = bevyEntityAtlasImageCache.get(path);
   if (cached) {
+    bevyEntityAtlasImageCache.delete(path);
+    bevyEntityAtlasImageCache.set(path, cached);
     return cached;
   }
 
@@ -3397,6 +4384,16 @@ function loadBevyEntityAtlasImage(path: string) {
     image.src = path;
   });
   bevyEntityAtlasImageCache.set(path, promise);
+  while (bevyEntityAtlasImageCache.size > BEVY_ENTITY_ATLAS_CACHE_LIMIT * 4) {
+    const oldest = bevyEntityAtlasImageCache.keys().next().value;
+    if (typeof oldest !== "string") break;
+    bevyEntityAtlasImageCache.delete(oldest);
+  }
+  void promise.catch(() => {
+    if (bevyEntityAtlasImageCache.get(path) === promise) {
+      bevyEntityAtlasImageCache.delete(path);
+    }
+  });
   return promise;
 }
 

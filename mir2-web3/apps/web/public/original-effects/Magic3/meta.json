@@ -1,0 +1,1435 @@
+{
+  "count": 7898,
+  "frames": {
+    "60": {
+      "path": "/original-effects/Magic3/60.png",
+      "width": 40,
+      "height": 36,
+      "x": 7,
+      "y": -35,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "61": {
+      "path": "/original-effects/Magic3/61.png",
+      "width": 44,
+      "height": 44,
+      "x": 5,
+      "y": -23,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "62": {
+      "path": "/original-effects/Magic3/62.png",
+      "width": 36,
+      "height": 46,
+      "x": 4,
+      "y": -20,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "80": {
+      "path": "/original-effects/Magic3/80.png",
+      "width": 192,
+      "height": 163,
+      "x": -62,
+      "y": -92,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "81": {
+      "path": "/original-effects/Magic3/81.png",
+      "width": 344,
+      "height": 273,
+      "x": -151,
+      "y": -211,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "82": {
+      "path": "/original-effects/Magic3/82.png",
+      "width": 476,
+      "height": 338,
+      "x": -215,
+      "y": -265,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "83": {
+      "path": "/original-effects/Magic3/83.png",
+      "width": 616,
+      "height": 343,
+      "x": -286,
+      "y": -265,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "84": {
+      "path": "/original-effects/Magic3/84.png",
+      "width": 640,
+      "height": 353,
+      "x": -294,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "85": {
+      "path": "/original-effects/Magic3/85.png",
+      "width": 536,
+      "height": 287,
+      "x": -246,
+      "y": -264,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "86": {
+      "path": "/original-effects/Magic3/86.png",
+      "width": 364,
+      "height": 177,
+      "x": -160,
+      "y": -187,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "87": {
+      "path": "/original-effects/Magic3/87.png",
+      "width": 232,
+      "height": 127,
+      "x": -91,
+      "y": -161,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "88": {
+      "path": "/original-effects/Magic3/88.png",
+      "width": 144,
+      "height": 83,
+      "x": -46,
+      "y": -138,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "200": {
+      "path": "/original-effects/Magic3/200.png",
+      "width": 240,
+      "height": 146,
+      "x": -76,
+      "y": -82,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "201": {
+      "path": "/original-effects/Magic3/201.png",
+      "width": 304,
+      "height": 290,
+      "x": -116,
+      "y": -213,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "202": {
+      "path": "/original-effects/Magic3/202.png",
+      "width": 264,
+      "height": 297,
+      "x": -98,
+      "y": -204,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "203": {
+      "path": "/original-effects/Magic3/203.png",
+      "width": 240,
+      "height": 297,
+      "x": -89,
+      "y": -216,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "204": {
+      "path": "/original-effects/Magic3/204.png",
+      "width": 220,
+      "height": 285,
+      "x": -79,
+      "y": -217,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "205": {
+      "path": "/original-effects/Magic3/205.png",
+      "width": 184,
+      "height": 266,
+      "x": -64,
+      "y": -217,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "206": {
+      "path": "/original-effects/Magic3/206.png",
+      "width": 132,
+      "height": 215,
+      "x": -42,
+      "y": -188,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "207": {
+      "path": "/original-effects/Magic3/207.png",
+      "width": 92,
+      "height": 149,
+      "x": -23,
+      "y": -147,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "550": {
+      "path": "/original-effects/Magic3/550.png",
+      "width": 448,
+      "height": 302,
+      "x": -196,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "551": {
+      "path": "/original-effects/Magic3/551.png",
+      "width": 452,
+      "height": 302,
+      "x": -197,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "552": {
+      "path": "/original-effects/Magic3/552.png",
+      "width": 452,
+      "height": 303,
+      "x": -197,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "553": {
+      "path": "/original-effects/Magic3/553.png",
+      "width": 452,
+      "height": 302,
+      "x": -197,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "554": {
+      "path": "/original-effects/Magic3/554.png",
+      "width": 452,
+      "height": 303,
+      "x": -197,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "555": {
+      "path": "/original-effects/Magic3/555.png",
+      "width": 452,
+      "height": 303,
+      "x": -197,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "556": {
+      "path": "/original-effects/Magic3/556.png",
+      "width": 452,
+      "height": 303,
+      "x": -196,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "557": {
+      "path": "/original-effects/Magic3/557.png",
+      "width": 448,
+      "height": 303,
+      "x": -196,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "558": {
+      "path": "/original-effects/Magic3/558.png",
+      "width": 448,
+      "height": 302,
+      "x": -196,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "559": {
+      "path": "/original-effects/Magic3/559.png",
+      "width": 448,
+      "height": 302,
+      "x": -196,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "560": {
+      "path": "/original-effects/Magic3/560.png",
+      "width": 416,
+      "height": 302,
+      "x": -176,
+      "y": -266,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "561": {
+      "path": "/original-effects/Magic3/561.png",
+      "width": 344,
+      "height": 293,
+      "x": -110,
+      "y": -265,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "562": {
+      "path": "/original-effects/Magic3/562.png",
+      "width": 272,
+      "height": 203,
+      "x": -70,
+      "y": -234,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "563": {
+      "path": "/original-effects/Magic3/563.png",
+      "width": 240,
+      "height": 145,
+      "x": -70,
+      "y": -204,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "564": {
+      "path": "/original-effects/Magic3/564.png",
+      "width": 220,
+      "height": 101,
+      "x": -70,
+      "y": -182,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "565": {
+      "path": "/original-effects/Magic3/565.png",
+      "width": 204,
+      "height": 72,
+      "x": -70,
+      "y": -167,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "566": {
+      "path": "/original-effects/Magic3/566.png",
+      "width": 192,
+      "height": 42,
+      "x": -70,
+      "y": -153,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "590": {
+      "path": "/original-effects/Magic3/590.png",
+      "width": 152,
+      "height": 136,
+      "x": -47,
+      "y": -66,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "591": {
+      "path": "/original-effects/Magic3/591.png",
+      "width": 272,
+      "height": 238,
+      "x": -95,
+      "y": -127,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "592": {
+      "path": "/original-effects/Magic3/592.png",
+      "width": 340,
+      "height": 319,
+      "x": -143,
+      "y": -184,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "593": {
+      "path": "/original-effects/Magic3/593.png",
+      "width": 380,
+      "height": 352,
+      "x": -158,
+      "y": -195,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "594": {
+      "path": "/original-effects/Magic3/594.png",
+      "width": 356,
+      "height": 314,
+      "x": -131,
+      "y": -152,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "595": {
+      "path": "/original-effects/Magic3/595.png",
+      "width": 300,
+      "height": 303,
+      "x": -110,
+      "y": -144,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "596": {
+      "path": "/original-effects/Magic3/596.png",
+      "width": 296,
+      "height": 235,
+      "x": -107,
+      "y": -123,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "597": {
+      "path": "/original-effects/Magic3/597.png",
+      "width": 4,
+      "height": 1,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "598": {
+      "path": "/original-effects/Magic3/598.png",
+      "width": 4,
+      "height": 1,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "599": {
+      "path": "/original-effects/Magic3/599.png",
+      "width": 4,
+      "height": 1,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "610": {
+      "path": "/original-effects/Magic3/610.png",
+      "width": 108,
+      "height": 106,
+      "x": -35,
+      "y": -90,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "611": {
+      "path": "/original-effects/Magic3/611.png",
+      "width": 116,
+      "height": 114,
+      "x": -41,
+      "y": -98,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "612": {
+      "path": "/original-effects/Magic3/612.png",
+      "width": 112,
+      "height": 100,
+      "x": -38,
+      "y": -84,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "613": {
+      "path": "/original-effects/Magic3/613.png",
+      "width": 116,
+      "height": 101,
+      "x": -41,
+      "y": -81,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "614": {
+      "path": "/original-effects/Magic3/614.png",
+      "width": 120,
+      "height": 104,
+      "x": -44,
+      "y": -83,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "615": {
+      "path": "/original-effects/Magic3/615.png",
+      "width": 108,
+      "height": 121,
+      "x": -29,
+      "y": -92,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "616": {
+      "path": "/original-effects/Magic3/616.png",
+      "width": 100,
+      "height": 140,
+      "x": -29,
+      "y": -92,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "617": {
+      "path": "/original-effects/Magic3/617.png",
+      "width": 92,
+      "height": 91,
+      "x": -19,
+      "y": -65,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "618": {
+      "path": "/original-effects/Magic3/618.png",
+      "width": 4,
+      "height": 1,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "619": {
+      "path": "/original-effects/Magic3/619.png",
+      "width": 4,
+      "height": 1,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "620": {
+      "path": "/original-effects/Magic3/620.png",
+      "width": 104,
+      "height": 76,
+      "x": -29,
+      "y": -23,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "621": {
+      "path": "/original-effects/Magic3/621.png",
+      "width": 304,
+      "height": 212,
+      "x": -181,
+      "y": -44,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "622": {
+      "path": "/original-effects/Magic3/622.png",
+      "width": 536,
+      "height": 309,
+      "x": -268,
+      "y": -95,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "623": {
+      "path": "/original-effects/Magic3/623.png",
+      "width": 584,
+      "height": 442,
+      "x": -268,
+      "y": -228,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "624": {
+      "path": "/original-effects/Magic3/624.png",
+      "width": 588,
+      "height": 442,
+      "x": -269,
+      "y": -228,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "625": {
+      "path": "/original-effects/Magic3/625.png",
+      "width": 588,
+      "height": 442,
+      "x": -269,
+      "y": -228,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "626": {
+      "path": "/original-effects/Magic3/626.png",
+      "width": 588,
+      "height": 442,
+      "x": -269,
+      "y": -228,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "627": {
+      "path": "/original-effects/Magic3/627.png",
+      "width": 588,
+      "height": 442,
+      "x": -269,
+      "y": -228,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "628": {
+      "path": "/original-effects/Magic3/628.png",
+      "width": 588,
+      "height": 442,
+      "x": -269,
+      "y": -228,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "629": {
+      "path": "/original-effects/Magic3/629.png",
+      "width": 508,
+      "height": 365,
+      "x": -224,
+      "y": -170,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "680": {
+      "path": "/original-effects/Magic3/680.png",
+      "width": 456,
+      "height": 278,
+      "x": -199,
+      "y": -128,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "681": {
+      "path": "/original-effects/Magic3/681.png",
+      "width": 540,
+      "height": 293,
+      "x": -247,
+      "y": -132,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "682": {
+      "path": "/original-effects/Magic3/682.png",
+      "width": 576,
+      "height": 325,
+      "x": -264,
+      "y": -144,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "683": {
+      "path": "/original-effects/Magic3/683.png",
+      "width": 576,
+      "height": 336,
+      "x": -264,
+      "y": -147,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "684": {
+      "path": "/original-effects/Magic3/684.png",
+      "width": 576,
+      "height": 336,
+      "x": -263,
+      "y": -151,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "685": {
+      "path": "/original-effects/Magic3/685.png",
+      "width": 552,
+      "height": 336,
+      "x": -244,
+      "y": -147,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "686": {
+      "path": "/original-effects/Magic3/686.png",
+      "width": 504,
+      "height": 329,
+      "x": -220,
+      "y": -142,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "687": {
+      "path": "/original-effects/Magic3/687.png",
+      "width": 488,
+      "height": 324,
+      "x": -214,
+      "y": -137,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "688": {
+      "path": "/original-effects/Magic3/688.png",
+      "width": 484,
+      "height": 318,
+      "x": -214,
+      "y": -133,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "689": {
+      "path": "/original-effects/Magic3/689.png",
+      "width": 492,
+      "height": 315,
+      "x": -214,
+      "y": -133,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "690": {
+      "path": "/original-effects/Magic3/690.png",
+      "width": 536,
+      "height": 310,
+      "x": -230,
+      "y": -134,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "691": {
+      "path": "/original-effects/Magic3/691.png",
+      "width": 564,
+      "height": 305,
+      "x": -249,
+      "y": -135,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "692": {
+      "path": "/original-effects/Magic3/692.png",
+      "width": 576,
+      "height": 299,
+      "x": -263,
+      "y": -133,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "693": {
+      "path": "/original-effects/Magic3/693.png",
+      "width": 576,
+      "height": 289,
+      "x": -264,
+      "y": -130,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "694": {
+      "path": "/original-effects/Magic3/694.png",
+      "width": 576,
+      "height": 285,
+      "x": -261,
+      "y": -127,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "695": {
+      "path": "/original-effects/Magic3/695.png",
+      "width": 576,
+      "height": 284,
+      "x": -264,
+      "y": -126,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "696": {
+      "path": "/original-effects/Magic3/696.png",
+      "width": 576,
+      "height": 284,
+      "x": -264,
+      "y": -126,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "697": {
+      "path": "/original-effects/Magic3/697.png",
+      "width": 576,
+      "height": 291,
+      "x": -264,
+      "y": -130,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "698": {
+      "path": "/original-effects/Magic3/698.png",
+      "width": 580,
+      "height": 290,
+      "x": -265,
+      "y": -130,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "699": {
+      "path": "/original-effects/Magic3/699.png",
+      "width": 568,
+      "height": 293,
+      "x": -265,
+      "y": -131,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "700": {
+      "path": "/original-effects/Magic3/700.png",
+      "width": 508,
+      "height": 295,
+      "x": -233,
+      "y": -131,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "701": {
+      "path": "/original-effects/Magic3/701.png",
+      "width": 436,
+      "height": 292,
+      "x": -200,
+      "y": -131,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "702": {
+      "path": "/original-effects/Magic3/702.png",
+      "width": 436,
+      "height": 296,
+      "x": -200,
+      "y": -131,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "703": {
+      "path": "/original-effects/Magic3/703.png",
+      "width": 436,
+      "height": 296,
+      "x": -200,
+      "y": -131,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "704": {
+      "path": "/original-effects/Magic3/704.png",
+      "width": 4,
+      "height": 1,
+      "x": -4,
+      "y": -115,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "705": {
+      "path": "/original-effects/Magic3/705.png",
+      "width": 348,
+      "height": 432,
+      "x": -151,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "706": {
+      "path": "/original-effects/Magic3/706.png",
+      "width": 468,
+      "height": 412,
+      "x": -204,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "707": {
+      "path": "/original-effects/Magic3/707.png",
+      "width": 480,
+      "height": 413,
+      "x": -210,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "708": {
+      "path": "/original-effects/Magic3/708.png",
+      "width": 484,
+      "height": 413,
+      "x": -215,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "709": {
+      "path": "/original-effects/Magic3/709.png",
+      "width": 464,
+      "height": 412,
+      "x": -210,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "710": {
+      "path": "/original-effects/Magic3/710.png",
+      "width": 464,
+      "height": 412,
+      "x": -211,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "711": {
+      "path": "/original-effects/Magic3/711.png",
+      "width": 444,
+      "height": 408,
+      "x": -209,
+      "y": -242,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "712": {
+      "path": "/original-effects/Magic3/712.png",
+      "width": 396,
+      "height": 391,
+      "x": -182,
+      "y": -241,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "713": {
+      "path": "/original-effects/Magic3/713.png",
+      "width": 336,
+      "height": 357,
+      "x": -158,
+      "y": -218,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "714": {
+      "path": "/original-effects/Magic3/714.png",
+      "width": 4,
+      "height": 1,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1880": {
+      "path": "/original-effects/Magic3/1880.png",
+      "width": 76,
+      "height": 81,
+      "x": -13,
+      "y": -59,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1881": {
+      "path": "/original-effects/Magic3/1881.png",
+      "width": 108,
+      "height": 107,
+      "x": -34,
+      "y": -72,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1882": {
+      "path": "/original-effects/Magic3/1882.png",
+      "width": 120,
+      "height": 105,
+      "x": -40,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1883": {
+      "path": "/original-effects/Magic3/1883.png",
+      "width": 128,
+      "height": 104,
+      "x": -43,
+      "y": -70,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1884": {
+      "path": "/original-effects/Magic3/1884.png",
+      "width": 132,
+      "height": 105,
+      "x": -45,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1885": {
+      "path": "/original-effects/Magic3/1885.png",
+      "width": 132,
+      "height": 105,
+      "x": -46,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1886": {
+      "path": "/original-effects/Magic3/1886.png",
+      "width": 132,
+      "height": 104,
+      "x": -45,
+      "y": -70,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1887": {
+      "path": "/original-effects/Magic3/1887.png",
+      "width": 132,
+      "height": 104,
+      "x": -45,
+      "y": -70,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1890": {
+      "path": "/original-effects/Magic3/1890.png",
+      "width": 80,
+      "height": 105,
+      "x": -16,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1891": {
+      "path": "/original-effects/Magic3/1891.png",
+      "width": 80,
+      "height": 105,
+      "x": -16,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1892": {
+      "path": "/original-effects/Magic3/1892.png",
+      "width": 80,
+      "height": 105,
+      "x": -15,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1893": {
+      "path": "/original-effects/Magic3/1893.png",
+      "width": 76,
+      "height": 105,
+      "x": -14,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1894": {
+      "path": "/original-effects/Magic3/1894.png",
+      "width": 76,
+      "height": 105,
+      "x": -14,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1895": {
+      "path": "/original-effects/Magic3/1895.png",
+      "width": 76,
+      "height": 104,
+      "x": -14,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1896": {
+      "path": "/original-effects/Magic3/1896.png",
+      "width": 80,
+      "height": 105,
+      "x": -15,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1897": {
+      "path": "/original-effects/Magic3/1897.png",
+      "width": 80,
+      "height": 104,
+      "x": -15,
+      "y": -70,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1898": {
+      "path": "/original-effects/Magic3/1898.png",
+      "width": 80,
+      "height": 105,
+      "x": -16,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1899": {
+      "path": "/original-effects/Magic3/1899.png",
+      "width": 80,
+      "height": 104,
+      "x": -15,
+      "y": -70,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1910": {
+      "path": "/original-effects/Magic3/1910.png",
+      "width": 80,
+      "height": 105,
+      "x": -16,
+      "y": -71,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1911": {
+      "path": "/original-effects/Magic3/1911.png",
+      "width": 84,
+      "height": 96,
+      "x": -18,
+      "y": -66,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1912": {
+      "path": "/original-effects/Magic3/1912.png",
+      "width": 88,
+      "height": 87,
+      "x": -19,
+      "y": -61,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1913": {
+      "path": "/original-effects/Magic3/1913.png",
+      "width": 72,
+      "height": 98,
+      "x": -12,
+      "y": -67,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1914": {
+      "path": "/original-effects/Magic3/1914.png",
+      "width": 60,
+      "height": 109,
+      "x": -4,
+      "y": -73,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1915": {
+      "path": "/original-effects/Magic3/1915.png",
+      "width": 28,
+      "height": 114,
+      "x": 10,
+      "y": -76,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1916": {
+      "path": "/original-effects/Magic3/1916.png",
+      "width": 4,
+      "height": 97,
+      "x": 23,
+      "y": -68,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2300": {
+      "path": "/original-effects/Magic3/2300.png",
+      "width": 52,
+      "height": 59,
+      "x": 3,
+      "y": -53,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2301": {
+      "path": "/original-effects/Magic3/2301.png",
+      "width": 44,
+      "height": 52,
+      "x": 5,
+      "y": -51,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2302": {
+      "path": "/original-effects/Magic3/2302.png",
+      "width": 48,
+      "height": 58,
+      "x": 5,
+      "y": -51,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2303": {
+      "path": "/original-effects/Magic3/2303.png",
+      "width": 56,
+      "height": 53,
+      "x": 5,
+      "y": -51,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2304": {
+      "path": "/original-effects/Magic3/2304.png",
+      "width": 48,
+      "height": 53,
+      "x": 4,
+      "y": -48,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2305": {
+      "path": "/original-effects/Magic3/2305.png",
+      "width": 56,
+      "height": 58,
+      "x": 2,
+      "y": -50,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2306": {
+      "path": "/original-effects/Magic3/2306.png",
+      "width": 52,
+      "height": 62,
+      "x": 1,
+      "y": -51,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2307": {
+      "path": "/original-effects/Magic3/2307.png",
+      "width": 48,
+      "height": 68,
+      "x": 0,
+      "y": -54,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2710": {
+      "path": "/original-effects/Magic3/2710.png",
+      "width": 112,
+      "height": 74,
+      "x": -31,
+      "y": -14,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2711": {
+      "path": "/original-effects/Magic3/2711.png",
+      "width": 404,
+      "height": 266,
+      "x": -172,
+      "y": -107,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2712": {
+      "path": "/original-effects/Magic3/2712.png",
+      "width": 420,
+      "height": 270,
+      "x": -182,
+      "y": -111,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2713": {
+      "path": "/original-effects/Magic3/2713.png",
+      "width": 448,
+      "height": 283,
+      "x": -198,
+      "y": -124,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2714": {
+      "path": "/original-effects/Magic3/2714.png",
+      "width": 448,
+      "height": 284,
+      "x": -200,
+      "y": -125,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2715": {
+      "path": "/original-effects/Magic3/2715.png",
+      "width": 448,
+      "height": 282,
+      "x": -199,
+      "y": -123,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2716": {
+      "path": "/original-effects/Magic3/2716.png",
+      "width": 416,
+      "height": 264,
+      "x": -178,
+      "y": -115,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "2717": {
+      "path": "/original-effects/Magic3/2717.png",
+      "width": 352,
+      "height": 221,
+      "x": -150,
+      "y": -98,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    }
+  }
+}

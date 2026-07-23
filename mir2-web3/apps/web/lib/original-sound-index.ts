@@ -27,6 +27,23 @@ const presentSoundFiles = new Set(
   ((presentSoundManifest as PresentSoundManifest).files ?? []).map((name) => name.toLowerCase()),
 );
 
+function remoteAssetBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? "").trim().replace(/\/+$/, "");
+}
+
+function remoteBackedSoundPath(publicPath: string): string {
+  const baseUrl = remoteAssetBaseUrl();
+  if (!baseUrl) {
+    return publicPath;
+  }
+
+  try {
+    return new URL(publicPath.replace(/^\/+/, ""), `${baseUrl}/`).href;
+  } catch {
+    return publicPath;
+  }
+}
+
 function publicPathIsPresent(publicPath: string | null | undefined): boolean {
   if (!publicPath) {
     return false;
@@ -46,7 +63,7 @@ export function crystalSoundIndexEntry(sound: number | string | null | undefined
 export function crystalSoundPath(sound: number | string | null | undefined): string | null {
   const entry = crystalSoundIndexEntry(sound);
   if (entry?.sourceExists && entry.path && publicPathIsPresent(entry.path)) {
-    return entry.path;
+    return remoteBackedSoundPath(entry.path);
   }
   return null;
 }

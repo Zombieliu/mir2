@@ -131,7 +131,7 @@ Latest preview evidence:
   `character-select`, and `hud-core` are critical, while `bichon-spawn` remains
   background with a 180 sprite-frame scene cap. Verification passed
   service-worker/script syntax checks, Web typecheck, local Next production
-  build, Vercel production prebuild/deploy via `npx vercel@latest`, direct
+  build, Vercel production prebuild/deploy via `npx vercel@56.4.1`, direct
   player-domain manifest probe, and production cache-maintenance smoke
   `docs/generated/player-qa/cache-metrics/cache-metrics-resource-tier-prod-20260521.json`
   with `ok=true`, 387/387 prewarm ok, warm CacheStorage 3 caches / 383

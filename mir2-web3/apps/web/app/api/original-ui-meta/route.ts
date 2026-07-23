@@ -5,6 +5,10 @@ import {
   OriginalUiMetaError,
   readStaticOriginalUiLibraryMeta,
 } from "../../../lib/original-ui-meta-server";
+import {
+  ensureOriginalUiLibraryExport,
+  OriginalUiExportError,
+} from "../../../lib/original-ui-export-server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,6 +24,20 @@ export async function GET(request: Request) {
     const normalizedLibrary = normalizeOriginalUiLibraryKey(library);
     const staticMeta = await readStaticOriginalUiLibraryMeta(request, normalizedLibrary);
     if (staticMeta) return NextResponse.json(staticMeta);
+
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        return NextResponse.json(await ensureOriginalUiLibraryExport(normalizedLibrary));
+      } catch (error) {
+        if (error instanceof OriginalUiExportError) {
+          return NextResponse.json(
+            { error: error.message, code: error.code },
+            { status: error.status },
+          );
+        }
+        throw error;
+      }
+    }
 
     return NextResponse.json(
       {

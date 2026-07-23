@@ -68,7 +68,9 @@ export function loadMapAtlasIndex(): Promise<MapAtlasIndex | null> {
   }
   manifestPromise = (async () => {
     try {
-      const response = await fetch(MAP_ATLAS_MANIFEST_URL, { cache: "force-cache" });
+      // The URL is stable while atlas coordinates change whenever the pack is
+      // regenerated. Revalidate it so rects cannot outlive their matching PNG.
+      const response = await fetch(MAP_ATLAS_MANIFEST_URL, { cache: "no-cache" });
       if (!response.ok) {
         return null;
       }
@@ -88,4 +90,18 @@ export function mapAtlasRectKeyForPath(path: string): string | null {
     return null;
   }
   return `${match[1]}/${match[2]}#${match[3]}`;
+}
+
+export function mapAtlasPathRequiresAlphaKey(path: string): boolean {
+  try {
+    const normalized = new URL(path, "https://mir2.invalid/").pathname;
+    return (
+      normalized.startsWith("/original-map/") &&
+      /\/(?:objects(?:_32bit|\d*)?|smobjects\d*|furnitures?c?|walls?c?|animations?c?|houses?c?|cliffs?c?|dungeons?c?|inners?c?|object[12]c)\//i.test(
+        normalized,
+      )
+    );
+  } catch {
+    return false;
+  }
 }

@@ -191,11 +191,11 @@ export function attackModeLabel(mode: number): string {
     case 2:
       return "Guild";
     case 3:
-      return "RedOnly";
+      return "EnemyGuild";
     case 4:
-      return "All";
+      return "RedBrown";
     case 5:
-      return "PeaceAttack";
+      return "All";
     default:
       return `Mode ${mode}`;
   }
@@ -207,18 +207,56 @@ export function petModeLabel(mode: number): string {
     case 0:
       return "Both";
     case 1:
-      return "Group";
+      return "MoveOnly";
     case 2:
-      return "Guild";
+      return "AttackOnly";
     case 3:
       return "None";
     case 4:
-      return "AttackOnly";
-    case 5:
-      return "MoveOnly";
+      return "FocusMasterTarget";
     default:
       return `Pet Mode ${mode}`;
   }
+}
+
+export type CrystalModeChatMessage = {
+  localizationKey: string;
+  fallback: string;
+};
+
+/** Mirrors GameScene.ChangeAMode, including the startup mode-sync message. */
+export function attackModeChatMessage(mode: number): CrystalModeChatMessage | null {
+  const messages: CrystalModeChatMessage[] = [
+    { localizationKey: "client.AttackMode_Peace", fallback: "[Mode: Peaceful]" },
+    { localizationKey: "client.AttackMode_Group", fallback: "[Mode: Group]" },
+    { localizationKey: "client.AttackMode_Guild", fallback: "[Mode: Guild]" },
+    { localizationKey: "client.AttackMode_EnemyGuild", fallback: "[Mode: Enemy Guild]" },
+    { localizationKey: "client.AttackMode_RedBrown", fallback: "[Mode: Red/Brown]" },
+    { localizationKey: "client.AttackMode_All", fallback: "[Mode: Attack All]" },
+  ];
+  return Number.isInteger(mode) ? messages[mode] ?? null : null;
+}
+
+/** Mirrors GameScene.ChangePMode, including the startup pet-mode message. */
+export function petModeChatMessage(mode: number): CrystalModeChatMessage | null {
+  const messages: CrystalModeChatMessage[] = [
+    { localizationKey: "client.PetMode_Both", fallback: "[Pet: Attack and Move]" },
+    { localizationKey: "client.PetMode_MoveOnly", fallback: "[Pet: Do Not Attack]" },
+    { localizationKey: "client.PetMode_AttackOnly", fallback: "[Pet: Do Not Move]" },
+    { localizationKey: "client.PetMode_None", fallback: "[Pet: Do Not Attack or Move]" },
+    {
+      localizationKey: "client.PetMode_FocusMasterTarget",
+      fallback: "[Pet: Focus Master Target]",
+    },
+  ];
+  return Number.isInteger(mode) ? messages[mode] ?? null : null;
+}
+
+/** Matches Crystal's `{0:#0.##%}` main-HUD experience label. */
+export function formatCrystalExperiencePercent(ratio: number): string {
+  const safeRatio = Number.isFinite(ratio) ? Math.max(0, ratio) : 0;
+  const percent = (safeRatio * 100).toFixed(2).replace(/\.?0+$/, "");
+  return `${percent}%`;
 }
 
 /** Result-code text for MailSent / ParcelCollected. */

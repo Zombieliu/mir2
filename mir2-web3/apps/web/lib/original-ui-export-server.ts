@@ -10,7 +10,16 @@ import sourceLibraries from "../public/original-ui/source-libraries.generated.js
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
 const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
-const PUBLIC_ORIGINAL_UI_DIR = path.join(WORKSPACE_ROOT, "public", "original-ui");
+// Keep the writable development export cache out of Turbopack's static
+// directory-reference graph. A literal `public/original-ui` join makes Next
+// enumerate tens of thousands of generated PNGs while compiling this API route.
+const ORIGINAL_UI_OUTPUT_RELATIVE = Buffer.from(
+  "cHVibGljL29yaWdpbmFsLXVp",
+  "base64",
+).toString("utf8");
+const PUBLIC_ORIGINAL_UI_DIR = process.env.MIR2_ORIGINAL_UI_OUTPUT_DIR
+  ? path.resolve(process.env.MIR2_ORIGINAL_UI_OUTPUT_DIR)
+  : path.resolve(WORKSPACE_ROOT, ORIGINAL_UI_OUTPUT_RELATIVE);
 const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
 const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -257,7 +266,10 @@ async function readExistingMeta(metaPath: string) {
 
 async function existingFramesArePresent(meta: OriginalUiLibraryMeta) {
   for (const frame of meta.frames) {
-    const filePath = path.join(/* turbopackIgnore: true */ WORKSPACE_ROOT, "public", frame.path);
+    const relativeFramePath = frame.path
+      .replace(/^[/\\]+/, "")
+      .replace(/^original-ui[/\\]/, "");
+    const filePath = path.join(PUBLIC_ORIGINAL_UI_DIR, relativeFramePath);
     try {
       const info = await stat(/* turbopackIgnore: true */ filePath);
       if (!info.isFile() || info.size === 0) {

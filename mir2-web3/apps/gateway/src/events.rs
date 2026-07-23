@@ -101,6 +101,49 @@ pub trait GameplayEventSink: Send + Sync {
 
 pub type SharedGameplayEventSink = Arc<dyn GameplayEventSink>;
 
+#[derive(Clone)]
+pub(crate) struct GatewayGameplayEventPublisher {
+    state: Arc<Mutex<GatewayGameplayEventPublisherState>>,
+}
+
+struct GatewayGameplayEventPublisherState {
+    zone_id: ZoneId,
+    event_sequence: u64,
+    sink: SharedGameplayEventSink,
+}
+
+impl GatewayGameplayEventPublisher {
+    pub(crate) fn new(zone_id: ZoneId, sink: SharedGameplayEventSink) -> Self {
+        Self {
+            state: Arc::new(Mutex::new(GatewayGameplayEventPublisherState {
+                zone_id,
+                event_sequence: 0,
+                sink,
+            })),
+        }
+    }
+
+    pub(crate) fn publish(&self, outcome: &WorldCommandOutcome) {
+        let mut state = self
+            .state
+            .lock()
+            .expect("gameplay event publisher mutex should not be poisoned");
+        state.event_sequence = state.event_sequence.saturating_add(1);
+        let event =
+            GatewayGameplayEvent::from_world_outcome(&state.zone_id, state.event_sequence, outcome);
+        // Keep sequence allocation and sink enqueue in the same critical section so
+        // reader fast-path and session events cannot be reordered.
+        state.sink.publish(event);
+    }
+
+    pub(crate) fn rebind_zone(&self, zone_id: ZoneId) {
+        self.state
+            .lock()
+            .expect("gameplay event publisher mutex should not be poisoned")
+            .zone_id = zone_id;
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct InMemoryGameplayEventSink {
     events: Mutex<Vec<GatewayGameplayEvent>>,
@@ -317,6 +360,7 @@ fn command_kind_label(kind: &WorldCommandKind) -> String {
         WorldCommandKind::DeleteCharacter => "runtime.deleteCharacter".to_string(),
         WorldCommandKind::CastSkill => "runtime.castSkill".to_string(),
         WorldCommandKind::TransferMap => "runtime.transferMap".to_string(),
+        WorldCommandKind::ApplyHandoffTransform => "runtime.applyHandoffTransform".to_string(),
         WorldCommandKind::Stage5Command(action) => format!("stage5.{action}"),
         WorldCommandKind::GrantOnchainOre => "onchain.grantOre".to_string(),
         WorldCommandKind::CreditGoldFromOre => "onchain.creditGold".to_string(),
@@ -477,10 +521,14 @@ fn post_http_json(url: &ParsedHttpUrl, path: &str, body: &str) -> Result<HttpRes
 #[cfg(test)]
 mod tests {
     use super::{
-        publish_redpanda, GatewayGameplayEvent, ParsedHttpUrl, DEFAULT_GAMEPLAY_EVENT_TOPIC,
+        publish_redpanda, GatewayGameplayEvent, GatewayGameplayEventPublisher,
+        InMemoryGameplayEventSink, ParsedHttpUrl, DEFAULT_GAMEPLAY_EVENT_TOPIC,
     };
+    use crate::routing::ZoneId;
+    use mir2_simulation::{WorldCommandKind, WorldCommandOutcome};
     use std::io::{Read, Write};
     use std::net::TcpListener;
+    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
 
@@ -557,6 +605,35 @@ mod tests {
                 clickhouse_schema.contains(&format!("{json_field} AS {table_field}")),
                 "ClickHouse materialized view should project {json_field} into {table_field}"
             );
+        }
+    }
+
+    #[test]
+    fn gameplay_event_publisher_serializes_concurrent_sequences() {
+        let sink = Arc::new(InMemoryGameplayEventSink::default());
+        let publisher = GatewayGameplayEventPublisher::new(ZoneId::primary(), sink.clone());
+        let mut workers = Vec::new();
+        for _ in 0..4 {
+            let publisher = publisher.clone();
+            workers.push(thread::spawn(move || {
+                for _ in 0..25 {
+                    publisher.publish(&WorldCommandOutcome {
+                        command_kind: WorldCommandKind::Tick,
+                        packet_count: 0,
+                        snapshot_tick: 0,
+                        active_identity: None,
+                    });
+                }
+            }));
+        }
+        for worker in workers {
+            worker.join().expect("publisher worker should finish");
+        }
+
+        let events = sink.list();
+        assert_eq!(events.len(), 100);
+        for (index, event) in events.iter().enumerate() {
+            assert_eq!(event.event_id, format!("primary:0:{}", index + 1));
         }
     }
 

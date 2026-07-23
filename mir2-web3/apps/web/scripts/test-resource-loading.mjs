@@ -77,6 +77,7 @@ function buildFakeLib(frameCount) {
 }
 
 const minimapHelperExports = loadTypeScriptModule(new URL("../lib/crystal-minimap-transform.ts", import.meta.url));
+const mapBlendExports = loadTypeScriptModule(new URL("../lib/crystal-map-blend.ts", import.meta.url));
 const minimapTransformExports = loadTypeScriptModule(
   new URL("../lib/generated/crystal-minimap-transforms.ts", import.meta.url),
   { "../crystal-minimap-transform": minimapHelperExports },
@@ -84,6 +85,7 @@ const minimapTransformExports = loadTypeScriptModule(
 const loaderExports = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
   "server-only": {},
   "./crystal-minimap-transform": minimapHelperExports,
+  "./crystal-map-blend": mapBlendExports,
   "./generated/crystal-minimap-transforms": minimapTransformExports,
 });
 const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-cache.ts", import.meta.url), {
@@ -161,7 +163,7 @@ const fullBichonMapDataAvailable =
     height: 34,
   });
   assert.equal(a, b, "same scene chunk and size bucket should share one blueprint cache key");
-  assert.match(a, /2026-05-27-v3-0-cx\d+-cy\d+-w40-h40-/);
+  assert.match(a, /^2026-07-13-v4-map-blend-0-cx\d+-cy\d+-w40-h40-default$/);
 }
 
 {
@@ -263,6 +265,7 @@ const fullBichonMapDataAvailable =
       strictLoader = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
         "server-only": {},
         "./crystal-minimap-transform": minimapHelperExports,
+        "./crystal-map-blend": mapBlendExports,
         "./generated/crystal-minimap-transforms": minimapTransformExports,
       });
     } finally {
@@ -296,6 +299,7 @@ const fullBichonMapDataAvailable =
     strictLoader = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
       "server-only": {},
       "./crystal-minimap-transform": minimapHelperExports,
+      "./crystal-map-blend": mapBlendExports,
       "./generated/crystal-minimap-transforms": minimapTransformExports,
     });
   } finally {

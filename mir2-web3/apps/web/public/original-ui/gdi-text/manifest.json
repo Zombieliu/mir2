@@ -1,0 +1,597 @@
+{
+    "schemaVersion":  1,
+    "generator":  {
+                      "name":  "crystal-gdi-text",
+                      "version":  "1.0.0",
+                      "renderer":  "System.Windows.Forms.TextRenderer",
+                      "sourceBehaviour":  "Crystal Client MirLabel"
+                  },
+    "source":  {
+                   "inputSha256":  "3719cbb9987dcf714a62a6e86053d8239948af980e58e30f4f9f108dd7933679",
+                   "itemCount":  8
+               },
+    "environment":  {
+                        "windowsBuild":  "26200.8875",
+                        "clrVersion":  "4.0.30319.42000",
+                        "processArchitecture":  "X64"
+                    },
+    "font":  {
+                 "requestedFamily":  "Arial",
+                 "resolvedFamily":  "Arial",
+                 "style":  "Regular",
+                 "sizePoints":  8,
+                 "dpi":  96,
+                 "fileName":  "arial.ttf",
+                 "fileSha256":  "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a"
+             },
+    "texture":  {
+                    "pixelFormat":  "Format32bppArgb",
+                    "pngColourModel":  "RGBA",
+                    "graphics":  {
+                                     "smoothingMode":  "AntiAlias",
+                                     "textRenderingHint":  "AntiAliasGridFit",
+                                     "compositingQuality":  "HighQuality",
+                                     "interpolationMode":  "NearestNeighbor",
+                                     "pixelOffsetMode":  "HighQuality",
+                                     "textContrast":  0
+                                 }
+                },
+    "assets":  [
+                   {
+                       "key":  "entity-assistant-jane",
+                       "output":  "images/entity-assistant-jane.png",
+                       "text":  "Assistant Jane",
+                       "foreground":  "#FF00FF00",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "HorizontalCenter"
+                                                    ],
+                                          "value":  1
+                                      },
+                       "size":  {
+                                    "mode":  "fixed",
+                                    "requested":  {
+                                                      "width":  50,
+                                                      "height":  15
+                                                  },
+                                    "measured":  {
+                                                     "width":  79,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  50,
+                                                   "height":  15
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "d7c45ab85fe05802c14ef8602cd804bbe4efe1e87ab065bbaa998a78746d6da6",
+                                    "argb":  "371d7a860eac5dbf1e9224f5f1a28aef5c439e0de443212fcfba457647361d1a"
+                                },
+                       "alpha":  {
+                                     "transparent":  424,
+                                     "translucent":  0,
+                                     "opaque":  326,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "entity-merchant-ruben-multiline",
+                       "output":  "images/entity-merchant-ruben-multiline.png",
+                       "text":  "Merchant\r\nRuben",
+                       "foreground":  "#FF00FF00",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "HorizontalCenter",
+                                                        "WordBreak"
+                                                    ],
+                                          "value":  17
+                                      },
+                       "size":  {
+                                    "mode":  "fixed",
+                                    "requested":  {
+                                                      "width":  54,
+                                                      "height":  32
+                                                  },
+                                    "measured":  {
+                                                     "width":  52,
+                                                     "height":  28
+                                                 },
+                                    "output":  {
+                                                   "width":  54,
+                                                   "height":  32
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "4ef60032c450d5357279aa9be86c74192026a4bdac0bd2b5122631923eb3038c",
+                                    "argb":  "7303abe7661643c26c2ee8454ebb61f20e41e1fd1e27eb75fd0417ce69468c0b"
+                                },
+                       "alpha":  {
+                                     "transparent":  1184,
+                                     "translucent":  0,
+                                     "opaque":  544,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "hud-hp",
+                       "output":  "images/hud-hp.png",
+                       "text":  "HP 51/51",
+                       "foreground":  "#FFFFFFFF",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "WordBreak"
+                                                    ],
+                                          "value":  16
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  50,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  52,
+                                                   "height":  16
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "6853e8d57b6284a6c92c4206422cafb9dd09b228a5a77dfb9db439d7cd05722f",
+                                    "argb":  "c9e632a95606266f4b03fc26a55befd838684695bfc50660aa6eaf6d17f0a56e"
+                                },
+                       "alpha":  {
+                                     "transparent":  550,
+                                     "translucent":  0,
+                                     "opaque":  282,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "minimap-coordinate",
+                       "output":  "images/minimap-coordinate.png",
+                       "text":  "328, 275",
+                       "foreground":  "#FFFFFFFF",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "HorizontalCenter",
+                                                        "VerticalCenter"
+                                                    ],
+                                          "value":  5
+                                      },
+                       "size":  {
+                                    "mode":  "fixed",
+                                    "requested":  {
+                                                      "width":  55,
+                                                      "height":  15
+                                                  },
+                                    "measured":  {
+                                                     "width":  49,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  55,
+                                                   "height":  15
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "81c8ee4b1c342797c7fd966d25124b7dce05350b99a72a0f006773c65f8109c3",
+                                    "argb":  "9d4a68e52e4ba213e67543b1db8b44d02378d611d4b6fb8e6c215cf423fbf303"
+                                },
+                       "alpha":  {
+                                     "transparent":  538,
+                                     "translucent":  0,
+                                     "opaque":  287,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "chat-online-players",
+                       "output":  "images/chat-online-players.png",
+                       "text":  "Online Players: 1",
+                       "foreground":  "#FF006400",
+                       "background":  "#FFFFFFFF",
+                       "outline":  {
+                                       "enabled":  false,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  0
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "WordBreak"
+                                                    ],
+                                          "value":  16
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  88,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  88,
+                                                   "height":  14
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "7cb235bcc90d4e8f2aa587f9434bc1fe12069e7a1b3c0aa4d7dd2bafbad70784",
+                                    "argb":  "9402848704dca7016f48f750f02b85eafd9da0f8c198fecaf3f16ba3d918dbce"
+                                },
+                       "alpha":  {
+                                     "transparent":  0,
+                                     "translucent":  0,
+                                     "opaque":  1232,
+                                     "min":  255,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "chat-line-message-net-8",
+                       "output":  "images/chat-line-message-net-8.png",
+                       "text":  "Now in Net.8",
+                       "foreground":  "#FFFFFFFF",
+                       "background":  "#FF0000FF",
+                       "outline":  {
+                                       "enabled":  false,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  0
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "WordBreak"
+                                                    ],
+                                          "value":  16
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  69,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  69,
+                                                   "height":  14
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "c2676055e09afbbebfa186a8e7828ba3c9dac8ac3075763dcc53de68fb31d028",
+                                    "argb":  "b8bfc57ccac844abe3c9127f2fd8d810474897fe2fd8b69891ecffdec80bf0c5"
+                                },
+                       "alpha":  {
+                                     "transparent":  0,
+                                     "translucent":  0,
+                                     "opaque":  966,
+                                     "min":  255,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "chat-system-error",
+                       "output":  "images/chat-system-error.png",
+                       "text":  "Connection failed.",
+                       "foreground":  "#FFFFFFFF",
+                       "background":  "#FFFF0000",
+                       "outline":  {
+                                       "enabled":  false,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  0
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "WordBreak"
+                                                    ],
+                                          "value":  16
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  93,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  93,
+                                                   "height":  14
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "49e6a15c4a75a63b363cb3e2644d3afbdc2aa82206ef95e5ac99296d8e6c223e",
+                                    "argb":  "af3918930a5fc72afc619e294943a944486c4408175425f45527946bbfc42647"
+                                },
+                       "alpha":  {
+                                     "transparent":  0,
+                                     "translucent":  0,
+                                     "opaque":  1302,
+                                     "min":  255,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "pt-br-accents",
+                       "output":  "images/pt-br-accents.png",
+                       "text":  "Poção, bênção, ação, coração, missão, você",
+                       "foreground":  "#FFFFFF00",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "WordBreak",
+                                                        "NoPrefix"
+                                                    ],
+                                          "value":  2064
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  225,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  227,
+                                                   "height":  16
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "b7cfc452063660b7376099a98e154489828b6934fe5c13ceb579ffe211b3744a",
+                                    "argb":  "e111f01372233ea156f6e1affdb5d1568c6644104c6047302b4d051544825835"
+                                },
+                       "alpha":  {
+                                     "transparent":  2220,
+                                     "translucent":  0,
+                                     "opaque":  1412,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   }
+               ]
+}

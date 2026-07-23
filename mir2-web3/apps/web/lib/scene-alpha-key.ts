@@ -1,9 +1,18 @@
-// Black-key + edge-feather for Mir2 map object sprites (trees/decor/walls).
+// Black-key + edge-feather + dither-shadow resolve for Mir2 map object sprites (trees/decor/walls).
 //
-// The legacy art uses a near-black background as a color key rather than real alpha. We
-// flood-fill from the image borders inward, keying out connected dark pixels and feathering
-// the edge by brightness (solid below SOLID, fully opaque above FEATHER, ramped between).
-// Interior dark pixels are preserved because the fill only reaches background-connected ones.
+// Pass 1 (black key): the legacy art uses a near-black background as a color key rather than
+// real alpha. We flood-fill from the image borders inward, keying out connected dark pixels and
+// feathering the edge by brightness (solid below SOLID, fully opaque above FEATHER, ramped
+// between). Interior dark pixels are preserved because the fill only reaches background-connected
+// ones.
+//
+// Pass 2 (dither shadow): the 8-bit art has no real alpha, so object ground-shadows are baked as
+// a ~50% ordered dither — a checkerboard of near-black opaque texels alternating with transparent
+// ones. The border flood-fill cannot reach those texels (each is ringed by transparency), so on a
+// crisp (image-rendering: pixelated) canvas they show as a hard halftone "screen door" instead of
+// the soft shadow Crystal gets from DirectX texture filtering. Pass 2 detects the checkerboard
+// geometrically and rewrites it to a uniform translucent black. See the inline comment for why
+// this is inert on solid art.
 //
 // `alphaKeyMapObjectPixels` is intentionally SELF-CONTAINED: it is both imported directly on
 // the main thread (the fallback path) AND serialized via `.toString()` into the off-thread
@@ -64,6 +73,66 @@ export function alphaKeyMapObjectPixels(
     enqueue(x - 1, y);
     enqueue(x, y + 1);
     enqueue(x, y - 1);
+  }
+
+  // Pass 2: resolve 1-bit dithered shadows into a uniform translucent shadow.
+  //
+  // Object ground-shadows are a perfect checkerboard: a near-black opaque texel whose four
+  // orthogonal neighbours are ALL transparent (a dither dot), interleaved with transparent
+  // texels whose four neighbours are ALL near-black (a dither gap). We rewrite both to one
+  // translucent black so the region reads as a smooth ~50% shadow rather than hard dots.
+  //
+  // Requiring all four neighbours to share the opposite state (and treating the image edge as
+  // transparent) is what makes this safe on real art: a solid shape's interior/edge texels —
+  // and even 1px-thin dark lines — always keep at least one same-state orthogonal neighbour, so
+  // they never satisfy the all-four test and are left untouched. Classification reads the
+  // post-pass-1 buffer and is applied in a separate loop, so no in-place edit changes a
+  // neighbour's class mid-scan.
+  const SHADOW_TEXEL_MAX_LUMA = 48;
+  const SHADOW_ALPHA = 120;
+  const isShadowTexel = (pixelIndex: number) => {
+    const offset = pixelIndex * 4;
+    return (
+      pixels[offset + 3] !== 0 &&
+      pixels[offset] <= SHADOW_TEXEL_MAX_LUMA &&
+      pixels[offset + 1] <= SHADOW_TEXEL_MAX_LUMA &&
+      pixels[offset + 2] <= SHADOW_TEXEL_MAX_LUMA
+    );
+  };
+  const isClear = (pixelIndex: number) => pixels[pixelIndex * 4 + 3] === 0;
+  const shadowTargets = new Uint8Array(width * height);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const pixelIndex = y * width + x;
+      const upClear = y === 0 || isClear(pixelIndex - width);
+      const downClear = y === height - 1 || isClear(pixelIndex + width);
+      const leftClear = x === 0 || isClear(pixelIndex - 1);
+      const rightClear = x === width - 1 || isClear(pixelIndex + 1);
+      if (isShadowTexel(pixelIndex)) {
+        if (upClear && downClear && leftClear && rightClear) {
+          shadowTargets[pixelIndex] = 1;
+        }
+      } else if (isClear(pixelIndex)) {
+        const upDark = y > 0 && isShadowTexel(pixelIndex - width);
+        const downDark = y < height - 1 && isShadowTexel(pixelIndex + width);
+        const leftDark = x > 0 && isShadowTexel(pixelIndex - 1);
+        const rightDark = x < width - 1 && isShadowTexel(pixelIndex + 1);
+        if (upDark && downDark && leftDark && rightDark) {
+          shadowTargets[pixelIndex] = 1;
+        }
+      }
+    }
+  }
+  for (let pixelIndex = 0; pixelIndex < shadowTargets.length; pixelIndex += 1) {
+    if (!shadowTargets[pixelIndex]) {
+      continue;
+    }
+    const offset = pixelIndex * 4;
+    pixels[offset] = 0;
+    pixels[offset + 1] = 0;
+    pixels[offset + 2] = 0;
+    pixels[offset + 3] = SHADOW_ALPHA;
+    changed += 1;
   }
 
   return changed;

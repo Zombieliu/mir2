@@ -52,6 +52,8 @@ img {
   height: 100vh;
   background: #000;
   --mir-stage-scale: 1;
+  --mir-stage-left: 0px;
+  --mir-stage-top: 0px;
 }
 
 .mir-stage {
@@ -63,13 +65,13 @@ img {
 
 .client-stage-frame {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: var(--mir-stage-left, 0px);
+  top: var(--mir-stage-top, 0px);
   width: 1024px;
   height: 768px;
   overflow: hidden;
-  transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 1));
-  transform-origin: center center;
+  transform: scale(var(--mir-stage-scale, 1));
+  transform-origin: top left;
   background: #000;
   box-shadow: none;
   cursor: var(--mir-cursor-default);
@@ -189,6 +191,18 @@ img {
   image-rendering: pixelated;
 }
 
+.game-world-composite {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.game-world-composite.inactive {
+  visibility: hidden;
+}
+
 .game-scene-backdrop {
   position: absolute;
   inset: 0;
@@ -302,6 +316,7 @@ img {
 .viewport-grid-overlay,
 .viewport-drop-overlay,
 .viewport-sprite-overlay,
+.viewport-effect-overlay,
 .viewport-entity-overlay {
   position: absolute;
   inset: 0;
@@ -324,8 +339,68 @@ img {
 }
 
 .viewport-sprite-overlay {
-  z-index: 5;
+  /* Keep depth-sorted children in the world stacking context so additive
+     sprites blend against the map instead of an isolated transparent layer. */
+  z-index: auto;
   pointer-events: none;
+}
+
+.viewport-effect-overlay {
+  /* The parent must stay pass-through. Each effect receives the imperative
+     camera translation directly so its depth can still clear the GPU canvas. */
+  z-index: auto;
+  pointer-events: none;
+}
+
+.viewport-crystal-light-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 32760;
+  pointer-events: none;
+  isolation: isolate;
+  mix-blend-mode: multiply;
+}
+
+/* Crystal builds an opaque light buffer, adds procedural light textures into it,
+   then multiplies the completed buffer over the world. */
+.viewport-map-light-surface {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.viewport-crystal-light-overlay.night {
+  background: rgb(0, 0, 0);
+}
+
+.viewport-crystal-light-overlay.evening {
+  background: rgb(50, 50, 50);
+}
+
+.viewport-crystal-light-overlay.dawn {
+  background: rgb(50, 50, 50);
+}
+
+.viewport-map-light,
+.viewport-object-light {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  mix-blend-mode: plus-lighter;
+  max-width: none;
+  object-fit: fill;
+}
+
+.viewport-crystal-light-overlay.dawn .viewport-map-light,
+.viewport-crystal-light-overlay.evening .viewport-map-light {
+  /* The rgb(50) Dawn/Evening buffer needs this measured CSS compositing correction; Night does not. */
+  filter: brightness(1.9);
+  transform: translateY(24px);
+}
+
+.viewport-object-light.merchant {
+  color: inherit;
 }
 
 .client-stage-frame.scene-assets-pending .viewport-grid-overlay {
@@ -373,7 +448,7 @@ img {
 }
 
 .viewport-entity-overlay {
-  z-index: 6;
+  z-index: 32761;
   pointer-events: none;
 }
 
@@ -526,28 +601,45 @@ img {
 
 .entity-nameplate {
   position: absolute;
-  transform: translate(-50%, -100%);
+  width: 50px;
+  transform: none;
   min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
   pointer-events: auto;
   display: grid;
-  gap: 1px;
+  gap: 0;
   text-align: center;
   box-shadow: none;
-  text-shadow: 1px 1px 0 #000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-synthesis: none;
+  font-weight: 400;
+  text-shadow:
+    0 -1px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000,
+    0 1px 0 #000;
+}
+
+.entity-nameplate.npc,
+.entity-nameplate.monster {
+  width: 48px;
+}
+
+.entity-nameplate[data-ui-interactive="false"] {
+  pointer-events: none;
 }
 
 .entity-nameplate strong {
-  font-size: 12px;
-  line-height: 1;
+  font-size: 11px;
+  line-height: 12px;
   color: var(--entity-name-color, #ffffff);
   font-weight: 400;
 }
 
 .entity-nameplate strong + strong {
-  margin-top: 1px;
+  margin-top: 0;
 }
 
 .entity-nameplate .entity-subname,
@@ -561,6 +653,9 @@ img {
   z-index: 10;
   width: 1024px;
   height: 768px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-synthesis: none;
+  font-weight: 400;
   pointer-events: none;
 }
 
@@ -1493,7 +1588,7 @@ img {
   left: 618px;
   top: 1px;
   display: grid;
-  grid-template-rows: 8px 30px 8px 8px;
+  grid-template-rows: 8px 30px 6px 8px;
 }
 
 .chat-count-bar {
@@ -1512,19 +1607,25 @@ img {
   left: 1px;
   top: 1px;
   width: 614px;
-  display: grid;
-  grid-auto-rows: 13px;
-  gap: 0;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .chat-feed-line {
+  position: relative;
+  left: 1px;
+  top: 1px;
+  height: 13px;
   min-height: 13px;
+  max-width: 614px;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 11px;
   line-height: 13px;
   color: #000;
   text-shadow: none;
-  background: #fff;
+  background: transparent;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -1554,6 +1655,11 @@ img {
   color: #008000;
 }
 
+.chat-feed-line.channel-line {
+  color: #fff;
+  background: #0000ff;
+}
+
 .chat-feed-line.channel-hint {
   color: #006400;
 }
@@ -1569,6 +1675,11 @@ img {
   background: rgba(72, 72, 72, 0.82);
   color: #101010;
   font-size: 11px;
+}
+
+.chat-textbox[data-chat-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .chat-frame.transparent .chat-frame-bg,
@@ -1635,7 +1746,9 @@ img {
 }
 
 .belt-dialog-overlay {
-  opacity: 0.5;
+  /* Crystal's D3D half-blend path does not source-over this nearly opaque dark
+     frame. CSS opacity did, dimming the six transparent slots by roughly 50%. */
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -1650,6 +1763,7 @@ img {
 .belt-item {
   position: absolute;
   inset: 0;
+  z-index: 2;
   border: 0;
   background: transparent;
   overflow: visible;
@@ -1659,13 +1773,15 @@ img {
 
 .belt-slot-label {
   position: absolute;
+  z-index: 3;
   width: 26px;
   height: 14px;
-  color: #ddcfb3;
+  color: #111;
   font-size: 11px;
   line-height: 14px;
   text-align: center;
-  text-shadow: 1px 1px 0 #000;
+  text-shadow: 1px 1px 0 #d8c8a2;
+  pointer-events: none;
 }
 
 .belt-button {
@@ -3172,6 +3288,12 @@ img {
 .character-tab.stats2 { left: 132px; top: 70px; }
 .character-tab.spells { left: 194px; top: 70px; }
 
+/* Character tabs only overlay their bright sprite while selected (Crystal
+   draws Index = -1 for the others). Pin the clickable hotspot to the Crystal
+   tab size (64x20) so an unselected, img-less tab still switches pages. */
+.character-tab .window-tab-button { width: 64px; height: 20px; }
+.character-tab .window-tab-button img { display: block; }
+
 .inventory-grid,
 .inventory-weight-bar,
 .inventory-gold,
@@ -3296,6 +3418,7 @@ img {
 
 .item-stack-count {
   position: absolute;
+  z-index: 4;
   min-width: 12px;
   color: #ecd5a1;
   font-size: 10px;
@@ -3720,8 +3843,9 @@ img {
 }
 
 .belt-item-count {
-  right: -2px;
-  bottom: -1px;
+  right: 1px;
+  bottom: 1px;
+  color: #ffff00;
 }
 
 .inventory-quest-log {
@@ -3894,11 +4018,12 @@ button.character-spell-value:hover {
 
 .mini-map-panel {
   position: absolute;
-  right: 0;
+  right: -2px;
   top: 0;
   width: 128px;
   height: 154px;
   z-index: 15;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .mini-map-panel.small {
@@ -3925,9 +4050,13 @@ button.character-spell-value:hover {
   height: 18px;
   line-height: 18px;
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   overflow: hidden;
-  text-shadow: 1px 1px 0 #000;
+  text-shadow:
+    0 -1px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000,
+    0 1px 0 #000;
 }
 
 .mini-map-name span {
@@ -3944,9 +4073,15 @@ button.character-spell-value:hover {
   left: 46px;
   top: 131px;
   width: 56px;
+  height: 18px;
+  line-height: 18px;
   text-align: center;
   font-size: 11px;
-  text-shadow: 1px 1px 0 #000;
+  text-shadow:
+    0 -1px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000,
+    0 1px 0 #000;
 }
 
 .mini-map-button {
@@ -4094,6 +4229,8 @@ button.character-spell-value:hover {
 .npc-dialog-panel {
   position: absolute;
   z-index: 16;
+  display: flex;
+  flex-direction: column;
   border: 2px solid #9c8151;
   background: #050403;
   box-shadow:
@@ -4121,15 +4258,17 @@ button.character-spell-value:hover {
   left: 2px;
   top: 0;
   width: 432px;
-  min-height: 228px;
+  /* Size to content: the in-flow flex children (head/body/footer) drive the
+     height, so a sparse "Current Objective" dialog no longer reserves a huge
+     empty black box. A small min-height keeps the chrome from looking cramped. */
+  min-height: 64px;
   padding: 4px;
+  gap: 6px;
 }
 
 .npc-dialog-head {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  right: 4px;
+  position: relative;
+  flex: 0 0 auto;
   height: 24px;
   display: flex;
   align-items: center;
@@ -4158,11 +4297,9 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-body {
-  position: absolute;
-  left: 8px;
-  top: 34px;
-  width: 416px;
-  min-height: 156px;
+  position: relative;
+  flex: 0 1 auto;
+  margin: 0 4px;
   padding: 0;
   color: #fff;
 }
@@ -4172,7 +4309,7 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-links {
-  margin-top: 20px;
+  margin-top: 10px;
   display: grid;
   gap: 0;
   justify-items: start;
@@ -4195,10 +4332,8 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-input-form {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
+  flex: 0 0 auto;
+  margin: 0 4px;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -4220,10 +4355,8 @@ button.character-spell-value:hover {
 }
 
 .npc-dialog-footer {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 4px;
+  flex: 0 0 auto;
+  margin: 0 4px;
   min-height: 18px;
   color: #d8c28c;
 }
@@ -4250,24 +4383,59 @@ button.character-spell-value:hover {
   left: 0;
   top: 616px;
   z-index: 15;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .main-hud {
   position: relative;
+  /* Crystal's captured MainDialog content lands 2px below the shell anchor. */
+  top: 2px;
   width: 1024px;
   height: 152px;
 }
 
 .hud-base,
 .hud-exp-bar,
-.hud-weight-bar,
 .hud-cap {
   position: absolute;
 }
 
 .hud-base { left: 0; top: 0; }
-.hud-exp-bar { left: 9px; top: 143px; }
-.hud-weight-bar { left: 919px; top: 103px; }
+.hud-exp-bar {
+  left: 9px;
+  top: 143px;
+  height: 8px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hud-exp-bar-fill {
+  display: block;
+  width: 1004px;
+  height: 8px;
+  max-width: none;
+}
+.hud-weight-bar {
+  position: absolute;
+  left: 919px;
+  top: 103px;
+  width: 76px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.hud-weight-bar-clip {
+  height: 12px;
+  overflow: hidden;
+}
+
+.hud-weight-bar-fill {
+  display: block;
+  width: 76px;
+  height: 12px;
+  max-width: none;
+}
+
 .hud-cap { display: none; bottom: 0; }
 .hud-cap.left { left: -67px; }
 .hud-cap.right { right: -72px; }
@@ -4285,6 +4453,10 @@ button.character-spell-value:hover {
   left: 0;
 }
 
+.hud-orb-fill.hp-only {
+  width: 100px;
+}
+
 .hud-orb-fill.mp {
   left: 51px;
 }
@@ -4296,7 +4468,7 @@ button.character-spell-value:hover {
 .hud-orb-fill img {
   position: absolute;
   bottom: 0;
-  width: 101px;
+  width: 104px;
   height: 80px;
   max-width: none;
 }
@@ -4321,32 +4493,40 @@ button.character-spell-value:hover {
 .hud-weight-label,
 .hud-space-label {
   position: absolute;
-  text-shadow: 1px 1px 0 #000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-synthesis: none;
+  font-weight: 400;
+  text-shadow:
+    0 -1px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000,
+    0 1px 0 #000;
 }
 
-.hud-top-label { left: 11px; top: 31px; width: 76px; text-align: center; font-size: 12px; white-space: pre; }
-.hud-bottom-label { left: 11px; top: 61px; width: 76px; text-align: center; font-size: 12px; white-space: pre; }
-.hud-health-only-label { left: 3px; top: 56px; width: 94px; text-align: center; font-size: 12px; color: #fff; }
-.hud-level-label { left: 6px; top: 108px; font-size: 12px; }
-.hud-name-label { left: 6px; top: 121px; width: 90px; text-align: center; font-size: 12px; }
+.hud-top-label { left: 11px; top: 31px; width: 76px; text-align: center; white-space: pre; }
+.hud-bottom-label { left: 11px; top: 61px; width: 76px; text-align: center; white-space: pre; }
+.hud-health-only-label { left: 3px; top: 56px; width: 94px; text-align: center; color: #fff; }
+.hud-level-label { left: 6px; top: 108px; }
+.hud-name-label { left: 6px; top: 121px; width: 90px; text-align: center; }
 .hud-map-label { left: 394px; top: 111px; width: 260px; text-align: center; font-size: 11px; color: #cfbb95; }
 .hud-buff-label { left: 356px; top: 94px; width: 336px; text-align: center; font-size: 10px; color: #8ff0af; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.hud-exp-label { left: 492px; top: 133px; width: 60px; text-align: center; font-size: 11px; color: #ddc99c; }
-.hud-gold-label { display: none; }
-.hud-weight-label { left: 930px; top: 119px; width: 56px; text-align: right; font-size: 12px; }
-.hud-space-label { left: 992px; top: 119px; width: 24px; text-align: right; font-size: 12px; }
+.hud-exp-label { left: 492px; top: 133px; font-size: 11px; color: #ddc99c; white-space: nowrap; }
+.hud-gold-label { left: 919px; top: 119px; width: 99px; height: 13px; }
+.hud-weight-label { left: 919px; top: 101px; width: 40px; height: 14px; }
+.hud-space-label { left: 994px; top: 101px; width: 26px; height: 14px; }
 
 .hud-button {
   position: absolute;
 }
 
-.hud-button.shop { left: 918px; top: 35px; }
-.hud-button.menu { left: 968px; top: 35px; }
-.hud-button.character { left: 904px; top: 76px; }
-.hud-button.inventory { left: 927px; top: 76px; }
-.hud-button.skill { left: 950px; top: 76px; }
-.hud-button.quest { left: 973px; top: 76px; }
-.hud-button.option { left: 996px; top: 76px; }
+.hud-button.shop { left: 919px; top: 35px; }
+.hud-button.menu { left: 969px; top: 35px; }
+.hud-button.character { left: 905px; top: 76px; }
+.hud-button.inventory { left: 928px; top: 76px; }
+.hud-button.skill { left: 951px; top: 76px; }
+.hud-button.quest { left: 974px; top: 76px; }
+.hud-button.option { left: 997px; top: 76px; }
 
 .mir-mobile-controls,
 .mir-mobile-rotate-overlay {
@@ -4585,7 +4765,7 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.78));
+    transform: scale(var(--mir-stage-scale, 0.78));
   }
 
   .mail-row-message,
@@ -4608,13 +4788,13 @@ button.character-spell-value:hover {
 
 @media (max-width: 799px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.72));
+    transform: scale(var(--mir-stage-scale, 0.72));
   }
 }
 
 @media (max-height: 575px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.7));
+    transform: scale(var(--mir-stage-scale, 0.7));
   }
 }
 
@@ -4629,13 +4809,13 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
+    transform: scale(var(--mir-stage-scale, 0.54));
   }
 }
 
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 420px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.49));
+    transform: scale(var(--mir-stage-scale, 0.49));
   }
 
   .mir-mobile-stick-shell {
@@ -4719,7 +4899,7 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.42));
+    transform: scale(var(--mir-stage-scale, 0.42));
     opacity: 0.58;
   }
 }
@@ -4729,7 +4909,7 @@ button.character-spell-value:hover {
 }
 
 .mir-client-page.force-mobile-controls .client-stage-frame {
-  transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
+  transform: scale(var(--mir-stage-scale, 0.54));
 }
 
 .debug-snapshot-toast {
@@ -4763,6 +4943,51 @@ button.character-spell-value:hover {
 
 .debug-snapshot-toast.failed {
   border-color: rgba(238, 104, 104, 0.9);
+}
+
+.crystal-gdi-text {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  overflow: visible;
+  color: transparent;
+  line-height: 0;
+  text-shadow: none;
+  vertical-align: top;
+}
+
+.crystal-gdi-text > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  max-width: none;
+  image-rendering: auto;
+  pointer-events: none;
+}
+
+.crystal-gdi-text-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.entity-nameplate > .entity-nameplate-gdi {
+  justify-self: center;
+}
+
+.chat-feed-line > .crystal-gdi-text,
+.mini-map-coords > .crystal-gdi-text,
+.hud-health-only-label > .crystal-gdi-text {
+  display: block;
+}
+
+.mini-map-coords > .crystal-gdi-text {
+  margin: 1px auto 0;
 }
 
 @media (orientation: portrait) and (max-width: 900px) {

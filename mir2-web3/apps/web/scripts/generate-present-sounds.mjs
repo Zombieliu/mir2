@@ -5,10 +5,10 @@
 // public/original-ui/Sound, because the full set was not yet uploaded anywhere — resolving
 // against that tiny set turned every other id into a clean "missing" result so the client never
 // fired a doomed request. That guard is now obsolete: the full Crystal sound library (the 320
-// distinct .wav files the 450 SoundList ids reference) is published to R2 and served at
-// /original-ui/Sound/... exactly like every other original asset, which is NOT committed to git
-// either. Gating playback on local-disk presence therefore silenced ~316 sounds that are in fact
-// available in production.
+// distinct .wav files the 450 SoundList ids reference) belongs to the external/private asset
+// release and is served at /original-ui/Sound/... when that release is configured. It is not
+// committed to Git. Gating playback on local-disk presence would therefore silence release
+// sounds even when their remote bytes are available.
 //
 // The present set is now the union of:
 //   1. any .wav actually committed under public/original-ui/Sound (so a local checkout stays
@@ -17,9 +17,9 @@
 //      (public/original-ui/sound-index.generated.json) with sourceExists + a public path — that
 //      index is generated against the full client export and is the source of truth for what the
 //      release publishes.
-// In production both resolve from R2; in a bytes-less local dev checkout the request 404s and the
-// audio layer degrades gracefully (same as every other R2-served asset), which is acceptable and
-// far better than hard-silencing the whole library.
+// With an external release both resolve remotely; in a bytes-limited local checkout the request
+// can 404 and the audio layer degrades gracefully. A strict local audio release check remains
+// available through MIR2_REQUIRE_LOCAL_SOUND_CLOSURE=1 in preflight-asset-release.mjs.
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

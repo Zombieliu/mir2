@@ -86,6 +86,7 @@ pub(super) struct MonsterPoisonState {
     pub(super) green_damage: i32,
     pub(super) next_damage_tick: u64,
     pub(super) expires_at_tick: u64,
+    pub(super) player_owned: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

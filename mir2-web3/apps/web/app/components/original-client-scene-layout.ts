@@ -31,7 +31,11 @@ export type SceneBackdropTile = {
 export type ViewportMapSprite = {
   key: string;
   path: string;
+  // All source frames for the visible map animation. The standalone renderer
+  // uses this to make additive-family handoff to Bevy atomic.
+  animationFramePaths?: string[];
   kind: "back" | "middle" | "front" | "tileAnimation";
+  blendMode?: "normal" | "additive";
   cellX: number;
   cellY: number;
   left: number;
@@ -63,6 +67,8 @@ export const EMPTY_VIEWPORT_OFFSET: ViewportOffset = {
 
 const VIEWPORT_ROW_Z_STRIDE = 128;
 const VIEWPORT_BASE_Z = 4096;
+const VIEWPORT_FLOOR_LAYER_Z_STRIDE = 256;
+const VIEWPORT_FLOOR_ROW_Z_STRIDE = 4;
 
 export function ratio(value?: number, max?: number) {
   if (value === undefined || max === undefined || max <= 0) {
@@ -79,6 +85,21 @@ export function viewportDepthForCell(
   layerOffset = 0,
 ) {
   return VIEWPORT_BASE_Z + (y - player.y) * VIEWPORT_ROW_Z_STRIDE + (x - player.x) * 2 + layerOffset;
+}
+
+export function viewportFloorDepthForCell(
+  x: number,
+  y: number,
+  player: Pick<DisplayEntity, "x" | "y">,
+  layerOrder: number,
+) {
+  const localRow = y - player.y + VIEWPORT_RANGE_Y;
+  const localColumn = x - player.x + VIEWPORT_RANGE_X;
+  return (
+    layerOrder * VIEWPORT_FLOOR_LAYER_Z_STRIDE +
+    localRow * VIEWPORT_FLOOR_ROW_Z_STRIDE +
+    localColumn * 0.01
+  );
 }
 
 export function argbToCssColor(value: number | undefined) {

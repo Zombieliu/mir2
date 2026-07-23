@@ -13,7 +13,7 @@ run() {
 
 run_web_typecheck() {
   if [ -x apps/web/node_modules/.bin/tsc ]; then
-    run apps/web/node_modules/.bin/tsc --noEmit --project apps/web/tsconfig.json
+    run npm run typecheck --prefix apps/web
   else
     printf '\n==> skip player web typecheck (apps/web/node_modules/.bin/tsc is missing)\n'
   fi
