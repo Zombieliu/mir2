@@ -830,6 +830,7 @@ mod tests {
             expires_at_ms: 5_000,
             workload: CapacityWorkload {
                 concurrent_sessions: 64,
+                max_sessions_per_zone: 16,
                 zone_count: 4,
                 command_count: 100,
                 maximum_p95_latency_ms: 50,
@@ -932,11 +933,13 @@ mod tests {
             endpoint: "127.0.0.1:7300".to_string(),
             failure_domain: "az-a".to_string(),
             max_sessions: 100,
+            max_sessions_per_zone: 20,
             max_zones: 10,
             weight: 100,
         };
         let heartbeat = ZoneHostHeartbeat {
             session_count: 0,
+            busiest_zone_session_count: 0,
             active_connections: 0,
             observed_at_ms: 10,
         };

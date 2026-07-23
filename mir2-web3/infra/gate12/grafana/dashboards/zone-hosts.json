@@ -35,7 +35,7 @@
       "type": "timeseries",
       "title": "RPC Request Rate",
       "id": 5,
-      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+      "gridPos": {"h": 9, "w": 8, "x": 0, "y": 8},
       "targets": [
         {
           "expr": "rate(obelisk_zone_host_rpc_requests_total[1m])",
@@ -48,10 +48,23 @@
       "type": "timeseries",
       "title": "Session Utilization",
       "id": 6,
-      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8},
+      "gridPos": {"h": 9, "w": 8, "x": 8, "y": 8},
       "targets": [
         {
           "expr": "obelisk_zone_host_sessions / obelisk_zone_host_session_capacity",
+          "legendFormat": "{{host_id}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Busiest Zone Utilization",
+      "id": 7,
+      "gridPos": {"h": 9, "w": 8, "x": 16, "y": 8},
+      "targets": [
+        {
+          "expr": "obelisk_zone_host_busiest_zone_sessions / obelisk_zone_host_session_capacity_per_zone",
           "legendFormat": "{{host_id}}",
           "refId": "A"
         }

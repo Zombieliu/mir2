@@ -36,6 +36,7 @@ struct Gate13AcceptanceEvidence {
     capacity_challenge_id: String,
     capacity_completed_commands: u64,
     capacity_p95_latency_ms: u64,
+    capacity_max_sessions_per_zone: usize,
     capacity_certificate_id: String,
     capacity_certificate_issuer: String,
     capacity_certificate_expires_at_ms: u64,
@@ -83,6 +84,7 @@ fn run() -> Result<(), String> {
         expires_at_ms: issued_at_ms.saturating_add(30_000),
         workload: CapacityWorkload {
             concurrent_sessions: registration.max_sessions.min(16),
+            max_sessions_per_zone: registration.max_sessions.min(4),
             zone_count: registration.max_zones.min(4),
             command_count: 2_000,
             maximum_p95_latency_ms: 100,
@@ -204,6 +206,7 @@ fn run() -> Result<(), String> {
         capacity_challenge_id: response.challenge.challenge_id,
         capacity_completed_commands: response.completed_commands,
         capacity_p95_latency_ms: response.p95_latency_ms,
+        capacity_max_sessions_per_zone: certificate.max_sessions_per_zone,
         capacity_certificate_id: certificate.certificate_id,
         capacity_certificate_issuer: certificate.issuer_public_key,
         capacity_certificate_expires_at_ms: certificate.expires_at_ms,
