@@ -19,6 +19,8 @@ type ZoneHostHealth = {
   sessionCount: number;
   activeConnections: number;
   sessionCapacity: number;
+  sessionCapacityPerZone: number;
+  busiestZoneSessionCount: number;
   zoneCount: number;
   zoneCapacity: number;
   draining: boolean;
@@ -48,6 +50,8 @@ type ZoneHostHeartbeat = {
     protocolVersion: number;
     sessionCount: number;
     sessionCapacity: number;
+    sessionCapacityPerZone: number;
+    busiestZoneSessionCount: number;
     zoneCount: number;
     zoneCapacity: number;
     activeConnections: number;
@@ -71,6 +75,8 @@ export type DubheNodeRecord = {
   protocolVersion?: number;
   sessions: number;
   sessionCapacity: number;
+  sessionCapacityPerZone?: number;
+  busiestZoneSessionCount?: number;
   zones: number;
   zoneCapacity: number;
   activeConnections: number;
@@ -112,6 +118,7 @@ export type DubheNodeConsoleSnapshot = {
   };
   capacity: {
     completedCommands: number;
+    maxSessionsPerZone: number;
     p95LatencyMs: number;
     certificateId: string;
     certificateExpiresAtMs: number;
@@ -189,6 +196,7 @@ export async function readDubheNodeConsole(): Promise<DubheNodeConsoleSnapshot> 
     },
     capacity: {
       completedCommands: acceptanceEvidence.capacityCompletedCommands,
+      maxSessionsPerZone: acceptanceEvidence.capacityMaxSessionsPerZone,
       p95LatencyMs: acceptanceEvidence.capacityP95LatencyMs,
       certificateId: acceptanceEvidence.capacityCertificateId,
       certificateExpiresAtMs: acceptanceEvidence.capacityCertificateExpiresAtMs,
@@ -274,6 +282,14 @@ function recordFromProbe(probe: OperatorProbe & { telemetry: ZoneHostTelemetry }
     protocolVersion: health.protocolVersion,
     sessions: health.sessionCount,
     sessionCapacity: health.sessionCapacity,
+    sessionCapacityPerZone:
+      probe.heartbeatVerified && heartbeat
+        ? heartbeat.sessionCapacityPerZone
+        : health.sessionCapacityPerZone,
+    busiestZoneSessionCount:
+      probe.heartbeatVerified && heartbeat
+        ? heartbeat.busiestZoneSessionCount
+        : health.busiestZoneSessionCount,
     zones: health.zoneCount,
     zoneCapacity: health.zoneCapacity,
     activeConnections: health.activeConnections,
@@ -326,7 +342,17 @@ function verifyHeartbeat(heartbeat: ZoneHostHeartbeat) {
   try {
     if (
       heartbeat.signatureAlgorithm !== "ed25519-zip215" ||
-      heartbeat.payload.keyGeneration <= 0
+      heartbeat.payload.schema !== "obelisk.zone-host-heartbeat.v2" ||
+      heartbeat.payload.keyGeneration <= 0 ||
+      heartbeat.payload.sessionCapacity <= 0 ||
+      heartbeat.payload.sessionCapacityPerZone <= 0 ||
+      heartbeat.payload.sessionCapacityPerZone > heartbeat.payload.sessionCapacity ||
+      heartbeat.payload.sessionCount > heartbeat.payload.sessionCapacity ||
+      heartbeat.payload.busiestZoneSessionCount >
+        heartbeat.payload.sessionCapacityPerZone ||
+      heartbeat.payload.busiestZoneSessionCount > heartbeat.payload.sessionCount ||
+      heartbeat.payload.zoneCapacity <= 0 ||
+      heartbeat.payload.zoneCount > heartbeat.payload.zoneCapacity
     ) {
       return false;
     }

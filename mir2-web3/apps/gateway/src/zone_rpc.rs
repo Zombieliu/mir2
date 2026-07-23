@@ -28,10 +28,11 @@ use crate::routing::{
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 5;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 6;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
+pub const DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
 pub const ZONE_HOST_CHECKPOINT_VERSION: u32 = 4;
@@ -46,6 +47,7 @@ pub struct ZoneRpcLimits {
     pub max_frame_bytes: usize,
     pub max_connections: usize,
     pub max_sessions: usize,
+    pub max_sessions_per_zone: usize,
     pub max_outbound_messages: usize,
     pub outbound_poll_limit: usize,
     pub io_timeout: Duration,
@@ -57,6 +59,7 @@ impl Default for ZoneRpcLimits {
             max_frame_bytes: DEFAULT_ZONE_RPC_MAX_FRAME_BYTES,
             max_connections: DEFAULT_ZONE_RPC_MAX_CONNECTIONS,
             max_sessions: DEFAULT_ZONE_RPC_MAX_SESSIONS,
+            max_sessions_per_zone: DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE,
             max_outbound_messages: DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES,
             outbound_poll_limit: DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT,
             io_timeout: Duration::from_secs(5),
@@ -67,13 +70,18 @@ impl Default for ZoneRpcLimits {
 impl ZoneRpcLimits {
     pub fn from_env() -> Self {
         let defaults = Self::default();
+        let max_sessions =
+            positive_usize_env("MIR2_ZONE_HOST_MAX_SESSIONS").unwrap_or(defaults.max_sessions);
+        let max_sessions_per_zone = positive_usize_env("MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE")
+            .unwrap_or(max_sessions)
+            .min(max_sessions);
         Self {
             max_frame_bytes: positive_usize_env("MIR2_ZONE_RPC_MAX_FRAME_BYTES")
                 .unwrap_or(defaults.max_frame_bytes),
             max_connections: positive_usize_env("MIR2_ZONE_HOST_MAX_CONNECTIONS")
                 .unwrap_or(defaults.max_connections),
-            max_sessions: positive_usize_env("MIR2_ZONE_HOST_MAX_SESSIONS")
-                .unwrap_or(defaults.max_sessions),
+            max_sessions,
+            max_sessions_per_zone,
             max_outbound_messages: positive_usize_env("MIR2_ZONE_RPC_MAX_OUTBOUND_MESSAGES")
                 .unwrap_or(defaults.max_outbound_messages),
             outbound_poll_limit: positive_usize_env("MIR2_ZONE_RPC_OUTBOUND_POLL_LIMIT")
@@ -94,6 +102,8 @@ pub struct ZoneHostHealth {
     pub session_count: usize,
     pub active_connections: usize,
     pub session_capacity: usize,
+    pub session_capacity_per_zone: usize,
+    pub busiest_zone_session_count: usize,
     pub zone_count: usize,
     pub zone_capacity: usize,
     pub draining: bool,
@@ -301,6 +311,8 @@ impl TcpZoneOwnerRpcTransport {
                 session_count,
                 active_connections,
                 session_capacity,
+                session_capacity_per_zone,
+                busiest_zone_session_count,
                 zone_count,
                 zone_capacity,
                 draining,
@@ -311,6 +323,8 @@ impl TcpZoneOwnerRpcTransport {
                 session_count,
                 active_connections,
                 session_capacity,
+                session_capacity_per_zone,
+                busiest_zone_session_count,
                 zone_count,
                 zone_capacity,
                 draining,
@@ -908,6 +922,8 @@ impl ZoneHostServer {
             session_count: self.session_count(),
             active_connections: self.active_connections.load(Ordering::Acquire),
             session_capacity: self.limits.max_sessions,
+            session_capacity_per_zone: self.limits.max_sessions_per_zone,
+            busiest_zone_session_count: self.busiest_zone_session_count(),
             zone_count: self.zone_count(),
             zone_capacity: self.zone_capacity,
             draining: self.is_draining(),
@@ -942,6 +958,19 @@ impl ZoneHostServer {
                     .map(|(_, zone_id)| zone_id.as_str())
                     .collect::<std::collections::BTreeSet<_>>()
                     .len()
+            })
+            .unwrap_or(0)
+    }
+
+    pub fn busiest_zone_session_count(&self) -> usize {
+        self.sessions
+            .lock()
+            .map(|sessions| {
+                let mut counts = BTreeMap::<&str, usize>::new();
+                for (_, zone_id) in sessions.keys() {
+                    *counts.entry(zone_id.as_str()).or_default() += 1;
+                }
+                counts.into_values().max().unwrap_or(0)
             })
             .unwrap_or(0)
     }
@@ -1050,6 +1079,8 @@ impl ZoneHostServer {
                 session_count: health.session_count,
                 active_connections: health.active_connections,
                 session_capacity: health.session_capacity,
+                session_capacity_per_zone: health.session_capacity_per_zone,
+                busiest_zone_session_count: health.busiest_zone_session_count,
                 zone_count: health.zone_count,
                 zone_capacity: health.zone_capacity,
                 draining: health.draining,
@@ -1248,6 +1279,19 @@ impl ZoneHostServer {
                 format!(
                     "zone host session capacity {} reached",
                     self.limits.max_sessions
+                ),
+            ));
+        }
+        let zone_session_count = sessions
+            .keys()
+            .filter(|(_, existing)| existing == zone_id)
+            .count();
+        if zone_session_count >= self.limits.max_sessions_per_zone {
+            return Err(ZoneRpcFault::new(
+                "capacity",
+                format!(
+                    "Zone {zone_id} session capacity {} reached",
+                    self.limits.max_sessions_per_zone
                 ),
             ));
         }
@@ -1590,6 +1634,8 @@ enum ZoneRpcPayload {
         session_count: usize,
         active_connections: usize,
         session_capacity: usize,
+        session_capacity_per_zone: usize,
+        busiest_zone_session_count: usize,
         zone_count: usize,
         zone_capacity: usize,
         draining: bool,

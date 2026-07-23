@@ -85,7 +85,8 @@ commits:
 - schema, node id, advertised RPC endpoint, and failure domain;
 - observation timestamp and monotonic process-local sequence;
 - process/protocol versions;
-- current session/Zone counts and capacities;
+- current session/Zone counts, global capacity, per-Zone session capacity, and
+  the busiest Zone count;
 - active connections and draining state.
 
 Consumers reject a public key that does not derive the advertised stable node
@@ -107,6 +108,7 @@ identifiers are deliberately absent.
 - a scrape target being down;
 - a node remaining in draining state;
 - session capacity exceeding 85%;
+- busiest-Zone session capacity exceeding 85%;
 - repeated Zone RPC errors.
 
 These are operator signals, not reward evidence. Rewards must continue to use

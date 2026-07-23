@@ -330,6 +330,7 @@ fn run_capacity_challenge(address: &str, node_id: &str) -> Result<bool, String> 
         expires_at_ms: issued_at_ms.saturating_add(30_000),
         workload: CapacityWorkload {
             concurrent_sessions: 4,
+            max_sessions_per_zone: 2,
             zone_count: 2,
             command_count: 1_000,
             maximum_p95_latency_ms: 100,

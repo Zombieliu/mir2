@@ -44,6 +44,7 @@ const copy = {
     verified: "Verified",
     notVerified: "Not verified",
     sessionsLabel: "Sessions",
+    busiestZoneLabel: "Busiest Zone",
     zonesLabel: "Zones",
     rpc: "RPC requests",
     errors: "Errors",
@@ -121,6 +122,7 @@ const copy = {
     verified: "签名已验证",
     notVerified: "未验证",
     sessionsLabel: "会话",
+    busiestZoneLabel: "最拥挤 Zone",
     zonesLabel: "Zone",
     rpc: "RPC 请求",
     errors: "错误",
@@ -416,7 +418,7 @@ export function DubheNodeConsole({
             </div>
             <div className="dubhe-evidence-grid">
               <Evidence
-                detail={`${snapshot.capacity.p95LatencyMs}ms ${labels.latency}`}
+                detail={`${snapshot.capacity.maxSessionsPerZone}/Zone · ${snapshot.capacity.p95LatencyMs}ms ${labels.latency}`}
                 label={labels.capacityRun}
                 value={snapshot.capacity.completedCommands.toLocaleString()}
               />
@@ -591,6 +593,14 @@ function NodeCard({
           max={node.sessionCapacity}
           value={node.sessions}
         />
+        {node.sessionCapacityPerZone !== undefined &&
+        node.busiestZoneSessionCount !== undefined ? (
+          <CapacityBar
+            label={labels.busiestZoneLabel}
+            max={node.sessionCapacityPerZone}
+            value={node.busiestZoneSessionCount}
+          />
+        ) : null}
         <CapacityBar label={labels.zonesLabel} max={node.zoneCapacity} value={node.zones} />
       </div>
 

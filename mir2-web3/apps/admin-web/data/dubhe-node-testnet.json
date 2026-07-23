@@ -27,12 +27,13 @@
     "checkpoint": 363531316
   },
   "acceptance": {
-    "generatedAtMs": 1784818088508,
+    "generatedAtMs": 1784835070089,
     "capacityCompletedCommands": 2000,
     "capacityP95LatencyMs": 1,
-    "capacityCertificateId": "a83ea5ccc3dd7abcf0ac61ba54632f9d53d69da9a9d754e299ed579405a63e9c",
+    "capacityMaxSessionsPerZone": 4,
+    "capacityCertificateId": "24d837314f4b9021448a114a904d58ca7cac6b5c3b74ae2500dc13029e67940f",
     "capacityCertificateIssuer": "Jk1nYVMYs_pb_nnnZ5e2veL_XKrHIP-e3i8_Y6qrk2M",
-    "capacityCertificateExpiresAtMs": 1784821688508,
+    "capacityCertificateExpiresAtMs": 1784838670088,
     "commonwareQuorum": 3,
     "commonwareFinalizedHeight": 3,
     "membershipEligible": true,
