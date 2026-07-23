@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> Latest timed system-chat server parity note: 2026-07-23 models Crystal's
+> process-wide `Online Players` and `LineMessage` cadence in Gateway rather than
+> synthesizing fixed browser text. TCP and WebSocket players share one online
+> count, register only after StartGame reaches an active Zone, and unregister on
+> every world/socket exit path. The scheduler emits Hint at five-minute and
+> LineMessage at ten-minute production intervals, reads the original line file
+> when present, and uses deterministic tests for ordering and lifecycle. QA-only
+> interval/fixed-line/packet-limit overrides fail closed without a configured
+> control token. Five focused tests and the full Gateway 307/307 regression pass.
+> This is presentation/system-message
+> parity only; it does not bypass the existing authenticated Session and shared
+> Zone command boundaries.
+
 > Latest monster defence-type parity note: 2026-07-22 follows the original
 > ShamanZombie and WaterDragon server classes instead of inferring every defence
 > channel from range. AI 26 uses `MACAgility` even beside the player; AI 181 uses
@@ -1784,3 +1797,14 @@ The Rust backend is considered "done" only when these areas are functionally ali
 ## Working Rule
 
 When behaviour differs, Crystal is the source of truth. Rust structure does not need to mirror Crystal classes, but gameplay results and packet-visible state eventually must.
+
+## 2026-07-23 Snapshot/Light Parity Note
+
+Crystal monster `AI` now survives the full simulation snapshot -> shared zone
+merge -> `ObjectMonster` observer-seed path instead of falling back to zero.
+This fixes packet-visible minimap disposition for AI 6 guards without changing
+authoritative monster movement or combat. A server-only fixed light setting
+(`MIR2_SIMULATION_FIXED_LIGHT_SETTING=1..4`) was added for deterministic QA;
+normal servers continue to use the Crystal UTC time-of-day formula when the
+override is absent or invalid. Focused AI/light regressions and locked
+Simulation/Gateway checks pass.

@@ -105,6 +105,18 @@ const lightBlock = globalCss.slice(lightBlockStart, lightBlockEnd);
 assert.match(lightBlock, /mix-blend-mode:\s*plus-lighter/);
 assert.doesNotMatch(lightBlock, /radial-gradient/);
 
+const mapLightBlockStart = globalCss.indexOf(
+  ".viewport-crystal-light-overlay.dawn .viewport-map-light,\n" +
+    ".viewport-crystal-light-overlay.evening .viewport-map-light {",
+);
+assert.notEqual(mapLightBlockStart, -1, "map light calibration CSS block must exist");
+const mapLightBlockEnd = globalCss.indexOf("\n}", mapLightBlockStart);
+assert.notEqual(mapLightBlockEnd, -1, "map light calibration CSS block must close");
+const mapLightBlock = globalCss.slice(mapLightBlockStart, mapLightBlockEnd);
+assert.match(mapLightBlock, /filter:\s*brightness\(1\.9\)/);
+assert.match(mapLightBlock, /transform:\s*translateY\(24px\)/);
+assert.doesNotMatch(mapLightBlock, /\.night/);
+
 const expectedTextureSizes = [
   [205, 156],
   [285, 217],

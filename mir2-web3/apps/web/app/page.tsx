@@ -30,6 +30,10 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import {
+  CrystalChatType,
+  type CrystalChatType as CrystalChatTypeValue,
+} from "../lib/crystal-chat-history";
+import {
   installDebugCapture,
   recordDebugEvent,
   setSnapshotContext,
@@ -194,6 +198,8 @@ type RuntimeModule = {
   getMir2RendererBackend?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
   setMir2EntityRenderState?: (snapshotJson: string) => void;
+  resolveMir2EntityAnimationPoses?: (snapshotJson: string) => string;
+  resetMir2EntityAnimations?: () => void;
   setMir2EntityRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
   setMir2MapRenderState?: (snapshotJson: string) => void;
   setMir2MapRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
@@ -259,6 +265,7 @@ type UiLogLine = {
   text: string;
   tone: UiLogTone;
   channel: UiLogChannel;
+  crystalChatType?: number;
 };
 
 type CrystalBootstrapChatLine = {
@@ -318,6 +325,7 @@ type GatewayWorldEntity = {
   kind: EntityKind;
   name: string;
   ownerName?: string | null;
+  ai?: number | null;
   x: number;
   y: number;
   direction: string;
@@ -336,6 +344,12 @@ type GatewayWorldEntity = {
   showOnBigMap?: boolean | null;
   canTeleportTo?: boolean | null;
 };
+
+type PendingGatewayProtocolAction =
+  | { kind: "bootstrap" }
+  | { kind: "newAccount" }
+  | { kind: "passwordLogin" }
+  | { kind: "suiLogin"; login: SuiLoginToken };
 
 type GatewayGroundDrop = {
   objectId: number;
@@ -534,6 +548,7 @@ type WorldEntity = {
   kind: EntityKind;
   name: string;
   ownerName?: string;
+  ai?: number;
   x: number;
   y: number;
   direction?: string;
@@ -1643,9 +1658,8 @@ export default function HomePage() {
   // the flash inline (e.g. markPlayerStruck) leave this false, so the bus flash still works.
   const suppressStruckFlashRef = useRef(false);
   const screenRef = useRef<ClientScreen>("login");
-  const pendingLoginRef = useRef(false);
-  const pendingNewAccountRef = useRef(false);
-  const pendingSuiLoginRef = useRef<SuiLoginToken | null>(null);
+  const gatewayProtocolReadyRef = useRef(false);
+  const pendingGatewayProtocolActionRef = useRef<PendingGatewayProtocolAction | null>(null);
   const lastRankingRequestRef = useRef<RankingRequestState>({
     rankType: 0,
     rankIndex: 0,
@@ -4699,14 +4713,15 @@ export default function HomePage() {
     text: string,
     tone: UiLogTone = "system",
     channel: UiLogChannel = defaultLogChannel(tone),
+    crystalChatType: CrystalChatTypeValue = crystalChatTypeForUiLog(tone, channel),
   ) {
     if (tone === "network") return;
 
     setLogs((current) =>
       [
-        createLogLine(text, tone, channel, locale),
+        createLogLine(text, tone, channel, crystalChatType),
         ...current,
-      ].slice(0, 24),
+      ].slice(0, 2048),
     );
   }
 
@@ -4723,10 +4738,10 @@ export default function HomePage() {
     setLogs((current) => {
       const seeded = [...overrideLines]
         .reverse()
-        .map((line) => createLogLine(line.text, line.tone, line.channel, locale));
+        .map((line) => createLogLine(line.text, line.tone, line.channel));
       // Capture-only parity mode: the URL parameter is a snapshot of Crystal's
       // visible chat slots, so mixing in startup packets creates false diffs.
-      return seeded.slice(0, 24);
+      return seeded.slice(0, 2048);
     });
   }
 
@@ -4994,6 +5009,7 @@ export default function HomePage() {
           language: Mir2Language;
           accountId: string;
           wsState: string;
+          gatewayProtocolReady: boolean;
           reconnectStatus: ReconnectStatus;
           loginBusy: boolean;
           selectedCharacterIndex: number;
@@ -5089,6 +5105,9 @@ export default function HomePage() {
         language,
         accountId,
         wsState,
+        get gatewayProtocolReady() {
+          return gatewayProtocolReadyRef.current;
+        },
         reconnectStatus,
         loginBusy,
         selectedCharacterIndex,
@@ -5393,9 +5412,49 @@ export default function HomePage() {
     };
   }, []);
 
+  function flushGatewayProtocolQueue() {
+    send({ type: "setLanguage", language }, { quiet: true });
+    const pendingAction = pendingGatewayProtocolActionRef.current;
+    pendingGatewayProtocolActionRef.current = null;
+    const reconnectSnapshot = reconnectSnapshotRef.current;
+    if (reconnectSnapshot && reconnectAttemptRef.current > 0) {
+      setGatewayReconnectStatus({
+        mode: "resuming",
+        attempt: reconnectStatusRef.current.attempt || reconnectAttemptRef.current,
+        nextAttemptAt: null,
+      });
+      markMir2CacheMilestone("gatewayReconnectResuming", {
+        attempt: reconnectStatusRef.current.attempt || reconnectAttemptRef.current,
+        characterIndex: reconnectSnapshot.characterIndex,
+        characterName: reconnectSnapshot.characterName,
+      });
+      sendGatewayReconnectSequence(reconnectSnapshot);
+      return;
+    }
+    switch (pendingAction?.kind) {
+      case "suiLogin":
+        sendSuiLoginCommand(send, pendingAction.login.accountId, pendingAction.login.token);
+        break;
+      case "newAccount":
+        sendGatewayNewAccountCommand(send, accountIdRef.current, passwordRef.current);
+        break;
+      case "passwordLogin":
+        sendPasswordLoginCommand(send, accountIdRef.current, passwordRef.current, {
+          quietClientVersion: true,
+        });
+        break;
+      case "bootstrap":
+        sendGatewayBootstrapSequence(send, accountIdRef.current, passwordRef.current);
+        break;
+    }
+  }
+
   function connectGateway(bootstrapAfterOpen = false) {
+    if (bootstrapAfterOpen) {
+      pendingGatewayProtocolActionRef.current = { kind: "bootstrap" };
+    }
     if (socketRef.current?.readyState === WebSocket.OPEN) {
-      if (bootstrapAfterOpen) sendGatewayBootstrapSequence(send, accountIdRef.current, passwordRef.current);
+      if (gatewayProtocolReadyRef.current) flushGatewayProtocolQueue();
       return;
     }
     if (socketRef.current?.readyState === WebSocket.CONNECTING) {
@@ -5406,71 +5465,41 @@ export default function HomePage() {
       url: resolveGatewayWebSocketUrl(),
       bootstrapAfterOpen,
     });
+    manualSocketCloseRef.current = false;
+    gatewayProtocolReadyRef.current = false;
     const socket = new WebSocket(resolveGatewayWebSocketUrl());
     socketRef.current = socket;
     setWsState("connecting");
 
     socket.addEventListener("open", () => {
+      if (socketRef.current !== socket) return;
       setWsState("open");
       markMir2CacheMilestone("gatewayConnected");
       updateWorld((current) => ({ ...current, connected: true }));
       appendLog(t("log.gatewayWsOpen"), "network");
-      send({ type: "setLanguage", language }, { quiet: true });
-      const reconnectSnapshot = reconnectSnapshotRef.current;
-      if (reconnectSnapshot && reconnectAttemptRef.current > 0) {
-        setGatewayReconnectStatus({
-          mode: "resuming",
-          attempt: reconnectStatusRef.current.attempt || reconnectAttemptRef.current,
-          nextAttemptAt: null,
-        });
-        markMir2CacheMilestone("gatewayReconnectResuming", {
-          attempt: reconnectStatusRef.current.attempt || reconnectAttemptRef.current,
-          characterIndex: reconnectSnapshot.characterIndex,
-          characterName: reconnectSnapshot.characterName,
-        });
-        sendGatewayReconnectSequence(reconnectSnapshot);
-        return;
-      }
-      if (pendingSuiLoginRef.current) {
-        const pending = pendingSuiLoginRef.current;
-        pendingSuiLoginRef.current = null;
-        sendSuiLoginCommand(send, pending.accountId, pending.token);
-        return;
-      }
-      if (pendingNewAccountRef.current) {
-        pendingNewAccountRef.current = false;
-        sendGatewayNewAccountCommand(send, accountIdRef.current, passwordRef.current);
-        return;
-      }
-      if (pendingLoginRef.current) {
-        pendingLoginRef.current = false;
-        sendPasswordLoginCommand(send, accountIdRef.current, passwordRef.current, { quietClientVersion: true });
-        return;
-      }
-      if (bootstrapAfterOpen) sendGatewayBootstrapSequence(send, accountIdRef.current, passwordRef.current);
     });
 
     socket.addEventListener("close", () => {
-      const isCurrentSocket = socketRef.current === socket;
+      if (socketRef.current !== socket) return;
       const closedManually = manualSocketCloseRef.current;
-      if (isCurrentSocket) {
-        socketRef.current = null;
-      }
+      socketRef.current = null;
       manualSocketCloseRef.current = false;
-      pendingLoginRef.current = false;
-      pendingNewAccountRef.current = false;
-      pendingSuiLoginRef.current = null;
+      if (closedManually) {
+        pendingGatewayProtocolActionRef.current = null;
+      }
+      gatewayProtocolReadyRef.current = false;
       setLoginBusy(false);
       setWsState("closed");
       markMir2CacheMilestone("gatewayClosed");
       updateWorld((current) => ({ ...current, connected: false }));
       appendLog(t("log.gatewayWsClosed"), "network");
-      if (isCurrentSocket && !closedManually && reconnectStatusRef.current.mode !== "failed") {
+      if (!closedManually && reconnectStatusRef.current.mode !== "failed") {
         scheduleGatewayReconnect(reconnectSnapshotRef.current ?? captureGatewayReconnectSnapshot());
       }
     });
 
     socket.addEventListener("error", () => {
+      if (socketRef.current !== socket) return;
       if (reconnectSnapshotRef.current) {
         markMir2CacheMilestone("gatewayReconnectSocketError", {
           attempt: reconnectStatusRef.current.attempt || reconnectAttemptRef.current,
@@ -5479,6 +5508,7 @@ export default function HomePage() {
     });
 
     socket.addEventListener("message", (event) => {
+      if (socketRef.current !== socket) return;
       try {
         handleGatewayEvent(JSON.parse(event.data as string) as GatewayEvent);
       } catch (error) {
@@ -5488,7 +5518,7 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
+    if (socketRef.current?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current) {
       send({ type: "setLanguage", language }, { quiet: true });
     }
   }, [language]);
@@ -5498,8 +5528,8 @@ export default function HomePage() {
     setLoginBusy(false);
     setLoginErrorKey(null);
 
-    if (socketRef.current?.readyState !== WebSocket.OPEN) {
-      pendingNewAccountRef.current = true;
+    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
+      pendingGatewayProtocolActionRef.current = { kind: "newAccount" };
       connectGateway();
       return;
     }
@@ -5526,8 +5556,8 @@ export default function HomePage() {
     setLoginErrorKey(null);
     markMir2CacheMilestone("loginSubmit", { method: "password" });
 
-    if (socketRef.current?.readyState !== WebSocket.OPEN) {
-      pendingLoginRef.current = true;
+    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
+      pendingGatewayProtocolActionRef.current = { kind: "passwordLogin" };
       connectGateway();
       return;
     }
@@ -5554,8 +5584,8 @@ export default function HomePage() {
         expiresAt: login.expiresAt,
       };
       setAccountId(login.accountId);
-      if (socketRef.current?.readyState !== WebSocket.OPEN) {
-        pendingSuiLoginRef.current = login;
+      if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
+        pendingGatewayProtocolActionRef.current = { kind: "suiLogin", login };
         connectGateway();
         return;
       }
@@ -5597,7 +5627,7 @@ export default function HomePage() {
       password,
     };
     markMir2CacheMilestone("quickEnterSubmit");
-    if (socketRef.current?.readyState !== WebSocket.OPEN) {
+    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
       connectGateway(true);
       return;
     }
@@ -5613,9 +5643,8 @@ export default function HomePage() {
     );
     resetGatewayReconnectState();
     activeReconnectAuthRef.current = null;
-    pendingLoginRef.current = false;
-    pendingNewAccountRef.current = false;
-    pendingSuiLoginRef.current = null;
+    pendingGatewayProtocolActionRef.current = null;
+    gatewayProtocolReadyRef.current = false;
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
     lockedMonsterAttackRef.current = null;
@@ -7473,9 +7502,7 @@ export default function HomePage() {
     debugWindow.__mir2GatewayEventHistory = gatewayHistory;
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
-      pendingLoginRef.current = false;
-      pendingNewAccountRef.current = false;
-      pendingSuiLoginRef.current = null;
+      pendingGatewayProtocolActionRef.current = null;
       setLoginBusy(false);
       if (reconnectSnapshotRef.current) {
         failGatewayReconnect();
@@ -7544,6 +7571,8 @@ export default function HomePage() {
       switch (event.packet) {
       case "Connected":
         setLoginErrorKey(null);
+        gatewayProtocolReadyRef.current = true;
+        flushGatewayProtocolQueue();
         break;
       case "ClientVersion":
         if (numberOrZero(payload.result) !== 1) {
@@ -7551,6 +7580,7 @@ export default function HomePage() {
         }
         break;
       case "Disconnect":
+        gatewayProtocolReadyRef.current = false;
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
         setLoginBusy(false);
@@ -8227,6 +8257,7 @@ export default function HomePage() {
           stringOrFallback(payload.message, ""),
           gatewayChatTone(payload.chatType),
           gatewayChatChannel(payload.chatType),
+          gatewayCrystalChatType(payload.chatType),
         );
         break;
       case "ObjectChat":
@@ -8234,6 +8265,7 @@ export default function HomePage() {
           stringOrFallback(payload.text, ""),
           gatewayChatTone(payload.chatType),
           gatewayChatChannel(payload.chatType),
+          gatewayCrystalChatType(payload.chatType),
         );
         break;
       case "StorageUnlockResult": {
@@ -10247,6 +10279,7 @@ export default function HomePage() {
             kind === "npc" ? t("ui.npc") : kind === "monster" ? t("ui.monster") : t("ui.player"),
           ),
           ownerName: stringOrNull(payload.ownerName) ?? undefined,
+          ai: numberOrUndefined(payload.ai) ?? previousEntity?.ai,
           x: numberOrZero(location?.x),
           y: numberOrZero(location?.y),
           direction: stringOrNull(payload.direction) ?? undefined,
@@ -10946,6 +10979,7 @@ export default function HomePage() {
       kind: entity.kind,
       name: entity.name,
       ownerName: entity.ownerName ?? undefined,
+      ai: entity.ai ?? undefined,
       x: entity.x,
       y: entity.y,
       direction: entity.direction,
@@ -13266,17 +13300,14 @@ function createLogLine(
   text: string,
   tone: UiLogTone,
   channel: UiLogChannel,
-  locale: string,
+  crystalChatType: CrystalChatTypeValue = crystalChatTypeForUiLog(tone, channel),
 ): UiLogLine {
   return {
-    text: `[${new Date().toLocaleTimeString(locale)}] ${text}`,
+    text,
     tone,
     channel,
+    crystalChatType,
   };
-}
-
-function trimLogTimestamp(text: string) {
-  return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
 }
 
 function defaultLogChannel(tone: UiLogTone): UiLogChannel {
@@ -13330,6 +13361,75 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
 function gatewayChatTone(value: unknown): UiLogTone {
   const channel = gatewayChatChannel(value);
   return channel === "system" || channel === "hint" || channel === "announcement" ? "system" : "chat";
+}
+
+function gatewayCrystalChatType(value: unknown): CrystalChatTypeValue {
+  if (typeof value !== "string") return CrystalChatType.Normal;
+
+  switch (value.toLowerCase()) {
+    case "shout":
+      return CrystalChatType.Shout;
+    case "system":
+      return CrystalChatType.System;
+    case "hint":
+      return CrystalChatType.Hint;
+    case "announcement":
+      return CrystalChatType.Announcement;
+    case "group":
+      return CrystalChatType.Group;
+    case "whisperin":
+      return CrystalChatType.WhisperIn;
+    case "whisperout":
+      return CrystalChatType.WhisperOut;
+    case "guild":
+      return CrystalChatType.Guild;
+    case "trainer":
+      return CrystalChatType.Trainer;
+    case "levelup":
+      return CrystalChatType.LevelUp;
+    case "system2":
+      return CrystalChatType.System2;
+    case "relationship":
+      return CrystalChatType.Relationship;
+    case "mentor":
+      return CrystalChatType.Mentor;
+    case "shout2":
+      return CrystalChatType.Shout2;
+    case "shout3":
+      return CrystalChatType.Shout3;
+    case "linemessage":
+      return CrystalChatType.LineMessage;
+    default:
+      return CrystalChatType.Normal;
+  }
+}
+
+function crystalChatTypeForUiLog(tone: UiLogTone, channel: UiLogChannel): CrystalChatTypeValue {
+  switch (channel) {
+    case "shout":
+      return CrystalChatType.Shout;
+    case "whisper":
+      return CrystalChatType.WhisperIn;
+    case "group":
+      return CrystalChatType.Group;
+    case "guild":
+      return CrystalChatType.Guild;
+    case "mentor":
+      return CrystalChatType.Mentor;
+    case "relationship":
+      return CrystalChatType.Relationship;
+    case "hint":
+      return CrystalChatType.Hint;
+    case "line":
+      return CrystalChatType.LineMessage;
+    case "announcement":
+      return CrystalChatType.Announcement;
+    case "system":
+    case "server":
+      return CrystalChatType.System;
+    default:
+      return tone === "system" ? CrystalChatType.System : CrystalChatType.Normal;
+  }
 }
 
 function storageUnlockResultMessage(result: number, hasPassword: boolean) {

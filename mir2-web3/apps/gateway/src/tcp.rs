@@ -4,16 +4,25 @@ use std::sync::Arc;
 use mir2_protocol::{decode_client_packet, encode_server_packet, ServerPacket};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::mpsc;
+use tokio::sync::{broadcast, mpsc};
 
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
+#[path = "chat_broadcast.rs"]
+pub mod chat_broadcast;
+
+use chat_broadcast::{recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol};
+
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
 
-pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
+pub async fn run_tcp_gateway(
+    addr: &str,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone (see
     // `run_web_gateway`). Empty maps stay dormant regardless.
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
@@ -35,10 +44,11 @@ pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         let config = Arc::clone(&config);
         let zone_registry = Arc::clone(&zone_registry);
         let gameplay_event_sink = gameplay_event_sink.clone();
+        let chat_hub = chat_hub.clone();
 
         tokio::spawn(async move {
             if let Err(error) =
-                handle_client(stream, config, zone_registry, gameplay_event_sink).await
+                handle_client(stream, config, zone_registry, gameplay_event_sink, chat_hub).await
             {
                 eprintln!("tcp client error from {peer}: {error}");
             }
@@ -51,6 +61,7 @@ async fn handle_client(
     config: Arc<GatewayConfig>,
     zone_registry: Arc<ZoneRegistry>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
+    chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
     let peer = stream.peer_addr().ok();
     let mut session = match gameplay_event_sink {
@@ -61,7 +72,7 @@ async fn handle_client(
         ),
         None => GatewaySession::new_with_zone_registry((*config).clone(), &zone_registry),
     };
-    let result = handle_client_inner(&mut stream, &mut session, peer).await;
+    let result = handle_client_inner(&mut stream, &mut session, peer, &chat_hub).await;
     let _ = catch_gateway_panic("tcp save_active_character", || {
         session.save_active_character()
     });
@@ -72,6 +83,7 @@ async fn handle_client_inner(
     stream: &mut TcpStream,
     session: &mut GatewaySession,
     peer: Option<std::net::SocketAddr>,
+    chat_hub: &ChatBroadcastHub,
 ) -> io::Result<()> {
     let connect_packets = catch_gateway_panic("tcp on_connect", || session.on_connect())
         .map_err(session_panic_io_error)?;
@@ -84,6 +96,7 @@ async fn handle_client_inner(
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
     let mut active_zone_outbound_registration_id = 0;
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
+    let mut chat_presence: Option<ChatPresence> = None;
 
     loop {
         let frame = {
@@ -106,6 +119,13 @@ async fn handle_client_inner(
                         }
                         send_packet(&mut writer, &outbound.into_packet()).await?;
                     }
+                    broadcast = recv_optional_chat(&mut chat_presence) => {
+                        match broadcast {
+                            Ok(packet) => send_packet(&mut writer, &packet).await?,
+                            Err(broadcast::error::RecvError::Lagged(_)) => continue,
+                            Err(broadcast::error::RecvError::Closed) => chat_presence = None,
+                        }
+                    }
                 }
             }
         };
@@ -126,9 +146,17 @@ async fn handle_client_inner(
 
         match decode_client_packet(&frame) {
             Ok(packet) => {
+                let starts_game = matches!(&packet, mir2_protocol::ClientPacket::StartGame { .. });
+                let leaves_world = matches!(
+                    &packet,
+                    mir2_protocol::ClientPacket::Disconnect | mir2_protocol::ClientPacket::LogOut
+                );
                 let responses =
                     catch_gateway_panic("tcp handle_packet", || session.handle_packet(packet))
                         .map_err(session_panic_io_error)?;
+                if leaves_world || session.active_identity().is_none() {
+                    chat_presence = None;
+                }
                 let next_registration = session
                     .register_zone_live_outbound(zone_outbound_tx.clone())
                     .map_err(session_panic_io_error)?;
@@ -142,6 +170,13 @@ async fn handle_client_inner(
                 _zone_live_outbound_registration = next_registration;
                 for response in responses {
                     send_packet(&mut writer, &response).await?;
+                }
+                if starts_game
+                    && chat_presence.is_none()
+                    && session.active_identity().is_some()
+                    && session.zone_movement_ingress().is_some()
+                {
+                    chat_presence = Some(chat_hub.register(ChatProtocol::Tcp));
                 }
                 catch_gateway_panic("tcp save_active_character", || {
                     session.save_active_character()
@@ -213,7 +248,7 @@ mod tests {
     use tokio::io::AsyncWriteExt;
     use tokio::net::{TcpListener, TcpStream};
 
-    use super::{handle_client_inner, read_frame};
+    use super::{chat_broadcast::ChatBroadcastHub, handle_client_inner, read_frame};
     use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
     async fn send_client_packets(stream: &mut TcpStream, packets: &[ClientPacket]) {
@@ -254,6 +289,8 @@ mod tests {
             .expect("server should accept client");
 
         let registry = ZoneRegistry::in_process();
+        let chat_hub = ChatBroadcastHub::for_tests();
+        let server_chat_hub = chat_hub.clone();
         let mut session =
             GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
         session.handle_packet(ClientPacket::Login {
@@ -261,7 +298,7 @@ mod tests {
             password: "demo".to_string(),
         });
         let server_task = tokio::spawn(async move {
-            handle_client_inner(&mut server, &mut session, Some(peer)).await
+            handle_client_inner(&mut server, &mut session, Some(peer), &server_chat_hub).await
         });
 
         let _ = drain_server_packets(&mut client).await;
@@ -277,6 +314,7 @@ mod tests {
                 .any(|packet| matches!(packet, ServerPacket::StartGame { .. })),
             "StartGame response should arrive: {start_packets:?}"
         );
+        assert_eq!(chat_hub.online_count(), 1);
 
         // The walk completes immediately; the following run is cadence-delayed.
         // Sending both frames together ensures no later client input can wake TCP.
@@ -313,5 +351,6 @@ mod tests {
             .await
             .expect("TCP server task should not panic")
             .expect("TCP server should close cleanly");
+        assert_eq!(chat_hub.online_count(), 0);
     }
 }

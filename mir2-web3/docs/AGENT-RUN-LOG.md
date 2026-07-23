@@ -5947,3 +5947,127 @@ Outcome:
 - 11 sampled maps still have out-of-range frame-reference risk.
 - Minimap 450/451 remain missing for `DogYoArena2` / `DogYoHyun`.
 - This is source-resource audit evidence only; full-map visual 1:1 and human visual/feel acceptance remain open.
+
+## 2026-07-23 - Deterministic same-scene visual normalization
+
+Scope:
+
+- Rebuilt the Crystal/Web pair around one native account state at Bichon
+  `0 @ 328,275`, with overlay-free cursor capture and explicit server light.
+- Fixed pre-`Connected` login/bootstrap races, stale WebSocket callbacks,
+  capture-secret leakage, HUD experience/HP crops, chat scrollbar geometry,
+  minimap reverse quantization, and AI 6 radar colour propagation.
+- Added a QA-only fixed Crystal light resolver and scoped the measured map-light
+  compositor correction to Dawn/Evening after rejected Night r31 exposed a
+  global-rule regression.
+- Added 555 deterministic Crystal map source PNGs (`3,082,712` bytes) required
+  by the captured Bichon scene. The generated map atlas remains ignored.
+
+Evidence:
+
+- r29 Dawn baseline: full/world `36.4%/40.2%`, world MAE `18.845`.
+- r33 final Dawn: full/world `24.2%/26.1%`, world MAE `11.987`.
+- r26 Night baseline: full/world `12.4%/12.6%`, world MAE `6.985`.
+- r32 final Night: full/world `12.5%/12.6%`, world MAE `7.074`.
+- r32/r33: exact map/coordinate and light pairing, zero critical errors, zero
+  non-favicon 404s.
+- `bevy-runtime-backends-20260723-r30.json`: all default, forced WebGPU,
+  forced WebGL2, raw WebGL2, movement shadow, and presentation assertions pass.
+- Final headed WebGPU and WebGL2 movement reports each pass 28/28 strict
+  assertions with four ordered request/ack pairs, final `328,275`, no pending
+  transaction, no critical console errors, and no non-favicon 404s.
+
+Verification:
+
+- Web typecheck, complete `test:frontend-logic`, minimap transform, and native
+  capture-state tests pass.
+- Rust fmt/check plus fixed-light, visible-respawn, neutral-AI, spawn-packet,
+  and shared observer movement tests pass.
+- Production Web build publishes 8,228 entity frames, 12,015 map source PNGs,
+  40 map atlas pages, and 39,401 manifest assets.
+- Asset release preflight and resource-loading tests pass with 99.76% map-frame
+  renderability and all 39,401 manifest assets hashable from the filesystem.
+
+Remaining:
+
+- GDI font rasterization, deterministic chat text, roaming entity phase, and
+  final human visual/feel acceptance.
+
+## 2026-07-23 - Final deterministic GDI/chat/animation Candidate
+
+Goal: close the final fixed-font, chat-state, and per-object animation-phase
+gaps while preserving movement, map transaction, combat, dual-backend, and
+full-resource gates.
+
+Implementation:
+
+- Added a reproducible Windows TextRenderer exporter with strict ARGB/hash
+  manifests and eight exact full-string Crystal acceptance assets. Exact keys
+  use the bitmap; arbitrary text remains accessible CSS fallback.
+- Replaced browser timestamp logs with Crystal's 17 chat types, colour table,
+  614px wrapping, four-line history, channel filters, and scroll semantics.
+- Added one shared Gateway TCP/WebSocket system-chat presence and scheduler for
+  five-minute online counts and ten-minute LineMessage announcements. All
+  capture overrides require a non-empty process QA control token.
+- Added a persistent Rust per-object animation state machine and WASM bridge for
+  seeded idle/harvest phases, FIFO actions, incarnation reuse, death, and revive.
+  Every renderer consumes the same resulting action/frame pose. Entering or
+  leaving the game screen resets the bridge so a same-character relog cannot
+  inherit an earlier session's action queue; in-game reconnects retain continuity.
+
+Evidence:
+
+- `cwp-20260723-r40-gdi-chat-final`: Bichon `0 @ 328,275`, light 1,
+  `bevy-e9d354eada933661`, automated Candidate 100%, world 89%, HUD UI 91%,
+  chat 84%, MiniMap 87%, 0 critical errors, and 0 non-favicon 404s.
+- `final-parity-r40` WebGPU and WebGL2 strict captures: four commands and four
+  authoritative ACKs, exact final positions, no jumps, rollback, route spam,
+  blackouts, failed assets, critical errors, or 404s.
+- `native-vs-current-r40`: four native/Web actions aligned over a 2700/2702ms
+  span, 4/4 bounded paired-frame artifacts emitted, automated status `ok`.
+- Full frontend logic and TypeScript pass; Bevy runtime tests pass 126/126;
+  focused Gateway system-chat tests pass 5/5; both runtime backend smoke paths
+  pass all assertions.
+- Full Gateway library regression passes 307/307 in 1679.68s. The first run
+  exposed one stale hard-coded durability expectation; the test now derives its
+  expected result from the equipped weapon's pre-command durability while the
+  production saturating-subtraction behavior remains unchanged.
+- Windows GDI self-test passes eight exact assets across two byte-identical
+  exports and rejects all eight invalid/path-safety fixtures.
+- Resource loading hashes 39,409 public assets. Full-pack verification passes
+  1,440 libraries, 4,446 unique pages, 1,869,869 drawable frames, and content
+  hash `f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`.
+
+Outcome:
+
+- The implementation is 100% automated Candidate for the deterministic scene.
+  The only remaining gate is explicit human `Accepted`; independent actor,
+  random animation/effect, and compositor phases prevent an honest bit-perfect
+  raw full-window claim.
+
+## 2026-07-23 - Quest marker GPU overlay regression
+
+Scope:
+
+- Investigated the reported invisible Scarecrow and missing task markers in the
+  live WebGPU game scene.
+- Verified `Monster/005` frame availability and separated the player by one
+  tile, proving the Scarecrow body was rendered but visually overlapped.
+- Moved quest markers out of the GPU-owned world sprite stack and into the
+  independent entity UI overlay while preserving motion, Crystal offsets, and
+  NPC interaction.
+- Updated the NPC click smoke lookup and added source-placement regression
+  assertions so a marker cannot silently return below the GPU canvas.
+
+Evidence:
+
+- `docs/generated/player-qa/r41-quest-marker-overlay/r41-quest-marker-overlay-final.jpg`
+  shows all three current available-quest yellow exclamation markers.
+- Browser hit testing places `.entity-quest-icon` above
+  `.viewport-drop-overlay` and `#mir2-web3-canvas`.
+
+Verification:
+
+- `node apps/web/scripts/test-player-frames.mjs`
+- `npm run typecheck --prefix apps/web`
+- `git diff --check`

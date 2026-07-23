@@ -72,6 +72,20 @@ export function assertNativeFrameDimensions(frame, options = {}) {
   return { width, height };
 }
 
+export function assertNativeCursorParking(report) {
+  const parking = report?.cursorParking;
+  if (!parking || parking.succeeded !== true) {
+    throw new Error("Native capture did not confirm that the cursor was parked outside the client.");
+  }
+  if (!Number.isFinite(Number(parking.requestedScreenX)) || !Number.isFinite(Number(parking.requestedScreenY))) {
+    throw new Error("Native capture cursor parking coordinates are invalid.");
+  }
+  return {
+    requestedScreenX: Number(parking.requestedScreenX),
+    requestedScreenY: Number(parking.requestedScreenY),
+  };
+}
+
 function expectedDimension(value, fallback, label) {
   const parsed = value === undefined ? fallback : Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) {

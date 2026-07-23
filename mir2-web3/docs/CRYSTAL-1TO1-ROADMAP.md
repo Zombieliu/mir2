@@ -1,5 +1,30 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Final 100% Candidate roadmap sync: 2026-07-23 closes the deterministic GDI,
+> chat-state, and per-object animation-phase slice. A source-audited Windows
+> exporter records exact Arial 8pt/96-DPI TextRenderer output and ARGB hashes for
+> eight fixed acceptance strings. The Web client uses those images only on an
+> exact text/style key match and keeps accessible fallback text for dynamic
+> strings. Crystal's four-line chat history, 17 chat types, channel colours,
+> filtering, scrolling, and no-timestamp behavior are now modeled from real
+> packets. Gateway TCP/WebSocket sessions register one shared online presence
+> after StartGame and receive Crystal-cadence online-count and LineMessage
+> broadcasts; QA cadence/fixed-line controls require an explicitly configured
+> control token.
+>
+> Entity animation is now one persistent Rust/Bevy state machine per object and
+> incarnation, covering standing, walking, running, attack, struck, spell,
+> harvest, die, and revive action lifecycles with bounded FIFO events and seeded
+> Crystal idle selection. Both GPU backends consume the same pose bridge. Final
+> r40 at Bichon `0 @ 328,275`, light 1, reports a 100% automated Candidate score,
+> zero critical errors/404s, 89% world similarity, 91% HUD UI, 84% chat, and 87%
+> MiniMap. Current WebGPU/WebGL2 strict movement, native/Web four-action temporal
+> alignment, 126/126 runtime tests, Gateway 307/307, complete frontend logic,
+> typecheck, and the 1,440-library full-asset hash gate pass. Roadmap implementation status is now
+> **100% Candidate**. Only the explicit final human **Accepted** decision remains;
+> raw pixel identity is not asserted across independently sampled roaming
+> actors, random idle frames, particles, and native/browser compositors.
+
 > Latest developer-handoff roadmap sync: 2026-07-22 establishes a reproducible
 > code-and-assets entry point for another developer. A recursive clone resolves
 > the maintained Crystal handoff branch, Windows scripts bootstrap Node 22 and
@@ -3791,3 +3816,20 @@ Entries:
 - Keep UI debug controls useful but isolated from normal gameplay where needed.
 - Update this document after each completed task, not only at the end of a stage.
 - Update `docs/BACKEND-1TO1-PROGRESS.md` and `docs/CRYSTAL-SERVER-PARITY.md` when backend parity meaningfully changes.
+
+## 2026-07-23 Deterministic Visual-Parity Milestone
+
+The camera/HUD/light/effect normalization slice is complete. Final Dawn r33
+reduces full/world changed pixels from r29 `36.4%/40.2%` to `24.2%/26.1%` and
+world MAE from `18.845` to `11.987`. Final Night r32 remains at
+`12.5%/12.6%`, matching r26 and proving the Dawn/Evening compositor correction
+does not regress the Night path. Both pairs are same-account, same-coordinate,
+fixed-light, overlay-free, and zero-error.
+
+The milestone also closes the capture handshake race, stale-socket event race,
+secret redaction, cursor parking verification, Crystal minimap quantization,
+AI 6 radar propagation, and HUD experience/HP clipping. Movement/map
+transaction unit gates and WebGPU/WebGL runtime smokes remain green. The next
+visual milestone is intentionally narrower: GDI text rasterization,
+deterministic chat content, roaming entity/animation phase, and final human
+visual/feel acceptance.
