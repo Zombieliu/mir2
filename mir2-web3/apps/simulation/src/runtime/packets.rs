@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy_ecs::entity::Entity;
@@ -5664,12 +5665,31 @@ pub(super) fn crystal_time_of_day_lights_for_utc_hour(hour: u32) -> u8 {
     }
 }
 
+pub(super) fn parse_fixed_crystal_light_setting(raw: &str) -> Option<u8> {
+    raw.trim()
+        .parse::<u8>()
+        .ok()
+        .filter(|setting| (1..=4).contains(setting))
+}
+
+pub(super) fn crystal_time_of_day_lights_with_override(
+    fixed_setting: Option<&str>,
+    utc_hour: u32,
+) -> u8 {
+    fixed_setting
+        .and_then(parse_fixed_crystal_light_setting)
+        .unwrap_or_else(|| crystal_time_of_day_lights_for_utc_hour(utc_hour))
+}
+
 pub(super) fn current_crystal_time_of_day_lights() -> u8 {
+    static FIXED_LIGHT_SETTING: OnceLock<Option<String>> = OnceLock::new();
+    let fixed_setting = FIXED_LIGHT_SETTING
+        .get_or_init(|| std::env::var("MIR2_SIMULATION_FIXED_LIGHT_SETTING").ok());
     let utc_hour = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|duration| ((duration.as_secs() / 3600) % 24) as u32)
         .unwrap_or(0);
-    crystal_time_of_day_lights_for_utc_hour(utc_hour)
+    crystal_time_of_day_lights_with_override(fixed_setting.as_deref(), utc_hour)
 }
 
 pub(super) fn decode_crystal_payload(packet_id: ServerPacketId, payload: Vec<u8>) -> ServerPacket {
@@ -6110,6 +6130,12 @@ pub(super) fn collect_world_entities(
             kind,
             name: name.resolve(language),
             owner_name: hero_marker.map(|hero| hero.owner_name.clone()),
+            ai: match kind {
+                WorldEntityKind::Monster => {
+                    crystal_monster_by_name(&name.value).map(|monster| monster.ai)
+                }
+                _ => None,
+            },
             x: position.0.x,
             y: position.0.y,
             direction: facing.0,

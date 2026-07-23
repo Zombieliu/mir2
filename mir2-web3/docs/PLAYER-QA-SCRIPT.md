@@ -788,3 +788,38 @@ Screenshot/trace:
 Severity: blocker | high | medium | low
 Decision: fix | accept | defer
 ```
+
+## Deterministic Crystal/Web Pair - 2026-07-23
+
+Use these local evidence packs before reporting a lighting or camera regression:
+
+- Dawn: `docs/generated/player-qa/visual-parity/cwp-20260723-r33-final-fixed-dawn/`
+  (`24.2%` full changed, `26.1%` world changed, world MAE `11.987`).
+- Night: `docs/generated/player-qa/visual-parity/cwp-20260723-r32-fixed-night-scoped-light/`
+  (`12.5%` full changed, `12.6%` world changed, world MAE `7.074`).
+
+Required capture invariants:
+
+- Native and Web are `1024x768`, map `0`, coordinate `328,275`, and the same
+  account/character state.
+- Start the isolated Gateway with
+  `MIR2_SIMULATION_FIXED_LIGHT_SETTING=1` for Dawn or `4` for Night, and pass
+  the same value as `--captureLightSetting`.
+- The native report must contain `cursorParking.succeeded=true`.
+- Web capture evidence must contain `protocolReady.gatewayProtocolReady=true`,
+  exact requested/server light equality, zero critical console errors, and zero
+  non-favicon 404s.
+- Do not apply the Dawn/Evening map-light correction to Night. Rejected r31 is
+  the regression fixture: Night world changed pixels rise to `43.3%`.
+- Dynamic chat text and roaming monster positions are review masks, not proof
+  of camera or movement failure. Verify movement separately with the strict
+  movement suite and the dual-backend runtime smoke.
+
+Current strict references:
+
+- `docs/generated/player-qa/movement-jitter/movement-visual-parity-final-webgpu-20260723.json`
+- `docs/generated/player-qa/movement-jitter/movement-visual-parity-final-webgl2-20260723.json`
+
+Both must retain `ok=true`, 28/28 passing assertions, an empty pending plan,
+the requested renderer backend, zero critical console errors, and zero
+non-favicon 404s.

@@ -450,7 +450,9 @@ async function readNpcSmokeState(client, patternSource) {
           const hit = node.querySelector(".entity-sprite-hit");
           return pattern.test(hit?.getAttribute("aria-label") ?? "");
         });
-      const icon = spriteStack?.querySelector(".entity-quest-icon") ?? null;
+      const icon = npc
+        ? document.querySelector('.entity-quest-icon[data-object-id="' + npc.objectId + '"]')
+        : null;
       const hit = spriteStack?.querySelector(".entity-sprite-hit") ?? null;
       const body = spriteStack?.querySelector(".entity-sprite-layer.body") ?? null;
       const nameplate = [...document.querySelectorAll("button.entity-nameplate")]

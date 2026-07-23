@@ -23,6 +23,10 @@ export function pushMir2MovementShadowEvent(event_json: string): void;
 
 export function releaseMir2MapRenderImages(keys_json: string): void;
 
+export function resetMir2EntityAnimations(): void;
+
+export function resolveMir2EntityAnimationPoses(snapshot_json: string): string;
+
 export function setMir2EntityRenderAtlas(key: string, width: number, height: number, pixels: Uint8Array): void;
 
 export function setMir2EntityRenderState(snapshot_json: string): void;
@@ -59,6 +63,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly getMir2RendererBackend: () => [number, number];
+    readonly resolveMir2EntityAnimationPoses: (a: number, b: number) => [number, number];
     readonly pushMir2MovementShadowEvent: (a: number, b: number) => void;
     readonly getMir2MovementShadowDiagnostics: () => [number, number];
     readonly setMir2RemoteMotionPresentationEnabled: (a: number) => void;
@@ -81,6 +86,7 @@ export interface InitOutput {
     readonly releaseMir2MapRenderImages: (a: number, b: number) => void;
     readonly clearMir2StatusSink: () => void;
     readonly clearMir2PresentationPoseSink: () => void;
+    readonly resetMir2EntityAnimations: () => void;
     readonly wasm_bindgen__convert__closures_____invoke__h4a292f8eb4388d53: (a: number, b: number, c: any) => [number, number];
     readonly wasm_bindgen__convert__closures_____invoke__hd5f30831ea795a9b: (a: number, b: number, c: any, d: any) => void;
     readonly wasm_bindgen__convert__closures_____invoke__h90a90d7cc6391bd0: (a: number, b: number, c: any) => void;

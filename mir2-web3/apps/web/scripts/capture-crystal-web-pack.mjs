@@ -11,10 +11,12 @@ import {
 } from "./crystal-capture-visual-state.mjs";
 import {
   assertCanonicalNativeCaptureReport,
+  assertNativeCursorParking,
   assertNativeFrameDimensions,
   CRYSTAL_NATIVE_CLIENT_HEIGHT,
   CRYSTAL_NATIVE_CLIENT_WIDTH,
 } from "./crystal-native-capture-state.mjs";
+import { redactCaptureSecrets, redactCommandArgs } from "./capture-secret-redaction.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
@@ -25,6 +27,7 @@ const DEFAULT_PASSWORD = "Mir2test1";
 const DEFAULT_MAP = "0";
 const DEFAULT_X = 149;
 const DEFAULT_Y = 411;
+const DEFAULT_CRYSTAL_ANIMATION_SEED = 0x4352_5953;
 
 const args = parseArgs(process.argv.slice(2));
 const prefix = args.prefix ?? `crystal-web-pack-${timestamp()}`;
@@ -42,6 +45,10 @@ const characterName = args.characterName ?? account;
 const map = args.map ?? DEFAULT_MAP;
 const x = numberArg(args.x, DEFAULT_X);
 const y = numberArg(args.y, DEFAULT_Y);
+const crystalAnimationSeed = numberArg(
+  args.crystalAnimationSeed ?? process.env.MIR2_CRYSTAL_ANIMATION_SEED,
+  DEFAULT_CRYSTAL_ANIMATION_SEED,
+);
 const originalDurationMs = numberArg(args.originalDurationMs, 250);
 const originalSampleMs = numberArg(args.originalSampleMs, 50);
 const windowTitlePattern = args.windowTitlePattern ?? "*Legend of Mir 2*";
@@ -193,6 +200,7 @@ async function captureNativeWindow() {
       "-WindowTitlePattern",
       windowTitlePattern,
       "-ActivateWindow",
+      "-ParkCursorOutsideClient",
       "-ExpectedClientWidth",
       String(expectedNativeWidth),
       "-ExpectedClientHeight",
@@ -215,6 +223,7 @@ async function captureNativeWindow() {
     expectedWidth: expectedNativeWidth,
     expectedHeight: expectedNativeHeight,
   });
+  assertNativeCursorParking(report);
   const samples = (Array.isArray(report.samples) ? report.samples : [])
     .filter((sample) => sample?.capture?.path)
     .map((sample) => ({
@@ -509,6 +518,9 @@ function buildWebBaseUrl() {
   if (!url.searchParams.has("cacheDebug")) {
     url.searchParams.set("cacheDebug", "0");
   }
+  if (!url.searchParams.has("crystalAnimationSeed")) {
+    url.searchParams.set("crystalAnimationSeed", String(crystalAnimationSeed >>> 0));
+  }
   return url.toString();
 }
 
@@ -559,11 +571,13 @@ async function runJsonCommand(command, commandArgs, options = {}) {
     child.on("close", resolve);
   });
   if (timer) clearTimeout(timer);
+  const displayCommand = `${command} ${redactCommandArgs(commandArgs).join(" ")}`;
+  const diagnosticOutput = redactCaptureSecrets(stderr || stdout);
   if (timedOut) {
-    throw new Error(`${command} ${commandArgs.join(" ")} timed out after ${timeoutMs}ms\n${stderr || stdout}`);
+    throw new Error(`${displayCommand} timed out after ${timeoutMs}ms\n${diagnosticOutput}`);
   }
   if (code !== 0) {
-    throw new Error(`${command} ${commandArgs.join(" ")} failed with code ${code}\n${stderr || stdout}`);
+    throw new Error(`${displayCommand} failed with code ${code}\n${diagnosticOutput}`);
   }
   const trimmed = stdout.trim();
   const start = trimmed.lastIndexOf("\n{") >= 0 ? trimmed.lastIndexOf("\n{") + 1 : trimmed.indexOf("{");

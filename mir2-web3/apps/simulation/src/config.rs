@@ -3376,6 +3376,9 @@ pub struct WorldEntitySnapshot {
     pub kind: WorldEntityKind,
     pub name: String,
     pub owner_name: Option<String>,
+    /// Crystal monster AI id. The client needs AI 6 to reproduce the native
+    /// green minimap radar colour; non-monster entities leave this unset.
+    pub ai: Option<u8>,
     pub x: i32,
     pub y: i32,
     pub direction: MirDirection,
