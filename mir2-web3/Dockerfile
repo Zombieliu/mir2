@@ -58,3 +58,15 @@ COPY --from=builder /out/gate12-acceptance /usr/local/bin/gate12-acceptance
 COPY --from=builder /out/gate13-acceptance /usr/local/bin/gate13-acceptance
 USER 65534:65534
 CMD ["/usr/local/bin/gate12-acceptance"]
+
+FROM builder AS capacity-benchmark-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-simulation --example zone_load \
+    && install -Dm755 target/release/examples/zone_load /out/dubhe-zone-load
+
+FROM runtime AS capacity-benchmark
+COPY --from=capacity-benchmark-builder /out/dubhe-zone-load /usr/local/bin/dubhe-zone-load
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/dubhe-zone-load"]
