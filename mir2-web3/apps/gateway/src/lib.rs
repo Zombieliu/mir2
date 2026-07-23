@@ -8,6 +8,7 @@ pub mod events;
 mod inject;
 pub mod mir2_workload;
 pub mod node_security;
+pub mod operator;
 pub mod rewards;
 pub mod routing;
 mod session;
@@ -55,6 +56,10 @@ pub use node_security::{
     GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
     VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
 };
+pub use operator::{
+    serve_zone_host_operator, SignedZoneHostHeartbeat, ZoneHostHeartbeatPayload,
+    ZoneHostOperatorConfig,
+};
 pub use rewards::{
     GameRewardPolicy, MultiGameRewardLedger, RewardAllocation, RewardClaimProof,
     RewardSettlementBatch, SettlementStatus, VerifiedWorkReceipt,
@@ -77,5 +82,6 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
-    ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneHostTelemetrySnapshot, ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION,
+    ZONE_RPC_PROTOCOL_VERSION,
 };

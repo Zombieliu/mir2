@@ -122,6 +122,7 @@ The iteration count is bounded to `1..=10000` to prevent accidental unbounded lo
 | 9 rewards | game isolation, dedup, budget/cap, proof, Commonware policy/close, unsigned Sui transactions, and 15 Move tests |
 | 10 beta | fail-closed readiness, divergent-node end-to-end acceptance, deterministic soak, JSON, and Prometheus output |
 | 11 real recovery | Crystal combat/drop/handoff, complete v4 Zone image, four-session/two-map/two-failure fencing, and atomic JSON evidence |
+| 12 distribution | non-root Docker images, two-host Compose, signed node heartbeat, Prometheus/Grafana, and live-container primary failure acceptance |
 
 Full local acceptance:
 
@@ -210,3 +211,5 @@ sui move test --path src/mir2_mine
 
 The real Mir2 workload acceptance continues in
 [`GATE11-REAL-MIR2-WORKLOAD.md`](GATE11-REAL-MIR2-WORKLOAD.md).
+The operator distribution and telemetry package continues in
+[`GATE12-DISTRIBUTION-NODE-TELEMETRY.md`](GATE12-DISTRIBUTION-NODE-TELEMETRY.md).

@@ -6,7 +6,8 @@ use std::sync::Arc;
 
 use mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env;
 use mir2_gateway::{
-    validate_zone_host_bind, GatewayConfig, ZoneHostServer, ZoneRpcLimits, ZoneTopology,
+    serve_zone_host_operator, validate_zone_host_bind, GatewayConfig, ZoneHostOperatorConfig,
+    ZoneHostServer, ZoneRpcLimits, ZoneTopology,
 };
 
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
@@ -33,21 +34,35 @@ fn main() -> io::Result<()> {
 
     let listener = TcpListener::bind(address)?;
     let bound_address = listener.local_addr()?;
-    eprintln!(
-        "mir2-zone-host listening on {bound_address} pid={} authenticated={}",
-        std::process::id(),
-        auth_token.is_some()
-    );
     let topology = ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    Arc::new(ZoneHostServer::with_options_and_factory(
+    let server = Arc::new(ZoneHostServer::with_options_and_factory(
         config,
         default_zone_owner_lease_authority_from_env(),
         auth_token,
         ZoneRpcLimits::from_env(),
         topology.runtime_factory(),
-    ))
-    .serve(listener)
+    ));
+    let operator_config = ZoneHostOperatorConfig::from_env(bound_address)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let operator_listener = TcpListener::bind(operator_config.address)?;
+    let operator_address = operator_listener.local_addr()?;
+    let operator_server = Arc::clone(&server);
+    std::thread::Builder::new()
+        .name("mir2-zone-host-operator".to_string())
+        .spawn(move || {
+            if let Err(error) =
+                serve_zone_host_operator(operator_listener, operator_server, operator_config)
+            {
+                eprintln!("zone host operator server stopped: {error}");
+            }
+        })?;
+    eprintln!(
+        "mir2-zone-host listening on {bound_address} metrics=http://{operator_address}/metrics pid={} authenticated={}",
+        std::process::id(),
+        env::var("MIR2_ZONE_HOST_TOKEN").is_ok()
+    );
+    server.serve(listener)
 }
 
 fn env_flag(name: &str, default: bool) -> bool {
