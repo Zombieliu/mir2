@@ -1,12 +1,13 @@
 # Crystal Server Parity
 
-> Latest remote-Zone failover parity note: 2026-07-23 proves one real Crystal
-> workload across active/standby TCP Zone Hosts: login, map join, client melee
-> and damage, item drop/pickup, atomic cross-map handoff, checkpoint install,
-> active loss, owner-fenced promotion, and continued player session state.
-> Zone RPC v5 carries handoff HP/MP and checkpoint v3 normalizes the durable
-> player/session commitment. Autonomous monster/timer/public-drop state is not
-> yet a complete failover image and remains explicit Gate 11.2 parity debt.
+> Latest remote-Zone failover parity note: 2026-07-23 completes Gate 11.1-11.4.
+> Zone RPC v5/checkpoint v4 now restores the private durable session projection
+> and complete shared map image, including player vitals, autonomous monster/AI
+> timers, pending combat/effects, public drops/claims, doors, hazards, map
+> layers, trades/rentals, and NPC state. Real Crystal combat/drop/cross-map
+> handoff survives takeover, and four sessions across two maps survive two
+> consecutive fenced host failures. Release evidence is emitted as one
+> fail-closed JSON manifest; multi-AZ RTO remains a deployment measurement.
 
 > Latest monster defence-type parity note: 2026-07-22 follows the original
 > ShamanZombie and WaterDragon server classes instead of inferring every defence

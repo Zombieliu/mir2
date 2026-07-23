@@ -2,11 +2,13 @@ use std::collections::BTreeMap;
 
 use bevy_tasks::{ComputeTaskPool, TaskPool};
 use mir2_protocol::{MirDirection, Point, Spell};
+use serde::{Deserialize, Serialize};
 
 /// Below this many zones, parallel ticking's task overhead outweighs the gain,
 /// so `tick_all` runs inline. Measured break-even; see the multi-zone scaling
 /// section of `examples/zone_load.rs` and docs/L2-ECS-ZONE-DESIGN.md.
 const PARALLEL_TICK_MIN_ZONES: usize = 4;
+const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 1;
 
 use super::runtime::ZoneRuntime;
 use super::types::{SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneOutbound};
@@ -19,12 +21,78 @@ pub struct ZoneManager {
     session_zones: BTreeMap<SessionId, ZoneKey>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ZoneManagerCheckpoint {
+    version: u32,
+    zones: Vec<(ZoneKey, Vec<u8>)>,
+    session_zones: BTreeMap<SessionId, ZoneKey>,
+}
+
 impl ZoneManager {
     pub fn new() -> Self {
         Self {
             zones: BTreeMap::new(),
             session_zones: BTreeMap::new(),
         }
+    }
+
+    pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
+        let zones = self
+            .zones
+            .iter()
+            .map(|(key, runtime)| Ok((key.clone(), runtime.checkpoint_bytes()?)))
+            .collect::<Result<Vec<_>, String>>()?;
+        serde_json::to_vec(&ZoneManagerCheckpoint {
+            version: ZONE_MANAGER_CHECKPOINT_VERSION,
+            zones,
+            session_zones: self.session_zones.clone(),
+        })
+        .map_err(|error| format!("failed to encode zone manager checkpoint: {error}"))
+    }
+
+    pub fn restore_checkpoint(bytes: &[u8]) -> Result<Self, String> {
+        let checkpoint: ZoneManagerCheckpoint = serde_json::from_slice(bytes)
+            .map_err(|error| format!("failed to decode zone manager checkpoint: {error}"))?;
+        if checkpoint.version != ZONE_MANAGER_CHECKPOINT_VERSION {
+            return Err(format!(
+                "unsupported zone manager checkpoint version {}, expected {}",
+                checkpoint.version, ZONE_MANAGER_CHECKPOINT_VERSION
+            ));
+        }
+        let mut zones = BTreeMap::new();
+        for (expected_key, runtime_bytes) in checkpoint.zones {
+            let runtime = ZoneRuntime::restore_checkpoint(&runtime_bytes)?;
+            if runtime.key() != &expected_key {
+                return Err(format!(
+                    "zone manager checkpoint key mismatch for map {}",
+                    expected_key.map_file_name
+                ));
+            }
+            if zones.insert(expected_key.clone(), runtime).is_some() {
+                return Err(format!(
+                    "zone manager checkpoint contains duplicate map {}",
+                    expected_key.map_file_name
+                ));
+            }
+        }
+        for (session_id, key) in &checkpoint.session_zones {
+            let runtime = zones.get(key).ok_or_else(|| {
+                format!(
+                    "zone manager checkpoint routes session {} to a missing zone",
+                    session_id.as_str()
+                )
+            })?;
+            if runtime.player_object_id(session_id).is_none() {
+                return Err(format!(
+                    "zone manager checkpoint routes session {} without a player",
+                    session_id.as_str()
+                ));
+            }
+        }
+        Ok(Self {
+            zones,
+            session_zones: checkpoint.session_zones,
+        })
     }
 
     pub fn join(&mut self, join: ZoneJoin) -> Vec<ZoneOutbound> {
@@ -54,6 +122,7 @@ impl ZoneManager {
             | ZoneCommand::UpdateChatProfile { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
+            | ZoneCommand::SyncPlayerVitals { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }
             | ZoneCommand::SyncSharedObjects { session_id, .. }
@@ -154,6 +223,11 @@ impl ZoneManager {
             zone.player_position(session_id)?,
             zone.player_direction(session_id)?,
         ))
+    }
+
+    pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_vitals(session_id)
     }
 
     pub fn can_player_cast_magic(

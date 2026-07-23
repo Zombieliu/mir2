@@ -107,14 +107,14 @@ pub struct ActiveSessionIdentity {
     pub character_name: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedTradeOfferItem {
     pub item_state_json: String,
     pub key: String,
     pub unique_id: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedTradeOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -124,7 +124,7 @@ pub struct SharedTradeOffer {
     pub items: Vec<SharedTradeOfferItem>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalItemOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -136,7 +136,7 @@ pub struct SharedItemRentalItemOffer {
     pub days: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalFeeOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -145,13 +145,13 @@ pub struct SharedItemRentalFeeOffer {
     pub fee: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalAgreement {
     pub item: SharedItemRentalItemOffer,
     pub fee: SharedItemRentalFeeOffer,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SharedItemRentalDelivery {
     Lender(SharedItemRentalAgreement),
     Borrower(SharedItemRentalAgreement),

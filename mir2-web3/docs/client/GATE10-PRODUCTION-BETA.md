@@ -121,6 +121,7 @@ The iteration count is bounded to `1..=10000` to prevent accidental unbounded lo
 | 8 finality | no-empty-block, 3-of-4 quorum, fork/replay/equivocation, projection, and pinned upstream Commonware type tests |
 | 9 rewards | game isolation, dedup, budget/cap, proof, Commonware policy/close, unsigned Sui transactions, and 15 Move tests |
 | 10 beta | fail-closed readiness, divergent-node end-to-end acceptance, deterministic soak, JSON, and Prometheus output |
+| 11 real recovery | Crystal combat/drop/handoff, complete v4 Zone image, four-session/two-map/two-failure fencing, and atomic JSON evidence |
 
 Full local acceptance:
 
@@ -150,6 +151,8 @@ sui move test --path src/mir2_mine
   secret on a guild host.
 - Persist Zone checkpoints and Commonware finalized blocks before acknowledging a generation
   switch. Back up the Sui package/registry/cap object IDs separately from secrets.
+- Run `gate11_full_acceptance -- --output <release-evidence.json>` for the exact candidate binary
+  and retain the accepted manifest with the deployment record.
 
 ## Startup sequence
 
@@ -198,10 +201,12 @@ sui move test --path src/mir2_mine
 - The checked acceptance marks an observed Sui checkpoint without broadcasting a funded
   transaction. Live testnet publication is an operator ceremony because it requires a private key,
   gas, registry/cap object IDs, and an intentional external write.
-- Host checkpoint v3 commits and restores the durable player/session projection. Autonomous
-  monster movement/combat and shared ground-drop state are not yet serialized as a complete live
-  Zone image; operators must not advertise seamless full-map-state failover until that image is
-  implemented and accepted.
+- Host checkpoint v4 commits an exact durable active-character record plus the private
+  player/session projection and complete shared-Zone state, including equipment durability,
+  monster AI/timers, combat vitals, pending effects, public drops/claims, doors, hazards,
+  trades/rentals, and NPC state. Gate 11 validates two consecutive fenced takeovers.
+- The Gate 11 measurements use localhost TCP hosts. Production RTO/SLO claims still require the
+  same manifest to pass under the deployed network, durable checkpoint store, and scheduler.
 
 The real Mir2 workload acceptance continues in
 [`GATE11-REAL-MIR2-WORKLOAD.md`](GATE11-REAL-MIR2-WORKLOAD.md).

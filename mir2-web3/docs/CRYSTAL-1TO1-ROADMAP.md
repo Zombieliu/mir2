@@ -1,12 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Latest distributed Mir2 workload roadmap sync: 2026-07-23 adds Gate 11.1,
-> which drives a real Crystal login/map join, monster melee damage, inventory
-> drop/pickup, atomic cross-map Zone handoff, checkpoint replication, active
-> host loss, and fenced standby continuation as one TCP-hosted acceptance
-> chain. Player/session state is preserved across takeover. Full autonomous
-> monster/timer/public-drop map-image recovery remains the explicit Gate 11.2
-> item; v3 checkpoints must not yet be represented as whole-map-state failover.
+> Latest distributed Mir2 workload roadmap sync: 2026-07-23 completes Gate
+> 11.1-11.4. Checkpoint v4 combines the journal with a canonical complete Zone
+> image and rebuilds derived occupancy/AOI/ECS state on restore. Real Crystal
+> combat, item drop/pickup, cross-map handoff, monster HP, retained drops, and
+> player vitals survive takeover. Four sessions on two maps then survive two
+> consecutive host failures with old generations rejected. A unified operations
+> binary writes atomic, versioned JSON release evidence including size and RTO.
 
 > Latest developer-handoff roadmap sync: 2026-07-22 establishes a reproducible
 > code-and-assets entry point for another developer. A recursive clone resolves

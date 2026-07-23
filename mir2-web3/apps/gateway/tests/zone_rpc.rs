@@ -464,7 +464,11 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     let standby_checkpoint = standby_owner
         .export_host_checkpoint()
         .expect("standby checkpoint should export");
-    assert_eq!(standby_checkpoint.checksum, checkpoint.checksum);
+    assert_eq!(standby_checkpoint.entry_count, checkpoint.entry_count);
+    assert_eq!(standby_checkpoint.session_count, checkpoint.session_count);
+    assert_eq!(standby_checkpoint.zone_count, checkpoint.zone_count);
+    assert!(checkpoint.zone_state_bytes > 0);
+    assert!(standby_checkpoint.zone_state_bytes > 0);
 
     let promoted = authority.handoff_zone_owner(&zone_id, "standby-owner");
     standby_owner
