@@ -9,6 +9,9 @@ use mir2_protocol::{
     ObjectMovement, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
     Point, ServerPacket, Spell, UserItem, UserItemStat,
 };
+use serde::{Deserialize, Serialize};
+
+mod checkpoint;
 
 use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 use super::aoi_grid::AoiGrid;
@@ -115,7 +118,7 @@ pub struct ZoneRuntime {
     next_object_id: u32,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct ZoneHazardState {
     lightning: bool,
     fire: bool,
@@ -127,13 +130,13 @@ struct ZoneHazardState {
     fire_strikes: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct ZoneObjectDeadState {
     position: Option<Point>,
     direction: Option<MirDirection>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeMonsterHit {
     ready_at_ms: u64,
     session_id: SessionId,
@@ -142,7 +145,7 @@ struct PendingNativeMonsterHit {
     damage: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeProjectile {
     ready_at_ms: u64,
     session_id: SessionId,
@@ -151,7 +154,7 @@ struct PendingNativeProjectile {
     destination_id: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativePlayerHit {
     ready_at_ms: u64,
     attacker_object_id: u32,
@@ -163,19 +166,19 @@ struct PendingNativePlayerHit {
     magic: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativePlayerHeal {
     ready_at_ms: u64,
     session_id: SessionId,
     amount: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeSummon {
     ready_at_ms: u64,
     owner_session_id: SessionId,
     owner_object_id: u32,
-    monster_name: &'static str,
+    monster_name: String,
     max_summons: usize,
     limit_scope: NativeSummonLimitScope,
     expires_at_ms: Option<u64>,
@@ -184,7 +187,7 @@ struct PendingNativeSummon {
     direction: MirDirection,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeGroundSpellAction {
     spell: Spell,
     caster_session_id: SessionId,
@@ -201,13 +204,13 @@ struct PendingNativeGroundSpellAction {
     tick_interval_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 struct ZoneNativeMonsterPlayerStatus {
     poison: u16,
     duration_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 enum NativeSummonLimitScope {
     SameMonster,
     AllOwned,
@@ -343,6 +346,12 @@ impl ZoneRuntime {
         self.players.get(session_id).map(|player| player.direction)
     }
 
+    pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
+        self.players
+            .get(session_id)
+            .map(|player| (player.hp, player.max_hp, player.mp))
+    }
+
     pub fn player_identity(&self, session_id: &SessionId) -> Option<(SessionId, String, i32)> {
         self.players.get(session_id).map(|player| {
             (
@@ -351,6 +360,23 @@ impl ZoneRuntime {
                 player.character_index,
             )
         })
+    }
+
+    fn sync_player_vitals(
+        &mut self,
+        session_id: &SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        player.max_hp = max_hp.max(1);
+        player.hp = hp.clamp(0, player.max_hp);
+        player.mp = mp.max(0);
+        player.dead = player.hp == 0;
+        Vec::new()
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -410,6 +436,12 @@ impl ZoneRuntime {
                 position,
                 direction,
             } => self.sync_player_transform(&session_id, position, direction),
+            ZoneCommand::SyncPlayerVitals {
+                session_id,
+                hp,
+                max_hp,
+                mp,
+            } => self.sync_player_vitals(&session_id, hp, max_hp, mp),
             ZoneCommand::Chat {
                 session_id,
                 message,
@@ -2372,7 +2404,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms.saturating_add(delay_ms),
                         owner_session_id: session_id.clone(),
                         owner_object_id: player.object_id,
-                        monster_name: profile.monster_name,
+                        monster_name: profile.monster_name.to_string(),
                         max_summons: profile.max_summons,
                         limit_scope: profile.limit_scope,
                         expires_at_ms,
@@ -4414,13 +4446,13 @@ impl ZoneRuntime {
         if !owner_present
             || self.active_native_summon_count_for_scope(
                 summon.owner_object_id,
-                summon.monster_name,
+                &summon.monster_name,
                 summon.limit_scope,
             ) >= summon.max_summons
         {
             return Vec::new();
         }
-        let Some(template) = crystal_monster_by_name(summon.monster_name) else {
+        let Some(template) = crystal_monster_by_name(&summon.monster_name) else {
             return Vec::new();
         };
         let object_id = self.unique_object_id(0);

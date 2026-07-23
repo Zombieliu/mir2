@@ -24,6 +24,8 @@ tools/procmon/
 **/bin/
 !mir2-web3/apps/gateway/src/bin/
 !mir2-web3/apps/gateway/src/bin/**
+!mir2-web3/apps/simulation/src/bin/
+!mir2-web3/apps/simulation/src/bin/**
 **/obj/
 
 # Browser automation profiles and transient UI captures

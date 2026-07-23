@@ -22,15 +22,17 @@ pub use config::{
     WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldSnapshot,
 };
 pub use runtime::{
-    intelligent_creature_allows_ground_drop, set_crystal_full_world_zone_collision,
-    zone_ground_drop_snapshots_for_monster_at_tick, ActiveSessionIdentity, ChatPacketPreparation,
-    PlayerId, PreparedChatPacket, SessionId, SharedAccountInventoryTransactionKind,
-    SharedAccountInventoryTransactionReceipt, SharedGroundDropPickupCommit,
-    SharedItemRentalAgreement, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
-    SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, SimulationSession,
-    ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
-    ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZonePlayerCombatStats, ZoneRuntime, CRYSTAL_OBJECT_DATA_RANGE,
+    gate5_demo_scenario, intelligent_creature_allows_ground_drop, run_zone_replay_scenario,
+    set_crystal_full_world_zone_collision, zone_ground_drop_snapshots_for_monster_at_tick,
+    zone_id_for_key, ActiveSessionIdentity, ChatPacketPreparation, PlayerId, PreparedChatPacket,
+    SessionId, SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
+    SharedGroundDropPickupCommit, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer,
+    SimulationSession, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
+    ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward,
+    ZoneMonsterSpawn, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats,
+    ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport, ZoneReplayScenario,
+    ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, WorldCommand, WorldCommandExecution,

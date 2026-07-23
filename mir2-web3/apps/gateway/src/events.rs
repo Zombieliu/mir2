@@ -135,6 +135,13 @@ impl GatewayGameplayEventPublisher {
         // reader fast-path and session events cannot be reordered.
         state.sink.publish(event);
     }
+
+    pub(crate) fn rebind_zone(&self, zone_id: ZoneId) {
+        self.state
+            .lock()
+            .expect("gameplay event publisher mutex should not be poisoned")
+            .zone_id = zone_id;
+    }
 }
 
 #[derive(Debug, Default)]
@@ -353,6 +360,7 @@ fn command_kind_label(kind: &WorldCommandKind) -> String {
         WorldCommandKind::DeleteCharacter => "runtime.deleteCharacter".to_string(),
         WorldCommandKind::CastSkill => "runtime.castSkill".to_string(),
         WorldCommandKind::TransferMap => "runtime.transferMap".to_string(),
+        WorldCommandKind::ApplyHandoffTransform => "runtime.applyHandoffTransform".to_string(),
         WorldCommandKind::Stage5Command(action) => format!("stage5.{action}"),
         WorldCommandKind::GrantOnchainOre => "onchain.grantOre".to_string(),
         WorldCommandKind::CreditGoldFromOre => "onchain.creditGold".to_string(),

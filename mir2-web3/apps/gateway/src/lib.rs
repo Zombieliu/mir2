@@ -1,14 +1,29 @@
 mod auth;
+pub mod beta;
 mod browser_commands;
 pub mod cache;
+pub mod consensus_log;
+pub mod control_plane;
 pub mod events;
+pub mod guild_node_foundation;
 mod inject;
+pub mod mir2_workload;
+pub mod node_identity;
+pub mod node_security;
+pub mod operator;
+pub mod rewards;
 pub mod routing;
 mod session;
 pub mod tcp;
+pub mod topology;
 pub mod web;
 pub mod zone_lease;
+pub mod zone_rpc;
 
+pub use beta::{
+    run_gate10_acceptance, BetaReadinessCheck, BetaReadinessReport, BetaReadinessRequirements,
+    Gate10AcceptanceEvidence, ProductionBetaReadinessProbe,
+};
 pub use cache::{
     default_gateway_session_cache_from_env, fresh_route_request_for_character,
     gateway_session_cache_from_env, gateway_session_cache_requires_redis_from_env,
@@ -19,13 +34,46 @@ pub use cache::{
     GatewaySessionCacheRuntimeBackend, GatewaySessionCacheStatus, GatewaySessionRoute,
     InMemoryGatewaySessionCache, RedisGatewaySessionCache, SharedGatewaySessionCache,
 };
+pub use consensus_log::{
+    CommonwareControlLog, ConsensusEquivocationEvidence, ControlBlock, ControlCommandEnvelope,
+    FinalizedControlBlock, FinalizedControlProjector, ProjectedControlEffect,
+    ReplicatedControlCommand,
+};
+pub use control_plane::{
+    ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostLifecycle, ZoneHostRegistration,
+    ZoneHostSnapshot, ZonePlacementEndpoint, ZonePlacementLease, ZoneRebalanceMove,
+};
 pub use events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSink,
     GameplayEventSinkStatus, GatewayGameplayEvent, InMemoryGameplayEventSink,
     LoggingGameplayEventSink, RedpandaGameplayEventSink, SharedGameplayEventSink,
 };
+pub use guild_node_foundation::{
+    CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
+    GuildNodeStatus, NodeCapacityCertificate, SuiFinalityProof,
+};
 pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;
+pub use mir2_workload::{
+    run_gate11_acceptance, run_gate11_full_acceptance, run_gate11_scale_acceptance,
+    Gate11AcceptanceEvidence, Gate11FinalAcceptanceEvidence, Gate11ScaleEvidence,
+};
+pub use node_identity::{
+    node_id_from_public_key, validate_ed25519_public_key, verify_ed25519_signature,
+    NodeHeartbeatReplayGuard, NodeSigningIdentity,
+};
+pub use node_security::{
+    GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
+    VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
+};
+pub use operator::{
+    serve_zone_host_operator, SignedZoneHostHeartbeat, ZoneHostHeartbeatPayload,
+    ZoneHostOperatorConfig,
+};
+pub use rewards::{
+    GameRewardPolicy, MultiGameRewardLedger, RewardAllocation, RewardClaimProof,
+    RewardNodeEligibility, RewardSettlementBatch, SettlementStatus, VerifiedWorkReceipt,
+};
 pub use routing::{
     HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
     InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneOwnerCommandClient,
@@ -41,3 +89,9 @@ pub use routing::{
     ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
+pub use topology::{ZoneTopology, ZoneTopologyMode};
+pub use zone_rpc::{
+    validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
+    ZoneHostTelemetrySnapshot, ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION,
+    ZONE_RPC_PROTOCOL_VERSION,
+};

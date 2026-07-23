@@ -6,7 +6,8 @@
     "dev": "next dev -p 3020",
     "build": "next build",
     "start": "next start -p 3020",
-    "typecheck": "next typegen && tsc --noEmit --pretty false"
+    "typecheck": "next typegen && tsc --noEmit --pretty false",
+    "check:dubhe-node-snapshot": "node scripts/check-dubhe-node-snapshot.mjs"
   },
   "dependencies": {
     "next": "16.2.11",
@@ -23,6 +24,7 @@
     "node": ">=22"
   },
   "overrides": {
-    "postcss": "8.5.21"
+    "postcss": "8.5.21",
+    "sharp": "0.35.3"
   }
 }

@@ -5,12 +5,15 @@ use crate::runtime::{
     SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, ZoneMonsterSpawn,
 };
 use crate::{
-    ActiveSessionIdentity, ChatPacketPreparation, GroundDropSnapshot, SharedGroundDropPickupCommit,
-    SimulationConfig, SimulationSession, WorldEntitySnapshot, WorldSnapshot,
+    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
+    SharedGroundDropPickupCommit, SimulationConfig, SimulationSession, WorldEntitySnapshot,
+    WorldSnapshot,
 };
-use mir2_protocol::{client_packet_name, ChatItem, ClientPacket, Point, ServerPacket, Spell};
+use mir2_protocol::{
+    client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
+};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
     PasskeyLogin {
@@ -49,6 +52,14 @@ pub enum WorldCommand {
     },
     TransferMap {
         key: String,
+    },
+    /// Trusted Gateway-to-Zone handoff reconciliation. This is never accepted
+    /// on the raw production-player path.
+    ApplyHandoffTransform {
+        position: Point,
+        direction: MirDirection,
+        hp: Option<i32>,
+        mp: Option<i32>,
     },
     Stage5Command {
         action: String,
@@ -91,6 +102,9 @@ pub fn validate_production_player_command(
         }
         WorldCommand::MoveTo { .. } => {
             Err("debug MoveTo is not allowed on the production player path".to_string())
+        }
+        WorldCommand::ApplyHandoffTransform { .. } => {
+            Err("handoff transform is not allowed on the production player path".to_string())
         }
         WorldCommand::Stage5Command { .. } => {
             Err("Stage5Command is not allowed on the production player path".to_string())
@@ -136,6 +150,7 @@ pub enum WorldCommandKind {
     DeleteCharacter,
     CastSkill,
     TransferMap,
+    ApplyHandoffTransform,
     Stage5Command(String),
     GrantOnchainOre,
     CreditGoldFromOre,
@@ -162,6 +177,7 @@ impl WorldCommand {
             Self::DeleteCharacter { .. } => WorldCommandKind::DeleteCharacter,
             Self::CastSkill { .. } => WorldCommandKind::CastSkill,
             Self::TransferMap { .. } => WorldCommandKind::TransferMap,
+            Self::ApplyHandoffTransform { .. } => WorldCommandKind::ApplyHandoffTransform,
             Self::Stage5Command { action, .. } => WorldCommandKind::Stage5Command(action.clone()),
             Self::GrantOnchainOre { .. } => WorldCommandKind::GrantOnchainOre,
             Self::CreditGoldFromOre { .. } => WorldCommandKind::CreditGoldFromOre,
@@ -239,6 +255,15 @@ pub trait WorldRuntime: Send + Sync {
 
     fn world_snapshot(&self) -> WorldSnapshot;
     fn active_identity(&self) -> Option<ActiveSessionIdentity>;
+    fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        None
+    }
+    fn restore_active_character_checkpoint(
+        &mut self,
+        _checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        Err("world runtime does not support active character checkpoint restore".to_string())
+    }
     fn save_active_character(&self);
     fn refresh_active_external_mail(&mut self) -> bool;
 }
@@ -391,6 +416,10 @@ impl InProcessWorldRuntime {
             .force_authoritative_player_transform(position, direction);
     }
 
+    pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
+        self.session.force_authoritative_player_vitals(hp, mp);
+    }
+
     pub fn apply_zone_player_damage(&mut self, damage: i32) {
         self.session.apply_zone_player_damage(damage);
     }
@@ -507,6 +536,17 @@ impl WorldRuntime for InProcessWorldRuntime {
             }
             WorldCommand::CastSkill { key } => self.session.cast_skill(&key),
             WorldCommand::TransferMap { key } => self.session.transfer_map(&key),
+            WorldCommand::ApplyHandoffTransform {
+                position,
+                direction,
+                hp,
+                mp,
+            } => {
+                self.session
+                    .force_authoritative_player_transform(position, direction);
+                self.session.force_authoritative_player_vitals(hp, mp);
+                Vec::new()
+            }
             WorldCommand::Stage5Command { action, args } => {
                 self.session.stage5_command(&action, args)
             }
@@ -548,6 +588,17 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn active_identity(&self) -> Option<ActiveSessionIdentity> {
         self.session.active_identity()
+    }
+
+    fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        self.session.active_character_checkpoint()
+    }
+
+    fn restore_active_character_checkpoint(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session.restore_active_character_checkpoint(checkpoint)
     }
 
     fn save_active_character(&self) {

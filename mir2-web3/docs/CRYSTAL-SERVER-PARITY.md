@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> Latest remote-Zone failover parity note: 2026-07-23 completes Gate 11.1-11.4.
+> Zone RPC v5/checkpoint v4 now restores the private durable session projection
+> and complete shared map image, including player vitals, autonomous monster/AI
+> timers, pending combat/effects, public drops/claims, doors, hazards, map
+> layers, trades/rentals, and NPC state. Real Crystal combat/drop/cross-map
+> handoff survives takeover, and four sessions across two maps survive two
+> consecutive fenced host failures. Release evidence is emitted as one
+> fail-closed JSON manifest; multi-AZ RTO remains a deployment measurement.
+
 > Latest timed system-chat server parity note: 2026-07-23 models Crystal's
 > process-wide `Online Players` and `LineMessage` cadence in Gateway rather than
 > synthesizing fixed browser text. TCP and WebSocket players share one online

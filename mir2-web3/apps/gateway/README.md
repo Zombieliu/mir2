@@ -23,6 +23,9 @@ still depends on human Crystal visual/feel acceptance.
 - `src/browser_commands.rs`: browser command parsing and protocol enum helpers.
 - `src/bin/smoke.rs`: scripted local TCP smoke.
 - `src/bin/packet_trace.rs`: local/live packet trace and matrix artifact harness.
+- `src/bin/gate11_acceptance.rs`: real Crystal-world remote Zone handoff/failover acceptance.
+- `src/bin/gate11_scale_acceptance.rs`: four-session, two-map, two-generation fencing acceptance.
+- `src/bin/gate11_full_acceptance.rs`: fail-closed Gate 11 manifest and atomic evidence writer.
 
 ## Supported Local Flows
 
@@ -81,6 +84,34 @@ Account-store runtime policy:
   simulation steps can be isolated from lightweight HTTP health scheduling.
 - production/staging Passkey and wallet login also requires
   `MIR2_PASSKEY_AUTH_SECRET`.
+- Zone placement can be loaded from `MIR2_ZONE_TOPOLOGY_FILE` or
+  `MIR2_ZONE_TOPOLOGY_JSON`; see `config/zone-topology.example.json`. Explicit
+  groups share quiet maps, while unlisted maps receive a dedicated Zone and
+  every Zone owns its configured tick cadence.
+- Active characters atomically rebind after a topology-changing map transfer.
+  Remote close is owner-fenced and checkpointed, while server shouts and GM
+  announcements use the bounded cross-Zone live message bus.
+- `ZoneHostControlPlane` registers multiple Zone Hosts, schedules primary/replica
+  placement leases by capacity and failure domain, fences rebalances by generation,
+  and drains hosts without accepting new sessions. Zone RPC v5 health advertises
+  host identity, load, capacity, active connections, and drain state, while
+  handoff carries authoritative player vitals.
+- Guild-operated hosts can be wrapped by a threshold verifier: admissions expire and
+  carry narrow capabilities, every command compares canonical packet plus post-state
+  commitments, and divergent/unavailable nodes accumulate strikes and quarantine.
+- The `commonware-2026-2` feature pins Commonware's `v2026.2.0` release and maps
+  finalized epoch/height/view blocks into the Zone scheduler and guild admission
+  registry. Control blocks are event-driven; idle periods do not emit empty blocks.
+- Verified guild execution can emit reward receipts into a per-game, Commonware-governed
+  budget ledger. Gate 9 produces deterministic Merkle batches and an unsigned Sui/Dubhe
+  settlement transaction; guild hosts never receive settlement keys.
+- `cargo run -p mir2-gateway --bin gate10_acceptance` executes the no-secret production-beta
+  path and prints fail-closed readiness JSON plus Prometheus gauges. Set
+  `GATE10_ACCEPTANCE_ITERATIONS` for a bounded deterministic soak.
+- `cargo run -p mir2-gateway --bin gate11_acceptance` runs a real Crystal map workload across
+  two TCP Zone Hosts, then stops the active host and verifies fenced standby continuation.
+- `cargo run -p mir2-gateway --bin gate11_full_acceptance -- --output target/gate11.json` runs
+  the complete v4 Zone-image and repeated-failure suite and atomically writes release evidence.
 
 Admin runtime read endpoints:
 

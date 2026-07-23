@@ -1,10 +1,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use mir2_protocol::Point;
+use serde::Serialize;
 
 use crate::runtime::map::zone_map_collision_data;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct ZoneBounds {
     pub min_x: i32,
     pub max_x: i32,
@@ -30,7 +31,7 @@ impl ZoneBounds {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneCollision {
     bounds: Option<ZoneBounds>,
     blocked_cells: BTreeSet<(i32, i32)>,
