@@ -1,0 +1,21 @@
+{
+  "gate": "12-distribution-node-telemetry",
+  "accepted": true,
+  "generatedAtMs": 1784817433385,
+  "gatewayAddress": "gateway:7000",
+  "primaryHostId": "ed25519:b0148cd2c95f53860f824403adede93ba850d083735182951dca3c1b8ddfd216",
+  "standbyHostId": "ed25519:b444c72cf9487f9ede70b9d76e9a46ff29f5105932c46dbf1acb42983af782d8",
+  "primarySessionCountBeforeFailure": 1,
+  "standbySessionCountBeforeFailure": 1,
+  "standbySessionCountAfterFailure": 1,
+  "primaryHeartbeatVerified": true,
+  "standbyHeartbeatVerified": true,
+  "primaryRemoteCapacityVerified": true,
+  "standbyRemoteCapacityVerified": true,
+  "prometheusMetricVerified": true,
+  "postFailureUserLocationObserved": true,
+  "postFailurePacketCount": 2,
+  "standbyRpcRequestsBeforeFailure": 10,
+  "standbyRpcRequestsAfterFailure": 78,
+  "failoverObservedMs": 814
+}

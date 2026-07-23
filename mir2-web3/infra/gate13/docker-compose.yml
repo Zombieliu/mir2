@@ -1,0 +1,65 @@
+name: obelisk-gate13
+
+services:
+  zone-host:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    environment:
+      MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+      MIR2_ZONE_HOST_METRICS_ADDR: 0.0.0.0:9100
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: zone-host:7020
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: testnet-az-b
+      MIR2_ZONE_HOST_SIGNING_KEY_FILE: /run/secrets/node-signing-key
+      MIR2_ZONE_HOST_KEY_GENERATION: 1
+      MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate13-local-zone-rpc-token}
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
+      MIR2_ZONE_HOST_MAX_SESSIONS: 128
+      MIR2_ZONE_HOST_MAX_ZONES: 8
+      MIR2_ZONE_HOST_CAPACITY_MAX_COMMANDS: 10000
+      MIR2_ZONE_ROUTING_MODE: per_map
+    volumes:
+      - ${GATE13_NODE_SIGNING_KEY_FILE:?set GATE13_NODE_SIGNING_KEY_FILE}:/run/secrets/node-signing-key:ro
+    ports:
+      - "${GATE13_ZONE_RPC_PORT:-27220}:7020"
+      - "${GATE13_ZONE_METRICS_PORT:-29100}:9100"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - obelisk
+
+  acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: acceptance
+    command: ["/usr/local/bin/gate13-acceptance"]
+    environment:
+      GATE13_OPERATOR_ADDR: zone-host:9100
+      GATE13_REGISTRATION_JSON: /evidence-input/active-registration.json
+      GATE13_CAPACITY_ISSUER_KEY_FILE: /run/secrets/capacity-issuer
+      GATE13_EVIDENCE_DIR: /evidence
+    volumes:
+      - ../../docs/generated/gate13/testnet/active-registration.json:/evidence-input/active-registration.json:ro
+      - ${GATE13_CAPACITY_ISSUER_KEY_FILE:?set GATE13_CAPACITY_ISSUER_KEY_FILE}:/run/secrets/capacity-issuer:ro
+      - ${GATE13_EVIDENCE_DIR:-./evidence}:/evidence
+    depends_on:
+      zone-host:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    networks:
+      - obelisk
+
+networks:
+  obelisk:
+    driver: bridge

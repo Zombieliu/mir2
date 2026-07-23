@@ -5,6 +5,8 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 compose_file="${script_dir}/docker-compose.yml"
 evidence_dir="${GATE12_EVIDENCE_DIR:-}"
 keep_stack="${GATE12_KEEP_STACK:-0}"
+repo_root="$(cd -- "${script_dir}/../.." && pwd)"
+key_dir="$(mktemp -d "${TMPDIR:-/tmp}/obelisk-gate12-keys.XXXXXX")"
 
 if [[ -z "${evidence_dir}" ]]; then
   evidence_dir="$(mktemp -d "${TMPDIR:-/tmp}/obelisk-gate12.XXXXXX")"
@@ -13,9 +15,20 @@ mkdir -p "${evidence_dir}"
 evidence_dir="$(cd -- "${evidence_dir}" && pwd)"
 export GATE12_EVIDENCE_DIR="${evidence_dir}"
 
+cargo +1.89.0 run --quiet --manifest-path "${repo_root}/Cargo.toml" \
+  -p mir2-gateway --bin node_identity -- generate "${key_dir}/zone-a.key" \
+  >/dev/null
+cargo +1.89.0 run --quiet --manifest-path "${repo_root}/Cargo.toml" \
+  -p mir2-gateway --bin node_identity -- generate "${key_dir}/zone-b.key" \
+  >/dev/null
+export GATE12_ZONE_A_SIGNING_KEY_FILE="${key_dir}/zone-a.key"
+export GATE12_ZONE_B_SIGNING_KEY_FILE="${key_dir}/zone-b.key"
+
 cleanup() {
   if [[ "${keep_stack}" != "1" ]]; then
     docker compose -f "${compose_file}" --profile acceptance down --volumes --remove-orphans
+    rm -f "${key_dir}/zone-a.key" "${key_dir}/zone-b.key"
+    rmdir "${key_dir}"
   fi
 }
 trap cleanup EXIT

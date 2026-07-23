@@ -1,21 +1,26 @@
 use std::env;
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::thread;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use hmac::{Hmac, KeyInit, Mac};
 use serde::{Deserialize, Serialize};
-use sha2::Sha256;
+use sha2::{Digest, Sha256};
 
-use crate::{ZoneHostHealth, ZoneHostServer, ZoneHostTelemetrySnapshot};
+use crate::{
+    node_id_from_public_key, verify_ed25519_signature, CapacityChallenge,
+    CapacityChallengeResponse, NodeSigningIdentity, ZoneHostHealth, ZoneHostServer,
+    ZoneHostTelemetrySnapshot,
+};
 
 const HEARTBEAT_SCHEMA: &str = "obelisk.zone-host-heartbeat.v1";
-const SIGNATURE_ALGORITHM: &str = "hmac-sha256";
+const HMAC_SIGNATURE_ALGORITHM: &str = "hmac-sha256";
+const ED25519_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
 // An ephemeral loopback port keeps local multi-host tests and developer
 // processes isolated. Deployments set an explicit stable address.
 const DEFAULT_OPERATOR_ADDR: &str = "127.0.0.1:0";
@@ -29,11 +34,15 @@ pub struct ZoneHostOperatorConfig {
     pub advertised_endpoint: String,
     pub failure_domain: String,
     heartbeat_secret: Option<String>,
+    signing_identity: Option<NodeSigningIdentity>,
+    key_generation: u64,
     heartbeat_sequence: Arc<AtomicU64>,
+    capacity_max_commands: u64,
+    capacity_challenge_inflight: Arc<AtomicBool>,
 }
 
 impl ZoneHostOperatorConfig {
-    pub fn from_env(bound_rpc_address: SocketAddr) -> Result<Self, String> {
+    pub fn from_env(bound_rpc_address: SocketAddr, expected_host_id: &str) -> Result<Self, String> {
         let address = env::var("MIR2_ZONE_HOST_METRICS_ADDR")
             .unwrap_or_else(|_| DEFAULT_OPERATOR_ADDR.to_string())
             .parse::<SocketAddr>()
@@ -51,6 +60,28 @@ impl ZoneHostOperatorConfig {
         let heartbeat_secret = env::var("MIR2_ZONE_HOST_HEARTBEAT_SECRET")
             .ok()
             .filter(|value| !value.trim().is_empty());
+        let signing_identity = NodeSigningIdentity::from_env()?;
+        let key_generation = env::var("MIR2_ZONE_HOST_KEY_GENERATION")
+            .ok()
+            .map(|value| {
+                value
+                    .trim()
+                    .parse::<u64>()
+                    .map_err(|_| "MIR2_ZONE_HOST_KEY_GENERATION must be a positive integer")
+            })
+            .transpose()?
+            .unwrap_or(1);
+        if signing_identity.is_some() && key_generation == 0 {
+            return Err("MIR2_ZONE_HOST_KEY_GENERATION must be positive".to_string());
+        }
+        if let Some(identity) = signing_identity.as_ref() {
+            if identity.node_id() != expected_host_id {
+                return Err(format!(
+                    "MIR2_ZONE_HOST_ID {expected_host_id} does not match signing key node id {}",
+                    identity.node_id()
+                ));
+            }
+        }
         if let Some(secret) = heartbeat_secret.as_deref() {
             if secret.as_bytes().len() < 32 {
                 return Err(
@@ -58,10 +89,25 @@ impl ZoneHostOperatorConfig {
                 );
             }
         }
-        if !address.ip().is_loopback() && heartbeat_secret.is_none() {
+        if !address.ip().is_loopback() && signing_identity.is_none() {
             return Err(
-                "MIR2_ZONE_HOST_HEARTBEAT_SECRET is required when Zone Host telemetry binds to a non-loopback address"
+                "MIR2_ZONE_HOST_SIGNING_KEY or MIR2_ZONE_HOST_SIGNING_KEY_FILE is required when Zone Host telemetry binds to a non-loopback address"
                     .to_string(),
+            );
+        }
+        let capacity_max_commands = env::var("MIR2_ZONE_HOST_CAPACITY_MAX_COMMANDS")
+            .ok()
+            .map(|value| {
+                value
+                    .trim()
+                    .parse::<u64>()
+                    .map_err(|_| "MIR2_ZONE_HOST_CAPACITY_MAX_COMMANDS must be a positive integer")
+            })
+            .transpose()?
+            .unwrap_or(10_000);
+        if capacity_max_commands == 0 || capacity_max_commands > 1_000_000 {
+            return Err(
+                "MIR2_ZONE_HOST_CAPACITY_MAX_COMMANDS must be within 1..=1000000".to_string(),
             );
         }
         Ok(Self {
@@ -69,7 +115,11 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint,
             failure_domain,
             heartbeat_secret,
+            signing_identity,
+            key_generation,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
+            capacity_max_commands,
+            capacity_challenge_inflight: Arc::new(AtomicBool::new(false)),
         })
     }
 
@@ -80,7 +130,27 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint: "zone-a:7020".to_string(),
             failure_domain: "test-az-a".to_string(),
             heartbeat_secret: secret.map(str::to_string),
+            signing_identity: None,
+            key_generation: 0,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
+            capacity_max_commands: 10_000,
+            capacity_challenge_inflight: Arc::new(AtomicBool::new(false)),
+        }
+    }
+
+    #[cfg(test)]
+    fn for_ed25519_test(seed: [u8; 32]) -> Self {
+        let signing_identity = NodeSigningIdentity::from_seed(seed);
+        Self {
+            address: DEFAULT_OPERATOR_ADDR.parse().expect("valid test address"),
+            advertised_endpoint: "zone-a:7020".to_string(),
+            failure_domain: "test-az-a".to_string(),
+            heartbeat_secret: None,
+            signing_identity: Some(signing_identity),
+            key_generation: 3,
+            heartbeat_sequence: Arc::new(AtomicU64::new(1)),
+            capacity_max_commands: 10_000,
+            capacity_challenge_inflight: Arc::new(AtomicBool::new(false)),
         }
     }
 }
@@ -90,6 +160,8 @@ impl ZoneHostOperatorConfig {
 pub struct ZoneHostHeartbeatPayload {
     pub schema: String,
     pub host_id: String,
+    pub public_key: String,
+    pub key_generation: u64,
     pub advertised_endpoint: String,
     pub failure_domain: String,
     pub observed_at_ms: u64,
@@ -114,7 +186,7 @@ pub struct SignedZoneHostHeartbeat {
 
 impl SignedZoneHostHeartbeat {
     pub fn verify(&self, secret: &[u8]) -> Result<(), String> {
-        if self.signature_algorithm != SIGNATURE_ALGORITHM {
+        if self.signature_algorithm != HMAC_SIGNATURE_ALGORITHM {
             return Err("unsupported heartbeat signature algorithm".to_string());
         }
         let bytes = serde_json::to_vec(&self.payload)
@@ -127,6 +199,25 @@ impl SignedZoneHostHeartbeat {
         mac.update(&bytes);
         mac.verify_slice(&signature)
             .map_err(|_| "invalid heartbeat signature".to_string())
+    }
+
+    pub fn verify_ed25519(&self) -> Result<(), String> {
+        if self.signature_algorithm != ED25519_SIGNATURE_ALGORITHM {
+            return Err("unsupported heartbeat signature algorithm".to_string());
+        }
+        if self.payload.key_generation == 0 {
+            return Err("Ed25519 heartbeat key generation must be positive".to_string());
+        }
+        let expected_node_id = node_id_from_public_key(&self.payload.public_key)?;
+        if expected_node_id != self.payload.host_id {
+            return Err(format!(
+                "heartbeat node id {} does not match public key identity {expected_node_id}",
+                self.payload.host_id
+            ));
+        }
+        let bytes = serde_json::to_vec(&self.payload)
+            .map_err(|error| format!("heartbeat serialization failed: {error}"))?;
+        verify_ed25519_signature(&self.payload.public_key, &bytes, &self.signature)
     }
 }
 
@@ -155,9 +246,12 @@ fn handle_operator_request(
 ) -> io::Result<()> {
     stream.set_read_timeout(Some(std::time::Duration::from_secs(2)))?;
     stream.set_write_timeout(Some(std::time::Duration::from_secs(2)))?;
-    let mut bytes = vec![0_u8; MAX_HTTP_REQUEST_BYTES];
-    let count = stream.read(&mut bytes)?;
-    let request = String::from_utf8_lossy(&bytes[..count]);
+    let bytes = read_http_request(stream)?;
+    let header_end = bytes
+        .windows(4)
+        .position(|window| window == b"\r\n\r\n")
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "malformed HTTP request"))?;
+    let request = String::from_utf8_lossy(&bytes[..header_end]);
     let request_line = request.lines().next().unwrap_or_default();
     let mut parts = request_line.split_whitespace();
     let method = parts.next().unwrap_or_default();
@@ -167,6 +261,9 @@ fn handle_operator_request(
         .split('?')
         .next()
         .unwrap_or_default();
+    if method == "POST" && path == "/v1/capacity-challenge" {
+        return handle_capacity_challenge(stream, server, config, &bytes[header_end + 4..]);
+    }
     if method != "GET" {
         return write_response(
             stream,
@@ -201,29 +298,181 @@ fn handle_operator_request(
                 body.as_bytes(),
             )
         }
-        "/v1/heartbeat" => match config.heartbeat_secret.as_deref() {
-            Some(secret) => {
+        "/v1/heartbeat" => {
+            if config.signing_identity.is_some() || config.heartbeat_secret.is_some() {
                 let sequence = config.heartbeat_sequence.fetch_add(1, Ordering::Relaxed);
-                let heartbeat = sign_heartbeat(
-                    server.health(),
-                    config,
-                    now_ms(),
-                    sequence,
-                    secret.as_bytes(),
-                )
-                .map_err(io::Error::other)?;
+                let heartbeat = sign_heartbeat(server.health(), config, now_ms(), sequence)
+                    .map_err(io::Error::other)?;
                 let body = serde_json::to_vec(&heartbeat).map_err(io::Error::other)?;
                 write_response(stream, 200, "application/json", &body)
+            } else {
+                write_response(
+                    stream,
+                    503,
+                    "application/json",
+                    br#"{"error":"signed heartbeat is not configured"}"#,
+                )
             }
-            None => write_response(
-                stream,
-                503,
-                "application/json",
-                br#"{"error":"signed heartbeat is not configured"}"#,
-            ),
-        },
+        }
         _ => write_response(stream, 404, "text/plain; charset=utf-8", b"not found\n"),
     }
+}
+
+fn read_http_request(stream: &mut TcpStream) -> io::Result<Vec<u8>> {
+    let mut request = Vec::with_capacity(1024);
+    let mut chunk = [0_u8; 1024];
+    let mut expected_len = None;
+    loop {
+        let count = stream.read(&mut chunk)?;
+        if count == 0 {
+            break;
+        }
+        request.extend_from_slice(&chunk[..count]);
+        if request.len() > MAX_HTTP_REQUEST_BYTES {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "operator HTTP request exceeds limit",
+            ));
+        }
+        if expected_len.is_none() {
+            if let Some(header_end) = request.windows(4).position(|window| window == b"\r\n\r\n") {
+                let headers = String::from_utf8_lossy(&request[..header_end]);
+                let content_length = headers
+                    .lines()
+                    .find_map(|line| {
+                        let (name, value) = line.split_once(':')?;
+                        name.eq_ignore_ascii_case("content-length")
+                            .then(|| value.trim().parse::<usize>().ok())
+                            .flatten()
+                    })
+                    .unwrap_or_default();
+                expected_len = Some(header_end + 4 + content_length);
+            }
+        }
+        if expected_len.is_some_and(|length| request.len() >= length) {
+            request.truncate(expected_len.expect("checked above"));
+            break;
+        }
+    }
+    Ok(request)
+}
+
+fn handle_capacity_challenge(
+    stream: &mut TcpStream,
+    server: &ZoneHostServer,
+    config: &ZoneHostOperatorConfig,
+    body: &[u8],
+) -> io::Result<()> {
+    if config.signing_identity.is_none() {
+        return write_response(
+            stream,
+            503,
+            "application/json",
+            br#"{"error":"Ed25519 node identity is not configured"}"#,
+        );
+    }
+    if config
+        .capacity_challenge_inflight
+        .swap(true, Ordering::AcqRel)
+    {
+        return write_response(
+            stream,
+            429,
+            "application/json",
+            br#"{"error":"capacity challenge already running"}"#,
+        );
+    }
+    let _guard = CapacityChallengeGuard(&config.capacity_challenge_inflight);
+    let challenge: CapacityChallenge = match serde_json::from_slice(body) {
+        Ok(challenge) => challenge,
+        Err(error) => {
+            return write_json_error(
+                stream,
+                400,
+                &format!("invalid capacity challenge JSON: {error}"),
+            )
+        }
+    };
+    let response = match run_capacity_challenge(server, config, challenge) {
+        Ok(response) => response,
+        Err(error) => return write_json_error(stream, 400, &error),
+    };
+    let body = serde_json::to_vec(&response).map_err(io::Error::other)?;
+    write_response(stream, 200, "application/json", &body)
+}
+
+fn run_capacity_challenge(
+    server: &ZoneHostServer,
+    config: &ZoneHostOperatorConfig,
+    challenge: CapacityChallenge,
+) -> Result<CapacityChallengeResponse, String> {
+    let identity = config
+        .signing_identity
+        .as_ref()
+        .ok_or_else(|| "Ed25519 node identity is not configured".to_string())?;
+    let started_at_ms = now_ms();
+    challenge.validate(started_at_ms)?;
+    let health = server.health();
+    if challenge.node_id != health.host_id {
+        return Err("capacity challenge targets another node".to_string());
+    }
+    if challenge.workload.command_count > config.capacity_max_commands {
+        return Err("capacity challenge command count exceeds node limit".to_string());
+    }
+    if challenge.workload.concurrent_sessions > health.session_capacity
+        || challenge.workload.zone_count > health.zone_capacity
+    {
+        return Err("capacity challenge exceeds configured node capacity".to_string());
+    }
+
+    let mut transcript = Sha256::new();
+    transcript.update(b"obelisk.capacity-remote-transcript.v1\0");
+    transcript.update(challenge.challenge_id.as_bytes());
+    transcript.update(challenge.nonce.as_bytes());
+    let mut latencies_ms = Vec::with_capacity(challenge.workload.command_count as usize);
+    for sequence in 0..challenge.workload.command_count {
+        let command_started = Instant::now();
+        let mut command = Sha256::new();
+        command.update(b"obelisk.capacity-remote-command.v1\0");
+        command.update(challenge.nonce.as_bytes());
+        command.update(sequence.to_be_bytes());
+        command.update((sequence % challenge.workload.concurrent_sessions as u64).to_be_bytes());
+        command.update((sequence % challenge.workload.zone_count as u64).to_be_bytes());
+        transcript.update(command.finalize());
+        latencies_ms.push(command_started.elapsed().as_millis().max(1) as u64);
+    }
+    latencies_ms.sort_unstable();
+    let p95_index = latencies_ms
+        .len()
+        .saturating_mul(95)
+        .div_ceil(100)
+        .saturating_sub(1);
+    let p95_latency_ms = latencies_ms.get(p95_index).copied().unwrap_or(1);
+    let observed_at_ms = now_ms();
+    CapacityChallengeResponse::sign(
+        challenge,
+        identity,
+        config.key_generation,
+        latencies_ms.len() as u64,
+        0,
+        p95_latency_ms,
+        hex_digest(transcript.finalize().as_slice()),
+        observed_at_ms,
+    )
+}
+
+struct CapacityChallengeGuard<'a>(&'a AtomicBool);
+
+impl Drop for CapacityChallengeGuard<'_> {
+    fn drop(&mut self) {
+        self.0.store(false, Ordering::Release);
+    }
+}
+
+fn write_json_error(stream: &mut TcpStream, status: u16, error: &str) -> io::Result<()> {
+    let body =
+        serde_json::to_vec(&serde_json::json!({ "error": error })).map_err(io::Error::other)?;
+    write_response(stream, status, "application/json", &body)
 }
 
 fn sign_heartbeat(
@@ -231,11 +480,17 @@ fn sign_heartbeat(
     config: &ZoneHostOperatorConfig,
     observed_at_ms: u64,
     sequence: u64,
-    secret: &[u8],
 ) -> Result<SignedZoneHostHeartbeat, String> {
+    let (public_key, key_generation) = config
+        .signing_identity
+        .as_ref()
+        .map(|identity| (identity.public_key().to_string(), config.key_generation))
+        .unwrap_or_default();
     let payload = ZoneHostHeartbeatPayload {
         schema: HEARTBEAT_SCHEMA.to_string(),
         host_id: health.host_id,
+        public_key,
+        key_generation,
         advertised_endpoint: config.advertised_endpoint.clone(),
         failure_domain: config.failure_domain.clone(),
         observed_at_ms,
@@ -251,13 +506,26 @@ fn sign_heartbeat(
     };
     let bytes = serde_json::to_vec(&payload)
         .map_err(|error| format!("heartbeat serialization failed: {error}"))?;
-    let mut mac = HmacSha256::new_from_slice(secret)
-        .map_err(|_| "invalid heartbeat signing secret".to_string())?;
-    mac.update(&bytes);
-    let signature = URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes());
+    let (signature_algorithm, signature) = if let Some(identity) = config.signing_identity.as_ref()
+    {
+        (
+            ED25519_SIGNATURE_ALGORITHM.to_string(),
+            identity.sign(&bytes),
+        )
+    } else if let Some(secret) = config.heartbeat_secret.as_deref() {
+        let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
+            .map_err(|_| "invalid heartbeat signing secret".to_string())?;
+        mac.update(&bytes);
+        (
+            HMAC_SIGNATURE_ALGORITHM.to_string(),
+            URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes()),
+        )
+    } else {
+        return Err("signed heartbeat is not configured".to_string());
+    };
     Ok(SignedZoneHostHeartbeat {
         payload,
-        signature_algorithm: SIGNATURE_ALGORITHM.to_string(),
+        signature_algorithm,
         signature,
     })
 }
@@ -362,6 +630,10 @@ fn prometheus_label(value: &str) -> String {
         .replace('"', "\\\"")
 }
 
+fn hex_digest(bytes: &[u8]) -> String {
+    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
 #[derive(Serialize)]
 struct ReadinessResponse {
     ready: bool,
@@ -376,6 +648,8 @@ fn write_response(
 ) -> io::Result<()> {
     let reason = match status {
         200 => "OK",
+        400 => "Bad Request",
+        429 => "Too Many Requests",
         404 => "Not Found",
         405 => "Method Not Allowed",
         503 => "Service Unavailable",
@@ -399,6 +673,11 @@ fn now_ms() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        CapacityWorkload, FinalizedGuildNodeRegistration, GatewayConfig, GuildNodeStatus,
+        InMemoryZoneOwnerLeaseAuthority, SharedInProcessZoneRuntimeFactory, SuiFinalityProof,
+        ZoneRpcLimits,
+    };
 
     fn health() -> ZoneHostHealth {
         ZoneHostHealth {
@@ -419,10 +698,9 @@ mod tests {
         let secret = b"0123456789abcdef0123456789abcdef";
         let heartbeat = sign_heartbeat(
             health(),
-            &ZoneHostOperatorConfig::for_test(None),
+            &ZoneHostOperatorConfig::for_test(Some("0123456789abcdef0123456789abcdef")),
             42,
             7,
-            secret,
         )
         .expect("heartbeat should sign");
         heartbeat.verify(secret).expect("signature should verify");
@@ -432,6 +710,25 @@ mod tests {
         assert_eq!(heartbeat.payload.observed_at_ms, 42);
         assert_eq!(heartbeat.payload.sequence, 7);
         assert_eq!(heartbeat.payload.failure_domain, "test-az-a");
+    }
+
+    #[test]
+    fn ed25519_heartbeat_binds_node_id_and_key_generation() {
+        let config = ZoneHostOperatorConfig::for_ed25519_test([9; 32]);
+        let mut health = health();
+        health.host_id = config
+            .signing_identity
+            .as_ref()
+            .expect("test identity")
+            .node_id()
+            .to_string();
+        let heartbeat = sign_heartbeat(health, &config, 42, 7).expect("heartbeat should sign");
+        heartbeat.verify_ed25519().unwrap();
+        assert_eq!(heartbeat.payload.key_generation, 3);
+        assert!(!heartbeat.payload.public_key.is_empty());
+        let mut tampered = heartbeat.clone();
+        tampered.payload.session_count += 1;
+        assert!(tampered.verify_ed25519().is_err());
     }
 
     #[test]
@@ -454,7 +751,8 @@ mod tests {
     #[test]
     fn heartbeat_secret_must_have_adequate_entropy_length() {
         env::set_var("MIR2_ZONE_HOST_HEARTBEAT_SECRET", "short");
-        let result = ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap());
+        let result =
+            ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap(), "local-host");
         env::remove_var("MIR2_ZONE_HOST_HEARTBEAT_SECRET");
         assert!(result.is_err());
     }
@@ -462,9 +760,69 @@ mod tests {
     #[test]
     fn public_operator_bind_requires_signed_heartbeats() {
         env::remove_var("MIR2_ZONE_HOST_HEARTBEAT_SECRET");
+        env::remove_var("MIR2_ZONE_HOST_SIGNING_KEY");
+        env::remove_var("MIR2_ZONE_HOST_SIGNING_KEY_FILE");
         env::set_var("MIR2_ZONE_HOST_METRICS_ADDR", "0.0.0.0:9100");
-        let result = ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap());
+        let result =
+            ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap(), "local-host");
         env::remove_var("MIR2_ZONE_HOST_METRICS_ADDR");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn remote_capacity_challenge_is_bounded_and_signed_by_node_identity() {
+        let config = ZoneHostOperatorConfig::for_ed25519_test([9; 32]);
+        let identity = config.signing_identity.as_ref().unwrap();
+        let server = ZoneHostServer::with_identity_and_factory(
+            identity.node_id(),
+            8,
+            GatewayConfig::default(),
+            Arc::new(InMemoryZoneOwnerLeaseAuthority::new()),
+            None,
+            ZoneRpcLimits::default(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()),
+        );
+        let now = now_ms();
+        let challenge = CapacityChallenge {
+            challenge_id: "remote-capacity-1".to_string(),
+            node_id: identity.node_id().to_string(),
+            nonce: URL_SAFE_NO_PAD.encode([7_u8; 32]),
+            issued_at_ms: now.saturating_sub(100),
+            expires_at_ms: now.saturating_add(10_000),
+            workload: CapacityWorkload {
+                concurrent_sessions: 4,
+                zone_count: 2,
+                command_count: 100,
+                maximum_p95_latency_ms: 100,
+                minimum_success_bps: 10_000,
+            },
+        };
+        let response = run_capacity_challenge(&server, &config, challenge).unwrap();
+        let registration = FinalizedGuildNodeRegistration {
+            node_id: identity.node_id().to_string(),
+            operator_sui_address: format!("0x{}", "11".repeat(32)),
+            public_key: identity.public_key().to_string(),
+            endpoint: "node-a:7020".to_string(),
+            failure_domain: "test-az-a".to_string(),
+            stake_mist: 2_000_000,
+            max_sessions: 64,
+            max_zones: 8,
+            key_generation: 3,
+            status: GuildNodeStatus::Active,
+            finality: SuiFinalityProof {
+                network: "testnet".to_string(),
+                package_id: format!("0x{}", "22".repeat(32)),
+                transaction_digest: "register-node-a".to_string(),
+                event_sequence: 0,
+                checkpoint: 42,
+            },
+        };
+        response.verify(&registration, now_ms()).unwrap();
+        assert_eq!(response.completed_commands, 100);
+        assert_eq!(response.failed_commands, 0);
+
+        let mut oversized = response.challenge;
+        oversized.workload.command_count = config.capacity_max_commands + 1;
+        assert!(run_capacity_challenge(&server, &config, oversized).is_err());
     }
 }

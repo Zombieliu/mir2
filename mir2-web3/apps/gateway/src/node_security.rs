@@ -13,6 +13,7 @@ use crate::routing::{
     SharedZoneLiveOutboundSender, SharedZoneOwnerRpcTransport, ZoneLiveOutboundRegistration,
     ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport,
 };
+use crate::{FinalizedGuildNodeRegistration, GuildNodeStatus, NodeCapacityCertificate};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -28,6 +29,10 @@ pub struct GuildNodeAdmission {
     pub operator_id: String,
     pub expires_at_ms: u64,
     pub capabilities: BTreeSet<GuildNodeCapability>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finalized_registration: Option<FinalizedGuildNodeRegistration>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capacity_certificate: Option<NodeCapacityCertificate>,
 }
 
 impl GuildNodeAdmission {
@@ -41,7 +46,45 @@ impl GuildNodeAdmission {
             operator_id: operator_id.into(),
             expires_at_ms,
             capabilities: BTreeSet::from([GuildNodeCapability::ExecuteZone]),
+            finalized_registration: None,
+            capacity_certificate: None,
         }
+    }
+
+    pub fn from_finalized(
+        registration: FinalizedGuildNodeRegistration,
+        certificate: NodeCapacityCertificate,
+    ) -> Result<Self, String> {
+        registration.validate()?;
+        if registration.status != GuildNodeStatus::Active {
+            return Err("cannot admit a revoked guild node".to_string());
+        }
+        if certificate.node_id != registration.node_id
+            || certificate.public_key != registration.public_key
+            || certificate.key_generation != registration.key_generation
+        {
+            return Err(
+                "capacity certificate does not match finalized guild node registration".to_string(),
+            );
+        }
+        if certificate.max_sessions > registration.max_sessions
+            || certificate.max_zones > registration.max_zones
+        {
+            return Err(
+                "capacity certificate exceeds the node's Sui-registered capacity".to_string(),
+            );
+        }
+        Ok(Self {
+            node_id: registration.node_id.clone(),
+            operator_id: registration.operator_sui_address.clone(),
+            expires_at_ms: certificate.expires_at_ms,
+            capabilities: BTreeSet::from([
+                GuildNodeCapability::ExecuteZone,
+                GuildNodeCapability::ReplicateCheckpoint,
+            ]),
+            finalized_registration: Some(registration),
+            capacity_certificate: Some(certificate),
+        })
     }
 }
 
@@ -68,6 +111,7 @@ pub struct GuildNodeSecurityRegistry {
     nodes: Mutex<BTreeMap<String, GuildNodeSecurityRecord>>,
     strike_limit: u32,
     quarantine_ms: u64,
+    trusted_capacity_issuers: BTreeSet<String>,
 }
 
 impl GuildNodeSecurityRegistry {
@@ -76,12 +120,34 @@ impl GuildNodeSecurityRegistry {
             nodes: Mutex::new(BTreeMap::new()),
             strike_limit: strike_limit.max(1),
             quarantine_ms: quarantine_ms.max(1),
+            trusted_capacity_issuers: BTreeSet::new(),
         }
+    }
+
+    pub fn with_trusted_capacity_issuers(
+        strike_limit: u32,
+        quarantine_ms: u64,
+        issuers: impl IntoIterator<Item = String>,
+    ) -> Result<Self, String> {
+        let trusted_capacity_issuers = issuers.into_iter().collect::<BTreeSet<_>>();
+        if trusted_capacity_issuers.is_empty() {
+            return Err("permissionless guild registry needs a capacity issuer".to_string());
+        }
+        for issuer in &trusted_capacity_issuers {
+            crate::validate_ed25519_public_key(issuer)?;
+        }
+        Ok(Self {
+            nodes: Mutex::new(BTreeMap::new()),
+            strike_limit: strike_limit.max(1),
+            quarantine_ms: quarantine_ms.max(1),
+            trusted_capacity_issuers,
+        })
     }
 
     pub fn admit(&self, admission: GuildNodeAdmission, now_ms: u64) -> Result<(), String> {
         validate_identity("guild node id", &admission.node_id)?;
         validate_identity("guild operator id", &admission.operator_id)?;
+        self.validate_admission_foundation(&admission, now_ms)?;
         if admission.expires_at_ms <= now_ms {
             return Err(format!(
                 "guild node admission {} is already expired",
@@ -110,6 +176,18 @@ impl GuildNodeSecurityRegistry {
         Ok(())
     }
 
+    pub fn admit_finalized(
+        &self,
+        registration: FinalizedGuildNodeRegistration,
+        certificate: NodeCapacityCertificate,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        self.admit(
+            GuildNodeAdmission::from_finalized(registration, certificate)?,
+            now_ms,
+        )
+    }
+
     pub fn revoke(&self, node_id: &str) -> bool {
         self.nodes
             .lock()
@@ -127,6 +205,11 @@ impl GuildNodeSecurityRegistry {
                 record.admission.expires_at_ms > now_ms
                     && record.quarantine_until_ms <= now_ms
                     && record.admission.capabilities.contains(&capability)
+                    && record
+                        .admission
+                        .capacity_certificate
+                        .as_ref()
+                        .is_none_or(|certificate| certificate.expires_at_ms > now_ms)
             })
     }
 
@@ -167,6 +250,56 @@ impl GuildNodeSecurityRegistry {
                     record.strikes = 0;
                 }
             }
+        }
+    }
+
+    fn validate_admission_foundation(
+        &self,
+        admission: &GuildNodeAdmission,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        match (
+            admission.finalized_registration.as_ref(),
+            admission.capacity_certificate.as_ref(),
+        ) {
+            (Some(registration), Some(certificate)) => {
+                registration.validate()?;
+                if registration.status != GuildNodeStatus::Active {
+                    return Err("guild node is revoked in finalized Sui state".to_string());
+                }
+                if registration.node_id != admission.node_id
+                    || registration.operator_sui_address != admission.operator_id
+                    || certificate.node_id != admission.node_id
+                    || certificate.public_key != registration.public_key
+                    || certificate.key_generation != registration.key_generation
+                {
+                    return Err(
+                        "guild admission identity does not match finalized registration"
+                            .to_string(),
+                    );
+                }
+                if !self
+                    .trusted_capacity_issuers
+                    .contains(&certificate.issuer_public_key)
+                {
+                    return Err("guild capacity certificate issuer is not trusted".to_string());
+                }
+                certificate.verify(&certificate.issuer_public_key, now_ms)?;
+                if admission.expires_at_ms != certificate.expires_at_ms {
+                    return Err(
+                        "guild admission expiry must match capacity certificate".to_string()
+                    );
+                }
+                Ok(())
+            }
+            (None, None) if self.trusted_capacity_issuers.is_empty() => Ok(()),
+            (None, None) => Err(
+                "permissionless guild admission requires Sui finality and capacity proof".into(),
+            ),
+            _ => Err(
+                "guild admission requires both finalized registration and capacity certificate"
+                    .to_string(),
+            ),
         }
     }
 }
@@ -641,10 +774,13 @@ fn validate_identity(label: &str, value: &str) -> Result<(), String> {
 mod tests {
     use super::*;
     use crate::{
-        GatewayConfig, HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
-        SharedInProcessZoneRuntimeFactory, SharedZoneOwnerLeaseAuthority, ZoneId,
+        CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, GatewayConfig,
+        HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority, NodeSigningIdentity,
+        SharedInProcessZoneRuntimeFactory, SharedZoneOwnerLeaseAuthority, SuiFinalityProof, ZoneId,
         ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneRuntimeFactory,
     };
+    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    use base64::Engine;
     use mir2_protocol::{ClientPacket, ServerPacket};
     use mir2_simulation::WorldCommand;
 
@@ -671,6 +807,52 @@ mod tests {
                 runtime, authority,
             )),
         }
+    }
+
+    fn finalized_admission(
+        node: &NodeSigningIdentity,
+        issuer: &NodeSigningIdentity,
+    ) -> (FinalizedGuildNodeRegistration, NodeCapacityCertificate) {
+        let registration = FinalizedGuildNodeRegistration {
+            node_id: node.node_id().to_string(),
+            operator_sui_address: format!("0x{}", "11".repeat(32)),
+            public_key: node.public_key().to_string(),
+            endpoint: "node-a:7020".to_string(),
+            failure_domain: "test-az-a".to_string(),
+            stake_mist: 2_000_000,
+            max_sessions: 128,
+            max_zones: 8,
+            key_generation: 1,
+            status: GuildNodeStatus::Active,
+            finality: SuiFinalityProof {
+                network: "testnet".to_string(),
+                package_id: format!("0x{}", "22".repeat(32)),
+                transaction_digest: "register-node-a".to_string(),
+                event_sequence: 0,
+                checkpoint: 42,
+            },
+        };
+        let challenge = CapacityChallenge {
+            challenge_id: "challenge-a".to_string(),
+            node_id: registration.node_id.clone(),
+            nonce: URL_SAFE_NO_PAD.encode([3_u8; 32]),
+            issued_at_ms: 1_000,
+            expires_at_ms: 5_000,
+            workload: CapacityWorkload {
+                concurrent_sessions: 64,
+                zone_count: 4,
+                command_count: 100,
+                maximum_p95_latency_ms: 50,
+                minimum_success_bps: 9_900,
+            },
+        };
+        let response =
+            CapacityChallengeResponse::sign(challenge, node, 1, 100, 0, 20, "ab".repeat(32), 2_000)
+                .unwrap();
+        let certificate =
+            NodeCapacityCertificate::issue(&response, &registration, issuer, 2_500, 10_000, 1)
+                .unwrap();
+        (registration, certificate)
     }
 
     #[derive(Debug)]
@@ -779,6 +961,51 @@ mod tests {
             ))
             .expect_err("expired admission must fail closed");
         assert!(error.contains("quorum unavailable"));
+    }
+
+    #[test]
+    fn permissionless_admission_requires_sui_finality_and_trusted_capacity_issuer() {
+        let node = NodeSigningIdentity::from_seed([7; 32]);
+        let issuer = NodeSigningIdentity::from_seed([9; 32]);
+        let untrusted = NodeSigningIdentity::from_seed([10; 32]);
+        let (registration, certificate) = finalized_admission(&node, &issuer);
+        let registry = GuildNodeSecurityRegistry::with_trusted_capacity_issuers(
+            1,
+            60_000,
+            [issuer.public_key().to_string()],
+        )
+        .unwrap();
+
+        assert!(registry
+            .admit(
+                GuildNodeAdmission::zone_executor(node.node_id(), "guild", 10_000),
+                3_000,
+            )
+            .is_err());
+
+        let wrong_registry = GuildNodeSecurityRegistry::with_trusted_capacity_issuers(
+            1,
+            60_000,
+            [untrusted.public_key().to_string()],
+        )
+        .unwrap();
+        assert!(wrong_registry
+            .admit_finalized(registration.clone(), certificate.clone(), 3_000)
+            .is_err());
+
+        registry
+            .admit_finalized(registration.clone(), certificate.clone(), 3_000)
+            .unwrap();
+        assert!(registry.is_eligible(
+            &registration.node_id,
+            GuildNodeCapability::ExecuteZone,
+            3_000,
+        ));
+        assert!(!registry.is_eligible(
+            &registration.node_id,
+            GuildNodeCapability::ExecuteZone,
+            certificate.expires_at_ms,
+        ));
     }
 
     #[test]
