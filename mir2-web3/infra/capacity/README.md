@@ -380,6 +380,7 @@ jq -e '
 
 ```text
 MIR2_ZONE_HOST_MAX_SESSIONS
+MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE
 MIR2_ZONE_HOST_MAX_ZONES
 MIR2_ZONE_HOST_MAX_CONNECTIONS
 ```
@@ -393,6 +394,7 @@ MIR2_ZONE_HOST_MAX_CONNECTIONS
 ```yaml
 environment:
   MIR2_ZONE_HOST_MAX_SESSIONS: 125
+  MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 125
   MIR2_ZONE_HOST_MAX_ZONES: 8
 ```
 
@@ -413,15 +415,18 @@ Zone 数：6
 ```yaml
 environment:
   MIR2_ZONE_HOST_MAX_SESSIONS: 300
+  MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 50
   MIR2_ZONE_HOST_MAX_ZONES: 6
 ```
 
-但必须同时满足一个额外条件：**调度器必须将每个 Zone 限制在 50 人以内**。
+Zone Host 会在创建新会话时同时检查全局会话数与目标 Zone 会话数。达到
+`MAX_SESSIONS_PER_ZONE` 后，该 Zone 的新会话会被拒绝，但其他未满的 Zone
+仍可继续接收会话；会话关闭后容量立即释放。
 
-当前 Zone Host 只有全局 `MAX_SESSIONS` 和 `MAX_ZONES`，还没有
-`MAX_SESSIONS_PER_ZONE` 环境变量。因此，在每 Zone 硬限制落地前，不能只凭上面
-两个变量把生产证书直接提高到 300。否则 300 人集中进入同一张地图时，会突破
-5 Mbps 配置的安全边界。
+容量挑战和容量证书也会绑定 `maxSessionsPerZone`。这意味着 300 总会话 / 6 Zone
+/ 每 Zone 50 的分布假设，不再只是部署约定，而是运行时准入与离线证书共同验证
+的容量边界。Sui 注册仍保存节点的全局 `maxSessions` 和 `maxZones`，每 Zone
+上限由带签名的容量证书与实时心跳承载，且不得超过链上全局会话上限。
 
 ## 9. 新增服务器配置
 
