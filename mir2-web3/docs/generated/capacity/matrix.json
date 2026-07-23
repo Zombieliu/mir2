@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1784831157219,
+  "profileCount": 4,
+  "profiles": [
+    {
+      "profile": "1c1g-3mbps-50gb",
+      "hardware": {
+        "label": "1c1g-3mbps-50gb",
+        "requestedCpuCores": "1",
+        "requestedMemoryBytes": 1073741824,
+        "requestedNetworkEgressMbps": 3.0,
+        "requestedDiskBytes": 50000000000,
+        "cgroupCpuMax": "100000 100000",
+        "cgroupMemoryMax": "1073741824",
+        "availableParallelism": 1
+      },
+      "safeNetworkBudgetMbps": 2.1,
+      "computeOnlyMaxTestedPlayers": 500,
+      "denseZone": {
+        "players": 100,
+        "p95Ms": 4.383916,
+        "modeledEgressMbps": 2.021125714285714,
+        "rssAfterBytes": 4927488
+      },
+      "distributedZones": {
+        "zones": 8,
+        "playersPerZone": 25,
+        "totalPlayers": 200,
+        "parallelP95Ms": 2.3770000000000002,
+        "modeledEgressMbps": 0.9622857142857143
+      },
+      "distributedResultAtTestedEdge": false,
+      "status": "benchmark-only-not-production-certified",
+      "evidencePath": "docs/generated/capacity/1c1g-3mbps-50gb/latest.json"
+    },
+    {
+      "profile": "2c2g-5mbps-100gb",
+      "hardware": {
+        "label": "2c2g-5mbps-100gb",
+        "requestedCpuCores": "2",
+        "requestedMemoryBytes": 2147483648,
+        "requestedNetworkEgressMbps": 5.0,
+        "requestedDiskBytes": 100000000000,
+        "cgroupCpuMax": "200000 100000",
+        "cgroupMemoryMax": "2147483648",
+        "availableParallelism": 2
+      },
+      "safeNetworkBudgetMbps": 3.5,
+      "computeOnlyMaxTestedPlayers": 500,
+      "denseZone": {
+        "players": 125,
+        "p95Ms": 6.966209,
+        "modeledEgressMbps": 2.9841914285714286,
+        "rssAfterBytes": 5529600
+      },
+      "distributedZones": {
+        "zones": 6,
+        "playersPerZone": 50,
+        "totalPlayers": 300,
+        "parallelP95Ms": 5.852958,
+        "modeledEgressMbps": 2.900571428571429
+      },
+      "distributedResultAtTestedEdge": false,
+      "status": "benchmark-only-not-production-certified",
+      "evidencePath": "docs/generated/capacity/2c2g-5mbps-100gb/latest.json"
+    },
+    {
+      "profile": "4c4g-10mbps-200gb",
+      "hardware": {
+        "label": "4c4g-10mbps-200gb",
+        "requestedCpuCores": "4",
+        "requestedMemoryBytes": 4294967296,
+        "requestedNetworkEgressMbps": 10.0,
+        "requestedDiskBytes": 200000000000,
+        "cgroupCpuMax": "400000 100000",
+        "cgroupMemoryMax": "4294967296",
+        "availableParallelism": 4
+      },
+      "safeNetworkBudgetMbps": 7.0,
+      "computeOnlyMaxTestedPlayers": 500,
+      "denseZone": {
+        "players": 200,
+        "p95Ms": 16.702709,
+        "modeledEgressMbps": 6.30836,
+        "rssAfterBytes": 8695808
+      },
+      "distributedZones": {
+        "zones": 6,
+        "playersPerZone": 75,
+        "totalPlayers": 450,
+        "parallelP95Ms": 14.712166,
+        "modeledEgressMbps": 6.781745714285715
+      },
+      "distributedResultAtTestedEdge": false,
+      "status": "benchmark-only-not-production-certified",
+      "evidencePath": "docs/generated/capacity/4c4g-10mbps-200gb/latest.json"
+    },
+    {
+      "profile": "8c6g-50mbps-500gb",
+      "hardware": {
+        "label": "8c6g-50mbps-500gb",
+        "requestedCpuCores": "8",
+        "requestedMemoryBytes": 6442450944,
+        "requestedNetworkEgressMbps": 50.0,
+        "requestedDiskBytes": 500000000000,
+        "cgroupCpuMax": "800000 100000",
+        "cgroupMemoryMax": "6442450944",
+        "availableParallelism": 8
+      },
+      "safeNetworkBudgetMbps": 35.0,
+      "computeOnlyMaxTestedPlayers": 500,
+      "denseZone": {
+        "players": 500,
+        "p95Ms": 75.956041,
+        "modeledEgressMbps": 22.127368571428573,
+        "rssAfterBytes": 25374720
+      },
+      "distributedZones": {
+        "zones": 8,
+        "playersPerZone": 150,
+        "totalPlayers": 1200,
+        "parallelP95Ms": 80.456542,
+        "modeledEgressMbps": 32.46137142857143
+      },
+      "distributedResultAtTestedEdge": true,
+      "status": "benchmark-only-not-production-certified",
+      "evidencePath": "docs/generated/capacity/8c6g-50mbps-500gb/latest.json"
+    }
+  ]
+}
