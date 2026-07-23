@@ -30,6 +30,8 @@ Desktop.ini
 .env.local
 .env.*
 !.env.example
+infra/gate12/.secrets/
+infra/gate13/.secrets/
 
 # Logs
 *.log

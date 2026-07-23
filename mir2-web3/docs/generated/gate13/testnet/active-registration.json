@@ -1,0 +1,19 @@
+{
+  "nodeId": "ed25519:e5b4574f4c34f6c53adb1ec87fd980199b403bfaf653492602298e16f1108482",
+  "operatorSuiAddress": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+  "publicKey": "8Z09Uhpp5xpvtdO5fT8xHEu4LKLPmT07gn5vml4u2xc",
+  "endpoint": "node-active.test:7020",
+  "failureDomain": "testnet-az-b",
+  "stakeMist": 2000000,
+  "maxSessions": 128,
+  "maxZones": 8,
+  "keyGeneration": 1,
+  "status": "active",
+  "finality": {
+    "network": "testnet",
+    "packageId": "0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e",
+    "transactionDigest": "FuvLLhCaNJswJcZCj2uRYdSC2YbHN79SZ8nEgdaEBVYH",
+    "eventSequence": 0,
+    "checkpoint": 363531316
+  }
+}
