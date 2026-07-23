@@ -12,6 +12,7 @@ x-zone-host-common: &zone-host-common
     MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
     MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
     MIR2_ZONE_HOST_MAX_SESSIONS: 512
+    MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 128
     MIR2_ZONE_HOST_MAX_ZONES: 64
     MIR2_ACCOUNT_STORE_BACKEND: postgres
     MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
@@ -60,6 +61,7 @@ services:
       MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
       MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
       MIR2_ZONE_HOST_MAX_SESSIONS: 512
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 128
       MIR2_ZONE_HOST_MAX_ZONES: 64
       MIR2_ACCOUNT_STORE_BACKEND: postgres
       MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
@@ -84,6 +86,7 @@ services:
       MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
       MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
       MIR2_ZONE_HOST_MAX_SESSIONS: 512
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 128
       MIR2_ZONE_HOST_MAX_ZONES: 64
       MIR2_ACCOUNT_STORE_BACKEND: postgres
       MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2

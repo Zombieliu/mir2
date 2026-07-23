@@ -25,6 +25,14 @@ groups:
         annotations:
           summary: "Zone Host {{ $labels.host_id }} session capacity is above 85%"
 
+      - alert: ObeliskZoneHostPerZoneSessionSaturation
+        expr: obelisk_zone_host_busiest_zone_sessions / obelisk_zone_host_session_capacity_per_zone > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} busiest Zone is above 85% session capacity"
+
       - alert: ObeliskZoneHostRpcErrors
         expr: increase(obelisk_zone_host_rpc_errors_total[5m]) > 10
         for: 5m
