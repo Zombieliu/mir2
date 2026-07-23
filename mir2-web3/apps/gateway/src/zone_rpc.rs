@@ -27,14 +27,14 @@ use crate::routing::{
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 4;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 5;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
-const ZONE_HOST_CHECKPOINT_VERSION: u32 = 2;
-const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v2\0";
+const ZONE_HOST_CHECKPOINT_VERSION: u32 = 3;
+const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v3\0";
 
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
@@ -1582,6 +1582,10 @@ enum WireWorldCommand {
     ApplyHandoffTransform {
         position: Point,
         direction: mir2_protocol::MirDirection,
+        #[serde(default)]
+        hp: Option<i32>,
+        #[serde(default)]
+        mp: Option<i32>,
     },
     Stage5Command {
         action: String,
@@ -1634,9 +1638,13 @@ impl WireWorldCommand {
             WorldCommand::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             } => Self::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             },
             WorldCommand::Stage5Command { action, args } => Self::Stage5Command { action, args },
             WorldCommand::GrantOnchainOre {
@@ -1702,9 +1710,13 @@ impl WireWorldCommand {
             Self::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             } => WorldCommand::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             },
             Self::Stage5Command { action, args } => WorldCommand::Stage5Command { action, args },
             Self::GrantOnchainOre {
@@ -2020,7 +2032,8 @@ fn session_commitments(
 }
 
 fn snapshot_digest(snapshot: &WorldSnapshot) -> Result<String, ZoneRpcFault> {
-    let bytes = serde_json::to_vec(snapshot).map_err(|error| {
+    let durable = durable_session_snapshot(snapshot.clone());
+    let bytes = serde_json::to_vec(&durable).map_err(|error| {
         ZoneRpcFault::new(
             "checkpoint_encode",
             format!("zone host snapshot encode failed: {error}"),
@@ -2031,6 +2044,28 @@ fn snapshot_digest(snapshot: &WorldSnapshot) -> Result<String, ZoneRpcFault> {
     hasher.update(b"snapshot\0");
     hasher.update(bytes);
     Ok(hex_lower_bytes(&hasher.finalize()))
+}
+
+fn durable_session_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
+    snapshot.tick = 0;
+    snapshot.map_title = None;
+    snapshot.player_object_id = None;
+    snapshot
+        .entities
+        .retain(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer);
+    let player_hp = snapshot.player_hp;
+    let player_max_hp = snapshot.player_max_hp;
+    for entity in &mut snapshot.entities {
+        entity.object_id = 0;
+        entity.hp = player_hp;
+        entity.max_hp = player_max_hp;
+    }
+    // Shared map actors and ground drops advance on the Zone cadence and are
+    // not reconstructable from the per-session command journal. Version 3
+    // therefore commits only the durable player/session projection. A future
+    // map-state checkpoint must serialize the Zone state machine separately.
+    snapshot.ground_drops.clear();
+    snapshot
 }
 
 fn zone_host_checkpoint_checksum(

@@ -23,6 +23,7 @@ still depends on human Crystal visual/feel acceptance.
 - `src/browser_commands.rs`: browser command parsing and protocol enum helpers.
 - `src/bin/smoke.rs`: scripted local TCP smoke.
 - `src/bin/packet_trace.rs`: local/live packet trace and matrix artifact harness.
+- `src/bin/gate11_acceptance.rs`: real Crystal-world remote Zone handoff/failover acceptance.
 
 ## Supported Local Flows
 
@@ -90,8 +91,9 @@ Account-store runtime policy:
   announcements use the bounded cross-Zone live message bus.
 - `ZoneHostControlPlane` registers multiple Zone Hosts, schedules primary/replica
   placement leases by capacity and failure domain, fences rebalances by generation,
-  and drains hosts without accepting new sessions. Zone RPC v4 health advertises
-  host identity, load, capacity, active connections, and drain state.
+  and drains hosts without accepting new sessions. Zone RPC v5 health advertises
+  host identity, load, capacity, active connections, and drain state, while
+  handoff carries authoritative player vitals.
 - Guild-operated hosts can be wrapped by a threshold verifier: admissions expire and
   carry narrow capabilities, every command compares canonical packet plus post-state
   commitments, and divergent/unavailable nodes accumulate strikes and quarantine.
@@ -104,6 +106,8 @@ Account-store runtime policy:
 - `cargo run -p mir2-gateway --bin gate10_acceptance` executes the no-secret production-beta
   path and prints fail-closed readiness JSON plus Prometheus gauges. Set
   `GATE10_ACCEPTANCE_ITERATIONS` for a bounded deterministic soak.
+- `cargo run -p mir2-gateway --bin gate11_acceptance` runs a real Crystal map workload across
+  two TCP Zone Hosts, then stops the active host and verifies fenced standby continuation.
 
 Admin runtime read endpoints:
 

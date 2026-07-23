@@ -183,7 +183,7 @@ sui move test --path src/mir2_mine
    placement generation before disconnecting the old hosts.
 3. Pause new reward epoch closures. Preserve pending batches and retry them after rollback; never
    generate a second root for an already finalized game/epoch.
-4. Roll gateway/Zone binaries back together if the Zone RPC protocol changes. Protocol v4 peers
+4. Roll gateway/Zone binaries back together if the Zone RPC protocol changes. Protocol v5 peers
    reject incompatible versions rather than silently decoding them.
 5. Keep the finalized Commonware log and Sui registry immutable. Rebuild projectors/ledgers by
    replay; do not edit historical control blocks or payout events.
@@ -198,3 +198,10 @@ sui move test --path src/mir2_mine
 - The checked acceptance marks an observed Sui checkpoint without broadcasting a funded
   transaction. Live testnet publication is an operator ceremony because it requires a private key,
   gas, registry/cap object IDs, and an intentional external write.
+- Host checkpoint v3 commits and restores the durable player/session projection. Autonomous
+  monster movement/combat and shared ground-drop state are not yet serialized as a complete live
+  Zone image; operators must not advertise seamless full-map-state failover until that image is
+  implemented and accepted.
+
+The real Mir2 workload acceptance continues in
+[`GATE11-REAL-MIR2-WORKLOAD.md`](GATE11-REAL-MIR2-WORKLOAD.md).

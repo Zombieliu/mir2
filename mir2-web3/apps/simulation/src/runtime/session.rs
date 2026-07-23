@@ -502,6 +502,32 @@ impl SimulationSession {
         advance_runtime_tick(world);
     }
 
+    pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
+        if (hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(hp) = hp {
+                    vitals.hp = hp.clamp(0, vitals.max_hp);
+                }
+                if let Some(mp) = mp {
+                    vitals.mp = mp.clamp(0, vitals.max_mp);
+                }
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
+    }
+
     /// Land chain-confirmed ore in the active player's bag (M3, WF-4) and re-render the
     /// vein from the chain-reported `stones_left` when `mine_id` maps to a configured
     /// on-chain node (M4, WF-6). Injected by the trusted relayer/gateway path only (never

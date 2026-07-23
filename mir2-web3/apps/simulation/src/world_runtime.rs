@@ -57,6 +57,8 @@ pub enum WorldCommand {
     ApplyHandoffTransform {
         position: Point,
         direction: MirDirection,
+        hp: Option<i32>,
+        mp: Option<i32>,
     },
     Stage5Command {
         action: String,
@@ -523,9 +525,12 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::ApplyHandoffTransform {
                 position,
                 direction,
+                hp,
+                mp,
             } => {
                 self.session
                     .force_authoritative_player_transform(position, direction);
+                self.session.force_authoritative_player_vitals(hp, mp);
                 Vec::new()
             }
             WorldCommand::Stage5Command { action, args } => {
