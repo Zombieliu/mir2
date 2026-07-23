@@ -6044,3 +6044,30 @@ Outcome:
   The only remaining gate is explicit human `Accepted`; independent actor,
   random animation/effect, and compositor phases prevent an honest bit-perfect
   raw full-window claim.
+
+## 2026-07-23 - Quest marker GPU overlay regression
+
+Scope:
+
+- Investigated the reported invisible Scarecrow and missing task markers in the
+  live WebGPU game scene.
+- Verified `Monster/005` frame availability and separated the player by one
+  tile, proving the Scarecrow body was rendered but visually overlapped.
+- Moved quest markers out of the GPU-owned world sprite stack and into the
+  independent entity UI overlay while preserving motion, Crystal offsets, and
+  NPC interaction.
+- Updated the NPC click smoke lookup and added source-placement regression
+  assertions so a marker cannot silently return below the GPU canvas.
+
+Evidence:
+
+- `docs/generated/player-qa/r41-quest-marker-overlay/r41-quest-marker-overlay-final.jpg`
+  shows all three current available-quest yellow exclamation markers.
+- Browser hit testing places `.entity-quest-icon` above
+  `.viewport-drop-overlay` and `#mir2-web3-canvas`.
+
+Verification:
+
+- `node apps/web/scripts/test-player-frames.mjs`
+- `npm run typecheck --prefix apps/web`
+- `git diff --check`
