@@ -16,11 +16,15 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
       --bin mir2-gateway \
       --bin zone_host \
       --bin zone_replicator \
+      --bin node_identity \
       --bin gate12_acceptance \
+      --bin gate13_acceptance \
     && install -Dm755 target/release/mir2-gateway /out/mir2-gateway \
     && install -Dm755 target/release/zone_host /out/obelisk-zone-host \
     && install -Dm755 target/release/zone_replicator /out/obelisk-zone-replicator \
-    && install -Dm755 target/release/gate12_acceptance /out/gate12-acceptance
+    && install -Dm755 target/release/node_identity /out/obelisk-node-identity \
+    && install -Dm755 target/release/gate12_acceptance /out/gate12-acceptance \
+    && install -Dm755 target/release/gate13_acceptance /out/gate13-acceptance
 
 FROM debian:bookworm-slim AS runtime
 RUN install -d -o 65534 -g 65534 /var/lib/obelisk /evidence
@@ -29,6 +33,7 @@ WORKDIR /var/lib/obelisk
 
 FROM runtime AS zone-host
 COPY --from=builder /out/obelisk-zone-host /usr/local/bin/obelisk-zone-host
+COPY --from=builder /out/obelisk-node-identity /usr/local/bin/obelisk-node-identity
 USER 65534:65534
 EXPOSE 7020 9100
 HEALTHCHECK --interval=5s --timeout=2s --start-period=10s --retries=20 \
@@ -50,5 +55,6 @@ CMD ["/usr/local/bin/obelisk-zone-replicator"]
 
 FROM runtime AS acceptance
 COPY --from=builder /out/gate12-acceptance /usr/local/bin/gate12-acceptance
+COPY --from=builder /out/gate13-acceptance /usr/local/bin/gate13-acceptance
 USER 65534:65534
 CMD ["/usr/local/bin/gate12-acceptance"]

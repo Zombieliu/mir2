@@ -3,6 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use crate::{FinalizedGuildNodeRegistration, GuildNodeStatus, NodeCapacityCertificate};
+
 const QUALITY_DENOMINATOR: u128 = 10_000;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -19,6 +21,16 @@ pub struct VerifiedWorkReceipt {
     pub quorum_node_ids: Vec<String>,
     pub execution_commitment: String,
     pub observed_at_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RewardNodeEligibility {
+    pub node_id: String,
+    pub public_key: String,
+    pub capacity_certificate_id: String,
+    pub expires_at_ms: u64,
+    pub finalized_control_height: u64,
 }
 
 impl VerifiedWorkReceipt {
@@ -159,9 +171,57 @@ pub struct MultiGameRewardLedger {
     receipt_ids: BTreeSet<(String, String)>,
     batches: BTreeMap<(String, u64), RewardSettlementBatch>,
     settlement: BTreeMap<String, SettlementStatus>,
+    node_eligibility: BTreeMap<String, RewardNodeEligibility>,
+    enforce_node_eligibility: bool,
 }
 
 impl MultiGameRewardLedger {
+    pub fn register_node_eligibility(
+        &mut self,
+        registration: &FinalizedGuildNodeRegistration,
+        certificate: &NodeCapacityCertificate,
+    ) -> Result<(), String> {
+        registration.validate()?;
+        if registration.status != GuildNodeStatus::Active {
+            return Err("reward eligibility requires an active Sui registration".to_string());
+        }
+        if certificate.node_id != registration.node_id
+            || certificate.public_key != registration.public_key
+            || certificate.key_generation != registration.key_generation
+        {
+            return Err(
+                "reward eligibility certificate does not match Sui registration".to_string(),
+            );
+        }
+        if certificate.max_sessions > registration.max_sessions
+            || certificate.max_zones > registration.max_zones
+        {
+            return Err(
+                "reward eligibility certificate exceeds Sui-registered capacity".to_string(),
+            );
+        }
+        certificate.verify(&certificate.issuer_public_key, certificate.issued_at_ms)?;
+        let eligibility = RewardNodeEligibility {
+            node_id: registration.node_id.clone(),
+            public_key: registration.public_key.clone(),
+            capacity_certificate_id: certificate.certificate_id.clone(),
+            expires_at_ms: certificate.expires_at_ms,
+            finalized_control_height: certificate.finalized_control_height,
+        };
+        self.node_eligibility
+            .insert(eligibility.node_id.clone(), eligibility);
+        self.enforce_node_eligibility = true;
+        Ok(())
+    }
+
+    pub fn revoke_node_eligibility(&mut self, node_id: &str) -> bool {
+        self.node_eligibility.remove(node_id).is_some()
+    }
+
+    pub fn node_eligibility(&self, node_id: &str) -> Option<&RewardNodeEligibility> {
+        self.node_eligibility.get(node_id)
+    }
+
     pub fn register_policy(&mut self, policy: GameRewardPolicy) -> Result<(), String> {
         policy.validate()?;
         let key = (policy.game_id.clone(), policy.epoch);
@@ -189,6 +249,24 @@ impl MultiGameRewardLedger {
         }
         if receipt.quorum_node_ids.len() < usize::from(policy.minimum_quorum) {
             return Err("verified work quorum is below policy minimum".to_string());
+        }
+        if self.enforce_node_eligibility {
+            for node_id in &receipt.quorum_node_ids {
+                let eligibility = self.node_eligibility.get(node_id).ok_or_else(|| {
+                    format!("verified work node {node_id} has no active reward eligibility")
+                })?;
+                if eligibility.expires_at_ms <= receipt.observed_at_ms {
+                    return Err(format!(
+                        "verified work node {node_id} capacity certificate is expired"
+                    ));
+                }
+                if eligibility.finalized_control_height > receipt.control_height {
+                    return Err(format!(
+                        "verified work node {node_id} eligibility is newer than control height {}",
+                        receipt.control_height
+                    ));
+                }
+            }
         }
         let receipt_key = (receipt.game_id.clone(), receipt.receipt_id.clone());
         if !self.receipt_ids.insert(receipt_key) {
@@ -459,6 +537,12 @@ fn validate_id(label: &str, value: &str) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, NodeSigningIdentity,
+        SuiFinalityProof,
+    };
+    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    use base64::Engine;
 
     fn policy(game_id: &str, budget: u64) -> GameRewardPolicy {
         GameRewardPolicy {
@@ -487,6 +571,61 @@ mod tests {
             execution_commitment: "ab".repeat(32),
             observed_at_ms: 1,
         }
+    }
+
+    fn permissionless_node(
+        seed: u8,
+        issuer: &NodeSigningIdentity,
+    ) -> (FinalizedGuildNodeRegistration, NodeCapacityCertificate) {
+        let node = NodeSigningIdentity::from_seed([seed; 32]);
+        let registration = FinalizedGuildNodeRegistration {
+            node_id: node.node_id().to_string(),
+            operator_sui_address: format!("0x{}", "11".repeat(32)),
+            public_key: node.public_key().to_string(),
+            endpoint: format!("node-{seed}:7020"),
+            failure_domain: format!("test-az-{seed}"),
+            stake_mist: 2_000_000,
+            max_sessions: 128,
+            max_zones: 8,
+            key_generation: 1,
+            status: GuildNodeStatus::Active,
+            finality: SuiFinalityProof {
+                network: "testnet".to_string(),
+                package_id: format!("0x{}", "22".repeat(32)),
+                transaction_digest: format!("register-node-{seed}"),
+                event_sequence: 0,
+                checkpoint: 42,
+            },
+        };
+        let challenge = CapacityChallenge {
+            challenge_id: format!("challenge-{seed}"),
+            node_id: registration.node_id.clone(),
+            nonce: URL_SAFE_NO_PAD.encode([seed; 32]),
+            issued_at_ms: 1_000,
+            expires_at_ms: 5_000,
+            workload: CapacityWorkload {
+                concurrent_sessions: 64,
+                zone_count: 4,
+                command_count: 100,
+                maximum_p95_latency_ms: 50,
+                minimum_success_bps: 9_900,
+            },
+        };
+        let response = CapacityChallengeResponse::sign(
+            challenge,
+            &node,
+            1,
+            100,
+            0,
+            20,
+            "ab".repeat(32),
+            2_000,
+        )
+        .unwrap();
+        let certificate =
+            NodeCapacityCertificate::issue(&response, &registration, issuer, 2_500, 10_000, 10)
+                .unwrap();
+        (registration, certificate)
     }
 
     #[test]
@@ -558,5 +697,57 @@ mod tests {
             ledger.settlement_status(&batch.batch_id),
             Some(SettlementStatus::Finalized { checkpoint: 99, .. })
         ));
+    }
+
+    #[test]
+    fn permissionless_rewards_require_live_finalized_identity_and_capacity() {
+        let issuer = NodeSigningIdentity::from_seed([99; 32]);
+        let (registration_a, certificate_a) = permissionless_node(7, &issuer);
+        let (registration_b, certificate_b) = permissionless_node(8, &issuer);
+        let mut ledger = MultiGameRewardLedger::default();
+        ledger.register_policy(policy("mir2", 1_000)).unwrap();
+        ledger
+            .register_node_eligibility(&registration_a, &certificate_a)
+            .unwrap();
+
+        let mut before_b = receipt(
+            "before-b",
+            "mir2",
+            &[&registration_a.node_id, &registration_b.node_id],
+            10,
+        );
+        before_b.observed_at_ms = 3_000;
+        assert!(ledger.ingest_verified(before_b).is_err());
+
+        ledger
+            .register_node_eligibility(&registration_b, &certificate_b)
+            .unwrap();
+        let mut accepted = receipt(
+            "eligible",
+            "mir2",
+            &[&registration_a.node_id, &registration_b.node_id],
+            10,
+        );
+        accepted.observed_at_ms = 3_000;
+        assert!(ledger.ingest_verified(accepted).unwrap());
+
+        let mut expired = receipt(
+            "expired",
+            "mir2",
+            &[&registration_a.node_id, &registration_b.node_id],
+            10,
+        );
+        expired.observed_at_ms = certificate_a.expires_at_ms;
+        assert!(ledger.ingest_verified(expired).is_err());
+
+        assert!(ledger.revoke_node_eligibility(&registration_b.node_id));
+        let mut revoked = receipt(
+            "revoked",
+            "mir2",
+            &[&registration_a.node_id, &registration_b.node_id],
+            10,
+        );
+        revoked.observed_at_ms = 3_100;
+        assert!(ledger.ingest_verified(revoked).is_err());
     }
 }

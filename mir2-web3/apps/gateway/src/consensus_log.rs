@@ -5,9 +5,10 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    GameRewardPolicy, GuildNodeAdmission, GuildNodeSecurityRegistry, MultiGameRewardLedger,
-    RewardSettlementBatch, ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostRegistration, ZoneId,
-    ZonePlacementLease, ZoneRebalanceMove,
+    FinalizedGuildNodeRegistration, GameRewardPolicy, GuildNodeAdmission,
+    GuildNodeSecurityRegistry, MultiGameRewardLedger, NodeCapacityCertificate,
+    RewardSettlementBatch, SuiFinalityProof, ZoneHostControlPlane, ZoneHostHeartbeat,
+    ZoneHostRegistration, ZoneId, ZonePlacementLease, ZoneRebalanceMove,
 };
 
 const CONTROL_BLOCK_DOMAIN: &[u8] = b"obelisk.mir2.control-block.v1\0";
@@ -166,6 +167,15 @@ pub enum ReplicatedControlCommand {
     RevokeGuildNode {
         node_id: String,
     },
+    SyncFinalizedGuildNode {
+        registration: FinalizedGuildNodeRegistration,
+        capacity_certificate: NodeCapacityCertificate,
+        now_ms: u64,
+    },
+    RevokeFinalizedGuildNode {
+        node_id: String,
+        finality: SuiFinalityProof,
+    },
     RegisterGameRewardPolicy {
         policy: GameRewardPolicy,
     },
@@ -192,8 +202,23 @@ pub enum ProjectedControlEffect {
     ZoneHostDrainStarted(Vec<ZoneRebalanceMove>),
     ZoneHostDrainFinished(String),
     GuildNodeAdmitted(String),
-    GuildNodeRevoked { node_id: String, existed: bool },
-    RewardPolicyRegistered { game_id: String, epoch: u64 },
+    GuildNodeRevoked {
+        node_id: String,
+        existed: bool,
+    },
+    FinalizedGuildNodeSynced {
+        node_id: String,
+        sui_checkpoint: u64,
+    },
+    FinalizedGuildNodeRevoked {
+        node_id: String,
+        sui_checkpoint: u64,
+        existed: bool,
+    },
+    RewardPolicyRegistered {
+        game_id: String,
+        epoch: u64,
+    },
     RewardEpochFinalized(RewardSettlementBatch),
 }
 
@@ -255,7 +280,11 @@ impl FinalizedControlProjector {
             }
             let command: ReplicatedControlCommand = serde_json::from_slice(&envelope.payload)
                 .map_err(|error| format!("finalized control command decode failed: {error}"))?;
-            effects.push(self.apply_command(command, finalized.block.height)?);
+            effects.push(self.apply_command(
+                command,
+                finalized.block.height,
+                &envelope.idempotency_key,
+            )?);
         }
         *last_height = finalized.block.height;
         Ok(effects)
@@ -265,6 +294,7 @@ impl FinalizedControlProjector {
         &self,
         command: ReplicatedControlCommand,
         finalized_height: u64,
+        idempotency_key: &str,
     ) -> Result<ProjectedControlEffect, String> {
         match command {
             ReplicatedControlCommand::RegisterZoneHost {
@@ -299,6 +329,63 @@ impl FinalizedControlProjector {
             ReplicatedControlCommand::RevokeGuildNode { node_id } => {
                 let existed = self.guild_security.revoke(&node_id);
                 Ok(ProjectedControlEffect::GuildNodeRevoked { node_id, existed })
+            }
+            ReplicatedControlCommand::SyncFinalizedGuildNode {
+                registration,
+                capacity_certificate,
+                now_ms,
+            } => {
+                registration.validate()?;
+                if idempotency_key != registration.finality.idempotency_key() {
+                    return Err(
+                        "finalized guild node command idempotency key does not match Sui event"
+                            .to_string(),
+                    );
+                }
+                if capacity_certificate.finalized_control_height > finalized_height {
+                    return Err(
+                        "capacity certificate depends on a future Commonware height".to_string()
+                    );
+                }
+                let node_id = registration.node_id.clone();
+                let checkpoint = registration.finality.checkpoint;
+                self.guild_security.admit_finalized(
+                    registration.clone(),
+                    capacity_certificate.clone(),
+                    now_ms,
+                )?;
+                if let Some(ledger) = self.reward_ledger.as_ref() {
+                    ledger
+                        .lock()
+                        .map_err(|_| "reward ledger mutex poisoned".to_string())?
+                        .register_node_eligibility(&registration, &capacity_certificate)?;
+                }
+                Ok(ProjectedControlEffect::FinalizedGuildNodeSynced {
+                    node_id,
+                    sui_checkpoint: checkpoint,
+                })
+            }
+            ReplicatedControlCommand::RevokeFinalizedGuildNode { node_id, finality } => {
+                finality.validate()?;
+                if idempotency_key != finality.idempotency_key() {
+                    return Err(
+                        "guild node revocation idempotency key does not match Sui event"
+                            .to_string(),
+                    );
+                }
+                let checkpoint = finality.checkpoint;
+                let existed = self.guild_security.revoke(&node_id);
+                if let Some(ledger) = self.reward_ledger.as_ref() {
+                    ledger
+                        .lock()
+                        .map_err(|_| "reward ledger mutex poisoned".to_string())?
+                        .revoke_node_eligibility(&node_id);
+                }
+                Ok(ProjectedControlEffect::FinalizedGuildNodeRevoked {
+                    node_id,
+                    sui_checkpoint: checkpoint,
+                    existed,
+                })
             }
             ReplicatedControlCommand::RegisterGameRewardPolicy { policy } => {
                 let game_id = policy.game_id.clone();
@@ -689,6 +776,12 @@ fn validate_component(label: &str, value: &str) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, GuildNodeCapability,
+        GuildNodeStatus, NodeSigningIdentity,
+    };
+    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    use base64::Engine;
 
     fn committee() -> Vec<String> {
         ["validator-a", "validator-b", "validator-c", "validator-d"]
@@ -704,6 +797,52 @@ mod tests {
             &serde_json::json!({"zoneId": "map:0", "generation": 1}),
         )
         .expect("control command")
+    }
+
+    fn permissionless_registration(
+        node: &NodeSigningIdentity,
+        issuer: &NodeSigningIdentity,
+    ) -> (FinalizedGuildNodeRegistration, NodeCapacityCertificate) {
+        let registration = FinalizedGuildNodeRegistration {
+            node_id: node.node_id().to_string(),
+            operator_sui_address: format!("0x{}", "11".repeat(32)),
+            public_key: node.public_key().to_string(),
+            endpoint: "node-a:7020".to_string(),
+            failure_domain: "test-az-a".to_string(),
+            stake_mist: 2_000_000,
+            max_sessions: 128,
+            max_zones: 8,
+            key_generation: 1,
+            status: GuildNodeStatus::Active,
+            finality: SuiFinalityProof {
+                network: "testnet".to_string(),
+                package_id: format!("0x{}", "22".repeat(32)),
+                transaction_digest: "register-node-a".to_string(),
+                event_sequence: 0,
+                checkpoint: 42,
+            },
+        };
+        let challenge = CapacityChallenge {
+            challenge_id: "capacity-node-a".to_string(),
+            node_id: registration.node_id.clone(),
+            nonce: URL_SAFE_NO_PAD.encode([3_u8; 32]),
+            issued_at_ms: 1_000,
+            expires_at_ms: 5_000,
+            workload: CapacityWorkload {
+                concurrent_sessions: 64,
+                zone_count: 4,
+                command_count: 100,
+                maximum_p95_latency_ms: 50,
+                minimum_success_bps: 9_900,
+            },
+        };
+        let response =
+            CapacityChallengeResponse::sign(challenge, node, 1, 100, 0, 20, "ab".repeat(32), 2_000)
+                .unwrap();
+        let certificate =
+            NodeCapacityCertificate::issue(&response, &registration, issuer, 2_500, 10_000, 1)
+                .unwrap();
+        (registration, certificate)
     }
 
     #[test]
@@ -972,6 +1111,114 @@ mod tests {
             [ProjectedControlEffect::RewardEpochFinalized(batch)]
                 if batch.game_id == "mir2" && batch.finalized_control_height == 2
         ));
+    }
+
+    #[test]
+    fn sui_finality_and_capacity_become_membership_only_after_commonware_quorum() {
+        let node = NodeSigningIdentity::from_seed([7; 32]);
+        let issuer = NodeSigningIdentity::from_seed([9; 32]);
+        let (registration, capacity_certificate) = permissionless_registration(&node, &issuer);
+        let security = Arc::new(
+            GuildNodeSecurityRegistry::with_trusted_capacity_issuers(
+                1,
+                1_000,
+                [issuer.public_key().to_string()],
+            )
+            .unwrap(),
+        );
+        let rewards = Arc::new(Mutex::new(MultiGameRewardLedger::default()));
+        let projector = FinalizedControlProjector::new(
+            Arc::new(ZoneHostControlPlane::new(100, 1_000, 0)),
+            security.clone(),
+        )
+        .with_reward_ledger(rewards.clone());
+        let log = CommonwareControlLog::new(committee()).unwrap();
+        let sync_key = registration.finality.idempotency_key();
+        let block = log
+            .propose(
+                "validator-a",
+                vec![ReplicatedControlCommand::SyncFinalizedGuildNode {
+                    registration: registration.clone(),
+                    capacity_certificate,
+                    now_ms: 3_000,
+                }
+                .envelope(sync_key)
+                .unwrap()],
+            )
+            .unwrap();
+
+        assert!(log.vote("validator-a", &block.digest).unwrap().is_none());
+        assert!(log.vote("validator-b", &block.digest).unwrap().is_none());
+        assert!(!security.is_eligible(
+            &registration.node_id,
+            GuildNodeCapability::ExecuteZone,
+            3_000,
+        ));
+        assert!(rewards
+            .lock()
+            .unwrap()
+            .node_eligibility(&registration.node_id)
+            .is_none());
+
+        let finalized = log.vote("validator-c", &block.digest).unwrap().unwrap();
+        assert!(matches!(
+            projector.apply(&finalized).unwrap().as_slice(),
+            [ProjectedControlEffect::FinalizedGuildNodeSynced {
+                node_id,
+                sui_checkpoint: 42,
+            }] if node_id == &registration.node_id
+        ));
+        assert!(security.is_eligible(
+            &registration.node_id,
+            GuildNodeCapability::ExecuteZone,
+            3_000,
+        ));
+        assert!(rewards
+            .lock()
+            .unwrap()
+            .node_eligibility(&registration.node_id)
+            .is_some());
+
+        let revocation = SuiFinalityProof {
+            network: "testnet".to_string(),
+            package_id: registration.finality.package_id.clone(),
+            transaction_digest: "revoke-node-a".to_string(),
+            event_sequence: 0,
+            checkpoint: 43,
+        };
+        let revoke = log
+            .propose(
+                "validator-b",
+                vec![ReplicatedControlCommand::RevokeFinalizedGuildNode {
+                    node_id: registration.node_id.clone(),
+                    finality: revocation.clone(),
+                }
+                .envelope(revocation.idempotency_key())
+                .unwrap()],
+            )
+            .unwrap();
+        for validator in ["validator-a", "validator-b"] {
+            assert!(log.vote(validator, &revoke.digest).unwrap().is_none());
+        }
+        let revoke = log.vote("validator-c", &revoke.digest).unwrap().unwrap();
+        assert!(matches!(
+            projector.apply(&revoke).unwrap().as_slice(),
+            [ProjectedControlEffect::FinalizedGuildNodeRevoked {
+                node_id,
+                sui_checkpoint: 43,
+                existed: true,
+            }] if node_id == &registration.node_id
+        ));
+        assert!(!security.is_eligible(
+            &registration.node_id,
+            GuildNodeCapability::ExecuteZone,
+            3_100,
+        ));
+        assert!(rewards
+            .lock()
+            .unwrap()
+            .node_eligibility(&registration.node_id)
+            .is_none());
     }
 
     #[cfg(feature = "commonware-2026-2")]
