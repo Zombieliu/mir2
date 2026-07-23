@@ -12,7 +12,8 @@ The Gateway uses a prepare/commit protocol:
 2. sync the shared-Zone transform and persist the source character;
 3. open the topology-selected target Zone, authenticate it through the trusted passkey path, and
    start the same character;
-4. apply the source map position/direction through the trusted `ApplyHandoffTransform` command;
+4. apply the source map position/direction and authoritative HP/MP through the trusted
+   `ApplyHandoffTransform` command;
 5. compare normalized player-state commitments (identity, map, position, vitals, economy,
    inventory/equipment, quests, skills, buffs and Stage 5 systems);
 6. close the source under its current owner fence, then atomically swap the Gateway binding and
@@ -30,8 +31,9 @@ Gateway rebind before the next packet.
 
 ## Remote lifecycle and checkpoint replay
 
-Zone RPC protocol version 3 introduced fenced `CloseSession` (the current protocol is version 4
-after Gate 6 health/drain metadata). A close is journaled as a tombstone, so a
+Zone RPC protocol version 3 introduced fenced `CloseSession`; version 4 added Gate 6
+health/drain metadata, and the current version 5 carries authoritative HP/MP during handoff. A
+close is journaled as a tombstone, so a
 replicated checkpoint replays the source commands and the later removal in the same global order.
 This prevents remote handoffs and ordinary disconnects from leaving ghost players or consuming
 Zone Host session capacity.

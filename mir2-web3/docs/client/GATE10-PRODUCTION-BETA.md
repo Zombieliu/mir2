@@ -121,6 +121,8 @@ The iteration count is bounded to `1..=10000` to prevent accidental unbounded lo
 | 8 finality | no-empty-block, 3-of-4 quorum, fork/replay/equivocation, projection, and pinned upstream Commonware type tests |
 | 9 rewards | game isolation, dedup, budget/cap, proof, Commonware policy/close, unsigned Sui transactions, and 15 Move tests |
 | 10 beta | fail-closed readiness, divergent-node end-to-end acceptance, deterministic soak, JSON, and Prometheus output |
+| 11 real recovery | Crystal combat/drop/handoff, complete v4 Zone image, four-session/two-map/two-failure fencing, and atomic JSON evidence |
+| 12 distribution | non-root Docker images, two-host Compose, signed node heartbeat, Prometheus/Grafana, and live-container primary failure acceptance |
 
 Full local acceptance:
 
@@ -150,6 +152,8 @@ sui move test --path src/mir2_mine
   secret on a guild host.
 - Persist Zone checkpoints and Commonware finalized blocks before acknowledging a generation
   switch. Back up the Sui package/registry/cap object IDs separately from secrets.
+- Run `gate11_full_acceptance -- --output <release-evidence.json>` for the exact candidate binary
+  and retain the accepted manifest with the deployment record.
 
 ## Startup sequence
 
@@ -183,7 +187,7 @@ sui move test --path src/mir2_mine
    placement generation before disconnecting the old hosts.
 3. Pause new reward epoch closures. Preserve pending batches and retry them after rollback; never
    generate a second root for an already finalized game/epoch.
-4. Roll gateway/Zone binaries back together if the Zone RPC protocol changes. Protocol v4 peers
+4. Roll gateway/Zone binaries back together if the Zone RPC protocol changes. Protocol v5 peers
    reject incompatible versions rather than silently decoding them.
 5. Keep the finalized Commonware log and Sui registry immutable. Rebuild projectors/ledgers by
    replay; do not edit historical control blocks or payout events.
@@ -198,3 +202,14 @@ sui move test --path src/mir2_mine
 - The checked acceptance marks an observed Sui checkpoint without broadcasting a funded
   transaction. Live testnet publication is an operator ceremony because it requires a private key,
   gas, registry/cap object IDs, and an intentional external write.
+- Host checkpoint v4 commits an exact durable active-character record plus the private
+  player/session projection and complete shared-Zone state, including equipment durability,
+  monster AI/timers, combat vitals, pending effects, public drops/claims, doors, hazards,
+  trades/rentals, and NPC state. Gate 11 validates two consecutive fenced takeovers.
+- The Gate 11 measurements use localhost TCP hosts. Production RTO/SLO claims still require the
+  same manifest to pass under the deployed network, durable checkpoint store, and scheduler.
+
+The real Mir2 workload acceptance continues in
+[`GATE11-REAL-MIR2-WORKLOAD.md`](GATE11-REAL-MIR2-WORKLOAD.md).
+The operator distribution and telemetry package continues in
+[`GATE12-DISTRIBUTION-NODE-TELEMETRY.md`](GATE12-DISTRIBUTION-NODE-TELEMETRY.md).

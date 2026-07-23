@@ -30,6 +30,11 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     assert_eq!(health.protocol_version, ZONE_RPC_PROTOCOL_VERSION);
     assert_eq!(health.process_id, std::process::id());
     assert_eq!(health.session_capacity, test_limits().max_sessions);
+    assert_eq!(
+        health.session_capacity_per_zone,
+        test_limits().max_sessions_per_zone
+    );
+    assert_eq!(health.busiest_zone_session_count, 0);
     assert!(!health.draining);
     assert_eq!(health.session_count, 0);
 
@@ -71,6 +76,50 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
         .world_snapshot()
         .expect("second snapshot should round trip");
     assert_eq!(server.session_count(), 2);
+    assert_eq!(server.busiest_zone_session_count(), 2);
+
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn zone_host_enforces_per_zone_session_capacity_and_releases_it_on_close() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let limits = ZoneRpcLimits {
+        max_sessions: 4,
+        max_sessions_per_zone: 2,
+        ..test_limits()
+    };
+    let (address, server, stop, handle) = start_server_with_limits(authority.clone(), limits);
+    let crowded_zone = ZoneId::new("map:crowded");
+    let other_zone = ZoneId::new("map:other");
+    let first = test_transport(address, crowded_zone.clone(), "crowded-a");
+    let second = test_transport(address, crowded_zone.clone(), "crowded-b");
+    let rejected = test_transport(address, crowded_zone.clone(), "crowded-c");
+    let distributed = test_transport(address, other_zone, "other-a");
+
+    first.on_connect().expect("first crowded session");
+    second.on_connect().expect("second crowded session");
+    let error = rejected
+        .on_connect()
+        .expect_err("third session in one Zone must be rejected");
+    assert!(error.contains("session capacity 2 reached"), "{error}");
+    distributed
+        .on_connect()
+        .expect("another Zone should still have capacity");
+
+    let health = first.health().expect("capacity health");
+    assert_eq!(health.session_count, 3);
+    assert_eq!(health.session_capacity, 4);
+    assert_eq!(health.session_capacity_per_zone, 2);
+    assert_eq!(health.busiest_zone_session_count, 2);
+
+    let lease = authority.owner_lease(&crowded_zone);
+    ZoneOwnerRpcTransport::close_session(&first, &lease)
+        .expect("closing a session should release per-Zone capacity");
+    rejected
+        .on_connect()
+        .expect("released per-Zone capacity should be reusable");
+    assert_eq!(server.busiest_zone_session_count(), 2);
 
     stop_server(address, stop, handle);
 }
@@ -464,7 +513,11 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     let standby_checkpoint = standby_owner
         .export_host_checkpoint()
         .expect("standby checkpoint should export");
-    assert_eq!(standby_checkpoint.checksum, checkpoint.checksum);
+    assert_eq!(standby_checkpoint.entry_count, checkpoint.entry_count);
+    assert_eq!(standby_checkpoint.session_count, checkpoint.session_count);
+    assert_eq!(standby_checkpoint.zone_count, checkpoint.zone_count);
+    assert!(checkpoint.zone_state_bytes > 0);
+    assert!(standby_checkpoint.zone_state_bytes > 0);
 
     let promoted = authority.handoff_zone_owner(&zone_id, "standby-owner");
     standby_owner
@@ -798,10 +851,28 @@ fn start_server(
     Arc<AtomicBool>,
     thread::JoinHandle<()>,
 ) {
+    start_server_with_limits(authority, test_limits())
+}
+
+fn start_server_with_limits(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    limits: ZoneRpcLimits,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind test zone host");
     let address = listener.local_addr().expect("test zone host address");
     let stop = Arc::new(AtomicBool::new(false));
-    let server = test_server(authority);
+    let shared: SharedZoneOwnerLeaseAuthority = authority;
+    let server = Arc::new(ZoneHostServer::with_options(
+        GatewayConfig::default(),
+        shared,
+        None,
+        limits,
+    ));
     let running_server = Arc::clone(&server);
     let server_stop = Arc::clone(&stop);
     let handle = thread::spawn(move || {

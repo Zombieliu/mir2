@@ -12,6 +12,7 @@ Implemented desktop-first pages:
 - Economy analysis
 - Activity configuration
 - World/server monitor
+- Dubhe Node telemetry and admission console
 - Anti-cheat and risk
 - Mail and GM tools
 - Approvals
@@ -88,11 +89,43 @@ npm install
 npm run dev
 ```
 
+### Dubhe Node console
+
+Open `http://127.0.0.1:3020/dubhe-nodes`. The console combines two deliberately
+separate data classes:
+
+- live, signed Zone Host telemetry from `/healthz` and `/v1/heartbeat`;
+- public Sui testnet registration and committed Gate 13 acceptance evidence.
+
+By default it probes ports `19100`, `19101`, and `29100`. Override the endpoints
+and operations links when running another topology:
+
+```bash
+DUBHE_NODE_OPERATOR_URLS=http://127.0.0.1:29100 \
+DUBHE_NODE_GRAFANA_URL=http://127.0.0.1:13000 \
+DUBHE_NODE_PROMETHEUS_URL=http://127.0.0.1:19090 \
+npm run dev
+```
+
+The page cryptographically verifies Ed25519-ZIP215 heartbeat signatures and
+checks that the live identity matches the active Sui registration. Key rotation
+and revocation remain intentionally read-only in the web UI; they require the
+owner capability and the audited CLI lifecycle.
+
+The UI-local public snapshot exists because the production Next.js build does
+not import JSON from outside the Admin Web root. Verify that it still matches
+the authoritative deployment and Gate 13 files after regenerating evidence:
+
+```bash
+npm run check:dubhe-node-snapshot
+```
+
 ## Verification
 
 ```bash
 ./node_modules/.bin/tsc --noEmit
 ./node_modules/.bin/next build
+npm run check:dubhe-node-snapshot
 curl -sS http://127.0.0.1:7420/health
 curl -sS -X POST http://127.0.0.1:3020/api/admin/system-mail \
   -H 'content-type: application/json' \

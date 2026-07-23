@@ -107,14 +107,14 @@ pub struct ActiveSessionIdentity {
     pub character_name: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedTradeOfferItem {
     pub item_state_json: String,
     pub key: String,
     pub unique_id: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedTradeOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -124,7 +124,7 @@ pub struct SharedTradeOffer {
     pub items: Vec<SharedTradeOfferItem>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalItemOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -136,7 +136,7 @@ pub struct SharedItemRentalItemOffer {
     pub days: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalFeeOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -145,13 +145,13 @@ pub struct SharedItemRentalFeeOffer {
     pub fee: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalAgreement {
     pub item: SharedItemRentalItemOffer,
     pub fee: SharedItemRentalFeeOffer,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SharedItemRentalDelivery {
     Lender(SharedItemRentalAgreement),
     Borrower(SharedItemRentalAgreement),
@@ -500,6 +500,32 @@ impl SimulationSession {
             runtime.player_direction = direction;
         }
         advance_runtime_tick(world);
+    }
+
+    pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
+        if (hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(hp) = hp {
+                    vitals.hp = hp.clamp(0, vitals.max_hp);
+                }
+                if let Some(mp) = mp {
+                    vitals.mp = mp.clamp(0, vitals.max_mp);
+                }
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
     }
 
     /// Land chain-confirmed ore in the active player's bag (M3, WF-4) and re-render the

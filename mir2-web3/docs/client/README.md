@@ -34,6 +34,7 @@ in [`apps/web/CLAUDE.md`](../../apps/web/CLAUDE.md) (auto-loaded by Claude Code 
 | [`GATE6-ZONE-HOST-SCHEDULER.md`](GATE6-ZONE-HOST-SCHEDULER.md) | Gate 6 host registration, capacity-aware replicated placement leases, drain and rebalance |
 | [`GATE7-UNTRUSTED-GUILD-NODES.md`](GATE7-UNTRUSTED-GUILD-NODES.md) | Gate 7 expiring node admission, deterministic execution quorum, strikes and quarantine |
 | [`GATE8-COMMONWARE-CONTROL-LOG.md`](GATE8-COMMONWARE-CONTROL-LOG.md) | Gate 8 pinned Commonware v2026.2.0 finality log, event blocks, replay and live projections |
+| [`GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md`](GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md) | Gate 13 Ed25519 identity, Sui testnet registry, finalized membership, remote capacity certificate and reward eligibility |
 
 ## Keeping these honest
 

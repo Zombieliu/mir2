@@ -1,0 +1,246 @@
+name: obelisk-gate12
+
+x-zone-host-common: &zone-host-common
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+    target: zone-host
+  restart: unless-stopped
+  environment:
+    MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+    MIR2_ZONE_HOST_METRICS_ADDR: 0.0.0.0:9100
+    MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
+    MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
+    MIR2_ZONE_HOST_MAX_SESSIONS: 512
+    MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 128
+    MIR2_ZONE_HOST_MAX_ZONES: 64
+    MIR2_ACCOUNT_STORE_BACKEND: postgres
+    MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
+    MIR2_ACCOUNT_STORE_PATH: /var/lib/obelisk/accounts.json
+    MIR2_ZONE_ROUTING_MODE: per_map
+  depends_on:
+    postgres:
+      condition: service_healthy
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  networks:
+    - obelisk
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mir2
+      POSTGRES_USER: mir2
+      POSTGRES_PASSWORD: mir2_dev_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks:
+      - obelisk
+
+  zone-host-a:
+    <<: *zone-host-common
+    hostname: zone-host-a
+    environment:
+      MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: zone-host-a:7020
+      MIR2_ZONE_HOST_METRICS_ADDR: 0.0.0.0:9100
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: local-az-a
+      MIR2_ZONE_HOST_SIGNING_KEY_FILE: /run/secrets/node-signing-key
+      MIR2_ZONE_HOST_KEY_GENERATION: 1
+      MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
+      MIR2_ZONE_HOST_MAX_SESSIONS: 512
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 128
+      MIR2_ZONE_HOST_MAX_ZONES: 64
+      MIR2_ACCOUNT_STORE_BACKEND: postgres
+      MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
+      MIR2_ACCOUNT_STORE_PATH: /var/lib/obelisk/accounts.json
+      MIR2_ZONE_ROUTING_MODE: per_map
+    volumes:
+      - ${GATE12_ZONE_A_SIGNING_KEY_FILE:?set GATE12_ZONE_A_SIGNING_KEY_FILE}:/run/secrets/node-signing-key:ro
+    ports:
+      - "${GATE12_ZONE_A_RPC_PORT:-17020}:7020"
+      - "${GATE12_ZONE_A_METRICS_PORT:-19100}:9100"
+
+  zone-host-b:
+    <<: *zone-host-common
+    hostname: zone-host-b
+    environment:
+      MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: zone-host-b:7020
+      MIR2_ZONE_HOST_METRICS_ADDR: 0.0.0.0:9100
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: local-az-b
+      MIR2_ZONE_HOST_SIGNING_KEY_FILE: /run/secrets/node-signing-key
+      MIR2_ZONE_HOST_KEY_GENERATION: 1
+      MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: 128
+      MIR2_ZONE_HOST_MAX_SESSIONS: 512
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: 128
+      MIR2_ZONE_HOST_MAX_ZONES: 64
+      MIR2_ACCOUNT_STORE_BACKEND: postgres
+      MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
+      MIR2_ACCOUNT_STORE_PATH: /var/lib/obelisk/accounts.json
+      MIR2_ZONE_ROUTING_MODE: per_map
+    volumes:
+      - ${GATE12_ZONE_B_SIGNING_KEY_FILE:?set GATE12_ZONE_B_SIGNING_KEY_FILE}:/run/secrets/node-signing-key:ro
+    ports:
+      - "${GATE12_ZONE_B_RPC_PORT:-17021}:7020"
+      - "${GATE12_ZONE_B_METRICS_PORT:-19101}:9100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      zone-host-a:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gateway
+    restart: unless-stopped
+    environment:
+      MIR2_GATEWAY_TCP_ADDR: 0.0.0.0:7000
+      MIR2_GATEWAY_WEB_ADDR: 0.0.0.0:7010
+      MIR2_ZONE_HOST_ADDRS: zone-host-a:7020,zone-host-b:7020
+      MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
+      MIR2_ACCOUNT_STORE_BACKEND: postgres
+      MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
+      MIR2_ACCOUNT_STORE_PATH: /var/lib/obelisk/accounts.json
+    ports:
+      - "${GATE12_GATEWAY_TCP_PORT:-17000}:7000"
+      - "${GATE12_GATEWAY_WEB_PORT:-17010}:7010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      zone-host-a:
+        condition: service_healthy
+      zone-host-b:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - obelisk
+
+  zone-replicator:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-replicator
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_ACTIVE_ADDR: zone-host-a:7020
+      MIR2_ZONE_STANDBY_ADDR: zone-host-b:7020
+      MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
+      MIR2_ZONE_REPLICA_INTERVAL_MS: 100
+    depends_on:
+      zone-host-a:
+        condition: service_healthy
+      zone-host-b:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    networks:
+      - obelisk
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/rules/alerts.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${GATE12_PROMETHEUS_PORT:-19090}:9090"
+    depends_on:
+      zone-host-a:
+        condition: service_healthy
+      zone-host-b:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/bin/promtool", "check", "healthy"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - obelisk
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GATE12_GRAFANA_ADMIN_PASSWORD:-gate12-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GATE12_GRAFANA_PORT:-13000}:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3000/api/health | grep -q ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - obelisk
+
+  acceptance:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: acceptance
+    environment:
+      GATE12_GATEWAY_ADDR: gateway:7000
+      GATE12_PRIMARY_OPERATOR_ADDR: zone-host-a:9100
+      GATE12_STANDBY_OPERATOR_ADDR: zone-host-b:9100
+      GATE12_EVIDENCE_DIR: /evidence
+    volumes:
+      - ${GATE12_EVIDENCE_DIR:-./evidence}:/evidence
+    depends_on:
+      gateway:
+        condition: service_healthy
+      zone-replicator:
+        condition: service_started
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    networks:
+      - obelisk
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  obelisk:
+    driver: bridge
