@@ -3289,7 +3289,7 @@ fn starter_safe_zones() -> Vec<SafeZoneRecord> {
     }]
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum WorldEntityKind {
     SelfPlayer,
@@ -3298,7 +3298,7 @@ pub enum WorldEntityKind {
     Npc,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum WorldEntityDisposition {
     Friendly,
@@ -3344,7 +3344,7 @@ pub enum QuestStage {
     Completed,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldEntitySpriteSnapshot {
     pub body_library: String,
@@ -3369,7 +3369,7 @@ pub struct WorldEntitySpriteSnapshot {
     pub mount_frame_offset: Option<u16>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldEntitySnapshot {
     pub object_id: u32,
@@ -3397,7 +3397,7 @@ pub struct WorldEntitySnapshot {
     pub quest_ids: Vec<i32>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldItemSnapshot {
     pub key: String,
@@ -3415,7 +3415,7 @@ pub struct WorldItemSnapshot {
     pub added_defence: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EquipmentItemSnapshot {
     pub slot: EquipmentSlot,
@@ -3436,7 +3436,7 @@ pub struct EquipmentItemSnapshot {
     pub sealed_next_time_binary_datetime: i64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GroundDropSnapshot {
     pub object_id: u32,
@@ -3456,7 +3456,7 @@ pub struct GroundDropSnapshot {
     pub loot: GroundDropLootSnapshot,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum GroundDropLootSnapshot {
     Gold {
@@ -3478,7 +3478,7 @@ pub enum GroundDropLootSnapshot {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuestSnapshot {
     pub quest_id: i32,
@@ -3493,7 +3493,7 @@ pub struct QuestSnapshot {
     pub reward_preview: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcDialogSnapshot {
     pub npc_object_id: u32,
@@ -3505,21 +3505,21 @@ pub struct NpcDialogSnapshot {
     pub input: Option<NpcDialogInputSnapshot>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcDialogLinkSnapshot {
     pub text: String,
     pub target: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcDialogInputSnapshot {
     pub target: String,
     pub prompt: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillSnapshot {
     pub key: String,
@@ -3536,7 +3536,7 @@ pub struct SkillSnapshot {
     pub cooldown_remaining_ticks: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NpcScriptDiagnosticSnapshot {
     pub script_key: String,
@@ -3549,7 +3549,7 @@ pub struct NpcScriptDiagnosticSnapshot {
 /// A buff stat rendered for the browser buff window: keeps Crystal's raw `stat`
 /// byte (backward compatible) and adds the `label` (Crystal `Stat` enum name,
 /// `Crystal/Shared/Data/Stat.cs`) so the window can show `{label, value}`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BuffStatSnapshot {
     pub stat: u8,
@@ -3557,7 +3557,7 @@ pub struct BuffStatSnapshot {
     pub value: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BuffSnapshot {
     pub key: String,
@@ -4233,7 +4233,7 @@ pub struct Stage5ProfessionState {
     pub crafted_items: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MapTransferSnapshot {
     pub key: String,
@@ -4245,7 +4245,7 @@ pub struct MapTransferSnapshot {
     pub to_direction: MirDirection,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
     pub tick: u64,

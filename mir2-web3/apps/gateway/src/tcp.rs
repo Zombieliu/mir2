@@ -7,9 +7,9 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, mpsc};
 
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
-use crate::routing::{SharedZoneLiveOutbound, SharedZoneLiveOutboundRegistration};
+use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::catch_gateway_panic;
-use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 #[path = "chat_broadcast.rs"]
 pub mod chat_broadcast;
@@ -30,9 +30,11 @@ pub async fn run_tcp_gateway(
     }
     let listener = TcpListener::bind(addr).await?;
     let config = Arc::new(config);
-    let zone_registry = Arc::new(ZoneRegistry::in_process_with_owner_lease_authority(
-        crate::zone_lease::default_zone_owner_lease_authority_from_env(),
-    ));
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let zone_registry = Arc::new(
+        topology.zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
+    );
     let gameplay_event_sink = default_gameplay_event_sink_from_env();
 
     eprintln!("mir2-gateway tcp listening on {addr}");
@@ -93,7 +95,7 @@ async fn handle_client_inner(
     let (zone_outbound_tx, mut zone_outbound_rx) =
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
     let mut active_zone_outbound_registration_id = 0;
-    let mut _zone_live_outbound_registration: Option<SharedZoneLiveOutboundRegistration> = None;
+    let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
 
     loop {
@@ -129,7 +131,16 @@ async fn handle_client_inner(
         };
         let frame = match frame {
             Ok(frame) => frame,
-            Err(error) if error.kind() == io::ErrorKind::UnexpectedEof => return Ok(()),
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    io::ErrorKind::UnexpectedEof
+                        | io::ErrorKind::ConnectionReset
+                        | io::ErrorKind::BrokenPipe
+                ) =>
+            {
+                return Ok(())
+            }
             Err(error) => return Err(error),
         };
 
@@ -147,15 +158,15 @@ async fn handle_client_inner(
                     chat_presence = None;
                 }
                 let next_registration = session
-                    .zone_movement_ingress()
-                    .map(|ingress| ingress.register_live_outbound(zone_outbound_tx.clone()))
-                    .transpose()
-                    .map_err(session_panic_io_error)?
-                    .flatten();
+                    .register_zone_live_outbound(zone_outbound_tx.clone())
+                    .map_err(session_panic_io_error)?;
                 active_zone_outbound_registration_id = next_registration
                     .as_ref()
-                    .map(SharedZoneLiveOutboundRegistration::registration_id)
+                    .map(|registration| registration.registration_id())
                     .unwrap_or(0);
+                if let Some(registration) = next_registration.as_ref() {
+                    registration.activate();
+                }
                 _zone_live_outbound_registration = next_registration;
                 for response in responses {
                     send_packet(&mut writer, &response).await?;

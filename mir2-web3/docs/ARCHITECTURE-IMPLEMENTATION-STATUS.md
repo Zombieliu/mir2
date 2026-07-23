@@ -144,6 +144,14 @@ score, not a Crystal parity score or a production launch sign-off.
 - `scripts/quality-gate.sh` is the current lightweight engineering gate for
   Rust formatting/checks, Player Web typecheck, optional Admin Web typecheck,
   and whitespace diff checks.
+- Gate 12 packages Gateway, Zone Host, checkpoint replication, and acceptance
+  as minimal non-root Docker targets. The operator Compose runs two failure
+  domains with PostgreSQL, Prometheus, and a provisioned Grafana dashboard.
+  Zone Hosts expose health/readiness/low-cardinality Prometheus metrics plus a
+  signed, sequenced HMAC heartbeat; public telemetry binds fail closed without
+  a 32-byte enrollment secret. The Docker acceptance keeps a real Mir2 client
+  online, stops the primary container after checkpoint replication, and
+  requires authoritative movement output from the standby.
 - The public `SimulationSession` API remains available for compatibility tests
   and direct simulation use.
 

@@ -33,10 +33,11 @@ use super::map::{
 use super::packets::*;
 use super::quests::QuestState;
 use super::resources::{
-    current_language, BuffResource, HeroInventoryResource, InventoryResource, ItemRentalResource,
-    MapRuntimeResource, NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource,
-    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
+    current_language, runtime_tick, set_runtime_tick, BuffResource, HeroInventoryResource,
+    InventoryResource, ItemRentalResource, MapRuntimeResource, NpcStateResource,
+    ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
+    PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
+    SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 use super::skills::seed_skills;
@@ -185,6 +186,54 @@ pub(super) fn persist_active_character_save(world: &World) {
         .clone()
         .unwrap_or_else(|| "demo".to_string());
     persist_character_save(world, &account_id, save);
+}
+
+impl SimulationSession {
+    /// Capture the exact durable private state for the active character without
+    /// mutating the configured account store.
+    pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        snapshot_active_character_save(self.app.world())
+    }
+
+    /// Restore the active character's durable private state after journal
+    /// replay. Shared Zone state is restored separately by the Gateway and
+    /// remains authoritative for map entities, position, and vitals.
+    pub fn restore_active_character_checkpoint(
+        &mut self,
+        save: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let identity = self
+            .active_identity()
+            .ok_or_else(|| "active character checkpoint requires an active identity".to_string())?;
+        if identity.character_index != save.character.index
+            || identity.character_name != save.character.name
+        {
+            return Err(format!(
+                "active character checkpoint identity mismatch: runtime={}/{}, checkpoint={}/{}",
+                identity.character_index,
+                identity.character_name,
+                save.character.index,
+                save.character.name
+            ));
+        }
+
+        let replay_tick = runtime_tick(self.app.world());
+        apply_character_save(self.app.world_mut(), save);
+        refresh_runtime_map_collision(self.app.world_mut());
+        refresh_storage_password_state(self.app.world_mut());
+        rebuild_world(self.app.world_mut());
+        if should_use_crystal_current_map_world(self.app.world()) {
+            clear_non_player_world_entities(self.app.world_mut());
+            spawn_visible_world_for_current_map(self.app.world_mut());
+            spawn_config_visible_npcs(self.app.world_mut());
+        }
+        self.visible_objects = collect_visible_objects(self.app.world())
+            .keys()
+            .copied()
+            .collect();
+        set_runtime_tick(self.app.world_mut(), replay_tick);
+        Ok(())
+    }
 }
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {

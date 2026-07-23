@@ -7,8 +7,9 @@ use mir2_protocol::{
     ChatItem, ClientBuff, MirClass, MirDirection, MirGender, ObjectHealthInfo, ObjectManaInfo,
     Point, ServerPacket, Spell, UserItem,
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct SessionId(pub String);
 
 impl SessionId {
@@ -33,10 +34,10 @@ impl From<String> for SessionId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 pub struct PlayerId(pub u32);
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct ZoneKey {
     pub shard_id: String,
     pub map_file_name: String,
@@ -64,7 +65,7 @@ impl ZoneKey {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneChatProfile {
     pub group_members: Vec<String>,
     pub guild_name: Option<String>,
@@ -91,7 +92,7 @@ impl Default for ZoneChatProfile {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneChatItem {
     pub metadata: ChatItem,
     pub item: Option<UserItem>,
@@ -113,7 +114,7 @@ pub struct ZoneChatItem {
 ///
 /// When `has_authoritative_damage()` is `false` (the default), the zone falls
 /// back to the legacy trusted scalar so existing callers keep working.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct ZonePlayerCombatStats {
     pub min_dc: i32,
     pub max_dc: i32,
@@ -152,7 +153,7 @@ impl ZonePlayerCombatStats {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneJoin {
     pub session_id: SessionId,
     pub account_id: String,
@@ -172,14 +173,14 @@ pub struct ZoneJoin {
     pub combat_stats: ZonePlayerCombatStats,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ZoneMovementActionKind {
     Turn,
     Walk,
     Run,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMovementAction {
     pub kind: ZoneMovementActionKind,
     pub direction: MirDirection,
@@ -187,7 +188,7 @@ pub struct ZoneMovementAction {
     pub received_at_ms: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneMonsterSpawn {
     pub object_id: u32,
     pub name: String,
@@ -209,7 +210,7 @@ pub struct ZoneMonsterSpawn {
 }
 
 /// Authoritative defensive stats for a shared-zone monster.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct ZoneMonsterDefense {
     pub agility: i32,
     pub min_ac: i32,
@@ -241,7 +242,7 @@ impl ZoneMonsterDefense {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterKillAward {
     pub monster_object_id: u32,
     pub monster_name: String,
@@ -287,6 +288,12 @@ pub enum ZoneCommand {
         session_id: SessionId,
         position: Point,
         direction: MirDirection,
+    },
+    SyncPlayerVitals {
+        session_id: SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
     },
     Chat {
         session_id: SessionId,
@@ -442,13 +449,13 @@ pub enum ZoneOutbound {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZonePlayerBuff {
     pub buff: ClientBuff,
     pub expires_at_ms: Option<u64>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub(crate) struct ZoneObject {
     pub object_id: u32,
     pub position: Point,
@@ -459,19 +466,19 @@ pub(crate) struct ZoneObject {
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneGroundDrop {
     pub drop: GroundDropSnapshot,
     pub owner_expires_at_ms: Option<u64>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneGroundDropClaim {
     pub session_id: SessionId,
     pub drop: GroundDropSnapshot,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneNativeMonster {
     pub name: String,
     pub ai: u8,
@@ -544,7 +551,7 @@ fn zone_native_monster_targets_players(ai: u8) -> bool {
     !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZonePlayer {
     pub session_id: SessionId,
     pub account_id: String,

@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Latest remote-Zone workload sync: 2026-07-23 completes Gate 11.1-11.4.
+> Checkpoint v4 restores the durable session projection plus complete shared
+> Zone state: player vitals, monsters/AI timers, pending combat/effects, drops
+> and claims, doors, hazards, map layers, trades/rentals, and NPC state. One
+> real Crystal combat/drop/map-handoff workload survives active loss, while a
+> separate four-session/two-map harness survives two consecutive host failures;
+> both old generations are fenced at tokens 2 and 3. The full operations binary
+> writes one fail-closed, versioned JSON evidence manifest atomically.
+
 > Latest Crystal system-chat parity sync: 2026-07-23 adds one shared Gateway
 > scheduler for native TCP and WebSocket sessions. Presence begins only after a
 > successful StartGame/Zone join and is removed by LogOut, Disconnect, socket

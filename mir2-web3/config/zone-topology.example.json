@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "mode": "per_map",
+  "defaultZoneId": "lobby",
+  "defaultTickMs": 100,
+  "zones": {
+    "hot-bichon": {
+      "maps": ["0"],
+      "tickMs": 50
+    },
+    "cold-leveling": {
+      "maps": ["1", "2", "3", "4"],
+      "tickMs": 250
+    },
+    "instances": {
+      "maps": ["D001", "D002"],
+      "tickMs": 100
+    }
+  }
+}

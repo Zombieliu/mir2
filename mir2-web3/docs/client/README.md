@@ -26,6 +26,15 @@ in [`apps/web/CLAUDE.md`](../../apps/web/CLAUDE.md) (auto-loaded by Claude Code 
 | [`audio-vfx.md`](audio-vfx.md) | sound-id → wav pipeline (prod allowlist / R2 fallback) + the magic-effect atlas + procedural fallback |
 | [`chat-system.md`](chat-system.md) | the chat / system-message log: the flat `logs` state, channel/tone classification, the outbound prefix→`chat` command |
 | [`onchain-mine.md`](onchain-mine.md) | the `NEXT_PUBLIC_ONCHAIN_MINE`-gated Sui on-chain mine (web3) subsystem |
+| [`GATE5-DETERMINISTIC-ZONE-REPLAY.md`](GATE5-DETERMINISTIC-ZONE-REPLAY.md) | Gate 5.1 deterministic Zone input log, state root, checkpoint and replay acceptance |
+| [`GATE5-REMOTE-ZONE-HOST.md`](GATE5-REMOTE-ZONE-HOST.md) | Gate 5.2 separate Zone Host process, bounded TCP RPC, fencing and reconnect acceptance |
+| [`GATE5-RELIABLE-ZONE-FAILOVER.md`](GATE5-RELIABLE-ZONE-FAILOVER.md) | Gate 5.3 reliable live outbounds, host checkpoints, standby replication and endpoint failover |
+| [`GATE5-MAP-ZONE-TOPOLOGY.md`](GATE5-MAP-ZONE-TOPOLOGY.md) | Gate 5.4 versioned Map-to-Zone topology, hot/cold grouping and independent Zone ticks |
+| [`GATE5-ATOMIC-ZONE-HANDOFF.md`](GATE5-ATOMIC-ZONE-HANDOFF.md) | Gate 5.5 atomic local/remote map handoff, rollback, fenced close and cross-Zone messages |
+| [`GATE6-ZONE-HOST-SCHEDULER.md`](GATE6-ZONE-HOST-SCHEDULER.md) | Gate 6 host registration, capacity-aware replicated placement leases, drain and rebalance |
+| [`GATE7-UNTRUSTED-GUILD-NODES.md`](GATE7-UNTRUSTED-GUILD-NODES.md) | Gate 7 expiring node admission, deterministic execution quorum, strikes and quarantine |
+| [`GATE8-COMMONWARE-CONTROL-LOG.md`](GATE8-COMMONWARE-CONTROL-LOG.md) | Gate 8 pinned Commonware v2026.2.0 finality log, event blocks, replay and live projections |
+| [`GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md`](GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md) | Gate 13 Ed25519 identity, Sui testnet registry, finalized membership, remote capacity certificate and reward eligibility |
 
 ## Keeping these honest
 
