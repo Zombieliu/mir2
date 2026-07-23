@@ -18,7 +18,7 @@ use crate::{
     ZoneHostTelemetrySnapshot,
 };
 
-const HEARTBEAT_SCHEMA: &str = "obelisk.zone-host-heartbeat.v1";
+const HEARTBEAT_SCHEMA: &str = "obelisk.zone-host-heartbeat.v2";
 const HMAC_SIGNATURE_ALGORITHM: &str = "hmac-sha256";
 const ED25519_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
 // An ephemeral loopback port keeps local multi-host tests and developer
@@ -170,6 +170,8 @@ pub struct ZoneHostHeartbeatPayload {
     pub protocol_version: u16,
     pub session_count: usize,
     pub session_capacity: usize,
+    pub session_capacity_per_zone: usize,
+    pub busiest_zone_session_count: usize,
     pub zone_count: usize,
     pub zone_capacity: usize,
     pub active_connections: usize,
@@ -186,6 +188,7 @@ pub struct SignedZoneHostHeartbeat {
 
 impl SignedZoneHostHeartbeat {
     pub fn verify(&self, secret: &[u8]) -> Result<(), String> {
+        self.validate_payload()?;
         if self.signature_algorithm != HMAC_SIGNATURE_ALGORITHM {
             return Err("unsupported heartbeat signature algorithm".to_string());
         }
@@ -202,6 +205,7 @@ impl SignedZoneHostHeartbeat {
     }
 
     pub fn verify_ed25519(&self) -> Result<(), String> {
+        self.validate_payload()?;
         if self.signature_algorithm != ED25519_SIGNATURE_ALGORITHM {
             return Err("unsupported heartbeat signature algorithm".to_string());
         }
@@ -218,6 +222,24 @@ impl SignedZoneHostHeartbeat {
         let bytes = serde_json::to_vec(&self.payload)
             .map_err(|error| format!("heartbeat serialization failed: {error}"))?;
         verify_ed25519_signature(&self.payload.public_key, &bytes, &self.signature)
+    }
+
+    fn validate_payload(&self) -> Result<(), String> {
+        if self.payload.schema != HEARTBEAT_SCHEMA {
+            return Err("unsupported heartbeat schema".to_string());
+        }
+        if self.payload.session_capacity == 0
+            || self.payload.session_capacity_per_zone == 0
+            || self.payload.session_capacity_per_zone > self.payload.session_capacity
+            || self.payload.session_count > self.payload.session_capacity
+            || self.payload.busiest_zone_session_count > self.payload.session_capacity_per_zone
+            || self.payload.busiest_zone_session_count > self.payload.session_count
+            || self.payload.zone_capacity == 0
+            || self.payload.zone_count > self.payload.zone_capacity
+        {
+            return Err("heartbeat capacity claims are inconsistent".to_string());
+        }
+        Ok(())
     }
 }
 
@@ -420,6 +442,7 @@ fn run_capacity_challenge(
         return Err("capacity challenge command count exceeds node limit".to_string());
     }
     if challenge.workload.concurrent_sessions > health.session_capacity
+        || challenge.workload.max_sessions_per_zone > health.session_capacity_per_zone
         || challenge.workload.zone_count > health.zone_capacity
     {
         return Err("capacity challenge exceeds configured node capacity".to_string());
@@ -499,6 +522,8 @@ fn sign_heartbeat(
         protocol_version: health.protocol_version,
         session_count: health.session_count,
         session_capacity: health.session_capacity,
+        session_capacity_per_zone: health.session_capacity_per_zone,
+        busiest_zone_session_count: health.busiest_zone_session_count,
         zone_count: health.zone_count,
         zone_capacity: health.zone_capacity,
         active_connections: health.active_connections,
@@ -567,6 +592,18 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         "gauge",
         "obelisk_zone_host_session_capacity",
         health.session_capacity
+    );
+    metric!(
+        "Configured session capacity per Zone.",
+        "gauge",
+        "obelisk_zone_host_session_capacity_per_zone",
+        health.session_capacity_per_zone
+    );
+    metric!(
+        "Current session count in the busiest Zone.",
+        "gauge",
+        "obelisk_zone_host_busiest_zone_sessions",
+        health.busiest_zone_session_count
     );
     metric!(
         "Currently hosted Zones.",
@@ -686,10 +723,12 @@ mod tests {
             session_count: 3,
             active_connections: 2,
             session_capacity: 64,
+            session_capacity_per_zone: 16,
+            busiest_zone_session_count: 3,
             zone_count: 1,
             zone_capacity: 8,
             draining: false,
-            protocol_version: 5,
+            protocol_version: 6,
         }
     }
 
@@ -710,6 +749,7 @@ mod tests {
         assert_eq!(heartbeat.payload.observed_at_ms, 42);
         assert_eq!(heartbeat.payload.sequence, 7);
         assert_eq!(heartbeat.payload.failure_domain, "test-az-a");
+        assert_eq!(heartbeat.payload.schema, HEARTBEAT_SCHEMA);
     }
 
     #[test]
@@ -744,6 +784,8 @@ mod tests {
         let output = render_prometheus(&snapshot);
         assert!(output.contains("obelisk_zone_host_sessions{host_id=\"guild-a\\\"node\"} 3"));
         assert!(output.contains("obelisk_zone_host_rpc_requests_total"));
+        assert!(output.contains("obelisk_zone_host_session_capacity_per_zone"));
+        assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
         assert!(!output.contains("session_id"));
         assert!(!output.contains("account_id"));
     }
@@ -779,7 +821,11 @@ mod tests {
             GatewayConfig::default(),
             Arc::new(InMemoryZoneOwnerLeaseAuthority::new()),
             None,
-            ZoneRpcLimits::default(),
+            ZoneRpcLimits {
+                max_sessions: 64,
+                max_sessions_per_zone: 32,
+                ..ZoneRpcLimits::default()
+            },
             Arc::new(SharedInProcessZoneRuntimeFactory::new()),
         );
         let now = now_ms();
@@ -791,6 +837,7 @@ mod tests {
             expires_at_ms: now.saturating_add(10_000),
             workload: CapacityWorkload {
                 concurrent_sessions: 4,
+                max_sessions_per_zone: 2,
                 zone_count: 2,
                 command_count: 100,
                 maximum_p95_latency_ms: 100,
@@ -820,9 +867,29 @@ mod tests {
         response.verify(&registration, now_ms()).unwrap();
         assert_eq!(response.completed_commands, 100);
         assert_eq!(response.failed_commands, 0);
+        assert_eq!(response.challenge.workload.max_sessions_per_zone, 2);
 
         let mut oversized = response.challenge;
         oversized.workload.command_count = config.capacity_max_commands + 1;
         assert!(run_capacity_challenge(&server, &config, oversized).is_err());
+
+        let mut oversized_per_zone = CapacityChallenge {
+            challenge_id: "remote-capacity-per-zone".to_string(),
+            node_id: identity.node_id().to_string(),
+            nonce: URL_SAFE_NO_PAD.encode([8_u8; 32]),
+            issued_at_ms: now.saturating_sub(100),
+            expires_at_ms: now.saturating_add(10_000),
+            workload: CapacityWorkload {
+                concurrent_sessions: 64,
+                max_sessions_per_zone: 33,
+                zone_count: 2,
+                command_count: 100,
+                maximum_p95_latency_ms: 100,
+                minimum_success_bps: 10_000,
+            },
+        };
+        assert!(run_capacity_challenge(&server, &config, oversized_per_zone.clone()).is_err());
+        oversized_per_zone.workload.max_sessions_per_zone = 32;
+        assert!(run_capacity_challenge(&server, &config, oversized_per_zone).is_ok());
     }
 }

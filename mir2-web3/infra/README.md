@@ -115,6 +115,11 @@ The active key must match
 must match the deployment manifest. Private seeds are never committed. See
 `docs/client/GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md`.
 
+To measure a node instead of relying on its declared capacity, run the
+container-constrained profiles in [`infra/capacity/README.md`](capacity/README.md).
+The first committed profile covers a 2 vCPU / 2 GiB / 5 Mbps / 100 GB offer and
+keeps benchmark capacity separate from production certification.
+
 Local default endpoints:
 
 | Service | Endpoint | Purpose |
