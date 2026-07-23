@@ -24,6 +24,8 @@ still depends on human Crystal visual/feel acceptance.
 - `src/bin/smoke.rs`: scripted local TCP smoke.
 - `src/bin/packet_trace.rs`: local/live packet trace and matrix artifact harness.
 - `src/bin/gate11_acceptance.rs`: real Crystal-world remote Zone handoff/failover acceptance.
+- `src/bin/gate11_scale_acceptance.rs`: four-session, two-map, two-generation fencing acceptance.
+- `src/bin/gate11_full_acceptance.rs`: fail-closed Gate 11 manifest and atomic evidence writer.
 
 ## Supported Local Flows
 
@@ -108,6 +110,8 @@ Account-store runtime policy:
   `GATE10_ACCEPTANCE_ITERATIONS` for a bounded deterministic soak.
 - `cargo run -p mir2-gateway --bin gate11_acceptance` runs a real Crystal map workload across
   two TCP Zone Hosts, then stops the active host and verifies fenced standby continuation.
+- `cargo run -p mir2-gateway --bin gate11_full_acceptance -- --output target/gate11.json` runs
+  the complete v4 Zone-image and repeated-failure suite and atomically writes release evidence.
 
 Admin runtime read endpoints:
 

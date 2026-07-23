@@ -5,8 +5,9 @@ use crate::runtime::{
     SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, ZoneMonsterSpawn,
 };
 use crate::{
-    ActiveSessionIdentity, ChatPacketPreparation, GroundDropSnapshot, SharedGroundDropPickupCommit,
-    SimulationConfig, SimulationSession, WorldEntitySnapshot, WorldSnapshot,
+    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
+    SharedGroundDropPickupCommit, SimulationConfig, SimulationSession, WorldEntitySnapshot,
+    WorldSnapshot,
 };
 use mir2_protocol::{
     client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
@@ -254,6 +255,15 @@ pub trait WorldRuntime: Send + Sync {
 
     fn world_snapshot(&self) -> WorldSnapshot;
     fn active_identity(&self) -> Option<ActiveSessionIdentity>;
+    fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        None
+    }
+    fn restore_active_character_checkpoint(
+        &mut self,
+        _checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        Err("world runtime does not support active character checkpoint restore".to_string())
+    }
     fn save_active_character(&self);
     fn refresh_active_external_mail(&mut self) -> bool;
 }
@@ -404,6 +414,10 @@ impl InProcessWorldRuntime {
     ) {
         self.session
             .force_authoritative_player_transform(position, direction);
+    }
+
+    pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
+        self.session.force_authoritative_player_vitals(hp, mp);
     }
 
     pub fn apply_zone_player_damage(&mut self, damage: i32) {
@@ -574,6 +588,17 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn active_identity(&self) -> Option<ActiveSessionIdentity> {
         self.session.active_identity()
+    }
+
+    fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        self.session.active_character_checkpoint()
+    }
+
+    fn restore_active_character_checkpoint(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session.restore_active_character_checkpoint(checkpoint)
     }
 
     fn save_active_character(&self) {

@@ -47,7 +47,10 @@ pub use events::{
 };
 pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;
-pub use mir2_workload::{run_gate11_acceptance, Gate11AcceptanceEvidence};
+pub use mir2_workload::{
+    run_gate11_acceptance, run_gate11_full_acceptance, run_gate11_scale_acceptance,
+    Gate11AcceptanceEvidence, Gate11FinalAcceptanceEvidence, Gate11ScaleEvidence,
+};
 pub use node_security::{
     GuildNodeAdmission, GuildNodeCapability, GuildNodeSecurityRegistry, GuildNodeSecuritySnapshot,
     VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
@@ -74,5 +77,5 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
-    ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };

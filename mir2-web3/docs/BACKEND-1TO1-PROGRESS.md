@@ -1,13 +1,13 @@
 # Backend 1:1 Progress
 
-> Latest remote-Zone workload sync: 2026-07-23 introduces Gate 11.1 acceptance
-> over two real TCP Zone Hosts. The same Gateway session performs Crystal
-> login/StartGame, client melee with authoritative monster HP loss, client item
-> drop/pickup, and `map:0 -> map:1` atomic handoff; the active host checkpoint
-> is installed on standby, the active listener is stopped, a higher owner fence
-> is finalized, and KeepAlive plus durable player state continue on standby.
-> Zone RPC is now v5 and trusted handoff transfers HP/MP. Checkpoint v3 covers
-> durable player/session state, not a complete autonomous live-map image.
+> Latest remote-Zone workload sync: 2026-07-23 completes Gate 11.1-11.4.
+> Checkpoint v4 restores the durable session projection plus complete shared
+> Zone state: player vitals, monsters/AI timers, pending combat/effects, drops
+> and claims, doors, hazards, map layers, trades/rentals, and NPC state. One
+> real Crystal combat/drop/map-handoff workload survives active loss, while a
+> separate four-session/two-map harness survives two consecutive host failures;
+> both old generations are fenced at tokens 2 and 3. The full operations binary
+> writes one fail-closed, versioned JSON evidence manifest atomically.
 
 > Latest source-verified monster-defence sync: 2026-07-22 corrects the player
 > mitigation channel for Crystal AI 26 ShamanZombie and AI 181 WaterDragon /
