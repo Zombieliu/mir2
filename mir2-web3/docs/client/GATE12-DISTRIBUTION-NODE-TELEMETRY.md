@@ -12,10 +12,17 @@ game code inside the Zone Host container.
 ## Quickstart
 
 Copy the environment template and replace every example secret before exposing
-the stack outside a local development machine:
+the stack outside a local development machine. Manual Compose startup also
+needs two distinct Ed25519 seed files:
 
 ```bash
 cp infra/gate12/.env.example infra/gate12/.env
+cargo +1.89.0 run -p mir2-gateway --bin node_identity -- \
+  generate /secure/path/gate12-zone-a.key
+cargo +1.89.0 run -p mir2-gateway --bin node_identity -- \
+  generate /secure/path/gate12-zone-b.key
+export GATE12_ZONE_A_SIGNING_KEY_FILE=/secure/path/gate12-zone-a.key
+export GATE12_ZONE_B_SIGNING_KEY_FILE=/secure/path/gate12-zone-b.key
 docker compose --env-file infra/gate12/.env \
   -f infra/gate12/docker-compose.yml up --build -d
 ```
@@ -71,20 +78,24 @@ Every Zone Host exposes a separate HTTP listener configured by
 - `GET /v1/heartbeat`: canonical signed node heartbeat.
 
 A non-loopback operator bind fails startup unless
-`MIR2_ZONE_HOST_HEARTBEAT_SECRET` contains at least 32 bytes. Each node should
-receive a different enrollment secret in production. The HMAC-SHA256 heartbeat
+`MIR2_ZONE_HOST_SIGNING_KEY_FILE` (or `MIR2_ZONE_HOST_SIGNING_KEY`) supplies an
+Ed25519 seed. Each node must receive a distinct key. The signed heartbeat
 commits:
 
 - schema, node id, advertised RPC endpoint, and failure domain;
 - observation timestamp and monotonic process-local sequence;
 - process/protocol versions;
-- current session/Zone counts and capacities;
+- current session/Zone counts, global capacity, per-Zone session capacity, and
+  the busiest Zone count;
 - active connections and draining state.
 
-Consumers must reject invalid signatures, timestamps outside their allowed
-clock window, and a sequence that does not advance for the same node/process.
-Gate 12 provides the signing and verification primitive; durable replay windows
-and public-key node identities remain control-plane work.
+Consumers reject a public key that does not derive the advertised stable node
+ID, invalid signatures, timestamps outside the allowed clock window, and a
+sequence that does not advance for the same node/key-generation/process tuple.
+The operator API also exposes a bounded, one-at-a-time
+`POST /v1/capacity-challenge` used by Gate 13. Loopback-only development can
+still opt into the legacy HMAC secret; it is not accepted as a permissionless
+node identity.
 
 Prometheus labels contain only the low-cardinality `host_id`, build version, and
 protocol version. Player account, character, session, map-instance, and object
@@ -97,6 +108,7 @@ identifiers are deliberately absent.
 - a scrape target being down;
 - a node remaining in draining state;
 - session capacity exceeding 85%;
+- busiest-Zone session capacity exceeding 85%;
 - repeated Zone RPC errors.
 
 These are operator signals, not reward evidence. Rewards must continue to use
@@ -117,7 +129,8 @@ The script:
 2. starts PostgreSQL, two Zone Hosts, Gateway, replicator, Prometheus, Grafana;
 3. waits for every service health contract;
 4. queries Prometheus and verifies the provisioned Grafana dashboard;
-5. verifies both node heartbeat signatures;
+5. verifies both Ed25519 heartbeat signatures and nonce-bound remote capacity
+   challenge responses;
 6. opens one real Mir2 Gateway session and reaches `StartGame`;
 7. waits until the standby contains the replicated live session;
 8. stops the primary Zone Host while the client stays connected;
@@ -143,13 +156,16 @@ GATE12_EVIDENCE_DIR=/absolute/path/to/evidence \
 Before permissionless guild operation, the package still needs:
 
 - CI-published multi-architecture images, SBOMs, signatures, and provenance;
-- asymmetric per-node enrollment identities and rotation/revocation;
 - TLS/mTLS for RPC, heartbeat, metrics, and checkpoint transport;
 - a durable object-store checkpoint backend instead of only direct replication;
 - Kubernetes/Helm packaging, disruption budgets, and multi-AZ drills;
-- a public Commonware validator/network process and finalized registration path;
+- a public Commonware validator/network process instead of only the app-side
+  finality adapter;
 - remote upgrade policy, protocol compatibility gates, and rollback automation;
 - real load/SLO measurements on release builds and deployed networks.
 
 Gate 12 therefore proves distribution, telemetry, signature plumbing, and a
-real container failover. It does not claim permissionless mainnet readiness.
+real container failover. Gate 13 adds Sui testnet registration, rotation,
+revocation, capacity certificates, finalized membership, and reward eligibility;
+see [`GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md`](GATE13-PERMISSIONLESS-GUILD-NODE-FOUNDATION.md).
+Neither gate claims permissionless mainnet readiness.

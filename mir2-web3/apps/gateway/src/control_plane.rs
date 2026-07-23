@@ -20,6 +20,7 @@ pub struct ZoneHostRegistration {
     pub endpoint: String,
     pub failure_domain: String,
     pub max_sessions: usize,
+    pub max_sessions_per_zone: usize,
     pub max_zones: usize,
     pub weight: u32,
 }
@@ -36,6 +37,7 @@ impl ZoneHostRegistration {
             endpoint: endpoint.into(),
             failure_domain: failure_domain.into(),
             max_sessions: health.session_capacity,
+            max_sessions_per_zone: health.session_capacity_per_zone,
             max_zones: health.zone_capacity,
             weight,
         }
@@ -47,6 +49,11 @@ impl ZoneHostRegistration {
         validate_component("Zone Host failure domain", &self.failure_domain)?;
         if self.max_sessions == 0 {
             return Err("Zone Host max_sessions must be positive".to_string());
+        }
+        if self.max_sessions_per_zone == 0 || self.max_sessions_per_zone > self.max_sessions {
+            return Err(
+                "Zone Host max_sessions_per_zone must be within 1..=max_sessions".to_string(),
+            );
         }
         if self.max_zones == 0 {
             return Err("Zone Host max_zones must be positive".to_string());
@@ -62,6 +69,7 @@ impl ZoneHostRegistration {
 #[serde(rename_all = "camelCase")]
 pub struct ZoneHostHeartbeat {
     pub session_count: usize,
+    pub busiest_zone_session_count: usize,
     pub active_connections: usize,
     pub observed_at_ms: u64,
 }
@@ -70,6 +78,7 @@ impl ZoneHostHeartbeat {
     pub fn from_health(health: &ZoneHostHealth, observed_at_ms: u64) -> Self {
         Self {
             session_count: health.session_count,
+            busiest_zone_session_count: health.busiest_zone_session_count,
             active_connections: health.active_connections,
             observed_at_ms,
         }
@@ -169,6 +178,14 @@ impl ZoneHostControlPlane {
                 registration.host_id, heartbeat.session_count, registration.max_sessions
             ));
         }
+        if heartbeat.busiest_zone_session_count > registration.max_sessions_per_zone {
+            return Err(format!(
+                "Zone Host {} reports {} sessions in its busiest Zone above per-Zone capacity {}",
+                registration.host_id,
+                heartbeat.busiest_zone_session_count,
+                registration.max_sessions_per_zone
+            ));
+        }
         let mut state = self.lock_state()?;
         state.hosts.insert(
             registration.host_id.clone(),
@@ -197,6 +214,13 @@ impl ZoneHostControlPlane {
             return Err(format!(
                 "Zone Host {host_id} reports {} sessions above capacity {}",
                 heartbeat.session_count, host.registration.max_sessions
+            ));
+        }
+        if heartbeat.busiest_zone_session_count > host.registration.max_sessions_per_zone {
+            return Err(format!(
+                "Zone Host {host_id} reports {} sessions in its busiest Zone above per-Zone capacity {}",
+                heartbeat.busiest_zone_session_count,
+                host.registration.max_sessions_per_zone
             ));
         }
         host.heartbeat = heartbeat;
@@ -539,16 +563,68 @@ mod tests {
                     endpoint: format!("127.0.0.1:{}", 30_000 + host_id.len()),
                     failure_domain: domain.to_string(),
                     max_sessions: 100,
+                    max_sessions_per_zone: 50,
                     max_zones: 2,
                     weight: 100,
                 },
                 ZoneHostHeartbeat {
                     session_count: 0,
+                    busiest_zone_session_count: 0,
                     active_connections: 0,
                     observed_at_ms: now_ms,
                 },
             )
             .expect("host should register");
+    }
+
+    #[test]
+    fn registration_and_heartbeats_enforce_per_zone_capacity() {
+        let control = ZoneHostControlPlane::new(100, 1_000, 0);
+        let registration = ZoneHostRegistration {
+            host_id: "host-a".to_string(),
+            endpoint: "127.0.0.1:30000".to_string(),
+            failure_domain: "az-a".to_string(),
+            max_sessions: 100,
+            max_sessions_per_zone: 10,
+            max_zones: 8,
+            weight: 100,
+        };
+        let over_capacity = ZoneHostHeartbeat {
+            session_count: 11,
+            busiest_zone_session_count: 11,
+            active_connections: 1,
+            observed_at_ms: 10,
+        };
+        assert!(control
+            .register_host(registration.clone(), over_capacity)
+            .is_err());
+
+        control
+            .register_host(
+                registration,
+                ZoneHostHeartbeat {
+                    session_count: 10,
+                    busiest_zone_session_count: 10,
+                    active_connections: 1,
+                    observed_at_ms: 10,
+                },
+            )
+            .expect("at-limit heartbeat is valid");
+        control
+            .place_zone(ZoneId::new("map:0"), 10)
+            .expect("a full existing Zone must not make the whole host unavailable");
+
+        assert!(control
+            .heartbeat(
+                "host-a",
+                ZoneHostHeartbeat {
+                    session_count: 11,
+                    busiest_zone_session_count: 11,
+                    active_connections: 1,
+                    observed_at_ms: 11,
+                },
+            )
+            .is_err());
     }
 
     #[test]
@@ -624,6 +700,7 @@ mod tests {
                 survivor,
                 ZoneHostHeartbeat {
                     session_count: 0,
+                    busiest_zone_session_count: 0,
                     active_connections: 0,
                     observed_at_ms: 25,
                 },
