@@ -5,6 +5,7 @@ pub mod cache;
 pub mod consensus_log;
 pub mod control_plane;
 pub mod events;
+pub mod gate14;
 pub mod guild_node_foundation;
 mod inject;
 pub mod mir2_workload;
@@ -47,6 +48,12 @@ pub use events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSink,
     GameplayEventSinkStatus, GatewayGameplayEvent, InMemoryGameplayEventSink,
     LoggingGameplayEventSink, RedpandaGameplayEventSink, SharedGameplayEventSink,
+};
+pub use gate14::{
+    replay_gate14_records, Gate14Account, Gate14ApplyOutcome, Gate14AuthoritativeState,
+    Gate14Character, Gate14Command, Gate14CommandEnvelope, Gate14FinalizedRecord, Gate14Placement,
+    Gate14QuorumClient, Gate14QuorumSnapshot, Gate14SessionLease, Gate14ValidatorStatus,
+    Gate14ZoneHost,
 };
 pub use guild_node_foundation::{
     CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
@@ -92,6 +99,6 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostHealth, ZoneHostServer,
-    ZoneHostTelemetrySnapshot, ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION,
-    ZONE_RPC_PROTOCOL_VERSION,
+    ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope, ZoneRpcLimits,
+    ZONE_HOST_CHECKPOINT_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };

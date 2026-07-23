@@ -1,0 +1,403 @@
+name: obelisk-gate14
+
+x-validator-common: &validator-common
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+    target: gate14
+  image: obelisk/gate14:local
+  command: ["/usr/local/bin/gate14-validator"]
+  restart: unless-stopped
+  environment:
+    GATE14_PARTICIPANTS: "0,1,2,3"
+    GATE14_P2P_BIND: "0.0.0.0:9300"
+    GATE14_API_BIND: "0.0.0.0:9400"
+    RUST_LOG: "info"
+  networks:
+    gate14:
+
+x-gateway-common: &gateway-common
+  image: obelisk/gate14:local
+  pull_policy: never
+  command: ["/usr/local/bin/gate14-gateway"]
+  restart: unless-stopped
+  environment:
+    GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+    GATE14_GATEWAY_BIND: "0.0.0.0:9500"
+  depends_on:
+    validator-0:
+      condition: service_healthy
+    validator-1:
+      condition: service_healthy
+    validator-2:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "/bin/bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9500 && printf 'GET /healthz HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+    interval: 3s
+    timeout: 2s
+    retries: 30
+  networks:
+    gate14:
+
+x-projector-common: &projector-common
+  image: obelisk/gate14:local
+  pull_policy: never
+  command: ["/usr/local/bin/gate14-projector"]
+  restart: unless-stopped
+  environment:
+    GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+    GATE14_PROJECTOR_BIND: "0.0.0.0:9600"
+  depends_on:
+    validator-0:
+      condition: service_healthy
+    validator-1:
+      condition: service_healthy
+    validator-2:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "/bin/bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9600 && printf 'GET /healthz HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+    interval: 3s
+    timeout: 2s
+    retries: 40
+  networks:
+    gate14:
+
+services:
+  validator-0:
+    <<: *validator-common
+    container_name: gate14-validator-0
+    environment:
+      GATE14_VALIDATOR_SEED: "0"
+      GATE14_VALIDATOR_ID: "validator-0"
+      GATE14_PARTICIPANTS: "0,1,2,3"
+      GATE14_P2P_BIND: "0.0.0.0:9300"
+      GATE14_P2P_ADVERTISE: "172.31.14.10:9300"
+      GATE14_API_BIND: "0.0.0.0:9400"
+      GATE14_DATA_DIR: "/var/lib/obelisk/gate14"
+      RUST_LOG: "info"
+    ports: ["19400:9400"]
+    volumes: ["validator-0-data:/var/lib/obelisk/gate14"]
+    networks:
+      gate14:
+        ipv4_address: 172.31.14.10
+    healthcheck:
+      test: ["CMD", "/bin/bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9400 && printf 'GET /healthz HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+
+  validator-1:
+    <<: *validator-common
+    container_name: gate14-validator-1
+    environment:
+      GATE14_VALIDATOR_SEED: "1"
+      GATE14_VALIDATOR_ID: "validator-1"
+      GATE14_PARTICIPANTS: "0,1,2,3"
+      GATE14_P2P_BIND: "0.0.0.0:9300"
+      GATE14_P2P_ADVERTISE: "172.31.14.11:9300"
+      GATE14_BOOTSTRAPPERS: "0@172.31.14.10:9300"
+      GATE14_API_BIND: "0.0.0.0:9400"
+      GATE14_DATA_DIR: "/var/lib/obelisk/gate14"
+      RUST_LOG: "info"
+    ports: ["19401:9400"]
+    volumes: ["validator-1-data:/var/lib/obelisk/gate14"]
+    networks:
+      gate14:
+        ipv4_address: 172.31.14.11
+    healthcheck:
+      test: ["CMD", "/bin/bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9400 && printf 'GET /healthz HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+
+  validator-2:
+    <<: *validator-common
+    container_name: gate14-validator-2
+    environment:
+      GATE14_VALIDATOR_SEED: "2"
+      GATE14_VALIDATOR_ID: "validator-2"
+      GATE14_PARTICIPANTS: "0,1,2,3"
+      GATE14_P2P_BIND: "0.0.0.0:9300"
+      GATE14_P2P_ADVERTISE: "172.31.14.12:9300"
+      GATE14_BOOTSTRAPPERS: "0@172.31.14.10:9300"
+      GATE14_API_BIND: "0.0.0.0:9400"
+      GATE14_DATA_DIR: "/var/lib/obelisk/gate14"
+      RUST_LOG: "info"
+    ports: ["19402:9400"]
+    volumes: ["validator-2-data:/var/lib/obelisk/gate14"]
+    networks:
+      gate14:
+        ipv4_address: 172.31.14.12
+    healthcheck:
+      test: ["CMD", "/bin/bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9400 && printf 'GET /healthz HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+
+  validator-3:
+    <<: *validator-common
+    container_name: gate14-validator-3
+    environment:
+      GATE14_VALIDATOR_SEED: "3"
+      GATE14_VALIDATOR_ID: "validator-3"
+      GATE14_PARTICIPANTS: "0,1,2,3"
+      GATE14_P2P_BIND: "0.0.0.0:9300"
+      GATE14_P2P_ADVERTISE: "172.31.14.13:9300"
+      GATE14_BOOTSTRAPPERS: "0@172.31.14.10:9300"
+      GATE14_API_BIND: "0.0.0.0:9400"
+      GATE14_DATA_DIR: "/var/lib/obelisk/gate14"
+      RUST_LOG: "info"
+    ports: ["19403:9400"]
+    volumes: ["validator-3-data:/var/lib/obelisk/gate14"]
+    networks:
+      gate14:
+        ipv4_address: 172.31.14.13
+    healthcheck:
+      test: ["CMD", "/bin/bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9400 && printf 'GET /healthz HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+
+  postgres-a:
+    image: postgres:16-alpine
+    container_name: gate14-postgres-a
+    environment:
+      POSTGRES_DB: gate14
+      POSTGRES_USER: gate14
+      POSTGRES_PASSWORD: gate14_dev
+    ports: ["15432:5432"]
+    volumes: ["postgres-a-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gate14 -d gate14"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+    networks: [gate14]
+
+  postgres-b:
+    image: postgres:16-alpine
+    container_name: gate14-postgres-b
+    environment:
+      POSTGRES_DB: gate14
+      POSTGRES_USER: gate14
+      POSTGRES_PASSWORD: gate14_dev
+    ports: ["15433:5432"]
+    volumes: ["postgres-b-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gate14 -d gate14"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+    networks: [gate14]
+
+  redis-a:
+    image: redis:7-alpine
+    container_name: gate14-redis-a
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["16379:6379"]
+    volumes: ["redis-a-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+    networks: [gate14]
+
+  redis-b:
+    image: redis:7-alpine
+    container_name: gate14-redis-b
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["16380:6379"]
+    volumes: ["redis-b-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+    networks: [gate14]
+
+  gateway-a:
+    <<: *gateway-common
+    container_name: gate14-gateway-a
+    environment:
+      GATE14_GATEWAY_ID: "gateway-a"
+      GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+      GATE14_GATEWAY_BIND: "0.0.0.0:9500"
+      GATE14_REDIS_URL: "redis://redis-a:6379"
+    ports: ["19500:9500"]
+    depends_on:
+      redis-a:
+        condition: service_healthy
+      validator-0:
+        condition: service_healthy
+      validator-1:
+        condition: service_healthy
+      validator-2:
+        condition: service_healthy
+
+  gateway-b:
+    <<: *gateway-common
+    container_name: gate14-gateway-b
+    environment:
+      GATE14_GATEWAY_ID: "gateway-b"
+      GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+      GATE14_GATEWAY_BIND: "0.0.0.0:9500"
+      GATE14_REDIS_URL: "redis://redis-b:6379"
+    ports: ["19501:9500"]
+    depends_on:
+      redis-b:
+        condition: service_healthy
+      validator-0:
+        condition: service_healthy
+      validator-1:
+        condition: service_healthy
+      validator-2:
+        condition: service_healthy
+
+  projector-a:
+    <<: *projector-common
+    container_name: gate14-projector-a
+    environment:
+      GATE14_PROJECTOR_ID: "projector-a"
+      GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+      GATE14_PROJECTOR_BIND: "0.0.0.0:9600"
+      GATE14_DATABASE_URL: "postgresql://gate14:gate14_dev@postgres-a:5432/gate14"
+      GATE14_REDIS_URL: "redis://redis-a:6379"
+    ports: ["19600:9600"]
+    depends_on:
+      postgres-a:
+        condition: service_healthy
+      redis-a:
+        condition: service_healthy
+      validator-0:
+        condition: service_healthy
+      validator-1:
+        condition: service_healthy
+      validator-2:
+        condition: service_healthy
+
+  projector-b:
+    <<: *projector-common
+    container_name: gate14-projector-b
+    environment:
+      GATE14_PROJECTOR_ID: "projector-b"
+      GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+      GATE14_PROJECTOR_BIND: "0.0.0.0:9600"
+      GATE14_DATABASE_URL: "postgresql://gate14:gate14_dev@postgres-b:5432/gate14"
+      GATE14_REDIS_URL: "redis://redis-b:6379"
+    ports: ["19601:9600"]
+    depends_on:
+      postgres-b:
+        condition: service_healthy
+      redis-b:
+        condition: service_healthy
+      validator-0:
+        condition: service_healthy
+      validator-1:
+        condition: service_healthy
+      validator-2:
+        condition: service_healthy
+
+  dubhe-a:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    image: obelisk/zone-host:local
+    container_name: gate14-dubhe-a
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_METRICS_ADDR: "0.0.0.0:9100"
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: "dubhe-a:7020"
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: "rack-a"
+      MIR2_ZONE_HOST_SIGNING_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "128"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "32"
+      MIR2_ZONE_HOST_MAX_ZONES: "8"
+      MIR2_ZONE_HOST_CRYSTAL_WORLD: "0"
+    ports: ["20200:7020", "19100:9100"]
+    volumes: ["dubhe-a-data:/var/lib/obelisk"]
+    networks: [gate14]
+
+  dubhe-b:
+    image: obelisk/zone-host:local
+    pull_policy: never
+    container_name: gate14-dubhe-b
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_METRICS_ADDR: "0.0.0.0:9100"
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: "dubhe-b:7020"
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: "rack-b"
+      MIR2_ZONE_HOST_SIGNING_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE"
+      MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "128"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "32"
+      MIR2_ZONE_HOST_MAX_ZONES: "8"
+      MIR2_ZONE_HOST_CRYSTAL_WORLD: "0"
+    ports: ["20201:7020", "19101:9100"]
+    volumes: ["dubhe-b-data:/var/lib/obelisk"]
+    depends_on:
+      dubhe-a:
+        condition: service_healthy
+    networks: [gate14]
+
+  admin-web:
+    image: node:22-bookworm-slim
+    container_name: gate14-admin-web
+    profiles: ["ui"]
+    working_dir: /workspace/apps/admin-web
+    command: ["bash", "-lc", "npm install --no-audit --no-fund && npm run dev -- --hostname 0.0.0.0"]
+    environment:
+      DUBHE_NODE_OPERATOR_URLS: "http://dubhe-a:9100,http://dubhe-b:9100"
+      NEXT_PUBLIC_GATE14_GATEWAY_A: "http://localhost:19500"
+      NEXT_PUBLIC_GATE14_GATEWAY_B: "http://localhost:19501"
+    ports: ["13020:3020"]
+    volumes:
+      - ../..:/workspace
+      - admin-web-node-modules:/workspace/apps/admin-web/node_modules
+    depends_on:
+      gateway-a:
+        condition: service_healthy
+      gateway-b:
+        condition: service_healthy
+    networks: [gate14]
+
+  sui-relayer:
+    image: node:22-bookworm-slim
+    container_name: gate14-sui-testnet-relayer
+    profiles: ["sui-testnet"]
+    working_dir: /workspace/onchain
+    command: ["bash", "-lc", "corepack enable && pnpm install --frozen-lockfile && pnpm relayer"]
+    environment:
+      SUI_NETWORK: "testnet"
+      MINE_PACKAGE_ID: "0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e"
+      RELAYER_STATE_DIR: "/var/lib/obelisk/relayer"
+      RELAYER_POLL_MS: "4000"
+    volumes:
+      - ../..:/workspace
+      - sui-relayer-state:/var/lib/obelisk/relayer
+    networks: [gate14]
+
+networks:
+  gate14:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.14.0/24
+
+volumes:
+  validator-0-data:
+  validator-1-data:
+  validator-2-data:
+  validator-3-data:
+  postgres-a-data:
+  postgres-b-data:
+  redis-a-data:
+  redis-b-data:
+  dubhe-a-data:
+  dubhe-b-data:
+  admin-web-node-modules:
+  sui-relayer-state:
