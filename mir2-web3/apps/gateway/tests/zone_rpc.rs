@@ -1,3 +1,4 @@
+use std::collections::{BTreeMap, BTreeSet};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -10,8 +11,9 @@ use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
     SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostControlPlane, ZoneHostHeartbeat,
-    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority,
-    ZoneOwnerRpcTransport, ZoneRegistry, ZoneRpcLimits, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneMapScope, ZoneOwnerCommandRequest,
+    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneRpcLimits,
+    ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::WorldCommand;
@@ -22,6 +24,7 @@ static ENVIRONMENT_TEST_LOCK: Mutex<()> = Mutex::new(());
 fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (address, server, stop, handle) = start_server(authority.clone());
+    server.configure_zone_map_catalog(BTreeMap::new(), BTreeSet::from(["primary".to_string()]));
     let zone_id = ZoneId::primary();
     let first = test_transport(address, zone_id.clone(), "session-a");
     let second = test_transport(address, zone_id.clone(), "session-b");
@@ -77,6 +80,12 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
         .expect("second snapshot should round trip");
     assert_eq!(server.session_count(), 2);
     assert_eq!(server.busiest_zone_session_count(), 2);
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.zones.len(), 1);
+    assert_eq!(telemetry.zones[0].zone_id, "primary");
+    assert_eq!(telemetry.zones[0].map_scope, ZoneMapScope::All);
+    assert!(telemetry.zones[0].map_file_names.is_empty());
+    assert_eq!(telemetry.zones[0].session_count, 2);
 
     stop_server(address, stop, handle);
 }
@@ -120,6 +129,21 @@ fn zone_host_enforces_per_zone_session_capacity_and_releases_it_on_close() {
         .on_connect()
         .expect("released per-Zone capacity should be reusable");
     assert_eq!(server.busiest_zone_session_count(), 2);
+    let active_zones = server.active_zones();
+    assert_eq!(
+        active_zones
+            .iter()
+            .map(|zone| (
+                zone.zone_id.as_str(),
+                zone.map_file_names.as_slice(),
+                zone.session_count,
+            ))
+            .collect::<Vec<_>>(),
+        vec![
+            ("map:crowded", &["crowded".to_string()][..], 2),
+            ("map:other", &["other".to_string()][..], 1),
+        ]
+    );
 
     stop_server(address, stop, handle);
 }

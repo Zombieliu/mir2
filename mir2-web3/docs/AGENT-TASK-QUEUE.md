@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> Latest Gate 14 distributed-control closure: 2026-07-24. A real four-validator
+> Commonware `v2026.2.0` Simplex network now finalizes event-driven control
+> commands with 3-of-4 quorum and persistent certificates. Dual Gateways derive
+> placement and fenced session leases only from quorum state; account,
+> character, inventory, gold, placement, and lease authority replay
+> deterministically into independent Postgres/Redis projections. The Docker
+> acceptance stops a validator, Gateway, Redis, Postgres, and the active Dubhe
+> Zone Host, then recovers all services at height 14 with identical validator
+> and database roots. Evidence and the whole-project architecture are in
+> `docs/GATE14-NO-SINGLE-POINT-POC.md` and
+> `docs/generated/gate14/gate14-acceptance.json`. Production follow-up is
+> authenticated ingress/mempool, non-root packaging, dynamic asymmetric
+> committee identity, multi-region deployment, and long-running live handoff
+> soak rather than more POC authority work.
+
 > Latest final deterministic presentation closure: 2026-07-23. The maintained
 > Web client now has a Rust-owned per-object animation state machine with
 > persistent incarnation, FIFO action, death/revive, seeded idle, and Crystal

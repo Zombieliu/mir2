@@ -25,6 +25,7 @@ Bevy runtimes.
 - [Crystal 1:1 roadmap](docs/CRYSTAL-1TO1-ROADMAP.md)
 - [Backend progress](docs/BACKEND-1TO1-PROGRESS.md)
 - [Crystal server parity](docs/CRYSTAL-SERVER-PARITY.md)
+- [Gate 14 no-single-point POC](docs/GATE14-NO-SINGLE-POINT-POC.md)
 
 ## Layout
 
@@ -54,6 +55,11 @@ Bevy runtimes.
 - Postgres, Redis, NATS, Redpanda, ClickHouse, Meilisearch, Loki, and Grafana are
   optional local infrastructure. They are not required for the basic file-store
   Player Web flow.
+- Gate 14 adds an opt-in four-validator Commonware `v2026.2.0` control network,
+  dual dynamic Gateways, dual Dubhe Zone Hosts, and replayable Postgres/Redis
+  projections. Its Docker fault-recovery acceptance and full architecture
+  diagram are documented in
+  [`docs/GATE14-NO-SINGLE-POINT-POC.md`](docs/GATE14-NO-SINGLE-POINT-POC.md).
 
 ## Crystal Reference
 

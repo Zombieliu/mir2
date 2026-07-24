@@ -29,11 +29,19 @@ type ZoneHostHealth = {
 
 type ZoneHostTelemetry = {
   health: ZoneHostHealth;
+  zones?: ZoneHostZone[];
   startedAtMs: number;
   uptimeSeconds: number;
   acceptedConnectionsTotal: number;
   rpcRequestsTotal: number;
   rpcErrorsTotal: number;
+};
+
+type ZoneHostZone = {
+  zoneId: string;
+  mapScope: "all" | "explicit" | "unknown";
+  mapFileNames: string[];
+  sessionCount: number;
 };
 
 type ZoneHostHeartbeat = {
@@ -54,12 +62,15 @@ type ZoneHostHeartbeat = {
     busiestZoneSessionCount: number;
     zoneCount: number;
     zoneCapacity: number;
+    zones?: ZoneHostZone[];
     activeConnections: number;
     draining: boolean;
   };
   signatureAlgorithm: string;
   signature: string;
 };
+
+export type DubheNodeZoneRecord = ZoneHostZone;
 
 export type DubheNodeRecord = {
   nodeId: string;
@@ -79,6 +90,8 @@ export type DubheNodeRecord = {
   busiestZoneSessionCount?: number;
   zones: number;
   zoneCapacity: number;
+  activeZones: DubheNodeZoneRecord[];
+  zoneDetailsVerified: boolean;
   activeConnections: number;
   draining: boolean;
   uptimeSeconds: number;
@@ -268,6 +281,16 @@ function recordFromProbe(probe: OperatorProbe & { telemetry: ZoneHostTelemetry }
     claimsRegisteredNode &&
     heartbeat?.publicKey === activeRegistration.publicKey &&
     heartbeat.keyGeneration === activeRegistration.keyGeneration;
+  const carriesSignedZoneDetails =
+    probe.heartbeatVerified &&
+    heartbeat?.schema === "obelisk.zone-host-heartbeat.v3";
+  const activeZones =
+    carriesSignedZoneDetails && heartbeat
+      ? normalizeSignedZones(heartbeat.zones ?? [])
+      : [];
+  const zoneDetailsVerified =
+    carriesSignedZoneDetails &&
+    (health.zoneCount === 0 || activeZones.length === health.zoneCount);
   return {
     nodeId: health.hostId,
     label: shortNodeId(health.hostId),
@@ -292,6 +315,8 @@ function recordFromProbe(probe: OperatorProbe & { telemetry: ZoneHostTelemetry }
         : health.busiestZoneSessionCount,
     zones: health.zoneCount,
     zoneCapacity: health.zoneCapacity,
+    activeZones,
+    zoneDetailsVerified,
     activeConnections: health.activeConnections,
     draining: health.draining,
     uptimeSeconds: probe.telemetry.uptimeSeconds,
@@ -326,6 +351,8 @@ function registrationRecord(liveRecords: DubheNodeRecord[]): DubheNodeRecord {
     sessionCapacity: activeRegistration.maxSessions,
     zones: 0,
     zoneCapacity: activeRegistration.maxZones,
+    activeZones: [],
+    zoneDetailsVerified: false,
     activeConnections: 0,
     draining: false,
     uptimeSeconds: 0,
@@ -340,9 +367,12 @@ function registrationRecord(liveRecords: DubheNodeRecord[]): DubheNodeRecord {
 
 function verifyHeartbeat(heartbeat: ZoneHostHeartbeat) {
   try {
+    const schemaHasZoneDetails =
+      heartbeat.payload.schema === "obelisk.zone-host-heartbeat.v3";
     if (
       heartbeat.signatureAlgorithm !== "ed25519-zip215" ||
-      heartbeat.payload.schema !== "obelisk.zone-host-heartbeat.v2" ||
+      (!schemaHasZoneDetails &&
+        heartbeat.payload.schema !== "obelisk.zone-host-heartbeat.v2") ||
       heartbeat.payload.keyGeneration <= 0 ||
       heartbeat.payload.sessionCapacity <= 0 ||
       heartbeat.payload.sessionCapacityPerZone <= 0 ||
@@ -355,6 +385,35 @@ function verifyHeartbeat(heartbeat: ZoneHostHeartbeat) {
       heartbeat.payload.zoneCount > heartbeat.payload.zoneCapacity
     ) {
       return false;
+    }
+    const zones = heartbeat.payload.zones ?? [];
+    if (schemaHasZoneDetails) {
+      if (
+        zones.length !== heartbeat.payload.zoneCount ||
+        sum(zones.map((zone) => zone.sessionCount)) !== heartbeat.payload.sessionCount
+      ) {
+        return false;
+      }
+      const zoneIds = new Set<string>();
+      for (const zone of zones) {
+        const mapsAreValid =
+          zone.mapScope === "explicit"
+            ? zone.mapFileNames.length > 0 &&
+              zone.mapFileNames.every((map) => validTelemetryIdentifier(map))
+            : (zone.mapScope === "all" || zone.mapScope === "unknown") &&
+              zone.mapFileNames.length === 0;
+        if (
+          !validTelemetryIdentifier(zone.zoneId) ||
+          zoneIds.has(zone.zoneId) ||
+          !Number.isSafeInteger(zone.sessionCount) ||
+          zone.sessionCount <= 0 ||
+          zone.sessionCount > heartbeat.payload.sessionCapacityPerZone ||
+          !mapsAreValid
+        ) {
+          return false;
+        }
+        zoneIds.add(zone.zoneId);
+      }
     }
     const publicKeyBytes = Buffer.from(heartbeat.payload.publicKey, "base64url");
     if (publicKeyBytes.length !== 32) {
@@ -381,6 +440,28 @@ function verifyHeartbeat(heartbeat: ZoneHostHeartbeat) {
   } catch {
     return false;
   }
+}
+
+function normalizeSignedZones(zones: ZoneHostZone[]): DubheNodeZoneRecord[] {
+  return zones
+    .map((zone) => ({
+      zoneId: zone.zoneId,
+      mapScope: zone.mapScope,
+      mapFileNames: [...zone.mapFileNames].sort((left, right) =>
+        left.localeCompare(right, undefined, { numeric: true })
+      ),
+      sessionCount: zone.sessionCount
+    }))
+    .sort((left, right) => left.zoneId.localeCompare(right.zoneId));
+}
+
+function validTelemetryIdentifier(value: string) {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    value.length <= 160 &&
+    !/[\u0000-\u001f\u007f]/u.test(value)
+  );
 }
 
 function sum(values: number[]) {

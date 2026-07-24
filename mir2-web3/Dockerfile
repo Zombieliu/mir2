@@ -59,6 +59,45 @@ COPY --from=builder /out/gate13-acceptance /usr/local/bin/gate13-acceptance
 USER 65534:65534
 CMD ["/usr/local/bin/gate12-acceptance"]
 
+# Commonware v2026.2.0 uses stable library APIs newer than Rust 1.89. Keep the
+# existing game binaries pinned above, and install the newer toolchain only in
+# the Gate 14 build stage. Starting from the pinned image also avoids depending
+# on a future Docker Hub tag being published at build time.
+FROM rust:1.89.0-bookworm AS gate14-builder
+WORKDIR /src
+
+RUN rustup toolchain install 1.95.0 --profile minimal
+
+COPY Cargo.toml Cargo.lock ./
+COPY apps/admin-api ./apps/admin-api
+COPY apps/gateway ./apps/gateway
+COPY apps/simulation ./apps/simulation
+COPY packages/game-data ./packages/game-data
+COPY packages/protocol ./packages/protocol
+COPY infra/postgres/migrations ./infra/postgres/migrations
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo +1.95.0 build --locked --release -p mir2-gateway \
+      --features commonware-2026-2 \
+      --bin gate14_validator \
+      --bin gate14_gateway \
+      --bin gate14_projector \
+    && install -Dm755 target/release/gate14_validator /out/gate14-validator \
+    && install -Dm755 target/release/gate14_gateway /out/gate14-gateway \
+    && install -Dm755 target/release/gate14_projector /out/gate14-projector
+
+FROM runtime AS gate14
+COPY --from=gate14-builder /out/gate14-validator /usr/local/bin/gate14-validator
+COPY --from=gate14-builder /out/gate14-gateway /usr/local/bin/gate14-gateway
+COPY --from=gate14-builder /out/gate14-projector /usr/local/bin/gate14-projector
+# The validator creates Commonware journal partitions on first boot. Named
+# volumes are mounted root-owned by Docker, so this POC image starts as root;
+# production packaging should replace this with an init/chown step and then
+# drop privileges before the process starts.
+EXPOSE 9300 9400 9500 9600
+
 FROM builder AS capacity-benchmark-builder
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \

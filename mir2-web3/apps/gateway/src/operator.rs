@@ -15,10 +15,10 @@ use sha2::{Digest, Sha256};
 use crate::{
     node_id_from_public_key, verify_ed25519_signature, CapacityChallenge,
     CapacityChallengeResponse, NodeSigningIdentity, ZoneHostHealth, ZoneHostServer,
-    ZoneHostTelemetrySnapshot,
+    ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope,
 };
 
-const HEARTBEAT_SCHEMA: &str = "obelisk.zone-host-heartbeat.v2";
+const HEARTBEAT_SCHEMA: &str = "obelisk.zone-host-heartbeat.v3";
 const HMAC_SIGNATURE_ALGORITHM: &str = "hmac-sha256";
 const ED25519_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
 // An ephemeral loopback port keeps local multi-host tests and developer
@@ -174,6 +174,8 @@ pub struct ZoneHostHeartbeatPayload {
     pub busiest_zone_session_count: usize,
     pub zone_count: usize,
     pub zone_capacity: usize,
+    #[serde(default)]
+    pub zones: Vec<ZoneHostZoneTelemetry>,
     pub active_connections: usize,
     pub draining: bool,
 }
@@ -238,6 +240,43 @@ impl SignedZoneHostHeartbeat {
             || self.payload.zone_count > self.payload.zone_capacity
         {
             return Err("heartbeat capacity claims are inconsistent".to_string());
+        }
+        if self.payload.zones.len() != self.payload.zone_count
+            || self
+                .payload
+                .zones
+                .iter()
+                .map(|zone| zone.session_count)
+                .sum::<usize>()
+                != self.payload.session_count
+        {
+            return Err("heartbeat Zone details do not match aggregate counts".to_string());
+        }
+        let mut zone_ids = std::collections::BTreeSet::new();
+        for zone in &self.payload.zones {
+            if zone.zone_id.trim().is_empty()
+                || zone.zone_id.len() > 160
+                || zone.zone_id.chars().any(char::is_control)
+                || !zone_ids.insert(zone.zone_id.as_str())
+                || zone.session_count == 0
+                || zone.session_count > self.payload.session_capacity_per_zone
+            {
+                return Err("heartbeat Zone detail is invalid".to_string());
+            }
+            let maps_are_valid = match zone.map_scope {
+                ZoneMapScope::All | ZoneMapScope::Unknown => zone.map_file_names.is_empty(),
+                ZoneMapScope::Explicit => {
+                    !zone.map_file_names.is_empty()
+                        && zone.map_file_names.iter().all(|map| {
+                            !map.trim().is_empty()
+                                && map.len() <= 160
+                                && !map.chars().any(char::is_control)
+                        })
+                }
+            };
+            if !maps_are_valid {
+                return Err("heartbeat Zone map membership is invalid".to_string());
+            }
         }
         Ok(())
     }
@@ -323,8 +362,10 @@ fn handle_operator_request(
         "/v1/heartbeat" => {
             if config.signing_identity.is_some() || config.heartbeat_secret.is_some() {
                 let sequence = config.heartbeat_sequence.fetch_add(1, Ordering::Relaxed);
-                let heartbeat = sign_heartbeat(server.health(), config, now_ms(), sequence)
-                    .map_err(io::Error::other)?;
+                let snapshot = server.telemetry_snapshot();
+                let heartbeat =
+                    sign_heartbeat(snapshot.health, snapshot.zones, config, now_ms(), sequence)
+                        .map_err(io::Error::other)?;
                 let body = serde_json::to_vec(&heartbeat).map_err(io::Error::other)?;
                 write_response(stream, 200, "application/json", &body)
             } else {
@@ -500,6 +541,7 @@ fn write_json_error(stream: &mut TcpStream, status: u16, error: &str) -> io::Res
 
 fn sign_heartbeat(
     health: ZoneHostHealth,
+    zones: Vec<ZoneHostZoneTelemetry>,
     config: &ZoneHostOperatorConfig,
     observed_at_ms: u64,
     sequence: u64,
@@ -526,6 +568,7 @@ fn sign_heartbeat(
         busiest_zone_session_count: health.busiest_zone_session_count,
         zone_count: health.zone_count,
         zone_capacity: health.zone_capacity,
+        zones,
         active_connections: health.active_connections,
         draining: health.draining,
     };
@@ -732,11 +775,21 @@ mod tests {
         }
     }
 
+    fn zones() -> Vec<ZoneHostZoneTelemetry> {
+        vec![ZoneHostZoneTelemetry {
+            zone_id: "map:0".to_string(),
+            map_scope: ZoneMapScope::Explicit,
+            map_file_names: vec!["0".to_string()],
+            session_count: 3,
+        }]
+    }
+
     #[test]
     fn signed_heartbeat_round_trips_and_rejects_wrong_secret() {
         let secret = b"0123456789abcdef0123456789abcdef";
         let heartbeat = sign_heartbeat(
             health(),
+            zones(),
             &ZoneHostOperatorConfig::for_test(Some("0123456789abcdef0123456789abcdef")),
             42,
             7,
@@ -750,6 +803,9 @@ mod tests {
         assert_eq!(heartbeat.payload.sequence, 7);
         assert_eq!(heartbeat.payload.failure_domain, "test-az-a");
         assert_eq!(heartbeat.payload.schema, HEARTBEAT_SCHEMA);
+        let mut missing_zone_details = heartbeat.clone();
+        missing_zone_details.payload.zones.clear();
+        assert!(missing_zone_details.validate_payload().is_err());
     }
 
     #[test]
@@ -762,7 +818,8 @@ mod tests {
             .expect("test identity")
             .node_id()
             .to_string();
-        let heartbeat = sign_heartbeat(health, &config, 42, 7).expect("heartbeat should sign");
+        let heartbeat =
+            sign_heartbeat(health, zones(), &config, 42, 7).expect("heartbeat should sign");
         heartbeat.verify_ed25519().unwrap();
         assert_eq!(heartbeat.payload.key_generation, 3);
         assert!(!heartbeat.payload.public_key.is_empty());
@@ -775,6 +832,7 @@ mod tests {
     fn prometheus_output_is_low_cardinality_and_escapes_host_id() {
         let snapshot = ZoneHostTelemetrySnapshot {
             health: health(),
+            zones: zones(),
             started_at_ms: 1,
             uptime_seconds: 9,
             accepted_connections_total: 10,
