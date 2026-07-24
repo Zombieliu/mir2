@@ -443,9 +443,9 @@ fn tcp_zone_rpc_registration_bridges_live_outbounds_to_gateway_channel() {
 #[test]
 fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
-    let (active_address, _active_server, active_stop, active_handle) =
+    let (active_address, active_server, active_stop, active_handle) =
         start_server(authority.clone());
-    let (standby_address, _standby_server, standby_stop, standby_handle) =
+    let (standby_address, standby_server, standby_stop, standby_handle) =
         start_server(authority.clone());
     let zone_id = ZoneId::primary();
     let active_owner = test_transport(active_address, zone_id.clone(), "checkpoint-owner");
@@ -508,6 +508,30 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     standby_owner
         .install_host_checkpoint(&checkpoint)
         .expect("repeated full-journal install should replay from a clean account baseline");
+    let active_telemetry = active_server.telemetry_snapshot();
+    assert_eq!(active_telemetry.checkpoint.exports_total, 1);
+    assert_eq!(
+        active_telemetry.checkpoint.journal_entries,
+        checkpoint.entry_count as u64
+    );
+    assert_eq!(
+        active_telemetry.checkpoint.export_last_bytes,
+        checkpoint.as_bytes().len() as u64
+    );
+    let standby_telemetry = standby_server.telemetry_snapshot();
+    assert_eq!(standby_telemetry.checkpoint.installs_total, 2);
+    assert_eq!(
+        standby_telemetry.checkpoint.replay_entries_total,
+        (checkpoint.entry_count * 2) as u64
+    );
+    assert_eq!(
+        standby_telemetry.checkpoint.replay_last_entries,
+        checkpoint.entry_count as u64
+    );
+    assert_eq!(
+        standby_telemetry.checkpoint.install_last_bytes,
+        checkpoint.as_bytes().len() as u64
+    );
 
     assert_eq!(
         standby_owner
