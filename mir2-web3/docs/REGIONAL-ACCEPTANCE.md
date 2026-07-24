@@ -159,12 +159,18 @@ Gate 20 必须把 thread-per-connection 改成异步多路复用，并实现 AOI
 
 ```bash
 ./infra/gate18/run-economy-producer-acceptance.sh
+./infra/gate18/run-remote-economy-acceptance.sh
 ./infra/gate18/run-session-capacity.sh
 ```
 
 `gate18-economy-producer.json` 当前包含 11 条真实 PostgreSQL 断言，覆盖 legacy
 opening balance、active/standby fence、金币拾取幂等、双边交易守恒、交易重试
 、技能精确扣减，以及 PostgreSQL 已提交但运行时尚未投影时的新 Host 恢复。它
-证明了本小节列出的 producer 能力，但仍不等同于 Gate 18 整体通过；死亡掉落、
-地图切换、组队/公会共享状态、完整 Gateway→远程 Zone→PostgreSQL 端到端路径
-和 500 人 30 分钟混合行为仍需继续验收。
+证明了本小节列出的 producer 能力，但仍不等同于 Gate 18 整体通过。
+
+`gate18-remote-economy.json` 由三个相互隔离的容器产生：Gateway 验收进程、
+独立 Zone Host 和 PostgreSQL。它通过真实客户端 `DropGold` / `PickUp` 请求验证
+远程 RPC、持久 owner fence、运行时投影、opening balance 与最终 PostgreSQL
+余额一致，并验证客户端重试不重复记账。验收角色的 100 金币由明确记录的
+`qa.applyNativeState` fixture 提供，不把测试资产来源冒充生产发放流程。死亡
+掉落、地图切换、组队/公会共享状态和 500 人 30 分钟混合行为仍需继续验收。

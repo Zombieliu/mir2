@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784934384698,
+  "runId": "gate18-remote-1784934384698",
+  "gatewayProcessId": 1,
+  "zoneHostEndpoint": "zone-host:7020",
+  "zoneHostId": "gate18-regional-owner",
+  "zoneHostProcessId": 1,
+  "zoneId": "map:0",
+  "accountId": "g18r934384698",
+  "characterIndex": 1,
+  "fixtureGold": 100,
+  "initialGold": 100,
+  "dropPacketObserved": true,
+  "goldAfterDrop": 75,
+  "goldAfterPickup": 100,
+  "goldAfterRetry": 100,
+  "bootstrapOpeningGold": 75,
+  "ledgerGoldAfterPickup": 100,
+  "ledgerGoldAfterRetry": 100,
+  "assertions": {
+    "authenticatedRemoteZoneHostHandledSession": true,
+    "clientRetryDidNotDuplicateGold": true,
+    "gatewayUsesSeparateZoneHostContainer": true,
+    "postgresLedgerMatchesFinalRuntimeGold": true,
+    "postgresOpeningBalanceCapturedBeforeCredit": true,
+    "realClientDropAndPickupRoundTripped": true,
+    "remoteGroundObjectWasConsumed": true
+  },
+  "success": true
+}
