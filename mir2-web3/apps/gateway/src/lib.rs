@@ -4,6 +4,7 @@ mod browser_commands;
 pub mod cache;
 pub mod consensus_log;
 pub mod control_plane;
+pub mod economy;
 pub mod events;
 pub mod gate14;
 pub mod gate15;
@@ -103,10 +104,13 @@ pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_replication::{ZoneBaseSnapshotStore, ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneBaseSnapshot,
-    ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth, ZoneHostServer,
-    ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope, ZoneMutationBatch,
-    ZoneMutationEntry, ZoneReplicationCoverage, ZoneReplicationHead, ZoneRpcLimits,
-    DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
-    DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES, ZONE_HOST_CHECKPOINT_VERSION,
-    ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth,
+    ZoneHostPromotionTelemetry, ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry,
+    ZoneMapScope, ZoneMutationBatch, ZoneMutationEntry, ZonePromotionReadiness,
+    ZonePromotionReceipt, ZoneQuiesceReceipt, ZoneReplicationCoverage, ZoneReplicationHead,
+    ZoneRpcLimits, DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES,
+    DEFAULT_ZONE_PROMOTION_MAX_LAG_MS, DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS,
+    DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
+    ZONE_HOST_CHECKPOINT_VERSION, ZONE_PROMOTION_READINESS_VERSION, ZONE_REPLICATION_HEAD_VERSION,
+    ZONE_RPC_PROTOCOL_VERSION,
 };

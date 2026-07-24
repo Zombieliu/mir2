@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "startedAt": "2026-07-24T16:35:24.182Z",
-  "finishedAt": "2026-07-24T16:35:59.197Z",
-  "durationMs": 35015,
+  "startedAt": "2026-07-24T19:49:59.834Z",
+  "finishedAt": "2026-07-24T19:50:34.923Z",
+  "durationMs": 35089,
   "assertions": {
     "bothReachedGame": true,
     "bothObservedFailover": true,
@@ -18,19 +18,23 @@
       "inGame": true,
       "markerSeen": true,
       "closedUnexpectedly": false,
-      "messages": 785,
-      "zoneResponses": 86,
-      "zoneResponsesAfterFailover": 68,
+      "messages": 867,
+      "zoneResponses": 114,
+      "zoneResponsesAfterFailover": 105,
       "errors": [
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations"
       ],
-      "bytesSent": 6983,
-      "bytesReceived": 771609
+      "bytesSent": 7024,
+      "bytesReceived": 782613
     },
     {
       "index": 1,
@@ -40,19 +44,23 @@
       "inGame": true,
       "markerSeen": true,
       "closedUnexpectedly": false,
-      "messages": 762,
-      "zoneResponses": 56,
-      "zoneResponsesAfterFailover": 47,
+      "messages": 860,
+      "zoneResponses": 54,
+      "zoneResponsesAfterFailover": 48,
       "errors": [
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations"
       ],
-      "bytesSent": 6687,
-      "bytesReceived": 769830
+      "bytesSent": 6727,
+      "bytesReceived": 783005
     }
   ]
 }

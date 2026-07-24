@@ -32,6 +32,7 @@ Bevy runtimes.
 - [Gate 14 no-single-point POC](docs/GATE14-NO-SINGLE-POINT-POC.md)
 - [Gate 15 real-player failover](docs/GATE15-REAL-PLAYER-FAILOVER.md)
 - [Gate 16 incremental replication](docs/GATE16-INCREMENTAL-REPLICATION.md)
+- [Gate 17 transactional game economy](docs/GATE17-TRANSACTIONAL-ECONOMY.md)
 
 ## Layout
 
@@ -80,9 +81,9 @@ Bevy runtimes.
   safety fields.
 - Gate 16.3 adds bounded verified mutation batches plus a restart-safe,
   fsync-before-ACK receive WAL in both replication directions. The replicator
-  intentionally continues installing v4 checkpoints: autonomous tick/AI
-  capture, incremental standby apply, compaction, and promotion readiness remain
-  later Gate 16 work.
+  intentionally continued installing v4 checkpoints at that milestone; the
+  later Gate 16.4-16.5 work below completes autonomous tick/AI capture,
+  incremental standby apply, compaction, and promotion readiness.
 - Gate 16.4a adds per-Zone, cursor-bound gzip base snapshots with SHA-256
   identity and crash-safe atomic persistence.
 - Gate 16.4b1 makes complete Session images installable without replaying old
@@ -96,6 +97,20 @@ Bevy runtimes.
   atomically compacts the durable WAL to a restart-safe base anchor, and moves
   the WAL-enabled replicator off v4 full-checkpoint installs. Replica account
   writes are isolated from the active file/PostgreSQL repository.
+- Gate 16.5 adds an auditable readiness receipt, active quiesce barrier, exact
+  standby-head validation, finalized Commonware owner fencing, and single-use
+  promotion. The old active immediately loses autonomous-tick authority after
+  the generation changes.
+- Gate 16.6 certifies 50 and 125 concurrent player Sessions plus 700, 10k, and
+  100k history points inside a constrained 2-CPU/2-GiB container. It compares
+  v5 periodic-base plus bounded delta apply against the v4 full-history replay
+  ruler and requires at least 80% lower network, wall, and process-CPU cost.
+- Gate 17 adds the authoritative PostgreSQL transaction boundary for gold,
+  unique equipment, consumption, rewards, and two-sided trades. Balance writes,
+  idempotency receipts, and outbox events commit together; leased delivery,
+  inbox deduplication, dead letters, redrive, and reconciliation cover crash
+  recovery. See
+  [`docs/GATE17-TRANSACTIONAL-ECONOMY.md`](docs/GATE17-TRANSACTIONAL-ECONOMY.md).
 
 ## Crystal Reference
 

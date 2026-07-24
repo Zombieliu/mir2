@@ -158,13 +158,30 @@ cursor-bound, gzip-compressed base snapshot through an atomic rename. That
 historical run wrote A-to-B base cursor `11` and B-to-A base cursor `712`;
 their JSON files were `25,827` and `29,700` bytes.
 
-The current Gate 16.4b2 acceptance uses the WAL-enabled v5 path in both
+The current Gate 16.5 acceptance uses the WAL-enabled v5 path in both
 directions. A-to-B installs an empty, restorable cursor-0 base before players
 arrive and then incrementally applies ordered player/tick batches. B-to-A
 installs the current cursor-708 two-session base during reverse recovery. No v4
 checkpoint is installed in the accepted run; v4 remains only the no-WAL
-fallback. This proves recovery correctness, not safe automatic promotion:
-`promotionReady` remains `false` until Gate 16.5.
+fallback. Before switching, the script quiesces A, requires an exact B
+readiness receipt, proves that promotion is rejected before the owner fence,
+finalizes Commonware generation 2, and consumes the receipt once to promote B.
+The old active then loses tick authority under the new fence.
+
+The Zone Host keeps its cryptographic telemetry identity as
+`ed25519:<public-key>`, while the Commonware control plane may use a stable
+operator alias such as `dubhe-a`. Each process must explicitly bind its accepted
+control-plane identities through `MIR2_ZONE_HOST_OWNER_ALIASES`. Quiesce,
+resume, promotion, and autonomous-tick authorization all use that fail-closed
+allowlist; an arbitrary placement owner string is never treated as the local
+host.
+
+The final accepted run finalized height `16`, assessed the standby at `4 ms`
+lag, rejected promotion before the generation-2 fence, promoted Dubhe B only
+after finalization, and kept both player sockets connected. The two players
+completed `105` and `48` Zone responses after failover. All 17 machine
+assertions are true in
+[`docs/generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json).
 
 ## Manual inspection
 

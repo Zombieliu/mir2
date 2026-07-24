@@ -768,6 +768,42 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         "obelisk_zone_host_checkpoint_replay_last_entries",
         snapshot.checkpoint.replay_last_entries
     );
+    metric!(
+        "Standby promotion readiness assessments.",
+        "counter",
+        "obelisk_zone_host_promotion_assessments_total",
+        snapshot.promotion.assessments_total
+    );
+    metric!(
+        "Standby promotion readiness assessments that issued a receipt.",
+        "counter",
+        "obelisk_zone_host_promotion_ready_assessments_total",
+        snapshot.promotion.ready_assessments_total
+    );
+    metric!(
+        "Fenced standby promotion attempts.",
+        "counter",
+        "obelisk_zone_host_promotion_attempts_total",
+        snapshot.promotion.promotion_attempts_total
+    );
+    metric!(
+        "Successful fenced standby promotions.",
+        "counter",
+        "obelisk_zone_host_promotions_total",
+        snapshot.promotion.promotions_total
+    );
+    metric!(
+        "Unix timestamp in milliseconds of the last successful promotion.",
+        "gauge",
+        "obelisk_zone_host_promotion_last_promoted_at_ms",
+        snapshot.promotion.last_promoted_at_ms
+    );
+    metric!(
+        "Number of Zones with an unexpired promotion readiness receipt.",
+        "gauge",
+        "obelisk_zone_host_promotion_ready_zones",
+        snapshot.promotion.ready_zone_ids.len()
+    );
     output.push_str(
         "# HELP obelisk_zone_host_build_info Static Zone Host build and protocol information.\n",
     );
@@ -912,6 +948,7 @@ mod tests {
             health: health(),
             zones: zones(),
             checkpoint: Default::default(),
+            promotion: Default::default(),
             started_at_ms: 1,
             uptime_seconds: 9,
             accepted_connections_total: 10,
@@ -925,6 +962,8 @@ mod tests {
         assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
         assert!(output.contains("obelisk_zone_host_checkpoint_journal_entries"));
         assert!(output.contains("obelisk_zone_host_checkpoint_replay_entries_total"));
+        assert!(output.contains("obelisk_zone_host_promotion_assessments_total"));
+        assert!(output.contains("obelisk_zone_host_promotions_total"));
         assert!(!output.contains("session_id"));
         assert!(!output.contains("account_id"));
     }
