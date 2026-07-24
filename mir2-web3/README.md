@@ -33,6 +33,7 @@ Bevy runtimes.
 - [Gate 15 real-player failover](docs/GATE15-REAL-PLAYER-FAILOVER.md)
 - [Gate 16 incremental replication](docs/GATE16-INCREMENTAL-REPLICATION.md)
 - [Gate 17 transactional game economy](docs/GATE17-TRANSACTIONAL-ECONOMY.md)
+- [Regional Gate 18-21 acceptance contract](docs/REGIONAL-ACCEPTANCE.md)
 
 ## Layout
 

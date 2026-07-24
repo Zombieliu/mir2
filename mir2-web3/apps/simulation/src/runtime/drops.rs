@@ -2476,6 +2476,24 @@ impl SimulationSession {
         }
     }
 
+    pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return false;
+        }
+        match &drop.loot {
+            GroundDropLootSnapshot::Gold { amount } => {
+                can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount)
+            }
+            GroundDropLootSnapshot::InventoryItem { key, .. } => can_gain_item_quantity(
+                world.resource::<InventoryResource>(),
+                ItemContainer::Bag1,
+                key,
+                drop.quantity,
+            ),
+        }
+    }
+
     pub fn commit_shared_monster_kill_award_transaction(
         &mut self,
         monster_object_id: u32,

@@ -2153,7 +2153,7 @@ impl ZoneHostServer {
     ) -> Result<ZonePromotionReadiness, String> {
         let _operation = self
             .operation_gate
-            .lock()
+            .lock_zone(zone_id)
             .map_err(|_| "zone host operation mutex poisoned".to_string())?;
         self.assess_promotion_readiness_locked(
             zone_id,
@@ -2337,7 +2337,7 @@ impl ZoneHostServer {
     ) -> Result<ZonePromotionReceipt, String> {
         let _operation = self
             .operation_gate
-            .lock()
+            .lock_zone(zone_id)
             .map_err(|_| "zone host operation mutex poisoned".to_string())?;
         self.promote_replica_locked(zone_id, readiness_id, owner_lease)
             .map_err(|error| error.message)
@@ -2689,12 +2689,18 @@ impl ZoneHostServer {
             });
         }
 
-        let _operation = self
-            .operation_gate
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
-        self.prune_expired_promotion_readiness(unix_now_ms())?;
         let request = envelope.request;
+        let zone_id = ZoneId::new(&envelope.zone_id);
+        let _operation = if matches!(
+            &request,
+            ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. }
+        ) {
+            self.operation_gate.lock()
+        } else {
+            self.operation_gate.lock_zone(&zone_id)
+        }
+        .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
+        self.prune_expired_promotion_readiness(unix_now_ms())?;
         if self
             .quiesced_zones
             .lock()
@@ -2858,6 +2864,13 @@ impl ZoneHostServer {
                         "lease zone id does not match envelope zone id",
                     ));
                 }
+                let source_sequence = self
+                    .journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .head(zone_id)
+                    .next_sequence;
                 let journal_entry = WireHostJournalEntry {
                     sequence: 0,
                     session_id: session_id.to_string(),
@@ -2880,7 +2893,8 @@ impl ZoneHostServer {
                             command.into_world()?,
                         )
                     }
-                };
+                }
+                .with_source_sequence(source_sequence);
                 let execution = session.execute_request(request)?;
                 self.append_journal(journal_entry)?;
                 Ok(ZoneRpcPayload::Execution {
@@ -3551,7 +3565,12 @@ impl ZoneHostServer {
                         session
                     }
                 };
-                session.execute_replay_request(entry.clone().into_request()?)?;
+                session.execute_replay_request(
+                    entry
+                        .clone()
+                        .into_request()?
+                        .with_source_sequence(mutation.sequence),
+                )?;
             }
             self.append_journal(entry)?;
             let applied = self
@@ -4318,6 +4337,7 @@ impl WireHostJournalEntry {
                 "Zone cadence tick is not a Session command",
             ));
         }
+        let source_sequence = self.sequence;
         let lease = self.owner_lease.into_lease()?;
         let command = self.command.ok_or_else(|| {
             ZoneRpcFault::new("checkpoint_command", "journal execute entry has no command")
@@ -4328,7 +4348,8 @@ impl WireHostJournalEntry {
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
                 ZoneOwnerCommandRequest::production_player(lease, authenticated, command)
             }
-        })
+        }
+        .with_source_sequence(source_sequence))
     }
 }
 

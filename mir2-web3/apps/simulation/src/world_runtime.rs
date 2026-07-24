@@ -308,6 +308,10 @@ impl InProcessWorldRuntime {
             .commit_shared_ground_drop_pickup_transaction(drop)
     }
 
+    pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
+        self.session.can_commit_shared_ground_drop_pickup(drop)
+    }
+
     pub fn apply_shared_monster_kill_award(
         &mut self,
         monster_object_id: u32,

@@ -7,8 +7,9 @@ use std::time::Duration;
 use serde::Deserialize;
 
 use crate::routing::{
-    SessionRouteRequest, SessionRouter, SharedInProcessZoneRuntimeFactory, SharedSessionRouter,
-    SharedZoneOwnerLeaseAuthority, SharedZoneRuntimeFactory, ZoneId, ZoneRegistry,
+    SessionRouteRequest, SessionRouter, SharedAccountInventoryServiceHandle,
+    SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
+    SharedZoneRuntimeFactory, ZoneId, ZoneRegistry,
 };
 
 const TOPOLOGY_VERSION: u32 = 1;
@@ -196,6 +197,24 @@ impl ZoneTopology {
             Duration::from_millis(self.default_tick_ms),
             tick_cadences,
         ))
+    }
+
+    pub fn runtime_factory_with_account_inventory_service(
+        &self,
+        account_inventory_service: SharedAccountInventoryServiceHandle,
+    ) -> Arc<SharedInProcessZoneRuntimeFactory> {
+        let tick_cadences = self
+            .tick_ms_by_zone
+            .iter()
+            .map(|(zone_id, tick_ms)| (zone_id.clone(), Duration::from_millis(*tick_ms)))
+            .collect();
+        Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_tick_cadences_and_account_inventory_service(
+                Duration::from_millis(self.default_tick_ms),
+                tick_cadences,
+                account_inventory_service,
+            ),
+        )
     }
 
     pub fn zone_registry(

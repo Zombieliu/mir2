@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784929093747,
+  "runId": "gate18-1784929093747",
+  "zoneId": "regional:gate18",
+  "fencingGeneration": 18,
+  "sourceSequence": 700,
+  "activeGoldBefore": 0,
+  "activeGoldAfter": 25,
+  "standbyGoldBefore": 0,
+  "standbyGoldAfter": 25,
+  "ledgerGoldAfter": 25,
+  "assertions": {
+    "activeOwnerCommittedLedgerAndProjection": true,
+    "activeRetryDidNotDoubleCredit": true,
+    "ownerFenceAndSourceSequenceBound": true,
+    "standbyReplayUpdatedProjectionOnly": true,
+    "unfencedProducerRejected": true
+  },
+  "success": true
+}

@@ -8,6 +8,7 @@ COPY apps/simulation ./apps/simulation
 COPY packages/game-data ./packages/game-data
 COPY packages/protocol ./packages/protocol
 COPY infra/postgres/migrations ./infra/postgres/migrations
+COPY infra/regional ./infra/regional
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
@@ -151,3 +152,15 @@ FROM runtime AS gate17-acceptance
 COPY --from=gate17-acceptance-builder /out/gate17-acceptance /usr/local/bin/gate17-acceptance
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/gate17-acceptance"]
+
+FROM builder AS gate18-economy-producer-acceptance-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate18_economy_producer_acceptance \
+    && install -Dm755 target/release/gate18_economy_producer_acceptance /out/gate18-economy-producer-acceptance
+
+FROM runtime AS gate18-economy-producer-acceptance
+COPY --from=gate18-economy-producer-acceptance-builder /out/gate18-economy-producer-acceptance /usr/local/bin/gate18-economy-producer-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate18-economy-producer-acceptance"]

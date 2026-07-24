@@ -5,6 +5,7 @@
 //! against a v4 full-history checkpoint at N. Cold base installation is
 //! reported separately and is not hidden inside the steady-state result.
 
+use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 use std::net::{SocketAddr, TcpListener};
@@ -58,8 +59,11 @@ struct Environment {
 struct PlayerResult {
     requested_players: usize,
     connected_players: usize,
+    zone_count: usize,
     commands_per_player: usize,
     completed_commands: usize,
+    failed_commands: usize,
+    failure_reasons: BTreeMap<String, usize>,
     wall_ms: f64,
     throughput_commands_per_second: f64,
     latency_ms: NumericSummary,
@@ -231,18 +235,31 @@ fn run_player_profile(players: usize) -> Result<PlayerResult, String> {
     let limits = benchmark_limits(players.max(256));
     let shared: SharedZoneOwnerLeaseAuthority = authority.clone();
     let host = RunningHost::start(shared, limits.clone())?;
-    let zone_id = ZoneId::new(format!("capacity:{players}"));
-    let lease = authority.owner_lease(&zone_id);
+    let zone_count = env::var("MIR2_GATE16_PLAYER_ZONE_COUNT")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(1)
+        .min(players.max(1));
     let commands_per_player = 8;
-    for player in 0..players {
-        transport(
-            host.address,
-            zone_id.clone(),
-            &format!("capacity-{players}-{player}"),
-            limits.clone(),
-        )
-        .on_connect()?;
-    }
+    let clients = (0..players)
+        .map(|player| {
+            let zone_id = if zone_count == 1 {
+                ZoneId::new(format!("capacity:{players}"))
+            } else {
+                ZoneId::new(format!("capacity:{players}:{}", player % zone_count))
+            };
+            let lease = authority.owner_lease(&zone_id);
+            let client = transport(
+                host.address,
+                zone_id,
+                &format!("capacity-{players}-{player}"),
+                limits.clone(),
+            );
+            client.on_connect()?;
+            Ok((client, lease))
+        })
+        .collect::<Result<Vec<_>, String>>()?;
 
     let barrier = Arc::new(Barrier::new(players.max(1)));
     let latencies = Arc::new(Mutex::new(Vec::with_capacity(
@@ -252,21 +269,12 @@ fn run_player_profile(players: usize) -> Result<PlayerResult, String> {
     let failures = Arc::new(Mutex::new(Vec::<String>::new()));
     let started = Instant::now();
     thread::scope(|scope| {
-        for player in 0..players {
+        for (player, (client, lease)) in clients.into_iter().enumerate() {
             let barrier = Arc::clone(&barrier);
             let latencies = Arc::clone(&latencies);
             let completed = Arc::clone(&completed);
             let failures = Arc::clone(&failures);
-            let zone_id = zone_id.clone();
-            let lease = lease.clone();
-            let limits = limits.clone();
             scope.spawn(move || {
-                let client = transport(
-                    host.address,
-                    zone_id,
-                    &format!("capacity-{players}-{player}"),
-                    limits,
-                );
                 barrier.wait();
                 for command in 0..commands_per_player {
                     let command_started = Instant::now();
@@ -298,12 +306,25 @@ fn run_player_profile(players: usize) -> Result<PlayerResult, String> {
         .map_err(|_| "player latency references remain".to_string())?
         .into_inner()
         .map_err(|_| "player latency mutex poisoned".to_string())?;
-    let failure_count = failures.lock().map(|items| items.len()).unwrap_or(1);
+    let failure_reasons = failures
+        .lock()
+        .map(|items| {
+            let mut reasons = BTreeMap::new();
+            for error in items.iter() {
+                *reasons.entry(error.clone()).or_insert(0) += 1;
+            }
+            reasons
+        })
+        .unwrap_or_else(|_| BTreeMap::from([("failure mutex poisoned".to_string(), 1)]));
+    let failure_count = failure_reasons.values().sum();
     Ok(PlayerResult {
         requested_players: players,
         connected_players: players,
+        zone_count,
         commands_per_player,
         completed_commands,
+        failed_commands: failure_count,
+        failure_reasons,
         wall_ms,
         throughput_commands_per_second: if wall_ms > 0.0 {
             completed_commands as f64 / (wall_ms / 1_000.0)

@@ -7,6 +7,7 @@ use std::sync::Arc;
 use mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env;
 use mir2_gateway::{
     serve_zone_host_operator, validate_zone_host_bind, GatewayConfig, NodeSigningIdentity,
+    PostgresEconomyAccountInventoryService, SharedAccountInventoryServiceHandle,
     ZoneHostOperatorConfig, ZoneHostServer, ZoneRpcLimits, ZoneTopology,
 };
 
@@ -39,12 +40,27 @@ fn main() -> io::Result<()> {
     let bound_address = listener.local_addr()?;
     let topology = ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let runtime_factory = match env::var("MIR2_ECONOMY_DATABASE_URL")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+    {
+        Some(database_url) => {
+            let service = Arc::new(PostgresEconomyAccountInventoryService::new(database_url));
+            service
+                .ensure_migrated()
+                .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
+            topology.runtime_factory_with_account_inventory_service(
+                service as SharedAccountInventoryServiceHandle,
+            )
+        }
+        None => topology.runtime_factory(),
+    };
     let server = Arc::new(ZoneHostServer::with_options_and_factory(
         config,
         default_zone_owner_lease_authority_from_env(),
         auth_token,
         ZoneRpcLimits::from_env(),
-        topology.runtime_factory(),
+        runtime_factory,
     ));
     server.configure_zone_map_catalog(topology.zone_map_catalog(), topology.all_maps_zone_ids());
     let operator_config = ZoneHostOperatorConfig::from_env(bound_address, &server.health().host_id)

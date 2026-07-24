@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: mir2
+      POSTGRES_PASSWORD: mir2-gate18-local
+      POSTGRES_DB: mir2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  economy-producer-acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-economy-producer-acceptance
+    image: mir2-gate18-economy-producer-acceptance:local
+    environment:
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_GATE18_ECONOMY_OUT: /evidence/gate18-economy-producer.json
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy

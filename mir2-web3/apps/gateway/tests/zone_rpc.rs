@@ -1029,17 +1029,17 @@ fn autonomous_zone_ticks_are_ordered_and_incrementally_applied_after_the_base() 
     standby.install_base_snapshot(&base).unwrap();
 
     let next_tick_deadline = Instant::now() + Duration::from_secs(2);
-    let head = loop {
+    loop {
         let head = active.replication_head().unwrap();
         if head.next_sequence > base.base_sequence {
-            break head;
+            break;
         }
         assert!(
             Instant::now() < next_tick_deadline,
             "active Zone did not capture a post-base cadence tick"
         );
         thread::sleep(Duration::from_millis(10));
-    };
+    }
     let batch = active
         .export_mutation_batch(base.base_sequence, 32, 1024 * 1024)
         .unwrap();
@@ -1051,7 +1051,8 @@ fn autonomous_zone_ticks_are_ordered_and_incrementally_applied_after_the_base() 
     let standby_head = standby.replication_head().unwrap();
     assert_eq!(standby_head.next_sequence, batch.next_sequence);
     assert_eq!(standby_head.latest_digest, batch.latest_digest);
-    assert!(standby_head.next_sequence <= head.next_sequence);
+    let active_head_after_apply = active.replication_head().unwrap();
+    assert!(standby_head.next_sequence <= active_head_after_apply.next_sequence);
     thread::sleep(Duration::from_millis(80));
     assert_eq!(
         standby.replication_head().unwrap(),
