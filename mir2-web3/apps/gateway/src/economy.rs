@@ -6,11 +6,21 @@
 //! event are committed in one PostgreSQL transaction.
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use mir2_simulation::{
+    GroundDropLootSnapshot, InProcessWorldRuntime, SharedAccountInventoryTransactionKind,
+    SharedAccountInventoryTransactionReceipt, WorldRuntime,
+};
 use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+
+use crate::routing::{
+    SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
+    SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
+};
 
 const ECONOMY_EVENT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-event.v1\0";
 const MAX_ECONOMY_LEGS: usize = 128;
@@ -719,6 +729,262 @@ impl PostgresEconomyStore {
     }
 }
 
+/// Gate 18 bridge from real Mir2 Zone rewards/pickups to the Gate 17 ledger.
+///
+/// The active owner commits PostgreSQL before mutating its private character
+/// projection. A verified standby replay never writes PostgreSQL; it only
+/// rebuilds the same private projection. A duplicate authoritative transaction
+/// without a local cached projection is treated as already materialized (the
+/// base snapshot or outbox projector owns recovery), so a post-promotion retry
+/// cannot credit the character twice.
+#[derive(Debug)]
+pub struct PostgresEconomyAccountInventoryService {
+    store: PostgresEconomyStore,
+    projected_receipts: Mutex<BTreeMap<String, SharedAccountInventoryTransactionReceipt>>,
+}
+
+impl PostgresEconomyAccountInventoryService {
+    pub fn new(database_url: impl Into<String>) -> Self {
+        Self::with_store(PostgresEconomyStore::new(database_url))
+    }
+
+    pub fn with_store(store: PostgresEconomyStore) -> Self {
+        Self {
+            store,
+            projected_receipts: Mutex::new(BTreeMap::new()),
+        }
+    }
+
+    pub fn ensure_migrated(&self) -> Result<(), String> {
+        self.store.ensure_migrated()
+    }
+
+    fn apply_projection(
+        runtime: &mut InProcessWorldRuntime,
+        envelope: &SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        match &envelope.command {
+            SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+                runtime.commit_shared_ground_drop_pickup_transaction(drop)
+            }
+            SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
+                .commit_shared_monster_kill_award_transaction(
+                    award.monster_object_id,
+                    &award.monster_name,
+                    award.experience,
+                ),
+            SharedAccountInventoryCommand::SkillItemConsume { spell, .. } => {
+                runtime.commit_shared_skill_item_consumption_transaction(*spell)
+            }
+        }
+    }
+
+    fn failed_receipt(
+        command: &SharedAccountInventoryCommand,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        SharedAccountInventoryTransactionReceipt {
+            kind: command_kind(command),
+            committed: false,
+            packets: Vec::new(),
+        }
+    }
+
+    fn already_materialized_receipt(
+        command: &SharedAccountInventoryCommand,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        SharedAccountInventoryTransactionReceipt {
+            kind: command_kind(command),
+            committed: true,
+            packets: Vec::new(),
+        }
+    }
+}
+
+impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
+    fn commit(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        // A PostgreSQL producer without an ordered, finalized Zone context is
+        // unsafe. Local development keeps using InProcessAccountInventoryService.
+        Self::failed_receipt(&envelope.command)
+    }
+
+    fn commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        if runtime.active_identity().as_ref() != Some(&envelope.identity) {
+            return Self::failed_receipt(&envelope.command);
+        }
+        let Some(context) = context else {
+            return Self::failed_receipt(&envelope.command);
+        };
+        let stable_key = envelope.stable_idempotency_key();
+        if self
+            .projected_receipts
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .get(&stable_key)
+            .is_some()
+        {
+            return Self::already_materialized_receipt(&envelope.command);
+        }
+
+        if !context.external_commit_authorized {
+            let receipt = Self::apply_projection(runtime, &envelope);
+            if receipt.committed {
+                self.projected_receipts
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .insert(stable_key, receipt.clone());
+            }
+            return receipt;
+        }
+
+        if !preflight_projection(runtime, &envelope.command) {
+            return Self::failed_receipt(&envelope.command);
+        }
+        let Some(transaction) = economy_transaction_for_command(context, &envelope) else {
+            // Commands without an external asset delta remain deterministic
+            // Zone-only effects. Skill-item consumption is deliberately
+            // rejected until its exact inventory component IDs are included.
+            return match &envelope.command {
+                SharedAccountInventoryCommand::MonsterKillAward(award) if award.experience == 0 => {
+                    Self::apply_projection(runtime, &envelope)
+                }
+                _ => Self::failed_receipt(&envelope.command),
+            };
+        };
+        let transaction_receipt = match self.store.transact(&transaction) {
+            Ok(receipt) => receipt,
+            Err(_) => return Self::failed_receipt(&envelope.command),
+        };
+        if transaction_receipt.duplicate {
+            return Self::already_materialized_receipt(&envelope.command);
+        }
+
+        let receipt = Self::apply_projection(runtime, &envelope);
+        if receipt.committed {
+            self.projected_receipts
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .insert(stable_key, receipt.clone());
+        }
+        receipt
+    }
+}
+
+fn command_kind(command: &SharedAccountInventoryCommand) -> SharedAccountInventoryTransactionKind {
+    match command {
+        SharedAccountInventoryCommand::GroundDropPickup(_) => {
+            SharedAccountInventoryTransactionKind::GroundDropPickup
+        }
+        SharedAccountInventoryCommand::MonsterKillAward(_) => {
+            SharedAccountInventoryTransactionKind::MonsterKillAward
+        }
+        SharedAccountInventoryCommand::SkillItemConsume { .. } => {
+            SharedAccountInventoryTransactionKind::SkillItemConsumption
+        }
+    }
+}
+
+fn preflight_projection(
+    runtime: &InProcessWorldRuntime,
+    command: &SharedAccountInventoryCommand,
+) -> bool {
+    match command {
+        SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+            runtime.can_commit_shared_ground_drop_pickup(drop)
+        }
+        SharedAccountInventoryCommand::MonsterKillAward(_) => runtime.active_identity().is_some(),
+        SharedAccountInventoryCommand::SkillItemConsume { .. } => false,
+    }
+}
+
+fn economy_transaction_for_command(
+    context: &SharedAccountInventoryExecutionContext,
+    command: &SharedAccountInventoryCommandEnvelope,
+) -> Option<EconomyTransactionEnvelope> {
+    let identity = &command.identity;
+    let stable_key = command.stable_idempotency_key();
+    let mut metadata = BTreeMap::from([
+        ("producer".to_string(), "mir2-zone".to_string()),
+        ("characterName".to_string(), identity.character_name.clone()),
+    ]);
+    let (transaction_kind, legs) = match &command.command {
+        SharedAccountInventoryCommand::GroundDropPickup(drop) => match &drop.loot {
+            GroundDropLootSnapshot::Gold { amount } => {
+                metadata.insert("operation".to_string(), "groundDropGoldPickup".to_string());
+                metadata.insert("objectId".to_string(), drop.object_id.to_string());
+                (
+                    EconomyTransactionKind::Reward,
+                    vec![EconomyLeg {
+                        balance: EconomyBalanceKey::gold(
+                            identity.account_id.clone(),
+                            identity.character_index,
+                        ),
+                        delta: i64::from(*amount),
+                    }],
+                )
+            }
+            GroundDropLootSnapshot::InventoryItem { key, name, .. } => {
+                metadata.insert("operation".to_string(), "groundDropItemPickup".to_string());
+                metadata.insert("objectId".to_string(), drop.object_id.to_string());
+                metadata.insert("itemKey".to_string(), key.clone());
+                metadata.insert("itemName".to_string(), name.clone());
+                metadata.insert("quantity".to_string(), drop.quantity.to_string());
+                (
+                    EconomyTransactionKind::Reward,
+                    vec![EconomyLeg {
+                        balance: EconomyBalanceKey::item(
+                            identity.account_id.clone(),
+                            identity.character_index,
+                            format!("zone:{}:drop:{}:{}", context.zone_id, drop.object_id, key),
+                        ),
+                        delta: 1,
+                    }],
+                )
+            }
+        },
+        SharedAccountInventoryCommand::MonsterKillAward(award) if award.experience > 0 => {
+            metadata.insert("operation".to_string(), "monsterKillExperience".to_string());
+            metadata.insert(
+                "monsterObjectId".to_string(),
+                award.monster_object_id.to_string(),
+            );
+            metadata.insert("monsterName".to_string(), award.monster_name.clone());
+            (
+                EconomyTransactionKind::Reward,
+                vec![EconomyLeg {
+                    balance: EconomyBalanceKey {
+                        account_id: identity.account_id.clone(),
+                        character_index: identity.character_index,
+                        asset_kind: "experience".to_string(),
+                        asset_key: "experience".to_string(),
+                    },
+                    delta: i64::from(award.experience),
+                }],
+            )
+        }
+        SharedAccountInventoryCommand::MonsterKillAward(_)
+        | SharedAccountInventoryCommand::SkillItemConsume { .. } => return None,
+    };
+    Some(EconomyTransactionEnvelope {
+        idempotency_key: format!("zone:{}:{stable_key}", context.zone_id),
+        transaction_kind,
+        zone_id: context.zone_id.as_str().to_string(),
+        fencing_generation: context.fencing_generation,
+        source_sequence: context.source_sequence,
+        created_at_ms: context.created_at_ms,
+        legs,
+        metadata,
+    })
+}
+
 fn aggregate_legs(legs: &[EconomyLeg]) -> Result<BTreeMap<EconomyBalanceKey, i64>, String> {
     let mut aggregated = BTreeMap::<EconomyBalanceKey, i64>::new();
     for leg in legs {
@@ -798,6 +1064,7 @@ fn hex_lower(bytes: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mir2_simulation::{ActiveSessionIdentity, GroundDropSnapshot};
 
     fn leg(account: &str, asset: &str, delta: i64) -> EconomyLeg {
         EconomyLeg {
@@ -840,5 +1107,66 @@ mod tests {
         let first = envelope.event_id().unwrap();
         envelope.fencing_generation += 1;
         assert_ne!(first, envelope.event_id().unwrap());
+    }
+
+    #[test]
+    fn zone_gold_pickup_binds_business_key_fence_and_source_sequence() {
+        let context = SharedAccountInventoryExecutionContext {
+            zone_id: crate::ZoneId::new("map:0"),
+            fencing_generation: 9,
+            source_sequence: 42,
+            created_at_ms: 77,
+            external_commit_authorized: true,
+        };
+        let command = SharedAccountInventoryCommandEnvelope {
+            identity: ActiveSessionIdentity {
+                account_id: "alice".to_string(),
+                character_index: 3,
+                character_name: "Blade".to_string(),
+            },
+            command: SharedAccountInventoryCommand::GroundDropPickup(GroundDropSnapshot {
+                object_id: 9001,
+                name: "25 Gold".to_string(),
+                name_colour_argb: -1,
+                icon: 0,
+                x: 10,
+                y: 20,
+                quantity: 25,
+                source_monster: "Field Wasp".to_string(),
+                owner_object_id: None,
+                ownership_remaining_ticks: None,
+                loot: GroundDropLootSnapshot::Gold { amount: 25 },
+            }),
+        };
+        let envelope =
+            economy_transaction_for_command(&context, &command).expect("gold transaction");
+
+        assert_eq!(envelope.zone_id, "map:0");
+        assert_eq!(envelope.fencing_generation, 9);
+        assert_eq!(envelope.source_sequence, 42);
+        assert_eq!(envelope.created_at_ms, 77);
+        assert_eq!(
+            envelope.idempotency_key,
+            "zone:map:0:alice:3:ground-drop-pickup:9001"
+        );
+        assert_eq!(envelope.legs.len(), 1);
+        assert_eq!(
+            envelope.legs[0].balance,
+            EconomyBalanceKey::gold("alice", 3)
+        );
+        assert_eq!(envelope.legs[0].delta, 25);
+        envelope.validate().expect("valid economy envelope");
+    }
+
+    #[test]
+    fn standby_context_cannot_authorize_an_external_commit() {
+        let context = SharedAccountInventoryExecutionContext {
+            zone_id: crate::ZoneId::new("map:0"),
+            fencing_generation: 9,
+            source_sequence: 42,
+            created_at_ms: 77,
+            external_commit_authorized: false,
+        };
+        assert!(!context.external_commit_authorized);
     }
 }

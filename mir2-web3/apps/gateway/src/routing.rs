@@ -3,7 +3,7 @@ use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{
     mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TrySendError},
-    Arc, Condvar, Mutex,
+    Arc, Condvar, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard,
 };
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -113,6 +113,7 @@ pub struct ZoneOwnerCommandRequest {
     owner_lease: ZoneOwnerLease,
     mode: ZoneOwnerCommandMode,
     command: WorldCommand,
+    source_sequence: Option<u64>,
 }
 
 impl ZoneOwnerCommandRequest {
@@ -121,6 +122,7 @@ impl ZoneOwnerCommandRequest {
             owner_lease,
             mode: ZoneOwnerCommandMode::Direct,
             command,
+            source_sequence: None,
         }
     }
 
@@ -133,7 +135,19 @@ impl ZoneOwnerCommandRequest {
             owner_lease,
             mode: ZoneOwnerCommandMode::ProductionPlayer { authenticated },
             command,
+            source_sequence: None,
         }
+    }
+
+    /// Bind an already-ordered Zone mutation sequence to external side effects.
+    ///
+    /// Gateway-originated requests do not choose this number. The authoritative
+    /// Zone Host assigns it while holding its operation gate, before executing
+    /// the command. Verified standby replay reuses the source sequence carried
+    /// by the mutation batch.
+    pub(crate) fn with_source_sequence(mut self, source_sequence: u64) -> Self {
+        self.source_sequence = Some(source_sequence);
+        self
     }
 
     pub fn owner_lease(&self) -> &ZoneOwnerLease {
@@ -146,6 +160,10 @@ impl ZoneOwnerCommandRequest {
 
     pub fn command(&self) -> &WorldCommand {
         &self.command
+    }
+
+    pub fn source_sequence(&self) -> Option<u64> {
+        self.source_sequence
     }
 
     pub fn into_command(self) -> WorldCommand {
@@ -551,7 +569,7 @@ impl HostedZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(request.owner_lease())?;
         }
-        self.execute_replay_request(request)
+        self.execute_request_with_economy_context(request, true)
     }
 
     /// Apply a mutation that was already authenticated, fenced, ordered, and
@@ -560,6 +578,23 @@ impl HostedZoneOwnerCommandClient {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
+        self.execute_request_with_economy_context(request, false)
+    }
+
+    fn execute_request_with_economy_context(
+        &self,
+        request: ZoneOwnerCommandRequest,
+        external_commit_authorized: bool,
+    ) -> Result<WorldCommandExecution, String> {
+        let economy_context = request.source_sequence().map(|source_sequence| {
+            SharedAccountInventoryExecutionContext {
+                zone_id: request.owner_lease().zone_id().clone(),
+                fencing_generation: request.owner_lease().fencing_token(),
+                source_sequence,
+                created_at_ms: shared_gateway_now_ms(),
+                external_commit_authorized,
+            }
+        });
         let mode = request.mode();
         let command = request.into_command();
         let mut runtime = self
@@ -569,12 +604,27 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
-        match mode {
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.set_economy_execution_context(economy_context);
+        }
+        let result = match mode {
             ZoneOwnerCommandMode::Direct => runtime.execute_with_outcome(command),
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
                 runtime.execute_production_player_command(authenticated, command)
             }
+        };
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.set_economy_execution_context(None);
         }
+        result
     }
 
     pub(crate) fn register_live_outbound(
@@ -832,6 +882,18 @@ pub trait ZoneRuntimeFactory: Send + Sync {
 
 pub type SharedZoneRuntimeFactory = Arc<dyn ZoneRuntimeFactory>;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedAccountInventoryExecutionContext {
+    pub zone_id: ZoneId,
+    pub fencing_generation: u64,
+    pub source_sequence: u64,
+    pub created_at_ms: u64,
+    /// Only the finalized active owner may create an external economy
+    /// transaction. Standby replay still applies the deterministic in-memory
+    /// projection but must never write PostgreSQL again.
+    pub external_commit_authorized: bool,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum SharedAccountInventoryCommand {
     GroundDropPickup(GroundDropSnapshot),
@@ -867,6 +929,12 @@ impl SharedAccountInventoryCommandEnvelope {
             self.identity.account_id, self.identity.character_index, command_key
         )))
     }
+
+    pub fn stable_idempotency_key(&self) -> String {
+        self.idempotency_key()
+            .expect("all shared account/inventory commands have an idempotency key")
+            .0
+    }
 }
 
 pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
@@ -875,6 +943,15 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         runtime: &mut InProcessWorldRuntime,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> mir2_simulation::SharedAccountInventoryTransactionReceipt;
+
+    fn commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> mir2_simulation::SharedAccountInventoryTransactionReceipt {
+        self.commit(runtime, envelope)
+    }
 
     fn commit_ground_drop_pickup(
         &self,
@@ -3061,8 +3138,20 @@ type SharedZoneTickAuthorizer = Arc<dyn Fn(&ZoneId) -> Result<(), String> + Send
 
 #[derive(Debug, Default)]
 struct SharedZoneMutationGateState {
+    lanes: BTreeMap<ZoneId, SharedZoneMutationLane>,
+}
+
+#[derive(Debug, Default)]
+struct SharedZoneMutationLane {
     next_ticket: u64,
     serving_ticket: u64,
+    waiters: BTreeMap<u64, Arc<SharedZoneMutationWaiter>>,
+}
+
+#[derive(Debug, Default)]
+struct SharedZoneMutationWaiter {
+    ready: Mutex<bool>,
+    changed: Condvar,
 }
 
 /// FIFO gate shared by player commands and autonomous Zone ticks.
@@ -3073,41 +3162,107 @@ struct SharedZoneMutationGateState {
 /// the single-writer sequence explicit and bounded by the work already queued.
 #[derive(Debug, Default)]
 pub(crate) struct SharedZoneMutationGate {
+    scope: RwLock<()>,
     state: Mutex<SharedZoneMutationGateState>,
-    changed: Condvar,
 }
 
 impl SharedZoneMutationGate {
+    /// Stops every Zone lane for host-wide checkpoint install/export.
     pub(crate) fn lock(&self) -> Result<SharedZoneMutationGateGuard<'_>, String> {
+        let scope = self
+            .scope
+            .write()
+            .map_err(|_| "shared Zone mutation scope was poisoned".to_string())?;
+        Ok(SharedZoneMutationGateGuard {
+            gate: self,
+            zone_id: None,
+            _scope: SharedZoneMutationScopeGuard::Exclusive { _guard: scope },
+        })
+    }
+
+    /// Serializes one Zone while allowing unrelated maps to make progress.
+    pub(crate) fn lock_zone(
+        &self,
+        zone_id: &ZoneId,
+    ) -> Result<SharedZoneMutationGateGuard<'_>, String> {
+        let scope = self
+            .scope
+            .read()
+            .map_err(|_| "shared Zone mutation scope was poisoned".to_string())?;
         let mut state = self
             .state
             .lock()
             .map_err(|_| "shared Zone mutation gate mutex was poisoned".to_string())?;
-        let ticket = state.next_ticket;
-        state.next_ticket = state.next_ticket.wrapping_add(1);
-        while state.serving_ticket != ticket {
-            state = self
-                .changed
-                .wait(state)
-                .map_err(|_| "shared Zone mutation gate mutex was poisoned".to_string())?;
+        let lane = state.lanes.entry(zone_id.clone()).or_default();
+        let ticket = lane.next_ticket;
+        lane.next_ticket = lane.next_ticket.wrapping_add(1);
+        if lane.serving_ticket == ticket {
+            return Ok(SharedZoneMutationGateGuard {
+                gate: self,
+                zone_id: Some(zone_id.clone()),
+                _scope: SharedZoneMutationScopeGuard::Shared { _guard: scope },
+            });
         }
-        Ok(SharedZoneMutationGateGuard { gate: self })
+
+        let waiter = Arc::new(SharedZoneMutationWaiter::default());
+        lane.waiters.insert(ticket, Arc::clone(&waiter));
+        drop(state);
+
+        let mut ready = waiter
+            .ready
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        while !*ready {
+            ready = waiter
+                .changed
+                .wait(ready)
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+        }
+        Ok(SharedZoneMutationGateGuard {
+            gate: self,
+            zone_id: Some(zone_id.clone()),
+            _scope: SharedZoneMutationScopeGuard::Shared { _guard: scope },
+        })
     }
+}
+
+enum SharedZoneMutationScopeGuard<'a> {
+    Shared { _guard: RwLockReadGuard<'a, ()> },
+    Exclusive { _guard: RwLockWriteGuard<'a, ()> },
 }
 
 pub(crate) struct SharedZoneMutationGateGuard<'a> {
     gate: &'a SharedZoneMutationGate,
+    zone_id: Option<ZoneId>,
+    _scope: SharedZoneMutationScopeGuard<'a>,
 }
 
 impl Drop for SharedZoneMutationGateGuard<'_> {
     fn drop(&mut self) {
-        let mut state = self
-            .gate
-            .state
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        state.serving_ticket = state.serving_ticket.wrapping_add(1);
-        self.gate.changed.notify_all();
+        let Some(zone_id) = self.zone_id.as_ref() else {
+            return;
+        };
+        let next = {
+            let mut state = self
+                .gate
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            let lane = state
+                .lanes
+                .get_mut(zone_id)
+                .expect("acquired Zone mutation lane should remain registered");
+            lane.serving_ticket = lane.serving_ticket.wrapping_add(1);
+            let serving_ticket = lane.serving_ticket;
+            lane.waiters.remove(&serving_ticket)
+        };
+        if let Some(waiter) = next {
+            *waiter
+                .ready
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner) = true;
+            waiter.changed.notify_one();
+        }
     }
 }
 
@@ -3173,6 +3328,23 @@ impl SharedInProcessZoneRuntimeFactory {
         Self {
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service: Arc::new(InProcessAccountInventoryService::new()),
+            npc_world_service: Arc::new(InProcessNpcWorldService),
+            default_tick_cadence: default_tick_cadence.max(Duration::from_millis(1)),
+            tick_cadences: Arc::new(tick_cadences),
+            mutation_capture: Arc::new(Mutex::new(None)),
+            autonomous_ticks_by_default: true,
+            replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
+        }
+    }
+
+    pub fn with_tick_cadences_and_account_inventory_service(
+        default_tick_cadence: Duration,
+        tick_cadences: BTreeMap<ZoneId, Duration>,
+        account_inventory_service: SharedAccountInventoryServiceHandle,
+    ) -> Self {
+        Self {
+            zones: Arc::new(Mutex::new(BTreeMap::new())),
+            account_inventory_service,
             npc_world_service: Arc::new(InProcessNpcWorldService),
             default_tick_cadence: default_tick_cadence.max(Duration::from_millis(1)),
             tick_cadences: Arc::new(tick_cadences),
@@ -4423,6 +4595,7 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             zone_state: resources.zone_state.clone(),
             account_inventory_service: self.account_inventory_service.clone(),
             npc_world_service: self.npc_world_service.clone(),
+            economy_execution_context: None,
             movement_ingress: SharedZoneMovementIngress::new(
                 resources.movement_sender,
                 resources.zone_state,
@@ -4784,7 +4957,7 @@ fn shared_zone_owner_loop(
                 .ok()
                 .and_then(|capture| capture.clone());
             let result = if let Some(capture) = capture {
-                let _gate = match capture.gate.lock() {
+                let _gate = match capture.gate.lock_zone(&zone_id) {
                     Ok(gate) => gate,
                     Err(_) => {
                         eprintln!("shared zone cadence stopped: mutation gate poisoned");
@@ -4972,6 +5145,7 @@ struct SharedInProcessZoneSessionRuntime {
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
+    economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
     movement_ingress: SharedZoneMovementIngress,
     shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
@@ -5014,6 +5188,22 @@ impl fmt::Debug for SharedInProcessZoneSessionRuntime {
 impl SharedInProcessZoneSessionRuntime {
     fn zone_now_ms() -> u64 {
         shared_gateway_now_ms()
+    }
+
+    fn set_economy_execution_context(
+        &mut self,
+        context: Option<SharedAccountInventoryExecutionContext>,
+    ) {
+        self.economy_execution_context = context;
+    }
+
+    fn commit_account_inventory(
+        &mut self,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        service.commit_fenced(&mut self.inner, context.as_ref(), envelope)
     }
 
     fn recent_zone_player_movement_input_window_active(&self, now_ms: u64) -> bool {
@@ -5733,13 +5923,11 @@ impl SharedInProcessZoneSessionRuntime {
         awards
             .into_iter()
             .flat_map(|award| {
-                let receipt = self.account_inventory_service.commit(
-                    &mut self.inner,
-                    SharedAccountInventoryCommandEnvelope {
+                let receipt =
+                    self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
                         identity: identity.clone(),
                         command: SharedAccountInventoryCommand::MonsterKillAward(award),
-                    },
-                );
+                    });
                 debug_assert_eq!(
                     receipt.kind,
                     SharedAccountInventoryTransactionKind::MonsterKillAward
@@ -5766,13 +5954,11 @@ impl SharedInProcessZoneSessionRuntime {
         let mut canceled_claims = BTreeSet::new();
         for drop in claims {
             let object_id = drop.object_id;
-            let mut receipt = self.account_inventory_service.commit(
-                &mut self.inner,
-                SharedAccountInventoryCommandEnvelope {
+            let mut receipt =
+                self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
                     identity: identity.clone(),
                     command: SharedAccountInventoryCommand::GroundDropPickup(drop.clone()),
-                },
-            );
+                });
             debug_assert_eq!(
                 receipt.kind,
                 SharedAccountInventoryTransactionKind::GroundDropPickup
@@ -6296,16 +6482,14 @@ impl SharedInProcessZoneSessionRuntime {
                     return Vec::new();
                 };
                 let request_id = self.next_shared_skill_item_request_id();
-                let receipt = self.account_inventory_service.commit(
-                    &mut self.inner,
-                    SharedAccountInventoryCommandEnvelope {
+                let receipt =
+                    self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
                         identity,
                         command: SharedAccountInventoryCommand::SkillItemConsume {
                             spell: *spell,
                             request_id,
                         },
-                    },
-                );
+                    });
                 if !receipt.committed {
                     return Vec::new();
                 }
@@ -8125,8 +8309,8 @@ mod tests {
         SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
         SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
         SharedNpcWorldTransactionReceipt, SharedSessionRouter, SharedZoneMovementIngress,
-        SharedZoneRuntimeFactory, ZoneId, ZoneNativePlayerAttack, ZoneNativePlayerAttackKind,
-        ZonePresenceKey, ZoneRegistry, ZoneRuntimeFactory,
+        SharedZoneMutationGate, SharedZoneRuntimeFactory, ZoneId, ZoneNativePlayerAttack,
+        ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry, ZoneRuntimeFactory,
     };
     use crate::{GatewayConfig, GatewaySession};
     use mir2_protocol::{
@@ -8145,10 +8329,117 @@ mod tests {
     };
     use std::{
         collections::BTreeSet,
-        sync::{mpsc::sync_channel, Arc, Barrier, Condvar, Mutex},
+        sync::{
+            mpsc::{channel, sync_channel},
+            Arc, Barrier, Condvar, Mutex,
+        },
         thread,
         time::{Duration, Instant},
     };
+
+    #[test]
+    fn shared_zone_mutation_gate_hands_off_to_exact_next_ticket() {
+        let gate = Arc::new(SharedZoneMutationGate::default());
+        let zone_id = ZoneId::new("gate-test");
+        let first = gate
+            .lock_zone(&zone_id)
+            .expect("first ticket should acquire");
+        let (acquired_sender, acquired_receiver) = channel();
+        let mut workers = Vec::new();
+
+        for worker_id in 0..32 {
+            let worker_gate = Arc::clone(&gate);
+            let worker_zone_id = zone_id.clone();
+            let acquired_sender = acquired_sender.clone();
+            workers.push(thread::spawn(move || {
+                let _guard = worker_gate
+                    .lock_zone(&worker_zone_id)
+                    .expect("queued ticket should acquire");
+                acquired_sender
+                    .send(worker_id)
+                    .expect("acquisition should be observed");
+            }));
+
+            let expected_next_ticket = u64::try_from(worker_id + 2).unwrap();
+            let deadline = Instant::now() + Duration::from_secs(2);
+            loop {
+                let queued = gate
+                    .state
+                    .lock()
+                    .expect("gate state should lock")
+                    .lanes
+                    .get(&zone_id)
+                    .expect("test Zone lane should exist")
+                    .next_ticket
+                    == expected_next_ticket;
+                if queued {
+                    break;
+                }
+                assert!(
+                    Instant::now() < deadline,
+                    "worker {worker_id} did not enqueue its ticket"
+                );
+                thread::yield_now();
+            }
+        }
+
+        drop(acquired_sender);
+        drop(first);
+        let acquired = acquired_receiver.iter().collect::<Vec<_>>();
+        for worker in workers {
+            worker.join().expect("queued worker should finish");
+        }
+        assert_eq!(acquired, (0..32).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn shared_zone_mutation_gate_runs_zones_in_parallel_but_fences_host_checkpoint() {
+        let gate = Arc::new(SharedZoneMutationGate::default());
+        let first_zone = ZoneId::new("gate-a");
+        let second_zone = ZoneId::new("gate-b");
+        let first_guard = gate
+            .lock_zone(&first_zone)
+            .expect("first Zone should acquire");
+
+        let (second_sender, second_receiver) = channel();
+        let second_gate = Arc::clone(&gate);
+        let second_worker = thread::spawn(move || {
+            let _guard = second_gate
+                .lock_zone(&second_zone)
+                .expect("unrelated Zone should acquire");
+            second_sender.send(()).expect("second Zone should report");
+        });
+        second_receiver
+            .recv_timeout(Duration::from_secs(1))
+            .expect("unrelated Zone must not wait behind first Zone");
+        second_worker
+            .join()
+            .expect("second Zone worker should finish");
+
+        let (checkpoint_sender, checkpoint_receiver) = channel();
+        let checkpoint_gate = Arc::clone(&gate);
+        let checkpoint_worker = thread::spawn(move || {
+            let _guard = checkpoint_gate
+                .lock()
+                .expect("host checkpoint scope should acquire");
+            checkpoint_sender
+                .send(())
+                .expect("checkpoint scope should report");
+        });
+        assert!(
+            checkpoint_receiver
+                .recv_timeout(Duration::from_millis(50))
+                .is_err(),
+            "host checkpoint must wait for active Zone writers"
+        );
+        drop(first_guard);
+        checkpoint_receiver
+            .recv_timeout(Duration::from_secs(1))
+            .expect("host checkpoint should acquire after Zone writers finish");
+        checkpoint_worker
+            .join()
+            .expect("checkpoint worker should finish");
+    }
 
     #[test]
     fn in_process_registry_routes_new_sessions_to_primary_zone() {
@@ -15299,6 +15590,7 @@ mod tests {
             zone_state: zone_state.clone(),
             account_inventory_service,
             npc_world_service,
+            economy_execution_context: None,
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,

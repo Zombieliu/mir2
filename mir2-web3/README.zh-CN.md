@@ -462,6 +462,13 @@ Gate 17 已新增独立于管理事件总线的游戏经济事务层。金币、
 架构、生产接入边界和 Docker 验收见
 [`docs/GATE17-TRANSACTIONAL-ECONOMY.md`](docs/GATE17-TRANSACTIONAL-ECONOMY.md)。
 
+下一阶段的 Regional 总目标已经由
+[`docs/REGIONAL-ACCEPTANCE.md`](docs/REGIONAL-ACCEPTANCE.md) 和机器配置
+[`infra/regional/profile.json`](infra/regional/profile.json) 固定。它要求真实
+Mir2 行为的 500 → 1,000 → 3,000 玩家分段验收、500 人热点地图、p95
+`<200 ms`、Zone RTO `<5 s`、经济零重复和完整 72 小时运行，不能用空闲连接
+或缩短测试后线性外推代替。
+
 ## 本地验收 Gate 15
 
 要求：

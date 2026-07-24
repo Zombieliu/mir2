@@ -14,6 +14,7 @@ pub mod mir2_workload;
 pub mod node_identity;
 pub mod node_security;
 pub mod operator;
+pub mod regional;
 pub mod rewards;
 pub mod routing;
 mod session;
@@ -47,6 +48,7 @@ pub use control_plane::{
     ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostLifecycle, ZoneHostRegistration,
     ZoneHostSnapshot, ZonePlacementEndpoint, ZonePlacementLease, ZoneRebalanceMove,
 };
+pub use economy::PostgresEconomyAccountInventoryService;
 pub use events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSink,
     GameplayEventSinkStatus, GatewayGameplayEvent, InMemoryGameplayEventSink,
@@ -81,6 +83,10 @@ pub use operator::{
     serve_zone_host_operator, SignedZoneHostHeartbeat, ZoneHostHeartbeatPayload,
     ZoneHostOperatorConfig,
 };
+pub use regional::{
+    RegionalProfile, RegionalReferenceDeployment, RegionalStage, RegionalStages, RegionalWorkload,
+    REGIONAL_PROFILE_SCHEMA_VERSION, REGIONAL_REFERENCE_PROFILE_ID,
+};
 pub use rewards::{
     GameRewardPolicy, MultiGameRewardLedger, RewardAllocation, RewardClaimProof,
     RewardNodeEligibility, RewardSettlementBatch, SettlementStatus, VerifiedWorkReceipt,
@@ -90,14 +96,14 @@ pub use routing::{
     InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneOwnerCommandClient,
     InProcessZoneRuntimeFactory, MapZoneSessionRouter, RoutedZoneRuntime,
     RpcZoneOwnerCommandClient, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
-    SharedAccountInventoryCommandEnvelope, SharedAccountInventoryService,
-    SharedAccountInventoryServiceHandle, SharedInProcessZoneRuntimeFactory, SharedNpcWorldCommand,
-    SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
-    SharedNpcWorldTransactionReceipt, SharedSessionRouter, SharedZoneOwnerCommandClient,
-    SharedZoneOwnerLeaseAuthority, SharedZoneOwnerRpcTransport, SharedZoneRuntimeFactory,
-    SingleZoneSessionRouter, ZoneId, ZoneOwnerCommandClient, ZoneOwnerCommandMode,
-    ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport,
-    ZoneRegistry, ZoneRuntimeFactory,
+    SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
+    SharedAccountInventoryService, SharedAccountInventoryServiceHandle,
+    SharedInProcessZoneRuntimeFactory, SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope,
+    SharedNpcWorldService, SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt,
+    SharedSessionRouter, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority,
+    SharedZoneOwnerRpcTransport, SharedZoneRuntimeFactory, SingleZoneSessionRouter, ZoneId,
+    ZoneOwnerCommandClient, ZoneOwnerCommandMode, ZoneOwnerCommandRequest, ZoneOwnerLease,
+    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
