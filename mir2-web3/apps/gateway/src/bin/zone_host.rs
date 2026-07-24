@@ -13,6 +13,8 @@ use mir2_gateway::{
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
 
 fn main() -> io::Result<()> {
+    mir2_gateway::gate15::initialize_from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     use_signing_identity_as_default_host_id()?;
     let address = env::var("MIR2_ZONE_HOST_ADDR")
         .unwrap_or_else(|_| DEFAULT_ZONE_HOST_ADDR.to_string())

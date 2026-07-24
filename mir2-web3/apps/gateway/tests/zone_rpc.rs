@@ -505,6 +505,9 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     standby_owner
         .install_host_checkpoint(&checkpoint)
         .expect("standby host should install checkpoint");
+    standby_owner
+        .install_host_checkpoint(&checkpoint)
+        .expect("repeated full-journal install should replay from a clean account baseline");
 
     assert_eq!(
         standby_owner

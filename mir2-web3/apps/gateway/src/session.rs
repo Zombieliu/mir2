@@ -358,6 +358,13 @@ impl GatewaySession {
     }
 
     pub(crate) fn zone_movement_ingress(&self) -> Option<GatewayZoneMovementIngress> {
+        // Gate 15 placements can change while a player remains connected. The
+        // legacy fast path snapshots the owner lease when the ingress is built,
+        // so route Gate 15 movement through the serialized session path until
+        // that ingress carries a dynamically refreshed fencing token.
+        if crate::gate15::health().is_some() {
+            return None;
+        }
         // The shared-Zone ingress rejects movement near a transfer boundary and
         // returns control to the serialized session path. Safe movement can stay
         // on the owner cadence; topology-changing movement still runs the atomic
@@ -936,6 +943,9 @@ fn default_zone_owner_command_client(
     zone_id: &ZoneId,
     zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,
 ) -> SharedZoneOwnerCommandClient {
+    if let Some(transport) = crate::gate15::zone_owner_rpc_transport(zone_id.clone()) {
+        return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(transport));
+    }
     if let Some(transport) = crate::zone_rpc::TcpZoneOwnerRpcTransport::from_env(zone_id.clone()) {
         return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(std::sync::Arc::new(
             transport,
