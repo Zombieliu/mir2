@@ -1043,7 +1043,18 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             Err(_) => return Self::failed_receipt(&envelope.command),
         };
         if transaction_receipt.duplicate {
-            return Self::already_materialized_receipt(&envelope.command);
+            // A finalized economy write may have outlived the Zone Host that
+            // was about to apply its deterministic runtime projection. A new
+            // Host has an empty process-local projection cache, so it must
+            // replay that projection while PostgreSQL remains unchanged.
+            let receipt = Self::apply_projection(runtime, &envelope);
+            if receipt.committed {
+                self.projected_receipts
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .insert(stable_key, receipt.clone());
+            }
+            return receipt;
         }
 
         let receipt = Self::apply_projection(runtime, &envelope);

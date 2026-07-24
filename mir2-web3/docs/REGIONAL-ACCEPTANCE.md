@@ -162,8 +162,9 @@ Gate 20 必须把 thread-per-connection 改成异步多路复用，并实现 AOI
 ./infra/gate18/run-session-capacity.sh
 ```
 
-`gate18-economy-producer.json` 当前包含 10 条真实 PostgreSQL 断言，覆盖 legacy
+`gate18-economy-producer.json` 当前包含 11 条真实 PostgreSQL 断言，覆盖 legacy
 opening balance、active/standby fence、金币拾取幂等、双边交易守恒、交易重试
-以及技能精确扣减。它证明了本小节列出的 producer 能力，但仍不等同于 Gate 18
-整体通过；死亡掉落、地图切换、组队/公会共享状态、完整 Gateway→远程 Zone→
-PostgreSQL 端到端路径和 500 人 30 分钟混合行为仍需继续验收。
+、技能精确扣减，以及 PostgreSQL 已提交但运行时尚未投影时的新 Host 恢复。它
+证明了本小节列出的 producer 能力，但仍不等同于 Gate 18 整体通过；死亡掉落、
+地图切换、组队/公会共享状态、完整 Gateway→远程 Zone→PostgreSQL 端到端路径
+和 500 人 30 分钟混合行为仍需继续验收。
