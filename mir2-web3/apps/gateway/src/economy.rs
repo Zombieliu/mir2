@@ -919,6 +919,13 @@ pub struct PostgresEconomyAccountInventoryService {
     projected_receipts: Mutex<BTreeMap<String, SharedAccountInventoryTransactionReceipt>>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ProjectionRecoveryState {
+    Materialized,
+    NeedsReplay,
+    Diverged,
+}
+
 impl PostgresEconomyAccountInventoryService {
     pub fn new(database_url: impl Into<String>) -> Self {
         Self::with_store(PostgresEconomyStore::new(database_url))
@@ -972,6 +979,38 @@ impl PostgresEconomyAccountInventoryService {
             kind: command_kind(command),
             committed: true,
             packets: Vec::new(),
+        }
+    }
+
+    fn projection_recovery_state(
+        &self,
+        runtime: &InProcessWorldRuntime,
+        transaction: &EconomyTransactionEnvelope,
+    ) -> Result<ProjectionRecoveryState, String> {
+        let identity = runtime
+            .active_identity()
+            .ok_or_else(|| "economy projection recovery requires an active identity".to_string())?;
+        let snapshot = runtime.world_snapshot();
+        let deltas = aggregate_legs(&transaction.legs)?;
+        let mut all_materialized = true;
+        let mut all_need_replay = true;
+        for (balance, delta) in deltas {
+            if balance.account_id != identity.account_id
+                || balance.character_index != identity.character_index
+            {
+                return Ok(ProjectionRecoveryState::Diverged);
+            }
+            let ledger_after = self.store.balance(&balance)?;
+            let runtime_amount = runtime_balance_amount(&snapshot, &balance)?;
+            all_materialized &= runtime_amount == ledger_after;
+            all_need_replay &= runtime_amount
+                .checked_add(delta)
+                .is_some_and(|after| after == ledger_after);
+        }
+        match (all_materialized, all_need_replay) {
+            (true, _) => Ok(ProjectionRecoveryState::Materialized),
+            (false, true) => Ok(ProjectionRecoveryState::NeedsReplay),
+            (false, false) => Ok(ProjectionRecoveryState::Diverged),
         }
     }
 }
@@ -1043,11 +1082,23 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             Err(_) => return Self::failed_receipt(&envelope.command),
         };
         if transaction_receipt.duplicate {
-            // A finalized economy write may have outlived the Zone Host that
-            // was about to apply its deterministic runtime projection. A new
-            // Host has an empty process-local projection cache, so it must
-            // replay that projection while PostgreSQL remains unchanged.
-            let receipt = Self::apply_projection(runtime, &envelope);
+            // A new Host cannot infer projection state from its empty
+            // process-local receipt cache. Compare the restored character
+            // balances with PostgreSQL: equal means the checkpoint already
+            // contains the effect; exactly one transaction delta behind means
+            // the crash happened before projection; every other state is a
+            // split-brain/divergence and fails closed.
+            let receipt = match self.projection_recovery_state(runtime, &transaction) {
+                Ok(ProjectionRecoveryState::Materialized) => {
+                    Self::already_materialized_receipt(&envelope.command)
+                }
+                Ok(ProjectionRecoveryState::NeedsReplay) => {
+                    Self::apply_projection(runtime, &envelope)
+                }
+                Ok(ProjectionRecoveryState::Diverged) | Err(_) => {
+                    return Self::failed_receipt(&envelope.command);
+                }
+            };
             if receipt.committed {
                 self.projected_receipts
                     .lock()
@@ -1108,6 +1159,43 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             Ok(_) => SharedTradeSettlementOutcome::Committed,
             Err(_) => SharedTradeSettlementOutcome::Rejected,
         }
+    }
+}
+
+fn runtime_balance_amount(
+    snapshot: &WorldSnapshot,
+    balance: &EconomyBalanceKey,
+) -> Result<i64, String> {
+    match balance.asset_kind.as_str() {
+        "gold" if balance.asset_key == "gold" => Ok(i64::from(snapshot.gold)),
+        "experience" if balance.asset_key == "experience" => Ok(snapshot.player_experience),
+        "item_quantity" => snapshot
+            .inventory_items
+            .iter()
+            .chain(snapshot.belt_items.iter())
+            .chain(snapshot.storage_items.iter())
+            .chain(snapshot.hero_inventory_items.iter())
+            .filter(|item| item.key == balance.asset_key)
+            .try_fold(0_i64, |total, item| {
+                total
+                    .checked_add(i64::from(item.quantity))
+                    .ok_or_else(|| "runtime item quantity overflow".to_string())
+            })
+            .and_then(|total| {
+                snapshot
+                    .equipment_items
+                    .iter()
+                    .filter(|item| item.key == balance.asset_key)
+                    .try_fold(total, |total, item| {
+                        total
+                            .checked_add(i64::from(item.quantity))
+                            .ok_or_else(|| "runtime equipment quantity overflow".to_string())
+                    })
+            }),
+        kind => Err(format!(
+            "unsupported runtime economy balance {kind}/{}",
+            balance.asset_key
+        )),
     }
 }
 

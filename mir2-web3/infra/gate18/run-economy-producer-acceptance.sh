@@ -13,7 +13,8 @@ trap 'docker compose -f "${compose_file}" down -v --remove-orphans >/dev/null 2>
 docker compose -f "${compose_file}" up \
   --build \
   --abort-on-container-exit \
-  --exit-code-from economy-producer-acceptance
+  --exit-code-from economy-producer-acceptance \
+  economy-producer-acceptance
 
 jq -e \
   '.schemaVersion == 1

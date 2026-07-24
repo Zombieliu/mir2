@@ -163,10 +163,12 @@ Gate 20 必须把 thread-per-connection 改成异步多路复用，并实现 AOI
 ./infra/gate18/run-session-capacity.sh
 ```
 
-`gate18-economy-producer.json` 当前包含 11 条真实 PostgreSQL 断言，覆盖 legacy
+`gate18-economy-producer.json` 当前包含 12 条真实 PostgreSQL 断言，覆盖 legacy
 opening balance、active/standby fence、金币拾取幂等、双边交易守恒、交易重试
-、技能精确扣减，以及 PostgreSQL 已提交但运行时尚未投影时的新 Host 恢复。它
-证明了本小节列出的 producer 能力，但仍不等同于 Gate 18 整体通过。
+、技能精确扣减，以及 PostgreSQL 已提交但运行时尚未投影、已恢复 checkpoint
+包含投影这两个相反崩溃窗口。新 Host 通过逐资产比较运行时与账本余额决定只重放
+一次或不重放，任何第三种分叉状态都关闭失败。它证明了本小节列出的 producer
+能力，但仍不等同于 Gate 18 整体通过。
 
 `gate18-remote-economy.json` 由三个相互隔离的容器产生：Gateway 验收进程、
 独立 Zone Host 和 PostgreSQL。它通过真实客户端 `DropGold` / `PickUp` 请求验证
