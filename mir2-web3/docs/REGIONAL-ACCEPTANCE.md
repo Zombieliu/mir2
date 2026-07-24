@@ -128,7 +128,13 @@ docs/generated/regional/gate21-72h.json
 
 已完成第一批可重复的基础能力：
 
-- PostgreSQL 经济 producer 已接入真实金币拾取、装备掉落 token 和击杀经验；
+- 旧角色金币、经验、背包、腰带、仓库、英雄背包和装备快照通过不可变摘要
+  一次性导入事务账本；重复启动不会重置已经发生过交易的余额；
+- PostgreSQL 经济 producer 已接入真实金币/物品拾取、击杀经验、双边玩家交易和
+  需要物品的技能消耗；
+- 双边交易在同一 PostgreSQL 事务中锁定两个角色并守恒金币和物品数量；
+- 装备栏中的符、毒等堆叠物现在保留真实数量；毒云分别扣减 `5` 张符和 `5`
+  份绿毒，账本扣减与运行时随后删除/减量的物品键完全一致；
 - active producer 强制携带 owner generation 与 Zone source sequence，standby
   重放不会再次写入 PostgreSQL；
 - 同一经济命令重试不会重复给角色加金币；
@@ -155,3 +161,9 @@ Gate 20 必须把 thread-per-connection 改成异步多路复用，并实现 AOI
 ./infra/gate18/run-economy-producer-acceptance.sh
 ./infra/gate18/run-session-capacity.sh
 ```
+
+`gate18-economy-producer.json` 当前包含 10 条真实 PostgreSQL 断言，覆盖 legacy
+opening balance、active/standby fence、金币拾取幂等、双边交易守恒、交易重试
+以及技能精确扣减。它证明了本小节列出的 producer 能力，但仍不等同于 Gate 18
+整体通过；死亡掉落、地图切换、组队/公会共享状态、完整 Gateway→远程 Zone→
+PostgreSQL 端到端路径和 500 人 30 分钟混合行为仍需继续验收。

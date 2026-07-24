@@ -45,7 +45,8 @@ pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use session::{
     ActiveSessionIdentity, SharedItemRentalAgreement, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer, SimulationSession,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedSkillItemConsumptionComponent,
+    SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
 };
 pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,

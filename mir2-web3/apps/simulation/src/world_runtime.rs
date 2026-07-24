@@ -2,7 +2,8 @@ use std::any::Any;
 
 use crate::runtime::{
     SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
-    SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, ZoneMonsterSpawn,
+    SharedItemRentalItemOffer, SharedNpcSavedValue, SharedSkillItemConsumptionComponent,
+    SharedTradeOffer, ZoneMonsterSpawn,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -341,6 +342,13 @@ impl InProcessWorldRuntime {
     ) -> SharedAccountInventoryTransactionReceipt {
         self.session
             .commit_shared_skill_item_consumption_transaction(spell)
+    }
+
+    pub fn shared_skill_item_consumption_components(
+        &self,
+        spell: Spell,
+    ) -> Option<Vec<SharedSkillItemConsumptionComponent>> {
+        self.session.shared_skill_item_consumption_components(spell)
     }
 
     pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {

@@ -3445,6 +3445,8 @@ pub struct WorldItemSnapshot {
 #[serde(rename_all = "camelCase")]
 pub struct EquipmentItemSnapshot {
     pub slot: EquipmentSlot,
+    pub key: String,
+    pub quantity: u32,
     pub name: String,
     pub icon: u16,
     pub shape: Option<u16>,

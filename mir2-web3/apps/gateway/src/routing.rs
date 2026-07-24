@@ -19,11 +19,12 @@ use mir2_simulation::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropLootSnapshot,
     GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
     SharedAccountInventoryTransactionReceipt, SharedItemRentalAgreement, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer,
-    WorldCommand, WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition,
-    WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
-    ZoneCommand, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
+    WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
+    WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneCommand, ZoneManager,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound, ZoneRuntimeHandle,
+    CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
@@ -894,11 +895,22 @@ pub struct SharedAccountInventoryExecutionContext {
     pub external_commit_authorized: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SharedTradeSettlementOutcome {
+    Committed,
+    Duplicate,
+    Rejected,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum SharedAccountInventoryCommand {
     GroundDropPickup(GroundDropSnapshot),
     MonsterKillAward(ZoneMonsterKillAward),
-    SkillItemConsume { spell: Spell, request_id: u64 },
+    SkillItemConsume {
+        spell: Spell,
+        request_id: u64,
+        components: Vec<SharedSkillItemConsumptionComponent>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -920,7 +932,9 @@ impl SharedAccountInventoryCommandEnvelope {
                 "monster-kill-award:{}:{}:{}",
                 award.monster_object_id, award.monster_name, award.experience
             ),
-            SharedAccountInventoryCommand::SkillItemConsume { spell, request_id } => {
+            SharedAccountInventoryCommand::SkillItemConsume {
+                spell, request_id, ..
+            } => {
                 format!("skill-item-consume:{}:{}", *spell as u8, request_id)
             }
         };
@@ -951,6 +965,23 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> mir2_simulation::SharedAccountInventoryTransactionReceipt {
         self.commit(runtime, envelope)
+    }
+
+    fn bootstrap_fenced(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        true
+    }
+
+    fn settle_trade_fenced(
+        &self,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+        _first: &SharedTradeOffer,
+        _second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        SharedTradeSettlementOutcome::Committed
     }
 
     fn commit_ground_drop_pickup(
@@ -1046,7 +1077,18 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
                     &award.monster_name,
                     award.experience,
                 ),
-            SharedAccountInventoryCommand::SkillItemConsume { spell, .. } => {
+            SharedAccountInventoryCommand::SkillItemConsume {
+                spell, components, ..
+            } => {
+                if runtime.shared_skill_item_consumption_components(spell)
+                    != Some(components.clone())
+                {
+                    return SharedAccountInventoryTransactionReceipt {
+                        kind,
+                        committed: false,
+                        packets: Vec::new(),
+                    };
+                }
                 runtime.commit_shared_skill_item_consumption_transaction(spell)
             }
         };
@@ -5206,6 +5248,23 @@ impl SharedInProcessZoneSessionRuntime {
         service.commit_fenced(&mut self.inner, context.as_ref(), envelope)
     }
 
+    fn bootstrap_account_inventory(&self) -> bool {
+        self.account_inventory_service
+            .bootstrap_fenced(&self.inner, self.economy_execution_context.as_ref())
+    }
+
+    fn settle_shared_trade(
+        &self,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.account_inventory_service.settle_trade_fenced(
+            self.economy_execution_context.as_ref(),
+            first,
+            second,
+        )
+    }
+
     fn recent_zone_player_movement_input_window_active(&self, now_ms: u64) -> bool {
         self.movement_ingress
             .session_state
@@ -6481,6 +6540,10 @@ impl SharedInProcessZoneSessionRuntime {
                 let Some(identity) = self.inner.active_identity() else {
                     return Vec::new();
                 };
+                let Some(components) = self.inner.shared_skill_item_consumption_components(*spell)
+                else {
+                    return Vec::new();
+                };
                 let request_id = self.next_shared_skill_item_request_id();
                 let receipt =
                     self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
@@ -6488,6 +6551,7 @@ impl SharedInProcessZoneSessionRuntime {
                         command: SharedAccountInventoryCommand::SkillItemConsume {
                             spell: *spell,
                             request_id,
+                            components,
                         },
                     });
                 if !receipt.committed {
@@ -7134,6 +7198,9 @@ impl SharedInProcessZoneSessionRuntime {
             return packets;
         }
 
+        if !self.bootstrap_account_inventory() {
+            return self.inner.shared_trade_cancel(false);
+        }
         let (mut packets, offer) = self.inner.shared_trade_confirm();
         let Some(offer) = offer else {
             return packets;
@@ -7144,7 +7211,7 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let self_free_bag_slots = self.inner.world_snapshot().free_bag_slots;
 
-        let mut deliver_to_self = Vec::new();
+        let mut matched_offer = None;
         let mut rollback_self = None;
         {
             let mut zone_state = self
@@ -7162,12 +7229,7 @@ impl SharedInProcessZoneSessionRuntime {
                     if shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
                         && shared_trade_offer_fits(partner_free_bag_slots, &offer)
                     {
-                        zone_state
-                            .pending_trade_deliveries
-                            .entry(partner_key)
-                            .or_default()
-                            .push(offer.clone());
-                        deliver_to_self.push(partner_offer);
+                        matched_offer = Some((partner_key, partner_offer));
                     } else {
                         zone_state
                             .pending_trade_rollbacks
@@ -7180,6 +7242,33 @@ impl SharedInProcessZoneSessionRuntime {
                     zone_state.trade_offers.insert(self_key, offer.clone());
                 }
             } else {
+                rollback_self = Some(offer.clone());
+            }
+        }
+
+        let mut deliver_to_self = Vec::new();
+        if let Some((partner_key, partner_offer)) = matched_offer {
+            let settlement = self.settle_shared_trade(&offer, &partner_offer);
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            if matches!(
+                settlement,
+                SharedTradeSettlementOutcome::Committed | SharedTradeSettlementOutcome::Duplicate
+            ) {
+                zone_state
+                    .pending_trade_deliveries
+                    .entry(partner_key)
+                    .or_default()
+                    .push(offer.clone());
+                deliver_to_self.push(partner_offer);
+            } else {
+                zone_state
+                    .pending_trade_rollbacks
+                    .entry(partner_key)
+                    .or_default()
+                    .push(partner_offer);
                 rollback_self = Some(offer.clone());
             }
         }
@@ -8304,13 +8393,15 @@ mod tests {
         InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
         MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
         SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
-        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
+        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneRuntimeFactory, SharedInProcessZoneSessionRuntime,
         SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
         SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
-        SharedNpcWorldTransactionReceipt, SharedSessionRouter, SharedZoneMovementIngress,
-        SharedZoneMutationGate, SharedZoneRuntimeFactory, ZoneId, ZoneNativePlayerAttack,
-        ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry, ZoneRuntimeFactory,
+        SharedNpcWorldTransactionReceipt, SharedSessionRouter, SharedTradeSettlementOutcome,
+        SharedZoneMovementIngress, SharedZoneMutationGate, SharedZoneRuntimeFactory, ZoneId,
+        ZoneNativePlayerAttack, ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry,
+        ZoneRuntimeFactory,
     };
     use crate::{GatewayConfig, GatewaySession};
     use mir2_protocol::{
@@ -8323,9 +8414,9 @@ mod tests {
     use mir2_simulation::{
         GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime, QuestStage,
         SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-        SharedNpcSavedValue, WorldCommand, WorldEntityDisposition, WorldEntityKind,
-        WorldEntitySnapshot, WorldRuntime, ZoneCommand, ZoneKey, ZoneMonsterKillAward,
-        ZoneOutbound, ZoneRuntimeHandle,
+        SharedNpcSavedValue, SharedTradeOffer, WorldCommand, WorldEntityDisposition,
+        WorldEntityKind, WorldEntitySnapshot, WorldRuntime, ZoneCommand, ZoneKey,
+        ZoneMonsterKillAward, ZoneOutbound, ZoneRuntimeHandle,
     };
     use std::{
         collections::BTreeSet,
@@ -10101,6 +10192,7 @@ mod tests {
                 command: SharedAccountInventoryCommand::SkillItemConsume {
                     spell: Spell::PoisonCloud,
                     request_id: 1,
+                    components: Vec::new(),
                 },
             },
         );
@@ -10194,6 +10286,7 @@ mod tests {
             command: SharedAccountInventoryCommand::SkillItemConsume {
                 spell: Spell::SummonSkeleton,
                 request_id: 42,
+                components: Vec::new(),
             },
         };
         let same = SharedAccountInventoryCommandEnvelope {
@@ -10201,6 +10294,7 @@ mod tests {
             command: SharedAccountInventoryCommand::SkillItemConsume {
                 spell: Spell::SummonSkeleton,
                 request_id: 42,
+                components: Vec::new(),
             },
         };
         let distinct_request = SharedAccountInventoryCommandEnvelope {
@@ -10208,6 +10302,7 @@ mod tests {
             command: SharedAccountInventoryCommand::SkillItemConsume {
                 spell: Spell::SummonSkeleton,
                 request_id: 43,
+                components: Vec::new(),
             },
         };
         let distinct_spell = SharedAccountInventoryCommandEnvelope {
@@ -10215,6 +10310,7 @@ mod tests {
             command: SharedAccountInventoryCommand::SkillItemConsume {
                 spell: Spell::SummonShinsu,
                 request_id: 42,
+                components: Vec::new(),
             },
         };
 
@@ -10295,6 +10391,47 @@ mod tests {
                     }
                 }
             }
+        }
+    }
+
+    #[derive(Debug)]
+    struct RecordingTradeSettlementService {
+        bootstraps: Arc<Mutex<usize>>,
+        trades: Arc<Mutex<Vec<(SharedTradeOffer, SharedTradeOffer)>>>,
+    }
+
+    impl SharedAccountInventoryService for RecordingTradeSettlementService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn bootstrap_fenced(
+            &self,
+            _runtime: &InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> bool {
+            *self
+                .bootstraps
+                .lock()
+                .expect("trade bootstrap count should lock") += 1;
+            true
+        }
+
+        fn settle_trade_fenced(
+            &self,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+            first: &SharedTradeOffer,
+            second: &SharedTradeOffer,
+        ) -> SharedTradeSettlementOutcome {
+            self.trades
+                .lock()
+                .expect("recorded trades should lock")
+                .push((first.clone(), second.clone()));
+            SharedTradeSettlementOutcome::Committed
         }
     }
 
@@ -10419,6 +10556,17 @@ mod tests {
         let mut runtime =
             shared_session_runtime_with_account_inventory_service(zone_state, service);
         start_new_runtime(&mut runtime, "zone-skill-item-precheck", "Blade");
+        equip_runtime_crystal_items(
+            &mut runtime,
+            &[
+                ("Amulet", mir2_simulation::EquipmentSlot::Amulet, 5),
+                (
+                    "GreenPoison",
+                    mir2_simulation::EquipmentSlot::BraceletRight,
+                    5,
+                ),
+            ],
+        );
 
         assert!(gateway_zone_magic_targets_ground(Spell::PoisonCloud));
         let self_entity = runtime
@@ -10465,7 +10613,9 @@ mod tests {
                         SharedAccountInventoryCommand::SkillItemConsume {
                             spell: Spell::PoisonCloud,
                             request_id: 1,
-                        }
+                            components,
+                        } if components.len() == 2
+                            && components.iter().all(|component| component.quantity == 5)
                     )
             }));
         assert!(first_cast
@@ -10509,6 +10659,10 @@ mod tests {
         let mut runtime =
             shared_session_runtime_with_account_inventory_service(zone_state, service);
         start_new_runtime(&mut runtime, "zone-summon-item-boundary", "Sage");
+        equip_runtime_crystal_items(
+            &mut runtime,
+            &[("Amulet", mir2_simulation::EquipmentSlot::Amulet, 1)],
+        );
 
         assert!(gateway_zone_magic_targets_summon(Spell::SummonSkeleton));
         assert!(gateway_zone_magic_targets_summon(Spell::SummonShinsu));
@@ -10585,7 +10739,9 @@ mod tests {
                         SharedAccountInventoryCommand::SkillItemConsume {
                             spell: Spell::SummonSkeleton,
                             request_id: 1,
-                        }
+                            components,
+                        } if components.len() == 1
+                            && components[0].quantity == 1
                     )
             }));
         assert!(cast_packets.iter().any(|packet| matches!(
@@ -15395,6 +15551,41 @@ mod tests {
     }
 
     #[test]
+    fn shared_in_process_registry_commits_trade_through_economy_boundary() {
+        let bootstraps = Arc::new(Mutex::new(0));
+        let trades = Arc::new(Mutex::new(Vec::new()));
+        let service = Arc::new(RecordingTradeSettlementService {
+            bootstraps: Arc::clone(&bootstraps),
+            trades: Arc::clone(&trades),
+        }) as SharedAccountInventoryServiceHandle;
+        let factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service))
+                as SharedZoneRuntimeFactory;
+        let registry = ZoneRegistry::new(ZoneId::primary(), factory);
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut second = GatewaySession::new_with_zone_registry(config, &registry);
+        start_demo_character(&mut first);
+        start_new_character(&mut second, "trade-ledger-second", "LedgerBob");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
+        second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+
+        assert_eq!(*bootstraps.lock().expect("bootstrap count should lock"), 2);
+        let trades = trades.lock().expect("recorded trades should lock");
+        assert_eq!(trades.len(), 1);
+        let (second_offer, first_offer) = &trades[0];
+        assert_eq!(second_offer.account_id, "trade-ledger-second");
+        assert_eq!(second_offer.gold, 0);
+        assert_eq!(first_offer.account_id, "demo");
+        assert_eq!(first_offer.gold, 30);
+    }
+
+    #[test]
     fn shared_in_process_registry_rolls_back_pending_trade_when_partner_cancels() {
         let (mut first, mut second) = started_shared_zone_sessions();
         let first_starting_gold = first.world_snapshot().gold;
@@ -15738,6 +15929,73 @@ mod tests {
                 character_index,
             }))
             .expect("new runtime start should execute");
+    }
+
+    fn equip_runtime_crystal_items(
+        runtime: &mut SharedInProcessZoneSessionRuntime,
+        items: &[(&str, mir2_simulation::EquipmentSlot, u32)],
+    ) {
+        let snapshot = runtime.inner.world_snapshot();
+        let identity = runtime
+            .inner
+            .active_identity()
+            .expect("equipment fixture requires an active character");
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("equipment fixture requires an in-world player");
+        let equipment_items_json = items
+            .iter()
+            .map(|(name, slot, quantity)| {
+                let template = mir2_game_data::crystal_item_by_name(name)
+                    .expect("equipment fixture template should exist");
+                serde_json::json!({
+                    "key": format!("crystal-item-{}", template.item_index),
+                    "slot": slot,
+                    "quantity": quantity,
+                    "name": template.name,
+                    "icon": template.image,
+                    "shape": u16::try_from(template.shape).ok(),
+                    "description": template.tooltip.unwrap_or_default(),
+                    "durability_current": template.durability.max(1),
+                    "durability_max": template.durability.max(1),
+                    "attack": 0,
+                    "defence": 0
+                })
+                .to_string()
+            })
+            .collect::<Vec<_>>();
+        let state = serde_json::json!({
+            "character": {
+                "name": identity.character_name,
+                "level": 35,
+                "class": "Taoist",
+                "gender": "Male"
+            },
+            "mapFileName": snapshot.map_file_name.unwrap_or_else(|| "0".to_string()),
+            "mapTitle": snapshot.map_title.unwrap_or_else(|| "BichonProvince".to_string()),
+            "position": { "x": player.x, "y": player.y },
+            "direction": player.direction,
+            "hp": snapshot.player_hp.unwrap_or(100),
+            "maxHp": snapshot.player_max_hp.unwrap_or(100),
+            "mp": snapshot.player_mp.unwrap_or(100),
+            "maxMp": snapshot.player_max_mp.unwrap_or(100),
+            "experience": snapshot.player_experience,
+            "maxExperience": snapshot.player_max_experience,
+            "gold": snapshot.gold,
+            "credit": snapshot.credit,
+            "inventoryItemsJson": [],
+            "beltItemsJson": [],
+            "storageItemsJson": [],
+            "equipmentItemsJson": equipment_items_json
+        });
+        runtime
+            .execute(WorldCommand::Stage5Command {
+                action: "qa.applyNativeState".to_string(),
+                args: vec![state.to_string()],
+            })
+            .expect("equipment fixture should apply through the test runtime");
     }
 
     fn shared_monster_entity(object_id: u32) -> WorldEntitySnapshot {
