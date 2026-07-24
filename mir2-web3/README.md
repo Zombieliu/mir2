@@ -2,6 +2,10 @@
 
 Crystal / Legend of Mir 2 compatible Web MMORPG implementation.
 
+> 简体中文读者请从 [`README.zh-CN.md`](README.zh-CN.md) 开始。它用玩家、
+> 公会和节点运营者都能理解的方式说明项目架构、Mir2 玩法设计、商业模式、
+> 当前验收状态与生产边界。
+
 For a new Windows checkout, start with the repository-level
 [`README.md`](../README.md), then use:
 
