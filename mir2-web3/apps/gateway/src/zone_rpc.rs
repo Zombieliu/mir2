@@ -5,7 +5,7 @@ use std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{
     decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet, Point,
@@ -115,11 +115,30 @@ pub struct ZoneHostHealth {
 pub struct ZoneHostTelemetrySnapshot {
     pub health: ZoneHostHealth,
     pub zones: Vec<ZoneHostZoneTelemetry>,
+    pub checkpoint: ZoneHostCheckpointTelemetry,
     pub started_at_ms: u64,
     pub uptime_seconds: u64,
     pub accepted_connections_total: u64,
     pub rpc_requests_total: u64,
     pub rpc_errors_total: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneHostCheckpointTelemetry {
+    pub journal_entries: u64,
+    pub exports_total: u64,
+    pub export_bytes_total: u64,
+    pub export_duration_ns_total: u64,
+    pub export_last_bytes: u64,
+    pub export_last_duration_ns: u64,
+    pub installs_total: u64,
+    pub install_bytes_total: u64,
+    pub install_duration_ns_total: u64,
+    pub install_last_bytes: u64,
+    pub install_last_duration_ns: u64,
+    pub replay_entries_total: u64,
+    pub replay_last_entries: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -844,6 +863,18 @@ pub struct ZoneHostServer {
     accepted_connections_total: AtomicU64,
     rpc_requests_total: AtomicU64,
     rpc_errors_total: AtomicU64,
+    checkpoint_exports_total: AtomicU64,
+    checkpoint_export_bytes_total: AtomicU64,
+    checkpoint_export_duration_ns_total: AtomicU64,
+    checkpoint_export_last_bytes: AtomicU64,
+    checkpoint_export_last_duration_ns: AtomicU64,
+    checkpoint_installs_total: AtomicU64,
+    checkpoint_install_bytes_total: AtomicU64,
+    checkpoint_install_duration_ns_total: AtomicU64,
+    checkpoint_install_last_bytes: AtomicU64,
+    checkpoint_install_last_duration_ns: AtomicU64,
+    checkpoint_replay_entries_total: AtomicU64,
+    checkpoint_replay_last_entries: AtomicU64,
 }
 
 impl fmt::Debug for ZoneHostServer {
@@ -943,6 +974,18 @@ impl ZoneHostServer {
             accepted_connections_total: AtomicU64::new(0),
             rpc_requests_total: AtomicU64::new(0),
             rpc_errors_total: AtomicU64::new(0),
+            checkpoint_exports_total: AtomicU64::new(0),
+            checkpoint_export_bytes_total: AtomicU64::new(0),
+            checkpoint_export_duration_ns_total: AtomicU64::new(0),
+            checkpoint_export_last_bytes: AtomicU64::new(0),
+            checkpoint_export_last_duration_ns: AtomicU64::new(0),
+            checkpoint_installs_total: AtomicU64::new(0),
+            checkpoint_install_bytes_total: AtomicU64::new(0),
+            checkpoint_install_duration_ns_total: AtomicU64::new(0),
+            checkpoint_install_last_bytes: AtomicU64::new(0),
+            checkpoint_install_last_duration_ns: AtomicU64::new(0),
+            checkpoint_replay_entries_total: AtomicU64::new(0),
+            checkpoint_replay_last_entries: AtomicU64::new(0),
         }
     }
 
@@ -966,6 +1009,33 @@ impl ZoneHostServer {
         ZoneHostTelemetrySnapshot {
             health: self.health(),
             zones: self.active_zones(),
+            checkpoint: ZoneHostCheckpointTelemetry {
+                journal_entries: self
+                    .journal
+                    .lock()
+                    .map(|journal| saturating_u64(journal.len()))
+                    .unwrap_or_default(),
+                exports_total: self.checkpoint_exports_total.load(Ordering::Acquire),
+                export_bytes_total: self.checkpoint_export_bytes_total.load(Ordering::Acquire),
+                export_duration_ns_total: self
+                    .checkpoint_export_duration_ns_total
+                    .load(Ordering::Acquire),
+                export_last_bytes: self.checkpoint_export_last_bytes.load(Ordering::Acquire),
+                export_last_duration_ns: self
+                    .checkpoint_export_last_duration_ns
+                    .load(Ordering::Acquire),
+                installs_total: self.checkpoint_installs_total.load(Ordering::Acquire),
+                install_bytes_total: self.checkpoint_install_bytes_total.load(Ordering::Acquire),
+                install_duration_ns_total: self
+                    .checkpoint_install_duration_ns_total
+                    .load(Ordering::Acquire),
+                install_last_bytes: self.checkpoint_install_last_bytes.load(Ordering::Acquire),
+                install_last_duration_ns: self
+                    .checkpoint_install_last_duration_ns
+                    .load(Ordering::Acquire),
+                replay_entries_total: self.checkpoint_replay_entries_total.load(Ordering::Acquire),
+                replay_last_entries: self.checkpoint_replay_last_entries.load(Ordering::Acquire),
+            },
             started_at_ms: self.started_at_ms,
             uptime_seconds: unix_now_ms().saturating_sub(self.started_at_ms) / 1_000,
             accepted_connections_total: self.accepted_connections_total.load(Ordering::Acquire),
@@ -1453,6 +1523,7 @@ impl ZoneHostServer {
     }
 
     fn export_host_checkpoint(&self) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        let started = Instant::now();
         let entries = self
             .journal
             .lock()
@@ -1520,10 +1591,23 @@ impl ZoneHostServer {
                 ),
             ));
         }
+        let byte_count = saturating_u64(bytes.len());
+        let duration_ns = saturating_duration_ns(started.elapsed());
+        self.checkpoint_exports_total
+            .fetch_add(1, Ordering::Relaxed);
+        self.checkpoint_export_bytes_total
+            .fetch_add(byte_count, Ordering::Relaxed);
+        self.checkpoint_export_duration_ns_total
+            .fetch_add(duration_ns, Ordering::Relaxed);
+        self.checkpoint_export_last_bytes
+            .store(byte_count, Ordering::Release);
+        self.checkpoint_export_last_duration_ns
+            .store(duration_ns, Ordering::Release);
         Ok(ZoneRpcPayload::HostCheckpoint { bytes })
     }
 
     fn install_host_checkpoint(&self, bytes: &[u8]) -> Result<(), ZoneRpcFault> {
+        let started = Instant::now();
         let checkpoint: WireZoneHostCheckpoint =
             serde_json::from_slice(bytes).map_err(|error| {
                 ZoneRpcFault::new(
@@ -1538,6 +1622,7 @@ impl ZoneHostServer {
             )
         })?;
 
+        let replay_entries = saturating_u64(checkpoint.entries.len());
         let factory = Arc::new(
             self.runtime_factory
                 .lock()
@@ -1678,8 +1763,32 @@ impl ZoneHostServer {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))? =
             checkpoint.entries;
+        let byte_count = saturating_u64(bytes.len());
+        let duration_ns = saturating_duration_ns(started.elapsed());
+        self.checkpoint_installs_total
+            .fetch_add(1, Ordering::Relaxed);
+        self.checkpoint_install_bytes_total
+            .fetch_add(byte_count, Ordering::Relaxed);
+        self.checkpoint_install_duration_ns_total
+            .fetch_add(duration_ns, Ordering::Relaxed);
+        self.checkpoint_install_last_bytes
+            .store(byte_count, Ordering::Release);
+        self.checkpoint_install_last_duration_ns
+            .store(duration_ns, Ordering::Release);
+        self.checkpoint_replay_entries_total
+            .fetch_add(replay_entries, Ordering::Relaxed);
+        self.checkpoint_replay_last_entries
+            .store(replay_entries, Ordering::Release);
         Ok(())
     }
+}
+
+fn saturating_u64(value: usize) -> u64 {
+    u64::try_from(value).unwrap_or(u64::MAX)
+}
+
+fn saturating_duration_ns(duration: Duration) -> u64 {
+    u64::try_from(duration.as_nanos()).unwrap_or(u64::MAX)
 }
 
 struct ActiveConnectionGuard<'a>(&'a AtomicUsize);

@@ -31,6 +31,7 @@ Bevy runtimes.
 - [Crystal server parity](docs/CRYSTAL-SERVER-PARITY.md)
 - [Gate 14 no-single-point POC](docs/GATE14-NO-SINGLE-POINT-POC.md)
 - [Gate 15 real-player failover](docs/GATE15-REAL-PLAYER-FAILOVER.md)
+- [Gate 16 incremental replication](docs/GATE16-INCREMENTAL-REPLICATION.md)
 
 ## Layout
 
@@ -69,6 +70,11 @@ Bevy runtimes.
   finalized control state. Two players on separate Gateways survive active Zone
   Host loss and continue on the promoted checkpoint replica without reconnecting.
   See [`docs/GATE15-REAL-PLAYER-FAILOVER.md`](docs/GATE15-REAL-PLAYER-FAILOVER.md).
+- Gate 16.1 adds the reproducible v4 full-checkpoint performance ruler,
+  low-cardinality checkpoint/replay telemetry, and a constrained Docker
+  baseline. The incremental per-Zone v5 protocol is the next implementation
+  step; see
+  [`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md).
 
 ## Crystal Reference
 

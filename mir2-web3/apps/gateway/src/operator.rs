@@ -690,6 +690,84 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         "obelisk_zone_host_rpc_errors_total",
         snapshot.rpc_errors_total
     );
+    metric!(
+        "Current v4 checkpoint journal entries.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_journal_entries",
+        snapshot.checkpoint.journal_entries
+    );
+    metric!(
+        "Successful v4 checkpoint exports.",
+        "counter",
+        "obelisk_zone_host_checkpoint_exports_total",
+        snapshot.checkpoint.exports_total
+    );
+    metric!(
+        "Bytes produced by successful v4 checkpoint exports.",
+        "counter",
+        "obelisk_zone_host_checkpoint_export_bytes_total",
+        snapshot.checkpoint.export_bytes_total
+    );
+    metric!(
+        "Nanoseconds spent producing successful v4 checkpoint exports.",
+        "counter",
+        "obelisk_zone_host_checkpoint_export_duration_ns_total",
+        snapshot.checkpoint.export_duration_ns_total
+    );
+    metric!(
+        "Bytes in the last successful v4 checkpoint export.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_export_last_bytes",
+        snapshot.checkpoint.export_last_bytes
+    );
+    metric!(
+        "Nanoseconds spent in the last successful v4 checkpoint export.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_export_last_duration_ns",
+        snapshot.checkpoint.export_last_duration_ns
+    );
+    metric!(
+        "Successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_installs_total",
+        snapshot.checkpoint.installs_total
+    );
+    metric!(
+        "Bytes consumed by successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_install_bytes_total",
+        snapshot.checkpoint.install_bytes_total
+    );
+    metric!(
+        "Nanoseconds spent applying successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_install_duration_ns_total",
+        snapshot.checkpoint.install_duration_ns_total
+    );
+    metric!(
+        "Bytes in the last successful v4 checkpoint install.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_install_last_bytes",
+        snapshot.checkpoint.install_last_bytes
+    );
+    metric!(
+        "Nanoseconds spent in the last successful v4 checkpoint install.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_install_last_duration_ns",
+        snapshot.checkpoint.install_last_duration_ns
+    );
+    metric!(
+        "Journal entries replayed by successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_replay_entries_total",
+        snapshot.checkpoint.replay_entries_total
+    );
+    metric!(
+        "Journal entries replayed by the last successful v4 checkpoint install.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_replay_last_entries",
+        snapshot.checkpoint.replay_last_entries
+    );
     output.push_str(
         "# HELP obelisk_zone_host_build_info Static Zone Host build and protocol information.\n",
     );
@@ -833,6 +911,7 @@ mod tests {
         let snapshot = ZoneHostTelemetrySnapshot {
             health: health(),
             zones: zones(),
+            checkpoint: Default::default(),
             started_at_ms: 1,
             uptime_seconds: 9,
             accepted_connections_total: 10,
@@ -844,6 +923,8 @@ mod tests {
         assert!(output.contains("obelisk_zone_host_rpc_requests_total"));
         assert!(output.contains("obelisk_zone_host_session_capacity_per_zone"));
         assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
+        assert!(output.contains("obelisk_zone_host_checkpoint_journal_entries"));
+        assert!(output.contains("obelisk_zone_host_checkpoint_replay_entries_total"));
         assert!(!output.contains("session_id"));
         assert!(!output.contains("account_id"));
     }

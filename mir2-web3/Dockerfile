@@ -109,3 +109,15 @@ FROM runtime AS capacity-benchmark
 COPY --from=capacity-benchmark-builder /out/dubhe-zone-load /usr/local/bin/dubhe-zone-load
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/dubhe-zone-load"]
+
+FROM builder AS gate16-v4-baseline-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate16_checkpoint_load \
+    && install -Dm755 target/release/gate16_checkpoint_load /out/gate16-checkpoint-load
+
+FROM runtime AS gate16-v4-baseline
+COPY --from=gate16-v4-baseline-builder /out/gate16-checkpoint-load /usr/local/bin/gate16-checkpoint-load
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate16-checkpoint-load"]

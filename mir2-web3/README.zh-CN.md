@@ -356,6 +356,7 @@ RMT、经济通胀和合规问题。
 | Gate 13 | Sui testnet 节点注册、轮换、撤销、质押退款、容量证书和奖励资格 |
 | Gate 14 | 四验证器、双 Gateway、双 Dubhe、双投影的无单点纵向 POC |
 | Gate 15 | 两个真实玩家通过不同 Gateway 进入同一 Zone，并在主 Dubhe 故障后保持连接继续操作 |
+| Gate 16.1 | v4 全量 checkpoint 的低基数遥测、历史规模基准和 2C2G 容器证据 |
 
 Gate 15 已接受的核心结果：
 
@@ -371,6 +372,15 @@ Gate 15 已接受的核心结果：
 - [`docs/GATE15-REAL-PLAYER-FAILOVER.md`](docs/GATE15-REAL-PLAYER-FAILOVER.md)
 - [`docs/generated/gate15/gate15-acceptance.json`](docs/generated/gate15/gate15-acceptance.json)
 - [`docs/generated/gate15/gate15-players.json`](docs/generated/gate15/gate15-players.json)
+
+Gate 16.1 已把当前全量复制成本量化：2C2G 容器中，700 条历史生成的
+checkpoint 为 215,622 bytes，导出约 18.91 ms，但备用节点从头安装和重放
+约 4.16 秒。100 ms 活跃复制的 payload 等效带宽约 17.25 Mbps。这个结果
+证明后续优化重点必须是每 Zone 增量 mutation、持久 WAL 和周期 base
+snapshot，而不是只压缩 checkpoint 文件。
+
+Gate 16 设计、指标和复测方法见
+[`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md)。
 
 ## 本地验收 Gate 15
 
