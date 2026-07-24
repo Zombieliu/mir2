@@ -827,7 +827,8 @@ impl ZoneHostOutbox {
 
 pub struct ZoneHostServer {
     host_id: String,
-    config: GatewayConfig,
+    config: Mutex<GatewayConfig>,
+    replay_baseline_config: GatewayConfig,
     runtime_factory: Mutex<Arc<SharedInProcessZoneRuntimeFactory>>,
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
     sessions: Mutex<BTreeMap<(String, String), Arc<ZoneHostSession>>>,
@@ -920,9 +921,13 @@ impl ZoneHostServer {
         limits: ZoneRpcLimits,
         runtime_factory: Arc<SharedInProcessZoneRuntimeFactory>,
     ) -> Self {
+        let replay_baseline_config = config
+            .fork_with_isolated_account_store()
+            .expect("Zone Host replay baseline account store should be available");
         Self {
             host_id: host_id.into(),
-            config,
+            config: Mutex::new(config),
+            replay_baseline_config,
             runtime_factory: Mutex::new(runtime_factory),
             owner_lease_authority,
             sessions: Mutex::new(BTreeMap::new()),
@@ -1399,7 +1404,12 @@ impl ZoneHostServer {
         zone_id: &str,
     ) -> Arc<ZoneHostSession> {
         let zone_id = ZoneId::new(zone_id);
-        let runtime = factory.create_runtime(self.config.clone(), &zone_id);
+        let config = self
+            .config
+            .lock()
+            .expect("Zone Host config mutex should not be poisoned")
+            .clone();
+        let runtime = factory.create_runtime(config, &zone_id);
         let hosted = Arc::new(HostedZoneOwnerCommandClient::with_owner_lease_authority(
             runtime,
             Arc::clone(&self.owner_lease_authority),
@@ -1414,10 +1424,11 @@ impl ZoneHostServer {
     fn create_replay_session(
         &self,
         factory: &Arc<SharedInProcessZoneRuntimeFactory>,
+        config: &GatewayConfig,
         zone_id: &str,
     ) -> Arc<ZoneHostSession> {
         let zone_id = ZoneId::new(zone_id);
-        let runtime = factory.create_runtime(self.config.clone(), &zone_id);
+        let runtime = factory.create_runtime(config.clone(), &zone_id);
         // Journal entries were accepted under historical fencing tokens. Replay
         // verifies their checkpoint checksum and sequence, but must not compare
         // those historical leases with today's finalized owner.
@@ -1533,6 +1544,10 @@ impl ZoneHostServer {
                 .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
                 .fresh(),
         );
+        let replay_config = self
+            .replay_baseline_config
+            .fork_with_isolated_account_store()
+            .map_err(classify_runtime_error)?;
         let mut sessions = BTreeMap::<(String, String), Arc<ZoneHostSession>>::new();
         for (expected_sequence, entry) in checkpoint.entries.iter().enumerate() {
             if entry.sequence != expected_sequence as u64 {
@@ -1563,7 +1578,9 @@ impl ZoneHostServer {
             }
             let session = sessions
                 .entry(key)
-                .or_insert_with(|| self.create_replay_session(&factory, &entry.zone_id))
+                .or_insert_with(|| {
+                    self.create_replay_session(&factory, &replay_config, &entry.zone_id)
+                })
                 .clone();
             let request = entry.clone().into_request()?;
             session.execute_request(request)?;
@@ -1646,6 +1663,11 @@ impl ZoneHostServer {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))? =
             factory;
+        *self
+            .config
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))? =
+            replay_config;
         *self
             .sessions
             .lock()

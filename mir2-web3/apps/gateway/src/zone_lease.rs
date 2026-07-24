@@ -352,6 +352,10 @@ fn default_instance_id() -> String {
 /// authority when `MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL` is set, otherwise the
 /// in-process authority (single-writer, no cross-process failover).
 pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuthority {
+    if let Some(authority) = crate::gate15::zone_owner_lease_authority() {
+        eprintln!("zone owner lease authority: Gate 15 Commonware finalized placement");
+        return authority;
+    }
     match PostgresZoneOwnerLeaseAuthority::from_env() {
         Some(authority) => {
             eprintln!(

@@ -2442,6 +2442,22 @@ impl Default for SimulationConfig {
 }
 
 impl SimulationConfig {
+    /// Clone the runtime configuration while giving it an independent account
+    /// store and persistence lock. Zone checkpoint replay uses this to ensure
+    /// every full-journal replay starts from the same baseline instead of a
+    /// store mutated by a previous checkpoint installation.
+    pub fn fork_with_isolated_account_store(&self) -> Result<Self, String> {
+        let account_store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store lock poisoned".to_string())?
+            .clone();
+        let mut fork = self.clone();
+        fork.account_store = Arc::new(Mutex::new(account_store));
+        fork.account_store_persist_lock = Arc::new(Mutex::new(()));
+        Ok(fork)
+    }
+
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
         Self::from_scene_with_collision(scene, starter_map_collision())
     }

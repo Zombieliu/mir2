@@ -1330,6 +1330,7 @@ struct HealthResponse {
     http: &'static str,
     ws: &'static str,
     tcp_stub: &'static str,
+    gate15: Option<crate::gate15::Gate15Health>,
     session_cache: GatewaySessionCacheStatus,
     capacity: GatewayCapacityStatus,
     gameplay_events: GameplayEventSinkStatus,
@@ -1467,6 +1468,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
+        gate15: crate::gate15::health(),
         session_cache: session_cache_status,
         capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
@@ -2099,6 +2101,14 @@ async fn handle_socket_inner(
                     }
                 };
                 let _serial_execution = serial_execution_gate.write().await;
+                if let Err(error) = catch_gateway_panic("web zone owner command heartbeat", || {
+                    tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
+                })
+                .and_then(|result| result.map(|_| ()))
+                {
+                    let _ = send_error_message(&sender, &error).await;
+                    continue;
+                }
                 let action = match queued_input.take_input() {
                     ParsedSocketInput::Action(action) => action,
                     ParsedSocketInput::ProtocolError(error) => {
@@ -2165,6 +2175,41 @@ async fn handle_socket_inner(
                         continue;
                     }
                 };
+                if let Some(key) = pending_start_game_route_lease.as_ref() {
+                    let zone_id = session.zone_id().clone();
+                    match crate::gate15::acquire_player_session(
+                        &key.account_id,
+                        key.character_index,
+                        &zone_id,
+                    )
+                    .await
+                    {
+                        Ok(Some(grant)) => {
+                            eprintln!(
+                                "Gate 15 Web StartGame finalized {}/{} on {} generation {} at height {}",
+                                key.account_id,
+                                key.character_index,
+                                grant.lease.zone_id,
+                                grant.placement.generation,
+                                grant.finalized_height
+                            );
+                        }
+                        Ok(None) => {}
+                        Err(error) => {
+                            release_pending_start_game_route_lease(
+                                session_cache.as_ref(),
+                                session,
+                                Some(key),
+                            );
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("Commonware session lease unavailable: {error}"),
+                            )
+                            .await;
+                            continue;
+                        }
+                    }
+                }
                 let action_capacity_permit = match inflight_capacity_kind_for_action(&action) {
                     Some(kind) => match capacity.try_acquire_action(kind) {
                         Ok(permit) => Some(permit),
@@ -2384,10 +2429,21 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let responses = match catch_gateway_panic("web session tick", || {
-                    tokio::task::block_in_place(|| session.tick())
-                }) {
+                    tokio::task::block_in_place(|| {
+                        session
+                            .execute_with_outcome(WorldCommand::Tick)
+                            .map(|execution| execution.packets)
+                    })
+                })
+                .and_then(|result| result) {
                     Ok(responses) => responses,
                     Err(error) => {
+                        if crate::gate15::health().is_some() {
+                            eprintln!(
+                                "Gate 15 transient Zone tick failure; keeping player socket for placement recovery: {error}"
+                            );
+                            continue;
+                        }
                         let _ = send_error_message(&sender, &error).await;
                         return;
                     }

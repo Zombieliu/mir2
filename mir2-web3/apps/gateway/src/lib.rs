@@ -6,6 +6,7 @@ pub mod consensus_log;
 pub mod control_plane;
 pub mod events;
 pub mod gate14;
+pub mod gate15;
 pub mod guild_node_foundation;
 mod inject;
 pub mod mir2_workload;
@@ -55,6 +56,7 @@ pub use gate14::{
     Gate14QuorumClient, Gate14QuorumSnapshot, Gate14SessionLease, Gate14ValidatorStatus,
     Gate14ZoneHost,
 };
+pub use gate15::{Gate15Health, Gate15PlayerLease};
 pub use guild_node_foundation::{
     CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
     GuildNodeStatus, NodeCapacityCertificate, SuiFinalityProof,

@@ -26,6 +26,7 @@ Bevy runtimes.
 - [Backend progress](docs/BACKEND-1TO1-PROGRESS.md)
 - [Crystal server parity](docs/CRYSTAL-SERVER-PARITY.md)
 - [Gate 14 no-single-point POC](docs/GATE14-NO-SINGLE-POINT-POC.md)
+- [Gate 15 real-player failover](docs/GATE15-REAL-PLAYER-FAILOVER.md)
 
 ## Layout
 
@@ -60,6 +61,10 @@ Bevy runtimes.
   projections. Its Docker fault-recovery acceptance and full architecture
   diagram are documented in
   [`docs/GATE14-NO-SINGLE-POINT-POC.md`](docs/GATE14-NO-SINGLE-POINT-POC.md).
+- Gate 15 connects real WebSocket and Crystal TCP player admission to that
+  finalized control state. Two players on separate Gateways survive active Zone
+  Host loss and continue on the promoted checkpoint replica without reconnecting.
+  See [`docs/GATE15-REAL-PLAYER-FAILOVER.md`](docs/GATE15-REAL-PLAYER-FAILOVER.md).
 
 ## Crystal Reference
 

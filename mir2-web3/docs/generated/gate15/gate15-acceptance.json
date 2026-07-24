@@ -1,0 +1,355 @@
+{
+  "ok": true,
+  "generatedAt": "2026-07-24T07:42:10Z",
+  "gate": "15.1-15.4",
+  "assertions": {
+    "twoRealPlayersStarted": true,
+    "playersSurvivedZoneFailure": true,
+    "placementFinalizedOnDubheB": true,
+    "allValidatorsAgree": true,
+    "bothRealGatewaysObserveQuorum": true,
+    "twoFencedPlayerLeasesFinalized": true,
+    "recoveredAReceivedReverseCheckpoint": true,
+    "bothProjectorsHealthy": true
+  },
+  "initialPlayers": {
+    "ready": true,
+    "pid": 85972,
+    "players": [
+      {
+        "index": 0,
+        "url": "ws://127.0.0.1:19710/ws",
+        "accountId": "gate15-player-0",
+        "characterIndex": 1,
+        "inGame": true,
+        "markerSeen": false,
+        "closedUnexpectedly": false,
+        "messages": 627,
+        "zoneResponses": 0,
+        "zoneResponsesAfterFailover": 0,
+        "errors": [],
+        "bytesSent": 422,
+        "bytesReceived": 755373
+      },
+      {
+        "index": 1,
+        "url": "ws://127.0.0.1:19711/ws",
+        "accountId": "gate15-player-1",
+        "characterIndex": 2,
+        "inGame": true,
+        "markerSeen": false,
+        "closedUnexpectedly": false,
+        "messages": 185,
+        "zoneResponses": 0,
+        "zoneResponsesAfterFailover": 0,
+        "errors": [],
+        "bytesSent": 423,
+        "bytesReceived": 384521
+      }
+    ]
+  },
+  "playerFaultRun": {
+    "ok": true,
+    "startedAt": "2026-07-24T07:41:25.653Z",
+    "finishedAt": "2026-07-24T07:42:00.837Z",
+    "durationMs": 35184,
+    "assertions": {
+      "bothReachedGame": true,
+      "bothObservedFailover": true,
+      "bothStayedConnected": true,
+      "bothExecutedZoneCommandsAfterFailover": true
+    },
+    "players": [
+      {
+        "index": 0,
+        "url": "ws://127.0.0.1:19710/ws",
+        "accountId": "gate15-player-0",
+        "characterIndex": 1,
+        "inGame": true,
+        "markerSeen": true,
+        "closedUnexpectedly": false,
+        "messages": 851,
+        "zoneResponses": 118,
+        "zoneResponsesAfterFailover": 113,
+        "errors": [
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+        ],
+        "bytesSent": 7024,
+        "bytesReceived": 780149
+      },
+      {
+        "index": 1,
+        "url": "ws://127.0.0.1:19711/ws",
+        "accountId": "gate15-player-1",
+        "characterIndex": 2,
+        "inGame": true,
+        "markerSeen": true,
+        "closedUnexpectedly": false,
+        "messages": 856,
+        "zoneResponses": 56,
+        "zoneResponsesAfterFailover": 52,
+        "errors": [
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+        ],
+        "bytesSent": 6727,
+        "bytesReceived": 782259
+      }
+    ]
+  },
+  "playerHarnessOutput": "Gate 15 players completed: postFailover=113/52 ok=true\n",
+  "finalRoute": {
+    "gatewayId": "gateway-b",
+    "finalizedHeight": 16,
+    "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+    "placement": {
+      "zoneId": "mir2-map-0",
+      "generation": 2,
+      "primaryHostId": "dubhe-b",
+      "replicaHostIds": [
+        "dubhe-a"
+      ],
+      "expiresAtMs": 1784882489417
+    },
+    "primaryEndpoint": "dubhe-b:7020",
+    "replicaEndpoints": [
+      "dubhe-a:7020"
+    ]
+  },
+  "gatewayHealth": [
+    {
+      "ok": true,
+      "http": "ready",
+      "ws": "ready",
+      "tcp_stub": "ready",
+      "gate15": {
+        "enabled": true,
+        "healthy": true,
+        "gatewayId": "player-gateway-a",
+        "finalizedHeight": 16,
+        "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 2,
+        "observedAtMs": 1784878930481,
+        "lastError": null
+      },
+      "session_cache": {
+        "configured": true,
+        "backend": "in_memory",
+        "ttlSeconds": null,
+        "recordCount": 1,
+        "staleRecordCount": 0,
+        "routeLeaseCount": 1,
+        "healthy": true,
+        "lastError": null
+      },
+      "capacity": {
+        "maxWsConnections": null,
+        "maxActiveSessions": null,
+        "maxReconnectLeases": null,
+        "maxLoginInFlight": null,
+        "maxNewCharacterInFlight": null,
+        "maxStartGameInFlight": null,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 1,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "gameplay_events": {
+        "configured": false,
+        "sink": "none",
+        "topic": null,
+        "accepted": 0,
+        "published": 0,
+        "failed": 0,
+        "dropped": 0,
+        "lastError": null
+      }
+    },
+    {
+      "ok": true,
+      "http": "ready",
+      "ws": "ready",
+      "tcp_stub": "ready",
+      "gate15": {
+        "enabled": true,
+        "healthy": true,
+        "gatewayId": "player-gateway-b",
+        "finalizedHeight": 16,
+        "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 2,
+        "observedAtMs": 1784878930410,
+        "lastError": null
+      },
+      "session_cache": {
+        "configured": true,
+        "backend": "in_memory",
+        "ttlSeconds": null,
+        "recordCount": 1,
+        "staleRecordCount": 0,
+        "routeLeaseCount": 1,
+        "healthy": true,
+        "lastError": null
+      },
+      "capacity": {
+        "maxWsConnections": null,
+        "maxActiveSessions": null,
+        "maxReconnectLeases": null,
+        "maxLoginInFlight": null,
+        "maxNewCharacterInFlight": null,
+        "maxStartGameInFlight": null,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 1,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "gameplay_events": {
+        "configured": false,
+        "sink": "none",
+        "topic": null,
+        "accepted": 0,
+        "published": 0,
+        "failed": 0,
+        "dropped": 0,
+        "lastError": null
+      }
+    }
+  ],
+  "projectorHealth": [
+    {
+      "role": "disposable-postgres-projector",
+      "projectorId": "projector-a",
+      "healthy": true,
+      "finalizedHeight": 16,
+      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "postgresAuthoritative": false,
+      "databaseAvailable": true,
+      "redisAuthoritative": false,
+      "redisAvailable": true,
+      "rebuiltCount": 1,
+      "projectedAtMs": 1784878930170,
+      "startedAtMs": 1784878930157,
+      "lastError": null
+    },
+    {
+      "role": "disposable-postgres-projector",
+      "projectorId": "projector-b",
+      "healthy": true,
+      "finalizedHeight": 16,
+      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "postgresAuthoritative": false,
+      "databaseAvailable": true,
+      "redisAuthoritative": false,
+      "redisAvailable": true,
+      "rebuiltCount": 1,
+      "projectedAtMs": 1784878930227,
+      "startedAtMs": 1784878930211,
+      "lastError": null
+    }
+  ],
+  "validatorStatuses": [
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-0",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784878853414
+    },
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-1",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784878853338
+    },
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-2",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784878853273
+    },
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-3",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784878853393
+    }
+  ],
+  "finalizedHeight": 16,
+  "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+  "sessionLeases": {
+    "player:gate15-player-0:1": {
+      "sessionId": "player:gate15-player-0:1",
+      "accountId": "gate15-player-0",
+      "characterId": "gate15-player-0:1",
+      "gatewayId": "player-gateway-a",
+      "zoneId": "mir2-map-0",
+      "fencingToken": 1,
+      "expiresAtMs": 1784878945789
+    },
+    "player:gate15-player-1:2": {
+      "sessionId": "player:gate15-player-1:2",
+      "accountId": "gate15-player-1",
+      "characterId": "gate15-player-1:2",
+      "gatewayId": "player-gateway-b",
+      "zoneId": "mir2-map-0",
+      "fencingToken": 1,
+      "expiresAtMs": 1784878946910
+    }
+  },
+  "reverseReplicatorLogTail": [
+    "gate15-zone-replicator-b-to-a  | zone-replicator installed checkpoint ae63c85a836849f589d9931263015f9d14b268b937668aa2cc95d49a239e2d68 (entries=698, sessions=2)"
+  ]
+}

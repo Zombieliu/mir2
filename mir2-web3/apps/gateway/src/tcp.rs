@@ -72,6 +72,7 @@ async fn handle_client(
         ),
         None => GatewaySession::new_with_zone_registry((*config).clone(), &zone_registry),
     };
+    session.configure_zone_owner_heartbeat(tcp_zone_owner_heartbeat_interval_ms(), 0);
     let result = handle_client_inner(&mut stream, &mut session, peer, &chat_hub).await;
     let _ = catch_gateway_panic("tcp save_active_character", || {
         session.save_active_character()
@@ -97,6 +98,7 @@ async fn handle_client_inner(
     let mut active_zone_outbound_registration_id = 0;
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
+    let mut authenticated_account_id: Option<String> = None;
 
     loop {
         let frame = {
@@ -146,16 +148,90 @@ async fn handle_client_inner(
 
         match decode_client_packet(&frame) {
             Ok(packet) => {
+                if let Err(error) = session.renew_zone_owner_lease_if_due() {
+                    if crate::gate15::health().is_some() {
+                        eprintln!(
+                            "Gate 15 Crystal owner-lease refresh is waiting for finalized placement: {error}"
+                        );
+                        continue;
+                    }
+                    return Err(session_panic_io_error(error));
+                }
+                let login_account_id = match &packet {
+                    mir2_protocol::ClientPacket::Login { account_id, .. } => {
+                        Some(account_id.clone())
+                    }
+                    _ => None,
+                };
+                let start_game_character_index = match &packet {
+                    mir2_protocol::ClientPacket::StartGame { character_index } => {
+                        Some(*character_index)
+                    }
+                    _ => None,
+                };
                 let starts_game = matches!(&packet, mir2_protocol::ClientPacket::StartGame { .. });
                 let leaves_world = matches!(
                     &packet,
                     mir2_protocol::ClientPacket::Disconnect | mir2_protocol::ClientPacket::LogOut
                 );
-                let responses =
-                    catch_gateway_panic("tcp handle_packet", || session.handle_packet(packet))
-                        .map_err(session_panic_io_error)?;
+                if let Some(character_index) = start_game_character_index {
+                    let account_id = authenticated_account_id.as_deref().ok_or_else(|| {
+                        io::Error::new(
+                            io::ErrorKind::PermissionDenied,
+                            "authenticated account is required before StartGame",
+                        )
+                    })?;
+                    let zone_id = session.zone_id().clone();
+                    if let Some(grant) =
+                        crate::gate15::acquire_player_session(account_id, character_index, &zone_id)
+                            .await
+                            .map_err(|error| {
+                                io::Error::new(
+                                    io::ErrorKind::PermissionDenied,
+                                    format!("Commonware session lease unavailable: {error}"),
+                                )
+                            })?
+                    {
+                        eprintln!(
+                            "Gate 15 Crystal StartGame finalized {account_id}/{character_index} on {} generation {} at height {}",
+                            grant.lease.zone_id,
+                            grant.placement.generation,
+                            grant.finalized_height
+                        );
+                    }
+                }
+                let responses = match catch_gateway_panic("tcp handle_packet", || {
+                    session.handle_packet(packet)
+                }) {
+                    Ok(responses) => responses,
+                    Err(error) if crate::gate15::health().is_some() => {
+                        eprintln!(
+                                "Gate 15 transient Crystal Zone command failure; keeping socket for placement recovery: {error}"
+                            );
+                        continue;
+                    }
+                    Err(error) => return Err(session_panic_io_error(error)),
+                };
+                if responses
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. }))
+                {
+                    authenticated_account_id = login_account_id;
+                } else if responses.iter().any(|packet| {
+                    matches!(
+                        packet,
+                        ServerPacket::Login { .. }
+                            | ServerPacket::LoginBanned { .. }
+                            | ServerPacket::ReturnToLogin
+                    )
+                }) {
+                    authenticated_account_id = None;
+                }
                 if leaves_world || session.active_identity().is_none() {
                     chat_presence = None;
+                }
+                if leaves_world {
+                    authenticated_account_id = None;
                 }
                 let next_registration = session
                     .register_zone_live_outbound(zone_outbound_tx.clone())
@@ -193,6 +269,14 @@ async fn handle_client_inner(
 
 fn session_panic_io_error(error: String) -> io::Error {
     io::Error::new(io::ErrorKind::Other, error)
+}
+
+fn tcp_zone_owner_heartbeat_interval_ms() -> u64 {
+    std::env::var("MIR2_GATEWAY_ZONE_OWNER_HEARTBEAT_MS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(10_000)
+        .clamp(100, 300_000)
 }
 
 /// Maximum time allowed to receive the remainder of a frame once its header has
@@ -272,6 +356,26 @@ mod tests {
         packets
     }
 
+    async fn read_server_packets_until(
+        stream: &mut TcpStream,
+        expected: impl Fn(&ServerPacket) -> bool,
+    ) -> Vec<ServerPacket> {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+        let mut packets = Vec::new();
+        loop {
+            let frame = tokio::time::timeout_at(deadline, read_frame(stream))
+                .await
+                .expect("expected TCP response should arrive before timeout")
+                .expect("TCP frame should remain readable");
+            let packet = decode_server_packet(&frame).expect("server packet should decode");
+            let done = expected(&packet);
+            packets.push(packet);
+            if done {
+                return packets;
+            }
+        }
+    }
+
     #[tokio::test]
     async fn delayed_zone_movement_reaches_idle_tcp_client() {
         let listener = TcpListener::bind("127.0.0.1:0")
@@ -293,10 +397,6 @@ mod tests {
         let server_chat_hub = chat_hub.clone();
         let mut session =
             GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
-        session.handle_packet(ClientPacket::Login {
-            account_id: "demo".to_string(),
-            password: "demo".to_string(),
-        });
         let server_task = tokio::spawn(async move {
             handle_client_inner(&mut server, &mut session, Some(peer), &server_chat_hub).await
         });
@@ -304,16 +404,41 @@ mod tests {
         let _ = drain_server_packets(&mut client).await;
         send_client_packets(
             &mut client,
+            &[ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }],
+        )
+        .await;
+        let login_packets = read_server_packets_until(&mut client, |packet| {
+            matches!(packet, ServerPacket::LoginSuccess { .. })
+        })
+        .await;
+        assert!(
+            login_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })),
+            "LoginSuccess response should arrive: {login_packets:?}"
+        );
+        send_client_packets(
+            &mut client,
             &[ClientPacket::StartGame { character_index: 0 }],
         )
         .await;
-        let start_packets = drain_server_packets(&mut client).await;
+        let start_packets = read_server_packets_until(&mut client, |packet| {
+            matches!(packet, ServerPacket::StartGame { .. })
+        })
+        .await;
         assert!(
             start_packets
                 .iter()
                 .any(|packet| matches!(packet, ServerPacket::StartGame { .. })),
             "StartGame response should arrive: {start_packets:?}"
         );
+        let chat_deadline = tokio::time::Instant::now() + Duration::from_secs(1);
+        while chat_hub.online_count() != 1 && tokio::time::Instant::now() < chat_deadline {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
         assert_eq!(chat_hub.online_count(), 1);
 
         // The walk completes immediately; the following run is cadence-delayed.

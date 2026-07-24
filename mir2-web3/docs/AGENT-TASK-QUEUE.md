@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> Latest Gate 15 real-player continuity closure: 2026-07-24. Real WebSocket and
+> Crystal TCP `StartGame` now acquire Commonware-finalized account/character
+> session leases, both player Gateways observe quorum placement and dynamically
+> refresh the Zone fencing generation, and repeated multi-session Zone
+> checkpoints replay from an isolated account baseline. The Docker acceptance
+> runs two players through separate Gateways, stops Dubhe A, finalizes Dubhe B
+> at generation 2, proves both sockets remain connected and execute 113/52
+> post-failover `UserLocation` responses, then recovers A with reverse
+> replication. All validators and projectors finish at height 16 and one state
+> root. Evidence and runbook:
+> `docs/GATE15-REAL-PLAYER-FAILOVER.md` and
+> `docs/generated/gate15/gate15-acceptance.json`. Production follow-up is
+> continuous long-session lease renewal/revocation, a dynamic-fence movement
+> fast path, multi-host soak, and production network/security packaging.
+
 > Latest Gate 14 distributed-control closure: 2026-07-24. A real four-validator
 > Commonware `v2026.2.0` Simplex network now finalizes event-driven control
 > commands with 3-of-4 quorum and persistent certificates. Dual Gateways derive

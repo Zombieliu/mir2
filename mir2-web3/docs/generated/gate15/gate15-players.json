@@ -1,0 +1,56 @@
+{
+  "ok": true,
+  "startedAt": "2026-07-24T07:41:25.653Z",
+  "finishedAt": "2026-07-24T07:42:00.837Z",
+  "durationMs": 35184,
+  "assertions": {
+    "bothReachedGame": true,
+    "bothObservedFailover": true,
+    "bothStayedConnected": true,
+    "bothExecutedZoneCommandsAfterFailover": true
+  },
+  "players": [
+    {
+      "index": 0,
+      "url": "ws://127.0.0.1:19710/ws",
+      "accountId": "gate15-player-0",
+      "characterIndex": 1,
+      "inGame": true,
+      "markerSeen": true,
+      "closedUnexpectedly": false,
+      "messages": 851,
+      "zoneResponses": 118,
+      "zoneResponsesAfterFailover": 113,
+      "errors": [
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+      ],
+      "bytesSent": 7024,
+      "bytesReceived": 780149
+    },
+    {
+      "index": 1,
+      "url": "ws://127.0.0.1:19711/ws",
+      "accountId": "gate15-player-1",
+      "characterIndex": 2,
+      "inGame": true,
+      "markerSeen": true,
+      "closedUnexpectedly": false,
+      "messages": 856,
+      "zoneResponses": 56,
+      "zoneResponsesAfterFailover": 52,
+      "errors": [
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+      ],
+      "bytesSent": 6727,
+      "bytesReceived": 782259
+    }
+  ]
+}
