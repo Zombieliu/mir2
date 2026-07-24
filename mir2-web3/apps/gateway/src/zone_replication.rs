@@ -27,7 +27,18 @@ struct ZoneMutationWalRecord {
     version: u32,
     zone_id: String,
     build_id: String,
-    batch: ZoneMutationBatch,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    batch: Option<ZoneMutationBatch>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    anchor: Option<ZoneMutationWalAnchor>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ZoneMutationWalAnchor {
+    snapshot_id: String,
+    next_sequence: u64,
+    latest_digest: String,
 }
 
 pub struct ZoneMutationWal {
@@ -329,7 +340,8 @@ impl ZoneMutationWal {
             version: ZONE_MUTATION_WAL_VERSION,
             zone_id: self.zone_id.clone(),
             build_id: self.build_id.clone(),
-            batch: batch.clone(),
+            batch: Some(batch.clone()),
+            anchor: None,
         };
         let encoded = serde_json::to_vec(&record)
             .map_err(|error| format!("failed to encode Zone mutation WAL record: {error}"))?;
@@ -361,6 +373,55 @@ impl ZoneMutationWal {
         self.latest_digest = batch.latest_digest.clone();
         Ok(self.ack())
     }
+
+    pub fn compact_to_base(
+        &mut self,
+        snapshot: &ZoneBaseSnapshot,
+    ) -> Result<ZoneMutationWalAck, String> {
+        snapshot.verify()?;
+        if snapshot.zone_id != self.zone_id || snapshot.build_id != self.build_id {
+            return Err(format!(
+                "Zone mutation WAL identity mismatch: expected {}/{}, got {}/{}",
+                self.zone_id, self.build_id, snapshot.zone_id, snapshot.build_id
+            ));
+        }
+        if !snapshot.apply_ready {
+            return Err("cannot compact WAL to an incomplete base snapshot".to_string());
+        }
+        if snapshot.base_sequence < self.next_sequence {
+            return Err(format!(
+                "base snapshot cursor {} is behind durable WAL cursor {}",
+                snapshot.base_sequence, self.next_sequence
+            ));
+        }
+        if snapshot.base_sequence == self.next_sequence
+            && snapshot.latest_digest != self.latest_digest
+        {
+            return Err(format!(
+                "base snapshot digest {} conflicts with durable WAL digest {} at cursor {}",
+                snapshot.latest_digest, self.latest_digest, self.next_sequence
+            ));
+        }
+        let record = ZoneMutationWalRecord {
+            version: ZONE_MUTATION_WAL_VERSION,
+            zone_id: self.zone_id.clone(),
+            build_id: self.build_id.clone(),
+            batch: None,
+            anchor: Some(ZoneMutationWalAnchor {
+                snapshot_id: snapshot.snapshot_id.clone(),
+                next_sequence: snapshot.base_sequence,
+                latest_digest: snapshot.latest_digest.clone(),
+            }),
+        };
+        let mut encoded = serde_json::to_vec(&record)
+            .map_err(|error| format!("failed to encode Zone mutation WAL base anchor: {error}"))?;
+        encoded.push(b'\n');
+        replace_wal_atomically(&self.path, &encoded)?;
+        self.file = open_wal_file(&self.path)?;
+        self.next_sequence = snapshot.base_sequence;
+        self.latest_digest = snapshot.latest_digest.clone();
+        Ok(self.ack())
+    }
 }
 
 fn replay_wal(
@@ -379,6 +440,7 @@ fn replay_wal(
     let mut next_sequence = 0u64;
     let mut latest_digest = ZERO_DIGEST.to_string();
     let mut valid_length = 0u64;
+    let mut saw_record = false;
     loop {
         let mut line = Vec::new();
         let bytes_read = reader.read_until(b'\n', &mut line).map_err(|error| {
@@ -416,18 +478,137 @@ fn replay_wal(
                 record.build_id
             ));
         }
-        validate_batch_continuity(
-            &record.batch,
-            expected_zone_id,
-            expected_build_id,
-            next_sequence,
-            &latest_digest,
-        )?;
-        next_sequence = record.batch.next_sequence;
-        latest_digest = record.batch.latest_digest;
+        match (record.batch, record.anchor) {
+            (Some(batch), None) => {
+                validate_batch_continuity(
+                    &batch,
+                    expected_zone_id,
+                    expected_build_id,
+                    next_sequence,
+                    &latest_digest,
+                )?;
+                next_sequence = batch.next_sequence;
+                latest_digest = batch.latest_digest;
+            }
+            (None, Some(anchor)) if !saw_record => {
+                validate_wal_identifier("base snapshot id", &anchor.snapshot_id)?;
+                validate_wal_digest(&anchor.latest_digest)?;
+                next_sequence = anchor.next_sequence;
+                latest_digest = anchor.latest_digest;
+            }
+            (None, Some(_)) => {
+                return Err(format!(
+                    "Zone mutation WAL {} contains a non-leading base anchor",
+                    path.display()
+                ));
+            }
+            _ => {
+                return Err(format!(
+                    "Zone mutation WAL {} record must contain exactly one batch or base anchor",
+                    path.display()
+                ));
+            }
+        }
+        saw_record = true;
         valid_length = valid_length.saturating_add(bytes_read as u64);
     }
     Ok((next_sequence, latest_digest, valid_length))
+}
+
+fn open_wal_file(path: &Path) -> Result<File, String> {
+    let mut options = OpenOptions::new();
+    options.create(true).read(true).write(true).append(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    options.open(path).map_err(|error| {
+        format!(
+            "failed to reopen Zone mutation WAL {}: {error}",
+            path.display()
+        )
+    })
+}
+
+fn replace_wal_atomically(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    let parent = path.parent().ok_or_else(|| {
+        format!(
+            "Zone mutation WAL path {} has no parent directory",
+            path.display()
+        )
+    })?;
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos();
+    let temp_path = parent.join(format!(
+        ".mutation-wal-v5-{}-{nonce}.tmp",
+        std::process::id()
+    ));
+    let mut options = OpenOptions::new();
+    options.create_new(true).write(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let write_result = (|| -> Result<(), String> {
+        let mut temp = options.open(&temp_path).map_err(|error| {
+            format!(
+                "failed to create compacted Zone mutation WAL {}: {error}",
+                temp_path.display()
+            )
+        })?;
+        temp.write_all(bytes).map_err(|error| {
+            format!(
+                "failed to write compacted Zone mutation WAL {}: {error}",
+                temp_path.display()
+            )
+        })?;
+        temp.flush().map_err(|error| {
+            format!(
+                "failed to flush compacted Zone mutation WAL {}: {error}",
+                temp_path.display()
+            )
+        })?;
+        temp.sync_all().map_err(|error| {
+            format!(
+                "failed to fsync compacted Zone mutation WAL {}: {error}",
+                temp_path.display()
+            )
+        })?;
+        drop(temp);
+        fs::rename(&temp_path, path).map_err(|error| {
+            format!(
+                "failed to atomically replace Zone mutation WAL {}: {error}",
+                path.display()
+            )
+        })?;
+        File::open(parent)
+            .and_then(|directory| directory.sync_all())
+            .map_err(|error| {
+                format!(
+                    "failed to fsync Zone mutation WAL directory {}: {error}",
+                    parent.display()
+                )
+            })
+    })();
+    if write_result.is_err() {
+        let _ = fs::remove_file(&temp_path);
+    }
+    write_result
+}
+
+fn validate_wal_digest(value: &str) -> Result<(), String> {
+    if value.len() != 64
+        || value
+            .bytes()
+            .any(|byte| !byte.is_ascii_digit() && !(b'a'..=b'f').contains(&byte))
+    {
+        return Err("Zone mutation WAL digest must be 64 lowercase hexadecimal bytes".to_string());
+    }
+    Ok(())
 }
 
 fn validate_batch_continuity(

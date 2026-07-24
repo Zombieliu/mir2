@@ -205,25 +205,25 @@ zoneId、buildId 和 mutationCoverage 必须与接收端一致
 恢复 cursor；最后一条未写完的 record 会被截断并同步，已经完整写入但内容
 损坏、乱序、跨 Zone 或 build 不一致则直接拒绝启动。
 
-Gate 15 双向 replicator 已接入各自独立的命名卷：
+Gate 16.3 当时的 Gate 15 双向 replicator 已接入各自独立的命名卷：
 
 ```text
 A → B：gate16-wal-a-to-b
 B → A：gate16-wal-b-to-a
 ```
 
-每个复制周期的顺序是：
+该阶段每个复制周期的顺序是：
 
 1. 读取 active 的 v5 Head；
 2. 从本地 durable cursor 拉取并 `fsync` 所有缺失 batch；
 3. 验证本地 WAL 是 active Head 的合法前缀；
 4. 继续使用 v4 全量 checkpoint 安装 standby。
 
-第 4 步是当前故意保留的安全双写。v5 WAL 已经证明“新增玩家命令可以有界
+第 4 步是该阶段故意保留的安全双写。v5 WAL 当时只证明“新增玩家命令可以有界
 传输并跨进程保存确认位置”，但它尚未独立重建 standby 运行时；因此 v4 仍是
-灾备正确性的来源，`promotionReady` 仍然为 `false`。
+当时灾备正确性的来源。
 
-最新完整 Gate 15 故障演练中：
+Gate 16.3 当时的完整 Gate 15 历史演练中：
 
 | 方向 | durable cursor | WAL 文件 |
 | --- | ---: | ---: |
@@ -232,8 +232,7 @@ B → A：gate16-wal-b-to-a
 
 同一次演练里，A 故障后两个真实玩家仍分别完成 `99` 和 `51` 次
 failover 后 Zone 响应；恢复后的 A 安装了包含 699 条历史和两个会话的 v4
-checkpoint。机器证据见
-[`docs/generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json)。
+checkpoint。当前 canonical evidence 已由 Gate 16.4b2 的 v5 完整复测覆盖。
 
 运行环境可通过以下变量选择接收 WAL 目录：
 
@@ -277,21 +276,21 @@ checksum、Zone/build identity、Session 去重和内部 payload 校验，再通
 Head 的合法前缀；snapshot 比 active 超前、摘要冲突、完整文件损坏或身份不一致
 都会拒绝启动。
 
-默认每新增 512 条 command-journal mutation 生成新 base；首次出现非零
-cursor 时立即生成。可通过以下变量调整：
+默认首次启动即生成 cursor `0` 的可安装 base，之后每新增 512 条
+command-journal mutation 生成新 base。可通过以下变量调整：
 
 ```text
 MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES=512
 ```
 
-最新完整 Gate 15 故障演练的真实结果：
+Gate 16.4a 当时的完整 Gate 15 历史验收结果：
 
 | 方向 | base cursor | gzip payload | JSON 文件 | 未压缩状态 |
 | --- | ---: | ---: | ---: | ---: |
 | A → B | 11 | 19,064 bytes | 25,827 bytes | 248,139 bytes |
 | B → A | 712 | 21,968 bytes | 29,700 bytes | 313,092 bytes |
 
-同一次演练里四个 Commonware validator 最终一致，两个真实玩家在切换后分别
+该次历史演练里四个 Commonware validator 最终一致，两个真实玩家在切换后分别
 继续完成 `80` 和 `49` 次 Zone 响应，双向 WAL、双向 base snapshot、反向
 v4 checkpoint 和两个 Projector 均通过自动断言。
 
@@ -311,9 +310,40 @@ v4 checkpoint 和两个 Projector 均通过自动断言。
 `replication_cursor_compacted`。由于 v4 格式无法表达已截断前缀，base 安装后
 会拒绝继续导出 v4 host checkpoint，避免生成不完整恢复点。
 
-这一步已证明恢复成本不再与旧 command journal 长度成正比，但 replicator
-尚未切换到该安装 RPC。自主 tick/AI mutation、post-base batch apply 和 WAL
-截断仍未完成，因此 `promotionReady=false`。
+这一步已证明恢复成本不再与旧 command journal 长度成正比。
+
+## Gate 16.4b2 已落地：增量 apply、自主 tick 与 WAL 截断
+
+共享 Zone owner cadence 现在与 RPC 命令共用同一个 mutation gate。每次
+cadence 以原始 `nowMs` 写入 journal，怪物 AI、掉落过期和 Zone 计时器因此
+不会与玩家命令重排。standby 安装 base 后关闭本地自主 cadence，只应用摘要
+验证通过的 tick mutation，避免两个时钟同时推进同一地图。
+
+`applyMutationBatch` 在执行前校验 Zone、build、cursor、previous digest 和
+逐 entry 摘要；每条成功后再次比对产生的 Head。Session 基线恢复同时把共享
+Zone checkpoint 中的 `lastSeenMoveSeq` 回灌到 movement ingress，保证第一条
+post-base Walk/Run 不会被去重。
+
+WAL 新增 restart-safe base anchor。新 snapshot 原子落盘后，旧 batch 文件以：
+
+```text
+0600 temp → write → flush → fsync(file) → rename → fsync(directory)
+```
+
+替换为单个 anchor，随后只追加 base 之后的 batch。进程重启会验证 anchor 的
+Zone/build/cursor/digest。WAL-enabled replicator 现在安装 v5 base 并增量追赶；
+只有未配置 `MIR2_ZONE_REPLICA_WAL_DIR` 时才使用 v4 fallback。standby runtime
+使用隔离且禁用外部持久化的 account store，影子 apply 不会重复写 active 的
+文件或 PostgreSQL。
+
+以上完成 v5 恢复与追赶闭环，但 `promotionReady` 仍保持 `false`，直到
+Gate 16.5 把 lag、完整性、容量和 fencing 条件合并为可审计 readiness。
+
+2026-07-24 的完整 Gate 15 Docker 复测从 cursor `0` 即安装 v5 base，随后
+增量恢复两个真实 Session；反向恢复在 cursor `708` 安装 v5 base。四个
+validator 最终一致，两名玩家换主后继续完成 `68 / 47` 次 Zone 响应，两个
+Projector 健康。最终机器证据见
+[`generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json)。
 
 ## Gate 16 后续实施顺序
 
@@ -324,7 +354,7 @@ v4 checkpoint 和两个 Projector 均通过自动断言。
 | 16.3 | 有界 mutation batch、durable ACK 和接收 WAL | 已完成安全桥接；重启恢复确认位置，v4 仍负责 standby 正确性 |
 | 16.4a | 按 Zone 压缩 base snapshot 与原子持久化 | 已完成；snapshot/cursor/digest 绑定 |
 | 16.4b1 | 完整 Session image 与 base 安装 | 已完成；无需旧 journal 重放，逐 Session commitment 一致 |
-| 16.4b2 | authoritative mutation capture、增量应用和 WAL 截断 | tick/AI 完整覆盖；100k 历史不会导致无限内存/网络增长 |
+| 16.4b2 | authoritative Zone mutation capture、增量应用和 WAL 截断 | 已完成；命令与 tick/AI 同序，WAL 收敛到 base anchor |
 | 16.5 | standby readiness 与安全 promotion | 缺口、校验失败或 build 不一致时禁止晋升 |
 | 16.6 | 50/125 玩家、700/10k/100k 历史验收 | v5 CPU 和网络相对 v4 至少下降 80% |
 
@@ -338,15 +368,15 @@ v4 checkpoint 和两个 Projector 均通过自动断言。
 
 ## 当前边界
 
-- Gate 16.1～16.4b1 已完成基线、Head、可验证 batch、持久接收 WAL、压缩
-  base snapshot 和完整 Session 基线安装；尚未完成仅依靠 v5 增量追赶并晋升
-  的闭环。
+- Gate 16.1～16.4b2 已完成基线、Head、可验证 batch、持久接收 WAL、压缩
+  base snapshot、完整 Session 基线安装、自主 tick 捕获和 v5 增量追赶；
+  尚未完成安全晋升闭环。
 - 当前基准使用一个顺序 `KeepAlive` 命令流来隔离历史长度成本，不包含完整
   战斗、怪物 AI、数据库和公网抖动。
-- 当前 WAL 只覆盖 Host command journal，不覆盖自主 tick、怪物 AI 和计时器；
-  接收端也尚未把 batch 增量应用为可晋升的 standby 状态。
-- base snapshot 已可安装，但 replicator 尚未调用安装 RPC，WAL 也尚未截断或
-  设置磁盘配额，不能无限期运行。
+- 当前 journal 覆盖 RPC 命令和共享 Zone cadence 驱动的 tick/AI/计时器；
+  非 Zone 的外部经济副作用仍由 Gate 17 transactional outbox/inbox 处理。
+- WAL 已在新 base 后原子截断，但生产仍需配置磁盘配额、告警和 object-store
+  远端备份。
 - 默认 `buildId` 是编译信息或包版本；生产镜像必须显式注入不可变的 commit
   或 image digest，不能仅靠同版本号判定二进制兼容。
 - 700 条容器证据是快速可复现基线；10k/100k 是完整认证矩阵，会消耗明显更长

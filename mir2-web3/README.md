@@ -68,7 +68,8 @@ Bevy runtimes.
   [`docs/GATE14-NO-SINGLE-POINT-POC.md`](docs/GATE14-NO-SINGLE-POINT-POC.md).
 - Gate 15 connects real WebSocket and Crystal TCP player admission to that
   finalized control state. Two players on separate Gateways survive active Zone
-  Host loss and continue on the promoted checkpoint replica without reconnecting.
+  Host loss and continue on the v5 base-plus-incremental replica without
+  reconnecting.
   See [`docs/GATE15-REAL-PLAYER-FAILOVER.md`](docs/GATE15-REAL-PLAYER-FAILOVER.md).
 - Gate 16.1 adds the reproducible v4 full-checkpoint performance ruler,
   low-cardinality checkpoint/replay telemetry, and a constrained Docker
@@ -90,6 +91,11 @@ Bevy runtimes.
   Zones, reports the compacted base cursor in v5 Head, and keeps
   `promotionReady=false` until autonomous tick/AI capture and incremental apply
   are complete.
+- Gate 16.4b2 orders autonomous Zone cadence/AI ticks with player commands,
+  incrementally applies verified post-base batches on a tick-disabled replica,
+  atomically compacts the durable WAL to a restart-safe base anchor, and moves
+  the WAL-enabled replicator off v4 full-checkpoint installs. Replica account
+  writes are isolated from the active file/PostgreSQL repository.
 
 ## Crystal Reference
 

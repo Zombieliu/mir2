@@ -103,7 +103,7 @@ fn run() -> Result<(), String> {
     let mut was_idle = None::<bool>;
 
     loop {
-        if let Some(replication) = mutation_replication.as_mut() {
+        let incremental_session_count = if let Some(replication) = mutation_replication.as_mut() {
             let before = replication.wal.ack();
             let after = sync_mutation_wal(&active, &mut replication.wal)?;
             if after.next_sequence != before.next_sequence {
@@ -113,17 +113,25 @@ fn run() -> Result<(), String> {
                 );
             }
             maybe_persist_base_snapshot(&active, replication)?;
-        }
-        let checkpoint = active.export_host_checkpoint()?;
-        let session_count = checkpoint.session_count;
-        if installed_checksum.as_deref() != Some(checkpoint.checksum.as_str()) {
-            standby.install_host_checkpoint(&checkpoint)?;
-            eprintln!(
-                "zone-replicator installed checkpoint {} (entries={}, sessions={})",
-                checkpoint.checksum, checkpoint.entry_count, session_count
-            );
-            installed_checksum = Some(checkpoint.checksum);
-        }
+            sync_incremental_standby(&active, &standby, replication)?
+        } else {
+            None
+        };
+        let session_count = if let Some(session_count) = incremental_session_count {
+            session_count
+        } else {
+            let checkpoint = active.export_host_checkpoint()?;
+            let session_count = checkpoint.session_count;
+            if installed_checksum.as_deref() != Some(checkpoint.checksum.as_str()) {
+                standby.install_host_checkpoint(&checkpoint)?;
+                eprintln!(
+                    "zone-replicator installed checkpoint {} (entries={}, sessions={})",
+                    checkpoint.checksum, checkpoint.entry_count, session_count
+                );
+                installed_checksum = Some(checkpoint.checksum);
+            }
+            session_count
+        };
         if once {
             return Ok(());
         }
@@ -153,30 +161,53 @@ fn mutation_replication_from_env(
     };
     let head = active.replication_head()?;
     let directory = PathBuf::from(directory);
-    let wal = ZoneMutationWal::open(
+    let mut wal = ZoneMutationWal::open(
         directory.join("mutation-batches-v5.jsonl"),
         &head.zone_id,
         &head.build_id,
     )?;
-    validate_wal_prefix(active, &wal.ack(), head.next_sequence, &head.latest_digest)?;
     let snapshot_store = ZoneBaseSnapshotStore::new(
         directory.join("base-snapshot-v5.json"),
         &head.zone_id,
         &head.build_id,
     )?;
-    let last_snapshot_sequence = snapshot_store
-        .load()?
-        .map(|snapshot| {
-            validate_snapshot_prefix(
-                active,
-                snapshot.base_sequence,
-                &snapshot.latest_digest,
-                head.next_sequence,
-                &head.latest_digest,
-            )?;
-            Ok::<u64, String>(snapshot.base_sequence)
-        })
-        .transpose()?;
+    let stored_snapshot = snapshot_store.load()?;
+    let needs_current_base = wal.ack().next_sequence < head.oldest_available_sequence
+        || stored_snapshot
+            .as_ref()
+            .is_some_and(|snapshot| snapshot.base_sequence < head.oldest_available_sequence);
+    let last_snapshot_sequence = if needs_current_base {
+        let snapshot = active.export_base_snapshot()?;
+        snapshot_store.persist(&snapshot)?;
+        wal.compact_to_base(&snapshot)?;
+        eprintln!(
+            "zone-replicator persisted base snapshot {} at cursor {} (compressed={} bytes, raw={} bytes, applyReady={})",
+            snapshot.snapshot_id,
+            snapshot.base_sequence,
+            snapshot.payload.len(),
+            snapshot.uncompressed_bytes,
+            snapshot.apply_ready
+        );
+        eprintln!(
+            "zone-replicator bootstrapped compacted active history from v5 base {} at cursor {}",
+            snapshot.snapshot_id, snapshot.base_sequence
+        );
+        Some(snapshot.base_sequence)
+    } else {
+        validate_wal_prefix(active, &wal.ack(), head.next_sequence, &head.latest_digest)?;
+        stored_snapshot
+            .map(|snapshot| {
+                validate_snapshot_prefix(
+                    active,
+                    snapshot.base_sequence,
+                    &snapshot.latest_digest,
+                    head.next_sequence,
+                    &head.latest_digest,
+                )?;
+                Ok::<u64, String>(snapshot.base_sequence)
+            })
+            .transpose()?
+    };
     eprintln!(
         "zone-replicator mutation WAL ready at {} (cursor={}, base={})",
         wal.path().display(),
@@ -206,9 +237,13 @@ fn sync_mutation_wal(
     let mut ack = wal.ack();
     validate_wal_prefix(active, &ack, head.next_sequence, &head.latest_digest)?;
     while ack.next_sequence < head.next_sequence {
+        let remaining = head.next_sequence.saturating_sub(ack.next_sequence);
+        let max_entries = usize::try_from(remaining)
+            .unwrap_or(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES)
+            .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES);
         let batch = active.export_mutation_batch(
             ack.next_sequence,
-            DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
+            max_entries,
             DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
         )?;
         if batch.entries.is_empty() {
@@ -233,19 +268,16 @@ fn maybe_persist_base_snapshot(
     replication: &mut MutationReplicationState,
 ) -> Result<(), String> {
     let durable_sequence = replication.wal.ack().next_sequence;
-    if durable_sequence == 0 {
-        return Ok(());
-    }
     if replication.last_snapshot_sequence.is_some_and(|last| {
         durable_sequence.saturating_sub(last) < replication.snapshot_interval_entries
     }) {
         return Ok(());
     }
     let snapshot = active.export_base_snapshot()?;
-    let durable_ack = sync_mutation_wal(active, &mut replication.wal)?;
-    if snapshot.base_sequence > durable_ack.next_sequence {
+    let durable_ack = replication.wal.ack();
+    if snapshot.base_sequence < durable_ack.next_sequence {
         return Err(format!(
-            "base snapshot cursor {} is ahead of durable mutation WAL {}",
+            "base snapshot cursor {} is behind durable mutation WAL {}",
             snapshot.base_sequence, durable_ack.next_sequence
         ));
     }
@@ -258,6 +290,7 @@ fn maybe_persist_base_snapshot(
         &active_head.latest_digest,
     )?;
     replication.snapshot_store.persist(&snapshot)?;
+    replication.wal.compact_to_base(&snapshot)?;
     replication.last_snapshot_sequence = Some(snapshot.base_sequence);
     eprintln!(
         "zone-replicator persisted base snapshot {} at cursor {} (compressed={} bytes, raw={} bytes, applyReady={})",
@@ -268,6 +301,89 @@ fn maybe_persist_base_snapshot(
         snapshot.apply_ready
     );
     Ok(())
+}
+
+fn sync_incremental_standby(
+    active: &TcpZoneOwnerRpcTransport,
+    standby: &TcpZoneOwnerRpcTransport,
+    replication: &mut MutationReplicationState,
+) -> Result<Option<usize>, String> {
+    let Some(snapshot) = replication.snapshot_store.load()? else {
+        return Ok(None);
+    };
+    if !snapshot.apply_ready {
+        return Ok(None);
+    }
+    let durable = replication.wal.ack();
+    if snapshot.base_sequence > durable.next_sequence {
+        return Err(format!(
+            "persisted base cursor {} is ahead of durable WAL {}",
+            snapshot.base_sequence, durable.next_sequence
+        ));
+    }
+    let mut standby_head = standby.replication_head()?;
+    if standby_head.build_id != snapshot.build_id {
+        return Err(format!(
+            "standby build {} does not match base build {}",
+            standby_head.build_id, snapshot.build_id
+        ));
+    }
+    let must_install_base = standby_head.next_sequence < snapshot.base_sequence
+        || (standby_head.next_sequence == snapshot.base_sequence
+            && (standby_head.latest_digest != snapshot.latest_digest
+                || standby_head.base_snapshot_id.as_deref()
+                    != Some(snapshot.snapshot_id.as_str())));
+    if must_install_base {
+        standby.install_base_snapshot(&snapshot)?;
+        standby_head = standby.replication_head()?;
+        eprintln!(
+            "zone-replicator installed v5 base {} at cursor {}",
+            snapshot.snapshot_id, snapshot.base_sequence
+        );
+    }
+    let prefix = ZoneMutationWalAck {
+        zone_id: standby_head.zone_id.clone(),
+        build_id: standby_head.build_id.clone(),
+        next_sequence: standby_head.next_sequence,
+        latest_digest: standby_head.latest_digest.clone(),
+        durable: true,
+    };
+    validate_wal_prefix(
+        active,
+        &prefix,
+        durable.next_sequence,
+        &durable.latest_digest,
+    )
+    .map_err(|error| format!("standby is not a prefix of durable WAL: {error}"))?;
+
+    while standby_head.next_sequence < durable.next_sequence {
+        let remaining = durable
+            .next_sequence
+            .saturating_sub(standby_head.next_sequence);
+        let max_entries = usize::try_from(remaining)
+            .unwrap_or(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES)
+            .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES);
+        let batch = active.export_mutation_batch(
+            standby_head.next_sequence,
+            max_entries,
+            DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+        )?;
+        if batch.entries.is_empty() || batch.next_sequence > durable.next_sequence {
+            return Err(format!(
+                "active returned invalid incremental batch {}..{} for durable cursor {}",
+                batch.first_sequence, batch.next_sequence, durable.next_sequence
+            ));
+        }
+        standby.apply_mutation_batch(&batch)?;
+        standby_head = standby.replication_head()?;
+    }
+    if standby_head.latest_digest != durable.latest_digest {
+        return Err(format!(
+            "standby digest {} does not match durable WAL {} at cursor {}",
+            standby_head.latest_digest, durable.latest_digest, durable.next_sequence
+        ));
+    }
+    Ok(Some(active.health()?.session_count))
 }
 
 fn validate_snapshot_prefix(

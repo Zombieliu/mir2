@@ -225,6 +225,11 @@ impl ZoneManager {
         ))
     }
 
+    pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_last_seen_move_seq(session_id)
+    }
+
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_vitals(session_id)

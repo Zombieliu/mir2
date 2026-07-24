@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{
     mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TrySendError},
     Arc, Mutex,
@@ -526,6 +526,24 @@ impl HostedZoneOwnerCommandClient {
             .restore_active_character_checkpoint(checkpoint)
     }
 
+    pub(crate) fn refresh_replica_zone_binding(&self) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        else {
+            return Ok(());
+        };
+        runtime.refresh_replica_zone_binding()
+    }
+
     pub fn execute_request(
         &self,
         request: ZoneOwnerCommandRequest,
@@ -533,6 +551,15 @@ impl HostedZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(request.owner_lease())?;
         }
+        self.execute_replay_request(request)
+    }
+
+    /// Apply a mutation that was already authenticated, fenced, ordered, and
+    /// digest-verified by the replication stream.
+    pub(crate) fn execute_replay_request(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
         let mode = request.mode();
         let command = request.into_command();
         let mut runtime = self
@@ -3028,13 +3055,47 @@ impl SharedInProcessZoneState {
     }
 }
 
-#[derive(Debug, Clone)]
+type SharedZoneMutationObserver =
+    Arc<dyn Fn(&ZoneId, u64) -> Result<(), String> + Send + Sync + 'static>;
+
+#[derive(Clone)]
+struct SharedZoneMutationCapture {
+    gate: Arc<Mutex<()>>,
+    observer: SharedZoneMutationObserver,
+}
+
+impl fmt::Debug for SharedZoneMutationCapture {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SharedZoneMutationCapture")
+            .finish_non_exhaustive()
+    }
+}
+
+#[derive(Clone)]
 pub struct SharedInProcessZoneRuntimeFactory {
     zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
     default_tick_cadence: Duration,
     tick_cadences: Arc<BTreeMap<ZoneId, Duration>>,
+    mutation_capture: Arc<Mutex<Option<SharedZoneMutationCapture>>>,
+    autonomous_ticks_by_default: bool,
+    replica_zone_ids: Arc<Mutex<BTreeSet<ZoneId>>>,
+}
+
+impl fmt::Debug for SharedInProcessZoneRuntimeFactory {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SharedInProcessZoneRuntimeFactory")
+            .field("active_zone_count", &self.active_zone_count())
+            .field("default_tick_cadence", &self.default_tick_cadence)
+            .field(
+                "autonomous_ticks_by_default",
+                &self.autonomous_ticks_by_default,
+            )
+            .finish_non_exhaustive()
+    }
 }
 
 impl SharedInProcessZoneRuntimeFactory {
@@ -3045,6 +3106,9 @@ impl SharedInProcessZoneRuntimeFactory {
             npc_world_service: Arc::new(InProcessNpcWorldService),
             default_tick_cadence: Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
             tick_cadences: Arc::new(BTreeMap::new()),
+            mutation_capture: Arc::new(Mutex::new(None)),
+            autonomous_ticks_by_default: true,
+            replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
 
@@ -3058,6 +3122,9 @@ impl SharedInProcessZoneRuntimeFactory {
             npc_world_service: Arc::new(InProcessNpcWorldService),
             default_tick_cadence: default_tick_cadence.max(Duration::from_millis(1)),
             tick_cadences: Arc::new(tick_cadences),
+            mutation_capture: Arc::new(Mutex::new(None)),
+            autonomous_ticks_by_default: true,
+            replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
 
@@ -3068,6 +3135,56 @@ impl SharedInProcessZoneRuntimeFactory {
             npc_world_service: self.npc_world_service.clone(),
             default_tick_cadence: self.default_tick_cadence,
             tick_cadences: self.tick_cadences.clone(),
+            mutation_capture: self.mutation_capture.clone(),
+            autonomous_ticks_by_default: self.autonomous_ticks_by_default,
+            replica_zone_ids: Arc::new(Mutex::new(
+                self.replica_zone_ids
+                    .lock()
+                    .expect("shared Zone replica marker mutex should not be poisoned")
+                    .clone(),
+            )),
+        }
+    }
+
+    pub(crate) fn fresh_replica(&self) -> Self {
+        Self {
+            zones: Arc::new(Mutex::new(BTreeMap::new())),
+            account_inventory_service: self.account_inventory_service.clone(),
+            npc_world_service: self.npc_world_service.clone(),
+            default_tick_cadence: self.default_tick_cadence,
+            tick_cadences: self.tick_cadences.clone(),
+            mutation_capture: self.mutation_capture.clone(),
+            autonomous_ticks_by_default: false,
+            replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
+        }
+    }
+
+    pub(crate) fn configure_mutation_capture(
+        &self,
+        gate: Arc<Mutex<()>>,
+        observer: SharedZoneMutationObserver,
+    ) {
+        *self
+            .mutation_capture
+            .lock()
+            .expect("shared Zone mutation capture mutex should not be poisoned") =
+            Some(SharedZoneMutationCapture { gate, observer });
+    }
+
+    pub(crate) fn mark_zone_as_replica(&self, zone_id: &ZoneId) {
+        self.replica_zone_ids
+            .lock()
+            .expect("shared Zone replica marker mutex should not be poisoned")
+            .insert(zone_id.clone());
+        if let Some(resources) = self
+            .zones
+            .lock()
+            .expect("shared Zone factory mutex should not be poisoned")
+            .get(zone_id)
+        {
+            resources
+                .autonomous_ticks_enabled
+                .store(false, Ordering::Release);
         }
     }
 
@@ -3196,6 +3313,9 @@ impl SharedInProcessZoneRuntimeFactory {
             npc_world_service: Arc::new(InProcessNpcWorldService),
             default_tick_cadence: Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
             tick_cadences: Arc::new(BTreeMap::new()),
+            mutation_capture: Arc::new(Mutex::new(None)),
+            autonomous_ticks_by_default: true,
+            replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
 
@@ -3209,6 +3329,9 @@ impl SharedInProcessZoneRuntimeFactory {
             npc_world_service,
             default_tick_cadence: Duration::from_millis(SHARED_CRYSTAL_TICK_MS),
             tick_cadences: Arc::new(BTreeMap::new()),
+            mutation_capture: Arc::new(Mutex::new(None)),
+            autonomous_ticks_by_default: true,
+            replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
 
@@ -3218,11 +3341,24 @@ impl SharedInProcessZoneRuntimeFactory {
             .get(zone_id)
             .copied()
             .unwrap_or(self.default_tick_cadence);
+        let autonomous_ticks_enabled = self.autonomous_ticks_by_default
+            && !self
+                .replica_zone_ids
+                .lock()
+                .expect("shared Zone replica marker mutex should not be poisoned")
+                .contains(zone_id);
         self.zones
             .lock()
             .expect("shared zone factory mutex should not be poisoned")
             .entry(zone_id.clone())
-            .or_insert_with(|| SharedInProcessZoneResources::new(zone_id, cadence))
+            .or_insert_with(|| {
+                SharedInProcessZoneResources::new(
+                    zone_id,
+                    cadence,
+                    self.mutation_capture.clone(),
+                    autonomous_ticks_enabled,
+                )
+            })
             .clone()
     }
 
@@ -3240,6 +3376,17 @@ impl SharedInProcessZoneRuntimeFactory {
             .and_then(|zones| zones.get(zone_id).cloned())
             .map(|resources| resources.tick_count.load(Ordering::Acquire))
             .unwrap_or_default()
+    }
+
+    pub(crate) fn apply_replicated_zone_tick(
+        &self,
+        zone_id: &ZoneId,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        let resources = self.resources_for_zone(zone_id);
+        run_shared_zone_cadence_tick(&resources.zone_state, now_ms)?;
+        resources.tick_count.fetch_add(1, Ordering::Release);
+        Ok(())
     }
 }
 
@@ -4388,22 +4535,32 @@ struct SharedInProcessZoneResources {
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     movement_sender: SyncSender<SharedZoneMovementRequest>,
     tick_count: Arc<AtomicU64>,
+    autonomous_ticks_enabled: Arc<AtomicBool>,
 }
 
 impl SharedInProcessZoneResources {
-    fn new(zone_id: &ZoneId, cadence: Duration) -> Self {
+    fn new(
+        zone_id: &ZoneId,
+        cadence: Duration,
+        mutation_capture: Arc<Mutex<Option<SharedZoneMutationCapture>>>,
+        autonomous_ticks_enabled: bool,
+    ) -> Self {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let tick_count = Arc::new(AtomicU64::new(0));
+        let autonomous_ticks_enabled = Arc::new(AtomicBool::new(autonomous_ticks_enabled));
         let movement_sender = spawn_shared_zone_owner_with_cadence_and_counter(
             zone_id,
             zone_state.clone(),
             cadence,
             tick_count.clone(),
+            mutation_capture,
+            autonomous_ticks_enabled.clone(),
         );
         Self {
             zone_state,
             movement_sender,
             tick_count,
+            autonomous_ticks_enabled,
         }
     }
 }
@@ -4415,6 +4572,10 @@ impl fmt::Debug for SharedInProcessZoneResources {
             .field("zone_state", &"SharedInProcessZoneState")
             .field("movement_sender", &"SyncSender")
             .field("tick_count", &self.tick_count.load(Ordering::Relaxed))
+            .field(
+                "autonomous_ticks_enabled",
+                &self.autonomous_ticks_enabled.load(Ordering::Relaxed),
+            )
             .finish()
     }
 }
@@ -4437,6 +4598,8 @@ fn spawn_shared_zone_owner_with_cadence(
         zone_state,
         cadence,
         Arc::new(AtomicU64::new(0)),
+        Arc::new(Mutex::new(None)),
+        Arc::new(AtomicBool::new(true)),
     )
 }
 
@@ -4445,27 +4608,65 @@ fn spawn_shared_zone_owner_with_cadence_and_counter(
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     cadence: Duration,
     tick_count: Arc<AtomicU64>,
+    mutation_capture: Arc<Mutex<Option<SharedZoneMutationCapture>>>,
+    autonomous_ticks_enabled: Arc<AtomicBool>,
 ) -> SyncSender<SharedZoneMovementRequest> {
     let (movement_sender, movement_receiver) = sync_channel(SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY);
+    let zone_id = zone_id.clone();
     thread::Builder::new()
         .name(format!("mir2-zone-owner-{}", zone_id.as_str()))
-        .spawn(move || shared_zone_owner_loop(zone_state, movement_receiver, cadence, tick_count))
+        .spawn(move || {
+            shared_zone_owner_loop(
+                zone_id,
+                zone_state,
+                movement_receiver,
+                cadence,
+                tick_count,
+                mutation_capture,
+                autonomous_ticks_enabled,
+            )
+        })
         .expect("shared zone owner thread should start");
     movement_sender
 }
 
 fn shared_zone_owner_loop(
+    zone_id: ZoneId,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     movement_receiver: Receiver<SharedZoneMovementRequest>,
     cadence: Duration,
     tick_count: Arc<AtomicU64>,
+    mutation_capture: Arc<Mutex<Option<SharedZoneMutationCapture>>>,
+    autonomous_ticks_enabled: Arc<AtomicBool>,
 ) {
     let cadence = cadence.max(Duration::from_millis(1));
     let mut next_tick = Instant::now() + cadence;
     loop {
         let now = Instant::now();
         if now >= next_tick {
-            if let Err(error) = run_shared_zone_cadence_tick(&zone_state, shared_gateway_now_ms()) {
+            if !autonomous_ticks_enabled.load(Ordering::Acquire) {
+                next_tick = Instant::now() + cadence;
+                continue;
+            }
+            let now_ms = shared_gateway_now_ms();
+            let capture = mutation_capture
+                .lock()
+                .ok()
+                .and_then(|capture| capture.clone());
+            let result = if let Some(capture) = capture {
+                let _gate = match capture.gate.lock() {
+                    Ok(gate) => gate,
+                    Err(_) => {
+                        eprintln!("shared zone cadence stopped: mutation gate poisoned");
+                        return;
+                    }
+                };
+                run_shared_zone_cadence_tick(&zone_state, now_ms)
+                    .and_then(|()| (capture.observer)(&zone_id, now_ms))
+            } else {
+                run_shared_zone_cadence_tick(&zone_state, now_ms)
+            };
+            if let Err(error) = result {
                 eprintln!("shared zone cadence stopped: {error}");
                 return;
             }
@@ -4684,6 +4885,32 @@ impl SharedInProcessZoneSessionRuntime {
             .expect("shared zone movement session mutex should not be poisoned")
             .recent_zone_player_movement_until_ms
             > now_ms
+    }
+
+    fn refresh_replica_zone_binding(&mut self) -> Result<(), String> {
+        let _ = self.sync_zone_snapshot();
+        let Some(key) = self.current_presence_key() else {
+            return Ok(());
+        };
+        let last_seen_move_seq = {
+            let zone_state = self
+                .zone_state
+                .lock()
+                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+            let Some(session_id) = zone_state.zone_sessions.get(&key) else {
+                return Ok(());
+            };
+            zone_state
+                .zone_manager
+                .player_last_seen_move_seq(session_id)
+                .unwrap_or_default()
+        };
+        self.movement_ingress
+            .session_state
+            .lock()
+            .map_err(|_| "shared zone movement session mutex is poisoned".to_string())?
+            .zone_move_seq = last_seen_move_seq;
+        Ok(())
     }
 
     fn next_shared_skill_item_request_id(&mut self) -> u64 {
@@ -11708,6 +11935,7 @@ mod tests {
                     zone_state,
                     movement_sender,
                     tick_count: Arc::new(std::sync::atomic::AtomicU64::new(0)),
+                    autonomous_ticks_enabled: Arc::new(std::sync::atomic::AtomicBool::new(true)),
                 },
             );
         let resources = factory.resources_for_zone(&zone_id);

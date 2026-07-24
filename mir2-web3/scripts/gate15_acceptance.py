@@ -258,6 +258,9 @@ def main() -> int:
         forward_logs = wait_logs(
             "zone-replicator", "persisted base snapshot", timeout=30
         )
+        forward_logs = wait_logs(
+            "zone-replicator", "installed v5 base", timeout=30
+        )
 
         compose(["stop", "dubhe-a"])
         expiry = int(time.time() * 1000) + 3_600_000
@@ -298,7 +301,8 @@ def main() -> int:
         player_report = json.loads(PLAYER_REPORT.read_text())
 
         # Recover A as the new standby. Stop the old A->B direction before A
-        # starts empty, then run the B->A direction to restore the checkpoint.
+        # starts empty, then run the B->A direction to restore the v5 base and
+        # incrementally catch up through the durable receive WAL.
         compose(["stop", "zone-replicator"], check=False)
         compose(["start", "dubhe-a"])
         deadline = time.monotonic() + 60
@@ -320,7 +324,7 @@ def main() -> int:
             ]
         )
         reverse_logs = wait_logs(
-            "zone-replicator-b-to-a", "installed checkpoint", timeout=30
+            "zone-replicator-b-to-a", "installed v5 base", timeout=30
         )
         reverse_logs = wait_logs(
             "zone-replicator-b-to-a", "persisted mutation WAL", timeout=30
@@ -374,8 +378,8 @@ def main() -> int:
                 )
                 for player in player_report["players"]
             ),
-            "recoveredAReceivedReverseCheckpoint": "installed checkpoint"
-            in reverse_logs,
+            "forwardStandbyInstalledV5Base": "installed v5 base" in forward_logs,
+            "recoveredAInstalledReverseV5Base": "installed v5 base" in reverse_logs,
             "forwardMutationWalDurable": "persisted mutation WAL" in forward_logs,
             "reverseMutationWalDurable": "persisted mutation WAL" in reverse_logs,
             "forwardBaseSnapshotDurable": "persisted base snapshot" in forward_logs,
