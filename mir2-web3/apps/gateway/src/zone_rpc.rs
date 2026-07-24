@@ -26,14 +26,14 @@ use tokio::sync::mpsc;
 
 use crate::routing::{
     HostedZoneOwnerCommandClient, SharedInProcessZoneRuntimeFactory, SharedZoneLiveOutbound,
-    SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender,
+    SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender, SharedZoneMutationGate,
     SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandMode,
     ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport, ZoneRuntimeFactory,
 };
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 6;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 7;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -45,6 +45,9 @@ pub const DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES: usize = 1024 * 1024;
 pub const DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES: usize = 64 * 1024 * 1024;
 pub const ZONE_HOST_CHECKPOINT_VERSION: u32 = 4;
 pub const ZONE_REPLICATION_HEAD_VERSION: u32 = 5;
+pub const ZONE_PROMOTION_READINESS_VERSION: u32 = 1;
+pub const DEFAULT_ZONE_PROMOTION_MAX_LAG_MS: u64 = 250;
+pub const DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS: u64 = 30_000;
 const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v4\0";
 const ZONE_REPLICATION_HEAD_DOMAIN: &[u8] = b"obelisk.mir2.zone-replication-head.v5\0";
 const ZONE_BASE_SNAPSHOT_DOMAIN: &[u8] = b"obelisk.mir2.zone-base-snapshot.v5\0";
@@ -127,11 +130,23 @@ pub struct ZoneHostTelemetrySnapshot {
     pub health: ZoneHostHealth,
     pub zones: Vec<ZoneHostZoneTelemetry>,
     pub checkpoint: ZoneHostCheckpointTelemetry,
+    pub promotion: ZoneHostPromotionTelemetry,
     pub started_at_ms: u64,
     pub uptime_seconds: u64,
     pub accepted_connections_total: u64,
     pub rpc_requests_total: u64,
     pub rpc_errors_total: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneHostPromotionTelemetry {
+    pub assessments_total: u64,
+    pub ready_assessments_total: u64,
+    pub promotion_attempts_total: u64,
+    pub promotions_total: u64,
+    pub last_promoted_at_ms: u64,
+    pub ready_zone_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -167,6 +182,72 @@ pub struct ZoneReplicationHead {
     pub next_sequence: u64,
     pub last_sequence: Option<u64>,
     pub latest_digest: String,
+}
+
+/// A short-lived, standby-issued proof that it held an exact, fenced replica
+/// image at `assessed_at_ms`. It is intentionally not an ownership grant:
+/// promotion still requires a newer lease from the finalized control plane.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZonePromotionReadiness {
+    pub version: u32,
+    pub readiness_id: Option<String>,
+    pub zone_id: String,
+    pub standby_host_id: String,
+    pub active_build_id: String,
+    pub standby_build_id: String,
+    pub active_next_sequence: u64,
+    pub standby_next_sequence: u64,
+    pub active_latest_digest: String,
+    pub standby_latest_digest: String,
+    pub source_observed_at_ms: u64,
+    pub assessed_at_ms: u64,
+    pub observed_lag_ms: u64,
+    pub max_lag_ms: u64,
+    pub expires_at_ms: Option<u64>,
+    pub session_count: usize,
+    pub session_capacity: usize,
+    pub zone_count: usize,
+    pub zone_capacity: usize,
+    pub build_matches: bool,
+    pub cursor_matches: bool,
+    pub digest_matches: bool,
+    pub base_matches: bool,
+    pub replica_clock_disabled: bool,
+    pub capacity_available: bool,
+    pub ready: bool,
+    pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZonePromotionReceipt {
+    pub version: u32,
+    pub readiness_id: String,
+    pub zone_id: String,
+    pub promoted_host_id: String,
+    pub owner_id: String,
+    pub generation: u64,
+    pub promoted_at_ms: u64,
+    pub head: ZoneReplicationHead,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneQuiesceReceipt {
+    pub version: u32,
+    pub zone_id: String,
+    pub host_id: String,
+    pub owner_id: String,
+    pub generation: u64,
+    pub quiesced_at_ms: u64,
+    pub head: ZoneReplicationHead,
+}
+
+#[derive(Debug, Clone)]
+struct ZonePromotionReadinessRecord {
+    readiness: ZonePromotionReadiness,
+    head: ZoneReplicationHead,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -837,6 +918,8 @@ pub struct TcpZoneOwnerRpcTransport {
     session_id: String,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
+    reuse_connections: bool,
+    connections: Arc<Vec<Mutex<Option<TcpStream>>>>,
     outbound_acknowledged: Arc<AtomicU64>,
     outbound_generation: Arc<AtomicU64>,
     outbound_stream_id: Arc<Mutex<Option<String>>>,
@@ -854,6 +937,7 @@ impl fmt::Debug for TcpZoneOwnerRpcTransport {
             .field("zone_id", &self.zone_id)
             .field("session_id", &self.session_id)
             .field("authenticated", &self.auth_token.is_some())
+            .field("reuse_connections", &self.reuse_connections)
             .field("limits", &self.limits)
             .finish()
     }
@@ -904,6 +988,9 @@ impl TcpZoneOwnerRpcTransport {
         if addresses.is_empty() {
             return Err("at least one Zone Host endpoint is required".to_string());
         }
+        let connections = (0..addresses.len())
+            .map(|_| Mutex::new(None))
+            .collect::<Vec<_>>();
         Ok(Self {
             addresses: Arc::new(addresses),
             active_endpoint: Arc::new(AtomicUsize::new(0)),
@@ -911,10 +998,22 @@ impl TcpZoneOwnerRpcTransport {
             session_id: session_id.into(),
             auth_token,
             limits,
+            reuse_connections: false,
+            connections: Arc::new(connections),
             outbound_acknowledged: Arc::new(AtomicU64::new(0)),
             outbound_generation: Arc::new(AtomicU64::new(0)),
             outbound_stream_id: Arc::new(Mutex::new(None)),
         })
+    }
+
+    /// Reuse one framed TCP stream per configured endpoint.
+    ///
+    /// Calls on the same transport remain serialized so response ordering is
+    /// unambiguous. Distinct player/session transports still execute in
+    /// parallel over independent connections.
+    pub fn with_connection_reuse(mut self) -> Self {
+        self.reuse_connections = true;
+        self
     }
 
     pub fn with_placement(
@@ -1001,6 +1100,57 @@ impl TcpZoneOwnerRpcTransport {
         match self.call(ZoneRpcRequest::ReplicationHead)? {
             ZoneRpcPayload::ReplicationHead { head } => Ok(head),
             payload => Err(unexpected_payload("replication_head", &payload)),
+        }
+    }
+
+    pub fn assess_promotion_readiness(
+        &self,
+        active_head: ZoneReplicationHead,
+        source_observed_at_ms: u64,
+        max_lag_ms: u64,
+    ) -> Result<ZonePromotionReadiness, String> {
+        match self.call(ZoneRpcRequest::AssessPromotionReadiness {
+            active_head,
+            source_observed_at_ms,
+            max_lag_ms,
+        })? {
+            ZoneRpcPayload::PromotionReadiness { readiness } => Ok(readiness),
+            payload => Err(unexpected_payload("assess_promotion_readiness", &payload)),
+        }
+    }
+
+    pub fn promote_replica(
+        &self,
+        readiness_id: impl Into<String>,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<ZonePromotionReceipt, String> {
+        match self.call(ZoneRpcRequest::PromoteReplica {
+            readiness_id: readiness_id.into(),
+            owner_lease: WireZoneOwnerLease::from(owner_lease),
+        })? {
+            ZoneRpcPayload::PromotionReceipt { receipt } => Ok(receipt),
+            payload => Err(unexpected_payload("promote_replica", &payload)),
+        }
+    }
+
+    pub fn quiesce_for_promotion(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<ZoneQuiesceReceipt, String> {
+        match self.call(ZoneRpcRequest::QuiesceForPromotion {
+            owner_lease: WireZoneOwnerLease::from(owner_lease),
+        })? {
+            ZoneRpcPayload::QuiesceReceipt { receipt } => Ok(receipt),
+            payload => Err(unexpected_payload("quiesce_for_promotion", &payload)),
+        }
+    }
+
+    pub fn resume_after_quiesce(&self, owner_lease: &ZoneOwnerLease) -> Result<(), String> {
+        match self.call(ZoneRpcRequest::ResumeAfterQuiesce {
+            owner_lease: WireZoneOwnerLease::from(owner_lease),
+        })? {
+            ZoneRpcPayload::Unit => Ok(()),
+            payload => Err(unexpected_payload("resume_after_quiesce", &payload)),
         }
     }
 
@@ -1185,7 +1335,12 @@ impl TcpZoneOwnerRpcTransport {
         for offset in 0..endpoint_count {
             let index = (start + offset) % endpoint_count;
             let address = &self.addresses[index];
-            match call_endpoint(address, &encoded, &self.limits) {
+            let response = if self.reuse_connections {
+                call_reused_endpoint(address, &encoded, &self.limits, &self.connections[index])
+            } else {
+                call_endpoint(address, &encoded, &self.limits)
+            };
+            match response {
                 Ok(ZoneRpcResponse::Ok { payload }) => {
                     self.active_endpoint.store(index, Ordering::Release);
                     return Ok(*payload);
@@ -1567,14 +1722,18 @@ impl ZoneHostOutbox {
 
 pub struct ZoneHostServer {
     host_id: String,
+    owner_ids: BTreeSet<String>,
     config: Mutex<GatewayConfig>,
     replay_baseline_config: GatewayConfig,
     runtime_factory: Mutex<Arc<SharedInProcessZoneRuntimeFactory>>,
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
     sessions: Mutex<BTreeMap<(String, String), Arc<ZoneHostSession>>>,
     zone_map_catalog: Mutex<ZoneMapCatalog>,
-    operation_gate: Arc<Mutex<()>>,
+    operation_gate: Arc<SharedZoneMutationGate>,
     journal: Arc<Mutex<ZoneHostJournal>>,
+    promotion_readiness: Mutex<BTreeMap<String, ZonePromotionReadinessRecord>>,
+    quiesced_zones: Mutex<BTreeSet<String>>,
+    promotion_frozen_zones: Mutex<BTreeSet<String>>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
     zone_capacity: usize,
@@ -1596,6 +1755,11 @@ pub struct ZoneHostServer {
     checkpoint_install_last_duration_ns: AtomicU64,
     checkpoint_replay_entries_total: AtomicU64,
     checkpoint_replay_last_entries: AtomicU64,
+    promotion_assessments_total: AtomicU64,
+    promotion_ready_assessments_total: AtomicU64,
+    promotion_attempts_total: AtomicU64,
+    promotions_total: AtomicU64,
+    promotion_last_promoted_at_ms: AtomicU64,
 }
 
 impl fmt::Debug for ZoneHostServer {
@@ -1673,14 +1837,32 @@ impl ZoneHostServer {
         limits: ZoneRpcLimits,
         runtime_factory: Arc<SharedInProcessZoneRuntimeFactory>,
     ) -> Self {
+        let host_id = host_id.into();
+        let owner_ids = configured_zone_host_owner_ids(&host_id);
         let replay_baseline_config = config
             .fork_with_isolated_account_store()
             .expect("Zone Host replay baseline account store should be available");
-        let operation_gate = Arc::new(Mutex::new(()));
+        let operation_gate = Arc::new(SharedZoneMutationGate::default());
         let journal = Arc::new(Mutex::new(ZoneHostJournal::default()));
         let tick_journal = Arc::clone(&journal);
+        let tick_authority = Arc::clone(&owner_lease_authority);
+        let tick_host_id = host_id.clone();
+        let tick_owner_ids = owner_ids.clone();
         runtime_factory.configure_mutation_capture(
             Arc::clone(&operation_gate),
+            Arc::new(move |zone_id| {
+                let lease = tick_authority.owner_lease(zone_id);
+                let legacy_in_process_owner =
+                    lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
+                if !legacy_in_process_owner && !tick_owner_ids.contains(lease.owner_id()) {
+                    return Err(format!(
+                        "Zone {zone_id} is fenced to {}, local host {} is not active",
+                        lease.owner_id(),
+                        tick_host_id
+                    ));
+                }
+                tick_authority.validate_owner_lease(&lease)
+            }),
             Arc::new(move |zone_id, now_ms| {
                 append_host_journal(
                     tick_journal.as_ref(),
@@ -1699,7 +1881,8 @@ impl ZoneHostServer {
             }),
         );
         Self {
-            host_id: host_id.into(),
+            host_id,
+            owner_ids,
             config: Mutex::new(config),
             replay_baseline_config,
             runtime_factory: Mutex::new(runtime_factory),
@@ -1708,6 +1891,9 @@ impl ZoneHostServer {
             zone_map_catalog: Mutex::new(ZoneMapCatalog::default()),
             operation_gate,
             journal,
+            promotion_readiness: Mutex::new(BTreeMap::new()),
+            quiesced_zones: Mutex::new(BTreeSet::new()),
+            promotion_frozen_zones: Mutex::new(BTreeSet::new()),
             auth_token,
             limits,
             zone_capacity: zone_capacity.max(1),
@@ -1729,6 +1915,11 @@ impl ZoneHostServer {
             checkpoint_install_last_duration_ns: AtomicU64::new(0),
             checkpoint_replay_entries_total: AtomicU64::new(0),
             checkpoint_replay_last_entries: AtomicU64::new(0),
+            promotion_assessments_total: AtomicU64::new(0),
+            promotion_ready_assessments_total: AtomicU64::new(0),
+            promotion_attempts_total: AtomicU64::new(0),
+            promotions_total: AtomicU64::new(0),
+            promotion_last_promoted_at_ms: AtomicU64::new(0),
         }
     }
 
@@ -1749,6 +1940,26 @@ impl ZoneHostServer {
     }
 
     pub fn telemetry_snapshot(&self) -> ZoneHostTelemetrySnapshot {
+        let now_ms = unix_now_ms();
+        let ready_zone_ids = self
+            .promotion_readiness
+            .lock()
+            .map(|records| {
+                records
+                    .values()
+                    .filter(|record| {
+                        record.readiness.ready
+                            && record
+                                .readiness
+                                .expires_at_ms
+                                .is_some_and(|expires_at_ms| now_ms <= expires_at_ms)
+                    })
+                    .map(|record| record.readiness.zone_id.clone())
+                    .collect::<BTreeSet<_>>()
+                    .into_iter()
+                    .collect()
+            })
+            .unwrap_or_default();
         ZoneHostTelemetrySnapshot {
             health: self.health(),
             zones: self.active_zones(),
@@ -1779,6 +1990,16 @@ impl ZoneHostServer {
                 replay_entries_total: self.checkpoint_replay_entries_total.load(Ordering::Acquire),
                 replay_last_entries: self.checkpoint_replay_last_entries.load(Ordering::Acquire),
             },
+            promotion: ZoneHostPromotionTelemetry {
+                assessments_total: self.promotion_assessments_total.load(Ordering::Acquire),
+                ready_assessments_total: self
+                    .promotion_ready_assessments_total
+                    .load(Ordering::Acquire),
+                promotion_attempts_total: self.promotion_attempts_total.load(Ordering::Acquire),
+                promotions_total: self.promotions_total.load(Ordering::Acquire),
+                last_promoted_at_ms: self.promotion_last_promoted_at_ms.load(Ordering::Acquire),
+                ready_zone_ids,
+            },
             started_at_ms: self.started_at_ms,
             uptime_seconds: unix_now_ms().saturating_sub(self.started_at_ms) / 1_000,
             accepted_connections_total: self.accepted_connections_total.load(Ordering::Acquire),
@@ -1788,10 +2009,436 @@ impl ZoneHostServer {
     }
 
     pub fn replication_head(&self, zone_id: &ZoneId) -> Result<ZoneReplicationHead, String> {
-        self.journal
+        let mut head = self
+            .journal
             .lock()
             .map(|journal| journal.replication.head(zone_id.as_str()))
-            .map_err(|_| "zone host journal mutex poisoned".to_string())
+            .map_err(|_| "zone host journal mutex poisoned".to_string())?;
+        let now_ms = unix_now_ms();
+        let replica_clock_disabled = self
+            .runtime_factory
+            .lock()
+            .map(|factory| {
+                factory.is_zone_replica(zone_id) && !factory.autonomous_ticks_enabled(zone_id)
+            })
+            .unwrap_or(false);
+        head.promotion_ready = replica_clock_disabled
+            && self
+                .promotion_readiness
+                .lock()
+                .map(|records| {
+                    records.values().any(|record| {
+                        record.readiness.zone_id == zone_id.as_str()
+                            && record.readiness.ready
+                            && record
+                                .readiness
+                                .expires_at_ms
+                                .is_some_and(|expires_at_ms| now_ms <= expires_at_ms)
+                            && replication_heads_match(&record.head, &head)
+                    })
+                })
+                .unwrap_or(false);
+        Ok(head)
+    }
+
+    fn prune_expired_promotion_readiness(&self, now_ms: u64) -> Result<(), ZoneRpcFault> {
+        let mut records = self
+            .promotion_readiness
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?;
+        records.retain(|_, record| {
+            record
+                .readiness
+                .expires_at_ms
+                .is_some_and(|expires_at_ms| now_ms <= expires_at_ms)
+        });
+        let ready_zones = records
+            .values()
+            .filter(|record| record.readiness.ready)
+            .map(|record| record.readiness.zone_id.as_str())
+            .collect::<BTreeSet<_>>();
+        self.promotion_frozen_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
+            .retain(|zone_id| ready_zones.contains(zone_id.as_str()));
+        Ok(())
+    }
+
+    fn accepts_owner_id(&self, owner_id: &str) -> bool {
+        self.owner_ids.contains(owner_id)
+    }
+
+    fn quiesce_for_promotion_locked(
+        &self,
+        zone_id: &ZoneId,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<ZoneQuiesceReceipt, ZoneRpcFault> {
+        if owner_lease.zone_id() != zone_id {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                "quiesce lease Zone does not match requested Zone",
+            ));
+        }
+        if !self.accepts_owner_id(owner_lease.owner_id()) {
+            return Err(ZoneRpcFault::new(
+                "quiesce_owner_mismatch",
+                format!(
+                    "quiesce lease owner {} does not match active host {}",
+                    owner_lease.owner_id(),
+                    self.host_id
+                ),
+            ));
+        }
+        self.owner_lease_authority
+            .validate_owner_lease(owner_lease)
+            .map_err(|message| ZoneRpcFault::new("quiesce_fence_rejected", message))?;
+        self.runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .quiesce_active_zone(zone_id)
+            .map_err(|message| ZoneRpcFault::new("quiesce_runtime_invalid", message))?;
+        self.quiesced_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
+            .insert(zone_id.as_str().to_string());
+        let head = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .replication
+            .head(zone_id.as_str());
+        Ok(ZoneQuiesceReceipt {
+            version: ZONE_PROMOTION_READINESS_VERSION,
+            zone_id: zone_id.as_str().to_string(),
+            host_id: self.host_id.clone(),
+            owner_id: owner_lease.owner_id().to_string(),
+            generation: owner_lease.fencing_token(),
+            quiesced_at_ms: unix_now_ms(),
+            head,
+        })
+    }
+
+    fn resume_after_quiesce_locked(
+        &self,
+        zone_id: &ZoneId,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<(), ZoneRpcFault> {
+        if owner_lease.zone_id() != zone_id || !self.accepts_owner_id(owner_lease.owner_id()) {
+            return Err(ZoneRpcFault::new(
+                "resume_owner_mismatch",
+                "resume lease does not name this Zone Host",
+            ));
+        }
+        self.owner_lease_authority
+            .validate_owner_lease(owner_lease)
+            .map_err(|message| ZoneRpcFault::new("resume_fence_rejected", message))?;
+        self.runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .resume_active_zone(zone_id)
+            .map_err(|message| ZoneRpcFault::new("resume_runtime_invalid", message))?;
+        self.quiesced_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
+            .remove(zone_id.as_str());
+        Ok(())
+    }
+
+    pub fn assess_promotion_readiness(
+        &self,
+        zone_id: &ZoneId,
+        active_head: &ZoneReplicationHead,
+        source_observed_at_ms: u64,
+        max_lag_ms: u64,
+    ) -> Result<ZonePromotionReadiness, String> {
+        let _operation = self
+            .operation_gate
+            .lock()
+            .map_err(|_| "zone host operation mutex poisoned".to_string())?;
+        self.assess_promotion_readiness_locked(
+            zone_id,
+            active_head,
+            source_observed_at_ms,
+            max_lag_ms,
+        )
+        .map_err(|error| error.message)
+    }
+
+    fn assess_promotion_readiness_locked(
+        &self,
+        zone_id: &ZoneId,
+        active_head: &ZoneReplicationHead,
+        source_observed_at_ms: u64,
+        max_lag_ms: u64,
+    ) -> Result<ZonePromotionReadiness, ZoneRpcFault> {
+        if active_head.version != ZONE_REPLICATION_HEAD_VERSION {
+            return Err(ZoneRpcFault::new(
+                "promotion_head_version",
+                format!(
+                    "active replication head version {} does not match {}",
+                    active_head.version, ZONE_REPLICATION_HEAD_VERSION
+                ),
+            ));
+        }
+        if active_head.zone_id != zone_id.as_str() {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                "active replication head Zone does not match requested Zone",
+            ));
+        }
+        let assessed_at_ms = unix_now_ms();
+        if source_observed_at_ms > assessed_at_ms.saturating_add(1_000) {
+            return Err(ZoneRpcFault::new(
+                "promotion_clock_skew",
+                "active replication head observation is in the future",
+            ));
+        }
+        let max_lag_ms = max_lag_ms.max(1).min(5_000);
+        let observed_lag_ms = assessed_at_ms.saturating_sub(source_observed_at_ms);
+        let standby_head = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .replication
+            .head(zone_id.as_str());
+        let factory = self
+            .runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .clone();
+        let replica_clock_disabled =
+            factory.is_zone_replica(zone_id) && !factory.autonomous_ticks_enabled(zone_id);
+        let session_count = self
+            .sessions
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?
+            .keys()
+            .filter(|(_, session_zone_id)| session_zone_id == zone_id.as_str())
+            .count();
+        let zone_count = self.zone_count();
+        let build_matches = active_head.build_id == standby_head.build_id
+            && active_head.mutation_coverage == standby_head.mutation_coverage;
+        let cursor_matches = active_head.next_sequence == standby_head.next_sequence;
+        let digest_matches = active_head.latest_digest == standby_head.latest_digest;
+        let base_matches = standby_head.base_snapshot_id.is_some()
+            && standby_head.base_sequence <= standby_head.next_sequence;
+        let capacity_available = !self.is_draining()
+            && session_count <= self.limits.max_sessions_per_zone
+            && self.session_count() <= self.limits.max_sessions
+            && zone_count <= self.zone_capacity;
+        let lag_ready = observed_lag_ms <= max_lag_ms;
+        let ready = build_matches
+            && cursor_matches
+            && digest_matches
+            && base_matches
+            && replica_clock_disabled
+            && capacity_available
+            && lag_ready;
+        let reason = if ready {
+            None
+        } else if !build_matches {
+            Some("build_or_coverage_mismatch".to_string())
+        } else if !cursor_matches {
+            Some("replica_cursor_behind".to_string())
+        } else if !digest_matches {
+            Some("replica_digest_mismatch".to_string())
+        } else if !base_matches {
+            Some("restorable_base_missing".to_string())
+        } else if !replica_clock_disabled {
+            Some("replica_clock_not_disabled".to_string())
+        } else if !capacity_available {
+            Some("standby_capacity_unavailable".to_string())
+        } else {
+            Some("replication_observation_stale".to_string())
+        };
+        let expires_at_ms =
+            ready.then(|| assessed_at_ms.saturating_add(DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS));
+        let readiness_id = ready.then(|| {
+            zone_promotion_readiness_id(
+                zone_id,
+                &self.host_id,
+                &standby_head,
+                assessed_at_ms,
+                expires_at_ms.unwrap_or_default(),
+            )
+        });
+        let readiness = ZonePromotionReadiness {
+            version: ZONE_PROMOTION_READINESS_VERSION,
+            readiness_id: readiness_id.clone(),
+            zone_id: zone_id.as_str().to_string(),
+            standby_host_id: self.host_id.clone(),
+            active_build_id: active_head.build_id.clone(),
+            standby_build_id: standby_head.build_id.clone(),
+            active_next_sequence: active_head.next_sequence,
+            standby_next_sequence: standby_head.next_sequence,
+            active_latest_digest: active_head.latest_digest.clone(),
+            standby_latest_digest: standby_head.latest_digest.clone(),
+            source_observed_at_ms,
+            assessed_at_ms,
+            observed_lag_ms,
+            max_lag_ms,
+            expires_at_ms,
+            session_count,
+            session_capacity: self.limits.max_sessions_per_zone,
+            zone_count,
+            zone_capacity: self.zone_capacity,
+            build_matches,
+            cursor_matches,
+            digest_matches,
+            base_matches,
+            replica_clock_disabled,
+            capacity_available,
+            ready,
+            reason,
+        };
+        self.promotion_assessments_total
+            .fetch_add(1, Ordering::Relaxed);
+        if readiness.ready {
+            self.promotion_ready_assessments_total
+                .fetch_add(1, Ordering::Relaxed);
+        }
+        let mut records = self
+            .promotion_readiness
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?;
+        records.retain(|_, record| {
+            record
+                .readiness
+                .expires_at_ms
+                .is_some_and(|expires_at_ms| assessed_at_ms <= expires_at_ms)
+        });
+        if let Some(readiness_id) = readiness_id {
+            records.insert(
+                readiness_id,
+                ZonePromotionReadinessRecord {
+                    readiness: readiness.clone(),
+                    head: standby_head,
+                },
+            );
+            self.promotion_frozen_zones
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
+                .insert(zone_id.as_str().to_string());
+        } else {
+            records.retain(|_, record| record.readiness.zone_id != zone_id.as_str());
+            self.promotion_frozen_zones
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
+                .remove(zone_id.as_str());
+        }
+        Ok(readiness)
+    }
+
+    pub fn promote_replica(
+        &self,
+        zone_id: &ZoneId,
+        readiness_id: &str,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<ZonePromotionReceipt, String> {
+        let _operation = self
+            .operation_gate
+            .lock()
+            .map_err(|_| "zone host operation mutex poisoned".to_string())?;
+        self.promote_replica_locked(zone_id, readiness_id, owner_lease)
+            .map_err(|error| error.message)
+    }
+
+    fn promote_replica_locked(
+        &self,
+        zone_id: &ZoneId,
+        readiness_id: &str,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<ZonePromotionReceipt, ZoneRpcFault> {
+        self.promotion_attempts_total
+            .fetch_add(1, Ordering::Relaxed);
+        if readiness_id.trim().is_empty() {
+            return Err(ZoneRpcFault::new(
+                "promotion_receipt_missing",
+                "promotion readiness id is required",
+            ));
+        }
+        if owner_lease.zone_id() != zone_id {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                "promotion lease Zone does not match requested Zone",
+            ));
+        }
+        if !self.accepts_owner_id(owner_lease.owner_id()) {
+            return Err(ZoneRpcFault::new(
+                "promotion_owner_mismatch",
+                format!(
+                    "promotion lease owner {} does not match standby host {}",
+                    owner_lease.owner_id(),
+                    self.host_id
+                ),
+            ));
+        }
+        self.owner_lease_authority
+            .validate_owner_lease(owner_lease)
+            .map_err(|message| ZoneRpcFault::new("promotion_fence_rejected", message))?;
+        let now_ms = unix_now_ms();
+        let record = self
+            .promotion_readiness
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?
+            .get(readiness_id)
+            .cloned()
+            .ok_or_else(|| {
+                ZoneRpcFault::new(
+                    "promotion_receipt_unknown",
+                    "promotion readiness receipt is unknown or already consumed",
+                )
+            })?;
+        if record.readiness.zone_id != zone_id.as_str()
+            || !record.readiness.ready
+            || record
+                .readiness
+                .expires_at_ms
+                .is_none_or(|expires_at_ms| now_ms > expires_at_ms)
+        {
+            return Err(ZoneRpcFault::new(
+                "promotion_receipt_expired",
+                "promotion readiness receipt is no longer valid",
+            ));
+        }
+        let current_head = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .replication
+            .head(zone_id.as_str());
+        if !replication_heads_match(&record.head, &current_head) {
+            return Err(ZoneRpcFault::new(
+                "promotion_replica_changed",
+                "standby replication head changed after readiness was assessed",
+            ));
+        }
+        self.runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .promote_zone_from_replica(zone_id)
+            .map_err(|message| ZoneRpcFault::new("promotion_replica_invalid", message))?;
+        self.promotion_readiness
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?
+            .remove(readiness_id);
+        self.promotion_frozen_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
+            .remove(zone_id.as_str());
+        self.promotions_total.fetch_add(1, Ordering::Relaxed);
+        self.promotion_last_promoted_at_ms
+            .store(now_ms, Ordering::Release);
+        Ok(ZonePromotionReceipt {
+            version: ZONE_PROMOTION_READINESS_VERSION,
+            readiness_id: readiness_id.to_string(),
+            zone_id: zone_id.as_str().to_string(),
+            promoted_host_id: self.host_id.clone(),
+            owner_id: owner_lease.owner_id().to_string(),
+            generation: owner_lease.fencing_token(),
+            promoted_at_ms: now_ms,
+            head: current_head,
+        })
     }
 
     pub fn export_mutation_batch(
@@ -1965,31 +2612,46 @@ impl ZoneHostServer {
     }
 
     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
-        self.rpc_requests_total.fetch_add(1, Ordering::Relaxed);
         // `serve_until` uses a non-blocking listener so it can observe the stop
-        // flag.  Some platforms propagate that mode to accepted sockets; the
+        // flag. Some platforms propagate that mode to accepted sockets; the
         // framed request handler is deliberately blocking with bounded timeouts.
         stream.set_nonblocking(false)?;
         stream.set_read_timeout(Some(self.limits.io_timeout))?;
         stream.set_write_timeout(Some(self.limits.io_timeout))?;
-        let bytes = read_frame(&mut stream, self.limits.max_frame_bytes)?;
-        let response = match serde_json::from_slice::<ZoneRpcEnvelope>(&bytes) {
-            Ok(envelope) => match self.handle_envelope(envelope) {
-                Ok(payload) => ZoneRpcResponse::Ok {
-                    payload: Box::new(payload),
+        loop {
+            let bytes = match read_frame(&mut stream, self.limits.max_frame_bytes) {
+                Ok(bytes) => bytes,
+                Err(error)
+                    if matches!(
+                        error.kind(),
+                        io::ErrorKind::UnexpectedEof
+                            | io::ErrorKind::ConnectionReset
+                            | io::ErrorKind::BrokenPipe
+                    ) =>
+                {
+                    return Ok(());
+                }
+                Err(error) => return Err(error),
+            };
+            self.rpc_requests_total.fetch_add(1, Ordering::Relaxed);
+            let response = match serde_json::from_slice::<ZoneRpcEnvelope>(&bytes) {
+                Ok(envelope) => match self.handle_envelope(envelope) {
+                    Ok(payload) => ZoneRpcResponse::Ok {
+                        payload: Box::new(payload),
+                    },
+                    Err(error) => error.into_response(),
                 },
-                Err(error) => error.into_response(),
-            },
-            Err(error) => ZoneRpcResponse::Error {
-                code: "invalid_request".to_string(),
-                message: format!("invalid JSON request: {error}"),
-            },
-        };
-        if matches!(response, ZoneRpcResponse::Error { .. }) {
-            self.rpc_errors_total.fetch_add(1, Ordering::Relaxed);
+                Err(error) => ZoneRpcResponse::Error {
+                    code: "invalid_request".to_string(),
+                    message: format!("invalid JSON request: {error}"),
+                },
+            };
+            if matches!(response, ZoneRpcResponse::Error { .. }) {
+                self.rpc_errors_total.fetch_add(1, Ordering::Relaxed);
+            }
+            let bytes = serde_json::to_vec(&response).map_err(io::Error::other)?;
+            write_frame(&mut stream, &bytes, self.limits.max_frame_bytes)?;
         }
-        let bytes = serde_json::to_vec(&response).map_err(io::Error::other)?;
-        write_frame(&mut stream, &bytes, self.limits.max_frame_bytes)
     }
 
     fn handle_envelope(&self, envelope: ZoneRpcEnvelope) -> Result<ZoneRpcPayload, ZoneRpcFault> {
@@ -2031,18 +2693,38 @@ impl ZoneHostServer {
             .operation_gate
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
+        self.prune_expired_promotion_readiness(unix_now_ms())?;
         let request = envelope.request;
+        if self
+            .quiesced_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
+            .contains(&envelope.zone_id)
+            || self
+                .promotion_frozen_zones
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
+                .contains(&envelope.zone_id)
+        {
+            if !zone_rpc_request_requires_active_mutation(&request) {
+                // Read-only and replication administration remains available
+                // while the promotion barrier is held.
+            } else {
+                return Err(ZoneRpcFault::new(
+                    "zone_quiesced",
+                    format!(
+                        "Zone {} is quiesced for a safe promotion and rejects new mutations",
+                        envelope.zone_id
+                    ),
+                ));
+            }
+        }
         match request {
             ZoneRpcRequest::ReplicationHead => {
                 return self
-                    .journal
-                    .lock()
-                    .map(|journal| ZoneRpcPayload::ReplicationHead {
-                        head: journal.replication.head(&envelope.zone_id),
-                    })
-                    .map_err(|_| {
-                        ZoneRpcFault::new("internal", "zone host journal mutex poisoned")
-                    });
+                    .replication_head(&ZoneId::new(&envelope.zone_id))
+                    .map(|head| ZoneRpcPayload::ReplicationHead { head })
+                    .map_err(|message| ZoneRpcFault::new("internal", message));
             }
             ZoneRpcRequest::ExportMutationBatch {
                 first_sequence,
@@ -2077,6 +2759,42 @@ impl ZoneHostServer {
             }
             ZoneRpcRequest::ApplyMutationBatch { batch } => {
                 self.apply_mutation_batch(&envelope.zone_id, &batch)?;
+                return Ok(ZoneRpcPayload::Unit);
+            }
+            ZoneRpcRequest::AssessPromotionReadiness {
+                active_head,
+                source_observed_at_ms,
+                max_lag_ms,
+            } => {
+                let readiness = self.assess_promotion_readiness_locked(
+                    &ZoneId::new(&envelope.zone_id),
+                    &active_head,
+                    source_observed_at_ms,
+                    max_lag_ms,
+                )?;
+                return Ok(ZoneRpcPayload::PromotionReadiness { readiness });
+            }
+            ZoneRpcRequest::PromoteReplica {
+                readiness_id,
+                owner_lease,
+            } => {
+                let owner_lease = owner_lease.into_lease()?;
+                let receipt = self.promote_replica_locked(
+                    &ZoneId::new(&envelope.zone_id),
+                    &readiness_id,
+                    &owner_lease,
+                )?;
+                return Ok(ZoneRpcPayload::PromotionReceipt { receipt });
+            }
+            ZoneRpcRequest::QuiesceForPromotion { owner_lease } => {
+                let owner_lease = owner_lease.into_lease()?;
+                let receipt = self
+                    .quiesce_for_promotion_locked(&ZoneId::new(&envelope.zone_id), &owner_lease)?;
+                return Ok(ZoneRpcPayload::QuiesceReceipt { receipt });
+            }
+            ZoneRpcRequest::ResumeAfterQuiesce { owner_lease } => {
+                let owner_lease = owner_lease.into_lease()?;
+                self.resume_after_quiesce_locked(&ZoneId::new(&envelope.zone_id), &owner_lease)?;
                 return Ok(ZoneRpcPayload::Unit);
             }
             ZoneRpcRequest::ExportHostCheckpoint => return self.export_host_checkpoint(),
@@ -2117,6 +2835,10 @@ impl ZoneHostServer {
             | ZoneRpcRequest::ExportBaseSnapshot
             | ZoneRpcRequest::InstallBaseSnapshot { .. }
             | ZoneRpcRequest::ApplyMutationBatch { .. }
+            | ZoneRpcRequest::AssessPromotionReadiness { .. }
+            | ZoneRpcRequest::PromoteReplica { .. }
+            | ZoneRpcRequest::QuiesceForPromotion { .. }
+            | ZoneRpcRequest::ResumeAfterQuiesce { .. }
             | ZoneRpcRequest::ExportHostCheckpoint
             | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
@@ -3168,6 +3890,21 @@ enum ZoneRpcRequest {
     ApplyMutationBatch {
         batch: ZoneMutationBatch,
     },
+    AssessPromotionReadiness {
+        active_head: ZoneReplicationHead,
+        source_observed_at_ms: u64,
+        max_lag_ms: u64,
+    },
+    PromoteReplica {
+        readiness_id: String,
+        owner_lease: WireZoneOwnerLease,
+    },
+    QuiesceForPromotion {
+        owner_lease: WireZoneOwnerLease,
+    },
+    ResumeAfterQuiesce {
+        owner_lease: WireZoneOwnerLease,
+    },
     OnConnect,
     Execute {
         owner_lease: WireZoneOwnerLease,
@@ -3223,6 +3960,15 @@ enum ZoneRpcPayload {
     },
     BaseSnapshot {
         snapshot: ZoneBaseSnapshot,
+    },
+    PromotionReadiness {
+        readiness: ZonePromotionReadiness,
+    },
+    PromotionReceipt {
+        receipt: ZonePromotionReceipt,
+    },
+    QuiesceReceipt {
+        receipt: ZoneQuiesceReceipt,
     },
     Packets {
         frames: Vec<Vec<u8>>,
@@ -3874,6 +4620,42 @@ fn call_endpoint(
     serde_json::from_slice(&response).map_err(|error| format!("response decode failed: {error}"))
 }
 
+fn call_reused_endpoint(
+    address: &str,
+    encoded: &[u8],
+    limits: &ZoneRpcLimits,
+    connection: &Mutex<Option<TcpStream>>,
+) -> Result<ZoneRpcResponse, String> {
+    let mut connection = connection
+        .lock()
+        .map_err(|_| "zone RPC connection mutex poisoned".to_string())?;
+    if connection.is_none() {
+        let stream = connect_with_timeout(address, limits.io_timeout)?;
+        stream
+            .set_read_timeout(Some(limits.io_timeout))
+            .map_err(|error| format!("set read timeout failed: {error}"))?;
+        stream
+            .set_write_timeout(Some(limits.io_timeout))
+            .map_err(|error| format!("set write timeout failed: {error}"))?;
+        *connection = Some(stream);
+    }
+    let result = (|| {
+        let stream = connection
+            .as_mut()
+            .ok_or_else(|| "zone RPC reusable connection missing".to_string())?;
+        write_frame(stream, encoded, limits.max_frame_bytes)
+            .map_err(|error| format!("write failed: {error}"))?;
+        let response = read_frame(stream, limits.max_frame_bytes)
+            .map_err(|error| format!("read failed: {error}"))?;
+        serde_json::from_slice(&response)
+            .map_err(|error| format!("response decode failed: {error}"))
+    })();
+    if result.is_err() {
+        *connection = None;
+    }
+    result
+}
+
 fn read_frame(reader: &mut impl Read, max_frame_bytes: usize) -> io::Result<Vec<u8>> {
     let mut header = [0_u8; 4];
     reader.read_exact(&mut header)?;
@@ -4171,6 +4953,39 @@ fn hex_lower_bytes(bytes: &[u8]) -> String {
     output
 }
 
+fn replication_heads_match(left: &ZoneReplicationHead, right: &ZoneReplicationHead) -> bool {
+    left.version == right.version
+        && left.zone_id == right.zone_id
+        && left.build_id == right.build_id
+        && left.mutation_coverage == right.mutation_coverage
+        && left.base_snapshot_id == right.base_snapshot_id
+        && left.base_sequence == right.base_sequence
+        && left.next_sequence == right.next_sequence
+        && left.latest_digest == right.latest_digest
+}
+
+fn zone_promotion_readiness_id(
+    zone_id: &ZoneId,
+    standby_host_id: &str,
+    head: &ZoneReplicationHead,
+    assessed_at_ms: u64,
+    expires_at_ms: u64,
+) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(b"obelisk.mir2.zone-promotion-readiness.v1\0");
+    hasher.update(zone_id.as_str().as_bytes());
+    hasher.update([0]);
+    hasher.update(standby_host_id.as_bytes());
+    hasher.update([0]);
+    hasher.update(head.build_id.as_bytes());
+    hasher.update([0]);
+    hasher.update(head.next_sequence.to_le_bytes());
+    hasher.update(head.latest_digest.as_bytes());
+    hasher.update(assessed_at_ms.to_le_bytes());
+    hasher.update(expires_at_ms.to_le_bytes());
+    hex_lower_bytes(&hasher.finalize())
+}
+
 fn parse_hex_digest(value: &str) -> Result<[u8; 32], String> {
     if value.len() != 64 {
         return Err(format!(
@@ -4195,6 +5010,32 @@ fn lowercase_hex_nibble(value: u8) -> Option<u8> {
         b'a'..=b'f' => Some(value - b'a' + 10),
         _ => None,
     }
+}
+
+fn configured_zone_host_owner_ids(host_id: &str) -> BTreeSet<String> {
+    let mut owner_ids = BTreeSet::from([host_id.to_string()]);
+    let configured = std::env::var("MIR2_ZONE_HOST_OWNER_ALIASES")
+        .ok()
+        .into_iter()
+        .flat_map(|value| {
+            value
+                .split(',')
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        });
+    let gate15_legacy = std::env::var("MIR2_GATE15_LOCAL_ZONE_HOST_ID")
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .into_iter();
+    for owner_id in configured.chain(gate15_legacy) {
+        if validate_identifier("Zone Host owner alias", &owner_id).is_ok() {
+            owner_ids.insert(owner_id);
+        }
+    }
+    owner_ids
 }
 
 fn positive_usize_env(name: &str) -> Option<usize> {
@@ -4235,6 +5076,17 @@ fn dynamic_map_file_name(zone_id: &str) -> Option<String> {
 
 fn unexpected_payload(operation: &str, payload: &ZoneRpcPayload) -> String {
     format!("zone RPC {operation} returned unexpected payload {payload:?}")
+}
+
+fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
+    matches!(
+        request,
+        ZoneRpcRequest::OnConnect
+            | ZoneRpcRequest::Execute { .. }
+            | ZoneRpcRequest::SaveActiveCharacter
+            | ZoneRpcRequest::RefreshActiveExternalMail
+            | ZoneRpcRequest::CloseSession { .. }
+    )
 }
 
 pub fn validate_zone_host_bind(address: SocketAddr, auth_token: Option<&str>) -> io::Result<()> {

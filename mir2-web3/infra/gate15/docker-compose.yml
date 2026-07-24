@@ -133,6 +133,7 @@ services:
       <<: *gate15-control-env
       MIR2_GATE15_GATEWAY_ID: "zone-host-a"
       MIR2_GATE15_LOCAL_ZONE_HOST_ID: "dubhe-a"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "dubhe-a"
       MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
       MIR2_ZONE_HOST_METRICS_ADDR: "0.0.0.0:9100"
       MIR2_ZONE_HOST_ADVERTISE_ADDR: "dubhe-a:7020"
@@ -158,6 +159,7 @@ services:
       <<: *gate15-control-env
       MIR2_GATE15_GATEWAY_ID: "zone-host-b"
       MIR2_GATE15_LOCAL_ZONE_HOST_ID: "dubhe-b"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "dubhe-b"
       MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
       MIR2_ZONE_HOST_METRICS_ADDR: "0.0.0.0:9100"
       MIR2_ZONE_HOST_ADVERTISE_ADDR: "dubhe-b:7020"

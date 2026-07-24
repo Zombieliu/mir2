@@ -336,8 +336,9 @@ Zone/build/cursor/digest。WAL-enabled replicator 现在安装 v5 base 并增量
 使用隔离且禁用外部持久化的 account store，影子 apply 不会重复写 active 的
 文件或 PostgreSQL。
 
-以上完成 v5 恢复与追赶闭环，但 `promotionReady` 仍保持 `false`，直到
-Gate 16.5 把 lag、完整性、容量和 fencing 条件合并为可审计 readiness。
+以上完成 v5 恢复与追赶闭环。Gate 16.5 现在进一步把 lag、完整性、容量和
+fencing 条件合并为可审计 readiness；只有拿到短期、单次使用 receipt 的精确
+副本才会返回 `promotionReady=true`。
 
 2026-07-24 的完整 Gate 15 Docker 复测从 cursor `0` 即安装 v5 base，随后
 增量恢复两个真实 Session；反向恢复在 cursor `708` 安装 v5 base。四个
@@ -345,7 +346,107 @@ validator 最终一致，两名玩家换主后继续完成 `68 / 47` 次 Zone �
 Projector 健康。最终机器证据见
 [`generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json)。
 
-## Gate 16 后续实施顺序
+## Gate 16.5 已落地：readiness、quiesce 与安全 promotion
+
+安全切主不再依赖“replicator 看起来追上了”的人工判断。当前流程是：
+
+```text
+active quiesce
+  → standby 追到 active 的精确 cursor / digest
+  → readiness 校验并冻结 standby image
+  → Commonware 最终确定更高 generation 的新 owner
+  → standby 使用同一 receipt 和 owner lease promotion
+```
+
+readiness 同时检查：
+
+- RPC / Head 版本、build identity 和 mutation coverage 一致；
+- cursor、digest 和可恢复 base 一致；
+- standby 自主时钟关闭，不会产生第二条 tick 时间线；
+- 接收端容量可用且 mutation lag 不超过 250 ms；
+- standby Head 在 readiness 到 promotion 之间完全不变。
+
+readiness receipt 只有 30 秒有效、只能使用一次，并绑定 Zone、Head 和评估
+时刻。receipt 签发后 standby 会进入 mutation barrier，避免玩家请求在窗口内
+偷偷改变副本；promotion 后 barrier 才移除。active 的 quiesce 同样停止自主
+tick 并拒绝新玩家 mutation；如果流程中止，可在 owner fence 未改变时 resume。
+
+promotion 还必须携带 Commonware 已最终确定的 owner lease。lease owner 必须
+等于 standby host，generation 必须高于旧 owner；因此即使有人拿到 readiness
+receipt，也不能在共识切权前自行升主。generation 改变后，旧 active 的 tick
+authorizer 每次 tick 都会检查 owner fence，立即停止推进，但进程不必退出，
+之后仍可作为 replica 恢复。
+
+这里同时区分两种身份：Zone Host 的签名和遥测身份是不可冒充的
+`ed25519:<public-key>`，Commonware placement 可使用 `dubhe-a` 等稳定运营
+别名。每个 Zone Host 只能通过 `MIR2_ZONE_HOST_OWNER_ALIASES` 显式声明自己
+接受的控制面别名；quiesce、resume、promotion 和自主 tick fencing 共用该
+白名单并 fail closed。这样既不要求控制面每次轮换密钥都改 placement ID，
+也不会把未经部署配置绑定的 owner 字符串当作本机。
+
+相关 Prometheus 指标采用低基数聚合：
+
+- `obelisk_zone_host_promotion_assessments_total`
+- `obelisk_zone_host_promotion_ready_assessments_total`
+- `obelisk_zone_host_promotion_attempts_total`
+- `obelisk_zone_host_promotions_total`
+- `obelisk_zone_host_promotion_last_promoted_at_ms`
+- `obelisk_zone_host_promotion_ready_zones`
+
+Gate 15 自动验收已改为真实执行 quiesce、精确 readiness、共识前拒绝、
+Commonware generation 2 最终化和单次 promotion，而不是先杀 active 再假定
+standby 可用。最终机器运行在 finalized height `16`、standby lag `4 ms`
+时签发 receipt；两名真实玩家保持连接并在切换后继续完成 `105 / 48` 次 Zone
+响应，17 项断言全部为真。
+
+## Gate 16.6 已落地：受限容器性能认证
+
+认证器在 `--cpus 2 --memory 2 GiB --memory-swap 2 GiB` 的容器中读取 cgroup
+限制并拒绝口径不符的运行。默认矩阵包含：
+
+- 50 和 125 个不同玩家的并发 Session，每玩家执行 8 条命令；
+- 700、10,000、100,000 条历史；
+- 每个历史点从 `N-64` 的周期 base 开始，应用一批 64 条 v5 delta；
+- 同一最终 active 状态另行执行 v4 全历史 checkpoint 安装作为固定对照。
+
+冷启动 base 安装单独计时和报告，不混进正常追赶指标。v4 / v5 对比同时记录
+wire bytes、墙钟时间和 Linux 进程 CPU ticks，并要求三个维度在每个历史点
+都至少下降 80%；最终 cursor 和 digest 必须相同。
+
+100k 压力运行还发现三个长负载问题：`std::sync::Mutex` 不承诺公平唤醒；
+旧 RPC 每条请求都重新建立 TCP 连接、服务端再创建一个 OS 线程；而 100k 的
+v4 全历史安装本身会超过原认证器 600 秒的 RPC deadline。玩家命令与自主 tick
+的单写者闸门因此改为 FIFO ticket gate；framed RPC 支持一个 Session 连接上
+连续收发多个请求；认证专用 deadline 调整为 30 分钟，使旧 v4 的真实长耗时
+继续计入墙钟 / CPU 对照，而不是被提前截断。不同 Session 仍使用独立连接
+并发，同一连接上的响应顺序保持明确，100k 认证也不再创建约 100k 个短连接
+和线程。
+
+完整复测：
+
+```bash
+infra/gate16/run-v5-certification.sh
+```
+
+可通过 `MIR2_GATE16_PLAYER_PROFILES`、`MIR2_GATE16_HISTORY_STEPS`、
+`GATE16_PROFILE_CPU_CORES` 和 `GATE16_PROFILE_MEMORY_BYTES` 扩展矩阵。机器
+证据写入：
+
+[`generated/gate16/v5-certification.json`](generated/gate16/v5-certification.json)
+
+2026-07-25 的最终 2C2G 认证结果：
+
+| 历史 | v5 delta / v4 checkpoint | 网络下降 | v5 / v4 墙钟 | 墙钟下降 | CPU 下降 |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 700 | 74,583 / 1,007,068 B | 92.59% | 379 / 4,104 ms | 90.77% | 90.80% |
+| 10,000 | 74,956 / 3,797,312 B | 98.03% | 387 / 59,115 ms | 99.35% | 99.36% |
+| 100,000 | 75,472 / 30,956,728 B | 99.76% | 399 / 626,962 ms | 99.94% | 99.94% |
+
+50 玩家完成 400 条命令，125 玩家完成 1,000 条命令。125 玩家档吞吐为
+135.36 commands/s、p95 为 975.65 ms；这证明 Session 和复制认证矩阵可完成，
+不等于已经满足最终战斗延迟 SLO，后续仍需怪物、技能、AOI 和数据库组合压测。
+
+## Gate 16 实施状态
 
 | 阶段 | 交付物 | 必须证明的事实 |
 | --- | --- | --- |
@@ -355,8 +456,8 @@ Projector 健康。最终机器证据见
 | 16.4a | 按 Zone 压缩 base snapshot 与原子持久化 | 已完成；snapshot/cursor/digest 绑定 |
 | 16.4b1 | 完整 Session image 与 base 安装 | 已完成；无需旧 journal 重放，逐 Session commitment 一致 |
 | 16.4b2 | authoritative Zone mutation capture、增量应用和 WAL 截断 | 已完成；命令与 tick/AI 同序，WAL 收敛到 base anchor |
-| 16.5 | standby readiness 与安全 promotion | 缺口、校验失败或 build 不一致时禁止晋升 |
-| 16.6 | 50/125 玩家、700/10k/100k 历史验收 | v5 CPU 和网络相对 v4 至少下降 80% |
+| 16.5 | standby readiness 与安全 promotion | 已完成；缺口、校验失败、Head 变化、build 不一致或 owner fence 未最终化时禁止晋升 |
+| 16.6 | 50/125 玩家、700/10k/100k 历史验收 | 已完成；受限容器内 v5 网络、墙钟和 CPU 相对 v4 均须至少下降 80% |
 
 复制延迟目标：
 
@@ -368,18 +469,20 @@ Projector 健康。最终机器证据见
 
 ## 当前边界
 
-- Gate 16.1～16.4b2 已完成基线、Head、可验证 batch、持久接收 WAL、压缩
-  base snapshot、完整 Session 基线安装、自主 tick 捕获和 v5 增量追赶；
-  尚未完成安全晋升闭环。
-- 当前基准使用一个顺序 `KeepAlive` 命令流来隔离历史长度成本，不包含完整
-  战斗、怪物 AI、数据库和公网抖动。
+- Gate 16.1～16.6 已完成基线、Head、可验证 batch、持久接收 WAL、压缩
+  base snapshot、完整 Session 基线安装、自主 tick 捕获、v5 增量追赶、
+  Commonware fenced promotion 和受限容器认证。
+- 历史认证使用 32 个命令 worker 隔离 journal 长度成本，玩家认证使用
+  50/125 个独立 Session；它仍不是完整战斗、怪物密集 AI、数据库和公网抖动
+  的替代品。
 - 当前 journal 覆盖 RPC 命令和共享 Zone cadence 驱动的 tick/AI/计时器；
   非 Zone 的外部经济副作用仍由 Gate 17 transactional outbox/inbox 处理。
 - WAL 已在新 base 后原子截断，但生产仍需配置磁盘配额、告警和 object-store
   远端备份。
 - 默认 `buildId` 是编译信息或包版本；生产镜像必须显式注入不可变的 commit
   或 image digest，不能仅靠同版本号判定二进制兼容。
-- 700 条容器证据是快速可复现基线；10k/100k 是完整认证矩阵，会消耗明显更长
-  时间。
-- Gate 17 才处理金币、装备、交易等 Class C 资产的 transactional
-  outbox/inbox 和对账，目标是资产语义上的 RPO=0。
+- 700 条是快速档，10k/100k 是同一完整认证矩阵的长历史档，会消耗明显更长
+  时间；三档机器证据都必须通过才算 Gate 16.6 完成。
+- Gate 17 已处理金币、装备、交易等 Class C 资产的 transactional
+  outbox/inbox、dead letter、redrive 和对账，目标是资产语义上的 RPO=0；
+  玩法 producer 仍必须显式迁移到该事务 API。

@@ -362,6 +362,9 @@ RMT、经济通胀和合规问题。
 | Gate 16.4a | 按 Zone gzip base snapshot、SHA-256 身份和崩溃安全的原子持久化 |
 | Gate 16.4b1 | 无需重放旧命令的完整 Session 基线安装、per-Zone 原子发布和 base-aware cursor |
 | Gate 16.4b2 | 自主 tick/AI 排序、post-base 增量应用、WAL 原子截断和 replicator v5 切换 |
+| Gate 16.5 | active quiesce、精确 standby readiness、Commonware owner fencing 和单次安全 promotion |
+| Gate 16.6 | 2C2G 容器中 50/125 玩家、700/10k/100k 历史的 v4/v5 CPU、网络和墙钟认证 |
+| Gate 17 | 金币、装备、消费和双边交易的事务 Outbox / Inbox、dead letter、redrive 与对账 |
 
 Gate 15 已接受的核心结果：
 
@@ -391,11 +394,11 @@ Gate 16.2 已增加每 Zone 独立的 v5 Head、连续 cursor、摘要链和 bui
 identity。Gate 16.3 已增加默认最多 512 entries / 1 MiB 的可验证 mutation
 batch，以及写入、`flush`、`fsync` 全部成功后才确认的接收 WAL。
 
-当前 Head 仍明确返回 `mutationCoverage=commandJournal` 和
-`promotionReady=false`。这里的 journal 已同时包含玩家命令和共享 Zone
-cadence tick；怪物 AI、掉落过期和 Zone 计时器由同一个带 `nowMs` 的 tick
-驱动。`promotionReady` 仍关闭，因为 readiness、容量认证和晋升协议属于
-Gate 16.5。
+Head 返回 `mutationCoverage=commandJournal`。这里的 journal 已同时包含玩家
+命令和共享 Zone cadence tick；怪物 AI、掉落过期和 Zone 计时器由同一个带
+`nowMs` 的 tick 驱动。普通 active / standby 的 `promotionReady` 默认仍为
+`false`；只有通过 Gate 16.5 全部检查并持有未过期 readiness receipt 的精确
+standby 才会短暂返回 `true`。
 
 Gate 16.4a 已把 base snapshot 真实接入双向 replicator。快照按 Zone 导出，
 绑定 cursor/digest，包含完整共享运行时状态和 Session commitments，并使用
@@ -407,8 +410,8 @@ Gate 16.4b1 已补齐 Session 基线：活跃玩家由可信 Passkey bootstrap�
 `StartGame`、完整 `CharacterSaveRecord` 和共享 Zone image 重建；发布前在隔离
 账号库中逐 Session 校验 commitment。安装成功后 v5 Head 从 base cursor
 继续，旧 cursor 返回 `replication_cursor_compacted`，其他 Zone 不受影响。
-这只表示 base 可安全安装，不表示副本可晋升，所以 `promotionReady` 仍为
-`false`。
+这只表示 base 可安全安装，不表示副本可晋升；是否可晋升由后续 readiness
+receipt 和 Commonware owner fence 决定。
 
 Gate 16.4b2 已把自主 Zone tick 与 RPC 命令放进同一个排序锁和摘要链。副本
 安装 base 后关闭本地自主 tick，只接受带原始 `nowMs` 的已验证 tick mutation；
@@ -423,11 +426,41 @@ rename → fsync directory` 原子收敛为 base anchor，重启从该 cursor �
 standby 使用禁用文件/PostgreSQL 持久化的隔离账号库，避免影子重放重复写入
 active 的账号数据库。
 
-2026-07-24 的 Gate 16.4b2 完整 Docker 验收从 cursor `0` 即安装 v5 base，
-不再出现 v4 checkpoint 安装；反向恢复在 cursor `708` 安装完整 v5 base。
-四个 validator 在高度 `16` 对同一 state root 达成一致，两名真实玩家换主后
-继续完成 `68 / 47` 次 Zone 响应，两个 Projector 均健康。机器证据见
+最终 Gate 16.5 完整 Docker 验收从 cursor `0` 即安装 v5 base，不再出现
+v4 checkpoint 安装；反向恢复安装完整双 Session v5 base。四个 validator
+在高度 `16` 对同一 state root 达成一致，standby 在 4 ms lag 下签发精确
+readiness receipt，Commonware 最终化 generation 2 后才允许 promotion。
+两名真实玩家保持连接并在换主后继续完成 `105 / 48` 次 Zone 响应，两个
+Projector 均健康。机器证据见
 [`docs/generated/gate15/gate15-acceptance.json`](docs/generated/gate15/gate15-acceptance.json)。
+
+Gate 16.5 把切主收敛为可审计协议：active 先 quiesce，standby 必须在 build、
+coverage、cursor、digest、可恢复 base、禁用本地时钟、容量和 250 ms lag 上
+全部达标。readiness receipt 绑定精确 Head，30 秒过期且只能使用一次；签发后
+standby 冻结玩家 mutation。只有 Commonware 已最终确定更高 generation 且
+新 owner 正是该 standby，promotion 才会成功。旧 active 的 tick 每次都检查
+owner fence，失权后立即停止推进。
+
+Zone Host 的遥测/签名身份继续使用 `ed25519:<public-key>`；控制面 placement
+可以使用 `dubhe-a` 这类稳定运营别名。部署必须通过
+`MIR2_ZONE_HOST_OWNER_ALIASES` 显式把别名绑定到当前进程，所有 quiesce、
+resume、promotion 和 tick fencing 都按该白名单闭合验证，不会把任意控制面
+字符串自动信任为本机身份。
+
+Gate 16.6 在真实 `2 CPU / 2 GiB` cgroup 中建立 50 和 125 个并发玩家
+Session，并在 700、10,000、100,000 条历史分别比较 v4 全历史恢复和 v5
+“周期 base + 64 条增量”。网络、墙钟和进程 CPU 三个维度都必须至少降低
+80%，冷 base 安装成本单独报告。最终 100k 结果为网络下降 99.76%、墙钟下降
+99.94%、CPU 下降 99.94%；125 玩家完成 1,000 条命令，但约 976 ms 的 p95
+仍明确属于后续战斗延迟优化对象。复测命令与机器证据见
+[`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md)。
+
+Gate 17 已新增独立于管理事件总线的游戏经济事务层。金币、唯一装备、奖励、
+消费和多方交易会把余额、幂等 receipt 和 outbox event 在同一个 PostgreSQL
+事务中提交；投递采用 lease / retry / dead letter / redrive，消费者用 inbox
+去重，并由 reconciliation 检查孤儿 transaction、过期投递、负余额和死信。
+架构、生产接入边界和 Docker 验收见
+[`docs/GATE17-TRANSACTIONAL-ECONOMY.md`](docs/GATE17-TRANSACTIONAL-ECONOMY.md)。
 
 ## 本地验收 Gate 15
 
@@ -528,9 +561,9 @@ permissionless mainnet、生产 Token 经济或最终法律合规。
 短暂的 `standby` 或 `stale placement` 错误在 placement 最终确认窗口内
 仍可能出现。Gate 15 证明连接能够存活，不代表玩家完全感知不到切换。
 
-## 建议的下一产品里程碑：沃玛契约
+## 建议的下一玩法里程碑：沃玛契约
 
-这是建议的 Gate 16 产品方向，尚未实现：
+这是基础设施 Gate 16 / 17 之后建议的产品方向，尚未实现：
 
 ```text
 比奇官方地图

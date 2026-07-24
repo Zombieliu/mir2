@@ -16,12 +16,14 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
       --bin mir2-gateway \
       --bin zone_host \
       --bin zone_replicator \
+      --bin zone_promoter \
       --bin node_identity \
       --bin gate12_acceptance \
       --bin gate13_acceptance \
     && install -Dm755 target/release/mir2-gateway /out/mir2-gateway \
     && install -Dm755 target/release/zone_host /out/obelisk-zone-host \
     && install -Dm755 target/release/zone_replicator /out/obelisk-zone-replicator \
+    && install -Dm755 target/release/zone_promoter /out/obelisk-zone-promoter \
     && install -Dm755 target/release/node_identity /out/obelisk-node-identity \
     && install -Dm755 target/release/gate12_acceptance /out/gate12-acceptance \
     && install -Dm755 target/release/gate13_acceptance /out/gate13-acceptance
@@ -53,6 +55,7 @@ CMD ["/usr/local/bin/mir2-gateway"]
 
 FROM runtime AS zone-replicator
 COPY --from=builder /out/obelisk-zone-replicator /usr/local/bin/obelisk-zone-replicator
+COPY --from=builder /out/obelisk-zone-promoter /usr/local/bin/obelisk-zone-promoter
 USER 65534:65534
 CMD ["/usr/local/bin/obelisk-zone-replicator"]
 
@@ -124,3 +127,27 @@ FROM runtime AS gate16-v4-baseline
 COPY --from=gate16-v4-baseline-builder /out/gate16-checkpoint-load /usr/local/bin/gate16-checkpoint-load
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/gate16-checkpoint-load"]
+
+FROM builder AS gate16-v5-certification-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate16_v5_certification \
+    && install -Dm755 target/release/gate16_v5_certification /out/gate16-v5-certification
+
+FROM runtime AS gate16-v5-certification
+COPY --from=gate16-v5-certification-builder /out/gate16-v5-certification /usr/local/bin/gate16-v5-certification
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate16-v5-certification"]
+
+FROM builder AS gate17-acceptance-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate17_acceptance \
+    && install -Dm755 target/release/gate17_acceptance /out/gate17-acceptance
+
+FROM runtime AS gate17-acceptance
+COPY --from=gate17-acceptance-builder /out/gate17-acceptance /usr/local/bin/gate17-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate17-acceptance"]

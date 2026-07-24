@@ -84,6 +84,29 @@ def wait_json(url: str, predicate, label: str, timeout: float = 90) -> Any:
     raise AcceptanceError(f"timed out waiting for {label}: {last_error}")
 
 
+def wait_prometheus_value(
+    url: str, metric: str, expected: float, label: str, timeout: float = 60
+) -> float:
+    deadline = time.monotonic() + timeout
+    last_value: float | None = None
+    last_error: Exception | None = None
+    while time.monotonic() < deadline:
+        try:
+            with urllib.request.urlopen(url, timeout=5) as response:
+                body = response.read().decode()
+            for line in body.splitlines():
+                if line.startswith(f"{metric}{{") or line.startswith(f"{metric} "):
+                    last_value = float(line.rsplit(" ", 1)[-1])
+                    if last_value == expected:
+                        return last_value
+        except Exception as error:  # acceptance polling records the final error
+            last_error = error
+        time.sleep(0.25)
+    raise AcceptanceError(
+        f"timed out waiting for {label}: value={last_value}, error={last_error}"
+    )
+
+
 def wait_file(path: Path, label: str, timeout: float = 30) -> dict[str, Any]:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -119,6 +142,60 @@ def submit(control: str, command: dict[str, Any], key: str) -> dict[str, Any]:
         },
         timeout=25,
     )
+
+
+def promoter(
+    operation: str,
+    *,
+    owner_id: str,
+    generation: int,
+    readiness_id: str | None = None,
+    check: bool = True,
+) -> dict[str, Any]:
+    arguments = [
+        "run",
+        "--rm",
+        "--no-deps",
+        "-T",
+        "-e",
+        f"MIR2_ZONE_PROMOTION_OWNER_ID={owner_id}",
+        "-e",
+        f"MIR2_ZONE_PROMOTION_GENERATION={generation}",
+    ]
+    if readiness_id is not None:
+        arguments.extend(
+            ["-e", f"MIR2_ZONE_PROMOTION_READINESS_ID={readiness_id}"]
+        )
+    arguments.extend(
+        [
+            "zone-replicator",
+            "/usr/local/bin/obelisk-zone-promoter",
+            operation,
+        ]
+    )
+    result = compose(arguments, check=check)
+    for line in reversed(result.stdout.splitlines()):
+        line = line.strip()
+        if line.startswith("{"):
+            return json.loads(line)
+    if check:
+        raise AcceptanceError(
+            f"zone promoter {operation} returned no JSON:\n{result.stdout}"
+        )
+    return {"output": result.stdout, "returncode": result.returncode}
+
+
+def wait_promotion_readiness(timeout: float = 20) -> dict[str, Any]:
+    deadline = time.monotonic() + timeout
+    last: dict[str, Any] | None = None
+    while time.monotonic() < deadline:
+        last = promoter(
+            "assess", owner_id="dubhe-a", generation=1, check=False
+        )
+        if last.get("ready") is True and last.get("readinessId"):
+            return last
+        time.sleep(0.2)
+    raise AcceptanceError(f"standby did not become promotion-ready: {last}")
 
 
 def seed_control_state() -> None:
@@ -251,7 +328,12 @@ def main() -> int:
     player_stdout = ""
     try:
         ready = wait_file(PLAYER_READY, "two real players", timeout=30)
-        forward_logs = wait_logs("zone-replicator", "sessions=2", timeout=30)
+        wait_prometheus_value(
+            "http://127.0.0.1:29101/metrics",
+            "obelisk_zone_host_sessions",
+            2,
+            "standby Dubhe B to restore both player Sessions",
+        )
         forward_logs = wait_logs(
             "zone-replicator", "persisted mutation WAL", timeout=30
         )
@@ -262,7 +344,17 @@ def main() -> int:
             "zone-replicator", "installed v5 base", timeout=30
         )
 
-        compose(["stop", "dubhe-a"])
+        quiesce_receipt = promoter(
+            "quiesce", owner_id="dubhe-a", generation=1
+        )
+        readiness = wait_promotion_readiness()
+        pre_fence_rejection = promoter(
+            "promote",
+            owner_id="dubhe-b",
+            generation=2,
+            readiness_id=readiness["readinessId"],
+            check=False,
+        )
         expiry = int(time.time() * 1000) + 3_600_000
         failover_command = submit(
             CONTROL_B,
@@ -276,6 +368,13 @@ def main() -> int:
             },
             "gate15-failover-primary-b",
         )
+        promotion_receipt = promoter(
+            "promote",
+            owner_id="dubhe-b",
+            generation=2,
+            readiness_id=readiness["readinessId"],
+        )
+        compose(["stop", "dubhe-a"])
         PLAYER_MARKER.write_text(
             json.dumps(
                 {
@@ -387,6 +486,25 @@ def main() -> int:
             "bothProjectorsHealthy": all(
                 status.get("healthy") is True for status in projector_health
             ),
+            "activeQuiescedAtExactHead": (
+                quiesce_receipt["head"]["nextSequence"]
+                == readiness["activeNextSequence"]
+            ),
+            "standbyReadinessPassed": (
+                readiness["ready"] is True
+                and readiness["cursorMatches"] is True
+                and readiness["digestMatches"] is True
+                and readiness["replicaClockDisabled"] is True
+                and readiness["capacityAvailable"] is True
+                and readiness["observedLagMs"] <= readiness["maxLagMs"]
+            ),
+            "standbyPromotedUnderGeneration2": (
+                promotion_receipt["ownerId"] == "dubhe-b"
+                and promotion_receipt["generation"] == 2
+            ),
+            "promotionRejectedBeforeFinalizedFence": (
+                pre_fence_rejection.get("returncode") not in (None, 0)
+            ),
         }
         evidence = {
             "ok": all(assertions.values()),
@@ -403,6 +521,10 @@ def main() -> int:
             "finalizedHeight": final_state["finalizedHeight"],
             "stateRoot": validator_statuses[0]["stateRoot"],
             "sessionLeases": final_state["sessionLeases"],
+            "quiesceReceipt": quiesce_receipt,
+            "promotionReadiness": readiness,
+            "promotionReceipt": promotion_receipt,
+            "preFencePromotionRejection": pre_fence_rejection,
             "forwardReplicatorLogTail": forward_logs.splitlines()[-20:],
             "reverseReplicatorLogTail": reverse_logs.splitlines()[-20:],
         }

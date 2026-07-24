@@ -1064,6 +1064,185 @@ fn autonomous_zone_ticks_are_ordered_and_incrementally_applied_after_the_base() 
 }
 
 #[test]
+fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotion() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let zone_id = ZoneId::new("map:safe-promotion");
+    let active_lease = authority.handoff_zone_owner(&zone_id, "active-host");
+    let (active_address, active_server, active_stop, active_handle) =
+        start_named_server_with_tick_cadence(
+            authority.clone(),
+            "active-host",
+            8,
+            Duration::from_millis(20),
+        );
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_named_server_with_tick_cadence(
+            authority.clone(),
+            "standby-host",
+            8,
+            Duration::from_millis(20),
+        );
+    let active = test_transport(active_address, zone_id.clone(), "promotion-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "promotion-session");
+
+    start_new_character(
+        &active,
+        active_lease.clone(),
+        "promotion-account",
+        "PromotionPlayer",
+    );
+    let base = active.export_base_snapshot().expect("active base snapshot");
+    standby
+        .install_base_snapshot(&base)
+        .expect("standby installs a restorable base");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_500 }),
+        ))
+        .expect("active advances after the standby base");
+    let first_quiesce = active
+        .quiesce_for_promotion(&active_lease)
+        .expect("current fenced owner may quiesce");
+    assert_eq!(first_quiesce.owner_id, "active-host");
+    assert!(active
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_501 }),
+        ))
+        .expect_err("quiesced active must reject new player mutations")
+        .contains("zone_quiesced"));
+    active
+        .resume_after_quiesce(&active_lease)
+        .expect("handoff may be aborted under the unchanged fence");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_502 }),
+        ))
+        .expect("resumed active accepts mutations");
+    let quiesce = active
+        .quiesce_for_promotion(&active_lease)
+        .expect("active quiesces at a final immutable head");
+    thread::sleep(Duration::from_millis(60));
+    assert_eq!(
+        active.replication_head().unwrap().next_sequence,
+        quiesce.head.next_sequence,
+        "quiesce must stop both player commands and autonomous cadence"
+    );
+
+    let now_ms = || {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64
+    };
+    let initial_active_head = active.replication_head().unwrap();
+    let initial_readiness = standby
+        .assess_promotion_readiness(initial_active_head, now_ms(), 250)
+        .expect("behind standby should return a report");
+    assert!(!initial_readiness.ready);
+    assert_eq!(
+        initial_readiness.reason.as_deref(),
+        Some("replica_cursor_behind")
+    );
+
+    let deadline = Instant::now() + Duration::from_secs(3);
+    let readiness = loop {
+        let standby_head = standby.replication_head().unwrap();
+        let active_head = active.replication_head().unwrap();
+        if standby_head.next_sequence < active_head.next_sequence {
+            let batch = active
+                .export_mutation_batch(standby_head.next_sequence, 512, 1024 * 1024)
+                .unwrap();
+            standby.apply_mutation_batch(&batch).unwrap();
+        }
+        let observed_at_ms = now_ms();
+        let active_head = active.replication_head().unwrap();
+        let report = standby
+            .assess_promotion_readiness(active_head, observed_at_ms, 250)
+            .unwrap();
+        if report.ready {
+            break report;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "standby did not become promotion-ready: {report:?}"
+        );
+        thread::sleep(Duration::from_millis(2));
+    };
+    assert!(readiness.replica_clock_disabled);
+    assert!(readiness.capacity_available);
+    assert!(readiness.readiness_id.is_some());
+    assert!(standby.replication_head().unwrap().promotion_ready);
+    assert!(standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_503 }),
+        ))
+        .expect_err("ready standby must freeze its exact promotion image")
+        .contains("zone_quiesced"));
+
+    let readiness_id = readiness.readiness_id.clone().unwrap();
+    let before_fence = standby
+        .promote_replica(readiness_id.clone(), &active_lease)
+        .expect_err("readiness alone must not grant ownership");
+    assert!(
+        before_fence.contains("promotion_owner_mismatch")
+            || before_fence.contains("promotion_fence_rejected"),
+        "{before_fence}"
+    );
+
+    let promoted_lease = authority.handoff_zone_owner(&zone_id, "standby-host");
+    let receipt = standby
+        .promote_replica(readiness_id.clone(), &promoted_lease)
+        .expect("new finalized generation should promote the ready standby");
+    assert_eq!(receipt.owner_id, "standby-host");
+    assert_eq!(receipt.generation, promoted_lease.fencing_token());
+    assert!(!standby.replication_head().unwrap().promotion_ready);
+    standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            promoted_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_504 }),
+        ))
+        .expect("promotion releases the standby mutation barrier");
+    assert!(standby
+        .promote_replica(readiness_id, &promoted_lease)
+        .expect_err("readiness receipt must be single-use")
+        .contains("promotion_receipt_unknown"));
+
+    thread::sleep(Duration::from_millis(80));
+    let frozen_active_head = active.replication_head().unwrap();
+    let promoted_head = standby.replication_head().unwrap();
+    thread::sleep(Duration::from_millis(80));
+    assert_eq!(
+        active.replication_head().unwrap(),
+        frozen_active_head,
+        "old active must stop autonomous ticks after losing the fence"
+    );
+    assert!(
+        standby.replication_head().unwrap().next_sequence > promoted_head.next_sequence,
+        "promoted standby must begin autonomous Zone cadence"
+    );
+    assert!(
+        standby_server
+            .replication_head(&zone_id)
+            .unwrap()
+            .next_sequence
+            > receipt.head.next_sequence
+    );
+    assert!(
+        !active_server
+            .replication_head(&zone_id)
+            .unwrap()
+            .promotion_ready
+    );
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
 fn multi_endpoint_transport_reroutes_to_replicated_standby_after_active_stops() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (active_address, _active_server, active_stop, active_handle) =
@@ -1169,6 +1348,38 @@ fn tcp_zone_rpc_client_reconnects_after_host_becomes_available() {
 
     let health = wait_for_health(&transport, Duration::from_secs(3));
     assert_eq!(health.protocol_version, ZONE_RPC_PROTOCOL_VERSION);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_reuses_one_framed_connection_for_multiple_requests() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_named_server_with_tick_cadence(
+        authority,
+        "persistent-rpc-host",
+        8,
+        Duration::from_secs(60),
+    );
+    let transport = test_transport(
+        address,
+        ZoneId::new("map:persistent-rpc"),
+        "persistent-rpc-session",
+    )
+    .with_connection_reuse();
+
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.accepted_connections_total, 1);
+    assert_eq!(telemetry.rpc_requests_total, 2);
+
+    drop(transport);
     stop_server(address, stop, handle);
 }
 
@@ -1564,6 +1775,43 @@ fn start_named_server(
         running_server
             .serve_until(listener, server_stop)
             .expect("named test Zone Host should run");
+    });
+    (address, server, stop, handle)
+}
+
+fn start_named_server_with_tick_cadence(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    host_id: &str,
+    zone_capacity: usize,
+    cadence: Duration,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind named tick test Zone Host");
+    let address = listener.local_addr().expect("named tick Zone Host address");
+    let stop = Arc::new(AtomicBool::new(false));
+    let shared: SharedZoneOwnerLeaseAuthority = authority;
+    let server = Arc::new(ZoneHostServer::with_identity_and_factory(
+        host_id,
+        zone_capacity,
+        GatewayConfig::default(),
+        shared,
+        None,
+        test_limits(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+            cadence,
+            BTreeMap::new(),
+        )),
+    ));
+    let running_server = Arc::clone(&server);
+    let server_stop = Arc::clone(&stop);
+    let handle = thread::spawn(move || {
+        running_server
+            .serve_until(listener, server_stop)
+            .expect("named tick test Zone Host should run");
     });
     (address, server, stop, handle)
 }

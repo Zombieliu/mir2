@@ -3,7 +3,7 @@ use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{
     mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TrySendError},
-    Arc, Mutex,
+    Arc, Condvar, Mutex,
 };
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -3057,10 +3057,64 @@ impl SharedInProcessZoneState {
 
 type SharedZoneMutationObserver =
     Arc<dyn Fn(&ZoneId, u64) -> Result<(), String> + Send + Sync + 'static>;
+type SharedZoneTickAuthorizer = Arc<dyn Fn(&ZoneId) -> Result<(), String> + Send + Sync + 'static>;
+
+#[derive(Debug, Default)]
+struct SharedZoneMutationGateState {
+    next_ticket: u64,
+    serving_ticket: u64,
+}
+
+/// FIFO gate shared by player commands and autonomous Zone ticks.
+///
+/// `std::sync::Mutex` does not promise fair waiter selection. Under a sustained
+/// multi-session journal load one RPC could therefore wait behind thousands of
+/// later arrivals and eventually hit its socket timeout. Ticket ordering makes
+/// the single-writer sequence explicit and bounded by the work already queued.
+#[derive(Debug, Default)]
+pub(crate) struct SharedZoneMutationGate {
+    state: Mutex<SharedZoneMutationGateState>,
+    changed: Condvar,
+}
+
+impl SharedZoneMutationGate {
+    pub(crate) fn lock(&self) -> Result<SharedZoneMutationGateGuard<'_>, String> {
+        let mut state = self
+            .state
+            .lock()
+            .map_err(|_| "shared Zone mutation gate mutex was poisoned".to_string())?;
+        let ticket = state.next_ticket;
+        state.next_ticket = state.next_ticket.wrapping_add(1);
+        while state.serving_ticket != ticket {
+            state = self
+                .changed
+                .wait(state)
+                .map_err(|_| "shared Zone mutation gate mutex was poisoned".to_string())?;
+        }
+        Ok(SharedZoneMutationGateGuard { gate: self })
+    }
+}
+
+pub(crate) struct SharedZoneMutationGateGuard<'a> {
+    gate: &'a SharedZoneMutationGate,
+}
+
+impl Drop for SharedZoneMutationGateGuard<'_> {
+    fn drop(&mut self) {
+        let mut state = self
+            .gate
+            .state
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        state.serving_ticket = state.serving_ticket.wrapping_add(1);
+        self.gate.changed.notify_all();
+    }
+}
 
 #[derive(Clone)]
 struct SharedZoneMutationCapture {
-    gate: Arc<Mutex<()>>,
+    gate: Arc<SharedZoneMutationGate>,
+    authorize_tick: SharedZoneTickAuthorizer,
     observer: SharedZoneMutationObserver,
 }
 
@@ -3161,14 +3215,19 @@ impl SharedInProcessZoneRuntimeFactory {
 
     pub(crate) fn configure_mutation_capture(
         &self,
-        gate: Arc<Mutex<()>>,
+        gate: Arc<SharedZoneMutationGate>,
+        authorize_tick: SharedZoneTickAuthorizer,
         observer: SharedZoneMutationObserver,
     ) {
         *self
             .mutation_capture
             .lock()
             .expect("shared Zone mutation capture mutex should not be poisoned") =
-            Some(SharedZoneMutationCapture { gate, observer });
+            Some(SharedZoneMutationCapture {
+                gate,
+                authorize_tick,
+                observer,
+            });
     }
 
     pub(crate) fn mark_zone_as_replica(&self, zone_id: &ZoneId) {
@@ -3186,6 +3245,77 @@ impl SharedInProcessZoneRuntimeFactory {
                 .autonomous_ticks_enabled
                 .store(false, Ordering::Release);
         }
+    }
+
+    pub(crate) fn is_zone_replica(&self, zone_id: &ZoneId) -> bool {
+        self.replica_zone_ids
+            .lock()
+            .map(|zone_ids| zone_ids.contains(zone_id))
+            .unwrap_or(false)
+    }
+
+    pub(crate) fn promote_zone_from_replica(&self, zone_id: &ZoneId) -> Result<(), String> {
+        if !self
+            .replica_zone_ids
+            .lock()
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?
+            .remove(zone_id)
+        {
+            return Err(format!("Zone {zone_id} is not a standby replica"));
+        }
+        let resources = self
+            .zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .get(zone_id)
+            .cloned()
+            .ok_or_else(|| format!("Zone {zone_id} has no installed replica state"))?;
+        resources
+            .autonomous_ticks_enabled
+            .store(true, Ordering::Release);
+        Ok(())
+    }
+
+    pub(crate) fn quiesce_active_zone(&self, zone_id: &ZoneId) -> Result<(), String> {
+        if self.is_zone_replica(zone_id) {
+            return Err(format!("Zone {zone_id} is a standby replica"));
+        }
+        let resources = self
+            .zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .get(zone_id)
+            .cloned()
+            .ok_or_else(|| format!("Zone {zone_id} has no active runtime state"))?;
+        resources
+            .autonomous_ticks_enabled
+            .store(false, Ordering::Release);
+        Ok(())
+    }
+
+    pub(crate) fn resume_active_zone(&self, zone_id: &ZoneId) -> Result<(), String> {
+        if self.is_zone_replica(zone_id) {
+            return Err(format!("Zone {zone_id} is a standby replica"));
+        }
+        let resources = self
+            .zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .get(zone_id)
+            .cloned()
+            .ok_or_else(|| format!("Zone {zone_id} has no active runtime state"))?;
+        resources
+            .autonomous_ticks_enabled
+            .store(true, Ordering::Release);
+        Ok(())
+    }
+
+    pub(crate) fn autonomous_ticks_enabled(&self, zone_id: &ZoneId) -> bool {
+        self.zones
+            .lock()
+            .ok()
+            .and_then(|zones| zones.get(zone_id).cloned())
+            .is_some_and(|resources| resources.autonomous_ticks_enabled.load(Ordering::Acquire))
     }
 
     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
@@ -4661,6 +4791,14 @@ fn shared_zone_owner_loop(
                         return;
                     }
                 };
+                if (capture.authorize_tick)(&zone_id).is_err() {
+                    // A still-running former primary is deliberately kept
+                    // alive but frozen. A later Commonware generation may
+                    // promote this host again, so do not terminate its owner
+                    // loop on a fencing miss.
+                    next_tick = Instant::now() + cadence;
+                    continue;
+                }
                 run_shared_zone_cadence_tick(&zone_state, now_ms)
                     .and_then(|()| (capture.observer)(&zone_id, now_ms))
             } else {

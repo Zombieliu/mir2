@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784917152433,
+  "runId": "gate17-1784917152113",
+  "assertions": {
+    "allOutboxDispatched": true,
+    "concurrentIdempotencyCommittedOnce": true,
+    "concurrentUniqueItemAwardCommittedOnce": true,
+    "crashAfterInboxRecovered": true,
+    "deadLetterDetectedAndRedriven": true,
+    "duplicateConsumeDidNotDoubleDebit": true,
+    "duplicateSeedDidNotDoubleCredit": true,
+    "duplicateTradeDidNotReplay": true,
+    "insufficientBalanceRolledBack": true,
+    "reconciliationHealthy": true,
+    "tradeCommittedAtomically": true,
+    "uniqueItemCannotHaveTwoOwners": true
+  },
+  "balances": {
+    "aliceGold": 67,
+    "aliceSword": 1,
+    "bobGold": 35,
+    "bobSword": 0
+  },
+  "duplicateReceipts": 10,
+  "recoveredDispatches": 7,
+  "reconciliation": {
+    "runId": "economy-reconcile-1784917152125-1",
+    "startedAtMs": 1784917152125,
+    "completedAtMs": 1784917152402,
+    "pendingCount": 0,
+    "expiredDeliveryCount": 0,
+    "deadLetterCount": 0,
+    "transactionWithoutOutboxCount": 0,
+    "negativeBalanceCount": 0,
+    "healthy": true
+  },
+  "success": true
+}

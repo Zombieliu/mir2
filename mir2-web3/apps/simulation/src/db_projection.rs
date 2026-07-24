@@ -43,6 +43,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0004_city_currencies",
         include_str!("../../../infra/postgres/migrations/0004_city_currencies.sql"),
     ),
+    (
+        "0005_game_economy_outbox",
+        include_str!("../../../infra/postgres/migrations/0005_game_economy_outbox.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order. Safe to call concurrently from
