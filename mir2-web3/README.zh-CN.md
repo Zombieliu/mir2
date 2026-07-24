@@ -382,6 +382,11 @@ snapshot，而不是只压缩 checkpoint 文件。
 Gate 16 设计、指标和复测方法见
 [`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md)。
 
+Gate 16.2 已增加每 Zone 独立的 v5 Head、连续 cursor、摘要链和 build
+identity。当前 Head 明确返回 `mutationCoverage=commandJournal` 和
+`promotionReady=false`：在自主 tick、怪物 AI 等 mutation 进入持久 WAL
+以前，不会为了降低带宽而错误跳过 v4 复制，也不会把不完整副本晋升为主节点。
+
 ## 本地验收 Gate 15
 
 要求：

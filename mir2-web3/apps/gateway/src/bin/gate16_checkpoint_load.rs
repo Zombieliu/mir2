@@ -25,8 +25,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use mir2_gateway::{
     GatewayConfig, InMemoryZoneOwnerLeaseAuthority, SharedZoneOwnerLeaseAuthority,
     TcpZoneOwnerRpcTransport, ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneId,
-    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRpcLimits,
-    ZONE_HOST_CHECKPOINT_VERSION, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneReplicationHead,
+    ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::ClientPacket;
 use mir2_simulation::WorldCommand;
@@ -72,6 +72,9 @@ struct HistoryResult {
     command_latency_ms: NumericSummary,
     checkpoint_entries: Option<usize>,
     checkpoint_bytes: Option<usize>,
+    replication_head: Option<ZoneReplicationHead>,
+    replication_head_bytes: Option<usize>,
+    replication_head_latency_us: NumericSummary,
     modeled_wire_mbps_at_100ms: Option<f64>,
     modeled_wire_mbps_at_5s: Option<f64>,
     export_wall_ms: Option<f64>,
@@ -260,6 +263,47 @@ fn try_run_history_step(
     let command_wall_ms = command_started.elapsed().as_secs_f64() * 1_000.0;
     let rss_after_history = process_rss_bytes();
 
+    let mut head_samples = Vec::with_capacity(100);
+    let mut replication_head = None;
+    for _ in 0..100 {
+        let head_started = Instant::now();
+        let current_head = active_transport.replication_head().map_err(|error| {
+            failure_from_hosts(
+                requested_commands,
+                command_samples.len(),
+                error,
+                &active,
+                &standby,
+            )
+        })?;
+        head_samples.push(head_started.elapsed().as_secs_f64() * 1_000_000.0);
+        if replication_head
+            .as_ref()
+            .is_some_and(|expected| expected != &current_head)
+        {
+            return Err(failure_from_hosts(
+                requested_commands,
+                command_samples.len(),
+                "replication head changed without a Zone mutation",
+                &active,
+                &standby,
+            ));
+        }
+        replication_head = Some(current_head);
+    }
+    let replication_head = replication_head.expect("100 head samples should produce a head");
+    let replication_head_bytes = serde_json::to_vec(&replication_head)
+        .map_err(|error| {
+            failure_from_hosts(
+                requested_commands,
+                command_samples.len(),
+                error,
+                &active,
+                &standby,
+            )
+        })?
+        .len();
+
     let export_started = Instant::now();
     let checkpoint = active_transport.export_host_checkpoint().map_err(|error| {
         failure_from_hosts(
@@ -295,6 +339,9 @@ fn try_run_history_step(
         command_latency_ms: summarize(&mut command_samples),
         checkpoint_entries: Some(checkpoint.entry_count),
         checkpoint_bytes: Some(checkpoint.as_bytes().len()),
+        replication_head: Some(replication_head),
+        replication_head_bytes: Some(replication_head_bytes),
+        replication_head_latency_us: summarize(&mut head_samples),
         modeled_wire_mbps_at_100ms: Some(modeled_wire_mbps(checkpoint.as_bytes().len(), 100)),
         modeled_wire_mbps_at_5s: Some(modeled_wire_mbps(checkpoint.as_bytes().len(), 5_000)),
         export_wall_ms: Some(export_wall_ms),
@@ -323,6 +370,9 @@ fn failure_from_hosts(
         command_latency_ms: summarize(&mut []),
         checkpoint_entries: None,
         checkpoint_bytes: None,
+        replication_head: None,
+        replication_head_bytes: None,
+        replication_head_latency_us: summarize(&mut []),
         modeled_wire_mbps_at_100ms: None,
         modeled_wire_mbps_at_5s: None,
         export_wall_ms: None,
@@ -354,6 +404,9 @@ fn empty_failure(requested_commands: usize, error: impl std::fmt::Display) -> Hi
         command_latency_ms: summarize(&mut []),
         checkpoint_entries: None,
         checkpoint_bytes: None,
+        replication_head: None,
+        replication_head_bytes: None,
+        replication_head_latency_us: summarize(&mut []),
         modeled_wire_mbps_at_100ms: None,
         modeled_wire_mbps_at_5s: None,
         export_wall_ms: None,

@@ -101,6 +101,7 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostCheckpointTelemetry, ZoneHostHealth,
-    ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope, ZoneRpcLimits,
-    ZONE_HOST_CHECKPOINT_VERSION, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope,
+    ZoneReplicationCoverage, ZoneReplicationHead, ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION,
+    ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };

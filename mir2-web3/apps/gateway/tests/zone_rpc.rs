@@ -12,8 +12,8 @@ use mir2_gateway::{
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
     SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostControlPlane, ZoneHostHeartbeat,
     ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneMapScope, ZoneOwnerCommandRequest,
-    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneRpcLimits,
-    ZONE_RPC_PROTOCOL_VERSION,
+    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneReplicationCoverage,
+    ZoneRpcLimits, ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::WorldCommand;
@@ -581,6 +581,94 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
         .execute(ZoneOwnerCommandRequest::direct(lease, WorldCommand::Tick))
         .expect_err("old active must be fenced")
         .contains("stale_lease"));
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_a = ZoneId::new("map:0");
+    let zone_b = ZoneId::new("map:1");
+    let active_a = test_transport(active_address, zone_a.clone(), "head-a");
+    let active_b = test_transport(active_address, zone_b.clone(), "head-b");
+    let standby_a = test_transport(standby_address, zone_a.clone(), "head-a");
+    let standby_b = test_transport(standby_address, zone_b.clone(), "head-b");
+
+    let empty = active_a
+        .replication_head()
+        .expect("empty replication head should respond");
+    assert_eq!(empty.version, ZONE_REPLICATION_HEAD_VERSION);
+    assert_eq!(empty.zone_id, "map:0");
+    assert_eq!(
+        empty.mutation_coverage,
+        ZoneReplicationCoverage::CommandJournal
+    );
+    assert!(!empty.promotion_ready);
+    assert_eq!(empty.base_snapshot_id, None);
+    assert_eq!(empty.base_sequence, 0);
+    assert_eq!(empty.oldest_available_sequence, 0);
+    assert_eq!(empty.entry_count, 0);
+    assert_eq!(empty.next_sequence, 0);
+    assert_eq!(empty.last_sequence, None);
+    assert_eq!(empty.latest_digest, "0".repeat(64));
+    assert!(
+        serde_json::to_vec(&empty).unwrap().len() < 1_024,
+        "100ms replication head must remain smaller than 1 KiB"
+    );
+
+    let lease_a = authority.owner_lease(&zone_a);
+    let lease_b = authority.owner_lease(&zone_b);
+    for time in [1, 2] {
+        active_a
+            .execute(ZoneOwnerCommandRequest::direct(
+                lease_a.clone(),
+                WorldCommand::ClientPacket(ClientPacket::KeepAlive { time }),
+            ))
+            .expect("zone A command should execute");
+    }
+    active_b
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease_b,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 3 }),
+        ))
+        .expect("zone B command should execute");
+
+    let active_a_head = active_a
+        .replication_head()
+        .expect("zone A replication head");
+    let active_b_head = active_b
+        .replication_head()
+        .expect("zone B replication head");
+    assert_eq!(active_a_head.entry_count, 2);
+    assert_eq!(active_a_head.next_sequence, 2);
+    assert_eq!(active_a_head.last_sequence, Some(1));
+    assert_eq!(active_b_head.entry_count, 1);
+    assert_eq!(active_b_head.next_sequence, 1);
+    assert_eq!(active_b_head.last_sequence, Some(0));
+    assert_ne!(active_a_head.latest_digest, active_b_head.latest_digest);
+    assert_eq!(
+        active_server.replication_head(&zone_a).unwrap(),
+        active_a_head
+    );
+    assert!(
+        serde_json::to_vec(&active_a_head).unwrap().len() < 1_024,
+        "non-empty replication head must remain smaller than 1 KiB"
+    );
+
+    let checkpoint = active_a
+        .export_host_checkpoint()
+        .expect("v4 checkpoint should export");
+    standby_a
+        .install_host_checkpoint(&checkpoint)
+        .expect("v4 checkpoint should rebuild v5 heads");
+    assert_eq!(standby_a.replication_head().unwrap(), active_a_head);
+    assert_eq!(standby_b.replication_head().unwrap(), active_b_head);
 
     stop_server(active_address, active_stop, active_handle);
     stop_server(standby_address, standby_stop, standby_handle);

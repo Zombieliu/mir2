@@ -75,6 +75,10 @@ Bevy runtimes.
   baseline. The incremental per-Zone v5 protocol is the next implementation
   step; see
   [`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md).
+- Gate 16.2 adds a bounded per-Zone v5 replication Head with a continuous
+  cursor, chained digest, build identity, and explicit coverage/readiness
+  safety fields. It remains non-promotable until authoritative mutation WAL
+  coverage lands in Gate 16.3.
 
 ## Crystal Reference
 
