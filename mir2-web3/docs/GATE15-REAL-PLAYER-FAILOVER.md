@@ -18,11 +18,11 @@ security, or multi-region certification.
 | Gate 15.1 | WebSocket and Crystal TCP `StartGame` resolve the authenticated account/character against finalized state and acquire a Commonware session lease before entering the world. | Two real accounts and character slots enter through separate player Gateways; two canonical `player:<account>:<characterIndex>` leases finalize. |
 | Gate 15.2 | Each Gateway observes a 3-of-4 validator quorum, derives the current Zone placement, refreshes the owner generation at the serialized command boundary, and rebuilds its Zone RPC route when the finalized generation or endpoints change. | Both Gateways observe the same height/root and adopt placement generation 2 without dropping either player socket. |
 | Gate 15.3 | Zone Host checkpoints carry the complete command journal, private active-character state, and shared Zone image for multiple live sessions. Repeated full-journal installs replay from an isolated account-store baseline. | A continuously replicated two-session checkpoint is promoted on Dubhe B after Dubhe A is stopped; both sessions continue returning `UserLocation`. |
-| Gate 15.4 | Docker fault injection, reverse recovery, final quorum checks, projector recovery, and machine-readable evidence are automated. | Dubhe A is recovered as standby, B-to-A replication installs a 699-entry/two-session checkpoint, all validators agree, and both disposable projectors finish healthy. |
+| Gate 15.4 | Docker fault injection, reverse recovery, final quorum checks, projector recovery, and machine-readable evidence are automated. | Dubhe A is recovered as standby, B-to-A replication installs a 712-entry/two-session checkpoint, all validators agree, and both disposable projectors finish healthy. |
 
 The accepted run finalized height `16` at state root
-`dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c`.
-After the failover marker, player A and player B received `99` and `51`
+`d4924ba46cbca5241fcb5a1e52f4f6e8c88dce68cdb917cd97ce599c40e47af1`.
+After the failover marker, player A and player B received `80` and `49`
 additional `UserLocation` responses respectively, with neither WebSocket
 closing unexpectedly. The canonical evidence is
 [`docs/generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json).
@@ -152,9 +152,12 @@ sampling slows down.
 
 With Gate 16.3 enabled, each direction owns a persistent receive-WAL volume.
 The replicator verifies and fsyncs new command-journal batches before installing
-the existing v4 checkpoint. The accepted run persisted A-to-B through cursor
-`21` and B-to-A through cursor `699`. v4 remains the promotion source until
-authoritative tick/AI capture and incremental standby apply land in Gate 16.4.
+the existing v4 checkpoint. Gate 16.4a additionally persists a cursor-bound,
+gzip-compressed base snapshot through an atomic rename. The accepted run wrote
+A-to-B base cursor `11` and B-to-A base cursor `712`; their JSON files were
+`25,827` and `29,700` bytes. v4 remains the promotion source until authoritative
+tick/AI capture, a complete private Session image, and incremental standby apply
+land in Gate 16.4b.
 
 ## Manual inspection
 
@@ -171,6 +174,7 @@ authoritative tick/AI capture and incremental standby apply land in Gate 16.4.
 | Canonical acceptance evidence | `docs/generated/gate15/gate15-acceptance.json` |
 | A-to-B mutation WAL | named volume `obelisk-gate15_gate16-wal-a-to-b` |
 | B-to-A mutation WAL | named volume `obelisk-gate15_gate16-wal-b-to-a` |
+| Base snapshot in each direction | `base-snapshot-v5.json` in the corresponding WAL volume |
 
 Expected final facts:
 
@@ -183,6 +187,7 @@ Expected final facts:
 - both projectors report healthy at height `16`;
 - both Dubhe hosts are healthy and `zone-replicator-b-to-a` is running.
 - both replicator log tails contain `persisted mutation WAL`.
+- both replicator log tails contain `persisted base snapshot`.
 
 ## Correctness decisions
 

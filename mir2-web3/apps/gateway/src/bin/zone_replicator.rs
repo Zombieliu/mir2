@@ -4,12 +4,21 @@ use std::thread;
 use std::time::Duration;
 
 use mir2_gateway::{
-    TcpZoneOwnerRpcTransport, ZoneId, ZoneMutationWal, ZoneMutationWalAck, ZoneRpcLimits,
-    DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
+    TcpZoneOwnerRpcTransport, ZoneBaseSnapshotStore, ZoneId, ZoneMutationWal, ZoneMutationWalAck,
+    ZoneRpcLimits, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+    DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
 };
 
 const DEFAULT_ACTIVE_INTERVAL_MS: u64 = 250;
 const DEFAULT_IDLE_INTERVAL_MS: u64 = 5_000;
+const DEFAULT_BASE_SNAPSHOT_INTERVAL_ENTRIES: u64 = 512;
+
+struct MutationReplicationState {
+    wal: ZoneMutationWal,
+    snapshot_store: ZoneBaseSnapshotStore,
+    last_snapshot_sequence: Option<u64>,
+    snapshot_interval_entries: u64,
+}
 
 #[derive(Debug, Clone, Copy)]
 struct ReplicationCadence {
@@ -89,20 +98,21 @@ fn run() -> Result<(), String> {
         limits,
     );
     let cadence = ReplicationCadence::from_env();
-    let mut mutation_wal = mutation_wal_from_env(&active)?;
+    let mut mutation_replication = mutation_replication_from_env(&active)?;
     let mut installed_checksum = None::<String>;
     let mut was_idle = None::<bool>;
 
     loop {
-        if let Some(wal) = mutation_wal.as_mut() {
-            let before = wal.ack();
-            let after = sync_mutation_wal(&active, wal)?;
+        if let Some(replication) = mutation_replication.as_mut() {
+            let before = replication.wal.ack();
+            let after = sync_mutation_wal(&active, &mut replication.wal)?;
             if after.next_sequence != before.next_sequence {
                 eprintln!(
                     "zone-replicator persisted mutation WAL through cursor {} ({})",
                     after.next_sequence, after.latest_digest
                 );
             }
+            maybe_persist_base_snapshot(&active, replication)?;
         }
         let checkpoint = active.export_host_checkpoint()?;
         let session_count = checkpoint.session_count;
@@ -131,9 +141,9 @@ fn run() -> Result<(), String> {
     }
 }
 
-fn mutation_wal_from_env(
+fn mutation_replication_from_env(
     active: &TcpZoneOwnerRpcTransport,
-) -> Result<Option<ZoneMutationWal>, String> {
+) -> Result<Option<MutationReplicationState>, String> {
     let Some(directory) = env::var("MIR2_ZONE_REPLICA_WAL_DIR")
         .ok()
         .map(|value| value.trim().to_string())
@@ -142,15 +152,50 @@ fn mutation_wal_from_env(
         return Ok(None);
     };
     let head = active.replication_head()?;
-    let path = PathBuf::from(directory).join("mutation-batches-v5.jsonl");
-    let wal = ZoneMutationWal::open(path, &head.zone_id, &head.build_id)?;
+    let directory = PathBuf::from(directory);
+    let wal = ZoneMutationWal::open(
+        directory.join("mutation-batches-v5.jsonl"),
+        &head.zone_id,
+        &head.build_id,
+    )?;
     validate_wal_prefix(active, &wal.ack(), head.next_sequence, &head.latest_digest)?;
+    let snapshot_store = ZoneBaseSnapshotStore::new(
+        directory.join("base-snapshot-v5.json"),
+        &head.zone_id,
+        &head.build_id,
+    )?;
+    let last_snapshot_sequence = snapshot_store
+        .load()?
+        .map(|snapshot| {
+            validate_snapshot_prefix(
+                active,
+                snapshot.base_sequence,
+                &snapshot.latest_digest,
+                head.next_sequence,
+                &head.latest_digest,
+            )?;
+            Ok::<u64, String>(snapshot.base_sequence)
+        })
+        .transpose()?;
     eprintln!(
-        "zone-replicator mutation WAL ready at {} (cursor={})",
+        "zone-replicator mutation WAL ready at {} (cursor={}, base={})",
         wal.path().display(),
-        wal.ack().next_sequence
+        wal.ack().next_sequence,
+        last_snapshot_sequence
+            .map(|sequence| sequence.to_string())
+            .unwrap_or_else(|| "none".to_string())
     );
-    Ok(Some(wal))
+    Ok(Some(MutationReplicationState {
+        wal,
+        snapshot_store,
+        last_snapshot_sequence,
+        snapshot_interval_entries: positive_u64_env(
+            "MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES",
+            DEFAULT_BASE_SNAPSHOT_INTERVAL_ENTRIES,
+            1,
+            1_000_000,
+        ),
+    }))
 }
 
 fn sync_mutation_wal(
@@ -181,6 +226,66 @@ fn sync_mutation_wal(
         ));
     }
     Ok(ack)
+}
+
+fn maybe_persist_base_snapshot(
+    active: &TcpZoneOwnerRpcTransport,
+    replication: &mut MutationReplicationState,
+) -> Result<(), String> {
+    let durable_sequence = replication.wal.ack().next_sequence;
+    if durable_sequence == 0 {
+        return Ok(());
+    }
+    if replication.last_snapshot_sequence.is_some_and(|last| {
+        durable_sequence.saturating_sub(last) < replication.snapshot_interval_entries
+    }) {
+        return Ok(());
+    }
+    let snapshot = active.export_base_snapshot()?;
+    let durable_ack = sync_mutation_wal(active, &mut replication.wal)?;
+    if snapshot.base_sequence > durable_ack.next_sequence {
+        return Err(format!(
+            "base snapshot cursor {} is ahead of durable mutation WAL {}",
+            snapshot.base_sequence, durable_ack.next_sequence
+        ));
+    }
+    let active_head = active.replication_head()?;
+    validate_snapshot_prefix(
+        active,
+        snapshot.base_sequence,
+        &snapshot.latest_digest,
+        active_head.next_sequence,
+        &active_head.latest_digest,
+    )?;
+    replication.snapshot_store.persist(&snapshot)?;
+    replication.last_snapshot_sequence = Some(snapshot.base_sequence);
+    eprintln!(
+        "zone-replicator persisted base snapshot {} at cursor {} (compressed={} bytes, raw={} bytes, applyReady={})",
+        snapshot.snapshot_id,
+        snapshot.base_sequence,
+        snapshot.payload.len(),
+        snapshot.uncompressed_bytes,
+        snapshot.apply_ready
+    );
+    Ok(())
+}
+
+fn validate_snapshot_prefix(
+    active: &TcpZoneOwnerRpcTransport,
+    snapshot_sequence: u64,
+    snapshot_digest: &str,
+    active_next_sequence: u64,
+    active_latest_digest: &str,
+) -> Result<(), String> {
+    let ack = ZoneMutationWalAck {
+        zone_id: String::new(),
+        build_id: String::new(),
+        next_sequence: snapshot_sequence,
+        latest_digest: snapshot_digest.to_string(),
+        durable: true,
+    };
+    validate_wal_prefix(active, &ack, active_next_sequence, active_latest_digest)
+        .map_err(|error| format!("base snapshot is not a prefix of active Head: {error}"))
 }
 
 fn validate_wal_prefix(
@@ -219,13 +324,15 @@ fn validate_wal_prefix(
 }
 
 fn duration_from_env(name: &str, default_ms: u64, min_ms: u64, max_ms: u64) -> Duration {
-    Duration::from_millis(
-        env::var(name)
-            .ok()
-            .and_then(|value| value.trim().parse::<u64>().ok())
-            .unwrap_or(default_ms)
-            .clamp(min_ms, max_ms),
-    )
+    Duration::from_millis(positive_u64_env(name, default_ms, min_ms, max_ms))
+}
+
+fn positive_u64_env(name: &str, default: u64, min: u64, max: u64) -> u64 {
+    env::var(name)
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(default)
+        .clamp(min, max)
 }
 
 fn required_env(name: &str) -> Result<String, String> {

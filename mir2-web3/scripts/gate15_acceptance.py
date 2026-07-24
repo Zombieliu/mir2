@@ -255,6 +255,9 @@ def main() -> int:
         forward_logs = wait_logs(
             "zone-replicator", "persisted mutation WAL", timeout=30
         )
+        forward_logs = wait_logs(
+            "zone-replicator", "persisted base snapshot", timeout=30
+        )
 
         compose(["stop", "dubhe-a"])
         expiry = int(time.time() * 1000) + 3_600_000
@@ -312,6 +315,7 @@ def main() -> int:
                 "reverse",
                 "up",
                 "-d",
+                "--no-deps",
                 "zone-replicator-b-to-a",
             ]
         )
@@ -320,6 +324,9 @@ def main() -> int:
         )
         reverse_logs = wait_logs(
             "zone-replicator-b-to-a", "persisted mutation WAL", timeout=30
+        )
+        reverse_logs = wait_logs(
+            "zone-replicator-b-to-a", "persisted base snapshot", timeout=30
         )
         # Validator containers can receive new bridge addresses while Dubhe A
         # is recovered. Restart the disposable projectors so their HTTP clients
@@ -371,6 +378,8 @@ def main() -> int:
             in reverse_logs,
             "forwardMutationWalDurable": "persisted mutation WAL" in forward_logs,
             "reverseMutationWalDurable": "persisted mutation WAL" in reverse_logs,
+            "forwardBaseSnapshotDurable": "persisted base snapshot" in forward_logs,
+            "reverseBaseSnapshotDurable": "persisted base snapshot" in reverse_logs,
             "bothProjectorsHealthy": all(
                 status.get("healthy") is True for status in projector_health
             ),

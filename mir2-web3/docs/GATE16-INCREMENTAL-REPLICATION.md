@@ -253,6 +253,52 @@ docker run --rm \
   sh -c 'wc -l -c /wal/mutation-batches-v5.jsonl'
 ```
 
+## Gate 16.4a 已落地：按 Zone 的压缩 base snapshot
+
+Zone RPC 现在可以导出与当前 v5 Head 绑定的 base snapshot。快照包含：
+
+- `zoneId`、不可变 `buildId`；
+- `baseSequence` 和该位置的 `latestDigest`；
+- 该 Zone 的完整共享运行时状态，包括 ZoneManager、怪物、地面物品、
+  玩家 presence、交易/租赁中间态、NPC 随机种子和 pending side effects；
+- 该 Zone 每个在线 Session 的 durable commitment 和 active-character
+  checkpoint；
+- `mutationCoverage=commandJournal` 与强制 `applyReady=false`；
+- 确定性 gzip payload 和覆盖全部元数据/payload 的 SHA-256 `snapshotId`。
+
+接收端把压缩 payload 以 base64 放入 JSON wire/file，先做 64 MiB 解压上限、
+checksum、Zone/build identity、Session 去重和内部 payload 校验，再通过：
+
+```text
+临时文件 0600 → write → flush → fsync(file) → atomic rename → fsync(directory)
+```
+
+写入 `base-snapshot-v5.json`。进程重启时会重新验证 snapshot 是当前 active
+Head 的合法前缀；snapshot 比 active 超前、摘要冲突、完整文件损坏或身份不一致
+都会拒绝启动。
+
+默认每新增 512 条 command-journal mutation 生成新 base；首次出现非零
+cursor 时立即生成。可通过以下变量调整：
+
+```text
+MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES=512
+```
+
+最新完整 Gate 15 故障演练的真实结果：
+
+| 方向 | base cursor | gzip payload | JSON 文件 | 未压缩状态 |
+| --- | ---: | ---: | ---: | ---: |
+| A → B | 11 | 19,064 bytes | 25,827 bytes | 248,139 bytes |
+| B → A | 712 | 21,968 bytes | 29,700 bytes | 313,092 bytes |
+
+同一次演练里四个 Commonware validator 最终一致，两个真实玩家在切换后分别
+继续完成 `80` 和 `49` 次 Zone 响应，双向 WAL、双向 base snapshot、反向
+v4 checkpoint 和两个 Projector 均通过自动断言。
+
+这个 base 目前是“可验证的权威共享状态锚点”，还不是可独立晋升的完整
+Session 镜像。私人 Session 运行时仍有部分字段只能由 v4 journal replay
+重建，所以 replicator 不会用 base 覆盖 standby，也不会据此截断 WAL。
+
 ## Gate 16 后续实施顺序
 
 | 阶段 | 交付物 | 必须证明的事实 |
@@ -260,7 +306,8 @@ docker run --rm \
 | 16.1 | v4 指标、历史基准、容器证据 | 已完成；后续结果有固定对照 |
 | 16.2 | 每 Zone v5 Head 与连续 cursor | 已完成；`O(1)` 状态读取，小于 1 KB，尚不可晋升 |
 | 16.3 | 有界 mutation batch、durable ACK 和接收 WAL | 已完成安全桥接；重启恢复确认位置，v4 仍负责 standby 正确性 |
-| 16.4 | authoritative mutation capture、base snapshot、增量应用和 WAL 截断 | tick/AI 完整覆盖；100k 历史不会导致无限内存/网络增长 |
+| 16.4a | 按 Zone 压缩 base snapshot 与原子持久化 | 已完成；snapshot/cursor/digest 绑定，强制不可 apply |
+| 16.4b | authoritative mutation capture、完整 Session image、增量应用和 WAL 截断 | tick/AI 完整覆盖；100k 历史不会导致无限内存/网络增长 |
 | 16.5 | standby readiness 与安全 promotion | 缺口、校验失败或 build 不一致时禁止晋升 |
 | 16.6 | 50/125 玩家、700/10k/100k 历史验收 | v5 CPU 和网络相对 v4 至少下降 80% |
 
@@ -274,13 +321,14 @@ docker run --rm \
 
 ## 当前边界
 
-- Gate 16.1～16.3 已完成基线、Head、可验证 batch 和持久接收 WAL；尚未完成
-  仅依靠 v5 恢复并晋升的闭环。
+- Gate 16.1～16.4a 已完成基线、Head、可验证 batch、持久接收 WAL 和压缩
+  base snapshot；尚未完成仅依靠 v5 恢复并晋升的闭环。
 - 当前基准使用一个顺序 `KeepAlive` 命令流来隔离历史长度成本，不包含完整
   战斗、怪物 AI、数据库和公网抖动。
 - 当前 WAL 只覆盖 Host command journal，不覆盖自主 tick、怪物 AI 和计时器；
   接收端也尚未把 batch 增量应用为可晋升的 standby 状态。
-- WAL 尚未建立 base snapshot、压缩、截断和磁盘配额，不能无限期运行。
+- base snapshot 已压缩并持久化，但 WAL 尚未截断或设置磁盘配额，不能无限期
+  运行。
 - 默认 `buildId` 是编译信息或包版本；生产镜像必须显式注入不可变的 commit
   或 image digest，不能仅靠同版本号判定二进制兼容。
 - 700 条容器证据是快速可复现基线；10k/100k 是完整认证矩阵，会消耗明显更长

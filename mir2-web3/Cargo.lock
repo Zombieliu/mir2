@@ -2352,6 +2352,7 @@ dependencies = [
  "commonware-runtime",
  "commonware-utils",
  "ed25519-consensus",
+ "flate2",
  "futures-util",
  "hmac 0.13.0",
  "mir2-game-data",

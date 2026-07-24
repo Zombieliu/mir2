@@ -3093,6 +3093,34 @@ impl SharedInProcessZoneRuntimeFactory {
         .map_err(|error| format!("failed to encode shared Zone factory checkpoint: {error}"))
     }
 
+    pub fn zone_checkpoint_bytes(&self, zone_id: &ZoneId) -> Result<Vec<u8>, String> {
+        let resources = self
+            .zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .get(zone_id)
+            .cloned();
+        let mut zones = BTreeMap::new();
+        if let Some(resources) = resources {
+            let checkpoint = resources
+                .zone_state
+                .lock()
+                .map_err(|_| format!("shared Zone {} state mutex was poisoned", zone_id))?
+                .checkpoint()?;
+            zones.insert(zone_id.clone(), checkpoint);
+        }
+        serde_json::to_vec(&SharedInProcessZoneFactoryCheckpoint {
+            version: SHARED_ZONE_FACTORY_CHECKPOINT_VERSION,
+            zones,
+        })
+        .map_err(|error| {
+            format!(
+                "failed to encode shared Zone {} checkpoint: {error}",
+                zone_id
+            )
+        })
+    }
+
     pub fn install_checkpoint_bytes(&self, bytes: &[u8]) -> Result<usize, String> {
         let checkpoint: SharedInProcessZoneFactoryCheckpoint = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode shared Zone factory checkpoint: {error}"))?;

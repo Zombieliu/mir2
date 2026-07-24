@@ -12,11 +12,11 @@ use mir2_gateway::routing::PerMapSessionRouter;
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
-    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostControlPlane, ZoneHostHeartbeat,
-    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneMapScope, ZoneMutationWal,
-    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry,
-    ZoneReplicationCoverage, ZoneRpcLimits, ZONE_REPLICATION_HEAD_VERSION,
-    ZONE_RPC_PROTOCOL_VERSION,
+    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneBaseSnapshotStore,
+    ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostRegistration, ZoneHostServer, ZoneId,
+    ZoneMapScope, ZoneMutationWal, ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority,
+    ZoneOwnerRpcTransport, ZoneRegistry, ZoneReplicationCoverage, ZoneRpcLimits,
+    ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::WorldCommand;
@@ -702,6 +702,29 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
     assert_eq!(second_batch.latest_digest, active_a_head.latest_digest);
     assert!(!second_batch.has_more);
 
+    let base_snapshot = active_a
+        .export_base_snapshot()
+        .expect("Zone A base snapshot should export");
+    assert_eq!(base_snapshot.version, ZONE_REPLICATION_HEAD_VERSION);
+    assert_eq!(base_snapshot.zone_id, "map:0");
+    assert_eq!(base_snapshot.build_id, active_a_head.build_id);
+    assert_eq!(
+        base_snapshot.mutation_coverage,
+        ZoneReplicationCoverage::CommandJournal
+    );
+    assert!(!base_snapshot.apply_ready);
+    assert_eq!(base_snapshot.base_sequence, 2);
+    assert_eq!(base_snapshot.latest_digest, active_a_head.latest_digest);
+    assert_eq!(base_snapshot.session_count, 1);
+    assert!(base_snapshot.uncompressed_bytes > 0);
+    assert!(!base_snapshot.payload.is_empty());
+    base_snapshot
+        .verify()
+        .expect("untampered base snapshot should verify");
+    let mut tampered_snapshot = base_snapshot.clone();
+    tampered_snapshot.payload[0] ^= 0xff;
+    assert!(tampered_snapshot.verify().is_err());
+
     let wal_path = std::env::temp_dir().join(format!(
         "mir2-gate16-wal-{}-{}.jsonl",
         std::process::id(),
@@ -748,6 +771,32 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
             .contains("corrupt complete record")
     );
     fs::remove_file(&wal_path).unwrap();
+
+    let snapshot_path = wal_path.with_extension("base.json");
+    let snapshot_store =
+        ZoneBaseSnapshotStore::new(&snapshot_path, "map:0", &active_a_head.build_id)
+            .expect("base snapshot store should open");
+    snapshot_store
+        .persist(&base_snapshot)
+        .expect("base snapshot should atomically persist");
+    assert_eq!(
+        snapshot_store
+            .load()
+            .expect("persisted base snapshot should load"),
+        Some(base_snapshot.clone())
+    );
+    let wrong_identity_store =
+        ZoneBaseSnapshotStore::new(&snapshot_path, "map:0", "different-build")
+            .expect("identity-bound base snapshot store should open");
+    assert!(wrong_identity_store.load().is_err());
+    OpenOptions::new()
+        .append(true)
+        .open(&snapshot_path)
+        .unwrap()
+        .write_all(b"x")
+        .unwrap();
+    assert!(snapshot_store.load().is_err());
+    fs::remove_file(&snapshot_path).unwrap();
 
     let caught_up = active_a
         .export_mutation_batch(2, 8, 1024 * 1024)

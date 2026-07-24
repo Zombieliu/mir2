@@ -100,12 +100,13 @@ pub use routing::{
 };
 pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
-pub use zone_replication::{ZoneMutationWal, ZoneMutationWalAck};
+pub use zone_replication::{ZoneBaseSnapshotStore, ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
-    validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostCheckpointTelemetry, ZoneHostHealth,
-    ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope,
-    ZoneMutationBatch, ZoneMutationEntry, ZoneReplicationCoverage, ZoneReplicationHead,
-    ZoneRpcLimits, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+    validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneBaseSnapshot,
+    ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth, ZoneHostServer,
+    ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope, ZoneMutationBatch,
+    ZoneMutationEntry, ZoneReplicationCoverage, ZoneReplicationHead, ZoneRpcLimits,
+    DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
     DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES, ZONE_HOST_CHECKPOINT_VERSION,
     ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
