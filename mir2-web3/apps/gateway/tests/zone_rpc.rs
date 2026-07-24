@@ -712,7 +712,7 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
         base_snapshot.mutation_coverage,
         ZoneReplicationCoverage::CommandJournal
     );
-    assert!(!base_snapshot.apply_ready);
+    assert!(base_snapshot.apply_ready);
     assert_eq!(base_snapshot.base_sequence, 2);
     assert_eq!(base_snapshot.latest_digest, active_a_head.latest_digest);
     assert_eq!(base_snapshot.session_count, 1);
@@ -831,6 +831,123 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
         .expect("v4 checkpoint should rebuild v5 heads");
     assert_eq!(standby_a.replication_head().unwrap(), active_a_head);
     assert_eq!(standby_b.replication_head().unwrap(), active_b_head);
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts_history() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::new("map:0");
+    let other_zone_id = ZoneId::new("map:other");
+    let active = test_transport(active_address, zone_id.clone(), "base-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "base-session");
+    let standby_other = test_transport(standby_address, other_zone_id.clone(), "other-session");
+    let lease = authority.owner_lease(&zone_id);
+    let other_lease = authority.owner_lease(&other_zone_id);
+
+    standby_other
+        .execute(ZoneOwnerCommandRequest::direct(
+            other_lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 99 }),
+        ))
+        .expect("unrelated Zone should have independent history");
+    let other_head_before = standby_other.replication_head().unwrap();
+
+    start_new_character(&active, lease.clone(), "base-account", "BasePlayer");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::TransferMap {
+                key: "crystal:0:330:270".to_string(),
+            },
+        ))
+        .expect("active player should move into the Crystal map");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::Walk {
+                direction: MirDirection::Right,
+            }),
+        ))
+        .expect("active player movement should execute");
+
+    let active_identity = active.active_identity().unwrap();
+    let active_snapshot = active.world_snapshot().unwrap();
+    let active_head = active.replication_head().unwrap();
+    let base = active.export_base_snapshot().unwrap();
+    assert!(base.apply_ready);
+    assert_eq!(base.base_sequence, active_head.next_sequence);
+    assert!(base.base_sequence > 0);
+
+    standby
+        .install_base_snapshot(&base)
+        .expect("standby should install the complete Session base image");
+    assert_eq!(standby.active_identity().unwrap(), active_identity);
+    let standby_snapshot = standby.world_snapshot().unwrap();
+    assert_eq!(
+        standby_snapshot.map_file_name,
+        active_snapshot.map_file_name
+    );
+    assert_eq!(standby_snapshot.gold, active_snapshot.gold);
+    assert_eq!(
+        standby_snapshot.inventory_items,
+        active_snapshot.inventory_items
+    );
+    assert_eq!(
+        standby_snapshot.equipment_items,
+        active_snapshot.equipment_items
+    );
+    assert_eq!(standby_snapshot.quest_log, active_snapshot.quest_log);
+    assert_eq!(standby_snapshot.known_skills, active_snapshot.known_skills);
+
+    let installed_head = standby.replication_head().unwrap();
+    assert_eq!(
+        installed_head.base_snapshot_id,
+        Some(base.snapshot_id.clone())
+    );
+    assert_eq!(installed_head.base_sequence, base.base_sequence);
+    assert_eq!(installed_head.oldest_available_sequence, base.base_sequence);
+    assert_eq!(installed_head.next_sequence, base.base_sequence);
+    assert_eq!(installed_head.latest_digest, base.latest_digest);
+    assert!(!installed_head.promotion_ready);
+    assert!(standby
+        .export_mutation_batch(0, 8, 1024 * 1024)
+        .expect_err("pre-base history must be compacted")
+        .contains("replication_cursor_compacted"));
+    let caught_up = standby
+        .export_mutation_batch(base.base_sequence, 8, 1024 * 1024)
+        .expect("base cursor should be caught up");
+    assert!(caught_up.entries.is_empty());
+    assert_eq!(caught_up.previous_digest, base.latest_digest);
+    assert!(standby
+        .export_host_checkpoint()
+        .expect_err("v4 export must fail after v5 compaction")
+        .contains("checkpoint_history_compacted"));
+
+    assert_eq!(standby_other.replication_head().unwrap(), other_head_before);
+    assert_eq!(standby_server.session_count(), 2);
+
+    standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 100 }),
+        ))
+        .expect("post-base mutation should execute");
+    let post_base_head = standby.replication_head().unwrap();
+    assert_eq!(post_base_head.next_sequence, base.base_sequence + 1);
+    let post_base_batch = standby
+        .export_mutation_batch(base.base_sequence, 8, 1024 * 1024)
+        .expect("post-base delta should export");
+    assert_eq!(post_base_batch.entries.len(), 1);
+    assert_eq!(post_base_batch.entries[0].sequence, base.base_sequence);
+    assert_eq!(post_base_batch.previous_digest, base.latest_digest);
+    assert_eq!(post_base_batch.latest_digest, post_base_head.latest_digest);
 
     stop_server(active_address, active_stop, active_handle);
     stop_server(standby_address, standby_stop, standby_handle);

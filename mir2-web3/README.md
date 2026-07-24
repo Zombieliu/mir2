@@ -83,9 +83,13 @@ Bevy runtimes.
   capture, incremental standby apply, compaction, and promotion readiness remain
   later Gate 16 work.
 - Gate 16.4a adds per-Zone, cursor-bound gzip base snapshots with SHA-256
-  identity and crash-safe atomic persistence. They remain explicitly
-  `applyReady=false` until the complete private Session image and autonomous
-  mutation stream are available.
+  identity and crash-safe atomic persistence.
+- Gate 16.4b1 makes complete Session images installable without replaying old
+  commands. Installation rebuilds and verifies private character state in
+  isolation, atomically adopts one Zone resource image, preserves unrelated
+  Zones, reports the compacted base cursor in v5 Head, and keeps
+  `promotionReady=false` until autonomous tick/AI capture and incremental apply
+  are complete.
 
 ## Crystal Reference
 

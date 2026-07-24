@@ -360,6 +360,7 @@ RMT、经济通胀和合规问题。
 | Gate 16.2 | 每 Zone v5 Head、连续 cursor、摘要链和显式 readiness 安全闸 |
 | Gate 16.3 | 有界可验证 mutation batch、fsync 后 ACK 的持久接收 WAL 和双向故障演练 |
 | Gate 16.4a | 按 Zone gzip base snapshot、SHA-256 身份和崩溃安全的原子持久化 |
+| Gate 16.4b1 | 无需重放旧命令的完整 Session 基线安装、per-Zone 原子发布和 base-aware cursor |
 
 Gate 15 已接受的核心结果：
 
@@ -393,16 +394,22 @@ batch，以及写入、`flush`、`fsync` 全部成功后才确认的接收 WAL�
 
 当前 Head 仍明确返回 `mutationCoverage=commandJournal` 和
 `promotionReady=false`。replicator 会先持久化 v5 新增命令，再继续安装 v4
-checkpoint；自主 tick、怪物 AI、完整 Session image、增量 standby 应用和
-WAL 截断将在 Gate 16.4b 完成。现在得到的是“重启不丢接收确认位置”的安全
-桥接，不是已经可以只靠 v5 晋升的生产复制闭环。
+checkpoint；自主 tick、怪物 AI、增量 standby 应用和 WAL 截断仍需在
+Gate 16.4b 后续完成。现在得到的是“重启不丢接收确认位置”的安全桥接，不是
+已经可以只靠 v5 晋升的生产复制闭环。
 
 Gate 16.4a 已把 base snapshot 真实接入双向 replicator。快照按 Zone 导出，
 绑定 cursor/digest，包含完整共享运行时状态和 Session commitments，并使用
 gzip + base64 + SHA-256；接收端通过临时文件、文件 fsync、原子 rename 和目录
 fsync 落盘。最新演练的 A→B / B→A 文件分别为 `25,827 / 29,700 bytes`，
-对应未压缩状态 `248,139 / 313,092 bytes`。由于完整私人 Session image 与
-自主 tick/AI mutation 尚未覆盖，snapshot 仍强制 `applyReady=false`。
+对应未压缩状态 `248,139 / 313,092 bytes`。
+
+Gate 16.4b1 已补齐 Session 基线：活跃玩家由可信 Passkey bootstrap、
+`StartGame`、完整 `CharacterSaveRecord` 和共享 Zone image 重建；发布前在隔离
+账号库中逐 Session 校验 commitment。安装成功后 v5 Head 从 base cursor
+继续，旧 cursor 返回 `replication_cursor_compacted`，其他 Zone 不受影响。
+这只表示 base 可安全安装，不表示副本可晋升；自主 tick/AI mutation 与
+post-base batch 应用尚未完成，所以 `promotionReady` 仍为 `false`。
 
 ## 本地验收 Gate 15
 

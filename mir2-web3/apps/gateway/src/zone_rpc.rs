@@ -13,11 +13,11 @@ use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::{Compression, GzBuilder};
 use mir2_protocol::{
-    decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet, Point,
-    ServerPacket,
+    decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet,
+    ClientPacket, Point, ServerPacket,
 };
 use mir2_simulation::{
-    ActiveSessionIdentity, CharacterSaveRecord, WorldCommand, WorldCommandExecution,
+    AccountRecord, ActiveSessionIdentity, CharacterSaveRecord, WorldCommand, WorldCommandExecution,
     WorldCommandOutcome, WorldSnapshot,
 };
 use serde::{Deserialize, Serialize};
@@ -302,6 +302,7 @@ impl ZoneBaseSnapshot {
         sessions: Vec<WireSessionCommitment>,
     ) -> Result<Self, ZoneRpcFault> {
         let session_count = sessions.len();
+        let apply_ready = sessions.iter().all(session_image_is_complete);
         let payload = serde_json::to_vec(&WireZoneBaseSnapshotPayload {
             version: ZONE_REPLICATION_HEAD_VERSION,
             zone_id: zone_id.clone(),
@@ -346,7 +347,7 @@ impl ZoneBaseSnapshot {
             zone_id,
             build_id,
             mutation_coverage: ZoneReplicationCoverage::CommandJournal,
-            apply_ready: false,
+            apply_ready,
             base_sequence,
             latest_digest,
             created_at_ms: unix_now_ms(),
@@ -371,12 +372,6 @@ impl ZoneBaseSnapshot {
         validate_identifier("base snapshot build id", &self.build_id)?;
         if self.mutation_coverage != ZoneReplicationCoverage::CommandJournal {
             return Err("unsupported base snapshot mutation coverage".to_string());
-        }
-        if self.apply_ready {
-            return Err(
-                "command-journal base snapshot must not claim incremental apply readiness"
-                    .to_string(),
-            );
         }
         parse_hex_digest(&self.latest_digest)?;
         if self.uncompressed_bytes > DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES {
@@ -411,6 +406,13 @@ impl ZoneBaseSnapshot {
             if !identities.insert(session.session_id.clone()) {
                 return Err(format!(
                     "base snapshot contains duplicate session {}",
+                    session.session_id
+                ));
+            }
+            validate_session_image(&session)?;
+            if self.apply_ready && !session_image_is_complete(&session) {
+                return Err(format!(
+                    "base snapshot session {} is incomplete but snapshot claims apply readiness",
                     session.session_id
                 ));
             }
@@ -490,6 +492,9 @@ struct ZoneMapCatalog {
 
 #[derive(Debug, Clone)]
 struct ZoneReplicationCursor {
+    base_snapshot_id: Option<String>,
+    base_sequence: u64,
+    base_digest: [u8; 32],
     next_sequence: u64,
     latest_digest: [u8; 32],
     host_entry_indexes: Vec<usize>,
@@ -499,6 +504,9 @@ struct ZoneReplicationCursor {
 impl Default for ZoneReplicationCursor {
     fn default() -> Self {
         Self {
+            base_snapshot_id: None,
+            base_sequence: 0,
+            base_digest: [0; 32],
             next_sequence: 0,
             latest_digest: [0; 32],
             host_entry_indexes: Vec::new(),
@@ -507,7 +515,7 @@ impl Default for ZoneReplicationCursor {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct ZoneReplicationCatalog {
     cursors: BTreeMap<String, ZoneReplicationCursor>,
 }
@@ -542,6 +550,38 @@ impl ZoneReplicationCatalog {
         Ok(catalog)
     }
 
+    fn from_base(snapshot: &ZoneBaseSnapshot) -> Result<Self, ZoneRpcFault> {
+        let base_digest = parse_hex_digest(&snapshot.latest_digest).map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_invalid",
+                format!(
+                    "Zone {} base snapshot digest is invalid: {error}",
+                    snapshot.zone_id
+                ),
+            )
+        })?;
+        let mut cursors = BTreeMap::new();
+        cursors.insert(
+            snapshot.zone_id.clone(),
+            ZoneReplicationCursor {
+                base_snapshot_id: Some(snapshot.snapshot_id.clone()),
+                base_sequence: snapshot.base_sequence,
+                base_digest,
+                next_sequence: snapshot.base_sequence,
+                latest_digest: base_digest,
+                host_entry_indexes: Vec::new(),
+                entry_digests: Vec::new(),
+            },
+        );
+        Ok(Self { cursors })
+    }
+
+    fn contains_compacted_history(&self) -> bool {
+        self.cursors
+            .values()
+            .any(|cursor| cursor.base_snapshot_id.is_some() || cursor.base_sequence > 0)
+    }
+
     fn head(&self, zone_id: &str) -> ZoneReplicationHead {
         let cursor = self.cursors.get(zone_id).cloned().unwrap_or_default();
         ZoneReplicationHead {
@@ -550,9 +590,9 @@ impl ZoneReplicationCatalog {
             build_id: zone_replication_build_id(),
             mutation_coverage: ZoneReplicationCoverage::CommandJournal,
             promotion_ready: false,
-            base_snapshot_id: None,
-            base_sequence: 0,
-            oldest_available_sequence: 0,
+            base_snapshot_id: cursor.base_snapshot_id,
+            base_sequence: cursor.base_sequence,
+            oldest_available_sequence: cursor.base_sequence,
             entry_count: cursor.next_sequence,
             next_sequence: cursor.next_sequence,
             last_sequence: cursor.next_sequence.checked_sub(1),
@@ -570,6 +610,15 @@ impl ZoneReplicationCatalog {
     ) -> Result<ZoneMutationBatch, ZoneRpcFault> {
         let empty = ZoneReplicationCursor::default();
         let cursor = self.cursors.get(zone_id).unwrap_or(&empty);
+        if first_sequence < cursor.base_sequence {
+            return Err(ZoneRpcFault::new(
+                "replication_cursor_compacted",
+                format!(
+                    "Zone {zone_id} cursor {first_sequence} predates oldest available sequence {}",
+                    cursor.base_sequence
+                ),
+            ));
+        }
         if first_sequence > cursor.next_sequence {
             return Err(ZoneRpcFault::new(
                 "replication_cursor_ahead",
@@ -579,14 +628,15 @@ impl ZoneReplicationCatalog {
                 ),
             ));
         }
-        let first_index = usize::try_from(first_sequence).map_err(|_| {
-            ZoneRpcFault::new(
-                "replication_cursor_invalid",
-                format!("Zone {zone_id} cursor does not fit this host"),
-            )
-        })?;
+        let first_index = usize::try_from(first_sequence.saturating_sub(cursor.base_sequence))
+            .map_err(|_| {
+                ZoneRpcFault::new(
+                    "replication_cursor_invalid",
+                    format!("Zone {zone_id} cursor does not fit this host"),
+                )
+            })?;
         let previous_digest = if first_index == 0 {
-            [0; 32]
+            cursor.base_digest
         } else {
             *cursor.entry_digests.get(first_index - 1).ok_or_else(|| {
                 ZoneRpcFault::new(
@@ -610,12 +660,20 @@ impl ZoneReplicationCatalog {
                     format!("Zone {zone_id} references missing host journal entry {host_index}"),
                 )
             })?;
-            let sequence = u64::try_from(zone_index).map_err(|_| {
-                ZoneRpcFault::new(
-                    "replication_sequence_invalid",
-                    format!("Zone {zone_id} sequence does not fit the wire format"),
-                )
-            })?;
+            let sequence = cursor
+                .base_sequence
+                .checked_add(u64::try_from(zone_index).map_err(|_| {
+                    ZoneRpcFault::new(
+                        "replication_sequence_invalid",
+                        format!("Zone {zone_id} sequence does not fit the wire format"),
+                    )
+                })?)
+                .ok_or_else(|| {
+                    ZoneRpcFault::new(
+                        "replication_sequence_exhausted",
+                        format!("Zone {zone_id} sequence overflowed"),
+                    )
+                })?;
             let mut canonical_entry = host_entry.clone();
             canonical_entry.sequence = sequence;
             let payload = serde_json::to_vec(&canonical_entry).map_err(|error| {
@@ -670,7 +728,7 @@ impl ZoneReplicationCatalog {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct ZoneHostJournal {
     entries: Vec<WireHostJournalEntry>,
     replication: ZoneReplicationCatalog,
@@ -691,6 +749,38 @@ impl ZoneHostJournal {
             max_entries,
             max_payload_bytes,
         )
+    }
+
+    fn install_base(&mut self, snapshot: &ZoneBaseSnapshot) -> Result<(), ZoneRpcFault> {
+        self.entries
+            .retain(|entry| entry.zone_id != snapshot.zone_id);
+        let mut cursors = self
+            .replication
+            .cursors
+            .iter()
+            .filter(|(zone_id, _)| zone_id.as_str() != snapshot.zone_id)
+            .map(|(zone_id, cursor)| {
+                (
+                    zone_id.clone(),
+                    ZoneReplicationCursor {
+                        base_snapshot_id: cursor.base_snapshot_id.clone(),
+                        base_sequence: cursor.base_sequence,
+                        base_digest: cursor.base_digest,
+                        next_sequence: cursor.base_sequence,
+                        latest_digest: cursor.base_digest,
+                        host_entry_indexes: Vec::new(),
+                        entry_digests: Vec::new(),
+                    },
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        cursors.extend(ZoneReplicationCatalog::from_base(snapshot)?.cursors);
+        let mut replication = ZoneReplicationCatalog { cursors };
+        for (host_entry_index, entry) in self.entries.iter().enumerate() {
+            replication.append(host_entry_index, entry)?;
+        }
+        self.replication = replication;
+        Ok(())
     }
 }
 
@@ -953,6 +1043,30 @@ impl TcpZoneOwnerRpcTransport {
             ));
         }
         Ok(snapshot)
+    }
+
+    pub fn install_base_snapshot(&self, snapshot: &ZoneBaseSnapshot) -> Result<(), String> {
+        snapshot.verify()?;
+        if snapshot.zone_id != self.zone_id.as_str() {
+            return Err(format!(
+                "base snapshot Zone {} does not match requested Zone {}",
+                snapshot.zone_id,
+                self.zone_id.as_str()
+            ));
+        }
+        match self.call(ZoneRpcRequest::InstallBaseSnapshot {
+            snapshot: snapshot.clone(),
+        })? {
+            ZoneRpcPayload::Unit => {
+                self.outbound_acknowledged.store(0, Ordering::Release);
+                *self
+                    .outbound_stream_id
+                    .lock()
+                    .map_err(|_| "zone RPC outbound stream mutex poisoned".to_string())? = None;
+                Ok(())
+            }
+            payload => Err(unexpected_payload("install_base_snapshot", &payload)),
+        }
     }
 
     pub fn poll_outbounds(
@@ -1906,6 +2020,10 @@ impl ZoneHostServer {
             ZoneRpcRequest::ExportBaseSnapshot => {
                 return self.export_base_snapshot(&ZoneId::new(envelope.zone_id));
             }
+            ZoneRpcRequest::InstallBaseSnapshot { snapshot } => {
+                self.install_base_snapshot(&envelope.zone_id, &snapshot)?;
+                return Ok(ZoneRpcPayload::Unit);
+            }
             ZoneRpcRequest::ExportHostCheckpoint => return self.export_host_checkpoint(),
             ZoneRpcRequest::InstallHostCheckpoint { bytes } => {
                 self.install_host_checkpoint(&bytes)?;
@@ -1942,6 +2060,7 @@ impl ZoneHostServer {
             ZoneRpcRequest::ReplicationHead
             | ZoneRpcRequest::ExportMutationBatch { .. }
             | ZoneRpcRequest::ExportBaseSnapshot
+            | ZoneRpcRequest::InstallBaseSnapshot { .. }
             | ZoneRpcRequest::ExportHostCheckpoint
             | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
@@ -2180,12 +2299,18 @@ impl ZoneHostServer {
 
     fn export_host_checkpoint(&self) -> Result<ZoneRpcPayload, ZoneRpcFault> {
         let started = Instant::now();
-        let entries = self
+        let journal = self
             .journal
             .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
-            .entries
-            .clone();
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?;
+        if journal.replication.contains_compacted_history() {
+            return Err(ZoneRpcFault::new(
+                "checkpoint_history_compacted",
+                "v4 host checkpoint export is unavailable after a v5 base snapshot installation",
+            ));
+        }
+        let entries = journal.entries.clone();
+        drop(journal);
         let sessions = self
             .sessions
             .lock()
@@ -2318,6 +2443,247 @@ impl ZoneHostServer {
             ));
         }
         Ok(ZoneRpcPayload::BaseSnapshot { snapshot })
+    }
+
+    fn install_base_snapshot(
+        &self,
+        requested_zone_id: &str,
+        snapshot: &ZoneBaseSnapshot,
+    ) -> Result<(), ZoneRpcFault> {
+        snapshot.verify().map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_invalid",
+                format!("Zone base snapshot verification failed: {error}"),
+            )
+        })?;
+        if snapshot.zone_id != requested_zone_id {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                format!(
+                    "base snapshot Zone {} does not match requested Zone {requested_zone_id}",
+                    snapshot.zone_id
+                ),
+            ));
+        }
+        if snapshot.build_id != zone_replication_build_id() {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_build_mismatch",
+                format!(
+                    "base snapshot build {} does not match host build {}",
+                    snapshot.build_id,
+                    zone_replication_build_id()
+                ),
+            ));
+        }
+        if !snapshot.apply_ready {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_incomplete",
+                "base snapshot does not contain a complete restorable Session image",
+            ));
+        }
+        let payload = snapshot.decode_payload().map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_decode",
+                format!("Zone base snapshot payload decode failed: {error}"),
+            )
+        })?;
+
+        // First reconstruct against an isolated account store. This validates
+        // every bootstrap, private character image, shared Zone image, and
+        // commitment without mutating the live host.
+        let validation_config = self
+            .config
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
+            .fork_with_isolated_account_store()
+            .map_err(classify_runtime_error)?;
+        seed_base_snapshot_accounts(&validation_config, &payload.sessions)?;
+        let validation_factory = Arc::new(
+            self.runtime_factory
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+                .fresh(),
+        );
+        self.reconstruct_base_sessions(&validation_factory, &validation_config, &payload)?;
+
+        // Build the publishable image a second time with the live account-store
+        // handle. Roll it back if deterministic reconstruction unexpectedly
+        // diverges before the Zone resources are adopted.
+        let live_config = self
+            .config
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
+            .clone();
+        let original_account_store = live_config
+            .account_store
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "account store mutex poisoned"))?
+            .clone();
+        seed_base_snapshot_accounts(&live_config, &payload.sessions)?;
+        let staged = (|| {
+            let live_factory = Arc::new(
+                self.runtime_factory
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+                    .fresh(),
+            );
+            let live_sessions =
+                self.reconstruct_base_sessions(&live_factory, &live_config, &payload)?;
+            let mut staged_journal = self
+                .journal
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                .clone();
+            staged_journal.install_base(snapshot)?;
+            Ok::<_, ZoneRpcFault>((live_factory, live_sessions, staged_journal))
+        })();
+        let (live_factory, live_sessions, staged_journal) = match staged {
+            Ok(staged) => staged,
+            Err(error) => {
+                if let Ok(mut account_store) = live_config.account_store.lock() {
+                    *account_store = original_account_store;
+                }
+                return Err(error);
+            }
+        };
+
+        let zone_id = ZoneId::new(&snapshot.zone_id);
+        let published = match self
+            .runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .adopt_zone_resources_from(&live_factory, &zone_id)
+            .map_err(classify_runtime_error)
+        {
+            Ok(published) => published,
+            Err(error) => {
+                if let Ok(mut account_store) = live_config.account_store.lock() {
+                    *account_store = original_account_store;
+                }
+                return Err(error);
+            }
+        };
+        if !published && !payload.sessions.is_empty() {
+            if let Ok(mut account_store) = live_config.account_store.lock() {
+                *account_store = original_account_store;
+            }
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_zone_state",
+                format!(
+                    "base snapshot reconstructed Sessions for Zone {} without shared Zone resources",
+                    snapshot.zone_id
+                ),
+            ));
+        }
+
+        let mut sessions = self
+            .sessions
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?;
+        sessions.retain(|(_, zone_id), _| zone_id != &snapshot.zone_id);
+        sessions.extend(live_sessions);
+        drop(sessions);
+        *self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))? =
+            staged_journal;
+        Ok(())
+    }
+
+    fn reconstruct_base_sessions(
+        &self,
+        factory: &Arc<SharedInProcessZoneRuntimeFactory>,
+        config: &GatewayConfig,
+        payload: &WireZoneBaseSnapshotPayload,
+    ) -> Result<BTreeMap<(String, String), Arc<ZoneHostSession>>, ZoneRpcFault> {
+        let mut sessions = BTreeMap::new();
+        for commitment in &payload.sessions {
+            let key = (commitment.session_id.clone(), commitment.zone_id.clone());
+            let session = self.create_replay_session(factory, config, commitment.zone_id.as_str());
+            if let (Some(identity), Some(active_character_bytes)) = (
+                commitment.active_identity.as_ref(),
+                commitment.active_character_bytes.as_ref(),
+            ) {
+                let zone_id = ZoneId::new(&commitment.zone_id);
+                let lease = ZoneOwnerLease::in_process(&zone_id);
+                session.execute_request(ZoneOwnerCommandRequest::direct(
+                    lease.clone(),
+                    WorldCommand::PasskeyLogin {
+                        account_id: identity.account_id.clone(),
+                    },
+                ))?;
+                session.execute_request(ZoneOwnerCommandRequest::direct(
+                    lease,
+                    WorldCommand::ClientPacket(ClientPacket::StartGame {
+                        character_index: identity.character_index,
+                    }),
+                ))?;
+                let actual_identity = session
+                    .hosted
+                    .active_identity()
+                    .map_err(classify_runtime_error)?;
+                if actual_identity.as_ref() != Some(identity) {
+                    return Err(ZoneRpcFault::new(
+                        "base_snapshot_identity",
+                        format!(
+                            "base snapshot bootstrap identity mismatch for session {}: expected={identity:?}, actual={actual_identity:?}",
+                            commitment.session_id
+                        ),
+                    ));
+                }
+                let active_character: CharacterSaveRecord =
+                    serde_json::from_slice(active_character_bytes).map_err(|error| {
+                        ZoneRpcFault::new(
+                            "base_snapshot_decode",
+                            format!(
+                                "session {} active character decode failed: {error}",
+                                commitment.session_id
+                            ),
+                        )
+                    })?;
+                session
+                    .hosted
+                    .restore_active_character_checkpoint(&active_character)
+                    .map_err(classify_runtime_error)?;
+            }
+            sessions.insert(key, session);
+        }
+        factory
+            .install_checkpoint_bytes(&payload.zone_state_bytes)
+            .map_err(classify_runtime_error)?;
+        let actual = session_commitments(&sessions)?;
+        if actual != payload.sessions {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_commitment",
+                format!(
+                    "Zone base snapshot Session image mismatch: {}",
+                    commitment_mismatch_details(&payload.sessions, &actual)
+                ),
+            ));
+        }
+
+        let mut live_sessions = BTreeMap::new();
+        for (key, replay_session) in sessions {
+            let runtime = replay_session
+                .hosted
+                .take_runtime_for_handoff()
+                .map_err(classify_runtime_error)?;
+            let hosted = Arc::new(
+                HostedZoneOwnerCommandClient::from_handoff_with_owner_lease_authority(
+                    runtime,
+                    Arc::clone(&self.owner_lease_authority),
+                ),
+            );
+            live_sessions.insert(
+                key,
+                Arc::new(ZoneHostSession::new(
+                    hosted,
+                    self.limits.max_outbound_messages,
+                )),
+            );
+        }
+        Ok(live_sessions)
     }
 
     fn install_host_checkpoint(&self, bytes: &[u8]) -> Result<(), ZoneRpcFault> {
@@ -2575,6 +2941,9 @@ enum ZoneRpcRequest {
         max_payload_bytes: usize,
     },
     ExportBaseSnapshot,
+    InstallBaseSnapshot {
+        snapshot: ZoneBaseSnapshot,
+    },
     OnConnect,
     Execute {
         owner_lease: WireZoneOwnerLease,
@@ -2994,6 +3363,120 @@ struct WireSessionCommitment {
     durable_snapshot: Box<WorldSnapshot>,
     active_character_bytes: Option<Vec<u8>>,
     active_identity: Option<ActiveSessionIdentity>,
+}
+
+fn session_image_is_complete(session: &WireSessionCommitment) -> bool {
+    matches!(
+        (&session.active_identity, &session.active_character_bytes),
+        (None, None) | (Some(_), Some(_))
+    )
+}
+
+fn validate_session_image(session: &WireSessionCommitment) -> Result<(), String> {
+    validate_identifier("base snapshot session id", &session.session_id)?;
+    validate_identifier("base snapshot session Zone id", &session.zone_id)?;
+    parse_hex_digest(&session.snapshot_digest)?;
+    let actual_digest =
+        snapshot_digest(session.durable_snapshot.as_ref()).map_err(|error| error.message)?;
+    if !constant_time_bytes_equal(actual_digest.as_bytes(), session.snapshot_digest.as_bytes()) {
+        return Err(format!(
+            "base snapshot session {} durable snapshot digest mismatch",
+            session.session_id
+        ));
+    }
+    let (Some(identity), Some(bytes)) = (&session.active_identity, &session.active_character_bytes)
+    else {
+        return Ok(());
+    };
+    validate_identifier("base snapshot account id", &identity.account_id)?;
+    validate_identifier(
+        "base snapshot active character name",
+        &identity.character_name,
+    )?;
+    let save: CharacterSaveRecord = serde_json::from_slice(bytes).map_err(|error| {
+        format!(
+            "base snapshot session {} active character decode failed: {error}",
+            session.session_id
+        )
+    })?;
+    if identity.character_index != save.character.index
+        || identity.character_name != save.character.name
+    {
+        return Err(format!(
+            "base snapshot session {} active character identity mismatch: identity={}/{}, save={}/{}",
+            session.session_id,
+            identity.character_index,
+            identity.character_name,
+            save.character.index,
+            save.character.name
+        ));
+    }
+    Ok(())
+}
+
+fn seed_base_snapshot_accounts(
+    config: &GatewayConfig,
+    sessions: &[WireSessionCommitment],
+) -> Result<(), ZoneRpcFault> {
+    let mut decoded = Vec::new();
+    let mut seen = BTreeMap::<(String, i32), Vec<u8>>::new();
+    for session in sessions {
+        let (Some(identity), Some(bytes)) =
+            (&session.active_identity, &session.active_character_bytes)
+        else {
+            continue;
+        };
+        if let Some(previous) = seen.insert(
+            (identity.account_id.clone(), identity.character_index),
+            bytes.clone(),
+        ) {
+            if previous != *bytes {
+                return Err(ZoneRpcFault::new(
+                    "base_snapshot_account_conflict",
+                    format!(
+                        "base snapshot contains conflicting images for account {} character {}",
+                        identity.account_id, identity.character_index
+                    ),
+                ));
+            }
+        }
+        let save: CharacterSaveRecord = serde_json::from_slice(bytes).map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_decode",
+                format!(
+                    "session {} active character decode failed: {error}",
+                    session.session_id
+                ),
+            )
+        })?;
+        decoded.push((identity.clone(), save));
+    }
+
+    let mut store = config
+        .account_store
+        .lock()
+        .map_err(|_| ZoneRpcFault::new("internal", "account store mutex poisoned"))?;
+    for (identity, save) in decoded {
+        let account = store
+            .accounts
+            .entry(identity.account_id)
+            .or_insert_with(AccountRecord::empty);
+        if let Some(character) = account
+            .characters
+            .iter_mut()
+            .find(|character| character.index == save.character.index)
+        {
+            *character = save.character.clone();
+        } else {
+            account.characters.push(save.character.clone());
+            account.characters.sort_by_key(|character| character.index);
+        }
+        account.saves.insert(save.character.index, save.clone());
+        store.next_character_index = store
+            .next_character_index
+            .max(save.character.index.saturating_add(1));
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
