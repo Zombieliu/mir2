@@ -346,6 +346,12 @@ impl ZoneRuntime {
         self.players.get(session_id).map(|player| player.direction)
     }
 
+    pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
+        self.players
+            .get(session_id)
+            .map(|player| player.last_seen_move_seq)
+    }
+
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         self.players
             .get(session_id)

@@ -17,12 +17,12 @@ security, or multi-region certification.
 | --- | --- | --- |
 | Gate 15.1 | WebSocket and Crystal TCP `StartGame` resolve the authenticated account/character against finalized state and acquire a Commonware session lease before entering the world. | Two real accounts and character slots enter through separate player Gateways; two canonical `player:<account>:<characterIndex>` leases finalize. |
 | Gate 15.2 | Each Gateway observes a 3-of-4 validator quorum, derives the current Zone placement, refreshes the owner generation at the serialized command boundary, and rebuilds its Zone RPC route when the finalized generation or endpoints change. | Both Gateways observe the same height/root and adopt placement generation 2 without dropping either player socket. |
-| Gate 15.3 | Zone Host checkpoints carry the complete command journal, private active-character state, and shared Zone image for multiple live sessions. Repeated full-journal installs replay from an isolated account-store baseline. | A continuously replicated two-session checkpoint is promoted on Dubhe B after Dubhe A is stopped; both sessions continue returning `UserLocation`. |
-| Gate 15.4 | Docker fault injection, reverse recovery, final quorum checks, projector recovery, and machine-readable evidence are automated. | Dubhe A is recovered as standby, B-to-A replication installs a 712-entry/two-session checkpoint, all validators agree, and both disposable projectors finish healthy. |
+| Gate 15.3 | Zone Host v5 replication carries a restorable base plus ordered player-command and authoritative cadence-tick mutations. The replica disables its own clock and isolates shadow account writes. | Dubhe B installs the cursor-0 v5 base, incrementally catches up two live sessions, and both sessions continue returning `UserLocation` after A is stopped. |
+| Gate 15.4 | Docker fault injection, reverse v5 recovery, final quorum checks, projector recovery, and machine-readable evidence are automated. | Dubhe A is recovered as standby, B-to-A replication installs a cursor-708/two-session v5 base, all validators agree, and both disposable projectors finish healthy. |
 
 The accepted run finalized height `16` at state root
-`d4924ba46cbca5241fcb5a1e52f4f6e8c88dce68cdb917cd97ce599c40e47af1`.
-After the failover marker, player A and player B received `80` and `49`
+`a8e84b5d80e263685722f52b9e6f7ed9975aa78f5bddd4de99d05544ae275ec9`.
+After the failover marker, player A and player B received `68` and `47`
 additional `UserLocation` responses respectively, with neither WebSocket
 closing unexpectedly. The canonical evidence is
 [`docs/generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json).
@@ -66,8 +66,8 @@ flowchart TB
   subgraph Zone["Fenced game compute"]
     ZA["Dubhe A<br/>initial primary"]
     ZB["Dubhe B<br/>initial replica / final primary"]
-    CP1["A to B v5 receive WAL<br/>plus v4 checkpoint"]
-    CP2["B to A v5 receive WAL<br/>plus v4 checkpoint"]
+    CP1["A to B v5 base<br/>plus durable incremental WAL"]
+    CP2["B to A v5 base<br/>plus durable incremental WAL"]
     ZA -.-> CP1 -.-> ZB
     ZB -.-> CP2 -.-> ZA
   end
@@ -95,8 +95,8 @@ flowchart TB
 1. Both players authenticate and `StartGame` finalizes one session lease per
    account/character through Commonware.
 2. Placement generation 1 names Dubhe A as primary and Dubhe B as replica.
-   Gateways execute movement on A while the replicator installs checkpoints on
-   B.
+   Gateways execute movement on A while the replicator applies v5 mutation
+   batches on B.
 3. The acceptance runner stops A, finalizes placement generation 2 with B as
    primary, and writes the player-visible failover marker.
 4. Each Gateway observer sees height 16, refreshes its owner fencing token, and
@@ -104,8 +104,9 @@ flowchart TB
 5. The same player sockets continue `Turn`/`Walk`/`Run` on B. Short
    `standby`/`stale placement` errors during the finality window are expected
    and do not close the connection.
-6. A restarts as standby and the reverse replicator installs B's current
-   checkpoint before the environment is handed to the operator.
+6. A restarts as standby and the reverse replicator installs B's current v5
+   base, then incrementally catches up before the environment is handed to the
+   operator.
 
 ## Run the automated acceptance
 
@@ -146,18 +147,24 @@ Use `down -v --remove-orphans` only when intentionally resetting the Gate 15
 environment and deleting its named volumes.
 
 The Gate 15 replicators use a 100 ms cadence while players are active and a
-5-second cadence after the exported checkpoint reaches zero active sessions.
+5-second cadence after the active Zone reaches zero sessions.
 The Zone simulation continues advancing while idle; only disaster-recovery
 sampling slows down.
 
-With Gate 16.3 enabled, each direction owns a persistent receive-WAL volume.
-The replicator verifies and fsyncs new command-journal batches before installing
-the existing v4 checkpoint. Gate 16.4a additionally persists a cursor-bound,
-gzip-compressed base snapshot through an atomic rename. The accepted run wrote
-A-to-B base cursor `11` and B-to-A base cursor `712`; their JSON files were
-`25,827` and `29,700` bytes. v4 remains the promotion source until authoritative
-tick/AI capture, a complete private Session image, and incremental standby apply
-land in Gate 16.4b.
+The earlier Gate 16.3 acceptance used a bridge: each direction owned a
+persistent receive-WAL volume, fsynced command-journal batches, and then
+installed the existing v4 checkpoint. Gate 16.4a also persisted a
+cursor-bound, gzip-compressed base snapshot through an atomic rename. That
+historical run wrote A-to-B base cursor `11` and B-to-A base cursor `712`;
+their JSON files were `25,827` and `29,700` bytes.
+
+The current Gate 16.4b2 acceptance uses the WAL-enabled v5 path in both
+directions. A-to-B installs an empty, restorable cursor-0 base before players
+arrive and then incrementally applies ordered player/tick batches. B-to-A
+installs the current cursor-708 two-session base during reverse recovery. No v4
+checkpoint is installed in the accepted run; v4 remains only the no-WAL
+fallback. This proves recovery correctness, not safe automatic promotion:
+`promotionReady` remains `false` until Gate 16.5.
 
 ## Manual inspection
 
@@ -188,6 +195,7 @@ Expected final facts:
 - both Dubhe hosts are healthy and `zone-replicator-b-to-a` is running.
 - both replicator log tails contain `persisted mutation WAL`.
 - both replicator log tails contain `persisted base snapshot`.
+- both replicator log tails contain `installed v5 base`.
 
 ## Correctness decisions
 
@@ -199,10 +207,9 @@ Expected final facts:
 - The legacy Web movement fast path snapshots a lease. Gate 15 therefore routes
   movement through the serialized Session/RPC boundary until that optimization
   gains a dynamically shared fencing token.
-- Checkpoint install is transactional from the live server's perspective.
-  Every replay starts from the Zone Host's isolated startup account baseline;
-  only a fully verified replay replaces the active factory, sessions, config,
-  and journal.
+- Base install validates a fully isolated Session/Zone image before publishing
+  one Zone. Post-base batches remain fenced by build, cursor, and digest; replica
+  account writes do not reach the active file/PostgreSQL repository.
 - Postgres and Redis remain projections/caches. Their restart or rebuild cannot
   grant a session, choose a Zone owner, or advance a fencing generation.
 

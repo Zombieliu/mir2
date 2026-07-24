@@ -2458,6 +2458,16 @@ impl SimulationConfig {
         Ok(fork)
     }
 
+    /// Build a standby-only runtime configuration. Replicated commands mutate
+    /// an isolated account image and must never mirror those shadow writes back
+    /// into the active file/PostgreSQL account repository.
+    pub fn fork_for_replica_apply(&self) -> Result<Self, String> {
+        let mut fork = self.fork_with_isolated_account_store()?;
+        fork.account_store_path = None;
+        fork.account_store_database_url = None;
+        Ok(fork)
+    }
+
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
         Self::from_scene_with_collision(scene, starter_map_collision())
     }

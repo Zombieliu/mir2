@@ -361,6 +361,7 @@ RMT、经济通胀和合规问题。
 | Gate 16.3 | 有界可验证 mutation batch、fsync 后 ACK 的持久接收 WAL 和双向故障演练 |
 | Gate 16.4a | 按 Zone gzip base snapshot、SHA-256 身份和崩溃安全的原子持久化 |
 | Gate 16.4b1 | 无需重放旧命令的完整 Session 基线安装、per-Zone 原子发布和 base-aware cursor |
+| Gate 16.4b2 | 自主 tick/AI 排序、post-base 增量应用、WAL 原子截断和 replicator v5 切换 |
 
 Gate 15 已接受的核心结果：
 
@@ -368,7 +369,7 @@ Gate 15 已接受的核心结果：
 - 两个真实玩家分别获得会话租约；
 - placement 从 Dubhe A 的 generation 1 切换到 Dubhe B 的 generation 2；
 - 两个玩家连接都没有意外关闭；
-- 恢复后的 A 从 B 安装反向 checkpoint；
+- 恢复后的 A 从 B 安装反向 v5 base 并增量追赶；
 - 两个 Projector 最终健康且状态一致。
 
 完整证据见：
@@ -388,28 +389,45 @@ Gate 16 设计、指标和复测方法见
 
 Gate 16.2 已增加每 Zone 独立的 v5 Head、连续 cursor、摘要链和 build
 identity。Gate 16.3 已增加默认最多 512 entries / 1 MiB 的可验证 mutation
-batch，以及写入、`flush`、`fsync` 全部成功后才确认的接收 WAL。最新完整故障
-演练中，A→B 和 B→A 分别持久化到 cursor `21` 和 `699`，两个真实玩家仍在
-主节点故障后继续执行 Zone 命令。
+batch，以及写入、`flush`、`fsync` 全部成功后才确认的接收 WAL。
 
 当前 Head 仍明确返回 `mutationCoverage=commandJournal` 和
-`promotionReady=false`。replicator 会先持久化 v5 新增命令，再继续安装 v4
-checkpoint；自主 tick、怪物 AI、增量 standby 应用和 WAL 截断仍需在
-Gate 16.4b 后续完成。现在得到的是“重启不丢接收确认位置”的安全桥接，不是
-已经可以只靠 v5 晋升的生产复制闭环。
+`promotionReady=false`。这里的 journal 已同时包含玩家命令和共享 Zone
+cadence tick；怪物 AI、掉落过期和 Zone 计时器由同一个带 `nowMs` 的 tick
+驱动。`promotionReady` 仍关闭，因为 readiness、容量认证和晋升协议属于
+Gate 16.5。
 
 Gate 16.4a 已把 base snapshot 真实接入双向 replicator。快照按 Zone 导出，
 绑定 cursor/digest，包含完整共享运行时状态和 Session commitments，并使用
 gzip + base64 + SHA-256；接收端通过临时文件、文件 fsync、原子 rename 和目录
-fsync 落盘。最新演练的 A→B / B→A 文件分别为 `25,827 / 29,700 bytes`，
-对应未压缩状态 `248,139 / 313,092 bytes`。
+fsync 落盘。Gate 16.4a 的历史验收文件 A→B / B→A 分别为
+`25,827 / 29,700 bytes`，对应未压缩状态 `248,139 / 313,092 bytes`。
 
 Gate 16.4b1 已补齐 Session 基线：活跃玩家由可信 Passkey bootstrap、
 `StartGame`、完整 `CharacterSaveRecord` 和共享 Zone image 重建；发布前在隔离
 账号库中逐 Session 校验 commitment。安装成功后 v5 Head 从 base cursor
 继续，旧 cursor 返回 `replication_cursor_compacted`，其他 Zone 不受影响。
-这只表示 base 可安全安装，不表示副本可晋升；自主 tick/AI mutation 与
-post-base batch 应用尚未完成，所以 `promotionReady` 仍为 `false`。
+这只表示 base 可安全安装，不表示副本可晋升，所以 `promotionReady` 仍为
+`false`。
+
+Gate 16.4b2 已把自主 Zone tick 与 RPC 命令放进同一个排序锁和摘要链。副本
+安装 base 后关闭本地自主 tick，只接受带原始 `nowMs` 的已验证 tick mutation；
+玩家 post-base batch 同样按 cursor/digest/build 校验后逐条应用。恢复出的
+movement ingress 会继承 checkpoint 内的 `lastSeenMoveSeq`，不会把切换后的
+第一步误判成重复输入。
+
+当配置 `MIR2_ZONE_REPLICA_WAL_DIR` 时，replicator 现在使用
+`base + incremental batch`，不再周期安装 v4 全量 checkpoint；未配置 WAL
+时仍保留 v4 fallback。新 base 持久化后，WAL 通过 `0600 temp → fsync →
+rename → fsync directory` 原子收敛为 base anchor，重启从该 cursor 继续。
+standby 使用禁用文件/PostgreSQL 持久化的隔离账号库，避免影子重放重复写入
+active 的账号数据库。
+
+2026-07-24 的 Gate 16.4b2 完整 Docker 验收从 cursor `0` 即安装 v5 base，
+不再出现 v4 checkpoint 安装；反向恢复在 cursor `708` 安装完整 v5 base。
+四个 validator 在高度 `16` 对同一 state root 达成一致，两名真实玩家换主后
+继续完成 `68 / 47` 次 Zone 响应，两个 Projector 均健康。机器证据见
+[`docs/generated/gate15/gate15-acceptance.json`](docs/generated/gate15/gate15-acceptance.json)。
 
 ## 本地验收 Gate 15
 
@@ -452,9 +470,9 @@ docker compose \
   --profile reverse stop
 ```
 
-Gate 15 在有在线会话时每 100ms 复制一次 checkpoint；会话归零后自动降到
-每 5 秒一次。地图里的怪物、掉落和计时器仍会继续运行，只降低灾备采样频率，
-避免无人在线时反复重放完整历史日志。只有明确要重置环境时，才使用
+Gate 15 在有在线会话时每 100ms 同步一次 v5 WAL/batch；会话归零后自动降到
+每 5 秒一次。地图里的怪物、掉落和计时器仍会继续运行，只降低灾备采样频率。
+只有明确要重置环境时，才使用
 `down -v --remove-orphans` 删除数据卷。
 
 ## 容量应该怎样理解

@@ -1069,6 +1069,23 @@ impl TcpZoneOwnerRpcTransport {
         }
     }
 
+    pub fn apply_mutation_batch(&self, batch: &ZoneMutationBatch) -> Result<(), String> {
+        batch.verify()?;
+        if batch.zone_id != self.zone_id.as_str() {
+            return Err(format!(
+                "mutation batch Zone {} does not match requested Zone {}",
+                batch.zone_id,
+                self.zone_id.as_str()
+            ));
+        }
+        match self.call(ZoneRpcRequest::ApplyMutationBatch {
+            batch: batch.clone(),
+        })? {
+            ZoneRpcPayload::Unit => Ok(()),
+            payload => Err(unexpected_payload("apply_mutation_batch", &payload)),
+        }
+    }
+
     pub fn poll_outbounds(
         &self,
         acknowledged_sequence: u64,
@@ -1429,6 +1446,18 @@ impl ZoneHostSession {
         Ok(execution)
     }
 
+    fn execute_replay_request(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, ZoneRpcFault> {
+        let execution = self
+            .hosted
+            .execute_replay_request(request)
+            .map_err(classify_runtime_error)?;
+        self.refresh_live_registration()?;
+        Ok(execution)
+    }
+
     fn poll_outbounds(
         &self,
         stream_id: Option<&str>,
@@ -1544,8 +1573,8 @@ pub struct ZoneHostServer {
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
     sessions: Mutex<BTreeMap<(String, String), Arc<ZoneHostSession>>>,
     zone_map_catalog: Mutex<ZoneMapCatalog>,
-    operation_gate: Mutex<()>,
-    journal: Mutex<ZoneHostJournal>,
+    operation_gate: Arc<Mutex<()>>,
+    journal: Arc<Mutex<ZoneHostJournal>>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
     zone_capacity: usize,
@@ -1647,6 +1676,28 @@ impl ZoneHostServer {
         let replay_baseline_config = config
             .fork_with_isolated_account_store()
             .expect("Zone Host replay baseline account store should be available");
+        let operation_gate = Arc::new(Mutex::new(()));
+        let journal = Arc::new(Mutex::new(ZoneHostJournal::default()));
+        let tick_journal = Arc::clone(&journal);
+        runtime_factory.configure_mutation_capture(
+            Arc::clone(&operation_gate),
+            Arc::new(move |zone_id, now_ms| {
+                append_host_journal(
+                    tick_journal.as_ref(),
+                    WireHostJournalEntry {
+                        sequence: 0,
+                        session_id: "__zone_tick__".to_string(),
+                        zone_id: zone_id.as_str().to_string(),
+                        owner_lease: WireZoneOwnerLease::from(&ZoneOwnerLease::in_process(zone_id)),
+                        mode: WireZoneOwnerCommandMode::Direct,
+                        command: None,
+                        closed: false,
+                        zone_tick_ms: Some(now_ms),
+                    },
+                )
+                .map_err(|error| error.message)
+            }),
+        );
         Self {
             host_id: host_id.into(),
             config: Mutex::new(config),
@@ -1655,8 +1706,8 @@ impl ZoneHostServer {
             owner_lease_authority,
             sessions: Mutex::new(BTreeMap::new()),
             zone_map_catalog: Mutex::new(ZoneMapCatalog::default()),
-            operation_gate: Mutex::new(()),
-            journal: Mutex::new(ZoneHostJournal::default()),
+            operation_gate,
+            journal,
             auth_token,
             limits,
             zone_capacity: zone_capacity.max(1),
@@ -2024,6 +2075,10 @@ impl ZoneHostServer {
                 self.install_base_snapshot(&envelope.zone_id, &snapshot)?;
                 return Ok(ZoneRpcPayload::Unit);
             }
+            ZoneRpcRequest::ApplyMutationBatch { batch } => {
+                self.apply_mutation_batch(&envelope.zone_id, &batch)?;
+                return Ok(ZoneRpcPayload::Unit);
+            }
             ZoneRpcRequest::ExportHostCheckpoint => return self.export_host_checkpoint(),
             ZoneRpcRequest::InstallHostCheckpoint { bytes } => {
                 self.install_host_checkpoint(&bytes)?;
@@ -2061,6 +2116,7 @@ impl ZoneHostServer {
             | ZoneRpcRequest::ExportMutationBatch { .. }
             | ZoneRpcRequest::ExportBaseSnapshot
             | ZoneRpcRequest::InstallBaseSnapshot { .. }
+            | ZoneRpcRequest::ApplyMutationBatch { .. }
             | ZoneRpcRequest::ExportHostCheckpoint
             | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
@@ -2088,6 +2144,7 @@ impl ZoneHostServer {
                     mode: mode.clone(),
                     command: Some(command.clone()),
                     closed: false,
+                    zone_tick_ms: None,
                 };
                 let request = match mode.into_mode() {
                     ZoneOwnerCommandMode::Direct => ZoneOwnerCommandRequest::direct(
@@ -2172,6 +2229,7 @@ impl ZoneHostServer {
                 mode: WireZoneOwnerCommandMode::Direct,
                 command: None,
                 closed: true,
+                zone_tick_ms: None,
             })?;
         }
         Ok(ZoneRpcPayload::Unit)
@@ -2281,20 +2339,8 @@ impl ZoneHostServer {
         ))
     }
 
-    fn append_journal(&self, mut entry: WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
-        let mut journal = self
-            .journal
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?;
-        entry.sequence = journal
-            .entries
-            .last()
-            .map(|entry| entry.sequence.saturating_add(1))
-            .unwrap_or(0);
-        let host_entry_index = journal.entries.len();
-        journal.replication.append(host_entry_index, &entry)?;
-        journal.entries.push(entry);
-        Ok(())
+    fn append_journal(&self, entry: WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
+        append_host_journal(self.journal.as_ref(), entry)
     }
 
     fn export_host_checkpoint(&self) -> Result<ZoneRpcPayload, ZoneRpcFault> {
@@ -2495,37 +2541,33 @@ impl ZoneHostServer {
             .config
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
-            .fork_with_isolated_account_store()
+            .fork_for_replica_apply()
             .map_err(classify_runtime_error)?;
         seed_base_snapshot_accounts(&validation_config, &payload.sessions)?;
         let validation_factory = Arc::new(
             self.runtime_factory
                 .lock()
                 .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
-                .fresh(),
+                .fresh_replica(),
         );
         self.reconstruct_base_sessions(&validation_factory, &validation_config, &payload)?;
 
-        // Build the publishable image a second time with the live account-store
-        // handle. Roll it back if deterministic reconstruction unexpectedly
-        // diverges before the Zone resources are adopted.
+        // Build the publishable image a second time with an independent,
+        // persistence-disabled replica account store. Replayed mutations must
+        // not duplicate the active host's file/PostgreSQL writes.
         let live_config = self
             .config
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
-            .clone();
-        let original_account_store = live_config
-            .account_store
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "account store mutex poisoned"))?
-            .clone();
+            .fork_for_replica_apply()
+            .map_err(classify_runtime_error)?;
         seed_base_snapshot_accounts(&live_config, &payload.sessions)?;
         let staged = (|| {
             let live_factory = Arc::new(
                 self.runtime_factory
                     .lock()
                     .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
-                    .fresh(),
+                    .fresh_replica(),
             );
             let live_sessions =
                 self.reconstruct_base_sessions(&live_factory, &live_config, &payload)?;
@@ -2539,34 +2581,24 @@ impl ZoneHostServer {
         })();
         let (live_factory, live_sessions, staged_journal) = match staged {
             Ok(staged) => staged,
-            Err(error) => {
-                if let Ok(mut account_store) = live_config.account_store.lock() {
-                    *account_store = original_account_store;
-                }
-                return Err(error);
-            }
+            Err(error) => return Err(error),
         };
 
         let zone_id = ZoneId::new(&snapshot.zone_id);
-        let published = match self
+        let target_factory = self
             .runtime_factory
             .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?;
+        target_factory.mark_zone_as_replica(&zone_id);
+        let published = match target_factory
             .adopt_zone_resources_from(&live_factory, &zone_id)
             .map_err(classify_runtime_error)
         {
             Ok(published) => published,
-            Err(error) => {
-                if let Ok(mut account_store) = live_config.account_store.lock() {
-                    *account_store = original_account_store;
-                }
-                return Err(error);
-            }
+            Err(error) => return Err(error),
         };
+        drop(target_factory);
         if !published && !payload.sessions.is_empty() {
-            if let Ok(mut account_store) = live_config.account_store.lock() {
-                *account_store = original_account_store;
-            }
             return Err(ZoneRpcFault::new(
                 "base_snapshot_zone_state",
                 format!(
@@ -2583,6 +2615,11 @@ impl ZoneHostServer {
         sessions.retain(|(_, zone_id), _| zone_id != &snapshot.zone_id);
         sessions.extend(live_sessions);
         drop(sessions);
+        *self
+            .config
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))? =
+            live_config;
         *self
             .journal
             .lock()
@@ -2652,6 +2689,12 @@ impl ZoneHostServer {
         factory
             .install_checkpoint_bytes(&payload.zone_state_bytes)
             .map_err(classify_runtime_error)?;
+        for session in sessions.values() {
+            session
+                .hosted
+                .refresh_replica_zone_binding()
+                .map_err(classify_runtime_error)?;
+        }
         let actual = session_commitments(&sessions)?;
         if actual != payload.sessions {
             return Err(ZoneRpcFault::new(
@@ -2686,6 +2729,154 @@ impl ZoneHostServer {
         Ok(live_sessions)
     }
 
+    fn apply_mutation_batch(
+        &self,
+        requested_zone_id: &str,
+        batch: &ZoneMutationBatch,
+    ) -> Result<(), ZoneRpcFault> {
+        batch.verify().map_err(|error| {
+            ZoneRpcFault::new(
+                "mutation_batch_invalid",
+                format!("Zone mutation batch verification failed: {error}"),
+            )
+        })?;
+        if batch.zone_id != requested_zone_id {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                format!(
+                    "mutation batch Zone {} does not match requested Zone {requested_zone_id}",
+                    batch.zone_id
+                ),
+            ));
+        }
+        if batch.build_id != zone_replication_build_id() {
+            return Err(ZoneRpcFault::new(
+                "mutation_build_mismatch",
+                format!(
+                    "mutation batch build {} does not match host build {}",
+                    batch.build_id,
+                    zone_replication_build_id()
+                ),
+            ));
+        }
+        let current = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .replication
+            .head(requested_zone_id);
+        if batch.first_sequence != current.next_sequence
+            || batch.previous_digest != current.latest_digest
+        {
+            return Err(ZoneRpcFault::new(
+                "mutation_cursor_mismatch",
+                format!(
+                    "mutation batch starts at {}/{}, standby Head is {}/{}",
+                    batch.first_sequence,
+                    batch.previous_digest,
+                    current.next_sequence,
+                    current.latest_digest
+                ),
+            ));
+        }
+
+        for mutation in &batch.entries {
+            let entry: WireHostJournalEntry =
+                serde_json::from_slice(&mutation.payload).map_err(|error| {
+                    ZoneRpcFault::new(
+                        "mutation_decode",
+                        format!(
+                            "Zone mutation {} payload decode failed: {error}",
+                            mutation.sequence
+                        ),
+                    )
+                })?;
+            let key = (entry.session_id.clone(), entry.zone_id.clone());
+            if let Some(now_ms) = entry.zone_tick_ms {
+                if entry.command.is_some() || entry.closed {
+                    return Err(ZoneRpcFault::new(
+                        "mutation_decode",
+                        "Zone cadence tick cannot contain a Session command or close marker",
+                    ));
+                }
+                self.runtime_factory
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+                    .apply_replicated_zone_tick(&ZoneId::new(&entry.zone_id), now_ms)
+                    .map_err(classify_runtime_error)?;
+            } else if entry.closed {
+                self.sessions
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?
+                    .remove(&key);
+            } else {
+                let session = {
+                    let mut sessions = self.sessions.lock().map_err(|_| {
+                        ZoneRpcFault::new("internal", "zone host session mutex poisoned")
+                    })?;
+                    if let Some(session) = sessions.get(&key) {
+                        Arc::clone(session)
+                    } else {
+                        let factory = self
+                            .runtime_factory
+                            .lock()
+                            .map_err(|_| {
+                                ZoneRpcFault::new("internal", "zone host factory mutex poisoned")
+                            })?
+                            .clone();
+                        let session = self.create_hosted_session(&factory, &entry.zone_id);
+                        sessions.insert(key, Arc::clone(&session));
+                        session
+                    }
+                };
+                session.execute_replay_request(entry.clone().into_request()?)?;
+            }
+            self.append_journal(entry)?;
+            let applied = self
+                .journal
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                .replication
+                .head(requested_zone_id);
+            if applied.latest_digest != mutation.digest
+                || applied.next_sequence != mutation.sequence.saturating_add(1)
+            {
+                return Err(ZoneRpcFault::new(
+                    "mutation_apply_diverged",
+                    format!(
+                        "applied mutation {} produced Head {}/{}, expected {}/{}",
+                        mutation.sequence,
+                        applied.next_sequence,
+                        applied.latest_digest,
+                        mutation.sequence.saturating_add(1),
+                        mutation.digest
+                    ),
+                ));
+            }
+        }
+        let applied = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .replication
+            .head(requested_zone_id);
+        if applied.next_sequence != batch.next_sequence
+            || applied.latest_digest != batch.latest_digest
+        {
+            return Err(ZoneRpcFault::new(
+                "mutation_apply_diverged",
+                format!(
+                    "applied batch produced Head {}/{}, expected {}/{}",
+                    applied.next_sequence,
+                    applied.latest_digest,
+                    batch.next_sequence,
+                    batch.latest_digest
+                ),
+            ));
+        }
+        Ok(())
+    }
+
     fn install_host_checkpoint(&self, bytes: &[u8]) -> Result<(), ZoneRpcFault> {
         let started = Instant::now();
         let checkpoint: WireZoneHostCheckpoint =
@@ -2708,11 +2899,11 @@ impl ZoneHostServer {
             self.runtime_factory
                 .lock()
                 .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
-                .fresh(),
+                .fresh_replica(),
         );
         let replay_config = self
             .replay_baseline_config
-            .fork_with_isolated_account_store()
+            .fork_for_replica_apply()
             .map_err(classify_runtime_error)?;
         let mut sessions = BTreeMap::<(String, String), Arc<ZoneHostSession>>::new();
         for (expected_sequence, entry) in checkpoint.entries.iter().enumerate() {
@@ -2730,6 +2921,18 @@ impl ZoneHostServer {
                     "checkpoint_zone_mismatch",
                     "zone host checkpoint lease does not match journal zone",
                 ));
+            }
+            if let Some(now_ms) = entry.zone_tick_ms {
+                if entry.command.is_some() || entry.closed {
+                    return Err(ZoneRpcFault::new(
+                        "checkpoint_command",
+                        "Zone cadence tick cannot contain a Session command or close marker",
+                    ));
+                }
+                factory
+                    .apply_replicated_zone_tick(&ZoneId::new(&entry.zone_id), now_ms)
+                    .map_err(classify_runtime_error)?;
+                continue;
             }
             let key = (entry.session_id.clone(), entry.zone_id.clone());
             if entry.closed {
@@ -2867,6 +3070,24 @@ impl ZoneHostServer {
     }
 }
 
+fn append_host_journal(
+    journal: &Mutex<ZoneHostJournal>,
+    mut entry: WireHostJournalEntry,
+) -> Result<(), ZoneRpcFault> {
+    let mut journal = journal
+        .lock()
+        .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?;
+    entry.sequence = journal
+        .entries
+        .last()
+        .map(|entry| entry.sequence.saturating_add(1))
+        .unwrap_or(0);
+    let host_entry_index = journal.entries.len();
+    journal.replication.append(host_entry_index, &entry)?;
+    journal.entries.push(entry);
+    Ok(())
+}
+
 fn saturating_u64(value: usize) -> u64 {
     u64::try_from(value).unwrap_or(u64::MAX)
 }
@@ -2943,6 +3164,9 @@ enum ZoneRpcRequest {
     ExportBaseSnapshot,
     InstallBaseSnapshot {
         snapshot: ZoneBaseSnapshot,
+    },
+    ApplyMutationBatch {
+        batch: ZoneMutationBatch,
     },
     OnConnect,
     Execute {
@@ -3336,10 +3560,18 @@ struct WireHostJournalEntry {
     command: Option<WireWorldCommand>,
     #[serde(default)]
     closed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    zone_tick_ms: Option<u64>,
 }
 
 impl WireHostJournalEntry {
     fn into_request(self) -> Result<ZoneOwnerCommandRequest, ZoneRpcFault> {
+        if self.zone_tick_ms.is_some() {
+            return Err(ZoneRpcFault::new(
+                "checkpoint_command",
+                "Zone cadence tick is not a Session command",
+            ));
+        }
         let lease = self.owner_lease.into_lease()?;
         let command = self.command.ok_or_else(|| {
             ZoneRpcFault::new("checkpoint_command", "journal execute entry has no command")
