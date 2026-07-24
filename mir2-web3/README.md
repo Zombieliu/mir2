@@ -81,7 +81,11 @@ Bevy runtimes.
   fsync-before-ACK receive WAL in both replication directions. The replicator
   intentionally continues installing v4 checkpoints: autonomous tick/AI
   capture, incremental standby apply, compaction, and promotion readiness remain
-  Gate 16.4 work.
+  later Gate 16 work.
+- Gate 16.4a adds per-Zone, cursor-bound gzip base snapshots with SHA-256
+  identity and crash-safe atomic persistence. They remain explicitly
+  `applyReady=false` until the complete private Session image and autonomous
+  mutation stream are available.
 
 ## Crystal Reference
 

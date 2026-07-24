@@ -229,6 +229,7 @@ services:
       MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
       MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
       MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/replication-wal"
+      MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES: "512"
       MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
     volumes:
       - gate16-wal-a-to-b:/var/lib/obelisk/replication-wal
@@ -252,6 +253,7 @@ services:
       MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
       MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
       MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/replication-wal"
+      MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES: "512"
       MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
     volumes:
       - gate16-wal-b-to-a:/var/lib/obelisk/replication-wal

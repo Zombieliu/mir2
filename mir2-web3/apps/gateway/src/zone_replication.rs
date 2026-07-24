@@ -1,13 +1,15 @@
 use std::fs::{self, File, OpenOptions};
-use std::io::{BufRead, BufReader, Seek, SeekFrom, Write};
+use std::io::{BufRead, BufReader, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{ZoneMutationBatch, ZoneReplicationCoverage};
+use crate::{ZoneBaseSnapshot, ZoneMutationBatch, ZoneReplicationCoverage};
 
 const ZONE_MUTATION_WAL_VERSION: u32 = 1;
 const ZERO_DIGEST: &str = "0000000000000000000000000000000000000000000000000000000000000000";
+const MAX_ZONE_BASE_SNAPSHOT_FILE_BYTES: u64 = 80 * 1024 * 1024;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -35,6 +37,178 @@ pub struct ZoneMutationWal {
     build_id: String,
     next_sequence: u64,
     latest_digest: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct ZoneBaseSnapshotStore {
+    path: PathBuf,
+    zone_id: String,
+    build_id: String,
+}
+
+impl ZoneBaseSnapshotStore {
+    pub fn new(
+        path: impl AsRef<Path>,
+        zone_id: impl Into<String>,
+        build_id: impl Into<String>,
+    ) -> Result<Self, String> {
+        let path = path.as_ref().to_path_buf();
+        let zone_id = zone_id.into();
+        let build_id = build_id.into();
+        validate_wal_identifier("Zone id", &zone_id)?;
+        validate_wal_identifier("build id", &build_id)?;
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).map_err(|error| {
+                format!(
+                    "failed to create Zone base snapshot directory {}: {error}",
+                    parent.display()
+                )
+            })?;
+        }
+        Ok(Self {
+            path,
+            zone_id,
+            build_id,
+        })
+    }
+
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn load(&self) -> Result<Option<ZoneBaseSnapshot>, String> {
+        let mut file = match File::open(&self.path) {
+            Ok(file) => file,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+            Err(error) => {
+                return Err(format!(
+                    "failed to open Zone base snapshot {}: {error}",
+                    self.path.display()
+                ));
+            }
+        };
+        let file_bytes = file
+            .metadata()
+            .map_err(|error| {
+                format!(
+                    "failed to inspect Zone base snapshot {}: {error}",
+                    self.path.display()
+                )
+            })?
+            .len();
+        if file_bytes == 0 || file_bytes > MAX_ZONE_BASE_SNAPSHOT_FILE_BYTES {
+            return Err(format!(
+                "Zone base snapshot {} has invalid file size {file_bytes}",
+                self.path.display()
+            ));
+        }
+        let mut bytes = Vec::with_capacity(usize::try_from(file_bytes).unwrap_or_default());
+        file.read_to_end(&mut bytes).map_err(|error| {
+            format!(
+                "failed to read Zone base snapshot {}: {error}",
+                self.path.display()
+            )
+        })?;
+        let snapshot: ZoneBaseSnapshot = serde_json::from_slice(&bytes).map_err(|error| {
+            format!(
+                "failed to decode Zone base snapshot {}: {error}",
+                self.path.display()
+            )
+        })?;
+        self.validate_identity(&snapshot)?;
+        snapshot.verify()?;
+        Ok(Some(snapshot))
+    }
+
+    pub fn persist(&self, snapshot: &ZoneBaseSnapshot) -> Result<(), String> {
+        self.validate_identity(snapshot)?;
+        snapshot.verify()?;
+        let bytes = serde_json::to_vec(snapshot)
+            .map_err(|error| format!("failed to encode Zone base snapshot: {error}"))?;
+        if bytes.is_empty() || bytes.len() as u64 > MAX_ZONE_BASE_SNAPSHOT_FILE_BYTES {
+            return Err(format!(
+                "Zone base snapshot encoded size {} is invalid",
+                bytes.len()
+            ));
+        }
+        let parent = self.path.parent().ok_or_else(|| {
+            format!(
+                "Zone base snapshot path {} has no parent directory",
+                self.path.display()
+            )
+        })?;
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        let temp_path = parent.join(format!(
+            ".base-snapshot-v5-{}-{nonce}.tmp",
+            std::process::id()
+        ));
+        let mut options = OpenOptions::new();
+        options.create_new(true).write(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let mut temp_file = options.open(&temp_path).map_err(|error| {
+            format!(
+                "failed to create temporary Zone base snapshot {}: {error}",
+                temp_path.display()
+            )
+        })?;
+        let write_result = (|| -> Result<(), String> {
+            temp_file.write_all(&bytes).map_err(|error| {
+                format!(
+                    "failed to write temporary Zone base snapshot {}: {error}",
+                    temp_path.display()
+                )
+            })?;
+            temp_file.flush().map_err(|error| {
+                format!(
+                    "failed to flush temporary Zone base snapshot {}: {error}",
+                    temp_path.display()
+                )
+            })?;
+            temp_file.sync_all().map_err(|error| {
+                format!(
+                    "failed to fsync temporary Zone base snapshot {}: {error}",
+                    temp_path.display()
+                )
+            })?;
+            drop(temp_file);
+            fs::rename(&temp_path, &self.path).map_err(|error| {
+                format!(
+                    "failed to atomically install Zone base snapshot {}: {error}",
+                    self.path.display()
+                )
+            })?;
+            File::open(parent)
+                .and_then(|directory| directory.sync_all())
+                .map_err(|error| {
+                    format!(
+                        "failed to fsync Zone base snapshot directory {}: {error}",
+                        parent.display()
+                    )
+                })?;
+            Ok(())
+        })();
+        if write_result.is_err() {
+            let _ = fs::remove_file(&temp_path);
+        }
+        write_result
+    }
+
+    fn validate_identity(&self, snapshot: &ZoneBaseSnapshot) -> Result<(), String> {
+        if snapshot.zone_id != self.zone_id || snapshot.build_id != self.build_id {
+            return Err(format!(
+                "Zone base snapshot identity mismatch: expected {}/{}, got {}/{}",
+                self.zone_id, self.build_id, snapshot.zone_id, snapshot.build_id
+            ));
+        }
+        Ok(())
+    }
 }
 
 impl std::fmt::Debug for ZoneMutationWal {

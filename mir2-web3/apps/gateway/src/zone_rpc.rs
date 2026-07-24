@@ -7,6 +7,11 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use base64::Engine;
+use flate2::read::GzDecoder;
+use flate2::write::GzEncoder;
+use flate2::{Compression, GzBuilder};
 use mir2_protocol::{
     decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet, Point,
     ServerPacket,
@@ -37,10 +42,12 @@ pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
 pub const DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES: usize = 512;
 pub const DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES: usize = 1024 * 1024;
+pub const DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES: usize = 64 * 1024 * 1024;
 pub const ZONE_HOST_CHECKPOINT_VERSION: u32 = 4;
 pub const ZONE_REPLICATION_HEAD_VERSION: u32 = 5;
 const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v4\0";
 const ZONE_REPLICATION_HEAD_DOMAIN: &[u8] = b"obelisk.mir2.zone-replication-head.v5\0";
+const ZONE_BASE_SNAPSHOT_DOMAIN: &[u8] = b"obelisk.mir2.zone-base-snapshot.v5\0";
 
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
@@ -257,6 +264,204 @@ impl ZoneMutationBatch {
             return Err("mutation batch latest digest mismatch".to_string());
         }
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneBaseSnapshotCompression {
+    Gzip,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneBaseSnapshot {
+    pub version: u32,
+    pub snapshot_id: String,
+    pub zone_id: String,
+    pub build_id: String,
+    pub mutation_coverage: ZoneReplicationCoverage,
+    pub apply_ready: bool,
+    pub base_sequence: u64,
+    pub latest_digest: String,
+    pub created_at_ms: u64,
+    pub session_count: usize,
+    pub compression: ZoneBaseSnapshotCompression,
+    pub uncompressed_bytes: usize,
+    #[serde(with = "base64_snapshot_payload")]
+    pub payload: Vec<u8>,
+}
+
+impl ZoneBaseSnapshot {
+    fn new(
+        zone_id: String,
+        build_id: String,
+        base_sequence: u64,
+        latest_digest: String,
+        zone_state_bytes: Vec<u8>,
+        sessions: Vec<WireSessionCommitment>,
+    ) -> Result<Self, ZoneRpcFault> {
+        let session_count = sessions.len();
+        let payload = serde_json::to_vec(&WireZoneBaseSnapshotPayload {
+            version: ZONE_REPLICATION_HEAD_VERSION,
+            zone_id: zone_id.clone(),
+            zone_state_bytes,
+            sessions,
+        })
+        .map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_encode",
+                format!("Zone {zone_id} base snapshot payload encode failed: {error}"),
+            )
+        })?;
+        if payload.len() > DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_too_large",
+                format!(
+                    "Zone {zone_id} base snapshot payload {} exceeds {} bytes",
+                    payload.len(),
+                    DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES
+                ),
+            ));
+        }
+        let uncompressed_bytes = payload.len();
+        let mut encoder: GzEncoder<Vec<u8>> = GzBuilder::new()
+            .mtime(0)
+            .write(Vec::new(), Compression::new(6));
+        encoder.write_all(&payload).map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_encode",
+                format!("Zone {zone_id} base snapshot compression failed: {error}"),
+            )
+        })?;
+        let payload = encoder.finish().map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_encode",
+                format!("Zone {zone_id} base snapshot compression finish failed: {error}"),
+            )
+        })?;
+        let mut snapshot = Self {
+            version: ZONE_REPLICATION_HEAD_VERSION,
+            snapshot_id: String::new(),
+            zone_id,
+            build_id,
+            mutation_coverage: ZoneReplicationCoverage::CommandJournal,
+            apply_ready: false,
+            base_sequence,
+            latest_digest,
+            created_at_ms: unix_now_ms(),
+            session_count,
+            compression: ZoneBaseSnapshotCompression::Gzip,
+            uncompressed_bytes,
+            payload,
+        };
+        snapshot.snapshot_id = zone_base_snapshot_checksum(&snapshot)?;
+        Ok(snapshot)
+    }
+
+    pub fn verify(&self) -> Result<(), String> {
+        if self.version != ZONE_REPLICATION_HEAD_VERSION {
+            return Err(format!(
+                "unsupported base snapshot version {}, expected {}",
+                self.version, ZONE_REPLICATION_HEAD_VERSION
+            ));
+        }
+        validate_identifier("base snapshot id", &self.snapshot_id)?;
+        validate_identifier("base snapshot Zone id", &self.zone_id)?;
+        validate_identifier("base snapshot build id", &self.build_id)?;
+        if self.mutation_coverage != ZoneReplicationCoverage::CommandJournal {
+            return Err("unsupported base snapshot mutation coverage".to_string());
+        }
+        if self.apply_ready {
+            return Err(
+                "command-journal base snapshot must not claim incremental apply readiness"
+                    .to_string(),
+            );
+        }
+        parse_hex_digest(&self.latest_digest)?;
+        if self.uncompressed_bytes > DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES {
+            return Err(format!(
+                "base snapshot declares {} uncompressed bytes, maximum is {}",
+                self.uncompressed_bytes, DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES
+            ));
+        }
+        let expected_id = zone_base_snapshot_checksum(self)?;
+        if !constant_time_bytes_equal(expected_id.as_bytes(), self.snapshot_id.as_bytes()) {
+            return Err("base snapshot checksum mismatch".to_string());
+        }
+        let payload = self.decode_payload()?;
+        if payload.version != self.version || payload.zone_id != self.zone_id {
+            return Err("base snapshot payload identity mismatch".to_string());
+        }
+        if payload.sessions.len() != self.session_count {
+            return Err(format!(
+                "base snapshot contains {} sessions, expected {}",
+                payload.sessions.len(),
+                self.session_count
+            ));
+        }
+        let mut identities = BTreeSet::new();
+        for session in payload.sessions {
+            if session.zone_id != self.zone_id {
+                return Err(format!(
+                    "base snapshot session {} belongs to Zone {}",
+                    session.session_id, session.zone_id
+                ));
+            }
+            if !identities.insert(session.session_id.clone()) {
+                return Err(format!(
+                    "base snapshot contains duplicate session {}",
+                    session.session_id
+                ));
+            }
+        }
+        if payload.zone_state_bytes.is_empty() {
+            return Err("base snapshot contains empty Zone state".to_string());
+        }
+        Ok(())
+    }
+
+    fn decode_payload(&self) -> Result<WireZoneBaseSnapshotPayload, String> {
+        let mut decoder = match self.compression {
+            ZoneBaseSnapshotCompression::Gzip => GzDecoder::new(self.payload.as_slice()),
+        };
+        let mut decoded = Vec::with_capacity(self.uncompressed_bytes.min(1024 * 1024));
+        decoder
+            .by_ref()
+            .take((DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES as u64).saturating_add(1))
+            .read_to_end(&mut decoded)
+            .map_err(|error| format!("base snapshot decompression failed: {error}"))?;
+        if decoded.len() != self.uncompressed_bytes {
+            return Err(format!(
+                "base snapshot decompressed to {} bytes, expected {}",
+                decoded.len(),
+                self.uncompressed_bytes
+            ));
+        }
+        serde_json::from_slice(&decoded)
+            .map_err(|error| format!("base snapshot payload decode failed: {error}"))
+    }
+}
+
+mod base64_snapshot_payload {
+    use super::{Engine, BASE64_STANDARD};
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(bytes: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&BASE64_STANDARD.encode(bytes))
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let encoded = String::deserialize(deserializer)?;
+        BASE64_STANDARD
+            .decode(encoded)
+            .map_err(serde::de::Error::custom)
     }
 }
 
@@ -732,6 +937,22 @@ impl TcpZoneOwnerRpcTransport {
             ));
         }
         Ok(batch)
+    }
+
+    pub fn export_base_snapshot(&self) -> Result<ZoneBaseSnapshot, String> {
+        let snapshot = match self.call(ZoneRpcRequest::ExportBaseSnapshot)? {
+            ZoneRpcPayload::BaseSnapshot { snapshot } => snapshot,
+            payload => return Err(unexpected_payload("export_base_snapshot", &payload)),
+        };
+        snapshot.verify()?;
+        if snapshot.zone_id != self.zone_id.as_str() {
+            return Err(format!(
+                "base snapshot Zone {} does not match requested Zone {}",
+                snapshot.zone_id,
+                self.zone_id.as_str()
+            ));
+        }
+        Ok(snapshot)
     }
 
     pub fn poll_outbounds(
@@ -1682,6 +1903,9 @@ impl ZoneHostServer {
                     )
                     .map(|batch| ZoneRpcPayload::MutationBatch { batch });
             }
+            ZoneRpcRequest::ExportBaseSnapshot => {
+                return self.export_base_snapshot(&ZoneId::new(envelope.zone_id));
+            }
             ZoneRpcRequest::ExportHostCheckpoint => return self.export_host_checkpoint(),
             ZoneRpcRequest::InstallHostCheckpoint { bytes } => {
                 self.install_host_checkpoint(&bytes)?;
@@ -1717,6 +1941,7 @@ impl ZoneHostServer {
             ZoneRpcRequest::Health => unreachable!(),
             ZoneRpcRequest::ReplicationHead
             | ZoneRpcRequest::ExportMutationBatch { .. }
+            | ZoneRpcRequest::ExportBaseSnapshot
             | ZoneRpcRequest::ExportHostCheckpoint
             | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
@@ -2038,6 +2263,63 @@ impl ZoneHostServer {
         Ok(ZoneRpcPayload::HostCheckpoint { bytes })
     }
 
+    fn export_base_snapshot(&self, zone_id: &ZoneId) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        let head = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .replication
+            .head(zone_id.as_str());
+        let selected_sessions = self
+            .sessions
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?
+            .iter()
+            .filter(|((_, session_zone_id), _)| session_zone_id == zone_id.as_str())
+            .map(|(key, session)| (key.clone(), Arc::clone(session)))
+            .collect::<BTreeMap<_, _>>();
+        let sessions = session_commitments(&selected_sessions)?;
+        let factory = self
+            .runtime_factory
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+            .clone();
+        let zone_state_bytes = factory
+            .zone_checkpoint_bytes(zone_id)
+            .map_err(classify_runtime_error)?;
+        let snapshot = ZoneBaseSnapshot::new(
+            zone_id.as_str().to_string(),
+            head.build_id,
+            head.next_sequence,
+            head.latest_digest,
+            zone_state_bytes,
+            sessions,
+        )?;
+        snapshot.verify().map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_invalid",
+                format!("generated Zone base snapshot failed verification: {error}"),
+            )
+        })?;
+        let wire_bytes = serde_json::to_vec(&snapshot).map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_encode",
+                format!("Zone base snapshot wire encode failed: {error}"),
+            )
+        })?;
+        if wire_bytes.len().saturating_add(1024) > self.limits.max_frame_bytes {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_too_large",
+                format!(
+                    "Zone base snapshot wire payload {} exceeds RPC frame limit {}",
+                    wire_bytes.len(),
+                    self.limits.max_frame_bytes
+                ),
+            ));
+        }
+        Ok(ZoneRpcPayload::BaseSnapshot { snapshot })
+    }
+
     fn install_host_checkpoint(&self, bytes: &[u8]) -> Result<(), ZoneRpcFault> {
         let started = Instant::now();
         let checkpoint: WireZoneHostCheckpoint =
@@ -2292,6 +2574,7 @@ enum ZoneRpcRequest {
         max_entries: usize,
         max_payload_bytes: usize,
     },
+    ExportBaseSnapshot,
     OnConnect,
     Execute {
         owner_lease: WireZoneOwnerLease,
@@ -2344,6 +2627,9 @@ enum ZoneRpcPayload {
     },
     MutationBatch {
         batch: ZoneMutationBatch,
+    },
+    BaseSnapshot {
+        snapshot: ZoneBaseSnapshot,
     },
     Packets {
         frames: Vec<Vec<u8>>,
@@ -2708,6 +2994,15 @@ struct WireSessionCommitment {
     durable_snapshot: Box<WorldSnapshot>,
     active_character_bytes: Option<Vec<u8>>,
     active_identity: Option<ActiveSessionIdentity>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct WireZoneBaseSnapshotPayload {
+    version: u32,
+    zone_id: String,
+    zone_state_bytes: Vec<u8>,
+    sessions: Vec<WireSessionCommitment>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3084,6 +3379,28 @@ fn durable_session_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
     // durable player/session projection.
     snapshot.ground_drops.clear();
     snapshot
+}
+
+fn zone_base_snapshot_checksum(snapshot: &ZoneBaseSnapshot) -> Result<String, String> {
+    let payload = serde_json::to_vec(&(
+        snapshot.version,
+        &snapshot.zone_id,
+        &snapshot.build_id,
+        snapshot.mutation_coverage,
+        snapshot.apply_ready,
+        snapshot.base_sequence,
+        &snapshot.latest_digest,
+        snapshot.created_at_ms,
+        snapshot.session_count,
+        snapshot.compression,
+        snapshot.uncompressed_bytes,
+        &snapshot.payload,
+    ))
+    .map_err(|error| format!("failed to encode base snapshot checksum payload: {error}"))?;
+    let mut hasher = Sha256::new();
+    hasher.update(ZONE_BASE_SNAPSHOT_DOMAIN);
+    hasher.update(payload);
+    Ok(hex_lower_bytes(&hasher.finalize()))
 }
 
 fn zone_host_checkpoint_checksum(
