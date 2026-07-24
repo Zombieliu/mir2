@@ -164,3 +164,15 @@ FROM runtime AS gate18-economy-producer-acceptance
 COPY --from=gate18-economy-producer-acceptance-builder /out/gate18-economy-producer-acceptance /usr/local/bin/gate18-economy-producer-acceptance
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/gate18-economy-producer-acceptance"]
+
+FROM builder AS gate18-remote-economy-acceptance-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate18_remote_economy_acceptance \
+    && install -Dm755 target/release/gate18_remote_economy_acceptance /out/gate18-remote-economy-acceptance
+
+FROM runtime AS gate18-remote-economy-acceptance
+COPY --from=gate18-remote-economy-acceptance-builder /out/gate18-remote-economy-acceptance /usr/local/bin/gate18-remote-economy-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate18-remote-economy-acceptance"]

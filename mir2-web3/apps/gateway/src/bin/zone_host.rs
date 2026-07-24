@@ -28,6 +28,11 @@ fn main() -> io::Result<()> {
 
     let mut config = GatewayConfig::default();
     if env_flag("MIR2_ZONE_HOST_CRYSTAL_WORLD", true) {
+        // A standalone Zone Host is the authoritative simulation process. It
+        // must activate the same complete Crystal collision catalog as the
+        // TCP/Web Gateway in embedded mode; otherwise valid remote movement,
+        // ground drops and pickups are evaluated against the starter map only.
+        mir2_simulation::set_crystal_full_world_zone_collision(true);
         config = config.with_crystal_world_runtime();
     }
     if let Ok(account_store_path) = env::var("MIR2_ACCOUNT_STORE_PATH") {
