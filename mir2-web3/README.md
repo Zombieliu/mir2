@@ -72,13 +72,16 @@ Bevy runtimes.
   See [`docs/GATE15-REAL-PLAYER-FAILOVER.md`](docs/GATE15-REAL-PLAYER-FAILOVER.md).
 - Gate 16.1 adds the reproducible v4 full-checkpoint performance ruler,
   low-cardinality checkpoint/replay telemetry, and a constrained Docker
-  baseline. The incremental per-Zone v5 protocol is the next implementation
-  step; see
+  baseline; see
   [`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md).
 - Gate 16.2 adds a bounded per-Zone v5 replication Head with a continuous
   cursor, chained digest, build identity, and explicit coverage/readiness
-  safety fields. It remains non-promotable until authoritative mutation WAL
-  coverage lands in Gate 16.3.
+  safety fields.
+- Gate 16.3 adds bounded verified mutation batches plus a restart-safe,
+  fsync-before-ACK receive WAL in both replication directions. The replicator
+  intentionally continues installing v4 checkpoints: autonomous tick/AI
+  capture, incremental standby apply, compaction, and promotion readiness remain
+  Gate 16.4 work.
 
 ## Crystal Reference
 

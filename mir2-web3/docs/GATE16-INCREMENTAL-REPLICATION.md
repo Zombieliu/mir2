@@ -184,9 +184,74 @@ Head。
 - 因此现有 `zone-replicator` 仍使用 v4 checkpoint，不能仅凭 Head 跳过复制；
 - standby 也不能根据这个阶段的 Head 宣称可安全晋升。
 
-Gate 16.3 完成全量 authoritative mutation capture、batch 和持久 WAL 后，
-才允许提升 coverage 并进入 readiness 判定。这样可以避免为了提前展示网络
-下降而牺牲无人地图状态的灾备正确性。
+Gate 16.3 已先完成可验证 batch 和持久接收 WAL；只有 Gate 16.4 完成全量
+authoritative mutation capture、base snapshot 和增量应用后，才允许提升
+coverage 并进入 readiness 判定。这样可以避免为了提前展示网络下降而牺牲
+无人地图状态的灾备正确性。
+
+## Gate 16.3 已落地：可验证 mutation batch 与持久接收 WAL
+
+Zone RPC 现在可以从任意尚未截断的 per-Zone cursor 导出有界 v5 batch：
+
+```text
+默认最多 512 entries / 1 MiB 原始 payload
+sequence 必须连续
+previousDigest → 每条 mutation digest → latestDigest 必须形成完整摘要链
+zoneId、buildId 和 mutationCoverage 必须与接收端一致
+```
+
+接收端会先完整验证 batch，再把一条 JSONL record 写入 WAL，执行
+`flush + fsync` 成功后才返回 `durable=true` 的 ACK。进程重启时会从 WAL
+恢复 cursor；最后一条未写完的 record 会被截断并同步，已经完整写入但内容
+损坏、乱序、跨 Zone 或 build 不一致则直接拒绝启动。
+
+Gate 15 双向 replicator 已接入各自独立的命名卷：
+
+```text
+A → B：gate16-wal-a-to-b
+B → A：gate16-wal-b-to-a
+```
+
+每个复制周期的顺序是：
+
+1. 读取 active 的 v5 Head；
+2. 从本地 durable cursor 拉取并 `fsync` 所有缺失 batch；
+3. 验证本地 WAL 是 active Head 的合法前缀；
+4. 继续使用 v4 全量 checkpoint 安装 standby。
+
+第 4 步是当前故意保留的安全双写。v5 WAL 已经证明“新增玩家命令可以有界
+传输并跨进程保存确认位置”，但它尚未独立重建 standby 运行时；因此 v4 仍是
+灾备正确性的来源，`promotionReady` 仍然为 `false`。
+
+最新完整 Gate 15 故障演练中：
+
+| 方向 | durable cursor | WAL 文件 |
+| --- | ---: | ---: |
+| A → B | 21 | 5 records / 50,500 bytes |
+| B → A | 699 | 3 records / 709,740 bytes |
+
+同一次演练里，A 故障后两个真实玩家仍分别完成 `99` 和 `51` 次
+failover 后 Zone 响应；恢复后的 A 安装了包含 699 条历史和两个会话的 v4
+checkpoint。机器证据见
+[`docs/generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json)。
+
+运行环境可通过以下变量选择接收 WAL 目录：
+
+```text
+MIR2_ZONE_REPLICA_WAL_DIR=/var/lib/obelisk/replication-wal
+```
+
+WAL 文件在 Unix 上以 `0600` 创建。它包含游戏命令 payload，不应直接暴露
+为下载接口；生产部署仍需磁盘加密、配额、保留周期和脱敏策略。
+
+停止验收环境后，可只读检查持久卷：
+
+```bash
+docker run --rm \
+  --volume obelisk-gate15_gate16-wal-a-to-b:/wal:ro \
+  debian:bookworm-slim \
+  sh -c 'wc -l -c /wal/mutation-batches-v5.jsonl'
+```
 
 ## Gate 16 后续实施顺序
 
@@ -194,8 +259,8 @@ Gate 16.3 完成全量 authoritative mutation capture、batch 和持久 WAL 后�
 | --- | --- | --- |
 | 16.1 | v4 指标、历史基准、容器证据 | 已完成；后续结果有固定对照 |
 | 16.2 | 每 Zone v5 Head 与连续 cursor | 已完成；`O(1)` 状态读取，小于 1 KB，尚不可晋升 |
-| 16.3 | mutation batch、ACK 和持久 WAL | 稳态只传新增 mutation；重启不丢确认位置 |
-| 16.4 | base snapshot、压缩和 WAL 截断 | 100k 历史不会导致无限内存/网络增长 |
+| 16.3 | 有界 mutation batch、durable ACK 和接收 WAL | 已完成安全桥接；重启恢复确认位置，v4 仍负责 standby 正确性 |
+| 16.4 | authoritative mutation capture、base snapshot、增量应用和 WAL 截断 | tick/AI 完整覆盖；100k 历史不会导致无限内存/网络增长 |
 | 16.5 | standby readiness 与安全 promotion | 缺口、校验失败或 build 不一致时禁止晋升 |
 | 16.6 | 50/125 玩家、700/10k/100k 历史验收 | v5 CPU 和网络相对 v4 至少下降 80% |
 
@@ -209,9 +274,15 @@ Gate 16.3 完成全量 authoritative mutation capture、batch 和持久 WAL 后�
 
 ## 当前边界
 
-- Gate 16.1 只完成测量基础，不代表 v5 增量协议已经完成。
+- Gate 16.1～16.3 已完成基线、Head、可验证 batch 和持久接收 WAL；尚未完成
+  仅依靠 v5 恢复并晋升的闭环。
 - 当前基准使用一个顺序 `KeepAlive` 命令流来隔离历史长度成本，不包含完整
   战斗、怪物 AI、数据库和公网抖动。
+- 当前 WAL 只覆盖 Host command journal，不覆盖自主 tick、怪物 AI 和计时器；
+  接收端也尚未把 batch 增量应用为可晋升的 standby 状态。
+- WAL 尚未建立 base snapshot、压缩、截断和磁盘配额，不能无限期运行。
+- 默认 `buildId` 是编译信息或包版本；生产镜像必须显式注入不可变的 commit
+  或 image digest，不能仅靠同版本号判定二进制兼容。
 - 700 条容器证据是快速可复现基线；10k/100k 是完整认证矩阵，会消耗明显更长
   时间。
 - Gate 17 才处理金币、装备、交易等 Class C 资产的 transactional

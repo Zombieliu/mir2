@@ -27,7 +27,10 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     && install -Dm755 target/release/gate13_acceptance /out/gate13-acceptance
 
 FROM debian:bookworm-slim AS runtime
-RUN install -d -o 65534 -g 65534 /var/lib/obelisk /evidence
+RUN install -d -o 65534 -g 65534 \
+    /var/lib/obelisk \
+    /var/lib/obelisk/replication-wal \
+    /evidence
 ENV RUST_BACKTRACE=1
 WORKDIR /var/lib/obelisk
 

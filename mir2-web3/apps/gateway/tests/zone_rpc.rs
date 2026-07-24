@@ -1,19 +1,22 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::routing::PerMapSessionRouter;
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
     SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostControlPlane, ZoneHostHeartbeat,
-    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneMapScope, ZoneOwnerCommandRequest,
-    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneReplicationCoverage,
-    ZoneRpcLimits, ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
+    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneMapScope, ZoneMutationWal,
+    ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry,
+    ZoneReplicationCoverage, ZoneRpcLimits, ZONE_REPLICATION_HEAD_VERSION,
+    ZONE_RPC_PROTOCOL_VERSION,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::WorldCommand;
@@ -660,6 +663,116 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
         serde_json::to_vec(&active_a_head).unwrap().len() < 1_024,
         "non-empty replication head must remain smaller than 1 KiB"
     );
+
+    let first_batch = active_a
+        .export_mutation_batch(0, 1, 1024 * 1024)
+        .expect("first Zone A mutation batch");
+    assert_eq!(first_batch.version, ZONE_REPLICATION_HEAD_VERSION);
+    assert_eq!(first_batch.zone_id, "map:0");
+    assert_eq!(
+        first_batch.mutation_coverage,
+        ZoneReplicationCoverage::CommandJournal
+    );
+    assert_eq!(first_batch.first_sequence, 0);
+    assert_eq!(first_batch.next_sequence, 1);
+    assert_eq!(first_batch.previous_digest, "0".repeat(64));
+    assert_eq!(first_batch.entries.len(), 1);
+    assert_eq!(first_batch.entries[0].sequence, 0);
+    assert!(!first_batch.entries[0].payload.is_empty());
+    assert_eq!(first_batch.latest_digest, first_batch.entries[0].digest);
+    assert!(first_batch.has_more);
+    first_batch
+        .verify()
+        .expect("untampered mutation batch should verify");
+    let mut tampered_batch = first_batch.clone();
+    tampered_batch.entries[0].payload.push(0);
+    assert!(tampered_batch.verify().is_err());
+    let mut tampered_digest = first_batch.clone();
+    tampered_digest.entries[0].digest = "f".repeat(64);
+    assert!(tampered_digest.verify().is_err());
+
+    let second_batch = active_a
+        .export_mutation_batch(1, 8, 1024 * 1024)
+        .expect("second Zone A mutation batch");
+    assert_eq!(second_batch.first_sequence, 1);
+    assert_eq!(second_batch.next_sequence, 2);
+    assert_eq!(second_batch.previous_digest, first_batch.latest_digest);
+    assert_eq!(second_batch.entries.len(), 1);
+    assert_eq!(second_batch.entries[0].sequence, 1);
+    assert_eq!(second_batch.latest_digest, active_a_head.latest_digest);
+    assert!(!second_batch.has_more);
+
+    let wal_path = std::env::temp_dir().join(format!(
+        "mir2-gate16-wal-{}-{}.jsonl",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let mut wal = ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+        .expect("new mutation WAL should open");
+    assert_eq!(wal.ack().next_sequence, 0);
+    let first_ack = wal
+        .append_batch(&first_batch)
+        .expect("first mutation batch should fsync");
+    assert!(first_ack.durable);
+    assert_eq!(first_ack.next_sequence, 1);
+    let second_ack = wal
+        .append_batch(&second_batch)
+        .expect("second mutation batch should fsync");
+    assert_eq!(second_ack.next_sequence, 2);
+    assert_eq!(second_ack.latest_digest, active_a_head.latest_digest);
+    assert!(wal.append_batch(&first_batch).is_err());
+    drop(wal);
+
+    OpenOptions::new()
+        .append(true)
+        .open(&wal_path)
+        .unwrap()
+        .write_all(b"{partial")
+        .unwrap();
+    let repaired_wal = ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+        .expect("reopen should discard only a partial final WAL record");
+    assert_eq!(repaired_wal.ack(), second_ack);
+    drop(repaired_wal);
+    OpenOptions::new()
+        .append(true)
+        .open(&wal_path)
+        .unwrap()
+        .write_all(b"{corrupt-complete-record}\n")
+        .unwrap();
+    assert!(
+        ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+            .expect_err("a corrupt complete WAL record must fail closed")
+            .contains("corrupt complete record")
+    );
+    fs::remove_file(&wal_path).unwrap();
+
+    let caught_up = active_a
+        .export_mutation_batch(2, 8, 1024 * 1024)
+        .expect("caught-up Zone A mutation batch");
+    assert!(caught_up.entries.is_empty());
+    assert_eq!(caught_up.first_sequence, 2);
+    assert_eq!(caught_up.next_sequence, 2);
+    assert_eq!(caught_up.previous_digest, active_a_head.latest_digest);
+    assert_eq!(caught_up.latest_digest, active_a_head.latest_digest);
+    assert!(!caught_up.has_more);
+
+    let zone_b_batch = active_b
+        .export_mutation_batch(0, 8, 1024 * 1024)
+        .expect("Zone B mutation batch");
+    assert_eq!(zone_b_batch.entries.len(), 1);
+    assert_eq!(zone_b_batch.next_sequence, 1);
+    assert_eq!(zone_b_batch.latest_digest, active_b_head.latest_digest);
+    assert!(active_a
+        .export_mutation_batch(3, 8, 1024 * 1024)
+        .expect_err("cursor ahead of the Zone head must fail")
+        .contains("replication_cursor_ahead"));
+    assert!(active_a
+        .export_mutation_batch(0, 8, 1)
+        .expect_err("an entry larger than the batch byte bound must fail")
+        .contains("replication_entry_too_large"));
 
     let checkpoint = active_a
         .export_host_checkpoint()

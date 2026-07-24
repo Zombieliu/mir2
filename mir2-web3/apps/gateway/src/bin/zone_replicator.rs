@@ -1,8 +1,12 @@
 use std::env;
+use std::path::PathBuf;
 use std::thread;
 use std::time::Duration;
 
-use mir2_gateway::{TcpZoneOwnerRpcTransport, ZoneId, ZoneRpcLimits};
+use mir2_gateway::{
+    TcpZoneOwnerRpcTransport, ZoneId, ZoneMutationWal, ZoneMutationWalAck, ZoneRpcLimits,
+    DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
+};
 
 const DEFAULT_ACTIVE_INTERVAL_MS: u64 = 250;
 const DEFAULT_IDLE_INTERVAL_MS: u64 = 5_000;
@@ -85,10 +89,21 @@ fn run() -> Result<(), String> {
         limits,
     );
     let cadence = ReplicationCadence::from_env();
+    let mut mutation_wal = mutation_wal_from_env(&active)?;
     let mut installed_checksum = None::<String>;
     let mut was_idle = None::<bool>;
 
     loop {
+        if let Some(wal) = mutation_wal.as_mut() {
+            let before = wal.ack();
+            let after = sync_mutation_wal(&active, wal)?;
+            if after.next_sequence != before.next_sequence {
+                eprintln!(
+                    "zone-replicator persisted mutation WAL through cursor {} ({})",
+                    after.next_sequence, after.latest_digest
+                );
+            }
+        }
         let checkpoint = active.export_host_checkpoint()?;
         let session_count = checkpoint.session_count;
         if installed_checksum.as_deref() != Some(checkpoint.checksum.as_str()) {
@@ -114,6 +129,93 @@ fn run() -> Result<(), String> {
         }
         thread::sleep(cadence.delay_after_checkpoint(session_count));
     }
+}
+
+fn mutation_wal_from_env(
+    active: &TcpZoneOwnerRpcTransport,
+) -> Result<Option<ZoneMutationWal>, String> {
+    let Some(directory) = env::var("MIR2_ZONE_REPLICA_WAL_DIR")
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+    else {
+        return Ok(None);
+    };
+    let head = active.replication_head()?;
+    let path = PathBuf::from(directory).join("mutation-batches-v5.jsonl");
+    let wal = ZoneMutationWal::open(path, &head.zone_id, &head.build_id)?;
+    validate_wal_prefix(active, &wal.ack(), head.next_sequence, &head.latest_digest)?;
+    eprintln!(
+        "zone-replicator mutation WAL ready at {} (cursor={})",
+        wal.path().display(),
+        wal.ack().next_sequence
+    );
+    Ok(Some(wal))
+}
+
+fn sync_mutation_wal(
+    active: &TcpZoneOwnerRpcTransport,
+    wal: &mut ZoneMutationWal,
+) -> Result<ZoneMutationWalAck, String> {
+    let head = active.replication_head()?;
+    let mut ack = wal.ack();
+    validate_wal_prefix(active, &ack, head.next_sequence, &head.latest_digest)?;
+    while ack.next_sequence < head.next_sequence {
+        let batch = active.export_mutation_batch(
+            ack.next_sequence,
+            DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
+            DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+        )?;
+        if batch.entries.is_empty() {
+            return Err(format!(
+                "active Zone {} reported cursor {} but returned no mutation at durable cursor {}",
+                head.zone_id, head.next_sequence, ack.next_sequence
+            ));
+        }
+        ack = wal.append_batch(&batch)?;
+    }
+    if ack.latest_digest != head.latest_digest {
+        return Err(format!(
+            "durable mutation WAL digest {} does not match active Head {} at cursor {}",
+            ack.latest_digest, head.latest_digest, head.next_sequence
+        ));
+    }
+    Ok(ack)
+}
+
+fn validate_wal_prefix(
+    active: &TcpZoneOwnerRpcTransport,
+    ack: &ZoneMutationWalAck,
+    active_next_sequence: u64,
+    active_latest_digest: &str,
+) -> Result<(), String> {
+    if ack.next_sequence > active_next_sequence {
+        return Err(format!(
+            "durable mutation WAL cursor {} is ahead of active Head {}",
+            ack.next_sequence, active_next_sequence
+        ));
+    }
+    if ack.next_sequence == active_next_sequence {
+        if ack.latest_digest != active_latest_digest {
+            return Err(format!(
+                "durable mutation WAL digest {} conflicts with active Head {} at cursor {}",
+                ack.latest_digest, active_latest_digest, active_next_sequence
+            ));
+        }
+        return Ok(());
+    }
+    let continuity = active.export_mutation_batch(
+        ack.next_sequence,
+        1,
+        DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+    )?;
+    if continuity.previous_digest != ack.latest_digest {
+        return Err(format!(
+            "durable mutation WAL digest {} is not a prefix of active Head {}",
+            ack.latest_digest, active_latest_digest
+        ));
+    }
+    Ok(())
 }
 
 fn duration_from_env(name: &str, default_ms: u64, min_ms: u64, max_ms: u64) -> Duration {

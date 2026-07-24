@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "generatedAt": "2026-07-24T07:42:10Z",
+  "generatedAt": "2026-07-24T13:34:27Z",
   "gate": "15.1-15.4",
   "assertions": {
     "twoRealPlayersStarted": true,
@@ -10,11 +10,13 @@
     "bothRealGatewaysObserveQuorum": true,
     "twoFencedPlayerLeasesFinalized": true,
     "recoveredAReceivedReverseCheckpoint": true,
+    "forwardMutationWalDurable": true,
+    "reverseMutationWalDurable": true,
     "bothProjectorsHealthy": true
   },
   "initialPlayers": {
     "ready": true,
-    "pid": 85972,
+    "pid": 14632,
     "players": [
       {
         "index": 0,
@@ -24,12 +26,12 @@
         "inGame": true,
         "markerSeen": false,
         "closedUnexpectedly": false,
-        "messages": 627,
+        "messages": 625,
         "zoneResponses": 0,
         "zoneResponsesAfterFailover": 0,
         "errors": [],
         "bytesSent": 422,
-        "bytesReceived": 755373
+        "bytesReceived": 755159
       },
       {
         "index": 1,
@@ -39,20 +41,20 @@
         "inGame": true,
         "markerSeen": false,
         "closedUnexpectedly": false,
-        "messages": 185,
+        "messages": 75,
         "zoneResponses": 0,
         "zoneResponsesAfterFailover": 0,
         "errors": [],
         "bytesSent": 423,
-        "bytesReceived": 384521
+        "bytesReceived": 235482
       }
     ]
   },
   "playerFaultRun": {
     "ok": true,
-    "startedAt": "2026-07-24T07:41:25.653Z",
-    "finishedAt": "2026-07-24T07:42:00.837Z",
-    "durationMs": 35184,
+    "startedAt": "2026-07-24T13:33:42.245Z",
+    "finishedAt": "2026-07-24T13:34:17.271Z",
+    "durationMs": 35026,
     "assertions": {
       "bothReachedGame": true,
       "bothObservedFailover": true,
@@ -68,18 +70,19 @@
         "inGame": true,
         "markerSeen": true,
         "closedUnexpectedly": false,
-        "messages": 851,
-        "zoneResponses": 118,
-        "zoneResponsesAfterFailover": 113,
+        "messages": 877,
+        "zoneResponses": 108,
+        "zoneResponsesAfterFailover": 99,
         "errors": [
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "stale Commonware Zone placement for mir2-map-0: finalized owner dubhe-b generation 2, got owner dubhe-a generation 1"
         ],
         "bytesSent": 7024,
-        "bytesReceived": 780149
+        "bytesReceived": 784188
       },
       {
         "index": 1,
@@ -89,26 +92,27 @@
         "inGame": true,
         "markerSeen": true,
         "closedUnexpectedly": false,
-        "messages": 856,
-        "zoneResponses": 56,
-        "zoneResponsesAfterFailover": 52,
+        "messages": 877,
+        "zoneResponses": 57,
+        "zoneResponsesAfterFailover": 51,
         "errors": [
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
           "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+          "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+          "stale Commonware Zone placement for mir2-map-0: finalized owner dubhe-b generation 2, got owner dubhe-a generation 1"
         ],
         "bytesSent": 6727,
-        "bytesReceived": 782259
+        "bytesReceived": 785622
       }
     ]
   },
-  "playerHarnessOutput": "Gate 15 players completed: postFailover=113/52 ok=true\n",
+  "playerHarnessOutput": "Gate 15 players completed: postFailover=99/51 ok=true\n",
   "finalRoute": {
     "gatewayId": "gateway-b",
     "finalizedHeight": 16,
-    "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+    "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
     "placement": {
       "zoneId": "mir2-map-0",
       "generation": 2,
@@ -116,7 +120,7 @@
       "replicaHostIds": [
         "dubhe-a"
       ],
-      "expiresAtMs": 1784882489417
+      "expiresAtMs": 1784903626359
     },
     "primaryEndpoint": "dubhe-b:7020",
     "replicaEndpoints": [
@@ -134,7 +138,7 @@
         "healthy": true,
         "gatewayId": "player-gateway-a",
         "finalizedHeight": 16,
-        "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+        "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
         "agreeingValidators": [
           "validator-0",
           "validator-1",
@@ -144,7 +148,7 @@
         "respondingValidators": 4,
         "placementCount": 1,
         "sessionLeaseCount": 2,
-        "observedAtMs": 1784878930481,
+        "observedAtMs": 1784900067565,
         "lastError": null
       },
       "session_cache": {
@@ -192,7 +196,7 @@
         "healthy": true,
         "gatewayId": "player-gateway-b",
         "finalizedHeight": 16,
-        "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+        "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
         "agreeingValidators": [
           "validator-0",
           "validator-1",
@@ -202,7 +206,7 @@
         "respondingValidators": 4,
         "placementCount": 1,
         "sessionLeaseCount": 2,
-        "observedAtMs": 1784878930410,
+        "observedAtMs": 1784900067495,
         "lastError": null
       },
       "session_cache": {
@@ -247,14 +251,14 @@
       "projectorId": "projector-a",
       "healthy": true,
       "finalizedHeight": 16,
-      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
       "postgresAuthoritative": false,
       "databaseAvailable": true,
       "redisAuthoritative": false,
       "redisAvailable": true,
       "rebuiltCount": 1,
-      "projectedAtMs": 1784878930170,
-      "startedAtMs": 1784878930157,
+      "projectedAtMs": 1784900067517,
+      "startedAtMs": 1784900067500,
       "lastError": null
     },
     {
@@ -262,14 +266,14 @@
       "projectorId": "projector-b",
       "healthy": true,
       "finalizedHeight": 16,
-      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
       "postgresAuthoritative": false,
       "databaseAvailable": true,
       "redisAuthoritative": false,
       "redisAvailable": true,
       "rebuiltCount": 1,
-      "projectedAtMs": 1784878930227,
-      "startedAtMs": 1784878930211,
+      "projectedAtMs": 1784900067560,
+      "startedAtMs": 1784900067545,
       "lastError": null
     }
   ],
@@ -282,10 +286,10 @@
       "quorum": 3,
       "finalizedHeight": 16,
       "lastSequence": 16,
-      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
       "preparedCount": 16,
       "pendingCount": 0,
-      "startedAtMs": 1784878853414
+      "startedAtMs": 1784900060094
     },
     {
       "role": "commonware-validator",
@@ -295,10 +299,10 @@
       "quorum": 3,
       "finalizedHeight": 16,
       "lastSequence": 16,
-      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
       "preparedCount": 16,
       "pendingCount": 0,
-      "startedAtMs": 1784878853338
+      "startedAtMs": 1784900060124
     },
     {
       "role": "commonware-validator",
@@ -308,10 +312,10 @@
       "quorum": 3,
       "finalizedHeight": 16,
       "lastSequence": 16,
-      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
       "preparedCount": 16,
       "pendingCount": 0,
-      "startedAtMs": 1784878853273
+      "startedAtMs": 1784900060058
     },
     {
       "role": "commonware-validator",
@@ -321,14 +325,14 @@
       "quorum": 3,
       "finalizedHeight": 16,
       "lastSequence": 16,
-      "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+      "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
       "preparedCount": 16,
       "pendingCount": 0,
-      "startedAtMs": 1784878853393
+      "startedAtMs": 1784899989343
     }
   ],
   "finalizedHeight": 16,
-  "stateRoot": "3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc",
+  "stateRoot": "dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c",
   "sessionLeases": {
     "player:gate15-player-0:1": {
       "sessionId": "player:gate15-player-0:1",
@@ -337,7 +341,7 @@
       "gatewayId": "player-gateway-a",
       "zoneId": "mir2-map-0",
       "fencingToken": 1,
-      "expiresAtMs": 1784878945789
+      "expiresAtMs": 1784900082376
     },
     "player:gate15-player-1:2": {
       "sessionId": "player:gate15-player-1:2",
@@ -346,10 +350,22 @@
       "gatewayId": "player-gateway-b",
       "zoneId": "mir2-map-0",
       "fencingToken": 1,
-      "expiresAtMs": 1784878946910
+      "expiresAtMs": 1784900083522
     }
   },
+  "forwardReplicatorLogTail": [
+    "gate15-zone-replicator  | zone-replicator mutation WAL ready at /var/lib/obelisk/replication-wal/mutation-batches-v5.jsonl (cursor=0)",
+    "gate15-zone-replicator  | zone-replicator installed checkpoint 78f44a62b96cbd57ff72d7dd5a0a0b59040d5f817cc80f15d5048f9af6015a4a (entries=0, sessions=0)",
+    "gate15-zone-replicator  | zone-replicator idle cadence: 5000ms (sessions=0)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 12 (5f90e0ac1ea1df1c86d5facc5ad7730e5975a015467809ecb9e1409b7af76f70)",
+    "gate15-zone-replicator  | zone-replicator installed checkpoint 9b0dbb023cbf165d78a4dc70fcbfb7263e244d5cce84566241a8fcaaf667c73b (entries=12, sessions=2)",
+    "gate15-zone-replicator  | zone-replicator active cadence: 100ms (sessions=2)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 21 (83271870e05992c1e7ed33991f4b7bea4b0718ab8b9d46f95c7db9a670698fcc)"
+  ],
   "reverseReplicatorLogTail": [
-    "gate15-zone-replicator-b-to-a  | zone-replicator installed checkpoint ae63c85a836849f589d9931263015f9d14b268b937668aa2cc95d49a239e2d68 (entries=698, sessions=2)"
+    "gate15-zone-replicator-b-to-a  | zone-replicator mutation WAL ready at /var/lib/obelisk/replication-wal/mutation-batches-v5.jsonl (cursor=0)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator persisted mutation WAL through cursor 699 (d01a26ffa5ee1f863c05fb1d582de00709f8594914a69aa0cfb8d1fd0a5ec853)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator installed checkpoint a9e96202c4c9aa069a0312f696ae04af252ef67bac417b7d6fbbee289e334c79 (entries=699, sessions=2)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator active cadence: 100ms (sessions=2)"
   ]
 }

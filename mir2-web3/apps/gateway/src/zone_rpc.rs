@@ -35,6 +35,8 @@ pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
+pub const DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES: usize = 512;
+pub const DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES: usize = 1024 * 1024;
 pub const ZONE_HOST_CHECKPOINT_VERSION: u32 = 4;
 pub const ZONE_REPLICATION_HEAD_VERSION: u32 = 5;
 const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v4\0";
@@ -166,6 +168,98 @@ pub enum ZoneReplicationCoverage {
     CommandJournal,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneMutationEntry {
+    pub sequence: u64,
+    pub digest: String,
+    pub payload: Vec<u8>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneMutationBatch {
+    pub version: u32,
+    pub zone_id: String,
+    pub build_id: String,
+    pub mutation_coverage: ZoneReplicationCoverage,
+    pub first_sequence: u64,
+    pub next_sequence: u64,
+    pub previous_digest: String,
+    pub latest_digest: String,
+    pub entries: Vec<ZoneMutationEntry>,
+    pub has_more: bool,
+}
+
+impl ZoneMutationBatch {
+    pub fn verify(&self) -> Result<(), String> {
+        if self.version != ZONE_REPLICATION_HEAD_VERSION {
+            return Err(format!(
+                "unsupported mutation batch version {}, expected {}",
+                self.version, ZONE_REPLICATION_HEAD_VERSION
+            ));
+        }
+        validate_identifier("mutation batch zone id", &self.zone_id)?;
+        validate_identifier("mutation batch build id", &self.build_id)?;
+        if self.mutation_coverage != ZoneReplicationCoverage::CommandJournal {
+            return Err("unsupported mutation coverage".to_string());
+        }
+        let expected_next = self
+            .first_sequence
+            .checked_add(saturating_u64(self.entries.len()))
+            .ok_or_else(|| "mutation batch sequence overflow".to_string())?;
+        if self.next_sequence != expected_next {
+            return Err(format!(
+                "mutation batch next sequence {} does not match expected {expected_next}",
+                self.next_sequence
+            ));
+        }
+        let mut previous_digest = parse_hex_digest(&self.previous_digest)?;
+        for (offset, mutation) in self.entries.iter().enumerate() {
+            let expected_sequence = self
+                .first_sequence
+                .checked_add(saturating_u64(offset))
+                .ok_or_else(|| "mutation entry sequence overflow".to_string())?;
+            if mutation.sequence != expected_sequence {
+                return Err(format!(
+                    "mutation entry sequence {} does not match expected {expected_sequence}",
+                    mutation.sequence
+                ));
+            }
+            let entry: WireHostJournalEntry = serde_json::from_slice(&mutation.payload)
+                .map_err(|error| format!("mutation entry decode failed: {error}"))?;
+            if entry.zone_id != self.zone_id {
+                return Err(format!(
+                    "mutation entry Zone {} does not match batch Zone {}",
+                    entry.zone_id, self.zone_id
+                ));
+            }
+            if entry.sequence != mutation.sequence {
+                return Err(format!(
+                    "mutation payload sequence {} does not match envelope sequence {}",
+                    entry.sequence, mutation.sequence
+                ));
+            }
+            let expected_digest =
+                zone_replication_entry_digest(&previous_digest, mutation.sequence, &entry)
+                    .map_err(|error| error.message)?;
+            let actual_digest = parse_hex_digest(&mutation.digest)?;
+            if !constant_time_bytes_equal(&expected_digest, &actual_digest) {
+                return Err(format!(
+                    "mutation entry {} digest mismatch",
+                    mutation.sequence
+                ));
+            }
+            previous_digest = expected_digest;
+        }
+        let latest_digest = parse_hex_digest(&self.latest_digest)?;
+        if !constant_time_bytes_equal(&previous_digest, &latest_digest) {
+            return Err("mutation batch latest digest mismatch".to_string());
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ZoneMapScope {
@@ -193,6 +287,8 @@ struct ZoneMapCatalog {
 struct ZoneReplicationCursor {
     next_sequence: u64,
     latest_digest: [u8; 32],
+    host_entry_indexes: Vec<usize>,
+    entry_digests: Vec<[u8; 32]>,
 }
 
 impl Default for ZoneReplicationCursor {
@@ -200,6 +296,8 @@ impl Default for ZoneReplicationCursor {
         Self {
             next_sequence: 0,
             latest_digest: [0; 32],
+            host_entry_indexes: Vec::new(),
+            entry_digests: Vec::new(),
         }
     }
 }
@@ -210,7 +308,11 @@ struct ZoneReplicationCatalog {
 }
 
 impl ZoneReplicationCatalog {
-    fn append(&mut self, entry: &WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
+    fn append(
+        &mut self,
+        host_entry_index: usize,
+        entry: &WireHostJournalEntry,
+    ) -> Result<(), ZoneRpcFault> {
         let cursor = self.cursors.entry(entry.zone_id.clone()).or_default();
         let next_sequence = cursor.next_sequence.checked_add(1).ok_or_else(|| {
             ZoneRpcFault::new(
@@ -222,13 +324,15 @@ impl ZoneReplicationCatalog {
             zone_replication_entry_digest(&cursor.latest_digest, cursor.next_sequence, entry)?;
         cursor.latest_digest = next_digest;
         cursor.next_sequence = next_sequence;
+        cursor.host_entry_indexes.push(host_entry_index);
+        cursor.entry_digests.push(next_digest);
         Ok(())
     }
 
     fn from_entries(entries: &[WireHostJournalEntry]) -> Result<Self, ZoneRpcFault> {
         let mut catalog = Self::default();
-        for entry in entries {
-            catalog.append(entry)?;
+        for (host_entry_index, entry) in entries.iter().enumerate() {
+            catalog.append(host_entry_index, entry)?;
         }
         Ok(catalog)
     }
@@ -250,12 +354,139 @@ impl ZoneReplicationCatalog {
             latest_digest: hex_lower_bytes(&cursor.latest_digest),
         }
     }
+
+    fn export_batch(
+        &self,
+        host_entries: &[WireHostJournalEntry],
+        zone_id: &str,
+        first_sequence: u64,
+        max_entries: usize,
+        max_payload_bytes: usize,
+    ) -> Result<ZoneMutationBatch, ZoneRpcFault> {
+        let empty = ZoneReplicationCursor::default();
+        let cursor = self.cursors.get(zone_id).unwrap_or(&empty);
+        if first_sequence > cursor.next_sequence {
+            return Err(ZoneRpcFault::new(
+                "replication_cursor_ahead",
+                format!(
+                    "Zone {zone_id} cursor {first_sequence} is ahead of next sequence {}",
+                    cursor.next_sequence
+                ),
+            ));
+        }
+        let first_index = usize::try_from(first_sequence).map_err(|_| {
+            ZoneRpcFault::new(
+                "replication_cursor_invalid",
+                format!("Zone {zone_id} cursor does not fit this host"),
+            )
+        })?;
+        let previous_digest = if first_index == 0 {
+            [0; 32]
+        } else {
+            *cursor.entry_digests.get(first_index - 1).ok_or_else(|| {
+                ZoneRpcFault::new(
+                    "replication_cursor_compacted",
+                    format!("Zone {zone_id} cursor {first_sequence} is no longer available"),
+                )
+            })?
+        };
+        let mut entries = Vec::new();
+        let mut payload_bytes = 0usize;
+        for zone_index in first_index
+            ..cursor
+                .host_entry_indexes
+                .len()
+                .min(first_index.saturating_add(max_entries))
+        {
+            let host_index = cursor.host_entry_indexes[zone_index];
+            let host_entry = host_entries.get(host_index).ok_or_else(|| {
+                ZoneRpcFault::new(
+                    "replication_index_invalid",
+                    format!("Zone {zone_id} references missing host journal entry {host_index}"),
+                )
+            })?;
+            let sequence = u64::try_from(zone_index).map_err(|_| {
+                ZoneRpcFault::new(
+                    "replication_sequence_invalid",
+                    format!("Zone {zone_id} sequence does not fit the wire format"),
+                )
+            })?;
+            let mut canonical_entry = host_entry.clone();
+            canonical_entry.sequence = sequence;
+            let payload = serde_json::to_vec(&canonical_entry).map_err(|error| {
+                ZoneRpcFault::new(
+                    "replication_encode",
+                    format!("Zone {zone_id} mutation encode failed: {error}"),
+                )
+            })?;
+            if payload.len() > max_payload_bytes && entries.is_empty() {
+                return Err(ZoneRpcFault::new(
+                    "replication_entry_too_large",
+                    format!(
+                        "Zone {zone_id} mutation payload {} exceeds batch byte limit {max_payload_bytes}",
+                        payload.len()
+                    ),
+                ));
+            }
+            if payload_bytes.saturating_add(payload.len()) > max_payload_bytes {
+                break;
+            }
+            payload_bytes = payload_bytes.saturating_add(payload.len());
+            entries.push(ZoneMutationEntry {
+                sequence,
+                digest: hex_lower_bytes(&cursor.entry_digests[zone_index]),
+                payload,
+            });
+        }
+        let next_sequence = first_sequence
+            .checked_add(saturating_u64(entries.len()))
+            .ok_or_else(|| {
+                ZoneRpcFault::new(
+                    "replication_sequence_exhausted",
+                    format!("Zone {zone_id} batch sequence overflowed"),
+                )
+            })?;
+        let latest_digest = entries
+            .last()
+            .map(|entry| entry.digest.clone())
+            .unwrap_or_else(|| hex_lower_bytes(&previous_digest));
+        Ok(ZoneMutationBatch {
+            version: ZONE_REPLICATION_HEAD_VERSION,
+            zone_id: zone_id.to_string(),
+            build_id: zone_replication_build_id(),
+            mutation_coverage: ZoneReplicationCoverage::CommandJournal,
+            first_sequence,
+            next_sequence,
+            previous_digest: hex_lower_bytes(&previous_digest),
+            latest_digest,
+            entries,
+            has_more: next_sequence < cursor.next_sequence,
+        })
+    }
 }
 
 #[derive(Debug, Default)]
 struct ZoneHostJournal {
     entries: Vec<WireHostJournalEntry>,
     replication: ZoneReplicationCatalog,
+}
+
+impl ZoneHostJournal {
+    fn export_batch(
+        &self,
+        zone_id: &str,
+        first_sequence: u64,
+        max_entries: usize,
+        max_payload_bytes: usize,
+    ) -> Result<ZoneMutationBatch, ZoneRpcFault> {
+        self.replication.export_batch(
+            &self.entries,
+            zone_id,
+            first_sequence,
+            max_entries,
+            max_payload_bytes,
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -476,6 +707,31 @@ impl TcpZoneOwnerRpcTransport {
             ZoneRpcPayload::ReplicationHead { head } => Ok(head),
             payload => Err(unexpected_payload("replication_head", &payload)),
         }
+    }
+
+    pub fn export_mutation_batch(
+        &self,
+        first_sequence: u64,
+        max_entries: usize,
+        max_payload_bytes: usize,
+    ) -> Result<ZoneMutationBatch, String> {
+        let batch = match self.call(ZoneRpcRequest::ExportMutationBatch {
+            first_sequence,
+            max_entries,
+            max_payload_bytes,
+        })? {
+            ZoneRpcPayload::MutationBatch { batch } => batch,
+            payload => return Err(unexpected_payload("export_mutation_batch", &payload)),
+        };
+        batch.verify()?;
+        if batch.zone_id != self.zone_id.as_str() {
+            return Err(format!(
+                "mutation batch Zone {} does not match requested Zone {}",
+                batch.zone_id,
+                self.zone_id.as_str()
+            ));
+        }
+        Ok(batch)
     }
 
     pub fn poll_outbounds(
@@ -1152,6 +1408,32 @@ impl ZoneHostServer {
             .map_err(|_| "zone host journal mutex poisoned".to_string())
     }
 
+    pub fn export_mutation_batch(
+        &self,
+        zone_id: &ZoneId,
+        first_sequence: u64,
+        max_entries: usize,
+        max_payload_bytes: usize,
+    ) -> Result<ZoneMutationBatch, String> {
+        let max_entries = max_entries
+            .max(1)
+            .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES);
+        let max_payload_bytes = max_payload_bytes
+            .max(1)
+            .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES)
+            .min(self.limits.max_frame_bytes.saturating_div(2).max(1));
+        self.journal
+            .lock()
+            .map_err(|_| "zone host journal mutex poisoned".to_string())?
+            .export_batch(
+                zone_id.as_str(),
+                first_sequence,
+                max_entries,
+                max_payload_bytes,
+            )
+            .map_err(|error| error.message)
+    }
+
     pub fn session_count(&self) -> usize {
         self.sessions
             .lock()
@@ -1376,6 +1658,30 @@ impl ZoneHostServer {
                         ZoneRpcFault::new("internal", "zone host journal mutex poisoned")
                     });
             }
+            ZoneRpcRequest::ExportMutationBatch {
+                first_sequence,
+                max_entries,
+                max_payload_bytes,
+            } => {
+                let max_entries = max_entries
+                    .max(1)
+                    .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES);
+                let max_payload_bytes = max_payload_bytes
+                    .max(1)
+                    .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES)
+                    .min(self.limits.max_frame_bytes.saturating_div(2).max(1));
+                return self
+                    .journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .export_batch(
+                        &envelope.zone_id,
+                        first_sequence,
+                        max_entries,
+                        max_payload_bytes,
+                    )
+                    .map(|batch| ZoneRpcPayload::MutationBatch { batch });
+            }
             ZoneRpcRequest::ExportHostCheckpoint => return self.export_host_checkpoint(),
             ZoneRpcRequest::InstallHostCheckpoint { bytes } => {
                 self.install_host_checkpoint(&bytes)?;
@@ -1410,6 +1716,7 @@ impl ZoneHostServer {
         match request {
             ZoneRpcRequest::Health => unreachable!(),
             ZoneRpcRequest::ReplicationHead
+            | ZoneRpcRequest::ExportMutationBatch { .. }
             | ZoneRpcRequest::ExportHostCheckpoint
             | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
@@ -1640,7 +1947,8 @@ impl ZoneHostServer {
             .last()
             .map(|entry| entry.sequence.saturating_add(1))
             .unwrap_or(0);
-        journal.replication.append(&entry)?;
+        let host_entry_index = journal.entries.len();
+        journal.replication.append(host_entry_index, &entry)?;
         journal.entries.push(entry);
         Ok(())
     }
@@ -1979,6 +2287,11 @@ struct ZoneRpcEnvelope {
 enum ZoneRpcRequest {
     Health,
     ReplicationHead,
+    ExportMutationBatch {
+        first_sequence: u64,
+        max_entries: usize,
+        max_payload_bytes: usize,
+    },
     OnConnect,
     Execute {
         owner_lease: WireZoneOwnerLease,
@@ -2028,6 +2341,9 @@ enum ZoneRpcPayload {
     },
     ReplicationHead {
         head: ZoneReplicationHead,
+    },
+    MutationBatch {
+        batch: ZoneMutationBatch,
     },
     Packets {
         frames: Vec<Vec<u8>>,
@@ -2821,6 +3137,32 @@ fn hex_lower_bytes(bytes: &[u8]) -> String {
         output.push(HEX[(byte & 0x0f) as usize] as char);
     }
     output
+}
+
+fn parse_hex_digest(value: &str) -> Result<[u8; 32], String> {
+    if value.len() != 64 {
+        return Err(format!(
+            "replication digest must contain 64 lowercase hexadecimal characters, got {}",
+            value.len()
+        ));
+    }
+    let mut digest = [0u8; 32];
+    for (index, pair) in value.as_bytes().chunks_exact(2).enumerate() {
+        let high = lowercase_hex_nibble(pair[0])
+            .ok_or_else(|| "replication digest contains a non-lowercase-hex byte".to_string())?;
+        let low = lowercase_hex_nibble(pair[1])
+            .ok_or_else(|| "replication digest contains a non-lowercase-hex byte".to_string())?;
+        digest[index] = (high << 4) | low;
+    }
+    Ok(digest)
+}
+
+fn lowercase_hex_nibble(value: u8) -> Option<u8> {
+    match value {
+        b'0'..=b'9' => Some(value - b'0'),
+        b'a'..=b'f' => Some(value - b'a' + 10),
+        _ => None,
+    }
 }
 
 fn positive_usize_env(name: &str) -> Option<usize> {

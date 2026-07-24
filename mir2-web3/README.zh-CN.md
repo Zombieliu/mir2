@@ -357,6 +357,8 @@ RMT、经济通胀和合规问题。
 | Gate 14 | 四验证器、双 Gateway、双 Dubhe、双投影的无单点纵向 POC |
 | Gate 15 | 两个真实玩家通过不同 Gateway 进入同一 Zone，并在主 Dubhe 故障后保持连接继续操作 |
 | Gate 16.1 | v4 全量 checkpoint 的低基数遥测、历史规模基准和 2C2G 容器证据 |
+| Gate 16.2 | 每 Zone v5 Head、连续 cursor、摘要链和显式 readiness 安全闸 |
+| Gate 16.3 | 有界可验证 mutation batch、fsync 后 ACK 的持久接收 WAL 和双向故障演练 |
 
 Gate 15 已接受的核心结果：
 
@@ -383,9 +385,16 @@ Gate 16 设计、指标和复测方法见
 [`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md)。
 
 Gate 16.2 已增加每 Zone 独立的 v5 Head、连续 cursor、摘要链和 build
-identity。当前 Head 明确返回 `mutationCoverage=commandJournal` 和
-`promotionReady=false`：在自主 tick、怪物 AI 等 mutation 进入持久 WAL
-以前，不会为了降低带宽而错误跳过 v4 复制，也不会把不完整副本晋升为主节点。
+identity。Gate 16.3 已增加默认最多 512 entries / 1 MiB 的可验证 mutation
+batch，以及写入、`flush`、`fsync` 全部成功后才确认的接收 WAL。最新完整故障
+演练中，A→B 和 B→A 分别持久化到 cursor `21` 和 `699`，两个真实玩家仍在
+主节点故障后继续执行 Zone 命令。
+
+当前 Head 仍明确返回 `mutationCoverage=commandJournal` 和
+`promotionReady=false`。replicator 会先持久化 v5 新增命令，再继续安装 v4
+checkpoint；自主 tick、怪物 AI、增量 standby 应用、base snapshot 和 WAL
+截断将在 Gate 16.4 完成。现在得到的是“重启不丢接收确认位置”的安全桥接，
+不是已经可以只靠 v5 晋升的生产复制闭环。
 
 ## 本地验收 Gate 15
 
