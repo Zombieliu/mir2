@@ -54,6 +54,15 @@ jq -e \
       and .completedCommands == .requestedCommands
       and .checkpointEntries == .requestedCommands
       and .checkpointBytes > 0
+      and .replicationHead.version == 5
+      and .replicationHead.mutationCoverage == "commandJournal"
+      and .replicationHead.promotionReady == false
+      and .replicationHead.baseSnapshotId == null
+      and .replicationHead.entryCount == .requestedCommands
+      and .replicationHead.nextSequence == .requestedCommands
+      and .replicationHeadBytes < 1024
+      and .replicationHeadLatencyUs.count == 100
+      and .replicationHeadLatencyUs.p95 < 100000
       and .commandLatencyMs.p95 != null
       and .activeTelemetry.checkpoint.exportsTotal == 1
       and .standbyTelemetry.checkpoint.installsTotal == 1

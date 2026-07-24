@@ -36,7 +36,9 @@ pub const DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE: usize = 4096;
 pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;
 pub const DEFAULT_ZONE_RPC_OUTBOUND_POLL_LIMIT: usize = 128;
 pub const ZONE_HOST_CHECKPOINT_VERSION: u32 = 4;
+pub const ZONE_REPLICATION_HEAD_VERSION: u32 = 5;
 const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v4\0";
+const ZONE_REPLICATION_HEAD_DOMAIN: &[u8] = b"obelisk.mir2.zone-replication-head.v5\0";
 
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
@@ -141,6 +143,29 @@ pub struct ZoneHostCheckpointTelemetry {
     pub replay_last_entries: u64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneReplicationHead {
+    pub version: u32,
+    pub zone_id: String,
+    pub build_id: String,
+    pub mutation_coverage: ZoneReplicationCoverage,
+    pub promotion_ready: bool,
+    pub base_snapshot_id: Option<String>,
+    pub base_sequence: u64,
+    pub oldest_available_sequence: u64,
+    pub entry_count: u64,
+    pub next_sequence: u64,
+    pub last_sequence: Option<u64>,
+    pub latest_digest: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneReplicationCoverage {
+    CommandJournal,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ZoneMapScope {
@@ -162,6 +187,75 @@ pub struct ZoneHostZoneTelemetry {
 struct ZoneMapCatalog {
     maps_by_zone: BTreeMap<String, Vec<String>>,
     all_maps_zone_ids: BTreeSet<String>,
+}
+
+#[derive(Debug, Clone)]
+struct ZoneReplicationCursor {
+    next_sequence: u64,
+    latest_digest: [u8; 32],
+}
+
+impl Default for ZoneReplicationCursor {
+    fn default() -> Self {
+        Self {
+            next_sequence: 0,
+            latest_digest: [0; 32],
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+struct ZoneReplicationCatalog {
+    cursors: BTreeMap<String, ZoneReplicationCursor>,
+}
+
+impl ZoneReplicationCatalog {
+    fn append(&mut self, entry: &WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
+        let cursor = self.cursors.entry(entry.zone_id.clone()).or_default();
+        let next_sequence = cursor.next_sequence.checked_add(1).ok_or_else(|| {
+            ZoneRpcFault::new(
+                "replication_sequence_exhausted",
+                format!("Zone {} exhausted its replication sequence", entry.zone_id),
+            )
+        })?;
+        let next_digest =
+            zone_replication_entry_digest(&cursor.latest_digest, cursor.next_sequence, entry)?;
+        cursor.latest_digest = next_digest;
+        cursor.next_sequence = next_sequence;
+        Ok(())
+    }
+
+    fn from_entries(entries: &[WireHostJournalEntry]) -> Result<Self, ZoneRpcFault> {
+        let mut catalog = Self::default();
+        for entry in entries {
+            catalog.append(entry)?;
+        }
+        Ok(catalog)
+    }
+
+    fn head(&self, zone_id: &str) -> ZoneReplicationHead {
+        let cursor = self.cursors.get(zone_id).cloned().unwrap_or_default();
+        ZoneReplicationHead {
+            version: ZONE_REPLICATION_HEAD_VERSION,
+            zone_id: zone_id.to_string(),
+            build_id: zone_replication_build_id(),
+            mutation_coverage: ZoneReplicationCoverage::CommandJournal,
+            promotion_ready: false,
+            base_snapshot_id: None,
+            base_sequence: 0,
+            oldest_available_sequence: 0,
+            entry_count: cursor.next_sequence,
+            next_sequence: cursor.next_sequence,
+            last_sequence: cursor.next_sequence.checked_sub(1),
+            latest_digest: hex_lower_bytes(&cursor.latest_digest),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+struct ZoneHostJournal {
+    entries: Vec<WireHostJournalEntry>,
+    replication: ZoneReplicationCatalog,
 }
 
 #[derive(Debug, Clone)]
@@ -374,6 +468,13 @@ impl TcpZoneOwnerRpcTransport {
                 protocol_version,
             }),
             payload => Err(unexpected_payload("health", &payload)),
+        }
+    }
+
+    pub fn replication_head(&self) -> Result<ZoneReplicationHead, String> {
+        match self.call(ZoneRpcRequest::ReplicationHead)? {
+            ZoneRpcPayload::ReplicationHead { head } => Ok(head),
+            payload => Err(unexpected_payload("replication_head", &payload)),
         }
     }
 
@@ -853,7 +954,7 @@ pub struct ZoneHostServer {
     sessions: Mutex<BTreeMap<(String, String), Arc<ZoneHostSession>>>,
     zone_map_catalog: Mutex<ZoneMapCatalog>,
     operation_gate: Mutex<()>,
-    journal: Mutex<Vec<WireHostJournalEntry>>,
+    journal: Mutex<ZoneHostJournal>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
     zone_capacity: usize,
@@ -964,7 +1065,7 @@ impl ZoneHostServer {
             sessions: Mutex::new(BTreeMap::new()),
             zone_map_catalog: Mutex::new(ZoneMapCatalog::default()),
             operation_gate: Mutex::new(()),
-            journal: Mutex::new(Vec::new()),
+            journal: Mutex::new(ZoneHostJournal::default()),
             auth_token,
             limits,
             zone_capacity: zone_capacity.max(1),
@@ -1013,7 +1114,7 @@ impl ZoneHostServer {
                 journal_entries: self
                     .journal
                     .lock()
-                    .map(|journal| saturating_u64(journal.len()))
+                    .map(|journal| saturating_u64(journal.entries.len()))
                     .unwrap_or_default(),
                 exports_total: self.checkpoint_exports_total.load(Ordering::Acquire),
                 export_bytes_total: self.checkpoint_export_bytes_total.load(Ordering::Acquire),
@@ -1042,6 +1143,13 @@ impl ZoneHostServer {
             rpc_requests_total: self.rpc_requests_total.load(Ordering::Acquire),
             rpc_errors_total: self.rpc_errors_total.load(Ordering::Acquire),
         }
+    }
+
+    pub fn replication_head(&self, zone_id: &ZoneId) -> Result<ZoneReplicationHead, String> {
+        self.journal
+            .lock()
+            .map(|journal| journal.replication.head(zone_id.as_str()))
+            .map_err(|_| "zone host journal mutex poisoned".to_string())
     }
 
     pub fn session_count(&self) -> usize {
@@ -1257,6 +1365,17 @@ impl ZoneHostServer {
             .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
         let request = envelope.request;
         match request {
+            ZoneRpcRequest::ReplicationHead => {
+                return self
+                    .journal
+                    .lock()
+                    .map(|journal| ZoneRpcPayload::ReplicationHead {
+                        head: journal.replication.head(&envelope.zone_id),
+                    })
+                    .map_err(|_| {
+                        ZoneRpcFault::new("internal", "zone host journal mutex poisoned")
+                    });
+            }
             ZoneRpcRequest::ExportHostCheckpoint => return self.export_host_checkpoint(),
             ZoneRpcRequest::InstallHostCheckpoint { bytes } => {
                 self.install_host_checkpoint(&bytes)?;
@@ -1290,7 +1409,9 @@ impl ZoneHostServer {
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
         match request {
             ZoneRpcRequest::Health => unreachable!(),
-            ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
+            ZoneRpcRequest::ReplicationHead
+            | ZoneRpcRequest::ExportHostCheckpoint
+            | ZoneRpcRequest::InstallHostCheckpoint { .. } => {
                 unreachable!()
             }
             ZoneRpcRequest::CloseSession { .. } => unreachable!(),
@@ -1515,10 +1636,12 @@ impl ZoneHostServer {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?;
         entry.sequence = journal
+            .entries
             .last()
             .map(|entry| entry.sequence.saturating_add(1))
             .unwrap_or(0);
-        journal.push(entry);
+        journal.replication.append(&entry)?;
+        journal.entries.push(entry);
         Ok(())
     }
 
@@ -1528,6 +1651,7 @@ impl ZoneHostServer {
             .journal
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .entries
             .clone();
         let sessions = self
             .sessions
@@ -1623,6 +1747,7 @@ impl ZoneHostServer {
         })?;
 
         let replay_entries = saturating_u64(checkpoint.entries.len());
+        let replication_catalog = ZoneReplicationCatalog::from_entries(&checkpoint.entries)?;
         let factory = Arc::new(
             self.runtime_factory
                 .lock()
@@ -1762,7 +1887,10 @@ impl ZoneHostServer {
             .journal
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))? =
-            checkpoint.entries;
+            ZoneHostJournal {
+                entries: checkpoint.entries,
+                replication: replication_catalog,
+            };
         let byte_count = saturating_u64(bytes.len());
         let duration_ns = saturating_duration_ns(started.elapsed());
         self.checkpoint_installs_total
@@ -1791,6 +1919,43 @@ fn saturating_duration_ns(duration: Duration) -> u64 {
     u64::try_from(duration.as_nanos()).unwrap_or(u64::MAX)
 }
 
+fn zone_replication_build_id() -> String {
+    if let Ok(build_id) = std::env::var("MIR2_ZONE_HOST_BUILD_ID") {
+        let build_id = build_id.trim();
+        if !build_id.is_empty() && build_id.len() <= 128 && !build_id.chars().any(char::is_control)
+        {
+            return build_id.to_string();
+        }
+    }
+    option_env!("GIT_COMMIT_SHA")
+        .filter(|build_id| !build_id.trim().is_empty() && build_id.len() <= 128)
+        .map(str::to_string)
+        .unwrap_or_else(|| format!("mir2-gateway/{}", env!("CARGO_PKG_VERSION")))
+}
+
+fn zone_replication_entry_digest(
+    previous_digest: &[u8; 32],
+    zone_sequence: u64,
+    entry: &WireHostJournalEntry,
+) -> Result<[u8; 32], ZoneRpcFault> {
+    let mut canonical_entry = entry.clone();
+    canonical_entry.sequence = zone_sequence;
+    let bytes = serde_json::to_vec(&canonical_entry).map_err(|error| {
+        ZoneRpcFault::new(
+            "replication_encode",
+            format!("zone replication entry encode failed: {error}"),
+        )
+    })?;
+    let mut hasher = Sha256::new();
+    hasher.update(ZONE_REPLICATION_HEAD_DOMAIN);
+    hasher.update(entry.zone_id.as_bytes());
+    hasher.update(b"\0");
+    hasher.update(previous_digest);
+    hasher.update(zone_sequence.to_be_bytes());
+    hasher.update(bytes);
+    Ok(hasher.finalize().into())
+}
+
 struct ActiveConnectionGuard<'a>(&'a AtomicUsize);
 
 impl Drop for ActiveConnectionGuard<'_> {
@@ -1813,6 +1978,7 @@ struct ZoneRpcEnvelope {
 #[serde(tag = "operation", content = "arguments", rename_all = "camelCase")]
 enum ZoneRpcRequest {
     Health,
+    ReplicationHead,
     OnConnect,
     Execute {
         owner_lease: WireZoneOwnerLease,
@@ -1859,6 +2025,9 @@ enum ZoneRpcPayload {
         zone_capacity: usize,
         draining: bool,
         protocol_version: u16,
+    },
+    ReplicationHead {
+        head: ZoneReplicationHead,
     },
     Packets {
         frames: Vec<Vec<u8>>,
