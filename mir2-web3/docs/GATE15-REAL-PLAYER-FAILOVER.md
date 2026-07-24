@@ -18,11 +18,11 @@ security, or multi-region certification.
 | Gate 15.1 | WebSocket and Crystal TCP `StartGame` resolve the authenticated account/character against finalized state and acquire a Commonware session lease before entering the world. | Two real accounts and character slots enter through separate player Gateways; two canonical `player:<account>:<characterIndex>` leases finalize. |
 | Gate 15.2 | Each Gateway observes a 3-of-4 validator quorum, derives the current Zone placement, refreshes the owner generation at the serialized command boundary, and rebuilds its Zone RPC route when the finalized generation or endpoints change. | Both Gateways observe the same height/root and adopt placement generation 2 without dropping either player socket. |
 | Gate 15.3 | Zone Host checkpoints carry the complete command journal, private active-character state, and shared Zone image for multiple live sessions. Repeated full-journal installs replay from an isolated account-store baseline. | A continuously replicated two-session checkpoint is promoted on Dubhe B after Dubhe A is stopped; both sessions continue returning `UserLocation`. |
-| Gate 15.4 | Docker fault injection, reverse recovery, final quorum checks, projector recovery, and machine-readable evidence are automated. | Dubhe A is recovered as standby, B-to-A replication installs a 698-entry/two-session checkpoint, all validators agree, and both disposable projectors finish healthy. |
+| Gate 15.4 | Docker fault injection, reverse recovery, final quorum checks, projector recovery, and machine-readable evidence are automated. | Dubhe A is recovered as standby, B-to-A replication installs a 699-entry/two-session checkpoint, all validators agree, and both disposable projectors finish healthy. |
 
 The accepted run finalized height `16` at state root
-`3b634ba7f5d26706294a97889c6a51cbe92898f107543596c5463285c01c2ecc`.
-After the failover marker, player A and player B received `113` and `52`
+`dbeb4cdae62845f135877be64ced79fe749039ab65a5786b528fdf1b8c0b177c`.
+After the failover marker, player A and player B received `99` and `51`
 additional `UserLocation` responses respectively, with neither WebSocket
 closing unexpectedly. The canonical evidence is
 [`docs/generated/gate15/gate15-acceptance.json`](generated/gate15/gate15-acceptance.json).
@@ -66,8 +66,8 @@ flowchart TB
   subgraph Zone["Fenced game compute"]
     ZA["Dubhe A<br/>initial primary"]
     ZB["Dubhe B<br/>initial replica / final primary"]
-    CP1["A to B checkpoint stream"]
-    CP2["B to A recovery stream"]
+    CP1["A to B v5 receive WAL<br/>plus v4 checkpoint"]
+    CP2["B to A v5 receive WAL<br/>plus v4 checkpoint"]
     ZA -.-> CP1 -.-> ZB
     ZB -.-> CP2 -.-> ZA
   end
@@ -150,6 +150,12 @@ The Gate 15 replicators use a 100 ms cadence while players are active and a
 The Zone simulation continues advancing while idle; only disaster-recovery
 sampling slows down.
 
+With Gate 16.3 enabled, each direction owns a persistent receive-WAL volume.
+The replicator verifies and fsyncs new command-journal batches before installing
+the existing v4 checkpoint. The accepted run persisted A-to-B through cursor
+`21` and B-to-A through cursor `699`. v4 remains the promotion source until
+authoritative tick/AI capture and incremental standby apply land in Gate 16.4.
+
 ## Manual inspection
 
 | Surface | URL or command |
@@ -163,6 +169,8 @@ sampling slows down.
 | Running recovered topology | `docker compose -f infra/gate14/docker-compose.yml -f infra/gate15/docker-compose.yml --profile reverse ps` |
 | Player fault report | `docs/generated/gate15/gate15-players.json` |
 | Canonical acceptance evidence | `docs/generated/gate15/gate15-acceptance.json` |
+| A-to-B mutation WAL | named volume `obelisk-gate15_gate16-wal-a-to-b` |
+| B-to-A mutation WAL | named volume `obelisk-gate15_gate16-wal-b-to-a` |
 
 Expected final facts:
 
@@ -174,6 +182,7 @@ Expected final facts:
   connected, and executed Zone commands after failover;
 - both projectors report healthy at height `16`;
 - both Dubhe hosts are healthy and `zone-replicator-b-to-a` is running.
+- both replicator log tails contain `persisted mutation WAL`.
 
 ## Correctness decisions
 

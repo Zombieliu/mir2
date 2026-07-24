@@ -228,7 +228,10 @@ services:
       MIR2_ZONE_REPLICA_ZONE_ID: "mir2-map-0"
       MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
       MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
+      MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/replication-wal"
       MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+    volumes:
+      - gate16-wal-a-to-b:/var/lib/obelisk/replication-wal
     depends_on:
       dubhe-a:
         condition: service_healthy
@@ -248,7 +251,10 @@ services:
       MIR2_ZONE_REPLICA_ZONE_ID: "mir2-map-0"
       MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
       MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
+      MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/replication-wal"
       MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+    volumes:
+      - gate16-wal-b-to-a:/var/lib/obelisk/replication-wal
     depends_on:
       dubhe-a:
         condition: service_healthy
@@ -269,3 +275,7 @@ networks:
     ipam:
       config:
         - subnet: 172.31.15.0/24
+
+volumes:
+  gate16-wal-a-to-b:
+  gate16-wal-b-to-a:

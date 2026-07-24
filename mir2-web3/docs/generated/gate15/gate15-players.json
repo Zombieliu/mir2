@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "startedAt": "2026-07-24T07:41:25.653Z",
-  "finishedAt": "2026-07-24T07:42:00.837Z",
-  "durationMs": 35184,
+  "startedAt": "2026-07-24T13:33:42.245Z",
+  "finishedAt": "2026-07-24T13:34:17.271Z",
+  "durationMs": 35026,
   "assertions": {
     "bothReachedGame": true,
     "bothObservedFailover": true,
@@ -18,18 +18,19 @@
       "inGame": true,
       "markerSeen": true,
       "closedUnexpectedly": false,
-      "messages": 851,
-      "zoneResponses": 118,
-      "zoneResponsesAfterFailover": 113,
+      "messages": 877,
+      "zoneResponses": 108,
+      "zoneResponsesAfterFailover": 99,
       "errors": [
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "stale Commonware Zone placement for mir2-map-0: finalized owner dubhe-b generation 2, got owner dubhe-a generation 1"
       ],
       "bytesSent": 7024,
-      "bytesReceived": 780149
+      "bytesReceived": 784188
     },
     {
       "index": 1,
@@ -39,18 +40,19 @@
       "inGame": true,
       "markerSeen": true,
       "closedUnexpectedly": false,
-      "messages": 856,
-      "zoneResponses": 56,
-      "zoneResponsesAfterFailover": 52,
+      "messages": 877,
+      "zoneResponses": 57,
+      "zoneResponsesAfterFailover": 51,
       "errors": [
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
         "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
-        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby"
+        "zone RPC runtime: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby",
+        "stale Commonware Zone placement for mir2-map-0: finalized owner dubhe-b generation 2, got owner dubhe-a generation 1"
       ],
       "bytesSent": 6727,
-      "bytesReceived": 782259
+      "bytesReceived": 785622
     }
   ]
 }

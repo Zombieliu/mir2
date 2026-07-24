@@ -251,7 +251,10 @@ def main() -> int:
     player_stdout = ""
     try:
         ready = wait_file(PLAYER_READY, "two real players", timeout=30)
-        wait_logs("zone-replicator", "sessions=2", timeout=30)
+        forward_logs = wait_logs("zone-replicator", "sessions=2", timeout=30)
+        forward_logs = wait_logs(
+            "zone-replicator", "persisted mutation WAL", timeout=30
+        )
 
         compose(["stop", "dubhe-a"])
         expiry = int(time.time() * 1000) + 3_600_000
@@ -315,6 +318,9 @@ def main() -> int:
         reverse_logs = wait_logs(
             "zone-replicator-b-to-a", "installed checkpoint", timeout=30
         )
+        reverse_logs = wait_logs(
+            "zone-replicator-b-to-a", "persisted mutation WAL", timeout=30
+        )
         # Validator containers can receive new bridge addresses while Dubhe A
         # is recovered. Restart the disposable projectors so their HTTP clients
         # resolve the live validators and the manual environment ends all-green.
@@ -363,6 +369,8 @@ def main() -> int:
             ),
             "recoveredAReceivedReverseCheckpoint": "installed checkpoint"
             in reverse_logs,
+            "forwardMutationWalDurable": "persisted mutation WAL" in forward_logs,
+            "reverseMutationWalDurable": "persisted mutation WAL" in reverse_logs,
             "bothProjectorsHealthy": all(
                 status.get("healthy") is True for status in projector_health
             ),
@@ -382,6 +390,7 @@ def main() -> int:
             "finalizedHeight": final_state["finalizedHeight"],
             "stateRoot": validator_statuses[0]["stateRoot"],
             "sessionLeases": final_state["sessionLeases"],
+            "forwardReplicatorLogTail": forward_logs.splitlines()[-20:],
             "reverseReplicatorLogTail": reverse_logs.splitlines()[-20:],
         }
         EVIDENCE.write_text(json.dumps(evidence, indent=2) + "\n")

@@ -20,6 +20,7 @@ pub mod tcp;
 pub mod topology;
 pub mod web;
 pub mod zone_lease;
+pub mod zone_replication;
 pub mod zone_rpc;
 
 pub use beta::{
@@ -99,9 +100,12 @@ pub use routing::{
 };
 pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
+pub use zone_replication::{ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
     validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneHostCheckpointTelemetry, ZoneHostHealth,
     ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope,
-    ZoneReplicationCoverage, ZoneReplicationHead, ZoneRpcLimits, ZONE_HOST_CHECKPOINT_VERSION,
+    ZoneMutationBatch, ZoneMutationEntry, ZoneReplicationCoverage, ZoneReplicationHead,
+    ZoneRpcLimits, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+    DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES, ZONE_HOST_CHECKPOINT_VERSION,
     ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
