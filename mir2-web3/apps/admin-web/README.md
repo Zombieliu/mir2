@@ -97,6 +97,15 @@ separate data classes:
 - live, signed Zone Host telemetry from `/healthz` and `/v1/heartbeat`;
 - public Sui testnet registration and committed Gate 13 acceptance evidence.
 
+The current v3 heartbeat also signs the node's active Zone workload list. The
+console expands the aggregate `Zones` capacity bar into Zone id, map scope,
+explicit map-file membership, and live session count. A `single` topology is
+shown as `All game maps`; configured groups show every map in the group; and
+dynamic `map:<file>` Zones expose their derived map file. Older nodes that only
+publish aggregate counts remain visible, but their map details are marked
+unverified instead of being inferred by the UI. Aggregate-only v2 heartbeats
+remain accepted during rolling upgrades.
+
 By default it probes ports `19100`, `19101`, and `29100`. Override the endpoints
 and operations links when running another topology:
 

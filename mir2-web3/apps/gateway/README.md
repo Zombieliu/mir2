@@ -26,6 +26,9 @@ still depends on human Crystal visual/feel acceptance.
 - `src/bin/gate11_acceptance.rs`: real Crystal-world remote Zone handoff/failover acceptance.
 - `src/bin/gate11_scale_acceptance.rs`: four-session, two-map, two-generation fencing acceptance.
 - `src/bin/gate11_full_acceptance.rs`: fail-closed Gate 11 manifest and atomic evidence writer.
+- `src/bin/gate14_validator.rs`: real four-node Commonware `v2026.2.0` Simplex validator.
+- `src/bin/gate14_gateway.rs`: finalized-state dynamic placement and fenced session Gateway.
+- `src/bin/gate14_projector.rs`: disposable Postgres/Redis projection rebuilder.
 
 ## Supported Local Flows
 
@@ -88,6 +91,11 @@ Account-store runtime policy:
   `MIR2_ZONE_TOPOLOGY_JSON`; see `config/zone-topology.example.json`. Explicit
   groups share quiet maps, while unlisted maps receive a dedicated Zone and
   every Zone owns its configured tick cadence.
+- The Zone Host operator `/healthz` response and signed v3 `/v1/heartbeat` include
+  active Zone workload details: Zone id, map scope, map-file membership, and
+  session count. The topology catalog marks single-Zone deployments as owning
+  all maps, preserves explicit grouped-map membership, and derives the map file
+  for dynamic `map:<file>` or `mir2/map/<file>` Zones.
 - Active characters atomically rebind after a topology-changing map transfer.
   Remote close is owner-fenced and checkpointed, while server shouts and GM
   announcements use the bounded cross-Zone live message bus.
@@ -112,6 +120,10 @@ Account-store runtime policy:
   two TCP Zone Hosts, then stops the active host and verifies fenced standby continuation.
 - `cargo run -p mir2-gateway --bin gate11_full_acceptance -- --output target/gate11.json` runs
   the complete v4 Zone-image and repeated-failure suite and atomically writes release evidence.
+- `python3 scripts/gate14_acceptance.py --reset` builds and exercises the complete Gate 14
+  four-validator/two-Gateway/two-Zone/two-projection Docker topology. It injects validator,
+  Gateway, Redis, Postgres, and Zone Host failures and leaves a recovered stack running for
+  manual inspection. See `docs/GATE14-NO-SINGLE-POINT-POC.md`.
 
 Admin runtime read endpoints:
 

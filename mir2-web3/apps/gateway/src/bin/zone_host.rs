@@ -44,6 +44,7 @@ fn main() -> io::Result<()> {
         ZoneRpcLimits::from_env(),
         topology.runtime_factory(),
     ));
+    server.configure_zone_map_catalog(topology.zone_map_catalog(), topology.all_maps_zone_ids());
     let operator_config = ZoneHostOperatorConfig::from_env(bound_address, &server.health().host_id)
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let operator_listener = TcpListener::bind(operator_config.address)?;

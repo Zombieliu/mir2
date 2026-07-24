@@ -1,0 +1,503 @@
+{
+  "gate": "14.1-14.4-no-single-point-vertical-poc",
+  "accepted": true,
+  "startedAtMs": 1784847316554,
+  "commonwareRelease": "v2026.2.0",
+  "milestones": {
+    "goal1Commonware": {
+      "accepted": true,
+      "validators": [
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-0",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 9,
+          "lastSequence": 9,
+          "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+          "preparedCount": 9,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320327
+        },
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-1",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 9,
+          "lastSequence": 9,
+          "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+          "preparedCount": 9,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320307
+        },
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-2",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 9,
+          "lastSequence": 9,
+          "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+          "preparedCount": 9,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320283
+        },
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-3",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 9,
+          "lastSequence": 9,
+          "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+          "preparedCount": 9,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320264
+        }
+      ],
+      "eventDriven": true,
+      "quorum": 3
+    },
+    "goal2DynamicGateway": {
+      "accepted": true,
+      "initialLease": {
+        "accepted": true,
+        "finalizedHeight": 9,
+        "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+        "lease": {
+          "sessionId": "gate14-session",
+          "accountId": "gate14-alice",
+          "characterId": "gate14-hero",
+          "gatewayId": "gateway-a",
+          "zoneId": "mir2-map-0",
+          "fencingToken": 1,
+          "expiresAtMs": 1784847401829
+        },
+        "route": {
+          "gatewayId": "gateway-a",
+          "finalizedHeight": 9,
+          "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+          "placement": {
+            "zoneId": "mir2-map-0",
+            "generation": 1,
+            "primaryHostId": "dubhe-a",
+            "replicaHostIds": [
+              "dubhe-b"
+            ],
+            "expiresAtMs": 1784848225903
+          },
+          "primaryEndpoint": "dubhe-a:7020",
+          "replicaEndpoints": [
+            "dubhe-b:7020"
+          ]
+        }
+      },
+      "gatewayA": {
+        "role": "dynamic-gateway",
+        "gatewayId": "gateway-a",
+        "healthy": true,
+        "finalizedHeight": 9,
+        "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 1,
+        "redisAvailable": true,
+        "redisAuthoritative": false,
+        "observedAtMs": 1784847343023,
+        "startedAtMs": 1784847323469,
+        "lastError": null
+      },
+      "gatewayB": {
+        "role": "dynamic-gateway",
+        "gatewayId": "gateway-b",
+        "healthy": true,
+        "finalizedHeight": 9,
+        "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 1,
+        "redisAvailable": true,
+        "redisAuthoritative": false,
+        "observedAtMs": 1784847343023,
+        "startedAtMs": 1784847323956,
+        "lastError": null
+      }
+    },
+    "goal3AuthoritativeStateAndProjection": {
+      "accepted": true,
+      "projectorA": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-a",
+        "healthy": true,
+        "finalizedHeight": 9,
+        "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 10,
+        "projectedAtMs": 1784847342902,
+        "startedAtMs": 1784847323451,
+        "lastError": null
+      },
+      "projectorB": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-b",
+        "healthy": true,
+        "finalizedHeight": 9,
+        "stateRoot": "3941d337b8a47a1b139a02ee59a580f94d0f0d3e3aa05161a67f89e9c24c6c91",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 10,
+        "projectedAtMs": 1784847342902,
+        "startedAtMs": 1784847323974,
+        "lastError": null
+      }
+    },
+    "goal4FaultRecovery": {
+      "accepted": true,
+      "finalHeight": 14,
+      "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+      "validatorStatuses": [
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-0",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 14,
+          "lastSequence": 14,
+          "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+          "preparedCount": 14,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320327
+        },
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-1",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 14,
+          "lastSequence": 14,
+          "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+          "preparedCount": 14,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320307
+        },
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-2",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 14,
+          "lastSequence": 14,
+          "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+          "preparedCount": 14,
+          "pendingCount": 0,
+          "startedAtMs": 1784847320283
+        },
+        {
+          "role": "commonware-validator",
+          "nodeId": "validator-3",
+          "commonwareRelease": "v2026.2.0",
+          "committeeSize": 4,
+          "quorum": 3,
+          "finalizedHeight": 14,
+          "lastSequence": 14,
+          "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+          "preparedCount": 14,
+          "pendingCount": 0,
+          "startedAtMs": 1784847345554
+        }
+      ],
+      "projectorA": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-a",
+        "healthy": true,
+        "finalizedHeight": 14,
+        "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 2,
+        "projectedAtMs": 1784847356561,
+        "startedAtMs": 1784847354000,
+        "lastError": null
+      },
+      "projectorB": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-b",
+        "healthy": true,
+        "finalizedHeight": 14,
+        "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 15,
+        "projectedAtMs": 1784847356553,
+        "startedAtMs": 1784847323974,
+        "lastError": null
+      },
+      "databaseChecks": {
+        "postgres-a": {
+          "height": 14,
+          "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+          "gold": 115,
+          "redPotion": 5,
+          "commandCount": 14
+        },
+        "postgres-b": {
+          "height": 14,
+          "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+          "gold": 115,
+          "redPotion": 5,
+          "commandCount": 14
+        }
+      },
+      "finalSessionLease": {
+        "sessionId": "gate14-session",
+        "accountId": "gate14-alice",
+        "characterId": "gate14-hero",
+        "gatewayId": "gateway-b",
+        "zoneId": "mir2-map-0",
+        "fencingToken": 2,
+        "expiresAtMs": 1784847406865
+      },
+      "finalRoute": {
+        "gatewayId": "gateway-b",
+        "finalizedHeight": 14,
+        "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+        "placement": {
+          "zoneId": "mir2-map-0",
+          "generation": 2,
+          "primaryHostId": "dubhe-b",
+          "replicaHostIds": [],
+          "expiresAtMs": 1784848255637
+        },
+        "primaryEndpoint": "dubhe-b:7020",
+        "replicaEndpoints": []
+      }
+    }
+  },
+  "faults": [
+    {
+      "fault": "validator-3-stop-and-catch-up",
+      "accepted": true,
+      "degradedGateway": {
+        "role": "dynamic-gateway",
+        "gatewayId": "gateway-a",
+        "healthy": true,
+        "finalizedHeight": 10,
+        "stateRoot": "30e3304c92031e0b6b49ab58644d121056fa9bda25f9b6f83585ac6254a9f18d",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2"
+        ],
+        "respondingValidators": 3,
+        "placementCount": 1,
+        "sessionLeaseCount": 1,
+        "redisAvailable": true,
+        "redisAuthoritative": false,
+        "observedAtMs": 1784847345375,
+        "startedAtMs": 1784847323469,
+        "lastError": null
+      },
+      "recoveredValidator": {
+        "role": "commonware-validator",
+        "nodeId": "validator-3",
+        "commonwareRelease": "v2026.2.0",
+        "committeeSize": 4,
+        "quorum": 3,
+        "finalizedHeight": 10,
+        "lastSequence": 10,
+        "stateRoot": "30e3304c92031e0b6b49ab58644d121056fa9bda25f9b6f83585ac6254a9f18d",
+        "preparedCount": 10,
+        "pendingCount": 0,
+        "startedAtMs": 1784847345554
+      }
+    },
+    {
+      "fault": "gateway-a-stop",
+      "accepted": true,
+      "takeoverLease": {
+        "accepted": true,
+        "finalizedHeight": 11,
+        "stateRoot": "f262dadd64cf0fdc57550726d2f51d8de104f5f41fe55e784f6ac4c07f8ba04d",
+        "lease": {
+          "sessionId": "gate14-session",
+          "accountId": "gate14-alice",
+          "characterId": "gate14-hero",
+          "gatewayId": "gateway-b",
+          "zoneId": "mir2-map-0",
+          "fencingToken": 2,
+          "expiresAtMs": 1784847406865
+        },
+        "route": {
+          "gatewayId": "gateway-b",
+          "finalizedHeight": 11,
+          "stateRoot": "f262dadd64cf0fdc57550726d2f51d8de104f5f41fe55e784f6ac4c07f8ba04d",
+          "placement": {
+            "zoneId": "mir2-map-0",
+            "generation": 1,
+            "primaryHostId": "dubhe-a",
+            "replicaHostIds": [
+              "dubhe-b"
+            ],
+            "expiresAtMs": 1784848225903
+          },
+          "primaryEndpoint": "dubhe-a:7020",
+          "replicaEndpoints": [
+            "dubhe-b:7020"
+          ]
+        }
+      }
+    },
+    {
+      "fault": "redis-a-stop",
+      "accepted": true,
+      "databaseContinued": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-a",
+        "healthy": true,
+        "finalizedHeight": 12,
+        "stateRoot": "3e97657ce9be27781dacbc822ef917818dd6db1663edb3bb0071d80b9387b4dc",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": false,
+        "rebuiltCount": 13,
+        "projectedAtMs": 1784847350014,
+        "startedAtMs": 1784847323451,
+        "lastError": null
+      },
+      "independentProjection": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-b",
+        "healthy": true,
+        "finalizedHeight": 12,
+        "stateRoot": "3e97657ce9be27781dacbc822ef917818dd6db1663edb3bb0071d80b9387b4dc",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 13,
+        "projectedAtMs": 1784847349917,
+        "startedAtMs": 1784847323974,
+        "lastError": null
+      },
+      "recovered": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-a",
+        "healthy": true,
+        "finalizedHeight": 12,
+        "stateRoot": "3e97657ce9be27781dacbc822ef917818dd6db1663edb3bb0071d80b9387b4dc",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 14,
+        "projectedAtMs": 1784847350534,
+        "startedAtMs": 1784847323451,
+        "lastError": null
+      }
+    },
+    {
+      "fault": "postgres-a-stop",
+      "accepted": true,
+      "projectorB": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-b",
+        "healthy": true,
+        "finalizedHeight": 13,
+        "stateRoot": "2e556fd4a186f98f589f6a50a6b816b8772d0a4f13491f3048337a6589e2fc57",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 14,
+        "projectedAtMs": 1784847352462,
+        "startedAtMs": 1784847323974,
+        "lastError": null
+      },
+      "projectorARebuilt": {
+        "role": "disposable-postgres-projector",
+        "projectorId": "projector-a",
+        "healthy": true,
+        "finalizedHeight": 13,
+        "stateRoot": "2e556fd4a186f98f589f6a50a6b816b8772d0a4f13491f3048337a6589e2fc57",
+        "postgresAuthoritative": false,
+        "databaseAvailable": true,
+        "redisAuthoritative": false,
+        "redisAvailable": true,
+        "rebuiltCount": 1,
+        "projectedAtMs": 1784847354014,
+        "startedAtMs": 1784847354000,
+        "lastError": null
+      }
+    },
+    {
+      "fault": "dubhe-a-stop",
+      "accepted": true,
+      "finalizedRoute": {
+        "gatewayId": "gateway-b",
+        "finalizedHeight": 14,
+        "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+        "placement": {
+          "zoneId": "mir2-map-0",
+          "generation": 2,
+          "primaryHostId": "dubhe-b",
+          "replicaHostIds": [],
+          "expiresAtMs": 1784848255637
+        },
+        "primaryEndpoint": "dubhe-b:7020",
+        "replicaEndpoints": []
+      },
+      "gatewayARecovered": {
+        "role": "dynamic-gateway",
+        "gatewayId": "gateway-a",
+        "healthy": true,
+        "finalizedHeight": 14,
+        "stateRoot": "611790df4dd2cf1ce68a13c6854dd541c17847af73b26aedb1095c58da225b3e",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 1,
+        "redisAvailable": true,
+        "redisAuthoritative": false,
+        "observedAtMs": 1784847357457,
+        "startedAtMs": 1784847357454,
+        "lastError": null
+      }
+    }
+  ],
+  "completedAtMs": 1784847358744
+}

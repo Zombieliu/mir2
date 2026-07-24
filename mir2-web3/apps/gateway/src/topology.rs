@@ -155,6 +155,31 @@ impl ZoneTopology {
         )
     }
 
+    /// Return the explicit map membership for every configured Zone.
+    ///
+    /// Dynamically-created `map:<file>` Zones are intentionally absent because
+    /// the Zone Host can derive their single-map membership from the Zone id.
+    pub fn zone_map_catalog(&self) -> BTreeMap<String, Vec<String>> {
+        let mut catalog = BTreeMap::<String, Vec<String>>::new();
+        for (map_file_name, zone_id) in &self.map_routes {
+            catalog
+                .entry(zone_id.as_str().to_string())
+                .or_default()
+                .push(map_file_name.clone());
+        }
+        catalog
+    }
+
+    /// Zones in this set own the complete game world instead of an explicit
+    /// subset of maps. This is the normal `single` topology.
+    pub fn all_maps_zone_ids(&self) -> BTreeSet<String> {
+        if self.mode == ZoneTopologyMode::Single {
+            BTreeSet::from([self.default_zone_id.as_str().to_string()])
+        } else {
+            BTreeSet::new()
+        }
+    }
+
     pub fn router(&self) -> SharedSessionRouter {
         Arc::new(ConfiguredZoneSessionRouter {
             topology: self.clone(),
@@ -288,6 +313,21 @@ mod tests {
         assert_eq!(
             topology.tick_cadence(&ZoneId::new("map:700")),
             std::time::Duration::from_millis(100)
+        );
+        assert_eq!(
+            topology.zone_map_catalog().get("cold-leveling"),
+            Some(&vec!["1".to_string(), "2".to_string()])
+        );
+        assert!(topology.all_maps_zone_ids().is_empty());
+    }
+
+    #[test]
+    fn single_topology_marks_its_default_zone_as_all_maps() {
+        let topology = ZoneTopology::single();
+        assert!(topology.zone_map_catalog().is_empty());
+        assert_eq!(
+            topology.all_maps_zone_ids(),
+            std::collections::BTreeSet::from(["primary".to_string()])
         );
     }
 
