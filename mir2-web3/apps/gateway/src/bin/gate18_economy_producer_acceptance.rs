@@ -30,6 +30,8 @@ struct Gate18EconomyProducerEvidence {
     active_gold_after: u32,
     standby_gold_before: u32,
     standby_gold_after: u32,
+    recovered_gold_before: u32,
+    recovered_gold_after: u32,
     ledger_gold_after: i64,
     bootstrap_opening_gold: i64,
     trade_item_key: String,
@@ -91,7 +93,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A different Zone Host owns a different producer instance. Verified
     // standby replay must rebuild its in-memory projection but must not write
     // the shared PostgreSQL ledger.
-    let standby_service = PostgresEconomyAccountInventoryService::new(database_url);
+    let standby_service = PostgresEconomyAccountInventoryService::new(database_url.clone());
     let mut standby_runtime = start_runtime(&account_id, &character_name)?;
     let standby_identity = standby_runtime
         .active_identity()
@@ -112,6 +114,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let standby_gold_after = standby_runtime.world_snapshot().gold;
     let ledger_gold_after_standby = store.balance(&balance)?;
+
+    // Simulate the crash window after PostgreSQL commit but before the active
+    // Host could checkpoint its runtime projection. A fresh producer must
+    // replay the projection from the duplicate receipt without crediting the
+    // ledger a second time.
+    let recovery_service = PostgresEconomyAccountInventoryService::new(database_url);
+    let mut recovery_runtime = start_runtime(&account_id, &character_name)?;
+    let recovery_identity = recovery_runtime
+        .active_identity()
+        .ok_or("recovery Gate 18 runtime has no identity")?;
+    let recovery_command = gold_pickup(recovery_identity, object_id, 25);
+    let recovered_gold_before = recovery_runtime.world_snapshot().gold;
+    let recovered = recovery_service.commit_fenced(
+        &mut recovery_runtime,
+        Some(&active_context),
+        recovery_command,
+    );
+    let recovered_gold_after = recovery_runtime.world_snapshot().gold;
+    let ledger_gold_after_recovery = store.balance(&balance)?;
 
     let active_bootstrap =
         store.bootstrap_character(&identity, &active_runtime.world_snapshot(), generated_at_ms)?;
@@ -259,6 +280,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && ledger_gold_after_standby == ledger_gold_after_active,
         ),
         (
+            "crashRecoveryReplayedProjectionWithoutLedgerDuplication".to_string(),
+            recovered.committed
+                && recovered_gold_after == recovered_gold_before.saturating_add(25)
+                && ledger_gold_after_recovery == ledger_gold_after_active,
+        ),
+        (
             "unfencedProducerRejected".to_string(),
             !unfenced.committed && unfenced.packets.is_empty(),
         ),
@@ -329,6 +356,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         active_gold_after,
         standby_gold_before,
         standby_gold_after,
+        recovered_gold_before,
+        recovered_gold_after,
         ledger_gold_after: ledger_gold_after_standby,
         bootstrap_opening_gold: active_bootstrap.gold,
         trade_item_key,
