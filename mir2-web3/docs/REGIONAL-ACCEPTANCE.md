@@ -132,6 +132,8 @@ docs/generated/regional/gate21-72h.json
   一次性导入事务账本；重复启动不会重置已经发生过交易的余额；
 - PostgreSQL 经济 producer 已接入真实金币/物品拾取、击杀经验、双边玩家交易和
   需要物品的技能消耗；
+- 玩家主动丢弃金币与背包物品先通过同一 fenced PostgreSQL producer 扣账，再
+  在 Zone 生成地面对象；拾回时用另一笔奖励事务恢复余额；
 - 双边交易在同一 PostgreSQL 事务中锁定两个角色并守恒金币和物品数量；
 - 装备栏中的符、毒等堆叠物现在保留真实数量；毒云分别扣减 `5` 张符和 `5`
   份绿毒，账本扣减与运行时随后删除/减量的物品键完全一致；
@@ -172,7 +174,7 @@ opening balance、active/standby fence、金币拾取幂等、双边交易守恒
 
 `gate18-remote-economy.json` 由三个相互隔离的容器产生：Gateway 验收进程、
 独立 Zone Host 和 PostgreSQL。它通过真实客户端 `DropGold` / `PickUp` 请求验证
-远程 RPC、持久 owner fence、运行时投影、opening balance 与最终 PostgreSQL
-余额一致，并验证客户端重试不重复记账。验收角色的 100 金币由明确记录的
+远程 RPC、持久 owner fence、丢弃扣账、拾取入账、运行时投影、opening balance
+与最终 PostgreSQL 余额一致，并验证客户端重试不重复记账。验收角色的 100 金币由明确记录的
 `qa.applyNativeState` fixture 提供，不把测试资产来源冒充生产发放流程。死亡
 掉落、地图切换、组队/公会共享状态和 500 人 30 分钟混合行为仍需继续验收。

@@ -313,6 +313,42 @@ impl InProcessWorldRuntime {
         self.session.can_commit_shared_ground_drop_pickup(drop)
     }
 
+    pub fn can_commit_shared_gold_drop(&self, amount: u32) -> bool {
+        self.session.can_commit_shared_gold_drop(amount)
+    }
+
+    pub fn commit_shared_gold_drop_transaction(
+        &mut self,
+        amount: u32,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.session.commit_shared_gold_drop_transaction(amount)
+    }
+
+    pub fn shared_inventory_item_drop(
+        &self,
+        unique_id: u64,
+        count: u16,
+        hero_inventory: bool,
+    ) -> Option<crate::SharedInventoryItemDrop> {
+        self.session
+            .shared_inventory_item_drop(unique_id, count, hero_inventory)
+    }
+
+    pub fn can_commit_shared_inventory_item_drop(
+        &self,
+        drop: &crate::SharedInventoryItemDrop,
+    ) -> bool {
+        self.session.can_commit_shared_inventory_item_drop(drop)
+    }
+
+    pub fn commit_shared_inventory_item_drop_transaction(
+        &mut self,
+        drop: &crate::SharedInventoryItemDrop,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.session
+            .commit_shared_inventory_item_drop_transaction(drop)
+    }
+
     pub fn apply_shared_monster_kill_award(
         &mut self,
         monster_object_id: u32,

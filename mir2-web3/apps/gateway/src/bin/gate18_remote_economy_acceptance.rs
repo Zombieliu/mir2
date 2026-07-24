@@ -12,6 +12,9 @@ use serde::Serialize;
 
 const PICKUP_GOLD: u32 = 25;
 const FIXTURE_GOLD: u32 = 100;
+const FIXTURE_ITEM_KEY: &str = "red-potion";
+const FIXTURE_ITEM_QUANTITY: u32 = 3;
+const DROP_ITEM_QUANTITY: u16 = 2;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -27,14 +30,26 @@ struct Gate18RemoteEconomyEvidence {
     account_id: String,
     character_index: i32,
     fixture_gold: u32,
+    fixture_item_key: String,
+    fixture_item_quantity: u32,
     initial_gold: u32,
+    initial_item_quantity: u32,
     drop_packet_observed: bool,
+    item_drop_packet_observed: bool,
     gold_after_drop: u32,
     gold_after_pickup: u32,
     gold_after_retry: u32,
+    item_quantity_after_drop: u32,
+    item_quantity_after_pickup: u32,
+    item_quantity_after_retry: u32,
     bootstrap_opening_gold: i64,
+    bootstrap_opening_item_quantity: i64,
+    ledger_gold_after_drop: i64,
     ledger_gold_after_pickup: i64,
     ledger_gold_after_retry: i64,
+    ledger_item_quantity_after_drop: i64,
+    ledger_item_quantity_after_pickup: i64,
+    ledger_item_quantity_after_retry: i64,
     assertions: BTreeMap<String, bool>,
     success: bool,
 }
@@ -120,7 +135,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         fixture_position.0, fixture_position.1
     ));
     apply_gold_fixture(&mut session, &identity.character_name)?;
+    session.stage5_command(
+        "qa.giveItem",
+        vec![
+            FIXTURE_ITEM_KEY.to_string(),
+            FIXTURE_ITEM_QUANTITY.to_string(),
+        ],
+    );
     let initial_gold = session.world_snapshot().gold;
+    let initial_item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == FIXTURE_ITEM_KEY)
+        .ok_or("remote QA item fixture was not applied")?;
+    let initial_item_quantity = item_quantity(&session, FIXTURE_ITEM_KEY);
 
     let drop_packets = session.handle_packet(ClientPacket::DropGold {
         amount: PICKUP_GOLD,
@@ -132,6 +161,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     });
     let gold_after_drop = session.world_snapshot().gold;
+    let balance_key = EconomyBalanceKey::gold(&account_id, character_index);
+    let ledger_gold_after_drop = store.balance(&balance_key)?;
     let dropped = session
         .world_snapshot()
         .ground_drops
@@ -162,7 +193,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("remote PickUp did not return GainedGold".into());
     }
     let gold_after_pickup = session.world_snapshot().gold;
-    let balance_key = EconomyBalanceKey::gold(&account_id, character_index);
     let ledger_gold_after_pickup = store.balance(&balance_key)?;
 
     // A real client may repeat PickUp after losing the response. The Zone no
@@ -171,6 +201,56 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     session.handle_packet(ClientPacket::PickUp);
     let gold_after_retry = session.world_snapshot().gold;
     let ledger_gold_after_retry = store.balance(&balance_key)?;
+
+    let item_balance_key =
+        EconomyBalanceKey::item_quantity(&account_id, character_index, FIXTURE_ITEM_KEY);
+    let item_drop_packets = session.handle_packet(ClientPacket::DropItem {
+        unique_id: initial_item.unique_id,
+        count: DROP_ITEM_QUANTITY,
+        hero_inventory: false,
+    });
+    let item_drop_packet_observed = item_drop_packets.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::DropItem {
+                unique_id,
+                count: DROP_ITEM_QUANTITY,
+                hero_inventory: false,
+                success: true,
+            } if *unique_id == initial_item.unique_id
+        )
+    });
+    let item_quantity_after_drop = item_quantity(&session, FIXTURE_ITEM_KEY);
+    let ledger_item_quantity_after_drop = store.balance(&item_balance_key)?;
+    let dropped_item = session
+        .world_snapshot()
+        .ground_drops
+        .into_iter()
+        .find(|drop| {
+            drop.quantity == u32::from(DROP_ITEM_QUANTITY)
+                && matches!(
+                    &drop.loot,
+                    mir2_simulation::GroundDropLootSnapshot::InventoryItem { key, .. }
+                        if key == FIXTURE_ITEM_KEY
+                )
+        })
+        .ok_or("remote item drop is missing from the Zone snapshot")?;
+    session.transfer_map(&format!(
+        "crystal:{current_map}:{}:{}",
+        dropped_item.x, dropped_item.y
+    ));
+    let item_pickup_packets = session.handle_packet(ClientPacket::PickUp);
+    if !item_pickup_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedItem { .. }))
+    {
+        return Err("remote item PickUp did not return GainedItem".into());
+    }
+    let item_quantity_after_pickup = item_quantity(&session, FIXTURE_ITEM_KEY);
+    let ledger_item_quantity_after_pickup = store.balance(&item_balance_key)?;
+    session.handle_packet(ClientPacket::PickUp);
+    let item_quantity_after_retry = item_quantity(&session, FIXTURE_ITEM_KEY);
+    let ledger_item_quantity_after_retry = store.balance(&item_balance_key)?;
     let bootstrap =
         store.bootstrap_character(&identity, &session.world_snapshot(), generated_at_ms)?;
     let host_after = health_probe.health()?;
@@ -195,12 +275,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && gold_after_pickup == initial_gold,
         ),
         (
-            "postgresOpeningBalanceCapturedBeforeCredit".to_string(),
-            bootstrap.gold == i64::from(gold_after_drop),
+            "postgresOpeningBalanceCapturedBeforeDrop".to_string(),
+            bootstrap.gold == i64::from(initial_gold),
+        ),
+        (
+            "postgresLedgerDebitedPlayerGoldDrop".to_string(),
+            ledger_gold_after_drop == i64::from(gold_after_drop),
         ),
         (
             "postgresLedgerMatchesFinalRuntimeGold".to_string(),
             ledger_gold_after_pickup == i64::from(gold_after_pickup),
+        ),
+        (
+            "realClientItemDropAndPickupRoundTripped".to_string(),
+            item_drop_packet_observed
+                && item_quantity_after_drop
+                    == initial_item_quantity.saturating_sub(u32::from(DROP_ITEM_QUANTITY))
+                && item_quantity_after_pickup == initial_item_quantity,
+        ),
+        (
+            "postgresOpeningItemBalanceCapturedBeforeDrop".to_string(),
+            bootstrap.item_quantity == i64::from(initial_item_quantity),
+        ),
+        (
+            "postgresLedgerDebitedPlayerItemDrop".to_string(),
+            ledger_item_quantity_after_drop == i64::from(item_quantity_after_drop),
+        ),
+        (
+            "postgresLedgerMatchesFinalRuntimeItemQuantity".to_string(),
+            ledger_item_quantity_after_pickup == i64::from(item_quantity_after_pickup),
         ),
         (
             "clientRetryDidNotDuplicateGold".to_string(),
@@ -208,12 +311,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && ledger_gold_after_retry == ledger_gold_after_pickup,
         ),
         (
+            "clientRetryDidNotDuplicateItem".to_string(),
+            item_quantity_after_retry == item_quantity_after_pickup
+                && ledger_item_quantity_after_retry == ledger_item_quantity_after_pickup,
+        ),
+        (
             "remoteGroundObjectWasConsumed".to_string(),
-            !session
-                .world_snapshot()
-                .ground_drops
-                .iter()
-                .any(|drop| drop.object_id == dropped.object_id),
+            !session.world_snapshot().ground_drops.iter().any(|drop| {
+                drop.object_id == dropped.object_id || drop.object_id == dropped_item.object_id
+            }),
         ),
     ]);
     let success = assertions.values().all(|passed| *passed);
@@ -229,14 +335,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         account_id,
         character_index,
         fixture_gold: FIXTURE_GOLD,
+        fixture_item_key: FIXTURE_ITEM_KEY.to_string(),
+        fixture_item_quantity: FIXTURE_ITEM_QUANTITY,
         initial_gold,
+        initial_item_quantity,
         drop_packet_observed,
+        item_drop_packet_observed,
         gold_after_drop,
         gold_after_pickup,
         gold_after_retry,
+        item_quantity_after_drop,
+        item_quantity_after_pickup,
+        item_quantity_after_retry,
         bootstrap_opening_gold: bootstrap.gold,
+        bootstrap_opening_item_quantity: bootstrap.item_quantity,
+        ledger_gold_after_drop,
         ledger_gold_after_pickup,
         ledger_gold_after_retry,
+        ledger_item_quantity_after_drop,
+        ledger_item_quantity_after_pickup,
+        ledger_item_quantity_after_retry,
         assertions,
         success,
     };
@@ -249,6 +367,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("Gate 18 remote economy acceptance failed".into());
     }
     Ok(())
+}
+
+fn item_quantity(session: &GatewaySession, item_key: &str) -> u32 {
+    session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .filter(|item| item.key == item_key)
+        .map(|item| item.quantity)
+        .sum()
 }
 
 fn apply_gold_fixture(
