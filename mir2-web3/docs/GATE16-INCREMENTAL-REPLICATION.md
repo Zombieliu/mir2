@@ -263,7 +263,7 @@ Zone RPC 现在可以导出与当前 v5 Head 绑定的 base snapshot。快照包
   玩家 presence、交易/租赁中间态、NPC 随机种子和 pending side effects；
 - 该 Zone 每个在线 Session 的 durable commitment 和 active-character
   checkpoint；
-- `mutationCoverage=commandJournal` 与强制 `applyReady=false`；
+- `mutationCoverage=commandJournal` 与显式 `applyReady`；
 - 确定性 gzip payload 和覆盖全部元数据/payload 的 SHA-256 `snapshotId`。
 
 接收端把压缩 payload 以 base64 放入 JSON wire/file，先做 64 MiB 解压上限、
@@ -295,9 +295,25 @@ MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES=512
 继续完成 `80` 和 `49` 次 Zone 响应，双向 WAL、双向 base snapshot、反向
 v4 checkpoint 和两个 Projector 均通过自动断言。
 
-这个 base 目前是“可验证的权威共享状态锚点”，还不是可独立晋升的完整
-Session 镜像。私人 Session 运行时仍有部分字段只能由 v4 journal replay
-重建，所以 replicator 不会用 base 覆盖 standby，也不会据此截断 WAL。
+## Gate 16.4b1 已落地：完整 Session 基线安装
+
+`applyReady` 现在只表达“这个 base 自身能否被安全安装”，不等于
+`promotionReady`。完整 Session image 覆盖两类状态：
+
+- 未进入角色世界的 Session：以全新 runtime 重建；
+- 活跃角色 Session：以可信 Passkey 登录、`StartGame` 和完整
+  `CharacterSaveRecord` 重建私人 durable 状态，再安装共享 Zone image。
+
+安装前会在隔离账号库和隔离 Zone factory 中完成第一次重建与 commitment
+比对；第二次使用 live account-store handle 重建，通过后只原子发布目标 Zone
+资源和 Session，其他 Zone 保持不变。安装后的 Head 记录
+`baseSnapshotId/baseSequence/oldestAvailableSequence`，旧 cursor 明确返回
+`replication_cursor_compacted`。由于 v4 格式无法表达已截断前缀，base 安装后
+会拒绝继续导出 v4 host checkpoint，避免生成不完整恢复点。
+
+这一步已证明恢复成本不再与旧 command journal 长度成正比，但 replicator
+尚未切换到该安装 RPC。自主 tick/AI mutation、post-base batch apply 和 WAL
+截断仍未完成，因此 `promotionReady=false`。
 
 ## Gate 16 后续实施顺序
 
@@ -306,8 +322,9 @@ Session 镜像。私人 Session 运行时仍有部分字段只能由 v4 journal 
 | 16.1 | v4 指标、历史基准、容器证据 | 已完成；后续结果有固定对照 |
 | 16.2 | 每 Zone v5 Head 与连续 cursor | 已完成；`O(1)` 状态读取，小于 1 KB，尚不可晋升 |
 | 16.3 | 有界 mutation batch、durable ACK 和接收 WAL | 已完成安全桥接；重启恢复确认位置，v4 仍负责 standby 正确性 |
-| 16.4a | 按 Zone 压缩 base snapshot 与原子持久化 | 已完成；snapshot/cursor/digest 绑定，强制不可 apply |
-| 16.4b | authoritative mutation capture、完整 Session image、增量应用和 WAL 截断 | tick/AI 完整覆盖；100k 历史不会导致无限内存/网络增长 |
+| 16.4a | 按 Zone 压缩 base snapshot 与原子持久化 | 已完成；snapshot/cursor/digest 绑定 |
+| 16.4b1 | 完整 Session image 与 base 安装 | 已完成；无需旧 journal 重放，逐 Session commitment 一致 |
+| 16.4b2 | authoritative mutation capture、增量应用和 WAL 截断 | tick/AI 完整覆盖；100k 历史不会导致无限内存/网络增长 |
 | 16.5 | standby readiness 与安全 promotion | 缺口、校验失败或 build 不一致时禁止晋升 |
 | 16.6 | 50/125 玩家、700/10k/100k 历史验收 | v5 CPU 和网络相对 v4 至少下降 80% |
 
@@ -321,14 +338,15 @@ Session 镜像。私人 Session 运行时仍有部分字段只能由 v4 journal 
 
 ## 当前边界
 
-- Gate 16.1～16.4a 已完成基线、Head、可验证 batch、持久接收 WAL 和压缩
-  base snapshot；尚未完成仅依靠 v5 恢复并晋升的闭环。
+- Gate 16.1～16.4b1 已完成基线、Head、可验证 batch、持久接收 WAL、压缩
+  base snapshot 和完整 Session 基线安装；尚未完成仅依靠 v5 增量追赶并晋升
+  的闭环。
 - 当前基准使用一个顺序 `KeepAlive` 命令流来隔离历史长度成本，不包含完整
   战斗、怪物 AI、数据库和公网抖动。
 - 当前 WAL 只覆盖 Host command journal，不覆盖自主 tick、怪物 AI 和计时器；
   接收端也尚未把 batch 增量应用为可晋升的 standby 状态。
-- base snapshot 已压缩并持久化，但 WAL 尚未截断或设置磁盘配额，不能无限期
-  运行。
+- base snapshot 已可安装，但 replicator 尚未调用安装 RPC，WAL 也尚未截断或
+  设置磁盘配额，不能无限期运行。
 - 默认 `buildId` 是编译信息或包版本；生产镜像必须显式注入不可变的 commit
   或 image digest，不能仅靠同版本号判定二进制兼容。
 - 700 条容器证据是快速可复现基线；10k/100k 是完整认证矩阵，会消耗明显更长

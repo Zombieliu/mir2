@@ -3158,6 +3158,35 @@ impl SharedInProcessZoneRuntimeFactory {
         Ok(zone_count)
     }
 
+    /// Atomically publish one fully validated Zone resource image from an
+    /// isolated factory. Existing resources for every other Zone are retained.
+    pub fn adopt_zone_resources_from(
+        &self,
+        source: &SharedInProcessZoneRuntimeFactory,
+        zone_id: &ZoneId,
+    ) -> Result<bool, String> {
+        if Arc::ptr_eq(&self.zones, &source.zones) {
+            return Ok(self
+                .zones
+                .lock()
+                .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+                .contains_key(zone_id));
+        }
+        let resources = source
+            .zones
+            .lock()
+            .map_err(|_| "source shared Zone factory mutex was poisoned".to_string())?
+            .remove(zone_id);
+        let Some(resources) = resources else {
+            return Ok(false);
+        };
+        self.zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .insert(zone_id.clone(), resources);
+        Ok(true)
+    }
+
     pub fn with_account_inventory_service(
         account_inventory_service: SharedAccountInventoryServiceHandle,
     ) -> Self {
