@@ -10,8 +10,9 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_simulation::{
-    GroundDropLootSnapshot, InProcessWorldRuntime, SharedAccountInventoryTransactionKind,
-    SharedAccountInventoryTransactionReceipt, WorldRuntime,
+    ActiveSessionIdentity, GroundDropLootSnapshot, InProcessWorldRuntime,
+    SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
+    SharedTradeOffer, WorldRuntime, WorldSnapshot,
 };
 use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
@@ -20,9 +21,12 @@ use sha2::{Digest, Sha256};
 use crate::routing::{
     SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
     SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
+    SharedTradeSettlementOutcome,
 };
 
 const ECONOMY_EVENT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-event.v1\0";
+const ECONOMY_BOOTSTRAP_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-bootstrap.v1\0";
+const ECONOMY_TRADE_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-trade.v1\0";
 const MAX_ECONOMY_LEGS: usize = 128;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -74,6 +78,28 @@ impl EconomyBalanceKey {
             character_index,
             asset_kind: "item".to_string(),
             asset_key: unique_item_id.into(),
+        }
+    }
+
+    pub fn item_quantity(
+        account_id: impl Into<String>,
+        character_index: i32,
+        item_key: impl Into<String>,
+    ) -> Self {
+        Self {
+            account_id: account_id.into(),
+            character_index,
+            asset_kind: "item_quantity".to_string(),
+            asset_key: item_key.into(),
+        }
+    }
+
+    pub fn experience(account_id: impl Into<String>, character_index: i32) -> Self {
+        Self {
+            account_id: account_id.into(),
+            character_index,
+            asset_kind: "experience".to_string(),
+            asset_key: "experience".to_string(),
         }
     }
 
@@ -193,6 +219,20 @@ pub struct EconomyTransactionReceipt {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct EconomyBootstrapReceipt {
+    pub account_id: String,
+    pub character_index: i32,
+    pub snapshot_digest: String,
+    pub gold: i64,
+    pub experience: i64,
+    pub item_quantity: i64,
+    pub item_kind_count: usize,
+    pub bootstrapped_at_ms: u64,
+    pub duplicate: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct EconomyOutboxEvent {
     pub event_id: String,
     pub idempotency_key: String,
@@ -245,6 +285,136 @@ impl PostgresEconomyStore {
         mir2_simulation::apply_migrations(&mut client)
     }
 
+    pub fn bootstrap_character(
+        &self,
+        identity: &ActiveSessionIdentity,
+        snapshot: &WorldSnapshot,
+        bootstrapped_at_ms: u64,
+    ) -> Result<EconomyBootstrapReceipt, String> {
+        let opening = EconomyOpeningSnapshot::from_runtime(identity, snapshot)?;
+        let snapshot_digest = opening.digest()?;
+        let mut client = self.connect()?;
+        mir2_simulation::apply_migrations(&mut client)?;
+        let mut transaction = client
+            .transaction()
+            .map_err(|error| format!("economy bootstrap begin failed: {error}"))?;
+        lock_economy_characters(
+            &mut transaction,
+            &BTreeSet::from([(identity.account_id.clone(), identity.character_index)]),
+        )?;
+
+        if let Some(row) = transaction
+            .query_opt(
+                "SELECT snapshot_digest,gold,experience,item_quantity,item_kind_count,
+                        bootstrapped_at_ms
+                 FROM game_economy_bootstraps
+                 WHERE account_id=$1 AND character_index=$2",
+                &[&identity.account_id, &identity.character_index],
+            )
+            .map_err(|error| format!("economy bootstrap lookup failed: {error}"))?
+        {
+            return Ok(EconomyBootstrapReceipt {
+                account_id: identity.account_id.clone(),
+                character_index: identity.character_index,
+                snapshot_digest: row.get("snapshot_digest"),
+                gold: row.get("gold"),
+                experience: row.get("experience"),
+                item_quantity: row.get("item_quantity"),
+                item_kind_count: usize::try_from(row.get::<_, i32>("item_kind_count").max(0))
+                    .unwrap_or_default(),
+                bootstrapped_at_ms: row.get::<_, i64>("bootstrapped_at_ms").max(0) as u64,
+                duplicate: true,
+            });
+        }
+
+        let expected = opening.balance_amounts();
+        let existing = transaction
+            .query(
+                "SELECT asset_kind,asset_key,amount
+                 FROM game_economy_balances
+                 WHERE account_id=$1 AND character_index=$2
+                   AND asset_kind IN ('gold','experience','item_quantity')
+                   AND amount <> 0",
+                &[&identity.account_id, &identity.character_index],
+            )
+            .map_err(|error| format!("economy bootstrap balance lookup failed: {error}"))?
+            .into_iter()
+            .map(|row| {
+                (
+                    (
+                        row.get::<_, String>("asset_kind"),
+                        row.get::<_, String>("asset_key"),
+                    ),
+                    row.get::<_, i64>("amount"),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        if !existing.is_empty() && existing != expected {
+            return Err(format!(
+                "economy bootstrap conflict for {}/{}: ledger does not match live runtime",
+                identity.account_id, identity.character_index
+            ));
+        }
+
+        for ((asset_kind, asset_key), amount) in &expected {
+            transaction
+                .execute(
+                    "INSERT INTO game_economy_balances
+                     (account_id,character_index,asset_kind,asset_key,amount,balance_version)
+                     VALUES ($1,$2,$3,$4,$5,0)
+                     ON CONFLICT (account_id,character_index,asset_kind,asset_key)
+                     DO UPDATE SET amount=EXCLUDED.amount,
+                                   balance_version=game_economy_balances.balance_version+1,
+                                   updated_at=now()",
+                    &[
+                        &identity.account_id,
+                        &identity.character_index,
+                        asset_kind,
+                        asset_key,
+                        amount,
+                    ],
+                )
+                .map_err(|error| format!("economy bootstrap balance write failed: {error}"))?;
+        }
+
+        let details = serde_json::to_value(&opening)
+            .map_err(|error| format!("encode economy bootstrap details: {error}"))?;
+        transaction
+            .execute(
+                "INSERT INTO game_economy_bootstraps
+                 (account_id,character_index,snapshot_digest,gold,experience,item_quantity,
+                  item_kind_count,bootstrapped_at_ms,details)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+                &[
+                    &identity.account_id,
+                    &identity.character_index,
+                    &snapshot_digest,
+                    &opening.gold,
+                    &opening.experience,
+                    &opening.total_item_quantity,
+                    &(i32::try_from(opening.item_quantities.len()).unwrap_or(i32::MAX)),
+                    &(bootstrapped_at_ms as i64),
+                    &details,
+                ],
+            )
+            .map_err(|error| format!("economy bootstrap receipt write failed: {error}"))?;
+        transaction
+            .commit()
+            .map_err(|error| format!("economy bootstrap commit failed: {error}"))?;
+
+        Ok(EconomyBootstrapReceipt {
+            account_id: identity.account_id.clone(),
+            character_index: identity.character_index,
+            snapshot_digest,
+            gold: opening.gold,
+            experience: opening.experience,
+            item_quantity: opening.total_item_quantity,
+            item_kind_count: opening.item_quantities.len(),
+            bootstrapped_at_ms,
+            duplicate: false,
+        })
+    }
+
     pub fn transact(
         &self,
         envelope: &EconomyTransactionEnvelope,
@@ -281,6 +451,12 @@ impl PostgresEconomyStore {
             return Ok(receipt);
         }
 
+        let characters = envelope
+            .legs
+            .iter()
+            .map(|leg| (leg.balance.account_id.clone(), leg.balance.character_index))
+            .collect::<BTreeSet<_>>();
+        lock_economy_characters(&mut transaction, &characters)?;
         let aggregated = aggregate_legs(&envelope.legs)?;
         let unique_item_ids = aggregated
             .keys()
@@ -823,6 +999,9 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         let Some(context) = context else {
             return Self::failed_receipt(&envelope.command);
         };
+        if !self.bootstrap_fenced(runtime, Some(context)) {
+            return Self::failed_receipt(&envelope.command);
+        }
         let stable_key = envelope.stable_idempotency_key();
         if self
             .projected_receipts
@@ -876,6 +1055,49 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         }
         receipt
     }
+
+    fn bootstrap_fenced(
+        &self,
+        runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        let Some(context) = context else {
+            return false;
+        };
+        if !context.external_commit_authorized {
+            return true;
+        }
+        let Some(identity) = runtime.active_identity() else {
+            return false;
+        };
+        self.store
+            .bootstrap_character(&identity, &runtime.world_snapshot(), context.created_at_ms)
+            .is_ok()
+    }
+
+    fn settle_trade_fenced(
+        &self,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        let Some(context) = context else {
+            return SharedTradeSettlementOutcome::Rejected;
+        };
+        if !context.external_commit_authorized {
+            return SharedTradeSettlementOutcome::Committed;
+        }
+        let transaction = match economy_transaction_for_trade(context, first, second) {
+            Ok(Some(transaction)) => transaction,
+            Ok(None) => return SharedTradeSettlementOutcome::Committed,
+            Err(_) => return SharedTradeSettlementOutcome::Rejected,
+        };
+        match self.store.transact(&transaction) {
+            Ok(receipt) if receipt.duplicate => SharedTradeSettlementOutcome::Duplicate,
+            Ok(_) => SharedTradeSettlementOutcome::Committed,
+            Err(_) => SharedTradeSettlementOutcome::Rejected,
+        }
+    }
 }
 
 fn command_kind(command: &SharedAccountInventoryCommand) -> SharedAccountInventoryTransactionKind {
@@ -901,7 +1123,13 @@ fn preflight_projection(
             runtime.can_commit_shared_ground_drop_pickup(drop)
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => runtime.active_identity().is_some(),
-        SharedAccountInventoryCommand::SkillItemConsume { .. } => false,
+        SharedAccountInventoryCommand::SkillItemConsume {
+            spell, components, ..
+        } => {
+            !components.is_empty()
+                && runtime.shared_skill_item_consumption_components(*spell)
+                    == Some(components.clone())
+        }
     }
 }
 
@@ -940,12 +1168,12 @@ fn economy_transaction_for_command(
                 (
                     EconomyTransactionKind::Reward,
                     vec![EconomyLeg {
-                        balance: EconomyBalanceKey::item(
+                        balance: EconomyBalanceKey::item_quantity(
                             identity.account_id.clone(),
                             identity.character_index,
-                            format!("zone:{}:drop:{}:{}", context.zone_id, drop.object_id, key),
+                            key.clone(),
                         ),
-                        delta: 1,
+                        delta: i64::from(drop.quantity),
                     }],
                 )
             }
@@ -960,14 +1188,43 @@ fn economy_transaction_for_command(
             (
                 EconomyTransactionKind::Reward,
                 vec![EconomyLeg {
-                    balance: EconomyBalanceKey {
-                        account_id: identity.account_id.clone(),
-                        character_index: identity.character_index,
-                        asset_kind: "experience".to_string(),
-                        asset_key: "experience".to_string(),
-                    },
+                    balance: EconomyBalanceKey::experience(
+                        identity.account_id.clone(),
+                        identity.character_index,
+                    ),
                     delta: i64::from(award.experience),
                 }],
+            )
+        }
+        SharedAccountInventoryCommand::SkillItemConsume {
+            spell,
+            request_id,
+            components,
+        } if !components.is_empty() => {
+            metadata.insert("operation".to_string(), "skillItemConsume".to_string());
+            metadata.insert("spell".to_string(), (*spell as u8).to_string());
+            metadata.insert("requestId".to_string(), request_id.to_string());
+            metadata.insert(
+                "components".to_string(),
+                components
+                    .iter()
+                    .map(|component| format!("{}:{}", component.item_key, component.quantity))
+                    .collect::<Vec<_>>()
+                    .join(","),
+            );
+            (
+                EconomyTransactionKind::Consume,
+                components
+                    .iter()
+                    .map(|component| EconomyLeg {
+                        balance: EconomyBalanceKey::item_quantity(
+                            identity.account_id.clone(),
+                            identity.character_index,
+                            component.item_key.clone(),
+                        ),
+                        delta: -i64::from(component.quantity),
+                    })
+                    .collect(),
             )
         }
         SharedAccountInventoryCommand::MonsterKillAward(_)
@@ -983,6 +1240,244 @@ fn economy_transaction_for_command(
         legs,
         metadata,
     })
+}
+
+fn economy_transaction_for_trade(
+    context: &SharedAccountInventoryExecutionContext,
+    first: &SharedTradeOffer,
+    second: &SharedTradeOffer,
+) -> Result<Option<EconomyTransactionEnvelope>, String> {
+    if first.account_id == second.account_id && first.character_index == second.character_index {
+        return Err("economy trade requires two different characters".to_string());
+    }
+    if !first
+        .partner_name
+        .eq_ignore_ascii_case(&second.character_name)
+        || !second
+            .partner_name
+            .eq_ignore_ascii_case(&first.character_name)
+    {
+        return Err("economy trade partners are not reciprocal".to_string());
+    }
+
+    let mut legs = Vec::new();
+    append_trade_offer_legs(first, second, &mut legs)?;
+    append_trade_offer_legs(second, first, &mut legs)?;
+    if legs.is_empty() {
+        return Ok(None);
+    }
+    let business_digest = trade_business_digest(first, second)?;
+    let metadata = BTreeMap::from([
+        ("operation".to_string(), "playerTrade".to_string()),
+        ("producer".to_string(), "mir2-zone".to_string()),
+        ("tradeDigest".to_string(), business_digest.clone()),
+        (
+            "participants".to_string(),
+            format!(
+                "{}/{}|{}/{}",
+                first.account_id, first.character_index, second.account_id, second.character_index
+            ),
+        ),
+    ]);
+    Ok(Some(EconomyTransactionEnvelope {
+        idempotency_key: format!(
+            "zone:{}:trade:{}:{business_digest}",
+            context.zone_id, context.source_sequence
+        ),
+        transaction_kind: EconomyTransactionKind::Trade,
+        zone_id: context.zone_id.as_str().to_string(),
+        fencing_generation: context.fencing_generation,
+        source_sequence: context.source_sequence,
+        created_at_ms: context.created_at_ms,
+        legs,
+        metadata,
+    }))
+}
+
+fn append_trade_offer_legs(
+    source: &SharedTradeOffer,
+    destination: &SharedTradeOffer,
+    legs: &mut Vec<EconomyLeg>,
+) -> Result<(), String> {
+    if source.gold > 0 {
+        let amount = i64::from(source.gold);
+        legs.push(EconomyLeg {
+            balance: EconomyBalanceKey::gold(source.account_id.clone(), source.character_index),
+            delta: -amount,
+        });
+        legs.push(EconomyLeg {
+            balance: EconomyBalanceKey::gold(
+                destination.account_id.clone(),
+                destination.character_index,
+            ),
+            delta: amount,
+        });
+    }
+    for item in &source.items {
+        if item.key.trim().is_empty() {
+            return Err("economy trade item key cannot be empty".to_string());
+        }
+        let value: serde_json::Value = serde_json::from_str(&item.item_state_json)
+            .map_err(|error| format!("decode economy trade item state: {error}"))?;
+        let quantity = value
+            .get("quantity")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or(1);
+        if quantity == 0 || quantity > i64::MAX as u64 {
+            return Err("economy trade item quantity is invalid".to_string());
+        }
+        let quantity = quantity as i64;
+        legs.push(EconomyLeg {
+            balance: EconomyBalanceKey::item_quantity(
+                source.account_id.clone(),
+                source.character_index,
+                item.key.clone(),
+            ),
+            delta: -quantity,
+        });
+        legs.push(EconomyLeg {
+            balance: EconomyBalanceKey::item_quantity(
+                destination.account_id.clone(),
+                destination.character_index,
+                item.key.clone(),
+            ),
+            delta: quantity,
+        });
+    }
+    Ok(())
+}
+
+fn trade_business_digest(
+    first: &SharedTradeOffer,
+    second: &SharedTradeOffer,
+) -> Result<String, String> {
+    let mut offers = [first, second];
+    offers.sort_by(|left, right| {
+        (&left.account_id, left.character_index, &left.character_name).cmp(&(
+            &right.account_id,
+            right.character_index,
+            &right.character_name,
+        ))
+    });
+    let payload =
+        serde_json::to_vec(&offers).map_err(|error| format!("encode economy trade: {error}"))?;
+    let mut hasher = Sha256::new();
+    hasher.update(ECONOMY_TRADE_DOMAIN);
+    hasher.update(payload);
+    Ok(hex_lower(&hasher.finalize()))
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EconomyOpeningSnapshot {
+    account_id: String,
+    character_index: i32,
+    character_name: String,
+    gold: i64,
+    experience: i64,
+    item_quantities: BTreeMap<String, i64>,
+    total_item_quantity: i64,
+}
+
+impl EconomyOpeningSnapshot {
+    fn from_runtime(
+        identity: &ActiveSessionIdentity,
+        snapshot: &WorldSnapshot,
+    ) -> Result<Self, String> {
+        if identity.account_id.trim().is_empty() || identity.character_index < 0 {
+            return Err("economy bootstrap requires a valid active identity".to_string());
+        }
+        if snapshot.player_experience < 0 {
+            return Err("economy bootstrap experience cannot be negative".to_string());
+        }
+        let mut item_quantities = BTreeMap::<String, i64>::new();
+        for item in snapshot
+            .inventory_items
+            .iter()
+            .chain(snapshot.belt_items.iter())
+            .chain(snapshot.storage_items.iter())
+            .chain(snapshot.hero_inventory_items.iter())
+        {
+            if item.key.trim().is_empty() {
+                return Err("economy bootstrap item key cannot be empty".to_string());
+            }
+            let quantity = i64::from(item.quantity);
+            let total = item_quantities.entry(item.key.clone()).or_default();
+            *total = total
+                .checked_add(quantity)
+                .ok_or_else(|| "economy bootstrap item quantity overflow".to_string())?;
+        }
+        for item in &snapshot.equipment_items {
+            if item.key.trim().is_empty() {
+                return Err("economy bootstrap equipment key cannot be empty".to_string());
+            }
+            let total = item_quantities.entry(item.key.clone()).or_default();
+            *total = total
+                .checked_add(i64::from(item.quantity))
+                .ok_or_else(|| "economy bootstrap equipment quantity overflow".to_string())?;
+        }
+        item_quantities.retain(|_, quantity| *quantity > 0);
+        let total_item_quantity = item_quantities
+            .values()
+            .try_fold(0_i64, |total, quantity| {
+                total
+                    .checked_add(*quantity)
+                    .ok_or_else(|| "economy bootstrap total item quantity overflow".to_string())
+            })?;
+        Ok(Self {
+            account_id: identity.account_id.clone(),
+            character_index: identity.character_index,
+            character_name: identity.character_name.clone(),
+            gold: i64::from(snapshot.gold),
+            experience: snapshot.player_experience,
+            item_quantities,
+            total_item_quantity,
+        })
+    }
+
+    fn digest(&self) -> Result<String, String> {
+        let payload = serde_json::to_vec(self)
+            .map_err(|error| format!("encode economy bootstrap snapshot: {error}"))?;
+        let mut hasher = Sha256::new();
+        hasher.update(ECONOMY_BOOTSTRAP_DOMAIN);
+        hasher.update(payload);
+        Ok(hex_lower(&hasher.finalize()))
+    }
+
+    fn balance_amounts(&self) -> BTreeMap<(String, String), i64> {
+        let mut balances = BTreeMap::new();
+        if self.gold > 0 {
+            balances.insert(("gold".to_string(), "gold".to_string()), self.gold);
+        }
+        if self.experience > 0 {
+            balances.insert(
+                ("experience".to_string(), "experience".to_string()),
+                self.experience,
+            );
+        }
+        for (key, quantity) in &self.item_quantities {
+            if *quantity > 0 {
+                balances.insert(("item_quantity".to_string(), key.clone()), *quantity);
+            }
+        }
+        balances
+    }
+}
+
+fn lock_economy_characters(
+    transaction: &mut Transaction<'_>,
+    characters: &BTreeSet<(String, i32)>,
+) -> Result<(), String> {
+    for (account_id, character_index) in characters {
+        let lock_key = format!("obelisk.mir2.economy-character:{account_id}:{character_index}");
+        transaction
+            .query_one(
+                "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
+                &[&lock_key],
+            )
+            .map_err(|error| format!("economy character lock failed: {error}"))?;
+    }
+    Ok(())
 }
 
 fn aggregate_legs(legs: &[EconomyLeg]) -> Result<BTreeMap<EconomyBalanceKey, i64>, String> {
@@ -1168,5 +1663,112 @@ mod tests {
             external_commit_authorized: false,
         };
         assert!(!context.external_commit_authorized);
+    }
+
+    #[test]
+    fn skill_consumption_maps_exact_runtime_components_to_negative_ledger_legs() {
+        let context = SharedAccountInventoryExecutionContext {
+            zone_id: crate::ZoneId::new("map:0"),
+            fencing_generation: 10,
+            source_sequence: 43,
+            created_at_ms: 78,
+            external_commit_authorized: true,
+        };
+        let command = SharedAccountInventoryCommandEnvelope {
+            identity: ActiveSessionIdentity {
+                account_id: "taoist".to_string(),
+                character_index: 2,
+                character_name: "Sage".to_string(),
+            },
+            command: SharedAccountInventoryCommand::SkillItemConsume {
+                spell: mir2_protocol::Spell::PoisonCloud,
+                request_id: 7,
+                components: vec![
+                    mir2_simulation::SharedSkillItemConsumptionComponent {
+                        item_key: "amulet".to_string(),
+                        quantity: 5,
+                    },
+                    mir2_simulation::SharedSkillItemConsumptionComponent {
+                        item_key: "green-poison".to_string(),
+                        quantity: 5,
+                    },
+                ],
+            },
+        };
+        let envelope =
+            economy_transaction_for_command(&context, &command).expect("skill transaction");
+
+        assert_eq!(envelope.transaction_kind, EconomyTransactionKind::Consume);
+        assert_eq!(
+            envelope.idempotency_key,
+            format!(
+                "zone:map:0:taoist:2:skill-item-consume:{}:7",
+                mir2_protocol::Spell::PoisonCloud as u8
+            )
+        );
+        assert_eq!(envelope.legs.len(), 2);
+        assert_eq!(
+            envelope.legs[0].balance,
+            EconomyBalanceKey::item_quantity("taoist", 2, "amulet")
+        );
+        assert_eq!(envelope.legs[0].delta, -5);
+        assert_eq!(
+            envelope.legs[1].balance,
+            EconomyBalanceKey::item_quantity("taoist", 2, "green-poison")
+        );
+        assert_eq!(envelope.legs[1].delta, -5);
+        envelope
+            .validate()
+            .expect("skill consumption envelope must be valid");
+    }
+
+    #[test]
+    fn player_trade_maps_gold_and_item_quantities_to_conserved_ledger_legs() {
+        let context = SharedAccountInventoryExecutionContext {
+            zone_id: crate::ZoneId::new("map:0"),
+            fencing_generation: 12,
+            source_sequence: 99,
+            created_at_ms: 123,
+            external_commit_authorized: true,
+        };
+        let alice = SharedTradeOffer {
+            account_id: "alice".to_string(),
+            character_index: 0,
+            character_name: "Alice".to_string(),
+            partner_name: "Bob".to_string(),
+            gold: 30,
+            items: vec![mir2_simulation::SharedTradeOfferItem {
+                item_state_json: r#"{"quantity":2}"#.to_string(),
+                key: "iron-ore".to_string(),
+                unique_id: 7,
+            }],
+        };
+        let bob = SharedTradeOffer {
+            account_id: "bob".to_string(),
+            character_index: 1,
+            character_name: "Bob".to_string(),
+            partner_name: "Alice".to_string(),
+            gold: 10,
+            items: Vec::new(),
+        };
+        let transaction = economy_transaction_for_trade(&context, &alice, &bob)
+            .expect("trade should map")
+            .expect("non-empty trade should create a transaction");
+
+        assert_eq!(transaction.transaction_kind, EconomyTransactionKind::Trade);
+        assert_eq!(transaction.source_sequence, 99);
+        assert_eq!(transaction.legs.len(), 6);
+        transaction.validate().expect("trade must conserve assets");
+        let aggregated = aggregate_legs(&transaction.legs).expect("trade legs aggregate");
+        assert_eq!(aggregated[&EconomyBalanceKey::gold("alice", 0)], -20);
+        assert_eq!(aggregated[&EconomyBalanceKey::gold("bob", 1)], 20);
+        assert_eq!(
+            aggregated[&EconomyBalanceKey::item_quantity("alice", 0, "iron-ore")],
+            -2
+        );
+        assert_eq!(
+            aggregated[&EconomyBalanceKey::item_quantity("bob", 1, "iron-ore")],
+            2
+        );
     }
 }

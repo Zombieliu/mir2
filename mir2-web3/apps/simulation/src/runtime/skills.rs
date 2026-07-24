@@ -818,14 +818,15 @@ fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
         | Spell::TrapHexagon
         | Spell::Plague
         | Spell::BindingShot
-        | Spell::SummonSkeleton
-        | Spell::SummonShinsu
-        | Spell::SummonHolyDeva => has_equipped_crystal_amulet(world, 0),
+        | Spell::SummonSkeleton => has_equipped_crystal_amulet(world, 0),
+        Spell::SummonShinsu => equipped_crystal_amulet_component(world, 0, 5).is_some(),
+        Spell::SummonHolyDeva => equipped_crystal_amulet_component(world, 0, 2).is_some(),
         Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
             has_equipped_crystal_poison(world, None)
         }
         Spell::PoisonCloud => {
-            has_equipped_crystal_amulet(world, 0) && has_equipped_crystal_poison(world, Some(1))
+            equipped_crystal_amulet_component(world, 0, 5).is_some()
+                && equipped_crystal_poison_component(world, Some(1), 5).is_some()
         }
         Spell::Trap | Spell::DelayedExplosion | Spell::ExplosiveTrap => {
             has_equipped_crystal_amulet(world, 0)
@@ -4753,7 +4754,9 @@ fn apply_crystal_poison_cloud_spell(
     let Some(player_object_id) = current_player_object_id(world) else {
         return Vec::new();
     };
-    if !has_equipped_crystal_amulet(world, 0) || !has_equipped_crystal_poison(world, Some(1)) {
+    if equipped_crystal_amulet_component(world, 0, 5).is_none()
+        || equipped_crystal_poison_component(world, Some(1), 5).is_none()
+    {
         return Vec::new();
     }
     let Some(amulet_delete_packet) = consume_equipped_crystal_amulet(world, 0, 5) else {
@@ -6807,24 +6810,47 @@ fn consume_equipped_crystal_amulet(
 ) -> Option<ServerPacket> {
     let mut inventory = world.resource_mut::<super::resources::InventoryResource>();
     let index = inventory.equipment_items.iter().position(|item| {
-        item.slot == EquipmentSlot::Amulet && item.shape == Some(shape) && !item.is_broken()
+        item.slot == EquipmentSlot::Amulet
+            && item.shape == Some(shape)
+            && !item.is_broken()
+            && item.quantity >= u32::from(count)
     })?;
     let unique_id = equipment_slot_unique_id(inventory.equipment_items[index].slot).unwrap_or(9);
-    inventory.equipment_items.remove(index);
+    inventory.equipment_items[index].quantity -= u32::from(count);
+    if inventory.equipment_items[index].quantity == 0 {
+        inventory.equipment_items.remove(index);
+    }
     Some(ServerPacket::DeleteItem { unique_id, count })
 }
 
 fn has_equipped_crystal_amulet(world: &World, shape: u16) -> bool {
     let inventory = world.resource::<super::resources::InventoryResource>();
     inventory.equipment_items.iter().any(|item| {
-        item.slot == EquipmentSlot::Amulet && item.shape == Some(shape) && !item.is_broken()
+        item.slot == EquipmentSlot::Amulet
+            && item.shape == Some(shape)
+            && !item.is_broken()
+            && item.quantity > 0
     })
+}
+
+fn equipped_crystal_amulet_component(world: &World, shape: u16, quantity: u32) -> Option<String> {
+    let inventory = world.resource::<super::resources::InventoryResource>();
+    inventory
+        .equipment_items
+        .iter()
+        .find(|item| {
+            item.slot == EquipmentSlot::Amulet
+                && item.shape == Some(shape)
+                && !item.is_broken()
+                && item.quantity >= quantity
+        })
+        .map(|item| item.key.clone())
 }
 
 fn has_equipped_crystal_poison(world: &World, shape: Option<u16>) -> bool {
     let inventory = world.resource::<super::resources::InventoryResource>();
     inventory.equipment_items.iter().any(|item| {
-        if item.is_broken() {
+        if item.is_broken() || item.quantity == 0 {
             return false;
         }
         let item_shape = item.shape.unwrap_or_default();
@@ -6840,6 +6866,60 @@ fn has_equipped_crystal_poison(world: &World, shape: Option<u16>) -> bool {
     })
 }
 
+fn equipped_crystal_poison_component(
+    world: &World,
+    shape: Option<u16>,
+    quantity: u32,
+) -> Option<String> {
+    let inventory = world.resource::<super::resources::InventoryResource>();
+    inventory
+        .equipment_items
+        .iter()
+        .find(|item| {
+            if item.is_broken() || item.quantity < quantity {
+                return false;
+            }
+            let item_shape = item.shape.unwrap_or_default();
+            let shape_matches = shape
+                .map(|shape| item_shape == shape)
+                .unwrap_or_else(|| matches!(item_shape, 1 | 2));
+            shape_matches
+                && crystal_item_template_for_dynamic_key(&item.key)
+                    .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+                    .unwrap_or(false)
+        })
+        .map(|item| item.key.clone())
+}
+
+pub(super) fn zone_magic_inventory_components(
+    world: &World,
+    spell: Spell,
+) -> Option<Vec<super::session::SharedSkillItemConsumptionComponent>> {
+    use super::session::SharedSkillItemConsumptionComponent;
+
+    let component =
+        |item_key: String, quantity| SharedSkillItemConsumptionComponent { item_key, quantity };
+    match spell {
+        Spell::PoisonCloud => Some(vec![
+            component(equipped_crystal_amulet_component(world, 0, 5)?, 5),
+            component(equipped_crystal_poison_component(world, Some(1), 5)?, 5),
+        ]),
+        Spell::SummonSkeleton => Some(vec![component(
+            equipped_crystal_amulet_component(world, 0, 1)?,
+            1,
+        )]),
+        Spell::SummonShinsu => Some(vec![component(
+            equipped_crystal_amulet_component(world, 0, 5)?,
+            5,
+        )]),
+        Spell::SummonHolyDeva => Some(vec![component(
+            equipped_crystal_amulet_component(world, 0, 2)?,
+            2,
+        )]),
+        _ => Some(Vec::new()),
+    }
+}
+
 fn consume_equipped_crystal_poison(
     world: &mut World,
     shape: Option<u16>,
@@ -6847,7 +6927,7 @@ fn consume_equipped_crystal_poison(
 ) -> Option<(ServerPacket, u16)> {
     let mut inventory = world.resource_mut::<super::resources::InventoryResource>();
     let index = inventory.equipment_items.iter().position(|item| {
-        if item.is_broken() {
+        if item.is_broken() || item.quantity < u32::from(count) {
             return false;
         }
         let item_shape = item.shape.unwrap_or_default();
@@ -6864,7 +6944,10 @@ fn consume_equipped_crystal_poison(
     let slot = inventory.equipment_items[index].slot;
     let poison_shape = inventory.equipment_items[index].shape.unwrap_or_default();
     let unique_id = equipment_slot_unique_id(slot).unwrap_or(9);
-    inventory.equipment_items.remove(index);
+    inventory.equipment_items[index].quantity -= u32::from(count);
+    if inventory.equipment_items[index].quantity == 0 {
+        inventory.equipment_items.remove(index);
+    }
     Some((ServerPacket::DeleteItem { unique_id, count }, poison_shape))
 }
 
@@ -6874,8 +6957,8 @@ pub(super) fn consume_zone_magic_inventory_components(
 ) -> Option<Vec<ServerPacket>> {
     match spell {
         Spell::PoisonCloud => {
-            if !has_equipped_crystal_amulet(world, 0)
-                || !has_equipped_crystal_poison(world, Some(1))
+            if equipped_crystal_amulet_component(world, 0, 5).is_none()
+                || equipped_crystal_poison_component(world, Some(1), 5).is_none()
             {
                 return None;
             }

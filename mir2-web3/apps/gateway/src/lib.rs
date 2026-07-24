@@ -100,10 +100,11 @@ pub use routing::{
     SharedAccountInventoryService, SharedAccountInventoryServiceHandle,
     SharedInProcessZoneRuntimeFactory, SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope,
     SharedNpcWorldService, SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt,
-    SharedSessionRouter, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority,
-    SharedZoneOwnerRpcTransport, SharedZoneRuntimeFactory, SingleZoneSessionRouter, ZoneId,
-    ZoneOwnerCommandClient, ZoneOwnerCommandMode, ZoneOwnerCommandRequest, ZoneOwnerLease,
-    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneRuntimeFactory,
+    SharedSessionRouter, SharedTradeSettlementOutcome, SharedZoneOwnerCommandClient,
+    SharedZoneOwnerLeaseAuthority, SharedZoneOwnerRpcTransport, SharedZoneRuntimeFactory,
+    SingleZoneSessionRouter, ZoneId, ZoneOwnerCommandClient, ZoneOwnerCommandMode,
+    ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport,
+    ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAtMs": 1784929093747,
-  "runId": "gate18-1784929093747",
+  "generatedAtMs": 1784932668717,
+  "runId": "gate18-1784932668717",
   "zoneId": "regional:gate18",
   "fencingGeneration": 18,
   "sourceSequence": 700,
@@ -10,12 +10,27 @@
   "standbyGoldBefore": 0,
   "standbyGoldAfter": 25,
   "ledgerGoldAfter": 25,
+  "bootstrapOpeningGold": 0,
+  "tradeItemKey": "red-potion",
+  "tradeAliceGoldAfter": 15,
+  "tradeBobGoldAfter": 10,
+  "tradeAliceItemAfter": 1,
+  "tradeBobItemAfter": 3,
+  "skillAmuletKey": "crystal-item-712",
+  "skillPoisonKey": "crystal-item-710",
+  "skillAmuletLedgerAfter": 0,
+  "skillPoisonLedgerAfter": 0,
   "assertions": {
     "activeOwnerCommittedLedgerAndProjection": true,
     "activeRetryDidNotDoubleCredit": true,
+    "exactSkillComponentsDebitedOnce": true,
+    "legacyOpeningBalancesBootstrappedOnce": true,
     "ownerFenceAndSourceSequenceBound": true,
     "standbyReplayUpdatedProjectionOnly": true,
-    "unfencedProducerRejected": true
+    "tradeRetryAndStandbyDidNotDoubleSettle": true,
+    "twoSidedTradeConservedGoldAndItems": true,
+    "unfencedProducerRejected": true,
+    "unfencedTradeRejected": true
   },
   "success": true
 }

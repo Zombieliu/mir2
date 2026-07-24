@@ -125,6 +125,12 @@ pub struct SharedTradeOffer {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SharedSkillItemConsumptionComponent {
+    pub item_key: String,
+    pub quantity: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalItemOffer {
     pub account_id: String,
     pub character_index: i32,
@@ -745,6 +751,16 @@ impl SimulationSession {
             );
         };
         SharedAccountInventoryTransactionReceipt::skill_item_consumption(true, packets)
+    }
+
+    pub fn shared_skill_item_consumption_components(
+        &self,
+        spell: Spell,
+    ) -> Option<Vec<SharedSkillItemConsumptionComponent>> {
+        if !is_in_world(self.app.world()) {
+            return None;
+        }
+        super::skills::zone_magic_inventory_components(self.app.world(), spell)
     }
 
     pub fn apply_shared_entity_snapshot(&mut self, snapshot: &WorldEntitySnapshot) -> bool {

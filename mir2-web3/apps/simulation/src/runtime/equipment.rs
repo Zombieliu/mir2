@@ -48,6 +48,8 @@ use super::resources::{
 pub(super) struct EquipmentState {
     pub(super) key: String,
     pub(super) slot: EquipmentSlot,
+    #[serde(default = "default_equipment_quantity")]
+    pub(super) quantity: u32,
     pub(super) name: String,
     pub(super) icon: u16,
     pub(super) shape: Option<u16>,
@@ -101,10 +103,16 @@ pub(super) struct EquipmentState {
     pub(super) defence: i32,
 }
 
+fn default_equipment_quantity() -> u32 {
+    1
+}
+
 impl EquipmentState {
     pub(super) fn snapshot(&self, language: LanguageCode) -> EquipmentItemSnapshot {
         EquipmentItemSnapshot {
             slot: self.slot,
+            key: self.key.clone(),
+            quantity: self.quantity,
             name: localized_equipment_name(language, &self.key, &self.name),
             icon: self.icon,
             shape: self.shape,
@@ -435,6 +443,7 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
     EquipmentState {
         key: equipment_state_key(slot, &template.name),
         slot,
+        quantity: 1,
         name: template.name.clone(),
         icon: equipment_icon_for_slot_and_name(slot, &template.name),
         shape: template
@@ -566,6 +575,7 @@ fn crystal_start_equipment(item_index: i32, slot: EquipmentSlot) -> EquipmentSta
     EquipmentState {
         key,
         slot,
+        quantity: 1,
         name: template.name.clone(),
         icon: template.image,
         shape: u16::try_from(template.shape).ok(),
@@ -634,7 +644,7 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
         item_index: template.item_index,
         current_dura: item.durability_current,
         max_dura: item.durability_max,
-        count: 1,
+        count: item.quantity.min(u32::from(u16::MAX)) as u16,
         soul_bound_id: equipment_state_soul_bound_id(item),
         identified: equipment_state_identified(item),
         cursed: item.cursed,
@@ -694,7 +704,7 @@ pub(super) fn item_state_from_equipment_state(
         slot,
         unique_id: default_item_unique_id(container, slot),
         container,
-        quantity: 1,
+        quantity: equipment.quantity,
         description: equipment.description,
         durability_current: Some(equipment.durability_current),
         durability_max: Some(equipment.durability_max),
@@ -732,6 +742,7 @@ pub(super) fn equipment_state_from_item_state(
     EquipmentState {
         key: item.key.clone(),
         slot,
+        quantity: item.quantity,
         name: item.name.clone(),
         icon: item.icon,
         // Crystal `Looks_Armour`/`Looks_Weapon` come from the worn item's
