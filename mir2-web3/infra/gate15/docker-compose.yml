@@ -227,6 +227,7 @@ services:
       MIR2_ZONE_STANDBY_ADDR: "dubhe-b:7020"
       MIR2_ZONE_REPLICA_ZONE_ID: "mir2-map-0"
       MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
+      MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
       MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
     depends_on:
       dubhe-a:
@@ -246,6 +247,7 @@ services:
       MIR2_ZONE_STANDBY_ADDR: "dubhe-a:7020"
       MIR2_ZONE_REPLICA_ZONE_ID: "mir2-map-0"
       MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
+      MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
       MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
     depends_on:
       dubhe-a:

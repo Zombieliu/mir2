@@ -404,14 +404,19 @@ python3 scripts/gate15_acceptance.py --reset --skip-build
 | Projector A/B | `http://127.0.0.1:20600/v1/status`、`http://127.0.0.1:20601/v1/status` |
 | Dubhe A/B metrics | `http://127.0.0.1:29100/metrics`、`http://127.0.0.1:29101/metrics` |
 
-停止并删除 Gate 15 本地环境：
+验收后只暂停容器并保留镜像、容器和数据卷：
 
 ```bash
 docker compose \
   -f infra/gate14/docker-compose.yml \
   -f infra/gate15/docker-compose.yml \
-  --profile reverse down -v --remove-orphans
+  --profile reverse stop
 ```
+
+Gate 15 在有在线会话时每 100ms 复制一次 checkpoint；会话归零后自动降到
+每 5 秒一次。地图里的怪物、掉落和计时器仍会继续运行，只降低灾备采样频率，
+避免无人在线时反复重放完整历史日志。只有明确要重置环境时，才使用
+`down -v --remove-orphans` 删除数据卷。
 
 ## 容量应该怎样理解
 

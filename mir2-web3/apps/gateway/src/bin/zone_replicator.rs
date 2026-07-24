@@ -4,6 +4,48 @@ use std::time::Duration;
 
 use mir2_gateway::{TcpZoneOwnerRpcTransport, ZoneId, ZoneRpcLimits};
 
+const DEFAULT_ACTIVE_INTERVAL_MS: u64 = 250;
+const DEFAULT_IDLE_INTERVAL_MS: u64 = 5_000;
+
+#[derive(Debug, Clone, Copy)]
+struct ReplicationCadence {
+    active: Duration,
+    idle: Duration,
+}
+
+impl ReplicationCadence {
+    fn from_env() -> Self {
+        let active = duration_from_env(
+            "MIR2_ZONE_REPLICA_INTERVAL_MS",
+            DEFAULT_ACTIVE_INTERVAL_MS,
+            50,
+            30_000,
+        );
+        let idle = duration_from_env(
+            "MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS",
+            DEFAULT_IDLE_INTERVAL_MS,
+            50,
+            300_000,
+        );
+        Self::new(active, idle)
+    }
+
+    fn new(active: Duration, idle: Duration) -> Self {
+        Self {
+            active,
+            idle: idle.max(active),
+        }
+    }
+
+    fn delay_after_checkpoint(self, session_count: usize) -> Duration {
+        if session_count == 0 {
+            self.idle
+        } else {
+            self.active
+        }
+    }
+}
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("zone-replicator failed: {error}");
@@ -42,30 +84,46 @@ fn run() -> Result<(), String> {
         token,
         limits,
     );
-    let interval = Duration::from_millis(
-        env::var("MIR2_ZONE_REPLICA_INTERVAL_MS")
-            .ok()
-            .and_then(|value| value.trim().parse::<u64>().ok())
-            .unwrap_or(250)
-            .clamp(50, 30_000),
-    );
+    let cadence = ReplicationCadence::from_env();
     let mut installed_checksum = None::<String>;
+    let mut was_idle = None::<bool>;
 
     loop {
         let checkpoint = active.export_host_checkpoint()?;
+        let session_count = checkpoint.session_count;
         if installed_checksum.as_deref() != Some(checkpoint.checksum.as_str()) {
             standby.install_host_checkpoint(&checkpoint)?;
             eprintln!(
                 "zone-replicator installed checkpoint {} (entries={}, sessions={})",
-                checkpoint.checksum, checkpoint.entry_count, checkpoint.session_count
+                checkpoint.checksum, checkpoint.entry_count, session_count
             );
             installed_checksum = Some(checkpoint.checksum);
         }
         if once {
             return Ok(());
         }
-        thread::sleep(interval);
+        let idle = session_count == 0;
+        if was_idle != Some(idle) {
+            let delay = cadence.delay_after_checkpoint(session_count);
+            eprintln!(
+                "zone-replicator {} cadence: {}ms (sessions={session_count})",
+                if idle { "idle" } else { "active" },
+                delay.as_millis()
+            );
+            was_idle = Some(idle);
+        }
+        thread::sleep(cadence.delay_after_checkpoint(session_count));
     }
+}
+
+fn duration_from_env(name: &str, default_ms: u64, min_ms: u64, max_ms: u64) -> Duration {
+    Duration::from_millis(
+        env::var(name)
+            .ok()
+            .and_then(|value| value.trim().parse::<u64>().ok())
+            .unwrap_or(default_ms)
+            .clamp(min_ms, max_ms),
+    )
 }
 
 fn required_env(name: &str) -> Result<String, String> {
@@ -74,4 +132,31 @@ fn required_env(name: &str) -> Result<String, String> {
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
         .ok_or_else(|| format!("{name} is required"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn replication_cadence_backs_off_when_no_sessions_are_active() {
+        let cadence = ReplicationCadence::new(Duration::from_millis(100), Duration::from_secs(5));
+
+        assert_eq!(
+            cadence.delay_after_checkpoint(2),
+            Duration::from_millis(100)
+        );
+        assert_eq!(cadence.delay_after_checkpoint(0), Duration::from_secs(5));
+    }
+
+    #[test]
+    fn idle_replication_cannot_poll_faster_than_active_replication() {
+        let cadence =
+            ReplicationCadence::new(Duration::from_millis(500), Duration::from_millis(100));
+
+        assert_eq!(
+            cadence.delay_after_checkpoint(0),
+            Duration::from_millis(500)
+        );
+    }
 }

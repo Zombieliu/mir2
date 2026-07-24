@@ -132,15 +132,23 @@ Re-run using the already built images:
 python3 scripts/gate15_acceptance.py --reset --skip-build
 ```
 
-A passing run deliberately leaves the recovered environment running. Stop it
-after inspection with:
+A passing run deliberately leaves the recovered environment running. Pause it
+after inspection while retaining containers, images, and named volumes with:
 
 ```bash
 docker compose \
   -f infra/gate14/docker-compose.yml \
   -f infra/gate15/docker-compose.yml \
-  --profile reverse down -v --remove-orphans
+  --profile reverse stop
 ```
+
+Use `down -v --remove-orphans` only when intentionally resetting the Gate 15
+environment and deleting its named volumes.
+
+The Gate 15 replicators use a 100 ms cadence while players are active and a
+5-second cadence after the exported checkpoint reaches zero active sessions.
+The Zone simulation continues advancing while idle; only disaster-recovery
+sampling slows down.
 
 ## Manual inspection
 
