@@ -26,9 +26,19 @@ jq -e \
    and .goldAfterDrop == (.initialGold - 25)
    and .goldAfterPickup == .initialGold
    and .goldAfterRetry == .goldAfterPickup
-   and .bootstrapOpeningGold == .goldAfterDrop
+   and .bootstrapOpeningGold == .initialGold
+   and .ledgerGoldAfterDrop == .goldAfterDrop
    and .ledgerGoldAfterPickup == .goldAfterPickup
-   and .ledgerGoldAfterRetry == .ledgerGoldAfterPickup' \
+   and .ledgerGoldAfterRetry == .ledgerGoldAfterPickup
+   and .fixtureItemKey == "red-potion"
+   and .initialItemQuantity == .fixtureItemQuantity
+   and .itemQuantityAfterDrop == (.initialItemQuantity - 2)
+   and .itemQuantityAfterPickup == .initialItemQuantity
+   and .itemQuantityAfterRetry == .itemQuantityAfterPickup
+   and .bootstrapOpeningItemQuantity == .initialItemQuantity
+   and .ledgerItemQuantityAfterDrop == .itemQuantityAfterDrop
+   and .ledgerItemQuantityAfterPickup == .itemQuantityAfterPickup
+   and .ledgerItemQuantityAfterRetry == .ledgerItemQuantityAfterPickup' \
   "${output}" >/dev/null
 
 echo "Gate 18 remote economy evidence written to ${output}"

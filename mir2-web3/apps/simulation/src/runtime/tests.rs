@@ -25,9 +25,10 @@ use super::{
 use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
-    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
-    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord,
-    WorldEntityDisposition, WorldEntityKind,
+    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage,
+    SharedAccountInventoryTransactionKind, SimulationConfig, Stage5AuctionListing,
+    Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord, WorldEntityDisposition,
+    WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -28450,6 +28451,62 @@ fn drop_gold_packet_emits_lose_gold() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 100 })));
+}
+
+#[test]
+fn shared_asset_drop_transactions_preflight_and_apply_exact_debits() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(session.can_commit_shared_gold_drop(25));
+    let gold = session.commit_shared_gold_drop_transaction(25);
+    assert_eq!(gold.kind, SharedAccountInventoryTransactionKind::GoldDrop);
+    assert!(gold.committed);
+    assert_eq!(player_gold(&session), 1255);
+    assert!(gold
+        .packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
+
+    session.stage5_command(
+        "qa.giveItem",
+        vec!["red-potion".to_string(), "3".to_string()],
+    );
+    let item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion")
+        .expect("QA item");
+    let prepared = session
+        .shared_inventory_item_drop(item.unique_id, 2, false)
+        .expect("valid shared item drop");
+    assert_eq!(prepared.item_key, "red-potion");
+    assert_eq!(prepared.quantity, 2);
+    let dropped = session.commit_shared_inventory_item_drop_transaction(&prepared);
+    assert_eq!(
+        dropped.kind,
+        SharedAccountInventoryTransactionKind::InventoryItemDrop
+    );
+    assert!(dropped.committed);
+    assert!(dropped.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DropItem {
+            unique_id,
+            count: 2,
+            success: true,
+            ..
+        } if *unique_id == item.unique_id
+    )));
+    assert_eq!(
+        session
+            .world_snapshot()
+            .inventory_items
+            .into_iter()
+            .find(|snapshot| snapshot.unique_id == item.unique_id)
+            .map(|snapshot| snapshot.quantity),
+        Some(item.quantity - 2)
+    );
 }
 
 #[test]

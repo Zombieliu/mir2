@@ -18,13 +18,13 @@ use mir2_simulation::{
     intelligent_creature_allows_ground_drop, zone_ground_drop_snapshots_for_monster_at_tick,
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropLootSnapshot,
     GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
-    SharedAccountInventoryTransactionReceipt, SharedItemRentalAgreement, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
-    SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
-    WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
-    WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneCommand, ZoneManager,
-    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound, ZoneRuntimeHandle,
-    CRYSTAL_OBJECT_DATA_RANGE,
+    SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
+    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
+    SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
+    WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneCommand,
+    ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
@@ -904,6 +904,14 @@ pub enum SharedTradeSettlementOutcome {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SharedAccountInventoryCommand {
+    GoldDrop {
+        amount: u32,
+        request_id: u64,
+    },
+    InventoryItemDrop {
+        drop: SharedInventoryItemDrop,
+        request_id: u64,
+    },
     GroundDropPickup(GroundDropSnapshot),
     MonsterKillAward(ZoneMonsterKillAward),
     SkillItemConsume {
@@ -925,6 +933,15 @@ pub struct SharedAccountInventoryCommandEnvelope {
 impl SharedAccountInventoryCommandEnvelope {
     fn idempotency_key(&self) -> Option<SharedAccountInventoryCommandKey> {
         let command_key = match &self.command {
+            SharedAccountInventoryCommand::GoldDrop { amount, request_id } => {
+                format!("gold-drop:{request_id}:{amount}")
+            }
+            SharedAccountInventoryCommand::InventoryItemDrop { drop, request_id } => {
+                format!(
+                    "inventory-item-drop:{request_id}:{}:{}:{}",
+                    drop.unique_id, drop.item_key, drop.quantity
+                )
+            }
             SharedAccountInventoryCommand::GroundDropPickup(drop) => {
                 format!("ground-drop-pickup:{}", drop.object_id)
             }
@@ -1050,6 +1067,12 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             }
         }
         let kind = match &envelope.command {
+            SharedAccountInventoryCommand::GoldDrop { .. } => {
+                SharedAccountInventoryTransactionKind::GoldDrop
+            }
+            SharedAccountInventoryCommand::InventoryItemDrop { .. } => {
+                SharedAccountInventoryTransactionKind::InventoryItemDrop
+            }
             SharedAccountInventoryCommand::GroundDropPickup(_) => {
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             }
@@ -1068,6 +1091,12 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             };
         }
         let receipt = match envelope.command {
+            SharedAccountInventoryCommand::GoldDrop { amount, .. } => {
+                runtime.commit_shared_gold_drop_transaction(amount)
+            }
+            SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
+                runtime.commit_shared_inventory_item_drop_transaction(&drop)
+            }
             SharedAccountInventoryCommand::GroundDropPickup(drop) => {
                 runtime.commit_shared_ground_drop_pickup_transaction(&drop)
             }
@@ -5300,9 +5329,50 @@ impl SharedInProcessZoneSessionRuntime {
         Ok(())
     }
 
-    fn next_shared_skill_item_request_id(&mut self) -> u64 {
+    fn next_shared_economy_request_id(&mut self) -> u64 {
+        if let Some(context) = self.economy_execution_context.as_ref() {
+            return context.source_sequence;
+        }
         self.shared_skill_item_request_seq = self.shared_skill_item_request_seq.saturating_add(1);
         self.shared_skill_item_request_seq
+    }
+
+    fn execute_shared_gold_drop(&mut self, amount: u32) -> Vec<ServerPacket> {
+        let Some(identity) = self.inner.active_identity() else {
+            return Vec::new();
+        };
+        let request_id = self.next_shared_economy_request_id();
+        let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+            identity,
+            command: SharedAccountInventoryCommand::GoldDrop { amount, request_id },
+        });
+        debug_assert_eq!(
+            receipt.kind,
+            SharedAccountInventoryTransactionKind::GoldDrop
+        );
+        receipt.packets
+    }
+
+    fn execute_shared_inventory_item_drop(
+        &mut self,
+        unique_id: u64,
+        count: u16,
+        hero_inventory: bool,
+    ) -> Option<Vec<ServerPacket>> {
+        let drop = self
+            .inner
+            .shared_inventory_item_drop(unique_id, count, hero_inventory)?;
+        let identity = self.inner.active_identity()?;
+        let request_id = self.next_shared_economy_request_id();
+        let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+            identity,
+            command: SharedAccountInventoryCommand::InventoryItemDrop { drop, request_id },
+        });
+        debug_assert_eq!(
+            receipt.kind,
+            SharedAccountInventoryTransactionKind::InventoryItemDrop
+        );
+        Some(receipt.packets)
     }
 
     fn filter_stale_owner_dead_entity_packets(&mut self, packets: &mut Vec<ServerPacket>) {
@@ -6544,7 +6614,7 @@ impl SharedInProcessZoneSessionRuntime {
                 else {
                     return Vec::new();
                 };
-                let request_id = self.next_shared_skill_item_request_id();
+                let request_id = self.next_shared_economy_request_id();
                 let receipt =
                     self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
                         identity,
@@ -7624,6 +7694,25 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             WorldCommand::ClientPacket(ClientPacket::PickUp) => Some(None),
             _ => None,
         };
+        let shared_gold_drop_amount = match &command {
+            WorldCommand::ClientPacket(ClientPacket::DropGold { amount }) => Some(*amount),
+            _ => None,
+        };
+        let shared_inventory_item_drop = match &command {
+            WorldCommand::ClientPacket(ClientPacket::DropItem {
+                unique_id,
+                count,
+                hero_inventory,
+            }) => Some((*unique_id, *count, *hero_inventory)),
+            WorldCommand::DropItem { key } => self
+                .inner
+                .world_snapshot()
+                .inventory_items
+                .iter()
+                .find(|item| item.key == *key)
+                .map(|item| (item.unique_id, 1, false)),
+            _ => None,
+        };
         let syncs_inner_position_before_session_execute = matches!(
             &command,
             WorldCommand::PickUp { .. }
@@ -7782,6 +7871,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.execute_shared_item_rental_request(partner_name)
         } else if let Some(partner_name) = shared_trade_partner {
             self.inner.trade_request(&partner_name)
+        } else if let Some(amount) = shared_gold_drop_amount {
+            self.execute_shared_gold_drop(amount)
+        } else if let Some((unique_id, count, hero_inventory)) = shared_inventory_item_drop {
+            match self.execute_shared_inventory_item_drop(unique_id, count, hero_inventory) {
+                Some(packets) => packets,
+                None => self.inner.execute(command)?,
+            }
         } else if let Some(object_id) = shared_pickup_object_id {
             let shared_packets = self.pick_up_shared_drop(object_id);
             if shared_packets.is_empty() {
@@ -10342,6 +10438,25 @@ mod tests {
                 .expect("account inventory commands should lock")
                 .push(envelope);
             match command {
+                SharedAccountInventoryCommand::GoldDrop { amount, .. } => {
+                    SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GoldDrop,
+                        committed: true,
+                        packets: vec![ServerPacket::LoseGold { gold: amount }],
+                    }
+                }
+                SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
+                    SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::InventoryItemDrop,
+                        committed: true,
+                        packets: vec![ServerPacket::DropItem {
+                            unique_id: drop.unique_id,
+                            count: u16::try_from(drop.quantity).unwrap_or(u16::MAX),
+                            hero_inventory: drop.hero_inventory,
+                            success: true,
+                        }],
+                    }
+                }
                 SharedAccountInventoryCommand::GroundDropPickup(_) => {
                     *self
                         .ground_drop_calls

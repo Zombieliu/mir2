@@ -38,7 +38,7 @@ pub const CRYSTAL_OBJECT_DATA_RANGE: i32 = crystal_compat::CRYSTAL_DATA_RANGE;
 
 pub use drops::{
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-    SharedGroundDropPickupCommit,
+    SharedGroundDropPickupCommit, SharedInventoryItemDrop,
 };
 pub use map::set_crystal_full_world_zone_collision;
 pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;

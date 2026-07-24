@@ -947,6 +947,12 @@ impl PostgresEconomyAccountInventoryService {
         envelope: &SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryTransactionReceipt {
         match &envelope.command {
+            SharedAccountInventoryCommand::GoldDrop { amount, .. } => {
+                runtime.commit_shared_gold_drop_transaction(*amount)
+            }
+            SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
+                runtime.commit_shared_inventory_item_drop_transaction(drop)
+            }
             SharedAccountInventoryCommand::GroundDropPickup(drop) => {
                 runtime.commit_shared_ground_drop_pickup_transaction(drop)
             }
@@ -1201,6 +1207,12 @@ fn runtime_balance_amount(
 
 fn command_kind(command: &SharedAccountInventoryCommand) -> SharedAccountInventoryTransactionKind {
     match command {
+        SharedAccountInventoryCommand::GoldDrop { .. } => {
+            SharedAccountInventoryTransactionKind::GoldDrop
+        }
+        SharedAccountInventoryCommand::InventoryItemDrop { .. } => {
+            SharedAccountInventoryTransactionKind::InventoryItemDrop
+        }
         SharedAccountInventoryCommand::GroundDropPickup(_) => {
             SharedAccountInventoryTransactionKind::GroundDropPickup
         }
@@ -1218,6 +1230,12 @@ fn preflight_projection(
     command: &SharedAccountInventoryCommand,
 ) -> bool {
     match command {
+        SharedAccountInventoryCommand::GoldDrop { amount, .. } => {
+            runtime.can_commit_shared_gold_drop(*amount)
+        }
+        SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
+            runtime.can_commit_shared_inventory_item_drop(drop)
+        }
         SharedAccountInventoryCommand::GroundDropPickup(drop) => {
             runtime.can_commit_shared_ground_drop_pickup(drop)
         }
@@ -1243,6 +1261,40 @@ fn economy_transaction_for_command(
         ("characterName".to_string(), identity.character_name.clone()),
     ]);
     let (transaction_kind, legs) = match &command.command {
+        SharedAccountInventoryCommand::GoldDrop { amount, request_id } if *amount > 0 => {
+            metadata.insert("operation".to_string(), "playerGoldDrop".to_string());
+            metadata.insert("requestId".to_string(), request_id.to_string());
+            (
+                EconomyTransactionKind::Consume,
+                vec![EconomyLeg {
+                    balance: EconomyBalanceKey::gold(
+                        identity.account_id.clone(),
+                        identity.character_index,
+                    ),
+                    delta: -i64::from(*amount),
+                }],
+            )
+        }
+        SharedAccountInventoryCommand::InventoryItemDrop { drop, request_id }
+            if drop.quantity > 0 =>
+        {
+            metadata.insert("operation".to_string(), "playerItemDrop".to_string());
+            metadata.insert("requestId".to_string(), request_id.to_string());
+            metadata.insert("itemKey".to_string(), drop.item_key.clone());
+            metadata.insert("uniqueId".to_string(), drop.unique_id.to_string());
+            metadata.insert("quantity".to_string(), drop.quantity.to_string());
+            (
+                EconomyTransactionKind::Consume,
+                vec![EconomyLeg {
+                    balance: EconomyBalanceKey::item_quantity(
+                        identity.account_id.clone(),
+                        identity.character_index,
+                        drop.item_key.clone(),
+                    ),
+                    delta: -i64::from(drop.quantity),
+                }],
+            )
+        }
         SharedAccountInventoryCommand::GroundDropPickup(drop) => match &drop.loot {
             GroundDropLootSnapshot::Gold { amount } => {
                 metadata.insert("operation".to_string(), "groundDropGoldPickup".to_string());
@@ -1326,7 +1378,9 @@ fn economy_transaction_for_command(
                     .collect(),
             )
         }
-        SharedAccountInventoryCommand::MonsterKillAward(_)
+        SharedAccountInventoryCommand::GoldDrop { .. }
+        | SharedAccountInventoryCommand::InventoryItemDrop { .. }
+        | SharedAccountInventoryCommand::MonsterKillAward(_)
         | SharedAccountInventoryCommand::SkillItemConsume { .. } => return None,
     };
     Some(EconomyTransactionEnvelope {
@@ -1750,6 +1804,62 @@ mod tests {
         );
         assert_eq!(envelope.legs[0].delta, 25);
         envelope.validate().expect("valid economy envelope");
+    }
+
+    #[test]
+    fn player_gold_and_item_drops_map_to_fenced_debits() {
+        let context = SharedAccountInventoryExecutionContext {
+            zone_id: crate::ZoneId::new("map:0"),
+            fencing_generation: 9,
+            source_sequence: 44,
+            created_at_ms: 79,
+            external_commit_authorized: true,
+        };
+        let identity = ActiveSessionIdentity {
+            account_id: "alice".to_string(),
+            character_index: 3,
+            character_name: "Blade".to_string(),
+        };
+        let gold = economy_transaction_for_command(
+            &context,
+            &SharedAccountInventoryCommandEnvelope {
+                identity: identity.clone(),
+                command: SharedAccountInventoryCommand::GoldDrop {
+                    amount: 25,
+                    request_id: 44,
+                },
+            },
+        )
+        .expect("gold drop transaction");
+        assert_eq!(gold.transaction_kind, EconomyTransactionKind::Consume);
+        assert_eq!(gold.source_sequence, 44);
+        assert_eq!(gold.legs[0].balance, EconomyBalanceKey::gold("alice", 3));
+        assert_eq!(gold.legs[0].delta, -25);
+        gold.validate().expect("gold drop transaction is valid");
+
+        let item = economy_transaction_for_command(
+            &context,
+            &SharedAccountInventoryCommandEnvelope {
+                identity,
+                command: SharedAccountInventoryCommand::InventoryItemDrop {
+                    drop: mir2_simulation::SharedInventoryItemDrop {
+                        item_key: "iron-ore".to_string(),
+                        unique_id: 77,
+                        quantity: 2,
+                        hero_inventory: false,
+                    },
+                    request_id: 44,
+                },
+            },
+        )
+        .expect("item drop transaction");
+        assert_eq!(item.transaction_kind, EconomyTransactionKind::Consume);
+        assert_eq!(
+            item.legs[0].balance,
+            EconomyBalanceKey::item_quantity("alice", 3, "iron-ore")
+        );
+        assert_eq!(item.legs[0].delta, -2);
+        item.validate().expect("item drop transaction is valid");
     }
 
     #[test]
