@@ -32,6 +32,8 @@ struct Gate18EconomyProducerEvidence {
     standby_gold_after: u32,
     recovered_gold_before: u32,
     recovered_gold_after: u32,
+    materialized_gold_before: u32,
+    materialized_gold_after: u32,
     ledger_gold_after: i64,
     bootstrap_opening_gold: i64,
     trade_item_key: String,
@@ -119,7 +121,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Host could checkpoint its runtime projection. A fresh producer must
     // replay the projection from the duplicate receipt without crediting the
     // ledger a second time.
-    let recovery_service = PostgresEconomyAccountInventoryService::new(database_url);
+    let recovery_service = PostgresEconomyAccountInventoryService::new(database_url.clone());
     let mut recovery_runtime = start_runtime(&account_id, &character_name)?;
     let recovery_identity = recovery_runtime
         .active_identity()
@@ -133,6 +135,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let recovered_gold_after = recovery_runtime.world_snapshot().gold;
     let ledger_gold_after_recovery = store.balance(&balance)?;
+
+    // The opposite restart window restores a checkpoint that already includes
+    // the projection. A fresh producer must recognize parity with PostgreSQL
+    // and must not apply the duplicate credit again.
+    let materialized_service = PostgresEconomyAccountInventoryService::new(database_url.clone());
+    let materialized_gold_before = active_runtime.world_snapshot().gold;
+    let materialized = materialized_service.commit_fenced(
+        &mut active_runtime,
+        Some(&active_context),
+        command.clone(),
+    );
+    let materialized_gold_after = active_runtime.world_snapshot().gold;
+    let ledger_gold_after_materialized = store.balance(&balance)?;
 
     let active_bootstrap =
         store.bootstrap_character(&identity, &active_runtime.world_snapshot(), generated_at_ms)?;
@@ -286,6 +301,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && ledger_gold_after_recovery == ledger_gold_after_active,
         ),
         (
+            "restoredCheckpointDidNotReplayMaterializedProjection".to_string(),
+            materialized.committed
+                && materialized_gold_after == materialized_gold_before
+                && ledger_gold_after_materialized == ledger_gold_after_active,
+        ),
+        (
             "unfencedProducerRejected".to_string(),
             !unfenced.committed && unfenced.packets.is_empty(),
         ),
@@ -358,6 +379,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         standby_gold_after,
         recovered_gold_before,
         recovered_gold_after,
+        materialized_gold_before,
+        materialized_gold_after,
         ledger_gold_after: ledger_gold_after_standby,
         bootstrap_opening_gold: active_bootstrap.gold,
         trade_item_key,
