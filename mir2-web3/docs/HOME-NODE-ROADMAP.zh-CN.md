@@ -30,23 +30,85 @@
 - 生产级代码沙箱、远程证明和恶意节点对抗；
 - 在真实不同运营商家庭网络上的容量与奖励 Beta。
 
-## 目标网络
+## 整体架构
 
 ```mermaid
-flowchart LR
-  H["家庭 Dubhe Node"] -->|"主动出站 QUIC / mTLS"| R["官方 Regional Relay"]
-  P["玩家"] --> G["Gateway"]
-  G --> R
-  R --> Z["家庭 Zone Tunnel"]
-  Z --> H
-  H -->|"checkpoint / heartbeat / work receipt"| C["Commonware 控制平面"]
-  H -. "无数据库密钥" .-> E["官方经济事务服务"]
-  H --> S["配对官方或社区 standby"]
+flowchart TB
+  subgraph Public["公开入口"]
+    P["玩家客户端"] --> D["Anycast / WAF / DDoS Edge"]
+    D --> G["Regional Gateway"]
+  end
+
+  subgraph Regional["官方 Regional 区域"]
+    G --> R["QUIC / mTLS Relay"]
+    SC["Dubhe Scheduler"] --> G
+    CW["Commonware 控制与最终准入"] --> SC
+    SU["Sui testnet 节点注册"] --> CW
+    E["官方经济事务服务"] --> DB["PostgreSQL / Redis"]
+    U["签名版本与升级服务"]
+    T["遥测、告警与节点管理"]
+    O["官方 / 专业 Standby Zone"]
+  end
+
+  subgraph Home["普通家庭网络 / CGNAT"]
+    A["Dubhe Home Agent"] -->|"主动出站 QUIC / mTLS"| R
+    A --> B["只读、无特权签名沙箱"]
+    B --> Z["Home Zone / Replica"]
+    A -->|"heartbeat / metrics / work receipt"| T
+    A -->|"仅下载并验签"| U
+  end
+
+  G -->|"已授权 Session 流"| R
+  R -->|"反向隧道"| A
+  SC -->|"placement / generation / capacity cert"| A
+  Z -->|"经济意图，不直接写库"| E
+  Z -->|"checkpoint / WAL"| O
+  O -->|"家庭节点掉线时接管"| G
 ```
 
 玩家不直接连接家庭 IP。家庭节点不持有 PostgreSQL、Sui settlement 或奖励签名
 密钥；它只接收已授权的 Zone 命令，并用 node generation/sequence 提交结果。
 经济副作用由官方事务服务验证和落账。
+
+这不是“客户端直接连公会电脑”，而是两条明确分开的路径：
+
+1. **数据面**：玩家 → DDoS Edge → Gateway → Relay → Home Agent → Zone；
+2. **控制面**：注册/证书 → Commonware 最终准入 → Scheduler placement；
+3. **状态面**：Home Zone 持续把 checkpoint/WAL 复制到不同故障域 standby；
+4. **经济面**：家庭节点只提交带 generation/sequence 的意图，官方服务验签、
+   去重并写 PostgreSQL；
+5. **运维面**：Home Agent 把脱敏遥测上报，并只运行验签成功的版本。
+
+因此 Relay 解决“怎么找到 CGNAT 后的节点”和“怎么隐藏家庭 IP”，standby
+解决“家里断网后玩家怎么办”，沙箱和经济隔离解决“陌生电脑是否可信”。
+
+## 遥测与隐私
+
+家庭节点通过已经建立的出站控制隧道发送遥测，不开放新的入站端口。遥测数据按
+受众分层：
+
+| 受众 | 可见内容 |
+| --- | --- |
+| 节点主人 | CPU、内存、磁盘、带宽、温度、地图、Session、收益和 drain |
+| 游戏/平台运营方 | Node ID、粗粒度地区、ASN、RTT、丢包、证书、Zone、checkpoint lag、故障率 |
+| 公会/玩家公开页 | 公会名、节点数、服务地图、在线率、聚合容量和历史质量分 |
+
+公开页不得显示精确 IP、家庭地址、机器用户名、磁盘路径或家庭局域网信息。
+Regional Relay 为建立传输会短暂处理来源 IP；观测系统只保存带轮换盐的哈希和
+粗粒度地区，原始 Relay 连接日志使用短保留期并限制安全人员访问。
+
+家庭节点卡片至少显示：
+
+```text
+Node ID / Home、Replica 或 Professional 等级
+Serving、Draining、Replica、Offline 状态
+粗粒度地区和到 Relay RTT
+容量证书：Sessions / Zones / 到期时间
+当前 Sessions / Zones / 带宽 / checkpoint lag
+30 天在线率、故障次数、质量分和 reward work units
+版本、签名状态和是否需要升级
+IP hidden by Regional Relay
+```
 
 ## 节点等级
 
@@ -61,6 +123,16 @@ flowchart LR
 家庭节点 Beta 从 Observer/Replica 开始，之后只开放冷地图。热点地图必须等真实
 家庭网络故障矩阵、隐私 Relay 和快速接管全部通过后再开放。
 
+## 谁负责什么
+
+| 参与方 | 负责 | 不负责 |
+| --- | --- | --- |
+| 游戏方 | 客户端、Gateway、玩法版本、数据库、经济规则和官方 standby | 要求家庭用户开放公网端口 |
+| Dubhe / Regional | 节点注册、调度、Relay、容量证书、遥测、奖励证明和升级 | 替家庭节点保管玩家资产私钥 |
+| 公会/家庭节点 | 提供受限 CPU、内存、带宽，运行指定 Zone/Replica | 自行修改玩法、直接写经济数据库 |
+| Commonware | 多方控制决定、placement/fence 最终性、work receipt 聚合 | 承载逐帧游戏流量 |
+| Sui testnet | 节点注册、轮换、撤销和质押生命周期证明 | 实时移动、战斗和地图 Tick |
+
 ## 家庭节点最低建议
 
 - 4 CPU / 8GiB，可用 SSD 至少 100GiB；
@@ -73,12 +145,41 @@ flowchart LR
 
 ## 剩余里程碑
 
-1. Outbound Tunnel POC：家庭节点在 CGNAT 后主动连接 Relay，Gateway 通过隧道
-   完成一个真实 Session 的登录、移动、断线恢复。
-2. Home Replica Beta：只复制 checkpoint/WAL，验证断网、换 IP、休眠和恢复。
-3. Home Zone Beta：10–30 人冷地图，配对官方 standby，故障恢复小于 5 秒。
-4. Certified Home Node：签名安装包、自动更新、资源策略、隐私 Relay、容量挑战
-   和真实奖励结算。
+### Gate 22：Outbound Tunnel
+
+- 家庭节点在双 NAT、CGNAT 和动态 IP 后主动建立 QUIC/mTLS 隧道；
+- Gateway 通过 Relay 完成一个真实 Session 的登录、移动、战斗和断线恢复；
+- 隧道只接受匹配 Node ID、generation、短期容量证书和 placement 的流；
+- 家庭端没有任何必须开放的 TCP/UDP 入站端口；
+- 换 IP 后恢复隧道，旧连接和旧 generation 不能继续写。
+
+### Gate 23：Home Agent
+
+- Windows、macOS、Linux 安装包和托盘/本地管理页；
+- 版本清单、镜像和配置全部验签，支持失败回滚；
+- 空闲 CPU/内存/带宽策略，用户开始高负载工作时停止接新 Session；
+- 休眠、退出和升级前 drain；超时则触发 standby 接管；
+- 私钥进入系统密钥库，不写日志、环境文件或容器镜像。
+
+### Gate 24：Privacy Relay 与沙箱
+
+- 玩家和公开遥测看不到家庭 IP；
+- WAF/DDoS 只暴露官方入口，家庭节点不接收任意公网流量；
+- Zone 运行在只读根文件系统、无特权、无宿主 socket、有限网络出口的签名沙箱；
+- 无 PostgreSQL、Sui settlement、奖励 issuer 或平台管理员密钥；
+- 伪造 work receipt、回滚 sequence、修改镜像、超额资源和数据外传全部 fail closed。
+
+### Gate 25：真实家庭网络 Beta
+
+- Observer/Replica → 10–30 人 Home Zone → 50–128 Session Certified Zone 分级开放；
+- 至少覆盖三家运营商、CGNAT、换 IP、路由器重启、休眠、丢包和带宽拥塞；
+- paired standby 位于不同家庭/机房故障域，Session 恢复小于 5 秒；
+- 遥测三种受众权限、IP 脱敏、保留期和删除流程通过；
+- 容量证书、真实 Session 分钟、质量分和奖励批次可对账。
+
+Gate 25 通过之前只能称为 Home Node POC/Beta，不能宣称家庭节点可以承载生产
+商业服。即使 Gate 25 通过，热点攻城、沙巴克和高价值经济地图仍应优先放在
+Professional Zone；Home Zone 先承载冷地图、私人副本和 standby replica。
 
 功能 POC 预计约一周 AI 工程时间；达到公开家庭节点 Beta，预计 2–4 周并需要
 真实家庭网络参与测试。时间估计不包含外部安全审计和大规模运营观察期。
