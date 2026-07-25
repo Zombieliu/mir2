@@ -44,6 +44,7 @@ x-gateway-common: &gateway-common
     MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
     MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
     MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+    MIR2_ZONE_RPC_CODEC: "msgpack"
     MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
     MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
     MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
@@ -295,6 +296,7 @@ services:
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
       MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
@@ -316,6 +318,7 @@ services:
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
       MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
@@ -337,6 +340,7 @@ services:
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
       MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
@@ -367,6 +371,7 @@ services:
       MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
       MIR2_GATE19_ZONE_FAILOVER_POLL_MS: "20"
       MIR2_GATE19_ZONE_FAILURE_THRESHOLD: "2"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_GATE19_ZONE_RPC_TIMEOUT_MS: "100"
       MIR2_GATE19_ZONE_SYNC_RPC_TIMEOUT_MS: "1000"
       MIR2_GATE19_MAX_ZONE_RTO_MS: "5000"
@@ -392,6 +397,7 @@ services:
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_ZONE_RPC_TIMEOUT_MS: "250"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
       MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
@@ -420,6 +426,7 @@ services:
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
       MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
@@ -448,6 +455,7 @@ services:
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
       MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
       MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url

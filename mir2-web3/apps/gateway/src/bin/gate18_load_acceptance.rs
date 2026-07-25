@@ -423,8 +423,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (
             "profileContractAccepted".to_string(),
             (profile_exact
-                && requested_players == 500
-                && duration_seconds == 1_800
+                && requested_players == stage_players
+                && duration_seconds == stage_duration_seconds
                 && profile.profile_id == "mir2-regional-v1")
                 || allow_dev_profile,
         ),
