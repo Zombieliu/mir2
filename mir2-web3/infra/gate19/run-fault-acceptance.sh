@@ -114,10 +114,11 @@ jq -n \
       failoverController: $controller,
       gameplayProbe: $gameplayProbe
     },
-    success:
+    success: (
       (($gitCommit | length) >= 7)
       and all([$zone, $gateway, $infraProbe, $zoneSeed, $controller, $gameplayProbe][];
         startswith("sha256:"))
+    )
   }' >"${evidence_dir}/gate19-runtime-manifest.json"
 jq -e '.success == true' "${evidence_dir}/gate19-runtime-manifest.json" >/dev/null
 

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784983438213,
+  "phase": "preflight",
+  "faultStartedAtMs": null,
+  "recoveryRtoMs": null,
+  "gateways": [
+    {
+      "endpoint": "gateway-1:7010",
+      "healthy": true,
+      "latencyMs": 5.444292,
+      "error": null
+    },
+    {
+      "endpoint": "gateway-2:7010",
+      "healthy": true,
+      "latencyMs": 1.119958,
+      "error": null
+    },
+    {
+      "endpoint": "gateway-3:7010",
+      "healthy": true,
+      "latencyMs": 0.9095000000000001,
+      "error": null
+    }
+  ],
+  "healthyGatewayCount": 3,
+  "requiredHealthyGatewayCount": 3,
+  "redisMasterRoundTrip": true,
+  "redisMasterAddress": "redis-primary:6379",
+  "redisRouteLeaseOwner": "gate19-gateway-1",
+  "postgresWritablePrimary": true,
+  "postgresServerAddress": "172.18.0.3/32",
+  "postgresZoneFencingToken": 1,
+  "assertions": {
+    "gatewayQuorumHealthy": true,
+    "postgresFencedWriteSucceeded": true,
+    "postgresSelectedWritablePrimary": true,
+    "redisMasterRoundTripSucceeded": true,
+    "redisRouteLeaseAcquired": true
+  },
+  "success": true
+}

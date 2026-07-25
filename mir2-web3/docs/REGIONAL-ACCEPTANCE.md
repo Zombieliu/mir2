@@ -218,6 +218,30 @@ Gate 18 的正式 `mir2-regional-v1` 运行已完成，聚合证据为
 - 750 次金币丢弃全部生成不同的地面对象 ID；最终经济重复数、运行时/账本偏差、
   过期投递、死信、无 Outbox 事务和负余额均为 0。
 
+## Gate 19 已完成：生产 HA 与自动故障恢复
+
+Gate 19 的正式聚合证据为 `docs/generated/regional/gate19.json`：
+
+- 500/500 名不同玩家在 120 个 Zone 上运行 `3,600.294s`，完成
+  `2,642,218 / 2,642,287` 条真实命令，覆盖率 `96.9977%`、错误率
+  `0.002611%`；
+- MessagePack 与 128-lane 有界共享连接池把 500 条逻辑 Session 收敛为
+  120 条 gameplay 连接并保留 control lanes；p50 / p95 / p99 为
+  `34.57 / 185.67 / 317.59ms`；
+- active Zone `SIGKILL` 后自动复制、CAS fence 和 promotion 的 RTO 为
+  `7.80ms`，玩家身份与地图保持不变，恢复后首条命令为 `54.15ms`；
+- standby Zone、Gateway、Redis primary、PostgreSQL primary、active Zone 和
+  Commonware validator 六种单故障全部通过；
+- Gateway 路由接管为 `2.52s`；Redis Sentinel 和 PostgreSQL physical standby
+  均成为不同的可写主节点；
+- Commonware 严格使用 `v2026.2.0`，在 `3/4` validator 下继续 finality，
+  恢复节点追平 height `14` 和相同 state root；
+- 最终经济重复、运行时/账本偏差、负余额、孤儿事务和 dead letter 均为 0。
+
+Gate 19 的正式长跑同时记录了 checkpoint journal 随命令数持续增长。这不影响
+本 Gate 的一小时 SLO，但 Gate 21 必须实现 durable base snapshot 和已确认前缀
+截断，才能证明 72 小时内存增长 `<=5%`、未压缩 WAL 增长 `<=1GiB`。
+
 聚合器不会只信任顶层 `success`：它重新校验 30 分钟、500 个不同玩家、120 个
 活动 Zone、行为比例、错误率、安全晋升、迁移后探测、经济对账以及上述四份
 底层验收，并把每个源文件的 SHA-256 写入 `gate18.json`。
