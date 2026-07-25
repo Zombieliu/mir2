@@ -1,0 +1,3 @@
+self-hosted-runner:
+  labels:
+    - mir2-full-assets

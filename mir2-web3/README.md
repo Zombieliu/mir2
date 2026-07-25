@@ -3,7 +3,8 @@
 Crystal / Legend of Mir 2 compatible Web MMORPG implementation.
 
 For a new checkout, install Git and Docker Desktop, then use the pinned
-cross-platform developer environment:
+cross-platform developer environment. Full private assets additionally require
+GitHub CLI on the host:
 
 ```powershell
 .\scripts\dev.cmd up -Build -OpenBrowser
@@ -21,7 +22,9 @@ debugging.
 
 Authorized developers can install the content-hashed full asset bundle and
 start the same stack in one command. The first run performs GitHub device
-authorization inside the persistent local Docker volume:
+authorization through the official host `gh`. The launcher verifies the remote
+witness, digest, and revision, pulls with an ephemeral Docker configuration,
+then supplies the credential to the exact immutable fetcher over standard input:
 
 ```powershell
 .\scripts\dev.cmd up -FullAssets -OpenBrowser

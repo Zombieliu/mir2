@@ -6,7 +6,7 @@
 
 ## Windows / macOS 一键启动
 
-新开发者默认只需安装 Git 和 Docker Desktop。Node `22.18.0`、npm `11.13.0`、Rust `1.89.0`、WASM target 与 Linux 构建依赖全部由仓库的锁定开发镜像提供。
+新开发者运行 Starter 默认只需安装 Git 和 Docker Desktop。Node `22.18.0`、npm `11.13.0`、Rust `1.89.0`、WASM target 与 Linux 构建依赖全部由仓库的锁定开发镜像提供；安装私有完整素材时还需要宿主机 GitHub CLI。
 
 Windows：
 
@@ -24,7 +24,7 @@ cd mir2/mir2-web3
 ./scripts/dev.sh up --build --open
 ```
 
-默认使用仓库自带 Starter 素材，可直接完成注册、登录、创建角色和进入游戏。获授权开发者也可从 clone 后用一条命令安装固定版本完整视觉素材并启动；首次运行会在容器内打开 GitHub 设备授权，凭据只保存在本机 Docker 命名卷：
+默认使用仓库自带 Starter 素材，可直接完成注册、登录、创建角色和进入游戏。获授权开发者也可从 clone 后用一条命令安装固定版本完整视觉素材并启动；首次运行由宿主机官方 `gh` 打开 GitHub 设备授权。启动器核验远端 witness、镜像摘要和 revision，使用临时 Docker 配置拉取镜像，再经标准输入把凭据交给精确的不可变 fetcher，不写入仓库或容器配置：
 
 ```text
 Windows: .\scripts\dev.cmd up -FullAssets -OpenBrowser

@@ -27,6 +27,8 @@ jobs:
     name: Publish amd64/arm64 toolchain image
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -52,6 +54,8 @@ jobs:
           file: mir2-web3/infra/developer.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            MIR2_DEVELOPER_IMAGE_REVISION=${{ github.sha }}
           tags: |
             ghcr.io/zombieliu/mir2-developer:main
             ghcr.io/zombieliu/mir2-developer:sha-${{ github.sha }}
@@ -63,6 +67,31 @@ jobs:
           provenance: mode=max
           sbom: true
 
+      - name: Verify published amd64 and arm64 runtimes
+        env:
+          IMAGE_REFERENCE: ghcr.io/zombieliu/mir2-developer@${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools inspect "$IMAGE_REFERENCE"
+          for platform_and_arch in linux/amd64:x86_64 linux/arm64:aarch64; do
+            IFS=: read -r platform expected_arch <<<"$platform_and_arch"
+            docker run --rm \
+              --platform "$platform" \
+              --env "EXPECTED_ARCH=$expected_arch" \
+              "$IMAGE_REFERENCE" \
+              bash -lc '
+              test "$(uname -m)" = "$EXPECTED_ARCH"
+              test "$(node --version)" = "v22.18.0"
+              test "$(npm --version)" = "11.13.0"
+              rustc +1.89.0 --version | grep -E "^rustc 1\\.89\\.0 "
+              gh --version | head -n 1 | grep -F "gh version 2.96.0"
+              rustup target list --installed --toolchain 1.89.0 |
+                grep -Fx wasm32-unknown-unknown
+              test -x /usr/local/bin/mir2-developer-asset-fetch
+              bash -n /usr/local/bin/mir2-developer-asset-fetch
+            '
+          done
+
       - name: Record immutable digest
         run: |
           {
@@ -72,3 +101,42 @@ jobs:
             echo
             echo "Update \`config/developer-release.json\` only after the clean-room workflow passes."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  witness:
+    name: Publish immutable digest witness
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout published revision
+        uses: actions/checkout@v4
+
+      - name: Publish immutable digest witness tag
+        env:
+          IMAGE_DIGEST: ${{ needs.publish.outputs.digest }}
+        run: |
+          set -euo pipefail
+          test "${IMAGE_DIGEST}" != ""
+          witness_tag="developer-image-${GITHUB_SHA}"
+          image_reference="ghcr.io/zombieliu/mir2-developer@${IMAGE_DIGEST}"
+          remote_tag="$(
+            git ls-remote --tags origin "refs/tags/${witness_tag}" |
+              awk 'NR == 1 { print $1 }'
+          )"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -z "$remote_tag" ]]; then
+            git tag --annotate "$witness_tag" \
+              --message "$image_reference" "$GITHUB_SHA"
+            git push origin "refs/tags/${witness_tag}"
+          else
+            temp_ref="refs/witness-check/${witness_tag}"
+            trap 'git update-ref -d "$temp_ref" >/dev/null 2>&1 || true' EXIT
+            git fetch --quiet --no-tags origin \
+              "refs/tags/${witness_tag}:${temp_ref}"
+            git rev-parse --verify "${temp_ref}^{tag}" >/dev/null
+            test "$(git rev-parse "${temp_ref}^{}")" = "$GITHUB_SHA"
+            test "$(git for-each-ref --format='%(contents)' "$temp_ref")" = \
+              "$image_reference"
+          fi

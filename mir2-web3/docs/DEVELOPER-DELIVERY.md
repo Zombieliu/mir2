@@ -43,12 +43,14 @@ cd mir2/mir2-web3
 ./scripts/dev.sh up --build --open
 ```
 
-完整素材一条命令启动；首次运行会在容器内要求 GitHub 设备授权，凭据保存在本机 Docker 命名卷：
+完整素材一条命令启动；完整素材模式额外要求宿主机安装官方 GitHub CLI。首次运行会要求 GitHub 设备授权：
 
 ```text
 Windows: .\scripts\dev.cmd up -FullAssets -OpenBrowser
 macOS:   ./scripts/dev.sh up --full-assets --open
 ```
+
+普通 Starter/开发运行优先使用 `config/developer-release.json` 中的不可变发布镜像，拉取不可用时可安全回退到 digest-pinned 基础镜像的本地构建，因为该路径不接触 GitHub token。完整素材下载则绝不回退：宿主机官方 `gh` 登录 GitHub，启动器只接受固定仓库的 `publishedImage@publishedDigest`，并核验远端 `developer-image-<revision>` witness 与 OCI revision。GHCR 登录仅使用临时 `DOCKER_CONFIG`，下载凭据经标准输入交给不可变 `asset-fetch`，不会写入容器配置元数据。宿主机 `gh` 自身仍按官方机制保存用户登录；Workspace、Gateway、Web、本地构建镜像和仓库目录都拿不到 token。
 
 ## 两级验收
 
@@ -77,9 +79,18 @@ Full asset gate：
 
 Starter 通过不代表完整视觉素材通过。Full gate 不应因下载成本在每个普通 PR 上执行，而应在素材版本发布、交接和 Candidate 验收时执行。
 
+CI 证据也分开命名：
+
+- `developer-environment-starter-<commit>`：Windows、Intel Mac、Apple Silicon Mac、Ubuntu 启动器合同和真实 Ubuntu Starter Compose 已通过。
+- `developer-environment-full-<commit>`：专用服务器已从空目录下载、校验、安装完整素材并实际启动 Gateway/Web。
+
 ## 第二台服务器
 
-推荐准备一台 Linux 主机，安装 Git、`jq`、Docker Engine 和 Docker Compose `2.24.4+`，配置 DNS A/AAAA 记录并开放 80/443。先用固定 Caddy 镜像生成 Argon2id 或 bcrypt hash，并把用户名、hash 和只用于部署后探活的明文密码放入服务器秘密环境变量，不要写进仓库或命令行。服务器 clone 到固定目录后：
+第二台服务器不是每台开发机启动 Web 的前置条件；它承担全量素材 clean-room gate、共享 HTTPS/WSS 验收站和集中日志。推荐使用 x64 Linux、至少 40 GiB 临时空闲空间，并安装 Git、官方 GitHub CLI、Docker Engine 和 Docker Compose `2.24.4+`。
+
+在 GitHub 仓库的 **Settings / Actions / Runners** 注册该主机为 self-hosted runner，安装为系统服务，并增加自定义标签 `mir2-full-assets`。`.github/workflows/developer-full-assets.yml` 会在不可变镜像锁更新后，或人工触发时，在这台机器上执行真实 7 分卷空目录验收；普通 PR 不会重复下载 9.08 GiB 素材。工作流使用仓库临时 `GITHUB_TOKEN`，认证 HOME 和 Docker 配置均位于临时目录，结束后清除。
+
+如还要把它作为长期共享验收站，配置 DNS A/AAAA 记录并开放 80/443。先用固定 Caddy 镜像生成 Argon2id 或 bcrypt hash，并把用户名、hash 和只用于部署后探活的明文密码放入服务器秘密环境变量，不要写进仓库或命令行。服务器 clone 到固定目录后：
 
 ```bash
 export MIR2_ACCEPTANCE_BASIC_AUTH_USER='mir2-qa'
@@ -114,4 +125,4 @@ git submodule update --init --recursive
 - Crystal 原生客户端只能在 Windows 上运行。
 - 当前完整素材不包含尚未授权/发布的完整声音库。
 - `config/developer-release.json` 的 `assets.remoteBaseUrl` 仍为空，表示正式 R2 URL 尚未落地。
-- 发布 GHCR 镜像后，应把 `container.publishedImage` 固定到镜像 digest；在此之前脚本会从 digest-pinned 基础镜像本地构建。
+- 完整素材模式要求 `container.publishedDigest` 与 `container.publishedRevision` 已锁定；普通 Starter 在 digest 尚未发布或拉取不可用时仍可从 digest-pinned 基础镜像本地构建。

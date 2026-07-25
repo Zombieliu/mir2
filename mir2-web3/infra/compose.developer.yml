@@ -8,6 +8,7 @@ x-developer-image: &developer-image
     args:
       RUST_VERSION: "1.89.0"
       NPM_VERSION: "11.13.0"
+      MIR2_DEVELOPER_IMAGE_REVISION: ${MIR2_DEVELOPER_IMAGE_REVISION:-unknown}
   init: true
   working_dir: /workspace/mir2-web3
 
@@ -36,14 +37,6 @@ services:
       - admin-web-node-modules:/workspace/mir2-web3/apps/admin-web/node_modules
       - admin-web-next:/workspace/mir2-web3/apps/admin-web/.next
 
-  asset-auth:
-    <<: *developer-image
-    profiles: ["assets"]
-    command: ["gh", "auth", "status"]
-    working_dir: /home/node
-    volumes:
-      - developer-gh-config:/home/node/.config/gh
-
   asset-fetch:
     <<: *developer-image
     profiles: ["assets"]
@@ -55,7 +48,6 @@ services:
     volumes:
       - ../config/developer-assets.json:/asset-manifest/developer-assets.json:ro
       - developer-asset-cache:/asset-cache
-      - developer-gh-config:/home/node/.config/gh
 
   gateway:
     <<: *developer-image
@@ -119,9 +111,6 @@ services:
 volumes:
   developer-cargo-registry:
   developer-cargo-git:
-  developer-gh-config:
-    external: true
-    name: mir2-developer-gh-config
   developer-asset-cache:
   developer-npm-cache:
   developer-target:

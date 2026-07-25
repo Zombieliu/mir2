@@ -19,6 +19,15 @@ open_browser=0
 build=0
 full_assets=0
 remove_volumes=0
+runtime_image_prepared=0
+asset_image_prepared=0
+developer_revision=""
+local_developer_image=""
+published_image=""
+published_digest=""
+published_revision=""
+published_reference=""
+requested_developer_image="${MIR2_DEV_IMAGE:-}"
 
 usage() {
   cat <<'EOF'
@@ -26,7 +35,7 @@ Usage: ./scripts/dev.sh [command] [options]
 
 Commands:
   doctor  Validate Docker, version locks, submodule, and Compose
-  auth    Authorize the private GitHub Release in a persistent Docker volume
+  auth    Authorize GitHub and pull the immutable private developer image
   build   Build the pinned developer image
   up      Start Gateway and Player Web in the background (default)
   down    Stop the developer services
@@ -148,6 +157,159 @@ wait_for_http() {
   return 1
 }
 
+select_local_developer_image() {
+  export MIR2_DEV_IMAGE="${local_developer_image}"
+}
+
+prepare_runtime_image() {
+  if [[ "${runtime_image_prepared}" -eq 1 ]]; then
+    return
+  fi
+
+  if [[ -n "${published_reference}" && "${MIR2_DEV_IMAGE}" == "${published_reference}" ]]; then
+    if docker image inspect "${MIR2_DEV_IMAGE}" >/dev/null 2>&1 ||
+       docker pull "${MIR2_DEV_IMAGE}" >/dev/null 2>&1; then
+      runtime_image_prepared=1
+      return
+    fi
+    echo "[dev] Published image is unavailable; falling back to the locked local build."
+    select_local_developer_image
+  fi
+
+  if [[ "${MIR2_DEV_IMAGE}" == "${local_developer_image}" ]]; then
+    local actual_revision=""
+    if [[ "${build}" -eq 0 ]]; then
+      actual_revision="$(
+        docker image inspect \
+          --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+          "${MIR2_DEV_IMAGE}" 2>/dev/null || true
+      )"
+    fi
+    if [[ "${actual_revision}" != "${developer_revision}" ]]; then
+      echo "[dev] Build the locked local developer image for ${developer_revision}."
+      compose build workspace
+    fi
+  elif ! docker image inspect "${MIR2_DEV_IMAGE}" >/dev/null 2>&1 &&
+       ! docker pull "${MIR2_DEV_IMAGE}" >/dev/null 2>&1; then
+    if [[ "${MIR2_DEV_IMAGE}" == *@sha256:* ]]; then
+      echo "Unable to pull the explicitly selected developer image: ${MIR2_DEV_IMAGE}" >&2
+      exit 1
+    fi
+    compose build workspace
+  fi
+
+  runtime_image_prepared=1
+}
+
+verify_published_image_witness() {
+  local witness_tag
+  local reference_parts
+  local tag_type
+  local tag_object
+  local witness_parts
+  local witness_target
+  local witness_message
+
+  witness_tag="developer-image-${published_revision}"
+  mapfile -t reference_parts < <(
+    gh api \
+      "repos/Zombieliu/mir2/git/ref/tags/${witness_tag}" \
+      --jq '.object.type, .object.sha'
+  )
+  tag_type="${reference_parts[0]:-}"
+  tag_object="${reference_parts[1]:-}"
+  if [[ "${tag_type}" != "tag" || ! "${tag_object}" =~ ^[a-f0-9]{40}$ ]]; then
+    echo "Published developer image witness is missing or is not annotated: ${witness_tag}" >&2
+    exit 1
+  fi
+
+  mapfile -t witness_parts < <(
+    gh api \
+      "repos/Zombieliu/mir2/git/tags/${tag_object}" \
+      --jq '.object.sha, .message'
+  )
+  witness_target="${witness_parts[0]:-}"
+  witness_message="${witness_parts[1]:-}"
+  if [[ "${witness_target}" != "${published_revision}" ||
+        "${witness_message}" != "${published_reference}" ]]; then
+    echo "Published developer image witness does not match the release lock." >&2
+    exit 1
+  fi
+}
+
+prepare_asset_image() {
+  if [[ "${asset_image_prepared}" -eq 1 ]]; then
+    return
+  fi
+
+  if [[ -z "${published_reference}" || -z "${published_revision}" ]]; then
+    echo "Full assets require a published image digest and revision in config/developer-release.json." >&2
+    exit 1
+  fi
+  if [[ "${published_image}" != "ghcr.io/zombieliu/mir2-developer" ||
+        ! "${published_digest}" =~ ^sha256:[a-f0-9]{64}$ ||
+        ! "${published_revision}" =~ ^[a-f0-9]{40}$ ]]; then
+    echo "Full assets require the trusted published image, digest, and revision lock." >&2
+    exit 1
+  fi
+
+  if [[ -n "${requested_developer_image}" &&
+        "${requested_developer_image}" != "${published_reference}" ]]; then
+    echo "Full asset authorization refuses a custom developer image." >&2
+    echo "Expected exactly: ${published_reference}" >&2
+    exit 1
+  fi
+
+  require_command gh "Install GitHub CLI, then run 'gh auth login'."
+  if ! gh auth status --hostname github.com >/dev/null 2>&1; then
+    echo "[assets] Authorize the private repository and package."
+    gh auth login \
+      --hostname github.com \
+      --web \
+      --git-protocol https \
+      --scopes "repo,read:packages"
+  fi
+  verify_published_image_witness
+
+  local github_login
+  local docker_config
+  github_login="${MIR2_GITHUB_LOGIN:-}"
+  if [[ -z "${github_login}" ]]; then
+    github_login="$(gh api user --jq .login)"
+  fi
+  if [[ -z "${github_login}" ]]; then
+    echo "GitHub CLI did not return the authenticated login." >&2
+    exit 1
+  fi
+
+  docker_config="$(mktemp -d "${TMPDIR:-/tmp}/mir2-docker-auth.XXXXXXXX")"
+  if ! (
+    export DOCKER_CONFIG="${docker_config}"
+    gh auth token --hostname github.com |
+      docker login ghcr.io --username "${github_login}" --password-stdin >/dev/null
+    docker pull "${published_reference}" >/dev/null
+  ); then
+    rm -rf -- "${docker_config}"
+    echo "Unable to authenticate and pull the immutable developer image." >&2
+    exit 1
+  fi
+  rm -rf -- "${docker_config}"
+
+  export MIR2_DEV_IMAGE="${published_reference}"
+  local actual_revision
+  actual_revision="$(
+    docker image inspect \
+      --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+      "${MIR2_DEV_IMAGE}"
+  )"
+  if [[ "${actual_revision}" != "${published_revision}" ]]; then
+    echo "Published developer image revision mismatch: expected ${published_revision}, got ${actual_revision:-<empty>}." >&2
+    exit 1
+  fi
+
+  asset_image_prepared=1
+}
+
 release_lock_check() {
   require_command git "Install Git, then clone with --recurse-submodules."
 
@@ -205,23 +367,13 @@ open_url() {
 
 install_full_assets() {
   local release_tag
-  local run_args=(run --rm --no-deps)
-  if [[ -z "${MIR2_DEV_IMAGE:-}" || "${MIR2_DEV_IMAGE}" != *@sha256:* ]]; then
-    echo "Full assets require the published digest-pinned developer image." >&2
-    echo "Wait for the Developer Image workflow and update config/developer-release.json." >&2
-    exit 1
-  fi
+  local gh_token
+  prepare_asset_image
 
-  docker volume create mir2-developer-gh-config >/dev/null
-  if [[ -n "${GH_TOKEN:-}" ]]; then
-    run_args+=(-e GH_TOKEN)
-  fi
-
-  if ! compose "${run_args[@]}" asset-auth gh auth status >/dev/null 2>&1; then
-    echo "[assets] Authorize access to the pinned private release."
-    compose run --rm --no-deps asset-auth gh auth login --web --git-protocol https
-  fi
-  compose "${run_args[@]}" asset-fetch
+  gh_token="$(gh auth token --hostname github.com)"
+  printf '%s\n' "${gh_token}" |
+    compose run --rm --no-deps -T asset-fetch
+  unset gh_token
 
   release_tag="$(
     sed -n 's/^[[:space:]]*"releaseTag":[[:space:]]*"\([^"]*\)".*/\1/p' \
@@ -238,6 +390,7 @@ install_full_assets() {
 }
 
 require_command docker "Install Docker Desktop (macOS/Windows) or Docker Engine with Compose."
+require_command git "Install Git, then clone with --recurse-submodules."
 if ! docker_server_version="$(docker info --format '{{.ServerVersion}}' 2>&1)"; then
   echo "Docker engine is not ready. Start Docker Desktop and wait for the Linux engine." >&2
   printf '%s\n' "${docker_server_version}" >&2
@@ -249,7 +402,6 @@ if [[ -z "${docker_server_version}" ]]; then
 fi
 echo "[ok] Docker engine ${docker_server_version}"
 docker compose version >/dev/null
-docker volume create mir2-developer-gh-config >/dev/null
 
 export MIR2_WEB_PORT="${web_port}"
 export MIR2_GATEWAY_WEB_PORT="${gateway_web_port}"
@@ -257,12 +409,28 @@ export MIR2_GATEWAY_TCP_PORT="${gateway_tcp_port}"
 export MIR2_BIND_ADDRESS="${bind_address}"
 export MIR2_GATEWAY_WS_URL="${gateway_ws_url:-ws://127.0.0.1:${gateway_web_port}/ws}"
 export MIR2_ASSET_BASE_URL="${asset_base_url}"
+developer_revision="$(git -C "${repository_root}" rev-parse HEAD)"
+if [[ ! "${developer_revision}" =~ ^[a-f0-9]{40}$ ]]; then
+  echo "Unable to resolve a full Git revision for the developer image." >&2
+  exit 1
+fi
+export MIR2_DEVELOPER_IMAGE_REVISION="${developer_revision}"
+local_developer_image="mir2-web3-developer:local-${developer_revision:0:12}"
+published_image="$(sed -n 's/^[[:space:]]*"publishedImage":[[:space:]]*"\([^"]*\)".*/\1/p' "${project_root}/config/developer-release.json" | head -n 1)"
+published_digest="$(sed -n 's/^[[:space:]]*"publishedDigest":[[:space:]]*"\([^"]*\)".*/\1/p' "${project_root}/config/developer-release.json" | head -n 1)"
+published_revision="$(sed -n 's/^[[:space:]]*"publishedRevision":[[:space:]]*"\([^"]*\)".*/\1/p' "${project_root}/config/developer-release.json" | head -n 1)"
+if [[ -n "${published_digest}" ]]; then
+  published_reference="${published_image}@${published_digest}"
+fi
 if [[ -z "${MIR2_DEV_IMAGE:-}" ]]; then
-  published_image="$(sed -n 's/^[[:space:]]*"publishedImage":[[:space:]]*"\([^"]*\)".*/\1/p' "${project_root}/config/developer-release.json" | head -n 1)"
-  published_digest="$(sed -n 's/^[[:space:]]*"publishedDigest":[[:space:]]*"\([^"]*\)".*/\1/p' "${project_root}/config/developer-release.json" | head -n 1)"
-  if [[ -n "${published_digest}" ]]; then
-    export MIR2_DEV_IMAGE="${published_image}@${published_digest}"
+  if [[ -n "${published_reference}" ]]; then
+    export MIR2_DEV_IMAGE="${published_reference}"
+  else
+    select_local_developer_image
   fi
+fi
+if [[ "${build}" -eq 1 ]]; then
+  select_local_developer_image
 fi
 
 web_url="http://127.0.0.1:${web_port}/"
@@ -276,16 +444,11 @@ case "${command}" in
     ;;
   auth)
     release_lock_check
-    if [[ -z "${MIR2_DEV_IMAGE:-}" || "${MIR2_DEV_IMAGE}" != *@sha256:* ]]; then
-      echo "Asset authorization requires the published digest-pinned developer image." >&2
-      exit 1
-    fi
-    docker volume create mir2-developer-gh-config >/dev/null
-    compose run --rm --no-deps asset-auth \
-      gh auth login --web --git-protocol https
+    prepare_asset_image
+    echo "[ok] GitHub and GHCR authorization are ready for ${published_reference}."
     ;;
   build)
-    export MIR2_DEV_IMAGE="mir2-web3-developer:local"
+    select_local_developer_image
     release_lock_check
     compose build workspace
     ;;
@@ -293,14 +456,13 @@ case "${command}" in
     release_lock_check
     if [[ "${full_assets}" -eq 1 ]]; then
       install_full_assets
+      if [[ "${build}" -eq 1 ]]; then
+        select_local_developer_image
+        runtime_image_prepared=0
+      fi
     fi
-    if [[ "${build}" -eq 1 ]]; then
-      export MIR2_DEV_IMAGE="mir2-web3-developer:local"
-    fi
+    prepare_runtime_image
     up_args=(up -d)
-    if [[ "${build}" -eq 1 ]]; then
-      up_args+=(--build)
-    fi
     up_args+=(gateway web)
     compose "${up_args[@]}"
     wait_for_http "Gateway" "${gateway_health_url}"
@@ -322,10 +484,12 @@ case "${command}" in
     compose logs -f --tail 200 gateway web
     ;;
   shell)
+    prepare_runtime_image
     compose run --rm --no-deps workspace bash
     ;;
   verify)
     release_lock_check
+    prepare_runtime_image
     compose run --rm --no-deps workspace bash -lc \
       'npm ci --prefix apps/web && npm --prefix apps/web run typecheck && cargo +1.89.0 check --locked -p mir2-gateway'
     ;;

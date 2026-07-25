@@ -6,6 +6,7 @@ FROM ${NODE_IMAGE}
 ARG RUST_VERSION=1.89.0
 ARG NPM_VERSION=11.13.0
 ARG GH_VERSION=2.96.0
+ARG MIR2_DEVELOPER_IMAGE_REVISION=unknown
 
 ENV DEBIAN_FRONTEND=noninteractive \
     RUSTUP_HOME=/usr/local/rustup \
@@ -64,6 +65,7 @@ RUN chmod 0755 \
 WORKDIR /workspace/mir2-web3
 
 LABEL org.opencontainers.image.source="https://github.com/Zombieliu/mir2" \
+      org.opencontainers.image.revision="${MIR2_DEVELOPER_IMAGE_REVISION}" \
       org.opencontainers.image.description="Pinned Mir2 Web developer toolchain"
 
 ENTRYPOINT ["/usr/local/bin/mir2-developer-entrypoint"]

@@ -1,6 +1,6 @@
 # macOS 本地开发
 
-macOS 开发者只需要 Git、Docker Desktop 和至少 50 GiB 可用磁盘。Node、npm、Rust、C/C++ 构建工具与 WASM target 都由锁定的 Linux 开发镜像提供，不需要在每台 Mac 上分别安装。
+macOS 开发者运行 Starter 只需要 Git、Docker Desktop 和至少 50 GiB 可用磁盘；完整私有素材模式还需要宿主机 GitHub CLI。Node、npm、Rust、C/C++ 构建工具与 WASM target 都由锁定的 Linux 开发镜像提供，不需要在每台 Mac 上分别安装。
 
 支持：
 
@@ -39,13 +39,13 @@ Player Web 为 `http://127.0.0.1:3002/`，Gateway 健康检查为 `http://127.0.
 
 ## 安装完整素材
 
-完整素材不是 Git 仓库的一部分。第一次使用时，下面这一条命令会在开发容器中完成 GitHub 设备授权、下载校验、安装和启动；凭据保存在本机 Docker 命名卷，不会写入仓库：
+完整素材不是 Git 仓库的一部分。第一次使用时，下面这一条命令会通过宿主机官方 `gh` 完成 GitHub 设备授权，再下载、校验、安装和启动；token 不会写入仓库：
 
 ```bash
 ./scripts/dev.sh up --full-assets --open
 ```
 
-下载凭据只挂载给 digest-pinned 镜像中的隔离 fetcher；默认 Dev Container、Gateway、Web 和项目脚本都无法读取。安装器读取 `config/developer-assets.json`，逐卷校验大小与 SHA-256，并以 staging + 原子替换方式安装。完整视觉包约 9.08 GiB，安装过程建议预留至少 40 GiB，完整开发环境建议预留 50 GiB。
+启动器先核验远端 witness、release lock 中的精确 digest 和镜像 revision，使用临时 Docker 配置拉取，再经标准输入把下载凭据交给隔离 fetcher；凭据不进入容器配置，本地构建镜像、默认 Dev Container、Gateway 与 Web 都无法读取。安装器读取 `config/developer-assets.json`，逐卷校验大小与 SHA-256，并以 staging + 原子替换方式安装。完整视觉包约 9.08 GiB，安装过程建议预留至少 40 GiB，完整开发环境建议预留 50 GiB。
 
 ## VS Code Dev Container
 

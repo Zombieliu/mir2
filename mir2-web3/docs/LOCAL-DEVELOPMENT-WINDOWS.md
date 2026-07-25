@@ -2,7 +2,7 @@
 
 本文是 Windows 上运行 Player Web + Rust Gateway 的可复制步骤。默认使用仓库预编译的 Bevy WebGPU/WebGL2 Runtime，普通接手者不需要先安装 `wasm-bindgen-cli`。
 
-推荐路径只需要 Git 与 Docker Desktop：
+Starter 推荐路径只需要 Git 与 Docker Desktop；完整私有素材模式另需 GitHub CLI：
 
 ```powershell
 git clone --filter=blob:none --recurse-submodules https://github.com/Zombieliu/mir2.git
@@ -23,7 +23,7 @@ cd mir2\mir2-web3
 | Rust | Rustup，脚本安装/使用 `1.89.0` |
 | MSVC | Visual Studio C++ Build Tools + Windows SDK |
 | 浏览器 | Chrome 或 Edge，启用硬件加速；WebGPU 不可用时可回退 WebGL2 |
-| GitHub CLI | 私有仓库和完整素材安装需要；必须具有仓库及 Release 读取权限 |
+| GitHub CLI | 完整素材模式必须在宿主机安装；账号必须具有仓库、Release 与 package 读取权限 |
 
 检查：
 
@@ -150,11 +150,13 @@ Starter 模式：
 
 开始安装前，同一磁盘至少保留 40 GiB 空闲，完整开发环境建议 50 GiB 以上。默认缓存分片约 9.08 GiB，安装后的图集约 9.08 GiB，重组 tar 和 staging 还会带来临时峰值。
 
-Docker 推荐路径用一条命令完成首次设备授权、分卷下载、完整校验、安装与启动；GitHub 凭据只保存在本机 Docker 命名卷：
+Docker 推荐路径用一条命令完成首次设备授权、分卷下载、完整校验、安装与启动；设备授权由宿主机官方 `gh` 完成：
 
 ```powershell
 .\scripts\dev.cmd up -FullAssets -OpenBrowser
 ```
+
+完整素材启动器只接受固定仓库、远端 witness 和 release lock 中精确匹配的不可变镜像 digest/revision。GHCR 登录使用临时 Docker 配置，下载凭据经标准输入交给隔离 fetcher，不进入容器配置；Gateway、Web、Workspace、本地构建镜像和仓库目录都不会收到该 token。宿主机 `gh` 登录仍由 GitHub CLI 自身管理。
 
 下面的原生安装器只用于不走 Docker 的 Windows 工具链：
 
