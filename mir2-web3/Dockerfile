@@ -82,6 +82,7 @@ COPY apps/simulation ./apps/simulation
 COPY packages/game-data ./packages/game-data
 COPY packages/protocol ./packages/protocol
 COPY infra/postgres/migrations ./infra/postgres/migrations
+COPY infra/regional ./infra/regional
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
@@ -212,3 +213,39 @@ FROM runtime AS gate18-migration-acceptance
 COPY --from=gate18-migration-acceptance-builder /out/gate18-migration-acceptance /usr/local/bin/gate18-migration-acceptance
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/gate18-migration-acceptance"]
+
+FROM builder AS gate19-zone-failover-controller-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate19_zone_failover_controller \
+    && install -Dm755 target/release/gate19_zone_failover_controller /out/gate19-zone-failover-controller
+
+FROM runtime AS gate19-zone-failover-controller
+COPY --from=gate19-zone-failover-controller-builder /out/gate19-zone-failover-controller /usr/local/bin/gate19-zone-failover-controller
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate19-zone-failover-controller"]
+
+FROM builder AS gate19-infra-probe-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate19_infra_probe \
+    && install -Dm755 target/release/gate19_infra_probe /out/gate19-infra-probe
+
+FROM runtime AS gate19-infra-probe
+COPY --from=gate19-infra-probe-builder /out/gate19-infra-probe /usr/local/bin/gate19-infra-probe
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate19-infra-probe"]
+
+FROM builder AS gate19-zone-seed-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate19_zone_seed \
+    && install -Dm755 target/release/gate19_zone_seed /out/gate19-zone-seed
+
+FROM runtime AS gate19-zone-seed
+COPY --from=gate19-zone-seed-builder /out/gate19-zone-seed /usr/local/bin/gate19-zone-seed
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate19-zone-seed"]

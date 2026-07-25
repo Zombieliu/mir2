@@ -1,0 +1,495 @@
+name: mir2-gate19
+
+x-postgres-url: &postgres-url "postgresql://mir2:mir2-gate19-local@postgres-primary:5432,postgres-standby:5432/mir2?target_session_attrs=read-write&connect_timeout=1"
+
+x-zone-common: &zone-common
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+    target: zone-host
+  image: mir2-gate19-zone-host:local
+  environment:
+    MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+    MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+    MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+    MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+    MIR2_ECONOMY_DATABASE_URL: *postgres-url
+    MIR2_ACCOUNT_STORE_PATH: "/tmp/gate19-accounts.json"
+    MIR2_ZONE_ROUTING_MODE: "per_map"
+    MIR2_ZONE_HOST_MAX_CONNECTIONS: "1024"
+    MIR2_ZONE_HOST_MAX_SESSIONS: "768"
+    MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "768"
+    MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+    MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+  depends_on:
+    postgres-primary:
+      condition: service_healthy
+    postgres-standby:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+    interval: 1s
+    timeout: 2s
+    retries: 90
+
+x-gateway-common: &gateway-common
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+    target: gateway
+  image: mir2-gate19-gateway:local
+  environment:
+    MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+    MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+    MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+    MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+    MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+    MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+    MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+    MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+    MIR2_ECONOMY_DATABASE_URL: *postgres-url
+    MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+    MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+    MIR2_GATEWAY_REQUIRE_REDIS_CACHE: "true"
+    MIR2_GATEWAY_REDIS_SENTINEL_ADDRS: "redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379"
+    MIR2_GATEWAY_REDIS_SENTINEL_MASTER: "mir2-primary"
+    MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS: "30"
+    MIR2_ZONE_ROUTING_MODE: "per_map"
+  depends_on:
+    postgres-primary:
+      condition: service_healthy
+    postgres-standby:
+      condition: service_healthy
+    redis-sentinel-1:
+      condition: service_healthy
+    redis-sentinel-2:
+      condition: service_healthy
+    redis-sentinel-3:
+      condition: service_healthy
+    zone-active:
+      condition: service_healthy
+    zone-standby:
+      condition: service_healthy
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "/bin/bash",
+        "-ec",
+        "exec 3<>/dev/tcp/127.0.0.1/7010 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3",
+      ]
+    interval: 1s
+    timeout: 2s
+    retries: 90
+
+services:
+  postgres-primary:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: "mir2"
+      POSTGRES_PASSWORD: "mir2-gate19-local"
+      POSTGRES_DB: "mir2"
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+      - -c
+      - wal_keep_size=256MB
+    volumes:
+      - postgres-primary-data:/var/lib/postgresql/data
+      - ./postgres-primary-init.sh:/docker-entrypoint-initdb.d/10-replication.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 1s
+      timeout: 3s
+      retries: 90
+
+  postgres-standby:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: "mir2"
+      POSTGRES_PASSWORD: "mir2-gate19-local"
+      POSTGRES_DB: "mir2"
+      REPLICATION_PASSWORD: "mir2-gate19-replication"
+    entrypoint: ["/opt/gate19/postgres-standby-entrypoint.sh"]
+    volumes:
+      - postgres-standby-data:/var/lib/postgresql/data
+      - ./postgres-standby-entrypoint.sh:/opt/gate19/postgres-standby-entrypoint.sh:ro
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 1s
+      timeout: 3s
+      retries: 90
+
+  redis-primary:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "no", "--protected-mode", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  redis-replica-1:
+    image: redis:7.4-alpine
+    command:
+      [
+        "redis-server",
+        "--replicaof",
+        "redis-primary",
+        "6379",
+        "--appendonly",
+        "no",
+        "--protected-mode",
+        "no",
+      ]
+    depends_on:
+      redis-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  redis-replica-2:
+    image: redis:7.4-alpine
+    command:
+      [
+        "redis-server",
+        "--replicaof",
+        "redis-primary",
+        "6379",
+        "--appendonly",
+        "no",
+        "--protected-mode",
+        "no",
+      ]
+    depends_on:
+      redis-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  redis-sentinel-1:
+    image: redis:7.4-alpine
+    command:
+      [
+        "sh",
+        "-ec",
+        "cp /config/sentinel.conf /tmp/sentinel.conf && exec redis-server /tmp/sentinel.conf --sentinel",
+      ]
+    volumes:
+      - ./redis-sentinel.conf:/config/sentinel.conf:ro
+    depends_on:
+      redis-primary:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  redis-sentinel-2:
+    image: redis:7.4-alpine
+    command:
+      [
+        "sh",
+        "-ec",
+        "cp /config/sentinel.conf /tmp/sentinel.conf && exec redis-server /tmp/sentinel.conf --sentinel",
+      ]
+    volumes:
+      - ./redis-sentinel.conf:/config/sentinel.conf:ro
+    depends_on:
+      redis-primary:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  redis-sentinel-3:
+    image: redis:7.4-alpine
+    command:
+      [
+        "sh",
+        "-ec",
+        "cp /config/sentinel.conf /tmp/sentinel.conf && exec redis-server /tmp/sentinel.conf --sentinel",
+      ]
+    volumes:
+      - ./redis-sentinel.conf:/config/sentinel.conf:ro
+    depends_on:
+      redis-primary:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  zone-active:
+    <<: *zone-common
+    environment:
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_HOST_ID: "gate19-active"
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-active"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_PATH: "/tmp/gate19-active-accounts.json"
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "1024"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "768"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "768"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+
+  zone-standby:
+    <<: *zone-common
+    environment:
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_HOST_ID: "gate19-standby"
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-standby"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_PATH: "/tmp/gate19-standby-accounts.json"
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "1024"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "768"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "768"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+
+  gateway-1:
+    <<: *gateway-common
+    environment:
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-gateway-1"
+      MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+      MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+      MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+      MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_REQUIRE_REDIS_CACHE: "true"
+      MIR2_GATEWAY_REDIS_SENTINEL_ADDRS: "redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379"
+      MIR2_GATEWAY_REDIS_SENTINEL_MASTER: "mir2-primary"
+      MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS: "30"
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+
+  gateway-2:
+    <<: *gateway-common
+    environment:
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-gateway-2"
+      MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+      MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+      MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+      MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_REQUIRE_REDIS_CACHE: "true"
+      MIR2_GATEWAY_REDIS_SENTINEL_ADDRS: "redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379"
+      MIR2_GATEWAY_REDIS_SENTINEL_MASTER: "mir2-primary"
+      MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS: "30"
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+
+  gateway-3:
+    <<: *gateway-common
+    environment:
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-gateway-3"
+      MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+      MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+      MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+      MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_REQUIRE_REDIS_CACHE: "true"
+      MIR2_GATEWAY_REDIS_SENTINEL_ADDRS: "redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379"
+      MIR2_GATEWAY_REDIS_SENTINEL_MASTER: "mir2-primary"
+      MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS: "30"
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+
+  zone-failover-controller:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate19-zone-failover-controller
+    image: mir2-gate19-zone-failover-controller:local
+    environment:
+      MIR2_ZONE_ACTIVE_ADDR: "zone-active:7020"
+      MIR2_ZONE_STANDBY_ADDR: "zone-standby:7020"
+      MIR2_ZONE_REPLICA_ZONE_ID: "map:0"
+      MIR2_ZONE_ACTIVE_OWNER_ID: "gate19-active"
+      MIR2_ZONE_STANDBY_OWNER_ID: "gate19-standby"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_GATE19_ZONE_FAILOVER_POLL_MS: "20"
+      MIR2_GATE19_ZONE_FAILURE_THRESHOLD: "2"
+      MIR2_GATE19_ZONE_RPC_TIMEOUT_MS: "100"
+      MIR2_GATE19_ZONE_SYNC_RPC_TIMEOUT_MS: "1000"
+      MIR2_GATE19_MAX_ZONE_RTO_MS: "5000"
+      MIR2_ZONE_PROMOTION_MAX_LAG_MS: "250"
+      MIR2_GATE19_ZONE_FAILOVER_OUT: "/evidence/gate19-zone-failover.json"
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      zone-active:
+        condition: service_healthy
+      zone-standby:
+        condition: service_healthy
+
+  zone-seed:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate19-zone-seed
+    image: mir2-gate19-zone-seed:local
+    environment:
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-active"
+      MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "250"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+      MIR2_ZONE_STANDBY_OWNER_ID: "gate19-standby"
+      MIR2_GATE19_ZONE_SESSION_MAX_WAIT_MS: "30000"
+      MIR2_GATE19_ZONE_SESSION_OUT: "/evidence/gate19-zone-session.json"
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      zone-active:
+        condition: service_healthy
+      zone-standby:
+        condition: service_healthy
+
+  gameplay-probe:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-gameplay-acceptance
+    image: mir2-gate19-gameplay-probe:local
+    environment:
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-active"
+      MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+      MIR2_GATE18_GAMEPLAY_OUT: "/evidence/gate19-standby-zone-kill.json"
+    volumes:
+      - ../../docs/generated/regional:/evidence
+
+  regional-load:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-load-acceptance
+    image: mir2-gate19-regional-load:local
+    environment:
+      MIR2_REGIONAL_GATE: "19"
+      MIR2_REGIONAL_LOAD_PLAYERS: "500"
+      MIR2_REGIONAL_LOAD_DURATION_SECONDS: "3600"
+      MIR2_REGIONAL_LOAD_WORKERS: "256"
+      MIR2_REGIONAL_LOAD_OUT: "/evidence/gate19-load.json"
+      MIR2_REGIONAL_ACTIVE_OWNER: "gate19-active"
+      MIR2_REGIONAL_STANDBY_OWNER: "gate19-standby"
+      MIR2_GATEWAY_INSTANCE_ID: "gate19-active"
+      MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_TOKEN: "gate19-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ZONE_ROUTING_MODE: "per_map"
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+      postgres-standby:
+        condition: service_healthy
+      zone-active:
+        condition: service_healthy
+      zone-standby:
+        condition: service_healthy
+
+  infra-probe:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate19-infra-probe
+    image: mir2-gate19-infra-probe:local
+    environment:
+      MIR2_GATE19_GATEWAY_ENDPOINTS: "gateway-1:7010,gateway-2:7010,gateway-3:7010"
+      MIR2_GATE19_REQUIRED_HEALTHY_GATEWAYS: "3"
+      MIR2_GATEWAY_REDIS_SENTINEL_ADDRS: "redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379"
+      MIR2_GATEWAY_REDIS_SENTINEL_MASTER: "mir2-primary"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATE19_INFRA_PROBE_OUT: "/evidence/gate19-infra-probe.json"
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      gateway-1:
+        condition: service_healthy
+      gateway-2:
+        condition: service_healthy
+      gateway-3:
+        condition: service_healthy
+
+volumes:
+  postgres-primary-data:
+  postgres-standby-data:
