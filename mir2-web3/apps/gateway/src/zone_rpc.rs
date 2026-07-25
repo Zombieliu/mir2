@@ -169,6 +169,36 @@ pub struct ZoneHostHealth {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct ZoneRpcRoutingHint {
+    pub protocol_version: u16,
+    pub session_id: String,
+    pub zone_id: String,
+}
+
+pub fn decode_zone_rpc_routing_hint(bytes: &[u8]) -> Result<ZoneRpcRoutingHint, String> {
+    let hint = serde_json::from_slice::<ZoneRpcRoutingHint>(bytes)
+        .or_else(|_| rmp_serde::from_slice::<ZoneRpcRoutingHint>(bytes))
+        .map_err(|_| "Zone RPC frame is neither valid JSON nor named MessagePack".to_string())?;
+    if hint.protocol_version != ZONE_RPC_PROTOCOL_VERSION {
+        return Err(format!(
+            "Zone RPC routing hint protocol version mismatch: expected {}, got {}",
+            ZONE_RPC_PROTOCOL_VERSION, hint.protocol_version
+        ));
+    }
+    if hint.session_id.trim().is_empty()
+        || hint.zone_id.trim().is_empty()
+        || hint.session_id.len() > 512
+        || hint.zone_id.len() > 512
+        || hint.session_id.chars().any(char::is_control)
+        || hint.zone_id.chars().any(char::is_control)
+    {
+        return Err("Zone RPC routing hint contains an invalid Session or Zone id".to_string());
+    }
+    Ok(hint)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ZoneHostTelemetrySnapshot {
     pub health: ZoneHostHealth,
     pub zones: Vec<ZoneHostZoneTelemetry>,

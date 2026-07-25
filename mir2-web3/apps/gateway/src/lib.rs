@@ -10,6 +10,7 @@ pub mod gate14;
 pub mod gate15;
 pub mod guild_node_foundation;
 pub mod home_tunnel;
+pub mod home_tunnel_transport;
 pub mod hotspot;
 mod inject;
 pub mod mir2_workload;
@@ -69,7 +70,12 @@ pub use guild_node_foundation::{
 };
 pub use home_tunnel::{
     HomeTunnelChallenge, HomeTunnelPlacement, HomeTunnelRegistration, HomeTunnelReplayGuard,
-    HomeTunnelStreamOpen, HOME_TUNNEL_MIN_NONCE_BYTES, HOME_TUNNEL_PROTOCOL_VERSION,
+    HomeTunnelStreamEnvelope, HomeTunnelStreamOpen, HOME_TUNNEL_MIN_NONCE_BYTES,
+    HOME_TUNNEL_PROTOCOL_VERSION,
+};
+pub use home_tunnel_transport::{
+    HomeTunnelAgent, HomeTunnelAgentConfig, HomeTunnelAgentNetworkHandle, HomeTunnelRelay,
+    HomeTunnelRelayConfig, HomeTunnelTlsMaterial,
 };
 pub use hotspot::{
     HotMapLineScheduler, HotMapLineSnapshot, HotMapPlacement, HotMapPlacementRequest, HotMapPolicy,
@@ -119,12 +125,12 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_replication::{ZoneBaseSnapshotStore, ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
-    validate_zone_host_bind, TcpZoneOwnerRpcTransport, ZoneBaseSnapshot,
-    ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth,
+    decode_zone_rpc_routing_hint, validate_zone_host_bind, TcpZoneOwnerRpcTransport,
+    ZoneBaseSnapshot, ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth,
     ZoneHostPromotionTelemetry, ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry,
     ZoneMapScope, ZoneMutationBatch, ZoneMutationEntry, ZonePromotionReadiness,
     ZonePromotionReceipt, ZoneQuiesceReceipt, ZoneReplicationCoverage, ZoneReplicationHead,
-    ZoneRpcLimits, DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES,
+    ZoneRpcLimits, ZoneRpcRoutingHint, DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES,
     DEFAULT_ZONE_PROMOTION_MAX_LAG_MS, DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS,
     DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
     ZONE_HOST_CHECKPOINT_VERSION, ZONE_PROMOTION_READINESS_VERSION, ZONE_REPLICATION_HEAD_VERSION,
