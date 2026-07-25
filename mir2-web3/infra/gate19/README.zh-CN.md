@@ -115,3 +115,24 @@ Zone 使用约 `8–9` 个 CPU 和约 `2 GiB` 内存。这是压力测试结果�
 | `gate19-infra-postgres-failover.json` | PostgreSQL standby 晋升并接收 fenced write |
 | `gate19-commonware-validator.json` | `3/4` 共识活性和落后验证者追赶 |
 | `gate19.json` | 以上来源的严格聚合结果与 SHA-256 |
+
+## 已通过的正式结果
+
+最终 `mir2-regional-v1` 证据已通过独立聚合：
+
+- 500/500 名不同玩家、120 个活跃 Zone，有效负载 `3,600.294s`；
+- 尝试 `2,642,287` 条、完成 `2,642,218` 条真实命令，覆盖率
+  `96.9977%`，错误率 `0.002611%`；
+- p50 / p95 / p99 为 `34.57 / 185.67 / 317.59ms`；
+- active Zone `SIGKILL` 后 generation `1 → 2`，RTO `7.80ms`，真实玩家
+  恢复后的首条命令 `54.15ms`；
+- Gateway 1 `SIGKILL` 后 Gateway 2 在 `2.52s` 内接管同一 route lease；
+- Redis Sentinel 与 PostgreSQL physical standby 均切换到不同可写主节点；
+- Commonware `v2026.2.0` 在 `3/4` validator 下继续 finality，恢复节点追平
+  height `14` 和相同 state root；
+- 经济重复、运行时/账本偏差、负余额、无 Outbox 事务和 dead letter 均为 `0`。
+
+本机长跑还暴露出 checkpoint command journal 会随命令数增长。它没有破坏
+Gate 19 的一小时 SLO，但不能满足 Gate 21 的 72 小时内存增长上限；Gate 21
+必须在保留可验证复制 cursor/digest 的前提下实现 durable base snapshot、
+已确认前缀截断和 WAL 上限。
