@@ -1,0 +1,132 @@
+name: ${MIR2_COMPOSE_PROJECT_NAME:-mir2-web3-developer}
+
+x-developer-image: &developer-image
+  image: ${MIR2_DEV_IMAGE:-mir2-web3-developer:local}
+  build:
+    context: .
+    dockerfile: developer.Dockerfile
+    args:
+      RUST_VERSION: "1.89.0"
+      NPM_VERSION: "11.13.0"
+  init: true
+  working_dir: /workspace/mir2-web3
+
+x-developer-environment: &developer-environment
+  MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
+  MIR2_DEPLOY_REVISION: ${MIR2_DEPLOY_REVISION:-}
+  RUST_BACKTRACE: "1"
+  CARGO_TERM_COLOR: always
+
+services:
+  workspace:
+    <<: *developer-image
+    command: ["sleep", "infinity"]
+    environment:
+      <<: *developer-environment
+    volumes:
+      - ../..:/workspace
+      - developer-cargo-registry:/home/node/.cargo/registry
+      - developer-cargo-git:/home/node/.cargo/git
+      - developer-npm-cache:/home/node/.npm
+      - developer-target:/workspace/mir2-web3/target
+      - developer-state:/workspace/mir2-web3/.mir2-data
+      - developer-asset-cache:/workspace/mir2-web3/.mir2-data/developer-assets
+      - player-web-node-modules:/workspace/mir2-web3/apps/web/node_modules
+      - player-web-next:/workspace/mir2-web3/apps/web/.next
+      - admin-web-node-modules:/workspace/mir2-web3/apps/admin-web/node_modules
+      - admin-web-next:/workspace/mir2-web3/apps/admin-web/.next
+
+  asset-auth:
+    <<: *developer-image
+    profiles: ["assets"]
+    command: ["gh", "auth", "status"]
+    working_dir: /home/node
+    volumes:
+      - developer-gh-config:/home/node/.config/gh
+
+  asset-fetch:
+    <<: *developer-image
+    profiles: ["assets"]
+    command: ["/usr/local/bin/mir2-developer-asset-fetch"]
+    working_dir: /home/node
+    environment:
+      MIR2_ASSET_MANIFEST_PATH: /asset-manifest/developer-assets.json
+      MIR2_ASSET_CACHE_ROOT: /asset-cache
+    volumes:
+      - ../config/developer-assets.json:/asset-manifest/developer-assets.json:ro
+      - developer-asset-cache:/asset-cache
+      - developer-gh-config:/home/node/.config/gh
+
+  gateway:
+    <<: *developer-image
+    command:
+      - bash
+      - -lc
+      - cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
+    environment:
+      <<: *developer-environment
+      MIR2_GATEWAY_WEB_ADDR: 0.0.0.0:7110
+      MIR2_GATEWAY_TCP_ADDR: 0.0.0.0:7000
+      MIR2_ACCOUNT_STORE_PATH: /workspace/mir2-web3/.mir2-data/accounts.json
+    ports:
+      - "${MIR2_BIND_ADDRESS:-127.0.0.1}:${MIR2_GATEWAY_WEB_PORT:-7110}:7110"
+      - "${MIR2_BIND_ADDRESS:-127.0.0.1}:${MIR2_GATEWAY_TCP_PORT:-7000}:7000"
+    volumes:
+      - ..:/workspace/mir2-web3
+      - developer-cargo-registry:/home/node/.cargo/registry
+      - developer-cargo-git:/home/node/.cargo/git
+      - developer-target:/workspace/mir2-web3/target
+      - developer-state:/workspace/mir2-web3/.mir2-data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:7110/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 200
+      start_period: 10s
+
+  web:
+    <<: *developer-image
+    command:
+      - bash
+      - -lc
+      - >-
+        lock_hash="$$(sha256sum package-lock.json | cut -d ' ' -f 1)";
+        if [ "$$(cat node_modules/.mir2-package-lock.sha256 2>/dev/null || true)" != "$$lock_hash" ];
+        then npm ci && printf '%s' "$$lock_hash" > node_modules/.mir2-package-lock.sha256; fi;
+        npm run dev -- --hostname 0.0.0.0 --port 3002
+    working_dir: /workspace/mir2-web3/apps/web
+    environment:
+      <<: *developer-environment
+      NEXT_PUBLIC_MIR2_GATEWAY_WS_URL: ${MIR2_GATEWAY_WS_URL:-ws://127.0.0.1:7110/ws}
+      NEXT_PUBLIC_MIR2_ASSET_BASE_URL: ${MIR2_ASSET_BASE_URL:-}
+    ports:
+      - "${MIR2_BIND_ADDRESS:-127.0.0.1}:${MIR2_WEB_PORT:-3002}:3002"
+    volumes:
+      - ..:/workspace/mir2-web3
+      - developer-npm-cache:/home/node/.npm
+      - player-web-node-modules:/workspace/mir2-web3/apps/web/node_modules
+      - player-web-next:/workspace/mir2-web3/apps/web/.next
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3002/"]
+      interval: 3s
+      timeout: 5s
+      retries: 200
+      start_period: 10s
+
+volumes:
+  developer-cargo-registry:
+  developer-cargo-git:
+  developer-gh-config:
+    external: true
+    name: mir2-developer-gh-config
+  developer-asset-cache:
+  developer-npm-cache:
+  developer-target:
+  developer-state:
+  player-web-node-modules:
+  player-web-next:
+  admin-web-node-modules:
+  admin-web-next:

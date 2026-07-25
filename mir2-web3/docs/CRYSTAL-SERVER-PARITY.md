@@ -1,5 +1,23 @@
 # Crystal Server Parity
 
+> Latest deployment-observability note: 2026-07-25 extends only the
+> non-Crystal HTTP health surface. When `MIR2_DEPLOY_REVISION` is configured,
+> Gateway `/health` reports the running revision so the protected shared
+> acceptance server can prove that its live process matches Git HEAD. The field
+> is omitted in ordinary local/Crystal-compatible operation, and TCP,
+> WebSocket, packet, session, and gameplay behavior are unchanged. Focused
+> configured/unset/blank revision tests pass.
+
+> Latest collision-cache parity note: 2026-07-25 changes ownership, not game
+> rules. Parsed full-map and world-map Crystal collision records are immutable
+> and now shared through `Arc` from their process caches, eliminating repeated
+> deep copies during StartGame respawn projection and map queries. Owned
+> Zone/ECS resources still receive their own value at the existing three
+> installation boundaries. Full-world Bichon bounds, visible-object bootstrap,
+> spread density, and representative Crystal spawn placement remain green in
+> four focused regressions; the live browser entered BichonProvince without a
+> collision correction or console error.
+
 > Latest remote-Zone failover parity note: 2026-07-23 completes Gate 11.1-11.4.
 > Zone RPC v5/checkpoint v4 now restores the private durable session projection
 > and complete shared map image, including player vitals, autonomous monster/AI

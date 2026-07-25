@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{With, Without, World};
@@ -90,6 +90,7 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     // modes keep the prior behaviour where "0" is the starter slice.
     let collision = if crystal_full_world_zone_collision_enabled() {
         runtime_world_map_collision_data(map_file_name)
+            .map(|collision| (*collision).clone())
             .or_else(|| runtime_map_collision_data(map_file_name))?
     } else {
         runtime_map_collision_data(map_file_name)?
@@ -1756,10 +1757,10 @@ pub(super) fn read_i32_le(bytes: &[u8], offset: usize) -> Option<i32> {
 
 pub(super) fn runtime_full_map_collision_data(
     map_file_name: &str,
-) -> Option<RuntimeMapCollisionData> {
+) -> Option<Arc<RuntimeMapCollisionData>> {
     let normalized = normalize_map_file_name(map_file_name);
     static RUNTIME_FULL_MAP_COLLISION_CACHE: OnceLock<
-        Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>>,
+        Mutex<BTreeMap<String, Option<Arc<RuntimeMapCollisionData>>>>,
     > = OnceLock::new();
     let cache = RUNTIME_FULL_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
     if let Some(cached) = cache
@@ -1774,7 +1775,8 @@ pub(super) fn runtime_full_map_collision_data(
     let parsed = crystal_map_path(&normalized)
         .and_then(|map_path| fs::read(map_path).ok())
         .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
-        .map(runtime_map_collision_from_template);
+        .map(runtime_map_collision_from_template)
+        .map(Arc::new);
     cache
         .lock()
         .expect("runtime full map collision cache should not be poisoned")
@@ -1791,10 +1793,10 @@ pub(super) fn runtime_full_map_collision_data(
 /// decompressed at most once per map file).
 pub(super) fn runtime_world_map_collision_data(
     map_file_name: &str,
-) -> Option<RuntimeMapCollisionData> {
+) -> Option<Arc<RuntimeMapCollisionData>> {
     let normalized = normalize_map_file_name(map_file_name);
     static RUNTIME_WORLD_MAP_COLLISION_CACHE: OnceLock<
-        Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>>,
+        Mutex<BTreeMap<String, Option<Arc<RuntimeMapCollisionData>>>>,
     > = OnceLock::new();
     let cache = RUNTIME_WORLD_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
     if let Some(cached) = cache
@@ -1810,6 +1812,7 @@ pub(super) fn runtime_world_map_collision_data(
         read_crystal_map_pack_bytes(&normalized)
             .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
             .map(runtime_map_collision_from_template)
+            .map(Arc::new)
     });
     cache
         .lock()
@@ -1829,6 +1832,7 @@ pub(super) fn refresh_runtime_map_collision(world: &mut World) {
     // every transfer and roam all maps. Other sources keep their prior collision.
     let collision = if spawn_source == MonsterSpawnSource::CrystalWorld {
         runtime_world_map_collision_data(&current_map.file_name)
+            .map(|collision| (*collision).clone())
     } else {
         runtime_active_map_collision_data(&current_map)
     }
@@ -1863,6 +1867,7 @@ pub(super) fn runtime_active_map_collision_data(
         && map.title != "Starter Field"
     {
         return runtime_full_map_collision_data(&map.file_name)
+            .map(|collision| (*collision).clone())
             .or_else(|| runtime_map_collision_data(&map.file_name));
     }
     runtime_map_collision_data(&map.file_name)

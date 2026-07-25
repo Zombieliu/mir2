@@ -2,7 +2,43 @@
 
 这是一个以 Crystal / Legend of Mir 2 为行为和视觉基准的现代化实现：浏览器端由 Next.js 与 Bevy WASM 负责呈现，Rust Gateway 和 Simulation 负责权威游戏状态，`Crystal` 子模块用于源码比对和验收。
 
-> 新开发者请从本页开始。一页式清单见 [`mir2-web3/docs/NEW-DEVELOPER-CHECKLIST.md`](mir2-web3/docs/NEW-DEVELOPER-CHECKLIST.md)，Windows 完整说明见 [`mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md`](mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md)，项目交接说明见 [`mir2-web3/docs/DEVELOPER-HANDOFF.md`](mir2-web3/docs/DEVELOPER-HANDOFF.md)。授权前必须阅读 [`mir2-web3/docs/LEGAL-AND-ASSET-RIGHTS.md`](mir2-web3/docs/LEGAL-AND-ASSET-RIGHTS.md)。
+> 新开发者请从本页开始。跨平台交付架构见 [`mir2-web3/docs/DEVELOPER-DELIVERY.md`](mir2-web3/docs/DEVELOPER-DELIVERY.md)，macOS 说明见 [`mir2-web3/docs/LOCAL-DEVELOPMENT-MACOS.md`](mir2-web3/docs/LOCAL-DEVELOPMENT-MACOS.md)，Windows 说明见 [`mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md`](mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md)。授权前必须阅读 [`mir2-web3/docs/LEGAL-AND-ASSET-RIGHTS.md`](mir2-web3/docs/LEGAL-AND-ASSET-RIGHTS.md)。
+
+## Windows / macOS 一键启动
+
+新开发者默认只需安装 Git 和 Docker Desktop。Node `22.18.0`、npm `11.13.0`、Rust `1.89.0`、WASM target 与 Linux 构建依赖全部由仓库的锁定开发镜像提供。
+
+Windows：
+
+```powershell
+git clone --filter=blob:none --recurse-submodules https://github.com/Zombieliu/mir2.git
+cd mir2\mir2-web3
+.\scripts\dev.cmd up -Build -OpenBrowser
+```
+
+macOS（Intel 与 Apple Silicon）：
+
+```bash
+git clone --filter=blob:none --recurse-submodules https://github.com/Zombieliu/mir2.git
+cd mir2/mir2-web3
+./scripts/dev.sh up --build --open
+```
+
+默认使用仓库自带 Starter 素材，可直接完成注册、登录、创建角色和进入游戏。获授权开发者也可从 clone 后用一条命令安装固定版本完整视觉素材并启动；首次运行会在容器内打开 GitHub 设备授权，凭据只保存在本机 Docker 命名卷：
+
+```text
+Windows: .\scripts\dev.cmd up -FullAssets -OpenBrowser
+macOS:   ./scripts/dev.sh up --full-assets --open
+```
+
+空目录自动验收：
+
+```text
+Windows: .\scripts\accept-clean-room.cmd
+macOS:   ./scripts/accept-clean-room.sh
+```
+
+Crystal 原生 `Client.exe` 只能在 Windows 运行；Mac 开发者使用相同 Web/Gateway 代码与素材，并通过共享 Windows 验收机、截图/录像/trace 做原生对照。
 
 ## 素材模式
 
@@ -16,7 +52,9 @@
 
 全量素材不会提交进 Git。Starter、私有包和 R2 的详细边界见 [`mir2-web3/docs/ASSET-CONSUMER-SETUP.md`](mir2-web3/docs/ASSET-CONSUMER-SETUP.md)。
 
-## Windows 快速开始
+## Windows 原生工具链（备用）
+
+以下路径不依赖 Docker，适合需要直接调试 Rust/Node 进程或运行 Crystal 原生客户端的 Windows 开发者。
 
 ### 1. 安装前置工具
 

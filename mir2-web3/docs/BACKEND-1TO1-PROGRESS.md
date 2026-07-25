@@ -1,5 +1,26 @@
 # Backend 1:1 Progress
 
+> Latest reproducible-deployment health sync: 2026-07-25 adds an optional
+> top-level `revision` to Gateway `/health`, sourced once from
+> `MIR2_DEPLOY_REVISION` at process startup. Local responses omit the field when
+> unset, preserving the prior health contract. The shared acceptance deploy now
+> compares this runtime value and Player Web `/version` against the checked-out
+> Git HEAD after force-recreating production containers. Focused Gateway
+> revision tests pass 2/2, Gateway check/fmt pass, and Player Web revision tests
+> pass 3/3 with typecheck green.
+
+> Latest StartGame collision-cache sync: 2026-07-25 keeps full/world Crystal
+> collision data behind one immutable `Arc` per normalized map instead of
+> deep-cloning the complete walkable/blocked cell sets for every respawn and
+> placement query. Callers that only inspect collision now share the cached
+> object; the three boundaries that install owned Zone/ECS collision state
+> still take an explicit clone, so movement, transfer, occupancy, and save
+> semantics do not change. `cargo +1.89.0 fmt --check` plus the focused
+> full-world Zone collision, StartGame visible-object, spread-density, and
+> representative-spawn regressions pass 4/4. A live isolated Gateway/Web flow
+> also completed New Account, Login, New Character, and Start Game into
+> BichonProvince with the full pack and no browser warnings/errors.
+
 > Latest remote-Zone workload sync: 2026-07-23 completes Gate 11.1-11.4.
 > Checkpoint v4 restores the durable session projection plus complete shared
 > Zone state: player vitals, monsters/AI timers, pending combat/effects, drops
