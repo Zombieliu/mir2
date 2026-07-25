@@ -18,6 +18,8 @@ x-zone-common: &zone-common
     dockerfile: Dockerfile
     target: zone-host
   image: mir2-gate20-zone-host:local
+  cpus: "8.0"
+  mem_limit: "16g"
   environment:
     MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
     MIR2_ZONE_HOST_TOKEN: "gate20-zone-host-token-at-least-32-bytes"
@@ -49,6 +51,8 @@ x-zone-common: &zone-common
 services:
   postgres-primary:
     image: postgres:16-bookworm
+    cpus: "8.0"
+    mem_limit: "32g"
     environment:
       POSTGRES_USER: "mir2"
       POSTGRES_PASSWORD: "mir2-gate20-local"
@@ -74,6 +78,8 @@ services:
 
   postgres-standby:
     image: postgres:16-bookworm
+    cpus: "8.0"
+    mem_limit: "32g"
     environment:
       POSTGRES_USER: "mir2"
       POSTGRES_PASSWORD: "mir2-gate20-local"
@@ -129,6 +135,30 @@ services:
       <<: *active-environment
       MIR2_ZONE_HOST_ID: "gate20-active-4"
 
+  zone-active-5:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-5"
+
+  zone-active-6:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-6"
+
+  zone-active-7:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-7"
+
+  zone-active-8:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-8"
+
   zone-standby:
     <<: *zone-common
     environment:
@@ -154,6 +184,8 @@ services:
       dockerfile: Dockerfile
       target: gate18-load-acceptance
     image: mir2-gate20-regional-load:local
+    cpus: "4.0"
+    mem_limit: "8g"
     environment:
       MIR2_REGIONAL_GATE: "20"
       MIR2_REGIONAL_LOAD_PLAYERS: "1000"
@@ -165,7 +197,7 @@ services:
       MIR2_REGIONAL_STANDBY_OWNER: "gate20-standby"
       MIR2_GATEWAY_INSTANCE_ID: "gate20-active"
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
-      MIR2_ZONE_HOST_ACTIVE_ADDRS: "zone-active:7020,zone-active-2:7020,zone-active-3:7020,zone-active-4:7020"
+      MIR2_ZONE_HOST_ACTIVE_ADDRS: "zone-active:7020,zone-active-2:7020,zone-active-3:7020,zone-active-4:7020,zone-active-5:7020,zone-active-6:7020,zone-active-7:7020,zone-active-8:7020"
       MIR2_ZONE_HOST_STANDBY_ADDRS: "zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate20-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
@@ -192,6 +224,14 @@ services:
       zone-active-3:
         condition: service_healthy
       zone-active-4:
+        condition: service_healthy
+      zone-active-5:
+        condition: service_healthy
+      zone-active-6:
+        condition: service_healthy
+      zone-active-7:
+        condition: service_healthy
+      zone-active-8:
         condition: service_healthy
       zone-standby:
         condition: service_healthy

@@ -31,7 +31,7 @@ flowchart LR
   H --> L5["line 5 / 50"]
   H --> L6["line 6 / 50"]
   C & L1 & L2 & L3 & L4 & L5 & L6 --> Q["有界 RPC 共享池 / 128 lanes"]
-  Q --> ZA["active Zone Host"]
+  Q --> ZA["8 个 active Zone Host / 每个 8 CPU + 16 GiB"]
   ZA --> ZB["standby Zone Host"]
   ZA & ZB --> PG["PostgreSQL primary + physical standby"]
 ```
@@ -43,15 +43,23 @@ flowchart LR
 
 ## 一键运行
 
-需要 Docker Desktop、Rust `1.89.0`、`jq` 和至少与本项目 reference profile
-相当的可用资源。先运行正式一小时负载：
+需要 Docker、Rust `1.89.0`、`jq` 和不低于
+`infra/regional/profile.json.referenceDeployment` 的可用资源。正式入口会先
+执行 `preflight-reference.sh`，读取 Docker Engine 实际可用 CPU/内存；当前
+profile 的最低总量是 `98 CPU / 240 GiB`，不足时会在构建或清理容器之前失败，
+不会产出可被聚合器接受的正式证据。Gate 20 Compose 为负载 Gateway 固定
+`4 CPU / 8 GiB`、为八个 active Zone Host 和一个 promotion standby 各固定
+`8 CPU / 16 GiB`、为两个 PostgreSQL 节点各固定 `8 CPU / 32 GiB`。
+
+先运行正式一小时负载：
 
 ```bash
 ./infra/gate20/run-load-acceptance.sh
 ```
 
 脚本会清理名为 `mir2-gate20` 的一次性 Compose 卷、从当前 commit 构建镜像，
-并把 Git SHA、镜像 digest、cgroup 资源、原始计数和延迟直方图写入：
+并把 Git SHA、镜像 digest、Docker 主机资源证明、负载容器 cgroup 配额、原始
+计数和延迟直方图写入：
 
 ```text
 docs/generated/regional/gate20-load.json
@@ -71,7 +79,9 @@ docs/generated/regional/gate20-load.json
 
 ```bash
 docker compose -f infra/gate20/docker-compose.yml --profile acceptance up -d \
-  postgres-primary postgres-standby zone-active zone-standby
+  postgres-primary postgres-standby \
+  zone-active zone-active-2 zone-active-3 zone-active-4 \
+  zone-active-5 zone-active-6 zone-active-7 zone-active-8 zone-standby
 docker compose -f infra/gate20/docker-compose.yml --profile acceptance run --rm --no-deps \
   -e MIR2_REGIONAL_ALLOW_DEV_PROFILE=true \
   -e MIR2_REGIONAL_LOAD_DURATION_SECONDS=300 \

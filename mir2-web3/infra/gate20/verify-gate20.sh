@@ -48,6 +48,10 @@ jq -e '
   and .resources.zoneRpcCodec == "msgpack"
   and .resources.zoneRpcSharedPoolSize == 128
   and .resources.zoneRpcQueueTimeoutMs == 500
+  and .resources.cgroupCpuMax == "400000 100000"
+  and .resources.cgroupMemoryMax == "8589934592"
+  and .referenceResourceAttestation.success == true
+  and all(.referenceResourceAttestation.assertions[]; . == true)
   and .workloadCommandCoverage >= 0.95
   and .errorRate <= 0.001
   and .promotion.success == true
@@ -91,6 +95,7 @@ jq -n \
       latencyMs: $load[0].latencyMs
     },
     resources: $load[0].resources,
+    referenceResourceAttestation: $load[0].referenceResourceAttestation,
     sourceSha256: {
       load: $loadSha
     },
@@ -103,6 +108,7 @@ jq -n \
       zoneRpcUsedBinaryCodec: true,
       oneThousandSessionsUsedABoundedSharedConnectionPool: true,
       rpcControlTrafficHadReservedCapacity: true,
+      referenceDeploymentResourcesWereAttested: true,
       p95StayedWithinTwoHundredMilliseconds: true,
       safePromotionPreservedAllSessions: true,
       economyHadNoDuplicateOrLedgerMismatch: true
