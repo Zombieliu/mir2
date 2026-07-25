@@ -2,6 +2,16 @@
 
 本文是 Windows 上运行 Player Web + Rust Gateway 的可复制步骤。默认使用仓库预编译的 Bevy WebGPU/WebGL2 Runtime，普通接手者不需要先安装 `wasm-bindgen-cli`。
 
+推荐路径只需要 Git 与 Docker Desktop：
+
+```powershell
+git clone --filter=blob:none --recurse-submodules https://github.com/Zombieliu/mir2.git
+cd mir2\mir2-web3
+.\scripts\dev.cmd up -Build -OpenBrowser
+```
+
+下文的 Node/Rust/Visual Studio 安装方式是需要直接调试本机进程时的备用路径。跨平台交付和空目录验收见 `docs/DEVELOPER-DELIVERY.md`。
+
 ## 前置条件
 
 | 工具 | 要求 |
@@ -139,6 +149,14 @@ Starter 模式：
 ## 完整素材模式
 
 开始安装前，同一磁盘至少保留 40 GiB 空闲，完整开发环境建议 50 GiB 以上。默认缓存分片约 9.08 GiB，安装后的图集约 9.08 GiB，重组 tar 和 staging 还会带来临时峰值。
+
+Docker 推荐路径用一条命令完成首次设备授权、分卷下载、完整校验、安装与启动；GitHub 凭据只保存在本机 Docker 命名卷：
+
+```powershell
+.\scripts\dev.cmd up -FullAssets -OpenBrowser
+```
+
+下面的原生安装器只用于不走 Docker 的 Windows 工具链：
 
 ```powershell
 .\scripts\install-developer-assets.ps1 -Download

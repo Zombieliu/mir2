@@ -105,6 +105,7 @@
     "test:crystal-gdi-text": "node ./scripts/test-crystal-gdi-text-assets.mjs",
     "test:crystal-chat-history": "node ./scripts/test-crystal-chat-history.mjs",
     "test:gateway-protocol-handshake": "node ./scripts/test-gateway-protocol-handshake.mjs",
+    "test:version-route": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test ./scripts/test-version-route.mjs",
     "test:sound-export": "node ./scripts/test-sound-export.mjs",
     "test:magic-effect-export": "node ./scripts/test-magic-effect-export.mjs",
     "test:scene-effect-runtime": "node ./scripts/test-scene-effect-runtime.mjs",

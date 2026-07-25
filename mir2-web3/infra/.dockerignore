@@ -1,0 +1,4 @@
+*
+!developer.Dockerfile
+!developer-entrypoint.sh
+!developer-asset-fetch.sh
