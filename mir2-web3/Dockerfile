@@ -189,6 +189,18 @@ COPY --from=gate18-gameplay-acceptance-builder /out/gate18-gameplay-acceptance /
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/gate18-gameplay-acceptance"]
 
+FROM builder AS gate18-load-acceptance-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate18_load_acceptance \
+    && install -Dm755 target/release/gate18_load_acceptance /out/gate18-load-acceptance
+
+FROM runtime AS gate18-load-acceptance
+COPY --from=gate18-load-acceptance-builder /out/gate18-load-acceptance /usr/local/bin/gate18-load-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate18-load-acceptance"]
+
 FROM builder AS gate18-migration-acceptance-builder
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
