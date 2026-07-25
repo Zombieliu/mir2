@@ -9,6 +9,7 @@ pub mod events;
 pub mod gate14;
 pub mod gate15;
 pub mod guild_node_foundation;
+pub mod home_tunnel;
 pub mod hotspot;
 mod inject;
 pub mod mir2_workload;
@@ -65,6 +66,10 @@ pub use gate15::{Gate15Health, Gate15PlayerLease};
 pub use guild_node_foundation::{
     CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
     GuildNodeStatus, NodeCapacityCertificate, SuiFinalityProof,
+};
+pub use home_tunnel::{
+    HomeTunnelChallenge, HomeTunnelPlacement, HomeTunnelRegistration, HomeTunnelReplayGuard,
+    HomeTunnelStreamOpen, HOME_TUNNEL_MIN_NONCE_BYTES, HOME_TUNNEL_PROTOCOL_VERSION,
 };
 pub use hotspot::{
     HotMapLineScheduler, HotMapLineSnapshot, HotMapPlacement, HotMapPlacementRequest, HotMapPolicy,
