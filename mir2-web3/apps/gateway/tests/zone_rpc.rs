@@ -75,6 +75,22 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
             .expect("second identity should round trip"),
         None
     );
+    let mut checkpoint = first
+        .active_character_checkpoint()
+        .expect("checkpoint request should use RPC")
+        .expect("active session should expose a checkpoint");
+    checkpoint.hp = checkpoint.hp.saturating_sub(3);
+    checkpoint.belt_items_json.clear();
+    first
+        .restore_active_character_checkpoint(&checkpoint)
+        .expect("checkpoint restore should use RPC");
+    let restored = first
+        .active_character_checkpoint()
+        .expect("restored checkpoint request should use RPC")
+        .expect("restored session should expose a checkpoint");
+    assert_eq!(restored.hp, checkpoint.hp);
+    assert_eq!(restored.belt_items_json, checkpoint.belt_items_json);
+    assert_eq!(restored.map_file_name, checkpoint.map_file_name);
     let _ = first
         .world_snapshot()
         .expect("first snapshot should round trip");

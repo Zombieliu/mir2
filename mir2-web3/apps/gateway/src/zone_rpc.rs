@@ -33,7 +33,7 @@ use crate::routing::{
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
-pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 7;
+pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -1742,6 +1742,30 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         }
     }
 
+    fn active_character_checkpoint(&self) -> Result<Option<CharacterSaveRecord>, String> {
+        match self.call(ZoneRpcRequest::ActiveCharacterCheckpoint)? {
+            ZoneRpcPayload::ActiveCharacterCheckpoint { checkpoint } => {
+                Ok(checkpoint.map(|value| *value))
+            }
+            payload => Err(unexpected_payload("active_character_checkpoint", &payload)),
+        }
+    }
+
+    fn restore_active_character_checkpoint(
+        &self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        match self.call(ZoneRpcRequest::RestoreActiveCharacterCheckpoint {
+            checkpoint: Box::new(checkpoint.clone()),
+        })? {
+            ZoneRpcPayload::Unit => Ok(()),
+            payload => Err(unexpected_payload(
+                "restore_active_character_checkpoint",
+                &payload,
+            )),
+        }
+    }
+
     fn save_active_character(&self) -> Result<(), String> {
         match self.call(ZoneRpcRequest::SaveActiveCharacter)? {
             ZoneRpcPayload::Unit => Ok(()),
@@ -3386,6 +3410,22 @@ impl ZoneHostServer {
                     .active_identity()
                     .map_err(classify_runtime_error)?,
             }),
+            ZoneRpcRequest::ActiveCharacterCheckpoint => {
+                Ok(ZoneRpcPayload::ActiveCharacterCheckpoint {
+                    checkpoint: session
+                        .hosted
+                        .active_character_checkpoint()
+                        .map_err(classify_runtime_error)?
+                        .map(Box::new),
+                })
+            }
+            ZoneRpcRequest::RestoreActiveCharacterCheckpoint { checkpoint } => {
+                session
+                    .hosted
+                    .restore_active_character_checkpoint(&checkpoint)
+                    .map_err(classify_runtime_error)?;
+                Ok(ZoneRpcPayload::Unit)
+            }
             ZoneRpcRequest::SaveActiveCharacter => {
                 ZoneOwnerRpcTransport::save_active_character(session.hosted.as_ref())
                     .map_err(classify_runtime_error)?;
@@ -4446,6 +4486,10 @@ enum ZoneRpcRequest {
     },
     WorldSnapshot,
     ActiveIdentity,
+    ActiveCharacterCheckpoint,
+    RestoreActiveCharacterCheckpoint {
+        checkpoint: Box<CharacterSaveRecord>,
+    },
     SaveActiveCharacter,
     RefreshActiveExternalMail,
     CloseSession {
@@ -4478,6 +4522,8 @@ impl ZoneRpcRequest {
             | Self::PollOutbounds { .. }
             | Self::WorldSnapshot
             | Self::ActiveIdentity
+            | Self::ActiveCharacterCheckpoint
+            | Self::RestoreActiveCharacterCheckpoint { .. }
             | Self::SaveActiveCharacter
             | Self::RefreshActiveExternalMail
             | Self::CloseSession { .. } => ZoneRpcPriority::Gameplay,
@@ -4550,6 +4596,9 @@ enum ZoneRpcPayload {
     },
     ActiveIdentity {
         identity: Option<ActiveSessionIdentity>,
+    },
+    ActiveCharacterCheckpoint {
+        checkpoint: Option<Box<CharacterSaveRecord>>,
     },
     Unit,
     Bool {
