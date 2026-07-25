@@ -1462,6 +1462,38 @@ fn tcp_zone_rpc_binary_codec_round_trips_on_the_same_listener_as_json() {
 }
 
 #[test]
+fn tcp_zone_rpc_multiplexes_many_sessions_over_a_bounded_shared_pool() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority);
+    let transports = (0..24)
+        .map(|index| {
+            test_transport(
+                address,
+                ZoneId::new(format!("map:pooled-{}", index % 4)),
+                &format!("pooled-session-{index}"),
+            )
+            .with_binary_codec()
+            .with_shared_connection_pool(4)
+        })
+        .collect::<Vec<_>>();
+
+    for transport in &transports {
+        assert!(!transport.on_connect().unwrap().is_empty());
+    }
+    assert_eq!(server.session_count(), 24);
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.rpc_requests_total, 24);
+    assert!(
+        telemetry.accepted_connections_total <= 3,
+        "one of four lanes is reserved for control traffic"
+    );
+    assert!(telemetry.accepted_connections_total < transports.len() as u64);
+
+    drop(transports);
+    stop_server(address, stop, handle);
+}
+
+#[test]
 fn tcp_zone_rpc_keeps_an_idle_reused_connection_alive_past_the_io_timeout() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let limits = ZoneRpcLimits {
