@@ -325,120 +325,159 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             handles.push(
                 scope.spawn(move || -> Result<Vec<(usize, LoadPlayer)>, String> {
                     let mut chunk_players = Vec::with_capacity(end - start);
-                    for player_index in start..end {
-                        let role = role_for_index(player_index, roles);
-                        let account_id = format!(
-                            "g18l{:09}{:04}",
-                            generated_at_ms % 1_000_000_000,
-                            player_index
-                        );
-                        let character_name =
-                            format!("L{:06}{:03}", generated_at_ms % 1_000_000, player_index);
-                        let (mut session, character_index) =
-                            start_session(&registry, config.clone(), &account_id, &character_name)
-                                .map_err(|error| error.to_string())?;
-                        let is_hot_map_player = regional_gate == "20"
-                            && (role == WorkloadRole::Economy
-                                || (role == WorkloadRole::Movement
-                                    && player_index < gate20_hot_movement_players));
-                        let hot_players_before = player_index.min(gate20_hot_movement_players)
-                            + player_index
-                                .saturating_sub(economy_start)
-                                .min(gate20_economy_players);
-                        let non_hot_player_ordinal = (!is_hot_map_player && regional_gate == "20")
-                            .then_some(player_index.saturating_sub(hot_players_before));
-                        let map = if is_hot_map_player {
-                            hot_map
-                        } else if regional_gate == "20" {
-                            non_hot_maps
-                                [non_hot_player_ordinal.unwrap_or_default() % non_hot_maps.len()]
-                        } else {
-                            active_maps[player_index % active_maps.len()]
-                        };
-                        let (target_map, position) = if role == WorkloadRole::Economy {
-                            let economy_index = player_index.saturating_sub(economy_start);
-                            (
-                                "0",
-                                (
-                                    330 + i32::try_from(economy_index % 5).unwrap_or_default() * 3,
-                                    270 + i32::try_from(economy_index / 5).unwrap_or_default() * 3,
-                                ),
-                            )
-                        } else {
-                            let local_player_index = if is_hot_map_player {
-                                player_index % 50
-                            } else if regional_gate == "20" {
-                                non_hot_player_ordinal.unwrap_or_default() / non_hot_maps.len()
-                            } else {
-                                player_index / active_maps.len()
-                            };
-                            (
-                                map.map_file_name.as_str(),
-                                map_fixture_position(map, local_player_index),
-                            )
-                        };
-                        let expected_zone = format!("map:{target_map}");
-                        let transfer_key =
-                            format!("crystal:{target_map}:{}:{}", position.0, position.1);
-                        let routed_to_expected_zone = (0..3).any(|attempt| {
-                            let result = session.execute_with_outcome(WorldCommand::TransferMap {
-                                key: transfer_key.clone(),
-                            });
-                            let routed = if regional_gate == "20" && is_hot_map_player {
-                                session
-                                    .zone_id()
-                                    .as_str()
-                                    .starts_with(&format!("{expected_zone}:line:"))
-                            } else {
-                                session.zone_id().as_str() == expected_zone
-                            };
-                            if !routed && attempt < 2 {
-                                thread::sleep(Duration::from_millis(10));
+                    // Start ordinary-map players first so their short stay on
+                    // Crystal's map-0 spawn does not become steady-state
+                    // hotspot placement evidence.
+                    let placement_phases: &[bool] = if regional_gate == "20" {
+                        &[false, true]
+                    } else {
+                        &[false]
+                    };
+                    for &hot_phase in placement_phases {
+                        for player_index in start..end {
+                            let role = role_for_index(player_index, roles);
+                            let is_hot_map_player = regional_gate == "20"
+                                && (role == WorkloadRole::Economy
+                                    || (role == WorkloadRole::Movement
+                                        && player_index < gate20_hot_movement_players));
+                            if is_hot_map_player != hot_phase {
+                                continue;
                             }
-                            result.is_ok() && routed
-                        });
-                        if !routed_to_expected_zone {
-                            return Err(format!(
-                                "player {player_index} routed to {}, expected {expected_zone}",
-                                session.zone_id()
+                            let account_id = format!(
+                                "g18l{:09}{:04}",
+                                generated_at_ms % 1_000_000_000,
+                                player_index
+                            );
+                            let character_name =
+                                format!("L{:06}{:03}", generated_at_ms % 1_000_000, player_index);
+                            let (mut session, character_index) = start_session(
+                                &registry,
+                                config.clone(),
+                                &account_id,
+                                &character_name,
+                            )
+                            .map_err(|error| error.to_string())?;
+                            let hot_players_before = player_index.min(gate20_hot_movement_players)
+                                + player_index
+                                    .saturating_sub(economy_start)
+                                    .min(gate20_economy_players);
+                            let non_hot_player_ordinal = (!is_hot_map_player
+                                && regional_gate == "20")
+                                .then_some(player_index.saturating_sub(hot_players_before));
+                            let map = if is_hot_map_player {
+                                hot_map
+                            } else if regional_gate == "20" {
+                                non_hot_maps[non_hot_player_ordinal.unwrap_or_default()
+                                    % non_hot_maps.len()]
+                            } else {
+                                active_maps[player_index % active_maps.len()]
+                            };
+                            let (target_map, position) = if is_hot_map_player {
+                                let (x, y) = if role == WorkloadRole::Economy {
+                                    let economy_index = player_index.saturating_sub(economy_start);
+                                    (
+                                        330 + i32::try_from(economy_index % 5).unwrap_or_default()
+                                            * 3,
+                                        270 + i32::try_from(economy_index / 5).unwrap_or_default()
+                                            * 3,
+                                    )
+                                } else {
+                                    (
+                                        360 + i32::try_from(player_index % 10).unwrap_or_default()
+                                            * 3,
+                                        180 + i32::try_from(player_index / 10).unwrap_or_default()
+                                            * 3,
+                                    )
+                                };
+                                ("0", (x, y))
+                            } else {
+                                let local_player_index = if regional_gate == "20" {
+                                    non_hot_player_ordinal.unwrap_or_default() / non_hot_maps.len()
+                                } else {
+                                    player_index / active_maps.len()
+                                };
+                                (
+                                    map.map_file_name.as_str(),
+                                    map_fixture_position(map, local_player_index),
+                                )
+                            };
+                            let expected_zone = format!("map:{target_map}");
+                            let transfer_key =
+                                format!("crystal:{target_map}:{}:{}", position.0, position.1);
+                            let routed_to_expected_zone = (0..3).any(|attempt| {
+                                let result =
+                                    session.execute_with_outcome(WorldCommand::TransferMap {
+                                        key: transfer_key.clone(),
+                                    });
+                                let routed = if regional_gate == "20" && is_hot_map_player {
+                                    session
+                                        .zone_id()
+                                        .as_str()
+                                        .starts_with(&format!("{expected_zone}:line:"))
+                                } else {
+                                    session.zone_id().as_str() == expected_zone
+                                };
+                                if !routed && attempt < 2 {
+                                    thread::sleep(Duration::from_millis(10));
+                                }
+                                result.is_ok() && routed
+                            });
+                            if !routed_to_expected_zone {
+                                return Err(format!(
+                                    "player {player_index} routed to {}, expected {expected_zone}",
+                                    session.zone_id()
+                                ));
+                            }
+                            if role == WorkloadRole::Economy {
+                                apply_gold_fixture(&mut session, 100)
+                                    .map_err(|error| error.to_string())?;
+                            }
+                            let combat_target = if role == WorkloadRole::Combat {
+                                session
+                                    .world_snapshot()
+                                    .entities
+                                    .into_iter()
+                                    .find(|entity| {
+                                        entity.kind == WorldEntityKind::Monster && !entity.dead
+                                    })
+                                    .map(|entity| entity.object_id)
+                                    .unwrap_or_default()
+                            } else {
+                                0
+                            };
+                            chunk_players.push((
+                                player_index,
+                                LoadPlayer {
+                                    session,
+                                    account_id,
+                                    character_index,
+                                    role,
+                                    is_hot_map_player,
+                                    command_ordinal: 0,
+                                    combat_target,
+                                    economy_drop: None,
+                                    economy_transitions: Vec::new(),
+                                },
                             ));
-                        }
-                        if role == WorkloadRole::Economy {
-                            apply_gold_fixture(&mut session, 100)
-                                .map_err(|error| error.to_string())?;
-                        }
-                        let combat_target = if role == WorkloadRole::Combat {
-                            session
-                                .world_snapshot()
-                                .entities
-                                .into_iter()
-                                .find(|entity| {
-                                    entity.kind == WorldEntityKind::Monster && !entity.dead
-                                })
-                                .map(|entity| entity.object_id)
-                                .unwrap_or_default()
-                        } else {
-                            0
-                        };
-                        chunk_players.push((
-                            player_index,
-                            LoadPlayer {
-                                session,
-                                account_id,
-                                character_index,
-                                role,
-                                is_hot_map_player,
-                                command_ordinal: 0,
-                                combat_target,
-                                economy_drop: None,
-                                economy_transitions: Vec::new(),
-                            },
-                        ));
-                        let connected = connected.fetch_add(1, Ordering::Relaxed) + 1;
-                        if connected % 50 == 0 || connected == requested_players {
-                            eprintln!(
+                            let connected = connected.fetch_add(1, Ordering::Relaxed) + 1;
+                            if connected % 50 == 0 || connected == requested_players {
+                                eprintln!(
                                 "Gate 18 load: connected {connected}/{requested_players} players"
                             );
+                            }
+                        }
+                        if regional_gate == "20" && !hot_phase {
+                            let wait_started = Instant::now();
+                            let expected_non_hot_players =
+                                requested_players.saturating_sub(hot_map_target);
+                            while connected.load(Ordering::Relaxed) < expected_non_hot_players {
+                                if wait_started.elapsed() >= Duration::from_secs(900) {
+                                    return Err(
+                                        "Gate 20 non-hot placement wave timed out".to_string()
+                                    );
+                                }
+                                thread::sleep(Duration::from_millis(10));
+                            }
                         }
                     }
                     Ok(chunk_players)
@@ -653,8 +692,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "hotMapAndLinesMatchStage".to_string(),
             regional_gate != "20"
                 || (observed_hot_map_players == hot_map_target
-                    && hot_map_line_players.len() >= 2
-                    && hot_map_line_players.values().all(|players| *players <= 64)),
+                    && hot_map_line_players.len() == 6
+                    && hot_map_line_players.values().all(|players| *players == 50)),
         ),
         (
             "commandLatencyWithinStageSlo".to_string(),

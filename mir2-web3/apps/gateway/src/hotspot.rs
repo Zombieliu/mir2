@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
 
@@ -287,7 +288,7 @@ fn choose_line(state: &HotMapState, map: &str, policy: &HotMapPolicy) -> u16 {
         lines
             .iter()
             .filter(|(_, sessions)| sessions.len() < policy.target_players_per_line)
-            .min_by_key(|(line, sessions)| (sessions.len(), **line))
+            .min_by_key(|(line, sessions)| (Reverse(sessions.len()), **line))
     }) {
         return *line;
     }
@@ -381,6 +382,35 @@ mod tests {
         assert_eq!(snapshot.total_players, 300);
         assert_eq!(snapshot.line_players.len(), 6);
         assert!(snapshot.line_players.values().all(|players| *players == 50));
+    }
+
+    #[test]
+    fn transient_empty_lines_do_not_fragment_final_hotspot_placement() {
+        let scheduler = scheduler();
+        for index in 0..400 {
+            scheduler.place(request(index)).unwrap();
+        }
+        for index in 0..400 {
+            scheduler
+                .release("0", &format!("player-{index}"), 1_000)
+                .unwrap();
+        }
+        for index in 0..300 {
+            scheduler.place(request(index)).unwrap();
+        }
+
+        let snapshot = scheduler.snapshot("0").unwrap();
+        let active_lines = snapshot
+            .line_players
+            .values()
+            .filter(|players| **players > 0)
+            .copied()
+            .collect::<Vec<_>>();
+        assert_eq!(snapshot.total_players, 300);
+        assert_eq!(active_lines.len(), 6);
+        assert!(active_lines.iter().all(|players| *players == 50));
+        assert_eq!(snapshot.line_players.get(&7), Some(&0));
+        assert_eq!(snapshot.line_players.get(&8), Some(&0));
     }
 
     #[test]
