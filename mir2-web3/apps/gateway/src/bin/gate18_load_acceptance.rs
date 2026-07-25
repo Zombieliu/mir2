@@ -138,7 +138,11 @@ struct Gate18LoadEvidence {
     distinct_characters: usize,
     profile_catalog_maps: usize,
     runtime_manifest_maps: usize,
+    active_map_count: usize,
     active_zone_count: usize,
+    hot_map_file_name: Option<String>,
+    hot_map_players: usize,
+    hot_map_line_players: BTreeMap<String, usize>,
     requested_active_duration_seconds: u64,
     measured_active_duration_ms: u128,
     promotion_pause_excluded_from_active_duration: bool,
@@ -178,6 +182,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             profile.stages.gate19.concurrent_players,
             profile.stages.gate19.duration_seconds,
             profile.stages.gate19.maximum_error_rate,
+        ),
+        "20" => (
+            profile.stages.gate20.concurrent_players,
+            profile.stages.gate20.duration_seconds,
+            profile.stages.gate20.maximum_error_rate,
         ),
         gate => return Err(format!("unsupported mixed-load Regional Gate {gate}").into()),
     };
@@ -249,6 +258,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .into());
     }
+    let hot_map_target = match regional_gate.as_str() {
+        "20" => profile.stages.gate20.hot_map_players.unwrap_or_default(),
+        _ => 0,
+    };
+    let hot_map = active_maps
+        .iter()
+        .find(|map| map.map_file_name == "0")
+        .copied()
+        .ok_or("Regional active map catalog must contain map 0")?;
+    let non_hot_maps = active_maps
+        .iter()
+        .copied()
+        .filter(|map| map.map_file_name != hot_map.map_file_name)
+        .collect::<Vec<_>>();
     let mut players = Vec::with_capacity(requested_players);
     for player_index in 0..requested_players {
         let role = role_for_index(player_index, &roles);
@@ -260,8 +283,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let character_name = format!("L{:06}{:03}", generated_at_ms % 1_000_000, player_index);
         let (mut session, character_index) =
             start_session(&registry, config.clone(), &account_id, &character_name)?;
-        let map = active_maps[player_index % active_maps.len()];
-        let (target_map, position) = if role == WorkloadRole::Economy {
+        let is_hot_map_player = player_index < hot_map_target;
+        let map = if is_hot_map_player {
+            hot_map
+        } else if regional_gate == "20" {
+            non_hot_maps[(player_index - hot_map_target) % non_hot_maps.len()]
+        } else {
+            active_maps[player_index % active_maps.len()]
+        };
+        let (target_map, position) = if role == WorkloadRole::Economy && regional_gate != "20" {
             let economy_index = player_index.saturating_sub(requested_players * 80 / 100);
             (
                 "0",
@@ -271,9 +301,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ),
             )
         } else {
+            let local_player_index = if is_hot_map_player {
+                player_index % 50
+            } else if regional_gate == "20" {
+                (player_index - hot_map_target) / non_hot_maps.len()
+            } else {
+                player_index / active_maps.len()
+            };
             (
                 map.map_file_name.as_str(),
-                map_fixture_position(map, player_index / active_maps.len()),
+                map_fixture_position(map, local_player_index),
             )
         };
         session.transfer_map(&format!(
@@ -281,7 +318,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             position.0, position.1
         ));
         let expected_zone = format!("map:{target_map}");
-        if session.zone_id().as_str() != expected_zone {
+        let routed_to_expected_zone = if regional_gate == "20" && is_hot_map_player {
+            session
+                .zone_id()
+                .as_str()
+                .starts_with(&format!("{expected_zone}:line:"))
+        } else {
+            session.zone_id().as_str() == expected_zone
+        };
+        if !routed_to_expected_zone {
             return Err(format!(
                 "player {player_index} routed to {}, expected {expected_zone}",
                 session.zone_id()
@@ -338,6 +383,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|player| player.session.zone_id().as_str())
         .collect::<std::collections::BTreeSet<_>>()
         .len();
+    let active_map_count = players
+        .iter()
+        .filter_map(|player| player.session.world_snapshot().map_file_name)
+        .collect::<std::collections::BTreeSet<_>>()
+        .len();
+    let hot_map_line_players = players
+        .iter()
+        .filter(|player| {
+            player.session.world_snapshot().map_file_name.as_deref()
+                == Some(hot_map.map_file_name.as_str())
+        })
+        .fold(BTreeMap::<String, usize>::new(), |mut counts, player| {
+            *counts
+                .entry(player.session.zone_id().as_str().to_string())
+                .or_default() += 1;
+            counts
+        });
+    let observed_hot_map_players = hot_map_line_players.values().sum::<usize>();
     let metrics = Arc::new(Mutex::new(SharedMetrics::default()));
     let first_phase_seconds = duration_seconds / 2;
     let second_phase_seconds = duration_seconds.saturating_sub(first_phase_seconds);
@@ -350,12 +413,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Arc::clone(&metrics),
     );
     let first_phase_elapsed = active_started.elapsed();
+    let promotion_zone_id = players
+        .iter()
+        .find(|player| {
+            player.session.world_snapshot().map_file_name.as_deref()
+                == Some(hot_map.map_file_name.as_str())
+        })
+        .map(|player| player.session.zone_id().clone())
+        .ok_or("promotion requires a hot-map player")?;
     let promotion = promote_zone(
         &mut players,
         &database_url,
         &active_owner,
         &standby_owner,
         &regional_gate,
+        promotion_zone_id,
     )?;
     let second_phase_started = Instant::now();
     run_phase(
@@ -423,8 +495,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (
             "profileContractAccepted".to_string(),
             (profile_exact
-                && requested_players == 500
-                && duration_seconds == 1_800
+                && requested_players == stage_players
+                && duration_seconds == stage_duration_seconds
                 && profile.profile_id == "mir2-regional-v1")
                 || allow_dev_profile,
         ),
@@ -442,7 +514,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         (
             "activeZoneCountMatchesProfile".to_string(),
-            active_zone_count == profile.active_maps.min(requested_players),
+            active_map_count == profile.active_maps.min(requested_players)
+                && (regional_gate == "20"
+                    || active_zone_count == profile.active_maps.min(requested_players)),
         ),
         (
             "allWorkloadRolesExecuted".to_string(),
@@ -464,6 +538,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (
             "errorRateWithinStageSlo".to_string(),
             error_rate <= maximum_error_rate,
+        ),
+        (
+            "hotMapAndLinesMatchStage".to_string(),
+            regional_gate != "20"
+                || (observed_hot_map_players == hot_map_target
+                    && hot_map_line_players.len() >= 2
+                    && hot_map_line_players.values().all(|players| *players <= 64)),
+        ),
+        (
+            "commandLatencyWithinStageSlo".to_string(),
+            match regional_gate.as_str() {
+                "20" => latency_ms.p95.is_some_and(|p95| {
+                    p95 <= profile
+                        .stages
+                        .gate20
+                        .maximum_command_p95_ms
+                        .unwrap_or(f64::MAX)
+                }),
+                _ => true,
+            },
         ),
         ("safeZonePromotionCompleted".to_string(), promotion.success),
         (
@@ -495,7 +589,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         distinct_characters,
         profile_catalog_maps: profile.catalog_maps,
         runtime_manifest_maps: manifest.maps.len(),
+        active_map_count,
         active_zone_count,
+        hot_map_file_name: (hot_map_target > 0).then(|| hot_map.map_file_name.clone()),
+        hot_map_players: observed_hot_map_players,
+        hot_map_line_players,
         requested_active_duration_seconds: duration_seconds,
         measured_active_duration_ms,
         promotion_pause_excluded_from_active_duration: true,
@@ -872,9 +970,9 @@ fn promote_zone(
     active_owner: &str,
     standby_owner: &str,
     regional_gate: &str,
+    zone_id: ZoneId,
 ) -> Result<PromotionEvidence, Box<dyn std::error::Error>> {
     let started = Instant::now();
-    let zone_id = ZoneId::new("map:0");
     let addresses = env::var("MIR2_ZONE_HOST_ADDRS")
         .map_err(|_| "MIR2_ZONE_HOST_ADDRS with active and standby is required")?;
     let mut endpoints = addresses.split(',').map(str::trim);
@@ -899,7 +997,8 @@ fn promote_zone(
         limits,
     );
     let active_lease = players
-        .first()
+        .iter()
+        .find(|player| player.session.zone_id() == &zone_id)
         .ok_or("promotion requires at least one player")?
         .session
         .zone_owner_lease()
