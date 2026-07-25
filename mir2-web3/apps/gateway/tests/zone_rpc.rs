@@ -887,8 +887,6 @@ fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts
         ))
         .expect("active player movement should execute");
 
-    let active_identity = active.active_identity().unwrap();
-    let active_snapshot = active.world_snapshot().unwrap();
     let active_head = active.replication_head().unwrap();
     let base = active.export_base_snapshot().unwrap();
     assert!(base.apply_ready);
@@ -898,23 +896,13 @@ fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts
     standby
         .install_base_snapshot(&base)
         .expect("standby should install the complete Session base image");
-    assert_eq!(standby.active_identity().unwrap(), active_identity);
-    let standby_snapshot = standby.world_snapshot().unwrap();
-    assert_eq!(
-        standby_snapshot.map_file_name,
-        active_snapshot.map_file_name
-    );
-    assert_eq!(standby_snapshot.gold, active_snapshot.gold);
-    assert_eq!(
-        standby_snapshot.inventory_items,
-        active_snapshot.inventory_items
-    );
-    assert_eq!(
-        standby_snapshot.equipment_items,
-        active_snapshot.equipment_items
-    );
-    assert_eq!(standby_snapshot.quest_log, active_snapshot.quest_log);
-    assert_eq!(standby_snapshot.known_skills, active_snapshot.known_skills);
+    let standby_base = standby
+        .export_base_snapshot()
+        .expect("standby control plane should export the installed Session image");
+    assert_eq!(standby_base.session_count, base.session_count);
+    assert_eq!(standby_base.base_sequence, base.base_sequence);
+    assert_eq!(standby_base.latest_digest, base.latest_digest);
+    assert_eq!(standby_base.payload, base.payload);
 
     let installed_head = standby.replication_head().unwrap();
     assert_eq!(
@@ -1005,9 +993,97 @@ fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts
         standby_post_base_head.base_snapshot_id,
         Some(base.snapshot_id)
     );
+    let active_post_base = active.export_base_snapshot().unwrap();
+    let standby_post_base = standby.export_base_snapshot().unwrap();
     assert_eq!(
-        standby.world_snapshot().unwrap().entities,
-        active.world_snapshot().unwrap().entities
+        standby_post_base.base_sequence,
+        active_post_base.base_sequence
+    );
+    assert_eq!(
+        standby_post_base.latest_digest,
+        active_post_base.latest_digest
+    );
+    assert_eq!(
+        standby_post_base.session_count,
+        active_post_base.session_count
+    );
+    standby_post_base
+        .verify()
+        .expect("post-base standby image should remain internally complete");
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn installed_replica_rejects_player_mutations_until_promoted() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::new("map:0");
+    let active = test_transport(active_address, zone_id.clone(), "replica-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "replica-session");
+    let lease = authority.owner_lease(&zone_id);
+
+    active
+        .on_connect()
+        .expect("active host should accept the player session");
+    let base = active
+        .export_base_snapshot()
+        .expect("active host should export a replica base");
+    standby
+        .install_base_snapshot(&base)
+        .expect("standby should install the replica base");
+
+    let connect_error = standby
+        .on_connect()
+        .expect_err("installed replica must reject player connects");
+    assert!(
+        connect_error.contains("zone_replica_read_only"),
+        "{connect_error}"
+    );
+    let snapshot_error = standby
+        .world_snapshot()
+        .expect_err("installed replica must reject stale player reads");
+    assert!(
+        snapshot_error.contains("zone_replica_read_only"),
+        "{snapshot_error}"
+    );
+    let execute_error = standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 7 }),
+        ))
+        .expect_err("installed replica must reject player commands");
+    assert!(
+        execute_error.contains("zone_replica_read_only"),
+        "{execute_error}"
+    );
+    let close_error = ZoneOwnerRpcTransport::close_session(&standby, &lease)
+        .expect_err("installed replica must reject player disconnect mutations");
+    assert!(
+        close_error.contains("zone_replica_read_only"),
+        "{close_error}"
+    );
+
+    let rerouted = TcpZoneOwnerRpcTransport::with_endpoints(
+        vec![standby_address.to_string(), active_address.to_string()],
+        zone_id,
+        "rerouted-session",
+        None,
+        test_limits(),
+    )
+    .expect("paired Zone endpoints should configure");
+    rerouted
+        .on_connect()
+        .expect("replica rejection should reroute the player to the active host");
+    assert_eq!(active_server.session_count(), 2);
+    assert_eq!(
+        standby_server.session_count(),
+        1,
+        "read-only retry must not create a Session on the replica"
     );
 
     stop_server(active_address, active_stop, active_handle);
@@ -1094,6 +1170,74 @@ fn autonomous_zone_ticks_are_ordered_and_incrementally_applied_after_the_base() 
 }
 
 #[test]
+fn installing_replica_does_not_disable_persistence_for_other_active_zones() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let replica_zone = ZoneId::new("map:replica-isolation");
+    let active_lease = authority.handoff_zone_owner(&replica_zone, "active-host");
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_named_server(authority.clone(), "active-host", 8);
+
+    let temp_dir = std::env::temp_dir().join(format!(
+        "mir2-zone-rpc-replica-isolation-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time should follow the Unix epoch")
+            .as_nanos()
+    ));
+    fs::create_dir_all(&temp_dir).expect("create replica isolation temp directory");
+    let account_store_path = temp_dir.join("accounts.json");
+    let standby_config =
+        GatewayConfig::default().with_account_store_path(account_store_path.clone());
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_named_server_with_config_and_tick_cadence(
+            authority.clone(),
+            "standby-host",
+            8,
+            Duration::from_secs(60 * 60),
+            standby_config,
+        );
+
+    let active = test_transport(
+        active_address,
+        replica_zone.clone(),
+        "replica-isolation-source",
+    );
+    start_new_character(
+        &active,
+        active_lease,
+        "replica-isolation-source",
+        "ReplicaSource",
+    );
+    let standby_replica = test_transport(standby_address, replica_zone, "replica-isolation-source");
+    standby_replica
+        .install_base_snapshot(&active.export_base_snapshot().expect("export replica base"))
+        .expect("installing one Zone replica should succeed");
+
+    let active_zone = ZoneId::primary();
+    let active_zone_lease = authority.handoff_zone_owner(&active_zone, "standby-host");
+    let unrelated_active = test_transport(standby_address, active_zone, "unrelated-active-session");
+    start_new_character(
+        &unrelated_active,
+        active_zone_lease,
+        "unrelated-active-account",
+        "UnrelatedActivePlayer",
+    );
+    unrelated_active
+        .save_active_character()
+        .expect("unrelated active Zone should retain its configured persistence");
+
+    let persisted =
+        fs::read_to_string(&account_store_path).expect("unrelated active Zone should persist");
+    assert!(persisted.contains("unrelated-active-account"));
+    assert!(persisted.contains("UnrelatedActivePlayer"));
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+    let _ = fs::remove_dir_all(temp_dir);
+}
+
+#[test]
 fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotion() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let zone_id = ZoneId::new("map:safe-promotion");
@@ -1105,12 +1249,25 @@ fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotio
             8,
             Duration::from_millis(20),
         );
+    let temp_dir = std::env::temp_dir().join(format!(
+        "mir2-zone-rpc-promoted-persistence-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time should follow the Unix epoch")
+            .as_nanos()
+    ));
+    fs::create_dir_all(&temp_dir).expect("create promoted persistence temp directory");
+    let account_store_path = temp_dir.join("accounts.json");
+    let standby_config =
+        GatewayConfig::default().with_account_store_path(account_store_path.clone());
     let (standby_address, standby_server, standby_stop, standby_handle) =
-        start_named_server_with_tick_cadence(
+        start_named_server_with_config_and_tick_cadence(
             authority.clone(),
             "standby-host",
             8,
             Duration::from_millis(20),
+            standby_config,
         );
     let active = test_transport(active_address, zone_id.clone(), "promotion-session");
     let standby = test_transport(standby_address, zone_id.clone(), "promotion-session");
@@ -1211,7 +1368,7 @@ fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotio
             WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_503 }),
         ))
         .expect_err("ready standby must freeze its exact promotion image")
-        .contains("zone_quiesced"));
+        .contains("zone_replica_read_only"));
 
     let readiness_id = readiness.readiness_id.clone().unwrap();
     let before_fence = standby
@@ -1236,6 +1393,13 @@ fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotio
             WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_504 }),
         ))
         .expect("promotion releases the standby mutation barrier");
+    standby
+        .save_active_character()
+        .expect("promoted replica should write through its authoritative account store");
+    let persisted =
+        fs::read_to_string(&account_store_path).expect("promoted session should persist");
+    assert!(persisted.contains("promotion-account"));
+    assert!(persisted.contains("PromotionPlayer"));
     assert!(standby
         .promote_replica(readiness_id, &promoted_lease)
         .expect_err("readiness receipt must be single-use")
@@ -1268,8 +1432,36 @@ fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotio
             .promotion_ready
     );
 
+    let reverse_quiesce = standby
+        .quiesce_for_promotion(&promoted_lease)
+        .expect("promoted owner should quiesce for a reverse handoff");
+    let reverse_base = standby
+        .export_base_snapshot()
+        .expect("promoted owner should export a reverse base");
+    active
+        .install_base_snapshot(&reverse_base)
+        .expect("previous active should become an explicit replica");
+    let reverse_readiness = active
+        .assess_promotion_readiness(reverse_quiesce.head, now_ms(), 250)
+        .expect("previous active should assess reverse readiness");
+    assert!(
+        reverse_readiness.ready,
+        "previous active should be exactly ready after the reverse base: {reverse_readiness:?}"
+    );
+    let returned_lease = authority.handoff_zone_owner(&zone_id, "active-host");
+    active
+        .promote_replica(reverse_readiness.readiness_id.unwrap(), &returned_lease)
+        .expect("previous active should promote under the next fence");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            returned_lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_505 }),
+        ))
+        .expect("reverse promotion must clear the previous active quiesce barrier");
+
     stop_server(active_address, active_stop, active_handle);
     stop_server(standby_address, standby_stop, standby_handle);
+    let _ = fs::remove_dir_all(temp_dir);
 }
 
 #[test]
@@ -1726,14 +1918,14 @@ fn zone_replicator_copies_checkpoint_between_separate_host_processes() {
         "zone replicator did not use the v5 base path: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert_eq!(
-        standby
-            .active_identity()
-            .expect("standby identity should respond")
-            .expect("replicated process should restore active character")
-            .account_id,
-        "demo"
-    );
+    let standby_base = standby
+        .export_base_snapshot()
+        .expect("standby control plane should export the replicated image");
+    assert_eq!(standby_base.session_count, 1);
+    assert!(standby_base.apply_ready);
+    standby_base
+        .verify()
+        .expect("standby replicated image should be internally complete");
 
     let recovery_reservation = TcpListener::bind("127.0.0.1:0").expect("reserve recovery address");
     let recovery_address = recovery_reservation.local_addr().expect("recovery address");
@@ -1766,14 +1958,14 @@ fn zone_replicator_copies_checkpoint_between_separate_host_processes() {
         reverse_stderr.contains("installed v5 base"),
         "reverse replicator did not install the v5 base: {reverse_stderr}"
     );
-    assert_eq!(
-        recovery
-            .active_identity()
-            .expect("recovery identity should respond")
-            .expect("reverse replicated process should restore active character")
-            .account_id,
-        "demo"
-    );
+    let recovery_base = recovery
+        .export_base_snapshot()
+        .expect("recovery control plane should export the reverse replicated image");
+    assert_eq!(recovery_base.session_count, 1);
+    assert!(recovery_base.apply_ready);
+    recovery_base
+        .verify()
+        .expect("reverse replicated image should be internally complete");
     fs::remove_dir_all(reverse_wal_dir).unwrap();
     fs::remove_dir_all(wal_dir).unwrap();
 }
@@ -1963,6 +2155,27 @@ fn start_named_server_with_tick_cadence(
     Arc<AtomicBool>,
     thread::JoinHandle<()>,
 ) {
+    start_named_server_with_config_and_tick_cadence(
+        authority,
+        host_id,
+        zone_capacity,
+        cadence,
+        GatewayConfig::default(),
+    )
+}
+
+fn start_named_server_with_config_and_tick_cadence(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    host_id: &str,
+    zone_capacity: usize,
+    cadence: Duration,
+    config: GatewayConfig,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind named tick test Zone Host");
     let address = listener.local_addr().expect("named tick Zone Host address");
     let stop = Arc::new(AtomicBool::new(false));
@@ -1970,7 +2183,7 @@ fn start_named_server_with_tick_cadence(
     let server = Arc::new(ZoneHostServer::with_identity_and_factory(
         host_id,
         zone_capacity,
-        GatewayConfig::default(),
+        config,
         shared,
         None,
         test_limits(),

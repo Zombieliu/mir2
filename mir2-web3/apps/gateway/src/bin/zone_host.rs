@@ -12,6 +12,7 @@ use mir2_gateway::{
 };
 
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
+const DEFAULT_ACCOUNT_STORE_PATH: &str = ".mir2-data/accounts.json";
 
 fn main() -> io::Result<()> {
     mir2_gateway::gate15::initialize_from_env()
@@ -35,11 +36,11 @@ fn main() -> io::Result<()> {
         mir2_simulation::set_crystal_full_world_zone_collision(true);
         config = config.with_crystal_world_runtime();
     }
-    if let Ok(account_store_path) = env::var("MIR2_ACCOUNT_STORE_PATH") {
-        config = config
-            .with_account_store_environment(PathBuf::from(account_store_path))
-            .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    }
+    let account_store_path = env::var("MIR2_ACCOUNT_STORE_PATH")
+        .unwrap_or_else(|_| DEFAULT_ACCOUNT_STORE_PATH.to_string());
+    config = config
+        .with_account_store_environment(PathBuf::from(account_store_path))
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
 
     let listener = TcpListener::bind(address)?;
     let bound_address = listener.local_addr()?;

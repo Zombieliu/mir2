@@ -108,10 +108,10 @@ impl PostgresZoneOwnerLeaseAuthority {
         let database_url = std::env::var("MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL")
             .ok()
             .filter(|value| !value.trim().is_empty())?;
-        let owner_id = std::env::var("MIR2_GATEWAY_INSTANCE_ID")
-            .ok()
-            .filter(|value| !value.trim().is_empty())
-            .unwrap_or_else(default_instance_id);
+        let owner_id = configured_owner_id(
+            std::env::var("MIR2_GATEWAY_ZONE_LEASE_OWNER_ID").ok(),
+            std::env::var("MIR2_GATEWAY_INSTANCE_ID").ok(),
+        );
         let lease_ttl_ms = std::env::var("MIR2_GATEWAY_ZONE_LEASE_TTL_MS")
             .ok()
             .and_then(|value| value.trim().parse::<u64>().ok())
@@ -395,6 +395,13 @@ impl PostgresZoneOwnerLeaseAuthority {
     }
 }
 
+fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<String>) -> String {
+    explicit_owner
+        .filter(|value| !value.trim().is_empty())
+        .or_else(|| instance_id.filter(|value| !value.trim().is_empty()))
+        .unwrap_or_else(default_instance_id)
+}
+
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         let now = now_ms();
@@ -513,6 +520,21 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn explicit_lease_owner_is_independent_from_process_instance_id() {
+        assert_eq!(
+            configured_owner_id(
+                Some("logical-active".to_string()),
+                Some("physical-zone-1".to_string())
+            ),
+            "logical-active"
+        );
+        assert_eq!(
+            configured_owner_id(None, Some("physical-zone-1".to_string())),
+            "physical-zone-1"
+        );
+    }
 
     #[test]
     fn live_cached_lease_validates_without_a_database_round_trip() {

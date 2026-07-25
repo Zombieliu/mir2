@@ -222,6 +222,14 @@ impl SimulationSession {
         }
     }
 
+    pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
+        self.app
+            .world_mut()
+            .resource_mut::<RuntimeConfigResource>()
+            .config
+            .rebind_account_store_from(authoritative);
+    }
+
     pub fn set_language(&mut self, language: LanguageCode) {
         self.app
             .world_mut()

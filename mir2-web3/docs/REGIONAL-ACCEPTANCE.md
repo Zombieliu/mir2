@@ -108,6 +108,20 @@ Gate 20 的优化不能绕过 Gate 16 mutation ordering、owner fence 或 Gate 1
 72 小时运行不能缩短后线性外推。功能开发可以使用较短 profile，但最终
 `regional-v1` 证据必须来自完整时间窗口。
 
+Gate 21 的可重复入口与中文手册位于 `infra/gate21/`：
+
+```bash
+./infra/gate21/run-load-acceptance.sh
+MIR2_GATE21_PREVIOUS_ZONE_IMAGE=<previous-release> \
+  ./infra/gate21/run-fault-acceptance.sh
+./infra/gate21/verify-gate21.sh
+```
+
+负载入口同时采集 72 小时内存与 durable WAL；故障入口要求滚动升级前后镜像
+digest 不同；总聚合器还会重新验证 Gate18–20 的正式证据。代码和短测通过不等于
+Gate21 完成，只有 `gate21-72h.json` 的全部断言来自合格硬件上的完整窗口时才
+能声明 Regional 已验收。
+
 ## 证据与完成定义
 
 每个 Gate 最少生成：

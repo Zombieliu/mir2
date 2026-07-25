@@ -567,6 +567,30 @@ impl HostedZoneOwnerCommandClient {
         runtime.refresh_replica_zone_binding()
     }
 
+    pub(crate) fn rebind_account_store(&self, authoritative: &GatewayConfig) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.rebind_account_store(authoritative);
+        } else if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<InProcessWorldRuntime>()
+        {
+            runtime.rebind_account_store(authoritative);
+        }
+        Ok(())
+    }
+
     pub fn execute_request(
         &self,
         request: ZoneOwnerCommandRequest,
@@ -5331,6 +5355,10 @@ impl SharedInProcessZoneSessionRuntime {
         context: Option<SharedAccountInventoryExecutionContext>,
     ) {
         self.economy_execution_context = context;
+    }
+
+    fn rebind_account_store(&mut self, authoritative: &GatewayConfig) {
+        self.inner.rebind_account_store(authoritative);
     }
 
     fn commit_account_inventory(
