@@ -383,6 +383,13 @@ fn sync_incremental_standby(
             standby_head.latest_digest, durable.latest_digest, durable.next_sequence
         ));
     }
+    let compacted_entries = active.compact_mutation_journal(&snapshot)?;
+    if compacted_entries > 0 {
+        eprintln!(
+            "zone-replicator compacted {compacted_entries} active journal entries through durable base {} at cursor {}",
+            snapshot.snapshot_id, snapshot.base_sequence
+        );
+    }
     Ok(Some(active.health()?.session_count))
 }
 
