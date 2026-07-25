@@ -9,6 +9,7 @@ pub mod events;
 pub mod gate14;
 pub mod gate15;
 pub mod guild_node_foundation;
+pub mod hotspot;
 mod inject;
 pub mod mir2_workload;
 pub mod node_identity;
@@ -64,6 +65,9 @@ pub use gate15::{Gate15Health, Gate15PlayerLease};
 pub use guild_node_foundation::{
     CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
     GuildNodeStatus, NodeCapacityCertificate, SuiFinalityProof,
+};
+pub use hotspot::{
+    HotMapLineScheduler, HotMapLineSnapshot, HotMapPlacement, HotMapPlacementRequest, HotMapPolicy,
 };
 pub use mir2_simulation::CharacterRecord;
 pub use mir2_simulation::WorldSnapshot;

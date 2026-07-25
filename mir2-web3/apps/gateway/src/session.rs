@@ -648,6 +648,8 @@ impl GatewaySession {
             account_id: Some(identity.account_id.clone()),
             character_index: Some(identity.character_index),
             map_file_name: Some(map_file_name),
+            affinity_key: None,
+            explicit_line: None,
         };
         let target_zone_id = routing.registry.route_session(&route_request);
         if target_zone_id == self.zone_id {

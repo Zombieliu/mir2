@@ -1206,6 +1206,8 @@ pub struct SessionRouteRequest {
     pub account_id: Option<String>,
     pub character_index: Option<i32>,
     pub map_file_name: Option<String>,
+    pub affinity_key: Option<String>,
+    pub explicit_line: Option<u16>,
 }
 
 impl SessionRouteRequest {
@@ -8843,6 +8845,7 @@ mod tests {
                 account_id: Some("demo".to_string()),
                 character_index: Some(0),
                 map_file_name: Some("0".to_string()),
+                ..SessionRouteRequest::anonymous()
             },
         );
         let default_routed = registry.open_session(GatewayConfig::default());
@@ -8865,6 +8868,7 @@ mod tests {
                     account_id: None,
                     character_index: None,
                     map_file_name: map.map(str::to_string),
+                    ..SessionRouteRequest::anonymous()
                 },
                 &default_zone,
             )
@@ -8895,6 +8899,7 @@ mod tests {
                     account_id: Some(account.to_string()),
                     character_index: Some(0),
                     map_file_name: Some(map.to_string()),
+                    ..SessionRouteRequest::anonymous()
                 },
             )
         };
@@ -8921,6 +8926,7 @@ mod tests {
                 account_id: Some(account.to_string()),
                 character_index: Some(0),
                 map_file_name: Some(map.to_string()),
+                ..SessionRouteRequest::anonymous()
             },
         );
         GatewaySession::with_routed_world_runtime(routed.zone_id, routed.runtime)
@@ -9177,6 +9183,7 @@ mod tests {
                         account_id: Some("demo".to_string()),
                         character_index: Some(0),
                         map_file_name: Some("0".to_string()),
+                        ..SessionRouteRequest::anonymous()
                     },
                 )
                 .runtime,

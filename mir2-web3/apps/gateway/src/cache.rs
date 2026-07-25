@@ -1365,6 +1365,8 @@ fn route_request_from_route(route: GatewaySessionRoute) -> SessionRouteRequest {
         account_id: Some(route.key.account_id),
         character_index: Some(route.key.character_index),
         map_file_name: route.map_file_name,
+        affinity_key: None,
+        explicit_line: None,
     }
 }
 
