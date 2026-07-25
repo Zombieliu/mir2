@@ -21,8 +21,6 @@ use postgres::{Client, NoTls};
 use serde::Serialize;
 
 const DEFAULT_OUTPUT: &str = "docs/generated/regional/gate18-load.json";
-const ACTIVE_OWNER: &str = "gate18-active";
-const STANDBY_OWNER: &str = "gate18-standby";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -128,7 +126,10 @@ struct EconomyTransitionEvidence {
 struct Gate18LoadEvidence {
     schema_version: u32,
     generated_at_ms: u64,
+    completed_at_ms: u64,
     run_id: String,
+    git_commit: String,
+    image_digest: String,
     profile_id: String,
     profile_exact: bool,
     requested_players: usize,
@@ -166,27 +167,66 @@ struct Gate18LoadEvidence {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let profile = RegionalProfile::reference()?;
     profile.require_reference_contract()?;
-    let requested_players = env_usize(
+    let regional_gate = env::var("MIR2_REGIONAL_GATE").unwrap_or_else(|_| "18".to_string());
+    let (stage_players, stage_duration_seconds, maximum_error_rate) = match regional_gate.as_str() {
+        "18" => (
+            profile.stages.gate18.concurrent_players,
+            profile.stages.gate18.duration_seconds,
+            profile.stages.gate18.maximum_error_rate,
+        ),
+        "19" => (
+            profile.stages.gate19.concurrent_players,
+            profile.stages.gate19.duration_seconds,
+            profile.stages.gate19.maximum_error_rate,
+        ),
+        gate => return Err(format!("unsupported mixed-load Regional Gate {gate}").into()),
+    };
+    let requested_players = env_usize_fallback(
+        "MIR2_REGIONAL_LOAD_PLAYERS",
         "MIR2_GATE18_LOAD_PLAYERS",
-        profile.stages.gate18.concurrent_players,
+        stage_players,
     );
-    let duration_seconds = env_u64(
+    let duration_seconds = env_u64_fallback(
+        "MIR2_REGIONAL_LOAD_DURATION_SECONDS",
         "MIR2_GATE18_LOAD_DURATION_SECONDS",
-        profile.stages.gate18.duration_seconds,
+        stage_duration_seconds,
     );
-    let worker_threads = env_usize("MIR2_GATE18_LOAD_WORKERS", 256)
-        .max(1)
-        .min(requested_players.max(1));
-    let profile_exact = requested_players == profile.stages.gate18.concurrent_players
-        && duration_seconds == profile.stages.gate18.duration_seconds;
-    let allow_dev_profile = env_bool("MIR2_GATE18_ALLOW_DEV_PROFILE");
+    let worker_threads = env_usize_fallback(
+        "MIR2_REGIONAL_LOAD_WORKERS",
+        "MIR2_GATE18_LOAD_WORKERS",
+        256,
+    )
+    .max(1)
+    .min(requested_players.max(1));
+    let profile_exact =
+        requested_players == stage_players && duration_seconds == stage_duration_seconds;
+    let allow_dev_profile =
+        env_bool("MIR2_REGIONAL_ALLOW_DEV_PROFILE") || env_bool("MIR2_GATE18_ALLOW_DEV_PROFILE");
     let database_url = env::var("MIR2_ECONOMY_DATABASE_URL")
         .map_err(|_| "MIR2_ECONOMY_DATABASE_URL is required")?;
+    let default_output = if regional_gate == "18" {
+        DEFAULT_OUTPUT.to_string()
+    } else {
+        format!("docs/generated/regional/gate{regional_gate}-load.json")
+    };
     let output = PathBuf::from(
-        env::var("MIR2_GATE18_LOAD_OUT").unwrap_or_else(|_| DEFAULT_OUTPUT.to_string()),
+        env::var("MIR2_REGIONAL_LOAD_OUT")
+            .or_else(|_| env::var("MIR2_GATE18_LOAD_OUT"))
+            .unwrap_or(default_output),
     );
     let generated_at_ms = now_ms();
-    let run_id = format!("gate18-load-{generated_at_ms}");
+    let run_id = format!("gate{regional_gate}-load-{generated_at_ms}");
+    let git_commit = env::var("MIR2_GIT_COMMIT").unwrap_or_default();
+    let image_digest = env::var("MIR2_IMAGE_DIGEST").unwrap_or_default();
+    if profile_exact && !allow_dev_profile && (git_commit.is_empty() || image_digest.is_empty()) {
+        return Err(
+            "exact Regional load requires MIR2_GIT_COMMIT and MIR2_IMAGE_DIGEST evidence".into(),
+        );
+    }
+    let active_owner = env::var("MIR2_REGIONAL_ACTIVE_OWNER")
+        .unwrap_or_else(|_| format!("gate{regional_gate}-active"));
+    let standby_owner = env::var("MIR2_REGIONAL_STANDBY_OWNER")
+        .unwrap_or_else(|_| format!("gate{regional_gate}-standby"));
 
     let store = PostgresEconomyStore::new(database_url.clone());
     store.ensure_migrated()?;
@@ -310,7 +350,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Arc::clone(&metrics),
     );
     let first_phase_elapsed = active_started.elapsed();
-    let promotion = promote_zone(&mut players, &database_url)?;
+    let promotion = promote_zone(
+        &mut players,
+        &database_url,
+        &active_owner,
+        &standby_owner,
+        &regional_gate,
+    )?;
     let second_phase_started = Instant::now();
     run_phase(
         &mut players,
@@ -416,8 +462,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }),
         ),
         (
-            "errorRateWithinGate18Slo".to_string(),
-            error_rate <= profile.stages.gate18.maximum_error_rate,
+            "errorRateWithinStageSlo".to_string(),
+            error_rate <= maximum_error_rate,
         ),
         ("safeZonePromotionCompleted".to_string(), promotion.success),
         (
@@ -437,7 +483,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let evidence = Gate18LoadEvidence {
         schema_version: 1,
         generated_at_ms,
+        completed_at_ms: now_ms(),
         run_id,
+        git_commit,
+        image_digest,
         profile_id: profile.profile_id.clone(),
         profile_exact,
         requested_players,
@@ -480,7 +529,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     println!("{}", serde_json::to_string_pretty(&evidence)?);
     if !success {
-        return Err("Gate 18 mixed load acceptance failed".into());
+        return Err(format!("Gate {regional_gate} mixed load acceptance failed").into());
     }
     Ok(())
 }
@@ -820,6 +869,9 @@ fn execute_player_command(player: &mut LoadPlayer, metrics: &Arc<Mutex<SharedMet
 fn promote_zone(
     players: &mut [LoadPlayer],
     database_url: &str,
+    active_owner: &str,
+    standby_owner: &str,
+    regional_gate: &str,
 ) -> Result<PromotionEvidence, Box<dyn std::error::Error>> {
     let started = Instant::now();
     let zone_id = ZoneId::new("map:0");
@@ -835,14 +887,14 @@ fn promote_zone(
     let active = TcpZoneOwnerRpcTransport::with_options(
         active_address,
         zone_id.clone(),
-        "gate18-promotion-active",
+        &format!("gate{regional_gate}-promotion-active"),
         token.clone(),
         limits.clone(),
     );
     let standby = TcpZoneOwnerRpcTransport::with_options(
         standby_address,
         zone_id.clone(),
-        "gate18-promotion-standby",
+        &format!("gate{regional_gate}-promotion-standby"),
         token,
         limits,
     );
@@ -869,8 +921,8 @@ fn promote_zone(
         .clone()
         .ok_or("ready standby returned no readiness id")?;
     let active_authority =
-        PostgresZoneOwnerLeaseAuthority::new(database_url, ACTIVE_OWNER, lease_ttl_ms());
-    let promoted_lease = active_authority.handoff_at(&active_lease, STANDBY_OWNER, now_ms())?;
+        PostgresZoneOwnerLeaseAuthority::new(database_url, active_owner, lease_ttl_ms());
+    let promoted_lease = active_authority.handoff_at(&active_lease, standby_owner, now_ms())?;
     let receipt = standby.promote_replica(readiness_id.clone(), &promoted_lease)?;
     let mut session_refresh_count = 0;
     for player in players.iter_mut() {
@@ -878,7 +930,7 @@ fn promote_zone(
             continue;
         }
         let refreshed = player.session.refresh_zone_owner_lease()?;
-        if refreshed.owner_id() != STANDBY_OWNER
+        if refreshed.owner_id() != standby_owner
             || refreshed.fencing_token() != promoted_lease.fencing_token()
         {
             return Err("player adopted the wrong post-promotion fence".into());
@@ -910,8 +962,8 @@ fn promote_zone(
         session_refresh_count,
         post_promotion_probe_count,
         wall_ms: started.elapsed().as_secs_f64() * 1_000.0,
-        success: active_lease.owner_id() == ACTIVE_OWNER
-            && promoted_lease.owner_id() == STANDBY_OWNER
+        success: active_lease.owner_id() == active_owner
+            && promoted_lease.owner_id() == standby_owner
             && promoted_lease.fencing_token() > active_lease.fencing_token()
             && promotion_zone_session_count > 0
             && session_refresh_count == promotion_zone_session_count
@@ -1076,12 +1128,20 @@ fn env_usize(name: &str, default: usize) -> usize {
         .unwrap_or(default)
 }
 
+fn env_usize_fallback(primary: &str, legacy: &str, default: usize) -> usize {
+    env_usize(primary, env_usize(legacy, default))
+}
+
 fn env_u64(name: &str, default: u64) -> u64 {
     env::var(name)
         .ok()
         .and_then(|value| value.parse().ok())
         .filter(|value| *value > 0)
         .unwrap_or(default)
+}
+
+fn env_u64_fallback(primary: &str, legacy: &str, default: u64) -> u64 {
+    env_u64(primary, env_u64(legacy, default))
 }
 
 fn env_bool(name: &str) -> bool {

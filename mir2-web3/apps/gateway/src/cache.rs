@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::io::{Read, Write};
 use std::net::TcpStream;
@@ -387,7 +387,9 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
 
 #[derive(Debug, Clone)]
 pub struct RedisGatewaySessionCache {
-    addr: String,
+    addr: Arc<Mutex<String>>,
+    sentinel_addrs: Arc<Vec<String>>,
+    sentinel_master_name: Option<String>,
     namespace: String,
     ttl_seconds: u64,
     timeout: Duration,
@@ -396,11 +398,46 @@ pub struct RedisGatewaySessionCache {
 impl RedisGatewaySessionCache {
     pub fn new(redis_url: &str, namespace: impl Into<String>, ttl_seconds: u64) -> Self {
         Self {
-            addr: redis_addr_from_url(redis_url),
+            addr: Arc::new(Mutex::new(redis_addr_from_url(redis_url))),
+            sentinel_addrs: Arc::new(Vec::new()),
+            sentinel_master_name: None,
             namespace: namespace.into(),
             ttl_seconds: ttl_seconds.max(1),
             timeout: Duration::from_millis(500),
         }
+    }
+
+    pub fn with_sentinels(
+        sentinel_urls: &str,
+        master_name: impl Into<String>,
+        namespace: impl Into<String>,
+        ttl_seconds: u64,
+    ) -> Result<Self, String> {
+        let sentinel_addrs = sentinel_urls
+            .split(',')
+            .map(redis_addr_from_url)
+            .filter(|address| !address.trim().is_empty())
+            .collect::<Vec<_>>();
+        if sentinel_addrs.iter().collect::<BTreeSet<_>>().len() < 3 {
+            return Err(
+                "Redis HA requires at least three distinct MIR2_GATEWAY_REDIS_SENTINEL_ADDRS"
+                    .to_string(),
+            );
+        }
+        let master_name = master_name.into();
+        if master_name.trim().is_empty() {
+            return Err("Redis Sentinel master name must not be empty".to_string());
+        }
+        let timeout = Duration::from_millis(500);
+        let addr = discover_redis_master(&sentinel_addrs, &master_name, timeout)?;
+        Ok(Self {
+            addr: Arc::new(Mutex::new(addr)),
+            sentinel_addrs: Arc::new(sentinel_addrs),
+            sentinel_master_name: Some(master_name),
+            namespace: namespace.into(),
+            ttl_seconds: ttl_seconds.max(1),
+            timeout,
+        })
     }
 
     fn redis_key(&self, key: &GatewaySessionCacheKey) -> String {
@@ -453,16 +490,36 @@ impl RedisGatewaySessionCache {
     }
 
     fn execute(&self, args: &[String]) -> Result<RedisValue, String> {
-        let mut stream = TcpStream::connect(&self.addr)
-            .map_err(|error| format!("redis connect {} failed: {error}", self.addr))?;
-        stream
-            .set_read_timeout(Some(self.timeout))
-            .map_err(|error| format!("redis read timeout setup failed: {error}"))?;
-        stream
-            .set_write_timeout(Some(self.timeout))
-            .map_err(|error| format!("redis write timeout setup failed: {error}"))?;
-        write_resp_command(&mut stream, args)?;
-        read_resp_value(&mut stream)
+        let current = self
+            .addr
+            .lock()
+            .map_err(|_| "Redis master address mutex poisoned".to_string())?
+            .clone();
+        match execute_redis_at(&current, args, self.timeout) {
+            Ok(value) => Ok(value),
+            Err(first_error) => {
+                let Some(master_name) = self.sentinel_master_name.as_deref() else {
+                    return Err(first_error);
+                };
+                let discovered =
+                    discover_redis_master(&self.sentinel_addrs, master_name, self.timeout)
+                        .map_err(|sentinel_error| {
+                            format!(
+                                "{first_error}; Redis Sentinel discovery failed: {sentinel_error}"
+                            )
+                        })?;
+                *self
+                    .addr
+                    .lock()
+                    .map_err(|_| "Redis master address mutex poisoned".to_string())? =
+                    discovered.clone();
+                execute_redis_at(&discovered, args, self.timeout).map_err(|retry_error| {
+                    format!(
+                        "{first_error}; Redis retry through discovered master {discovered} failed: {retry_error}"
+                    )
+                })
+            }
+        }
     }
 
     pub fn ping(&self) -> Result<(), String> {
@@ -470,6 +527,13 @@ impl RedisGatewaySessionCache {
             RedisValue::Simple(value) if value == "PONG" => Ok(()),
             other => Err(format!("unexpected redis PING response: {other:?}")),
         }
+    }
+
+    pub fn current_master_address(&self) -> Result<String, String> {
+        self.addr
+            .lock()
+            .map(|address| address.clone())
+            .map_err(|_| "Redis master address mutex poisoned".to_string())
     }
 
     fn list_keys(&self) -> Result<Vec<String>, String> {
@@ -927,6 +991,12 @@ pub fn gateway_session_cache_requires_redis_from_env() -> bool {
 
 pub fn gateway_session_cache_runtime_backend_from_env(
 ) -> Result<GatewaySessionCacheRuntimeBackend, String> {
+    if env::var("MIR2_GATEWAY_REDIS_SENTINEL_ADDRS")
+        .ok()
+        .is_some_and(|value| !value.trim().is_empty())
+    {
+        return Ok(GatewaySessionCacheRuntimeBackend::Redis);
+    }
     match env::var("MIR2_GATEWAY_REDIS_CACHE_URL") {
         Ok(redis_url) if !redis_url.trim().is_empty() => {
             Ok(GatewaySessionCacheRuntimeBackend::Redis)
@@ -942,16 +1012,29 @@ pub fn gateway_session_cache_runtime_backend_from_env(
 pub fn gateway_session_cache_from_env() -> Result<SharedGatewaySessionCache, String> {
     match gateway_session_cache_runtime_backend_from_env()? {
         GatewaySessionCacheRuntimeBackend::Redis => {
-            let redis_url = env::var("MIR2_GATEWAY_REDIS_CACHE_URL").map_err(|_| {
-                "MIR2_GATEWAY_REDIS_CACHE_URL is required for Redis session/routing cache"
-                    .to_string()
-            })?;
             let ttl_seconds = env::var("MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS")
                 .ok()
                 .and_then(|value| value.parse::<u64>().ok())
                 .unwrap_or(30);
-            let cache =
-                RedisGatewaySessionCache::new(&redis_url, "mir2:gateway:session", ttl_seconds);
+            let cache = match env::var("MIR2_GATEWAY_REDIS_SENTINEL_ADDRS")
+                .ok()
+                .filter(|value| !value.trim().is_empty())
+            {
+                Some(sentinel_urls) => RedisGatewaySessionCache::with_sentinels(
+                    &sentinel_urls,
+                    env::var("MIR2_GATEWAY_REDIS_SENTINEL_MASTER")
+                        .unwrap_or_else(|_| "mir2-primary".to_string()),
+                    "mir2:gateway:session",
+                    ttl_seconds,
+                )?,
+                None => {
+                    let redis_url = env::var("MIR2_GATEWAY_REDIS_CACHE_URL").map_err(|_| {
+                        "MIR2_GATEWAY_REDIS_CACHE_URL or MIR2_GATEWAY_REDIS_SENTINEL_ADDRS is required for Redis session/routing cache"
+                            .to_string()
+                    })?;
+                    RedisGatewaySessionCache::new(&redis_url, "mir2:gateway:session", ttl_seconds)
+                }
+            };
             if gateway_session_cache_requires_redis_from_env() {
                 cache.ping().map_err(|error| {
                     format!("required Redis session/routing cache is unavailable: {error}")
@@ -989,6 +1072,56 @@ fn redis_addr_from_url(redis_url: &str) -> String {
         .filter(|addr| !addr.is_empty())
         .unwrap_or("127.0.0.1:6379")
         .to_string()
+}
+
+fn execute_redis_at(
+    address: &str,
+    args: &[String],
+    timeout: Duration,
+) -> Result<RedisValue, String> {
+    let mut stream = TcpStream::connect(address)
+        .map_err(|error| format!("redis connect {address} failed: {error}"))?;
+    stream
+        .set_read_timeout(Some(timeout))
+        .map_err(|error| format!("redis read timeout setup failed: {error}"))?;
+    stream
+        .set_write_timeout(Some(timeout))
+        .map_err(|error| format!("redis write timeout setup failed: {error}"))?;
+    write_resp_command(&mut stream, args)?;
+    read_resp_value(&mut stream)
+}
+
+fn discover_redis_master(
+    sentinel_addrs: &[String],
+    master_name: &str,
+    timeout: Duration,
+) -> Result<String, String> {
+    let command = [
+        "SENTINEL".to_string(),
+        "get-master-addr-by-name".to_string(),
+        master_name.to_string(),
+    ];
+    let mut failures = Vec::new();
+    for sentinel in sentinel_addrs {
+        match execute_redis_at(sentinel, &command, timeout) {
+            Ok(RedisValue::Array(values)) if values.len() == 2 => {
+                let host = redis_string_value(&values[0]);
+                let port = redis_string_value(&values[1]);
+                if let (Some(host), Some(port)) = (host, port) {
+                    if !host.trim().is_empty() && port.parse::<u16>().is_ok() {
+                        return Ok(format!("{host}:{port}"));
+                    }
+                }
+                failures.push(format!("{sentinel}: invalid master address response"));
+            }
+            Ok(other) => failures.push(format!("{sentinel}: unexpected response {other:?}")),
+            Err(error) => failures.push(format!("{sentinel}: {error}")),
+        }
+    }
+    Err(format!(
+        "no Redis Sentinel resolved master {master_name}: {}",
+        failures.join("; ")
+    ))
 }
 
 fn sanitize_cache_key_part(value: &str) -> String {
@@ -1289,6 +1422,8 @@ mod tests {
             .expect("env lock should not be poisoned");
         let names = [
             "MIR2_GATEWAY_REDIS_CACHE_URL",
+            "MIR2_GATEWAY_REDIS_SENTINEL_ADDRS",
+            "MIR2_GATEWAY_REDIS_SENTINEL_MASTER",
             "MIR2_GATEWAY_REQUIRE_REDIS_CACHE",
             "MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS",
             "MIR2_RUNTIME_ENV",
@@ -1619,6 +1754,87 @@ mod tests {
         assert!(!cache.is_session_record_key(&lease_key));
         assert!(cache.is_character_index_key(&character_key));
         assert!(cache.is_route_lease_key(&lease_key));
+    }
+
+    #[test]
+    fn redis_sentinel_cache_rediscovers_a_promoted_master_after_connection_failure() {
+        use std::io::{Read, Write};
+        use std::net::TcpListener;
+        use std::thread;
+
+        fn spawn_ping_server(listener: TcpListener) -> thread::JoinHandle<()> {
+            thread::spawn(move || {
+                let (mut stream, _) = listener.accept().expect("accept Redis ping");
+                let mut request = [0_u8; 128];
+                let _ = stream.read(&mut request);
+                stream.write_all(b"+PONG\r\n").expect("write Redis PONG");
+            })
+        }
+
+        let first_master_listener =
+            TcpListener::bind("127.0.0.1:0").expect("bind first fake Redis master");
+        let first_master = first_master_listener
+            .local_addr()
+            .expect("first fake master address");
+        let second_master_listener =
+            TcpListener::bind("127.0.0.1:0").expect("bind second fake Redis master");
+        let second_master = second_master_listener
+            .local_addr()
+            .expect("second fake master address");
+        let current_master = Arc::new(Mutex::new(first_master));
+
+        let sentinel_listener = TcpListener::bind("127.0.0.1:0").expect("bind fake Redis Sentinel");
+        let sentinel_address = sentinel_listener.local_addr().expect("sentinel address");
+        let sentinel_master = Arc::clone(&current_master);
+        let sentinel = thread::spawn(move || {
+            for _ in 0..2 {
+                let (mut stream, _) = sentinel_listener.accept().expect("accept Sentinel query");
+                let mut request = [0_u8; 256];
+                let _ = stream.read(&mut request);
+                let master = *sentinel_master.lock().expect("master mutex");
+                let host = master.ip().to_string();
+                let port = master.port().to_string();
+                let response = format!(
+                    "*2\r\n${}\r\n{}\r\n${}\r\n{}\r\n",
+                    host.len(),
+                    host,
+                    port.len(),
+                    port
+                );
+                stream
+                    .write_all(response.as_bytes())
+                    .expect("write Sentinel response");
+            }
+        });
+        let unused_sentinel_a =
+            TcpListener::bind("127.0.0.1:0").expect("bind second sentinel address");
+        let unused_sentinel_b =
+            TcpListener::bind("127.0.0.1:0").expect("bind third sentinel address");
+        let sentinel_urls = format!(
+            "{sentinel_address},{},{}",
+            unused_sentinel_a.local_addr().expect("second sentinel"),
+            unused_sentinel_b.local_addr().expect("third sentinel")
+        );
+
+        let first_master_server = spawn_ping_server(first_master_listener);
+        let cache = RedisGatewaySessionCache::with_sentinels(
+            &sentinel_urls,
+            "mir2-primary",
+            "mir2:test:sentinel",
+            30,
+        )
+        .expect("Sentinel should resolve first master");
+        cache.ping().expect("first master should answer");
+        first_master_server.join().expect("first master server");
+
+        *current_master.lock().expect("master mutex") = second_master;
+        let second_master_server = spawn_ping_server(second_master_listener);
+        cache
+            .ping()
+            .expect("cache should rediscover and use promoted master");
+
+        second_master_server.join().expect("second master server");
+        sentinel.join().expect("sentinel server");
     }
 
     #[test]
