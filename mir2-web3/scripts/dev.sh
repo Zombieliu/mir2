@@ -203,33 +203,33 @@ prepare_runtime_image() {
 
 verify_published_image_witness() {
   local witness_tag
-  local reference_parts
+  local reference_record
   local tag_type
   local tag_object
-  local witness_parts
+  local witness_record
   local witness_target
   local witness_message
 
   witness_tag="developer-image-${published_revision}"
-  mapfile -t reference_parts < <(
+  reference_record="$(
     gh api \
       "repos/Zombieliu/mir2/git/ref/tags/${witness_tag}" \
       --jq '.object.type, .object.sha'
-  )
-  tag_type="${reference_parts[0]:-}"
-  tag_object="${reference_parts[1]:-}"
+  )"
+  tag_type="$(printf '%s\n' "${reference_record}" | sed -n '1p')"
+  tag_object="$(printf '%s\n' "${reference_record}" | sed -n '2p')"
   if [[ "${tag_type}" != "tag" || ! "${tag_object}" =~ ^[a-f0-9]{40}$ ]]; then
     echo "Published developer image witness is missing or is not annotated: ${witness_tag}" >&2
     exit 1
   fi
 
-  mapfile -t witness_parts < <(
+  witness_record="$(
     gh api \
       "repos/Zombieliu/mir2/git/tags/${tag_object}" \
       --jq '.object.sha, .message'
-  )
-  witness_target="${witness_parts[0]:-}"
-  witness_message="${witness_parts[1]:-}"
+  )"
+  witness_target="$(printf '%s\n' "${witness_record}" | sed -n '1p')"
+  witness_message="$(printf '%s\n' "${witness_record}" | sed -n '2p')"
   if [[ "${witness_target}" != "${published_revision}" ||
         "${witness_message}" != "${published_reference}" ]]; then
     echo "Published developer image witness does not match the release lock." >&2
