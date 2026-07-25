@@ -312,7 +312,7 @@ impl GatewaySession {
             .zone_owner_lease_authority
             .as_ref()
             .ok_or_else(|| "Zone owner lease authority is not configured".to_string())?;
-        self.zone_owner_lease = authority.owner_lease(&self.zone_id);
+        self.zone_owner_lease = authority.refresh_owner_lease(&self.zone_id);
         Ok(&self.zone_owner_lease)
     }
 

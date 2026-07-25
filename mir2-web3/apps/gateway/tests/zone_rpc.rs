@@ -1304,6 +1304,55 @@ fn multi_endpoint_transport_reroutes_to_replicated_standby_after_active_stops() 
 }
 
 #[test]
+fn multi_endpoint_transport_reroutes_after_old_active_is_logically_fenced() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_named_server(authority.clone(), "active-owner", 8);
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_named_server(authority.clone(), "standby-owner", 8);
+    let zone_id = ZoneId::new("map:logical-failover");
+    let active_lease = authority.handoff_zone_owner(&zone_id, "active-owner");
+    let active = test_transport(active_address, zone_id.clone(), "logical-failover-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "logical-failover-session");
+    start_new_character(
+        &active,
+        active_lease.clone(),
+        "logical-failover",
+        "LogicalFailover",
+    );
+    let checkpoint = active
+        .export_host_checkpoint()
+        .expect("active checkpoint should export");
+    standby
+        .install_host_checkpoint(&checkpoint)
+        .expect("standby checkpoint should install");
+
+    let failover = TcpZoneOwnerRpcTransport::with_endpoints(
+        vec![active_address.to_string(), standby_address.to_string()],
+        zone_id.clone(),
+        "logical-failover-session",
+        None,
+        test_limits(),
+    )
+    .expect("failover transport should accept two endpoints");
+    assert!(failover
+        .active_identity()
+        .expect("active endpoint identity")
+        .is_some());
+
+    let promoted = authority.handoff_zone_owner(&zone_id, "standby-owner");
+    failover
+        .execute(ZoneOwnerCommandRequest::direct(
+            promoted,
+            WorldCommand::Tick,
+        ))
+        .expect("stale active response should reroute to the promoted standby");
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
 fn tcp_zone_rpc_rejects_stale_fencing_token_at_host_boundary() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (address, _server, stop, handle) = start_server(authority.clone());
@@ -1372,6 +1421,40 @@ fn tcp_zone_rpc_reuses_one_framed_connection_for_multiple_requests() {
         transport.health().unwrap().protocol_version,
         ZONE_RPC_PROTOCOL_VERSION
     );
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.accepted_connections_total, 1);
+    assert_eq!(telemetry.rpc_requests_total, 2);
+
+    drop(transport);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_keeps_an_idle_reused_connection_alive_past_the_io_timeout() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let limits = ZoneRpcLimits {
+        io_timeout: Duration::from_millis(50),
+        ..test_limits()
+    };
+    let (address, server, stop, handle) = start_server_with_limits(authority, limits.clone());
+    let transport = TcpZoneOwnerRpcTransport::with_options(
+        address.to_string(),
+        ZoneId::new("map:idle-persistent-rpc"),
+        "idle-persistent-rpc-session",
+        None,
+        limits,
+    )
+    .with_connection_reuse();
+
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    thread::sleep(Duration::from_millis(200));
     assert_eq!(
         transport.health().unwrap().protocol_version,
         ZONE_RPC_PROTOCOL_VERSION

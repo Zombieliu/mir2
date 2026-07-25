@@ -179,6 +179,10 @@ impl ZoneOwnerCommandRequest {
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease;
 
+    fn refresh_owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
+        self.owner_lease(zone_id)
+    }
+
     fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
         let current = self.owner_lease(lease.zone_id());
         if current == *lease {
@@ -4446,6 +4450,13 @@ fn ground_drop_snapshot_from_spawn_packet(packet: &ServerPacket) -> Option<Groun
     }
 }
 
+fn same_ground_drop_projection(first: &GroundDropSnapshot, second: &GroundDropSnapshot) -> bool {
+    first.x == second.x
+        && first.y == second.y
+        && first.quantity == second.quantity
+        && first.loot == second.loot
+}
+
 fn ground_drop_spawn_object_ids(packets: &[ServerPacket]) -> BTreeSet<u32> {
     packets
         .iter()
@@ -4709,6 +4720,8 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             force_next_zone_transform_sync: false,
             last_shared_entity_ids_by_map: BTreeMap::new(),
             last_shared_drop_ids_by_map: BTreeMap::new(),
+            local_ground_drop_zone_ids: BTreeMap::new(),
+            retired_local_ground_drop_ids: BTreeSet::new(),
             owner_dead_entity_ids: BTreeSet::new(),
         })
     }
@@ -5256,6 +5269,8 @@ struct SharedInProcessZoneSessionRuntime {
     force_next_zone_transform_sync: bool,
     last_shared_entity_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
     last_shared_drop_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
+    local_ground_drop_zone_ids: BTreeMap<(String, u32), u32>,
+    retired_local_ground_drop_ids: BTreeSet<(String, u32)>,
     owner_dead_entity_ids: BTreeSet<u32>,
 }
 
@@ -5594,16 +5609,6 @@ impl SharedInProcessZoneSessionRuntime {
             .insert(map_file_name.clone(), shared_entity_ids)
             .unwrap_or_default();
 
-        let mut shared_ground_drops = snapshot.ground_drops.clone();
-        let shared_drop_ids = shared_ground_drops
-            .iter()
-            .map(|drop| drop.object_id)
-            .collect::<BTreeSet<_>>();
-        let previous_drop_ids = self
-            .last_shared_drop_ids_by_map
-            .insert(map_file_name.clone(), shared_drop_ids)
-            .unwrap_or_default();
-
         let Some(self_entity) = self_entity else {
             return self.remove_presence();
         };
@@ -5621,6 +5626,16 @@ impl SharedInProcessZoneSessionRuntime {
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
+        let mut shared_ground_drops =
+            self.current_snapshot_ground_drops_for_shared_state(&snapshot, &zone_state, Some(&key));
+        let shared_drop_ids = shared_ground_drops
+            .iter()
+            .map(|drop| drop.object_id)
+            .collect::<BTreeSet<_>>();
+        let previous_drop_ids = self
+            .last_shared_drop_ids_by_map
+            .insert(map_file_name.clone(), shared_drop_ids)
+            .unwrap_or_default();
         let previous_map = zone_state
             .players
             .get(&key)
@@ -5903,7 +5918,7 @@ impl SharedInProcessZoneSessionRuntime {
                 .map_layer(map_file_name.as_deref())
                 .map(|layer| layer.ground_drops)
                 .unwrap_or_default();
-            for drop in Self::current_snapshot_ground_drops_for_shared_state(
+            for drop in self.current_snapshot_ground_drops_for_shared_state(
                 &snapshot,
                 &zone_state,
                 current_key.as_ref(),
@@ -6127,6 +6142,7 @@ impl SharedInProcessZoneSessionRuntime {
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             );
             let followup = if receipt.committed {
+                self.retire_local_ground_drop_projection(&drop);
                 ZoneCommand::CommitGroundDropClaim {
                     session_id: session_id.clone(),
                     object_id,
@@ -6308,10 +6324,12 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn current_snapshot_ground_drops_for_shared_state(
+        &self,
         snapshot: &WorldSnapshot,
         zone_state: &SharedInProcessZoneState,
         current_key: Option<&ZonePresenceKey>,
     ) -> Vec<GroundDropSnapshot> {
+        let map_file_name = snapshot.map_file_name.as_deref().unwrap_or_default();
         let local_self_object_id = snapshot
             .entities
             .iter()
@@ -6323,7 +6341,31 @@ impl SharedInProcessZoneSessionRuntime {
                 .get(key)
                 .map(|presence| presence.zone_object_id)
         });
-        let mut drops = snapshot.ground_drops.clone();
+        let mut drops = snapshot
+            .ground_drops
+            .iter()
+            .filter_map(|drop| {
+                let key = (map_file_name.to_string(), drop.object_id);
+                if self.retired_local_ground_drop_ids.contains(&key) {
+                    return None;
+                }
+                let mut drop = drop.clone();
+                if let Some(zone_object_id) = self.local_ground_drop_zone_ids.get(&key) {
+                    drop.object_id = *zone_object_id;
+                } else if zone_state.maps.get(map_file_name).is_some_and(|map| {
+                    map.ground_drops
+                        .values()
+                        .any(|shared| same_ground_drop_projection(shared, &drop))
+                }) {
+                    // A promoted replica restores the private character
+                    // runtime separately from the shared Zone checkpoint.
+                    // If the unique Zone drop is already present, do not
+                    // re-introduce its old session-local object id.
+                    return None;
+                }
+                Some(drop)
+            })
+            .collect::<Vec<_>>();
         if let (Some(local_self_object_id), Some(zone_object_id)) =
             (local_self_object_id, zone_object_id)
         {
@@ -6334,6 +6376,58 @@ impl SharedInProcessZoneSessionRuntime {
             }
         }
         drops
+    }
+
+    fn remap_player_ground_drop_packets(&mut self, packets: &mut [ServerPacket]) {
+        let Some(map_file_name) = self.inner.world_snapshot().map_file_name else {
+            return;
+        };
+        let mut zone_state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        for packet in packets {
+            let local_object_id = match packet {
+                ServerPacket::ObjectGold { info } => info.object_id,
+                ServerPacket::ObjectItem { info } => info.object_id,
+                _ => continue,
+            };
+            let key = (map_file_name.clone(), local_object_id);
+            self.retired_local_ground_drop_ids.remove(&key);
+            let zone_object_id = if let Some(zone_object_id) =
+                self.local_ground_drop_zone_ids.get(&key)
+            {
+                *zone_object_id
+            } else {
+                let zone_object_id = zone_state.next_zone_object_id;
+                zone_state.next_zone_object_id = zone_state.next_zone_object_id.saturating_add(1);
+                self.local_ground_drop_zone_ids.insert(key, zone_object_id);
+                zone_object_id
+            };
+            match packet {
+                ServerPacket::ObjectGold { info } => info.object_id = zone_object_id,
+                ServerPacket::ObjectItem { info } => info.object_id = zone_object_id,
+                _ => {}
+            }
+        }
+    }
+
+    fn retire_local_ground_drop_projection(&mut self, shared_drop: &GroundDropSnapshot) {
+        let snapshot = self.inner.world_snapshot();
+        let Some(map_file_name) = snapshot.map_file_name else {
+            return;
+        };
+        let Some(local_object_id) = snapshot
+            .ground_drops
+            .iter()
+            .find(|drop| same_ground_drop_projection(drop, shared_drop))
+            .map(|drop| drop.object_id)
+        else {
+            return;
+        };
+        let key = (map_file_name, local_object_id);
+        self.local_ground_drop_zone_ids.remove(&key);
+        self.retired_local_ground_drop_ids.insert(key);
     }
 
     fn apply_shared_entity_packets_to_current_map(&mut self, packets: &[ServerPacket]) {
@@ -6391,7 +6485,7 @@ impl SharedInProcessZoneSessionRuntime {
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
-        let ground_drops = Self::current_snapshot_ground_drops_for_shared_state(
+        let ground_drops = self.current_snapshot_ground_drops_for_shared_state(
             &snapshot,
             &zone_state,
             current_key.as_ref(),
@@ -7596,6 +7690,7 @@ impl SharedInProcessZoneSessionRuntime {
             )
         });
         if gained {
+            self.retire_local_ground_drop_projection(&drop);
             packets.insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
             packets.extend(self.dispatch_zone_player_command(
                 ZoneCommand::CommitGroundDropClaim {
@@ -7941,6 +8036,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        if shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some() {
+            self.remap_player_ground_drop_packets(&mut command_packets);
+        }
         if command_packets.is_empty() {
             if let Some(object_id) = shared_interact_object_id {
                 command_packets = self.execute_shared_npc_interact(object_id);
@@ -14897,8 +14995,10 @@ mod tests {
     #[test]
     fn shared_in_process_registry_broadcasts_player_drop_gold_spawn() {
         let (mut first, mut second) = started_shared_zone_sessions();
+        let gold_before = first.world_snapshot().gold;
 
         let owner_packets = first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        assert_eq!(first.world_snapshot().gold, gold_before - 100);
         let gold_location = owner_packets
             .iter()
             .find_map(|packet| match packet {
@@ -14907,11 +15007,86 @@ mod tests {
             })
             .expect("owner should receive ObjectGold for dropped gold");
         let observer_packets = second.handle_packet(ClientPacket::KeepAlive { time: 106 });
+        first.handle_packet(ClientPacket::KeepAlive { time: 107 });
 
         assert!(observer_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectGold { info } if info.gold == 100 && info.location == gold_location
         )));
+        assert_eq!(
+            first.world_snapshot().gold,
+            gold_before - 100,
+            "a keepalive must not reapply or reset a committed gold projection"
+        );
+    }
+
+    #[test]
+    fn shared_in_process_registry_allocates_unique_ids_for_concurrent_player_gold_drops() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        let second_state = serde_json::json!({
+            "character": {
+                "name": "Blade",
+                "level": 1,
+                "class": "Warrior",
+                "gender": "Male"
+            },
+            "mapFileName": "0",
+            "mapTitle": "BichonProvince",
+            "position": { "x": 345, "y": 280 },
+            "direction": "Down",
+            "hp": 100,
+            "maxHp": 100,
+            "mp": 100,
+            "maxMp": 100,
+            "experience": 0,
+            "maxExperience": 100,
+            "gold": 1000,
+            "credit": 0,
+            "inventoryItemsJson": [],
+            "beltItemsJson": [],
+            "storageItemsJson": [],
+            "equipmentItemsJson": []
+        });
+        second.stage5_command("qa.applyNativeState", vec![second_state.to_string()]);
+
+        let first_packets = first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let second_packets = second.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let drop_from = |packets: &[ServerPacket]| {
+            packets.iter().rev().find_map(|packet| match packet {
+                ServerPacket::ObjectGold { info } => {
+                    Some((info.object_id, info.location.x, info.location.y))
+                }
+                _ => None,
+            })
+        };
+        let first_drop = drop_from(&first_packets).expect("first gold drop should spawn");
+        let second_drop = drop_from(&second_packets).expect("second gold drop should spawn");
+
+        assert_ne!(
+            first_drop.0, second_drop.0,
+            "session-local drop ids must be remapped by the shared Zone owner"
+        );
+        let shared_drop_ids = first
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .map(|drop| drop.object_id)
+            .collect::<BTreeSet<_>>();
+        assert!(shared_drop_ids.contains(&first_drop.0));
+        assert!(shared_drop_ids.contains(&second_drop.0));
+
+        first.transfer_map(&format!("crystal:0:{}:{}", first_drop.1, first_drop.2));
+        second.transfer_map(&format!("crystal:0:{}:{}", second_drop.1, second_drop.2));
+        assert!(first
+            .pick_up(first_drop.0)
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 100 })));
+        assert!(second
+            .pick_up(second_drop.0)
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 100 })));
+        assert!(first.world_snapshot().ground_drops.is_empty());
+        assert!(second.world_snapshot().ground_drops.is_empty());
     }
 
     #[test]
@@ -15988,6 +16163,8 @@ mod tests {
             force_next_zone_transform_sync: false,
             last_shared_entity_ids_by_map: Default::default(),
             last_shared_drop_ids_by_map: Default::default(),
+            local_ground_drop_zone_ids: Default::default(),
+            retired_local_ground_drop_ids: Default::default(),
             owner_dead_entity_ids: Default::default(),
         }
     }

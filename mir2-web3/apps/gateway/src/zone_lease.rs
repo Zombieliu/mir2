@@ -63,7 +63,13 @@ pub struct PostgresZoneOwnerLeaseAuthority {
     owner_id: String,
     lease_ttl_ms: u64,
     client: Arc<Mutex<Option<Client>>>,
-    last_known: Mutex<BTreeMap<String, ZoneOwnerLease>>,
+    last_known: Mutex<BTreeMap<String, CachedZoneLease>>,
+}
+
+#[derive(Debug, Clone)]
+struct CachedZoneLease {
+    lease: ZoneOwnerLease,
+    expires_at_ms: u64,
 }
 
 impl std::fmt::Debug for PostgresZoneOwnerLeaseAuthority {
@@ -159,13 +165,23 @@ impl PostgresZoneOwnerLeaseAuthority {
         .map_err(|_| "zone lease worker thread panicked".to_string())?
     }
 
-    fn remember(&self, lease: &ZoneOwnerLease) {
+    fn remember(&self, lease: &ZoneOwnerLease, expires_at_ms: u64) {
         if let Ok(mut cache) = self.last_known.lock() {
-            cache.insert(lease.zone_id().as_str().to_string(), lease.clone());
+            cache.insert(
+                lease.zone_id().as_str().to_string(),
+                CachedZoneLease {
+                    lease: lease.clone(),
+                    expires_at_ms,
+                },
+            );
         }
     }
 
     fn cached(&self, zone_id: &ZoneId) -> Option<ZoneOwnerLease> {
+        self.cached_entry(zone_id).map(|entry| entry.lease)
+    }
+
+    fn cached_entry(&self, zone_id: &ZoneId) -> Option<CachedZoneLease> {
         self.last_known
             .lock()
             .ok()
@@ -180,7 +196,7 @@ impl PostgresZoneOwnerLeaseAuthority {
         let expires_at = now_ms.saturating_add(self.lease_ttl_ms) as i64;
         let now = now_ms as i64;
         let zone_for_lease = zone_id.clone();
-        let lease = self.run(move |client| {
+        let (lease, stored_expires_at_ms) = self.run(move |client| {
             let row = client
                 .query_one(
                     "INSERT INTO zone_owner_leases \
@@ -204,19 +220,19 @@ impl PostgresZoneOwnerLeaseAuthority {
                            WHEN zone_owner_leases.owner_id <> EXCLUDED.owner_id AND zone_owner_leases.expires_at_ms <= $4 \
                                THEN EXCLUDED.acquired_at_ms ELSE zone_owner_leases.acquired_at_ms END, \
                        updated_at = now() \
-                     RETURNING owner_id, fencing_token",
+                     RETURNING owner_id, fencing_token, expires_at_ms",
                     &[&zone, &owner_id, &expires_at, &now],
                 )
                 .map_err(|error| format!("zone lease acquire failed for {zone}: {error}"))?;
             let owner_id: String = row.get("owner_id");
             let fencing_token: i64 = row.get("fencing_token");
-            Ok(ZoneOwnerLease::new(
-                zone_for_lease,
-                owner_id,
-                fencing_token.max(1) as u64,
+            let stored_expires_at_ms: i64 = row.get("expires_at_ms");
+            Ok((
+                ZoneOwnerLease::new(zone_for_lease, owner_id, fencing_token.max(1) as u64),
+                stored_expires_at_ms.max(0) as u64,
             ))
         })?;
-        self.remember(&lease);
+        self.remember(&lease, stored_expires_at_ms);
         Ok(lease)
     }
 
@@ -257,11 +273,75 @@ impl PostgresZoneOwnerLeaseAuthority {
             Ok(()) => {
                 let lease =
                     ZoneOwnerLease::new(zone_id, self.owner_id.clone(), lease.fencing_token());
-                self.remember(&lease);
+                self.remember(&lease, now_ms.saturating_add(self.lease_ttl_ms));
                 Ok(lease)
             }
             Err(error) => Err(error),
         }
+    }
+
+    /// Atomically hand a still-live lease to a new owner and advance its
+    /// fencing token. The caller must be the current owner; the compare-and-set
+    /// prevents a stale scheduler from overwriting a newer generation.
+    pub fn handoff_at(
+        &self,
+        current: &ZoneOwnerLease,
+        new_owner_id: impl Into<String>,
+        now_ms: u64,
+    ) -> Result<ZoneOwnerLease, String> {
+        if current.owner_id() != self.owner_id {
+            return Err(format!(
+                "cannot hand off zone lease owned by {} from authority {}",
+                current.owner_id(),
+                self.owner_id
+            ));
+        }
+        let new_owner_id = new_owner_id.into();
+        if new_owner_id.trim().is_empty() || new_owner_id == self.owner_id {
+            return Err("zone lease handoff requires a distinct non-empty owner".to_string());
+        }
+        let zone = current.zone_id().as_str().to_string();
+        let current_owner_id = self.owner_id.clone();
+        let current_token = current.fencing_token() as i64;
+        let new_expires_at_ms = now_ms.saturating_add(self.lease_ttl_ms);
+        let new_expires_at = new_expires_at_ms as i64;
+        let now = now_ms as i64;
+        let zone_id = current.zone_id().clone();
+        let owner_for_query = new_owner_id.clone();
+        let new_token = self.run(move |client| {
+            let row = client
+                .query_opt(
+                    "UPDATE zone_owner_leases
+                     SET owner_id=$4,
+                         fencing_token=fencing_token+1,
+                         expires_at_ms=$5,
+                         heartbeat_at_ms=$6,
+                         acquired_at_ms=$6,
+                         updated_at=now()
+                     WHERE zone_id=$1
+                       AND owner_id=$2
+                       AND fencing_token=$3
+                       AND expires_at_ms>$6
+                     RETURNING fencing_token",
+                    &[
+                        &zone,
+                        &current_owner_id,
+                        &current_token,
+                        &owner_for_query,
+                        &new_expires_at,
+                        &now,
+                    ],
+                )
+                .map_err(|error| format!("zone lease handoff failed for {zone}: {error}"))?
+                .ok_or_else(|| {
+                    format!("stale zone owner lease for {zone}: handoff compare-and-set rejected")
+                })?;
+            let token: i64 = row.get("fencing_token");
+            Ok(token.max(1) as u64)
+        })?;
+        let lease = ZoneOwnerLease::new(zone_id, new_owner_id, new_token);
+        self.remember(&lease, new_expires_at_ms);
+        Ok(lease)
     }
 
     /// Release the lease on graceful shutdown so a peer can take over immediately.
@@ -278,7 +358,11 @@ impl PostgresZoneOwnerLeaseAuthority {
                 )
                 .map_err(|error| format!("zone lease release failed for {zone}: {error}"))?;
             Ok(())
-        })
+        })?;
+        if let Ok(mut cache) = self.last_known.lock() {
+            cache.remove(lease.zone_id().as_str());
+        }
+        Ok(())
     }
 
     /// Read the current stored lease for a zone, whoever owns it.
@@ -314,6 +398,15 @@ impl PostgresZoneOwnerLeaseAuthority {
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         let now = now_ms();
+        if let Some(cached) = self.cached_entry(zone_id) {
+            let live = cached.expires_at_ms > now;
+            let owned_by_peer = cached.lease.owner_id() != self.owner_id;
+            let safely_before_renewal =
+                cached.expires_at_ms.saturating_sub(now) > self.lease_ttl_ms.saturating_div(2);
+            if live && (owned_by_peer || safely_before_renewal) {
+                return cached.lease;
+            }
+        }
         match self.acquire_at(zone_id, now) {
             Ok(lease) => lease,
             Err(error) => {
@@ -328,6 +421,53 @@ impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
                     ZoneOwnerLease::new(zone_id.clone(), self.owner_id.clone(), 1)
                 })
             }
+        }
+    }
+
+    fn refresh_owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
+        let now = now_ms();
+        match self.acquire_at(zone_id, now) {
+            Ok(lease) => lease,
+            Err(error) => {
+                eprintln!(
+                    "zone lease authority refresh degraded for {}: {error}",
+                    zone_id.as_str()
+                );
+                self.cached(zone_id).unwrap_or_else(|| {
+                    ZoneOwnerLease::new(zone_id.clone(), self.owner_id.clone(), 1)
+                })
+            }
+        }
+    }
+
+    fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
+        let now = now_ms();
+        if let Some(cached) = self.cached_entry(lease.zone_id()) {
+            let safely_live = cached.expires_at_ms > now
+                && (cached.lease.owner_id() != self.owner_id
+                    || cached.expires_at_ms.saturating_sub(now)
+                        > self.lease_ttl_ms.saturating_div(2));
+            if safely_live && cached.lease == *lease {
+                return Ok(());
+            }
+        }
+        let current = self.acquire_at(lease.zone_id(), now).map_err(|error| {
+            format!(
+                "cannot validate zone owner lease for {} after cached TTL: {error}",
+                lease.zone_id()
+            )
+        })?;
+        if current == *lease {
+            Ok(())
+        } else {
+            Err(format!(
+                "stale zone owner lease for zone {}: current owner {} fencing token {}, got owner {} fencing token {}",
+                lease.zone_id(),
+                current.owner_id(),
+                current.fencing_token(),
+                lease.owner_id(),
+                lease.fencing_token()
+            ))
         }
     }
 
@@ -373,6 +513,22 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn live_cached_lease_validates_without_a_database_round_trip() {
+        let authority = PostgresZoneOwnerLeaseAuthority::new(
+            "postgres://invalid@127.0.0.1:1/invalid",
+            "cached-owner",
+            30_000,
+        );
+        let zone = unique_zone("cached-validation");
+        let lease = ZoneOwnerLease::new(zone, "cached-owner", 7);
+        authority.remember(&lease, now_ms().saturating_add(30_000));
+
+        authority
+            .validate_owner_lease(&lease)
+            .expect("a safely live cached fence should validate locally");
+    }
 
     fn pg_test_url() -> Option<String> {
         let url = std::env::var("MIR2_TEST_POSTGRES_URL")

@@ -1049,7 +1049,7 @@ impl TcpZoneOwnerRpcTransport {
                     .filter(|value| !value.trim().is_empty())
                     .map(|address| vec![address.trim().to_string()])
             })?;
-        Self::with_endpoints(
+        let transport = Self::with_endpoints(
             addresses,
             zone_id,
             next_rpc_session_id(),
@@ -1058,7 +1058,12 @@ impl TcpZoneOwnerRpcTransport {
                 .filter(|value| !value.trim().is_empty()),
             ZoneRpcLimits::from_env(),
         )
-        .ok()
+        .ok()?;
+        Some(if enabled_env("MIR2_ZONE_RPC_REUSE_CONNECTIONS") {
+            transport.with_connection_reuse()
+        } else {
+            transport
+        })
     }
 
     pub fn session_id(&self) -> &str {
@@ -1346,7 +1351,14 @@ impl TcpZoneOwnerRpcTransport {
                     return Ok(*payload);
                 }
                 Ok(ZoneRpcResponse::Error { code, message })
-                    if code == "host_draining" || code == "capacity" =>
+                    if matches!(
+                        code.as_str(),
+                        "host_draining"
+                            | "capacity"
+                            | "stale_lease"
+                            | "zone_quiesced"
+                            | "owner_mismatch"
+                    ) =>
                 {
                     failures.push(format!("{address}: zone RPC {code}: {message}"));
                 }
@@ -2616,11 +2628,13 @@ impl ZoneHostServer {
         // flag. Some platforms propagate that mode to accepted sockets; the
         // framed request handler is deliberately blocking with bounded timeouts.
         stream.set_nonblocking(false)?;
+        stream.set_nodelay(true)?;
         stream.set_read_timeout(Some(self.limits.io_timeout))?;
         stream.set_write_timeout(Some(self.limits.io_timeout))?;
         loop {
-            let bytes = match read_frame(&mut stream, self.limits.max_frame_bytes) {
-                Ok(bytes) => bytes,
+            let bytes = match read_frame_allowing_idle(&mut stream, self.limits.max_frame_bytes) {
+                Ok(Some(bytes)) => bytes,
+                Ok(None) => continue,
                 Err(error)
                     if matches!(
                         error.kind(),
@@ -4610,7 +4624,12 @@ fn connect_with_timeout(address: &str, timeout: Duration) -> Result<TcpStream, S
     let mut last_error = None;
     for address in addresses {
         match TcpStream::connect_timeout(&address, timeout) {
-            Ok(stream) => return Ok(stream),
+            Ok(stream) => {
+                stream
+                    .set_nodelay(true)
+                    .map_err(|error| format!("set TCP_NODELAY failed: {error}"))?;
+                return Ok(stream);
+            }
             Err(error) => last_error = Some(error),
         }
     }
@@ -4675,6 +4694,38 @@ fn call_reused_endpoint(
         *connection = None;
     }
     result
+}
+
+fn read_frame_allowing_idle(
+    reader: &mut TcpStream,
+    max_frame_bytes: usize,
+) -> io::Result<Option<Vec<u8>>> {
+    let mut header = [0_u8; 4];
+    match reader.read_exact(&mut header) {
+        Ok(()) => {}
+        Err(error)
+            if matches!(
+                error.kind(),
+                io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
+            ) =>
+        {
+            // An idle persistent client is healthy. Only the fixed-size frame
+            // header is allowed to time out this way; once a header arrives,
+            // the body must complete within the configured I/O deadline.
+            return Ok(None);
+        }
+        Err(error) => return Err(error),
+    }
+    let length = u32::from_be_bytes(header) as usize;
+    if length == 0 || length > max_frame_bytes {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("invalid zone RPC frame length {length}"),
+        ));
+    }
+    let mut bytes = vec![0; length];
+    reader.read_exact(&mut bytes)?;
+    Ok(Some(bytes))
 }
 
 fn read_frame(reader: &mut impl Read, max_frame_bytes: usize) -> io::Result<Vec<u8>> {
@@ -5071,6 +5122,15 @@ fn positive_u64_env(name: &str) -> Option<u64> {
         .ok()
         .and_then(|value| value.trim().parse::<u64>().ok())
         .filter(|value| *value > 0)
+}
+
+fn enabled_env(name: &str) -> bool {
+    std::env::var(name).ok().is_some_and(|value| {
+        matches!(
+            value.trim().to_ascii_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        )
+    })
 }
 
 fn unknown_zone_telemetry(zone_id: String, session_count: usize) -> ZoneHostZoneTelemetry {

@@ -124,7 +124,7 @@ docs/generated/regional/gate21-72h.json
 通过、自动测试和 CI 通过、中文运行手册完成且代码进入可审查 PR，Regional
 总目标才完成。
 
-## 当前落地进度（不等同于 Gate 18 通过）
+## Gate 18 已完成：真实玩法与 500 玩家
 
 已完成第一批可重复的基础能力：
 
@@ -174,6 +174,8 @@ Gate 20 必须把 thread-per-connection 改成异步多路复用，并实现 AOI
 ./infra/gate18/run-gameplay-acceptance.sh
 ./infra/gate18/run-migration-acceptance.sh
 ./infra/gate18/run-session-capacity.sh
+./infra/gate18/run-load-acceptance.sh
+./infra/gate18/verify-gate18.sh
 ```
 
 `gate18-economy-producer.json` 当前包含 12 条真实 PostgreSQL 断言，覆盖 legacy
@@ -200,6 +202,22 @@ handoff、导入 Crystal `Hen` 的权威战斗、`Chicken` 物品掉落和拾取
 16 个 worker 全部成功，最终恰好存在 6 个版本记录且核心关系齐全。该证据修复
 并覆盖了多进程冷启动时 PostgreSQL 隐式 row type 的真实创建竞态。
 
-Gate 18 尚未完成的硬条件仍是：500 个不同账户按统一行为模型连续运行 30 分钟，
-运行中至少执行一次安全 Zone promotion，并生成聚合的 `gate18.json`。现有短时
-容量、经济和双玩家玩法证据都不能替代这两个条件。
+Gate 18 的正式 `mir2-regional-v1` 运行已完成，聚合证据为
+`docs/generated/regional/gate18.json`。本次结果为：
+
+- 500/500 个不同账户和角色完成登录、选角和地图加入，120 个 Zone 同时活跃；
+- 有效负载持续 `1,800.405 s`，共尝试 `1,331,916` 条真实玩法命令，完成
+  `1,331,915` 条，行为覆盖率 `97.7911%`；
+- 唯一失败是一条金币拾取未改变余额，错误率
+  `0.00007508%`，低于 Gate 18 的 `<0.1%` SLO；证据保留了原始失败分类；
+- p50 / p95 / p99 分别为 `87.46 / 343.37 / 579.00 ms`。Gate 18 不设延迟
+  门槛；该 p95 不能被用于声明 Gate 20/21 的 `<200 ms` 目标已经完成；
+- `map:0` 的 30 个 Session 从 generation 1 的 active 安全晋升到 generation 2
+  的 standby，之后对全部 500 个 Session 的探测成功；本次迁移墙钟
+  `14.447 s`，因此也不能替代 Gate 19 的 `<5 s` 故障恢复验收；
+- 750 次金币丢弃全部生成不同的地面对象 ID；最终经济重复数、运行时/账本偏差、
+  过期投递、死信、无 Outbox 事务和负余额均为 0。
+
+聚合器不会只信任顶层 `success`：它重新校验 30 分钟、500 个不同玩家、120 个
+活动 Zone、行为比例、错误率、安全晋升、迁移后探测、经济对账以及上述四份
+底层验收，并把每个源文件的 SHA-256 写入 `gate18.json`。
