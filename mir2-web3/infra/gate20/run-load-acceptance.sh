@@ -41,9 +41,14 @@ jq -e '
   and .hotMapPlayers == 300
   and (.hotMapLinePlayers | length) == 6
   and all(.hotMapLinePlayers[]; . == 50)
+  and .zoneHostSessionCount == 1000
+  and .zoneHostActiveConnections <= 130
   and .requestedActiveDurationSeconds == 3600
   and .measuredActiveDurationMs >= 3600000
   and .latencyMs.p95 <= 200
+  and .resources.zoneRpcCodec == "msgpack"
+  and .resources.zoneRpcSharedPoolSize == 128
+  and .resources.zoneRpcQueueTimeoutMs == 500
   and .workloadCommandCoverage >= 0.95
   and .errorRate <= 0.001
   and .economyDuplicateCount == 0

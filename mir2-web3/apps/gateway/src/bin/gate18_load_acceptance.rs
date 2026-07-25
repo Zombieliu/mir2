@@ -93,6 +93,9 @@ struct ResourceEvidence {
     cgroup_cpu_max: Option<String>,
     cgroup_memory_max: Option<String>,
     cgroup_memory_current: Option<String>,
+    zone_rpc_codec: String,
+    zone_rpc_shared_pool_size: Option<usize>,
+    zone_rpc_queue_timeout_ms: Option<u64>,
 }
 
 #[derive(Debug, Serialize)]
@@ -143,6 +146,8 @@ struct Gate18LoadEvidence {
     hot_map_file_name: Option<String>,
     hot_map_players: usize,
     hot_map_line_players: BTreeMap<String, usize>,
+    zone_host_session_count: usize,
+    zone_host_active_connections: usize,
     requested_active_duration_seconds: u64,
     measured_active_duration_ms: u128,
     promotion_pause_excluded_from_active_duration: bool,
@@ -401,6 +406,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             counts
         });
     let observed_hot_map_players = hot_map_line_players.values().sum::<usize>();
+    let zone_host_health = active_zone_host_health(
+        players
+            .first()
+            .map(|player| player.session.zone_id().clone())
+            .ok_or("Zone Host health requires at least one player")?,
+        &regional_gate,
+    )?;
     let metrics = Arc::new(Mutex::new(SharedMetrics::default()));
     let first_phase_seconds = duration_seconds / 2;
     let second_phase_seconds = duration_seconds.saturating_sub(first_phase_seconds);
@@ -559,6 +571,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 _ => true,
             },
         ),
+        (
+            "rpcConnectionMultiplexingActive".to_string(),
+            regional_gate != "20"
+                || (zone_host_health.session_count == requested_players
+                    && zone_host_health.active_connections <= 130
+                    && zone_host_health.active_connections * 4 < requested_players),
+        ),
         ("safeZonePromotionCompleted".to_string(), promotion.success),
         (
             "economyHasNoDuplicateResult".to_string(),
@@ -594,6 +613,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         hot_map_file_name: (hot_map_target > 0).then(|| hot_map.map_file_name.clone()),
         hot_map_players: observed_hot_map_players,
         hot_map_line_players,
+        zone_host_session_count: zone_host_health.session_count,
+        zone_host_active_connections: zone_host_health.active_connections,
         requested_active_duration_seconds: duration_seconds,
         measured_active_duration_ms,
         promotion_pause_excluded_from_active_duration: true,
@@ -1070,6 +1091,30 @@ fn promote_zone(
     })
 }
 
+fn active_zone_host_health(
+    zone_id: ZoneId,
+    regional_gate: &str,
+) -> Result<mir2_gateway::ZoneHostHealth, Box<dyn std::error::Error>> {
+    let active_address = env::var("MIR2_ZONE_HOST_ADDRS")
+        .map_err(|_| "MIR2_ZONE_HOST_ADDRS with active and standby is required")?
+        .split(',')
+        .next()
+        .map(str::trim)
+        .filter(|address| !address.is_empty())
+        .ok_or("active Zone endpoint missing")?
+        .to_string();
+    let transport = TcpZoneOwnerRpcTransport::with_options(
+        active_address,
+        zone_id,
+        format!("gate{regional_gate}-capacity-health"),
+        env::var("MIR2_ZONE_HOST_TOKEN")
+            .ok()
+            .filter(|value| !value.trim().is_empty()),
+        ZoneRpcLimits::from_env(),
+    );
+    Ok(transport.health()?)
+}
+
 fn start_session(
     registry: &mir2_gateway::ZoneRegistry,
     config: GatewayConfig,
@@ -1205,6 +1250,13 @@ fn resource_evidence() -> ResourceEvidence {
         cgroup_cpu_max: read_trimmed("/sys/fs/cgroup/cpu.max"),
         cgroup_memory_max: read_trimmed("/sys/fs/cgroup/memory.max"),
         cgroup_memory_current: read_trimmed("/sys/fs/cgroup/memory.current"),
+        zone_rpc_codec: env::var("MIR2_ZONE_RPC_CODEC").unwrap_or_else(|_| "json".to_string()),
+        zone_rpc_shared_pool_size: env::var("MIR2_ZONE_RPC_SHARED_POOL_SIZE")
+            .ok()
+            .and_then(|value| value.parse().ok()),
+        zone_rpc_queue_timeout_ms: env::var("MIR2_ZONE_RPC_QUEUE_TIMEOUT_MS")
+            .ok()
+            .and_then(|value| value.parse().ok()),
     }
 }
 
