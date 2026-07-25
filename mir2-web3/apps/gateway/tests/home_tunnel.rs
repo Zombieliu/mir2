@@ -66,7 +66,7 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         &control_identity,
     )
     .expect("test placement should sign");
-    let relay = HomeTunnelRelay::bind(HomeTunnelRelayConfig::with_defaults(
+    let mut relay_config = HomeTunnelRelayConfig::with_defaults(
         "relay-test-a",
         "127.0.0.1:0".parse().unwrap(),
         "127.0.0.1:0".parse().unwrap(),
@@ -75,9 +75,11 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         capacity_issuer.public_key(),
         control_identity.public_key(),
         vec![placement],
-    ))
-    .await
-    .expect("Relay should bind");
+    );
+    relay_config.max_agent_connections = 1;
+    let relay = HomeTunnelRelay::bind(relay_config)
+        .await
+        .expect("Relay should bind");
     let relay_address = relay.quic_addr().expect("Relay QUIC address");
     let gateway_address = relay.gateway_addr().expect("Relay gateway address");
     let (relay_shutdown_tx, relay_shutdown_rx) = watch::channel(false);
@@ -88,7 +90,7 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         relay_address,
         "relay.test",
         zone_address,
-        agent_tls,
+        agent_tls.clone(),
         node,
         1,
         "home-agent-test-a",
@@ -100,6 +102,25 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
     .await
     .expect("outbound-only Home Agent should register over mTLS QUIC");
     let network = agent.network_handle();
+    let second_connection = HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
+        "relay-test-a",
+        relay_address,
+        "relay.test",
+        zone_address,
+        agent_tls,
+        NodeSigningIdentity::from_seed([31; 32]),
+        1,
+        "home-agent-test-a-second",
+        2,
+        capacity_certificate(&NodeSigningIdentity::from_seed([31; 32]), &capacity_issuer),
+        relay_identity.public_key(),
+        control_identity.public_key(),
+    ))
+    .await;
+    assert!(
+        second_connection.is_err(),
+        "Relay must fail closed when the concurrent Agent connection budget is exhausted"
+    );
     let (agent_shutdown_tx, agent_shutdown_rx) = watch::channel(false);
     let agent_task = tokio::spawn(agent.serve(agent_shutdown_rx));
 
@@ -172,6 +193,76 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         .expect("Relay task should join")
         .expect("Relay should stop cleanly");
     stop_zone_host(zone_address, zone_stop, zone_handle);
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn relay_rejects_agent_certificate_from_untrusted_ca() {
+    let (relay_tls, _) = tls_materials();
+    let rogue_agent_tls = rogue_agent_tls(&relay_tls.ca_certificate_der);
+    let node = NodeSigningIdentity::from_seed([51; 32]);
+    let relay_identity = NodeSigningIdentity::from_seed([52; 32]);
+    let control_identity = NodeSigningIdentity::from_seed([53; 32]);
+    let capacity_issuer = NodeSigningIdentity::from_seed([54; 32]);
+    let now = now_ms();
+    let placement = HomeTunnelPlacement::issue(
+        "home-placement-untrusted-client",
+        "relay-test-untrusted-client",
+        "primary",
+        node.node_id(),
+        1,
+        1,
+        4,
+        202,
+        now.saturating_sub(100),
+        now.saturating_add(60_000),
+        &control_identity,
+    )
+    .unwrap();
+    let relay = HomeTunnelRelay::bind(HomeTunnelRelayConfig::with_defaults(
+        "relay-test-untrusted-client",
+        "127.0.0.1:0".parse().unwrap(),
+        "127.0.0.1:0".parse().unwrap(),
+        relay_tls,
+        relay_identity.clone(),
+        capacity_issuer.public_key(),
+        control_identity.public_key(),
+        vec![placement],
+    ))
+    .await
+    .unwrap();
+    let relay_address = relay.quic_addr().unwrap();
+    let (relay_shutdown_tx, relay_shutdown_rx) = watch::channel(false);
+    let relay_task = tokio::spawn(relay.serve(relay_shutdown_rx));
+
+    let error = HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
+        "relay-test-untrusted-client",
+        relay_address,
+        "relay.test",
+        "127.0.0.1:9".parse().unwrap(),
+        rogue_agent_tls,
+        node.clone(),
+        1,
+        "home-agent-untrusted-client",
+        1,
+        capacity_certificate(&node, &capacity_issuer),
+        relay_identity.public_key(),
+        control_identity.public_key(),
+    ))
+    .await
+    .expect_err("mTLS must reject a client certificate from an untrusted CA");
+    assert!(
+        error.contains("connect Home Tunnel Relay")
+            || error.contains("Home Tunnel Relay closed before challenge")
+            || error.contains("accept Home Tunnel registration stream"),
+        "unexpected mTLS rejection error: {error}"
+    );
+
+    relay_shutdown_tx.send(true).unwrap();
+    tokio::time::timeout(Duration::from_secs(5), relay_task)
+        .await
+        .expect("Relay shutdown should be bounded")
+        .expect("Relay task should join")
+        .expect("Relay should stop cleanly");
 }
 
 fn capacity_certificate(
@@ -254,6 +345,29 @@ fn tls_materials() -> (HomeTunnelTlsMaterial, HomeTunnelTlsMaterial) {
             private_key_pkcs8_der: client.1.serialize_der(),
         },
     )
+}
+
+fn rogue_agent_tls(trusted_server_ca_der: &[u8]) -> HomeTunnelTlsMaterial {
+    let mut ca_params = CertificateParams::new(Vec::<String>::new()).unwrap();
+    ca_params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
+    ca_params.key_usages = vec![
+        KeyUsagePurpose::DigitalSignature,
+        KeyUsagePurpose::KeyCertSign,
+        KeyUsagePurpose::CrlSign,
+    ];
+    let rogue_ca_key = KeyPair::generate().unwrap();
+    let rogue_ca = ca_params.self_signed(&rogue_ca_key).unwrap();
+    let client = leaf(
+        "rogue-agent.test",
+        ExtendedKeyUsagePurpose::ClientAuth,
+        &rogue_ca,
+        &rogue_ca_key,
+    );
+    HomeTunnelTlsMaterial {
+        ca_certificate_der: trusted_server_ca_der.to_vec(),
+        certificate_chain_der: vec![client.0.der().to_vec()],
+        private_key_pkcs8_der: client.1.serialize_der(),
+    }
 }
 
 fn leaf(

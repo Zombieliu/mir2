@@ -58,6 +58,39 @@ struct SharedMetrics {
     failures: BTreeMap<String, u64>,
 }
 
+impl SharedMetrics {
+    fn merge(&mut self, mut other: Self) {
+        self.attempted = self.attempted.saturating_add(other.attempted);
+        self.completed = self.completed.saturating_add(other.completed);
+        self.failed = self.failed.saturating_add(other.failed);
+        self.latencies_ms.append(&mut other.latencies_ms);
+        for (role, mut latencies) in other.latencies_ms_by_role {
+            self.latencies_ms_by_role
+                .entry(role)
+                .or_default()
+                .append(&mut latencies);
+        }
+        for (placement, mut latencies) in other.latencies_ms_by_placement {
+            self.latencies_ms_by_placement
+                .entry(placement)
+                .or_default()
+                .append(&mut latencies);
+        }
+        for (role, completed) in other.completed_by_role {
+            self.completed_by_role
+                .entry(role)
+                .and_modify(|current| *current = current.saturating_add(completed))
+                .or_insert(completed);
+        }
+        for (failure, count) in other.failures {
+            self.failures
+                .entry(failure)
+                .and_modify(|current| *current = current.saturating_add(count))
+                .or_insert(count);
+        }
+    }
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct NumericSummary {
@@ -991,6 +1024,7 @@ fn run_phase(
                 .name(format!("gate18-load-{chunk_index}"))
                 .stack_size(256 * 1024)
                 .spawn_scoped(scope, move || {
+                    let mut local_metrics = SharedMetrics::default();
                     let mut due = chunk
                         .iter()
                         .enumerate()
@@ -1007,7 +1041,7 @@ fn run_phase(
                         for (index, player) in chunk.iter_mut().enumerate() {
                             let now = Instant::now();
                             if now >= due[index] {
-                                execute_player_command(player, &metrics);
+                                execute_player_command(player, &mut local_metrics);
                                 due[index] += role_interval(player.role, profile);
                                 if due[index] <= now {
                                     due[index] = now + role_interval(player.role, profile);
@@ -1020,6 +1054,10 @@ fn run_phase(
                             thread::sleep((next_due - now).min(Duration::from_millis(5)));
                         }
                     }
+                    metrics
+                        .lock()
+                        .expect("Gate 18 metrics mutex poisoned")
+                        .merge(local_metrics);
                 })
                 .expect("Gate 18 load worker should spawn");
         }
@@ -1041,7 +1079,7 @@ fn role_interval(role: WorkloadRole, profile: &RegionalProfile) -> Duration {
     }
 }
 
-fn execute_player_command(player: &mut LoadPlayer, metrics: &Arc<Mutex<SharedMetrics>>) {
+fn execute_player_command(player: &mut LoadPlayer, metrics: &mut SharedMetrics) {
     if player.role == WorkloadRole::Economy
         && player.command_ordinal == 0
         && player.session.world_snapshot().gold != 100
@@ -1051,7 +1089,6 @@ fn execute_player_command(player: &mut LoadPlayer, metrics: &Arc<Mutex<SharedMet
         // on the authoritative hosted session immediately before its first
         // fenced production economy transaction.
         if let Err(error) = apply_gold_fixture(&mut player.session, 100) {
-            let mut metrics = metrics.lock().expect("Gate 18 metrics mutex poisoned");
             metrics.attempted += 1;
             metrics.failed += 1;
             *metrics
@@ -1158,7 +1195,6 @@ fn execute_player_command(player: &mut LoadPlayer, metrics: &Arc<Mutex<SharedMet
             ))
         }
     });
-    let mut metrics = metrics.lock().expect("Gate 18 metrics mutex poisoned");
     metrics.attempted += 1;
     match result {
         Ok(_) => {

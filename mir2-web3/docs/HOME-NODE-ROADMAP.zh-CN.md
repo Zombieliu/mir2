@@ -4,7 +4,9 @@
 
 当前仓库已经完成社区节点的身份、Sui testnet 生命周期、远程容量挑战、短期容量
 证书、Commonware 最终准入、Zone Host、复制/晋升和 verified-work 奖励 POC。
-它还不是“普通用户安装后无需公网 IP 即可承载商业服玩家”的完整家庭节点产品。
+Gate 22–24 已具备可重复的工程验收；Gate 25 已完成遥测、奖励对账和真实网络
+证据验证器，但还没有三家真实运营商的签名现场证据。它仍不能被宣传成“普通用户
+安装后即可承载商业服玩家”的生产认证产品。
 
 不得把 Gate 13 的远程挑战或 Gate 14 的本地双节点 POC 宣传成家庭网络生产认证。
 
@@ -19,15 +21,22 @@
 - 独立 Zone Host 承载真实 Mir2 Session；
 - PostgreSQL owner fence、checkpoint、durable WAL、主备复制和 promotion；
 - Gateway 路由重试、Session 刷新和经济幂等。
+- 出站 QUIC/mTLS Relay、签名 challenge/registration/placement/stream；
+- Docker public/private 网络隔离下的真实 Mir2 登录、进图、心跳与 Agent 重启恢复；
+- QUIC UDP socket rebind、mTLS 非信任 CA 拒绝和协议重放/回滚拒绝。
+- macOS/Windows/Linux Home Agent 打包入口、系统密钥库、签名升级/回滚和 drain；
+- 只读、非 root、cap-drop、seccomp、资源上限和网络隔离沙箱验收；
+- 签名分层遥测、IP rotating pseudonym、retention/delete 和公开聚合视图；
+- 真实 Home Agent → Zone `/healthz` → 签名 HTTPS Collector 的端到端遥测；
+- 家庭节点 work units 与 quorum `VerifiedWorkReceipt` 的零信任奖励对账；
+- 三运营商真实家庭网络双签证据格式和 fail-closed 生产 cohort 验证器。
 
 ## 尚未实现
 
-- CGNAT/动态 IP 下只使用出站连接的 QUIC/mTLS 反向隧道；
-- 隐藏家庭 IP 的官方 Relay 和抗 DDoS 边界；
-- 家庭节点桌面安装器、托盘管理、自动升级和签名镜像；
-- 游戏运行时自动降载、空闲算力模式、休眠前 drain；
+- 云厂商 WAF/DDoS 的真实压测与账单证据；
+- Apple notarization、Windows Authenticode 和 Linux 仓库发布签名；
 - 家庭宽带丢包、断网、换 IP、路由器重启的持续故障矩阵；
-- 生产级代码沙箱、远程证明和恶意节点对抗；
+- 硬件远程证明和独立第三方恶意节点安全审计；
 - 在真实不同运营商家庭网络上的容量与奖励 Beta。
 
 ## 整体架构
@@ -84,7 +93,8 @@ flowchart TB
 
 ## 遥测与隐私
 
-家庭节点通过已经建立的出站控制隧道发送遥测，不开放新的入站端口。遥测数据按
+家庭节点通过主动出站 HTTPS 向 Collector 发送遥测，不开放新的入站端口；
+Relay 数据隧道与遥测通道相互独立，避免数据面故障掩盖运维告警。遥测数据按
 受众分层：
 
 | 受众 | 可见内容 |
@@ -147,35 +157,55 @@ IP hidden by Regional Relay
 
 ### Gate 22：Outbound Tunnel
 
-- 家庭节点在双 NAT、CGNAT 和动态 IP 后主动建立 QUIC/mTLS 隧道；
-- Gateway 通过 Relay 完成一个真实 Session 的登录、移动、战斗和断线恢复；
-- 隧道只接受匹配 Node ID、generation、短期容量证书和 placement 的流；
-- 家庭端没有任何必须开放的 TCP/UDP 入站端口；
-- 换 IP 后恢复隧道，旧连接和旧 generation 不能继续写。
+**工程验收已通过。** 代码、Docker 拓扑、自动验收和生产边界见
+[`../infra/gate22/README.zh-CN.md`](../infra/gate22/README.zh-CN.md)。真实三运营商
+CGNAT/换 IP/路由器重启证据仍归 Gate 25，不能用本地 Docker 结果代替。
+
+- [x] 家庭节点主动建立 QUIC/mTLS 隧道；
+- [x] Gateway 通过 Relay 完成真实 Session 登录、进图、心跳和 Agent 重启恢复；
+- [x] 只接受匹配 Node ID、generation、短期容量证书和 placement 的流；
+- [x] 家庭端没有任何必须开放的 TCP/UDP 入站端口；
+- [x] UDP rebind 后 Session 继续工作，旧 nonce/sequence/generation fail closed；
+- [ ] 真实三运营商 CGNAT、换 IP 和路由器重启证据（Gate 25）。
 
 ### Gate 23：Home Agent
 
-- Windows、macOS、Linux 安装包和托盘/本地管理页；
-- 版本清单、镜像和配置全部验签，支持失败回滚；
-- 空闲 CPU/内存/带宽策略，用户开始高负载工作时停止接新 Session；
-- 休眠、退出和升级前 drain；超时则触发 standby 接管；
-- 私钥进入系统密钥库，不写日志、环境文件或容器镜像。
+**本地工程验收已通过。** 见
+[`../infra/gate23/README.zh-CN.md`](../infra/gate23/README.zh-CN.md)。
+
+- [x] Windows、macOS、Linux 打包与服务安装入口、本地 loopback 管理页；
+- [x] Launcher 管理 Supervisor、Zone Host 与 Agent，子进程退出 fail closed；
+- [x] 签名版本清单、SHA-256、anti-rollback、失败隔离与回滚；
+- [x] 空闲 CPU/内存策略和超限自动 drain；
+- [x] 休眠、退出和升级前 drain；
+- [x] 私钥进入系统密钥库，不写日志、环境文件或容器镜像；
+- [ ] 外部 notarization/AuthentiCode/Linux repository signing 证据。
 
 ### Gate 24：Privacy Relay 与沙箱
 
-- 玩家和公开遥测看不到家庭 IP；
-- WAF/DDoS 只暴露官方入口，家庭节点不接收任意公网流量；
-- Zone 运行在只读根文件系统、无特权、无宿主 socket、有限网络出口的签名沙箱；
-- 无 PostgreSQL、Sui settlement、奖励 issuer 或平台管理员密钥；
-- 伪造 work receipt、回滚 sequence、修改镜像、超额资源和数据外传全部 fail closed。
+**本地 Docker 硬化验收已通过。** 见
+[`../infra/gate24/README.zh-CN.md`](../infra/gate24/README.zh-CN.md)。
+
+- [x] 玩家和公开遥测结构不包含家庭 IP；
+- [x] 家庭 Agent 不暴露端口，Zone 位于 internal-only 网络；
+- [x] 只读根文件系统、非 root、无特权、cap-drop、seccomp 和资源限制；
+- [x] 无宿主 socket，禁止 PostgreSQL/Sui/reward/admin 等密钥环境变量；
+- [x] 修改镜像、超额连接/stream、错误 generation 和 secret 注入 fail closed；
+- [ ] 云 WAF/DDoS 与独立第三方渗透测试证据。
 
 ### Gate 25：真实家庭网络 Beta
 
-- Observer/Replica → 10–30 人 Home Zone → 50–128 Session Certified Zone 分级开放；
-- 至少覆盖三家运营商、CGNAT、换 IP、路由器重启、休眠、丢包和带宽拥塞；
-- paired standby 位于不同家庭/机房故障域，Session 恢复小于 5 秒；
-- 遥测三种受众权限、IP 脱敏、保留期和删除流程通过；
-- 容量证书、真实 Session 分钟、质量分和奖励批次可对账。
+**协议与本地验收器已完成，生产现场证据待执行。** 见
+[`../infra/gate25/README.zh-CN.md`](../infra/gate25/README.zh-CN.md)。
+
+- [x] Observer/Replica → Home Zone → Certified Zone 的证据字段和容量边界；
+- [x] 三家运营商、CGNAT、换 IP、路由器重启、休眠、丢包、拥塞的强制矩阵；
+- [x] standby `<5s`、Session 全恢复和 economy zero-duplicate 强校验；
+- [x] 遥测三种受众、IP rotating HMAC、保留期和删除接口；
+- [x] Agent 读取真实 Zone 健康状态、签名上报、Collector 验签/重放/鉴权/删除；
+- [x] 容量、Session 分钟和 quorum work receipt 奖励对账；
+- [x] 节点 + 运营方双签，拒绝模拟/实验室证据的 production validator；
+- [ ] 至少三家真实家庭运营商的双签现场证据。
 
 Gate 25 通过之前只能称为 Home Node POC/Beta，不能宣称家庭节点可以承载生产
 商业服。即使 Gate 25 通过，热点攻城、沙巴克和高价值经济地图仍应优先放在
