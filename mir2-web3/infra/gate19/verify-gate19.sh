@@ -15,6 +15,7 @@ gateway="${evidence_dir}/gate19-infra-gateway-kill.json"
 redis="${evidence_dir}/gate19-infra-redis-failover.json"
 postgres="${evidence_dir}/gate19-infra-postgres-failover.json"
 commonware="${evidence_dir}/gate19-commonware-validator.json"
+runtime_manifest="${evidence_dir}/gate19-runtime-manifest.json"
 
 sources=(
   "${load}"
@@ -26,6 +27,7 @@ sources=(
   "${redis}"
   "${postgres}"
   "${commonware}"
+  "${runtime_manifest}"
 )
 for evidence in "${sources[@]}"; do
   if [[ ! -f "${evidence}" ]]; then
@@ -149,6 +151,15 @@ jq -e '
   and .milestones.goal4FaultRecovery.accepted == true
 ' "${commonware}" >/dev/null
 
+jq -e '
+  .schemaVersion == 1
+  and .gate == 19
+  and .success == true
+  and (.gitCommit | length) >= 7
+  and (.images | keys | length) == 6
+  and all(.images[]; startswith("sha256:"))
+' "${runtime_manifest}" >/dev/null
+
 generated_at_ms="$(( $(date +%s) * 1000 ))"
 
 jq -n \
@@ -162,6 +173,7 @@ jq -n \
   --arg redisSha "$(shasum -a 256 "${redis}" | awk '{print $1}')" \
   --arg postgresSha "$(shasum -a 256 "${postgres}" | awk '{print $1}')" \
   --arg commonwareSha "$(shasum -a 256 "${commonware}" | awk '{print $1}')" \
+  --arg runtimeManifestSha "$(shasum -a 256 "${runtime_manifest}" | awk '{print $1}')" \
   --slurpfile load "${load}" \
   --slurpfile activeZone "${active_zone}" \
   --slurpfile zoneSession "${zone_session}" \
@@ -208,6 +220,7 @@ jq -n \
       redis: $redisSha,
       postgres: $postgresSha,
       commonware: $commonwareSha
+      ,runtimeManifest: $runtimeManifestSha
     },
     assertions: {
       exactFiveHundredPlayerOneHourProfileAccepted: true,
@@ -219,6 +232,7 @@ jq -n \
       redisSentinelPromotedANewWritableMaster: true,
       postgresStandbyPromotedToWritablePrimary: true,
       commonwareThreeOfFourFinalityAndCatchUpPassed: true,
+      faultImagesAndCommitAreReproducible: true,
       sixRequiredSingleFaultScenariosPassed: true,
       economyHadNoDuplicateOrLedgerMismatch: true
     },
