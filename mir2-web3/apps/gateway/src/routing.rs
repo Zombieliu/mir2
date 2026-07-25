@@ -1218,6 +1218,20 @@ impl SessionRouteRequest {
 
 pub trait SessionRouter: Send + Sync {
     fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId;
+
+    fn try_route_session(
+        &self,
+        request: &SessionRouteRequest,
+        default_zone_id: &ZoneId,
+    ) -> Result<ZoneId, String> {
+        Ok(self.route_session(request, default_zone_id))
+    }
+
+    /// Release any scheduler-owned placement state after a routed Session
+    /// leaves its current Zone. Static routers do not retain placement state.
+    fn release_session(&self, _request: &SessionRouteRequest, _now_ms: u64) -> Result<(), String> {
+        Ok(())
+    }
 }
 
 pub type SharedSessionRouter = Arc<dyn SessionRouter>;
@@ -8583,19 +8597,41 @@ impl ZoneRegistry {
         config: GatewayConfig,
         route_request: SessionRouteRequest,
     ) -> RoutedZoneRuntime {
-        let zone_id = self.route_session(&route_request);
+        self.try_open_session_for(config, route_request)
+            .expect("Zone session routing should succeed")
+    }
+
+    pub fn try_open_session_for(
+        &self,
+        config: GatewayConfig,
+        route_request: SessionRouteRequest,
+    ) -> Result<RoutedZoneRuntime, String> {
+        let zone_id = self.try_route_session(&route_request)?;
         let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
-        RoutedZoneRuntime {
+        Ok(RoutedZoneRuntime {
             runtime: self.runtime_factory.create_runtime(config, &zone_id),
             owner_lease,
             owner_lease_authority: self.owner_lease_authority.clone(),
             zone_id,
-        }
+        })
     }
 
     pub fn route_session(&self, route_request: &SessionRouteRequest) -> ZoneId {
         self.session_router
             .route_session(route_request, &self.default_zone_id)
+    }
+
+    pub fn try_route_session(&self, route_request: &SessionRouteRequest) -> Result<ZoneId, String> {
+        self.session_router
+            .try_route_session(route_request, &self.default_zone_id)
+    }
+
+    pub fn release_session(
+        &self,
+        route_request: &SessionRouteRequest,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        self.session_router.release_session(route_request, now_ms)
     }
 
     pub(crate) fn global_message_bus(&self) -> Arc<GlobalZoneMessageBus> {
