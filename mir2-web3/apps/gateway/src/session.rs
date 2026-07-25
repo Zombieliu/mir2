@@ -96,6 +96,8 @@ pub struct GatewaySession {
     runtime: ZoneRuntimeHandle,
     gameplay_event_publisher: Option<GatewayGameplayEventPublisher>,
     routing_context: Option<GatewaySessionRoutingContext>,
+    current_route_request: Option<SessionRouteRequest>,
+    requested_explicit_line: Option<u16>,
     global_message_bus: Option<Arc<GlobalZoneMessageBus>>,
     handoff_generation: u64,
 }
@@ -202,6 +204,8 @@ impl GatewaySession {
             runtime,
             gameplay_event_publisher: None,
             routing_context: None,
+            current_route_request: None,
+            requested_explicit_line: None,
             global_message_bus: None,
             handoff_generation: 0,
         }
@@ -259,6 +263,8 @@ impl GatewaySession {
             runtime,
             gameplay_event_publisher: Some(gameplay_event_publisher),
             routing_context: None,
+            current_route_request: None,
+            requested_explicit_line: None,
             global_message_bus: None,
             handoff_generation: 0,
         }
@@ -535,6 +541,24 @@ impl GatewaySession {
         })
     }
 
+    pub fn transfer_map_on_line(
+        &mut self,
+        key: &str,
+        explicit_line: u16,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if explicit_line == 0 {
+            return Err("explicit map line must be positive".to_string());
+        }
+        self.requested_explicit_line = Some(explicit_line);
+        let result = self
+            .execute_world_command(WorldCommand::TransferMap {
+                key: key.to_string(),
+            })
+            .map(|execution| execution.packets);
+        self.requested_explicit_line = None;
+        result
+    }
+
     pub fn stage5_command(&mut self, action: &str, args: Vec<String>) -> Vec<ServerPacket> {
         self.execute_infallible(WorldCommand::Stage5Command {
             action: action.to_string(),
@@ -648,10 +672,16 @@ impl GatewaySession {
             account_id: Some(identity.account_id.clone()),
             character_index: Some(identity.character_index),
             map_file_name: Some(map_file_name),
-            affinity_key: None,
-            explicit_line: None,
+            affinity_key: route_affinity_key(&identity, &source_snapshot),
+            explicit_line: self.requested_explicit_line.take(),
         };
-        let target_zone_id = routing.registry.route_session(&route_request);
+        let target_zone_id = match routing.registry.try_route_session(&route_request) {
+            Ok(zone_id) => zone_id,
+            Err(error) => {
+                self.rollback_failed_handoff(previous_snapshot);
+                return Err(format!("Zone handoff routing rejected: {error}"));
+            }
+        };
         if target_zone_id == self.zone_id {
             self.refresh_global_message_identity(Some(&identity));
             return Ok(());
@@ -669,7 +699,7 @@ impl GatewaySession {
 
         let routed = routing
             .registry
-            .open_session_for(routing.config.clone(), route_request);
+            .try_open_session_for(routing.config.clone(), route_request.clone())?;
         let target_client =
             default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
         let mut target_runtime = routed.runtime;
@@ -744,6 +774,9 @@ impl GatewaySession {
 
         if let Err(error) = prepare_result {
             let _ = target_client.close_session(&mut target_runtime, &routed.owner_lease);
+            let _ = routing
+                .registry
+                .release_session(&route_request, gateway_now_ms());
             self.rollback_failed_handoff(previous_snapshot);
             return Err(format!(
                 "Zone handoff {} -> {} prepare failed: {error}",
@@ -756,6 +789,9 @@ impl GatewaySession {
             .close_session(&mut self.runtime, &self.zone_owner_lease)
         {
             let _ = target_client.close_session(&mut target_runtime, &routed.owner_lease);
+            let _ = routing
+                .registry
+                .release_session(&route_request, gateway_now_ms());
             self.rollback_failed_handoff(previous_snapshot);
             return Err(format!(
                 "Zone handoff {} -> {} source close failed: {error}",
@@ -763,11 +799,17 @@ impl GatewaySession {
             ));
         }
 
+        if let Some(previous_route_request) = self.current_route_request.as_ref() {
+            let _ = routing
+                .registry
+                .release_session(previous_route_request, gateway_now_ms());
+        }
         let old_runtime = mem::replace(&mut self.runtime, target_runtime);
         self.zone_id = routed.zone_id;
         self.zone_owner_lease = routed.owner_lease;
         self.zone_owner_lease_authority = Some(routed.owner_lease_authority);
         self.zone_owner_command_client = target_client;
+        self.current_route_request = Some(route_request);
         self.handoff_generation = self.handoff_generation.saturating_add(1);
         if let Some(publisher) = self.gameplay_event_publisher.as_ref() {
             publisher.rebind_zone(self.zone_id.clone());
@@ -812,6 +854,14 @@ impl Drop for GatewaySession {
         let _ = self
             .zone_owner_command_client
             .close_session(&mut self.runtime, &self.zone_owner_lease);
+        if let (Some(routing), Some(route_request)) = (
+            self.routing_context.as_ref(),
+            self.current_route_request.as_ref(),
+        ) {
+            let _ = routing
+                .registry
+                .release_session(route_request, gateway_now_ms());
+        }
     }
 }
 
@@ -830,6 +880,21 @@ fn command_may_change_map(command: &WorldCommand) -> bool {
                     | ClientPacket::GuildWarReturn { .. }
             )
     )
+}
+
+fn route_affinity_key(
+    identity: &ActiveSessionIdentity,
+    snapshot: &WorldSnapshot,
+) -> Option<String> {
+    let mut group = snapshot.stage5_systems.group.members.clone();
+    if !group.is_empty() {
+        group.push(identity.character_name.clone());
+        group.sort_unstable();
+        group.dedup();
+        return Some(format!("party:{}", group.join("\u{1f}")));
+    }
+    let guild = snapshot.stage5_systems.guild.name.trim();
+    (!guild.is_empty()).then(|| format!("guild:{guild}"))
 }
 
 fn snapshot_transfer_key(snapshot: &WorldSnapshot) -> Option<String> {

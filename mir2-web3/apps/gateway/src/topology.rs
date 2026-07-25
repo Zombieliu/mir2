@@ -264,22 +264,26 @@ struct ConfiguredZoneSessionRouter {
     hot_map_scheduler: Option<Arc<HotMapLineScheduler>>,
 }
 
-impl SessionRouter for ConfiguredZoneSessionRouter {
-    fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
+impl ConfiguredZoneSessionRouter {
+    fn route_session_checked(
+        &self,
+        request: &SessionRouteRequest,
+        default_zone_id: &ZoneId,
+    ) -> Result<ZoneId, String> {
         let Some(map) = request.map_file_name.as_deref() else {
-            return default_zone_id.clone();
+            return Ok(default_zone_id.clone());
         };
         let Some(scheduler) = self.hot_map_scheduler.as_ref() else {
-            return self.topology.route_map(map);
+            return Ok(self.topology.route_map(map));
         };
         if !self.topology.hot_map_policies.contains_key(map) {
-            return self.topology.route_map(map);
+            return Ok(self.topology.route_map(map));
         }
         let session_key = match (&request.account_id, request.character_index) {
             (Some(account_id), Some(character_index)) => {
                 format!("{account_id}:{character_index}")
             }
-            _ => return self.topology.route_map(map),
+            _ => return Ok(self.topology.route_map(map)),
         };
         scheduler
             .place(HotMapPlacementRequest {
@@ -289,7 +293,45 @@ impl SessionRouter for ConfiguredZoneSessionRouter {
                 explicit_line: request.explicit_line,
             })
             .map(|placement| placement.zone_id)
-            .unwrap_or_else(|_| self.topology.route_map(map))
+    }
+}
+
+impl SessionRouter for ConfiguredZoneSessionRouter {
+    fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
+        self.route_session_checked(request, default_zone_id)
+            .unwrap_or_else(|_| {
+                self.topology
+                    .route_map(request.map_file_name.as_deref().unwrap_or_default())
+            })
+    }
+
+    fn try_route_session(
+        &self,
+        request: &SessionRouteRequest,
+        default_zone_id: &ZoneId,
+    ) -> Result<ZoneId, String> {
+        self.route_session_checked(request, default_zone_id)
+    }
+
+    fn release_session(&self, request: &SessionRouteRequest, now_ms: u64) -> Result<(), String> {
+        let Some(map) = request.map_file_name.as_deref() else {
+            return Ok(());
+        };
+        let Some(scheduler) = self.hot_map_scheduler.as_ref() else {
+            return Ok(());
+        };
+        if !self.topology.hot_map_policies.contains_key(map) {
+            return Ok(());
+        }
+        let session_key = match (&request.account_id, request.character_index) {
+            (Some(account_id), Some(character_index)) => {
+                format!("{account_id}:{character_index}")
+            }
+            _ => return Ok(()),
+        };
+        scheduler.release(map, &session_key, now_ms)?;
+        scheduler.reconcile(now_ms)?;
+        Ok(())
     }
 }
 
@@ -539,5 +581,88 @@ mod tests {
         );
         assert_eq!(party_one, ZoneId::new("map:0:line:7"));
         assert_eq!(party_two, party_one);
+    }
+
+    #[test]
+    fn adaptive_router_releases_departed_session_placement() {
+        let topology = ZoneTopology::from_json(
+            br#"{
+                "version": 1,
+                "mode": "per_map",
+                "hotMaps": {
+                    "0": {
+                        "targetPlayersPerLine": 1,
+                        "maximumPlayersPerLine": 2,
+                        "maximumLines": 2,
+                        "scaleInGraceMs": 0
+                    }
+                }
+            }"#,
+        )
+        .expect("adaptive topology should parse");
+        let router = topology.router();
+        let first = SessionRouteRequest {
+            account_id: Some("first".to_string()),
+            character_index: Some(0),
+            map_file_name: Some("0".to_string()),
+            ..SessionRouteRequest::anonymous()
+        };
+        let second = SessionRouteRequest {
+            account_id: Some("second".to_string()),
+            character_index: Some(0),
+            map_file_name: Some("0".to_string()),
+            ..SessionRouteRequest::anonymous()
+        };
+        assert_eq!(
+            router.route_session(&first, topology.default_zone_id()),
+            ZoneId::new("map:0:line:1")
+        );
+        assert_eq!(
+            router.route_session(&second, topology.default_zone_id()),
+            ZoneId::new("map:0:line:2")
+        );
+        router
+            .release_session(&second, 1_000)
+            .expect("release should update the production scheduler");
+        let explicitly_rejoined = SessionRouteRequest {
+            explicit_line: Some(1),
+            ..second
+        };
+        assert_eq!(
+            router.route_session(&explicitly_rejoined, topology.default_zone_id()),
+            ZoneId::new("map:0:line:1")
+        );
+    }
+
+    #[test]
+    fn checked_adaptive_route_rejects_capacity_exhaustion() {
+        let topology = ZoneTopology::from_json(
+            br#"{
+                "version": 1,
+                "mode": "per_map",
+                "hotMaps": {
+                    "0": {
+                        "targetPlayersPerLine": 1,
+                        "maximumPlayersPerLine": 1,
+                        "maximumLines": 1,
+                        "scaleInGraceMs": 0
+                    }
+                }
+            }"#,
+        )
+        .expect("adaptive topology should parse");
+        let registry = topology.zone_registry(Arc::new(InMemoryZoneOwnerLeaseAuthority::new()));
+        let request = |account: &str| SessionRouteRequest {
+            account_id: Some(account.to_string()),
+            character_index: Some(0),
+            map_file_name: Some("0".to_string()),
+            ..SessionRouteRequest::anonymous()
+        };
+        assert_eq!(
+            registry.try_route_session(&request("first")).unwrap(),
+            ZoneId::new("map:0:line:1")
+        );
+        let error = registry.try_route_session(&request("second")).unwrap_err();
+        assert!(error.contains("hard capacity"));
     }
 }

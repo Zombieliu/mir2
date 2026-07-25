@@ -64,6 +64,7 @@ pub struct HotMapLineSnapshot {
 struct HotMapState {
     assignments: BTreeMap<(String, String), u16>,
     affinities: BTreeMap<(String, String), u16>,
+    session_affinities: BTreeMap<(String, String), String>,
     lines: BTreeMap<String, BTreeMap<u16, BTreeSet<String>>>,
     empty_since_ms: BTreeMap<(String, u16), u64>,
 }
@@ -138,12 +139,9 @@ impl HotMapLineScheduler {
             .and_then(|lines| lines.get(&line_id))
             .map(BTreeSet::len)
             .unwrap_or_default();
-        if players_on_line >= policy.maximum_players_per_line
-            && request.explicit_line.is_some()
-            && affinity_line.is_none()
-        {
+        if players_on_line >= policy.maximum_players_per_line {
             return Err(format!(
-                "explicit line {line_id} reached its hard capacity {}",
+                "line {line_id} reached its hard capacity {}",
                 policy.maximum_players_per_line
             ));
         }
@@ -154,7 +152,7 @@ impl HotMapLineScheduler {
             .entry(line_id)
             .or_default()
             .insert(request.session_key.clone());
-        state.assignments.insert(assignment_key, line_id);
+        state.assignments.insert(assignment_key.clone(), line_id);
         state
             .empty_since_ms
             .remove(&(request.map_file_name.clone(), line_id));
@@ -162,6 +160,9 @@ impl HotMapLineScheduler {
             state
                 .affinities
                 .insert((request.map_file_name.clone(), affinity.clone()), line_id);
+            state
+                .session_affinities
+                .insert(assignment_key, affinity.clone());
         }
         Ok(placement(&state, &request, line_id, policy))
     }
@@ -180,6 +181,20 @@ impl HotMapLineScheduler {
         let Some(line_id) = state.assignments.remove(&assignment_key) else {
             return Ok(false);
         };
+        if let Some(affinity) = state.session_affinities.remove(&assignment_key) {
+            let affinity_still_active =
+                state
+                    .session_affinities
+                    .iter()
+                    .any(|((assigned_map, _), assigned_affinity)| {
+                        assigned_map == map_file_name && assigned_affinity == &affinity
+                    });
+            if !affinity_still_active {
+                state
+                    .affinities
+                    .remove(&(map_file_name.to_string(), affinity));
+            }
+        }
         let became_empty = state
             .lines
             .get_mut(map_file_name)
@@ -390,6 +405,27 @@ mod tests {
     }
 
     #[test]
+    fn affinity_pin_is_removed_after_its_last_session_leaves() {
+        let scheduler = scheduler();
+        scheduler
+            .place(HotMapPlacementRequest {
+                affinity_key: Some("party-7".to_string()),
+                explicit_line: Some(4),
+                ..request(1)
+            })
+            .unwrap();
+        scheduler.release("0", "player-1", 1_000).unwrap();
+        let rejoined = scheduler
+            .place(HotMapPlacementRequest {
+                affinity_key: Some("party-7".to_string()),
+                explicit_line: Some(3),
+                ..request(2)
+            })
+            .unwrap();
+        assert_eq!(rejoined.line_id, 3);
+    }
+
+    #[test]
     fn only_empty_lines_scale_in_after_grace() {
         let scheduler = scheduler();
         let placed = scheduler
@@ -407,5 +443,24 @@ mod tests {
             .unwrap()
             .line_players
             .contains_key(&3));
+    }
+
+    #[test]
+    fn hard_capacity_rejects_overflow_instead_of_overloading_a_line() {
+        let scheduler = HotMapLineScheduler::new(BTreeMap::from([(
+            "0".to_string(),
+            HotMapPolicy {
+                target_players_per_line: 1,
+                maximum_players_per_line: 1,
+                maximum_lines: 2,
+                scale_in_grace_ms: 1_000,
+            },
+        )]))
+        .unwrap();
+        scheduler.place(request(1)).unwrap();
+        scheduler.place(request(2)).unwrap();
+        let error = scheduler.place(request(3)).unwrap_err();
+        assert!(error.contains("hard capacity"));
+        assert_eq!(scheduler.snapshot("0").unwrap().total_players, 2);
     }
 }
