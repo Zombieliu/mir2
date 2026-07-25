@@ -1,7 +1,7 @@
 {
   "gate": "14.1-14.4-no-single-point-vertical-poc",
   "accepted": true,
-  "startedAtMs": 1784968176809,
+  "startedAtMs": 1784983461900,
   "commonwareRelease": "v2026.2.0",
   "milestones": {
     "goal1Commonware": {
@@ -15,10 +15,10 @@
           "quorum": 3,
           "finalizedHeight": 9,
           "lastSequence": 9,
-          "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+          "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
           "preparedCount": 9,
           "pendingCount": 0,
-          "startedAtMs": 1784968177940
+          "startedAtMs": 1784983521648
         },
         {
           "role": "commonware-validator",
@@ -28,10 +28,10 @@
           "quorum": 3,
           "finalizedHeight": 9,
           "lastSequence": 9,
-          "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+          "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
           "preparedCount": 9,
           "pendingCount": 0,
-          "startedAtMs": 1784968177965
+          "startedAtMs": 1784983521605
         },
         {
           "role": "commonware-validator",
@@ -41,10 +41,10 @@
           "quorum": 3,
           "finalizedHeight": 9,
           "lastSequence": 9,
-          "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+          "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
           "preparedCount": 9,
           "pendingCount": 0,
-          "startedAtMs": 1784968178008
+          "startedAtMs": 1784983521625
         },
         {
           "role": "commonware-validator",
@@ -54,10 +54,10 @@
           "quorum": 3,
           "finalizedHeight": 9,
           "lastSequence": 9,
-          "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+          "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
           "preparedCount": 9,
           "pendingCount": 0,
-          "startedAtMs": 1784968177924
+          "startedAtMs": 1784983521588
         }
       ],
       "eventDriven": true,
@@ -68,7 +68,7 @@
       "initialLease": {
         "accepted": true,
         "finalizedHeight": 9,
-        "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+        "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
         "lease": {
           "sessionId": "gate14-session",
           "accountId": "gate14-alice",
@@ -76,12 +76,12 @@
           "gatewayId": "gateway-a",
           "zoneId": "mir2-map-0",
           "fencingToken": 1,
-          "expiresAtMs": 1784968268932
+          "expiresAtMs": 1784983604992
         },
         "route": {
           "gatewayId": "gateway-a",
           "finalizedHeight": 9,
-          "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+          "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
           "placement": {
             "zoneId": "mir2-map-0",
             "generation": 1,
@@ -89,7 +89,7 @@
             "replicaHostIds": [
               "dubhe-b"
             ],
-            "expiresAtMs": 1784969083779
+            "expiresAtMs": 1784984427179
           },
           "primaryEndpoint": "dubhe-a:7020",
           "replicaEndpoints": [
@@ -102,7 +102,7 @@
         "gatewayId": "gateway-a",
         "healthy": true,
         "finalizedHeight": 9,
-        "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+        "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
         "agreeingValidators": [
           "validator-0",
           "validator-1",
@@ -114,8 +114,8 @@
         "sessionLeaseCount": 1,
         "redisAvailable": true,
         "redisAuthoritative": false,
-        "observedAtMs": 1784968210051,
-        "startedAtMs": 1784968181705,
+        "observedAtMs": 1784983546081,
+        "startedAtMs": 1784983525281,
         "lastError": null
       },
       "gatewayB": {
@@ -123,7 +123,7 @@
         "gatewayId": "gateway-b",
         "healthy": true,
         "finalizedHeight": 9,
-        "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+        "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
         "agreeingValidators": [
           "validator-0",
           "validator-1",
@@ -135,8 +135,8 @@
         "sessionLeaseCount": 1,
         "redisAvailable": true,
         "redisAuthoritative": false,
-        "observedAtMs": 1784968210052,
-        "startedAtMs": 1784968181681,
+        "observedAtMs": 1784983546083,
+        "startedAtMs": 1784983525296,
         "lastError": null
       }
     },
@@ -147,14 +147,14 @@
         "projectorId": "projector-a",
         "healthy": true,
         "finalizedHeight": 9,
-        "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+        "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 10,
-        "projectedAtMs": 1784968209987,
-        "startedAtMs": 1784968181731,
+        "projectedAtMs": 1784983545938,
+        "startedAtMs": 1784983525319,
         "lastError": null
       },
       "projectorB": {
@@ -162,21 +162,21 @@
         "projectorId": "projector-b",
         "healthy": true,
         "finalizedHeight": 9,
-        "stateRoot": "73b5e835b240b57ba52656dd2d6607dc653ad6bea9f99441b2feafae10ee17de",
+        "stateRoot": "cc48a4c2266b497f96b55559df198d3d6da1611d673dafb597eaba8ceb30bcc4",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 10,
-        "projectedAtMs": 1784968209947,
-        "startedAtMs": 1784968181662,
+        "projectedAtMs": 1784983545925,
+        "startedAtMs": 1784983525263,
         "lastError": null
       }
     },
     "goal4FaultRecovery": {
       "accepted": true,
       "finalHeight": 14,
-      "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+      "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
       "validatorStatuses": [
         {
           "role": "commonware-validator",
@@ -186,10 +186,10 @@
           "quorum": 3,
           "finalizedHeight": 14,
           "lastSequence": 14,
-          "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+          "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
           "preparedCount": 14,
           "pendingCount": 0,
-          "startedAtMs": 1784968177940
+          "startedAtMs": 1784983521648
         },
         {
           "role": "commonware-validator",
@@ -199,10 +199,10 @@
           "quorum": 3,
           "finalizedHeight": 14,
           "lastSequence": 14,
-          "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+          "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
           "preparedCount": 14,
           "pendingCount": 0,
-          "startedAtMs": 1784968177965
+          "startedAtMs": 1784983521605
         },
         {
           "role": "commonware-validator",
@@ -212,10 +212,10 @@
           "quorum": 3,
           "finalizedHeight": 14,
           "lastSequence": 14,
-          "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+          "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
           "preparedCount": 14,
           "pendingCount": 0,
-          "startedAtMs": 1784968178008
+          "startedAtMs": 1784983521625
         },
         {
           "role": "commonware-validator",
@@ -225,10 +225,10 @@
           "quorum": 3,
           "finalizedHeight": 14,
           "lastSequence": 14,
-          "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+          "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
           "preparedCount": 14,
           "pendingCount": 0,
-          "startedAtMs": 1784968212636
+          "startedAtMs": 1784983548445
         }
       ],
       "projectorA": {
@@ -236,14 +236,14 @@
         "projectorId": "projector-a",
         "healthy": true,
         "finalizedHeight": 14,
-        "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+        "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 2,
-        "projectedAtMs": 1784968223302,
-        "startedAtMs": 1784968220737,
+        "projectedAtMs": 1784983558905,
+        "startedAtMs": 1784983556602,
         "lastError": null
       },
       "projectorB": {
@@ -251,27 +251,27 @@
         "projectorId": "projector-b",
         "healthy": true,
         "finalizedHeight": 14,
-        "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+        "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 15,
-        "projectedAtMs": 1784968223232,
-        "startedAtMs": 1784968181662,
+        "projectedAtMs": 1784983558901,
+        "startedAtMs": 1784983525263,
         "lastError": null
       },
       "databaseChecks": {
         "postgres-a": {
           "height": 14,
-          "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+          "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
           "gold": 115,
           "redPotion": 5,
           "commandCount": 14
         },
         "postgres-b": {
           "height": 14,
-          "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+          "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
           "gold": 115,
           "redPotion": 5,
           "commandCount": 14
@@ -284,18 +284,18 @@
         "gatewayId": "gateway-b",
         "zoneId": "mir2-map-0",
         "fencingToken": 2,
-        "expiresAtMs": 1784968273979
+        "expiresAtMs": 1784983609746
       },
       "finalRoute": {
         "gatewayId": "gateway-b",
         "finalizedHeight": 14,
-        "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+        "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
         "placement": {
           "zoneId": "mir2-map-0",
           "generation": 2,
           "primaryHostId": "dubhe-b",
           "replicaHostIds": [],
-          "expiresAtMs": 1784969122384
+          "expiresAtMs": 1784984457949
         },
         "primaryEndpoint": "dubhe-b:7020",
         "replicaEndpoints": []
@@ -311,7 +311,7 @@
         "gatewayId": "gateway-a",
         "healthy": true,
         "finalizedHeight": 10,
-        "stateRoot": "fe4cae2c358cb429590be44fffb6662d5dd2fcacf5b7a0fc9288bd5c75e1e5b9",
+        "stateRoot": "c34f465de41d5111c50f8d12c0b41b30c1f06d2aec26afef387b3411d5aafbc7",
         "agreeingValidators": [
           "validator-0",
           "validator-1",
@@ -322,8 +322,8 @@
         "sessionLeaseCount": 1,
         "redisAvailable": true,
         "redisAuthoritative": false,
-        "observedAtMs": 1784968212441,
-        "startedAtMs": 1784968181705,
+        "observedAtMs": 1784983548259,
+        "startedAtMs": 1784983525281,
         "lastError": null
       },
       "recoveredValidator": {
@@ -334,10 +334,10 @@
         "quorum": 3,
         "finalizedHeight": 10,
         "lastSequence": 10,
-        "stateRoot": "fe4cae2c358cb429590be44fffb6662d5dd2fcacf5b7a0fc9288bd5c75e1e5b9",
+        "stateRoot": "c34f465de41d5111c50f8d12c0b41b30c1f06d2aec26afef387b3411d5aafbc7",
         "preparedCount": 10,
         "pendingCount": 0,
-        "startedAtMs": 1784968212636
+        "startedAtMs": 1784983548445
       }
     },
     {
@@ -346,7 +346,7 @@
       "takeoverLease": {
         "accepted": true,
         "finalizedHeight": 11,
-        "stateRoot": "d2523a0decdec93d15daf65283802bcf6afc8da571107e4fc835746ca4cc8cb5",
+        "stateRoot": "29135a9218bd28e755baa9a90c28f6470bebdc114bc92cecca61ef940b063f35",
         "lease": {
           "sessionId": "gate14-session",
           "accountId": "gate14-alice",
@@ -354,12 +354,12 @@
           "gatewayId": "gateway-b",
           "zoneId": "mir2-map-0",
           "fencingToken": 2,
-          "expiresAtMs": 1784968273979
+          "expiresAtMs": 1784983609746
         },
         "route": {
           "gatewayId": "gateway-b",
           "finalizedHeight": 11,
-          "stateRoot": "d2523a0decdec93d15daf65283802bcf6afc8da571107e4fc835746ca4cc8cb5",
+          "stateRoot": "29135a9218bd28e755baa9a90c28f6470bebdc114bc92cecca61ef940b063f35",
           "placement": {
             "zoneId": "mir2-map-0",
             "generation": 1,
@@ -367,7 +367,7 @@
             "replicaHostIds": [
               "dubhe-b"
             ],
-            "expiresAtMs": 1784969083779
+            "expiresAtMs": 1784984427179
           },
           "primaryEndpoint": "dubhe-a:7020",
           "replicaEndpoints": [
@@ -384,14 +384,14 @@
         "projectorId": "projector-a",
         "healthy": true,
         "finalizedHeight": 12,
-        "stateRoot": "1ebd4e26e0e1085116424bceb4d7637f2b1b5138c79872ad4128e198682d98c8",
+        "stateRoot": "7c70b8aa2c3ef61886af11d69cc89f5eb86eecd626f473319b079c0c8f2feda1",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": false,
         "rebuiltCount": 13,
-        "projectedAtMs": 1784968216974,
-        "startedAtMs": 1784968181731,
+        "projectedAtMs": 1784983553057,
+        "startedAtMs": 1784983525319,
         "lastError": null
       },
       "independentProjection": {
@@ -399,14 +399,14 @@
         "projectorId": "projector-b",
         "healthy": true,
         "finalizedHeight": 12,
-        "stateRoot": "1ebd4e26e0e1085116424bceb4d7637f2b1b5138c79872ad4128e198682d98c8",
+        "stateRoot": "7c70b8aa2c3ef61886af11d69cc89f5eb86eecd626f473319b079c0c8f2feda1",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 13,
-        "projectedAtMs": 1784968217114,
-        "startedAtMs": 1784968181662,
+        "projectedAtMs": 1784983553056,
+        "startedAtMs": 1784983525263,
         "lastError": null
       },
       "recovered": {
@@ -414,14 +414,14 @@
         "projectorId": "projector-a",
         "healthy": true,
         "finalizedHeight": 12,
-        "stateRoot": "1ebd4e26e0e1085116424bceb4d7637f2b1b5138c79872ad4128e198682d98c8",
+        "stateRoot": "7c70b8aa2c3ef61886af11d69cc89f5eb86eecd626f473319b079c0c8f2feda1",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 14,
-        "projectedAtMs": 1784968217493,
-        "startedAtMs": 1784968181731,
+        "projectedAtMs": 1784983553581,
+        "startedAtMs": 1784983525319,
         "lastError": null
       }
     },
@@ -433,14 +433,14 @@
         "projectorId": "projector-b",
         "healthy": true,
         "finalizedHeight": 13,
-        "stateRoot": "62ba0b825549de9c0222ca1b24e17666bbe8b432d45ca937c05adc3d3db15d20",
+        "stateRoot": "63967c361f7dc99d55e37f611e6694c07c9d29bfe3c4fb6817f725e68562837f",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 14,
-        "projectedAtMs": 1784968218908,
-        "startedAtMs": 1784968181662,
+        "projectedAtMs": 1784983554840,
+        "startedAtMs": 1784983525263,
         "lastError": null
       },
       "projectorARebuilt": {
@@ -448,14 +448,14 @@
         "projectorId": "projector-a",
         "healthy": true,
         "finalizedHeight": 13,
-        "stateRoot": "62ba0b825549de9c0222ca1b24e17666bbe8b432d45ca937c05adc3d3db15d20",
+        "stateRoot": "63967c361f7dc99d55e37f611e6694c07c9d29bfe3c4fb6817f725e68562837f",
         "postgresAuthoritative": false,
         "databaseAvailable": true,
         "redisAuthoritative": false,
         "redisAvailable": true,
         "rebuiltCount": 1,
-        "projectedAtMs": 1784968220752,
-        "startedAtMs": 1784968220737,
+        "projectedAtMs": 1784983556615,
+        "startedAtMs": 1784983556602,
         "lastError": null
       }
     },
@@ -465,13 +465,13 @@
       "finalizedRoute": {
         "gatewayId": "gateway-b",
         "finalizedHeight": 14,
-        "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+        "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
         "placement": {
           "zoneId": "mir2-map-0",
           "generation": 2,
           "primaryHostId": "dubhe-b",
           "replicaHostIds": [],
-          "expiresAtMs": 1784969122384
+          "expiresAtMs": 1784984457949
         },
         "primaryEndpoint": "dubhe-b:7020",
         "replicaEndpoints": []
@@ -481,7 +481,7 @@
         "gatewayId": "gateway-a",
         "healthy": true,
         "finalizedHeight": 14,
-        "stateRoot": "23bf775ca88b8f250e232527a419f8c91eeb7f8c79fcff3436295dab884eed9f",
+        "stateRoot": "3f0e76cb87361d91f4c618559686feabbeb0048a223b501b275d013a42c85dad",
         "agreeingValidators": [
           "validator-0",
           "validator-1",
@@ -493,11 +493,11 @@
         "sessionLeaseCount": 1,
         "redisAvailable": true,
         "redisAuthoritative": false,
-        "observedAtMs": 1784968224076,
-        "startedAtMs": 1784968224073,
+        "observedAtMs": 1784983559788,
+        "startedAtMs": 1784983559786,
         "lastError": null
       }
     }
   ],
-  "completedAtMs": 1784968225345
+  "completedAtMs": 1784983561054
 }
