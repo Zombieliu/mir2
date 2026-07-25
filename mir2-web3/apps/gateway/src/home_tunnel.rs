@@ -111,6 +111,7 @@ pub struct HomeTunnelRegistration {
     pub process_id: u32,
     pub sequence: u64,
     pub started_at_ms: u64,
+    pub tls_certificate_sha256: String,
     pub capacity_certificate: NodeCapacityCertificate,
     pub signature_algorithm: String,
     pub signature: String,
@@ -126,6 +127,7 @@ impl HomeTunnelRegistration {
         process_id: u32,
         sequence: u64,
         started_at_ms: u64,
+        tls_certificate_sha256: impl Into<String>,
         capacity_certificate: NodeCapacityCertificate,
     ) -> Result<Self, String> {
         let mut registration = Self {
@@ -138,6 +140,7 @@ impl HomeTunnelRegistration {
             process_id,
             sequence,
             started_at_ms,
+            tls_certificate_sha256: tls_certificate_sha256.into(),
             capacity_certificate,
             signature_algorithm: SIGNATURE_ALGORITHM.to_string(),
             signature: String::new(),
@@ -171,6 +174,10 @@ impl HomeTunnelRegistration {
         if self.started_at_ms == 0 || self.started_at_ms > now_ms {
             return Err("home tunnel agent start time is invalid".to_string());
         }
+        validate_sha256(
+            "home tunnel TLS certificate fingerprint",
+            &self.tls_certificate_sha256,
+        )?;
         if node_id_from_public_key(&self.public_key)? != self.node_id {
             return Err("home tunnel registration node id does not match public key".to_string());
         }
@@ -333,6 +340,33 @@ pub struct HomeTunnelStreamOpen {
     pub relay_public_key: String,
     pub signature_algorithm: String,
     pub signature: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HomeTunnelStreamEnvelope {
+    pub placement: HomeTunnelPlacement,
+    pub open: HomeTunnelStreamOpen,
+}
+
+impl HomeTunnelStreamEnvelope {
+    pub fn verify(
+        &self,
+        trusted_control_issuer: &str,
+        trusted_relay_issuer: &str,
+        expected_relay_id: &str,
+        capacity_certificate: &NodeCapacityCertificate,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        self.placement.verify(
+            trusted_control_issuer,
+            expected_relay_id,
+            capacity_certificate,
+            now_ms,
+        )?;
+        self.open
+            .verify(trusted_relay_issuer, &self.placement, now_ms)
+    }
 }
 
 impl HomeTunnelStreamOpen {
@@ -577,6 +611,13 @@ fn validate_nonce(label: &str, value: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn validate_sha256(label: &str, value: &str) -> Result<(), String> {
+    if value.len() != 64 || !value.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err(format!("{label} must be a SHA-256 hex digest"));
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -691,6 +732,7 @@ mod tests {
             42,
             1,
             2_900,
+            "aa".repeat(32),
             fixture.certificate.clone(),
         )
         .unwrap();
@@ -726,6 +768,7 @@ mod tests {
             42,
             1,
             2_900,
+            "aa".repeat(32),
             fixture.certificate,
         )
         .unwrap();
