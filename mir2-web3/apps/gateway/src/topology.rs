@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use serde::Deserialize;
 
+use crate::hotspot::{HotMapLineScheduler, HotMapPlacementRequest, HotMapPolicy};
 use crate::routing::{
     SessionRouteRequest, SessionRouter, SharedAccountInventoryServiceHandle,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
@@ -29,6 +30,7 @@ pub struct ZoneTopology {
     default_tick_ms: u64,
     map_routes: BTreeMap<String, ZoneId>,
     tick_ms_by_zone: BTreeMap<ZoneId, u64>,
+    hot_map_policies: BTreeMap<String, HotMapPolicy>,
 }
 
 impl ZoneTopology {
@@ -39,6 +41,7 @@ impl ZoneTopology {
             default_tick_ms: DEFAULT_TICK_MS,
             map_routes: BTreeMap::new(),
             tick_ms_by_zone: BTreeMap::new(),
+            hot_map_policies: BTreeMap::new(),
         }
     }
 
@@ -120,12 +123,27 @@ impl ZoneTopology {
         if document.mode == ZoneTopologyMode::Single && !map_routes.is_empty() {
             return Err("single Zone topology cannot declare map groups".to_string());
         }
+        if document.mode == ZoneTopologyMode::Single && !document.hot_maps.is_empty() {
+            return Err("single Zone topology cannot declare hot maps".to_string());
+        }
+        for (map, policy) in &document.hot_maps {
+            validate_identifier("hot map file name", map)?;
+            if assigned_maps.contains(map) {
+                return Err(format!(
+                    "hot map {map} must not also appear in a static Zone group"
+                ));
+            }
+            policy
+                .validate()
+                .map_err(|error| format!("invalid hot-map policy for {map}: {error}"))?;
+        }
         Ok(Self {
             mode: document.mode,
             default_zone_id,
             default_tick_ms,
             map_routes,
             tick_ms_by_zone,
+            hot_map_policies: document.hot_maps,
         })
     }
 
@@ -140,6 +158,9 @@ impl ZoneTopology {
     pub fn route_map(&self, map_file_name: &str) -> ZoneId {
         if self.mode == ZoneTopologyMode::Single {
             return self.default_zone_id.clone();
+        }
+        if self.hot_map_policies.contains_key(map_file_name) {
+            return ZoneId::new(format!("map:{map_file_name}:line:1"));
         }
         self.map_routes
             .get(map_file_name)
@@ -182,8 +203,15 @@ impl ZoneTopology {
     }
 
     pub fn router(&self) -> SharedSessionRouter {
+        let hot_map_scheduler = (!self.hot_map_policies.is_empty()).then(|| {
+            Arc::new(
+                HotMapLineScheduler::new(self.hot_map_policies.clone())
+                    .expect("validated hot-map policies must construct"),
+            )
+        });
         Arc::new(ConfiguredZoneSessionRouter {
             topology: self.clone(),
+            hot_map_scheduler,
         }) as SharedSessionRouter
     }
 
@@ -233,15 +261,35 @@ impl ZoneTopology {
 #[derive(Debug, Clone)]
 struct ConfiguredZoneSessionRouter {
     topology: ZoneTopology,
+    hot_map_scheduler: Option<Arc<HotMapLineScheduler>>,
 }
 
 impl SessionRouter for ConfiguredZoneSessionRouter {
     fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
-        request
-            .map_file_name
-            .as_deref()
-            .map(|map| self.topology.route_map(map))
-            .unwrap_or_else(|| default_zone_id.clone())
+        let Some(map) = request.map_file_name.as_deref() else {
+            return default_zone_id.clone();
+        };
+        let Some(scheduler) = self.hot_map_scheduler.as_ref() else {
+            return self.topology.route_map(map);
+        };
+        if !self.topology.hot_map_policies.contains_key(map) {
+            return self.topology.route_map(map);
+        }
+        let session_key = match (&request.account_id, request.character_index) {
+            (Some(account_id), Some(character_index)) => {
+                format!("{account_id}:{character_index}")
+            }
+            _ => return self.topology.route_map(map),
+        };
+        scheduler
+            .place(HotMapPlacementRequest {
+                session_key,
+                map_file_name: map.to_string(),
+                affinity_key: request.affinity_key.clone(),
+                explicit_line: request.explicit_line,
+            })
+            .map(|placement| placement.zone_id)
+            .unwrap_or_else(|_| self.topology.route_map(map))
     }
 }
 
@@ -256,6 +304,8 @@ struct ZoneTopologyDocument {
     default_tick_ms: u64,
     #[serde(default)]
     zones: BTreeMap<String, ZoneGroupDocument>,
+    #[serde(default)]
+    hot_maps: BTreeMap<String, HotMapPolicy>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -300,6 +350,7 @@ mod tests {
         InMemoryZoneOwnerLeaseAuthority, SessionRouteRequest, ZoneId, ZoneRuntimeFactory,
     };
     use crate::session::GatewayConfig;
+    use std::collections::BTreeMap;
     use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
@@ -430,5 +481,63 @@ mod tests {
         assert_eq!(hot.zone_id, ZoneId::new("hot"));
         assert_eq!(unknown.zone_id, ZoneId::new("map:700"));
         assert_ne!(hot.owner_lease.zone_id(), unknown.owner_lease.zone_id());
+    }
+
+    #[test]
+    fn adaptive_hot_map_routes_three_hundred_sessions_to_six_lines() {
+        let topology = ZoneTopology::from_json(
+            br#"{
+                "version": 1,
+                "mode": "per_map",
+                "hotMaps": {
+                    "0": {
+                        "targetPlayersPerLine": 50,
+                        "maximumPlayersPerLine": 64,
+                        "maximumLines": 8,
+                        "scaleInGraceMs": 30000
+                    }
+                }
+            }"#,
+        )
+        .expect("adaptive topology should parse");
+        let router = topology.router();
+        let mut counts = BTreeMap::<ZoneId, usize>::new();
+        for index in 0..300 {
+            let zone = router.route_session(
+                &SessionRouteRequest {
+                    account_id: Some(format!("account-{index}")),
+                    character_index: Some(0),
+                    map_file_name: Some("0".to_string()),
+                    ..SessionRouteRequest::anonymous()
+                },
+                topology.default_zone_id(),
+            );
+            *counts.entry(zone).or_default() += 1;
+        }
+        assert_eq!(counts.len(), 6);
+        assert!(counts.values().all(|players| *players == 50));
+
+        let party_one = router.route_session(
+            &SessionRouteRequest {
+                account_id: Some("party-one".to_string()),
+                character_index: Some(0),
+                map_file_name: Some("0".to_string()),
+                affinity_key: Some("guild-war-party-7".to_string()),
+                explicit_line: Some(7),
+            },
+            topology.default_zone_id(),
+        );
+        let party_two = router.route_session(
+            &SessionRouteRequest {
+                account_id: Some("party-two".to_string()),
+                character_index: Some(0),
+                map_file_name: Some("0".to_string()),
+                affinity_key: Some("guild-war-party-7".to_string()),
+                ..SessionRouteRequest::anonymous()
+            },
+            topology.default_zone_id(),
+        );
+        assert_eq!(party_one, ZoneId::new("map:0:line:7"));
+        assert_eq!(party_two, party_one);
     }
 }
