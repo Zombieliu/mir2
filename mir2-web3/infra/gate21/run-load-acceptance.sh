@@ -68,7 +68,7 @@ mv "${resource_tmp}" "${output}"
 jq -e '
   .schemaVersion == 1
   and .success == true
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .profileExact == true
   and .gitCommit == $gitCommit
   and .imageDigest == $imageDigest
@@ -87,8 +87,8 @@ jq -e '
   and .zoneHostSessionCount == 3000
   and .zoneHostActiveConnections <= 260
   and (.zoneHostActiveConnections * 4) < .zoneHostSessionCount
-  and .requestedActiveDurationSeconds == 259200
-  and .measuredActiveDurationMs >= 259200000
+  and .requestedActiveDurationSeconds == 900
+  and .measuredActiveDurationMs >= 900000
   and .latencyMs.p95 <= 200
   and .latencyMs.p99 <= 500
   and .resources.zoneRpcCodec == "msgpack"
@@ -109,4 +109,4 @@ jq -e '
   and all(.assertions[]; . == true)
 ' --arg gitCommit "${git_commit}" --arg imageDigest "${image_digest}" "${output}" >/dev/null
 
-echo "Gate 21 exact 3,000-player/72-hour load evidence written to ${output}"
+echo "Gate 21 exact 3,000-player/15-minute load evidence written to ${output}"

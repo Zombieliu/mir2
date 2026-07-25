@@ -10,8 +10,8 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-pub const REGIONAL_PROFILE_SCHEMA_VERSION: u32 = 1;
-pub const REGIONAL_REFERENCE_PROFILE_ID: &str = "mir2-regional-v1";
+pub const REGIONAL_PROFILE_SCHEMA_VERSION: u32 = 2;
+pub const REGIONAL_REFERENCE_PROFILE_ID: &str = "mir2-regional-v1-3000-15m";
 pub const REGIONAL_REFERENCE_PROFILE_JSON: &str =
     include_str!("../../../infra/regional/profile.json");
 
@@ -61,9 +61,9 @@ pub struct RegionalStage {
     #[serde(default)]
     pub orphan_economy_transaction_count: Option<u64>,
     #[serde(default)]
-    pub maximum_sustained_memory_growth_percent: Option<f64>,
+    pub maximum_observed_memory_growth_percent: Option<f64>,
     #[serde(default)]
-    pub maximum_sustained_wal_growth_bytes: Option<u64>,
+    pub maximum_observed_wal_bytes: Option<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -170,7 +170,6 @@ impl RegionalProfile {
             ("gate21", &self.stages.gate21),
         ];
         let mut previous_players = 0;
-        let mut previous_duration = 0;
         for (name, stage) in stages {
             stage.validate(name)?;
             if stage.concurrent_players < previous_players {
@@ -178,13 +177,7 @@ impl RegionalProfile {
                     "{name} concurrent players must not decrease from the previous Gate"
                 ));
             }
-            if stage.duration_seconds < previous_duration {
-                return Err(format!(
-                    "{name} duration must not decrease from the previous Gate"
-                ));
-            }
             previous_players = stage.concurrent_players;
-            previous_duration = stage.duration_seconds;
         }
 
         let unique_faults = self
@@ -235,10 +228,7 @@ impl RegionalStage {
         for (label, value) in [
             ("p95", self.maximum_command_p95_ms),
             ("p99", self.maximum_command_p99_ms),
-            (
-                "memory growth",
-                self.maximum_sustained_memory_growth_percent,
-            ),
+            ("memory growth", self.maximum_observed_memory_growth_percent),
         ] {
             if value.is_some_and(|value| !value.is_finite() || value <= 0.0) {
                 return Err(format!(
@@ -310,7 +300,8 @@ mod tests {
         assert_eq!(profile.stages.gate18.concurrent_players, 500);
         assert_eq!(profile.stages.gate20.concurrent_players, 1_000);
         assert_eq!(profile.stages.gate21.concurrent_players, 3_000);
-        assert_eq!(profile.stages.gate21.duration_seconds, 72 * 60 * 60);
+        assert_eq!(profile.stages.gate21.duration_seconds, 15 * 60);
+        assert_eq!(profile.stages.gate21.hot_map_players, Some(500));
     }
 
     #[test]

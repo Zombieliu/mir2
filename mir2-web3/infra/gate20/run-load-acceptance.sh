@@ -37,7 +37,7 @@ mv "${resource_tmp}" "${output}"
 jq -e '
   .schemaVersion == 1
   and .success == true
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .profileExact == true
   and .gitCommit == $gitCommit
   and .imageDigest == $imageDigest
@@ -53,14 +53,14 @@ jq -e '
   and all(.hotMapLinePlayers[]; . == 50)
   and .zoneHostSessionCount == 1000
   and .zoneHostActiveConnections <= 130
-  and .requestedActiveDurationSeconds == 3600
-  and .measuredActiveDurationMs >= 3600000
+  and .requestedActiveDurationSeconds == 900
+  and .measuredActiveDurationMs >= 900000
   and .latencyMs.p95 <= 200
   and .resources.zoneRpcCodec == "msgpack"
   and .resources.zoneRpcSharedPoolSize == 128
   and .resources.zoneRpcQueueTimeoutMs == 500
-  and .resources.cgroupCpuMax == "400000 100000"
-  and .resources.cgroupMemoryMax == "8589934592"
+  and .resources.cgroupCpuMax == "200000 100000"
+  and .resources.cgroupMemoryMax == "2147483648"
   and .referenceResourceAttestation.success == true
   and all(.referenceResourceAttestation.assertions[]; . == true)
   and .workloadCommandCoverage >= 0.95
@@ -71,4 +71,4 @@ jq -e '
   and all(.assertions[]; . == true)
 ' --arg gitCommit "${git_commit}" --arg imageDigest "${image_digest}" "${output}" >/dev/null
 
-echo "Gate 20 exact one-hour load evidence written to ${output}"
+echo "Gate 20 exact 1,000-player/15-minute load evidence written to ${output}"

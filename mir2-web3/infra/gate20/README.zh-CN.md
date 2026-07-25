@@ -6,7 +6,7 @@ Gate 20 把 Gate 19 已证明的 HA 边界扩展到热点场景。它不是把 `
 
 机器验收口径：
 
-- `1,000` 个不同账号和角色，持续有效负载 `3,600` 秒；
+- `1,000` 个不同账号和角色，持续有效负载 `900` 秒；
 - `120` 张地图同时有人，其中地图 `0` 恰好 `300` 人；
 - 热点目标每线 `50` 人、硬上限 `64` 人，结果必须为六条各 `50` 人；
 - 队伍、公会等 affinity key 固定在同一线路，玩家显式选线不会被后台迁移；
@@ -43,15 +43,14 @@ flowchart LR
 
 ## 一键运行
 
-需要 Docker、Rust `1.89.0`、`jq` 和不低于
-`infra/regional/profile.json.referenceDeployment` 的可用资源。正式入口会先
-执行 `preflight-reference.sh`，读取 Docker Engine 实际可用 CPU/内存；当前
-profile 的最低总量是 `98 CPU / 240 GiB`，不足时会在构建或清理容器之前失败，
-不会产出可被聚合器接受的正式证据。Gate 20 Compose 为负载 Gateway 固定
-`4 CPU / 8 GiB`、为八个 active Zone Host 和一个 promotion standby 各固定
-`8 CPU / 16 GiB`、为两个 PostgreSQL 节点各固定 `8 CPU / 32 GiB`。
+需要 Docker、Rust `1.89.0` 和 `jq`。Gate 20 是本机开发验收层，入口先执行
+`preflight-reference.sh`，要求 Docker 实际暴露至少 `10 CPU / 7.5GiB`，并把
+真实主机配置绑定到证据。容器资源值是上限而不是内存预留：负载器为
+`2 CPU / 2GiB`，每个 Zone Host 为 `2 CPU / 2GiB`，PostgreSQL 主备各为
+`2 CPU / 4GiB`。是否通过最终由 1,000 CCU 的 p95、错误率和经济一致性决定，
+不能只凭机器规格宣称容量。
 
-先运行正式一小时负载：
+先运行正式 15 分钟负载：
 
 ```bash
 ./infra/gate20/run-load-acceptance.sh
@@ -89,7 +88,7 @@ docker compose -f infra/gate20/docker-compose.yml --profile acceptance run --rm 
   regional-load
 ```
 
-`run-load-acceptance.sh` 始终只接受 `profileExact=true`、`1,000` 人和 `3,600`
+`run-load-acceptance.sh` 始终只接受 `profileExact=true`、`1,000` 人和 `900`
 秒，并写入正式路径；开发 profile 使用独立文件，不能覆盖正式证据。
 
 ## 人工观察
@@ -107,6 +106,6 @@ docker stats --no-stream
 3. p95 未因背压队列超时或 promotion 突增到 `200 ms` 以上；
 4. `economyDuplicateCount` 与 `economyRuntimeLedgerMismatchCount` 都为 `0`。
 
-本机短测只能用于开发反馈，不能线性外推 Commercial 容量。Gate 21 的
-`3,000` 人、`72` 小时、全故障矩阵、滚动升级和资源增长约束仍是 Regional
-最终认证边界。
+Gate 20 是本机开发验收层；证据绑定实际 Docker 主机资源，不能线性外推
+Commercial 容量。Gate 21 的 `3,000` CCU、完整故障矩阵和滚动升级仍是
+Regional 正式认证边界，但当前窗口同样为 15 分钟；长期耐久另行认证。

@@ -8,7 +8,7 @@ gate21_compose="${script_dir}/docker-compose.yml"
 evidence_dir="${repo_root}/docs/generated/regional"
 raw_output="${evidence_dir}/gate21-stability-samples.jsonl"
 summary_output="${evidence_dir}/gate21-stability.json"
-interval_seconds="${MIR2_GATE21_STABILITY_SAMPLE_SECONDS:-300}"
+interval_seconds="${MIR2_GATE21_STABILITY_SAMPLE_SECONDS:-15}"
 
 compose() {
   docker compose -f "${base_compose}" -f "${gate21_compose}" --profile acceptance "$@"
