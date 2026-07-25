@@ -113,8 +113,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         limits,
     )
     .with_connection_reuse();
-    let authority =
-        PostgresZoneOwnerLeaseAuthority::new(database_url, active_owner.clone(), lease_ttl_ms);
+    let authority = PostgresZoneOwnerLeaseAuthority::new(
+        database_url.clone(),
+        active_owner.clone(),
+        lease_ttl_ms,
+    );
     let active_lease = authority.acquire_at(&zone_id, now_ms())?;
     if active_lease.owner_id() != active_owner {
         return Err(format!(
@@ -167,7 +170,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .clone()
         .ok_or("ready standby did not return a readiness ID")?;
     let promoted_lease = authority.handoff_at(&active_lease, standby_owner.clone(), now_ms())?;
-    let receipt = standby.promote_replica(readiness_id.clone(), &promoted_lease)?;
+    let receipt = match standby.promote_replica(readiness_id.clone(), &promoted_lease) {
+        Ok(receipt) => receipt,
+        Err(promotion_error) => {
+            let standby_authority = PostgresZoneOwnerLeaseAuthority::new(
+                database_url,
+                standby_owner.clone(),
+                lease_ttl_ms,
+            );
+            let rollback_lease = standby_authority
+                .handoff_at(&promoted_lease, active_owner.clone(), now_ms())
+                .map_err(|rollback_error| {
+                    format!(
+                        "standby promotion failed after owner handoff: {promotion_error}; \
+                         ownership rollback also failed closed: {rollback_error}"
+                    )
+                })?;
+            let resume_result = active.resume_after_quiesce(&rollback_lease);
+            return Err(format!(
+                "standby promotion failed after owner handoff: {promotion_error}; \
+                 rolled ownership back to {} generation {}; active resume: {}",
+                rollback_lease.owner_id(),
+                rollback_lease.fencing_token(),
+                match resume_result {
+                    Ok(()) => "succeeded".to_string(),
+                    Err(error) => format!("unavailable ({error})"),
+                }
+            )
+            .into());
+        }
+    };
     let post_promotion_probe_succeeded = standby.health().is_ok_and(|health| !health.draining)
         && standby.replication_head().is_ok_and(|head| {
             head.next_sequence >= receipt.head.next_sequence
