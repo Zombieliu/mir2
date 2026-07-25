@@ -2722,6 +2722,34 @@ impl SimulationConfig {
         Ok(())
     }
 
+    /// Refresh one account from the authoritative PostgreSQL repository.
+    ///
+    /// Zone handoff and reconnect can land on a process whose in-memory account
+    /// image predates the latest character save. Loading only the requested
+    /// account keeps that boundary safe without re-reading every account on
+    /// every login.
+    pub(crate) fn refresh_account_store_account(&self, account_id: &str) -> Result<bool, String> {
+        if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth {
+            return Ok(false);
+        }
+        let Some(database_url) = self.account_store_database_url.as_deref() else {
+            return Ok(false);
+        };
+        let Some((account, versions)) =
+            load_account_from_postgres(database_url.to_string(), account_id.to_string())?
+        else {
+            return Ok(false);
+        };
+        let mut store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?;
+        store.accounts.insert(account_id.to_string(), account);
+        store.merge_source_versions(versions);
+        store.normalize_next_character_index();
+        Ok(true)
+    }
+
     pub fn save_account_store_account(&self, account_id: &str) -> Result<(), String> {
         let _persist_guard = self
             .account_store_persist_lock
@@ -2855,6 +2883,57 @@ fn load_account_store_from_postgres(
         postgres_account_store_pool(&database_url),
         default_character,
     )
+}
+
+fn load_account_from_postgres(
+    database_url: String,
+    account_id: String,
+) -> Result<Option<(AccountRecord, AccountStoreSourceVersions)>, String> {
+    let pool = postgres_account_store_pool(&database_url);
+    std::thread::spawn(move || {
+        let mut client = pool.connection()?;
+        pool.ensure_migrated(&mut client)?;
+        let Some(row) = client
+            .query_opt(
+                "SELECT raw_json, store_version FROM accounts WHERE account_id = $1",
+                &[&account_id],
+            )
+            .map_err(|error| {
+                format!("postgres account refresh failed for {account_id}: {error}")
+            })?
+        else {
+            return Ok(None);
+        };
+        let raw_json: Value = row.get("raw_json");
+        let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
+            format!("postgres account raw_json decode failed for {account_id}: {error}")
+        })?;
+        let mut versions = AccountStoreSourceVersions::default();
+        versions
+            .accounts
+            .insert(account_id.clone(), row.get("store_version"));
+        let save_rows = client
+            .query(
+                "SELECT character_index, save_version
+                 FROM character_saves
+                 WHERE account_id = $1
+                 ORDER BY character_index",
+                &[&account_id],
+            )
+            .map_err(|error| {
+                format!("postgres character-save refresh failed for {account_id}: {error}")
+            })?;
+        let save_versions = versions.saves.entry(account_id).or_default();
+        for save_row in save_rows {
+            save_versions.insert(
+                save_row.get("character_index"),
+                save_row.get("save_version"),
+            );
+        }
+        Ok(Some((account, versions)))
+    })
+    .join()
+    .map_err(|_| "postgres account refresh thread panicked".to_string())?
 }
 
 fn load_account_store_from_postgres_with_pool(

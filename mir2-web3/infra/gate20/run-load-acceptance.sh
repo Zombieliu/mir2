@@ -13,7 +13,8 @@ trap 'docker compose -f "${compose_file}" --profile acceptance down -v --remove-
 
 docker compose -f "${compose_file}" build zone-active zone-standby regional-load
 docker compose -f "${compose_file}" --profile acceptance up -d \
-  postgres-primary postgres-standby zone-active zone-standby
+  postgres-primary postgres-standby \
+  zone-active zone-active-2 zone-active-3 zone-active-4 zone-standby
 
 git_commit="$(git -C "${repo_root}" rev-parse HEAD)"
 image_digest="$(

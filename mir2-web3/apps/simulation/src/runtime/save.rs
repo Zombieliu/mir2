@@ -478,6 +478,9 @@ pub(super) fn login_account(
     account_id: &str,
     password: &str,
 ) -> AccountLoginResult {
+    if let Err(error) = config.refresh_account_store_account(account_id) {
+        eprintln!("failed to refresh postgres account {account_id}: {error}");
+    }
     let store = config
         .account_store
         .lock()
@@ -500,6 +503,9 @@ pub(super) fn login_passkey_account(
     config: &SimulationConfig,
     account_id: &str,
 ) -> AccountLoginResult {
+    if let Err(error) = config.refresh_account_store_account(account_id) {
+        eprintln!("failed to refresh postgres passkey account {account_id}: {error}");
+    }
     let mut store = config
         .account_store
         .lock()

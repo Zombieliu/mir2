@@ -691,6 +691,60 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         snapshot.rpc_errors_total
     );
     metric!(
+        "Nanoseconds spent decoding, dispatching, and encoding Zone RPC requests.",
+        "counter",
+        "obelisk_zone_host_rpc_service_duration_ns_total",
+        snapshot.rpc_service_duration_ns_total
+    );
+    metric!(
+        "Maximum nanoseconds spent decoding, dispatching, and encoding one Zone RPC request.",
+        "gauge",
+        "obelisk_zone_host_rpc_service_duration_ns_max",
+        snapshot.rpc_service_duration_ns_max
+    );
+    metric!(
+        "Encoded Zone RPC response bytes.",
+        "counter",
+        "obelisk_zone_host_rpc_response_bytes_total",
+        snapshot.rpc_response_bytes_total
+    );
+    metric!(
+        "Largest encoded Zone RPC response in bytes.",
+        "gauge",
+        "obelisk_zone_host_rpc_response_bytes_max",
+        snapshot.rpc_response_bytes_max
+    );
+    metric!(
+        "Nanoseconds spent waiting for per-Zone mutation lanes.",
+        "counter",
+        "obelisk_zone_host_zone_gate_wait_duration_ns_total",
+        snapshot.zone_gate_wait_duration_ns_total
+    );
+    metric!(
+        "Maximum nanoseconds spent waiting for a per-Zone mutation lane.",
+        "gauge",
+        "obelisk_zone_host_zone_gate_wait_duration_ns_max",
+        snapshot.zone_gate_wait_duration_ns_max
+    );
+    metric!(
+        "Execute RPC requests received.",
+        "counter",
+        "obelisk_zone_host_execute_requests_total",
+        snapshot.execute_requests_total
+    );
+    metric!(
+        "Nanoseconds spent executing gameplay runtime commands.",
+        "counter",
+        "obelisk_zone_host_execute_runtime_duration_ns_total",
+        snapshot.execute_runtime_duration_ns_total
+    );
+    metric!(
+        "Nanoseconds spent appending accepted gameplay commands to the journal.",
+        "counter",
+        "obelisk_zone_host_execute_journal_duration_ns_total",
+        snapshot.execute_journal_duration_ns_total
+    );
+    metric!(
         "Current v4 checkpoint journal entries.",
         "gauge",
         "obelisk_zone_host_checkpoint_journal_entries",
@@ -954,10 +1008,20 @@ mod tests {
             accepted_connections_total: 10,
             rpc_requests_total: 11,
             rpc_errors_total: 1,
+            rpc_service_duration_ns_total: 12,
+            rpc_service_duration_ns_max: 7,
+            rpc_response_bytes_total: 13,
+            rpc_response_bytes_max: 8,
+            zone_gate_wait_duration_ns_total: 14,
+            zone_gate_wait_duration_ns_max: 9,
+            execute_requests_total: 3,
+            execute_runtime_duration_ns_total: 15,
+            execute_journal_duration_ns_total: 16,
         };
         let output = render_prometheus(&snapshot);
         assert!(output.contains("obelisk_zone_host_sessions{host_id=\"guild-a\\\"node\"} 3"));
         assert!(output.contains("obelisk_zone_host_rpc_requests_total"));
+        assert!(output.contains("obelisk_zone_host_rpc_service_duration_ns_total"));
         assert!(output.contains("obelisk_zone_host_session_capacity_per_zone"));
         assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
         assert!(output.contains("obelisk_zone_host_checkpoint_journal_entries"));
