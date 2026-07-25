@@ -233,7 +233,6 @@ if [[ "${build}" -eq 1 ]]; then
 fi
 up_args+=(gateway web caddy)
 
-docker volume create mir2-developer-gh-config >/dev/null
 docker "${compose_args[@]}" config --quiet
 deployment_started=1
 docker "${compose_args[@]}" "${up_args[@]}"

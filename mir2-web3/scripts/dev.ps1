@@ -31,6 +31,15 @@ $ReleaseLockPath = Join-Path $ProjectRoot "config\developer-release.json"
 $AssetManifestPath = Join-Path $ProjectRoot "config\developer-assets.json"
 $WebUrl = "http://127.0.0.1:$WebPort/"
 $GatewayHealthUrl = "http://127.0.0.1:$GatewayWebPort/health"
+$script:DeveloperRevision = ""
+$script:LocalDeveloperImage = ""
+$script:RuntimeImagePrepared = $false
+$script:AssetImagePrepared = $false
+$script:PublishedImage = ""
+$script:PublishedDigest = ""
+$script:PublishedRevision = ""
+$script:PublishedReference = ""
+$script:RequestedDeveloperImage = $env:MIR2_DEV_IMAGE
 
 function Require-Command {
     param([string]$Name, [string]$InstallHint)
@@ -60,6 +69,19 @@ function Invoke-Compose {
     Invoke-External -Label "docker compose $($Arguments -join ' ')" `
         -FilePath "docker" `
         -Arguments (@("compose", "-f", $ComposeFile) + $Arguments)
+}
+
+function Invoke-ComposeWithInput {
+    param(
+        [string]$InputText,
+        [string[]]$Arguments
+    )
+
+    Write-Host "[dev] docker compose $($Arguments -join ' ')"
+    $InputText | & docker compose -f $ComposeFile @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker compose $($Arguments -join ' ') failed with exit code $LASTEXITCODE"
+    }
 }
 
 function Test-HttpOk {
@@ -141,39 +163,248 @@ function Test-ReleaseLock {
     Write-Host "[ok] Toolchain Node $($ReleaseLock.toolchains.node), npm $($ReleaseLock.toolchains.npm), Rust $($ReleaseLock.toolchains.rust)"
 }
 
-function Install-FullAssets {
-    if (-not $env:MIR2_DEV_IMAGE -or $env:MIR2_DEV_IMAGE -notmatch "@sha256:") {
-        throw "Full assets require the published digest-pinned developer image."
+function Select-LocalDeveloperImage {
+    $env:MIR2_DEV_IMAGE = $script:LocalDeveloperImage
+}
+
+function Test-DockerImageAvailable {
+    param([string]$Image)
+
+    $PreviousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & docker image inspect $Image *> $null
+        if ($LASTEXITCODE -eq 0) {
+            return $true
+        }
+        & docker pull $Image *> $null
+        return $LASTEXITCODE -eq 0
+    }
+    finally {
+        $ErrorActionPreference = $PreviousPreference
+    }
+}
+
+function Test-PublishedImageWitness {
+    $WitnessTag = "developer-image-$($script:PublishedRevision)"
+    $ReferenceRecord = (
+        & gh api `
+            "repos/Zombieliu/mir2/git/ref/tags/$WitnessTag" `
+            --jq '.object.type, .object.sha' |
+            Out-String
+    ).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to read published developer image witness: $WitnessTag"
+    }
+    $ReferenceParts = $ReferenceRecord -split "\r?\n"
+    if ($ReferenceParts.Count -ne 2 -or
+        $ReferenceParts[0] -ne "tag" -or
+        $ReferenceParts[1] -notmatch "^[a-f0-9]{40}$") {
+        throw "Published developer image witness is missing or is not annotated: $WitnessTag"
     }
 
-    Invoke-External -Label "ensure persistent GitHub authorization volume" `
-        -FilePath "docker" `
-        -Arguments @("volume", "create", "mir2-developer-gh-config")
+    $WitnessRecord = (
+        & gh api `
+            "repos/Zombieliu/mir2/git/tags/$($ReferenceParts[1])" `
+            --jq '.object.sha, .message' |
+            Out-String
+    ).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to read published developer image witness payload: $WitnessTag"
+    }
+    $WitnessParts = $WitnessRecord -split "\r?\n"
+    if ($WitnessParts.Count -ne 2 -or
+        $WitnessParts[0] -ne $script:PublishedRevision -or
+        $WitnessParts[1] -ne $script:PublishedReference) {
+        throw "Published developer image witness does not match the release lock."
+    }
+}
 
-    $RunArguments = @("run", "--rm", "--no-deps")
-    if ($env:GH_TOKEN) {
-        $RunArguments += @("-e", "GH_TOKEN")
+function Prepare-RuntimeImage {
+    if ($script:RuntimeImagePrepared) {
+        return
     }
 
+    if ($script:PublishedReference -and $env:MIR2_DEV_IMAGE -eq $script:PublishedReference) {
+        if (Test-DockerImageAvailable -Image $env:MIR2_DEV_IMAGE) {
+            $script:RuntimeImagePrepared = $true
+            return
+        }
+        Write-Host "[dev] Published image is unavailable; falling back to the locked local build."
+        Select-LocalDeveloperImage
+    }
+
+    if ($env:MIR2_DEV_IMAGE -eq $script:LocalDeveloperImage) {
+        $ActualRevision = ""
+        if (-not $Build) {
+            $PreviousPreference = $ErrorActionPreference
+            $ErrorActionPreference = "Continue"
+            try {
+                $ActualRevision = (
+                    & docker image inspect `
+                        --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' `
+                        $env:MIR2_DEV_IMAGE 2>$null |
+                        Out-String
+                ).Trim()
+            }
+            finally {
+                $ErrorActionPreference = $PreviousPreference
+            }
+        }
+        if ($ActualRevision -ne $script:DeveloperRevision) {
+            Write-Host "[dev] Build the locked local developer image for $($script:DeveloperRevision)."
+            Invoke-Compose -Arguments @("build", "workspace")
+        }
+    }
+    elseif (-not (Test-DockerImageAvailable -Image $env:MIR2_DEV_IMAGE)) {
+        if ($env:MIR2_DEV_IMAGE -match "@sha256:") {
+            throw "Unable to pull the explicitly selected developer image: $($env:MIR2_DEV_IMAGE)"
+        }
+        Invoke-Compose -Arguments @("build", "workspace")
+    }
+
+    $script:RuntimeImagePrepared = $true
+}
+
+function Prepare-AssetImage {
+    if ($script:AssetImagePrepared) {
+        return
+    }
+
+    if (-not $script:PublishedReference -or -not $script:PublishedRevision) {
+        throw "Full assets require a published image digest and revision in config/developer-release.json."
+    }
+    if ($script:PublishedImage -ne "ghcr.io/zombieliu/mir2-developer" -or
+        $script:PublishedDigest -notmatch "^sha256:[a-f0-9]{64}$" -or
+        $script:PublishedRevision -notmatch "^[a-f0-9]{40}$") {
+        throw "Full assets require the trusted published image, digest, and revision lock."
+    }
+
+    if ($script:RequestedDeveloperImage -and
+        $script:RequestedDeveloperImage -ne $script:PublishedReference) {
+        throw @"
+Full asset authorization refuses a custom developer image.
+Expected exactly: $($script:PublishedReference)
+"@
+    }
+
+    Require-Command "gh" "Install GitHub CLI, then run 'gh auth login'."
     $AuthReady = $false
     $PreviousPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        & docker compose -f $ComposeFile @RunArguments asset-auth gh auth status *> $null
+        & gh auth status --hostname github.com *> $null
         $AuthReady = $LASTEXITCODE -eq 0
     }
     finally {
         $ErrorActionPreference = $PreviousPreference
     }
     if (-not $AuthReady) {
-        Write-Host "[assets] Authorize access to the pinned private release."
-        Invoke-Compose -Arguments @(
-            "run", "--rm", "--no-deps", "asset-auth",
-            "gh", "auth", "login", "--web", "--git-protocol", "https"
-        )
+        Write-Host "[assets] Authorize the private repository and package."
+        Invoke-External -Label "GitHub device authorization" `
+            -FilePath "gh" `
+            -Arguments @(
+                "auth", "login",
+                "--hostname", "github.com",
+                "--web",
+                "--git-protocol", "https",
+                "--scopes", "repo,read:packages"
+            )
+    }
+    Test-PublishedImageWitness
+
+    $GitHubLogin = $env:MIR2_GITHUB_LOGIN
+    if (-not $GitHubLogin) {
+        $GitHubLogin = (& gh api user --jq .login | Out-String).Trim()
+    }
+    if ($LASTEXITCODE -ne 0 -or -not $GitHubLogin) {
+        throw "GitHub CLI did not return the authenticated login."
+    }
+    $GitHubToken = (& gh auth token --hostname github.com | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or -not $GitHubToken) {
+        throw "GitHub CLI did not return an authentication token."
+    }
+    $DockerConfigRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+    $DockerConfig = Join-Path $DockerConfigRoot ("mir2-docker-auth-" + [Guid]::NewGuid().ToString("N"))
+    $PreviousDockerConfig = [Environment]::GetEnvironmentVariable("DOCKER_CONFIG", "Process")
+    New-Item -ItemType Directory -Path $DockerConfig | Out-Null
+    try {
+        $env:DOCKER_CONFIG = $DockerConfig
+        $GitHubToken | & docker login ghcr.io --username $GitHubLogin --password-stdin
+        if ($LASTEXITCODE -ne 0) {
+            throw "GHCR login failed. Run: gh auth refresh --hostname github.com --scopes read:packages"
+        }
+        Invoke-External -Label "pull immutable developer image" `
+            -FilePath "docker" `
+            -Arguments @("pull", $script:PublishedReference)
+    }
+    finally {
+        $GitHubToken = $null
+        if ($null -eq $PreviousDockerConfig) {
+            Remove-Item Env:DOCKER_CONFIG -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:DOCKER_CONFIG = $PreviousDockerConfig
+        }
+        if (Test-Path -LiteralPath $DockerConfig) {
+            $ResolvedDockerConfig = [System.IO.Path]::GetFullPath($DockerConfig)
+            if (-not $ResolvedDockerConfig.StartsWith(
+                $DockerConfigRoot,
+                [System.StringComparison]::OrdinalIgnoreCase
+            )) {
+                throw "Refusing to remove Docker auth directory outside the temporary root."
+            }
+            Remove-Item -LiteralPath $ResolvedDockerConfig -Recurse -Force
+        }
     }
 
-    Invoke-Compose -Arguments ($RunArguments + @("asset-fetch"))
+    $env:MIR2_DEV_IMAGE = $script:PublishedReference
+    $PreviousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $ActualRevision = (
+            & docker image inspect `
+                --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' `
+                $env:MIR2_DEV_IMAGE 2>&1 |
+                Out-String
+        ).Trim()
+        $InspectExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $PreviousPreference
+    }
+    if ($InspectExitCode -ne 0) {
+        throw "Unable to inspect the published developer image."
+    }
+    if ($ActualRevision -ne $script:PublishedRevision) {
+        throw "Published developer image revision mismatch: expected $($script:PublishedRevision), got $ActualRevision."
+    }
+
+    $script:AssetImagePrepared = $true
+}
+
+function Install-FullAssets {
+    Prepare-AssetImage
+
+    $PreviousToken = $env:GH_TOKEN
+    $AssetToken = (& gh auth token --hostname github.com | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or -not $AssetToken) {
+        throw "GitHub CLI did not return a token for the asset fetcher."
+    }
+    try {
+        Invoke-ComposeWithInput -InputText $AssetToken -Arguments @(
+            "run", "--rm", "--no-deps", "-T", "asset-fetch"
+        )
+    }
+    finally {
+        $AssetToken = $null
+        if ($null -eq $PreviousToken) {
+            Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:GH_TOKEN = $PreviousToken
+        }
+    }
 
     $AssetManifest = Get-Content -LiteralPath $AssetManifestPath -Raw | ConvertFrom-Json
     $AssetCache = ".mir2-data/developer-assets/$($AssetManifest.releaseTag)"
@@ -189,12 +420,10 @@ Require-Command "docker" "Install Docker Desktop and enable Docker Compose."
 Require-Command "git" "Install Git for Windows."
 Test-DockerEngine
 Invoke-External -Label "check Docker Compose" -FilePath "docker" -Arguments @("compose", "version")
-Invoke-External -Label "ensure persistent GitHub authorization volume" `
-    -FilePath "docker" `
-    -Arguments @("volume", "create", "mir2-developer-gh-config")
 
 $PreviousEnvironment = @{
     MIR2_DEV_IMAGE = $env:MIR2_DEV_IMAGE
+    MIR2_DEVELOPER_IMAGE_REVISION = $env:MIR2_DEVELOPER_IMAGE_REVISION
     MIR2_WEB_PORT = $env:MIR2_WEB_PORT
     MIR2_GATEWAY_WEB_PORT = $env:MIR2_GATEWAY_WEB_PORT
     MIR2_GATEWAY_TCP_PORT = $env:MIR2_GATEWAY_TCP_PORT
@@ -204,11 +433,30 @@ $PreviousEnvironment = @{
 }
 
 try {
+    $script:DeveloperRevision = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0 -or $script:DeveloperRevision -notmatch "^[a-f0-9]{40}$") {
+        throw "Unable to resolve a full Git revision for the developer image."
+    }
+    $env:MIR2_DEVELOPER_IMAGE_REVISION = $script:DeveloperRevision
+    $script:LocalDeveloperImage = "mir2-web3-developer:local-$($script:DeveloperRevision.Substring(0, 12))"
+    $DeveloperRelease = Get-Content -LiteralPath $ReleaseLockPath -Raw | ConvertFrom-Json
+    $script:PublishedImage = [string]$DeveloperRelease.container.publishedImage
+    $script:PublishedDigest = [string]$DeveloperRelease.container.publishedDigest
+    $script:PublishedRevision = [string]$DeveloperRelease.container.publishedRevision
+    if ($script:PublishedDigest) {
+        $script:PublishedReference = "$($script:PublishedImage)@$($script:PublishedDigest)"
+    }
+
     if (-not $env:MIR2_DEV_IMAGE) {
-        $DeveloperRelease = Get-Content -LiteralPath $ReleaseLockPath -Raw | ConvertFrom-Json
-        if ($DeveloperRelease.container.publishedDigest) {
-            $env:MIR2_DEV_IMAGE = "$($DeveloperRelease.container.publishedImage)@$($DeveloperRelease.container.publishedDigest)"
+        if ($script:PublishedReference) {
+            $env:MIR2_DEV_IMAGE = $script:PublishedReference
         }
+        else {
+            Select-LocalDeveloperImage
+        }
+    }
+    if ($Build) {
+        Select-LocalDeveloperImage
     }
     $env:MIR2_WEB_PORT = "$WebPort"
     $env:MIR2_GATEWAY_WEB_PORT = "$GatewayWebPort"
@@ -231,19 +479,11 @@ try {
         }
         "auth" {
             Test-ReleaseLock
-            if (-not $env:MIR2_DEV_IMAGE -or $env:MIR2_DEV_IMAGE -notmatch "@sha256:") {
-                throw "Asset authorization requires the published digest-pinned developer image."
-            }
-            Invoke-External -Label "ensure persistent GitHub authorization volume" `
-                -FilePath "docker" `
-                -Arguments @("volume", "create", "mir2-developer-gh-config")
-            Invoke-Compose -Arguments @(
-                "run", "--rm", "--no-deps", "asset-auth",
-                "gh", "auth", "login", "--web", "--git-protocol", "https"
-            )
+            Prepare-AssetImage
+            Write-Host "[ok] GitHub and GHCR authorization are ready for $($script:PublishedReference)."
         }
         "build" {
-            $env:MIR2_DEV_IMAGE = "mir2-web3-developer:local"
+            Select-LocalDeveloperImage
             Test-ReleaseLock
             Invoke-Compose -Arguments @("build", "workspace")
         }
@@ -251,14 +491,13 @@ try {
             Test-ReleaseLock
             if ($FullAssets) {
                 Install-FullAssets
+                if ($Build) {
+                    Select-LocalDeveloperImage
+                    $script:RuntimeImagePrepared = $false
+                }
             }
-            if ($Build) {
-                $env:MIR2_DEV_IMAGE = "mir2-web3-developer:local"
-            }
+            Prepare-RuntimeImage
             $UpArguments = @("up", "-d")
-            if ($Build) {
-                $UpArguments += "--build"
-            }
             $UpArguments += @("gateway", "web")
             Invoke-Compose -Arguments $UpArguments
             Wait-ForHttp -Name "Gateway" -Url $GatewayHealthUrl
@@ -284,10 +523,12 @@ try {
             }
         }
         "shell" {
+            Prepare-RuntimeImage
             Invoke-Compose -Arguments @("run", "--rm", "--no-deps", "workspace", "bash")
         }
         "verify" {
             Test-ReleaseLock
+            Prepare-RuntimeImage
             Invoke-Compose -Arguments @(
                 "run", "--rm", "--no-deps", "workspace",
                 "bash", "-lc",
@@ -307,6 +548,11 @@ try {
 }
 finally {
     foreach ($Entry in $PreviousEnvironment.GetEnumerator()) {
-        Set-Item -Path "Env:$($Entry.Key)" -Value $Entry.Value
+        if ($null -eq $Entry.Value) {
+            Remove-Item -Path "Env:$($Entry.Key)" -ErrorAction SilentlyContinue
+        }
+        else {
+            Set-Item -Path "Env:$($Entry.Key)" -Value $Entry.Value
+        }
     }
 }

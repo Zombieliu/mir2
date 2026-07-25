@@ -51,6 +51,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
           - macos-latest
+          - macos-15-intel
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
@@ -156,6 +157,7 @@ jobs:
       MIR2_GATEWAY_WS_URL: ws://127.0.0.1:37110/ws
       MIR2_ASSET_BASE_URL: ""
       MIR2_DEPLOY_REVISION: ${{ github.sha }}
+      MIR2_DEVELOPER_IMAGE_REVISION: ${{ github.sha }}
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
@@ -183,6 +185,7 @@ jobs:
           docker build \
             --progress=plain \
             --tag "$MIR2_DEV_IMAGE" \
+            --build-arg "MIR2_DEVELOPER_IMAGE_REVISION=$GITHUB_SHA" \
             --file mir2-web3/infra/developer.Dockerfile \
             mir2-web3/infra
 
@@ -195,7 +198,13 @@ jobs:
             rustc +1.89.0 --version | grep -E "^rustc 1\\.89\\.0 "
             gh --version | head -n 1 | grep -F "gh version 2.96.0"
             rustup target list --installed --toolchain 1.89.0 | grep -Fx wasm32-unknown-unknown
+            grep -Fx ID=debian /etc/os-release
           '
+          test "$(
+            docker image inspect \
+              --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+              "$MIR2_DEV_IMAGE"
+          )" = "$GITHUB_SHA"
 
       - name: Validate real Compose definitions
         env:
@@ -221,7 +230,6 @@ jobs:
         run: |
           set -euo pipefail
           compose_file="mir2-web3/infra/compose.developer.yml"
-          docker volume create mir2-developer-gh-config >/dev/null
           cleanup() {
             exit_code=$?
             if [[ $exit_code -ne 0 ]]; then
@@ -284,3 +292,45 @@ jobs:
             if (bytes.length < 8 || !bytes.subarray(0, 8).equals(header)) process.exit(1);
             console.log("[compose-smoke] WebGPU WASM bytes:", bytes.length);
           ' "${RUNNER_TEMP}/mir2_bevy_runtime_bg.wasm"
+
+  starter-acceptance-witness:
+    name: Publish Starter clean-room acceptance witness
+    needs:
+      - cross-platform-release
+      - linux-docker-compose-smoke
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout accepted revision
+        uses: actions/checkout@v4
+
+      - name: Publish immutable acceptance witness
+        shell: bash
+        env:
+          ACCEPTED_REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tag="developer-environment-starter-${ACCEPTED_REVISION}"
+          message="starter clean-room developer acceptance passed for ${ACCEPTED_REVISION}"
+          remote_tag="$(
+            git ls-remote --tags origin "refs/tags/${tag}" |
+              awk 'NR == 1 { print $1 }'
+          )"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -z "$remote_tag" ]]; then
+            git tag --annotate \
+              --message "$message" \
+              "$tag" \
+              "$ACCEPTED_REVISION"
+            git push origin "refs/tags/${tag}"
+          else
+            temp_ref="refs/witness-check/${tag}"
+            trap 'git update-ref -d "$temp_ref" >/dev/null 2>&1 || true' EXIT
+            git fetch --quiet --no-tags origin "refs/tags/${tag}:${temp_ref}"
+            git rev-parse --verify "${temp_ref}^{tag}" >/dev/null
+            test "$(git rev-parse "${temp_ref}^{}")" = "$ACCEPTED_REVISION"
+            test "$(git for-each-ref --format='%(contents)' "$temp_ref")" = "$message"
+          fi

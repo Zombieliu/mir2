@@ -12,10 +12,13 @@
 > a separate workflow publishes amd64/arm64 GHCR images, while a Caddy overlay
 > provides authenticated HTTPS/WSS for the shared second-server acceptance
 > environment. Follow-up hardening isolates private GitHub credentials from the
-> default workspace, downloads only through a digest-pinned fixed fetcher,
+> default workspace and every local-build image, downloads only through the
+> release-locked digest/revision fetcher after remote witness validation, uses
+> ephemeral Docker authentication plus standard-input credential delivery,
 > supports transactional full-pack upgrades with locking/recovery, executes
-> host-wrapper contracts on Windows/macOS/Linux, and verifies the live Gateway
-> `/health` plus Player Web `/version` revisions against Git HEAD.
+> host-wrapper contracts on Windows/macOS/Linux, separates Starter and Full
+> Assets acceptance witnesses, and verifies the live Gateway `/health` plus
+> Player Web `/version` revisions against Git HEAD.
 > Local verification passes script parsing, both Compose models, installer
 > recovery/safety fixtures, all 1,440 full-pack libraries and 4,446 unique page
 > hashes, native Windows startup, and a complete browser account-to-Bichon flow

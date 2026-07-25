@@ -55,7 +55,7 @@ cd mir2/mir2-web3
 ./scripts/dev.sh up --full-assets --open
 ```
 
-首次运行会在隔离授权容器中要求 GitHub 设备授权；凭据仅保存在本机 Docker 命名卷，默认工作区和项目进程不可读取。需要提前授权或更换账号时，仍可单独运行 `dev.cmd auth` / `dev.sh auth`。
+完整素材模式要求宿主机已安装官方 GitHub CLI。首次运行通过宿主机 `gh` 完成设备授权；启动器核验固定仓库的远端 witness、精确 digest/revision 和 OCI revision，使用临时 Docker 配置拉取镜像，并经标准输入把下载凭据交给不可变 fetcher。默认工作区、项目进程、本地构建镜像和容器配置不可读取。需要提前授权或更换账号时，可单独运行 `dev.cmd auth` / `dev.sh auth`。
 
 默认缓存位于 `.mir2-data/developer-assets/developer-assets-f71b89aa3850`。安装完成后，已校验分片约 9.08 GiB；本地图集约 9.08 GiB。需要释放空间时可在确认安装验证通过后删除该 tag 的缓存目录，未来重装则需要重新下载。
 

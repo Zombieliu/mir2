@@ -5,7 +5,6 @@ write_dirs=(
   /home/node/.cargo
   /home/node/.cargo/git
   /home/node/.cargo/registry
-  /home/node/.config/gh
   /home/node/.npm
   /asset-cache
   /workspace/mir2-web3/.mir2-data

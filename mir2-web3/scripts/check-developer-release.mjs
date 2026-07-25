@@ -216,6 +216,16 @@ function checkDeveloperReleaseLock() {
       /^sha256:[a-f0-9]{64}$/.test(release.container.publishedDigest),
     "developer published image digest must be null or an OCI SHA-256 digest",
   );
+  assert(
+    release.container?.publishedRevision === null ||
+      /^[a-f0-9]{40}$/.test(release.container.publishedRevision),
+    "developer published image revision must be null or a full Git commit",
+  );
+  assert(
+    (release.container.publishedDigest === null) ===
+      (release.container.publishedRevision === null),
+    "developer published image digest and revision must be set together",
+  );
   assertJsonEqual(
     release.container?.platforms,
     ["linux/amd64", "linux/arm64"],
@@ -254,16 +264,24 @@ function checkDeveloperReleaseLock() {
     `ARG RUST_VERSION=${REQUIRED_RUST_TOOLCHAIN}`,
     `ARG NPM_VERSION=${REQUIRED_NPM_VERSION}`,
     `ARG GH_VERSION=${REQUIRED_GH_VERSION}`,
+    "ARG MIR2_DEVELOPER_IMAGE_REVISION=unknown",
+    'org.opencontainers.image.revision="${MIR2_DEVELOPER_IMAGE_REVISION}"',
   ]) {
     assert(dockerfile.includes(needle), `developer.Dockerfile is missing lock: ${needle}`);
   }
 
   const compose = readFileSync(projectPath("infra/compose.developer.yml"), "utf8");
-  for (const service of ["workspace:", "asset-auth:", "asset-fetch:", "gateway:", "web:"]) {
+  for (const service of ["workspace:", "asset-fetch:", "gateway:", "web:"]) {
     assert(compose.includes(service), `developer Compose is missing ${service}`);
   }
+  assert(
+    compose.includes(
+      "MIR2_DEVELOPER_IMAGE_REVISION: ${MIR2_DEVELOPER_IMAGE_REVISION:-unknown}",
+    ),
+    "developer Compose must pass the source revision into local image builds",
+  );
   const workspaceSection = compose
-    .split("\n  asset-auth:", 1)[0]
+    .split("\n  asset-fetch:", 1)[0]
     .split("\n  workspace:", 2)[1];
   assert(workspaceSection, "developer Compose workspace service could not be inspected");
   assert(
@@ -274,12 +292,88 @@ function checkDeveloperReleaseLock() {
     !workspaceSection.includes("developer-gh-config:/home/node/.config/gh"),
     "default developer workspace must not mount GitHub authorization",
   );
+  assert(
+    !compose.includes("developer-gh-config:/home/node/.config/gh"),
+    "developer Compose must not persist GitHub authorization inside project containers",
+  );
+  assert(
+    !compose.includes("GH_TOKEN"),
+    "developer Compose must not declare a persistent GitHub token environment",
+  );
 
   const fetcherRelativePath = "infra/developer-asset-fetch.sh";
   assertTracked(`mir2-web3/${fetcherRelativePath}`);
   const fetcher = readFileSync(projectPath(fetcherRelativePath), "utf8");
-  for (const needle of ["Zombieliu/mir2", "gh release download", "sha256sum"]) {
+  for (const needle of [
+    "Zombieliu/mir2",
+    "gh release download",
+    "sha256sum",
+    "GitHub token was not supplied on standard input",
+  ]) {
     assert(fetcher.includes(needle), `${fetcherRelativePath} is missing ${needle}`);
+  }
+
+  const bashLauncher = readFileSync(projectPath("scripts/dev.sh"), "utf8");
+  const powerShellLauncher = readFileSync(projectPath("scripts/dev.ps1"), "utf8");
+  for (const [label, launcher, needles] of [
+    [
+      "scripts/dev.sh",
+      bashLauncher,
+      [
+        "repos/Zombieliu/mir2/git/ref/tags/",
+        'published_image}" != "ghcr.io/zombieliu/mir2-developer"',
+        "DOCKER_CONFIG",
+        "compose run --rm --no-deps -T asset-fetch",
+      ],
+    ],
+    [
+      "scripts/dev.ps1",
+      powerShellLauncher,
+      [
+        "repos/Zombieliu/mir2/git/ref/tags/",
+        '$script:PublishedImage -ne "ghcr.io/zombieliu/mir2-developer"',
+        "DOCKER_CONFIG",
+        '"run", "--rm", "--no-deps", "-T", "asset-fetch"',
+      ],
+    ],
+  ]) {
+    for (const needle of needles) {
+      assert(launcher.includes(needle), `${label} is missing secure asset lock: ${needle}`);
+    }
+    assert(
+      !launcher.includes("-e GH_TOKEN"),
+      `${label} must not expose GH_TOKEN through container configuration`,
+    );
+  }
+
+  const workflowChecks = [
+    [
+      ".github/workflows/developer-image.yml",
+      ["linux/amd64:x86_64", "linux/arm64:aarch64", "developer-image-${GITHUB_SHA}"],
+    ],
+    [
+      ".github/workflows/developer-environment.yml",
+      ["macos-15-intel", "developer-environment-starter-${ACCEPTED_REVISION}"],
+    ],
+    [
+      ".github/workflows/developer-full-assets.yml",
+      [
+        "mir2-full-assets",
+        "--full-assets",
+        "developer-environment-full-${ACCEPTED_REVISION}",
+      ],
+    ],
+  ];
+  for (const [relativeWorkflowPath, needles] of workflowChecks) {
+    assertTracked(relativeWorkflowPath);
+    const workflow = readFileSync(repositoryPath(relativeWorkflowPath), "utf8");
+    for (const needle of needles) {
+      assert(workflow.includes(needle), `${relativeWorkflowPath} is missing ${needle}`);
+    }
+    assert(
+      !workflow.includes("git push --force") && !workflow.includes("git tag --force"),
+      `${relativeWorkflowPath} must not overwrite acceptance evidence`,
+    );
   }
 
   record(

@@ -14,6 +14,12 @@ command -v node >/dev/null 2>&1 || die "Node.js is unavailable."
 command -v sha256sum >/dev/null 2>&1 || die "sha256sum is unavailable."
 [ -f "${manifest_path}" ] || die "Manifest is missing: ${manifest_path}"
 
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  IFS= read -r GH_TOKEN || die "GitHub token was not supplied on standard input."
+  [ -n "${GH_TOKEN}" ] || die "GitHub token was empty."
+  export GH_TOKEN
+fi
+
 mkdir -p "${cache_root}"
 cache_root="$(cd "${cache_root}" && pwd -P)"
 [ "${cache_root}" != "/" ] || die "Refusing to use the filesystem root as cache."
