@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::{watch, RwLock};
+use tokio::sync::{watch, OwnedSemaphorePermit, RwLock, Semaphore};
 
 use crate::{
     decode_zone_rpc_routing_hint, HomeTunnelChallenge, HomeTunnelPlacement, HomeTunnelRegistration,
@@ -32,6 +32,9 @@ const DEFAULT_MAX_CONTROL_BYTES: usize = 1024 * 1024;
 const DEFAULT_CHALLENGE_TTL: Duration = Duration::from_secs(15);
 const DEFAULT_STREAM_TTL: Duration = Duration::from_secs(10);
 const DEFAULT_IO_TIMEOUT: Duration = Duration::from_secs(5);
+const DEFAULT_MAX_AGENT_CONNECTIONS: usize = 4_096;
+const DEFAULT_MAX_GATEWAY_CONNECTIONS: usize = 16_384;
+const DEFAULT_MAX_STREAMS_PER_NODE: usize = 512;
 
 #[derive(Clone)]
 pub struct HomeTunnelTlsMaterial {
@@ -147,6 +150,9 @@ pub struct HomeTunnelRelayConfig {
     pub challenge_ttl: Duration,
     pub stream_ttl: Duration,
     pub io_timeout: Duration,
+    pub max_agent_connections: usize,
+    pub max_gateway_connections: usize,
+    pub max_streams_per_node: usize,
 }
 
 impl HomeTunnelRelayConfig {
@@ -174,6 +180,9 @@ impl HomeTunnelRelayConfig {
             challenge_ttl: DEFAULT_CHALLENGE_TTL,
             stream_ttl: DEFAULT_STREAM_TTL,
             io_timeout: DEFAULT_IO_TIMEOUT,
+            max_agent_connections: DEFAULT_MAX_AGENT_CONNECTIONS,
+            max_gateway_connections: DEFAULT_MAX_GATEWAY_CONNECTIONS,
+            max_streams_per_node: DEFAULT_MAX_STREAMS_PER_NODE,
         }
     }
 
@@ -186,6 +195,9 @@ impl HomeTunnelRelayConfig {
             || self.challenge_ttl.is_zero()
             || self.stream_ttl.is_zero()
             || self.io_timeout.is_zero()
+            || self.max_agent_connections == 0
+            || self.max_gateway_connections == 0
+            || self.max_streams_per_node == 0
         {
             return Err(
                 "Home Tunnel Relay configuration contains an invalid zero/empty field".to_string(),
@@ -303,6 +315,7 @@ impl HomeTunnelAgentConfig {
 struct RegisteredHomeNode {
     connection: Connection,
     registration: HomeTunnelRegistration,
+    streams: Arc<Semaphore>,
 }
 
 struct HomeTunnelRelayShared {
@@ -311,6 +324,8 @@ struct HomeTunnelRelayShared {
     nodes: RwLock<BTreeMap<String, RegisteredHomeNode>>,
     replay_guard: HomeTunnelReplayGuard,
     stream_sequence: AtomicU64,
+    agent_connections: Arc<Semaphore>,
+    gateway_connections: Arc<Semaphore>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -352,6 +367,8 @@ impl HomeTunnelRelay {
             .cloned()
             .map(|placement| (placement.zone_id.clone(), placement))
             .collect();
+        let max_agent_connections = config.max_agent_connections;
+        let max_gateway_connections = config.max_gateway_connections;
         Ok(Self {
             endpoint,
             gateway_listener,
@@ -361,6 +378,8 @@ impl HomeTunnelRelay {
                 nodes: RwLock::new(BTreeMap::new()),
                 replay_guard: HomeTunnelReplayGuard::default(),
                 stream_sequence: AtomicU64::new(1),
+                agent_connections: Arc::new(Semaphore::new(max_agent_connections)),
+                gateway_connections: Arc::new(Semaphore::new(max_gateway_connections)),
             }),
         })
     }
@@ -394,9 +413,13 @@ impl HomeTunnelRelay {
                     let Some(incoming) = incoming else {
                         return Ok(());
                     };
+                    let Ok(permit) = Arc::clone(&self.shared.agent_connections).try_acquire_owned() else {
+                        incoming.refuse();
+                        continue;
+                    };
                     let shared = Arc::clone(&self.shared);
                     tokio::spawn(async move {
-                        if let Err(error) = handle_agent_connection(incoming, shared).await {
+                        if let Err(error) = handle_agent_connection(incoming, shared, permit).await {
                             eprintln!("Home Tunnel agent connection rejected: {error}");
                         }
                     });
@@ -404,9 +427,13 @@ impl HomeTunnelRelay {
                 accepted = self.gateway_listener.accept() => {
                     let (stream, _) = accepted
                         .map_err(|error| format!("accept Home Tunnel gateway connection: {error}"))?;
+                    let Ok(permit) = Arc::clone(&self.shared.gateway_connections).try_acquire_owned() else {
+                        drop(stream);
+                        continue;
+                    };
                     let shared = Arc::clone(&self.shared);
                     tokio::spawn(async move {
-                        if let Err(error) = handle_gateway_connection(stream, shared).await {
+                        if let Err(error) = handle_gateway_connection(stream, shared, permit).await {
                             eprintln!("Home Tunnel gateway connection closed: {error}");
                         }
                     });
@@ -558,6 +585,7 @@ impl HomeTunnelAgent {
 async fn handle_agent_connection(
     incoming: quinn::Incoming,
     shared: Arc<HomeTunnelRelayShared>,
+    _connection_permit: OwnedSemaphorePermit,
 ) -> Result<(), String> {
     let connection = incoming
         .await
@@ -617,6 +645,7 @@ async fn handle_agent_connection(
         RegisteredHomeNode {
             connection: connection.clone(),
             registration,
+            streams: Arc::new(Semaphore::new(shared.config.max_streams_per_node)),
         },
     );
     if let Some(previous) = previous {
@@ -650,6 +679,7 @@ async fn handle_agent_connection(
 async fn handle_gateway_connection(
     mut gateway: TcpStream,
     shared: Arc<HomeTunnelRelayShared>,
+    _connection_permit: OwnedSemaphorePermit,
 ) -> Result<(), String> {
     loop {
         let request = match read_frame(&mut gateway, shared.config.max_frame_bytes).await {
@@ -674,6 +704,14 @@ async fn handle_gateway_connection(
             .get(&placement.node_id)
             .cloned()
             .ok_or_else(|| format!("Home Tunnel node {} is offline", placement.node_id))?;
+        let _stream_permit = Arc::clone(&registered.streams)
+            .try_acquire_owned()
+            .map_err(|_| {
+                format!(
+                    "Home Tunnel node {} reached its concurrent stream limit",
+                    placement.node_id
+                )
+            })?;
         let now = now_ms();
         placement.verify(
             &shared.config.trusted_control_issuer,

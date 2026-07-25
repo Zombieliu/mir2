@@ -9,6 +9,9 @@ pub mod events;
 pub mod gate14;
 pub mod gate15;
 pub mod guild_node_foundation;
+pub mod home_agent_runtime;
+pub mod home_beta;
+pub mod home_sandbox;
 pub mod home_tunnel;
 pub mod home_tunnel_transport;
 pub mod hotspot;
@@ -67,6 +70,25 @@ pub use gate15::{Gate15Health, Gate15PlayerLease};
 pub use guild_node_foundation::{
     CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, FinalizedGuildNodeRegistration,
     GuildNodeStatus, NodeCapacityCertificate, SuiFinalityProof,
+};
+pub use home_agent_runtime::{
+    HomeAgentArtifact, HomeAgentKeyring, HomeAgentReleaseManifest, HomeAgentReleaseManifestPayload,
+    HomeAgentResourceController, HomeAgentResourceDecision, HomeAgentResourcePolicy,
+    HomeAgentResourceSample, HomeAgentUpdateState, HomeAgentUpdateStore, HomeAgentWorkMode,
+};
+pub use home_beta::{
+    aggregate_public_telemetry, reconcile_home_node_reward, relay_source_ip_pseudonym,
+    verify_home_network_beta_cohort, HomeBetaEnvironment, HomeBetaFaultKind,
+    HomeBetaFaultObservation, HomeNetworkBetaCohortAcceptance, HomeNetworkBetaRunPayload,
+    HomeNodeOperatorTelemetryView, HomeNodeOwnerTelemetryView, HomeNodePublicTelemetryView,
+    HomeNodeTelemetryPayload, HomeRewardReconciliation, HomeTelemetryReplayGuard,
+    HomeTelemetryStore, SignedHomeNetworkBetaRun, SignedHomeNodeTelemetry, HOME_BETA_COHORT_SCHEMA,
+    HOME_BETA_MAXIMUM_FAILOVER_RTO_MS, HOME_BETA_MINIMUM_DURATION_MS, HOME_BETA_RUN_SCHEMA,
+    HOME_RELAY_PSEUDONYM_MINIMUM_SECRET_BYTES, HOME_SIGNATURE_ALGORITHM, HOME_TELEMETRY_SCHEMA,
+};
+pub use home_sandbox::{
+    HomeSandboxManifest, HomeSandboxManifestPayload, HomeSandboxRuntimeAttestation,
+    HomeSandboxRuntimeLimits, HOME_SANDBOX_SCHEMA,
 };
 pub use home_tunnel::{
     HomeTunnelChallenge, HomeTunnelPlacement, HomeTunnelRegistration, HomeTunnelReplayGuard,

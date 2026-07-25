@@ -34,6 +34,7 @@ pub struct ZoneHostOperatorConfig {
     pub advertised_endpoint: String,
     pub failure_domain: String,
     heartbeat_secret: Option<String>,
+    management_token: Option<String>,
     signing_identity: Option<NodeSigningIdentity>,
     key_generation: u64,
     heartbeat_sequence: Arc<AtomicU64>,
@@ -58,6 +59,9 @@ impl ZoneHostOperatorConfig {
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| "local".to_string());
         let heartbeat_secret = env::var("MIR2_ZONE_HOST_HEARTBEAT_SECRET")
+            .ok()
+            .filter(|value| !value.trim().is_empty());
+        let management_token = env::var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN")
             .ok()
             .filter(|value| !value.trim().is_empty());
         let signing_identity = NodeSigningIdentity::from_env()?;
@@ -89,6 +93,14 @@ impl ZoneHostOperatorConfig {
                 );
             }
         }
+        if management_token
+            .as_deref()
+            .is_some_and(|token| token.as_bytes().len() < 32)
+        {
+            return Err(
+                "MIR2_ZONE_HOST_MANAGEMENT_TOKEN must contain at least 32 bytes".to_string(),
+            );
+        }
         if !address.ip().is_loopback() && signing_identity.is_none() {
             return Err(
                 "MIR2_ZONE_HOST_SIGNING_KEY or MIR2_ZONE_HOST_SIGNING_KEY_FILE is required when Zone Host telemetry binds to a non-loopback address"
@@ -115,6 +127,7 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint,
             failure_domain,
             heartbeat_secret,
+            management_token,
             signing_identity,
             key_generation,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
@@ -130,6 +143,7 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint: "zone-a:7020".to_string(),
             failure_domain: "test-az-a".to_string(),
             heartbeat_secret: secret.map(str::to_string),
+            management_token: Some("0123456789abcdef0123456789abcdef".to_string()),
             signing_identity: None,
             key_generation: 0,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
@@ -146,6 +160,7 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint: "zone-a:7020".to_string(),
             failure_domain: "test-az-a".to_string(),
             heartbeat_secret: None,
+            management_token: Some("0123456789abcdef0123456789abcdef".to_string()),
             signing_identity: Some(signing_identity),
             key_generation: 3,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
@@ -325,6 +340,20 @@ fn handle_operator_request(
     if method == "POST" && path == "/v1/capacity-challenge" {
         return handle_capacity_challenge(stream, server, config, &bytes[header_end + 4..]);
     }
+    if method == "POST" && matches!(path, "/v1/drain" | "/v1/resume") {
+        if !management_token_matches(&request, config.management_token.as_deref()) {
+            return write_response(
+                stream,
+                401,
+                "application/json",
+                br#"{"error":"valid management bearer token required"}"#,
+            );
+        }
+        let draining = path == "/v1/drain";
+        server.set_draining(draining);
+        let body = serde_json::to_vec(&server.health()).map_err(io::Error::other)?;
+        return write_response(stream, 200, "application/json", &body);
+    }
     if method != "GET" {
         return write_response(
             stream,
@@ -379,6 +408,34 @@ fn handle_operator_request(
         }
         _ => write_response(stream, 404, "text/plain; charset=utf-8", b"not found\n"),
     }
+}
+
+fn management_token_matches(request: &str, expected: Option<&str>) -> bool {
+    let Some(expected) = expected else {
+        return false;
+    };
+    let supplied = request.lines().find_map(|line| {
+        let (name, value) = line.split_once(':')?;
+        name.eq_ignore_ascii_case("authorization")
+            .then_some(value.trim())
+            .and_then(|value| value.strip_prefix("Bearer "))
+    });
+    let Some(supplied) = supplied else {
+        return false;
+    };
+    constant_time_bytes_equal(supplied.as_bytes(), expected.as_bytes())
+}
+
+fn constant_time_bytes_equal(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    left.iter()
+        .zip(right)
+        .fold(0_u8, |difference, (left, right)| {
+            difference | (left ^ right)
+        })
+        == 0
 }
 
 fn read_http_request(stream: &mut TcpStream) -> io::Result<Vec<u8>> {
@@ -909,6 +966,7 @@ fn write_response(
     let reason = match status {
         200 => "OK",
         400 => "Bad Request",
+        401 => "Unauthorized",
         429 => "Too Many Requests",
         404 => "Not Found",
         405 => "Method Not Allowed",
@@ -1052,6 +1110,36 @@ mod tests {
         let result =
             ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap(), "local-host");
         env::remove_var("MIR2_ZONE_HOST_HEARTBEAT_SECRET");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn management_bearer_token_is_required_and_compared_exactly() {
+        let token = "0123456789abcdef0123456789abcdef";
+        assert!(management_token_matches(
+            &format!("POST /v1/drain HTTP/1.1\r\nAuthorization: Bearer {token}\r\n"),
+            Some(token),
+        ));
+        assert!(!management_token_matches(
+            "POST /v1/drain HTTP/1.1\r\n",
+            Some(token),
+        ));
+        assert!(!management_token_matches(
+            "POST /v1/drain HTTP/1.1\r\nAuthorization: Bearer wrong\r\n",
+            Some(token),
+        ));
+        assert!(!management_token_matches(
+            &format!("POST /v1/drain HTTP/1.1\r\nAuthorization: Bearer {token}\r\n"),
+            None,
+        ));
+    }
+
+    #[test]
+    fn management_token_must_have_adequate_entropy_length() {
+        env::set_var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN", "short");
+        let result =
+            ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap(), "local-host");
+        env::remove_var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN");
         assert!(result.is_err());
     }
 

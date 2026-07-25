@@ -34,6 +34,9 @@ Bevy runtimes.
 - [Gate 16 incremental replication](docs/GATE16-INCREMENTAL-REPLICATION.md)
 - [Gate 17 transactional game economy](docs/GATE17-TRANSACTIONAL-ECONOMY.md)
 - [Regional Gate 18-21 acceptance contract](docs/REGIONAL-ACCEPTANCE.md)
+- [Home Node roadmap](docs/HOME-NODE-ROADMAP.zh-CN.md)
+- [Gate 25 home-network Beta acceptance](infra/gate25/README.zh-CN.md)
+- [Gate 22 outbound QUIC/mTLS Home Tunnel](infra/gate22/README.zh-CN.md)
 
 ## Layout
 

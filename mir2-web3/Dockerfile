@@ -19,6 +19,14 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
       --bin zone_replicator \
       --bin zone_promoter \
       --bin node_identity \
+      --bin home_relay \
+      --bin home_agent \
+      --bin home_tunnel_fixture \
+      --bin home_tunnel_acceptance \
+      --bin home_sandbox_policy \
+      --bin home_beta_policy \
+      --bin home_beta_local_acceptance \
+      --bin home_telemetry_collector \
       --bin gate12_acceptance \
       --bin gate13_acceptance \
     && install -Dm755 target/release/mir2-gateway /out/mir2-gateway \
@@ -26,6 +34,14 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     && install -Dm755 target/release/zone_replicator /out/obelisk-zone-replicator \
     && install -Dm755 target/release/zone_promoter /out/obelisk-zone-promoter \
     && install -Dm755 target/release/node_identity /out/obelisk-node-identity \
+    && install -Dm755 target/release/home_relay /out/obelisk-home-relay \
+    && install -Dm755 target/release/home_agent /out/obelisk-home-agent \
+    && install -Dm755 target/release/home_tunnel_fixture /out/home-tunnel-fixture \
+    && install -Dm755 target/release/home_tunnel_acceptance /out/home-tunnel-acceptance \
+    && install -Dm755 target/release/home_sandbox_policy /out/home-sandbox-policy \
+    && install -Dm755 target/release/home_beta_policy /out/home-beta-policy \
+    && install -Dm755 target/release/home_beta_local_acceptance /out/home-beta-local-acceptance \
+    && install -Dm755 target/release/home_telemetry_collector /out/home-telemetry-collector \
     && install -Dm755 target/release/gate12_acceptance /out/gate12-acceptance \
     && install -Dm755 target/release/gate13_acceptance /out/gate13-acceptance
 
@@ -53,6 +69,44 @@ EXPOSE 7000 7010
 HEALTHCHECK --interval=5s --timeout=2s --start-period=15s --retries=20 \
   CMD /bin/bash -ec "exec 3<>/dev/tcp/127.0.0.1/7010 && printf 'GET /health HTTP/1.0\r\n\r\n' >&3 && grep -q '200 OK' <&3"
 CMD ["/usr/local/bin/mir2-gateway"]
+
+FROM runtime AS home-relay
+COPY --from=builder /out/obelisk-home-relay /usr/local/bin/obelisk-home-relay
+USER 65534:65534
+EXPOSE 7443/udp 7444
+CMD ["/usr/local/bin/obelisk-home-relay"]
+
+FROM runtime AS home-agent
+COPY --from=builder /out/obelisk-home-agent /usr/local/bin/obelisk-home-agent
+USER 65534:65534
+CMD ["/usr/local/bin/obelisk-home-agent"]
+
+FROM runtime AS home-tunnel-fixture
+COPY --from=builder /out/home-tunnel-fixture /usr/local/bin/home-tunnel-fixture
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/home-tunnel-fixture"]
+
+FROM runtime AS home-tunnel-acceptance
+COPY --from=builder /out/home-tunnel-acceptance /usr/local/bin/home-tunnel-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/home-tunnel-acceptance"]
+
+FROM runtime AS home-sandbox-policy
+COPY --from=builder /out/home-sandbox-policy /usr/local/bin/home-sandbox-policy
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/home-sandbox-policy"]
+
+FROM runtime AS home-beta-policy
+COPY --from=builder /out/home-beta-policy /usr/local/bin/home-beta-policy
+COPY --from=builder /out/home-beta-local-acceptance /usr/local/bin/home-beta-local-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/home-beta-policy"]
+
+FROM runtime AS home-telemetry-collector
+COPY --from=builder /out/home-telemetry-collector /usr/local/bin/home-telemetry-collector
+USER 65534:65534
+EXPOSE 18080
+ENTRYPOINT ["/usr/local/bin/home-telemetry-collector"]
 
 FROM runtime AS zone-replicator
 COPY --from=builder /out/obelisk-zone-replicator /usr/local/bin/obelisk-zone-replicator

@@ -68,6 +68,7 @@ enum ZoneRpcCodec {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ZoneRpcPriority {
     Control,
+    Outbound,
     Gameplay,
 }
 
@@ -75,8 +76,10 @@ enum ZoneRpcPriority {
 struct SharedEndpointConnections {
     slots: Vec<Mutex<Option<TcpStream>>>,
     next_control: AtomicUsize,
+    next_outbound: AtomicUsize,
     next_gameplay: AtomicUsize,
     control_slots: usize,
+    outbound_slots: usize,
 }
 
 #[derive(Debug)]
@@ -1838,6 +1841,9 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         let acknowledged = Arc::clone(&self.outbound_acknowledged);
         let current_generation = Arc::clone(&self.outbound_generation);
         let handle = thread::spawn(move || {
+            let minimum_idle_poll = Duration::from_millis(20);
+            let maximum_idle_poll = Duration::from_millis(100);
+            let mut idle_poll = minimum_idle_poll;
             while !worker_stop.load(Ordering::Acquire) && !worker_active.load(Ordering::Acquire) {
                 thread::sleep(Duration::from_millis(1));
             }
@@ -1848,9 +1854,11 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                 match transport.poll_outbounds(ack, transport.limits.outbound_poll_limit) {
                     Ok(batch) => {
                         if batch.items.is_empty() {
-                            thread::sleep(Duration::from_millis(20));
+                            thread::sleep(idle_poll);
+                            idle_poll = idle_poll.saturating_mul(2).min(maximum_idle_poll);
                             continue;
                         }
+                        idle_poll = minimum_idle_poll;
                         for item in batch.items {
                             if worker_stop.load(Ordering::Acquire)
                                 || current_generation.load(Ordering::Acquire) != generation
@@ -3169,6 +3177,15 @@ impl ZoneHostServer {
         }
 
         let request = envelope.request;
+        if matches!(request, ZoneRpcRequest::PollOutbounds { .. }) {
+            let session = self.hosted_session(&envelope.session_id, &envelope.zone_id)?;
+            return self.handle_session_request(
+                &envelope.session_id,
+                &envelope.zone_id,
+                session,
+                request,
+            );
+        }
         let zone_id = ZoneId::new(&envelope.zone_id);
         let gate_wait_started = Instant::now();
         let _operation = if matches!(
@@ -4549,7 +4566,6 @@ impl ZoneRpcRequest {
             | Self::InstallHostCheckpoint { .. } => ZoneRpcPriority::Control,
             Self::OnConnect
             | Self::Execute { .. }
-            | Self::PollOutbounds { .. }
             | Self::WorldSnapshot
             | Self::ActiveIdentity
             | Self::ActiveCharacterCheckpoint
@@ -4557,6 +4573,7 @@ impl ZoneRpcRequest {
             | Self::SaveActiveCharacter
             | Self::RefreshActiveExternalMail
             | Self::CloseSession { .. } => ZoneRpcPriority::Gameplay,
+            Self::PollOutbounds { .. } => ZoneRpcPriority::Outbound,
         }
     }
 }
@@ -5251,7 +5268,7 @@ fn shared_rpc_pool(
     requested_size: usize,
     io_timeout: Duration,
 ) -> Arc<SharedZoneRpcConnectionPool> {
-    let size = requested_size.clamp(2, 1_024);
+    let size = requested_size.clamp(4, 1_024);
     let queue_timeout_ms = positive_u64_env("MIR2_ZONE_RPC_QUEUE_TIMEOUT_MS")
         .unwrap_or(500)
         .clamp(1, 30_000);
@@ -5269,14 +5286,17 @@ fn shared_rpc_pool(
     }
     registry.retain(|_, pool| pool.strong_count() > 0);
     let control_slots = (size / 16).clamp(1, size - 1);
+    let outbound_slots = (size / 8).clamp(1, size - control_slots - 1);
     let pool = Arc::new(SharedZoneRpcConnectionPool {
         endpoints: addresses
             .iter()
             .map(|_| SharedEndpointConnections {
                 slots: (0..size).map(|_| Mutex::new(None)).collect(),
                 next_control: AtomicUsize::new(0),
+                next_outbound: AtomicUsize::new(0),
                 next_gameplay: AtomicUsize::new(0),
                 control_slots,
+                outbound_slots,
             })
             .collect(),
         queue_timeout,
@@ -5305,9 +5325,14 @@ impl SharedZoneRpcConnectionPool {
                 endpoint.control_slots,
                 endpoint.next_control.fetch_add(1, Ordering::Relaxed),
             ),
-            ZoneRpcPriority::Gameplay => (
+            ZoneRpcPriority::Outbound => (
                 endpoint.control_slots,
-                endpoint.slots.len() - endpoint.control_slots,
+                endpoint.outbound_slots,
+                endpoint.next_outbound.fetch_add(1, Ordering::Relaxed),
+            ),
+            ZoneRpcPriority::Gameplay => (
+                endpoint.control_slots + endpoint.outbound_slots,
+                endpoint.slots.len() - endpoint.control_slots - endpoint.outbound_slots,
                 endpoint.next_gameplay.fetch_add(1, Ordering::Relaxed),
             ),
         };

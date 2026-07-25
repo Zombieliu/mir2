@@ -1,0 +1,52 @@
+{
+  "schema": "obelisk.gate23.acceptance.v1",
+  "accepted": true,
+  "keyring": {
+    "created": true,
+    "keyStore": "operating-system-keyring",
+    "nodeId": "ed25519:1a73a9746281dce54cedd99212d043cd4cef4eb207346b2dc5d7f6a1bf9b1de8",
+    "publicKey": "s0QFewFEc9jQSwOYHFWwxia2tpe7_kJBbiF6YBlhQh4"
+  },
+  "signedRelease": {
+    "sha256": "bb09467bc32fe46043df157868d301486f604e077b94894549143181bbb13bc7",
+    "sizeBytes": 31803829,
+    "target": "gate23-local-acceptance",
+    "verified": true,
+    "version": "0.1.1"
+  },
+  "stagedRelease": {
+    "staged": true,
+    "version": "0.1.1",
+    "activation": "pending-supervisor-restart",
+    "releaseDirectory": "versions/0.1.1"
+  },
+  "launcher": {
+    "activatedVersion": "0.1.1",
+    "previousVersion": "0.1.0"
+  },
+  "supervisor": {
+    "version": "0.1.0",
+    "mode": "draining",
+    "acceptNewSessions": false,
+    "reason": "starting",
+    "cpuUsagePercent": 0.0,
+    "availableMemoryBytes": 0,
+    "activeSessions": 0,
+    "zoneReachable": false,
+    "lastObservedAtMs": 1785023891529,
+    "nodeId": "ed25519:1a73a9746281dce54cedd99212d043cd4cef4eb207346b2dc5d7f6a1bf9b1de8",
+    "publicKey": "s0QFewFEc9jQSwOYHFWwxia2tpe7_kJBbiF6YBlhQh4",
+    "keyStore": "operating-system-keyring",
+    "managedProcesses": true
+  },
+  "drain": {
+    "unauthorizedStatus": 401,
+    "authenticatedDrain": true,
+    "authenticatedResume": true
+  },
+  "managedProcessFailure": {
+    "childExitFailedClosed": true,
+    "supervisorExitStatus": 1,
+    "zoneHostStoppedWithSupervisor": true
+  }
+}

@@ -32,6 +32,7 @@ Desktop.ini
 !.env.example
 infra/gate12/.secrets/
 infra/gate13/.secrets/
+infra/gate22/generated/
 
 # Logs
 *.log
