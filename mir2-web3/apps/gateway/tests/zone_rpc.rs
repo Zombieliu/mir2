@@ -1434,6 +1434,34 @@ fn tcp_zone_rpc_reuses_one_framed_connection_for_multiple_requests() {
 }
 
 #[test]
+fn tcp_zone_rpc_binary_codec_round_trips_on_the_same_listener_as_json() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority);
+    let binary = test_transport(address, ZoneId::new("map:binary-rpc"), "binary-rpc-session")
+        .with_binary_codec()
+        .with_connection_reuse();
+    let json = test_transport(address, ZoneId::new("map:json-rpc"), "json-rpc-session")
+        .with_connection_reuse();
+
+    assert_eq!(
+        binary.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    assert_eq!(
+        json.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    assert!(!binary.on_connect().unwrap().is_empty());
+    assert!(!json.on_connect().unwrap().is_empty());
+    assert_eq!(server.session_count(), 2);
+    assert_eq!(server.telemetry_snapshot().rpc_requests_total, 4);
+
+    drop(binary);
+    drop(json);
+    stop_server(address, stop, handle);
+}
+
+#[test]
 fn tcp_zone_rpc_keeps_an_idle_reused_connection_alive_past_the_io_timeout() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let limits = ZoneRpcLimits {

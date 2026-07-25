@@ -51,10 +51,31 @@ pub const DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS: u64 = 30_000;
 const ZONE_HOST_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.mir2.zone-host-checkpoint.v4\0";
 const ZONE_REPLICATION_HEAD_DOMAIN: &[u8] = b"obelisk.mir2.zone-replication-head.v5\0";
 const ZONE_BASE_SNAPSHOT_DOMAIN: &[u8] = b"obelisk.mir2.zone-base-snapshot.v5\0";
+const ZONE_RPC_BINARY_MAGIC: &[u8; 4] = b"MRM1";
 
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_OUTBOUND_STREAM_ID: AtomicU64 = AtomicU64::new(1);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ZoneRpcCodec {
+    Json,
+    MessagePack,
+}
+
+impl ZoneRpcCodec {
+    fn from_env() -> Self {
+        match std::env::var("MIR2_ZONE_RPC_CODEC") {
+            Ok(value)
+                if value.trim().eq_ignore_ascii_case("msgpack")
+                    || value.trim().eq_ignore_ascii_case("messagepack") =>
+            {
+                Self::MessagePack
+            }
+            _ => Self::Json,
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ZoneRpcLimits {
@@ -918,6 +939,7 @@ pub struct TcpZoneOwnerRpcTransport {
     session_id: String,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
+    codec: ZoneRpcCodec,
     reuse_connections: bool,
     connections: Arc<Vec<Mutex<Option<TcpStream>>>>,
     outbound_acknowledged: Arc<AtomicU64>,
@@ -937,6 +959,7 @@ impl fmt::Debug for TcpZoneOwnerRpcTransport {
             .field("zone_id", &self.zone_id)
             .field("session_id", &self.session_id)
             .field("authenticated", &self.auth_token.is_some())
+            .field("codec", &self.codec)
             .field("reuse_connections", &self.reuse_connections)
             .field("limits", &self.limits)
             .finish()
@@ -998,6 +1021,7 @@ impl TcpZoneOwnerRpcTransport {
             session_id: session_id.into(),
             auth_token,
             limits,
+            codec: ZoneRpcCodec::from_env(),
             reuse_connections: false,
             connections: Arc::new(connections),
             outbound_acknowledged: Arc::new(AtomicU64::new(0)),
@@ -1013,6 +1037,13 @@ impl TcpZoneOwnerRpcTransport {
     /// parallel over independent connections.
     pub fn with_connection_reuse(mut self) -> Self {
         self.reuse_connections = true;
+        self
+    }
+
+    /// Use the compact RPC codec. A magic prefix lets the same Zone Host
+    /// listener continue serving JSON clients during rolling upgrades.
+    pub fn with_binary_codec(mut self) -> Self {
+        self.codec = ZoneRpcCodec::MessagePack;
         self
     }
 
@@ -1325,7 +1356,7 @@ impl TcpZoneOwnerRpcTransport {
             auth_token: self.auth_token.clone(),
             request,
         };
-        let encoded = serde_json::to_vec(&envelope)
+        let encoded = encode_rpc_envelope(&envelope, self.codec)
             .map_err(|error| format!("zone RPC request encode failed: {error}"))?;
         if encoded.len() > self.limits.max_frame_bytes {
             return Err(format!(
@@ -1341,9 +1372,15 @@ impl TcpZoneOwnerRpcTransport {
             let index = (start + offset) % endpoint_count;
             let address = &self.addresses[index];
             let response = if self.reuse_connections {
-                call_reused_endpoint(address, &encoded, &self.limits, &self.connections[index])
+                call_reused_endpoint(
+                    address,
+                    &encoded,
+                    &self.limits,
+                    &self.connections[index],
+                    self.codec,
+                )
             } else {
-                call_endpoint(address, &encoded, &self.limits)
+                call_endpoint(address, &encoded, &self.limits, self.codec)
             };
             match response {
                 Ok(ZoneRpcResponse::Ok { payload }) => {
@@ -2648,7 +2685,8 @@ impl ZoneHostServer {
                 Err(error) => return Err(error),
             };
             self.rpc_requests_total.fetch_add(1, Ordering::Relaxed);
-            let response = match serde_json::from_slice::<ZoneRpcEnvelope>(&bytes) {
+            let codec = detect_rpc_codec(&bytes);
+            let response = match decode_rpc_envelope(&bytes, codec) {
                 Ok(envelope) => match self.handle_envelope(envelope) {
                     Ok(payload) => ZoneRpcResponse::Ok {
                         payload: Box::new(payload),
@@ -2663,7 +2701,7 @@ impl ZoneHostServer {
             if matches!(response, ZoneRpcResponse::Error { .. }) {
                 self.rpc_errors_total.fetch_add(1, Ordering::Relaxed);
             }
-            let bytes = serde_json::to_vec(&response).map_err(io::Error::other)?;
+            let bytes = encode_rpc_response(&response, codec).map_err(io::Error::other)?;
             write_frame(&mut stream, &bytes, self.limits.max_frame_bytes)?;
         }
     }
@@ -4645,6 +4683,7 @@ fn call_endpoint(
     address: &str,
     encoded: &[u8],
     limits: &ZoneRpcLimits,
+    codec: ZoneRpcCodec,
 ) -> Result<ZoneRpcResponse, String> {
     let mut stream = connect_with_timeout(address, limits.io_timeout)?;
     stream
@@ -4657,7 +4696,8 @@ fn call_endpoint(
         .map_err(|error| format!("write failed: {error}"))?;
     let response = read_frame(&mut stream, limits.max_frame_bytes)
         .map_err(|error| format!("read failed: {error}"))?;
-    serde_json::from_slice(&response).map_err(|error| format!("response decode failed: {error}"))
+    decode_rpc_response(&response, codec)
+        .map_err(|error| format!("response decode failed: {error}"))
 }
 
 fn call_reused_endpoint(
@@ -4665,6 +4705,7 @@ fn call_reused_endpoint(
     encoded: &[u8],
     limits: &ZoneRpcLimits,
     connection: &Mutex<Option<TcpStream>>,
+    codec: ZoneRpcCodec,
 ) -> Result<ZoneRpcResponse, String> {
     let mut connection = connection
         .lock()
@@ -4687,7 +4728,7 @@ fn call_reused_endpoint(
             .map_err(|error| format!("write failed: {error}"))?;
         let response = read_frame(stream, limits.max_frame_bytes)
             .map_err(|error| format!("read failed: {error}"))?;
-        serde_json::from_slice(&response)
+        decode_rpc_response(&response, codec)
             .map_err(|error| format!("response decode failed: {error}"))
     })();
     if result.is_err() {
@@ -4753,6 +4794,58 @@ fn write_frame(writer: &mut impl Write, bytes: &[u8], max_frame_bytes: usize) ->
     writer.write_all(&(bytes.len() as u32).to_be_bytes())?;
     writer.write_all(bytes)?;
     writer.flush()
+}
+
+fn detect_rpc_codec(bytes: &[u8]) -> ZoneRpcCodec {
+    if bytes.starts_with(ZONE_RPC_BINARY_MAGIC) {
+        ZoneRpcCodec::MessagePack
+    } else {
+        ZoneRpcCodec::Json
+    }
+}
+
+fn encode_rpc_envelope(envelope: &ZoneRpcEnvelope, codec: ZoneRpcCodec) -> Result<Vec<u8>, String> {
+    encode_rpc_value(envelope, codec)
+}
+
+fn decode_rpc_envelope(bytes: &[u8], codec: ZoneRpcCodec) -> Result<ZoneRpcEnvelope, String> {
+    decode_rpc_value(bytes, codec)
+}
+
+fn encode_rpc_response(response: &ZoneRpcResponse, codec: ZoneRpcCodec) -> Result<Vec<u8>, String> {
+    encode_rpc_value(response, codec)
+}
+
+fn decode_rpc_response(bytes: &[u8], codec: ZoneRpcCodec) -> Result<ZoneRpcResponse, String> {
+    decode_rpc_value(bytes, codec)
+}
+
+fn encode_rpc_value<T: Serialize>(value: &T, codec: ZoneRpcCodec) -> Result<Vec<u8>, String> {
+    match codec {
+        ZoneRpcCodec::Json => serde_json::to_vec(value).map_err(|error| error.to_string()),
+        ZoneRpcCodec::MessagePack => {
+            let payload = rmp_serde::to_vec_named(value).map_err(|error| error.to_string())?;
+            let mut bytes = Vec::with_capacity(ZONE_RPC_BINARY_MAGIC.len() + payload.len());
+            bytes.extend_from_slice(ZONE_RPC_BINARY_MAGIC);
+            bytes.extend_from_slice(&payload);
+            Ok(bytes)
+        }
+    }
+}
+
+fn decode_rpc_value<T: for<'de> Deserialize<'de>>(
+    bytes: &[u8],
+    codec: ZoneRpcCodec,
+) -> Result<T, String> {
+    match codec {
+        ZoneRpcCodec::Json => serde_json::from_slice(bytes).map_err(|error| error.to_string()),
+        ZoneRpcCodec::MessagePack => {
+            let payload = bytes
+                .strip_prefix(ZONE_RPC_BINARY_MAGIC)
+                .ok_or_else(|| "binary RPC frame is missing its magic prefix".to_string())?;
+            rmp_serde::from_slice(payload).map_err(|error| error.to_string())
+        }
+    }
 }
 
 fn validate_identifier(label: &str, value: &str) -> Result<(), String> {
