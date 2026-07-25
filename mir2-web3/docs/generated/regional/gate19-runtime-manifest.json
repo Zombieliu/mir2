@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "gate": 19,
+  "generatedAtMs": 1784983428000,
+  "gitCommit": "6704fb66a901821a40deba7689c284db6de9c878",
+  "images": {
+    "zone": "sha256:37a1029707296181061ff71fb7dfecb5e239a05122a1cba5c1c136024d3d7331",
+    "gateway": "sha256:3b6b2a68e4125065bd4dc55ce17e67f0278341308303f0b5f1e8b64b37cd88b4",
+    "infraProbe": "sha256:ad4a82ca4a7e32534d009047bc3aa5d65959b04856c40c8bb685a4d0fdb20dfe",
+    "zoneSeed": "sha256:ca1714da807a88edbb1211349ddee57cbb479d6f2c992fbd9ecc8abde0e4cdb8",
+    "failoverController": "sha256:cc404aa471a777636d5dd758e5e8d89cdc9d9ed680c3b51e7b196e72f801f094",
+    "gameplayProbe": "sha256:3778d12f5945fd393070d98c3efbcf048e81c49261c1f49d4a90409140e4530b"
+  },
+  "success": true
+}
