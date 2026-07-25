@@ -230,6 +230,21 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         Ok(runtime.active_identity())
     }
 
+    fn active_character_checkpoint(
+        &self,
+        runtime: &ZoneRuntimeHandle,
+    ) -> Result<Option<CharacterSaveRecord>, String> {
+        Ok(runtime.active_character_checkpoint())
+    }
+
+    fn restore_active_character_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        runtime.restore_active_character_checkpoint(checkpoint)
+    }
+
     fn save_active_character(&self, runtime: &ZoneRuntimeHandle) -> Result<(), String> {
         runtime.save_active_character();
         Ok(())
@@ -277,6 +292,20 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
     fn world_snapshot(&self) -> Result<WorldSnapshot, String>;
 
     fn active_identity(&self) -> Result<Option<ActiveSessionIdentity>, String>;
+
+    fn active_character_checkpoint(&self) -> Result<Option<CharacterSaveRecord>, String> {
+        Err("zone owner RPC transport does not implement active_character_checkpoint".to_string())
+    }
+
+    fn restore_active_character_checkpoint(
+        &self,
+        _checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        Err(
+            "zone owner RPC transport does not implement restore_active_character_checkpoint"
+                .to_string(),
+        )
+    }
 
     fn save_active_character(&self) -> Result<(), String>;
 
@@ -338,6 +367,22 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
         _runtime: &ZoneRuntimeHandle,
     ) -> Result<Option<ActiveSessionIdentity>, String> {
         self.transport.active_identity()
+    }
+
+    fn active_character_checkpoint(
+        &self,
+        _runtime: &ZoneRuntimeHandle,
+    ) -> Result<Option<CharacterSaveRecord>, String> {
+        self.transport.active_character_checkpoint()
+    }
+
+    fn restore_active_character_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.transport
+            .restore_active_character_checkpoint(checkpoint)
     }
 
     fn save_active_character(&self, _runtime: &ZoneRuntimeHandle) -> Result<(), String> {
@@ -698,6 +743,21 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         HostedZoneOwnerCommandClient::active_identity(self)
     }
 
+    fn active_character_checkpoint(
+        &self,
+        _runtime: &ZoneRuntimeHandle,
+    ) -> Result<Option<CharacterSaveRecord>, String> {
+        HostedZoneOwnerCommandClient::active_character_checkpoint(self)
+    }
+
+    fn restore_active_character_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
+    }
+
     fn save_active_character(&self, _runtime: &ZoneRuntimeHandle) -> Result<(), String> {
         let runtime = self
             .runtime
@@ -739,6 +799,17 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
 
     fn active_identity(&self) -> Result<Option<ActiveSessionIdentity>, String> {
         HostedZoneOwnerCommandClient::active_identity(self)
+    }
+
+    fn active_character_checkpoint(&self) -> Result<Option<CharacterSaveRecord>, String> {
+        HostedZoneOwnerCommandClient::active_character_checkpoint(self)
+    }
+
+    fn restore_active_character_checkpoint(
+        &self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
     }
 
     fn save_active_character(&self) -> Result<(), String> {
@@ -9063,6 +9134,118 @@ mod tests {
             "the committed map and bound Zone must move together"
         );
         assert_eq!(session.handoff_generation(), 2);
+    }
+
+    #[test]
+    fn checkpoint_handoff_repairs_a_stale_target_projection_before_commit() {
+        #[derive(Debug)]
+        struct StaleStartGameRuntime {
+            inner: InProcessWorldRuntime,
+        }
+
+        impl WorldRuntime for StaleStartGameRuntime {
+            fn as_any(&self) -> &dyn std::any::Any {
+                self
+            }
+
+            fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+                self
+            }
+
+            fn on_connect(&self) -> Vec<ServerPacket> {
+                self.inner.on_connect()
+            }
+
+            fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+                let corrupt_after_start = matches!(
+                    &command,
+                    WorldCommand::ClientPacket(ClientPacket::StartGame { .. })
+                );
+                let packets = self.inner.execute(command)?;
+                if corrupt_after_start {
+                    let mut stale = self
+                        .inner
+                        .active_character_checkpoint()
+                        .expect("StartGame should produce an active checkpoint");
+                    stale.hp = stale.hp.saturating_sub(7);
+                    stale.belt_items_json.clear();
+                    self.inner
+                        .restore_active_character_checkpoint(&stale)
+                        .expect("test fixture should install stale target state");
+                }
+                Ok(packets)
+            }
+
+            fn world_snapshot(&self) -> mir2_simulation::WorldSnapshot {
+                self.inner.world_snapshot()
+            }
+
+            fn active_identity(&self) -> Option<mir2_simulation::ActiveSessionIdentity> {
+                self.inner.active_identity()
+            }
+
+            fn active_character_checkpoint(&self) -> Option<mir2_simulation::CharacterSaveRecord> {
+                self.inner.active_character_checkpoint()
+            }
+
+            fn restore_active_character_checkpoint(
+                &mut self,
+                checkpoint: &mir2_simulation::CharacterSaveRecord,
+            ) -> Result<(), String> {
+                self.inner.restore_active_character_checkpoint(checkpoint)
+            }
+
+            fn save_active_character(&self) {
+                self.inner.save_active_character();
+            }
+
+            fn refresh_active_external_mail(&mut self) -> bool {
+                self.inner.refresh_active_external_mail()
+            }
+        }
+
+        #[derive(Debug)]
+        struct StaleMapOneFactory {
+            inner: SharedInProcessZoneRuntimeFactory,
+        }
+
+        impl ZoneRuntimeFactory for StaleMapOneFactory {
+            fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
+                if zone_id == &ZoneId::new("map:1") {
+                    return Box::new(StaleStartGameRuntime {
+                        inner: InProcessWorldRuntime::new(config),
+                    });
+                }
+                self.inner.create_runtime(config, zone_id)
+            }
+        }
+
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(StaleMapOneFactory {
+                inner: SharedInProcessZoneRuntimeFactory::new(),
+            }) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        start_new_character(&mut session, "handoff-checkpoint", "Checkpoint");
+        let before = session.world_snapshot();
+        let expected_hp = before.player_hp;
+        let expected_belt_items = before.belt_items;
+
+        session
+            .execute_with_outcome(WorldCommand::TransferMap {
+                key: "crystal:1:100:100".to_string(),
+            })
+            .expect("source checkpoint should repair stale target state");
+
+        assert_eq!(session.zone_id(), &ZoneId::new("map:1"));
+        assert_eq!(session.handoff_generation(), 2);
+        let after = session.world_snapshot();
+        assert_eq!(after.map_file_name.as_deref(), Some("1"));
+        assert_eq!(after.player_hp, expected_hp);
+        assert_eq!(after.belt_items, expected_belt_items);
     }
 
     #[test]

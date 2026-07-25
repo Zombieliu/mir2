@@ -664,7 +664,7 @@ impl GatewaySession {
         let Some(identity) = self.active_identity() else {
             return Ok(());
         };
-        let mut source_snapshot = self.world_snapshot();
+        let source_snapshot = self.world_snapshot();
         let Some(map_file_name) = source_snapshot.map_file_name.clone() else {
             return Ok(());
         };
@@ -689,14 +689,14 @@ impl GatewaySession {
 
         sync_zone_movement_transform(&mut self.runtime)
             .map_err(|error| format!("Zone handoff source transform sync failed: {error}"))?;
+        let source_checkpoint = self
+            .zone_owner_command_client
+            .active_character_checkpoint(&self.runtime)
+            .map_err(|error| format!("Zone handoff source checkpoint failed: {error}"))?
+            .ok_or_else(|| "Zone handoff source has no active character checkpoint".to_string())?;
         self.zone_owner_command_client
             .save_active_character(&self.runtime)
             .map_err(|error| format!("Zone handoff source save failed: {error}"))?;
-        source_snapshot = self
-            .zone_owner_command_client
-            .world_snapshot(&self.runtime)
-            .map_err(|error| format!("Zone handoff source snapshot failed: {error}"))?;
-
         let routed = routing
             .registry
             .try_open_session_for(routing.config.clone(), route_request.clone())?;
@@ -722,51 +722,34 @@ impl GatewaySession {
                     }),
                 ),
             )?;
-            if let Some(key) = snapshot_transfer_key(&source_snapshot) {
-                target_client.execute(
-                    &mut target_runtime,
-                    ZoneOwnerCommandRequest::direct(
-                        routed.owner_lease.clone(),
-                        WorldCommand::TransferMap { key },
-                    ),
-                )?;
-            }
-            if let (Some(position), Some(direction)) = (
-                snapshot_player_position(&source_snapshot),
-                snapshot_player_direction(&source_snapshot),
-            ) {
-                target_client.execute(
-                    &mut target_runtime,
-                    ZoneOwnerCommandRequest::direct(
-                        routed.owner_lease.clone(),
-                        WorldCommand::ApplyHandoffTransform {
-                            position,
-                            direction,
-                            hp: source_snapshot.player_hp,
-                            mp: source_snapshot.player_mp,
-                        },
-                    ),
-                )?;
-            }
             let target_identity = target_client.active_identity(&target_runtime)?;
             if target_identity.as_ref() != Some(&identity) {
                 return Err(format!(
                     "target identity mismatch: expected {identity:?}, got {target_identity:?}"
                 ));
             }
-            let target_snapshot = target_client.world_snapshot(&target_runtime)?;
-            let source_commitment = normalized_handoff_snapshot(source_snapshot.clone());
-            let target_commitment = normalized_handoff_snapshot(target_snapshot);
-            if source_commitment != target_commitment {
-                let source_json = serde_json::to_value(&source_commitment).ok();
-                let target_json = serde_json::to_value(&target_commitment).ok();
-                let difference = source_json
-                    .as_ref()
-                    .zip(target_json.as_ref())
-                    .and_then(|(source, target)| first_json_difference(source, target, "$"))
+            // Login refreshes the target host's account projection, but the
+            // target must not depend on a read-after-write race in that
+            // projection. Transfer the exact source checkpoint through the
+            // authenticated, fenced Zone RPC and verify it before ownership
+            // changes. This carries vitals, inventory, map and private systems
+            // as one commitment.
+            target_client
+                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)?;
+            let target_checkpoint = target_client
+                .active_character_checkpoint(&target_runtime)?
+                .ok_or_else(|| {
+                    "target returned no active character checkpoint after restore".to_string()
+                })?;
+            let source_json = serde_json::to_value(&source_checkpoint)
+                .map_err(|error| format!("encode source checkpoint: {error}"))?;
+            let target_json = serde_json::to_value(&target_checkpoint)
+                .map_err(|error| format!("encode target checkpoint: {error}"))?;
+            if source_json != target_json {
+                let difference = first_json_difference(&source_json, &target_json, "$")
                     .unwrap_or_else(|| "unknown field".to_string());
                 return Err(format!(
-                    "target player-state commitment mismatch at {difference}"
+                    "target checkpoint commitment mismatch at {difference}"
                 ));
             }
             Ok(())
@@ -906,47 +889,6 @@ fn snapshot_transfer_key(snapshot: &WorldSnapshot) -> Option<String> {
     Some(format!("crystal:{map}:{}:{}", player.x, player.y))
 }
 
-fn snapshot_player_direction(snapshot: &WorldSnapshot) -> Option<mir2_protocol::MirDirection> {
-    snapshot
-        .entities
-        .iter()
-        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-        .map(|entity| entity.direction)
-}
-
-fn snapshot_player_position(snapshot: &WorldSnapshot) -> Option<Point> {
-    snapshot
-        .entities
-        .iter()
-        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-        .map(|entity| Point {
-            x: entity.x,
-            y: entity.y,
-        })
-}
-
-fn normalized_handoff_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
-    snapshot.tick = 0;
-    snapshot.map_title = None;
-    snapshot.player_object_id = None;
-    snapshot
-        .entities
-        .retain(|entity| entity.kind == WorldEntityKind::SelfPlayer);
-    let player_hp = snapshot.player_hp;
-    let player_max_hp = snapshot.player_max_hp;
-    for entity in &mut snapshot.entities {
-        entity.object_id = 0;
-        // `player_hp` is the persisted authority. During delayed shared-Zone
-        // combat the scene projection can still carry the pre-damage HP until
-        // the next projection pass, so comparing that duplicate field would
-        // reject an otherwise identical target runtime after reload.
-        entity.hp = player_hp;
-        entity.max_hp = player_max_hp;
-    }
-    snapshot.ground_drops.clear();
-    snapshot
-}
-
 fn is_global_message_execution(packets: &[ServerPacket]) -> bool {
     packets.iter().any(|packet| {
         matches!(
@@ -1043,7 +985,7 @@ fn gateway_now_ms() -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{normalized_handoff_snapshot, GatewayConfig, GatewaySession};
+    use super::{GatewayConfig, GatewaySession};
     use crate::{
         CharacterRecord, HostedZoneOwnerCommandClient, InMemoryGameplayEventSink,
         InMemoryZoneOwnerLeaseAuthority, InProcessZoneOwnerCommandClient,
@@ -1098,37 +1040,6 @@ mod tests {
         assert_eq!(
             result.expect_err("panic should be caught"),
             "gateway session panic during unit-test: boom"
-        );
-    }
-
-    #[test]
-    fn handoff_commitment_uses_persisted_player_hp_over_stale_scene_projection() {
-        let mut session = GatewaySession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::Login {
-            account_id: "demo".to_string(),
-            password: "demo".to_string(),
-        });
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        let mut source = session.world_snapshot();
-        let mut target = source.clone();
-        source.player_hp = Some(13);
-        target.player_hp = Some(13);
-        source
-            .entities
-            .iter_mut()
-            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
-            .expect("source should contain self player")
-            .hp = Some(60);
-        target
-            .entities
-            .iter_mut()
-            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
-            .expect("target should contain self player")
-            .hp = Some(13);
-
-        assert_eq!(
-            normalized_handoff_snapshot(source),
-            normalized_handoff_snapshot(target)
         );
     }
 
