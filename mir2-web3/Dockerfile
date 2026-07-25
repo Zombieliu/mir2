@@ -176,3 +176,27 @@ FROM runtime AS gate18-remote-economy-acceptance
 COPY --from=gate18-remote-economy-acceptance-builder /out/gate18-remote-economy-acceptance /usr/local/bin/gate18-remote-economy-acceptance
 USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/gate18-remote-economy-acceptance"]
+
+FROM builder AS gate18-gameplay-acceptance-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate18_gameplay_acceptance \
+    && install -Dm755 target/release/gate18_gameplay_acceptance /out/gate18-gameplay-acceptance
+
+FROM runtime AS gate18-gameplay-acceptance
+COPY --from=gate18-gameplay-acceptance-builder /out/gate18-gameplay-acceptance /usr/local/bin/gate18-gameplay-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate18-gameplay-acceptance"]
+
+FROM builder AS gate18-migration-acceptance-builder
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/src/target \
+    cargo build --locked --release -p mir2-gateway --bin gate18_migration_acceptance \
+    && install -Dm755 target/release/gate18_migration_acceptance /out/gate18-migration-acceptance
+
+FROM runtime AS gate18-migration-acceptance
+COPY --from=gate18-migration-acceptance-builder /out/gate18-migration-acceptance /usr/local/bin/gate18-migration-acceptance
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/gate18-migration-acceptance"]

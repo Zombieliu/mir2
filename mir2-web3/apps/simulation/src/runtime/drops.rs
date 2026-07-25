@@ -2609,6 +2609,15 @@ impl SimulationSession {
         .packets
     }
 
+    pub fn shared_monster_kill_experience_balance_delta(&self, experience: u32) -> i64 {
+        let world = self.app.world();
+        if !is_in_world(world) || experience == 0 {
+            return 0;
+        }
+        let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
+        super::leveling::experience_balance_delta_for_gain(world, i64::from(experience))
+    }
+
     pub fn commit_shared_ground_drop_pickup_transaction(
         &mut self,
         drop: &GroundDropSnapshot,

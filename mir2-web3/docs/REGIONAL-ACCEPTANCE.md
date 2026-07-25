@@ -140,6 +140,15 @@ docs/generated/regional/gate21-72h.json
 - active producer 强制携带 owner generation 与 Zone source sequence，standby
   重放不会再次写入 PostgreSQL；
 - 同一经济命令重试不会重复给角色加金币；
+- 怪物击杀经验按角色“当前等级经验槽”的实际变化写账，跨等级时账本不再把
+  原始奖励误当成经验槽增量；运行时与 PostgreSQL 在升级扣除阈值后保持一致；
+- Zone 的权威掉落快照会覆盖旧客户端协议包只能携带的瘦快照，保留怪物来源、
+  真实物品键、数量和所有权窗口，后续拾取不会退化成显示名称推断；
+- 两个真实 Session 已通过独立 Zone Host 验证组队/公会聊天、死亡与城镇复活、
+  `map:0 → map:1 → map:0` handoff、导入 Crystal `Hen` 击杀、经验入账以及
+  `Chicken` 掉落、拾取和幂等重试；
+- 数据库迁移从 schema bootstrap 到最后一个版本记录持有事务级 advisory lock，
+  16 个进程同时连接全新 PostgreSQL 时均成功，6 个版本只应用一遍；
 - Zone 单写者由 Host 全局队列拆为每 Zone 独立队列，Host checkpoint 仍通过
   全局写屏障冻结全部 Zone；
 - 500 条真实长连接的容量探针会记录失败命令数和完整错误分类。
@@ -162,6 +171,8 @@ Gate 20 必须把 thread-per-connection 改成异步多路复用，并实现 AOI
 ```bash
 ./infra/gate18/run-economy-producer-acceptance.sh
 ./infra/gate18/run-remote-economy-acceptance.sh
+./infra/gate18/run-gameplay-acceptance.sh
+./infra/gate18/run-migration-acceptance.sh
 ./infra/gate18/run-session-capacity.sh
 ```
 
@@ -176,5 +187,19 @@ opening balance、active/standby fence、金币拾取幂等、双边交易守恒
 独立 Zone Host 和 PostgreSQL。它通过真实客户端 `DropGold` / `PickUp` 请求验证
 远程 RPC、持久 owner fence、丢弃扣账、拾取入账、运行时投影、opening balance
 与最终 PostgreSQL 余额一致，并验证客户端重试不重复记账。验收角色的 100 金币由明确记录的
-`qa.applyNativeState` fixture 提供，不把测试资产来源冒充生产发放流程。死亡
-掉落、地图切换、组队/公会共享状态和 500 人 30 分钟混合行为仍需继续验收。
+`qa.applyNativeState` fixture 提供，不把测试资产来源冒充生产发放流程。
+
+`gate18-gameplay.json` 同样使用独立 Gateway 验收进程、Zone Host 和 PostgreSQL，
+但建立两个不同账户/角色，覆盖组队与公会聊天、玩家死亡/城镇复活、跨地图
+handoff、导入 Crystal `Hen` 的权威战斗、`Chicken` 物品掉落和拾取。击杀经验
+与物品数量均逐项比较运行态和账本，重复拾取不增加资产；所有 10 条断言通过。
+角色战斗数值由明确的 `qa.applyNativeState` fixture 提供，怪物模板和掉落表来自
+导入的 Crystal 数据。
+
+`gate18-migrations.json` 在全新 PostgreSQL 上让 16 个线程同时执行完整迁移；
+16 个 worker 全部成功，最终恰好存在 6 个版本记录且核心关系齐全。该证据修复
+并覆盖了多进程冷启动时 PostgreSQL 隐式 row type 的真实创建竞态。
+
+Gate 18 尚未完成的硬条件仍是：500 个不同账户按统一行为模型连续运行 30 分钟，
+运行中至少执行一次安全 Zone promotion，并生成聚合的 `gate18.json`。现有短时
+容量、经济和双玩家玩法证据都不能替代这两个条件。

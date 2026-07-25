@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784938070916,
+  "processId": 1,
+  "concurrentWorkers": 16,
+  "successfulWorkers": 16,
+  "expectedMigrationCount": 6,
+  "appliedMigrationCount": 6,
+  "requiredRelationsPresent": true,
+  "success": true
+}
