@@ -199,6 +199,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             profile.stages.gate20.duration_seconds,
             profile.stages.gate20.maximum_error_rate,
         ),
+        "21" => (
+            profile.stages.gate21.concurrent_players,
+            profile.stages.gate21.duration_seconds,
+            profile.stages.gate21.maximum_error_rate,
+        ),
         gate => return Err(format!("unsupported mixed-load Regional Gate {gate}").into()),
     };
     let requested_players = env_usize_fallback(
@@ -271,6 +276,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let hot_map_target = match regional_gate.as_str() {
         "20" => profile.stages.gate20.hot_map_players.unwrap_or_default(),
+        "21" => profile.stages.gate21.hot_map_players.unwrap_or_default(),
         _ => 0,
     };
     let hot_map = active_maps
@@ -283,14 +289,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .copied()
         .filter(|map| map.map_file_name != hot_map.map_file_name)
         .collect::<Vec<_>>();
-    let gate20_economy_players = roles
+    let hot_map_economy_players = roles
         .get(&WorkloadRole::Economy)
         .copied()
         .unwrap_or_default();
-    if regional_gate == "20" && gate20_economy_players > hot_map_target {
-        return Err("Gate 20 hotspot cannot contain all economy players".into());
+    if hot_map_target > 0 && hot_map_economy_players > hot_map_target {
+        return Err(
+            format!("Gate {regional_gate} hotspot cannot contain all economy players").into(),
+        );
     }
-    let gate20_hot_movement_players = hot_map_target.saturating_sub(gate20_economy_players);
+    let hot_map_movement_players = hot_map_target.saturating_sub(hot_map_economy_players);
     let connect_workers = env_usize_fallback(
         "MIR2_REGIONAL_CONNECT_WORKERS",
         "MIR2_GATE18_CONNECT_WORKERS",
@@ -328,7 +336,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     // Start ordinary-map players first so their short stay on
                     // Crystal's map-0 spawn does not become steady-state
                     // hotspot placement evidence.
-                    let placement_phases: &[bool] = if regional_gate == "20" {
+                    let placement_phases: &[bool] = if hot_map_target > 0 {
                         &[false, true]
                     } else {
                         &[false]
@@ -336,10 +344,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     for &hot_phase in placement_phases {
                         for player_index in start..end {
                             let role = role_for_index(player_index, roles);
-                            let is_hot_map_player = regional_gate == "20"
+                            let is_hot_map_player = hot_map_target > 0
                                 && (role == WorkloadRole::Economy
                                     || (role == WorkloadRole::Movement
-                                        && player_index < gate20_hot_movement_players));
+                                        && player_index < hot_map_movement_players));
                             if is_hot_map_player != hot_phase {
                                 continue;
                             }
@@ -357,16 +365,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 &character_name,
                             )
                             .map_err(|error| error.to_string())?;
-                            let hot_players_before = player_index.min(gate20_hot_movement_players)
+                            let hot_players_before = player_index.min(hot_map_movement_players)
                                 + player_index
                                     .saturating_sub(economy_start)
-                                    .min(gate20_economy_players);
-                            let non_hot_player_ordinal = (!is_hot_map_player
-                                && regional_gate == "20")
+                                    .min(hot_map_economy_players);
+                            let non_hot_player_ordinal = (!is_hot_map_player && hot_map_target > 0)
                                 .then_some(player_index.saturating_sub(hot_players_before));
                             let map = if is_hot_map_player {
                                 hot_map
-                            } else if regional_gate == "20" {
+                            } else if hot_map_target > 0 {
                                 non_hot_maps[non_hot_player_ordinal.unwrap_or_default()
                                     % non_hot_maps.len()]
                             } else {
@@ -375,12 +382,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             let (target_map, position) = if is_hot_map_player {
                                 let (x, y) = if role == WorkloadRole::Economy {
                                     let economy_index = player_index.saturating_sub(economy_start);
-                                    (
-                                        330 + i32::try_from(economy_index % 5).unwrap_or_default()
-                                            * 3,
-                                        270 + i32::try_from(economy_index / 5).unwrap_or_default()
-                                            * 3,
-                                    )
+                                    if regional_gate == "21" {
+                                        (
+                                            315 + i32::try_from(economy_index % 10)
+                                                .unwrap_or_default()
+                                                * 3,
+                                            255 + i32::try_from(economy_index / 10)
+                                                .unwrap_or_default()
+                                                * 3,
+                                        )
+                                    } else {
+                                        (
+                                            330 + i32::try_from(economy_index % 5)
+                                                .unwrap_or_default()
+                                                * 3,
+                                            270 + i32::try_from(economy_index / 5)
+                                                .unwrap_or_default()
+                                                * 3,
+                                        )
+                                    }
                                 } else {
                                     (
                                         360 + i32::try_from(player_index % 10).unwrap_or_default()
@@ -391,7 +411,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 };
                                 ("0", (x, y))
                             } else {
-                                let local_player_index = if regional_gate == "20" {
+                                let local_player_index = if hot_map_target > 0 {
                                     non_hot_player_ordinal.unwrap_or_default() / non_hot_maps.len()
                                 } else {
                                     player_index / active_maps.len()
@@ -409,7 +429,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     session.execute_with_outcome(WorldCommand::TransferMap {
                                         key: transfer_key.clone(),
                                     });
-                                let routed = if regional_gate == "20" && is_hot_map_player {
+                                let routed = if hot_map_target > 0 && is_hot_map_player {
                                     session
                                         .zone_id()
                                         .as_str()
@@ -466,7 +486,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             );
                             }
                         }
-                        if regional_gate == "20" && !hot_phase {
+                        if hot_map_target > 0 && !hot_phase {
                             let wait_started = Instant::now();
                             let expected_non_hot_players =
                                 requested_players.saturating_sub(hot_map_target);
@@ -533,6 +553,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             counts
         });
     let observed_hot_map_players = hot_map_line_players.values().sum::<usize>();
+    let expected_hot_map_lines = hot_map_target.div_ceil(50);
+    let maximum_zone_host_connections = if regional_gate == "21" { 260 } else { 130 };
     let zone_host_health = active_zone_host_health(
         players
             .first()
@@ -540,6 +562,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .ok_or("Zone Host health requires at least one player")?,
         &regional_gate,
     )?;
+    eprintln!(
+        "REGIONAL_LOAD_ACTIVE_STARTED gate={regional_gate} run={run_id} at_ms={} players={} zones={active_zone_count}",
+        now_ms(),
+        players.len()
+    );
     let metrics = Arc::new(Mutex::new(SharedMetrics::default()));
     let first_phase_seconds = duration_seconds / 2;
     let second_phase_seconds = duration_seconds.saturating_sub(first_phase_seconds);
@@ -664,8 +691,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (
             "activeZoneCountMatchesProfile".to_string(),
             active_map_count == profile.active_maps.min(requested_players)
-                && (regional_gate == "20"
-                    || active_zone_count == profile.active_maps.min(requested_players)),
+                && (if hot_map_target > 0 {
+                    active_zone_count
+                        == profile
+                            .active_maps
+                            .min(requested_players)
+                            .saturating_add(expected_hot_map_lines.saturating_sub(1))
+                } else {
+                    active_zone_count == profile.active_maps.min(requested_players)
+                }),
         ),
         (
             "allWorkloadRolesExecuted".to_string(),
@@ -690,9 +724,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         (
             "hotMapAndLinesMatchStage".to_string(),
-            regional_gate != "20"
+            hot_map_target == 0
                 || (observed_hot_map_players == hot_map_target
-                    && hot_map_line_players.len() == 6
+                    && hot_map_line_players.len() == expected_hot_map_lines
                     && hot_map_line_players.values().all(|players| *players == 50)),
         ),
         (
@@ -705,14 +739,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .maximum_command_p95_ms
                         .unwrap_or(f64::MAX)
                 }),
+                "21" => {
+                    latency_ms.p95.is_some_and(|p95| {
+                        p95 <= profile
+                            .stages
+                            .gate21
+                            .maximum_command_p95_ms
+                            .unwrap_or(f64::MAX)
+                    }) && latency_ms.p99.is_some_and(|p99| {
+                        p99 <= profile
+                            .stages
+                            .gate21
+                            .maximum_command_p99_ms
+                            .unwrap_or(f64::MAX)
+                    })
+                }
                 _ => true,
             },
         ),
         (
             "rpcConnectionMultiplexingActive".to_string(),
-            regional_gate != "20"
+            hot_map_target == 0
                 || (zone_host_health.session_count == requested_players
-                    && zone_host_health.active_connections <= 130
+                    && zone_host_health.active_connections <= maximum_zone_host_connections
                     && zone_host_health.active_connections * 4 < requested_players),
         ),
         ("safeZonePromotionCompleted".to_string(), promotion.success),
@@ -1209,16 +1258,7 @@ fn promote_zone(
         }
         session_refresh_count += 1;
     }
-    let mut post_promotion_probe_count = 0;
-    for player in players.iter_mut() {
-        player.session.execute_production_player_command(
-            true,
-            WorldCommand::ClientPacket(ClientPacket::KeepAlive {
-                time: now_ms().try_into().unwrap_or(i64::MAX),
-            }),
-        )?;
-        post_promotion_probe_count += 1;
-    }
+    let post_promotion_probe_count = probe_players_after_promotion(players)?;
     Ok(PromotionEvidence {
         zone_id: zone_id.as_str().to_string(),
         zone_session_count: promotion_zone_session_count,
@@ -1240,6 +1280,37 @@ fn promote_zone(
             && promotion_zone_session_count > 0
             && session_refresh_count == promotion_zone_session_count
             && post_promotion_probe_count == players.len(),
+    })
+}
+
+fn probe_players_after_promotion(players: &mut [LoadPlayer]) -> Result<usize, String> {
+    let worker_count =
+        env_usize("MIR2_REGIONAL_PROMOTION_PROBE_WORKERS", 128).clamp(1, players.len().max(1));
+    let chunk_size = players.len().div_ceil(worker_count).max(1);
+    thread::scope(|scope| {
+        let mut handles = Vec::new();
+        for chunk in players.chunks_mut(chunk_size) {
+            handles.push(scope.spawn(move || -> Result<usize, String> {
+                let mut completed = 0;
+                for player in chunk {
+                    player.session.execute_production_player_command(
+                        true,
+                        WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                            time: now_ms().try_into().unwrap_or(i64::MAX),
+                        }),
+                    )?;
+                    completed += 1;
+                }
+                Ok(completed)
+            }));
+        }
+        let mut completed = 0;
+        for handle in handles {
+            completed += handle
+                .join()
+                .map_err(|_| "post-promotion probe worker panicked".to_string())??;
+        }
+        Ok(completed)
     })
 }
 

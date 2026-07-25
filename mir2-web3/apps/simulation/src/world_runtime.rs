@@ -283,6 +283,10 @@ impl InProcessWorldRuntime {
         }
     }
 
+    pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
+        self.session.rebind_account_store(authoritative);
+    }
+
     pub fn into_session(self) -> SimulationSession {
         self.session
     }

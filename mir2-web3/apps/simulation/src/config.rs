@@ -2468,6 +2468,17 @@ impl SimulationConfig {
         Ok(fork)
     }
 
+    /// Rebind an already-restored replica Session to the authoritative account
+    /// store when its Zone is promoted. The Session keeps its reconstructed
+    /// world state while future character saves use the live host repository.
+    pub fn rebind_account_store_from(&mut self, authoritative: &Self) {
+        self.account_store = Arc::clone(&authoritative.account_store);
+        self.account_store_path = authoritative.account_store_path.clone();
+        self.account_store_database_url = authoritative.account_store_database_url.clone();
+        self.account_store_database_mode = authoritative.account_store_database_mode;
+        self.account_store_persist_lock = Arc::clone(&authoritative.account_store_persist_lock);
+    }
+
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
         Self::from_scene_with_collision(scene, starter_map_collision())
     }

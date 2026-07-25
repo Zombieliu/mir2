@@ -1322,9 +1322,20 @@ impl TcpZoneOwnerRpcTransport {
         let active = comma_separated_env("MIR2_ZONE_HOST_ACTIVE_ADDRS");
         if !active.is_empty() {
             let standby = comma_separated_env("MIR2_ZONE_HOST_STANDBY_ADDRS");
+            let colocated_standby = standby.is_empty()
+                && active.len() > 1
+                && enabled_env("MIR2_ZONE_HOST_COLOCATED_STANDBY");
+            let paired_standby =
+                !standby.is_empty() && enabled_env("MIR2_ZONE_HOST_PAIRED_STANDBY");
             let active_shard_count = active.len();
             return Some((
-                select_zone_shard_endpoints(zone_id, &active, &standby),
+                select_zone_shard_endpoints(
+                    zone_id,
+                    &active,
+                    &standby,
+                    colocated_standby,
+                    paired_standby,
+                ),
                 active_shard_count,
             ));
         }
@@ -1655,6 +1666,7 @@ impl TcpZoneOwnerRpcTransport {
                             | "stale_lease"
                             | "zone_quiesced"
                             | "owner_mismatch"
+                            | "zone_replica_read_only"
                     ) =>
                 {
                     failures.push(format!("{address}: zone RPC {code}: {message}"));
@@ -2779,11 +2791,16 @@ impl ZoneHostServer {
                 "standby replication head changed after readiness was assessed",
             ));
         }
+        self.activate_replica_session_persistence(zone_id)?;
         self.runtime_factory
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
             .promote_zone_from_replica(zone_id)
             .map_err(|message| ZoneRpcFault::new("promotion_replica_invalid", message))?;
+        self.quiesced_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
+            .remove(zone_id.as_str());
         self.promotion_readiness
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?
@@ -2805,6 +2822,31 @@ impl ZoneHostServer {
             promoted_at_ms: now_ms,
             head: current_head,
         })
+    }
+
+    fn activate_replica_session_persistence(&self, zone_id: &ZoneId) -> Result<(), ZoneRpcFault> {
+        let authoritative_config = self
+            .config
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
+            .clone();
+        let selected_sessions = self
+            .sessions
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?
+            .iter()
+            .filter(|((_, session_zone_id), _)| session_zone_id == zone_id.as_str())
+            .map(|(key, session)| (key.clone(), Arc::clone(session)))
+            .collect::<BTreeMap<_, _>>();
+        let commitments = session_commitments(&selected_sessions)?;
+        seed_base_snapshot_accounts(&authoritative_config, &commitments)?;
+        for session in selected_sessions.values() {
+            session
+                .hosted
+                .rebind_account_store(&authoritative_config)
+                .map_err(classify_runtime_error)?;
+        }
+        Ok(())
     }
 
     pub fn export_mutation_batch(
@@ -3090,6 +3132,21 @@ impl ZoneHostServer {
         self.zone_gate_wait_duration_ns_max
             .fetch_max(gate_wait_duration_ns, Ordering::Relaxed);
         self.prune_expired_promotion_readiness(unix_now_ms())?;
+        let replica_is_read_only = zone_rpc_request_requires_active_session(&request)
+            && self
+                .runtime_factory
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
+                .is_zone_replica(&zone_id);
+        if replica_is_read_only {
+            return Err(ZoneRpcFault::new(
+                "zone_replica_read_only",
+                format!(
+                    "Zone {} is a standby replica and rejects active Session requests before promotion",
+                    envelope.zone_id
+                ),
+            ));
+        }
         if self
             .quiesced_zones
             .lock()
@@ -3802,15 +3859,14 @@ impl ZoneHostServer {
         sessions.extend(live_sessions);
         drop(sessions);
         *self
-            .config
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))? =
-            live_config;
-        *self
             .journal
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))? =
             staged_journal;
+        self.quiesced_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
+            .remove(snapshot.zone_id.as_str());
         Ok(())
     }
 
@@ -5762,6 +5818,8 @@ fn select_zone_shard_endpoints(
     zone_id: &ZoneId,
     active: &[String],
     standby: &[String],
+    colocated_standby: bool,
+    paired_standby: bool,
 ) -> Vec<String> {
     debug_assert!(!active.is_empty());
     let (hash_key, line_offset) = zone_id
@@ -5780,11 +5838,30 @@ fn select_zone_shard_endpoints(
     let base_index =
         usize::try_from(u64::from_be_bytes(prefix) % active.len() as u64).unwrap_or_default();
     let active_index = base_index.wrapping_add(line_offset) % active.len();
-    let mut endpoints = Vec::with_capacity(1 + standby.len());
+    let mut endpoints = Vec::with_capacity(
+        1 + if colocated_standby {
+            active.len().saturating_sub(1)
+        } else {
+            standby.len()
+        },
+    );
     endpoints.push(active[active_index].clone());
-    for address in standby {
-        if !endpoints.contains(address) {
-            endpoints.push(address.clone());
+    if colocated_standby {
+        for offset in 1..active.len() {
+            endpoints.push(active[(active_index + offset) % active.len()].clone());
+        }
+    } else if paired_standby {
+        for offset in 0..standby.len() {
+            let address = &standby[(active_index + offset) % standby.len()];
+            if !endpoints.contains(address) {
+                endpoints.push(address.clone());
+            }
+        }
+    } else {
+        for address in standby {
+            if !endpoints.contains(address) {
+                endpoints.push(address.clone());
+            }
         }
     }
     endpoints
@@ -5850,6 +5927,20 @@ fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
     )
 }
 
+fn zone_rpc_request_requires_active_session(request: &ZoneRpcRequest) -> bool {
+    matches!(
+        request,
+        ZoneRpcRequest::OnConnect
+            | ZoneRpcRequest::Execute { .. }
+            | ZoneRpcRequest::PollOutbounds { .. }
+            | ZoneRpcRequest::WorldSnapshot
+            | ZoneRpcRequest::ActiveIdentity
+            | ZoneRpcRequest::SaveActiveCharacter
+            | ZoneRpcRequest::RefreshActiveExternalMail
+            | ZoneRpcRequest::CloseSession { .. }
+    )
+}
+
 fn command_changes_live_registration(command: &WorldCommand) -> bool {
     matches!(
         command,
@@ -5872,4 +5963,65 @@ pub fn validate_zone_host_bind(address: SocketAddr, auth_token: Option<&str>) ->
         ));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod shard_endpoint_tests {
+    use super::*;
+
+    #[test]
+    fn colocated_standby_is_the_next_distinct_active_host() {
+        let active = (1..=8)
+            .map(|index| format!("zone-{index}:7020"))
+            .collect::<Vec<_>>();
+        let endpoints =
+            select_zone_shard_endpoints(&ZoneId::new("map:0:line:1"), &active, &[], true, false);
+        let active_index = active
+            .iter()
+            .position(|address| address == &endpoints[0])
+            .expect("selected active must come from the configured set");
+
+        assert_eq!(endpoints.len(), 8);
+        assert_eq!(endpoints[1], active[(active_index + 1) % active.len()]);
+        assert_eq!(
+            endpoints
+                .iter()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            active.len()
+        );
+    }
+
+    #[test]
+    fn dedicated_standby_order_remains_unchanged() {
+        let active = vec!["zone-a:7020".to_string(), "zone-b:7020".to_string()];
+        let standby = vec!["standby-a:7020".to_string(), "standby-b:7020".to_string()];
+        let endpoints =
+            select_zone_shard_endpoints(&ZoneId::new("map:0"), &active, &standby, false, false);
+
+        assert_eq!(&endpoints[1..], standby.as_slice());
+    }
+
+    #[test]
+    fn paired_standby_uses_the_active_shard_index() {
+        let active = (1..=4)
+            .map(|index| format!("active-{index}:7020"))
+            .collect::<Vec<_>>();
+        let standby = (1..=4)
+            .map(|index| format!("standby-{index}:7020"))
+            .collect::<Vec<_>>();
+        let endpoints = select_zone_shard_endpoints(
+            &ZoneId::new("map:0:line:1"),
+            &active,
+            &standby,
+            false,
+            true,
+        );
+        let active_index = active
+            .iter()
+            .position(|address| address == &endpoints[0])
+            .expect("selected active must come from the configured set");
+
+        assert_eq!(endpoints[1], standby[active_index]);
+    }
 }
