@@ -1072,7 +1072,15 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         if !preflight_projection(runtime, &envelope.command) {
             return Self::failed_receipt(&envelope.command);
         }
-        let Some(transaction) = economy_transaction_for_command(context, &envelope) else {
+        let experience_balance_delta = match &envelope.command {
+            SharedAccountInventoryCommand::MonsterKillAward(award) => {
+                Some(runtime.shared_monster_kill_experience_balance_delta(award.experience))
+            }
+            _ => None,
+        };
+        let Some(transaction) =
+            economy_transaction_for_command(context, &envelope, experience_balance_delta)
+        else {
             // Commands without an external asset delta remain deterministic
             // Zone-only effects. Skill-item consumption is deliberately
             // rejected until its exact inventory component IDs are included.
@@ -1253,6 +1261,7 @@ fn preflight_projection(
 fn economy_transaction_for_command(
     context: &SharedAccountInventoryExecutionContext,
     command: &SharedAccountInventoryCommandEnvelope,
+    experience_balance_delta: Option<i64>,
 ) -> Option<EconomyTransactionEnvelope> {
     let identity = &command.identity;
     let stable_key = command.stable_idempotency_key();
@@ -1336,6 +1345,13 @@ fn economy_transaction_for_command(
                 award.monster_object_id.to_string(),
             );
             metadata.insert("monsterName".to_string(), award.monster_name.clone());
+            let balance_delta =
+                experience_balance_delta.unwrap_or_else(|| i64::from(award.experience));
+            metadata.insert("rawExperience".to_string(), award.experience.to_string());
+            metadata.insert(
+                "experienceBalanceDelta".to_string(),
+                balance_delta.to_string(),
+            );
             (
                 EconomyTransactionKind::Reward,
                 vec![EconomyLeg {
@@ -1343,7 +1359,7 @@ fn economy_transaction_for_command(
                         identity.account_id.clone(),
                         identity.character_index,
                     ),
-                    delta: i64::from(award.experience),
+                    delta: balance_delta,
                 }],
             )
         }
@@ -1787,7 +1803,7 @@ mod tests {
             }),
         };
         let envelope =
-            economy_transaction_for_command(&context, &command).expect("gold transaction");
+            economy_transaction_for_command(&context, &command, None).expect("gold transaction");
 
         assert_eq!(envelope.zone_id, "map:0");
         assert_eq!(envelope.fencing_generation, 9);
@@ -1829,6 +1845,7 @@ mod tests {
                     request_id: 44,
                 },
             },
+            None,
         )
         .expect("gold drop transaction");
         assert_eq!(gold.transaction_kind, EconomyTransactionKind::Consume);
@@ -1851,6 +1868,7 @@ mod tests {
                     request_id: 44,
                 },
             },
+            None,
         )
         .expect("item drop transaction");
         assert_eq!(item.transaction_kind, EconomyTransactionKind::Consume);
@@ -1905,7 +1923,7 @@ mod tests {
             },
         };
         let envelope =
-            economy_transaction_for_command(&context, &command).expect("skill transaction");
+            economy_transaction_for_command(&context, &command, None).expect("skill transaction");
 
         assert_eq!(envelope.transaction_kind, EconomyTransactionKind::Consume);
         assert_eq!(

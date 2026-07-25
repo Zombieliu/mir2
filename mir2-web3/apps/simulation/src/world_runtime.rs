@@ -317,6 +317,11 @@ impl InProcessWorldRuntime {
         self.session.can_commit_shared_gold_drop(amount)
     }
 
+    pub fn shared_monster_kill_experience_balance_delta(&self, experience: u32) -> i64 {
+        self.session
+            .shared_monster_kill_experience_balance_delta(experience)
+    }
+
     pub fn commit_shared_gold_drop_transaction(
         &mut self,
         amount: u32,

@@ -2042,6 +2042,35 @@ impl SharedInProcessZoneState {
             .push(award);
     }
 
+    fn sync_authoritative_zone_drops_for_key(
+        &mut self,
+        key: &ZonePresenceKey,
+        drops: &[GroundDropSnapshot],
+    ) {
+        if drops.is_empty() {
+            return;
+        }
+        let Some(map_file_name) = self
+            .players
+            .get(key)
+            .map(|presence| presence.map_file_name.clone())
+        else {
+            return;
+        };
+        let now_ms = shared_gateway_now_ms();
+        let map = self.maps.entry(map_file_name).or_default();
+        for drop in drops {
+            if map.removed_drop_ids.contains(&drop.object_id) {
+                continue;
+            }
+            Self::sync_drop_ownership_deadline(map, drop, now_ms);
+            // ObjectItem/ObjectGold packets only contain the legacy client-facing
+            // fields. The kill award carries the authoritative item, ownership,
+            // quantity, and monster provenance used by persistence and pickup.
+            map.ground_drops.insert(drop.object_id, drop.clone());
+        }
+    }
+
     fn take_pending_zone_monster_kill_awards(
         &mut self,
         key: &ZonePresenceKey,
@@ -2190,6 +2219,7 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    self.sync_authoritative_zone_drops_for_key(&key, &award.drops);
                     if current_key == Some(&key) {
                         current_monster_kill_awards.push(award);
                     } else {
@@ -2602,7 +2632,11 @@ impl SharedInProcessZoneState {
                     if let Some(drop) = ground_drop_snapshot_from_spawn_packet(packet) {
                         if !map.removed_drop_ids.contains(&drop.object_id) {
                             Self::sync_drop_ownership_deadline(map, &drop, shared_gateway_now_ms());
-                            map.ground_drops.insert(drop.object_id, drop);
+                            // A legacy spawn packet is intentionally lossy. Keep an
+                            // authoritative snapshot already supplied by the Zone
+                            // kill award instead of replacing it during the outer
+                            // packet fan-out pass.
+                            map.ground_drops.entry(drop.object_id).or_insert(drop);
                         }
                     }
                 }
@@ -7637,10 +7671,21 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. }
             )
         );
+        let is_personal_session_chat_packet = match &command {
+            WorldCommand::ClientPacket(ClientPacket::Chat { message, .. }) => {
+                let trimmed = message.trim_start();
+                (trimmed.len() > 1
+                    && trimmed.starts_with('@')
+                    && !trimmed.starts_with("@!")
+                    && !trimmed.eq_ignore_ascii_case("@ADDSTORAGE"))
+                    || self.inner.gm_login_pending()
+            }
+            _ => false,
+        };
         let is_low_latency_zone_chat_packet = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::Chat { .. })
-        );
+        ) && !is_personal_session_chat_packet;
         let is_low_latency_zone_packet =
             is_low_latency_zone_player_packet || is_low_latency_zone_chat_packet;
         let is_transfer_map_command = matches!(&command, WorldCommand::TransferMap { .. });
@@ -10089,6 +10134,20 @@ mod tests {
         };
         let current_session_id = SharedInProcessZoneState::zone_session_id_for_key(&current_key);
         let remote_session_id = SharedInProcessZoneState::zone_session_id_for_key(&remote_key);
+        let current_zone_object_id = state.upsert_player(
+            current_key.clone(),
+            "Current",
+            "0".to_string(),
+            shared_picker_entity(1, 329, 269),
+            10,
+        );
+        state.upsert_player(
+            remote_key.clone(),
+            "Remote",
+            "0".to_string(),
+            shared_picker_entity(2, 330, 269),
+            10,
+        );
         state
             .zone_session_keys
             .insert(current_session_id.clone(), current_key.clone());
@@ -10096,14 +10155,19 @@ mod tests {
             .zone_session_keys
             .insert(remote_session_id.clone(), remote_key.clone());
 
+        let drop = shared_gold_drop(9101, 329, 269, Some(current_zone_object_id), Some(100));
         let award = ZoneMonsterKillAward {
             monster_object_id: 9100,
             monster_name: "Field Wasp".to_string(),
             experience: 6,
-            drops: Vec::new(),
+            drops: vec![drop.clone()],
         };
         let (_, _, _, _, current_awards, _, _) = state.dispatch_zone_outbounds(
             vec![
+                ZoneOutbound::ToMany {
+                    session_ids: vec![current_session_id.clone(), remote_session_id.clone()],
+                    packets: vec![ground_drop_spawn_packet(&drop)],
+                },
                 ZoneOutbound::MonsterKillAward {
                     session_id: current_session_id,
                     award: award.clone(),
@@ -10121,6 +10185,13 @@ mod tests {
             state.take_pending_zone_monster_kill_awards(&remote_key),
             vec![award]
         );
+        state.apply_shared_entity_packets("0", &[ground_drop_spawn_packet(&drop)]);
+        let shared_drop = state
+            .maps
+            .get("0")
+            .and_then(|map| map.ground_drops.get(&drop.object_id))
+            .expect("kill award should replace the legacy packet snapshot");
+        assert_eq!(shared_drop, &drop);
     }
 
     #[test]
@@ -13717,7 +13788,7 @@ mod tests {
 
     #[test]
     fn shared_in_process_registry_routes_gm_chat_commands_to_personal_session() {
-        let (mut runtime, _) = started_shared_zone_sessions();
+        let (mut runtime, mut observer) = started_shared_zone_sessions();
         let player_id = runtime
             .world_snapshot()
             .player_object_id
@@ -13735,6 +13806,21 @@ mod tests {
             packet,
             ServerPacket::ObjectDied { info } if info.object_id == player_id
         )));
+        assert_eq!(runtime.world_snapshot().player_hp, Some(0));
+        assert!(observer
+            .handle_packet(ClientPacket::KeepAlive { time: 105 })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectDied { .. })));
+
+        let revive_packets = runtime.handle_packet(ClientPacket::TownRevive);
+        assert!(revive_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Revived)));
+        assert!(revive_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == player_id
+        )));
+        assert!(runtime.world_snapshot().player_hp.is_some_and(|hp| hp > 0));
     }
 
     #[test]
