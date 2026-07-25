@@ -3,7 +3,7 @@ use std::fmt;
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard, OnceLock, TryLockError, Weak};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -56,11 +56,33 @@ const ZONE_RPC_BINARY_MAGIC: &[u8; 4] = b"MRM1";
 static NEXT_RPC_SESSION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_REMOTE_OUTBOUND_REGISTRATION_ID: AtomicU64 = AtomicU64::new(1);
 static NEXT_OUTBOUND_STREAM_ID: AtomicU64 = AtomicU64::new(1);
+static SHARED_RPC_POOLS: OnceLock<Mutex<BTreeMap<String, Weak<SharedZoneRpcConnectionPool>>>> =
+    OnceLock::new();
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ZoneRpcCodec {
     Json,
     MessagePack,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ZoneRpcPriority {
+    Control,
+    Gameplay,
+}
+
+#[derive(Debug)]
+struct SharedEndpointConnections {
+    slots: Vec<Mutex<Option<TcpStream>>>,
+    next_control: AtomicUsize,
+    next_gameplay: AtomicUsize,
+    control_slots: usize,
+}
+
+#[derive(Debug)]
+struct SharedZoneRpcConnectionPool {
+    endpoints: Vec<SharedEndpointConnections>,
+    queue_timeout: Duration,
 }
 
 impl ZoneRpcCodec {
@@ -942,6 +964,7 @@ pub struct TcpZoneOwnerRpcTransport {
     codec: ZoneRpcCodec,
     reuse_connections: bool,
     connections: Arc<Vec<Mutex<Option<TcpStream>>>>,
+    shared_connections: Option<Arc<SharedZoneRpcConnectionPool>>,
     outbound_acknowledged: Arc<AtomicU64>,
     outbound_generation: Arc<AtomicU64>,
     outbound_stream_id: Arc<Mutex<Option<String>>>,
@@ -961,6 +984,7 @@ impl fmt::Debug for TcpZoneOwnerRpcTransport {
             .field("authenticated", &self.auth_token.is_some())
             .field("codec", &self.codec)
             .field("reuse_connections", &self.reuse_connections)
+            .field("shared_connection_pool", &self.shared_connections.is_some())
             .field("limits", &self.limits)
             .finish()
     }
@@ -1014,6 +1038,8 @@ impl TcpZoneOwnerRpcTransport {
         let connections = (0..addresses.len())
             .map(|_| Mutex::new(None))
             .collect::<Vec<_>>();
+        let shared_connections = positive_usize_env("MIR2_ZONE_RPC_SHARED_POOL_SIZE")
+            .map(|size| shared_rpc_pool(&addresses, size, limits.io_timeout));
         Ok(Self {
             addresses: Arc::new(addresses),
             active_endpoint: Arc::new(AtomicUsize::new(0)),
@@ -1024,6 +1050,7 @@ impl TcpZoneOwnerRpcTransport {
             codec: ZoneRpcCodec::from_env(),
             reuse_connections: false,
             connections: Arc::new(connections),
+            shared_connections,
             outbound_acknowledged: Arc::new(AtomicU64::new(0)),
             outbound_generation: Arc::new(AtomicU64::new(0)),
             outbound_stream_id: Arc::new(Mutex::new(None)),
@@ -1044,6 +1071,19 @@ impl TcpZoneOwnerRpcTransport {
     /// listener continue serving JSON clients during rolling upgrades.
     pub fn with_binary_codec(mut self) -> Self {
         self.codec = ZoneRpcCodec::MessagePack;
+        self
+    }
+
+    /// Multiplex logical sessions over a bounded set of long-lived sockets.
+    /// Control traffic uses reserved lanes so gameplay saturation cannot block
+    /// health, replication, fencing, or promotion.
+    pub fn with_shared_connection_pool(mut self, pool_size: usize) -> Self {
+        self.shared_connections = Some(shared_rpc_pool(
+            self.addresses.as_ref(),
+            pool_size,
+            self.limits.io_timeout,
+        ));
+        self.reuse_connections = true;
         self
     }
 
@@ -1349,6 +1389,7 @@ impl TcpZoneOwnerRpcTransport {
 
     fn call(&self, request: ZoneRpcRequest) -> Result<ZoneRpcPayload, String> {
         validate_identifier("RPC session id", &self.session_id)?;
+        let priority = request.priority();
         let envelope = ZoneRpcEnvelope {
             protocol_version: ZONE_RPC_PROTOCOL_VERSION,
             session_id: self.session_id.clone(),
@@ -1371,7 +1412,9 @@ impl TcpZoneOwnerRpcTransport {
         for offset in 0..endpoint_count {
             let index = (start + offset) % endpoint_count;
             let address = &self.addresses[index];
-            let response = if self.reuse_connections {
+            let response = if let Some(pool) = self.shared_connections.as_ref() {
+                pool.call(index, address, &encoded, &self.limits, self.codec, priority)
+            } else if self.reuse_connections {
                 call_reused_endpoint(
                     address,
                     &encoded,
@@ -4000,6 +4043,33 @@ enum ZoneRpcRequest {
     },
 }
 
+impl ZoneRpcRequest {
+    fn priority(&self) -> ZoneRpcPriority {
+        match self {
+            Self::Health
+            | Self::ReplicationHead
+            | Self::ExportMutationBatch { .. }
+            | Self::ExportBaseSnapshot
+            | Self::InstallBaseSnapshot { .. }
+            | Self::ApplyMutationBatch { .. }
+            | Self::AssessPromotionReadiness { .. }
+            | Self::PromoteReplica { .. }
+            | Self::QuiesceForPromotion { .. }
+            | Self::ResumeAfterQuiesce { .. }
+            | Self::ExportHostCheckpoint
+            | Self::InstallHostCheckpoint { .. } => ZoneRpcPriority::Control,
+            Self::OnConnect
+            | Self::Execute { .. }
+            | Self::PollOutbounds { .. }
+            | Self::WorldSnapshot
+            | Self::ActiveIdentity
+            | Self::SaveActiveCharacter
+            | Self::RefreshActiveExternalMail
+            | Self::CloseSession { .. } => ZoneRpcPriority::Gameplay,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "status", rename_all = "camelCase")]
 enum ZoneRpcResponse {
@@ -4679,6 +4749,104 @@ fn connect_with_timeout(address: &str, timeout: Duration) -> Result<TcpStream, S
     ))
 }
 
+fn shared_rpc_pool(
+    addresses: &[String],
+    requested_size: usize,
+    io_timeout: Duration,
+) -> Arc<SharedZoneRpcConnectionPool> {
+    let size = requested_size.clamp(2, 1_024);
+    let queue_timeout_ms = positive_u64_env("MIR2_ZONE_RPC_QUEUE_TIMEOUT_MS")
+        .unwrap_or(500)
+        .clamp(1, 30_000);
+    let queue_timeout = Duration::from_millis(queue_timeout_ms).min(io_timeout);
+    let key = format!(
+        "{}|size={size}|queue_ms={queue_timeout_ms}",
+        addresses.join(",")
+    );
+    let registry = SHARED_RPC_POOLS.get_or_init(|| Mutex::new(BTreeMap::new()));
+    let mut registry = registry
+        .lock()
+        .expect("shared Zone RPC pool registry mutex poisoned");
+    if let Some(pool) = registry.get(&key).and_then(Weak::upgrade) {
+        return pool;
+    }
+    registry.retain(|_, pool| pool.strong_count() > 0);
+    let control_slots = (size / 16).clamp(1, size - 1);
+    let pool = Arc::new(SharedZoneRpcConnectionPool {
+        endpoints: addresses
+            .iter()
+            .map(|_| SharedEndpointConnections {
+                slots: (0..size).map(|_| Mutex::new(None)).collect(),
+                next_control: AtomicUsize::new(0),
+                next_gameplay: AtomicUsize::new(0),
+                control_slots,
+            })
+            .collect(),
+        queue_timeout,
+    });
+    registry.insert(key, Arc::downgrade(&pool));
+    pool
+}
+
+impl SharedZoneRpcConnectionPool {
+    fn call(
+        &self,
+        endpoint_index: usize,
+        address: &str,
+        encoded: &[u8],
+        limits: &ZoneRpcLimits,
+        codec: ZoneRpcCodec,
+        priority: ZoneRpcPriority,
+    ) -> Result<ZoneRpcResponse, String> {
+        let endpoint = self
+            .endpoints
+            .get(endpoint_index)
+            .ok_or_else(|| format!("shared Zone RPC endpoint index {endpoint_index} is invalid"))?;
+        let (start, length, sequence) = match priority {
+            ZoneRpcPriority::Control => (
+                0,
+                endpoint.control_slots,
+                endpoint.next_control.fetch_add(1, Ordering::Relaxed),
+            ),
+            ZoneRpcPriority::Gameplay => (
+                endpoint.control_slots,
+                endpoint.slots.len() - endpoint.control_slots,
+                endpoint.next_gameplay.fetch_add(1, Ordering::Relaxed),
+            ),
+        };
+        let deadline = Instant::now() + self.queue_timeout;
+        loop {
+            for offset in 0..length {
+                let index = start + ((sequence + offset) % length);
+                match endpoint.slots[index].try_lock() {
+                    Ok(connection) => {
+                        return call_locked_reused_endpoint(
+                            address, encoded, limits, codec, connection,
+                        );
+                    }
+                    Err(TryLockError::WouldBlock) => {}
+                    Err(TryLockError::Poisoned(_)) => {
+                        return Err(format!(
+                            "zone RPC shared connection {endpoint_index}/{index} mutex poisoned"
+                        ));
+                    }
+                }
+            }
+            if Instant::now() >= deadline {
+                return Err(format!(
+                    "zone RPC backpressure: {:?} queue exceeded {}ms",
+                    priority,
+                    self.queue_timeout.as_millis()
+                ));
+            }
+            // A bounded micro-sleep avoids turning queue pressure into a
+            // CPU-burning spin loop while remaining far below the gameplay
+            // latency budget.
+            thread::sleep(Duration::from_micros(50));
+        }
+    }
+}
+
 fn call_endpoint(
     address: &str,
     encoded: &[u8],
@@ -4707,9 +4875,19 @@ fn call_reused_endpoint(
     connection: &Mutex<Option<TcpStream>>,
     codec: ZoneRpcCodec,
 ) -> Result<ZoneRpcResponse, String> {
-    let mut connection = connection
+    let connection = connection
         .lock()
         .map_err(|_| "zone RPC connection mutex poisoned".to_string())?;
+    call_locked_reused_endpoint(address, encoded, limits, codec, connection)
+}
+
+fn call_locked_reused_endpoint(
+    address: &str,
+    encoded: &[u8],
+    limits: &ZoneRpcLimits,
+    codec: ZoneRpcCodec,
+    mut connection: MutexGuard<'_, Option<TcpStream>>,
+) -> Result<ZoneRpcResponse, String> {
     if connection.is_none() {
         let stream = connect_with_timeout(address, limits.io_timeout)?;
         stream
