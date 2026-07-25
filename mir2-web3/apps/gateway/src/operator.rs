@@ -751,6 +751,18 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         snapshot.checkpoint.journal_entries
     );
     metric!(
+        "Successful durable-prefix journal compactions.",
+        "counter",
+        "obelisk_zone_host_journal_compactions_total",
+        snapshot.checkpoint.journal_compactions_total
+    );
+    metric!(
+        "Journal entries removed by durable-prefix compaction.",
+        "counter",
+        "obelisk_zone_host_journal_compacted_entries_total",
+        snapshot.checkpoint.journal_compacted_entries_total
+    );
+    metric!(
         "Successful v4 checkpoint exports.",
         "counter",
         "obelisk_zone_host_checkpoint_exports_total",
@@ -1025,6 +1037,8 @@ mod tests {
         assert!(output.contains("obelisk_zone_host_session_capacity_per_zone"));
         assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
         assert!(output.contains("obelisk_zone_host_checkpoint_journal_entries"));
+        assert!(output.contains("obelisk_zone_host_journal_compactions_total"));
+        assert!(output.contains("obelisk_zone_host_journal_compacted_entries_total"));
         assert!(output.contains("obelisk_zone_host_checkpoint_replay_entries_total"));
         assert!(output.contains("obelisk_zone_host_promotion_assessments_total"));
         assert!(output.contains("obelisk_zone_host_promotions_total"));

@@ -849,7 +849,7 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
 #[test]
 fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts_history() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
-    let (active_address, _active_server, active_stop, active_handle) =
+    let (active_address, active_server, active_stop, active_handle) =
         start_server(authority.clone());
     let (standby_address, standby_server, standby_stop, standby_handle) =
         start_server(authority.clone());
@@ -953,6 +953,35 @@ fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts
         .expect("active post-base mutation should execute");
     let post_base_head = active.replication_head().unwrap();
     assert_eq!(post_base_head.next_sequence, base.base_sequence + 1);
+    let compacted_entries = active
+        .compact_mutation_journal(&base)
+        .expect("durable base should compact only the active journal prefix");
+    assert_eq!(compacted_entries as u64, base.base_sequence);
+    assert_eq!(
+        active
+            .compact_mutation_journal(&base)
+            .expect("active journal compaction should be idempotent"),
+        0
+    );
+    let compacted_head = active.replication_head().unwrap();
+    assert_eq!(
+        compacted_head.base_snapshot_id,
+        Some(base.snapshot_id.clone())
+    );
+    assert_eq!(compacted_head.base_sequence, base.base_sequence);
+    assert_eq!(compacted_head.oldest_available_sequence, base.base_sequence);
+    assert_eq!(compacted_head.next_sequence, post_base_head.next_sequence);
+    assert_eq!(compacted_head.latest_digest, post_base_head.latest_digest);
+    assert!(active
+        .export_mutation_batch(0, 8, 1024 * 1024)
+        .expect_err("active pre-base history must be compacted")
+        .contains("replication_cursor_compacted"));
+    let active_telemetry = active_server.telemetry_snapshot();
+    assert_eq!(active_telemetry.checkpoint.journal_compactions_total, 1);
+    assert_eq!(
+        active_telemetry.checkpoint.journal_compacted_entries_total,
+        base.base_sequence
+    );
     let post_base_batch = active
         .export_mutation_batch(base.base_sequence, 8, 1024 * 1024)
         .expect("post-base delta should export");

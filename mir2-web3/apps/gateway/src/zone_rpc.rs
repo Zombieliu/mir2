@@ -205,6 +205,10 @@ pub struct ZoneHostPromotionTelemetry {
 #[serde(rename_all = "camelCase")]
 pub struct ZoneHostCheckpointTelemetry {
     pub journal_entries: u64,
+    #[serde(default)]
+    pub journal_compactions_total: u64,
+    #[serde(default)]
+    pub journal_compacted_entries_total: u64,
     pub exports_total: u64,
     pub export_bytes_total: u64,
     pub export_duration_ns_total: u64,
@@ -648,6 +652,47 @@ impl Default for ZoneReplicationCursor {
     }
 }
 
+impl ZoneReplicationCursor {
+    fn digest_at_sequence(&self, sequence: u64, zone_id: &str) -> Result<[u8; 32], ZoneRpcFault> {
+        if sequence < self.base_sequence {
+            return Err(ZoneRpcFault::new(
+                "replication_cursor_compacted",
+                format!(
+                    "Zone {zone_id} cursor {sequence} predates oldest available sequence {}",
+                    self.base_sequence
+                ),
+            ));
+        }
+        if sequence > self.next_sequence {
+            return Err(ZoneRpcFault::new(
+                "replication_cursor_ahead",
+                format!(
+                    "Zone {zone_id} cursor {sequence} is ahead of next sequence {}",
+                    self.next_sequence
+                ),
+            ));
+        }
+        if sequence == self.base_sequence {
+            return Ok(self.base_digest);
+        }
+        let digest_index = usize::try_from(sequence - self.base_sequence - 1).map_err(|_| {
+            ZoneRpcFault::new(
+                "replication_cursor_invalid",
+                format!("Zone {zone_id} cursor does not fit this host"),
+            )
+        })?;
+        self.entry_digests
+            .get(digest_index)
+            .copied()
+            .ok_or_else(|| {
+                ZoneRpcFault::new(
+                    "replication_cursor_compacted",
+                    format!("Zone {zone_id} cursor {sequence} is no longer available"),
+                )
+            })
+    }
+}
+
 #[derive(Debug, Default, Clone)]
 struct ZoneReplicationCatalog {
     cursors: BTreeMap<String, ZoneReplicationCursor>,
@@ -914,6 +959,134 @@ impl ZoneHostJournal {
         }
         self.replication = replication;
         Ok(())
+    }
+
+    fn compact_to_base(&mut self, snapshot: &ZoneBaseSnapshot) -> Result<usize, ZoneRpcFault> {
+        snapshot.verify().map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_invalid",
+                format!("Zone base snapshot verification failed: {error}"),
+            )
+        })?;
+        let current = self
+            .replication
+            .cursors
+            .get(&snapshot.zone_id)
+            .cloned()
+            .unwrap_or_default();
+        let snapshot_digest = parse_hex_digest(&snapshot.latest_digest).map_err(|error| {
+            ZoneRpcFault::new(
+                "base_snapshot_invalid",
+                format!(
+                    "Zone {} base snapshot digest is invalid: {error}",
+                    snapshot.zone_id
+                ),
+            )
+        })?;
+        let expected_digest =
+            current.digest_at_sequence(snapshot.base_sequence, &snapshot.zone_id)?;
+        if snapshot_digest != expected_digest {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_prefix_mismatch",
+                format!(
+                    "Zone {} base digest {} does not match journal prefix {} at cursor {}",
+                    snapshot.zone_id,
+                    snapshot.latest_digest,
+                    hex_lower_bytes(&expected_digest),
+                    snapshot.base_sequence
+                ),
+            ));
+        }
+        if current.base_sequence == snapshot.base_sequence {
+            if current.base_snapshot_id.as_deref() == Some(snapshot.snapshot_id.as_str()) {
+                return Ok(0);
+            }
+        }
+
+        let compacted_count = usize::try_from(
+            snapshot.base_sequence.saturating_sub(current.base_sequence),
+        )
+        .map_err(|_| {
+            ZoneRpcFault::new(
+                "replication_cursor_invalid",
+                format!(
+                    "Zone {} compacted prefix does not fit this host",
+                    snapshot.zone_id
+                ),
+            )
+        })?;
+        if compacted_count > current.host_entry_indexes.len() {
+            return Err(ZoneRpcFault::new(
+                "replication_cursor_invalid",
+                format!(
+                    "Zone {} compacted prefix {} exceeds {} retained entries",
+                    snapshot.zone_id,
+                    compacted_count,
+                    current.host_entry_indexes.len()
+                ),
+            ));
+        }
+        let retained_target_indexes = current
+            .host_entry_indexes
+            .iter()
+            .skip(compacted_count)
+            .copied()
+            .collect::<BTreeSet<_>>();
+        let entries = self
+            .entries
+            .iter()
+            .enumerate()
+            .filter(|(index, entry)| {
+                entry.zone_id != snapshot.zone_id || retained_target_indexes.contains(index)
+            })
+            .map(|(_, entry)| entry.clone())
+            .collect::<Vec<_>>();
+
+        let mut cursors = self
+            .replication
+            .cursors
+            .iter()
+            .filter(|(zone_id, _)| zone_id.as_str() != snapshot.zone_id)
+            .map(|(zone_id, cursor)| {
+                (
+                    zone_id.clone(),
+                    ZoneReplicationCursor {
+                        base_snapshot_id: cursor.base_snapshot_id.clone(),
+                        base_sequence: cursor.base_sequence,
+                        base_digest: cursor.base_digest,
+                        next_sequence: cursor.base_sequence,
+                        latest_digest: cursor.base_digest,
+                        host_entry_indexes: Vec::new(),
+                        entry_digests: Vec::new(),
+                    },
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        cursors.extend(ZoneReplicationCatalog::from_base(snapshot)?.cursors);
+        let mut replication = ZoneReplicationCatalog { cursors };
+        for (host_entry_index, entry) in entries.iter().enumerate() {
+            replication.append(host_entry_index, entry)?;
+        }
+        let rebuilt = replication.head(&snapshot.zone_id);
+        let previous = self.replication.head(&snapshot.zone_id);
+        if rebuilt.next_sequence != previous.next_sequence
+            || rebuilt.latest_digest != previous.latest_digest
+        {
+            return Err(ZoneRpcFault::new(
+                "replication_compaction_mismatch",
+                format!(
+                    "Zone {} compaction changed head {}/{} to {}/{}",
+                    snapshot.zone_id,
+                    previous.next_sequence,
+                    previous.latest_digest,
+                    rebuilt.next_sequence,
+                    rebuilt.latest_digest
+                ),
+            ));
+        }
+        self.entries = entries;
+        self.replication = replication;
+        Ok(compacted_count)
     }
 }
 
@@ -1320,6 +1493,22 @@ impl TcpZoneOwnerRpcTransport {
                 Ok(())
             }
             payload => Err(unexpected_payload("install_base_snapshot", &payload)),
+        }
+    }
+
+    pub fn compact_mutation_journal(&self, snapshot: &ZoneBaseSnapshot) -> Result<usize, String> {
+        if snapshot.zone_id != self.zone_id.as_str() {
+            return Err(format!(
+                "base snapshot Zone {} does not match requested Zone {}",
+                snapshot.zone_id,
+                self.zone_id.as_str()
+            ));
+        }
+        match self.call(ZoneRpcRequest::CompactMutationJournal {
+            snapshot: snapshot.clone(),
+        })? {
+            ZoneRpcPayload::JournalCompaction { compacted_entries } => Ok(compacted_entries),
+            payload => Err(unexpected_payload("compact_mutation_journal", &payload)),
         }
     }
 
@@ -1896,6 +2085,8 @@ pub struct ZoneHostServer {
     checkpoint_install_last_duration_ns: AtomicU64,
     checkpoint_replay_entries_total: AtomicU64,
     checkpoint_replay_last_entries: AtomicU64,
+    journal_compactions_total: AtomicU64,
+    journal_compacted_entries_total: AtomicU64,
     promotion_assessments_total: AtomicU64,
     promotion_ready_assessments_total: AtomicU64,
     promotion_attempts_total: AtomicU64,
@@ -2065,6 +2256,8 @@ impl ZoneHostServer {
             checkpoint_install_last_duration_ns: AtomicU64::new(0),
             checkpoint_replay_entries_total: AtomicU64::new(0),
             checkpoint_replay_last_entries: AtomicU64::new(0),
+            journal_compactions_total: AtomicU64::new(0),
+            journal_compacted_entries_total: AtomicU64::new(0),
             promotion_assessments_total: AtomicU64::new(0),
             promotion_ready_assessments_total: AtomicU64::new(0),
             promotion_attempts_total: AtomicU64::new(0),
@@ -2119,6 +2312,10 @@ impl ZoneHostServer {
                     .lock()
                     .map(|journal| saturating_u64(journal.entries.len()))
                     .unwrap_or_default(),
+                journal_compactions_total: self.journal_compactions_total.load(Ordering::Acquire),
+                journal_compacted_entries_total: self
+                    .journal_compacted_entries_total
+                    .load(Ordering::Acquire),
                 exports_total: self.checkpoint_exports_total.load(Ordering::Acquire),
                 export_bytes_total: self.checkpoint_export_bytes_total.load(Ordering::Acquire),
                 export_duration_ns_total: self
@@ -2955,6 +3152,11 @@ impl ZoneHostServer {
                 self.install_base_snapshot(&envelope.zone_id, &snapshot)?;
                 return Ok(ZoneRpcPayload::Unit);
             }
+            ZoneRpcRequest::CompactMutationJournal { snapshot } => {
+                let compacted_entries =
+                    self.compact_mutation_journal(&envelope.zone_id, &snapshot)?;
+                return Ok(ZoneRpcPayload::JournalCompaction { compacted_entries });
+            }
             ZoneRpcRequest::ApplyMutationBatch { batch } => {
                 self.apply_mutation_batch(&envelope.zone_id, &batch)?;
                 return Ok(ZoneRpcPayload::Unit);
@@ -3032,6 +3234,7 @@ impl ZoneHostServer {
             | ZoneRpcRequest::ExportMutationBatch { .. }
             | ZoneRpcRequest::ExportBaseSnapshot
             | ZoneRpcRequest::InstallBaseSnapshot { .. }
+            | ZoneRpcRequest::CompactMutationJournal { .. }
             | ZoneRpcRequest::ApplyMutationBatch { .. }
             | ZoneRpcRequest::AssessPromotionReadiness { .. }
             | ZoneRpcRequest::PromoteReplica { .. }
@@ -3280,6 +3483,50 @@ impl ZoneHostServer {
 
     fn append_journal(&self, entry: WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
         append_host_journal(self.journal.as_ref(), entry)
+    }
+
+    fn compact_mutation_journal(
+        &self,
+        requested_zone_id: &str,
+        snapshot: &ZoneBaseSnapshot,
+    ) -> Result<usize, ZoneRpcFault> {
+        if snapshot.zone_id != requested_zone_id {
+            return Err(ZoneRpcFault::new(
+                "zone_mismatch",
+                format!(
+                    "base snapshot Zone {} does not match requested Zone {requested_zone_id}",
+                    snapshot.zone_id
+                ),
+            ));
+        }
+        if snapshot.build_id != zone_replication_build_id() {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_build_mismatch",
+                format!(
+                    "base snapshot build {} does not match host build {}",
+                    snapshot.build_id,
+                    zone_replication_build_id()
+                ),
+            ));
+        }
+        if !snapshot.apply_ready {
+            return Err(ZoneRpcFault::new(
+                "base_snapshot_incomplete",
+                "cannot compact to a base snapshot without a complete restorable Session image",
+            ));
+        }
+        let compacted_entries = self
+            .journal
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+            .compact_to_base(snapshot)?;
+        if compacted_entries > 0 {
+            self.journal_compactions_total
+                .fetch_add(1, Ordering::Relaxed);
+            self.journal_compacted_entries_total
+                .fetch_add(saturating_u64(compacted_entries), Ordering::Relaxed);
+        }
+        Ok(compacted_entries)
     }
 
     fn export_host_checkpoint(&self) -> Result<ZoneRpcPayload, ZoneRpcFault> {
@@ -4109,6 +4356,9 @@ enum ZoneRpcRequest {
     InstallBaseSnapshot {
         snapshot: ZoneBaseSnapshot,
     },
+    CompactMutationJournal {
+        snapshot: ZoneBaseSnapshot,
+    },
     ApplyMutationBatch {
         batch: ZoneMutationBatch,
     },
@@ -4159,6 +4409,7 @@ impl ZoneRpcRequest {
             | Self::ExportMutationBatch { .. }
             | Self::ExportBaseSnapshot
             | Self::InstallBaseSnapshot { .. }
+            | Self::CompactMutationJournal { .. }
             | Self::ApplyMutationBatch { .. }
             | Self::AssessPromotionReadiness { .. }
             | Self::PromoteReplica { .. }
@@ -4209,6 +4460,9 @@ enum ZoneRpcPayload {
     },
     BaseSnapshot {
         snapshot: ZoneBaseSnapshot,
+    },
+    JournalCompaction {
+        compacted_entries: usize,
     },
     PromotionReadiness {
         readiness: ZonePromotionReadiness,
