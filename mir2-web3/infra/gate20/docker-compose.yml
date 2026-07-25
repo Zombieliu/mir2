@@ -1,6 +1,12 @@
 name: mir2-gate20
 
 x-postgres-url: &postgres-url "postgresql://mir2:mir2-gate20-local@postgres-primary:5432,postgres-standby:5432/mir2?target_session_attrs=read-write&connect_timeout=1"
+x-account-store: &account-store
+  MIR2_ACCOUNT_STORE_PATH: "/var/lib/obelisk/accounts.json"
+  MIR2_ACCOUNT_STORE_BACKEND: "postgres"
+  MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+  MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+  MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE: "16"
 x-topology: &topology >-
   {"version":1,"mode":"per_map","defaultZoneId":"lobby","defaultTickMs":100,
   "hotMaps":{"0":{"targetPlayersPerLine":50,"maximumPlayersPerLine":64,
@@ -18,6 +24,11 @@ x-zone-common: &zone-common
     MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
     MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
     MIR2_ECONOMY_DATABASE_URL: *postgres-url
+    MIR2_ACCOUNT_STORE_PATH: "/var/lib/obelisk/accounts.json"
+    MIR2_ACCOUNT_STORE_BACKEND: "postgres"
+    MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+    MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+    MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE: "16"
     MIR2_ZONE_TOPOLOGY_JSON: *topology
     MIR2_ZONE_HOST_MAX_CONNECTIONS: "256"
     MIR2_ZONE_HOST_MAX_SESSIONS: "1536"
@@ -83,9 +94,11 @@ services:
 
   zone-active:
     <<: *zone-common
-    environment:
+    environment: &active-environment
+      <<: *account-store
       MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
-      MIR2_ZONE_HOST_ID: "gate20-active"
+      MIR2_ZONE_HOST_ID: "gate20-active-1"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate20-active"
       MIR2_GATEWAY_INSTANCE_ID: "gate20-active"
       MIR2_ZONE_HOST_TOKEN: "gate20-zone-host-token-at-least-32-bytes"
       MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
@@ -98,9 +111,28 @@ services:
       MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
       MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
 
+  zone-active-2:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-2"
+
+  zone-active-3:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-3"
+
+  zone-active-4:
+    <<: *zone-common
+    environment:
+      <<: *active-environment
+      MIR2_ZONE_HOST_ID: "gate20-active-4"
+
   zone-standby:
     <<: *zone-common
     environment:
+      <<: *account-store
       MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
       MIR2_ZONE_HOST_ID: "gate20-standby"
       MIR2_GATEWAY_INSTANCE_ID: "gate20-standby"
@@ -127,11 +159,14 @@ services:
       MIR2_REGIONAL_LOAD_PLAYERS: "1000"
       MIR2_REGIONAL_LOAD_DURATION_SECONDS: "3600"
       MIR2_REGIONAL_LOAD_WORKERS: "128"
+      MIR2_REGIONAL_CONNECT_WORKERS: "8"
       MIR2_REGIONAL_LOAD_OUT: "/evidence/gate20-load.json"
       MIR2_REGIONAL_ACTIVE_OWNER: "gate20-active"
       MIR2_REGIONAL_STANDBY_OWNER: "gate20-standby"
       MIR2_GATEWAY_INSTANCE_ID: "gate20-active"
       MIR2_ZONE_HOST_ADDRS: "zone-active:7020,zone-standby:7020"
+      MIR2_ZONE_HOST_ACTIVE_ADDRS: "zone-active:7020,zone-active-2:7020,zone-active-3:7020,zone-active-4:7020"
+      MIR2_ZONE_HOST_STANDBY_ADDRS: "zone-standby:7020"
       MIR2_ZONE_HOST_TOKEN: "gate20-zone-host-token-at-least-32-bytes"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
       MIR2_ZONE_RPC_CODEC: "msgpack"
@@ -151,6 +186,12 @@ services:
       postgres-standby:
         condition: service_healthy
       zone-active:
+        condition: service_healthy
+      zone-active-2:
+        condition: service_healthy
+      zone-active-3:
+        condition: service_healthy
+      zone-active-4:
         condition: service_healthy
       zone-standby:
         condition: service_healthy

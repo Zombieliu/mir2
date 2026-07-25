@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -38,6 +39,7 @@ struct LoadPlayer {
     account_id: String,
     character_index: i32,
     role: WorkloadRole,
+    is_hot_map_player: bool,
     command_ordinal: u64,
     combat_target: u32,
     economy_drop: Option<(u32, i32, i32)>,
@@ -50,6 +52,8 @@ struct SharedMetrics {
     completed: u64,
     failed: u64,
     latencies_ms: Vec<f64>,
+    latencies_ms_by_role: BTreeMap<WorkloadRole, Vec<f64>>,
+    latencies_ms_by_placement: BTreeMap<&'static str, Vec<f64>>,
     completed_by_role: BTreeMap<WorkloadRole, u64>,
     failures: BTreeMap<String, u64>,
 }
@@ -162,6 +166,8 @@ struct Gate18LoadEvidence {
     workload_command_coverage: f64,
     failure_reasons: BTreeMap<String, u64>,
     latency_ms: NumericSummary,
+    latency_ms_by_role: BTreeMap<WorkloadRole, NumericSummary>,
+    latency_ms_by_placement: BTreeMap<&'static str, NumericSummary>,
     promotion: PromotionEvidence,
     economy_duplicate_count: i64,
     economy_runtime_ledger_mismatch_count: usize,
@@ -277,101 +283,183 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .copied()
         .filter(|map| map.map_file_name != hot_map.map_file_name)
         .collect::<Vec<_>>();
-    let mut players = Vec::with_capacity(requested_players);
-    for player_index in 0..requested_players {
-        let role = role_for_index(player_index, &roles);
-        let account_id = format!(
-            "g18l{:09}{:04}",
-            generated_at_ms % 1_000_000_000,
-            player_index
-        );
-        let character_name = format!("L{:06}{:03}", generated_at_ms % 1_000_000, player_index);
-        let (mut session, character_index) =
-            start_session(&registry, config.clone(), &account_id, &character_name)?;
-        let is_hot_map_player = player_index < hot_map_target;
-        let map = if is_hot_map_player {
-            hot_map
-        } else if regional_gate == "20" {
-            non_hot_maps[(player_index - hot_map_target) % non_hot_maps.len()]
-        } else {
-            active_maps[player_index % active_maps.len()]
-        };
-        let (target_map, position) = if role == WorkloadRole::Economy && regional_gate != "20" {
-            let economy_index = player_index.saturating_sub(requested_players * 80 / 100);
-            (
-                "0",
-                (
-                    330 + i32::try_from(economy_index % 5).unwrap_or_default() * 3,
-                    270 + i32::try_from(economy_index / 5).unwrap_or_default() * 3,
-                ),
-            )
-        } else {
-            let local_player_index = if is_hot_map_player {
-                player_index % 50
-            } else if regional_gate == "20" {
-                (player_index - hot_map_target) / non_hot_maps.len()
-            } else {
-                player_index / active_maps.len()
-            };
-            (
-                map.map_file_name.as_str(),
-                map_fixture_position(map, local_player_index),
-            )
-        };
-        session.transfer_map(&format!(
-            "crystal:{target_map}:{}:{}",
-            position.0, position.1
-        ));
-        let expected_zone = format!("map:{target_map}");
-        let routed_to_expected_zone = if regional_gate == "20" && is_hot_map_player {
-            session
-                .zone_id()
-                .as_str()
-                .starts_with(&format!("{expected_zone}:line:"))
-        } else {
-            session.zone_id().as_str() == expected_zone
-        };
-        if !routed_to_expected_zone {
-            return Err(format!(
-                "player {player_index} routed to {}, expected {expected_zone}",
-                session.zone_id()
-            )
-            .into());
-        }
-        if role == WorkloadRole::Economy {
-            // Seed the deterministic opening balance on the authoritative
-            // hosted session before the measured production workload.
-            apply_gold_fixture(&mut session, 100)?;
-        }
-        let combat_target = if role == WorkloadRole::Combat {
-            session
-                .world_snapshot()
-                .entities
-                .into_iter()
-                .find(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
-                .map(|entity| entity.object_id)
-                .unwrap_or_default()
-        } else {
-            0
-        };
-        players.push(LoadPlayer {
-            session,
-            account_id,
-            character_index,
-            role,
-            command_ordinal: 0,
-            combat_target,
-            economy_drop: None,
-            economy_transitions: Vec::new(),
-        });
-        if (player_index + 1) % 50 == 0 || player_index + 1 == requested_players {
-            eprintln!(
-                "Gate 18 load: connected {}/{} players",
-                player_index + 1,
-                requested_players
+    let gate20_economy_players = roles
+        .get(&WorkloadRole::Economy)
+        .copied()
+        .unwrap_or_default();
+    if regional_gate == "20" && gate20_economy_players > hot_map_target {
+        return Err("Gate 20 hotspot cannot contain all economy players".into());
+    }
+    let gate20_hot_movement_players = hot_map_target.saturating_sub(gate20_economy_players);
+    let connect_workers = env_usize_fallback(
+        "MIR2_REGIONAL_CONNECT_WORKERS",
+        "MIR2_GATE18_CONNECT_WORKERS",
+        32,
+    )
+    .clamp(1, requested_players.max(1));
+    let economy_start = roles
+        .get(&WorkloadRole::Movement)
+        .copied()
+        .unwrap_or_default()
+        + roles
+            .get(&WorkloadRole::Combat)
+            .copied()
+            .unwrap_or_default()
+        + roles
+            .get(&WorkloadRole::Social)
+            .copied()
+            .unwrap_or_default();
+    let connected = AtomicUsize::new(0);
+    let mut indexed_players = thread::scope(|scope| {
+        let chunk_size = requested_players.div_ceil(connect_workers);
+        let mut handles = Vec::new();
+        for start in (0..requested_players).step_by(chunk_size) {
+            let end = (start + chunk_size).min(requested_players);
+            let registry = registry.clone();
+            let config = config.clone();
+            let active_maps = &active_maps;
+            let non_hot_maps = &non_hot_maps;
+            let roles = &roles;
+            let connected = &connected;
+            let regional_gate = regional_gate.as_str();
+            handles.push(
+                scope.spawn(move || -> Result<Vec<(usize, LoadPlayer)>, String> {
+                    let mut chunk_players = Vec::with_capacity(end - start);
+                    for player_index in start..end {
+                        let role = role_for_index(player_index, roles);
+                        let account_id = format!(
+                            "g18l{:09}{:04}",
+                            generated_at_ms % 1_000_000_000,
+                            player_index
+                        );
+                        let character_name =
+                            format!("L{:06}{:03}", generated_at_ms % 1_000_000, player_index);
+                        let (mut session, character_index) =
+                            start_session(&registry, config.clone(), &account_id, &character_name)
+                                .map_err(|error| error.to_string())?;
+                        let is_hot_map_player = regional_gate == "20"
+                            && (role == WorkloadRole::Economy
+                                || (role == WorkloadRole::Movement
+                                    && player_index < gate20_hot_movement_players));
+                        let hot_players_before = player_index.min(gate20_hot_movement_players)
+                            + player_index
+                                .saturating_sub(economy_start)
+                                .min(gate20_economy_players);
+                        let non_hot_player_ordinal = (!is_hot_map_player && regional_gate == "20")
+                            .then_some(player_index.saturating_sub(hot_players_before));
+                        let map = if is_hot_map_player {
+                            hot_map
+                        } else if regional_gate == "20" {
+                            non_hot_maps
+                                [non_hot_player_ordinal.unwrap_or_default() % non_hot_maps.len()]
+                        } else {
+                            active_maps[player_index % active_maps.len()]
+                        };
+                        let (target_map, position) = if role == WorkloadRole::Economy {
+                            let economy_index = player_index.saturating_sub(economy_start);
+                            (
+                                "0",
+                                (
+                                    330 + i32::try_from(economy_index % 5).unwrap_or_default() * 3,
+                                    270 + i32::try_from(economy_index / 5).unwrap_or_default() * 3,
+                                ),
+                            )
+                        } else {
+                            let local_player_index = if is_hot_map_player {
+                                player_index % 50
+                            } else if regional_gate == "20" {
+                                non_hot_player_ordinal.unwrap_or_default() / non_hot_maps.len()
+                            } else {
+                                player_index / active_maps.len()
+                            };
+                            (
+                                map.map_file_name.as_str(),
+                                map_fixture_position(map, local_player_index),
+                            )
+                        };
+                        let expected_zone = format!("map:{target_map}");
+                        let transfer_key =
+                            format!("crystal:{target_map}:{}:{}", position.0, position.1);
+                        let routed_to_expected_zone = (0..3).any(|attempt| {
+                            let result = session.execute_with_outcome(WorldCommand::TransferMap {
+                                key: transfer_key.clone(),
+                            });
+                            let routed = if regional_gate == "20" && is_hot_map_player {
+                                session
+                                    .zone_id()
+                                    .as_str()
+                                    .starts_with(&format!("{expected_zone}:line:"))
+                            } else {
+                                session.zone_id().as_str() == expected_zone
+                            };
+                            if !routed && attempt < 2 {
+                                thread::sleep(Duration::from_millis(10));
+                            }
+                            result.is_ok() && routed
+                        });
+                        if !routed_to_expected_zone {
+                            return Err(format!(
+                                "player {player_index} routed to {}, expected {expected_zone}",
+                                session.zone_id()
+                            ));
+                        }
+                        if role == WorkloadRole::Economy {
+                            apply_gold_fixture(&mut session, 100)
+                                .map_err(|error| error.to_string())?;
+                        }
+                        let combat_target = if role == WorkloadRole::Combat {
+                            session
+                                .world_snapshot()
+                                .entities
+                                .into_iter()
+                                .find(|entity| {
+                                    entity.kind == WorldEntityKind::Monster && !entity.dead
+                                })
+                                .map(|entity| entity.object_id)
+                                .unwrap_or_default()
+                        } else {
+                            0
+                        };
+                        chunk_players.push((
+                            player_index,
+                            LoadPlayer {
+                                session,
+                                account_id,
+                                character_index,
+                                role,
+                                is_hot_map_player,
+                                command_ordinal: 0,
+                                combat_target,
+                                economy_drop: None,
+                                economy_transitions: Vec::new(),
+                            },
+                        ));
+                        let connected = connected.fetch_add(1, Ordering::Relaxed) + 1;
+                        if connected % 50 == 0 || connected == requested_players {
+                            eprintln!(
+                                "Gate 18 load: connected {connected}/{requested_players} players"
+                            );
+                        }
+                    }
+                    Ok(chunk_players)
+                }),
             );
         }
-    }
+        let mut indexed_players = Vec::with_capacity(requested_players);
+        for handle in handles {
+            indexed_players.extend(
+                handle
+                    .join()
+                    .map_err(|_| "Gate 18 connect worker panicked".to_string())??,
+            );
+        }
+        Ok::<_, String>(indexed_players)
+    })?;
+    indexed_players.sort_by_key(|(index, _)| *index);
+    let mut players = indexed_players
+        .into_iter()
+        .map(|(_, player)| player)
+        .collect::<Vec<_>>();
 
     let distinct_accounts = players
         .iter()
@@ -491,6 +579,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .into_inner()
         .map_err(|_| "Gate 18 metrics mutex poisoned")?;
     let latency_ms = summarize(&mut metrics.latencies_ms);
+    let latency_ms_by_role = metrics
+        .latencies_ms_by_role
+        .iter_mut()
+        .map(|(role, latencies)| (*role, summarize(latencies)))
+        .collect();
+    let latency_ms_by_placement = metrics
+        .latencies_ms_by_placement
+        .iter_mut()
+        .map(|(placement, latencies)| (*placement, summarize(latencies)))
+        .collect();
     let error_rate = if metrics.attempted == 0 {
         1.0
     } else {
@@ -629,6 +727,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         workload_command_coverage,
         failure_reasons: metrics.failures,
         latency_ms,
+        latency_ms_by_role,
+        latency_ms_by_placement,
         promotion,
         economy_duplicate_count,
         economy_runtime_ledger_mismatch_count,
@@ -976,6 +1076,20 @@ fn execute_player_command(player: &mut LoadPlayer, metrics: &Arc<Mutex<SharedMet
         Ok(_) => {
             metrics.completed += 1;
             metrics.latencies_ms.push(latency);
+            metrics
+                .latencies_ms_by_role
+                .entry(player.role)
+                .or_default()
+                .push(latency);
+            metrics
+                .latencies_ms_by_placement
+                .entry(if player.is_hot_map_player {
+                    "hot-map"
+                } else {
+                    "regular-map"
+                })
+                .or_default()
+                .push(latency);
             *metrics.completed_by_role.entry(player.role).or_default() += 1;
         }
         Err(error) => {
@@ -994,24 +1108,23 @@ fn promote_zone(
     zone_id: ZoneId,
 ) -> Result<PromotionEvidence, Box<dyn std::error::Error>> {
     let started = Instant::now();
-    let addresses = env::var("MIR2_ZONE_HOST_ADDRS")
-        .map_err(|_| "MIR2_ZONE_HOST_ADDRS with active and standby is required")?;
-    let mut endpoints = addresses.split(',').map(str::trim);
-    let active_address = endpoints.next().ok_or("active Zone endpoint missing")?;
-    let standby_address = endpoints.next().ok_or("standby Zone endpoint missing")?;
+    let (addresses, _) = TcpZoneOwnerRpcTransport::configured_endpoints_from_env(&zone_id)
+        .ok_or("Zone endpoints with active and standby are required")?;
+    let active_address = addresses.first().ok_or("active Zone endpoint missing")?;
+    let standby_address = addresses.get(1).ok_or("standby Zone endpoint missing")?;
     let token = env::var("MIR2_ZONE_HOST_TOKEN")
         .ok()
         .filter(|value| !value.trim().is_empty());
     let limits = ZoneRpcLimits::from_env();
     let active = TcpZoneOwnerRpcTransport::with_options(
-        active_address,
+        active_address.clone(),
         zone_id.clone(),
         &format!("gate{regional_gate}-promotion-active"),
         token.clone(),
         limits.clone(),
     );
     let standby = TcpZoneOwnerRpcTransport::with_options(
-        standby_address,
+        standby_address.clone(),
         zone_id.clone(),
         &format!("gate{regional_gate}-promotion-standby"),
         token,
@@ -1091,28 +1204,58 @@ fn promote_zone(
     })
 }
 
+#[derive(Debug, Clone, Copy)]
+struct ZoneHostCapacity {
+    session_count: usize,
+    active_connections: usize,
+}
+
 fn active_zone_host_health(
     zone_id: ZoneId,
     regional_gate: &str,
-) -> Result<mir2_gateway::ZoneHostHealth, Box<dyn std::error::Error>> {
-    let active_address = env::var("MIR2_ZONE_HOST_ADDRS")
-        .map_err(|_| "MIR2_ZONE_HOST_ADDRS with active and standby is required")?
-        .split(',')
-        .next()
-        .map(str::trim)
-        .filter(|address| !address.is_empty())
-        .ok_or("active Zone endpoint missing")?
-        .to_string();
-    let transport = TcpZoneOwnerRpcTransport::with_options(
-        active_address,
-        zone_id,
-        format!("gate{regional_gate}-capacity-health"),
-        env::var("MIR2_ZONE_HOST_TOKEN")
-            .ok()
-            .filter(|value| !value.trim().is_empty()),
-        ZoneRpcLimits::from_env(),
-    );
-    Ok(transport.health()?)
+) -> Result<ZoneHostCapacity, Box<dyn std::error::Error>> {
+    let active_addresses = env::var("MIR2_ZONE_HOST_ACTIVE_ADDRS")
+        .ok()
+        .map(|value| {
+            value
+                .split(',')
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .filter(|addresses| !addresses.is_empty())
+        .unwrap_or_else(|| {
+            TcpZoneOwnerRpcTransport::configured_endpoints_from_env(&zone_id)
+                .map(|(addresses, _)| addresses.into_iter().take(1).collect())
+                .unwrap_or_default()
+        });
+    if active_addresses.is_empty() {
+        return Err("active Zone endpoint missing".into());
+    }
+    let token = env::var("MIR2_ZONE_HOST_TOKEN")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    let limits = ZoneRpcLimits::from_env();
+    let mut capacity = ZoneHostCapacity {
+        session_count: 0,
+        active_connections: 0,
+    };
+    for (index, address) in active_addresses.into_iter().enumerate() {
+        let health = TcpZoneOwnerRpcTransport::with_options(
+            address,
+            zone_id.clone(),
+            format!("gate{regional_gate}-capacity-health-{index}"),
+            token.clone(),
+            limits.clone(),
+        )
+        .health()?;
+        capacity.session_count = capacity.session_count.saturating_add(health.session_count);
+        capacity.active_connections = capacity
+            .active_connections
+            .saturating_add(health.active_connections);
+    }
+    Ok(capacity)
 }
 
 fn start_session(

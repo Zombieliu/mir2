@@ -179,6 +179,15 @@ pub struct ZoneHostTelemetrySnapshot {
     pub accepted_connections_total: u64,
     pub rpc_requests_total: u64,
     pub rpc_errors_total: u64,
+    pub rpc_service_duration_ns_total: u64,
+    pub rpc_service_duration_ns_max: u64,
+    pub rpc_response_bytes_total: u64,
+    pub rpc_response_bytes_max: u64,
+    pub zone_gate_wait_duration_ns_total: u64,
+    pub zone_gate_wait_duration_ns_max: u64,
+    pub execute_requests_total: u64,
+    pub execute_runtime_duration_ns_total: u64,
+    pub execute_journal_duration_ns_total: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -1103,23 +1112,7 @@ impl TcpZoneOwnerRpcTransport {
     }
 
     pub fn from_env(zone_id: ZoneId) -> Option<Self> {
-        let addresses = std::env::var("MIR2_ZONE_HOST_ADDRS")
-            .ok()
-            .map(|value| {
-                value
-                    .split(',')
-                    .map(str::trim)
-                    .filter(|value| !value.is_empty())
-                    .map(str::to_string)
-                    .collect::<Vec<_>>()
-            })
-            .filter(|addresses| !addresses.is_empty())
-            .or_else(|| {
-                std::env::var("MIR2_ZONE_HOST_ADDR")
-                    .ok()
-                    .filter(|value| !value.trim().is_empty())
-                    .map(|address| vec![address.trim().to_string()])
-            })?;
+        let (addresses, active_shard_count) = Self::configured_endpoints_from_env(&zone_id)?;
         let transport = Self::with_endpoints(
             addresses,
             zone_id,
@@ -1130,11 +1123,46 @@ impl TcpZoneOwnerRpcTransport {
             ZoneRpcLimits::from_env(),
         )
         .ok()?;
+        let transport = if active_shard_count > 1 {
+            if let Some(total_size) = positive_usize_env("MIR2_ZONE_RPC_SHARED_POOL_SIZE") {
+                transport.with_shared_connection_pool(total_size.div_ceil(active_shard_count))
+            } else {
+                transport
+            }
+        } else {
+            transport
+        };
         Some(if enabled_env("MIR2_ZONE_RPC_REUSE_CONNECTIONS") {
             transport.with_connection_reuse()
         } else {
             transport
         })
+    }
+
+    /// Resolve the ordered endpoints used for one Zone.
+    ///
+    /// When `MIR2_ZONE_HOST_ACTIVE_ADDRS` is present, the Zone id is hashed to
+    /// exactly one active shard and the configured standby endpoints follow it
+    /// as failover candidates. The legacy `MIR2_ZONE_HOST_ADDRS` list keeps its
+    /// original active/standby semantics when active sharding is not enabled.
+    pub fn configured_endpoints_from_env(zone_id: &ZoneId) -> Option<(Vec<String>, usize)> {
+        let active = comma_separated_env("MIR2_ZONE_HOST_ACTIVE_ADDRS");
+        if !active.is_empty() {
+            let standby = comma_separated_env("MIR2_ZONE_HOST_STANDBY_ADDRS");
+            let active_shard_count = active.len();
+            return Some((
+                select_zone_shard_endpoints(zone_id, &active, &standby),
+                active_shard_count,
+            ));
+        }
+        let addresses = comma_separated_env("MIR2_ZONE_HOST_ADDRS");
+        if !addresses.is_empty() {
+            return Some((addresses, 1));
+        }
+        std::env::var("MIR2_ZONE_HOST_ADDR")
+            .ok()
+            .filter(|value| !value.trim().is_empty())
+            .map(|address| (vec![address.trim().to_string()], 1))
     }
 
     pub fn session_id(&self) -> &str {
@@ -1668,7 +1696,17 @@ impl ZoneHostSession {
         }
     }
 
-    fn refresh_live_registration(&self) -> Result<(), ZoneRpcFault> {
+    fn refresh_live_registration(&self, force: bool) -> Result<(), ZoneRpcFault> {
+        let mut live_registration = self.live_registration.lock().map_err(|_| {
+            ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
+        })?;
+        if !force && live_registration.is_some() {
+            return Ok(());
+        }
+        if force {
+            *live_registration = None;
+        }
+        drop(live_registration);
         let registration = self
             .hosted
             .register_live_outbound(self.outbound_sender.clone())
@@ -1685,11 +1723,12 @@ impl ZoneHostSession {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, ZoneRpcFault> {
+        let force_live_registration = command_changes_live_registration(request.command());
         let execution = self
             .hosted
             .execute_request(request)
             .map_err(classify_runtime_error)?;
-        self.refresh_live_registration()?;
+        self.refresh_live_registration(force_live_registration)?;
         Ok(execution)
     }
 
@@ -1697,11 +1736,12 @@ impl ZoneHostSession {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, ZoneRpcFault> {
+        let force_live_registration = command_changes_live_registration(request.command());
         let execution = self
             .hosted
             .execute_replay_request(request)
             .map_err(classify_runtime_error)?;
-        self.refresh_live_registration()?;
+        self.refresh_live_registration(force_live_registration)?;
         Ok(execution)
     }
 
@@ -1711,7 +1751,7 @@ impl ZoneHostSession {
         acknowledged_sequence: u64,
         max_items: usize,
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
-        self.refresh_live_registration()?;
+        self.refresh_live_registration(false)?;
         let mut receiver = self.outbound_receiver.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host outbound receiver mutex poisoned")
         })?;
@@ -1835,6 +1875,15 @@ pub struct ZoneHostServer {
     accepted_connections_total: AtomicU64,
     rpc_requests_total: AtomicU64,
     rpc_errors_total: AtomicU64,
+    rpc_service_duration_ns_total: AtomicU64,
+    rpc_service_duration_ns_max: AtomicU64,
+    rpc_response_bytes_total: AtomicU64,
+    rpc_response_bytes_max: AtomicU64,
+    zone_gate_wait_duration_ns_total: AtomicU64,
+    zone_gate_wait_duration_ns_max: AtomicU64,
+    execute_requests_total: AtomicU64,
+    execute_runtime_duration_ns_total: AtomicU64,
+    execute_journal_duration_ns_total: AtomicU64,
     checkpoint_exports_total: AtomicU64,
     checkpoint_export_bytes_total: AtomicU64,
     checkpoint_export_duration_ns_total: AtomicU64,
@@ -1995,6 +2044,15 @@ impl ZoneHostServer {
             accepted_connections_total: AtomicU64::new(0),
             rpc_requests_total: AtomicU64::new(0),
             rpc_errors_total: AtomicU64::new(0),
+            rpc_service_duration_ns_total: AtomicU64::new(0),
+            rpc_service_duration_ns_max: AtomicU64::new(0),
+            rpc_response_bytes_total: AtomicU64::new(0),
+            rpc_response_bytes_max: AtomicU64::new(0),
+            zone_gate_wait_duration_ns_total: AtomicU64::new(0),
+            zone_gate_wait_duration_ns_max: AtomicU64::new(0),
+            execute_requests_total: AtomicU64::new(0),
+            execute_runtime_duration_ns_total: AtomicU64::new(0),
+            execute_journal_duration_ns_total: AtomicU64::new(0),
             checkpoint_exports_total: AtomicU64::new(0),
             checkpoint_export_bytes_total: AtomicU64::new(0),
             checkpoint_export_duration_ns_total: AtomicU64::new(0),
@@ -2097,6 +2155,25 @@ impl ZoneHostServer {
             accepted_connections_total: self.accepted_connections_total.load(Ordering::Acquire),
             rpc_requests_total: self.rpc_requests_total.load(Ordering::Acquire),
             rpc_errors_total: self.rpc_errors_total.load(Ordering::Acquire),
+            rpc_service_duration_ns_total: self
+                .rpc_service_duration_ns_total
+                .load(Ordering::Acquire),
+            rpc_service_duration_ns_max: self.rpc_service_duration_ns_max.load(Ordering::Acquire),
+            rpc_response_bytes_total: self.rpc_response_bytes_total.load(Ordering::Acquire),
+            rpc_response_bytes_max: self.rpc_response_bytes_max.load(Ordering::Acquire),
+            zone_gate_wait_duration_ns_total: self
+                .zone_gate_wait_duration_ns_total
+                .load(Ordering::Acquire),
+            zone_gate_wait_duration_ns_max: self
+                .zone_gate_wait_duration_ns_max
+                .load(Ordering::Acquire),
+            execute_requests_total: self.execute_requests_total.load(Ordering::Acquire),
+            execute_runtime_duration_ns_total: self
+                .execute_runtime_duration_ns_total
+                .load(Ordering::Acquire),
+            execute_journal_duration_ns_total: self
+                .execute_journal_duration_ns_total
+                .load(Ordering::Acquire),
         }
     }
 
@@ -2728,6 +2805,7 @@ impl ZoneHostServer {
                 Err(error) => return Err(error),
             };
             self.rpc_requests_total.fetch_add(1, Ordering::Relaxed);
+            let service_started = Instant::now();
             let codec = detect_rpc_codec(&bytes);
             let response = match decode_rpc_envelope(&bytes, codec) {
                 Ok(envelope) => match self.handle_envelope(envelope) {
@@ -2745,6 +2823,19 @@ impl ZoneHostServer {
                 self.rpc_errors_total.fetch_add(1, Ordering::Relaxed);
             }
             let bytes = encode_rpc_response(&response, codec).map_err(io::Error::other)?;
+            let response_bytes = saturating_u64(bytes.len());
+            self.rpc_response_bytes_total
+                .fetch_add(response_bytes, Ordering::Relaxed);
+            self.rpc_response_bytes_max
+                .fetch_max(response_bytes, Ordering::Relaxed);
+            let service_duration_ns = service_started
+                .elapsed()
+                .as_nanos()
+                .min(u128::from(u64::MAX)) as u64;
+            self.rpc_service_duration_ns_total
+                .fetch_add(service_duration_ns, Ordering::Relaxed);
+            self.rpc_service_duration_ns_max
+                .fetch_max(service_duration_ns, Ordering::Relaxed);
             write_frame(&mut stream, &bytes, self.limits.max_frame_bytes)?;
         }
     }
@@ -2786,6 +2877,7 @@ impl ZoneHostServer {
 
         let request = envelope.request;
         let zone_id = ZoneId::new(&envelope.zone_id);
+        let gate_wait_started = Instant::now();
         let _operation = if matches!(
             &request,
             ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. }
@@ -2795,6 +2887,11 @@ impl ZoneHostServer {
             self.operation_gate.lock_zone(&zone_id)
         }
         .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
+        let gate_wait_duration_ns = saturating_duration_ns(gate_wait_started.elapsed());
+        self.zone_gate_wait_duration_ns_total
+            .fetch_add(gate_wait_duration_ns, Ordering::Relaxed);
+        self.zone_gate_wait_duration_ns_max
+            .fetch_max(gate_wait_duration_ns, Ordering::Relaxed);
         self.prune_expired_promotion_readiness(unix_now_ms())?;
         if self
             .quiesced_zones
@@ -2953,6 +3050,7 @@ impl ZoneHostServer {
                 mode,
                 command,
             } => {
+                self.execute_requests_total.fetch_add(1, Ordering::Relaxed);
                 if owner_lease.zone_id != zone_id {
                     return Err(ZoneRpcFault::new(
                         "zone_mismatch",
@@ -2990,8 +3088,18 @@ impl ZoneHostServer {
                     }
                 }
                 .with_source_sequence(source_sequence);
+                let runtime_started = Instant::now();
                 let execution = session.execute_request(request)?;
+                self.execute_runtime_duration_ns_total.fetch_add(
+                    saturating_duration_ns(runtime_started.elapsed()),
+                    Ordering::Relaxed,
+                );
+                let journal_started = Instant::now();
                 self.append_journal(journal_entry)?;
+                self.execute_journal_duration_ns_total.fetch_add(
+                    saturating_duration_ns(journal_started.elapsed()),
+                    Ordering::Relaxed,
+                );
                 Ok(ZoneRpcPayload::Execution {
                     frames: encode_server_frames(execution.packets)?,
                     packet_count: execution.outcome.packet_count,
@@ -5381,6 +5489,53 @@ fn configured_zone_host_owner_ids(host_id: &str) -> BTreeSet<String> {
     owner_ids
 }
 
+fn comma_separated_env(name: &str) -> Vec<String> {
+    std::env::var(name)
+        .ok()
+        .into_iter()
+        .flat_map(|value| {
+            value
+                .split(',')
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .collect()
+}
+
+fn select_zone_shard_endpoints(
+    zone_id: &ZoneId,
+    active: &[String],
+    standby: &[String],
+) -> Vec<String> {
+    debug_assert!(!active.is_empty());
+    let (hash_key, line_offset) = zone_id
+        .as_str()
+        .rsplit_once(":line:")
+        .and_then(|(map_zone, line)| {
+            line.parse::<usize>()
+                .ok()
+                .filter(|line| *line > 0)
+                .map(|line| (map_zone, line - 1))
+        })
+        .unwrap_or((zone_id.as_str(), 0));
+    let digest = Sha256::digest(hash_key.as_bytes());
+    let mut prefix = [0u8; 8];
+    prefix.copy_from_slice(&digest[..8]);
+    let base_index =
+        usize::try_from(u64::from_be_bytes(prefix) % active.len() as u64).unwrap_or_default();
+    let active_index = base_index.wrapping_add(line_offset) % active.len();
+    let mut endpoints = Vec::with_capacity(1 + standby.len());
+    endpoints.push(active[active_index].clone());
+    for address in standby {
+        if !endpoints.contains(address) {
+            endpoints.push(address.clone());
+        }
+    }
+    endpoints
+}
+
 fn positive_usize_env(name: &str) -> Option<usize> {
     std::env::var(name)
         .ok()
@@ -5438,6 +5593,20 @@ fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
             | ZoneRpcRequest::SaveActiveCharacter
             | ZoneRpcRequest::RefreshActiveExternalMail
             | ZoneRpcRequest::CloseSession { .. }
+    )
+}
+
+fn command_changes_live_registration(command: &WorldCommand) -> bool {
+    matches!(
+        command,
+        WorldCommand::PasskeyLogin { .. }
+            | WorldCommand::ClientPacket(
+                ClientPacket::NewAccount { .. }
+                    | ClientPacket::Login { .. }
+                    | ClientPacket::StartGame { .. }
+                    | ClientPacket::LogOut
+                    | ClientPacket::Disconnect
+            )
     )
 }
 
