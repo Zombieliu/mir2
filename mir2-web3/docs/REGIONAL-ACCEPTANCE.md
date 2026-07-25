@@ -1,7 +1,8 @@
 # Mir2 Regional：Gate 18–21 生产区域服验收规范
 
 Regional 的外部目标是让一套区域集群承载 `3,000` 名真实行为玩家，而不是只
-维持 `3,000` 个空闲连接。工程仍按 Gate 18–21 分段验收；任何阶段未通过都
+维持 `3,000` 个空闲连接。当前正式容量窗口为 15 分钟；长期耐久作为商业服
+后续认证。工程仍按 Gate 18–21 分段验收；任何阶段未通过都
 不能跳过，也不能用下一阶段的一次成功运行覆盖当前阶段的正确性缺口。
 
 机器口径以
@@ -94,19 +95,20 @@ Gate 20 解决当前单 Zone 串行路径无法满足 Regional 延迟的问题�
 Gate 20 的优化不能绕过 Gate 16 mutation ordering、owner fence 或 Gate 17
 事务边界。
 
-## Gate 21：3,000 玩家与 72 小时认证
+## Gate 21：3,000 CCU 与 15 分钟 Regional 认证
 
 最终认证使用 reference deployment 或性能不低于它的明确硬件：
 
-- 3,000 玩家、120 活跃 Zone、500 人热点地图；
-- 连续 72 小时执行统一行为模型；
+- 3,000 玩家、120 张活跃地图、500 人热点地图；
+- 连续 15 分钟执行统一行为模型；
 - 注入 profile 中全部故障和一次滚动升级；
 - 故障前后 cursor/digest、Session lease、经济 receipt 和 outbox/inbox 可对账；
-- 稳态内存增长不超过 5%，未压缩 WAL 持续增长不超过 1 GiB；
+- 15 分钟窗口内观测内存增长不超过 5%，未压缩 WAL 最大观测占用不超过 1 GiB；
 - 最终没有 dead letter、负余额、孤儿 transaction 或未解释的 Session。
 
-72 小时运行不能缩短后线性外推。功能开发可以使用较短 profile，但最终
-`regional-v1` 证据必须来自完整时间窗口。
+15 分钟证据只证明当前容量、延迟、故障恢复和一致性 SLO，不能证明不存在跨日
+内存泄漏或磁盘增长。1 小时、24 小时和 72 小时耐久测试保留为商业服扩展门，
+不阻塞当前 `mir2-regional-v1-3000-15m`。
 
 Gate 21 的可重复入口与中文手册位于 `infra/gate21/`：
 
@@ -117,9 +119,9 @@ MIR2_GATE21_PREVIOUS_ZONE_IMAGE=<previous-release> \
 ./infra/gate21/verify-gate21.sh
 ```
 
-负载入口同时采集 72 小时内存与 durable WAL；故障入口要求滚动升级前后镜像
+负载入口每 15 秒采集短窗内存与 durable WAL；故障入口要求滚动升级前后镜像
 digest 不同；总聚合器还会重新验证 Gate18–20 的正式证据。代码和短测通过不等于
-Gate21 完成，只有 `gate21-72h.json` 的全部断言来自合格硬件上的完整窗口时才
+Gate21 完成，只有 `gate21.json` 的全部断言来自合格硬件上的完整窗口时才
 能声明 Regional 已验收。
 
 ## 证据与完成定义
@@ -130,7 +132,7 @@ Gate21 完成，只有 `gate21-72h.json` 的全部断言来自合格硬件上的
 docs/generated/regional/gate18.json
 docs/generated/regional/gate19.json
 docs/generated/regional/gate20.json
-docs/generated/regional/gate21-72h.json
+docs/generated/regional/gate21.json
 ```
 
 证据必须包含逐场景断言、延迟直方图、吞吐、错误分类、进程/容器 CPU 和内存、
@@ -216,7 +218,7 @@ handoff、导入 Crystal `Hen` 的权威战斗、`Chicken` 物品掉落和拾取
 16 个 worker 全部成功，最终恰好存在 6 个版本记录且核心关系齐全。该证据修复
 并覆盖了多进程冷启动时 PostgreSQL 隐式 row type 的真实创建竞态。
 
-Gate 18 的正式 `mir2-regional-v1` 运行已完成，聚合证据为
+Gate 18 的历史正式 `mir2-regional-v1` 运行已完成，聚合证据为
 `docs/generated/regional/gate18.json`。本次结果为：
 
 - 500/500 个不同账户和角色完成登录、选角和地图加入，120 个 Zone 同时活跃；
@@ -253,8 +255,8 @@ Gate 19 的正式聚合证据为 `docs/generated/regional/gate19.json`：
 - 最终经济重复、运行时/账本偏差、负余额、孤儿事务和 dead letter 均为 0。
 
 Gate 19 的正式长跑同时记录了 checkpoint journal 随命令数持续增长。这不影响
-本 Gate 的一小时 SLO，但 Gate 21 必须实现 durable base snapshot 和已确认前缀
-截断，才能证明 72 小时内存增长 `<=5%`、未压缩 WAL 增长 `<=1GiB`。
+本 Gate 的历史一小时 SLO。Gate 21 已实现 durable base snapshot 和已确认前缀
+截断；当前 15 分钟门只验证短窗观测上限，不能替代长期资源增长认证。
 
 聚合器不会只信任顶层 `success`：它重新校验 30 分钟、500 个不同玩家、120 个
 活动 Zone、行为比例、错误率、安全晋升、迁移后探测、经济对账以及上述四份

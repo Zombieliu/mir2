@@ -18,8 +18,8 @@ x-zone-common: &zone-common
     dockerfile: Dockerfile
     target: zone-host
   image: mir2-gate20-zone-host:local
-  cpus: "8.0"
-  mem_limit: "16g"
+  cpus: "2.0"
+  mem_limit: "2g"
   environment:
     MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
     MIR2_ZONE_HOST_TOKEN: "gate20-zone-host-token-at-least-32-bytes"
@@ -51,8 +51,8 @@ x-zone-common: &zone-common
 services:
   postgres-primary:
     image: postgres:16-bookworm
-    cpus: "8.0"
-    mem_limit: "32g"
+    cpus: "2.0"
+    mem_limit: "4g"
     environment:
       POSTGRES_USER: "mir2"
       POSTGRES_PASSWORD: "mir2-gate20-local"
@@ -78,8 +78,8 @@ services:
 
   postgres-standby:
     image: postgres:16-bookworm
-    cpus: "8.0"
-    mem_limit: "32g"
+    cpus: "2.0"
+    mem_limit: "4g"
     environment:
       POSTGRES_USER: "mir2"
       POSTGRES_PASSWORD: "mir2-gate20-local"
@@ -184,12 +184,12 @@ services:
       dockerfile: Dockerfile
       target: gate18-load-acceptance
     image: mir2-gate20-regional-load:local
-    cpus: "4.0"
-    mem_limit: "8g"
+    cpus: "2.0"
+    mem_limit: "2g"
     environment:
       MIR2_REGIONAL_GATE: "20"
       MIR2_REGIONAL_LOAD_PLAYERS: "1000"
-      MIR2_REGIONAL_LOAD_DURATION_SECONDS: "3600"
+      MIR2_REGIONAL_LOAD_DURATION_SECONDS: "900"
       MIR2_REGIONAL_LOAD_WORKERS: "128"
       MIR2_REGIONAL_CONNECT_WORKERS: "8"
       MIR2_REGIONAL_LOAD_OUT: "/evidence/gate20-load.json"

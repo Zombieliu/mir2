@@ -87,7 +87,7 @@ def main() -> None:
     output = {
         "schemaVersion": 1,
         "gate": 21,
-        "profileId": "mir2-regional-v1",
+        "profileId": "mir2-regional-v1-3000-15m",
         "gitCommit": manifest.get("gitCommit"),
         "faults": [
             "active-zone-host-kill",

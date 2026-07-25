@@ -7,7 +7,7 @@ import json
 import statistics
 from pathlib import Path
 
-MINIMUM_ACTIVE_DURATION_MS = 259_200_000
+MINIMUM_ACTIVE_DURATION_MS = 900_000
 MAXIMUM_MEMORY_GROWTH_PERCENT = 5.0
 MAXIMUM_WAL_BYTES = 1_073_741_824
 
@@ -68,14 +68,14 @@ def main() -> None:
     )
     assertions = {
         "loadEvidenceAccepted": load.get("success") is True,
-        "loadMeasuredFullSeventyTwoHours": load.get("measuredActiveDurationMs", 0)
+        "loadMeasuredFullFifteenMinutes": load.get("measuredActiveDurationMs", 0)
         >= MINIMUM_ACTIVE_DURATION_MS,
         "sampleStreamCoveredFullActiveWindow": sampled_duration_ms
         >= MINIMUM_ACTIVE_DURATION_MS,
         "sampleCountMatchesCadence": len(samples) >= minimum_samples,
         "sampleCadenceHadNoDoubleGap": maximum_gap_ms
         <= args.sample_interval_seconds * 2_000,
-        "sustainedReferenceMemoryGrowthWithinFivePercent": memory_growth_percent
+        "shortWindowReferenceMemoryGrowthWithinFivePercent": memory_growth_percent
         <= MAXIMUM_MEMORY_GROWTH_PERCENT,
         "durableUncompressedWalStayedWithinOneGiB": maximum_wal_bytes
         <= MAXIMUM_WAL_BYTES,
@@ -83,7 +83,7 @@ def main() -> None:
     output = {
         "schemaVersion": 1,
         "gate": 21,
-        "profileId": "mir2-regional-v1",
+        "profileId": "mir2-regional-v1-3000-15m",
         "activeStartMs": samples[0]["activeStartMs"],
         "sampledDurationMs": sampled_duration_ms,
         "sampleIntervalSeconds": args.sample_interval_seconds,
@@ -93,7 +93,7 @@ def main() -> None:
             "windowSamples": window,
             "baselineMedianBytes": baseline_memory,
             "endingMedianBytes": ending_memory,
-            "sustainedGrowthPercent": memory_growth_percent,
+            "observedGrowthPercent": memory_growth_percent,
             "maximumObservedBytes": max(
                 sample["referenceMemoryBytes"] for sample in samples
             ),

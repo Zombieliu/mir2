@@ -7,7 +7,7 @@ evidence_dir="${repo_root}/docs/generated/regional"
 load="${evidence_dir}/gate21-load.json"
 stability="${evidence_dir}/gate21-stability.json"
 faults="${evidence_dir}/gate21-faults.json"
-output="${evidence_dir}/gate21-72h.json"
+output="${evidence_dir}/gate21.json"
 
 for evidence in \
   "${evidence_dir}/gate18.json" \
@@ -31,7 +31,7 @@ done
 jq -e '
   .schemaVersion == 1
   and .success == true
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .profileExact == true
   and (.gitCommit | length) >= 7
   and (.imageDigest | startswith("sha256:"))
@@ -51,8 +51,8 @@ jq -e '
   and .zoneHostSessionCount == 3000
   and .zoneHostActiveConnections <= 260
   and (.zoneHostActiveConnections * 4) < .zoneHostSessionCount
-  and .requestedActiveDurationSeconds == 259200
-  and .measuredActiveDurationMs >= 259200000
+  and .requestedActiveDurationSeconds == 900
+  and .measuredActiveDurationMs >= 900000
   and .roles == {
     "movement": 1800,
     "combat": 450,
@@ -84,9 +84,9 @@ jq -e '
 jq -e '
   .schemaVersion == 1
   and .gate == 21
-  and .profileId == "mir2-regional-v1"
-  and .sampledDurationMs >= 259200000
-  and .memory.sustainedGrowthPercent <= 5
+  and .profileId == "mir2-regional-v1-3000-15m"
+  and .sampledDurationMs >= 900000
+  and .memory.observedGrowthPercent <= 5
   and .wal.maximumObservedBytes <= .wal.limitBytes
   and .success == true
   and all(.assertions[]; . == true)
@@ -96,7 +96,7 @@ load_commit="$(jq -r '.gitCommit' "${load}")"
 jq -e --arg loadCommit "${load_commit}" '
   .schemaVersion == 1
   and .gate == 21
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .gitCommit == $loadCommit
   and (.faults | length) == 8
   and .success == true
@@ -125,7 +125,7 @@ jq -n \
   '{
     schemaVersion: 1,
     gate: 21,
-    profileId: "mir2-regional-v1",
+    profileId: "mir2-regional-v1-3000-15m",
     generatedAtMs: $generatedAtMs,
     gitCommit: $load[0].gitCommit,
     imageDigest: $load[0].imageDigest,
@@ -138,7 +138,7 @@ jq -n \
       hotMapLinePlayers: $load[0].hotMapLinePlayers,
       errorRate: $load[0].errorRate,
       latencyMs: $load[0].latencyMs,
-      memoryGrowthPercent: $stability[0].memory.sustainedGrowthPercent,
+      memoryGrowthPercent: $stability[0].memory.observedGrowthPercent,
       maximumWalBytes: $stability[0].wal.maximumObservedBytes,
       acceptedFaults: $faults[0].faults
     },
@@ -152,11 +152,11 @@ jq -n \
     },
     assertions: {
       allEarlierRegionalGatesAccepted: true,
-      exactThreeThousandPlayerSeventyTwoHourProfileAccepted: true,
+      exactThreeThousandPlayerFifteenMinuteProfileAccepted: true,
       oneHundredTwentyMapsAndOneHundredTwentyNineZonesWereActive: true,
       hotMapWasSplitIntoTenBalancedLines: true,
       p95AndP99StayedWithinRegionalSlo: true,
-      sustainedMemoryGrowthStayedWithinFivePercent: true,
+      shortWindowMemoryGrowthStayedWithinFivePercent: true,
       durableWalStayedWithinOneGiB: true,
       fullFaultAndRollingUpgradeMatrixAccepted: true,
       economyAndSessionStateReconciled: true

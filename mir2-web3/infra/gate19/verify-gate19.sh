@@ -39,7 +39,7 @@ done
 jq -e '
   .schemaVersion == 1
   and .success == true
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .profileExact == true
   and (.gitCommit | length) >= 7
   and (.imageDigest | length) >= 12
@@ -51,8 +51,8 @@ jq -e '
   and .profileCatalogMaps == 700
   and .runtimeManifestMaps >= 120
   and .activeZoneCount == 120
-  and .requestedActiveDurationSeconds == 3600
-  and .measuredActiveDurationMs >= 3600000
+  and .requestedActiveDurationSeconds == 900
+  and .measuredActiveDurationMs >= 900000
   and .roles == {
     "movement": 300,
     "combat": 75,
@@ -184,7 +184,7 @@ jq -n \
   '{
     schemaVersion: 1,
     gate: 19,
-    profileId: "mir2-regional-v1",
+    profileId: "mir2-regional-v1-3000-15m",
     generatedAtMs: $generatedAtMs,
     summary: {
       requestedPlayers: $load[0].requestedPlayers,

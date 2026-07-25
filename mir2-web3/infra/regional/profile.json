@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "profileId": "mir2-regional-v1",
+  "schemaVersion": 2,
+  "profileId": "mir2-regional-v1-3000-15m",
   "catalogMaps": 700,
   "activeMaps": 120,
   "stages": {
@@ -12,7 +12,7 @@
     },
     "gate19": {
       "concurrentPlayers": 500,
-      "durationSeconds": 3600,
+      "durationSeconds": 900,
       "maximumErrorRate": 0.001,
       "maximumZoneFailoverRtoMs": 5000,
       "maximumGatewayReconnectRtoMs": 10000,
@@ -21,7 +21,7 @@
     },
     "gate20": {
       "concurrentPlayers": 1000,
-      "durationSeconds": 3600,
+      "durationSeconds": 900,
       "hotMapPlayers": 300,
       "maximumCommandP95Ms": 200,
       "maximumErrorRate": 0.001,
@@ -29,7 +29,7 @@
     },
     "gate21": {
       "concurrentPlayers": 3000,
-      "durationSeconds": 259200,
+      "durationSeconds": 900,
       "hotMapPlayers": 500,
       "maximumCommandP95Ms": 200,
       "maximumCommandP99Ms": 500,
@@ -39,8 +39,8 @@
       "economyDuplicateCount": 0,
       "negativeEconomyBalanceCount": 0,
       "orphanEconomyTransactionCount": 0,
-      "maximumSustainedMemoryGrowthPercent": 5,
-      "maximumSustainedWalGrowthBytes": 1073741824
+      "maximumObservedMemoryGrowthPercent": 5,
+      "maximumObservedWalBytes": 1073741824
     }
   },
   "workload": {

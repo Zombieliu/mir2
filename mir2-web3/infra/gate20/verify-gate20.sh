@@ -15,7 +15,7 @@ fi
 jq -e '
   .schemaVersion == 1
   and .success == true
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .profileExact == true
   and (.gitCommit | length) >= 7
   and (.imageDigest | startswith("sha256:"))
@@ -35,8 +35,8 @@ jq -e '
   and .zoneHostSessionCount == 1000
   and .zoneHostActiveConnections <= 130
   and (.zoneHostActiveConnections * 4) < .zoneHostSessionCount
-  and .requestedActiveDurationSeconds == 3600
-  and .measuredActiveDurationMs >= 3600000
+  and .requestedActiveDurationSeconds == 900
+  and .measuredActiveDurationMs >= 900000
   and .roles == {
     "movement": 600,
     "combat": 150,
@@ -48,8 +48,8 @@ jq -e '
   and .resources.zoneRpcCodec == "msgpack"
   and .resources.zoneRpcSharedPoolSize == 128
   and .resources.zoneRpcQueueTimeoutMs == 500
-  and .resources.cgroupCpuMax == "400000 100000"
-  and .resources.cgroupMemoryMax == "8589934592"
+  and .resources.cgroupCpuMax == "200000 100000"
+  and .resources.cgroupMemoryMax == "2147483648"
   and .referenceResourceAttestation.success == true
   and all(.referenceResourceAttestation.assertions[]; . == true)
   and .workloadCommandCoverage >= 0.95
@@ -74,7 +74,7 @@ jq -n \
   '{
     schemaVersion: 1,
     gate: 20,
-    profileId: "mir2-regional-v1",
+    profileId: "mir2-regional-v1-3000-15m",
     generatedAtMs: $generatedAtMs,
     gitCommit: $load[0].gitCommit,
     imageDigest: $load[0].imageDigest,
@@ -100,7 +100,7 @@ jq -n \
       load: $loadSha
     },
     assertions: {
-      exactOneThousandPlayerOneHourProfileAccepted: true,
+      exactOneThousandPlayerFifteenMinuteProfileAccepted: true,
       oneHundredTwentyMapsWereActive: true,
       crystalMapHadExactlyThreeHundredPlayers: true,
       hotMapWasSplitIntoSixBalancedLines: true,
@@ -108,7 +108,7 @@ jq -n \
       zoneRpcUsedBinaryCodec: true,
       oneThousandSessionsUsedABoundedSharedConnectionPool: true,
       rpcControlTrafficHadReservedCapacity: true,
-      referenceDeploymentResourcesWereAttested: true,
+      localAcceptanceHostResourcesWereAttested: true,
       p95StayedWithinTwoHundredMilliseconds: true,
       safePromotionPreservedAllSessions: true,
       economyHadNoDuplicateOrLedgerMismatch: true

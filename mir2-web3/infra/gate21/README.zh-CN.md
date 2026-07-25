@@ -1,4 +1,4 @@
-# Gate 21：Regional 3,000 玩家 / 72 小时最终认证
+# Gate 21：Regional 3,000 CCU / 15 分钟正式认证
 
 Gate 21 是 Regional 的最终门。它把 Gate 20 已验证的热点地图分线扩展为可持续
 运行的区域级部署，并把 Zone 状态从“可复制 checkpoint”升级为：
@@ -15,7 +15,7 @@ Gate 21 是 Regional 的最终门。它把 Gate 20 已验证的热点地图分�
 
 正式证据必须同时满足：
 
-- 3,000 个不同账号和角色，持续有效负载 `259,200` 秒（72 小时）；
+- 3,000 个不同账号和角色，持续有效负载 `900` 秒（15 分钟）；
 - 120 张真实 Mir2 地图同时活跃；
 - 地图 `0` 有 500 人，由热点策略拆成 10 条各 50 人的线路；
 - 129 个权威 Zone（119 张普通地图 + 10 条热点线路）；
@@ -23,13 +23,15 @@ Gate 21 是 Regional 的最终门。它把 Gate 20 已验证的热点地图分�
 - Gateway 到 Zone Host 使用 MessagePack 和 256-lane 有界共享连接池；
 - 3,000 条 Session 对 Zone Host 的活动连接不超过 260；
 - 中途安全 promotion 后，全部目标 Session 刷新 owner 并继续真实命令；
-- 稳态参考容器内存增长 `<=5%`；
-- durable、未压缩 WAL 的最大占用 `<=1GiB`；
+- 15 分钟窗口内参考容器观测内存增长 `<=5%`；
+- 15 分钟窗口内 durable、未压缩 WAL 的最大观测占用 `<=1GiB`；
 - active/standby Zone、Gateway、Redis、PostgreSQL、Commonware、网络分区和
   滚动升级故障矩阵全部通过；
 - 经济重复、运行态/账本偏差、dead letter、负余额和孤儿事务均为 0。
 
-短测只能证明功能路径，不能把 5 分钟结果线性外推成 72 小时认证。
+这是一项容量、延迟、故障恢复和经济一致性认证，不是长期耐久认证。15 分钟结果
+不能证明不存在慢速内存泄漏、磁盘增长或跨日资源碎片；1 小时、24 小时和 72
+小时耐久测试在商业服阶段单独执行，不阻塞当前 Regional v1。
 
 ## 架构
 
@@ -71,16 +73,45 @@ MIR2_ZONE_HOST_OWNER_ALIASES       = gate21-active   # Host 接受的 owner
 ## 正式硬件与依赖
 
 需要 Docker Engine、Rust `1.89.0`、`jq`、Python 3、`rg` 和 `shasum`。
-单机认证 runner 除参考部署外还承载负载器、复制器、Sentinel 和 Commonware：
+参考部署是整个分布式集群的总资源，不是一台服务器的配置：
 
 - 参考部署：`98 CPU / 240GiB`；
 - 认证 harness：`14.75 CPU / 20.375GiB`；
-- 单机最低：`113 CPU / 260.375GiB`（CPU 向上取整）。
+- 仅当把所有容器压在一台认证 runner 时，才需要
+  `113 CPU / 260.375GiB`（CPU 向上取整）。
+
+生产部署推荐拆成：
+
+| 角色 | 数量 | 单机配置 |
+| --- | ---: | ---: |
+| Gateway | 3 | 4 CPU / 8GiB |
+| active Zone Host | 4 | 8 CPU / 16GiB |
+| standby Zone Host | 4 | 8 CPU / 16GiB |
+| PostgreSQL | 2 | 8 CPU / 32GiB / NVMe |
+| Redis | 3 | 2 CPU / 8GiB |
+| Commonware validator | 4 | 2 CPU / 2GiB |
+
+部署前复制清单模板，填写真实区域、故障域和实测节点 RTT：
+
+```bash
+cp infra/gate21/distributed-inventory.example.json \
+  /secure/path/regional-inventory.json
+python3 infra/gate21/verify-distributed-inventory.py \
+  --inventory /secure/path/regional-inventory.json \
+  --output docs/generated/regional/gate21-distributed-resources.json
+```
+
+模板以圣保罗 `sa-east-1` 为示例；部署到香港或其他区域时必须替换，并提供
+`<=2ms` 的实测集群内 RTT。验证器还要求 Gateway/PostgreSQL/Redis/Commonware
+跨故障域，并要求
+每对 active/standby Zone 位于不同故障域。
 
 `preflight-reference.sh` 从 Docker Engine 实际配额取值；资源不足时会在构建和
-清理容器前失败，并写出未通过的 attestation，不能产生正式 Gate21 结论。
+清理容器前失败，并写出未通过的 attestation。它验证的是单机合并 runner；
+生产分布式部署必须分别记录各节点资源、镜像 digest 和网络区域，不能把笔记本
+上的缩小拓扑冒充 3,000 CCU 证据。
 
-## 第一步：72 小时负载与稳定性
+## 第一步：15 分钟负载与短窗资源观测
 
 ```bash
 ./infra/gate21/run-load-acceptance.sh
@@ -92,7 +123,7 @@ MIR2_ZONE_HOST_OWNER_ALIASES       = gate21-active   # Host 接受的 owner
 2. 从当前 commit 构建 Gateway、Zone Host、复制器和负载镜像；
 3. 启动 3 Gateway、4 active、4 standby、PostgreSQL 主备、Redis/Sentinel；
 4. 连接 3,000 个角色并执行统一 movement/combat/social/economy/idle 行为；
-5. 每 5 分钟采集每个参考容器内存、复制器内存和 durable WAL 字节数；
+5. 每 15 秒采集每个参考容器内存、复制器内存和 durable WAL 字节数；
 6. 等负载容器正常退出后独立汇总稳定性窗口；
 7. 将 Git SHA、镜像 digest、cgroup 配额和资源证明绑定进原始证据。
 
@@ -149,7 +180,7 @@ docs/generated/regional/gate21-faults.json
 成功后生成：
 
 ```text
-docs/generated/regional/gate21-72h.json
+docs/generated/regional/gate21.json
 ```
 
 只有该文件 `success=true` 且全部 assertion 为 `true`，Regional 才算机器验收。

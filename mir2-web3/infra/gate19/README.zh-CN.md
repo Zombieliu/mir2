@@ -4,7 +4,7 @@ Gate 19 的目标不是“容器数量看起来像集群”，而是在真实 Mi
 状态和 PostgreSQL 经济事务上证明单节点故障不会破坏玩家状态。机器口径来自
 [`../regional/profile.json`](../regional/profile.json)：
 
-- `500` 个不同账号和角色，运行 `3600` 秒；
+- `500` 个不同账号和角色，运行 `900` 秒；
 - `120` 个同时活跃 Zone；
 - 命令错误率 `<0.1%`；
 - Zone 故障恢复 `<5s`，Gateway 路由恢复 `<10s`；
@@ -51,14 +51,14 @@ promotion 先要求备用节点拥有同一 cursor/digest，再通过 PostgreSQL
 Commonware 镜像会额外安装仓库已固定的编译工具链，其依赖仍严格使用
 `v2026.2.0` tag。
 
-先运行一小时正式负载：
+先运行 15 分钟正式负载：
 
 ```bash
 ./infra/gate19/run-load-acceptance.sh
 ```
 
 脚本从当前 commit 重建镜像，把 Git SHA 和负载镜像 digest 写入证据，清空专用
-测试卷后创建 500 名真实玩家。初始化玩家的时间不计入 3600 秒；中点的安全
+测试卷后创建 500 名真实玩家。初始化玩家的时间不计入 900 秒；中点的安全
 promotion 暂停也不计入有效负载时长。
 
 再运行六类故障：
@@ -106,7 +106,7 @@ Zone 使用约 `8–9` 个 CPU 和约 `2 GiB` 内存。这是压力测试结果�
 
 | 文件 | 证明内容 |
 | --- | --- |
-| `gate19-load.json` | 500 玩家、3600 秒、120 Zone、混合行为、经济对账 |
+| `gate19-load.json` | 500 玩家、900 秒、120 Zone、混合行为、经济对账 |
 | `gate19-zone-failover.json` | cursor/digest、generation、Zone RTO |
 | `gate19-zone-session.json` | 玩家身份、地图和晋升后生产命令连续 |
 | `gate19-standby-zone-kill.json` | 备用节点死亡不影响 active 真实玩法 |
@@ -118,7 +118,8 @@ Zone 使用约 `8–9` 个 CPU 和约 `2 GiB` 内存。这是压力测试结果�
 
 ## 已通过的正式结果
 
-最终 `mir2-regional-v1` 证据已通过独立聚合：
+历史 `mir2-regional-v1` 一小时证据已通过独立聚合；当前重新运行使用
+`mir2-regional-v1-3000-15m`：
 
 - 500/500 名不同玩家、120 个活跃 Zone，有效负载 `3,600.294s`；
 - 尝试 `2,642,287` 条、完成 `2,642,218` 条真实命令，覆盖率
@@ -133,6 +134,7 @@ Zone 使用约 `8–9` 个 CPU 和约 `2 GiB` 内存。这是压力测试结果�
 - 经济重复、运行时/账本偏差、负余额、无 Outbox 事务和 dead letter 均为 `0`。
 
 本机长跑还暴露出 checkpoint command journal 会随命令数增长。它没有破坏
-Gate 19 的一小时 SLO，但不能满足 Gate 21 的 72 小时内存增长上限；Gate 21
+历史 Gate 19 的一小时 SLO 已通过。当前 Gate 21 把长期资源增长移出发布门槛，
+只在 15 分钟窗口观测内存与 WAL；商业服阶段仍必须补做长期耐久认证。Gate 21
 必须在保留可验证复制 cursor/digest 的前提下实现 durable base snapshot、
 已确认前缀截断和 WAL 上限。

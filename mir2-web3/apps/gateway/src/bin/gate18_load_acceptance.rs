@@ -14,7 +14,7 @@ use mir2_gateway::zone_lease::{
 };
 use mir2_gateway::{
     GatewayConfig, GatewaySession, RegionalProfile, TcpZoneOwnerRpcTransport, ZoneId,
-    ZoneRpcLimits, ZoneTopology,
+    ZoneRpcLimits, ZoneTopology, REGIONAL_REFERENCE_PROFILE_ID,
 };
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
 use mir2_simulation::{WorldCommand, WorldEntityKind};
@@ -673,7 +673,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             (profile_exact
                 && requested_players == stage_players
                 && duration_seconds == stage_duration_seconds
-                && profile.profile_id == "mir2-regional-v1")
+                && profile.profile_id == REGIONAL_REFERENCE_PROFILE_ID)
                 || allow_dev_profile,
         ),
         (

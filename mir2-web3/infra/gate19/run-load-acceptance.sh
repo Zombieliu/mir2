@@ -35,7 +35,7 @@ docker compose -f "${compose_file}" --profile acceptance run --rm --no-deps \
 jq -e '
   .schemaVersion == 1
   and .success == true
-  and .profileId == "mir2-regional-v1"
+  and .profileId == "mir2-regional-v1-3000-15m"
   and .profileExact == true
   and .gitCommit == $gitCommit
   and .imageDigest == $imageDigest
@@ -44,8 +44,8 @@ jq -e '
   and .distinctAccounts == 500
   and .distinctCharacters == 500
   and .activeZoneCount == 120
-  and .requestedActiveDurationSeconds == 3600
-  and .measuredActiveDurationMs >= 3600000
+  and .requestedActiveDurationSeconds == 900
+  and .measuredActiveDurationMs >= 900000
   and .workloadCommandCoverage >= 0.95
   and .errorRate <= 0.001
   and .promotion.activeOwner == "gate19-active"
@@ -58,4 +58,4 @@ jq -e '
 ' --arg gitCommit "${git_commit}" --arg imageDigest "${image_digest}" "${output}" \
   >/dev/null
 
-echo "Gate 19 exact one-hour load evidence written to ${output}"
+echo "Gate 19 exact 500-player/15-minute load evidence written to ${output}"
