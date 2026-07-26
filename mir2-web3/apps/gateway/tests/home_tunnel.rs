@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::net::{SocketAddr, TcpListener, TcpStream, UdpSocket};
+use std::net::{SocketAddr, TcpListener, TcpStream as StdTcpStream, UdpSocket};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -7,6 +7,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use mir2_gateway::tcp::{chat_broadcast::ChatBroadcastHub, serve_tcp_gateway};
 use mir2_gateway::{
     decode_zone_rpc_routing_hint, CapacityChallenge, CapacityChallengeResponse, CapacityWorkload,
     FinalizedGuildNodeRegistration, GatewayConfig, GuildNodeStatus, HomeTunnelAgent,
@@ -17,12 +18,13 @@ use mir2_gateway::{
     ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRpcLimits, ZoneRpcRoutingHint,
     ZONE_RPC_PROTOCOL_VERSION,
 };
-use mir2_protocol::{ClientPacket, ServerPacket};
+use mir2_protocol::{decode_server_packet, encode_client_packet, ClientPacket, ServerPacket};
 use mir2_simulation::WorldCommand;
 use rcgen::{
     BasicConstraints, Certificate, CertificateParams, ExtendedKeyUsagePurpose, IsCa, KeyPair,
     KeyUsagePurpose,
 };
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::watch;
 
 #[test]
@@ -42,9 +44,11 @@ fn relay_routing_hint_accepts_json_and_named_message_pack() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() {
+async fn public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebind() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
-    let (zone_address, zone_stop, zone_handle) = start_zone_host(authority.clone());
+    let gateway_token = "home-relay-official-gateway-test-token";
+    let (zone_address, zone_stop, zone_handle) =
+        start_zone_host(authority.clone(), Some(gateway_token.to_string()));
     let (relay_tls, agent_tls) = tls_materials();
     let node = NodeSigningIdentity::from_seed([31; 32]);
     let relay_identity = NodeSigningIdentity::from_seed([32; 32]);
@@ -66,6 +70,8 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         &control_identity,
     )
     .expect("test placement should sign");
+    let placements_path = temporary_json_path("home-tunnel-placements");
+    write_json_atomically(&placements_path, &vec![placement.clone()]);
     let mut relay_config = HomeTunnelRelayConfig::with_defaults(
         "relay-test-a",
         "127.0.0.1:0".parse().unwrap(),
@@ -76,7 +82,10 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         control_identity.public_key(),
         vec![placement],
     );
+    relay_config.placements_file = Some(placements_path.clone());
     relay_config.max_agent_connections = 1;
+    relay_config.gateway_auth_token = Some(gateway_token.to_string());
+    relay_config.io_timeout = Duration::from_secs(3);
     let relay = HomeTunnelRelay::bind(relay_config)
         .await
         .expect("Relay should bind");
@@ -85,7 +94,7 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
     let (relay_shutdown_tx, relay_shutdown_rx) = watch::channel(false);
     let relay_task = tokio::spawn(relay.serve(relay_shutdown_rx));
 
-    let agent = HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
+    let mut agent_config = HomeTunnelAgentConfig::with_defaults(
         "relay-test-a",
         relay_address,
         "relay.test",
@@ -98,9 +107,11 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         certificate,
         relay_identity.public_key(),
         control_identity.public_key(),
-    ))
-    .await
-    .expect("outbound-only Home Agent should register over mTLS QUIC");
+    );
+    agent_config.io_timeout = Duration::from_secs(2);
+    let agent = HomeTunnelAgent::connect(agent_config)
+        .await
+        .expect("outbound-only Home Agent should register over mTLS QUIC");
     let network = agent.network_handle();
     let second_connection = HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
         "relay-test-a",
@@ -123,63 +134,123 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
     );
     let (agent_shutdown_tx, agent_shutdown_rx) = watch::channel(false);
     let agent_task = tokio::spawn(agent.serve(agent_shutdown_rx));
+    let replacement = HomeTunnelPlacement::issue(
+        "home-placement-primary-generation-2",
+        "relay-test-a",
+        "primary",
+        NodeSigningIdentity::from_seed([31; 32]).node_id(),
+        1,
+        2,
+        4,
+        102,
+        now.saturating_sub(100),
+        now.saturating_add(60_000),
+        &control_identity,
+    )
+    .expect("replacement placement should sign");
+    write_json_atomically(&placements_path, &vec![replacement]);
+
+    let unauthorized = TcpZoneOwnerRpcTransport::with_options(
+        gateway_address.to_string(),
+        ZoneId::primary(),
+        "home-session-unauthorized",
+        Some("wrong-gateway-token".to_string()),
+        ZoneRpcLimits {
+            io_timeout: Duration::from_secs(2),
+            ..ZoneRpcLimits::default()
+        },
+    );
+    assert!(
+        unauthorized.health().is_err(),
+        "Relay must reject a Zone RPC frame without the official Gateway credential"
+    );
 
     let transport = TcpZoneOwnerRpcTransport::with_options(
         gateway_address.to_string(),
         ZoneId::primary(),
         "home-session-a",
-        None,
+        Some(gateway_token.to_string()),
         ZoneRpcLimits {
             io_timeout: Duration::from_secs(5),
             ..ZoneRpcLimits::default()
         },
     );
     wait_for_health(&transport).await;
-    let lease = authority.owner_lease(&ZoneId::primary());
-    let login = transport
+    transport
+        .on_connect()
+        .expect("direct on_connect probe should cross Home Tunnel");
+    let probe_lease = authority.owner_lease(&ZoneId::primary());
+    let probe_login = transport
         .execute(ZoneOwnerCommandRequest::direct(
-            lease.clone(),
+            probe_lease,
             WorldCommand::ClientPacket(ClientPacket::Login {
                 account_id: "demo".to_string(),
                 password: "demo".to_string(),
             }),
         ))
-        .expect("real Mir2 login should cross Home Tunnel");
-    assert!(login
+        .expect("direct Mir2 login probe should cross Home Tunnel");
+    assert!(probe_login
         .packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
-    transport
-        .execute(ZoneOwnerCommandRequest::direct(
-            lease.clone(),
-            WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
-        ))
-        .expect("real Mir2 StartGame should cross Home Tunnel");
-    assert_eq!(
-        transport
-            .active_identity()
-            .expect("identity RPC should cross Home Tunnel")
-            .expect("player should be active")
-            .account_id,
-        "demo"
-    );
+
+    // The real client never connects to the Home Node or Relay. It connects to
+    // the official Mir2 Gateway, whose Zone RPC transport targets the Relay.
+    unsafe {
+        std::env::set_var("MIR2_ZONE_HOST_ADDR", gateway_address.to_string());
+        std::env::set_var("MIR2_ZONE_HOST_TOKEN", gateway_token);
+    }
+    let player_listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+        .await
+        .expect("public player Gateway listener should bind");
+    let player_gateway_address = player_listener.local_addr().unwrap();
+    let chat_hub = ChatBroadcastHub::from_env().unwrap();
+    let player_gateway_task = tokio::spawn(serve_tcp_gateway(
+        player_listener,
+        GatewayConfig::default(),
+        chat_hub,
+    ));
+    let mut player = tokio::net::TcpStream::connect(player_gateway_address)
+        .await
+        .expect("real Mir2 player should connect to official Gateway");
+    let _connected = read_player_packet(&mut player).await;
+    send_player_packet(
+        &mut player,
+        &ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        },
+    )
+    .await;
+    read_player_until(&mut player, |packet| {
+        matches!(packet, ServerPacket::LoginSuccess { .. })
+    })
+    .await;
+    send_player_packet(&mut player, &ClientPacket::StartGame { character_index: 0 }).await;
+    read_player_until(&mut player, |packet| {
+        matches!(packet, ServerPacket::StartGame { .. })
+    })
+    .await;
 
     let rebound = UdpSocket::bind("127.0.0.1:0").expect("bind replacement UDP socket");
     network
         .rebind(rebound)
         .expect("QUIC connection should survive a NAT-style UDP port rebind");
     tokio::time::sleep(Duration::from_millis(50)).await;
-    let keep_alive = transport
-        .execute(ZoneOwnerCommandRequest::direct(
-            lease,
-            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 4242 }),
-        ))
-        .expect("Mir2 Session should continue after UDP rebind");
-    assert!(keep_alive
-        .packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::KeepAlive { time: 4242 })));
+    send_player_packet(&mut player, &ClientPacket::KeepAlive { time: 4242 }).await;
+    read_player_until(&mut player, |packet| {
+        matches!(packet, ServerPacket::KeepAlive { time: 4242 })
+    })
+    .await;
 
+    drop(player);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    player_gateway_task.abort();
+    let _ = player_gateway_task.await;
+    unsafe {
+        std::env::remove_var("MIR2_ZONE_HOST_ADDR");
+        std::env::remove_var("MIR2_ZONE_HOST_TOKEN");
+    }
     agent_shutdown_tx.send(true).unwrap();
     tokio::time::timeout(Duration::from_secs(5), agent_task)
         .await
@@ -193,6 +264,7 @@ async fn real_mir2_session_crosses_outbound_mtls_quic_and_survives_udp_rebind() 
         .expect("Relay task should join")
         .expect("Relay should stop cleanly");
     stop_zone_host(zone_address, zone_stop, zone_handle);
+    let _ = std::fs::remove_file(placements_path);
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -386,6 +458,7 @@ fn leaf(
 
 fn start_zone_host(
     authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    auth_token: Option<String>,
 ) -> (SocketAddr, Arc<AtomicBool>, thread::JoinHandle<()>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = listener.local_addr().unwrap();
@@ -394,7 +467,7 @@ fn start_zone_host(
     let server = Arc::new(ZoneHostServer::with_options_and_factory(
         GatewayConfig::default(),
         shared,
-        None,
+        auth_token,
         ZoneRpcLimits::default(),
         Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
             Duration::from_secs(60 * 60),
@@ -426,8 +499,47 @@ async fn wait_for_health(transport: &TcpZoneOwnerRpcTransport) {
 
 fn stop_zone_host(address: SocketAddr, stop: Arc<AtomicBool>, handle: thread::JoinHandle<()>) {
     stop.store(true, Ordering::Release);
-    let _ = TcpStream::connect(address);
+    let _ = StdTcpStream::connect(address);
     handle.join().unwrap();
+}
+
+async fn send_player_packet(stream: &mut tokio::net::TcpStream, packet: &ClientPacket) {
+    stream
+        .write_all(&encode_client_packet(packet).expect("client packet should encode"))
+        .await
+        .expect("client packet should write");
+}
+
+async fn read_player_packet(stream: &mut tokio::net::TcpStream) -> ServerPacket {
+    let mut header = [0_u8; 2];
+    tokio::time::timeout(Duration::from_secs(5), stream.read_exact(&mut header))
+        .await
+        .expect("player response header should arrive")
+        .expect("player response header should read");
+    let length = u16::from_le_bytes(header) as usize;
+    assert!(length >= 4, "player response frame length should be valid");
+    let mut frame = vec![0_u8; length];
+    frame[..2].copy_from_slice(&header);
+    tokio::time::timeout(Duration::from_secs(5), stream.read_exact(&mut frame[2..]))
+        .await
+        .expect("player response body should arrive")
+        .expect("player response body should read");
+    decode_server_packet(&frame).expect("server packet should decode")
+}
+
+async fn read_player_until(
+    stream: &mut tokio::net::TcpStream,
+    expected: impl Fn(&ServerPacket) -> bool,
+) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    loop {
+        let packet = read_player_packet(stream).await;
+        let done = expected(&packet);
+        packets.push(packet);
+        if done {
+            return packets;
+        }
+    }
 }
 
 fn now_ms() -> u64 {
@@ -435,4 +547,22 @@ fn now_ms() -> u64 {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as u64
+}
+
+fn temporary_json_path(label: &str) -> std::path::PathBuf {
+    std::env::temp_dir().join(format!(
+        "mir2-{label}-{}-{}.json",
+        std::process::id(),
+        now_ms()
+    ))
+}
+
+fn write_json_atomically(path: &std::path::Path, value: &impl serde::Serialize) {
+    let staging = path.with_extension("json.next");
+    std::fs::write(
+        &staging,
+        serde_json::to_vec_pretty(value).expect("temporary JSON should encode"),
+    )
+    .expect("temporary JSON should write");
+    std::fs::rename(&staging, path).expect("temporary JSON should publish atomically");
 }

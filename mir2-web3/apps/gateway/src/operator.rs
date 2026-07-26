@@ -28,6 +28,24 @@ const MAX_HTTP_REQUEST_BYTES: usize = 8 * 1024;
 
 type HmacSha256 = Hmac<Sha256>;
 
+pub fn zone_host_signing_identity_from_env() -> Result<Option<NodeSigningIdentity>, String> {
+    let configured_identity = NodeSigningIdentity::from_env()?;
+    let keyring_account = env::var("MIR2_ZONE_HOST_KEYRING_ACCOUNT")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    match (configured_identity, keyring_account) {
+        (Some(_), Some(_)) => Err(
+            "configure either Zone Host signing key environment variables or MIR2_ZONE_HOST_KEYRING_ACCOUNT, not both"
+                .to_string(),
+        ),
+        (Some(identity), None) => Ok(Some(identity)),
+        (None, Some(account)) => crate::HomeAgentKeyring::new(account)?
+            .load_identity()
+            .map(Some),
+        (None, None) => Ok(None),
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ZoneHostOperatorConfig {
     pub address: SocketAddr,
@@ -64,7 +82,7 @@ impl ZoneHostOperatorConfig {
         let management_token = env::var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN")
             .ok()
             .filter(|value| !value.trim().is_empty());
-        let signing_identity = NodeSigningIdentity::from_env()?;
+        let signing_identity = zone_host_signing_identity_from_env()?;
         let key_generation = env::var("MIR2_ZONE_HOST_KEY_GENERATION")
             .ok()
             .map(|value| {

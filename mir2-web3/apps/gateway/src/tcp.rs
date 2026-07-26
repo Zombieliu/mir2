@@ -23,12 +23,25 @@ pub async fn run_tcp_gateway(
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
+    let listener = TcpListener::bind(addr).await?;
+    serve_tcp_gateway(listener, config, chat_hub).await
+}
+
+/// Serve the public Mir2 TCP protocol on a pre-bound listener.
+///
+/// Production uses [`run_tcp_gateway`]. Acceptances use this form so the OS can
+/// allocate an isolated port without a bind/drop/rebind race.
+pub async fn serve_tcp_gateway(
+    listener: TcpListener,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone (see
     // `run_web_gateway`). Empty maps stay dormant regardless.
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
         mir2_simulation::set_crystal_full_world_zone_collision(true);
     }
-    let listener = TcpListener::bind(addr).await?;
+    let addr = listener.local_addr()?;
     let config = Arc::new(config);
     let topology = ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
@@ -74,8 +87,10 @@ async fn handle_client(
     };
     session.configure_zone_owner_heartbeat(tcp_zone_owner_heartbeat_interval_ms(), 0);
     let result = handle_client_inner(&mut stream, &mut session, peer, &chat_hub).await;
-    let _ = catch_gateway_panic("tcp save_active_character", || {
-        session.save_active_character()
+    let _ = gateway_blocking(|| {
+        catch_gateway_panic("tcp save_active_character", || {
+            session.save_active_character()
+        })
     });
     result
 }
@@ -86,8 +101,9 @@ async fn handle_client_inner(
     peer: Option<std::net::SocketAddr>,
     chat_hub: &ChatBroadcastHub,
 ) -> io::Result<()> {
-    let connect_packets = catch_gateway_panic("tcp on_connect", || session.on_connect())
-        .map_err(session_panic_io_error)?;
+    let connect_packets =
+        gateway_blocking(|| catch_gateway_panic("tcp on_connect", || session.on_connect()))
+            .map_err(session_panic_io_error)?;
     for packet in connect_packets {
         send_packet(stream, &packet).await?;
     }
@@ -148,7 +164,7 @@ async fn handle_client_inner(
 
         match decode_client_packet(&frame) {
             Ok(packet) => {
-                if let Err(error) = session.renew_zone_owner_lease_if_due() {
+                if let Err(error) = gateway_blocking(|| session.renew_zone_owner_lease_if_due()) {
                     if crate::gate15::health().is_some() {
                         eprintln!(
                             "Gate 15 Crystal owner-lease refresh is waiting for finalized placement: {error}"
@@ -200,8 +216,8 @@ async fn handle_client_inner(
                         );
                     }
                 }
-                let responses = match catch_gateway_panic("tcp handle_packet", || {
-                    session.handle_packet(packet)
+                let responses = match gateway_blocking(|| {
+                    catch_gateway_panic("tcp handle_packet", || session.handle_packet(packet))
                 }) {
                     Ok(responses) => responses,
                     Err(error) if crate::gate15::health().is_some() => {
@@ -227,15 +243,17 @@ async fn handle_client_inner(
                 }) {
                     authenticated_account_id = None;
                 }
-                if leaves_world || session.active_identity().is_none() {
+                let active_identity = gateway_blocking(|| session.active_identity());
+                if leaves_world || active_identity.is_none() {
                     chat_presence = None;
                 }
                 if leaves_world {
                     authenticated_account_id = None;
                 }
-                let next_registration = session
-                    .register_zone_live_outbound(zone_outbound_tx.clone())
-                    .map_err(session_panic_io_error)?;
+                let next_registration = gateway_blocking(|| {
+                    session.register_zone_live_outbound(zone_outbound_tx.clone())
+                })
+                .map_err(session_panic_io_error)?;
                 active_zone_outbound_registration_id = next_registration
                     .as_ref()
                     .map(|registration| registration.registration_id())
@@ -249,13 +267,15 @@ async fn handle_client_inner(
                 }
                 if starts_game
                     && chat_presence.is_none()
-                    && session.active_identity().is_some()
+                    && active_identity.is_some()
                     && session.zone_movement_ingress().is_some()
                 {
                     chat_presence = Some(chat_hub.register(ChatProtocol::Tcp));
                 }
-                catch_gateway_panic("tcp save_active_character", || {
-                    session.save_active_character()
+                gateway_blocking(|| {
+                    catch_gateway_panic("tcp save_active_character", || {
+                        session.save_active_character()
+                    })
                 })
                 .map_err(session_panic_io_error)?;
             }
@@ -264,6 +284,17 @@ async fn handle_client_inner(
                 return Ok(());
             }
         }
+    }
+}
+
+fn gateway_blocking<T>(operation: impl FnOnce() -> T) -> T {
+    let multi_thread = tokio::runtime::Handle::try_current()
+        .map(|handle| handle.runtime_flavor() == tokio::runtime::RuntimeFlavor::MultiThread)
+        .unwrap_or(false);
+    if multi_thread {
+        tokio::task::block_in_place(operation)
+    } else {
+        operation()
     }
 }
 

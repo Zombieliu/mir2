@@ -12,6 +12,7 @@ pub mod guild_node_foundation;
 pub mod home_agent_runtime;
 pub mod home_beta;
 pub mod home_beta_plan;
+pub mod home_enrollment;
 pub mod home_sandbox;
 pub mod home_tunnel;
 pub mod home_tunnel_transport;
@@ -94,6 +95,13 @@ pub use home_beta_plan::{
     HomeBetaTestPlanPayload, SignedHomeBetaTestPlan, HOME_BETA_JOURNAL_SCHEMA,
     HOME_BETA_PLAN_MAXIMUM_LIFETIME_MS, HOME_BETA_PLAN_SCHEMA,
 };
+pub use home_enrollment::{
+    HomeCapacityCertificationRequest, HomeEnrollmentBundlePayload, HomeEnrollmentChallengePayload,
+    HomeEnrollmentRelayConfig, HomeEnrollmentRelayCredential, HomeEnrollmentRequest,
+    HomeEnrollmentResourcePolicy, SignedHomeEnrollmentBundle, SignedHomeEnrollmentChallenge,
+    HOME_ENROLLMENT_BUNDLE_SCHEMA, HOME_ENROLLMENT_CHALLENGE_SCHEMA,
+    HOME_ENROLLMENT_SIGNATURE_ALGORITHM,
+};
 pub use home_sandbox::{
     HomeSandboxManifest, HomeSandboxManifestPayload, HomeSandboxRuntimeAttestation,
     HomeSandboxRuntimeLimits, HOME_SANDBOX_SCHEMA,
@@ -125,8 +133,8 @@ pub use node_security::{
     VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
 };
 pub use operator::{
-    serve_zone_host_operator, SignedZoneHostHeartbeat, ZoneHostHeartbeatPayload,
-    ZoneHostOperatorConfig,
+    serve_zone_host_operator, zone_host_signing_identity_from_env, SignedZoneHostHeartbeat,
+    ZoneHostHeartbeatPayload, ZoneHostOperatorConfig,
 };
 pub use regional::{
     RegionalProfile, RegionalReferenceDeployment, RegionalStage, RegionalStages, RegionalWorkload,
@@ -155,14 +163,14 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_replication::{ZoneBaseSnapshotStore, ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
-    decode_zone_rpc_routing_hint, validate_zone_host_bind, TcpZoneOwnerRpcTransport,
-    ZoneBaseSnapshot, ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth,
-    ZoneHostPromotionTelemetry, ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry,
-    ZoneMapScope, ZoneMutationBatch, ZoneMutationEntry, ZonePromotionReadiness,
-    ZonePromotionReceipt, ZoneQuiesceReceipt, ZoneReplicationCoverage, ZoneReplicationHead,
-    ZoneRpcLimits, ZoneRpcRoutingHint, DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES,
-    DEFAULT_ZONE_PROMOTION_MAX_LAG_MS, DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS,
-    DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
-    ZONE_HOST_CHECKPOINT_VERSION, ZONE_PROMOTION_READINESS_VERSION, ZONE_REPLICATION_HEAD_VERSION,
-    ZONE_RPC_PROTOCOL_VERSION,
+    decode_zone_rpc_routing_hint, validate_zone_host_bind, validate_zone_rpc_authorization,
+    TcpZoneOwnerRpcTransport, ZoneBaseSnapshot, ZoneBaseSnapshotCompression,
+    ZoneHostCheckpointTelemetry, ZoneHostHealth, ZoneHostPromotionTelemetry, ZoneHostServer,
+    ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope, ZoneMutationBatch,
+    ZoneMutationEntry, ZonePromotionReadiness, ZonePromotionReceipt, ZoneQuiesceReceipt,
+    ZoneReplicationCoverage, ZoneReplicationHead, ZoneRpcLimits, ZoneRpcRoutingHint,
+    DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES, DEFAULT_ZONE_PROMOTION_MAX_LAG_MS,
+    DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
+    DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES, ZONE_HOST_CHECKPOINT_VERSION,
+    ZONE_PROMOTION_READINESS_VERSION, ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };

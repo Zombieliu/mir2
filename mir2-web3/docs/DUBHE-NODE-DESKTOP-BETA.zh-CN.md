@@ -9,10 +9,13 @@
 
 当前仍是 **Home Node Beta**，不是可公开承诺 SLA 的正式发行版：
 
-- 桌面安装包尚未捆绑 Gate 23 后台服务，测试前仍需安装 Home Agent；
 - Apple notarization、Windows Authenticode 和 Linux 仓库签名尚未接入；
 - 尚无三家真实家庭运营商的完整现场证据；
-- 桌面客户端的远程 enrollment API 尚未接入，签名测试计划暂由 CLI 导入。
+- 关闭桌面应用会停止它临时托管的 Supervisor；开机自启和系统服务迁移尚未接入。
+
+远程签名 enrollment、容量挑战、短期容量证书、CSR/mTLS 证书签发、动态
+placement、Relay 连接和签名遥测已经接入桌面流程。它们的本地自动化验收不能
+替代真实 Sui testnet 活跃注册、正式 TLS/发行证书和三运营商现场证据。
 
 ## 操作者看到的产品
 
@@ -23,7 +26,7 @@ flowchart LR
   S --> Z["Zone Host"]
   S --> A["Home Agent"]
   A -->|"主动出站 QUIC + mTLS"| R["官方 Relay"]
-  A -->|"签名脱敏遥测"| T["Telemetry"]
+  A -->|"生产 Bundle 准入后的签名脱敏遥测"| T["Telemetry"]
   C["Beta Controller<br/>离线运营方签名"] -->|"绑定 Node / build / 有效期的计划"| D
   D -->|"本机确认固定动作"| B["Beta Runner"]
   B -->|"节点签名证据"| C
@@ -55,10 +58,15 @@ MSI/NSIS 与 deb/AppImage/RPM。当前仓库凭据没有 GitHub `workflow` scope
 
 ## 启动后台节点
 
-桌面控制层依赖 Gate 23 的 `home_agent_supervisor`。开发验收先按
-`infra/gate23/README.zh-CN.md` 安装后台服务；Supervisor 默认只监听
-`127.0.0.1:17990`。如果没有显式提供管理令牌，Supervisor 和桌面端会使用相同
-keyring account 创建或读取独立的 32 字节管理令牌。
+Tauri 构建会先以锁定依赖编译 `home_agent_supervisor`、
+`home_agent_launcher`、`home_agent` 和 `zone_host`，再把四个目标平台原生
+sidecar 放入安装包。首次打开会自动启动 Supervisor；用户不需要先开终端。
+
+Supervisor 默认只监听 `127.0.0.1:17990`。管理令牌由桌面 Rust 后端创建并
+保存在独立 keyring entry，只通过子进程环境传给 Supervisor；Node ID 和
+public key 可以传递，节点私钥不会进入子进程环境。签名 enrollment 完成后启动
+Zone Host；只有容量证书、placement 和 Relay mTLS 客户端证书完整且在有效期内，
+Home Agent 才启动，“开始贡献”才可用。
 
 打开客户端后应看到：
 
@@ -67,6 +75,96 @@ keyring account 创建或读取独立的 32 字节管理令牌。
 3. CPU、可用内存、Session 数和最近观测时间；
 4. “开始贡献 / 暂停贡献”控制；
 5. 家庭网络只出站、IP 由 Relay 隐藏的边界说明。
+
+## 为什么认证前显示“无遥测”
+
+桌面客户端支持遥测，但生产 Collector 不接受匿名机器。每份报告必须同时匹配：
+
+- Enrollment Bundle 中的 Node ID 和 Ed25519 public key；
+- 当前 key generation；
+- 短期容量证书 ID 与有效期；
+- Commonware/控制面签发的 placement generation；
+- Collector 动态加载的签名 admission。
+
+因此初次打开时看到 `—`、`等待 enrollment` 或 `Relay 未连接` 是正确的
+fail-closed 状态。此时只能显示本机 CPU、内存和 Supervisor 状态，不能把本地
+自报值计入公开容量、在线率或奖励。
+
+桌面端现在区分三件事：`遥测 URL 已配置`、`Home Agent 已启动`、`Collector
+已接受签名报告`。只有 Collector 返回成功后，Agent 才把不含密钥的运行态回执
+原子写入应用数据目录；Supervisor 校验回执的 Node ID 和 90 秒新鲜度后才向
+界面显示报告序号与接收时间。回执缺失、过期或身份不符时会自动 drain。
+完整流程如下：
+
+```mermaid
+stateDiagram-v2
+  [*] --> LocalIdentity: 首次打开
+  LocalIdentity --> Enrolled: 签名 challenge/response
+  Enrolled --> CapacityReady: Zone 容量挑战通过
+  CapacityReady --> RelayReady: CSR 获得 mTLS 证书和 placement
+  RelayReady --> RelayConnected: Agent 出站连接 Relay
+  RelayConnected --> TelemetryVisible: Collector 验证签名 admission 并返回成功
+  TelemetryVisible --> Serving: Supervisor 验证本机新鲜回执
+  Serving --> Draining: 用户暂停或资源超限
+  Draining --> Serving: 资源恢复并重新开启
+  Serving --> Enrolled: 证书到期、撤销或 generation 变化
+```
+
+## 玩家怎么玩
+
+Dubhe Node 是节点运营软件，不是游戏客户端。玩家仍使用原版 TCP 客户端或 Web
+客户端，并只连接官方 Gateway：
+
+```mermaid
+flowchart LR
+  P["玩家客户端"] -->|"Mir2 TCP :7000<br/>或 WebSocket"| G["官方 Gateway"]
+  G -->|"Commonware 最终 Session lease"| C["控制面"]
+  C -->|"Zone endpoint = Relay 私网地址"| G
+  G -->|"Zone RPC + 内部 token"| R["官方 Relay Gateway listener"]
+  R -->|"签名 stream / QUIC mTLS"| A["家庭 Home Agent"]
+  A -->|"127.0.0.1 Zone RPC"| Z["Zone Host"]
+  Z --> R --> G --> P
+```
+
+家庭节点不开放端口，玩家看不到家庭 IP。Relay 的 Gateway listener 对非
+loopback 绑定强制配置 `MIR2_HOME_RELAY_GATEWAY_TOKEN`；官方 Gateway 使用相同
+值作为 `MIR2_ZONE_HOST_TOKEN`。错误 token 在建立 Home stream 前即被拒绝，
+Zone Host 还会再次校验同一凭据。
+
+## 本地人工验收
+
+1. 启动 Enrollment Authority、Telemetry Collector 和 Relay 所需的测试配置。
+2. 给桌面客户端设置 Authority URL 和可信 issuer public key。
+3. 打开应用；macOS 如出现 Keychain 弹窗，点击“允许”。
+4. 点击签名 enrollment，确认界面进入“待容量认证”，Zone Host 为健康。
+5. 点击“执行容量认证并申请 Relay mTLS”。
+6. 确认 `capacity ready`、`Relay ready`、Agent 已托管并出现远程遥测。
+7. 用 Mir2 客户端连接官方 Gateway，不连接桌面应用或家庭 IP，完成 Login、
+   StartGame 和 KeepAlive。
+
+仓库级可重复验收：
+
+```bash
+cd apps/dubhe-node-desktop
+npm run acceptance
+```
+
+等价的分项命令：
+
+```bash
+cargo +1.89.0 test -p mir2-gateway --bin home_enrollment_service
+cargo +1.89.0 test -p mir2-gateway --bin home_telemetry_collector
+cargo +1.89.0 test -p mir2-gateway --bin home_agent_supervisor
+cargo +1.89.0 test -p mir2-gateway home_tunnel --lib
+cargo +1.89.0 test -p mir2-gateway --test home_tunnel
+cd apps/dubhe-node-desktop
+npm run build
+npm run tauri build -- --debug --bundles app
+```
+
+`home_tunnel` 集成验收通过真正的玩家 TCP Gateway 完成 Login、StartGame 和
+KeepAlive，同时覆盖 Gateway 内部凭据拒绝、mTLS 非信任 CA、QUIC 合法乱序、
+精确重放拒绝、动态 placement reload 和 UDP rebind。
 
 ## 生产 Beta：运营方签发计划
 

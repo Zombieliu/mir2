@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::fmt;
 use std::net::{SocketAddr, UdpSocket};
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -21,9 +22,9 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{watch, OwnedSemaphorePermit, RwLock, Semaphore};
 
 use crate::{
-    decode_zone_rpc_routing_hint, HomeTunnelChallenge, HomeTunnelPlacement, HomeTunnelRegistration,
-    HomeTunnelReplayGuard, HomeTunnelStreamEnvelope, HomeTunnelStreamOpen, NodeCapacityCertificate,
-    NodeSigningIdentity,
+    decode_zone_rpc_routing_hint, validate_zone_rpc_authorization, HomeTunnelChallenge,
+    HomeTunnelPlacement, HomeTunnelRegistration, HomeTunnelReplayGuard, HomeTunnelStreamEnvelope,
+    HomeTunnelStreamOpen, NodeCapacityCertificate, NodeSigningIdentity,
 };
 
 const HOME_TUNNEL_ALPN: &[u8] = b"obelisk-home-tunnel/1";
@@ -144,7 +145,11 @@ pub struct HomeTunnelRelayConfig {
     pub relay_identity: NodeSigningIdentity,
     pub trusted_capacity_issuer: String,
     pub trusted_control_issuer: String,
+    /// Shared secret presented by the official Gateway inside every Zone RPC
+    /// envelope. It may be omitted only for a loopback Relay listener.
+    pub gateway_auth_token: Option<String>,
     pub placements: Vec<HomeTunnelPlacement>,
+    pub placements_file: Option<PathBuf>,
     pub max_frame_bytes: usize,
     pub max_control_bytes: usize,
     pub challenge_ttl: Duration,
@@ -174,7 +179,9 @@ impl HomeTunnelRelayConfig {
             relay_identity,
             trusted_capacity_issuer: trusted_capacity_issuer.into(),
             trusted_control_issuer: trusted_control_issuer.into(),
+            gateway_auth_token: None,
             placements,
+            placements_file: None,
             max_frame_bytes: DEFAULT_MAX_FRAME_BYTES,
             max_control_bytes: DEFAULT_MAX_CONTROL_BYTES,
             challenge_ttl: DEFAULT_CHALLENGE_TTL,
@@ -204,29 +211,62 @@ impl HomeTunnelRelayConfig {
             );
         }
         self.tls.validate()?;
-        if self.placements.is_empty() {
+        if self
+            .gateway_auth_token
+            .as_deref()
+            .is_some_and(|token| token.trim().is_empty())
+        {
+            return Err("Home Tunnel Relay Gateway token must not be empty".to_string());
+        }
+        if !self.gateway_bind.ip().is_loopback() && self.gateway_auth_token.is_none() {
+            return Err(
+                "non-loopback Home Tunnel Gateway listener requires gateway authentication"
+                    .to_string(),
+            );
+        }
+        if self.placements.is_empty() && self.placements_file.is_none() {
             return Err("Home Tunnel Relay requires at least one placement".to_string());
         }
-        let mut zones = BTreeMap::new();
-        for placement in &self.placements {
-            if placement.relay_id != self.relay_id {
-                return Err(format!(
-                    "Home Tunnel placement {} targets relay {}, expected {}",
-                    placement.placement_id, placement.relay_id, self.relay_id
-                ));
-            }
-            if zones
-                .insert(placement.zone_id.clone(), placement.placement_id.clone())
-                .is_some()
-            {
-                return Err(format!(
-                    "Home Tunnel Relay has duplicate placement for Zone {}",
-                    placement.zone_id
-                ));
-            }
+        validate_relay_placements(&self.relay_id, &self.placements)?;
+        if let Some(path) = &self.placements_file {
+            let placements = read_relay_placements(path)?;
+            validate_relay_placements(&self.relay_id, &placements)?;
         }
         Ok(())
     }
+}
+
+fn validate_relay_placements(
+    relay_id: &str,
+    placements: &[HomeTunnelPlacement],
+) -> Result<(), String> {
+    let mut zones = BTreeMap::new();
+    for placement in placements {
+        if placement.relay_id != relay_id {
+            return Err(format!(
+                "Home Tunnel placement {} targets relay {}, expected {}",
+                placement.placement_id, placement.relay_id, relay_id
+            ));
+        }
+        if zones
+            .insert(placement.zone_id.clone(), placement.placement_id.clone())
+            .is_some()
+        {
+            return Err(format!(
+                "Home Tunnel Relay has duplicate placement for Zone {}",
+                placement.zone_id
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn read_relay_placements(path: &std::path::Path) -> Result<Vec<HomeTunnelPlacement>, String> {
+    serde_json::from_slice(
+        &std::fs::read(path)
+            .map_err(|error| format!("read Home Tunnel placements {}: {error}", path.display()))?,
+    )
+    .map_err(|error| format!("decode Home Tunnel placements {}: {error}", path.display()))
 }
 
 #[derive(Debug, Clone)]
@@ -320,7 +360,7 @@ struct RegisteredHomeNode {
 
 struct HomeTunnelRelayShared {
     config: Arc<HomeTunnelRelayConfig>,
-    placements: BTreeMap<String, HomeTunnelPlacement>,
+    placements: RwLock<BTreeMap<String, HomeTunnelPlacement>>,
     nodes: RwLock<BTreeMap<String, RegisteredHomeNode>>,
     replay_guard: HomeTunnelReplayGuard,
     stream_sequence: AtomicU64,
@@ -361,8 +401,12 @@ impl HomeTunnelRelay {
         let gateway_listener = TcpListener::bind(config.gateway_bind)
             .await
             .map_err(|error| format!("bind Home Tunnel gateway listener: {error}"))?;
-        let placements = config
-            .placements
+        let configured_placements = if let Some(path) = &config.placements_file {
+            read_relay_placements(path)?
+        } else {
+            config.placements.clone()
+        };
+        let placements = configured_placements
             .iter()
             .cloned()
             .map(|placement| (placement.zone_id.clone(), placement))
@@ -374,7 +418,7 @@ impl HomeTunnelRelay {
             gateway_listener,
             shared: Arc::new(HomeTunnelRelayShared {
                 config: Arc::new(config),
-                placements,
+                placements: RwLock::new(placements),
                 nodes: RwLock::new(BTreeMap::new()),
                 replay_guard: HomeTunnelReplayGuard::default(),
                 stream_sequence: AtomicU64::new(1),
@@ -441,6 +485,20 @@ impl HomeTunnelRelay {
             }
         }
     }
+}
+
+async fn refresh_relay_placements(shared: &HomeTunnelRelayShared) -> Result<(), String> {
+    let Some(path) = &shared.config.placements_file else {
+        return Ok(());
+    };
+    let placements = read_relay_placements(path)?;
+    validate_relay_placements(&shared.config.relay_id, &placements)?;
+    let placements = placements
+        .into_iter()
+        .map(|placement| (placement.zone_id.clone(), placement))
+        .collect();
+    *shared.placements.write().await = placements;
+    Ok(())
 }
 
 pub struct HomeTunnelAgent {
@@ -622,15 +680,19 @@ async fn handle_agent_connection(
         &shared.config.relay_id,
         now_ms(),
     )?;
+    refresh_relay_placements(&shared).await?;
     let assigned = shared
         .placements
+        .read()
+        .await
         .values()
         .filter(|placement| placement.node_id == registration.node_id)
+        .cloned()
         .collect::<Vec<_>>();
     if assigned.is_empty() {
         return Err("Home Tunnel node has no finalized placement on this Relay".to_string());
     }
-    for placement in assigned {
+    for placement in &assigned {
         placement.verify(
             &shared.config.trusted_control_issuer,
             &shared.config.relay_id,
@@ -691,9 +753,15 @@ async fn handle_gateway_connection(
             }
             Err(error) => return Err(error),
         };
+        if let Some(expected_token) = shared.config.gateway_auth_token.as_deref() {
+            validate_zone_rpc_authorization(&request, expected_token)?;
+        }
         let hint = decode_zone_rpc_routing_hint(&request)?;
+        refresh_relay_placements(&shared).await?;
         let placement = shared
             .placements
+            .read()
+            .await
             .get(&hint.zone_id)
             .cloned()
             .ok_or_else(|| format!("no Home Tunnel placement for Zone {}", hint.zone_id))?;
@@ -749,6 +817,13 @@ async fn handle_gateway_connection(
         )
         .await
         .map_err(|_| "Home Tunnel Zone RPC response timed out".to_string())??;
+        let trailing = tokio::time::timeout(shared.config.io_timeout, receive.read_to_end(0))
+            .await
+            .map_err(|_| "Home Tunnel Zone RPC response finish timed out".to_string())?
+            .map_err(|error| format!("finish Home Tunnel Zone RPC response: {error}"))?;
+        if !trailing.is_empty() {
+            return Err("Home Tunnel Zone RPC response contains trailing bytes".to_string());
+        }
         write_frame(&mut gateway, &response, shared.config.max_frame_bytes).await?;
     }
 }
@@ -799,6 +874,12 @@ async fn handle_agent_stream(
         .await
         .map_err(|_| "local Zone Host response timed out".to_string())??;
         write_frame(&mut send, &response, shared.config.max_frame_bytes).await?;
+        // The response frame is complete, so the next strictly-sequential RPC
+        // for this Session may proceed. Releasing only after QUIC FIN creates a
+        // race where the Relay can deliver the response upstream before this
+        // Agent observes `finish`, causing the immediate next Login/StartGame
+        // request to be mistaken for a concurrent replay.
+        shared.replay_guard.close_stream(&placement_id, &session_id);
         send.finish()
             .map_err(|error| format!("finish Home Tunnel response stream: {error}"))
     }

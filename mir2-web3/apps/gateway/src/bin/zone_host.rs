@@ -6,8 +6,8 @@ use std::sync::Arc;
 
 use mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env;
 use mir2_gateway::{
-    serve_zone_host_operator, validate_zone_host_bind, GatewayConfig, NodeSigningIdentity,
-    PostgresEconomyAccountInventoryService, SharedAccountInventoryServiceHandle,
+    serve_zone_host_operator, validate_zone_host_bind, zone_host_signing_identity_from_env,
+    GatewayConfig, PostgresEconomyAccountInventoryService, SharedAccountInventoryServiceHandle,
     ZoneHostOperatorConfig, ZoneHostServer, ZoneRpcLimits, ZoneTopology,
 };
 
@@ -98,7 +98,7 @@ fn use_signing_identity_as_default_host_id() -> io::Result<()> {
     {
         return Ok(());
     }
-    if let Some(identity) = NodeSigningIdentity::from_env()
+    if let Some(identity) = zone_host_signing_identity_from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?
     {
         // This runs before the server or operator threads start. Both surfaces

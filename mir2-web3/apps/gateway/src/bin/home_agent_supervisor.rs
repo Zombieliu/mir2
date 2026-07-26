@@ -13,19 +13,22 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::StreamExt;
 use mir2_gateway::{
-    HomeAgentKeyring, HomeAgentManagementKeyring, HomeAgentReleaseManifest,
-    HomeAgentResourceController, HomeAgentResourceDecision, HomeAgentResourcePolicy,
-    HomeAgentResourceSample, HomeAgentUpdateStore, HomeAgentWorkMode, ZoneHostTelemetrySnapshot,
+    node_id_from_public_key, HomeAgentKeyring, HomeAgentManagementKeyring,
+    HomeAgentReleaseManifest, HomeAgentResourceController, HomeAgentResourceDecision,
+    HomeAgentResourcePolicy, HomeAgentResourceSample, HomeAgentUpdateStore, HomeAgentWorkMode,
+    ZoneHostTelemetrySnapshot,
 };
 use semver::Version;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sysinfo::System;
 use tokio::process::{Child, Command};
 use tokio::sync::{oneshot, Mutex, RwLock};
 
 const DEFAULT_BIND: &str = "127.0.0.1:17990";
 const DEFAULT_KEYRING_ACCOUNT: &str = "default";
+const DEFAULT_ZONE_OPERATOR_URL: &str = "http://127.0.0.1:7021";
 const UPDATE_RESTART_EXIT_CODE: i32 = 75;
+const AGENT_RUNTIME_STATUS_MAX_AGE_MS: u64 = 90_000;
 
 enum SupervisorExit {
     Clean,
@@ -48,19 +51,43 @@ struct SupervisorStatus {
     public_key: String,
     key_store: String,
     managed_processes: bool,
+    agent_managed: bool,
+    relay_connected: bool,
+    telemetry_configured: bool,
+    telemetry_accepted: bool,
+    telemetry_sequence: Option<u64>,
+    last_telemetry_at_ms: Option<u64>,
+    telemetry_error: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct HomeAgentRuntimeStatus {
+    node_id: String,
+    relay_id: String,
+    relay_connected: bool,
+    telemetry_configured: bool,
+    telemetry_accepted: bool,
+    telemetry_sequence: Option<u64>,
+    last_telemetry_at_ms: Option<u64>,
+    last_error: Option<String>,
+    updated_at_ms: u64,
 }
 
 #[derive(Clone)]
 struct AppState {
     status: Arc<RwLock<SupervisorStatus>>,
     controller: Arc<Mutex<HomeAgentResourceController>>,
+    node_id: String,
     operator_url: String,
     management_token: String,
+    public_ingress_configured: bool,
+    agent_status_file: Option<PathBuf>,
 }
 
 struct ManagedHomeProcesses {
     zone_host: Child,
-    home_agent: Child,
+    home_agent: Option<Child>,
 }
 
 #[tokio::main]
@@ -131,6 +158,38 @@ fn management_token() -> Result<String, String> {
     HomeAgentManagementKeyring::new(keyring_account())?
         .load_or_create_token()
         .map(|(token, _)| token)
+}
+
+fn supervisor_identity() -> Result<(String, String), String> {
+    let node_id = env::var("MIR2_HOME_NODE_ID")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    let public_key = env::var("MIR2_HOME_NODE_PUBLIC_KEY")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    match (node_id, public_key) {
+        (Some(node_id), Some(public_key)) => {
+            if node_id_from_public_key(&public_key)? != node_id {
+                return Err("Home Agent public identity claim does not match Node ID".to_string());
+            }
+            Ok((node_id, public_key))
+        }
+        (None, None) => {
+            let identity = keyring()?.load_identity().map_err(|error| {
+                format!(
+                    "initialize the Home Agent identity with `home_agent_supervisor key-init`: {error}"
+                )
+            })?;
+            Ok((
+                identity.node_id().to_string(),
+                identity.public_key().to_string(),
+            ))
+        }
+        _ => Err(
+            "MIR2_HOME_NODE_ID and MIR2_HOME_NODE_PUBLIC_KEY must be configured together"
+                .to_string(),
+        ),
+    }
 }
 
 fn key_init() -> Result<(), String> {
@@ -398,14 +457,15 @@ fn update_root() -> Result<PathBuf, String> {
 }
 
 async fn serve() -> Result<SupervisorExit, String> {
-    let identity = keyring()?.load_identity().map_err(|error| {
-        format!("initialize the Home Agent identity with `home_agent_supervisor key-init`: {error}")
-    })?;
+    let (node_id, public_key) = supervisor_identity()?;
     let bind = required_socket_env("MIR2_HOME_SUPERVISOR_BIND", DEFAULT_BIND)?;
     if !bind.ip().is_loopback() {
         return Err("Home Agent supervisor must bind to a loopback address".to_string());
     }
-    let operator_url = required_env("MIR2_HOME_ZONE_OPERATOR_URL")?;
+    let operator_url = env::var("MIR2_HOME_ZONE_OPERATOR_URL")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| DEFAULT_ZONE_OPERATOR_URL.to_string());
     let parsed_operator = reqwest::Url::parse(&operator_url)
         .map_err(|error| format!("invalid MIR2_HOME_ZONE_OPERATOR_URL: {error}"))?;
     if !matches!(
@@ -417,6 +477,13 @@ async fn serve() -> Result<SupervisorExit, String> {
     let management_token = management_token()?;
     let policy = policy_from_env()?;
     let managed_processes = boolean_env("MIR2_HOME_MANAGE_CHILDREN", false)?;
+    let agent_managed =
+        managed_processes && boolean_env("MIR2_HOME_MANAGE_AGENT", managed_processes)?;
+    let agent_status_file = if agent_managed {
+        Some(PathBuf::from(required_env("MIR2_HOME_AGENT_STATUS_FILE")?))
+    } else {
+        None
+    };
     let status = Arc::new(RwLock::new(SupervisorStatus {
         version: env!("CARGO_PKG_VERSION").to_string(),
         mode: HomeAgentWorkMode::Draining,
@@ -427,10 +494,17 @@ async fn serve() -> Result<SupervisorExit, String> {
         active_sessions: 0,
         zone_reachable: false,
         last_observed_at_ms: now_ms(),
-        node_id: identity.node_id().to_string(),
-        public_key: identity.public_key().to_string(),
+        node_id: node_id.clone(),
+        public_key,
         key_store: "operating-system-keyring".to_string(),
         managed_processes,
+        agent_managed,
+        relay_connected: false,
+        telemetry_configured: false,
+        telemetry_accepted: false,
+        telemetry_sequence: None,
+        last_telemetry_at_ms: None,
+        telemetry_error: None,
     }));
     let controller = Arc::new(Mutex::new(HomeAgentResourceController::new(
         policy.clone(),
@@ -438,9 +512,24 @@ async fn serve() -> Result<SupervisorExit, String> {
     let state = AppState {
         status: Arc::clone(&status),
         controller: Arc::clone(&controller),
+        node_id: node_id.clone(),
         operator_url,
         management_token,
+        public_ingress_configured: agent_managed,
+        agent_status_file,
     };
+    if let Some(path) = state.agent_status_file.as_ref() {
+        match std::fs::remove_file(path) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => {
+                return Err(format!(
+                    "remove stale Home Agent runtime status {}: {error}",
+                    path.display()
+                ));
+            }
+        }
+    }
     let mut managed_processes = spawn_managed_processes(&state).await?;
     let monitor_state = state.clone();
     let monitor = tokio::spawn(async move { monitor_resources(monitor_state, policy).await });
@@ -471,7 +560,7 @@ async fn serve() -> Result<SupervisorExit, String> {
         .map_err(|error| format!("bind Home Agent supervisor {bind}: {error}"))?;
     println!(
         "HOME_AGENT_SUPERVISOR_READY http=http://{bind}/ node_id={}",
-        identity.node_id()
+        node_id
     );
     let shutdown_state = state.clone();
     let server = axum::serve(listener, router).with_graceful_shutdown(async move {
@@ -491,29 +580,50 @@ async fn serve() -> Result<SupervisorExit, String> {
     let server = server.into_future();
     tokio::pin!(server);
     let result: Result<bool, String> = if let Some(processes) = managed_processes.as_mut() {
-        tokio::select! {
-            server_result = &mut server => {
-                server_result
-                    .map(|()| false)
-                    .map_err(|error| format!("Home Agent supervisor server: {error}"))
+        if let Some(home_agent) = processes.home_agent.as_mut() {
+            tokio::select! {
+                server_result = &mut server => {
+                    server_result
+                        .map(|()| false)
+                        .map_err(|error| format!("Home Agent supervisor server: {error}"))
+                }
+                status = processes.zone_host.wait() => {
+                    Err(format!(
+                        "managed Zone Host exited unexpectedly: {}",
+                        status.map_err(|error| format!("wait for managed Zone Host: {error}"))?
+                    ))
+                }
+                status = home_agent.wait() => {
+                    let _ = request_manual_drain(&state, true).await;
+                    Err(format!(
+                        "managed Home Agent exited unexpectedly: {}",
+                        status.map_err(|error| format!("wait for managed Home Agent: {error}"))?
+                    ))
+                }
+                update = &mut update_receiver => {
+                    update.map_err(|_| "Home Agent update monitor stopped before staging".to_string())?;
+                    drain_and_wait(&state).await?;
+                    Ok(true)
+                }
             }
-            status = processes.zone_host.wait() => {
-                Err(format!(
-                    "managed Zone Host exited unexpectedly: {}",
-                    status.map_err(|error| format!("wait for managed Zone Host: {error}"))?
-                ))
-            }
-            status = processes.home_agent.wait() => {
-                let _ = request_manual_drain(&state, true).await;
-                Err(format!(
-                    "managed Home Agent exited unexpectedly: {}",
-                    status.map_err(|error| format!("wait for managed Home Agent: {error}"))?
-                ))
-            }
-            update = &mut update_receiver => {
-                update.map_err(|_| "Home Agent update monitor stopped before staging".to_string())?;
-                drain_and_wait(&state).await?;
-                Ok(true)
+        } else {
+            tokio::select! {
+                server_result = &mut server => {
+                    server_result
+                        .map(|()| false)
+                        .map_err(|error| format!("Home Agent supervisor server: {error}"))
+                }
+                status = processes.zone_host.wait() => {
+                    Err(format!(
+                        "managed Zone Host exited unexpectedly: {}",
+                        status.map_err(|error| format!("wait for managed Zone Host: {error}"))?
+                    ))
+                }
+                update = &mut update_receiver => {
+                    update.map_err(|_| "Home Agent update monitor stopped before staging".to_string())?;
+                    drain_and_wait(&state).await?;
+                    Ok(true)
+                }
             }
         }
     } else {
@@ -535,9 +645,13 @@ async fn serve() -> Result<SupervisorExit, String> {
         update_monitor.abort();
     }
     if let Some(mut processes) = managed_processes {
-        let _ = processes.home_agent.start_kill();
+        if let Some(home_agent) = processes.home_agent.as_mut() {
+            let _ = home_agent.start_kill();
+        }
         let _ = processes.zone_host.start_kill();
-        let _ = processes.home_agent.wait().await;
+        if let Some(mut home_agent) = processes.home_agent {
+            let _ = home_agent.wait().await;
+        }
         let _ = processes.zone_host.wait().await;
     }
     if result? {
@@ -586,16 +700,22 @@ async fn spawn_managed_processes(state: &AppState) -> Result<Option<ManagedHomeP
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
 
-    let home_agent = match managed_command(&agent_binary, &state.management_token).spawn() {
-        Ok(child) => child,
-        Err(error) => {
-            let _ = zone_host.start_kill();
-            let _ = zone_host.wait().await;
-            return Err(format!(
-                "start managed Home Agent {}: {error}",
-                agent_binary.display()
-            ));
-        }
+    let home_agent = if boolean_env("MIR2_HOME_MANAGE_AGENT", true)? {
+        Some(
+            match managed_command(&agent_binary, &state.management_token).spawn() {
+                Ok(child) => child,
+                Err(error) => {
+                    let _ = zone_host.start_kill();
+                    let _ = zone_host.wait().await;
+                    return Err(format!(
+                        "start managed Home Agent {}: {error}",
+                        agent_binary.display()
+                    ));
+                }
+            },
+        )
+    } else {
+        None
     };
     Ok(Some(ManagedHomeProcesses {
         zone_host,
@@ -685,14 +805,89 @@ async fn monitor_resources(state: AppState, policy: HomeAgentResourcePolicy) -> 
             elapsed_since_previous_ms: elapsed,
         };
         let decision = state.controller.lock().await.observe(sample);
-        if decision.request_drain {
+        let mut runtime_error = None;
+        let runtime_status = state.agent_status_file.as_ref().and_then(|path| {
+            match load_agent_runtime_status(path, &state.node_id) {
+                Ok(status) => Some(status),
+                Err(error) => {
+                    runtime_error = Some(error);
+                    None
+                }
+            }
+        });
+        let public_ingress_ready = state.public_ingress_configured
+            && runtime_status.as_ref().is_some_and(|status| {
+                status.relay_connected && status.telemetry_configured && status.telemetry_accepted
+            });
+        if !public_ingress_ready {
+            if zone_reachable {
+                operator_action(&state, true).await?;
+            }
+        } else if decision.request_drain {
             operator_action(&state, true).await?;
         } else if decision.request_resume && zone_reachable {
             operator_action(&state, false).await?;
         }
         let mut status = state.status.write().await;
         apply_status(&mut status, sample, decision, zone_reachable);
+        apply_agent_runtime_status(&mut status, runtime_status.as_ref(), runtime_error);
+        if !public_ingress_ready {
+            status.mode = HomeAgentWorkMode::Draining;
+            status.accept_new_sessions = false;
+            status.reason = if !zone_reachable {
+                "zone_operator_unreachable".to_string()
+            } else if !state.public_ingress_configured {
+                "relay_credentials_pending".to_string()
+            } else if !status.relay_connected {
+                "relay_connecting".to_string()
+            } else if !status.telemetry_accepted {
+                "telemetry_receipt_pending".to_string()
+            } else {
+                "public_ingress_not_ready".to_string()
+            };
+        }
     }
+}
+
+fn load_agent_runtime_status(
+    path: &Path,
+    expected_node_id: &str,
+) -> Result<HomeAgentRuntimeStatus, String> {
+    let bytes = std::fs::read(path)
+        .map_err(|error| format!("read Home Agent runtime status {}: {error}", path.display()))?;
+    let status: HomeAgentRuntimeStatus = serde_json::from_slice(&bytes).map_err(|error| {
+        format!(
+            "decode Home Agent runtime status {}: {error}",
+            path.display()
+        )
+    })?;
+    if status.node_id != expected_node_id {
+        return Err("Home Agent runtime status belongs to another Node ID".to_string());
+    }
+    if status.relay_id.trim().is_empty() {
+        return Err("Home Agent runtime status has no Relay ID".to_string());
+    }
+    let observed_at_ms = now_ms();
+    if status.updated_at_ms > observed_at_ms.saturating_add(5_000)
+        || observed_at_ms.saturating_sub(status.updated_at_ms) > AGENT_RUNTIME_STATUS_MAX_AGE_MS
+    {
+        return Err("Home Agent runtime status is stale".to_string());
+    }
+    Ok(status)
+}
+
+fn apply_agent_runtime_status(
+    status: &mut SupervisorStatus,
+    runtime: Option<&HomeAgentRuntimeStatus>,
+    error: Option<String>,
+) {
+    status.relay_connected = runtime.is_some_and(|runtime| runtime.relay_connected);
+    status.telemetry_configured = runtime.is_some_and(|runtime| runtime.telemetry_configured);
+    status.telemetry_accepted = runtime.is_some_and(|runtime| runtime.telemetry_accepted);
+    status.telemetry_sequence = runtime.and_then(|runtime| runtime.telemetry_sequence);
+    status.last_telemetry_at_ms = runtime.and_then(|runtime| runtime.last_telemetry_at_ms);
+    status.telemetry_error =
+        error.or_else(|| runtime.and_then(|runtime| runtime.last_error.clone()));
 }
 
 fn apply_status(
@@ -804,6 +999,17 @@ async fn api_manual_action(state: AppState, headers: HeaderMap, drain: bool) -> 
         )
             .into_response();
     }
+    let status = state.status.read().await;
+    if !drain && (!status.relay_connected || !status.telemetry_accepted) {
+        return (
+            StatusCode::CONFLICT,
+            Json(serde_json::json!({
+                "error": "Home Agent Relay connection and accepted telemetry receipt are required; public serving remains drained"
+            })),
+        )
+            .into_response();
+    }
+    drop(status);
     match request_manual_drain(&state, drain).await {
         Ok(()) => (
             StatusCode::OK,
@@ -917,4 +1123,65 @@ fn now_ms() -> u64 {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as u64
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn runtime_status_path(label: &str) -> PathBuf {
+        std::env::temp_dir().join(format!(
+            "mir2-home-agent-runtime-{label}-{}-{}.json",
+            std::process::id(),
+            now_ms()
+        ))
+    }
+
+    fn write_runtime_status(path: &Path, node_id: &str, updated_at_ms: u64) {
+        std::fs::write(
+            path,
+            serde_json::to_vec(&serde_json::json!({
+                "nodeId": node_id,
+                "relayId": "relay-hk-1",
+                "relayConnected": true,
+                "telemetryConfigured": true,
+                "telemetryAccepted": true,
+                "telemetrySequence": 7,
+                "lastTelemetryAtMs": updated_at_ms,
+                "lastError": null,
+                "updatedAtMs": updated_at_ms
+            }))
+            .expect("runtime status JSON"),
+        )
+        .expect("write runtime status");
+    }
+
+    #[test]
+    fn runtime_status_requires_matching_node_and_fresh_receipt() {
+        let path = runtime_status_path("fresh");
+        write_runtime_status(&path, "node-a", now_ms());
+        let status =
+            load_agent_runtime_status(&path, "node-a").expect("fresh matching runtime status");
+        assert!(status.relay_connected);
+        assert!(status.telemetry_accepted);
+        assert_eq!(status.telemetry_sequence, Some(7));
+        assert!(load_agent_runtime_status(&path, "node-b")
+            .expect_err("wrong node must fail")
+            .contains("another Node ID"));
+        std::fs::remove_file(path).expect("remove runtime status");
+    }
+
+    #[test]
+    fn stale_runtime_status_cannot_open_public_ingress() {
+        let path = runtime_status_path("stale");
+        write_runtime_status(
+            &path,
+            "node-a",
+            now_ms().saturating_sub(AGENT_RUNTIME_STATUS_MAX_AGE_MS + 1),
+        );
+        assert!(load_agent_runtime_status(&path, "node-a")
+            .expect_err("stale status must fail")
+            .contains("stale"));
+        std::fs::remove_file(path).expect("remove runtime status");
+    }
 }

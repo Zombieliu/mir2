@@ -200,6 +200,32 @@ pub fn decode_zone_rpc_routing_hint(bytes: &[u8]) -> Result<ZoneRpcRoutingHint, 
     Ok(hint)
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ZoneRpcAuthorizationHint {
+    auth_token: Option<String>,
+}
+
+/// Verify the internal Gateway credential carried by a Zone RPC frame without
+/// decoding or executing its request payload.
+///
+/// The Home Relay uses this at its private Gateway listener before choosing a
+/// Home Node. The Zone Host independently validates the same credential after
+/// the frame crosses the mTLS tunnel, so a Relay bypass does not weaken the
+/// final authorization boundary.
+pub fn validate_zone_rpc_authorization(bytes: &[u8], expected_token: &str) -> Result<(), String> {
+    if expected_token.trim().is_empty() {
+        return Err("Zone RPC authorization token must not be empty".to_string());
+    }
+    let hint = serde_json::from_slice::<ZoneRpcAuthorizationHint>(bytes)
+        .or_else(|_| rmp_serde::from_slice::<ZoneRpcAuthorizationHint>(bytes))
+        .map_err(|_| "Zone RPC frame is neither valid JSON nor named MessagePack".to_string())?;
+    if !tokens_equal(Some(expected_token), hint.auth_token.as_deref()) {
+        return Err("invalid Home Relay Gateway token".to_string());
+    }
+    Ok(())
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ZoneHostTelemetrySnapshot {

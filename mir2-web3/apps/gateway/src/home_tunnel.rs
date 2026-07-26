@@ -473,9 +473,9 @@ pub struct HomeTunnelReplayGuard {
 struct HomeTunnelReplayState {
     challenge_ids: BTreeSet<String>,
     registration_sequences: BTreeMap<(String, u64, String, u32), u64>,
-    stream_sequences: BTreeMap<(String, String), u64>,
+    stream_sequences: BTreeMap<(String, u64), u64>,
     active_sessions: BTreeMap<String, BTreeSet<String>>,
-    stream_nonces: BTreeSet<(String, String)>,
+    stream_nonces: BTreeMap<(String, String), u64>,
 }
 
 impl HomeTunnelReplayGuard {
@@ -533,20 +533,22 @@ impl HomeTunnelReplayGuard {
         now_ms: u64,
     ) -> Result<(), String> {
         open.verify(trusted_relay_issuer, placement, now_ms)?;
-        let stream_key = (open.placement_id.clone(), open.session_id.clone());
+        let stream_key = (open.placement_id.clone(), open.stream_sequence);
         let nonce_key = (open.placement_id.clone(), open.nonce.clone());
         let mut state = self
             .state
             .lock()
             .map_err(|_| "home tunnel replay guard mutex poisoned".to_string())?;
-        if state.stream_nonces.contains(&nonce_key) {
+        state
+            .stream_sequences
+            .retain(|_, expires_at_ms| now_ms <= *expires_at_ms);
+        state
+            .stream_nonces
+            .retain(|_, expires_at_ms| now_ms <= *expires_at_ms);
+        if state.stream_nonces.contains_key(&nonce_key) {
             return Err("home tunnel stream nonce was replayed".to_string());
         }
-        if state
-            .stream_sequences
-            .get(&stream_key)
-            .is_some_and(|previous| open.stream_sequence <= *previous)
-        {
+        if state.stream_sequences.contains_key(&stream_key) {
             return Err("home tunnel stream sequence was replayed".to_string());
         }
         let active = state
@@ -560,8 +562,8 @@ impl HomeTunnelReplayGuard {
         active.insert(open.session_id.clone());
         state
             .stream_sequences
-            .insert(stream_key, open.stream_sequence);
-        state.stream_nonces.insert(nonce_key);
+            .insert(stream_key, open.expires_at_ms);
+        state.stream_nonces.insert(nonce_key, open.expires_at_ms);
         Ok(())
     }
 
@@ -879,5 +881,37 @@ mod tests {
             .unwrap();
         guard.close_stream(&placement.placement_id, "session-a");
         assert_eq!(guard.active_streams(&placement.placement_id), 0);
+
+        let ahead = HomeTunnelStreamOpen::sign(
+            &placement,
+            "session-a",
+            4,
+            URL_SAFE_NO_PAD.encode([10; 32]),
+            3_200,
+            3_900,
+            &fixture.relay,
+        )
+        .unwrap();
+        guard
+            .accept_stream(&ahead, &placement, fixture.relay.public_key(), 3_500)
+            .unwrap();
+        guard.close_stream(&placement.placement_id, "session-a");
+        let delayed = HomeTunnelStreamOpen::sign(
+            &placement,
+            "session-a",
+            3,
+            URL_SAFE_NO_PAD.encode([11; 32]),
+            3_200,
+            3_900,
+            &fixture.relay,
+        )
+        .unwrap();
+        guard
+            .accept_stream(&delayed, &placement, fixture.relay.public_key(), 3_500)
+            .expect("unique signed QUIC streams may be handled out of order");
+        guard.close_stream(&placement.placement_id, "session-a");
+        assert!(guard
+            .accept_stream(&ahead, &placement, fixture.relay.public_key(), 3_500)
+            .is_err());
     }
 }
