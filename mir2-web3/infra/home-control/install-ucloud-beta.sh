@@ -15,8 +15,8 @@ current_link="/opt/mir2/home-control/current"
 config_dir="/etc/mir2/home-control"
 state_dir="/var/lib/mir2/home-control"
 secret_dir="$state_dir/secrets"
-relay_hostname="165.154.65.136.sslip.io"
-relay_future_hostname="relay-hk.obelisk.build"
+relay_hostname="relay-hk.obelisk.build"
+relay_legacy_hostname="165.154.65.136.sslip.io"
 node_id="ed25519:cc0993651c112ce0b10bafd2a1ee633589d0bc0ae781c8ecacb4fadd810d5c41"
 
 for binary in \
@@ -93,7 +93,7 @@ if ! sudo -n test -f "$secret_dir/relay-ca.der"; then
     -key "$secret_dir/relay-server-key.pem" \
     -out "$secret_dir/relay-server.csr" \
     -subj "/CN=$relay_hostname" \
-    -addext "subjectAltName=DNS:$relay_hostname,DNS:$relay_future_hostname" \
+    -addext "subjectAltName=DNS:$relay_hostname,DNS:$relay_legacy_hostname" \
     -addext "extendedKeyUsage=serverAuth" \
     -addext "keyUsage=critical,digitalSignature"
   sudo -n -u mir2 openssl x509 \
