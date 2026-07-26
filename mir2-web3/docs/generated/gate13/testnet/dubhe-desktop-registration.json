@@ -1,0 +1,19 @@
+{
+  "nodeId": "ed25519:cc0993651c112ce0b10bafd2a1ee633589d0bc0ae781c8ecacb4fadd810d5c41",
+  "operatorSuiAddress": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+  "publicKey": "-HNoPVahQNmlDB26JQTGR1N61XGVzaMGlk3KeiL9ueU",
+  "endpoint": "relay-testnet.obelisk.game:443",
+  "failureDomain": "home-cn-east-testnet",
+  "stakeMist": 2000000,
+  "maxSessions": 128,
+  "maxZones": 8,
+  "keyGeneration": 1,
+  "status": "active",
+  "finality": {
+    "network": "testnet",
+    "packageId": "0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e",
+    "transactionDigest": "Ft3HrGfQUFs37geSssVJuHMcTzo2vKVD8vpMBLXCohNH",
+    "eventSequence": 0,
+    "checkpoint": 364647783
+  }
+}

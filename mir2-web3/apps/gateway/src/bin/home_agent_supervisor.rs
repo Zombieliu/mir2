@@ -727,6 +727,8 @@ fn managed_command(binary: &Path, management_token: &str) -> Command {
     let mut command = Command::new(binary);
     command
         .env("MIR2_ZONE_HOST_MANAGEMENT_TOKEN", management_token)
+        .env("MIR2_ZONE_HOST_TOKEN", management_token)
+        .env("MIR2_HOME_LOCAL_ZONE_RPC_TOKEN", management_token)
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -793,10 +795,16 @@ async fn monitor_resources(state: AppState, policy: HomeAgentResourcePolicy) -> 
         let elapsed = now.duration_since(previous).as_millis() as u64;
         previous = now;
         let zone = fetch_zone_health(&state.operator_url).await;
-        let (active_sessions, zone_reachable) = zone
+        let (active_sessions, zone_reachable, zone_draining) = zone
             .as_ref()
-            .map(|snapshot| (snapshot.health.session_count, true))
-            .unwrap_or((0, false));
+            .map(|snapshot| {
+                (
+                    snapshot.health.session_count,
+                    true,
+                    snapshot.health.draining,
+                )
+            })
+            .unwrap_or((0, false, true));
         let sample = HomeAgentResourceSample {
             observed_at_ms: now_ms(),
             cpu_usage_percent: system.global_cpu_usage(),
@@ -819,17 +827,18 @@ async fn monitor_resources(state: AppState, policy: HomeAgentResourcePolicy) -> 
             && runtime_status.as_ref().is_some_and(|status| {
                 status.relay_connected && status.telemetry_configured && status.telemetry_accepted
             });
-        if !public_ingress_ready {
-            if zone_reachable {
-                operator_action(&state, true).await?;
+        let resource_accepts_sessions = decision.accept_new_sessions;
+        if zone_reachable {
+            if let Some(drain) = zone_drain_reconciliation(
+                public_ingress_ready,
+                resource_accepts_sessions,
+                zone_draining,
+            ) {
+                operator_action(&state, drain).await?;
             }
-        } else if decision.request_drain {
-            operator_action(&state, true).await?;
-        } else if decision.request_resume && zone_reachable {
-            operator_action(&state, false).await?;
         }
         let mut status = state.status.write().await;
-        apply_status(&mut status, sample, decision, zone_reachable);
+        apply_status(&mut status, sample, decision, zone_reachable, zone_draining);
         apply_agent_runtime_status(&mut status, runtime_status.as_ref(), runtime_error);
         if !public_ingress_ready {
             status.mode = HomeAgentWorkMode::Draining;
@@ -845,8 +854,21 @@ async fn monitor_resources(state: AppState, policy: HomeAgentResourcePolicy) -> 
             } else {
                 "public_ingress_not_ready".to_string()
             };
+        } else if resource_accepts_sessions && zone_draining {
+            status.mode = HomeAgentWorkMode::Draining;
+            status.accept_new_sessions = false;
+            status.reason = "zone_resume_pending".to_string();
         }
     }
+}
+
+fn zone_drain_reconciliation(
+    public_ingress_ready: bool,
+    resource_accepts_sessions: bool,
+    zone_draining: bool,
+) -> Option<bool> {
+    let should_drain = !public_ingress_ready || !resource_accepts_sessions;
+    (should_drain != zone_draining).then_some(should_drain)
 }
 
 fn load_agent_runtime_status(
@@ -895,9 +917,10 @@ fn apply_status(
     sample: HomeAgentResourceSample,
     decision: HomeAgentResourceDecision,
     zone_reachable: bool,
+    zone_draining: bool,
 ) {
     status.mode = decision.mode;
-    status.accept_new_sessions = decision.accept_new_sessions && zone_reachable;
+    status.accept_new_sessions = decision.accept_new_sessions && zone_reachable && !zone_draining;
     status.reason = if zone_reachable {
         decision.reason
     } else {
@@ -1183,5 +1206,29 @@ mod tests {
             .expect_err("stale status must fail")
             .contains("stale"));
         std::fs::remove_file(path).expect("remove runtime status");
+    }
+
+    #[test]
+    fn zone_drain_state_is_level_reconciled_after_late_relay_readiness() {
+        assert_eq!(
+            zone_drain_reconciliation(false, true, false),
+            Some(true),
+            "public ingress not ready must drain an accepting Zone"
+        );
+        assert_eq!(
+            zone_drain_reconciliation(true, true, true),
+            Some(false),
+            "late Relay and telemetry readiness must resume a drained Zone"
+        );
+        assert_eq!(
+            zone_drain_reconciliation(true, true, false),
+            None,
+            "already reconciled serving state needs no edge-trigger"
+        );
+        assert_eq!(
+            zone_drain_reconciliation(true, false, true),
+            None,
+            "already reconciled resource drain needs no repeated request"
+        );
     }
 }

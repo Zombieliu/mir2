@@ -6,6 +6,8 @@ const desktopDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url
 const repositoryRoot = path.resolve(desktopDirectory, "../..");
 
 const checks = [
+  ["cargo", ["+1.89.0", "check", "-p", "mir2-gateway", "--bin", "home_local_stack_fixture"]],
+  ["cargo", ["+1.89.0", "check", "-p", "mir2-gateway", "--bin", "home_player_probe"]],
   ["cargo", ["+1.89.0", "test", "-p", "mir2-gateway", "--bin", "home_enrollment_service"]],
   ["cargo", ["+1.89.0", "test", "-p", "mir2-gateway", "--bin", "home_telemetry_collector"]],
   ["cargo", ["+1.89.0", "test", "-p", "mir2-gateway", "--bin", "home_agent_supervisor"]],

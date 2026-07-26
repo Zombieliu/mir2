@@ -45,6 +45,12 @@ sequenceDiagram
 Commonware 最终确认的 Zone Host endpoint 指向官方 Relay 的私有 Gateway
 监听地址，Relay 再把该 Zone 的流量转给已认证家庭节点。
 
+官方 Gateway token 只在 Relay 边界验证，绝不下发给家庭节点。Home Agent
+验证 Relay 签名 stream 后，会将认证字段替换成 Supervisor 生成的本机随机
+Zone RPC token；该 token 只用于 `Home Agent -> 127.0.0.1 Zone Host`。因此
+官方凭据泄漏不能直接授权家庭 Zone Host，家庭节点也无法获得官方 Gateway
+凭据。
+
 界面在 enrollment 或容量认证前显示“无远程遥测”，不是客户端不支持遥测：
 未认证节点没有容量证书 ID、placement generation 和 Collector admission，服务端
 必须拒绝它的报告，避免任意电脑污染容量、在线率和奖励数据。完成容量认证且
@@ -92,6 +98,13 @@ macOS 重新构建的 debug `.app` 第一次读取旧身份时会出现 Keychain
 “允许”或“始终允许”后才能继续；这是 macOS 对新签名二进制的密钥库保护，不是
 enrollment 或 Relay 故障。
 
+Relay 短暂离线时，Home Agent 不会退出，也不会带着 Zone Host 一起停止。它先把
+`relayConnected=false` 写入本机运行态，Supervisor 因而立即保持/进入 drain，
+随后使用 `1/2/4/8/16/32s` 封顶退避重新建立 QUIC、递增注册序列并重新接受
+placement。Relay 恢复后仍需新的 Collector 回执，Supervisor 才重新开放 Session，
+因此不会用陈旧遥测误报“在线”。Collector 短暂失败也采用同样的封顶退避，
+不会终止 Agent 或 Zone Host；上报恢复并取得新回执后才恢复接客。
+
 ## 自动验收
 
 在桌面应用目录执行一条命令：
@@ -124,4 +137,20 @@ Mir2 玩家 TCP
 
 并验证错误 Gateway token、非信任客户端 CA 和重复 stream 被拒绝，动态
 placement generation 无需重启 Relay 即可生效，UDP rebind 后玩家 Session
-继续工作。
+继续工作；同一测试还会启动真实 `home_agent` 子进程，关闭并重启 Relay，验证
+Agent 在断线期间不退出并能自动重新注册。
+
+已经启动完整本地栈时，还可以对正在运行的官方 Gateway 做一次独立玩家探针：
+
+```bash
+MIR2_HOME_PLAYER_GATEWAY_ADDR=127.0.0.1:17000 \
+MIR2_HOME_PLAYER_PROBE_OUT=docs/generated/home-node/live-player-probe.json \
+cargo +1.89.0 run -p mir2-gateway --bin home_player_probe
+```
+
+探针使用 Mir2 原生 TCP 帧依次等待 `Connected`、提交 `Login`、提交
+`StartGame`、校验 `KeepAlive` 回包，并记录每一步实际延迟。它不直连 Relay 或
+家庭 IP，因此可以验证玩家走的是
+`Gateway -> Relay -> Home Agent -> Zone Host`，而不是误走本机模拟捷径。
+默认单步超时为 30 秒，用来容纳 debug 世界初始化；报告中的延迟不是生产 SLO，
+性能结论必须另跑 release/Regional 压测。

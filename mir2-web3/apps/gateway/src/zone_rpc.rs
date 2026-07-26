@@ -179,9 +179,7 @@ pub struct ZoneRpcRoutingHint {
 }
 
 pub fn decode_zone_rpc_routing_hint(bytes: &[u8]) -> Result<ZoneRpcRoutingHint, String> {
-    let hint = serde_json::from_slice::<ZoneRpcRoutingHint>(bytes)
-        .or_else(|_| rmp_serde::from_slice::<ZoneRpcRoutingHint>(bytes))
-        .map_err(|_| "Zone RPC frame is neither valid JSON nor named MessagePack".to_string())?;
+    let hint = decode_zone_rpc_projection::<ZoneRpcRoutingHint>(bytes)?;
     if hint.protocol_version != ZONE_RPC_PROTOCOL_VERSION {
         return Err(format!(
             "Zone RPC routing hint protocol version mismatch: expected {}, got {}",
@@ -210,20 +208,56 @@ struct ZoneRpcAuthorizationHint {
 /// decoding or executing its request payload.
 ///
 /// The Home Relay uses this at its private Gateway listener before choosing a
-/// Home Node. The Zone Host independently validates the same credential after
-/// the frame crosses the mTLS tunnel, so a Relay bypass does not weaken the
-/// final authorization boundary.
+/// Home Node. The credential terminates at that boundary and must be replaced
+/// with a node-local credential before the frame reaches the Zone Host.
 pub fn validate_zone_rpc_authorization(bytes: &[u8], expected_token: &str) -> Result<(), String> {
     if expected_token.trim().is_empty() {
         return Err("Zone RPC authorization token must not be empty".to_string());
     }
-    let hint = serde_json::from_slice::<ZoneRpcAuthorizationHint>(bytes)
-        .or_else(|_| rmp_serde::from_slice::<ZoneRpcAuthorizationHint>(bytes))
-        .map_err(|_| "Zone RPC frame is neither valid JSON nor named MessagePack".to_string())?;
+    let hint = decode_zone_rpc_projection::<ZoneRpcAuthorizationHint>(bytes)?;
     if !tokens_equal(Some(expected_token), hint.auth_token.as_deref()) {
         return Err("invalid Home Relay Gateway token".to_string());
     }
     Ok(())
+}
+
+/// Replace the credential in a complete Zone RPC envelope while preserving its
+/// JSON, named MessagePack, or magic-prefixed MessagePack wire format.
+///
+/// Home Tunnel uses this after verifying the Relay-signed stream so the
+/// official Gateway credential never reaches a community-operated node. The
+/// replacement is a node-local loopback credential shared only by Home Agent
+/// and its managed Zone Host.
+pub fn rewrite_zone_rpc_authorization(
+    bytes: &[u8],
+    auth_token: Option<&str>,
+) -> Result<Vec<u8>, String> {
+    if auth_token.is_some_and(|token| token.trim().is_empty()) {
+        return Err("replacement Zone RPC authorization token must not be empty".to_string());
+    }
+    if bytes.starts_with(ZONE_RPC_BINARY_MAGIC) {
+        let mut envelope = decode_rpc_envelope(bytes, ZoneRpcCodec::MessagePack)?;
+        envelope.auth_token = auth_token.map(str::to_string);
+        return encode_rpc_envelope(&envelope, ZoneRpcCodec::MessagePack);
+    }
+    if let Ok(mut envelope) = serde_json::from_slice::<ZoneRpcEnvelope>(bytes) {
+        envelope.auth_token = auth_token.map(str::to_string);
+        return serde_json::to_vec(&envelope).map_err(|error| error.to_string());
+    }
+    let mut envelope = rmp_serde::from_slice::<ZoneRpcEnvelope>(bytes)
+        .map_err(|_| "Zone RPC frame is neither valid JSON nor named MessagePack".to_string())?;
+    envelope.auth_token = auth_token.map(str::to_string);
+    rmp_serde::to_vec_named(&envelope).map_err(|error| error.to_string())
+}
+
+fn decode_zone_rpc_projection<T: for<'de> Deserialize<'de>>(bytes: &[u8]) -> Result<T, String> {
+    if let Some(payload) = bytes.strip_prefix(ZONE_RPC_BINARY_MAGIC) {
+        return rmp_serde::from_slice(payload)
+            .map_err(|_| "Zone RPC frame is not valid magic-prefixed MessagePack".to_string());
+    }
+    serde_json::from_slice(bytes)
+        .or_else(|_| rmp_serde::from_slice(bytes))
+        .map_err(|_| "Zone RPC frame is neither valid JSON nor named MessagePack".to_string())
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -6093,6 +6127,45 @@ pub fn validate_zone_host_bind(address: SocketAddr, auth_token: Option<&str>) ->
         ));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod zone_rpc_authorization_tests {
+    use super::*;
+
+    fn envelope() -> ZoneRpcEnvelope {
+        ZoneRpcEnvelope {
+            protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+            session_id: "home-session-auth".to_string(),
+            zone_id: "primary".to_string(),
+            auth_token: Some("official-gateway-token".to_string()),
+            request: ZoneRpcRequest::Health,
+        }
+    }
+
+    #[test]
+    fn relay_credential_is_replaced_in_every_supported_codec() {
+        let json = serde_json::to_vec(&envelope()).unwrap();
+        let named_message_pack = rmp_serde::to_vec_named(&envelope()).unwrap();
+        let magic_message_pack =
+            encode_rpc_envelope(&envelope(), ZoneRpcCodec::MessagePack).unwrap();
+
+        for frame in [json, named_message_pack, magic_message_pack] {
+            validate_zone_rpc_authorization(&frame, "official-gateway-token").unwrap();
+            let rewritten =
+                rewrite_zone_rpc_authorization(&frame, Some("node-local-token")).unwrap();
+            validate_zone_rpc_authorization(&rewritten, "node-local-token").unwrap();
+            assert!(validate_zone_rpc_authorization(&rewritten, "official-gateway-token").is_err());
+            assert_eq!(
+                decode_zone_rpc_routing_hint(&rewritten).unwrap(),
+                ZoneRpcRoutingHint {
+                    protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+                    session_id: "home-session-auth".to_string(),
+                    zone_id: "primary".to_string(),
+                }
+            );
+        }
+    }
 }
 
 #[cfg(test)]

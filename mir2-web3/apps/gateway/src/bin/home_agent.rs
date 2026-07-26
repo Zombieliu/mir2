@@ -1,6 +1,8 @@
 use std::env;
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::{
@@ -50,9 +52,15 @@ async fn run() -> Result<(), String> {
         agent_instance_id.clone(),
         capacity_certificate.clone(),
     )?;
-    let runtime_status = HomeAgentRuntimeStatusWriter::from_env(node_identity.node_id(), &relay_id);
-    runtime_status.write(false, telemetry.is_some(), false, None, None)?;
-    let agent = match HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
+    let relay_connected = Arc::new(AtomicBool::new(false));
+    let runtime_status = HomeAgentRuntimeStatusWriter::from_env(
+        node_identity.node_id(),
+        &relay_id,
+        Arc::clone(&relay_connected),
+    );
+    let telemetry_configured = telemetry.is_some();
+    runtime_status.write(telemetry_configured, false, None, None)?;
+    let mut agent_config = HomeTunnelAgentConfig::with_defaults(
         relay_id,
         relay_addr,
         relay_server_name,
@@ -65,27 +73,23 @@ async fn run() -> Result<(), String> {
         capacity_certificate,
         trusted_relay_issuer,
         trusted_control_issuer,
-    ))
-    .await
-    {
-        Ok(agent) => agent,
-        Err(error) => {
-            runtime_status.write(false, telemetry.is_some(), false, None, Some(&error))?;
-            return Err(error);
-        }
-    };
-    runtime_status.write(true, telemetry.is_some(), false, None, None)?;
-    println!(
-        "HOME_AGENT_READY relay={} local_zone_rpc={local_zone_rpc_addr}",
-        required_env("MIR2_HOME_RELAY_ID")?
     );
+    agent_config.local_zone_rpc_auth_token = env::var("MIR2_HOME_LOCAL_ZONE_RPC_TOKEN")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
     let (shutdown_tx, shutdown_rx) = watch::channel(false);
     tokio::spawn(async move {
         let _ = tokio::signal::ctrl_c().await;
         let _ = shutdown_tx.send(true);
     });
     let telemetry_shutdown = shutdown_rx.clone();
-    let agent_serve = agent.serve(shutdown_rx);
+    let agent_serve = serve_tunnel_with_reconnect(
+        agent_config,
+        shutdown_rx,
+        runtime_status.clone(),
+        telemetry_configured,
+        Arc::clone(&relay_connected),
+    );
     tokio::pin!(agent_serve);
     let result = if let Some(telemetry) = telemetry {
         let telemetry_status = runtime_status.clone();
@@ -105,9 +109,72 @@ async fn run() -> Result<(), String> {
     } else {
         agent_serve.await
     };
+    relay_connected.store(false, Ordering::Release);
     let final_error = result.as_ref().err().map(String::as_str);
-    runtime_status.write(false, false, false, None, final_error)?;
+    runtime_status.write(telemetry_configured, false, None, final_error)?;
     result
+}
+
+async fn serve_tunnel_with_reconnect(
+    mut config: HomeTunnelAgentConfig,
+    mut shutdown: watch::Receiver<bool>,
+    runtime_status: HomeAgentRuntimeStatusWriter,
+    telemetry_configured: bool,
+    relay_connected: Arc<AtomicBool>,
+) -> Result<(), String> {
+    let initial_sequence = config.registration_sequence;
+    let mut registration_attempt = 0_u64;
+    let mut consecutive_failures = 0_u64;
+    loop {
+        if *shutdown.borrow() {
+            return Ok(());
+        }
+        config.registration_sequence = initial_sequence
+            .checked_add(registration_attempt)
+            .ok_or_else(|| "Home Tunnel registration sequence exhausted".to_string())?;
+        match HomeTunnelAgent::connect(config.clone()).await {
+            Ok(agent) => {
+                consecutive_failures = 0;
+                relay_connected.store(true, Ordering::Release);
+                runtime_status.write(telemetry_configured, false, None, None)?;
+                println!(
+                    "HOME_AGENT_READY relay={} local_zone_rpc={} registration_sequence={}",
+                    config.relay_id, config.local_zone_rpc_addr, config.registration_sequence
+                );
+                let result = agent.serve(shutdown.clone()).await;
+                relay_connected.store(false, Ordering::Release);
+                if *shutdown.borrow() {
+                    return Ok(());
+                }
+                let error = result
+                    .err()
+                    .unwrap_or_else(|| "Home Tunnel connection stopped unexpectedly".to_string());
+                runtime_status.write(telemetry_configured, false, None, Some(&error))?;
+                eprintln!("HOME_AGENT_RECONNECT tunnel_lost={error}");
+            }
+            Err(error) => {
+                relay_connected.store(false, Ordering::Release);
+                runtime_status.write(telemetry_configured, false, None, Some(&error))?;
+                eprintln!("HOME_AGENT_RECONNECT connect_failed={error}");
+            }
+        }
+        registration_attempt = registration_attempt.saturating_add(1);
+        consecutive_failures = consecutive_failures.saturating_add(1);
+        let delay = reconnect_delay(consecutive_failures);
+        tokio::select! {
+            changed = shutdown.changed() => {
+                if changed.is_err() || *shutdown.borrow() {
+                    return Ok(());
+                }
+            }
+            () = tokio::time::sleep(delay) => {}
+        }
+    }
+}
+
+fn reconnect_delay(attempt: u64) -> Duration {
+    let exponent = attempt.saturating_sub(1).min(5) as u32;
+    Duration::from_secs(1_u64 << exponent)
 }
 
 async fn emit_telemetry_once() -> Result<(), String> {
@@ -169,6 +236,8 @@ struct HomeAgentRuntimeStatusWriter {
     path: Option<PathBuf>,
     node_id: String,
     relay_id: String,
+    relay_connected: Arc<AtomicBool>,
+    write_lock: Arc<std::sync::Mutex<()>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -187,7 +256,7 @@ struct HomeAgentRuntimeStatus<'a> {
 }
 
 impl HomeAgentRuntimeStatusWriter {
-    fn from_env(node_id: &str, relay_id: &str) -> Self {
+    fn from_env(node_id: &str, relay_id: &str, relay_connected: Arc<AtomicBool>) -> Self {
         Self {
             path: env::var("MIR2_HOME_AGENT_STATUS_FILE")
                 .ok()
@@ -195,12 +264,13 @@ impl HomeAgentRuntimeStatusWriter {
                 .map(PathBuf::from),
             node_id: node_id.to_string(),
             relay_id: relay_id.to_string(),
+            relay_connected,
+            write_lock: Arc::new(std::sync::Mutex::new(())),
         }
     }
 
     fn write(
         &self,
-        relay_connected: bool,
         telemetry_configured: bool,
         telemetry_accepted: bool,
         telemetry: Option<(u64, u64)>,
@@ -209,6 +279,10 @@ impl HomeAgentRuntimeStatusWriter {
         let Some(path) = self.path.as_ref() else {
             return Ok(());
         };
+        let _write_guard = self
+            .write_lock
+            .lock()
+            .map_err(|_| "Home Agent runtime status write mutex poisoned".to_string())?;
         let parent = path
             .parent()
             .ok_or_else(|| "Home Agent status path has no parent directory".to_string())?;
@@ -222,7 +296,7 @@ impl HomeAgentRuntimeStatusWriter {
             version: env!("CARGO_PKG_VERSION"),
             node_id: &self.node_id,
             relay_id: &self.relay_id,
-            relay_connected,
+            relay_connected: self.relay_connected.load(Ordering::Acquire),
             telemetry_configured,
             telemetry_accepted,
             telemetry_sequence: telemetry.map(|(sequence, _)| sequence),
@@ -326,6 +400,7 @@ impl HomeTelemetryEmitter {
         let mut sequence = 1_u64;
         let mut window_started_at_ms = now_ms().saturating_sub(1);
         let mut session_milliseconds = 0_u64;
+        let mut consecutive_failures = 0_u64;
         loop {
             if *shutdown.borrow() {
                 return Ok(());
@@ -342,11 +417,22 @@ impl HomeTelemetryEmitter {
             {
                 Ok(emitted) => emitted,
                 Err(error) => {
-                    runtime_status.write(true, true, false, None, Some(&error))?;
-                    return Err(error);
+                    runtime_status.write(true, false, None, Some(&error))?;
+                    consecutive_failures = consecutive_failures.saturating_add(1);
+                    eprintln!("HOME_TELEMETRY_RETRY submit_failed={error}");
+                    tokio::select! {
+                        changed = shutdown.changed() => {
+                            if changed.is_err() || *shutdown.borrow() {
+                                return Ok(());
+                            }
+                        }
+                        () = tokio::time::sleep(reconnect_delay(consecutive_failures)) => {}
+                    }
+                    continue;
                 }
             };
-            runtime_status.write(true, true, true, Some((sequence, emitted.0)), None)?;
+            consecutive_failures = 0;
+            runtime_status.write(true, true, Some((sequence, emitted.0)), None)?;
             sequence = sequence.saturating_add(1);
             window_started_at_ms = emitted.0;
             session_milliseconds = emitted.1;
@@ -643,4 +729,17 @@ async fn resolve_socket_env(name: &str) -> Result<SocketAddr, String> {
         .next()
         .ok_or_else(|| format!("{name}={value} resolved to no addresses"))?;
     Ok(address)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn relay_reconnect_backoff_is_bounded() {
+        assert_eq!(reconnect_delay(1), Duration::from_secs(1));
+        assert_eq!(reconnect_delay(2), Duration::from_secs(2));
+        assert_eq!(reconnect_delay(6), Duration::from_secs(32));
+        assert_eq!(reconnect_delay(u64::MAX), Duration::from_secs(32));
+    }
 }
