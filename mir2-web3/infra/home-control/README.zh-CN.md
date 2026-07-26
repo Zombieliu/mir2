@@ -92,8 +92,23 @@ handle_path /home/telemetry/* {
 }
 ```
 
-Beta 暂时可以使用 `<公网 IP>.sslip.io`。正式环境应换成 Cloudflare 托管的
-固定域名，并重新签发匹配该域名的 Relay 服务端证书。
+当前香港 Beta 使用 Cloudflare 托管的固定域名
+`relay-hk.obelisk.build`，DNS 为灰云 `A` 记录并直指 Relay 公网 IP。这里不能
+开启普通橙云代理：Home Agent 使用公网 `UDP/9443` QUIC，而普通 Cloudflare
+HTTP 代理不会转发该 UDP 端口。
+
+公网 HTTPS 入口：
+
+```text
+https://relay-hk.obelisk.build/v1/challenges
+https://relay-hk.obelisk.build/v1/enrollments
+https://relay-hk.obelisk.build/v1/capacity/*
+https://relay-hk.obelisk.build/home/enrollment/*
+https://relay-hk.obelisk.build/home/telemetry/*
+```
+
+Relay 服务端证书必须包含 `DNS:relay-hk.obelisk.build` SAN。安装器同时保留
+旧 `sslip.io` SAN 作为迁移回退；新的 Enrollment Bundle 只下发正式域名。
 
 ## 接入官方 Gateway
 
@@ -157,6 +172,7 @@ cargo +1.89.0 run --release -p mir2-gateway --bin home_player_probe
 
 2026-07-27 在 UCloud 香港轻量主机和 macOS 家庭节点完成：
 
+- Cloudflare `relay-hk.obelisk.build` 灰云 DNS 和 Let's Encrypt HTTPS；
 - 容量认证：128 Sessions、8 Zones、p95 1ms、成功率 100%；
 - QUIC 双向 mTLS 隧道建立；
 - 签名遥测被 Collector 接受；
