@@ -10,11 +10,19 @@ mkdir -p "$(dirname "${output}")"
 docker_info="$(docker info --format '{{json .}}')"
 available_cpu="$(jq -r '.NCPU' <<<"${docker_info}")"
 available_memory_bytes="$(jq -r '.MemTotal' <<<"${docker_info}")"
-# Gate 20 is the bounded local-development acceptance tier. Container CPU and
-# memory limits are ceilings rather than reservations; the evidence binds the
-# actual Docker host and the latency/error SLO decides whether that host passes.
-required_cpu=10
-required_memory_bytes=8053063680
+# The exact single-host profile must be able to honour the concurrent service
+# budgets instead of relying on Docker host oversubscription:
+#
+#   8 active Zone Hosts       16 CPU / 16 GiB
+#   1 promotion standby        2 CPU /  2 GiB
+#   PostgreSQL primary+standby 4 CPU /  8 GiB
+#   load generator             2 CPU /  2 GiB
+#
+# A smaller machine may still run the documented development profile, but it
+# cannot issue production-shaped 1,000 CCU evidence because host scheduler
+# contention would be folded into the gameplay latency result.
+required_cpu=24
+required_memory_bytes=30064771072
 
 cpu_passed=false
 memory_passed=false
@@ -37,7 +45,7 @@ jq -n \
     schemaVersion: 1,
     generatedAtMs: $generatedAtMs,
     profileId: $profileId,
-    tier: "local-1000ccu-15m",
+    tier: "single-host-1000ccu-15m",
     source: "docker-info",
     host: {
       architecture: $architecture,
@@ -51,14 +59,14 @@ jq -n \
       memoryBytes: $requiredMemoryBytes
     },
     assertions: {
-      cpuMeetsLocalAcceptanceFloor: $cpuPassed,
-      memoryMeetsLocalAcceptanceFloor: $memoryPassed
+      cpuMeetsNonOversubscribedServiceBudget: $cpuPassed,
+      memoryMeetsNonOversubscribedServiceBudget: $memoryPassed
     },
     success: ($cpuPassed and $memoryPassed)
   }' >"${output}"
 
 if [[ "${cpu_passed}" != true || "${memory_passed}" != true ]]; then
-  echo "Gate 20 local preflight failed: host has ${available_cpu} CPU / ${available_memory_bytes} bytes, requires ${required_cpu} CPU / ${required_memory_bytes} bytes" >&2
+  echo "Gate 20 exact-profile preflight failed: host has ${available_cpu} CPU / ${available_memory_bytes} bytes, requires a non-oversubscribed ${required_cpu} CPU / ${required_memory_bytes} bytes; use the documented development profile on smaller hosts" >&2
   exit 1
 fi
 

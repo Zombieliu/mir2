@@ -43,12 +43,12 @@ flowchart LR
 
 ## 一键运行
 
-需要 Docker、Rust `1.89.0` 和 `jq`。Gate 20 是本机开发验收层，入口先执行
-`preflight-reference.sh`，要求 Docker 实际暴露至少 `10 CPU / 7.5GiB`，并把
-真实主机配置绑定到证据。容器资源值是上限而不是内存预留：负载器为
-`2 CPU / 2GiB`，每个 Zone Host 为 `2 CPU / 2GiB`，PostgreSQL 主备各为
-`2 CPU / 4GiB`。是否通过最终由 1,000 CCU 的 p95、错误率和经济一致性决定，
-不能只凭机器规格宣称容量。
+需要 Docker、Rust `1.89.0` 和 `jq`。正式入口先执行
+`preflight-reference.sh`，要求单机 Docker 实际暴露至少 `24 CPU / 28GiB`，
+并把真实主机配置绑定到证据。这不是容量宣称，而是防止把容器预算超卖给宿主机：
+负载器为 `2 CPU / 2GiB`，八个 active 与一个 promotion standby Zone Host
+各为 `2 CPU / 2GiB`，PostgreSQL 主备各为 `2 CPU / 4GiB`。机器满足资源前置
+条件后，仍必须由 1,000 CCU 的 p95、错误率和经济一致性决定是否通过。
 
 先运行正式 15 分钟负载：
 
@@ -112,16 +112,20 @@ docker compose -f infra/gate20/docker-compose.yml --profile acceptance run --rm 
 `2 CPU / 2GiB`。此外，非变更型的实时出站轮询已从每 Zone 串行 mutation gate
 移出，并使用独立的共享连接 lane，避免 1,000 个实时会话的轮询饿死玩法命令；
 认证、frame bound、Session 隔离和序列恢复约束保持不变。SLO、行为频率和业务
-路径没有放宽。`10 CPU / 7.5GiB` 只是允许
-采集本机证据的最低配置，不代表必然通过。4 CPU / 8GiB 的 Early 配置仍只承诺
-约 100 CCU；只有新的完整 15 分钟证据通过后，才能更新 Gate 20 认证结论。
+路径没有放宽。`10 CPU / 7.5GiB` 只能采集明确标记为开发 profile 的诊断，
+不能再进入正式验收。4 CPU / 8GiB 的 Early 配置仍只承诺约 100 CCU；只有在
+非超卖 runner 上取得新的完整 15 分钟通过证据，才能更新 Gate 20 认证结论。
 
 在同一台 `10 CPU / 7.75GiB` Docker 主机上又执行了三次独立
 `1,000 CCU / 60 秒`开发探针。三次均为 `0` 命令错误、promotion 成功和经济
 零重复，但 p95 分别为 `275.12 / 274.32 / 277.81ms`，覆盖率为
 `60.58% / 61.10% / 61.10%`；活动窗口内八个 Zone Host 合计已接近占满主机
-CPU。该结果把当前阻塞定位为认证 runner 容量，而不是负载统计锁。短测不能替代
-正式证据，但也明确禁止在这台机器上继续反复跑 15 分钟并把失败结果包装成通过。
+CPU。随后一次独立 `1,000 CCU / 15 秒` 调度诊断在活动窗口观察到八个 active
+Zone Host 合计约 `930% CPU`；加上负载器与 PostgreSQL 后已耗尽宿主机的十核，
+而各 Zone Host 的 `2 CPU` cgroup 只出现极少量限流。这把当前阻塞定位为
+**单机 CPU 超卖**，不是某个 Zone 容器撞到自身上限。短测不能替代正式证据，
+正式入口现在要求 `24 CPU / 28GiB` 的非超卖单机；较小机器仍可按下文命令运行
+开发 profile，但不能写入正式证据路径或宣称 Gate 20 通过。
 
 ## 人工观察
 
@@ -138,6 +142,6 @@ docker stats --no-stream
 3. p95 未因背压队列超时或 promotion 突增到 `200 ms` 以上；
 4. `economyDuplicateCount` 与 `economyRuntimeLedgerMismatchCount` 都为 `0`。
 
-Gate 20 是本机开发验收层；证据绑定实际 Docker 主机资源，不能线性外推
+Gate 20 是单机 1,000 CCU 验收层；证据绑定实际 Docker 主机资源，不能线性外推
 Commercial 容量。Gate 21 的 `3,000` CCU、完整故障矩阵和滚动升级仍是
 Regional 正式认证边界，但当前窗口同样为 15 分钟；长期耐久另行认证。
