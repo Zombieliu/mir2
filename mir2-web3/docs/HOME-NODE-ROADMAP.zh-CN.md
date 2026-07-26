@@ -30,6 +30,10 @@ Gate 22–24 已具备可重复的工程验收；Gate 25 已完成遥测、奖�
 - 真实 Home Agent → Zone `/healthz` → 签名 HTTPS Collector 的端到端遥测；
 - 家庭节点 work units 与 quorum `VerifiedWorkReceipt` 的零信任奖励对账；
 - 三运营商真实家庭网络双签证据格式和 fail-closed 生产 cohort 验证器。
+- Tauri 2 桌面控制层、品牌化 macOS/Windows/Linux 构建入口；
+- Supervisor 管理令牌独立进入系统密钥库，桌面 WebView 不接触令牌；
+- 绑定 Node/build/有效期的签名 Beta 计划和无任意 Shell 的固定动作状态机；
+- 节点签名与运营方离线复签分离，避免两把私钥出现在同一执行环境。
 
 ## 尚未实现
 
@@ -38,6 +42,7 @@ Gate 22–24 已具备可重复的工程验收；Gate 25 已完成遥测、奖�
 - 家庭宽带丢包、断网、换 IP、路由器重启的持续故障矩阵；
 - 硬件远程证明和独立第三方恶意节点安全审计；
 - 在真实不同运营商家庭网络上的容量与奖励 Beta。
+- 桌面安装包内置并安装 Gate 23 后台服务，以及正式远程 enrollment API。
 
 ## 整体架构
 

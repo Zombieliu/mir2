@@ -571,7 +571,7 @@ pub enum HomeBetaFaultKind {
 }
 
 impl HomeBetaFaultKind {
-    fn required() -> BTreeSet<Self> {
+    pub fn required() -> BTreeSet<Self> {
         BTreeSet::from([
             Self::CgnatBaseline,
             Self::DynamicIpChange,
@@ -626,6 +626,61 @@ pub struct HomeNetworkBetaRunPayload {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct NodeSignedHomeNetworkBetaRun {
+    pub payload: HomeNetworkBetaRunPayload,
+    pub node_signature_algorithm: String,
+    pub node_signature: String,
+}
+
+impl NodeSignedHomeNetworkBetaRun {
+    pub fn sign(
+        payload: HomeNetworkBetaRunPayload,
+        node: &NodeSigningIdentity,
+    ) -> Result<Self, String> {
+        validate_beta_payload(&payload, false)?;
+        if payload.node_id != node.node_id() || payload.node_public_key != node.public_key() {
+            return Err("Beta run payload does not match node signing identity".to_string());
+        }
+        let node_signature = node.sign(&domain_json(BETA_NODE_DOMAIN, &payload)?);
+        Ok(Self {
+            payload,
+            node_signature_algorithm: HOME_SIGNATURE_ALGORITHM.to_string(),
+            node_signature,
+        })
+    }
+
+    pub fn verify(&self, require_physical: bool) -> Result<(), String> {
+        validate_beta_payload(&self.payload, require_physical)?;
+        if self.node_signature_algorithm != HOME_SIGNATURE_ALGORITHM {
+            return Err("unsupported Home Beta node signature algorithm".to_string());
+        }
+        verify_ed25519_signature(
+            &self.payload.node_public_key,
+            &domain_json(BETA_NODE_DOMAIN, &self.payload)?,
+            &self.node_signature,
+        )
+    }
+
+    pub fn operator_countersign(
+        self,
+        operator: &NodeSigningIdentity,
+    ) -> Result<SignedHomeNetworkBetaRun, String> {
+        self.verify(false)?;
+        let mut run = SignedHomeNetworkBetaRun {
+            payload: self.payload,
+            node_signature_algorithm: self.node_signature_algorithm,
+            node_signature: self.node_signature,
+            operator_public_key: operator.public_key().to_string(),
+            operator_signature_algorithm: HOME_SIGNATURE_ALGORITHM.to_string(),
+            operator_signature: String::new(),
+        };
+        run.operator_signature = operator.sign(&run.operator_signing_bytes()?);
+        Ok(run)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignedHomeNetworkBetaRun {
     pub payload: HomeNetworkBetaRunPayload,
     pub node_signature_algorithm: String,
@@ -641,21 +696,7 @@ impl SignedHomeNetworkBetaRun {
         node: &NodeSigningIdentity,
         operator: &NodeSigningIdentity,
     ) -> Result<Self, String> {
-        validate_beta_payload(&payload, false)?;
-        if payload.node_id != node.node_id() || payload.node_public_key != node.public_key() {
-            return Err("Beta run payload does not match node signing identity".to_string());
-        }
-        let node_signature = node.sign(&domain_json(BETA_NODE_DOMAIN, &payload)?);
-        let mut run = Self {
-            payload,
-            node_signature_algorithm: HOME_SIGNATURE_ALGORITHM.to_string(),
-            node_signature,
-            operator_public_key: operator.public_key().to_string(),
-            operator_signature_algorithm: HOME_SIGNATURE_ALGORITHM.to_string(),
-            operator_signature: String::new(),
-        };
-        run.operator_signature = operator.sign(&run.operator_signing_bytes()?);
-        Ok(run)
+        NodeSignedHomeNetworkBetaRun::sign(payload, node)?.operator_countersign(operator)
     }
 
     pub fn verify(
@@ -1202,5 +1243,23 @@ mod tests {
         let mut slow = beta_payload(&node, 1, HomeBetaEnvironment::PhysicalHomeNetwork);
         slow.maximum_failover_rto_ms = 5_000;
         assert!(SignedHomeNetworkBetaRun::sign(slow, &node, &operator).is_err());
+    }
+
+    #[test]
+    fn beta_node_and_operator_signatures_are_created_in_separate_steps() {
+        let operator = NodeSigningIdentity::from_seed([51; 32]);
+        let node = NodeSigningIdentity::from_seed([52; 32]);
+        let node_signed = NodeSignedHomeNetworkBetaRun::sign(
+            beta_payload(&node, 1, HomeBetaEnvironment::PhysicalHomeNetwork),
+            &node,
+        )
+        .unwrap();
+        node_signed.verify(true).unwrap();
+
+        let signed = node_signed.operator_countersign(&operator).unwrap();
+        signed.verify(operator.public_key(), true).unwrap();
+
+        let wrong_operator = NodeSigningIdentity::from_seed([53; 32]);
+        assert!(signed.verify(wrong_operator.public_key(), true).is_err());
     }
 }
