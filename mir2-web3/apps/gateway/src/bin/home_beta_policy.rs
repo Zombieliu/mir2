@@ -5,8 +5,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::{
     reconcile_home_node_reward, verify_home_network_beta_cohort, GameRewardPolicy,
-    HomeNetworkBetaRunPayload, NodeSigningIdentity, SignedHomeNetworkBetaRun,
-    SignedHomeNodeTelemetry, VerifiedWorkReceipt,
+    HomeNetworkBetaRunPayload, NodeSignedHomeNetworkBetaRun, NodeSigningIdentity,
+    SignedHomeNetworkBetaRun, SignedHomeNodeTelemetry, VerifiedWorkReceipt,
 };
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -74,14 +74,24 @@ fn run() -> Result<(), String> {
             );
             Ok(())
         }
-        Some("sign-run") if arguments.len() == 3 => {
+        Some("node-sign-run") if arguments.len() == 3 => {
             let payload: HomeNetworkBetaRunPayload = read_json(&arguments[1])?;
             let node = identity_from_file_env("MIR2_HOME_NODE_SIGNING_KEY_FILE")?;
-            let operator = identity_from_file_env("MIR2_HOME_BETA_OPERATOR_SIGNING_KEY_FILE")?;
-            let run = SignedHomeNetworkBetaRun::sign(payload, &node, &operator)?;
+            let run = NodeSignedHomeNetworkBetaRun::sign(payload, &node)?;
             write_json(&arguments[2], &run)?;
             println!(
-                "HOME_BETA_RUN_SIGNED run={} node={} output={}",
+                "HOME_BETA_RUN_NODE_SIGNED run={} node={} output={}",
+                run.payload.run_id, run.payload.node_id, arguments[2]
+            );
+            Ok(())
+        }
+        Some("operator-countersign-run") if arguments.len() == 3 => {
+            let node_signed: NodeSignedHomeNetworkBetaRun = read_json(&arguments[1])?;
+            let operator = identity_from_file_env("MIR2_HOME_BETA_OPERATOR_SIGNING_KEY_FILE")?;
+            let run = node_signed.operator_countersign(&operator)?;
+            write_json(&arguments[2], &run)?;
+            println!(
+                "HOME_BETA_RUN_OPERATOR_COUNTERSIGNED run={} node={} output={}",
                 run.payload.run_id, run.payload.node_id, arguments[2]
             );
             Ok(())
@@ -120,7 +130,7 @@ fn run() -> Result<(), String> {
             Ok(())
         }
         _ => Err(
-            "usage:\n  home_beta_policy sign-telemetry <payload.json> <signed.json>\n  home_beta_policy verify-telemetry <signed.json> <maximum-age-ms>\n  home_beta_policy reconcile <signed-telemetry.json> <receipts.json> <policy.json> <output.json>\n  home_beta_policy sign-run <payload.json> <signed.json>\n  home_beta_policy verify-run <signed.json> <production|non-production> <trusted-operator-public-key>\n  home_beta_policy verify-cohort <trusted-operator-public-key> <output.json> <run1.json> <run2.json> <run3.json> [runN.json]"
+            "usage:\n  home_beta_policy sign-telemetry <payload.json> <signed.json>\n  home_beta_policy verify-telemetry <signed.json> <maximum-age-ms>\n  home_beta_policy reconcile <signed-telemetry.json> <receipts.json> <policy.json> <output.json>\n  home_beta_policy node-sign-run <payload.json> <node-signed.json>\n  home_beta_policy operator-countersign-run <node-signed.json> <signed.json>\n  home_beta_policy verify-run <signed.json> <production|non-production> <trusted-operator-public-key>\n  home_beta_policy verify-cohort <trusted-operator-public-key> <output.json> <run1.json> <run2.json> <run3.json> [runN.json]"
                 .to_string(),
         ),
     }

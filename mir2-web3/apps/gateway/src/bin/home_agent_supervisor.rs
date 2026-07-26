@@ -13,9 +13,9 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::StreamExt;
 use mir2_gateway::{
-    HomeAgentKeyring, HomeAgentReleaseManifest, HomeAgentResourceController,
-    HomeAgentResourceDecision, HomeAgentResourcePolicy, HomeAgentResourceSample,
-    HomeAgentUpdateStore, HomeAgentWorkMode, ZoneHostTelemetrySnapshot,
+    HomeAgentKeyring, HomeAgentManagementKeyring, HomeAgentReleaseManifest,
+    HomeAgentResourceController, HomeAgentResourceDecision, HomeAgentResourcePolicy,
+    HomeAgentResourceSample, HomeAgentUpdateStore, HomeAgentWorkMode, ZoneHostTelemetrySnapshot,
 };
 use semver::Version;
 use serde::Serialize;
@@ -107,6 +107,30 @@ fn keyring() -> Result<HomeAgentKeyring, String> {
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| DEFAULT_KEYRING_ACCOUNT.to_string()),
     )
+}
+
+fn keyring_account() -> String {
+    env::var("MIR2_HOME_AGENT_KEYRING_ACCOUNT")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| DEFAULT_KEYRING_ACCOUNT.to_string())
+}
+
+fn management_token() -> Result<String, String> {
+    if let Some(token) = env::var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+    {
+        if token.as_bytes().len() < 32 {
+            return Err(
+                "MIR2_ZONE_HOST_MANAGEMENT_TOKEN must contain at least 32 bytes".to_string(),
+            );
+        }
+        return Ok(token);
+    }
+    HomeAgentManagementKeyring::new(keyring_account())?
+        .load_or_create_token()
+        .map(|(token, _)| token)
 }
 
 fn key_init() -> Result<(), String> {
@@ -390,10 +414,7 @@ async fn serve() -> Result<SupervisorExit, String> {
     ) {
         return Err("Home Agent Zone operator URL must target loopback".to_string());
     }
-    let management_token = required_env("MIR2_ZONE_HOST_MANAGEMENT_TOKEN")?;
-    if management_token.as_bytes().len() < 32 {
-        return Err("MIR2_ZONE_HOST_MANAGEMENT_TOKEN must contain at least 32 bytes".to_string());
-    }
+    let management_token = management_token()?;
     let policy = policy_from_env()?;
     let managed_processes = boolean_env("MIR2_HOME_MANAGE_CHILDREN", false)?;
     let status = Arc::new(RwLock::new(SupervisorStatus {
@@ -541,7 +562,7 @@ async fn spawn_managed_processes(state: &AppState) -> Result<Option<ManagedHomeP
     ensure_executable_file(&zone_binary)?;
     ensure_executable_file(&agent_binary)?;
 
-    let mut zone_host = managed_command(&zone_binary)
+    let mut zone_host = managed_command(&zone_binary, &state.management_token)
         .spawn()
         .map_err(|error| format!("start managed Zone Host {}: {error}", zone_binary.display()))?;
     let startup_deadline = Instant::now() + Duration::from_secs(30);
@@ -565,7 +586,7 @@ async fn spawn_managed_processes(state: &AppState) -> Result<Option<ManagedHomeP
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
 
-    let home_agent = match managed_command(&agent_binary).spawn() {
+    let home_agent = match managed_command(&agent_binary, &state.management_token).spawn() {
         Ok(child) => child,
         Err(error) => {
             let _ = zone_host.start_kill();
@@ -582,9 +603,10 @@ async fn spawn_managed_processes(state: &AppState) -> Result<Option<ManagedHomeP
     }))
 }
 
-fn managed_command(binary: &Path) -> Command {
+fn managed_command(binary: &Path, management_token: &str) -> Command {
     let mut command = Command::new(binary);
     command
+        .env("MIR2_ZONE_HOST_MANAGEMENT_TOKEN", management_token)
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())

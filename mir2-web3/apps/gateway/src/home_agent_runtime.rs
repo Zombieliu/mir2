@@ -16,6 +16,7 @@ use crate::{verify_ed25519_signature, NodeSigningIdentity};
 pub const HOME_AGENT_RELEASE_SCHEMA: &str = "obelisk.home-agent-release.v1";
 pub const HOME_AGENT_RELEASE_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
 pub const HOME_AGENT_KEYRING_SERVICE: &str = "com.obelisk-labs.dubhe-home-agent";
+pub const HOME_AGENT_MANAGEMENT_KEYRING_SUFFIX: &str = "management-token";
 pub const HOME_AGENT_BUNDLE_MAX_UNCOMPRESSED_BYTES: u64 = 512 * 1024 * 1024;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -430,6 +431,65 @@ impl HomeAgentKeyring {
         keyring::Entry::new(HOME_AGENT_KEYRING_SERVICE, &self.account)
             .map_err(|error| format!("open operating-system keyring: {error}"))
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct HomeAgentManagementKeyring {
+    secret: HomeAgentKeyring,
+}
+
+impl HomeAgentManagementKeyring {
+    pub fn new(account: impl Into<String>) -> Result<Self, String> {
+        let account = account.into();
+        if account.trim().is_empty() || account.len() > 220 {
+            return Err("Home Agent management keyring account is invalid".to_string());
+        }
+        Ok(Self {
+            secret: HomeAgentKeyring::new(format!(
+                "{account}:{HOME_AGENT_MANAGEMENT_KEYRING_SUFFIX}"
+            ))?,
+        })
+    }
+
+    pub fn load_token(&self) -> Result<String, String> {
+        let secret = self.secret.load_secret()?;
+        validate_management_secret(&secret)?;
+        Ok(URL_SAFE_NO_PAD.encode(secret))
+    }
+
+    pub fn load_or_create_token(&self) -> Result<(String, bool), String> {
+        let entry = self.secret.entry()?;
+        match entry.get_secret() {
+            Ok(secret) => {
+                validate_management_secret(&secret)?;
+                Ok((URL_SAFE_NO_PAD.encode(secret), false))
+            }
+            Err(keyring::Error::NoEntry) => {
+                let mut secret = [0_u8; 32];
+                OsRng.fill_bytes(&mut secret);
+                entry
+                    .set_secret(&secret)
+                    .map_err(|error| format!("store Home Agent management token: {error}"))?;
+                Ok((URL_SAFE_NO_PAD.encode(secret), true))
+            }
+            Err(error) => Err(format!(
+                "read Home Agent management token from operating-system keyring: {error}"
+            )),
+        }
+    }
+
+    pub fn delete_token(&self) -> Result<(), String> {
+        self.secret.delete_secret()
+    }
+}
+
+fn validate_management_secret(secret: &[u8]) -> Result<(), String> {
+    if secret.len() != 32 {
+        return Err(
+            "Home Agent management keyring token must contain exactly 32 bytes".to_string(),
+        );
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
