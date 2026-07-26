@@ -33,6 +33,7 @@ const DEFAULT_MAX_CONTROL_BYTES: usize = 1024 * 1024;
 const DEFAULT_CHALLENGE_TTL: Duration = Duration::from_secs(15);
 const DEFAULT_STREAM_TTL: Duration = Duration::from_secs(10);
 const DEFAULT_IO_TIMEOUT: Duration = Duration::from_secs(5);
+const CLOCK_SKEW_ALLOWANCE: Duration = Duration::from_secs(5);
 const DEFAULT_MAX_AGENT_CONNECTIONS: usize = 4_096;
 const DEFAULT_MAX_GATEWAY_CONNECTIONS: usize = 16_384;
 const DEFAULT_MAX_STREAMS_PER_NODE: usize = 512;
@@ -664,8 +665,9 @@ async fn handle_agent_connection(
         .open_bi()
         .await
         .map_err(|error| format!("open Home Tunnel registration stream: {error}"))?;
-    let issued_at_ms = now_ms();
-    let expires_at_ms = issued_at_ms
+    let relay_now_ms = now_ms();
+    let issued_at_ms = clock_skew_tolerant_issued_at_ms(relay_now_ms);
+    let expires_at_ms = relay_now_ms
         .saturating_add(u64::try_from(shared.config.challenge_ttl.as_millis()).unwrap_or(u64::MAX));
     let nonce = random_nonce();
     let challenge = HomeTunnelChallenge::issue(
@@ -808,7 +810,7 @@ async fn handle_gateway_connection(
             hint.session_id,
             shared.stream_sequence.fetch_add(1, Ordering::Relaxed),
             random_nonce(),
-            now,
+            clock_skew_tolerant_issued_at_ms(now),
             expires_at_ms,
             &shared.config.relay_identity,
         )?;
@@ -1025,6 +1027,21 @@ fn now_ms() -> u64 {
         .as_millis() as u64
 }
 
+fn clock_skew_tolerant_issued_at_ms(now_ms: u64) -> u64 {
+    now_ms.saturating_sub(u64::try_from(CLOCK_SKEW_ALLOWANCE.as_millis()).unwrap_or(u64::MAX))
+}
+
 fn hex_digest(bytes: &[u8]) -> String {
     bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn relay_issued_timestamps_allow_small_client_clock_skew() {
+        assert_eq!(clock_skew_tolerant_issued_at_ms(10_000), 5_000);
+        assert_eq!(clock_skew_tolerant_issued_at_ms(4_000), 0);
+    }
 }

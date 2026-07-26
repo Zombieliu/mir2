@@ -35,6 +35,7 @@ const DEFAULT_CHALLENGE_TTL_MS: u64 = 60_000;
 const DEFAULT_BUNDLE_TTL_MS: u64 = 24 * 60 * 60 * 1_000;
 const DEFAULT_CAPACITY_CERTIFICATE_TTL_MS: u64 = 24 * 60 * 60 * 1_000;
 const DEFAULT_RELAY_CREDENTIAL_TTL_MS: u64 = 24 * 60 * 60 * 1_000;
+const CLOCK_SKEW_ALLOWANCE_MS: u64 = 5_000;
 const MAX_CSR_DER_BYTES: usize = 64 * 1024;
 
 #[derive(Debug, Clone)]
@@ -257,13 +258,14 @@ async fn issue_challenge(
     }
     ensure_allowed(&state.policy, &request.node_id)?;
     let now_ms = now_ms();
+    let issued_at_ms = now_ms.saturating_sub(CLOCK_SKEW_ALLOWANCE_MS);
     let challenge_id = random_token(18);
     let challenge = SignedHomeEnrollmentChallenge::issue(
         challenge_id.clone(),
         random_token(32),
         request.node_id,
         request.public_key,
-        now_ms,
+        issued_at_ms,
         state.policy.challenge_ttl_ms,
         &state.issuer,
     )
@@ -285,6 +287,7 @@ async fn complete_enrollment(
     Json(request): Json<HomeEnrollmentRequest>,
 ) -> Result<Json<EnrollmentResponse>, ApiError> {
     let now_ms = now_ms();
+    let issued_at_ms = now_ms.saturating_sub(CLOCK_SKEW_ALLOWANCE_MS);
     request
         .verify(state.issuer.public_key(), now_ms)
         .map_err(ApiError::bad_request)?;
@@ -319,8 +322,8 @@ async fn complete_enrollment(
         node_id: request.challenge.payload.node_id,
         public_key: request.challenge.payload.public_key,
         key_generation,
-        issued_at_ms: now_ms,
-        expires_at_ms: now_ms.saturating_add(state.policy.bundle_ttl_ms),
+        issued_at_ms,
+        expires_at_ms: issued_at_ms.saturating_add(state.policy.bundle_ttl_ms),
         relay: state.policy.relay.clone(),
         control_issuer_public_key: state.policy.control_issuer_public_key.clone(),
         telemetry_url: state.policy.telemetry_url.clone(),
@@ -345,6 +348,7 @@ async fn issue_capacity_challenge(
     Json(enrollment): Json<SignedHomeEnrollmentBundle>,
 ) -> Result<Json<CapacityChallenge>, ApiError> {
     let now_ms = now_ms();
+    let issued_at_ms = now_ms.saturating_sub(CLOCK_SKEW_ALLOWANCE_MS);
     enrollment
         .verify(
             state.issuer.public_key(),
@@ -396,8 +400,8 @@ async fn issue_capacity_challenge(
         challenge_id: challenge_id.clone(),
         node_id: enrollment.payload.node_id.clone(),
         nonce: random_token(32),
-        issued_at_ms: now_ms,
-        expires_at_ms: now_ms.saturating_add(state.policy.challenge_ttl_ms),
+        issued_at_ms,
+        expires_at_ms: issued_at_ms.saturating_add(state.policy.challenge_ttl_ms),
         workload,
     };
     challenge.validate(now_ms).map_err(ApiError::internal)?;
@@ -419,6 +423,7 @@ async fn complete_capacity_certification(
     Json(request): Json<HomeCapacityCertificationRequest>,
 ) -> Result<Json<CapacityCertificationResponse>, ApiError> {
     let now_ms = now_ms();
+    let issued_at_ms = now_ms.saturating_sub(CLOCK_SKEW_ALLOWANCE_MS);
     request
         .enrollment
         .verify(
@@ -450,7 +455,7 @@ async fn complete_capacity_certification(
         relay_tls_authority,
         &csr_der,
         &request.enrollment.payload.node_id,
-        now_ms,
+        issued_at_ms,
         state.policy.relay_credential_ttl_ms,
     )?;
 
@@ -478,7 +483,7 @@ async fn complete_capacity_certification(
         &request.response,
         registration,
         &state.issuer,
-        now_ms,
+        issued_at_ms,
         state.policy.capacity_certificate_ttl_ms,
         registration.finality.checkpoint,
     )
@@ -503,14 +508,14 @@ async fn complete_capacity_certification(
         1,
         certificate.max_sessions_per_zone,
         registration.finality.checkpoint,
-        now_ms,
+        issued_at_ms,
         bundle_expires_at_ms,
         &state.control_issuer,
     )
     .map_err(ApiError::internal)?;
     publish_placement(&state, &placement).await?;
     let mut payload = request.enrollment.payload;
-    payload.issued_at_ms = now_ms;
+    payload.issued_at_ms = issued_at_ms;
     payload.expires_at_ms = bundle_expires_at_ms;
     payload.capacity_issuer_public_key = state.issuer.public_key().to_string();
     payload.capacity_certificate = Some(certificate);
