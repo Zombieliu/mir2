@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.obelisklabs.dubhenode",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "npm run prepare:sidecars && npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run prepare:sidecars && npm run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -28,6 +28,12 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "externalBin": [
+      "binaries/home_agent",
+      "binaries/home_agent_launcher",
+      "binaries/home_agent_supervisor",
+      "binaries/zone_host"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

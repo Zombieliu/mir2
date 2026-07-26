@@ -18,6 +18,13 @@ type SupervisorStatus = {
   publicKey: string;
   keyStore: string;
   managedProcesses: boolean;
+  agentManaged: boolean;
+  relayConnected: boolean;
+  telemetryConfigured: boolean;
+  telemetryAccepted: boolean;
+  telemetrySequence?: number;
+  lastTelemetryAtMs?: number;
+  telemetryError?: string;
 };
 
 type DesktopIdentity = {
@@ -32,6 +39,20 @@ type DesktopBootstrap = {
   managementTokenCreated: boolean;
   supervisorReachable: boolean;
   status?: SupervisorStatus;
+};
+
+type DesktopEnrollmentStatus = {
+  configured: boolean;
+  enrolled: boolean;
+  capacityReady: boolean;
+  relayReady: boolean;
+  enrollmentId?: string;
+  expiresAtMs?: number;
+  relayId?: string;
+  telemetryUrl?: string;
+  maxSessions?: number;
+  maxZones?: number;
+  error?: string;
 };
 
 type Tab = "overview" | "network" | "beta" | "settings";
@@ -69,7 +90,9 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [bootstrap, setBootstrap] = useState<DesktopBootstrap>();
   const [status, setStatus] = useState<SupervisorStatus>();
+  const [enrollment, setEnrollment] = useState<DesktopEnrollmentStatus>();
   const [busy, setBusy] = useState(false);
+  const [enrollmentBusy, setEnrollmentBusy] = useState(false);
   const [error, setError] = useState<string>();
 
   const initialize = useCallback(async () => {
@@ -78,6 +101,8 @@ function App() {
       setBootstrap(result);
       setStatus(result.status);
       setError(result.supervisorReachable ? undefined : "后台服务尚未启动，节点保持安全暂停状态。");
+      const enrollmentStatus = await invoke<DesktopEnrollmentStatus>("enrollment_status");
+      setEnrollment(enrollmentStatus);
     } catch (cause) {
       setError(String(cause));
     }
@@ -90,7 +115,7 @@ function App() {
       setError(undefined);
     } catch {
       setStatus(undefined);
-      setError("后台服务尚未启动，节点保持安全暂停状态。");
+      setError((current) => current ?? "后台服务尚未启动，节点保持安全暂停状态。");
     }
   }, []);
 
@@ -103,18 +128,27 @@ function App() {
     return () => window.clearInterval(timer);
   }, [refresh]);
 
-  const serving = status?.mode === "serving" && status.acceptNewSessions;
-  const connected = Boolean(status?.zoneReachable);
+  const serving =
+    status?.mode === "serving" &&
+    status.acceptNewSessions &&
+    status.relayConnected &&
+    status.telemetryAccepted &&
+    enrollment?.capacityReady;
+  const connected = Boolean(status?.relayConnected && status?.telemetryAccepted);
   const nodeId = status?.nodeId ?? bootstrap?.identity.nodeId;
   const readiness = useMemo(
     () => [
       { label: "节点身份已保存在系统密钥库", ready: Boolean(bootstrap?.identity.nodeId) },
       { label: "本地 Zone Host 健康", ready: Boolean(status?.zoneReachable) },
-      { label: "Agent 与 Supervisor 由安装器托管", ready: Boolean(status?.managedProcesses) },
-      { label: "生产 enrollment 与容量证书", ready: false },
+      { label: "Zone Host 与 Supervisor 由安装器托管", ready: Boolean(status?.managedProcesses) },
+      { label: "官方签名 enrollment", ready: Boolean(enrollment?.enrolled) },
+      { label: "生产容量证书", ready: Boolean(enrollment?.capacityReady) },
+      { label: "Home Agent Relay mTLS 凭证", ready: Boolean(enrollment?.relayReady) },
+      { label: "官方 Relay 隧道已连接", ready: Boolean(status?.relayConnected) },
+      { label: "Collector 已接受签名遥测", ready: Boolean(status?.telemetryAccepted) },
       { label: "签名 Beta 测试计划", ready: false },
     ],
-    [bootstrap, status],
+    [bootstrap, enrollment, status],
   );
 
   async function toggleServing() {
@@ -130,6 +164,35 @@ function App() {
       setError(String(cause));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function requestEnrollment() {
+    if (enrollmentBusy || !enrollment?.configured) return;
+    setEnrollmentBusy(true);
+    try {
+      const result = await invoke<DesktopEnrollmentStatus>("enroll_node");
+      setEnrollment(result);
+      setError(undefined);
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setEnrollmentBusy(false);
+    }
+  }
+
+  async function requestCertification() {
+    if (enrollmentBusy || !enrollment?.enrolled || enrollment.relayReady) return;
+    setEnrollmentBusy(true);
+    try {
+      const result = await invoke<DesktopEnrollmentStatus>("certify_node");
+      setEnrollment(result);
+      await refresh();
+      setError(undefined);
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setEnrollmentBusy(false);
     }
   }
 
@@ -209,12 +272,34 @@ function App() {
                 </p>
                 <button
                   className={serving ? "power-button stop" : "power-button"}
-                  disabled={!status || busy}
+                  disabled={
+                    !status ||
+                    busy ||
+                    (!serving &&
+                      (!status.zoneReachable ||
+                        !status.relayConnected ||
+                        !status.telemetryAccepted ||
+                        !enrollment?.capacityReady))
+                  }
                   onClick={() => void toggleServing()}
                   type="button"
                 >
                   <span className="power-icon">⌁</span>
-                  {busy ? "正在切换…" : serving ? "暂停贡献" : "开始贡献"}
+                  {busy
+                    ? "正在切换…"
+                    : serving
+                      ? "暂停贡献"
+                      : !enrollment?.enrolled
+                        ? "等待 enrollment"
+                        : !enrollment.capacityReady
+                          ? "等待容量认证"
+                          : !status?.relayConnected
+                            ? "等待 Relay 连接"
+                            : !status?.telemetryAccepted
+                              ? "等待遥测回执"
+                              : status?.zoneReachable
+                                ? "开始贡献"
+                                : "等待 Zone 启动"}
                 </button>
               </div>
             </section>
@@ -236,9 +321,16 @@ function App() {
                 <em>{relativeTime(status?.lastObservedAtMs)}</em>
               </article>
               <article>
-                <span className="metric-icon amber">RWD</span>
-                <div><small>今日预计奖励</small><strong>—</strong></div>
-                <em>等待权威回执</em>
+                <span className="metric-icon amber">TEL</span>
+                <div>
+                  <small>生产遥测</small>
+                  <strong>{status?.telemetryAccepted ? "已接收" : "等待"}</strong>
+                </div>
+                <em>
+                  {status?.telemetryAccepted
+                    ? `#${status.telemetrySequence ?? 0} · ${relativeTime(status.lastTelemetryAtMs)}`
+                    : status?.telemetryError ?? "等待 Collector 回执"}
+                </em>
               </article>
             </section>
 
@@ -252,20 +344,64 @@ function App() {
                 <dl>
                   <div><dt>客户端版本</dt><dd>v{status?.version ?? "0.1.0"}</dd></div>
                   <div><dt>工作模式</dt><dd>{status?.mode ?? "paused"}</dd></div>
-                  <div><dt>进程托管</dt><dd>{status?.managedProcesses ? "已启用" : "待安装"}</dd></div>
+                  <div>
+                    <dt>进程托管</dt>
+                    <dd>
+                      {status?.agentManaged
+                        ? "Zone + Agent"
+                        : status?.managedProcesses
+                          ? "Zone only"
+                          : "待安装"}
+                    </dd>
+                  </div>
                 </dl>
               </article>
               <article className="panel activity-panel">
                 <div className="panel-title"><h3>服务状态</h3><span className="live">实时</span></div>
                 <div className="timeline">
-                  <div className={connected ? "event good" : "event"}>
-                    <i /><div><strong>本地 Zone Host</strong><span>{connected ? "健康检查通过" : "等待后台服务"}</span></div>
+                  <div className={status?.zoneReachable ? "event good" : "event"}>
+                    <i /><div><strong>本地 Zone Host</strong><span>{status?.zoneReachable ? "健康检查通过" : "等待后台服务"}</span></div>
                   </div>
                   <div className={serving ? "event good" : "event"}>
-                    <i /><div><strong>接收新 Session</strong><span>{serving ? "已开放" : "已关闭"}</span></div>
+                    <i />
+                    <div>
+                      <strong>接收新 Session</strong>
+                      <span>
+                        {serving
+                          ? "已开放"
+                          : status?.zoneReachable && !status?.agentManaged
+                            ? "本地就绪，公网未开放"
+                            : "已关闭"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="event">
-                    <i /><div><strong>官方 Relay</strong><span>等待 enrollment 配置</span></div>
+                  <div className={status?.relayConnected ? "event good" : "event"}>
+                    <i />
+                    <div>
+                      <strong>官方 Relay</strong>
+                      <span>
+                        {status?.relayConnected
+                          ? "QUIC + mTLS 隧道已连接"
+                          : status?.agentManaged
+                            ? "Home Agent 已启动，正在连接"
+                            : enrollment?.capacityReady
+                              ? "等待 Relay 连接"
+                              : enrollment?.enrolled
+                                ? "等待容量证书与 mTLS"
+                                : "等待 enrollment 配置"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={status?.telemetryAccepted ? "event good" : "event"}>
+                    <i />
+                    <div>
+                      <strong>生产遥测 Collector</strong>
+                      <span>
+                        {status?.telemetryAccepted
+                          ? `签名报告 #${status.telemetrySequence ?? 0} 已接受`
+                          : status?.telemetryError ?? "等待首份签名报告回执"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -283,7 +419,17 @@ function App() {
               <b>→</b>
               <div><span>02</span><strong>QUIC + mTLS</strong><small>主动出站隧道</small></div>
               <b>→</b>
-              <div><span>03</span><strong>官方 Relay</strong><small>隐藏家庭 IP</small></div>
+              <div>
+                <span>03</span>
+                <strong>{enrollment?.relayId ?? "官方 Relay"}</strong>
+                <small>
+                  {status?.relayConnected
+                    ? "QUIC + mTLS 已连接"
+                    : enrollment?.enrolled
+                      ? "已配置，等待运行态连接"
+                      : "等待 enrollment"}
+                </small>
+              </div>
             </div>
           </section>
         )}
@@ -302,7 +448,59 @@ function App() {
                 </div>
               ))}
             </div>
-            <button className="secondary-button" disabled type="button">等待生产 enrollment</button>
+            {enrollment?.enrolled && (
+              <div className="settings-list">
+                <div>
+                  <span><strong>Enrollment ID</strong><small>官方签名配置</small></span>
+                  <b>{enrollment.enrollmentId}</b>
+                </div>
+                <div>
+                  <span><strong>授权容量</strong><small>最终以容量证书为准</small></span>
+                  <b>{enrollment.maxSessions ?? 0} Sessions / {enrollment.maxZones ?? 0} Zones</b>
+                </div>
+                <div>
+                  <span><strong>遥测出口</strong><small>仅发送签名最小化指标</small></span>
+                  <b>
+                    {status?.telemetryAccepted
+                      ? `Collector 已接收 #${status.telemetrySequence ?? 0}`
+                      : enrollment.telemetryUrl
+                        ? "已配置，等待回执"
+                        : "未配置"}
+                  </b>
+                </div>
+              </div>
+            )}
+            <button
+              className="secondary-button"
+              disabled={!enrollment?.configured || enrollmentBusy || enrollment?.enrolled}
+              onClick={() => void requestEnrollment()}
+              type="button"
+            >
+              {enrollmentBusy
+                ? "正在签名并申请…"
+                : enrollment?.enrolled
+                  ? enrollment.capacityReady
+                    ? "Enrollment 与容量证书有效"
+                    : "Enrollment 有效，等待容量认证"
+                  : enrollment?.configured
+                    ? "签名申请入网"
+                    : "未配置 Enrollment Service"}
+            </button>
+            {enrollment?.enrolled && !enrollment.relayReady && (
+              <button
+                className="secondary-button"
+                disabled={enrollmentBusy || !status?.zoneReachable}
+                onClick={() => void requestCertification()}
+                type="button"
+              >
+                {enrollmentBusy
+                  ? "正在执行容量挑战…"
+                  : status?.zoneReachable
+                    ? "执行容量认证并申请 Relay mTLS"
+                    : "等待本地 Zone Host"}
+              </button>
+            )}
+            {enrollment?.error && <p className="page-lead">{enrollment.error}</p>}
           </section>
         )}
 

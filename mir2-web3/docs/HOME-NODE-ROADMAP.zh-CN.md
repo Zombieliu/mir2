@@ -32,6 +32,9 @@ Gate 22–24 已具备可重复的工程验收；Gate 25 已完成遥测、奖�
 - 三运营商真实家庭网络双签证据格式和 fail-closed 生产 cohort 验证器。
 - Tauri 2 桌面控制层、品牌化 macOS/Windows/Linux 构建入口；
 - Supervisor 管理令牌独立进入系统密钥库，桌面 WebView 不接触令牌；
+- 签名远程 enrollment、本机容量挑战、CSR/mTLS 签发和生产 Bundle 原子落盘；
+- Relay 与 Telemetry 动态加载 Authority 发布的 placement/admission，无需人工改节点；
+- 真实玩家 TCP 经官方 Gateway、内部鉴权 Relay、出站 QUIC 到 Home Zone；
 - 绑定 Node/build/有效期的签名 Beta 计划和无任意 Shell 的固定动作状态机；
 - 节点签名与运营方离线复签分离，避免两把私钥出现在同一执行环境。
 
@@ -42,7 +45,7 @@ Gate 22–24 已具备可重复的工程验收；Gate 25 已完成遥测、奖�
 - 家庭宽带丢包、断网、换 IP、路由器重启的持续故障矩阵；
 - 硬件远程证明和独立第三方恶意节点安全审计；
 - 在真实不同运营商家庭网络上的容量与奖励 Beta。
-- 桌面安装包内置并安装 Gate 23 后台服务，以及正式远程 enrollment API。
+- 桌面托管进程到开机自启系统服务的受控迁移。
 
 ## 整体架构
 
@@ -72,7 +75,7 @@ flowchart TB
     A -->|"仅下载并验签"| U
   end
 
-  G -->|"已授权 Session 流"| R
+  G -->|"内部 token + 已授权 Session 流"| R
   R -->|"反向隧道"| A
   SC -->|"placement / generation / capacity cert"| A
   Z -->|"经济意图，不直接写库"| E
@@ -101,6 +104,13 @@ flowchart TB
 家庭节点通过主动出站 HTTPS 向 Collector 发送遥测，不开放新的入站端口；
 Relay 数据隧道与遥测通道相互独立，避免数据面故障掩盖运维告警。遥测数据按
 受众分层：
+
+Collector 只接受 Authority 动态发布的签名生产 Bundle。Node ID、public key、
+key generation、容量证书 ID、placement generation 和有效期任一不匹配都会
+拒绝；未完成容量认证时界面没有远程遥测是预期行为，而不是功能缺失。桌面端
+只有在 Collector 已接受报告、且本机运行态回执 Node ID 匹配并小于 90 秒时才
+显示遥测在线；这个显示回执不参与奖励结算，但会作为是否允许新玩家进入 Home
+Zone 的 fail-closed 条件。
 
 | 受众 | 可见内容 |
 | --- | --- |
@@ -168,9 +178,13 @@ CGNAT/换 IP/路由器重启证据仍归 Gate 25，不能用本地 Docker 结果
 
 - [x] 家庭节点主动建立 QUIC/mTLS 隧道；
 - [x] Gateway 通过 Relay 完成真实 Session 登录、进图、心跳和 Agent 重启恢复；
+- [x] 真实玩家 TCP 先进入官方 Gateway，再经 Relay 完成 Login、StartGame、
+      KeepAlive；玩家不感知家庭节点；
+- [x] Relay 私有 Gateway 监听使用内部 token，非 loopback 未配置时拒绝启动；
 - [x] 只接受匹配 Node ID、generation、短期容量证书和 placement 的流；
 - [x] 家庭端没有任何必须开放的 TCP/UDP 入站端口；
-- [x] UDP rebind 后 Session 继续工作，旧 nonce/sequence/generation fail closed；
+- [x] UDP rebind 后 Session 继续工作；QUIC 合法乱序可执行，重复
+      nonce/sequence 和旧 generation fail closed；
 - [ ] 真实三运营商 CGNAT、换 IP 和路由器重启证据（Gate 25）。
 
 ### Gate 23：Home Agent
@@ -208,6 +222,10 @@ CGNAT/换 IP/路由器重启证据仍归 Gate 25，不能用本地 Docker 结果
 - [x] standby `<5s`、Session 全恢复和 economy zero-duplicate 强校验；
 - [x] 遥测三种受众、IP rotating HMAC、保留期和删除接口；
 - [x] Agent 读取真实 Zone 健康状态、签名上报、Collector 验签/重放/鉴权/删除；
+- [x] Collector 动态加载签名 enrollment admission，拒绝身份、容量证书或
+      placement generation 不匹配的遥测；
+- [x] 桌面 Supervisor 校验 Relay 连接和 Collector 接收回执；回执缺失、过期
+      或 Node ID 不匹配时保持 drain；
 - [x] 容量、Session 分钟和 quorum work receipt 奖励对账；
 - [x] 节点 + 运营方双签，拒绝模拟/实验室证据的 production validator；
 - [ ] 至少三家真实家庭运营商的双签现场证据。

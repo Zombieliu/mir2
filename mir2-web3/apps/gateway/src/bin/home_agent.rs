@@ -8,6 +8,7 @@ use mir2_gateway::{
     HomeTunnelAgentConfig, HomeTunnelTlsMaterial, NodeCapacityCertificate, NodeSigningIdentity,
     SignedHomeNodeTelemetry, ZoneHostTelemetrySnapshot, HOME_TELEMETRY_SCHEMA,
 };
+use serde::Serialize;
 use sysinfo::System;
 use tokio::sync::watch;
 
@@ -49,7 +50,9 @@ async fn run() -> Result<(), String> {
         agent_instance_id.clone(),
         capacity_certificate.clone(),
     )?;
-    let agent = HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
+    let runtime_status = HomeAgentRuntimeStatusWriter::from_env(node_identity.node_id(), &relay_id);
+    runtime_status.write(false, telemetry.is_some(), false, None, None)?;
+    let agent = match HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
         relay_id,
         relay_addr,
         relay_server_name,
@@ -63,7 +66,15 @@ async fn run() -> Result<(), String> {
         trusted_relay_issuer,
         trusted_control_issuer,
     ))
-    .await?;
+    .await
+    {
+        Ok(agent) => agent,
+        Err(error) => {
+            runtime_status.write(false, telemetry.is_some(), false, None, Some(&error))?;
+            return Err(error);
+        }
+    };
+    runtime_status.write(true, telemetry.is_some(), false, None, None)?;
     println!(
         "HOME_AGENT_READY relay={} local_zone_rpc={local_zone_rpc_addr}",
         required_env("MIR2_HOME_RELAY_ID")?
@@ -76,8 +87,10 @@ async fn run() -> Result<(), String> {
     let telemetry_shutdown = shutdown_rx.clone();
     let agent_serve = agent.serve(shutdown_rx);
     tokio::pin!(agent_serve);
-    if let Some(telemetry) = telemetry {
-        let mut telemetry_task = tokio::spawn(telemetry.serve(telemetry_shutdown));
+    let result = if let Some(telemetry) = telemetry {
+        let telemetry_status = runtime_status.clone();
+        let mut telemetry_task =
+            tokio::spawn(telemetry.serve(telemetry_shutdown, telemetry_status));
         tokio::select! {
             result = &mut agent_serve => {
                 telemetry_task.abort();
@@ -91,7 +104,10 @@ async fn run() -> Result<(), String> {
         }
     } else {
         agent_serve.await
-    }
+    };
+    let final_error = result.as_ref().err().map(String::as_str);
+    runtime_status.write(false, false, false, None, final_error)?;
+    result
 }
 
 async fn emit_telemetry_once() -> Result<(), String> {
@@ -146,6 +162,90 @@ fn agent_instance_id() -> String {
                     .as_nanos()
             )
         })
+}
+
+#[derive(Debug, Clone)]
+struct HomeAgentRuntimeStatusWriter {
+    path: Option<PathBuf>,
+    node_id: String,
+    relay_id: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HomeAgentRuntimeStatus<'a> {
+    version: &'static str,
+    node_id: &'a str,
+    relay_id: &'a str,
+    relay_connected: bool,
+    telemetry_configured: bool,
+    telemetry_accepted: bool,
+    telemetry_sequence: Option<u64>,
+    last_telemetry_at_ms: Option<u64>,
+    last_error: Option<&'a str>,
+    updated_at_ms: u64,
+}
+
+impl HomeAgentRuntimeStatusWriter {
+    fn from_env(node_id: &str, relay_id: &str) -> Self {
+        Self {
+            path: env::var("MIR2_HOME_AGENT_STATUS_FILE")
+                .ok()
+                .filter(|value| !value.trim().is_empty())
+                .map(PathBuf::from),
+            node_id: node_id.to_string(),
+            relay_id: relay_id.to_string(),
+        }
+    }
+
+    fn write(
+        &self,
+        relay_connected: bool,
+        telemetry_configured: bool,
+        telemetry_accepted: bool,
+        telemetry: Option<(u64, u64)>,
+        last_error: Option<&str>,
+    ) -> Result<(), String> {
+        let Some(path) = self.path.as_ref() else {
+            return Ok(());
+        };
+        let parent = path
+            .parent()
+            .ok_or_else(|| "Home Agent status path has no parent directory".to_string())?;
+        std::fs::create_dir_all(parent).map_err(|error| {
+            format!(
+                "create Home Agent runtime status directory {}: {error}",
+                parent.display()
+            )
+        })?;
+        let status = HomeAgentRuntimeStatus {
+            version: env!("CARGO_PKG_VERSION"),
+            node_id: &self.node_id,
+            relay_id: &self.relay_id,
+            relay_connected,
+            telemetry_configured,
+            telemetry_accepted,
+            telemetry_sequence: telemetry.map(|(sequence, _)| sequence),
+            last_telemetry_at_ms: telemetry.map(|(_, observed_at_ms)| observed_at_ms),
+            last_error,
+            updated_at_ms: now_ms(),
+        };
+        let bytes = serde_json::to_vec_pretty(&status)
+            .map_err(|error| format!("encode Home Agent runtime status: {error}"))?;
+        let temporary = path.with_extension("json.tmp");
+        std::fs::write(&temporary, bytes).map_err(|error| {
+            format!(
+                "write Home Agent runtime status {}: {error}",
+                temporary.display()
+            )
+        })?;
+        std::fs::rename(&temporary, path).map_err(|error| {
+            format!(
+                "install Home Agent runtime status {}: {error}",
+                path.display()
+            )
+        })
+    }
 }
 
 struct HomeTelemetryEmitter {
@@ -215,7 +315,11 @@ impl HomeTelemetryEmitter {
         }))
     }
 
-    async fn serve(self, mut shutdown: watch::Receiver<bool>) -> Result<(), String> {
+    async fn serve(
+        self,
+        mut shutdown: watch::Receiver<bool>,
+        runtime_status: HomeAgentRuntimeStatusWriter,
+    ) -> Result<(), String> {
         let client = telemetry_client()?;
         let mut system = System::new_all();
         tokio::time::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL).await;
@@ -226,7 +330,7 @@ impl HomeTelemetryEmitter {
             if *shutdown.borrow() {
                 return Ok(());
             }
-            let emitted = self
+            let emitted = match self
                 .emit(
                     &client,
                     &mut system,
@@ -234,7 +338,15 @@ impl HomeTelemetryEmitter {
                     window_started_at_ms,
                     session_milliseconds,
                 )
-                .await?;
+                .await
+            {
+                Ok(emitted) => emitted,
+                Err(error) => {
+                    runtime_status.write(true, true, false, None, Some(&error))?;
+                    return Err(error);
+                }
+            };
+            runtime_status.write(true, true, true, Some((sequence, emitted.0)), None)?;
             sequence = sequence.saturating_add(1);
             window_started_at_ms = emitted.0;
             session_milliseconds = emitted.1;

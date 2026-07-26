@@ -2045,7 +2045,9 @@ async fn handle_socket_inner(
         Arc::clone(&background_route_refresh_record),
     );
 
-    let connect_packets = match catch_gateway_panic("web on_connect", || session.on_connect()) {
+    let connect_packets = match catch_gateway_panic("web on_connect", || {
+        tokio::task::block_in_place(|| session.on_connect())
+    }) {
         Ok(packets) => packets,
         Err(error) => {
             let _ = send_error_message(&sender, &error).await;
@@ -2162,13 +2164,15 @@ async fn handle_socket_inner(
                         );
                     }
                 }
-                let pending_start_game_route_lease = match try_acquire_start_game_route_lease(
-                    session_cache.as_ref(),
-                    session,
-                    authenticated,
-                    authenticated_account_id.as_deref(),
-                    start_game_character_index,
-                ) {
+                let pending_start_game_route_lease = match tokio::task::block_in_place(|| {
+                    try_acquire_start_game_route_lease(
+                        session_cache.as_ref(),
+                        session,
+                        authenticated,
+                        authenticated_account_id.as_deref(),
+                        start_game_character_index,
+                    )
+                }) {
                     Ok(key) => key,
                     Err(error) => {
                         let _ = send_error_message(&sender, &error).await;
@@ -2227,7 +2231,7 @@ async fn handle_socket_inner(
                 };
                 let mut pending_active_session_permit = None;
                 if start_game_character_index.is_some()
-                    && session.active_identity().is_none()
+                    && tokio::task::block_in_place(|| session.active_identity()).is_none()
                     && active_session_permit.is_none()
                 {
                     match capacity.try_acquire_active_session() {
@@ -2273,16 +2277,20 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
-                if leaves_world || session.active_identity().is_none() {
+                let active_identity =
+                    tokio::task::block_in_place(|| session.active_identity());
+                if leaves_world || active_identity.is_none() {
                     chat_presence = None;
                 }
                 drop(action_capacity_permit);
-                release_unclaimed_start_game_route_lease(
-                    session_cache.as_ref(),
-                    session,
-                    pending_start_game_route_lease.as_ref(),
-                );
-                if pending_active_session_permit.is_some() && session.active_identity().is_some() {
+                tokio::task::block_in_place(|| {
+                    release_unclaimed_start_game_route_lease(
+                        session_cache.as_ref(),
+                        session,
+                        pending_start_game_route_lease.as_ref(),
+                    )
+                });
+                if pending_active_session_permit.is_some() && active_identity.is_some() {
                     *active_session_permit = pending_active_session_permit.take();
                 }
                 let force_route_refresh = start_game_character_index.is_some();
@@ -2308,11 +2316,13 @@ async fn handle_socket_inner(
                     .expect("zone movement ingress slot should not be poisoned") =
                     next_movement_ingress.clone();
                 let next_zone_live_outbound_registration = if authenticated {
-                    match register_zone_live_outbound(
-                        session,
-                        &zone_outbound_tx,
-                        active_zone_outbound_registration_id.as_ref(),
-                    ) {
+                    match tokio::task::block_in_place(|| {
+                        register_zone_live_outbound(
+                            session,
+                            &zone_outbound_tx,
+                            active_zone_outbound_registration_id.as_ref(),
+                        )
+                    }) {
                         Ok(registration) => registration,
                         Err(error) => {
                             let _ = send_error_message(&sender, &error).await;
@@ -2344,7 +2354,7 @@ async fn handle_socket_inner(
                 }
                 if starts_game
                     && chat_presence.is_none()
-                    && session.active_identity().is_some()
+                    && active_identity.is_some()
                     && session.zone_movement_ingress().is_some()
                 {
                     chat_presence = Some(chat_hub.register(ChatProtocol::WebSocket));
@@ -2581,7 +2591,10 @@ async fn flush_session_updates(
         send_world_snapshot(sender, session).await?;
     }
 
-    if !low_latency_action && should_queue_save_by_action && session.active_identity().is_some() {
+    if !low_latency_action
+        && should_queue_save_by_action
+        && tokio::task::block_in_place(|| session.active_identity()).is_some()
+    {
         save_queue.request_save(Instant::now(), || {
             tokio::task::block_in_place(|| {
                 catch_gateway_panic("web save_active_character", || {
@@ -2599,9 +2612,9 @@ async fn flush_session_updates(
         })?;
     }
 
-    if let Err(error) =
+    if let Err(error) = tokio::task::block_in_place(|| {
         route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
-    {
+    }) {
         eprintln!("web session route lease refresh skipped: {error}");
     }
 

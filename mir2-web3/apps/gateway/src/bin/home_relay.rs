@@ -52,6 +52,10 @@ async fn run() -> Result<(), String> {
         trusted_control_issuer,
         placements,
     );
+    config.placements_file = Some(placements_path);
+    config.gateway_auth_token = env::var("MIR2_HOME_RELAY_GATEWAY_TOKEN")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
     if let Some(value) = optional_positive_usize_env("MIR2_HOME_RELAY_MAX_AGENT_CONNECTIONS")? {
         config.max_agent_connections = value;
     }
