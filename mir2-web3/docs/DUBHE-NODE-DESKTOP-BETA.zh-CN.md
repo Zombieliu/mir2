@@ -128,8 +128,17 @@ flowchart LR
 
 家庭节点不开放端口，玩家看不到家庭 IP。Relay 的 Gateway listener 对非
 loopback 绑定强制配置 `MIR2_HOME_RELAY_GATEWAY_TOKEN`；官方 Gateway 使用相同
-值作为 `MIR2_ZONE_HOST_TOKEN`。错误 token 在建立 Home stream 前即被拒绝，
-Zone Host 还会再次校验同一凭据。
+值作为 `MIR2_ZONE_HOST_TOKEN`。该官方凭据在 Relay 验证后立即终止，不会传给
+家庭节点。Home Agent 在验证 Relay 签名的 stream 后，把认证字段替换为仅存在于
+本机的随机 Zone RPC token，再通过 loopback 交给 Zone Host。错误官方 token 在
+建立 Home stream 前即被拒绝；即使官方 token 泄漏，它也不能直接授权家庭
+Zone Host。
+
+Relay 连接中断时，Home Agent 保持进程和本机 Zone Host 存活，将
+`relayConnected=false` 写入运行态，并按 `1/2/4/8/16/32s` 封顶退避重新连接。
+每次重连递增注册序列，避免被 Relay 的 replay guard 误判。Supervisor 在 Relay
+断开或新的 Collector 回执尚未到达时持续 drain；两者恢复后才自动 resume。
+Collector 短暂不可达时，遥测任务同样退避重试，不会结束 Agent 或 Zone Host。
 
 ## 本地人工验收
 
@@ -141,6 +150,25 @@ Zone Host 还会再次校验同一凭据。
 6. 确认 `capacity ready`、`Relay ready`、Agent 已托管并出现远程遥测。
 7. 用 Mir2 客户端连接官方 Gateway，不连接桌面应用或家庭 IP，完成 Login、
    StartGame 和 KeepAlive。
+
+本仓库当前桌面节点的 Sui testnet 最终确认注册证据位于
+`docs/generated/gate13/testnet/dubhe-desktop-registration.json`。本地 Authority
+读取的是该最终确认记录，而不是自行伪造一个“已上链”布尔值。用于开发的
+Relay CA、Authority 私钥和内部 token 只能生成到临时目录，不能提交或用于公网。
+
+当 Gateway 已经以 `MIR2_ZONE_HOST_ADDR=<Relay private listener>` 和
+`MIR2_ZONE_HOST_TOKEN=<internal token>` 启动后，运行独立玩家探针：
+
+```bash
+MIR2_HOME_PLAYER_GATEWAY_ADDR=127.0.0.1:17000 \
+MIR2_HOME_PLAYER_PROBE_OUT=docs/generated/home-node/live-player-probe.json \
+cargo +1.89.0 run -p mir2-gateway --bin home_player_probe
+```
+
+通过标志是 `HOME_PLAYER_PROBE_PASS`。JSON 证据必须同时包含 `connect`、
+`login`、`startGame` 和 `keepAlive` 四步；只看到进程在线、端口打开或桌面绿灯
+都不能替代玩家协议验收。探针默认单步超时 30 秒，以容纳 debug 世界初始化；
+记录的实际延迟仍会保留，但不能替代 release/Regional 性能 SLO。
 
 仓库级可重复验收：
 
@@ -155,6 +183,8 @@ npm run acceptance
 cargo +1.89.0 test -p mir2-gateway --bin home_enrollment_service
 cargo +1.89.0 test -p mir2-gateway --bin home_telemetry_collector
 cargo +1.89.0 test -p mir2-gateway --bin home_agent_supervisor
+cargo +1.89.0 check -p mir2-gateway --bin home_local_stack_fixture
+cargo +1.89.0 check -p mir2-gateway --bin home_player_probe
 cargo +1.89.0 test -p mir2-gateway home_tunnel --lib
 cargo +1.89.0 test -p mir2-gateway --test home_tunnel
 cd apps/dubhe-node-desktop
@@ -164,7 +194,8 @@ npm run tauri build -- --debug --bundles app
 
 `home_tunnel` 集成验收通过真正的玩家 TCP Gateway 完成 Login、StartGame 和
 KeepAlive，同时覆盖 Gateway 内部凭据拒绝、mTLS 非信任 CA、QUIC 合法乱序、
-精确重放拒绝、动态 placement reload 和 UDP rebind。
+精确重放拒绝、动态 placement reload、UDP rebind，以及真实 Home Agent
+子进程在 Relay 重启期间保持存活并自动重新注册。
 
 ## 生产 Beta：运营方签发计划
 

@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::fs;
 use std::net::{SocketAddr, TcpListener, TcpStream as StdTcpStream, UdpSocket};
+use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -47,8 +49,9 @@ fn relay_routing_hint_accepts_json_and_named_message_pack() {
 async fn public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebind() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let gateway_token = "home-relay-official-gateway-test-token";
+    let local_zone_token = "home-node-local-zone-test-token";
     let (zone_address, zone_stop, zone_handle) =
-        start_zone_host(authority.clone(), Some(gateway_token.to_string()));
+        start_zone_host(authority.clone(), Some(local_zone_token.to_string()));
     let (relay_tls, agent_tls) = tls_materials();
     let node = NodeSigningIdentity::from_seed([31; 32]);
     let relay_identity = NodeSigningIdentity::from_seed([32; 32]);
@@ -108,12 +111,13 @@ async fn public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebin
         relay_identity.public_key(),
         control_identity.public_key(),
     );
+    agent_config.local_zone_rpc_auth_token = Some(local_zone_token.to_string());
     agent_config.io_timeout = Duration::from_secs(2);
     let agent = HomeTunnelAgent::connect(agent_config)
         .await
         .expect("outbound-only Home Agent should register over mTLS QUIC");
     let network = agent.network_handle();
-    let second_connection = HomeTunnelAgent::connect(HomeTunnelAgentConfig::with_defaults(
+    let mut second_agent_config = HomeTunnelAgentConfig::with_defaults(
         "relay-test-a",
         relay_address,
         "relay.test",
@@ -126,8 +130,9 @@ async fn public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebin
         capacity_certificate(&NodeSigningIdentity::from_seed([31; 32]), &capacity_issuer),
         relay_identity.public_key(),
         control_identity.public_key(),
-    ))
-    .await;
+    );
+    second_agent_config.local_zone_rpc_auth_token = Some(local_zone_token.to_string());
+    let second_connection = HomeTunnelAgent::connect(second_agent_config).await;
     assert!(
         second_connection.is_err(),
         "Relay must fail closed when the concurrent Agent connection budget is exhausted"
@@ -163,6 +168,20 @@ async fn public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebin
     assert!(
         unauthorized.health().is_err(),
         "Relay must reject a Zone RPC frame without the official Gateway credential"
+    );
+    let leaked_gateway_credential = TcpZoneOwnerRpcTransport::with_options(
+        zone_address.to_string(),
+        ZoneId::primary(),
+        "home-session-leaked-gateway-token",
+        Some(gateway_token.to_string()),
+        ZoneRpcLimits {
+            io_timeout: Duration::from_secs(2),
+            ..ZoneRpcLimits::default()
+        },
+    );
+    assert!(
+        leaked_gateway_credential.health().is_err(),
+        "official Gateway credential must not authorize the node-local Zone Host"
     );
 
     let transport = TcpZoneOwnerRpcTransport::with_options(
@@ -265,6 +284,154 @@ async fn public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebin
         .expect("Relay should stop cleanly");
     stop_zone_host(zone_address, zone_stop, zone_handle);
     let _ = std::fs::remove_file(placements_path);
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn home_agent_process_reconnects_after_relay_restart() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let local_zone_token = "home-node-reconnect-local-zone-token";
+    let (zone_address, zone_stop, zone_handle) =
+        start_zone_host(authority, Some(local_zone_token.to_string()));
+    let (relay_tls, agent_tls) = tls_materials();
+    let node_seed = [61_u8; 32];
+    let node = NodeSigningIdentity::from_seed(node_seed);
+    let relay_identity = NodeSigningIdentity::from_seed([62; 32]);
+    let control_identity = NodeSigningIdentity::from_seed([63; 32]);
+    let capacity_issuer = NodeSigningIdentity::from_seed([64; 32]);
+    let certificate = capacity_certificate(&node, &capacity_issuer);
+    let now = now_ms();
+    let placement = HomeTunnelPlacement::issue(
+        "home-placement-reconnect",
+        "relay-test-reconnect",
+        "primary",
+        node.node_id(),
+        1,
+        1,
+        4,
+        303,
+        now.saturating_sub(100),
+        now.saturating_add(60_000),
+        &control_identity,
+    )
+    .unwrap();
+    let relay_config = |quic_bind, gateway_bind| {
+        let mut config = HomeTunnelRelayConfig::with_defaults(
+            "relay-test-reconnect",
+            quic_bind,
+            gateway_bind,
+            relay_tls.clone(),
+            relay_identity.clone(),
+            capacity_issuer.public_key(),
+            control_identity.public_key(),
+            vec![placement.clone()],
+        );
+        config.io_timeout = Duration::from_secs(2);
+        config
+    };
+    let relay = HomeTunnelRelay::bind(relay_config(
+        "127.0.0.1:0".parse().unwrap(),
+        "127.0.0.1:0".parse().unwrap(),
+    ))
+    .await
+    .unwrap();
+    let relay_address = relay.quic_addr().unwrap();
+    let gateway_address = relay.gateway_addr().unwrap();
+    let (first_relay_shutdown_tx, first_relay_shutdown_rx) = watch::channel(false);
+    let first_relay_task = tokio::spawn(relay.serve(first_relay_shutdown_rx));
+
+    let fixture_dir = std::env::temp_dir().join(format!(
+        "mir2-home-agent-reconnect-{}-{}",
+        std::process::id(),
+        now_ms()
+    ));
+    fs::create_dir_all(&fixture_dir).unwrap();
+    let ca_path = fixture_dir.join("ca.der");
+    let certificate_path = fixture_dir.join("agent.der");
+    let private_key_path = fixture_dir.join("agent-key.der");
+    let capacity_path = fixture_dir.join("capacity.json");
+    let status_path = fixture_dir.join("status.json");
+    fs::write(&ca_path, &agent_tls.ca_certificate_der).unwrap();
+    fs::write(&certificate_path, &agent_tls.certificate_chain_der[0]).unwrap();
+    fs::write(&private_key_path, &agent_tls.private_key_pkcs8_der).unwrap();
+    fs::write(&capacity_path, serde_json::to_vec(&certificate).unwrap()).unwrap();
+
+    let mut agent = Command::new(env!("CARGO_BIN_EXE_home_agent"))
+        .env("MIR2_HOME_RELAY_ID", "relay-test-reconnect")
+        .env("MIR2_HOME_RELAY_ADDR", relay_address.to_string())
+        .env("MIR2_HOME_RELAY_SERVER_NAME", "relay.test")
+        .env("MIR2_HOME_LOCAL_ZONE_RPC_ADDR", zone_address.to_string())
+        .env("MIR2_HOME_LOCAL_ZONE_RPC_TOKEN", local_zone_token)
+        .env("MIR2_HOME_AGENT_TLS_CA_DER", &ca_path)
+        .env("MIR2_HOME_AGENT_TLS_CERT_CHAIN_DER", &certificate_path)
+        .env("MIR2_HOME_AGENT_TLS_KEY_DER", &private_key_path)
+        .env(
+            "MIR2_HOME_AGENT_SIGNING_KEY",
+            URL_SAFE_NO_PAD.encode(node_seed),
+        )
+        .env("MIR2_HOME_AGENT_KEY_GENERATION", "1")
+        .env("MIR2_HOME_CAPACITY_CERTIFICATE_FILE", &capacity_path)
+        .env("MIR2_HOME_RELAY_PUBLIC_KEY", relay_identity.public_key())
+        .env(
+            "MIR2_HOME_CONTROL_ISSUER_PUBLIC_KEY",
+            control_identity.public_key(),
+        )
+        .env("MIR2_HOME_AGENT_STATUS_FILE", &status_path)
+        .env_remove("MIR2_HOME_TELEMETRY_URL")
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("Home Agent process should start");
+
+    wait_for_agent_relay_status(&status_path, &mut agent, true).await;
+    first_relay_shutdown_tx.send(true).unwrap();
+    tokio::time::timeout(Duration::from_secs(5), first_relay_task)
+        .await
+        .expect("first Relay shutdown should be bounded")
+        .expect("first Relay task should join")
+        .expect("first Relay should stop cleanly");
+    wait_for_agent_relay_status(&status_path, &mut agent, false).await;
+    assert!(
+        agent.try_wait().unwrap().is_none(),
+        "Home Agent must stay alive while Relay is unavailable"
+    );
+
+    let rebind_deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    let relay = loop {
+        match HomeTunnelRelay::bind(relay_config(relay_address, gateway_address)).await {
+            Ok(relay) => break relay,
+            Err(error)
+                if error.contains("Address already in use")
+                    && tokio::time::Instant::now() < rebind_deadline =>
+            {
+                tokio::time::sleep(Duration::from_millis(50)).await;
+            }
+            Err(error) => panic!("Relay should rebind its previous addresses: {error}"),
+        }
+    };
+    let (second_relay_shutdown_tx, second_relay_shutdown_rx) = watch::channel(false);
+    let second_relay_task = tokio::spawn(relay.serve(second_relay_shutdown_rx));
+    wait_for_agent_relay_status(&status_path, &mut agent, true).await;
+
+    agent.kill().expect("Home Agent process should stop");
+    let _ = agent.wait();
+    second_relay_shutdown_tx.send(true).unwrap();
+    tokio::time::timeout(Duration::from_secs(5), second_relay_task)
+        .await
+        .expect("second Relay shutdown should be bounded")
+        .expect("second Relay task should join")
+        .expect("second Relay should stop cleanly");
+    stop_zone_host(zone_address, zone_stop, zone_handle);
+    for path in [
+        ca_path,
+        certificate_path,
+        private_key_path,
+        capacity_path,
+        status_path,
+    ] {
+        let _ = fs::remove_file(path);
+    }
+    let _ = fs::remove_dir(fixture_dir);
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -494,6 +661,33 @@ async fn wait_for_health(transport: &TcpZoneOwnerRpcTransport) {
             "Home Tunnel never routed a Zone Host health request"
         );
         tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+}
+
+async fn wait_for_agent_relay_status(
+    path: &std::path::Path,
+    child: &mut std::process::Child,
+    expected: bool,
+) {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(15);
+    loop {
+        assert!(
+            child.try_wait().unwrap().is_none(),
+            "Home Agent exited before relayConnected={expected}"
+        );
+        if fs::read(path)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+            .and_then(|status| status["relayConnected"].as_bool())
+            == Some(expected)
+        {
+            return;
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "Home Agent never reported relayConnected={expected}"
+        );
+        tokio::time::sleep(Duration::from_millis(50)).await;
     }
 }
 

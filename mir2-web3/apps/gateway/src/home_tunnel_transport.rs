@@ -22,9 +22,9 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{watch, OwnedSemaphorePermit, RwLock, Semaphore};
 
 use crate::{
-    decode_zone_rpc_routing_hint, validate_zone_rpc_authorization, HomeTunnelChallenge,
-    HomeTunnelPlacement, HomeTunnelRegistration, HomeTunnelReplayGuard, HomeTunnelStreamEnvelope,
-    HomeTunnelStreamOpen, NodeCapacityCertificate, NodeSigningIdentity,
+    decode_zone_rpc_routing_hint, rewrite_zone_rpc_authorization, validate_zone_rpc_authorization,
+    HomeTunnelChallenge, HomeTunnelPlacement, HomeTunnelRegistration, HomeTunnelReplayGuard,
+    HomeTunnelStreamEnvelope, HomeTunnelStreamOpen, NodeCapacityCertificate, NodeSigningIdentity,
 };
 
 const HOME_TUNNEL_ALPN: &[u8] = b"obelisk-home-tunnel/1";
@@ -275,6 +275,9 @@ pub struct HomeTunnelAgentConfig {
     pub relay_addr: SocketAddr,
     pub relay_server_name: String,
     pub local_zone_rpc_addr: SocketAddr,
+    /// Credential used only on the node's loopback Agent -> Zone Host hop.
+    /// It is never sent to or learned by the Relay.
+    pub local_zone_rpc_auth_token: Option<String>,
     pub tls: HomeTunnelTlsMaterial,
     pub node_identity: NodeSigningIdentity,
     pub key_generation: u64,
@@ -309,6 +312,7 @@ impl HomeTunnelAgentConfig {
             relay_addr,
             relay_server_name: relay_server_name.into(),
             local_zone_rpc_addr,
+            local_zone_rpc_auth_token: None,
             tls,
             node_identity,
             key_generation,
@@ -346,6 +350,13 @@ impl HomeTunnelAgentConfig {
             return Err(
                 "Home Tunnel Agent identity does not match capacity certificate".to_string(),
             );
+        }
+        if self
+            .local_zone_rpc_auth_token
+            .as_deref()
+            .is_some_and(|token| token.trim().is_empty())
+        {
+            return Err("Home Tunnel Agent local Zone RPC token must not be empty".to_string());
         }
         self.tls.validate()
     }
@@ -866,7 +877,11 @@ async fn handle_agent_stream(
         .await
         .map_err(|_| "connect local Zone Host timed out".to_string())?
         .map_err(|error| format!("connect local Zone Host: {error}"))?;
-        write_frame(&mut local, &request, shared.config.max_frame_bytes).await?;
+        let local_request = rewrite_zone_rpc_authorization(
+            &request,
+            shared.config.local_zone_rpc_auth_token.as_deref(),
+        )?;
+        write_frame(&mut local, &local_request, shared.config.max_frame_bytes).await?;
         let response = tokio::time::timeout(
             shared.config.io_timeout,
             read_frame(&mut local, shared.config.max_frame_bytes),

@@ -163,14 +163,15 @@ pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use zone_replication::{ZoneBaseSnapshotStore, ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
-    decode_zone_rpc_routing_hint, validate_zone_host_bind, validate_zone_rpc_authorization,
-    TcpZoneOwnerRpcTransport, ZoneBaseSnapshot, ZoneBaseSnapshotCompression,
-    ZoneHostCheckpointTelemetry, ZoneHostHealth, ZoneHostPromotionTelemetry, ZoneHostServer,
-    ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope, ZoneMutationBatch,
-    ZoneMutationEntry, ZonePromotionReadiness, ZonePromotionReceipt, ZoneQuiesceReceipt,
-    ZoneReplicationCoverage, ZoneReplicationHead, ZoneRpcLimits, ZoneRpcRoutingHint,
-    DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES, DEFAULT_ZONE_PROMOTION_MAX_LAG_MS,
-    DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS, DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES,
-    DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES, ZONE_HOST_CHECKPOINT_VERSION,
-    ZONE_PROMOTION_READINESS_VERSION, ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
+    decode_zone_rpc_routing_hint, rewrite_zone_rpc_authorization, validate_zone_host_bind,
+    validate_zone_rpc_authorization, TcpZoneOwnerRpcTransport, ZoneBaseSnapshot,
+    ZoneBaseSnapshotCompression, ZoneHostCheckpointTelemetry, ZoneHostHealth,
+    ZoneHostPromotionTelemetry, ZoneHostServer, ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry,
+    ZoneMapScope, ZoneMutationBatch, ZoneMutationEntry, ZonePromotionReadiness,
+    ZonePromotionReceipt, ZoneQuiesceReceipt, ZoneReplicationCoverage, ZoneReplicationHead,
+    ZoneRpcLimits, ZoneRpcRoutingHint, DEFAULT_ZONE_BASE_SNAPSHOT_MAX_UNCOMPRESSED_BYTES,
+    DEFAULT_ZONE_PROMOTION_MAX_LAG_MS, DEFAULT_ZONE_PROMOTION_RECEIPT_TTL_MS,
+    DEFAULT_ZONE_REPLICATION_MAX_BATCH_BYTES, DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES,
+    ZONE_HOST_CHECKPOINT_VERSION, ZONE_PROMOTION_READINESS_VERSION, ZONE_REPLICATION_HEAD_VERSION,
+    ZONE_RPC_PROTOCOL_VERSION,
 };

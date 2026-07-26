@@ -237,9 +237,6 @@ fn load_admissions(
     now_ms: u64,
 ) -> Result<BTreeMap<String, HomeTelemetryAdmission>, String> {
     let bundles: Vec<SignedHomeEnrollmentBundle> = read_json(path)?;
-    if bundles.is_empty() {
-        return Err("Home telemetry admissions file is empty".to_string());
-    }
     let mut admissions = BTreeMap::new();
     for bundle in bundles {
         bundle.verify(
@@ -451,6 +448,16 @@ mod tests {
         HomeEnrollmentResourcePolicy, HomeNodeTelemetryPayload, HomeTunnelPlacement,
         NodeCapacityCertificate, NodeSigningIdentity, SuiFinalityProof, HOME_TELEMETRY_SCHEMA,
     };
+
+    #[test]
+    fn empty_dynamic_admission_set_starts_fail_closed() {
+        let path = temporary_json_path();
+        publish_json(&path, &Vec::<SignedHomeEnrollmentBundle>::new());
+        let admissions = load_admissions(&path, "unused-while-empty", now_ms())
+            .expect("empty signed admission set should be a valid fail-closed startup state");
+        assert!(admissions.is_empty());
+        let _ = std::fs::remove_file(path);
+    }
 
     #[test]
     fn signed_production_admission_allows_only_matching_telemetry() {
