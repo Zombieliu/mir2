@@ -11,7 +11,8 @@
 
 - Apple notarization、Windows Authenticode 和 Linux 仓库签名尚未接入；
 - 尚无三家真实家庭运营商的完整现场证据；
-- 关闭桌面应用会停止它临时托管的 Supervisor；开机自启和系统服务迁移尚未接入。
+- Supervisor 可以在桌面窗口退出后继续提供后台服务，重开窗口能够通过本机管理
+  令牌重新接管；开机自启和正式系统服务安装仍未接入。
 
 远程签名 enrollment、容量挑战、短期容量证书、CSR/mTLS 证书签发、动态
 placement、Relay 连接和签名遥测已经接入桌面流程。它们的本地自动化验收不能
@@ -140,6 +141,33 @@ Relay 连接中断时，Home Agent 保持进程和本机 Zone Host 存活，将
 断开或新的 Collector 回执尚未到达时持续 drain；两者恢复后才自动 resume。
 Collector 短暂不可达时，遥测任务同样退避重试，不会结束 Agent 或 Zone Host。
 
+## 24 小时短期凭证如何自动续期
+
+桌面 Rust 后台默认每 5 分钟检查一次有效期，并在最早到期的 Bundle、容量证书、
+placement 或 Relay mTLS 证书只剩 6 小时时进入续期窗口：
+
+1. 没有活跃 Session 时，重新完成签名 enrollment；
+2. 对本机 Zone Host 再执行一次容量挑战；
+3. 使用系统密钥库中原有的 Relay 私钥生成新 CSR，避免重复弹出密钥授权；
+4. 验证并原子写入新容量证书、placement 和 mTLS 证书；
+5. 通过带本机 Bearer Token 的 `/v1/shutdown` 要求 Supervisor drain；
+6. Supervisor 等存量 Session 归零，再回收 Home Agent 和 Zone Host；
+7. 新 Supervisor/Agent 从磁盘和系统密钥库读取新凭证并恢复 Relay、遥测和接客。
+
+桌面进程没有旧 Supervisor 的子进程句柄时（例如关闭窗口后重开），仍可通过相同
+鉴权接口接管；客户端会等待 Supervisor 与 Zone operator 两个端口都释放后才启动
+新进程，避免旧 Zone Host 与新 Zone Host 抢占 `7020/7021`。
+
+如果进入续期窗口时仍有玩家，节点只关闭新 Session，不强制断开存量玩家；后台
+在下一轮检查发现 Session 已归零后再轮换。界面“生产 Beta”页会显示续期窗口、
+`等待存量玩家退出 / 正在轮换凭证 / 自动续期已启用` 状态，并允许操作者手动
+触发同一条安全续期流程。自动轮换失败时保留旧凭证和 drain 状态，后台继续重试，
+不会把未验证的新材料加载到生产进程。
+
+如果电脑关机超过续期窗口导致旧 Bundle 已过期，客户端会先用新基础 Enrollment
+重启一个只管理 Zone Host 的 Supervisor，恢复本机容量挑战能力；认证通过后再
+切换到 Zone Host + Home Agent。该恢复路径同样不复用过期 admission。
+
 ## 本地人工验收
 
 1. 启动 Enrollment Authority、Telemetry Collector 和 Relay 所需的测试配置。
@@ -150,6 +178,8 @@ Collector 短暂不可达时，遥测任务同样退避重试，不会结束 Age
 6. 确认 `capacity ready`、`Relay ready`、Agent 已托管并出现远程遥测。
 7. 用 Mir2 客户端连接官方 Gateway，不连接桌面应用或家庭 IP，完成 Login、
    StartGame 和 KeepAlive。
+8. 在“生产 Beta”点击“立即检查并续期”，确认 Enrollment ID/到期时间更新、
+   Supervisor PID 更新、`7020` 只有一个 Zone Host 监听，并再次完成玩家探针。
 
 本仓库当前桌面节点的 Sui testnet 最终确认注册证据位于
 `docs/generated/gate13/testnet/dubhe-desktop-registration.json`。本地 Authority
@@ -187,6 +217,7 @@ cargo +1.89.0 check -p mir2-gateway --bin home_local_stack_fixture
 cargo +1.89.0 check -p mir2-gateway --bin home_player_probe
 cargo +1.89.0 test -p mir2-gateway home_tunnel --lib
 cargo +1.89.0 test -p mir2-gateway --test home_tunnel
+cargo +1.89.0 test --manifest-path apps/dubhe-node-desktop/src-tauri/Cargo.toml
 cd apps/dubhe-node-desktop
 npm run build
 npm run tauri build -- --debug --bundles app

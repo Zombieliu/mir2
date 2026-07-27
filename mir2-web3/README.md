@@ -36,6 +36,7 @@ Bevy runtimes.
 - [Regional Gate 18-21 acceptance contract](docs/REGIONAL-ACCEPTANCE.md)
 - [Home Node roadmap](docs/HOME-NODE-ROADMAP.zh-CN.md)
 - [Dubhe Node desktop and production Beta](docs/DUBHE-NODE-DESKTOP-BETA.zh-CN.md)
+- [Mir2 AI 世界导演 MVP](docs/AI-WORLD-DIRECTOR-MVP.zh-CN.md)
 - [Gate 25 home-network Beta acceptance](infra/gate25/README.zh-CN.md)
 - [Gate 22 outbound QUIC/mTLS Home Tunnel](infra/gate22/README.zh-CN.md)
 

@@ -9,7 +9,7 @@ use base64::Engine;
 use mir2_gateway::{
     CapacityChallenge, CapacityChallengeResponse, HomeAgentKeyring, HomeAgentManagementKeyring,
     HomeAgentWorkMode, HomeCapacityCertificationRequest, HomeEnrollmentRequest,
-    SignedHomeEnrollmentBundle, SignedHomeEnrollmentChallenge,
+    NodeSigningIdentity, SignedHomeEnrollmentBundle, SignedHomeEnrollmentChallenge,
 };
 use rcgen::{
     CertificateParams, DistinguishedName, DnType, ExtendedKeyUsagePurpose, IsCa, KeyPair,
@@ -19,7 +19,7 @@ use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, State};
 use tokio::process::{Child, Command};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 
 const DEFAULT_KEYRING_ACCOUNT: &str = "default";
 const DEFAULT_SUPERVISOR_URL: &str = "http://127.0.0.1:17990";
@@ -30,10 +30,43 @@ const RELAY_CA_CERTIFICATE_FILE: &str = "relay-ca.der";
 const RELAY_CLIENT_CERTIFICATE_FILE: &str = "relay-client.der";
 const RELAY_TLS_KEYRING_SUFFIX: &str = "relay-tls";
 const AGENT_RUNTIME_STATUS_FILE: &str = "agent-runtime-status.json";
+const DEFAULT_CREDENTIAL_RENEWAL_WINDOW_MS: u64 = 6 * 60 * 60 * 1_000;
+const DEFAULT_CREDENTIAL_RENEWAL_POLL_MS: u64 = 5 * 60 * 1_000;
+const SUPERVISOR_GRACEFUL_SHUTDOWN_SECONDS: u64 = 40;
 
-#[derive(Default)]
 struct DesktopState {
     supervisor: Mutex<Option<Child>>,
+    credential_maintenance: Mutex<()>,
+    renewal: RwLock<RenewalRuntime>,
+}
+
+impl Default for DesktopState {
+    fn default() -> Self {
+        Self {
+            supervisor: Mutex::new(None),
+            credential_maintenance: Mutex::new(()),
+            renewal: RwLock::new(RenewalRuntime::default()),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct RenewalRuntime {
+    state: &'static str,
+    last_renewed_at_ms: Option<u64>,
+    error: Option<String>,
+    renewal_draining: bool,
+}
+
+impl Default for RenewalRuntime {
+    fn default() -> Self {
+        Self {
+            state: "idle",
+            last_renewed_at_ms: None,
+            error: None,
+            renewal_draining: false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -100,6 +133,10 @@ struct DesktopEnrollmentStatus {
     telemetry_url: Option<String>,
     max_sessions: Option<usize>,
     max_zones: Option<usize>,
+    renewal_state: String,
+    renew_at_ms: Option<u64>,
+    last_renewed_at_ms: Option<u64>,
+    renewal_error: Option<String>,
     error: Option<String>,
 }
 
@@ -350,8 +387,17 @@ fn enrollment_status_for(
     bundle: Option<&SignedHomeEnrollmentBundle>,
     node_id: &str,
     public_key: &str,
+    renewal: &RenewalRuntime,
 ) -> DesktopEnrollmentStatus {
+    let renewal_fields = || {
+        (
+            renewal.state.to_string(),
+            renewal.last_renewed_at_ms,
+            renewal.error.clone(),
+        )
+    };
     let Some(config) = config else {
+        let (renewal_state, last_renewed_at_ms, renewal_error) = renewal_fields();
         return DesktopEnrollmentStatus {
             configured: false,
             enrolled: false,
@@ -363,10 +409,15 @@ fn enrollment_status_for(
             telemetry_url: None,
             max_sessions: None,
             max_zones: None,
+            renewal_state,
+            renew_at_ms: None,
+            last_renewed_at_ms,
+            renewal_error,
             error: Some("尚未配置官方 Enrollment Service".to_string()),
         };
     };
     let Some(bundle) = bundle else {
+        let (renewal_state, last_renewed_at_ms, renewal_error) = renewal_fields();
         return DesktopEnrollmentStatus {
             configured: true,
             enrolled: false,
@@ -378,6 +429,10 @@ fn enrollment_status_for(
             telemetry_url: None,
             max_sessions: None,
             max_zones: None,
+            renewal_state,
+            renew_at_ms: None,
+            last_renewed_at_ms,
+            renewal_error,
             error: None,
         };
     };
@@ -389,6 +444,7 @@ fn enrollment_status_for(
             now_ms(),
         )
         .err();
+    let (renewal_state, last_renewed_at_ms, renewal_error) = renewal_fields();
     DesktopEnrollmentStatus {
         configured: true,
         enrolled: error.is_none(),
@@ -400,6 +456,12 @@ fn enrollment_status_for(
         telemetry_url: Some(bundle.payload.telemetry_url.clone()),
         max_sessions: Some(bundle.payload.resource_policy.max_sessions),
         max_zones: Some(bundle.payload.resource_policy.max_zones),
+        renewal_state,
+        renew_at_ms: Some(
+            credential_expires_at_ms(bundle).saturating_sub(credential_renewal_window_ms()),
+        ),
+        last_renewed_at_ms,
+        renewal_error,
         error,
     }
 }
@@ -418,6 +480,102 @@ async fn fetch_status() -> Result<SupervisorStatus, String> {
         .json()
         .await
         .map_err(|error| format!("decode local Dubhe Node status: {error}"))
+}
+
+async fn fetch_status_after(previous_observation_ms: u64) -> Result<SupervisorStatus, String> {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+    while tokio::time::Instant::now() < deadline {
+        let status = fetch_status().await?;
+        if status.last_observed_at_ms > previous_observation_ms {
+            return Ok(status);
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    Err("Supervisor did not publish a fresh Zone session count within 10 seconds".to_string())
+}
+
+async fn request_supervisor_action(action: &str, management_token: &str) -> Result<(), String> {
+    let endpoint = supervisor_url()?
+        .join(&format!("/v1/{action}"))
+        .map_err(|error| format!("build Supervisor {action} URL: {error}"))?;
+    supervisor_client()?
+        .post(endpoint)
+        .bearer_auth(management_token)
+        .send()
+        .await
+        .map_err(|error| format!("request local Dubhe Node {action}: {error}"))?
+        .error_for_status()
+        .map_err(|error| format!("local Dubhe Node {action} rejected: {error}"))?;
+    Ok(())
+}
+
+async fn local_zone_reachable() -> bool {
+    let Ok(client) = Client::builder()
+        .no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .timeout(Duration::from_millis(500))
+        .build()
+    else {
+        return true;
+    };
+    client
+        .get("http://127.0.0.1:7021/healthz")
+        .send()
+        .await
+        .is_ok_and(|response| response.status().is_success())
+}
+
+async fn stop_supervisor(
+    process: &mut Option<Child>,
+    management_token: &str,
+) -> Result<(), String> {
+    let graceful_result = request_supervisor_action("shutdown", management_token).await;
+    if graceful_result.is_ok() {
+        if let Some(child) = process.as_mut() {
+            match tokio::time::timeout(
+                Duration::from_secs(SUPERVISOR_GRACEFUL_SHUTDOWN_SECONDS),
+                child.wait(),
+            )
+            .await
+            {
+                Ok(Ok(_)) => {
+                    *process = None;
+                    return Ok(());
+                }
+                Ok(Err(error)) => {
+                    return Err(format!("wait for local Dubhe Node shutdown: {error}"));
+                }
+                Err(_) => {}
+            }
+        } else {
+            let deadline = tokio::time::Instant::now()
+                + Duration::from_secs(SUPERVISOR_GRACEFUL_SHUTDOWN_SECONDS);
+            while tokio::time::Instant::now() < deadline {
+                if fetch_status().await.is_err() && !local_zone_reachable().await {
+                    return Ok(());
+                }
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+            return Err(
+                "existing Dubhe Node Supervisor did not finish graceful shutdown within 40 seconds"
+                    .to_string(),
+            );
+        }
+    }
+    let Some(child) = process.as_mut() else {
+        return Err(graceful_result
+            .err()
+            .unwrap_or_else(|| "existing Dubhe Node Supervisor is unresponsive".to_string()));
+    };
+    child
+        .start_kill()
+        .map_err(|error| format!("stop unresponsive local Dubhe Node service: {error}"))?;
+    child
+        .wait()
+        .await
+        .map_err(|error| format!("reap unresponsive local Dubhe Node service: {error}"))?;
+    *process = None;
+    Ok(())
 }
 
 fn bundled_binary(name: &str) -> Result<PathBuf, String> {
@@ -448,24 +606,19 @@ async fn ensure_supervisor(
     public_key: &str,
     keyring_account: &str,
     enrollment: Option<&SignedHomeEnrollmentBundle>,
+    force_restart: bool,
 ) -> Result<SupervisorStatus, String> {
     let manage_zone = enrollment.is_some();
     let manage_agent = enrollment.is_some_and(SignedHomeEnrollmentBundle::relay_ready);
     let mut process = state.supervisor.lock().await;
     if let Ok(status) = fetch_status().await {
-        if status.managed_processes == manage_zone && status.agent_managed == manage_agent {
+        if !force_restart
+            && status.managed_processes == manage_zone
+            && status.agent_managed == manage_agent
+        {
             return Ok(status);
         }
-        if let Some(child) = process.as_mut() {
-            let _ = child.start_kill();
-            let _ = child.wait().await;
-            *process = None;
-        } else {
-            return Err(
-                "another Dubhe Node Supervisor is running with stale enrollment configuration; close the other app instance and retry"
-                    .to_string(),
-            );
-        }
+        stop_supervisor(&mut process, management_token).await?;
     }
     if let Some(child) = process.as_mut() {
         if child
@@ -506,6 +659,9 @@ async fn ensure_supervisor(
             .kill_on_drop(true);
         if let Some(bundle) = enrollment {
             command
+                .env("MIR2_ZONE_OWNER_LEASE_BACKEND", "trusted-rpc")
+                .env("MIR2_ZONE_OWNER_TRUSTED_RPC_OWNERS", node_id)
+                .env("MIR2_ZONE_HOST_OWNER_ALIASES", node_id)
                 .env(
                     "MIR2_HOME_MAX_CPU_PERCENT",
                     bundle.payload.resource_policy.cpu_limit_percent.to_string(),
@@ -653,12 +809,15 @@ async fn bootstrap_node(
         HomeAgentManagementKeyring::new(&account)?.load_or_create_token()?;
     let enrollment_config = enrollment_client_config(&app)?;
     let enrollment_bundle = load_enrollment_bundle(&app)?;
+    let renewal = state.renewal.read().await;
     let enrollment_status = enrollment_status_for(
         enrollment_config.as_ref(),
         enrollment_bundle.as_ref(),
         identity.node_id(),
         identity.public_key(),
+        &renewal,
     );
+    drop(renewal);
     let verified_enrollment = enrollment_status
         .enrolled
         .then_some(enrollment_bundle.as_ref())
@@ -671,6 +830,7 @@ async fn bootstrap_node(
         identity.public_key(),
         &account,
         verified_enrollment,
+        false,
     )
     .await?;
     Ok(DesktopBootstrap {
@@ -692,7 +852,16 @@ async fn node_status() -> Result<SupervisorStatus, String> {
 }
 
 #[tauri::command]
-async fn set_node_serving(serving: bool) -> Result<NodeActionReceipt, String> {
+async fn set_node_serving(
+    serving: bool,
+    state: State<'_, DesktopState>,
+) -> Result<NodeActionReceipt, String> {
+    if serving && matches!(state.renewal.read().await.state, "draining" | "renewing") {
+        return Err(
+            "credential renewal is draining the node; new Sessions remain closed until rotation completes"
+                .to_string(),
+        );
+    }
     let account = keyring_account();
     let token = HomeAgentManagementKeyring::new(account)?.load_token()?;
     let action = if serving { "resume" } else { "drain" };
@@ -718,33 +887,37 @@ async fn set_node_serving(serving: bool) -> Result<NodeActionReceipt, String> {
 }
 
 #[tauri::command]
-async fn enrollment_status(app: AppHandle) -> Result<DesktopEnrollmentStatus, String> {
+async fn enrollment_status(
+    app: AppHandle,
+    state: State<'_, DesktopState>,
+) -> Result<DesktopEnrollmentStatus, String> {
     let identity = HomeAgentKeyring::new(keyring_account())?.load_identity()?;
     let config = enrollment_client_config(&app)?;
     let bundle = load_enrollment_bundle(&app)?;
+    let renewal = state.renewal.read().await;
     Ok(enrollment_status_for(
         config.as_ref(),
         bundle.as_ref(),
         identity.node_id(),
         identity.public_key(),
+        &renewal,
     ))
 }
 
-#[tauri::command]
-async fn enroll_node(
-    app: AppHandle,
-    state: State<'_, DesktopState>,
-) -> Result<DesktopEnrollmentStatus, String> {
-    let account = keyring_account();
-    let identity = HomeAgentKeyring::new(&account)?.load_identity()?;
-    let config = enrollment_client_config(&app)?
-        .ok_or_else(|| "尚未配置官方 Enrollment Service".to_string())?;
-    let client = Client::builder()
+fn enrollment_http_client(timeout: Duration) -> Result<Client, String> {
+    Client::builder()
         .no_proxy()
         .redirect(reqwest::redirect::Policy::none())
-        .timeout(Duration::from_secs(10))
+        .timeout(timeout)
         .build()
-        .map_err(|error| format!("build Home enrollment client: {error}"))?;
+        .map_err(|error| format!("build Home enrollment client: {error}"))
+}
+
+async fn request_enrollment_bundle(
+    config: &EnrollmentClientConfig,
+    identity: &NodeSigningIdentity,
+) -> Result<SignedHomeEnrollmentBundle, String> {
+    let client = enrollment_http_client(Duration::from_secs(10))?;
     let challenge_url = config
         .base_url
         .join("/v1/challenges")
@@ -765,7 +938,7 @@ async fn enroll_node(
         .map_err(|error| format!("decode Home enrollment challenge: {error}"))?;
     let request = HomeEnrollmentRequest::sign(
         challenge,
-        &identity,
+        identity,
         &config.trusted_issuer_public_key,
         now_ms(),
     )?;
@@ -793,7 +966,21 @@ async fn enroll_node(
         identity.public_key(),
         now_ms(),
     )?;
-    save_enrollment_bundle(&app, &response.bundle)?;
+    Ok(response.bundle)
+}
+
+#[tauri::command]
+async fn enroll_node(
+    app: AppHandle,
+    state: State<'_, DesktopState>,
+) -> Result<DesktopEnrollmentStatus, String> {
+    let _maintenance = state.credential_maintenance.lock().await;
+    let account = keyring_account();
+    let identity = HomeAgentKeyring::new(&account)?.load_identity()?;
+    let config = enrollment_client_config(&app)?
+        .ok_or_else(|| "尚未配置官方 Enrollment Service".to_string())?;
+    let bundle = request_enrollment_bundle(&config, &identity).await?;
+    save_enrollment_bundle(&app, &bundle)?;
     let management_token = HomeAgentManagementKeyring::new(&account)?.load_token()?;
     ensure_supervisor(
         &app,
@@ -802,20 +989,30 @@ async fn enroll_node(
         identity.node_id(),
         identity.public_key(),
         &account,
-        Some(&response.bundle),
+        Some(&bundle),
+        false,
     )
     .await?;
+    let renewal = state.renewal.read().await;
     Ok(enrollment_status_for(
         Some(&config),
-        Some(&response.bundle),
+        Some(&bundle),
         identity.node_id(),
         identity.public_key(),
+        &renewal,
     ))
 }
 
-fn create_relay_certificate_request(node_id: &str) -> Result<(Vec<u8>, String), String> {
-    let key =
-        KeyPair::generate().map_err(|error| format!("generate Home Relay client key: {error}"))?;
+fn create_relay_certificate_request(
+    node_id: &str,
+    existing_key: Option<&[u8]>,
+) -> Result<(Vec<u8>, String), String> {
+    let key = match existing_key {
+        Some(key) => KeyPair::try_from(key)
+            .map_err(|error| format!("decode existing Home Relay client key: {error}"))?,
+        None => KeyPair::generate()
+            .map_err(|error| format!("generate Home Relay client key: {error}"))?,
+    };
     let mut params = CertificateParams::new(Vec::<String>::new())
         .map_err(|error| format!("create Home Relay certificate request: {error}"))?;
     params.is_ca = IsCa::NoCa;
@@ -832,17 +1029,12 @@ fn create_relay_certificate_request(node_id: &str) -> Result<(Vec<u8>, String), 
     ))
 }
 
-#[tauri::command]
-async fn certify_node(
-    app: AppHandle,
-    state: State<'_, DesktopState>,
-) -> Result<DesktopEnrollmentStatus, String> {
-    let account = keyring_account();
-    let identity = HomeAgentKeyring::new(&account)?.load_identity()?;
-    let config = enrollment_client_config(&app)?
-        .ok_or_else(|| "尚未配置官方 Enrollment Service".to_string())?;
-    let enrollment =
-        load_enrollment_bundle(&app)?.ok_or_else(|| "请先完成节点签名 Enrollment".to_string())?;
+async fn request_capacity_certification(
+    config: &EnrollmentClientConfig,
+    identity: &NodeSigningIdentity,
+    enrollment: SignedHomeEnrollmentBundle,
+    existing_relay_key: Option<&[u8]>,
+) -> Result<(SignedHomeEnrollmentBundle, Vec<u8>), String> {
     enrollment.verify(
         &config.trusted_issuer_public_key,
         identity.node_id(),
@@ -852,12 +1044,7 @@ async fn certify_node(
     if !fetch_status().await?.zone_reachable {
         return Err("本地 Zone Host 尚未就绪，无法执行容量挑战".to_string());
     }
-    let client = Client::builder()
-        .no_proxy()
-        .redirect(reqwest::redirect::Policy::none())
-        .timeout(Duration::from_secs(45))
-        .build()
-        .map_err(|error| format!("build Home capacity certification client: {error}"))?;
+    let client = enrollment_http_client(Duration::from_secs(45))?;
     let challenge_url = config
         .base_url
         .join("/v1/capacity/challenges")
@@ -886,7 +1073,7 @@ async fn certify_node(
         .map_err(|error| format!("decode signed Home capacity response: {error}"))?;
     response.verify_node_claim(now_ms())?;
     let (relay_private_key, certificate_signing_request_der) =
-        create_relay_certificate_request(identity.node_id())?;
+        create_relay_certificate_request(identity.node_id(), existing_relay_key)?;
     let certification_url = config
         .base_url
         .join("/v1/capacity/certifications")
@@ -921,9 +1108,26 @@ async fn certify_node(
                 .to_string(),
         );
     }
+    Ok((certification.bundle, relay_private_key))
+}
+
+#[tauri::command]
+async fn certify_node(
+    app: AppHandle,
+    state: State<'_, DesktopState>,
+) -> Result<DesktopEnrollmentStatus, String> {
+    let _maintenance = state.credential_maintenance.lock().await;
+    let account = keyring_account();
+    let identity = HomeAgentKeyring::new(&account)?.load_identity()?;
+    let config = enrollment_client_config(&app)?
+        .ok_or_else(|| "尚未配置官方 Enrollment Service".to_string())?;
+    let enrollment =
+        load_enrollment_bundle(&app)?.ok_or_else(|| "请先完成节点签名 Enrollment".to_string())?;
+    let (bundle, relay_private_key) =
+        request_capacity_certification(&config, &identity, enrollment, None).await?;
     HomeAgentKeyring::new(relay_tls_keyring_account(&account))?.store_secret(&relay_private_key)?;
-    save_certified_bundle_material(&app, &account, &certification.bundle)?;
-    save_enrollment_bundle(&app, &certification.bundle)?;
+    save_certified_bundle_material(&app, &account, &bundle)?;
+    save_enrollment_bundle(&app, &bundle)?;
     let management_token = HomeAgentManagementKeyring::new(&account)?.load_token()?;
     ensure_supervisor(
         &app,
@@ -932,14 +1136,254 @@ async fn certify_node(
         identity.node_id(),
         identity.public_key(),
         &account,
-        Some(&certification.bundle),
+        Some(&bundle),
+        false,
     )
     .await?;
+    let renewal = state.renewal.read().await;
     Ok(enrollment_status_for(
         Some(&config),
-        Some(&certification.bundle),
+        Some(&bundle),
         identity.node_id(),
         identity.public_key(),
+        &renewal,
+    ))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RenewalDecision {
+    Current,
+    Drain,
+    Renew,
+}
+
+fn renewal_decision(
+    expires_at_ms: u64,
+    observed_at_ms: u64,
+    active_sessions: usize,
+    renewal_window_ms: u64,
+    force: bool,
+) -> RenewalDecision {
+    if !force && expires_at_ms.saturating_sub(observed_at_ms) > renewal_window_ms {
+        RenewalDecision::Current
+    } else if active_sessions > 0 {
+        RenewalDecision::Drain
+    } else {
+        RenewalDecision::Renew
+    }
+}
+
+fn credential_expires_at_ms(bundle: &SignedHomeEnrollmentBundle) -> u64 {
+    let mut expires_at_ms = bundle.payload.expires_at_ms;
+    if let Some(certificate) = bundle.payload.capacity_certificate.as_ref() {
+        expires_at_ms = expires_at_ms.min(certificate.expires_at_ms);
+    }
+    if let Some(placement) = bundle.payload.placement.as_ref() {
+        expires_at_ms = expires_at_ms.min(placement.expires_at_ms);
+    }
+    if let Some(credential) = bundle.payload.relay_credential.as_ref() {
+        expires_at_ms = expires_at_ms.min(credential.expires_at_ms);
+    }
+    expires_at_ms
+}
+
+fn preserve_drain_after_restart(status: &SupervisorStatus, renewal_draining: bool) -> bool {
+    !renewal_draining
+        && !status.accept_new_sessions
+        && matches!(
+            status.reason.as_str(),
+            "manual_drain" | "host_resource_pressure" | "system_sleep_or_resume_detected"
+        )
+}
+
+fn duration_env_ms(name: &str, default: u64) -> u64 {
+    env::var(name)
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .filter(|value| *value >= 1_000)
+        .unwrap_or(default)
+}
+
+fn credential_renewal_window_ms() -> u64 {
+    duration_env_ms(
+        "MIR2_HOME_CREDENTIAL_RENEWAL_WINDOW_MS",
+        DEFAULT_CREDENTIAL_RENEWAL_WINDOW_MS,
+    )
+}
+
+fn credential_renewal_poll_ms() -> u64 {
+    duration_env_ms(
+        "MIR2_HOME_CREDENTIAL_RENEWAL_POLL_MS",
+        DEFAULT_CREDENTIAL_RENEWAL_POLL_MS,
+    )
+}
+
+async fn set_renewal_state(
+    state: &DesktopState,
+    renewal_state: &'static str,
+    error: Option<String>,
+) {
+    let mut renewal = state.renewal.write().await;
+    renewal.state = renewal_state;
+    renewal.error = error;
+}
+
+async fn maintain_credentials(
+    app: &AppHandle,
+    state: &DesktopState,
+    force: bool,
+) -> Result<bool, String> {
+    let _maintenance = state.credential_maintenance.lock().await;
+    let account = keyring_account();
+    let identity = HomeAgentKeyring::new(&account)?.load_identity()?;
+    let Some(config) = enrollment_client_config(app)? else {
+        set_renewal_state(state, "not-configured", None).await;
+        return Ok(false);
+    };
+    let Some(bundle) = load_enrollment_bundle(app)? else {
+        set_renewal_state(state, "awaiting-enrollment", None).await;
+        return Ok(false);
+    };
+    if !bundle.relay_ready() {
+        set_renewal_state(state, "awaiting-certification", None).await;
+        return Ok(false);
+    }
+    let mut status = fetch_status().await?;
+    let bundle_valid = bundle
+        .verify(
+            &config.trusted_issuer_public_key,
+            identity.node_id(),
+            identity.public_key(),
+            now_ms(),
+        )
+        .is_ok();
+    let expires_at_ms = credential_expires_at_ms(&bundle);
+    match renewal_decision(
+        expires_at_ms,
+        now_ms(),
+        status.active_sessions,
+        credential_renewal_window_ms(),
+        force || !bundle_valid,
+    ) {
+        RenewalDecision::Current => {
+            set_renewal_state(state, "current", None).await;
+            return Ok(false);
+        }
+        RenewalDecision::Drain => {
+            let management_token = HomeAgentManagementKeyring::new(&account)?.load_token()?;
+            request_supervisor_action("drain", &management_token).await?;
+            let mut renewal = state.renewal.write().await;
+            renewal.state = "draining";
+            renewal.error = None;
+            renewal.renewal_draining = true;
+            return Ok(false);
+        }
+        RenewalDecision::Renew => {}
+    }
+
+    let management_token = HomeAgentManagementKeyring::new(&account)?.load_token()?;
+    if status.accept_new_sessions {
+        let previous_observation_ms = status.last_observed_at_ms;
+        request_supervisor_action("drain", &management_token).await?;
+        {
+            let mut renewal = state.renewal.write().await;
+            renewal.state = "draining";
+            renewal.error = None;
+            renewal.renewal_draining = true;
+        }
+        status = fetch_status_after(previous_observation_ms).await?;
+        if status.active_sessions > 0 {
+            return Ok(false);
+        }
+    }
+    set_renewal_state(state, "renewing", None).await;
+    let relay_keyring = HomeAgentKeyring::new(relay_tls_keyring_account(&account))?;
+    let relay_private_key = relay_keyring.load_secret()?;
+    let fresh_enrollment = request_enrollment_bundle(&config, &identity).await?;
+    if !status.zone_reachable {
+        ensure_supervisor(
+            app,
+            state,
+            &management_token,
+            identity.node_id(),
+            identity.public_key(),
+            &account,
+            Some(&fresh_enrollment),
+            true,
+        )
+        .await?;
+    }
+    let (certified_bundle, returned_relay_key) = request_capacity_certification(
+        &config,
+        &identity,
+        fresh_enrollment,
+        Some(&relay_private_key),
+    )
+    .await?;
+    if returned_relay_key != relay_private_key {
+        return Err(
+            "Home Relay renewal unexpectedly replaced the existing private key".to_string(),
+        );
+    }
+    save_certified_bundle_material(app, &account, &certified_bundle)?;
+    save_enrollment_bundle(app, &certified_bundle)?;
+    let renewal_draining = state.renewal.read().await.renewal_draining;
+    let restore_drain = preserve_drain_after_restart(&status, renewal_draining);
+    ensure_supervisor(
+        app,
+        state,
+        &management_token,
+        identity.node_id(),
+        identity.public_key(),
+        &account,
+        Some(&certified_bundle),
+        true,
+    )
+    .await?;
+    if restore_drain {
+        request_supervisor_action("drain", &management_token).await?;
+    }
+    let mut renewal = state.renewal.write().await;
+    renewal.state = "current";
+    renewal.last_renewed_at_ms = Some(now_ms());
+    renewal.error = None;
+    renewal.renewal_draining = false;
+    Ok(true)
+}
+
+async fn credential_renewal_loop(app: AppHandle) {
+    let interval = Duration::from_millis(credential_renewal_poll_ms());
+    loop {
+        tokio::time::sleep(interval).await;
+        let state = app.state::<DesktopState>();
+        if let Err(error) = maintain_credentials(&app, &state, false).await {
+            let mut renewal = state.renewal.write().await;
+            renewal.state = "failed";
+            renewal.error = Some(error);
+        }
+    }
+}
+
+#[tauri::command]
+async fn renew_node_credentials(
+    app: AppHandle,
+    state: State<'_, DesktopState>,
+) -> Result<DesktopEnrollmentStatus, String> {
+    if let Err(error) = maintain_credentials(&app, &state, true).await {
+        set_renewal_state(&state, "failed", Some(error.clone())).await;
+        return Err(error);
+    }
+    let account = keyring_account();
+    let identity = HomeAgentKeyring::new(&account)?.load_identity()?;
+    let config = enrollment_client_config(&app)?;
+    let bundle = load_enrollment_bundle(&app)?;
+    let renewal = state.renewal.read().await;
+    Ok(enrollment_status_for(
+        config.as_ref(),
+        bundle.as_ref(),
+        identity.node_id(),
+        identity.public_key(),
+        &renewal,
     ))
 }
 
@@ -954,13 +1398,21 @@ fn now_ms() -> u64 {
 pub fn run() {
     tauri::Builder::default()
         .manage(DesktopState::default())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                credential_renewal_loop(handle).await;
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             bootstrap_node,
             node_status,
             set_node_serving,
             enrollment_status,
             enroll_node,
-            certify_node
+            certify_node,
+            renew_node_credentials
         ])
         .run(tauri::generate_context!())
         .expect("error while running Dubhe Node desktop application");
@@ -987,5 +1439,37 @@ mod tests {
         assert!(validate_enrollment_url("http://localhost:18080").is_ok());
         assert!(validate_enrollment_url("http://enrollment.obelisk.game").is_err());
         assert!(validate_enrollment_url("https://user@example.com").is_err());
+    }
+
+    #[test]
+    fn renewal_waits_for_sessions_and_rotates_inside_window() {
+        let expires_at_ms = 10_000;
+        assert_eq!(
+            renewal_decision(expires_at_ms, 1_000, 0, 2_000, false),
+            RenewalDecision::Current
+        );
+        assert_eq!(
+            renewal_decision(expires_at_ms, 9_000, 3, 2_000, false),
+            RenewalDecision::Drain
+        );
+        assert_eq!(
+            renewal_decision(expires_at_ms, 9_000, 0, 2_000, false),
+            RenewalDecision::Renew
+        );
+        assert_eq!(
+            renewal_decision(expires_at_ms, 1_000, 0, 2_000, true),
+            RenewalDecision::Renew
+        );
+    }
+
+    #[test]
+    fn relay_certificate_renewal_reuses_private_key() {
+        let (key, first_request) =
+            create_relay_certificate_request("node-test", None).expect("create first request");
+        let (reused, second_request) =
+            create_relay_certificate_request("node-test", Some(&key)).expect("reuse client key");
+        assert_eq!(reused, key);
+        assert!(!first_request.is_empty());
+        assert!(!second_request.is_empty());
     }
 }

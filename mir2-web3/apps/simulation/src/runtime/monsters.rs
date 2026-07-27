@@ -223,7 +223,7 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
 /// disagree. It mirrors [`start_game_visible_respawn_spawns`] but places the
 /// entire `count` over the whole spread (no data-range clamp); callers that
 /// only want the on-screen subset filter the result by `point_in_data_range`.
-pub(super) fn crystal_world_respawn_spawns(
+pub fn crystal_world_respawn_spawns(
     map_file_name: &str,
     respawn: &CrystalRespawnTemplate,
 ) -> Vec<(usize, Point, MirDirection)> {

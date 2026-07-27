@@ -1,0 +1,137 @@
+HTTP/1.1 200 OK
+Content-Type: text/plain; version=0.0.4; charset=utf-8
+Content-Length: 10058
+Connection: close
+
+# HELP obelisk_zone_host_up Zone Host process readiness.
+# TYPE obelisk_zone_host_up gauge
+obelisk_zone_host_up{host_id="gate20-active-3"} 1
+# HELP obelisk_zone_host_uptime_seconds Zone Host process uptime in seconds.
+# TYPE obelisk_zone_host_uptime_seconds gauge
+obelisk_zone_host_uptime_seconds{host_id="gate20-active-3"} 289
+# HELP obelisk_zone_host_sessions Currently hosted sessions.
+# TYPE obelisk_zone_host_sessions gauge
+obelisk_zone_host_sessions{host_id="gate20-active-3"} 6
+# HELP obelisk_zone_host_session_capacity Configured session capacity.
+# TYPE obelisk_zone_host_session_capacity gauge
+obelisk_zone_host_session_capacity{host_id="gate20-active-3"} 1536
+# HELP obelisk_zone_host_session_capacity_per_zone Configured session capacity per Zone.
+# TYPE obelisk_zone_host_session_capacity_per_zone gauge
+obelisk_zone_host_session_capacity_per_zone{host_id="gate20-active-3"} 128
+# HELP obelisk_zone_host_busiest_zone_sessions Current session count in the busiest Zone.
+# TYPE obelisk_zone_host_busiest_zone_sessions gauge
+obelisk_zone_host_busiest_zone_sessions{host_id="gate20-active-3"} 2
+# HELP obelisk_zone_host_zones Currently hosted Zones.
+# TYPE obelisk_zone_host_zones gauge
+obelisk_zone_host_zones{host_id="gate20-active-3"} 5
+# HELP obelisk_zone_host_zone_capacity Configured Zone capacity.
+# TYPE obelisk_zone_host_zone_capacity gauge
+obelisk_zone_host_zone_capacity{host_id="gate20-active-3"} 128
+# HELP obelisk_zone_host_active_connections Currently active Zone RPC connections.
+# TYPE obelisk_zone_host_active_connections gauge
+obelisk_zone_host_active_connections{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_draining Whether the Zone Host is draining.
+# TYPE obelisk_zone_host_draining gauge
+obelisk_zone_host_draining{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_connections_total Accepted Zone RPC connections.
+# TYPE obelisk_zone_host_connections_total counter
+obelisk_zone_host_connections_total{host_id="gate20-active-3"} 337
+# HELP obelisk_zone_host_rpc_requests_total Zone RPC requests received.
+# TYPE obelisk_zone_host_rpc_requests_total counter
+obelisk_zone_host_rpc_requests_total{host_id="gate20-active-3"} 21452
+# HELP obelisk_zone_host_rpc_errors_total Zone RPC requests that returned an error.
+# TYPE obelisk_zone_host_rpc_errors_total counter
+obelisk_zone_host_rpc_errors_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_rpc_service_duration_ns_total Nanoseconds spent decoding, dispatching, and encoding Zone RPC requests.
+# TYPE obelisk_zone_host_rpc_service_duration_ns_total counter
+obelisk_zone_host_rpc_service_duration_ns_total{host_id="gate20-active-3"} 1565695928538
+# HELP obelisk_zone_host_rpc_service_duration_ns_max Maximum nanoseconds spent decoding, dispatching, and encoding one Zone RPC request.
+# TYPE obelisk_zone_host_rpc_service_duration_ns_max gauge
+obelisk_zone_host_rpc_service_duration_ns_max{host_id="gate20-active-3"} 1310860417
+# HELP obelisk_zone_host_rpc_response_bytes_total Encoded Zone RPC response bytes.
+# TYPE obelisk_zone_host_rpc_response_bytes_total counter
+obelisk_zone_host_rpc_response_bytes_total{host_id="gate20-active-3"} 210469509
+# HELP obelisk_zone_host_rpc_response_bytes_max Largest encoded Zone RPC response in bytes.
+# TYPE obelisk_zone_host_rpc_response_bytes_max gauge
+obelisk_zone_host_rpc_response_bytes_max{host_id="gate20-active-3"} 116951
+# HELP obelisk_zone_host_zone_gate_wait_duration_ns_total Nanoseconds spent waiting for per-Zone mutation lanes.
+# TYPE obelisk_zone_host_zone_gate_wait_duration_ns_total counter
+obelisk_zone_host_zone_gate_wait_duration_ns_total{host_id="gate20-active-3"} 1299490187846
+# HELP obelisk_zone_host_zone_gate_wait_duration_ns_max Maximum nanoseconds spent waiting for a per-Zone mutation lane.
+# TYPE obelisk_zone_host_zone_gate_wait_duration_ns_max gauge
+obelisk_zone_host_zone_gate_wait_duration_ns_max{host_id="gate20-active-3"} 1209075250
+# HELP obelisk_zone_host_execute_requests_total Execute RPC requests received.
+# TYPE obelisk_zone_host_execute_requests_total counter
+obelisk_zone_host_execute_requests_total{host_id="gate20-active-3"} 6514
+# HELP obelisk_zone_host_execute_runtime_duration_ns_total Nanoseconds spent executing gameplay runtime commands.
+# TYPE obelisk_zone_host_execute_runtime_duration_ns_total counter
+obelisk_zone_host_execute_runtime_duration_ns_total{host_id="gate20-active-3"} 205887532221
+# HELP obelisk_zone_host_execute_journal_duration_ns_total Nanoseconds spent appending accepted gameplay commands to the journal.
+# TYPE obelisk_zone_host_execute_journal_duration_ns_total counter
+obelisk_zone_host_execute_journal_duration_ns_total{host_id="gate20-active-3"} 139117029
+# HELP obelisk_zone_host_checkpoint_journal_entries Current v4 checkpoint journal entries.
+# TYPE obelisk_zone_host_checkpoint_journal_entries gauge
+obelisk_zone_host_checkpoint_journal_entries{host_id="gate20-active-3"} 54422
+# HELP obelisk_zone_host_journal_compactions_total Successful durable-prefix journal compactions.
+# TYPE obelisk_zone_host_journal_compactions_total counter
+obelisk_zone_host_journal_compactions_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_journal_compacted_entries_total Journal entries removed by durable-prefix compaction.
+# TYPE obelisk_zone_host_journal_compacted_entries_total counter
+obelisk_zone_host_journal_compacted_entries_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_exports_total Successful v4 checkpoint exports.
+# TYPE obelisk_zone_host_checkpoint_exports_total counter
+obelisk_zone_host_checkpoint_exports_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_export_bytes_total Bytes produced by successful v4 checkpoint exports.
+# TYPE obelisk_zone_host_checkpoint_export_bytes_total counter
+obelisk_zone_host_checkpoint_export_bytes_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_export_duration_ns_total Nanoseconds spent producing successful v4 checkpoint exports.
+# TYPE obelisk_zone_host_checkpoint_export_duration_ns_total counter
+obelisk_zone_host_checkpoint_export_duration_ns_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_export_last_bytes Bytes in the last successful v4 checkpoint export.
+# TYPE obelisk_zone_host_checkpoint_export_last_bytes gauge
+obelisk_zone_host_checkpoint_export_last_bytes{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_export_last_duration_ns Nanoseconds spent in the last successful v4 checkpoint export.
+# TYPE obelisk_zone_host_checkpoint_export_last_duration_ns gauge
+obelisk_zone_host_checkpoint_export_last_duration_ns{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_installs_total Successful v4 checkpoint installs.
+# TYPE obelisk_zone_host_checkpoint_installs_total counter
+obelisk_zone_host_checkpoint_installs_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_install_bytes_total Bytes consumed by successful v4 checkpoint installs.
+# TYPE obelisk_zone_host_checkpoint_install_bytes_total counter
+obelisk_zone_host_checkpoint_install_bytes_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_install_duration_ns_total Nanoseconds spent applying successful v4 checkpoint installs.
+# TYPE obelisk_zone_host_checkpoint_install_duration_ns_total counter
+obelisk_zone_host_checkpoint_install_duration_ns_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_install_last_bytes Bytes in the last successful v4 checkpoint install.
+# TYPE obelisk_zone_host_checkpoint_install_last_bytes gauge
+obelisk_zone_host_checkpoint_install_last_bytes{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_install_last_duration_ns Nanoseconds spent in the last successful v4 checkpoint install.
+# TYPE obelisk_zone_host_checkpoint_install_last_duration_ns gauge
+obelisk_zone_host_checkpoint_install_last_duration_ns{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_replay_entries_total Journal entries replayed by successful v4 checkpoint installs.
+# TYPE obelisk_zone_host_checkpoint_replay_entries_total counter
+obelisk_zone_host_checkpoint_replay_entries_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_checkpoint_replay_last_entries Journal entries replayed by the last successful v4 checkpoint install.
+# TYPE obelisk_zone_host_checkpoint_replay_last_entries gauge
+obelisk_zone_host_checkpoint_replay_last_entries{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_promotion_assessments_total Standby promotion readiness assessments.
+# TYPE obelisk_zone_host_promotion_assessments_total counter
+obelisk_zone_host_promotion_assessments_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_promotion_ready_assessments_total Standby promotion readiness assessments that issued a receipt.
+# TYPE obelisk_zone_host_promotion_ready_assessments_total counter
+obelisk_zone_host_promotion_ready_assessments_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_promotion_attempts_total Fenced standby promotion attempts.
+# TYPE obelisk_zone_host_promotion_attempts_total counter
+obelisk_zone_host_promotion_attempts_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_promotions_total Successful fenced standby promotions.
+# TYPE obelisk_zone_host_promotions_total counter
+obelisk_zone_host_promotions_total{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_promotion_last_promoted_at_ms Unix timestamp in milliseconds of the last successful promotion.
+# TYPE obelisk_zone_host_promotion_last_promoted_at_ms gauge
+obelisk_zone_host_promotion_last_promoted_at_ms{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_promotion_ready_zones Number of Zones with an unexpired promotion readiness receipt.
+# TYPE obelisk_zone_host_promotion_ready_zones gauge
+obelisk_zone_host_promotion_ready_zones{host_id="gate20-active-3"} 0
+# HELP obelisk_zone_host_build_info Static Zone Host build and protocol information.
+# TYPE obelisk_zone_host_build_info gauge
+obelisk_zone_host_build_info{host_id="gate20-active-3",version="0.1.0",protocol_version="8"} 1
