@@ -110,6 +110,12 @@ https://relay-hk.obelisk.build/home/telemetry/*
 Relay 服务端证书必须包含 `DNS:relay-hk.obelisk.build` SAN。安装器同时保留
 旧 `sslip.io` SAN 作为迁移回退；新的 Enrollment Bundle 只下发正式域名。
 
+远程管理台使用 `GET /home/telemetry/v1/operator` 读取全部已准入家庭节点、
+分配 Zone、认证容量与最近一次签名遥测。该接口必须携带
+`Authorization: Bearer <telemetry operator token>`，令牌只保存在 UCloud
+密钥文件与 Vercel 加密环境变量中；浏览器不会收到该令牌。单节点路径
+`/home/telemetry/v1/operator/{node_id}` 保留用于定点巡检与撤销后的排障。
+
 ## 接入官方 Gateway
 
 Gateway 二进制必须包含 `MIR2_ZONE_HOST_ADDR` 远程 Zone RPC 支持。旧二进制
