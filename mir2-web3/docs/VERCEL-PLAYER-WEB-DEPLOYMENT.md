@@ -599,6 +599,9 @@ runtime assets in the app bundle when practical.
 Before handing a Vercel Player Web URL to testers:
 
 - Vercel preview build passes.
+- `/version` returns the deployed Git SHA. `MIR2_DEPLOY_REVISION` remains the
+  explicit self-hosted override; Vercel falls back to its runtime
+  `VERCEL_GIT_COMMIT_SHA` and a build-captured copy of the same value.
 - Vercel runtime logs show no missing `MIR2_PASSKEY_AUTH_SECRET`.
 - Browser first load returns 200.
 - `/api/passkey/login` rejects malformed input and succeeds for a valid wallet
