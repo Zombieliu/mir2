@@ -10,8 +10,11 @@ use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
-use mir2_gateway::{HomeTelemetryStore, SignedHomeEnrollmentBundle, SignedHomeNodeTelemetry};
-use serde::Deserialize;
+use mir2_gateway::{
+    HomeNodeOperatorTelemetryView, HomeTelemetryStore, SignedHomeEnrollmentBundle,
+    SignedHomeNodeTelemetry,
+};
+use serde::{Deserialize, Serialize};
 
 const DEFAULT_BIND: &str = "127.0.0.1:18081";
 
@@ -30,8 +33,23 @@ struct HomeTelemetryAdmission {
     public_key: String,
     key_generation: u64,
     capacity_certificate_id: String,
+    capacity_max_sessions: usize,
+    capacity_max_zones: usize,
+    assigned_zone_id: String,
     placement_generation: u64,
     expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HomeTelemetryOperatorNode {
+    node_id: String,
+    assigned_zone_id: String,
+    capacity_max_sessions: usize,
+    capacity_max_zones: usize,
+    placement_generation: u64,
+    admission_expires_at_ms: u64,
+    telemetry: Option<HomeNodeOperatorTelemetryView>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -88,6 +106,7 @@ async fn run() -> Result<(), String> {
         .route("/healthz", get(health))
         .route("/v1/telemetry", post(ingest))
         .route("/v1/public", get(public_view))
+        .route("/v1/operator", get(operator_nodes))
         .route(
             "/v1/operator/{node_id}",
             get(operator_view).delete(delete_node),
@@ -265,6 +284,9 @@ fn load_admissions(
             public_key: bundle.payload.public_key.clone(),
             key_generation: bundle.payload.key_generation,
             capacity_certificate_id: certificate.certificate_id.clone(),
+            capacity_max_sessions: certificate.max_sessions,
+            capacity_max_zones: certificate.max_zones,
+            assigned_zone_id: placement.zone_id.clone(),
             placement_generation: placement.generation,
             expires_at_ms: bundle
                 .payload
@@ -327,6 +349,50 @@ async fn operator_view(
         )
             .into_response(),
     }
+}
+
+async fn operator_nodes(State(state): State<CollectorState>, headers: HeaderMap) -> Response {
+    if !bearer_matches(&headers, &state.operator_token) {
+        return unauthorized();
+    }
+    if let Err(error) = refresh_admissions(&state, now_ms()) {
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(serde_json::json!({"error": error})),
+        )
+            .into_response();
+    }
+    let now = now_ms();
+    let admissions = match state.admissions.read() {
+        Ok(admissions) => admissions,
+        Err(_) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": "Home telemetry admissions lock poisoned"})),
+            )
+                .into_response();
+        }
+    };
+    let nodes = admissions
+        .iter()
+        .map(|(node_id, admission)| HomeTelemetryOperatorNode {
+            node_id: node_id.clone(),
+            assigned_zone_id: admission.assigned_zone_id.clone(),
+            capacity_max_sessions: admission.capacity_max_sessions,
+            capacity_max_zones: admission.capacity_max_zones,
+            placement_generation: admission.placement_generation,
+            admission_expires_at_ms: admission.expires_at_ms,
+            telemetry: state.store.operator_view(node_id, now),
+        })
+        .collect::<Vec<_>>();
+    (
+        StatusCode::OK,
+        Json(serde_json::json!({
+            "generatedAtMs": now,
+            "nodes": nodes,
+        })),
+    )
+        .into_response()
 }
 
 async fn delete_node(

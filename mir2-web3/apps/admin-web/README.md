@@ -121,6 +121,31 @@ checks that the live identity matches the active Sui registration. Key rotation
 and revocation remain intentionally read-only in the web UI; they require the
 owner capability and the audited CLI lifecycle.
 
+### Remote Home Node telemetry
+
+The production console is available at
+`https://telemetry.obelisk.build/dubhe-nodes`. Vercel runs the Next.js
+application, while the Cloudflare `mir2-telemetry-domain-proxy` Worker provides
+the custom domain, TLS edge, no-store policy, and response security headers.
+The application also requires `ADMIN_DASHBOARD_TOKEN`; the same server-side
+guard protects both pages and `/api/dubhe-nodes`, including direct Vercel URLs.
+
+Production reads the UCloud collector through its authenticated operator API:
+
+```dotenv
+DUBHE_HOME_TELEMETRY_URL=https://relay-hk.obelisk.build/home/telemetry
+DUBHE_HOME_RELAY_URL=https://relay-hk.obelisk.build
+DUBHE_HOME_TELEMETRY_OPERATOR_TOKEN=<collector read token>
+ADMIN_DASHBOARD_TOKEN=<independent dashboard login token>
+```
+
+`GET /v1/operator` returns every signed production admission, its assigned
+Zone, certified capacity, and the latest verified Home Node report. This keeps
+an admitted but offline node visible. The console deliberately distinguishes
+assigned workload from current activity: `primary` means all game maps even
+when no player is online; `map:<file>:line:<n>` identifies one explicit map
+line; Sessions and Active Zones remain zero while the node is idle.
+
 The UI-local public snapshot exists because the production Next.js build does
 not import JSON from outside the Admin Web root. Verify that it still matches
 the authoritative deployment and Gate 13 files after regenerating evidence:
