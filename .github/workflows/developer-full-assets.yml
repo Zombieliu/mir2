@@ -15,8 +15,6 @@ on:
       - "mir2-web3/scripts/accept-clean-room.sh"
       - "mir2-web3/scripts/dev.sh"
       - "mir2-web3/scripts/install-developer-assets.sh"
-  workflow_dispatch:
-
 concurrency:
   group: developer-full-assets-main
   cancel-in-progress: false
@@ -33,7 +31,7 @@ jobs:
       ready: ${{ steps.lock.outputs.ready }}
     steps:
       - name: Checkout release lock
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Inspect release lock
         id: lock
@@ -74,7 +72,7 @@ jobs:
       asset_hash: ${{ steps.release.outputs.asset_hash }}
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           clean: true
           persist-credentials: false
@@ -86,12 +84,17 @@ jobs:
           docker info --format 'Docker Engine {{.ServerVersion}}'
           docker compose version
           gh --version | head -n 1
-          available_kib="$(df -Pk "$RUNNER_TEMP" | awk 'NR == 2 { print $4 }')"
           required_kib=$((40 * 1024 * 1024))
-          if [[ "$available_kib" -lt "$required_kib" ]]; then
-            echo "Full asset acceptance requires at least 40 GiB free in RUNNER_TEMP." >&2
-            exit 1
-          fi
+          docker_root="$(docker info --format '{{.DockerRootDir}}')"
+          for capacity_path in "$RUNNER_TEMP" "$docker_root"; do
+            available_kib="$(
+              df -Pk "$capacity_path" | awk 'NR == 2 { print $4 }'
+            )"
+            if [[ "$available_kib" -lt "$required_kib" ]]; then
+              echo "Full asset acceptance requires at least 40 GiB free at $capacity_path." >&2
+              exit 1
+            fi
+          done
 
       - name: Read locked asset identity
         id: release
@@ -112,14 +115,47 @@ jobs:
           trap cleanup EXIT
           export HOME="$auth_home"
           gh auth status --hostname github.com
-          gh auth setup-git
-          git config --global \
-            url."https://github.com/".insteadOf \
-            "git@github.com:"
+          credential_file="$auth_home/git-credentials"
+          (
+            umask 077
+            printf 'https://x-access-token:%s@github.com\n' "$GH_TOKEN" > \
+              "$credential_file"
+          )
+          export GIT_CONFIG_COUNT=3
+          export GIT_CONFIG_KEY_0=credential.helper
+          export GIT_CONFIG_VALUE_0=
+          export GIT_CONFIG_KEY_1=credential.helper
+          export GIT_CONFIG_VALUE_1="store --file=$credential_file"
+          export GIT_CONFIG_KEY_2=url.https://github.com/.insteadOf
+          export GIT_CONFIG_VALUE_2=git@github.com:
           ./mir2-web3/scripts/accept-clean-room.sh \
             --repository https://github.com/Zombieliu/mir2.git \
             --revision "$GITHUB_SHA" \
             --full-assets
+
+      - name: Reclaim dedicated runner Docker space
+        if: always()
+        run: |
+          published_reference="$(
+            node -e '
+              const release = require("./mir2-web3/config/developer-release.json");
+              process.stdout.write(
+                `${release.container.publishedImage}@${release.container.publishedDigest}`,
+              );
+            '
+          )"
+          if ! docker image rm \
+            "mir2-web3-developer:local-${GITHUB_SHA:0:12}" \
+            "$published_reference" \
+            >/dev/null 2>&1; then
+            echo "::warning::Unable to remove one or more clean-room images."
+          fi
+          if ! docker builder prune \
+            --force \
+            --filter "until=168h" \
+            >/dev/null; then
+            echo "::warning::Unable to prune stale dedicated-runner build cache."
+          fi
 
   full-assets-witness:
     name: Publish Full Assets clean-room witness
@@ -129,7 +165,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout accepted revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Publish immutable Full Assets witness
         env:

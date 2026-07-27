@@ -55,6 +55,66 @@ function readJson(absolutePath, label) {
   }
 }
 
+function yamlTopLevelBlock(source, key, label) {
+  const lines = source.replaceAll("\r\n", "\n").split("\n");
+  const start = lines.findIndex((line) => line === `${key}:`);
+  assert(start >= 0, `${label} has no top-level ${key} block`);
+  let end = start + 1;
+  while (
+    end < lines.length &&
+    (lines[end].trim() === "" || lines[end].trimStart().startsWith("#") || /^\s/.test(lines[end]))
+  ) {
+    end += 1;
+  }
+  return lines.slice(start + 1, end);
+}
+
+function assertMainPushOnlyWorkflow(source, label) {
+  const onBlock = yamlTopLevelBlock(source, "on", label);
+  const events = onBlock
+    .map((line) => /^  ([a-zA-Z0-9_-]+):(?:\s.*)?$/.exec(line)?.[1])
+    .filter(Boolean);
+  assertJsonEqual(events, ["push"], `${label} privileged triggers`);
+
+  const pushStart = onBlock.findIndex((line) => line === "  push:");
+  assert(pushStart >= 0, `${label} has no push trigger`);
+  const pushBlock = onBlock.slice(pushStart + 1);
+  const branchStart = pushBlock.findIndex((line) => line === "    branches:");
+  assert(branchStart >= 0, `${label} push trigger has no branch allowlist`);
+  const branches = [];
+  for (let index = branchStart + 1; index < pushBlock.length; index += 1) {
+    const line = pushBlock[index];
+    if (/^\s{4}\S/.test(line)) break;
+    const match = /^\s{6}-\s+(.+?)\s*$/.exec(line);
+    if (match) branches.push(match[1]);
+  }
+  assertJsonEqual(branches, ["main"], `${label} privileged push branches`);
+}
+
+function assertPinnedWorkflowActions(source, label) {
+  const actionRefs = [...source.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)].map(
+    (match) => match[1],
+  );
+  assert(actionRefs.length > 0, `${label} has no external actions to inspect`);
+  for (const actionRef of actionRefs) {
+    assert(
+      /@[a-f0-9]{40}$/.test(actionRef),
+      `${label} action is not pinned to a full commit: ${actionRef}`,
+    );
+  }
+}
+
+function assertTopLevelPermissions(source, expected, label) {
+  const permissions = {};
+  for (const line of yamlTopLevelBlock(source, "permissions", label)) {
+    if (line.trim() === "" || line.trimStart().startsWith("#")) continue;
+    const match = /^  ([a-zA-Z0-9_-]+):\s*(read|write|none)\s*$/.exec(line);
+    assert(match, `${label} has an invalid top-level permission line: ${line}`);
+    permissions[match[1]] = match[2];
+  }
+  assertJsonEqual(permissions, expected, `${label} top-level permissions`);
+}
+
 function fileInfo(absolutePath, label) {
   let info;
   try {
@@ -373,6 +433,80 @@ function checkDeveloperReleaseLock() {
     assert(
       !workflow.includes("git push --force") && !workflow.includes("git tag --force"),
       `${relativeWorkflowPath} must not overwrite acceptance evidence`,
+    );
+  }
+  const imageWorkflow = readFileSync(
+    repositoryPath(".github/workflows/developer-image.yml"),
+    "utf8",
+  );
+  const fullAssetWorkflow = readFileSync(
+    repositoryPath(".github/workflows/developer-full-assets.yml"),
+    "utf8",
+  );
+  assertMainPushOnlyWorkflow(
+    imageWorkflow,
+    ".github/workflows/developer-image.yml",
+  );
+  assertMainPushOnlyWorkflow(
+    fullAssetWorkflow,
+    ".github/workflows/developer-full-assets.yml",
+  );
+  assertPinnedWorkflowActions(imageWorkflow, ".github/workflows/developer-image.yml");
+  assertPinnedWorkflowActions(
+    fullAssetWorkflow,
+    ".github/workflows/developer-full-assets.yml",
+  );
+  assertTopLevelPermissions(
+    imageWorkflow,
+    {
+      contents: "read",
+      packages: "write",
+      attestations: "write",
+      "id-token": "write",
+    },
+    ".github/workflows/developer-image.yml",
+  );
+  assertTopLevelPermissions(
+    fullAssetWorkflow,
+    {
+      contents: "read",
+      packages: "read",
+    },
+    ".github/workflows/developer-full-assets.yml",
+  );
+  for (const needle of [
+    'auth_home="$(mktemp -d "$RUNNER_TEMP/mir2-gh-home.XXXXXXXX")"',
+    'rm -rf -- "$auth_home"',
+    "trap cleanup EXIT",
+    'credential_file="$auth_home/git-credentials"',
+    "umask 077",
+    "printf 'https://x-access-token:%s@github.com\\n' \"$GH_TOKEN\"",
+    "GIT_CONFIG_COUNT=3",
+    "GIT_CONFIG_KEY_0=credential.helper",
+    "GIT_CONFIG_VALUE_0=",
+    "GIT_CONFIG_KEY_1=credential.helper",
+    'GIT_CONFIG_VALUE_1="store --file=$credential_file"',
+    "DockerRootDir",
+    'builder prune \\\n            --force \\\n            --filter "until=168h"',
+    "::warning::Unable to prune stale dedicated-runner build cache.",
+  ]) {
+    assert(
+      fullAssetWorkflow.includes(needle),
+      `.github/workflows/developer-full-assets.yml is missing isolation: ${needle}`,
+    );
+  }
+  for (const forbidden of [
+    "gh auth setup-git",
+    "git config --global",
+    "git push --force",
+    "git tag --force",
+    "workflow_dispatch",
+    "pull_request_target",
+    "repository_dispatch",
+  ]) {
+    assert(
+      !fullAssetWorkflow.includes(forbidden),
+      `.github/workflows/developer-full-assets.yml contains forbidden privilege path: ${forbidden}`,
     );
   }
 

@@ -88,7 +88,9 @@ CI 证据也分开命名：
 
 第二台服务器不是每台开发机启动 Web 的前置条件；它承担全量素材 clean-room gate、共享 HTTPS/WSS 验收站和集中日志。推荐使用 x64 Linux、至少 40 GiB 临时空闲空间，并安装 Git、官方 GitHub CLI、Docker Engine 和 Docker Compose `2.24.4+`。
 
-在 GitHub 仓库的 **Settings / Actions / Runners** 注册该主机为 self-hosted runner，安装为系统服务，并增加自定义标签 `mir2-full-assets`。`.github/workflows/developer-full-assets.yml` 会在不可变镜像锁更新后，或人工触发时，在这台机器上执行真实 7 分卷空目录验收；普通 PR 不会重复下载 9.08 GiB 素材。工作流使用仓库临时 `GITHUB_TOKEN`，认证 HOME 和 Docker 配置均位于临时目录，结束后清除。
+在 GitHub 仓库的 **Settings / Actions / Runners** 注册该主机为专用或一次性 self-hosted runner，安装为系统服务，并增加自定义标签 `mir2-full-assets`。`.github/workflows/developer-full-assets.yml` 仅由 `main` 上相关发布文件的 push 触发，在这台机器上执行真实 7 分卷空目录验收；普通 PR 和任意分支的手工 dispatch 都不能执行该特权 Runner。工作流使用仓库临时 `GITHUB_TOKEN`，认证 HOME 和 Docker 配置均位于临时目录，结束后清除；同时检查 `RUNNER_TEMP` 与 Docker Root Dir，并回收本次镜像和超过 7 天的构建缓存。
+
+仓库管理员还应为 `developer-image-*` 与 `developer-environment-*` 创建 GitHub tag ruleset，禁止普通用户创建、更新或删除 witness 标签，并只允许受信任的 GitHub Actions 身份绕过。仓库内工作流已经拒绝覆盖已有 witness；服务端 ruleset 是防止管理员以外凭据预先创建、删除后重建或篡改证据的最后一层。
 
 如还要把它作为长期共享验收站，配置 DNS A/AAAA 记录并开放 80/443。先用固定 Caddy 镜像生成 Argon2id 或 bcrypt hash，并把用户名、hash 和只用于部署后探活的明文密码放入服务器秘密环境变量，不要写进仓库或命令行。服务器 clone 到固定目录后：
 
