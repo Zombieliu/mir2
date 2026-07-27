@@ -145,6 +145,8 @@ export type DubheNodeConsoleSnapshot = {
   links: {
     grafana: string;
     prometheus: string;
+    prometheusAlerts: string;
+    snapshotExport: string;
     registrationExplorer: string;
     packageExplorer: string;
   };
@@ -262,6 +264,9 @@ export async function readDubheNodeConsole(): Promise<DubheNodeConsoleSnapshot> 
     links: {
       grafana: process.env.DUBHE_NODE_GRAFANA_URL ?? "http://127.0.0.1:13000",
       prometheus: process.env.DUBHE_NODE_PROMETHEUS_URL ?? "http://127.0.0.1:19090",
+      prometheusAlerts:
+        process.env.DUBHE_NODE_PROMETHEUS_ALERTS_URL ?? "http://127.0.0.1:19090/alerts",
+      snapshotExport: "/api/dubhe-nodes",
       registrationExplorer: suiTransactionUrl(activeRegistration.transactionDigest),
       packageExplorer: `https://suiscan.xyz/testnet/object/${deployment.packageId}`
     },
@@ -356,8 +361,15 @@ async function readHomeTelemetryConsole(
       total: acceptanceEvidence.rewardTotal
     },
     links: {
-      grafana: process.env.DUBHE_NODE_GRAFANA_URL ?? telemetryUrl,
-      prometheus: process.env.DUBHE_NODE_PROMETHEUS_URL ?? telemetryUrl,
+      grafana:
+        process.env.DUBHE_NODE_GRAFANA_URL ??
+        "/ops/grafana/d/dubhe-home-nodes/dubhe-home-node-fleet?orgId=1&refresh=10s",
+      prometheus:
+        process.env.DUBHE_NODE_PROMETHEUS_URL ??
+        "/ops/prometheus/query?g0.expr=dubhe_home_nodes_live&g0.tab=0",
+      prometheusAlerts:
+        process.env.DUBHE_NODE_PROMETHEUS_ALERTS_URL ?? "/ops/prometheus/alerts",
+      snapshotExport: "/api/dubhe-nodes",
       registrationExplorer: suiTransactionUrl(activeRegistration.transactionDigest),
       packageExplorer: `https://suiscan.xyz/testnet/object/${deployment.packageId}`
     },
