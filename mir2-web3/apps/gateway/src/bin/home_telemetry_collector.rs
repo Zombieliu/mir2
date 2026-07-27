@@ -24,6 +24,7 @@ struct CollectorState {
     operator_token: String,
     admissions: Arc<RwLock<BTreeMap<String, HomeTelemetryAdmission>>>,
     admission_enforced: bool,
+    maximum_age_ms: u64,
     admissions_file: Option<PathBuf>,
     enrollment_issuer_public_key: Option<String>,
 }
@@ -99,11 +100,13 @@ async fn run() -> Result<(), String> {
         operator_token,
         admissions: Arc::new(RwLock::new(admissions)),
         admission_enforced,
+        maximum_age_ms,
         admissions_file,
         enrollment_issuer_public_key,
     };
     let router = Router::new()
         .route("/healthz", get(health))
+        .route("/metrics", get(metrics))
         .route("/v1/telemetry", post(ingest))
         .route("/v1/public", get(public_view))
         .route("/v1/operator", get(operator_nodes))
@@ -132,6 +135,169 @@ async fn health(State(state): State<CollectorState>) -> Json<serde_json::Value> 
         "admissionEnforced": state.admission_enforced,
         "admittedNodes": state.admissions.read().map(|value| value.len()).unwrap_or_default(),
     }))
+}
+
+async fn metrics(State(state): State<CollectorState>, headers: HeaderMap) -> Response {
+    if !bearer_matches(&headers, &state.operator_token) {
+        return unauthorized();
+    }
+    if let Err(error) = refresh_admissions(&state, now_ms()) {
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+            format!("Home telemetry admissions unavailable: {error}\n"),
+        )
+            .into_response();
+    }
+    match render_prometheus_metrics(&state, now_ms()) {
+        Ok(body) => (
+            StatusCode::OK,
+            [(
+                header::CONTENT_TYPE,
+                "text/plain; version=0.0.4; charset=utf-8",
+            )],
+            body,
+        )
+            .into_response(),
+        Err(error) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+            format!("Home telemetry metrics unavailable: {error}\n"),
+        )
+            .into_response(),
+    }
+}
+
+fn render_prometheus_metrics(state: &CollectorState, now_ms: u64) -> Result<String, String> {
+    let admissions = state
+        .admissions
+        .read()
+        .map_err(|_| "Home telemetry admissions lock poisoned".to_string())?;
+    let mut lines = vec![
+        "# HELP dubhe_home_nodes_admitted Signed production Home Node admissions.".to_string(),
+        "# TYPE dubhe_home_nodes_admitted gauge".to_string(),
+        format!("dubhe_home_nodes_admitted {}", admissions.len()),
+        "# HELP dubhe_home_nodes_live Admitted Home Nodes with a fresh signed telemetry report."
+            .to_string(),
+        "# TYPE dubhe_home_nodes_live gauge".to_string(),
+        "# HELP dubhe_home_node_live Whether an admitted Home Node has fresh signed telemetry."
+            .to_string(),
+        "# TYPE dubhe_home_node_live gauge".to_string(),
+        "# HELP dubhe_home_node_active_sessions Current player Sessions hosted by a Home Node."
+            .to_string(),
+        "# TYPE dubhe_home_node_active_sessions gauge".to_string(),
+        "# HELP dubhe_home_node_active_zones Current active Zone workloads on a Home Node."
+            .to_string(),
+        "# TYPE dubhe_home_node_active_zones gauge".to_string(),
+        "# HELP dubhe_home_node_capacity_sessions Certified Session capacity.".to_string(),
+        "# TYPE dubhe_home_node_capacity_sessions gauge".to_string(),
+        "# HELP dubhe_home_node_capacity_zones Certified Zone capacity.".to_string(),
+        "# TYPE dubhe_home_node_capacity_zones gauge".to_string(),
+        "# HELP dubhe_home_node_relay_rtt_ms Home Node to Relay round-trip latency in milliseconds."
+            .to_string(),
+        "# TYPE dubhe_home_node_relay_rtt_ms gauge".to_string(),
+        "# HELP dubhe_home_node_packet_loss_bps Home Node packet loss in basis points.".to_string(),
+        "# TYPE dubhe_home_node_packet_loss_bps gauge".to_string(),
+        "# HELP dubhe_home_node_upstream_kbps Measured Home Node upstream bandwidth in kilobits per second."
+            .to_string(),
+        "# TYPE dubhe_home_node_upstream_kbps gauge".to_string(),
+        "# HELP dubhe_home_node_checkpoint_lag_ms Home Node finalized checkpoint lag in milliseconds."
+            .to_string(),
+        "# TYPE dubhe_home_node_checkpoint_lag_ms gauge".to_string(),
+        "# HELP dubhe_home_node_verified_work_units Cumulative verified work units.".to_string(),
+        "# TYPE dubhe_home_node_verified_work_units counter".to_string(),
+        "# HELP dubhe_home_node_session_milliseconds Cumulative hosted Session milliseconds."
+            .to_string(),
+        "# TYPE dubhe_home_node_session_milliseconds counter".to_string(),
+        "# HELP dubhe_home_node_telemetry_age_seconds Age of the most recent signed telemetry report."
+            .to_string(),
+        "# TYPE dubhe_home_node_telemetry_age_seconds gauge".to_string(),
+    ];
+    let mut live_nodes = 0_u64;
+    for (node_id, admission) in admissions.iter() {
+        let telemetry = state.store.operator_view(node_id, now_ms);
+        let live = telemetry.as_ref().is_some_and(|view| {
+            now_ms >= view.observed_at_ms
+                && now_ms.saturating_sub(view.observed_at_ms) <= state.maximum_age_ms
+        });
+        live_nodes += u64::from(live);
+        let common_labels = match telemetry.as_ref() {
+            Some(view) => format!(
+                "node_id=\"{}\",assigned_zone=\"{}\",region=\"{}\",provider=\"{}\",work_mode=\"{}\"",
+                prometheus_label(node_id),
+                prometheus_label(&admission.assigned_zone_id),
+                prometheus_label(&view.coarse_region),
+                prometheus_label(&view.provider_code),
+                prometheus_label(&format!("{:?}", view.work_mode).to_ascii_lowercase())
+            ),
+            None => format!(
+                "node_id=\"{}\",assigned_zone=\"{}\",region=\"unknown\",provider=\"unknown\",work_mode=\"offline\"",
+                prometheus_label(node_id),
+                prometheus_label(&admission.assigned_zone_id)
+            ),
+        };
+        lines.push(format!(
+            "dubhe_home_node_live{{{common_labels}}} {}",
+            u8::from(live)
+        ));
+        lines.push(format!(
+            "dubhe_home_node_capacity_sessions{{{common_labels}}} {}",
+            admission.capacity_max_sessions
+        ));
+        lines.push(format!(
+            "dubhe_home_node_capacity_zones{{{common_labels}}} {}",
+            admission.capacity_max_zones
+        ));
+        if let Some(view) = telemetry {
+            lines.push(format!(
+                "dubhe_home_node_active_sessions{{{common_labels}}} {}",
+                view.active_sessions
+            ));
+            lines.push(format!(
+                "dubhe_home_node_active_zones{{{common_labels}}} {}",
+                view.active_zones
+            ));
+            lines.push(format!(
+                "dubhe_home_node_relay_rtt_ms{{{common_labels}}} {}",
+                view.relay_rtt_ms
+            ));
+            lines.push(format!(
+                "dubhe_home_node_packet_loss_bps{{{common_labels}}} {}",
+                view.packet_loss_bps
+            ));
+            lines.push(format!(
+                "dubhe_home_node_upstream_kbps{{{common_labels}}} {}",
+                view.measured_upstream_kbps
+            ));
+            lines.push(format!(
+                "dubhe_home_node_checkpoint_lag_ms{{{common_labels}}} {}",
+                view.checkpoint_lag_ms
+            ));
+            lines.push(format!(
+                "dubhe_home_node_verified_work_units{{{common_labels}}} {}",
+                view.verified_work_units
+            ));
+            lines.push(format!(
+                "dubhe_home_node_session_milliseconds{{{common_labels}}} {}",
+                view.session_milliseconds
+            ));
+            lines.push(format!(
+                "dubhe_home_node_telemetry_age_seconds{{{common_labels}}} {:.3}",
+                now_ms.saturating_sub(view.observed_at_ms) as f64 / 1_000.0
+            ));
+        }
+    }
+    lines.push(format!("dubhe_home_nodes_live {live_nodes}"));
+    lines.push(String::new());
+    Ok(lines.join("\n"))
+}
+
+fn prometheus_label(value: &str) -> String {
+    value
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
 }
 
 async fn ingest(
@@ -593,6 +759,7 @@ mod tests {
             operator_token: "a".repeat(32),
             admissions: Arc::new(RwLock::new(admissions)),
             admission_enforced: true,
+            maximum_age_ms: 120_000,
             admissions_file: Some(path.clone()),
             enrollment_issuer_public_key: Some(issuer.public_key().to_string()),
         };
@@ -600,6 +767,13 @@ mod tests {
             SignedHomeNodeTelemetry::sign(telemetry_payload(&node, &certificate, now, 7), &node)
                 .unwrap();
         validate_admission(&state, &report, now).unwrap();
+        state.store.ingest(report, now).unwrap();
+        let metrics = render_prometheus_metrics(&state, now).unwrap();
+        assert!(metrics.contains("dubhe_home_nodes_admitted 1"));
+        assert!(metrics.contains("dubhe_home_nodes_live 1"));
+        assert!(metrics.contains("dubhe_home_node_active_sessions{"));
+        assert!(metrics.contains("assigned_zone=\"primary\""));
+        assert!(metrics.contains("} 1"));
 
         let mismatched =
             SignedHomeNodeTelemetry::sign(telemetry_payload(&node, &certificate, now, 8), &node)
