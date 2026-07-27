@@ -14,7 +14,8 @@ use sha2::{Digest, Sha256};
 
 use crate::{
     node_id_from_public_key, verify_ed25519_signature, CapacityChallenge,
-    CapacityChallengeResponse, NodeSigningIdentity, ZoneHostHealth, ZoneHostServer,
+    CapacityChallengeResponse, FinalizedDirectorSubmission, NodeSigningIdentity,
+    WorldDirectorRuntimeService, WorldDirectorRuntimeStatus, ZoneHostHealth, ZoneHostServer,
     ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope,
 };
 
@@ -24,7 +25,7 @@ const ED25519_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
 // An ephemeral loopback port keeps local multi-host tests and developer
 // processes isolated. Deployments set an explicit stable address.
 const DEFAULT_OPERATOR_ADDR: &str = "127.0.0.1:0";
-const MAX_HTTP_REQUEST_BYTES: usize = 8 * 1024;
+const MAX_HTTP_REQUEST_BYTES: usize = 2 * 1024 * 1024;
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -320,12 +321,27 @@ pub fn serve_zone_host_operator(
     server: Arc<ZoneHostServer>,
     config: ZoneHostOperatorConfig,
 ) -> io::Result<()> {
+    serve_zone_host_operator_with_world_director(listener, server, config, None)
+}
+
+pub fn serve_zone_host_operator_with_world_director(
+    listener: TcpListener,
+    server: Arc<ZoneHostServer>,
+    config: ZoneHostOperatorConfig,
+    world_director: Option<Arc<WorldDirectorRuntimeService>>,
+) -> io::Result<()> {
     for stream in listener.incoming() {
         let mut stream = stream?;
         let server = Arc::clone(&server);
         let config = config.clone();
+        let world_director = world_director.clone();
         thread::spawn(move || {
-            if let Err(error) = handle_operator_request(&mut stream, server.as_ref(), &config) {
+            if let Err(error) = handle_operator_request(
+                &mut stream,
+                server.as_ref(),
+                &config,
+                world_director.as_deref(),
+            ) {
                 eprintln!("zone host operator request failed: {error}");
             }
         });
@@ -337,6 +353,7 @@ fn handle_operator_request(
     stream: &mut TcpStream,
     server: &ZoneHostServer,
     config: &ZoneHostOperatorConfig,
+    world_director: Option<&WorldDirectorRuntimeService>,
 ) -> io::Result<()> {
     stream.set_read_timeout(Some(std::time::Duration::from_secs(2)))?;
     stream.set_write_timeout(Some(std::time::Duration::from_secs(2)))?;
@@ -357,6 +374,46 @@ fn handle_operator_request(
         .unwrap_or_default();
     if method == "POST" && path == "/v1/capacity-challenge" {
         return handle_capacity_challenge(stream, server, config, &bytes[header_end + 4..]);
+    }
+    if method == "POST"
+        && matches!(
+            path,
+            "/v1/world-director/finalized" | "/v1/world-director/advance"
+        )
+    {
+        if !management_token_matches(&request, config.management_token.as_deref()) {
+            return write_json_error(stream, 401, "valid management bearer token required");
+        }
+        let Some(world_director) = world_director else {
+            return write_json_error(stream, 503, "world director runtime is not configured");
+        };
+        if path == "/v1/world-director/advance" {
+            return match world_director.advance(now_ms()) {
+                Ok(receipt) => {
+                    let body = serde_json::to_vec(&receipt).map_err(io::Error::other)?;
+                    write_response(stream, 200, "application/json", &body)
+                }
+                Err(error) => write_json_error(stream, 400, &error),
+            };
+        }
+        let submission: FinalizedDirectorSubmission =
+            match serde_json::from_slice(&bytes[header_end + 4..]) {
+                Ok(submission) => submission,
+                Err(error) => {
+                    return write_json_error(
+                        stream,
+                        400,
+                        &format!("invalid finalized director submission JSON: {error}"),
+                    )
+                }
+            };
+        return match world_director.install_submission(submission, now_ms()) {
+            Ok(receipt) => {
+                let body = serde_json::to_vec(&receipt).map_err(io::Error::other)?;
+                write_response(stream, 200, "application/json", &body)
+            }
+            Err(error) => write_json_error(stream, 400, &error),
+        };
     }
     if method == "POST" && matches!(path, "/v1/drain" | "/v1/resume") {
         if !management_token_matches(&request, config.management_token.as_deref()) {
@@ -382,6 +439,21 @@ fn handle_operator_request(
     }
 
     match path {
+        "/v1/world-director" => {
+            if !management_token_matches(&request, config.management_token.as_deref()) {
+                return write_json_error(stream, 401, "valid management bearer token required");
+            }
+            let Some(world_director) = world_director else {
+                return write_json_error(stream, 503, "world director runtime is not configured");
+            };
+            match world_director.status() {
+                Ok(status) => {
+                    let body = serde_json::to_vec(&status).map_err(io::Error::other)?;
+                    write_response(stream, 200, "application/json", &body)
+                }
+                Err(error) => write_json_error(stream, 503, &error),
+            }
+        }
         "/healthz" => {
             let body =
                 serde_json::to_vec(&server.telemetry_snapshot()).map_err(io::Error::other)?;
@@ -398,7 +470,17 @@ fn handle_operator_request(
             write_response(stream, status, "application/json", &body)
         }
         "/metrics" => {
-            let body = render_prometheus(&server.telemetry_snapshot());
+            let mut body = render_prometheus(&server.telemetry_snapshot());
+            if let Some(world_director) = world_director {
+                match world_director.status() {
+                    Ok(status) => body.push_str(&render_world_director_prometheus(&status)),
+                    Err(_) => body.push_str(
+                        "# HELP obelisk_world_director_scrape_error World director status scrape failures.\n\
+                         # TYPE obelisk_world_director_scrape_error gauge\n\
+                         obelisk_world_director_scrape_error 1\n",
+                    ),
+                }
+            }
             write_response(
                 stream,
                 200,
@@ -426,6 +508,34 @@ fn handle_operator_request(
         }
         _ => write_response(stream, 404, "text/plain; charset=utf-8", b"not found\n"),
     }
+}
+
+fn render_world_director_prometheus(status: &WorldDirectorRuntimeStatus) -> String {
+    format!(
+        "# HELP obelisk_world_director_enabled Whether the world director runtime is enabled.\n\
+# TYPE obelisk_world_director_enabled gauge\n\
+obelisk_world_director_enabled 1\n\
+# HELP obelisk_world_director_finalized_height Last imported Commonware control height.\n\
+# TYPE obelisk_world_director_finalized_height gauge\n\
+obelisk_world_director_finalized_height {}\n\
+# HELP obelisk_world_director_installed_commands Installed signed world director commands.\n\
+# TYPE obelisk_world_director_installed_commands gauge\n\
+obelisk_world_director_installed_commands {}\n\
+# HELP obelisk_world_director_applied_actions Idempotently applied world director actions.\n\
+# TYPE obelisk_world_director_applied_actions gauge\n\
+obelisk_world_director_applied_actions {}\n\
+# HELP obelisk_world_director_spawned_monsters_total Monsters spawned by finalized world events.\n\
+# TYPE obelisk_world_director_spawned_monsters_total counter\n\
+obelisk_world_director_spawned_monsters_total {}\n\
+# HELP obelisk_world_director_broadcast_messages_total World-event messages broadcast to Zones.\n\
+# TYPE obelisk_world_director_broadcast_messages_total counter\n\
+obelisk_world_director_broadcast_messages_total {}\n",
+        status.finalized_height,
+        status.installed_command_count,
+        status.applied_action_count,
+        status.spawned_monsters_total,
+        status.broadcast_messages_total,
+    )
 }
 
 fn management_token_matches(request: &str, expected: Option<&str>) -> bool {
@@ -1162,6 +1272,67 @@ mod tests {
     }
 
     #[test]
+    fn world_director_operator_status_is_authenticated_and_exported_as_metrics() {
+        let config = ZoneHostOperatorConfig::for_test(None);
+        let factory = Arc::new(SharedInProcessZoneRuntimeFactory::new());
+        let server = Arc::new(ZoneHostServer::with_identity_and_factory(
+            "operator-test-host",
+            8,
+            GatewayConfig::default(),
+            Arc::new(InMemoryZoneOwnerLeaseAuthority::new()),
+            None,
+            ZoneRpcLimits::default(),
+            Arc::clone(&factory),
+        ));
+        let director_identity = NodeSigningIdentity::from_seed([19; 32]);
+        let director = Arc::new(
+            WorldDirectorRuntimeService::new(
+                [
+                    "validator-a".to_string(),
+                    "validator-b".to_string(),
+                    "validator-c".to_string(),
+                    "validator-d".to_string(),
+                ],
+                director_identity.public_key(),
+                factory,
+                None,
+            )
+            .unwrap(),
+        );
+
+        let unauthorized = operator_request(
+            Arc::clone(&server),
+            config.clone(),
+            Some(Arc::clone(&director)),
+            "GET /v1/world-director HTTP/1.1\r\nHost: local\r\n\r\n",
+        );
+        assert!(unauthorized.starts_with("HTTP/1.1 401"));
+
+        let token = "0123456789abcdef0123456789abcdef";
+        let authorized = operator_request(
+            Arc::clone(&server),
+            config.clone(),
+            Some(Arc::clone(&director)),
+            &format!(
+                "GET /v1/world-director HTTP/1.1\r\nHost: local\r\nAuthorization: Bearer {token}\r\n\r\n"
+            ),
+        );
+        assert!(authorized.starts_with("HTTP/1.1 200"));
+        assert!(authorized.contains("\"enabled\":true"));
+        assert!(authorized.contains("\"finalizedHeight\":0"));
+
+        let metrics = operator_request(
+            server,
+            config,
+            Some(director),
+            "GET /metrics HTTP/1.1\r\nHost: local\r\n\r\n",
+        );
+        assert!(metrics.starts_with("HTTP/1.1 200"));
+        assert!(metrics.contains("obelisk_world_director_enabled 1"));
+        assert!(metrics.contains("obelisk_world_director_finalized_height 0"));
+    }
+
+    #[test]
     fn public_operator_bind_requires_signed_heartbeats() {
         env::remove_var("MIR2_ZONE_HOST_HEARTBEAT_SECRET");
         env::remove_var("MIR2_ZONE_HOST_SIGNING_KEY");
@@ -1253,5 +1424,31 @@ mod tests {
         assert!(run_capacity_challenge(&server, &config, oversized_per_zone.clone()).is_err());
         oversized_per_zone.workload.max_sessions_per_zone = 32;
         assert!(run_capacity_challenge(&server, &config, oversized_per_zone).is_ok());
+    }
+
+    fn operator_request(
+        server: Arc<ZoneHostServer>,
+        config: ZoneHostOperatorConfig,
+        world_director: Option<Arc<WorldDirectorRuntimeService>>,
+        request: &str,
+    ) -> String {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let worker = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            handle_operator_request(
+                &mut stream,
+                server.as_ref(),
+                &config,
+                world_director.as_deref(),
+            )
+            .unwrap();
+        });
+        let mut stream = TcpStream::connect(address).unwrap();
+        stream.write_all(request.as_bytes()).unwrap();
+        let mut response = String::new();
+        stream.read_to_string(&mut response).unwrap();
+        worker.join().unwrap();
+        response
     }
 }

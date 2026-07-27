@@ -8,6 +8,8 @@ Supervisor，节点身份和管理令牌保存在操作系统密钥库中。
 - 首次启动创建或加载 Ed25519 节点身份；
 - 通过 challenge/response 完成签名 enrollment；
 - 在本机 Zone Host 执行容量挑战，申请短期容量证书和 Relay mTLS 客户端证书；
+- 到期前 6 小时自动重新 enrollment、容量认证并续签 mTLS，复用系统密钥库中的
+  Relay 私钥；
 - 自动托管 Supervisor、Zone Host 和认证后的 Home Agent；
 - 查看本机 Supervisor、Zone Host、Relay、Session 和签名遥测状态；
 - 安全开启或暂停新 Session；
@@ -104,6 +106,24 @@ Relay 短暂离线时，Home Agent 不会退出，也不会带着 Zone Host 一�
 placement。Relay 恢复后仍需新的 Collector 回执，Supervisor 才重新开放 Session，
 因此不会用陈旧遥测误报“在线”。Collector 短暂失败也采用同样的封顶退避，
 不会终止 Agent 或 Zone Host；上报恢复并取得新回执后才恢复接客。
+
+短期凭证由 Tauri Rust 后台每 5 分钟检查一次。进入续期窗口且没有活跃 Session
+时，客户端会申请新的签名 Bundle、重新执行本机容量挑战并续签 Relay mTLS
+证书；有玩家时先通过 Supervisor drain，停止接收新玩家，待存量 Session
+自然归零后再续期。凭证落盘后，桌面端调用只监听 loopback 且要求 Bearer
+Token 的 `/v1/shutdown`，Supervisor 最多等待 30 秒完成 drain，再回收 Home
+Agent 与 Zone Host。新 Supervisor 启动后才读取新凭证，因此不会留下占用
+`7020` 端口的孤儿 Zone Host，也不会让运行中的 Agent 继续使用旧证书。
+桌面窗口重开时即使 Supervisor 已在后台运行，新实例也能用系统密钥库中的同一
+管理令牌安全接管并轮换；它会同时等待 `17990` Supervisor 和 `7021` Zone
+operator 退出后才启动新进程，避免端口释放竞态。
+
+生产默认值可用以下环境变量在测试环境缩短；数值单位均为毫秒且最小为 1000：
+
+```bash
+MIR2_HOME_CREDENTIAL_RENEWAL_WINDOW_MS=21600000
+MIR2_HOME_CREDENTIAL_RENEWAL_POLL_MS=300000
+```
 
 ## 自动验收
 

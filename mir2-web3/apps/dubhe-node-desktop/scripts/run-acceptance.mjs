@@ -13,6 +13,15 @@ const checks = [
   ["cargo", ["+1.89.0", "test", "-p", "mir2-gateway", "--bin", "home_agent_supervisor"]],
   ["cargo", ["+1.89.0", "test", "-p", "mir2-gateway", "home_tunnel", "--lib"]],
   ["cargo", ["+1.89.0", "test", "-p", "mir2-gateway", "--test", "home_tunnel"]],
+  [
+    "cargo",
+    [
+      "+1.89.0",
+      "test",
+      "--manifest-path",
+      "apps/dubhe-node-desktop/src-tauri/Cargo.toml",
+    ],
+  ],
   ["npm", ["--prefix", "apps/dubhe-node-desktop", "run", "build"]],
 ];
 

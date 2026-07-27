@@ -1,0 +1,790 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1785024801539,
+  "completedAtMs": 1785025091599,
+  "runId": "gate20-load-1785024801539",
+  "gitCommit": "",
+  "imageDigest": "",
+  "profileId": "mir2-regional-v1-3000-15m",
+  "profileExact": false,
+  "requestedPlayers": 1000,
+  "connectedPlayers": 1000,
+  "distinctAccounts": 1000,
+  "distinctCharacters": 1000,
+  "profileCatalogMaps": 700,
+  "runtimeManifestMaps": 463,
+  "activeMapCount": 120,
+  "activeZoneCount": 125,
+  "hotMapFileName": "0",
+  "hotMapPlayers": 300,
+  "hotMapLinePlayers": {
+    "map:0:line:1": 50,
+    "map:0:line:2": 50,
+    "map:0:line:3": 50,
+    "map:0:line:4": 50,
+    "map:0:line:5": 50,
+    "map:0:line:6": 50
+  },
+  "zoneHostSessionCount": 1000,
+  "zoneHostActiveConnections": 112,
+  "requestedActiveDurationSeconds": 15,
+  "measuredActiveDurationMs": 15954,
+  "promotionPauseExcludedFromActiveDuration": true,
+  "workerThreads": 128,
+  "roles": {
+    "movement": 600,
+    "combat": 150,
+    "social": 50,
+    "economy": 50,
+    "idle": 150
+  },
+  "attemptedCommands": 14648,
+  "completedCommands": 14648,
+  "failedCommands": 0,
+  "errorRate": 0.0,
+  "expectedCommandsByRole": {
+    "movement": 18000,
+    "combat": 4500,
+    "social": 25,
+    "economy": 25,
+    "idle": 150
+  },
+  "completedByRole": {
+    "movement": 12063,
+    "combat": 2382,
+    "social": 26,
+    "economy": 26,
+    "idle": 151
+  },
+  "workloadCommandCoverage": 0.6452863436123348,
+  "failureReasons": {},
+  "latencyMs": {
+    "count": 14648,
+    "minimum": 0.10450000000000001,
+    "mean": 97.31976136912844,
+    "p50": 71.69983400000001,
+    "p95": 260.028626,
+    "p99": 423.176708,
+    "maximum": 1011.9525840000001
+  },
+  "latencyMsByRole": {
+    "movement": {
+      "count": 12063,
+      "minimum": 0.10450000000000001,
+      "mean": 91.59020490217999,
+      "p50": 63.689416,
+      "p95": 254.10466599999998,
+      "p99": 404.052458,
+      "maximum": 1011.9525840000001
+    },
+    "combat": {
+      "count": 2382,
+      "minimum": 11.931333,
+      "mean": 122.91268217968101,
+      "p50": 102.976125,
+      "p95": 274.653584,
+      "p99": 509.604042,
+      "maximum": 980.987959
+    },
+    "social": {
+      "count": 26,
+      "minimum": 3.575,
+      "mean": 53.32657857692308,
+      "p50": 31.040709,
+      "p95": 141.6885,
+      "p99": 287.59499999999997,
+      "maximum": 287.59499999999997
+    },
+    "economy": {
+      "count": 26,
+      "minimum": 72.276875,
+      "mean": 159.87758661538462,
+      "p50": 160.949542,
+      "p95": 240.313666,
+      "p99": 274.692542,
+      "maximum": 274.692542
+    },
+    "idle": {
+      "count": 151,
+      "minimum": 19.301624999999998,
+      "mean": 148.11857982119204,
+      "p50": 131.147834,
+      "p95": 324.76925,
+      "p99": 462.797625,
+      "maximum": 478.299417
+    }
+  },
+  "latencyMsByPlacement": {
+    "hot-map": {
+      "count": 4000,
+      "minimum": 5.110542,
+      "mean": 117.63781051975015,
+      "p50": 103.03875,
+      "p95": 269.183291,
+      "p99": 385.279208,
+      "maximum": 736.628251
+    },
+    "regular-map": {
+      "count": 10648,
+      "minimum": 0.10450000000000001,
+      "mean": 89.6871358429753,
+      "p50": 59.844791,
+      "p95": 254.646292,
+      "p99": 441.310625,
+      "maximum": 1011.9525840000001
+    }
+  },
+  "promotion": {
+    "zoneId": "map:0:line:1",
+    "zoneSessionCount": 50,
+    "activeOwner": "gate20-active",
+    "activeGeneration": 1,
+    "standbyOwner": "gate20-standby",
+    "standbyGeneration": 2,
+    "quiescedAtMs": 1785025073561,
+    "readinessId": "5ac65ef578a3f23ef5c03195cff45e19f55b928989edea309b52839ba1f70b42",
+    "readinessLagMs": 1,
+    "baseSequence": 5512,
+    "promotedSequence": 5512,
+    "sessionRefreshCount": 50,
+    "postPromotionProbeCount": 1000,
+    "wallMs": 9253.388629,
+    "success": true
+  },
+  "economyDuplicateCount": 0,
+  "economyRuntimeLedgerMismatchCount": 35,
+  "economyMismatches": [
+    {
+      "accountId": "g18l0248015390800",
+      "characterIndex": 701,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390801",
+      "characterIndex": 706,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390803",
+      "characterIndex": 712,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390804",
+      "characterIndex": 715,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390805",
+      "characterIndex": 718,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390806",
+      "characterIndex": 721,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390808",
+      "characterIndex": 727,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390810",
+      "characterIndex": 733,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390811",
+      "characterIndex": 736,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390812",
+      "characterIndex": 739,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390813",
+      "characterIndex": 742,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390815",
+      "characterIndex": 748,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390817",
+      "characterIndex": 754,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390818",
+      "characterIndex": 758,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390819",
+      "characterIndex": 761,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390820",
+      "characterIndex": 764,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390822",
+      "characterIndex": 770,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390824",
+      "characterIndex": 776,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390825",
+      "characterIndex": 779,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390826",
+      "characterIndex": 783,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390827",
+      "characterIndex": 786,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390829",
+      "characterIndex": 793,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390830",
+      "characterIndex": 797,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390831",
+      "characterIndex": 800,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390834",
+      "characterIndex": 809,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390836",
+      "characterIndex": 815,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390837",
+      "characterIndex": 818,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390838",
+      "characterIndex": 821,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390839",
+      "characterIndex": 824,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390841",
+      "characterIndex": 830,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390843",
+      "characterIndex": 838,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390844",
+      "characterIndex": 841,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390845",
+      "characterIndex": 844,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390846",
+      "characterIndex": 847,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    },
+    {
+      "accountId": "g18l0248015390848",
+      "characterIndex": 853,
+      "commandOrdinal": 0,
+      "runtimeGold": 100,
+      "ledgerGold": 0,
+      "ledgerError": null
+    }
+  ],
+  "economyTransitions": [
+    {
+      "accountId": "g18l0248015390802",
+      "characterIndex": 709,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50751,
+      "objectX": 335,
+      "objectY": 269,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390802",
+      "characterIndex": 709,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50751,
+      "objectX": 335,
+      "objectY": 269,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390807",
+      "characterIndex": 724,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50753,
+      "objectX": 335,
+      "objectY": 271,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390809",
+      "characterIndex": 730,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50750,
+      "objectX": 341,
+      "objectY": 272,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390809",
+      "characterIndex": 730,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50750,
+      "objectX": 341,
+      "objectY": 272,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390814",
+      "characterIndex": 745,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50752,
+      "objectX": 342,
+      "objectY": 275,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390814",
+      "characterIndex": 745,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50752,
+      "objectX": 342,
+      "objectY": 275,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390816",
+      "characterIndex": 751,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50051,
+      "objectX": 332,
+      "objectY": 278,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390816",
+      "characterIndex": 751,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50051,
+      "objectX": 332,
+      "objectY": 278,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390821",
+      "characterIndex": 767,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50053,
+      "objectX": 332,
+      "objectY": 281,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390821",
+      "characterIndex": 767,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50053,
+      "objectX": 332,
+      "objectY": 281,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390823",
+      "characterIndex": 773,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50050,
+      "objectX": 338,
+      "objectY": 281,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390823",
+      "characterIndex": 773,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50050,
+      "objectX": 338,
+      "objectY": 281,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390828",
+      "characterIndex": 789,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50052,
+      "objectX": 338,
+      "objectY": 284,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390828",
+      "characterIndex": 789,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50052,
+      "objectX": 338,
+      "objectY": 284,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390833",
+      "characterIndex": 806,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50054,
+      "objectX": 338,
+      "objectY": 287,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390835",
+      "characterIndex": 812,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50051,
+      "objectX": 329,
+      "objectY": 290,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390835",
+      "characterIndex": 812,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50051,
+      "objectX": 329,
+      "objectY": 290,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390840",
+      "characterIndex": 827,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50053,
+      "objectX": 329,
+      "objectY": 293,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390840",
+      "characterIndex": 827,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50053,
+      "objectX": 329,
+      "objectY": 293,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390842",
+      "characterIndex": 833,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50050,
+      "objectX": 335,
+      "objectY": 293,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390842",
+      "characterIndex": 833,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50050,
+      "objectX": 335,
+      "objectY": 293,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390847",
+      "characterIndex": 850,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50052,
+      "objectX": 334,
+      "objectY": 295,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390847",
+      "characterIndex": 850,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50052,
+      "objectX": 334,
+      "objectY": 295,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390849",
+      "characterIndex": 856,
+      "commandOrdinal": 0,
+      "operation": "drop",
+      "beforeGold": 100,
+      "afterGold": 99,
+      "objectId": 50050,
+      "objectX": 341,
+      "objectY": 296,
+      "semanticSuccess": true
+    },
+    {
+      "accountId": "g18l0248015390849",
+      "characterIndex": 856,
+      "commandOrdinal": 1,
+      "operation": "pickup",
+      "beforeGold": 99,
+      "afterGold": 100,
+      "objectId": 50050,
+      "objectX": 341,
+      "objectY": 296,
+      "semanticSuccess": true
+    }
+  ],
+  "economyReconciliation": {
+    "runId": "economy-reconcile-1785025091590-1",
+    "startedAtMs": 1785025091590,
+    "completedAtMs": 1785025091595,
+    "pendingCount": 26,
+    "expiredDeliveryCount": 0,
+    "deadLetterCount": 0,
+    "transactionWithoutOutboxCount": 0,
+    "negativeBalanceCount": 0,
+    "healthy": true
+  },
+  "resources": {
+    "availableParallelism": 2,
+    "cgroupCpuMax": "200000 100000",
+    "cgroupMemoryMax": "2147483648",
+    "cgroupMemoryCurrent": "203309056",
+    "zoneRpcCodec": "msgpack",
+    "zoneRpcSharedPoolSize": 128,
+    "zoneRpcQueueTimeoutMs": 500
+  },
+  "assertions": {
+    "activeZoneCountMatchesProfile": true,
+    "allAccountsAndCharactersDistinct": true,
+    "allPlayersConnected": true,
+    "allWorkloadRolesExecuted": true,
+    "commandLatencyWithinStageSlo": false,
+    "economyHasNoDuplicateResult": true,
+    "economyReconciliationHealthy": true,
+    "economyRuntimeMatchesLedger": false,
+    "errorRateWithinStageSlo": true,
+    "hotMapAndLinesMatchStage": true,
+    "profileContractAccepted": true,
+    "rpcConnectionMultiplexingActive": true,
+    "safeZonePromotionCompleted": true,
+    "workloadCommandRateSustained": false,
+    "workloadMixMatchesProfile": true
+  },
+  "success": false
+}

@@ -22,7 +22,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sysinfo::System;
 use tokio::process::{Child, Command};
-use tokio::sync::{oneshot, Mutex, RwLock};
+use tokio::sync::{oneshot, watch, Mutex, RwLock};
 
 const DEFAULT_BIND: &str = "127.0.0.1:17990";
 const DEFAULT_KEYRING_ACCOUNT: &str = "default";
@@ -78,6 +78,7 @@ struct HomeAgentRuntimeStatus {
 struct AppState {
     status: Arc<RwLock<SupervisorStatus>>,
     controller: Arc<Mutex<HomeAgentResourceController>>,
+    shutdown: watch::Sender<bool>,
     node_id: String,
     operator_url: String,
     management_token: String,
@@ -509,9 +510,11 @@ async fn serve() -> Result<SupervisorExit, String> {
     let controller = Arc::new(Mutex::new(HomeAgentResourceController::new(
         policy.clone(),
     )?));
+    let (shutdown, mut shutdown_receiver) = watch::channel(false);
     let state = AppState {
         status: Arc::clone(&status),
         controller: Arc::clone(&controller),
+        shutdown,
         node_id: node_id.clone(),
         operator_url,
         management_token,
@@ -554,6 +557,7 @@ async fn serve() -> Result<SupervisorExit, String> {
         .route("/v1/status", get(api_status))
         .route("/v1/drain", post(api_drain))
         .route("/v1/resume", post(api_resume))
+        .route("/v1/shutdown", post(api_shutdown))
         .with_state(state.clone());
     let listener = tokio::net::TcpListener::bind(bind)
         .await
@@ -564,7 +568,14 @@ async fn serve() -> Result<SupervisorExit, String> {
     );
     let shutdown_state = state.clone();
     let server = axum::serve(listener, router).with_graceful_shutdown(async move {
-        let _ = tokio::signal::ctrl_c().await;
+        tokio::select! {
+            _ = tokio::signal::ctrl_c() => {}
+            result = shutdown_receiver.changed() => {
+                if result.is_err() || !*shutdown_receiver.borrow() {
+                    return;
+                }
+            }
+        }
         let _ = request_manual_drain(&shutdown_state, true).await;
         let deadline = Instant::now() + Duration::from_secs(30);
         while Instant::now() < deadline {
@@ -1014,6 +1025,32 @@ async fn api_resume(State(state): State<AppState>, headers: HeaderMap) -> Respon
     api_manual_action(state, headers, false).await
 }
 
+async fn api_shutdown(State(state): State<AppState>, headers: HeaderMap) -> Response {
+    if !bearer_matches(&headers, &state.management_token) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "valid local management bearer token required"})),
+        )
+            .into_response();
+    }
+    match state.shutdown.send(true) {
+        Ok(()) => (
+            StatusCode::ACCEPTED,
+            Json(serde_json::json!({
+                "accepted": true,
+                "draining": true,
+                "shutdown": true
+            })),
+        )
+            .into_response(),
+        Err(_) => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(serde_json::json!({"error": "Supervisor shutdown channel is unavailable"})),
+        )
+            .into_response(),
+    }
+}
+
 async fn api_manual_action(state: AppState, headers: HeaderMap, drain: bool) -> Response {
     if !bearer_matches(&headers, &state.management_token) {
         return (
@@ -1230,5 +1267,25 @@ mod tests {
             None,
             "already reconciled resource drain needs no repeated request"
         );
+    }
+
+    #[test]
+    fn shutdown_bearer_must_match_exactly() {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            header::AUTHORIZATION,
+            "Bearer local-management-secret"
+                .parse()
+                .expect("authorization header"),
+        );
+        assert!(bearer_matches(&headers, "local-management-secret"));
+        assert!(!bearer_matches(&headers, "local-management-secret-2"));
+        headers.insert(
+            header::AUTHORIZATION,
+            "Basic local-management-secret"
+                .parse()
+                .expect("wrong authorization scheme"),
+        );
+        assert!(!bearer_matches(&headers, "local-management-secret"));
     }
 }

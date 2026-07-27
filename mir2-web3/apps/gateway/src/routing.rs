@@ -23,8 +23,8 @@ use mir2_simulation::{
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
     WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneCommand,
-    ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
@@ -2761,6 +2761,19 @@ impl SharedInProcessZoneState {
                         entity.owner_name = player_names_by_zone_object_id
                             .get(&info.master_object_id)
                             .cloned();
+                        if let Some(existing) = map.entities.get(&info.object_id) {
+                            // ObjectMonster is a legacy client projection and
+                            // does not carry authoritative level or health.
+                            // Preserve richer finalized world-event metadata
+                            // while applying its live transform/appearance.
+                            entity.level = existing.level;
+                            entity.hp = existing.hp;
+                            entity.max_hp = existing.max_hp;
+                            entity.quest_ids = existing.quest_ids.clone();
+                            if entity.owner_name.is_none() {
+                                entity.owner_name = existing.owner_name.clone();
+                            }
+                        }
                         if let Some(dead) = map.dead_entity_ids.get(&info.object_id) {
                             entity.dead = true;
                             entity.hp = Some(0);
@@ -3126,6 +3139,18 @@ impl SharedInProcessZoneState {
     }
 
     fn apply_zone_packets_to_map_layer(&mut self, key: &ZonePresenceKey, packets: &[ServerPacket]) {
+        if let Some(map_file_name) = self
+            .players
+            .get(key)
+            .map(|presence| presence.map_file_name.clone())
+        {
+            // Autonomous Zone ticks bypass the owning session runtime. Keep the
+            // shared action index aligned with the movement/combat packets that
+            // players receive, otherwise a world-event monster can move next to
+            // a player while targeted actions still resolve against its spawn
+            // position.
+            self.apply_shared_entity_packets(&map_file_name, packets);
+        }
         for packet in packets {
             match packet {
                 ServerPacket::ObjectRemove { object_id }
@@ -3900,6 +3925,139 @@ impl SharedInProcessZoneRuntimeFactory {
             .unwrap_or_default()
     }
 
+    /// Apply finalized world-director monster spawns through the same per-Zone
+    /// single-writer gate and replication observer used by autonomous ticks.
+    pub fn apply_world_event_monsters(
+        &self,
+        zone_id: &ZoneId,
+        map_file_name: &str,
+        spawns: &[ZoneMonsterSpawn],
+        now_ms: u64,
+    ) -> Result<usize, String> {
+        if map_file_name.trim().is_empty() {
+            return Err("world event map file name must not be empty".to_string());
+        }
+        let resources = self.resources_for_zone(zone_id);
+        let capture = self
+            .mutation_capture
+            .lock()
+            .map_err(|_| "shared Zone mutation capture mutex was poisoned".to_string())?
+            .clone();
+        let _gate = match capture.as_ref() {
+            Some(capture) => Some(capture.gate.lock_zone(zone_id)?),
+            None => None,
+        };
+        if let Some(capture) = capture.as_ref() {
+            (capture.authorize_tick)(zone_id)?;
+        }
+
+        let mut zone_state = resources
+            .zone_state
+            .lock()
+            .map_err(|_| format!("shared Zone {zone_id} state mutex was poisoned"))?;
+        let key = ZoneKey::for_map(map_file_name);
+        let mut spawned = 0;
+        for spawn in spawns {
+            let (accepted, outbounds) =
+                zone_state
+                    .zone_manager
+                    .spawn_world_event_monster(key.clone(), spawn, now_ms);
+            if accepted {
+                spawned += 1;
+            }
+            if let Some(monster) = zone_state
+                .zone_manager
+                .native_monster_snapshots(&key)
+                .into_iter()
+                .find(|monster| monster.object_id == spawn.object_id)
+            {
+                let map = zone_state
+                    .maps
+                    .entry(map_file_name.to_string())
+                    .or_default();
+                map.entities
+                    .entry(spawn.object_id)
+                    .or_insert_with(|| world_entity_from_zone_monster_spawn(spawn, &monster));
+            }
+            let _ = zone_state.dispatch_zone_outbounds(outbounds, None);
+        }
+        drop(zone_state);
+        if let Some(capture) = capture.as_ref() {
+            (capture.observer)(zone_id, now_ms)?;
+        }
+        Ok(spawned)
+    }
+
+    pub fn broadcast_world_event_message(
+        &self,
+        zone_id: &ZoneId,
+        map_file_name: &str,
+        message: &str,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        if message.trim().is_empty() {
+            return Err("world event message must not be empty".to_string());
+        }
+        let resources = self.resources_for_zone(zone_id);
+        let capture = self
+            .mutation_capture
+            .lock()
+            .map_err(|_| "shared Zone mutation capture mutex was poisoned".to_string())?
+            .clone();
+        let _gate = match capture.as_ref() {
+            Some(capture) => Some(capture.gate.lock_zone(zone_id)?),
+            None => None,
+        };
+        if let Some(capture) = capture.as_ref() {
+            (capture.authorize_tick)(zone_id)?;
+        }
+        let mut zone_state = resources
+            .zone_state
+            .lock()
+            .map_err(|_| format!("shared Zone {zone_id} state mutex was poisoned"))?;
+        let outbounds = zone_state
+            .zone_manager
+            .broadcast_world_event_message(ZoneKey::for_map(map_file_name), message);
+        let _ = zone_state.dispatch_zone_outbounds(outbounds, None);
+        drop(zone_state);
+        if let Some(capture) = capture.as_ref() {
+            (capture.observer)(zone_id, now_ms)?;
+        }
+        Ok(())
+    }
+
+    pub fn world_event_monster_count(
+        &self,
+        zone_id: &ZoneId,
+        map_file_name: &str,
+    ) -> Result<usize, String> {
+        let resources = self.resources_for_zone(zone_id);
+        let zone_state = resources
+            .zone_state
+            .lock()
+            .map_err(|_| format!("shared Zone {zone_id} state mutex was poisoned"))?;
+        Ok(zone_state
+            .zone_manager
+            .zone(&ZoneKey::for_map(map_file_name))
+            .map(|runtime| runtime.native_monster_count())
+            .unwrap_or_default())
+    }
+
+    pub fn world_event_monster_snapshots(
+        &self,
+        zone_id: &ZoneId,
+        map_file_name: &str,
+    ) -> Result<Vec<ZoneNativeMonsterSnapshot>, String> {
+        let resources = self.resources_for_zone(zone_id);
+        let zone_state = resources
+            .zone_state
+            .lock()
+            .map_err(|_| format!("shared Zone {zone_id} state mutex was poisoned"))?;
+        Ok(zone_state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map(map_file_name)))
+    }
+
     pub(crate) fn apply_replicated_zone_tick(
         &self,
         zone_id: &ZoneId,
@@ -4009,6 +4167,37 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         disposition: world_entity_disposition_for_monster_ai(info.ai),
         sprite: Some(simple_world_entity_sprite_snapshot(
             "Monster", info.image, 3,
+        )),
+        quest_ids: Vec::new(),
+    }
+}
+
+fn world_entity_from_zone_monster_spawn(
+    spawn: &ZoneMonsterSpawn,
+    monster: &ZoneNativeMonsterSnapshot,
+) -> WorldEntitySnapshot {
+    WorldEntitySnapshot {
+        object_id: monster.object_id,
+        kind: WorldEntityKind::Monster,
+        name: monster.name.clone(),
+        owner_name: None,
+        ai: Some(spawn.ai),
+        x: monster.position.x,
+        y: monster.position.y,
+        direction: spawn.direction,
+        class: None,
+        gender: None,
+        level: Some(spawn.level),
+        hp: Some(monster.hp),
+        max_hp: Some(monster.max_hp),
+        light: 0,
+        name_colour_argb: spawn.name_colour_argb,
+        dead: monster.dead,
+        disposition: world_entity_disposition_for_monster_ai(spawn.ai),
+        sprite: Some(simple_world_entity_sprite_snapshot(
+            "Monster",
+            spawn.image,
+            3,
         )),
         quest_ids: Vec::new(),
     }
@@ -6629,10 +6818,9 @@ impl SharedInProcessZoneSessionRuntime {
         &self,
         command: &WorldCommand,
     ) -> Option<ZoneNativePlayerAttack> {
-        let (object_id, packet_direction, requested_target, mut kind) = match command {
+        let (object_id, packet_direction, mut kind) = match command {
             WorldCommand::Attack { object_id } => (
                 *object_id,
-                None,
                 None,
                 ZoneNativePlayerAttackKind::Melee {
                     spell: Spell::None as u8,
@@ -6647,7 +6835,6 @@ impl SharedInProcessZoneSessionRuntime {
             }) if *target_id != 0 => (
                 *target_id,
                 Some(*direction),
-                Some(target_location.clone()),
                 ZoneNativePlayerAttackKind::Range {
                     target: target_location.clone(),
                     spell: Spell::None,
@@ -6663,7 +6850,6 @@ impl SharedInProcessZoneSessionRuntime {
             }) if *target_id == 0 && gateway_zone_magic_targets_ground(*spell) => (
                 0,
                 Some(*direction),
-                Some(location.clone()),
                 ZoneNativePlayerAttackKind::Magic {
                     target: location.clone(),
                     spell: *spell,
@@ -6681,7 +6867,6 @@ impl SharedInProcessZoneSessionRuntime {
             }) if *target_id == 0 && gateway_zone_magic_targets_summon(*spell) => (
                 0,
                 Some(*direction),
-                Some(location.clone()),
                 ZoneNativePlayerAttackKind::Magic {
                     target: location.clone(),
                     spell: *spell,
@@ -6703,7 +6888,6 @@ impl SharedInProcessZoneSessionRuntime {
                 (
                     *target_id,
                     Some(*direction),
-                    Some(location.clone()),
                     ZoneNativePlayerAttackKind::Magic {
                         target: location.clone(),
                         spell: *spell,
@@ -6722,7 +6906,6 @@ impl SharedInProcessZoneSessionRuntime {
             }) if *target_id != 0 => (
                 *target_id,
                 Some(*direction),
-                Some(location.clone()),
                 ZoneNativePlayerAttackKind::Magic {
                     target: location.clone(),
                     spell: *spell,
@@ -6754,9 +6937,10 @@ impl SharedInProcessZoneSessionRuntime {
             if target.kind != WorldEntityKind::Monster || target.dead {
                 return None;
             }
-            if requested_target.is_some_and(|point| point.x != target.x || point.y != target.y) {
-                return None;
-            }
+            // Keep stale client coordinates inside the authoritative Zone
+            // request. The Zone validates cooldown, range, and the live target
+            // position in that order and returns a correction when required;
+            // rejecting here would fall back to the private Session runtime.
             let monster = self
                 .inner
                 .zone_monster_spawn_snapshot(object_id)
@@ -8792,7 +8976,8 @@ mod tests {
         SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
         SharedNpcSavedValue, SharedTradeOffer, WorldCommand, WorldEntityDisposition,
         WorldEntityKind, WorldEntitySnapshot, WorldRuntime, ZoneCommand, ZoneKey,
-        ZoneMonsterKillAward, ZoneOutbound, ZoneRuntimeHandle,
+        ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+        ZoneRuntimeHandle,
     };
     use std::{
         collections::BTreeSet,
@@ -9781,6 +9966,152 @@ mod tests {
                 .map(|sprite| sprite.body_library.as_str()),
             Some("Monster/033")
         );
+    }
+
+    #[test]
+    fn finalized_world_event_monster_is_indexed_as_player_action_target() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let zone_id = ZoneId::primary();
+        let spawn = ZoneMonsterSpawn {
+            object_id: 0x7000_0042,
+            name: "WoomaSoldier".to_string(),
+            name_colour_argb: -1,
+            image: 29,
+            ai: 0,
+            level: 30,
+            max_hp: 285,
+            hp: 285,
+            experience: 310,
+            position: Point { x: 168, y: 155 },
+            direction: MirDirection::Down,
+            defense: ZoneMonsterDefense::default(),
+            drops: Vec::new(),
+        };
+
+        assert_eq!(
+            factory
+                .apply_world_event_monsters(&zone_id, "D022", &[spawn.clone()], 1_000)
+                .unwrap(),
+            1
+        );
+
+        let resources = factory.resources_for_zone(&zone_id);
+        let mut zone_state = resources.zone_state.lock().unwrap();
+        zone_state.apply_shared_entity_packets(
+            "D022",
+            &[ServerPacket::ObjectMonster {
+                info: MonsterInfo {
+                    object_id: spawn.object_id,
+                    name: spawn.name.clone(),
+                    name_colour_argb: spawn.name_colour_argb,
+                    location: spawn.position.clone(),
+                    image: spawn.image,
+                    direction: spawn.direction,
+                    effect: 0,
+                    ai: spawn.ai,
+                    light: 0,
+                    dead: false,
+                    skeleton: false,
+                    poison: 0,
+                    hidden: false,
+                    shock_time: 0,
+                    binding_shot_center: false,
+                    extra: false,
+                    extra_byte: 0,
+                    master_object_id: 0,
+                    rarity: 0,
+                    buffs: Vec::new(),
+                },
+            }],
+        );
+        let entity = zone_state
+            .maps
+            .get("D022")
+            .and_then(|map| map.entities.get(&spawn.object_id))
+            .expect("world event monster must enter the shared player-action index");
+        assert_eq!(entity.name, spawn.name);
+        assert_eq!(entity.level, Some(spawn.level));
+        assert_eq!(entity.hp, Some(spawn.hp));
+        assert_eq!(entity.max_hp, Some(spawn.max_hp));
+        assert_eq!(entity.disposition, WorldEntityDisposition::Hostile);
+    }
+
+    #[test]
+    fn player_attack_routes_to_finalized_world_event_monster() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let zone_id = ZoneId::primary();
+        let spawn = ZoneMonsterSpawn {
+            object_id: 0x7000_0043,
+            name: "WoomaSoldier".to_string(),
+            name_colour_argb: -1,
+            image: 29,
+            ai: 0,
+            level: 30,
+            max_hp: 285,
+            hp: 285,
+            experience: 310,
+            position: Point { x: 168, y: 155 },
+            direction: MirDirection::Down,
+            defense: ZoneMonsterDefense::default(),
+            drops: Vec::new(),
+        };
+        factory
+            .apply_world_event_monsters(&zone_id, "D022", &[spawn.clone()], 1_000)
+            .unwrap();
+        let resources = factory.resources_for_zone(&zone_id);
+        let mut runtime = shared_session_runtime(resources.zone_state);
+        start_new_runtime(&mut runtime, "director-fighter", "DirectorFighter");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:D022:168:156".to_string(),
+            })
+            .unwrap();
+        let zone_session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session id");
+        {
+            let mut zone_state = runtime.zone_state.lock().unwrap();
+            let entity = zone_state
+                .maps
+                .get_mut("D022")
+                .and_then(|map| map.entities.get_mut(&spawn.object_id))
+                .expect("world event monster should be indexed");
+            entity.x = 168;
+            entity.y = 156;
+            let _ = zone_state.dispatch_zone_outbounds(
+                vec![ZoneOutbound::ToSession {
+                    session_id: zone_session_id,
+                    packets: vec![ServerPacket::ObjectWalk {
+                        movement: ObjectMovement {
+                            object_id: spawn.object_id,
+                            position: spawn.position.clone(),
+                            direction: MirDirection::Up,
+                        },
+                    }],
+                }],
+                None,
+            );
+            let entity = zone_state
+                .maps
+                .get("D022")
+                .and_then(|map| map.entities.get(&spawn.object_id))
+                .expect("world event monster should remain indexed");
+            assert_eq!(
+                (entity.x, entity.y),
+                (spawn.position.x, spawn.position.y),
+                "autonomous Zone packets must refresh the player-action index"
+            );
+        }
+
+        let packets = runtime
+            .execute(WorldCommand::Attack {
+                object_id: spawn.object_id,
+            })
+            .unwrap();
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { info } if info.object_id != spawn.object_id
+        )));
     }
 
     #[test]

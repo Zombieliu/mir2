@@ -24,7 +24,7 @@
 //! live in-memory zone runtime to a new owner still depends on the zone-owner RPC
 //! transport, which is tracked separately.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -487,6 +487,95 @@ impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
     }
 }
 
+/// A local Zone Host authority for the authenticated Home Agent hop.
+///
+/// The Home Agent has already verified the Relay's signed placement envelope
+/// over mTLS before it forwards the Zone RPC frame over an authenticated
+/// loopback socket. This authority lets the Zone Host adopt that external
+/// lease while retaining monotonic fencing locally. It must only be enabled
+/// with an explicit allow-list of Commonware Zone Host ids.
+#[derive(Debug)]
+pub struct TrustedRpcZoneOwnerLeaseAuthority {
+    trusted_owners: BTreeSet<String>,
+    leases: Mutex<BTreeMap<ZoneId, ZoneOwnerLease>>,
+}
+
+impl TrustedRpcZoneOwnerLeaseAuthority {
+    pub fn new(trusted_owners: impl IntoIterator<Item = String>) -> Result<Self, String> {
+        let trusted_owners = trusted_owners
+            .into_iter()
+            .map(|owner| owner.trim().to_string())
+            .filter(|owner| !owner.is_empty())
+            .collect::<BTreeSet<_>>();
+        if trusted_owners.is_empty() {
+            return Err(
+                "trusted-rpc Zone lease authority requires at least one trusted owner".to_string(),
+            );
+        }
+        Ok(Self {
+            trusted_owners,
+            leases: Mutex::new(BTreeMap::new()),
+        })
+    }
+
+    fn from_env() -> Result<Self, String> {
+        let owners = std::env::var("MIR2_ZONE_OWNER_TRUSTED_RPC_OWNERS")
+            .unwrap_or_default()
+            .split(',')
+            .map(str::to_string)
+            .collect::<Vec<_>>();
+        Self::new(owners)
+    }
+}
+
+impl ZoneOwnerLeaseAuthority for TrustedRpcZoneOwnerLeaseAuthority {
+    fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
+        self.leases
+            .lock()
+            .expect("trusted-rpc Zone lease mutex should not be poisoned")
+            .get(zone_id)
+            .cloned()
+            .unwrap_or_else(|| ZoneOwnerLease::in_process(zone_id))
+    }
+
+    fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
+        if !self.trusted_owners.contains(lease.owner_id()) {
+            return Err(format!(
+                "untrusted Zone owner {} for authenticated Home Agent RPC",
+                lease.owner_id()
+            ));
+        }
+        let mut leases = self
+            .leases
+            .lock()
+            .expect("trusted-rpc Zone lease mutex should not be poisoned");
+        match leases.get(lease.zone_id()) {
+            None => {
+                leases.insert(lease.zone_id().clone(), lease.clone());
+                Ok(())
+            }
+            Some(current) if current == lease => Ok(()),
+            Some(current) if lease.fencing_token() > current.fencing_token() => {
+                leases.insert(lease.zone_id().clone(), lease.clone());
+                Ok(())
+            }
+            Some(current) => Err(format!(
+                "stale zone owner lease for zone {}: current owner {} fencing token {}, got owner {} fencing token {}",
+                lease.zone_id(),
+                current.owner_id(),
+                current.fencing_token(),
+                lease.owner_id(),
+                lease.fencing_token()
+            )),
+        }
+    }
+
+    fn renew_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<ZoneOwnerLease, String> {
+        self.validate_owner_lease(lease)?;
+        Ok(lease.clone())
+    }
+}
+
 fn default_instance_id() -> String {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -502,6 +591,18 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
     if let Some(authority) = crate::gate15::zone_owner_lease_authority() {
         eprintln!("zone owner lease authority: Gate 15 Commonware finalized placement");
         return authority;
+    }
+    if std::env::var("MIR2_ZONE_OWNER_LEASE_BACKEND")
+        .ok()
+        .is_some_and(|value| value.trim().eq_ignore_ascii_case("trusted-rpc"))
+    {
+        let authority = TrustedRpcZoneOwnerLeaseAuthority::from_env()
+            .expect("invalid trusted-rpc Zone owner lease configuration");
+        eprintln!(
+            "zone owner lease authority: authenticated Home Agent RPC ({} trusted owners)",
+            authority.trusted_owners.len()
+        );
+        return Arc::new(authority) as SharedZoneOwnerLeaseAuthority;
     }
     match PostgresZoneOwnerLeaseAuthority::from_env() {
         Some(authority) => {
@@ -520,6 +621,36 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn trusted_rpc_authority_adopts_and_fences_allowed_owner() {
+        let authority =
+            TrustedRpcZoneOwnerLeaseAuthority::new(["home-a".to_string()]).expect("authority");
+        let zone = ZoneId::primary();
+        let first = ZoneOwnerLease::new(zone.clone(), "home-a", 2);
+        authority
+            .validate_owner_lease(&first)
+            .expect("first authenticated lease should be adopted");
+        assert_eq!(authority.owner_lease(&zone), first);
+
+        let stale = ZoneOwnerLease::new(zone.clone(), "home-a", 1);
+        assert!(authority.validate_owner_lease(&stale).is_err());
+        let next = ZoneOwnerLease::new(zone.clone(), "home-a", 3);
+        authority
+            .validate_owner_lease(&next)
+            .expect("higher fencing token should replace the current lease");
+        assert_eq!(authority.owner_lease(&zone), next);
+    }
+
+    #[test]
+    fn trusted_rpc_authority_rejects_unlisted_owner() {
+        let authority =
+            TrustedRpcZoneOwnerLeaseAuthority::new(["home-a".to_string()]).expect("authority");
+        let error = authority
+            .validate_owner_lease(&ZoneOwnerLease::new(ZoneId::primary(), "home-b", 1))
+            .expect_err("unlisted owner must be rejected");
+        assert!(error.contains("untrusted Zone owner home-b"));
+    }
 
     #[test]
     fn explicit_lease_owner_is_independent_from_process_instance_id() {

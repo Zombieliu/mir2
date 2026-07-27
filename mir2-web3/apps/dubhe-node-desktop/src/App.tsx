@@ -52,6 +52,10 @@ type DesktopEnrollmentStatus = {
   telemetryUrl?: string;
   maxSessions?: number;
   maxZones?: number;
+  renewalState: string;
+  renewAtMs?: number;
+  lastRenewedAtMs?: number;
+  renewalError?: string;
   error?: string;
 };
 
@@ -82,6 +86,29 @@ function relativeTime(timestamp?: number) {
   return `${Math.floor(seconds / 60)} 分钟前`;
 }
 
+function formatDateTime(timestamp?: number) {
+  if (!timestamp) return "等待签发";
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(timestamp);
+}
+
+function renewalLabel(state?: string) {
+  switch (state) {
+    case "current": return "自动续期已启用";
+    case "draining": return "等待存量玩家退出";
+    case "renewing": return "正在轮换凭证";
+    case "failed": return "续期失败，后台将重试";
+    case "awaiting-certification": return "等待首次容量认证";
+    case "awaiting-enrollment": return "等待首次 Enrollment";
+    case "not-configured": return "未配置";
+    default: return "后台检查中";
+  }
+}
+
 function Icon({ children }: { children: string }) {
   return <span className="nav-icon" aria-hidden="true">{children}</span>;
 }
@@ -110,8 +137,12 @@ function App() {
 
   const refresh = useCallback(async () => {
     try {
-      const next = await invoke<SupervisorStatus>("node_status");
-      setStatus(next);
+      const [nextStatus, nextEnrollment] = await Promise.all([
+        invoke<SupervisorStatus>("node_status"),
+        invoke<DesktopEnrollmentStatus>("enrollment_status"),
+      ]);
+      setStatus(nextStatus);
+      setEnrollment(nextEnrollment);
       setError(undefined);
     } catch {
       setStatus(undefined);
@@ -186,6 +217,21 @@ function App() {
     setEnrollmentBusy(true);
     try {
       const result = await invoke<DesktopEnrollmentStatus>("certify_node");
+      setEnrollment(result);
+      await refresh();
+      setError(undefined);
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setEnrollmentBusy(false);
+    }
+  }
+
+  async function renewCredentials() {
+    if (enrollmentBusy || !enrollment?.relayReady) return;
+    setEnrollmentBusy(true);
+    try {
+      const result = await invoke<DesktopEnrollmentStatus>("renew_node_credentials");
       setEnrollment(result);
       await refresh();
       setError(undefined);
@@ -275,6 +321,8 @@ function App() {
                   disabled={
                     !status ||
                     busy ||
+                    enrollment?.renewalState === "draining" ||
+                    enrollment?.renewalState === "renewing" ||
                     (!serving &&
                       (!status.zoneReachable ||
                         !status.relayConnected ||
@@ -468,6 +516,14 @@ function App() {
                         : "未配置"}
                   </b>
                 </div>
+                <div>
+                  <span><strong>凭证自动续期</strong><small>到期前 6 小时安全轮换</small></span>
+                  <b>{renewalLabel(enrollment.renewalState)}</b>
+                </div>
+                <div>
+                  <span><strong>下次续期窗口</strong><small>有活跃玩家时先 drain，不强制断线</small></span>
+                  <b>{formatDateTime(enrollment.renewAtMs)}</b>
+                </div>
               </div>
             )}
             <button
@@ -500,6 +556,21 @@ function App() {
                     : "等待本地 Zone Host"}
               </button>
             )}
+            {enrollment?.relayReady && (
+              <button
+                className="secondary-button"
+                disabled={enrollmentBusy}
+                onClick={() => void renewCredentials()}
+                type="button"
+              >
+                {enrollmentBusy
+                  ? "正在安全续期…"
+                  : enrollment.renewalState === "draining"
+                    ? "等待存量玩家退出"
+                    : "立即检查并续期"}
+              </button>
+            )}
+            {enrollment?.renewalError && <p className="page-lead">{enrollment.renewalError}</p>}
             {enrollment?.error && <p className="page-lead">{enrollment.error}</p>}
           </section>
         )}

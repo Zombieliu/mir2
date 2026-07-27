@@ -18,8 +18,8 @@ use mir2_gateway::{
     ZoneOwnerRpcTransport, ZoneRegistry, ZoneReplicationCoverage, ZoneRpcLimits,
     ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
-use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
-use mir2_simulation::WorldCommand;
+use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket};
+use mir2_simulation::{WorldCommand, ZoneMonsterDefense, ZoneMonsterSpawn};
 
 static ENVIRONMENT_TEST_LOCK: Mutex<()> = Mutex::new(());
 
@@ -106,6 +106,87 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     assert!(telemetry.zones[0].map_file_names.is_empty());
     assert_eq!(telemetry.zones[0].session_count, 2);
 
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let factory = Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+        Duration::from_millis(25),
+        BTreeMap::new(),
+    ));
+    let zone_id = ZoneId::primary();
+    let spawn = ZoneMonsterSpawn {
+        object_id: 0x7000_0044,
+        name: "WoomaSoldier".to_string(),
+        name_colour_argb: -1,
+        image: 29,
+        ai: 0,
+        level: 30,
+        max_hp: 285,
+        hp: 285,
+        experience: 310,
+        position: Point { x: 168, y: 155 },
+        direction: MirDirection::Down,
+        defense: ZoneMonsterDefense::default(),
+        drops: Vec::new(),
+    };
+    factory
+        .apply_world_event_monsters(&zone_id, "D022", &[spawn.clone()], 1_000)
+        .unwrap();
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind event Zone Host");
+    let address = listener.local_addr().unwrap();
+    let stop = Arc::new(AtomicBool::new(false));
+    let shared_authority: SharedZoneOwnerLeaseAuthority = authority.clone();
+    let server = Arc::new(ZoneHostServer::with_options_and_factory(
+        GatewayConfig::default(),
+        shared_authority,
+        None,
+        test_limits(),
+        factory,
+    ));
+    let running_server = Arc::clone(&server);
+    let server_stop = Arc::clone(&stop);
+    let handle = thread::spawn(move || {
+        running_server
+            .serve_until(listener, server_stop)
+            .expect("event Zone Host should run");
+    });
+    let transport = test_transport(address, zone_id.clone(), "director-combat");
+    let lease = authority.owner_lease(&zone_id);
+    start_demo_character(&transport, lease.clone());
+    transport
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::TransferMap {
+                key: "crystal:D022:168:156".to_string(),
+            },
+        ))
+        .unwrap();
+
+    let launch = transport
+        .execute(ZoneOwnerCommandRequest::production_player(
+            lease.clone(),
+            true,
+            WorldCommand::Attack {
+                object_id: spawn.object_id,
+            },
+        ))
+        .unwrap();
+    assert!(launch.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id != spawn.object_id
+    )));
+
+    thread::sleep(Duration::from_millis(75));
+    let resolved = transport
+        .execute(ZoneOwnerCommandRequest::direct(lease, WorldCommand::Tick))
+        .unwrap();
+    assert!(resolved.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectStruck { info } if info.object_id == spawn.object_id
+    )));
     stop_server(address, stop, handle);
 }
 

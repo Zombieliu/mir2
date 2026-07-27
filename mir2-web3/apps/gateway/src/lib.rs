@@ -29,6 +29,7 @@ mod session;
 pub mod tcp;
 pub mod topology;
 pub mod web;
+pub mod world_director;
 pub mod zone_lease;
 pub mod zone_replication;
 pub mod zone_rpc;
@@ -133,8 +134,9 @@ pub use node_security::{
     VerifiedGuildNode, VerifiedGuildZoneTransport, VerifiedWorkMeterContext,
 };
 pub use operator::{
-    serve_zone_host_operator, zone_host_signing_identity_from_env, SignedZoneHostHeartbeat,
-    ZoneHostHeartbeatPayload, ZoneHostOperatorConfig,
+    serve_zone_host_operator, serve_zone_host_operator_with_world_director,
+    zone_host_signing_identity_from_env, SignedZoneHostHeartbeat, ZoneHostHeartbeatPayload,
+    ZoneHostOperatorConfig,
 };
 pub use regional::{
     RegionalProfile, RegionalReferenceDeployment, RegionalStage, RegionalStages, RegionalWorkload,
@@ -161,6 +163,18 @@ pub use routing::{
 };
 pub use session::{GatewayConfig, GatewaySession};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
+pub use world_director::{
+    director_commands_from_finalized, AiDirectorProposalAdapter, AiDirectorProposalRequest,
+    AppliedDirectorStage, ApprovedDirectorPlan, DirectorAction, DirectorBudgetPolicy,
+    DirectorCommandPayload, DirectorEventTemplate, DirectorExecutionReceipt, DirectorPolicyState,
+    DirectorPressure, DirectorPressureScores, DirectorProposal, DirectorProposalSource,
+    DirectorReplayGuard, DirectorSimulationAdvanceReceipt, DirectorStage, DirectorTemplateSummary,
+    EconomyTelemetrySnapshot, FinalizedDirectorInstallReceipt, FinalizedDirectorSubmission,
+    GuildTelemetrySnapshot, MapTelemetrySnapshot, Mir2DirectorSimulationAdapter,
+    SharedDirectorZoneRouter, SignedDirectorCommand, WorldDirectorPolicy,
+    WorldDirectorRuntimeService, WorldDirectorRuntimeStatus, WorldTelemetrySnapshot,
+    ZoneDirectorExecutor, MAX_AI_PROPOSAL_BYTES, WORLD_DIRECTOR_NAMESPACE, WORLD_DIRECTOR_SCHEMA,
+};
 pub use zone_replication::{ZoneBaseSnapshotStore, ZoneMutationWal, ZoneMutationWalAck};
 pub use zone_rpc::{
     decode_zone_rpc_routing_hint, rewrite_zone_rpc_authorization, validate_zone_host_bind,
