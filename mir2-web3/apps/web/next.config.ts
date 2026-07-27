@@ -8,6 +8,10 @@ const shortRuntimeCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=0, must-revalidate";
 const clearAltSvcHeader = { key: "Alt-Svc", value: "clear" };
+const buildRevision =
+  process.env.MIR2_DEPLOY_REVISION?.trim() ||
+  process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
+  "";
 
 // Heavy static game media (PNG/WAV/WASM/cursor) is served by Vercel static
 // output and the Cloudflare Worker + R2 origin; these server functions only read
@@ -41,6 +45,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // `env` is intentionally build-time and public. A Git revision is not a
+  // secret, and capturing it here keeps /version trustworthy even when a host
+  // does not expose its system variables to server functions at runtime.
+  env: {
+    MIR2_BUILD_REVISION: buildRevision,
+  },
   outputFileTracingExcludes: {
     "/api/asset-manifest": heavyPublicMediaTracingExcludes,
     "/api/original-ui-meta": heavyPublicMediaTracingExcludes,
