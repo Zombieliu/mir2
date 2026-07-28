@@ -27,9 +27,8 @@ for dir in "${write_dirs[@]}"; do
 done
 
 for file in "${write_files[@]}"; do
-  if [ -e "$file" ]; then
-    chown node:node "$file"
-  fi
+  touch "$file"
+  chown node:node "$file"
 done
 
 if [ "$(id -u)" -eq 0 ]; then
