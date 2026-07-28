@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 120
     defaults:
       run:
-        working-directory: apps/dubhe-node-desktop
+        working-directory: mir2-web3/apps/dubhe-node-desktop
     env:
       DUBHE_NODE_UPDATER_PUBLIC_KEY: ${{ vars.DUBHE_NODE_UPDATER_PUBLIC_KEY }}
       DUBHE_NODE_UPDATE_STABLE_URL: ${{ vars.DUBHE_NODE_UPDATE_STABLE_URL }}
@@ -67,7 +67,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: apps/dubhe-node-desktop/package-lock.json
+          cache-dependency-path: mir2-web3/apps/dubhe-node-desktop/package-lock.json
 
       - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
         with:
@@ -113,7 +113,7 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          projectPath: apps/dubhe-node-desktop
+          projectPath: mir2-web3/apps/dubhe-node-desktop
           tagName: ${{ inputs.release_tag }}
           releaseName: Dubhe Node ${{ inputs.release_tag }}
           releaseBody: Signed ${{ inputs.channel }} desktop release. Promote only after three-platform smoke acceptance.
@@ -141,13 +141,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: apps/dubhe-node-desktop/package-lock.json
+          cache-dependency-path: mir2-web3/apps/dubhe-node-desktop/package-lock.json
 
       - run: npm ci
-        working-directory: apps/dubhe-node-desktop
+        working-directory: mir2-web3/apps/dubhe-node-desktop
 
       - name: Download all draft release assets
         run: gh release download "${{ inputs.release_tag }}" --dir release-assets
+        working-directory: .
 
       - name: Create deterministic SHA-256 manifest
         run: |
@@ -155,10 +156,11 @@ jobs:
           find . -maxdepth 1 -type f ! -name '*.sig' ! -name 'latest.json' -print0 \
             | sort -z \
             | xargs -0 sha256sum > SHA256SUMS
+        working-directory: .
 
       - name: Sign checksum manifest with offline updater key
-        run: npm run tauri signer sign -- ../../release-assets/SHA256SUMS
-        working-directory: apps/dubhe-node-desktop
+        run: npm run tauri signer sign -- ../../../release-assets/SHA256SUMS
+        working-directory: mir2-web3/apps/dubhe-node-desktop
 
       - name: Upload signed checksum manifest
         run: |
@@ -166,3 +168,4 @@ jobs:
             release-assets/SHA256SUMS \
             release-assets/SHA256SUMS.sig \
             --clobber
+        working-directory: .
