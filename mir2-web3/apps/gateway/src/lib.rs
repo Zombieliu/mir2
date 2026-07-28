@@ -44,6 +44,7 @@ pub mod rewards {
 }
 pub mod routing;
 mod session;
+pub mod spectator;
 pub mod tcp;
 pub mod topology;
 pub mod web;
@@ -181,6 +182,10 @@ pub use routing::{
     ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
+pub use spectator::{
+    SpectatorAuthorization, SpectatorConfig, SpectatorFrame, SpectatorHub, SpectatorMatch,
+    SpectatorMetrics, SpectatorRecording, SpectatorTarget,
+};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use world_director::{
     director_commands_from_finalized, AiDirectorProposalAdapter, AiDirectorProposalRequest,
