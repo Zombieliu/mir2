@@ -4,6 +4,10 @@
 //! player session or an authoritative Zone command handle, so model, TTS, Discord, and encoder
 //! failures cannot affect gameplay.
 
+use crate::ai_distribution::{
+    AiDistributionChannel, AiDistributionConfig, AiDistributionHub, AiDistributionMetrics,
+    AiDistributionStatus,
+};
 use crate::spectator::{SpectatorEvent, SpectatorFrame, SpectatorHub};
 use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
@@ -24,7 +28,6 @@ const MAX_SUBTITLE_CHARS: usize = 96;
 const MAX_REASON_CHARS: usize = 160;
 const MAX_MODEL_RESPONSE_BYTES: usize = 32 * 1024;
 const MAX_RECENT_SEGMENTS: usize = 24;
-const MAX_PENDING_DELIVERIES: usize = 256;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -46,11 +49,8 @@ pub struct AiLiveConfig {
     pub tts_api_key: Option<String>,
     pub tts_model: String,
     pub tts_voice: String,
-    pub discord_webhook: Option<String>,
-    pub public_spectator_url: Option<String>,
     pub poll_interval_ms: u64,
     pub minimum_score: u8,
-    pub discord_minimum_score: u8,
     pub commentary_cooldown_ms: u64,
     pub data_dir: PathBuf,
     pub production: bool,
@@ -84,12 +84,8 @@ impl AiLiveConfig {
             tts_model: env::var("MIR2_AI_LIVE_TTS_MODEL")
                 .unwrap_or_else(|_| "gpt-4o-mini-tts".to_string()),
             tts_voice: env::var("MIR2_AI_LIVE_TTS_VOICE").unwrap_or_else(|_| "alloy".to_string()),
-            discord_webhook: optional_env("MIR2_AI_LIVE_DISCORD_WEBHOOK"),
-            public_spectator_url: optional_env("MIR2_AI_LIVE_PUBLIC_URL"),
             poll_interval_ms: bounded_u64_env("MIR2_AI_LIVE_POLL_MS", 500, 100, 10_000),
             minimum_score: bounded_u64_env("MIR2_AI_LIVE_MIN_SCORE", 60, 1, 100) as u8,
-            discord_minimum_score: bounded_u64_env("MIR2_AI_LIVE_DISCORD_MIN_SCORE", 90, 1, 100)
-                as u8,
             commentary_cooldown_ms: bounded_u64_env(
                 "MIR2_AI_LIVE_COOLDOWN_MS",
                 8_000,
@@ -117,11 +113,8 @@ impl AiLiveConfig {
             tts_api_key: None,
             tts_model: "test-tts".to_string(),
             tts_voice: "alloy".to_string(),
-            discord_webhook: None,
-            public_spectator_url: None,
             poll_interval_ms: 500,
             minimum_score: 60,
-            discord_minimum_score: 90,
             commentary_cooldown_ms: 8_000,
             data_dir,
             production: false,
@@ -140,33 +133,12 @@ impl AiLiveConfig {
         for (name, endpoint) in [
             ("MIR2_AI_LIVE_TEXT_ENDPOINT", self.text_endpoint.as_deref()),
             ("MIR2_AI_LIVE_TTS_ENDPOINT", self.tts_endpoint.as_deref()),
-            (
-                "MIR2_AI_LIVE_DISCORD_WEBHOOK",
-                self.discord_webhook.as_deref(),
-            ),
-            (
-                "MIR2_AI_LIVE_PUBLIC_URL",
-                self.public_spectator_url.as_deref(),
-            ),
         ] {
             let Some(endpoint) = endpoint else { continue };
             let url =
                 Url::parse(endpoint).map_err(|error| format!("{name} is invalid: {error}"))?;
             if self.production && url.scheme() != "https" {
                 return Err(format!("{name} must use HTTPS in production"));
-            }
-        }
-        if self.production {
-            if let Some(webhook) = self.discord_webhook.as_deref() {
-                let host = Url::parse(webhook)
-                    .ok()
-                    .and_then(|url| url.host_str().map(str::to_string));
-                if !matches!(host.as_deref(), Some("discord.com" | "discordapp.com")) {
-                    return Err(
-                        "MIR2_AI_LIVE_DISCORD_WEBHOOK must use an official Discord host"
-                            .to_string(),
-                    );
-                }
             }
         }
         Ok(())
@@ -214,6 +186,11 @@ pub struct AiLiveMetrics {
     pub model_failure_total: u64,
     pub tts_success_total: u64,
     pub tts_failure_total: u64,
+    pub distribution_success_total: u64,
+    pub distribution_failure_total: u64,
+    pub distribution_dead_letters_total: u64,
+    pub queued_distribution_deliveries: usize,
+    // Compatibility counters retained for existing dashboards during the v1 migration.
     pub discord_success_total: u64,
     pub discord_failure_total: u64,
     pub discord_dead_letters_total: u64,
@@ -233,6 +210,7 @@ pub struct AiLiveStatus {
     pub recent_segments: Vec<AiLiveSegment>,
     pub providers: AiLiveProviderStatus,
     pub metrics: AiLiveMetrics,
+    pub distribution: AiDistributionStatus,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -244,20 +222,11 @@ pub struct AiLiveProviderStatus {
     pub broadcast_url_configured: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct PendingDiscordDelivery {
-    segment: AiLiveSegment,
-    attempts: u8,
-    next_attempt_at_ms: u64,
-}
-
 #[derive(Debug)]
 struct AiLiveState {
     mode: AiLiveMode,
     latest_segment: Option<AiLiveSegment>,
     recent_segments: VecDeque<AiLiveSegment>,
-    pending_discord: VecDeque<PendingDiscordDelivery>,
     last_sequence_by_map: BTreeMap<String, u64>,
     last_segment_at_ms: u64,
     processed_frames_total: u64,
@@ -267,9 +236,6 @@ struct AiLiveState {
     model_failure_total: u64,
     tts_success_total: u64,
     tts_failure_total: u64,
-    discord_success_total: u64,
-    discord_failure_total: u64,
-    discord_dead_letters_total: u64,
     persisted_segments_total: u64,
     persistence_errors_total: u64,
 }
@@ -280,7 +246,6 @@ impl AiLiveState {
             mode,
             latest_segment: None,
             recent_segments: VecDeque::new(),
-            pending_discord: VecDeque::new(),
             last_sequence_by_map: BTreeMap::new(),
             last_segment_at_ms: 0,
             processed_frames_total: 0,
@@ -290,9 +255,6 @@ impl AiLiveState {
             model_failure_total: 0,
             tts_success_total: 0,
             tts_failure_total: 0,
-            discord_success_total: 0,
-            discord_failure_total: 0,
-            discord_dead_letters_total: 0,
             persisted_segments_total: 0,
             persistence_errors_total: 0,
         }
@@ -302,6 +264,7 @@ impl AiLiveState {
 #[derive(Debug, Clone)]
 pub struct AiLiveHub {
     config: Arc<AiLiveConfig>,
+    distribution: AiDistributionHub,
     state: Arc<Mutex<AiLiveState>>,
     client: Client,
     running: Arc<AtomicBool>,
@@ -325,10 +288,21 @@ struct ModelCommentary {
 
 impl AiLiveHub {
     pub fn from_env() -> Result<Self, String> {
-        Self::new(AiLiveConfig::from_env()?)
+        let config = AiLiveConfig::from_env()?;
+        let distribution =
+            AiDistributionConfig::from_env(config.data_dir.clone(), config.production)?;
+        Self::new_with_distribution(config, distribution)
     }
 
     pub fn new(config: AiLiveConfig) -> Result<Self, String> {
+        let distribution = AiDistributionConfig::disabled_for_tests(config.data_dir.clone());
+        Self::new_with_distribution(config, distribution)
+    }
+
+    pub fn new_with_distribution(
+        config: AiLiveConfig,
+        distribution_config: AiDistributionConfig,
+    ) -> Result<Self, String> {
         config.validate()?;
         if config.enabled {
             fs::create_dir_all(config.data_dir.join("audio")).map_err(|error| {
@@ -339,11 +313,10 @@ impl AiLiveHub {
             })?;
         }
         let mode = config.mode;
-        let pending_discord = load_discord_queue(&config.data_dir)?;
-        let mut state = AiLiveState::new(mode);
-        state.pending_discord = pending_discord;
+        let state = AiLiveState::new(mode);
         Ok(Self {
             config: Arc::new(config),
+            distribution: AiDistributionHub::new(distribution_config)?,
             state: Arc::new(Mutex::new(state)),
             client: Client::builder()
                 .connect_timeout(Duration::from_secs(5))
@@ -370,7 +343,17 @@ impl AiLiveHub {
             loop {
                 tick.tick().await;
                 hub.poll_once(&spectator).await;
-                hub.retry_discord_once().await;
+            }
+        });
+        let hub = self.clone();
+        tokio::spawn(async move {
+            let mut tick = tokio::time::interval(Duration::from_millis(250));
+            tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+            loop {
+                tick.tick().await;
+                if hub.mode() == AiLiveMode::Live {
+                    hub.distribution.retry_once().await;
+                }
             }
         });
     }
@@ -535,29 +518,8 @@ impl AiLiveHub {
             eprintln!("AI live segment persistence failed: {error}");
         }
 
-        if mode == AiLiveMode::Live
-            && segment.score >= self.config.discord_minimum_score
-            && self.config.discord_webhook.is_some()
-        {
-            if let Err(error) = self.deliver_discord(&segment).await {
-                eprintln!("AI live Discord delivery queued: {error}");
-                self.with_state(|state| {
-                    state.discord_failure_total = state.discord_failure_total.saturating_add(1);
-                    if state.pending_discord.len() >= MAX_PENDING_DELIVERIES {
-                        state.pending_discord.pop_front();
-                    }
-                    state.pending_discord.push_back(PendingDiscordDelivery {
-                        segment: segment.clone(),
-                        attempts: 1,
-                        next_attempt_at_ms: now_ms().saturating_add(2_000),
-                    });
-                });
-                self.persist_discord_queue();
-            } else {
-                self.with_state(|state| {
-                    state.discord_success_total = state.discord_success_total.saturating_add(1)
-                });
-            }
+        if mode == AiLiveMode::Live {
+            self.distribution.publish(&segment);
         }
         Ok(Some(segment))
     }
@@ -688,118 +650,9 @@ impl AiLiveHub {
         Ok(Some(format!("/ai-live/audio/{segment_id}.mp3")))
     }
 
-    async fn deliver_discord(&self, segment: &AiLiveSegment) -> Result<(), String> {
-        let webhook = self
-            .config
-            .discord_webhook
-            .as_deref()
-            .ok_or_else(|| "Discord webhook is not configured".to_string())?;
-        let watch_url = self.config.public_spectator_url.as_deref().map(|base| {
-            format!(
-                "{}?spectate=1&aiLive=1&spectateMap={}",
-                base.trim_end_matches('/'),
-                percent_encode_query(&segment.map_file_name)
-            )
-        });
-        let mut description = format!(
-            "{}\n\n地图：{} · 高光分 {}",
-            segment.commentary, segment.map_title, segment.score
-        );
-        if let Some(url) = watch_url {
-            description.push_str(&format!("\n[进入只读观战]({url})"));
-        }
-        let response = self
-            .client
-            .post(webhook)
-            .json(&json!({
-                "username": "Dubhe AI Live",
-                "allowed_mentions": {"parse": []},
-                "embeds": [{
-                    "title": segment.subtitle,
-                    "description": bounded_text(&description, 1500),
-                    "color": 3585905,
-                    "footer": {"text": format!("{} · {}", segment.segment_id, segment.reason)}
-                }]
-            }))
-            .send()
-            .await
-            .map_err(|error| format!("Discord request failed: {error}"))?;
-        if !response.status().is_success() {
-            return Err(format!("Discord returned HTTP {}", response.status()));
-        }
-        Ok(())
-    }
-
-    async fn retry_discord_once(&self) {
-        if self.mode() != AiLiveMode::Live {
-            return;
-        }
-        let pending = self.with_state_value(|state| {
-            state
-                .pending_discord
-                .front()
-                .filter(|delivery| delivery.next_attempt_at_ms <= now_ms())
-                .cloned()
-        });
-        let Some(mut pending) = pending else { return };
-        match self.deliver_discord(&pending.segment).await {
-            Ok(()) => {
-                self.with_state(|state| {
-                    if state.pending_discord.front().is_some_and(|current| {
-                        current.segment.segment_id == pending.segment.segment_id
-                    }) {
-                        state.pending_discord.pop_front();
-                    }
-                    state.discord_success_total = state.discord_success_total.saturating_add(1);
-                });
-                self.persist_discord_queue();
-            }
-            Err(error) => {
-                eprintln!("AI live Discord retry failed: {error}");
-                self.with_state(|state| {
-                    state.discord_failure_total = state.discord_failure_total.saturating_add(1)
-                });
-                pending.attempts = pending.attempts.saturating_add(1);
-                let mut dead_letter = None;
-                if pending.attempts <= 8 {
-                    let backoff = 2_000u64.saturating_mul(1u64 << pending.attempts.min(6));
-                    pending.next_attempt_at_ms = now_ms().saturating_add(backoff);
-                    self.with_state(|state| {
-                        if let Some(current) = state.pending_discord.front_mut() {
-                            if current.segment.segment_id == pending.segment.segment_id {
-                                *current = pending.clone();
-                            }
-                        }
-                    });
-                } else {
-                    self.with_state(|state| {
-                        if state.pending_discord.front().is_some_and(|current| {
-                            current.segment.segment_id == pending.segment.segment_id
-                        }) {
-                            dead_letter = state.pending_discord.pop_front();
-                        }
-                        state.discord_dead_letters_total =
-                            state.discord_dead_letters_total.saturating_add(1);
-                    });
-                }
-                self.persist_discord_queue();
-                if let Some(dead_letter) = dead_letter {
-                    if let Err(error) =
-                        append_discord_dead_letter(&self.config.data_dir, &dead_letter, &error)
-                    {
-                        eprintln!("persist AI live Discord dead letter failed: {error}");
-                        self.with_state(|state| {
-                            state.persistence_errors_total =
-                                state.persistence_errors_total.saturating_add(1)
-                        });
-                    }
-                }
-            }
-        }
-    }
-
     pub fn status(&self) -> AiLiveStatus {
         let state = self.state.lock().expect("AI live state mutex poisoned");
+        let distribution = self.distribution.status();
         AiLiveStatus {
             schema: AI_LIVE_SCHEMA,
             enabled: self.config.enabled,
@@ -812,16 +665,35 @@ impl AiLiveHub {
                     && self.config.text_api_key.is_some(),
                 tts_configured: self.config.tts_endpoint.is_some()
                     && self.config.tts_api_key.is_some(),
-                discord_configured: self.config.discord_webhook.is_some(),
-                broadcast_url_configured: self.config.public_spectator_url.is_some(),
+                discord_configured: distribution.channels.iter().any(|channel| {
+                    channel.channel == AiDistributionChannel::DiscordWebhook && channel.configured
+                }),
+                broadcast_url_configured: distribution.channels.iter().any(|channel| {
+                    channel.channel == AiDistributionChannel::WebBroadcast && channel.configured
+                }),
             },
-            metrics: metrics_from_state(&self.config, &state, self.running.load(Ordering::Acquire)),
+            metrics: metrics_from_state(
+                &self.config,
+                &state,
+                self.running.load(Ordering::Acquire),
+                self.distribution.metrics(),
+                self.distribution
+                    .channel_status(AiDistributionChannel::DiscordWebhook),
+            ),
+            distribution,
         }
     }
 
     pub fn metrics(&self) -> AiLiveMetrics {
         let state = self.state.lock().expect("AI live state mutex poisoned");
-        metrics_from_state(&self.config, &state, self.running.load(Ordering::Acquire))
+        metrics_from_state(
+            &self.config,
+            &state,
+            self.running.load(Ordering::Acquire),
+            self.distribution.metrics(),
+            self.distribution
+                .channel_status(AiDistributionChannel::DiscordWebhook),
+        )
     }
 
     pub fn mode(&self) -> AiLiveMode {
@@ -835,17 +707,36 @@ impl AiLiveHub {
         if !self.config.enabled {
             return Err("AI live service is disabled".to_string());
         }
-        let expected = self
-            .config
-            .operator_token
-            .as_deref()
-            .ok_or_else(|| "AI live operator token is not configured".to_string())?;
-        let actual = token.ok_or_else(|| "AI live operator token is required".to_string())?;
-        if !constant_time_eq(expected.as_bytes(), actual.as_bytes()) {
-            return Err("invalid AI live operator token".to_string());
-        }
+        self.authorize(token)?;
         self.with_state(|state| state.mode = mode);
         Ok(self.status())
+    }
+
+    pub fn distribution_status(&self) -> AiDistributionStatus {
+        self.distribution.status()
+    }
+
+    pub async fn retry_distribution_once(&self) {
+        self.distribution.retry_once().await;
+    }
+
+    pub fn set_distribution_channel(
+        &self,
+        token: Option<&str>,
+        channel: AiDistributionChannel,
+        enabled: bool,
+    ) -> Result<AiDistributionStatus, String> {
+        self.authorize(token)?;
+        self.distribution.set_channel_enabled(channel, enabled)
+    }
+
+    pub fn retry_distribution_channel(
+        &self,
+        token: Option<&str>,
+        channel: AiDistributionChannel,
+    ) -> Result<AiDistributionStatus, String> {
+        self.authorize(token)?;
+        self.distribution.retry_channel_now(channel)
     }
 
     pub fn audio_path(&self, clip: &str) -> Result<PathBuf, String> {
@@ -867,24 +758,27 @@ impl AiLiveHub {
         }
     }
 
-    fn with_state_value<T>(&self, apply: impl FnOnce(&mut AiLiveState) -> T) -> T {
-        let mut state = self.state.lock().expect("AI live state mutex poisoned");
-        apply(&mut state)
-    }
-
-    fn persist_discord_queue(&self) {
-        let queue = self
-            .with_state_value(|state| state.pending_discord.iter().cloned().collect::<Vec<_>>());
-        if let Err(error) = save_discord_queue(&self.config.data_dir, &queue) {
-            eprintln!("persist AI live Discord queue failed: {error}");
-            self.with_state(|state| {
-                state.persistence_errors_total = state.persistence_errors_total.saturating_add(1)
-            });
+    fn authorize(&self, token: Option<&str>) -> Result<(), String> {
+        let expected = self
+            .config
+            .operator_token
+            .as_deref()
+            .ok_or_else(|| "AI live operator token is not configured".to_string())?;
+        let actual = token.ok_or_else(|| "AI live operator token is required".to_string())?;
+        if !constant_time_eq(expected.as_bytes(), actual.as_bytes()) {
+            return Err("invalid AI live operator token".to_string());
         }
+        Ok(())
     }
 }
 
-fn metrics_from_state(config: &AiLiveConfig, state: &AiLiveState, running: bool) -> AiLiveMetrics {
+fn metrics_from_state(
+    config: &AiLiveConfig,
+    state: &AiLiveState,
+    running: bool,
+    distribution: AiDistributionMetrics,
+    discord: crate::ai_distribution::AiChannelStatus,
+) -> AiLiveMetrics {
     AiLiveMetrics {
         enabled: config.enabled,
         mode: state.mode,
@@ -896,12 +790,16 @@ fn metrics_from_state(config: &AiLiveConfig, state: &AiLiveState, running: bool)
         model_failure_total: state.model_failure_total,
         tts_success_total: state.tts_success_total,
         tts_failure_total: state.tts_failure_total,
-        discord_success_total: state.discord_success_total,
-        discord_failure_total: state.discord_failure_total,
-        discord_dead_letters_total: state.discord_dead_letters_total,
+        distribution_success_total: distribution.delivered_total,
+        distribution_failure_total: distribution.failure_total,
+        distribution_dead_letters_total: distribution.dead_letters_total,
+        queued_distribution_deliveries: distribution.queued_deliveries,
+        discord_success_total: discord.delivered_total,
+        discord_failure_total: discord.failure_total,
+        discord_dead_letters_total: discord.dead_letters_total,
         persisted_segments_total: state.persisted_segments_total,
         persistence_errors_total: state.persistence_errors_total,
-        queued_discord_deliveries: state.pending_discord.len(),
+        queued_discord_deliveries: discord.queued,
     }
 }
 
@@ -1024,72 +922,6 @@ fn append_segment(data_dir: &Path, segment: &AiLiveSegment) -> Result<(), String
         .map_err(|error| format!("flush {} failed: {error}", path.display()))
 }
 
-fn load_discord_queue(data_dir: &Path) -> Result<VecDeque<PendingDiscordDelivery>, String> {
-    let path = data_dir.join("discord-queue.json");
-    let bytes = match fs::read(&path) {
-        Ok(bytes) => bytes,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(VecDeque::new()),
-        Err(error) => return Err(format!("read {} failed: {error}", path.display())),
-    };
-    let queue: Vec<PendingDiscordDelivery> = serde_json::from_slice(&bytes)
-        .map_err(|error| format!("decode {} failed: {error}", path.display()))?;
-    Ok(queue.into_iter().take(MAX_PENDING_DELIVERIES).collect())
-}
-
-fn save_discord_queue(data_dir: &Path, queue: &[PendingDiscordDelivery]) -> Result<(), String> {
-    fs::create_dir_all(data_dir)
-        .map_err(|error| format!("create AI live data dir failed: {error}"))?;
-    let path = data_dir.join("discord-queue.json");
-    let temporary = data_dir.join("discord-queue.json.tmp");
-    let bytes = serde_json::to_vec_pretty(queue)
-        .map_err(|error| format!("encode AI live Discord queue failed: {error}"))?;
-    let mut file = OpenOptions::new()
-        .create(true)
-        .truncate(true)
-        .write(true)
-        .open(&temporary)
-        .map_err(|error| format!("open {} failed: {error}", temporary.display()))?;
-    file.write_all(&bytes)
-        .and_then(|()| file.sync_all())
-        .map_err(|error| format!("flush {} failed: {error}", temporary.display()))?;
-    #[cfg(windows)]
-    if path.exists() {
-        fs::remove_file(&path)
-            .map_err(|error| format!("remove old {} failed: {error}", path.display()))?;
-    }
-    fs::rename(&temporary, &path)
-        .map_err(|error| format!("replace {} failed: {error}", path.display()))
-}
-
-fn append_discord_dead_letter(
-    data_dir: &Path,
-    delivery: &PendingDiscordDelivery,
-    last_error: &str,
-) -> Result<(), String> {
-    fs::create_dir_all(data_dir)
-        .map_err(|error| format!("create AI live data dir failed: {error}"))?;
-    let path = data_dir.join("discord-dead-letter.jsonl");
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&path)
-        .map_err(|error| format!("open {} failed: {error}", path.display()))?;
-    serde_json::to_writer(
-        &mut file,
-        &json!({
-            "schema": AI_LIVE_SCHEMA,
-            "failedAtMs": now_ms(),
-            "attempts": delivery.attempts,
-            "lastError": bounded_text(last_error, 500),
-            "segment": delivery.segment
-        }),
-    )
-    .map_err(|error| format!("encode Discord dead letter failed: {error}"))?;
-    file.write_all(b"\n")
-        .and_then(|()| file.flush())
-        .map_err(|error| format!("flush {} failed: {error}", path.display()))
-}
-
 fn segment_id(frame: &SpectatorFrame, now_ms: u64) -> String {
     let digest = Sha256::digest(
         format!(
@@ -1121,19 +953,6 @@ fn safe_component(value: &str) -> String {
                 character
             } else {
                 '_'
-            }
-        })
-        .collect()
-}
-
-fn percent_encode_query(value: &str) -> String {
-    value
-        .bytes()
-        .flat_map(|byte| {
-            if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
-                vec![byte as char]
-            } else {
-                format!("%{byte:02X}").chars().collect()
             }
         })
         .collect()
@@ -1326,11 +1145,12 @@ mod tests {
         config.text_api_key = Some("text-secret".to_string());
         config.tts_endpoint = Some(format!("http://{address}/tts"));
         config.tts_api_key = Some("tts-secret".to_string());
-        config.discord_webhook = Some(format!("http://{address}/discord"));
         config.minimum_score = 60;
-        config.discord_minimum_score = 90;
         config.commentary_cooldown_ms = 500;
-        let hub = AiLiveHub::new(config).expect("AI live hub");
+        let mut distribution = AiDistributionConfig::disabled_for_tests(data_dir.clone());
+        distribution.discord_webhook = Some(format!("http://{address}/discord"));
+        distribution.discord_minimum_score = 90;
+        let hub = AiLiveHub::new_with_distribution(config, distribution).expect("AI live hub");
         let segment = hub
             .process_frame(frame(vec![SpectatorEvent {
                 kind: "death".to_string(),
@@ -1342,6 +1162,7 @@ mod tests {
             .await
             .expect("pipeline")
             .expect("highlight segment");
+        hub.retry_distribution_once().await;
 
         assert_eq!(segment.source, AiLiveNarrativeSource::Model);
         assert_eq!(segment.target.as_deref(), Some("TestHero"));
@@ -1372,11 +1193,13 @@ mod tests {
         config.enabled = true;
         config.mode = AiLiveMode::Live;
         config.operator_token = Some("test-token".to_string());
-        config.discord_webhook = Some("http://127.0.0.1:1/discord".to_string());
         config.minimum_score = 60;
-        config.discord_minimum_score = 90;
         config.commentary_cooldown_ms = 500;
-        let hub = AiLiveHub::new(config.clone()).expect("AI live hub");
+        let mut distribution = AiDistributionConfig::disabled_for_tests(data_dir.clone());
+        distribution.discord_webhook = Some("http://127.0.0.1:1/discord".to_string());
+        distribution.discord_minimum_score = 90;
+        let hub = AiLiveHub::new_with_distribution(config.clone(), distribution.clone())
+            .expect("AI live hub");
         hub.process_frame(frame(vec![SpectatorEvent {
             kind: "death".to_string(),
             at_ms: 1_000,
@@ -1388,9 +1211,10 @@ mod tests {
         .expect("pipeline")
         .expect("highlight segment");
         assert_eq!(hub.metrics().queued_discord_deliveries, 1);
-        assert!(data_dir.join("discord-queue.json").is_file());
+        assert!(data_dir.join("distribution-queue.json").is_file());
 
-        let restarted = AiLiveHub::new(config).expect("restarted AI live hub");
+        let restarted =
+            AiLiveHub::new_with_distribution(config, distribution).expect("restarted AI live hub");
         assert_eq!(restarted.metrics().queued_discord_deliveries, 1);
 
         let _ = fs::remove_dir_all(data_dir);

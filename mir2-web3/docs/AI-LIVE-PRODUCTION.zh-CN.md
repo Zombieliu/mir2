@@ -8,7 +8,7 @@
 2. `SpectatorHub` 只发布脱敏后的地图、玩家位置、生命值与战斗事件。
 3. AI Live Worker 对死亡、复活、掉落、高额伤害和多人交战做确定性评分。
 4. 达到阈值后，模型只根据脱敏事件写解说，并且只能从当前可见、已脱敏的战斗单位白名单中选择镜头。
-5. 模型失败时使用规则解说；TTS、Discord 或推流失败也不会影响玩家。
+5. 模型失败时使用规则解说；TTS、任一分发渠道或推流失败也不会影响玩家。
 6. 干净播出页负责画面、字幕、节目角标和可选语音。
 7. 独立 Chromium + FFmpeg 容器把播出页编码为本地 HLS 或 RTMP/RTMPS。
 
@@ -100,7 +100,7 @@ http://127.0.0.1:3002/spectate?aiLive=1&spectateMode=director&spectateToken=<dir
 7. 关闭模型接口后重复测试，页面仍应出现“规则解说”，玩家不掉线。
 8. `/ai-live/status` 返回脱敏节目状态；`/ai-live/metrics/prometheus` 可供 Prometheus 抓取。
 9. `.mir2-data/ai-live/segments.jsonl` 保存每个片段的帧摘要、分数、来源和模型标识；语音在 `audio/`。
-10. Discord 失败任务持久化在 `discord-queue.json`，Gateway 重启后继续指数退避重试；超过 8 次进入 `discord-dead-letter.jsonl`。
+10. 所有推送渠道共用 `distribution-queue.json`，Gateway 重启后继续指数退避重试；超过 8 次进入 `distribution-dead-letter.jsonl`。旧的 `discord-queue.json` 会自动迁移。
 
 自动检查：
 
@@ -154,4 +154,8 @@ artifacts/ai-live/hls/live.m3u8
 
 ## 当前生产边界
 
-代码已经完成从观战事件到节目、语音文件、Discord 消息和编码容器的闭环。真正向 YouTube、Twitch、Bilibili 或其他平台开播，还必须由运营方提供相应平台的 RTMP/RTMPS 推流密钥；仓库和验收环境不会伪造这项外部授权。
+代码已经完成从观战事件到节目、语音文件、Discord 消息和编码容器的闭环，并通过
+[`AI Distribution Fabric v1`](AI-DISTRIBUTION-FABRIC.zh-CN.md) 将节目生产与渠道投递
+解耦。真正向 YouTube、Twitch、Bilibili 或其他平台开播，还必须由运营方提供相应
+平台的 RTMP/RTMPS 推流密钥；Discord Go Live 还需要独立桌面 Relay。仓库和验收环境
+不会伪造这些外部授权。

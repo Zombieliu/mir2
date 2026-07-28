@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const ALLOWED_PATHS = new Set(["status", "metrics", "control"]);
+const ALLOWED_PATHS = new Set(["status", "metrics", "control", "distribution"]);
 
 function gatewayBase() {
   const direct = process.env.MIR2_GATEWAY_HTTP_URL?.trim();
@@ -32,7 +32,11 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   if (path.length !== 1 || !ALLOWED_PATHS.has(path[0])) {
     return Response.json({ error: "unsupported AI live route" }, { status: 404 });
   }
-  if (request.method === "POST" && path[0] !== "control") {
+  if (
+    request.method === "POST"
+    && path[0] !== "control"
+    && path[0] !== "distribution"
+  ) {
     return Response.json({ error: "method not allowed" }, { status: 405 });
   }
   if (request.method === "GET" && path[0] === "control") {
