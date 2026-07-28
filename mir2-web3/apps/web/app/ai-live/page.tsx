@@ -10,6 +10,16 @@ function number(value: number | undefined) {
   return new Intl.NumberFormat("zh-CN").format(value ?? 0);
 }
 
+function channelStateLabel(state: string) {
+  switch (state) {
+    case "ready": return "已验证";
+    case "waiting": return "等待真实信号";
+    case "degraded": return "链路异常";
+    case "disabled": return "已暂停";
+    default: return "待配置";
+  }
+}
+
 export default function AiLiveControlPage() {
   const base = useMemo(() => "/api/ai-live", []);
   const [status, setStatus] = useState<AiLiveStatus | null>(null);
@@ -220,22 +230,67 @@ export default function AiLiveControlPage() {
               一次生成，多渠道投递；任一渠道失败不会影响玩家
             </p>
           </div>
+          {status?.distribution.launch ? (
+            <div
+              data-testid="ai-launch-readiness"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 18,
+                marginTop: 18,
+                padding: 16,
+                border: `1px solid ${status.distribution.launch.readyForLaunch ? "#54e1bd44" : "#f2c86b33"}`,
+                borderRadius: 12,
+                background: status.distribution.launch.readyForLaunch ? "#54e1bd0d" : "#f2c86b0c",
+                flexWrap: "wrap",
+              }}
+            >
+              <div>
+                <strong>
+                  首发渠道 {status.distribution.launch.readyChannels}/{status.distribution.launch.requiredChannels}
+                </strong>
+                <p style={{ margin: "6px 0 0", color: "#718a9a", fontSize: 11 }}>
+                  Web/HLS、游戏内事件、Discord、YouTube RTMPS
+                </p>
+              </div>
+              <div style={{ color: status.distribution.launch.readyForLaunch ? "#54e1bd" : "#f2c86b", fontSize: 12 }}>
+                {status.distribution.launch.readyForLaunch
+                  ? "全部收到真实运行证据"
+                  : `仍需验证 ${status.distribution.launch.blockers.length} 项`}
+              </div>
+            </div>
+          ) : null}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, marginTop: 20 }}>
             {(status?.distribution.channels ?? []).map((channel) => {
               const color = channel.state === "ready"
                 ? "#54e1bd"
                 : channel.state === "degraded"
                   ? "#ff9d85"
+                  : channel.state === "waiting"
+                    ? "#f2c86b"
                   : "#708899";
               return (
                 <article key={channel.channel} style={{ padding: 18, border: `1px solid ${color}33`, borderRadius: 14, background: "rgba(3, 12, 22, .66)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                    <strong>{channel.label}</strong>
-                    <span style={{ color, fontSize: 10 }}>{channel.state}</span>
+                    <strong>
+                      {channel.label}
+                      {channel.launchRequired ? <small style={{ marginLeft: 7, color: "#5f7a8c" }}>首发</small> : null}
+                    </strong>
+                    <span style={{ color, fontSize: 10 }}>{channelStateLabel(channel.state)}</span>
                   </div>
                   <p style={{ margin: "12px 0", color: "#657f91", fontSize: 11 }}>
                     {channel.deliveryMode} · 成功 {number(channel.deliveredTotal)} · 等待 {number(channel.queued)}
                   </p>
+                  {channel.runtime ? (
+                    <p style={{ margin: "0 0 12px", color: "#7193a6", fontSize: 10, lineHeight: 1.55 }}>
+                      {channel.runtime.platform} · {channel.runtime.workerId}<br />
+                      心跳 {new Date(channel.runtime.lastHeartbeatAtMs).toLocaleTimeString("zh-CN")}
+                    </p>
+                  ) : channel.channel === "rtmpBroadcast" && channel.configured ? (
+                    <p style={{ margin: "0 0 12px", color: "#f2c86b", fontSize: 10 }}>
+                      等待 YouTube 编码器心跳，不会把开关当成在线
+                    </p>
+                  ) : null}
                   {channel.lastError ? (
                     <p style={{ margin: "0 0 12px", color: "#ff9d85", fontSize: 10 }}>
                       {channel.lastError}
@@ -265,6 +320,9 @@ export default function AiLiveControlPage() {
               );
             })}
           </div>
+          <p style={{ margin: "18px 0 0", color: "#526a7a", fontSize: 10, lineHeight: 1.7 }}>
+            后续阶段保持关闭：Discord Go Live、短视频 Clip、Twitch、Bilibili。它们不影响首发验收。
+          </p>
         </section>
       </div>
     </main>

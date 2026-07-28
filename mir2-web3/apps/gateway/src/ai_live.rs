@@ -739,6 +739,14 @@ impl AiLiveHub {
         self.distribution.retry_channel_now(channel)
     }
 
+    pub fn record_distribution_runtime_heartbeat(
+        &self,
+        token: Option<&str>,
+        request: crate::ai_distribution::AiRuntimeHeartbeatRequest,
+    ) -> Result<AiDistributionStatus, String> {
+        self.distribution.record_runtime_heartbeat(token, request)
+    }
+
     pub fn audio_path(&self, clip: &str) -> Result<PathBuf, String> {
         let id = clip.strip_suffix(".mp3").unwrap_or(clip);
         if id.is_empty()

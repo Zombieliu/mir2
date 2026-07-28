@@ -5642,6 +5642,89 @@ button.character-spell-value:hover {
   letter-spacing: 0.12em;
 }
 
+.ai-live-game-highlight {
+  position: fixed;
+  z-index: 3450;
+  top: 78px;
+  right: 22px;
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  width: min(460px, calc(100vw - 28px));
+  padding: 12px 13px;
+  border: 1px solid rgba(104, 226, 255, 0.34);
+  border-radius: 14px;
+  background:
+    linear-gradient(105deg, rgba(4, 19, 34, 0.96), rgba(7, 31, 47, 0.9)),
+    rgba(3, 11, 20, 0.94);
+  color: #eafaff;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.46), inset 0 1px rgba(255, 255, 255, 0.04);
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  animation: ai-live-lower-third-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  backdrop-filter: blur(16px);
+}
+
+.ai-live-game-highlight__pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5167;
+  box-shadow: 0 0 0 5px rgba(255, 81, 103, 0.12), 0 0 18px #ff5167;
+  animation: ai-live-pulse 1.7s ease-out infinite;
+}
+
+.ai-live-game-highlight__copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.ai-live-game-highlight__copy span,
+.ai-live-game-highlight__copy small {
+  overflow: hidden;
+  color: #6edff1;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-live-game-highlight__copy strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-live-game-highlight__copy small {
+  color: #7993a4;
+  letter-spacing: 0.04em;
+}
+
+.ai-live-game-highlight a {
+  padding: 8px 10px;
+  border: 1px solid rgba(106, 226, 255, 0.28);
+  border-radius: 8px;
+  background: rgba(106, 226, 255, 0.08);
+  color: #77e7fa;
+  font-size: 11px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ai-live-game-highlight button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #6f8898;
+  font: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+
 @keyframes ai-live-pulse {
   0% { box-shadow: 0 0 0 0 rgba(255, 70, 95, 0.45), 0 0 18px #ff465f; }
   100% { box-shadow: 0 0 0 10px rgba(255, 70, 95, 0), 0 0 18px #ff465f; }
@@ -5653,6 +5736,16 @@ button.character-spell-value:hover {
 }
 
 @media (max-width: 700px) {
+  .ai-live-game-highlight {
+    top: 58px;
+    right: 14px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .ai-live-game-highlight a {
+    display: none;
+  }
+
   .ai-live-broadcast__header {
     top: 14px;
     right: 14px;

@@ -23,9 +23,9 @@ flowchart LR
 
 | 渠道 | 工作方式 | v1 行为 |
 | --- | --- | --- |
-| `gameOverlay` | `push` | 调用游戏内节目接入端；未配置时不宣称玩家客户端已接入 |
+| `gameOverlay` | `inProcess` | Gateway 把最新高光送入普通玩家 WebSocket，玩家端显示轻量事件卡片 |
 | `webBroadcast` | `pull` | 干净播出页由浏览器、HLS 编码器或官网读取 |
-| `rtmpBroadcast` | `relay` | 独立 Chromium + FFmpeg 编码容器推送 RTMP/RTMPS |
+| `rtmpBroadcast` | `relay` | 独立 Chromium + FFmpeg 编码容器推送 RTMP/RTMPS；只有新鲜编码器心跳才算在线 |
 | `discordWebhook` | `push` | 高分内容包转换为 Discord 高光卡片 |
 | `discordGoLive` | `push` | 调用受信任 Windows 播出 Relay；未配置时明确显示 `unconfigured` |
 | `clipExport` | `push` | 调用外部裁片/竖版视频 Worker；未配置时不创建虚假任务 |
@@ -89,11 +89,13 @@ export MIR2_AI_LIVE_PUBLIC_URL='https://mir2.obelisk.build/'
 多渠道配置：
 
 ```bash
-# 编码容器确实接入 RTMP/RTMPS 时，在 Gateway 同步声明渠道已配置。
+# 编码容器确实接入 RTMP/RTMPS 时，在 Gateway 声明渠道并要求真实心跳。
 export MIR2_AI_DISTRIBUTION_RTMP_ENABLED=1
+export MIR2_AI_DISTRIBUTION_RTMP_PLATFORM=youtube
+export MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN='replace-with-long-random-secret'
 
-# 游戏客户端或活动系统的受信任接入端。
-export MIR2_AI_DISTRIBUTION_GAME_ENDPOINT='https://game.example/v1/programs'
+# 内建普通玩家 WebSocket 事件入口，默认开启。
+export MIR2_AI_DISTRIBUTION_GAME_OVERLAY_ENABLED=1
 
 # 受信任的 Windows Discord 播出 Relay。
 export MIR2_AI_DISTRIBUTION_DISCORD_GO_LIVE_ENDPOINT='https://relay.example/v1/programs'
@@ -117,6 +119,7 @@ export MIR2_AI_DISTRIBUTION_ADAPTER_TOKEN='replace-with-secret-manager-value'
 | `GET /ai-live/status` | AI 节目和完整分发状态 |
 | `GET /ai-live/distribution` | 六个渠道、队列和最近投递 |
 | `POST /ai-live/distribution` | 启用、暂停或立即重试某一渠道 |
+| `POST /ai-live/distribution/heartbeat` | 编码器用独立令牌上报脱敏运行心跳 |
 | `GET /ai-live/metrics/prometheus` | 节目和通用分发指标 |
 | Web `/ai-live` | 非技术运维页面 |
 
@@ -134,8 +137,8 @@ curl -X POST http://127.0.0.1:7110/ai-live/distribution \
 ## 人工验收
 
 1. 以影子模式启动，触发死亡事件；节目生成，但分发成功数不增加。
-2. 配置 Game Adapter 后切换正式直播，再触发死亡；`gameOverlay` 投递成功。
-3. 未配置 Game Adapter 时必须显示 `unconfigured`，不能把观战页误报为玩家客户端接入。
+2. 切换正式直播并触发死亡；普通玩家画面出现 AI 世界事件卡片，`gameOverlay` 投递成功。
+3. 关闭 `MIR2_AI_DISTRIBUTION_GAME_OVERLAY_ENABLED` 时必须显示 `unconfigured`。
 4. 配置公开观战 URL 后，`webBroadcast` 显示 `ready`，内容包带安全观战链接。
 5. 配置测试 Discord Webhook；高分事件投递成功，Discord 指标增加。
 6. 把 Webhook 改为不可达地址；任务进入通用等待队列，控制台显示 `degraded`。
