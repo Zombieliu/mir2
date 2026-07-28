@@ -1,0 +1,310 @@
+name: mir2-gate21
+
+# Gate 21 is an override for ../gate19/docker-compose.yml. It keeps the proven
+# PostgreSQL/Redis/Gateway HA services and replaces the Zone data plane with
+# four active plus four index-paired standby shards.
+
+x-postgres-url: &postgres-url "postgresql://mir2:mir2-gate19-local@postgres-primary:5432,postgres-standby:5432/mir2?target_session_attrs=read-write&connect_timeout=1"
+x-active-zone-addresses: &active-zone-addresses "zone-active:7020,zone-active-2:7020,zone-active-3:7020,zone-active-4:7020"
+x-standby-zone-addresses: &standby-zone-addresses "zone-active-5:7020,zone-active-6:7020,zone-active-7:7020,zone-standby:7020"
+x-topology: &topology >-
+  {"version":1,"mode":"per_map","defaultZoneId":"lobby","defaultTickMs":100,
+  "hotMaps":{"0":{"targetPlayersPerLine":50,"maximumPlayersPerLine":64,
+  "maximumLines":10,"scaleInGraceMs":30000}}}
+x-zone-environment: &zone-environment
+  MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+  MIR2_ZONE_HOST_TOKEN: "gate21-zone-host-token-at-least-32-bytes"
+  MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+  MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-active"
+  MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+  MIR2_ECONOMY_DATABASE_URL: *postgres-url
+  MIR2_ACCOUNT_STORE_BACKEND: "postgres"
+  MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+  MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+  MIR2_ACCOUNT_STORE_PATH: "/var/lib/obelisk/accounts.json"
+  MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE: "32"
+  MIR2_ZONE_TOPOLOGY_JSON: *topology
+  MIR2_ZONE_HOST_MAX_CONNECTIONS: "512"
+  MIR2_ZONE_HOST_MAX_SESSIONS: "1024"
+  MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "64"
+  MIR2_ZONE_HOST_MAX_ZONES: "256"
+  MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+  MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+x-new-zone-host: &new-zone-host
+  image: "${MIR2_GATE21_ZONE_IMAGE:-mir2-gate21-zone-host:local}"
+  pull_policy: never
+  cpus: "8.0"
+  mem_limit: "16g"
+  environment:
+    <<: *zone-environment
+  depends_on:
+    postgres-primary:
+      condition: service_healthy
+    postgres-standby:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+    interval: 1s
+    timeout: 2s
+    retries: 90
+x-gateway-environment: &gateway-environment
+  MIR2_ZONE_HOST_ADDRS: *active-zone-addresses
+  MIR2_ZONE_HOST_ACTIVE_ADDRS: *active-zone-addresses
+  MIR2_ZONE_HOST_STANDBY_ADDRS: *standby-zone-addresses
+  MIR2_ZONE_HOST_PAIRED_STANDBY: "true"
+  MIR2_ZONE_HOST_TOKEN: "gate21-zone-host-token-at-least-32-bytes"
+  MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+  MIR2_ZONE_RPC_CODEC: "msgpack"
+  MIR2_ZONE_RPC_SHARED_POOL_SIZE: "256"
+  MIR2_ZONE_RPC_QUEUE_TIMEOUT_MS: "500"
+  MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+  MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+  MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+  MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-active"
+  MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+  MIR2_ECONOMY_DATABASE_URL: *postgres-url
+  MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+  MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+  MIR2_GATEWAY_REQUIRE_REDIS_CACHE: "true"
+  MIR2_GATEWAY_REDIS_SENTINEL_ADDRS: "redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379"
+  MIR2_GATEWAY_REDIS_SENTINEL_MASTER: "mir2-primary"
+  MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS: "30"
+  MIR2_ZONE_TOPOLOGY_JSON: *topology
+
+services:
+  postgres-primary:
+    cpus: "8.0"
+    mem_limit: "32g"
+
+  postgres-standby:
+    cpus: "8.0"
+    mem_limit: "32g"
+
+  redis-primary:
+    cpus: "2.0"
+    mem_limit: "8g"
+
+  redis-replica-1:
+    cpus: "2.0"
+    mem_limit: "8g"
+
+  redis-replica-2:
+    cpus: "2.0"
+    mem_limit: "8g"
+
+  redis-sentinel-1:
+    cpus: "0.25"
+    mem_limit: "128m"
+
+  redis-sentinel-2:
+    cpus: "0.25"
+    mem_limit: "128m"
+
+  redis-sentinel-3:
+    cpus: "0.25"
+    mem_limit: "128m"
+
+  zone-active:
+    image: "${MIR2_GATE21_ZONE_IMAGE:-mir2-gate21-zone-host:local}"
+    cpus: "8.0"
+    mem_limit: "16g"
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-1"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-active"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-1"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-active"
+
+  zone-active-2:
+    <<: *new-zone-host
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-2"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-active"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-2"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-active"
+
+  zone-active-3:
+    <<: *new-zone-host
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-3"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-active"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-3"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-active"
+
+  zone-active-4:
+    <<: *new-zone-host
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-4"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-active"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-4"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-active"
+
+  zone-active-5:
+    <<: *new-zone-host
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-5"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-standby"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-5"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-standby"
+
+  zone-active-6:
+    <<: *new-zone-host
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-6"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-standby"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-6"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-standby"
+
+  zone-active-7:
+    <<: *new-zone-host
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-7"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-standby"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-7"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-standby"
+
+  # The Gate 19 service name is retained so its HA probes remain reusable. It
+  # is the fourth paired standby and therefore the eighth total Zone Host.
+  zone-standby:
+    image: "${MIR2_GATE21_ZONE_IMAGE:-mir2-gate21-zone-host:local}"
+    cpus: "8.0"
+    mem_limit: "16g"
+    environment:
+      <<: *zone-environment
+      MIR2_ZONE_HOST_ID: "gate21-zone-8"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "gate21-standby"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-zone-8"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "gate21-standby"
+
+  gateway-1:
+    image: mir2-gate21-gateway:local
+    cpus: "4.0"
+    mem_limit: "8g"
+    environment:
+      <<: *gateway-environment
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-gateway-1"
+
+  gateway-2:
+    image: mir2-gate21-gateway:local
+    cpus: "4.0"
+    mem_limit: "8g"
+    environment:
+      <<: *gateway-environment
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-gateway-2"
+
+  gateway-3:
+    image: mir2-gate21-gateway:local
+    cpus: "4.0"
+    mem_limit: "8g"
+    environment:
+      <<: *gateway-environment
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-gateway-3"
+
+  zone-seed:
+    environment:
+      <<: *gateway-environment
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-active"
+      MIR2_ZONE_STANDBY_OWNER_ID: "gate21-standby"
+      MIR2_GATE19_ZONE_SESSION_MAX_WAIT_MS: "30000"
+      MIR2_GATE19_ZONE_SESSION_OUT: "/evidence/gate21-zone-session.json"
+
+  gameplay-probe:
+    environment:
+      <<: *gateway-environment
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-active"
+      MIR2_GATE18_GAMEPLAY_OUT: "/evidence/gate21-gameplay.json"
+
+  zone-replication-init:
+    profiles: ["acceptance"]
+    image: alpine:3.22
+    user: "0:0"
+    command: ["sh", "-ec", "chown 65534:65534 /var/lib/obelisk/zone-replication"]
+    volumes:
+      - zone-replication-data:/var/lib/obelisk/zone-replication
+
+  zone-replicator:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-replicator
+    image: mir2-gate21-zone-replicator:local
+    cpus: "2.0"
+    mem_limit: "4g"
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_REPLICA_ACTIVE_MAP_COUNT: "120"
+      MIR2_ZONE_REPLICA_HOT_MAP: "0"
+      MIR2_ZONE_REPLICA_HOT_MAP_LINES: "10"
+      MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/zone-replication"
+      MIR2_ZONE_REPLICA_INTERVAL_MS: "250"
+      MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
+      MIR2_ZONE_REPLICA_WORKERS: "16"
+      MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES: "512"
+      MIR2_ZONE_HOST_ACTIVE_ADDRS: *active-zone-addresses
+      MIR2_ZONE_HOST_STANDBY_ADDRS: *standby-zone-addresses
+      MIR2_ZONE_HOST_PAIRED_STANDBY: "true"
+      MIR2_ZONE_HOST_TOKEN: "gate21-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_FAILOVER_DATABASE_URL: *postgres-url
+      MIR2_ZONE_FAILOVER_ACTIVE_OWNER_ID: "gate21-active"
+      MIR2_ZONE_FAILOVER_STANDBY_OWNER_ID: "gate21-standby"
+      MIR2_ZONE_FAILOVER_LEASE_TTL_MS: "30000"
+      MIR2_ZONE_FAILOVER_FAILURE_THRESHOLD: "2"
+      MIR2_ZONE_PROMOTION_MAX_LAG_MS: "2000"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+    volumes:
+      - zone-replication-data:/var/lib/obelisk/zone-replication
+    depends_on:
+      zone-replication-init:
+        condition: service_completed_successfully
+      zone-active:
+        condition: service_healthy
+      zone-active-2:
+        condition: service_healthy
+      zone-active-3:
+        condition: service_healthy
+      zone-active-4:
+        condition: service_healthy
+      zone-active-5:
+        condition: service_healthy
+      zone-active-6:
+        condition: service_healthy
+      zone-active-7:
+        condition: service_healthy
+      zone-standby:
+        condition: service_healthy
+
+  regional-load:
+    image: mir2-gate21-regional-load:local
+    cpus: "4.0"
+    mem_limit: "8g"
+    environment:
+      MIR2_REGIONAL_GATE: "21"
+      MIR2_REGIONAL_LOAD_PLAYERS: "3000"
+      MIR2_REGIONAL_LOAD_DURATION_SECONDS: "900"
+      MIR2_REGIONAL_LOAD_WORKERS: "256"
+      MIR2_REGIONAL_CONNECT_WORKERS: "32"
+      MIR2_REGIONAL_PROMOTION_PROBE_WORKERS: "128"
+      MIR2_REGIONAL_LOAD_OUT: "/evidence/gate21-load.json"
+      MIR2_REGIONAL_ACTIVE_OWNER: "gate21-active"
+      MIR2_REGIONAL_STANDBY_OWNER: "gate21-standby"
+      MIR2_GIT_COMMIT: "${MIR2_GIT_COMMIT:-}"
+      MIR2_IMAGE_DIGEST: "${MIR2_IMAGE_DIGEST:-}"
+      MIR2_GATEWAY_INSTANCE_ID: "gate21-active"
+      <<: *gateway-environment
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      zone-replicator:
+        condition: service_started
+
+volumes:
+  zone-replication-data:

@@ -85,7 +85,8 @@ services:
         lock_hash="$$(sha256sum package-lock.json | cut -d ' ' -f 1)";
         if [ "$$(cat node_modules/.mir2-package-lock.sha256 2>/dev/null || true)" != "$$lock_hash" ];
         then npm ci && printf '%s' "$$lock_hash" > node_modules/.mir2-package-lock.sha256; fi;
-        npm run dev -- --hostname 0.0.0.0 --port 3002
+        npm run assets:map-atlas:ensure &&
+        npm exec -- next dev --hostname 0.0.0.0 --port 3002
     working_dir: /workspace/mir2-web3/apps/web
     environment:
       <<: *developer-environment
@@ -98,6 +99,7 @@ services:
       - developer-npm-cache:/home/node/.npm
       - player-web-node-modules:/workspace/mir2-web3/apps/web/node_modules
       - player-web-next:/workspace/mir2-web3/apps/web/.next
+      - player-web-map-atlas:/workspace/mir2-web3/apps/web/public/generated/map-atlas
     depends_on:
       gateway:
         condition: service_healthy
@@ -117,5 +119,6 @@ volumes:
   developer-state:
   player-web-node-modules:
   player-web-next:
+  player-web-map-atlas:
   admin-web-node-modules:
   admin-web-next:

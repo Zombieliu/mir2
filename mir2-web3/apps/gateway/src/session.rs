@@ -96,6 +96,8 @@ pub struct GatewaySession {
     runtime: ZoneRuntimeHandle,
     gameplay_event_publisher: Option<GatewayGameplayEventPublisher>,
     routing_context: Option<GatewaySessionRoutingContext>,
+    current_route_request: Option<SessionRouteRequest>,
+    requested_explicit_line: Option<u16>,
     global_message_bus: Option<Arc<GlobalZoneMessageBus>>,
     handoff_generation: u64,
 }
@@ -202,6 +204,8 @@ impl GatewaySession {
             runtime,
             gameplay_event_publisher: None,
             routing_context: None,
+            current_route_request: None,
+            requested_explicit_line: None,
             global_message_bus: None,
             handoff_generation: 0,
         }
@@ -259,6 +263,8 @@ impl GatewaySession {
             runtime,
             gameplay_event_publisher: Some(gameplay_event_publisher),
             routing_context: None,
+            current_route_request: None,
+            requested_explicit_line: None,
             global_message_bus: None,
             handoff_generation: 0,
         }
@@ -312,7 +318,7 @@ impl GatewaySession {
             .zone_owner_lease_authority
             .as_ref()
             .ok_or_else(|| "Zone owner lease authority is not configured".to_string())?;
-        self.zone_owner_lease = authority.owner_lease(&self.zone_id);
+        self.zone_owner_lease = authority.refresh_owner_lease(&self.zone_id);
         Ok(&self.zone_owner_lease)
     }
 
@@ -358,6 +364,13 @@ impl GatewaySession {
     }
 
     pub(crate) fn zone_movement_ingress(&self) -> Option<GatewayZoneMovementIngress> {
+        // Gate 15 placements can change while a player remains connected. The
+        // legacy fast path snapshots the owner lease when the ingress is built,
+        // so route Gate 15 movement through the serialized session path until
+        // that ingress carries a dynamically refreshed fencing token.
+        if crate::gate15::health().is_some() {
+            return None;
+        }
         // The shared-Zone ingress rejects movement near a transfer boundary and
         // returns control to the serialized session path. Safe movement can stay
         // on the owner cadence; topology-changing movement still runs the atomic
@@ -528,6 +541,24 @@ impl GatewaySession {
         })
     }
 
+    pub fn transfer_map_on_line(
+        &mut self,
+        key: &str,
+        explicit_line: u16,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if explicit_line == 0 {
+            return Err("explicit map line must be positive".to_string());
+        }
+        self.requested_explicit_line = Some(explicit_line);
+        let result = self
+            .execute_world_command(WorldCommand::TransferMap {
+                key: key.to_string(),
+            })
+            .map(|execution| execution.packets);
+        self.requested_explicit_line = None;
+        result
+    }
+
     pub fn stage5_command(&mut self, action: &str, args: Vec<String>) -> Vec<ServerPacket> {
         self.execute_infallible(WorldCommand::Stage5Command {
             action: action.to_string(),
@@ -633,7 +664,7 @@ impl GatewaySession {
         let Some(identity) = self.active_identity() else {
             return Ok(());
         };
-        let mut source_snapshot = self.world_snapshot();
+        let source_snapshot = self.world_snapshot();
         let Some(map_file_name) = source_snapshot.map_file_name.clone() else {
             return Ok(());
         };
@@ -641,8 +672,16 @@ impl GatewaySession {
             account_id: Some(identity.account_id.clone()),
             character_index: Some(identity.character_index),
             map_file_name: Some(map_file_name),
+            affinity_key: route_affinity_key(&identity, &source_snapshot),
+            explicit_line: self.requested_explicit_line.take(),
         };
-        let target_zone_id = routing.registry.route_session(&route_request);
+        let target_zone_id = match routing.registry.try_route_session(&route_request) {
+            Ok(zone_id) => zone_id,
+            Err(error) => {
+                self.rollback_failed_handoff(previous_snapshot);
+                return Err(format!("Zone handoff routing rejected: {error}"));
+            }
+        };
         if target_zone_id == self.zone_id {
             self.refresh_global_message_identity(Some(&identity));
             return Ok(());
@@ -650,17 +689,17 @@ impl GatewaySession {
 
         sync_zone_movement_transform(&mut self.runtime)
             .map_err(|error| format!("Zone handoff source transform sync failed: {error}"))?;
+        let source_checkpoint = self
+            .zone_owner_command_client
+            .active_character_checkpoint(&self.runtime)
+            .map_err(|error| format!("Zone handoff source checkpoint failed: {error}"))?
+            .ok_or_else(|| "Zone handoff source has no active character checkpoint".to_string())?;
         self.zone_owner_command_client
             .save_active_character(&self.runtime)
             .map_err(|error| format!("Zone handoff source save failed: {error}"))?;
-        source_snapshot = self
-            .zone_owner_command_client
-            .world_snapshot(&self.runtime)
-            .map_err(|error| format!("Zone handoff source snapshot failed: {error}"))?;
-
         let routed = routing
             .registry
-            .open_session_for(routing.config.clone(), route_request);
+            .try_open_session_for(routing.config.clone(), route_request.clone())?;
         let target_client =
             default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
         let mut target_runtime = routed.runtime;
@@ -683,51 +722,34 @@ impl GatewaySession {
                     }),
                 ),
             )?;
-            if let Some(key) = snapshot_transfer_key(&source_snapshot) {
-                target_client.execute(
-                    &mut target_runtime,
-                    ZoneOwnerCommandRequest::direct(
-                        routed.owner_lease.clone(),
-                        WorldCommand::TransferMap { key },
-                    ),
-                )?;
-            }
-            if let (Some(position), Some(direction)) = (
-                snapshot_player_position(&source_snapshot),
-                snapshot_player_direction(&source_snapshot),
-            ) {
-                target_client.execute(
-                    &mut target_runtime,
-                    ZoneOwnerCommandRequest::direct(
-                        routed.owner_lease.clone(),
-                        WorldCommand::ApplyHandoffTransform {
-                            position,
-                            direction,
-                            hp: source_snapshot.player_hp,
-                            mp: source_snapshot.player_mp,
-                        },
-                    ),
-                )?;
-            }
             let target_identity = target_client.active_identity(&target_runtime)?;
             if target_identity.as_ref() != Some(&identity) {
                 return Err(format!(
                     "target identity mismatch: expected {identity:?}, got {target_identity:?}"
                 ));
             }
-            let target_snapshot = target_client.world_snapshot(&target_runtime)?;
-            let source_commitment = normalized_handoff_snapshot(source_snapshot.clone());
-            let target_commitment = normalized_handoff_snapshot(target_snapshot);
-            if source_commitment != target_commitment {
-                let source_json = serde_json::to_value(&source_commitment).ok();
-                let target_json = serde_json::to_value(&target_commitment).ok();
-                let difference = source_json
-                    .as_ref()
-                    .zip(target_json.as_ref())
-                    .and_then(|(source, target)| first_json_difference(source, target, "$"))
+            // Login refreshes the target host's account projection, but the
+            // target must not depend on a read-after-write race in that
+            // projection. Transfer the exact source checkpoint through the
+            // authenticated, fenced Zone RPC and verify it before ownership
+            // changes. This carries vitals, inventory, map and private systems
+            // as one commitment.
+            target_client
+                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)?;
+            let target_checkpoint = target_client
+                .active_character_checkpoint(&target_runtime)?
+                .ok_or_else(|| {
+                    "target returned no active character checkpoint after restore".to_string()
+                })?;
+            let source_json = serde_json::to_value(&source_checkpoint)
+                .map_err(|error| format!("encode source checkpoint: {error}"))?;
+            let target_json = serde_json::to_value(&target_checkpoint)
+                .map_err(|error| format!("encode target checkpoint: {error}"))?;
+            if source_json != target_json {
+                let difference = first_json_difference(&source_json, &target_json, "$")
                     .unwrap_or_else(|| "unknown field".to_string());
                 return Err(format!(
-                    "target player-state commitment mismatch at {difference}"
+                    "target checkpoint commitment mismatch at {difference}"
                 ));
             }
             Ok(())
@@ -735,6 +757,9 @@ impl GatewaySession {
 
         if let Err(error) = prepare_result {
             let _ = target_client.close_session(&mut target_runtime, &routed.owner_lease);
+            let _ = routing
+                .registry
+                .release_session(&route_request, gateway_now_ms());
             self.rollback_failed_handoff(previous_snapshot);
             return Err(format!(
                 "Zone handoff {} -> {} prepare failed: {error}",
@@ -747,6 +772,9 @@ impl GatewaySession {
             .close_session(&mut self.runtime, &self.zone_owner_lease)
         {
             let _ = target_client.close_session(&mut target_runtime, &routed.owner_lease);
+            let _ = routing
+                .registry
+                .release_session(&route_request, gateway_now_ms());
             self.rollback_failed_handoff(previous_snapshot);
             return Err(format!(
                 "Zone handoff {} -> {} source close failed: {error}",
@@ -754,11 +782,17 @@ impl GatewaySession {
             ));
         }
 
+        if let Some(previous_route_request) = self.current_route_request.as_ref() {
+            let _ = routing
+                .registry
+                .release_session(previous_route_request, gateway_now_ms());
+        }
         let old_runtime = mem::replace(&mut self.runtime, target_runtime);
         self.zone_id = routed.zone_id;
         self.zone_owner_lease = routed.owner_lease;
         self.zone_owner_lease_authority = Some(routed.owner_lease_authority);
         self.zone_owner_command_client = target_client;
+        self.current_route_request = Some(route_request);
         self.handoff_generation = self.handoff_generation.saturating_add(1);
         if let Some(publisher) = self.gameplay_event_publisher.as_ref() {
             publisher.rebind_zone(self.zone_id.clone());
@@ -803,6 +837,14 @@ impl Drop for GatewaySession {
         let _ = self
             .zone_owner_command_client
             .close_session(&mut self.runtime, &self.zone_owner_lease);
+        if let (Some(routing), Some(route_request)) = (
+            self.routing_context.as_ref(),
+            self.current_route_request.as_ref(),
+        ) {
+            let _ = routing
+                .registry
+                .release_session(route_request, gateway_now_ms());
+        }
     }
 }
 
@@ -823,6 +865,21 @@ fn command_may_change_map(command: &WorldCommand) -> bool {
     )
 }
 
+fn route_affinity_key(
+    identity: &ActiveSessionIdentity,
+    snapshot: &WorldSnapshot,
+) -> Option<String> {
+    let mut group = snapshot.stage5_systems.group.members.clone();
+    if !group.is_empty() {
+        group.push(identity.character_name.clone());
+        group.sort_unstable();
+        group.dedup();
+        return Some(format!("party:{}", group.join("\u{1f}")));
+    }
+    let guild = snapshot.stage5_systems.guild.name.trim();
+    (!guild.is_empty()).then(|| format!("guild:{guild}"))
+}
+
 fn snapshot_transfer_key(snapshot: &WorldSnapshot) -> Option<String> {
     let map = snapshot.map_file_name.as_deref()?;
     let player = snapshot
@@ -830,47 +887,6 @@ fn snapshot_transfer_key(snapshot: &WorldSnapshot) -> Option<String> {
         .iter()
         .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)?;
     Some(format!("crystal:{map}:{}:{}", player.x, player.y))
-}
-
-fn snapshot_player_direction(snapshot: &WorldSnapshot) -> Option<mir2_protocol::MirDirection> {
-    snapshot
-        .entities
-        .iter()
-        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-        .map(|entity| entity.direction)
-}
-
-fn snapshot_player_position(snapshot: &WorldSnapshot) -> Option<Point> {
-    snapshot
-        .entities
-        .iter()
-        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-        .map(|entity| Point {
-            x: entity.x,
-            y: entity.y,
-        })
-}
-
-fn normalized_handoff_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
-    snapshot.tick = 0;
-    snapshot.map_title = None;
-    snapshot.player_object_id = None;
-    snapshot
-        .entities
-        .retain(|entity| entity.kind == WorldEntityKind::SelfPlayer);
-    let player_hp = snapshot.player_hp;
-    let player_max_hp = snapshot.player_max_hp;
-    for entity in &mut snapshot.entities {
-        entity.object_id = 0;
-        // `player_hp` is the persisted authority. During delayed shared-Zone
-        // combat the scene projection can still carry the pre-damage HP until
-        // the next projection pass, so comparing that duplicate field would
-        // reject an otherwise identical target runtime after reload.
-        entity.hp = player_hp;
-        entity.max_hp = player_max_hp;
-    }
-    snapshot.ground_drops.clear();
-    snapshot
 }
 
 fn is_global_message_execution(packets: &[ServerPacket]) -> bool {
@@ -936,6 +952,9 @@ fn default_zone_owner_command_client(
     zone_id: &ZoneId,
     zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,
 ) -> SharedZoneOwnerCommandClient {
+    if let Some(transport) = crate::gate15::zone_owner_rpc_transport(zone_id.clone()) {
+        return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(transport));
+    }
     if let Some(transport) = crate::zone_rpc::TcpZoneOwnerRpcTransport::from_env(zone_id.clone()) {
         return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(std::sync::Arc::new(
             transport,
@@ -966,7 +985,7 @@ fn gateway_now_ms() -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{normalized_handoff_snapshot, GatewayConfig, GatewaySession};
+    use super::{GatewayConfig, GatewaySession};
     use crate::{
         CharacterRecord, HostedZoneOwnerCommandClient, InMemoryGameplayEventSink,
         InMemoryZoneOwnerLeaseAuthority, InProcessZoneOwnerCommandClient,
@@ -1021,37 +1040,6 @@ mod tests {
         assert_eq!(
             result.expect_err("panic should be caught"),
             "gateway session panic during unit-test: boom"
-        );
-    }
-
-    #[test]
-    fn handoff_commitment_uses_persisted_player_hp_over_stale_scene_projection() {
-        let mut session = GatewaySession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::Login {
-            account_id: "demo".to_string(),
-            password: "demo".to_string(),
-        });
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        let mut source = session.world_snapshot();
-        let mut target = source.clone();
-        source.player_hp = Some(13);
-        target.player_hp = Some(13);
-        source
-            .entities
-            .iter_mut()
-            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
-            .expect("source should contain self player")
-            .hp = Some(60);
-        target
-            .entities
-            .iter_mut()
-            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
-            .expect("target should contain self player")
-            .hp = Some(13);
-
-        assert_eq!(
-            normalized_handoff_snapshot(source),
-            normalized_handoff_snapshot(target)
         );
     }
 

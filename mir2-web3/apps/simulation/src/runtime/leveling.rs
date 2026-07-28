@@ -163,6 +163,26 @@ pub(super) fn apply_experience_gain(world: &mut World, amount: i64) -> Vec<Serve
     packets
 }
 
+pub(super) fn experience_balance_delta_for_gain(world: &World, amount: i64) -> i64 {
+    if amount <= 0 {
+        return 0;
+    }
+    let mut level = player_current_level(world);
+    let runtime = world.resource::<PlayerRuntimeResource>();
+    let before = runtime.experience;
+    let mut experience = before.saturating_add(amount);
+    let mut max_experience = runtime.max_experience;
+    if max_experience <= 0 {
+        max_experience = crystal_max_experience_for_level(level);
+    }
+    while level < CRYSTAL_MAX_LEVEL && max_experience > 0 && experience >= max_experience {
+        level += 1;
+        experience -= max_experience;
+        max_experience = crystal_max_experience_for_level(level);
+    }
+    experience.saturating_sub(before)
+}
+
 /// Apply a new level: update the authoritative session level and the body
 /// mirror, point `max_experience` at the new level's curve threshold, recompute
 /// the stat block / HP-MP pools for the new level (Crystal `RefreshLevelStats`

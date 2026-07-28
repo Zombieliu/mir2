@@ -1,0 +1,59 @@
+{
+  "schema": "obelisk.gate23.acceptance.v1",
+  "accepted": true,
+  "keyring": {
+    "created": true,
+    "keyStore": "operating-system-keyring",
+    "nodeId": "ed25519:50e59aa9d44a441daac70f8e297d3fb7ee28de30f49fb86e8a7912808c6ca214",
+    "publicKey": "Z_Zxee_txPWdueX9JI1drWL02GWI78DQchpEr0PdzdM"
+  },
+  "signedRelease": {
+    "sha256": "6238461a8bd44dfcc6a574ac1ea9833d17526ee1f7b7ee92f66e983cef0c5746",
+    "sizeBytes": 33838065,
+    "target": "gate23-local-acceptance",
+    "verified": true,
+    "version": "0.1.1"
+  },
+  "stagedRelease": {
+    "staged": true,
+    "version": "0.1.1",
+    "activation": "pending-supervisor-restart",
+    "releaseDirectory": "versions/0.1.1"
+  },
+  "launcher": {
+    "activatedVersion": "0.1.1",
+    "previousVersion": "0.1.0"
+  },
+  "supervisor": {
+    "version": "0.1.0",
+    "mode": "serving",
+    "acceptNewSessions": true,
+    "reason": "healthy",
+    "cpuUsagePercent": 38.027016,
+    "availableMemoryBytes": 23903092736,
+    "activeSessions": 0,
+    "zoneReachable": true,
+    "lastObservedAtMs": 1785264926528,
+    "nodeId": "ed25519:50e59aa9d44a441daac70f8e297d3fb7ee28de30f49fb86e8a7912808c6ca214",
+    "publicKey": "Z_Zxee_txPWdueX9JI1drWL02GWI78DQchpEr0PdzdM",
+    "keyStore": "operating-system-keyring",
+    "managedProcesses": true,
+    "agentManaged": true,
+    "relayConnected": true,
+    "telemetryConfigured": true,
+    "telemetryAccepted": true,
+    "telemetrySequence": 1,
+    "lastTelemetryAtMs": 1785264926000,
+    "telemetryError": null
+  },
+  "drain": {
+    "unauthorizedStatus": 401,
+    "authenticatedDrain": true,
+    "authenticatedResume": true
+  },
+  "managedProcessFailure": {
+    "childExitFailedClosed": true,
+    "supervisorExitStatus": 1,
+    "zoneHostStoppedWithSupervisor": true
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "payload": {
+    "schema": "obelisk.home-node-telemetry.v1",
+    "nodeId": "ed25519:bef5746d0c392c693ca4b72d81dd9f75d3f0b1f34d4081319f27cde5ce2b6aa3",
+    "publicKey": "4oqJcHUzMr1y_vQT5rCy7xtKrdp6osFB8jNxKmh2s1E",
+    "keyGeneration": 1,
+    "agentInstanceId": "gate25-local-agent",
+    "sequence": 1,
+    "windowStartedAtMs": 1785023468013,
+    "observedAtMs": 1785023528013,
+    "coarseRegion": "local-lab",
+    "providerCode": "simulated-provider",
+    "relayRttMs": 12,
+    "packetLossBps": 0,
+    "measuredUpstreamKbps": 100000,
+    "activeSessions": 10,
+    "activeZones": 1,
+    "zoneIds": [
+      "mir2/map/0"
+    ],
+    "checkpointLagMs": 8,
+    "cpuUsageBps": 2500,
+    "memoryUsageBps": 2000,
+    "workMode": "serving",
+    "capacityCertificateId": "gate25-local-capacity",
+    "capacityCertificateExpiresAtMs": 1785027128013,
+    "capacityMaxSessions": 32,
+    "capacityMaxZones": 4,
+    "finalizedControlHeight": 101,
+    "placementGeneration": 7,
+    "gameId": "mir2",
+    "rewardEpoch": 25,
+    "verifiedWorkUnits": 20,
+    "sessionMilliseconds": 600000,
+    "agentVersion": "0.1.0"
+  },
+  "signatureAlgorithm": "ed25519-zip215",
+  "signature": "HE9xq2mWqk0t8muxVKTHnjp_Txc7rI69fiiXSu_jhwGQtPlxsHu8Jp4wufW-45vrp9BhrQ96M5ZpZjKkdscTDQ"
+}

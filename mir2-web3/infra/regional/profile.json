@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 2,
+  "profileId": "mir2-regional-v1-3000-15m",
+  "catalogMaps": 700,
+  "activeMaps": 120,
+  "stages": {
+    "gate18": {
+      "concurrentPlayers": 500,
+      "durationSeconds": 1800,
+      "maximumErrorRate": 0.001,
+      "economyDuplicateCount": 0
+    },
+    "gate19": {
+      "concurrentPlayers": 500,
+      "durationSeconds": 900,
+      "maximumErrorRate": 0.001,
+      "maximumZoneFailoverRtoMs": 5000,
+      "maximumGatewayReconnectRtoMs": 10000,
+      "minimumSingleFaultScenarios": 6,
+      "economyDuplicateCount": 0
+    },
+    "gate20": {
+      "concurrentPlayers": 1000,
+      "durationSeconds": 900,
+      "hotMapPlayers": 300,
+      "maximumCommandP95Ms": 200,
+      "maximumErrorRate": 0.001,
+      "economyDuplicateCount": 0
+    },
+    "gate21": {
+      "concurrentPlayers": 3000,
+      "durationSeconds": 900,
+      "hotMapPlayers": 500,
+      "maximumCommandP95Ms": 200,
+      "maximumCommandP99Ms": 500,
+      "maximumErrorRate": 0.001,
+      "maximumZoneFailoverRtoMs": 5000,
+      "maximumGatewayReconnectRtoMs": 10000,
+      "economyDuplicateCount": 0,
+      "negativeEconomyBalanceCount": 0,
+      "orphanEconomyTransactionCount": 0,
+      "maximumObservedMemoryGrowthPercent": 5,
+      "maximumObservedWalBytes": 1073741824
+    }
+  },
+  "workload": {
+    "movementPlayersPercent": 60,
+    "combatPlayersPercent": 15,
+    "socialEconomyPlayersPercent": 10,
+    "idlePlayersPercent": 15,
+    "movementCommandsPerSecond": 2,
+    "combatCommandsPerSecond": 2,
+    "socialEconomyTransactionsPerMinute": 2,
+    "idleKeepAliveSeconds": 15,
+    "minimumDistinctAccountsPercent": 100,
+    "minimumDistinctCharactersPercent": 100
+  },
+  "faults": [
+    "active-zone-host-kill",
+    "standby-zone-host-kill",
+    "gateway-kill",
+    "redis-primary-failover",
+    "postgres-primary-failover",
+    "commonware-validator-kill",
+    "rolling-zone-host-upgrade",
+    "network-partition-active-to-control"
+  ],
+  "referenceDeployment": {
+    "gatewayReplicas": 3,
+    "zoneHostReplicas": 8,
+    "commonwareValidators": 4,
+    "postgresReplicas": 2,
+    "redisReplicas": 3,
+    "gatewayCpuPerReplica": 4,
+    "gatewayMemoryGiBPerReplica": 8,
+    "zoneHostCpuPerReplica": 8,
+    "zoneHostMemoryGiBPerReplica": 16,
+    "postgresCpuPerReplica": 8,
+    "postgresMemoryGiBPerReplica": 32,
+    "redisCpuPerReplica": 2,
+    "redisMemoryGiBPerReplica": 8
+  }
+}

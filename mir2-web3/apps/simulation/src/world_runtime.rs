@@ -2,7 +2,8 @@ use std::any::Any;
 
 use crate::runtime::{
     SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
-    SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer, ZoneMonsterSpawn,
+    SharedItemRentalItemOffer, SharedNpcSavedValue, SharedSkillItemConsumptionComponent,
+    SharedTradeOffer, ZoneMonsterSpawn,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -282,6 +283,10 @@ impl InProcessWorldRuntime {
         }
     }
 
+    pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
+        self.session.rebind_account_store(authoritative);
+    }
+
     pub fn into_session(self) -> SimulationSession {
         self.session
     }
@@ -306,6 +311,51 @@ impl InProcessWorldRuntime {
     ) -> SharedAccountInventoryTransactionReceipt {
         self.session
             .commit_shared_ground_drop_pickup_transaction(drop)
+    }
+
+    pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
+        self.session.can_commit_shared_ground_drop_pickup(drop)
+    }
+
+    pub fn can_commit_shared_gold_drop(&self, amount: u32) -> bool {
+        self.session.can_commit_shared_gold_drop(amount)
+    }
+
+    pub fn shared_monster_kill_experience_balance_delta(&self, experience: u32) -> i64 {
+        self.session
+            .shared_monster_kill_experience_balance_delta(experience)
+    }
+
+    pub fn commit_shared_gold_drop_transaction(
+        &mut self,
+        amount: u32,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.session.commit_shared_gold_drop_transaction(amount)
+    }
+
+    pub fn shared_inventory_item_drop(
+        &self,
+        unique_id: u64,
+        count: u16,
+        hero_inventory: bool,
+    ) -> Option<crate::SharedInventoryItemDrop> {
+        self.session
+            .shared_inventory_item_drop(unique_id, count, hero_inventory)
+    }
+
+    pub fn can_commit_shared_inventory_item_drop(
+        &self,
+        drop: &crate::SharedInventoryItemDrop,
+    ) -> bool {
+        self.session.can_commit_shared_inventory_item_drop(drop)
+    }
+
+    pub fn commit_shared_inventory_item_drop_transaction(
+        &mut self,
+        drop: &crate::SharedInventoryItemDrop,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.session
+            .commit_shared_inventory_item_drop_transaction(drop)
     }
 
     pub fn apply_shared_monster_kill_award(
@@ -337,6 +387,13 @@ impl InProcessWorldRuntime {
     ) -> SharedAccountInventoryTransactionReceipt {
         self.session
             .commit_shared_skill_item_consumption_transaction(spell)
+    }
+
+    pub fn shared_skill_item_consumption_components(
+        &self,
+        spell: Spell,
+    ) -> Option<Vec<SharedSkillItemConsumptionComponent>> {
+        self.session.shared_skill_item_consumption_components(spell)
     }
 
     pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {

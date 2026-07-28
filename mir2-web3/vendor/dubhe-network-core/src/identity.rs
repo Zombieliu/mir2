@@ -5,8 +5,8 @@ use std::fs;
 use std::path::Path;
 use std::sync::Mutex;
 
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use ed25519_consensus::{Signature, SigningKey, VerificationKey};
 use sha2::{Digest, Sha256};
 
@@ -66,15 +66,35 @@ impl NodeSigningIdentity {
     }
 
     pub fn from_env() -> Result<Option<Self>, String> {
-        let inline = env::var("MIR2_ZONE_HOST_SIGNING_KEY")
+        let dubhe_inline = env::var("DUBHE_NODE_SIGNING_KEY")
             .ok()
             .filter(|value| !value.trim().is_empty());
-        let file = env::var("MIR2_ZONE_HOST_SIGNING_KEY_FILE")
+        let legacy_inline = env::var("MIR2_ZONE_HOST_SIGNING_KEY")
             .ok()
             .filter(|value| !value.trim().is_empty());
+        let dubhe_file = env::var("DUBHE_NODE_SIGNING_KEY_FILE")
+            .ok()
+            .filter(|value| !value.trim().is_empty());
+        let legacy_file = env::var("MIR2_ZONE_HOST_SIGNING_KEY_FILE")
+            .ok()
+            .filter(|value| !value.trim().is_empty());
+        if dubhe_inline.is_some() && legacy_inline.is_some() {
+            return Err(
+                "configure DUBHE_NODE_SIGNING_KEY or legacy MIR2_ZONE_HOST_SIGNING_KEY, not both"
+                    .to_string(),
+            );
+        }
+        if dubhe_file.is_some() && legacy_file.is_some() {
+            return Err(
+                "configure DUBHE_NODE_SIGNING_KEY_FILE or legacy MIR2_ZONE_HOST_SIGNING_KEY_FILE, not both"
+                    .to_string(),
+            );
+        }
+        let inline = dubhe_inline.or(legacy_inline);
+        let file = dubhe_file.or(legacy_file);
         match (inline, file) {
             (Some(_), Some(_)) => Err(
-                "configure only one of MIR2_ZONE_HOST_SIGNING_KEY or MIR2_ZONE_HOST_SIGNING_KEY_FILE"
+                "configure only one of DUBHE_NODE_SIGNING_KEY or DUBHE_NODE_SIGNING_KEY_FILE"
                     .to_string(),
             ),
             (Some(value), None) => Self::from_base64_seed(&value).map(Some),

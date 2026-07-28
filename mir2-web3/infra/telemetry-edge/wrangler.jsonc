@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "mir2-telemetry-domain-proxy",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-28",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "telemetry.obelisk.build/*",
+      "zone_name": "obelisk.build"
+    }
+  ]
+}

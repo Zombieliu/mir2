@@ -14,7 +14,8 @@ use sha2::{Digest, Sha256};
 
 use crate::{
     node_id_from_public_key, verify_ed25519_signature, CapacityChallenge,
-    CapacityChallengeResponse, NodeSigningIdentity, ZoneHostHealth, ZoneHostServer,
+    CapacityChallengeResponse, FinalizedDirectorSubmission, NodeSigningIdentity,
+    WorldDirectorRuntimeService, WorldDirectorRuntimeStatus, ZoneHostHealth, ZoneHostServer,
     ZoneHostTelemetrySnapshot, ZoneHostZoneTelemetry, ZoneMapScope,
 };
 
@@ -24,9 +25,27 @@ const ED25519_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
 // An ephemeral loopback port keeps local multi-host tests and developer
 // processes isolated. Deployments set an explicit stable address.
 const DEFAULT_OPERATOR_ADDR: &str = "127.0.0.1:0";
-const MAX_HTTP_REQUEST_BYTES: usize = 8 * 1024;
+const MAX_HTTP_REQUEST_BYTES: usize = 2 * 1024 * 1024;
 
 type HmacSha256 = Hmac<Sha256>;
+
+pub fn zone_host_signing_identity_from_env() -> Result<Option<NodeSigningIdentity>, String> {
+    let configured_identity = NodeSigningIdentity::from_env()?;
+    let keyring_account = env::var("MIR2_ZONE_HOST_KEYRING_ACCOUNT")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    match (configured_identity, keyring_account) {
+        (Some(_), Some(_)) => Err(
+            "configure either Zone Host signing key environment variables or MIR2_ZONE_HOST_KEYRING_ACCOUNT, not both"
+                .to_string(),
+        ),
+        (Some(identity), None) => Ok(Some(identity)),
+        (None, Some(account)) => crate::HomeAgentKeyring::new(account)?
+            .load_identity()
+            .map(Some),
+        (None, None) => Ok(None),
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ZoneHostOperatorConfig {
@@ -34,6 +53,7 @@ pub struct ZoneHostOperatorConfig {
     pub advertised_endpoint: String,
     pub failure_domain: String,
     heartbeat_secret: Option<String>,
+    management_token: Option<String>,
     signing_identity: Option<NodeSigningIdentity>,
     key_generation: u64,
     heartbeat_sequence: Arc<AtomicU64>,
@@ -60,7 +80,10 @@ impl ZoneHostOperatorConfig {
         let heartbeat_secret = env::var("MIR2_ZONE_HOST_HEARTBEAT_SECRET")
             .ok()
             .filter(|value| !value.trim().is_empty());
-        let signing_identity = NodeSigningIdentity::from_env()?;
+        let management_token = env::var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN")
+            .ok()
+            .filter(|value| !value.trim().is_empty());
+        let signing_identity = zone_host_signing_identity_from_env()?;
         let key_generation = env::var("MIR2_ZONE_HOST_KEY_GENERATION")
             .ok()
             .map(|value| {
@@ -89,6 +112,14 @@ impl ZoneHostOperatorConfig {
                 );
             }
         }
+        if management_token
+            .as_deref()
+            .is_some_and(|token| token.as_bytes().len() < 32)
+        {
+            return Err(
+                "MIR2_ZONE_HOST_MANAGEMENT_TOKEN must contain at least 32 bytes".to_string(),
+            );
+        }
         if !address.ip().is_loopback() && signing_identity.is_none() {
             return Err(
                 "MIR2_ZONE_HOST_SIGNING_KEY or MIR2_ZONE_HOST_SIGNING_KEY_FILE is required when Zone Host telemetry binds to a non-loopback address"
@@ -115,6 +146,7 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint,
             failure_domain,
             heartbeat_secret,
+            management_token,
             signing_identity,
             key_generation,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
@@ -130,6 +162,7 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint: "zone-a:7020".to_string(),
             failure_domain: "test-az-a".to_string(),
             heartbeat_secret: secret.map(str::to_string),
+            management_token: Some("0123456789abcdef0123456789abcdef".to_string()),
             signing_identity: None,
             key_generation: 0,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
@@ -146,6 +179,7 @@ impl ZoneHostOperatorConfig {
             advertised_endpoint: "zone-a:7020".to_string(),
             failure_domain: "test-az-a".to_string(),
             heartbeat_secret: None,
+            management_token: Some("0123456789abcdef0123456789abcdef".to_string()),
             signing_identity: Some(signing_identity),
             key_generation: 3,
             heartbeat_sequence: Arc::new(AtomicU64::new(1)),
@@ -287,12 +321,27 @@ pub fn serve_zone_host_operator(
     server: Arc<ZoneHostServer>,
     config: ZoneHostOperatorConfig,
 ) -> io::Result<()> {
+    serve_zone_host_operator_with_world_director(listener, server, config, None)
+}
+
+pub fn serve_zone_host_operator_with_world_director(
+    listener: TcpListener,
+    server: Arc<ZoneHostServer>,
+    config: ZoneHostOperatorConfig,
+    world_director: Option<Arc<WorldDirectorRuntimeService>>,
+) -> io::Result<()> {
     for stream in listener.incoming() {
         let mut stream = stream?;
         let server = Arc::clone(&server);
         let config = config.clone();
+        let world_director = world_director.clone();
         thread::spawn(move || {
-            if let Err(error) = handle_operator_request(&mut stream, server.as_ref(), &config) {
+            if let Err(error) = handle_operator_request(
+                &mut stream,
+                server.as_ref(),
+                &config,
+                world_director.as_deref(),
+            ) {
                 eprintln!("zone host operator request failed: {error}");
             }
         });
@@ -304,6 +353,7 @@ fn handle_operator_request(
     stream: &mut TcpStream,
     server: &ZoneHostServer,
     config: &ZoneHostOperatorConfig,
+    world_director: Option<&WorldDirectorRuntimeService>,
 ) -> io::Result<()> {
     stream.set_read_timeout(Some(std::time::Duration::from_secs(2)))?;
     stream.set_write_timeout(Some(std::time::Duration::from_secs(2)))?;
@@ -325,6 +375,60 @@ fn handle_operator_request(
     if method == "POST" && path == "/v1/capacity-challenge" {
         return handle_capacity_challenge(stream, server, config, &bytes[header_end + 4..]);
     }
+    if method == "POST"
+        && matches!(
+            path,
+            "/v1/world-director/finalized" | "/v1/world-director/advance"
+        )
+    {
+        if !management_token_matches(&request, config.management_token.as_deref()) {
+            return write_json_error(stream, 401, "valid management bearer token required");
+        }
+        let Some(world_director) = world_director else {
+            return write_json_error(stream, 503, "world director runtime is not configured");
+        };
+        if path == "/v1/world-director/advance" {
+            return match world_director.advance(now_ms()) {
+                Ok(receipt) => {
+                    let body = serde_json::to_vec(&receipt).map_err(io::Error::other)?;
+                    write_response(stream, 200, "application/json", &body)
+                }
+                Err(error) => write_json_error(stream, 400, &error),
+            };
+        }
+        let submission: FinalizedDirectorSubmission =
+            match serde_json::from_slice(&bytes[header_end + 4..]) {
+                Ok(submission) => submission,
+                Err(error) => {
+                    return write_json_error(
+                        stream,
+                        400,
+                        &format!("invalid finalized director submission JSON: {error}"),
+                    )
+                }
+            };
+        return match world_director.install_submission(submission, now_ms()) {
+            Ok(receipt) => {
+                let body = serde_json::to_vec(&receipt).map_err(io::Error::other)?;
+                write_response(stream, 200, "application/json", &body)
+            }
+            Err(error) => write_json_error(stream, 400, &error),
+        };
+    }
+    if method == "POST" && matches!(path, "/v1/drain" | "/v1/resume") {
+        if !management_token_matches(&request, config.management_token.as_deref()) {
+            return write_response(
+                stream,
+                401,
+                "application/json",
+                br#"{"error":"valid management bearer token required"}"#,
+            );
+        }
+        let draining = path == "/v1/drain";
+        server.set_draining(draining);
+        let body = serde_json::to_vec(&server.health()).map_err(io::Error::other)?;
+        return write_response(stream, 200, "application/json", &body);
+    }
     if method != "GET" {
         return write_response(
             stream,
@@ -335,6 +439,21 @@ fn handle_operator_request(
     }
 
     match path {
+        "/v1/world-director" => {
+            if !management_token_matches(&request, config.management_token.as_deref()) {
+                return write_json_error(stream, 401, "valid management bearer token required");
+            }
+            let Some(world_director) = world_director else {
+                return write_json_error(stream, 503, "world director runtime is not configured");
+            };
+            match world_director.status() {
+                Ok(status) => {
+                    let body = serde_json::to_vec(&status).map_err(io::Error::other)?;
+                    write_response(stream, 200, "application/json", &body)
+                }
+                Err(error) => write_json_error(stream, 503, &error),
+            }
+        }
         "/healthz" => {
             let body =
                 serde_json::to_vec(&server.telemetry_snapshot()).map_err(io::Error::other)?;
@@ -351,7 +470,17 @@ fn handle_operator_request(
             write_response(stream, status, "application/json", &body)
         }
         "/metrics" => {
-            let body = render_prometheus(&server.telemetry_snapshot());
+            let mut body = render_prometheus(&server.telemetry_snapshot());
+            if let Some(world_director) = world_director {
+                match world_director.status() {
+                    Ok(status) => body.push_str(&render_world_director_prometheus(&status)),
+                    Err(_) => body.push_str(
+                        "# HELP obelisk_world_director_scrape_error World director status scrape failures.\n\
+                         # TYPE obelisk_world_director_scrape_error gauge\n\
+                         obelisk_world_director_scrape_error 1\n",
+                    ),
+                }
+            }
             write_response(
                 stream,
                 200,
@@ -379,6 +508,62 @@ fn handle_operator_request(
         }
         _ => write_response(stream, 404, "text/plain; charset=utf-8", b"not found\n"),
     }
+}
+
+fn render_world_director_prometheus(status: &WorldDirectorRuntimeStatus) -> String {
+    format!(
+        "# HELP obelisk_world_director_enabled Whether the world director runtime is enabled.\n\
+# TYPE obelisk_world_director_enabled gauge\n\
+obelisk_world_director_enabled 1\n\
+# HELP obelisk_world_director_finalized_height Last imported Commonware control height.\n\
+# TYPE obelisk_world_director_finalized_height gauge\n\
+obelisk_world_director_finalized_height {}\n\
+# HELP obelisk_world_director_installed_commands Installed signed world director commands.\n\
+# TYPE obelisk_world_director_installed_commands gauge\n\
+obelisk_world_director_installed_commands {}\n\
+# HELP obelisk_world_director_applied_actions Idempotently applied world director actions.\n\
+# TYPE obelisk_world_director_applied_actions gauge\n\
+obelisk_world_director_applied_actions {}\n\
+# HELP obelisk_world_director_spawned_monsters_total Monsters spawned by finalized world events.\n\
+# TYPE obelisk_world_director_spawned_monsters_total counter\n\
+obelisk_world_director_spawned_monsters_total {}\n\
+# HELP obelisk_world_director_broadcast_messages_total World-event messages broadcast to Zones.\n\
+# TYPE obelisk_world_director_broadcast_messages_total counter\n\
+obelisk_world_director_broadcast_messages_total {}\n",
+        status.finalized_height,
+        status.installed_command_count,
+        status.applied_action_count,
+        status.spawned_monsters_total,
+        status.broadcast_messages_total,
+    )
+}
+
+fn management_token_matches(request: &str, expected: Option<&str>) -> bool {
+    let Some(expected) = expected else {
+        return false;
+    };
+    let supplied = request.lines().find_map(|line| {
+        let (name, value) = line.split_once(':')?;
+        name.eq_ignore_ascii_case("authorization")
+            .then_some(value.trim())
+            .and_then(|value| value.strip_prefix("Bearer "))
+    });
+    let Some(supplied) = supplied else {
+        return false;
+    };
+    constant_time_bytes_equal(supplied.as_bytes(), expected.as_bytes())
+}
+
+fn constant_time_bytes_equal(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    left.iter()
+        .zip(right)
+        .fold(0_u8, |difference, (left, right)| {
+            difference | (left ^ right)
+        })
+        == 0
 }
 
 fn read_http_request(stream: &mut TcpStream) -> io::Result<Vec<u8>> {
@@ -690,6 +875,186 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         "obelisk_zone_host_rpc_errors_total",
         snapshot.rpc_errors_total
     );
+    metric!(
+        "Nanoseconds spent decoding, dispatching, and encoding Zone RPC requests.",
+        "counter",
+        "obelisk_zone_host_rpc_service_duration_ns_total",
+        snapshot.rpc_service_duration_ns_total
+    );
+    metric!(
+        "Maximum nanoseconds spent decoding, dispatching, and encoding one Zone RPC request.",
+        "gauge",
+        "obelisk_zone_host_rpc_service_duration_ns_max",
+        snapshot.rpc_service_duration_ns_max
+    );
+    metric!(
+        "Encoded Zone RPC response bytes.",
+        "counter",
+        "obelisk_zone_host_rpc_response_bytes_total",
+        snapshot.rpc_response_bytes_total
+    );
+    metric!(
+        "Largest encoded Zone RPC response in bytes.",
+        "gauge",
+        "obelisk_zone_host_rpc_response_bytes_max",
+        snapshot.rpc_response_bytes_max
+    );
+    metric!(
+        "Nanoseconds spent waiting for per-Zone mutation lanes.",
+        "counter",
+        "obelisk_zone_host_zone_gate_wait_duration_ns_total",
+        snapshot.zone_gate_wait_duration_ns_total
+    );
+    metric!(
+        "Maximum nanoseconds spent waiting for a per-Zone mutation lane.",
+        "gauge",
+        "obelisk_zone_host_zone_gate_wait_duration_ns_max",
+        snapshot.zone_gate_wait_duration_ns_max
+    );
+    metric!(
+        "Execute RPC requests received.",
+        "counter",
+        "obelisk_zone_host_execute_requests_total",
+        snapshot.execute_requests_total
+    );
+    metric!(
+        "Nanoseconds spent executing gameplay runtime commands.",
+        "counter",
+        "obelisk_zone_host_execute_runtime_duration_ns_total",
+        snapshot.execute_runtime_duration_ns_total
+    );
+    metric!(
+        "Nanoseconds spent appending accepted gameplay commands to the journal.",
+        "counter",
+        "obelisk_zone_host_execute_journal_duration_ns_total",
+        snapshot.execute_journal_duration_ns_total
+    );
+    metric!(
+        "Current v4 checkpoint journal entries.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_journal_entries",
+        snapshot.checkpoint.journal_entries
+    );
+    metric!(
+        "Successful durable-prefix journal compactions.",
+        "counter",
+        "obelisk_zone_host_journal_compactions_total",
+        snapshot.checkpoint.journal_compactions_total
+    );
+    metric!(
+        "Journal entries removed by durable-prefix compaction.",
+        "counter",
+        "obelisk_zone_host_journal_compacted_entries_total",
+        snapshot.checkpoint.journal_compacted_entries_total
+    );
+    metric!(
+        "Successful v4 checkpoint exports.",
+        "counter",
+        "obelisk_zone_host_checkpoint_exports_total",
+        snapshot.checkpoint.exports_total
+    );
+    metric!(
+        "Bytes produced by successful v4 checkpoint exports.",
+        "counter",
+        "obelisk_zone_host_checkpoint_export_bytes_total",
+        snapshot.checkpoint.export_bytes_total
+    );
+    metric!(
+        "Nanoseconds spent producing successful v4 checkpoint exports.",
+        "counter",
+        "obelisk_zone_host_checkpoint_export_duration_ns_total",
+        snapshot.checkpoint.export_duration_ns_total
+    );
+    metric!(
+        "Bytes in the last successful v4 checkpoint export.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_export_last_bytes",
+        snapshot.checkpoint.export_last_bytes
+    );
+    metric!(
+        "Nanoseconds spent in the last successful v4 checkpoint export.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_export_last_duration_ns",
+        snapshot.checkpoint.export_last_duration_ns
+    );
+    metric!(
+        "Successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_installs_total",
+        snapshot.checkpoint.installs_total
+    );
+    metric!(
+        "Bytes consumed by successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_install_bytes_total",
+        snapshot.checkpoint.install_bytes_total
+    );
+    metric!(
+        "Nanoseconds spent applying successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_install_duration_ns_total",
+        snapshot.checkpoint.install_duration_ns_total
+    );
+    metric!(
+        "Bytes in the last successful v4 checkpoint install.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_install_last_bytes",
+        snapshot.checkpoint.install_last_bytes
+    );
+    metric!(
+        "Nanoseconds spent in the last successful v4 checkpoint install.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_install_last_duration_ns",
+        snapshot.checkpoint.install_last_duration_ns
+    );
+    metric!(
+        "Journal entries replayed by successful v4 checkpoint installs.",
+        "counter",
+        "obelisk_zone_host_checkpoint_replay_entries_total",
+        snapshot.checkpoint.replay_entries_total
+    );
+    metric!(
+        "Journal entries replayed by the last successful v4 checkpoint install.",
+        "gauge",
+        "obelisk_zone_host_checkpoint_replay_last_entries",
+        snapshot.checkpoint.replay_last_entries
+    );
+    metric!(
+        "Standby promotion readiness assessments.",
+        "counter",
+        "obelisk_zone_host_promotion_assessments_total",
+        snapshot.promotion.assessments_total
+    );
+    metric!(
+        "Standby promotion readiness assessments that issued a receipt.",
+        "counter",
+        "obelisk_zone_host_promotion_ready_assessments_total",
+        snapshot.promotion.ready_assessments_total
+    );
+    metric!(
+        "Fenced standby promotion attempts.",
+        "counter",
+        "obelisk_zone_host_promotion_attempts_total",
+        snapshot.promotion.promotion_attempts_total
+    );
+    metric!(
+        "Successful fenced standby promotions.",
+        "counter",
+        "obelisk_zone_host_promotions_total",
+        snapshot.promotion.promotions_total
+    );
+    metric!(
+        "Unix timestamp in milliseconds of the last successful promotion.",
+        "gauge",
+        "obelisk_zone_host_promotion_last_promoted_at_ms",
+        snapshot.promotion.last_promoted_at_ms
+    );
+    metric!(
+        "Number of Zones with an unexpired promotion readiness receipt.",
+        "gauge",
+        "obelisk_zone_host_promotion_ready_zones",
+        snapshot.promotion.ready_zone_ids.len()
+    );
     output.push_str(
         "# HELP obelisk_zone_host_build_info Static Zone Host build and protocol information.\n",
     );
@@ -729,6 +1094,7 @@ fn write_response(
     let reason = match status {
         200 => "OK",
         400 => "Bad Request",
+        401 => "Unauthorized",
         429 => "Too Many Requests",
         404 => "Not Found",
         405 => "Method Not Allowed",
@@ -833,17 +1199,35 @@ mod tests {
         let snapshot = ZoneHostTelemetrySnapshot {
             health: health(),
             zones: zones(),
+            checkpoint: Default::default(),
+            promotion: Default::default(),
             started_at_ms: 1,
             uptime_seconds: 9,
             accepted_connections_total: 10,
             rpc_requests_total: 11,
             rpc_errors_total: 1,
+            rpc_service_duration_ns_total: 12,
+            rpc_service_duration_ns_max: 7,
+            rpc_response_bytes_total: 13,
+            rpc_response_bytes_max: 8,
+            zone_gate_wait_duration_ns_total: 14,
+            zone_gate_wait_duration_ns_max: 9,
+            execute_requests_total: 3,
+            execute_runtime_duration_ns_total: 15,
+            execute_journal_duration_ns_total: 16,
         };
         let output = render_prometheus(&snapshot);
         assert!(output.contains("obelisk_zone_host_sessions{host_id=\"guild-a\\\"node\"} 3"));
         assert!(output.contains("obelisk_zone_host_rpc_requests_total"));
+        assert!(output.contains("obelisk_zone_host_rpc_service_duration_ns_total"));
         assert!(output.contains("obelisk_zone_host_session_capacity_per_zone"));
         assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
+        assert!(output.contains("obelisk_zone_host_checkpoint_journal_entries"));
+        assert!(output.contains("obelisk_zone_host_journal_compactions_total"));
+        assert!(output.contains("obelisk_zone_host_journal_compacted_entries_total"));
+        assert!(output.contains("obelisk_zone_host_checkpoint_replay_entries_total"));
+        assert!(output.contains("obelisk_zone_host_promotion_assessments_total"));
+        assert!(output.contains("obelisk_zone_host_promotions_total"));
         assert!(!output.contains("session_id"));
         assert!(!output.contains("account_id"));
     }
@@ -855,6 +1239,97 @@ mod tests {
             ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap(), "local-host");
         env::remove_var("MIR2_ZONE_HOST_HEARTBEAT_SECRET");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn management_bearer_token_is_required_and_compared_exactly() {
+        let token = "0123456789abcdef0123456789abcdef";
+        assert!(management_token_matches(
+            &format!("POST /v1/drain HTTP/1.1\r\nAuthorization: Bearer {token}\r\n"),
+            Some(token),
+        ));
+        assert!(!management_token_matches(
+            "POST /v1/drain HTTP/1.1\r\n",
+            Some(token),
+        ));
+        assert!(!management_token_matches(
+            "POST /v1/drain HTTP/1.1\r\nAuthorization: Bearer wrong\r\n",
+            Some(token),
+        ));
+        assert!(!management_token_matches(
+            &format!("POST /v1/drain HTTP/1.1\r\nAuthorization: Bearer {token}\r\n"),
+            None,
+        ));
+    }
+
+    #[test]
+    fn management_token_must_have_adequate_entropy_length() {
+        env::set_var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN", "short");
+        let result =
+            ZoneHostOperatorConfig::from_env("127.0.0.1:7020".parse().unwrap(), "local-host");
+        env::remove_var("MIR2_ZONE_HOST_MANAGEMENT_TOKEN");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn world_director_operator_status_is_authenticated_and_exported_as_metrics() {
+        let config = ZoneHostOperatorConfig::for_test(None);
+        let factory = Arc::new(SharedInProcessZoneRuntimeFactory::new());
+        let server = Arc::new(ZoneHostServer::with_identity_and_factory(
+            "operator-test-host",
+            8,
+            GatewayConfig::default(),
+            Arc::new(InMemoryZoneOwnerLeaseAuthority::new()),
+            None,
+            ZoneRpcLimits::default(),
+            Arc::clone(&factory),
+        ));
+        let director_identity = NodeSigningIdentity::from_seed([19; 32]);
+        let director = Arc::new(
+            WorldDirectorRuntimeService::new(
+                [
+                    "validator-a".to_string(),
+                    "validator-b".to_string(),
+                    "validator-c".to_string(),
+                    "validator-d".to_string(),
+                ],
+                director_identity.public_key(),
+                factory,
+                None,
+            )
+            .unwrap(),
+        );
+
+        let unauthorized = operator_request(
+            Arc::clone(&server),
+            config.clone(),
+            Some(Arc::clone(&director)),
+            "GET /v1/world-director HTTP/1.1\r\nHost: local\r\n\r\n",
+        );
+        assert!(unauthorized.starts_with("HTTP/1.1 401"));
+
+        let token = "0123456789abcdef0123456789abcdef";
+        let authorized = operator_request(
+            Arc::clone(&server),
+            config.clone(),
+            Some(Arc::clone(&director)),
+            &format!(
+                "GET /v1/world-director HTTP/1.1\r\nHost: local\r\nAuthorization: Bearer {token}\r\n\r\n"
+            ),
+        );
+        assert!(authorized.starts_with("HTTP/1.1 200"));
+        assert!(authorized.contains("\"enabled\":true"));
+        assert!(authorized.contains("\"finalizedHeight\":0"));
+
+        let metrics = operator_request(
+            server,
+            config,
+            Some(director),
+            "GET /metrics HTTP/1.1\r\nHost: local\r\n\r\n",
+        );
+        assert!(metrics.starts_with("HTTP/1.1 200"));
+        assert!(metrics.contains("obelisk_world_director_enabled 1"));
+        assert!(metrics.contains("obelisk_world_director_finalized_height 0"));
     }
 
     #[test]
@@ -949,5 +1424,31 @@ mod tests {
         assert!(run_capacity_challenge(&server, &config, oversized_per_zone.clone()).is_err());
         oversized_per_zone.workload.max_sessions_per_zone = 32;
         assert!(run_capacity_challenge(&server, &config, oversized_per_zone).is_ok());
+    }
+
+    fn operator_request(
+        server: Arc<ZoneHostServer>,
+        config: ZoneHostOperatorConfig,
+        world_director: Option<Arc<WorldDirectorRuntimeService>>,
+        request: &str,
+    ) -> String {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let worker = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            handle_operator_request(
+                &mut stream,
+                server.as_ref(),
+                &config,
+                world_director.as_deref(),
+            )
+            .unwrap();
+        });
+        let mut stream = TcpStream::connect(address).unwrap();
+        stream.write_all(request.as_bytes()).unwrap();
+        let mut response = String::new();
+        stream.read_to_string(&mut response).unwrap();
+        worker.join().unwrap();
+        response
     }
 }

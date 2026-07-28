@@ -1,0 +1,11 @@
+{
+  "accepted": true,
+  "endpoint": "home-relay:7444",
+  "zoneId": "primary",
+  "sessionId": "gate22-docker-session",
+  "loginSuccess": true,
+  "startGameSuccess": true,
+  "keepAliveSuccess": true,
+  "playerAccountId": "demo",
+  "mapFileName": "0"
+}

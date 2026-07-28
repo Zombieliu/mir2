@@ -140,7 +140,7 @@ impl RewardClaimProof {
             let Some(sibling) = decode_digest(sibling) else {
                 return false;
             };
-            hash = if index % 2 == 0 {
+            hash = if index.is_multiple_of(2) {
                 merkle_parent(&hash, &sibling)
             } else {
                 merkle_parent(&sibling, &hash)
@@ -491,10 +491,12 @@ fn merkle_levels(allocations: &[RewardAllocation]) -> Result<Vec<Vec<[u8; 32]>>,
     if allocations.is_empty() {
         return Err("reward allocation tree needs at least one leaf".to_string());
     }
-    let mut levels = vec![allocations
-        .iter()
-        .map(allocation_leaf)
-        .collect::<Result<Vec<_>, _>>()?];
+    let mut levels = vec![
+        allocations
+            .iter()
+            .map(allocation_leaf)
+            .collect::<Result<Vec<_>, _>>()?,
+    ];
     while levels.last().is_some_and(|level| level.len() > 1) {
         let current = levels.last().expect("merkle level exists");
         let mut next = Vec::with_capacity(current.len().div_ceil(2));
@@ -543,8 +545,8 @@ mod tests {
         CapacityChallenge, CapacityChallengeResponse, CapacityWorkload, NodeSigningIdentity,
         SuiFinalityProof,
     };
-    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
     use base64::Engine;
+    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 
     fn policy(game_id: &str, budget: u64) -> GameRewardPolicy {
         GameRewardPolicy {
@@ -635,15 +637,21 @@ mod tests {
     fn verified_receipts_are_deduplicated_and_capped_by_game_budget() {
         let mut ledger = MultiGameRewardLedger::default();
         ledger.register_policy(policy("mir2", 1_000)).unwrap();
-        assert!(ledger
-            .ingest_verified(receipt("r1", "mir2", &["node-a", "node-b"], 100))
-            .unwrap());
-        assert!(!ledger
-            .ingest_verified(receipt("r1", "mir2", &["node-a", "node-b"], 100))
-            .unwrap());
-        assert!(ledger
-            .ingest_verified(receipt("r2", "mir2", &["node-b", "node-c"], 100))
-            .unwrap());
+        assert!(
+            ledger
+                .ingest_verified(receipt("r1", "mir2", &["node-a", "node-b"], 100))
+                .unwrap()
+        );
+        assert!(
+            !ledger
+                .ingest_verified(receipt("r1", "mir2", &["node-a", "node-b"], 100))
+                .unwrap()
+        );
+        assert!(
+            ledger
+                .ingest_verified(receipt("r2", "mir2", &["node-b", "node-c"], 100))
+                .unwrap()
+        );
 
         let batch = ledger.finalize_epoch("mir2", 7, 11).unwrap();
         assert_eq!(batch.total_reward, 1_000);

@@ -25,9 +25,10 @@ use super::{
 use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
-    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
-    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord,
-    WorldEntityDisposition, WorldEntityKind,
+    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage,
+    SharedAccountInventoryTransactionKind, SimulationConfig, Stage5AuctionListing,
+    Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord, WorldEntityDisposition,
+    WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -554,6 +555,15 @@ fn add_inventory_crystal_item(session: &mut SimulationSession, template_name: &s
 }
 
 fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot: EquipmentSlot) {
+    equip_crystal_item_with_quantity(session, template_name, slot, 1);
+}
+
+fn equip_crystal_item_with_quantity(
+    session: &mut SimulationSession,
+    template_name: &str,
+    slot: EquipmentSlot,
+    quantity: u32,
+) {
     let template = mir2_game_data::crystal_item_by_name(template_name)
         .expect("Crystal equipment template should exist");
     let key = super::crystal_item_key_for_template(&template);
@@ -563,6 +573,7 @@ fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot
     resources.equipment_items.push(super::EquipmentState {
         key: key.clone(),
         slot,
+        quantity,
         awake_type: 0,
         awake_values: Vec::new(),
         name: template.name.clone(),
@@ -602,6 +613,7 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
         .push(super::EquipmentState {
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
+            quantity: 1,
             awake_type: 0,
             awake_values: Vec::new(),
             name: "Test Mount".to_string(),
@@ -28442,6 +28454,62 @@ fn drop_gold_packet_emits_lose_gold() {
 }
 
 #[test]
+fn shared_asset_drop_transactions_preflight_and_apply_exact_debits() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(session.can_commit_shared_gold_drop(25));
+    let gold = session.commit_shared_gold_drop_transaction(25);
+    assert_eq!(gold.kind, SharedAccountInventoryTransactionKind::GoldDrop);
+    assert!(gold.committed);
+    assert_eq!(player_gold(&session), 1255);
+    assert!(gold
+        .packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
+
+    session.stage5_command(
+        "qa.giveItem",
+        vec!["red-potion".to_string(), "3".to_string()],
+    );
+    let item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion")
+        .expect("QA item");
+    let prepared = session
+        .shared_inventory_item_drop(item.unique_id, 2, false)
+        .expect("valid shared item drop");
+    assert_eq!(prepared.item_key, "red-potion");
+    assert_eq!(prepared.quantity, 2);
+    let dropped = session.commit_shared_inventory_item_drop_transaction(&prepared);
+    assert_eq!(
+        dropped.kind,
+        SharedAccountInventoryTransactionKind::InventoryItemDrop
+    );
+    assert!(dropped.committed);
+    assert!(dropped.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DropItem {
+            unique_id,
+            count: 2,
+            success: true,
+            ..
+        } if *unique_id == item.unique_id
+    )));
+    assert_eq!(
+        session
+            .world_snapshot()
+            .inventory_items
+            .into_iter()
+            .find(|snapshot| snapshot.unique_id == item.unique_id)
+            .map(|snapshot| snapshot.quantity),
+        Some(item.quantity - 2)
+    );
+}
+
+#[test]
 fn drop_gold_packet_allows_zero_gold_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -33643,6 +33711,7 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
             .push(super::EquipmentState {
                 key: "test-mount".to_string(),
                 slot: EquipmentSlot::Mount,
+                quantity: 1,
                 awake_type: 0,
                 awake_values: Vec::new(),
                 name: "Test Mount".to_string(),
@@ -33727,6 +33796,7 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
         .push(super::EquipmentState {
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
+            quantity: 1,
             awake_type: 0,
             awake_values: Vec::new(),
             name: "Test Mount".to_string(),
@@ -43368,8 +43438,8 @@ fn magic_packet_crystal_poison_cloud_consumes_amulet_and_green_poison_ground_tic
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 48);
     set_current_player_mp(&mut session, 500);
-    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
-    equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::BraceletRight);
+    equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    equip_crystal_item_with_quantity(&mut session, "GreenPoison", EquipmentSlot::BraceletRight, 5);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 4, 2, 2, 2);
     let target_point = Point {
@@ -48030,7 +48100,7 @@ fn magic_packet_crystal_summon_skeleton_and_holy_deva_consume_amulets() {
     }
     assert!(saw_skeleton);
 
-    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
+    equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 2);
     let packets = session.handle_packet(ClientPacket::Magic {
         object_id,
         spell: Spell::SummonHolyDeva,
@@ -48860,7 +48930,7 @@ fn casting_summon_shinsu_spawns_friendly_player_pet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
-    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
+    equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
     let cast_packets = session.cast_skill("summon-shinsu");
@@ -48901,7 +48971,7 @@ fn casting_summon_shinsu_recalls_existing_pet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
-    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
+    equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
     let first_position = Point { x: 333, y: 267 };
     let second_position = Point { x: 360, y: 267 };
     set_player_position(&mut session, first_position.clone());
@@ -49382,7 +49452,7 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
-    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
+    equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
     let origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, origin.clone());
 

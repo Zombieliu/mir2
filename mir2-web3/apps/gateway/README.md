@@ -29,6 +29,8 @@ still depends on human Crystal visual/feel acceptance.
 - `src/bin/gate14_validator.rs`: real four-node Commonware `v2026.2.0` Simplex validator.
 - `src/bin/gate14_gateway.rs`: finalized-state dynamic placement and fenced session Gateway.
 - `src/bin/gate14_projector.rs`: disposable Postgres/Redis projection rebuilder.
+- `src/gate15.rs`: quorum-observed real-player admission, finalized placement
+  authority, and generation-aware Zone RPC routing.
 
 ## Supported Local Flows
 
@@ -124,12 +126,28 @@ Account-store runtime policy:
   four-validator/two-Gateway/two-Zone/two-projection Docker topology. It injects validator,
   Gateway, Redis, Postgres, and Zone Host failures and leaves a recovered stack running for
   manual inspection. See `docs/GATE14-NO-SINGLE-POINT-POC.md`.
+- `python3 scripts/gate15_acceptance.py --reset` runs two real Crystal-compatible players
+  through separate Gateways, finalizes their Commonware leases, stops the active Zone Host,
+  promotes the continuously checkpointed standby, proves both sockets continue gameplay, and
+  restores reverse replication. See `docs/GATE15-REAL-PLAYER-FAILOVER.md`.
 
 Admin runtime read endpoints:
 
 - `POST /admin/system-mail`: deliver audited Admin API mail into the configured account store.
 - `POST /admin/kick-player`: remove one character from the current session/routing cache.
 - `GET /admin/sessions`: list current online session-cache records from the in-memory or Redis cache.
+- `GET /admin/session-trace?accountId=<id>&characterIndex=<n>`: return the
+  current placement, bounded transition history, and embedded Gate15 finalized
+  lease. In staging/production it requires
+  `Authorization: Bearer $MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN`.
+
+Production trace history is stored with the Redis session index. Configure
+`MIR2_GATEWAY_TRACE_HISTORY_TTL_SECONDS` (default 86400, bounded to 30 days);
+each character retains at most 128 transition events. Set
+`MIR2_GATEWAY_ID`, `MIR2_GATEWAY_PUBLIC_ENDPOINT`,
+`MIR2_GATEWAY_RELAY_ID`, `MIR2_GATEWAY_RELAY_ENDPOINT`, and
+`MIR2_GATEWAY_NODE_KIND` so the operations page can distinguish Gateway,
+Relay, Home Node, and Official Node hops.
 
 ## Smoke And Trace
 

@@ -2,6 +2,10 @@
 
 Crystal / Legend of Mir 2 compatible Web MMORPG implementation.
 
+> 简体中文读者请从 [`README.zh-CN.md`](README.zh-CN.md) 开始。它用玩家、
+> 公会和节点运营者都能理解的方式说明项目架构、Mir2 玩法设计、商业模式、
+> 当前验收状态与生产边界。
+
 For a new checkout, install Git and Docker Desktop, then use the pinned
 cross-platform developer environment. Full private assets additionally require
 GitHub CLI on the host:
@@ -46,6 +50,16 @@ then supplies the credential to the exact immutable fetcher over standard input:
 - [Backend progress](docs/BACKEND-1TO1-PROGRESS.md)
 - [Crystal server parity](docs/CRYSTAL-SERVER-PARITY.md)
 - [Gate 14 no-single-point POC](docs/GATE14-NO-SINGLE-POINT-POC.md)
+- [Gate 15 real-player failover](docs/GATE15-REAL-PLAYER-FAILOVER.md)
+- [Gate 16 incremental replication](docs/GATE16-INCREMENTAL-REPLICATION.md)
+- [Gate 17 transactional game economy](docs/GATE17-TRANSACTIONAL-ECONOMY.md)
+- [Regional Gate 18-21 acceptance contract](docs/REGIONAL-ACCEPTANCE.md)
+- [Home Node roadmap](docs/HOME-NODE-ROADMAP.zh-CN.md)
+- [Dubhe Node desktop and production Beta](docs/DUBHE-NODE-DESKTOP-BETA.zh-CN.md)
+- [Dubhe Network Core 与 Mir2 适配边界](docs/DUBHE-NETWORK-CORE-INTEGRATION.zh-CN.md)
+- [Mir2 AI 世界导演 MVP](docs/AI-WORLD-DIRECTOR-MVP.zh-CN.md)
+- [Gate 25 home-network Beta acceptance](infra/gate25/README.zh-CN.md)
+- [Gate 22 outbound QUIC/mTLS Home Tunnel](infra/gate22/README.zh-CN.md)
 
 ## Layout
 
@@ -80,6 +94,50 @@ then supplies the credential to the exact immutable fetcher over standard input:
   projections. Its Docker fault-recovery acceptance and full architecture
   diagram are documented in
   [`docs/GATE14-NO-SINGLE-POINT-POC.md`](docs/GATE14-NO-SINGLE-POINT-POC.md).
+- Gate 15 connects real WebSocket and Crystal TCP player admission to that
+  finalized control state. Two players on separate Gateways survive active Zone
+  Host loss and continue on the v5 base-plus-incremental replica without
+  reconnecting.
+  See [`docs/GATE15-REAL-PLAYER-FAILOVER.md`](docs/GATE15-REAL-PLAYER-FAILOVER.md).
+- Gate 16.1 adds the reproducible v4 full-checkpoint performance ruler,
+  low-cardinality checkpoint/replay telemetry, and a constrained Docker
+  baseline; see
+  [`docs/GATE16-INCREMENTAL-REPLICATION.md`](docs/GATE16-INCREMENTAL-REPLICATION.md).
+- Gate 16.2 adds a bounded per-Zone v5 replication Head with a continuous
+  cursor, chained digest, build identity, and explicit coverage/readiness
+  safety fields.
+- Gate 16.3 adds bounded verified mutation batches plus a restart-safe,
+  fsync-before-ACK receive WAL in both replication directions. The replicator
+  intentionally continued installing v4 checkpoints at that milestone; the
+  later Gate 16.4-16.5 work below completes autonomous tick/AI capture,
+  incremental standby apply, compaction, and promotion readiness.
+- Gate 16.4a adds per-Zone, cursor-bound gzip base snapshots with SHA-256
+  identity and crash-safe atomic persistence.
+- Gate 16.4b1 makes complete Session images installable without replaying old
+  commands. Installation rebuilds and verifies private character state in
+  isolation, atomically adopts one Zone resource image, preserves unrelated
+  Zones, reports the compacted base cursor in v5 Head, and keeps
+  `promotionReady=false` until autonomous tick/AI capture and incremental apply
+  are complete.
+- Gate 16.4b2 orders autonomous Zone cadence/AI ticks with player commands,
+  incrementally applies verified post-base batches on a tick-disabled replica,
+  atomically compacts the durable WAL to a restart-safe base anchor, and moves
+  the WAL-enabled replicator off v4 full-checkpoint installs. Replica account
+  writes are isolated from the active file/PostgreSQL repository.
+- Gate 16.5 adds an auditable readiness receipt, active quiesce barrier, exact
+  standby-head validation, finalized Commonware owner fencing, and single-use
+  promotion. The old active immediately loses autonomous-tick authority after
+  the generation changes.
+- Gate 16.6 certifies 50 and 125 concurrent player Sessions plus 700, 10k, and
+  100k history points inside a constrained 2-CPU/2-GiB container. It compares
+  v5 periodic-base plus bounded delta apply against the v4 full-history replay
+  ruler and requires at least 80% lower network, wall, and process-CPU cost.
+- Gate 17 adds the authoritative PostgreSQL transaction boundary for gold,
+  unique equipment, consumption, rewards, and two-sided trades. Balance writes,
+  idempotency receipts, and outbox events commit together; leased delivery,
+  inbox deduplication, dead letters, redrive, and reconciliation cover crash
+  recovery. See
+  [`docs/GATE17-TRANSACTIONAL-ECONOMY.md`](docs/GATE17-TRANSACTIONAL-ECONOMY.md).
 
 ## Crystal Reference
 

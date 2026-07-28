@@ -56,6 +56,8 @@ set -euo pipefail
 
 [ "${1:-}" = "release" ] && [ "${2:-}" = "download" ] ||
   { echo "Unexpected gh command" >&2; exit 2; }
+[ "${GH_TOKEN:-}" = "fixture-token-from-stdin" ] ||
+  { echo "Fixture token was not forwarded through standard input" >&2; exit 2; }
 tag="${3:-}"
 shift 3
 repository=""
@@ -85,12 +87,13 @@ EOF
 chmod +x "${fake_bin}/gh"
 
 run_fetcher() {
-  PATH="${fake_bin}:${PATH}" \
-  GH_FIXTURE_RELEASE_DIRECTORY="${source_directory}" \
-  GH_FIXTURE_DOWNLOAD_LOG="${download_log}" \
-  MIR2_ASSET_MANIFEST_PATH="${manifest_path}" \
-  MIR2_ASSET_CACHE_ROOT="${cache_directory}" \
-    "${project_root}/infra/developer-asset-fetch.sh"
+  printf '%s\n' 'fixture-token-from-stdin' |
+    PATH="${fake_bin}:${PATH}" \
+    GH_FIXTURE_RELEASE_DIRECTORY="${source_directory}" \
+    GH_FIXTURE_DOWNLOAD_LOG="${download_log}" \
+    MIR2_ASSET_MANIFEST_PATH="${manifest_path}" \
+    MIR2_ASSET_CACHE_ROOT="${cache_directory}" \
+      "${project_root}/infra/developer-asset-fetch.sh"
 }
 
 run_fetcher
@@ -110,7 +113,8 @@ cmp "${source_directory}/fixture.tar.part001" "${installed_cache}/fixture.tar.pa
 malicious_manifest="${test_root}/malicious-repository.json"
 sed 's#"Zombieliu/mir2"#"attacker/private-repository"#' \
   "${manifest_path}" > "${malicious_manifest}"
-if PATH="${fake_bin}:${PATH}" \
+if printf '%s\n' 'fixture-token-from-stdin' |
+   PATH="${fake_bin}:${PATH}" \
    GH_FIXTURE_RELEASE_DIRECTORY="${source_directory}" \
    GH_FIXTURE_DOWNLOAD_LOG="${download_log}" \
    MIR2_ASSET_MANIFEST_PATH="${malicious_manifest}" \
@@ -123,7 +127,8 @@ fi
 traversal_manifest="${test_root}/traversal-part.json"
 sed 's#"fixture.tar.part001"#"../fixture.tar.part001"#' \
   "${manifest_path}" > "${traversal_manifest}"
-if PATH="${fake_bin}:${PATH}" \
+if printf '%s\n' 'fixture-token-from-stdin' |
+   PATH="${fake_bin}:${PATH}" \
    GH_FIXTURE_RELEASE_DIRECTORY="${source_directory}" \
    GH_FIXTURE_DOWNLOAD_LOG="${download_log}" \
    MIR2_ASSET_MANIFEST_PATH="${traversal_manifest}" \

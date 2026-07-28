@@ -52,6 +52,12 @@ export default async function PlayerDetailPage({
           <Link className="button" href="/gm-tools">
             {t("playerDetail.sendMail")}
           </Link>
+          <Link
+            className="button secondary"
+            href={`/service-trace?query=${encodeURIComponent(summary?.playerId ?? requestedId)}`}
+          >
+            服务节点追踪
+          </Link>
         </div>
       </div>
       {error ? <p className="notice">{error}</p> : null}

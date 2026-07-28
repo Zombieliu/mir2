@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest v5 failover roadmap sync: 2026-07-29 closes the final deterministic
+> base-image restore gap found during main-branch landing. Standby Session
+> rebinding now restores only its local movement ingress, cached transfers, and
+> move sequence from the installed Zone image instead of running a second full
+> world synchronization over that image. Re-exporting an installed base
+> snapshot is therefore byte-identical, including static Crystal entity fields.
+> The complete Gateway matrix is green: 390 library, 17 packet-trace, 2 Gate
+> 11, 4 Home Tunnel, and 28 Zone RPC tests.
+
 > Latest cross-platform delivery roadmap sync: 2026-07-25 replaces the
 > Windows-only handoff path with a version-locked Docker/Dev Container contract
 > for Windows, Intel Mac, Apple Silicon, and Linux. One release lock binds the

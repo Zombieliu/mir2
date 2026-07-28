@@ -1,0 +1,95 @@
+name: Dubhe Node Desktop CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/dubhe-node-desktop-*.yml"
+      - "mir2-web3/apps/dubhe-node-desktop/**"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/Cargo.lock"
+      - "mir2-web3/Cargo.toml"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/dubhe-node-desktop-*.yml"
+      - "mir2-web3/apps/dubhe-node-desktop/**"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/Cargo.lock"
+      - "mir2-web3/Cargo.toml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dubhe-node-desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: deb,appimage
+          - name: Windows x64
+            os: windows-2025
+            target: x86_64-pc-windows-msvc
+            bundles: nsis,msi
+          - name: macOS Apple Silicon
+            os: macos-15
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+          - name: macOS Intel
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+            bundles: app,dmg
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/dubhe-node-desktop
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/dubhe-node-desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+        with:
+          toolchain: 1.89.0
+          targets: ${{ matrix.target }}
+
+      - name: Install Linux bundle dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        working-directory: .
+
+      - run: npm ci
+      - run: npm run build
+      - name: Prepare target sidecars
+        run: npm run prepare:sidecars
+        env:
+          DUBHE_NODE_TARGET: ${{ matrix.target }}
+      - run: cargo +1.89.0 test --manifest-path src-tauri/Cargo.toml
+      - run: npm run tauri build -- --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+
+      - name: Upload unsigned CI installers
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dubhe-node-${{ matrix.target }}-unsigned
+          path: mir2-web3/target/${{ matrix.target }}/release/bundle
+          if-no-files-found: error
+          retention-days: 7

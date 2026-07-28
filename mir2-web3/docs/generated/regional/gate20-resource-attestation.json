@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1785007532000,
+  "profileId": "mir2-regional-v1-3000-15m",
+  "tier": "local-1000ccu-15m",
+  "source": "docker-info",
+  "host": {
+    "architecture": "aarch64",
+    "operatingSystem": "Docker Desktop",
+    "dockerVersion": "29.1.3",
+    "availableCpu": 10,
+    "availableMemoryBytes": 8322101248
+  },
+  "required": {
+    "cpu": 10,
+    "memoryBytes": 8053063680
+  },
+  "assertions": {
+    "cpuMeetsLocalAcceptanceFloor": true,
+    "memoryMeetsLocalAcceptanceFloor": true
+  },
+  "success": true
+}

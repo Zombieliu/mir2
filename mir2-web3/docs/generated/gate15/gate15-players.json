@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "startedAt": "2026-07-24T19:49:59.834Z",
+  "finishedAt": "2026-07-24T19:50:34.923Z",
+  "durationMs": 35089,
+  "assertions": {
+    "bothReachedGame": true,
+    "bothObservedFailover": true,
+    "bothStayedConnected": true,
+    "bothExecutedZoneCommandsAfterFailover": true
+  },
+  "players": [
+    {
+      "index": 0,
+      "url": "ws://127.0.0.1:19710/ws",
+      "accountId": "gate15-player-0",
+      "characterIndex": 1,
+      "inGame": true,
+      "markerSeen": true,
+      "closedUnexpectedly": false,
+      "messages": 867,
+      "zoneResponses": 114,
+      "zoneResponsesAfterFailover": 105,
+      "errors": [
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations"
+      ],
+      "bytesSent": 7024,
+      "bytesReceived": 782613
+    },
+    {
+      "index": 1,
+      "url": "ws://127.0.0.1:19711/ws",
+      "accountId": "gate15-player-1",
+      "characterIndex": 2,
+      "inGame": true,
+      "markerSeen": true,
+      "closedUnexpectedly": false,
+      "messages": 860,
+      "zoneResponses": 54,
+      "zoneResponsesAfterFailover": 48,
+      "errors": [
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+        "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations"
+      ],
+      "bytesSent": 6727,
+      "bytesReceived": 783005
+    }
+  ]
+}

@@ -193,6 +193,7 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm "$MIR2_DEV_IMAGE" bash -lc '
+            set -euo pipefail
             test "$(node --version)" = "v22.18.0"
             test "$(npm --version)" = "11.13.0"
             rustc +1.89.0 --version | grep -E "^rustc 1\\.89\\.0 "

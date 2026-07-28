@@ -1,0 +1,15 @@
+{
+  "nodeId": "ed25519:bef5746d0c392c693ca4b72d81dd9f75d3f0b1f34d4081319f27cde5ce2b6aa3",
+  "gameId": "mir2",
+  "epoch": 25,
+  "telemetryWorkUnits": 20,
+  "receiptWorkUnits": 20,
+  "acceptedWorkScore": 19,
+  "estimatedReward": 190,
+  "sessionMilliseconds": 600000,
+  "acceptedReceiptIds": [
+    "gate25-local-receipt"
+  ],
+  "discrepancies": [],
+  "payable": true
+}

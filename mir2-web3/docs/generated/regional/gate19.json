@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "gate": 19,
+  "profileId": "mir2-regional-v1",
+  "generatedAtMs": 1784983584000,
+  "summary": {
+    "requestedPlayers": 500,
+    "measuredActiveDurationMs": 3600294,
+    "activeZoneCount": 120,
+    "attemptedCommands": 2642287,
+    "completedCommands": 2642218,
+    "failedCommands": 69,
+    "errorRate": 0.000026113741618529705,
+    "latencyMs": {
+      "count": 2642218,
+      "minimum": 2.1102920000000003,
+      "mean": 57.989383606230504,
+      "p50": 34.574958,
+      "p95": 185.670667,
+      "p99": 317.589208,
+      "maximum": 2102.960293
+    },
+    "zoneFailoverRtoMs": 7.7950420000000005,
+    "zoneResumeCommandMs": 54.148666,
+    "gatewayRecoveryRtoMs": 2520,
+    "redisPromotedMaster": "172.18.0.5:6379",
+    "postgresPromotedServer": "172.18.0.6/32",
+    "commonwareFinalHeight": 14
+  },
+  "faults": [
+    "active-zone-host-kill",
+    "standby-zone-host-kill",
+    "gateway-kill",
+    "redis-primary-failover",
+    "postgres-primary-failover",
+    "commonware-validator-kill"
+  ],
+  "sourceSha256": {
+    "load": "59d34a77d1ede25b5bdb72222d69a89ed5c1ce0d6953b7da1b49e2f00867c19f",
+    "standbyZone": "c11f1dc7b17db2eace4befc8b999d000b3a942899356b61289119d6933d9cec6",
+    "activeZone": "0b857040554245fbe04d597179320683b90bd8a7de662f4e9f0306024ee091a1",
+    "zoneSession": "f89e80aefa8e898965abbfed60e47f149b629050e8d0a2dd05aed92cacc77258",
+    "preflight": "5b278ae83a581125a022254c616a5a25ddaad450b8d830e27c173cd9d3049998",
+    "gateway": "ac28ba5ca84bb1e3e415e91fba4d8fa933d3f79fb7d96a0f6f7a28c863aba820",
+    "redis": "1c002016cfcafb4625a142780f5884c0f7cdb278ff55e3d45b2086a2209e246f",
+    "postgres": "231a41d683f33e3c3c73e58eacd2ffbd196619f7e11afdcf5affe5e56ea267ee",
+    "commonware": "d840411b3584313c0aff5c4a3a60d88b161e097f4612d964bb604b86ce17f8e4",
+    "runtimeManifest": "59c3d5a33ef87774df62a1a4444914fbd0334d25c662767003016799cb02c4fb"
+  },
+  "assertions": {
+    "exactFiveHundredPlayerOneHourProfileAccepted": true,
+    "oneHundredTwentyZonesWereActive": true,
+    "activeZoneFailoverMetFiveSecondRto": true,
+    "realPlayerIdentityAndMapSurvivedPromotion": true,
+    "standbyZoneLossDidNotInterruptAuthoritativeGameplay": true,
+    "gatewayRouteMovedWithinTenSeconds": true,
+    "redisSentinelPromotedANewWritableMaster": true,
+    "postgresStandbyPromotedToWritablePrimary": true,
+    "commonwareThreeOfFourFinalityAndCatchUpPassed": true,
+    "faultImagesAndCommitAreReproducible": true,
+    "sixRequiredSingleFaultScenariosPassed": true,
+    "economyHadNoDuplicateOrLedgerMismatch": true
+  },
+  "success": true
+}

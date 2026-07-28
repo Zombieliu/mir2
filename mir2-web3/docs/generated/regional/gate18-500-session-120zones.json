@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1784930266966,
+  "build": "release",
+  "zoneRpcProtocolVersion": 7,
+  "environment": {
+    "profileLabel": "gate18-2c2g-120zones",
+    "requestedCpuCores": "2",
+    "requestedMemoryBytes": "2147483648",
+    "cgroupCpuMax": "200000 100000",
+    "cgroupMemoryMax": "2147483648",
+    "availableParallelism": 2
+  },
+  "playerResults": [
+    {
+      "requestedPlayers": 500,
+      "connectedPlayers": 500,
+      "zoneCount": 120,
+      "commandsPerPlayer": 8,
+      "completedCommands": 4000,
+      "failedCommands": 0,
+      "failureReasons": {},
+      "wallMs": 20585.57026,
+      "throughputCommandsPerSecond": 194.31086676148266,
+      "latencyMs": {
+        "count": 4000,
+        "min": 99.619875,
+        "mean": 2228.7811742289955,
+        "p50": 1992.957292,
+        "p95": 4887.965335,
+        "p99": 6385.695960999999,
+        "max": 8694.738712
+      },
+      "success": true
+    }
+  ],
+  "historyResults": [
+    {
+      "historyEntries": 700,
+      "baseSequence": 636,
+      "deltaEntries": 64,
+      "baseSnapshotWireBytes": 18708,
+      "baseInstallWallMs": 128.4175,
+      "v5DeltaWireBytes": 74583,
+      "v5ApplyWallMs": 382.35775,
+      "v5ApplyCpuTicks": 38,
+      "v4CheckpointWireBytes": 1007068,
+      "v4InstallWallMs": 4195.325918,
+      "v4InstallCpuTicks": 422,
+      "networkReductionPercent": 92.59404528790509,
+      "wallReductionPercent": 90.88610140252756,
+      "cpuReductionPercent": 90.99526066350711,
+      "headsMatch": true,
+      "success": true
+    }
+  ],
+  "assertions": {
+    "playerProfilesPass": true,
+    "historyProfilesPass": true,
+    "networkReductionAtLeast80Percent": true,
+    "cpuReductionAtLeast80Percent": true,
+    "wallReductionAtLeast80Percent": true,
+    "cgroupProfileMatches": true
+  },
+  "success": true
+}

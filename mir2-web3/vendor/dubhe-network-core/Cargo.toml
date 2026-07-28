@@ -1,0 +1,22 @@
+[package]
+name = "dubhe-network-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89.0"
+description = "Game-agnostic node identity, enrollment, capacity, telemetry, rewards, and home-network protocols for Dubhe"
+license = "Apache-2.0"
+repository = "https://github.com/0xobelisk/dubhe-chain-poc"
+
+[dependencies]
+base64 = "0.22.1"
+ed25519-consensus = "2.1.0"
+flate2 = "1.1.5"
+hmac = "0.13.0"
+keyring = { version = "3.6.3", features = ["apple-native", "windows-native", "sync-secret-service", "vendored"] }
+rand = "0.8.5"
+reqwest = { version = "0.12.24", default-features = false }
+semver = "1.0.27"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.11.0"
+tar = "0.4.44"

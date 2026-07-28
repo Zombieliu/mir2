@@ -2382,9 +2382,19 @@ pub(super) fn tick_ground_drop_expiry(world: &mut World, tick: u64) {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SharedAccountInventoryTransactionKind {
+    GoldDrop,
+    InventoryItemDrop,
     GroundDropPickup,
     MonsterKillAward,
     SkillItemConsumption,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedInventoryItemDrop {
+    pub item_key: String,
+    pub unique_id: u64,
+    pub quantity: u32,
+    pub hero_inventory: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -2395,6 +2405,22 @@ pub struct SharedAccountInventoryTransactionReceipt {
 }
 
 impl SharedAccountInventoryTransactionReceipt {
+    fn gold_drop(committed: bool, packets: Vec<ServerPacket>) -> Self {
+        Self {
+            kind: SharedAccountInventoryTransactionKind::GoldDrop,
+            committed,
+            packets,
+        }
+    }
+
+    fn inventory_item_drop(committed: bool, packets: Vec<ServerPacket>) -> Self {
+        Self {
+            kind: SharedAccountInventoryTransactionKind::InventoryItemDrop,
+            committed,
+            packets,
+        }
+    }
+
     fn ground_drop_pickup(committed: bool, packets: Vec<ServerPacket>) -> Self {
         Self {
             kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
@@ -2427,6 +2453,125 @@ pub struct SharedGroundDropPickupCommit {
 }
 
 impl SimulationSession {
+    pub fn can_commit_shared_gold_drop(&self, amount: u32) -> bool {
+        let world = self.app.world();
+        if !is_in_world(world) || amount == 0 {
+            return false;
+        }
+        let Some(player) = player_entity(world) else {
+            return false;
+        };
+        let Some(position) = entity_position(world, player) else {
+            return false;
+        };
+        world.resource::<PlayerRuntimeResource>().gold >= amount
+            && crystal_ground_drop_position(world, &position, CRYSTAL_PLAYER_DROP_GOLD_RANGE)
+                .is_some()
+    }
+
+    pub fn commit_shared_gold_drop_transaction(
+        &mut self,
+        amount: u32,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        if !self.can_commit_shared_gold_drop(amount) {
+            return SharedAccountInventoryTransactionReceipt::gold_drop(false, Vec::new());
+        }
+        let packets = drop_gold_impl(self.app.world_mut(), amount);
+        let committed = packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == amount));
+        SharedAccountInventoryTransactionReceipt::gold_drop(
+            committed,
+            self.finalize_packets(packets),
+        )
+    }
+
+    pub fn shared_inventory_item_drop(
+        &self,
+        unique_id: u64,
+        count: u16,
+        hero_inventory: bool,
+    ) -> Option<SharedInventoryItemDrop> {
+        let world = self.app.world();
+        if !is_in_world(world)
+            || current_player_is_dead(world)
+            || current_map_disallows_throw_item(world)
+            || hero_inventory
+            || count == 0
+        {
+            return None;
+        }
+        let item = world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .find(|item| item_matches_inventory_unique_id(item, unique_id))?;
+        let quantity = u32::from(count);
+        if quantity > item.quantity
+            || item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP)
+        {
+            return None;
+        }
+        if !crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DESTROY_ON_DROP) {
+            let player = player_entity(world)?;
+            let position = entity_position(world, player)?;
+            crystal_ground_drop_position(world, &position, CRYSTAL_PLAYER_DROP_ITEM_RANGE)?;
+        }
+        Some(SharedInventoryItemDrop {
+            item_key: item.key.clone(),
+            unique_id,
+            quantity,
+            hero_inventory,
+        })
+    }
+
+    pub fn can_commit_shared_inventory_item_drop(&self, drop: &SharedInventoryItemDrop) -> bool {
+        u16::try_from(drop.quantity)
+            .ok()
+            .and_then(|count| {
+                self.shared_inventory_item_drop(drop.unique_id, count, drop.hero_inventory)
+            })
+            .as_ref()
+            == Some(drop)
+    }
+
+    pub fn commit_shared_inventory_item_drop_transaction(
+        &mut self,
+        drop: &SharedInventoryItemDrop,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        if !self.can_commit_shared_inventory_item_drop(drop) {
+            return SharedAccountInventoryTransactionReceipt::inventory_item_drop(
+                false,
+                Vec::new(),
+            );
+        }
+        let count = u16::try_from(drop.quantity)
+            .expect("validated shared inventory item drop quantity should fit u16");
+        let packets = drop_item_packet(
+            self.app.world_mut(),
+            drop.unique_id,
+            count,
+            drop.hero_inventory,
+        );
+        let committed = packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::DropItem {
+                    unique_id,
+                    count: packet_count,
+                    hero_inventory,
+                    success: true,
+                } if *unique_id == drop.unique_id
+                    && u32::from(*packet_count) == drop.quantity
+                    && *hero_inventory == drop.hero_inventory
+            )
+        });
+        SharedAccountInventoryTransactionReceipt::inventory_item_drop(
+            committed,
+            self.finalize_packets(packets),
+        )
+    }
+
     pub fn pick_up(&mut self, object_id: u32) -> Vec<ServerPacket> {
         let packets = self.pick_up_impl(object_id);
         self.finalize_packets(packets)
@@ -2464,6 +2609,15 @@ impl SimulationSession {
         .packets
     }
 
+    pub fn shared_monster_kill_experience_balance_delta(&self, experience: u32) -> i64 {
+        let world = self.app.world();
+        if !is_in_world(world) || experience == 0 {
+            return 0;
+        }
+        let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
+        super::leveling::experience_balance_delta_for_gain(world, i64::from(experience))
+    }
+
     pub fn commit_shared_ground_drop_pickup_transaction(
         &mut self,
         drop: &GroundDropSnapshot,
@@ -2473,6 +2627,24 @@ impl SimulationSession {
             kind: receipt.kind,
             committed: receipt.committed,
             packets: self.finalize_packets(receipt.packets),
+        }
+    }
+
+    pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return false;
+        }
+        match &drop.loot {
+            GroundDropLootSnapshot::Gold { amount } => {
+                can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount)
+            }
+            GroundDropLootSnapshot::InventoryItem { key, .. } => can_gain_item_quantity(
+                world.resource::<InventoryResource>(),
+                ItemContainer::Bag1,
+                key,
+                drop.quantity,
+            ),
         }
     }
 

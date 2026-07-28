@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::io::{Read, Write};
 use std::net::TcpStream;
@@ -21,6 +21,20 @@ pub struct GatewaySessionCacheKey {
 pub struct GatewaySessionCacheRecord {
     pub key: GatewaySessionCacheKey,
     pub character_name: String,
+    #[serde(default, rename = "gatewaySessionId")]
+    pub gateway_session_id: Option<String>,
+    #[serde(default, rename = "gatewayId")]
+    pub gateway_id: Option<String>,
+    #[serde(default, rename = "gatewayEndpoint")]
+    pub gateway_endpoint: Option<String>,
+    #[serde(default, rename = "relayId")]
+    pub relay_id: Option<String>,
+    #[serde(default, rename = "relayEndpoint")]
+    pub relay_endpoint: Option<String>,
+    #[serde(default, rename = "serviceNodeId")]
+    pub service_node_id: Option<String>,
+    #[serde(default, rename = "nodeKind")]
+    pub node_kind: Option<String>,
     #[serde(default, rename = "zoneId")]
     pub zone_id: Option<String>,
     #[serde(default, rename = "zoneOwnerId")]
@@ -39,6 +53,29 @@ pub struct GatewaySessionCacheRecord {
     pub route_lease_owner: Option<String>,
     #[serde(default, rename = "routeLeaseExpiresAtMs")]
     pub route_lease_expires_at_ms: Option<u64>,
+    #[serde(default, rename = "handoffGeneration")]
+    pub handoff_generation: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatewaySessionTraceEvent {
+    pub event_id: String,
+    pub event_type: String,
+    pub occurred_at_ms: u64,
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub gateway_session_id: Option<String>,
+    pub gateway_id: Option<String>,
+    pub relay_id: Option<String>,
+    pub service_node_id: Option<String>,
+    pub node_kind: Option<String>,
+    pub zone_id: Option<String>,
+    pub map_file_name: Option<String>,
+    pub zone_owner_fencing_token: Option<u64>,
+    pub handoff_generation: u64,
+    pub reason: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -119,6 +156,13 @@ pub trait GatewaySessionCache: Send + Sync {
         Some(record)
     }
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord>;
+    fn trace_events(
+        &self,
+        _key: &GatewaySessionCacheKey,
+        _limit: usize,
+    ) -> Vec<GatewaySessionTraceEvent> {
+        Vec::new()
+    }
     fn acquire_route_lease(
         &self,
         key: &GatewaySessionCacheKey,
@@ -185,6 +229,7 @@ pub enum GatewaySessionCacheRuntimeBackend {
 pub struct InMemoryGatewaySessionCache {
     records: Mutex<BTreeMap<GatewaySessionCacheKey, GatewaySessionCacheRecord>>,
     route_leases: Mutex<BTreeMap<GatewaySessionCacheKey, GatewayRouteLease>>,
+    trace_history: Mutex<BTreeMap<GatewaySessionCacheKey, Vec<GatewaySessionTraceEvent>>>,
 }
 
 impl GatewaySessionCache for InMemoryGatewaySessionCache {
@@ -206,14 +251,26 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
     }
 
     fn put(&self, record: GatewaySessionCacheRecord) {
-        self.records
+        let previous = self
+            .records
             .lock()
             .expect("gateway session cache mutex should not be poisoned")
-            .insert(record.key.clone(), record);
+            .insert(record.key.clone(), record.clone());
+        let events = trace_events_for_transition(previous.as_ref(), &record);
+        if !events.is_empty() {
+            let mut history = self
+                .trace_history
+                .lock()
+                .expect("gateway session trace mutex should not be poisoned");
+            let entries = history.entry(record.key.clone()).or_default();
+            entries.extend(events);
+            trim_trace_history(entries);
+        }
     }
 
     fn remove(&self, key: &GatewaySessionCacheKey) {
-        self.records
+        let removed = self
+            .records
             .lock()
             .expect("gateway session cache mutex should not be poisoned")
             .remove(key);
@@ -221,6 +278,19 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
             .lock()
             .expect("gateway route lease mutex should not be poisoned")
             .remove(key);
+        if let Some(record) = removed {
+            let mut history = self
+                .trace_history
+                .lock()
+                .expect("gateway session trace mutex should not be poisoned");
+            let entries = history.entry(key.clone()).or_default();
+            entries.push(trace_event(
+                &record,
+                "disconnected",
+                "session cache entry removed",
+            ));
+            trim_trace_history(entries);
+        }
     }
 
     fn remove_owned(
@@ -242,6 +312,16 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
             .lock()
             .expect("gateway route lease mutex should not be poisoned")
             .remove(key);
+        drop(records);
+        if let Some(record) = record.as_ref() {
+            let mut history = self
+                .trace_history
+                .lock()
+                .expect("gateway session trace mutex should not be poisoned");
+            let entries = history.entry(key.clone()).or_default();
+            entries.push(trace_event(record, "disconnected", "owned session removed"));
+            trim_trace_history(entries);
+        }
         record
     }
 
@@ -259,7 +339,40 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
             .lock()
             .expect("gateway route lease mutex should not be poisoned")
             .remove(&key);
+        if let Some(record) = record.as_ref() {
+            let mut history = self
+                .trace_history
+                .lock()
+                .expect("gateway session trace mutex should not be poisoned");
+            let entries = history.entry(key).or_default();
+            entries.push(trace_event(
+                record,
+                "disconnected",
+                "character session removed",
+            ));
+            trim_trace_history(entries);
+        }
         record
+    }
+
+    fn trace_events(
+        &self,
+        key: &GatewaySessionCacheKey,
+        limit: usize,
+    ) -> Vec<GatewaySessionTraceEvent> {
+        self.trace_history
+            .lock()
+            .expect("gateway session trace mutex should not be poisoned")
+            .get(key)
+            .map(|events| {
+                events
+                    .iter()
+                    .rev()
+                    .take(limit.clamp(1, MAX_TRACE_HISTORY_EVENTS))
+                    .cloned()
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     fn acquire_route_lease(
@@ -387,7 +500,9 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
 
 #[derive(Debug, Clone)]
 pub struct RedisGatewaySessionCache {
-    addr: String,
+    addr: Arc<Mutex<String>>,
+    sentinel_addrs: Arc<Vec<String>>,
+    sentinel_master_name: Option<String>,
     namespace: String,
     ttl_seconds: u64,
     timeout: Duration,
@@ -396,11 +511,46 @@ pub struct RedisGatewaySessionCache {
 impl RedisGatewaySessionCache {
     pub fn new(redis_url: &str, namespace: impl Into<String>, ttl_seconds: u64) -> Self {
         Self {
-            addr: redis_addr_from_url(redis_url),
+            addr: Arc::new(Mutex::new(redis_addr_from_url(redis_url))),
+            sentinel_addrs: Arc::new(Vec::new()),
+            sentinel_master_name: None,
             namespace: namespace.into(),
             ttl_seconds: ttl_seconds.max(1),
             timeout: Duration::from_millis(500),
         }
+    }
+
+    pub fn with_sentinels(
+        sentinel_urls: &str,
+        master_name: impl Into<String>,
+        namespace: impl Into<String>,
+        ttl_seconds: u64,
+    ) -> Result<Self, String> {
+        let sentinel_addrs = sentinel_urls
+            .split(',')
+            .map(redis_addr_from_url)
+            .filter(|address| !address.trim().is_empty())
+            .collect::<Vec<_>>();
+        if sentinel_addrs.iter().collect::<BTreeSet<_>>().len() < 3 {
+            return Err(
+                "Redis HA requires at least three distinct MIR2_GATEWAY_REDIS_SENTINEL_ADDRS"
+                    .to_string(),
+            );
+        }
+        let master_name = master_name.into();
+        if master_name.trim().is_empty() {
+            return Err("Redis Sentinel master name must not be empty".to_string());
+        }
+        let timeout = Duration::from_millis(500);
+        let addr = discover_redis_master(&sentinel_addrs, &master_name, timeout)?;
+        Ok(Self {
+            addr: Arc::new(Mutex::new(addr)),
+            sentinel_addrs: Arc::new(sentinel_addrs),
+            sentinel_master_name: Some(master_name),
+            namespace: namespace.into(),
+            ttl_seconds: ttl_seconds.max(1),
+            timeout,
+        })
     }
 
     fn redis_key(&self, key: &GatewaySessionCacheKey) -> String {
@@ -437,6 +587,19 @@ impl RedisGatewaySessionCache {
         format!("{}:lease:", self.namespace)
     }
 
+    fn trace_key(&self, key: &GatewaySessionCacheKey) -> String {
+        format!(
+            "{}:trace:{}:{}",
+            self.namespace,
+            sanitize_cache_key_part(&key.account_id),
+            key.character_index
+        )
+    }
+
+    fn trace_key_prefix(&self) -> String {
+        format!("{}:trace:", self.namespace)
+    }
+
     fn is_character_index_key(&self, key: &str) -> bool {
         key.starts_with(&self.character_index_key_prefix())
     }
@@ -445,24 +608,76 @@ impl RedisGatewaySessionCache {
         key.starts_with(&self.route_lease_key_prefix())
     }
 
+    fn is_trace_key(&self, key: &str) -> bool {
+        key.starts_with(&self.trace_key_prefix())
+    }
+
     fn is_session_record_key(&self, key: &str) -> bool {
         let namespace_prefix = format!("{}:", self.namespace);
         key.starts_with(&namespace_prefix)
             && !self.is_character_index_key(key)
             && !self.is_route_lease_key(key)
+            && !self.is_trace_key(key)
+    }
+
+    fn append_trace_event(&self, key: &GatewaySessionCacheKey, event: GatewaySessionTraceEvent) {
+        let Ok(value) = serde_json::to_string(&event) else {
+            eprintln!("redis session trace serialization failed");
+            return;
+        };
+        let trace_key = self.trace_key(key);
+        for args in [
+            vec!["LPUSH".to_string(), trace_key.clone(), value],
+            vec![
+                "LTRIM".to_string(),
+                trace_key.clone(),
+                "0".to_string(),
+                (MAX_TRACE_HISTORY_EVENTS - 1).to_string(),
+            ],
+            vec![
+                "EXPIRE".to_string(),
+                trace_key,
+                trace_history_ttl_seconds().to_string(),
+            ],
+        ] {
+            if let Err(error) = self.execute(&args) {
+                eprintln!("redis session trace append failed: {error}");
+                return;
+            }
+        }
     }
 
     fn execute(&self, args: &[String]) -> Result<RedisValue, String> {
-        let mut stream = TcpStream::connect(&self.addr)
-            .map_err(|error| format!("redis connect {} failed: {error}", self.addr))?;
-        stream
-            .set_read_timeout(Some(self.timeout))
-            .map_err(|error| format!("redis read timeout setup failed: {error}"))?;
-        stream
-            .set_write_timeout(Some(self.timeout))
-            .map_err(|error| format!("redis write timeout setup failed: {error}"))?;
-        write_resp_command(&mut stream, args)?;
-        read_resp_value(&mut stream)
+        let current = self
+            .addr
+            .lock()
+            .map_err(|_| "Redis master address mutex poisoned".to_string())?
+            .clone();
+        match execute_redis_at(&current, args, self.timeout) {
+            Ok(value) => Ok(value),
+            Err(first_error) => {
+                let Some(master_name) = self.sentinel_master_name.as_deref() else {
+                    return Err(first_error);
+                };
+                let discovered =
+                    discover_redis_master(&self.sentinel_addrs, master_name, self.timeout)
+                        .map_err(|sentinel_error| {
+                            format!(
+                                "{first_error}; Redis Sentinel discovery failed: {sentinel_error}"
+                            )
+                        })?;
+                *self
+                    .addr
+                    .lock()
+                    .map_err(|_| "Redis master address mutex poisoned".to_string())? =
+                    discovered.clone();
+                execute_redis_at(&discovered, args, self.timeout).map_err(|retry_error| {
+                    format!(
+                        "{first_error}; Redis retry through discovered master {discovered} failed: {retry_error}"
+                    )
+                })
+            }
+        }
     }
 
     pub fn ping(&self) -> Result<(), String> {
@@ -470,6 +685,13 @@ impl RedisGatewaySessionCache {
             RedisValue::Simple(value) if value == "PONG" => Ok(()),
             other => Err(format!("unexpected redis PING response: {other:?}")),
         }
+    }
+
+    pub fn current_master_address(&self) -> Result<String, String> {
+        self.addr
+            .lock()
+            .map(|address| address.clone())
+            .map_err(|_| "Redis master address mutex poisoned".to_string())
     }
 
     fn list_keys(&self) -> Result<Vec<String>, String> {
@@ -580,6 +802,7 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
     }
 
     fn put(&self, record: GatewaySessionCacheRecord) {
+        let previous = self.get(&record.key);
         let redis_key = self.redis_key(&record.key);
         let character_index_key = self.character_index_key(&record.character_name);
         let Ok(value) = serde_json::to_string(&record) else {
@@ -604,6 +827,9 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
         if let Err(error) = self.execute(&index_args) {
             eprintln!("redis session-cache character index put failed: {error}");
         }
+        for event in trace_events_for_transition(previous.as_ref(), &record) {
+            self.append_trace_event(&record.key, event);
+        }
     }
 
     fn remove(&self, key: &GatewaySessionCacheKey) {
@@ -618,6 +844,10 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
             if let Err(error) = self.execute(&["DEL".to_string(), character_index_key]) {
                 eprintln!("redis session-cache character index remove failed: {error}");
             }
+            self.append_trace_event(
+                key,
+                trace_event(&record, "disconnected", "session cache entry removed"),
+            );
         }
     }
 
@@ -671,8 +901,41 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
             {
                 eprintln!("redis session-cache character lease remove failed: {error}");
             }
+            self.append_trace_event(
+                &record.key,
+                trace_event(record, "disconnected", "character session removed"),
+            );
         }
         record
+    }
+
+    fn trace_events(
+        &self,
+        key: &GatewaySessionCacheKey,
+        limit: usize,
+    ) -> Vec<GatewaySessionTraceEvent> {
+        let limit = limit.clamp(1, MAX_TRACE_HISTORY_EVENTS);
+        let response = match self.execute(&[
+            "LRANGE".to_string(),
+            self.trace_key(key),
+            "0".to_string(),
+            (limit - 1).to_string(),
+        ]) {
+            Ok(response) => response,
+            Err(error) => {
+                eprintln!("redis session trace list failed: {error}");
+                return Vec::new();
+            }
+        };
+        let RedisValue::Array(values) = response else {
+            eprintln!("unexpected redis session trace response: {response:?}");
+            return Vec::new();
+        };
+        values
+            .into_iter()
+            .filter_map(|value| redis_string_value(&value))
+            .filter_map(|value| serde_json::from_str(&value).ok())
+            .collect()
     }
 
     fn acquire_route_lease(
@@ -927,6 +1190,12 @@ pub fn gateway_session_cache_requires_redis_from_env() -> bool {
 
 pub fn gateway_session_cache_runtime_backend_from_env(
 ) -> Result<GatewaySessionCacheRuntimeBackend, String> {
+    if env::var("MIR2_GATEWAY_REDIS_SENTINEL_ADDRS")
+        .ok()
+        .is_some_and(|value| !value.trim().is_empty())
+    {
+        return Ok(GatewaySessionCacheRuntimeBackend::Redis);
+    }
     match env::var("MIR2_GATEWAY_REDIS_CACHE_URL") {
         Ok(redis_url) if !redis_url.trim().is_empty() => {
             Ok(GatewaySessionCacheRuntimeBackend::Redis)
@@ -942,16 +1211,29 @@ pub fn gateway_session_cache_runtime_backend_from_env(
 pub fn gateway_session_cache_from_env() -> Result<SharedGatewaySessionCache, String> {
     match gateway_session_cache_runtime_backend_from_env()? {
         GatewaySessionCacheRuntimeBackend::Redis => {
-            let redis_url = env::var("MIR2_GATEWAY_REDIS_CACHE_URL").map_err(|_| {
-                "MIR2_GATEWAY_REDIS_CACHE_URL is required for Redis session/routing cache"
-                    .to_string()
-            })?;
             let ttl_seconds = env::var("MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS")
                 .ok()
                 .and_then(|value| value.parse::<u64>().ok())
                 .unwrap_or(30);
-            let cache =
-                RedisGatewaySessionCache::new(&redis_url, "mir2:gateway:session", ttl_seconds);
+            let cache = match env::var("MIR2_GATEWAY_REDIS_SENTINEL_ADDRS")
+                .ok()
+                .filter(|value| !value.trim().is_empty())
+            {
+                Some(sentinel_urls) => RedisGatewaySessionCache::with_sentinels(
+                    &sentinel_urls,
+                    env::var("MIR2_GATEWAY_REDIS_SENTINEL_MASTER")
+                        .unwrap_or_else(|_| "mir2-primary".to_string()),
+                    "mir2:gateway:session",
+                    ttl_seconds,
+                )?,
+                None => {
+                    let redis_url = env::var("MIR2_GATEWAY_REDIS_CACHE_URL").map_err(|_| {
+                        "MIR2_GATEWAY_REDIS_CACHE_URL or MIR2_GATEWAY_REDIS_SENTINEL_ADDRS is required for Redis session/routing cache"
+                            .to_string()
+                    })?;
+                    RedisGatewaySessionCache::new(&redis_url, "mir2:gateway:session", ttl_seconds)
+                }
+            };
             if gateway_session_cache_requires_redis_from_env() {
                 cache.ping().map_err(|error| {
                     format!("required Redis session/routing cache is unavailable: {error}")
@@ -989,6 +1271,56 @@ fn redis_addr_from_url(redis_url: &str) -> String {
         .filter(|addr| !addr.is_empty())
         .unwrap_or("127.0.0.1:6379")
         .to_string()
+}
+
+fn execute_redis_at(
+    address: &str,
+    args: &[String],
+    timeout: Duration,
+) -> Result<RedisValue, String> {
+    let mut stream = TcpStream::connect(address)
+        .map_err(|error| format!("redis connect {address} failed: {error}"))?;
+    stream
+        .set_read_timeout(Some(timeout))
+        .map_err(|error| format!("redis read timeout setup failed: {error}"))?;
+    stream
+        .set_write_timeout(Some(timeout))
+        .map_err(|error| format!("redis write timeout setup failed: {error}"))?;
+    write_resp_command(&mut stream, args)?;
+    read_resp_value(&mut stream)
+}
+
+fn discover_redis_master(
+    sentinel_addrs: &[String],
+    master_name: &str,
+    timeout: Duration,
+) -> Result<String, String> {
+    let command = [
+        "SENTINEL".to_string(),
+        "get-master-addr-by-name".to_string(),
+        master_name.to_string(),
+    ];
+    let mut failures = Vec::new();
+    for sentinel in sentinel_addrs {
+        match execute_redis_at(sentinel, &command, timeout) {
+            Ok(RedisValue::Array(values)) if values.len() == 2 => {
+                let host = redis_string_value(&values[0]);
+                let port = redis_string_value(&values[1]);
+                if let (Some(host), Some(port)) = (host, port) {
+                    if !host.trim().is_empty() && port.parse::<u16>().is_ok() {
+                        return Ok(format!("{host}:{port}"));
+                    }
+                }
+                failures.push(format!("{sentinel}: invalid master address response"));
+            }
+            Ok(other) => failures.push(format!("{sentinel}: unexpected response {other:?}")),
+            Err(error) => failures.push(format!("{sentinel}: {error}")),
+        }
+    }
+    Err(format!(
+        "no Redis Sentinel resolved master {master_name}: {}",
+        failures.join("; ")
+    ))
 }
 
 fn sanitize_cache_key_part(value: &str) -> String {
@@ -1125,6 +1457,13 @@ pub fn session_cache_record(session: &GatewaySession) -> Option<GatewaySessionCa
             character_index: identity.character_index,
         },
         character_name: identity.character_name,
+        gateway_session_id: Some(session.session_id().to_string()),
+        gateway_id: Some(gateway_runtime_identity()),
+        gateway_endpoint: optional_env("MIR2_GATEWAY_PUBLIC_ENDPOINT"),
+        relay_id: optional_env("MIR2_GATEWAY_RELAY_ID"),
+        relay_endpoint: optional_env("MIR2_GATEWAY_RELAY_ENDPOINT"),
+        service_node_id: Some(zone_owner_lease.owner_id().to_string()),
+        node_kind: optional_env("MIR2_GATEWAY_NODE_KIND").or_else(|| Some("official".to_string())),
         zone_id: Some(session.zone_id().as_str().to_string()),
         zone_owner_id: Some(zone_owner_lease.owner_id().to_string()),
         zone_owner_fencing_token: Some(zone_owner_lease.fencing_token()),
@@ -1137,6 +1476,7 @@ pub fn session_cache_record(session: &GatewaySession) -> Option<GatewaySessionCa
         updated_at_ms: current_unix_ms(),
         route_lease_owner: None,
         route_lease_expires_at_ms: None,
+        handoff_generation: session.handoff_generation(),
     })
 }
 
@@ -1232,6 +1572,8 @@ fn route_request_from_route(route: GatewaySessionRoute) -> SessionRouteRequest {
         account_id: Some(route.key.account_id),
         character_index: Some(route.key.character_index),
         map_file_name: route.map_file_name,
+        affinity_key: None,
+        explicit_line: None,
     }
 }
 
@@ -1258,6 +1600,114 @@ fn current_unix_ms() -> u64 {
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis() as u64)
         .unwrap_or(0)
+}
+
+const MAX_TRACE_HISTORY_EVENTS: usize = 128;
+
+fn optional_env(name: &str) -> Option<String> {
+    env::var(name)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+}
+
+fn gateway_runtime_identity() -> String {
+    optional_env("MIR2_GATEWAY_ID")
+        .or_else(|| optional_env("MIR2_GATEWAY_INSTANCE_ID"))
+        .or_else(|| optional_env("HOSTNAME"))
+        .unwrap_or_else(|| "gateway-local".to_string())
+}
+
+fn trace_history_ttl_seconds() -> u64 {
+    env::var("MIR2_GATEWAY_TRACE_HISTORY_TTL_SECONDS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(86_400)
+        .clamp(300, 2_592_000)
+}
+
+fn trace_events_for_transition(
+    previous: Option<&GatewaySessionCacheRecord>,
+    next: &GatewaySessionCacheRecord,
+) -> Vec<GatewaySessionTraceEvent> {
+    let mut events = Vec::new();
+    let Some(previous) = previous else {
+        events.push(trace_event(
+            next,
+            "session_started",
+            "player entered the world",
+        ));
+        events.push(trace_event(
+            next,
+            "placement_assigned",
+            "initial service placement",
+        ));
+        return events;
+    };
+    if previous.gateway_session_id != next.gateway_session_id {
+        events.push(trace_event(
+            next,
+            "session_reconnected",
+            "gateway session identity changed",
+        ));
+    }
+    if previous.zone_id != next.zone_id || previous.map_file_name != next.map_file_name {
+        events.push(trace_event(
+            next,
+            "map_transfer",
+            "player Zone or map changed",
+        ));
+    }
+    if previous.service_node_id != next.service_node_id
+        || previous.zone_owner_id != next.zone_owner_id
+        || previous.zone_owner_fencing_token != next.zone_owner_fencing_token
+        || previous.handoff_generation != next.handoff_generation
+    {
+        events.push(trace_event(
+            next,
+            "placement_changed",
+            "service node ownership or fencing generation changed",
+        ));
+    }
+    if previous.relay_id != next.relay_id || previous.relay_endpoint != next.relay_endpoint {
+        events.push(trace_event(next, "relay_changed", "relay route changed"));
+    }
+    events
+}
+
+fn trace_event(
+    record: &GatewaySessionCacheRecord,
+    event_type: &str,
+    reason: &str,
+) -> GatewaySessionTraceEvent {
+    let occurred_at_ms = current_unix_ms();
+    GatewaySessionTraceEvent {
+        event_id: format!(
+            "trace-{occurred_at_ms}-{event_type}-{}",
+            record.gateway_session_id.as_deref().unwrap_or("unknown")
+        ),
+        event_type: event_type.to_string(),
+        occurred_at_ms,
+        account_id: record.key.account_id.clone(),
+        character_index: record.key.character_index,
+        character_name: record.character_name.clone(),
+        gateway_session_id: record.gateway_session_id.clone(),
+        gateway_id: record.gateway_id.clone(),
+        relay_id: record.relay_id.clone(),
+        service_node_id: record.service_node_id.clone(),
+        node_kind: record.node_kind.clone(),
+        zone_id: record.zone_id.clone(),
+        map_file_name: record.map_file_name.clone(),
+        zone_owner_fencing_token: record.zone_owner_fencing_token,
+        handoff_generation: record.handoff_generation,
+        reason: reason.to_string(),
+    }
+}
+
+fn trim_trace_history(events: &mut Vec<GatewaySessionTraceEvent>) {
+    if events.len() > MAX_TRACE_HISTORY_EVENTS {
+        events.drain(..events.len() - MAX_TRACE_HISTORY_EVENTS);
+    }
 }
 
 #[cfg(test)]
@@ -1289,6 +1739,8 @@ mod tests {
             .expect("env lock should not be poisoned");
         let names = [
             "MIR2_GATEWAY_REDIS_CACHE_URL",
+            "MIR2_GATEWAY_REDIS_SENTINEL_ADDRS",
+            "MIR2_GATEWAY_REDIS_SENTINEL_MASTER",
             "MIR2_GATEWAY_REQUIRE_REDIS_CACHE",
             "MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS",
             "MIR2_RUNTIME_ENV",
@@ -1622,6 +2074,87 @@ mod tests {
     }
 
     #[test]
+    fn redis_sentinel_cache_rediscovers_a_promoted_master_after_connection_failure() {
+        use std::io::{Read, Write};
+        use std::net::TcpListener;
+        use std::thread;
+
+        fn spawn_ping_server(listener: TcpListener) -> thread::JoinHandle<()> {
+            thread::spawn(move || {
+                let (mut stream, _) = listener.accept().expect("accept Redis ping");
+                let mut request = [0_u8; 128];
+                let _ = stream.read(&mut request);
+                stream.write_all(b"+PONG\r\n").expect("write Redis PONG");
+            })
+        }
+
+        let first_master_listener =
+            TcpListener::bind("127.0.0.1:0").expect("bind first fake Redis master");
+        let first_master = first_master_listener
+            .local_addr()
+            .expect("first fake master address");
+        let second_master_listener =
+            TcpListener::bind("127.0.0.1:0").expect("bind second fake Redis master");
+        let second_master = second_master_listener
+            .local_addr()
+            .expect("second fake master address");
+        let current_master = Arc::new(Mutex::new(first_master));
+
+        let sentinel_listener = TcpListener::bind("127.0.0.1:0").expect("bind fake Redis Sentinel");
+        let sentinel_address = sentinel_listener.local_addr().expect("sentinel address");
+        let sentinel_master = Arc::clone(&current_master);
+        let sentinel = thread::spawn(move || {
+            for _ in 0..2 {
+                let (mut stream, _) = sentinel_listener.accept().expect("accept Sentinel query");
+                let mut request = [0_u8; 256];
+                let _ = stream.read(&mut request);
+                let master = *sentinel_master.lock().expect("master mutex");
+                let host = master.ip().to_string();
+                let port = master.port().to_string();
+                let response = format!(
+                    "*2\r\n${}\r\n{}\r\n${}\r\n{}\r\n",
+                    host.len(),
+                    host,
+                    port.len(),
+                    port
+                );
+                stream
+                    .write_all(response.as_bytes())
+                    .expect("write Sentinel response");
+            }
+        });
+        let unused_sentinel_a =
+            TcpListener::bind("127.0.0.1:0").expect("bind second sentinel address");
+        let unused_sentinel_b =
+            TcpListener::bind("127.0.0.1:0").expect("bind third sentinel address");
+        let sentinel_urls = format!(
+            "{sentinel_address},{},{}",
+            unused_sentinel_a.local_addr().expect("second sentinel"),
+            unused_sentinel_b.local_addr().expect("third sentinel")
+        );
+
+        let first_master_server = spawn_ping_server(first_master_listener);
+        let cache = RedisGatewaySessionCache::with_sentinels(
+            &sentinel_urls,
+            "mir2-primary",
+            "mir2:test:sentinel",
+            30,
+        )
+        .expect("Sentinel should resolve first master");
+        cache.ping().expect("first master should answer");
+        first_master_server.join().expect("first master server");
+
+        *current_master.lock().expect("master mutex") = second_master;
+        let second_master_server = spawn_ping_server(second_master_listener);
+        cache
+            .ping()
+            .expect("cache should rediscover and use promoted master");
+
+        second_master_server.join().expect("second master server");
+        sentinel.join().expect("sentinel server");
+    }
+
+    #[test]
     fn session_cache_route_lease_blocks_stale_owner_overwrite_and_owned_remove() {
         let mut first = GatewaySession::new(GatewayConfig::default());
         let mut second = GatewaySession::new(GatewayConfig::default());
@@ -1673,6 +2206,38 @@ mod tests {
         assert!(!refreshed);
         assert!(cache.route_character("Scout").is_none());
         assert_eq!(cache.route_lease_count(), 0);
+    }
+
+    #[test]
+    fn in_memory_trace_records_assignment_transfer_failover_and_disconnect() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        let mut record = super::session_cache_record(&session)
+            .expect("active session should produce a cache record");
+        let key = record.key.clone();
+
+        cache.put(record.clone());
+        record.zone_id = Some("map:0103:line:2".into());
+        record.map_file_name = Some("0103".into());
+        record.service_node_id = Some("node-home-2".into());
+        record.zone_owner_id = Some("node-home-2".into());
+        record.zone_owner_fencing_token = Some(2);
+        record.handoff_generation = 1;
+        cache.put(record);
+        cache.remove(&key);
+
+        let events = cache.trace_events(&key, 16);
+        let event_types = events
+            .iter()
+            .map(|event| event.event_type.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(event_types.first().copied(), Some("disconnected"));
+        assert!(event_types.contains(&"placement_changed"));
+        assert!(event_types.contains(&"map_transfer"));
+        assert!(event_types.contains(&"placement_assigned"));
+        assert!(event_types.contains(&"session_started"));
+        assert_eq!(events.len(), 5);
     }
 
     #[test]

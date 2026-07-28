@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1784898441230,
+  "workload": "zone-rpc-v4-full-checkpoint-history",
+  "checkpointVersion": 4,
+  "zoneRpcProtocolVersion": 6,
+  "build": "release",
+  "environment": {
+    "profileLabel": "2c2g",
+    "requestedCpuCores": "2",
+    "requestedMemoryBytes": "2147483648",
+    "cgroupCpuMax": "200000 100000",
+    "cgroupMemoryMax": "2147483648",
+    "availableParallelism": 2
+  },
+  "historySteps": [
+    700
+  ],
+  "results": [
+    {
+      "requestedCommands": 700,
+      "completedCommands": 700,
+      "success": true,
+      "error": null,
+      "commandWallMs": 6723.09042,
+      "commandLatencyMs": {
+        "count": 700,
+        "min": 5.955541,
+        "mean": 9.604203935714283,
+        "p50": 8.45475,
+        "p95": 13.9035,
+        "p99": 14.738667000000001,
+        "max": 15.737542
+      },
+      "checkpointEntries": 700,
+      "checkpointBytes": 215622,
+      "replicationHead": {
+        "version": 5,
+        "zoneId": "map:0",
+        "buildId": "mir2-gateway/0.1.0",
+        "mutationCoverage": "commandJournal",
+        "promotionReady": false,
+        "baseSnapshotId": null,
+        "baseSequence": 0,
+        "oldestAvailableSequence": 0,
+        "entryCount": 700,
+        "nextSequence": 700,
+        "lastSequence": 699,
+        "latestDigest": "1709ce6185b3228e3c722fce5551a97c8dcede618f267bd96f8b6f0b4d1fb892"
+      },
+      "replicationHeadBytes": 324,
+      "replicationHeadLatencyUs": {
+        "count": 100,
+        "min": 3073.25,
+        "mean": 7096.0382199999995,
+        "p50": 6627.791,
+        "p95": 10664.541,
+        "p99": 14618.709,
+        "max": 22810.583
+      },
+      "modeledWireMbpsAt100ms": 17.24976,
+      "modeledWireMbpsAt5s": 0.3449952,
+      "exportWallMs": 38.382542,
+      "installWallMs": 4085.6573359999998,
+      "processRssBeforeBytes": 5144576,
+      "processRssAfterHistoryBytes": 23994368,
+      "processRssAfterInstallBytes": 27840512,
+      "activeTelemetry": {
+        "health": {
+          "hostId": "zone-host-1",
+          "processId": 1,
+          "sessionCount": 1,
+          "activeConnections": 0,
+          "sessionCapacity": 8,
+          "sessionCapacityPerZone": 8,
+          "busiestZoneSessionCount": 1,
+          "zoneCount": 1,
+          "zoneCapacity": 128,
+          "draining": false,
+          "protocolVersion": 6
+        },
+        "zones": [
+          {
+            "zoneId": "map:0",
+            "mapScope": "explicit",
+            "mapFileNames": [
+              "0"
+            ],
+            "sessionCount": 1
+          }
+        ],
+        "checkpoint": {
+          "journalEntries": 700,
+          "exportsTotal": 1,
+          "exportBytesTotal": 215622,
+          "exportDurationNsTotal": 6804583,
+          "exportLastBytes": 215622,
+          "exportLastDurationNs": 6804583,
+          "installsTotal": 0,
+          "installBytesTotal": 0,
+          "installDurationNsTotal": 0,
+          "installLastBytes": 0,
+          "installLastDurationNs": 0,
+          "replayEntriesTotal": 0,
+          "replayLastEntries": 0
+        },
+        "startedAtMs": 1784898429634,
+        "uptimeSeconds": 11,
+        "acceptedConnectionsTotal": 802,
+        "rpcRequestsTotal": 802,
+        "rpcErrorsTotal": 0
+      },
+      "standbyTelemetry": {
+        "health": {
+          "hostId": "zone-host-1",
+          "processId": 1,
+          "sessionCount": 1,
+          "activeConnections": 0,
+          "sessionCapacity": 8,
+          "sessionCapacityPerZone": 8,
+          "busiestZoneSessionCount": 1,
+          "zoneCount": 1,
+          "zoneCapacity": 128,
+          "draining": false,
+          "protocolVersion": 6
+        },
+        "zones": [
+          {
+            "zoneId": "map:0",
+            "mapScope": "explicit",
+            "mapFileNames": [
+              "0"
+            ],
+            "sessionCount": 1
+          }
+        ],
+        "checkpoint": {
+          "journalEntries": 700,
+          "exportsTotal": 0,
+          "exportBytesTotal": 0,
+          "exportDurationNsTotal": 0,
+          "exportLastBytes": 0,
+          "exportLastDurationNs": 0,
+          "installsTotal": 1,
+          "installBytesTotal": 215622,
+          "installDurationNsTotal": 4076671460,
+          "installLastBytes": 215622,
+          "installLastDurationNs": 4076671460,
+          "replayEntriesTotal": 700,
+          "replayLastEntries": 700
+        },
+        "startedAtMs": 1784898429634,
+        "uptimeSeconds": 11,
+        "acceptedConnectionsTotal": 1,
+        "rpcRequestsTotal": 1,
+        "rpcErrorsTotal": 0
+      }
+    }
+  ],
+  "caveats": [
+    "The workload uses one sequential KeepAlive command stream to isolate history-size cost.",
+    "Command latency includes a fresh localhost TCP Zone RPC connection and acknowledgement.",
+    "This is a single-process localhost baseline; container CPU/network certification is separate.",
+    "The v4 max frame limit is raised for measurement and is not a production recommendation.",
+    "Modeled wire rates use checkpoint payload bytes and omit TCP/IP framing and retransmits."
+  ]
+}

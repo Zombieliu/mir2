@@ -1,0 +1,117 @@
+name: Home Agent
+
+on:
+  pull_request:
+    paths:
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/infra/gate22/**"
+      - "mir2-web3/infra/gate23/**"
+      - "mir2-web3/infra/gate24/**"
+      - "mir2-web3/infra/gate25/**"
+      - "mir2-web3/Dockerfile"
+      - ".github/workflows/home-agent.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-2025
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: mir2-web3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: false
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: 1.89.0
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
+        with:
+          workspaces: mir2-web3
+      - name: Build Home Agent
+        run: >-
+          cargo +1.89.0 build --locked --release
+          --target ${{ matrix.target }}
+          -p mir2-gateway
+          --bin home_agent
+          --bin home_agent_launcher
+          --bin home_agent_supervisor
+          --bin zone_host
+      - name: Home Agent core tests
+        run: >-
+          cargo +1.89.0 test --locked
+          -p mir2-gateway
+          home_agent_runtime
+          --lib
+          --
+          --test-threads=1
+      - name: Gate 23 launcher, keyring, update and fail-closed acceptance
+        if: matrix.os == 'macos-14'
+        run: ./infra/gate23/verify-gate23.sh
+
+  gate22-gate24:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: mir2-web3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: false
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: 1.89.0
+      - uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
+        with:
+          workspaces: mir2-web3
+      - name: Gate 22 real Mir2 outbound tunnel acceptance
+        run: ./infra/gate22/verify-gate22.sh
+      - name: Gate 24 hardened sandbox acceptance
+        run: ./infra/gate24/verify-gate24.sh
+
+  gate25-policy:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: mir2-web3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: false
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: 1.89.0
+      - uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
+        with:
+          workspaces: mir2-web3
+      - name: Gate 25 signed telemetry and cohort tests
+        run: cargo +1.89.0 test --locked -p mir2-gateway home_beta --lib
+      - name: Build signed telemetry collector
+        run: >-
+          cargo +1.89.0 build --locked --release
+          -p mir2-gateway
+          --bin home_telemetry_collector
+      - name: Gate 25 local fail-closed acceptance
+        run: ./infra/gate25/verify-gate25-local.sh
+      - name: Build policy container
+        run: >-
+          docker build --target home-beta-policy
+          -t dubhe-home-beta-policy:${{ github.sha }} .
+      - name: Build telemetry collector container
+        run: >-
+          docker build --target home-telemetry-collector
+          -t dubhe-home-telemetry-collector:${{ github.sha }} .

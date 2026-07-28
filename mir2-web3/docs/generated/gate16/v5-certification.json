@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1784921498558,
+  "build": "release",
+  "zoneRpcProtocolVersion": 7,
+  "environment": {
+    "profileLabel": "2c2g",
+    "requestedCpuCores": "2",
+    "requestedMemoryBytes": "2147483648",
+    "cgroupCpuMax": "200000 100000",
+    "cgroupMemoryMax": "2147483648",
+    "availableParallelism": 2
+  },
+  "playerResults": [
+    {
+      "requestedPlayers": 50,
+      "connectedPlayers": 50,
+      "commandsPerPlayer": 8,
+      "completedCommands": 400,
+      "wallMs": 2573.220168,
+      "throughputCommandsPerSecond": 155.44725048183287,
+      "latencyMs": {
+        "count": 400,
+        "min": 13.990542,
+        "mean": 302.8904261725,
+        "p50": 309.974876,
+        "p95": 365.655291,
+        "p99": 409.74366699999996,
+        "max": 422.379625
+      },
+      "success": true
+    },
+    {
+      "requestedPlayers": 125,
+      "connectedPlayers": 125,
+      "commandsPerPlayer": 8,
+      "completedCommands": 1000,
+      "wallMs": 7387.82767,
+      "throughputCommandsPerSecond": 135.35778643845924,
+      "latencyMs": {
+        "count": 1000,
+        "min": 10.713542,
+        "mean": 873.4961227370006,
+        "p50": 928.04825,
+        "p95": 975.654917,
+        "p99": 984.609459,
+        "max": 1019.7043329999999
+      },
+      "success": true
+    }
+  ],
+  "historyResults": [
+    {
+      "historyEntries": 700,
+      "baseSequence": 636,
+      "deltaEntries": 64,
+      "baseSnapshotWireBytes": 18708,
+      "baseInstallWallMs": 128.54637499999998,
+      "v5DeltaWireBytes": 74583,
+      "v5ApplyWallMs": 378.98737500000004,
+      "v5ApplyCpuTicks": 38,
+      "v4CheckpointWireBytes": 1007068,
+      "v4InstallWallMs": 4103.87446,
+      "v4InstallCpuTicks": 413,
+      "networkReductionPercent": 92.59404528790509,
+      "wallReductionPercent": 90.76513234764009,
+      "cpuReductionPercent": 90.79903147699758,
+      "headsMatch": true,
+      "success": true
+    },
+    {
+      "historyEntries": 10000,
+      "baseSequence": 9936,
+      "deltaEntries": 64,
+      "baseSnapshotWireBytes": 18709,
+      "baseInstallWallMs": 129.760666,
+      "v5DeltaWireBytes": 74956,
+      "v5ApplyWallMs": 386.638792,
+      "v5ApplyCpuTicks": 38,
+      "v4CheckpointWireBytes": 3797312,
+      "v4InstallWallMs": 59114.594735,
+      "v4InstallCpuTicks": 5949,
+      "networkReductionPercent": 98.02607739369323,
+      "wallReductionPercent": 99.34595036347076,
+      "cpuReductionPercent": 99.36123718271979,
+      "headsMatch": true,
+      "success": true
+    },
+    {
+      "historyEntries": 100000,
+      "baseSequence": 99936,
+      "deltaEntries": 64,
+      "baseSnapshotWireBytes": 18710,
+      "baseInstallWallMs": 134.13608299999999,
+      "v5DeltaWireBytes": 75472,
+      "v5ApplyWallMs": 398.996084,
+      "v5ApplyCpuTicks": 40,
+      "v4CheckpointWireBytes": 30956728,
+      "v4InstallWallMs": 626962.193494,
+      "v4InstallCpuTicks": 63097,
+      "networkReductionPercent": 99.7562016244094,
+      "wallReductionPercent": 99.93636042362037,
+      "cpuReductionPercent": 99.93660554384519,
+      "headsMatch": true,
+      "success": true
+    }
+  ],
+  "assertions": {
+    "playerProfilesPass": true,
+    "historyProfilesPass": true,
+    "networkReductionAtLeast80Percent": true,
+    "cpuReductionAtLeast80Percent": true,
+    "wallReductionAtLeast80Percent": true,
+    "cgroupProfileMatches": true
+  },
+  "success": true
+}

@@ -39,6 +39,9 @@ RUN mkdir -p /usr/local/cargo /usr/local/rustup /home/node/.cargo \
     && CARGO_HOME=/usr/local/cargo rustup component add rustfmt \
     && CARGO_HOME=/usr/local/cargo rustup target add wasm32-unknown-unknown \
     && npm install --global "npm@${NPM_VERSION}" \
+    && printf '%s\n' \
+         'export PATH="/usr/local/cargo/bin:/home/node/.cargo/bin:${PATH}"' \
+         > /etc/profile.d/mir2-rust-path.sh \
     && chown -R node:node /home/node
 
 RUN architecture="$(dpkg --print-architecture)" \
