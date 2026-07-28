@@ -77,6 +77,8 @@
     "smoke:reconnect-resume": "node ./scripts/smoke-reconnect-resume.mjs",
     "smoke:two-client-zone": "node ./scripts/smoke-two-client-zone.mjs",
     "smoke:passkey-start-game": "node ./scripts/smoke-passkey-start-game.mjs",
+    "smoke:spectator": "node ./scripts/smoke-spectator.mjs",
+    "smoke:spectator-ui": "node ./scripts/smoke-spectator-ui.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
     "smoke:gateway-capacity": "node ./scripts/load-gateway-ws.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",

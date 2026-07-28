@@ -46,6 +46,7 @@ use crate::events::{
 };
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
+use crate::spectator::{SpectatorFrame, SpectatorHub};
 use crate::tcp::chat_broadcast::{
     recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
 };
@@ -138,6 +139,59 @@ struct WebState {
     gameplay_event_sink: Option<SharedGameplayEventSink>,
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
+    spectator: SpectatorHub,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorAccessQuery {
+    map: Option<String>,
+    target: Option<String>,
+    delay_ms: Option<u64>,
+    token: Option<String>,
+    mode: Option<String>,
+    replay_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+enum SpectatorControl {
+    Follow { target: Option<String> },
+    Map { map: String },
+    Director { enabled: bool },
+    Camera { x: i32, y: i32 },
+    CameraClear,
+    ReplayPlay,
+    ReplayPause,
+    ReplaySeek { captured_at_ms: u64 },
+    ReplaySpeed { speed: f64 },
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorDirectoryResponse {
+    source: String,
+    generated_at_ms: u64,
+    public_delay_ms: u64,
+    max_delay_ms: u64,
+    matches: Vec<crate::spectator::SpectatorMatch>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorRecordingsResponse {
+    source: String,
+    generated_at_ms: u64,
+    recordings: Vec<crate::spectator::SpectatorRecording>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorReplayResponse {
+    source: String,
+    generated_at_ms: u64,
+    recording_id: String,
+    frames: Vec<SpectatorFrame>,
 }
 
 #[derive(Debug)]
@@ -1337,6 +1391,7 @@ struct HealthResponse {
     session_cache: GatewaySessionCacheStatus,
     capacity: GatewayCapacityStatus,
     gameplay_events: GameplayEventSinkStatus,
+    spectator: crate::spectator::SpectatorMetrics,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1446,6 +1501,7 @@ pub async fn run_web_gateway(
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
         injector: crate::inject::LiveSessionInjector::default(),
+        spectator: SpectatorHub::from_env(),
     };
 
     let app = Router::new()
@@ -1457,6 +1513,11 @@ pub async fn run_web_gateway(
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
         .route("/onchain/inject", post(onchain_inject))
+        .route("/spectator/matches", get(spectator_matches))
+        .route("/spectator/recordings", get(spectator_recordings))
+        .route("/spectator/replay", get(spectator_replay))
+        .route("/spectator/metrics", get(spectator_metrics))
+        .route("/spectator/ws", get(spectator_ws_upgrade))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -1505,6 +1566,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         session_cache: session_cache_status,
         capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
+        spectator: state.spectator.metrics(),
     })
 }
 
@@ -1830,6 +1892,417 @@ fn canonical_admin_control_action(action: &str) -> Result<String, String> {
     Ok(canonical.to_string())
 }
 
+async fn spectator_matches(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<SpectatorDirectoryResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let authorization = state
+        .spectator
+        .config()
+        .authorize(query.map.as_deref(), query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    Ok(Json(SpectatorDirectoryResponse {
+        source: "gateway-spectator".to_string(),
+        generated_at_ms: gateway_unix_ms(),
+        public_delay_ms: authorization.delay_ms,
+        max_delay_ms: state.spectator.config().max_delay_ms,
+        matches: state.spectator.matches(authorization.director),
+    }))
+}
+
+async fn spectator_recordings(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<SpectatorRecordingsResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let authorization = state
+        .spectator
+        .config()
+        .authorize(None, query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    Ok(Json(SpectatorRecordingsResponse {
+        source: "gateway-spectator".to_string(),
+        generated_at_ms: gateway_unix_ms(),
+        recordings: state.spectator.recordings(authorization.director),
+    }))
+}
+
+async fn spectator_replay(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<SpectatorReplayResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let recording_id = query
+        .replay_id
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(AdminErrorResponse {
+                    error: "replayId is required".to_string(),
+                }),
+            )
+        })?;
+    let authorization = state
+        .spectator
+        .config()
+        .authorize(None, query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    let frames = state
+        .spectator
+        .load_replay(
+            recording_id,
+            authorization.director,
+            gateway_unix_ms().saturating_sub(authorization.delay_ms),
+        )
+        .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
+    Ok(Json(SpectatorReplayResponse {
+        source: "gateway-spectator".to_string(),
+        generated_at_ms: gateway_unix_ms(),
+        recording_id: recording_id.to_string(),
+        frames,
+    }))
+}
+
+async fn spectator_metrics(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<crate::spectator::SpectatorMetrics>, (StatusCode, Json<AdminErrorResponse>)> {
+    state
+        .spectator
+        .config()
+        .authorize(None, query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    Ok(Json(state.spectator.metrics()))
+}
+
+fn spectator_access_error(error: String) -> (StatusCode, Json<AdminErrorResponse>) {
+    (StatusCode::FORBIDDEN, Json(AdminErrorResponse { error }))
+}
+
+async fn spectator_ws_upgrade(
+    ws: WebSocketUpgrade,
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Response {
+    let ws_connection_permit = match state.capacity.try_acquire_ws_connection() {
+        Ok(permit) => permit,
+        Err(error) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(AdminErrorResponse { error }),
+            )
+                .into_response();
+        }
+    };
+    let authorization = match state.spectator.config().authorize(
+        query.map.as_deref(),
+        query.delay_ms,
+        query.token.as_deref(),
+    ) {
+        Ok(authorization) => authorization,
+        Err(error) => return spectator_access_error(error).into_response(),
+    };
+    ws.on_upgrade(move |socket| {
+        handle_spectator_socket(
+            socket,
+            state.spectator,
+            query,
+            authorization,
+            ws_connection_permit,
+        )
+    })
+}
+
+async fn handle_spectator_socket(
+    socket: WebSocket,
+    hub: SpectatorHub,
+    query: SpectatorAccessQuery,
+    authorization: crate::spectator::SpectatorAuthorization,
+    _ws_connection_permit: GatewayCapacityPermit,
+) {
+    let _viewer_guard = hub.viewer_connected();
+    let (mut sender, mut receiver) = socket.split();
+    let mut tick = tokio::time::interval(Duration::from_millis(100));
+    tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut map = query
+        .map
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .or_else(|| hub.latest_map(authorization.director))
+        .unwrap_or_else(|| "0".to_string());
+    let mut target = query
+        .target
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string);
+    let mut director = authorization.director
+        && query
+            .mode
+            .as_deref()
+            .is_some_and(|mode| mode.eq_ignore_ascii_case("director"));
+    let mut camera: Option<(i32, i32)> = None;
+    let mut last_sequence = 0u64;
+    let replay_frames = match query.replay_id.as_deref() {
+        Some(recording_id) => hub
+            .load_replay(
+                recording_id,
+                authorization.director,
+                gateway_unix_ms().saturating_sub(authorization.delay_ms),
+            )
+            .unwrap_or_default(),
+        None => Vec::new(),
+    };
+    let mut replay_index = 0usize;
+    let mut replay_playing = !replay_frames.is_empty();
+    let mut replay_speed = 1.0f64;
+    let mut replay_due = Instant::now();
+    eprintln!(
+        "spectator audit event=connect map={} director={} delay_ms={} replay={}",
+        map,
+        authorization.director,
+        authorization.delay_ms,
+        query.replay_id.as_deref().unwrap_or("-")
+    );
+
+    let initial_status_frame = replay_frames.first().cloned().or_else(|| {
+        hub.frame_at(
+            &map,
+            gateway_unix_ms().saturating_sub(authorization.delay_ms),
+            0,
+        )
+    });
+    if send_spectator_status(
+        &mut sender,
+        &hub,
+        &map,
+        target.as_deref(),
+        authorization,
+        director,
+        camera,
+        replay_frames.as_slice(),
+        replay_index,
+        replay_playing,
+        replay_speed,
+        initial_status_frame.as_ref(),
+    )
+    .await
+    .is_err()
+    {
+        return;
+    }
+
+    loop {
+        tokio::select! {
+            inbound = receiver.next() => {
+                let Some(inbound) = inbound else { return; };
+                let message = match inbound {
+                    Ok(Message::Text(text)) => text,
+                    Ok(Message::Close(_)) => return,
+                    Ok(_) => continue,
+                    Err(_) => return,
+                };
+                let control = match serde_json::from_str::<SpectatorControl>(&message) {
+                    Ok(control) => control,
+                    Err(error) => {
+                        let _ = sender.send(Message::Text(json!({
+                            "type": "error",
+                            "message": format!("invalid spectator control: {error}")
+                        }).to_string().into())).await;
+                        continue;
+                    }
+                };
+                eprintln!(
+                    "spectator audit event=control map={} director={} control={control:?}",
+                    map, authorization.director
+                );
+                match control {
+                    SpectatorControl::Follow { target: next_target } => {
+                        target = next_target
+                            .map(|value| value.trim().to_string())
+                            .filter(|value| !value.is_empty());
+                        camera = None;
+                        director = false;
+                    }
+                    SpectatorControl::Map { map: next_map } => {
+                        let next_map = next_map.trim();
+                        if !authorization.director && !hub.config().is_public_map(next_map) {
+                            let _ = sender.send(Message::Text(json!({
+                                "type": "error",
+                                "message": format!("map {next_map} is not public for spectators")
+                            }).to_string().into())).await;
+                            continue;
+                        }
+                        map = next_map.to_string();
+                        last_sequence = 0;
+                        target = None;
+                        camera = None;
+                    }
+                    SpectatorControl::Director { enabled } => {
+                        if authorization.director {
+                            director = enabled;
+                            camera = None;
+                        }
+                    }
+                    SpectatorControl::Camera { x, y } => {
+                        if authorization.director {
+                            camera = Some((x, y));
+                            director = false;
+                        }
+                    }
+                    SpectatorControl::CameraClear => camera = None,
+                    SpectatorControl::ReplayPlay => replay_playing = true,
+                    SpectatorControl::ReplayPause => replay_playing = false,
+                    SpectatorControl::ReplaySeek { captured_at_ms } => {
+                        replay_index = replay_frames
+                            .iter()
+                            .position(|frame| frame.captured_at_ms >= captured_at_ms)
+                            .unwrap_or_else(|| replay_frames.len().saturating_sub(1));
+                        replay_due = Instant::now();
+                    }
+                    SpectatorControl::ReplaySpeed { speed } => {
+                        replay_speed = speed.clamp(0.25, 8.0);
+                    }
+                }
+                let status_frame = if replay_frames.is_empty() {
+                    hub.frame_at(
+                        &map,
+                        gateway_unix_ms().saturating_sub(authorization.delay_ms),
+                        0,
+                    )
+                } else {
+                    replay_frames
+                        .get(replay_index.min(replay_frames.len().saturating_sub(1)))
+                        .cloned()
+                };
+                if send_spectator_status(
+                    &mut sender,
+                    &hub,
+                    &map,
+                    target.as_deref(),
+                    authorization,
+                    director,
+                    camera,
+                    replay_frames.as_slice(),
+                    replay_index,
+                    replay_playing,
+                    replay_speed,
+                    status_frame.as_ref(),
+                ).await.is_err() {
+                    return;
+                }
+            }
+            _ = tick.tick() => {
+                let frame = if replay_frames.is_empty() {
+                    hub.frame_at(
+                        &map,
+                        gateway_unix_ms().saturating_sub(authorization.delay_ms),
+                        last_sequence,
+                    )
+                } else if replay_playing && Instant::now() >= replay_due {
+                    let current = replay_frames.get(replay_index).cloned();
+                    if let Some(current) = current.as_ref() {
+                        let next_delta_ms = replay_frames
+                            .get(replay_index.saturating_add(1))
+                            .map(|next| next.captured_at_ms.saturating_sub(current.captured_at_ms))
+                            .unwrap_or(250)
+                            .clamp(25, 5_000);
+                        replay_due = Instant::now()
+                            + Duration::from_millis(
+                                ((next_delta_ms as f64) / replay_speed).max(10.0) as u64,
+                            );
+                        replay_index = (replay_index + 1).min(replay_frames.len().saturating_sub(1));
+                        if replay_index + 1 >= replay_frames.len() {
+                            replay_playing = false;
+                        }
+                    }
+                    current
+                } else {
+                    None
+                };
+                let Some(frame) = frame else { continue; };
+                last_sequence = frame.sequence;
+                let world = frame.world_for_view(target.as_deref(), director, camera);
+                if sender.send(Message::Text(json!({
+                    "type": "worldSnapshot",
+                    "payload": world
+                }).to_string().into())).await.is_err() {
+                    return;
+                }
+                if send_spectator_status(
+                    &mut sender,
+                    &hub,
+                    &map,
+                    target.as_deref(),
+                    authorization,
+                    director,
+                    camera,
+                    replay_frames.as_slice(),
+                    replay_index,
+                    replay_playing,
+                    replay_speed,
+                    Some(&frame),
+                ).await.is_err() {
+                    return;
+                }
+            }
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn send_spectator_status(
+    sender: &mut WebSocketSender,
+    hub: &SpectatorHub,
+    map: &str,
+    target: Option<&str>,
+    authorization: crate::spectator::SpectatorAuthorization,
+    director: bool,
+    camera: Option<(i32, i32)>,
+    replay_frames: &[SpectatorFrame],
+    replay_index: usize,
+    replay_playing: bool,
+    replay_speed: f64,
+    frame: Option<&SpectatorFrame>,
+) -> Result<(), axum::Error> {
+    let replay_cursor = replay_index.min(replay_frames.len().saturating_sub(1));
+    sender
+        .send(Message::Text(
+            json!({
+                "type": "spectatorStatus",
+                "payload": {
+                    "readOnly": true,
+                    "directorAuthorized": authorization.director,
+                    "director": director,
+                    "delayMs": authorization.delay_ms,
+                    "map": map,
+                    "target": target,
+                    "camera": camera.map(|(x, y)| json!({"x": x, "y": y})),
+                    "matches": hub.matches(authorization.director),
+                    "targets": frame.map(SpectatorFrame::targets).unwrap_or_default(),
+                    "events": frame.map(|frame| frame.events.clone()).unwrap_or_default(),
+                    "recordingId": frame.map(|frame| frame.recording_id.clone()),
+                    "sequence": frame.map(|frame| frame.sequence),
+                    "capturedAtMs": frame.map(|frame| frame.captured_at_ms),
+                    "replay": {
+                        "active": !replay_frames.is_empty(),
+                        "playing": replay_playing,
+                        "speed": replay_speed,
+                        "startAtMs": replay_frames.first().map(|frame| frame.captured_at_ms),
+                        "endAtMs": replay_frames.last().map(|frame| frame.captured_at_ms),
+                        "currentAtMs": replay_frames.get(replay_cursor).map(|frame| frame.captured_at_ms)
+                    }
+                }
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+}
+
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
     let ws_connection_permit = match state.capacity.try_acquire_ws_connection() {
         Ok(permit) => permit,
@@ -1866,6 +2339,7 @@ async fn handle_socket(
         state.injector.clone(),
         realm_info,
         state.chat_hub.clone(),
+        state.spectator.clone(),
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -2173,6 +2647,7 @@ async fn handle_socket_inner(
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
+    spectator: SpectatorHub,
 ) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
@@ -2187,6 +2662,10 @@ async fn handle_socket_inner(
     }
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
     runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut spectator_publish_tick = tokio::time::interval(Duration::from_millis(
+        spectator.config().capture_interval_ms,
+    ));
+    spectator_publish_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let mut runtime_tick_deferred_until = Instant::now();
     let enforce_player_command_safety = production_player_command_safety_enabled();
     let mut authenticated = false;
@@ -2600,6 +3079,15 @@ async fn handle_socket_inner(
                     return;
                 }
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
+            }
+            _ = spectator_publish_tick.tick() => {
+                if tokio::task::block_in_place(|| session.active_identity()).is_none() {
+                    continue;
+                }
+                let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
+                if let Err(error) = spectator.publish(&snapshot) {
+                    eprintln!("spectator frame publish skipped: {error}");
+                }
             }
             _ = runtime_tick.tick() => {
                 let now = Instant::now();
@@ -7152,6 +7640,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             injector: crate::inject::LiveSessionInjector::default(),
+            spectator: crate::spectator::SpectatorHub::from_env(),
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -7205,6 +7694,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
             injector: crate::inject::LiveSessionInjector::default(),
+            spectator: crate::spectator::SpectatorHub::from_env(),
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -7338,6 +7828,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             injector: crate::inject::LiveSessionInjector::default(),
+            spectator: crate::spectator::SpectatorHub::from_env(),
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;
