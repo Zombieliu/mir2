@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> Latest v5 replica-image stability sync: 2026-07-29 keeps an installed base
+> snapshot byte-identical when a restored Session is rebound on the standby.
+> Replica rebinding now restores only the Session-local movement ingress,
+> cached map transfers, and `lastSeenMoveSeq`; it no longer runs a full
+> `sync_zone_snapshot()` that can merge reconstructed static entity fields back
+> into the already validated authoritative Zone image. The regression covers
+> the previous Royal_Archer light drift (`0` to `5`) and proves the re-exported
+> gzip payload is identical. Gateway verification passes 390/390 library tests,
+> 17/17 packet-trace tests, Gate 11 2/2, Home Tunnel 4/4, and Zone RPC 28/28.
+
 > Latest reproducible-deployment health sync: 2026-07-25 adds an optional
 > top-level `revision` to Gateway `/health`, sourced once from
 > `MIR2_DEPLOY_REVISION` at process startup. Local responses omit the field when

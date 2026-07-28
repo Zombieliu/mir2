@@ -310,6 +310,12 @@ v4 checkpoint 和两个 Projector 均通过自动断言。
 `replication_cursor_compacted`。由于 v4 格式无法表达已截断前缀，base 安装后
 会拒绝继续导出 v4 host checkpoint，避免生成不完整恢复点。
 
+2026-07-29 的 main 落地复测补齐了一个确定性边界：安装共享 Zone image 后，
+Session 重绑只恢复本地 movement ingress、地图传送缓存和
+`lastSeenMoveSeq`，不再调用完整 `sync_zone_snapshot()` 把重建出的静态实体
+再次合并进已验证的 checkpoint。这样避免 Royal_Archer 的 `light` 从 `0`
+漂移为模板值 `5`，并保证安装后重新导出的 gzip payload 与来源逐字节一致。
+
 这一步已证明恢复成本不再与旧 command journal 长度成正比。
 
 ## Gate 16.4b2 已落地：增量 apply、自主 tick 与 WAL 截断

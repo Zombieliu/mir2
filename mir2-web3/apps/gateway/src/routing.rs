@@ -5657,10 +5657,26 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn refresh_replica_zone_binding(&mut self) -> Result<(), String> {
-        let _ = self.sync_zone_snapshot();
-        let Some(key) = self.current_presence_key() else {
+        let Some(identity) = self.inner.active_identity() else {
             return Ok(());
         };
+        let snapshot = self.inner.world_snapshot();
+        let Some(map_file_name) = snapshot.map_file_name else {
+            return Ok(());
+        };
+        let cached_map_transfers = snapshot
+            .map_transfers
+            .iter()
+            .map(|transfer| CachedMapTransfer {
+                key: transfer.key.clone(),
+                map_file_name: transfer.map_file_name.clone(),
+                min_x: transfer.bounds.min_x,
+                max_x: transfer.bounds.max_x,
+                min_y: transfer.bounds.min_y,
+                max_y: transfer.bounds.max_y,
+            })
+            .collect::<Vec<_>>();
+        let key = ZonePresenceKey::from_identity(&identity);
         let last_seen_move_seq = {
             let zone_state = self
                 .zone_state
@@ -5674,11 +5690,13 @@ impl SharedInProcessZoneSessionRuntime {
                 .player_last_seen_move_seq(session_id)
                 .unwrap_or_default()
         };
-        self.movement_ingress
+        let mut movement = self
+            .movement_ingress
             .session_state
             .lock()
-            .map_err(|_| "shared zone movement session mutex is poisoned".to_string())?
-            .zone_move_seq = last_seen_move_seq;
+            .map_err(|_| "shared zone movement session mutex is poisoned".to_string())?;
+        movement.activate(key, map_file_name, cached_map_transfers);
+        movement.zone_move_seq = last_seen_move_seq;
         Ok(())
     }
 
