@@ -3,15 +3,15 @@ use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
-use rand::rngs::OsRng;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use rand::RngCore;
+use rand::rngs::OsRng;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-use crate::{verify_ed25519_signature, NodeSigningIdentity};
+use crate::{NodeSigningIdentity, verify_ed25519_signature};
 
 pub const HOME_AGENT_RELEASE_SCHEMA: &str = "obelisk.home-agent-release.v1";
 pub const HOME_AGENT_RELEASE_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
@@ -936,44 +936,52 @@ mod tests {
     fn signed_release_rejects_tamper_expiry_and_rollback() {
         let issuer = NodeSigningIdentity::from_seed([81; 32]);
         let manifest = release(&issuer, "1.1.0", b"signed-home-agent");
-        assert!(manifest
-            .verify(
-                issuer.public_key(),
-                "stable",
-                "aarch64-apple-darwin",
-                "1.0.0",
-                2_000,
-            )
-            .is_ok());
+        assert!(
+            manifest
+                .verify(
+                    issuer.public_key(),
+                    "stable",
+                    "aarch64-apple-darwin",
+                    "1.0.0",
+                    2_000,
+                )
+                .is_ok()
+        );
         let mut tampered = manifest.clone();
         tampered.payload.version = "9.9.9".to_string();
-        assert!(tampered
-            .verify(
-                issuer.public_key(),
-                "stable",
-                "aarch64-apple-darwin",
-                "1.0.0",
-                2_000,
-            )
-            .is_err());
-        assert!(manifest
-            .verify(
-                issuer.public_key(),
-                "stable",
-                "aarch64-apple-darwin",
-                "1.0.0",
-                4_000,
-            )
-            .is_err());
-        assert!(manifest
-            .verify(
-                issuer.public_key(),
-                "stable",
-                "aarch64-apple-darwin",
-                "1.1.0",
-                2_000,
-            )
-            .is_err());
+        assert!(
+            tampered
+                .verify(
+                    issuer.public_key(),
+                    "stable",
+                    "aarch64-apple-darwin",
+                    "1.0.0",
+                    2_000,
+                )
+                .is_err()
+        );
+        assert!(
+            manifest
+                .verify(
+                    issuer.public_key(),
+                    "stable",
+                    "aarch64-apple-darwin",
+                    "1.0.0",
+                    4_000,
+                )
+                .is_err()
+        );
+        assert!(
+            manifest
+                .verify(
+                    issuer.public_key(),
+                    "stable",
+                    "aarch64-apple-darwin",
+                    "1.1.0",
+                    2_000,
+                )
+                .is_err()
+        );
     }
 
     #[test]
@@ -1040,9 +1048,11 @@ mod tests {
         store.record_health_failure(&mut state).unwrap();
         assert_eq!(state.current_version, "1.0.0");
         assert!(state.failed_versions.contains("1.1.0"));
-        assert!(store
-            .stage(&mut state, &manifest, &artifact, bytes)
-            .is_err());
+        assert!(
+            store
+                .stage(&mut state, &manifest, &artifact, bytes)
+                .is_err()
+        );
         fs::remove_dir_all(root).unwrap();
     }
 

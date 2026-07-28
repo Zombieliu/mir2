@@ -1,11 +1,11 @@
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    node_id_from_public_key, validate_ed25519_public_key, verify_ed25519_signature,
-    NodeSigningIdentity,
+    NodeSigningIdentity, node_id_from_public_key, validate_ed25519_public_key,
+    verify_ed25519_signature,
 };
 
 const CHALLENGE_RESPONSE_DOMAIN: &[u8] = b"obelisk.capacity-response.v2\0";

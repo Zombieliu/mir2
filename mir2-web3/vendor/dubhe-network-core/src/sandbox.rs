@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{verify_ed25519_signature, NodeSigningIdentity};
+use crate::{NodeSigningIdentity, verify_ed25519_signature};
 
 pub const HOME_SANDBOX_SCHEMA: &str = "obelisk.home-zone-sandbox.v1";
 const HOME_SANDBOX_SIGNATURE_ALGORITHM: &str = "ed25519-zip215";
@@ -422,8 +422,10 @@ mod tests {
         let mut secret = inspect();
         secret[0]["Config"]["Env"] = serde_json::json!(["DATABASE_URL=postgres://forbidden"]);
         assert!(manifest.attest_docker_inspect(&secret).is_err());
-        assert!(manifest
-            .verify(issuer.public_key(), "ed25519:test-home-node", 8, 2_000,)
-            .is_err());
+        assert!(
+            manifest
+                .verify(issuer.public_key(), "ed25519:test-home-node", 8, 2_000,)
+                .is_err()
+        );
     }
 }

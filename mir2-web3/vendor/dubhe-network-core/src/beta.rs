@@ -3,9 +3,10 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    node_id_from_public_key, verify_ed25519_signature, HomeBetaFaultKind, HomeBetaFaultObservation,
-    HomeNetworkBetaRunPayload, NodeSigningIdentity, HOME_BETA_MAXIMUM_FAILOVER_RTO_MS,
-    HOME_BETA_MINIMUM_DURATION_MS, HOME_BETA_RUN_SCHEMA, HOME_SIGNATURE_ALGORITHM,
+    HOME_BETA_MAXIMUM_FAILOVER_RTO_MS, HOME_BETA_MINIMUM_DURATION_MS, HOME_BETA_RUN_SCHEMA,
+    HOME_SIGNATURE_ALGORITHM, HomeBetaFaultKind, HomeBetaFaultObservation,
+    HomeNetworkBetaRunPayload, NodeSigningIdentity, node_id_from_public_key,
+    verify_ed25519_signature,
 };
 
 pub const HOME_BETA_PLAN_SCHEMA: &str = "obelisk.home-network-beta-plan.v1";
@@ -176,6 +177,7 @@ impl HomeBetaRunJournal {
         Ok(action)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn complete_action(
         &mut self,
         sessions_before: u32,
@@ -442,15 +444,17 @@ mod tests {
                 3_000,
             )
             .unwrap();
-        assert!(signed
-            .verify(
-                operator.public_key(),
-                node.node_id(),
-                node.public_key(),
-                "other-build",
-                3_000,
-            )
-            .is_err());
+        assert!(
+            signed
+                .verify(
+                    operator.public_key(),
+                    node.node_id(),
+                    node.public_key(),
+                    "other-build",
+                    3_000,
+                )
+                .is_err()
+        );
 
         let mut forbidden = plan(&node);
         forbidden.actions[1].execution = HomeBetaActionExecution::BoundedNetworkProbe;
@@ -470,21 +474,23 @@ mod tests {
         journal
             .complete_action(2, 2, 0, "ab".repeat(32), &node, "abc123", 5_000)
             .unwrap();
-        assert!(journal
-            .clone()
-            .finish(
-                &node,
-                "abc123",
-                3_000 + HOME_BETA_MINIMUM_DURATION_MS,
-                HomeBetaRunMetadata {
-                    provider_code: "isp-a".to_string(),
-                    provider_asn: 64_500,
-                    failure_domain: "home-a".to_string(),
-                    coarse_region: "hk".to_string(),
-                    active_session_minutes: 15,
-                    machine_attestation_sha256: "cd".repeat(32),
-                },
-            )
-            .is_err());
+        assert!(
+            journal
+                .clone()
+                .finish(
+                    &node,
+                    "abc123",
+                    3_000 + HOME_BETA_MINIMUM_DURATION_MS,
+                    HomeBetaRunMetadata {
+                        provider_code: "isp-a".to_string(),
+                        provider_asn: 64_500,
+                        failure_domain: "home-a".to_string(),
+                        coarse_region: "hk".to_string(),
+                        active_session_minutes: 15,
+                        machine_attestation_sha256: "cd".repeat(32),
+                    },
+                )
+                .is_err()
+        );
     }
 }

@@ -8,22 +8,40 @@ pub mod economy;
 pub mod events;
 pub mod gate14;
 pub mod gate15;
-pub mod guild_node_foundation;
-pub mod home_agent_runtime;
-pub mod home_beta;
-pub mod home_beta_plan;
-pub mod home_enrollment;
-pub mod home_sandbox;
-pub mod home_tunnel;
+pub mod guild_node_foundation {
+    pub use dubhe_network_core::capacity::*;
+}
+pub mod home_agent_runtime {
+    pub use dubhe_network_core::agent::*;
+}
+pub mod home_beta {
+    pub use dubhe_network_core::telemetry::*;
+}
+pub mod home_beta_plan {
+    pub use dubhe_network_core::beta::*;
+}
+pub mod home_enrollment {
+    pub use dubhe_network_core::enrollment::*;
+}
+pub mod home_sandbox {
+    pub use dubhe_network_core::sandbox::*;
+}
+pub mod home_tunnel {
+    pub use dubhe_network_core::tunnel::*;
+}
 pub mod home_tunnel_transport;
 pub mod hotspot;
 mod inject;
 pub mod mir2_workload;
-pub mod node_identity;
+pub mod node_identity {
+    pub use dubhe_network_core::identity::*;
+}
 pub mod node_security;
 pub mod operator;
 pub mod regional;
-pub mod rewards;
+pub mod rewards {
+    pub use dubhe_network_core::rewards::*;
+}
 pub mod routing;
 mod session;
 pub mod tcp;

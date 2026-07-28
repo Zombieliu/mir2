@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 
 use crate::{
-    node_id_from_public_key, verify_ed25519_signature, GameRewardPolicy, HomeAgentWorkMode,
-    NodeSigningIdentity, VerifiedWorkReceipt,
+    GameRewardPolicy, HomeAgentWorkMode, NodeSigningIdentity, VerifiedWorkReceipt,
+    node_id_from_public_key, verify_ed25519_signature,
 };
 
 pub const HOME_TELEMETRY_SCHEMA: &str = "obelisk.home-node-telemetry.v1";
@@ -1096,9 +1096,11 @@ mod tests {
         let guard = HomeTelemetryReplayGuard::default();
         guard.accept(&report, 2_100, 1_000).unwrap();
         assert!(guard.accept(&report, 2_100, 1_000).is_err());
-        assert!(!serde_json::to_string(&report.operator_view())
-            .unwrap()
-            .contains("192.168."));
+        assert!(
+            !serde_json::to_string(&report.operator_view())
+                .unwrap()
+                .contains("192.168.")
+        );
 
         let mut raw_ip = telemetry(&identity);
         raw_ip.coarse_region = "203.0.113.9".to_string();
@@ -1122,9 +1124,14 @@ mod tests {
         let identity = NodeSigningIdentity::from_seed([22; 32]);
         let report = SignedHomeNodeTelemetry::sign(telemetry(&identity), &identity).unwrap();
         let receipt = receipt(&identity);
-        let accepted =
-            reconcile_home_node_reward(&report, &[receipt.clone()], &policy(), 2_100, 1_000)
-                .unwrap();
+        let accepted = reconcile_home_node_reward(
+            &report,
+            std::slice::from_ref(&receipt),
+            &policy(),
+            2_100,
+            1_000,
+        )
+        .unwrap();
         assert!(accepted.payable);
         assert_eq!(accepted.accepted_work_score, 4);
         assert_eq!(accepted.estimated_reward, 40);

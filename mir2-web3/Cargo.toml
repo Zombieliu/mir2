@@ -6,5 +6,6 @@ members = [
     "apps/simulation",
     "packages/game-data",
     "packages/protocol",
+    "vendor/dubhe-network-core",
 ]
 resolver = "2"
