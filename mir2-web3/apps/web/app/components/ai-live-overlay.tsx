@@ -21,6 +21,48 @@ export type AiLiveSegment = {
   eventKinds: string[];
 };
 
+export type AiDistributionChannel =
+  | "gameOverlay"
+  | "webBroadcast"
+  | "rtmpBroadcast"
+  | "discordWebhook"
+  | "discordGoLive"
+  | "clipExport";
+
+export type AiChannelStatus = {
+  channel: AiDistributionChannel;
+  label: string;
+  deliveryMode: "inProcess" | "pull" | "relay" | "push";
+  configured: boolean;
+  enabled: boolean;
+  state: "ready" | "disabled" | "degraded" | "unconfigured";
+  queued: number;
+  deliveredTotal: number;
+  failureTotal: number;
+  deadLettersTotal: number;
+  lastSuccessAtMs: number | null;
+  lastFailureAtMs: number | null;
+  lastError: string | null;
+};
+
+export type AiDistributionStatus = {
+  schema: string;
+  channels: AiChannelStatus[];
+  recentReceipts: Array<{
+    jobId: string;
+    contentId: string;
+    channel: AiDistributionChannel;
+    deliveredAtMs: number;
+    attempts: number;
+  }>;
+  metrics: {
+    deliveredTotal: number;
+    failureTotal: number;
+    deadLettersTotal: number;
+    queuedDeliveries: number;
+  };
+};
+
 export type AiLiveStatus = {
   schema: string;
   enabled: boolean;
@@ -38,8 +80,13 @@ export type AiLiveStatus = {
     generatedSegmentsTotal: number;
     modelFailureTotal: number;
     ttsFailureTotal: number;
+    distributionSuccessTotal: number;
+    distributionFailureTotal: number;
+    distributionDeadLettersTotal: number;
+    queuedDistributionDeliveries: number;
     queuedDiscordDeliveries: number;
   };
+  distribution: AiDistributionStatus;
 };
 
 type AiLiveOverlayProps = {

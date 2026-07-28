@@ -1,3 +1,4 @@
+pub mod ai_distribution;
 pub mod ai_live;
 mod auth;
 pub mod beta;
@@ -54,6 +55,11 @@ pub mod zone_lease;
 pub mod zone_replication;
 pub mod zone_rpc;
 
+pub use ai_distribution::{
+    AiChannelStatus, AiContentAssets, AiContentContext, AiContentKind, AiContentPackage,
+    AiDeliveryReceipt, AiDistributionChannel, AiDistributionConfig, AiDistributionHub,
+    AiDistributionMetrics, AiDistributionStatus,
+};
 pub use ai_live::{
     AiLiveConfig, AiLiveHub, AiLiveMetrics, AiLiveMode, AiLiveNarrativeSource, AiLiveSegment,
     AiLiveStatus,
