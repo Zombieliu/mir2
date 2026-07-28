@@ -176,6 +176,14 @@ struct AiLiveControlRequest {
     token: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AiDistributionControlRequest {
+    channel: String,
+    action: String,
+    token: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SpectatorDirectoryResponse {
@@ -1534,6 +1542,10 @@ pub async fn run_web_gateway(
         .route("/ai-live/metrics", get(ai_live_metrics))
         .route("/ai-live/metrics/prometheus", get(ai_live_prometheus))
         .route("/ai-live/control", post(ai_live_control))
+        .route(
+            "/ai-live/distribution",
+            get(ai_distribution_status).post(ai_distribution_control),
+        )
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
@@ -1584,6 +1596,12 @@ async fn ai_live_status(State(state): State<WebState>) -> Json<crate::ai_live::A
     Json(state.ai_live.status())
 }
 
+async fn ai_distribution_status(
+    State(state): State<WebState>,
+) -> Json<crate::ai_distribution::AiDistributionStatus> {
+    Json(state.ai_live.distribution_status())
+}
+
 async fn ai_live_metrics(State(state): State<WebState>) -> Json<crate::ai_live::AiLiveMetrics> {
     Json(state.ai_live.metrics())
 }
@@ -1612,6 +1630,18 @@ async fn ai_live_prometheus(State(state): State<WebState>) -> Response {
             "# HELP mir2_ai_live_tts_failures_total TTS failures handled without blocking broadcast.\n",
             "# TYPE mir2_ai_live_tts_failures_total counter\n",
             "mir2_ai_live_tts_failures_total {tts_failures}\n",
+            "# HELP mir2_ai_distribution_delivered_total Successful channel deliveries.\n",
+            "# TYPE mir2_ai_distribution_delivered_total counter\n",
+            "mir2_ai_distribution_delivered_total {distribution_delivered}\n",
+            "# HELP mir2_ai_distribution_failures_total Failed channel delivery attempts.\n",
+            "# TYPE mir2_ai_distribution_failures_total counter\n",
+            "mir2_ai_distribution_failures_total {distribution_failures}\n",
+            "# HELP mir2_ai_distribution_queue Pending channel-neutral delivery jobs.\n",
+            "# TYPE mir2_ai_distribution_queue gauge\n",
+            "mir2_ai_distribution_queue {distribution_queue}\n",
+            "# HELP mir2_ai_distribution_dead_letters_total Exhausted channel deliveries.\n",
+            "# TYPE mir2_ai_distribution_dead_letters_total counter\n",
+            "mir2_ai_distribution_dead_letters_total {distribution_dead_letters}\n",
             "# HELP mir2_ai_live_discord_queue Pending Discord highlight deliveries.\n",
             "# TYPE mir2_ai_live_discord_queue gauge\n",
             "mir2_ai_live_discord_queue {discord_queue}\n",
@@ -1624,6 +1654,10 @@ async fn ai_live_prometheus(State(state): State<WebState>) -> Response {
         segments = metrics.generated_segments_total,
         model_failures = metrics.model_failure_total,
         tts_failures = metrics.tts_failure_total,
+        distribution_delivered = metrics.distribution_success_total,
+        distribution_failures = metrics.distribution_failure_total,
+        distribution_queue = metrics.queued_distribution_deliveries,
+        distribution_dead_letters = metrics.distribution_dead_letters_total,
         discord_queue = metrics.queued_discord_deliveries,
         discord_dead_letters = metrics.discord_dead_letters_total,
     );
@@ -1633,6 +1667,47 @@ async fn ai_live_prometheus(State(state): State<WebState>) -> Response {
         body,
     )
         .into_response()
+}
+
+async fn ai_distribution_control(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<AiDistributionControlRequest>,
+) -> Result<
+    Json<crate::ai_distribution::AiDistributionStatus>,
+    (StatusCode, Json<AdminErrorResponse>),
+> {
+    let channel = crate::ai_distribution::AiDistributionChannel::parse(&request.channel)
+        .ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(AdminErrorResponse {
+                    error: "unsupported AI distribution channel".to_string(),
+                }),
+            )
+        })?;
+    let bearer = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim);
+    let token = request.token.as_deref().or(bearer);
+    let result = match request.action.trim().to_ascii_lowercase().as_str() {
+        "enable" | "start" => state.ai_live.set_distribution_channel(token, channel, true),
+        "disable" | "pause" | "stop" => state
+            .ai_live
+            .set_distribution_channel(token, channel, false),
+        "retry" => state.ai_live.retry_distribution_channel(token, channel),
+        _ => Err("action must be enable, disable, or retry".to_string()),
+    };
+    result.map(Json).map_err(|error| {
+        let status = if error.contains("token") {
+            StatusCode::FORBIDDEN
+        } else {
+            StatusCode::BAD_REQUEST
+        };
+        (status, Json(AdminErrorResponse { error }))
+    })
 }
 
 async fn ai_live_control(

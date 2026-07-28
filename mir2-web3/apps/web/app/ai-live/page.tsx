@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { AiLiveStatus } from "../components/ai-live-overlay";
+import type {
+  AiDistributionChannel,
+  AiLiveStatus,
+} from "../components/ai-live-overlay";
 
 function number(value: number | undefined) {
   return new Intl.NumberFormat("zh-CN").format(value ?? 0);
@@ -62,6 +65,35 @@ export default function AiLiveControlPage() {
     }
   }
 
+  async function channelControl(
+    channel: AiDistributionChannel,
+    action: "enable" | "disable" | "retry",
+  ) {
+    if (!operatorToken.trim()) {
+      setError("请先输入导播令牌。令牌只保存在当前浏览器标签页。");
+      return;
+    }
+    setBusy(true);
+    try {
+      window.sessionStorage.setItem("mir2.aiLiveOperatorToken", operatorToken);
+      const response = await fetch(`${base}/distribution`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${operatorToken}`,
+        },
+        body: JSON.stringify({ channel, action }),
+      });
+      const body = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "渠道控制失败");
+      await refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "渠道控制失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const segment = status?.latestSegment;
   const broadcastUrl = "/spectate?aiLive=1&spectateMode=director";
 
@@ -115,7 +147,7 @@ export default function AiLiveControlPage() {
             ["片段", number(status?.metrics.generatedSegmentsTotal)],
             ["模型降级", number(status?.metrics.modelFailureTotal)],
             ["语音降级", number(status?.metrics.ttsFailureTotal)],
-            ["待推送", number(status?.metrics.queuedDiscordDeliveries)],
+            ["待分发", number(status?.metrics.queuedDistributionDeliveries)],
           ].map(([label, value]) => (
             <article key={label} style={{ minHeight: 108, padding: 18, border: "1px solid rgba(130, 205, 226, .13)", borderRadius: 14, background: "rgba(8, 21, 35, .72)" }}>
               <span style={{ color: "#627d8f", fontSize: 10, letterSpacing: ".12em" }}>{label}</span>
@@ -172,10 +204,67 @@ export default function AiLiveControlPage() {
                 ))}
               </div>
               <p style={{ margin: "20px 0 0", color: "#566f80", fontSize: 10, lineHeight: 1.6 }}>
-                正式直播才会生成语音并推送 Discord；影子模式只验证选题与文案。
+                正式直播才会生成语音并进入多渠道分发；影子模式只验证选题与文案。
               </p>
             </form>
           </aside>
+        </section>
+
+        <section style={{ marginTop: 16, padding: 24, border: "1px solid rgba(130, 205, 226, .13)", borderRadius: 18, background: "rgba(8, 21, 35, .76)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <span style={{ color: "#62dbef", fontSize: 10, letterSpacing: ".18em" }}>DISTRIBUTION FABRIC</span>
+              <h2 style={{ margin: "10px 0 0", fontSize: 26 }}>节目分发渠道</h2>
+            </div>
+            <p style={{ margin: 0, color: "#6f8797", fontSize: 11 }}>
+              一次生成，多渠道投递；任一渠道失败不会影响玩家
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, marginTop: 20 }}>
+            {(status?.distribution.channels ?? []).map((channel) => {
+              const color = channel.state === "ready"
+                ? "#54e1bd"
+                : channel.state === "degraded"
+                  ? "#ff9d85"
+                  : "#708899";
+              return (
+                <article key={channel.channel} style={{ padding: 18, border: `1px solid ${color}33`, borderRadius: 14, background: "rgba(3, 12, 22, .66)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <strong>{channel.label}</strong>
+                    <span style={{ color, fontSize: 10 }}>{channel.state}</span>
+                  </div>
+                  <p style={{ margin: "12px 0", color: "#657f91", fontSize: 11 }}>
+                    {channel.deliveryMode} · 成功 {number(channel.deliveredTotal)} · 等待 {number(channel.queued)}
+                  </p>
+                  {channel.lastError ? (
+                    <p style={{ margin: "0 0 12px", color: "#ff9d85", fontSize: 10 }}>
+                      {channel.lastError}
+                    </p>
+                  ) : null}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      type="button"
+                      disabled={busy || !channel.configured}
+                      onClick={() => void channelControl(channel.channel, channel.enabled ? "disable" : "enable")}
+                      style={{ minHeight: 34, padding: "0 12px", border: `1px solid ${color}44`, borderRadius: 8, background: `${color}12`, color, cursor: channel.configured ? "pointer" : "not-allowed" }}
+                    >
+                      {!channel.configured ? "待配置" : channel.enabled ? "暂停渠道" : "启用渠道"}
+                    </button>
+                    {channel.queued > 0 ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void channelControl(channel.channel, "retry")}
+                        style={{ minHeight: 34, padding: "0 12px", border: "1px solid #71dff244", borderRadius: 8, background: "#71dff212", color: "#71dff2", cursor: "pointer" }}
+                      >
+                        立即重试
+                      </button>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
       </div>
     </main>
