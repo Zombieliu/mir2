@@ -27,6 +27,7 @@ commonware-2026-2 = [
 [dependencies]
 axum = { version = "0.8", features = ["http1", "json", "tokio", "ws"] }
 base64 = "0.22"
+dubhe-network-core = { path = "../../vendor/dubhe-network-core" }
 commonware-codec = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
 commonware-consensus = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
 commonware-cryptography = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }

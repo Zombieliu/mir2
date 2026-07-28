@@ -1,0 +1,6 @@
+repository = "https://github.com/0xobelisk/dubhe-chain-poc"
+revision = "665e7b38169a01a8be48da5627de454c40e8fb01"
+path = "crates/network-core"
+license = "Apache-2.0"
+canonical = true
+reason = "Vendored while the canonical repository is private; avoids cross-private-repository CI credentials."

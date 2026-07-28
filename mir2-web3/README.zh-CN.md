@@ -1,5 +1,10 @@
 # Mir2 Web3 / Dubhe Node 中文说明
 
+> Dubhe 的通用节点身份、注册、容量证明、家庭节点隧道协议、遥测和奖励结算
+> 已迁移到 [`0xobelisk/dubhe-chain-poc`](https://github.com/0xobelisk/dubhe-chain-poc)。
+> 本仓库只保留 Mir2 网关、地图模拟和传输适配。详细边界与同步方式见
+> [`docs/DUBHE-NETWORK-CORE-INTEGRATION.zh-CN.md`](docs/DUBHE-NETWORK-CORE-INTEGRATION.zh-CN.md)。
+>
 > 本文是本项目的中文总入口。它先解释玩家实际连接了什么，再说明
 > Commonware、Dubhe Node、Sui、Postgres 和 Redis 各自负责什么，最后把
 > 这套基础设施落到 Mir2 的行会、地图、打宝、攻城和商业模式中。
