@@ -79,6 +79,10 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+      - name: Prepare target sidecars
+        run: npm run prepare:sidecars
+        env:
+          DUBHE_NODE_TARGET: ${{ matrix.target }}
       - run: cargo +1.89.0 test --manifest-path src-tauri/Cargo.toml
       - run: npm run tauri build -- --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
 
