@@ -73,6 +73,10 @@ jobs:
           docker buildx imagetools inspect "$IMAGE_REFERENCE"
           for platform_and_arch in linux/amd64:x86_64 linux/arm64:aarch64; do
             IFS=: read -r platform expected_arch <<<"$platform_and_arch"
+            # The classic Docker image store cannot retain two platform
+            # variants under the same multi-architecture digest. Clear the
+            # previously verified variant before pulling the next platform.
+            docker image rm --force "$IMAGE_REFERENCE" >/dev/null 2>&1 || true
             docker run --rm \
               --platform "$platform" \
               --env "EXPECTED_ARCH=$expected_arch" \
