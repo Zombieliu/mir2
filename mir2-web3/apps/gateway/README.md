@@ -136,6 +136,18 @@ Admin runtime read endpoints:
 - `POST /admin/system-mail`: deliver audited Admin API mail into the configured account store.
 - `POST /admin/kick-player`: remove one character from the current session/routing cache.
 - `GET /admin/sessions`: list current online session-cache records from the in-memory or Redis cache.
+- `GET /admin/session-trace?accountId=<id>&characterIndex=<n>`: return the
+  current placement, bounded transition history, and embedded Gate15 finalized
+  lease. In staging/production it requires
+  `Authorization: Bearer $MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN`.
+
+Production trace history is stored with the Redis session index. Configure
+`MIR2_GATEWAY_TRACE_HISTORY_TTL_SECONDS` (default 86400, bounded to 30 days);
+each character retains at most 128 transition events. Set
+`MIR2_GATEWAY_ID`, `MIR2_GATEWAY_PUBLIC_ENDPOINT`,
+`MIR2_GATEWAY_RELAY_ID`, `MIR2_GATEWAY_RELAY_ENDPOINT`, and
+`MIR2_GATEWAY_NODE_KIND` so the operations page can distinguish Gateway,
+Relay, Home Node, and Official Node hops.
 
 ## Smoke And Trace
 

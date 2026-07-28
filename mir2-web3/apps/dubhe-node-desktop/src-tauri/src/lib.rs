@@ -21,6 +21,8 @@ use tauri::{AppHandle, Manager, State};
 use tokio::process::{Child, Command};
 use tokio::sync::{Mutex, RwLock};
 
+mod desktop_runtime;
+
 const DEFAULT_KEYRING_ACCOUNT: &str = "default";
 const DEFAULT_SUPERVISOR_URL: &str = "http://127.0.0.1:17990";
 const ENROLLMENT_CLIENT_CONFIG_FILE: &str = "enrollment-client.json";
@@ -30,6 +32,8 @@ const RELAY_CA_CERTIFICATE_FILE: &str = "relay-ca.der";
 const RELAY_CLIENT_CERTIFICATE_FILE: &str = "relay-client.der";
 const RELAY_TLS_KEYRING_SUFFIX: &str = "relay-tls";
 const AGENT_RUNTIME_STATUS_FILE: &str = "agent-runtime-status.json";
+const SUPERVISOR_LOG_FILE: &str = "home-agent-supervisor.log";
+const SUPERVISOR_LOG_MAX_BYTES: u64 = 10 * 1024 * 1024;
 const DEFAULT_CREDENTIAL_RENEWAL_WINDOW_MS: u64 = 6 * 60 * 60 * 1_000;
 const DEFAULT_CREDENTIAL_RENEWAL_POLL_MS: u64 = 5 * 60 * 1_000;
 const SUPERVISOR_GRACEFUL_SHUTDOWN_SECONDS: u64 = 40;
@@ -638,6 +642,33 @@ async fn ensure_supervisor(
         fs::create_dir_all(&application_config_directory)
             .map_err(|error| format!("create Dubhe Node configuration directory: {error}"))?;
         let agent_runtime_status = application_config_directory.join(AGENT_RUNTIME_STATUS_FILE);
+        let supervisor_log = application_config_directory.join(SUPERVISOR_LOG_FILE);
+        if fs::metadata(&supervisor_log)
+            .map(|metadata| metadata.len() >= SUPERVISOR_LOG_MAX_BYTES)
+            .unwrap_or(false)
+        {
+            let rotated = supervisor_log.with_extension("log.1");
+            let _ = fs::remove_file(&rotated);
+            fs::rename(&supervisor_log, &rotated).map_err(|error| {
+                format!(
+                    "rotate Dubhe Node Supervisor log {}: {error}",
+                    supervisor_log.display()
+                )
+            })?;
+        }
+        let stdout = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&supervisor_log)
+            .map_err(|error| {
+                format!(
+                    "open Dubhe Node Supervisor log {}: {error}",
+                    supervisor_log.display()
+                )
+            })?;
+        let stderr = stdout
+            .try_clone()
+            .map_err(|error| format!("clone Dubhe Node Supervisor log handle: {error}"))?;
         let mut command = Command::new(&binary);
         command
             .arg("serve")
@@ -654,8 +685,8 @@ async fn ensure_supervisor(
             .env("MIR2_HOME_ZONE_OPERATOR_URL", "http://127.0.0.1:7021")
             .env("MIR2_HOME_AGENT_STATUS_FILE", agent_runtime_status)
             .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stdout(Stdio::from(stdout))
+            .stderr(Stdio::from(stderr))
             .kill_on_drop(true);
         if let Some(bundle) = enrollment {
             command
@@ -1398,7 +1429,14 @@ fn now_ms() -> u64 {
 pub fn run() {
     tauri::Builder::default()
         .manage(DesktopState::default())
+        .manage(desktop_runtime::DesktopRuntimeState::default())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec!["--hidden"]),
+        ))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
+            desktop_runtime::setup(app)?;
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 credential_renewal_loop(handle).await;
@@ -1412,8 +1450,17 @@ pub fn run() {
             enrollment_status,
             enroll_node,
             certify_node,
-            renew_node_credentials
+            renew_node_credentials,
+            desktop_runtime::desktop_preferences,
+            desktop_runtime::set_desktop_preferences,
+            desktop_runtime::check_for_desktop_update,
+            desktop_runtime::install_desktop_update,
+            desktop_runtime::desktop_recovery_status,
+            desktop_runtime::rollback_desktop_update,
+            desktop_runtime::export_diagnostics,
+            desktop_runtime::prepare_uninstall
         ])
+        .on_window_event(desktop_runtime::handle_window_event)
         .run(tauri::generate_context!())
         .expect("error while running Dubhe Node desktop application");
 }

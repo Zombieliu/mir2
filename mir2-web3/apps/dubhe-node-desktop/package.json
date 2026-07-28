@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "acceptance": "node scripts/run-acceptance.mjs",
     "prepare:sidecars": "node scripts/prepare-sidecars.mjs",
+    "release:check": "node scripts/validate-release.mjs",
     "preview": "vite preview",
     "tauri": "tauri"
   },

@@ -1646,6 +1646,7 @@ impl AuditRepository for PostgresAdminRepository {
         let status = status_text(&record.status);
         let target_type = target_type_text(&record.target.target_type);
         let completed_at_ms = record.completed_at_ms.map(|value| value as i64);
+        let command_id = postgres_audit_command_id(&record);
         let mut client = self.client.lock().map_err(repository_lock_error)?;
         client
             .execute(
@@ -1668,7 +1669,7 @@ impl AuditRepository for PostgresAdminRepository {
                 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)",
                 &[
                     &record.audit_id,
-                    &record.command_id,
+                    &command_id,
                     &record.operator_id,
                     &record.operator_email,
                     &record.operator_role_snapshot,
@@ -2356,6 +2357,35 @@ where
 
     pub fn audit_records(&self, limit: usize) -> Vec<AuditRecord> {
         self.audit_store.list_recent(limit)
+    }
+
+    pub fn record_read_audit(
+        &mut self,
+        operator: &Operator,
+        permission: Permission,
+        target: AdminTarget,
+        reason: impl Into<String>,
+        trace_id: impl Into<String>,
+        created_at_ms: u64,
+    ) -> Result<AuditRecord, AdminError> {
+        let trace_id = trace_id.into();
+        let record = AuditRecord {
+            audit_id: format!("audit-{trace_id}"),
+            command_id: format!("read-{trace_id}"),
+            operator_id: operator.id.clone(),
+            operator_email: operator.email.clone(),
+            operator_role_snapshot: operator.role.clone(),
+            permission,
+            target,
+            reason: reason.into(),
+            status: CommandStatus::Succeeded,
+            error_code: None,
+            trace_id,
+            created_at_ms,
+            completed_at_ms: Some(created_at_ms),
+        };
+        self.audit_store.append(record.clone())?;
+        Ok(record)
     }
 
     pub fn create_approval(
@@ -3339,6 +3369,13 @@ where
 }
 
 fn get_json_from_gateway(gateway_url: &str) -> Result<String, String> {
+    get_json_from_gateway_with_bearer(gateway_url, None)
+}
+
+fn get_json_from_gateway_with_bearer(
+    gateway_url: &str,
+    bearer: Option<&str>,
+) -> Result<String, String> {
     let (host, path) = parse_http_url(gateway_url)?;
     let mut stream = TcpStream::connect(&host)
         .map_err(|error| format!("gateway endpoint unavailable: {error}"))?;
@@ -3348,9 +3385,12 @@ fn get_json_from_gateway(gateway_url: &str) -> Result<String, String> {
     stream
         .set_write_timeout(Some(Duration::from_secs(3)))
         .map_err(|error| format!("gateway write timeout setup failed: {error}"))?;
+    let authorization = bearer
+        .map(|token| format!("Authorization: Bearer {token}\r\n"))
+        .unwrap_or_default();
     write!(
         stream,
-        "GET {path} HTTP/1.1\r\nHost: {host}\r\nAccept: application/json\r\nConnection: close\r\n\r\n"
+        "GET {path} HTTP/1.1\r\nHost: {host}\r\nAccept: application/json\r\n{authorization}Connection: close\r\n\r\n"
     )
     .map_err(|error| format!("gateway request write failed: {error}"))?;
 
@@ -4177,6 +4217,11 @@ fn admin_protected_router() -> Router<AdminApiState> {
         .route("/admin/read/accounts/:account_id", get(read_account_detail))
         .route("/admin/read/players", get(read_players))
         .route("/admin/read/players/:player_id", get(read_player_detail))
+        .route("/admin/read/service-trace", get(read_service_trace))
+        .route(
+            "/admin/read/commonware-network",
+            get(read_commonware_network),
+        )
         .route("/admin/read/economy", get(read_economy))
         .route("/admin/read/economy/aggregate", get(read_economy_aggregate))
         .route("/admin/read/mail", get(read_mail))
@@ -4695,6 +4740,118 @@ pub struct AdminPlayerDetail {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AdminServiceTraceReadModel {
+    pub generated_at_ms: u64,
+    pub query: String,
+    pub status: String,
+    pub reason: Option<String>,
+    pub player: Option<AdminServiceTracePlayer>,
+    pub candidates: Vec<AdminServiceTracePlayer>,
+    pub current: Option<AdminServicePlacement>,
+    pub history: Vec<AdminServiceTraceEvent>,
+    pub commonware: Option<AdminCommonwarePlacement>,
+    pub diagnostics: Vec<AdminServiceTraceDiagnostic>,
+    pub sensitive_redacted: bool,
+    pub audit_trace_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminCommonwareNetworkReadModel {
+    pub generated_at_ms: u64,
+    pub status: String,
+    pub error: Option<String>,
+    pub placement: Option<AdminCommonwarePlacement>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminServiceTracePlayer {
+    pub player_id: String,
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub online: bool,
+    pub map_file_name: String,
+    pub player_object_id: Option<u32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminServicePlacement {
+    pub gateway_session_id: Option<String>,
+    pub gateway_id: Option<String>,
+    pub gateway_endpoint: Option<String>,
+    pub relay_id: Option<String>,
+    pub relay_endpoint: Option<String>,
+    pub service_node_id: Option<String>,
+    pub node_kind: Option<String>,
+    pub zone_id: Option<String>,
+    pub line_id: Option<u16>,
+    pub map_file_name: Option<String>,
+    pub zone_owner_fencing_token: Option<u64>,
+    pub handoff_generation: u64,
+    pub route_lease_expires_at_ms: Option<u64>,
+    pub updated_at_ms: u64,
+    pub tick: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminServiceTraceEvent {
+    pub event_id: String,
+    pub event_type: String,
+    pub occurred_at_ms: u64,
+    pub gateway_session_id: Option<String>,
+    pub gateway_id: Option<String>,
+    pub relay_id: Option<String>,
+    pub service_node_id: Option<String>,
+    pub node_kind: Option<String>,
+    pub zone_id: Option<String>,
+    pub line_id: Option<u16>,
+    pub map_file_name: Option<String>,
+    pub zone_owner_fencing_token: Option<u64>,
+    pub handoff_generation: u64,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminCommonwarePlacement {
+    pub source: String,
+    pub gateway_id: String,
+    pub finalized_height: u64,
+    pub state_root: String,
+    pub zone_id: String,
+    pub generation: u64,
+    pub primary_host_id: String,
+    pub replica_host_ids: Vec<String>,
+    pub primary_endpoint: String,
+    pub replica_endpoints: Vec<String>,
+    pub expires_at_ms: u64,
+    pub session_lease: Option<AdminCommonwareSessionLease>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminCommonwareSessionLease {
+    pub session_id: String,
+    pub gateway_id: String,
+    pub zone_id: String,
+    pub fencing_token: u64,
+    pub expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminServiceTraceDiagnostic {
+    pub component: String,
+    pub status: String,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AdminNpcFlagRecord {
     pub index: u32,
     pub active: bool,
@@ -5010,24 +5167,149 @@ struct GatewaySessionsResponse {
     sessions: Vec<GatewaySessionRecord>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct GatewaySessionRecord {
     key: GatewaySessionKey,
     character_name: String,
+    #[serde(default)]
+    gateway_session_id: Option<String>,
+    #[serde(default)]
+    gateway_id: Option<String>,
+    #[serde(default)]
+    gateway_endpoint: Option<String>,
+    #[serde(default)]
+    relay_id: Option<String>,
+    #[serde(default)]
+    relay_endpoint: Option<String>,
+    #[serde(default)]
+    service_node_id: Option<String>,
+    #[serde(default)]
+    node_kind: Option<String>,
+    #[serde(default)]
+    zone_id: Option<String>,
+    #[serde(default)]
+    zone_owner_id: Option<String>,
+    #[serde(default)]
+    zone_owner_fencing_token: Option<u64>,
     map_file_name: Option<String>,
     player_object_id: Option<u32>,
     player_hp: Option<i32>,
     player_max_hp: Option<i32>,
     gold: u32,
     tick: u64,
+    #[serde(default)]
+    updated_at_ms: u64,
+    #[serde(default)]
+    route_lease_owner: Option<String>,
+    #[serde(default)]
+    route_lease_expires_at_ms: Option<u64>,
+    #[serde(default)]
+    handoff_generation: u64,
 }
 
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 struct GatewaySessionKey {
     account_id: String,
     character_index: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionTraceResponse {
+    source: String,
+    generated_at_ms: u64,
+    status: String,
+    current: Option<GatewaySessionRecord>,
+    events: Vec<GatewaySessionTraceEventRecord>,
+    #[serde(default)]
+    commonware: Option<GatewayCommonwareTraceRecord>,
+    reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionTraceEventRecord {
+    event_id: String,
+    event_type: String,
+    occurred_at_ms: u64,
+    gateway_session_id: Option<String>,
+    gateway_id: Option<String>,
+    relay_id: Option<String>,
+    service_node_id: Option<String>,
+    node_kind: Option<String>,
+    zone_id: Option<String>,
+    map_file_name: Option<String>,
+    zone_owner_fencing_token: Option<u64>,
+    handoff_generation: u64,
+    reason: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Gate14RouteResponse {
+    gateway_id: String,
+    finalized_height: u64,
+    state_root: String,
+    placement: Gate14PlacementRecord,
+    primary_endpoint: String,
+    replica_endpoints: Vec<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Gate14PlacementRecord {
+    zone_id: String,
+    generation: u64,
+    primary_host_id: String,
+    replica_host_ids: Vec<String>,
+    expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Gate14SessionLeaseRecord {
+    session_id: String,
+    gateway_id: String,
+    zone_id: String,
+    fencing_token: u64,
+    expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewayCommonwareTraceRecord {
+    finalized_height: u64,
+    state_root: String,
+    lease: Gate14SessionLeaseRecord,
+    placement: GatewayCommonwarePlacementRecord,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewayCommonwarePlacementRecord {
+    zone_id: String,
+    generation: u64,
+    primary: GatewayCommonwareEndpointRecord,
+    replicas: Vec<GatewayCommonwareEndpointRecord>,
+    expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewayCommonwareEndpointRecord {
+    host_id: String,
+    endpoint: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminServiceTraceQuery {
+    query: String,
+    #[serde(default)]
+    sensitive: bool,
+    history_limit: Option<usize>,
 }
 
 impl AdminReadModelStore {
@@ -5504,6 +5786,55 @@ async fn read_player_detail(
     })
     .await
     .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_service_trace(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Query(request): Query<AdminServiceTraceQuery>,
+) -> Result<Json<AdminServiceTraceReadModel>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::CharacterRead)?;
+    if request.sensitive {
+        require_operator_permission(&operator, Permission::ServerControl)?;
+    }
+    let query = request.query.trim().to_string();
+    if query.len() < 2 || query.len() > 128 {
+        return Err(ApiError {
+            status: StatusCode::BAD_REQUEST,
+            message: "query must contain between 2 and 128 characters".into(),
+        });
+    }
+    let history_limit = request.history_limit.unwrap_or(64).clamp(1, 128);
+    let response = tokio::task::spawn_blocking(move || {
+        build_service_trace_read_model(state, operator, query, request.sensitive, history_limit)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_commonware_network() -> Result<Json<AdminCommonwareNetworkReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(|| {
+        let generated_at_ms = now_ms();
+        match load_commonware_placement("primary", None, false) {
+            Ok(placement) => AdminCommonwareNetworkReadModel {
+                generated_at_ms,
+                status: "live".into(),
+                error: None,
+                placement: Some(placement),
+            },
+            Err(error) => AdminCommonwareNetworkReadModel {
+                generated_at_ms,
+                status: "unavailable".into(),
+                error: Some(error),
+                placement: None,
+            },
+        }
+    })
+    .await
+    .map_err(join_error)?;
     Ok(Json(response))
 }
 
@@ -6918,6 +7249,517 @@ fn read_admin_log_tails() -> Vec<AdminLogTailRecord> {
                 error: Some(error.to_string()),
             },
         })
+        .collect()
+}
+
+fn build_service_trace_read_model(
+    state: AdminApiState,
+    operator: Operator,
+    query: String,
+    sensitive: bool,
+    history_limit: usize,
+) -> Result<AdminServiceTraceReadModel, ApiError> {
+    let generated_at_ms = now_ms();
+    let audit_trace_id = format!(
+        "service-trace-{generated_at_ms}-{}",
+        sanitize_trace_component(&operator.id)
+    );
+    let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+    let presence = load_gateway_presence();
+    let players = build_player_summaries(&snapshot, Some(&presence));
+    let matched = service_trace_candidates(&players, &query);
+    let candidates = matched
+        .iter()
+        .map(|player| service_trace_player(player, sensitive))
+        .collect::<Vec<_>>();
+    let selected = (matched.len() == 1).then(|| matched[0].clone());
+    let target_id = selected
+        .as_ref()
+        .map(|player| player.player_id.clone())
+        .unwrap_or_else(|| format!("search:{}", mask_identifier(&query)));
+    {
+        let mut control = state.control_plane.lock().map_err(lock_error)?;
+        control
+            .record_read_audit(
+                &operator,
+                Permission::CharacterRead,
+                AdminTarget {
+                    target_type: TargetType::Character,
+                    target_id: target_id.clone(),
+                    account_id: selected.as_ref().map(|player| player.account_id.clone()),
+                    character_id: selected.as_ref().map(|player| player.player_id.clone()),
+                },
+                "service placement trace query",
+                audit_trace_id.clone(),
+                generated_at_ms,
+            )
+            .map_err(ApiError::from)?;
+    }
+
+    let Some(player) = selected else {
+        let (status, reason) = if matched.is_empty() {
+            (
+                "not_found".to_string(),
+                Some(
+                    "未在账号存档或在线 Session 中找到该账号、角色、角色 ID 或对象 ID。"
+                        .to_string(),
+                ),
+            )
+        } else {
+            (
+                "ambiguous".to_string(),
+                Some("查询命中了多个角色，请选择一个精确结果。".to_string()),
+            )
+        };
+        return Ok(AdminServiceTraceReadModel {
+            generated_at_ms,
+            query,
+            status,
+            reason,
+            player: None,
+            candidates,
+            current: None,
+            history: Vec::new(),
+            commonware: None,
+            diagnostics: vec![
+                AdminServiceTraceDiagnostic {
+                    component: "account_store".into(),
+                    status: "ready".into(),
+                    message: format!("read model source: {}", snapshot.source),
+                },
+                AdminServiceTraceDiagnostic {
+                    component: "gateway_session_cache".into(),
+                    status: if presence.error.is_some() {
+                        "unavailable".into()
+                    } else {
+                        "ready".into()
+                    },
+                    message: presence.error.unwrap_or_else(|| {
+                        format!("{} live session records", presence.sessions.len())
+                    }),
+                },
+            ],
+            sensitive_redacted: !sensitive,
+            audit_trace_id,
+        });
+    };
+
+    let gateway_trace =
+        load_gateway_session_trace(&player.account_id, player.character_index, history_limit);
+    let mut diagnostics = vec![AdminServiceTraceDiagnostic {
+        component: "account_store".into(),
+        status: "ready".into(),
+        message: format!("player resolved from {}", snapshot.source),
+    }];
+    let (trace, trace_error) = match gateway_trace {
+        Ok(trace) => {
+            diagnostics.push(AdminServiceTraceDiagnostic {
+                component: "gateway_session_cache".into(),
+                status: "ready".into(),
+                message: format!("{} / generated {}", trace.source, trace.generated_at_ms),
+            });
+            (Some(trace), None)
+        }
+        Err(error) => {
+            diagnostics.push(AdminServiceTraceDiagnostic {
+                component: "gateway_session_cache".into(),
+                status: "unavailable".into(),
+                message: error.clone(),
+            });
+            (None, Some(error))
+        }
+    };
+    let current_record = trace.as_ref().and_then(|trace| trace.current.as_ref());
+    let current = current_record.map(|record| service_placement(record, sensitive));
+    let history = trace
+        .as_ref()
+        .map(|trace| {
+            trace
+                .events
+                .iter()
+                .map(service_trace_event)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let commonware_session_id = format!("player:{}:{}", player.account_id, player.character_index);
+    let commonware_result = trace
+        .as_ref()
+        .and_then(|trace| trace.commonware.as_ref())
+        .map(|commonware| Ok(commonware_from_gateway(commonware, sensitive)))
+        .or_else(|| {
+            current_record
+                .and_then(|record| record.zone_id.as_deref())
+                .map(|zone_id| {
+                    load_commonware_placement(zone_id, Some(&commonware_session_id), sensitive)
+                })
+        });
+    let commonware = match commonware_result {
+        Some(Ok(placement)) => {
+            diagnostics.push(AdminServiceTraceDiagnostic {
+                component: "commonware".into(),
+                status: "ready".into(),
+                message: format!(
+                    "finalized height {} / generation {}",
+                    placement.finalized_height, placement.generation
+                ),
+            });
+            Some(placement)
+        }
+        Some(Err(error)) => {
+            diagnostics.push(AdminServiceTraceDiagnostic {
+                component: "commonware".into(),
+                status: "unavailable".into(),
+                message: error,
+            });
+            None
+        }
+        None => {
+            diagnostics.push(AdminServiceTraceDiagnostic {
+                component: "commonware".into(),
+                status: "not_applicable".into(),
+                message: "no current Zone placement to resolve".into(),
+            });
+            None
+        }
+    };
+    let gateway_status = trace
+        .as_ref()
+        .map(|trace| trace.status.as_str())
+        .unwrap_or("unavailable");
+    let (status, reason) = match gateway_status {
+        "online" if commonware.is_some() => ("online", None),
+        "online" => (
+            "degraded",
+            Some("玩家在线，但 Commonware placement 暂时无法读取。".to_string()),
+        ),
+        "stale" => (
+            "stale",
+            trace.as_ref().and_then(|trace| trace.reason.clone()),
+        ),
+        "offline" => (
+            "offline",
+            trace.as_ref().and_then(|trace| trace.reason.clone()),
+        ),
+        "not_found" => (
+            "no_runtime_record",
+            Some("角色存在，但 Gateway 尚无当前 Session 或保留历史。".to_string()),
+        ),
+        _ => (
+            "unavailable",
+            trace_error.or_else(|| Some("Gateway trace source unavailable".into())),
+        ),
+    };
+    Ok(AdminServiceTraceReadModel {
+        generated_at_ms,
+        query,
+        status: status.into(),
+        reason,
+        player: Some(service_trace_player(&player, sensitive)),
+        candidates,
+        current,
+        history,
+        commonware,
+        diagnostics,
+        sensitive_redacted: !sensitive,
+        audit_trace_id,
+    })
+}
+
+fn service_trace_candidates(
+    players: &[AdminPlayerSummary],
+    query: &str,
+) -> Vec<AdminPlayerSummary> {
+    let query_lower = query.to_ascii_lowercase();
+    let mut exact = players
+        .iter()
+        .filter(|player| {
+            player.player_id.eq_ignore_ascii_case(query)
+                || player.account_id.eq_ignore_ascii_case(query)
+                || player.character_name.eq_ignore_ascii_case(query)
+                || player
+                    .player_object_id
+                    .is_some_and(|object_id| object_id.to_string() == query)
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+    if exact.is_empty() && query.len() >= 3 {
+        exact = players
+            .iter()
+            .filter(|player| {
+                player.player_id.to_ascii_lowercase().contains(&query_lower)
+                    || player
+                        .character_name
+                        .to_ascii_lowercase()
+                        .contains(&query_lower)
+            })
+            .take(8)
+            .cloned()
+            .collect();
+    }
+    exact
+}
+
+fn service_trace_player(player: &AdminPlayerSummary, sensitive: bool) -> AdminServiceTracePlayer {
+    let account_id = if sensitive {
+        player.account_id.clone()
+    } else {
+        mask_identifier(&player.account_id)
+    };
+    AdminServiceTracePlayer {
+        player_id: format!("{account_id}:{}", player.character_index),
+        account_id,
+        character_index: player.character_index,
+        character_name: player.character_name.clone(),
+        online: player.online,
+        map_file_name: player.map_file_name.clone(),
+        player_object_id: player.player_object_id,
+    }
+}
+
+fn service_placement(record: &GatewaySessionRecord, sensitive: bool) -> AdminServicePlacement {
+    AdminServicePlacement {
+        gateway_session_id: record.gateway_session_id.clone(),
+        gateway_id: record.gateway_id.clone(),
+        gateway_endpoint: redact_endpoint_option(record.gateway_endpoint.as_deref(), sensitive),
+        relay_id: record.relay_id.clone(),
+        relay_endpoint: redact_endpoint_option(record.relay_endpoint.as_deref(), sensitive),
+        service_node_id: record
+            .service_node_id
+            .clone()
+            .or_else(|| record.zone_owner_id.clone()),
+        node_kind: record.node_kind.clone(),
+        zone_id: record.zone_id.clone(),
+        line_id: record.zone_id.as_deref().and_then(zone_line_id),
+        map_file_name: record.map_file_name.clone(),
+        zone_owner_fencing_token: record.zone_owner_fencing_token,
+        handoff_generation: record.handoff_generation,
+        route_lease_expires_at_ms: record.route_lease_expires_at_ms,
+        updated_at_ms: record.updated_at_ms,
+        tick: record.tick,
+    }
+}
+
+fn service_trace_event(event: &GatewaySessionTraceEventRecord) -> AdminServiceTraceEvent {
+    AdminServiceTraceEvent {
+        event_id: event.event_id.clone(),
+        event_type: event.event_type.clone(),
+        occurred_at_ms: event.occurred_at_ms,
+        gateway_session_id: event.gateway_session_id.clone(),
+        gateway_id: event.gateway_id.clone(),
+        relay_id: event.relay_id.clone(),
+        service_node_id: event.service_node_id.clone(),
+        node_kind: event.node_kind.clone(),
+        zone_id: event.zone_id.clone(),
+        line_id: event.zone_id.as_deref().and_then(zone_line_id),
+        map_file_name: event.map_file_name.clone(),
+        zone_owner_fencing_token: event.zone_owner_fencing_token,
+        handoff_generation: event.handoff_generation,
+        reason: event.reason.clone(),
+    }
+}
+
+fn load_gateway_session_trace(
+    account_id: &str,
+    character_index: i32,
+    history_limit: usize,
+) -> Result<GatewaySessionTraceResponse, String> {
+    let base = env::var("ADMIN_GATEWAY_SERVICE_TRACE_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/session-trace".to_string());
+    let separator = if base.contains('?') { '&' } else { '?' };
+    let url = format!(
+        "{base}{separator}accountId={}&characterIndex={character_index}&limit={history_limit}",
+        url_encode_component(account_id)
+    );
+    let token = env::var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN")
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+    let body = get_json_from_gateway_with_bearer(&url, token.as_deref())?;
+    serde_json::from_str(&body)
+        .map_err(|error| format!("decode gateway service trace failed: {error}"))
+}
+
+fn commonware_from_gateway(
+    record: &GatewayCommonwareTraceRecord,
+    sensitive: bool,
+) -> AdminCommonwarePlacement {
+    AdminCommonwarePlacement {
+        source: "gateway_gate15_observer".into(),
+        gateway_id: record.lease.gateway_id.clone(),
+        finalized_height: record.finalized_height,
+        state_root: record.state_root.clone(),
+        zone_id: record.placement.zone_id.clone(),
+        generation: record.placement.generation,
+        primary_host_id: record.placement.primary.host_id.clone(),
+        replica_host_ids: record
+            .placement
+            .replicas
+            .iter()
+            .map(|endpoint| endpoint.host_id.clone())
+            .collect(),
+        primary_endpoint: redact_endpoint(&record.placement.primary.endpoint, sensitive),
+        replica_endpoints: record
+            .placement
+            .replicas
+            .iter()
+            .map(|endpoint| redact_endpoint(&endpoint.endpoint, sensitive))
+            .collect(),
+        expires_at_ms: record.placement.expires_at_ms,
+        session_lease: Some(AdminCommonwareSessionLease {
+            session_id: record.lease.session_id.clone(),
+            gateway_id: record.lease.gateway_id.clone(),
+            zone_id: record.lease.zone_id.clone(),
+            fencing_token: record.lease.fencing_token,
+            expires_at_ms: record.lease.expires_at_ms,
+        }),
+    }
+}
+
+fn load_commonware_placement(
+    zone_id: &str,
+    session_id: Option<&str>,
+    sensitive: bool,
+) -> Result<AdminCommonwarePlacement, String> {
+    let base = env::var("ADMIN_COMMONWARE_GATEWAY_URL")
+        .or_else(|_| env::var("ADMIN_GATE14_GATEWAY_URL"))
+        .map_err(|_| {
+            "ADMIN_COMMONWARE_GATEWAY_URL or ADMIN_GATE14_GATEWAY_URL is not configured".to_string()
+        })?;
+    let base = base.trim_end_matches('/');
+    let route_body = get_json_from_gateway(&format!(
+        "{base}/v1/routes/{}",
+        url_encode_component(zone_id)
+    ))?;
+    let route: Gate14RouteResponse = serde_json::from_str(&route_body)
+        .map_err(|error| format!("decode Commonware route failed: {error}"))?;
+    let session_lease = session_id
+        .map(|session_id| {
+            get_json_from_gateway(&format!(
+                "{base}/v1/sessions/{}",
+                url_encode_component(session_id)
+            ))
+            .and_then(|body| {
+                serde_json::from_str::<Gate14SessionLeaseRecord>(&body)
+                    .map_err(|error| format!("decode Commonware session lease failed: {error}"))
+            })
+        })
+        .transpose()?
+        .map(|lease| AdminCommonwareSessionLease {
+            session_id: lease.session_id,
+            gateway_id: lease.gateway_id,
+            zone_id: lease.zone_id,
+            fencing_token: lease.fencing_token,
+            expires_at_ms: lease.expires_at_ms,
+        });
+    Ok(AdminCommonwarePlacement {
+        source: "commonware_gate14".into(),
+        gateway_id: route.gateway_id,
+        finalized_height: route.finalized_height,
+        state_root: route.state_root,
+        zone_id: route.placement.zone_id,
+        generation: route.placement.generation,
+        primary_host_id: route.placement.primary_host_id,
+        replica_host_ids: route.placement.replica_host_ids,
+        primary_endpoint: redact_endpoint(&route.primary_endpoint, sensitive),
+        replica_endpoints: route
+            .replica_endpoints
+            .iter()
+            .map(|endpoint| redact_endpoint(endpoint, sensitive))
+            .collect(),
+        expires_at_ms: route.placement.expires_at_ms,
+        session_lease,
+    })
+}
+
+fn zone_line_id(zone_id: &str) -> Option<u16> {
+    zone_id
+        .rsplit_once(":line:")
+        .and_then(|(_, value)| value.parse::<u16>().ok())
+}
+
+fn mask_identifier(value: &str) -> String {
+    let chars = value.chars().collect::<Vec<_>>();
+    if chars.len() <= 4 {
+        return "****".into();
+    }
+    format!(
+        "{}{}***{}{}",
+        chars[0],
+        chars[1],
+        chars[chars.len() - 2],
+        chars[chars.len() - 1]
+    )
+}
+
+fn redact_endpoint_option(value: Option<&str>, sensitive: bool) -> Option<String> {
+    value.map(|value| redact_endpoint(value, sensitive))
+}
+
+fn redact_endpoint(value: &str, sensitive: bool) -> String {
+    if sensitive {
+        return value.to_string();
+    }
+    let trimmed = value.trim();
+    let host_port = trimmed
+        .split_once("://")
+        .map(|(_, rest)| rest)
+        .unwrap_or(trimmed)
+        .split('/')
+        .next()
+        .unwrap_or(trimmed);
+    if host_port.parse::<std::net::SocketAddr>().is_ok() {
+        return "private-endpoint".into();
+    }
+    let host = if let Some(bracketed) = host_port.strip_prefix('[') {
+        bracketed
+            .split_once(']')
+            .map(|(host, _)| host)
+            .unwrap_or("")
+    } else if host_port.matches(':').count() <= 1 {
+        host_port
+            .split_once(':')
+            .map(|(host, _)| host)
+            .unwrap_or(host_port)
+    } else {
+        ""
+    };
+    if host.is_empty() || host.contains('@') {
+        return "private-endpoint".into();
+    }
+    if host.parse::<std::net::IpAddr>().is_ok()
+        || host.eq_ignore_ascii_case("localhost")
+        || host.ends_with(".local")
+    {
+        "private-endpoint".into()
+    } else {
+        host.to_string()
+    }
+}
+
+fn url_encode_component(value: &str) -> String {
+    value
+        .bytes()
+        .map(|byte| {
+            if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
+                (byte as char).to_string()
+            } else {
+                format!("%{byte:02X}")
+            }
+        })
+        .collect()
+}
+
+fn sanitize_trace_component(value: &str) -> String {
+    value
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_') {
+                ch
+            } else {
+                '_'
+            }
+        })
+        .take(40)
         .collect()
 }
 
@@ -9336,11 +10178,14 @@ fn row_to_audit_record(row: &Row) -> Result<AuditRecord, AdminError> {
         .map_err(|error| AdminError::Repository(format!("decode audit target failed: {error}")))?;
     let permission: String = row.get("permission");
     let status: String = row.get("status");
+    let trace_id: String = row.get("trace_id");
     let created_at_ms: i64 = row.get("created_at_ms");
     let completed_at_ms: Option<i64> = row.get("completed_at_ms");
     Ok(AuditRecord {
         audit_id: row.get("audit_id"),
-        command_id: row.get("command_id"),
+        command_id: row
+            .get::<_, Option<String>>("command_id")
+            .unwrap_or_else(|| format!("read-{trace_id}")),
         operator_id: row.get("operator_id"),
         operator_email: row.get("operator_email"),
         operator_role_snapshot: row.get("operator_role_snapshot"),
@@ -9349,10 +10194,14 @@ fn row_to_audit_record(row: &Row) -> Result<AuditRecord, AdminError> {
         reason: row.get("reason"),
         status: parse_status(&status)?,
         error_code: row.get("error_code"),
-        trace_id: row.get("trace_id"),
+        trace_id,
         created_at_ms: created_at_ms.max(0) as u64,
         completed_at_ms: completed_at_ms.map(|value| value.max(0) as u64),
     })
+}
+
+fn postgres_audit_command_id(record: &AuditRecord) -> Option<&str> {
+    (!record.command_id.starts_with("read-")).then_some(record.command_id.as_str())
 }
 
 fn row_to_approval_record(row: &Row) -> Result<ApprovalRecord, AdminError> {
@@ -9768,6 +10617,117 @@ fn timeline_matches(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn service_trace_helpers_resolve_identity_line_and_default_redaction() {
+        let players = vec![
+            AdminPlayerSummary {
+                player_id: "account-one:0".into(),
+                account_id: "account-one".into(),
+                character_index: 0,
+                character_name: "Scout".into(),
+                class_name: "Warrior".into(),
+                gender: "Male".into(),
+                level: 7,
+                map_file_name: "0103".into(),
+                map_title: "Bichon".into(),
+                position_x: 1,
+                position_y: 2,
+                hp: 10,
+                max_hp: 10,
+                mp: 5,
+                gold: 50,
+                credit: 0,
+                pk_points: 0,
+                chat_banned: false,
+                chat_ban_until_ms: None,
+                status: "Online".into(),
+                online: true,
+                online_source: Some("gateway_session_cache".into()),
+                player_object_id: Some(1001),
+                runtime_tick: Some(9),
+                store_version: None,
+                save_version: None,
+            },
+            AdminPlayerSummary {
+                player_id: "account-two:1".into(),
+                account_id: "account-two".into(),
+                character_index: 1,
+                character_name: "Mage".into(),
+                class_name: "Wizard".into(),
+                gender: "Female".into(),
+                level: 7,
+                map_file_name: "0".into(),
+                map_title: "Bichon".into(),
+                position_x: 1,
+                position_y: 2,
+                hp: 10,
+                max_hp: 10,
+                mp: 5,
+                gold: 50,
+                credit: 0,
+                pk_points: 0,
+                chat_banned: false,
+                chat_ban_until_ms: None,
+                status: "Normal".into(),
+                online: false,
+                online_source: None,
+                player_object_id: None,
+                runtime_tick: None,
+                store_version: None,
+                save_version: None,
+            },
+        ];
+
+        assert_eq!(service_trace_candidates(&players, "Scout").len(), 1);
+        assert_eq!(service_trace_candidates(&players, "1001").len(), 1);
+        assert_eq!(service_trace_candidates(&players, "account").len(), 2);
+        assert_eq!(zone_line_id("map:0103:line:12"), Some(12));
+        assert_eq!(redact_endpoint("10.0.0.8:9500", false), "private-endpoint");
+        assert_eq!(
+            redact_endpoint("relay-hk.obelisk.build:443", false),
+            "relay-hk.obelisk.build"
+        );
+        assert_eq!(redact_endpoint("10.0.0.8:9500", true), "10.0.0.8:9500");
+        assert_ne!(mask_identifier("account-one"), "account-one");
+    }
+
+    #[test]
+    fn service_trace_read_audit_is_persisted_as_completed_character_read() {
+        let executor = SystemMailExecutor::new(InMemorySystemMailOutbox::default());
+        let mut control = AdminControlPlane::new(executor);
+        let operator = operator_with([Permission::CharacterRead]);
+
+        let record = control
+            .record_read_audit(
+                &operator,
+                Permission::CharacterRead,
+                AdminTarget {
+                    target_type: TargetType::Character,
+                    target_id: "account-one:0".into(),
+                    account_id: Some("account-one".into()),
+                    character_id: Some("account-one:0".into()),
+                },
+                "service placement trace query",
+                "service-trace-test",
+                1_000,
+            )
+            .expect("read audit should persist");
+
+        assert_eq!(record.status, CommandStatus::Succeeded);
+        assert_eq!(record.permission, Permission::CharacterRead);
+        assert_eq!(record.trace_id, "service-trace-test");
+        assert_eq!(postgres_audit_command_id(&record), None);
+        let command_audit = AuditRecord::pending(
+            &sample_envelope(operator_with([Permission::MailSendSystem])),
+            Permission::MailSendSystem,
+        );
+        assert_eq!(
+            postgres_audit_command_id(&command_audit),
+            Some(command_audit.command_id.as_str())
+        );
+        assert_eq!(control.audit_records(10), vec![record]);
+    }
 
     #[test]
     fn admin_rate_limit_blocks_after_max_requests() {
@@ -10333,12 +11293,26 @@ mod tests {
                     character_index: 0,
                 },
                 character_name: "Scout".into(),
+                gateway_session_id: Some("gateway-test-1".into()),
+                gateway_id: Some("gateway-test".into()),
+                gateway_endpoint: None,
+                relay_id: None,
+                relay_endpoint: None,
+                service_node_id: Some("node-test".into()),
+                node_kind: Some("official".into()),
+                zone_id: Some("map:0103:line:1".into()),
+                zone_owner_id: Some("node-test".into()),
+                zone_owner_fencing_token: Some(1),
                 map_file_name: Some("0103".into()),
                 player_object_id: Some(7),
                 player_hp: Some(88),
                 player_max_hp: Some(99),
                 gold: 9_999,
                 tick: 42,
+                updated_at_ms: 1_000,
+                route_lease_owner: Some("gateway-test-1".into()),
+                route_lease_expires_at_ms: Some(u64::MAX),
+                handoff_generation: 0,
             }],
             error: None,
         };

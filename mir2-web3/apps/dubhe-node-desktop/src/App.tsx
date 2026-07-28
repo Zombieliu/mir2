@@ -59,6 +59,41 @@ type DesktopEnrollmentStatus = {
   error?: string;
 };
 
+type UpdateChannel = "stable" | "beta";
+
+type DesktopPreferences = {
+  closeToTray: boolean;
+  startMinimized: boolean;
+  autostartEnabled: boolean;
+  autoCheckUpdates: boolean;
+  updateChannel: UpdateChannel;
+};
+
+type DesktopUpdateStatus = {
+  configured: boolean;
+  channel: UpdateChannel;
+  currentVersion: string;
+  availableVersion?: string;
+  notes?: string;
+  publishedAt?: string;
+  error?: string;
+};
+
+type DiagnosticExport = {
+  path: string;
+  redacted: boolean;
+  generatedAtMs: number;
+};
+
+type DesktopRecoveryStatus = {
+  available: boolean;
+  configured: boolean;
+  currentVersion: string;
+  rollbackVersion?: string;
+  installedVersion?: string;
+  error?: string;
+};
+
 type Tab = "overview" | "network" | "beta" | "settings";
 
 const nav: Array<{ id: Tab; label: string; icon: string }> = [
@@ -120,7 +155,13 @@ function App() {
   const [enrollment, setEnrollment] = useState<DesktopEnrollmentStatus>();
   const [busy, setBusy] = useState(false);
   const [enrollmentBusy, setEnrollmentBusy] = useState(false);
+  const [preferencesBusy, setPreferencesBusy] = useState(false);
+  const [updateBusy, setUpdateBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [preferences, setPreferences] = useState<DesktopPreferences>();
+  const [updateStatus, setUpdateStatus] = useState<DesktopUpdateStatus>();
+  const [recoveryStatus, setRecoveryStatus] = useState<DesktopRecoveryStatus>();
+  const [diagnosticPath, setDiagnosticPath] = useState<string>();
 
   const initialize = useCallback(async () => {
     try {
@@ -153,6 +194,25 @@ function App() {
   useEffect(() => {
     void initialize();
   }, [initialize]);
+
+  useEffect(() => {
+    void Promise.all([
+      invoke<DesktopPreferences>("desktop_preferences"),
+      invoke<DesktopRecoveryStatus>("desktop_recovery_status"),
+    ])
+      .then(([desktopPreferences, recovery]) => {
+        setPreferences(desktopPreferences);
+        setRecoveryStatus(recovery);
+        if (desktopPreferences.autoCheckUpdates) {
+          return invoke<DesktopUpdateStatus>("check_for_desktop_update");
+        }
+        return undefined;
+      })
+      .then((result) => {
+        if (result) setUpdateStatus(result);
+      })
+      .catch((cause) => setError(String(cause)));
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => void refresh(), 5_000);
@@ -239,6 +299,85 @@ function App() {
       setError(String(cause));
     } finally {
       setEnrollmentBusy(false);
+    }
+  }
+
+  async function savePreferences(next: DesktopPreferences) {
+    if (preferencesBusy) return;
+    const previous = preferences;
+    setPreferences(next);
+    setPreferencesBusy(true);
+    try {
+      const saved = await invoke<DesktopPreferences>("set_desktop_preferences", {
+        preferences: next,
+      });
+      setPreferences(saved);
+      if (saved.autoCheckUpdates || saved.updateChannel !== previous?.updateChannel) {
+        const result = await invoke<DesktopUpdateStatus>("check_for_desktop_update");
+        setUpdateStatus(result);
+      }
+      setError(undefined);
+    } catch (cause) {
+      setPreferences(previous);
+      setError(String(cause));
+    } finally {
+      setPreferencesBusy(false);
+    }
+  }
+
+  async function checkForUpdate(install: boolean) {
+    if (updateBusy) return;
+    setUpdateBusy(true);
+    try {
+      const result = await invoke<DesktopUpdateStatus>(
+        install ? "install_desktop_update" : "check_for_desktop_update",
+      );
+      setUpdateStatus(result);
+      setError(result.error);
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setUpdateBusy(false);
+    }
+  }
+
+  async function exportDiagnostics() {
+    try {
+      const result = await invoke<DiagnosticExport>("export_diagnostics");
+      setDiagnosticPath(result.path);
+      setError(undefined);
+    } catch (cause) {
+      setError(String(cause));
+    }
+  }
+
+  async function rollbackUpdate() {
+    if (
+      updateBusy ||
+      !recoveryStatus?.available ||
+      !window.confirm(`将回滚到已签名版本 v${recoveryStatus.rollbackVersion}，是否继续？`)
+    ) return;
+    setUpdateBusy(true);
+    try {
+      const result = await invoke<DesktopRecoveryStatus>("rollback_desktop_update");
+      setRecoveryStatus(result);
+      setError("签名回滚安装完成；请按安装器提示重新启动 Dubhe Node。");
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setUpdateBusy(false);
+    }
+  }
+
+  async function prepareUninstall() {
+    if (!window.confirm("将停止接收新玩家并关闭开机自启。节点身份会保留，是否继续？")) return;
+    try {
+      const result = await invoke<{ instructions: string }>("prepare_uninstall");
+      setError(result.instructions);
+      const refreshed = await invoke<DesktopPreferences>("desktop_preferences");
+      setPreferences(refreshed);
+    } catch (cause) {
+      setError(String(cause));
     }
   }
 
@@ -577,13 +716,139 @@ function App() {
 
         {activeTab === "settings" && (
           <section className="page-card">
-            <p className="section-label">LOCAL-FIRST SECURITY</p>
-            <h2>安全与资源策略</h2>
+            <p className="section-label">DESKTOP LIFECYCLE</p>
+            <h2>桌面端与发行设置</h2>
+            <p className="page-lead">
+              关闭窗口默认隐藏到系统托盘；只有选择“停止节点并退出”才会结束后台进程。
+            </p>
             <div className="settings-list">
               <div><span><strong>最大 CPU 使用率</strong><small>持续超限后自动 drain</small></span><b>75%</b></div>
               <div><span><strong>最低可用内存</strong><small>保留给你的游戏和日常应用</small></span><b>2 GB</b></div>
-              <div><span><strong>自动更新</strong><small>仅接受离线发行密钥签名版本</small></span><b>Stable</b></div>
+              <div>
+                <span><strong>关闭到系统托盘</strong><small>关闭窗口时继续服务已有玩家</small></span>
+                <button
+                  className={preferences?.closeToTray ? "toggle on" : "toggle"}
+                  disabled={!preferences || preferencesBusy}
+                  onClick={() => preferences && void savePreferences({
+                    ...preferences,
+                    closeToTray: !preferences.closeToTray,
+                  })}
+                  type="button"
+                  aria-pressed={preferences?.closeToTray}
+                >
+                  <i />
+                </button>
+              </div>
+              <div>
+                <span><strong>开机自动运行</strong><small>使用系统原生启动项，启动后隐藏到托盘</small></span>
+                <button
+                  className={preferences?.autostartEnabled ? "toggle on" : "toggle"}
+                  disabled={!preferences || preferencesBusy}
+                  onClick={() => preferences && void savePreferences({
+                    ...preferences,
+                    autostartEnabled: !preferences.autostartEnabled,
+                  })}
+                  type="button"
+                  aria-pressed={preferences?.autostartEnabled}
+                >
+                  <i />
+                </button>
+              </div>
+              <div>
+                <span><strong>普通启动时最小化</strong><small>手动打开应用时也直接进入托盘</small></span>
+                <button
+                  className={preferences?.startMinimized ? "toggle on" : "toggle"}
+                  disabled={!preferences || preferencesBusy}
+                  onClick={() => preferences && void savePreferences({
+                    ...preferences,
+                    startMinimized: !preferences.startMinimized,
+                  })}
+                  type="button"
+                  aria-pressed={preferences?.startMinimized}
+                >
+                  <i />
+                </button>
+              </div>
+              <div>
+                <span><strong>自动检查签名更新</strong><small>只安装离线发行密钥签名的版本</small></span>
+                <button
+                  className={preferences?.autoCheckUpdates ? "toggle on" : "toggle"}
+                  disabled={!preferences || preferencesBusy}
+                  onClick={() => preferences && void savePreferences({
+                    ...preferences,
+                    autoCheckUpdates: !preferences.autoCheckUpdates,
+                  })}
+                  type="button"
+                  aria-pressed={preferences?.autoCheckUpdates}
+                >
+                  <i />
+                </button>
+              </div>
+              <div>
+                <span><strong>更新通道</strong><small>Beta 可提前验证新功能，随时可切回 Stable</small></span>
+                <select
+                  className="channel-select"
+                  disabled={!preferences || preferencesBusy}
+                  value={preferences?.updateChannel ?? "stable"}
+                  onChange={(event) => preferences && void savePreferences({
+                    ...preferences,
+                    updateChannel: event.target.value as UpdateChannel,
+                  })}
+                >
+                  <option value="stable">Stable</option>
+                  <option value="beta">Beta</option>
+                </select>
+              </div>
               <div><span><strong>身份存储</strong><small>节点私钥不可导出到网页</small></span><b>OS Keyring</b></div>
+            </div>
+            <div className="settings-actions">
+              <button
+                className="secondary-button"
+                disabled={updateBusy}
+                onClick={() => void checkForUpdate(false)}
+                type="button"
+              >
+                {updateBusy ? "正在检查…" : "检查更新"}
+              </button>
+              {updateStatus?.availableVersion && (
+                <button
+                  className="secondary-button primary"
+                  disabled={updateBusy}
+                  onClick={() => void checkForUpdate(true)}
+                  type="button"
+                >
+                  安装 v{updateStatus.availableVersion}
+                </button>
+              )}
+              <button className="secondary-button" onClick={() => void exportDiagnostics()} type="button">
+                导出脱敏诊断
+              </button>
+              {recoveryStatus?.available && (
+                <button
+                  className="secondary-button"
+                  disabled={updateBusy}
+                  onClick={() => void rollbackUpdate()}
+                  type="button"
+                >
+                  回滚到 v{recoveryStatus.rollbackVersion}
+                </button>
+              )}
+              <button className="secondary-button danger" onClick={() => void prepareUninstall()} type="button">
+                准备卸载
+              </button>
+            </div>
+            <div className="release-status">
+              <strong>
+                当前 v{updateStatus?.currentVersion ?? "0.1.0"} · {(preferences?.updateChannel ?? "stable").toUpperCase()}
+              </strong>
+              <span>
+                {updateStatus?.availableVersion
+                  ? `发现签名版本 v${updateStatus.availableVersion}`
+                  : updateStatus?.configured
+                    ? "已是当前通道最新版本"
+                    : "开发构建：正式安装包发布时注入签名更新源"}
+              </span>
+              {diagnosticPath && <code>诊断已导出：{diagnosticPath}</code>}
             </div>
           </section>
         )}

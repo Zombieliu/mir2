@@ -13,7 +13,56 @@ Supervisor，节点身份和管理令牌保存在操作系统密钥库中。
 - 自动托管 Supervisor、Zone Host 和认证后的 Home Agent；
 - 查看本机 Supervisor、Zone Host、Relay、Session 和签名遥测状态；
 - 安全开启或暂停新 Session；
+- 关闭窗口后常驻系统托盘，托盘可开始贡献、暂停贡献或安全停止节点；
+- 使用 Windows、macOS、Linux 原生启动项实现可选的开机自启；
+- Stable/Beta 双通道签名更新，以及最近一次已知良好版本的签名回滚；
+- 导出不含私钥、管理令牌、mTLS 证书和家庭 IP 的脱敏诊断；
 - 家庭网络只建立出站 QUIC，不要求公网 IP 或路由器端口映射。
+
+## 桌面安装与生命周期
+
+正式发行入口在：
+
+```text
+.github/workflows/dubhe-node-desktop-release.yml
+```
+
+它会在四个原生 Runner 上构建：
+
+| 操作系统 | 架构 | 安装包 |
+| --- | --- | --- |
+| macOS | Apple Silicon | `.app`、`.dmg` |
+| macOS | Intel x64 | `.app`、`.dmg` |
+| Windows | x64 | `.msi`、NSIS `.exe` |
+| Linux | x64 | `.deb`、`.AppImage` |
+
+普通 CI 产物明确标记为 `unsigned`，只用于安装与功能冒烟。正式发布工作流必须
+同时拿到 Tauri 离线更新签名密钥、Apple Developer ID/公证凭据和 Windows
+Authenticode 证书；缺少任一关键发布配置时 `npm run release:check` 会直接失败，
+不会生成“看起来像正式版”的包。
+
+窗口右上角关闭按钮默认只隐藏到托盘。托盘“停止节点并退出”会先要求 Supervisor
+停止接收新玩家、等待存量 Session 安全退出并关闭托管 Sidecar，再结束桌面进程。
+开机自启由操作系统原生启动项实现，并附带 `--hidden`，因此不会在每次登录时弹出
+主窗口。
+
+正式安装包编译时注入三个 HTTPS 更新源：
+
+```text
+DUBHE_NODE_UPDATE_STABLE_URL
+DUBHE_NODE_UPDATE_BETA_URL
+DUBHE_NODE_UPDATE_ROLLBACK_URL
+```
+
+以及只读的 `DUBHE_NODE_UPDATER_PUBLIC_KEY`。下载的安装包必须通过该离线公钥验签。
+升级前会记录 `fromVersion -> toVersion`；只有当前版本确实是最近一次升级的目标
+版本，回滚源又返回精确的 `fromVersion`，界面才允许回滚。任意更旧版本、未签名
+版本或服务器临时替换的安装包都会被拒绝。
+
+“准备卸载”会关闭系统启动项并安全停止节点，但默认保留操作系统密钥库中的节点
+身份，方便重装后恢复。彻底删除身份属于不可逆操作，不由普通卸载流程静默执行。
+完整发行、升级、回滚、卸载和三平台验收见
+[`../../docs/DUBHE-NODE-DESKTOP-DISTRIBUTION.zh-CN.md`](../../docs/DUBHE-NODE-DESKTOP-DISTRIBUTION.zh-CN.md)。
 
 ## 节点、遥测与玩家如何串起来
 
@@ -79,6 +128,12 @@ npm run build
 
 ```bash
 npm run tauri build
+```
+
+只构建当前平台原生包而不生成更新签名产物：
+
+```bash
+npm run tauri build -- --debug --bundles app
 ```
 
 Tauri 构建会先编译并打包 `home_agent_supervisor`、`home_agent_launcher`、

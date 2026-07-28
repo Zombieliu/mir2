@@ -77,6 +77,8 @@ export type DubheNodeRecord = {
   label: string;
   advertisedEndpoint: string;
   failureDomain: string;
+  coarseRegion?: string;
+  providerCode?: string;
   telemetryState: "live" | "offline";
   registrationState: "active" | "unregistered";
   heartbeatVerified: boolean;
@@ -98,6 +100,15 @@ export type DubheNodeRecord = {
   rpcRequestsTotal: number;
   rpcErrorsTotal: number;
   observedAtMs?: number;
+  workMode?: string;
+  relayRttMs?: number;
+  packetLossBps?: number;
+  measuredUpstreamKbps?: number;
+  checkpointLagMs?: number;
+  placementGeneration?: number;
+  verifiedWorkUnits?: number;
+  sessionMilliseconds?: number;
+  agentVersion?: string;
   stakeMist: number;
   operatorSuiAddress?: string;
   publicKey?: string;
@@ -406,6 +417,8 @@ function recordFromHomeTelemetry(
     failureDomain: telemetry
       ? `${telemetry.coarseRegion} · ${telemetry.providerCode}`
       : "admitted · awaiting telemetry",
+    coarseRegion: telemetry?.coarseRegion,
+    providerCode: telemetry?.providerCode,
     telemetryState: live ? "live" : "offline",
     registrationState: claimsRegisteredNode ? "active" : "unregistered",
     heartbeatVerified: Boolean(telemetry),
@@ -424,6 +437,15 @@ function recordFromHomeTelemetry(
     rpcRequestsTotal: telemetry?.verifiedWorkUnits ?? 0,
     rpcErrorsTotal: 0,
     observedAtMs: telemetry?.observedAtMs,
+    workMode: telemetry?.workMode,
+    relayRttMs: telemetry?.relayRttMs,
+    packetLossBps: telemetry?.packetLossBps,
+    measuredUpstreamKbps: telemetry?.measuredUpstreamKbps,
+    checkpointLagMs: telemetry?.checkpointLagMs,
+    placementGeneration: telemetry?.placementGeneration,
+    verifiedWorkUnits: telemetry?.verifiedWorkUnits,
+    sessionMilliseconds: telemetry?.sessionMilliseconds,
+    agentVersion: telemetry?.agentVersion,
     stakeMist: claimsRegisteredNode ? activeRegistration.stakeMist : 0,
     operatorSuiAddress: claimsRegisteredNode
       ? activeRegistration.operatorSuiAddress

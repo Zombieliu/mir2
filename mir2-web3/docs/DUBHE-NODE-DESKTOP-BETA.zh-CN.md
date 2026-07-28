@@ -7,12 +7,24 @@
 开启或暂停新 Session。生产 Beta 的测试计划、节点证据和运营方复签已经拆成
 三个不同权限边界。
 
+当前代码已经具备接近 Clash Verge 的桌面发行骨架：
+
+- 关闭到托盘、托盘启停节点和安全退出；
+- Windows、macOS、Linux 原生开机启动项；
+- Supervisor/Zone Host/Home Agent Sidecar 后台托管和轮转日志；
+- Stable/Beta 签名更新、最近一次已知良好版本的签名回滚；
+- 安全卸载准备和脱敏诊断导出；
+- 四 Runner 原生安装包 CI 与受保护的签名发布工作流。
+
 当前仍是 **Home Node Beta**，不是可公开承诺 SLA 的正式发行版：
 
-- Apple notarization、Windows Authenticode 和 Linux 仓库签名尚未接入；
+- Apple notarization、Windows Authenticode 和更新签名的接入点已经写入发布工作流，
+  但只有在 GitHub 受保护 Environment 注入真实凭据并成功跑完后，产物才算正式
+  签名包；
 - 尚无三家真实家庭运营商的完整现场证据；
-- Supervisor 可以在桌面窗口退出后继续提供后台服务，重开窗口能够通过本机管理
-  令牌重新接管；开机自启和正式系统服务安装仍未接入。
+- 桌面应用通过托盘常驻并管理 Supervisor；它不是需要 root/Administrator 的
+  特权系统服务，应用崩溃时会 fail-closed 回收 Sidecar，而不会留下无人管理的
+  Zone Host。
 
 远程签名 enrollment、容量挑战、短期容量证书、CSR/mTLS 证书签发、动态
 placement、Relay 连接和签名遥测已经接入桌面流程。它们的本地自动化验收不能
@@ -53,9 +65,12 @@ macOS 产物：
 target/debug/bundle/macos/Dubhe Node.app
 ```
 
-同一工程可在 Windows x64 和 Linux x64 原生 Runner 上执行上述命令，分别生成
-MSI/NSIS 与 deb/AppImage/RPM。当前仓库凭据没有 GitHub `workflow` scope，
-自动构建矩阵尚未提交；生成的未签名验收包不能直接作为正式下载页发行包。
+同一工程通过 `.github/workflows/dubhe-node-desktop-ci.yml` 在 Windows x64 和
+Linux x64 原生 Runner 上生成 MSI/NSIS 与 deb/AppImage，并在 macOS Apple
+Silicon/Intel Runner 生成 DMG。普通 CI 产物名包含 `unsigned`，不能直接作为
+正式下载页发行包。正式签名、公证与更新元数据由
+`.github/workflows/dubhe-node-desktop-release.yml` 生成草稿 Release，经过三平台
+冒烟后才允许人工发布。
 
 ## 启动后台节点
 
