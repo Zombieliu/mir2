@@ -59,6 +59,7 @@ services:
       MIR2_HOME_RELAY_ID: "gate22-relay"
       MIR2_HOME_RELAY_QUIC_BIND: "0.0.0.0:7443"
       MIR2_HOME_RELAY_GATEWAY_BIND: "0.0.0.0:7444"
+      MIR2_HOME_RELAY_GATEWAY_TOKEN: "gate24-gateway-relay-token"
       MIR2_HOME_RELAY_TLS_CA_DER: "/run/gate22/ca.der"
       MIR2_HOME_RELAY_TLS_CERT_CHAIN_DER: "/run/gate22/relay.der"
       MIR2_HOME_RELAY_TLS_KEY_DER: "/run/gate22/relay-key.der"
@@ -87,6 +88,7 @@ services:
       MIR2_HOME_RELAY_ADDR: "home-relay:7443"
       MIR2_HOME_RELAY_SERVER_NAME: "relay.test"
       MIR2_HOME_LOCAL_ZONE_RPC_ADDR: "zone-host:7020"
+      MIR2_HOME_LOCAL_ZONE_RPC_TOKEN: "gate24-zone-rpc-token"
       MIR2_HOME_AGENT_TLS_CA_DER: "/run/gate22/ca.der"
       MIR2_HOME_AGENT_TLS_CERT_CHAIN_DER: "/run/gate22/agent.der"
       MIR2_HOME_AGENT_TLS_KEY_DER: "/run/gate22/agent-key.der"
@@ -114,7 +116,7 @@ services:
       MIR2_HOME_ACCEPTANCE_RELAY_ADDR: "home-relay:7444"
       MIR2_HOME_ACCEPTANCE_ZONE_ID: "primary"
       MIR2_HOME_ACCEPTANCE_SESSION_ID: "gate24-sandbox-session"
-      MIR2_ZONE_HOST_TOKEN: "gate24-zone-rpc-token"
+      MIR2_ZONE_HOST_TOKEN: "gate24-gateway-relay-token"
     depends_on: [home-agent]
     networks: [relay-public]
 
