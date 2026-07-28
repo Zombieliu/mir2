@@ -4,20 +4,20 @@ on:
   pull_request:
     paths:
       - ".github/workflows/dubhe-node-desktop-*.yml"
-      - "apps/dubhe-node-desktop/**"
-      - "apps/gateway/**"
-      - "apps/simulation/**"
-      - "Cargo.lock"
-      - "Cargo.toml"
+      - "mir2-web3/apps/dubhe-node-desktop/**"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/Cargo.lock"
+      - "mir2-web3/Cargo.toml"
   push:
     branches: [main]
     paths:
       - ".github/workflows/dubhe-node-desktop-*.yml"
-      - "apps/dubhe-node-desktop/**"
-      - "apps/gateway/**"
-      - "apps/simulation/**"
-      - "Cargo.lock"
-      - "Cargo.toml"
+      - "mir2-web3/apps/dubhe-node-desktop/**"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/Cargo.lock"
+      - "mir2-web3/Cargo.toml"
 
 permissions:
   contents: read
@@ -54,7 +54,7 @@ jobs:
     timeout-minutes: 90
     defaults:
       run:
-        working-directory: apps/dubhe-node-desktop
+        working-directory: mir2-web3/apps/dubhe-node-desktop
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -63,7 +63,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: apps/dubhe-node-desktop/package-lock.json
+          cache-dependency-path: mir2-web3/apps/dubhe-node-desktop/package-lock.json
 
       - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
         with:
@@ -86,6 +86,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dubhe-node-${{ matrix.target }}-unsigned
-          path: target/${{ matrix.target }}/release/bundle
+          path: mir2-web3/target/${{ matrix.target }}/release/bundle
           if-no-files-found: error
           retention-days: 7
