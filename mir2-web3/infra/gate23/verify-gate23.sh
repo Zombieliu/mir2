@@ -49,6 +49,7 @@ jq -e \
   --slurpfile public "${TMP_DIR}/key-public.json" \
   '.created == true and .nodeId == $public[0].nodeId and .publicKey == $public[0].publicKey and .keyStore == "operating-system-keyring"' \
   "${TMP_DIR}/key-init.json" >/dev/null
+NODE_ID="$(jq -er '.nodeId' "${TMP_DIR}/key-init.json")"
 
 "${REPO_ROOT}/target/debug/node_identity" generate "${TMP_DIR}/release-issuer.key" \
   >"${TMP_DIR}/release-issuer.json"
@@ -94,8 +95,15 @@ MANAGEMENT_TOKEN="gate23-management-token-0123456789abcdef"
 printf '%s\n' \
   '#!/usr/bin/env bash' \
   'set -euo pipefail' \
+  'status_path="${MIR2_HOME_AGENT_STATUS_FILE:?}"' \
+  'node_id="${MIR2_GATE23_NODE_ID:?}"' \
   'trap "exit 0" INT TERM' \
-  'while true; do sleep 1; done' \
+  'while true; do' \
+  '  observed_at_ms="$(($(date +%s) * 1000))"' \
+  '  printf '\''{"nodeId":"%s","relayId":"gate23-fixture-relay","relayConnected":true,"telemetryConfigured":true,"telemetryAccepted":true,"telemetrySequence":1,"lastTelemetryAtMs":%s,"lastError":null,"updatedAtMs":%s}\n'\'' "${node_id}" "${observed_at_ms}" "${observed_at_ms}" >"${status_path}.tmp"' \
+  '  mv -f -- "${status_path}.tmp" "${status_path}"' \
+  '  sleep 1' \
+  'done' \
   >"${TMP_DIR}/home_agent"
 chmod 700 "${TMP_DIR}/home_agent"
 
@@ -113,6 +121,8 @@ MIR2_ZONE_HOST_ADDR="127.0.0.1:${ZONE_RPC_PORT}" \
   MIR2_HOME_MAX_CPU_PERCENT="100" \
   MIR2_HOME_MIN_AVAILABLE_MEMORY_MIB="1" \
   MIR2_HOME_MANAGE_CHILDREN="true" \
+  MIR2_HOME_AGENT_STATUS_FILE="${TMP_DIR}/home-agent-status.json" \
+  MIR2_GATE23_NODE_ID="${NODE_ID}" \
   MIR2_HOME_ZONE_BINARY="${REPO_ROOT}/target/debug/zone_host" \
   MIR2_HOME_AGENT_BINARY="${TMP_DIR}/home_agent" \
   MIR2_HOME_UPDATE_ROOT="${TMP_DIR}/updates" \
@@ -124,7 +134,9 @@ SUPERVISOR_PID=$!
 
 deadline=$((SECONDS + 30))
 until curl --fail --silent "http://127.0.0.1:${SUPERVISOR_PORT}/v1/status" \
-  >"${TMP_DIR}/status-initial.json"; do
+  >"${TMP_DIR}/status-initial.json" &&
+  jq -e '.relayConnected == true and .telemetryAccepted == true' \
+    "${TMP_DIR}/status-initial.json" >/dev/null; do
   if (( SECONDS >= deadline )); then
     cat "${TMP_DIR}/supervisor.log"
     echo "Gate 23 supervisor did not become ready" >&2
