@@ -1,0 +1,30 @@
+{
+  "name": "Mir2 Web",
+  "dockerComposeFile": "../infra/compose.developer.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspace/mir2-web3",
+  "shutdownAction": "none",
+  "remoteUser": "node",
+  "forwardPorts": [3002, 7000, 7110],
+  "portsAttributes": {
+    "3002": {
+      "label": "Player Web"
+    },
+    "7110": {
+      "label": "Gateway WebSocket"
+    },
+    "7000": {
+      "label": "Crystal TCP"
+    }
+  },
+  "postCreateCommand": "npm ci --prefix apps/web && npm ci --prefix apps/admin-web && cargo +1.89.0 fetch --locked",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

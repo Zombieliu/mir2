@@ -1,5 +1,37 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest cross-platform delivery roadmap sync: 2026-07-25 replaces the
+> Windows-only handoff path with a version-locked Docker/Dev Container contract
+> for Windows, Intel Mac, Apple Silicon, and Linux. One release lock binds the
+> Crystal gitlink, Node 22.18.0, npm 11.13.0, Rust 1.89.0, GitHub CLI 2.96.0,
+> digest-pinned base image, and full-asset tag/content hash. Windows and
+> macOS/Linux now have matching doctor/build/up/down/logs/verify/assets commands,
+> transactional full-pack installers, and clean-room clone/start acceptance
+> scripts. GitHub CI checks clean checkouts on all three host OS families and
+> runs the real repository Dockerfile plus Gateway/Web Compose smoke on Linux;
+> a separate workflow publishes amd64/arm64 GHCR images, while a Caddy overlay
+> provides authenticated HTTPS/WSS for the shared second-server acceptance
+> environment. Follow-up hardening isolates private GitHub credentials from the
+> default workspace and every local-build image, downloads only through the
+> release-locked digest/revision fetcher after remote witness validation, uses
+> ephemeral Docker authentication plus standard-input credential delivery,
+> supports transactional full-pack upgrades with locking/recovery, executes
+> host-wrapper contracts on Windows/macOS/Linux, separates Starter and Full
+> Assets acceptance witnesses, and verifies the live Gateway `/health` plus
+> Player Web `/version` revisions against Git HEAD.
+> Local verification passes script parsing, both Compose models, installer
+> recovery/safety fixtures, all 1,440 full-pack libraries and 4,446 unique page
+> hashes, native Windows startup, and a complete browser account-to-Bichon flow
+> with no console warning/error. The current Windows host cannot execute Linux
+> containers because firmware/WSL virtualization is disabled, so the real
+> container build remains a required hosted-CI gate after push; macOS native
+> Crystal `Client.exe` remains intentionally unsupported.
+>
+> The same round removes a StartGame hot-path copy amplification: immutable
+> full/world collision caches now return shared `Arc` values instead of cloning
+> complete map cell sets for every respawn query. Four focused collision and
+> StartGame-spawn regressions pass without changing authoritative behavior.
+
 > Latest distributed Mir2 workload roadmap sync: 2026-07-23 completes Gate
 > 11.1-11.4. Checkpoint v4 combines the journal with a canonical complete Zone
 > image and rebuilds derived occupancy/AOI/ECS state on restore. Real Crystal

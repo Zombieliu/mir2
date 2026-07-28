@@ -1,0 +1,336 @@
+name: Developer Environment Acceptance
+
+on:
+  pull_request:
+    paths:
+      - ".gitmodules"
+      - ".github/workflows/developer-environment.yml"
+      - ".github/workflows/developer-image.yml"
+      - "README.md"
+      - "mir2-web3/.devcontainer/**"
+      - "mir2-web3/infra/.dockerignore"
+      - "mir2-web3/.nvmrc"
+      - "mir2-web3/Cargo.toml"
+      - "mir2-web3/Cargo.lock"
+      - "mir2-web3/README.md"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/apps/web/**"
+      - "mir2-web3/apps/admin-web/package.json"
+      - "mir2-web3/apps/admin-web/package-lock.json"
+      - "mir2-web3/config/developer-assets.json"
+      - "mir2-web3/config/developer-release.json"
+      - "mir2-web3/docs/DEVELOPER-DELIVERY.md"
+      - "mir2-web3/docs/LOCAL-DEVELOPMENT-MACOS.md"
+      - "mir2-web3/docs/LOCAL-DEVELOPMENT-WINDOWS.md"
+      - "mir2-web3/infra/**"
+      - "mir2-web3/packages/**"
+      - "mir2-web3/rust-toolchain.toml"
+      - "mir2-web3/scripts/**"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: developer-environment-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cross-platform-release:
+    name: Clean checkout (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+          - macos-15-intel
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "mir2-web3/.nvmrc"
+
+      - name: Verify Node and npm pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = "v22.18.0"
+          npm install --global npm@11.13.0
+          test "$(npm --version)" = "11.13.0"
+
+      - name: Install pinned Rust
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.89.0 --profile minimal --component rustfmt
+          test "$(rustc +1.89.0 --version | awk '{print $2}')" = "1.89.0"
+
+      - name: Verify developer release locks and Starter resources
+        run: node mir2-web3/scripts/check-developer-release.mjs
+
+      - name: Parse developer PowerShell scripts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $Scripts = Get-ChildItem "mir2-web3/scripts" -Filter "*.ps1" -File
+          foreach ($Script in $Scripts) {
+            $Tokens = $null
+            $Errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $Script.FullName,
+              [ref]$Tokens,
+              [ref]$Errors
+            ) | Out-Null
+            if ($Errors.Count -gt 0) {
+              throw "$($Script.FullName) failed PowerShell parsing:`n$($Errors | Out-String)"
+            }
+            Write-Host "[powershell-parse] $($Script.FullName)"
+          }
+
+      - name: Parse tracked Bash scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r script; do
+            bash -n "$script"
+            echo "[bash-parse] $script"
+          done < <(git ls-files "mir2-web3/infra/*.sh" "mir2-web3/scripts/*.sh")
+
+      - name: Execute Bash developer wrapper contract
+        if: runner.os != 'Windows'
+        shell: bash
+        run: bash mir2-web3/scripts/test-developer-wrapper.sh
+
+      - name: Execute Windows developer wrapper contract
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./mir2-web3/scripts/test-developer-wrapper.ps1
+
+      - name: Verify tracked Bash executable modes
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r script; do
+            mode="$(git ls-files --stage -- "$script" | awk '{print $1}')"
+            test "$mode" = "100755" || {
+              echo "$script must be committed with mode 100755, found $mode" >&2
+              exit 1
+            }
+            echo "[bash-mode] $mode $script"
+          done < <(git ls-files "mir2-web3/infra/*.sh" "mir2-web3/scripts/*.sh")
+
+      - name: Prove checks are read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(git status --porcelain=v1 --untracked-files=all)"
+          if [[ -n "$status" ]]; then
+            printf '%s\n' "$status"
+            echo "Developer environment checks changed the clean checkout." >&2
+            exit 1
+          fi
+
+  linux-docker-compose-smoke:
+    name: Real developer image and Compose smoke
+    needs: cross-platform-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MIR2_DEV_IMAGE: mir2-developer:${{ github.sha }}
+      MIR2_BIND_ADDRESS: 127.0.0.1
+      MIR2_WEB_PORT: 33002
+      MIR2_GATEWAY_WEB_PORT: 37110
+      MIR2_GATEWAY_TCP_PORT: 37000
+      MIR2_GATEWAY_WS_URL: ws://127.0.0.1:37110/ws
+      MIR2_ASSET_BASE_URL: ""
+      MIR2_DEPLOY_REVISION: ${{ github.sha }}
+      MIR2_DEVELOPER_IMAGE_REVISION: ${{ github.sha }}
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Verify Docker tooling
+        run: |
+          set -euo pipefail
+          docker version
+          docker compose version
+
+      - name: Test isolated developer asset fetcher
+        run: bash mir2-web3/scripts/test-developer-asset-fetcher.sh
+
+      - name: Test transactional developer asset installer
+        run: bash mir2-web3/scripts/test-developer-asset-installer.sh
+
+      - name: Test Player Web revision route
+        run: npm --prefix mir2-web3/apps/web run test:version-route
+
+      - name: Build the repository developer image
+        run: |
+          set -euo pipefail
+          docker build \
+            --progress=plain \
+            --tag "$MIR2_DEV_IMAGE" \
+            --build-arg "MIR2_DEVELOPER_IMAGE_REVISION=$GITHUB_SHA" \
+            --file mir2-web3/infra/developer.Dockerfile \
+            mir2-web3/infra
+
+      - name: Verify image toolchain
+        run: |
+          set -euo pipefail
+          docker run --rm "$MIR2_DEV_IMAGE" bash -lc '
+            test "$(node --version)" = "v22.18.0"
+            test "$(npm --version)" = "11.13.0"
+            rustc +1.89.0 --version | grep -E "^rustc 1\\.89\\.0 "
+            gh --version | head -n 1 | grep -F "gh version 2.96.0"
+            rustup target list --installed --toolchain 1.89.0 | grep -Fx wasm32-unknown-unknown
+            grep -Fx ID=debian /etc/os-release
+          '
+          test "$(
+            docker image inspect \
+              --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+              "$MIR2_DEV_IMAGE"
+          )" = "$GITHUB_SHA"
+
+      - name: Validate real Compose definitions
+        env:
+          MIR2_ACCEPTANCE_DOMAIN: play-dev.example.com
+        run: |
+          set -euo pipefail
+          docker compose \
+            --file mir2-web3/infra/compose.developer.yml \
+            config --quiet
+          export MIR2_DEPLOY_REVISION="$GITHUB_SHA"
+          export MIR2_ACCEPTANCE_BASIC_AUTH_USER="mir2-ci"
+          export MIR2_ACCEPTANCE_BASIC_AUTH_ALGORITHM="bcrypt"
+          test_hash='$2a$12$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+          export MIR2_ACCEPTANCE_BASIC_AUTH_HASH_B64="$(
+            printf '%s' "$test_hash" | base64 | tr -d '\r\n'
+          )"
+          docker compose \
+            --file mir2-web3/infra/compose.developer.yml \
+            --file mir2-web3/infra/compose.acceptance.yml \
+            config --quiet
+
+      - name: Run real Gateway/Web Compose smoke
+        run: |
+          set -euo pipefail
+          compose_file="mir2-web3/infra/compose.developer.yml"
+          cleanup() {
+            exit_code=$?
+            if [[ $exit_code -ne 0 ]]; then
+              docker compose --file "$compose_file" ps || true
+              docker compose --file "$compose_file" logs --no-color --tail 300 || true
+            fi
+            mir2-web3/scripts/dev.sh down --remove-volumes || true
+            trap - EXIT
+            exit "$exit_code"
+          }
+          trap cleanup EXIT
+
+          mir2-web3/scripts/dev.sh up
+          docker compose --file "$compose_file" ps
+
+          curl --fail --silent --show-error \
+            http://127.0.0.1:37110/health \
+            --output "${RUNNER_TEMP}/gateway-health.json"
+          node -e '
+            const fs = require("node:fs");
+            const health = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (!health || typeof health !== "object" ||
+                health.revision !== process.env.MIR2_DEPLOY_REVISION) process.exit(1);
+            console.log("[compose-smoke] Gateway health:", health);
+          ' "${RUNNER_TEMP}/gateway-health.json"
+
+          curl --fail --silent --show-error \
+            http://127.0.0.1:33002/ \
+            --output "${RUNNER_TEMP}/web-index.html"
+          test -s "${RUNNER_TEMP}/web-index.html"
+
+          curl --fail --silent --show-error \
+            http://127.0.0.1:33002/version \
+            --output "${RUNNER_TEMP}/web-version.json"
+          node -e '
+            const fs = require("node:fs");
+            const version = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (version.revision !== process.env.MIR2_DEPLOY_REVISION) process.exit(1);
+            console.log("[compose-smoke] Player Web revision:", version.revision);
+          ' "${RUNNER_TEMP}/web-version.json"
+
+          curl --fail --silent --show-error \
+            http://127.0.0.1:33002/generated/crystal-packs/entities-starter/manifest.json \
+            --output "${RUNNER_TEMP}/entities-starter.json"
+          node -e '
+            const fs = require("node:fs");
+            const manifest = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (manifest.kind !== "mir2-crystal-entity-pack" ||
+                manifest.id !== "entities-starter") process.exit(1);
+            console.log("[compose-smoke] Starter manifest:", manifest.contentHash);
+          ' "${RUNNER_TEMP}/entities-starter.json"
+
+          curl --fail --silent --show-error \
+            http://127.0.0.1:33002/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm \
+            --output "${RUNNER_TEMP}/mir2_bevy_runtime_bg.wasm"
+          node -e '
+            const fs = require("node:fs");
+            const bytes = fs.readFileSync(process.argv[1]);
+            const header = Buffer.from([0, 97, 115, 109, 1, 0, 0, 0]);
+            if (bytes.length < 8 || !bytes.subarray(0, 8).equals(header)) process.exit(1);
+            console.log("[compose-smoke] WebGPU WASM bytes:", bytes.length);
+          ' "${RUNNER_TEMP}/mir2_bevy_runtime_bg.wasm"
+
+  starter-acceptance-witness:
+    name: Publish Starter clean-room acceptance witness
+    needs:
+      - cross-platform-release
+      - linux-docker-compose-smoke
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout accepted revision
+        uses: actions/checkout@v4
+
+      - name: Publish immutable acceptance witness
+        shell: bash
+        env:
+          ACCEPTED_REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tag="developer-environment-starter-${ACCEPTED_REVISION}"
+          message="starter clean-room developer acceptance passed for ${ACCEPTED_REVISION}"
+          remote_tag="$(
+            git ls-remote --tags origin "refs/tags/${tag}" |
+              awk 'NR == 1 { print $1 }'
+          )"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -z "$remote_tag" ]]; then
+            git tag --annotate \
+              --message "$message" \
+              "$tag" \
+              "$ACCEPTED_REVISION"
+            git push origin "refs/tags/${tag}"
+          else
+            temp_ref="refs/witness-check/${tag}"
+            trap 'git update-ref -d "$temp_ref" >/dev/null 2>&1 || true' EXIT
+            git fetch --quiet --no-tags origin "refs/tags/${tag}:${temp_ref}"
+            git rev-parse --verify "${temp_ref}^{tag}" >/dev/null
+            test "$(git rev-parse "${temp_ref}^{}")" = "$ACCEPTED_REVISION"
+            test "$(git for-each-ref --format='%(contents)' "$temp_ref")" = "$message"
+          fi

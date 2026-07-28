@@ -7,8 +7,11 @@ Dubhe 的通用分布式节点能力以
 为唯一上游。Mir2 是第一个接入它的游戏，不是这些通用协议的所有者。
 
 本仓库暂时在 `vendor/dubhe-network-core` 固定一份上游源码快照。这样两个私有
-GitHub 仓库之间的 CI 不需要共享个人令牌，也能复现构建。快照来源、版本和许可
-记录在 `vendor/dubhe-network-core/UPSTREAM.toml`；它不是允许双向修改的分叉。
+GitHub 仓库之间的 CI 不需要共享个人令牌，也能复现构建。快照来源、版本、许可
+和本地 manifest 适配记录在 `vendor/dubhe-network-core/UPSTREAM.toml`；它不是
+允许双向修改的分叉。`src/` 与上游提交保持逐文件一致；由于脱离上游 workspace
+后不能继续使用 `*.workspace = true`，vendored `Cargo.toml` 会展开包元数据和
+Serde 依赖，并保持 Mir2 已验证的 Rust 1.89.0 工具链下限。
 
 ## 代码边界
 
@@ -46,7 +49,8 @@ Core 不认识地图编号、角色背包或 Crystal 数据包；Mir2 不自行�
 1. 通用能力只能先在 `dubhe-chain-poc/crates/network-core` 修改、测试和合并。
 2. 将合并后的 `crates/network-core` 完整同步到本仓库
    `vendor/dubhe-network-core`。
-3. 更新 `UPSTREAM.toml` 的 `revision`，保持源码与该提交完全一致。
+3. 更新 `UPSTREAM.toml` 的 `revision`，保持 `src/` 与该提交完全一致；只允许
+   `UPSTREAM.toml` 已记录的 manifest 展开适配，不得修改通用协议源码。
 4. 运行：
 
    ```bash

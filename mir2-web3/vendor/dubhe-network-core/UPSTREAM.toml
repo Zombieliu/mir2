@@ -4,3 +4,4 @@ path = "crates/network-core"
 license = "Apache-2.0"
 canonical = true
 reason = "Vendored while the canonical repository is private; avoids cross-private-repository CI credentials."
+manifest_adaptation = "Workspace-inherited package metadata and serde dependencies are materialized locally; rust-version remains pinned to Mir2's tested 1.89.0 toolchain."

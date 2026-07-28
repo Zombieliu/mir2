@@ -129,6 +129,7 @@ impl Drop for ZoneOutboundSenderTask {
 #[derive(Clone)]
 struct WebState {
     config: Arc<GatewayConfig>,
+    deploy_revision: Option<String>,
     zone_registry: Arc<ZoneRegistry>,
     chat_hub: ChatBroadcastHub,
     session_cache: SharedGatewaySessionCache,
@@ -1331,6 +1332,8 @@ struct HealthResponse {
     ws: &'static str,
     tcp_stub: &'static str,
     gate15: Option<crate::gate15::Gate15Health>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    revision: Option<String>,
     session_cache: GatewaySessionCacheStatus,
     capacity: GatewayCapacityStatus,
     gameplay_events: GameplayEventSinkStatus,
@@ -1431,6 +1434,7 @@ pub async fn run_web_gateway(
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let state = WebState {
         config: Arc::new(config),
+        deploy_revision: deploy_revision_from_env(),
         zone_registry: Arc::new(
             topology
                 .zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
@@ -1468,6 +1472,13 @@ async fn manual_ui() -> Html<&'static str> {
     Html(include_str!("../static/manual.html"))
 }
 
+fn deploy_revision_from_env() -> Option<String> {
+    env::var("MIR2_DEPLOY_REVISION")
+        .ok()
+        .map(|revision| revision.trim().to_owned())
+        .filter(|revision| !revision.is_empty())
+}
+
 async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
     state.reconnect_sessions.purge_expired();
     let session_cache = Arc::clone(&state.session_cache);
@@ -1490,6 +1501,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         ws: "ready",
         tcp_stub: "ready",
         gate15: crate::gate15::health(),
+        revision: state.deploy_revision.clone(),
         session_cache: session_cache_status,
         capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
@@ -6945,6 +6957,7 @@ mod tests {
         let default_character = config.default_character.clone();
         let state = super::WebState {
             config: Arc::new(config),
+            deploy_revision: None,
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
@@ -6997,6 +7010,7 @@ mod tests {
         let shared_event_sink: crate::SharedGameplayEventSink = event_sink;
         let state = super::WebState {
             config: Arc::new(crate::GatewayConfig::default()),
+            deploy_revision: None,
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
@@ -7009,6 +7023,14 @@ mod tests {
         let Json(response) = super::health(State(state)).await;
 
         assert!(response.ok);
+        assert_eq!(response.revision, None);
+        assert!(
+            serde_json::to_value(&response)
+                .expect("health response should serialize")
+                .get("revision")
+                .is_none(),
+            "local health responses should remain compatible when no revision is configured"
+        );
         assert_eq!(response.session_cache.backend, "in_memory");
         assert!(response.session_cache.healthy);
         assert_eq!(
@@ -7033,6 +7055,57 @@ mod tests {
             response.gameplay_events.topic.as_deref(),
             Some(crate::events::DEFAULT_GAMEPLAY_EVENT_TOPIC)
         );
+    }
+
+    #[tokio::test]
+    async fn health_reports_configured_deploy_revision() {
+        let state = super::WebState {
+            config: Arc::new(crate::GatewayConfig::default()),
+            deploy_revision: Some("681bc20a01fe9892fa7cbe285f5e747ead696a93".to_string()),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
+            session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
+            capacity: Arc::new(super::GatewayCapacityState::unlimited()),
+            gameplay_event_sink: None,
+            injector: crate::inject::LiveSessionInjector::default(),
+        };
+
+        let Json(response) = super::health(State(state)).await;
+        let serialized = serde_json::to_value(&response).expect("health response should serialize");
+
+        assert_eq!(
+            response.revision.as_deref(),
+            Some("681bc20a01fe9892fa7cbe285f5e747ead696a93")
+        );
+        assert_eq!(
+            serialized.get("revision"),
+            Some(&json!("681bc20a01fe9892fa7cbe285f5e747ead696a93"))
+        );
+    }
+
+    #[test]
+    fn deploy_revision_from_env_trims_values_and_ignores_blanks() {
+        let configured = with_env_var(
+            "MIR2_DEPLOY_REVISION",
+            Some("  acceptance-revision-42  "),
+            super::deploy_revision_from_env,
+        );
+        assert_eq!(configured.as_deref(), Some("acceptance-revision-42"));
+
+        let blank = with_env_var(
+            "MIR2_DEPLOY_REVISION",
+            Some("  "),
+            super::deploy_revision_from_env,
+        );
+        assert_eq!(blank, None);
+
+        let missing = with_env_var(
+            "MIR2_DEPLOY_REVISION",
+            None,
+            super::deploy_revision_from_env,
+        );
+        assert_eq!(missing, None);
     }
 
     #[tokio::test]
@@ -7070,6 +7143,7 @@ mod tests {
         );
         let state = super::WebState {
             config: Arc::new(crate::GatewayConfig::default()),
+            deploy_revision: None,
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: cache,

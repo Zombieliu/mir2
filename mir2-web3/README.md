@@ -6,24 +6,44 @@ Crystal / Legend of Mir 2 compatible Web MMORPG implementation.
 > 公会和节点运营者都能理解的方式说明项目架构、Mir2 玩法设计、商业模式、
 > 当前验收状态与生产边界。
 
-For a new Windows checkout, start with the repository-level
-[`README.md`](../README.md), then use:
+For a new checkout, install Git and Docker Desktop, then use the pinned
+cross-platform developer environment. Full private assets additionally require
+GitHub CLI on the host:
 
 ```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\scripts\bootstrap-developer.ps1
-.\scripts\start-developer.ps1 -OpenBrowser
+.\scripts\dev.cmd up -Build -OpenBrowser
+```
+
+```bash
+./scripts/dev.sh up --build --open
 ```
 
 The supported default is Player Web on `http://127.0.0.1:3002/`, Gateway
 HTTP/WebSocket on `127.0.0.1:7110`, and Crystal TCP on `127.0.0.1:7000`.
-The start script aligns these ports and uses the tracked prebuilt WebGPU/WebGL2
-Bevy runtimes.
+The scripts align these ports and use the tracked prebuilt WebGPU/WebGL2 Bevy
+runtimes. Windows native-toolchain scripts remain available for direct process
+debugging.
+
+Authorized developers can install the content-hashed full asset bundle and
+start the same stack in one command. The first run performs GitHub device
+authorization through the official host `gh`. The launcher verifies the remote
+witness, digest, and revision, pulls with an ephemeral Docker configuration,
+then supplies the credential to the exact immutable fetcher over standard input:
+
+```powershell
+.\scripts\dev.cmd up -FullAssets -OpenBrowser
+```
+
+```bash
+./scripts/dev.sh up --full-assets --open
+```
 
 ## Developer Documentation
 
 - [Developer handoff](docs/DEVELOPER-HANDOFF.md)
+- [Developer delivery and shared server](docs/DEVELOPER-DELIVERY.md)
 - [Windows local development](docs/LOCAL-DEVELOPMENT-WINDOWS.md)
+- [macOS local development](docs/LOCAL-DEVELOPMENT-MACOS.md)
 - [Asset consumer setup](docs/ASSET-CONSUMER-SETUP.md)
 - [Agent orchestration](docs/AGENT-ORCHESTRATION.md)
 - [Crystal 1:1 roadmap](docs/CRYSTAL-1TO1-ROADMAP.md)

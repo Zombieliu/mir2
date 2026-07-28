@@ -1,6 +1,6 @@
 # New Developer Checklist
 
-这是一页式接手清单。完整背景见 `docs/DEVELOPER-HANDOFF.md`，Windows 细节见 `docs/LOCAL-DEVELOPMENT-WINDOWS.md`，素材边界见 `docs/ASSET-CONSUMER-SETUP.md`。
+这是一页式接手清单。跨平台交付见 `docs/DEVELOPER-DELIVERY.md`，Windows 细节见 `docs/LOCAL-DEVELOPMENT-WINDOWS.md`，macOS 细节见 `docs/LOCAL-DEVELOPMENT-MACOS.md`，素材边界见 `docs/ASSET-CONSUMER-SETUP.md`。
 
 ## 项目所有者先完成
 
@@ -25,14 +25,20 @@ git ls-remote https://github.com/Zombieliu/Crystal.git `
 
 ## 从零启动 Starter
 
+Windows：
+
 ```powershell
-git clone --filter=blob:none --recurse-submodules --also-filter-submodules `
-  https://github.com/Zombieliu/mir2.git
+git clone --filter=blob:none --recurse-submodules https://github.com/Zombieliu/mir2.git
 cd mir2\mir2-web3
-Set-ExecutionPolicy -Scope Process Bypass
-.\scripts\bootstrap-developer.ps1
-.\scripts\verify-developer-setup.ps1 -SkipBuild
-.\scripts\start-developer.ps1 -OpenBrowser
+.\scripts\dev.cmd up -Build -OpenBrowser
+```
+
+macOS：
+
+```bash
+git clone --filter=blob:none --recurse-submodules https://github.com/Zombieliu/mir2.git
+cd mir2/mir2-web3
+./scripts/dev.sh up --build --open
 ```
 
 打开 `http://127.0.0.1:3002/`，执行 `New Account -> Login -> New Character -> Start Game`。本地账号保存在 `.mir2-data/accounts.json`，不要提交。
@@ -42,10 +48,14 @@ Set-ExecutionPolicy -Scope Process Bypass
 安装前建议同一磁盘至少保留 40 GiB 空闲，完整开发环境建议 50 GiB 以上：
 
 ```powershell
-.\scripts\install-developer-assets.ps1 -Download
-.\scripts\verify-developer-setup.ps1 -SkipBuild
-.\scripts\start-developer.ps1 -OpenBrowser
+.\scripts\dev.cmd up -FullAssets -OpenBrowser
 ```
+
+```bash
+./scripts/dev.sh up --full-assets --open
+```
+
+完整素材模式要求宿主机已安装官方 GitHub CLI。首次运行通过宿主机 `gh` 完成设备授权；启动器核验固定仓库的远端 witness、精确 digest/revision 和 OCI revision，使用临时 Docker 配置拉取镜像，并经标准输入把下载凭据交给不可变 fetcher。默认工作区、项目进程、本地构建镜像和容器配置不可读取。需要提前授权或更换账号时，可单独运行 `dev.cmd auth` / `dev.sh auth`。
 
 默认缓存位于 `.mir2-data/developer-assets/developer-assets-f71b89aa3850`。安装完成后，已校验分片约 9.08 GiB；本地图集约 9.08 GiB。需要释放空间时可在确认安装验证通过后删除该 tag 的缓存目录，未来重装则需要重新下载。
 

@@ -1,0 +1,197 @@
+name: Full Asset Clean-Room Acceptance
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/developer-full-assets.yml"
+      - "mir2-web3/config/developer-assets.json"
+      - "mir2-web3/config/developer-release.json"
+      - "mir2-web3/infra/compose.developer.yml"
+      - "mir2-web3/infra/developer-asset-fetch.sh"
+      - "mir2-web3/infra/developer.Dockerfile"
+      - "mir2-web3/infra/developer-entrypoint.sh"
+      - "mir2-web3/scripts/accept-clean-room.sh"
+      - "mir2-web3/scripts/dev.sh"
+      - "mir2-web3/scripts/install-developer-assets.sh"
+concurrency:
+  group: developer-full-assets-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  release-lock:
+    name: Check whether the immutable image is pinned
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.lock.outputs.ready }}
+    steps:
+      - name: Checkout release lock
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Inspect release lock
+        id: lock
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require("node:fs");
+          const release = JSON.parse(
+            fs.readFileSync("mir2-web3/config/developer-release.json", "utf8"),
+          );
+          const digest = release.container?.publishedDigest;
+          const revision = release.container?.publishedRevision;
+          const ready =
+            /^sha256:[a-f0-9]{64}$/.test(digest ?? "") &&
+            /^[a-f0-9]{40}$/.test(revision ?? "");
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `ready=${ready}\n`);
+          console.log(
+            ready
+              ? `Full asset gate is ready for ${revision}.`
+              : "Full asset gate is waiting for the immutable image lock.",
+          );
+          NODE
+
+  full-assets-clean-room:
+    name: Empty-directory full asset install and runtime
+    needs: release-lock
+    if: needs.release-lock.outputs.ready == 'true'
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - mir2-full-assets
+    timeout-minutes: 240
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MIR2_GITHUB_LOGIN: ${{ github.actor }}
+    outputs:
+      asset_hash: ${{ steps.release.outputs.asset_hash }}
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          clean: true
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Verify dedicated runner capacity
+        run: |
+          set -euo pipefail
+          docker info --format 'Docker Engine {{.ServerVersion}}'
+          docker compose version
+          gh --version | head -n 1
+          required_kib=$((40 * 1024 * 1024))
+          docker_root="$(docker info --format '{{.DockerRootDir}}')"
+          for capacity_path in "$RUNNER_TEMP" "$docker_root"; do
+            available_kib="$(
+              df -Pk "$capacity_path" | awk 'NR == 2 { print $4 }'
+            )"
+            if [[ "$available_kib" -lt "$required_kib" ]]; then
+              echo "Full asset acceptance requires at least 40 GiB free at $capacity_path." >&2
+              exit 1
+            fi
+          done
+
+      - name: Read locked asset identity
+        id: release
+        run: |
+          set -euo pipefail
+          asset_hash="$(
+            node -p "require('./mir2-web3/config/developer-assets.json').contentHash"
+          )"
+          echo "asset_hash=$asset_hash" >> "$GITHUB_OUTPUT"
+
+      - name: Run real empty-directory full asset acceptance
+        run: |
+          set -euo pipefail
+          auth_home="$(mktemp -d "$RUNNER_TEMP/mir2-gh-home.XXXXXXXX")"
+          cleanup() {
+            rm -rf -- "$auth_home"
+          }
+          trap cleanup EXIT
+          export HOME="$auth_home"
+          gh auth status --hostname github.com
+          credential_file="$auth_home/git-credentials"
+          (
+            umask 077
+            printf 'https://x-access-token:%s@github.com\n' "$GH_TOKEN" > \
+              "$credential_file"
+          )
+          export GIT_CONFIG_COUNT=3
+          export GIT_CONFIG_KEY_0=credential.helper
+          export GIT_CONFIG_VALUE_0=
+          export GIT_CONFIG_KEY_1=credential.helper
+          export GIT_CONFIG_VALUE_1="store --file=$credential_file"
+          export GIT_CONFIG_KEY_2=url.https://github.com/.insteadOf
+          export GIT_CONFIG_VALUE_2=git@github.com:
+          ./mir2-web3/scripts/accept-clean-room.sh \
+            --repository https://github.com/Zombieliu/mir2.git \
+            --revision "$GITHUB_SHA" \
+            --full-assets
+
+      - name: Reclaim dedicated runner Docker space
+        if: always()
+        run: |
+          published_reference="$(
+            node -e '
+              const release = require("./mir2-web3/config/developer-release.json");
+              process.stdout.write(
+                `${release.container.publishedImage}@${release.container.publishedDigest}`,
+              );
+            '
+          )"
+          if ! docker image rm \
+            "mir2-web3-developer:local-${GITHUB_SHA:0:12}" \
+            "$published_reference" \
+            >/dev/null 2>&1; then
+            echo "::warning::Unable to remove one or more clean-room images."
+          fi
+          if ! docker builder prune \
+            --force \
+            --filter "until=168h" \
+            >/dev/null; then
+            echo "::warning::Unable to prune stale dedicated-runner build cache."
+          fi
+
+  full-assets-witness:
+    name: Publish Full Assets clean-room witness
+    needs: full-assets-clean-room
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout accepted revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Publish immutable Full Assets witness
+        env:
+          ASSET_HASH: ${{ needs.full-assets-clean-room.outputs.asset_hash }}
+          ACCEPTED_REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tag="developer-environment-full-${ACCEPTED_REVISION}"
+          message="full-assets clean-room passed for ${ACCEPTED_REVISION} assets ${ASSET_HASH}"
+          remote_tag="$(
+            git ls-remote --tags origin "refs/tags/${tag}" |
+              awk 'NR == 1 { print $1 }'
+          )"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -z "$remote_tag" ]]; then
+            git tag --annotate \
+              --message "$message" \
+              "$tag" \
+              "$ACCEPTED_REVISION"
+            git push origin "refs/tags/${tag}"
+          else
+            temp_ref="refs/witness-check/${tag}"
+            trap 'git update-ref -d "$temp_ref" >/dev/null 2>&1 || true' EXIT
+            git fetch --quiet --no-tags origin "refs/tags/${tag}:${temp_ref}"
+            git rev-parse --verify "${temp_ref}^{tag}" >/dev/null
+            test "$(git rev-parse "${temp_ref}^{}")" = "$ACCEPTED_REVISION"
+            test "$(git for-each-ref --format='%(contents)' "$temp_ref")" = "$message"
+          fi

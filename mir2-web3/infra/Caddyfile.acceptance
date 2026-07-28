@@ -1,0 +1,12 @@
+{$MIR2_ACCEPTANCE_DOMAIN} {
+	encode zstd gzip
+
+	basic_auth {$MIR2_ACCEPTANCE_BASIC_AUTH_ALGORITHM} {
+		{$MIR2_ACCEPTANCE_BASIC_AUTH_USER} {$MIR2_ACCEPTANCE_BASIC_AUTH_HASH}
+	}
+
+	@gateway path /health /ws
+	reverse_proxy @gateway gateway:7110
+
+	reverse_proxy web:3002
+}
