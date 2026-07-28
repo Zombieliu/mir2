@@ -21,6 +21,7 @@ const CONTENT_SCHEMA: &str = "obelisk.mir2.ai-content.v1";
 const MAX_PENDING_DELIVERIES: usize = 256;
 const MAX_RECENT_RECEIPTS: usize = 40;
 const MAX_ATTEMPTS: u8 = 8;
+const DEFAULT_RUNTIME_HEARTBEAT_TTL_MS: u64 = 45_000;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -79,7 +80,7 @@ impl AiDistributionChannel {
 
     fn delivery_mode(self) -> &'static str {
         match self {
-            Self::GameOverlay => "push",
+            Self::GameOverlay => "inProcess",
             Self::WebBroadcast => "pull",
             Self::RtmpBroadcast => "relay",
             Self::DiscordWebhook => "push",
@@ -95,7 +96,11 @@ pub struct AiDistributionConfig {
     pub production: bool,
     pub discord_webhook: Option<String>,
     pub public_spectator_url: Option<String>,
+    pub game_overlay_enabled: bool,
     pub rtmp_enabled: bool,
+    pub rtmp_platform: String,
+    pub runtime_heartbeat_token: Option<String>,
+    pub runtime_heartbeat_ttl_ms: u64,
     pub game_overlay_endpoint: Option<String>,
     pub discord_go_live_endpoint: Option<String>,
     pub clip_export_endpoint: Option<String>,
@@ -112,7 +117,16 @@ impl AiDistributionConfig {
             production,
             discord_webhook: optional_env("MIR2_AI_LIVE_DISCORD_WEBHOOK"),
             public_spectator_url: optional_env("MIR2_AI_LIVE_PUBLIC_URL"),
+            game_overlay_enabled: bool_env("MIR2_AI_DISTRIBUTION_GAME_OVERLAY_ENABLED", true),
             rtmp_enabled: bool_env("MIR2_AI_DISTRIBUTION_RTMP_ENABLED", false),
+            rtmp_platform: optional_env("MIR2_AI_DISTRIBUTION_RTMP_PLATFORM")
+                .unwrap_or_else(|| "youtube".to_string()),
+            runtime_heartbeat_token: optional_env("MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN"),
+            runtime_heartbeat_ttl_ms: u64_env(
+                "MIR2_AI_DISTRIBUTION_HEARTBEAT_TTL_MS",
+                DEFAULT_RUNTIME_HEARTBEAT_TTL_MS,
+            )
+            .clamp(10_000, 300_000),
             game_overlay_endpoint: optional_env("MIR2_AI_DISTRIBUTION_GAME_ENDPOINT"),
             discord_go_live_endpoint: optional_env("MIR2_AI_DISTRIBUTION_DISCORD_GO_LIVE_ENDPOINT"),
             clip_export_endpoint: optional_env("MIR2_AI_DISTRIBUTION_CLIP_ENDPOINT"),
@@ -134,7 +148,11 @@ impl AiDistributionConfig {
             production: false,
             discord_webhook: None,
             public_spectator_url: None,
+            game_overlay_enabled: false,
             rtmp_enabled: false,
+            rtmp_platform: "youtube".to_string(),
+            runtime_heartbeat_token: None,
+            runtime_heartbeat_ttl_ms: DEFAULT_RUNTIME_HEARTBEAT_TTL_MS,
             game_overlay_endpoint: None,
             discord_go_live_endpoint: None,
             clip_export_endpoint: None,
@@ -197,13 +215,37 @@ impl AiDistributionConfig {
                         .to_string(),
                 );
             }
+            if self.rtmp_enabled
+                && self
+                    .runtime_heartbeat_token
+                    .as_deref()
+                    .is_none_or(|token| token.len() < 24)
+            {
+                return Err(
+                    "MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN must contain at least 24 characters when RTMP is enabled in production"
+                        .to_string(),
+                );
+            }
+        }
+        if self.rtmp_platform.len() > 32
+            || !self
+                .rtmp_platform
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+        {
+            return Err(
+                "MIR2_AI_DISTRIBUTION_RTMP_PLATFORM must be a short platform identifier"
+                    .to_string(),
+            );
         }
         Ok(())
     }
 
     fn configured(&self, channel: AiDistributionChannel) -> bool {
         match channel {
-            AiDistributionChannel::GameOverlay => self.game_overlay_endpoint.is_some(),
+            AiDistributionChannel::GameOverlay => {
+                self.game_overlay_enabled || self.game_overlay_endpoint.is_some()
+            }
             AiDistributionChannel::WebBroadcast => self.public_spectator_url.is_some(),
             AiDistributionChannel::RtmpBroadcast => self.rtmp_enabled,
             AiDistributionChannel::DiscordWebhook => self.discord_webhook.is_some(),
@@ -339,12 +381,32 @@ struct ChannelCounters {
     last_error: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiRuntimeHeartbeat {
+    pub platform: String,
+    pub worker_id: String,
+    pub runtime_state: String,
+    pub last_heartbeat_at_ms: u64,
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AiRuntimeHeartbeatRequest {
+    pub platform: String,
+    pub worker_id: String,
+    pub runtime_state: String,
+    pub message: Option<String>,
+}
+
 #[derive(Debug)]
 struct AiDistributionState {
     queue: VecDeque<DistributionJob>,
     enabled: BTreeMap<AiDistributionChannel, bool>,
     counters: BTreeMap<AiDistributionChannel, ChannelCounters>,
     recent_receipts: VecDeque<AiDeliveryReceipt>,
+    runtime_heartbeats: BTreeMap<AiDistributionChannel, AiRuntimeHeartbeat>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -356,6 +418,9 @@ pub struct AiChannelStatus {
     pub configured: bool,
     pub enabled: bool,
     pub state: &'static str,
+    pub launch_required: bool,
+    pub target: Option<String>,
+    pub runtime: Option<AiRuntimeHeartbeat>,
     pub queued: usize,
     pub delivered_total: u64,
     pub failure_total: u64,
@@ -378,9 +443,20 @@ pub struct AiDistributionMetrics {
 #[serde(rename_all = "camelCase")]
 pub struct AiDistributionStatus {
     pub schema: &'static str,
+    pub launch: AiLaunchReadiness,
     pub channels: Vec<AiChannelStatus>,
     pub recent_receipts: Vec<AiDeliveryReceipt>,
     pub metrics: AiDistributionMetrics,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiLaunchReadiness {
+    pub profile: &'static str,
+    pub ready_for_launch: bool,
+    pub ready_channels: usize,
+    pub required_channels: usize,
+    pub blockers: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -420,6 +496,7 @@ impl AiDistributionHub {
                 enabled,
                 counters: BTreeMap::new(),
                 recent_receipts: VecDeque::new(),
+                runtime_heartbeats: BTreeMap::new(),
             })),
             client: Client::builder()
                 .connect_timeout(Duration::from_secs(5))
@@ -449,16 +526,23 @@ impl AiDistributionHub {
                 next_attempt_at_ms: now_ms(),
                 last_error: None,
             };
-            if matches!(
-                channel,
-                AiDistributionChannel::GameOverlay
-                    | AiDistributionChannel::DiscordWebhook
-                    | AiDistributionChannel::DiscordGoLive
-                    | AiDistributionChannel::ClipExport
-            ) {
-                self.enqueue(job);
-            } else {
-                self.record_success(&job);
+            match channel {
+                AiDistributionChannel::GameOverlay => {
+                    if self.config.game_overlay_endpoint.is_some() {
+                        self.enqueue(job);
+                    } else {
+                        self.record_success(&job);
+                    }
+                }
+                AiDistributionChannel::DiscordWebhook
+                | AiDistributionChannel::DiscordGoLive
+                | AiDistributionChannel::ClipExport => self.enqueue(job),
+                AiDistributionChannel::WebBroadcast => self.record_success(&job),
+                AiDistributionChannel::RtmpBroadcast => {
+                    if self.runtime_ready(AiDistributionChannel::RtmpBroadcast) {
+                        self.record_success(&job);
+                    }
+                }
             }
         }
         package
@@ -542,8 +626,10 @@ impl AiDistributionHub {
             .into_iter()
             .map(|channel| channel_status(&self.config, &state, channel))
             .collect::<Vec<_>>();
+        let launch = launch_readiness(&channels);
         AiDistributionStatus {
             schema: DISTRIBUTION_SCHEMA,
+            launch,
             channels,
             recent_receipts: state.recent_receipts.iter().cloned().collect(),
             metrics: metrics_from_state(&state),
@@ -598,6 +684,76 @@ impl AiDistributionHub {
         }
         self.persist_queue();
         Ok(self.status())
+    }
+
+    pub fn record_runtime_heartbeat(
+        &self,
+        token: Option<&str>,
+        request: AiRuntimeHeartbeatRequest,
+    ) -> Result<AiDistributionStatus, String> {
+        let expected = self
+            .config
+            .runtime_heartbeat_token
+            .as_deref()
+            .ok_or_else(|| "AI distribution heartbeat is not configured".to_string())?;
+        let actual =
+            token.ok_or_else(|| "AI distribution heartbeat token is required".to_string())?;
+        if !constant_time_eq(expected.as_bytes(), actual.as_bytes()) {
+            return Err("AI distribution heartbeat token is invalid".to_string());
+        }
+        if request.platform != self.config.rtmp_platform {
+            return Err(
+                "heartbeat platform does not match the configured RTMP platform".to_string(),
+            );
+        }
+        if request.worker_id.is_empty()
+            || request.worker_id.len() > 80
+            || !request.worker_id.bytes().all(|byte| {
+                byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b':')
+            })
+        {
+            return Err("heartbeat workerId is invalid".to_string());
+        }
+        let runtime_state = request.runtime_state.trim().to_ascii_lowercase();
+        if !matches!(
+            runtime_state.as_str(),
+            "starting" | "live" | "stopped" | "error"
+        ) {
+            return Err(
+                "heartbeat runtimeState must be starting, live, stopped, or error".to_string(),
+            );
+        }
+        let message = request
+            .message
+            .as_deref()
+            .map(|message| bounded_text(message.trim(), 200))
+            .filter(|message| !message.is_empty());
+        self.with_state(|state| {
+            state.runtime_heartbeats.insert(
+                AiDistributionChannel::RtmpBroadcast,
+                AiRuntimeHeartbeat {
+                    platform: request.platform,
+                    worker_id: request.worker_id,
+                    runtime_state,
+                    last_heartbeat_at_ms: now_ms(),
+                    message,
+                },
+            );
+        });
+        Ok(self.status())
+    }
+
+    fn runtime_ready(&self, channel: AiDistributionChannel) -> bool {
+        self.with_state_value(|state| {
+            state
+                .runtime_heartbeats
+                .get(&channel)
+                .is_some_and(|heartbeat| {
+                    heartbeat.runtime_state == "live"
+                        && now_ms().saturating_sub(heartbeat.last_heartbeat_at_ms)
+                            <= self.config.runtime_heartbeat_ttl_ms
+                })
+        })
     }
 
     fn should_route(&self, channel: AiDistributionChannel, score: u8) -> bool {
@@ -797,20 +953,56 @@ fn channel_status(
     let configured = config.configured(channel);
     let enabled = state.enabled.get(&channel).copied().unwrap_or(false);
     let counter = state.counters.get(&channel).cloned().unwrap_or_default();
+    let runtime = state.runtime_heartbeats.get(&channel).cloned();
     let queued = state
         .queue
         .iter()
         .filter(|job| job.channel == channel)
         .count();
+    let runtime_age_ms = runtime
+        .as_ref()
+        .map(|heartbeat| now_ms().saturating_sub(heartbeat.last_heartbeat_at_ms));
     let health = if !configured {
         "unconfigured"
     } else if !enabled {
         "disabled"
+    } else if channel == AiDistributionChannel::RtmpBroadcast {
+        match runtime.as_ref() {
+            None => "waiting",
+            Some(_heartbeat)
+                if runtime_age_ms.unwrap_or(u64::MAX) > config.runtime_heartbeat_ttl_ms =>
+            {
+                "degraded"
+            }
+            Some(heartbeat) if heartbeat.runtime_state == "live" => "ready",
+            Some(heartbeat) if heartbeat.runtime_state == "error" => "degraded",
+            Some(_) => "waiting",
+        }
     } else if counter.last_error.is_some() {
         "degraded"
+    } else if matches!(
+        channel,
+        AiDistributionChannel::DiscordWebhook
+            | AiDistributionChannel::DiscordGoLive
+            | AiDistributionChannel::ClipExport
+    ) && counter.last_success_at_ms.is_none()
+    {
+        "waiting"
     } else {
         "ready"
     };
+    let runtime_error = runtime.as_ref().and_then(|heartbeat| {
+        if heartbeat.runtime_state == "error" {
+            heartbeat
+                .message
+                .clone()
+                .or_else(|| Some("encoder reported an error".to_string()))
+        } else if runtime_age_ms.is_some_and(|age| age > config.runtime_heartbeat_ttl_ms) {
+            Some("encoder heartbeat expired".to_string())
+        } else {
+            None
+        }
+    });
     AiChannelStatus {
         channel,
         label: channel.label(),
@@ -818,13 +1010,52 @@ fn channel_status(
         configured,
         enabled,
         state: health,
+        launch_required: is_launch_required(channel),
+        target: match channel {
+            AiDistributionChannel::WebBroadcast => config.public_spectator_url.clone(),
+            AiDistributionChannel::RtmpBroadcast => Some(config.rtmp_platform.clone()),
+            _ => None,
+        },
+        runtime,
         queued,
         delivered_total: counter.delivered,
         failure_total: counter.failed,
         dead_letters_total: counter.dead_letters,
         last_success_at_ms: counter.last_success_at_ms,
         last_failure_at_ms: counter.last_failure_at_ms,
-        last_error: counter.last_error,
+        last_error: runtime_error.or(counter.last_error),
+    }
+}
+
+fn is_launch_required(channel: AiDistributionChannel) -> bool {
+    matches!(
+        channel,
+        AiDistributionChannel::GameOverlay
+            | AiDistributionChannel::WebBroadcast
+            | AiDistributionChannel::RtmpBroadcast
+            | AiDistributionChannel::DiscordWebhook
+    )
+}
+
+fn launch_readiness(channels: &[AiChannelStatus]) -> AiLaunchReadiness {
+    let required = channels
+        .iter()
+        .filter(|channel| channel.launch_required)
+        .collect::<Vec<_>>();
+    let blockers = required
+        .iter()
+        .filter(|channel| channel.state != "ready")
+        .map(|channel| format!("{}: {}", channel.label, channel.state))
+        .collect::<Vec<_>>();
+    AiLaunchReadiness {
+        profile: "launch-v1",
+        ready_for_launch: blockers.is_empty(),
+        ready_channels: required
+            .iter()
+            .filter(|channel| channel.state == "ready")
+            .count(),
+        required_channels: required.len(),
+        blockers,
     }
 }
 
@@ -1013,6 +1244,13 @@ fn bool_env(name: &str, default: bool) -> bool {
         .unwrap_or(default)
 }
 
+fn u64_env(name: &str, default: u64) -> u64 {
+    env::var(name)
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(default)
+}
+
 fn bounded_score_env(name: &str, default: u8) -> u8 {
     env::var(name)
         .ok()
@@ -1042,6 +1280,16 @@ fn now_ms() -> u64 {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as u64
+}
+
+fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    left.iter()
+        .zip(right.iter())
+        .fold(0u8, |difference, (left, right)| difference | (left ^ right))
+        == 0
 }
 
 #[cfg(test)]
@@ -1079,7 +1327,18 @@ mod tests {
         let mut config = AiDistributionConfig::disabled_for_tests(data_dir.clone());
         config.public_spectator_url = Some("https://mir2.example".to_string());
         config.rtmp_enabled = true;
+        config.runtime_heartbeat_token = Some("runtime-test-secret".to_string());
         let hub = AiDistributionHub::new(config).expect("distribution hub");
+        hub.record_runtime_heartbeat(
+            Some("runtime-test-secret"),
+            AiRuntimeHeartbeatRequest {
+                platform: "youtube".to_string(),
+                worker_id: "encoder-test-01".to_string(),
+                runtime_state: "live".to_string(),
+                message: None,
+            },
+        )
+        .expect("runtime heartbeat");
         let package = hub.publish(&segment(100));
         let status = hub.status();
 
@@ -1089,8 +1348,85 @@ mod tests {
             Some("https://mir2.example?spectate=1&aiLive=1&spectateMap=0")
         );
         assert_eq!(status.metrics.delivered_total, 2);
+        assert_eq!(
+            status
+                .channels
+                .iter()
+                .find(|channel| channel.channel == AiDistributionChannel::RtmpBroadcast)
+                .map(|channel| channel.state),
+            Some("ready")
+        );
         assert_eq!(status.metrics.queued_deliveries, 0);
         assert!(data_dir.join("content-packages.jsonl").is_file());
+
+        let _ = fs::remove_dir_all(data_dir);
+    }
+
+    #[test]
+    fn launch_readiness_waits_for_runtime_and_real_push_delivery() {
+        let data_dir = env::temp_dir().join(format!(
+            "mir2-ai-distribution-launch-{}-{}",
+            std::process::id(),
+            now_ms()
+        ));
+        let mut config = AiDistributionConfig::disabled_for_tests(data_dir.clone());
+        config.game_overlay_enabled = true;
+        config.public_spectator_url = Some("https://mir2.example".to_string());
+        config.rtmp_enabled = true;
+        config.runtime_heartbeat_token = Some("runtime-test-secret".to_string());
+        config.discord_webhook = Some("http://127.0.0.1:1/discord".to_string());
+        let hub = AiDistributionHub::new(config).expect("distribution hub");
+        let status = hub.status();
+
+        assert!(!status.launch.ready_for_launch);
+        assert_eq!(status.launch.ready_channels, 2);
+        assert_eq!(status.launch.required_channels, 4);
+        assert!(status.channels.iter().any(|channel| channel.channel
+            == AiDistributionChannel::RtmpBroadcast
+            && channel.state == "waiting"));
+        assert!(status.channels.iter().any(|channel| channel.channel
+            == AiDistributionChannel::DiscordWebhook
+            && channel.state == "waiting"));
+
+        let _ = fs::remove_dir_all(data_dir);
+    }
+
+    #[test]
+    fn runtime_heartbeat_requires_exact_token_and_expires() {
+        let data_dir = env::temp_dir().join(format!(
+            "mir2-ai-distribution-heartbeat-{}-{}",
+            std::process::id(),
+            now_ms()
+        ));
+        let mut config = AiDistributionConfig::disabled_for_tests(data_dir.clone());
+        config.rtmp_enabled = true;
+        config.runtime_heartbeat_token = Some("runtime-test-secret".to_string());
+        config.runtime_heartbeat_ttl_ms = 1;
+        let hub = AiDistributionHub::new(config).expect("distribution hub");
+        let heartbeat = AiRuntimeHeartbeatRequest {
+            platform: "youtube".to_string(),
+            worker_id: "encoder-test-01".to_string(),
+            runtime_state: "live".to_string(),
+            message: None,
+        };
+
+        assert!(hub
+            .record_runtime_heartbeat(Some("wrong-secret"), heartbeat.clone())
+            .is_err());
+        hub.record_runtime_heartbeat(Some("runtime-test-secret"), heartbeat)
+            .expect("runtime heartbeat");
+        assert_eq!(
+            hub.channel_status(AiDistributionChannel::RtmpBroadcast)
+                .state,
+            "ready"
+        );
+        std::thread::sleep(Duration::from_millis(5));
+        let expired = hub.channel_status(AiDistributionChannel::RtmpBroadcast);
+        assert_eq!(expired.state, "degraded");
+        assert_eq!(
+            expired.last_error.as_deref(),
+            Some("encoder heartbeat expired")
+        );
 
         let _ = fs::remove_dir_all(data_dir);
     }

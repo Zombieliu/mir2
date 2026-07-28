@@ -30,6 +30,7 @@ Desktop.ini
 .env.local
 .env.*
 !.env.example
+!infra/ai-live/.env.youtube.example
 infra/gate12/.secrets/
 infra/gate13/.secrets/
 infra/gate22/generated/
@@ -40,6 +41,7 @@ infra/gate22/generated/
 # Browser QA
 .playwright-cli/
 output/playwright/
+output/web-game/
 
 # Local AI-generated/reference images
 ai/

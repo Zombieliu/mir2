@@ -1,5 +1,16 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-07-29 — Launch Channel Pack v1
+
+- Goal: land the first production-oriented AI distribution loop across Web/HLS, Discord Webhook, YouTube RTMPS, and a lightweight in-game AI event entry.
+- Acceptance boundary: channel health must reflect real runtime evidence; missing YouTube/Discord credentials remain visibly waiting rather than reporting false readiness.
+- Deferred by design: Discord Go Live, clip export, Twitch, and Bilibili remain disabled for this launch pack.
+- Verification will cover the player-facing game entry, operator controls, gateway tests, production web build, and the web-game Playwright client.
+- Implemented the in-process player WebSocket event entry with a 60-second freshness boundary and a dismissible “立即观战” card.
+- Added launch-v1 readiness for Game, Web/HLS, Discord, and YouTube RTMPS. YouTube now requires an authenticated live encoder heartbeat; stale or failed heartbeats degrade instead of reporting false readiness.
+- Added the YouTube encoder secret template, runtime heartbeat loop, acceptance probe, non-technical launch readiness UI, and Chinese production/manual acceptance guide. Discord Go Live, Clip, Twitch, and Bilibili remain explicitly deferred.
+- Verified: AI distribution tests 6/6, AI Live tests 7/7, Web `typecheck`, production Next build, shell syntax, Docker Compose config, `git diff --check`, authenticated 3/4 local launch probe, and the required web-game Playwright client with no browser console errors.
+
 2026-07-29 production AI live goal:
 
 - New user goal: land a production-grade AI live broadcast system on top of the completed

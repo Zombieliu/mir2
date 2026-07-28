@@ -35,7 +35,16 @@ export type AiChannelStatus = {
   deliveryMode: "inProcess" | "pull" | "relay" | "push";
   configured: boolean;
   enabled: boolean;
-  state: "ready" | "disabled" | "degraded" | "unconfigured";
+  state: "ready" | "waiting" | "disabled" | "degraded" | "unconfigured";
+  launchRequired: boolean;
+  target: string | null;
+  runtime: {
+    platform: string;
+    workerId: string;
+    runtimeState: "starting" | "live" | "stopped" | "error";
+    lastHeartbeatAtMs: number;
+    message: string | null;
+  } | null;
   queued: number;
   deliveredTotal: number;
   failureTotal: number;
@@ -47,6 +56,13 @@ export type AiChannelStatus = {
 
 export type AiDistributionStatus = {
   schema: string;
+  launch: {
+    profile: "launch-v1";
+    readyForLaunch: boolean;
+    readyChannels: number;
+    requiredChannels: number;
+    blockers: string[];
+  };
   channels: AiChannelStatus[];
   recentReceipts: Array<{
     jobId: string;

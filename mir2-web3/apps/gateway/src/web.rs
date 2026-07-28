@@ -1546,6 +1546,10 @@ pub async fn run_web_gateway(
             "/ai-live/distribution",
             get(ai_distribution_status).post(ai_distribution_control),
         )
+        .route(
+            "/ai-live/distribution/heartbeat",
+            post(ai_distribution_heartbeat),
+        )
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
@@ -1708,6 +1712,33 @@ async fn ai_distribution_control(
         };
         (status, Json(AdminErrorResponse { error }))
     })
+}
+
+async fn ai_distribution_heartbeat(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<crate::ai_distribution::AiRuntimeHeartbeatRequest>,
+) -> Result<
+    Json<crate::ai_distribution::AiDistributionStatus>,
+    (StatusCode, Json<AdminErrorResponse>),
+> {
+    let bearer = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim);
+    state
+        .ai_live
+        .record_distribution_runtime_heartbeat(bearer, request)
+        .map(Json)
+        .map_err(|error| {
+            let status = if error.contains("token") {
+                StatusCode::FORBIDDEN
+            } else {
+                StatusCode::BAD_REQUEST
+            };
+            (status, Json(AdminErrorResponse { error }))
+        })
 }
 
 async fn ai_live_control(
@@ -2582,6 +2613,7 @@ async fn handle_socket(
         state.injector.clone(),
         state.chat_hub.clone(),
         state.spectator.clone(),
+        state.ai_live.clone(),
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -2889,6 +2921,7 @@ async fn handle_socket_inner(
     injector: crate::inject::LiveSessionInjector,
     chat_hub: ChatBroadcastHub,
     spectator: SpectatorHub,
+    ai_live: AiLiveHub,
 ) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
@@ -2898,6 +2931,9 @@ async fn handle_socket_inner(
         spectator.config().capture_interval_ms,
     ));
     spectator_publish_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut ai_live_tick = tokio::time::interval(Duration::from_secs(1));
+    ai_live_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut last_ai_live_segment_id: Option<String> = None;
     let mut runtime_tick_deferred_until = Instant::now();
     let enforce_player_command_safety = production_player_command_safety_enabled();
     let mut authenticated = false;
@@ -3305,6 +3341,46 @@ async fn handle_socket_inner(
                 let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
                 if let Err(error) = spectator.publish(&snapshot) {
                     eprintln!("spectator frame publish skipped: {error}");
+                }
+            }
+            _ = ai_live_tick.tick(), if authenticated => {
+                let status = ai_live.status();
+                let game_overlay_ready = status.distribution.channels.iter().any(|channel| {
+                    channel.channel
+                        == crate::ai_distribution::AiDistributionChannel::GameOverlay
+                        && channel.enabled
+                        && channel.state == "ready"
+                });
+                let latest_segment_id = status
+                    .latest_segment
+                    .as_ref()
+                    .map(|segment| segment.segment_id.clone());
+                let latest_segment_is_fresh = status.latest_segment.as_ref().is_some_and(|segment| {
+                    gateway_unix_ms().saturating_sub(segment.created_at_ms) <= 60_000
+                });
+                if status.mode == AiLiveMode::Live
+                    && game_overlay_ready
+                    && latest_segment_is_fresh
+                    && latest_segment_id.is_some()
+                    && latest_segment_id != last_ai_live_segment_id
+                {
+                    if sender
+                        .lock()
+                        .await
+                        .send(Message::Text(
+                            json!({
+                                "type": "aiLiveStatus",
+                                "payload": status
+                            })
+                            .to_string()
+                            .into(),
+                        ))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    last_ai_live_segment_id = latest_segment_id;
                 }
             }
             _ = runtime_tick.tick() => {
