@@ -241,6 +241,31 @@ pub async fn acquire_player_session(
         .map(Some)
 }
 
+pub fn inspect_player_session(
+    account_id: &str,
+    character_index: i32,
+    zone_id: &ZoneId,
+) -> Result<Option<Gate15PlayerLease>, String> {
+    let Some(control) = GATE15_CONTROL_PLANE.get() else {
+        return Ok(None);
+    };
+    let observed = control
+        .observed
+        .read()
+        .map_err(|_| "Gate 15 observed state lock poisoned".to_string())?;
+    let session_id = player_session_id(account_id, character_index);
+    let Some(lease) = observed.state.session_lease(&session_id, now_ms()).cloned() else {
+        return Ok(None);
+    };
+    let placement = placement_from_state(&observed.state, zone_id, now_ms())?;
+    Ok(Some(Gate15PlayerLease {
+        finalized_height: observed.state.finalized_height,
+        state_root: observed.state_root.clone(),
+        lease,
+        placement,
+    }))
+}
+
 impl Gate15ControlPlane {
     async fn refresh(&self) -> Result<(), String> {
         match self.quorum.quorum_state().await {

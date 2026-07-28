@@ -256,6 +256,99 @@ export type AdminPlayerDetail = {
   bannedAtMs?: number;
 };
 
+export type AdminServiceTracePlayer = {
+  playerId: string;
+  accountId: string;
+  characterIndex: number;
+  characterName: string;
+  online: boolean;
+  mapFileName: string;
+  playerObjectId?: number;
+};
+
+export type AdminServicePlacement = {
+  gatewaySessionId?: string;
+  gatewayId?: string;
+  gatewayEndpoint?: string;
+  relayId?: string;
+  relayEndpoint?: string;
+  serviceNodeId?: string;
+  nodeKind?: string;
+  zoneId?: string;
+  lineId?: number;
+  mapFileName?: string;
+  zoneOwnerFencingToken?: number;
+  handoffGeneration: number;
+  routeLeaseExpiresAtMs?: number;
+  updatedAtMs: number;
+  tick: number;
+};
+
+export type AdminServiceTraceEvent = {
+  eventId: string;
+  eventType: string;
+  occurredAtMs: number;
+  gatewaySessionId?: string;
+  gatewayId?: string;
+  relayId?: string;
+  serviceNodeId?: string;
+  nodeKind?: string;
+  zoneId?: string;
+  lineId?: number;
+  mapFileName?: string;
+  zoneOwnerFencingToken?: number;
+  handoffGeneration: number;
+  reason: string;
+};
+
+export type AdminCommonwarePlacement = {
+  source: string;
+  gatewayId: string;
+  finalizedHeight: number;
+  stateRoot: string;
+  zoneId: string;
+  generation: number;
+  primaryHostId: string;
+  replicaHostIds: string[];
+  primaryEndpoint: string;
+  replicaEndpoints: string[];
+  expiresAtMs: number;
+  sessionLease?: {
+    sessionId: string;
+    gatewayId: string;
+    zoneId: string;
+    fencingToken: number;
+    expiresAtMs: number;
+  };
+};
+
+export type AdminServiceTraceReadModel = {
+  generatedAtMs: number;
+  query: string;
+  status:
+    | "online"
+    | "degraded"
+    | "stale"
+    | "offline"
+    | "no_runtime_record"
+    | "not_found"
+    | "ambiguous"
+    | "unavailable";
+  reason?: string;
+  player?: AdminServiceTracePlayer;
+  candidates: AdminServiceTracePlayer[];
+  current?: AdminServicePlacement;
+  history: AdminServiceTraceEvent[];
+  commonware?: AdminCommonwarePlacement;
+  diagnostics: Array<{
+    component: string;
+    status: string;
+    message: string;
+  }>;
+  sensitiveRedacted: boolean;
+  auditTraceId: string;
+};
+
 export type AdminEconomyAsset = {
   asset: string;
   total: number;
@@ -467,7 +560,12 @@ export type AdminRiskReadModel = {
   }>;
 };
 
-const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
+const configuredAdminApiBase = process.env.ADMIN_API_BASE_URL?.trim();
+const adminApiBase = configuredAdminApiBase ?? "http://127.0.0.1:7420";
+const adminApiTimeoutMs = Math.max(
+  1_000,
+  Math.min(30_000, Number(process.env.ADMIN_API_TIMEOUT_MS ?? 8_000) || 8_000)
+);
 
 // Permissive operator identity used ONLY for local development with the
 // header/policy auth backend. In production the operator must be configured
@@ -486,9 +584,13 @@ function isProductionRuntime() {
 
 export async function operatorHeaders() {
   const cookieStore = await cookies();
-  const token =
-    cookieStore.get("admin_operator_token")?.value?.trim() ??
-    process.env.ADMIN_OPERATOR_TOKEN?.trim();
+  const cookieToken = cookieStore.get("admin_operator_token")?.value?.trim();
+  // Hosted deployments keep dashboard login and Admin API service credentials
+  // separate. Local development still permits switching operator tokens via
+  // the login cookie.
+  const token = isProductionRuntime()
+    ? process.env.ADMIN_OPERATOR_TOKEN?.trim()
+    : cookieToken ?? process.env.ADMIN_OPERATOR_TOKEN?.trim();
   // Fail closed in production: if the operator identity is not explicitly
   // configured, send empty headers (the admin-api rejects them) instead of
   // defaulting to a full-permission "local-gm" operator.
@@ -509,15 +611,23 @@ export async function operatorHeaders() {
   if (token) {
     headers.authorization = `Bearer ${token}`;
   }
+  const proxyToken = process.env.ADMIN_API_PROXY_TOKEN?.trim();
+  if (proxyToken) {
+    headers["x-dubhe-admin-proxy-token"] = proxyToken;
+  }
   return headers;
 }
 
 export async function adminGet<T>(path: string): Promise<ApiResult<T>> {
+  if (isProductionRuntime() && !configuredAdminApiBase) {
+    return { ok: false, error: "ADMIN_API_BASE_URL is not configured" };
+  }
   try {
     const headers = await operatorHeaders();
     const response = await fetch(`${adminApiBase}${path}`, {
       cache: "no-store",
-      headers
+      headers,
+      signal: AbortSignal.timeout(adminApiTimeoutMs)
     });
     const data = (await response.json()) as unknown;
     if (!response.ok) {
@@ -540,6 +650,9 @@ export async function adminPost<T>(
   path: string,
   body: unknown
 ): Promise<ApiResult<T>> {
+  if (isProductionRuntime() && !configuredAdminApiBase) {
+    return { ok: false, error: "ADMIN_API_BASE_URL is not configured" };
+  }
   try {
     const authHeaders = await operatorHeaders();
     const response = await fetch(`${adminApiBase}${path}`, {
@@ -549,6 +662,7 @@ export async function adminPost<T>(
         "content-type": "application/json",
         ...authHeaders
       },
+      signal: AbortSignal.timeout(adminApiTimeoutMs),
       body: JSON.stringify(body)
     });
     const data = (await response.json()) as unknown;

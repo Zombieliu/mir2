@@ -94,6 +94,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let record = GatewaySessionCacheRecord {
         key: key.clone(),
         character_name: format!("Gate19{phase}"),
+        gateway_session_id: Some(route_owner.clone()),
+        gateway_id: Some(format!("gate19-probe-{phase}")),
+        gateway_endpoint: None,
+        relay_id: None,
+        relay_endpoint: None,
+        service_node_id: Some("gate19-active".to_string()),
+        node_kind: Some("official".to_string()),
         zone_id: Some("map:0".to_string()),
         zone_owner_id: Some("gate19-active".to_string()),
         zone_owner_fencing_token: Some(1),
@@ -106,6 +113,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         updated_at_ms: now_ms(),
         route_lease_owner: Some(route_lease.owner.clone()),
         route_lease_expires_at_ms: Some(route_lease.expires_at_ms),
+        handoff_generation: 0,
     };
     cache.put(record.clone());
     let redis_master_round_trip = cache.get(&key).as_ref() == Some(&record);

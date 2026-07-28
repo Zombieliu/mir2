@@ -46,7 +46,8 @@ pub use cache::{
     remove_stale_session_routes, route_request_for_character, GatewayRouteLease,
     GatewaySessionCache, GatewaySessionCacheKey, GatewaySessionCacheRecord,
     GatewaySessionCacheRuntimeBackend, GatewaySessionCacheStatus, GatewaySessionRoute,
-    InMemoryGatewaySessionCache, RedisGatewaySessionCache, SharedGatewaySessionCache,
+    GatewaySessionTraceEvent, InMemoryGatewaySessionCache, RedisGatewaySessionCache,
+    SharedGatewaySessionCache,
 };
 pub use consensus_log::{
     CommonwareControlLog, ConsensusEquivocationEvidence, ControlBlock, ControlCommandEnvelope,

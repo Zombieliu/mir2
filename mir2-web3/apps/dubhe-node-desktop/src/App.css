@@ -179,6 +179,34 @@ dt { color: #585d6d; } dd { margin: 0; color: #aeb2bf; }
 .settings-list strong { font-size: 11px; }
 .settings-list small { margin-top: 4px; color: #5e6372; font-size: 9px; }
 .settings-list b { color: #9e91f6; font-size: 10px; font-weight: 600; }
+.toggle {
+  width: 38px; height: 22px; padding: 2px; border: 1px solid rgba(255,255,255,.09);
+  border-radius: 999px; background: #181a22; cursor: pointer; transition: .18s ease;
+}
+.toggle i {
+  display: block; width: 16px; height: 16px; border-radius: 50%; background: #656a78;
+  transition: transform .18s ease, background .18s ease;
+}
+.toggle.on { border-color: rgba(104,83,255,.38); background: rgba(104,83,255,.22); }
+.toggle.on i { transform: translateX(16px); background: #8f80ff; }
+.toggle:disabled { opacity: .5; cursor: wait; }
+.channel-select {
+  min-width: 106px; height: 34px; padding: 0 30px 0 12px;
+  border: 1px solid rgba(118,99,255,.22); border-radius: 8px;
+  color: #b2a8ff; background: #171622; font-size: 10px;
+}
+.settings-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 24px; }
+.secondary-button { cursor: pointer; }
+.secondary-button:disabled { cursor: wait; opacity: .5; }
+.secondary-button.primary { color: #dcd7ff; border-color: rgba(118,99,255,.42); background: rgba(106,84,244,.16); }
+.secondary-button.danger { margin-left: auto; color: #cf8e92; border-color: rgba(197,88,98,.18); background: rgba(120,42,49,.06); }
+.release-status {
+  display: grid; gap: 5px; margin-top: 18px; padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,.055); border-radius: 11px; background: rgba(255,255,255,.015);
+}
+.release-status strong { font-size: 10px; }
+.release-status span { color: #676c7a; font-size: 9px; }
+.release-status code { margin-top: 3px; color: #66bd99; font-size: 8px; overflow-wrap: anywhere; }
 
 @media (max-width: 980px) {
   .app-shell { grid-template-columns: 190px 1fr; }

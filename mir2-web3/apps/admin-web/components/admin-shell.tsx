@@ -7,8 +7,10 @@ import { LanguageSwitcher } from "./language-switcher";
 const navItems = [
   { href: "/", labelKey: "shell.nav.dashboard", count: "Live" },
   { href: "/console", labelKey: "shell.nav.console", count: "Ops" },
+  { href: "/network", labelKey: "shell.nav.network", count: "Live" },
   { href: "/accounts", labelKey: "shell.nav.accounts", count: "GM" },
   { href: "/players", labelKey: "shell.nav.players", count: "Read" },
+  { href: "/service-trace", labelKey: "shell.nav.serviceTrace", count: "Trace" },
   { href: "/economy", labelKey: "shell.nav.economy", count: "Read" },
   { href: "/market", labelKey: "shell.nav.market", count: "Mod" },
   { href: "/guilds", labelKey: "shell.nav.guilds", count: "Mod" },
