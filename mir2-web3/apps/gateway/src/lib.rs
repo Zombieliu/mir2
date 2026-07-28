@@ -1,3 +1,4 @@
+pub mod ai_live;
 mod auth;
 pub mod beta;
 mod browser_commands;
@@ -53,6 +54,10 @@ pub mod zone_lease;
 pub mod zone_replication;
 pub mod zone_rpc;
 
+pub use ai_live::{
+    AiLiveConfig, AiLiveHub, AiLiveMetrics, AiLiveMode, AiLiveNarrativeSource, AiLiveSegment,
+    AiLiveStatus,
+};
 pub use beta::{
     run_gate10_acceptance, BetaReadinessCheck, BetaReadinessReport, BetaReadinessRequirements,
     Gate10AcceptanceEvidence, ProductionBetaReadinessProbe,

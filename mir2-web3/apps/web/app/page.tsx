@@ -25,6 +25,10 @@ import {
   SpectatorOverlay,
   type SpectatorStatus,
 } from "./components/spectator-overlay";
+import {
+  AiLiveOverlay,
+  type AiLiveStatus,
+} from "./components/ai-live-overlay";
 
 import {
   buildTranslator,
@@ -303,6 +307,7 @@ type GatewayEvent =
   | { type: "packet"; packet: string; payload?: Record<string, unknown> }
   | { type: "worldSnapshot"; payload: GatewayWorldSnapshot }
   | { type: "spectatorStatus"; payload: SpectatorStatus }
+  | { type: "aiLiveStatus"; payload: AiLiveStatus }
   | { type: "error"; message?: string }
   | { type: string; packet?: string; payload?: Record<string, unknown>; message?: string };
 
@@ -1152,6 +1157,14 @@ function isSpectatorBrowserMode() {
   return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("spectate") === "1";
 }
 
+function isAiLiveBrowserMode() {
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("aiLive") === "1";
+}
+
+function isAiLiveAudioEnabled() {
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("aiLiveAudio") === "1";
+}
+
 function resolveGatewayWebSocketUrl() {
   if (typeof window === "undefined") return CONFIGURED_GATEWAY_WS_URL || LOCAL_GATEWAY_WS_URL;
   const onLocalHost = isLocalWebHost(window.location.hostname);
@@ -1949,6 +1962,9 @@ export default function HomePage() {
   const [wsState, setWsState] = useState("closed");
   const [spectatorMode, setSpectatorMode] = useState(false);
   const [spectatorStatus, setSpectatorStatus] = useState<SpectatorStatus | null>(null);
+  const [aiLiveBrowserMode, setAiLiveBrowserMode] = useState(false);
+  const [aiLiveAudioEnabled, setAiLiveAudioEnabled] = useState(false);
+  const [aiLiveStatus, setAiLiveStatus] = useState<AiLiveStatus | null>(null);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
@@ -5678,6 +5694,8 @@ export default function HomePage() {
   useEffect(() => {
     if (!isSpectatorBrowserMode()) return;
     setSpectatorMode(true);
+    setAiLiveBrowserMode(isAiLiveBrowserMode());
+    setAiLiveAudioEnabled(isAiLiveAudioEnabled());
     setShowTutorial(false);
     screenRef.current = "game";
     setScreen("game");
@@ -5698,6 +5716,7 @@ export default function HomePage() {
         mode: "spectator",
         connection: wsState,
         status: spectatorStatus,
+        aiLive: aiLiveStatus,
         world: {
           mapFileName: worldRef.current.mapFileName,
           mapTitle: worldRef.current.mapTitle,
@@ -5712,7 +5731,7 @@ export default function HomePage() {
       delete debugWindow.render_game_to_text;
       delete debugWindow.advanceTime;
     };
-  }, [spectatorMode, spectatorStatus, wsState]);
+  }, [aiLiveStatus, spectatorMode, spectatorStatus, wsState]);
 
   useEffect(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current) {
@@ -7717,6 +7736,10 @@ export default function HomePage() {
       setSpectatorMode(true);
       screenRef.current = "game";
       setScreen("game");
+      return;
+    }
+    if (event.type === "aiLiveStatus") {
+      setAiLiveStatus(event.payload as AiLiveStatus);
       return;
     }
     if (event.type === "error") {
@@ -13036,11 +13059,18 @@ export default function HomePage() {
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
-    {spectatorMode ? (
+    {spectatorMode && !aiLiveBrowserMode ? (
       <SpectatorOverlay
         status={spectatorStatus}
         connectionState={wsState}
         onControl={sendSpectatorControl}
+      />
+    ) : null}
+    {spectatorMode && aiLiveBrowserMode ? (
+      <AiLiveOverlay
+        status={aiLiveStatus}
+        gatewayWebSocketUrl={resolveGatewayWebSocketUrl()}
+        audioEnabled={aiLiveAudioEnabled}
       />
     ) : null}
     {debugSnapshotNotice ? (

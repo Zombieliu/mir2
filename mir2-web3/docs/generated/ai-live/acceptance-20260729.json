@@ -1,0 +1,78 @@
+{
+  "schema": "obelisk.mir2.ai-live.acceptance.v1",
+  "generatedAt": "2026-07-29T02:49:00+08:00",
+  "ok": true,
+  "backend": {
+    "gatewayLibraryTests": {
+      "passed": 400,
+      "failed": 0
+    },
+    "aiLiveTests": {
+      "passed": 7,
+      "failed": 0,
+      "coverage": [
+        "highlight-scoring",
+        "strict-model-json",
+        "target-allowlist",
+        "operator-token",
+        "model-http",
+        "tts-http-and-mp3",
+        "discord-http",
+        "durable-discord-restart-queue",
+        "path-traversal-rejection",
+        "production-https-validation"
+      ]
+    },
+    "liveSpectatorSmoke": {
+      "readOnly": true,
+      "directorAuthorized": true,
+      "privateFieldsRedacted": true,
+      "persistedFrames": 1,
+      "timelineEvents": 25
+    },
+    "programFeed": {
+      "workerRunning": true,
+      "modeControlViaSameOriginProxy": true,
+      "fallbackSegmentGenerated": true,
+      "prometheusMetrics": true
+    }
+  },
+  "web": {
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "routes": [
+      "/ai-live",
+      "/api/ai-live/[...path]",
+      "/spectate?aiLive=1"
+    ],
+    "browserChecks": {
+      "desktopControlConsole": "passed",
+      "desktopBroadcastOverlayOnRealGame": "passed",
+      "mobileControlConsole390x844": "passed",
+      "operatorModeTransition": "live-to-shadow-passed",
+      "screenshots": [
+        "output/playwright/ai-live-console.png",
+        "output/playwright/ai-live-broadcast.png",
+        "output/playwright/ai-live-console-mobile-final.png"
+      ]
+    }
+  },
+  "encoder": {
+    "composeConfig": "passed",
+    "shellSyntax": "passed",
+    "localHlsCodecProbe": {
+      "video": "h264",
+      "audio": "aac",
+      "resolution": "1280x720",
+      "playlistSegments": 2
+    },
+    "dockerImageBuild": {
+      "status": "blocked-by-local-engine",
+      "reason": "Docker Desktop returned HTTP 500 for the daemon ping before build execution"
+    },
+    "externalRtmpPublish": {
+      "status": "not-run",
+      "reason": "No third-party streaming ingest key was provided"
+    }
+  }
+}
