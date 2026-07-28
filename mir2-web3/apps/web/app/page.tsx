@@ -21,6 +21,10 @@ import {
   type MailComposeDraft,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
+import {
+  SpectatorOverlay,
+  type SpectatorStatus,
+} from "./components/spectator-overlay";
 
 import {
   buildTranslator,
@@ -277,6 +281,7 @@ type CrystalBootstrapChatLine = {
 type GatewayEvent =
   | { type: "packet"; packet: string; payload?: Record<string, unknown> }
   | { type: "worldSnapshot"; payload: GatewayWorldSnapshot }
+  | { type: "spectatorStatus"; payload: SpectatorStatus }
   | { type: "error"; message?: string }
   | { type: string; packet?: string; payload?: Record<string, unknown>; message?: string };
 
@@ -1114,6 +1119,10 @@ function isLocalWebHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
 
+function isSpectatorBrowserMode() {
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("spectate") === "1";
+}
+
 function resolveGatewayWebSocketUrl() {
   if (typeof window === "undefined") return CONFIGURED_GATEWAY_WS_URL || LOCAL_GATEWAY_WS_URL;
   const onLocalHost = isLocalWebHost(window.location.hostname);
@@ -1121,12 +1130,43 @@ function resolveGatewayWebSocketUrl() {
   // Honoring it on a hosted origin would let a crafted link silently redirect a
   // player's WebSocket — and the login credentials sent over it — to an
   // attacker-controlled gateway, so it is ignored outside localhost.
+  let resolved: string | null = null;
   if (onLocalHost) {
     const queryValue = new URLSearchParams(window.location.search).get("gatewayWs");
-    if (queryValue && /^wss?:\/\//.test(queryValue)) return queryValue;
+    if (queryValue && /^wss?:\/\//.test(queryValue)) resolved = queryValue;
   }
-  if (CONFIGURED_GATEWAY_WS_URL) return CONFIGURED_GATEWAY_WS_URL;
-  return onLocalHost ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL;
+  resolved ??= CONFIGURED_GATEWAY_WS_URL || (onLocalHost ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL);
+  if (!isSpectatorBrowserMode()) return resolved;
+
+  const pageQuery = new URLSearchParams(window.location.search);
+  const spectatorUrl = new URL(resolved, window.location.href);
+  spectatorUrl.pathname = spectatorUrl.pathname.replace(/\/ws\/?$/, "/spectator/ws");
+  if (!spectatorUrl.pathname.endsWith("/spectator/ws")) {
+    spectatorUrl.pathname = "/spectator/ws";
+  }
+  const mappings = [
+    ["spectateMap", "map"],
+    ["spectateTarget", "target"],
+    ["spectateDelayMs", "delayMs"],
+    ["spectateMode", "mode"],
+    ["spectateToken", "token"],
+    ["replayId", "replayId"],
+  ] as const;
+  for (const [source, target] of mappings) {
+    const value = pageQuery.get(source);
+    if (value) spectatorUrl.searchParams.set(target, value);
+  }
+  return spectatorUrl.toString();
+}
+
+function safeGatewayUrlForDiagnostics(url: string) {
+  try {
+    const safe = new URL(url);
+    if (safe.searchParams.has("token")) safe.searchParams.set("token", "[redacted]");
+    return safe.toString();
+  } catch {
+    return url;
+  }
 }
 
 function markMir2CacheMilestone(name: string, detail?: Record<string, unknown>) {
@@ -1860,6 +1900,8 @@ export default function HomePage() {
   const [characters, setCharacters] = useState<SelectCharacterEntry[]>(() => [fallbackCharacter("en")]);
   const [selectedCharacterIndex, setSelectedCharacterIndex] = useState(0);
   const [wsState, setWsState] = useState("closed");
+  const [spectatorMode, setSpectatorMode] = useState(false);
+  const [spectatorStatus, setSpectatorStatus] = useState<SpectatorStatus | null>(null);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
@@ -1996,7 +2038,7 @@ export default function HomePage() {
   // Persisted in localStorage so it only runs once; reopenable later via Alt+J's
   // help flow / a future menu entry. Net-new (no Crystal equivalent).
   useEffect(() => {
-    if (screen !== "game") return;
+    if (screen !== "game" || spectatorMode) return;
     let alreadySeen = false;
     try {
       alreadySeen = window.localStorage.getItem("mir2:tutorialCompleted") === "1";
@@ -2004,7 +2046,7 @@ export default function HomePage() {
       alreadySeen = false;
     }
     if (!alreadySeen) setShowTutorial(true);
-  }, [screen]);
+  }, [screen, spectatorMode]);
   // When the hero/pet window opens, ask the server to start streaming intelligent
   // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).
   useEffect(() => {
@@ -4836,6 +4878,10 @@ export default function HomePage() {
   }
 
   function send(command: Record<string, unknown>, options?: { quiet?: boolean }) {
+    // Spectator sockets are structurally read-only and accept only the explicit
+    // controls sent through sendSpectatorControl below. Drop every gameplay
+    // command before it reaches the network or local prediction pipeline.
+    if (isSpectatorBrowserMode()) return false;
     if (socketRef.current?.readyState !== WebSocket.OPEN) return false;
     lastCommandRef.current = command;
     const commandNow = Date.now();
@@ -4906,6 +4952,11 @@ export default function HomePage() {
     }
     if (!options?.quiet) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
+  }
+
+  function sendSpectatorControl(command: Record<string, unknown>) {
+    if (!isSpectatorBrowserMode() || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    socketRef.current.send(JSON.stringify(command));
   }
 
   function sendGatewayTick() {
@@ -5461,13 +5512,14 @@ export default function HomePage() {
       return;
     }
 
+    const gatewayUrl = resolveGatewayWebSocketUrl();
     markMir2CacheMilestone("gatewayConnectStart", {
-      url: resolveGatewayWebSocketUrl(),
+      url: safeGatewayUrlForDiagnostics(gatewayUrl),
       bootstrapAfterOpen,
     });
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
-    const socket = new WebSocket(resolveGatewayWebSocketUrl());
+    const socket = new WebSocket(gatewayUrl);
     socketRef.current = socket;
     setWsState("connecting");
 
@@ -5493,7 +5545,13 @@ export default function HomePage() {
       markMir2CacheMilestone("gatewayClosed");
       updateWorld((current) => ({ ...current, connected: false }));
       appendLog(t("log.gatewayWsClosed"), "network");
-      if (!closedManually && reconnectStatusRef.current.mode !== "failed") {
+      if (!closedManually && isSpectatorBrowserMode()) {
+        clearGatewayReconnectTimer();
+        reconnectTimerRef.current = window.setTimeout(() => {
+          reconnectTimerRef.current = null;
+          connectGateway();
+        }, 1_000);
+      } else if (!closedManually && reconnectStatusRef.current.mode !== "failed") {
         scheduleGatewayReconnect(reconnectSnapshotRef.current ?? captureGatewayReconnectSnapshot());
       }
     });
@@ -5516,6 +5574,45 @@ export default function HomePage() {
       }
     });
   }
+
+  useEffect(() => {
+    if (!isSpectatorBrowserMode()) return;
+    setSpectatorMode(true);
+    setShowTutorial(false);
+    screenRef.current = "game";
+    setScreen("game");
+    connectGateway();
+    // connectGateway is a hoisted closure over refs; this mount-only effect is
+    // intentionally responsible for the dedicated spectator bootstrap.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!spectatorMode) return;
+    const debugWindow = window as typeof window & {
+      render_game_to_text?: () => string;
+      advanceTime?: (milliseconds: number) => Promise<void>;
+    };
+    debugWindow.render_game_to_text = () =>
+      JSON.stringify({
+        mode: "spectator",
+        connection: wsState,
+        status: spectatorStatus,
+        world: {
+          mapFileName: worldRef.current.mapFileName,
+          mapTitle: worldRef.current.mapTitle,
+          tick: worldRef.current.worldTick,
+          playerObjectId: worldRef.current.playerObjectId,
+          entityCount: worldRef.current.entities.length,
+        },
+      });
+    debugWindow.advanceTime = (milliseconds) =>
+      new Promise((resolve) => window.setTimeout(resolve, Math.max(0, milliseconds)));
+    return () => {
+      delete debugWindow.render_game_to_text;
+      delete debugWindow.advanceTime;
+    };
+  }, [spectatorMode, spectatorStatus, wsState]);
 
   useEffect(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current) {
@@ -7500,6 +7597,14 @@ export default function HomePage() {
     gatewayHistory.unshift(debugEvent);
     if (gatewayHistory.length > 50) gatewayHistory.length = 50;
     debugWindow.__mir2GatewayEventHistory = gatewayHistory;
+    if (event.type === "spectatorStatus") {
+      const status = event.payload as SpectatorStatus;
+      setSpectatorStatus(status);
+      setSpectatorMode(true);
+      screenRef.current = "game";
+      setScreen("game");
+      return;
+    }
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
       pendingGatewayProtocolActionRef.current = null;
@@ -12750,6 +12855,13 @@ export default function HomePage() {
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
+    {spectatorMode ? (
+      <SpectatorOverlay
+        status={spectatorStatus}
+        connectionState={wsState}
+        onControl={sendSpectatorControl}
+      />
+    ) : null}
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
         <span>{debugSnapshotNotice.message}</span>

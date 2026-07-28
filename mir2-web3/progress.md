@@ -1,5 +1,16 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+2026-07-28 production spectator goal:
+
+- New user goal: fully land a production-verifiable spectator system instead of leaving the
+  existing `Observe` packet and GM flags as protocol-only shells.
+- Scope: a mutation-free spectator transport, live map/target following, director/free-camera
+  controls, configurable public delay, durable recordings and timeline playback, metrics/audit
+  surfaces, browser UI, automated tests, human acceptance documentation, commit, and push.
+- Architectural decision: spectator sockets are separate from player `/ws` sessions. They consume
+  sanitized Zone-derived frames and never own a `GatewaySession`, so movement/combat/economy
+  commands cannot cross the spectator boundary.
+
 2026-05-25 Bevy entity atlas prebuild/cache goal:
 
 - New user goal: move the expensive Bevy entity atlas cold path out of page live packing where possible, using prebuilt atlas packs and persistent browser cache so mobile/input feel is not blocked by hundreds of image decodes and canvas packing.
@@ -206,3 +217,15 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - Production deployment `dpl_8hgZxTUoDTUokZ1tkTkpVQeU2uwf` is live behind `https://mir2.obelisk.build`. Public probes passed for `/health`, the WebGPU/WebGL2 `bevy-6732ca9f6ab18f6d` runtime JS files, and `/bevy-entity-atlases/manifest.json`.
 - Production evidence: `docs/generated/player-qa/movement-jitter/prod-mobile-dom-fallback-canvas-hidden-finalready-20260525.json` / `.png` passed with mobile controls, selected/compiled backend `webgpu`, Bevy entity renderer `enabled=false`, `canvasHidden=true`, one Walk send, one UserLocation ACK, visible ground/entities, no critical console errors, and no non-favicon 404s. `docs/generated/player-qa/movement-jitter/prod-desktop-webgpu-transparent-guard-finalready-20260525.json` / `.png` passed with Bevy entity renderer `enabled=true`, `canvasHidden=false`, prebuilt atlas source, one Walk send, one UserLocation ACK, and visible ground. `docs/generated/player-qa/movement-jitter/prod-bevy-canvas-off-dom-fallback-finalready-20260525.json` / `.png` passed as the explicit `?bevyCanvas=0` escape hatch.
 - QA harness note: `apps/web/scripts/capture-web-movement-jitter.mjs` now supports `--finalSceneReadyTimeoutMs` so post-movement screenshots wait for the refreshed scene asset key before capture. This avoids treating the transient resource-cache overlay frame as final visual evidence.
+
+2026-07-28 production spectator goal:
+
+- Added a structurally read-only `SpectatorHub` and `/spectator/ws`; spectators never receive a `GatewaySession`, and gameplay commands cannot enter the authoritative command path.
+- Added server-enforced public delay, public-map allowlisting, constant-time director-token authorization, follow target, auto-director, free camera, bounded buffers, WebSocket capacity accounting, active-viewer metrics, and audit logs.
+- Added sanitized hourly JSONL recording and replay. Inventory, storage, quests, skills, buffs, equipment, NPC dialog, and other private character state are stripped.
+- Added a bounded all-map event timeline for spawn/despawn, movement, health, death/revive, and ground-drop changes, plus stale entity pruning for merged AOI snapshots.
+- Added `/spectator/matches`, `/spectator/recordings`, `/spectator/replay`, `/spectator/metrics`, and spectator metrics in `/health`.
+- Added `/spectate` Player Web entry, read-only spectator overlay, map/target selection, director controls, replay timeline/speed, event feed, reconnect, `render_game_to_text`, and `advanceTime`.
+- Added backend smoke `npm run smoke:spectator`, browser CDP smoke `npm run smoke:spectator-ui`, and Chinese production/operations/manual acceptance guide `docs/SPECTATOR-MODE.zh-CN.md`.
+- Local evidence before the final event-timeline pass: backend smoke verified read-only rejection, privacy redaction, one active viewer, persistence, and replay; browser smoke rendered the real Bichon scene with `Scout`, director and replay controls, no critical browser errors, and captured `apps/web/artifacts/spectator/spectator-ui.png`.
+- The generic `develop-web-game` Playwright client was attempted but its skill-local script could not resolve `playwright`; the project CDP smoke exercised the actual browser path instead.
