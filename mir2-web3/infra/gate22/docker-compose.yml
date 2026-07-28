@@ -36,6 +36,7 @@ services:
       MIR2_HOME_RELAY_ID: "gate22-relay"
       MIR2_HOME_RELAY_QUIC_BIND: "0.0.0.0:7443"
       MIR2_HOME_RELAY_GATEWAY_BIND: "0.0.0.0:7444"
+      MIR2_HOME_RELAY_GATEWAY_TOKEN: "gate22-docker-zone-rpc"
       MIR2_HOME_RELAY_TLS_CA_DER: "/run/gate22/ca.der"
       MIR2_HOME_RELAY_TLS_CERT_CHAIN_DER: "/run/gate22/relay.der"
       MIR2_HOME_RELAY_TLS_KEY_DER: "/run/gate22/relay-key.der"
