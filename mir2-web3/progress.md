@@ -1,5 +1,29 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+2026-07-29 production AI live goal:
+
+- New user goal: land a production-grade AI live broadcast system on top of the completed
+  read-only spectator transport.
+- Scope: deterministic highlight scoring, bounded AI commentary, TTS clips, AI camera target
+  decisions, durable segment evidence, live/shadow/pause controls, a player-safe broadcast
+  overlay, an isolated Chromium/FFmpeg encoder container, Discord highlight delivery,
+  observability, tests, Chinese operations documentation, browser acceptance, commit, and push.
+- Architectural decision: the Gateway only produces a sanitized broadcast program feed. The
+  encoder runs as a separate disposable service, and no model, TTS, webhook, or streaming
+  failure is allowed to block Zone ticks or player WebSocket sessions.
+- Backend landed: deterministic highlight scoring, strict model JSON and target allowlist,
+  deterministic fallback, OpenAI-compatible TTS, AI director target, JSONL segment evidence,
+  restart-durable Discord retry/dead-letter state, live/shadow/pause controls, redacted status,
+  audio serving, JSON metrics, and Prometheus metrics.
+- Frontend and broadcast landed: responsive `/ai-live` operations console, same-origin
+  server-side control proxy, WebSocket `aiLiveStatus`, clean `/spectate?aiLive=1` lower thirds,
+  optional AI audio, and an isolated Chromium/PulseAudio/FFmpeg HLS/RTMP container profile.
+- Verification: Gateway 400/400 library tests, AI Live 7/7 focused tests including mock
+  model/TTS/Discord, Web TypeScript and production build, real spectator smoke, desktop
+  operations/broadcast browser passes, 390x844 mobile pass, Compose/shell validation, and local
+  H.264/AAC HLS encoding passed. Docker Desktop itself returned HTTP 500 before image build;
+  third-party RTMP was not attempted because no platform ingest key was provided.
+
 2026-07-29 production AI daily report goal:
 
 - New user goal: land a production-grade AI daily reporting system and publish approved player-facing reports to Discord.

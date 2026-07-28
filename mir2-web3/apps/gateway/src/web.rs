@@ -6,7 +6,8 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::{Query, State};
+use axum::extract::{Path as AxumPath, Query, State};
+use axum::http::header::{AUTHORIZATION, CACHE_CONTROL, CONTENT_TYPE};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
@@ -29,6 +30,7 @@ use tokio::sync::{mpsc, Mutex as AsyncMutex, RwLock as AsyncRwLock};
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
+use crate::ai_live::{AiLiveHub, AiLiveMode};
 use crate::auth::verify_passkey_gateway_token;
 use crate::browser_commands::{
     default_drop_count, default_market_max_shape, parse_class, parse_direction, parse_gender,
@@ -139,6 +141,7 @@ struct WebState {
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
     spectator: SpectatorHub,
+    ai_live: AiLiveHub,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -164,6 +167,13 @@ enum SpectatorControl {
     ReplayPause,
     ReplaySeek { captured_at_ms: u64 },
     ReplaySpeed { speed: f64 },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AiLiveControlRequest {
+    action: String,
+    token: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -1389,6 +1399,7 @@ struct HealthResponse {
     capacity: GatewayCapacityStatus,
     gameplay_events: GameplayEventSinkStatus,
     spectator: crate::spectator::SpectatorMetrics,
+    ai_live: crate::ai_live::AiLiveMetrics,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1484,6 +1495,10 @@ pub async fn run_web_gateway(
     }
     let topology = ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let spectator = SpectatorHub::from_env();
+    let ai_live = AiLiveHub::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    ai_live.spawn(spectator.clone());
     let state = WebState {
         config: Arc::new(config),
         zone_registry: Arc::new(
@@ -1497,7 +1512,8 @@ pub async fn run_web_gateway(
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
         injector: crate::inject::LiveSessionInjector::default(),
-        spectator: SpectatorHub::from_env(),
+        spectator,
+        ai_live,
     };
 
     let app = Router::new()
@@ -1514,6 +1530,11 @@ pub async fn run_web_gateway(
         .route("/spectator/replay", get(spectator_replay))
         .route("/spectator/metrics", get(spectator_metrics))
         .route("/spectator/ws", get(spectator_ws_upgrade))
+        .route("/ai-live/status", get(ai_live_status))
+        .route("/ai-live/metrics", get(ai_live_metrics))
+        .route("/ai-live/metrics/prometheus", get(ai_live_prometheus))
+        .route("/ai-live/control", post(ai_live_control))
+        .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -1555,7 +1576,138 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
         spectator: state.spectator.metrics(),
+        ai_live: state.ai_live.metrics(),
     })
+}
+
+async fn ai_live_status(State(state): State<WebState>) -> Json<crate::ai_live::AiLiveStatus> {
+    Json(state.ai_live.status())
+}
+
+async fn ai_live_metrics(State(state): State<WebState>) -> Json<crate::ai_live::AiLiveMetrics> {
+    Json(state.ai_live.metrics())
+}
+
+async fn ai_live_prometheus(State(state): State<WebState>) -> Response {
+    let metrics = state.ai_live.metrics();
+    let mode = match metrics.mode {
+        AiLiveMode::Live => 2,
+        AiLiveMode::Shadow => 1,
+        AiLiveMode::Paused => 0,
+    };
+    let body = format!(
+        concat!(
+            "# HELP mir2_ai_live_mode AI live mode: paused=0 shadow=1 live=2.\n",
+            "# TYPE mir2_ai_live_mode gauge\n",
+            "mir2_ai_live_mode {mode}\n",
+            "# HELP mir2_ai_live_processed_frames_total Sanitized spectator frames inspected.\n",
+            "# TYPE mir2_ai_live_processed_frames_total counter\n",
+            "mir2_ai_live_processed_frames_total {processed}\n",
+            "# HELP mir2_ai_live_generated_segments_total Broadcast segments generated.\n",
+            "# TYPE mir2_ai_live_generated_segments_total counter\n",
+            "mir2_ai_live_generated_segments_total {segments}\n",
+            "# HELP mir2_ai_live_model_failures_total Model failures handled by fallback.\n",
+            "# TYPE mir2_ai_live_model_failures_total counter\n",
+            "mir2_ai_live_model_failures_total {model_failures}\n",
+            "# HELP mir2_ai_live_tts_failures_total TTS failures handled without blocking broadcast.\n",
+            "# TYPE mir2_ai_live_tts_failures_total counter\n",
+            "mir2_ai_live_tts_failures_total {tts_failures}\n",
+            "# HELP mir2_ai_live_discord_queue Pending Discord highlight deliveries.\n",
+            "# TYPE mir2_ai_live_discord_queue gauge\n",
+            "mir2_ai_live_discord_queue {discord_queue}\n",
+            "# HELP mir2_ai_live_discord_dead_letters_total Exhausted Discord deliveries.\n",
+            "# TYPE mir2_ai_live_discord_dead_letters_total counter\n",
+            "mir2_ai_live_discord_dead_letters_total {discord_dead_letters}\n"
+        ),
+        mode = mode,
+        processed = metrics.processed_frames_total,
+        segments = metrics.generated_segments_total,
+        model_failures = metrics.model_failure_total,
+        tts_failures = metrics.tts_failure_total,
+        discord_queue = metrics.queued_discord_deliveries,
+        discord_dead_letters = metrics.discord_dead_letters_total,
+    );
+    (
+        StatusCode::OK,
+        [(CONTENT_TYPE, "text/plain; version=0.0.4; charset=utf-8")],
+        body,
+    )
+        .into_response()
+}
+
+async fn ai_live_control(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<AiLiveControlRequest>,
+) -> Result<Json<crate::ai_live::AiLiveStatus>, (StatusCode, Json<AdminErrorResponse>)> {
+    let mode = match request.action.trim().to_ascii_lowercase().as_str() {
+        "live" | "start" => AiLiveMode::Live,
+        "shadow" => AiLiveMode::Shadow,
+        "pause" | "paused" | "stop" => AiLiveMode::Paused,
+        _ => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(AdminErrorResponse {
+                    error: "action must be live, shadow, or pause".to_string(),
+                }),
+            ))
+        }
+    };
+    let bearer = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim);
+    state
+        .ai_live
+        .set_mode(request.token.as_deref().or(bearer), mode)
+        .map(Json)
+        .map_err(|error| (StatusCode::FORBIDDEN, Json(AdminErrorResponse { error })))
+}
+
+async fn ai_live_audio(
+    State(state): State<WebState>,
+    AxumPath(clip): AxumPath<String>,
+) -> Response {
+    let path = match state.ai_live.audio_path(&clip) {
+        Ok(path) => path,
+        Err(error) => {
+            return (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })).into_response()
+        }
+    };
+    let result = tokio::task::spawn_blocking(move || std::fs::read(path)).await;
+    match result {
+        Ok(Ok(bytes)) => (
+            StatusCode::OK,
+            [
+                (CONTENT_TYPE, "audio/mpeg"),
+                (CACHE_CONTROL, "public, max-age=86400, immutable"),
+            ],
+            bytes,
+        )
+            .into_response(),
+        Ok(Err(error)) if error.kind() == io::ErrorKind::NotFound => (
+            StatusCode::NOT_FOUND,
+            Json(AdminErrorResponse {
+                error: "AI live audio clip not found".to_string(),
+            }),
+        )
+            .into_response(),
+        Ok(Err(error)) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(AdminErrorResponse {
+                error: format!("read AI live audio clip failed: {error}"),
+            }),
+        )
+            .into_response(),
+        Err(error) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(AdminErrorResponse {
+                error: format!("AI live audio task failed: {error}"),
+            }),
+        )
+            .into_response(),
+    }
 }
 
 async fn admin_system_mail(
@@ -1995,6 +2147,7 @@ async fn spectator_ws_upgrade(
         handle_spectator_socket(
             socket,
             state.spectator,
+            state.ai_live,
             query,
             authorization,
             ws_connection_permit,
@@ -2005,6 +2158,7 @@ async fn spectator_ws_upgrade(
 async fn handle_spectator_socket(
     socket: WebSocket,
     hub: SpectatorHub,
+    ai_live: AiLiveHub,
     query: SpectatorAccessQuery,
     authorization: crate::spectator::SpectatorAuthorization,
     _ws_connection_permit: GatewayCapacityPermit,
@@ -2066,6 +2220,7 @@ async fn handle_spectator_socket(
     if send_spectator_status(
         &mut sender,
         &hub,
+        &ai_live,
         &map,
         target.as_deref(),
         authorization,
@@ -2169,6 +2324,7 @@ async fn handle_spectator_socket(
                 if send_spectator_status(
                     &mut sender,
                     &hub,
+                    &ai_live,
                     &map,
                     target.as_deref(),
                     authorization,
@@ -2213,7 +2369,20 @@ async fn handle_spectator_socket(
                 };
                 let Some(frame) = frame else { continue; };
                 last_sequence = frame.sequence;
-                let world = frame.world_for_view(target.as_deref(), director, camera);
+                let ai_target = if director {
+                    ai_live
+                        .status()
+                        .latest_segment
+                        .filter(|segment| segment.map_file_name == frame.map_file_name)
+                        .and_then(|segment| segment.target)
+                } else {
+                    None
+                };
+                let world = frame.world_for_view(
+                    target.as_deref().or(ai_target.as_deref()),
+                    director,
+                    camera,
+                );
                 if sender.send(Message::Text(json!({
                     "type": "worldSnapshot",
                     "payload": world
@@ -2223,6 +2392,7 @@ async fn handle_spectator_socket(
                 if send_spectator_status(
                     &mut sender,
                     &hub,
+                    &ai_live,
                     &map,
                     target.as_deref(),
                     authorization,
@@ -2245,6 +2415,7 @@ async fn handle_spectator_socket(
 async fn send_spectator_status(
     sender: &mut WebSocketSender,
     hub: &SpectatorHub,
+    ai_live: &AiLiveHub,
     map: &str,
     target: Option<&str>,
     authorization: crate::spectator::SpectatorAuthorization,
@@ -2284,6 +2455,16 @@ async fn send_spectator_status(
                         "currentAtMs": replay_frames.get(replay_cursor).map(|frame| frame.captured_at_ms)
                     }
                 }
+            })
+            .to_string()
+            .into(),
+        ))
+        .await?;
+    sender
+        .send(Message::Text(
+            json!({
+                "type": "aiLiveStatus",
+                "payload": ai_live.status()
             })
             .to_string()
             .into(),
@@ -7441,6 +7622,12 @@ mod tests {
             gameplay_event_sink: None,
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
+            ai_live: crate::ai_live::AiLiveHub::new(
+                crate::ai_live::AiLiveConfig::disabled_for_tests(
+                    std::env::temp_dir().join("mir2-ai-live-web-mail-test"),
+                ),
+            )
+            .expect("test AI live hub"),
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -7494,6 +7681,12 @@ mod tests {
             gameplay_event_sink: Some(shared_event_sink),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
+            ai_live: crate::ai_live::AiLiveHub::new(
+                crate::ai_live::AiLiveConfig::disabled_for_tests(
+                    std::env::temp_dir().join("mir2-ai-live-web-health-test"),
+                ),
+            )
+            .expect("test AI live hub"),
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -7568,6 +7761,12 @@ mod tests {
             gameplay_event_sink: None,
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
+            ai_live: crate::ai_live::AiLiveHub::new(
+                crate::ai_live::AiLiveConfig::disabled_for_tests(
+                    std::env::temp_dir().join("mir2-ai-live-web-admin-test"),
+                ),
+            )
+            .expect("test AI live hub"),
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;
