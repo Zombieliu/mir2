@@ -8,11 +8,49 @@ video_size="${MIR2_AI_LIVE_VIDEO_SIZE:-1920x1080}"
 frame_rate="${MIR2_AI_LIVE_FRAME_RATE:-30}"
 video_bitrate="${MIR2_AI_LIVE_VIDEO_BITRATE:-4500k}"
 audio_bitrate="${MIR2_AI_LIVE_AUDIO_BITRATE:-128k}"
+heartbeat_url="${MIR2_AI_DISTRIBUTION_HEARTBEAT_URL:-}"
+heartbeat_token="${MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN:-}"
+heartbeat_platform="${MIR2_AI_DISTRIBUTION_RTMP_PLATFORM:-youtube}"
+heartbeat_worker_id="${MIR2_AI_DISTRIBUTION_WORKER_ID:-$(hostname)}"
+heartbeat_pid=""
 
 case "$video_size" in
   *x*) ;;
   *) echo "MIR2_AI_LIVE_VIDEO_SIZE must look like 1920x1080" >&2; exit 64 ;;
 esac
+
+case "$heartbeat_platform" in
+  *[!A-Za-z0-9_-]*|"") echo "MIR2_AI_DISTRIBUTION_RTMP_PLATFORM is invalid" >&2; exit 64 ;;
+esac
+case "$heartbeat_worker_id" in
+  *[!A-Za-z0-9_.:-]*|"") echo "MIR2_AI_DISTRIBUTION_WORKER_ID is invalid" >&2; exit 64 ;;
+esac
+if [ -n "$heartbeat_url" ] && [ -z "$heartbeat_token" ]; then
+  echo "MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN is required when heartbeat URL is set" >&2
+  exit 64
+fi
+
+post_heartbeat() {
+  runtime_state="$1"
+  message="${2:-}"
+  [ -n "$heartbeat_url" ] || return 0
+  curl --silent --show-error --fail --max-time 4 \
+    -H "Authorization: Bearer $heartbeat_token" \
+    -H "Content-Type: application/json" \
+    --data "{\"platform\":\"$heartbeat_platform\",\"workerId\":\"$heartbeat_worker_id\",\"runtimeState\":\"$runtime_state\",\"message\":\"$message\"}" \
+    "$heartbeat_url" >/dev/null 2>&1 || true
+}
+
+heartbeat_loop() {
+  watched_pid="$1"
+  # Do not report live merely because FFmpeg forked. It must survive the initial
+  # RTMP/RTMPS connection window first.
+  sleep 3
+  while kill -0 "$watched_pid" 2>/dev/null; do
+    post_heartbeat live "encoder process healthy"
+    sleep 10
+  done
+}
 
 if [ "$output_format" = "auto" ]; then
   case "$output_url" in
@@ -62,6 +100,8 @@ chromium \
 chromium_pid=$!
 
 cleanup() {
+  [ -n "$heartbeat_pid" ] && kill "$heartbeat_pid" 2>/dev/null || true
+  post_heartbeat stopped "encoder container stopping"
   [ -f /run/ai-live/ffmpeg.pid ] && kill "$(cat /run/ai-live/ffmpeg.pid)" 2>/dev/null || true
   kill "$chromium_pid" "$xvfb_pid" 2>/dev/null || true
 }
@@ -94,8 +134,19 @@ while kill -0 "$chromium_pid" 2>/dev/null && kill -0 "$xvfb_pid" 2>/dev/null; do
   ffmpeg_pid=$!
   echo "$ffmpeg_pid" >/run/ai-live/ffmpeg.pid
   touch /run/ai-live/healthy
+  if [ "$output_format" = "rtmp" ]; then
+    post_heartbeat starting "encoder process started"
+    heartbeat_loop "$ffmpeg_pid" &
+    heartbeat_pid=$!
+  fi
 
   wait "$ffmpeg_pid" || true
+  if [ -n "$heartbeat_pid" ]; then
+    kill "$heartbeat_pid" 2>/dev/null || true
+    wait "$heartbeat_pid" 2>/dev/null || true
+    heartbeat_pid=""
+    post_heartbeat error "encoder process exited"
+  fi
   rm -f /run/ai-live/ffmpeg.pid /run/ai-live/healthy
   sleep 3
 done

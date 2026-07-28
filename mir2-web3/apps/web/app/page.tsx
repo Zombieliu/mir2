@@ -29,6 +29,7 @@ import {
   AiLiveOverlay,
   type AiLiveStatus,
 } from "./components/ai-live-overlay";
+import { AiLiveGameHighlight } from "./components/ai-live-game-highlight";
 
 import {
   buildTranslator,
@@ -5606,16 +5607,16 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!spectatorMode) return;
+    if (!spectatorMode && screen !== "game") return;
     const debugWindow = window as typeof window & {
       render_game_to_text?: () => string;
       advanceTime?: (milliseconds: number) => Promise<void>;
     };
     debugWindow.render_game_to_text = () =>
       JSON.stringify({
-        mode: "spectator",
+        mode: spectatorMode ? "spectator" : "player",
         connection: wsState,
-        status: spectatorStatus,
+        status: spectatorMode ? spectatorStatus : null,
         aiLive: aiLiveStatus,
         world: {
           mapFileName: worldRef.current.mapFileName,
@@ -5631,7 +5632,7 @@ export default function HomePage() {
       delete debugWindow.render_game_to_text;
       delete debugWindow.advanceTime;
     };
-  }, [aiLiveStatus, spectatorMode, spectatorStatus, wsState]);
+  }, [aiLiveStatus, screen, spectatorMode, spectatorStatus, wsState]);
 
   useEffect(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current) {
@@ -12891,6 +12892,9 @@ export default function HomePage() {
         gatewayWebSocketUrl={resolveGatewayWebSocketUrl()}
         audioEnabled={aiLiveAudioEnabled}
       />
+    ) : null}
+    {screen === "game" && !spectatorMode ? (
+      <AiLiveGameHighlight status={aiLiveStatus} />
     ) : null}
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">

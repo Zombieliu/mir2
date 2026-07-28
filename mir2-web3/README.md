@@ -41,6 +41,7 @@ Bevy runtimes.
 - [生产级 AI 日报与 Discord 发布](docs/AI-DAILY-REPORT-PRODUCTION.zh-CN.md)
 - [生产级 AI 直播、解说与推流](docs/AI-LIVE-PRODUCTION.zh-CN.md)
 - [AI 多渠道内容分发架构](docs/AI-DISTRIBUTION-FABRIC.zh-CN.md)
+- [AI 首发渠道闭环与验收](docs/AI-LAUNCH-CHANNELS.zh-CN.md)
 - [Gate 25 home-network Beta acceptance](infra/gate25/README.zh-CN.md)
 - [Gate 22 outbound QUIC/mTLS Home Tunnel](infra/gate22/README.zh-CN.md)
 
