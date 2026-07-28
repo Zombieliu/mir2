@@ -24,6 +24,15 @@ use postgres::{Client, NoTls, Row};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+mod daily_report;
+
+pub use daily_report::spawn_daily_report_scheduler;
+use daily_report::{
+    approve_daily_report, daily_report_prometheus, generate_daily_report, get_daily_report,
+    latest_public_daily_report, list_daily_reports, publish_daily_report,
+    retry_daily_report_discord, DailyReportService,
+};
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Permission {
@@ -4052,6 +4061,7 @@ pub struct AdminApiState {
     control_plane: Arc<Mutex<HttpControlPlane>>,
     read_models: Arc<AdminReadModelStore>,
     admin_store: Option<PostgresAdminRepository>,
+    daily_reports: Arc<DailyReportService>,
 }
 
 impl Default for AdminApiState {
@@ -4066,6 +4076,7 @@ impl AdminApiState {
         let read_models = Arc::new(AdminReadModelStore::from_config(domain.fallback_config()));
         let postgres_repository = PostgresAdminRepository::from_env()?;
         let admin_store = postgres_repository.clone();
+        let daily_reports = Arc::new(DailyReportService::from_env(admin_store.clone())?);
         let (command_store, audit_store, approval_store) = match postgres_repository {
             Some(repository) => (
                 CommandRepositoryBackend::Postgres(repository.clone()),
@@ -4087,6 +4098,7 @@ impl AdminApiState {
             ))),
             read_models,
             admin_store,
+            daily_reports,
         })
     }
 }
@@ -4179,8 +4191,18 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
             state.clone(),
             require_authenticated_operator,
         ))
+        .with_state(state.clone());
+    let public_daily_reports = Router::new()
+        .route("/metrics", get(daily_report_prometheus))
+        .route(
+            "/public/daily-report/latest",
+            get(latest_public_daily_report),
+        )
         .with_state(state);
-    Router::new().route("/health", get(health)).merge(protected)
+    Router::new()
+        .route("/health", get(health))
+        .merge(public_daily_reports)
+        .merge(protected)
 }
 
 fn admin_protected_router() -> Router<AdminApiState> {
@@ -4210,6 +4232,21 @@ fn admin_protected_router() -> Router<AdminApiState> {
             get(get_gameplay_event_summary),
         )
         .route("/admin/gameplay-events", get(list_gameplay_events))
+        .route("/admin/daily-reports", get(list_daily_reports))
+        .route("/admin/daily-reports/generate", post(generate_daily_report))
+        .route("/admin/daily-reports/:report_id", get(get_daily_report))
+        .route(
+            "/admin/daily-reports/:report_id/approve",
+            post(approve_daily_report),
+        )
+        .route(
+            "/admin/daily-reports/:report_id/publish",
+            post(publish_daily_report),
+        )
+        .route(
+            "/admin/daily-reports/:report_id/retry-discord",
+            post(retry_daily_report_discord),
+        )
         .route("/admin/timeline", get(list_admin_timeline))
         .route("/admin/system-mail/outbox", get(list_system_mail_outbox))
         .route("/admin/read/dashboard", get(read_dashboard))
@@ -11379,6 +11416,9 @@ mod tests {
             control_plane: Arc::new(Mutex::new(control)),
             read_models,
             admin_store: None,
+            daily_reports: Arc::new(
+                DailyReportService::from_env(None).expect("test daily reports should initialize"),
+            ),
         };
 
         let record = get_command_status(State(state.clone()), Path("cmd-1".into()))
@@ -11578,6 +11618,9 @@ mod tests {
             ))),
             read_models,
             admin_store: None,
+            daily_reports: Arc::new(
+                DailyReportService::from_env(None).expect("test daily reports should initialize"),
+            ),
         };
 
         let timeline = build_admin_timeline(
