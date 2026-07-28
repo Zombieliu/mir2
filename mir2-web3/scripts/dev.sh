@@ -156,6 +156,12 @@ wait_for_http() {
       compose logs --tail 120 "${service}" >&2 || true
       return 1
     fi
+    if [[ -n "${service}" ]] &&
+       compose ps --status unhealthy --services | grep -Fxq "${service}"; then
+      echo "[error] ${name} became unhealthy before becoming ready. Recent logs:" >&2
+      compose logs --tail 120 "${service}" >&2 || true
+      return 1
+    fi
     sleep 2
   done
 
