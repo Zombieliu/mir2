@@ -1,12 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
 
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    node_id_from_public_key, verify_ed25519_signature, NodeCapacityCertificate, NodeSigningIdentity,
+    NodeCapacityCertificate, NodeSigningIdentity, node_id_from_public_key, verify_ed25519_signature,
 };
 
 const CHALLENGE_DOMAIN: &[u8] = b"obelisk.home-tunnel.challenge.v1\0";
@@ -568,12 +568,12 @@ impl HomeTunnelReplayGuard {
     }
 
     pub fn close_stream(&self, placement_id: &str, session_id: &str) {
-        if let Ok(mut state) = self.state.lock() {
-            if let Some(active) = state.active_sessions.get_mut(placement_id) {
-                active.remove(session_id);
-                if active.is_empty() {
-                    state.active_sessions.remove(placement_id);
-                }
+        if let Ok(mut state) = self.state.lock()
+            && let Some(active) = state.active_sessions.get_mut(placement_id)
+        {
+            active.remove(session_id);
+            if active.is_empty() {
+                state.active_sessions.remove(placement_id);
             }
         }
     }
@@ -749,14 +749,16 @@ mod tests {
 
         let mut tampered = registration;
         tampered.key_generation = 2;
-        assert!(tampered
-            .verify(
-                fixture.relay.public_key(),
-                fixture.capacity_issuer.public_key(),
-                "relay-hk-a",
-                3_500,
-            )
-            .is_err());
+        assert!(
+            tampered
+                .verify(
+                    fixture.relay.public_key(),
+                    fixture.capacity_issuer.public_key(),
+                    "relay-hk-a",
+                    3_500,
+                )
+                .is_err()
+        );
     }
 
     #[test]
@@ -784,15 +786,17 @@ mod tests {
                 3_500,
             )
             .unwrap();
-        assert!(guard
-            .accept_registration(
-                &registration,
-                fixture.relay.public_key(),
-                fixture.capacity_issuer.public_key(),
-                "relay-hk-a",
-                3_500,
-            )
-            .is_err());
+        assert!(
+            guard
+                .accept_registration(
+                    &registration,
+                    fixture.relay.public_key(),
+                    fixture.capacity_issuer.public_key(),
+                    "relay-hk-a",
+                    3_500,
+                )
+                .is_err()
+        );
     }
 
     #[test]
@@ -809,24 +813,28 @@ mod tests {
             .unwrap();
 
         let overflow = placement(&fixture, 5);
-        assert!(overflow
-            .verify(
-                fixture.control.public_key(),
-                "relay-hk-a",
-                &fixture.certificate,
-                3_500,
-            )
-            .is_err());
+        assert!(
+            overflow
+                .verify(
+                    fixture.control.public_key(),
+                    "relay-hk-a",
+                    &fixture.certificate,
+                    3_500,
+                )
+                .is_err()
+        );
         let mut stale = valid;
         stale.generation = 8;
-        assert!(stale
-            .verify(
-                fixture.control.public_key(),
-                "relay-hk-a",
-                &fixture.certificate,
-                3_500,
-            )
-            .is_err());
+        assert!(
+            stale
+                .verify(
+                    fixture.control.public_key(),
+                    "relay-hk-a",
+                    &fixture.certificate,
+                    3_500,
+                )
+                .is_err()
+        );
     }
 
     #[test]
@@ -848,9 +856,11 @@ mod tests {
             .accept_stream(&first, &placement, fixture.relay.public_key(), 3_500)
             .unwrap();
         assert_eq!(guard.active_streams(&placement.placement_id), 1);
-        assert!(guard
-            .accept_stream(&first, &placement, fixture.relay.public_key(), 3_500)
-            .is_err());
+        assert!(
+            guard
+                .accept_stream(&first, &placement, fixture.relay.public_key(), 3_500)
+                .is_err()
+        );
 
         let overflow = HomeTunnelStreamOpen::sign(
             &placement,
@@ -862,9 +872,11 @@ mod tests {
             &fixture.relay,
         )
         .unwrap();
-        assert!(guard
-            .accept_stream(&overflow, &placement, fixture.relay.public_key(), 3_500)
-            .is_err());
+        assert!(
+            guard
+                .accept_stream(&overflow, &placement, fixture.relay.public_key(), 3_500)
+                .is_err()
+        );
 
         let reconnect = HomeTunnelStreamOpen::sign(
             &placement,
@@ -910,8 +922,10 @@ mod tests {
             .accept_stream(&delayed, &placement, fixture.relay.public_key(), 3_500)
             .expect("unique signed QUIC streams may be handled out of order");
         guard.close_stream(&placement.placement_id, "session-a");
-        assert!(guard
-            .accept_stream(&ahead, &placement, fixture.relay.public_key(), 3_500)
-            .is_err());
+        assert!(
+            guard
+                .accept_stream(&ahead, &placement, fixture.relay.public_key(), 3_500)
+                .is_err()
+        );
     }
 }

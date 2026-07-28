@@ -1,13 +1,13 @@
 use std::collections::BTreeSet;
 
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use reqwest::Url;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    node_id_from_public_key, validate_ed25519_public_key, verify_ed25519_signature,
     CapacityChallengeResponse, HomeTunnelPlacement, NodeCapacityCertificate, NodeSigningIdentity,
+    node_id_from_public_key, validate_ed25519_public_key, verify_ed25519_signature,
 };
 
 pub const HOME_ENROLLMENT_CHALLENGE_SCHEMA: &str = "obelisk.home-enrollment-challenge.v1";

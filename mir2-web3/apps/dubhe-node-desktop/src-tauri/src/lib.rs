@@ -6,7 +6,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
-use mir2_gateway::{
+use dubhe_network_core::{
     CapacityChallenge, CapacityChallengeResponse, HomeAgentKeyring, HomeAgentManagementKeyring,
     HomeAgentWorkMode, HomeCapacityCertificationRequest, HomeEnrollmentRequest,
     NodeSigningIdentity, SignedHomeEnrollmentBundle, SignedHomeEnrollmentChallenge,
