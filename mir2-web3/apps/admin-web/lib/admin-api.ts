@@ -93,6 +93,96 @@ export type GameplayEventSummaryResponse = {
   commands: GameplayEventCommandSummary[];
 };
 
+export type DailyMapMetric = {
+  mapFileName: string;
+  mapTitle: string;
+  characterCount: number;
+  percent: number;
+};
+
+export type DailyReport = {
+  reportId: string;
+  reportDate: string;
+  timezone: string;
+  scope: string;
+  status: string;
+  sourceWindowStartMs: number;
+  sourceWindowEndMs: number;
+  metrics: {
+    totalAccounts: number;
+    totalCharacters: number;
+    onlineAtGeneration: number;
+    dailyActiveAccounts: number;
+    gameplayEventCount: number;
+    activeZones: number;
+    lastGameplayEventAtMs?: number;
+    totalGoldStock: number;
+    totalCreditStock: number;
+    activeBans: number;
+    healthyServices: number;
+    configuredServices: number;
+    mapPopulation: DailyMapMetric[];
+    levelDistribution: Array<{ label: string; characters: number }>;
+    commandDistribution: GameplayEventCommandSummary[];
+  };
+  evidence: {
+    generatedAtMs: number;
+    sources: Array<{
+      source: string;
+      status: string;
+      detail: string;
+      observedAtMs: number;
+    }>;
+    warnings: string[];
+    privacy: string;
+  };
+  operationsMarkdown: string;
+  playerMarkdown: string;
+  generationSource: string;
+  model?: string;
+  promptVersion: string;
+  inputSha256: string;
+  contentSha256: string;
+  createdBy: string;
+  reviewedBy?: string;
+  reviewReason?: string;
+  publishedBy?: string;
+  createdAtMs: number;
+  updatedAtMs: number;
+  reviewedAtMs?: number;
+  publishedAtMs?: number;
+};
+
+export type DailyReportDelivery = {
+  deliveryId: string;
+  reportId: string;
+  channel: string;
+  destinationLabel: string;
+  status: string;
+  attempts: number;
+  nextAttemptAtMs?: number;
+  lastAttemptAtMs?: number;
+  deliveredAtMs?: number;
+  providerMessageId?: string;
+  lastError?: string;
+  createdAtMs: number;
+  updatedAtMs: number;
+};
+
+export type DailyReportListResponse = {
+  configured: boolean;
+  schedulerEnabled: boolean;
+  discordConfigured: boolean;
+  timezone: string;
+  schedule: string;
+  reports: DailyReport[];
+};
+
+export type DailyReportDetailResponse = {
+  report: DailyReport;
+  deliveries: DailyReportDelivery[];
+};
+
 export type AdminAuthMeResponse = {
   source: string;
   operator: {

@@ -5209,3 +5209,254 @@ button.character-spell-value:hover {
     display: flex;
   }
 }
+
+/* Published player world newspaper -------------------------------------- */
+
+.world-report-page {
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 72px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 70% 0%, rgba(32, 133, 119, 0.2), transparent 32rem),
+    radial-gradient(circle at 8% 18%, rgba(173, 111, 49, 0.18), transparent 26rem),
+    linear-gradient(145deg, #061016, #071316 45%, #030708);
+  color: #e9eee9;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+.world-report-page::before {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.1;
+  background-image:
+    linear-gradient(rgba(109, 234, 208, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(109, 234, 208, 0.1) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 20%, black, transparent 75%);
+}
+
+.world-report-header,
+.world-report-hero,
+.world-report-copy,
+.world-report-maps,
+.world-report-footer,
+.world-report-unavailable {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100%);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.world-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(106, 232, 209, 0.2);
+}
+
+.world-report-header p,
+.world-report-hero span,
+.world-report-maps > p,
+.world-report-footer,
+.world-report-unavailable > span {
+  margin: 0;
+  color: #67dcc8;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.world-report-header h1 {
+  margin: 8px 0 0;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.world-report-header a,
+.world-report-unavailable a {
+  padding: 11px 16px;
+  border: 1px solid rgba(103, 220, 200, 0.32);
+  border-radius: 10px;
+  background: rgba(103, 220, 200, 0.06);
+  color: #9aeee0;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.world-report-hero {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 42px;
+  padding: clamp(36px, 7vw, 84px) 0 34px;
+}
+
+.world-report-hero h2 {
+  margin: 14px 0 10px;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: clamp(44px, 7vw, 92px);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+}
+
+.world-report-hero p {
+  color: #859a96;
+  font-size: 13px;
+}
+
+.world-report-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-content: end;
+}
+
+.world-report-metrics article {
+  min-height: 126px;
+  padding: 20px;
+  border: 1px solid rgba(103, 220, 200, 0.17);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(25, 57, 56, 0.66), rgba(4, 16, 19, 0.8));
+}
+
+.world-report-metrics span {
+  display: block;
+  color: #6f918a;
+  font-size: 11px;
+}
+
+.world-report-metrics strong {
+  display: block;
+  margin-top: 24px;
+  color: #90f1df;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: clamp(24px, 3vw, 42px);
+  font-weight: 500;
+}
+
+.world-report-copy {
+  padding: clamp(28px, 5vw, 58px);
+  border: 1px solid rgba(180, 130, 68, 0.18);
+  border-radius: 24px;
+  background:
+    linear-gradient(140deg, rgba(45, 35, 22, 0.42), rgba(7, 20, 21, 0.8));
+  color: #d8dcd5;
+  font-size: clamp(14px, 1.4vw, 17px);
+  line-height: 2;
+}
+
+.world-report-copy h2,
+.world-report-copy h3,
+.world-report-copy h4,
+.world-report-copy p {
+  margin: 0;
+}
+
+.world-report-copy h2 {
+  color: #f3eee5;
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 500;
+}
+
+.world-report-copy h3 {
+  color: #bca06a;
+  font-size: clamp(17px, 2vw, 23px);
+  font-weight: 500;
+}
+
+.world-report-copy strong {
+  color: #8eebda;
+}
+
+.world-report-copy-list {
+  padding-left: 8px;
+}
+
+.world-report-copy-gap {
+  height: 14px;
+}
+
+.world-report-maps {
+  padding: 48px 0;
+}
+
+.world-report-maps > div {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.world-report-maps article {
+  display: grid;
+  min-height: 108px;
+  gap: 8px;
+  align-content: center;
+  padding: 16px;
+  border-left: 2px solid rgba(103, 220, 200, 0.4);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.world-report-maps article span,
+.world-report-maps article em {
+  color: #6d8580;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.world-report-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(103, 220, 200, 0.13);
+  color: #506863;
+}
+
+.world-report-unavailable {
+  display: grid;
+  min-height: 70vh;
+  place-content: center;
+  justify-items: start;
+}
+
+.world-report-unavailable h2 {
+  margin: 18px 0 8px;
+  font-size: clamp(30px, 5vw, 62px);
+  font-weight: 500;
+}
+
+.world-report-unavailable p {
+  margin: 0 0 30px;
+  color: #7d928e;
+}
+
+@media (max-width: 760px) {
+  .world-report-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .world-report-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .world-report-metrics article {
+    min-height: 96px;
+    padding: 14px;
+  }
+
+  .world-report-metrics strong {
+    margin-top: 14px;
+  }
+
+  .world-report-maps > div {
+    grid-template-columns: 1fr 1fr;
+  }
+}

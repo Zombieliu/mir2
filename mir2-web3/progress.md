@@ -1,5 +1,15 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+2026-07-29 production AI daily report goal:
+
+- New user goal: land a production-grade AI daily reporting system and publish approved player-facing reports to Discord.
+- Scope: real gameplay/account/infrastructure aggregation, deterministic metrics before AI prose, PostgreSQL persistence, idempotent scheduling/backfill, evidence and model audit, operator review/publish workflow, durable Discord retries/dead-letter handling, admin UI, player world-report page, metrics, tests, Chinese runbook, commit, and push.
+- Architectural decision: daily metrics remain authoritative and deterministic; the model only writes bounded narrative JSON. Discord is an outbound publication channel, never the source of truth, and its webhook secret remains environment-only.
+- Backend landed: migration `0008_ai_daily_reports`, complete date-window aggregation, OpenAI-compatible strict narrative adapter, deterministic fallback, immutable published reports, draft/approve/publish state machine, scheduler, public player edition, Prometheus metrics, and durable Discord retry/dead-letter state.
+- Frontend landed: Admin Web `/daily-reports` and Player Web `/world-report`, both responsive and backed by the published report API.
+- Real acceptance passed against an isolated Homebrew PostgreSQL cluster plus mock model and mock Discord: `ok=true`, AI request 1, Discord delivery 1, delivery `delivered`, public response redaction and Prometheus metrics verified.
+- Browser acceptance passed for the Chinese Admin report page and player newspaper at 1280px with no horizontal overflow and no browser console warnings/errors. The skill-local generic Playwright client remains unavailable because its own install cannot resolve `playwright`; the in-app browser Playwright surface covered the live pages instead.
+
 2026-07-28 production spectator goal:
 
 - New user goal: fully land a production-verifiable spectator system instead of leaving the
