@@ -121,6 +121,70 @@ checks that the live identity matches the active Sui registration. Key rotation
 and revocation remain intentionally read-only in the web UI; they require the
 owner capability and the audited CLI lifecycle.
 
+### Remote Home Node telemetry
+
+The production console is available at
+`https://telemetry.obelisk.build/dubhe-nodes`. Vercel runs the Next.js
+application, while the Cloudflare `mir2-telemetry-domain-proxy` Worker provides
+the custom domain, TLS edge, no-store policy, and response security headers.
+The application also requires `ADMIN_DASHBOARD_TOKEN`; the same server-side
+guard protects both pages and `/api/dubhe-nodes`, including direct Vercel URLs.
+
+Production reads the UCloud collector through its authenticated operator API:
+
+```dotenv
+DUBHE_HOME_TELEMETRY_URL=https://relay-hk.obelisk.build/home/telemetry
+DUBHE_HOME_RELAY_URL=https://relay-hk.obelisk.build
+DUBHE_HOME_TELEMETRY_OPERATOR_TOKEN=<collector read token>
+ADMIN_DASHBOARD_TOKEN=<independent dashboard login token>
+ADMIN_API_BASE_URL=https://relay-hk.example.com/home/admin
+ADMIN_OPERATOR_TOKEN=<server-side Admin API operator token>
+ADMIN_API_PROXY_TOKEN=<TLS reverse-proxy token>
+ADMIN_API_TIMEOUT_MS=8000
+```
+
+Hosted deployments deliberately keep `ADMIN_DASHBOARD_TOKEN` separate from
+`ADMIN_OPERATOR_TOKEN`: the browser cookie authenticates the dashboard, while
+the server-only operator and proxy tokens authenticate Vercel-to-Admin-API
+requests. The reverse proxy must reject `/home/admin/*` when
+`X-Dubhe-Admin-Proxy-Token` does not match.
+
+`GET /v1/operator` returns every signed production admission, its assigned
+Zone, certified capacity, and the latest verified Home Node report. This keeps
+an admitted but offline node visible. The console deliberately distinguishes
+assigned workload from current activity: `primary` means all game maps even
+when no player is online; `map:<file>:line:<n>` identifies one explicit map
+line; Sessions and Active Zones remain zero while the node is idle.
+
+### Global network telemetry
+
+`/network` is the privacy-preserving global operations view. It refreshes every
+five seconds and aggregates the authenticated Home Node fleet into regional
+centroids, capacity, Sessions, active Zones, maps, Relay RTT, packet loss, and
+Commonware finalized placement. Selecting a region opens
+`/network/region/<region-code>` with its node and workload detail; a selected
+node can continue into `/service-trace`.
+
+The browser only calls `/api/network`. Raw home IPs and advertised endpoints
+never enter the response model. A node-reported coarse region is preferred; if
+the desktop agent has not supplied one, the UI can display the official Relay
+region as an explicitly labelled fallback rather than pretending it is the
+node's physical location.
+
+### Player service trace
+
+`/service-trace` is the authenticated operations view for answering “which
+node is serving this player?”. Search accepts an account, character name,
+`account:index` player id, or live object id. The page joins the
+account/character read model, Gateway Session cache and retained transition
+history, the real Gateway's embedded Gate15 finalized lease, Relay and
+service-node identity, and Dubhe node telemetry down to Zone, map and line.
+
+The browser only calls `/api/service-trace`; operator and telemetry tokens stay
+server-side. Account ids and private endpoints are redacted by default.
+Revealing protected endpoints requires `server_control`, and every query is
+written to the Admin audit store.
+
 The UI-local public snapshot exists because the production Next.js build does
 not import JSON from outside the Admin Web root. Verify that it still matches
 the authoritative deployment and Gate 13 files after regenerating evidence:
@@ -135,6 +199,7 @@ npm run check:dubhe-node-snapshot
 ./node_modules/.bin/tsc --noEmit
 ./node_modules/.bin/next build
 npm run check:dubhe-node-snapshot
+npm run check:dubhe-network
 curl -sS http://127.0.0.1:7420/health
 curl -sS -X POST http://127.0.0.1:3020/api/admin/system-mail \
   -H 'content-type: application/json' \

@@ -1,0 +1,153 @@
+name: mir2-early
+
+x-postgres-url: &postgres-url "postgresql://mir2:${MIR2_EARLY_POSTGRES_PASSWORD:-change-me}@postgres:5432/mir2"
+x-topology: &topology >-
+  {"version":1,"mode":"per_map","defaultZoneId":"lobby","defaultTickMs":100,
+  "hotMaps":{"0":{"targetPlayersPerLine":50,"maximumPlayersPerLine":64,
+  "maximumLines":2,"scaleInGraceMs":30000}}}
+
+services:
+  postgres:
+    image: postgres:16-bookworm
+    cpus: "1.0"
+    mem_limit: "1536m"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "mir2"
+      POSTGRES_USER: "mir2"
+      POSTGRES_PASSWORD: "${MIR2_EARLY_POSTGRES_PASSWORD:-change-me}"
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - max_connections=100
+      - -c
+      - wal_compression=on
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7.4-alpine
+    cpus: "0.25"
+    mem_limit: "256m"
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 192mb
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 30
+
+  zone:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    image: mir2-early-zone-host:local
+    cpus: "2.0"
+    mem_limit: "2560m"
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_ID: "early-zone-1"
+      MIR2_GATEWAY_INSTANCE_ID: "early-zone-1"
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "early-zone-1"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "early-zone-1"
+      MIR2_ZONE_HOST_TOKEN: "${MIR2_EARLY_ZONE_TOKEN:-replace-with-at-least-32-random-bytes}"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_BACKEND: "postgres"
+      MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+      MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE: "8"
+      MIR2_ZONE_TOPOLOGY_JSON: *topology
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "256"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "128"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "64"
+      MIR2_ZONE_HOST_MAX_ZONES: "64"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+      interval: 5s
+      timeout: 2s
+      retries: 30
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gateway
+    image: mir2-early-gateway:local
+    cpus: "1.0"
+    mem_limit: "1536m"
+    restart: unless-stopped
+    ports:
+      - "${MIR2_EARLY_TCP_PORT:-7000}:7000"
+      - "${MIR2_EARLY_WEB_PORT:-7010}:7010"
+    environment:
+      MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+      MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+      MIR2_GATEWAY_INSTANCE_ID: "early-gateway-1"
+      MIR2_ZONE_HOST_ADDRS: "zone:7020"
+      MIR2_ZONE_HOST_TOKEN: "${MIR2_EARLY_ZONE_TOKEN:-replace-with-at-least-32-random-bytes}"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_ZONE_RPC_CODEC: "msgpack"
+      MIR2_ZONE_RPC_SHARED_POOL_SIZE: "32"
+      MIR2_ZONE_RPC_QUEUE_TIMEOUT_MS: "500"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "1000"
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_ZONE_LEASE_OWNER_ID: "early-zone-1"
+      MIR2_ECONOMY_DATABASE_URL: *postgres-url
+      MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES: "true"
+      MIR2_ACCOUNT_STORE_DATABASE_URL: *postgres-url
+      MIR2_GATEWAY_REQUIRE_REDIS_CACHE: "true"
+      MIR2_GATEWAY_REDIS_CACHE_URL: "redis://redis:6379/"
+      MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS: "30"
+      MIR2_GATEWAY_MAX_WS_CONNECTIONS: "128"
+      MIR2_GATEWAY_MAX_ACTIVE_SESSIONS: "100"
+      MIR2_GATEWAY_MAX_RECONNECT_LEASES: "100"
+      MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT: "32"
+      MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT: "4"
+      MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT: "16"
+      MIR2_ZONE_TOPOLOGY_JSON: *topology
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zone:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/bin/bash",
+          "-ec",
+          "exec 3<>/dev/tcp/127.0.0.1/7010 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3",
+        ]
+      interval: 5s
+      timeout: 2s
+      retries: 30
+
+volumes:
+  postgres-data:
+  redis-data:

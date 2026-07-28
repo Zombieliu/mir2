@@ -39,7 +39,11 @@ MIR2_ZONE_STANDBY_ADDR=127.0.0.1:7021 \
 cargo +1.89.0 run -p mir2-gateway --bin zone_replicator
 ```
 
-Use `--once` for an acceptance copy. `MIR2_ZONE_REPLICA_INTERVAL_MS` defaults to 250 ms.
+Use `--once` for an acceptance copy. `MIR2_ZONE_REPLICA_INTERVAL_MS` defaults to 250 ms while
+sessions are active. `MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS` defaults to 5 seconds when the exported
+checkpoint has no active sessions; it is never allowed to be shorter than the active interval.
+The idle cadence still preserves autonomous world progress, but avoids repeatedly replaying a
+large historical journal at player-active frequency.
 
 ## Lease-aware rerouting
 

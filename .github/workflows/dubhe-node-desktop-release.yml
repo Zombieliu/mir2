@@ -1,0 +1,171 @@
+name: Release Dubhe Node Desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Signed release channel
+        required: true
+        type: choice
+        options: [beta, stable]
+      release_tag:
+        description: Existing tag such as dubhe-node-v0.2.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dubhe-node-desktop-release-${{ inputs.channel }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Sign ${{ matrix.name }}
+    environment: dubhe-node-${{ inputs.channel }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: Linux x64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: deb,appimage
+          - name: Windows x64
+            os: windows-2025
+            target: x86_64-pc-windows-msvc
+            bundles: nsis,msi
+          - name: macOS Apple Silicon
+            os: macos-15
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+          - name: macOS Intel
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+            bundles: app,dmg
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/dubhe-node-desktop
+    env:
+      DUBHE_NODE_UPDATER_PUBLIC_KEY: ${{ vars.DUBHE_NODE_UPDATER_PUBLIC_KEY }}
+      DUBHE_NODE_UPDATE_STABLE_URL: ${{ vars.DUBHE_NODE_UPDATE_STABLE_URL }}
+      DUBHE_NODE_UPDATE_BETA_URL: ${{ vars.DUBHE_NODE_UPDATE_BETA_URL }}
+      DUBHE_NODE_UPDATE_ROLLBACK_URL: ${{ vars.DUBHE_NODE_UPDATE_ROLLBACK_URL }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.release_tag }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/dubhe-node-desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+        with:
+          toolchain: 1.89.0
+          targets: ${{ matrix.target }}
+
+      - name: Install Linux bundle dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        working-directory: .
+
+      - name: Import Windows Authenticode certificate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if (-not $env:WINDOWS_CERTIFICATE_BASE64 -or -not $env:WINDOWS_CERTIFICATE_PASSWORD) {
+            throw "Windows signing certificate secrets are required"
+          }
+          $certificatePath = Join-Path $env:RUNNER_TEMP "dubhe-node-signing.pfx"
+          [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
+          $securePassword = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $certificate = Import-PfxCertificate -FilePath $certificatePath -CertStoreLocation Cert:\CurrentUser\My -Password $securePassword
+          Remove-Item $certificatePath -Force
+          "TAURI_BUNDLER_WINDOWS_CERTIFICATE_THUMBPRINT=$($certificate.Thumbprint)" >> $env:GITHUB_ENV
+          "TAURI_BUNDLER_WINDOWS_TIMESTAMP_URL=http://timestamp.digicert.com" >> $env:GITHUB_ENV
+
+      - run: npm ci
+      - run: npm run release:check
+
+      - name: Build, sign, notarize and publish draft assets
+        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: mir2-web3/apps/dubhe-node-desktop
+          tagName: ${{ inputs.release_tag }}
+          releaseName: Dubhe Node ${{ inputs.release_tag }}
+          releaseBody: Signed ${{ inputs.channel }} desktop release. Promote only after three-platform smoke acceptance.
+          releaseDraft: true
+          prerelease: ${{ inputs.channel == 'beta' }}
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} --config src-tauri/tauri.release.conf.json
+
+  signed-manifest:
+    name: Sign release checksum manifest
+    needs: release
+    runs-on: ubuntu-22.04
+    environment: dubhe-node-${{ inputs.channel }}
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.release_tag }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/dubhe-node-desktop/package-lock.json
+
+      - run: npm ci
+        working-directory: mir2-web3/apps/dubhe-node-desktop
+
+      - name: Download all draft release assets
+        run: gh release download "${{ inputs.release_tag }}" --dir release-assets
+        working-directory: .
+
+      - name: Create deterministic SHA-256 manifest
+        run: |
+          cd release-assets
+          find . -maxdepth 1 -type f ! -name '*.sig' ! -name 'latest.json' -print0 \
+            | sort -z \
+            | xargs -0 sha256sum > SHA256SUMS
+        working-directory: .
+
+      - name: Sign checksum manifest with offline updater key
+        run: npm run tauri signer sign -- ../../../release-assets/SHA256SUMS
+        working-directory: mir2-web3/apps/dubhe-node-desktop
+
+      - name: Upload signed checksum manifest
+        run: |
+          gh release upload "${{ inputs.release_tag }}" \
+            release-assets/SHA256SUMS \
+            release-assets/SHA256SUMS.sig \
+            --clobber
+        working-directory: .

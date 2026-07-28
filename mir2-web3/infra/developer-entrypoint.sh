@@ -12,13 +12,23 @@ write_dirs=(
   /workspace/mir2-web3/target
   /workspace/mir2-web3/apps/web/.next
   /workspace/mir2-web3/apps/web/node_modules
+  /workspace/mir2-web3/apps/web/public/generated/map-atlas
   /workspace/mir2-web3/apps/admin-web/.next
   /workspace/mir2-web3/apps/admin-web/node_modules
+)
+
+write_files=(
+  /workspace/mir2-web3/apps/web/next-env.d.ts
 )
 
 for dir in "${write_dirs[@]}"; do
   mkdir -p "$dir"
   chown node:node "$dir"
+done
+
+for file in "${write_files[@]}"; do
+  touch "$file"
+  chown node:node "$file"
 done
 
 if [ "$(id -u)" -eq 0 ]; then

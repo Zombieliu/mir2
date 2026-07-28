@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784983454520,
+  "phase": "gateway-kill",
+  "faultStartedAtMs": 1784983452000,
+  "recoveryRtoMs": 2520,
+  "gateways": [
+    {
+      "endpoint": "gateway-1:7010",
+      "healthy": false,
+      "latencyMs": 4.662542,
+      "error": "connect gateway-1:7010 failed: failed to lookup address information: Name or service not known"
+    },
+    {
+      "endpoint": "gateway-2:7010",
+      "healthy": true,
+      "latencyMs": 2.021625,
+      "error": null
+    },
+    {
+      "endpoint": "gateway-3:7010",
+      "healthy": true,
+      "latencyMs": 1.335458,
+      "error": null
+    }
+  ],
+  "healthyGatewayCount": 2,
+  "requiredHealthyGatewayCount": 2,
+  "redisMasterRoundTrip": true,
+  "redisMasterAddress": "redis-primary:6379",
+  "redisRouteLeaseOwner": "gate19-gateway-2",
+  "postgresWritablePrimary": true,
+  "postgresServerAddress": "172.18.0.3/32",
+  "postgresZoneFencingToken": 1,
+  "assertions": {
+    "gatewayQuorumHealthy": true,
+    "postgresFencedWriteSucceeded": true,
+    "postgresSelectedWritablePrimary": true,
+    "redisMasterRoundTripSucceeded": true,
+    "redisRouteLeaseAcquired": true
+  },
+  "success": true
+}

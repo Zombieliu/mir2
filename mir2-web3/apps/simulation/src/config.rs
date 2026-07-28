@@ -2442,6 +2442,43 @@ impl Default for SimulationConfig {
 }
 
 impl SimulationConfig {
+    /// Clone the runtime configuration while giving it an independent account
+    /// store and persistence lock. Zone checkpoint replay uses this to ensure
+    /// every full-journal replay starts from the same baseline instead of a
+    /// store mutated by a previous checkpoint installation.
+    pub fn fork_with_isolated_account_store(&self) -> Result<Self, String> {
+        let account_store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store lock poisoned".to_string())?
+            .clone();
+        let mut fork = self.clone();
+        fork.account_store = Arc::new(Mutex::new(account_store));
+        fork.account_store_persist_lock = Arc::new(Mutex::new(()));
+        Ok(fork)
+    }
+
+    /// Build a standby-only runtime configuration. Replicated commands mutate
+    /// an isolated account image and must never mirror those shadow writes back
+    /// into the active file/PostgreSQL account repository.
+    pub fn fork_for_replica_apply(&self) -> Result<Self, String> {
+        let mut fork = self.fork_with_isolated_account_store()?;
+        fork.account_store_path = None;
+        fork.account_store_database_url = None;
+        Ok(fork)
+    }
+
+    /// Rebind an already-restored replica Session to the authoritative account
+    /// store when its Zone is promoted. The Session keeps its reconstructed
+    /// world state while future character saves use the live host repository.
+    pub fn rebind_account_store_from(&mut self, authoritative: &Self) {
+        self.account_store = Arc::clone(&authoritative.account_store);
+        self.account_store_path = authoritative.account_store_path.clone();
+        self.account_store_database_url = authoritative.account_store_database_url.clone();
+        self.account_store_database_mode = authoritative.account_store_database_mode;
+        self.account_store_persist_lock = Arc::clone(&authoritative.account_store_persist_lock);
+    }
+
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
         Self::from_scene_with_collision(scene, starter_map_collision())
     }
@@ -2696,6 +2733,34 @@ impl SimulationConfig {
         Ok(())
     }
 
+    /// Refresh one account from the authoritative PostgreSQL repository.
+    ///
+    /// Zone handoff and reconnect can land on a process whose in-memory account
+    /// image predates the latest character save. Loading only the requested
+    /// account keeps that boundary safe without re-reading every account on
+    /// every login.
+    pub(crate) fn refresh_account_store_account(&self, account_id: &str) -> Result<bool, String> {
+        if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth {
+            return Ok(false);
+        }
+        let Some(database_url) = self.account_store_database_url.as_deref() else {
+            return Ok(false);
+        };
+        let Some((account, versions)) =
+            load_account_from_postgres(database_url.to_string(), account_id.to_string())?
+        else {
+            return Ok(false);
+        };
+        let mut store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?;
+        store.accounts.insert(account_id.to_string(), account);
+        store.merge_source_versions(versions);
+        store.normalize_next_character_index();
+        Ok(true)
+    }
+
     pub fn save_account_store_account(&self, account_id: &str) -> Result<(), String> {
         let _persist_guard = self
             .account_store_persist_lock
@@ -2829,6 +2894,57 @@ fn load_account_store_from_postgres(
         postgres_account_store_pool(&database_url),
         default_character,
     )
+}
+
+fn load_account_from_postgres(
+    database_url: String,
+    account_id: String,
+) -> Result<Option<(AccountRecord, AccountStoreSourceVersions)>, String> {
+    let pool = postgres_account_store_pool(&database_url);
+    std::thread::spawn(move || {
+        let mut client = pool.connection()?;
+        pool.ensure_migrated(&mut client)?;
+        let Some(row) = client
+            .query_opt(
+                "SELECT raw_json, store_version FROM accounts WHERE account_id = $1",
+                &[&account_id],
+            )
+            .map_err(|error| {
+                format!("postgres account refresh failed for {account_id}: {error}")
+            })?
+        else {
+            return Ok(None);
+        };
+        let raw_json: Value = row.get("raw_json");
+        let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
+            format!("postgres account raw_json decode failed for {account_id}: {error}")
+        })?;
+        let mut versions = AccountStoreSourceVersions::default();
+        versions
+            .accounts
+            .insert(account_id.clone(), row.get("store_version"));
+        let save_rows = client
+            .query(
+                "SELECT character_index, save_version
+                 FROM character_saves
+                 WHERE account_id = $1
+                 ORDER BY character_index",
+                &[&account_id],
+            )
+            .map_err(|error| {
+                format!("postgres character-save refresh failed for {account_id}: {error}")
+            })?;
+        let save_versions = versions.saves.entry(account_id).or_default();
+        for save_row in save_rows {
+            save_versions.insert(
+                save_row.get("character_index"),
+                save_row.get("save_version"),
+            );
+        }
+        Ok(Some((account, versions)))
+    })
+    .join()
+    .map_err(|_| "postgres account refresh thread panicked".to_string())?
 }
 
 fn load_account_store_from_postgres_with_pool(
@@ -3419,6 +3535,8 @@ pub struct WorldItemSnapshot {
 #[serde(rename_all = "camelCase")]
 pub struct EquipmentItemSnapshot {
     pub slot: EquipmentSlot,
+    pub key: String,
+    pub quantity: u32,
     pub name: String,
     pub icon: u16,
     pub shape: Option<u16>,

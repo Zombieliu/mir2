@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> Latest Zone replica parity note: 2026-07-29 makes v5 base restore preserve
+> the installed authoritative shared-Zone image exactly. A standby Session now
+> rebuilds only its local movement binding and sequence cursor after restore;
+> it does not resynchronize reconstructed static entities into the installed
+> Zone checkpoint. This removes the observed Royal_Archer light drift while
+> preserving the Crystal Session snapshot, movement ingress, and post-base
+> mutation order. The byte-stability regression and the complete Gateway
+> integration matrix pass, including Zone RPC 28/28.
+
 > Latest deployment-observability note: 2026-07-25 extends only the
 > non-Crystal HTTP health surface. When `MIR2_DEPLOY_REVISION` is configured,
 > Gateway `/health` reports the running revision so the protected shared

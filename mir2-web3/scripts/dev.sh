@@ -143,11 +143,24 @@ wait_for_http() {
   local name="$1"
   local url="$2"
   local attempts="${3:-300}"
+  local service="${4:-}"
   local attempt
   for ((attempt = 1; attempt <= attempts; attempt += 1)); do
     if http_ok "${url}"; then
       echo "[ready] ${name} ${url}"
       return 0
+    fi
+    if [[ -n "${service}" ]] &&
+       compose ps --status exited --services | grep -Fxq "${service}"; then
+      echo "[error] ${name} exited before becoming ready. Recent logs:" >&2
+      compose logs --tail 120 "${service}" >&2 || true
+      return 1
+    fi
+    if [[ -n "${service}" ]] &&
+       compose ps --status unhealthy --services | grep -Fxq "${service}"; then
+      echo "[error] ${name} became unhealthy before becoming ready. Recent logs:" >&2
+      compose logs --tail 120 "${service}" >&2 || true
+      return 1
     fi
     sleep 2
   done
@@ -465,8 +478,8 @@ case "${command}" in
     up_args=(up -d)
     up_args+=(gateway web)
     compose "${up_args[@]}"
-    wait_for_http "Gateway" "${gateway_health_url}"
-    wait_for_http "Player Web" "${web_url}"
+    wait_for_http "Gateway" "${gateway_health_url}" 300 gateway
+    wait_for_http "Player Web" "${web_url}" 300 web
     printf '\nMir2 is ready: %s\n' "${web_url}"
     echo "Stop it with: ./scripts/dev.sh down"
     if [[ "${open_browser}" -eq 1 ]]; then

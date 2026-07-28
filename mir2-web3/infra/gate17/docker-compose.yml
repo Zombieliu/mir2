@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: mir2
+      POSTGRES_PASSWORD: mir2-gate17-local
+      POSTGRES_DB: mir2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate17-acceptance
+    image: mir2-gate17-acceptance:local
+    environment:
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate17-local@postgres:5432/mir2
+      MIR2_GATE17_ACCEPTANCE_OUT: /evidence/gate17-acceptance.json
+    volumes:
+      - ../../docs/generated/gate17:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy

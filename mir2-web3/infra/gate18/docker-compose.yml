@@ -1,0 +1,210 @@
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: mir2
+      POSTGRES_PASSWORD: mir2-gate18-local
+      POSTGRES_DB: mir2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  economy-producer-acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-economy-producer-acceptance
+    image: mir2-gate18-economy-producer-acceptance:local
+    environment:
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_GATE18_ECONOMY_OUT: /evidence/gate18-economy-producer.json
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  zone-host:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    image: mir2-gate18-zone-host:local
+    environment:
+      MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+      MIR2_ZONE_HOST_TOKEN: gate18-remote-economy-token
+      MIR2_ZONE_HOST_ID: gate18-regional-owner
+      MIR2_GATEWAY_INSTANCE_ID: gate18-regional-owner
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ACCOUNT_STORE_PATH: /var/lib/obelisk/gate18-accounts.json
+      MIR2_ZONE_ROUTING_MODE: per_map
+      MIR2_ZONE_HOST_MAX_SESSIONS: "32"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "32"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  remote-economy-acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-remote-economy-acceptance
+    image: mir2-gate18-remote-economy-acceptance:local
+    environment:
+      MIR2_ZONE_HOST_ADDR: zone-host:7020
+      MIR2_ZONE_HOST_TOKEN: gate18-remote-economy-token
+      MIR2_GATEWAY_INSTANCE_ID: gate18-regional-owner
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ZONE_ROUTING_MODE: per_map
+      MIR2_GATE18_REMOTE_ECONOMY_OUT: /evidence/gate18-remote-economy.json
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy
+      zone-host:
+        condition: service_healthy
+
+  gameplay-acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-gameplay-acceptance
+    image: mir2-gate18-gameplay-acceptance:local
+    environment:
+      MIR2_ZONE_HOST_ADDR: zone-host:7020
+      MIR2_ZONE_HOST_TOKEN: gate18-remote-economy-token
+      MIR2_GATEWAY_INSTANCE_ID: gate18-regional-owner
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ZONE_ROUTING_MODE: per_map
+      MIR2_GATE18_GAMEPLAY_OUT: /evidence/gate18-gameplay.json
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy
+      zone-host:
+        condition: service_healthy
+
+  migration-acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-migration-acceptance
+    image: mir2-gate18-migration-acceptance:local
+    environment:
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_GATE18_MIGRATION_WORKERS: "16"
+      MIR2_GATE18_MIGRATION_OUT: /evidence/gate18-migrations.json
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  load-active:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    image: mir2-gate18-zone-host:local
+    environment:
+      MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+      MIR2_ZONE_HOST_TOKEN: gate18-load-token
+      MIR2_ZONE_HOST_ID: gate18-active
+      MIR2_GATEWAY_INSTANCE_ID: gate18-active
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ACCOUNT_STORE_PATH: /tmp/gate18-active-accounts.json
+      MIR2_ZONE_ROUTING_MODE: per_map
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "1024"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "768"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "768"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  load-standby:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    image: mir2-gate18-zone-host:local
+    environment:
+      MIR2_ZONE_HOST_ADDR: 0.0.0.0:7020
+      MIR2_ZONE_HOST_TOKEN: gate18-load-token
+      MIR2_ZONE_HOST_ID: gate18-standby
+      MIR2_GATEWAY_INSTANCE_ID: gate18-standby
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ACCOUNT_STORE_PATH: /tmp/gate18-standby-accounts.json
+      MIR2_ZONE_ROUTING_MODE: per_map
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "1024"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "768"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "768"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+      interval: 1s
+      timeout: 2s
+      retries: 60
+
+  load-acceptance:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: gate18-load-acceptance
+    image: mir2-gate18-load-acceptance:local
+    environment:
+      MIR2_ZONE_HOST_ADDRS: load-active:7020,load-standby:7020
+      MIR2_ZONE_HOST_TOKEN: gate18-load-token
+      MIR2_GATEWAY_INSTANCE_ID: gate18-active
+      MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_GATEWAY_ZONE_LEASE_TTL_MS: "30000"
+      MIR2_ECONOMY_DATABASE_URL: postgres://mir2:mir2-gate18-local@postgres:5432/mir2
+      MIR2_ZONE_ROUTING_MODE: per_map
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "1024"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "768"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "768"
+      MIR2_ZONE_RPC_MAX_FRAME_BYTES: "67108864"
+      MIR2_ZONE_RPC_TIMEOUT_MS: "30000"
+      MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
+      MIR2_GATE18_LOAD_OUT: /evidence/gate18-load.json
+      MIR2_GATE18_LOAD_PLAYERS: ${MIR2_GATE18_LOAD_PLAYERS:-500}
+      MIR2_GATE18_LOAD_DURATION_SECONDS: ${MIR2_GATE18_LOAD_DURATION_SECONDS:-1800}
+      MIR2_GATE18_LOAD_WORKERS: ${MIR2_GATE18_LOAD_WORKERS:-256}
+      MIR2_GATE18_ALLOW_DEV_PROFILE: ${MIR2_GATE18_ALLOW_DEV_PROFILE:-false}
+    volumes:
+      - ../../docs/generated/regional:/evidence
+    depends_on:
+      postgres:
+        condition: service_healthy
+      load-active:
+        condition: service_healthy
+      load-standby:
+        condition: service_healthy

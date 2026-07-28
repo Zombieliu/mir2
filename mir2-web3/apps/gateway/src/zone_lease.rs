@@ -24,7 +24,7 @@
 //! live in-memory zone runtime to a new owner still depends on the zone-owner RPC
 //! transport, which is tracked separately.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -63,7 +63,13 @@ pub struct PostgresZoneOwnerLeaseAuthority {
     owner_id: String,
     lease_ttl_ms: u64,
     client: Arc<Mutex<Option<Client>>>,
-    last_known: Mutex<BTreeMap<String, ZoneOwnerLease>>,
+    last_known: Mutex<BTreeMap<String, CachedZoneLease>>,
+}
+
+#[derive(Debug, Clone)]
+struct CachedZoneLease {
+    lease: ZoneOwnerLease,
+    expires_at_ms: u64,
 }
 
 impl std::fmt::Debug for PostgresZoneOwnerLeaseAuthority {
@@ -102,10 +108,10 @@ impl PostgresZoneOwnerLeaseAuthority {
         let database_url = std::env::var("MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL")
             .ok()
             .filter(|value| !value.trim().is_empty())?;
-        let owner_id = std::env::var("MIR2_GATEWAY_INSTANCE_ID")
-            .ok()
-            .filter(|value| !value.trim().is_empty())
-            .unwrap_or_else(default_instance_id);
+        let owner_id = configured_owner_id(
+            std::env::var("MIR2_GATEWAY_ZONE_LEASE_OWNER_ID").ok(),
+            std::env::var("MIR2_GATEWAY_INSTANCE_ID").ok(),
+        );
         let lease_ttl_ms = std::env::var("MIR2_GATEWAY_ZONE_LEASE_TTL_MS")
             .ok()
             .and_then(|value| value.trim().parse::<u64>().ok())
@@ -159,13 +165,23 @@ impl PostgresZoneOwnerLeaseAuthority {
         .map_err(|_| "zone lease worker thread panicked".to_string())?
     }
 
-    fn remember(&self, lease: &ZoneOwnerLease) {
+    fn remember(&self, lease: &ZoneOwnerLease, expires_at_ms: u64) {
         if let Ok(mut cache) = self.last_known.lock() {
-            cache.insert(lease.zone_id().as_str().to_string(), lease.clone());
+            cache.insert(
+                lease.zone_id().as_str().to_string(),
+                CachedZoneLease {
+                    lease: lease.clone(),
+                    expires_at_ms,
+                },
+            );
         }
     }
 
     fn cached(&self, zone_id: &ZoneId) -> Option<ZoneOwnerLease> {
+        self.cached_entry(zone_id).map(|entry| entry.lease)
+    }
+
+    fn cached_entry(&self, zone_id: &ZoneId) -> Option<CachedZoneLease> {
         self.last_known
             .lock()
             .ok()
@@ -180,7 +196,7 @@ impl PostgresZoneOwnerLeaseAuthority {
         let expires_at = now_ms.saturating_add(self.lease_ttl_ms) as i64;
         let now = now_ms as i64;
         let zone_for_lease = zone_id.clone();
-        let lease = self.run(move |client| {
+        let (lease, stored_expires_at_ms) = self.run(move |client| {
             let row = client
                 .query_one(
                     "INSERT INTO zone_owner_leases \
@@ -204,19 +220,19 @@ impl PostgresZoneOwnerLeaseAuthority {
                            WHEN zone_owner_leases.owner_id <> EXCLUDED.owner_id AND zone_owner_leases.expires_at_ms <= $4 \
                                THEN EXCLUDED.acquired_at_ms ELSE zone_owner_leases.acquired_at_ms END, \
                        updated_at = now() \
-                     RETURNING owner_id, fencing_token",
+                     RETURNING owner_id, fencing_token, expires_at_ms",
                     &[&zone, &owner_id, &expires_at, &now],
                 )
                 .map_err(|error| format!("zone lease acquire failed for {zone}: {error}"))?;
             let owner_id: String = row.get("owner_id");
             let fencing_token: i64 = row.get("fencing_token");
-            Ok(ZoneOwnerLease::new(
-                zone_for_lease,
-                owner_id,
-                fencing_token.max(1) as u64,
+            let stored_expires_at_ms: i64 = row.get("expires_at_ms");
+            Ok((
+                ZoneOwnerLease::new(zone_for_lease, owner_id, fencing_token.max(1) as u64),
+                stored_expires_at_ms.max(0) as u64,
             ))
         })?;
-        self.remember(&lease);
+        self.remember(&lease, stored_expires_at_ms);
         Ok(lease)
     }
 
@@ -257,11 +273,75 @@ impl PostgresZoneOwnerLeaseAuthority {
             Ok(()) => {
                 let lease =
                     ZoneOwnerLease::new(zone_id, self.owner_id.clone(), lease.fencing_token());
-                self.remember(&lease);
+                self.remember(&lease, now_ms.saturating_add(self.lease_ttl_ms));
                 Ok(lease)
             }
             Err(error) => Err(error),
         }
+    }
+
+    /// Atomically hand a still-live lease to a new owner and advance its
+    /// fencing token. The caller must be the current owner; the compare-and-set
+    /// prevents a stale scheduler from overwriting a newer generation.
+    pub fn handoff_at(
+        &self,
+        current: &ZoneOwnerLease,
+        new_owner_id: impl Into<String>,
+        now_ms: u64,
+    ) -> Result<ZoneOwnerLease, String> {
+        if current.owner_id() != self.owner_id {
+            return Err(format!(
+                "cannot hand off zone lease owned by {} from authority {}",
+                current.owner_id(),
+                self.owner_id
+            ));
+        }
+        let new_owner_id = new_owner_id.into();
+        if new_owner_id.trim().is_empty() || new_owner_id == self.owner_id {
+            return Err("zone lease handoff requires a distinct non-empty owner".to_string());
+        }
+        let zone = current.zone_id().as_str().to_string();
+        let current_owner_id = self.owner_id.clone();
+        let current_token = current.fencing_token() as i64;
+        let new_expires_at_ms = now_ms.saturating_add(self.lease_ttl_ms);
+        let new_expires_at = new_expires_at_ms as i64;
+        let now = now_ms as i64;
+        let zone_id = current.zone_id().clone();
+        let owner_for_query = new_owner_id.clone();
+        let new_token = self.run(move |client| {
+            let row = client
+                .query_opt(
+                    "UPDATE zone_owner_leases
+                     SET owner_id=$4,
+                         fencing_token=fencing_token+1,
+                         expires_at_ms=$5,
+                         heartbeat_at_ms=$6,
+                         acquired_at_ms=$6,
+                         updated_at=now()
+                     WHERE zone_id=$1
+                       AND owner_id=$2
+                       AND fencing_token=$3
+                       AND expires_at_ms>$6
+                     RETURNING fencing_token",
+                    &[
+                        &zone,
+                        &current_owner_id,
+                        &current_token,
+                        &owner_for_query,
+                        &new_expires_at,
+                        &now,
+                    ],
+                )
+                .map_err(|error| format!("zone lease handoff failed for {zone}: {error}"))?
+                .ok_or_else(|| {
+                    format!("stale zone owner lease for {zone}: handoff compare-and-set rejected")
+                })?;
+            let token: i64 = row.get("fencing_token");
+            Ok(token.max(1) as u64)
+        })?;
+        let lease = ZoneOwnerLease::new(zone_id, new_owner_id, new_token);
+        self.remember(&lease, new_expires_at_ms);
+        Ok(lease)
     }
 
     /// Release the lease on graceful shutdown so a peer can take over immediately.
@@ -278,7 +358,11 @@ impl PostgresZoneOwnerLeaseAuthority {
                 )
                 .map_err(|error| format!("zone lease release failed for {zone}: {error}"))?;
             Ok(())
-        })
+        })?;
+        if let Ok(mut cache) = self.last_known.lock() {
+            cache.remove(lease.zone_id().as_str());
+        }
+        Ok(())
     }
 
     /// Read the current stored lease for a zone, whoever owns it.
@@ -311,9 +395,25 @@ impl PostgresZoneOwnerLeaseAuthority {
     }
 }
 
+fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<String>) -> String {
+    explicit_owner
+        .filter(|value| !value.trim().is_empty())
+        .or_else(|| instance_id.filter(|value| !value.trim().is_empty()))
+        .unwrap_or_else(default_instance_id)
+}
+
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         let now = now_ms();
+        if let Some(cached) = self.cached_entry(zone_id) {
+            let live = cached.expires_at_ms > now;
+            let owned_by_peer = cached.lease.owner_id() != self.owner_id;
+            let safely_before_renewal =
+                cached.expires_at_ms.saturating_sub(now) > self.lease_ttl_ms.saturating_div(2);
+            if live && (owned_by_peer || safely_before_renewal) {
+                return cached.lease;
+            }
+        }
         match self.acquire_at(zone_id, now) {
             Ok(lease) => lease,
             Err(error) => {
@@ -331,12 +431,148 @@ impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
         }
     }
 
+    fn refresh_owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
+        let now = now_ms();
+        match self.acquire_at(zone_id, now) {
+            Ok(lease) => lease,
+            Err(error) => {
+                eprintln!(
+                    "zone lease authority refresh degraded for {}: {error}",
+                    zone_id.as_str()
+                );
+                self.cached(zone_id).unwrap_or_else(|| {
+                    ZoneOwnerLease::new(zone_id.clone(), self.owner_id.clone(), 1)
+                })
+            }
+        }
+    }
+
+    fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
+        let now = now_ms();
+        if let Some(cached) = self.cached_entry(lease.zone_id()) {
+            let safely_live = cached.expires_at_ms > now
+                && (cached.lease.owner_id() != self.owner_id
+                    || cached.expires_at_ms.saturating_sub(now)
+                        > self.lease_ttl_ms.saturating_div(2));
+            if safely_live && cached.lease == *lease {
+                return Ok(());
+            }
+        }
+        let current = self.acquire_at(lease.zone_id(), now).map_err(|error| {
+            format!(
+                "cannot validate zone owner lease for {} after cached TTL: {error}",
+                lease.zone_id()
+            )
+        })?;
+        if current == *lease {
+            Ok(())
+        } else {
+            Err(format!(
+                "stale zone owner lease for zone {}: current owner {} fencing token {}, got owner {} fencing token {}",
+                lease.zone_id(),
+                current.owner_id(),
+                current.fencing_token(),
+                lease.owner_id(),
+                lease.fencing_token()
+            ))
+        }
+    }
+
     fn renew_owner_lease_at(
         &self,
         lease: &ZoneOwnerLease,
         now_ms: u64,
     ) -> Result<ZoneOwnerLease, String> {
         self.renew_at(lease, now_ms)
+    }
+}
+
+/// A local Zone Host authority for the authenticated Home Agent hop.
+///
+/// The Home Agent has already verified the Relay's signed placement envelope
+/// over mTLS before it forwards the Zone RPC frame over an authenticated
+/// loopback socket. This authority lets the Zone Host adopt that external
+/// lease while retaining monotonic fencing locally. It must only be enabled
+/// with an explicit allow-list of Commonware Zone Host ids.
+#[derive(Debug)]
+pub struct TrustedRpcZoneOwnerLeaseAuthority {
+    trusted_owners: BTreeSet<String>,
+    leases: Mutex<BTreeMap<ZoneId, ZoneOwnerLease>>,
+}
+
+impl TrustedRpcZoneOwnerLeaseAuthority {
+    pub fn new(trusted_owners: impl IntoIterator<Item = String>) -> Result<Self, String> {
+        let trusted_owners = trusted_owners
+            .into_iter()
+            .map(|owner| owner.trim().to_string())
+            .filter(|owner| !owner.is_empty())
+            .collect::<BTreeSet<_>>();
+        if trusted_owners.is_empty() {
+            return Err(
+                "trusted-rpc Zone lease authority requires at least one trusted owner".to_string(),
+            );
+        }
+        Ok(Self {
+            trusted_owners,
+            leases: Mutex::new(BTreeMap::new()),
+        })
+    }
+
+    fn from_env() -> Result<Self, String> {
+        let owners = std::env::var("MIR2_ZONE_OWNER_TRUSTED_RPC_OWNERS")
+            .unwrap_or_default()
+            .split(',')
+            .map(str::to_string)
+            .collect::<Vec<_>>();
+        Self::new(owners)
+    }
+}
+
+impl ZoneOwnerLeaseAuthority for TrustedRpcZoneOwnerLeaseAuthority {
+    fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
+        self.leases
+            .lock()
+            .expect("trusted-rpc Zone lease mutex should not be poisoned")
+            .get(zone_id)
+            .cloned()
+            .unwrap_or_else(|| ZoneOwnerLease::in_process(zone_id))
+    }
+
+    fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
+        if !self.trusted_owners.contains(lease.owner_id()) {
+            return Err(format!(
+                "untrusted Zone owner {} for authenticated Home Agent RPC",
+                lease.owner_id()
+            ));
+        }
+        let mut leases = self
+            .leases
+            .lock()
+            .expect("trusted-rpc Zone lease mutex should not be poisoned");
+        match leases.get(lease.zone_id()) {
+            None => {
+                leases.insert(lease.zone_id().clone(), lease.clone());
+                Ok(())
+            }
+            Some(current) if current == lease => Ok(()),
+            Some(current) if lease.fencing_token() > current.fencing_token() => {
+                leases.insert(lease.zone_id().clone(), lease.clone());
+                Ok(())
+            }
+            Some(current) => Err(format!(
+                "stale zone owner lease for zone {}: current owner {} fencing token {}, got owner {} fencing token {}",
+                lease.zone_id(),
+                current.owner_id(),
+                current.fencing_token(),
+                lease.owner_id(),
+                lease.fencing_token()
+            )),
+        }
+    }
+
+    fn renew_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<ZoneOwnerLease, String> {
+        self.validate_owner_lease(lease)?;
+        Ok(lease.clone())
     }
 }
 
@@ -352,6 +588,22 @@ fn default_instance_id() -> String {
 /// authority when `MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL` is set, otherwise the
 /// in-process authority (single-writer, no cross-process failover).
 pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuthority {
+    if let Some(authority) = crate::gate15::zone_owner_lease_authority() {
+        eprintln!("zone owner lease authority: Gate 15 Commonware finalized placement");
+        return authority;
+    }
+    if std::env::var("MIR2_ZONE_OWNER_LEASE_BACKEND")
+        .ok()
+        .is_some_and(|value| value.trim().eq_ignore_ascii_case("trusted-rpc"))
+    {
+        let authority = TrustedRpcZoneOwnerLeaseAuthority::from_env()
+            .expect("invalid trusted-rpc Zone owner lease configuration");
+        eprintln!(
+            "zone owner lease authority: authenticated Home Agent RPC ({} trusted owners)",
+            authority.trusted_owners.len()
+        );
+        return Arc::new(authority) as SharedZoneOwnerLeaseAuthority;
+    }
     match PostgresZoneOwnerLeaseAuthority::from_env() {
         Some(authority) => {
             eprintln!(
@@ -369,6 +621,67 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn trusted_rpc_authority_adopts_and_fences_allowed_owner() {
+        let authority =
+            TrustedRpcZoneOwnerLeaseAuthority::new(["home-a".to_string()]).expect("authority");
+        let zone = ZoneId::primary();
+        let first = ZoneOwnerLease::new(zone.clone(), "home-a", 2);
+        authority
+            .validate_owner_lease(&first)
+            .expect("first authenticated lease should be adopted");
+        assert_eq!(authority.owner_lease(&zone), first);
+
+        let stale = ZoneOwnerLease::new(zone.clone(), "home-a", 1);
+        assert!(authority.validate_owner_lease(&stale).is_err());
+        let next = ZoneOwnerLease::new(zone.clone(), "home-a", 3);
+        authority
+            .validate_owner_lease(&next)
+            .expect("higher fencing token should replace the current lease");
+        assert_eq!(authority.owner_lease(&zone), next);
+    }
+
+    #[test]
+    fn trusted_rpc_authority_rejects_unlisted_owner() {
+        let authority =
+            TrustedRpcZoneOwnerLeaseAuthority::new(["home-a".to_string()]).expect("authority");
+        let error = authority
+            .validate_owner_lease(&ZoneOwnerLease::new(ZoneId::primary(), "home-b", 1))
+            .expect_err("unlisted owner must be rejected");
+        assert!(error.contains("untrusted Zone owner home-b"));
+    }
+
+    #[test]
+    fn explicit_lease_owner_is_independent_from_process_instance_id() {
+        assert_eq!(
+            configured_owner_id(
+                Some("logical-active".to_string()),
+                Some("physical-zone-1".to_string())
+            ),
+            "logical-active"
+        );
+        assert_eq!(
+            configured_owner_id(None, Some("physical-zone-1".to_string())),
+            "physical-zone-1"
+        );
+    }
+
+    #[test]
+    fn live_cached_lease_validates_without_a_database_round_trip() {
+        let authority = PostgresZoneOwnerLeaseAuthority::new(
+            "postgres://invalid@127.0.0.1:1/invalid",
+            "cached-owner",
+            30_000,
+        );
+        let zone = unique_zone("cached-validation");
+        let lease = ZoneOwnerLease::new(zone, "cached-owner", 7);
+        authority.remember(&lease, now_ms().saturating_add(30_000));
+
+        authority
+            .validate_owner_lease(&lease)
+            .expect("a safely live cached fence should validate locally");
+    }
 
     fn pg_test_url() -> Option<String> {
         let url = std::env::var("MIR2_TEST_POSTGRES_URL")

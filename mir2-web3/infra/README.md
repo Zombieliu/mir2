@@ -64,6 +64,23 @@ Gateway WebSocket load evidence.
 The GitHub Actions workflow `.github/workflows/mir2-candidate-gate.yml` runs
 the `local` Candidate gate on pushes to `main` and pull requests.
 
+## Early single-host game server
+
+For an initial `0–100 CCU` release on one `4 CPU / 8 GB` host, use the bounded
+Early stack rather than the full Regional HA topology:
+
+```bash
+cp infra/early/.env.example infra/early/.env
+docker compose --env-file infra/early/.env \
+  -f infra/early/docker-compose.yml up -d --build
+```
+
+The stack runs one Gateway, one authoritative Zone Host, PostgreSQL, and Redis.
+It activates maps on demand and splits the configured hot map at 50 players.
+It deliberately has one host failure domain, so off-host backup is mandatory.
+See [`infra/early/README.zh-CN.md`](early/README.zh-CN.md) for preflight,
+backup/restore rehearsal, and scale-out thresholds.
+
 ## Gate 12 operator network
 
 The operator-facing Docker network is separate from the broad development

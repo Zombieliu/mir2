@@ -77,6 +77,8 @@ export type DubheNodeRecord = {
   label: string;
   advertisedEndpoint: string;
   failureDomain: string;
+  coarseRegion?: string;
+  providerCode?: string;
   telemetryState: "live" | "offline";
   registrationState: "active" | "unregistered";
   heartbeatVerified: boolean;
@@ -98,6 +100,15 @@ export type DubheNodeRecord = {
   rpcRequestsTotal: number;
   rpcErrorsTotal: number;
   observedAtMs?: number;
+  workMode?: string;
+  relayRttMs?: number;
+  packetLossBps?: number;
+  measuredUpstreamKbps?: number;
+  checkpointLagMs?: number;
+  placementGeneration?: number;
+  verifiedWorkUnits?: number;
+  sessionMilliseconds?: number;
+  agentVersion?: string;
   stakeMist: number;
   operatorSuiAddress?: string;
   publicKey?: string;
@@ -145,6 +156,8 @@ export type DubheNodeConsoleSnapshot = {
   links: {
     grafana: string;
     prometheus: string;
+    prometheusAlerts: string;
+    snapshotExport: string;
     registrationExplorer: string;
     packageExplorer: string;
   };
@@ -159,7 +172,46 @@ type OperatorProbe = {
   error?: string;
 };
 
+type HomeOperatorTelemetry = {
+  nodeId: string;
+  keyGeneration: number;
+  observedAtMs: number;
+  coarseRegion: string;
+  providerCode: string;
+  workMode: string;
+  activeSessions: number;
+  activeZones: number;
+  zoneIds: string[];
+  relayRttMs: number;
+  packetLossBps: number;
+  measuredUpstreamKbps: number;
+  checkpointLagMs: number;
+  placementGeneration: number;
+  verifiedWorkUnits: number;
+  sessionMilliseconds: number;
+  agentVersion: string;
+};
+
+type HomeOperatorNode = {
+  nodeId: string;
+  assignedZoneId: string;
+  capacityMaxSessions: number;
+  capacityMaxZones: number;
+  placementGeneration: number;
+  admissionExpiresAtMs: number;
+  telemetry?: HomeOperatorTelemetry;
+};
+
+type HomeOperatorSnapshot = {
+  generatedAtMs: number;
+  nodes: HomeOperatorNode[];
+};
+
 export async function readDubheNodeConsole(): Promise<DubheNodeConsoleSnapshot> {
+  const homeTelemetryUrl = process.env.DUBHE_HOME_TELEMETRY_URL?.trim();
+  if (homeTelemetryUrl) {
+    return readHomeTelemetryConsole(homeTelemetryUrl);
+  }
   const operatorUrls = configuredOperatorUrls();
   const probes = await Promise.all(operatorUrls.map(probeOperator));
   const liveRecords = probes
@@ -223,6 +275,9 @@ export async function readDubheNodeConsole(): Promise<DubheNodeConsoleSnapshot> 
     links: {
       grafana: process.env.DUBHE_NODE_GRAFANA_URL ?? "http://127.0.0.1:13000",
       prometheus: process.env.DUBHE_NODE_PROMETHEUS_URL ?? "http://127.0.0.1:19090",
+      prometheusAlerts:
+        process.env.DUBHE_NODE_PROMETHEUS_ALERTS_URL ?? "http://127.0.0.1:19090/alerts",
+      snapshotExport: "/api/dubhe-nodes",
       registrationExplorer: suiTransactionUrl(activeRegistration.transactionDigest),
       packageExplorer: `https://suiscan.xyz/testnet/object/${deployment.packageId}`
     },
@@ -230,6 +285,200 @@ export async function readDubheNodeConsole(): Promise<DubheNodeConsoleSnapshot> 
       mode === "offline"
         ? "No configured Zone Host operator endpoint responded; chain and acceptance evidence remain visible."
         : `${liveProbeCount}/${operatorUrls.length} configured operator endpoints responded.`
+  };
+}
+
+async function readHomeTelemetryConsole(
+  configuredUrl: string
+): Promise<DubheNodeConsoleSnapshot> {
+  const telemetryUrl = configuredUrl.replace(/\/+$/, "");
+  const operatorToken = process.env.DUBHE_HOME_TELEMETRY_OPERATOR_TOKEN?.trim();
+  let operatorSnapshot: HomeOperatorSnapshot | undefined;
+  let error: string | undefined;
+  if (!operatorToken) {
+    error = "DUBHE_HOME_TELEMETRY_OPERATOR_TOKEN is not configured.";
+  } else {
+    try {
+      operatorSnapshot = await fetchJson<HomeOperatorSnapshot>(
+        `${telemetryUrl}/v1/operator`,
+        {
+          headers: {
+            authorization: `Bearer ${operatorToken}`
+          }
+        },
+        4_000
+      );
+    } catch (cause) {
+      error =
+        cause instanceof Error ? cause.message : "Home telemetry operator endpoint unavailable";
+    }
+  }
+
+  const generatedAtMs = operatorSnapshot?.generatedAtMs ?? Date.now();
+  const nodes =
+    operatorSnapshot?.nodes.map((node) => recordFromHomeTelemetry(node, generatedAtMs)) ?? [
+      {
+        ...registrationRecord([]),
+        advertisedEndpoint: telemetryUrl,
+        error: error ?? "No admitted Home Nodes were returned."
+      }
+    ];
+  const liveNodes = nodes.filter((node) => node.telemetryState === "live");
+  const mode =
+    liveNodes.length === 0
+      ? "offline"
+      : liveNodes.length === nodes.length
+        ? "live"
+        : "degraded";
+
+  return {
+    generatedAtMs,
+    mode,
+    network: "testnet",
+    packageId: deployment.packageId,
+    registryId: deployment.registryId,
+    publishTransaction: deployment.publishTransaction,
+    activeRegistrationTransaction: activeRegistration.transactionDigest,
+    activeRegistrationCheckpoint: activeRegistration.checkpoint,
+    registeredNodeCount: Math.max(deployment.registeredNodeCount, nodes.length),
+    retiredNodeCount: deployment.retiredNodeCount,
+    liveNodeCount: liveNodes.length,
+    totalSessions: sum(liveNodes.map((node) => node.sessions)),
+    totalSessionCapacity: sum(liveNodes.map((node) => node.sessionCapacity)),
+    totalZones: sum(liveNodes.map((node) => node.zones)),
+    totalZoneCapacity: sum(liveNodes.map((node) => node.zoneCapacity)),
+    totalStakeMist: nodes
+      .filter((node) => node.registrationState === "active")
+      .reduce((total, node) => total + node.stakeMist, 0),
+    nodes,
+    finality: {
+      adapter: "Commonware v2026.2.0",
+      quorum: acceptanceEvidence.commonwareQuorum,
+      finalizedHeight: acceptanceEvidence.commonwareFinalizedHeight,
+      membershipEligible: acceptanceEvidence.membershipEligible,
+      evidenceGeneratedAtMs: acceptanceEvidence.generatedAtMs
+    },
+    capacity: {
+      completedCommands: acceptanceEvidence.capacityCompletedCommands,
+      maxSessionsPerZone: acceptanceEvidence.capacityMaxSessionsPerZone,
+      p95LatencyMs: acceptanceEvidence.capacityP95LatencyMs,
+      certificateId: acceptanceEvidence.capacityCertificateId,
+      certificateExpiresAtMs: acceptanceEvidence.capacityCertificateExpiresAtMs,
+      issuerPublicKey: acceptanceEvidence.capacityCertificateIssuer
+    },
+    rewards: {
+      batchId: acceptanceEvidence.rewardBatchId,
+      merkleRoot: acceptanceEvidence.rewardMerkleRoot,
+      total: acceptanceEvidence.rewardTotal
+    },
+    links: {
+      grafana:
+        process.env.DUBHE_NODE_GRAFANA_URL ??
+        "/ops/grafana/d/dubhe-home-nodes/dubhe-home-node-fleet?orgId=1&refresh=10s",
+      prometheus:
+        process.env.DUBHE_NODE_PROMETHEUS_URL ??
+        "/ops/prometheus/query?g0.expr=dubhe_home_nodes_live&g0.tab=0",
+      prometheusAlerts:
+        process.env.DUBHE_NODE_PROMETHEUS_ALERTS_URL ?? "/ops/prometheus/alerts",
+      snapshotExport: "/api/dubhe-nodes",
+      registrationExplorer: suiTransactionUrl(activeRegistration.transactionDigest),
+      packageExplorer: `https://suiscan.xyz/testnet/object/${deployment.packageId}`
+    },
+    sourceNote: error
+      ? `Home telemetry is degraded: ${error}`
+      : `${liveNodes.length}/${nodes.length} admitted Home Nodes are live; assigned and active Zone workloads are shown separately.`
+  };
+}
+
+function recordFromHomeTelemetry(
+  node: HomeOperatorNode,
+  generatedAtMs: number
+): DubheNodeRecord {
+  const telemetry = node.telemetry;
+  const live =
+    telemetry !== undefined &&
+    generatedAtMs >= telemetry.observedAtMs &&
+    generatedAtMs - telemetry.observedAtMs <= 180_000;
+  const claimsRegisteredNode = node.nodeId === activeRegistration.nodeId;
+  const assignedZoneIds = [
+    node.assignedZoneId,
+    ...(telemetry?.zoneIds ?? [])
+  ].filter((zoneId, index, values) => zoneId && values.indexOf(zoneId) === index);
+  const activeZoneIds = new Set(telemetry?.zoneIds ?? []);
+  const activeZones = assignedZoneIds.map((zoneId, index) => ({
+    ...zoneWorkload(zoneId),
+    sessionCount:
+      activeZoneIds.has(zoneId) && index === 0 ? (telemetry?.activeSessions ?? 0) : 0
+  }));
+  return {
+    nodeId: node.nodeId,
+    label: shortNodeId(node.nodeId),
+    advertisedEndpoint: process.env.DUBHE_HOME_RELAY_URL ?? "relay-hk.obelisk.build",
+    failureDomain: telemetry
+      ? `${telemetry.coarseRegion} · ${telemetry.providerCode}`
+      : "admitted · awaiting telemetry",
+    coarseRegion: telemetry?.coarseRegion,
+    providerCode: telemetry?.providerCode,
+    telemetryState: live ? "live" : "offline",
+    registrationState: claimsRegisteredNode ? "active" : "unregistered",
+    heartbeatVerified: Boolean(telemetry),
+    registrationMatched: Boolean(telemetry) && claimsRegisteredNode,
+    keyGeneration: telemetry?.keyGeneration ?? activeRegistration.keyGeneration,
+    sessions: telemetry?.activeSessions ?? 0,
+    sessionCapacity: node.capacityMaxSessions,
+    busiestZoneSessionCount: telemetry?.activeSessions ?? 0,
+    zones: telemetry?.activeZones ?? 0,
+    zoneCapacity: node.capacityMaxZones,
+    activeZones,
+    zoneDetailsVerified: true,
+    activeConnections: 0,
+    draining: telemetry?.workMode === "draining",
+    uptimeSeconds: 0,
+    rpcRequestsTotal: telemetry?.verifiedWorkUnits ?? 0,
+    rpcErrorsTotal: 0,
+    observedAtMs: telemetry?.observedAtMs,
+    workMode: telemetry?.workMode,
+    relayRttMs: telemetry?.relayRttMs,
+    packetLossBps: telemetry?.packetLossBps,
+    measuredUpstreamKbps: telemetry?.measuredUpstreamKbps,
+    checkpointLagMs: telemetry?.checkpointLagMs,
+    placementGeneration: telemetry?.placementGeneration,
+    verifiedWorkUnits: telemetry?.verifiedWorkUnits,
+    sessionMilliseconds: telemetry?.sessionMilliseconds,
+    agentVersion: telemetry?.agentVersion,
+    stakeMist: claimsRegisteredNode ? activeRegistration.stakeMist : 0,
+    operatorSuiAddress: claimsRegisteredNode
+      ? activeRegistration.operatorSuiAddress
+      : undefined,
+    publicKey: claimsRegisteredNode ? activeRegistration.publicKey : undefined,
+    error: live
+      ? undefined
+      : telemetry
+        ? "The last signed Home Node report is stale."
+        : "The node is admitted but has not submitted telemetry."
+  };
+}
+
+function zoneWorkload(zoneId: string): Omit<ZoneHostZone, "sessionCount"> {
+  if (zoneId === "primary") {
+    return {
+      zoneId,
+      mapScope: "all",
+      mapFileNames: []
+    };
+  }
+  const mapLine = /^map:([^:]+):line:\d+$/u.exec(zoneId);
+  if (mapLine) {
+    return {
+      zoneId,
+      mapScope: "explicit",
+      mapFileNames: [mapLine[1]]
+    };
+  }
+  return {
+    zoneId,
+    mapScope: "unknown",
+    mapFileNames: []
   };
 }
 
@@ -261,10 +510,15 @@ async function probeOperator(operatorUrl: string): Promise<OperatorProbe> {
   }
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
+async function fetchJson<T>(
+  url: string,
+  init: RequestInit = {},
+  timeoutMs = 1_500
+): Promise<T> {
   const response = await fetch(url, {
+    ...init,
     cache: "no-store",
-    signal: AbortSignal.timeout(1_500)
+    signal: AbortSignal.timeout(timeoutMs)
   });
   if (!response.ok) {
     throw new Error(`${new URL(url).host} returned HTTP ${response.status}`);

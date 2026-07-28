@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-27T21:28:41Z",
+  "source": {
+    "branch": "codex/gate21-regional-certification",
+    "baseCommit": "26a30f95657d16663d473a35813f9c5b12be5a98",
+    "workingTreeIncludesUncommittedDistributionChanges": true
+  },
+  "desktopVersion": "0.1.0",
+  "localPlatform": {
+    "os": "macOS",
+    "architecture": "aarch64",
+    "appBundle": "target/debug/bundle/macos/Dubhe Node.app",
+    "dmg": "target/debug/bundle/dmg/Dubhe Node_0.1.0_aarch64.dmg",
+    "dmgBytes": 30616864,
+    "dmgSha256": "7ba869d917e166025d6ce0e11d5bae1276d2dff2b0ea6f9dc169cb50fdee96fd",
+    "nativeSidecars": [
+      "home_agent",
+      "home_agent_launcher",
+      "home_agent_supervisor",
+      "zone_host"
+    ],
+    "allBinariesAreArm64MachO": true,
+    "signedAndNotarized": false,
+    "artifactClassification": "local-debug-acceptance-only"
+  },
+  "checks": {
+    "desktopRustTests": {
+      "status": "pass",
+      "passed": 7,
+      "failed": 0
+    },
+    "frontendProductionBuild": {
+      "status": "pass"
+    },
+    "homeNodeAcceptance": {
+      "status": "pass",
+      "marker": "DUBHE_NODE_ACCEPTANCE_OK",
+      "covers": [
+        "enrollment",
+        "capacity-certification",
+        "telemetry-admission",
+        "supervisor-fail-closed",
+        "outbound-mtls-quic-player-path",
+        "relay-reconnect",
+        "desktop-rust-tests",
+        "frontend-build"
+      ]
+    },
+    "releaseConfiguration": {
+      "status": "pass",
+      "marker": "DUBHE_NODE_RELEASE_CHECK_PASS version=0.1.0"
+    },
+    "workflowYaml": {
+      "status": "pass",
+      "files": [
+        ".github/workflows/dubhe-node-desktop-ci.yml",
+        ".github/workflows/dubhe-node-desktop-release.yml"
+      ]
+    },
+    "releaseConfigMergeBuild": {
+      "status": "pass",
+      "mode": "debug-no-bundle-with-placeholder-release-inputs"
+    },
+    "rustFormatting": {
+      "status": "pass"
+    },
+    "gitDiffCheck": {
+      "status": "pass"
+    }
+  },
+  "distributionMatrix": [
+    {
+      "runner": "macos-15",
+      "target": "aarch64-apple-darwin",
+      "bundles": ["app", "dmg"],
+      "localArtifactVerified": true,
+      "ciExecutionPendingPush": true
+    },
+    {
+      "runner": "macos-15-intel",
+      "target": "x86_64-apple-darwin",
+      "bundles": ["app", "dmg"],
+      "localArtifactVerified": false,
+      "ciExecutionPendingPush": true
+    },
+    {
+      "runner": "windows-2025",
+      "target": "x86_64-pc-windows-msvc",
+      "bundles": ["nsis", "msi"],
+      "localArtifactVerified": false,
+      "ciExecutionPendingPush": true
+    },
+    {
+      "runner": "ubuntu-22.04",
+      "target": "x86_64-unknown-linux-gnu",
+      "bundles": ["deb", "appimage"],
+      "localArtifactVerified": false,
+      "ciExecutionPendingPush": true
+    }
+  ],
+  "releaseBoundary": {
+    "productionSignedArtifactsExist": false,
+    "requiredBeforePublicRelease": [
+      "push branch and run four-platform CI",
+      "configure protected beta and stable GitHub environments",
+      "inject Apple signing and notarization credentials",
+      "inject Windows Authenticode certificate",
+      "inject Tauri offline update signing key and HTTPS endpoints",
+      "complete three-platform installation, update, rollback and uninstall smoke tests",
+      "publish the draft release only after manual approval"
+    ]
+  }
+}

@@ -32,7 +32,7 @@ use super::packets::{
 use super::types::{
     PlayerId, SessionId, ZoneCommand, ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey,
     ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction, ZoneMovementActionKind,
-    ZoneNativeMonster, ZoneObject, ZoneOutbound, ZonePlayer,
+    ZoneNativeMonster, ZoneNativeMonsterSnapshot, ZoneObject, ZoneOutbound, ZonePlayer,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
@@ -326,6 +326,28 @@ impl ZoneRuntime {
         self.ground_drops.len()
     }
 
+    pub fn native_monster_count(&self) -> usize {
+        self.native_monsters.len()
+    }
+
+    pub fn has_native_monster(&self, object_id: u32) -> bool {
+        self.native_monsters.contains_key(&object_id)
+    }
+
+    pub fn native_monster_snapshots(&self) -> Vec<ZoneNativeMonsterSnapshot> {
+        self.native_monsters
+            .iter()
+            .map(|(object_id, monster)| ZoneNativeMonsterSnapshot {
+                object_id: *object_id,
+                name: monster.name.clone(),
+                position: monster.position.clone(),
+                hp: monster.hp,
+                max_hp: monster.max_hp,
+                dead: monster.dead,
+            })
+            .collect()
+    }
+
     pub fn has_ground_drop(&self, object_id: u32) -> bool {
         self.ground_drops.contains_key(&object_id)
     }
@@ -344,6 +366,12 @@ impl ZoneRuntime {
 
     pub fn player_direction(&self, session_id: &SessionId) -> Option<MirDirection> {
         self.players.get(session_id).map(|player| player.direction)
+    }
+
+    pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
+        self.players
+            .get(session_id)
+            .map(|player| player.last_seen_move_seq)
     }
 
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
@@ -1732,10 +1760,28 @@ impl ZoneRuntime {
         if !self.players.contains_key(session_id) {
             return Vec::new();
         }
+        self.spawn_authoritative_monster(spawn, now_ms).1
+    }
 
+    /// Spawn a monster from a finalized control-plane world event without
+    /// inventing a player Session. The monster enters the same native AI,
+    /// combat, AOI and checkpoint state as a player-originated spawn.
+    pub fn spawn_world_event_monster(
+        &mut self,
+        spawn: &ZoneMonsterSpawn,
+        now_ms: u64,
+    ) -> (bool, Vec<ZoneOutbound>) {
+        self.spawn_authoritative_monster(spawn, now_ms)
+    }
+
+    fn spawn_authoritative_monster(
+        &mut self,
+        spawn: &ZoneMonsterSpawn,
+        now_ms: u64,
+    ) -> (bool, Vec<ZoneOutbound>) {
         let requested_object_id = spawn.object_id;
         if self.native_monsters.contains_key(&requested_object_id) {
-            return Vec::new();
+            return (false, Vec::new());
         }
         let object_id = if requested_object_id != 0
             && !self
@@ -1756,7 +1802,20 @@ impl ZoneRuntime {
         let packet = native_monster_spawn_packet(spawn, object_id);
         self.native_monsters.insert(object_id, monster);
         self.apply_zone_object_packets(&[packet], now_ms);
-        self.diff_all_zone_object_visibility()
+        (true, self.diff_all_zone_object_visibility())
+    }
+
+    pub fn broadcast_world_event_message(&self, message: &str) -> Vec<ZoneOutbound> {
+        if self.players.is_empty() || message.trim().is_empty() {
+            return Vec::new();
+        }
+        vec![ZoneOutbound::ToMany {
+            session_ids: self.players.keys().cloned().collect(),
+            packets: vec![ServerPacket::Chat {
+                message: message.to_string(),
+                chat_type: ChatType::System,
+            }],
+        }]
     }
 
     fn player_attack_native_object(

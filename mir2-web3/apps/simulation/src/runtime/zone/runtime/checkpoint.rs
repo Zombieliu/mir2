@@ -279,7 +279,7 @@ fn hex_lower(bytes: &[u8]) -> String {
 mod tests {
     use super::*;
     use crate::runtime::zone::types::{
-        ZoneChatProfile, ZoneCommand, ZoneJoin, ZonePlayerCombatStats,
+        ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneOutbound, ZonePlayerCombatStats,
     };
     use mir2_protocol::{MirClass, MirDirection, MirGender};
 
@@ -350,5 +350,96 @@ mod tests {
         let error =
             ZoneRuntime::restore_checkpoint(&tampered).expect_err("tampered state must fail");
         assert!(error.contains("state root mismatch"), "{error}");
+    }
+
+    #[test]
+    fn world_event_monster_without_player_is_authoritative_and_checkpointed() {
+        use crate::runtime::zone::types::{ZoneMonsterDefense, ZoneMonsterSpawn};
+
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("D022"));
+        let spawn = ZoneMonsterSpawn {
+            object_id: 9_100_001,
+            name: "WoomaSoldier".to_string(),
+            name_colour_argb: -1,
+            image: 135,
+            ai: 2,
+            level: 24,
+            max_hp: 500,
+            hp: 500,
+            experience: 1_000,
+            position: Point { x: 30, y: 30 },
+            direction: MirDirection::Down,
+            defense: ZoneMonsterDefense::default(),
+            drops: Vec::new(),
+        };
+        let (spawned, outbounds) = runtime.spawn_world_event_monster(&spawn, 1_000);
+        assert!(spawned);
+        assert!(outbounds.is_empty(), "empty Zone has no AOI recipients");
+        assert!(runtime.has_native_monster(spawn.object_id));
+
+        let bytes = runtime.checkpoint_bytes().expect("event checkpoint");
+        let restored = ZoneRuntime::restore_checkpoint(&bytes).expect("event checkpoint restore");
+        assert!(restored.has_native_monster(spawn.object_id));
+        assert_eq!(restored.native_monster_count(), 1);
+        assert_eq!(
+            restored.canonical_state_root().unwrap(),
+            runtime.canonical_state_root().unwrap()
+        );
+    }
+
+    #[test]
+    fn online_player_receives_world_event_monster_spawn_packet() {
+        use crate::runtime::zone::types::{ZoneMonsterDefense, ZoneMonsterSpawn};
+
+        let session_id = SessionId::new("director-witness");
+        let mut runtime =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("D024"), ZoneCollision::unbounded());
+        runtime.handle(ZoneCommand::Join(ZoneJoin {
+            session_id,
+            account_id: "witness-account".to_string(),
+            character_index: 9,
+            object_id: 99,
+            name: "Witness".to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 30,
+            hp: 300,
+            max_hp: 300,
+            mp: 80,
+            map_file_name: "D024".to_string(),
+            position: Point { x: 30, y: 30 },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        }));
+        let spawn = ZoneMonsterSpawn {
+            object_id: 9_100_002,
+            name: "WoomaTaurus".to_string(),
+            name_colour_argb: -65_281,
+            image: 139,
+            ai: 58,
+            level: 40,
+            max_hp: 10_000,
+            hp: 10_000,
+            experience: 20_000,
+            position: Point { x: 31, y: 30 },
+            direction: MirDirection::Down,
+            defense: ZoneMonsterDefense::default(),
+            drops: Vec::new(),
+        };
+        let (spawned, outbounds) = runtime.spawn_world_event_monster(&spawn, 2_000);
+        assert!(spawned);
+        assert!(outbounds.iter().any(|outbound| match outbound {
+            ZoneOutbound::ToSession { packets, .. } | ZoneOutbound::ToMany { packets, .. } => {
+                packets.iter().any(|packet| {
+                    matches!(
+                        packet,
+                        mir2_protocol::ServerPacket::ObjectMonster { info }
+                            if info.object_id == spawn.object_id && info.name == "WoomaTaurus"
+                    )
+                })
+            }
+            _ => false,
+        }));
     }
 }

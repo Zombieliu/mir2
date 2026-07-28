@@ -83,9 +83,12 @@ const copy = {
     operationsTitle: "Observe and act safely",
     grafana: "Open Grafana",
     prometheus: "Open Prometheus",
-    rotation: "Rotate node key",
-    revoke: "Revoke registration",
-    cliRequired: "Owner capability + audited CLI required",
+    grafanaDetail: "Fleet history, node health, and Zone workload trends",
+    prometheusDetail: "PromQL queries and scrape target status",
+    alerts: "Open alert status",
+    alertsDetail: "Active and pending Home Node alert rules",
+    exportSnapshot: "Download live snapshot",
+    exportSnapshotDetail: "Current authenticated node data as JSON",
     readOnly: "Read-only console",
     source: "Source boundary",
     sourceLive:
@@ -169,9 +172,12 @@ const copy = {
     operationsTitle: "安全地观察与操作",
     grafana: "打开 Grafana",
     prometheus: "打开 Prometheus",
-    rotation: "轮换节点密钥",
-    revoke: "撤销链上注册",
-    cliRequired: "需要 Owner Capability 与审计 CLI",
+    grafanaDetail: "节点历史、健康状态与 Zone 工作负载趋势",
+    prometheusDetail: "PromQL 查询与采集目标状态",
+    alerts: "查看告警状态",
+    alertsDetail: "家庭节点当前及待触发告警规则",
+    exportSnapshot: "下载实时快照",
+    exportSnapshotDetail: "导出当前已认证节点 JSON 数据",
     readOnly: "只读控制台",
     source: "数据边界",
     sourceLive: "运行指标为实时数据；链上成员与奖励卡片来自已提交的 Gate 13 验收证据。",
@@ -458,6 +464,7 @@ export function DubheNodeConsole({
                 <p>{labels.operations}</p>
                 <h3>{labels.operationsTitle}</h3>
               </div>
+              <span className="dubhe-readonly">{labels.readOnly}</span>
             </div>
             <a
               className="dubhe-operation"
@@ -467,7 +474,7 @@ export function DubheNodeConsole({
             >
               <span className="operation-icon cyan" aria-hidden="true">↗</span>
               <span>{labels.grafana}</span>
-              <small>Live metrics</small>
+              <small>{labels.grafanaDetail}</small>
             </a>
             <a
               className="dubhe-operation"
@@ -477,18 +484,27 @@ export function DubheNodeConsole({
             >
               <span className="operation-icon violet" aria-hidden="true">↗</span>
               <span>{labels.prometheus}</span>
-              <small>Queries & alerts</small>
+              <small>{labels.prometheusDetail}</small>
             </a>
-            <div className="dubhe-operation disabled" aria-disabled="true">
-              <span className="operation-icon muted-icon" aria-hidden="true">↻</span>
-              <span>{labels.rotation}</span>
-              <small>{labels.cliRequired}</small>
-            </div>
-            <div className="dubhe-operation disabled danger" aria-disabled="true">
-              <span className="operation-icon muted-icon" aria-hidden="true">×</span>
-              <span>{labels.revoke}</span>
-              <small>{labels.cliRequired}</small>
-            </div>
+            <a
+              className="dubhe-operation"
+              href={snapshot.links.prometheusAlerts}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <span className="operation-icon muted-icon" aria-hidden="true">!</span>
+              <span>{labels.alerts}</span>
+              <small>{labels.alertsDetail}</small>
+            </a>
+            <a
+              className="dubhe-operation"
+              download={`dubhe-node-snapshot-${snapshot.generatedAtMs}.json`}
+              href={snapshot.links.snapshotExport}
+            >
+              <span className="operation-icon muted-icon" aria-hidden="true">↓</span>
+              <span>{labels.exportSnapshot}</span>
+              <small>{labels.exportSnapshotDetail}</small>
+            </a>
           </section>
         </aside>
       </div>

@@ -11,6 +11,7 @@ export default async function LoginPage({
   const { locale, t } = await getAdminI18n();
   const params = (await searchParams) ?? {};
   const error = firstParam(params.error);
+  const returnTo = safeReturnTo(firstParam(params.next));
 
   return (
     <main className="login-screen">
@@ -24,6 +25,7 @@ export default async function LoginPage({
         </div>
         {error ? <p className="notice">{t("login.tokenRequired")}</p> : null}
         <form action={loginAction} className="form-stack">
+          <input name="returnTo" type="hidden" value={returnTo} />
           <label className="field">
             <span>{t("login.token")}</span>
             <input
@@ -51,4 +53,8 @@ export default async function LoginPage({
 
 function firstParam(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
+}
+
+function safeReturnTo(value: string) {
+  return value.startsWith("/") && !value.startsWith("//") ? value : "/dubhe-nodes";
 }

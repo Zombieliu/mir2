@@ -1,0 +1,104 @@
+name: mir2-gate22
+
+services:
+  zone-host:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-host
+    image: mir2-gate22-zone-host:local
+    environment:
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_CRYSTAL_WORLD: "0"
+      MIR2_ZONE_HOST_MAX_CONNECTIONS: "64"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "32"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "16"
+      MIR2_ZONE_HOST_TOKEN: "gate22-docker-zone-rpc"
+    expose:
+      - "7020"
+    networks:
+      - home-private
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash -ec 'exec 3<>/dev/tcp/127.0.0.1/7020'"]
+      interval: 1s
+      timeout: 2s
+      retries: 30
+
+  home-relay:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: home-relay
+    image: mir2-gate22-home-relay:local
+    env_file:
+      - generated/fixture.env
+    environment:
+      MIR2_HOME_RELAY_ID: "gate22-relay"
+      MIR2_HOME_RELAY_QUIC_BIND: "0.0.0.0:7443"
+      MIR2_HOME_RELAY_GATEWAY_BIND: "0.0.0.0:7444"
+      MIR2_HOME_RELAY_GATEWAY_TOKEN: "gate22-docker-gateway-relay"
+      MIR2_HOME_RELAY_TLS_CA_DER: "/run/gate22/ca.der"
+      MIR2_HOME_RELAY_TLS_CERT_CHAIN_DER: "/run/gate22/relay.der"
+      MIR2_HOME_RELAY_TLS_KEY_DER: "/run/gate22/relay-key.der"
+      MIR2_HOME_PLACEMENTS_FILE: "/run/gate22/placements.json"
+    volumes:
+      - ./generated:/run/gate22:ro
+    ports:
+      - "17443:7443/udp"
+      - "127.0.0.1:17444:7444"
+    networks:
+      - relay-public
+    restart: "on-failure:5"
+
+  home-agent:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: home-agent
+    image: mir2-gate22-home-agent:local
+    env_file:
+      - generated/fixture.env
+    environment:
+      MIR2_HOME_RELAY_ID: "gate22-relay"
+      MIR2_HOME_RELAY_ADDR: "home-relay:7443"
+      MIR2_HOME_RELAY_SERVER_NAME: "relay.test"
+      MIR2_HOME_LOCAL_ZONE_RPC_ADDR: "zone-host:7020"
+      MIR2_HOME_LOCAL_ZONE_RPC_TOKEN: "gate22-docker-zone-rpc"
+      MIR2_HOME_AGENT_TLS_CA_DER: "/run/gate22/ca.der"
+      MIR2_HOME_AGENT_TLS_CERT_CHAIN_DER: "/run/gate22/agent.der"
+      MIR2_HOME_AGENT_TLS_KEY_DER: "/run/gate22/agent-key.der"
+      MIR2_HOME_AGENT_KEY_GENERATION: "1"
+      MIR2_HOME_CAPACITY_CERTIFICATE_FILE: "/run/gate22/capacity-certificate.json"
+    volumes:
+      - ./generated:/run/gate22:ro
+    depends_on:
+      zone-host:
+        condition: service_healthy
+      home-relay:
+        condition: service_started
+    networks:
+      - relay-public
+      - home-private
+    restart: "on-failure:10"
+
+  acceptance:
+    profiles: ["acceptance"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: home-tunnel-acceptance
+    image: mir2-gate22-home-tunnel-acceptance:local
+    environment:
+      MIR2_HOME_ACCEPTANCE_RELAY_ADDR: "home-relay:7444"
+      MIR2_HOME_ACCEPTANCE_ZONE_ID: "primary"
+      MIR2_HOME_ACCEPTANCE_SESSION_ID: "${MIR2_HOME_ACCEPTANCE_SESSION_ID:-gate22-docker-session}"
+      MIR2_ZONE_HOST_TOKEN: "gate22-docker-gateway-relay"
+    depends_on:
+      - home-agent
+    networks:
+      - relay-public
+
+networks:
+  relay-public:
+  home-private:
+    internal: true

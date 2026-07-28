@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::State;
+use axum::extract::{Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
@@ -38,7 +38,7 @@ use crate::cache::{
     gateway_session_cache_from_env, gateway_session_cache_status,
     refresh_session_cache_with_route_lease, remove_owned_session_cache, session_cache_key,
     session_cache_record, GatewaySessionCacheKey, GatewaySessionCacheRecord,
-    GatewaySessionCacheStatus, SharedGatewaySessionCache,
+    GatewaySessionCacheStatus, GatewaySessionTraceEvent, SharedGatewaySessionCache,
 };
 use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
@@ -1331,6 +1331,7 @@ struct HealthResponse {
     http: &'static str,
     ws: &'static str,
     tcp_stub: &'static str,
+    gate15: Option<crate::gate15::Gate15Health>,
     #[serde(skip_serializing_if = "Option::is_none")]
     revision: Option<String>,
     session_cache: GatewaySessionCacheStatus,
@@ -1372,6 +1373,26 @@ struct AdminKickPlayerReceipt {
 struct AdminSessionsResponse {
     source: String,
     sessions: Vec<GatewaySessionCacheRecord>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminSessionTraceQuery {
+    account_id: String,
+    character_index: i32,
+    limit: Option<usize>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminSessionTraceResponse {
+    source: String,
+    generated_at_ms: u64,
+    status: String,
+    current: Option<GatewaySessionCacheRecord>,
+    events: Vec<GatewaySessionTraceEvent>,
+    commonware: Option<crate::gate15::Gate15PlayerLease>,
+    reason: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1432,6 +1453,7 @@ pub async fn run_web_gateway(
         .route("/health", get(health))
         .route("/admin/system-mail", post(admin_system_mail))
         .route("/admin/sessions", get(admin_sessions))
+        .route("/admin/session-trace", get(admin_session_trace))
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
         .route("/onchain/inject", post(onchain_inject))
@@ -1478,6 +1500,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
+        gate15: crate::gate15::health(),
         revision: state.deploy_revision.clone(),
         session_cache: session_cache_status,
         capacity: state.capacity.status(),
@@ -1622,6 +1645,121 @@ async fn admin_sessions(State(state): State<WebState>) -> Json<AdminSessionsResp
         source: "gateway_session_cache".to_string(),
         sessions,
     })
+}
+
+async fn admin_session_trace(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Query(query): Query<AdminSessionTraceQuery>,
+) -> Result<Json<AdminSessionTraceResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    require_gateway_admin_trace_token(&headers)?;
+    if query.account_id.trim().is_empty() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(AdminErrorResponse {
+                error: "accountId is required".to_string(),
+            }),
+        ));
+    }
+    let key = GatewaySessionCacheKey {
+        account_id: query.account_id.trim().to_string(),
+        character_index: query.character_index,
+    };
+    let current = state.session_cache.get(&key);
+    let events = state
+        .session_cache
+        .trace_events(&key, query.limit.unwrap_or(64).clamp(1, 128));
+    let commonware = current
+        .as_ref()
+        .and_then(|record| record.zone_id.as_deref())
+        .map(|zone_id| {
+            crate::gate15::inspect_player_session(
+                &key.account_id,
+                key.character_index,
+                &crate::ZoneId::new(zone_id),
+            )
+        })
+        .transpose()
+        .map_err(|error| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(AdminErrorResponse { error }),
+            )
+        })?
+        .flatten();
+    let now_ms = gateway_unix_ms();
+    let status = match current.as_ref() {
+        Some(record)
+            if record
+                .route_lease_expires_at_ms
+                .is_some_and(|expires| expires > now_ms) =>
+        {
+            "online"
+        }
+        Some(_) => "stale",
+        None if events.is_empty() => "not_found",
+        None => "offline",
+    };
+    let reason = match status {
+        "not_found" => Some("no current session or retained placement history".to_string()),
+        "offline" => Some("session is offline; retained history is available".to_string()),
+        "stale" => Some("session cache exists but its route lease is not live".to_string()),
+        _ => None,
+    };
+    Ok(Json(AdminSessionTraceResponse {
+        source: "gateway_session_trace".to_string(),
+        generated_at_ms: now_ms,
+        status: status.to_string(),
+        current,
+        events,
+        commonware,
+        reason,
+    }))
+}
+
+fn require_gateway_admin_trace_token(
+    headers: &HeaderMap,
+) -> Result<(), (StatusCode, Json<AdminErrorResponse>)> {
+    let expected = env::var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN")
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+    let provided = bearer_token(headers).map(str::trim);
+    match (expected.as_deref(), provided) {
+        (Some(expected), Some(provided)) if expected == provided => Ok(()),
+        (Some(_), _) => Err((
+            StatusCode::UNAUTHORIZED,
+            Json(AdminErrorResponse {
+                error: "invalid gateway admin operator token".to_string(),
+            }),
+        )),
+        (None, _) if gateway_prod_like_env() => Err((
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(AdminErrorResponse {
+                error: "MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN is required in production".to_string(),
+            }),
+        )),
+        (None, _) => Ok(()),
+    }
+}
+
+fn gateway_prod_like_env() -> bool {
+    ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
+        .into_iter()
+        .filter_map(|name| env::var(name).ok())
+        .any(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "production" | "prod" | "staging"
+            )
+        })
+}
+
+fn gateway_unix_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or_default()
 }
 
 async fn admin_control(
@@ -2055,7 +2193,9 @@ async fn handle_socket_inner(
         Arc::clone(&background_route_refresh_record),
     );
 
-    let connect_packets = match catch_gateway_panic("web on_connect", || session.on_connect()) {
+    let connect_packets = match catch_gateway_panic("web on_connect", || {
+        tokio::task::block_in_place(|| session.on_connect())
+    }) {
         Ok(packets) => packets,
         Err(error) => {
             let _ = send_error_message(&sender, &error).await;
@@ -2111,6 +2251,14 @@ async fn handle_socket_inner(
                     }
                 };
                 let _serial_execution = serial_execution_gate.write().await;
+                if let Err(error) = catch_gateway_panic("web zone owner command heartbeat", || {
+                    tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
+                })
+                .and_then(|result| result.map(|_| ()))
+                {
+                    let _ = send_error_message(&sender, &error).await;
+                    continue;
+                }
                 let action = match queued_input.take_input() {
                     ParsedSocketInput::Action(action) => action,
                     ParsedSocketInput::ProtocolError(error) => {
@@ -2164,19 +2312,56 @@ async fn handle_socket_inner(
                         );
                     }
                 }
-                let pending_start_game_route_lease = match try_acquire_start_game_route_lease(
-                    session_cache.as_ref(),
-                    session,
-                    authenticated,
-                    authenticated_account_id.as_deref(),
-                    start_game_character_index,
-                ) {
+                let pending_start_game_route_lease = match tokio::task::block_in_place(|| {
+                    try_acquire_start_game_route_lease(
+                        session_cache.as_ref(),
+                        session,
+                        authenticated,
+                        authenticated_account_id.as_deref(),
+                        start_game_character_index,
+                    )
+                }) {
                     Ok(key) => key,
                     Err(error) => {
                         let _ = send_error_message(&sender, &error).await;
                         continue;
                     }
                 };
+                if let Some(key) = pending_start_game_route_lease.as_ref() {
+                    let zone_id = session.zone_id().clone();
+                    match crate::gate15::acquire_player_session(
+                        &key.account_id,
+                        key.character_index,
+                        &zone_id,
+                    )
+                    .await
+                    {
+                        Ok(Some(grant)) => {
+                            eprintln!(
+                                "Gate 15 Web StartGame finalized {}/{} on {} generation {} at height {}",
+                                key.account_id,
+                                key.character_index,
+                                grant.lease.zone_id,
+                                grant.placement.generation,
+                                grant.finalized_height
+                            );
+                        }
+                        Ok(None) => {}
+                        Err(error) => {
+                            release_pending_start_game_route_lease(
+                                session_cache.as_ref(),
+                                session,
+                                Some(key),
+                            );
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("Commonware session lease unavailable: {error}"),
+                            )
+                            .await;
+                            continue;
+                        }
+                    }
+                }
                 let action_capacity_permit = match inflight_capacity_kind_for_action(&action) {
                     Some(kind) => match capacity.try_acquire_action(kind) {
                         Ok(permit) => Some(permit),
@@ -2194,7 +2379,7 @@ async fn handle_socket_inner(
                 };
                 let mut pending_active_session_permit = None;
                 if start_game_character_index.is_some()
-                    && session.active_identity().is_none()
+                    && tokio::task::block_in_place(|| session.active_identity()).is_none()
                     && active_session_permit.is_none()
                 {
                     match capacity.try_acquire_active_session() {
@@ -2240,16 +2425,20 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
-                if leaves_world || session.active_identity().is_none() {
+                let active_identity =
+                    tokio::task::block_in_place(|| session.active_identity());
+                if leaves_world || active_identity.is_none() {
                     chat_presence = None;
                 }
                 drop(action_capacity_permit);
-                release_unclaimed_start_game_route_lease(
-                    session_cache.as_ref(),
-                    session,
-                    pending_start_game_route_lease.as_ref(),
-                );
-                if pending_active_session_permit.is_some() && session.active_identity().is_some() {
+                tokio::task::block_in_place(|| {
+                    release_unclaimed_start_game_route_lease(
+                        session_cache.as_ref(),
+                        session,
+                        pending_start_game_route_lease.as_ref(),
+                    )
+                });
+                if pending_active_session_permit.is_some() && active_identity.is_some() {
                     *active_session_permit = pending_active_session_permit.take();
                 }
                 let force_route_refresh = start_game_character_index.is_some();
@@ -2275,11 +2464,13 @@ async fn handle_socket_inner(
                     .expect("zone movement ingress slot should not be poisoned") =
                     next_movement_ingress.clone();
                 let next_zone_live_outbound_registration = if authenticated {
-                    match register_zone_live_outbound(
-                        session,
-                        &zone_outbound_tx,
-                        active_zone_outbound_registration_id.as_ref(),
-                    ) {
+                    match tokio::task::block_in_place(|| {
+                        register_zone_live_outbound(
+                            session,
+                            &zone_outbound_tx,
+                            active_zone_outbound_registration_id.as_ref(),
+                        )
+                    }) {
                         Ok(registration) => registration,
                         Err(error) => {
                             let _ = send_error_message(&sender, &error).await;
@@ -2311,7 +2502,7 @@ async fn handle_socket_inner(
                 }
                 if starts_game
                     && chat_presence.is_none()
-                    && session.active_identity().is_some()
+                    && active_identity.is_some()
                     && session.zone_movement_ingress().is_some()
                 {
                     chat_presence = Some(chat_hub.register(ChatProtocol::WebSocket));
@@ -2396,10 +2587,21 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let responses = match catch_gateway_panic("web session tick", || {
-                    tokio::task::block_in_place(|| session.tick())
-                }) {
+                    tokio::task::block_in_place(|| {
+                        session
+                            .execute_with_outcome(WorldCommand::Tick)
+                            .map(|execution| execution.packets)
+                    })
+                })
+                .and_then(|result| result) {
                     Ok(responses) => responses,
                     Err(error) => {
+                        if crate::gate15::health().is_some() {
+                            eprintln!(
+                                "Gate 15 transient Zone tick failure; keeping player socket for placement recovery: {error}"
+                            );
+                            continue;
+                        }
                         let _ = send_error_message(&sender, &error).await;
                         return;
                     }
@@ -2537,7 +2739,10 @@ async fn flush_session_updates(
         send_world_snapshot(sender, session).await?;
     }
 
-    if !low_latency_action && should_queue_save_by_action && session.active_identity().is_some() {
+    if !low_latency_action
+        && should_queue_save_by_action
+        && tokio::task::block_in_place(|| session.active_identity()).is_some()
+    {
         save_queue.request_save(Instant::now(), || {
             tokio::task::block_in_place(|| {
                 catch_gateway_panic("web save_active_character", || {
@@ -2555,9 +2760,9 @@ async fn flush_session_updates(
         })?;
     }
 
-    if let Err(error) =
+    if let Err(error) = tokio::task::block_in_place(|| {
         route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
-    {
+    }) {
         eprintln!("web session route lease refresh skipped: {error}");
     }
 
@@ -6914,6 +7119,13 @@ mod tests {
                     character_index: 0,
                 },
                 character_name: "Scout".into(),
+                gateway_session_id: Some("gateway-test-1".into()),
+                gateway_id: Some("gateway-test".into()),
+                gateway_endpoint: Some("http://gateway.test".into()),
+                relay_id: Some("relay-test".into()),
+                relay_endpoint: Some("relay.test:443".into()),
+                service_node_id: Some("owner-crystal".into()),
+                node_kind: Some("official".into()),
                 zone_id: Some("crystal".into()),
                 zone_owner_id: Some("owner-crystal".into()),
                 zone_owner_fencing_token: Some(1),
@@ -6926,6 +7138,7 @@ mod tests {
                 updated_at_ms: 1_000,
                 route_lease_owner: None,
                 route_lease_expires_at_ms: None,
+                handoff_generation: 0,
             },
         );
         let state = super::WebState {
@@ -6940,10 +7153,35 @@ mod tests {
             injector: crate::inject::LiveSessionInjector::default(),
         };
 
-        let Json(sessions) = super::admin_sessions(State(state)).await;
+        let Json(sessions) = super::admin_sessions(State(state.clone())).await;
         assert_eq!(sessions.source, "gateway_session_cache");
         assert_eq!(sessions.sessions.len(), 1);
         assert_eq!(sessions.sessions[0].character_name, "Scout");
+
+        let Json(trace) = super::admin_session_trace(
+            State(state),
+            axum::http::HeaderMap::new(),
+            axum::extract::Query(super::AdminSessionTraceQuery {
+                account_id: "demo".into(),
+                character_index: 0,
+                limit: Some(16),
+            }),
+        )
+        .await
+        .expect("session trace should be queryable in local development");
+        assert_eq!(trace.source, "gateway_session_trace");
+        assert_eq!(trace.status, "stale");
+        assert_eq!(
+            trace
+                .current
+                .as_ref()
+                .and_then(|record| record.service_node_id.as_deref()),
+            Some("owner-crystal")
+        );
+        assert!(trace
+            .events
+            .iter()
+            .any(|event| event.event_type == "placement_assigned"));
 
         let Json(receipt) = super::admin_control(Json(super::AdminControlRequest {
             action: "reload-npcs".into(),
@@ -6966,6 +7204,30 @@ mod tests {
         .await
         .expect_err("dev gateway should not execute stop");
         assert_eq!(stop_error.0, axum::http::StatusCode::CONFLICT);
+    }
+
+    #[test]
+    fn admin_session_trace_requires_configured_gateway_operator_token() {
+        with_env_var(
+            "MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN",
+            Some("gateway-trace-test-secret"),
+            || {
+                let missing =
+                    super::require_gateway_admin_trace_token(&axum::http::HeaderMap::new())
+                        .expect_err("missing token should be rejected");
+                assert_eq!(missing.0, axum::http::StatusCode::UNAUTHORIZED);
+
+                let mut headers = axum::http::HeaderMap::new();
+                headers.insert(
+                    axum::http::header::AUTHORIZATION,
+                    "Bearer gateway-trace-test-secret"
+                        .parse()
+                        .expect("valid authorization header"),
+                );
+                super::require_gateway_admin_trace_token(&headers)
+                    .expect("matching token should be accepted");
+            },
+        );
     }
 
     #[test]

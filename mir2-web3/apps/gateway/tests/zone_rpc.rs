@@ -1,22 +1,25 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::routing::PerMapSessionRouter;
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
-    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneHostControlPlane, ZoneHostHeartbeat,
-    ZoneHostRegistration, ZoneHostServer, ZoneId, ZoneMapScope, ZoneOwnerCommandRequest,
-    ZoneOwnerLeaseAuthority, ZoneOwnerRpcTransport, ZoneRegistry, ZoneRpcLimits,
-    ZONE_RPC_PROTOCOL_VERSION,
+    SharedZoneRuntimeFactory, TcpZoneOwnerRpcTransport, ZoneBaseSnapshotStore,
+    ZoneHostControlPlane, ZoneHostHeartbeat, ZoneHostRegistration, ZoneHostServer, ZoneId,
+    ZoneMapScope, ZoneMutationWal, ZoneOwnerCommandRequest, ZoneOwnerLeaseAuthority,
+    ZoneOwnerRpcTransport, ZoneRegistry, ZoneReplicationCoverage, ZoneRpcLimits,
+    ZONE_REPLICATION_HEAD_VERSION, ZONE_RPC_PROTOCOL_VERSION,
 };
-use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
-use mir2_simulation::WorldCommand;
+use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket};
+use mir2_simulation::{WorldCommand, ZoneMonsterDefense, ZoneMonsterSpawn};
 
 static ENVIRONMENT_TEST_LOCK: Mutex<()> = Mutex::new(());
 
@@ -72,6 +75,22 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
             .expect("second identity should round trip"),
         None
     );
+    let mut checkpoint = first
+        .active_character_checkpoint()
+        .expect("checkpoint request should use RPC")
+        .expect("active session should expose a checkpoint");
+    checkpoint.hp = checkpoint.hp.saturating_sub(3);
+    checkpoint.belt_items_json.clear();
+    first
+        .restore_active_character_checkpoint(&checkpoint)
+        .expect("checkpoint restore should use RPC");
+    let restored = first
+        .active_character_checkpoint()
+        .expect("restored checkpoint request should use RPC")
+        .expect("restored session should expose a checkpoint");
+    assert_eq!(restored.hp, checkpoint.hp);
+    assert_eq!(restored.belt_items_json, checkpoint.belt_items_json);
+    assert_eq!(restored.map_file_name, checkpoint.map_file_name);
     let _ = first
         .world_snapshot()
         .expect("first snapshot should round trip");
@@ -87,6 +106,87 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     assert!(telemetry.zones[0].map_file_names.is_empty());
     assert_eq!(telemetry.zones[0].session_count, 2);
 
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let factory = Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+        Duration::from_millis(25),
+        BTreeMap::new(),
+    ));
+    let zone_id = ZoneId::primary();
+    let spawn = ZoneMonsterSpawn {
+        object_id: 0x7000_0044,
+        name: "WoomaSoldier".to_string(),
+        name_colour_argb: -1,
+        image: 29,
+        ai: 0,
+        level: 30,
+        max_hp: 285,
+        hp: 285,
+        experience: 310,
+        position: Point { x: 168, y: 155 },
+        direction: MirDirection::Down,
+        defense: ZoneMonsterDefense::default(),
+        drops: Vec::new(),
+    };
+    factory
+        .apply_world_event_monsters(&zone_id, "D022", &[spawn.clone()], 1_000)
+        .unwrap();
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind event Zone Host");
+    let address = listener.local_addr().unwrap();
+    let stop = Arc::new(AtomicBool::new(false));
+    let shared_authority: SharedZoneOwnerLeaseAuthority = authority.clone();
+    let server = Arc::new(ZoneHostServer::with_options_and_factory(
+        GatewayConfig::default(),
+        shared_authority,
+        None,
+        test_limits(),
+        factory,
+    ));
+    let running_server = Arc::clone(&server);
+    let server_stop = Arc::clone(&stop);
+    let handle = thread::spawn(move || {
+        running_server
+            .serve_until(listener, server_stop)
+            .expect("event Zone Host should run");
+    });
+    let transport = test_transport(address, zone_id.clone(), "director-combat");
+    let lease = authority.owner_lease(&zone_id);
+    start_demo_character(&transport, lease.clone());
+    transport
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::TransferMap {
+                key: "crystal:D022:168:156".to_string(),
+            },
+        ))
+        .unwrap();
+
+    let launch = transport
+        .execute(ZoneOwnerCommandRequest::production_player(
+            lease.clone(),
+            true,
+            WorldCommand::Attack {
+                object_id: spawn.object_id,
+            },
+        ))
+        .unwrap();
+    assert!(launch.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id != spawn.object_id
+    )));
+
+    thread::sleep(Duration::from_millis(75));
+    let resolved = transport
+        .execute(ZoneOwnerCommandRequest::direct(lease, WorldCommand::Tick))
+        .unwrap();
+    assert!(resolved.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectStruck { info } if info.object_id == spawn.object_id
+    )));
     stop_server(address, stop, handle);
 }
 
@@ -443,9 +543,9 @@ fn tcp_zone_rpc_registration_bridges_live_outbounds_to_gateway_channel() {
 #[test]
 fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
-    let (active_address, _active_server, active_stop, active_handle) =
+    let (active_address, active_server, active_stop, active_handle) =
         start_server(authority.clone());
-    let (standby_address, _standby_server, standby_stop, standby_handle) =
+    let (standby_address, standby_server, standby_stop, standby_handle) =
         start_server(authority.clone());
     let zone_id = ZoneId::primary();
     let active_owner = test_transport(active_address, zone_id.clone(), "checkpoint-owner");
@@ -505,6 +605,33 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
     standby_owner
         .install_host_checkpoint(&checkpoint)
         .expect("standby host should install checkpoint");
+    standby_owner
+        .install_host_checkpoint(&checkpoint)
+        .expect("repeated full-journal install should replay from a clean account baseline");
+    let active_telemetry = active_server.telemetry_snapshot();
+    assert_eq!(active_telemetry.checkpoint.exports_total, 1);
+    assert_eq!(
+        active_telemetry.checkpoint.journal_entries,
+        checkpoint.entry_count as u64
+    );
+    assert_eq!(
+        active_telemetry.checkpoint.export_last_bytes,
+        checkpoint.as_bytes().len() as u64
+    );
+    let standby_telemetry = standby_server.telemetry_snapshot();
+    assert_eq!(standby_telemetry.checkpoint.installs_total, 2);
+    assert_eq!(
+        standby_telemetry.checkpoint.replay_entries_total,
+        (checkpoint.entry_count * 2) as u64
+    );
+    assert_eq!(
+        standby_telemetry.checkpoint.replay_last_entries,
+        checkpoint.entry_count as u64
+    );
+    assert_eq!(
+        standby_telemetry.checkpoint.install_last_bytes,
+        checkpoint.as_bytes().len() as u64
+    );
 
     assert_eq!(
         standby_owner
@@ -557,6 +684,881 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
 
     stop_server(active_address, active_stop, active_handle);
     stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_a = ZoneId::new("map:0");
+    let zone_b = ZoneId::new("map:1");
+    let active_a = test_transport(active_address, zone_a.clone(), "head-a");
+    let active_b = test_transport(active_address, zone_b.clone(), "head-b");
+    let standby_a = test_transport(standby_address, zone_a.clone(), "head-a");
+    let standby_b = test_transport(standby_address, zone_b.clone(), "head-b");
+
+    let empty = active_a
+        .replication_head()
+        .expect("empty replication head should respond");
+    assert_eq!(empty.version, ZONE_REPLICATION_HEAD_VERSION);
+    assert_eq!(empty.zone_id, "map:0");
+    assert_eq!(
+        empty.mutation_coverage,
+        ZoneReplicationCoverage::CommandJournal
+    );
+    assert!(!empty.promotion_ready);
+    assert_eq!(empty.base_snapshot_id, None);
+    assert_eq!(empty.base_sequence, 0);
+    assert_eq!(empty.oldest_available_sequence, 0);
+    assert_eq!(empty.entry_count, 0);
+    assert_eq!(empty.next_sequence, 0);
+    assert_eq!(empty.last_sequence, None);
+    assert_eq!(empty.latest_digest, "0".repeat(64));
+    assert!(
+        serde_json::to_vec(&empty).unwrap().len() < 1_024,
+        "100ms replication head must remain smaller than 1 KiB"
+    );
+
+    let lease_a = authority.owner_lease(&zone_a);
+    let lease_b = authority.owner_lease(&zone_b);
+    for time in [1, 2] {
+        active_a
+            .execute(ZoneOwnerCommandRequest::direct(
+                lease_a.clone(),
+                WorldCommand::ClientPacket(ClientPacket::KeepAlive { time }),
+            ))
+            .expect("zone A command should execute");
+    }
+    active_b
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease_b,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 3 }),
+        ))
+        .expect("zone B command should execute");
+
+    let active_a_head = active_a
+        .replication_head()
+        .expect("zone A replication head");
+    let active_b_head = active_b
+        .replication_head()
+        .expect("zone B replication head");
+    assert_eq!(active_a_head.entry_count, 2);
+    assert_eq!(active_a_head.next_sequence, 2);
+    assert_eq!(active_a_head.last_sequence, Some(1));
+    assert_eq!(active_b_head.entry_count, 1);
+    assert_eq!(active_b_head.next_sequence, 1);
+    assert_eq!(active_b_head.last_sequence, Some(0));
+    assert_ne!(active_a_head.latest_digest, active_b_head.latest_digest);
+    assert_eq!(
+        active_server.replication_head(&zone_a).unwrap(),
+        active_a_head
+    );
+    assert!(
+        serde_json::to_vec(&active_a_head).unwrap().len() < 1_024,
+        "non-empty replication head must remain smaller than 1 KiB"
+    );
+
+    let first_batch = active_a
+        .export_mutation_batch(0, 1, 1024 * 1024)
+        .expect("first Zone A mutation batch");
+    assert_eq!(first_batch.version, ZONE_REPLICATION_HEAD_VERSION);
+    assert_eq!(first_batch.zone_id, "map:0");
+    assert_eq!(
+        first_batch.mutation_coverage,
+        ZoneReplicationCoverage::CommandJournal
+    );
+    assert_eq!(first_batch.first_sequence, 0);
+    assert_eq!(first_batch.next_sequence, 1);
+    assert_eq!(first_batch.previous_digest, "0".repeat(64));
+    assert_eq!(first_batch.entries.len(), 1);
+    assert_eq!(first_batch.entries[0].sequence, 0);
+    assert!(!first_batch.entries[0].payload.is_empty());
+    assert_eq!(first_batch.latest_digest, first_batch.entries[0].digest);
+    assert!(first_batch.has_more);
+    first_batch
+        .verify()
+        .expect("untampered mutation batch should verify");
+    let mut tampered_batch = first_batch.clone();
+    tampered_batch.entries[0].payload.push(0);
+    assert!(tampered_batch.verify().is_err());
+    let mut tampered_digest = first_batch.clone();
+    tampered_digest.entries[0].digest = "f".repeat(64);
+    assert!(tampered_digest.verify().is_err());
+
+    let second_batch = active_a
+        .export_mutation_batch(1, 8, 1024 * 1024)
+        .expect("second Zone A mutation batch");
+    assert_eq!(second_batch.first_sequence, 1);
+    assert_eq!(second_batch.next_sequence, 2);
+    assert_eq!(second_batch.previous_digest, first_batch.latest_digest);
+    assert_eq!(second_batch.entries.len(), 1);
+    assert_eq!(second_batch.entries[0].sequence, 1);
+    assert_eq!(second_batch.latest_digest, active_a_head.latest_digest);
+    assert!(!second_batch.has_more);
+
+    let base_snapshot = active_a
+        .export_base_snapshot()
+        .expect("Zone A base snapshot should export");
+    assert_eq!(base_snapshot.version, ZONE_REPLICATION_HEAD_VERSION);
+    assert_eq!(base_snapshot.zone_id, "map:0");
+    assert_eq!(base_snapshot.build_id, active_a_head.build_id);
+    assert_eq!(
+        base_snapshot.mutation_coverage,
+        ZoneReplicationCoverage::CommandJournal
+    );
+    assert!(base_snapshot.apply_ready);
+    assert_eq!(base_snapshot.base_sequence, 2);
+    assert_eq!(base_snapshot.latest_digest, active_a_head.latest_digest);
+    assert_eq!(base_snapshot.session_count, 1);
+    assert!(base_snapshot.uncompressed_bytes > 0);
+    assert!(!base_snapshot.payload.is_empty());
+    base_snapshot
+        .verify()
+        .expect("untampered base snapshot should verify");
+    let mut tampered_snapshot = base_snapshot.clone();
+    tampered_snapshot.payload[0] ^= 0xff;
+    assert!(tampered_snapshot.verify().is_err());
+
+    let wal_path = std::env::temp_dir().join(format!(
+        "mir2-gate16-wal-{}-{}.jsonl",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let mut wal = ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+        .expect("new mutation WAL should open");
+    assert_eq!(wal.ack().next_sequence, 0);
+    let first_ack = wal
+        .append_batch(&first_batch)
+        .expect("first mutation batch should fsync");
+    assert!(first_ack.durable);
+    assert_eq!(first_ack.next_sequence, 1);
+    let second_ack = wal
+        .append_batch(&second_batch)
+        .expect("second mutation batch should fsync");
+    assert_eq!(second_ack.next_sequence, 2);
+    assert_eq!(second_ack.latest_digest, active_a_head.latest_digest);
+    assert!(wal.append_batch(&first_batch).is_err());
+    drop(wal);
+
+    OpenOptions::new()
+        .append(true)
+        .open(&wal_path)
+        .unwrap()
+        .write_all(b"{partial")
+        .unwrap();
+    let mut repaired_wal = ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+        .expect("reopen should discard only a partial final WAL record");
+    assert_eq!(repaired_wal.ack(), second_ack);
+    let pre_compaction_bytes = fs::metadata(&wal_path).unwrap().len();
+    let compacted_ack = repaired_wal
+        .compact_to_base(&base_snapshot)
+        .expect("durable base should atomically compact the WAL");
+    assert_eq!(compacted_ack, second_ack);
+    assert!(fs::metadata(&wal_path).unwrap().len() < pre_compaction_bytes);
+    drop(repaired_wal);
+    let reopened_compacted = ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+        .expect("compacted WAL base anchor should survive restart");
+    assert_eq!(reopened_compacted.ack(), second_ack);
+    drop(reopened_compacted);
+    OpenOptions::new()
+        .append(true)
+        .open(&wal_path)
+        .unwrap()
+        .write_all(b"{corrupt-complete-record}\n")
+        .unwrap();
+    assert!(
+        ZoneMutationWal::open(&wal_path, "map:0", &active_a_head.build_id)
+            .expect_err("a corrupt complete WAL record must fail closed")
+            .contains("corrupt complete record")
+    );
+    fs::remove_file(&wal_path).unwrap();
+
+    let snapshot_path = wal_path.with_extension("base.json");
+    let snapshot_store =
+        ZoneBaseSnapshotStore::new(&snapshot_path, "map:0", &active_a_head.build_id)
+            .expect("base snapshot store should open");
+    snapshot_store
+        .persist(&base_snapshot)
+        .expect("base snapshot should atomically persist");
+    assert_eq!(
+        snapshot_store
+            .load()
+            .expect("persisted base snapshot should load"),
+        Some(base_snapshot.clone())
+    );
+    let wrong_identity_store =
+        ZoneBaseSnapshotStore::new(&snapshot_path, "map:0", "different-build")
+            .expect("identity-bound base snapshot store should open");
+    assert!(wrong_identity_store.load().is_err());
+    OpenOptions::new()
+        .append(true)
+        .open(&snapshot_path)
+        .unwrap()
+        .write_all(b"x")
+        .unwrap();
+    assert!(snapshot_store.load().is_err());
+    fs::remove_file(&snapshot_path).unwrap();
+
+    let caught_up = active_a
+        .export_mutation_batch(2, 8, 1024 * 1024)
+        .expect("caught-up Zone A mutation batch");
+    assert!(caught_up.entries.is_empty());
+    assert_eq!(caught_up.first_sequence, 2);
+    assert_eq!(caught_up.next_sequence, 2);
+    assert_eq!(caught_up.previous_digest, active_a_head.latest_digest);
+    assert_eq!(caught_up.latest_digest, active_a_head.latest_digest);
+    assert!(!caught_up.has_more);
+
+    let zone_b_batch = active_b
+        .export_mutation_batch(0, 8, 1024 * 1024)
+        .expect("Zone B mutation batch");
+    assert_eq!(zone_b_batch.entries.len(), 1);
+    assert_eq!(zone_b_batch.next_sequence, 1);
+    assert_eq!(zone_b_batch.latest_digest, active_b_head.latest_digest);
+    assert!(active_a
+        .export_mutation_batch(3, 8, 1024 * 1024)
+        .expect_err("cursor ahead of the Zone head must fail")
+        .contains("replication_cursor_ahead"));
+    assert!(active_a
+        .export_mutation_batch(0, 8, 1)
+        .expect_err("an entry larger than the batch byte bound must fail")
+        .contains("replication_entry_too_large"));
+
+    let checkpoint = active_a
+        .export_host_checkpoint()
+        .expect("v4 checkpoint should export");
+    standby_a
+        .install_host_checkpoint(&checkpoint)
+        .expect("v4 checkpoint should rebuild v5 heads");
+    assert_eq!(standby_a.replication_head().unwrap(), active_a_head);
+    assert_eq!(standby_b.replication_head().unwrap(), active_b_head);
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts_history() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::new("map:0");
+    let other_zone_id = ZoneId::new("map:other");
+    let active = test_transport(active_address, zone_id.clone(), "base-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "base-session");
+    let standby_other = test_transport(standby_address, other_zone_id.clone(), "other-session");
+    let lease = authority.owner_lease(&zone_id);
+    let other_lease = authority.owner_lease(&other_zone_id);
+
+    standby_other
+        .execute(ZoneOwnerCommandRequest::direct(
+            other_lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 99 }),
+        ))
+        .expect("unrelated Zone should have independent history");
+    let other_head_before = standby_other.replication_head().unwrap();
+
+    start_new_character(&active, lease.clone(), "base-account", "BasePlayer");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::TransferMap {
+                key: "crystal:0:330:270".to_string(),
+            },
+        ))
+        .expect("active player should move into the Crystal map");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::Walk {
+                direction: MirDirection::Right,
+            }),
+        ))
+        .expect("active player movement should execute");
+
+    let active_head = active.replication_head().unwrap();
+    let base = active.export_base_snapshot().unwrap();
+    assert!(base.apply_ready);
+    assert_eq!(base.base_sequence, active_head.next_sequence);
+    assert!(base.base_sequence > 0);
+
+    standby
+        .install_base_snapshot(&base)
+        .expect("standby should install the complete Session base image");
+    let standby_base = standby
+        .export_base_snapshot()
+        .expect("standby control plane should export the installed Session image");
+    assert_eq!(standby_base.session_count, base.session_count);
+    assert_eq!(standby_base.base_sequence, base.base_sequence);
+    assert_eq!(standby_base.latest_digest, base.latest_digest);
+    assert_eq!(standby_base.payload, base.payload);
+
+    let installed_head = standby.replication_head().unwrap();
+    assert_eq!(
+        installed_head.base_snapshot_id,
+        Some(base.snapshot_id.clone())
+    );
+    assert_eq!(installed_head.base_sequence, base.base_sequence);
+    assert_eq!(installed_head.oldest_available_sequence, base.base_sequence);
+    assert_eq!(installed_head.next_sequence, base.base_sequence);
+    assert_eq!(installed_head.latest_digest, base.latest_digest);
+    assert!(!installed_head.promotion_ready);
+    assert!(standby
+        .export_mutation_batch(0, 8, 1024 * 1024)
+        .expect_err("pre-base history must be compacted")
+        .contains("replication_cursor_compacted"));
+    let caught_up = standby
+        .export_mutation_batch(base.base_sequence, 8, 1024 * 1024)
+        .expect("base cursor should be caught up");
+    assert!(caught_up.entries.is_empty());
+    assert_eq!(caught_up.previous_digest, base.latest_digest);
+    assert!(standby
+        .export_host_checkpoint()
+        .expect_err("v4 export must fail after v5 compaction")
+        .contains("checkpoint_history_compacted"));
+
+    assert_eq!(standby_other.replication_head().unwrap(), other_head_before);
+    assert_eq!(standby_server.session_count(), 2);
+
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease,
+            WorldCommand::ClientPacket(ClientPacket::Walk {
+                direction: MirDirection::Left,
+            }),
+        ))
+        .expect("active post-base mutation should execute");
+    let post_base_head = active.replication_head().unwrap();
+    assert_eq!(post_base_head.next_sequence, base.base_sequence + 1);
+    let compacted_entries = active
+        .compact_mutation_journal(&base)
+        .expect("durable base should compact only the active journal prefix");
+    assert_eq!(compacted_entries as u64, base.base_sequence);
+    assert_eq!(
+        active
+            .compact_mutation_journal(&base)
+            .expect("active journal compaction should be idempotent"),
+        0
+    );
+    let compacted_head = active.replication_head().unwrap();
+    assert_eq!(
+        compacted_head.base_snapshot_id,
+        Some(base.snapshot_id.clone())
+    );
+    assert_eq!(compacted_head.base_sequence, base.base_sequence);
+    assert_eq!(compacted_head.oldest_available_sequence, base.base_sequence);
+    assert_eq!(compacted_head.next_sequence, post_base_head.next_sequence);
+    assert_eq!(compacted_head.latest_digest, post_base_head.latest_digest);
+    assert!(active
+        .export_mutation_batch(0, 8, 1024 * 1024)
+        .expect_err("active pre-base history must be compacted")
+        .contains("replication_cursor_compacted"));
+    let active_telemetry = active_server.telemetry_snapshot();
+    assert_eq!(active_telemetry.checkpoint.journal_compactions_total, 1);
+    assert_eq!(
+        active_telemetry.checkpoint.journal_compacted_entries_total,
+        base.base_sequence
+    );
+    let post_base_batch = active
+        .export_mutation_batch(base.base_sequence, 8, 1024 * 1024)
+        .expect("post-base delta should export");
+    assert_eq!(post_base_batch.entries.len(), 1);
+    assert_eq!(post_base_batch.entries[0].sequence, base.base_sequence);
+    assert_eq!(post_base_batch.previous_digest, base.latest_digest);
+    assert_eq!(post_base_batch.latest_digest, post_base_head.latest_digest);
+    standby
+        .apply_mutation_batch(&post_base_batch)
+        .expect("standby should incrementally apply the post-base delta");
+    let standby_post_base_head = standby.replication_head().unwrap();
+    assert_eq!(
+        standby_post_base_head.next_sequence,
+        post_base_head.next_sequence
+    );
+    assert_eq!(
+        standby_post_base_head.latest_digest,
+        post_base_head.latest_digest
+    );
+    assert_eq!(
+        standby_post_base_head.base_snapshot_id,
+        Some(base.snapshot_id)
+    );
+    let active_post_base = active.export_base_snapshot().unwrap();
+    let standby_post_base = standby.export_base_snapshot().unwrap();
+    assert_eq!(
+        standby_post_base.base_sequence,
+        active_post_base.base_sequence
+    );
+    assert_eq!(
+        standby_post_base.latest_digest,
+        active_post_base.latest_digest
+    );
+    assert_eq!(
+        standby_post_base.session_count,
+        active_post_base.session_count
+    );
+    standby_post_base
+        .verify()
+        .expect("post-base standby image should remain internally complete");
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn installed_replica_rejects_player_mutations_until_promoted() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::new("map:0");
+    let active = test_transport(active_address, zone_id.clone(), "replica-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "replica-session");
+    let lease = authority.owner_lease(&zone_id);
+
+    active
+        .on_connect()
+        .expect("active host should accept the player session");
+    let base = active
+        .export_base_snapshot()
+        .expect("active host should export a replica base");
+    standby
+        .install_base_snapshot(&base)
+        .expect("standby should install the replica base");
+
+    let connect_error = standby
+        .on_connect()
+        .expect_err("installed replica must reject player connects");
+    assert!(
+        connect_error.contains("zone_replica_read_only"),
+        "{connect_error}"
+    );
+    let snapshot_error = standby
+        .world_snapshot()
+        .expect_err("installed replica must reject stale player reads");
+    assert!(
+        snapshot_error.contains("zone_replica_read_only"),
+        "{snapshot_error}"
+    );
+    let execute_error = standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 7 }),
+        ))
+        .expect_err("installed replica must reject player commands");
+    assert!(
+        execute_error.contains("zone_replica_read_only"),
+        "{execute_error}"
+    );
+    let close_error = ZoneOwnerRpcTransport::close_session(&standby, &lease)
+        .expect_err("installed replica must reject player disconnect mutations");
+    assert!(
+        close_error.contains("zone_replica_read_only"),
+        "{close_error}"
+    );
+
+    let rerouted = TcpZoneOwnerRpcTransport::with_endpoints(
+        vec![standby_address.to_string(), active_address.to_string()],
+        zone_id,
+        "rerouted-session",
+        None,
+        test_limits(),
+    )
+    .expect("paired Zone endpoints should configure");
+    rerouted
+        .on_connect()
+        .expect("replica rejection should reroute the player to the active host");
+    assert_eq!(active_server.session_count(), 2);
+    assert_eq!(
+        standby_server.session_count(),
+        1,
+        "read-only retry must not create a Session on the replica"
+    );
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn autonomous_zone_ticks_are_ordered_and_incrementally_applied_after_the_base() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_server_with_tick_cadence(authority.clone(), Duration::from_millis(20));
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::new("map:tick");
+    let active = test_transport(active_address, zone_id.clone(), "tick-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "tick-session");
+    let lease = authority.owner_lease(&zone_id);
+
+    let empty_base = active.export_base_snapshot().unwrap();
+    assert_eq!(empty_base.base_sequence, 0);
+    assert!(empty_base.apply_ready);
+    standby.install_base_snapshot(&empty_base).unwrap();
+    start_new_character(&active, lease, "tick-account", "TickPlayer");
+
+    let first_tick_deadline = Instant::now() + Duration::from_secs(2);
+    loop {
+        if active.replication_head().unwrap().next_sequence > 4 {
+            break;
+        }
+        assert!(
+            Instant::now() < first_tick_deadline,
+            "active Zone did not capture an autonomous cadence tick"
+        );
+        thread::sleep(Duration::from_millis(10));
+    }
+    let initial_batch = active.export_mutation_batch(0, 256, 1024 * 1024).unwrap();
+    standby.apply_mutation_batch(&initial_batch).unwrap();
+    let empty_base_catchup_head = standby.replication_head().unwrap();
+    thread::sleep(Duration::from_millis(80));
+    assert_eq!(
+        standby.replication_head().unwrap(),
+        empty_base_catchup_head,
+        "a Zone created after an empty base install must remain tick-disabled"
+    );
+
+    let base = active.export_base_snapshot().unwrap();
+    assert!(base.apply_ready);
+    standby.install_base_snapshot(&base).unwrap();
+
+    let next_tick_deadline = Instant::now() + Duration::from_secs(2);
+    loop {
+        let head = active.replication_head().unwrap();
+        if head.next_sequence > base.base_sequence {
+            break;
+        }
+        assert!(
+            Instant::now() < next_tick_deadline,
+            "active Zone did not capture a post-base cadence tick"
+        );
+        thread::sleep(Duration::from_millis(10));
+    }
+    let batch = active
+        .export_mutation_batch(base.base_sequence, 32, 1024 * 1024)
+        .unwrap();
+    assert!(!batch.entries.is_empty());
+    assert!(batch.entries.iter().all(|entry| {
+        std::str::from_utf8(&entry.payload).is_ok_and(|payload| payload.contains("\"zoneTickMs\""))
+    }));
+    standby.apply_mutation_batch(&batch).unwrap();
+    let standby_head = standby.replication_head().unwrap();
+    assert_eq!(standby_head.next_sequence, batch.next_sequence);
+    assert_eq!(standby_head.latest_digest, batch.latest_digest);
+    let active_head_after_apply = active.replication_head().unwrap();
+    assert!(standby_head.next_sequence <= active_head_after_apply.next_sequence);
+    thread::sleep(Duration::from_millis(80));
+    assert_eq!(
+        standby.replication_head().unwrap(),
+        standby_head,
+        "replica autonomous ticks must remain disabled between applied batches"
+    );
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn installing_replica_does_not_disable_persistence_for_other_active_zones() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let replica_zone = ZoneId::new("map:replica-isolation");
+    let active_lease = authority.handoff_zone_owner(&replica_zone, "active-host");
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_named_server(authority.clone(), "active-host", 8);
+
+    let temp_dir = std::env::temp_dir().join(format!(
+        "mir2-zone-rpc-replica-isolation-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time should follow the Unix epoch")
+            .as_nanos()
+    ));
+    fs::create_dir_all(&temp_dir).expect("create replica isolation temp directory");
+    let account_store_path = temp_dir.join("accounts.json");
+    let standby_config =
+        GatewayConfig::default().with_account_store_path(account_store_path.clone());
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_named_server_with_config_and_tick_cadence(
+            authority.clone(),
+            "standby-host",
+            8,
+            Duration::from_secs(60 * 60),
+            standby_config,
+        );
+
+    let active = test_transport(
+        active_address,
+        replica_zone.clone(),
+        "replica-isolation-source",
+    );
+    start_new_character(
+        &active,
+        active_lease,
+        "replica-isolation-source",
+        "ReplicaSource",
+    );
+    let standby_replica = test_transport(standby_address, replica_zone, "replica-isolation-source");
+    standby_replica
+        .install_base_snapshot(&active.export_base_snapshot().expect("export replica base"))
+        .expect("installing one Zone replica should succeed");
+
+    let active_zone = ZoneId::primary();
+    let active_zone_lease = authority.handoff_zone_owner(&active_zone, "standby-host");
+    let unrelated_active = test_transport(standby_address, active_zone, "unrelated-active-session");
+    start_new_character(
+        &unrelated_active,
+        active_zone_lease,
+        "unrelated-active-account",
+        "UnrelatedActivePlayer",
+    );
+    unrelated_active
+        .save_active_character()
+        .expect("unrelated active Zone should retain its configured persistence");
+
+    let persisted =
+        fs::read_to_string(&account_store_path).expect("unrelated active Zone should persist");
+    assert!(persisted.contains("unrelated-active-account"));
+    assert!(persisted.contains("UnrelatedActivePlayer"));
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+    let _ = fs::remove_dir_all(temp_dir);
+}
+
+#[test]
+fn standby_readiness_requires_exact_replica_and_commonware_fence_before_promotion() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let zone_id = ZoneId::new("map:safe-promotion");
+    let active_lease = authority.handoff_zone_owner(&zone_id, "active-host");
+    let (active_address, active_server, active_stop, active_handle) =
+        start_named_server_with_tick_cadence(
+            authority.clone(),
+            "active-host",
+            8,
+            Duration::from_millis(20),
+        );
+    let temp_dir = std::env::temp_dir().join(format!(
+        "mir2-zone-rpc-promoted-persistence-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time should follow the Unix epoch")
+            .as_nanos()
+    ));
+    fs::create_dir_all(&temp_dir).expect("create promoted persistence temp directory");
+    let account_store_path = temp_dir.join("accounts.json");
+    let standby_config =
+        GatewayConfig::default().with_account_store_path(account_store_path.clone());
+    let (standby_address, standby_server, standby_stop, standby_handle) =
+        start_named_server_with_config_and_tick_cadence(
+            authority.clone(),
+            "standby-host",
+            8,
+            Duration::from_millis(20),
+            standby_config,
+        );
+    let active = test_transport(active_address, zone_id.clone(), "promotion-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "promotion-session");
+
+    start_new_character(
+        &active,
+        active_lease.clone(),
+        "promotion-account",
+        "PromotionPlayer",
+    );
+    let base = active.export_base_snapshot().expect("active base snapshot");
+    standby
+        .install_base_snapshot(&base)
+        .expect("standby installs a restorable base");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_500 }),
+        ))
+        .expect("active advances after the standby base");
+    let first_quiesce = active
+        .quiesce_for_promotion(&active_lease)
+        .expect("current fenced owner may quiesce");
+    assert_eq!(first_quiesce.owner_id, "active-host");
+    assert!(active
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_501 }),
+        ))
+        .expect_err("quiesced active must reject new player mutations")
+        .contains("zone_quiesced"));
+    active
+        .resume_after_quiesce(&active_lease)
+        .expect("handoff may be aborted under the unchanged fence");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_502 }),
+        ))
+        .expect("resumed active accepts mutations");
+    let quiesce = active
+        .quiesce_for_promotion(&active_lease)
+        .expect("active quiesces at a final immutable head");
+    thread::sleep(Duration::from_millis(60));
+    assert_eq!(
+        active.replication_head().unwrap().next_sequence,
+        quiesce.head.next_sequence,
+        "quiesce must stop both player commands and autonomous cadence"
+    );
+
+    let now_ms = || {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64
+    };
+    let initial_active_head = active.replication_head().unwrap();
+    let initial_readiness = standby
+        .assess_promotion_readiness(initial_active_head, now_ms(), 250)
+        .expect("behind standby should return a report");
+    assert!(!initial_readiness.ready);
+    assert_eq!(
+        initial_readiness.reason.as_deref(),
+        Some("replica_cursor_behind")
+    );
+
+    let deadline = Instant::now() + Duration::from_secs(3);
+    let readiness = loop {
+        let standby_head = standby.replication_head().unwrap();
+        let active_head = active.replication_head().unwrap();
+        if standby_head.next_sequence < active_head.next_sequence {
+            let batch = active
+                .export_mutation_batch(standby_head.next_sequence, 512, 1024 * 1024)
+                .unwrap();
+            standby.apply_mutation_batch(&batch).unwrap();
+        }
+        let observed_at_ms = now_ms();
+        let active_head = active.replication_head().unwrap();
+        let report = standby
+            .assess_promotion_readiness(active_head, observed_at_ms, 250)
+            .unwrap();
+        if report.ready {
+            break report;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "standby did not become promotion-ready: {report:?}"
+        );
+        thread::sleep(Duration::from_millis(2));
+    };
+    assert!(readiness.replica_clock_disabled);
+    assert!(readiness.capacity_available);
+    assert!(readiness.readiness_id.is_some());
+    assert!(standby.replication_head().unwrap().promotion_ready);
+    assert!(standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            active_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_503 }),
+        ))
+        .expect_err("ready standby must freeze its exact promotion image")
+        .contains("zone_replica_read_only"));
+
+    let readiness_id = readiness.readiness_id.clone().unwrap();
+    let before_fence = standby
+        .promote_replica(readiness_id.clone(), &active_lease)
+        .expect_err("readiness alone must not grant ownership");
+    assert!(
+        before_fence.contains("promotion_owner_mismatch")
+            || before_fence.contains("promotion_fence_rejected"),
+        "{before_fence}"
+    );
+
+    let promoted_lease = authority.handoff_zone_owner(&zone_id, "standby-host");
+    let receipt = standby
+        .promote_replica(readiness_id.clone(), &promoted_lease)
+        .expect("new finalized generation should promote the ready standby");
+    assert_eq!(receipt.owner_id, "standby-host");
+    assert_eq!(receipt.generation, promoted_lease.fencing_token());
+    assert!(!standby.replication_head().unwrap().promotion_ready);
+    standby
+        .execute(ZoneOwnerCommandRequest::direct(
+            promoted_lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_504 }),
+        ))
+        .expect("promotion releases the standby mutation barrier");
+    standby
+        .save_active_character()
+        .expect("promoted replica should write through its authoritative account store");
+    let persisted =
+        fs::read_to_string(&account_store_path).expect("promoted session should persist");
+    assert!(persisted.contains("promotion-account"));
+    assert!(persisted.contains("PromotionPlayer"));
+    assert!(standby
+        .promote_replica(readiness_id, &promoted_lease)
+        .expect_err("readiness receipt must be single-use")
+        .contains("promotion_receipt_unknown"));
+
+    thread::sleep(Duration::from_millis(80));
+    let frozen_active_head = active.replication_head().unwrap();
+    let promoted_head = standby.replication_head().unwrap();
+    thread::sleep(Duration::from_millis(80));
+    assert_eq!(
+        active.replication_head().unwrap(),
+        frozen_active_head,
+        "old active must stop autonomous ticks after losing the fence"
+    );
+    assert!(
+        standby.replication_head().unwrap().next_sequence > promoted_head.next_sequence,
+        "promoted standby must begin autonomous Zone cadence"
+    );
+    assert!(
+        standby_server
+            .replication_head(&zone_id)
+            .unwrap()
+            .next_sequence
+            > receipt.head.next_sequence
+    );
+    assert!(
+        !active_server
+            .replication_head(&zone_id)
+            .unwrap()
+            .promotion_ready
+    );
+
+    let reverse_quiesce = standby
+        .quiesce_for_promotion(&promoted_lease)
+        .expect("promoted owner should quiesce for a reverse handoff");
+    let reverse_base = standby
+        .export_base_snapshot()
+        .expect("promoted owner should export a reverse base");
+    active
+        .install_base_snapshot(&reverse_base)
+        .expect("previous active should become an explicit replica");
+    let reverse_readiness = active
+        .assess_promotion_readiness(reverse_quiesce.head, now_ms(), 250)
+        .expect("previous active should assess reverse readiness");
+    assert!(
+        reverse_readiness.ready,
+        "previous active should be exactly ready after the reverse base: {reverse_readiness:?}"
+    );
+    let returned_lease = authority.handoff_zone_owner(&zone_id, "active-host");
+    active
+        .promote_replica(reverse_readiness.readiness_id.unwrap(), &returned_lease)
+        .expect("previous active should promote under the next fence");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            returned_lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 16_505 }),
+        ))
+        .expect("reverse promotion must clear the previous active quiesce barrier");
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+    let _ = fs::remove_dir_all(temp_dir);
 }
 
 #[test]
@@ -620,6 +1622,55 @@ fn multi_endpoint_transport_reroutes_to_replicated_standby_after_active_stops() 
 }
 
 #[test]
+fn multi_endpoint_transport_reroutes_after_old_active_is_logically_fenced() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_named_server(authority.clone(), "active-owner", 8);
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_named_server(authority.clone(), "standby-owner", 8);
+    let zone_id = ZoneId::new("map:logical-failover");
+    let active_lease = authority.handoff_zone_owner(&zone_id, "active-owner");
+    let active = test_transport(active_address, zone_id.clone(), "logical-failover-session");
+    let standby = test_transport(standby_address, zone_id.clone(), "logical-failover-session");
+    start_new_character(
+        &active,
+        active_lease.clone(),
+        "logical-failover",
+        "LogicalFailover",
+    );
+    let checkpoint = active
+        .export_host_checkpoint()
+        .expect("active checkpoint should export");
+    standby
+        .install_host_checkpoint(&checkpoint)
+        .expect("standby checkpoint should install");
+
+    let failover = TcpZoneOwnerRpcTransport::with_endpoints(
+        vec![active_address.to_string(), standby_address.to_string()],
+        zone_id.clone(),
+        "logical-failover-session",
+        None,
+        test_limits(),
+    )
+    .expect("failover transport should accept two endpoints");
+    assert!(failover
+        .active_identity()
+        .expect("active endpoint identity")
+        .is_some());
+
+    let promoted = authority.handoff_zone_owner(&zone_id, "standby-owner");
+    failover
+        .execute(ZoneOwnerCommandRequest::direct(
+            promoted,
+            WorldCommand::Tick,
+        ))
+        .expect("stale active response should reroute to the promoted standby");
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
 fn tcp_zone_rpc_rejects_stale_fencing_token_at_host_boundary() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (address, _server, stop, handle) = start_server(authority.clone());
@@ -665,6 +1716,132 @@ fn tcp_zone_rpc_client_reconnects_after_host_becomes_available() {
 
     let health = wait_for_health(&transport, Duration::from_secs(3));
     assert_eq!(health.protocol_version, ZONE_RPC_PROTOCOL_VERSION);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_reuses_one_framed_connection_for_multiple_requests() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_named_server_with_tick_cadence(
+        authority,
+        "persistent-rpc-host",
+        8,
+        Duration::from_secs(60),
+    );
+    let transport = test_transport(
+        address,
+        ZoneId::new("map:persistent-rpc"),
+        "persistent-rpc-session",
+    )
+    .with_connection_reuse();
+
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.accepted_connections_total, 1);
+    assert_eq!(telemetry.rpc_requests_total, 2);
+
+    drop(transport);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_binary_codec_round_trips_on_the_same_listener_as_json() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority);
+    let binary = test_transport(address, ZoneId::new("map:binary-rpc"), "binary-rpc-session")
+        .with_binary_codec()
+        .with_connection_reuse();
+    let json = test_transport(address, ZoneId::new("map:json-rpc"), "json-rpc-session")
+        .with_connection_reuse();
+
+    assert_eq!(
+        binary.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    assert_eq!(
+        json.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    assert!(!binary.on_connect().unwrap().is_empty());
+    assert!(!json.on_connect().unwrap().is_empty());
+    assert_eq!(server.session_count(), 2);
+    assert_eq!(server.telemetry_snapshot().rpc_requests_total, 4);
+
+    drop(binary);
+    drop(json);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_multiplexes_many_sessions_over_a_bounded_shared_pool() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority);
+    let transports = (0..24)
+        .map(|index| {
+            test_transport(
+                address,
+                ZoneId::new(format!("map:pooled-{}", index % 4)),
+                &format!("pooled-session-{index}"),
+            )
+            .with_binary_codec()
+            .with_shared_connection_pool(4)
+        })
+        .collect::<Vec<_>>();
+
+    for transport in &transports {
+        assert!(!transport.on_connect().unwrap().is_empty());
+    }
+    assert_eq!(server.session_count(), 24);
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.rpc_requests_total, 24);
+    assert!(
+        telemetry.accepted_connections_total <= 3,
+        "one of four lanes is reserved for control traffic"
+    );
+    assert!(telemetry.accepted_connections_total < transports.len() as u64);
+
+    drop(transports);
+    stop_server(address, stop, handle);
+}
+
+#[test]
+fn tcp_zone_rpc_keeps_an_idle_reused_connection_alive_past_the_io_timeout() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let limits = ZoneRpcLimits {
+        io_timeout: Duration::from_millis(50),
+        ..test_limits()
+    };
+    let (address, server, stop, handle) = start_server_with_limits(authority, limits.clone());
+    let transport = TcpZoneOwnerRpcTransport::with_options(
+        address.to_string(),
+        ZoneId::new("map:idle-persistent-rpc"),
+        "idle-persistent-rpc-session",
+        None,
+        limits,
+    )
+    .with_connection_reuse();
+
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    thread::sleep(Duration::from_millis(200));
+    assert_eq!(
+        transport.health().unwrap().protocol_version,
+        ZONE_RPC_PROTOCOL_VERSION
+    );
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.accepted_connections_total, 1);
+    assert_eq!(telemetry.rpc_requests_total, 2);
+
+    drop(transport);
     stop_server(address, stop, handle);
 }
 
@@ -782,12 +1959,49 @@ fn zone_replicator_copies_checkpoint_between_separate_host_processes() {
     let standby = test_transport(standby_address, zone_id.clone(), "process-replica-session");
     wait_for_health(&active, Duration::from_secs(5));
     wait_for_health(&standby, Duration::from_secs(5));
-    start_demo_character(&active, mir2_gateway::ZoneOwnerLease::in_process(&zone_id));
+    let wal_dir = std::env::temp_dir().join(format!(
+        "mir2-zone-replicator-v5-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    fs::create_dir_all(&wal_dir).unwrap();
 
+    let empty_output = Command::new(env!("CARGO_BIN_EXE_zone_replicator"))
+        .arg("--once")
+        .env("MIR2_ZONE_ACTIVE_ADDR", active_address.to_string())
+        .env("MIR2_ZONE_STANDBY_ADDR", standby_address.to_string())
+        .env("MIR2_ZONE_REPLICA_WAL_DIR", &wal_dir)
+        .env("MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES", "1")
+        .env_remove("MIR2_ZONE_HOST_TOKEN")
+        .output()
+        .expect("empty-base zone replicator process should spawn");
+    assert!(
+        empty_output.status.success(),
+        "empty-base zone replicator failed: {}",
+        String::from_utf8_lossy(&empty_output.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&empty_output.stderr).contains("installed v5 base"),
+        "empty cursor must still install the v5 base identity: {}",
+        String::from_utf8_lossy(&empty_output.stderr)
+    );
+    assert_eq!(standby.replication_head().unwrap().next_sequence, 0);
+    assert!(standby
+        .replication_head()
+        .unwrap()
+        .base_snapshot_id
+        .is_some());
+
+    start_demo_character(&active, mir2_gateway::ZoneOwnerLease::in_process(&zone_id));
     let output = Command::new(env!("CARGO_BIN_EXE_zone_replicator"))
         .arg("--once")
         .env("MIR2_ZONE_ACTIVE_ADDR", active_address.to_string())
         .env("MIR2_ZONE_STANDBY_ADDR", standby_address.to_string())
+        .env("MIR2_ZONE_REPLICA_WAL_DIR", &wal_dir)
+        .env("MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES", "1")
         .env_remove("MIR2_ZONE_HOST_TOKEN")
         .output()
         .expect("zone replicator process should spawn");
@@ -796,14 +2010,61 @@ fn zone_replicator_copies_checkpoint_between_separate_host_processes() {
         "zone replicator failed: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert_eq!(
-        standby
-            .active_identity()
-            .expect("standby identity should respond")
-            .expect("replicated process should restore active character")
-            .account_id,
-        "demo"
+    assert!(
+        String::from_utf8_lossy(&output.stderr).contains("installed v5 base"),
+        "zone replicator did not use the v5 base path: {}",
+        String::from_utf8_lossy(&output.stderr)
     );
+    let standby_base = standby
+        .export_base_snapshot()
+        .expect("standby control plane should export the replicated image");
+    assert_eq!(standby_base.session_count, 1);
+    assert!(standby_base.apply_ready);
+    standby_base
+        .verify()
+        .expect("standby replicated image should be internally complete");
+
+    let recovery_reservation = TcpListener::bind("127.0.0.1:0").expect("reserve recovery address");
+    let recovery_address = recovery_reservation.local_addr().expect("recovery address");
+    drop(recovery_reservation);
+    let mut recovery_child = spawn_zone_host_process(recovery_address);
+    let _recovery_guard = ChildGuard(&mut recovery_child);
+    let recovery = test_transport(recovery_address, zone_id.clone(), "process-replica-session");
+    wait_for_health(&recovery, Duration::from_secs(5));
+    let reverse_wal_dir = wal_dir.with_extension("reverse");
+    fs::create_dir_all(&reverse_wal_dir).unwrap();
+    let reverse_output = Command::new(env!("CARGO_BIN_EXE_zone_replicator"))
+        .arg("--once")
+        .env("MIR2_ZONE_ACTIVE_ADDR", standby_address.to_string())
+        .env("MIR2_ZONE_STANDBY_ADDR", recovery_address.to_string())
+        .env("MIR2_ZONE_REPLICA_WAL_DIR", &reverse_wal_dir)
+        .env("MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES", "1")
+        .env_remove("MIR2_ZONE_HOST_TOKEN")
+        .output()
+        .expect("reverse zone replicator process should spawn");
+    let reverse_stderr = String::from_utf8_lossy(&reverse_output.stderr);
+    assert!(
+        reverse_output.status.success(),
+        "reverse zone replicator failed: {reverse_stderr}"
+    );
+    assert!(
+        reverse_stderr.contains("bootstrapped compacted active history from v5 base"),
+        "reverse replicator did not bridge the active compacted prefix: {reverse_stderr}"
+    );
+    assert!(
+        reverse_stderr.contains("installed v5 base"),
+        "reverse replicator did not install the v5 base: {reverse_stderr}"
+    );
+    let recovery_base = recovery
+        .export_base_snapshot()
+        .expect("recovery control plane should export the reverse replicated image");
+    assert_eq!(recovery_base.session_count, 1);
+    assert!(recovery_base.apply_ready);
+    recovery_base
+        .verify()
+        .expect("reverse replicated image should be internally complete");
+    fs::remove_dir_all(reverse_wal_dir).unwrap();
+    fs::remove_dir_all(wal_dir).unwrap();
 }
 
 #[test]
@@ -891,11 +2152,15 @@ fn start_server_with_limits(
     let address = listener.local_addr().expect("test zone host address");
     let stop = Arc::new(AtomicBool::new(false));
     let shared: SharedZoneOwnerLeaseAuthority = authority;
-    let server = Arc::new(ZoneHostServer::with_options(
+    let server = Arc::new(ZoneHostServer::with_options_and_factory(
         GatewayConfig::default(),
         shared,
         None,
         limits,
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+            Duration::from_secs(60 * 60),
+            BTreeMap::new(),
+        )),
     ));
     let running_server = Arc::clone(&server);
     let server_stop = Arc::clone(&stop);
@@ -903,6 +2168,39 @@ fn start_server_with_limits(
         running_server
             .serve_until(listener, server_stop)
             .expect("test zone host should run");
+    });
+    (address, server, stop, handle)
+}
+
+fn start_server_with_tick_cadence(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    cadence: Duration,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind tick test zone host");
+    let address = listener.local_addr().expect("tick test zone host address");
+    let stop = Arc::new(AtomicBool::new(false));
+    let shared: SharedZoneOwnerLeaseAuthority = authority;
+    let server = Arc::new(ZoneHostServer::with_options_and_factory(
+        GatewayConfig::default(),
+        shared,
+        None,
+        test_limits(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+            cadence,
+            BTreeMap::new(),
+        )),
+    ));
+    let running_server = Arc::clone(&server);
+    let server_stop = Arc::clone(&stop);
+    let handle = thread::spawn(move || {
+        running_server
+            .serve_until(listener, server_stop)
+            .expect("tick test zone host should run");
     });
     (address, server, stop, handle)
 }
@@ -928,7 +2226,10 @@ fn start_named_server(
         shared,
         None,
         test_limits(),
-        Arc::new(SharedInProcessZoneRuntimeFactory::new()),
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+            Duration::from_secs(60 * 60),
+            BTreeMap::new(),
+        )),
     ));
     let running_server = Arc::clone(&server);
     let server_stop = Arc::clone(&stop);
@@ -940,13 +2241,75 @@ fn start_named_server(
     (address, server, stop, handle)
 }
 
+fn start_named_server_with_tick_cadence(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    host_id: &str,
+    zone_capacity: usize,
+    cadence: Duration,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
+    start_named_server_with_config_and_tick_cadence(
+        authority,
+        host_id,
+        zone_capacity,
+        cadence,
+        GatewayConfig::default(),
+    )
+}
+
+fn start_named_server_with_config_and_tick_cadence(
+    authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+    host_id: &str,
+    zone_capacity: usize,
+    cadence: Duration,
+    config: GatewayConfig,
+) -> (
+    SocketAddr,
+    Arc<ZoneHostServer>,
+    Arc<AtomicBool>,
+    thread::JoinHandle<()>,
+) {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind named tick test Zone Host");
+    let address = listener.local_addr().expect("named tick Zone Host address");
+    let stop = Arc::new(AtomicBool::new(false));
+    let shared: SharedZoneOwnerLeaseAuthority = authority;
+    let server = Arc::new(ZoneHostServer::with_identity_and_factory(
+        host_id,
+        zone_capacity,
+        config,
+        shared,
+        None,
+        test_limits(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+            cadence,
+            BTreeMap::new(),
+        )),
+    ));
+    let running_server = Arc::clone(&server);
+    let server_stop = Arc::clone(&stop);
+    let handle = thread::spawn(move || {
+        running_server
+            .serve_until(listener, server_stop)
+            .expect("named tick test Zone Host should run");
+    });
+    (address, server, stop, handle)
+}
+
 fn test_server(authority: Arc<InMemoryZoneOwnerLeaseAuthority>) -> Arc<ZoneHostServer> {
     let shared: SharedZoneOwnerLeaseAuthority = authority;
-    Arc::new(ZoneHostServer::with_options(
+    Arc::new(ZoneHostServer::with_options_and_factory(
         GatewayConfig::default(),
         shared,
         None,
         test_limits(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
+            Duration::from_secs(60 * 60),
+            BTreeMap::new(),
+        )),
     ))
 }
 

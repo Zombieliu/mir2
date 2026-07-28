@@ -1,9 +1,11 @@
 [workspace]
 members = [
     "apps/admin-api",
+    "apps/dubhe-node-desktop/src-tauri",
     "apps/gateway",
     "apps/simulation",
     "packages/game-data",
     "packages/protocol",
+    "vendor/dubhe-network-core",
 ]
 resolver = "2"

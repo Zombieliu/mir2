@@ -510,6 +510,17 @@ pub(crate) struct ZoneNativeMonster {
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneNativeMonsterSnapshot {
+    pub object_id: u32,
+    pub name: String,
+    pub position: Point,
+    pub hp: i32,
+    pub max_hp: i32,
+    pub dead: bool,
+}
+
 impl ZoneNativeMonster {
     pub fn from_spawn(spawn: &ZoneMonsterSpawn, _object_id: u32) -> Self {
         let max_hp = spawn.max_hp.max(1);

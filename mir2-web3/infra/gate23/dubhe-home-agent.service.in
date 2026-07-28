@@ -1,0 +1,22 @@
+[Unit]
+Description=Dubhe Home Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=MIR2_HOME_MANAGE_CHILDREN=true
+Environment=MIR2_HOME_BIN_DIR=__INSTALL_ROOT__/bin
+ExecStart=__INSTALL_ROOT__/bin/home_agent_launcher
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=__INSTALL_ROOT__
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=default.target

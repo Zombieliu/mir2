@@ -89,6 +89,9 @@ Required:
 - `ADMIN_GATEWAY_MAIL_URL`
 - `ADMIN_GATEWAY_KICK_URL`
 - `ADMIN_GATEWAY_SESSIONS_URL`
+- `ADMIN_GATEWAY_SERVICE_TRACE_URL`
+- `MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN`
+- `ADMIN_COMMONWARE_GATEWAY_URL` (optional legacy fallback)
 
 Keep unset in staging unless explicitly doing a temporary bootstrap:
 
@@ -109,6 +112,12 @@ Required:
 - `MIR2_GATEWAY_REDIS_CACHE_URL`
 - `MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS`
 - `MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS`
+- `MIR2_GATEWAY_TRACE_HISTORY_TTL_SECONDS`
+- `MIR2_GATEWAY_ID`
+- `MIR2_GATEWAY_PUBLIC_ENDPOINT`
+- `MIR2_GATEWAY_RELAY_ID`
+- `MIR2_GATEWAY_RELAY_ENDPOINT`
+- `MIR2_GATEWAY_NODE_KIND`
 - `MIR2_GAMEPLAY_EVENT_REDPANDA_URL`
 - `MIR2_GAMEPLAY_EVENT_TOPIC`
 - `ADMIN_API_BASE_URL`
@@ -123,11 +132,17 @@ The token in `MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN` must belong to an active
 Postgres operator with `content_publish`, because the heartbeat writes
 `/admin/servers/zones`.
 
+The same secret protects Gateway `GET /admin/session-trace`; Admin API uses it
+only over the internal service network. Do not expose that endpoint at the
+public ingress.
+
 ### Admin Web
 
 Required:
 
 - `ADMIN_API_BASE_URL`
+- `DUBHE_HOME_TELEMETRY_URL`
+- `DUBHE_HOME_TELEMETRY_OPERATOR_TOKEN`
 
 Optional:
 

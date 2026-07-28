@@ -1,0 +1,285 @@
+name: obelisk-gate15
+
+# Gate 15 is an overlay on the accepted Gate 14 control topology:
+#
+# docker compose \
+#   -f infra/gate14/docker-compose.yml \
+#   -f infra/gate15/docker-compose.yml up -d --build
+#
+# `gateway-a` and `gateway-b` from Gate 14 remain private control-command
+# ingress for the local acceptance harness. Real players connect only to
+# `player-gateway-a` and `player-gateway-b`.
+
+x-gate15-control-env: &gate15-control-env
+  MIR2_GATE15_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
+  MIR2_GATE15_OBSERVER_INTERVAL_MS: "100"
+  MIR2_GATE15_SESSION_LEASE_TTL_MS: "60000"
+  MIR2_ZONE_TOPOLOGY_JSON: '{"version":1,"mode":"single","defaultZoneId":"mir2-map-0","defaultTickMs":100,"zones":{}}'
+  MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+
+x-player-gateway-common: &player-gateway-common
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+    target: gateway
+  image: obelisk/gateway:gate15-local
+  restart: unless-stopped
+  environment:
+    <<: *gate15-control-env
+    MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+    MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+    MIR2_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: "500"
+    MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY: "1"
+    MIR2_ZONE_HOST_CRYSTAL_WORLD: "0"
+  depends_on:
+    validator-0:
+      condition: service_healthy
+    validator-1:
+      condition: service_healthy
+    validator-2:
+      condition: service_healthy
+    dubhe-a:
+      condition: service_healthy
+    dubhe-b:
+      condition: service_healthy
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "/bin/bash",
+        "-ec",
+        "exec 3<>/dev/tcp/127.0.0.1/7010 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3",
+      ]
+    interval: 3s
+    timeout: 2s
+    retries: 40
+  networks: [gate14]
+
+services:
+  validator-0:
+    container_name: gate15-validator-0
+    environment:
+      GATE14_P2P_ADVERTISE: "172.31.15.10:9300"
+    networks:
+      gate14:
+        ipv4_address: 172.31.15.10
+    ports: !override ["20400:9400"]
+
+  validator-1:
+    container_name: gate15-validator-1
+    environment:
+      GATE14_P2P_ADVERTISE: "172.31.15.11:9300"
+      GATE14_BOOTSTRAPPERS: "0@172.31.15.10:9300"
+    networks:
+      gate14:
+        ipv4_address: 172.31.15.11
+    ports: !override ["20401:9400"]
+
+  validator-2:
+    container_name: gate15-validator-2
+    environment:
+      GATE14_P2P_ADVERTISE: "172.31.15.12:9300"
+      GATE14_BOOTSTRAPPERS: "0@172.31.15.10:9300"
+    networks:
+      gate14:
+        ipv4_address: 172.31.15.12
+    ports: !override ["20402:9400"]
+
+  validator-3:
+    container_name: gate15-validator-3
+    environment:
+      GATE14_P2P_ADVERTISE: "172.31.15.13:9300"
+      GATE14_BOOTSTRAPPERS: "0@172.31.15.10:9300"
+    networks:
+      gate14:
+        ipv4_address: 172.31.15.13
+    ports: !override ["20403:9400"]
+
+  postgres-a:
+    container_name: gate15-postgres-a
+    ports: !override ["25432:5432"]
+
+  postgres-b:
+    container_name: gate15-postgres-b
+    ports: !override ["25433:5432"]
+
+  redis-a:
+    container_name: gate15-redis-a
+    ports: !override ["26379:6379"]
+
+  redis-b:
+    container_name: gate15-redis-b
+    ports: !override ["26380:6379"]
+
+  gateway-a:
+    container_name: gate15-control-gateway-a
+    ports: !override ["20500:9500"]
+
+  gateway-b:
+    container_name: gate15-control-gateway-b
+    ports: !override ["20501:9500"]
+
+  projector-a:
+    container_name: gate15-projector-a
+    ports: !override ["20600:9600"]
+
+  projector-b:
+    container_name: gate15-projector-b
+    ports: !override ["20601:9600"]
+
+  dubhe-a:
+    container_name: gate15-dubhe-a
+    environment:
+      <<: *gate15-control-env
+      MIR2_GATE15_GATEWAY_ID: "zone-host-a"
+      MIR2_GATE15_LOCAL_ZONE_HOST_ID: "dubhe-a"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "dubhe-a"
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_METRICS_ADDR: "0.0.0.0:9100"
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: "dubhe-a:7020"
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: "rack-a"
+      MIR2_ZONE_HOST_SIGNING_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "128"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "32"
+      MIR2_ZONE_HOST_MAX_ZONES: "8"
+      MIR2_ZONE_HOST_CRYSTAL_WORLD: "0"
+    ports: !override ["21200:7020", "29100:9100"]
+    depends_on:
+      validator-0:
+        condition: service_healthy
+      validator-1:
+        condition: service_healthy
+      validator-2:
+        condition: service_healthy
+
+  dubhe-b:
+    container_name: gate15-dubhe-b
+    environment:
+      <<: *gate15-control-env
+      MIR2_GATE15_GATEWAY_ID: "zone-host-b"
+      MIR2_GATE15_LOCAL_ZONE_HOST_ID: "dubhe-b"
+      MIR2_ZONE_HOST_OWNER_ALIASES: "dubhe-b"
+      MIR2_ZONE_HOST_ADDR: "0.0.0.0:7020"
+      MIR2_ZONE_HOST_METRICS_ADDR: "0.0.0.0:9100"
+      MIR2_ZONE_HOST_ADVERTISE_ADDR: "dubhe-b:7020"
+      MIR2_ZONE_HOST_FAILURE_DOMAIN: "rack-b"
+      MIR2_ZONE_HOST_SIGNING_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE"
+      MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+      MIR2_ZONE_HOST_MAX_SESSIONS: "128"
+      MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "32"
+      MIR2_ZONE_HOST_MAX_ZONES: "8"
+      MIR2_ZONE_HOST_CRYSTAL_WORLD: "0"
+    ports: !override ["21201:7020", "29101:9100"]
+    depends_on:
+      validator-0:
+        condition: service_healthy
+      validator-1:
+        condition: service_healthy
+      validator-2:
+        condition: service_healthy
+      dubhe-a:
+        condition: service_healthy
+
+  player-gateway-a:
+    <<: *player-gateway-common
+    container_name: gate15-player-gateway-a
+    environment:
+      <<: *gate15-control-env
+      MIR2_GATE15_GATEWAY_ID: "player-gateway-a"
+      MIR2_GATEWAY_INSTANCE_ID: "player-gateway-a"
+      MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+      MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+      MIR2_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: "500"
+      MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY: "1"
+    ports:
+      - "19700:7000"
+      - "19710:7010"
+
+  player-gateway-b:
+    <<: *player-gateway-common
+    image: obelisk/gateway:gate15-local
+    pull_policy: never
+    container_name: gate15-player-gateway-b
+    environment:
+      <<: *gate15-control-env
+      MIR2_GATE15_GATEWAY_ID: "player-gateway-b"
+      MIR2_GATEWAY_INSTANCE_ID: "player-gateway-b"
+      MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
+      MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
+      MIR2_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: "500"
+      MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY: "1"
+    ports:
+      - "19701:7000"
+      - "19711:7010"
+    depends_on:
+      player-gateway-a:
+        condition: service_healthy
+
+  zone-replicator:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: zone-replicator
+    image: obelisk/zone-replicator:gate15-local
+    container_name: gate15-zone-replicator
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_ACTIVE_ADDR: "dubhe-a:7020"
+      MIR2_ZONE_STANDBY_ADDR: "dubhe-b:7020"
+      MIR2_ZONE_REPLICA_ZONE_ID: "mir2-map-0"
+      MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
+      MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
+      MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/replication-wal"
+      MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES: "512"
+      MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+    volumes:
+      - gate16-wal-a-to-b:/var/lib/obelisk/replication-wal
+    depends_on:
+      dubhe-a:
+        condition: service_healthy
+      dubhe-b:
+        condition: service_healthy
+    networks: [gate14]
+
+  zone-replicator-b-to-a:
+    image: obelisk/zone-replicator:gate15-local
+    pull_policy: never
+    container_name: gate15-zone-replicator-b-to-a
+    profiles: ["reverse"]
+    restart: unless-stopped
+    environment:
+      MIR2_ZONE_ACTIVE_ADDR: "dubhe-b:7020"
+      MIR2_ZONE_STANDBY_ADDR: "dubhe-a:7020"
+      MIR2_ZONE_REPLICA_ZONE_ID: "mir2-map-0"
+      MIR2_ZONE_REPLICA_INTERVAL_MS: "100"
+      MIR2_ZONE_REPLICA_IDLE_INTERVAL_MS: "5000"
+      MIR2_ZONE_REPLICA_WAL_DIR: "/var/lib/obelisk/replication-wal"
+      MIR2_ZONE_REPLICA_BASE_SNAPSHOT_INTERVAL_ENTRIES: "512"
+      MIR2_ZONE_HOST_TOKEN: "gate14-zone-host-token-at-least-32-bytes"
+    volumes:
+      - gate16-wal-b-to-a:/var/lib/obelisk/replication-wal
+    depends_on:
+      dubhe-a:
+        condition: service_healthy
+      dubhe-b:
+        condition: service_healthy
+    networks: [gate14]
+
+  admin-web:
+    container_name: gate15-admin-web
+    ports: !override ["23020:3020"]
+
+  sui-relayer:
+    container_name: gate15-sui-testnet-relayer
+
+networks:
+  gate14:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.15.0/24
+
+volumes:
+  gate16-wal-a-to-b:
+  gate16-wal-b-to-a:

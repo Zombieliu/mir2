@@ -38,21 +38,24 @@ pub const CRYSTAL_OBJECT_DATA_RANGE: i32 = crystal_compat::CRYSTAL_DATA_RANGE;
 
 pub use drops::{
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-    SharedGroundDropPickupCommit,
+    SharedGroundDropPickupCommit, SharedInventoryItemDrop,
 };
 pub use map::set_crystal_full_world_zone_collision;
+pub use monsters::crystal_world_respawn_spawns;
 pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use session::{
     ActiveSessionIdentity, SharedItemRentalAgreement, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer, SimulationSession,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedSkillItemConsumptionComponent,
+    SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
 };
 pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
     ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin,
-    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
-    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
+    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
+    ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
+    ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

@@ -43,13 +43,40 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0004_city_currencies",
         include_str!("../../../infra/postgres/migrations/0004_city_currencies.sql"),
     ),
+    (
+        "0005_game_economy_outbox",
+        include_str!("../../../infra/postgres/migrations/0005_game_economy_outbox.sql"),
+    ),
+    (
+        "0006_game_economy_bootstrap",
+        include_str!("../../../infra/postgres/migrations/0006_game_economy_bootstrap.sql"),
+    ),
+    (
+        "0007_admin_read_audits",
+        include_str!("../../../infra/postgres/migrations/0007_admin_read_audits.sql"),
+    ),
 ];
 
-/// Apply every pending migration in order. Safe to call concurrently from
-/// multiple processes/pools: each version is guarded by `schema_migrations` and
-/// the underlying SQL is idempotent, so the worst case is a redundant no-op.
+/// Apply every pending migration in order.
+///
+/// PostgreSQL `CREATE ... IF NOT EXISTS` is not sufficient concurrency control:
+/// two fresh processes can still race while PostgreSQL creates the table's
+/// implicit row type. Hold one transaction-scoped advisory lock from the schema
+/// bootstrap through the last migration record so all Gateway, Zone Host and
+/// worker processes serialize only during migration.
 pub fn apply_migrations(client: &mut Client) -> Result<(), String> {
-    client
+    const MIGRATION_ADVISORY_LOCK_ID: i64 = 0x4D49_5232_4D49_4752;
+
+    let mut transaction = client
+        .transaction()
+        .map_err(|error| format!("schema migration transaction begin failed: {error}"))?;
+    transaction
+        .query_one(
+            "SELECT pg_advisory_xact_lock($1)",
+            &[&MIGRATION_ADVISORY_LOCK_ID],
+        )
+        .map_err(|error| format!("schema migration advisory lock failed: {error}"))?;
+    transaction
         .batch_execute(
             "CREATE TABLE IF NOT EXISTS schema_migrations (\
                 version TEXT PRIMARY KEY, \
@@ -58,7 +85,7 @@ pub fn apply_migrations(client: &mut Client) -> Result<(), String> {
         .map_err(|error| format!("schema_migrations bootstrap failed: {error}"))?;
 
     for (version, sql) in MIGRATIONS {
-        let already_applied = client
+        let already_applied = transaction
             .query_opt(
                 "SELECT 1 FROM schema_migrations WHERE version = $1",
                 &[version],
@@ -68,17 +95,19 @@ pub fn apply_migrations(client: &mut Client) -> Result<(), String> {
         if already_applied {
             continue;
         }
-        client
+        transaction
             .batch_execute(sql)
             .map_err(|error| format!("migration {version} failed: {error}"))?;
-        client
+        transaction
             .execute(
                 "INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT DO NOTHING",
                 &[version],
             )
             .map_err(|error| format!("schema_migrations record failed for {version}: {error}"))?;
     }
-    Ok(())
+    transaction
+        .commit()
+        .map_err(|error| format!("schema migration transaction commit failed: {error}"))
 }
 
 /// A single inventory/equipment/storage row.

@@ -11,7 +11,9 @@ const PARALLEL_TICK_MIN_ZONES: usize = 4;
 const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 1;
 
 use super::runtime::ZoneRuntime;
-use super::types::{SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneOutbound};
+use super::types::{
+    SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot, ZoneOutbound,
+};
 
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
@@ -206,6 +208,36 @@ impl ZoneManager {
         self.zones.get(key)
     }
 
+    pub fn native_monster_snapshots(&self, key: &ZoneKey) -> Vec<ZoneNativeMonsterSnapshot> {
+        self.zones
+            .get(key)
+            .map(ZoneRuntime::native_monster_snapshots)
+            .unwrap_or_default()
+    }
+
+    pub fn spawn_world_event_monster(
+        &mut self,
+        key: ZoneKey,
+        spawn: &super::types::ZoneMonsterSpawn,
+        now_ms: u64,
+    ) -> (bool, Vec<ZoneOutbound>) {
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| ZoneRuntime::new(key))
+            .spawn_world_event_monster(spawn, now_ms)
+    }
+
+    pub fn broadcast_world_event_message(
+        &mut self,
+        key: ZoneKey,
+        message: &str,
+    ) -> Vec<ZoneOutbound> {
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| ZoneRuntime::new(key))
+            .broadcast_world_event_message(message)
+    }
+
     /// Tick all zones on the current thread. Identical output to `tick_all`;
     /// used to force single-threaded execution (constrained environments) and as
     /// the benchmark baseline that proves the parallel path's speedup.
@@ -223,6 +255,11 @@ impl ZoneManager {
             zone.player_position(session_id)?,
             zone.player_direction(session_id)?,
         ))
+    }
+
+    pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_last_seen_move_seq(session_id)
     }
 
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {

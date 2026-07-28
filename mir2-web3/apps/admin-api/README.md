@@ -128,6 +128,8 @@ Routes:
 - `GET /admin/read/dashboard`
 - `GET /admin/read/players`
 - `GET /admin/read/players/:player_id`
+- `GET /admin/read/service-trace?query=<account|character|player-id|object-id>`
+- `GET /admin/read/commonware-network`
 - `GET /admin/read/economy`
 - `GET /admin/read/activities`
 - `GET /admin/read/servers`
@@ -188,6 +190,28 @@ for local smoke runs.
   enforced by simulation login/start-game.
 
 ## Verification
+
+`/admin/read/service-trace` requires `character_read`. It resolves identity
+against the account read model, then joins the protected Gateway trace endpoint
+with the real Gateway's embedded Gate15 Commonware lease. Results are
+endpoint-redacted by default and every read appends a completed
+`CharacterRead` audit record. Passing `sensitive=true` additionally requires
+`server_control`.
+
+`/admin/read/commonware-network` also requires `character_read`. It exposes the
+real Commonware primary placement as a read-only, endpoint-free telemetry
+model. A temporary Commonware outage returns `status: unavailable` without
+inventing a placement height, allowing Admin Web to label the network as
+degraded while the game Session remains online.
+
+Production configuration:
+
+```dotenv
+ADMIN_GATEWAY_SERVICE_TRACE_URL=http://mir2-gateway:7110/admin/session-trace
+MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN=<shared internal gateway operator token>
+# Optional fallback when the Gateway response has no embedded Gate15 data:
+ADMIN_COMMONWARE_GATEWAY_URL=http://gate14-gateway:9500
+```
 
 ```bash
 cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1

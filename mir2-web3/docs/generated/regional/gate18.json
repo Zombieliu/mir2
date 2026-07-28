@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "gate": 18,
+  "profileId": "mir2-regional-v1",
+  "generatedAtMs": 1784965898000,
+  "summary": {
+    "requestedPlayers": 500,
+    "connectedPlayers": 500,
+    "distinctAccounts": 500,
+    "distinctCharacters": 500,
+    "activeZoneCount": 120,
+    "runtimeManifestMaps": 463,
+    "requestedActiveDurationSeconds": 1800,
+    "measuredActiveDurationMs": 1800405,
+    "attemptedCommands": 1331916,
+    "completedCommands": 1331915,
+    "failedCommands": 1,
+    "failureReasons": {
+      "economy_semantic_mismatch:pickup:99:99": 1
+    },
+    "errorRate": 7.507980983785765E-7,
+    "workloadCommandCoverage": 0.9779111600587371,
+    "latencyMs": {
+      "count": 1331915,
+      "minimum": 2.207667,
+      "mean": 120.2338155079449,
+      "p50": 87.46424999999999,
+      "p95": 343.36508399999997,
+      "p99": 578.9963750000001,
+      "maximum": 1904.0178760000001
+    },
+    "promotion": {
+      "zoneId": "map:0",
+      "zoneSessionCount": 30,
+      "activeOwner": "gate18-active",
+      "activeGeneration": 1,
+      "standbyOwner": "gate18-standby",
+      "standbyGeneration": 2,
+      "quiescedAtMs": 1784964713525,
+      "readinessId": "82c3026ec321cd6b00c8b76f62c1f532cf9f32afae2da7576db1bbb5ac03a62c",
+      "readinessLagMs": 1,
+      "baseSequence": 17746,
+      "promotedSequence": 17746,
+      "sessionRefreshCount": 30,
+      "postPromotionProbeCount": 500,
+      "wallMs": 14447.283089999999,
+      "success": true
+    },
+    "economyDuplicateCount": 0,
+    "economyRuntimeLedgerMismatchCount": 0,
+    "economyReconciliation": {
+      "runId": "economy-reconcile-1784965628446-1",
+      "startedAtMs": 1784965628446,
+      "completedAtMs": 1784965628453,
+      "pendingCount": 1499,
+      "expiredDeliveryCount": 0,
+      "deadLetterCount": 0,
+      "transactionWithoutOutboxCount": 0,
+      "negativeBalanceCount": 0,
+      "healthy": true
+    }
+  },
+  "sourceEvidence": {
+    "load": {
+      "path": "docs/generated/regional/gate18-load.json",
+      "sha256": "ca99833b9b4bddaed4e3809ef5e022d674e15e89d66d7f5db928e8a876d765a4",
+      "runId": "gate18-load-1784963587269"
+    },
+    "gameplay": {
+      "path": "docs/generated/regional/gate18-gameplay.json",
+      "sha256": "d71479af5b8382365def142b5aebf125485ea95dfc35c4f04543793fa0840758",
+      "runId": "gate18-gameplay-1784965731055"
+    },
+    "migrations": {
+      "path": "docs/generated/regional/gate18-migrations.json",
+      "sha256": "2b2692686d351b8a7f1c9c2cdfb4cfa078dceb7566f2f2f14f44b36cea6f95ec"
+    },
+    "remoteEconomy": {
+      "path": "docs/generated/regional/gate18-remote-economy.json",
+      "sha256": "57d55bcfb2031dbfd81022809bbe8f22ac0dc10d01c57a570ae3d2f453f2a7a8",
+      "runId": "gate18-remote-1784965708778"
+    },
+    "economyProducer": {
+      "path": "docs/generated/regional/gate18-economy-producer.json",
+      "sha256": "567d2154a76ad456b3965616928211c5ed60845c25fde1051a729d280b414c09",
+      "runId": "gate18-1784965688867"
+    },
+    "sessionCapacity": {
+      "path": "docs/generated/regional/gate18-500-session-120zones.json",
+      "sha256": "67868c4a8e2a20aee60c4dda02ac0ab811aed5b408d816fe52b10d20fd5db586"
+    }
+  },
+  "assertions": {
+    "exactRegionalProfileAccepted": true,
+    "fiveHundredDistinctPlayersRanForThirtyMinutes": true,
+    "oneHundredTwentyZonesWereActive": true,
+    "mixedGameplayCoverageMet": true,
+    "safeZonePromotionCompleted": true,
+    "postPromotionSessionsRemainedUsable": true,
+    "economySemanticFailuresStayedWithinSlo": true,
+    "economyHadNoDuplicateOrLedgerMismatch": true,
+    "gameplayAcceptancePassed": true,
+    "concurrentMigrationsPassed": true,
+    "remoteEconomyAcceptancePassed": true,
+    "producerCrashWindowAcceptancePassed": true,
+    "supportingSessionCapacityPassed": true
+  },
+  "success": true
+}

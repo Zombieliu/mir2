@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-28T01:47:09+08:00",
+  "environment": "ucloud-hk-single-host-online-devnet",
+  "commonwareRelease": "v2026.2.0",
+  "commonwareReleasePath": "/opt/mir2/commonware/releases/20260727T170915Z-0341f17f",
+  "gatewayReleasePath": "/opt/mir2/gateway/releases/20260727T173949Z-0341f17f-gate15",
+  "services": {
+    "mir2-gateway": "active",
+    "mir2-commonware-validator@0": "active",
+    "mir2-commonware-validator@1": "active",
+    "mir2-commonware-validator@2": "active",
+    "mir2-commonware-validator@3": "active",
+    "mir2-commonware-gateway": "active",
+    "mir2-commonware-projector": "active",
+    "mir2-commonware-reconcile.timer": "active",
+    "mir2-commonware-placement-renew.timer": "active",
+    "dubhe-home-relay": "active",
+    "dubhe-home-enrollment": "active",
+    "dubhe-home-telemetry": "active"
+  },
+  "consensus": {
+    "committeeSize": 4,
+    "quorum": 3,
+    "validatorHeights": [
+      3722,
+      3722,
+      3722,
+      3722
+    ],
+    "stateRootsEqual": true,
+    "gatewayGate15Enabled": true,
+    "gatewayGate15Healthy": true,
+    "respondingValidators": 4,
+    "agreeingValidators": 4
+  },
+  "migratedIdentity": {
+    "sourceAccounts": 1912,
+    "finalizedAccounts": 1912,
+    "sourceCharacters": 1798,
+    "finalizedCharacters": 1798,
+    "accepted": true
+  },
+  "placement": {
+    "zoneId": "primary",
+    "generation": 4,
+    "primaryHostId": "ed25519:cc0993651c112ce0b10bafd2a1ee633589d0bc0ae781c8ecacb4fadd810d5c41",
+    "endpoint": "127.0.0.1:9444",
+    "maxSessions": 128,
+    "maxZones": 8,
+    "autoRenewEnabled": true
+  },
+  "homeNodeTelemetry": {
+    "onlineNodes": 1,
+    "servingNodes": 1,
+    "aggregateCapacitySessions": 128,
+    "aggregateCapacityZones": 8,
+    "availabilityBps": 10000,
+    "p95RelayRttMs": 1,
+    "ipHiddenByRegionalRelay": true
+  },
+  "productionPlayerProbe": {
+    "success": true,
+    "totalLatencyMs": 7227,
+    "steps": [
+      {
+        "name": "connect",
+        "latencyMs": 2448
+      },
+      {
+        "name": "login",
+        "latencyMs": 132
+      },
+      {
+        "name": "startGame",
+        "latencyMs": 4069
+      },
+      {
+        "name": "keepAlive",
+        "latencyMs": 575
+      }
+    ]
+  },
+  "singleValidatorFault": {
+    "stoppedValidator": "ucloud-hk-validator-3",
+    "remainingQuorum": 3,
+    "playerProbeSuccess": true,
+    "playerProbeTotalLatencyMs": 7118,
+    "automaticCatchUp": {
+      "fromHeight": 3719,
+      "toHeight": 3720,
+      "importedFinalizedRecords": 1,
+      "finalHeights": [
+        3720,
+        3720,
+        3720,
+        3720
+      ],
+      "stateRootsEqual": true
+    }
+  },
+  "projection": {
+    "healthy": true,
+    "postgresAvailable": true,
+    "redisAvailable": true,
+    "authoritative": false
+  },
+  "accepted": true,
+  "boundary": "All four validators currently run on one UCloud host. This proves an online Commonware and Gate15 execution path, but not independent Regional failure domains."
+}
