@@ -59,6 +59,35 @@ The existing 1024x768 render surface remains authoritative. Layout profiles
 change surrounding controls, panel placement, visibility, and focus treatment;
 they do not fork the renderer or network command path.
 
+## Touch landscape composition
+
+Every login, character-select, and gameplay screen uses a contained 4:3 stage.
+The client never width-fits a landscape phone by cropping the stage vertically,
+so character-select actions at the bottom of the original 768px composition
+remain visible.
+
+Gameplay reserves two physical control rails outside the stage:
+
+```text
+┌────────────── viewport ──────────────┐
+│ left rail │ 4:3 Crystal stage │ right rail │
+│ joystick  │ original HUD       │ actions    │
+└────────────────────────────────────────────┘
+```
+
+- Touch gameplay keeps each rail at least 128 CSS px wide. On narrow phones the
+  game stage shrinks slightly instead of allowing controls to cover its HUD.
+- The joystick fits inside the left rail; panel, quick-slot, movement-mode,
+  approach, pickup, and primary-action controls form a compact vertical cluster
+  in the right rail.
+- Both rails include `safe-area-inset-*`, keeping controls away from iPhone
+  camera cutouts, home indicators, and browser gesture edges.
+- Login and character-select do not reserve gameplay rails, but still contain
+  the complete stage. Their language/audio controls retain the original compact
+  positions instead of being enlarged over the character list.
+- Touch gameplay starts with the chat history collapsed. The existing chat
+  toggle remains available and desktop/TV retain their current default.
+
 ## Controller contract
 
 Baseline standard-gamepad mapping:
@@ -89,9 +118,14 @@ D-pad press from moving both the focused menu item and the player.
 
 - Landscape play controls appear for coarse-pointer devices of any tablet or
   phone height.
+- Login and character-select show the entire 1024x768 composition without
+  vertical cropping.
 - Safe-area insets keep controls clear of notches and browser gestures.
+- Touch controls remain outside the original stage and never overlap the
+  mini-map, chat, belt, or bottom HUD.
 - Inventory, character, NPC, shop, map, and system panels remain usable at
   touch target sizes.
+- Chat history is collapsed on initial entry and can be expanded explicitly.
 - Portrait gameplay shows a rotate affordance; observer and account surfaces
   may receive a portrait layout later.
 
@@ -121,7 +155,9 @@ depending on Xbox Edge behavior and the number of devices in the matrix.
 ## Verification matrix
 
 - Chromium desktop: keyboard/mouse and Xbox controller
-- WebKit mobile emulation: iPhone landscape and safe areas
-- Chromium mobile emulation: Android phone and tablet landscape
+- WebKit mobile emulation: iPhone 14 Pro Max landscape at 932x430, including
+  select-screen bottom actions and notch safe areas
+- Chromium mobile emulation: Android 667x375 and tablet landscape, including
+  the 128px minimum gameplay rails
 - Xbox Series S/X Microsoft Edge hardware
 - Optional: Steam Deck browser and Bluetooth controller on iOS/Android
