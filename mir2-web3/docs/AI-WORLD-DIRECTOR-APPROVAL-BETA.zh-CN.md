@@ -6,7 +6,8 @@
 
 ```text
 Gateway / ClickHouse / Postgres 聚合遥测
-  → 规则引擎生成受限 DirectorProposal
+  → OpenAI Responses API 或规则引擎生成受限 DirectorProposal
+  → 服务端 JSON Schema、白名单、预算和压力阈值安全闸
   → Admin Web 人工修改 / 批准 / 拒绝 / 取消
   → Ed25519 DirectorCommand
   → 远程 Gate14 Commonware Finality 锚定
@@ -19,7 +20,8 @@ Gateway / ClickHouse / Postgres 聚合遥测
 
 ## 自动和人工的边界
 
-- 自动完成：采集聚合数据、计算五类压力、选择白名单模板、生成待审批提案。
+- 自动完成：采集聚合数据、计算五类压力；模型只能在服务端提供的模板、地图、
+  时长和预算范围内生成待审批提案。
 - 人工完成：检查证据、修改受限参数、批准或拒绝。
 - 批准以后自动完成：签名、Commonware 锚定、Zone Host 投递和状态回传。
 - AI/规则不能返回动作列表、代码、SQL、资产铸造、封号或自由脚本。
@@ -80,10 +82,25 @@ MIR2_WORLD_DIRECTOR_GAME_ID=mir2
 MIR2_WORLD_DIRECTOR_REGION_ID=asia-hk
 MIR2_WORLD_DIRECTOR_AUTOMATIC_GENERATION=true
 MIR2_WORLD_DIRECTOR_GENERATION_INTERVAL_SECONDS=300
+
+# 真实 AI 提案生成。密钥只注入 Admin API，不进入网页或日志。
+MIR2_WORLD_DIRECTOR_PROPOSAL_MODE=openai
+MIR2_WORLD_DIRECTOR_AI_API_KEY=<secret>
+MIR2_WORLD_DIRECTOR_AI_ENDPOINT=https://api.openai.com/v1/responses
+MIR2_WORLD_DIRECTOR_AI_MODEL=gpt-5.6-terra
+MIR2_WORLD_DIRECTOR_AI_REASONING_EFFORT=low
+MIR2_WORLD_DIRECTOR_AI_TIMEOUT_SECONDS=45
 ```
 
 Gate14 Gateway 必须设置相同的 `GATE14_CONTROL_TOKEN`。其控制命令入口使用常量时间
 Bearer 校验；健康、状态和指标读取仍可单独由网络策略控制。
+
+`MIR2_WORLD_DIRECTOR_PROPOSAL_MODE` 默认为 `rule`，便于离线验收。生产要使用真实
+AI 必须显式设为 `openai` 并提供密钥；缺少密钥时服务拒绝启动。模型调用使用严格
+JSON Schema，只返回“是否提案、模板、目标地图、时长、预算、理由”。模型不能返回
+代码、SQL、自由动作或签名命令。即使结构正确，结果仍必须通过同一套服务端压力阈值、
+地图白名单、奖励预算、冷却和并发校验。模型拒答、超时、HTTP 错误或非法输出均直接
+报错，不会静默降级成规则提案。
 
 生产环境默认要求远程 Commonware。若远程 Commonware 未配置或不可用，批准操作会失败
 关闭，不会绕过共识直接向地图节点下发。
@@ -155,7 +172,8 @@ Finality 高度、状态根和命令摘要。网关回执的命令摘要若与�
 ## 当前明确边界
 
 - 当前生产 Beta 只有 `mir2.bichon-wooma-awakening.v1` 一套事件模板。
-- 自动提案目前使用确定性规则；可选模型适配器仍处于严格 JSON 边界，尚未作为常驻模型服务启用。
+- 真实模型适配器已经完成，但只有部署环境安全注入 API 密钥并显式启用 `openai`
+  模式后才会调用；控制台会展示实际 provider/model，未配置时禁止伪装为 AI。
 - “取消”只适用于 Finality 前；活动中事件的安全撤场、已生成怪物处理和奖励补偿需要独立的补偿型控制命令。
 - 实时经济流量仍需接入 mint/burn 事件流；当前不会把金币库存误当成通胀流量。
 - 进入 Limited Auto 前必须先运行 7–14 天 Shadow/人工审批观察。

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LanguageSwitcher } from "../../components/language-switcher";
+import { SubmitButton } from "../../components/submit-button";
 import { getAdminI18n } from "../../lib/i18n";
 import { loginAction } from "./actions";
 
@@ -36,9 +37,10 @@ export default async function LoginPage({
               type="password"
             />
           </label>
-          <button className="button" type="submit">
-            {t("login.submit")}
-          </button>
+          <SubmitButton
+            idle={t("login.submit")}
+            pending={t("common.working")}
+          />
         </form>
         <div className="login-foot">
           <LanguageSwitcher locale={locale} label={t("shell.language")} />
