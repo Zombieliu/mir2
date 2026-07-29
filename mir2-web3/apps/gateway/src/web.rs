@@ -31,7 +31,10 @@ use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
 use crate::ai_live::{AiLiveHub, AiLiveMode};
-use crate::auth::verify_passkey_gateway_token;
+use crate::auth::{
+    issue_gateway_identity_token, verify_channel_guest_proof, verify_gateway_identity_token,
+    verify_operator_token, verify_passkey_gateway_token, verify_sui_login_proof,
+};
 use crate::browser_commands::{
     default_drop_count, default_market_max_shape, parse_class, parse_direction, parse_gender,
     parse_grid, parse_move_mode, parse_spell, parse_spell_name,
@@ -41,6 +44,10 @@ use crate::cache::{
     refresh_session_cache_with_route_lease, remove_owned_session_cache, session_cache_key,
     session_cache_record, GatewaySessionCacheKey, GatewaySessionCacheRecord,
     GatewaySessionCacheStatus, GatewaySessionTraceEvent, SharedGatewaySessionCache,
+};
+use crate::channel_identity::{
+    verify_crazygames_token, ChannelIdentityProvider, ChannelIdentityRegistry,
+    ChannelIdentityRegistryStatus, PlayerIdentityAccount,
 };
 use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
@@ -142,6 +149,7 @@ struct WebState {
     injector: crate::inject::LiveSessionInjector,
     spectator: SpectatorHub,
     ai_live: AiLiveHub,
+    channel_identity: ChannelIdentityRegistry,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1408,6 +1416,7 @@ struct HealthResponse {
     gameplay_events: GameplayEventSinkStatus,
     spectator: crate::spectator::SpectatorMetrics,
     ai_live: crate::ai_live::AiLiveMetrics,
+    channel_identity: ChannelIdentityRegistryStatus,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1490,6 +1499,41 @@ struct AdminErrorResponse {
     error: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelSessionExchangeRequest {
+    provider: String,
+    credential: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelSessionExchangeResponse {
+    account_id: String,
+    player_id: String,
+    provider: String,
+    token: String,
+    expires_at: u64,
+    created: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelIdentityLinkRequest {
+    account_id: String,
+    session_token: String,
+    provider: String,
+    credential: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelIdentityLinkResponse {
+    account_id: String,
+    linked_provider: String,
+    identity_count: usize,
+}
+
 pub async fn run_web_gateway(
     addr: &str,
     config: GatewayConfig,
@@ -1507,6 +1551,15 @@ pub async fn run_web_gateway(
     let ai_live = AiLiveHub::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     ai_live.spawn(spectator.clone());
+    let channel_identity = tokio::task::spawn_blocking(ChannelIdentityRegistry::from_env)
+        .await
+        .map_err(|error| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                format!("channel identity initialization task failed: {error}"),
+            )
+        })?
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let state = WebState {
         config: Arc::new(config),
         zone_registry: Arc::new(
@@ -1522,6 +1575,7 @@ pub async fn run_web_gateway(
         injector: crate::inject::LiveSessionInjector::default(),
         spectator,
         ai_live,
+        channel_identity,
     };
 
     let app = Router::new()
@@ -1530,9 +1584,18 @@ pub async fn run_web_gateway(
         .route("/admin/system-mail", post(admin_system_mail))
         .route("/admin/sessions", get(admin_sessions))
         .route("/admin/session-trace", get(admin_session_trace))
+        .route(
+            "/admin/channel-identities/{player_id}",
+            get(admin_channel_identity),
+        )
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
         .route("/onchain/inject", post(onchain_inject))
+        .route(
+            "/v1/channels/session/exchange",
+            post(channel_session_exchange),
+        )
+        .route("/v1/channels/identity/link", post(channel_identity_link))
         .route("/spectator/matches", get(spectator_matches))
         .route("/spectator/recordings", get(spectator_recordings))
         .route("/spectator/replay", get(spectator_replay))
@@ -1582,8 +1645,20 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
                 healthy: false,
                 last_error: Some(format!("session-cache health task failed: {error}")),
             });
+    let channel_identity = state.channel_identity.clone();
+    let channel_identity_status = tokio::task::spawn_blocking(move || channel_identity.status())
+        .await
+        .ok()
+        .and_then(Result::ok)
+        .unwrap_or(ChannelIdentityRegistryStatus {
+            backend: "error".to_string(),
+            durable: false,
+            account_count: 0,
+            identity_count: 0,
+        });
+    let channel_identity_healthy = channel_identity_status.backend != "error";
     Json(HealthResponse {
-        ok: true,
+        ok: channel_identity_healthy,
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
@@ -1593,7 +1668,189 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
         spectator: state.spectator.metrics(),
         ai_live: state.ai_live.metrics(),
+        channel_identity: channel_identity_status,
     })
+}
+
+async fn channel_session_exchange(
+    State(state): State<WebState>,
+    Json(request): Json<ChannelSessionExchangeRequest>,
+) -> Result<Json<ChannelSessionExchangeResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let _login_permit = state
+        .capacity
+        .try_acquire_action(GatewayCapacityKind::Login)
+        .map_err(|error| channel_exchange_error(StatusCode::TOO_MANY_REQUESTS, error))?;
+    let provider = ChannelIdentityProvider::parse(&request.provider)
+        .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?;
+    let subject = verified_channel_subject(provider, &request.credential).await?;
+
+    let registry = state.channel_identity.clone();
+    let (account, created) = tokio::task::spawn_blocking(move || {
+        registry.resolve_or_create_with_outcome(provider, &subject)
+    })
+    .await
+    .map_err(|error| {
+        channel_exchange_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("channel identity task failed: {error}"),
+        )
+    })?
+    .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
+    let expires_at = gateway_now_ms().saturating_add(channel_session_token_ttl_ms());
+    let token = issue_gateway_identity_token(&account.player_id, provider.as_str(), expires_at)
+        .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
+    Ok(Json(ChannelSessionExchangeResponse {
+        account_id: account.player_id.clone(),
+        player_id: account.player_id,
+        provider: provider.as_str().to_string(),
+        token,
+        expires_at,
+        created,
+    }))
+}
+
+async fn channel_identity_link(
+    State(state): State<WebState>,
+    Json(request): Json<ChannelIdentityLinkRequest>,
+) -> Result<Json<ChannelIdentityLinkResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let _login_permit = state
+        .capacity
+        .try_acquire_action(GatewayCapacityKind::Login)
+        .map_err(|error| channel_exchange_error(StatusCode::TOO_MANY_REQUESTS, error))?;
+    verify_gateway_identity_token(&request.account_id, &request.session_token)
+        .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+    let provider = ChannelIdentityProvider::parse(&request.provider)
+        .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?;
+    if !provider.is_primary_capable() {
+        return Err(channel_exchange_error(
+            StatusCode::BAD_REQUEST,
+            "guest channel identities cannot be linked as ownership credentials".to_string(),
+        ));
+    }
+    let subject = verified_channel_subject(provider, &request.credential).await?;
+    let registry = state.channel_identity.clone();
+    let player_id = request.account_id.clone();
+    let account =
+        tokio::task::spawn_blocking(move || registry.link_identity(&player_id, provider, &subject))
+            .await
+            .map_err(|error| {
+                channel_exchange_error(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("channel identity task failed: {error}"),
+                )
+            })?
+            .map_err(|error| {
+                let status = if error.contains("another player") {
+                    StatusCode::CONFLICT
+                } else if error.contains("not found") {
+                    StatusCode::NOT_FOUND
+                } else {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                };
+                channel_exchange_error(status, error)
+            })?;
+    Ok(Json(ChannelIdentityLinkResponse {
+        account_id: account.player_id,
+        linked_provider: provider.as_str().to_string(),
+        identity_count: account.identities.len(),
+    }))
+}
+
+async fn admin_channel_identity(
+    State(state): State<WebState>,
+    AxumPath(player_id): AxumPath<String>,
+    headers: HeaderMap,
+) -> Result<Json<PlayerIdentityAccount>, (StatusCode, Json<AdminErrorResponse>)> {
+    let token = bearer_token(&headers).ok_or_else(|| {
+        channel_exchange_error(
+            StatusCode::UNAUTHORIZED,
+            "missing operator bearer token".to_string(),
+        )
+    })?;
+    verify_operator_token(token)
+        .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+    let registry = state.channel_identity.clone();
+    let account = tokio::task::spawn_blocking(move || registry.account(&player_id))
+        .await
+        .map_err(|error| {
+            channel_exchange_error(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("channel identity task failed: {error}"),
+            )
+        })?
+        .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?
+        .ok_or_else(|| {
+            channel_exchange_error(
+                StatusCode::NOT_FOUND,
+                "Obelisk player identity was not found".to_string(),
+            )
+        })?;
+    Ok(Json(account))
+}
+
+async fn verified_channel_subject(
+    provider: ChannelIdentityProvider,
+    credential: &str,
+) -> Result<String, (StatusCode, Json<AdminErrorResponse>)> {
+    if credential.is_empty() || credential.len() > 64 * 1024 {
+        return Err(channel_exchange_error(
+            StatusCode::BAD_REQUEST,
+            "channel credential size is invalid".to_string(),
+        ));
+    }
+    match provider {
+        ChannelIdentityProvider::SuiPasskey | ChannelIdentityProvider::SuiWallet => {
+            let proof = verify_sui_login_proof(credential)
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+            if proof.provider != provider.as_str() {
+                return Err(channel_exchange_error(
+                    StatusCode::UNAUTHORIZED,
+                    "Sui login proof provider mismatch".to_string(),
+                ));
+            }
+            Ok(proof.subject)
+        }
+        ChannelIdentityProvider::CrazyGames => Ok(verify_crazygames_token(credential)
+            .await
+            .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?
+            .user_id),
+        ChannelIdentityProvider::Itch
+        | ChannelIdentityProvider::DirectGuest
+        | ChannelIdentityProvider::CrazyGamesGuest => {
+            let proof = verify_channel_guest_proof(credential)
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+            if proof.provider != provider.as_str() {
+                return Err(channel_exchange_error(
+                    StatusCode::UNAUTHORIZED,
+                    "channel guest proof provider mismatch".to_string(),
+                ));
+            }
+            Ok(proof.subject)
+        }
+    }
+}
+
+fn channel_exchange_error(
+    status: StatusCode,
+    error: String,
+) -> (StatusCode, Json<AdminErrorResponse>) {
+    (status, Json(AdminErrorResponse { error }))
+}
+
+fn channel_session_token_ttl_ms() -> u64 {
+    env::var("MIR2_CHANNEL_SESSION_TOKEN_TTL_SECONDS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(3_600)
+        .clamp(60, 43_200)
+        .saturating_mul(1_000)
+}
+
+fn gateway_now_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
 }
 
 async fn ai_live_status(State(state): State<WebState>) -> Json<crate::ai_live::AiLiveStatus> {
@@ -7779,6 +8036,7 @@ mod tests {
                 ),
             )
             .expect("test AI live hub"),
+            channel_identity: crate::ChannelIdentityRegistry::in_memory(),
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -7838,6 +8096,7 @@ mod tests {
                 ),
             )
             .expect("test AI live hub"),
+            channel_identity: crate::ChannelIdentityRegistry::in_memory(),
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -7918,6 +8177,7 @@ mod tests {
                 ),
             )
             .expect("test AI live hub"),
+            channel_identity: crate::ChannelIdentityRegistry::in_memory(),
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;

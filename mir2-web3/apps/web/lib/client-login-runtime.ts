@@ -5,8 +5,14 @@ import {
   DUBHE_WALLET_URL,
   getActiveSuiWalletSession,
   getSuiWalletSummaries,
+  linkChannelIdentity,
+  linkSuiIdentity,
   requestPasskeyLoginToken,
+  requestPasskeyIdentityCredential,
+  requestChannelSessionToken,
+  requestGuestChannelSessionToken,
   requestWalletLoginToken,
+  requestWalletIdentityCredential,
   subscribeToSuiWalletChanges,
   type ActiveSuiWalletSession,
   type SuiLoginToken,
@@ -18,7 +24,13 @@ export {
   DUBHE_WALLET_URL,
   getActiveSuiWalletSession,
   getSuiWalletSummaries,
+  linkChannelIdentity,
+  linkSuiIdentity,
+  requestPasskeyIdentityCredential,
   subscribeToSuiWalletChanges,
+  requestChannelSessionToken,
+  requestGuestChannelSessionToken,
+  requestWalletIdentityCredential,
 };
 export type { ActiveSuiWalletSession, SuiLoginToken, SuiWalletSummary };
 
