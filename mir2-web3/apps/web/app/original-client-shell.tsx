@@ -125,6 +125,8 @@ import {
   type SceneChatBubble,
 } from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
+import { OriginalClientGamepadControls } from "./components/original-client-gamepad-controls";
+import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
 import {
   createCrystalAnimationWorldSeed,
   entityAnimationRuntimeFromWindow,
@@ -594,8 +596,7 @@ export function OriginalClientShell({
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
-  const [forceMobileControls, setForceMobileControls] = useState(false);
-  const [touchPrimaryDevice, setTouchPrimaryDevice] = useState(false);
+  const clientProfile = useOriginalClientDeviceProfile();
   const [stagePresentation, setStagePresentation] = useState({
     scale: 1,
     left: 0,
@@ -706,11 +707,77 @@ export function OriginalClientShell({
   const loginTransitionAudioActive = screen === "select" && loginTransitionFrame !== null;
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setForceMobileControls(params.get("mobileControls") === "1" || params.get("mobile") === "1");
-    setTouchPrimaryDevice(window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
     setMotionNow(Date.now());
   }, []);
+
+  useEffect(() => {
+    const renderGameToText = () =>
+      JSON.stringify({
+        coordinateSystem: "tile coordinates; origin top-left; x right; y down",
+        screen,
+        layout: clientProfile.layout,
+        input: clientProfile.input,
+        sceneInteractionReady,
+        player: player
+          ? {
+              objectId: player.objectId,
+              x: player.x,
+              y: player.y,
+              direction: player.direction ?? null,
+              hp: player.hp ?? null,
+              maxHp: player.maxHp ?? null,
+            }
+          : null,
+        selectedEntity: selectedEntity
+          ? {
+              objectId: selectedEntity.objectId,
+              kind: selectedEntity.kind,
+              name: selectedEntity.name,
+              x: selectedEntity.x,
+              y: selectedEntity.y,
+              dead: Boolean(selectedEntity.dead),
+            }
+          : null,
+        visibleEntities: sourceViewportEntities.slice(0, 32).map((entity) => ({
+          objectId: entity.objectId,
+          kind: entity.kind,
+          name: entity.name,
+          x: entity.x,
+          y: entity.y,
+          dead: Boolean(entity.dead),
+        })),
+        groundDrops: world.groundDrops.slice(0, 16).map((drop) => ({
+          objectId: drop.objectId,
+          name: drop.name,
+          x: drop.x,
+          y: drop.y,
+        })),
+        panels: {
+          inventory: showInventory,
+          character: showCharacter,
+        },
+      });
+    const gameWindow = window as typeof window & {
+      render_game_to_text?: () => string;
+    };
+    gameWindow.render_game_to_text = renderGameToText;
+    return () => {
+      if (gameWindow.render_game_to_text === renderGameToText) {
+        delete gameWindow.render_game_to_text;
+      }
+    };
+  }, [
+    clientProfile.input,
+    clientProfile.layout,
+    player,
+    sceneInteractionReady,
+    screen,
+    selectedEntity,
+    showCharacter,
+    showInventory,
+    sourceViewportEntities,
+    world.groundDrops,
+  ]);
 
   // Announce that #mir2-web3-canvas is mounted so the Bevy runtime can boot against it.
   // This shell is lazily mounted (dynamic, ssr:false); the runtime attaches to this canvas
@@ -1088,12 +1155,21 @@ export function OriginalClientShell({
       // Keep the transformed 4:3 stage on whole device pixels. Rounding the
       // CSS scale itself (the old toFixed(4) path) produced fractional bounds,
       // so the compositor resampled the complete pixel-art canvas on every move.
-      const nativeDeviceWidth = Math.floor(1024 * deviceScale);
-      const fittedDeviceWidth = Math.min(
-        nativeDeviceWidth,
-        deviceWidth,
-        Math.floor((deviceHeight * 4) / 3),
-      );
+      const nativeDeviceWidth =
+        clientProfile.layout === "tv"
+          ? Math.floor(2048 * deviceScale)
+          : Math.floor(1024 * deviceScale);
+      // Touch login/select screens use the whole landscape width and crop the
+      // decorative 4:3 top/bottom. Gameplay still fits by height so the empty
+      // side gutters remain available for the joystick and action pad.
+      const widthFitTouchChrome = clientProfile.layout === "touch" && screen !== "game";
+      const fittedDeviceWidth = widthFitTouchChrome
+        ? Math.min(nativeDeviceWidth, deviceWidth)
+        : Math.min(
+            nativeDeviceWidth,
+            deviceWidth,
+            Math.floor((deviceHeight * 4) / 3),
+          );
       const displayDeviceWidth = Math.max(4, Math.floor(fittedDeviceWidth / 4) * 4);
       const displayDeviceHeight = (displayDeviceWidth * 3) / 4;
       const next = {
@@ -1116,7 +1192,7 @@ export function OriginalClientShell({
       window.removeEventListener("resize", updateStageScale);
       window.visualViewport?.removeEventListener("resize", updateStageScale);
     };
-  }, []);
+  }, [clientProfile.layout, screen]);
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
@@ -1616,7 +1692,7 @@ export function OriginalClientShell({
   const selectedTargetReadoutLabel = selectedEntity
     ? selectedTargetActionLabel(t, selectedEntity, targetDistance)
     : null;
-  const domEntityFallbackRequested = shouldUseDomEntityFallback(forceMobileControls || touchPrimaryDevice);
+  const domEntityFallbackRequested = shouldUseDomEntityFallback(clientProfile.layout === "touch");
   // Phase 3b (renderer consolidation), default ON. On the webgl2 backend the Bevy
   // canvas stays VISIBLE and transparent (the wasm build is transparent for both
   // backends) and draws entities itself; the DOM WebGl2EntityAtlasLayer
@@ -2962,7 +3038,12 @@ export function OriginalClientShell({
   );
 
   return (
-    <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
+    <main
+      className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
+      data-layout-profile={clientProfile.layout}
+      data-input-profile={clientProfile.input}
+      style={stageScaleStyle}
+    >
       <section className="mir-stage">
         <div
           ref={stageFrameRef}
@@ -3220,13 +3301,35 @@ export function OriginalClientShell({
           ) : null}
         </div>
       </section>
+      {clientProfile.layout === "tv" && clientProfile.input === "gamepad" && screen !== "game" ? (
+        <div className="mir-gamepad-hint" role="status">
+          {t("ui.gamepadNavigationHint", [], "D-pad: Navigate · A: Select · B: Back")}
+        </div>
+      ) : null}
       <OriginalClientMobileControls
         enabled={screen === "game" && sceneInteractionReady}
-        forceVisible={forceMobileControls}
+        forceVisible={clientProfile.layout === "touch" && clientProfile.input === "touch"}
         t={t}
         world={world}
         player={player}
         selectedEntity={selectedEntity}
+        onDirectionIntent={onViewportDirectionIntent}
+        onDirectionStop={onViewportDirectionStop}
+        onPrimaryTargetAction={onPrimaryTargetAction}
+        onApproachTarget={onApproachTarget}
+        onPickGroundDrop={onPickGroundDrop}
+        onToggleInventory={onToggleInventory}
+        onToggleCharacter={onToggleCharacter}
+        onCastSkill={onCastSkill}
+        onUseItem={onUseItem}
+      />
+      <OriginalClientGamepadControls
+        enabled={clientProfile.input === "gamepad"}
+        screen={screen}
+        gameplayReady={screen === "game" && sceneInteractionReady}
+        stageRootRef={stageFrameRef}
+        world={world}
+        player={player}
         onDirectionIntent={onViewportDirectionIntent}
         onDirectionStop={onViewportDirectionStop}
         onPrimaryTargetAction={onPrimaryTargetAction}

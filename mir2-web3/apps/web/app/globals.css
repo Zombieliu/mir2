@@ -4912,6 +4912,145 @@ button.character-spell-value:hover {
   transform: scale(var(--mir-stage-scale, 0.54));
 }
 
+/* Runtime layout/input profiles are intentionally independent. A touch device
+   using a Bluetooth controller keeps the touch layout but hides touch controls. */
+@media (orientation: landscape) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-controls {
+    display: block;
+  }
+}
+
+@media (orientation: portrait) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-rotate-overlay {
+    display: flex;
+  }
+}
+
+.mir-client-page[data-input-profile="gamepad"] .mir-mobile-controls,
+.mir-client-page[data-input-profile="gamepad"] .mir-mobile-rotate-overlay {
+  display: none;
+}
+
+.mir-client-page[data-layout-profile="touch"] {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+.mir-client-page[data-layout-profile="touch"] .login-language-selector,
+.mir-client-page[data-layout-profile="touch"] .select-language-selector {
+  top: 158px;
+  transform: scale(1.2);
+  transform-origin: top right;
+}
+
+.mir-client-page[data-layout-profile="touch"] .login-audio-settings,
+.mir-client-page[data-layout-profile="touch"] .select-audio-settings {
+  top: 208px;
+  transform: scale(1.2);
+  transform-origin: top right;
+}
+
+.mir-client-page[data-layout-profile="touch"] .select-title {
+  top: 152px;
+}
+
+.mir-client-page[data-layout-profile="touch"] .select-server-name {
+  top: 184px;
+}
+
+.mir-client-page[data-layout-profile="touch"] .select-action {
+  top: 600px;
+}
+
+.mir-client-page[data-layout-profile="touch"] .select-last-access-label,
+.mir-client-page[data-layout-profile="touch"] .select-last-access-value {
+  top: 568px;
+}
+
+/* Keep the original window content and sprites, but present the high-value
+   panels as centered, enlarged surfaces on a physically small touch screen. */
+.mir-client-page[data-layout-profile="touch"] .inventory-window:not(.with-storage) {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.45);
+  transform-origin: center;
+  z-index: 60;
+}
+
+.mir-client-page[data-layout-profile="touch"] .inventory-window.with-storage {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.05);
+  transform-origin: center;
+  z-index: 60;
+}
+
+.mir-client-page[data-layout-profile="touch"] .character-window {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.25);
+  transform-origin: center;
+  z-index: 60;
+}
+
+.mir-client-page[data-layout-profile="touch"] .npc-dialog-panel {
+  left: 50%;
+  top: auto;
+  bottom: 178px;
+  transform: translateX(-50%) scale(1.15);
+  transform-origin: bottom center;
+  z-index: 58;
+}
+
+/* TV layout uses an inset UI plane over the full-resolution game scene. This
+   gives controller focus and edge HUD elements a conservative overscan margin. */
+.mir-client-page[data-layout-profile="tv"] .game-ui-scene,
+.mir-client-page[data-layout-profile="tv"] .login-overlay,
+.mir-client-page[data-layout-profile="tv"] .select-overlay {
+  left: 26px;
+  top: 19px;
+  transform: scale(0.95);
+  transform-origin: top left;
+}
+
+.mir-client-page[data-input-profile="gamepad"] :is(
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [tabindex]
+):focus {
+  outline: 3px solid #ffe18a;
+  outline-offset: 3px;
+  filter: drop-shadow(0 0 5px rgba(255, 210, 90, 0.95));
+}
+
+.mir-client-page[data-layout-profile="tv"] :is(button, input, select, textarea) {
+  scroll-margin: 64px;
+}
+
+.mir-gamepad-hint {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 95;
+  transform: translateX(-50%);
+  border: 1px solid rgba(238, 209, 118, 0.66);
+  border-radius: 999px;
+  background: rgba(8, 6, 4, 0.88);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48);
+  color: #f4dfae;
+  padding: 8px 16px;
+  font: 600 14px/1.2 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.01em;
+  text-shadow: 1px 1px #000;
+  pointer-events: none;
+}
+
 .debug-snapshot-toast {
   position: fixed;
   left: 16px;
