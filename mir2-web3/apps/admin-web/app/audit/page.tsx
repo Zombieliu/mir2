@@ -1,5 +1,6 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { SubmitButton } from "../../components/submit-button";
 import {
   adminGet,
   type AdminCommandRecord,
@@ -135,9 +136,10 @@ export default async function AuditPage({
             <option value="denied">{translateAdminStatus(t, "denied")}</option>
             <option value="dead_letter">{translateAdminStatus(t, "dead_letter")}</option>
           </select>
-          <button className="button" type="submit">
-            {t("audit.applyFilters")}
-          </button>
+          <SubmitButton
+            idle={t("audit.applyFilters")}
+            pending={t("common.working")}
+          />
         </form>
         {events.ok && events.data.degraded ? <p className="notice">{events.data.error}</p> : null}
         {!events.ok ? <p className="notice">{events.error}</p> : null}

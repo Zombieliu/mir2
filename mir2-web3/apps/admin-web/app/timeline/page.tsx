@@ -1,5 +1,6 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { SubmitButton } from "../../components/submit-button";
 import { adminGet, type AdminTimelineItem, type AdminTimelineResponse } from "../../lib/admin-api";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
 
@@ -43,9 +44,10 @@ export default async function TimelinePage({
             name="targetId"
             placeholder={t("gm.target")}
           />
-          <button className="button" type="submit">
-            {t("audit.applyFilters")}
-          </button>
+          <SubmitButton
+            idle={t("audit.applyFilters")}
+            pending={t("common.working")}
+          />
         </form>
         {timeline.ok && timeline.data.degraded ? (
           <p className="notice">{timeline.data.error}</p>

@@ -3,6 +3,7 @@ import { logoutAction } from "../app/login/actions";
 import { adminGet, type AdminAuthMeResponse } from "../lib/admin-api";
 import { getAdminI18n } from "../lib/i18n";
 import { LanguageSwitcher } from "./language-switcher";
+import { SubmitButton } from "./submit-button";
 
 const navItems = [
   { href: "/", labelKey: "shell.nav.dashboard", count: "Live" },
@@ -80,9 +81,11 @@ export async function AdminShell({
             </Link>
             {auth.ok ? (
               <form action={logoutAction}>
-                <button className="user-chip user-chip-button" type="submit">
-                  {t("shell.logout")}
-                </button>
+                <SubmitButton
+                  className="user-chip user-chip-button"
+                  idle={t("shell.logout")}
+                  pending={t("common.working")}
+                />
               </form>
             ) : null}
           </div>

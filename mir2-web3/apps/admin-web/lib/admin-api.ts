@@ -292,6 +292,10 @@ export type WorldDirectorDashboard = {
     generationIntervalSeconds: number;
     remoteCommonwareConfigured: boolean;
     remoteCommonwareRequired: boolean;
+    proposalGenerator: "rule_engine" | "openai_responses" | string;
+    aiConfigured: boolean;
+    aiProvider?: string;
+    aiModel?: string;
   };
   runtimeStatuses: Array<{
     endpoint: string;

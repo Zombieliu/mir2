@@ -8,14 +8,14 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::{
     CommonwareControlLog, DirectorPolicyState, DirectorPressureScores, DirectorProposal,
-    FinalizedControlBlock, FinalizedDirectorInstallReceipt, FinalizedDirectorSubmission,
-    Gate14Command, Gate14CommandEnvelope, NodeSigningIdentity, SignedDirectorCommand,
-    WorldDirectorPolicy, WorldDirectorRuntimeStatus, WorldTelemetrySnapshot,
+    DirectorProposalSource, FinalizedControlBlock, FinalizedDirectorInstallReceipt,
+    FinalizedDirectorSubmission, Gate14Command, Gate14CommandEnvelope, NodeSigningIdentity,
+    SignedDirectorCommand, WorldDirectorPolicy, WorldDirectorRuntimeStatus, WorldTelemetrySnapshot,
 };
 use postgres::{Client, NoTls};
 use reqwest::blocking::Client as HttpClient;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
 const CHECKPOINT_VERSION: u32 = 1;
@@ -122,6 +122,10 @@ pub struct DirectorApprovalConfiguration {
     pub generation_interval_seconds: u64,
     pub remote_commonware_configured: bool,
     pub remote_commonware_required: bool,
+    pub proposal_generator: String,
+    pub ai_configured: bool,
+    pub ai_provider: Option<String>,
+    pub ai_model: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -384,6 +388,94 @@ enum DirectorDelivery {
 }
 
 #[derive(Clone)]
+enum DirectorProposalGenerator {
+    RuleEngine,
+    OpenAiResponses {
+        endpoint: String,
+        api_key: String,
+        model: String,
+        reasoning_effort: String,
+        timeout_seconds: u64,
+    },
+}
+
+impl DirectorProposalGenerator {
+    fn from_env() -> Result<Self, String> {
+        let mode = env::var("MIR2_WORLD_DIRECTOR_PROPOSAL_MODE")
+            .unwrap_or_else(|_| "rule".to_string())
+            .trim()
+            .to_ascii_lowercase();
+        match mode.as_str() {
+            "rule" | "rules" | "rule_engine" => Ok(Self::RuleEngine),
+            "openai" | "openai_responses" => {
+                let api_key = env::var("MIR2_WORLD_DIRECTOR_AI_API_KEY")
+                    .or_else(|_| env::var("OPENAI_API_KEY"))
+                    .ok()
+                    .filter(|value| !value.trim().is_empty())
+                    .ok_or_else(|| {
+                        "OpenAI proposal mode requires MIR2_WORLD_DIRECTOR_AI_API_KEY or OPENAI_API_KEY"
+                            .to_string()
+                    })?;
+                let endpoint = env::var("MIR2_WORLD_DIRECTOR_AI_ENDPOINT")
+                    .unwrap_or_else(|_| "https://api.openai.com/v1/responses".to_string())
+                    .trim()
+                    .to_string();
+                if !endpoint.starts_with("https://") {
+                    return Err("MIR2_WORLD_DIRECTOR_AI_ENDPOINT must use HTTPS".to_string());
+                }
+                let model = env::var("MIR2_WORLD_DIRECTOR_AI_MODEL")
+                    .unwrap_or_else(|_| "gpt-5.6-terra".to_string())
+                    .trim()
+                    .to_string();
+                if model.is_empty() {
+                    return Err("MIR2_WORLD_DIRECTOR_AI_MODEL must not be empty".to_string());
+                }
+                let reasoning_effort = env::var("MIR2_WORLD_DIRECTOR_AI_REASONING_EFFORT")
+                    .unwrap_or_else(|_| "low".to_string())
+                    .trim()
+                    .to_ascii_lowercase();
+                if !matches!(
+                    reasoning_effort.as_str(),
+                    "none" | "low" | "medium" | "high" | "xhigh" | "max"
+                ) {
+                    return Err(
+                        "MIR2_WORLD_DIRECTOR_AI_REASONING_EFFORT must be none, low, medium, high, xhigh, or max"
+                            .to_string(),
+                    );
+                }
+                let timeout_seconds = env::var("MIR2_WORLD_DIRECTOR_AI_TIMEOUT_SECONDS")
+                    .ok()
+                    .and_then(|value| value.trim().parse::<u64>().ok())
+                    .unwrap_or(45)
+                    .clamp(5, 120);
+                Ok(Self::OpenAiResponses {
+                    endpoint,
+                    api_key,
+                    model,
+                    reasoning_effort,
+                    timeout_seconds,
+                })
+            }
+            _ => Err("MIR2_WORLD_DIRECTOR_PROPOSAL_MODE must be rule or openai".to_string()),
+        }
+    }
+
+    fn label(&self) -> &'static str {
+        match self {
+            Self::RuleEngine => "rule_engine",
+            Self::OpenAiResponses { .. } => "openai_responses",
+        }
+    }
+
+    fn ai_identity(&self) -> Option<(&'static str, &str)> {
+        match self {
+            Self::RuleEngine => None,
+            Self::OpenAiResponses { model, .. } => Some(("openai", model)),
+        }
+    }
+}
+
+#[derive(Clone)]
 struct DirectorApprovalConfig {
     repository: DirectorRepository,
     director: Option<NodeSigningIdentity>,
@@ -394,6 +486,7 @@ struct DirectorApprovalConfig {
     commonware_gateway_url: Option<String>,
     commonware_gateway_token: Option<String>,
     require_remote_commonware: bool,
+    proposal_generator: DirectorProposalGenerator,
 }
 
 impl DirectorApprovalConfig {
@@ -473,6 +566,7 @@ impl DirectorApprovalConfig {
             commonware_gateway_url,
             commonware_gateway_token,
             require_remote_commonware,
+            proposal_generator: DirectorProposalGenerator::from_env()?,
         })
     }
 
@@ -496,6 +590,40 @@ impl DirectorApprovalConfig {
 struct DirectorApprovalInner {
     config: DirectorApprovalConfig,
     checkpoint: Mutex<DirectorApprovalCheckpoint>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AiDirectorDecision {
+    should_propose: bool,
+    template_id: String,
+    target_zones: Vec<String>,
+    duration_ms: u64,
+    reward_budget: u64,
+    rationale: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct OpenAiResponseEnvelope {
+    #[serde(default)]
+    status: String,
+    #[serde(default)]
+    output: Vec<OpenAiOutputItem>,
+    incomplete_details: Option<Value>,
+}
+
+#[derive(Debug, Deserialize)]
+struct OpenAiOutputItem {
+    #[serde(default)]
+    content: Vec<OpenAiContentItem>,
+}
+
+#[derive(Debug, Deserialize)]
+struct OpenAiContentItem {
+    #[serde(rename = "type")]
+    content_type: String,
+    text: Option<String>,
+    refusal: Option<String>,
 }
 
 #[derive(Clone)]
@@ -554,10 +682,17 @@ impl WorldDirectorApprovalService {
     ) -> Result<Option<DirectorApprovalRecord>, String> {
         snapshot.validate()?;
         let scores = DirectorPressureScores::from_snapshot(&snapshot)?;
-        let Some(proposal) = DirectorProposal::bichon_wooma_rule(&snapshot, &scores, now_ms) else {
+        let policy = WorldDirectorPolicy::mir2_default();
+        let Some(proposal) = generate_director_proposal(
+            &self.inner.config.proposal_generator,
+            &policy,
+            &snapshot,
+            &scores,
+            now_ms,
+        )?
+        else {
             return Ok(None);
         };
-        let policy = WorldDirectorPolicy::mir2_default();
         let requested_by = requested_by.into();
         let mut checkpoint = self.lock_checkpoint()?;
         self.refresh_checkpoint(&mut checkpoint)?;
@@ -1189,6 +1324,20 @@ impl WorldDirectorApprovalService {
                 generation_interval_seconds: self.inner.config.generation_interval_seconds,
                 remote_commonware_configured: self.inner.config.commonware_gateway_url.is_some(),
                 remote_commonware_required: self.inner.config.require_remote_commonware,
+                proposal_generator: self.inner.config.proposal_generator.label().to_string(),
+                ai_configured: self.inner.config.proposal_generator.ai_identity().is_some(),
+                ai_provider: self
+                    .inner
+                    .config
+                    .proposal_generator
+                    .ai_identity()
+                    .map(|(provider, _)| provider.to_string()),
+                ai_model: self
+                    .inner
+                    .config
+                    .proposal_generator
+                    .ai_identity()
+                    .map(|(_, model)| model.to_string()),
             },
             runtime_statuses,
             pending_count,
@@ -1424,6 +1573,200 @@ pub fn now_ms_now() -> u64 {
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis() as u64)
         .unwrap_or_default()
+}
+
+fn generate_director_proposal(
+    generator: &DirectorProposalGenerator,
+    policy: &WorldDirectorPolicy,
+    snapshot: &WorldTelemetrySnapshot,
+    scores: &DirectorPressureScores,
+    now_ms: u64,
+) -> Result<Option<DirectorProposal>, String> {
+    match generator {
+        DirectorProposalGenerator::RuleEngine => Ok(DirectorProposal::bichon_wooma_rule(
+            snapshot, scores, now_ms,
+        )),
+        DirectorProposalGenerator::OpenAiResponses {
+            endpoint,
+            api_key,
+            model,
+            reasoning_effort,
+            timeout_seconds,
+        } => {
+            let request = policy.ai_request(snapshot, scores)?;
+            let body = json!({
+                "model": model,
+                "store": false,
+                "reasoning": {
+                    "effort": reasoning_effort
+                },
+                "text": {
+                    "verbosity": "low",
+                    "format": {
+                        "type": "json_schema",
+                        "name": "mir2_world_director_decision",
+                        "strict": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "shouldPropose": { "type": "boolean" },
+                                "templateId": { "type": "string", "maxLength": 160 },
+                                "targetZones": {
+                                    "type": "array",
+                                    "maxItems": 8,
+                                    "items": { "type": "string", "maxLength": 160 }
+                                },
+                                "durationMs": { "type": "integer", "minimum": 0 },
+                                "rewardBudget": { "type": "integer", "minimum": 0 },
+                                "rationale": { "type": "string", "maxLength": 512 }
+                            },
+                            "required": [
+                                "shouldPropose",
+                                "templateId",
+                                "targetZones",
+                                "durationMs",
+                                "rewardBudget",
+                                "rationale"
+                            ]
+                        }
+                    }
+                },
+                "instructions": concat!(
+                    "你是 Mir2 世界事件提案器。只做分析和提案，不执行任何操作。",
+                    "只能选择输入中列出的 templateId 与 targetZones，不能创造动作、脚本、物品、封禁或数据库写入。",
+                    "只有当压力指标达到模板阈值且事件能改善玩家体验时 shouldPropose=true；否则返回 false。",
+                    "false 时 templateId、targetZones、durationMs、rewardBudget、rationale 分别返回空字符串、空数组、0、0 和简短原因。",
+                    "true 时 rationale 使用简洁中文，并严格遵守输入预算。所有提案仍需人工审批和服务器策略校验。"
+                ),
+                "input": serde_json::to_string(&request)
+                    .map_err(|error| format!("AI director request encode failed: {error}"))?,
+                "max_output_tokens": 1_200,
+                "safety_identifier": format!(
+                    "mir2-world-director-{}",
+                    snapshot.region_id.replace(|character: char| !character.is_ascii_alphanumeric(), "-")
+                )
+            });
+            let client = HttpClient::builder()
+                .timeout(Duration::from_secs(*timeout_seconds))
+                .build()
+                .map_err(|error| format!("AI director HTTP client build failed: {error}"))?;
+            let response = client
+                .post(endpoint)
+                .bearer_auth(api_key)
+                .header("Content-Type", "application/json")
+                .json(&body)
+                .send()
+                .map_err(|error| format!("OpenAI Responses request failed: {error}"))?;
+            let status = response.status();
+            let bytes = response
+                .bytes()
+                .map_err(|error| format!("OpenAI Responses body read failed: {error}"))?;
+            if bytes.len() > 512 * 1024 {
+                return Err("OpenAI Responses body exceeded 512 KiB".to_string());
+            }
+            if !status.is_success() {
+                let preview = String::from_utf8_lossy(&bytes)
+                    .replace(['\r', '\n'], " ")
+                    .chars()
+                    .take(512)
+                    .collect::<String>();
+                return Err(format!(
+                    "OpenAI Responses returned HTTP {}: {}",
+                    status.as_u16(),
+                    preview
+                ));
+            }
+            let decision = decode_openai_director_decision(&bytes)?;
+            materialize_ai_director_proposal(decision, snapshot, model, now_ms)
+        }
+    }
+}
+
+fn decode_openai_director_decision(response: &[u8]) -> Result<AiDirectorDecision, String> {
+    let envelope = serde_json::from_slice::<OpenAiResponseEnvelope>(response)
+        .map_err(|error| format!("OpenAI Responses JSON decode failed: {error}"))?;
+    if envelope.status == "incomplete" {
+        return Err(format!(
+            "OpenAI Responses generation was incomplete: {}",
+            envelope
+                .incomplete_details
+                .map(|value| value.to_string())
+                .unwrap_or_else(|| "no details".to_string())
+        ));
+    }
+    let mut refusal = None;
+    let output_text = envelope.output.iter().find_map(|output| {
+        output.content.iter().find_map(|content| {
+            if content.content_type == "refusal" {
+                refusal = content.refusal.clone();
+                None
+            } else if content.content_type == "output_text" {
+                content.text.clone()
+            } else {
+                None
+            }
+        })
+    });
+    if let Some(refusal) = refusal {
+        return Err(format!(
+            "OpenAI refused the World Director proposal: {refusal}"
+        ));
+    }
+    let output_text =
+        output_text.ok_or_else(|| "OpenAI Responses did not contain output_text".to_string())?;
+    serde_json::from_str(&output_text)
+        .map_err(|error| format!("OpenAI structured World Director output was invalid: {error}"))
+}
+
+fn materialize_ai_director_proposal(
+    decision: AiDirectorDecision,
+    snapshot: &WorldTelemetrySnapshot,
+    model: &str,
+    now_ms: u64,
+) -> Result<Option<DirectorProposal>, String> {
+    if !decision.should_propose {
+        return Ok(None);
+    }
+    if decision.template_id.trim().is_empty()
+        || decision.target_zones.is_empty()
+        || decision.duration_ms == 0
+        || decision.reward_budget == 0
+        || decision.rationale.trim().is_empty()
+    {
+        return Err("OpenAI proposed an incomplete World Director event".to_string());
+    }
+    let normalized = serde_json::to_vec(&json!({
+        "snapshotId": snapshot.snapshot_id,
+        "model": model,
+        "templateId": decision.template_id,
+        "targetZones": decision.target_zones,
+        "durationMs": decision.duration_ms,
+        "rewardBudget": decision.reward_budget,
+        "rationale": decision.rationale,
+        "nowMs": now_ms
+    }))
+    .map_err(|error| format!("AI director decision hash encode failed: {error}"))?;
+    let digest = Sha256::digest(normalized);
+    let mut seed_bytes = [0_u8; 8];
+    seed_bytes.copy_from_slice(&digest[..8]);
+    let seed = u64::from_be_bytes(seed_bytes).max(1);
+    let suffix = hex(&digest[..8]);
+    Ok(Some(DirectorProposal {
+        proposal_id: format!("proposal:{}:ai:{suffix}", snapshot.snapshot_id),
+        snapshot_id: snapshot.snapshot_id.clone(),
+        template_id: decision.template_id,
+        source: DirectorProposalSource::Ai {
+            provider: "openai".to_string(),
+            model: model.to_string(),
+        },
+        target_zones: decision.target_zones.into_iter().collect(),
+        duration_ms: decision.duration_ms,
+        reward_budget: decision.reward_budget,
+        seed,
+        generation: 1,
+        rationale: decision.rationale,
+    }))
 }
 
 fn proposal_risk(proposal: &DirectorProposal) -> DirectorRiskLevel {
@@ -2019,6 +2362,7 @@ mod tests {
             commonware_gateway_url,
             commonware_gateway_token: None,
             require_remote_commonware: false,
+            proposal_generator: DirectorProposalGenerator::RuleEngine,
         })
         .unwrap()
     }
@@ -2069,6 +2413,180 @@ mod tests {
             player_deaths: boss_kills.saturating_mul(2),
             completed_quests: active_players as u64 / 4,
         }
+    }
+
+    #[test]
+    fn openai_structured_output_materializes_a_policy_bounded_proposal() {
+        let now_ms = 1_800_000_000_000;
+        let response = json!({
+            "status": "completed",
+            "output": [{
+                "type": "message",
+                "content": [{
+                    "type": "output_text",
+                    "text": serde_json::to_string(&json!({
+                        "shouldPropose": true,
+                        "templateId": "mir2.bichon-wooma-awakening.v1",
+                        "targetZones": ["map:D022", "map:D024"],
+                        "durationMs": 1_800_000,
+                        "rewardBudget": 120_000,
+                        "rationale": "沃玛区域疲劳度较高，建议开启受限事件并保留人工审批。"
+                    })).unwrap()
+                }]
+            }]
+        });
+        let decision =
+            decode_openai_director_decision(&serde_json::to_vec(&response).unwrap()).unwrap();
+        let snapshot = snapshot(now_ms);
+        let proposal =
+            materialize_ai_director_proposal(decision, &snapshot, "gpt-5.6-terra", now_ms)
+                .unwrap()
+                .unwrap();
+        assert!(matches!(
+            proposal.source,
+            DirectorProposalSource::Ai {
+                ref provider,
+                ref model
+            } if provider == "openai" && model == "gpt-5.6-terra"
+        ));
+        let scores = DirectorPressureScores::from_snapshot(&snapshot).unwrap();
+        WorldDirectorPolicy::mir2_default()
+            .approve(
+                &proposal,
+                &snapshot,
+                &scores,
+                &DirectorPolicyState::default(),
+                now_ms,
+            )
+            .unwrap();
+    }
+
+    #[test]
+    fn openai_no_event_decision_returns_no_proposal() {
+        let response = json!({
+            "status": "completed",
+            "output": [{
+                "type": "message",
+                "content": [{
+                    "type": "output_text",
+                    "text": serde_json::to_string(&json!({
+                        "shouldPropose": false,
+                        "templateId": "",
+                        "targetZones": [],
+                        "durationMs": 0,
+                        "rewardBudget": 0,
+                        "rationale": "当前压力不足，不生成事件。"
+                    })).unwrap()
+                }]
+            }]
+        });
+        let decision =
+            decode_openai_director_decision(&serde_json::to_vec(&response).unwrap()).unwrap();
+        assert!(materialize_ai_director_proposal(
+            decision,
+            &snapshot(1_800_000_010_000),
+            "gpt-5.6-terra",
+            1_800_000_010_000,
+        )
+        .unwrap()
+        .is_none());
+    }
+
+    #[test]
+    fn openai_refusal_is_reported_instead_of_falling_back_to_rules() {
+        let response = json!({
+            "status": "completed",
+            "output": [{
+                "type": "message",
+                "content": [{
+                    "type": "refusal",
+                    "refusal": "request refused"
+                }]
+            }]
+        });
+        let error =
+            decode_openai_director_decision(&serde_json::to_vec(&response).unwrap()).unwrap_err();
+        assert!(error.contains("refused"));
+    }
+
+    #[test]
+    fn openai_responses_adapter_posts_schema_and_returns_ai_proposal() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request = vec![0_u8; 64 * 1024];
+            let read = stream.read(&mut request).unwrap();
+            let request = String::from_utf8_lossy(&request[..read]);
+            assert!(request.starts_with("POST /v1/responses "));
+            assert!(request
+                .to_ascii_lowercase()
+                .contains("authorization: bearer test-api-key"));
+            let body = request.split_once("\r\n\r\n").unwrap().1;
+            let body = serde_json::from_str::<Value>(body).unwrap();
+            assert_eq!(body["model"], "gpt-5.6-terra");
+            assert_eq!(body["store"], false);
+            assert_eq!(body["text"]["format"]["type"], "json_schema");
+            assert_eq!(body["text"]["format"]["strict"], true);
+
+            let decision = serde_json::to_string(&json!({
+                "shouldPropose": true,
+                "templateId": "mir2.bichon-wooma-awakening.v1",
+                "targetZones": ["map:D022", "map:D024"],
+                "durationMs": 1_800_000,
+                "rewardBudget": 120_000,
+                "rationale": "真实模型经安全闸生成的受限提案。"
+            }))
+            .unwrap();
+            let response = json!({
+                "status": "completed",
+                "output": [{
+                    "type": "message",
+                    "content": [{
+                        "type": "output_text",
+                        "text": decision
+                    }]
+                }]
+            })
+            .to_string();
+            write!(
+                stream,
+                "HTTP/1.1 200 OK\r\ncontent-type: application/json\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{}",
+                response.len(),
+                response
+            )
+            .unwrap();
+        });
+
+        let now_ms = 1_800_000_005_000;
+        let snapshot = snapshot(now_ms);
+        let scores = DirectorPressureScores::from_snapshot(&snapshot).unwrap();
+        let proposal = generate_director_proposal(
+            &DirectorProposalGenerator::OpenAiResponses {
+                endpoint: format!("http://{address}/v1/responses"),
+                api_key: "test-api-key".to_string(),
+                model: "gpt-5.6-terra".to_string(),
+                reasoning_effort: "low".to_string(),
+                timeout_seconds: 5,
+            },
+            &WorldDirectorPolicy::mir2_default(),
+            &snapshot,
+            &scores,
+            now_ms,
+        )
+        .unwrap()
+        .unwrap();
+        server.join().unwrap();
+        assert!(matches!(proposal.source, DirectorProposalSource::Ai { .. }));
+        WorldDirectorPolicy::mir2_default()
+            .approve(
+                &proposal,
+                &snapshot,
+                &scores,
+                &DirectorPolicyState::default(),
+                now_ms,
+            )
+            .unwrap();
     }
 
     #[test]
