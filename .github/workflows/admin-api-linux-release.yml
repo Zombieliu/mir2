@@ -2,18 +2,6 @@ name: Admin API Linux release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - codex/world-director-approval-beta
-    paths:
-      - ".github/workflows/admin-api-linux-release.yml"
-      - "mir2-web3/Cargo.lock"
-      - "mir2-web3/Cargo.toml"
-      - "mir2-web3/apps/admin-api/**"
-      - "mir2-web3/apps/gateway/**"
-      - "mir2-web3/apps/simulation/**"
-      - "mir2-web3/packages/game-data/**"
-      - "mir2-web3/packages/protocol/**"
 
 permissions:
   contents: read
