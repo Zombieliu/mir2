@@ -50,7 +50,10 @@ import {
   SelectOverlay,
 } from "./components/original-client-overlays";
 import { GameUiScene, GameUiSceneStoreBound } from "./components/original-client-game-ui-scene";
-import { calculateMir2StagePresentation } from "./components/original-client-stage-presentation";
+import {
+  calculateMir2StagePresentation,
+  calculateMir2TouchControlDeck,
+} from "./components/original-client-stage-presentation";
 import type {
   BevyEntityRenderState,
   BevyMapRenderState,
@@ -683,15 +686,16 @@ export function OriginalClientShell({
     renderPlayer: player,
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
   });
-  const stageScaleStyle = useMemo(
-    () =>
-      ({
-        "--mir-stage-scale": stagePresentation.scale,
-        "--mir-stage-left": `${stagePresentation.left}px`,
-        "--mir-stage-top": `${stagePresentation.top}px`,
-      }) as CSSProperties,
-    [stagePresentation],
-  );
+  const stageScaleStyle = useMemo(() => {
+    const touchControlDeck = calculateMir2TouchControlDeck(stagePresentation);
+    return {
+      "--mir-stage-scale": stagePresentation.scale,
+      "--mir-stage-left": `${stagePresentation.left}px`,
+      "--mir-stage-top": `${stagePresentation.top}px`,
+      "--mir-control-deck-left": `${touchControlDeck.left}px`,
+      "--mir-control-deck-width": `${touchControlDeck.width}px`,
+    } as CSSProperties;
+  }, [stagePresentation]);
   const sceneAssetReadinessCallbackRef = useRef(onSceneAssetReadinessChange);
   sceneAssetReadinessCallbackRef.current = onSceneAssetReadinessChange;
 

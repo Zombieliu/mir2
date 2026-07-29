@@ -4535,7 +4535,10 @@ button.character-spell-value:hover {
 
 .mir-mobile-controls {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: var(--mir-control-deck-left, 0px);
+  width: var(--mir-control-deck-width, 100vw);
   z-index: 80;
   pointer-events: none;
   touch-action: none;
@@ -4545,7 +4548,7 @@ button.character-spell-value:hover {
 
 .mir-mobile-stick-shell {
   position: absolute;
-  left: max(8px, env(safe-area-inset-left));
+  left: max(8px, calc(env(safe-area-inset-left) - var(--mir-control-deck-left, 0px)));
   bottom: max(8px, env(safe-area-inset-bottom));
   width: 112px;
   height: 112px;
@@ -4586,7 +4589,7 @@ button.character-spell-value:hover {
 .mir-mobile-action-pad {
   position: absolute;
   top: max(8px, env(safe-area-inset-top));
-  right: max(8px, env(safe-area-inset-right));
+  right: max(8px, calc(env(safe-area-inset-right) - var(--mir-control-deck-left, 0px)));
   bottom: max(8px, env(safe-area-inset-bottom));
   width: 114px;
   pointer-events: none;
