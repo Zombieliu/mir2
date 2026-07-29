@@ -43,3 +43,11 @@ export function resolveAssetPrewarmPolicy(
     backgroundMode: resolvedBackgroundMode,
   };
 }
+
+export function shouldPrewarmRawMapFrames(tier: RenderTier): boolean {
+  // Medium/high clients render the packed map atlas by default. Prewarming the
+  // source PNGs in those tiers duplicates the atlas download and can request
+  // historical R2 objects that are not part of the active release. Low tier
+  // keeps the DOM image path warm as its compatibility fallback.
+  return tier === "low";
+}

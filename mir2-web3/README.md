@@ -43,6 +43,7 @@ Bevy runtimes.
 - [AI 多渠道内容分发架构](docs/AI-DISTRIBUTION-FABRIC.zh-CN.md)
 - [AI 首发渠道闭环与验收](docs/AI-LAUNCH-CHANNELS.zh-CN.md)
 - [游戏发行渠道与统一账号](docs/DISTRIBUTION-CHANNEL-INTEGRATION.zh-CN.md)
+- [Mir2 瘦客户端与 R2 素材边界](docs/THIN-CLIENT-R2-ASSETS.zh-CN.md)
 - [Gate 25 home-network Beta acceptance](infra/gate25/README.zh-CN.md)
 - [Gate 22 outbound QUIC/mTLS Home Tunnel](infra/gate22/README.zh-CN.md)
 

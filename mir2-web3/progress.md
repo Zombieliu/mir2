@@ -1,5 +1,15 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-07-30 — Thin player client / R2 asset boundary
+
+- Goal: separate the complete local Crystal source corpus from the player distribution, verify the real R2 boundary, remove duplicate runtime bytes, and produce a production-verifiable standalone thin client.
+- Root cause: `apps/web/public` is a deterministic source/generation corpus (429,070,362 logical bytes), while `.next/cache` and `.next/dev` contribute another ~1.1 GB of compiler state. Neither is the player download.
+- R2 audit: the immutable prefix contains 86,447 objects / 443,736,598 bytes, but its online release manifest contains only 188 historical entries and several current starter-map/HUD paths are absent. The build now preserves the 39,409-entry filesystem manifest instead of allowing the stale remote manifest to shrink it to 184 entries.
+- Implemented: conditional Next standalone output, a 360 MiB thin-package budget/report, R2/local asset smoke, runtime same-origin fallback, local map/entity atlases, explicit tiny compatibility assets, removal of the 37 MiB legacy WebGL2 mirror, and tier-aware prewarming that no longer downloads raw map frames on packed-atlas tiers.
+- Final artifact: `.mir2-thin-client` is 348,608,686 logical bytes (332.46 MiB), contains both selectable Bevy backends, and passes 13 local package checks plus 12 live R2 checks.
+- Browser acceptance: `demo/demo` logged in through the real local Gateway, entered BichonProvince, rendered via WebGPU Bevy with scene interaction ready, completed cache prewarm 215/215 with 0 failures, and moved authoritatively from `(288,616)` to `(289,616)`.
+- Known remote-release advisory: optional `Monster/006` metadata and the private full Crystal pack index remain unavailable in the historical R2 prefix. They are graceful optional fallbacks and do not block the verified starter gameplay path; a future R2 republish must use a new immutable version rather than overwriting the current prefix.
+
 ## 2026-07-29 — Launch Channel Pack v1
 
 - Goal: land the first production-oriented AI distribution loop across Web/HLS, Discord Webhook, YouTube RTMPS, and a lightweight in-game AI event entry.
@@ -286,3 +296,17 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - Browser evidence: itch guest login remained stable across reload; CrazyGames SDK v3 automatically entered the verified channel account with no external-login controls and no console errors; a Chromium virtual platform authenticator completed a real WebAuthn/Sui Passkey registration and linked it to the existing itch Player ID.
 - Data evidence: operator lookup returned `primaryProvider=suiPasskey`, `lastAuthenticatedProvider=suiPasskey`, and both `itch`/`suiPasskey` bindings for the same Player ID; `/health` returned `ok=true`, `backend=postgres`, and `durable=true`.
 - Verification: Gateway full library suite `413 passed / 0 failed / 1 ignored`; focused channel suite `4 passed / 0 failed / 1 ignored`; ignored two-independent-Gateway PostgreSQL test passed separately; Web typecheck and optimized Next production build passed; the negative authentication probe returned HTTP 401 when an Ed25519 wallet signature claimed `suiPasskey`.
+2026-07-30 thin player client / R2 asset boundary goal:
+
+- New user goal: explain and eliminate the ~700 MB Mir2 client build while keeping the full local
+  source corpus available for development and offline asset generation.
+- Cloudflare read-only inventory verified that `mir2/v/37596e16d64fde7c/` still contains 86,447
+  objects / 443,736,598 bytes (69,885 map objects and 16,551 UI objects), while the currently
+  published `remote-asset-release.json` has drifted down to a 188-file runtime sample.
+- Local size diagnosis: `apps/web/public` is ~563 MB of source/runtime assets; `.next` is ~877 MB
+  only because it combines ~456 MB production webpack cache and ~405 MB development cache with
+  the real ~15 MB production server/static output. Neither cache is a player distribution.
+- Architectural decision: keep source assets in git for deterministic generation and local/offline
+  development, but make production packaging a measured thin-client boundary: only the two
+  same-origin Bevy runtimes plus explicit bootstrap/generated packs may ship; R2-backed original
+  UI/map media must be excluded and fetched through the existing versioned Service Worker cache.

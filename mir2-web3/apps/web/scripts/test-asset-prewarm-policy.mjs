@@ -22,7 +22,7 @@ assert.deepEqual(errors, []);
 
 const loadedModule = { exports: {} };
 new Function("exports", "module", compiled.outputText)(loadedModule.exports, loadedModule);
-const { resolveAssetPrewarmPolicy } = loadedModule.exports;
+const { resolveAssetPrewarmPolicy, shouldPrewarmRawMapFrames } = loadedModule.exports;
 
 test("low tier bounds scene prewarm and disables background packs by default", () => {
   assert.deepEqual(resolveAssetPrewarmPolicy("low"), {
@@ -54,4 +54,10 @@ test("medium and high tiers preserve progressively more eager prewarming", () =>
 test("an explicit background mode remains available for deterministic QA", () => {
   assert.equal(resolveAssetPrewarmPolicy("low", "immediate").backgroundMode, "immediate");
   assert.equal(resolveAssetPrewarmPolicy("high", "off").backgroundMode, "off");
+});
+
+test("only the low tier prewarms raw map frames for the DOM compatibility path", () => {
+  assert.equal(shouldPrewarmRawMapFrames("low"), true);
+  assert.equal(shouldPrewarmRawMapFrames("medium"), false);
+  assert.equal(shouldPrewarmRawMapFrames("high"), false);
 });
