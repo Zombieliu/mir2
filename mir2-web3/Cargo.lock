@@ -3604,6 +3604,7 @@ dependencies = [
  "axum 0.7.9",
  "chrono",
  "mir2-game-data",
+ "mir2-gateway",
  "mir2-simulation",
  "postgres",
  "reqwest 0.12.28",

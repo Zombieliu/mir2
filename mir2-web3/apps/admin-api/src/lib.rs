@@ -25,6 +25,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 mod daily_report;
+mod world_director_approval;
 
 pub use daily_report::spawn_daily_report_scheduler;
 use daily_report::{
@@ -32,6 +33,15 @@ use daily_report::{
     latest_public_daily_report, list_daily_reports, publish_daily_report,
     retry_daily_report_discord, DailyReportService,
 };
+use mir2_gateway::{
+    EconomyTelemetrySnapshot as DirectorEconomyTelemetrySnapshot,
+    GuildTelemetrySnapshot as DirectorGuildTelemetrySnapshot, MapTelemetrySnapshot,
+    WorldTelemetrySnapshot, WORLD_DIRECTOR_SCHEMA,
+};
+use world_director_approval::{
+    now_ms_now as world_director_now_ms, DirectorApprovalDashboard, DirectorApprovalRecord,
+};
+pub use world_director_approval::{DirectorProposalPatch, WorldDirectorApprovalService};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -4062,6 +4072,7 @@ pub struct AdminApiState {
     read_models: Arc<AdminReadModelStore>,
     admin_store: Option<PostgresAdminRepository>,
     daily_reports: Arc<DailyReportService>,
+    world_director: Arc<WorldDirectorApprovalService>,
 }
 
 impl Default for AdminApiState {
@@ -4077,6 +4088,10 @@ impl AdminApiState {
         let postgres_repository = PostgresAdminRepository::from_env()?;
         let admin_store = postgres_repository.clone();
         let daily_reports = Arc::new(DailyReportService::from_env(admin_store.clone())?);
+        let world_director =
+            Arc::new(WorldDirectorApprovalService::from_env().map_err(|error| {
+                AdminError::Repository(format!("world director init failed: {error}"))
+            })?);
         let (command_store, audit_store, approval_store) = match postgres_repository {
             Some(repository) => (
                 CommandRepositoryBackend::Postgres(repository.clone()),
@@ -4099,8 +4114,234 @@ impl AdminApiState {
             read_models,
             admin_store,
             daily_reports,
+            world_director,
         })
     }
+}
+
+pub fn spawn_world_director_approval_scheduler(state: AdminApiState) {
+    let recovery_state = state.clone();
+    tokio::spawn(async move {
+        let service = recovery_state.world_director.clone();
+        match tokio::task::spawn_blocking(move || service.recover_inflight(world_director_now_ms()))
+            .await
+        {
+            Ok(Ok(recovered)) if recovered > 0 => {
+                eprintln!("world director recovered {recovered} in-flight proposal(s)");
+            }
+            Ok(Ok(_)) => {}
+            Ok(Err(error)) => {
+                eprintln!("world director in-flight recovery failed: {error}");
+            }
+            Err(error) => {
+                eprintln!("world director recovery task failed: {error}");
+            }
+        }
+    });
+    if !state.world_director.automatic_generation_enabled() {
+        return;
+    }
+    tokio::spawn(async move {
+        let interval = state.world_director.generation_interval();
+        loop {
+            let generation_state = state.clone();
+            let generated = tokio::task::spawn_blocking(move || {
+                let now = world_director_now_ms();
+                let snapshot = build_live_world_director_snapshot(&generation_state, now)?;
+                generation_state
+                    .world_director
+                    .generate(snapshot, "world-director-scheduler", now)
+                    .map_err(world_director_api_error)
+            })
+            .await;
+            if let Err(error) = generated {
+                eprintln!("world director scheduler task failed: {error}");
+            } else if let Ok(Err(error)) = generated {
+                eprintln!(
+                    "world director scheduler generation failed: {}",
+                    error.message
+                );
+            }
+            tokio::time::sleep(interval).await;
+        }
+    });
+}
+
+fn build_live_world_director_snapshot(
+    state: &AdminApiState,
+    observed_at_ms: u64,
+) -> Result<WorldTelemetrySnapshot, ApiError> {
+    let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+    let presence = load_gateway_presence();
+    let players = build_player_summaries(&snapshot, Some(&presence));
+    let guilds = build_guilds_read_model(&snapshot);
+    let window_seconds = 15 * 60;
+    let gameplay = fetch_clickhouse_gameplay_event_summary(
+        &GameplayEventSummaryQuery {
+            window_seconds: Some(window_seconds),
+            limit: Some(128),
+            ..GameplayEventSummaryQuery::default()
+        },
+        observed_at_ms,
+        window_seconds,
+    )
+    .ok();
+    let attack_events = gameplay
+        .as_ref()
+        .map(|summary| {
+            summary
+                .commands
+                .iter()
+                .filter(|command| {
+                    let kind = command.command_kind.to_ascii_lowercase();
+                    kind.contains("attack") || kind.contains("castskill")
+                })
+                .map(|command| command.event_count)
+                .sum::<u64>()
+        })
+        .unwrap_or_default();
+    let quest_events = gameplay
+        .as_ref()
+        .map(|summary| {
+            summary
+                .commands
+                .iter()
+                .filter(|command| command.command_kind.to_ascii_lowercase().contains("quest"))
+                .map(|command| command.event_count)
+                .sum::<u64>()
+        })
+        .unwrap_or_default();
+    let boss_events = gameplay
+        .as_ref()
+        .map(|summary| {
+            summary
+                .commands
+                .iter()
+                .filter(|command| command.command_kind.to_ascii_lowercase().contains("boss"))
+                .map(|command| command.event_count)
+                .sum::<u64>()
+        })
+        .unwrap_or_default();
+
+    let mut map_names = players
+        .iter()
+        .map(|player| normalize_director_map_name(&player.map_file_name))
+        .collect::<BTreeSet<_>>();
+    map_names.extend(
+        ["0", "D022", "D023", "D024"]
+            .into_iter()
+            .map(str::to_string),
+    );
+    let total_active = players.iter().filter(|player| player.online).count() as u64;
+    let maps = map_names
+        .into_iter()
+        .map(|map_file_name| {
+            let map_players = players
+                .iter()
+                .filter(|player| {
+                    normalize_director_map_name(&player.map_file_name) == map_file_name
+                })
+                .collect::<Vec<_>>();
+            let active = map_players
+                .iter()
+                .filter(|player| player.online)
+                .copied()
+                .collect::<Vec<_>>();
+            let level_source = if active.is_empty() {
+                &map_players
+            } else {
+                &active
+            };
+            let median_level = median_u16(
+                level_source
+                    .iter()
+                    .map(|player| player.level)
+                    .collect::<Vec<_>>(),
+            );
+            let active_players = active.len() as u32;
+            let share = |total: u64| {
+                if total_active == 0 {
+                    0
+                } else {
+                    total.saturating_mul(active_players as u64) / total_active
+                }
+            };
+            MapTelemetrySnapshot {
+                zone_id: format!("map:{map_file_name}"),
+                active_players,
+                median_level,
+                new_player_count: active.iter().filter(|player| player.level <= 10).count() as u32,
+                returning_player_count: 0,
+                monster_kills: share(attack_events),
+                boss_kills: share(boss_events),
+                player_deaths: 0,
+                completed_quests: share(quest_events),
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let total_gold = players.iter().map(|player| player.gold).sum::<u64>();
+    let total_guild_members = guilds
+        .guilds
+        .iter()
+        .map(|guild| guild.member_count as u64)
+        .sum::<u64>();
+    let largest_guild_members = guilds
+        .guilds
+        .iter()
+        .map(|guild| guild.member_count as u64)
+        .max()
+        .unwrap_or_default();
+    let largest_guild_population_bps = if total_guild_members == 0 {
+        0
+    } else {
+        ((largest_guild_members.saturating_mul(10_000) / total_guild_members).min(10_000)) as u16
+    };
+
+    let snapshot = WorldTelemetrySnapshot {
+        schema: WORLD_DIRECTOR_SCHEMA.to_string(),
+        snapshot_id: format!(
+            "live-{}-{observed_at_ms}",
+            snapshot.source.replace(['/', ' '], "-")
+        ),
+        game_id: env::var("MIR2_WORLD_DIRECTOR_GAME_ID").unwrap_or_else(|_| "mir2".to_string()),
+        region_id: env::var("MIR2_WORLD_DIRECTOR_REGION_ID")
+            .unwrap_or_else(|_| "asia-hk".to_string()),
+        observed_at_ms,
+        window_ms: window_seconds * 1_000,
+        maps,
+        // Stock is not flow. Until the economy event stream exposes mint/burn
+        // deltas, keep monetary pressure neutral rather than inventing inflation.
+        economy: DirectorEconomyTelemetrySnapshot {
+            gold_created: total_gold.max(1),
+            gold_destroyed: total_gold.max(1),
+            median_trade_price_index_bps: 10_000,
+        },
+        guilds: DirectorGuildTelemetrySnapshot {
+            active_guilds: guilds.guilds.len().min(u32::MAX as usize) as u32,
+            largest_guild_population_bps,
+            largest_guild_boss_kill_share_bps: largest_guild_population_bps,
+        },
+    };
+    snapshot.validate().map_err(world_director_api_error)?;
+    Ok(snapshot)
+}
+
+fn normalize_director_map_name(value: &str) -> String {
+    value
+        .trim()
+        .strip_prefix("map:")
+        .unwrap_or(value.trim())
+        .trim_end_matches(".map")
+        .to_string()
+}
+
+fn median_u16(mut values: Vec<u16>) -> u16 {
+    if values.is_empty() {
+        return 1;
+    }
+    values.sort_unstable();
+    values[values.len() / 2]
 }
 
 pub fn admin_router() -> Router {
@@ -4225,6 +4466,39 @@ fn admin_protected_router() -> Router<AdminApiState> {
         .route(
             "/admin/approvals/:approval_id/reject",
             post(reject_approval),
+        )
+        .route("/admin/world-director", get(read_world_director))
+        .route(
+            "/admin/world-director/proposals/generate",
+            post(generate_world_director_proposal),
+        )
+        .route(
+            "/admin/world-director/proposals/:proposal_id/approve",
+            post(approve_world_director_proposal),
+        )
+        .route(
+            "/admin/world-director/proposals/:proposal_id/edit",
+            post(edit_world_director_proposal),
+        )
+        .route(
+            "/admin/world-director/proposals/:proposal_id/retry",
+            post(retry_world_director_delivery),
+        )
+        .route(
+            "/admin/world-director/proposals/:proposal_id/reject",
+            post(reject_world_director_proposal),
+        )
+        .route(
+            "/admin/world-director/proposals/:proposal_id/cancel",
+            post(cancel_world_director_proposal),
+        )
+        .route(
+            "/admin/world-director/control/pause",
+            post(pause_world_director),
+        )
+        .route(
+            "/admin/world-director/control/resume",
+            post(resume_world_director),
         )
         .route("/admin/events", get(list_admin_events))
         .route(
@@ -4490,6 +4764,27 @@ pub struct CreateApprovalRequest {
 #[serde(rename_all = "camelCase")]
 pub struct ApprovalDecisionRequest {
     pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GenerateWorldDirectorProposalRequest {
+    pub snapshot: Option<WorldTelemetrySnapshot>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldDirectorDecisionRequest {
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EditWorldDirectorProposalRequest {
+    pub reason: String,
+    pub duration_ms: Option<u64>,
+    pub reward_budget: Option<u64>,
+    pub target_zones: Option<BTreeSet<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -5586,6 +5881,256 @@ async fn decide_approval_handler(
     .await
     .map_err(join_error)??;
     Ok(Json(record))
+}
+
+async fn read_world_director(
+    State(state): State<AdminApiState>,
+) -> Result<Json<DirectorApprovalDashboard>, ApiError> {
+    let service = state.world_director.clone();
+    let dashboard = tokio::task::spawn_blocking(move || {
+        service
+            .dashboard(world_director_now_ms())
+            .map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(dashboard))
+}
+
+async fn generate_world_director_proposal(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<GenerateWorldDirectorProposalRequest>,
+) -> Result<Json<Option<DirectorApprovalRecord>>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_approval_manager(&operator)?;
+    let now = world_director_now_ms();
+    let snapshot = match request.snapshot {
+        Some(snapshot) => snapshot,
+        None => {
+            let state_for_snapshot = state.clone();
+            tokio::task::spawn_blocking(move || {
+                build_live_world_director_snapshot(&state_for_snapshot, now)
+            })
+            .await
+            .map_err(join_error)??
+        }
+    };
+    let service = state.world_director.clone();
+    let requested_by = format!("world-director-engine:triggered-by:{}", operator.id);
+    let proposal = tokio::task::spawn_blocking(move || {
+        service
+            .generate(snapshot, requested_by, now)
+            .map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(proposal))
+}
+
+async fn approve_world_director_proposal(
+    State(state): State<AdminApiState>,
+    Path(proposal_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<WorldDirectorDecisionRequest>,
+) -> Result<Json<DirectorApprovalRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_approval_manager(&operator)?;
+    let service = state.world_director.clone();
+    let operator_id = operator.id;
+    let record = tokio::task::spawn_blocking(move || {
+        service
+            .approve(
+                &proposal_id,
+                &operator_id,
+                &request.reason,
+                world_director_now_ms(),
+            )
+            .map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(record))
+}
+
+async fn edit_world_director_proposal(
+    State(state): State<AdminApiState>,
+    Path(proposal_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<EditWorldDirectorProposalRequest>,
+) -> Result<Json<DirectorApprovalRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_approval_manager(&operator)?;
+    let service = state.world_director.clone();
+    let operator_id = operator.id;
+    let record = tokio::task::spawn_blocking(move || {
+        service
+            .edit(
+                &proposal_id,
+                &operator_id,
+                &request.reason,
+                DirectorProposalPatch {
+                    duration_ms: request.duration_ms,
+                    reward_budget: request.reward_budget,
+                    target_zones: request.target_zones,
+                },
+                world_director_now_ms(),
+            )
+            .map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(record))
+}
+
+async fn retry_world_director_delivery(
+    State(state): State<AdminApiState>,
+    Path(proposal_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<WorldDirectorDecisionRequest>,
+) -> Result<Json<DirectorApprovalRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_approval_manager(&operator)?;
+    let service = state.world_director.clone();
+    let operator_id = operator.id;
+    let record = tokio::task::spawn_blocking(move || {
+        service
+            .retry_delivery(
+                &proposal_id,
+                &operator_id,
+                &request.reason,
+                world_director_now_ms(),
+            )
+            .map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(record))
+}
+
+async fn reject_world_director_proposal(
+    State(state): State<AdminApiState>,
+    Path(proposal_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<WorldDirectorDecisionRequest>,
+) -> Result<Json<DirectorApprovalRecord>, ApiError> {
+    decide_world_director_proposal(
+        state,
+        proposal_id,
+        headers,
+        request,
+        DirectorProposalDecision::Reject,
+    )
+    .await
+}
+
+async fn cancel_world_director_proposal(
+    State(state): State<AdminApiState>,
+    Path(proposal_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<WorldDirectorDecisionRequest>,
+) -> Result<Json<DirectorApprovalRecord>, ApiError> {
+    decide_world_director_proposal(
+        state,
+        proposal_id,
+        headers,
+        request,
+        DirectorProposalDecision::Cancel,
+    )
+    .await
+}
+
+enum DirectorProposalDecision {
+    Reject,
+    Cancel,
+}
+
+async fn decide_world_director_proposal(
+    state: AdminApiState,
+    proposal_id: String,
+    headers: HeaderMap,
+    request: WorldDirectorDecisionRequest,
+    decision: DirectorProposalDecision,
+) -> Result<Json<DirectorApprovalRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_approval_manager(&operator)?;
+    let service = state.world_director.clone();
+    let operator_id = operator.id;
+    let record = tokio::task::spawn_blocking(move || {
+        let result = match decision {
+            DirectorProposalDecision::Reject => service.reject(
+                &proposal_id,
+                &operator_id,
+                &request.reason,
+                world_director_now_ms(),
+            ),
+            DirectorProposalDecision::Cancel => service.cancel(
+                &proposal_id,
+                &operator_id,
+                &request.reason,
+                world_director_now_ms(),
+            ),
+        };
+        result.map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(record))
+}
+
+async fn pause_world_director(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<WorldDirectorDecisionRequest>,
+) -> Result<Json<DirectorApprovalDashboard>, ApiError> {
+    set_world_director_pause(state, headers, request, true).await
+}
+
+async fn resume_world_director(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<WorldDirectorDecisionRequest>,
+) -> Result<Json<DirectorApprovalDashboard>, ApiError> {
+    set_world_director_pause(state, headers, request, false).await
+}
+
+async fn set_world_director_pause(
+    state: AdminApiState,
+    headers: HeaderMap,
+    request: WorldDirectorDecisionRequest,
+    paused: bool,
+) -> Result<Json<DirectorApprovalDashboard>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_approval_manager(&operator)?;
+    require_operator_permission(&operator, Permission::ServerControl)?;
+    let service = state.world_director.clone();
+    let operator_id = operator.id;
+    let dashboard = tokio::task::spawn_blocking(move || {
+        let now = world_director_now_ms();
+        service
+            .set_paused(paused, &operator_id, &request.reason, now)
+            .map_err(world_director_api_error)?;
+        service.dashboard(now).map_err(world_director_api_error)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(dashboard))
+}
+
+fn world_director_api_error(message: String) -> ApiError {
+    let status = if message.contains("not found") {
+        StatusCode::NOT_FOUND
+    } else if message.contains("not configured") || message.contains("unavailable") {
+        StatusCode::SERVICE_UNAVAILABLE
+    } else if message.contains("paused")
+        || message.contains("expected pending")
+        || message.contains("changed concurrently")
+    {
+        StatusCode::CONFLICT
+    } else {
+        StatusCode::BAD_REQUEST
+    };
+    ApiError { status, message }
 }
 
 async fn list_admin_events(
@@ -11419,6 +11964,10 @@ mod tests {
             daily_reports: Arc::new(
                 DailyReportService::from_env(None).expect("test daily reports should initialize"),
             ),
+            world_director: Arc::new(
+                WorldDirectorApprovalService::from_env()
+                    .expect("test world director should initialize"),
+            ),
         };
 
         let record = get_command_status(State(state.clone()), Path("cmd-1".into()))
@@ -11620,6 +12169,10 @@ mod tests {
             admin_store: None,
             daily_reports: Arc::new(
                 DailyReportService::from_env(None).expect("test daily reports should initialize"),
+            ),
+            world_director: Arc::new(
+                WorldDirectorApprovalService::from_env()
+                    .expect("test world director should initialize"),
             ),
         };
 

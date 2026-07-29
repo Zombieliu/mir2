@@ -2,6 +2,21 @@ export function formatNumber(value: number | undefined | null) {
   return (value ?? 0).toLocaleString();
 }
 
+export function formatCompactNumber(value: number | undefined | null) {
+  return new Intl.NumberFormat(undefined, {
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(value ?? 0);
+}
+
+export function formatDateTime(value: number | undefined | null) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "short",
+    timeStyle: "medium"
+  }).format(new Date(value));
+}
+
 export function formatVersion(value: number | undefined | null) {
   return value === undefined || value === null ? "-" : value.toLocaleString();
 }

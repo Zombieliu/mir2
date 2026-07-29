@@ -211,6 +211,104 @@ export type ApprovalRecord = {
   decidedAtMs?: number;
 };
 
+export type DirectorPressureScores = {
+  populationImbalanceBps: number;
+  contentFatigueBps: number;
+  progressionGapBps: number;
+  economyInflationBps: number;
+  guildDominanceBps: number;
+};
+
+export type DirectorApprovalRecord = {
+  proposalId: string;
+  status: string;
+  riskLevel: string;
+  snapshot: {
+    snapshotId: string;
+    gameId: string;
+    regionId: string;
+    observedAtMs: number;
+    maps: Array<{
+      zoneId: string;
+      activePlayers: number;
+      medianLevel: number;
+      monsterKills: number;
+      completedQuests: number;
+    }>;
+  };
+  pressureScores: DirectorPressureScores;
+  proposal: {
+    templateId: string;
+    targetZones: string[];
+    durationMs: number;
+    rewardBudget: number;
+    rationale: string;
+  };
+  requestedBy: string;
+  requestedAtMs: number;
+  decidedBy?: string;
+  decisionReason?: string;
+  decidedAtMs?: number;
+  commandId?: string;
+  finalizedHeight?: number;
+  finalizedDigest?: string;
+  commonwareNetworkHeight?: number;
+  commonwareNetworkStateRoot?: string;
+  commonwareNetworkCommandDigest?: string;
+  approvalAuditHash?: string;
+  zoneReceipts: unknown[];
+  lastError?: string;
+  updatedAtMs: number;
+};
+
+export type DirectorAuditRecord = {
+  auditId: string;
+  proposalId?: string;
+  action: string;
+  actorId: string;
+  fromStatus?: string;
+  toStatus?: string;
+  reason: string;
+  occurredAtMs: number;
+  previousHash: string;
+  recordHash: string;
+};
+
+export type WorldDirectorDashboard = {
+  schema: string;
+  generatedAtMs: number;
+  paused: boolean;
+  pauseReason?: string;
+  proposals: DirectorApprovalRecord[];
+  audit: DirectorAuditRecord[];
+  configuration: {
+    executionConfigured: boolean;
+    persistence: string;
+    directorPublicKey?: string;
+    committeeSize: number;
+    zoneHostCount: number;
+    automaticGenerationEnabled: boolean;
+    generationIntervalSeconds: number;
+    remoteCommonwareConfigured: boolean;
+    remoteCommonwareRequired: boolean;
+  };
+  runtimeStatuses: Array<{
+    endpoint: string;
+    status: string;
+    error?: string;
+    runtime?: {
+      finalizedHeight: number;
+      installedCommandCount: number;
+      appliedActionCount: number;
+      spawnedMonstersTotal: number;
+      broadcastMessagesTotal: number;
+      lastAdvanceAtMs: number;
+    };
+  }>;
+  pendingCount: number;
+  activeCount: number;
+};
+
 export type SystemMailReceipt = {
   outboxId: string;
   targetKind: string;
