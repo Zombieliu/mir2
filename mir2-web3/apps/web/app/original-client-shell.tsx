@@ -50,6 +50,7 @@ import {
   SelectOverlay,
 } from "./components/original-client-overlays";
 import { GameUiScene, GameUiSceneStoreBound } from "./components/original-client-game-ui-scene";
+import { calculateMir2StagePresentation } from "./components/original-client-stage-presentation";
 import type {
   BevyEntityRenderState,
   BevyMapRenderState,
@@ -1149,34 +1150,14 @@ export function OriginalClientShell({
       const viewport = window.visualViewport;
       const cssWidth = Math.max(1, viewport?.width ?? window.innerWidth);
       const cssHeight = Math.max(1, viewport?.height ?? window.innerHeight);
-      const deviceScale = Math.max(0.25, window.devicePixelRatio || 1);
-      const deviceWidth = Math.max(1, Math.floor(cssWidth * deviceScale));
-      const deviceHeight = Math.max(1, Math.floor(cssHeight * deviceScale));
-      // Keep the transformed 4:3 stage on whole device pixels. Rounding the
-      // CSS scale itself (the old toFixed(4) path) produced fractional bounds,
-      // so the compositor resampled the complete pixel-art canvas on every move.
-      const nativeDeviceWidth =
-        clientProfile.layout === "tv"
-          ? Math.floor(2048 * deviceScale)
-          : Math.floor(1024 * deviceScale);
-      // Touch login/select screens use the whole landscape width and crop the
-      // decorative 4:3 top/bottom. Gameplay still fits by height so the empty
-      // side gutters remain available for the joystick and action pad.
-      const widthFitTouchChrome = clientProfile.layout === "touch" && screen !== "game";
-      const fittedDeviceWidth = widthFitTouchChrome
-        ? Math.min(nativeDeviceWidth, deviceWidth)
-        : Math.min(
-            nativeDeviceWidth,
-            deviceWidth,
-            Math.floor((deviceHeight * 4) / 3),
-          );
-      const displayDeviceWidth = Math.max(4, Math.floor(fittedDeviceWidth / 4) * 4);
-      const displayDeviceHeight = (displayDeviceWidth * 3) / 4;
-      const next = {
-        scale: displayDeviceWidth / deviceScale / 1024,
-        left: Math.round((deviceWidth - displayDeviceWidth) / 2) / deviceScale,
-        top: Math.round((deviceHeight - displayDeviceHeight) / 2) / deviceScale,
-      };
+      const next = calculateMir2StagePresentation({
+        cssWidth,
+        cssHeight,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        layout: clientProfile.layout,
+        input: clientProfile.input,
+        screen,
+      });
       setStagePresentation((current) =>
         current.scale === next.scale && current.left === next.left && current.top === next.top
           ? current
@@ -1192,7 +1173,7 @@ export function OriginalClientShell({
       window.removeEventListener("resize", updateStageScale);
       window.visualViewport?.removeEventListener("resize", updateStageScale);
     };
-  }, [clientProfile.layout, screen]);
+  }, [clientProfile.input, clientProfile.layout, screen]);
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
@@ -3042,6 +3023,7 @@ export function OriginalClientShell({
       className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
       data-layout-profile={clientProfile.layout}
       data-input-profile={clientProfile.input}
+      data-client-screen={screen}
       style={stageScaleStyle}
     >
       <section className="mir-stage">
@@ -3233,6 +3215,7 @@ export function OriginalClientShell({
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
+                  defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
                   onSendChat,
                   onRequestTrade,
