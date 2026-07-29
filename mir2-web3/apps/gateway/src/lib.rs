@@ -4,6 +4,7 @@ mod auth;
 pub mod beta;
 mod browser_commands;
 pub mod cache;
+pub mod channel_identity;
 pub mod consensus_log;
 pub mod control_plane;
 pub mod economy;
@@ -78,6 +79,10 @@ pub use cache::{
     GatewaySessionCacheRuntimeBackend, GatewaySessionCacheStatus, GatewaySessionRoute,
     GatewaySessionTraceEvent, InMemoryGatewaySessionCache, RedisGatewaySessionCache,
     SharedGatewaySessionCache,
+};
+pub use channel_identity::{
+    ChannelIdentityBinding, ChannelIdentityProvider, ChannelIdentityRegistry,
+    ChannelIdentityRegistryStatus, PlayerIdentityAccount,
 };
 pub use consensus_log::{
     CommonwareControlLog, ConsensusEquivocationEvidence, ControlBlock, ControlCommandEnvelope,
