@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 import urllib.error
 import urllib.request
@@ -15,11 +16,15 @@ def request_json(
     method: str, url: str, body: dict[str, Any] | None = None, timeout: int = 30
 ) -> dict[str, Any]:
     payload = None if body is None else json.dumps(body).encode()
+    headers = {"Content-Type": "application/json"}
+    control_token = os.environ.get("GATE14_CONTROL_TOKEN", "").strip()
+    if control_token:
+        headers["Authorization"] = f"Bearer {control_token}"
     request = urllib.request.Request(
         url,
         data=payload,
         method=method,
-        headers={"Content-Type": "application/json"},
+        headers=headers,
     )
     with urllib.request.urlopen(request, timeout=timeout) as response:
         return json.loads(response.read())

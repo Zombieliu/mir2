@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { parseAdminApiResponse } from "./admin-api-response";
 
 export type ApiResult<T> =
   | { ok: true; data: T }
@@ -817,7 +818,11 @@ export async function adminGet<T>(path: string): Promise<ApiResult<T>> {
       headers,
       signal: AbortSignal.timeout(adminApiTimeoutMs)
     });
-    const data = (await response.json()) as unknown;
+    const parsed = await parseAdminApiResponse(response);
+    if (!parsed.ok) {
+      return { ok: false, status: response.status, error: parsed.error };
+    }
+    const data = parsed.data;
     if (!response.ok) {
       return {
         ok: false,
@@ -853,7 +858,11 @@ export async function adminPost<T>(
       signal: AbortSignal.timeout(adminApiTimeoutMs),
       body: JSON.stringify(body)
     });
-    const data = (await response.json()) as unknown;
+    const parsed = await parseAdminApiResponse(response);
+    if (!parsed.ok) {
+      return { ok: false, status: response.status, error: parsed.error };
+    }
+    const data = parsed.data;
     if (!response.ok) {
       return {
         ok: false,
