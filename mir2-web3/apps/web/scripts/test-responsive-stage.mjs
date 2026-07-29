@@ -16,7 +16,11 @@ const compiled = ts.transpileModule(source, {
 const module = { exports: {} };
 new Function("exports", "module", compiled.outputText)(module.exports, module);
 
-const { calculateMir2StagePresentation, MIR2_TOUCH_GAME_RAIL_CSS_PX } = module.exports;
+const {
+  calculateMir2StagePresentation,
+  calculateMir2TouchControlDeck,
+  MIR2_TOUCH_GAME_RAIL_CSS_PX,
+} = module.exports;
 
 function assertContained(input, presentation) {
   const stageWidth = 1024 * presentation.scale;
@@ -45,6 +49,10 @@ const iphoneGame = { ...iphoneSelect, screen: "game" };
 const iphoneGamePresentation = calculateMir2StagePresentation(iphoneGame);
 assertContained(iphoneGame, iphoneGamePresentation);
 assert.ok(iphoneGamePresentation.left >= MIR2_TOUCH_GAME_RAIL_CSS_PX);
+assert.deepEqual(calculateMir2TouchControlDeck(iphoneGamePresentation), {
+  left: 52,
+  width: 828,
+});
 
 const narrowAndroidGame = {
   cssWidth: 667,
@@ -57,6 +65,24 @@ const narrowAndroidGame = {
 const narrowAndroidPresentation = calculateMir2StagePresentation(narrowAndroidGame);
 assertContained(narrowAndroidGame, narrowAndroidPresentation);
 assert.ok(narrowAndroidPresentation.left >= MIR2_TOUCH_GAME_RAIL_CSS_PX - 1);
+
+const ultraWideTouchGame = {
+  cssWidth: 995,
+  cssHeight: 289.5,
+  devicePixelRatio: 2,
+  layout: "touch",
+  input: "touch",
+  screen: "game",
+};
+const ultraWideTouchPresentation = calculateMir2StagePresentation(ultraWideTouchGame);
+const ultraWideTouchDeck = calculateMir2TouchControlDeck(ultraWideTouchPresentation);
+assertContained(ultraWideTouchGame, ultraWideTouchPresentation);
+assert.ok(ultraWideTouchDeck.left > 170);
+assert.ok(ultraWideTouchDeck.left + ultraWideTouchDeck.width < ultraWideTouchGame.cssWidth - 170);
+assert.equal(
+  ultraWideTouchDeck.left + MIR2_TOUCH_GAME_RAIL_CSS_PX,
+  ultraWideTouchPresentation.left,
+);
 
 const desktop = {
   cssWidth: 1440,

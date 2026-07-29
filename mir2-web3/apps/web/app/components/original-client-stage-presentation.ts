@@ -17,6 +17,11 @@ export type Mir2StagePresentation = {
   top: number;
 };
 
+export type Mir2TouchControlDeck = {
+  left: number;
+  width: number;
+};
+
 export const MIR2_TOUCH_GAME_RAIL_CSS_PX = 128;
 
 /**
@@ -58,5 +63,21 @@ export function calculateMir2StagePresentation({
     scale: displayDeviceWidth / deviceScale / 1024,
     left: Math.round((deviceWidth - displayDeviceWidth) / 2) / deviceScale,
     top: Math.round((deviceHeight - displayDeviceHeight) / 2) / deviceScale,
+  };
+}
+
+/**
+ * Centers the touch controls around the rendered game stage instead of pinning
+ * them to the physical viewport edges. The reserved 128px rails stay directly
+ * beside the 4:3 composition, so ultra-wide landscape screens remain compact
+ * and normal phones keep the same non-overlap guarantee.
+ */
+export function calculateMir2TouchControlDeck(
+  presentation: Mir2StagePresentation,
+): Mir2TouchControlDeck {
+  const stageWidth = 1024 * presentation.scale;
+  return {
+    left: Math.max(0, presentation.left - MIR2_TOUCH_GAME_RAIL_CSS_PX),
+    width: stageWidth + MIR2_TOUCH_GAME_RAIL_CSS_PX * 2,
   };
 }
