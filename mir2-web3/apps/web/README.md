@@ -133,6 +133,9 @@ The packaging and release procedure is documented in
 
 ### R2 CDN
 
+生产瘦包、R2 完整性边界、体积解释与验收命令见
+[Mir2 瘦客户端与 R2 素材边界](../../docs/THIN-CLIENT-R2-ASSETS.zh-CN.md)。
+
 Use the immutable release root supplied by the maintainer. Do not copy an old
 hash from documentation:
 

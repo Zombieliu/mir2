@@ -5,6 +5,7 @@ next-env.d.ts
 dist/
 out/
 .mir2-remote-assets/
+.mir2-thin-client/
 docs/generated/remote-assets/
 apps/web/public/original-asset-manifest.generated.json
 # Full Crystal conversion is reproducible from the local client. Do not commit

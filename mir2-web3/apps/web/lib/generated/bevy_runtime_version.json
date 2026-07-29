@@ -16,14 +16,6 @@
     {
       "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
       "sha256": "6723f3cf3d2ec6e8755dbba19cde9c458a061dea21c23cbbbe1fef3e05d4dac6"
-    },
-    {
-      "path": "public/bevy-runtime/pkg/mir2_bevy_runtime.js",
-      "sha256": "7e1b29de24d39c3870d94719ee3716989def97519cce16065cdb60af67f41bb2"
-    },
-    {
-      "path": "public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm",
-      "sha256": "6723f3cf3d2ec6e8755dbba19cde9c458a061dea21c23cbbbe1fef3e05d4dac6"
     }
   ]
 }

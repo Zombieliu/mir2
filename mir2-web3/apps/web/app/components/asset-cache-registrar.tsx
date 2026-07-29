@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import {
   resolveAssetPrewarmPolicy,
+  shouldPrewarmRawMapFrames,
   type AssetPrewarmPolicy,
   type BackgroundPrewarmMode,
 } from "../../lib/asset-prewarm-policy";
@@ -884,6 +885,7 @@ async function prewarmAssetPacks(
       metrics,
       concurrency,
       options.maxSceneFrames,
+      options.tier,
       undefined,
       includeSceneFrames,
     );
@@ -917,6 +919,7 @@ async function prewarmPack(
   metrics: CacheMetricsHandle,
   concurrency: number,
   maxSceneFrames: number | null,
+  renderTier: AssetPrewarmPolicy["tier"],
   existingMetric?: CachePrewarmMetric,
   includeScenes = true,
 ) {
@@ -956,7 +959,9 @@ async function prewarmPack(
       const sceneFrameLimit = maxSceneFrames === null
         ? scene.spriteFrameLimit
         : Math.min(scene.spriteFrameLimit, maxSceneFrames);
-      const frameUrls = extractSceneFrameUrls(blueprint, sceneFrameLimit);
+      const frameUrls = extractSceneFrameUrls(blueprint, sceneFrameLimit, {
+        includeRawMapFrames: shouldPrewarmRawMapFrames(renderTier),
+      });
       packMetric.requested += frameUrls.length;
       publishPrewarmProgress(metrics, "running");
       await hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
@@ -1048,7 +1053,11 @@ async function fetchWithRetry(url: string, init: RequestInit) {
   throw lastError;
 }
 
-function extractSceneFrameUrls(blueprint: unknown, limit: number) {
+function extractSceneFrameUrls(
+  blueprint: unknown,
+  limit: number,
+  options: { includeRawMapFrames: boolean },
+) {
   const typedBlueprint = blueprint as {
     sceneView?: { center?: { x?: number; y?: number } };
     originalMapRegion?: {
@@ -1069,8 +1078,8 @@ function extractSceneFrameUrls(blueprint: unknown, limit: number) {
     for (const frame of sprite.frames ?? []) {
       if (frame.path?.startsWith("/original-map/")) {
         sourceFrameCount += 1;
-        urls.push(frame.path);
         const renderPath = mapSpriteRenderPrewarmPath(frame.path);
+        if (options.includeRawMapFrames) urls.push(frame.path);
         if (renderPath !== frame.path) urls.push(renderPath);
       }
       if (sourceFrameCount >= limit) return Array.from(new Set(urls));
