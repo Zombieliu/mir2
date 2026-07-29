@@ -73,7 +73,13 @@ import {
   DUBHE_WALLET_URL,
   getActiveSuiWalletSession,
   getSuiWalletSummaries,
+  linkChannelIdentity,
+  linkSuiIdentity,
+  requestPasskeyIdentityCredential,
+  requestChannelSessionToken,
+  requestGuestChannelSessionToken,
   requestSuiLoginToken,
+  requestWalletIdentityCredential,
   sendBootstrapSequence as sendGatewayBootstrapSequence,
   sendNewAccountCommand as sendGatewayNewAccountCommand,
   sendPasswordLoginCommand,
@@ -84,6 +90,14 @@ import {
   type SuiLoginToken,
   type SuiWalletSummary,
 } from "../lib/client-login-runtime";
+import {
+  channelGameplayStart,
+  channelGameplayStop,
+  channelIdentity,
+  channelLoadingFinished,
+  initializeChannelBridge,
+  subscribeChannelIdentityChanges,
+} from "../lib/channel-bridge";
 // Pure config only — the @mysten/sui PTB builders + wallet session are imported
 // DYNAMICALLY inside the handlers so the SDK stays out of the main bundle.
 import {
@@ -1943,6 +1957,9 @@ export default function HomePage() {
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  const [identityProvider, setIdentityProvider] = useState<string | null>(null);
+  const [identityLinkBusy, setIdentityLinkBusy] = useState(false);
+  const [identityLinkStatus, setIdentityLinkStatus] = useState<string | null>(null);
   // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
   const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
   const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
@@ -5707,6 +5724,112 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (isSpectatorBrowserMode()) return;
+    let cancelled = false;
+    let unsubscribeIdentity = () => {};
+    let identityChangeInFlight = false;
+    void (async () => {
+      try {
+        const context = await initializeChannelBridge();
+        await channelLoadingFinished();
+        if (cancelled || context.channel === "direct") return;
+        const identity = await channelIdentity();
+        if (cancelled) return;
+        const login =
+          identity.kind === "authenticated"
+            ? await requestChannelSessionToken(identity.provider, identity.credential)
+            : await requestGuestChannelSessionToken(identity.provider);
+        if (cancelled) return;
+        submitIdentitySession(login, context.channel === "crazyGames" ? "crazyGames" : "itch");
+        if (context.channel === "crazyGames") {
+          unsubscribeIdentity = await subscribeChannelIdentityChanges(() => {
+            if (identityChangeInFlight) return;
+            identityChangeInFlight = true;
+            void (async () => {
+              try {
+                const changed = await channelIdentity();
+                const currentAuth = activeReconnectAuthRef.current;
+                if (cancelled) return;
+                if (changed.kind === "guest") {
+                  const guestLogin = await requestGuestChannelSessionToken(changed.provider);
+                  if (!cancelled) {
+                    submitIdentitySession(guestLogin, "crazyGames");
+                    setIdentityLinkStatus("CrazyGames 已退出，已切换到游客角色归属。");
+                  }
+                  return;
+                }
+
+                if (
+                  currentAuth?.kind === "sui" &&
+                  currentAuth.accountId.startsWith("obl_")
+                ) {
+                  try {
+                    const linked = await linkChannelIdentity(
+                      currentAuth.accountId,
+                      currentAuth.token,
+                      changed.provider,
+                      changed.credential,
+                    );
+                    if (cancelled) return;
+                    setIdentityProvider(changed.provider);
+                    setIdentityLinkStatus(
+                      `CrazyGames 已绑定（共 ${linked.identityCount ?? 1} 个身份）`,
+                    );
+                    return;
+                  } catch {
+                    // The CrazyGames identity may already own another Player ID.
+                    // Never merge progress implicitly; switch to that verified
+                    // identity instead and leave both accounts intact.
+                  }
+                }
+
+                const authenticatedLogin = await requestChannelSessionToken(
+                  changed.provider,
+                  changed.credential,
+                );
+                if (!cancelled) {
+                  submitIdentitySession(authenticatedLogin, "crazyGames");
+                  setIdentityLinkStatus("CrazyGames 身份已切换。");
+                }
+              } catch (error) {
+                if (!cancelled) {
+                  setIdentityLinkStatus(
+                    `CrazyGames 账号切换失败：${error instanceof Error ? error.message : String(error)}`,
+                  );
+                }
+              } finally {
+                identityChangeInFlight = false;
+              }
+            })();
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoginBusy(false);
+          setLoginErrorKey(
+            `Channel login failed: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+      unsubscribeIdentity();
+    };
+    // The channel bootstrap runs once. Login submission is routed through refs
+    // and the existing reconnect-safe Gateway path.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (screen === "game") {
+      void channelGameplayStart();
+    } else {
+      void channelGameplayStop();
+    }
+  }, [screen]);
+
+  useEffect(() => {
     if (!spectatorMode && screen !== "game") return;
     const debugWindow = window as typeof window & {
       render_game_to_text?: () => string;
@@ -5764,6 +5887,7 @@ export default function HomePage() {
     passwordRef.current = nextPassword;
     setAccountId(normalizedAccountId);
     setPassword(nextPassword);
+    setIdentityProvider(null);
     activeReconnectAuthRef.current = {
       kind: "password",
       accountId: normalizedAccountId,
@@ -5794,24 +5918,36 @@ export default function HomePage() {
 
     try {
       const login = await requestSuiLoginToken(kind, walletId);
-      activeReconnectAuthRef.current = {
-        kind: "sui",
-        accountId: login.accountId,
-        token: login.token,
-        expiresAt: login.expiresAt,
-      };
-      setAccountId(login.accountId);
-      if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
-        pendingGatewayProtocolActionRef.current = { kind: "suiLogin", login };
-        connectGateway();
-        return;
-      }
-      sendSuiLoginCommand(send, login.accountId, login.token);
+      submitIdentitySession(login, kind);
     } catch (error) {
       setLoginBusy(false);
       const label = kind === "passkey" ? "Passkey" : "Wallet";
       setLoginErrorKey(`${label} login failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  function submitIdentitySession(
+    login: SuiLoginToken,
+    method: SuiLoginKind | "crazyGames" | "itch",
+  ) {
+    resetGatewayReconnectState();
+    activeReconnectAuthRef.current = {
+      kind: "sui",
+      accountId: login.accountId,
+      token: login.token,
+      expiresAt: login.expiresAt,
+    };
+    setAccountId(login.accountId);
+    setIdentityProvider(login.provider ?? method);
+    setLoginBusy(true);
+    setLoginErrorKey(null);
+    markMir2CacheMilestone("loginSubmit", { method });
+    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
+      pendingGatewayProtocolActionRef.current = { kind: "suiLogin", login };
+      connectGateway();
+      return;
+    }
+    sendSuiLoginCommand(send, login.accountId, login.token);
   }
 
   function submitPasskeyLogin() {
@@ -5826,6 +5962,41 @@ export default function HomePage() {
   function submitWalletLogin(walletId: string) {
     setWalletPickerOpen(false);
     void submitSuiLogin("wallet", walletId);
+  }
+
+  async function linkCurrentSuiIdentity(kind: SuiLoginKind, walletId?: string) {
+    const currentAuth = activeReconnectAuthRef.current;
+    if (
+      !accountId.startsWith("obl_") ||
+      currentAuth?.kind !== "sui" ||
+      currentAuth.accountId !== accountId
+    ) {
+      setIdentityLinkStatus("当前会话不能绑定身份，请重新通过渠道进入。");
+      return;
+    }
+    if (currentAuth.expiresAt <= Date.now()) {
+      setIdentityLinkStatus("绑定授权已过期，请退出后重新进入再绑定。");
+      return;
+    }
+    setIdentityLinkBusy(true);
+    setIdentityLinkStatus(null);
+    try {
+      const identity =
+        kind === "passkey"
+          ? await requestPasskeyIdentityCredential()
+          : await requestWalletIdentityCredential(walletId);
+      const linked = await linkSuiIdentity(accountId, currentAuth.token, identity);
+      setIdentityLinkStatus(
+        `${identity.provider === "suiPasskey" ? "Sui Passkey" : "Dubhe / Sui Wallet"} 已绑定（共 ${linked.identityCount ?? 1} 个身份）`,
+      );
+      setIdentityProvider(identity.provider);
+    } catch (error) {
+      setIdentityLinkStatus(
+        `绑定失败：${error instanceof Error ? error.message : String(error)}`,
+      );
+    } finally {
+      setIdentityLinkBusy(false);
+    }
   }
 
   function startSelectedCharacter() {
@@ -12966,6 +13137,9 @@ export default function HomePage() {
       suiWallets={suiWallets}
       walletPickerOpen={walletPickerOpen}
       dubheWalletUrl={DUBHE_WALLET_URL}
+      identityProvider={identityProvider}
+      identityLinkBusy={identityLinkBusy}
+      identityLinkStatus={identityLinkStatus}
       characters={characters}
       selectedCharacterIndex={selectedCharacterIndex}
       showInventory={showInventory}
@@ -12982,6 +13156,8 @@ export default function HomePage() {
       onPasskeyLogin={submitPasskeyLogin}
       onWalletPickerToggle={toggleWalletPicker}
       onWalletLogin={submitWalletLogin}
+      onIdentityLinkPasskey={() => void linkCurrentSuiIdentity("passkey")}
+      onIdentityLinkWallet={(walletId) => void linkCurrentSuiIdentity("wallet", walletId)}
       onQuickEnter={quickEnterWorld}
       onResetClient={resetClient}
       onSendChat={(message) => send({ type: "chat", message })}

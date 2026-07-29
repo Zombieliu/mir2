@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07090d" />
+    <title>Obelisk Mir2</title>
+    <style>
+      html,
+      body,
+      iframe {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border: 0;
+        background: #07090d;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      .fallback {
+        position: fixed;
+        z-index: 2;
+        right: 12px;
+        bottom: 12px;
+        padding: 9px 13px;
+        border: 1px solid #3c9fb8;
+        border-radius: 6px;
+        color: #d8f7ff;
+        background: rgba(3, 17, 24, 0.9);
+        font: 600 13px/1.2 system-ui, sans-serif;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe
+      title="Obelisk Mir2"
+      src="https://mir2.obelisk.build/?channel=itch&amp;utm_source=itch&amp;utm_medium=html5"
+      allow="autoplay; fullscreen; publickey-credentials-create; publickey-credentials-get"
+      allowfullscreen
+    ></iframe>
+    <a
+      class="fallback"
+      href="https://mir2.obelisk.build/?channel=itch&amp;utm_source=itch&amp;utm_medium=external"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Open in a new tab
+    </a>
+  </body>
+</html>

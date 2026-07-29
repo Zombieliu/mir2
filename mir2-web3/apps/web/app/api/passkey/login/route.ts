@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 
+import { SIGNATURE_SCHEME_TO_FLAG } from "@mysten/sui/cryptography";
 import { verifyPersonalMessageSignature } from "@mysten/sui/verify";
 import { NextResponse } from "next/server";
 
@@ -13,6 +14,7 @@ type PasskeyLoginRequest = {
   address?: string;
   message?: string;
   signature?: string;
+  provider?: "suiPasskey" | "suiWallet";
 };
 
 type PasskeyLoginMessage = {
@@ -30,6 +32,10 @@ export async function POST(request: Request) {
   if (!body?.address || !body.message || !body.signature) {
     return errorResponse("address, message, and signature are required", 400);
   }
+  const provider = body.provider ?? "suiPasskey";
+  if (provider !== "suiPasskey" && provider !== "suiWallet") {
+    return errorResponse("invalid Sui login provider", 400);
+  }
 
   let loginMessage: PasskeyLoginMessage;
   try {
@@ -44,9 +50,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    await verifyPersonalMessageSignature(new TextEncoder().encode(body.message), body.signature, {
-      address: body.address,
-    });
+    const publicKey = await verifyPersonalMessageSignature(
+      new TextEncoder().encode(body.message),
+      body.signature,
+      {
+        address: body.address,
+      },
+    );
+    if (provider === "suiPasskey" && publicKey.flag() !== SIGNATURE_SCHEME_TO_FLAG.Passkey) {
+      return errorResponse("suiPasskey requires a Sui Passkey signature", 401);
+    }
   } catch {
     return errorResponse("invalid passkey signature", 401);
   }
@@ -55,12 +68,13 @@ export async function POST(request: Request) {
   const expiresAt = Math.min(loginMessage.expiresAt!, Date.now() + 60_000);
   let token: string;
   try {
-    token = issueGatewayToken(accountId, expiresAt);
+    token = issueGatewayToken(accountId, provider, expiresAt);
   } catch (error) {
     return errorResponse(error instanceof Error ? error.message : "passkey auth is not configured", 500);
   }
   return NextResponse.json({
     accountId,
+    provider,
     token,
     expiresAt,
   });
@@ -96,12 +110,17 @@ function validateLoginMessage(
   return null;
 }
 
-function issueGatewayToken(accountId: string, expiresAt: number) {
+function issueGatewayToken(
+  accountId: string,
+  provider: "suiPasskey" | "suiWallet",
+  expiresAt: number,
+) {
   const payload = base64Url(
     Buffer.from(
       JSON.stringify({
         auth: TOKEN_AUTH,
         accountId,
+        provider,
         expMs: expiresAt,
       }),
     ),

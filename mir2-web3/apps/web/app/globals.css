@@ -1228,6 +1228,75 @@ html[data-display-mode="standalone"] .mir-client-page {
   top: 68px;
 }
 
+.select-identity-trigger {
+  position: absolute;
+  z-index: 20;
+  left: 18px;
+  top: 18px;
+  max-width: 240px;
+  border: 1px solid rgba(110, 205, 221, 0.58);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(22, 61, 72, 0.94), rgba(8, 28, 36, 0.94));
+  color: #bfeef2;
+  padding: 6px 10px;
+  font-size: 11px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.select-identity-panel {
+  position: absolute;
+  z-index: 24;
+  left: 34px;
+  top: 58px;
+  display: grid;
+  width: 286px;
+  gap: 8px;
+  padding: 13px;
+  border: 1px solid rgba(94, 200, 219, 0.62);
+  background: linear-gradient(180deg, rgba(14, 38, 47, 0.97), rgba(8, 16, 23, 0.97));
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.46);
+  color: #d9e8e8;
+  font-size: 12px;
+  line-height: 1.35;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.select-identity-panel strong {
+  color: #9ce7ee;
+  font-size: 14px;
+}
+
+.select-identity-id {
+  overflow: hidden;
+  color: #91a9ac;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-identity-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.select-identity-actions button {
+  min-height: 38px;
+  border: 1px solid rgba(105, 201, 215, 0.52);
+  background: rgba(19, 64, 75, 0.9);
+  color: #d3f4f6;
+  padding: 5px;
+}
+
+.select-identity-actions button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.select-identity-status {
+  color: #f2d38f;
+}
+
 .select-overlay {
   color: #e8d9ba;
 }
