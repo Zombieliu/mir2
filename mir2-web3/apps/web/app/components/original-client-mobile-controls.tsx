@@ -286,7 +286,18 @@ function OriginalClientMobileControlsInner({
   }, [dispatchLatestIntent, enabled, publishDebugState]);
 
   if (!enabled) {
-    return null;
+    if (!forceVisible) {
+      return null;
+    }
+
+    return (
+      <div className="mir-mobile-rotate-overlay force-mobile-controls">
+        <div className="mir-mobile-rotate-card">
+          <span className="mir-mobile-rotate-icon" aria-hidden="true">[]</span>
+          <span>{t("ui.mobileRotateLandscape", [], "Rotate to landscape")}</span>
+        </div>
+      </div>
+    );
   }
 
   return (
