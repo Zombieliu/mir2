@@ -19,6 +19,7 @@ new Function("exports", "module", compiled.outputText)(module.exports, module);
 const {
   calculateMir2StagePresentation,
   calculateMir2TouchControlDeck,
+  calculateMir2TouchControlMetrics,
   MIR2_TOUCH_GAME_RAIL_CSS_PX,
 } = module.exports;
 
@@ -76,6 +77,7 @@ const ultraWideTouchGame = {
 };
 const ultraWideTouchPresentation = calculateMir2StagePresentation(ultraWideTouchGame);
 const ultraWideTouchDeck = calculateMir2TouchControlDeck(ultraWideTouchPresentation);
+const ultraWideTouchControls = calculateMir2TouchControlMetrics(ultraWideTouchGame.cssHeight);
 assertContained(ultraWideTouchGame, ultraWideTouchPresentation);
 assert.ok(ultraWideTouchDeck.left > 170);
 assert.ok(ultraWideTouchDeck.left + ultraWideTouchDeck.width < ultraWideTouchGame.cssWidth - 170);
@@ -83,6 +85,21 @@ assert.equal(
   ultraWideTouchDeck.left + MIR2_TOUCH_GAME_RAIL_CSS_PX,
   ultraWideTouchPresentation.left,
 );
+assert.equal(ultraWideTouchControls.actionSize, 36);
+const shortActionPadHeight = ultraWideTouchGame.cssHeight - 16;
+const shortQuickSlotBottom =
+  ultraWideTouchControls.quickRowTops[2] + ultraWideTouchControls.actionSize;
+const shortRunTop =
+  shortActionPadHeight -
+  ultraWideTouchControls.runBottom -
+  ultraWideTouchControls.actionSize;
+const shortRunBottom = shortActionPadHeight - ultraWideTouchControls.runBottom;
+const shortPrimaryTop = shortActionPadHeight - ultraWideTouchControls.primarySize;
+assert.ok(shortQuickSlotBottom < shortRunTop);
+assert.ok(shortRunBottom < shortPrimaryTop);
+
+const regularTouchControls = calculateMir2TouchControlMetrics(iphoneGame.cssHeight);
+assert.equal(regularTouchControls.actionSize, 44);
 
 const desktop = {
   cssWidth: 1440,

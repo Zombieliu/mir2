@@ -4591,7 +4591,7 @@ button.character-spell-value:hover {
   top: max(8px, env(safe-area-inset-top));
   right: max(8px, calc(env(safe-area-inset-right) - var(--mir-control-deck-left, 0px)));
   bottom: max(8px, env(safe-area-inset-bottom));
-  width: 114px;
+  width: var(--mir-mobile-action-pad-width, 114px);
   pointer-events: none;
 }
 
@@ -4605,8 +4605,8 @@ button.character-spell-value:hover {
 }
 
 .mir-mobile-panel-button {
-  width: 44px;
-  height: 44px;
+  width: var(--mir-mobile-panel-size, 44px);
+  height: var(--mir-mobile-panel-size, 44px);
   padding: 2px;
   border: 1px solid rgba(224, 196, 128, 0.5);
   border-radius: 999px;
@@ -4627,8 +4627,8 @@ button.character-spell-value:hover {
 
 .mir-mobile-action {
   position: absolute;
-  width: 44px;
-  height: 44px;
+  width: var(--mir-mobile-action-size, 44px);
+  height: var(--mir-mobile-action-size, 44px);
   padding: 2px;
   pointer-events: auto;
   border: 1px solid rgba(230, 207, 142, 0.48);
@@ -4671,8 +4671,8 @@ button.character-spell-value:hover {
 .mir-mobile-action.primary {
   right: 0;
   bottom: 0;
-  width: 64px;
-  height: 64px;
+  width: var(--mir-mobile-primary-size, 64px);
+  height: var(--mir-mobile-primary-size, 64px);
   border-width: 2px;
   border-color: rgba(238, 220, 168, 0.68);
   font-size: 10px;
@@ -4684,41 +4684,41 @@ button.character-spell-value:hover {
 
 .mir-mobile-action.run {
   right: 0;
-  bottom: 68px;
+  bottom: var(--mir-mobile-run-bottom, 68px);
 }
 
 .mir-mobile-action.approach {
-  right: 70px;
+  right: var(--mir-mobile-side-right, 70px);
   bottom: 0;
 }
 
 .mir-mobile-action.pick {
-  right: 70px;
-  bottom: 48px;
+  right: var(--mir-mobile-side-right, 70px);
+  bottom: var(--mir-mobile-pick-bottom, 48px);
 }
 
 .mir-mobile-action.quick-0 {
-  top: 52px;
+  top: var(--mir-mobile-quick-row-1, 52px);
   right: 0;
 }
 
 .mir-mobile-action.quick-1 {
-  top: 52px;
-  right: 48px;
+  top: var(--mir-mobile-quick-row-1, 52px);
+  right: var(--mir-mobile-action-column-step, 48px);
 }
 
 .mir-mobile-action.quick-2 {
-  top: 100px;
+  top: var(--mir-mobile-quick-row-2, 100px);
   right: 0;
 }
 
 .mir-mobile-action.quick-3 {
-  top: 100px;
-  right: 48px;
+  top: var(--mir-mobile-quick-row-2, 100px);
+  right: var(--mir-mobile-action-column-step, 48px);
 }
 
 .mir-mobile-action.quick-4 {
-  top: 148px;
+  top: var(--mir-mobile-quick-row-3, 148px);
   right: 0;
 }
 
