@@ -164,6 +164,17 @@ function GameUiSceneInner({
     : null;
   const visibleDialog =
     world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
+  const gamepadUiOpen = Boolean(
+    showMailPanel ||
+      showBigMap ||
+      showReportPanel ||
+      showSystemMenu ||
+      showSystemMenuFeaturePanel ||
+      showGameShop ||
+      visibleDialog ||
+      showInventory ||
+      showCharacter,
+  );
 
   function selectChatFilter(filter: ChatFilterKey) {
     const previousPrefix = chatPrefixForFilter(activeChatFilter);
@@ -212,7 +223,10 @@ function GameUiSceneInner({
   }, [dialogKey, dismissedDialogKey]);
 
   return (
-    <div className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}>
+    <div
+      className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}
+      data-gamepad-ui-open={gamepadUiOpen ? "true" : "false"}
+    >
       <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />
       <MiniMapPanel
         t={t}
