@@ -27,6 +27,9 @@ The crate now contains:
   and account-store fallback;
 - grant item, grant currency, kick player, and ban account executors;
 - persistent approval records and approval events;
+- AI 世界导演人工审批控制面：自动聚合提案、受限参数修改、全局暂停、
+  Ed25519 命令、远程 Gate14 Commonware 锚定、Zone Host 投递、失败重试、
+  Postgres/原子文件恢复和哈希链审计；
 - Postgres-backed operator token auth selected by
   `ADMIN_OPERATOR_AUTH_BACKEND=postgres`, with `/admin/auth/me`,
   `admin_operators.token_hash`, and last-authenticated timestamps;
@@ -148,6 +151,15 @@ Routes:
 - `POST /admin/approvals`
 - `POST /admin/approvals/:approval_id/approve`
 - `POST /admin/approvals/:approval_id/reject`
+- `GET /admin/world-director`
+- `POST /admin/world-director/proposals/generate`
+- `POST /admin/world-director/proposals/:proposal_id/edit`
+- `POST /admin/world-director/proposals/:proposal_id/approve`
+- `POST /admin/world-director/proposals/:proposal_id/reject`
+- `POST /admin/world-director/proposals/:proposal_id/cancel`
+- `POST /admin/world-director/proposals/:proposal_id/retry`
+- `POST /admin/world-director/control/pause`
+- `POST /admin/world-director/control/resume`
 
 Operator authentication:
 
@@ -216,7 +228,16 @@ ADMIN_COMMONWARE_GATEWAY_URL=http://gate14-gateway:9500
 ```bash
 cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1
 cargo +1.89.0 fmt --check
+apps/admin-api/scripts/world-director-approval-acceptance.sh
+apps/admin-api/scripts/world-director-postgres-concurrency-acceptance.sh
 ```
+
+世界导演人工审批的架构、生产环境变量和人工验收说明见
+`docs/AI-WORLD-DIRECTOR-APPROVAL-BETA.zh-CN.md`。
+公共 `/metrics` 同时提供提案生命周期、全局暂停、防篡改审计、远程
+Commonware 锚点、Zone 执行回执和目标健康指标。
+第二个验收脚本会启动本地临时 Postgres 与两个 Admin API 副本，并发写入同一提案，
+用于证明乐观锁会明确拒绝冲突、数据库修订号与审计记录一致且不存在丢失更新。
 
 Latest live local acceptance also covered Admin Web login, Operators,
 Approvals, peer-approved GM grant, Servers heartbeat, Audit, Timeline, and

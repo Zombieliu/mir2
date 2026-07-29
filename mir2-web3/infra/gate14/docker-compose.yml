@@ -224,6 +224,8 @@ services:
       GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
       GATE14_GATEWAY_BIND: "0.0.0.0:9500"
       GATE14_REDIS_URL: "redis://redis-a:6379"
+      GATE14_CONTROL_TOKEN: "${GATE14_CONTROL_TOKEN:-}"
+      GATE14_REQUIRE_CONTROL_TOKEN: "${GATE14_REQUIRE_CONTROL_TOKEN:-false}"
     ports: ["19500:9500"]
     depends_on:
       redis-a:
@@ -243,6 +245,8 @@ services:
       GATE14_VALIDATOR_URLS: "http://validator-0:9400,http://validator-1:9400,http://validator-2:9400,http://validator-3:9400"
       GATE14_GATEWAY_BIND: "0.0.0.0:9500"
       GATE14_REDIS_URL: "redis://redis-b:6379"
+      GATE14_CONTROL_TOKEN: "${GATE14_CONTROL_TOKEN:-}"
+      GATE14_REQUIRE_CONTROL_TOKEN: "${GATE14_REQUIRE_CONTROL_TOKEN:-false}"
     ports: ["19501:9500"]
     depends_on:
       redis-b:

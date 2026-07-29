@@ -17,6 +17,7 @@ const navItems = [
   { href: "/namelists", labelKey: "shell.nav.namelists", count: "NPC" },
   { href: "/content", labelKey: "shell.nav.content", count: "DB" },
   { href: "/activities", labelKey: "shell.nav.activities", count: "Empty" },
+  { href: "/world-director", labelKey: "shell.nav.worldDirector", count: "AI" },
   { href: "/daily-reports", labelKey: "shell.nav.dailyReports", count: "AI" },
   { href: "/servers", labelKey: "shell.nav.servers", count: "Health" },
   { href: "/dubhe-nodes", labelKey: "shell.nav.dubheNodes", count: "Nodes" },
