@@ -22,6 +22,7 @@ import { createAssetResidency } from "../lib/asset-residency";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
 import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
+import { shouldLoadCrystalFullPack } from "../lib/crystal-full-pack-capability";
 import { loadCrystalFullPackIndex } from "../lib/crystal-full-pack-index";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../lib/render-tier";
 import {
@@ -4223,7 +4224,15 @@ async function loadCrystalFullPackBevyEntityAtlasSnapshot(
   key: string,
 ): Promise<BevyEntityAtlasSnapshot | null> {
   if (typeof window === "undefined") return null;
-  if (new URLSearchParams(window.location.search).get("crystalFullPack") === "0") return null;
+  if (
+    !shouldLoadCrystalFullPack({
+      queryValue: new URLSearchParams(window.location.search).get("crystalFullPack"),
+      configuredValue: process.env.NEXT_PUBLIC_MIR2_CRYSTAL_FULL_PACK_ENABLED,
+      remoteAssetBaseUrl: process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL,
+    })
+  ) {
+    return null;
+  }
   try {
     const runtime = await loadCrystalFullPackIndex();
     return await buildCrystalFullPackAtlasSnapshot(runtime, sources, key);
