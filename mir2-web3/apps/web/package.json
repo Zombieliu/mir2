@@ -78,6 +78,7 @@
     "test:device-profile": "node ./scripts/test-device-profile.mjs",
     "test:responsive-stage": "node ./scripts/test-responsive-stage.mjs",
     "test:gamepad-input": "node ./scripts/test-gamepad-input.mjs",
+    "test:scene-sprite-meta": "node ./scripts/test-original-scene-sprite-meta.mjs",
     "test:target-combat": "node ./scripts/test-target-combat.mjs",
     "test:scene-motion": "node ./scripts/test-scene-motion.mjs",
     "test:crystal-lighting": "node ./scripts/test-crystal-lighting.mjs",
