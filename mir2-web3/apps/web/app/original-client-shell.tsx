@@ -54,6 +54,7 @@ import { GameUiScene, GameUiSceneStoreBound } from "./components/original-client
 import {
   calculateMir2StagePresentation,
   calculateMir2TouchControlDeck,
+  calculateMir2TouchControlMetrics,
 } from "./components/original-client-stage-presentation";
 import type {
   BevyEntityRenderState,
@@ -607,6 +608,7 @@ export function OriginalClientShell({
     left: 0,
     top: 0,
   });
+  const [touchControlViewportHeight, setTouchControlViewportHeight] = useState(768);
   const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
   const [bevyLocalSelfMotion, setBevyLocalSelfMotion] =
     useState<BevyPresentationEntityMotion | null>(null);
@@ -689,14 +691,26 @@ export function OriginalClientShell({
   });
   const stageScaleStyle = useMemo(() => {
     const touchControlDeck = calculateMir2TouchControlDeck(stagePresentation);
+    const touchControlMetrics = calculateMir2TouchControlMetrics(touchControlViewportHeight);
     return {
       "--mir-stage-scale": stagePresentation.scale,
       "--mir-stage-left": `${stagePresentation.left}px`,
       "--mir-stage-top": `${stagePresentation.top}px`,
       "--mir-control-deck-left": `${touchControlDeck.left}px`,
       "--mir-control-deck-width": `${touchControlDeck.width}px`,
+      "--mir-mobile-action-size": `${touchControlMetrics.actionSize}px`,
+      "--mir-mobile-primary-size": `${touchControlMetrics.primarySize}px`,
+      "--mir-mobile-panel-size": `${touchControlMetrics.panelSize}px`,
+      "--mir-mobile-action-pad-width": `${touchControlMetrics.padWidth}px`,
+      "--mir-mobile-action-column-step": `${touchControlMetrics.columnStep}px`,
+      "--mir-mobile-quick-row-1": `${touchControlMetrics.quickRowTops[0]}px`,
+      "--mir-mobile-quick-row-2": `${touchControlMetrics.quickRowTops[1]}px`,
+      "--mir-mobile-quick-row-3": `${touchControlMetrics.quickRowTops[2]}px`,
+      "--mir-mobile-run-bottom": `${touchControlMetrics.runBottom}px`,
+      "--mir-mobile-side-right": `${touchControlMetrics.sideRight}px`,
+      "--mir-mobile-pick-bottom": `${touchControlMetrics.pickBottom}px`,
     } as CSSProperties;
-  }, [stagePresentation]);
+  }, [stagePresentation, touchControlViewportHeight]);
   const sceneAssetReadinessCallbackRef = useRef(onSceneAssetReadinessChange);
   sceneAssetReadinessCallbackRef.current = onSceneAssetReadinessChange;
 
@@ -1155,6 +1169,7 @@ export function OriginalClientShell({
       const viewport = window.visualViewport;
       const cssWidth = Math.max(1, viewport?.width ?? window.innerWidth);
       const cssHeight = Math.max(1, viewport?.height ?? window.innerHeight);
+      setTouchControlViewportHeight((current) => (current === cssHeight ? current : cssHeight));
       const next = calculateMir2StagePresentation({
         cssWidth,
         cssHeight,

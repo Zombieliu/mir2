@@ -22,7 +22,55 @@ export type Mir2TouchControlDeck = {
   width: number;
 };
 
+export type Mir2TouchControlMetrics = {
+  actionSize: number;
+  primarySize: number;
+  panelSize: number;
+  padWidth: number;
+  columnStep: number;
+  quickRowTops: [number, number, number];
+  runBottom: number;
+  sideRight: number;
+  pickBottom: number;
+};
+
 export const MIR2_TOUCH_GAME_RAIL_CSS_PX = 128;
+export const MIR2_TOUCH_COMPACT_HEIGHT_CSS_PX = 360;
+
+const REGULAR_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
+  actionSize: 44,
+  primarySize: 64,
+  panelSize: 44,
+  padWidth: 114,
+  columnStep: 48,
+  quickRowTops: [52, 100, 148],
+  runBottom: 68,
+  sideRight: 70,
+  pickBottom: 48,
+};
+
+const COMPACT_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
+  actionSize: 36,
+  primarySize: 52,
+  panelSize: 36,
+  padWidth: 98,
+  columnStep: 38,
+  quickRowTops: [40, 78, 116],
+  runBottom: 56,
+  sideRight: 56,
+  pickBottom: 38,
+};
+
+/**
+ * Compacts the action rail when browser chrome or docked DevTools leaves a
+ * very short visual viewport. The regular rail needs about 324 CSS px before
+ * its top quick slots and bottom combat cluster can no longer collide.
+ */
+export function calculateMir2TouchControlMetrics(cssHeight: number): Mir2TouchControlMetrics {
+  return cssHeight <= MIR2_TOUCH_COMPACT_HEIGHT_CSS_PX
+    ? COMPACT_TOUCH_CONTROL_METRICS
+    : REGULAR_TOUCH_CONTROL_METRICS;
+}
 
 /**
  * Fits the native 1024x768 composition inside the visual viewport while
