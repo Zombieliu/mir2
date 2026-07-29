@@ -1138,8 +1138,12 @@ textarea.control {
 }
 
 .button {
+  display: inline-flex;
   min-height: 44px;
   padding: 0 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
   border: 1px solid rgba(214, 168, 76, 0.36);
   border-radius: 14px;
   background: linear-gradient(180deg, rgba(214, 168, 76, 0.24), rgba(114, 63, 25, 0.24));
@@ -1150,6 +1154,28 @@ textarea.control {
 
 .button:hover {
   filter: brightness(1.08);
+}
+
+.button:disabled {
+  cursor: wait;
+  filter: none;
+  opacity: 0.62;
+}
+
+.button-spinner {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: button-spin 0.72s linear infinite;
+}
+
+@keyframes button-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .button.secondary {
@@ -1202,6 +1228,12 @@ textarea.control {
   background: var(--blue-soft);
   color: #cfe9ff;
   font-size: 13px;
+}
+
+.notice.success {
+  border-color: rgba(82, 204, 151, 0.34);
+  background: rgba(41, 134, 91, 0.14);
+  color: #baf4d8;
 }
 
 /* AI world director approval --------------------------------------------- */

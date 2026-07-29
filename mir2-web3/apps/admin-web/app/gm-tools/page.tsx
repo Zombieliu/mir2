@@ -182,7 +182,11 @@ export default async function GmToolsPage({
             <input className="control" name="itemId" placeholder={t("gm.itemId")} />
             <input className="control" name="count" placeholder={t("gm.count")} type="number" />
             <input className="control" name="reason" placeholder={t("mail.reason")} />
-            <button className="button" type="submit">{t("gm.grantItem")}</button>
+            <SubmitButton
+              confirmMessage={t("common.confirmDangerous")}
+              idle={t("gm.grantItem")}
+              pending={t("common.submitting")}
+            />
           </form>
           <div className="rune-divider" />
           <form action={grantCurrencyAction} className="form-stack">
@@ -193,7 +197,11 @@ export default async function GmToolsPage({
             <input className="control" defaultValue="gold" name="currency" placeholder={t("gm.currency")} />
             <input className="control" name="amount" placeholder={t("gm.amount")} type="number" />
             <input className="control" name="reason" placeholder={t("mail.reason")} />
-            <button className="button" type="submit">{t("gm.grantCurrency")}</button>
+            <SubmitButton
+              confirmMessage={t("common.confirmDangerous")}
+              idle={t("gm.grantCurrency")}
+              pending={t("common.submitting")}
+            />
           </form>
         </section>
         <section className="card">
@@ -204,7 +212,11 @@ export default async function GmToolsPage({
             <input className="control" name="traceId" placeholder={t("gm.traceId")} />
             <input className="control" name="characterId" placeholder={t("gm.characterId")} />
             <input className="control" name="reason" placeholder={t("mail.reason")} />
-            <button className="button" type="submit">{t("gm.kickPlayer")}</button>
+            <SubmitButton
+              confirmMessage={t("common.confirmDangerous")}
+              idle={t("gm.kickPlayer")}
+              pending={t("common.submitting")}
+            />
           </form>
         </section>
         <section className="card">
@@ -217,7 +229,11 @@ export default async function GmToolsPage({
             <input className="control" name="accountId" placeholder={t("gm.accountId")} />
             <input className="control" name="durationSeconds" placeholder={t("gm.durationSeconds")} type="number" />
             <input className="control" name="reason" placeholder={t("mail.reason")} />
-            <button className="button" type="submit">{t("gm.banAccount")}</button>
+            <SubmitButton
+              confirmMessage={t("common.confirmDangerous")}
+              idle={t("gm.banAccount")}
+              pending={t("common.submitting")}
+            />
           </form>
         </section>
         <section className="card">
@@ -258,9 +274,15 @@ export default async function GmToolsPage({
           )}
           <div className="rune-divider" />
           <div className="actions">
-            <button className="button secondary">{t("gm.announcement")}</button>
-            <button className="button secondary">{t("gm.sensitiveWords")}</button>
-            <button className="button secondary">{t("gm.hotfixNotice")}</button>
+            <button className="button secondary" disabled type="button">
+              {t("gm.announcement")}
+            </button>
+            <button className="button secondary" disabled type="button">
+              {t("gm.sensitiveWords")}
+            </button>
+            <button className="button secondary" disabled type="button">
+              {t("gm.hotfixNotice")}
+            </button>
           </div>
         </section>
       </div>

@@ -8,6 +8,7 @@
     "start": "next start -p 3020",
     "typecheck": "next typegen && tsc --noEmit --pretty false",
     "check:admin-api-response": "node --test scripts/check-admin-api-response.mjs",
+    "check:submit-buttons": "node scripts/check-submit-buttons.mjs",
     "check:dubhe-node-snapshot": "node scripts/check-dubhe-node-snapshot.mjs",
     "check:dubhe-network": "node --test scripts/check-dubhe-network.mjs"
   },

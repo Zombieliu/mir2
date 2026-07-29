@@ -13,7 +13,15 @@ export async function generateDirectorProposalAction() {
     "/admin/world-director/proposals/generate",
     {}
   );
-  finish(response);
+  if (!response.ok) {
+    finish(response);
+  }
+  revalidatePath("/world-director");
+  redirect(
+    response.data
+      ? "/world-director?notice=proposal-generated"
+      : "/world-director?notice=no-proposal"
+  );
 }
 
 export async function approveDirectorProposalAction(formData: FormData) {
@@ -90,10 +98,10 @@ function numberValue(formData: FormData, key: string) {
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
 }
 
-function finish(response: { ok: true; data: unknown } | { ok: false; error: string }) {
+function finish(response: { ok: true; data: unknown } | { ok: false; error: string }): never {
   revalidatePath("/world-director");
   if (!response.ok) {
     redirect(`/world-director?error=${encodeURIComponent(response.error)}`);
   }
-  redirect("/world-director");
+  redirect("/world-director?notice=updated");
 }

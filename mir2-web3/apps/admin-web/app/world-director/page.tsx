@@ -1,6 +1,7 @@
 import { AdminShell } from "../../components/admin-shell";
 import { MetricCard } from "../../components/metric-card";
 import { StatusBadge } from "../../components/status-badge";
+import { SubmitButton } from "../../components/submit-button";
 import {
   adminGet,
   type DirectorApprovalRecord,
@@ -30,6 +31,7 @@ export default async function WorldDirectorPage({
   const { t } = await getAdminI18n();
   const params = (await searchParams) ?? {};
   const error = firstParam(params.error);
+  const notice = firstParam(params.notice);
   const response = await adminGet<WorldDirectorDashboard>("/admin/world-director");
 
   return (
@@ -52,6 +54,7 @@ export default async function WorldDirectorPage({
       </div>
 
       {error ? <p className="notice">{error}</p> : null}
+      {notice ? <p className="notice success">{directorNotice(t, notice)}</p> : null}
       {!response.ok ? (
         <p className="notice">{response.error}</p>
       ) : (
@@ -112,12 +115,23 @@ function DirectorDashboard({
               ? dashboard.pauseReason ?? t("director.paused")
               : `${dashboard.configuration.persistence} · ${dashboard.configuration.directorPublicKey?.slice(0, 18) ?? "-"}…`}
           </p>
+          <p className="muted">
+            {dashboard.configuration.aiConfigured
+              ? `${t("director.generatorAi")} · ${dashboard.configuration.aiProvider}/${dashboard.configuration.aiModel}`
+              : t("director.aiNotConfigured")}
+          </p>
         </div>
         <div className="director-control-actions">
           <form action={generateDirectorProposalAction}>
-            <button className="button" type="submit">
-              {t("director.generate")}
-            </button>
+            <SubmitButton
+              disabled={!dashboard.configuration.aiConfigured}
+              idle={
+                dashboard.configuration.aiConfigured
+                  ? t("director.generate")
+                  : t("director.aiNotConfigured")
+              }
+              pending={t("director.generating")}
+            />
           </form>
           <form
             action={dashboard.paused ? resumeDirectorAction : pauseDirectorAction}
@@ -135,9 +149,14 @@ function DirectorDashboard({
               maxLength={512}
               required
             />
-            <button className="button secondary" type="submit">
-              {dashboard.paused ? t("director.resume") : t("director.pause")}
-            </button>
+            <SubmitButton
+              className="button secondary"
+              confirmMessage={t("common.confirmDangerous")}
+              idle={dashboard.paused ? t("director.resume") : t("director.pause")}
+              pending={
+                dashboard.paused ? t("director.resuming") : t("director.pausing")
+              }
+            />
           </form>
         </div>
       </section>
@@ -290,12 +309,16 @@ function DirectorProposalCard({
               proposalId={record.proposalId}
               reason={t("director.defaultApproveReason")}
               label={t("director.approve")}
+              pendingLabel={t("director.approving")}
+              confirmMessage={t("common.confirmDangerous")}
             />
             <DecisionForm
               action={rejectDirectorProposalAction}
               proposalId={record.proposalId}
               reason={t("director.defaultRejectReason")}
               label={t("director.reject")}
+              pendingLabel={t("director.rejecting")}
+              confirmMessage={t("common.confirmDangerous")}
               secondary
             />
             <DecisionForm
@@ -303,6 +326,8 @@ function DirectorProposalCard({
               proposalId={record.proposalId}
               reason={t("director.defaultCancelReason")}
               label={t("director.cancel")}
+              pendingLabel={t("director.cancelling")}
+              confirmMessage={t("common.confirmDangerous")}
               secondary
             />
           </div>
@@ -350,9 +375,12 @@ function DirectorProposalCard({
                 required
               />
             </label>
-            <button className="button secondary" type="submit">
-              {t("director.edit")}
-            </button>
+            <SubmitButton
+              className="button secondary"
+              confirmMessage={t("common.confirmDangerous")}
+              idle={t("director.edit")}
+              pending={t("director.editing")}
+            />
           </form>
         </>
       ) : record.status === "failed" ? (
@@ -361,6 +389,8 @@ function DirectorProposalCard({
           proposalId={record.proposalId}
           reason={t("director.defaultRetryReason")}
           label={t("director.retry")}
+          pendingLabel={t("director.retrying")}
+          confirmMessage={t("common.confirmDangerous")}
         />
       ) : (
         <p className="muted">
@@ -376,12 +406,16 @@ function DecisionForm({
   proposalId,
   reason,
   label,
+  pendingLabel,
+  confirmMessage,
   secondary
 }: {
   action: (formData: FormData) => Promise<void>;
   proposalId: string;
   reason: string;
   label: string;
+  pendingLabel: string;
+  confirmMessage?: string;
   secondary?: boolean;
 }) {
   return (
@@ -395,9 +429,12 @@ function DecisionForm({
         maxLength={512}
         required
       />
-      <button className={secondary ? "button secondary" : "button"} type="submit">
-        {label}
-      </button>
+      <SubmitButton
+        className={secondary ? "button secondary" : "button"}
+        confirmMessage={confirmMessage}
+        idle={label}
+        pending={pendingLabel}
+      />
     </form>
   );
 }
@@ -433,4 +470,10 @@ function PressureBars({
 
 function firstParam(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
+}
+
+function directorNotice(t: (key: string) => string, notice: string) {
+  if (notice === "proposal-generated") return t("director.proposalGenerated");
+  if (notice === "no-proposal") return t("director.noProposal");
+  return t("director.operationUpdated");
 }
