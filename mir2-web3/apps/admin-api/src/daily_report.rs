@@ -1394,10 +1394,17 @@ pub(super) async fn latest_public_daily_report(
 pub(super) async fn daily_report_prometheus(
     State(state): State<AdminApiState>,
 ) -> Result<String, ApiError> {
-    let service = state.daily_reports.clone();
-    let metrics = tokio::task::spawn_blocking(move || service.metrics())
-        .await
-        .map_err(super::join_error)??;
+    let daily_report_service = state.daily_reports.clone();
+    let world_director_service = state.world_director.clone();
+    let (metrics, world_director_metrics) = tokio::task::spawn_blocking(move || {
+        let metrics = daily_report_service.metrics()?;
+        let world_director_metrics = world_director_service
+            .prometheus_metrics(super::world_director_now_ms())
+            .map_err(super::world_director_api_error)?;
+        Ok::<_, ApiError>((metrics, world_director_metrics))
+    })
+    .await
+    .map_err(super::join_error)??;
     Ok(format!(
         "# HELP mir2_daily_reports_configured Whether persistent AI daily reports are configured.\n\
          # TYPE mir2_daily_reports_configured gauge\n\
@@ -1419,7 +1426,7 @@ pub(super) async fn daily_report_prometheus(
         metrics.published_reports,
         metrics.pending_deliveries,
         metrics.failed_deliveries
-    ))
+    ) + &world_director_metrics)
 }
 
 pub fn spawn_daily_report_scheduler(state: AdminApiState) {

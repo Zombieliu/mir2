@@ -15,6 +15,10 @@ use sha2::{Digest, Sha256};
 const STATE_ROOT_DOMAIN: &[u8] = b"obelisk.gate14.authoritative-state.v1\0";
 const COMMAND_DIGEST_DOMAIN: &[u8] = b"obelisk.gate14.command.v1\0";
 
+fn is_zero(value: &u64) -> bool {
+    *value == 0
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Gate14CommandEnvelope {
@@ -101,6 +105,12 @@ pub enum Gate14Command {
         character_id: String,
         item_id: String,
         quantity: u32,
+    },
+    AnchorWorldDirector {
+        command_id: String,
+        proposal_id: String,
+        payload_digest: String,
+        approval_audit_hash: String,
     },
 }
 
@@ -212,6 +222,17 @@ impl Gate14Command {
                     return Err("consumed quantity must be positive".to_string());
                 }
             }
+            Self::AnchorWorldDirector {
+                command_id,
+                proposal_id,
+                payload_digest,
+                approval_audit_hash,
+            } => {
+                validate_component("world director command id", command_id)?;
+                validate_component("world director proposal id", proposal_id)?;
+                validate_hex_digest("world director payload digest", payload_digest)?;
+                validate_hex_digest("world director approval audit hash", approval_audit_hash)?;
+            }
         }
         Ok(())
     }
@@ -267,6 +288,19 @@ pub struct Gate14Account {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Gate14WorldDirectorAnchor {
+    pub command_id: String,
+    pub proposal_id: String,
+    pub payload_digest: String,
+    pub approval_audit_hash: String,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub finalized_height: u64,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub command_digest: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Gate14AuthoritativeState {
     pub version: u32,
     pub finalized_height: u64,
@@ -276,6 +310,8 @@ pub struct Gate14AuthoritativeState {
     pub session_leases: BTreeMap<String, Gate14SessionLease>,
     pub accounts: BTreeMap<String, Gate14Account>,
     pub verified_loot_receipts: BTreeSet<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub world_director_anchors: BTreeMap<String, Gate14WorldDirectorAnchor>,
     pub applied_idempotency_keys: BTreeSet<String>,
 }
 
@@ -290,6 +326,7 @@ impl Default for Gate14AuthoritativeState {
             session_leases: BTreeMap::new(),
             accounts: BTreeMap::new(),
             verified_loot_receipts: BTreeSet::new(),
+            world_director_anchors: BTreeMap::new(),
             applied_idempotency_keys: BTreeSet::new(),
         }
     }
@@ -326,6 +363,18 @@ impl Gate14AuthoritativeState {
         }
 
         self.apply_command(&envelope.command)?;
+        if let Gate14Command::AnchorWorldDirector { command_id, .. } = &envelope.command {
+            let anchor = self
+                .world_director_anchors
+                .get_mut(command_id)
+                .ok_or_else(|| {
+                    format!("world director command {command_id} anchor was not installed")
+                })?;
+            if anchor.finalized_height == 0 {
+                anchor.finalized_height = height;
+                anchor.command_digest = envelope.digest()?;
+            }
+        }
         self.finalized_height = height;
         self.last_sequence = envelope.sequence;
         self.applied_idempotency_keys
@@ -556,6 +605,36 @@ impl Gate14AuthoritativeState {
                 } else {
                     character.inventory.insert(item_id.clone(), remaining);
                 }
+            }
+            Gate14Command::AnchorWorldDirector {
+                command_id,
+                proposal_id,
+                payload_digest,
+                approval_audit_hash,
+            } => {
+                if let Some(existing) = self.world_director_anchors.get(command_id) {
+                    if existing.command_id != *command_id
+                        || existing.proposal_id != *proposal_id
+                        || existing.payload_digest != *payload_digest
+                        || existing.approval_audit_hash != *approval_audit_hash
+                    {
+                        return Err(format!(
+                            "world director command {command_id} is already anchored with different evidence"
+                        ));
+                    }
+                    return Ok(());
+                }
+                self.world_director_anchors.insert(
+                    command_id.clone(),
+                    Gate14WorldDirectorAnchor {
+                        command_id: command_id.clone(),
+                        proposal_id: proposal_id.clone(),
+                        payload_digest: payload_digest.clone(),
+                        approval_audit_hash: approval_audit_hash.clone(),
+                        finalized_height: 0,
+                        command_digest: String::new(),
+                    },
+                );
             }
         }
         Ok(())
@@ -887,6 +966,13 @@ fn validate_component(label: &str, value: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn validate_hex_digest(label: &str, value: &str) -> Result<(), String> {
+    if value.len() != 64 || !value.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err(format!("{label} must be a 64-character hexadecimal digest"));
+    }
+    Ok(())
+}
+
 fn hex(bytes: &[u8]) -> String {
     const DIGITS: &[u8; 16] = b"0123456789abcdef";
     let mut output = String::with_capacity(bytes.len() * 2);
@@ -1010,6 +1096,50 @@ mod tests {
                 .gateway_id,
             "gateway-a"
         );
+    }
+
+    #[test]
+    fn world_director_anchor_is_finalized_and_replay_stable() {
+        let command = envelope(
+            1,
+            Gate14Command::AnchorWorldDirector {
+                command_id: "a".repeat(64),
+                proposal_id: "proposal-world-1".into(),
+                payload_digest: "b".repeat(64),
+                approval_audit_hash: "c".repeat(64),
+            },
+        );
+        let mut state = Gate14AuthoritativeState::default();
+        let outcome = state.apply_finalized(1, &command).unwrap();
+        let record = Gate14FinalizedRecord {
+            height: 1,
+            epoch: 0,
+            view: 1,
+            command_digest: command.digest().unwrap(),
+            commonware_digest: "commonware-director-anchor".into(),
+            signer_count: 3,
+            certificate_base64: "test".into(),
+            command,
+            state_root: outcome.state_root,
+            finalized_at_ms: 2_000,
+        };
+        let command_digest = record.command_digest.clone();
+        let replayed = replay_gate14_records(&[record]).unwrap();
+        assert_eq!(replayed, state);
+        assert_eq!(
+            replayed
+                .world_director_anchors
+                .get(&"a".repeat(64))
+                .unwrap()
+                .proposal_id,
+            "proposal-world-1"
+        );
+        let anchor = replayed
+            .world_director_anchors
+            .get(&"a".repeat(64))
+            .unwrap();
+        assert_eq!(anchor.finalized_height, 1);
+        assert_eq!(anchor.command_digest, command_digest);
     }
 
     #[test]

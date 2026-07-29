@@ -98,7 +98,7 @@ pub use gate14::{
     replay_gate14_records, Gate14Account, Gate14ApplyOutcome, Gate14AuthoritativeState,
     Gate14Character, Gate14Command, Gate14CommandEnvelope, Gate14FinalizedRecord, Gate14Placement,
     Gate14QuorumClient, Gate14QuorumSnapshot, Gate14SessionLease, Gate14ValidatorStatus,
-    Gate14ZoneHost,
+    Gate14WorldDirectorAnchor, Gate14ZoneHost,
 };
 pub use gate15::{Gate15Health, Gate15PlayerLease};
 pub use guild_node_foundation::{

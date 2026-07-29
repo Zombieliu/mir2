@@ -1204,6 +1204,216 @@ textarea.control {
   font-size: 13px;
 }
 
+/* AI world director approval --------------------------------------------- */
+
+.director-console,
+.director-proposal-list {
+  display: grid;
+  gap: 20px;
+}
+
+.director-control-card,
+.director-control-actions,
+.director-inline-form,
+.director-title-line,
+.director-finality {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.director-control-card {
+  justify-content: space-between;
+}
+
+.director-control-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.director-inline-form .control {
+  min-width: min(420px, 42vw);
+}
+
+.director-proposal-card {
+  overflow: hidden;
+}
+
+.director-proposal-card > header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.director-proposal-card h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.director-proposal-card code,
+.director-audit-list code {
+  color: var(--blue);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+}
+
+.director-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.director-facts > div {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--line-cool);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.director-facts span,
+.director-facts strong {
+  display: block;
+}
+
+.director-facts span {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.director-facts strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+
+.director-pressure {
+  display: grid;
+  gap: 9px;
+  margin: 18px 0;
+}
+
+.director-pressure > div {
+  display: grid;
+  grid-template-columns: 88px minmax(120px, 1fr) 44px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.director-pressure > div > div {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.director-pressure i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--jade), var(--gold), var(--red));
+  box-shadow: 0 0 16px rgba(214, 168, 76, 0.24);
+}
+
+.director-finality {
+  flex-wrap: wrap;
+  padding: 13px 14px;
+  border: 1px solid rgba(108, 195, 163, 0.2);
+  border-radius: 12px;
+  background: var(--jade-soft);
+  font-size: 12px;
+}
+
+.director-decisions {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.director-decisions form {
+  display: grid;
+  gap: 8px;
+}
+
+.director-decisions textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.director-edit-form {
+  display: grid;
+  grid-template-columns: 0.65fr 0.8fr 1.1fr 1.8fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.director-edit-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.director-runtime-list,
+.director-audit-list {
+  display: grid;
+  gap: 0;
+}
+
+.director-runtime-list article,
+.director-audit-list article {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.director-runtime-list article:last-child,
+.director-audit-list article:last-child {
+  border-bottom: 0;
+}
+
+.director-runtime-list p,
+.director-audit-list p {
+  margin: 5px 0 0;
+}
+
+@media (max-width: 900px) {
+  .director-control-card,
+  .director-control-actions,
+  .director-inline-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .director-inline-form .control {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .director-facts,
+  .director-decisions,
+  .director-edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .director-proposal-card > header {
+    flex-direction: column;
+  }
+}
+
 .dubhe-console {
   --dubhe-cyan: #66e3ff;
   --dubhe-violet: #a78bfa;
