@@ -6,6 +6,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { constants as zlibConstants, gzipSync } from "node:zlib";
 
 import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
 
@@ -211,12 +212,26 @@ await test("verified full Crystal pack files are included only when explicitly r
       libraryCount: 2,
       pageCount: 2,
       fileCount: 5,
+      jsonContentEncoding: "gzip",
     });
     assert.ok(files.has("/generated/crystal-packs/full/index.json"));
     assert.ok(files.has("/generated/crystal-packs/full/libraries/entities/npc.json"));
     assert.ok(files.has("/generated/crystal-packs/full/libraries/ui/prguse.json"));
     assert.ok(files.has(pageAUrl));
     assert.ok(files.has(pageBUrl));
+    for (const jsonPath of [
+      "/generated/crystal-packs/full/index.json",
+      "/generated/crystal-packs/full/libraries/entities/npc.json",
+      "/generated/crystal-packs/full/libraries/ui/prguse.json",
+    ]) {
+      const file = files.get(jsonPath);
+      assert.equal(file.contentEncoding, "gzip");
+      assert.ok(file.encodedSize > 0);
+      assert.match(file.encodedSha256, /^[a-f0-9]{64}$/);
+    }
+    assert.equal(release.stats.encodedFileCount, 3);
+    assert.ok(release.stats.storageBytes < release.stats.totalBytes);
+    assert.ok(release.stats.storageSavingsBytes > 0);
     assert.deepEqual(
       files.get(pageAUrl).sources,
       ["full-crystal-pack:page"],
@@ -327,7 +342,75 @@ await test("release manifest upload starts after every referenced asset upload c
   });
 });
 
-console.log("asset release safety tests passed (3/3)");
+await test("r2-s3 uploads deterministic gzip bytes with matching metadata", async () => {
+  await withTempDir(async (root) => {
+    const requests = [];
+    const server = await listen((request, response) => {
+      const chunks = [];
+      request.on("data", (chunk) => chunks.push(chunk));
+      request.on("end", () => {
+        requests.push({
+          method: request.method,
+          url: request.url,
+          headers: request.headers,
+          body: Buffer.concat(chunks),
+        });
+        response.statusCode = 200;
+        response.setHeader("etag", '"fixture"');
+        response.end();
+      });
+    });
+
+    try {
+      const stagePath = path.join(root, "index.json");
+      const manifestPath = path.join(root, "release.json");
+      const raw = Buffer.from(JSON.stringify({
+        kind: "mir2-crystal-full-pack-index",
+        libraries: Array.from({ length: 100 }, (_, index) => ({ key: `Library/${index}` })),
+      }));
+      const encoded = gzipSync(raw, {
+        level: zlibConstants.Z_BEST_COMPRESSION,
+        mtime: 0,
+      });
+      await fs.writeFile(stagePath, raw);
+      await fs.writeFile(manifestPath, JSON.stringify({
+        objectPrefix: "mir2/v/gzip-fixture",
+        fullCrystalPack: { enabled: true },
+        files: [{
+          relativePath: "generated/crystal-packs/full/index.json",
+          stagePath,
+          size: raw.byteLength,
+          sha256: createHash("sha256").update(raw).digest("hex"),
+          contentType: "application/json; charset=utf-8",
+          contentEncoding: "gzip",
+          encodedSize: encoded.byteLength,
+          encodedSha256: createHash("sha256").update(encoded).digest("hex"),
+        }],
+      }));
+
+      await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "r2-s3",
+        "--s3Endpoint", server.url,
+        "--s3AccessKeyId", "fixture-access",
+        "--s3SecretAccessKey", "fixture-secret",
+        "--includeReleaseManifest", "false",
+        "--maxAttempts", "1",
+      ]);
+
+      assert.equal(requests.length, 1);
+      assert.equal(requests[0].method, "PUT");
+      assert.equal(requests[0].headers["content-encoding"], "gzip");
+      assert.equal(Number(requests[0].headers["content-length"]), encoded.byteLength);
+      assert.deepEqual(requests[0].body, encoded);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+console.log("asset release safety tests passed (4/4)");
 
 async function test(name, fn) {
   try {

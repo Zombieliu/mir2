@@ -1,8 +1,12 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import path from "node:path";
+import { Writable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
+import { constants as zlibConstants, createGzip } from "node:zlib";
 
 import { loadCasUploadPlan } from "./asset-pipeline/cas-release.mjs";
 
@@ -16,6 +20,10 @@ const DEFAULT_MANIFEST = path.resolve(
   "remote-assets",
   "latest-remote-asset-release.json",
 );
+const FULL_PACK_GZIP_OPTIONS = Object.freeze({
+  level: zlibConstants.Z_BEST_COMPRESSION,
+  mtime: 0,
+});
 
 const args = parseArgs(process.argv.slice(2));
 const manifestPath = path.resolve(args.manifest ?? process.env.MIR2_REMOTE_ASSET_RELEASE_MANIFEST ?? DEFAULT_MANIFEST);
@@ -70,6 +78,14 @@ async function main() {
     );
   }
   const legacyAssetUploads = await buildUploadList(release);
+  await verifyEncodedUploads(legacyAssetUploads);
+  const encodedUploads = legacyAssetUploads.filter((upload) => upload.contentEncoding);
+  if (encodedUploads.length > 0 && uploadDriver !== "s3") {
+    throw new Error("Content-encoded release assets require MIR2_R2_UPLOAD_DRIVER=r2-s3.");
+  }
+  if (encodedUploads.length > 0 && release.cas) {
+    throw new Error("Content-encoded releases cannot also publish raw CAS assets.");
+  }
   const legacyUploadByPath = new Map(legacyAssetUploads.map((upload) => [upload.relativePath, upload]));
   const casUploads = release.cas
     ? await loadCasUploadPlan(release, {
@@ -100,6 +116,7 @@ async function main() {
   ];
 
   const totalBytes = uploads.reduce((sum, upload) => sum + upload.size, 0);
+  const logicalTotalBytes = uploads.reduce((sum, upload) => sum + (upload.logicalSize ?? upload.size), 0);
   if (dryRun) {
     console.log(
       JSON.stringify(
@@ -113,6 +130,9 @@ async function main() {
           assetBaseUrl: release.assetBaseUrl ?? null,
           uploadCount: uploads.length,
           totalBytes,
+          logicalTotalBytes,
+          encodedUploadCount: encodedUploads.length,
+          storageSavingsBytes: logicalTotalBytes - totalBytes,
           verifyOriginalAssets,
           publishOrder: {
             assets: assetUploads.length,
@@ -123,7 +143,9 @@ async function main() {
           sample: uploads.slice(0, 8).map((upload) => ({
             objectKey: upload.objectKey,
             size: upload.size,
+            logicalSize: upload.logicalSize ?? upload.size,
             contentType: upload.contentType,
+            contentEncoding: upload.contentEncoding ?? null,
           })),
         },
         null,
@@ -220,6 +242,9 @@ async function main() {
         assetBaseUrl: release.assetBaseUrl ?? null,
         uploadCount: uploads.length,
         totalBytes,
+        logicalTotalBytes,
+        encodedUploadCount: encodedUploads.length,
+        storageSavingsBytes: logicalTotalBytes - totalBytes,
         verifiedOriginalAssetCount: verifyOriginalAssets
           ? legacyAssetUploads.filter((upload) => upload.sources?.includes("original-asset-manifest")).length
           : 0,
@@ -276,19 +301,65 @@ async function buildUploadList(release) {
     }
     const stats = await fs.stat(stagePath);
     if (!stats.isFile()) throw new Error(`Not a file: ${stagePath}`);
+    const expectedSize = numberOrNull(file.size ?? file.s);
+    if (expectedSize !== null && expectedSize !== stats.size) {
+      throw new Error(`Release source size mismatch for ${relativePath}: expected ${expectedSize}, found ${stats.size}`);
+    }
+    const contentEncoding = normalizeContentEncoding(file.contentEncoding ?? file.e);
+    const encodedSize = numberOrNull(file.encodedSize ?? file.es);
+    const encodedSha256 = normalizeSha256(file.encodedSha256 ?? file.eh);
+    if (contentEncoding && (!encodedSize || !encodedSha256)) {
+      throw new Error(`Encoded release file is missing encodedSize or encodedSha256: ${relativePath}`);
+    }
     uploads.push({
       path: file.path ?? `/${relativePath}`,
       relativePath,
       stagePath,
       objectKey,
-      size: stats.size,
+      size: contentEncoding ? encodedSize : stats.size,
+      logicalSize: stats.size,
       contentType: file.contentType ?? file.c ?? "application/octet-stream",
+      contentEncoding,
       cacheControl: file.cacheControl || "public, max-age=31536000, immutable",
       sources: file.sources ?? file.src ?? [],
       sha256: file.sha256 ?? file.h ?? null,
+      encodedSha256,
     });
   }
   return uploads;
+}
+
+async function verifyEncodedUploads(uploads) {
+  const encodedUploads = uploads.filter((upload) => upload.contentEncoding);
+  if (!encodedUploads.length) return;
+  let completed = 0;
+  await runPool(encodedUploads, Math.min(concurrency, 4), async (upload) => {
+    const actual = await gzipFileMetadata(upload.stagePath);
+    if (actual.size !== upload.size || actual.sha256 !== upload.encodedSha256) {
+      throw new Error(
+        `Encoded release metadata mismatch for ${upload.relativePath}: ` +
+          `expected ${upload.size}/${upload.encodedSha256}, found ${actual.size}/${actual.sha256}`,
+      );
+    }
+    completed += 1;
+    if (completed % 250 === 0 || completed === encodedUploads.length) {
+      console.log(`[mir2-r2] verified encoded assets ${completed}/${encodedUploads.length}`);
+    }
+  });
+}
+
+async function gzipFileMetadata(filePath) {
+  const hash = createHash("sha256");
+  let size = 0;
+  const sink = new Writable({
+    write(chunk, _encoding, callback) {
+      size += chunk.length;
+      hash.update(chunk);
+      callback();
+    },
+  });
+  await pipeline(createReadStream(filePath), createGzip(FULL_PACK_GZIP_OPTIONS), sink);
+  return { size, sha256: hash.digest("hex") };
 }
 
 function normalizeReleaseFileRelativePath(file) {
@@ -357,8 +428,14 @@ async function uploadViaWorker(upload) {
 
 async function uploadViaS3(upload) {
   const { PutObjectCommand } = await import("@aws-sdk/client-s3");
-  const body = createReadStream(upload.stagePath);
+  const source = createReadStream(upload.stagePath);
+  const body = upload.contentEncoding === "gzip"
+    ? source.pipe(createGzip(FULL_PACK_GZIP_OPTIONS))
+    : source;
   const client = await createS3Client();
+  const metadata = {};
+  if (upload.sha256) metadata.sha256 = upload.sha256;
+  if (upload.encodedSha256) metadata.encodedsha256 = upload.encodedSha256;
   await client.send(
     new PutObjectCommand({
       Bucket: bucket,
@@ -366,8 +443,9 @@ async function uploadViaS3(upload) {
       Body: body,
       ContentLength: upload.size,
       ContentType: upload.contentType,
+      ContentEncoding: upload.contentEncoding || undefined,
       CacheControl: upload.cacheControl,
-      Metadata: upload.sha256 ? { sha256: upload.sha256 } : undefined,
+      Metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
     }),
   );
 }
@@ -399,6 +477,8 @@ async function createS3Client() {
     region: "auto",
     endpoint: resolveS3Endpoint(),
     forcePathStyle: true,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
     credentials: {
       accessKeyId: s3AccessKeyId,
       secretAccessKey: s3SecretAccessKey,
@@ -506,6 +586,26 @@ function joinObjectKey(prefix, relativePath) {
 function numberArg(value, fallback) {
   const numeric = Number(value);
   return Number.isFinite(numeric) && numeric > 0 ? Math.trunc(numeric) : fallback;
+}
+
+function numberOrNull(value) {
+  if (value == null || value === "") return null;
+  const numeric = Number(value);
+  return Number.isSafeInteger(numeric) && numeric >= 0 ? numeric : null;
+}
+
+function normalizeContentEncoding(value) {
+  const encoding = String(value || "").trim().toLowerCase();
+  if (!encoding) return null;
+  if (encoding !== "gzip") {
+    throw new Error(`Unsupported release content encoding: ${encoding}`);
+  }
+  return encoding;
+}
+
+function normalizeSha256(value) {
+  const digest = String(value || "").trim().toLowerCase();
+  return /^[a-f0-9]{64}$/.test(digest) ? digest : null;
 }
 
 function booleanArg(value, fallback) {
