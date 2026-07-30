@@ -18,6 +18,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use mir2_protocol::ServerPacket;
 use mir2_simulation::{ActiveSessionIdentity, WorldCommandExecution, WorldSnapshot};
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 use crate::gate14::{
     Gate14AuthoritativeState, Gate14Command, Gate14CommandEnvelope, Gate14QuorumClient,
@@ -515,20 +516,11 @@ impl Gate15ControlPlane {
         for attempt in 0..3 {
             let snapshot = self.quorum.quorum_state().await?;
             self.install_snapshot(snapshot.clone());
-            let account = snapshot
-                .state
-                .accounts
-                .get(account_id)
-                .ok_or_else(|| format!("Gate 15 finalized account {account_id} disappeared"))?;
-            if let Some(character) = account.characters.get(&character_id) {
-                if character.name != name {
-                    return Err(format!(
-                        "Gate 15 character {character_id} is finalized as {}, not {name}",
-                        character.name
-                    ));
-                }
+            let Some(control_name) =
+                character_finalization_plan(&snapshot.state, account_id, character_index, name)?
+            else {
                 return Ok(snapshot.state.finalized_height);
-            }
+            };
             let sequence = snapshot.state.last_sequence.saturating_add(1);
             let command = Gate14CommandEnvelope {
                 sequence,
@@ -540,7 +532,7 @@ impl Gate15ControlPlane {
                 command: Gate14Command::CreateCharacter {
                     account_id: account_id.to_string(),
                     character_id: character_id.clone(),
-                    name: name.to_string(),
+                    name: control_name.clone(),
                 },
             };
             match self.quorum.submit(&command).await {
@@ -555,7 +547,7 @@ impl Gate15ControlPlane {
                         .get(account_id)
                         .and_then(|account| account.characters.get(&character_id))
                         .map(|character| character.name.as_str());
-                    if finalized_name != Some(name) {
+                    if finalized_name != Some(control_name.as_str()) {
                         return Err(format!(
                             "Gate 15 finalized height {sequence} has no matching character {character_id}"
                         ));
@@ -576,6 +568,62 @@ impl Gate15ControlPlane {
             "Gate 15 character finalization retries exhausted for {character_id}"
         ))
     }
+}
+
+/// Plan the control-plane identity for an account-store character slot.
+///
+/// The immutable identity is `account_id:character_index`. `name` is control
+/// metadata and may differ from the player-facing display name because the
+/// legacy migration deterministically disambiguated duplicate names.
+fn character_finalization_plan(
+    state: &Gate14AuthoritativeState,
+    account_id: &str,
+    character_index: i32,
+    display_name: &str,
+) -> Result<Option<String>, String> {
+    let account = state
+        .accounts
+        .get(account_id)
+        .ok_or_else(|| format!("Gate 15 finalized account {account_id} disappeared"))?;
+    let character_id = format!("{account_id}:{character_index}");
+    if account.characters.contains_key(&character_id) {
+        return Ok(None);
+    }
+
+    let name_is_available = !state
+        .accounts
+        .values()
+        .flat_map(|account| account.characters.values())
+        .any(|character| character.name == display_name);
+    if name_is_available {
+        return Ok(Some(display_name.to_string()));
+    }
+
+    let digest = Sha256::digest(character_id.as_bytes())
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    for digest_length in [8_usize, 16, 32, 64] {
+        let suffix = format!("~{}", &digest[..digest_length]);
+        let maximum_prefix_bytes = 256 - suffix.len();
+        let mut prefix_end = display_name.len().min(maximum_prefix_bytes);
+        while !display_name.is_char_boundary(prefix_end) {
+            prefix_end -= 1;
+        }
+        let candidate = format!("{}{}", &display_name[..prefix_end], suffix);
+        let candidate_is_available = !state
+            .accounts
+            .values()
+            .flat_map(|account| account.characters.values())
+            .any(|character| character.name == candidate);
+        if candidate_is_available {
+            return Ok(Some(candidate));
+        }
+    }
+
+    Err(format!(
+        "Gate 15 could not derive a unique control name for character {character_id}"
+    ))
 }
 
 #[derive(Debug)]
@@ -843,7 +891,10 @@ fn next_gate15_rpc_session_id() -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{character_id_for_index, placement_from_state, player_session_id};
+    use super::{
+        character_finalization_plan, character_id_for_index, placement_from_state,
+        player_session_id,
+    };
     use crate::gate14::{
         Gate14Account, Gate14AuthoritativeState, Gate14Character, Gate14Placement, Gate14ZoneHost,
     };
@@ -919,5 +970,49 @@ mod tests {
             "demo-hero"
         );
         assert_eq!(player_session_id("demo", 0), "player:demo:0");
+    }
+
+    #[test]
+    fn migrated_control_name_alias_does_not_reject_the_same_character_slot() {
+        let mut state = finalized_state();
+        state.accounts.get_mut("demo").unwrap().characters = BTreeMap::from([(
+            "demo:0".to_string(),
+            Gate14Character {
+                character_id: "demo:0".to_string(),
+                name: "Scout~b98ded00".to_string(),
+                gold: 0,
+                inventory: BTreeMap::new(),
+            },
+        )]);
+
+        assert_eq!(
+            character_finalization_plan(&state, "demo", 0, "Scout")
+                .expect("canonical migrated slot should be accepted"),
+            None
+        );
+    }
+
+    #[test]
+    fn duplicate_display_name_gets_a_deterministic_control_alias() {
+        let mut state = finalized_state();
+        state.accounts.insert(
+            "new-account".to_string(),
+            Gate14Account {
+                account_id: "new-account".to_string(),
+                characters: BTreeMap::new(),
+            },
+        );
+
+        let first = character_finalization_plan(&state, "new-account", 0, "Scout")
+            .expect("duplicate name should be disambiguated")
+            .expect("new slot should require finalization");
+        let second = character_finalization_plan(&state, "new-account", 0, "Scout")
+            .expect("duplicate name should be disambiguated")
+            .expect("new slot should require finalization");
+
+        assert_eq!(first, second);
+        assert!(first.starts_with("Scout~"));
+        assert_ne!(first, "Scout");
+        assert!(first.len() <= 256);
     }
 }
