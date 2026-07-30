@@ -24,6 +24,12 @@ The scripts align these ports and use the tracked prebuilt WebGPU/WebGL2 Bevy
 runtimes. Windows native-toolchain scripts remain available for direct process
 debugging.
 
+Player Web uses one URL across desktop, landscape mobile, and console browsers
+that expose the Web Gamepad API. It switches its controls tutorial to the most
+recent keyboard/mouse, touch, or gamepad input, provides Xbox and PlayStation
+button labels when the browser identifies them, and keeps the tutorial
+available from the in-game `Help` menu.
+
 Authorized developers can install the content-hashed full asset bundle and
 start the same stack in one command. The first run performs GitHub device
 authorization through the official host `gh`. The launcher verifies the remote
