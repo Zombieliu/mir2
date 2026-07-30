@@ -16,8 +16,9 @@
 
 export type TutorialLang = "en" | "zh-CN" | "es" | "pt-BR";
 export type TutorialInputProfile = "keyboardMouse" | "touch" | "gamepad";
+export type TutorialGamepadFamily = "xbox" | "playstation" | "generic";
 
-export const TUTORIAL_VERSION = 2;
+export const TUTORIAL_VERSION = 3;
 export const TUTORIAL_CONTROL_EVENT = "mir2:tutorial-control";
 
 export type TutorialWindow = "inventory" | "character" | "questLog";
@@ -58,6 +59,7 @@ export interface TutorialStep {
 
 export interface TutorialState {
   input: TutorialInputProfile;
+  gamepadFamily: TutorialGamepadFamily;
   stepIndex: number;
   // Per-action cumulative counts, used by `count`-gated action triggers.
   actionCounts: Record<string, number>;
@@ -317,94 +319,175 @@ const TOUCH_TUTORIAL_STEPS: TutorialStep[] = [
   },
 ];
 
-const GAMEPAD_TUTORIAL_STEPS: TutorialStep[] = [
-  {
-    id: "gamepad-welcome",
-    title: { en: "Controller controls", "zh-CN": "手柄操作" },
-    body: {
-      en: "This tour covers movement, combat, shortcuts and menu navigation for a standard Xbox controller.",
-      "zh-CN": "这个教程会介绍标准 Xbox 手柄的移动、战斗、快捷操作和菜单导航。",
+function tutorialGamepadLabels(family: TutorialGamepadFamily) {
+  if (family === "playstation") {
+    return {
+      primary: "×",
+      cancel: "○",
+      pick: "□",
+      approach: "△",
+      leftBumper: "L1",
+      rightBumper: "R1",
+      leftTrigger: "L2",
+      rightTrigger: "R2",
+      view: "Create",
+      menu: "Options",
+    };
+  }
+  if (family === "xbox") {
+    return {
+      primary: "A",
+      cancel: "B",
+      pick: "X",
+      approach: "Y",
+      leftBumper: "LB",
+      rightBumper: "RB",
+      leftTrigger: "LT",
+      rightTrigger: "RT",
+      view: "View",
+      menu: "Menu",
+    };
+  }
+  return {
+    primary: "1",
+    cancel: "2",
+    pick: "3",
+    approach: "4",
+    leftBumper: "L1",
+    rightBumper: "R1",
+    leftTrigger: "L2",
+    rightTrigger: "R2",
+    view: "Select",
+    menu: "Start",
+  };
+}
+
+function createGamepadTutorialSteps(family: TutorialGamepadFamily): TutorialStep[] {
+  const labels = tutorialGamepadLabels(family);
+  const controllerName =
+    family === "playstation"
+      ? { en: "PlayStation controller", "zh-CN": "PlayStation 手柄" }
+      : family === "xbox"
+        ? { en: "Xbox controller", "zh-CN": "Xbox 手柄" }
+        : { en: "game controller", "zh-CN": "游戏手柄" };
+
+  return [
+    {
+      id: "gamepad-welcome",
+      title: {
+        en: family === "playstation" ? "PlayStation controls" : "Controller controls",
+        "zh-CN": family === "playstation" ? "PlayStation 手柄操作" : "手柄操作",
+      },
+      body: {
+        en: `This tour covers movement, combat, shortcuts and menu navigation for your ${controllerName.en}.`,
+        "zh-CN": `这个教程会介绍${controllerName["zh-CN"]}的移动、战斗、快捷操作和菜单导航。`,
+      },
+      trigger: { kind: "manual" },
     },
-    trigger: { kind: "manual" },
-  },
-  {
-    id: "gamepad-move",
-    title: { en: "Move", "zh-CN": "移动" },
-    body: {
-      en: "Use the left stick or D-pad to move. Push farther to run and ease the stick for precise movement.",
-      "zh-CN": "使用左摇杆或方向键移动。大幅推动摇杆会跑步，轻推可精确走位。",
+    {
+      id: "gamepad-move",
+      title: { en: "Move", "zh-CN": "移动" },
+      body: {
+        en: "Use the left stick or D-pad to move. Push farther to run and ease the stick for precise movement.",
+        "zh-CN": "使用左摇杆或方向键移动。大幅推动摇杆会跑步，轻推可精确走位。",
+      },
+      hint: { en: "Left stick / D-pad", "zh-CN": "左摇杆 / 方向键" },
+      trigger: { kind: "action", actionType: "gamepad:move" },
     },
-    hint: { en: "Left stick / D-pad", "zh-CN": "左摇杆 / 方向键" },
-    trigger: { kind: "action", actionType: "gamepad:move" },
-  },
-  {
-    id: "gamepad-actions",
-    title: { en: "Combat actions", "zh-CN": "战斗操作" },
-    body: {
-      en: "A performs the primary action, Y approaches the selected target, and X picks up the nearest drop.",
-      "zh-CN": "A 执行主要操作，Y 接近选中目标，X 拾取最近的掉落物。",
+    {
+      id: "gamepad-actions",
+      title: { en: "Combat actions", "zh-CN": "战斗操作" },
+      body: {
+        en: `${labels.primary} performs the primary action, ${labels.approach} approaches the selected target, and ${labels.pick} picks up the nearest drop.`,
+        "zh-CN": `${labels.primary} 执行主要操作，${labels.approach} 接近选中目标，${labels.pick} 拾取最近的掉落物。`,
+      },
+      hint: {
+        en: `${labels.primary}: Attack · ${labels.approach}: Approach · ${labels.pick}: Pick`,
+        "zh-CN": `${labels.primary}：攻击 · ${labels.approach}：接近 · ${labels.pick}：拾取`,
+      },
+      trigger: { kind: "action", actionType: ["gamepad:primary", "gamepad:approach", "gamepad:pick"] },
     },
-    hint: { en: "A: Attack · Y: Approach · X: Pick", "zh-CN": "A：攻击 · Y：接近 · X：拾取" },
-    trigger: { kind: "action", actionType: ["gamepad:primary", "gamepad:approach", "gamepad:pick"] },
-  },
-  {
-    id: "gamepad-quick",
-    title: { en: "Skills and items", "zh-CN": "技能与物品" },
-    body: {
-      en: "LT and RT cast skill slots 1 and 2. LB and RB use belt items 1 and 2.",
-      "zh-CN": "LT、RT 释放技能槽 1、2；LB、RB 使用腰带物品 1、2。",
+    {
+      id: "gamepad-quick",
+      title: { en: "Skills and items", "zh-CN": "技能与物品" },
+      body: {
+        en: `${labels.leftTrigger} and ${labels.rightTrigger} cast skill slots 1 and 2. ${labels.leftBumper} and ${labels.rightBumper} use belt items 1 and 2.`,
+        "zh-CN": `${labels.leftTrigger}、${labels.rightTrigger} 释放技能槽 1、2；${labels.leftBumper}、${labels.rightBumper} 使用腰带物品 1、2。`,
+      },
+      hint: {
+        en: `${labels.leftTrigger} / ${labels.rightTrigger}: Skills · ${labels.leftBumper} / ${labels.rightBumper}: Items`,
+        "zh-CN": `${labels.leftTrigger} / ${labels.rightTrigger}：技能 · ${labels.leftBumper} / ${labels.rightBumper}：物品`,
+      },
+      trigger: { kind: "action", actionType: "gamepad:quick" },
     },
-    hint: { en: "LT / RT: Skills · LB / RB: Items", "zh-CN": "LT / RT：技能 · LB / RB：物品" },
-    trigger: { kind: "action", actionType: "gamepad:quick" },
-  },
-  {
-    id: "gamepad-panels",
-    title: { en: "Character and Bag", "zh-CN": "角色与背包" },
-    body: {
-      en: "View opens Character. Menu opens Bag. While a panel is open, the D-pad moves focus, A activates and B goes back.",
-      "zh-CN": "View 打开角色，Menu 打开背包。面板打开时，用方向键移动焦点、A 确认、B 返回。",
+    {
+      id: "gamepad-panels",
+      title: { en: "Character and Bag", "zh-CN": "角色与背包" },
+      body: {
+        en: `${labels.view} opens Character. ${labels.menu} opens Bag. While a panel is open, the D-pad moves focus, ${labels.primary} activates and ${labels.cancel} goes back.`,
+        "zh-CN": `${labels.view} 打开角色，${labels.menu} 打开背包。面板打开时，用方向键移动焦点、${labels.primary} 确认、${labels.cancel} 返回。`,
+      },
+      hint: {
+        en: `${labels.view}: Character · ${labels.menu}: Bag`,
+        "zh-CN": `${labels.view}：角色 · ${labels.menu}：背包`,
+      },
+      trigger: { kind: "action", actionType: "gamepad:panel" },
     },
-    hint: { en: "View: Character · Menu: Bag", "zh-CN": "View：角色 · Menu：背包" },
-    trigger: { kind: "action", actionType: "gamepad:panel" },
-  },
-  {
-    id: "gamepad-replay",
-    title: { en: "Replay this guide", "zh-CN": "重新播放教程" },
-    body: {
-      en: "Open the game Menu, choose Help, then activate Replay controls tutorial.",
-      "zh-CN": "打开游戏菜单，选择“帮助”，再确认“重新播放操作教学”。",
+    {
+      id: "gamepad-replay",
+      title: { en: "Replay this guide", "zh-CN": "重新播放教程" },
+      body: {
+        en: "Open the game Menu, choose Help, then activate Replay controls tutorial.",
+        "zh-CN": "打开游戏菜单，选择“帮助”，再确认“重新播放操作教学”。",
+      },
+      trigger: { kind: "manual" },
     },
-    trigger: { kind: "manual" },
-  },
-  {
-    id: "gamepad-done",
-    title: { en: "Controller ready", "zh-CN": "手柄已准备就绪" },
-    body: {
-      en: "You can complete movement, combat and the core UI without a mouse or keyboard.",
-      "zh-CN": "现在无需鼠标和键盘，也能完成移动、战斗和核心界面操作。",
+    {
+      id: "gamepad-done",
+      title: { en: "Controller ready", "zh-CN": "手柄已准备就绪" },
+      body: {
+        en: "You can complete movement, combat and the core UI without a mouse or keyboard.",
+        "zh-CN": "现在无需鼠标和键盘，也能完成移动、战斗和核心界面操作。",
+      },
+      trigger: { kind: "manual" },
     },
-    trigger: { kind: "manual" },
-  },
-];
+  ];
+}
+
+const GAMEPAD_TUTORIAL_STEPS: Record<TutorialGamepadFamily, TutorialStep[]> = {
+  xbox: createGamepadTutorialSteps("xbox"),
+  playstation: createGamepadTutorialSteps("playstation"),
+  generic: createGamepadTutorialSteps("generic"),
+};
 
 export const TUTORIAL_STEPS = KEYBOARD_MOUSE_TUTORIAL_STEPS;
 
-export function tutorialStepsForInput(input: TutorialInputProfile): TutorialStep[] {
+export function tutorialStepsForInput(
+  input: TutorialInputProfile,
+  gamepadFamily: TutorialGamepadFamily = "generic",
+): TutorialStep[] {
   if (input === "touch") return TOUCH_TUTORIAL_STEPS;
-  if (input === "gamepad") return GAMEPAD_TUTORIAL_STEPS;
+  if (input === "gamepad") return GAMEPAD_TUTORIAL_STEPS[gamepadFamily];
   return KEYBOARD_MOUSE_TUTORIAL_STEPS;
 }
 
-export function tutorialCompletionStorageKey(input: TutorialInputProfile): string {
-  return `mir2:tutorialCompleted:v${TUTORIAL_VERSION}:${input}`;
+export function tutorialCompletionStorageKey(
+  input: TutorialInputProfile,
+  gamepadFamily: TutorialGamepadFamily = "generic",
+): string {
+  const inputKey = input === "gamepad" ? `${input}:${gamepadFamily}` : input;
+  return `mir2:tutorialCompleted:v${TUTORIAL_VERSION}:${inputKey}`;
 }
 
 export function pickText(text: TutorialText, lang: TutorialLang): string {
   return text[lang] ?? text.en;
 }
 
-export function createTutorialState(input: TutorialInputProfile = "keyboardMouse"): TutorialState {
-  return { input, stepIndex: 0, actionCounts: {}, done: false };
+export function createTutorialState(
+  input: TutorialInputProfile = "keyboardMouse",
+  gamepadFamily: TutorialGamepadFamily = "generic",
+): TutorialState {
+  return { input, gamepadFamily, stepIndex: 0, actionCounts: {}, done: false };
 }
 
 function actionTypesOf(trigger: TutorialTrigger): string[] {
@@ -437,7 +520,7 @@ function clampIndex(index: number, maxIndex: number): number {
 // events to this; keeping it pure makes the whole flow unit-testable.
 export function reduceTutorial(state: TutorialState, event: TutorialEvent): TutorialState {
   if (state.done) return state;
-  const steps = tutorialStepsForInput(state.input);
+  const steps = tutorialStepsForInput(state.input, state.gamepadFamily);
 
   switch (event.kind) {
     case "skipAll":
@@ -480,5 +563,5 @@ export function reduceTutorial(state: TutorialState, event: TutorialEvent): Tuto
 }
 
 export function currentStep(state: TutorialState): TutorialStep | null {
-  return tutorialStepsForInput(state.input)[state.stepIndex] ?? null;
+  return tutorialStepsForInput(state.input, state.gamepadFamily)[state.stepIndex] ?? null;
 }

@@ -23,6 +23,7 @@ import { GameShopWindow } from "./original-client-game-shop";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
+import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
 import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
@@ -93,6 +94,7 @@ type GameUiSceneProps = {
   onSendClientCommand: (command: Record<string, unknown>) => void;
   transferOptions: SystemMenuTransferOption[];
   inputProfile: Mir2InputProfile;
+  gamepadFamily: Mir2GamepadFamily;
   onStartTutorial: () => void;
 };
 
@@ -148,6 +150,7 @@ function GameUiSceneInner({
   onSendClientCommand,
   transferOptions,
   inputProfile,
+  gamepadFamily,
   onStartTutorial,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(false);
@@ -339,6 +342,7 @@ function GameUiSceneInner({
           inSafeZone={world.inSafeZone}
           transferOptions={transferOptions}
           inputProfile={inputProfile}
+          gamepadFamily={gamepadFamily}
           onStartTutorial={() => {
             setShowSystemMenu(false);
             onStartTutorial();

@@ -173,6 +173,7 @@ import { OriginalClientTutorialOverlay } from "./components/original-client-tuto
 import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
 import {
   tutorialCompletionStorageKey,
+  type TutorialGamepadFamily,
   type TutorialInputProfile,
 } from "../lib/tutorial-steps";
 
@@ -1873,6 +1874,8 @@ export default function HomePage() {
   // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialInput, setTutorialInput] = useState<TutorialInputProfile>("keyboardMouse");
+  const [tutorialGamepadFamily, setTutorialGamepadFamily] =
+    useState<TutorialGamepadFamily>("generic");
   const [tutorialRunId, setTutorialRunId] = useState(0);
   const [showHeroPet, setShowHeroPet] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
@@ -2000,8 +2003,12 @@ export default function HomePage() {
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
   }, []);
-  const startTutorial = useCallback((input: TutorialInputProfile) => {
+  const startTutorial = useCallback((
+    input: TutorialInputProfile,
+    gamepadFamily: TutorialGamepadFamily = "generic",
+  ) => {
     setTutorialInput(input);
+    setTutorialGamepadFamily(gamepadFamily);
     setTutorialRunId((current) => current + 1);
     setShowTutorial(true);
   }, []);
@@ -2014,14 +2021,16 @@ export default function HomePage() {
     let alreadySeen = false;
     try {
       alreadySeen =
-        window.localStorage.getItem(tutorialCompletionStorageKey(clientProfile.input)) === "1" ||
+        window.localStorage.getItem(
+          tutorialCompletionStorageKey(clientProfile.input, clientProfile.gamepad.family),
+        ) === "1" ||
         (clientProfile.input === "keyboardMouse" &&
           window.localStorage.getItem("mir2:tutorialCompleted") === "1");
     } catch {
       alreadySeen = false;
     }
-    if (!alreadySeen) startTutorial(clientProfile.input);
-  }, [clientProfile.input, screen, startTutorial]);
+    if (!alreadySeen) startTutorial(clientProfile.input, clientProfile.gamepad.family);
+  }, [clientProfile.gamepad.family, clientProfile.input, screen, startTutorial]);
   // When the hero/pet window opens, ask the server to start streaming intelligent
   // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).
   useEffect(() => {
@@ -12776,9 +12785,10 @@ export default function HomePage() {
     ) : null}
     {screen === "game" && showTutorial ? (
       <OriginalClientTutorialOverlay
-        key={`${tutorialInput}:${tutorialRunId}`}
+        key={`${tutorialInput}:${tutorialGamepadFamily}:${tutorialRunId}`}
         language={language}
         input={tutorialInput}
+        gamepadFamily={tutorialGamepadFamily}
         windows={{
           inventory: showInventory,
           character: showCharacter,
