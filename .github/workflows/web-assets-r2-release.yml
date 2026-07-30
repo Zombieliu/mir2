@@ -225,15 +225,27 @@ jobs:
               "original-map/WemadeMir2/Objects10/5493.png",
               "original-map/WemadeMir2/Tiles/1504.png",
               "original-ui/Sound/Login2.wav",
+              "generated/map-atlas/manifest.json",
             ];
+            const mapAtlasPaths = files
+              .map((file) => String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""))
+              .filter((value) => value.startsWith("generated/map-atlas/"));
+            if (!mapAtlasPaths.some((value) => value.endsWith(".png"))) {
+              throw new Error("remote release has no map-atlas PNG page");
+            }
             if (String(process.env.REQUIRE_FULL_CRYSTAL_PACK).toLowerCase() === "true") {
               required.push("generated/crystal-packs/full/index.json");
               if (release.fullCrystalPack?.enabled !== true || release.fullCrystalPack?.verified !== true) {
                 throw new Error("remote release does not declare a verified full Crystal pack");
               }
-              const fullPaths = files
-                .map((file) => String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""))
-                .filter((value) => value.startsWith("generated/crystal-packs/full/"));
+              const fullFiles = files.filter((file) =>
+                String(file.p ?? file.relativePath ?? file.path ?? "")
+                  .replace(/^\/+/, "")
+                  .startsWith("generated/crystal-packs/full/"),
+              );
+              const fullPaths = fullFiles.map((file) =>
+                String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""),
+              );
               if (fullPaths.length !== Number(release.fullCrystalPack.fileCount ?? 0)) {
                 throw new Error(
                   `remote release full-pack file count mismatch: declared ${release.fullCrystalPack.fileCount}, found ${fullPaths.length}`,
@@ -244,6 +256,27 @@ jobs:
               }
               if (!fullPaths.some((value) => value.includes("/pages/") && value.endsWith(".png"))) {
                 throw new Error("remote release has no full-pack page");
+              }
+              const fullJsonFiles = fullFiles.filter((file) =>
+                String(file.p ?? file.relativePath ?? file.path ?? "").toLowerCase().endsWith(".json"),
+              );
+              const encodedJsonFiles = fullJsonFiles.filter((file) => {
+                const encoding = String(file.e ?? file.contentEncoding ?? "").toLowerCase();
+                const encodedSize = Number(file.es ?? file.encodedSize ?? 0);
+                const encodedSha256 = String(file.eh ?? file.encodedSha256 ?? "").toLowerCase();
+                return encoding === "gzip" && encodedSize > 0 && /^[a-f0-9]{64}$/.test(encodedSha256);
+              });
+              if (
+                release.fullCrystalPack.jsonContentEncoding !== "gzip" ||
+                encodedJsonFiles.length !== fullJsonFiles.length
+              ) {
+                throw new Error(
+                  `remote release full-pack JSON is not fully gzip encoded: ${encodedJsonFiles.length}/${fullJsonFiles.length}`,
+                );
+              }
+              const storageBytes = Number(release.stats?.storageBytes ?? 0);
+              if (!storageBytes || storageBytes >= 10_000_000_000) {
+                throw new Error(`remote release storageBytes must stay below 10GB: ${storageBytes}`);
               }
             }
             const missing = required.filter((path) => !hasPath(path));

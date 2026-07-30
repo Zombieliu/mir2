@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Writable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
+import { constants as zlibConstants, createGzip } from "node:zlib";
 
 import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
 import { inspectFullPackClosure, sha256File } from "./asset-pipeline/full-pack-closure.mjs";
@@ -39,8 +43,13 @@ const DEFAULT_PUBLIC_ASSET_ROOTS = [
   "original-ui",
   "original-map",
   "generated/original-map-blend",
+  "generated/map-atlas",
   "bevy-entity-atlases",
 ];
+const FULL_PACK_GZIP_OPTIONS = Object.freeze({
+  level: zlibConstants.Z_BEST_COMPRESSION,
+  mtime: 0,
+});
 const LOGIN_TITLE_PATHS = [
   ...makeRange(30, 32),
   ...makeRange(320, 334),
@@ -113,8 +122,23 @@ const compactFiles = booleanArg(args.compactFiles ?? process.env.MIR2_REMOTE_ASS
 const casEnabled = booleanArg(args.cas ?? process.env.MIR2_REMOTE_ASSET_CAS, true);
 const casPrefix = args.casPrefix ?? process.env.MIR2_REMOTE_ASSET_CAS_PREFIX ?? "mir2/cas";
 const releaseChannel = args.channel ?? process.env.MIR2_REMOTE_ASSET_CHANNEL ?? "production";
+const gzipFullCrystalPackJson = booleanArg(
+  args.gzipFullCrystalPackJson ?? process.env.MIR2_REMOTE_ASSET_GZIP_FULL_PACK_JSON,
+  includeFullCrystalPack,
+);
+const gzipConcurrency = positiveIntegerArg(
+  args.gzipConcurrency ?? process.env.MIR2_REMOTE_ASSET_GZIP_CONCURRENCY,
+  4,
+);
 
 async function main() {
+  if (gzipFullCrystalPackJson && !includeFullCrystalPack) {
+    throw new Error("Full-pack JSON compression requires --includeFullCrystalPack true.");
+  }
+  if (gzipFullCrystalPackJson && casEnabled) {
+    throw new Error("Compressed full-pack releases require --cas false to avoid uploading duplicate raw CAS objects.");
+  }
+
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);
   const assetManifest = offlineManifest ? createOfflineAssetManifest() : await fetchJson(manifestUrl);
   const version = String(assetManifest.version || "unknown");
@@ -149,6 +173,7 @@ async function main() {
     allowMissing,
     concurrency: stageConcurrency,
   });
+  await annotateStoredRepresentations(staged.files);
   const requiredManifestPaths = includeFullCrystalPack
     ? [...REQUIRED_MANIFEST_PATHS, FULL_CRYSTAL_PACK_INDEX_PATH]
     : REQUIRED_MANIFEST_PATHS;
@@ -192,7 +217,14 @@ async function main() {
       fileCount: staged.files.length,
       missingCount: staged.missing.length,
       totalBytes: staged.files.reduce((sum, file) => sum + file.size, 0),
+      storageBytes: staged.files.reduce((sum, file) => sum + (file.encodedSize ?? file.size), 0),
+      encodedFileCount: staged.files.filter((file) => file.contentEncoding).length,
+      storageSavingsBytes: staged.files.reduce(
+        (sum, file) => sum + file.size - (file.encodedSize ?? file.size),
+        0,
+      ),
       stageConcurrency,
+      gzipConcurrency,
     },
     packs: collected.packs,
     scenes: collected.scenes,
@@ -248,13 +280,19 @@ async function main() {
 }
 
 function compactReleaseFile(file) {
-  return {
+  const compact = {
     p: file.relativePath,
     s: file.size,
     h: file.sha256,
     c: file.contentType,
     src: file.sources,
   };
+  if (file.contentEncoding) {
+    compact.e = file.contentEncoding;
+    compact.es = file.encodedSize;
+    compact.eh = file.encodedSha256;
+  }
+  return compact;
 }
 
 function stringifyRelease(release) {
@@ -432,6 +470,7 @@ async function collectFullCrystalPackStaticUrls(staticUrls) {
     libraryCount: closure.libraryCount,
     pageCount: closure.pageCount,
     fileCount: closure.fileCount,
+    jsonContentEncoding: gzipFullCrystalPackJson ? "gzip" : null,
   };
 }
 
@@ -559,6 +598,39 @@ async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissi
   }
 
   return { files, missing };
+}
+
+async function annotateStoredRepresentations(files) {
+  if (!gzipFullCrystalPackJson) return;
+  const encodedFiles = files.filter((file) =>
+    file.relativePath.startsWith("generated/crystal-packs/full/") &&
+    file.relativePath.toLowerCase().endsWith(".json"),
+  );
+  let completed = 0;
+  await mapWithConcurrency(encodedFiles, gzipConcurrency, async (file) => {
+    const encoded = await gzipFileMetadata(file.stagePath);
+    file.contentEncoding = "gzip";
+    file.encodedSize = encoded.size;
+    file.encodedSha256 = encoded.sha256;
+    completed += 1;
+    if (completed % 250 === 0 || completed === encodedFiles.length) {
+      console.error(`[remote-asset-release] measured gzip ${completed}/${encodedFiles.length}`);
+    }
+  });
+}
+
+async function gzipFileMetadata(filePath) {
+  const hash = createHash("sha256");
+  let size = 0;
+  const sink = new Writable({
+    write(chunk, _encoding, callback) {
+      size += chunk.length;
+      hash.update(chunk);
+      callback();
+    },
+  });
+  await pipeline(createReadStream(filePath), createGzip(FULL_PACK_GZIP_OPTIONS), sink);
+  return { size, sha256: hash.digest("hex") };
 }
 
 async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
@@ -915,6 +987,7 @@ function normalizePublicAssetRoot(value) {
     root !== "original-ui" &&
     root !== "original-map" &&
     root !== "generated/original-map-blend" &&
+    root !== "generated/map-atlas" &&
     root !== "bevy-entity-atlases"
   ) {
     return "";

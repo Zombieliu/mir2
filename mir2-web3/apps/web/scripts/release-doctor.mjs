@@ -33,6 +33,7 @@ const BEVY_ENTITY_ATLAS_PATHS = [
   "/bevy-entity-atlases/manifest.json",
   "/bevy-entity-atlases/starter-bichon-base.png",
 ];
+const MAP_ATLAS_MANIFEST_PATH = "/generated/map-atlas/manifest.json";
 
 const REQUIRED_ASSETS = [
   ...LOGIN_TITLE_PATHS,
@@ -42,6 +43,7 @@ const REQUIRED_ASSETS = [
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
   ...EXTRA_ORIGINAL_ASSET_PATHS,
   ...BEVY_ENTITY_ATLAS_PATHS,
+  MAP_ATLAS_MANIFEST_PATH,
 ];
 const BEVY_RUNTIME_PATHS = [
   "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
@@ -80,6 +82,15 @@ async function main() {
       .map((file) => normalizePath(file?.path ?? file?.p ?? file?.relativePath))
       .filter(Boolean),
   );
+  const manifestFileByPath = new Map(
+    (Array.isArray(release.files) ? release.files : [])
+      .map((file) => [normalizePath(file?.path ?? file?.p ?? file?.relativePath), file])
+      .filter(([assetPath]) => Boolean(assetPath)),
+  );
+  const mapAtlasPaths = [...manifestPathSet]
+    .filter((assetPath) => assetPath.startsWith("/generated/map-atlas/"))
+    .sort();
+  const mapAtlasPagePaths = mapAtlasPaths.filter((assetPath) => assetPath.toLowerCase().endsWith(".png"));
   const fullPackPaths = [...manifestPathSet]
     .filter((assetPath) => assetPath.startsWith("/generated/crystal-packs/full/"))
     .sort();
@@ -89,8 +100,8 @@ async function main() {
     fullPackPaths.find((assetPath) => assetPath.includes("/pages/") && assetPath.endsWith(".png")),
   ].filter(Boolean);
   const requiredAssets = requireFullCrystalPack
-    ? [...new Set([...REQUIRED_ASSETS, ...fullPackPaths])]
-    : REQUIRED_ASSETS;
+    ? [...new Set([...REQUIRED_ASSETS, ...mapAtlasPaths, ...fullPackPaths])]
+    : [...new Set([...REQUIRED_ASSETS, ...mapAtlasPaths])];
 
   let failed = false;
   const report = {
@@ -99,6 +110,13 @@ async function main() {
     checks: {
       manifest: { ok: true, missing: [], requiredCount: requiredAssets.length },
       r2: { ok: true, results: [] },
+      remoteRelease: {
+        ok: true,
+        url: null,
+        status: null,
+        version: null,
+        objectPrefix: null,
+      },
       worker: { ok: true, results: [] },
       fullCrystalPack: {
         required: requireFullCrystalPack,
@@ -106,6 +124,12 @@ async function main() {
         fileCount: fullPackPaths.length,
         expectedFileCount: Number(release.fullCrystalPack?.fileCount ?? 0),
         samples: fullPackSamples,
+        encodedJsonCount: 0,
+      },
+      mapAtlas: {
+        ok: true,
+        fileCount: mapAtlasPaths.length,
+        pageCount: mapAtlasPagePaths.length,
       },
       bevyRuntime: {
         ok: true,
@@ -128,23 +152,40 @@ async function main() {
     } else {
       console.log("[release-doctor] manifest required assets present.");
     }
+    if (!mapAtlasPagePaths.length) {
+      report.checks.mapAtlas.ok = false;
+      report.checks.manifest.ok = false;
+      failed = true;
+      console.error("[release-doctor] map atlas manifest has no published PNG pages.");
+    }
   }
 
   if (requireFullCrystalPack) {
     const fullPack = release.fullCrystalPack ?? {};
     const expectedFileCount = Number(fullPack.fileCount ?? 0);
     const hasAllSampleKinds = fullPackSamples.length === 3;
+    const fullPackJsonPaths = fullPackPaths.filter((assetPath) => assetPath.endsWith(".json"));
+    const encodedFullPackJsonPaths = fullPackJsonPaths.filter((assetPath) => {
+      const file = manifestFileByPath.get(assetPath);
+      const encoding = String(file?.contentEncoding ?? file?.e ?? "").toLowerCase();
+      const encodedSize = Number(file?.encodedSize ?? file?.es ?? 0);
+      const encodedSha256 = String(file?.encodedSha256 ?? file?.eh ?? "").toLowerCase();
+      return encoding === "gzip" && encodedSize > 0 && /^[a-f0-9]{64}$/.test(encodedSha256);
+    });
+    report.checks.fullCrystalPack.encodedJsonCount = encodedFullPackJsonPaths.length;
     if (
       fullPack.enabled !== true ||
       fullPack.verified !== true ||
       !expectedFileCount ||
       fullPackPaths.length !== expectedFileCount ||
-      !hasAllSampleKinds
+      !hasAllSampleKinds ||
+      fullPack.jsonContentEncoding !== "gzip" ||
+      encodedFullPackJsonPaths.length !== fullPackJsonPaths.length
     ) {
       report.checks.fullCrystalPack.ok = false;
       failed = true;
       console.error(
-        `[release-doctor] full Crystal pack invalid: enabled=${fullPack.enabled} verified=${fullPack.verified} expectedFiles=${expectedFileCount} manifestFiles=${fullPackPaths.length} sampleKinds=${fullPackSamples.length}/3`,
+        `[release-doctor] full Crystal pack invalid: enabled=${fullPack.enabled} verified=${fullPack.verified} expectedFiles=${expectedFileCount} manifestFiles=${fullPackPaths.length} sampleKinds=${fullPackSamples.length}/3 gzipJson=${encodedFullPackJsonPaths.length}/${fullPackJsonPaths.length}`,
       );
     } else {
       console.log(
@@ -165,10 +206,17 @@ async function main() {
       report.checks.r2.ok = false;
       console.error("[release-doctor] assetBaseUrl is missing. Set ASSET_ORIGIN_URL, NEXT_PUBLIC_MIR2_ASSET_BASE_URL, or release.assetBaseUrl.");
     } else {
-      const outcome = await probeAssets(requiredAssets, requiredForR2.assetBaseUrl, "R2");
+      const outcome = await probeAssets(requiredAssets, requiredForR2.assetBaseUrl, "R2", manifestFileByPath);
       report.checks.r2.results = outcome.results;
       report.checks.r2.ok = outcome.ok;
       if (!outcome.ok) failed = true;
+      const remoteRelease = await probeRemoteReleaseManifest(requiredForR2.assetBaseUrl, release);
+      report.checks.remoteRelease = remoteRelease;
+      if (!remoteRelease.ok) {
+        failed = true;
+        report.checks.r2.ok = false;
+        console.error(`[release-doctor] remote release manifest failed: ${remoteRelease.error}`);
+      }
     }
     if (report.checks.r2.ok) {
       console.log("[release-doctor] R2 asset presence check passed.");
@@ -176,7 +224,7 @@ async function main() {
   }
 
   if (checkWorker) {
-    const outcome = await probeAssets(requiredAssets, webBaseUrl, "worker");
+    const outcome = await probeAssets(requiredAssets, webBaseUrl, "worker", manifestFileByPath);
     report.checks.worker.results = outcome.results;
     report.checks.worker.ok = outcome.ok;
     if (!outcome.ok) failed = true;
@@ -226,16 +274,81 @@ async function main() {
   }
 }
 
-async function probeAssets(assetPaths, baseUrl, label) {
+async function probeRemoteReleaseManifest(assetBaseUrl, expectedRelease) {
+  const url = `${assetBaseUrl}/remote-asset-release.json`;
+  let response;
+  try {
+    response = await fetch(url, { cache: "no-store" });
+  } catch (error) {
+    return {
+      ok: false,
+      url,
+      status: null,
+      version: null,
+      objectPrefix: null,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+  if (!response.ok) {
+    return {
+      ok: false,
+      url,
+      status: response.status,
+      version: null,
+      objectPrefix: null,
+      error: `HTTP ${response.status}`,
+    };
+  }
+
+  let remoteRelease;
+  try {
+    remoteRelease = await response.json();
+  } catch (error) {
+    return {
+      ok: false,
+      url,
+      status: response.status,
+      version: null,
+      objectPrefix: null,
+      error: `invalid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  const mismatches = [];
+  for (const [label, expected, actual] of [
+    ["version", expectedRelease.version, remoteRelease.version],
+    ["objectPrefix", expectedRelease.objectPrefix, remoteRelease.objectPrefix],
+    ["fullCrystalPack.contentHash", expectedRelease.fullCrystalPack?.contentHash, remoteRelease.fullCrystalPack?.contentHash],
+  ]) {
+    if (expected !== actual) mismatches.push(`${label}: expected ${expected}, found ${actual}`);
+  }
+
+  return {
+    ok: mismatches.length === 0,
+    url,
+    status: response.status,
+    version: remoteRelease.version ?? null,
+    objectPrefix: remoteRelease.objectPrefix ?? null,
+    error: mismatches.length ? mismatches.join("; ") : null,
+  };
+}
+
+async function probeAssets(assetPaths, baseUrl, label, manifestFileByPath) {
   const results = new Array(assetPaths.length);
   let ok = true;
   await runPool(assetPaths, probeConcurrency, async (assetPath, index) => {
     const url = `${baseUrl}/${assetPath.replace(/^\/+/, "")}`;
     const result = await probe(url);
-    results[index] = { path: assetPath, ...result };
-    if (!result.ok) {
+    const file = manifestFileByPath.get(assetPath);
+    const expectedContentEncoding = String(file?.contentEncoding ?? file?.e ?? "").toLowerCase() || null;
+    const encodingOk = !expectedContentEncoding || result.contentEncoding === expectedContentEncoding;
+    results[index] = { path: assetPath, expectedContentEncoding, encodingOk, ...result };
+    if (!result.ok || !encodingOk) {
       ok = false;
-      console.error(`[release-doctor] ${label} miss: ${url} -> ${result.error ?? `HTTP ${result.status}`}`);
+      const error = !result.ok
+        ? result.error ?? `HTTP ${result.status}`
+        : `content-encoding ${result.contentEncoding ?? "missing"}, expected ${expectedContentEncoding}`;
+      console.error(`[release-doctor] ${label} miss: ${url} -> ${error}`);
     }
   });
   return { ok, results };
@@ -264,6 +377,7 @@ async function probe(url) {
     elapsedMs: Date.now() - startedAt,
     contentType: response.headers.get("content-type"),
     cacheControl: response.headers.get("cache-control"),
+    contentEncoding: response.headers.get("content-encoding"),
   };
 }
 
