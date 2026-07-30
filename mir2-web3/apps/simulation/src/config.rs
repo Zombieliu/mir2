@@ -2336,6 +2336,105 @@ pub enum AccountStoreRuntimeBackend {
     Postgres,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentLevelRate {
+    pub min_level: u16,
+    pub max_level: u16,
+    pub multiplier: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentRatePolicy {
+    pub label: String,
+    pub monster_experience_tiers: Vec<ContentLevelRate>,
+    pub gold_multiplier: u32,
+    pub drop_multiplier: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContentProfileRuntime {
+    pub profile_id: String,
+    pub version: u32,
+    pub acceptance_level: u16,
+    pub source: String,
+    pub rate_policy: ContentRatePolicy,
+    pub bundle_hash: String,
+    pub bundle_built_at: String,
+    pub crystal_database_version: i32,
+    pub crystal_database_custom_version: i32,
+}
+
+impl ContentProfileRuntime {
+    pub fn platinum_176() -> Self {
+        Self {
+            profile_id: "platinum_176".to_string(),
+            version: 6,
+            acceptance_level: 50,
+            source: "Crystal.Database-29.01.25/Jev with classic three-class 1.76 overrides"
+                .to_string(),
+            rate_policy: ContentRatePolicy {
+                label: "launch_candidate_tiered_xp_1x_economy".to_string(),
+                monster_experience_tiers: vec![
+                    ContentLevelRate {
+                        min_level: 1,
+                        max_level: 21,
+                        multiplier: 2,
+                    },
+                    ContentLevelRate {
+                        min_level: 22,
+                        max_level: 35,
+                        multiplier: 3,
+                    },
+                    ContentLevelRate {
+                        min_level: 36,
+                        max_level: 50,
+                        multiplier: 4,
+                    },
+                ],
+                gold_multiplier: 1,
+                drop_multiplier: 1,
+            },
+            bundle_hash: "2d00329bf7feb071e8e2e4ade557112897ac4be7f0d88491934c609f6913c29a"
+                .to_string(),
+            bundle_built_at: "2026-07-29T23:32:34.770Z".to_string(),
+            crystal_database_version: 117,
+            crystal_database_custom_version: 0,
+        }
+    }
+
+    pub fn monster_experience_multiplier(&self, level: u16) -> u32 {
+        self.rate_policy
+            .monster_experience_tiers
+            .iter()
+            .find(|tier| tier.min_level <= level && level <= tier.max_level)
+            .map(|tier| tier.multiplier)
+            .unwrap_or(1)
+            .max(1)
+    }
+}
+
+#[cfg(test)]
+mod content_profile_runtime_tests {
+    use super::ContentProfileRuntime;
+
+    #[test]
+    fn platinum_176_rate_tiers_cover_the_acceptance_path() {
+        let profile = ContentProfileRuntime::platinum_176();
+
+        assert_eq!(profile.monster_experience_multiplier(1), 2);
+        assert_eq!(profile.monster_experience_multiplier(21), 2);
+        assert_eq!(profile.monster_experience_multiplier(22), 3);
+        assert_eq!(profile.monster_experience_multiplier(35), 3);
+        assert_eq!(profile.monster_experience_multiplier(36), 4);
+        assert_eq!(profile.monster_experience_multiplier(50), 4);
+        assert_eq!(profile.monster_experience_multiplier(51), 1);
+        assert_eq!(profile.rate_policy.gold_multiplier, 1);
+        assert_eq!(profile.rate_policy.drop_multiplier, 1);
+    }
+}
+
 pub fn account_store_runtime_backend_from_env() -> Result<AccountStoreRuntimeBackend, String> {
     let backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
     let backend = backend.trim().to_ascii_lowercase();
@@ -2432,6 +2531,7 @@ pub struct SimulationConfig {
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
     pub account_store_database_mode: AccountStoreDatabaseMode,
+    pub content_profile: Option<ContentProfileRuntime>,
     account_store_persist_lock: Arc<Mutex<()>>,
 }
 
@@ -2560,8 +2660,21 @@ impl SimulationConfig {
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
+            content_profile: None,
             account_store_persist_lock: Arc::new(Mutex::new(())),
         }
+    }
+
+    pub fn with_platinum_176_profile(mut self) -> Self {
+        self.content_profile = Some(ContentProfileRuntime::platinum_176());
+        self
+    }
+
+    pub fn monster_experience_multiplier(&self, level: u16) -> u32 {
+        self.content_profile
+            .as_ref()
+            .map(|profile| profile.monster_experience_multiplier(level))
+            .unwrap_or(1)
     }
 
     pub fn with_account_store_path(mut self, path: impl Into<PathBuf>) -> Self {

@@ -1849,6 +1849,7 @@ async fn handle_socket(
     state: WebState,
     _ws_connection_permit: GatewayCapacityPermit,
 ) {
+    let realm_info = realm_info_event(state.config.as_ref());
     let mut session = new_gateway_session_for_web(&state);
     let mut active_session_permit: Option<GatewayCapacityPermit> = None;
     let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
@@ -1863,6 +1864,7 @@ async fn handle_socket(
         &mut save_queue,
         &mut route_refresh,
         state.injector.clone(),
+        realm_info,
         state.chat_hub.clone(),
     )
     .await;
@@ -2169,10 +2171,20 @@ async fn handle_socket_inner(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     injector: crate::inject::LiveSessionInjector,
+    realm_info: Value,
     chat_hub: ChatBroadcastHub,
 ) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
+    if sender
+        .lock()
+        .await
+        .send(Message::Text(realm_info.to_string().into()))
+        .await
+        .is_err()
+    {
+        return;
+    }
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
     runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let mut runtime_tick_deferred_until = Instant::now();
@@ -4155,6 +4167,35 @@ async fn send_world_snapshot(
         ))
         .await
         .map_err(|error| error.to_string())
+}
+
+fn realm_info_event(config: &GatewayConfig) -> Value {
+    let profile = config.content_profile.as_ref();
+    let profile_id = profile
+        .map(|profile| profile.profile_id.as_str())
+        .unwrap_or("crystal_full");
+    let realm_id = env::var("MIR2_REALM_ID")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| profile_id.to_string());
+    json!({
+        "type": "realmInfo",
+        "payload": {
+            "schema": "mir2-realm-handshake/1",
+            "realmId": realm_id,
+            "profileId": profile_id,
+            "profileVersion": profile.map(|profile| profile.version).unwrap_or(0),
+            "acceptanceLevel": profile.map(|profile| profile.acceptance_level),
+            "source": profile.map(|profile| profile.source.as_str()),
+            "ratePolicy": profile.map(|profile| &profile.rate_policy),
+            "bundleHash": profile.map(|profile| profile.bundle_hash.as_str()),
+            "bundleBuiltAt": profile.map(|profile| profile.bundle_built_at.as_str()),
+            "sourceData": profile.map(|profile| json!({
+                "crystalDatabaseVersion": profile.crystal_database_version,
+                "crystalDatabaseCustomVersion": profile.crystal_database_custom_version,
+            })),
+        }
+    })
 }
 
 async fn send_server_packet(
@@ -6905,8 +6946,8 @@ fn movement_json(
 #[cfg(test)]
 mod tests {
     use super::{
-        responses_require_world_snapshot, should_send_world_snapshot_for_action, BrowserCommand,
-        QaControlAction, SessionAction,
+        realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
+        BrowserCommand, QaControlAction, SessionAction,
     };
     use axum::extract::State;
     use axum::Json;
@@ -6925,6 +6966,30 @@ mod tests {
     use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    #[test]
+    fn realm_info_exposes_platinum_176_release_identity() {
+        let config = SimulationConfig::default().with_platinum_176_profile();
+        let event = realm_info_event(&config);
+
+        assert_eq!(event["type"], "realmInfo");
+        assert_eq!(event["payload"]["schema"], "mir2-realm-handshake/1");
+        assert_eq!(event["payload"]["profileId"], "platinum_176");
+        assert_eq!(event["payload"]["profileVersion"], 6);
+        assert_eq!(event["payload"]["acceptanceLevel"], 50);
+        assert_eq!(
+            event["payload"]["ratePolicy"]["monsterExperienceTiers"][0]["multiplier"],
+            2
+        );
+        assert_eq!(
+            event["payload"]["ratePolicy"]["monsterExperienceTiers"][2]["multiplier"],
+            4
+        );
+        assert_eq!(
+            event["payload"]["bundleHash"].as_str().map(str::len),
+            Some(64)
+        );
+    }
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
         UserItem {
