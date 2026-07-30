@@ -3,14 +3,16 @@
 import { useEffect, useReducer, useRef, useState, type CSSProperties } from "react";
 
 import {
-  TUTORIAL_STEPS,
+  TUTORIAL_CONTROL_EVENT,
   createTutorialState,
   currentStep,
   pickText,
   reduceTutorial,
+  tutorialCompletionStorageKey,
+  tutorialStepsForInput,
   type TutorialEvent,
+  type TutorialInputProfile,
   type TutorialLang,
-  type TutorialState,
   type TutorialWindow,
 } from "../../lib/tutorial-steps";
 import { guideQuestAttackHint, type GuideQuestLike } from "../../lib/onboarding-guidance";
@@ -27,6 +29,7 @@ import { guideQuestAttackHint, type GuideQuestLike } from "../../lib/onboarding-
 
 export type TutorialOverlayProps = {
   language: TutorialLang;
+  input: TutorialInputProfile;
   // Live open/closed state of the tracked windows (drives window-trigger steps).
   windows: { inventory: boolean; character: boolean; questLog: boolean };
   // The player's active quest log (drives guide-quest coordination on the
@@ -47,12 +50,13 @@ type ActionEventDetail = { type?: unknown };
 
 export function OriginalClientTutorialOverlay({
   language,
+  input,
   windows,
   questLog,
   playerClass,
   onClose,
 }: TutorialOverlayProps) {
-  const [state, dispatch] = useReducer(reduceTutorial, undefined, createTutorialState);
+  const [state, dispatch] = useReducer(reduceTutorial, input, createTutorialState);
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
   const closedRef = useRef(false);
 
@@ -65,6 +69,19 @@ export function OriginalClientTutorialOverlay({
     };
     window.addEventListener(ACTION_EVENT, onAction);
     return () => window.removeEventListener(ACTION_EVENT, onAction);
+  }, []);
+
+  // Touch and gamepad adapters emit semantic control events that do not always
+  // correspond 1:1 with a network packet (for example toggling Run or opening a
+  // panel). Feed those into the same pure reducer as outbound game actions.
+  useEffect(() => {
+    const onControl = (event: Event) => {
+      const detail = (event as CustomEvent<{ action?: unknown }>).detail;
+      const action = typeof detail?.action === "string" ? detail.action : null;
+      if (action) dispatch({ kind: "action", type: action });
+    };
+    window.addEventListener(TUTORIAL_CONTROL_EVENT, onControl);
+    return () => window.removeEventListener(TUTORIAL_CONTROL_EVENT, onControl);
   }, []);
 
   // Window-open edges → reducer. Fire only on the closed→open transition.
@@ -82,15 +99,40 @@ export function OriginalClientTutorialOverlay({
     if (state.done && !closedRef.current) {
       closedRef.current = true;
       try {
-        window.localStorage.setItem("mir2:tutorialCompleted", "1");
+        window.localStorage.setItem(tutorialCompletionStorageKey(state.input), "1");
+        if (state.input === "keyboardMouse") {
+          window.localStorage.setItem("mir2:tutorialCompleted", "1");
+        }
       } catch {
         /* ignore storage failures (private mode etc.) */
       }
       onClose();
     }
-  }, [state.done, onClose]);
+  }, [state.done, state.input, onClose]);
 
   const step = currentStep(state);
+
+  // Keep the active tutorial step visible to the project's browser QA hook.
+  // This is deliberately read-only and contains no player/account data.
+  useEffect(() => {
+    const gameWindow = window as typeof window & {
+      __mir2Tutorial?: {
+        input: TutorialInputProfile;
+        stepId: string | null;
+        stepIndex: number;
+        done: boolean;
+      };
+    };
+    gameWindow.__mir2Tutorial = {
+      input: state.input,
+      stepId: step?.id ?? null,
+      stepIndex: state.stepIndex,
+      done: state.done,
+    };
+    return () => {
+      delete gameWindow.__mir2Tutorial;
+    };
+  }, [state.done, state.input, state.stepIndex, step?.id]);
 
   // Resolve the optional spotlight target each step / on resize. Degrades to no
   // ring if the selector is absent or doesn't match anything in the DOM.
@@ -114,7 +156,8 @@ export function OriginalClientTutorialOverlay({
 
   if (state.done || !step) return null;
 
-  const total = TUTORIAL_STEPS.length;
+  const steps = tutorialStepsForInput(state.input);
+  const total = steps.length;
   const stepNumber = state.stepIndex + 1;
   const isManual = step.trigger.kind === "manual";
   const isLast = state.stepIndex === total - 1;
@@ -128,11 +171,24 @@ export function OriginalClientTutorialOverlay({
 
   const send = (event: TutorialEvent) => dispatch(event);
 
+  const touchPresentation = state.input === "touch";
+
   return (
-    <div style={ROOT_STYLE} aria-hidden={false}>
+    <div
+      className="mir-tutorial-overlay"
+      data-tutorial-input={state.input}
+      data-tutorial-step={step.id}
+      style={ROOT_STYLE}
+      aria-hidden={false}
+    >
       {spotlightRect ? <div style={spotlightStyle(spotlightRect)} /> : null}
 
-      <div style={CARD_STYLE} role="dialog" aria-label="Beginner tutorial">
+      <div
+        className="mir-tutorial-card"
+        style={touchPresentation ? { ...CARD_STYLE, ...TOUCH_CARD_STYLE } : CARD_STYLE}
+        role="dialog"
+        aria-label={language === "zh-CN" ? "操作教学" : "Controls tutorial"}
+      >
         <span style={studStyle("tl")} aria-hidden="true" />
         <span style={studStyle("tr")} aria-hidden="true" />
         <span style={studStyle("bl")} aria-hidden="true" />
@@ -167,11 +223,12 @@ export function OriginalClientTutorialOverlay({
           <div style={ACTIONS_STYLE}>
             <button
               type="button"
-              style={
+              style={tutorialButtonStyle(
                 state.stepIndex === 0
                   ? { ...GHOST_BUTTON_STYLE, opacity: 0.4, cursor: "default" }
-                  : GHOST_BUTTON_STYLE
-              }
+                  : GHOST_BUTTON_STYLE,
+                touchPresentation,
+              )}
               onClick={() => send({ kind: "back" })}
               disabled={state.stepIndex === 0}
             >
@@ -181,7 +238,7 @@ export function OriginalClientTutorialOverlay({
             {!isManual ? (
               <button
                 type="button"
-                style={GHOST_BUTTON_STYLE}
+                style={tutorialButtonStyle(GHOST_BUTTON_STYLE, touchPresentation)}
                 onClick={() => send({ kind: "skipStep" })}
               >
                 {language === "zh-CN" ? "跳过这步" : "Skip step"}
@@ -190,7 +247,7 @@ export function OriginalClientTutorialOverlay({
 
             <button
               type="button"
-              style={PRIMARY_BUTTON_STYLE}
+              style={tutorialButtonStyle(PRIMARY_BUTTON_STYLE, touchPresentation)}
               onClick={() => send({ kind: "next" })}
             >
               {isLast
@@ -256,6 +313,16 @@ const CARD_STYLE: CSSProperties = {
   lineHeight: 1.55,
   fontFamily: 'Georgia, "Times New Roman", serif',
   textShadow: "1px 1px 0 #000",
+};
+
+const TOUCH_CARD_STYLE: CSSProperties = {
+  bottom: 8,
+  width: 400,
+  maxWidth: "calc(100vw - 280px)",
+  maxHeight: "calc(100dvh - 16px)",
+  overflowY: "auto",
+  fontSize: 16,
+  lineHeight: 1.35,
 };
 
 // Embossed gold title band, like the original window headers.
@@ -395,6 +462,12 @@ function studStyle(corner: "tl" | "tr" | "bl" | "br"): CSSProperties {
   const vertical = corner[0] === "t" ? { top: 5 } : { bottom: 5 };
   const horizontal = corner[1] === "l" ? { left: 5 } : { right: 5 };
   return { ...STUD_BASE, ...vertical, ...horizontal };
+}
+
+function tutorialButtonStyle(style: CSSProperties, touchPresentation: boolean): CSSProperties {
+  return touchPresentation
+    ? { ...style, minHeight: 40, padding: "8px 12px", fontSize: 14 }
+    : style;
 }
 
 function spotlightStyle(rect: DOMRect): CSSProperties {

@@ -2,6 +2,7 @@ import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/o
 import type { Mir2Language } from "../../lib/localization";
 import type { WorldStore } from "../../lib/world-model";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { SystemMenuTransferOption } from "./original-client-system-menu";
 import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import type {
@@ -247,6 +248,7 @@ export type OriginalClientShellProps = {
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   transferOptions: SystemMenuTransferOption[];
+  onStartTutorial: (input: Mir2InputProfile) => void;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
   onCloseCharacter: () => void;
