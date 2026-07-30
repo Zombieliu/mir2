@@ -7,6 +7,10 @@ surface behind the Cloudflare Worker domain `https://mir2.obelisk.build`,
 while the game Gateway and authoritative services remain on separately managed
 servers. This is an internal test deployment, not final human gameplay sign-off.
 
+For complete Crystal asset publishing, production switching, rollback, and R2
+bucket cleanup, follow
+[`R2-ASSET-RELEASE-RUNBOOK.md`](R2-ASSET-RELEASE-RUNBOOK.md).
+
 Latest preview evidence:
 
 - 2026-05-26: Production deployment `dpl_HttHWiP21hufr1d3mm6fMsHNwcmW`

@@ -167,6 +167,11 @@ pack:
 | Private GitHub bundle | `.\scripts\install-developer-assets.ps1 -Download` | Full offline developer assets |
 | R2 CDN | `.\scripts\start-developer.ps1 -AssetBaseUrl <url>` | Remote acceptance and CDN/cache testing |
 
+Maintainers should use
+[`docs/R2-ASSET-RELEASE-RUNBOOK.md`](docs/R2-ASSET-RELEASE-RUNBOOK.md) for the
+versioned upload, production switch, rollback window, and guarded bucket
+cleanup procedure.
+
 The full pack belongs at
 `apps/web/public/generated/crystal-packs/full` and is intentionally ignored by
 Git. Do not commit Crystal client builds, original `.Lib` files, the full pack,
