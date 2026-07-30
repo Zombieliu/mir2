@@ -241,6 +241,25 @@ pub async fn acquire_player_session(
         .map(Some)
 }
 
+/// Ensure identities accepted by the authoritative account repository are also
+/// quorum-finalized before the player reaches StartGame.
+///
+/// Gate 15 was originally activated after a one-time legacy identity migration.
+/// Without this write-through path, accounts created after that cutover can
+/// authenticate and create characters but can never acquire a player lease.
+pub async fn finalize_player_identities(
+    account_id: &str,
+    characters: &[(i32, String)],
+) -> Result<Option<u64>, String> {
+    let Some(control) = GATE15_CONTROL_PLANE.get() else {
+        return Ok(None);
+    };
+    control
+        .finalize_player_identities(account_id, characters)
+        .await
+        .map(Some)
+}
+
 pub fn inspect_player_session(
     account_id: &str,
     character_index: i32,
@@ -409,6 +428,153 @@ impl Gate15ControlPlane {
             }
         }
         Err("Gate 15 session lease retries exhausted".to_string())
+    }
+
+    async fn finalize_player_identities(
+        &self,
+        account_id: &str,
+        characters: &[(i32, String)],
+    ) -> Result<u64, String> {
+        let account_id = account_id.trim();
+        if account_id.is_empty() {
+            return Err("Gate 15 account id is required".to_string());
+        }
+        if let Some((index, _)) = characters.iter().find(|(index, _)| *index < 0) {
+            return Err(format!(
+                "Gate 15 character index must be non-negative, got {index}"
+            ));
+        }
+        if characters.iter().any(|(_, name)| name.trim().is_empty()) {
+            return Err("Gate 15 character name is required".to_string());
+        }
+
+        let _guard = self.submit_lock.lock().await;
+        let mut finalized_height = self.ensure_account_finalized(account_id).await?;
+        for (character_index, name) in characters {
+            finalized_height = self
+                .ensure_character_finalized(account_id, *character_index, name)
+                .await?;
+        }
+        Ok(finalized_height)
+    }
+
+    async fn ensure_account_finalized(&self, account_id: &str) -> Result<u64, String> {
+        for attempt in 0..3 {
+            let snapshot = self.quorum.quorum_state().await?;
+            self.install_snapshot(snapshot.clone());
+            if snapshot.state.accounts.contains_key(account_id) {
+                return Ok(snapshot.state.finalized_height);
+            }
+            let sequence = snapshot.state.last_sequence.saturating_add(1);
+            let command = Gate14CommandEnvelope {
+                sequence,
+                idempotency_key: format!(
+                    "gate15-identity-account:{account_id}:{sequence}:{}",
+                    self.gateway_id
+                ),
+                submitted_at_ms: now_ms(),
+                command: Gate14Command::CreateAccount {
+                    account_id: account_id.to_string(),
+                },
+            };
+            match self.quorum.submit(&command).await {
+                Ok(_) => {
+                    let finalized = self
+                        .quorum
+                        .wait_for_height(sequence, COMMAND_FINALITY_TIMEOUT)
+                        .await?;
+                    if !finalized.state.accounts.contains_key(account_id) {
+                        return Err(format!(
+                            "Gate 15 finalized height {sequence} has no account {account_id}"
+                        ));
+                    }
+                    let height = finalized.state.finalized_height;
+                    self.install_snapshot(finalized);
+                    return Ok(height);
+                }
+                Err(error) if attempt < 2 => {
+                    eprintln!(
+                        "Gate 15 account finalization sequence {sequence} raced, retrying: {error}"
+                    );
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        Err(format!(
+            "Gate 15 account finalization retries exhausted for {account_id}"
+        ))
+    }
+
+    async fn ensure_character_finalized(
+        &self,
+        account_id: &str,
+        character_index: i32,
+        name: &str,
+    ) -> Result<u64, String> {
+        let character_id = format!("{account_id}:{character_index}");
+        for attempt in 0..3 {
+            let snapshot = self.quorum.quorum_state().await?;
+            self.install_snapshot(snapshot.clone());
+            let account = snapshot
+                .state
+                .accounts
+                .get(account_id)
+                .ok_or_else(|| format!("Gate 15 finalized account {account_id} disappeared"))?;
+            if let Some(character) = account.characters.get(&character_id) {
+                if character.name != name {
+                    return Err(format!(
+                        "Gate 15 character {character_id} is finalized as {}, not {name}",
+                        character.name
+                    ));
+                }
+                return Ok(snapshot.state.finalized_height);
+            }
+            let sequence = snapshot.state.last_sequence.saturating_add(1);
+            let command = Gate14CommandEnvelope {
+                sequence,
+                idempotency_key: format!(
+                    "gate15-identity-character:{character_id}:{sequence}:{}",
+                    self.gateway_id
+                ),
+                submitted_at_ms: now_ms(),
+                command: Gate14Command::CreateCharacter {
+                    account_id: account_id.to_string(),
+                    character_id: character_id.clone(),
+                    name: name.to_string(),
+                },
+            };
+            match self.quorum.submit(&command).await {
+                Ok(_) => {
+                    let finalized = self
+                        .quorum
+                        .wait_for_height(sequence, COMMAND_FINALITY_TIMEOUT)
+                        .await?;
+                    let finalized_name = finalized
+                        .state
+                        .accounts
+                        .get(account_id)
+                        .and_then(|account| account.characters.get(&character_id))
+                        .map(|character| character.name.as_str());
+                    if finalized_name != Some(name) {
+                        return Err(format!(
+                            "Gate 15 finalized height {sequence} has no matching character {character_id}"
+                        ));
+                    }
+                    let height = finalized.state.finalized_height;
+                    self.install_snapshot(finalized);
+                    return Ok(height);
+                }
+                Err(error) if attempt < 2 => {
+                    eprintln!(
+                        "Gate 15 character finalization sequence {sequence} raced, retrying: {error}"
+                    );
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        Err(format!(
+            "Gate 15 character finalization retries exhausted for {character_id}"
+        ))
     }
 }
 
