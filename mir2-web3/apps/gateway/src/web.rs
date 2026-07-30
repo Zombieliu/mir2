@@ -2425,6 +2425,20 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
+                if let Err(error) = finalize_gate15_identities_for_responses(
+                    authenticated_account_id.as_deref(),
+                    login_account_id.as_deref(),
+                    &responses,
+                )
+                .await
+                {
+                    let _ = send_error_message(
+                        &sender,
+                        &format!("Commonware identity finalization unavailable: {error}"),
+                    )
+                    .await;
+                    continue;
+                }
                 let active_identity =
                     tokio::task::block_in_place(|| session.active_identity());
                 if leaves_world || active_identity.is_none() {
@@ -3198,6 +3212,82 @@ fn update_authenticated_state(current: bool, responses: &[ServerPacket]) -> bool
         return false;
     }
     current
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Gate15IdentityBatch {
+    account_id: String,
+    characters: Vec<(i32, String)>,
+}
+
+fn gate15_identity_batch_for_responses(
+    authenticated_account_id: Option<&str>,
+    login_account_id: Option<&str>,
+    responses: &[ServerPacket],
+) -> Result<Option<Gate15IdentityBatch>, String> {
+    let has_identity_update = responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::LoginSuccess { .. } | ServerPacket::NewCharacterSuccess { .. }
+        )
+    });
+    if !has_identity_update {
+        return Ok(None);
+    }
+    let account_id = login_account_id
+        .or(authenticated_account_id)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| {
+            "authenticated account is required for Commonware identity finalization".to_string()
+        })?;
+    let mut characters = Vec::new();
+    for packet in responses {
+        match packet {
+            ServerPacket::LoginSuccess {
+                characters: login_characters,
+            } => {
+                characters.extend(
+                    login_characters
+                        .iter()
+                        .map(|character| (character.index, character.name.clone())),
+                );
+            }
+            ServerPacket::NewCharacterSuccess { char_info } => {
+                characters.push((char_info.index, char_info.name.clone()));
+            }
+            _ => {}
+        }
+    }
+    characters.sort_by_key(|(index, _)| *index);
+    characters.dedup_by(|left, right| left.0 == right.0);
+    Ok(Some(Gate15IdentityBatch {
+        account_id: account_id.to_string(),
+        characters,
+    }))
+}
+
+async fn finalize_gate15_identities_for_responses(
+    authenticated_account_id: Option<&str>,
+    login_account_id: Option<&str>,
+    responses: &[ServerPacket],
+) -> Result<(), String> {
+    let Some(batch) =
+        gate15_identity_batch_for_responses(authenticated_account_id, login_account_id, responses)?
+    else {
+        return Ok(());
+    };
+    if let Some(finalized_height) =
+        crate::gate15::finalize_player_identities(&batch.account_id, &batch.characters).await?
+    {
+        eprintln!(
+            "Gate 15 finalized account {} and {} character identities at height {}",
+            batch.account_id,
+            batch.characters.len(),
+            finalized_height
+        );
+    }
+    Ok(())
 }
 
 fn production_player_command_safety_enabled() -> bool {
@@ -6824,8 +6914,8 @@ mod tests {
         ClientAuction, ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature,
         ClientMail, ClientMapInfo, ClientPacket, ClientQuestInfo, GroupMember,
         IntelligentCreatureItemFilter, IntelligentCreatureRules, MirClass, MirDirection, MirGender,
-        MirGridType, ObjectManaInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId, Spell,
-        UserItem, UserItemStat, UserLocation,
+        MirGridType, ObjectManaInfo, Point, RankCharacterInfo, SelectInfo, ServerPacket,
+        ServerPacketId, Spell, UserItem, UserItemStat, UserLocation,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
@@ -9279,6 +9369,43 @@ mod tests {
                 },
             ))
             .is_none()
+        );
+    }
+
+    #[test]
+    fn successful_identity_packets_build_gate15_write_through_batches() {
+        let login_batch = super::gate15_identity_batch_for_responses(
+            None,
+            Some("fresh"),
+            &[ServerPacket::LoginSuccess {
+                characters: Vec::new(),
+            }],
+        )
+        .expect("login identity batch should parse")
+        .expect("login success should finalize the account");
+        assert_eq!(login_batch.account_id, "fresh");
+        assert!(login_batch.characters.is_empty());
+
+        let character_batch = super::gate15_identity_batch_for_responses(
+            Some("fresh"),
+            None,
+            &[ServerPacket::NewCharacterSuccess {
+                char_info: SelectInfo {
+                    index: 1878,
+                    name: "AlphaHero".to_string(),
+                    level: 1,
+                    class: MirClass::Warrior,
+                    gender: MirGender::Male,
+                    last_access_binary_datetime: 0,
+                },
+            }],
+        )
+        .expect("character identity batch should parse")
+        .expect("character success should finalize the character");
+        assert_eq!(character_batch.account_id, "fresh");
+        assert_eq!(
+            character_batch.characters,
+            vec![(1878, "AlphaHero".to_string())]
         );
     }
 
