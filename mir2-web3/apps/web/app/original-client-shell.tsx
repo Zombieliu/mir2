@@ -550,6 +550,7 @@ export function OriginalClientShell({
   onRunStage5Command,
   onSendClientCommand,
   transferOptions,
+  onStartTutorial,
   onToggleCharacter,
   onToggleInventory,
   onCloseCharacter,
@@ -731,6 +732,15 @@ export function OriginalClientShell({
   }, []);
 
   useEffect(() => {
+    const gameWindow = window as typeof window & {
+      render_game_to_text?: () => string;
+      __mir2Tutorial?: {
+        input: string;
+        stepId: string | null;
+        stepIndex: number;
+        done: boolean;
+      };
+    };
     const renderGameToText = () =>
       JSON.stringify({
         coordinateSystem: "tile coordinates; origin top-left; x right; y down",
@@ -776,10 +786,8 @@ export function OriginalClientShell({
           inventory: showInventory,
           character: showCharacter,
         },
+        tutorial: gameWindow.__mir2Tutorial ?? null,
       });
-    const gameWindow = window as typeof window & {
-      render_game_to_text?: () => string;
-    };
     gameWindow.render_game_to_text = renderGameToText;
     return () => {
       if (gameWindow.render_game_to_text === renderGameToText) {
@@ -3273,6 +3281,8 @@ export function OriginalClientShell({
                   onRunStage5Command,
                   onSendClientCommand,
                   transferOptions,
+                  inputProfile: clientProfile.input,
+                  onStartTutorial: () => onStartTutorial(clientProfile.input),
                 };
                 // Stage 5c: opt-in store-bound HUD (subscribes to `world` slices via
                 // useWorldSelector). Defaults OFF — when the flag is absent/false (or no
