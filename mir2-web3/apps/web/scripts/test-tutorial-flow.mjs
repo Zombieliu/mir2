@@ -90,11 +90,41 @@ check("each input profile has its own intro and completion flow", () => {
 });
 
 check("completion storage is versioned and isolated per input profile", () => {
-  const keys = INPUT_PROFILES.map(tutorialCompletionStorageKey);
+  const keys = INPUT_PROFILES.map((input) => tutorialCompletionStorageKey(input));
   assert.equal(new Set(keys).size, INPUT_PROFILES.length);
   for (let index = 0; index < INPUT_PROFILES.length; index += 1) {
-    assert.equal(keys[index], `mir2:tutorialCompleted:v${TUTORIAL_VERSION}:${INPUT_PROFILES[index]}`);
+    const suffix =
+      INPUT_PROFILES[index] === "gamepad" ? "gamepad:generic" : INPUT_PROFILES[index];
+    assert.equal(keys[index], `mir2:tutorialCompleted:v${TUTORIAL_VERSION}:${suffix}`);
   }
+});
+
+check("Xbox and PlayStation tutorials use distinct labels and completion keys", () => {
+  const xboxSteps = tutorialStepsForInput("gamepad", "xbox");
+  const playStationSteps = tutorialStepsForInput("gamepad", "playstation");
+  const xboxActions = xboxSteps.find((step) => step.id === "gamepad-actions");
+  const playStationActions = playStationSteps.find((step) => step.id === "gamepad-actions");
+  const xboxQuick = xboxSteps.find((step) => step.id === "gamepad-quick");
+  const playStationQuick = playStationSteps.find((step) => step.id === "gamepad-quick");
+  const xboxPanels = xboxSteps.find((step) => step.id === "gamepad-panels");
+  const playStationPanels = playStationSteps.find((step) => step.id === "gamepad-panels");
+
+  assert.match(xboxActions.body.en, /\bA\b/);
+  assert.match(xboxActions.body.en, /\bY\b/);
+  assert.match(playStationActions.body.en, /×/);
+  assert.match(playStationActions.body.en, /△/);
+  assert.match(xboxQuick.body.en, /\bLT\b/);
+  assert.match(playStationQuick.body.en, /\bL2\b/);
+  assert.match(xboxPanels.body.en, /\bView\b/);
+  assert.match(playStationPanels.body.en, /\bCreate\b/);
+  assert.notEqual(
+    tutorialCompletionStorageKey("gamepad", "xbox"),
+    tutorialCompletionStorageKey("gamepad", "playstation"),
+  );
+
+  const state = createTutorialState("gamepad", "playstation");
+  assert.equal(state.gamepadFamily, "playstation");
+  assert.equal(currentStep(state).body.en, playStationSteps[0].body.en);
 });
 
 check("manual step does not advance on actions, only on next", () => {

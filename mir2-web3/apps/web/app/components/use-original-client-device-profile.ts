@@ -8,10 +8,12 @@ import {
   type Mir2ClientProfile,
   type Mir2InputProfile,
 } from "./original-client-device-profile";
+import { resolveMir2GamepadProfile } from "./original-client-gamepad-input";
 
 const DEFAULT_PROFILE: Mir2ClientProfile = {
   layout: "desktop",
   input: "keyboardMouse",
+  gamepad: resolveMir2GamepadProfile(null),
   layoutForced: false,
   inputForced: false,
 };
@@ -33,12 +35,19 @@ export function useOriginalClientDeviceProfile() {
       setActiveInput(event.pointerType === "touch" ? "touch" : "keyboardMouse");
     };
     const onKeyDown = () => setActiveInput("keyboardMouse");
-    const onGamepadConnected = () => setActiveInput("gamepad");
+    const onGamepadConnected = () => {
+      resolve();
+      setActiveInput("gamepad");
+      window.setTimeout(resolve, 0);
+    };
+    const onGamepadDisconnected = () => {
+      window.setTimeout(resolve, 0);
+    };
 
     resolve();
     window.addEventListener("resize", resolve);
     window.addEventListener("gamepadconnected", onGamepadConnected);
-    window.addEventListener("gamepaddisconnected", resolve);
+    window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
     window.addEventListener("pointerdown", onPointerDown, true);
     window.addEventListener("keydown", onKeyDown, true);
     coarsePointer.addEventListener?.("change", resolve);
@@ -46,7 +55,7 @@ export function useOriginalClientDeviceProfile() {
     return () => {
       window.removeEventListener("resize", resolve);
       window.removeEventListener("gamepadconnected", onGamepadConnected);
-      window.removeEventListener("gamepaddisconnected", resolve);
+      window.removeEventListener("gamepaddisconnected", onGamepadDisconnected);
       window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("keydown", onKeyDown, true);
       coarsePointer.removeEventListener?.("change", resolve);

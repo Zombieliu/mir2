@@ -4,8 +4,40 @@ export type Mir2GamepadButtonLike = {
 };
 
 export type Mir2GamepadLike = {
+  id?: string;
+  mapping?: string;
+  connected?: boolean;
   axes: readonly number[];
   buttons: readonly Mir2GamepadButtonLike[];
+};
+
+export type Mir2GamepadFamily = "xbox" | "playstation" | "generic";
+export type Mir2GamepadMappingMode =
+  | "standard"
+  | "known-fallback"
+  | "platform"
+  | "unverified";
+
+export type Mir2GamepadProfile = {
+  family: Mir2GamepadFamily;
+  displayName: string;
+  connected: boolean;
+  mapping: string;
+  mappingMode: Mir2GamepadMappingMode;
+  supported: boolean;
+};
+
+export type Mir2GamepadLabels = {
+  primary: string;
+  cancel: string;
+  pick: string;
+  approach: string;
+  leftBumper: string;
+  rightBumper: string;
+  leftTrigger: string;
+  rightTrigger: string;
+  view: string;
+  menu: string;
 };
 
 export type Mir2GamepadVector = {
@@ -34,6 +66,93 @@ export const MIR2_GAMEPAD_BUTTON = {
 } as const;
 
 const GAMEPAD_AXIS_DEAD_ZONE = 0.18;
+const XBOX_GAMEPAD_ID = /\b(?:xbox|xinput)\b|045e/i;
+const PLAYSTATION_GAMEPAD_ID =
+  /\b(?:dualsense|dualshock|playstation|sony interactive)\b|^Wireless Controller(?:\s|$)|054c/i;
+const XBOX_USER_AGENT = /\bXbox\b/i;
+const PLAYSTATION_USER_AGENT = /\bPlayStation\b|\bPS5\b/i;
+
+const GAMEPAD_LABELS: Record<Mir2GamepadFamily, Mir2GamepadLabels> = {
+  xbox: {
+    primary: "A",
+    cancel: "B",
+    pick: "X",
+    approach: "Y",
+    leftBumper: "LB",
+    rightBumper: "RB",
+    leftTrigger: "LT",
+    rightTrigger: "RT",
+    view: "View",
+    menu: "Menu",
+  },
+  playstation: {
+    primary: "×",
+    cancel: "○",
+    pick: "□",
+    approach: "△",
+    leftBumper: "L1",
+    rightBumper: "R1",
+    leftTrigger: "L2",
+    rightTrigger: "R2",
+    view: "Create",
+    menu: "Options",
+  },
+  generic: {
+    primary: "1",
+    cancel: "2",
+    pick: "3",
+    approach: "4",
+    leftBumper: "L1",
+    rightBumper: "R1",
+    leftTrigger: "L2",
+    rightTrigger: "R2",
+    view: "Select",
+    menu: "Start",
+  },
+};
+
+export function resolveMir2GamepadProfile(
+  gamepad: Pick<Mir2GamepadLike, "id" | "mapping" | "connected"> | null | undefined,
+  userAgent = "",
+  forcedFamily?: Mir2GamepadFamily | null,
+): Mir2GamepadProfile {
+  const id = gamepad?.id?.trim() ?? "";
+  const mapping = gamepad?.mapping?.trim() ?? "";
+  const connected = Boolean(gamepad) && gamepad?.connected !== false;
+  const family =
+    forcedFamily ??
+    (PLAYSTATION_GAMEPAD_ID.test(id) || PLAYSTATION_USER_AGENT.test(userAgent)
+      ? "playstation"
+      : XBOX_GAMEPAD_ID.test(id) || XBOX_USER_AGENT.test(userAgent)
+        ? "xbox"
+        : "generic");
+  const mappingMode: Mir2GamepadMappingMode =
+    mapping === "standard"
+      ? "standard"
+      : connected && family !== "generic"
+        ? "known-fallback"
+        : !connected && family !== "generic"
+          ? "platform"
+          : "unverified";
+
+  return {
+    family,
+    displayName:
+      family === "playstation"
+        ? "PlayStation controller"
+        : family === "xbox"
+          ? "Xbox controller"
+          : id || "Game controller",
+    connected,
+    mapping,
+    mappingMode,
+    supported: mappingMode !== "unverified",
+  };
+}
+
+export function mir2GamepadLabels(family: Mir2GamepadFamily): Mir2GamepadLabels {
+  return GAMEPAD_LABELS[family];
+}
 
 export function mir2GamepadButtonDown(gamepad: Mir2GamepadLike, index: number) {
   const button = gamepad.buttons[index];

@@ -132,6 +132,7 @@ import {
 } from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
 import { OriginalClientGamepadControls } from "./components/original-client-gamepad-controls";
+import { mir2GamepadLabels } from "./components/original-client-gamepad-input";
 import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
 import {
   createCrystalAnimationWorldSeed,
@@ -604,6 +605,10 @@ export function OriginalClientShell({
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
   const clientProfile = useOriginalClientDeviceProfile();
+  const gamepadLabels = useMemo(
+    () => mir2GamepadLabels(clientProfile.gamepad.family),
+    [clientProfile.gamepad.family],
+  );
   const [stagePresentation, setStagePresentation] = useState({
     scale: 1,
     left: 0,
@@ -736,10 +741,12 @@ export function OriginalClientShell({
       render_game_to_text?: () => string;
       __mir2Tutorial?: {
         input: string;
+        gamepadFamily: string;
         stepId: string | null;
         stepIndex: number;
         done: boolean;
       };
+      __mir2GamepadControls?: Record<string, unknown>;
     };
     const renderGameToText = () =>
       JSON.stringify({
@@ -787,6 +794,7 @@ export function OriginalClientShell({
           character: showCharacter,
         },
         tutorial: gameWindow.__mir2Tutorial ?? null,
+        gamepad: gameWindow.__mir2GamepadControls ?? null,
       });
     gameWindow.render_game_to_text = renderGameToText;
     return () => {
@@ -3051,6 +3059,7 @@ export function OriginalClientShell({
       className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
       data-layout-profile={clientProfile.layout}
       data-input-profile={clientProfile.input}
+      data-gamepad-family={clientProfile.gamepad.family}
       data-client-screen={screen}
       style={stageScaleStyle}
     >
@@ -3282,7 +3291,9 @@ export function OriginalClientShell({
                   onSendClientCommand,
                   transferOptions,
                   inputProfile: clientProfile.input,
-                  onStartTutorial: () => onStartTutorial(clientProfile.input),
+                  gamepadFamily: clientProfile.gamepad.family,
+                  onStartTutorial: () =>
+                    onStartTutorial(clientProfile.input, clientProfile.gamepad.family),
                 };
                 // Stage 5c: opt-in store-bound HUD (subscribes to `world` slices via
                 // useWorldSelector). Defaults OFF — when the flag is absent/false (or no
@@ -3316,7 +3327,11 @@ export function OriginalClientShell({
       </section>
       {clientProfile.layout === "tv" && clientProfile.input === "gamepad" && screen !== "game" ? (
         <div className="mir-gamepad-hint" role="status">
-          {t("ui.gamepadNavigationHint", [], "D-pad: Navigate · A: Select · B: Back")}
+          {t(
+            "ui.gamepadNavigationHint",
+            [gamepadLabels.primary, gamepadLabels.cancel],
+            `D-pad: Navigate · ${gamepadLabels.primary}: Select · ${gamepadLabels.cancel}: Back`,
+          )}
         </div>
       ) : null}
       <OriginalClientMobileControls
@@ -3338,6 +3353,8 @@ export function OriginalClientShell({
       />
       <OriginalClientGamepadControls
         enabled={clientProfile.input === "gamepad"}
+        t={t}
+        expectedProfile={clientProfile.gamepad}
         screen={screen}
         gameplayReady={screen === "game" && sceneInteractionReady}
         stageRootRef={stageFrameRef}
