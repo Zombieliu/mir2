@@ -4,6 +4,7 @@ import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { DEFAULT_HOTKEY_GROUPS } from "./original-client-hotkey-window";
+import type { Mir2InputProfile } from "./original-client-device-profile";
 import { SpriteButton } from "./original-client-overlays";
 import { SocialSystemPanel, type SystemMenuSocialPanel } from "./original-client-social-system-panel";
 
@@ -83,6 +84,8 @@ export function SystemMenuPanel({
   mapFileName,
   inSafeZone,
   transferOptions,
+  inputProfile,
+  onStartTutorial,
   onOpenPanel,
   onClose,
   onLogout,
@@ -95,6 +98,8 @@ export function SystemMenuPanel({
   mapFileName: string | null;
   inSafeZone: boolean;
   transferOptions: SystemMenuTransferOption[];
+  inputProfile: Mir2InputProfile;
+  onStartTutorial: () => void;
   onOpenPanel: (panel: SystemMenuSurfacePanel) => void;
   onClose: () => void;
   onLogout: () => void;
@@ -103,9 +108,9 @@ export function SystemMenuPanel({
   const [qaMap, setQaMap] = useState(() => normalizeMapInput(mapFileName ?? "0"));
   const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
   const [qaY, setQaY] = useState(() => String(playerPosition?.y ?? 270));
-  // Local, self-contained reference overlay (no host wiring needed). The
-  // original options screen exposes a key list + quick help next to the menu;
-  // we surface the same content without changing the prop contract.
+  // Local reference overlay. The original options screen exposes a key list +
+  // quick help next to the menu; this version also links back to the active
+  // input profile's interactive tutorial.
   const [infoOverlay, setInfoOverlay] = useState<"help" | "keyboard" | null>(null);
   const noop = () => undefined;
   const toggleInfoOverlay = (next: "help" | "keyboard") =>
@@ -232,7 +237,13 @@ export function SystemMenuPanel({
         </div>
       </section>
       {infoOverlay ? (
-        <SystemMenuInfoOverlay t={t} mode={infoOverlay} onClose={() => setInfoOverlay(null)} />
+        <SystemMenuInfoOverlay
+          t={t}
+          mode={infoOverlay}
+          inputProfile={inputProfile}
+          onStartTutorial={onStartTutorial}
+          onClose={() => setInfoOverlay(null)}
+        />
       ) : null}
     </>
   );
@@ -241,10 +252,14 @@ export function SystemMenuPanel({
 function SystemMenuInfoOverlay({
   t,
   mode,
+  inputProfile,
+  onStartTutorial,
   onClose,
 }: {
   t: TranslateFn;
   mode: "help" | "keyboard";
+  inputProfile: Mir2InputProfile;
+  onStartTutorial: () => void;
   onClose: () => void;
 }) {
   const title = mode === "keyboard" ? t("ui.keyboard", [], "Keyboard") : t("ui.help", [], "Help");
@@ -277,9 +292,33 @@ function SystemMenuInfoOverlay({
         ) : (
           <div style={infoStyle.group}>
             <div style={infoStyle.groupTitle}>{t("ui.helpSubtitle", [], "Legend of Mir 2 quick reference")}</div>
-            <p style={infoStyle.helpLine}>{t("ui.helpMoveBody", [], "Left-click the ground to walk. Hold the button to keep moving.")}</p>
-            <p style={infoStyle.helpLine}>{t("ui.helpInteractBody", [], "Left-click an NPC to talk, a monster to attack, or a dropped item to pick it up.")}</p>
-            <p style={infoStyle.helpLine}>{t("ui.helpWindowsBody", [], "Use the toolbar or hotkeys to open Character, Inventory, Skills and this menu.")}</p>
+            {inputProfile === "touch" ? (
+              <>
+                <p style={infoStyle.helpLine}>{t("ui.helpTouchMoveBody", [], "Drag the left joystick to move. Tap Run to switch between running and walking.")}</p>
+                <p style={infoStyle.helpLine}>{t("ui.helpTouchInteractBody", [], "Use Attack, Approach and Pick for targets and nearby loot. S and number buttons are skills and belt items.")}</p>
+                <p style={infoStyle.helpLine}>{t("ui.helpTouchWindowsBody", [], "Char opens equipment and stats. Bag opens inventory, quests and storage.")}</p>
+              </>
+            ) : inputProfile === "gamepad" ? (
+              <>
+                <p style={infoStyle.helpLine}>{t("ui.helpGamepadMoveBody", [], "Move with the left stick or D-pad. A is primary action, Y approaches and X picks up loot.")}</p>
+                <p style={infoStyle.helpLine}>{t("ui.helpGamepadQuickBody", [], "LT/RT cast skills, LB/RB use belt items, View opens Character and Menu opens Bag.")}</p>
+                <p style={infoStyle.helpLine}>{t("ui.helpGamepadUiBody", [], "In menus, use the D-pad to move focus, A to activate and B to go back.")}</p>
+              </>
+            ) : (
+              <>
+                <p style={infoStyle.helpLine}>{t("ui.helpMoveBody", [], "Left-click the ground to walk. Hold the button to keep moving.")}</p>
+                <p style={infoStyle.helpLine}>{t("ui.helpInteractBody", [], "Left-click an NPC to talk, a monster to attack, or a dropped item to pick it up.")}</p>
+                <p style={infoStyle.helpLine}>{t("ui.helpWindowsBody", [], "Use the toolbar or hotkeys to open Character, Inventory, Skills and this menu.")}</p>
+              </>
+            )}
+            <button
+              type="button"
+              data-system-menu-action="tutorial"
+              onClick={onStartTutorial}
+              style={infoStyle.tutorialButton}
+            >
+              {t("ui.replayControlsTutorial", [], "Replay controls tutorial")}
+            </button>
           </div>
         )}
       </div>
@@ -578,6 +617,18 @@ const infoStyle: Record<string, CSSProperties> = {
     textAlign: "center",
   },
   helpLine: { margin: 0, color: "#d6c6a5", lineHeight: 1.4 },
+  tutorialButton: {
+    marginTop: 8,
+    minHeight: 36,
+    padding: "7px 10px",
+    border: "1px solid rgba(214, 180, 110, 0.72)",
+    borderRadius: 3,
+    background: "linear-gradient(180deg, #755226, #3d2914)",
+    color: "#ffe3a8",
+    font: "700 12px Georgia, 'Times New Roman', serif",
+    cursor: "pointer",
+    textShadow: "1px 1px 0 #000",
+  },
 };
 
 function normalizeMapInput(value: string) {

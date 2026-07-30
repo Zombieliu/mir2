@@ -38,11 +38,15 @@ const mod = loadTypeScriptModule(new URL("../lib/tutorial-steps.ts", import.meta
 
 const {
   TUTORIAL_STEPS,
+  TUTORIAL_VERSION,
   createTutorialState,
   currentStep,
   pickText,
   reduceTutorial,
+  tutorialCompletionStorageKey,
+  tutorialStepsForInput,
 } = mod;
+const INPUT_PROFILES = ["keyboardMouse", "touch", "gamepad"];
 
 let passed = 0;
 function check(label, fn) {
@@ -58,8 +62,8 @@ function indexOf(id) {
 }
 
 // Helper: replay a sequence of events from a fresh state.
-function run(events) {
-  return events.reduce((state, event) => reduceTutorial(state, event), createTutorialState());
+function run(events, input = "keyboardMouse") {
+  return events.reduce((state, event) => reduceTutorial(state, event), createTutorialState(input));
 }
 
 check("initial state starts at step 0, not done", () => {
@@ -67,6 +71,30 @@ check("initial state starts at step 0, not done", () => {
   assert.equal(state.stepIndex, 0);
   assert.equal(state.done, false);
   assert.equal(currentStep(state).id, "welcome");
+});
+
+check("each input profile has its own intro and completion flow", () => {
+  const expectedFirst = {
+    keyboardMouse: "welcome",
+    touch: "touch-welcome",
+    gamepad: "gamepad-welcome",
+  };
+  for (const input of INPUT_PROFILES) {
+    const steps = tutorialStepsForInput(input);
+    const state = createTutorialState(input);
+    assert.equal(state.input, input);
+    assert.equal(currentStep(state).id, expectedFirst[input]);
+    assert.equal(steps[0].trigger.kind, "manual");
+    assert.equal(steps.at(-1).trigger.kind, "manual");
+  }
+});
+
+check("completion storage is versioned and isolated per input profile", () => {
+  const keys = INPUT_PROFILES.map(tutorialCompletionStorageKey);
+  assert.equal(new Set(keys).size, INPUT_PROFILES.length);
+  for (let index = 0; index < INPUT_PROFILES.length; index += 1) {
+    assert.equal(keys[index], `mir2:tutorialCompleted:v${TUTORIAL_VERSION}:${INPUT_PROFILES[index]}`);
+  }
 });
 
 check("manual step does not advance on actions, only on next", () => {
@@ -146,12 +174,15 @@ check("back never goes below 0", () => {
 });
 
 check("next on the final step reaches done", () => {
-  let state = createTutorialState();
-  // walk all the way through with next.
-  for (let i = 0; i < TUTORIAL_STEPS.length; i += 1) {
-    state = reduceTutorial(state, { kind: "next" });
+  for (const input of INPUT_PROFILES) {
+    let state = createTutorialState(input);
+    const steps = tutorialStepsForInput(input);
+    // Walk all the way through with next.
+    for (let i = 0; i < steps.length; i += 1) {
+      state = reduceTutorial(state, { kind: "next" });
+    }
+    assert.equal(state.done, true, `${input} finishes after its final step`);
   }
-  assert.equal(state.done, true, "stepping past the last step finishes the tutorial");
 });
 
 check("a finished tutorial ignores further events", () => {
@@ -162,17 +193,51 @@ check("a finished tutorial ignores further events", () => {
   assert.deepEqual(state, before, "done state is frozen");
 });
 
-check("every step has English text and a valid trigger; pickText falls back", () => {
-  for (const step of TUTORIAL_STEPS) {
-    assert.ok(step.title.en && step.body.en, `step ${step.id} needs English title/body`);
-    assert.ok(
-      ["action", "window", "manual"].includes(step.trigger.kind),
-      `step ${step.id} has a known trigger kind`,
-    );
-    // pickText returns the locale string when present, English otherwise.
-    assert.equal(pickText(step.title, "zh-CN"), step.title["zh-CN"] ?? step.title.en);
-    assert.equal(pickText(step.title, "es"), step.title.es ?? step.title.en);
+check("every profile step has English and Chinese text plus a valid trigger", () => {
+  for (const input of INPUT_PROFILES) {
+    for (const step of tutorialStepsForInput(input)) {
+      assert.ok(step.title.en && step.body.en, `step ${step.id} needs English title/body`);
+      assert.ok(step.title["zh-CN"] && step.body["zh-CN"], `step ${step.id} needs Chinese title/body`);
+      assert.ok(
+        ["action", "window", "manual"].includes(step.trigger.kind),
+        `step ${step.id} has a known trigger kind`,
+      );
+      // pickText returns the locale string when present, English otherwise.
+      assert.equal(pickText(step.title, "zh-CN"), step.title["zh-CN"]);
+      assert.equal(pickText(step.title, "es"), step.title.es ?? step.title.en);
+    }
   }
+});
+
+check("touch tutorial covers every requested mobile control group", () => {
+  const touchSteps = tutorialStepsForInput("touch");
+  const ids = new Set(touchSteps.map((step) => step.id));
+  for (const requiredId of [
+    "touch-move",
+    "touch-run",
+    "touch-attack",
+    "touch-approach",
+    "touch-pick",
+    "touch-quick",
+    "touch-panels",
+    "touch-replay",
+  ]) {
+    assert.ok(ids.has(requiredId), `${requiredId} is present`);
+  }
+});
+
+check("touch and gamepad semantic actions advance their matching steps", () => {
+  let touch = reduceTutorial(createTutorialState("touch"), { kind: "next" });
+  assert.equal(currentStep(touch).id, "touch-move");
+  touch = reduceTutorial(touch, { kind: "action", type: "touch:move" });
+  assert.equal(currentStep(touch).id, "touch-run");
+
+  let gamepad = reduceTutorial(createTutorialState("gamepad"), { kind: "next" });
+  assert.equal(currentStep(gamepad).id, "gamepad-move");
+  gamepad = reduceTutorial(gamepad, { kind: "action", type: "gamepad:move" });
+  assert.equal(currentStep(gamepad).id, "gamepad-actions");
+  gamepad = reduceTutorial(gamepad, { kind: "action", type: "gamepad:primary" });
+  assert.equal(currentStep(gamepad).id, "gamepad-quick");
 });
 
 check("spotlight selectors point only at known stable DOM hooks", () => {
@@ -183,13 +248,23 @@ check("spotlight selectors point only at known stable DOM hooks", () => {
     ".hud-button.inventory",
     ".hud-button.character",
     ".hud-button.quest",
+    ".hud-button.menu",
     ".belt-dialog",
+    ".mir-mobile-stick-shell",
+    ".mir-mobile-action.run",
+    ".mir-mobile-action.primary",
+    ".mir-mobile-action.approach",
+    ".mir-mobile-action.pick",
+    ".mir-mobile-action.quick",
+    ".mir-mobile-panel-row",
   ]);
-  for (const step of TUTORIAL_STEPS) {
-    if (step.spotlight === undefined) continue;
-    assert.equal(typeof step.spotlight, "string");
-    assert.ok(step.spotlight.length > 0, `step ${step.id} spotlight is non-empty`);
-    assert.ok(KNOWN_HOOKS.has(step.spotlight), `step ${step.id} spotlight "${step.spotlight}" is a known hook`);
+  for (const input of INPUT_PROFILES) {
+    for (const step of tutorialStepsForInput(input)) {
+      if (step.spotlight === undefined) continue;
+      assert.equal(typeof step.spotlight, "string");
+      assert.ok(step.spotlight.length > 0, `step ${step.id} spotlight is non-empty`);
+      assert.ok(KNOWN_HOOKS.has(step.spotlight), `step ${step.id} spotlight "${step.spotlight}" is a known hook`);
+    }
   }
 });
 

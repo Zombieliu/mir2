@@ -3,6 +3,7 @@
 import { memo, useEffect, useRef, type RefObject } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
+import { TUTORIAL_CONTROL_EVENT } from "../../lib/tutorial-steps";
 import {
   MIR2_GAMEPAD_BUTTON,
   mir2GamepadButtonPressed,
@@ -144,6 +145,9 @@ function OriginalClientGamepadControlsInner({
         );
         const previousMovement = activeMovementRef.current;
         activeMovementRef.current = movement;
+        if (movement && !previousMovement) {
+          publishTutorialControl("gamepad:move");
+        }
         if (!movement) {
           if (previousMovement) onDirectionStop();
         } else if (
@@ -157,34 +161,43 @@ function OriginalClientGamepadControlsInner({
         }
 
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.primary)) {
+          publishTutorialControl("gamepad:primary");
           onPrimaryTargetAction();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.approach)) {
+          publishTutorialControl("gamepad:approach");
           onApproachTarget();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.pick)) {
+          publishTutorialControl("gamepad:pick");
           const drop = nearestGroundDrop(world, player);
           if (drop) onPickGroundDrop(drop.objectId);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.view)) {
+          publishTutorialControl("gamepad:panel");
           onToggleCharacter();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.menu)) {
+          publishTutorialControl("gamepad:panel");
           onToggleInventory();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.leftTrigger)) {
+          publishTutorialControl("gamepad:quick");
           const skill = world.knownSkills[0];
           if (skill) onCastSkill(skill.key);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.rightTrigger)) {
+          publishTutorialControl("gamepad:quick");
           const skill = world.knownSkills[1];
           if (skill) onCastSkill(skill.key);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.leftBumper)) {
+          publishTutorialControl("gamepad:quick");
           const item = [...world.beltItems].sort((a, b) => a.slot - b.slot)[0];
           if (item) onUseItem(item);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.rightBumper)) {
+          publishTutorialControl("gamepad:quick");
           const item = [...world.beltItems].sort((a, b) => a.slot - b.slot)[1];
           if (item) onUseItem(item);
         }
@@ -255,4 +268,8 @@ function publishDebug(state: Mir2GamepadDebugState) {
     __mir2GamepadControls?: Mir2GamepadDebugState;
   };
   debugWindow.__mir2GamepadControls = state;
+}
+
+function publishTutorialControl(action: string) {
+  window.dispatchEvent(new CustomEvent(TUTORIAL_CONTROL_EVENT, { detail: { action } }));
 }
