@@ -218,7 +218,7 @@ function OriginalClientMobileControlsInner({
             back: "rgba(17, 12, 8, 0.72)",
             front: "rgba(226, 195, 112, 0.88)",
           },
-          size: 118,
+          size: 104,
           threshold: 0.08,
           restJoystick: true,
           restOpacity: 0.72,
@@ -286,7 +286,18 @@ function OriginalClientMobileControlsInner({
   }, [dispatchLatestIntent, enabled, publishDebugState]);
 
   if (!enabled) {
-    return null;
+    if (!forceVisible) {
+      return null;
+    }
+
+    return (
+      <div className="mir-mobile-rotate-overlay force-mobile-controls">
+        <div className="mir-mobile-rotate-card">
+          <span className="mir-mobile-rotate-icon" aria-hidden="true">[]</span>
+          <span>{t("ui.mobileRotateLandscape", [], "Rotate to landscape")}</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -295,16 +306,28 @@ function OriginalClientMobileControlsInner({
         <div className="mir-mobile-stick-shell" aria-label={t("ui.mobileMove", [], "Move")}>
           <div ref={joystickZoneRef} className="mir-mobile-stick-zone" data-mobile-joystick="true" />
           <div className="mir-mobile-stick-state" data-active={activeIntent ? "true" : "false"}>
-            {activeIntent ? activeIntent.direction.replace(/([A-Z])/g, " $1").trim() : "Move"}
+            {activeIntent
+              ? activeIntent.direction.replace(/([A-Z])/g, " $1").trim()
+              : t("ui.mobileMove", [], "Move")}
           </div>
         </div>
         <div className="mir-mobile-action-pad" aria-label={t("ui.mobileActions", [], "Actions")}>
           <div className="mir-mobile-panel-row">
-            <button type="button" className="mir-mobile-panel-button" onClick={onToggleCharacter}>
-              Char
+            <button
+              type="button"
+              className="mir-mobile-panel-button"
+              aria-label={t("ui.character", [], "Character")}
+              onClick={onToggleCharacter}
+            >
+              {mobileCompactLabel(t("ui.character", [], "Character"))}
             </button>
-            <button type="button" className="mir-mobile-panel-button" onClick={onToggleInventory}>
-              Bag
+            <button
+              type="button"
+              className="mir-mobile-panel-button"
+              aria-label={t("ui.inventory", [], "Inventory")}
+              onClick={onToggleInventory}
+            >
+              {mobileCompactLabel(t("ui.inventory", [], "Inventory"))}
             </button>
           </div>
           {Array.from({ length: 5 }).map((_, index) => {
@@ -343,37 +366,41 @@ function OriginalClientMobileControlsInner({
           <button
             type="button"
             className={`mir-mobile-action wheel run ${runLocked ? "active" : ""}`}
+            aria-label={t("ui.mobileRun", [], "Run")}
             aria-pressed={runLocked}
             onClick={() => {
               setRunLocked((current) => !current);
               window.setTimeout(() => publishDebugState(), 0);
             }}
           >
-            Run
+            {t("ui.mobileRun", [], "Run")}
           </button>
           <button
             type="button"
             className="mir-mobile-action wheel approach"
+            aria-label={t("ui.approach", [], "Approach")}
             disabled={!selectedEntity}
             onClick={onApproachTarget}
           >
-            Go
+            {mobileCompactLabel(t("ui.approach", [], "Approach"))}
           </button>
           <button
             type="button"
             className="mir-mobile-action wheel pick"
+            aria-label={t("ui.mobilePickUp", [], "Pick up")}
             disabled={!nearestDrop}
             onClick={() => nearestDrop && onPickGroundDrop(nearestDrop.objectId)}
           >
-            Pick
+            {t("ui.mobilePickUp", [], "Pick")}
           </button>
           <button
             type="button"
             className="mir-mobile-action wheel primary"
+            aria-label={t("ui.attack", [], "Attack")}
             disabled={!selectedEntity}
             onClick={onPrimaryTargetAction}
           >
-            Atk
+            {mobileCompactLabel(t("ui.attack", [], "Attack"))}
           </button>
         </div>
       </div>
@@ -391,6 +418,11 @@ function OriginalClientMobileControlsInner({
 // (world, player, selectedEntity, callbacks) only change on server/user events, not
 // on every 30 Hz motion tick. Memo prevents spurious re-renders during gameplay.
 export const OriginalClientMobileControls = memo(OriginalClientMobileControlsInner);
+
+function mobileCompactLabel(label: string): string {
+  const glyphs = Array.from(label.trim());
+  return glyphs.length <= 4 ? glyphs.join("") : glyphs.slice(0, 4).join("");
+}
 
 function readNippleMoveData(args: unknown[]): NippleMoveData | null {
   for (const arg of args) {
