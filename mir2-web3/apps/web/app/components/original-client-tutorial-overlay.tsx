@@ -11,6 +11,7 @@ import {
   tutorialCompletionStorageKey,
   tutorialStepsForInput,
   type TutorialEvent,
+  type TutorialGamepadFamily,
   type TutorialInputProfile,
   type TutorialLang,
   type TutorialWindow,
@@ -30,6 +31,7 @@ import { guideQuestAttackHint, type GuideQuestLike } from "../../lib/onboarding-
 export type TutorialOverlayProps = {
   language: TutorialLang;
   input: TutorialInputProfile;
+  gamepadFamily: TutorialGamepadFamily;
   // Live open/closed state of the tracked windows (drives window-trigger steps).
   windows: { inventory: boolean; character: boolean; questLog: boolean };
   // The player's active quest log (drives guide-quest coordination on the
@@ -51,12 +53,17 @@ type ActionEventDetail = { type?: unknown };
 export function OriginalClientTutorialOverlay({
   language,
   input,
+  gamepadFamily,
   windows,
   questLog,
   playerClass,
   onClose,
 }: TutorialOverlayProps) {
-  const [state, dispatch] = useReducer(reduceTutorial, input, createTutorialState);
+  const [state, dispatch] = useReducer(
+    reduceTutorial,
+    { input, gamepadFamily },
+    (seed) => createTutorialState(seed.input, seed.gamepadFamily),
+  );
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
   const closedRef = useRef(false);
 
@@ -99,7 +106,10 @@ export function OriginalClientTutorialOverlay({
     if (state.done && !closedRef.current) {
       closedRef.current = true;
       try {
-        window.localStorage.setItem(tutorialCompletionStorageKey(state.input), "1");
+        window.localStorage.setItem(
+          tutorialCompletionStorageKey(state.input, state.gamepadFamily),
+          "1",
+        );
         if (state.input === "keyboardMouse") {
           window.localStorage.setItem("mir2:tutorialCompleted", "1");
         }
@@ -108,7 +118,7 @@ export function OriginalClientTutorialOverlay({
       }
       onClose();
     }
-  }, [state.done, state.input, onClose]);
+  }, [state.done, state.gamepadFamily, state.input, onClose]);
 
   const step = currentStep(state);
 
@@ -118,6 +128,7 @@ export function OriginalClientTutorialOverlay({
     const gameWindow = window as typeof window & {
       __mir2Tutorial?: {
         input: TutorialInputProfile;
+        gamepadFamily: TutorialGamepadFamily;
         stepId: string | null;
         stepIndex: number;
         done: boolean;
@@ -125,6 +136,7 @@ export function OriginalClientTutorialOverlay({
     };
     gameWindow.__mir2Tutorial = {
       input: state.input,
+      gamepadFamily: state.gamepadFamily,
       stepId: step?.id ?? null,
       stepIndex: state.stepIndex,
       done: state.done,
@@ -132,7 +144,7 @@ export function OriginalClientTutorialOverlay({
     return () => {
       delete gameWindow.__mir2Tutorial;
     };
-  }, [state.done, state.input, state.stepIndex, step?.id]);
+  }, [state.done, state.gamepadFamily, state.input, state.stepIndex, step?.id]);
 
   // Resolve the optional spotlight target each step / on resize. Degrades to no
   // ring if the selector is absent or doesn't match anything in the DOM.
@@ -156,7 +168,7 @@ export function OriginalClientTutorialOverlay({
 
   if (state.done || !step) return null;
 
-  const steps = tutorialStepsForInput(state.input);
+  const steps = tutorialStepsForInput(state.input, state.gamepadFamily);
   const total = steps.length;
   const stepNumber = state.stepIndex + 1;
   const isManual = step.trigger.kind === "manual";
@@ -177,6 +189,7 @@ export function OriginalClientTutorialOverlay({
     <div
       className="mir-tutorial-overlay"
       data-tutorial-input={state.input}
+      data-tutorial-gamepad-family={state.gamepadFamily}
       data-tutorial-step={step.id}
       style={ROOT_STYLE}
       aria-hidden={false}

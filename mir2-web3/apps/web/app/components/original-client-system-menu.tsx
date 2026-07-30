@@ -5,6 +5,10 @@ import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { DEFAULT_HOTKEY_GROUPS } from "./original-client-hotkey-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
+import {
+  mir2GamepadLabels,
+  type Mir2GamepadFamily,
+} from "./original-client-gamepad-input";
 import { SpriteButton } from "./original-client-overlays";
 import { SocialSystemPanel, type SystemMenuSocialPanel } from "./original-client-social-system-panel";
 
@@ -85,6 +89,7 @@ export function SystemMenuPanel({
   inSafeZone,
   transferOptions,
   inputProfile,
+  gamepadFamily,
   onStartTutorial,
   onOpenPanel,
   onClose,
@@ -99,6 +104,7 @@ export function SystemMenuPanel({
   inSafeZone: boolean;
   transferOptions: SystemMenuTransferOption[];
   inputProfile: Mir2InputProfile;
+  gamepadFamily: Mir2GamepadFamily;
   onStartTutorial: () => void;
   onOpenPanel: (panel: SystemMenuSurfacePanel) => void;
   onClose: () => void;
@@ -241,6 +247,7 @@ export function SystemMenuPanel({
           t={t}
           mode={infoOverlay}
           inputProfile={inputProfile}
+          gamepadFamily={gamepadFamily}
           onStartTutorial={onStartTutorial}
           onClose={() => setInfoOverlay(null)}
         />
@@ -253,16 +260,19 @@ function SystemMenuInfoOverlay({
   t,
   mode,
   inputProfile,
+  gamepadFamily,
   onStartTutorial,
   onClose,
 }: {
   t: TranslateFn;
   mode: "help" | "keyboard";
   inputProfile: Mir2InputProfile;
+  gamepadFamily: Mir2GamepadFamily;
   onStartTutorial: () => void;
   onClose: () => void;
 }) {
   const title = mode === "keyboard" ? t("ui.keyboard", [], "Keyboard") : t("ui.help", [], "Help");
+  const gamepadLabels = mir2GamepadLabels(gamepadFamily);
   return (
     <section
       className="system-menu-info-overlay"
@@ -300,9 +310,34 @@ function SystemMenuInfoOverlay({
               </>
             ) : inputProfile === "gamepad" ? (
               <>
-                <p style={infoStyle.helpLine}>{t("ui.helpGamepadMoveBody", [], "Move with the left stick or D-pad. A is primary action, Y approaches and X picks up loot.")}</p>
-                <p style={infoStyle.helpLine}>{t("ui.helpGamepadQuickBody", [], "LT/RT cast skills, LB/RB use belt items, View opens Character and Menu opens Bag.")}</p>
-                <p style={infoStyle.helpLine}>{t("ui.helpGamepadUiBody", [], "In menus, use the D-pad to move focus, A to activate and B to go back.")}</p>
+                <p style={infoStyle.helpLine}>
+                  {t(
+                    "ui.helpGamepadMoveBody",
+                    [gamepadLabels.primary, gamepadLabels.approach, gamepadLabels.pick],
+                    `Move with the left stick or D-pad. ${gamepadLabels.primary} is primary action, ${gamepadLabels.approach} approaches and ${gamepadLabels.pick} picks up loot.`,
+                  )}
+                </p>
+                <p style={infoStyle.helpLine}>
+                  {t(
+                    "ui.helpGamepadQuickBody",
+                    [
+                      gamepadLabels.leftTrigger,
+                      gamepadLabels.rightTrigger,
+                      gamepadLabels.leftBumper,
+                      gamepadLabels.rightBumper,
+                      gamepadLabels.view,
+                      gamepadLabels.menu,
+                    ],
+                    `${gamepadLabels.leftTrigger}/${gamepadLabels.rightTrigger} cast skills, ${gamepadLabels.leftBumper}/${gamepadLabels.rightBumper} use belt items, ${gamepadLabels.view} opens Character and ${gamepadLabels.menu} opens Bag.`,
+                  )}
+                </p>
+                <p style={infoStyle.helpLine}>
+                  {t(
+                    "ui.helpGamepadUiBody",
+                    [gamepadLabels.primary, gamepadLabels.cancel],
+                    `In menus, use the D-pad to move focus, ${gamepadLabels.primary} to activate and ${gamepadLabels.cancel} to go back.`,
+                  )}
+                </p>
               </>
             ) : (
               <>

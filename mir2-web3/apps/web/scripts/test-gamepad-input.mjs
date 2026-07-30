@@ -56,6 +56,48 @@ assert.equal(
   false,
 );
 
+const xboxProfile = input.resolveMir2GamepadProfile({
+  id: "Xbox Wireless Controller",
+  mapping: "standard",
+  connected: true,
+});
+assert.equal(xboxProfile.family, "xbox");
+assert.equal(xboxProfile.mappingMode, "standard");
+assert.equal(xboxProfile.supported, true);
+assert.equal(input.mir2GamepadLabels(xboxProfile.family).primary, "A");
+
+const dualSenseProfile = input.resolveMir2GamepadProfile({
+  id: "DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)",
+  mapping: "standard",
+  connected: true,
+});
+assert.equal(dualSenseProfile.family, "playstation");
+assert.equal(input.mir2GamepadLabels(dualSenseProfile.family).primary, "×");
+assert.equal(input.mir2GamepadLabels(dualSenseProfile.family).menu, "Options");
+
+const dualSenseFallback = input.resolveMir2GamepadProfile({
+  id: "054c Wireless Controller",
+  mapping: "",
+  connected: true,
+});
+assert.equal(dualSenseFallback.family, "playstation");
+assert.equal(dualSenseFallback.mappingMode, "known-fallback");
+assert.equal(dualSenseFallback.supported, true);
+
+const genericProfile = input.resolveMir2GamepadProfile({
+  id: "Mystery USB Controller",
+  mapping: "",
+  connected: true,
+});
+assert.equal(genericProfile.family, "generic");
+assert.equal(genericProfile.mappingMode, "unverified");
+assert.equal(genericProfile.supported, false);
+
+const xboxPlatform = input.resolveMir2GamepadProfile(null, "Mozilla/5.0 (Xbox; Xbox Series X)");
+assert.equal(xboxPlatform.family, "xbox");
+assert.equal(xboxPlatform.mappingMode, "platform");
+assert.equal(xboxPlatform.connected, false);
+
 const current = { left: 100, top: 100, width: 20, height: 20 };
 const candidates = [
   { left: 20, top: 100, width: 20, height: 20 },
