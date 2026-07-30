@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const isDevelopment = process.env.NODE_ENV === "development";
+const configDir = path.dirname(fileURLToPath(import.meta.url));
+const monorepoRoot = path.resolve(configDir, "../../..");
 const immutableGameAssetCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=31536000, immutable";
@@ -41,6 +45,12 @@ const heavyPublicMediaTracingExcludes = [
   "**/public/generated/crystal-packs/full/**",
 ];
 
+// These source/reference trees are useful to local exporters but are not hosted
+// runtime inputs. Excluding them prevents multi-gigabyte local evidence from
+// being traced into serverless functions during a prebuilt monorepo deploy.
+const localCrystalSourceTracingExcludes = ["../../../downloads/**/*"];
+const localDiagnosticsTracingExcludes = ["../../docs/generated/**/*"];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
@@ -51,12 +61,20 @@ const nextConfig: NextConfig = {
   env: {
     MIR2_BUILD_REVISION: buildRevision,
   },
+  outputFileTracingRoot: monorepoRoot,
   outputFileTracingExcludes: {
     "/api/asset-manifest": heavyPublicMediaTracingExcludes,
     "/api/original-ui-meta": heavyPublicMediaTracingExcludes,
-    "/api/scene/crystal": heavyPublicMediaTracingExcludes,
+    "/api/scene/crystal": [
+      ...heavyPublicMediaTracingExcludes,
+      ...localCrystalSourceTracingExcludes,
+    ],
     "/api/qa/map-monster-scenes": heavyPublicMediaTracingExcludes,
-    "/qa/map-monsters": heavyPublicMediaTracingExcludes,
+    "/qa/map-monsters": [
+      ...heavyPublicMediaTracingExcludes,
+      ...localCrystalSourceTracingExcludes,
+    ],
+    "/api/movement-diagnostics": localDiagnosticsTracingExcludes,
   },
   outputFileTracingIncludes: {
     "/api/scene/crystal": [
