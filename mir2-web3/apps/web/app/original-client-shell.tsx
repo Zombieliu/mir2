@@ -22,6 +22,7 @@ import { createAssetResidency } from "../lib/asset-residency";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
 import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
+import { shouldLoadCrystalFullPack } from "../lib/crystal-full-pack-capability";
 import { loadCrystalFullPackIndex } from "../lib/crystal-full-pack-index";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../lib/render-tier";
 import {
@@ -50,6 +51,11 @@ import {
   SelectOverlay,
 } from "./components/original-client-overlays";
 import { GameUiScene, GameUiSceneStoreBound } from "./components/original-client-game-ui-scene";
+import {
+  calculateMir2StagePresentation,
+  calculateMir2TouchControlDeck,
+  calculateMir2TouchControlMetrics,
+} from "./components/original-client-stage-presentation";
 import type {
   BevyEntityRenderState,
   BevyMapRenderState,
@@ -125,6 +131,8 @@ import {
   type SceneChatBubble,
 } from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
+import { OriginalClientGamepadControls } from "./components/original-client-gamepad-controls";
+import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
 import {
   createCrystalAnimationWorldSeed,
   entityAnimationRuntimeFromWindow,
@@ -594,13 +602,13 @@ export function OriginalClientShell({
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
-  const [forceMobileControls, setForceMobileControls] = useState(false);
-  const [touchPrimaryDevice, setTouchPrimaryDevice] = useState(false);
+  const clientProfile = useOriginalClientDeviceProfile();
   const [stagePresentation, setStagePresentation] = useState({
     scale: 1,
     left: 0,
     top: 0,
   });
+  const [touchControlViewportHeight, setTouchControlViewportHeight] = useState(768);
   const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
   const [bevyLocalSelfMotion, setBevyLocalSelfMotion] =
     useState<BevyPresentationEntityMotion | null>(null);
@@ -681,15 +689,28 @@ export function OriginalClientShell({
     renderPlayer: player,
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
   });
-  const stageScaleStyle = useMemo(
-    () =>
-      ({
-        "--mir-stage-scale": stagePresentation.scale,
-        "--mir-stage-left": `${stagePresentation.left}px`,
-        "--mir-stage-top": `${stagePresentation.top}px`,
-      }) as CSSProperties,
-    [stagePresentation],
-  );
+  const stageScaleStyle = useMemo(() => {
+    const touchControlDeck = calculateMir2TouchControlDeck(stagePresentation);
+    const touchControlMetrics = calculateMir2TouchControlMetrics(touchControlViewportHeight);
+    return {
+      "--mir-stage-scale": stagePresentation.scale,
+      "--mir-stage-left": `${stagePresentation.left}px`,
+      "--mir-stage-top": `${stagePresentation.top}px`,
+      "--mir-control-deck-left": `${touchControlDeck.left}px`,
+      "--mir-control-deck-width": `${touchControlDeck.width}px`,
+      "--mir-mobile-action-size": `${touchControlMetrics.actionSize}px`,
+      "--mir-mobile-primary-size": `${touchControlMetrics.primarySize}px`,
+      "--mir-mobile-panel-size": `${touchControlMetrics.panelSize}px`,
+      "--mir-mobile-action-pad-width": `${touchControlMetrics.padWidth}px`,
+      "--mir-mobile-action-column-step": `${touchControlMetrics.columnStep}px`,
+      "--mir-mobile-quick-row-1": `${touchControlMetrics.quickRowTops[0]}px`,
+      "--mir-mobile-quick-row-2": `${touchControlMetrics.quickRowTops[1]}px`,
+      "--mir-mobile-quick-row-3": `${touchControlMetrics.quickRowTops[2]}px`,
+      "--mir-mobile-run-bottom": `${touchControlMetrics.runBottom}px`,
+      "--mir-mobile-side-right": `${touchControlMetrics.sideRight}px`,
+      "--mir-mobile-pick-bottom": `${touchControlMetrics.pickBottom}px`,
+    } as CSSProperties;
+  }, [stagePresentation, touchControlViewportHeight]);
   const sceneAssetReadinessCallbackRef = useRef(onSceneAssetReadinessChange);
   sceneAssetReadinessCallbackRef.current = onSceneAssetReadinessChange;
 
@@ -706,11 +727,77 @@ export function OriginalClientShell({
   const loginTransitionAudioActive = screen === "select" && loginTransitionFrame !== null;
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setForceMobileControls(params.get("mobileControls") === "1" || params.get("mobile") === "1");
-    setTouchPrimaryDevice(window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
     setMotionNow(Date.now());
   }, []);
+
+  useEffect(() => {
+    const renderGameToText = () =>
+      JSON.stringify({
+        coordinateSystem: "tile coordinates; origin top-left; x right; y down",
+        screen,
+        layout: clientProfile.layout,
+        input: clientProfile.input,
+        sceneInteractionReady,
+        player: player
+          ? {
+              objectId: player.objectId,
+              x: player.x,
+              y: player.y,
+              direction: player.direction ?? null,
+              hp: player.hp ?? null,
+              maxHp: player.maxHp ?? null,
+            }
+          : null,
+        selectedEntity: selectedEntity
+          ? {
+              objectId: selectedEntity.objectId,
+              kind: selectedEntity.kind,
+              name: selectedEntity.name,
+              x: selectedEntity.x,
+              y: selectedEntity.y,
+              dead: Boolean(selectedEntity.dead),
+            }
+          : null,
+        visibleEntities: sourceViewportEntities.slice(0, 32).map((entity) => ({
+          objectId: entity.objectId,
+          kind: entity.kind,
+          name: entity.name,
+          x: entity.x,
+          y: entity.y,
+          dead: Boolean(entity.dead),
+        })),
+        groundDrops: world.groundDrops.slice(0, 16).map((drop) => ({
+          objectId: drop.objectId,
+          name: drop.name,
+          x: drop.x,
+          y: drop.y,
+        })),
+        panels: {
+          inventory: showInventory,
+          character: showCharacter,
+        },
+      });
+    const gameWindow = window as typeof window & {
+      render_game_to_text?: () => string;
+    };
+    gameWindow.render_game_to_text = renderGameToText;
+    return () => {
+      if (gameWindow.render_game_to_text === renderGameToText) {
+        delete gameWindow.render_game_to_text;
+      }
+    };
+  }, [
+    clientProfile.input,
+    clientProfile.layout,
+    player,
+    sceneInteractionReady,
+    screen,
+    selectedEntity,
+    showCharacter,
+    showInventory,
+    sourceViewportEntities,
+    world.groundDrops,
+  ]);
 
   // Announce that #mir2-web3-canvas is mounted so the Bevy runtime can boot against it.
   // This shell is lazily mounted (dynamic, ssr:false); the runtime attaches to this canvas
@@ -1082,25 +1169,15 @@ export function OriginalClientShell({
       const viewport = window.visualViewport;
       const cssWidth = Math.max(1, viewport?.width ?? window.innerWidth);
       const cssHeight = Math.max(1, viewport?.height ?? window.innerHeight);
-      const deviceScale = Math.max(0.25, window.devicePixelRatio || 1);
-      const deviceWidth = Math.max(1, Math.floor(cssWidth * deviceScale));
-      const deviceHeight = Math.max(1, Math.floor(cssHeight * deviceScale));
-      // Keep the transformed 4:3 stage on whole device pixels. Rounding the
-      // CSS scale itself (the old toFixed(4) path) produced fractional bounds,
-      // so the compositor resampled the complete pixel-art canvas on every move.
-      const nativeDeviceWidth = Math.floor(1024 * deviceScale);
-      const fittedDeviceWidth = Math.min(
-        nativeDeviceWidth,
-        deviceWidth,
-        Math.floor((deviceHeight * 4) / 3),
-      );
-      const displayDeviceWidth = Math.max(4, Math.floor(fittedDeviceWidth / 4) * 4);
-      const displayDeviceHeight = (displayDeviceWidth * 3) / 4;
-      const next = {
-        scale: displayDeviceWidth / deviceScale / 1024,
-        left: Math.round((deviceWidth - displayDeviceWidth) / 2) / deviceScale,
-        top: Math.round((deviceHeight - displayDeviceHeight) / 2) / deviceScale,
-      };
+      setTouchControlViewportHeight((current) => (current === cssHeight ? current : cssHeight));
+      const next = calculateMir2StagePresentation({
+        cssWidth,
+        cssHeight,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        layout: clientProfile.layout,
+        input: clientProfile.input,
+        screen,
+      });
       setStagePresentation((current) =>
         current.scale === next.scale && current.left === next.left && current.top === next.top
           ? current
@@ -1116,7 +1193,7 @@ export function OriginalClientShell({
       window.removeEventListener("resize", updateStageScale);
       window.visualViewport?.removeEventListener("resize", updateStageScale);
     };
-  }, []);
+  }, [clientProfile.input, clientProfile.layout, screen]);
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
@@ -1616,7 +1693,7 @@ export function OriginalClientShell({
   const selectedTargetReadoutLabel = selectedEntity
     ? selectedTargetActionLabel(t, selectedEntity, targetDistance)
     : null;
-  const domEntityFallbackRequested = shouldUseDomEntityFallback(forceMobileControls || touchPrimaryDevice);
+  const domEntityFallbackRequested = shouldUseDomEntityFallback(clientProfile.layout === "touch");
   // Phase 3b (renderer consolidation), default ON. On the webgl2 backend the Bevy
   // canvas stays VISIBLE and transparent (the wasm build is transparent for both
   // backends) and draws entities itself; the DOM WebGl2EntityAtlasLayer
@@ -2962,7 +3039,13 @@ export function OriginalClientShell({
   );
 
   return (
-    <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
+    <main
+      className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
+      data-layout-profile={clientProfile.layout}
+      data-input-profile={clientProfile.input}
+      data-client-screen={screen}
+      style={stageScaleStyle}
+    >
       <section className="mir-stage">
         <div
           ref={stageFrameRef}
@@ -3152,6 +3235,7 @@ export function OriginalClientShell({
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
+                  defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
                   onSendChat,
                   onRequestTrade,
@@ -3220,13 +3304,35 @@ export function OriginalClientShell({
           ) : null}
         </div>
       </section>
+      {clientProfile.layout === "tv" && clientProfile.input === "gamepad" && screen !== "game" ? (
+        <div className="mir-gamepad-hint" role="status">
+          {t("ui.gamepadNavigationHint", [], "D-pad: Navigate · A: Select · B: Back")}
+        </div>
+      ) : null}
       <OriginalClientMobileControls
         enabled={screen === "game" && sceneInteractionReady}
-        forceVisible={forceMobileControls}
+        forceVisible={clientProfile.layout === "touch" && clientProfile.input === "touch"}
         t={t}
         world={world}
         player={player}
         selectedEntity={selectedEntity}
+        onDirectionIntent={onViewportDirectionIntent}
+        onDirectionStop={onViewportDirectionStop}
+        onPrimaryTargetAction={onPrimaryTargetAction}
+        onApproachTarget={onApproachTarget}
+        onPickGroundDrop={onPickGroundDrop}
+        onToggleInventory={onToggleInventory}
+        onToggleCharacter={onToggleCharacter}
+        onCastSkill={onCastSkill}
+        onUseItem={onUseItem}
+      />
+      <OriginalClientGamepadControls
+        enabled={clientProfile.input === "gamepad"}
+        screen={screen}
+        gameplayReady={screen === "game" && sceneInteractionReady}
+        stageRootRef={stageFrameRef}
+        world={world}
+        player={player}
         onDirectionIntent={onViewportDirectionIntent}
         onDirectionStop={onViewportDirectionStop}
         onPrimaryTargetAction={onPrimaryTargetAction}
@@ -4133,7 +4239,15 @@ async function loadCrystalFullPackBevyEntityAtlasSnapshot(
   key: string,
 ): Promise<BevyEntityAtlasSnapshot | null> {
   if (typeof window === "undefined") return null;
-  if (new URLSearchParams(window.location.search).get("crystalFullPack") === "0") return null;
+  if (
+    !shouldLoadCrystalFullPack({
+      queryValue: new URLSearchParams(window.location.search).get("crystalFullPack"),
+      configuredValue: process.env.NEXT_PUBLIC_MIR2_CRYSTAL_FULL_PACK_ENABLED,
+      remoteAssetBaseUrl: process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL,
+    })
+  ) {
+    return null;
+  }
   try {
     const runtime = await loadCrystalFullPackIndex();
     return await buildCrystalFullPackAtlasSnapshot(runtime, sources, key);

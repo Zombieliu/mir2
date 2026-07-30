@@ -231,6 +231,7 @@ export function LoginOverlay({
         <img className="login-label password" src={ORIGINAL_UI.login.passwordLabel} alt="" draggable={false} />
         <input
           className="login-input account"
+          data-gamepad-initial="true"
           value={accountId}
           onChange={(event) => onAccountIdChange(event.target.value)}
           onKeyDown={(event) => {
@@ -489,6 +490,7 @@ export function SelectOverlay({
               type="button"
               className={`select-character-slot-card row-${slotIndex + 1} ${character ? "" : "empty"} ${character && slotIndex === selectedCharacterIndex ? "selected" : ""}`}
               disabled={!character}
+              data-gamepad-initial={character && slotIndex === selectedCharacterIndex ? "true" : undefined}
               onClick={() => {
                 if (character) {
                   onSelectCharacter(slotIndex);

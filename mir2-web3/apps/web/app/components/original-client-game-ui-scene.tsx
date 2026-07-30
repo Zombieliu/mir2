@@ -53,6 +53,7 @@ type GameUiSceneProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  defaultChatExpanded?: boolean;
   onChatMessageChange: (value: string) => void;
   onSendChat: (message: string) => void;
   onRequestTrade: () => void;
@@ -105,6 +106,7 @@ function GameUiSceneInner({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  defaultChatExpanded = true,
   onChatMessageChange,
   onSendChat,
   onRequestTrade,
@@ -149,7 +151,7 @@ function GameUiSceneInner({
   const [activeChatFilter, setActiveChatFilter] = useState<ChatFilterKey>("all");
   const [hiddenChatFilters, setHiddenChatFilters] = useState<ChatOptionFilterKey[]>([]);
   const [transparentChat, setTransparentChat] = useState(false);
-  const [chatExpanded, setChatExpanded] = useState(true);
+  const [chatExpanded, setChatExpanded] = useState(defaultChatExpanded);
   const [showChatSettings, setShowChatSettings] = useState(false);
   const [showMailPanel, setShowMailPanel] = useState(false);
   const [showBigMap, setShowBigMap] = useState(false);
@@ -164,6 +166,17 @@ function GameUiSceneInner({
     : null;
   const visibleDialog =
     world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
+  const gamepadUiOpen = Boolean(
+    showMailPanel ||
+      showBigMap ||
+      showReportPanel ||
+      showSystemMenu ||
+      showSystemMenuFeaturePanel ||
+      showGameShop ||
+      visibleDialog ||
+      showInventory ||
+      showCharacter,
+  );
 
   function selectChatFilter(filter: ChatFilterKey) {
     const previousPrefix = chatPrefixForFilter(activeChatFilter);
@@ -212,7 +225,11 @@ function GameUiSceneInner({
   }, [dialogKey, dismissedDialogKey]);
 
   return (
-    <div className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}>
+    <div
+      className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}
+      data-gamepad-ui-open={gamepadUiOpen ? "true" : "false"}
+      data-chat-expanded={chatExpanded ? "true" : "false"}
+    >
       <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />
       <MiniMapPanel
         t={t}

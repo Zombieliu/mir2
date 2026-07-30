@@ -4535,7 +4535,10 @@ button.character-spell-value:hover {
 
 .mir-mobile-controls {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: var(--mir-control-deck-left, 0px);
+  width: var(--mir-control-deck-width, 100vw);
   z-index: 80;
   pointer-events: none;
   touch-action: none;
@@ -4545,10 +4548,10 @@ button.character-spell-value:hover {
 
 .mir-mobile-stick-shell {
   position: absolute;
-  left: max(16px, env(safe-area-inset-left));
-  bottom: max(18px, env(safe-area-inset-bottom));
-  width: 152px;
-  height: 152px;
+  left: max(8px, calc(env(safe-area-inset-left) - var(--mir-control-deck-left, 0px)));
+  bottom: max(8px, env(safe-area-inset-bottom));
+  width: 112px;
+  height: 112px;
   pointer-events: auto;
 }
 
@@ -4565,8 +4568,8 @@ button.character-spell-value:hover {
 .mir-mobile-stick-state {
   position: absolute;
   left: 50%;
-  bottom: -7px;
-  min-width: 72px;
+  bottom: 2px;
+  min-width: 58px;
   height: 18px;
   transform: translateX(-50%);
   border: 1px solid rgba(226, 195, 112, 0.48);
@@ -4585,10 +4588,10 @@ button.character-spell-value:hover {
 
 .mir-mobile-action-pad {
   position: absolute;
-  right: max(14px, env(safe-area-inset-right));
-  bottom: max(15px, env(safe-area-inset-bottom));
-  width: 318px;
-  height: 238px;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, calc(env(safe-area-inset-right) - var(--mir-control-deck-left, 0px)));
+  bottom: max(8px, env(safe-area-inset-bottom));
+  width: var(--mir-mobile-action-pad-width, 114px);
   pointer-events: none;
 }
 
@@ -4597,13 +4600,14 @@ button.character-spell-value:hover {
   top: 0;
   right: 0;
   display: flex;
-  gap: 8px;
+  gap: 4px;
   pointer-events: auto;
 }
 
 .mir-mobile-panel-button {
-  width: 58px;
-  height: 58px;
+  width: var(--mir-mobile-panel-size, 44px);
+  height: var(--mir-mobile-panel-size, 44px);
+  padding: 2px;
   border: 1px solid rgba(224, 196, 128, 0.5);
   border-radius: 999px;
   background:
@@ -4614,8 +4618,8 @@ button.character-spell-value:hover {
     inset 0 -8px 16px rgba(0, 0, 0, 0.5),
     0 4px 12px rgba(0, 0, 0, 0.55);
   color: #f7dfb2;
-  font-size: 11px;
-  line-height: 1;
+  font-size: 9px;
+  line-height: 1.05;
   text-align: center;
   text-shadow: 1px 1px #000;
   touch-action: manipulation;
@@ -4623,8 +4627,9 @@ button.character-spell-value:hover {
 
 .mir-mobile-action {
   position: absolute;
-  width: 62px;
-  height: 62px;
+  width: var(--mir-mobile-action-size, 44px);
+  height: var(--mir-mobile-action-size, 44px);
+  padding: 2px;
   pointer-events: auto;
   border: 1px solid rgba(230, 207, 142, 0.48);
   border-radius: 999px;
@@ -4637,8 +4642,8 @@ button.character-spell-value:hover {
     inset 0 -10px 18px rgba(0, 0, 0, 0.58),
     0 5px 14px rgba(0, 0, 0, 0.62);
   color: #f3ddb0;
-  font-size: 12px;
-  line-height: 1;
+  font-size: 9px;
+  line-height: 1.05;
   text-align: center;
   text-shadow: 1px 1px #000;
   touch-action: manipulation;
@@ -4666,11 +4671,11 @@ button.character-spell-value:hover {
 .mir-mobile-action.primary {
   right: 0;
   bottom: 0;
-  width: 88px;
-  height: 88px;
+  width: var(--mir-mobile-primary-size, 64px);
+  height: var(--mir-mobile-primary-size, 64px);
   border-width: 2px;
   border-color: rgba(238, 220, 168, 0.68);
-  font-size: 15px;
+  font-size: 10px;
   background:
     radial-gradient(circle at 36% 26%, rgba(255, 255, 255, 0.32), transparent 29%),
     radial-gradient(circle at 50% 58%, rgba(111, 108, 101, 0.7), rgba(21, 20, 18, 0.92) 58%, rgba(0, 0, 0, 0.95)),
@@ -4678,43 +4683,43 @@ button.character-spell-value:hover {
 }
 
 .mir-mobile-action.run {
-  right: 98px;
-  bottom: 90px;
+  right: 0;
+  bottom: var(--mir-mobile-run-bottom, 68px);
 }
 
 .mir-mobile-action.approach {
-  right: 98px;
-  bottom: 12px;
+  right: var(--mir-mobile-side-right, 70px);
+  bottom: 0;
 }
 
 .mir-mobile-action.pick {
-  right: 178px;
-  bottom: 18px;
+  right: var(--mir-mobile-side-right, 70px);
+  bottom: var(--mir-mobile-pick-bottom, 48px);
 }
 
 .mir-mobile-action.quick-0 {
-  right: 178px;
-  bottom: 92px;
+  top: var(--mir-mobile-quick-row-1, 52px);
+  right: 0;
 }
 
 .mir-mobile-action.quick-1 {
-  right: 250px;
-  bottom: 46px;
+  top: var(--mir-mobile-quick-row-1, 52px);
+  right: var(--mir-mobile-action-column-step, 48px);
 }
 
 .mir-mobile-action.quick-2 {
-  right: 244px;
-  bottom: 124px;
+  top: var(--mir-mobile-quick-row-2, 100px);
+  right: 0;
 }
 
 .mir-mobile-action.quick-3 {
-  right: 168px;
-  bottom: 160px;
+  top: var(--mir-mobile-quick-row-2, 100px);
+  right: var(--mir-mobile-action-column-step, 48px);
 }
 
 .mir-mobile-action.quick-4 {
-  right: 84px;
-  bottom: 166px;
+  top: var(--mir-mobile-quick-row-3, 148px);
+  right: 0;
 }
 
 .mir-mobile-rotate-overlay {
@@ -4817,76 +4822,6 @@ button.character-spell-value:hover {
   .client-stage-frame {
     transform: scale(var(--mir-stage-scale, 0.49));
   }
-
-  .mir-mobile-stick-shell {
-    width: 132px;
-    height: 132px;
-  }
-
-  .mir-mobile-action-pad {
-    right: max(10px, env(safe-area-inset-right));
-    bottom: max(10px, env(safe-area-inset-bottom));
-    width: 282px;
-    height: 210px;
-  }
-
-  .mir-mobile-panel-button {
-    width: 50px;
-    height: 50px;
-    font-size: 10px;
-  }
-
-  .mir-mobile-action {
-    width: 54px;
-    height: 54px;
-    font-size: 11px;
-  }
-
-  .mir-mobile-action.primary {
-    width: 76px;
-    height: 76px;
-    font-size: 13px;
-  }
-
-  .mir-mobile-action.run {
-    right: 84px;
-    bottom: 78px;
-  }
-
-  .mir-mobile-action.approach {
-    right: 84px;
-    bottom: 10px;
-  }
-
-  .mir-mobile-action.pick {
-    right: 150px;
-    bottom: 14px;
-  }
-
-  .mir-mobile-action.quick-0 {
-    right: 150px;
-    bottom: 80px;
-  }
-
-  .mir-mobile-action.quick-1 {
-    right: 214px;
-    bottom: 40px;
-  }
-
-  .mir-mobile-action.quick-2 {
-    right: 210px;
-    bottom: 108px;
-  }
-
-  .mir-mobile-action.quick-3 {
-    right: 145px;
-    bottom: 138px;
-  }
-
-  .mir-mobile-action.quick-4 {
-    right: 72px;
-    bottom: 144px;
-  }
 }
 
 @media (pointer: coarse) and (orientation: portrait) and (max-width: 900px) {
@@ -4910,6 +4845,114 @@ button.character-spell-value:hover {
 
 .mir-client-page.force-mobile-controls .client-stage-frame {
   transform: scale(var(--mir-stage-scale, 0.54));
+}
+
+/* Runtime layout/input profiles are intentionally independent. A touch device
+   using a Bluetooth controller keeps the touch layout but hides touch controls. */
+@media (orientation: landscape) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-controls {
+    display: block;
+  }
+}
+
+@media (orientation: portrait) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-rotate-overlay {
+    display: flex;
+  }
+}
+
+.mir-client-page[data-input-profile="gamepad"] .mir-mobile-controls,
+.mir-client-page[data-input-profile="gamepad"] .mir-mobile-rotate-overlay {
+  display: none;
+}
+
+.mir-client-page[data-layout-profile="touch"] {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+/* Keep the original window content and sprites, but present the high-value
+   panels as centered, enlarged surfaces on a physically small touch screen. */
+.mir-client-page[data-layout-profile="touch"] .inventory-window:not(.with-storage) {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.45);
+  transform-origin: center;
+  z-index: 60;
+}
+
+.mir-client-page[data-layout-profile="touch"] .inventory-window.with-storage {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.05);
+  transform-origin: center;
+  z-index: 60;
+}
+
+.mir-client-page[data-layout-profile="touch"] .character-window {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.25);
+  transform-origin: center;
+  z-index: 60;
+}
+
+.mir-client-page[data-layout-profile="touch"] .npc-dialog-panel {
+  left: 50%;
+  top: auto;
+  bottom: 178px;
+  transform: translateX(-50%) scale(1.15);
+  transform-origin: bottom center;
+  z-index: 58;
+}
+
+/* TV layout uses an inset UI plane over the full-resolution game scene. This
+   gives controller focus and edge HUD elements a conservative overscan margin. */
+.mir-client-page[data-layout-profile="tv"] .game-ui-scene,
+.mir-client-page[data-layout-profile="tv"] .login-overlay,
+.mir-client-page[data-layout-profile="tv"] .select-overlay {
+  left: 26px;
+  top: 19px;
+  transform: scale(0.95);
+  transform-origin: top left;
+}
+
+.mir-client-page[data-input-profile="gamepad"] :is(
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [tabindex]
+):focus {
+  outline: 3px solid #ffe18a;
+  outline-offset: 3px;
+  filter: drop-shadow(0 0 5px rgba(255, 210, 90, 0.95));
+}
+
+.mir-client-page[data-layout-profile="tv"] :is(button, input, select, textarea) {
+  scroll-margin: 64px;
+}
+
+.mir-gamepad-hint {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 95;
+  transform: translateX(-50%);
+  border: 1px solid rgba(238, 209, 118, 0.66);
+  border-radius: 999px;
+  background: rgba(8, 6, 4, 0.88);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48);
+  color: #f4dfae;
+  padding: 8px 16px;
+  font: 600 14px/1.2 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.01em;
+  text-shadow: 1px 1px #000;
+  pointer-events: none;
 }
 
 .debug-snapshot-toast {

@@ -134,12 +134,10 @@ export function loadOriginalSceneSpriteLibrary(
   return pending;
 }
 
-async function fetchOriginalSceneSpriteMeta(normalizedKey: string) {
-  if (availableSceneSpriteLibraries.has(normalizedKey)) {
-    const staticResponse = await fetch(`/original-ui/${normalizedKey}/meta.json`);
-    if (staticResponse.ok || !sourceSceneSpriteLibraries.has(normalizedKey)) {
-      return staticResponse;
-    }
+export async function fetchOriginalSceneSpriteMeta(normalizedKey: string) {
+  const staticResponse = await fetch(`/original-ui/${normalizedKey}/meta.json`);
+  if (staticResponse.ok || !sourceSceneSpriteLibraries.has(normalizedKey)) {
+    return staticResponse;
   }
 
   return fetch(`/api/original-ui-meta?library=${encodeURIComponent(normalizedKey)}`);
