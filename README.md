@@ -40,6 +40,14 @@ macOS:   ./scripts/accept-clean-room.sh
 
 Crystal 原生 `Client.exe` 只能在 Windows 运行；Mac 开发者使用相同 Web/Gateway 代码与素材，并通过共享 Windows 验收机、截图/录像/trace 做原生对照。
 
+## 统一浏览器操作
+
+Player Web 使用同一个链接自动适配桌面、手机横屏和支持 Web Gamepad API 的
+主机浏览器，不需要维护单独的移动版地址。客户端会根据最近使用的输入方式显示
+键鼠、触控或手柄教程；触控模式提供摇杆、Walk/Run、Attack、Approach、Pick、
+技能/物品快捷键及 Char/Bag 入口说明，手柄模式会按 Xbox、PlayStation 或
+通用手柄显示对应按键标签。教程完成后仍可从游戏菜单的 `Help` 重新播放。
+
 ## 素材模式
 
 启动前先明确本次使用哪一种素材模式：

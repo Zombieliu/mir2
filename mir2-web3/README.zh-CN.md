@@ -112,6 +112,14 @@ sequenceDiagram
 
 Commonware 管的是“权力”，Dubhe Node 管的是“游戏”。
 
+## 玩家端怎样操作
+
+Player Web 使用同一个链接自动适配桌面键鼠、手机横屏触控和支持 Web Gamepad
+API 的主机浏览器。客户端会根据最近使用的输入方式切换教程：手机说明摇杆、
+Walk/Run、Attack、Approach、Pick、技能/物品快捷键和 Char/Bag；手柄按浏览器
+识别结果显示 Xbox、PlayStation 或通用按键名称。教程关闭或完成后，可从游戏
+菜单的 `Help` 再次播放。
+
 ## 主节点故障时发生什么
 
 正常状态下，Commonware 最终状态可能是：
