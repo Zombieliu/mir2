@@ -1680,6 +1680,12 @@ pub(super) fn handle_monster_defeat(
         .map(|monster| monster.experience)
         .filter(|experience| *experience > 0)
     {
+        let player_level = super::leveling::player_current_level(world);
+        let experience_multiplier = world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .monster_experience_multiplier(player_level);
+        let experience = experience.saturating_mul(experience_multiplier);
         let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
         packets.extend(super::leveling::apply_experience_gain(
             world,
@@ -2614,6 +2620,12 @@ impl SimulationSession {
         if !is_in_world(world) || experience == 0 {
             return 0;
         }
+        let player_level = super::leveling::player_current_level(world);
+        let experience_multiplier = world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .monster_experience_multiplier(player_level);
+        let experience = experience.saturating_mul(experience_multiplier);
         let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
         super::leveling::experience_balance_delta_for_gain(world, i64::from(experience))
     }
@@ -2691,6 +2703,12 @@ impl SimulationSession {
             );
         }
         if experience > 0 {
+            let player_level = super::leveling::player_current_level(world);
+            let experience_multiplier = world
+                .resource::<RuntimeConfigResource>()
+                .config
+                .monster_experience_multiplier(player_level);
+            let experience = experience.saturating_mul(experience_multiplier);
             // Marriage / mentorship / guild membership grant a Crystal-style
             // experience-rate bonus (no-op for an unattached player).
             let experience = super::stats::crystal_apply_social_exp_rate(world, experience);

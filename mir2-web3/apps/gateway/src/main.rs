@@ -29,8 +29,23 @@ async fn async_main() -> std::io::Result<()> {
         env::var("MIR2_GATEWAY_WEB_ADDR").unwrap_or_else(|_| DEFAULT_WEB_ADDR.to_string());
     let account_store_path =
         env::var("MIR2_ACCOUNT_STORE_PATH").unwrap_or_else(|_| DEFAULT_ACCOUNT_STORE_PATH.into());
-    let config = GatewayConfig::default()
-        .with_crystal_world_runtime()
+    let config = GatewayConfig::default().with_crystal_world_runtime();
+    let config = match env::var("MIR2_CONTENT_PROFILE")
+        .unwrap_or_else(|_| "platinum_176".to_string())
+        .as_str()
+    {
+        "platinum_176" => config.with_platinum_176_profile(),
+        "crystal_full" => config,
+        profile => {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!(
+                    "unsupported MIR2_CONTENT_PROFILE {profile}; expected platinum_176 or crystal_full"
+                ),
+            ));
+        }
+    };
+    let config = config
         .with_account_store_environment(PathBuf::from(account_store_path))
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let chat_hub = ChatBroadcastHub::from_env()?;
