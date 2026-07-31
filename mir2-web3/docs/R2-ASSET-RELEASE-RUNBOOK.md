@@ -100,11 +100,14 @@ npm run release:doctor -- `
   --checkWorker false `
   --checkBevyRuntime false `
   --requireFullCrystalPack true `
+  --probeTimeoutMs 15000 `
   --assetBaseUrl $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL
 ```
 
 This checks the required UI/map/entity assets, all 5,887 full-pack objects,
-all map-atlas pages, and the gzip response headers.
+all map-atlas pages, and the gzip response headers. Each probe is bounded by
+`probeTimeoutMs` so a stalled TLS request is retried instead of hanging the
+release indefinitely.
 
 ## 4. Switch Worker And Vercel
 
@@ -144,6 +147,7 @@ npm --prefix E:\mir2\mir2-web3\apps\web run release:doctor -- `
   --checkWorker true `
   --checkBevyRuntime true `
   --requireFullCrystalPack true `
+  --probeTimeoutMs 15000 `
   --webBaseUrl "https://mir2.obelisk.build"
 ```
 

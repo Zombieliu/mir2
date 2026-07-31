@@ -72,6 +72,10 @@ const probeRetryBaseMs = positiveIntegerArg(
   args.probeRetryBaseMs ?? process.env.RELEASE_DOCTOR_PROBE_RETRY_BASE_MS,
   250,
 );
+const probeTimeoutMs = positiveIntegerArg(
+  args.probeTimeoutMs ?? process.env.RELEASE_DOCTOR_PROBE_TIMEOUT_MS,
+  15_000,
+);
 const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
 const assetBaseUrlInput = normalizeOptionalUrl(
   args.assetBaseUrl ??
@@ -372,9 +376,9 @@ async function probe(url) {
 
   for (let attempt = 1; attempt <= probeAttempts; attempt += 1) {
     try {
-      let response = await fetch(url, { method: "HEAD", cache: "no-store" });
+      let response = await fetchWithTimeout(url, { method: "HEAD", cache: "no-store" });
       if (response.status === 405 || response.status === 501) {
-        response = await fetch(url, { method: "GET", cache: "no-store" });
+        response = await fetchWithTimeout(url, { method: "GET", cache: "no-store" });
       }
       lastResponse = response;
       lastError = null;
@@ -399,6 +403,13 @@ async function probe(url) {
     attempts: probeAttempts,
     error: lastError instanceof Error ? lastError.message : String(lastError ?? "fetch failed"),
   };
+}
+
+function fetchWithTimeout(url, options) {
+  return fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(probeTimeoutMs),
+  });
 }
 
 function probeResponseResult(response, startedAt, attempts) {
