@@ -124,7 +124,11 @@ export async function GET() {
     schemaVersion: 1,
     version,
     cacheNamespace,
-    versionSource: process.env.MIR2_ASSET_VERSION ? "env:MIR2_ASSET_VERSION" : "stable-input-digest",
+    versionSource: process.env.MIR2_PINNED_ASSET_VERSION
+      ? "build:MIR2_PINNED_ASSET_VERSION"
+      : process.env.MIR2_ASSET_VERSION
+        ? "env:MIR2_ASSET_VERSION"
+        : "stable-input-digest",
     generatedAt: new Date().toISOString(),
     staticPrefixes: [
       "/original-ui/",
@@ -221,7 +225,11 @@ function createResourcePacksInputState(): ManifestInputState {
 }
 
 function createAssetVersion(inputs: ManifestInputState[]) {
-  const configuredVersion = normalizeAssetVersion(process.env.MIR2_ASSET_VERSION ?? "");
+  const configuredVersion = normalizeAssetVersion(
+    process.env.MIR2_PINNED_ASSET_VERSION ??
+      process.env.MIR2_ASSET_VERSION ??
+      "",
+  );
   if (configuredVersion) {
     return configuredVersion;
   }
@@ -314,8 +322,14 @@ function normalizeAssetVersion(value: string) {
 
 function createRemoteAssetConfig(version: string) {
   const configuredBaseUrl =
-    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? process.env.MIR2_ASSET_BASE_URL ?? "";
-  const objectPrefixTemplate = process.env.MIR2_ASSET_OBJECT_PREFIX ?? "mir2/v/{version}";
+    process.env.MIR2_PINNED_ASSET_BASE_URL ??
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ??
+    process.env.MIR2_ASSET_BASE_URL ??
+    "";
+  const objectPrefixTemplate =
+    process.env.MIR2_PINNED_ASSET_OBJECT_PREFIX ??
+    process.env.MIR2_ASSET_OBJECT_PREFIX ??
+    "mir2/v/{version}";
   const objectPrefix = normalizeObjectPrefix(resolveTemplate(objectPrefixTemplate, version));
   const assetBaseUrl = normalizeAssetBaseUrl(resolveTemplate(configuredBaseUrl, version));
 

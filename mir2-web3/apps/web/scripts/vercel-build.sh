@@ -37,6 +37,7 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
   export MIR2_ORIGINAL_ASSET_REMOTE_RELEASE="$(
     node -p "require(process.argv[1]).remoteReleaseUrl" "$PRODUCTION_ASSET_CONFIG"
   )"
+  export MIR2_USE_PREBUILT_BEVY_RUNTIME="${MIR2_USE_PREBUILT_BEVY_RUNTIME:-1}"
 
   npm run generate:original-asset-manifest
   echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."
