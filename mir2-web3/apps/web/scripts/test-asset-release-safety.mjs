@@ -410,7 +410,149 @@ await test("r2-s3 uploads deterministic gzip bytes with matching metadata", asyn
   });
 });
 
-console.log("asset release safety tests passed (4/4)");
+await test("Cloudflare OAuth API streams deterministic gzip bytes with HTTP metadata", async () => {
+  await withTempDir(async (root) => {
+    const requests = [];
+    const server = await listen((request, response) => {
+      const chunks = [];
+      request.on("data", (chunk) => chunks.push(chunk));
+      request.on("end", () => {
+        requests.push({
+          method: request.method,
+          url: request.url,
+          headers: request.headers,
+          body: Buffer.concat(chunks),
+        });
+        response.statusCode = 200;
+        response.end();
+      });
+    });
+
+    try {
+      const stagePath = path.join(root, "index.json");
+      const manifestPath = path.join(root, "release.json");
+      const raw = Buffer.from(JSON.stringify({
+        kind: "mir2-crystal-full-pack-index",
+        libraries: Array.from({ length: 100 }, (_, index) => ({ key: `Library/${index}` })),
+      }));
+      const encoded = gzipSync(raw, {
+        level: zlibConstants.Z_BEST_COMPRESSION,
+        mtime: 0,
+      });
+      await fs.writeFile(stagePath, raw);
+      await fs.writeFile(manifestPath, JSON.stringify({
+        objectPrefix: "mir2/v/oauth-api-fixture",
+        fullCrystalPack: { enabled: true },
+        files: [{
+          relativePath: "generated/crystal-packs/full/index.json",
+          stagePath,
+          size: raw.byteLength,
+          sha256: createHash("sha256").update(raw).digest("hex"),
+          contentType: "application/json; charset=utf-8",
+          contentEncoding: "gzip",
+          encodedSize: encoded.byteLength,
+          encodedSha256: createHash("sha256").update(encoded).digest("hex"),
+        }],
+      }));
+
+      await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "api",
+        "--accountId", "fixture-account",
+        "--apiBaseUrl", server.url,
+        "--includeReleaseManifest", "false",
+        "--maxAttempts", "1",
+      ], { CLOUDFLARE_API_TOKEN: "fixture-oauth-token" });
+
+      assert.equal(requests.length, 1);
+      assert.equal(requests[0].method, "PUT");
+      assert.match(
+        requests[0].url,
+        /^\/accounts\/fixture-account\/r2\/buckets\/fixture\/objects\/mir2\/v\/oauth-api-fixture\//,
+      );
+      assert.equal(requests[0].headers.authorization, "Bearer fixture-oauth-token");
+      assert.equal(requests[0].headers["content-encoding"], "gzip");
+      assert.equal(Number(requests[0].headers["content-length"]), encoded.byteLength);
+      assert.deepEqual(requests[0].body, encoded);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+await test("upload Worker streams deterministic gzip bytes with integrity headers", async () => {
+  await withTempDir(async (root) => {
+    const requests = [];
+    const server = await listen((request, response) => {
+      const chunks = [];
+      request.on("data", (chunk) => chunks.push(chunk));
+      request.on("end", () => {
+        requests.push({
+          method: request.method,
+          url: request.url,
+          headers: request.headers,
+          body: Buffer.concat(chunks),
+        });
+        response.statusCode = 200;
+        response.end(JSON.stringify({ ok: true }));
+      });
+    });
+
+    try {
+      const stagePath = path.join(root, "index.json");
+      const manifestPath = path.join(root, "release.json");
+      const raw = Buffer.from(JSON.stringify({
+        kind: "mir2-crystal-full-pack-index",
+        libraries: Array.from({ length: 100 }, (_, index) => ({ key: `Library/${index}` })),
+      }));
+      const encoded = gzipSync(raw, {
+        level: zlibConstants.Z_BEST_COMPRESSION,
+        mtime: 0,
+      });
+      const rawSha256 = createHash("sha256").update(raw).digest("hex");
+      const encodedSha256 = createHash("sha256").update(encoded).digest("hex");
+      await fs.writeFile(stagePath, raw);
+      await fs.writeFile(manifestPath, JSON.stringify({
+        objectPrefix: "mir2/v/worker-fixture",
+        fullCrystalPack: { enabled: true },
+        files: [{
+          relativePath: "generated/crystal-packs/full/index.json",
+          stagePath,
+          size: raw.byteLength,
+          sha256: rawSha256,
+          contentType: "application/json; charset=utf-8",
+          contentEncoding: "gzip",
+          encodedSize: encoded.byteLength,
+          encodedSha256,
+        }],
+      }));
+
+      await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "worker",
+        "--workerUrl", server.url,
+        "--includeReleaseManifest", "false",
+        "--maxAttempts", "1",
+      ], { MIR2_R2_UPLOAD_SECRET: "fixture-worker-token" });
+
+      assert.equal(requests.length, 1);
+      assert.equal(requests[0].method, "PUT");
+      assert.match(requests[0].url, /^\/upload\?key=mir2%2Fv%2Fworker-fixture%2F/);
+      assert.equal(requests[0].headers.authorization, "Bearer fixture-worker-token");
+      assert.equal(requests[0].headers["content-encoding"], "gzip");
+      assert.equal(requests[0].headers["x-mir2-sha256"], rawSha256);
+      assert.equal(requests[0].headers["x-mir2-encoded-sha256"], encodedSha256);
+      assert.equal(Number(requests[0].headers["content-length"]), encoded.byteLength);
+      assert.deepEqual(requests[0].body, encoded);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+console.log("asset release safety tests passed (6/6)");
 
 async function test(name, fn) {
   try {

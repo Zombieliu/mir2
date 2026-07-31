@@ -7,7 +7,9 @@ export interface Env {
 const DEFAULT_ALLOWED_PREFIX = "mir2/";
 const DEFAULT_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const RELEASE_MANIFEST_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
-const CORS_EXPOSE_HEADERS = "accept-ranges, content-length, content-range, etag, x-mir2-edge-cache";
+const CORS_EXPOSE_HEADERS =
+  "accept-ranges, content-encoding, content-length, content-range, etag, " +
+  "x-mir2-edge-cache, x-mir2-storage-content-encoding";
 
 const CONTENT_TYPES: Record<string, string> = {
   ".bmp": "image/bmp",
@@ -32,6 +34,9 @@ export default {
     }
 
     const rangeHeader = request.headers.get("range");
+    if (isStoredGzipPath(key)) {
+      return serveFromR2(request, env, key, "BYPASS", rangeHeader ? parseRange(rangeHeader) : undefined);
+    }
     if (rangeHeader) {
       return serveFromR2(request, env, key, "BYPASS", parseRange(rangeHeader));
     }
@@ -56,15 +61,22 @@ async function serveFromR2(
   cacheState: "MISS" | "BYPASS",
   range?: R2Range,
 ): Promise<Response> {
-  const object = await env.MIR2_ASSETS.get(key, range ? { range } : undefined);
+  let object = await env.MIR2_ASSETS.get(key, range ? { range } : undefined);
   if (!object) return text("not_found", 404, "no-store", cacheState);
+
+  // Encoded JSON is stored compressed to keep the R2 bucket below its budget.
+  // Byte ranges cannot be decoded independently, so fall back to the complete
+  // representation for the rare range request against an encoded object.
+  if (range && object.httpMetadata?.contentEncoding) {
+    object = await env.MIR2_ASSETS.get(key);
+    range = undefined;
+    if (!object) return text("not_found", 404, "no-store", cacheState);
+  }
 
   const etag = object.httpEtag;
   if (!range && etag && request.headers.get("if-none-match") === etag) {
-    return new Response(null, {
-      status: 304,
-      headers: responseHeaders(key, object, env, cacheState),
-    });
+    const headers = responseHeaders(key, object, env, cacheState);
+    return new Response(null, { status: 304, headers });
   }
 
   const headers = responseHeaders(key, object, env, cacheState);
@@ -77,7 +89,10 @@ async function serveFromR2(
     return new Response(null, { status, headers });
   }
 
-  return new Response(object.body, { status, headers });
+  const body = object.httpMetadata?.contentEncoding === "gzip"
+    ? object.body.pipeThrough(new DecompressionStream("gzip"))
+    : object.body;
+  return new Response(body, { status, headers });
 }
 
 function responseHeaders(
@@ -87,14 +102,22 @@ function responseHeaders(
   cacheState: "HIT" | "MISS" | "BYPASS",
 ): Headers {
   const headers = new Headers();
+  const httpMetadata = object.httpMetadata;
   const objectCacheControl = object.httpMetadata?.cacheControl;
   headers.set("accept-ranges", "bytes");
   applyCorsHeaders(headers);
   headers.set("cache-control", cacheControlForKey(key, objectCacheControl, env));
-  headers.set("content-type", object.httpMetadata?.contentType || inferContentType(key));
+  headers.set("content-type", httpMetadata?.contentType || inferContentType(key));
+  copyHeader(headers, "content-disposition", httpMetadata?.contentDisposition);
+  copyHeader(headers, "content-language", httpMetadata?.contentLanguage);
+  copyHeader(headers, "x-mir2-storage-content-encoding", httpMetadata?.contentEncoding);
   headers.set("etag", object.httpEtag);
   headers.set("x-mir2-edge-cache", cacheState);
   return headers;
+}
+
+function copyHeader(headers: Headers, name: string, value: string | undefined): void {
+  if (value) headers.set(name, value);
 }
 
 function cacheControlForKey(key: string, objectValue: string | undefined, env: Env): string {
@@ -134,6 +157,10 @@ function decodeObjectKey(pathname: string): string {
 function isAllowedKey(key: string, allowedPrefix: string): boolean {
   const normalizedPrefix = allowedPrefix.trim().replace(/^\/+/, "");
   return Boolean(key && normalizedPrefix && key.startsWith(normalizedPrefix));
+}
+
+function isStoredGzipPath(key: string): boolean {
+  return key.includes("/generated/crystal-packs/full/") && key.endsWith(".json");
 }
 
 function parseRange(value: string): R2Range | undefined {

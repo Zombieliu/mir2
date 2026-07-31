@@ -62,7 +62,15 @@ const requireFullCrystalPack = booleanArg(
 );
 const probeConcurrency = positiveIntegerArg(
   args.probeConcurrency ?? process.env.RELEASE_DOCTOR_PROBE_CONCURRENCY,
-  32,
+  8,
+);
+const probeAttempts = positiveIntegerArg(
+  args.probeAttempts ?? process.env.RELEASE_DOCTOR_PROBE_ATTEMPTS,
+  3,
+);
+const probeRetryBaseMs = positiveIntegerArg(
+  args.probeRetryBaseMs ?? process.env.RELEASE_DOCTOR_PROBE_RETRY_BASE_MS,
+  250,
 );
 const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
 const assetBaseUrlInput = normalizeOptionalUrl(
@@ -341,13 +349,16 @@ async function probeAssets(assetPaths, baseUrl, label, manifestFileByPath) {
     const result = await probe(url);
     const file = manifestFileByPath.get(assetPath);
     const expectedContentEncoding = String(file?.contentEncoding ?? file?.e ?? "").toLowerCase() || null;
-    const encodingOk = !expectedContentEncoding || result.contentEncoding === expectedContentEncoding;
+    const encodingOk = !expectedContentEncoding ||
+      result.contentEncoding === expectedContentEncoding ||
+      result.storageContentEncoding === expectedContentEncoding;
     results[index] = { path: assetPath, expectedContentEncoding, encodingOk, ...result };
     if (!result.ok || !encodingOk) {
       ok = false;
       const error = !result.ok
         ? result.error ?? `HTTP ${result.status}`
-        : `content-encoding ${result.contentEncoding ?? "missing"}, expected ${expectedContentEncoding}`;
+        : `content-encoding ${result.contentEncoding ?? "missing"} / storage encoding ` +
+          `${result.storageContentEncoding ?? "missing"}, expected ${expectedContentEncoding}`;
       console.error(`[release-doctor] ${label} miss: ${url} -> ${error}`);
     }
   });
@@ -356,29 +367,64 @@ async function probeAssets(assetPaths, baseUrl, label, manifestFileByPath) {
 
 async function probe(url) {
   const startedAt = Date.now();
-  let response;
-  try {
-    response = await fetch(url, { method: "HEAD", cache: "no-store" });
-    if (response.status === 405 || response.status === 501) {
-      response = await fetch(url, { method: "GET", cache: "no-store" });
+  let lastResponse;
+  let lastError;
+
+  for (let attempt = 1; attempt <= probeAttempts; attempt += 1) {
+    try {
+      let response = await fetch(url, { method: "HEAD", cache: "no-store" });
+      if (response.status === 405 || response.status === 501) {
+        response = await fetch(url, { method: "GET", cache: "no-store" });
+      }
+      lastResponse = response;
+      lastError = null;
+      if (response.ok || !isRetryableStatus(response.status) || attempt === probeAttempts) {
+        return probeResponseResult(response, startedAt, attempt);
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt === probeAttempts) break;
     }
-  } catch (error) {
-    return {
-      ok: false,
-      status: null,
-      elapsedMs: Date.now() - startedAt,
-      error: error instanceof Error ? error.message : String(error),
-    };
+
+    await sleep(Math.min(probeRetryBaseMs * (2 ** (attempt - 1)), 2_000));
   }
 
+  if (lastResponse) {
+    return probeResponseResult(lastResponse, startedAt, probeAttempts);
+  }
+  return {
+    ok: false,
+    status: null,
+    elapsedMs: Date.now() - startedAt,
+    attempts: probeAttempts,
+    error: lastError instanceof Error ? lastError.message : String(lastError ?? "fetch failed"),
+  };
+}
+
+function probeResponseResult(response, startedAt, attempts) {
   return {
     ok: response.ok,
     status: response.status,
     elapsedMs: Date.now() - startedAt,
+    attempts,
     contentType: response.headers.get("content-type"),
     cacheControl: response.headers.get("cache-control"),
     contentEncoding: response.headers.get("content-encoding"),
+    storageContentEncoding: response.headers.get("x-mir2-storage-content-encoding"),
   };
+}
+
+function isRetryableStatus(status) {
+  return status === 408 ||
+    status === 425 ||
+    status === 429 ||
+    status >= 500;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function getRequiredAssetUrls({ assetBaseUrlInput, release, releaseVersion }) {
