@@ -47,6 +47,11 @@ const uploadDriverInput = String(args.driver ?? process.env.MIR2_R2_UPLOAD_DRIVE
 const uploadDriver = normalizeUploadDriver(uploadDriverInput);
 const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
 const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN ?? "";
+const cloudflareApiBaseUrl = normalizeOptionalUrl(
+  args.apiBaseUrl ??
+    process.env.MIR2_CLOUDFLARE_API_BASE_URL ??
+    "https://api.cloudflare.com/client/v4",
+);
 const workerUploadUrl = normalizeOptionalUrl(args.workerUrl ?? process.env.MIR2_R2_UPLOAD_WORKER_URL ?? "");
 const workerUploadSecret = process.env.MIR2_R2_UPLOAD_SECRET ?? "";
 const s3Endpoint = normalizeOptionalUrl(
@@ -72,16 +77,17 @@ let s3Client;
 
 async function main() {
   const release = JSON.parse(await fs.readFile(manifestPath, "utf8"));
-  if (release.fullCrystalPack?.enabled === true && uploadDriver !== "s3") {
+  if (release.fullCrystalPack?.enabled === true && !["api", "s3", "worker"].includes(uploadDriver)) {
     throw new Error(
-      "Verified full Crystal packs must use MIR2_R2_UPLOAD_DRIVER=r2-s3 so large shards are streamed directly to R2.",
+      "Verified full Crystal packs must use MIR2_R2_UPLOAD_DRIVER=api, worker, or r2-s3 " +
+        "so large shards are streamed directly to R2.",
     );
   }
   const legacyAssetUploads = await buildUploadList(release);
   await verifyEncodedUploads(legacyAssetUploads);
   const encodedUploads = legacyAssetUploads.filter((upload) => upload.contentEncoding);
-  if (encodedUploads.length > 0 && uploadDriver !== "s3") {
-    throw new Error("Content-encoded release assets require MIR2_R2_UPLOAD_DRIVER=r2-s3.");
+  if (encodedUploads.length > 0 && !["api", "s3", "worker"].includes(uploadDriver)) {
+    throw new Error("Content-encoded release assets require MIR2_R2_UPLOAD_DRIVER=api, worker, or r2-s3.");
   }
   if (encodedUploads.length > 0 && release.cas) {
     throw new Error("Content-encoded releases cannot also publish raw CAS assets.");
@@ -406,7 +412,10 @@ async function uploadWithRetry(upload) {
 }
 
 async function uploadViaWorker(upload) {
-  const body = await fs.readFile(upload.stagePath);
+  const source = createReadStream(upload.stagePath);
+  const body = upload.contentEncoding === "gzip"
+    ? source.pipe(createGzip(FULL_PACK_GZIP_OPTIONS))
+    : source;
   const endpoint = new URL("/upload", workerUploadUrl);
   endpoint.searchParams.set("key", upload.objectKey);
   const response = await fetch(endpoint, {
@@ -414,9 +423,14 @@ async function uploadViaWorker(upload) {
     headers: {
       Authorization: `Bearer ${workerUploadSecret}`,
       "Content-Type": upload.contentType,
+      "Content-Encoding": upload.contentEncoding || undefined,
+      "Content-Length": String(upload.size),
       "Cache-Control": upload.cacheControl,
+      "X-Mir2-Sha256": upload.sha256 || undefined,
+      "X-Mir2-Encoded-Sha256": upload.encodedSha256 || undefined,
     },
     body,
+    duplex: "half",
   });
   const text = await response.text();
   if (!response.ok) {
@@ -490,9 +504,12 @@ async function createS3Client() {
 }
 
 async function uploadViaCloudflareApi(upload) {
-  const body = await fs.readFile(upload.stagePath);
+  const source = createReadStream(upload.stagePath);
+  const body = upload.contentEncoding === "gzip"
+    ? source.pipe(createGzip(FULL_PACK_GZIP_OPTIONS))
+    : source;
   const endpoint = new URL(
-    `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(
+    `${cloudflareApiBaseUrl.replace(/\/+$/, "")}/accounts/${encodeURIComponent(
       cloudflareAccountId,
     )}/r2/buckets/${encodeURIComponent(bucket)}/objects/${encodeObjectKey(upload.objectKey)}`,
   );
@@ -501,9 +518,12 @@ async function uploadViaCloudflareApi(upload) {
     headers: {
       Authorization: `Bearer ${cloudflareApiToken}`,
       "Content-Type": upload.contentType,
+      "Content-Encoding": upload.contentEncoding || undefined,
+      "Content-Length": String(upload.size),
       "Cache-Control": upload.cacheControl,
     },
     body,
+    duplex: "half",
   });
   const text = await response.text();
   let payload = null;

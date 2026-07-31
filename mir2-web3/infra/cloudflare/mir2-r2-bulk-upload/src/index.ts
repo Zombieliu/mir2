@@ -34,13 +34,24 @@ export default {
     await env.MIR2_ASSETS.put(key, request.body, {
       httpMetadata: {
         contentType: request.headers.get("content-type") ?? undefined,
+        contentEncoding: request.headers.get("content-encoding") ?? undefined,
         cacheControl: request.headers.get("cache-control") ?? undefined,
       },
+      customMetadata: uploadMetadata(request),
     });
 
     return json({ ok: true, key });
   },
 };
+
+function uploadMetadata(request: Request): Record<string, string> {
+  const metadata: Record<string, string> = {};
+  const sha256 = request.headers.get("x-mir2-sha256");
+  const encodedSha256 = request.headers.get("x-mir2-encoded-sha256");
+  if (sha256) metadata.sha256 = sha256;
+  if (encodedSha256) metadata.encodedsha256 = encodedSha256;
+  return metadata;
+}
 
 function normalizeObjectKey(value: string): string {
   const key = value.trim().replace(/^\/+/, "");
