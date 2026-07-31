@@ -14,6 +14,34 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" != "production" ] \
   exit 0
 fi
 
+# Production asset identity is versioned with the code. This deliberately
+# overrides stale dashboard variables so a main-branch deployment cannot point
+# at an older R2 prefix than the commit that triggered it.
+if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
+  PRODUCTION_ASSET_CONFIG="$(pwd)/../../config/production-web-assets.json"
+  if [ ! -f "$PRODUCTION_ASSET_CONFIG" ]; then
+    echo "[vercel-build] Missing $PRODUCTION_ASSET_CONFIG." >&2
+    exit 1
+  fi
+
+  export MIR2_ASSET_VERSION="$(
+    node -p "require(process.argv[1]).version" "$PRODUCTION_ASSET_CONFIG"
+  )"
+  export MIR2_ASSET_OBJECT_PREFIX="$(
+    node -p "require(process.argv[1]).objectPrefix" "$PRODUCTION_ASSET_CONFIG"
+  )"
+  export NEXT_PUBLIC_MIR2_ASSET_BASE_URL="$(
+    node -p "require(process.argv[1]).assetBaseUrl" "$PRODUCTION_ASSET_CONFIG"
+  )"
+  export MIR2_ORIGINAL_ASSET_MANIFEST_MODE="remote-release"
+  export MIR2_ORIGINAL_ASSET_REMOTE_RELEASE="$(
+    node -p "require(process.argv[1]).remoteReleaseUrl" "$PRODUCTION_ASSET_CONFIG"
+  )"
+
+  npm run generate:original-asset-manifest
+  echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."
+fi
+
 TOOLCHAIN="${RUST_TOOLCHAIN_VERSION:-1.89.0}"
 export PATH="$HOME/.cargo/bin:$PATH"
 
