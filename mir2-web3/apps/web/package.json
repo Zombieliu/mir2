@@ -76,6 +76,7 @@
     "vercel:deploy:prod": "npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes",
     "smoke:reconnect-resume": "node ./scripts/smoke-reconnect-resume.mjs",
     "smoke:two-client-zone": "node ./scripts/smoke-two-client-zone.mjs",
+    "smoke:passkey-start-game": "node ./scripts/smoke-passkey-start-game.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
     "smoke:gateway-capacity": "node ./scripts/load-gateway-ws.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",

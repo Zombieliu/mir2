@@ -1,7 +1,7 @@
-use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point};
+use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket};
 use mir2_simulation::{
-    validate_production_player_command, InProcessWorldRuntime, SessionId, SimulationConfig,
-    WorldCommand, WorldRuntime, ZoneCommand, ZoneJoin, ZoneKey, ZoneRuntime,
+    InProcessWorldRuntime, SessionId, SimulationConfig, WorldCommand, WorldRuntime, ZoneCommand,
+    ZoneJoin, ZoneKey, ZoneRuntime, validate_production_player_command,
 };
 
 fn assert_rejected(command: WorldCommand) {
@@ -79,6 +79,55 @@ fn production_player_wrapper_rejects_before_runtime_execution() {
 
     assert!(error.contains("authenticated account"));
     assert!(runtime.active_identity().is_none());
+}
+
+#[test]
+fn passkey_account_can_create_character_and_start_game() {
+    let account_id = "sui:0xpasskey-lifecycle";
+    let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+
+    let login = runtime
+        .execute(WorldCommand::PasskeyLogin {
+            account_id: account_id.to_string(),
+        })
+        .expect("passkey login should succeed");
+    assert!(matches!(
+        login.as_slice(),
+        [ServerPacket::LoginSuccess { characters }] if characters.is_empty()
+    ));
+
+    let created = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::NewCharacter {
+            name: "PassBlade".to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        }))
+        .expect("authenticated passkey account should create a character");
+    let character_index = created
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+            _ => None,
+        })
+        .expect("new character response should contain its server index");
+
+    let started = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index,
+        }))
+        .expect("passkey character should start the game");
+    assert!(started.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::StartGame {
+            result: 4,
+            resolution
+        } if *resolution > 0
+    )));
+    let identity = runtime
+        .active_identity()
+        .expect("started passkey character should become active");
+    assert_eq!(identity.account_id, account_id);
+    assert_eq!(identity.character_index, character_index);
 }
 
 #[test]
