@@ -9,8 +9,17 @@
 > WebGL2, fallback, movement/presentation, and raw WebGL2 browser assertions all
 > pass with no critical console errors. The Brazil support policy is now 2 GiB
 > unsupported, 3 GiB experimental, 4 GiB engineering-only, 6 GiB provisional
-> public minimum, and 8 GiB recommended. Physical Android certification and the
-> P0 texture/prewarm work remain open; see `docs/LOW-END-ANDROID-SUPPORT.md`.
+> public minimum, and 8 GiB recommended. The code-side P0 is now closed: login,
+> character-select, and game/HUD prewarm are screen-staged; low tier skips
+> optional audio/scene-frame scatter; WebGL2 map textures use decoded-byte LRU
+> budgets with explicit release and retain the previous frame during cold page
+> loads; Bevy takeover releases duplicate WebGL2 residency; and all 40 map pages
+> are 4096-safe with build/dev manifest gates. Full frontend logic, TypeScript,
+> focused prewarm/LRU/atlas tests, and a live forced-low login are green. The
+> remaining delivery P0 is publishing the regenerated pages through a new
+> immutable R2 release (the live 20260730 prefix still has two 8192 pages),
+> followed by physical 4 GiB Android certification; see
+> `docs/LOW-END-ANDROID-SUPPORT.md`.
 > The old World Director branch must not be merged wholesale; its true 12-commit
 > tail is classified in `docs/WORLD-DIRECTOR-BRANCH-INTEGRATION.md`.
 

@@ -11,11 +11,11 @@ RAM Boost, virtual RAM, and swap do not count.
 
 | Class | Required baseline | Current promise |
 | --- | --- | --- |
-| Unsupported | 2 GiB or less, 32-bit Android, Android 11 or older, no WebGL2, or `MAX_TEXTURE_SIZE < 8192` | Do not allow into a paid/public compatibility list |
+| Unsupported | 2 GiB or less, 32-bit Android, Android 11 or older, no WebGL2, or `MAX_TEXTURE_SIZE < 4096` | Do not allow into a paid/public compatibility list |
 | Experimental | 3 GiB / 64 GiB, Android Go, 64-bit, current Chrome, WebGL2 | Low tier only; no 30 FPS, long-session, or Crystal 1:1 promise |
-| Engineering floor | 4 GiB / 128 GiB, Android 12+, 64-bit, four or more CPU cores, current Chrome, WebGL2, `MAX_TEXTURE_SIZE >= 8192` | Candidate test hardware only; not yet a public minimum |
+| Engineering floor | 4 GiB / 128 GiB, Android 12+, 64-bit, four or more CPU cores, current Chrome, WebGL2, `MAX_TEXTURE_SIZE >= 4096` | Candidate test hardware only; not yet a public minimum |
 | Provisional public minimum | 6 GiB / 128 GiB, Android 12+, current Chrome, stable WebGL2 or WebGPU, at least 1 GiB free storage | May become the public minimum after the physical test matrix passes |
-| Recommended | 8 GiB / 128 or 256 GiB, Android 13+, current Chrome, WebGPU-capable Vulkan driver, `MAX_TEXTURE_SIZE >= 8192` | Current purchase recommendation |
+| Recommended | 8 GiB / 128 or 256 GiB, Android 13+, current Chrome, WebGPU-capable Vulkan driver, `MAX_TEXTURE_SIZE >= 4096` | Current purchase recommendation |
 
 The game must select a backend from capability results, not a model-name
 allowlist:
@@ -86,14 +86,16 @@ Current measured facts:
 
 - A cold mobile-low startup can issue about 434 requests, transfer about
   57.8 MB, and decode about 92.1 MB before normal browser/runtime overhead.
-- The 19 `ChrSel` PNG files alone total about 40.1 MiB and are currently in the
-  login critical-prewarm closure even though character selection is later.
+- The 19 `ChrSel` PNG files total about 40.1 MiB. They are no longer in the
+  blocking login prewarm closure; the login animation requests frames on demand,
+  and the character-select pack starts only after that screen is requested.
 - Starter entity atlases use about 72 MiB as decoded RGBA textures.
 - All current map-atlas pages total about 378.75 MiB as RGBA textures.
 - A representative Bichon region can reference up to about 218 MiB of decoded
   map textures.
-- Two map pages are `1024x8192`, so a device limited to 4096 texture height
-  cannot use the complete accelerated atlas path reliably.
+- All 40 generated map pages are now at most `1024x4096`. The previous two
+  `1024x8192` pages were transparent-padding over-allocation caused by an exact
+  final shelf boundary; the packer now sizes from actual content extent.
 - Full assets remain lazy: the 7.9 GB R2 release is not downloaded at startup.
 - Current assets are PNG RGBA8, not KTX2/Basis/ETC2/ASTC. Network PNG
   compression does not reduce GPU texture memory after upload.
@@ -104,15 +106,41 @@ it is about 46 seconds; at 20 Mbps it is about 23 seconds. This is why START and
 first entry can feel slow on Brazilian mobile networks even when the renderer
 itself reaches frame rate.
 
-## Known low-end blockers
+## Implemented low-end P0
+
+Completed on 2026-08-01:
+
+- Asset prewarm is screen-staged. Login blocks only on the compact login shell;
+  character-selection and game/HUD packs start when their screen is requested.
+  Stage work is serialized and exposed only after Service Worker cache-tier
+  configuration. Low tier skips optional login audio and scene-frame scatter
+  prewarm while retaining current-screen essentials.
+- Standalone WebGL2 map textures use decoded RGBA8 byte budgets: 64 MiB on the
+  2 GiB escape path, 96 MiB on normal low tier, 144-160 MiB on medium, and
+  256 MiB on high. Current-frame pages are pinned; non-visible pages use an 85%
+  low-watermark LRU and every eviction, replacement, disable, context change,
+  and unmount calls `gl.deleteTexture()`.
+- A newly referenced atlas page loads before the canvas is cleared, preserving
+  the previous complete frame instead of blinking transparent during decode.
+  Bevy ownership disables the WebGL2 layer and immediately releases its map
+  textures so both renderers do not retain duplicate GPU memory.
+- Map packing and release builds enforce a 4096 texture dimension. Development
+  `assets:map-atlas:ensure` validates an existing manifest and rebuilds stale
+  8192 output instead of trusting file existence.
+
+Automated evidence: full `test:frontend-logic`, focused prewarm/LRU/atlas tests,
+TypeScript, `git diff --check`, and a live forced-low login passed. The live
+cache panel reported 19/19 compact login prewarm resources, 0 failures and no
+console warnings/errors. Screenshot:
+`docs/generated/player-qa/low-end-android/low-tier-login-prewarm-20260801.png`.
+
+## Remaining low-end blockers
 
 P0 before claiming a 4 GiB public minimum:
 
-- Reduce login critical prewarm. Defer character-selection and HUD PNGs until
-  their screen is approaching.
-- Add a decoded-byte LRU and explicit `gl.deleteTexture()` lifecycle to the
-  standalone WebGL2 map atlas. Its current cache is not byte-bounded.
-- Split or repack both 8192-high map pages to a 4096-safe layout.
+- Publish the regenerated 4096-safe map atlas through the next immutable R2
+  release. Production release `20260730-fullcrystal-f71b89aa-gzip1` still has
+  the two historical 1024x8192 pages; it must not be overwritten in place.
 - Run real 4 GiB Android cold/warm login, 30-minute roam, map transition,
   background/resume, context-loss, and memory-pressure tests.
 
