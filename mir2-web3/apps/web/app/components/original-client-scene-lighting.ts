@@ -2,6 +2,66 @@ import type { DisplayEntity } from "./original-client-types";
 
 export type CrystalSceneLightClassName = "dawn" | "evening" | "night";
 
+export function crystalTimeOfDayLightSetting(
+  serverSetting: number | null | undefined,
+  override: string | null | undefined,
+): number | null {
+  const normalizedServerSetting =
+    serverSetting && serverSetting >= 1 && serverSetting <= 4 ? Math.trunc(serverSetting) : null;
+  switch (override?.trim().toLowerCase()) {
+    case "dawn":
+    case "1":
+      return 1;
+    case "day":
+    case "2":
+      return 2;
+    case "evening":
+    case "3":
+      return 3;
+    case "night":
+    case "4":
+      return 4;
+    case "dynamic":
+    case "":
+    case undefined:
+    case null:
+      return normalizedServerSetting;
+    default:
+      return normalizedServerSetting;
+  }
+}
+
+export function crystalEffectiveLightSetting(
+  mapLightSetting: number | null | undefined,
+  timeOfDayLightSetting: number | null | undefined,
+): number | null {
+  return mapLightSetting && mapLightSetting >= 1 && mapLightSetting <= 4
+    ? Math.trunc(mapLightSetting)
+    : timeOfDayLightSetting && timeOfDayLightSetting >= 1 && timeOfDayLightSetting <= 4
+      ? Math.trunc(timeOfDayLightSetting)
+      : null;
+}
+
+export function crystalSceneDarknessColor(
+  lightSetting: number | null | undefined,
+  mapDarkLight: number | null | undefined,
+): string | null {
+  if (lightSetting === 1 || lightSetting === 3) return "rgb(50, 50, 50)";
+  if (lightSetting !== 4) return null;
+  switch (mapDarkLight) {
+    case 1:
+      return "rgb(20, 20, 20)";
+    case 2:
+      return "lightslategray";
+    case 3:
+      return "skyblue";
+    case 4:
+      return "goldenrod";
+    default:
+      return "rgb(0, 0, 0)";
+  }
+}
+
 export type CrystalObjectLightSpec = {
   value: number;
   range: number;

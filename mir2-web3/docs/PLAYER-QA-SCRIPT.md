@@ -1,8 +1,25 @@
 # Player QA Script
 
-Last updated: 2026-07-18
+Last updated: 2026-08-01
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
+
+## Weather And Lighting
+
+- Normal local and production testing should enter in Day lighting. Use
+  `?crystalLight=night` for browser-only presentation verification, or set
+  `MIR2_SIMULATION_FIXED_LIGHT_SETTING=night` and restart Gateway to verify the
+  black/default night buffer, object lights, map-cell lights, and MiniMap icon.
+- Repeat with `dawn` and `evening`; their gray buffer must remain behind weather
+  and in front of the completed world, without hiding HUD or interaction text.
+- Use `?crystalLight=dynamic` (or set both deployment/server overrides to
+  `dynamic`) to verify Crystal's UTC-driven cycle. Final acceptance must record
+  the selected mode explicitly; the current production test default is Day.
+- Transfer to `DogYoHyun`; `weatherParticles=3` must render Fog plus Red Ember
+  together. Leaving the map must remove both layers without stale particles.
+- Enable reduced-motion at OS/browser level; weather remains visible but its
+  CSS motion pauses. Confirm movement input, target selection and HUD remain
+  interactive because the weather/light layers have no pointer events.
 
 ## Original Bichon Q1-Q9 Level-6 Route
 
@@ -84,6 +101,17 @@ Purpose: keep final human frontend validation focused. The project can be driven
 
 ## Full Pack / Low-End Gate
 
+- The public support policy is defined in
+  `docs/LOW-END-ANDROID-SUPPORT.md`. A forced desktop `renderTier=low` run is a
+  renderer regression, not proof that a physical 2 GiB Android phone is
+  supported. Current policy is: 2 GiB unsupported, 3 GiB experimental, 4 GiB
+  engineering floor, 6 GiB provisional public minimum, and 8 GiB recommended.
+- Bevy 0.19 runtime `bevy-e7694d022c448d16` passes the forced WebGPU, forced
+  WebGL2, fallback, presentation-pose, local-motion, and raw WebGL2 checks with
+  zero critical console errors. Its size-optimized WASM is 27,605,807 bytes for
+  WebGPU and 28,999,520 bytes for WebGL2, down 24.66% and 25.27% from the Bevy
+  0.18 main artifacts.
+
 - Force the constrained path with
   `?renderTier=low&bevyBackend=webgl2&bevyEntities=1&bevyAtlas=1` and keep
   `?mir2Debug=1` while collecting evidence. The runtime debug snapshot must
@@ -92,7 +120,7 @@ Purpose: keep final human frontend validation focused. The project can be driven
   least four acknowledged tile steps. Require no residual movement plan,
   visual jump, logical rollback, scene blackout, critical console error, or
   non-favicon 404.
-- On a 2 GiB low-tier profile, decoded resident entity-atlas bytes must remain
+- On the simulated 2 GiB low-tier budget, decoded resident entity-atlas bytes must remain
   below 64 MiB. The accepted local baseline used 13 pages, 1,598 rects, and
   58,379,430 bytes while passing all 28 movement/render assertions.
 - Low-tier scene prewarm must stay below 1,000 requests with no failures;
@@ -103,9 +131,9 @@ Purpose: keep final human frontend validation focused. The project can be driven
 - Review
   `docs/generated/player-qa/full-asset-pack-low-tier/full-pack-low-tier-summary.json`
   and `full-pack-low-tier-webgl2-clean.png`. This desktop/local-network gate is
-  necessary but not sufficient for Brazil release: repeat it on physical 2 GiB
-  and 4 GiB Android devices with throttled 4G, map transitions, background
-  resume, and memory pressure.
+  necessary but not sufficient for Brazil release. Do not certify physical 2
+  GiB devices. Repeat it on 4, 6, and 8 GiB Android devices with throttled 4G,
+  map transitions, background resume, and memory pressure.
 
 ## Crystal/Web Temporal Pack
 

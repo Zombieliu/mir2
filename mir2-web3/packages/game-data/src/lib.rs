@@ -947,6 +947,10 @@ pub struct CrystalRespawnMap {
     #[serde(default)]
     pub light: u8,
     #[serde(default)]
+    pub map_dark_light: u8,
+    #[serde(default)]
+    pub weather_particles: u16,
+    #[serde(default)]
     pub no_throw_item: bool,
     #[serde(default)]
     pub no_drop_player: bool,
@@ -2659,6 +2663,11 @@ mod tests {
         assert_eq!(penal_cavern.big_map, 0);
         assert_eq!(penal_cavern.light, 4);
         assert!(!penal_cavern.movements.is_empty());
+
+        let dog_yo_hyun = crystal_map_respawns_by_file_name("DogYoHyun")
+            .expect("DogYoHyun weather map should exist");
+        assert_eq!(dog_yo_hyun.weather_particles, 3);
+        assert_eq!(dog_yo_hyun.map_dark_light, 0);
     }
 
     #[test]

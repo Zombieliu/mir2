@@ -1,5 +1,28 @@
 # Agent Task Queue
 
+> Latest Bevy/mobile delivery sync: 2026-08-01. The adaptive touch/gamepad
+> tutorial branch was rebased onto current main and its device-profile,
+> gamepad-input, tutorial-flow, and TypeScript gates pass. The independent WASM
+> runtime now uses Bevy 0.19 with Rust 1.95 and a size-oriented `wasm-release`
+> profile; WebGPU is 27,605,807 bytes and WebGL2 is 28,999,520 bytes, reducing
+> the previous tracked artifacts by 24.66% and 25.27%. Forced WebGPU, forced
+> WebGL2, fallback, movement/presentation, and raw WebGL2 browser assertions all
+> pass with no critical console errors. The Brazil support policy is now 2 GiB
+> unsupported, 3 GiB experimental, 4 GiB engineering-only, 6 GiB provisional
+> public minimum, and 8 GiB recommended. The code-side P0 is now closed: login,
+> character-select, and game/HUD prewarm are screen-staged; low tier skips
+> optional audio/scene-frame scatter; WebGL2 map textures use decoded-byte LRU
+> budgets with explicit release and retain the previous frame during cold page
+> loads; Bevy takeover releases duplicate WebGL2 residency; and all 40 map pages
+> are 4096-safe with build/dev manifest gates. Full frontend logic, TypeScript,
+> focused prewarm/LRU/atlas tests, and a live forced-low login are green. The
+> remaining delivery P0 is publishing the regenerated pages through a new
+> immutable R2 release (the live 20260730 prefix still has two 8192 pages),
+> followed by physical 4 GiB Android certification; see
+> `docs/LOW-END-ANDROID-SUPPORT.md`.
+> The old World Director branch must not be merged wholesale; its true 12-commit
+> tail is classified in `docs/WORLD-DIRECTOR-BRANCH-INTEGRATION.md`.
+
 > Latest Gate 15 real-player continuity closure: 2026-07-24. Real WebSocket and
 > Crystal TCP `StartGame` now acquire Commonware-finalized account/character
 > session leases, both player Gateways observe quorum placement and dynamically

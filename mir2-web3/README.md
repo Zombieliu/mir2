@@ -24,6 +24,14 @@ The scripts align these ports and use the tracked prebuilt WebGPU/WebGL2 Bevy
 runtimes. Windows native-toolchain scripts remain available for direct process
 debugging.
 
+Player Web currently defaults the global Crystal time-of-day light to `Day` so
+development and production testing remain readable. Use `?crystalLight=dynamic`
+to restore the server's UTC-driven cycle, or `dawn`, `day`, `evening`, and
+`night` for a fixed browser test. `NEXT_PUBLIC_MIR2_FIXED_LIGHT_SETTING` changes
+the deployment default. Map-specific fixed light settings still take priority.
+Direct Gateway development can independently use
+`MIR2_SIMULATION_FIXED_LIGHT_SETTING` with the same named values.
+
 Player Web uses one URL across desktop, landscape mobile, and console browsers
 that expose the Web Gamepad API. It switches its controls tutorial to the most
 recent keyboard/mouse, touch, or gamepad input, provides Xbox and PlayStation
@@ -51,6 +59,8 @@ then supplies the credential to the exact immutable fetcher over standard input:
 - [Windows local development](docs/LOCAL-DEVELOPMENT-WINDOWS.md)
 - [macOS local development](docs/LOCAL-DEVELOPMENT-MACOS.md)
 - [Asset consumer setup](docs/ASSET-CONSUMER-SETUP.md)
+- [Low-end Android and Brazil device support](docs/LOW-END-ANDROID-SUPPORT.md)
+- [World Director branch integration audit](docs/WORLD-DIRECTOR-BRANCH-INTEGRATION.md)
 - [Agent orchestration](docs/AGENT-ORCHESTRATION.md)
 - [Crystal 1:1 roadmap](docs/CRYSTAL-1TO1-ROADMAP.md)
 - [Backend progress](docs/BACKEND-1TO1-PROGRESS.md)

@@ -148,6 +148,8 @@ function main() {
         mini_map: map.mini_map,
         big_map: map.big_map,
         light: map.light,
+        map_dark_light: map.map_dark_light,
+        weather_particles: map.weather_particles,
         no_throw_item: map.no_throw_item,
         no_drop_player: map.no_drop_player,
         no_drop_monster: map.no_drop_monster,
@@ -370,7 +372,7 @@ function parseMaps(reader) {
     reader.readInt32();
     reader.readBoolean();
     reader.readInt32();
-    reader.readUInt8();
+    const map_dark_light = reader.readUInt8();
 
     const mineZoneCount = reader.readInt32();
     for (let mineIndex = 0; mineIndex < mineZoneCount; mineIndex += 1) {
@@ -387,10 +389,9 @@ function parseMaps(reader) {
     reader.readUInt16();
     reader.readBoolean();
     reader.readBoolean();
-    reader.readUInt16();
+    const weather_particles = reader.readUInt16();
     reader.readBoolean();
     reader.readUInt8();
-    reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
@@ -408,6 +409,8 @@ function parseMaps(reader) {
       mini_map,
       big_map,
       light,
+      map_dark_light,
+      weather_particles,
       no_throw_item,
       no_drop_player,
       no_drop_monster,

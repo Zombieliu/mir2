@@ -14,6 +14,9 @@ x-developer-image: &developer-image
 
 x-developer-environment: &developer-environment
   MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
+  # Safe only inside this local developer stack. Production requires the
+  # explicit MIR2_PASSKEY_AUTH_SECRET shared by Web and Gateway.
+  MIR2_ALLOW_DEV_PASSKEY_SECRET: "1"
   MIR2_DEPLOY_REVISION: ${MIR2_DEPLOY_REVISION:-}
   RUST_BACKTRACE: "1"
   CARGO_TERM_COLOR: always
@@ -60,6 +63,7 @@ services:
       MIR2_GATEWAY_WEB_ADDR: 0.0.0.0:7110
       MIR2_GATEWAY_TCP_ADDR: 0.0.0.0:7000
       MIR2_ACCOUNT_STORE_PATH: /workspace/mir2-web3/.mir2-data/accounts.json
+      MIR2_SIMULATION_FIXED_LIGHT_SETTING: ${MIR2_SIMULATION_FIXED_LIGHT_SETTING:-day}
     ports:
       - "${MIR2_BIND_ADDRESS:-127.0.0.1}:${MIR2_GATEWAY_WEB_PORT:-7110}:7110"
       - "${MIR2_BIND_ADDRESS:-127.0.0.1}:${MIR2_GATEWAY_TCP_PORT:-7000}:7000"

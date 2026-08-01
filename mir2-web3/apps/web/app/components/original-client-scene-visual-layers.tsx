@@ -34,6 +34,7 @@ import {
   crystalMapLightTopLeft,
   crystalObjectLightSpec,
   crystalObjectLightTopLeft,
+  crystalSceneDarknessColor,
   crystalSceneLightClassName,
   type CrystalMapLightSpec,
 } from "./original-client-scene-lighting";
@@ -69,6 +70,7 @@ import {
   type ViewportMapSprites,
   type ViewportOffset,
 } from "./original-client-scene-rendering";
+import { OriginalClientWeatherLayer } from "./original-client-weather-layer";
 
 type ViewportGroundDrop = DisplayWorld["groundDrops"][number] & {
   dx: number;
@@ -941,11 +943,15 @@ function OriginalClientSceneVisualLayersInner({
         })}
       </div>
 
+      {screen === "game" ? <OriginalClientWeatherLayer weatherParticles={world.weatherParticles} /> : null}
+
       {screen === "game" && sceneLightClassName ? (
         <div
           aria-hidden="true"
           className={`viewport-crystal-light-overlay ${sceneLightClassName}`}
           data-light-setting={world.lightSetting ?? ""}
+          data-map-dark-light={world.mapDarkLight ?? 0}
+          style={{ background: crystalSceneDarknessColor(world.lightSetting, world.mapDarkLight) ?? undefined }}
         >
           <div
             ref={imperativeCamera ? registerCameraSurface("map-lights") : undefined}

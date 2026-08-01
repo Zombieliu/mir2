@@ -84,7 +84,7 @@ impl CrystalAdditiveMaterialCache {
         let tint = LinearRgba::new(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
         let uv_scale_offset = Vec4::new(1.0, 1.0, 0.0, 0.0);
         if let Some(handle) = self.materials.get(cache_key) {
-            if let Some(material) = materials.get_mut(handle) {
+            if let Some(mut material) = materials.get_mut(handle) {
                 material.texture = texture;
                 material.tint = tint;
                 material.uv_scale_offset = uv_scale_offset;
