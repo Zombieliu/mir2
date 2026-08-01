@@ -51,6 +51,8 @@ then supplies the credential to the exact immutable fetcher over standard input:
 - [Windows local development](docs/LOCAL-DEVELOPMENT-WINDOWS.md)
 - [macOS local development](docs/LOCAL-DEVELOPMENT-MACOS.md)
 - [Asset consumer setup](docs/ASSET-CONSUMER-SETUP.md)
+- [Low-end Android and Brazil device support](docs/LOW-END-ANDROID-SUPPORT.md)
+- [World Director branch integration audit](docs/WORLD-DIRECTOR-BRANCH-INTEGRATION.md)
 - [Agent orchestration](docs/AGENT-ORCHESTRATION.md)
 - [Crystal 1:1 roadmap](docs/CRYSTAL-1TO1-ROADMAP.md)
 - [Backend progress](docs/BACKEND-1TO1-PROGRESS.md)
