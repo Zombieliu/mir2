@@ -6,13 +6,15 @@ Purpose: keep final human frontend validation focused. The project can be driven
 
 ## Weather And Lighting
 
-- Normal local development should enter in Day lighting. Set
+- Normal local and production testing should enter in Day lighting. Use
+  `?crystalLight=night` for browser-only presentation verification, or set
   `MIR2_SIMULATION_FIXED_LIGHT_SETTING=night` and restart Gateway to verify the
   black/default night buffer, object lights, map-cell lights, and MiniMap icon.
 - Repeat with `dawn` and `evening`; their gray buffer must remain behind weather
   and in front of the completed world, without hiding HUD or interaction text.
-- Set the value to `dynamic` to verify Crystal's UTC-driven cycle. Production
-  and acceptance deployments must not silently inherit the local Day default.
+- Use `?crystalLight=dynamic` (or set both deployment/server overrides to
+  `dynamic`) to verify Crystal's UTC-driven cycle. Final acceptance must record
+  the selected mode explicitly; the current production test default is Day.
 - Transfer to `DogYoHyun`; `weatherParticles=3` must render Fog plus Red Ember
   together. Leaving the map must remove both layers without stale particles.
 - Enable reduced-motion at OS/browser level; weather remains visible but its

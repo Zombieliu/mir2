@@ -5,8 +5,9 @@
 > The generated 463-map manifest preserves the real fields, Simulation projects
 > them into `MapInformation`, Gateway emits browser-facing camelCase values, and
 > Web renders fixed-map/global-TimeOfDay precedence plus lazy original weather
-> textures. Local Developer Compose defaults to readable Day; production keeps
-> the original UTC dynamic cycle. Focused GameData, Simulation, Gateway,
+> textures. Local Developer Compose and the current production Web test build
+> default to readable Day; `?crystalLight=dynamic` restores the original UTC
+> cycle, while map-specific fixed light remains authoritative. Focused GameData, Simulation, Gateway,
 > frontend logic and TypeScript checks pass; final human weather appearance on
 > `DogYoHyun` remains part of Player QA acceptance.
 
