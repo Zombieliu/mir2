@@ -13,7 +13,7 @@ services:
       MIR2_ZONE_HOST_MAX_CONNECTIONS: "64"
       MIR2_ZONE_HOST_MAX_SESSIONS: "32"
       MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "16"
-      MIR2_ZONE_HOST_TOKEN: "gate22-docker-zone-rpc"
+      MIR2_ZONE_HOST_TOKEN: "gate22-node-local-zone-rpc"
     expose:
       - "7020"
     networks:
@@ -36,7 +36,7 @@ services:
       MIR2_HOME_RELAY_ID: "gate22-relay"
       MIR2_HOME_RELAY_QUIC_BIND: "0.0.0.0:7443"
       MIR2_HOME_RELAY_GATEWAY_BIND: "0.0.0.0:7444"
-      MIR2_HOME_RELAY_GATEWAY_TOKEN: "gate22-docker-zone-rpc"
+      MIR2_HOME_RELAY_GATEWAY_TOKEN: "gate22-relay-gateway-rpc"
       MIR2_HOME_RELAY_TLS_CA_DER: "/run/gate22/ca.der"
       MIR2_HOME_RELAY_TLS_CERT_CHAIN_DER: "/run/gate22/relay.der"
       MIR2_HOME_RELAY_TLS_KEY_DER: "/run/gate22/relay-key.der"
@@ -63,6 +63,7 @@ services:
       MIR2_HOME_RELAY_ADDR: "home-relay:7443"
       MIR2_HOME_RELAY_SERVER_NAME: "relay.test"
       MIR2_HOME_LOCAL_ZONE_RPC_ADDR: "zone-host:7020"
+      MIR2_HOME_LOCAL_ZONE_RPC_TOKEN: "gate22-node-local-zone-rpc"
       MIR2_HOME_AGENT_TLS_CA_DER: "/run/gate22/ca.der"
       MIR2_HOME_AGENT_TLS_CERT_CHAIN_DER: "/run/gate22/agent.der"
       MIR2_HOME_AGENT_TLS_KEY_DER: "/run/gate22/agent-key.der"
@@ -91,7 +92,7 @@ services:
       MIR2_HOME_ACCEPTANCE_RELAY_ADDR: "home-relay:7444"
       MIR2_HOME_ACCEPTANCE_ZONE_ID: "primary"
       MIR2_HOME_ACCEPTANCE_SESSION_ID: "${MIR2_HOME_ACCEPTANCE_SESSION_ID:-gate22-docker-session}"
-      MIR2_ZONE_HOST_TOKEN: "gate22-docker-zone-rpc"
+      MIR2_ZONE_HOST_TOKEN: "gate22-relay-gateway-rpc"
     depends_on:
       - home-agent
     networks:
