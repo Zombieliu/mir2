@@ -90,12 +90,17 @@ ZONE_RPC_PORT="${MIR2_GATE23_ZONE_RPC_PORT:-19220}"
 ZONE_OPERATOR_PORT="${MIR2_GATE23_ZONE_OPERATOR_PORT:-19221}"
 SUPERVISOR_PORT="${MIR2_GATE23_SUPERVISOR_PORT:-19222}"
 MANAGEMENT_TOKEN="gate23-management-token-0123456789abcdef"
+HOME_AGENT_NODE_ID="$(jq -er '.nodeId' "${TMP_DIR}/key-init.json")"
 
 printf '%s\n' \
   '#!/usr/bin/env bash' \
   'set -euo pipefail' \
   'trap "exit 0" INT TERM' \
-  'while true; do sleep 1; done' \
+  'while true; do' \
+  '  updated_at_ms="$(($(date +%s) * 1000))"' \
+  '  printf '\''{"version":"0.1.0","nodeId":"%s","relayId":"gate23-relay","relayConnected":true,"telemetryConfigured":true,"telemetryAccepted":true,"telemetrySequence":1,"lastTelemetryAtMs":%s,"lastError":null,"updatedAtMs":%s}\n'\'' "${MIR2_GATE23_NODE_ID}" "${updated_at_ms}" "${updated_at_ms}" >"${MIR2_HOME_AGENT_STATUS_FILE}"' \
+  '  sleep 1' \
+  'done' \
   >"${TMP_DIR}/home_agent"
 chmod 700 "${TMP_DIR}/home_agent"
 
@@ -112,9 +117,11 @@ MIR2_ZONE_HOST_ADDR="127.0.0.1:${ZONE_RPC_PORT}" \
   MIR2_HOME_RECOVERY_SAMPLES="2" \
   MIR2_HOME_MAX_CPU_PERCENT="100" \
   MIR2_HOME_MIN_AVAILABLE_MEMORY_MIB="1" \
+  MIR2_GATE23_NODE_ID="${HOME_AGENT_NODE_ID}" \
   MIR2_HOME_MANAGE_CHILDREN="true" \
   MIR2_HOME_ZONE_BINARY="${REPO_ROOT}/target/debug/zone_host" \
   MIR2_HOME_AGENT_BINARY="${TMP_DIR}/home_agent" \
+  MIR2_HOME_AGENT_STATUS_FILE="${TMP_DIR}/home-agent-status.json" \
   MIR2_HOME_UPDATE_ROOT="${TMP_DIR}/updates" \
   MIR2_HOME_SUPERVISOR_HEALTH_URL="http://127.0.0.1:${SUPERVISOR_PORT}/v1/status" \
   MIR2_HOME_UPDATE_HEALTH_TIMEOUT_SECONDS="10" \
@@ -124,7 +131,9 @@ SUPERVISOR_PID=$!
 
 deadline=$((SECONDS + 30))
 until curl --fail --silent "http://127.0.0.1:${SUPERVISOR_PORT}/v1/status" \
-  >"${TMP_DIR}/status-initial.json"; do
+  >"${TMP_DIR}/status-initial.json" \
+  && jq -e '.relayConnected == true and .telemetryAccepted == true' \
+    "${TMP_DIR}/status-initial.json" >/dev/null; do
   if (( SECONDS >= deadline )); then
     cat "${TMP_DIR}/supervisor.log"
     echo "Gate 23 supervisor did not become ready" >&2

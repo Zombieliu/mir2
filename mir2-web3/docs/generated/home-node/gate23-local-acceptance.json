@@ -4,12 +4,12 @@
   "keyring": {
     "created": true,
     "keyStore": "operating-system-keyring",
-    "nodeId": "ed25519:1a73a9746281dce54cedd99212d043cd4cef4eb207346b2dc5d7f6a1bf9b1de8",
-    "publicKey": "s0QFewFEc9jQSwOYHFWwxia2tpe7_kJBbiF6YBlhQh4"
+    "nodeId": "ed25519:ffc5dfc4244abc6281dd7021b3b0babedcad61dc943a7136681495789de45baf",
+    "publicKey": "_ReT3vKEFTM22Bk2cLEpOI9G4MDEagDzzvtxY9jyRrg"
   },
   "signedRelease": {
-    "sha256": "bb09467bc32fe46043df157868d301486f604e077b94894549143181bbb13bc7",
-    "sizeBytes": 31803829,
+    "sha256": "8a05b61a7e6708e351d14dc6d3d1a51c9783008218adfb0fb0ad253b6ca83cf0",
+    "sizeBytes": 34095085,
     "target": "gate23-local-acceptance",
     "verified": true,
     "version": "0.1.1"
@@ -26,18 +26,25 @@
   },
   "supervisor": {
     "version": "0.1.0",
-    "mode": "draining",
-    "acceptNewSessions": false,
-    "reason": "starting",
-    "cpuUsagePercent": 0.0,
-    "availableMemoryBytes": 0,
+    "mode": "serving",
+    "acceptNewSessions": true,
+    "reason": "healthy",
+    "cpuUsagePercent": 21.905935,
+    "availableMemoryBytes": 31448727552,
     "activeSessions": 0,
-    "zoneReachable": false,
-    "lastObservedAtMs": 1785023891529,
-    "nodeId": "ed25519:1a73a9746281dce54cedd99212d043cd4cef4eb207346b2dc5d7f6a1bf9b1de8",
-    "publicKey": "s0QFewFEc9jQSwOYHFWwxia2tpe7_kJBbiF6YBlhQh4",
+    "zoneReachable": true,
+    "lastObservedAtMs": 1785614184864,
+    "nodeId": "ed25519:ffc5dfc4244abc6281dd7021b3b0babedcad61dc943a7136681495789de45baf",
+    "publicKey": "_ReT3vKEFTM22Bk2cLEpOI9G4MDEagDzzvtxY9jyRrg",
     "keyStore": "operating-system-keyring",
-    "managedProcesses": true
+    "managedProcesses": true,
+    "agentManaged": true,
+    "relayConnected": true,
+    "telemetryConfigured": true,
+    "telemetryAccepted": true,
+    "telemetrySequence": 1,
+    "lastTelemetryAtMs": 1785614184000,
+    "telemetryError": null
   },
   "drain": {
     "unauthorizedStatus": 401,
