@@ -254,8 +254,9 @@ async function serveStaticAssetFromR2(
     return assetError("asset_not_found", 404, "invalid_asset_path", publicUrl.pathname, null);
   }
 
+  const storedGzip = isStoredGzipPath(objectKey);
   const cacheKey = new Request(`https://mir2-r2-cache.local/${objectKey}`, { method: "GET" });
-  if (request.method === "GET") {
+  if (request.method === "GET" && !storedGzip) {
     const cached = await caches.default.match(cacheKey);
     if (cached) {
       const cachedHeaders = new Headers(cached.headers);
@@ -275,11 +276,16 @@ async function serveStaticAssetFromR2(
   }
 
   const headers = assetObjectHeaders(objectKey, object, env, assetVersion, "MISS");
-  const response = new Response(request.method === "HEAD" ? null : object.body, {
+  const body = request.method === "HEAD"
+    ? null
+    : object.httpMetadata?.contentEncoding === "gzip"
+      ? object.body.pipeThrough(new DecompressionStream("gzip"))
+      : object.body;
+  const response = new Response(body, {
     headers,
     status: 200,
   });
-  if (request.method === "GET") {
+  if (request.method === "GET" && !storedGzip) {
     ctx.waitUntil(caches.default.put(cacheKey, response.clone()));
   }
   return response;
@@ -313,6 +319,10 @@ function assetObjectHeaders(
   headers.set("x-mir2-asset-version", assetVersion);
   headers.set("x-mir2-domain-proxy", "r2-asset");
   headers.set("x-mir2-edge-cache", cacheState);
+  const storageContentEncoding = object.httpMetadata?.contentEncoding;
+  if (storageContentEncoding) {
+    headers.set("x-mir2-storage-content-encoding", storageContentEncoding);
+  }
   const sha256 = object.customMetadata?.sha256;
   if (sha256 && /^[a-f0-9]{64}$/i.test(sha256)) {
     headers.set("x-mir2-sha256", sha256.toLowerCase());
@@ -375,6 +385,10 @@ function assetObjectKeyForPath(pathname: string, prefix: string): string {
 
 function normalizeAssetObjectPrefix(value: string | undefined): string {
   return String(value ?? "").trim().replace(/^\/+|\/+$/g, "");
+}
+
+function isStoredGzipPath(objectKey: string): boolean {
+  return objectKey.includes("/generated/crystal-packs/full/") && objectKey.endsWith(".json");
 }
 
 type AssetReleaseConfigResult = {

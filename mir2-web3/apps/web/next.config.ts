@@ -1,10 +1,25 @@
 import type { NextConfig } from "next";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const isDevelopment = process.env.NODE_ENV === "development";
+const isVercelProduction =
+  process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
 const configDir = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.resolve(configDir, "../../..");
+const productionAssetRelease = isVercelProduction
+  ? JSON.parse(
+      readFileSync(
+        path.resolve(configDir, "../../config/production-web-assets.json"),
+        "utf8",
+      ),
+    ) as {
+      version: string;
+      objectPrefix: string;
+      assetBaseUrl: string;
+    }
+  : null;
 const immutableGameAssetCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=31536000, immutable";
@@ -60,6 +75,9 @@ const nextConfig: NextConfig = {
   // does not expose its system variables to server functions at runtime.
   env: {
     MIR2_BUILD_REVISION: buildRevision,
+    MIR2_PINNED_ASSET_VERSION: productionAssetRelease?.version ?? "",
+    MIR2_PINNED_ASSET_OBJECT_PREFIX: productionAssetRelease?.objectPrefix ?? "",
+    MIR2_PINNED_ASSET_BASE_URL: productionAssetRelease?.assetBaseUrl ?? "",
   },
   outputFileTracingRoot: monorepoRoot,
   outputFileTracingExcludes: {
