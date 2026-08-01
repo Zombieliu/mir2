@@ -33,13 +33,32 @@ new Function("exports", "module", "require", compiled.outputText)(
 );
 
 const {
+  crystalEffectiveLightSetting,
   crystalLightTexturePath,
   crystalMapLightSpec,
   crystalMapLightTopLeft,
   crystalObjectLightSpec,
   crystalObjectLightTopLeft,
+  crystalSceneDarknessColor,
   crystalSceneLightClassName,
+  crystalTimeOfDayLightSetting,
 } = module.exports;
+
+assert.equal(crystalTimeOfDayLightSetting(4, "day"), 2);
+assert.equal(crystalTimeOfDayLightSetting(2, "night"), 4);
+assert.equal(crystalTimeOfDayLightSetting(3, "dynamic"), 3);
+assert.equal(crystalTimeOfDayLightSetting(1, "invalid"), 1);
+assert.equal(crystalTimeOfDayLightSetting(null, "day"), 2);
+assert.equal(crystalEffectiveLightSetting(4, 2), 4);
+assert.equal(crystalEffectiveLightSetting(0, 2), 2);
+assert.equal(crystalEffectiveLightSetting(null, 3), 3);
+assert.equal(crystalSceneDarknessColor(4, 0), "rgb(0, 0, 0)");
+assert.equal(crystalSceneDarknessColor(4, 1), "rgb(20, 20, 20)");
+assert.equal(crystalSceneDarknessColor(4, 2), "lightslategray");
+assert.equal(crystalSceneDarknessColor(4, 3), "skyblue");
+assert.equal(crystalSceneDarknessColor(4, 4), "goldenrod");
+assert.equal(crystalSceneDarknessColor(1, 0), "rgb(50, 50, 50)");
+assert.equal(crystalSceneDarknessColor(2, 0), null);
 
 assert.equal(crystalSceneLightClassName(1), "dawn");
 assert.equal(crystalSceneLightClassName(2), null);

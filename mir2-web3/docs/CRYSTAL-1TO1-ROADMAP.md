@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest map-environment roadmap sync: 2026-08-01 closes the source-to-browser
+> path for Crystal map light overrides, `MapDarkLight`, and `WeatherParticles`.
+> The generated 463-map manifest preserves the real fields, Simulation projects
+> them into `MapInformation`, Gateway emits browser-facing camelCase values, and
+> Web renders fixed-map/global-TimeOfDay precedence plus lazy original weather
+> textures. Local Developer Compose and the current production Web test build
+> default to readable Day; `?crystalLight=dynamic` restores the original UTC
+> cycle, while map-specific fixed light remains authoritative. Focused GameData, Simulation, Gateway,
+> frontend logic and TypeScript checks pass; final human weather appearance on
+> `DogYoHyun` remains part of Player QA acceptance.
+
 > Latest v5 failover roadmap sync: 2026-07-29 closes the final deterministic
 > base-image restore gap found during main-branch landing. Standby Session
 > rebinding now restores only its local movement ingress, cached transfers, and

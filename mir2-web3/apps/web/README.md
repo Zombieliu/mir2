@@ -139,6 +139,11 @@ The normal start script injects local values without requiring this file.
 Do not put credentials, GitHub tokens, R2 access keys, or upload secrets in a
 tracked env file.
 
+The repository-local `scripts/start-developer.ps1` and `scripts/dev.ps1 up`
+commands automatically opt both Web and Gateway into the insecure development
+Passkey secret. Production and staging still require an explicit matching
+`MIR2_PASSKEY_AUTH_SECRET` on both services.
+
 ## Verification
 
 Run the repository verifier after onboarding or before handoff:

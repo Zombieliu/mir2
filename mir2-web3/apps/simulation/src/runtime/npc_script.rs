@@ -2179,6 +2179,8 @@ pub(super) fn crystal_npc_move_map_information(
         info.mini_map = map.mini_map;
         info.big_map = map.big_map;
         info.lights = map.light;
+        info.map_dark_light = map.map_dark_light;
+        info.weather_particles = map.weather_particles;
         return info;
     }
 

@@ -480,7 +480,7 @@ pub(crate) struct RemoteMotionPresentationPlugin;
 
 impl Plugin for RemoteMotionPresentationPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_non_send_resource(RemoteMotionPresentationMainThread)
+        app.insert_non_send(RemoteMotionPresentationMainThread)
             .init_resource::<RemoteMotionPresentation>()
             .add_systems(
                 PreUpdate,

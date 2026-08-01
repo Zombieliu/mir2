@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Latest map-environment backend sync: 2026-08-01 extends the existing Crystal
+> map import with `MapDarkLight` and `WeatherParticles` without changing Zone
+> authority. Simulation emits those values through its existing typed
+> `MapInformation` path, and Gateway now keeps light/weather fields in explicit
+> browser-facing `MapInformation` and `MapChanged` events. The generator was
+> corrected to the current v117 `MapInfo` boolean layout and regenerated 463
+> maps; `DogYoHyun` carries the source combination `weather_particles=3`.
+> Focused GameData, Simulation and Gateway regressions pass.
+
 > Latest v5 replica-image stability sync: 2026-07-29 keeps an installed base
 > snapshot byte-identical when a restored Session is rebound on the standby.
 > Replica rebinding now restores only the Session-local movement ingress,

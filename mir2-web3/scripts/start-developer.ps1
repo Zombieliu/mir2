@@ -28,6 +28,11 @@ $GatewayHealthUrl = "http://127.0.0.1:$GatewayWebPort/health"
 $WebUrl = "http://127.0.0.1:$WebPort/"
 $GatewayProcess = $null
 $StartedGateway = $false
+$PreviousDevPasskeySecret = $env:MIR2_ALLOW_DEV_PASSKEY_SECRET
+
+# The local Web token issuer and Gateway verifier must use the same opt-in
+# development secret. Production never runs through this developer wrapper.
+$env:MIR2_ALLOW_DEV_PASSKEY_SECRET = "1"
 
 function Test-HttpOk {
     param([string]$Url)
@@ -170,6 +175,7 @@ finally {
     $env:MIR2_USE_PREBUILT_BEVY_RUNTIME = $PreviousPrebuilt
     $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL = $PreviousGatewayWs
     $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL = $PreviousAssetBase
+    $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = $PreviousDevPasskeySecret
 
     if ($StartedGateway -and $null -ne $GatewayProcess -and -not $GatewayProcess.HasExited) {
         Stop-Process -Id $GatewayProcess.Id -Force

@@ -3906,6 +3906,8 @@ fn request_map_info_packet(world: &World, map_index: i32) -> Vec<ServerPacket> {
         info.mini_map = map.mini_map;
         info.big_map = map.big_map;
         info.lights = map.light;
+        info.map_dark_light = map.map_dark_light;
+        info.weather_particles = map.weather_particles;
     }
     vec![ServerPacket::MapInformation { info }]
 }
@@ -5666,10 +5668,16 @@ pub(super) fn crystal_time_of_day_lights_for_utc_hour(hour: u32) -> u8 {
 }
 
 pub(super) fn parse_fixed_crystal_light_setting(raw: &str) -> Option<u8> {
-    raw.trim()
-        .parse::<u8>()
-        .ok()
-        .filter(|setting| (1..=4).contains(setting))
+    match raw.trim().to_ascii_lowercase().as_str() {
+        "dawn" => Some(1),
+        "day" => Some(2),
+        "evening" => Some(3),
+        "night" => Some(4),
+        value => value
+            .parse::<u8>()
+            .ok()
+            .filter(|setting| (1..=4).contains(setting)),
+    }
 }
 
 pub(super) fn crystal_time_of_day_lights_with_override(
@@ -5689,7 +5697,16 @@ pub(super) fn current_crystal_time_of_day_lights() -> u8 {
         .duration_since(UNIX_EPOCH)
         .map(|duration| ((duration.as_secs() / 3600) % 24) as u32)
         .unwrap_or(0);
-    crystal_time_of_day_lights_with_override(fixed_setting.as_deref(), utc_hour)
+    match fixed_setting.as_deref().map(str::trim) {
+        Some(value) if value.eq_ignore_ascii_case("dynamic") => {
+            crystal_time_of_day_lights_for_utc_hour(utc_hour)
+        }
+        Some(value) => crystal_time_of_day_lights_with_override(Some(value), utc_hour),
+        // Local debug builds stay readable by default. Production Release builds
+        // preserve Crystal's UTC-driven 12-hour day/night cycle.
+        None if cfg!(debug_assertions) => 2,
+        None => crystal_time_of_day_lights_for_utc_hour(utc_hour),
+    }
 }
 
 pub(super) fn decode_crystal_payload(packet_id: ServerPacketId, payload: Vec<u8>) -> ServerPacket {
