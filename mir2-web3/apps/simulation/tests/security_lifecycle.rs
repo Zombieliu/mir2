@@ -1,7 +1,7 @@
-use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point};
+use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket};
 use mir2_simulation::{
     validate_production_player_command, InProcessWorldRuntime, SessionId, SimulationConfig,
-    WorldCommand, WorldRuntime, ZoneCommand, ZoneJoin, ZoneKey, ZoneRuntime,
+    SimulationSession, WorldCommand, WorldRuntime, ZoneCommand, ZoneJoin, ZoneKey, ZoneRuntime,
 };
 
 fn assert_rejected(command: WorldCommand) {
@@ -128,4 +128,83 @@ fn each_joined_player_has_unique_object_id() {
         zone.player_object_id(&first),
         zone.player_object_id(&second)
     );
+}
+
+#[test]
+fn password_accounts_are_written_as_argon2id_and_can_login() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+
+    let created = session.handle_packet(ClientPacket::NewAccount {
+        account_id: "argon-account".to_string(),
+        password: "CommercialPassword42!".to_string(),
+        birth_date_binary: 0,
+        user_name: String::new(),
+        secret_question: String::new(),
+        secret_answer: String::new(),
+        email_address: String::new(),
+    });
+    assert!(matches!(
+        created.as_slice(),
+        [ServerPacket::NewAccount { result: 8 }]
+    ));
+
+    let stored = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .get("argon-account")
+        .expect("created account should exist")
+        .password
+        .clone();
+    assert!(stored.starts_with("$argon2id$"));
+    assert!(!stored.contains("CommercialPassword42!"));
+
+    let logged_in = session.handle_packet(ClientPacket::Login {
+        account_id: "argon-account".to_string(),
+        password: "CommercialPassword42!".to_string(),
+    });
+    assert!(matches!(
+        logged_in.as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
+}
+
+#[test]
+fn successful_legacy_plaintext_login_is_migrated_to_argon2id() {
+    let config = SimulationConfig::default();
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let account = store
+            .accounts
+            .get_mut("demo")
+            .expect("default demo account should exist");
+        account.password = "legacy-password".to_string();
+    }
+
+    let mut session = SimulationSession::new(config.clone());
+    let logged_in = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "legacy-password".to_string(),
+    });
+    assert!(matches!(
+        logged_in.as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
+
+    let migrated = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .get("demo")
+        .expect("default demo account should exist")
+        .password
+        .clone();
+    assert!(migrated.starts_with("$argon2id$"));
+    assert_ne!(migrated, "legacy-password");
 }

@@ -8,6 +8,7 @@ import {
   type WalletAccount,
   type SuiSignPersonalMessageFeature,
 } from "@mysten/wallet-standard";
+import { normalizeSuiAddress } from "@mysten/sui/utils";
 
 const PASSKEY_STORAGE_KEY = "mir2.suiPasskey";
 const SUI_LOGIN_PURPOSE = "mir2-sui-login";
@@ -28,6 +29,13 @@ type StoredPasskey = {
 export type SuiLoginToken = {
   accountId: string;
   token: string;
+  expiresAt: number;
+};
+
+type SuiLoginChallenge = {
+  challenge: string;
+  challengeId: string;
+  issuedAt: number;
   expiresAt: number;
 };
 
@@ -114,8 +122,9 @@ export async function requestPasskeyLoginToken(): Promise<SuiLoginToken> {
     });
   }
 
-  const address = keypair.getPublicKey().toSuiAddress();
-  const message = buildSuiLoginMessage(address);
+  const address = normalizeSuiAddress(keypair.getPublicKey().toSuiAddress());
+  const challenge = await requestSuiLoginChallenge(address, "passkey");
+  const message = buildSuiLoginMessage(address, challenge, "passkey");
   const { signature } = await keypair.signPersonalMessage(new TextEncoder().encode(message));
 
   return requestSuiLoginToken(address, message, signature);
@@ -133,7 +142,9 @@ export async function requestWalletLoginToken(walletId?: string): Promise<SuiLog
   // Retain the connected wallet so on-chain mining can sign with it later (M4, WF-6).
   retainWalletSession(wallet, account);
 
-  const message = buildSuiLoginMessage(account.address);
+  const address = normalizeSuiAddress(account.address);
+  const challenge = await requestSuiLoginChallenge(address, "wallet");
+  const message = buildSuiLoginMessage(address, challenge, "wallet");
   const chain = account.chains?.find((entry) => entry.startsWith("sui:"));
   const { signature } = await wallet.features[SuiSignPersonalMessage].signPersonalMessage({
     account,
@@ -141,7 +152,7 @@ export async function requestWalletLoginToken(walletId?: string): Promise<SuiLog
     chain,
   });
 
-  return requestSuiLoginToken(account.address, message, signature);
+  return requestSuiLoginToken(address, message, signature);
 }
 
 export function getSuiWalletSummaries(): SuiWalletSummary[] {
@@ -168,17 +179,41 @@ export function subscribeToSuiWalletChanges(listener: () => void) {
   };
 }
 
-function buildSuiLoginMessage(address: string) {
-  const now = Date.now();
+function buildSuiLoginMessage(
+  address: string,
+  challenge: SuiLoginChallenge,
+  authMethod: "passkey" | "wallet",
+) {
   return JSON.stringify({
     purpose: SUI_LOGIN_PURPOSE,
     accountId: `sui:${address}`,
     address,
     origin: window.location.origin,
-    issuedAt: now,
-    expiresAt: now + 60_000,
-    nonce: crypto.randomUUID(),
+    issuedAt: challenge.issuedAt,
+    expiresAt: challenge.expiresAt,
+    nonce: challenge.challengeId,
+    challenge: challenge.challenge,
+    authMethod,
   });
+}
+
+async function requestSuiLoginChallenge(
+  address: string,
+  authMethod: "passkey" | "wallet",
+): Promise<SuiLoginChallenge> {
+  const response = await fetch("/api/passkey/challenge", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ address, authMethod }),
+  });
+  const body = (await response.json().catch(() => null)) as
+    | SuiLoginChallenge
+    | { error?: string }
+    | null;
+  if (!response.ok || !body || !("challenge" in body)) {
+    throw new Error(body && "error" in body && body.error ? body.error : "Sui login challenge failed");
+  }
+  return body;
 }
 
 async function requestSuiLoginToken(address: string, message: string, signature: string) {
