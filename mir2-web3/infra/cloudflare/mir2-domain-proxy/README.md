@@ -27,6 +27,16 @@ version used by `/api/asset-manifest`, the R2 upload, and the Vercel build.
 Missing R2 objects return a JSON 404 with the exact object key, so Bevy and DOM
 asset failures are diagnosable from the browser network panel.
 
+The checked-in production pin is currently:
+
+```text
+20260730-fullcrystal-f71b89aa-gzip1
+```
+
+It is the verified full-Crystal release in `mir2-web3-assets`; the browser keeps
+requesting stable same-origin paths while this Worker serves the matching R2
+objects without packaging those bytes into the Vercel frontend deployment.
+
 Deploy:
 
 ```bash
