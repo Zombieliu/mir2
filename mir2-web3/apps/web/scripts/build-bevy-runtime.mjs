@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const profiles = {
   dev: { cargoProfileDir: "debug", cargoFlags: [] },
-  release: { cargoProfileDir: "release", cargoFlags: ["--release"] },
+  release: { cargoProfileDir: "wasm-release", cargoFlags: ["--profile", "wasm-release"] },
 };
 const requestedArgs = process.argv.slice(2);
 const selfCheckMode = requestedArgs.some((arg) => arg === "--self-check" || arg === "self-check");
@@ -364,7 +364,7 @@ function buildCargoEnv(selectedProfile, targetDir, platform = process.platform, 
     return env;
   }
 
-  // Rust 1.89 + Bevy's wasm dependency graph is most reliable on Windows with
+  // Bevy's wasm dependency graph is most reliable on Windows with
   // one non-incremental Cargo job. Dev also strips debug data from dependencies.
   env.CARGO_BUILD_JOBS ??= "1";
   env.CARGO_INCREMENTAL ??= "0";
@@ -954,7 +954,7 @@ function runSelfCheck() {
     selfCheckBuildLock(tempRoot);
     selfCheckPublication(tempRoot);
     const pinnedToolchain = readPinnedRustToolchain(runtimeDir);
-    assertSelfCheck(pinnedToolchain.version === "1.89.0", "rust-toolchain.toml pin was not read as 1.89.0");
+    assertSelfCheck(pinnedToolchain.version === "1.95.0", "rust-toolchain.toml pin was not read as 1.95.0");
     console.log("[bevy-runtime] self-check passed (no Cargo build was run)");
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });

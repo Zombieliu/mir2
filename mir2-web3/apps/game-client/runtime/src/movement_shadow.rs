@@ -907,7 +907,7 @@ pub(crate) struct MovementShadowPlugin;
 
 impl Plugin for MovementShadowPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_non_send_resource(MovementShadowMainThread)
+        app.insert_non_send(MovementShadowMainThread)
             .init_resource::<MovementShadow>()
             .insert_resource(Time::<Fixed>::from_duration(MOVEMENT_SHADOW_FIXED_INTERVAL))
             .add_systems(FixedUpdate, movement_shadow_fixed_update_system);
