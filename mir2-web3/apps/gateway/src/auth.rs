@@ -87,7 +87,9 @@ pub(crate) fn verify_passkey_gateway_token(
                 ),
                 expires_at_ms: claims.exp_ms,
                 auth_method,
-                credential_subject: claims.subject,
+                credential_subject: claims
+                    .subject
+                    .map(|subject| subject.strip_prefix("sui:").unwrap_or(&subject).to_string()),
             });
         }
     }
@@ -441,6 +443,24 @@ mod tests {
         )
     }
 
+    fn signed_legacy_sui_token(account_id: &str, exp_ms: u64) -> String {
+        let payload = URL_SAFE_NO_PAD.encode(
+            serde_json::to_vec(&json!({
+                "auth": "sui-passkey-v1",
+                "accountId": account_id,
+                "expMs": exp_ms,
+                "provider": "suiPasskey",
+            }))
+            .expect("legacy payload should serialize"),
+        );
+        let secret = passkey_gateway_secret().expect("test passkey secret should resolve");
+        let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
+            .expect("test passkey secret should initialize hmac");
+        mac.update(payload.as_bytes());
+        let signature = URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes());
+        format!("{payload}.{signature}")
+    }
+
     fn signed_guest_token(subject: &str, provider: &str, exp_ms: u64) -> String {
         let payload = URL_SAFE_NO_PAD.encode(
             serde_json::to_vec(&json!({
@@ -494,6 +514,26 @@ mod tests {
                 assert_eq!(proof.provider, provider);
             }
         });
+    }
+
+    #[test]
+    fn production_rejects_replayable_legacy_sui_proofs() {
+        with_passkey_env(
+            &[
+                ("MIR2_RUNTIME_ENV", Some("production")),
+                (
+                    "MIR2_PASSKEY_AUTH_SECRET",
+                    Some("production-test-passkey-secret-32-chars"),
+                ),
+            ],
+            || {
+                let token =
+                    signed_legacy_sui_token("sui:0xlegacy", unix_now_ms().saturating_add(60_000));
+                let error = verify_sui_login_proof(&token)
+                    .expect_err("production must reject replayable legacy proofs");
+                assert!(error.contains("legacy Sui login proofs"));
+            },
+        );
     }
 
     #[test]

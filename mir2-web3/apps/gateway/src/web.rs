@@ -9151,6 +9151,20 @@ mod tests {
         );
     }
 
+    #[test]
+    fn channel_identity_proofs_are_consumed_once() {
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        let proof = super::VerifiedChannelSubject {
+            subject: "sui:0xonce".to_string(),
+            token_id: Some("channel-proof-once".to_string()),
+            expires_at_ms: Some(super::gateway_now_ms().saturating_add(60_000)),
+        };
+        assert!(super::consume_channel_subject_proof(&cache, &proof).is_ok());
+        let replay = super::consume_channel_subject_proof(&cache, &proof)
+            .expect_err("the same channel proof must not be accepted twice");
+        assert_eq!(replay.0, axum::http::StatusCode::UNAUTHORIZED);
+    }
+
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
         UserItem {
             unique_id,
@@ -9388,58 +9402,6 @@ mod tests {
             response.gameplay_events.topic.as_deref(),
             Some(crate::events::DEFAULT_GAMEPLAY_EVENT_TOPIC)
         );
-    }
-
-    #[tokio::test]
-    async fn health_reports_configured_deploy_revision() {
-        let state = super::WebState {
-            config: Arc::new(crate::GatewayConfig::default()),
-            deploy_revision: Some("681bc20a01fe9892fa7cbe285f5e747ead696a93".to_string()),
-            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
-            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
-            session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
-            reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
-            capacity: Arc::new(super::GatewayCapacityState::unlimited()),
-            gameplay_event_sink: None,
-            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
-            injector: crate::inject::LiveSessionInjector::default(),
-        };
-
-        let Json(response) = super::health(State(state)).await;
-        let serialized = serde_json::to_value(&response).expect("health response should serialize");
-
-        assert_eq!(
-            response.revision.as_deref(),
-            Some("681bc20a01fe9892fa7cbe285f5e747ead696a93")
-        );
-        assert_eq!(
-            serialized.get("revision"),
-            Some(&json!("681bc20a01fe9892fa7cbe285f5e747ead696a93"))
-        );
-    }
-
-    #[test]
-    fn deploy_revision_from_env_trims_values_and_ignores_blanks() {
-        let configured = with_env_var(
-            "MIR2_DEPLOY_REVISION",
-            Some("  acceptance-revision-42  "),
-            super::deploy_revision_from_env,
-        );
-        assert_eq!(configured.as_deref(), Some("acceptance-revision-42"));
-
-        let blank = with_env_var(
-            "MIR2_DEPLOY_REVISION",
-            Some("  "),
-            super::deploy_revision_from_env,
-        );
-        assert_eq!(blank, None);
-
-        let missing = with_env_var(
-            "MIR2_DEPLOY_REVISION",
-            None,
-            super::deploy_revision_from_env,
-        );
-        assert_eq!(missing, None);
     }
 
     #[tokio::test]

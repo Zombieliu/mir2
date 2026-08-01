@@ -44,7 +44,7 @@ sequenceDiagram
 
 ## 3. 数据与隐私
 
-Postgres migration `0008_commercial_identity.sql` 建立四类记录：凭据、Session、
+Postgres migration `0010_commercial_identity.sql` 建立四类记录：凭据、Session、
 恢复码和审计。数据库只保存 Argon2 密码摘要、恢复码的带 pepper HMAC、脱敏凭据
 主体，以及经 HMAC 处理的网络指纹；不会保存恢复码明文、身份 Session 明文或家庭 IP。
 
@@ -91,14 +91,14 @@ Session 失效；轮换恢复 pepper 会使旧恢复码失效，二者都应先�
 
 ## 5. 上线顺序与回滚
 
-1. 备份 Postgres，执行 migration `0008`；迁移是新增表，不修改角色数据。
+1. 备份 Postgres，执行 migration `0010`；迁移是新增表，不修改角色数据。
 2. 写入四个独立 Secret、Origin、Postgres、Redis 和并发上限。
 3. 在与线上功能同源的 commit 构建 Gateway，记录 commit、Cargo.lock 与二进制 SHA-256。
 4. 先启动单个候选实例，验证健康检查、密码登录、Passkey、建角和 StartGame。
 5. 验证新角色已通过 Gate15 最终化并进入 Zone，再切换其余流量。
 6. 发布 Player Web 与 Admin Web，验证账号安全页面和强制下线。
 
-回滚时恢复上一版本 Gateway 二进制和环境文件即可；`0008` 新表可保留，旧版本不会读取。
+回滚时恢复上一版本 Gateway 二进制和环境文件即可；`0010` 新表可保留，旧版本不会读取。
 不要自动删除身份表或恢复旧密码摘要。若出现安全事件，应先撤销账号全部 Session、轮换
 相关 Secret，再恢复服务。
 
@@ -112,8 +112,8 @@ SHA-256 校验；上一版本和环境文件已保留，可立即回滚。线上
 
 这次热修复只解决“新角色被 Gate15 拒绝”，没有把本章商业身份系统发布到 UCloud。
 生产仍包含 `main` 尚未具备的观战、AI Live 和渠道身份能力，不能直接用 `main` 覆盖。
-商业身份正式发布前，必须把本分支移植或合并到可复现的生产源码线，执行 migration
-`0008`，配置独立 Secret，并按第 5 节进行候选实例和回滚验收。
+本分支已经移植到可复现的生产源码线；商业身份正式发布前仍须执行 migration `0010`，
+配置独立 Secret，并按第 5 节进行候选实例和回滚验收。
 
 ## 7. 人工验收清单
 
