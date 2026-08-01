@@ -17,6 +17,9 @@ x-developer-environment: &developer-environment
   # Safe only inside this local developer stack. Production requires the
   # explicit MIR2_PASSKEY_AUTH_SECRET shared by Web and Gateway.
   MIR2_ALLOW_DEV_PASSKEY_SECRET: "1"
+  # Safe only inside this local developer stack. Production must configure
+  # independent identity session and recovery secrets and never enable this.
+  MIR2_ALLOW_DEV_IDENTITY_SECRETS: "1"
   MIR2_DEPLOY_REVISION: ${MIR2_DEPLOY_REVISION:-}
   RUST_BACKTRACE: "1"
   CARGO_TERM_COLOR: always
