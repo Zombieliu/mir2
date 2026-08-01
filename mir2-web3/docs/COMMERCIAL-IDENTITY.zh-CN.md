@@ -93,27 +93,46 @@ Session 失效；轮换恢复 pepper 会使旧恢复码失效，二者都应先�
 
 1. 备份 Postgres，执行 migration `0010`；迁移是新增表，不修改角色数据。
 2. 写入四个独立 Secret、Origin、Postgres、Redis 和并发上限。
-3. 在与线上功能同源的 commit 构建 Gateway，记录 commit、Cargo.lock 与二进制 SHA-256。
-4. 先启动单个候选实例，验证健康检查、密码登录、Passkey、建角和 StartGame。
-5. 验证新角色已通过 Gate15 最终化并进入 Zone，再切换其余流量。
-6. 发布 Player Web 与 Admin Web，验证账号安全页面和强制下线。
+3. 在同一个 commit 构建 Gateway 与权威 Zone Host，记录 commit、Cargo.lock 和两个二进制的 SHA-256；涉及账号或模拟状态的发布不得只更新一端。
+4. 备份两个服务的环境文件、当前软链和二进制哈希，先切换 Zone Host，再切换 Gateway；任一步失败均恢复两个旧软链。
+5. 启动单个候选链路，验证健康检查、密码登录、Passkey、建角、Gate15 最终化和 StartGame。
+6. 发布 Player Web 与 Admin Web，验证账号安全页面、恢复、会话撤销和运营强制下线。
 
-回滚时恢复上一版本 Gateway 二进制和环境文件即可；`0010` 新表可保留，旧版本不会读取。
-不要自动删除身份表或恢复旧密码摘要。若出现安全事件，应先撤销账号全部 Session、轮换
-相关 Secret，再恢复服务。
+回滚时默认同时恢复上一组 Gateway、Zone Host 软链及环境文件；`0010` 新表可保留，旧版本
+不会读取。只有 diff 已证明变更完全不进入 Zone Host 编译和执行路径时，才允许单独滚动
+Gateway，且仍须重跑本章完整验收。不要自动删除身份表或恢复旧密码摘要。若出现安全事件，
+应先撤销账号全部 Session、轮换相关 Secret，再恢复服务。
 
-## 6. UCloud 当前发布边界
+## 6. UCloud 当前生产状态
 
-2026-08-02 已在生产源码基线 `b6e0b21e` 上移植 Gate15 新角色最终化修复，并发布
-`20260802-gate15-new-player`（git revision `8681d9451`）。发布包与包内二进制均通过
-SHA-256 校验；上一版本和环境文件已保留，可立即回滚。线上新建 QA 账号、角色与
-`StartGame` 分别在 Commonware 高度 5452、5453、5454 最终化，客户端验收结果为
-`ready=1`、`startedGames=1`、`errors=0`。
+2026-08-02 商业身份系统已经部署到 UCloud 生产环境：
 
-这次热修复只解决“新角色被 Gate15 拒绝”，没有把本章商业身份系统发布到 UCloud。
-生产仍包含 `main` 尚未具备的观战、AI Live 和渠道身份能力，不能直接用 `main` 覆盖。
-本分支已经移植到可复现的生产源码线；商业身份正式发布前仍须执行 migration `0010`，
-配置独立 Secret，并按第 5 节进行候选实例和回滚验收。
+- Postgres migration `0010` 已执行，身份凭据、Session、恢复码和审计四张表已建立。
+- Gateway 当前 revision 为 `a2f05a346`，包含商业身份基线 `f02aa2acd`，以及 Postgres
+  运行时隔离和有界账号动作队列；二进制 SHA-256 为
+  `f4f93ba48d6366a7108dd4261ed39ae8ae439cb1bcfa1225601b949846039aae`。
+- 权威 Zone Host 使用同一商业身份基线 `f02aa2acd`，二进制 SHA-256 为
+  `1befec70b3eb5d4ed1461db72ee8b4d5cb3b25f58b6dbdf4ff1af618b4a44e55`。
+  后续两个 Gateway-only commit 只修改 `identity.rs` 和 `web.rs`，不改变 Zone Host
+  编译路径；其生产发布后已重新执行完整账号生命周期验收。
+- Gateway 健康接口确认 `identity_backend=postgres`、Redis Session Cache 健康，Gate15
+  四个验证者全部响应。
+- Player Web 生产部署 `dpl_Hi7zKb5YPfjuTK1kxiCvqwydfrW7` 已绑定
+  `https://mir2.obelisk.build`；Admin Web 生产部署
+  `dpl_EZLvBtvDAtDPmmiiKorstucryoVh` 已绑定
+  `https://mir2-telemetry.vercel.app`。
+
+真实外网验收已连续通过两次：新账号、建角、首次 StartGame、Postgres 身份 Session、
+十枚恢复码轮换、密码恢复、新密码重登、原角色重载、第二次 StartGame、当前 Session
+撤销，以及撤销 Token 返回 HTTP 401。浏览器验收同时确认玩家站 HTTP 200、后台可登录
+`/identity-security`、管理 API 已配置，两个页面均无运行时错误。
+
+后台登录 Token 与 Gateway 管理 Token 相互独立，保存在运维 Mac 的 Keychain 中，不写入
+仓库或文档。授权运维人员可在该机器执行以下命令取用：
+
+```bash
+security find-generic-password -a henryliu -s obelisk-mir2-admin-dashboard -w
+```
 
 ## 7. 人工验收清单
 
