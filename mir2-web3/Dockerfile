@@ -7,6 +7,7 @@ COPY apps/gateway ./apps/gateway
 COPY apps/simulation ./apps/simulation
 COPY packages/game-data ./packages/game-data
 COPY packages/protocol ./packages/protocol
+COPY vendor/dubhe-network-core ./vendor/dubhe-network-core
 COPY infra/postgres/migrations ./infra/postgres/migrations
 COPY infra/regional ./infra/regional
 
@@ -135,6 +136,7 @@ COPY apps/gateway ./apps/gateway
 COPY apps/simulation ./apps/simulation
 COPY packages/game-data ./packages/game-data
 COPY packages/protocol ./packages/protocol
+COPY vendor/dubhe-network-core ./vendor/dubhe-network-core
 COPY infra/postgres/migrations ./infra/postgres/migrations
 COPY infra/regional ./infra/regional
 
