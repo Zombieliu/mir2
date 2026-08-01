@@ -1,5 +1,6 @@
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket};
 use mir2_simulation::{
+    reset_account_password_after_recovery, validate_commercial_identity_credentials,
     validate_production_player_command, InProcessWorldRuntime, SessionId, SimulationConfig,
     SimulationSession, WorldCommand, WorldRuntime, ZoneCommand, ZoneJoin, ZoneKey, ZoneRuntime,
 };
@@ -207,4 +208,51 @@ fn successful_legacy_plaintext_login_is_migrated_to_argon2id() {
         .clone();
     assert!(migrated.starts_with("$argon2id$"));
     assert_ne!(migrated, "legacy-password");
+}
+
+#[test]
+fn commercial_identity_policy_rejects_weak_or_ambiguous_credentials() {
+    assert!(validate_commercial_identity_credentials("valid.account", "LongEnough42!").is_ok());
+    assert!(validate_commercial_identity_credentials("x", "LongEnough42!").is_err());
+    assert!(validate_commercial_identity_credentials("bad account", "LongEnough42!").is_err());
+    assert!(validate_commercial_identity_credentials("valid.account", "password").is_err());
+    assert!(validate_commercial_identity_credentials("valid.account", "valid.account").is_err());
+}
+
+#[test]
+fn recovery_password_reset_rehashes_and_invalidates_the_previous_password() {
+    let config = SimulationConfig::default();
+    reset_account_password_after_recovery(&config, "demo", "RecoveredPassword42!")
+        .expect("recovery reset should persist a commercial password");
+
+    let stored = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .get("demo")
+        .expect("default demo account should exist")
+        .password
+        .clone();
+    assert!(stored.starts_with("$argon2id$"));
+
+    let mut old_session = SimulationSession::new(config.clone());
+    let old_login = old_session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(!matches!(
+        old_login.as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
+
+    let mut new_session = SimulationSession::new(config);
+    let new_login = new_session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "RecoveredPassword42!".to_string(),
+    });
+    assert!(matches!(
+        new_login.as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
 }

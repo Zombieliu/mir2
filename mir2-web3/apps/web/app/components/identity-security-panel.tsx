@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { requestSuiLoginToken, type SuiLoginKind } from "../../lib/client-login-runtime";
 
@@ -52,6 +52,10 @@ export function IdentitySecurityPanel({ token, accountId, language, onCurrentSes
   const [recoverAccount, setRecoverAccount] = useState(accountId);
   const [recoveryCode, setRecoveryCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const onCurrentSessionRevokedRef = useRef(onCurrentSessionRevoked);
+  useEffect(() => {
+    onCurrentSessionRevokedRef.current = onCurrentSessionRevoked;
+  }, [onCurrentSessionRevoked]);
 
   const call = useCallback(async (path: string, init?: RequestInit) => {
     const response = await fetch(`/api/identity/${path}`, {
@@ -63,7 +67,15 @@ export function IdentitySecurityPanel({ token, accountId, language, onCurrentSes
       cache: "no-store",
     });
     const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-    if (!response.ok) throw new Error(typeof payload?.error === "string" ? payload.error : `HTTP ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 401 && token) {
+        setOverview(null);
+        setCodes(null);
+        setOpen(false);
+        onCurrentSessionRevokedRef.current();
+      }
+      throw new Error(typeof payload?.error === "string" ? payload.error : `HTTP ${response.status}`);
+    }
     return payload;
   }, [token]);
 

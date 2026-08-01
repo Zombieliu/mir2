@@ -24,6 +24,10 @@ export async function POST(request: Request, context: RouteContext) {
 }
 
 async function proxyIdentityRequest(request: Request, context: RouteContext, method: "GET" | "POST") {
+  const origin = request.headers.get("origin");
+  if (method === "POST" && !isSameOriginBrowserRequest(request, origin)) {
+    return NextResponse.json({ error: "cross-origin identity request rejected" }, { status: 403 });
+  }
   const { path } = await context.params;
   const relative = path.join("/");
   if (!ALLOWED_PATHS.has(relative)) {
@@ -66,4 +70,25 @@ async function proxyIdentityRequest(request: Request, context: RouteContext, met
   } catch {
     return NextResponse.json({ error: "identity service is unavailable" }, { status: 503 });
   }
+}
+
+function isSameOriginBrowserRequest(request: Request, origin: string | null): boolean {
+  if (!origin) {
+    return request.headers.get("sec-fetch-site") === "same-origin";
+  }
+  let originUrl: URL;
+  try {
+    originUrl = new URL(origin);
+  } catch {
+    return false;
+  }
+  const requestUrl = new URL(request.url);
+  const forwardedHost = request.headers.get("x-forwarded-host")?.trim();
+  const host = request.headers.get("host")?.trim();
+  const expectedHost = forwardedHost || host || requestUrl.host;
+  if (originUrl.host !== expectedHost) return false;
+
+  const forwardedProtocol = request.headers.get("x-forwarded-proto")?.trim().replace(/:$/u, "");
+  const expectedProtocol = forwardedProtocol ? `${forwardedProtocol}:` : requestUrl.protocol;
+  return originUrl.protocol === expectedProtocol;
 }
