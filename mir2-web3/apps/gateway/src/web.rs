@@ -401,6 +401,29 @@ impl GatewayCapacityState {
         self.try_acquire(kind)
     }
 
+    async fn acquire_action_with_wait(
+        self: &Arc<Self>,
+        kind: GatewayCapacityKind,
+        maximum_wait: Duration,
+    ) -> Result<GatewayCapacityPermit, String> {
+        let started_at = Instant::now();
+        loop {
+            match self.try_acquire_action(kind) {
+                Ok(permit) => return Ok(permit),
+                Err(error) if maximum_wait.is_zero() => return Err(error),
+                Err(error) => {
+                    let Some(remaining) = maximum_wait.checked_sub(started_at.elapsed()) else {
+                        return Err(format!(
+                            "{error}; queue wait timed out after {}ms",
+                            maximum_wait.as_millis()
+                        ));
+                    };
+                    tokio::time::sleep(remaining.min(Duration::from_millis(100))).await;
+                }
+            }
+        }
+    }
+
     fn try_acquire(
         self: &Arc<Self>,
         kind: GatewayCapacityKind,
@@ -4156,7 +4179,10 @@ async fn handle_socket_inner(
                     }
                 }
                 let action_capacity_permit = match inflight_capacity_kind_for_action(&action) {
-                    Some(kind) => match capacity.try_acquire_action(kind) {
+                    Some(kind) => match capacity
+                        .acquire_action_with_wait(kind, gateway_action_queue_wait(kind))
+                        .await
+                    {
                         Ok(permit) => Some(permit),
                         Err(error) => {
                             release_pending_start_game_route_lease(
@@ -4796,6 +4822,27 @@ fn gateway_zone_owner_heartbeat_interval_ms() -> u64 {
     )
     .as_millis()
     .min(u128::from(u64::MAX)) as u64
+}
+
+fn gateway_action_queue_wait(kind: GatewayCapacityKind) -> Duration {
+    let (name, production_default_ms) = match kind {
+        GatewayCapacityKind::Login => ("MIR2_GATEWAY_LOGIN_QUEUE_WAIT_MS", 30_000),
+        GatewayCapacityKind::NewCharacter => ("MIR2_GATEWAY_NEW_CHARACTER_QUEUE_WAIT_MS", 30_000),
+        GatewayCapacityKind::StartGame => ("MIR2_GATEWAY_START_GAME_QUEUE_WAIT_MS", 300_000),
+        GatewayCapacityKind::WebSocketConnection
+        | GatewayCapacityKind::ActiveSession
+        | GatewayCapacityKind::ReconnectLease => return Duration::ZERO,
+    };
+    duration_from_millis_env(
+        name,
+        if gateway_prod_like_env() {
+            production_default_ms
+        } else {
+            0
+        },
+        0,
+        600_000,
+    )
 }
 
 fn duration_from_millis_env(name: &str, default_ms: u64, min_ms: u64, max_ms: u64) -> Duration {
@@ -11664,6 +11711,38 @@ mod tests {
         drop(start_game);
         assert_eq!(capacity.status().current_login_in_flight, 0);
         assert_eq!(capacity.status().current_new_character_in_flight, 0);
+        assert_eq!(capacity.status().current_start_game_in_flight, 0);
+    }
+
+    #[tokio::test]
+    async fn action_capacity_waits_for_a_released_slot() {
+        let capacity = Arc::new(super::GatewayCapacityState::with_action_limits(
+            None,
+            None,
+            Some(1),
+        ));
+        let first = capacity
+            .try_acquire_action(super::GatewayCapacityKind::StartGame)
+            .expect("first StartGame should fit capacity");
+        let waiting_capacity = Arc::clone(&capacity);
+        let waiting = tokio::spawn(async move {
+            waiting_capacity
+                .acquire_action_with_wait(
+                    super::GatewayCapacityKind::StartGame,
+                    std::time::Duration::from_millis(500),
+                )
+                .await
+        });
+
+        tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        assert!(!waiting.is_finished());
+        drop(first);
+        let second = waiting
+            .await
+            .expect("capacity waiter should not panic")
+            .expect("capacity waiter should acquire the released slot");
+        assert_eq!(capacity.status().current_start_game_in_flight, 1);
+        drop(second);
         assert_eq!(capacity.status().current_start_game_in_flight, 0);
     }
 
