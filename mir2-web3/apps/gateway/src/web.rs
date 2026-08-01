@@ -1644,17 +1644,14 @@ pub async fn run_web_gateway(
     let ai_live = AiLiveHub::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     ai_live.spawn(spectator.clone());
-    let channel_identity = tokio::task::spawn_blocking(ChannelIdentityRegistry::from_env)
-        .await
-        .map_err(|error| {
-            io::Error::new(
-                io::ErrorKind::Other,
-                format!("channel identity initialization task failed: {error}"),
-            )
-        })?
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let identity = IdentityService::from_env(config.account_store_database_url.clone())
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let channel_identity =
+        run_blocking_component_initializer("channel identity", ChannelIdentityRegistry::from_env)
+            .await?;
+    let identity_database_url = config.account_store_database_url.clone();
+    let identity = run_blocking_component_initializer("commercial identity", move || {
+        IdentityService::from_env(identity_database_url)
+    })
+    .await?;
     let state = WebState {
         config: Arc::new(config),
         zone_registry: Arc::new(
@@ -1746,6 +1743,24 @@ pub async fn run_web_gateway(
     )
     .await
     .map_err(|error| io::Error::new(io::ErrorKind::Other, error.to_string()))
+}
+
+async fn run_blocking_component_initializer<T>(
+    component: &'static str,
+    initializer: impl FnOnce() -> Result<T, String> + Send + 'static,
+) -> io::Result<T>
+where
+    T: Send + 'static,
+{
+    tokio::task::spawn_blocking(initializer)
+        .await
+        .map_err(|error| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                format!("{component} initialization task failed: {error}"),
+            )
+        })?
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))
 }
 
 async fn manual_ui() -> Html<&'static str> {
@@ -9041,6 +9056,21 @@ mod tests {
     use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn blocking_component_initializer_supports_sync_clients_with_own_runtime() {
+        let value = super::run_blocking_component_initializer("test sync client", || {
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|error| error.to_string())?;
+            Ok(runtime.block_on(async { 17_u8 }))
+        })
+        .await
+        .expect("blocking initialization must not nest runtimes on a Tokio worker");
+
+        assert_eq!(value, 17);
+    }
 
     #[test]
     fn channel_identity_proofs_are_consumed_once() {
