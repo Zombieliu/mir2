@@ -4691,6 +4691,9 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "title": info.title,
                 "miniMapIndex": info.mini_map,
                 "bigMapIndex": info.big_map,
+                "lights": info.lights,
+                "mapDarkLight": info.map_dark_light,
+                "weatherParticles": info.weather_particles,
                 // Crystal SoundList music id for this map (0 = silent); the Web client loops it as
                 // background music, matching MapControl.LoadMap -> SoundManager.PlayMusic(Music).
                 "music": info.music,
@@ -4698,6 +4701,35 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                     "lightning": info.has_lightning(),
                     "fire": info.has_fire()
                 }
+            }
+        }),
+        ServerPacket::MapChanged {
+            map_index,
+            file_name,
+            title,
+            mini_map,
+            big_map,
+            lights,
+            location,
+            direction,
+            map_dark_light,
+            music,
+            weather,
+        } => json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {
+                "mapIndex": map_index,
+                "fileName": file_name,
+                "title": title,
+                "miniMap": mini_map,
+                "bigMap": big_map,
+                "lights": lights,
+                "location": location,
+                "direction": format!("{direction:?}"),
+                "mapDarkLight": map_dark_light,
+                "music": music,
+                "weatherParticles": weather
             }
         }),
         ServerPacket::UserInformation { info } => json!({
@@ -6954,9 +6986,9 @@ mod tests {
     use mir2_protocol::{
         ClientAuction, ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature,
         ClientMail, ClientMapInfo, ClientPacket, ClientQuestInfo, GroupMember,
-        IntelligentCreatureItemFilter, IntelligentCreatureRules, MirClass, MirDirection, MirGender,
-        MirGridType, ObjectManaInfo, Point, RankCharacterInfo, SelectInfo, ServerPacket,
-        ServerPacketId, Spell, UserItem, UserItemStat, UserLocation,
+        IntelligentCreatureItemFilter, IntelligentCreatureRules, MapInformation, MirClass,
+        MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, RankCharacterInfo, SelectInfo,
+        ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat, UserLocation,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
@@ -7592,6 +7624,45 @@ mod tests {
         assert_eq!(raw["payload"]["payloadLength"], 4);
         assert_eq!(raw["payload"]["payloadHex"], "001122aa");
         assert_eq!(raw["payload"]["rawPayloadLength"], 4);
+    }
+
+    #[test]
+    fn map_environment_packets_use_browser_facing_fields() {
+        let map = super::server_packet_to_event(&ServerPacket::MapInformation {
+            info: MapInformation {
+                map_index: 7,
+                file_name: "DogYoHyun".into(),
+                title: "DogYoHyun".into(),
+                mini_map: 3,
+                big_map: 4,
+                lights: 0,
+                flags: 3,
+                map_dark_light: 2,
+                music: 11,
+                weather_particles: 3,
+            },
+        });
+        assert_eq!(map["payload"]["lights"], 0);
+        assert_eq!(map["payload"]["mapDarkLight"], 2);
+        assert_eq!(map["payload"]["weatherParticles"], 3);
+
+        let changed = super::server_packet_to_event(&ServerPacket::MapChanged {
+            map_index: 8,
+            file_name: "D1801".into(),
+            title: "PenalCavern".into(),
+            mini_map: 0,
+            big_map: 0,
+            lights: 4,
+            location: Point { x: 12, y: 34 },
+            direction: MirDirection::Down,
+            map_dark_light: 1,
+            music: 0,
+            weather: 64,
+        });
+        assert_eq!(changed["payload"]["lights"], 4);
+        assert_eq!(changed["payload"]["mapDarkLight"], 1);
+        assert_eq!(changed["payload"]["weatherParticles"], 64);
+        assert_eq!(changed["payload"]["direction"], "Down");
     }
 
     #[test]

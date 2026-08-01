@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> Latest map-environment parity note: 2026-08-01 preserves Crystal's separation
+> between server `TimeOfDay` and per-map environment metadata. `Light=Normal`
+> follows global Dawn/Day/Evening/Night, nonzero map Light overrides it, and the
+> original `MapDarkLight`/`WeatherParticles` bytes now survive generated data,
+> Simulation packets, and Gateway browser adaptation. Developer-only Day is an
+> explicit local environment default; production Release behavior remains the
+> UTC formula unless an operator intentionally configures an override.
+
 > Latest Zone replica parity note: 2026-07-29 makes v5 base restore preserve
 > the installed authoritative shared-Zone image exactly. A standby Session now
 > rebuilds only its local movement binding and sequence cursor after restore;

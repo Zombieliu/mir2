@@ -2,6 +2,16 @@
 
 Last updated: 2026-08-01
 
+> 2026-08-01 Crystal map-weather/light override closure: generated map data now
+> carries `map_dark_light` and `weather_particles` from `Server.MirDB`; typed
+> `MapInformation`/`MapChanged` browser events preserve lights, dark tint, and
+> weather bits; Web resolves fixed map light before global `TimeOfDay`, applies
+> all five Crystal night tints, and renders Fog/Ember/Snow/Rain/Leaves variants
+> from seven selectively exported `Weather.Lib` base frames. The layer stays
+> lazy and compositor-bounded. Developer Compose and direct debug builds default
+> to Day for readability; Release production remains UTC-dynamic, while named
+> or numeric overrides retain deterministic Dawn/Day/Evening/Night QA.
+
 > 2026-08-01 low-end rendering/resource closure: screen-staged prewarm removes
 > character-selection and game/HUD packs from login blocking work, serializes
 > later stages after Service Worker setup, and lets low tier skip optional audio

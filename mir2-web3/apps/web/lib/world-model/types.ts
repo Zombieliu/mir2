@@ -403,6 +403,10 @@ export type WorldState = {
   miniMapIndex: number | null;
   bigMapIndex: number | null;
   lightSetting: number | null;
+  timeOfDayLightSetting: number | null;
+  mapLightSetting: number | null;
+  mapDarkLight: number;
+  weatherParticles: number;
   sceneView: import("../scene-types").SceneView | null;
   terrainPatches: import("../scene-types").TerrainPatch[];
   decorObjects: import("../scene-types").DecorObject[];
@@ -467,6 +471,10 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   miniMapIndex: null,
   bigMapIndex: null,
   lightSetting: null,
+  timeOfDayLightSetting: null,
+  mapLightSetting: null,
+  mapDarkLight: 0,
+  weatherParticles: 0,
   sceneView: null,
   terrainPatches: [],
   decorObjects: [],

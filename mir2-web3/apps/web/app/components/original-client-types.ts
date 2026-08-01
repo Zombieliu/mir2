@@ -311,6 +311,10 @@ export type DisplayWorld = {
   miniMapIndex: number | null;
   bigMapIndex?: number | null;
   lightSetting?: number | null;
+  timeOfDayLightSetting?: number | null;
+  mapLightSetting?: number | null;
+  mapDarkLight?: number;
+  weatherParticles?: number;
   playerName: string | null;
   playerHp?: number;
   playerMaxHp?: number;

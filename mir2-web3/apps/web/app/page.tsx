@@ -171,6 +171,7 @@ import type {
 } from "./components/original-client-shell-types";
 import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
 import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
+import { crystalEffectiveLightSetting } from "./components/original-client-scene-lighting";
 import {
   tutorialCompletionStorageKey,
   type TutorialGamepadFamily,
@@ -818,6 +819,10 @@ type WorldState = {
   miniMapIndex: number | null;
   bigMapIndex: number | null;
   lightSetting: number | null;
+  timeOfDayLightSetting: number | null;
+  mapLightSetting: number | null;
+  mapDarkLight: number;
+  weatherParticles: number;
   sceneView: SceneView | null;
   terrainPatches: TerrainPatch[];
   decorObjects: DecorObject[];
@@ -964,6 +969,10 @@ const DEFAULT_WORLD_STATE: WorldState = {
   miniMapIndex: null,
   bigMapIndex: null,
   lightSetting: null,
+  timeOfDayLightSetting: null,
+  mapLightSetting: null,
+  mapDarkLight: 0,
+  weatherParticles: 0,
   sceneView: null,
   terrainPatches: [],
   decorObjects: [],
@@ -5080,6 +5089,10 @@ export default function HomePage() {
           freeBagSlots: number;
           maxBagSlots: number;
           lightSetting: number | null;
+          timeOfDayLightSetting: number | null;
+          mapLightSetting: number | null;
+          mapDarkLight: number;
+          weatherParticles: number;
           sceneTerrainKinds: string[];
           originalMapRegionSummary: {
             mapFileName: string;
@@ -5240,6 +5253,10 @@ export default function HomePage() {
         freeBagSlots: world.freeBagSlots,
         maxBagSlots: world.maxBagSlots,
         lightSetting: world.lightSetting,
+        timeOfDayLightSetting: world.timeOfDayLightSetting,
+        mapLightSetting: world.mapLightSetting,
+        mapDarkLight: world.mapDarkLight,
+        weatherParticles: world.weatherParticles,
         sceneTerrainKinds: world.terrainPatches.map((patch) => patch.kind),
         originalMapRegionSummary: world.originalMapRegion
           ? {
@@ -7779,6 +7796,9 @@ export default function HomePage() {
       case "MapInformation": {
         const miniMapIndex = numberOrUndefined(payload.miniMapIndex);
         const bigMapIndex = numberOrUndefined(payload.bigMapIndex);
+        const mapLightSetting = numberOrUndefined(payload.lights);
+        const mapDarkLight = numberOrUndefined(payload.mapDarkLight);
+        const weatherParticles = numberOrUndefined(payload.weatherParticles);
         // Loop this map's background music (Crystal MapInfo.Music); 0/absent stops the track.
         gameBusRef.current!.emit({ type: "mapMusicChanged", musicId: numberOrUndefined(payload.music) });
         updateWorld((current) => {
@@ -7788,12 +7808,35 @@ export default function HomePage() {
           const preservedSelfEntity = current.playerObjectId
             ? current.entities.find((entity) => entity.objectId === current.playerObjectId)
             : undefined;
+          const nextMapLightSetting =
+            typeof mapLightSetting === "number" && mapLightSetting >= 0 && mapLightSetting <= 4
+              ? mapLightSetting
+              : mapChanged
+                ? 0
+                : current.mapLightSetting;
           const nextWorld = {
             ...current,
             mapTitle: stringOrNull(payload.title),
             mapFileName: nextMapFileName,
             miniMapIndex: miniMapIndex && miniMapIndex > 0 ? miniMapIndex : null,
             bigMapIndex: bigMapIndex && bigMapIndex > 0 ? bigMapIndex : null,
+            mapLightSetting: nextMapLightSetting,
+            mapDarkLight:
+              typeof mapDarkLight === "number" && mapDarkLight >= 0 && mapDarkLight <= 4
+                ? mapDarkLight
+                : mapChanged
+                  ? 0
+                  : current.mapDarkLight,
+            weatherParticles:
+              typeof weatherParticles === "number" && weatherParticles >= 0
+                ? Math.trunc(weatherParticles)
+                : mapChanged
+                  ? 0
+                  : current.weatherParticles,
+            lightSetting: crystalEffectiveLightSetting(
+              nextMapLightSetting,
+              current.timeOfDayLightSetting ?? current.lightSetting,
+            ),
             selectedObjectId: mapChanged ? null : current.selectedObjectId,
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
             entities: mapChanged && preservedSelfEntity ? [preservedSelfEntity] : mapChanged ? [] : current.entities,
@@ -9440,7 +9483,11 @@ export default function HomePage() {
         const fileName = stringOrNull(payload.fileName);
         const miniMap = numberOrUndefined(payload.miniMap);
         const bigMap = numberOrUndefined(payload.bigMap);
+        const mapLightSetting = numberOrUndefined(payload.lights);
+        const mapDarkLight = numberOrUndefined(payload.mapDarkLight);
+        const weatherParticles = numberOrUndefined(payload.weatherParticles);
         const location = payload.location as { x?: number; y?: number } | undefined;
+        gameBusRef.current!.emit({ type: "mapMusicChanged", musicId: numberOrUndefined(payload.music) });
         updateWorld((current) => {
           const mapChanged =
             normalizeMapFileName(fileName) !== normalizeMapFileName(current.mapFileName);
@@ -9456,12 +9503,35 @@ export default function HomePage() {
                   direction: stringOrNull(payload.direction) ?? preservedSelfEntity.direction,
                 }
               : preservedSelfEntity;
+          const nextMapLightSetting =
+            typeof mapLightSetting === "number" && mapLightSetting >= 0 && mapLightSetting <= 4
+              ? mapLightSetting
+              : mapChanged
+                ? 0
+                : current.mapLightSetting;
           const nextWorld = {
             ...current,
             mapTitle: stringOrNull(payload.title) ?? current.mapTitle,
             mapFileName: fileName ?? current.mapFileName,
             miniMapIndex: typeof miniMap === "number" && miniMap > 0 ? miniMap : current.miniMapIndex,
             bigMapIndex: typeof bigMap === "number" && bigMap > 0 ? bigMap : current.bigMapIndex,
+            mapLightSetting: nextMapLightSetting,
+            mapDarkLight:
+              typeof mapDarkLight === "number" && mapDarkLight >= 0 && mapDarkLight <= 4
+                ? mapDarkLight
+                : mapChanged
+                  ? 0
+                  : current.mapDarkLight,
+            weatherParticles:
+              typeof weatherParticles === "number" && weatherParticles >= 0
+                ? Math.trunc(weatherParticles)
+                : mapChanged
+                  ? 0
+                  : current.weatherParticles,
+            lightSetting: crystalEffectiveLightSetting(
+              nextMapLightSetting,
+              current.timeOfDayLightSetting ?? current.lightSetting,
+            ),
             selectedObjectId: mapChanged ? null : current.selectedObjectId,
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
             entities: mapChanged && movedSelf ? [movedSelf] : mapChanged ? [] : current.entities,
@@ -10061,7 +10131,8 @@ export default function HomePage() {
         if (lights !== undefined) {
           updateWorld((current) => ({
             ...current,
-            lightSetting: lights,
+            timeOfDayLightSetting: lights,
+            lightSetting: crystalEffectiveLightSetting(current.mapLightSetting, lights),
           }));
         }
         break;
@@ -11346,7 +11417,11 @@ export default function HomePage() {
         mapTitle: snapshot.mapTitle ?? current.mapTitle,
         mapFileName: snapshotMapFileName,
         inSafeZone: snapshot.inSafeZone ?? current.inSafeZone,
-        lightSetting: snapshot.lightSetting ?? current.lightSetting,
+        timeOfDayLightSetting: snapshot.lightSetting ?? current.timeOfDayLightSetting,
+        lightSetting: crystalEffectiveLightSetting(
+          current.mapLightSetting,
+          snapshot.lightSetting ?? current.timeOfDayLightSetting ?? current.lightSetting,
+        ),
         playerObjectId,
         playerName: effectiveSelfEntity?.name ?? current.playerName,
         playerHp: snapshot.playerHp ?? undefined,

@@ -24,6 +24,12 @@ The scripts align these ports and use the tracked prebuilt WebGPU/WebGL2 Bevy
 runtimes. Windows native-toolchain scripts remain available for direct process
 debugging.
 
+Local developer builds stay in Crystal `Day` lighting by default so gameplay
+and UI work remain readable. Set `MIR2_SIMULATION_FIXED_LIGHT_SETTING` to
+`dawn`, `day`, `evening`, or `night` for a fixed visual test, or to `dynamic`
+to restore Crystal's UTC-driven cycle. Production and acceptance deployments
+do not force this developer override.
+
 Player Web uses one URL across desktop, landscape mobile, and console browsers
 that expose the Web Gamepad API. It switches its controls tutorial to the most
 recent keyboard/mouse, touch, or gamepad input, provides Xbox and PlayStation
