@@ -102,6 +102,10 @@ import {
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
 import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
+import {
+  IdentitySecurityPanel,
+  type BrowserIdentitySession,
+} from "./components/identity-security-panel";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -284,6 +288,7 @@ type GatewayEvent =
   | { type: "packet"; packet: string; payload?: Record<string, unknown> }
   | { type: "worldSnapshot"; payload: GatewayWorldSnapshot }
   | { type: "error"; message?: string }
+  | { type: "identitySession"; token: string; session: BrowserIdentitySession }
   | { type: string; packet?: string; payload?: Record<string, unknown>; message?: string };
 
 type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
@@ -1849,6 +1854,9 @@ export default function HomePage() {
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  // Commercial identity bearer stays in React memory only. It is never written
+  // to localStorage/sessionStorage, so closing or reloading the tab discards it.
+  const [identitySessionToken, setIdentitySessionToken] = useState<string | null>(null);
   // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
   const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
   const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
@@ -7526,6 +7534,13 @@ export default function HomePage() {
     gatewayHistory.unshift(debugEvent);
     if (gatewayHistory.length > 50) gatewayHistory.length = 50;
     debugWindow.__mir2GatewayEventHistory = gatewayHistory;
+    if (event.type === "identitySession") {
+      const identityToken = "token" in event ? event.token : undefined;
+      if (typeof identityToken === "string" && identityToken.length <= 4096) {
+        setIdentitySessionToken(identityToken);
+      }
+      return;
+    }
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
       pendingGatewayProtocolActionRef.current = null;
@@ -7606,6 +7621,7 @@ export default function HomePage() {
         }
         break;
       case "Disconnect":
+        setIdentitySessionToken(null);
         gatewayProtocolReadyRef.current = false;
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -8384,6 +8400,7 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
+        setIdentitySessionToken(null);
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
         screenRef.current = "login";
@@ -12776,6 +12793,15 @@ export default function HomePage() {
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
+    />
+    <IdentitySecurityPanel
+      token={identitySessionToken}
+      accountId={accountId}
+      language={language}
+      onCurrentSessionRevoked={() => {
+        setIdentitySessionToken(null);
+        send({ type: "logOut" });
+      }}
     />
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">

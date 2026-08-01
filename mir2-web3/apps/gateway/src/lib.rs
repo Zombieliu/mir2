@@ -31,6 +31,7 @@ pub mod home_tunnel {
 }
 pub mod home_tunnel_transport;
 pub mod hotspot;
+pub mod identity;
 mod inject;
 pub mod mir2_workload;
 pub mod node_identity {

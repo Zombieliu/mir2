@@ -12,12 +12,24 @@ use sha2::Sha256;
 struct PasskeyGatewayTokenPayload {
     auth: String,
     account_id: String,
+    jti: String,
     exp_ms: u64,
+    auth_method: String,
 }
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub(crate) fn verify_passkey_gateway_token(account_id: &str, token: &str) -> Result<(), String> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct VerifiedPasskeyGatewayToken {
+    pub token_id: String,
+    pub expires_at_ms: u64,
+    pub auth_method: &'static str,
+}
+
+pub(crate) fn verify_passkey_gateway_token(
+    account_id: &str,
+    token: &str,
+) -> Result<VerifiedPasskeyGatewayToken, String> {
     let (payload_b64, signature_b64) = token
         .split_once('.')
         .ok_or_else(|| "invalid passkey token".to_string())?;
@@ -29,7 +41,11 @@ pub(crate) fn verify_passkey_gateway_token(account_id: &str, token: &str) -> Res
         .map_err(|_| "invalid passkey token signature".to_string())?;
     let payload: PasskeyGatewayTokenPayload = serde_json::from_slice(&payload_bytes)
         .map_err(|_| "invalid passkey token payload".to_string())?;
-    if payload.auth != "sui-passkey-v1" || payload.account_id != account_id {
+    if payload.auth != "sui-passkey-v2"
+        || payload.account_id != account_id
+        || payload.jti.trim().is_empty()
+        || !matches!(payload.auth_method.as_str(), "passkey" | "wallet")
+    {
         return Err("invalid passkey token".to_string());
     }
     if payload.exp_ms < unix_now_ms() {
@@ -41,14 +57,23 @@ pub(crate) fn verify_passkey_gateway_token(account_id: &str, token: &str) -> Res
         .map_err(|_| "invalid passkey secret".to_string())?;
     mac.update(payload_b64.as_bytes());
     mac.verify_slice(&signature)
-        .map_err(|_| "invalid passkey token signature".to_string())
+        .map_err(|_| "invalid passkey token signature".to_string())?;
+    Ok(VerifiedPasskeyGatewayToken {
+        token_id: payload.jti,
+        expires_at_ms: payload.exp_ms,
+        auth_method: if payload.auth_method == "wallet" {
+            "sui_wallet"
+        } else {
+            "sui_passkey"
+        },
+    })
 }
 
 fn passkey_gateway_secret() -> Result<String, String> {
     match env::var("MIR2_PASSKEY_AUTH_SECRET") {
-        Ok(secret) if !secret.is_empty() => Ok(secret),
+        Ok(secret) if secret.len() >= 32 => Ok(secret),
         _ if passkey_secret_required_from_env() => {
-            Err("MIR2_PASSKEY_AUTH_SECRET is required for production passkey login".to_string())
+            Err("MIR2_PASSKEY_AUTH_SECRET with at least 32 characters is required for production passkey login".to_string())
         }
         // Fail closed by default: the insecure local secret is only used when a
         // developer explicitly opts in. This prevents a misconfigured
@@ -197,9 +222,11 @@ mod tests {
     fn signed_passkey_token(account_id: &str, exp_ms: u64) -> String {
         let payload = URL_SAFE_NO_PAD.encode(
             serde_json::to_vec(&json!({
-                "auth": "sui-passkey-v1",
+                "auth": "sui-passkey-v2",
                 "accountId": account_id,
+                "jti": "test-login-token",
                 "expMs": exp_ms,
+                "authMethod": "passkey",
             }))
             .expect("payload should serialize"),
         );
@@ -231,16 +258,19 @@ mod tests {
             let account_id = "sui:0xpasskey";
             let payload = URL_SAFE_NO_PAD.encode(
                 serde_json::to_vec(&json!({
-                    "auth": "sui-passkey-v1",
+                    "auth": "sui-passkey-v2",
                     "accountId": account_id,
+                    "jti": "test-login-token",
                     "expMs": unix_now_ms() + 60_000,
+                    "authMethod": "passkey",
                 }))
                 .expect("payload should serialize"),
             );
             let token = format!("{payload}.AA");
             let error = verify_passkey_gateway_token(account_id, &token)
                 .expect_err("production passkey auth should require explicit secret");
-            assert!(error.contains("MIR2_PASSKEY_AUTH_SECRET is required"));
+            assert!(error.contains("MIR2_PASSKEY_AUTH_SECRET"));
+            assert!(error.contains("at least 32 characters"));
         });
     }
 

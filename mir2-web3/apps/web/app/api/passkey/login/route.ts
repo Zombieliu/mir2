@@ -1,12 +1,16 @@
-import { createHmac } from "node:crypto";
-
 import { verifyPersonalMessageSignature } from "@mysten/sui/verify";
+import { isValidSuiAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 import { NextResponse } from "next/server";
+
+import {
+  issueGatewayPasskeyToken,
+  passkeyRequestOriginAllowed,
+  verifyPasskeyChallenge,
+} from "../../../../lib/server/passkey-auth";
 
 export const runtime = "nodejs";
 
 const SUI_LOGIN_PURPOSES = new Set(["mir2-sui-login", "mir2-passkey-login"]);
-const TOKEN_AUTH = "sui-passkey-v1";
 const MAX_LOGIN_WINDOW_MS = 120_000;
 
 type PasskeyLoginRequest = {
@@ -23,6 +27,8 @@ type PasskeyLoginMessage = {
   issuedAt?: number;
   expiresAt?: number;
   nonce?: string;
+  challenge?: string;
+  authMethod?: "passkey" | "wallet";
 };
 
 export async function POST(request: Request) {
@@ -38,9 +44,32 @@ export async function POST(request: Request) {
     return errorResponse("invalid passkey message", 400);
   }
 
-  const validationError = validateLoginMessage(loginMessage, body.address, request.headers.get("origin"));
+  const requestOrigin = request.headers.get("origin");
+  if (!passkeyRequestOriginAllowed(requestOrigin, request.url)) {
+    return errorResponse("passkey request Origin is not allowed", 403);
+  }
+  const validationError = validateLoginMessage(loginMessage, body.address, requestOrigin);
   if (validationError) {
     return errorResponse(validationError, 400);
+  }
+
+  let challenge;
+  try {
+    challenge = verifyPasskeyChallenge(loginMessage.challenge!);
+  } catch (error) {
+    return errorResponse(error instanceof Error ? error.message : "invalid passkey challenge", 401);
+  }
+  const now = Date.now();
+  if (
+    challenge.jti !== loginMessage.nonce ||
+    normalizeSuiAddress(challenge.address) !== normalizeSuiAddress(body.address) ||
+    challenge.origin !== requestOrigin ||
+    challenge.iatMs !== loginMessage.issuedAt ||
+    challenge.expMs !== loginMessage.expiresAt ||
+    challenge.authMethod !== loginMessage.authMethod ||
+    challenge.expMs <= now
+  ) {
+    return errorResponse("passkey challenge mismatch or expired", 401);
   }
 
   try {
@@ -55,7 +84,7 @@ export async function POST(request: Request) {
   const expiresAt = Math.min(loginMessage.expiresAt!, Date.now() + 60_000);
   let token: string;
   try {
-    token = issueGatewayToken(accountId, expiresAt);
+    token = issueGatewayPasskeyToken(accountId, challenge.jti, expiresAt, challenge.authMethod);
   } catch (error) {
     return errorResponse(error instanceof Error ? error.message : "passkey auth is not configured", 500);
   }
@@ -73,9 +102,17 @@ function validateLoginMessage(
 ) {
   const now = Date.now();
   if (!message.purpose || !SUI_LOGIN_PURPOSES.has(message.purpose)) return "invalid passkey purpose";
-  if (message.address !== address) return "passkey address mismatch";
-  if (message.accountId !== `sui:${address}`) return "passkey account mismatch";
+  if (!message.address || !isValidSuiAddress(message.address) || !isValidSuiAddress(address)) {
+    return "invalid passkey address";
+  }
+  const normalizedAddress = normalizeSuiAddress(address);
+  if (normalizeSuiAddress(message.address) !== normalizedAddress) return "passkey address mismatch";
+  if (message.accountId !== `sui:${normalizedAddress}`) return "passkey account mismatch";
   if (!message.nonce) return "passkey nonce is required";
+  if (!message.challenge) return "server passkey challenge is required";
+  if (message.authMethod !== "passkey" && message.authMethod !== "wallet") {
+    return "invalid authentication method";
+  }
   if (!Number.isFinite(message.issuedAt) || !Number.isFinite(message.expiresAt)) {
     return "invalid passkey timestamp";
   }
@@ -94,53 +131,6 @@ function validateLoginMessage(
     return "passkey origin mismatch";
   }
   return null;
-}
-
-function issueGatewayToken(accountId: string, expiresAt: number) {
-  const payload = base64Url(
-    Buffer.from(
-      JSON.stringify({
-        auth: TOKEN_AUTH,
-        accountId,
-        expMs: expiresAt,
-      }),
-    ),
-  );
-  const signature = createHmac("sha256", passkeyGatewaySecret()).update(payload).digest("base64url");
-  return `${payload}.${signature}`;
-}
-
-function passkeyGatewaySecret() {
-  const secret = process.env.MIR2_PASSKEY_AUTH_SECRET;
-  if (secret && secret.length > 0) return secret;
-  if (passkeySecretRequiredFromEnv()) {
-    throw new Error("MIR2_PASSKEY_AUTH_SECRET is required for production passkey login");
-  }
-  // Fail closed by default: only use the insecure local secret when explicitly
-  // opted in, so a misconfigured deployment cannot silently sign tokens with a
-  // publicly known key.
-  if (!devPasskeySecretAllowed()) {
-    throw new Error(
-      "MIR2_PASSKEY_AUTH_SECRET is not set; set it, or set MIR2_ALLOW_DEV_PASSKEY_SECRET=1 to use the insecure local development secret",
-    );
-  }
-  return "mir2-web3-local-passkey-auth-secret";
-}
-
-function devPasskeySecretAllowed() {
-  const value = process.env.MIR2_ALLOW_DEV_PASSKEY_SECRET?.trim().toLowerCase();
-  return value === "1" || value === "true" || value === "yes";
-}
-
-function passkeySecretRequiredFromEnv() {
-  return ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV", "VERCEL_ENV"].some((name) => {
-    const value = process.env[name]?.trim().toLowerCase();
-    return value === "production" || value === "prod" || value === "staging";
-  });
-}
-
-function base64Url(bytes: Buffer) {
-  return bytes.toString("base64url");
 }
 
 function errorResponse(error: string, status: number) {
