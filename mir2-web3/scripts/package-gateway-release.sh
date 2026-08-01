@@ -73,6 +73,10 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git_dirty="true"
   fi
 fi
+if [ "${MIR2_RELEASE_REQUIRE_CLEAN:-0}" = "1" ] && [ "$git_dirty" != "false" ]; then
+  echo "refusing to package a production Gateway from a dirty source tree" >&2
+  exit 1
+fi
 
 stage="$(mktemp -d "${TMPDIR:-/tmp}/mir2-gateway-release.XXXXXX")"
 trap 'rm -rf "$stage"' EXIT
