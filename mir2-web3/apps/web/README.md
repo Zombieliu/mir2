@@ -51,6 +51,31 @@ Account creation does not log the account in automatically. Reusing an
 existing account can surface the protocol message `creation disabled`; use a
 new account name or log in with the existing password.
 
+## Mobile PWA And Fullscreen
+
+The hosted player is installable as a Progressive Web App. Installation is the
+supported way to remove mobile browser address and navigation bars; a normal
+iPhone browser tab cannot reliably hide them with CSS or JavaScript.
+
+- iPhone/iPad: open the player, tap Share, choose `Add to Home Screen`, then
+  launch `Mir 2` from the new Home Screen icon.
+- Android Chrome/Samsung Internet: choose `Install game` in the player. If the
+  system prompt is unavailable, use the browser menu and choose `Install app`.
+- Android browser fallback: the `Full screen` action uses the Fullscreen API
+  from a user gesture and requests landscape orientation when the browser
+  permits it.
+
+The PWA manifest requests fullscreen landscape presentation and falls back to
+the platform's standalone app mode. `viewport-fit=cover`, dynamic viewport
+height, and safe-area insets keep the game and touch controls inside notches,
+rounded corners, and gesture areas.
+
+iOS treats an installed Home Screen web app as a separate storage context.
+Players may need to log in once after installation; do not assume a browser-tab
+wallet or login session is copied into the installed game. Always regression
+test Passkey and wallet return flows from the installed icon as well as from a
+normal browser tab.
+
 ## Asset Modes
 
 Do not treat "repository assets", "private developer bundle", and "R2 CDN" as
@@ -162,6 +187,12 @@ The verifier checks the Crystal submodule handoff branch, tracked Starter and
 prebuilt runtime files, Gateway compilation, asset-release safety tests,
 TypeScript, and (unless skipped) a production Web build. With
 `-AssetBaseUrl` it also probes the remote full-pack index.
+
+For the focused PWA contract and icon checks:
+
+```powershell
+npm run test:pwa
+```
 
 ## Manual Web Start
 

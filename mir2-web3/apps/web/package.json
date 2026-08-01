@@ -83,6 +83,7 @@
     "test:movement-controller": "node ./scripts/test-movement-controller.mjs",
     "test:device-profile": "node ./scripts/test-device-profile.mjs",
     "test:responsive-stage": "node ./scripts/test-responsive-stage.mjs",
+    "test:pwa": "node ./scripts/test-pwa-shell.mjs",
     "test:gamepad-input": "node ./scripts/test-gamepad-input.mjs",
     "test:scene-sprite-meta": "node ./scripts/test-original-scene-sprite-meta.mjs",
     "test:full-pack-capability": "node ./scripts/test-crystal-full-pack-capability.mjs",

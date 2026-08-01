@@ -1,6 +1,22 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-01
+Last updated: 2026-08-02
+
+> 2026-08-02 mobile PWA/fullscreen shell closure: Player Web now publishes a
+> standards-based fullscreen/landscape Web App Manifest with 192px, 512px,
+> maskable, and Apple touch icons. Root metadata includes `viewport-fit=cover`,
+> explicit iOS standalone/status-bar tags, and a dynamic-viewport page shell.
+> The mobile-only install surface handles Android `beforeinstallprompt`, iOS
+> Add-to-Home-Screen guidance, app installation/display-mode changes, and a
+> user-gesture Fullscreen API plus advisory landscape lock fallback. Copy is
+> available in English, Brazilian Portuguese, and Chinese; dismissal storage
+> fails open in private browsing. It reuses the existing asset Service Worker
+> rather than adding a competing worker. PWA contract/icon tests, responsive
+> stage tests, TypeScript, HTTP manifest/metadata/icon probes, and the direct
+> Next 16 production build pass. Automated local visual capture is not claimed:
+> the in-app browser policy rejected control of the `127.0.0.1` tab. Physical
+> iPhone and Android installed-mode login/wallet/fullscreen acceptance remains
+> a human/device gate, separate from Crystal scene parity.
 
 > 2026-08-01 Crystal map-weather/light override closure: generated map data now
 > carries `map_dark_light` and `weather_particles` from `Server.MirDB`; typed

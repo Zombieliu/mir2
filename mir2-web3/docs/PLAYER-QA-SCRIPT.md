@@ -1,8 +1,30 @@
 # Player QA Script
 
-Last updated: 2026-08-01
+Last updated: 2026-08-02
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
+
+## Mobile PWA And Browser Chrome
+
+- On iPhone, first open the hosted HTTPS player in Safari or Chrome. Confirm a
+  normal tab shows the `Install game` action and the Add-to-Home-Screen guide;
+  browser address/navigation bars are expected in this mode.
+- Add the game to the Home Screen and launch it from the `Mir 2` icon. Confirm
+  there is no browser address or navigation toolbar, the game requests
+  landscape presentation, and the stage remains inside notch and home-indicator
+  safe areas in both landscape directions.
+- On Android Chrome and Samsung Internet, accept the native `Install game`
+  prompt. Also reject it once and confirm the page degrades to written install
+  guidance instead of reusing an expired prompt.
+- In an uninstalled Android tab, activate `Full screen` and confirm it is
+  user-gesture driven, hides browser UI when supported, requests landscape, and
+  returns to the correctly scaled stage after exiting fullscreen.
+- Complete Passkey and wallet login from the installed icon. Treat the PWA as a
+  separate storage context: a one-time re-login is acceptable, but login,
+  character selection, Start Game, reconnect, and wallet return must all work.
+- Rotate during resource prewarm and after entering the world. The cache panel,
+  install guide, Crystal stage, joystick, action rail, and HUD must not overlap
+  the notch, gesture area, or each other.
 
 ## Weather And Lighting
 
