@@ -1153,6 +1153,18 @@ function markMir2CacheMilestone(name: string, detail?: Record<string, unknown>) 
   ].slice(-50);
 }
 
+type AssetPrewarmStageName = "login" | "character-select" | "game";
+
+function requestAssetPrewarmStage(stage: AssetPrewarmStageName) {
+  if (typeof window === "undefined") return;
+  const cacheWindow = window as typeof window & {
+    __mir2AssetCachePrewarmStage?: (stage: AssetPrewarmStageName) => Promise<void>;
+    __mir2PendingAssetPrewarmStage?: AssetPrewarmStageName;
+  };
+  cacheWindow.__mir2PendingAssetPrewarmStage = stage;
+  void cacheWindow.__mir2AssetCachePrewarmStage?.(stage);
+}
+
 function scheduleBevyRuntimeCacheRecovery(message: string) {
   if (typeof window === "undefined") return false;
   if (!message.includes("WebAssembly.instantiate") || !message.includes("mir2_bevy_runtime_bg.js")) {
@@ -1808,6 +1820,11 @@ export default function HomePage() {
     }
   }, []);
   const [screen, setScreen] = useState<ClientScreen>("login");
+  useEffect(() => {
+    requestAssetPrewarmStage(
+      screen === "select" ? "character-select" : screen === "game" ? "game" : "login",
+    );
+  }, [screen]);
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
   // Render-perf Stage 5c opt-in flag (`?selectorHud=1`). Initialized false so SSR
   // and first client paint always take the legacy `world={world}` HUD path (no

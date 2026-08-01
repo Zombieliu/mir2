@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { MapAtlasIndex } from "../../lib/map-atlas-manifest";
+import {
+  normalizeDeviceMemoryGiB,
+  resolveRenderTier,
+} from "../../lib/render-tier";
+import {
+  estimateRgba8TextureBytes,
+  mapTextureResidencyBytes,
+  planMapTextureEvictions,
+  resolveMapTextureByteBudget,
+} from "../../lib/webgl2-map-texture-cache";
 
 // GPU renderer for MAP TILES from the packed per-library atlases (Crystal MLibrary analog:
 // a few resident atlas textures + GPU blits, instead of ~450-510 per-frame DOM <img>/R2 GETs).
@@ -49,7 +59,26 @@ type WebGl2MapAtlasLayerProps = {
   onDebugChange?: (debug: Record<string, unknown>) => void;
 };
 
-type TextureRecord = { key: string; width: number; height: number; texture: WebGLTexture };
+type TextureRecord = {
+  key: string;
+  width: number;
+  height: number;
+  imageUrl: string;
+  texture: WebGLTexture;
+  byteSize: number;
+  lastUsedAt: number;
+};
+type PendingTextureLoad = {
+  signature: string;
+  token: symbol;
+  promise: Promise<TextureRecord | null>;
+};
+type TextureCacheLimits = {
+  tier: "low" | "medium" | "high";
+  maxBytes: number;
+  maxTextureSize: number;
+  deviceMemoryGiB: number | null;
+};
 type ProgramRecord = {
   program: WebGLProgram;
   positionLocation: number;
@@ -74,6 +103,40 @@ export function WebGl2MapAtlasLayer({
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const programRef = useRef<ProgramRecord | null>(null);
   const texturesRef = useRef<Map<string, TextureRecord>>(new Map());
+  const pendingTextureLoadsRef = useRef<Map<string, PendingTextureLoad>>(
+    new Map(),
+  );
+  const pinnedAtlasKeysRef = useRef<Set<string>>(new Set());
+  const [contextEpoch, setContextEpoch] = useState(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const releaseCurrentContext = () => {
+      const gl = glRef.current;
+      pinnedAtlasKeysRef.current.clear();
+      pendingTextureLoadsRef.current.clear();
+      if (gl) releaseGlResources(gl, texturesRef.current, programRef);
+      glRef.current = null;
+    };
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      releaseCurrentContext();
+      setContextEpoch((epoch) => epoch + 1);
+    };
+    const handleContextRestored = () => {
+      setContextEpoch((epoch) => epoch + 1);
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
+      releaseCurrentContext();
+    };
+  }, []);
 
   useEffect(() => {
     let disposed = false;
@@ -81,22 +144,125 @@ export function WebGl2MapAtlasLayer({
     async function render() {
       const canvas = canvasRef.current;
       if (!canvas) return;
+      const neededAtlasKeys =
+        enabled && index
+          ? new Set(tiles.map((tile) => tile.atlasKey))
+          : new Set<string>();
+      pinnedAtlasKeysRef.current = neededAtlasKeys;
 
-      if (!enabled || !index || !tiles.length) {
-        clearCanvas(canvas, glRef.current);
-        publish({ enabled, rendered: 0, reason: !enabled ? "disabled" : !index ? "no-manifest" : "no-tiles" });
+      if (!enabled) {
+        pendingTextureLoadsRef.current.clear();
+        const gl = glRef.current;
+        if (gl) releaseTextureCache(gl, texturesRef.current);
+        clearCanvas(canvas, gl);
+        publish({ enabled, rendered: 0, reason: "disabled" });
         return;
       }
 
-      const gl = glRef.current ?? canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true });
+      if (!index || !tiles.length) {
+        clearCanvas(canvas, glRef.current);
+        publish({
+          enabled,
+          rendered: 0,
+          reason: !index ? "no-manifest" : "no-tiles",
+        });
+        return;
+      }
+
+      const canvasGl = canvas.getContext("webgl2", {
+        alpha: true,
+        premultipliedAlpha: true,
+      });
+      if (glRef.current && canvasGl && glRef.current !== canvasGl) {
+        pendingTextureLoadsRef.current.clear();
+        releaseGlResources(glRef.current, texturesRef.current, programRef);
+        glRef.current = null;
+      }
+      const gl = canvasGl;
       if (!gl) {
-        publish({ enabled, supported: false, rendered: 0, reason: "no-webgl2" });
+        publish({
+          enabled,
+          supported: false,
+          rendered: 0,
+          reason: "no-webgl2",
+        });
+        return;
+      }
+      if (gl.isContextLost()) {
+        publish({
+          enabled,
+          supported: true,
+          rendered: 0,
+          reason: "context-lost",
+        });
         return;
       }
       glRef.current = gl;
+      const textureLimits = resolveTextureCacheLimits(gl);
       const program = programRef.current ?? createProgramRecord(gl);
       programRef.current = program;
 
+      // Load only the atlas pages actually referenced by the current tiles (a handful).
+      const usedAt = performance.now();
+      let missingTextureBytes = 0;
+      for (const atlasKey of neededAtlasKeys) {
+        const page = index.pages.get(atlasKey);
+        if (!page) continue;
+        const existing = texturesRef.current.get(atlasKey);
+        if (existing && !textureRecordMatchesPage(existing, page)) {
+          gl.deleteTexture(existing.texture);
+          texturesRef.current.delete(atlasKey);
+        }
+        const current = texturesRef.current.get(atlasKey);
+        if (current) {
+          current.lastUsedAt = usedAt;
+        } else {
+          missingTextureBytes += estimateRgba8TextureBytes(
+            page.width,
+            page.height,
+          );
+        }
+      }
+      evictTextureCache(
+        gl,
+        texturesRef.current,
+        neededAtlasKeys,
+        Math.max(0, textureLimits.maxBytes - missingTextureBytes),
+      );
+
+      const atlasTextures = new Map<string, TextureRecord>();
+      const loadedTextures = await Promise.all(
+        [...neededAtlasKeys].map(async (atlasKey) => {
+          const page = index.pages.get(atlasKey);
+          if (!page) return [atlasKey, null] as const;
+          const texture = await textureForPage(
+            gl,
+            texturesRef.current,
+            pendingTextureLoadsRef.current,
+            page,
+            usedAt,
+            () =>
+              glRef.current === gl &&
+              !gl.isContextLost() &&
+              pinnedAtlasKeysRef.current.has(page.key),
+          );
+          return [atlasKey, texture] as const;
+        }),
+      );
+      if (disposed) return;
+      for (const [atlasKey, texture] of loadedTextures) {
+        if (texture) atlasTextures.set(atlasKey, texture);
+      }
+      evictTextureCache(
+        gl,
+        texturesRef.current,
+        neededAtlasKeys,
+        textureLimits.maxBytes,
+      );
+
+      // Keep the previous complete frame visible while a newly referenced page
+      // is fetched/decoded. Clearing before Promise.all is what caused a full-map
+      // blink whenever movement crossed an atlas-page boundary.
       resizeCanvasForDevicePixels(canvas, stageWidth, stageHeight);
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 0, 0);
@@ -105,29 +271,34 @@ export function WebGl2MapAtlasLayer({
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.disable(gl.DEPTH_TEST);
 
-      // Load only the atlas pages actually referenced by the current tiles (a handful).
-      const neededAtlasKeys = new Set(tiles.map((tile) => tile.atlasKey));
-      const atlasTextures = new Map<string, TextureRecord>();
-      for (const atlasKey of neededAtlasKeys) {
-        const page = index.pages.get(atlasKey);
-        if (!page) continue;
-        const texture = await textureForPage(gl, texturesRef.current, page);
-        if (disposed) return;
-        if (texture) atlasTextures.set(atlasKey, texture);
-      }
-
       gl.useProgram(program.program);
       gl.uniform2f(program.resolutionLocation, canvas.width, canvas.height);
       gl.uniform1i(program.textureLocation, 0);
       gl.bindBuffer(gl.ARRAY_BUFFER, program.buffer);
       gl.enableVertexAttribArray(program.positionLocation);
-      gl.vertexAttribPointer(program.positionLocation, 2, gl.FLOAT, false, 16, 0);
+      gl.vertexAttribPointer(
+        program.positionLocation,
+        2,
+        gl.FLOAT,
+        false,
+        16,
+        0,
+      );
       gl.enableVertexAttribArray(program.texCoordLocation);
-      gl.vertexAttribPointer(program.texCoordLocation, 2, gl.FLOAT, false, 16, 8);
+      gl.vertexAttribPointer(
+        program.texCoordLocation,
+        2,
+        gl.FLOAT,
+        false,
+        16,
+        8,
+      );
 
       let rendered = 0;
       let skipped = 0;
-      const sorted = tiles.slice().sort((a, b) => a.z - b.z || a.rectKey.localeCompare(b.rectKey));
+      const sorted = tiles
+        .slice()
+        .sort((a, b) => a.z - b.z || a.rectKey.localeCompare(b.rectKey));
       for (const tile of sorted) {
         const page = index.pages.get(tile.atlasKey);
         const texture = atlasTextures.get(tile.atlasKey);
@@ -147,18 +318,34 @@ export function WebGl2MapAtlasLayer({
         skipped,
         tileCount: tiles.length,
         atlasPages: atlasTextures.size,
+        textureCacheTier: textureLimits.tier,
+        textureCacheBytes: mapTextureResidencyBytes(
+          texturesRef.current.values(),
+        ),
+        textureCacheEntries: texturesRef.current.size,
+        textureCacheByteLimit: textureLimits.maxBytes,
+        maxTextureSize: textureLimits.maxTextureSize,
+        deviceMemoryGiB: textureLimits.deviceMemoryGiB,
         reason: rendered > 0 ? "rendered" : "no-renderable-tiles",
       });
     }
 
     void render().catch((error) => {
-      publish({ enabled, rendered: 0, reason: "error", error: error instanceof Error ? error.message : String(error) });
+      if (disposed) return;
+      publish({
+        enabled,
+        rendered: 0,
+        reason: "error",
+        error: error instanceof Error ? error.message : String(error),
+      });
     });
 
     function publish(payload: Record<string, unknown>) {
       const debug = { ...payload, updatedAt: Date.now() };
       if (typeof window !== "undefined") {
-        (window as typeof window & { __mir2WebGl2MapRendererDebug?: unknown }).__mir2WebGl2MapRendererDebug = debug;
+        (
+          window as typeof window & { __mir2WebGl2MapRendererDebug?: unknown }
+        ).__mir2WebGl2MapRendererDebug = debug;
       }
       onDebugChange?.(debug);
     }
@@ -166,7 +353,15 @@ export function WebGl2MapAtlasLayer({
     return () => {
       disposed = true;
     };
-  }, [enabled, stageWidth, stageHeight, index, tiles, onDebugChange]);
+  }, [
+    enabled,
+    stageWidth,
+    stageHeight,
+    index,
+    tiles,
+    onDebugChange,
+    contextEpoch,
+  ]);
 
   return (
     <canvas
@@ -179,13 +374,20 @@ export function WebGl2MapAtlasLayer({
   );
 }
 
-function clearCanvas(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext | null) {
+function clearCanvas(
+  canvas: HTMLCanvasElement,
+  gl: WebGL2RenderingContext | null,
+) {
   if (!gl) return;
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
 }
 
-function resizeCanvasForDevicePixels(canvas: HTMLCanvasElement, width: number, height: number) {
+function resizeCanvasForDevicePixels(
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+) {
   const ratio = devicePixelRatioForCanvas();
   const nextWidth = Math.max(1, Math.round(width * ratio));
   const nextHeight = Math.max(1, Math.round(height * ratio));
@@ -233,7 +435,9 @@ function createProgramRecord(gl: WebGL2RenderingContext): ProgramRecord {
   gl.attachShader(program, fragmentShader);
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    throw new Error(gl.getProgramInfoLog(program) ?? "Unable to link WebGL2 map program");
+    throw new Error(
+      gl.getProgramInfoLog(program) ?? "Unable to link WebGL2 map program",
+    );
   }
   const buffer = gl.createBuffer();
   const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
@@ -253,13 +457,19 @@ function createProgramRecord(gl: WebGL2RenderingContext): ProgramRecord {
   };
 }
 
-function compileShader(gl: WebGL2RenderingContext, type: number, source: string) {
+function compileShader(
+  gl: WebGL2RenderingContext,
+  type: number,
+  source: string,
+) {
   const shader = gl.createShader(type);
   if (!shader) throw new Error("Unable to create WebGL2 shader");
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    throw new Error(gl.getShaderInfoLog(shader) ?? "Unable to compile WebGL2 shader");
+    throw new Error(
+      gl.getShaderInfoLog(shader) ?? "Unable to compile WebGL2 shader",
+    );
   }
   return shader;
 }
@@ -267,25 +477,178 @@ function compileShader(gl: WebGL2RenderingContext, type: number, source: string)
 async function textureForPage(
   gl: WebGL2RenderingContext,
   textureCache: Map<string, TextureRecord>,
+  pendingLoads: Map<string, PendingTextureLoad>,
   page: { key: string; width: number; height: number; imageUrl: string },
+  usedAt: number,
+  isContextCurrent: () => boolean,
 ) {
+  const maxTextureSize = Number(gl.getParameter(gl.MAX_TEXTURE_SIZE));
+  if (page.width > maxTextureSize || page.height > maxTextureSize) {
+    throw new Error(
+      `Map atlas ${page.key} is ${page.width}x${page.height}, exceeding WebGL2 MAX_TEXTURE_SIZE ${maxTextureSize}`,
+    );
+  }
   const existing = textureCache.get(page.key);
-  if (existing && existing.width === page.width && existing.height === page.height) {
+  if (existing && textureRecordMatchesPage(existing, page)) {
+    existing.lastUsedAt = usedAt;
     return existing;
   }
-  const texture = gl.createTexture();
-  if (!texture) return null;
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  const image = await loadImage(page.imageUrl);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-  const record = { key: page.key, width: page.width, height: page.height, texture };
-  textureCache.set(page.key, record);
-  return record;
+  if (existing) {
+    gl.deleteTexture(existing.texture);
+    textureCache.delete(page.key);
+  }
+
+  const signature = texturePageSignature(page);
+  const pending = pendingLoads.get(page.key);
+  if (pending?.signature === signature) {
+    const record = await pending.promise;
+    if (record) record.lastUsedAt = Math.max(record.lastUsedAt, usedAt);
+    return record;
+  }
+
+  const token = Symbol(page.key);
+  const promise = (async () => {
+    try {
+      const image = await loadImage(page.imageUrl);
+      if (!isContextCurrent() || pendingLoads.get(page.key)?.token !== token)
+        return null;
+
+      const texture = gl.createTexture();
+      if (!texture) return null;
+      try {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          image,
+        );
+      } catch (error) {
+        gl.deleteTexture(texture);
+        throw error;
+      }
+
+      if (!isContextCurrent() || pendingLoads.get(page.key)?.token !== token) {
+        gl.deleteTexture(texture);
+        return null;
+      }
+      const record: TextureRecord = {
+        key: page.key,
+        width: page.width,
+        height: page.height,
+        imageUrl: page.imageUrl,
+        texture,
+        byteSize: estimateRgba8TextureBytes(page.width, page.height),
+        lastUsedAt: usedAt,
+      };
+      const replaced = textureCache.get(page.key);
+      if (replaced) gl.deleteTexture(replaced.texture);
+      textureCache.set(page.key, record);
+      return record;
+    } finally {
+      if (pendingLoads.get(page.key)?.token === token)
+        pendingLoads.delete(page.key);
+    }
+  })();
+  pendingLoads.set(page.key, { signature, token, promise });
+  return promise;
+}
+
+function textureRecordMatchesPage(
+  record: TextureRecord,
+  page: { width: number; height: number; imageUrl: string },
+) {
+  return (
+    record.width === page.width &&
+    record.height === page.height &&
+    record.imageUrl === page.imageUrl
+  );
+}
+
+function texturePageSignature(page: {
+  width: number;
+  height: number;
+  imageUrl: string;
+}) {
+  return `${page.width}x${page.height}:${page.imageUrl}`;
+}
+
+function resolveTextureCacheLimits(
+  gl: WebGL2RenderingContext,
+): TextureCacheLimits {
+  const maxTextureSize = Number(gl.getParameter(gl.MAX_TEXTURE_SIZE));
+  const forcedTier = new URLSearchParams(window.location.search).get(
+    "renderTier",
+  );
+  const deviceMemoryGiB = normalizeDeviceMemoryGiB(
+    (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+  );
+  const coarsePointer =
+    window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const tier = resolveRenderTier({
+    forcedTier,
+    deviceMemoryGiB,
+    coarsePointer,
+    maxTextureSize,
+  });
+  return {
+    tier,
+    maxBytes: resolveMapTextureByteBudget({
+      tier,
+      deviceMemoryGiB,
+      maxTextureSize,
+    }),
+    maxTextureSize,
+    deviceMemoryGiB,
+  };
+}
+
+function evictTextureCache(
+  gl: WebGL2RenderingContext,
+  textureCache: Map<string, TextureRecord>,
+  pinnedKeys: ReadonlySet<string>,
+  maxBytes: number,
+) {
+  const plan = planMapTextureEvictions(
+    textureCache.values(),
+    pinnedKeys,
+    maxBytes,
+  );
+  for (const key of plan.evictKeys) {
+    const record = textureCache.get(key);
+    if (!record) continue;
+    gl.deleteTexture(record.texture);
+    textureCache.delete(key);
+  }
+  return plan;
+}
+
+function releaseGlResources(
+  gl: WebGL2RenderingContext,
+  textureCache: Map<string, TextureRecord>,
+  programRef: { current: ProgramRecord | null },
+) {
+  releaseTextureCache(gl, textureCache);
+  if (programRef.current) {
+    gl.deleteBuffer(programRef.current.buffer);
+    gl.deleteProgram(programRef.current.program);
+    programRef.current = null;
+  }
+}
+
+function releaseTextureCache(
+  gl: WebGL2RenderingContext,
+  textureCache: Map<string, TextureRecord>,
+) {
+  for (const record of textureCache.values()) gl.deleteTexture(record.texture);
+  textureCache.clear();
 }
 
 function drawTile(
@@ -307,12 +670,30 @@ function drawTile(
   const topV = 1 - rect.y / atlasHeight;
   const bottomV = 1 - (rect.y + rect.height) / atlasHeight;
   const vertices = [
-    left, top, u0, topV,
-    left, bottom, u0, bottomV,
-    right, top, u1, topV,
-    right, top, u1, topV,
-    left, bottom, u0, bottomV,
-    right, bottom, u1, bottomV,
+    left,
+    top,
+    u0,
+    topV,
+    left,
+    bottom,
+    u0,
+    bottomV,
+    right,
+    top,
+    u1,
+    topV,
+    right,
+    top,
+    u1,
+    topV,
+    left,
+    bottom,
+    u0,
+    bottomV,
+    right,
+    bottom,
+    u1,
+    bottomV,
   ];
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture.texture);
@@ -334,11 +715,17 @@ function loadImage(src: string) {
     image.crossOrigin = "anonymous";
     image.onload = () => resolve(image);
     image.onerror = () => {
-      console.warn(`[mir2] WebGL2 map atlas image failed to load; falling back to DOM tiles: ${src}`);
+      console.warn(
+        `[mir2] WebGL2 map atlas image failed to load; falling back to DOM tiles: ${src}`,
+      );
       reject(new Error(`Unable to load WebGL2 map atlas image ${src}`));
     };
     image.src = src;
   });
   imagePromiseCache.set(src, promise);
+  const release = () => {
+    if (imagePromiseCache.get(src) === promise) imagePromiseCache.delete(src);
+  };
+  void promise.then(release, release);
   return promise;
 }

@@ -18,7 +18,7 @@ const DEFAULT_OUT_DIR = path.join(PUBLIC_ROOT, "generated", "map-atlas");
 
 const ATLAS_PADDING = 1;
 const INITIAL_WIDTH = 1024;
-const MAX_SIZE = 4096;
+export const MAX_SIZE = 4096;
 
 const args = parseArgs(process.argv.slice(2));
 const outDir = path.resolve(args.outDir ?? DEFAULT_OUT_DIR);
@@ -33,8 +33,16 @@ async function main() {
   if (args.skipIfPresent) {
     const existingManifest = path.join(outDir, "manifest.json");
     if (await exists(existingManifest)) {
-      console.log(JSON.stringify({ ok: true, skipped: true, reason: "manifest already present", manifestPath: existingManifest }));
-      return;
+      try {
+        const manifest = JSON.parse(await fs.readFile(existingManifest, "utf8"));
+        if (mapAtlasManifestFitsBudget(manifest)) {
+          console.log(JSON.stringify({ ok: true, skipped: true, reason: "compatible manifest already present", manifestPath: existingManifest }));
+          return;
+        }
+        console.warn(`[mir2-map-atlas] rebuilding incompatible manifest: ${existingManifest}`);
+      } catch {
+        console.warn(`[mir2-map-atlas] rebuilding unreadable manifest: ${existingManifest}`);
+      }
     }
   }
 
@@ -169,7 +177,7 @@ async function collectLibrarySources(lib) {
 
 // Shelf-pack into one or more pages (each <= MAX_SIZE). Tall/wide frames that don't fit a row
 // wrap to the next row; when the page height would exceed MAX_SIZE, start a new page.
-function packIntoPages(sources) {
+export function packIntoPages(sources) {
   const sorted = [...sources].sort((a, b) => b.height - a.height || b.width - a.width || a.frame.localeCompare(b.frame));
   const widest = sorted.reduce((max, s) => Math.max(max, s.width + ATLAS_PADDING * 2), 1);
   const width = Math.min(MAX_SIZE, Math.max(INITIAL_WIDTH, nextPowerOfTwo(widest)));
@@ -178,7 +186,9 @@ function packIntoPages(sources) {
   let current = newPage();
   const flush = () => {
     if (!current.sources.length) return;
-    current.height = nextPowerOfTwo(current.cursorY + current.rowHeight + ATLAS_PADDING);
+    // cursorY can already point at the next empty row when the previous row
+    // exactly fills a 4096px page. Size from the actual used extent instead.
+    current.height = nextPowerOfTwo(current.contentBottom + ATLAS_PADDING);
     current.width = width;
     pages.push(current);
   };
@@ -198,6 +208,7 @@ function packIntoPages(sources) {
       current = newPage();
     }
     current.sources.push({ ...s, x: current.cursorX, y: current.cursorY });
+    current.contentBottom = Math.max(current.contentBottom, current.cursorY + s.height);
     current.cursorX += s.width + ATLAS_PADDING;
     current.rowHeight = Math.max(current.rowHeight, s.height);
   }
@@ -205,8 +216,33 @@ function packIntoPages(sources) {
   return pages;
 }
 
+export function mapAtlasManifestFitsBudget(manifest, maxSize = MAX_SIZE) {
+  return Boolean(
+    manifest &&
+      Array.isArray(manifest.atlases) &&
+      manifest.atlases.length > 0 &&
+      manifest.atlases.every(
+        (atlas) =>
+          Number.isFinite(atlas?.width) &&
+          Number.isFinite(atlas?.height) &&
+          atlas.width > 0 &&
+          atlas.height > 0 &&
+          atlas.width <= maxSize &&
+          atlas.height <= maxSize,
+      ),
+  );
+}
+
 function newPage() {
-  return { sources: [], cursorX: ATLAS_PADDING, cursorY: ATLAS_PADDING, rowHeight: 0, width: 0, height: 0 };
+  return {
+    sources: [],
+    cursorX: ATLAS_PADDING,
+    cursorY: ATLAS_PADDING,
+    rowHeight: 0,
+    contentBottom: 0,
+    width: 0,
+    height: 0,
+  };
 }
 
 function nextPowerOfTwo(value) {
@@ -240,7 +276,9 @@ function parseListArg(value, fallback) {
   return String(value).split(",").map((e) => e.trim()).filter(Boolean);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

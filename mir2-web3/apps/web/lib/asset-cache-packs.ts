@@ -6,10 +6,14 @@ export type AssetCacheScenePrewarm = {
   spriteFrameLimit: number;
 };
 
+export type AssetPrewarmStage = "login" | "character-select" | "game";
+
 export type AssetCachePack = {
-  name: "login" | "bichon-spawn" | "character-select" | "hud-core" | "login-audio";
+  name:
+    "login" | "bichon-spawn" | "character-select" | "hud-core" | "login-audio";
   label: string;
   priority: number;
+  stage: AssetPrewarmStage;
   phase?: "critical" | "background";
   cacheTier?: "critical" | "background";
   urls: string[];
@@ -21,14 +25,27 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "login",
     label: "Login shell",
     priority: 10,
+    stage: "login",
     cacheTier: "critical",
-    urls: uniqueUrls([...collectStaticAssetUrls(ORIGINAL_UI.login)]),
+    // ChrSel/0..18 is roughly 40 MiB and is rendered lazily by the login scene.
+    // Keep the blocking prewarm limited to the small interactive login shell.
+    urls: uniqueUrls([
+      ...collectStaticAssetUrls({
+        dialog: ORIGINAL_UI.login.dialog,
+        title: ORIGINAL_UI.login.title,
+        accountLabel: ORIGINAL_UI.login.accountLabel,
+        passwordLabel: ORIGINAL_UI.login.passwordLabel,
+        buttons: ORIGINAL_UI.login.buttons,
+      }),
+    ]),
   },
   {
     name: "bichon-spawn",
     label: "Bichon spawn scene",
     priority: 15,
-    cacheTier: "critical",
+    stage: "game",
+    phase: "background",
+    cacheTier: "background",
     // Prewarm the packed entity atlas and the actual production Bichon entry footprint.
     // StartGame currently places Scout near 398,333, so warming the old login
     // showcase center still left the first playable scene to cold-load.
@@ -52,14 +69,18 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "character-select",
     label: "Character select",
     priority: 20,
-    cacheTier: "critical",
+    stage: "character-select",
+    phase: "background",
+    cacheTier: "background",
     urls: uniqueUrls([...collectStaticAssetUrls(ORIGINAL_UI.select)]),
   },
   {
     name: "hud-core",
     label: "Core HUD",
     priority: 30,
-    cacheTier: "critical",
+    stage: "game",
+    phase: "background",
+    cacheTier: "background",
     urls: uniqueUrls([
       ...collectStaticAssetUrls(ORIGINAL_UI.hud),
       ...collectStaticAssetUrls({
@@ -81,6 +102,7 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "login-audio",
     label: "Login and select audio",
     priority: 60,
+    stage: "character-select",
     phase: "background",
     cacheTier: "background",
     urls: uniqueUrls([
@@ -91,6 +113,15 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     ]),
   },
 ];
+
+export function selectAssetCachePacksForStage(
+  stage: AssetPrewarmStage,
+  packs: readonly AssetCachePack[] = ASSET_CACHE_PACKS,
+): AssetCachePack[] {
+  return packs
+    .filter((pack) => pack.stage === stage)
+    .sort((left, right) => left.priority - right.priority);
+}
 
 function collectStaticAssetUrls(value: unknown, urls: string[] = []) {
   if (typeof value === "string") {

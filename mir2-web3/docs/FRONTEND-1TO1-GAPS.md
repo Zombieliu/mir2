@@ -1,6 +1,22 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-07-23
+Last updated: 2026-08-01
+
+> 2026-08-01 low-end rendering/resource closure: screen-staged prewarm removes
+> character-selection and game/HUD packs from login blocking work, serializes
+> later stages after Service Worker setup, and lets low tier skip optional audio
+> and scene-frame scatter. Standalone WebGL2 map residency is now byte-bounded
+> with visible-page pinning, LRU low-watermark eviction and explicit texture
+> release on replacement, disable/Bevy takeover, context change and unmount.
+> Cold atlas pages load before canvas clear so crossing a page boundary keeps the
+> last complete frame rather than flashing transparent. The map shelf packer no
+> longer rounds exact 4096 content up to 8192; all 40 generated pages are at most
+> 1024x4096, and build/dev gates reject stale oversized manifests. Full frontend
+> logic, TypeScript, focused tests and a forced-low live login pass with no
+> browser warnings/errors. The live immutable 20260730 R2 release still contains
+> the two old 8192 pages and requires a new release rather than an in-place
+> overwrite. Physical 4 GiB Android soak remains the support gate; this resource
+> work does not change the final human Crystal visual/feel gate.
 
 > 2026-07-23 final deterministic frontend Candidate closure: the remaining
 > fixed-font, chat-history, and actor-phase work is implemented. Eight exact

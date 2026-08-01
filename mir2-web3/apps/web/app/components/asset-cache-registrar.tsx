@@ -7,7 +7,11 @@ import {
   type AssetPrewarmPolicy,
   type BackgroundPrewarmMode,
 } from "../../lib/asset-prewarm-policy";
-import type { AssetCachePack } from "../../lib/asset-cache-packs";
+import {
+  selectAssetCachePacksForStage,
+  type AssetCachePack,
+  type AssetPrewarmStage,
+} from "../../lib/asset-cache-packs";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
 
 type AssetManifest = {
@@ -201,6 +205,8 @@ declare global {
       prewarmPolicy?: AssetPrewarmPolicy;
     };
     __mir2AssetCacheReset?: (options?: AssetCacheResetOptions) => Promise<AssetCacheResetResult>;
+    __mir2AssetCachePrewarmStage?: (stage: AssetPrewarmStage) => Promise<void>;
+    __mir2PendingAssetPrewarmStage?: AssetPrewarmStage;
     __mir2CacheMetrics?: CacheMetricsHandle;
     __mir2ActiveCacheMetrics?: CacheMetricsHandle;
     __mir2PendingCacheMilestones?: Array<{ name: string; detail?: Record<string, unknown> }>;
@@ -212,8 +218,6 @@ declare global {
 
 const MAX_RESOURCE_METRICS = 2000;
 const MAX_API_METRICS = 500;
-const BACKGROUND_PREWARM_FIRST_PLAYABLE_TIMEOUT_MS = 90_000;
-const BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS = 20_000;
 const CACHE_NAMESPACE_STORAGE_KEY = "mir2.assetCacheNamespace";
 
 export function AssetCacheRegistrar() {
@@ -260,7 +264,6 @@ export function AssetCacheRegistrar() {
       coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
     });
     const prewarmPolicy = resolveAssetPrewarmPolicy(renderTier, resolveBackgroundPrewarmModeOverride(params));
-    const backgroundPrewarmDelayMs = resolveBackgroundPrewarmDelayMs(params, prewarmPolicy.backgroundMode);
 
     setDebugEnabled(debug);
     installFetchProbe();
@@ -269,6 +272,7 @@ export function AssetCacheRegistrar() {
 
     let disposed = false;
     let debugInterval = 0;
+    let installedStagePrewarm: ((stage: AssetPrewarmStage) => Promise<void>) | null = null;
 
     async function bootCacheLayer() {
       try {
@@ -405,23 +409,60 @@ export function AssetCacheRegistrar() {
           });
         }
 
-        if (shouldPrewarm) {
-          scheduleIdle(() => {
-            void prewarmAssetPacks(manifest, metrics, {
-              ...prewarmPolicy,
-              backgroundDelayMs: backgroundPrewarmDelayMs,
-            }).then(() => {
-              if (disposed) return;
-              window.__mir2AssetCache = {
-                ...(window.__mir2AssetCache ?? { enabled: false, status: "unknown" }),
-                prewarm: "done",
-              };
-              if (debug || process.env.NODE_ENV !== "production") {
-                console.info("[mir2-cache] prewarm", metrics.snapshot().summary);
+        // Expose stage prewarming only after the Service Worker has received its
+        // manifest/cache-tier configuration. A single queue prevents select and
+        // game packs from competing for bandwidth during a fast transition.
+        const stagePrewarmPromises = new Map<AssetPrewarmStage, Promise<void>>();
+        const completedPrewarmStages = new Set<AssetPrewarmStage>();
+        let stagePrewarmQueue = Promise.resolve();
+        installedStagePrewarm = (stage) => {
+          if (!shouldPrewarm) return Promise.resolve();
+          if (completedPrewarmStages.has(stage)) return Promise.resolve();
+          const existing = stagePrewarmPromises.get(stage);
+          if (existing) return existing;
+          let promise: Promise<void>;
+          promise = stagePrewarmQueue
+            .catch(() => {})
+            .then(async () => {
+              if (stage !== "login" && window.__mir2PendingAssetPrewarmStage !== stage) return;
+              await prewarmAssetPacks(manifest, metrics, prewarmPolicy, stage);
+              completedPrewarmStages.add(stage);
+              if (!disposed) setSnapshot(metrics.snapshot());
+            })
+            .finally(() => {
+              if (stagePrewarmPromises.get(stage) === promise) {
+                stagePrewarmPromises.delete(stage);
               }
-              setSnapshot(metrics.snapshot());
             });
-          });
+          stagePrewarmQueue = promise;
+          stagePrewarmPromises.set(stage, promise);
+          return promise;
+        };
+        window.__mir2AssetCachePrewarmStage = installedStagePrewarm;
+
+        if (shouldPrewarm) {
+          const pendingStage = window.__mir2PendingAssetPrewarmStage ?? "login";
+          const finishInitialPrewarm = () => {
+            if (disposed) return;
+            window.__mir2AssetCache = {
+              ...(window.__mir2AssetCache ?? { enabled: false, status: "unknown" }),
+              prewarm: "done",
+            };
+            if (debug || process.env.NODE_ENV !== "production") {
+              console.info("[mir2-cache] prewarm", metrics.snapshot().summary);
+            }
+            setSnapshot(metrics.snapshot());
+          };
+          if (pendingStage === "login") {
+            scheduleIdle(() => {
+              void installedStagePrewarm?.("login").then(finishInitialPrewarm);
+            });
+          } else {
+            void installedStagePrewarm(pendingStage).then(() => {
+              if (disposed) return;
+              finishInitialPrewarm();
+            });
+          }
         }
       } catch (error) {
         if (disposed) return;
@@ -449,6 +490,9 @@ export function AssetCacheRegistrar() {
       disposed = true;
       if (window.__mir2AssetCacheReset === assetCacheReset) {
         delete window.__mir2AssetCacheReset;
+      }
+      if (window.__mir2AssetCachePrewarmStage === installedStagePrewarm) {
+        delete window.__mir2AssetCachePrewarmStage;
       }
       if (debugInterval) window.clearInterval(debugInterval);
     };
@@ -812,100 +856,52 @@ function writeStorageValue(storage: Storage, key: string, value: string) {
 async function prewarmAssetPacks(
   manifest: AssetManifest,
   metrics: CacheMetricsHandle,
-  options: AssetPrewarmPolicy & { backgroundDelayMs: number },
+  options: AssetPrewarmPolicy,
+  stage: AssetPrewarmStage,
 ) {
-  metrics.markMilestone("prewarmStart", {
-    packCount: manifest.resourcePacks?.length ?? 0,
+  const stagePacks = selectAssetCachePacksForStage(stage, manifest.resourcePacks ?? []);
+  const packs = stagePacks.filter(
+    (pack) => options.backgroundMode !== "off" || pack.name !== "login-audio",
+  );
+  const includeSceneFrames = options.backgroundMode !== "off";
+  metrics.markMilestone(`prewarmStart:${stage}`, {
+    stage,
+    packCount: packs.length,
+    skippedPackCount: stagePacks.length - packs.length,
+    includeSceneFrames,
     renderTier: options.tier,
     criticalConcurrency: options.criticalConcurrency,
     backgroundConcurrency: options.backgroundConcurrency,
     maxSceneFrames: options.maxSceneFrames,
     backgroundMode: options.backgroundMode,
-    backgroundDelayMs: options.backgroundDelayMs,
   });
   publishPrewarmProgress(metrics, "running");
   await requestPersistentStorage(metrics);
-  const packs = [...(manifest.resourcePacks ?? [])].sort((a, b) => a.priority - b.priority);
-  const criticalPacks = packs.filter((pack) => pack.phase !== "background");
-  const backgroundPacks = options.backgroundMode === "off"
-    ? []
-    : packs.filter((pack) => pack.phase === "background");
-  const backgroundMetrics = new Map<string, CachePrewarmMetric>();
-
-  for (const pack of backgroundPacks) {
-    const metric = createPrewarmMetric(pack, "pending");
-    backgroundMetrics.set(pack.name, metric);
-    metrics.prewarmRuns.push(metric);
-  }
-
-  for (const pack of criticalPacks) {
-    await prewarmPack(pack, metrics, options.criticalConcurrency, options.maxSceneFrames);
-  }
-  metrics.markMilestone("criticalPrewarmDone", summarizeMetrics(metrics));
-
-  if (backgroundPacks.length > 0) {
-    if (options.backgroundMode === "afterPlayable") {
-      await waitForBackgroundPrewarmGate(metrics, options.backgroundDelayMs);
-    }
-    metrics.markMilestone("backgroundPrewarmStart", {
-      packCount: backgroundPacks.length,
-      mode: options.backgroundMode,
-      delayMs: options.backgroundDelayMs,
-    });
-    for (const pack of backgroundPacks) {
-      await prewarmPack(
-        pack,
-        metrics,
-        options.backgroundConcurrency,
-        options.maxSceneFrames,
-        backgroundMetrics.get(pack.name),
-      );
-    }
+  const concurrency = stage === "login" ? options.criticalConcurrency : options.backgroundConcurrency;
+  for (const pack of packs) {
+    await prewarmPack(
+      pack,
+      metrics,
+      concurrency,
+      options.maxSceneFrames,
+      undefined,
+      includeSceneFrames,
+    );
   }
   await refreshCacheStorageMetrics(metrics);
-  metrics.markMilestone("prewarmDone", summarizeMetrics(metrics));
+  metrics.markMilestone(`prewarmDone:${stage}`, summarizeMetrics(metrics));
   publishPrewarmProgress(metrics, "done");
 }
 
-async function waitForBackgroundPrewarmGate(metrics: CacheMetricsHandle, delayMs: number) {
-  const startedAt = performance.now();
-  metrics.markMilestone("backgroundPrewarmDeferred", {
-    until: delayMs > 0 ? "firstPlayableFrameAndIdleDelay" : "firstPlayableFrame",
-    timeoutMs: BACKGROUND_PREWARM_FIRST_PLAYABLE_TIMEOUT_MS,
-    delayMs,
-  });
-
-  while (performance.now() - startedAt < BACKGROUND_PREWARM_FIRST_PLAYABLE_TIMEOUT_MS) {
-    if (metrics.milestones.some((milestone) => milestone.name === "firstPlayableFrame")) {
-      if (delayMs > 0) {
-        metrics.markMilestone("backgroundPrewarmIdleDelayStart", { delayMs });
-        await sleep(delayMs);
-        await waitForBrowserIdle(1500);
-        metrics.markMilestone("backgroundPrewarmIdleDelayDone", {
-          delayMs,
-          waitedMs: performance.now() - startedAt,
-        });
-      }
-      metrics.markMilestone("backgroundPrewarmGateReady", {
-        reason: delayMs > 0 ? "firstPlayableFrameIdleDelay" : "firstPlayableFrame",
-        waitedMs: performance.now() - startedAt,
-      });
-      return;
-    }
-    await sleep(250);
-  }
-
-  metrics.markMilestone("backgroundPrewarmGateReady", {
-    reason: "timeout",
-    waitedMs: performance.now() - startedAt,
-  });
-}
-
-function createPrewarmMetric(pack: AssetCachePack, status: CachePrewarmMetric["status"]): CachePrewarmMetric {
+function createPrewarmMetric(
+  pack: AssetCachePack,
+  status: CachePrewarmMetric["status"],
+  includeScenes = true,
+): CachePrewarmMetric {
   return {
     name: pack.name,
     label: pack.label,
-    requested: pack.urls.length + (pack.scenes?.length ?? 0),
+    requested: pack.urls.length + (includeScenes ? (pack.scenes?.length ?? 0) : 0),
     ok: 0,
     failed: 0,
     failedUrls: [],
@@ -922,9 +918,10 @@ async function prewarmPack(
   concurrency: number,
   maxSceneFrames: number | null,
   existingMetric?: CachePrewarmMetric,
+  includeScenes = true,
 ) {
   const startedAt = performance.now();
-  const packMetric = existingMetric ?? createPrewarmMetric(pack, "running");
+  const packMetric = existingMetric ?? createPrewarmMetric(pack, "running", includeScenes);
   packMetric.status = "running";
   if (!existingMetric) metrics.prewarmRuns.push(packMetric);
   publishPrewarmProgress(metrics, "running");
@@ -933,7 +930,7 @@ async function prewarmPack(
     await hintAssetCacheTier(pack.urls, cacheTierForPack(pack));
     await prewarmUrls(pack.urls, packMetric, metrics, concurrency);
 
-    for (const scene of pack.scenes ?? []) {
+    for (const scene of includeScenes ? (pack.scenes ?? []) : []) {
       let response: Response;
       try {
         response = await fetchWithRetry(scene.url, { cache: "force-cache" });
@@ -1604,24 +1601,6 @@ function resolveBackgroundPrewarmModeOverride(params: URLSearchParams): Backgrou
   if (configured === "off" || configured === "immediate" || configured === "afterPlayable") return configured;
   if (params.get("skipRuntime") === "1") return "immediate";
   return null;
-}
-
-function resolveBackgroundPrewarmDelayMs(params: URLSearchParams, mode: BackgroundPrewarmMode) {
-  if (mode === "off" || mode === "immediate") return 0;
-  const configured = params.get("prewarmBackgroundDelayMs");
-  if (configured == null) return BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS;
-  const parsed = Number(configured);
-  return Number.isFinite(parsed) ? Math.max(0, Math.min(60_000, Math.round(parsed))) : BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS;
-}
-
-function waitForBrowserIdle(timeoutMs: number) {
-  const idleCallback = window.requestIdleCallback as
-    | ((callback: () => void, options?: { timeout: number }) => number)
-    | undefined;
-  if (!idleCallback) return sleep(Math.min(250, timeoutMs));
-  return new Promise<void>((resolve) => {
-    idleCallback(() => resolve(), { timeout: timeoutMs });
-  });
 }
 
 function sleep(ms: number) {
