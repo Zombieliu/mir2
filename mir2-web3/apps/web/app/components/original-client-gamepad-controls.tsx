@@ -1,14 +1,17 @@
 "use client";
 
-import { memo, useEffect, useRef, type RefObject } from "react";
+import { memo, useEffect, useRef, useState, type RefObject } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
+import { TUTORIAL_CONTROL_EVENT } from "../../lib/tutorial-steps";
 import {
   MIR2_GAMEPAD_BUTTON,
   mir2GamepadButtonPressed,
   mir2GamepadButtons,
   mir2GamepadSpatialDirection,
   mir2GamepadVector,
+  resolveMir2GamepadProfile,
+  type Mir2GamepadProfile,
 } from "./original-client-gamepad-input";
 import {
   activateMir2GamepadFocus,
@@ -24,8 +27,16 @@ import {
 import { CRYSTAL_MOVE_INPUT_INTERVAL_MS } from "./original-client-scene-layout";
 import type { DisplayEntity, DisplayWorld, ItemActionRef } from "./original-client-types";
 
+type TranslateFn = (
+  key: string,
+  params?: Array<string | number>,
+  fallback?: string,
+) => string;
+
 type OriginalClientGamepadControlsProps = {
   enabled: boolean;
+  t: TranslateFn;
+  expectedProfile: Mir2GamepadProfile;
   screen: ClientScreen;
   gameplayReady: boolean;
   stageRootRef: RefObject<HTMLDivElement | null>;
@@ -45,6 +56,10 @@ type OriginalClientGamepadControlsProps = {
 type Mir2GamepadDebugState = {
   connected: boolean;
   id: string | null;
+  family: Mir2GamepadProfile["family"];
+  mapping: string;
+  mappingMode: Mir2GamepadProfile["mappingMode"];
+  supported: boolean;
   uiMode: boolean;
   movement: Mir2MobileMoveIntent | null;
 };
@@ -54,6 +69,8 @@ const UI_REPEAT_MS = 115;
 
 function OriginalClientGamepadControlsInner({
   enabled,
+  t,
+  expectedProfile,
   screen,
   gameplayReady,
   stageRootRef,
@@ -70,14 +87,26 @@ function OriginalClientGamepadControlsInner({
   onUseItem,
 }: OriginalClientGamepadControlsProps) {
   const activeMovementRef = useRef<Mir2MobileMoveIntent | null>(null);
+  const statusKeyRef = useRef("");
+  const [status, setStatus] = useState<Mir2GamepadDebugState>(() =>
+    debugStateForProfile(expectedProfile),
+  );
 
   useEffect(() => {
+    const commitStatus = (next: Mir2GamepadDebugState) => {
+      const key = gamepadStatusKey(next);
+      if (key === statusKeyRef.current) return;
+      statusKeyRef.current = key;
+      setStatus(next);
+      publishDebug(next);
+    };
+
     if (!enabled) {
       if (activeMovementRef.current) {
         activeMovementRef.current = null;
         onDirectionStop();
       }
-      publishDebug({ connected: false, id: null, uiMode: false, movement: null });
+      commitStatus(debugStateForProfile(expectedProfile));
       return;
     }
 
@@ -99,11 +128,12 @@ function OriginalClientGamepadControlsInner({
         stopMovement();
         previousButtons = [];
         lastUiDirection = null;
-        publishDebug({ connected: false, id: null, uiMode: false, movement: null });
+        commitStatus(debugStateForProfile(expectedProfile));
         animationFrame = window.requestAnimationFrame(tick);
         return;
       }
 
+      const gamepadProfile = resolveMir2GamepadProfile(gamepad, navigator.userAgent);
       const vector = mir2GamepadVector(gamepad);
       const stageRoot = stageRootRef.current;
       const uiMode =
@@ -144,6 +174,9 @@ function OriginalClientGamepadControlsInner({
         );
         const previousMovement = activeMovementRef.current;
         activeMovementRef.current = movement;
+        if (movement && !previousMovement) {
+          publishTutorialControl("gamepad:move");
+        }
         if (!movement) {
           if (previousMovement) onDirectionStop();
         } else if (
@@ -157,34 +190,43 @@ function OriginalClientGamepadControlsInner({
         }
 
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.primary)) {
+          publishTutorialControl("gamepad:primary");
           onPrimaryTargetAction();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.approach)) {
+          publishTutorialControl("gamepad:approach");
           onApproachTarget();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.pick)) {
+          publishTutorialControl("gamepad:pick");
           const drop = nearestGroundDrop(world, player);
           if (drop) onPickGroundDrop(drop.objectId);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.view)) {
+          publishTutorialControl("gamepad:panel");
           onToggleCharacter();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.menu)) {
+          publishTutorialControl("gamepad:panel");
           onToggleInventory();
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.leftTrigger)) {
+          publishTutorialControl("gamepad:quick");
           const skill = world.knownSkills[0];
           if (skill) onCastSkill(skill.key);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.rightTrigger)) {
+          publishTutorialControl("gamepad:quick");
           const skill = world.knownSkills[1];
           if (skill) onCastSkill(skill.key);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.leftBumper)) {
+          publishTutorialControl("gamepad:quick");
           const item = [...world.beltItems].sort((a, b) => a.slot - b.slot)[0];
           if (item) onUseItem(item);
         }
         if (mir2GamepadButtonPressed(gamepad, previousButtons, MIR2_GAMEPAD_BUTTON.rightBumper)) {
+          publishTutorialControl("gamepad:quick");
           const item = [...world.beltItems].sort((a, b) => a.slot - b.slot)[1];
           if (item) onUseItem(item);
         }
@@ -193,9 +235,13 @@ function OriginalClientGamepadControlsInner({
       }
 
       previousButtons = mir2GamepadButtons(gamepad);
-      publishDebug({
+      commitStatus({
         connected: true,
         id: gamepad.id,
+        family: gamepadProfile.family,
+        mapping: gamepadProfile.mapping,
+        mappingMode: gamepadProfile.mappingMode,
+        supported: gamepadProfile.supported,
         uiMode,
         movement: activeMovementRef.current,
       });
@@ -206,10 +252,10 @@ function OriginalClientGamepadControlsInner({
     return () => {
       window.cancelAnimationFrame(animationFrame);
       stopMovement();
-      publishDebug({ connected: false, id: null, uiMode: false, movement: null });
     };
   }, [
     enabled,
+    expectedProfile,
     gameplayReady,
     onApproachTarget,
     onCastSkill,
@@ -226,7 +272,35 @@ function OriginalClientGamepadControlsInner({
     world,
   ]);
 
-  return null;
+  if (!enabled) return null;
+
+  const statusLabel = !status.connected
+    ? t("ui.gamepadWaiting", [], "Press any controller button to connect")
+    : status.supported
+      ? t(
+          "ui.gamepadConnected",
+          [gamepadFamilyLabel(status.family, t)],
+          "{0} connected",
+        )
+      : t(
+          "ui.gamepadUnverified",
+          [],
+          "Controller layout unverified · using standard fallback",
+        );
+
+  return (
+    <div
+      className={`mir-gamepad-status ${status.connected ? "connected" : "waiting"} ${status.supported ? "supported" : "unverified"}`}
+      data-gamepad-connected={status.connected ? "true" : "false"}
+      data-gamepad-family={status.family}
+      data-gamepad-mapping={status.mappingMode}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="mir-gamepad-status-icon" aria-hidden="true">🎮</span>
+      <span>{statusLabel}</span>
+    </div>
+  );
 }
 
 export const OriginalClientGamepadControls = memo(OriginalClientGamepadControlsInner);
@@ -255,4 +329,45 @@ function publishDebug(state: Mir2GamepadDebugState) {
     __mir2GamepadControls?: Mir2GamepadDebugState;
   };
   debugWindow.__mir2GamepadControls = state;
+}
+
+function publishTutorialControl(action: string) {
+  window.dispatchEvent(new CustomEvent(TUTORIAL_CONTROL_EVENT, { detail: { action } }));
+}
+
+function debugStateForProfile(profile: Mir2GamepadProfile): Mir2GamepadDebugState {
+  return {
+    connected: false,
+    id: null,
+    family: profile.family,
+    mapping: profile.mapping,
+    mappingMode: profile.mappingMode,
+    supported: profile.supported,
+    uiMode: false,
+    movement: null,
+  };
+}
+
+function gamepadStatusKey(state: Mir2GamepadDebugState) {
+  return [
+    state.connected,
+    state.id,
+    state.family,
+    state.mapping,
+    state.mappingMode,
+    state.supported,
+    state.uiMode,
+    state.movement?.direction ?? "",
+    state.movement?.mode ?? "",
+  ].join(":");
+}
+
+function gamepadFamilyLabel(family: Mir2GamepadProfile["family"], t: TranslateFn) {
+  if (family === "playstation") {
+    return t("ui.playStationController", [], "PlayStation controller");
+  }
+  if (family === "xbox") {
+    return t("ui.xboxController", [], "Xbox controller");
+  }
+  return t("ui.gameController", [], "Game controller");
 }

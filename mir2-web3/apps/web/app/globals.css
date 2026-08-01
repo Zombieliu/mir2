@@ -4955,6 +4955,42 @@ button.character-spell-value:hover {
   pointer-events: none;
 }
 
+.mir-gamepad-status {
+  position: fixed;
+  left: max(18px, env(safe-area-inset-left));
+  top: max(18px, env(safe-area-inset-top));
+  z-index: 112;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(420px, calc(100vw - 36px));
+  border: 1px solid rgba(238, 209, 118, 0.68);
+  border-radius: 999px;
+  background: rgba(8, 6, 4, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color: #f4dfae;
+  padding: 8px 15px;
+  font: 600 14px/1.2 Arial, Helvetica, sans-serif;
+  text-align: center;
+  text-shadow: 1px 1px #000;
+  pointer-events: none;
+}
+
+.mir-gamepad-status.connected.supported {
+  opacity: 0.88;
+}
+
+.mir-gamepad-status.waiting,
+.mir-gamepad-status.unverified {
+  border-color: rgba(255, 184, 78, 0.88);
+  color: #ffe0a0;
+}
+
+.mir-gamepad-status-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
 .debug-snapshot-toast {
   position: fixed;
   left: 16px;
