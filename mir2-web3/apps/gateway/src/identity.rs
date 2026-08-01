@@ -1078,16 +1078,35 @@ impl IdentityService {
         }
     }
 
-    fn with_postgres<T>(
+    fn with_postgres<T: Send>(
         &self,
-        action: impl FnOnce(&mut Client) -> Result<T, String>,
+        action: impl FnOnce(&mut Client) -> Result<T, String> + Send,
     ) -> Result<T, String> {
         let url = self
             .database_url
             .as_deref()
             .ok_or_else(|| "identity Postgres backend is not configured".to_string())?;
-        mir2_simulation::with_account_store_postgres_client(url, action)
+        run_on_dedicated_thread("identity Postgres", move || {
+            mir2_simulation::with_account_store_postgres_client(url, action)
+        })
     }
+}
+
+/// `postgres` is synchronous and drives its own Tokio runtime. `block_in_place`
+/// permits blocking work but does not leave the surrounding runtime context,
+/// so calling the client there can panic while opening or driving a connection.
+/// A scoped OS thread both leaves that context and lets database actions borrow
+/// request data without forcing every identity method to clone its inputs.
+fn run_on_dedicated_thread<T: Send>(
+    operation: &'static str,
+    action: impl FnOnce() -> Result<T, String> + Send,
+) -> Result<T, String> {
+    std::thread::scope(|scope| {
+        scope
+            .spawn(action)
+            .join()
+            .map_err(|_| format!("{operation} worker thread panicked"))?
+    })
 }
 
 trait Pipe: Sized {
@@ -1224,7 +1243,23 @@ fn random_recovery_code() -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::IdentityService;
+    use super::{run_on_dedicated_thread, IdentityService};
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn postgres_worker_leaves_the_callers_tokio_runtime_context() {
+        let value = tokio::task::block_in_place(|| {
+            run_on_dedicated_thread("test sync client", || {
+                let runtime = tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .map_err(|error| error.to_string())?;
+                Ok(runtime.block_on(async { 17_u8 }))
+            })
+        })
+        .expect("dedicated worker must allow a synchronous client to drive its own runtime");
+
+        assert_eq!(value, 17);
+    }
 
     #[test]
     fn identity_sessions_are_signed_listed_and_revocable() {
