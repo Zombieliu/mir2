@@ -29,6 +29,10 @@ export type OnchainMinePanelReconcile = {
 };
 
 export type OnchainMinePanelProps = {
+  /** Touch layouts use a fixed, compact presentation instead of a draggable desktop tool window. */
+  compactMode?: boolean;
+  /** Temporarily yield the viewport to higher-priority onboarding or modal UI. */
+  suppressed?: boolean;
   /** Signing wallet address (null until a wallet is connected for signing). */
   walletAddress: string | null;
   walletBusy: boolean;
@@ -176,6 +180,8 @@ function veinStageLabel(stage: number | null): string {
 }
 
 export function OnchainMinePanel({
+  compactMode = false,
+  suppressed = false,
   walletAddress,
   walletBusy,
   pendingSwings,
@@ -229,11 +235,13 @@ export function OnchainMinePanel({
       } else {
         setPosition(defaultPosition());
       }
-      setCollapsed(window.localStorage.getItem(COLLAPSED_STORAGE_KEY) === "1");
+      const storedCollapsed = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
+      setCollapsed(storedCollapsed === null ? compactMode : storedCollapsed === "1");
     } catch {
       setPosition(defaultPosition());
+      setCollapsed(compactMode);
     }
-  }, []);
+  }, [compactMode]);
 
   const persistPosition = useCallback((next: PanelPosition) => {
     try {
@@ -245,7 +253,7 @@ export function OnchainMinePanel({
 
   const onDragPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (event.button !== 0) return;
+      if (compactMode || event.button !== 0) return;
       const origin = position ?? defaultPosition();
       dragRef.current = {
         pointerStartX: event.clientX,
@@ -255,7 +263,7 @@ export function OnchainMinePanel({
       };
       event.currentTarget.setPointerCapture(event.pointerId);
     },
-    [position],
+    [compactMode, position],
   );
 
   const onDragPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
@@ -298,14 +306,38 @@ export function OnchainMinePanel({
     });
   }, []);
 
-  const positionedStyle: CSSProperties = position
-    ? { ...panelStyle, left: position.left, top: position.top }
-    : { ...panelStyle, right: 12, top: 372 };
+  const positionedStyle: CSSProperties = compactMode
+    ? {
+        ...panelStyle,
+        left: "50%",
+        top: "max(8px, env(safe-area-inset-top))",
+        width: collapsed ? 206 : "min(360px, calc(100vw - 24px))",
+        maxHeight: "calc(100dvh - 16px)",
+        overflowY: collapsed ? "hidden" : "auto",
+        transform: "translateX(-50%)",
+        padding: collapsed ? "7px 10px" : panelStyle.padding,
+      }
+    : position
+      ? { ...panelStyle, left: position.left, top: position.top }
+      : { ...panelStyle, right: 12, top: 372 };
+
+  if (suppressed) return null;
 
   return (
-    <div style={positionedStyle} data-testid="onchain-mine-panel">
+    <div
+      style={positionedStyle}
+      data-testid="onchain-mine-panel"
+      data-compact={compactMode ? "true" : "false"}
+      data-collapsed={collapsed ? "true" : "false"}
+    >
       <div
-        style={{ ...rowStyle, marginBottom: collapsed ? 0 : 6, alignItems: "center", ...dragHandleStyle }}
+        style={{
+          ...rowStyle,
+          marginBottom: collapsed ? 0 : 6,
+          alignItems: "center",
+          ...dragHandleStyle,
+          cursor: compactMode ? "default" : dragHandleStyle.cursor,
+        }}
         onPointerDown={onDragPointerDown}
         onPointerMove={onDragPointerMove}
         onPointerUp={onDragPointerUp}
@@ -325,14 +357,14 @@ export function OnchainMinePanel({
         </button>
       </div>
 
-      {collapsed ? (
+      {collapsed && !compactMode ? (
         <div style={{ ...rowStyle, marginTop: 4, opacity: 0.85 }}>
           <span>
             ({veinLocation.x},{veinLocation.y})
           </span>
           <span>{veinStageLabel(veinStage)}</span>
         </div>
-      ) : (
+      ) : collapsed ? null : (
         <>
       <div style={{ ...rowStyle, marginBottom: 6 }}>
         <span>矿脉 vein</span>
