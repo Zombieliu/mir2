@@ -5,7 +5,7 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine as _;
 use hmac::{Hmac, KeyInit, Mac};
 use serde::{Deserialize, Serialize};
-use sha2::Sha256;
+use sha2::{Digest, Sha256};
 
 const SUI_LOGIN_PROOF_AUTH: &str = "sui-passkey-v1";
 const CHANNEL_GUEST_PROOF_AUTH: &str = "mir2-channel-guest-v1";
@@ -14,6 +14,16 @@ const GATEWAY_IDENTITY_AUTH: &str = "mir2-identity-v1";
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct PasskeyGatewayTokenPayload {
+    auth: String,
+    account_id: String,
+    jti: String,
+    exp_ms: u64,
+    auth_method: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacySuiLoginTokenPayload {
     auth: String,
     account_id: String,
     exp_ms: u64,
@@ -26,6 +36,7 @@ pub(crate) struct SuiLoginProof {
     pub subject: String,
     pub provider: String,
     pub expires_at_ms: u64,
+    pub token_id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -43,30 +54,93 @@ pub(crate) struct GatewayIdentityClaims {
     pub auth: String,
     pub account_id: String,
     pub provider: String,
+    #[serde(default)]
+    pub subject: Option<String>,
     pub exp_ms: u64,
 }
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub(crate) fn verify_passkey_gateway_token(account_id: &str, token: &str) -> Result<(), String> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct VerifiedPasskeyGatewayToken {
+    pub token_id: String,
+    pub expires_at_ms: u64,
+    pub auth_method: &'static str,
+    pub credential_subject: Option<String>,
+}
+
+pub(crate) fn verify_passkey_gateway_token(
+    account_id: &str,
+    token: &str,
+) -> Result<VerifiedPasskeyGatewayToken, String> {
     if let Ok(claims) = verify_gateway_identity_token(account_id, token) {
         if claims.account_id == account_id {
-            return Ok(());
+            let auth_method = match claims.provider.as_str() {
+                "suiWallet" => "sui_wallet",
+                "suiPasskey" => "sui_passkey",
+                _ => "channel",
+            };
+            return Ok(VerifiedPasskeyGatewayToken {
+                token_id: format!(
+                    "gateway:{}",
+                    URL_SAFE_NO_PAD.encode(Sha256::digest(token.as_bytes()))
+                ),
+                expires_at_ms: claims.exp_ms,
+                auth_method,
+                credential_subject: claims.subject,
+            });
         }
     }
     let payload: PasskeyGatewayTokenPayload = decode_and_verify_hmac_token(token, "passkey token")?;
-    if payload.auth != SUI_LOGIN_PROOF_AUTH || payload.account_id != account_id {
+    if payload.auth != "sui-passkey-v2"
+        || payload.account_id != account_id
+        || payload.jti.trim().is_empty()
+        || !matches!(payload.auth_method.as_str(), "passkey" | "wallet")
+    {
         return Err("invalid passkey token".to_string());
     }
     if payload.exp_ms < unix_now_ms() {
         return Err("expired passkey token".to_string());
     }
-    Ok(())
+    Ok(VerifiedPasskeyGatewayToken {
+        token_id: payload.jti,
+        expires_at_ms: payload.exp_ms,
+        auth_method: if payload.auth_method == "wallet" {
+            "sui_wallet"
+        } else {
+            "sui_passkey"
+        },
+        credential_subject: payload.account_id.strip_prefix("sui:").map(str::to_string),
+    })
 }
 
 pub(crate) fn verify_sui_login_proof(token: &str) -> Result<SuiLoginProof, String> {
-    let payload: PasskeyGatewayTokenPayload =
-        decode_and_verify_hmac_token(token, "Sui login proof")?;
+    if let Ok(payload) =
+        decode_and_verify_hmac_token::<PasskeyGatewayTokenPayload>(token, "Sui login proof")
+    {
+        if payload.auth != "sui-passkey-v2" || !payload.account_id.starts_with("sui:") {
+            return Err("invalid Sui login proof".to_string());
+        }
+        if payload.exp_ms < unix_now_ms() {
+            return Err("expired Sui login proof".to_string());
+        }
+        let provider = match payload.auth_method.as_str() {
+            "passkey" => "suiPasskey",
+            "wallet" => "suiWallet",
+            _ => return Err("invalid Sui login proof provider".to_string()),
+        };
+        return Ok(SuiLoginProof {
+            subject: payload.account_id,
+            provider: provider.to_string(),
+            expires_at_ms: payload.exp_ms,
+            token_id: Some(payload.jti),
+        });
+    }
+    if passkey_secret_required_from_env() {
+        return Err("legacy Sui login proofs are not accepted in production".to_string());
+    }
+    let payload: LegacySuiLoginTokenPayload =
+        decode_and_verify_hmac_token(token, "legacy Sui login proof")?;
     if payload.auth != SUI_LOGIN_PROOF_AUTH || !payload.account_id.starts_with("sui:") {
         return Err("invalid Sui login proof".to_string());
     }
@@ -81,6 +155,7 @@ pub(crate) fn verify_sui_login_proof(token: &str) -> Result<SuiLoginProof, Strin
         subject: payload.account_id,
         provider,
         expires_at_ms: payload.exp_ms,
+        token_id: None,
     })
 }
 
@@ -101,9 +176,19 @@ pub(crate) fn verify_channel_guest_proof(token: &str) -> Result<ChannelGuestProo
     Ok(proof)
 }
 
+#[cfg(test)]
 pub(crate) fn issue_gateway_identity_token(
     account_id: &str,
     provider: &str,
+    expires_at_ms: u64,
+) -> Result<String, String> {
+    issue_gateway_identity_token_for_subject(account_id, provider, None, expires_at_ms)
+}
+
+pub(crate) fn issue_gateway_identity_token_for_subject(
+    account_id: &str,
+    provider: &str,
+    subject: Option<&str>,
     expires_at_ms: u64,
 ) -> Result<String, String> {
     if !account_id.starts_with("obl_") {
@@ -119,6 +204,7 @@ pub(crate) fn issue_gateway_identity_token(
         auth: GATEWAY_IDENTITY_AUTH.to_string(),
         account_id: account_id.to_string(),
         provider: provider.to_string(),
+        subject: subject.map(str::to_string),
         exp_ms: expires_at_ms,
     })
 }
@@ -175,9 +261,9 @@ fn sign_hmac_token(payload: &impl Serialize) -> Result<String, String> {
 
 fn passkey_gateway_secret() -> Result<String, String> {
     match env::var("MIR2_PASSKEY_AUTH_SECRET") {
-        Ok(secret) if !secret.is_empty() => Ok(secret),
+        Ok(secret) if secret.len() >= 32 => Ok(secret),
         _ if passkey_secret_required_from_env() => {
-            Err("MIR2_PASSKEY_AUTH_SECRET is required for production passkey login".to_string())
+            Err("MIR2_PASSKEY_AUTH_SECRET with at least 32 characters is required for production passkey login".to_string())
         }
         // Fail closed by default: the insecure local secret is only used when a
         // developer explicitly opts in. This prevents a misconfigured
@@ -331,10 +417,11 @@ mod tests {
     fn signed_sui_token(account_id: &str, exp_ms: u64, provider: Option<&str>) -> String {
         let payload = URL_SAFE_NO_PAD.encode(
             serde_json::to_vec(&json!({
-                "auth": "sui-passkey-v1",
+                "auth": "sui-passkey-v2",
                 "accountId": account_id,
+                "jti": "test-login-token",
                 "expMs": exp_ms,
-                "provider": provider,
+                "authMethod": if provider == Some("suiWallet") { "wallet" } else { "passkey" },
             }))
             .expect("payload should serialize"),
         );
@@ -442,16 +529,19 @@ mod tests {
             let account_id = "sui:0xpasskey";
             let payload = URL_SAFE_NO_PAD.encode(
                 serde_json::to_vec(&json!({
-                    "auth": "sui-passkey-v1",
+                    "auth": "sui-passkey-v2",
                     "accountId": account_id,
+                    "jti": "test-login-token",
                     "expMs": unix_now_ms() + 60_000,
+                    "authMethod": "passkey",
                 }))
                 .expect("payload should serialize"),
             );
             let token = format!("{payload}.AA");
             let error = verify_passkey_gateway_token(account_id, &token)
                 .expect_err("production passkey auth should require explicit secret");
-            assert!(error.contains("MIR2_PASSKEY_AUTH_SECRET is required"));
+            assert!(error.contains("MIR2_PASSKEY_AUTH_SECRET"));
+            assert!(error.contains("at least 32 characters"));
         });
     }
 
