@@ -198,11 +198,14 @@ impl GatewayCapacityState {
             max_ws_connections: positive_usize_env("MIR2_GATEWAY_MAX_WS_CONNECTIONS"),
             max_active_sessions: positive_usize_env("MIR2_GATEWAY_MAX_ACTIVE_SESSIONS"),
             max_reconnect_leases: positive_usize_env("MIR2_GATEWAY_MAX_RECONNECT_LEASES"),
-            max_login_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT"),
+            max_login_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT")
+                .or_else(|| gateway_prod_like_env().then_some(8)),
             max_new_character_in_flight: positive_usize_env(
                 "MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT",
-            ),
-            max_start_game_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT"),
+            )
+            .or_else(|| gateway_prod_like_env().then_some(4)),
+            max_start_game_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT")
+                .or_else(|| gateway_prod_like_env().then_some(4)),
             current_ws_connections: AtomicUsize::new(0),
             current_active_sessions: AtomicUsize::new(0),
             current_reconnect_leases: AtomicUsize::new(0),
@@ -2228,6 +2231,15 @@ fn require_gateway_admin_trace_token(
         .ok()
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty());
+    if gateway_prod_like_env() && expected.as_ref().is_some_and(|value| value.len() < 32) {
+        return Err((
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(AdminErrorResponse {
+                error: "MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN must contain at least 32 characters in production"
+                    .to_string(),
+            }),
+        ));
+    }
     let provided = bearer_token(headers).map(str::trim);
     match (expected.as_deref(), provided) {
         (Some(expected), Some(provided))
@@ -8399,6 +8411,22 @@ mod tests {
                     .expect("matching token should be accepted");
             },
         );
+    }
+
+    #[test]
+    fn production_admin_operator_token_rejects_short_secrets() {
+        with_env_var("MIR2_RUNTIME_ENV", Some("production"), || {
+            let previous = std::env::var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN").ok();
+            std::env::set_var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN", "too-short");
+            let rejected = super::require_gateway_admin_trace_token(&axum::http::HeaderMap::new())
+                .expect_err("production must fail closed for a short operator token");
+            assert_eq!(rejected.0, axum::http::StatusCode::SERVICE_UNAVAILABLE);
+            assert!(rejected.1 .0.error.contains("at least 32 characters"));
+            match previous {
+                Some(value) => std::env::set_var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN", value),
+                None => std::env::remove_var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN"),
+            }
+        });
     }
 
     #[test]
