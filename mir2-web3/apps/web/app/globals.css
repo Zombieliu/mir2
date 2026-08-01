@@ -4674,10 +4674,36 @@ button.character-spell-value:hover {
 .mir-mobile-panel-row {
   position: absolute;
   top: 0;
-  right: 0;
+  right: calc(var(--mir-mobile-panel-size, 44px) + 4px);
   display: flex;
   gap: 4px;
   pointer-events: auto;
+  transform-origin: right top;
+  transition: opacity 140ms ease-out, transform 140ms ease-out;
+}
+
+.mir-mobile-utility-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--mir-mobile-panel-size, 44px);
+  height: var(--mir-mobile-panel-size, 44px);
+  padding: 0;
+  pointer-events: auto;
+  border: 1px solid rgba(224, 196, 128, 0.5);
+  border-radius: 999px;
+  background: rgba(15, 12, 9, 0.88);
+  color: #f7dfb2;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px #000;
+  touch-action: manipulation;
+}
+
+.mir-mobile-utility-toggle.active {
+  border-color: rgba(126, 241, 151, 0.76);
+  color: #97f8aa;
 }
 
 .mir-mobile-panel-button {
@@ -4742,6 +4768,26 @@ button.character-spell-value:hover {
 
 .mir-mobile-action.quick:disabled {
   opacity: 0.62;
+}
+
+.mir-mobile-action.quick {
+  transform-origin: center;
+  transition: opacity 140ms ease-out, transform 140ms ease-out;
+}
+
+.mir-mobile-action-pad[data-secondary-open="false"] .mir-mobile-panel-row,
+.mir-mobile-action-pad[data-secondary-open="false"] .mir-mobile-action.quick {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.82);
+}
+
+.mir-mobile-action-pad[data-secondary-open="true"] .mir-mobile-panel-row,
+.mir-mobile-action-pad[data-secondary-open="true"] .mir-mobile-action.quick {
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1);
 }
 
 .mir-mobile-action.primary {

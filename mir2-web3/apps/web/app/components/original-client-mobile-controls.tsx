@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { TUTORIAL_CONTROL_EVENT } from "../../lib/tutorial-steps";
+import { TUTORIAL_CONTROL_EVENT, TUTORIAL_STEP_EVENT } from "../../lib/tutorial-steps";
 import { CRYSTAL_MOVE_INPUT_INTERVAL_MS } from "./original-client-scene-layout";
 import type {
   DisplayEntity,
@@ -84,6 +84,7 @@ function OriginalClientMobileControlsInner({
   const activeIntentRef = useRef<Mir2MobileMoveIntent | null>(null);
   const lastSentRef = useRef<{ direction: string; mode: Mir2MobileMoveMode; at: number } | null>(null);
   const [runLocked, setRunLocked] = useState(true);
+  const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [activeIntent, setActiveIntent] = useState<Mir2MobileMoveIntent | null>(null);
   const runLockedRef = useRef(runLocked);
   const enabledRef = useRef(enabled);
@@ -105,6 +106,16 @@ function OriginalClientMobileControlsInner({
   useEffect(() => {
     enabledRef.current = enabled;
   }, [enabled]);
+
+  useEffect(() => {
+    const onTutorialStep = (event: Event) => {
+      const detail = (event as CustomEvent<{ stepId?: unknown }>).detail;
+      const stepId = typeof detail?.stepId === "string" ? detail.stepId : null;
+      setSecondaryOpen(stepId === "touch-quick" || stepId === "touch-panels");
+    };
+    window.addEventListener(TUTORIAL_STEP_EVENT, onTutorialStep);
+    return () => window.removeEventListener(TUTORIAL_STEP_EVENT, onTutorialStep);
+  }, []);
 
   useEffect(() => {
     onDirectionIntentRef.current = onDirectionIntent;
@@ -296,7 +307,13 @@ function OriginalClientMobileControlsInner({
     }
 
     return (
-      <div className="mir-mobile-rotate-overlay force-mobile-controls">
+      <div
+        className="mir-mobile-rotate-overlay force-mobile-controls"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("ui.mobileRotateLandscape", [], "Rotate to landscape")}
+        data-testid="mobile-orientation-gate"
+      >
         <div className="mir-mobile-rotate-card">
           <span className="mir-mobile-rotate-icon" aria-hidden="true">[]</span>
           <span>{t("ui.mobileRotateLandscape", [], "Rotate to landscape")}</span>
@@ -316,7 +333,20 @@ function OriginalClientMobileControlsInner({
               : t("ui.mobileMove", [], "Move")}
           </div>
         </div>
-        <div className="mir-mobile-action-pad" aria-label={t("ui.mobileActions", [], "Actions")}>
+        <div
+          className="mir-mobile-action-pad"
+          data-secondary-open={secondaryOpen ? "true" : "false"}
+          aria-label={t("ui.mobileActions", [], "Actions")}
+        >
+          <button
+            type="button"
+            className={`mir-mobile-utility-toggle ${secondaryOpen ? "active" : ""}`}
+            aria-label={t("ui.mobileMoreActions", [], "More actions")}
+            aria-expanded={secondaryOpen}
+            onClick={() => setSecondaryOpen((current) => !current)}
+          >
+            {secondaryOpen ? "×" : "•••"}
+          </button>
           <div className="mir-mobile-panel-row">
             <button
               type="button"
@@ -326,6 +356,7 @@ function OriginalClientMobileControlsInner({
               onClick={() => {
                 publishTutorialControl("touch:panel");
                 onToggleCharacter();
+                setSecondaryOpen(false);
               }}
             >
               {mobileCompactLabel(t("ui.character", [], "Character"))}
@@ -338,6 +369,7 @@ function OriginalClientMobileControlsInner({
               onClick={() => {
                 publishTutorialControl("touch:panel");
                 onToggleInventory();
+                setSecondaryOpen(false);
               }}
             >
               {mobileCompactLabel(t("ui.mobileBag", [], "Bag"))}
@@ -370,6 +402,7 @@ function OriginalClientMobileControlsInner({
                   } else {
                     onUseItem(action.item);
                   }
+                  setSecondaryOpen(false);
                 }}
                 title={action.title}
               >
@@ -433,7 +466,13 @@ function OriginalClientMobileControlsInner({
           </button>
         </div>
       </div>
-      <div className={`mir-mobile-rotate-overlay ${forceVisible ? "force-mobile-controls" : ""}`}>
+      <div
+        className={`mir-mobile-rotate-overlay ${forceVisible ? "force-mobile-controls" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("ui.mobileRotateLandscape", [], "Rotate to landscape")}
+        data-testid="mobile-orientation-gate"
+      >
         <div className="mir-mobile-rotate-card">
           <span className="mir-mobile-rotate-icon" aria-hidden="true">[]</span>
           <span>{t("ui.mobileRotateLandscape", [], "Rotate to landscape")}</span>

@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef, useState, type CSSProperties } from "rea
 
 import {
   TUTORIAL_CONTROL_EVENT,
+  TUTORIAL_STEP_EVENT,
   createTutorialState,
   currentStep,
   pickText,
@@ -122,6 +123,22 @@ export function OriginalClientTutorialOverlay({
 
   const step = currentStep(state);
 
+  // Let adaptive control surfaces reveal only the controls needed by the
+  // current coach mark. The event contains no player/account state.
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent(TUTORIAL_STEP_EVENT, { detail: { stepId: step?.id ?? null } }),
+    );
+  }, [step?.id]);
+
+  useEffect(() => {
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent(TUTORIAL_STEP_EVENT, { detail: { stepId: null } }),
+      );
+    };
+  }, []);
+
   // Keep the active tutorial step visible to the project's browser QA hook.
   // This is deliberately read-only and contains no player/account data.
   useEffect(() => {
@@ -198,7 +215,8 @@ export function OriginalClientTutorialOverlay({
 
       <div
         className="mir-tutorial-card"
-        style={touchPresentation ? { ...CARD_STYLE, ...TOUCH_CARD_STYLE } : CARD_STYLE}
+        data-presentation={touchPresentation ? (isManual ? "touch-card" : "touch-coach") : "desktop-card"}
+        style={tutorialCardStyle(touchPresentation, isManual)}
         role="dialog"
         aria-label={language === "zh-CN" ? "操作教学" : "Controls tutorial"}
       >
@@ -329,13 +347,19 @@ const CARD_STYLE: CSSProperties = {
 };
 
 const TOUCH_CARD_STYLE: CSSProperties = {
-  bottom: 8,
-  width: 400,
-  maxWidth: "calc(100vw - 280px)",
+  top: "max(8px, env(safe-area-inset-top))",
+  bottom: "auto",
+  width: 360,
+  maxWidth: "calc(100vw - 256px)",
   maxHeight: "calc(100dvh - 16px)",
   overflowY: "auto",
-  fontSize: 16,
+  fontSize: 14,
   lineHeight: 1.35,
+};
+
+const TOUCH_COACH_STYLE: CSSProperties = {
+  width: 340,
+  fontSize: 13,
 };
 
 // Embossed gold title band, like the original window headers.
@@ -481,6 +505,13 @@ function tutorialButtonStyle(style: CSSProperties, touchPresentation: boolean): 
   return touchPresentation
     ? { ...style, minHeight: 40, padding: "8px 12px", fontSize: 14 }
     : style;
+}
+
+function tutorialCardStyle(touchPresentation: boolean, isManual: boolean): CSSProperties {
+  if (!touchPresentation) return CARD_STYLE;
+  return isManual
+    ? { ...CARD_STYLE, ...TOUCH_CARD_STYLE }
+    : { ...CARD_STYLE, ...TOUCH_CARD_STYLE, ...TOUCH_COACH_STYLE };
 }
 
 function spotlightStyle(rect: DOMRect): CSSProperties {

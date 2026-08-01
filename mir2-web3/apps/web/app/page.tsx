@@ -2043,15 +2043,41 @@ export default function HomePage() {
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
   }, []);
+  const closeTouchSecondaryWindows = useCallback((
+    except?: "character" | "inventory",
+    force = false,
+  ) => {
+    if (!force && clientProfile.layout !== "touch") return;
+    if (except !== "inventory") setShowInventory(false);
+    if (except !== "character") setShowCharacter(false);
+    setShowQuestLog(false);
+    setShowHeroPet(false);
+    setShowGuild(false);
+    setShowGroup(false);
+    setShowFriends(false);
+    setShowBonds(false);
+    setShowRanking(false);
+    setShowMarket(false);
+    setShowConquest(false);
+    setShowTrade(false);
+    setShowBuffs(false);
+    setShowMail(false);
+    setShowWorldMap(false);
+    setShowHelp(false);
+    setShowHotkeys(false);
+    setShowChatSettings(false);
+  }, [clientProfile.layout]);
+
   const startTutorial = useCallback((
     input: TutorialInputProfile,
     gamepadFamily: TutorialGamepadFamily = "generic",
   ) => {
+    if (input === "touch") closeTouchSecondaryWindows(undefined, true);
     setTutorialInput(input);
     setTutorialGamepadFamily(gamepadFamily);
     setTutorialRunId((current) => current + 1);
     setShowTutorial(true);
-  }, []);
+  }, [closeTouchSecondaryWindows]);
 
   // Auto-start each input-specific tutorial once. The legacy completion flag
   // suppresses only the keyboard/mouse tour; touch and gamepad users still see
@@ -7226,13 +7252,27 @@ export default function HomePage() {
   }
 
   function openCharacter(tab: "char" | "stats1" | "stats2" | "spells") {
+    closeTouchSecondaryWindows("character");
     setActiveCharacterTab(tab);
     setShowCharacter(true);
   }
 
   function openInventory(tab: "bag1" | "bag2" | "quest") {
+    closeTouchSecondaryWindows("inventory");
     setActiveInventoryTab(tab);
     setShowInventory(true);
+  }
+
+  function toggleCharacterWindow() {
+    const opening = !showCharacter;
+    if (opening) closeTouchSecondaryWindows("character");
+    setShowCharacter(opening);
+  }
+
+  function toggleInventoryWindow() {
+    const opening = !showInventory;
+    if (opening) closeTouchSecondaryWindows("inventory");
+    setShowInventory(opening);
   }
 
   function handleViewportTileAction(x: number, y: number, mode: "walk" | "run") {
@@ -12847,8 +12887,8 @@ export default function HomePage() {
       onSendClientCommand={sendClientCommand}
       transferOptions={QUICK_TRANSFER_OPTIONS}
       onStartTutorial={startTutorial}
-      onToggleCharacter={() => setShowCharacter((current) => !current)}
-      onToggleInventory={() => setShowInventory((current) => !current)}
+      onToggleCharacter={toggleCharacterWindow}
+      onToggleInventory={toggleInventoryWindow}
       onCloseCharacter={() => setShowCharacter(false)}
       onCloseInventory={() => setShowInventory(false)}
       onOpenCharacterTab={openCharacter}
@@ -12919,6 +12959,8 @@ export default function HomePage() {
     {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
       <OnchainMinePanelWithStore
         store={worldStoreRef.current}
+        compactMode={clientProfile.layout === "touch"}
+        suppressed={clientProfile.layout === "touch" && showTutorial}
         walletAddress={onchainWallet?.account.address ?? null}
         walletBusy={onchainWalletBusy}
         pendingSwings={onchainMine.pendingSwings}
