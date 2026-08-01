@@ -219,14 +219,14 @@ mod tests {
         result
     }
 
-    fn signed_passkey_token(account_id: &str, exp_ms: u64) -> String {
+    fn signed_passkey_token(account_id: &str, exp_ms: u64, auth_method: &str) -> String {
         let payload = URL_SAFE_NO_PAD.encode(
             serde_json::to_vec(&json!({
                 "auth": "sui-passkey-v2",
                 "accountId": account_id,
                 "jti": "test-login-token",
                 "expMs": exp_ms,
-                "authMethod": "passkey",
+                "authMethod": auth_method,
             }))
             .expect("payload should serialize"),
         );
@@ -242,13 +242,28 @@ mod tests {
     fn passkey_gateway_token_requires_matching_hmac_account_and_expiry() {
         with_passkey_env(&[], || {
             let account_id = "sui:0xpasskey";
-            let token = signed_passkey_token(account_id, unix_now_ms() + 60_000);
+            let token = signed_passkey_token(account_id, unix_now_ms() + 60_000, "passkey");
 
             assert!(verify_passkey_gateway_token(account_id, &token).is_ok());
             assert!(verify_passkey_gateway_token("sui:0xother", &token).is_err());
 
-            let expired = signed_passkey_token(account_id, unix_now_ms().saturating_sub(1));
+            let expired =
+                signed_passkey_token(account_id, unix_now_ms().saturating_sub(1), "passkey");
             assert!(verify_passkey_gateway_token(account_id, &expired).is_err());
+        });
+    }
+
+    #[test]
+    fn passkey_gateway_token_maps_only_supported_auth_methods() {
+        with_passkey_env(&[], || {
+            let account_id = "sui:0xwallet";
+            let wallet = signed_passkey_token(account_id, unix_now_ms() + 60_000, "wallet");
+            let verified = verify_passkey_gateway_token(account_id, &wallet)
+                .expect("wallet token should be accepted");
+            assert_eq!(verified.auth_method, "sui_wallet");
+
+            let unknown = signed_passkey_token(account_id, unix_now_ms() + 60_000, "email");
+            assert!(verify_passkey_gateway_token(account_id, &unknown).is_err());
         });
     }
 

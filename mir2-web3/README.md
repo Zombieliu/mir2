@@ -74,6 +74,7 @@ then supplies the credential to the exact immutable fetcher over standard input:
 - [Dubhe Node desktop and production Beta](docs/DUBHE-NODE-DESKTOP-BETA.zh-CN.md)
 - [Dubhe Network Core 与 Mir2 适配边界](docs/DUBHE-NETWORK-CORE-INTEGRATION.zh-CN.md)
 - [Mir2 AI 世界导演 MVP](docs/AI-WORLD-DIRECTOR-MVP.zh-CN.md)
+- [商业版账号、登录与恢复系统](docs/COMMERCIAL-IDENTITY.zh-CN.md)
 - [Gate 25 home-network Beta acceptance](infra/gate25/README.zh-CN.md)
 - [Gate 22 outbound QUIC/mTLS Home Tunnel](infra/gate22/README.zh-CN.md)
 
