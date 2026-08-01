@@ -361,6 +361,82 @@ img {
   mix-blend-mode: multiply;
 }
 
+.viewport-crystal-weather-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 32750;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.viewport-crystal-weather-layer {
+  position: absolute;
+  inset: -512px;
+  pointer-events: none;
+  background-repeat: repeat;
+  will-change: background-position, transform;
+}
+
+.viewport-crystal-weather-layer.fog {
+  opacity: 0.62;
+  background-size: 512px 512px;
+  animation: crystal-weather-fog 18s linear infinite;
+}
+
+.viewport-crystal-weather-layer.rain {
+  background-size: 512px 512px;
+  animation: crystal-weather-rain 1.35s linear infinite;
+}
+
+.viewport-crystal-weather-layer.snow {
+  background-size: 400px 400px;
+  animation: crystal-weather-snow 8s linear infinite;
+}
+
+.viewport-crystal-weather-layer.ember {
+  background-size: 32px 32px;
+  animation: crystal-weather-ember 7s linear infinite;
+}
+
+.viewport-crystal-weather-layer.red-ember { filter: sepia(1) saturate(8) hue-rotate(325deg); }
+.viewport-crystal-weather-layer.white-ember { filter: brightness(2.2) grayscale(1); }
+.viewport-crystal-weather-layer.yellow-ember { filter: sepia(1) saturate(8); }
+
+.viewport-crystal-weather-layer.leaves {
+  background-size: 512px 512px;
+  animation: crystal-weather-leaves 12s linear infinite;
+}
+
+.viewport-crystal-weather-layer.leaves-b { animation-duration: 15s; }
+.viewport-crystal-weather-layer.leaves-c { animation-duration: 19s; }
+.viewport-crystal-weather-layer.firey-leaves { filter: sepia(1) saturate(5) hue-rotate(330deg); }
+.viewport-crystal-weather-layer.purple-leaves { filter: sepia(1) saturate(5) hue-rotate(235deg); }
+
+@keyframes crystal-weather-fog {
+  to { background-position: 512px -512px; }
+}
+
+@keyframes crystal-weather-rain {
+  to { background-position: -96px 512px; }
+}
+
+@keyframes crystal-weather-snow {
+  to { background-position: 400px 400px; }
+}
+
+@keyframes crystal-weather-ember {
+  to { background-position: 96px -256px; }
+}
+
+@keyframes crystal-weather-leaves {
+  to { background-position: 512px 160px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport-crystal-weather-layer { animation-play-state: paused !important; }
+}
+
 /* Crystal builds an opaque light buffer, adds procedural light textures into it,
    then multiplies the completed buffer over the world. */
 .viewport-map-light-surface {

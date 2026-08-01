@@ -1503,7 +1503,10 @@ fn fixed_crystal_light_setting_accepts_only_crystal_runtime_values() {
     assert_eq!(super::parse_fixed_crystal_light_setting("4"), Some(4));
     assert_eq!(super::parse_fixed_crystal_light_setting("0"), None);
     assert_eq!(super::parse_fixed_crystal_light_setting("5"), None);
-    assert_eq!(super::parse_fixed_crystal_light_setting("night"), None);
+    assert_eq!(super::parse_fixed_crystal_light_setting("dawn"), Some(1));
+    assert_eq!(super::parse_fixed_crystal_light_setting("day"), Some(2));
+    assert_eq!(super::parse_fixed_crystal_light_setting("evening"), Some(3));
+    assert_eq!(super::parse_fixed_crystal_light_setting("night"), Some(4));
     assert_eq!(
         super::crystal_time_of_day_lights_with_override(Some("1"), 4),
         1

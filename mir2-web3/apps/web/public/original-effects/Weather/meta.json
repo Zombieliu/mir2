@@ -1,0 +1,61 @@
+{
+  "source": "Weather.Lib",
+  "frames": {
+    "0": {
+      "path": "/original-effects/Weather/0.png",
+      "width": 512,
+      "height": 512,
+      "x": -24,
+      "y": -16,
+      "bytes": 155502
+    },
+    "1": {
+      "path": "/original-effects/Weather/1.png",
+      "width": 32,
+      "height": 32,
+      "x": -296,
+      "y": -224,
+      "bytes": 164
+    },
+    "43": {
+      "path": "/original-effects/Weather/43.png",
+      "width": 400,
+      "height": 400,
+      "x": 0,
+      "y": 0,
+      "bytes": 35802
+    },
+    "164": {
+      "path": "/original-effects/Weather/164.png",
+      "width": 512,
+      "height": 512,
+      "x": 0,
+      "y": 0,
+      "bytes": 79067
+    },
+    "359": {
+      "path": "/original-effects/Weather/359.png",
+      "width": 512,
+      "height": 512,
+      "x": 0,
+      "y": 0,
+      "bytes": 26327
+    },
+    "531": {
+      "path": "/original-effects/Weather/531.png",
+      "width": 512,
+      "height": 512,
+      "x": 0,
+      "y": 0,
+      "bytes": 11834
+    },
+    "587": {
+      "path": "/original-effects/Weather/587.png",
+      "width": 512,
+      "height": 512,
+      "x": 0,
+      "y": 0,
+      "bytes": 3893
+    }
+  }
+}

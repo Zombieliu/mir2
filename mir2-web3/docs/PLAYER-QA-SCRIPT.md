@@ -4,6 +4,21 @@ Last updated: 2026-08-01
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
 
+## Weather And Lighting
+
+- Normal local development should enter in Day lighting. Set
+  `MIR2_SIMULATION_FIXED_LIGHT_SETTING=night` and restart Gateway to verify the
+  black/default night buffer, object lights, map-cell lights, and MiniMap icon.
+- Repeat with `dawn` and `evening`; their gray buffer must remain behind weather
+  and in front of the completed world, without hiding HUD or interaction text.
+- Set the value to `dynamic` to verify Crystal's UTC-driven cycle. Production
+  and acceptance deployments must not silently inherit the local Day default.
+- Transfer to `DogYoHyun`; `weatherParticles=3` must render Fog plus Red Ember
+  together. Leaving the map must remove both layers without stale particles.
+- Enable reduced-motion at OS/browser level; weather remains visible but its
+  CSS motion pauses. Confirm movement input, target selection and HUD remain
+  interactive because the weather/light layers have no pointer events.
+
 ## Original Bichon Q1-Q9 Level-6 Route
 
 - Create a fresh Warrior and begin on Bichon map `0` near Assistant Jane. Do

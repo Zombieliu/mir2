@@ -2986,6 +2986,8 @@ pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {
     map.mini_map = crystal_map.mini_map;
     map.big_map = crystal_map.big_map;
     map.lights = crystal_map.light;
+    map.map_dark_light = crystal_map.map_dark_light;
+    map.weather_particles = crystal_map.weather_particles;
     true
 }
 
