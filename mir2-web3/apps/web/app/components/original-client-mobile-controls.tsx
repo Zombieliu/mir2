@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { TUTORIAL_CONTROL_EVENT } from "../../lib/tutorial-steps";
 import { CRYSTAL_MOVE_INPUT_INTERVAL_MS } from "./original-client-scene-layout";
 import type {
   DisplayEntity,
@@ -237,9 +238,13 @@ function OriginalClientMobileControlsInner({
             runLockedRef.current,
             activeIntentRef.current?.direction ?? null,
           );
+          const previousIntent = activeIntentRef.current;
           activeIntentRef.current = nextIntent;
           setActiveIntent(nextIntent);
           publishDebugState(nextIntent);
+          if (nextIntent && !previousIntent) {
+            publishTutorialControl("touch:move");
+          }
 
           const previous = lastSentRef.current;
           if (
@@ -316,18 +321,26 @@ function OriginalClientMobileControlsInner({
             <button
               type="button"
               className="mir-mobile-panel-button"
+              data-tutorial-control="touch:panel"
               aria-label={t("ui.character", [], "Character")}
-              onClick={onToggleCharacter}
+              onClick={() => {
+                publishTutorialControl("touch:panel");
+                onToggleCharacter();
+              }}
             >
               {mobileCompactLabel(t("ui.character", [], "Character"))}
             </button>
             <button
               type="button"
               className="mir-mobile-panel-button"
+              data-tutorial-control="touch:panel"
               aria-label={t("ui.inventory", [], "Inventory")}
-              onClick={onToggleInventory}
+              onClick={() => {
+                publishTutorialControl("touch:panel");
+                onToggleInventory();
+              }}
             >
-              {mobileCompactLabel(t("ui.inventory", [], "Inventory"))}
+              {mobileCompactLabel(t("ui.mobileBag", [], "Bag"))}
             </button>
           </div>
           {Array.from({ length: 5 }).map((_, index) => {
@@ -351,6 +364,7 @@ function OriginalClientMobileControlsInner({
                 type="button"
                 className={`mir-mobile-action wheel quick quick-${index} ${action.kind}`}
                 onClick={() => {
+                  publishTutorialControl("touch:quick");
                   if (action.kind === "skill") {
                     onCastSkill(action.skillKey);
                   } else {
@@ -366,9 +380,11 @@ function OriginalClientMobileControlsInner({
           <button
             type="button"
             className={`mir-mobile-action wheel run ${runLocked ? "active" : ""}`}
+            data-tutorial-control="touch:run"
             aria-label={t("ui.mobileRun", [], "Run")}
             aria-pressed={runLocked}
             onClick={() => {
+              publishTutorialControl("touch:run");
               setRunLocked((current) => !current);
               window.setTimeout(() => publishDebugState(), 0);
             }}
@@ -378,27 +394,40 @@ function OriginalClientMobileControlsInner({
           <button
             type="button"
             className="mir-mobile-action wheel approach"
+            data-tutorial-control="touch:approach"
             aria-label={t("ui.approach", [], "Approach")}
             disabled={!selectedEntity}
-            onClick={onApproachTarget}
+            onClick={() => {
+              publishTutorialControl("touch:approach");
+              onApproachTarget();
+            }}
           >
             {mobileCompactLabel(t("ui.approach", [], "Approach"))}
           </button>
           <button
             type="button"
             className="mir-mobile-action wheel pick"
+            data-tutorial-control="touch:pick"
             aria-label={t("ui.mobilePickUp", [], "Pick up")}
             disabled={!nearestDrop}
-            onClick={() => nearestDrop && onPickGroundDrop(nearestDrop.objectId)}
+            onClick={() => {
+              if (!nearestDrop) return;
+              publishTutorialControl("touch:pick");
+              onPickGroundDrop(nearestDrop.objectId);
+            }}
           >
             {t("ui.mobilePickUp", [], "Pick")}
           </button>
           <button
             type="button"
             className="mir-mobile-action wheel primary"
+            data-tutorial-control="touch:attack"
             aria-label={t("ui.attack", [], "Attack")}
             disabled={!selectedEntity}
-            onClick={onPrimaryTargetAction}
+            onClick={() => {
+              publishTutorialControl("touch:attack");
+              onPrimaryTargetAction();
+            }}
           >
             {mobileCompactLabel(t("ui.attack", [], "Attack"))}
           </button>
@@ -422,6 +451,10 @@ export const OriginalClientMobileControls = memo(OriginalClientMobileControlsInn
 function mobileCompactLabel(label: string): string {
   const glyphs = Array.from(label.trim());
   return glyphs.length <= 4 ? glyphs.join("") : glyphs.slice(0, 4).join("");
+}
+
+function publishTutorialControl(action: string) {
+  window.dispatchEvent(new CustomEvent(TUTORIAL_CONTROL_EVENT, { detail: { action } }));
 }
 
 function readNippleMoveData(args: unknown[]): NippleMoveData | null {

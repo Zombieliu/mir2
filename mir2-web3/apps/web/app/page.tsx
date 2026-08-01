@@ -170,6 +170,12 @@ import type {
   SceneAssetReadiness,
 } from "./components/original-client-shell-types";
 import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
+import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
+import {
+  tutorialCompletionStorageKey,
+  type TutorialGamepadFamily,
+  type TutorialInputProfile,
+} from "../lib/tutorial-steps";
 
 const OriginalClientShell = dynamic(
   () => import("./original-client-shell").then((module) => module.OriginalClientShell),
@@ -1628,6 +1634,7 @@ function toBevyWorldSnapshot(world: WorldState): Record<string, unknown> {
 }
 
 export default function HomePage() {
+  const clientProfile = useOriginalClientDeviceProfile();
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const movementShadowBridgeRef = useRef<BevyMovementShadowBridge | null>(null);
   if (movementShadowBridgeRef.current === null) {
@@ -1866,6 +1873,10 @@ export default function HomePage() {
   const [showQuestLog, setShowQuestLog] = useState(false);
   // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
   const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialInput, setTutorialInput] = useState<TutorialInputProfile>("keyboardMouse");
+  const [tutorialGamepadFamily, setTutorialGamepadFamily] =
+    useState<TutorialGamepadFamily>("generic");
+  const [tutorialRunId, setTutorialRunId] = useState(0);
   const [showHeroPet, setShowHeroPet] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
   const [showGroup, setShowGroup] = useState(false);
@@ -1992,19 +2003,34 @@ export default function HomePage() {
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
   }, []);
-  // Auto-start the beginner tutorial the first time a player enters the world.
-  // Persisted in localStorage so it only runs once; reopenable later via Alt+J's
-  // help flow / a future menu entry. Net-new (no Crystal equivalent).
+  const startTutorial = useCallback((
+    input: TutorialInputProfile,
+    gamepadFamily: TutorialGamepadFamily = "generic",
+  ) => {
+    setTutorialInput(input);
+    setTutorialGamepadFamily(gamepadFamily);
+    setTutorialRunId((current) => current + 1);
+    setShowTutorial(true);
+  }, []);
+
+  // Auto-start each input-specific tutorial once. The legacy completion flag
+  // suppresses only the keyboard/mouse tour; touch and gamepad users still see
+  // their new control guide even if they completed the old desktop tutorial.
   useEffect(() => {
     if (screen !== "game") return;
     let alreadySeen = false;
     try {
-      alreadySeen = window.localStorage.getItem("mir2:tutorialCompleted") === "1";
+      alreadySeen =
+        window.localStorage.getItem(
+          tutorialCompletionStorageKey(clientProfile.input, clientProfile.gamepad.family),
+        ) === "1" ||
+        (clientProfile.input === "keyboardMouse" &&
+          window.localStorage.getItem("mir2:tutorialCompleted") === "1");
     } catch {
       alreadySeen = false;
     }
-    if (!alreadySeen) setShowTutorial(true);
-  }, [screen]);
+    if (!alreadySeen) startTutorial(clientProfile.input, clientProfile.gamepad.family);
+  }, [clientProfile.gamepad.family, clientProfile.input, screen, startTutorial]);
   // When the hero/pet window opens, ask the server to start streaming intelligent
   // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).
   useEffect(() => {
@@ -12706,6 +12732,7 @@ export default function HomePage() {
       onRunStage5Command={runStage5Command}
       onSendClientCommand={sendClientCommand}
       transferOptions={QUICK_TRANSFER_OPTIONS}
+      onStartTutorial={startTutorial}
       onToggleCharacter={() => setShowCharacter((current) => !current)}
       onToggleInventory={() => setShowInventory((current) => !current)}
       onCloseCharacter={() => setShowCharacter(false)}
@@ -12758,7 +12785,10 @@ export default function HomePage() {
     ) : null}
     {screen === "game" && showTutorial ? (
       <OriginalClientTutorialOverlay
+        key={`${tutorialInput}:${tutorialGamepadFamily}:${tutorialRunId}`}
         language={language}
+        input={tutorialInput}
+        gamepadFamily={tutorialGamepadFamily}
         windows={{
           inventory: showInventory,
           character: showCharacter,

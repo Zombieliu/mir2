@@ -22,6 +22,8 @@ import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-
 import { GameShopWindow } from "./original-client-game-shop";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
+import type { Mir2InputProfile } from "./original-client-device-profile";
+import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
 import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
@@ -91,6 +93,9 @@ type GameUiSceneProps = {
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   transferOptions: SystemMenuTransferOption[];
+  inputProfile: Mir2InputProfile;
+  gamepadFamily: Mir2GamepadFamily;
+  onStartTutorial: () => void;
 };
 
 function GameUiSceneInner({
@@ -144,6 +149,9 @@ function GameUiSceneInner({
   onRunStage5Command,
   onSendClientCommand,
   transferOptions,
+  inputProfile,
+  gamepadFamily,
+  onStartTutorial,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(false);
   const [showBelt, setShowBelt] = useState(true);
@@ -333,6 +341,12 @@ function GameUiSceneInner({
           mapFileName={world.mapFileName}
           inSafeZone={world.inSafeZone}
           transferOptions={transferOptions}
+          inputProfile={inputProfile}
+          gamepadFamily={gamepadFamily}
+          onStartTutorial={() => {
+            setShowSystemMenu(false);
+            onStartTutorial();
+          }}
           onOpenPanel={(panel) => {
             setShowSystemMenuFeaturePanel(panel);
             setShowSystemMenu(false);
