@@ -196,6 +196,15 @@ pub trait GatewaySessionCache: Send + Sync {
     fn route_lease_count(&self) -> usize {
         0
     }
+    /// Atomically reserve a short-lived authentication token identifier.
+    /// `false` means the token was already consumed and must be rejected.
+    fn consume_auth_token(&self, token_id: &str, ttl_seconds: u64) -> Result<bool, String>;
+    /// Atomically increment a security counter and return `(attempts, ttl_ms)`.
+    /// Implementations must apply the expiry when the key is first observed.
+    fn record_auth_attempt(&self, scope: &str, window_seconds: u64) -> Result<(u64, u64), String>;
+    fn clear_auth_attempt(&self, scope: &str) -> Result<(), String>;
+    fn revoke_identity_session(&self, session_id: &str, ttl_seconds: u64) -> Result<(), String>;
+    fn identity_session_is_revoked(&self, session_id: &str) -> Result<bool, String>;
     fn status(&self) -> GatewaySessionCacheStatus {
         let records = self.list();
         GatewaySessionCacheStatus {
@@ -230,9 +239,73 @@ pub struct InMemoryGatewaySessionCache {
     records: Mutex<BTreeMap<GatewaySessionCacheKey, GatewaySessionCacheRecord>>,
     route_leases: Mutex<BTreeMap<GatewaySessionCacheKey, GatewayRouteLease>>,
     trace_history: Mutex<BTreeMap<GatewaySessionCacheKey, Vec<GatewaySessionTraceEvent>>>,
+    consumed_auth_tokens: Mutex<BTreeMap<String, u64>>,
+    auth_attempts: Mutex<BTreeMap<String, (u64, u64)>>,
+    revoked_identity_sessions: Mutex<BTreeMap<String, u64>>,
 }
 
 impl GatewaySessionCache for InMemoryGatewaySessionCache {
+    fn revoke_identity_session(&self, session_id: &str, ttl_seconds: u64) -> Result<(), String> {
+        self.revoked_identity_sessions
+            .lock()
+            .map_err(|_| "gateway identity-revocation mutex should not be poisoned".to_string())?
+            .insert(
+                session_id.to_string(),
+                current_unix_ms().saturating_add(ttl_seconds.max(1).saturating_mul(1_000)),
+            );
+        Ok(())
+    }
+
+    fn identity_session_is_revoked(&self, session_id: &str) -> Result<bool, String> {
+        let now_ms = current_unix_ms();
+        let mut sessions = self
+            .revoked_identity_sessions
+            .lock()
+            .map_err(|_| "gateway identity-revocation mutex should not be poisoned".to_string())?;
+        sessions.retain(|_, expires_at_ms| *expires_at_ms > now_ms);
+        Ok(sessions.contains_key(session_id))
+    }
+
+    fn record_auth_attempt(&self, scope: &str, window_seconds: u64) -> Result<(u64, u64), String> {
+        let now_ms = current_unix_ms();
+        let window_ms = window_seconds.max(1).saturating_mul(1_000);
+        let mut attempts = self
+            .auth_attempts
+            .lock()
+            .map_err(|_| "gateway auth-attempt mutex should not be poisoned".to_string())?;
+        attempts.retain(|_, (_, expires_at_ms)| *expires_at_ms > now_ms);
+        let entry = attempts
+            .entry(scope.to_string())
+            .or_insert((0, now_ms.saturating_add(window_ms)));
+        entry.0 = entry.0.saturating_add(1);
+        Ok((entry.0, entry.1.saturating_sub(now_ms)))
+    }
+
+    fn clear_auth_attempt(&self, scope: &str) -> Result<(), String> {
+        self.auth_attempts
+            .lock()
+            .map_err(|_| "gateway auth-attempt mutex should not be poisoned".to_string())?
+            .remove(scope);
+        Ok(())
+    }
+
+    fn consume_auth_token(&self, token_id: &str, ttl_seconds: u64) -> Result<bool, String> {
+        let now_ms = current_unix_ms();
+        let mut tokens = self
+            .consumed_auth_tokens
+            .lock()
+            .map_err(|_| "gateway auth-token mutex should not be poisoned".to_string())?;
+        tokens.retain(|_, expires_at_ms| *expires_at_ms > now_ms);
+        if tokens.contains_key(token_id) {
+            return Ok(false);
+        }
+        tokens.insert(
+            token_id.to_string(),
+            now_ms.saturating_add(ttl_seconds.max(1).saturating_mul(1_000)),
+        );
+        Ok(true)
+    }
+
     fn get(&self, key: &GatewaySessionCacheKey) -> Option<GatewaySessionCacheRecord> {
         self.records
             .lock()
@@ -600,6 +673,42 @@ impl RedisGatewaySessionCache {
         format!("{}:trace:", self.namespace)
     }
 
+    fn auth_token_key(&self, token_id: &str) -> String {
+        format!(
+            "{}:auth-token:{}",
+            self.namespace,
+            sanitize_cache_key_part(token_id)
+        )
+    }
+
+    fn auth_token_key_prefix(&self) -> String {
+        format!("{}:auth-token:", self.namespace)
+    }
+
+    fn auth_attempt_key(&self, scope: &str) -> String {
+        format!(
+            "{}:auth-attempt:{}",
+            self.namespace,
+            sanitize_cache_key_part(scope)
+        )
+    }
+
+    fn auth_attempt_key_prefix(&self) -> String {
+        format!("{}:auth-attempt:", self.namespace)
+    }
+
+    fn identity_revocation_key(&self, session_id: &str) -> String {
+        format!(
+            "{}:identity-revoked:{}",
+            self.namespace,
+            sanitize_cache_key_part(session_id)
+        )
+    }
+
+    fn identity_revocation_key_prefix(&self) -> String {
+        format!("{}:identity-revoked:", self.namespace)
+    }
+
     fn is_character_index_key(&self, key: &str) -> bool {
         key.starts_with(&self.character_index_key_prefix())
     }
@@ -612,12 +721,27 @@ impl RedisGatewaySessionCache {
         key.starts_with(&self.trace_key_prefix())
     }
 
+    fn is_auth_token_key(&self, key: &str) -> bool {
+        key.starts_with(&self.auth_token_key_prefix())
+    }
+
+    fn is_auth_attempt_key(&self, key: &str) -> bool {
+        key.starts_with(&self.auth_attempt_key_prefix())
+    }
+
+    fn is_identity_revocation_key(&self, key: &str) -> bool {
+        key.starts_with(&self.identity_revocation_key_prefix())
+    }
+
     fn is_session_record_key(&self, key: &str) -> bool {
         let namespace_prefix = format!("{}:", self.namespace);
         key.starts_with(&namespace_prefix)
             && !self.is_character_index_key(key)
             && !self.is_route_lease_key(key)
             && !self.is_trace_key(key)
+            && !self.is_auth_token_key(key)
+            && !self.is_auth_attempt_key(key)
+            && !self.is_identity_revocation_key(key)
     }
 
     fn append_trace_event(&self, key: &GatewaySessionCacheKey, event: GatewaySessionTraceEvent) {
@@ -761,6 +885,80 @@ impl RedisGatewaySessionCache {
 }
 
 impl GatewaySessionCache for RedisGatewaySessionCache {
+    fn revoke_identity_session(&self, session_id: &str, ttl_seconds: u64) -> Result<(), String> {
+        self.execute(&[
+            "SETEX".to_string(),
+            self.identity_revocation_key(session_id),
+            ttl_seconds.max(1).to_string(),
+            "1".to_string(),
+        ])?;
+        Ok(())
+    }
+
+    fn identity_session_is_revoked(&self, session_id: &str) -> Result<bool, String> {
+        match self.execute(&[
+            "EXISTS".to_string(),
+            self.identity_revocation_key(session_id),
+        ])? {
+            RedisValue::Integer(0) => Ok(false),
+            RedisValue::Integer(1) => Ok(true),
+            other => Err(format!(
+                "unexpected Redis identity revocation response: {other:?}"
+            )),
+        }
+    }
+
+    fn record_auth_attempt(&self, scope: &str, window_seconds: u64) -> Result<(u64, u64), String> {
+        const SCRIPT: &str = "local n=redis.call('INCR',KEYS[1]); if n==1 then redis.call('PEXPIRE',KEYS[1],ARGV[1]); end; local ttl=redis.call('PTTL',KEYS[1]); return {n,ttl}";
+        let response = self.execute(&[
+            "EVAL".to_string(),
+            SCRIPT.to_string(),
+            "1".to_string(),
+            self.auth_attempt_key(scope),
+            window_seconds.max(1).saturating_mul(1_000).to_string(),
+        ])?;
+        let RedisValue::Array(values) = response else {
+            return Err(format!(
+                "unexpected Redis auth-attempt response: {response:?}"
+            ));
+        };
+        if values.len() != 2 {
+            return Err("unexpected Redis auth-attempt response arity".to_string());
+        }
+        let attempts = match &values[0] {
+            RedisValue::Integer(value) => (*value).max(0) as u64,
+            other => return Err(format!("unexpected Redis auth-attempt count: {other:?}")),
+        };
+        let ttl_ms = match &values[1] {
+            RedisValue::Integer(value) => (*value).max(0) as u64,
+            other => return Err(format!("unexpected Redis auth-attempt TTL: {other:?}")),
+        };
+        Ok((attempts, ttl_ms))
+    }
+
+    fn clear_auth_attempt(&self, scope: &str) -> Result<(), String> {
+        self.execute(&["DEL".to_string(), self.auth_attempt_key(scope)])?;
+        Ok(())
+    }
+
+    fn consume_auth_token(&self, token_id: &str, ttl_seconds: u64) -> Result<bool, String> {
+        let response = self.execute(&[
+            "SET".to_string(),
+            self.auth_token_key(token_id),
+            "1".to_string(),
+            "EX".to_string(),
+            ttl_seconds.max(1).to_string(),
+            "NX".to_string(),
+        ])?;
+        match response {
+            RedisValue::Simple(value) if value == "OK" => Ok(true),
+            RedisValue::Bulk(None) => Ok(false),
+            other => Err(format!(
+                "unexpected redis auth-token consumption response: {other:?}"
+            )),
+        }
+    }
+
     fn get(&self, key: &GatewaySessionCacheKey) -> Option<GatewaySessionCacheRecord> {
         let redis_key = self.redis_key(key);
         let value = match self.execute(&["GET".to_string(), redis_key]) {
@@ -1728,6 +1926,32 @@ mod tests {
     };
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    #[test]
+    fn in_memory_auth_token_can_only_be_consumed_once() {
+        let cache = InMemoryGatewaySessionCache::default();
+
+        assert_eq!(cache.consume_auth_token("challenge-1", 60), Ok(true));
+        assert_eq!(cache.consume_auth_token("challenge-1", 60), Ok(false));
+        assert_eq!(cache.consume_auth_token("challenge-2", 60), Ok(true));
+    }
+
+    #[test]
+    fn in_memory_auth_attempts_increment_and_clear() {
+        let cache = InMemoryGatewaySessionCache::default();
+        assert_eq!(cache.record_auth_attempt("account:alice", 60).unwrap().0, 1);
+        assert_eq!(cache.record_auth_attempt("account:alice", 60).unwrap().0, 2);
+        cache.clear_auth_attempt("account:alice").unwrap();
+        assert_eq!(cache.record_auth_attempt("account:alice", 60).unwrap().0, 1);
+    }
+
+    #[test]
+    fn in_memory_identity_session_revocation_is_visible() {
+        let cache = InMemoryGatewaySessionCache::default();
+        assert!(!cache.identity_session_is_revoked("session-1").unwrap());
+        cache.revoke_identity_session("session-1", 60).unwrap();
+        assert!(cache.identity_session_is_revoked("session-1").unwrap());
+    }
 
     fn with_isolated_session_cache_env<T>(
         vars: &[(&str, Option<&str>)],

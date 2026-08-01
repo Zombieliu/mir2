@@ -125,6 +125,10 @@ import {
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
 import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
+import {
+  IdentitySecurityPanel,
+  type BrowserIdentitySession,
+} from "./components/identity-security-panel";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -324,6 +328,7 @@ type GatewayEvent =
   | { type: "spectatorStatus"; payload: SpectatorStatus }
   | { type: "aiLiveStatus"; payload: AiLiveStatus }
   | { type: "error"; message?: string }
+  | { type: "identitySession"; token: string; session: BrowserIdentitySession }
   | { type: string; packet?: string; payload?: Record<string, unknown>; message?: string };
 
 type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
@@ -1960,6 +1965,9 @@ export default function HomePage() {
   const [identityProvider, setIdentityProvider] = useState<string | null>(null);
   const [identityLinkBusy, setIdentityLinkBusy] = useState(false);
   const [identityLinkStatus, setIdentityLinkStatus] = useState<string | null>(null);
+  // Commercial identity bearer stays in React memory only. It is never written
+  // to localStorage/sessionStorage, so closing or reloading the tab discards it.
+  const [identitySessionToken, setIdentitySessionToken] = useState<string | null>(null);
   // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
   const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
   const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
@@ -7914,6 +7922,13 @@ export default function HomePage() {
       setAiLiveStatus(event.payload as AiLiveStatus);
       return;
     }
+    if (event.type === "identitySession") {
+      const identityToken = "token" in event ? event.token : undefined;
+      if (typeof identityToken === "string" && identityToken.length <= 4096) {
+        setIdentitySessionToken(identityToken);
+    }
+      return;
+    }
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
       pendingGatewayProtocolActionRef.current = null;
@@ -7994,6 +8009,7 @@ export default function HomePage() {
         }
         break;
       case "Disconnect":
+        setIdentitySessionToken(null);
         gatewayProtocolReadyRef.current = false;
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -8798,6 +8814,7 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
+        setIdentitySessionToken(null);
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
         screenRef.current = "login";
@@ -13253,6 +13270,15 @@ export default function HomePage() {
     {screen === "game" && !spectatorMode ? (
       <AiLiveGameHighlight status={aiLiveStatus} />
     ) : null}
+    <IdentitySecurityPanel
+      token={identitySessionToken}
+      accountId={accountId}
+      language={language}
+      onCurrentSessionRevoked={() => {
+        setIdentitySessionToken(null);
+        send({ type: "logOut" });
+      }}
+    />
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
         <span>{debugSnapshotNotice.message}</span>

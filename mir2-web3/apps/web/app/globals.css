@@ -5278,7 +5278,6 @@ button.character-spell-value:hover {
     display: flex;
   }
 }
-
 /* Published player world newspaper -------------------------------------- */
 
 .world-report-page {
@@ -5849,4 +5848,88 @@ button.character-spell-value:hover {
   .ai-live-broadcast__footer {
     display: none;
   }
+}
+
+/* Commercial identity security center. Kept above the legacy Crystal canvas so
+   account recovery and session revocation remain usable at every client size. */
+.identity-security-trigger {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  top: max(14px, env(safe-area-inset-top));
+  z-index: 1200;
+  border: 1px solid rgba(112, 214, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(5, 12, 24, 0.88);
+  color: #d9f5ff;
+  padding: 8px 14px;
+  font: 600 12px/1.2 system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(12px);
+}
+
+.identity-security-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(1, 4, 10, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.identity-security-dialog {
+  width: min(760px, 100%);
+  max-height: min(820px, calc(100dvh - 40px));
+  overflow: auto;
+  border: 1px solid rgba(113, 205, 255, 0.35);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(11, 23, 42, 0.98), rgba(7, 11, 20, 0.98));
+  color: #e7f3ff;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.62), inset 0 1px rgba(255, 255, 255, 0.05);
+  padding: 22px;
+  font-family: system-ui, sans-serif;
+}
+
+.identity-security-dialog header,
+.identity-security-dialog article,
+.identity-security-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.identity-security-dialog header small { color: #62d8ff; letter-spacing: 0.16em; }
+.identity-security-dialog h2 { margin: 4px 0 0; font-size: 24px; }
+.identity-security-dialog h3 { margin: 22px 0 8px; color: #9edfff; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.identity-security-dialog button {
+  border: 1px solid rgba(113, 205, 255, 0.35);
+  border-radius: 9px;
+  background: rgba(35, 99, 150, 0.26);
+  color: #e8f7ff;
+  padding: 8px 11px;
+  cursor: pointer;
+}
+.identity-security-dialog button:disabled { opacity: 0.45; cursor: wait; }
+.identity-security-dialog header > button { border: 0; background: transparent; font-size: 28px; }
+.identity-security-actions { justify-content: flex-start; flex-wrap: wrap; margin-top: 18px; }
+.identity-security-list { display: grid; gap: 8px; }
+.identity-security-list article { border: 1px solid rgba(131, 166, 195, 0.18); border-radius: 12px; background: rgba(255,255,255,0.025); padding: 12px; }
+.identity-security-list article > div { display: grid; gap: 3px; min-width: 0; }
+.identity-security-list span { color: #8fa7ba; font-size: 12px; overflow-wrap: anywhere; }
+.identity-security-list .revoked { opacity: 0.5; }
+.identity-security-list em { color: #8fa7ba; font-size: 12px; }
+.identity-security-message { border-left: 3px solid #58cfff; background: rgba(75, 186, 255, 0.08); padding: 10px 12px; overflow-wrap: anywhere; }
+.identity-security-form { display: grid; gap: 14px; margin-top: 18px; }
+.identity-security-form label { display: grid; gap: 6px; color: #b9cede; font-size: 13px; }
+.identity-security-form input { border: 1px solid rgba(131, 166, 195, 0.28); border-radius: 9px; background: #070e19; color: white; padding: 11px; }
+.identity-recovery-codes { display: grid; gap: 10px; margin-top: 20px; border: 1px solid rgba(255, 194, 91, 0.35); border-radius: 12px; background: rgba(255, 174, 41, 0.07); padding: 14px; }
+.identity-recovery-codes code { white-space: pre-wrap; line-height: 1.65; user-select: all; }
+
+@media (max-width: 620px) {
+  .identity-security-backdrop { padding: 8px; align-items: end; }
+  .identity-security-dialog { max-height: 90dvh; border-radius: 18px 18px 0 0; padding: 16px; }
+  .identity-security-actions { align-items: stretch; }
+  .identity-security-actions button { flex: 1 1 42%; }
 }

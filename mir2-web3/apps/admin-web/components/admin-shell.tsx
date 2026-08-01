@@ -10,6 +10,7 @@ const navItems = [
   { href: "/console", labelKey: "shell.nav.console", count: "Ops" },
   { href: "/network", labelKey: "shell.nav.network", count: "Live" },
   { href: "/accounts", labelKey: "shell.nav.accounts", count: "GM" },
+  { href: "/identity-security", labelKey: "shell.nav.identitySecurity", count: "IAM" },
   { href: "/players", labelKey: "shell.nav.players", count: "Read" },
   { href: "/service-trace", labelKey: "shell.nav.serviceTrace", count: "Trace" },
   { href: "/economy", labelKey: "shell.nav.economy", count: "Read" },

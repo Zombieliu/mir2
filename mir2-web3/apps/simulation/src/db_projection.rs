@@ -63,6 +63,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0009_world_director_approval",
         include_str!("../../../infra/postgres/migrations/0009_world_director_approval.sql"),
     ),
+    (
+        "0010_commercial_identity",
+        include_str!("../../../infra/postgres/migrations/0010_commercial_identity.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

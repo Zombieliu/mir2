@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 use std::env;
 use std::io;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::{Path as AxumPath, Query, State};
+use axum::extract::{ConnectInfo, Path as AxumPath, Query, State};
 use axum::http::header::{AUTHORIZATION, CACHE_CONTROL, CONTENT_TYPE};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
@@ -32,8 +33,9 @@ use tokio::time::MissedTickBehavior;
 
 use crate::ai_live::{AiLiveHub, AiLiveMode};
 use crate::auth::{
-    issue_gateway_identity_token, verify_channel_guest_proof, verify_gateway_identity_token,
-    verify_operator_token, verify_passkey_gateway_token, verify_sui_login_proof,
+    issue_gateway_identity_token_for_subject, verify_channel_guest_proof,
+    verify_gateway_identity_token, verify_operator_token, verify_passkey_gateway_token,
+    verify_sui_login_proof,
 };
 use crate::browser_commands::{
     default_drop_count, default_market_max_shape, parse_class, parse_direction, parse_gender,
@@ -53,6 +55,7 @@ use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
     SharedGameplayEventSink,
 };
+use crate::identity::{IdentityService, VerifiedIdentitySession};
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
 use crate::spectator::{SpectatorFrame, SpectatorHub};
@@ -146,6 +149,7 @@ struct WebState {
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
+    identity: Arc<IdentityService>,
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
     spectator: SpectatorHub,
@@ -1351,6 +1355,7 @@ enum SessionAction {
     Packet(ClientPacket),
     PasskeyLogin {
         account_id: String,
+        proof_account_id: String,
         token: String,
     },
     MoveTo {
@@ -1420,6 +1425,85 @@ struct HealthResponse {
     spectator: crate::spectator::SpectatorMetrics,
     ai_live: crate::ai_live::AiLiveMetrics,
     channel_identity: ChannelIdentityRegistryStatus,
+    identity_backend: &'static str,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityOverviewResponse {
+    account_id: String,
+    current_session_id: String,
+    sessions: Vec<crate::identity::IdentitySessionView>,
+    credentials: Vec<crate::identity::IdentityCredentialView>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRevokeSessionRequest {
+    session_id: String,
+    #[serde(default)]
+    reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRevokeCredentialRequest {
+    credential_id: String,
+    #[serde(default)]
+    reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityBindSuiCredentialRequest {
+    address: String,
+    proof_token: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRecoverRequest {
+    account_id: String,
+    recovery_code: String,
+    new_password: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityMutationReceipt {
+    accepted: bool,
+    affected: u64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRecoveryCodesResponse {
+    recovery_codes: Vec<String>,
+    warning: &'static str,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminIdentityQuery {
+    account_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminIdentityRevokeRequest {
+    account_id: String,
+    session_id: Option<String>,
+    reason: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminIdentityResponse {
+    source: &'static str,
+    account_id: String,
+    sessions: Vec<crate::identity::IdentitySessionView>,
+    credentials: Vec<crate::identity::IdentityCredentialView>,
+    audit_events: Vec<Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1537,6 +1621,12 @@ struct ChannelIdentityLinkResponse {
     identity_count: usize,
 }
 
+struct VerifiedChannelSubject {
+    subject: String,
+    token_id: Option<String>,
+    expires_at_ms: Option<u64>,
+}
+
 pub async fn run_web_gateway(
     addr: &str,
     config: GatewayConfig,
@@ -1563,6 +1653,8 @@ pub async fn run_web_gateway(
             )
         })?
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let identity = IdentityService::from_env(config.account_store_database_url.clone())
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
@@ -1576,6 +1668,7 @@ pub async fn run_web_gateway(
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
+        identity: Arc::new(identity),
         injector: crate::inject::LiveSessionInjector::default(),
         spectator,
         ai_live,
@@ -1592,8 +1685,32 @@ pub async fn run_web_gateway(
             "/admin/channel-identities/{player_id}",
             get(admin_channel_identity),
         )
+        .route("/admin/identity", get(admin_identity_overview))
+        .route("/admin/identity/revoke", post(admin_identity_revoke))
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
+        .route("/v1/identity/me", get(identity_overview))
+        .route(
+            "/v1/identity/sessions/revoke",
+            post(identity_revoke_session),
+        )
+        .route(
+            "/v1/identity/sessions/revoke-others",
+            post(identity_revoke_other_sessions),
+        )
+        .route(
+            "/v1/identity/recovery-codes/rotate",
+            post(identity_rotate_recovery_codes),
+        )
+        .route(
+            "/v1/identity/credentials/revoke",
+            post(identity_revoke_credential),
+        )
+        .route(
+            "/v1/identity/credentials/bind-sui",
+            post(identity_bind_sui_credential),
+        )
+        .route("/v1/identity/recover", post(identity_recover_account))
         .route("/onchain/inject", post(onchain_inject))
         .route(
             "/v1/channels/session/exchange",
@@ -1624,9 +1741,12 @@ pub async fn run_web_gateway(
     let listener = TcpListener::bind(addr).await?;
     eprintln!("mir2-gateway web listening on http://{addr}");
 
-    axum::serve(listener, app)
-        .await
-        .map_err(|error| io::Error::new(io::ErrorKind::Other, error.to_string()))
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .map_err(|error| io::Error::new(io::ErrorKind::Other, error.to_string()))
 }
 
 async fn manual_ui() -> Html<&'static str> {
@@ -1681,6 +1801,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         spectator: state.spectator.metrics(),
         ai_live: state.ai_live.metrics(),
         channel_identity: channel_identity_status,
+        identity_backend: state.identity.backend_label(),
     })
 }
 
@@ -1694,7 +1815,10 @@ async fn channel_session_exchange(
         .map_err(|error| channel_exchange_error(StatusCode::TOO_MANY_REQUESTS, error))?;
     let provider = ChannelIdentityProvider::parse(&request.provider)
         .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?;
-    let subject = verified_channel_subject(provider, &request.credential).await?;
+    let verified = verified_channel_subject(provider, &request.credential).await?;
+    consume_channel_subject_proof(state.session_cache.as_ref(), &verified)?;
+    let subject = verified.subject;
+    let credential_subject = subject.clone();
 
     let registry = state.channel_identity.clone();
     let (account, created) = tokio::task::spawn_blocking(move || {
@@ -1709,8 +1833,13 @@ async fn channel_session_exchange(
     })?
     .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
     let expires_at = gateway_now_ms().saturating_add(channel_session_token_ttl_ms());
-    let token = issue_gateway_identity_token(&account.player_id, provider.as_str(), expires_at)
-        .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
+    let token = issue_gateway_identity_token_for_subject(
+        &account.player_id,
+        provider.as_str(),
+        Some(&credential_subject),
+        expires_at,
+    )
+    .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
     Ok(Json(ChannelSessionExchangeResponse {
         account_id: account.player_id.clone(),
         player_id: account.player_id,
@@ -1739,7 +1868,9 @@ async fn channel_identity_link(
             "guest channel identities cannot be linked as ownership credentials".to_string(),
         ));
     }
-    let subject = verified_channel_subject(provider, &request.credential).await?;
+    let verified = verified_channel_subject(provider, &request.credential).await?;
+    consume_channel_subject_proof(state.session_cache.as_ref(), &verified)?;
+    let subject = verified.subject;
     let registry = state.channel_identity.clone();
     let player_id = request.account_id.clone();
     let account =
@@ -1803,7 +1934,7 @@ async fn admin_channel_identity(
 async fn verified_channel_subject(
     provider: ChannelIdentityProvider,
     credential: &str,
-) -> Result<String, (StatusCode, Json<AdminErrorResponse>)> {
+) -> Result<VerifiedChannelSubject, (StatusCode, Json<AdminErrorResponse>)> {
     if credential.is_empty() || credential.len() > 64 * 1024 {
         return Err(channel_exchange_error(
             StatusCode::BAD_REQUEST,
@@ -1820,12 +1951,20 @@ async fn verified_channel_subject(
                     "Sui login proof provider mismatch".to_string(),
                 ));
             }
-            Ok(proof.subject)
+            Ok(VerifiedChannelSubject {
+                subject: proof.subject,
+                token_id: proof.token_id,
+                expires_at_ms: Some(proof.expires_at_ms),
+            })
         }
-        ChannelIdentityProvider::CrazyGames => Ok(verify_crazygames_token(credential)
-            .await
-            .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?
-            .user_id),
+        ChannelIdentityProvider::CrazyGames => Ok(VerifiedChannelSubject {
+            subject: verify_crazygames_token(credential)
+                .await
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?
+                .user_id,
+            token_id: None,
+            expires_at_ms: None,
+        }),
         ChannelIdentityProvider::Itch
         | ChannelIdentityProvider::DirectGuest
         | ChannelIdentityProvider::CrazyGamesGuest => {
@@ -1837,8 +1976,37 @@ async fn verified_channel_subject(
                     "channel guest proof provider mismatch".to_string(),
                 ));
             }
-            Ok(proof.subject)
+            Ok(VerifiedChannelSubject {
+                subject: proof.subject,
+                token_id: None,
+                expires_at_ms: Some(proof.exp_ms),
+            })
         }
+    }
+}
+
+fn consume_channel_subject_proof(
+    session_cache: &dyn crate::GatewaySessionCache,
+    proof: &VerifiedChannelSubject,
+) -> Result<(), (StatusCode, Json<AdminErrorResponse>)> {
+    let Some(token_id) = proof.token_id.as_deref() else {
+        return Ok(());
+    };
+    let ttl_seconds = proof
+        .expires_at_ms
+        .unwrap_or_else(gateway_now_ms)
+        .saturating_sub(gateway_now_ms())
+        .saturating_add(999)
+        / 1_000;
+    match session_cache
+        .consume_auth_token(token_id, ttl_seconds.max(1))
+        .map_err(|error| channel_exchange_error(StatusCode::SERVICE_UNAVAILABLE, error))?
+    {
+        true => Ok(()),
+        false => Err(channel_exchange_error(
+            StatusCode::UNAUTHORIZED,
+            "channel identity proof was already used".to_string(),
+        )),
     }
 }
 
@@ -2085,6 +2253,308 @@ async fn ai_live_audio(
     }
 }
 
+async fn identity_overview(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+) -> Result<Json<IdentityOverviewResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let sessions = identity
+            .list_sessions(&verified)
+            .map_err(identity_unavailable)?;
+        let credentials = identity
+            .list_credentials(&verified)
+            .map_err(identity_unavailable)?;
+        Ok(Json(IdentityOverviewResponse {
+            account_id: verified.account_id,
+            current_session_id: verified.session_id,
+            sessions,
+            credentials,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_revoke_session(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityRevokeSessionRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let changed = identity
+            .revoke_session(&verified, &request.session_id, &request.reason)
+            .map_err(identity_unavailable)?;
+        if changed {
+            session_cache
+                .revoke_identity_session(&request.session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: changed,
+            affected: u64::from(changed),
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_revoke_other_sessions(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let target_sessions = identity
+            .list_sessions(&verified)
+            .map_err(identity_unavailable)?
+            .into_iter()
+            .filter(|session| {
+                session.session_id != verified.session_id && session.revoked_at_ms.is_none()
+            })
+            .map(|session| session.session_id)
+            .collect::<Vec<_>>();
+        let affected = identity
+            .revoke_all_other_sessions(&verified)
+            .map_err(identity_unavailable)?;
+        for session_id in target_sessions {
+            session_cache
+                .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_rotate_recovery_codes(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+) -> Result<Json<IdentityRecoveryCodesResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let recovery_codes = identity
+            .generate_recovery_codes(&verified)
+            .map_err(identity_bad_request)?;
+        Ok(Json(IdentityRecoveryCodesResponse {
+            recovery_codes,
+            warning: "These recovery codes are shown once. Store them offline.",
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_revoke_credential(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityRevokeCredentialRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let target_sessions = identity
+            .list_sessions(&verified)
+            .map_err(identity_unavailable)?
+            .into_iter()
+            .filter(|session| {
+                session.credential_id.as_deref() == Some(request.credential_id.as_str())
+            })
+            .map(|session| session.session_id)
+            .collect::<Vec<_>>();
+        let changed = identity
+            .revoke_credential(&verified, &request.credential_id, &request.reason)
+            .map_err(identity_bad_request)?;
+        if changed {
+            for session_id in target_sessions {
+                session_cache
+                    .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                    .map_err(identity_unavailable)?;
+            }
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: changed,
+            affected: u64::from(changed),
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_bind_sui_credential(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityBindSuiCredentialRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let token = identity_bearer_token(&headers)?;
+    let proof_account_id = format!("sui:{}", request.address.trim());
+    let proof = verify_passkey_gateway_token(&proof_account_id, &request.proof_token)
+        .map_err(identity_unauthorized)?;
+    let ttl_seconds = proof
+        .expires_at_ms
+        .saturating_sub(gateway_unix_ms())
+        .saturating_add(999)
+        / 1_000;
+    match state
+        .session_cache
+        .consume_auth_token(&proof.token_id, ttl_seconds.max(1))
+        .map_err(identity_unavailable)?
+    {
+        true => {}
+        false => {
+            return Err(identity_unauthorized(
+                "Sui credential proof was already used",
+            ))
+        }
+    }
+    let identity = Arc::clone(&state.identity);
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        identity
+            .bind_sui_credential(&verified, proof.auth_method, request.address.trim())
+            .map_err(identity_bad_request)?;
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected: 1,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_recover_account(
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityRecoverRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let peer_address = trusted_client_address(&headers, peer);
+    let user_agent = headers
+        .get(axum::http::header::USER_AGENT)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("")
+        .to_string();
+    let context = AuthSecurityContext {
+        account_id: request.account_id.clone(),
+        action: AuthSecurityAction::Recovery,
+    };
+    enforce_auth_rate_limits(
+        state.session_cache.as_ref(),
+        &state.identity,
+        &peer_address,
+        &user_agent,
+        &context,
+    )
+    .map_err(|_| identity_unauthorized("account recovery could not be completed"))?;
+    mir2_simulation::validate_commercial_identity_credentials(
+        &request.account_id,
+        &request.new_password,
+    )
+    .map_err(identity_bad_request)?;
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let config = Arc::clone(&state.config);
+    tokio::task::spawn_blocking(move || {
+        if !identity
+            .consume_recovery_code(&request.account_id, &request.recovery_code)
+            .map_err(identity_unavailable)?
+        {
+            return Err(identity_unauthorized(
+                "account recovery could not be completed",
+            ));
+        }
+        let target_sessions = identity
+            .list_account_session_ids(&request.account_id)
+            .map_err(identity_unavailable)?;
+        mir2_simulation::reset_account_password_after_recovery(
+            config.as_ref(),
+            &request.account_id,
+            &request.new_password,
+        )
+        .map_err(identity_unavailable)?;
+        identity
+            .revoke_all_account_sessions(&request.account_id, "password_recovered")
+            .map_err(identity_unavailable)?;
+        for session_id in target_sessions {
+            session_cache
+                .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected: 1,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+fn identity_bearer_token(
+    headers: &HeaderMap,
+) -> Result<String, (StatusCode, Json<AdminErrorResponse>)> {
+    bearer_token(headers)
+        .map(str::trim)
+        .filter(|token| !token.is_empty() && token.len() <= 4096)
+        .map(str::to_string)
+        .ok_or_else(|| identity_unauthorized("missing identity bearer token"))
+}
+
+fn identity_unauthorized(error: impl Into<String>) -> (StatusCode, Json<AdminErrorResponse>) {
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(AdminErrorResponse {
+            error: error.into(),
+        }),
+    )
+}
+
+fn identity_bad_request(error: impl Into<String>) -> (StatusCode, Json<AdminErrorResponse>) {
+    (
+        StatusCode::BAD_REQUEST,
+        Json(AdminErrorResponse {
+            error: error.into(),
+        }),
+    )
+}
+
+fn identity_unavailable(error: impl Into<String>) -> (StatusCode, Json<AdminErrorResponse>) {
+    (
+        StatusCode::SERVICE_UNAVAILABLE,
+        Json(AdminErrorResponse {
+            error: error.into(),
+        }),
+    )
+}
+
 async fn admin_system_mail(
     State(state): State<WebState>,
     Json(request): Json<AdminSystemMailRequest>,
@@ -2294,6 +2764,94 @@ async fn admin_session_trace(
     }))
 }
 
+async fn admin_identity_overview(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Query(query): Query<AdminIdentityQuery>,
+) -> Result<Json<AdminIdentityResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    require_gateway_admin_trace_token(&headers)?;
+    let account_id = query.account_id.trim().to_string();
+    if account_id.is_empty() || account_id.len() > 160 {
+        return Err(identity_bad_request("accountId is required"));
+    }
+    let identity = Arc::clone(&state.identity);
+    tokio::task::spawn_blocking(move || {
+        let (sessions, credentials, audit_events) = identity
+            .operator_account_security(&account_id)
+            .map_err(identity_unavailable)?;
+        Ok(Json(AdminIdentityResponse {
+            source: "commercial_identity",
+            account_id,
+            sessions,
+            credentials,
+            audit_events,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn admin_identity_revoke(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<AdminIdentityRevokeRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    require_gateway_admin_trace_token(&headers)?;
+    let account_id = request.account_id.trim().to_string();
+    let reason = request.reason.trim().to_string();
+    if account_id.is_empty() || account_id.len() > 160 || reason.len() < 4 || reason.len() > 160 {
+        return Err(identity_bad_request(
+            "accountId and a reason of 4-160 characters are required",
+        ));
+    }
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    tokio::task::spawn_blocking(move || {
+        let (affected, targets) = if let Some(session_id) = request
+            .session_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+        {
+            let operator = VerifiedIdentitySession {
+                account_id: account_id.clone(),
+                session_id: String::new(),
+                expires_at_ms: u64::MAX,
+            };
+            let changed = identity
+                .revoke_session(&operator, session_id, &reason)
+                .map_err(identity_unavailable)?;
+            (
+                u64::from(changed),
+                if changed {
+                    vec![session_id.to_string()]
+                } else {
+                    Vec::new()
+                },
+            )
+        } else {
+            let targets = identity
+                .list_account_session_ids(&account_id)
+                .map_err(identity_unavailable)?;
+            let affected = identity
+                .revoke_all_account_sessions(&account_id, &reason)
+                .map_err(identity_unavailable)?;
+            (affected, targets)
+        };
+        for session_id in targets {
+            session_cache
+                .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
 fn require_gateway_admin_trace_token(
     headers: &HeaderMap,
 ) -> Result<(), (StatusCode, Json<AdminErrorResponse>)> {
@@ -2303,7 +2861,11 @@ fn require_gateway_admin_trace_token(
         .filter(|value| !value.is_empty());
     let provided = bearer_token(headers).map(str::trim);
     match (expected.as_deref(), provided) {
-        (Some(expected), Some(provided)) if expected == provided => Ok(()),
+        (Some(expected), Some(provided))
+            if constant_time_text_eq(expected.as_bytes(), provided.as_bytes()) =>
+        {
+            Ok(())
+        }
         (Some(_), _) => Err((
             StatusCode::UNAUTHORIZED,
             Json(AdminErrorResponse {
@@ -2320,6 +2882,18 @@ fn require_gateway_admin_trace_token(
     }
 }
 
+fn constant_time_text_eq(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    left.iter()
+        .zip(right)
+        .fold(0_u8, |difference, (left, right)| {
+            difference | (left ^ right)
+        })
+        == 0
+}
+
 fn gateway_prod_like_env() -> bool {
     ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
         .into_iter()
@@ -2330,6 +2904,61 @@ fn gateway_prod_like_env() -> bool {
                 "production" | "prod" | "staging"
             )
         })
+}
+
+fn validate_websocket_origin(headers: &HeaderMap) -> Result<(), String> {
+    let origin = headers
+        .get(axum::http::header::ORIGIN)
+        .and_then(|value| value.to_str().ok())
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let configured = env::var("MIR2_ALLOWED_WEB_ORIGINS")
+        .ok()
+        .map(|value| {
+            value
+                .split(',')
+                .map(str::trim)
+                .filter(|entry| !entry.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if configured.is_empty() {
+        return if gateway_prod_like_env() {
+            Err("MIR2_ALLOWED_WEB_ORIGINS is required in production".to_string())
+        } else {
+            Ok(())
+        };
+    }
+    let Some(origin) = origin else {
+        return Err("WebSocket Origin header is required".to_string());
+    };
+    if configured.iter().any(|allowed| allowed == origin) {
+        Ok(())
+    } else {
+        Err("WebSocket origin is not allowed".to_string())
+    }
+}
+
+fn trusted_client_address(headers: &HeaderMap, peer: SocketAddr) -> String {
+    if env::var("MIR2_TRUST_CF_CONNECTING_IP")
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes"
+            )
+        })
+        .unwrap_or(false)
+    {
+        if let Some(address) = headers
+            .get("cf-connecting-ip")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.trim().parse::<IpAddr>().ok())
+        {
+            return address.to_string();
+        }
+    }
+    peer.ip().to_string()
 }
 
 fn gateway_unix_ms() -> u64 {
@@ -2847,7 +3476,15 @@ async fn send_spectator_status(
         .await
 }
 
-async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
+async fn ws_upgrade(
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    ws: WebSocketUpgrade,
+    State(state): State<WebState>,
+) -> Response {
+    if let Err(error) = validate_websocket_origin(&headers) {
+        return (StatusCode::FORBIDDEN, Json(AdminErrorResponse { error })).into_response();
+    }
     let ws_connection_permit = match state.capacity.try_acquire_ws_connection() {
         Ok(permit) => permit,
         Err(error) => {
@@ -2858,13 +3495,32 @@ async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Resp
                 .into_response();
         }
     };
-    ws.on_upgrade(move |socket| handle_socket(socket, state, ws_connection_permit))
+    let peer_address = trusted_client_address(&headers, peer);
+    let user_agent = headers
+        .get(axum::http::header::USER_AGENT)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("unknown")
+        .chars()
+        .filter(|ch| !ch.is_control())
+        .take(160)
+        .collect::<String>();
+    ws.on_upgrade(move |socket| {
+        handle_socket(
+            socket,
+            state,
+            ws_connection_permit,
+            peer_address,
+            user_agent,
+        )
+    })
 }
 
 async fn handle_socket(
     socket: WebSocket,
     state: WebState,
     _ws_connection_permit: GatewayCapacityPermit,
+    peer_address: String,
+    user_agent: String,
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
     let mut session = new_gateway_session_for_web(&state);
@@ -2877,6 +3533,7 @@ async fn handle_socket(
         Arc::clone(&state.session_cache),
         Arc::clone(&state.reconnect_sessions),
         Arc::clone(&state.capacity),
+        Arc::clone(&state.identity),
         &mut active_session_permit,
         &mut save_queue,
         &mut route_refresh,
@@ -2885,6 +3542,8 @@ async fn handle_socket(
         state.chat_hub.clone(),
         state.spectator.clone(),
         state.ai_live.clone(),
+        peer_address,
+        user_agent,
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -3186,6 +3845,7 @@ async fn handle_socket_inner(
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
+    identity: Arc<IdentityService>,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
@@ -3194,6 +3854,8 @@ async fn handle_socket_inner(
     chat_hub: ChatBroadcastHub,
     spectator: SpectatorHub,
     ai_live: AiLiveHub,
+    peer_address: String,
+    user_agent: String,
 ) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
@@ -3219,6 +3881,9 @@ async fn handle_socket_inner(
     let enforce_player_command_safety = production_player_command_safety_enabled();
     let mut authenticated = false;
     let mut authenticated_account_id: Option<String> = None;
+    let mut active_identity_session: Option<VerifiedIdentitySession> = None;
+    let mut last_identity_revocation_check = Instant::now();
+    let mut last_identity_database_check = Instant::now();
     // M4 WF-5: this socket task registers an injection channel keyed by its account so the
     // /onchain/inject HTTP handler can hand chain-confirmed commands to it. The RAII guard
     // unregisters on every exit path (the loop has many early returns).
@@ -3299,7 +3964,7 @@ async fn handle_socket_inner(
                     let _ = send_error_message(&sender, &error).await;
                     continue;
                 }
-                let action = match queued_input.take_input() {
+                let mut action = match queued_input.take_input() {
                     ParsedSocketInput::Action(action) => action,
                     ParsedSocketInput::ProtocolError(error) => {
                         if send_error_message(&sender, &error).await.is_err() {
@@ -3321,7 +3986,20 @@ async fn handle_socket_inner(
                 let low_latency_action = is_low_latency_action(&action);
                 let should_queue_save_by_action = should_queue_save_for_action(&action);
                 let runtime_tick_defer_duration = runtime_tick_defer_duration_for_action(&action);
-                let login_account_id = login_account_id_for_action(&action).map(str::to_string);
+                let mut login_account_id = login_account_id_for_action(&action).map(str::to_string);
+                let mut login_identity_context = login_identity_context_for_action(&action);
+                if let Some(context) = auth_security_context_for_action(&action) {
+                    if let Err(error) = enforce_auth_rate_limits(
+                        session_cache.as_ref(),
+                        &identity,
+                        &peer_address,
+                        &user_agent,
+                        &context,
+                    ) {
+                        let _ = send_error_message(&sender, &error).await;
+                        continue;
+                    }
+                }
                 let keep_alive_time = keep_alive_time_for_action(&action);
                 if let Some(time) = keep_alive_time {
                     if send_server_packet(&sender, &ServerPacket::KeepAlive { time })
@@ -3396,6 +4074,78 @@ async fn handle_socket_inner(
                             let _ = send_error_message(
                                 &sender,
                                 &format!("Commonware session lease unavailable: {error}"),
+                            )
+                            .await;
+                            continue;
+                        }
+                    }
+                }
+                if let SessionAction::PasskeyLogin {
+                    account_id,
+                    proof_account_id,
+                    token,
+                } = &mut action
+                {
+                    let verified = match verify_passkey_gateway_token(proof_account_id, token) {
+                        Ok(verified) => verified,
+                        Err(error) => {
+                            let _ = send_error_message(&sender, &error).await;
+                            continue;
+                        }
+                    };
+                    if let Some(context) = login_identity_context.as_mut() {
+                        context.auth_method = verified.auth_method;
+                        context.credential_subject = verified
+                            .credential_subject
+                            .clone()
+                            .unwrap_or_else(|| {
+                                proof_account_id
+                                    .strip_prefix("sui:")
+                                    .unwrap_or(proof_account_id)
+                                    .to_string()
+                            });
+                        let resolved_account = match tokio::task::block_in_place(|| {
+                            identity.resolve_sui_account(
+                                verified.auth_method,
+                                &context.credential_subject,
+                            )
+                        }) {
+                            Ok(Some(resolved)) => resolved,
+                            Ok(None) => proof_account_id.clone(),
+                            Err(error) => {
+                                let _ = send_error_message(
+                                    &sender,
+                                    &format!("identity credential lookup unavailable: {error}"),
+                                )
+                                .await;
+                                continue;
+                            }
+                        };
+                        *account_id = resolved_account.clone();
+                        context.account_id = resolved_account.clone();
+                        login_account_id = Some(resolved_account);
+                    }
+                    let ttl_seconds = verified
+                        .expires_at_ms
+                        .saturating_sub(gateway_unix_ms())
+                        .saturating_add(999)
+                        / 1_000;
+                    match session_cache
+                        .consume_auth_token(&verified.token_id, ttl_seconds.max(1))
+                    {
+                        Ok(true) => {}
+                        Ok(false) => {
+                            let _ = send_error_message(
+                                &sender,
+                                "passkey login token was already consumed",
+                            )
+                            .await;
+                            continue;
+                        }
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("passkey replay protection unavailable: {error}"),
                             )
                             .await;
                             continue;
@@ -3497,6 +4247,71 @@ async fn handle_socket_inner(
                 }
                 let force_route_refresh = start_game_character_index.is_some();
                 let next_authenticated = update_authenticated_state(authenticated, &responses);
+                if !authenticated && !next_authenticated {
+                    if let Some(context) = login_identity_context.as_ref() {
+                        let _ = tokio::task::block_in_place(|| {
+                            identity.record_auth_security_event(
+                                Some(&context.account_id),
+                                "login_attempt",
+                                "failure",
+                                "invalid_credentials_or_policy",
+                                &peer_address,
+                                &user_agent,
+                            )
+                        });
+                    }
+                }
+                if !authenticated && next_authenticated {
+                    let Some(context) = login_identity_context.as_ref() else {
+                        let _ = send_error_message(
+                            &sender,
+                            "identity session cannot be issued for this login",
+                        )
+                        .await;
+                        return;
+                    };
+                    clear_successful_login_rate_limits(
+                        session_cache.as_ref(),
+                        &identity,
+                        &peer_address,
+                        &context.account_id,
+                    );
+                    let grant = match tokio::task::block_in_place(|| {
+                        identity.issue_session(
+                            &context.account_id,
+                            context.auth_method,
+                            &context.credential_subject,
+                            &peer_address,
+                            &user_agent,
+                        )
+                    }) {
+                        Ok(grant) => grant,
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity session unavailable: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    };
+                    active_identity_session = match tokio::task::block_in_place(|| {
+                        identity.verify_session_token(&grant.token)
+                    }) {
+                        Ok(verified) => Some(verified),
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity session unavailable: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    };
+                    if send_identity_session_grant(&sender, &grant).await.is_err() {
+                        return;
+                    }
+                }
                 if next_authenticated {
                     if let Some(account_id) = login_account_id {
                         _injection_registration = Some(crate::inject::InjectionRegistration::new(
@@ -3507,6 +4322,11 @@ async fn handle_socket_inner(
                         authenticated_account_id = Some(account_id);
                     }
                 } else if authenticated {
+                    if let Some(verified) = active_identity_session.take() {
+                        let _ = tokio::task::block_in_place(|| {
+                            identity.revoke_session(&verified, &verified.session_id, "player_logout")
+                        });
+                    }
                     authenticated_account_id = None;
                     _injection_registration = None;
                 }
@@ -3680,6 +4500,50 @@ async fn handle_socket_inner(
             }
             _ = runtime_tick.tick() => {
                 let now = Instant::now();
+                if authenticated
+                    && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
+                {
+                    last_identity_revocation_check = now;
+                    let Some(verified) = active_identity_session.as_ref() else {
+                        let _ = send_error_message(&sender, "identity session is missing").await;
+                        return;
+                    };
+                    if verified.expires_at_ms <= gateway_unix_ms() {
+                        let _ = send_error_message(&sender, "identity session expired").await;
+                        return;
+                    }
+                    match session_cache.identity_session_is_revoked(&verified.session_id) {
+                        Ok(false) => {}
+                        Ok(true) => {
+                            let _ = send_error_message(&sender, "identity session was revoked").await;
+                            return;
+                        }
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity revocation check unavailable: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    }
+                    if now.duration_since(last_identity_database_check)
+                        >= Duration::from_secs(60)
+                    {
+                        last_identity_database_check = now;
+                        let database_check = tokio::task::block_in_place(|| {
+                            identity.touch_session(verified)
+                        });
+                        if let Err(error) = database_check {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity session is no longer active: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    }
+                }
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
@@ -3979,6 +4843,152 @@ fn login_account_id_for_action(action: &SessionAction) -> Option<&str> {
     }
 }
 
+#[derive(Debug, Clone)]
+struct LoginIdentityContext {
+    account_id: String,
+    auth_method: &'static str,
+    credential_subject: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AuthSecurityAction {
+    Login,
+    Registration,
+    PasswordChange,
+    Recovery,
+}
+
+#[derive(Debug, Clone)]
+struct AuthSecurityContext {
+    account_id: String,
+    action: AuthSecurityAction,
+}
+
+fn login_identity_context_for_action(action: &SessionAction) -> Option<LoginIdentityContext> {
+    match action {
+        SessionAction::Packet(ClientPacket::Login { account_id, .. }) => {
+            Some(LoginIdentityContext {
+                account_id: account_id.clone(),
+                auth_method: "password",
+                credential_subject: account_id.clone(),
+            })
+        }
+        SessionAction::PasskeyLogin { account_id, .. } => Some(LoginIdentityContext {
+            account_id: account_id.clone(),
+            auth_method: "sui_passkey",
+            credential_subject: account_id
+                .strip_prefix("sui:")
+                .unwrap_or(account_id)
+                .to_string(),
+        }),
+        _ => None,
+    }
+}
+
+fn auth_security_context_for_action(action: &SessionAction) -> Option<AuthSecurityContext> {
+    match action {
+        SessionAction::Packet(ClientPacket::Login { account_id, .. })
+        | SessionAction::PasskeyLogin { account_id, .. } => Some(AuthSecurityContext {
+            account_id: account_id.clone(),
+            action: AuthSecurityAction::Login,
+        }),
+        SessionAction::Packet(ClientPacket::NewAccount { account_id, .. }) => {
+            Some(AuthSecurityContext {
+                account_id: account_id.clone(),
+                action: AuthSecurityAction::Registration,
+            })
+        }
+        SessionAction::Packet(ClientPacket::ChangePassword { account_id, .. }) => {
+            Some(AuthSecurityContext {
+                account_id: account_id.clone(),
+                action: AuthSecurityAction::PasswordChange,
+            })
+        }
+        _ => None,
+    }
+}
+
+fn enforce_auth_rate_limits(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    user_agent: &str,
+    context: &AuthSecurityContext,
+) -> Result<(), String> {
+    let peer = identity.peer_fingerprint(peer_address)?;
+    let device = identity.peer_fingerprint(&format!("device:{}", user_agent.trim()))?;
+    let account = context.account_id.trim().to_ascii_lowercase();
+    if account.is_empty() || account.len() > 160 {
+        return Err("invalid authentication request".to_string());
+    }
+    let policies: Vec<(String, u64, u64)> = match context.action {
+        AuthSecurityAction::Login => vec![
+            (format!("login:pair:{peer}:{account}"), 8, 15 * 60),
+            (format!("login:peer:{peer}"), 30, 15 * 60),
+            (format!("login:device:{device}"), 30, 15 * 60),
+            (format!("login:account:{account}"), 50, 15 * 60),
+        ],
+        AuthSecurityAction::Registration => vec![
+            (format!("register:peer:{peer}"), 5, 60 * 60),
+            (format!("register:device:{device}"), 5, 60 * 60),
+            (format!("register:account:{account}"), 3, 60 * 60),
+        ],
+        AuthSecurityAction::PasswordChange => vec![
+            (format!("password-change:pair:{peer}:{account}"), 5, 60 * 60),
+            (format!("password-change:device:{device}"), 10, 60 * 60),
+            (format!("password-change:account:{account}"), 20, 60 * 60),
+        ],
+        AuthSecurityAction::Recovery => vec![
+            (format!("recovery:pair:{peer}:{account}"), 5, 60 * 60),
+            (format!("recovery:peer:{peer}"), 15, 60 * 60),
+            (format!("recovery:device:{device}"), 10, 60 * 60),
+            (format!("recovery:account:{account}"), 20, 60 * 60),
+        ],
+    };
+    for (scope, limit, window_seconds) in policies {
+        let (attempts, ttl_ms) = cache.record_auth_attempt(&scope, window_seconds)?;
+        if attempts > limit {
+            let backoff = 1u64
+                .checked_shl((attempts - limit).min(8) as u32)
+                .unwrap_or(300)
+                .clamp(2, 300);
+            let retry_after = backoff.max(ttl_ms.saturating_add(999) / 1_000).min(3_600);
+            let _ = identity.record_auth_security_event(
+                Some(&context.account_id),
+                "authentication_rate_limited",
+                "blocked",
+                "rate_limit_exceeded",
+                peer_address,
+                user_agent,
+            );
+            return Err(format!(
+                "too many authentication attempts; retry after {retry_after} seconds"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn clear_successful_login_rate_limits(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    account_id: &str,
+) {
+    let Ok(peer) = identity.peer_fingerprint(peer_address) else {
+        return;
+    };
+    let account = account_id.trim().to_ascii_lowercase();
+    for scope in [
+        format!("login:pair:{peer}:{account}"),
+        format!("login:account:{account}"),
+    ] {
+        if let Err(error) = cache.clear_auth_attempt(&scope) {
+            eprintln!("failed to clear successful authentication counter: {error}");
+        }
+    }
+}
+
 fn start_game_character_index_for_action(action: &SessionAction) -> Option<i32> {
     match action {
         SessionAction::Packet(ClientPacket::StartGame { character_index }) => {
@@ -4107,8 +5117,12 @@ fn execute_session_action(
             log_move_action(move_log, &responses);
             Ok(responses)
         }
-        SessionAction::PasskeyLogin { account_id, token } => {
-            verify_passkey_gateway_token(&account_id, &token)?;
+        SessionAction::PasskeyLogin {
+            account_id,
+            proof_account_id,
+            token,
+        } => {
+            verify_passkey_gateway_token(&proof_account_id, &token)?;
             Ok(session.passkey_login(&account_id))
         }
         SessionAction::MoveTo { x, y, running } => {
@@ -4148,8 +5162,12 @@ fn execute_production_session_action(
                 authenticated,
                 WorldCommand::ClientPacket(packet),
             )?,
-        SessionAction::PasskeyLogin { account_id, token } => {
-            verify_passkey_gateway_token(&account_id, &token)?;
+        SessionAction::PasskeyLogin {
+            account_id,
+            proof_account_id,
+            token,
+        } => {
+            verify_passkey_gateway_token(&proof_account_id, &token)?;
             return Ok(session.passkey_login(&account_id));
         }
         SessionAction::MoveTo { x, y, running } => session
@@ -4472,9 +5490,11 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             account_id,
             password,
         })),
-        BrowserCommand::PasskeyLogin { account_id, token } => {
-            Ok(SessionAction::PasskeyLogin { account_id, token })
-        }
+        BrowserCommand::PasskeyLogin { account_id, token } => Ok(SessionAction::PasskeyLogin {
+            proof_account_id: account_id.clone(),
+            account_id,
+            token,
+        }),
         BrowserCommand::NewAccount {
             account_id,
             password,
@@ -5299,6 +6319,25 @@ async fn send_error_message(
             json!({
                 "type": "error",
                 "message": message
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+}
+
+async fn send_identity_session_grant(
+    sender: &SharedWebSocketSender,
+    grant: &crate::identity::IdentitySessionGrant,
+) -> Result<(), axum::Error> {
+    sender
+        .lock()
+        .await
+        .send(Message::Text(
+            json!({
+                "type": "identitySession",
+                "token": grant.token,
+                "session": grant.session,
             })
             .to_string()
             .into(),
@@ -8228,6 +9267,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -8289,6 +9329,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -8348,6 +9389,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
         };
 
@@ -8430,6 +9472,7 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -11018,6 +12061,7 @@ mod tests {
 
         let passkey = SessionAction::PasskeyLogin {
             account_id: "wallet-demo".to_string(),
+            proof_account_id: "wallet-demo".to_string(),
             token: "token".to_string(),
         };
         assert_eq!(

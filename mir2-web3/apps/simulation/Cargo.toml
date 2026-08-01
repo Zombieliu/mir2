@@ -10,6 +10,7 @@ name = "mir2_simulation"
 path = "src/lib.rs"
 
 [dependencies]
+argon2 = "0.5.3"
 bevy_app = "0.17"
 bevy_ecs = "0.17"
 bevy_tasks = { version = "0.17", features = ["multi_threaded"] }
@@ -17,6 +18,7 @@ libc = "0.2"
 mir2-game-data = { path = "../../packages/game-data" }
 mir2-protocol = { path = "../../packages/protocol" }
 postgres = { version = "0.19", features = ["with-serde_json-1"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 flate2 = "1"
