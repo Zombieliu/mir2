@@ -799,7 +799,7 @@ pub(crate) struct LocalMotionPresentationShadowPlugin;
 
 impl Plugin for LocalMotionPresentationShadowPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_non_send_resource(LocalMotionMainThread)
+        app.insert_non_send(LocalMotionMainThread)
             .init_resource::<LocalMotionPresentationShadow>()
             .add_systems(
                 PreUpdate,
