@@ -20,3 +20,4 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - Touch layouts now enforce one secondary game window at a time; starting the touch tutorial clears existing secondary windows.
 - Targeted typecheck, device-profile, responsive-stage, tutorial, on-chain mine, and gamepad tests pass.
 - The local full frontend suite reaches `test:map-render-routing` and then stops because this checkout intentionally lacks generated `public/mir2-asset-worker.js`; Preview/CI supplies the release artifact and is required for final visual verification.
+- Added a repository-root `.vercelignore` so root-directory deployments exclude local `.next`, `node_modules`, Rust targets, and non-web apps instead of uploading roughly 598 MB.
