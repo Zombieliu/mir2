@@ -171,7 +171,10 @@ import type {
 } from "./components/original-client-shell-types";
 import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
 import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
-import { crystalEffectiveLightSetting } from "./components/original-client-scene-lighting";
+import {
+  crystalEffectiveLightSetting,
+  crystalTimeOfDayLightSetting,
+} from "./components/original-client-scene-lighting";
 import {
   tutorialCompletionStorageKey,
   type TutorialGamepadFamily,
@@ -185,6 +188,17 @@ const OriginalClientShell = dynamic(
     loading: () => null,
   },
 );
+
+const DEFAULT_CRYSTAL_WEB_LIGHT_OVERRIDE =
+  process.env.NEXT_PUBLIC_MIR2_FIXED_LIGHT_SETTING?.trim() || "day";
+
+function currentCrystalWebLightOverride(): string {
+  if (typeof window === "undefined") return DEFAULT_CRYSTAL_WEB_LIGHT_OVERRIDE;
+  return (
+    new URLSearchParams(window.location.search).get("crystalLight") ??
+    DEFAULT_CRYSTAL_WEB_LIGHT_OVERRIDE
+  );
+}
 
 // Stable empty-list sentinel for the closed-window ExtraWindows props (Stage 3). When a window
 // is closed we skip its adapter pass entirely and hand the (unread) list prop this shared
@@ -10129,10 +10143,14 @@ export default function HomePage() {
         // Crystal updates world lighting silently; no ChatDialog line is added.
         const lights = numberOrUndefined(payload.lights);
         if (lights !== undefined) {
+          const timeOfDayLightSetting = crystalTimeOfDayLightSetting(
+            lights,
+            currentCrystalWebLightOverride(),
+          );
           updateWorld((current) => ({
             ...current,
-            timeOfDayLightSetting: lights,
-            lightSetting: crystalEffectiveLightSetting(current.mapLightSetting, lights),
+            timeOfDayLightSetting,
+            lightSetting: crystalEffectiveLightSetting(current.mapLightSetting, timeOfDayLightSetting),
           }));
         }
         break;
@@ -11412,15 +11430,19 @@ export default function HomePage() {
         });
       }
 
+      const timeOfDayLightSetting = crystalTimeOfDayLightSetting(
+        snapshot.lightSetting ?? current.timeOfDayLightSetting,
+        currentCrystalWebLightOverride(),
+      );
       const nextWorld = {
         ...current,
         mapTitle: snapshot.mapTitle ?? current.mapTitle,
         mapFileName: snapshotMapFileName,
         inSafeZone: snapshot.inSafeZone ?? current.inSafeZone,
-        timeOfDayLightSetting: snapshot.lightSetting ?? current.timeOfDayLightSetting,
+        timeOfDayLightSetting,
         lightSetting: crystalEffectiveLightSetting(
           current.mapLightSetting,
-          snapshot.lightSetting ?? current.timeOfDayLightSetting ?? current.lightSetting,
+          timeOfDayLightSetting ?? current.lightSetting,
         ),
         playerObjectId,
         playerName: effectiveSelfEntity?.name ?? current.playerName,

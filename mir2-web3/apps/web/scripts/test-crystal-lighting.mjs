@@ -41,8 +41,14 @@ const {
   crystalObjectLightTopLeft,
   crystalSceneDarknessColor,
   crystalSceneLightClassName,
+  crystalTimeOfDayLightSetting,
 } = module.exports;
 
+assert.equal(crystalTimeOfDayLightSetting(4, "day"), 2);
+assert.equal(crystalTimeOfDayLightSetting(2, "night"), 4);
+assert.equal(crystalTimeOfDayLightSetting(3, "dynamic"), 3);
+assert.equal(crystalTimeOfDayLightSetting(1, "invalid"), 1);
+assert.equal(crystalTimeOfDayLightSetting(null, "day"), 2);
 assert.equal(crystalEffectiveLightSetting(4, 2), 4);
 assert.equal(crystalEffectiveLightSetting(0, 2), 2);
 assert.equal(crystalEffectiveLightSetting(null, 3), 3);

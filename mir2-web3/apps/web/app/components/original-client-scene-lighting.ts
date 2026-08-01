@@ -2,6 +2,35 @@ import type { DisplayEntity } from "./original-client-types";
 
 export type CrystalSceneLightClassName = "dawn" | "evening" | "night";
 
+export function crystalTimeOfDayLightSetting(
+  serverSetting: number | null | undefined,
+  override: string | null | undefined,
+): number | null {
+  const normalizedServerSetting =
+    serverSetting && serverSetting >= 1 && serverSetting <= 4 ? Math.trunc(serverSetting) : null;
+  switch (override?.trim().toLowerCase()) {
+    case "dawn":
+    case "1":
+      return 1;
+    case "day":
+    case "2":
+      return 2;
+    case "evening":
+    case "3":
+      return 3;
+    case "night":
+    case "4":
+      return 4;
+    case "dynamic":
+    case "":
+    case undefined:
+    case null:
+      return normalizedServerSetting;
+    default:
+      return normalizedServerSetting;
+  }
+}
+
 export function crystalEffectiveLightSetting(
   mapLightSetting: number | null | undefined,
   timeOfDayLightSetting: number | null | undefined,

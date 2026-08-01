@@ -24,11 +24,13 @@ The scripts align these ports and use the tracked prebuilt WebGPU/WebGL2 Bevy
 runtimes. Windows native-toolchain scripts remain available for direct process
 debugging.
 
-Local developer builds stay in Crystal `Day` lighting by default so gameplay
-and UI work remain readable. Set `MIR2_SIMULATION_FIXED_LIGHT_SETTING` to
-`dawn`, `day`, `evening`, or `night` for a fixed visual test, or to `dynamic`
-to restore Crystal's UTC-driven cycle. Production and acceptance deployments
-do not force this developer override.
+Player Web currently defaults the global Crystal time-of-day light to `Day` so
+development and production testing remain readable. Use `?crystalLight=dynamic`
+to restore the server's UTC-driven cycle, or `dawn`, `day`, `evening`, and
+`night` for a fixed browser test. `NEXT_PUBLIC_MIR2_FIXED_LIGHT_SETTING` changes
+the deployment default. Map-specific fixed light settings still take priority.
+Direct Gateway development can independently use
+`MIR2_SIMULATION_FIXED_LIGHT_SETTING` with the same named values.
 
 Player Web uses one URL across desktop, landscape mobile, and console browsers
 that expose the Web Gamepad API. It switches its controls tutorial to the most
