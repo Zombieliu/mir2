@@ -80,8 +80,8 @@ html[data-display-mode="standalone"] .mir-client-page {
   position: absolute;
   left: var(--mir-stage-left, 0px);
   top: var(--mir-stage-top, 0px);
-  width: 1024px;
-  height: 768px;
+  width: var(--mir-stage-virtual-width, 1024px);
+  height: var(--mir-stage-virtual-height, 768px);
   overflow: hidden;
   transform: scale(var(--mir-stage-scale, 1));
   transform-origin: top left;
@@ -740,8 +740,8 @@ html[data-display-mode="standalone"] .mir-client-page {
   position: absolute;
   inset: 0;
   z-index: 10;
-  width: 1024px;
-  height: 768px;
+  width: var(--mir-stage-virtual-width, 1024px);
+  height: var(--mir-stage-virtual-height, 768px);
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
   font-weight: 400;
@@ -1304,8 +1304,8 @@ html[data-display-mode="standalone"] .mir-client-page {
 .select-scene {
   position: absolute;
   inset: 0;
-  width: 1024px;
-  height: 768px;
+  width: var(--mir-stage-virtual-width, 1024px);
+  height: var(--mir-stage-virtual-height, 768px);
   overflow: hidden;
 }
 
@@ -5073,6 +5073,18 @@ button.character-spell-value:hover {
 .mir-client-page[data-layout-profile="touch"] {
   touch-action: none;
   overscroll-behavior: none;
+}
+
+/* Experimental wide-mobile shell: keep the captured 4:3 HUD cluster centered
+   while edge-anchored controls (mini-map, status, etc.) can use the expanded
+   virtual stage. The flag is opt-in and does not alter the default client. */
+@media (pointer: coarse) and (orientation: landscape) {
+  .mir-client-page[data-wide-mobile="true"] .game-ui-scene .main-hud-shell,
+  .mir-client-page[data-wide-mobile="true"] .game-ui-scene .chat-frame,
+  .mir-client-page[data-wide-mobile="true"] .game-ui-scene .chat-filter-bar,
+  .mir-client-page[data-wide-mobile="true"] .game-ui-scene .belt-dialog.horizontal {
+    transform: translateX(var(--mir-wide-hud-offset-x, 0px));
+  }
 }
 
 /* Keep the original window content and sprites, but present the high-value

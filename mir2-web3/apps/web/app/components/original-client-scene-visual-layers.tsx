@@ -40,14 +40,9 @@ import {
 } from "./original-client-scene-lighting";
 import {
   EMPTY_VIEWPORT_OFFSET,
+  DEFAULT_VIEWPORT_LAYOUT,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
-  VIEWPORT_ENTITY_LEFT_ORIGIN,
-  VIEWPORT_ENTITY_TOP_ORIGIN,
-  VIEWPORT_RANGE_X,
-  VIEWPORT_RANGE_Y,
-  VIEWPORT_TILE_CENTER_X,
-  VIEWPORT_TILE_CENTER_Y,
   argbToCssColor,
   entityMotionOffsetForEntity,
   entityNameplateColor,
@@ -67,6 +62,7 @@ import {
   ratio,
   viewportDepthForCell,
   type ViewportEntitySprite,
+  type ViewportLayout,
   type ViewportMapSprites,
   type ViewportOffset,
 } from "./original-client-scene-rendering";
@@ -325,8 +321,16 @@ function collectViewportMapLights(
   world: DisplayWorld,
   player: DisplayEntity | null,
   cameraOffset: ViewportOffset,
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 ): ViewportMapLight[] {
   if (!player || !world.originalMapRegion) return [];
+
+  const {
+    entityLeftOrigin: VIEWPORT_ENTITY_LEFT_ORIGIN,
+    entityTopOrigin: VIEWPORT_ENTITY_TOP_ORIGIN,
+    rangeX: VIEWPORT_RANGE_X,
+    rangeY: VIEWPORT_RANGE_Y,
+  } = viewportLayout;
 
   const lights: ViewportMapLight[] = [];
   const maxDx = VIEWPORT_RANGE_X + 24;
@@ -391,12 +395,18 @@ function FallbackVfxNode({
   now,
   cameraOffset,
   viewportDepthPlayer,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   effect: FallbackVfx;
   now: number;
   cameraOffset: ViewportOffset;
   viewportDepthPlayer: Pick<DisplayEntity, "x" | "y">;
+  viewportLayout?: ViewportLayout;
 }) {
+  const {
+    tileCenterX: VIEWPORT_TILE_CENTER_X,
+    tileCenterY: VIEWPORT_TILE_CENTER_Y,
+  } = viewportLayout;
   const style = fallbackVfxStyle(effect, now);
   if (!style) {
     return null;
@@ -492,6 +502,7 @@ function OriginalClientSceneVisualLayersInner({
   entityKindClassName,
   onPickGroundDrop,
   onActivateEntity,
+  viewportLayout,
 }: {
   screen: ClientScreen;
   t: TranslateFn;
@@ -514,7 +525,16 @@ function OriginalClientSceneVisualLayersInner({
   entityKindClassName: (kind: EntityKind) => string;
   onPickGroundDrop: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
+  viewportLayout: ViewportLayout;
 }) {
+  const {
+    entityLeftOrigin: VIEWPORT_ENTITY_LEFT_ORIGIN,
+    entityTopOrigin: VIEWPORT_ENTITY_TOP_ORIGIN,
+    rangeX: VIEWPORT_RANGE_X,
+    rangeY: VIEWPORT_RANGE_Y,
+    tileCenterX: VIEWPORT_TILE_CENTER_X,
+    tileCenterY: VIEWPORT_TILE_CENTER_Y,
+  } = viewportLayout;
   // --- Magic / map VFX fallback integration (single block) ---------------
   // Atlas-first: when loadEffectAssets resolves real frames, the collectors below skip the
   // procedural fallback for those effects. Until then (assets empty / null) we derive short-lived
@@ -614,7 +634,7 @@ function OriginalClientSceneVisualLayersInner({
   );
   const sceneLightClassName = crystalSceneLightClassName(world.lightSetting);
   const viewportMapLights = sceneLightClassName
-    ? collectViewportMapLights(world, player, playerCameraMotionOffset)
+    ? collectViewportMapLights(world, player, playerCameraMotionOffset, viewportLayout)
     : [];
   const viewportObjectLights = sceneLightClassName
     ? viewportEntitySprites.flatMap(({ entity }) => {
@@ -815,6 +835,7 @@ function OriginalClientSceneVisualLayersInner({
             now={motionNow}
             cameraOffset={playerCameraMotionOffset}
             viewportDepthPlayer={viewportDepthPlayer}
+            viewportLayout={viewportLayout}
           />
         ))}
       </div>
