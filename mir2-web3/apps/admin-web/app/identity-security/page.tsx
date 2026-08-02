@@ -37,7 +37,7 @@ export default async function IdentitySecurityPage({
       <section className="card">
         <form className="form-grid" action="/identity-security">
           <input className="control" name="accountId" defaultValue={accountId} placeholder="账号 ID" minLength={1} maxLength={160} required />
-          <button className="button" type="submit">查询账号</button>
+          <SubmitButton idle="查询账号" pending="查询中…" />
         </form>
         {success ? <p className="notice">{success}</p> : null}
         {error ? <p className="notice">{error}</p> : null}

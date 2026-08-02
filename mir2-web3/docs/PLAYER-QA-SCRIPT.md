@@ -128,7 +128,7 @@ Purpose: keep final human frontend validation focused. The project can be driven
   renderer regression, not proof that a physical 2 GiB Android phone is
   supported. Current policy is: 2 GiB unsupported, 3 GiB experimental, 4 GiB
   engineering floor, 6 GiB provisional public minimum, and 8 GiB recommended.
-- Bevy 0.19 runtime `bevy-e7694d022c448d16` passes the forced WebGPU, forced
+- Bevy 0.19 thin runtime `bevy-9a5cbecc8f85ff75` passes the forced WebGPU, forced
   WebGL2, fallback, presentation-pose, local-motion, and raw WebGL2 checks with
   zero critical console errors. Its size-optimized WASM is 27,605,807 bytes for
   WebGPU and 28,999,520 bytes for WebGL2, down 24.66% and 25.27% from the Bevy
