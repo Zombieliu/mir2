@@ -51,6 +51,12 @@ import {
 } from "../lib/debug-snapshot";
 import { buildRenderStateSummary } from "./components/original-client-scene-map-rendering";
 import {
+  DEFAULT_VIEWPORT_LAYOUT,
+  viewportLayoutForStage,
+  type ViewportLayout,
+} from "./components/original-client-scene-rendering";
+import { wideMobileVirtualWidth } from "./components/original-client-stage-presentation";
+import {
   createSnapshotEmitter,
   createWorldStore,
   resetWorldPopulationForStartGame,
@@ -1044,18 +1050,6 @@ const DEFAULT_WORLD_STATE: WorldState = {
 
 const VIEWPORT_CELL_WIDTH = 48;
 const VIEWPORT_CELL_HEIGHT = 32;
-const VIEWPORT_OFFSET_X = Math.floor(1024 / 2 / VIEWPORT_CELL_WIDTH);
-const VIEWPORT_OFFSET_Y = Math.floor(768 / 2 / VIEWPORT_CELL_HEIGHT) - 1;
-const VIEWPORT_RANGE_X = VIEWPORT_OFFSET_X + 6;
-const VIEWPORT_RANGE_Y = VIEWPORT_OFFSET_Y + 6;
-const SCENE_CHUNK_WIDTH = Math.max(VIEWPORT_RANGE_X, 1);
-const SCENE_CHUNK_HEIGHT = Math.max(VIEWPORT_RANGE_Y, 1);
-const SCENE_PREFETCH_MARGIN_X = Math.max(8, Math.floor(VIEWPORT_RANGE_X * 0.75));
-const SCENE_PREFETCH_MARGIN_Y = Math.max(10, VIEWPORT_RANGE_Y);
-const SCENE_REQUEST_WIDTH = VIEWPORT_RANGE_X * 2 + SCENE_PREFETCH_MARGIN_X * 2;
-const SCENE_REQUEST_HEIGHT = VIEWPORT_RANGE_Y * 2 + SCENE_PREFETCH_MARGIN_Y * 2;
-const SCENE_RELOAD_MARGIN_X = Math.max(4, Math.floor(SCENE_PREFETCH_MARGIN_X / 2));
-const SCENE_RELOAD_MARGIN_Y = Math.max(4, Math.floor(SCENE_PREFETCH_MARGIN_Y / 2));
 const WALK_STEP_INTERVAL_MS = CRYSTAL_MOVE_DELAY_MS;
 const RUN_STEP_INTERVAL_MS = CRYSTAL_MOVE_DELAY_MS;
 const CRYSTAL_GAMEPLAY_TICK_MS = 1200;
@@ -1743,6 +1737,48 @@ function toBevyWorldSnapshot(world: WorldState): Record<string, unknown> {
 
 export default function HomePage() {
   const clientProfile = useOriginalClientDeviceProfile();
+  const [wideMobileViewport, setWideMobileViewport] = useState({ width: 1024, height: 768 });
+  const wideMobileRequested = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("wideMobile") === "0") return false;
+    if (params.get("wideMobile") === "1") return true;
+    return window.localStorage.getItem("mir2-wide-mobile") === "1";
+  }, []);
+  const updateWideMobileViewport = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const visualViewport = window.visualViewport;
+    setWideMobileViewport({
+      width: Math.max(1, visualViewport?.width ?? window.innerWidth),
+      height: Math.max(1, visualViewport?.height ?? window.innerHeight),
+    });
+  }, []);
+  useEffect(() => {
+    updateWideMobileViewport();
+    window.addEventListener("resize", updateWideMobileViewport);
+    window.visualViewport?.addEventListener("resize", updateWideMobileViewport);
+    window.addEventListener("orientationchange", updateWideMobileViewport);
+    return () => {
+      window.removeEventListener("resize", updateWideMobileViewport);
+      window.visualViewport?.removeEventListener("resize", updateWideMobileViewport);
+      window.removeEventListener("orientationchange", updateWideMobileViewport);
+    };
+  }, [updateWideMobileViewport]);
+  const wideMobileActive =
+    wideMobileRequested &&
+    clientProfile.layout === "touch" &&
+    clientProfile.input === "touch" &&
+    wideMobileViewport.width > wideMobileViewport.height;
+  const viewportLayout = useMemo(
+    () =>
+      viewportLayoutForStage(
+        wideMobileActive
+          ? wideMobileVirtualWidth(wideMobileViewport.width, wideMobileViewport.height)
+          : 1024,
+        768,
+      ),
+    [wideMobileActive, wideMobileViewport.height, wideMobileViewport.width],
+  );
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const movementShadowBridgeRef = useRef<BevyMovementShadowBridge | null>(null);
   if (movementShadowBridgeRef.current === null) {
@@ -4239,11 +4275,14 @@ export default function HomePage() {
   const viewportEntities = useMemo(() => {
     if (!viewportCenter) return [];
 
+    // Wide-mobile expands map framing only. Keep the authoritative combat/entity
+    // visibility radius at the original 1024x768 scope so a wider phone does not
+    // grant extra PvP scouting or target-selection information.
     return sortedEntities
       .filter(
         (entity) =>
-          Math.abs(entity.x - viewportCenter.x) <= VIEWPORT_RANGE_X &&
-          Math.abs(entity.y - viewportCenter.y) <= VIEWPORT_RANGE_Y,
+          Math.abs(entity.x - viewportCenter.x) <= DEFAULT_VIEWPORT_LAYOUT.rangeX &&
+          Math.abs(entity.y - viewportCenter.y) <= DEFAULT_VIEWPORT_LAYOUT.rangeY,
       )
       .map((entity) => ({
         ...entity,
@@ -4258,14 +4297,14 @@ export default function HomePage() {
 
     const tiles: Array<{ x: number; y: number; dx: number; dy: number }> = [];
 
-    for (let dy = -VIEWPORT_RANGE_Y; dy <= VIEWPORT_RANGE_Y; dy += 1) {
-      for (let dx = -VIEWPORT_RANGE_X; dx <= VIEWPORT_RANGE_X; dx += 1) {
+    for (let dy = -viewportLayout.rangeY; dy <= viewportLayout.rangeY; dy += 1) {
+      for (let dx = -viewportLayout.rangeX; dx <= viewportLayout.rangeX; dx += 1) {
         tiles.push({ x: center.x + dx, y: center.y + dy, dx, dy });
       }
     }
 
     return tiles;
-  }, [viewportCenter, world.sceneView]);
+  }, [viewportCenter, world.sceneView, viewportLayout]);
 
   useEffect(() => {
     let disposed = false;
@@ -4468,13 +4507,19 @@ export default function HomePage() {
   useEffect(() => {
     const center = self ?? world.sceneView?.center ?? { x: 330, y: 270 };
     const normalizedMapFileName = normalizeMapFileName(world.mapFileName);
-    const sceneKey = `${normalizedMapFileName}:${Math.floor(center.x / SCENE_CHUNK_WIDTH)}:${Math.floor(
-      center.y / SCENE_CHUNK_HEIGHT,
+    const sceneChunkWidth = Math.max(viewportLayout.rangeX, 1);
+    const sceneChunkHeight = Math.max(viewportLayout.rangeY, 1);
+    const scenePrefetchMarginX = Math.max(8, Math.floor(viewportLayout.rangeX * 0.75));
+    const scenePrefetchMarginY = Math.max(10, viewportLayout.rangeY);
+    const sceneRequestWidth = viewportLayout.rangeX * 2 + scenePrefetchMarginX * 2;
+    const sceneRequestHeight = viewportLayout.rangeY * 2 + scenePrefetchMarginY * 2;
+    const sceneKey = `${normalizedMapFileName}:${Math.floor(center.x / sceneChunkWidth)}:${Math.floor(
+      center.y / sceneChunkHeight,
     )}`;
     if (loadingSceneKeyRef.current === sceneKey) {
       return;
     }
-    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center)) {
+    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center, viewportLayout)) {
       return;
     }
 
@@ -4521,16 +4566,16 @@ export default function HomePage() {
             map: normalizedMapFileName,
             x: String(center.x),
           y: String(center.y),
-          width: String(SCENE_REQUEST_WIDTH),
-          height: String(SCENE_REQUEST_HEIGHT),
+          width: String(sceneRequestWidth),
+          height: String(sceneRequestHeight),
         });
         markMir2CacheMilestone("sceneBlueprintStart", {
           sceneKey,
           map: normalizedMapFileName,
           x: center.x,
           y: center.y,
-          width: SCENE_REQUEST_WIDTH,
-          height: SCENE_REQUEST_HEIGHT,
+          width: sceneRequestWidth,
+          height: sceneRequestHeight,
         });
         const response = await fetch(`/api/scene/crystal?${params.toString()}`);
         if (!response.ok) {
@@ -4592,7 +4637,7 @@ export default function HomePage() {
         loadingSceneKeyRef.current = null;
       }
     };
-  }, [self?.x, self?.y, world.mapFileName]);
+  }, [self?.x, self?.y, world.mapFileName, viewportLayout]);
 
   // Drive world->Bevy snapshot pushes from a fixed-cadence emitter rather than
   // React reconciliation. The emitter reads the world-model store (kept in sync
@@ -14457,6 +14502,7 @@ function shouldReloadCrystalScene(
   region: OriginalMapRegion | null,
   mapFileName: string,
   center: { x: number; y: number },
+  viewportLayout: ViewportLayout = viewportLayoutForStage(),
 ) {
   if (!region) {
     return true;
@@ -14476,11 +14522,13 @@ function shouldReloadCrystalScene(
   // steps". Measured: 77% of scene fetches were redundant re-fetches of the same
   // 1–2 chunks (one boundary re-fetched 30×). The margin check below already
   // covers genuine edge approach and teleports (player outside playBounds).
+  const marginX = Math.max(4, Math.floor(Math.max(8, viewportLayout.rangeX * 0.75) / 2));
+  const marginY = Math.max(4, Math.floor(Math.max(10, viewportLayout.rangeY) / 2));
   return (
-    center.x <= region.playBounds.minX + SCENE_RELOAD_MARGIN_X ||
-    center.x >= region.playBounds.maxX - SCENE_RELOAD_MARGIN_X ||
-    center.y <= region.playBounds.minY + SCENE_RELOAD_MARGIN_Y ||
-    center.y >= region.playBounds.maxY - SCENE_RELOAD_MARGIN_Y
+    center.x <= region.playBounds.minX + marginX ||
+    center.x >= region.playBounds.maxX - marginX ||
+    center.y <= region.playBounds.minY + marginY ||
+    center.y >= region.playBounds.maxY - marginY
   );
 }
 

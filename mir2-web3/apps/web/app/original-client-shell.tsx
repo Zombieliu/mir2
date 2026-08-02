@@ -88,20 +88,13 @@ import type {
 } from "./components/original-client-types";
 import {
   CRYSTAL_MOVE_INPUT_INTERVAL_MS,
+  DEFAULT_VIEWPORT_LAYOUT,
   EMPTY_VIEWPORT_MAP_SPRITES,
   EMPTY_VIEWPORT_OFFSET,
   GameSceneBackdrop,
   MAX_PREDICTED_PLAYER_LEAD_TILES,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
-  VIEWPORT_ENTITY_LEFT_ORIGIN,
-  VIEWPORT_ENTITY_TOP_ORIGIN,
-  VIEWPORT_MOUSE_TILE_CENTER_X,
-  VIEWPORT_MOUSE_TILE_CENTER_Y,
-  VIEWPORT_OFFSET_X,
-  VIEWPORT_OFFSET_Y,
-  VIEWPORT_RANGE_X,
-  VIEWPORT_RANGE_Y,
   buildViewportEntitySprite,
   buildViewportMapSprites,
   cameraMotionOffsetForEntity,
@@ -117,7 +110,9 @@ import {
   sceneAssetCandidateUrls,
   sceneAssetRuntimeStats,
   viewportDepthForCell,
+  viewportLayoutForStage,
   type ViewportMapSprites,
+  type ViewportLayout,
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
 import { OriginalClientSceneVisualLayers } from "./components/original-client-scene-visual-layers";
@@ -590,6 +585,10 @@ export function OriginalClientShell({
   const locale = useMemo(() => languageLocale(language), [language]);
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
   const runtimeMessageLabel = formatRuntimeMessage(language, runtimeMessage);
+  const wideMobileRequested = useMemo(
+    () => clientFeatureFlagEnabled("wideMobile", "mir2-wide-mobile", false),
+    [],
+  );
   // Shown over the (black) stage while the map tiles preload after entering the world. The
   // condition reuses sceneInteractionReady, which preloadSceneAssetUrls() flips true on
   // success or within its 5s partial-ready timeout, so this overlay can never stick.
@@ -618,7 +617,14 @@ export function OriginalClientShell({
     scale: 1,
     left: 0,
     top: 0,
+    virtualWidth: 1024,
+    virtualHeight: 768,
+    wideMobile: false,
   });
+  const viewportLayout = useMemo(
+    () => viewportLayoutForStage(stagePresentation.virtualWidth, stagePresentation.virtualHeight),
+    [stagePresentation.virtualHeight, stagePresentation.virtualWidth],
+  );
   const [touchControlViewportHeight, setTouchControlViewportHeight] = useState(768);
   const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
   const [bevyLocalSelfMotion, setBevyLocalSelfMotion] =
@@ -707,6 +713,9 @@ export function OriginalClientShell({
       "--mir-stage-scale": stagePresentation.scale,
       "--mir-stage-left": `${stagePresentation.left}px`,
       "--mir-stage-top": `${stagePresentation.top}px`,
+      "--mir-stage-virtual-width": `${stagePresentation.virtualWidth}px`,
+      "--mir-stage-virtual-height": `${stagePresentation.virtualHeight}px`,
+      "--mir-wide-hud-offset-x": `max(0px, calc((${stagePresentation.virtualWidth}px - 1024px) / 2))`,
       "--mir-control-deck-left": `${touchControlDeck.left}px`,
       "--mir-control-deck-width": `${touchControlDeck.width}px`,
       "--mir-mobile-action-size": `${touchControlMetrics.actionSize}px`,
@@ -759,6 +768,19 @@ export function OriginalClientShell({
         screen,
         layout: clientProfile.layout,
         input: clientProfile.input,
+        wideMobile: stagePresentation.wideMobile,
+        viewport: {
+          stageWidth: viewportLayout.stageWidth,
+          stageHeight: viewportLayout.stageHeight,
+          rangeX: viewportLayout.rangeX,
+          rangeY: viewportLayout.rangeY,
+          origin: {
+            tileLeft: viewportLayout.tileLeftOrigin,
+            tileTop: viewportLayout.tileTopOrigin,
+            entityLeft: viewportLayout.entityLeftOrigin,
+            entityTop: viewportLayout.entityTopOrigin,
+          },
+        },
         sceneInteractionReady,
         player: player
           ? {
@@ -818,6 +840,8 @@ export function OriginalClientShell({
     showInventory,
     sourceViewportEntities,
     world.groundDrops,
+    stagePresentation.wideMobile,
+    viewportLayout,
   ]);
 
   // Announce that #mir2-web3-canvas is mounted so the Bevy runtime can boot against it.
@@ -1198,9 +1222,15 @@ export function OriginalClientShell({
         layout: clientProfile.layout,
         input: clientProfile.input,
         screen,
+        wideMobile: wideMobileRequested,
       });
       setStagePresentation((current) =>
-        current.scale === next.scale && current.left === next.left && current.top === next.top
+        current.scale === next.scale &&
+        current.left === next.left &&
+        current.top === next.top &&
+        current.virtualWidth === next.virtualWidth &&
+        current.virtualHeight === next.virtualHeight &&
+        current.wideMobile === next.wideMobile
           ? current
           : next,
       );
@@ -1214,7 +1244,7 @@ export function OriginalClientShell({
       window.removeEventListener("resize", updateStageScale);
       window.visualViewport?.removeEventListener("resize", updateStageScale);
     };
-  }, [clientProfile.input, clientProfile.layout, screen]);
+  }, [clientProfile.input, clientProfile.layout, screen, wideMobileRequested]);
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
@@ -1502,8 +1532,8 @@ export function OriginalClientShell({
     ? world.groundDrops
         .filter(
           (drop) =>
-            Math.abs(drop.x - (renderPlayer ?? player).x) <= VIEWPORT_RANGE_X &&
-            Math.abs(drop.y - (renderPlayer ?? player).y) <= VIEWPORT_RANGE_Y,
+            Math.abs(drop.x - (renderPlayer ?? player).x) <= DEFAULT_VIEWPORT_LAYOUT.rangeX &&
+            Math.abs(drop.y - (renderPlayer ?? player).y) <= DEFAULT_VIEWPORT_LAYOUT.rangeY,
         )
         .map((drop) => ({
           ...drop,
@@ -1516,18 +1546,18 @@ export function OriginalClientShell({
   const staticViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, 0, "static")
+        ? buildViewportMapSprites(world, renderPlayer, 0, "static", 0, viewportLayout)
         : EMPTY_VIEWPORT_MAP_SPRITES,
-    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion],
+    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, viewportLayout],
   );
   // Animated layer (multi-frame sprites only) tracks the frame index; the per-tick pass
   // skips all single-frame sprites early, so on maps without animated tiles it is ~free.
   const animatedViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated")
+        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated", 0, viewportLayout)
         : EMPTY_VIEWPORT_MAP_SPRITES,
-    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion],
+    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion, viewportLayout],
   );
   const viewportMapSprites = useMemo(
     () => ({
@@ -1948,6 +1978,9 @@ export function OriginalClientShell({
     (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
   const entityRenderState = buildBevyEntityRenderState({
     enabled: useGpuEntityRenderer,
+    stageWidth: stagePresentation.virtualWidth,
+    stageHeight: stagePresentation.virtualHeight,
+    viewportLayout,
     player,
     viewportEntitySprites,
     viewportDepthPlayer,
@@ -2124,8 +2157,8 @@ export function OriginalClientShell({
     if (!bevyMapActive || !mapAtlasIndex) {
       return {
         enabled: false,
-        stageWidth: ORIGINAL_UI.game.sceneWidth,
-        stageHeight: ORIGINAL_UI.game.sceneHeight,
+        stageWidth: stagePresentation.virtualWidth,
+        stageHeight: stagePresentation.virtualHeight,
         ackKey,
         revision,
         ...center,
@@ -2197,8 +2230,8 @@ export function OriginalClientShell({
     }
     return {
       enabled: true,
-      stageWidth: ORIGINAL_UI.game.sceneWidth,
-      stageHeight: ORIGINAL_UI.game.sceneHeight,
+      stageWidth: stagePresentation.virtualWidth,
+      stageHeight: stagePresentation.virtualHeight,
       ackKey,
       revision,
       ...center,
@@ -2222,6 +2255,8 @@ export function OriginalClientShell({
     bevyMapRuntimeGeneration,
     renderPlayer?.x,
     renderPlayer?.y,
+    stagePresentation.virtualHeight,
+    stagePresentation.virtualWidth,
   ]);
 
   useLayoutEffect(() => {
@@ -2517,6 +2552,7 @@ export function OriginalClientShell({
   const sceneAssetUrlsRef = useRef<string[]>([]);
   sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites, {
     includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
+    viewportLayout,
   });
 
   // Prefetch a ring of static tiles just outside the visible viewport whenever the
@@ -2532,7 +2568,14 @@ export function OriginalClientShell({
       if (cancelled || !renderPlayer) {
         return;
       }
-      const ring = buildViewportMapSprites(world, renderPlayer, 0, "static", SCENE_TILE_PREFETCH_RING_CELLS);
+      const ring = buildViewportMapSprites(
+        world,
+        renderPlayer,
+        0,
+        "static",
+        SCENE_TILE_PREFETCH_RING_CELLS,
+        viewportLayout,
+      );
       const visible = new Set(sceneAssetUrlsRef.current);
       const ringUrls = Array.from(
         new Set([
@@ -2562,7 +2605,7 @@ export function OriginalClientShell({
     };
     // Re-run only on player-cell / map / screen change (not every animation tick).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen]);
+  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen, viewportLayout]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
   // True once the safety-valve window elapses with the scene up but readiness unresolved.
@@ -2848,8 +2891,8 @@ export function OriginalClientShell({
 
   function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
     const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
-    const scaleX = ORIGINAL_UI.game.sceneWidth / Math.max(rect.width, 1);
-    const scaleY = ORIGINAL_UI.game.sceneHeight / Math.max(rect.height, 1);
+    const scaleX = stagePresentation.virtualWidth / Math.max(rect.width, 1);
+    const scaleY = stagePresentation.virtualHeight / Math.max(rect.height, 1);
     return {
       sceneX: (event.clientX - rect.left) * scaleX,
       sceneY: (event.clientY - rect.top) * scaleY,
@@ -2872,8 +2915,11 @@ export function OriginalClientShell({
     const basePlayer = committedViewportPlayerPosition() ?? latest.renderPlayer ?? latest.player;
     if (!basePlayer) return null;
     return {
-      x: basePlayer.x + Math.floor(sceneX / VIEWPORT_CELL_WIDTH) - VIEWPORT_OFFSET_X,
-      y: basePlayer.y + Math.floor(sceneY / VIEWPORT_CELL_HEIGHT) - VIEWPORT_OFFSET_Y,
+      x:
+        basePlayer.x +
+        Math.floor(sceneX / VIEWPORT_CELL_WIDTH) -
+        viewportLayout.offsetX,
+      y: basePlayer.y + Math.floor(sceneY / VIEWPORT_CELL_HEIGHT) - viewportLayout.offsetY,
     };
   }
 
@@ -3002,8 +3048,8 @@ export function OriginalClientShell({
             type="button"
             className="tile-hit"
             style={{
-              left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
-              top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
+              left: `${viewportLayout.mouseTileCenterX + tile.dx * VIEWPORT_CELL_WIDTH}px`,
+              top: `${viewportLayout.mouseTileCenterY + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
             }}
             data-ui-interactive="true"
             onMouseDown={(event) => {
@@ -3056,7 +3102,7 @@ export function OriginalClientShell({
       </div>
     ) : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers read refs/hoisted fns; only sceneInteractionReady is dynamic state
-    [legacyTileHitGridEnabled, viewportTiles, screen, sceneInteractionReady],
+    [legacyTileHitGridEnabled, viewportTiles, screen, sceneInteractionReady, viewportLayout],
   );
 
   return (
@@ -3066,6 +3112,7 @@ export function OriginalClientShell({
       data-input-profile={clientProfile.input}
       data-gamepad-family={clientProfile.gamepad.family}
       data-client-screen={screen}
+      data-wide-mobile={stagePresentation.wideMobile ? "true" : "false"}
       style={stageScaleStyle}
     >
       <section className="mir-stage">
@@ -3074,12 +3121,12 @@ export function OriginalClientShell({
           className={`client-stage-frame ${screen === "game" && !sceneInteractionReady ? "scene-assets-pending" : ""}`}
           data-viewport-player-x={(renderPlayer ?? player)?.x}
           data-viewport-player-y={(renderPlayer ?? player)?.y}
-          data-viewport-tile-center-x={VIEWPORT_MOUSE_TILE_CENTER_X}
-          data-viewport-tile-center-y={VIEWPORT_MOUSE_TILE_CENTER_Y}
+          data-viewport-tile-center-x={viewportLayout.mouseTileCenterX}
+          data-viewport-tile-center-y={viewportLayout.mouseTileCenterY}
           data-viewport-cell-width={VIEWPORT_CELL_WIDTH}
           data-viewport-cell-height={VIEWPORT_CELL_HEIGHT}
-          data-viewport-scene-width={ORIGINAL_UI.game.sceneWidth}
-          data-viewport-scene-height={ORIGINAL_UI.game.sceneHeight}
+          data-viewport-scene-width={stagePresentation.virtualWidth}
+          data-viewport-scene-height={stagePresentation.virtualHeight}
           tabIndex={-1}
           onMouseDownCapture={(event) => {
             if (screen === "game") {
@@ -3134,8 +3181,8 @@ export function OriginalClientShell({
             />
             <WebGl2MapAtlasLayer
               enabled={mapGpuActive}
-              stageWidth={ORIGINAL_UI.game.sceneWidth}
-              stageHeight={ORIGINAL_UI.game.sceneHeight}
+              stageWidth={stagePresentation.virtualWidth}
+              stageHeight={stagePresentation.virtualHeight}
               index={mapAtlasIndex}
               tiles={mapTileDrawList}
               onDebugChange={handleMapAtlasDebug}
@@ -3151,6 +3198,7 @@ export function OriginalClientShell({
                 player={renderPlayer ?? player}
                 floorSprites={mapDomSprites.floor}
                 cameraOffset={effectiveCameraOffset}
+                viewportLayout={viewportLayout}
                 imperativeCamera={imperativeSceneMotion}
                 registerCameraSurface={sceneMotionDriver.registerCameraSurface}
               />
@@ -3180,6 +3228,7 @@ export function OriginalClientShell({
               entityKindClassName={entityKindClassName}
               onPickGroundDrop={onPickGroundDrop}
               onActivateEntity={onActivateEntity}
+              viewportLayout={viewportLayout}
             />
           </div>
           <OriginalClientSceneOverlays
@@ -3198,6 +3247,7 @@ export function OriginalClientShell({
             damageFloaters={world.damageFloaters}
             targetActionLabel={selectedTargetReadoutLabel}
             entityKindClassName={entityKindClassName}
+            viewportLayout={viewportLayout}
           />
           {screen === "login" ? (
             <LoginOverlay
@@ -3614,10 +3664,11 @@ function collectVisibleSceneAssetUrls(
       preloadPaths?: string[];
     } | null;
   }>,
-  options: { includeEntityPreloadPaths?: boolean } = {},
+  options: { includeEntityPreloadPaths?: boolean; viewportLayout?: ViewportLayout } = {},
 ) {
-  const sceneCenterX = ORIGINAL_UI.game.sceneWidth / 2;
-  const sceneCenterY = ORIGINAL_UI.game.sceneHeight / 2;
+  const viewportLayout = options.viewportLayout ?? viewportLayoutForStage();
+  const sceneCenterX = viewportLayout.stageWidth / 2;
+  const sceneCenterY = viewportLayout.stageHeight / 2;
   const rankedMapUrls = [
     ...viewportMapSprites.objects.map((sprite) => ({
       ...sprite,
@@ -3951,6 +4002,9 @@ function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRend
 
 function buildBevyEntityRenderState({
   enabled,
+  stageWidth,
+  stageHeight,
+  viewportLayout,
   player,
   viewportEntitySprites,
   viewportDepthPlayer,
@@ -3962,6 +4016,9 @@ function buildBevyEntityRenderState({
   bevyEntityInterpActive,
 }: {
   enabled: boolean;
+  stageWidth: number;
+  stageHeight: number;
+  viewportLayout: ViewportLayout;
   player: DisplayEntity | null;
   viewportEntitySprites: Array<{
     entity: DisplayEntity & { dx: number; dy: number };
@@ -3984,8 +4041,8 @@ function buildBevyEntityRenderState({
   if (!enabled || !player) {
     return {
       enabled: false,
-      stageWidth: 1024,
-      stageHeight: 768,
+      stageWidth,
+      stageHeight,
       atlases: [],
       entities: [],
     };
@@ -4017,8 +4074,8 @@ function buildBevyEntityRenderState({
 
   return {
     enabled: true,
-    stageWidth: 1024,
-    stageHeight: 768,
+    stageWidth,
+    stageHeight,
     centerX,
     centerY,
     // One render-atlas per texture page; the runtime registers each by key and
@@ -4067,9 +4124,9 @@ function buildBevyEntityRenderState({
       // spread ⇒ serialized state byte-identical to today.
       const interpMotion = interpEntityInBevy ? entityMotionSnapshots[entity.objectId] : undefined;
       const rootLeft =
-        VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
+      viewportLayout.entityLeftOrigin + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
       const rootTop =
-        VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y;
+        viewportLayout.entityTopOrigin + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y;
       const depth = viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64);
       const layers = sprite
         ? [

@@ -5,16 +5,16 @@ import { memo } from "react";
 import type { ClientScreen } from "../../lib/original-ui";
 import {
   EMPTY_VIEWPORT_OFFSET,
+  DEFAULT_VIEWPORT_LAYOUT,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
-  VIEWPORT_ENTITY_LEFT_ORIGIN,
-  VIEWPORT_ENTITY_TOP_ORIGIN,
   entityMotionOffsetForEntity,
   entityNameplateColor,
   entitySpriteHitBounds,
   ratio,
   viewportDepthForCell,
   type ViewportEntitySprite,
+  type ViewportLayout,
   type ViewportOffset,
 } from "./original-client-scene-rendering";
 import type {
@@ -56,6 +56,7 @@ function entityOriginScreenPosition(
   cameraOffset: ViewportOffset,
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>,
   motionNow: number,
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 ): { left: number; top: number } {
   const entityMotionOffset = isPlayer
     ? EMPTY_VIEWPORT_OFFSET
@@ -63,12 +64,12 @@ function entityOriginScreenPosition(
   const appliedCamera = isPlayer ? EMPTY_VIEWPORT_OFFSET : cameraOffset;
   return {
     left:
-      VIEWPORT_ENTITY_LEFT_ORIGIN +
+      viewportLayout.entityLeftOrigin +
       entry.entity.dx * VIEWPORT_CELL_WIDTH +
       appliedCamera.x +
       entityMotionOffset.x,
     top:
-      VIEWPORT_ENTITY_TOP_ORIGIN +
+      viewportLayout.entityTopOrigin +
       entry.entity.dy * VIEWPORT_CELL_HEIGHT +
       appliedCamera.y +
       entityMotionOffset.y,
@@ -92,6 +93,7 @@ function EntityHealthBars({
   motionNow,
   entityKindClassName,
   registerEntityEl,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   entries: ViewportEntityEntry[];
   player: DisplayEntity | null;
@@ -101,6 +103,7 @@ function EntityHealthBars({
   motionNow: number;
   entityKindClassName: (kind: EntityKind) => string;
   registerEntityEl?: RegisterEntityElement;
+  viewportLayout?: ViewportLayout;
 }) {
   return (
     <>
@@ -127,6 +130,7 @@ function EntityHealthBars({
           playerCameraMotionOffset,
           entityMotionSnapshots,
           motionNow,
+          viewportLayout,
         );
         const bounds = entitySpriteHitBounds(sprite);
         const centerOffset = (bounds.left + bounds.right) / 2;
@@ -159,6 +163,7 @@ function SceneChatBubbles({
   entityMotionSnapshots,
   motionNow,
   registerEntityEl,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   bubbles: SceneChatBubble[];
   entryByObjectId: Map<string, ViewportEntityEntry>;
@@ -167,6 +172,7 @@ function SceneChatBubbles({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   registerEntityEl?: RegisterEntityElement;
+  viewportLayout?: ViewportLayout;
 }) {
   return (
     <>
@@ -182,6 +188,7 @@ function SceneChatBubbles({
           playerCameraMotionOffset,
           entityMotionSnapshots,
           motionNow,
+          viewportLayout,
         );
         const bounds = entitySpriteHitBounds(entry.sprite);
         const centerOffset = (bounds.left + bounds.right) / 2;
@@ -218,6 +225,7 @@ function DamageFloaters({
   entityMotionSnapshots,
   motionNow,
   registerEntityEl,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   floaters: DisplayDamageFloater[];
   entryByObjectId: Map<string, ViewportEntityEntry>;
@@ -226,6 +234,7 @@ function DamageFloaters({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   registerEntityEl?: RegisterEntityElement;
+  viewportLayout?: ViewportLayout;
 }) {
   return (
     <>
@@ -244,6 +253,7 @@ function DamageFloaters({
           playerCameraMotionOffset,
           entityMotionSnapshots,
           motionNow,
+          viewportLayout,
         );
         const bounds = entitySpriteHitBounds(entry.sprite);
         const centerOffset = (bounds.left + bounds.right) / 2;
@@ -278,6 +288,7 @@ function HitFlashes({
   entityMotionSnapshots,
   motionNow,
   registerEntityEl,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   entries: ViewportEntityEntry[];
   player: DisplayEntity | null;
@@ -285,6 +296,7 @@ function HitFlashes({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   registerEntityEl?: RegisterEntityElement;
+  viewportLayout?: ViewportLayout;
 }) {
   return (
     <>
@@ -305,6 +317,7 @@ function HitFlashes({
           playerCameraMotionOffset,
           entityMotionSnapshots,
           motionNow,
+          viewportLayout,
         );
         const bounds = entitySpriteHitBounds(sprite);
         const opacity = Math.max(0, 1 - age / HIT_FLASH_MS) * 0.7;
@@ -339,6 +352,7 @@ function SelectionHighlight({
   entityMotionSnapshots,
   motionNow,
   registerEntityEl,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   selectedEntity: DisplayEntity | null;
   entryByObjectId: Map<string, ViewportEntityEntry>;
@@ -347,6 +361,7 @@ function SelectionHighlight({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   registerEntityEl?: RegisterEntityElement;
+  viewportLayout?: ViewportLayout;
 }) {
   if (!selectedEntity) {
     return null;
@@ -362,6 +377,7 @@ function SelectionHighlight({
     playerCameraMotionOffset,
     entityMotionSnapshots,
     motionNow,
+    viewportLayout,
   );
   const bounds = entitySpriteHitBounds(entry.sprite);
   const centerOffset = (bounds.left + bounds.right) / 2;
@@ -652,6 +668,7 @@ function OriginalClientSceneOverlaysInner({
   damageFloaters,
   targetActionLabel,
   entityKindClassName,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 }: {
   screen: ClientScreen;
   t: TranslateFn;
@@ -668,6 +685,7 @@ function OriginalClientSceneOverlaysInner({
   damageFloaters: DisplayDamageFloater[];
   targetActionLabel: string | null;
   entityKindClassName: (kind: EntityKind) => string;
+  viewportLayout?: ViewportLayout;
 }) {
   if (screen !== "game" || !player) {
     return null;
@@ -706,6 +724,7 @@ function OriginalClientSceneOverlaysInner({
         entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
         registerEntityEl={overlayEntityRegistration}
+        viewportLayout={viewportLayout}
       />
       <SelectionHighlight
         selectedEntity={selectedEntity}
@@ -715,6 +734,7 @@ function OriginalClientSceneOverlaysInner({
         entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
         registerEntityEl={overlayEntityRegistration}
+        viewportLayout={viewportLayout}
       />
       <EntityHealthBars
         entries={viewportEntitySprites}
@@ -725,6 +745,7 @@ function OriginalClientSceneOverlaysInner({
         motionNow={motionNow}
         entityKindClassName={entityKindClassName}
         registerEntityEl={overlayEntityRegistration}
+        viewportLayout={viewportLayout}
       />
       <SceneChatBubbles
         bubbles={chatBubbles}
@@ -734,6 +755,7 @@ function OriginalClientSceneOverlaysInner({
         entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
         registerEntityEl={overlayEntityRegistration}
+        viewportLayout={viewportLayout}
       />
       <DamageFloaters
         floaters={damageFloaters}
@@ -743,6 +765,7 @@ function OriginalClientSceneOverlaysInner({
         entityMotionSnapshots={overlayMotionSnapshots}
         motionNow={motionNow}
         registerEntityEl={overlayEntityRegistration}
+        viewportLayout={viewportLayout}
       />
       </div>
       <SelectedTargetReadout t={t} selectedEntity={selectedEntity} targetActionLabel={targetActionLabel} />

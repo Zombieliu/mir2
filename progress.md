@@ -23,3 +23,12 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - A repository-root `.vercelignore` excludes ordinary local build artifacts, but the decisive upload reduction comes from the existing CDN-first prebuilt flow: local Vercel build, R2-safe output pruning, then `vercel deploy --prebuilt --archive=tgz`. Final upload was 68 MB instead of roughly 598 MB.
 - Final Preview `dpl_Bqvhy9bUASzsL4h2Frg6CJHfdoxi` is READY at `https://mir2-web3-bo5b06umz-obelisk-labs.vercel.app`, built against R2 release `20260730-fullcrystal-f71b89aa-gzip1` and `wss://mir2.obelisk.build/ws`.
 - This execution environment cannot open `*.vercel.app` (network connection is closed before HTTP), so final device screenshots remain a user acceptance item. The deployment inspector, local production build, output contents, typecheck, and targeted input/layout tests are green.
+
+## 2026-08-02 wide mobile camera/HUD experiment
+
+- Created isolated branch `feat/mobile-wide-camera-hud` from `main` so the production 4:3 path remains unchanged.
+- Added opt-in `?wideMobile=1` virtual-stage mode: touch landscape stages expand their virtual width to the device aspect ratio, while the captured 4:3 height and default mode stay intact.
+- Reflow foundation: stage, game HUD, select scene, WebGL map state, Bevy entity state, and touch control deck now share the virtual stage dimensions; the original HUD cluster remains centered while edge-anchored surfaces can use the expanded width.
+- Stage B now threads one `ViewportLayout` through the page viewport, scene request window, map prefetch, DOM/WebGL2/Bevy origins, overlays, and pointer-to-tile conversion.
+- The wide band is map-only: authoritative entity and ground-drop visibility stays at the legacy 1024x768 combat radius, so a wider phone does not gain extra PvP scouting or targeting information.
+- Real-device walking, two-player visibility, and PWA standalone screenshots remain acceptance items before enabling the flag by default.
