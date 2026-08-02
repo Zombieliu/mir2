@@ -15,6 +15,78 @@ export const VIEWPORT_ENTITY_LEFT_ORIGIN = VIEWPORT_OFFSET_X * VIEWPORT_CELL_WID
 export const VIEWPORT_ENTITY_TOP_ORIGIN = VIEWPORT_OFFSET_Y * VIEWPORT_CELL_HEIGHT;
 export const VIEWPORT_MOUSE_TILE_CENTER_X = VIEWPORT_ENTITY_LEFT_ORIGIN + VIEWPORT_CELL_WIDTH / 2;
 export const VIEWPORT_MOUSE_TILE_CENTER_Y = VIEWPORT_ENTITY_TOP_ORIGIN + VIEWPORT_CELL_HEIGHT / 2;
+
+/**
+ * Screen-space geometry for one rendered world stage. The original client was
+ * authored around a 1024x768 stage, but the opt-in wide-mobile shell can expose
+ * additional columns without changing tile size. Keeping these values together
+ * prevents DOM, WebGL/Bevy, pointer hit-testing, and prefetch from drifting.
+ */
+export type ViewportLayout = {
+  stageWidth: number;
+  stageHeight: number;
+  offsetX: number;
+  offsetY: number;
+  rangeX: number;
+  rangeY: number;
+  tileLeftOrigin: number;
+  tileTopOrigin: number;
+  tileCenterX: number;
+  tileCenterY: number;
+  entityLeftOrigin: number;
+  entityTopOrigin: number;
+  mouseTileCenterX: number;
+  mouseTileCenterY: number;
+};
+
+export const DEFAULT_VIEWPORT_LAYOUT: ViewportLayout = {
+  stageWidth: ORIGINAL_UI.game.sceneWidth,
+  stageHeight: ORIGINAL_UI.game.sceneHeight,
+  offsetX: VIEWPORT_OFFSET_X,
+  offsetY: VIEWPORT_OFFSET_Y,
+  rangeX: VIEWPORT_RANGE_X,
+  rangeY: VIEWPORT_RANGE_Y,
+  tileLeftOrigin: VIEWPORT_TILE_LEFT_ORIGIN,
+  tileTopOrigin: VIEWPORT_TILE_TOP_ORIGIN,
+  tileCenterX: VIEWPORT_TILE_CENTER_X,
+  tileCenterY: VIEWPORT_TILE_CENTER_Y,
+  entityLeftOrigin: VIEWPORT_ENTITY_LEFT_ORIGIN,
+  entityTopOrigin: VIEWPORT_ENTITY_TOP_ORIGIN,
+  mouseTileCenterX: VIEWPORT_MOUSE_TILE_CENTER_X,
+  mouseTileCenterY: VIEWPORT_MOUSE_TILE_CENTER_Y,
+};
+
+export function viewportLayoutForStage(
+  stageWidth: number = ORIGINAL_UI.game.sceneWidth,
+  stageHeight: number = ORIGINAL_UI.game.sceneHeight,
+): ViewportLayout {
+  const safeWidth = Math.max(VIEWPORT_CELL_WIDTH, Math.floor(stageWidth));
+  const safeHeight = Math.max(VIEWPORT_CELL_HEIGHT, Math.floor(stageHeight));
+  const offsetX = Math.floor(safeWidth / 2 / VIEWPORT_CELL_WIDTH);
+  const offsetY = Math.floor(safeHeight / 2 / VIEWPORT_CELL_HEIGHT) - 1;
+  const tileLeftOrigin = offsetX * VIEWPORT_CELL_WIDTH - offsetX;
+  const tileTopOrigin = offsetY * VIEWPORT_CELL_HEIGHT;
+  const tileCenterX = tileLeftOrigin + VIEWPORT_CELL_WIDTH / 2;
+  const tileCenterY = tileTopOrigin + VIEWPORT_CELL_HEIGHT / 2;
+  const entityLeftOrigin = offsetX * VIEWPORT_CELL_WIDTH;
+  const entityTopOrigin = offsetY * VIEWPORT_CELL_HEIGHT;
+  return {
+    stageWidth: safeWidth,
+    stageHeight: safeHeight,
+    offsetX,
+    offsetY,
+    rangeX: offsetX + 6,
+    rangeY: offsetY + 6,
+    tileLeftOrigin,
+    tileTopOrigin,
+    tileCenterX,
+    tileCenterY,
+    entityLeftOrigin,
+    entityTopOrigin,
+    mouseTileCenterX: entityLeftOrigin + VIEWPORT_CELL_WIDTH / 2,
+    mouseTileCenterY: entityTopOrigin + VIEWPORT_CELL_HEIGHT / 2,
+  };
+}
 export const CRYSTAL_MOVE_INPUT_INTERVAL_MS = 100;
 export const CRYSTAL_MOVE_FRAME_COUNT = 6;
 export const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
@@ -92,9 +164,10 @@ export function viewportFloorDepthForCell(
   y: number,
   player: Pick<DisplayEntity, "x" | "y">,
   layerOrder: number,
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 ) {
-  const localRow = y - player.y + VIEWPORT_RANGE_Y;
-  const localColumn = x - player.x + VIEWPORT_RANGE_X;
+  const localRow = y - player.y + viewportLayout.rangeY;
+  const localColumn = x - player.x + viewportLayout.rangeX;
   return (
     layerOrder * VIEWPORT_FLOOR_LAYER_Z_STRIDE +
     localRow * VIEWPORT_FLOOR_ROW_Z_STRIDE +

@@ -39,6 +39,13 @@ export type Mir2TouchControlMetrics = {
 };
 
 export const MIR2_TOUCH_GAME_RAIL_CSS_PX = 128;
+
+export function wideMobileVirtualWidth(cssWidth: number, cssHeight: number, virtualHeight = 768) {
+  const safeCssWidth = Math.max(1, cssWidth);
+  const safeCssHeight = Math.max(1, cssHeight);
+  const requestedWidth = Math.max(1024, Math.ceil((safeCssWidth / safeCssHeight) * virtualHeight));
+  return Math.max(1024, Math.ceil(requestedWidth / 4) * 4);
+}
 export const MIR2_TOUCH_COMPACT_HEIGHT_CSS_PX = 360;
 
 const REGULAR_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
@@ -106,10 +113,7 @@ export function calculateMir2StagePresentation({
     input === "touch" &&
     safeCssWidth > safeCssHeight;
   const virtualHeight = 768;
-  const requestedVirtualWidth = wideMobileLandscape
-    ? Math.max(1024, Math.ceil((safeCssWidth / safeCssHeight) * virtualHeight))
-    : 1024;
-  const virtualWidth = Math.max(1024, Math.ceil(requestedVirtualWidth / 4) * 4);
+  const virtualWidth = wideMobileLandscape ? wideMobileVirtualWidth(safeCssWidth, safeCssHeight, virtualHeight) : 1024;
   const nativeDeviceWidth = Math.floor((layout === "tv" ? 2048 : virtualWidth) * deviceScale);
   const reserveTouchGameRails = layout === "touch" && input === "touch" && screen === "game";
   const railDeviceWidth = reserveTouchGameRails

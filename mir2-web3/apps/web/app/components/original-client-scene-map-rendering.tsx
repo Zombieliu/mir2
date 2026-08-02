@@ -22,16 +22,14 @@ import {
   EMPTY_VIEWPORT_OFFSET,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
-  VIEWPORT_RANGE_X,
-  VIEWPORT_RANGE_Y,
-  VIEWPORT_TILE_LEFT_ORIGIN,
-  VIEWPORT_TILE_TOP_ORIGIN,
+  DEFAULT_VIEWPORT_LAYOUT,
   viewportDepthForCell,
   viewportFloorDepthForCell,
   type SceneBackdropTile,
   type ViewportMapSprite,
   type ViewportMapSprites,
   type ViewportOffset,
+  type ViewportLayout,
 } from "./original-client-scene-layout";
 
 type OriginalMapCell = OriginalMapRegion["cells"][number];
@@ -50,6 +48,7 @@ function GameSceneBackdropInner({
   player,
   floorSprites,
   cameraOffset,
+  viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
   imperativeCamera = false,
   registerCameraSurface,
 }: {
@@ -57,10 +56,11 @@ function GameSceneBackdropInner({
   player: DisplayEntity | null;
   floorSprites: ViewportMapSprite[];
   cameraOffset: ViewportOffset;
+  viewportLayout?: ViewportLayout;
   imperativeCamera?: boolean;
   registerCameraSurface?: (key: string) => (el: HTMLElement | null) => void;
 }) {
-  const tiles = world.originalMapRegion ? [] : buildSceneBackdropTiles(world, player);
+  const tiles = world.originalMapRegion ? [] : buildSceneBackdropTiles(world, player, viewportLayout);
 
   if (!tiles.length && !floorSprites.length) {
     return null;
@@ -128,6 +128,7 @@ export function buildViewportMapSprites(
   animationFrameIndex: number,
   animationFilter: ViewportSpriteAnimationFilter = "all",
   rangeExpansion = 0,
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
@@ -137,10 +138,10 @@ export function buildViewportMapSprites(
   // rangeExpansion widens the cell window beyond the visible viewport — used by the
   // off-screen prefetch ring to warm tiles in the player's surroundings before they
   // scroll into view (eliminates walk-time pop-in). 0 = exact visible viewport.
-  const floorMinX = player.x - VIEWPORT_RANGE_X - rangeExpansion;
-  const floorMaxX = player.x + VIEWPORT_RANGE_X + rangeExpansion;
-  const floorMinY = player.y - VIEWPORT_RANGE_Y - rangeExpansion;
-  const floorMaxY = player.y + VIEWPORT_RANGE_Y + rangeExpansion;
+  const floorMinX = player.x - viewportLayout.rangeX - rangeExpansion;
+  const floorMaxX = player.x + viewportLayout.rangeX + rangeExpansion;
+  const floorMinY = player.y - viewportLayout.rangeY - rangeExpansion;
+  const floorMaxY = player.y + viewportLayout.rangeY + rangeExpansion;
   const objectMinX = floorMinX - 4;
   const objectMaxX = floorMaxX + 4;
   const objectMinY = floorMinY - 4;
@@ -163,6 +164,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      viewportLayout,
     );
     appendViewportMapSprite(
       floor,
@@ -175,6 +177,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      viewportLayout,
     );
     appendViewportMapSprite(
       floor,
@@ -187,6 +190,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      viewportLayout,
     );
     appendViewportMapSprite(
       floor,
@@ -199,6 +203,7 @@ export function buildViewportMapSprites(
       inFloorBounds,
       true,
       animationFilter,
+      viewportLayout,
     );
   }
 
@@ -390,6 +395,7 @@ function appendViewportMapSprite(
   inFloorBounds: boolean,
   inObjectBounds: boolean,
   animationFilter: ViewportSpriteAnimationFilter = "all",
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
 ) {
   if (!spriteId) {
     return;
@@ -433,8 +439,8 @@ function appendViewportMapSprite(
     return;
   }
 
-  const cellLeft = VIEWPORT_TILE_LEFT_ORIGIN + (cell.x - player.x) * VIEWPORT_CELL_WIDTH;
-  const cellTop = VIEWPORT_TILE_TOP_ORIGIN + (cell.y - player.y) * VIEWPORT_CELL_HEIGHT;
+  const cellLeft = viewportLayout.tileLeftOrigin + (cell.x - player.x) * VIEWPORT_CELL_WIDTH;
+  const cellTop = viewportLayout.tileTopOrigin + (cell.y - player.y) * VIEWPORT_CELL_HEIGHT;
   const crystalOffset = crystalMapFrameOffset(frame);
   const useCrystalOffset = sprite.drawMode === "object" && crystalMapFrameUsesOffset(frame);
   const left = cellLeft + (useCrystalOffset ? crystalOffset.x : 0);
@@ -443,7 +449,10 @@ function appendViewportMapSprite(
       ? cellTop + VIEWPORT_CELL_HEIGHT - frame.height + (useCrystalOffset ? crystalOffset.y : 0)
       : cellTop;
 
-  if (sprite.drawMode === "object" && !mapSpriteIntersectsViewport(left, top, frame.width, frame.height)) {
+  if (
+    sprite.drawMode === "object" &&
+    !mapSpriteIntersectsViewport(left, top, frame.width, frame.height, viewportLayout)
+  ) {
     return;
   }
 
@@ -464,19 +473,31 @@ function appendViewportMapSprite(
     height: frame.height,
     zIndex:
       sprite.drawMode === "floor"
-        ? viewportFloorDepthForCell(cell.x, cell.y, player, FLOOR_LAYER_ORDERS[sprite.kind])
+        ? viewportFloorDepthForCell(
+            cell.x,
+            cell.y,
+            player,
+            FLOOR_LAYER_ORDERS[sprite.kind],
+            viewportLayout,
+          )
         : viewportDepthForCell(cell.x, cell.y, player, 1),
   });
 }
 
-function mapSpriteIntersectsViewport(left: number, top: number, width: number, height: number) {
+function mapSpriteIntersectsViewport(
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
+) {
   const marginX = VIEWPORT_CELL_WIDTH * 2;
   const marginY = VIEWPORT_CELL_HEIGHT * 4;
   return (
     left + width >= -marginX &&
-    left <= ORIGINAL_UI.game.sceneWidth + marginX &&
+    left <= viewportLayout.stageWidth + marginX &&
     top + height >= -marginY &&
-    top <= ORIGINAL_UI.game.sceneHeight + marginY
+    top <= viewportLayout.stageHeight + marginY
   );
 }
 
@@ -526,7 +547,11 @@ function crystalMapFrameHasLegacyOffsetFallback(path: string) {
   return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path);
 }
 
-function buildSceneBackdropTiles(world: DisplayWorld, player: DisplayEntity | null): SceneBackdropTile[] {
+function buildSceneBackdropTiles(
+  world: DisplayWorld,
+  player: DisplayEntity | null,
+  viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
+): SceneBackdropTile[] {
   const center = player
     ? { x: player.x, y: player.y }
     : world.sceneView?.center
@@ -537,10 +562,10 @@ function buildSceneBackdropTiles(world: DisplayWorld, player: DisplayEntity | nu
     return [];
   }
 
-  const startX = center.x - VIEWPORT_RANGE_X;
-  const endX = center.x + VIEWPORT_RANGE_X;
-  const startY = center.y - VIEWPORT_RANGE_Y;
-  const endY = center.y + VIEWPORT_RANGE_Y;
+  const startX = center.x - viewportLayout.rangeX;
+  const endX = center.x + viewportLayout.rangeX;
+  const startY = center.y - viewportLayout.rangeY;
+  const endY = center.y + viewportLayout.rangeY;
   const tiles: SceneBackdropTile[] = [];
 
   for (let y = startY; y <= endY; y += 1) {
@@ -550,8 +575,8 @@ function buildSceneBackdropTiles(world: DisplayWorld, player: DisplayEntity | nu
 
       tiles.push({
         key: `${x}:${y}`,
-        left: VIEWPORT_TILE_LEFT_ORIGIN + (x - center.x) * VIEWPORT_CELL_WIDTH,
-        top: VIEWPORT_TILE_TOP_ORIGIN + (y - center.y) * VIEWPORT_CELL_HEIGHT,
+        left: viewportLayout.tileLeftOrigin + (x - center.x) * VIEWPORT_CELL_WIDTH,
+        top: viewportLayout.tileTopOrigin + (y - center.y) * VIEWPORT_CELL_HEIGHT,
         texture: sceneTextureForTerrain(terrain, variation),
         tint: sceneTintForTerrain(terrain, variation),
       });

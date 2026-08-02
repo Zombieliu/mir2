@@ -5,6 +5,8 @@ import ts from "typescript";
 
 const sourcePath = new URL("../app/components/original-client-stage-presentation.ts", import.meta.url);
 const source = readFileSync(sourcePath, "utf8");
+const layoutSourcePath = new URL("../app/components/original-client-scene-layout.ts", import.meta.url);
+const layoutSource = readFileSync(layoutSourcePath, "utf8");
 const mobileControlsSource = readFileSync(
   new URL("../app/components/original-client-mobile-controls.tsx", import.meta.url),
   "utf8",
@@ -21,12 +23,34 @@ const compiled = ts.transpileModule(source, {
 const module = { exports: {} };
 new Function("exports", "module", compiled.outputText)(module.exports, module);
 
+const compiledLayout = ts.transpileModule(layoutSource, {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    strict: true,
+  },
+  fileName: fileURLToPath(layoutSourcePath),
+});
+const layoutModule = { exports: {} };
+const layoutRequire = (specifier) => {
+  if (specifier === "../../lib/original-ui") {
+    return { ORIGINAL_UI: { game: { sceneWidth: 1024, sceneHeight: 768 } } };
+  }
+  throw new Error(`unexpected layout dependency: ${specifier}`);
+};
+new Function("exports", "module", "require", compiledLayout.outputText)(
+  layoutModule.exports,
+  layoutModule,
+  layoutRequire,
+);
+
 const {
   calculateMir2StagePresentation,
   calculateMir2TouchControlDeck,
   calculateMir2TouchControlMetrics,
   MIR2_TOUCH_GAME_RAIL_CSS_PX,
 } = module.exports;
+const { DEFAULT_VIEWPORT_LAYOUT, viewportLayoutForStage } = layoutModule.exports;
 
 function assertContained(input, presentation) {
   const stageWidth = 1024 * presentation.scale;
@@ -126,6 +150,16 @@ assert.deepEqual(calculateMir2TouchControlDeck(wideMobilePresentation), {
   left: 0,
   width: wideMobilePresentation.virtualWidth * wideMobilePresentation.scale,
 });
+const wideViewportLayout = viewportLayoutForStage(
+  wideMobilePresentation.virtualWidth,
+  wideMobilePresentation.virtualHeight,
+);
+assert.equal(wideViewportLayout.stageWidth, 1664);
+assert.equal(wideViewportLayout.rangeX, 23);
+assert.equal(wideViewportLayout.rangeY, DEFAULT_VIEWPORT_LAYOUT.rangeY);
+assert.equal(wideViewportLayout.entityLeftOrigin, 816);
+assert.equal(wideViewportLayout.mouseTileCenterX, 840);
+assert.equal(wideViewportLayout.tileLeftOrigin, 799);
 
 const regularTouchControls = calculateMir2TouchControlMetrics(iphoneGame.cssHeight);
 assert.equal(regularTouchControls.actionSize, 44);
