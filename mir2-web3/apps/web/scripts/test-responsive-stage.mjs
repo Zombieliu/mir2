@@ -202,6 +202,7 @@ assert.match(mobileControlsSource, /data-testid="mobile-orientation-gate"/);
 assert.match(mobileControlsSource, /data-secondary-open=/);
 assert.match(mobileControlsSource, /TUTORIAL_STEP_EVENT/);
 assert.match(globalCss, /@media \(orientation: portrait\)/);
+assert.match(globalCss, /mir-stage::before/);
 assert.match(globalCss, /data-secondary-open="false"/);
 
 console.log("responsive stage tests passed");

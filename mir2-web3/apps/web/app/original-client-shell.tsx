@@ -3115,7 +3115,15 @@ export function OriginalClientShell({
       data-wide-mobile={stagePresentation.wideMobile ? "true" : "false"}
       style={stageScaleStyle}
     >
-      <section className="mir-stage">
+      <section
+        className="mir-stage"
+        style={
+          {
+            "--mir-stage-letterbox-image":
+              screen === "login" ? `url("${loginBackgroundFrame}")` : undefined,
+          } as CSSProperties
+        }
+      >
         <div
           ref={stageFrameRef}
           className={`client-stage-frame ${screen === "game" && !sceneInteractionReady ? "scene-assets-pending" : ""}`}

@@ -39,3 +39,4 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - The PWA guide now stays closed while the device is portrait and reopens as a compact hint after rotation to landscape. The resource prewarm indicator is hidden in portrait and compacted into a small side gutter on short landscape phones.
 - The original 4:3 game stage remains contained and uncropped; the remaining side bars on a wide/short phone are intentional preservation of the original HUD rather than document overflow.
 - Follow-up branch: `fix/mobile-pwa-layout-overlays`.
+- The ultra-wide touch presentation now adds a low-contrast blurred letterbox backdrop in the side gutters. The 4:3 stage itself remains untouched, so this improves the phone composition without introducing crop or HUD distortion.

@@ -76,6 +76,29 @@ html[data-display-mode="standalone"] .mir-client-page {
   overflow: hidden;
 }
 
+/* A contained 4:3 client is the safest way to preserve Crystal's original
+   HUD, but ultra-wide phones otherwise expose harsh black pillarboxes. Use a
+   subdued, blurred backdrop in those gutters so the mobile presentation feels
+   intentional without scaling or cropping the actual game surface. */
+@media (pointer: coarse) and (orientation: landscape) and (min-aspect-ratio: 3/2) {
+  .mir-stage::before {
+    content: "";
+    position: absolute;
+    inset: -24px;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(
+      --mir-stage-letterbox-image,
+      linear-gradient(115deg, #0a0807 0%, #2b2017 48%, #0a0807 100%)
+    );
+    background-position: center;
+    background-size: cover;
+    filter: blur(18px) brightness(0.5) saturate(0.75);
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
 .client-stage-frame {
   position: absolute;
   left: var(--mir-stage-left, 0px);
@@ -88,6 +111,7 @@ html[data-display-mode="standalone"] .mir-client-page {
   background: #000;
   box-shadow: none;
   cursor: var(--mir-cursor-default);
+  z-index: 1;
 }
 
 .client-stage-frame,
