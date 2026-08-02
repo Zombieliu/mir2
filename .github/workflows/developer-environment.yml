@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - ".gitmodules"
+      - ".editorconfig"
+      - ".gitattributes"
+      - "AGENTS.md"
       - ".github/workflows/developer-environment.yml"
       - ".github/workflows/developer-image.yml"
       - "README.md"
@@ -54,12 +57,12 @@ jobs:
           - macos-15-intel
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: recursive
 
       - name: Set up pinned Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: "mir2-web3/.nvmrc"
 
@@ -160,7 +163,7 @@ jobs:
       MIR2_DEVELOPER_IMAGE_REVISION: ${{ github.sha }}
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: recursive
 
@@ -305,7 +308,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout accepted revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Publish immutable acceptance witness
         shell: bash

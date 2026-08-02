@@ -31,6 +31,18 @@ Windows: .\scripts\dev.cmd up -FullAssets -OpenBrowser
 macOS:   ./scripts/dev.sh up --full-assets --open
 ```
 
+日常协作只记住同一组动词；两端执行的是同一个 Compose 定义和同一套锁定工具链：
+
+| 工作 | Windows | macOS |
+| --- | --- | --- |
+| 环境诊断 | `.\scripts\dev.cmd doctor` | `./scripts/dev.sh doctor` |
+| 启动 | `.\scripts\dev.cmd up -OpenBrowser` | `./scripts/dev.sh up --open` |
+| 提交前验证 | `.\scripts\dev.cmd verify` | `./scripts/dev.sh verify` |
+| 查看日志 | `.\scripts\dev.cmd logs` | `./scripts/dev.sh logs` |
+| 停止 | `.\scripts\dev.cmd down` | `./scripts/dev.sh down` |
+
+版本锁统一来自 `mir2-web3/config/developer-release.json`：Node `22.18.0`、npm `11.13.0`、Rust `1.89.0`、Crystal gitlink、开发镜像与素材哈希都不能由某台机器私自漂移。文本格式由根目录 `.editorconfig` 与 `.gitattributes` 共同约束。
+
 空目录自动验收：
 
 ```text
