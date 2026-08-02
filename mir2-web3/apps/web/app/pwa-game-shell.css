@@ -112,6 +112,11 @@
 }
 
 @media (orientation: portrait) and (max-width: 900px) {
+  .mir-pwa-actions,
+  .mir-pwa-guide {
+    display: none;
+  }
+
   .mir-pwa-actions {
     top: auto;
     right: max(12px, env(safe-area-inset-right));
@@ -127,20 +132,25 @@
 
 @media (orientation: landscape) and (max-height: 430px) {
   .mir-pwa-guide {
-    width: min(390px, calc(100vw - 180px));
-    padding: 11px 13px;
+    width: min(230px, calc(100vw - 28px));
+    padding: 8px 10px;
   }
 
   .mir-pwa-guide strong {
-    font-size: 15px;
+    font-size: 13px;
   }
 
-  .mir-pwa-guide p {
-    margin-top: 4px;
-    font-size: 11px;
+  .mir-pwa-guide p:not(.mir-pwa-guide-status) {
+    display: none;
   }
 
   .mir-pwa-guide-buttons {
-    margin-top: 8px;
+    margin-top: 7px;
+  }
+
+  .mir-pwa-guide-buttons button {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 11px;
   }
 }

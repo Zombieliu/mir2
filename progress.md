@@ -32,3 +32,10 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - Stage B now threads one `ViewportLayout` through the page viewport, scene request window, map prefetch, DOM/WebGL2/Bevy origins, overlays, and pointer-to-tile conversion.
 - The wide band is map-only: authoritative entity and ground-drop visibility stays at the legacy 1024x768 combat radius, so a wider phone does not gain extra PvP scouting or targeting information.
 - Real-device walking, two-player visibility, and PWA standalone screenshots remain acceptance items before enabling the flag by default.
+
+## 2026-08-02 mobile PWA follow-up
+
+- Production mobile QA reproduced two concrete overlay issues: portrait showed the rotate gate together with the install guide and cache progress panel, while short landscape could let those panels cover the login/select surface.
+- The PWA guide now stays closed while the device is portrait and reopens as a compact hint after rotation to landscape. The resource prewarm indicator is hidden in portrait and compacted into a small side gutter on short landscape phones.
+- The original 4:3 game stage remains contained and uncropped; the remaining side bars on a wide/short phone are intentional preservation of the original HUD rather than document overflow.
+- Follow-up branch: `fix/mobile-pwa-layout-overlays`.

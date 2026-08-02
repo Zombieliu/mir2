@@ -72,5 +72,7 @@ const cssSource = ["globals.css", "pwa-game-shell.css"]
 assert.match(cssSource, /height:\s*100dvh/);
 assert.match(cssSource, /safe-area-inset-top/);
 assert.match(cssSource, /safe-area-inset-bottom/);
+assert.match(cssSource, /mir-cache-progress-panel/);
+assert.match(cssSource, /orientation:\s*portrait/);
 
 console.log("PWA shell contract passed");
