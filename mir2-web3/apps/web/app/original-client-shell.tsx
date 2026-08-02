@@ -590,6 +590,10 @@ export function OriginalClientShell({
   const locale = useMemo(() => languageLocale(language), [language]);
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
   const runtimeMessageLabel = formatRuntimeMessage(language, runtimeMessage);
+  const wideMobileRequested = useMemo(
+    () => clientFeatureFlagEnabled("wideMobile", "mir2-wide-mobile", false),
+    [],
+  );
   // Shown over the (black) stage while the map tiles preload after entering the world. The
   // condition reuses sceneInteractionReady, which preloadSceneAssetUrls() flips true on
   // success or within its 5s partial-ready timeout, so this overlay can never stick.
@@ -618,6 +622,9 @@ export function OriginalClientShell({
     scale: 1,
     left: 0,
     top: 0,
+    virtualWidth: 1024,
+    virtualHeight: 768,
+    wideMobile: false,
   });
   const [touchControlViewportHeight, setTouchControlViewportHeight] = useState(768);
   const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
@@ -707,6 +714,9 @@ export function OriginalClientShell({
       "--mir-stage-scale": stagePresentation.scale,
       "--mir-stage-left": `${stagePresentation.left}px`,
       "--mir-stage-top": `${stagePresentation.top}px`,
+      "--mir-stage-virtual-width": `${stagePresentation.virtualWidth}px`,
+      "--mir-stage-virtual-height": `${stagePresentation.virtualHeight}px`,
+      "--mir-wide-hud-offset-x": `max(0px, calc((${stagePresentation.virtualWidth}px - 1024px) / 2))`,
       "--mir-control-deck-left": `${touchControlDeck.left}px`,
       "--mir-control-deck-width": `${touchControlDeck.width}px`,
       "--mir-mobile-action-size": `${touchControlMetrics.actionSize}px`,
@@ -1198,9 +1208,15 @@ export function OriginalClientShell({
         layout: clientProfile.layout,
         input: clientProfile.input,
         screen,
+        wideMobile: wideMobileRequested,
       });
       setStagePresentation((current) =>
-        current.scale === next.scale && current.left === next.left && current.top === next.top
+        current.scale === next.scale &&
+        current.left === next.left &&
+        current.top === next.top &&
+        current.virtualWidth === next.virtualWidth &&
+        current.virtualHeight === next.virtualHeight &&
+        current.wideMobile === next.wideMobile
           ? current
           : next,
       );
@@ -1214,7 +1230,7 @@ export function OriginalClientShell({
       window.removeEventListener("resize", updateStageScale);
       window.visualViewport?.removeEventListener("resize", updateStageScale);
     };
-  }, [clientProfile.input, clientProfile.layout, screen]);
+  }, [clientProfile.input, clientProfile.layout, screen, wideMobileRequested]);
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
@@ -1948,6 +1964,8 @@ export function OriginalClientShell({
     (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
   const entityRenderState = buildBevyEntityRenderState({
     enabled: useGpuEntityRenderer,
+    stageWidth: stagePresentation.virtualWidth,
+    stageHeight: stagePresentation.virtualHeight,
     player,
     viewportEntitySprites,
     viewportDepthPlayer,
@@ -2124,8 +2142,8 @@ export function OriginalClientShell({
     if (!bevyMapActive || !mapAtlasIndex) {
       return {
         enabled: false,
-        stageWidth: ORIGINAL_UI.game.sceneWidth,
-        stageHeight: ORIGINAL_UI.game.sceneHeight,
+        stageWidth: stagePresentation.virtualWidth,
+        stageHeight: stagePresentation.virtualHeight,
         ackKey,
         revision,
         ...center,
@@ -2197,8 +2215,8 @@ export function OriginalClientShell({
     }
     return {
       enabled: true,
-      stageWidth: ORIGINAL_UI.game.sceneWidth,
-      stageHeight: ORIGINAL_UI.game.sceneHeight,
+      stageWidth: stagePresentation.virtualWidth,
+      stageHeight: stagePresentation.virtualHeight,
       ackKey,
       revision,
       ...center,
@@ -2222,6 +2240,8 @@ export function OriginalClientShell({
     bevyMapRuntimeGeneration,
     renderPlayer?.x,
     renderPlayer?.y,
+    stagePresentation.virtualHeight,
+    stagePresentation.virtualWidth,
   ]);
 
   useLayoutEffect(() => {
@@ -2848,8 +2868,8 @@ export function OriginalClientShell({
 
   function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
     const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
-    const scaleX = ORIGINAL_UI.game.sceneWidth / Math.max(rect.width, 1);
-    const scaleY = ORIGINAL_UI.game.sceneHeight / Math.max(rect.height, 1);
+    const scaleX = stagePresentation.virtualWidth / Math.max(rect.width, 1);
+    const scaleY = stagePresentation.virtualHeight / Math.max(rect.height, 1);
     return {
       sceneX: (event.clientX - rect.left) * scaleX,
       sceneY: (event.clientY - rect.top) * scaleY,
@@ -2872,7 +2892,10 @@ export function OriginalClientShell({
     const basePlayer = committedViewportPlayerPosition() ?? latest.renderPlayer ?? latest.player;
     if (!basePlayer) return null;
     return {
-      x: basePlayer.x + Math.floor(sceneX / VIEWPORT_CELL_WIDTH) - VIEWPORT_OFFSET_X,
+      x:
+        basePlayer.x +
+        Math.floor(sceneX / VIEWPORT_CELL_WIDTH) -
+        Math.floor(stagePresentation.virtualWidth / VIEWPORT_CELL_WIDTH / 2),
       y: basePlayer.y + Math.floor(sceneY / VIEWPORT_CELL_HEIGHT) - VIEWPORT_OFFSET_Y,
     };
   }
@@ -3066,6 +3089,7 @@ export function OriginalClientShell({
       data-input-profile={clientProfile.input}
       data-gamepad-family={clientProfile.gamepad.family}
       data-client-screen={screen}
+      data-wide-mobile={stagePresentation.wideMobile ? "true" : "false"}
       style={stageScaleStyle}
     >
       <section className="mir-stage">
@@ -3074,12 +3098,12 @@ export function OriginalClientShell({
           className={`client-stage-frame ${screen === "game" && !sceneInteractionReady ? "scene-assets-pending" : ""}`}
           data-viewport-player-x={(renderPlayer ?? player)?.x}
           data-viewport-player-y={(renderPlayer ?? player)?.y}
-          data-viewport-tile-center-x={VIEWPORT_MOUSE_TILE_CENTER_X}
+          data-viewport-tile-center-x={stagePresentation.virtualWidth / 2}
           data-viewport-tile-center-y={VIEWPORT_MOUSE_TILE_CENTER_Y}
           data-viewport-cell-width={VIEWPORT_CELL_WIDTH}
           data-viewport-cell-height={VIEWPORT_CELL_HEIGHT}
-          data-viewport-scene-width={ORIGINAL_UI.game.sceneWidth}
-          data-viewport-scene-height={ORIGINAL_UI.game.sceneHeight}
+          data-viewport-scene-width={stagePresentation.virtualWidth}
+          data-viewport-scene-height={stagePresentation.virtualHeight}
           tabIndex={-1}
           onMouseDownCapture={(event) => {
             if (screen === "game") {
@@ -3134,8 +3158,8 @@ export function OriginalClientShell({
             />
             <WebGl2MapAtlasLayer
               enabled={mapGpuActive}
-              stageWidth={ORIGINAL_UI.game.sceneWidth}
-              stageHeight={ORIGINAL_UI.game.sceneHeight}
+              stageWidth={stagePresentation.virtualWidth}
+              stageHeight={stagePresentation.virtualHeight}
               index={mapAtlasIndex}
               tiles={mapTileDrawList}
               onDebugChange={handleMapAtlasDebug}
@@ -3951,6 +3975,8 @@ function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRend
 
 function buildBevyEntityRenderState({
   enabled,
+  stageWidth,
+  stageHeight,
   player,
   viewportEntitySprites,
   viewportDepthPlayer,
@@ -3962,6 +3988,8 @@ function buildBevyEntityRenderState({
   bevyEntityInterpActive,
 }: {
   enabled: boolean;
+  stageWidth: number;
+  stageHeight: number;
   player: DisplayEntity | null;
   viewportEntitySprites: Array<{
     entity: DisplayEntity & { dx: number; dy: number };
@@ -3984,8 +4012,8 @@ function buildBevyEntityRenderState({
   if (!enabled || !player) {
     return {
       enabled: false,
-      stageWidth: 1024,
-      stageHeight: 768,
+      stageWidth,
+      stageHeight,
       atlases: [],
       entities: [],
     };
@@ -4017,8 +4045,8 @@ function buildBevyEntityRenderState({
 
   return {
     enabled: true,
-    stageWidth: 1024,
-    stageHeight: 768,
+    stageWidth,
+    stageHeight,
     centerX,
     centerY,
     // One render-atlas per texture page; the runtime registers each by key and

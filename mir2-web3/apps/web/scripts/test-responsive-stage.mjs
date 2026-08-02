@@ -50,6 +50,9 @@ assertContained(iphoneSelect, iphoneSelectPresentation);
 assert.equal(iphoneSelectPresentation.scale, 1144 / 2 / 1024);
 assert.equal(iphoneSelectPresentation.left, 180);
 assert.equal(iphoneSelectPresentation.top, 0.5);
+assert.equal(iphoneSelectPresentation.virtualWidth, 1024);
+assert.equal(iphoneSelectPresentation.virtualHeight, 768);
+assert.equal(iphoneSelectPresentation.wideMobile, false);
 
 const iphoneGame = { ...iphoneSelect, screen: "game" };
 const iphoneGamePresentation = calculateMir2StagePresentation(iphoneGame);
@@ -103,6 +106,27 @@ const shortPrimaryTop = shortActionPadHeight - ultraWideTouchControls.primarySiz
 assert.ok(shortQuickSlotBottom < shortRunTop);
 assert.ok(shortRunBottom < shortPrimaryTop);
 
+const wideMobile = {
+  cssWidth: 844,
+  cssHeight: 390,
+  devicePixelRatio: 1,
+  layout: "touch",
+  input: "touch",
+  screen: "game",
+  wideMobile: true,
+};
+const wideMobilePresentation = calculateMir2StagePresentation(wideMobile);
+assert.equal(wideMobilePresentation.wideMobile, true);
+assert.equal(wideMobilePresentation.virtualWidth, 1664);
+assert.equal(wideMobilePresentation.virtualHeight, 768);
+assert.equal(wideMobilePresentation.left, 0);
+assert.equal(wideMobilePresentation.top, 1);
+assert.equal(wideMobilePresentation.scale, 844 / 1664);
+assert.deepEqual(calculateMir2TouchControlDeck(wideMobilePresentation), {
+  left: 0,
+  width: wideMobilePresentation.virtualWidth * wideMobilePresentation.scale,
+});
+
 const regularTouchControls = calculateMir2TouchControlMetrics(iphoneGame.cssHeight);
 assert.equal(regularTouchControls.actionSize, 44);
 
@@ -118,6 +142,9 @@ assert.deepEqual(calculateMir2StagePresentation(desktop), {
   scale: 1,
   left: 208,
   top: 66,
+  virtualWidth: 1024,
+  virtualHeight: 768,
+  wideMobile: false,
 });
 
 const tv = {
@@ -132,6 +159,9 @@ assert.deepEqual(calculateMir2StagePresentation(tv), {
   scale: 1.40625,
   left: 240,
   top: 0,
+  virtualWidth: 1024,
+  virtualHeight: 768,
+  wideMobile: false,
 });
 
 assert.match(mobileControlsSource, /data-testid="mobile-orientation-gate"/);
