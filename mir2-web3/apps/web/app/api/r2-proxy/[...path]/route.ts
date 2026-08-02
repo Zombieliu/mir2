@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
-// Same-origin R2 asset proxy for LOCAL DEV (see next.config.ts `rewrites()`,
-// gated on MIR2_R2_PROXY_BASE). next.config rewrites the R2-backed asset paths
+// Same-origin R2 asset proxy for local development and standalone thin clients
+// (see next.config.ts `rewrites()`). next.config rewrites missing R2-backed paths
 // (/original-map, /original-ui, /generated, /bevy-entity-atlases, /Sound) the
 // local checkout doesn't have INTO this handler, which does its own server-side
 // fetch to R2. The point of a Route Handler rather than a direct rewrite: a
@@ -9,7 +9,7 @@ import type { NextRequest } from "next/server";
 // hotlink protection 403s any request carrying a non-allowed Referer. A Node
 // server-side `fetch` sends NO Referer, so R2 returns 200. The browser is then
 // same-origin with every asset → no CORS, no 404/403 retry storm, getImageData
-// works. Production never sets MIR2_R2_PROXY_BASE, so this stays inert there.
+// works. The fallback route is inert unless MIR2_R2_PROXY_BASE is configured.
 
 const PROXY_BASE = process.env.MIR2_R2_PROXY_BASE?.replace(/\/+$/, "");
 

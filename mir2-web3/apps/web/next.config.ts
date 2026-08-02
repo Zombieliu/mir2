@@ -79,6 +79,9 @@ const nextConfig: NextConfig = {
     MIR2_PINNED_ASSET_OBJECT_PREFIX: productionAssetRelease?.objectPrefix ?? "",
     MIR2_PINNED_ASSET_BASE_URL: productionAssetRelease?.assetBaseUrl ?? "",
   },
+  // Normal local/Vercel builds keep incremental caches. Downloadable bundles
+  // opt into standalone output so only traced runtime dependencies ship.
+  output: process.env.MIR2_NEXT_STANDALONE === "1" ? "standalone" : undefined,
   outputFileTracingRoot: monorepoRoot,
   outputFileTracingExcludes: {
     "/api/asset-manifest": heavyPublicMediaTracingExcludes,
@@ -173,19 +176,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // LOCAL-DEV CONVENIENCE: same-origin R2 proxy. Set `MIR2_R2_PROXY_BASE` (e.g.
-  // https://mir2.obelisk.build) and game assets the local checkout doesn't have
-  // (the ~156k uncovered map tiles, R2-only sprites/sounds) are proxied through
-  // THIS origin — so a localhost build is same-origin with its assets and the
-  // browser never hits a cross-origin CORS wall (R2 sends no Access-Control-
-  // Allow-Origin). `fallback` runs only after the filesystem/public + pages
-  // miss, so committed/downloaded assets are still served locally. Gated on the
-  // env var, so production (assets served same-origin already) is untouched.
+  // Same-origin R2 fallback for local development AND standalone thin clients.
+  // The fallback routes are always compiled because a standalone build receives
+  // MIR2_R2_PROXY_BASE at runtime, after next.config.ts has already run.
+  // Existing filesystem/public assets still win; only misses reach the handler.
+  // When MIR2_R2_PROXY_BASE is unset the handler returns an ordinary 404.
   async rewrites() {
-    const proxyBase = process.env.MIR2_R2_PROXY_BASE?.replace(/\/+$/, "");
-    if (!proxyBase) {
-      return [];
-    }
     const assetPrefixes = ["original-map", "original-ui", "generated", "bevy-entity-atlases", "Sound"];
     // Route THROUGH /api/r2-proxy (a Route Handler), NOT straight to R2: a direct
     // rewrite forwards the browser's `Referer: http://localhost:...` to R2, whose

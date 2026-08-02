@@ -47,7 +47,8 @@ function loadTypeScriptModule(sourcePath, dependencies = {}) {
   return loadedModule.exports;
 }
 
-const { resolveAssetPrewarmPolicy } = loadTypeScriptModule(prewarmPolicyPath);
+const { resolveAssetPrewarmPolicy, shouldPrewarmRawMapFrames } =
+  loadTypeScriptModule(prewarmPolicyPath);
 const originalUiModule = loadTypeScriptModule(originalUiPath);
 const { ASSET_CACHE_PACKS, selectAssetCachePacksForStage } =
   loadTypeScriptModule(assetCachePacksPath, {
@@ -144,4 +145,10 @@ test("the UI lifecycle requests each deferred prewarm stage", () => {
   assert.match(pageSource, /screen === "select" \? "character-select"/);
   assert.match(pageSource, /screen === "game" \? "game" : "login"/);
   assert.match(pageSource, /__mir2AssetCachePrewarmStage\?\.\(stage\)/);
+});
+
+test("only the low tier prewarms raw map frames for the DOM compatibility path", () => {
+  assert.equal(shouldPrewarmRawMapFrames("low"), true);
+  assert.equal(shouldPrewarmRawMapFrames("medium"), false);
+  assert.equal(shouldPrewarmRawMapFrames("high"), false);
 });

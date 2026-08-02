@@ -19,6 +19,7 @@ Implemented desktop-first pages:
 - Operators
 - Audit log
 - Timeline
+- Identity security (sessions, credentials, recovery and security audit)
 
 The GM tools page is connected to the Rust Admin API through server actions. The
 server side forwards an operator bearer token from the `admin_operator_token`
@@ -71,6 +72,8 @@ Start the admin web:
 ```bash
 ADMIN_API_BASE_URL=http://127.0.0.1:7420 \
 ADMIN_OPERATOR_TOKEN=r254-lead-token \
+MIR2_GATEWAY_ADMIN_URL=http://127.0.0.1:7110 \
+MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN=replace-with-random-32-byte-token \
 ./node_modules/.bin/next dev -p 3020
 ```
 
@@ -78,6 +81,12 @@ Open `http://127.0.0.1:3020/login` to switch tokens. The cookie takes precedence
 over `ADMIN_OPERATOR_TOKEN`, so multiple local operators can test the
 requester/approver split from the same browser session by logging out and back
 in with another token.
+
+`/identity-security` is server-rendered and keeps the Gateway operator token
+out of the browser. Operators can search one account, inspect redacted
+credentials and active/revoked sessions, review the security audit trail, and
+revoke one or every session. Production Gateway startup rejects an operator
+token shorter than 32 characters.
 
 For shared staging rollout, use `docs/ADMIN-STAGING-RUNBOOK.md` and
 `infra/staging.env.example`.

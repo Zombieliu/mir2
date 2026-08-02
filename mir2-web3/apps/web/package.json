@@ -72,17 +72,23 @@
     "verify:map-atlas-budget": "node --test ./scripts/test-map-atlas-budget.mjs --requireManifest",
     "test:webgl2-map-texture-cache": "node --test ./scripts/test-webgl2-map-texture-cache.mjs",
     "vercel:prune-output": "node ./scripts/prune-vercel-output-assets.mjs",
+    "build:thin": "node ./scripts/build-thin-client.mjs",
+    "report:client-size": "node ./scripts/build-thin-client.mjs --skipBuild true --reportOnly true",
+    "smoke:thin-client-assets": "node ./scripts/smoke-thin-client-assets.mjs",
     "vercel:build:prod": "npx vercel@56.4.1 build --prod --yes && npm run vercel:prune-output",
     "vercel:deploy:prod": "npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes",
     "smoke:reconnect-resume": "node ./scripts/smoke-reconnect-resume.mjs",
     "smoke:two-client-zone": "node ./scripts/smoke-two-client-zone.mjs",
     "smoke:passkey-start-game": "node ./scripts/smoke-passkey-start-game.mjs",
+    "smoke:spectator": "node ./scripts/smoke-spectator.mjs",
+    "smoke:spectator-ui": "node ./scripts/smoke-spectator-ui.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
     "smoke:gateway-capacity": "node ./scripts/load-gateway-ws.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",
     "test:movement-controller": "node ./scripts/test-movement-controller.mjs",
     "test:device-profile": "node ./scripts/test-device-profile.mjs",
     "test:responsive-stage": "node ./scripts/test-responsive-stage.mjs",
+    "test:pwa": "node ./scripts/test-pwa-shell.mjs",
     "test:gamepad-input": "node ./scripts/test-gamepad-input.mjs",
     "test:scene-sprite-meta": "node ./scripts/test-original-scene-sprite-meta.mjs",
     "test:full-pack-capability": "node ./scripts/test-crystal-full-pack-capability.mjs",
@@ -169,6 +175,7 @@
   "packageManager": "npm@11.13.0",
   "overrides": {
     "postcss": "8.5.21",
-    "sharp": "0.35.3"
+    "sharp": "0.35.3",
+    "valibot": "1.4.2"
   }
 }

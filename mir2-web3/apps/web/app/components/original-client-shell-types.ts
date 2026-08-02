@@ -200,6 +200,9 @@ export type OriginalClientShellProps = {
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheWalletUrl: string;
+  identityProvider: string | null;
+  identityLinkBusy: boolean;
+  identityLinkStatus: string | null;
   characters: SelectCharacterEntry[];
   selectedCharacterIndex: number;
   showInventory: boolean;
@@ -216,6 +219,8 @@ export type OriginalClientShellProps = {
   onPasskeyLogin: () => void;
   onWalletPickerToggle: () => void;
   onWalletLogin: (walletId: string) => void;
+  onIdentityLinkPasskey: () => void;
+  onIdentityLinkWallet: (walletId?: string) => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
   onExitSelect: () => void;

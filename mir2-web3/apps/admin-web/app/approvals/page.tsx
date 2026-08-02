@@ -1,5 +1,6 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { SubmitButton } from "../../components/submit-button";
 import {
   adminGet,
   type AdminAuthMeResponse,
@@ -64,9 +65,10 @@ export default async function ApprovalsPage({
               placeholder={t("approvals.reason")}
               required
             />
-            <button className="button" type="submit">
-              {t("approvals.request")}
-            </button>
+            <SubmitButton
+              idle={t("approvals.request")}
+              pending={t("common.submitting")}
+            />
           </form>
         </section>
         <section className="card">
@@ -116,9 +118,11 @@ export default async function ApprovalsPage({
                                 type="hidden"
                                 value={t("approvals.defaultApproveReason")}
                               />
-                              <button className="button" type="submit">
-                                {t("approvals.approve")}
-                              </button>
+                              <SubmitButton
+                                confirmMessage={t("common.confirmDangerous")}
+                                idle={t("approvals.approve")}
+                                pending={t("common.submitting")}
+                              />
                             </form>
                             <form action={rejectApprovalAction}>
                               <input
@@ -131,9 +135,12 @@ export default async function ApprovalsPage({
                                 type="hidden"
                                 value={t("approvals.defaultRejectReason")}
                               />
-                              <button className="button secondary" type="submit">
-                                {t("approvals.reject")}
-                              </button>
+                              <SubmitButton
+                                className="button secondary"
+                                confirmMessage={t("common.confirmDangerous")}
+                                idle={t("approvals.reject")}
+                                pending={t("common.submitting")}
+                              />
                             </form>
                           </div>
                         ) : (

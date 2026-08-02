@@ -16,7 +16,7 @@ P0/P1 缺口，接手者下一步只需进行最终人工 `Accepted` 观感/手�
 可重复缺陷，应先固定同地图、坐标、光照、账号状态和动作时间线，再作为新
 回归处理，不要用一次随机帧差异重开移动管线。
 
-本文面向接手 `mir2-web3` 的开发者和主协调者，描述当前可运行边界、代码入口、素材交付方式及交接验收。首次安装请先执行 `scripts/bootstrap-developer.ps1`，不要从历史 QA 命令反推本地端口和环境变量。
+本文面向接手 `mir2-web3` 的开发者和主协调者，描述当前可运行边界、代码入口、素材交付方式及交接验收。Windows 统一入口是 `scripts/dev.cmd`，macOS/Linux 统一入口是 `scripts/dev.sh`；不要从历史 QA 命令反推本地端口和环境变量。
 
 一页式执行清单见 `docs/NEW-DEVELOPER-CHECKLIST.md`。邀请外部开发者或交付素材前必须阅读 `docs/LEGAL-AND-ASSET-RIGHTS.md`；GitHub 访问权限和素材再分发授权是两件不同的事。
 
@@ -59,9 +59,12 @@ P0/P1 缺口，接手者下一步只需进行最终人工 `Accepted` 观感/手�
 
 | 脚本 | 作用 | 关键参数 |
 | --- | --- | --- |
-| `scripts/bootstrap-developer.ps1` | 检查工具、初始化子模块、安装 Rust 1.89 与 Player/Admin Web 锁定依赖、检查 Gateway | `-SkipRustCheck`, `-SkipWebInstall` |
-| `scripts/start-developer.ps1` | 对齐端口、构建/启动 Gateway、使用预编译 Bevy Runtime 并启动 Web | `-WebPort`, `-GatewayWebPort`, `-GatewayTcpPort`, `-AssetBaseUrl`, `-OpenBrowser`, `-SkipGatewayBuild`, `-ReuseGateway` |
-| `scripts/verify-developer-setup.ps1` | 校验子模块、Starter/本地 full-pack 闭包、Rust、素材安全测试、Player/Admin TypeScript 和生产 build | `-AssetBaseUrl`, `-SkipBuild`, `-Offline`, `-RunCoreTests` |
+| `scripts/dev.cmd` | Windows 的统一入口；调用平台等价的 PowerShell 实现 | `doctor`, `up`, `verify`, `logs`, `down`, `assets` |
+| `scripts/dev.sh` | Intel/Apple Silicon macOS 与 Linux 的统一入口 | `doctor`, `up`, `verify`, `logs`, `down`, `assets` |
+| `scripts/dev.ps1` | `dev.cmd` 的可测试实现；日常使用不必直接调用 | 与 `dev.cmd` 相同 |
+| `scripts/bootstrap-developer.ps1` | Windows 无 Docker 原生调试备用入口 | `-SkipRustCheck`, `-SkipWebInstall` |
+| `scripts/start-developer.ps1` | Windows 无 Docker 原生 Gateway/Web 启动备用入口 | `-WebPort`, `-GatewayWebPort`, `-GatewayTcpPort`, `-AssetBaseUrl`, `-OpenBrowser` |
+| `scripts/verify-developer-setup.ps1` | Windows 原生全量交接验证 | `-AssetBaseUrl`, `-SkipBuild`, `-Offline`, `-RunCoreTests` |
 | `scripts/install-developer-assets.ps1` | 下载或读取私有 Release 分卷，校验 SHA-256 并安装本地全量图集 | `-ManifestPath`, `-PartsDirectory`, `-CacheDirectory`, `-Download`, `-Force`, `-KeepArchive` |
 | `scripts/package-developer-assets.ps1` | 验证并确定性打包本地全量图集，生成 GitHub Release 分卷和 manifest | `-OutputDirectory`, `-PartSizeBytes`, `-KeepArchive` |
 

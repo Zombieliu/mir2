@@ -5,6 +5,7 @@ next-env.d.ts
 dist/
 out/
 .mir2-remote-assets/
+.mir2-thin-client/
 docs/generated/remote-assets/
 apps/web/public/original-asset-manifest.generated.json
 # Full Crystal conversion is reproducible from the local client. Do not commit
@@ -30,6 +31,7 @@ Desktop.ini
 .env.local
 .env.*
 !.env.example
+!infra/ai-live/.env.youtube.example
 infra/gate12/.secrets/
 infra/gate13/.secrets/
 infra/gate22/generated/
@@ -40,6 +42,7 @@ infra/gate22/generated/
 # Browser QA
 .playwright-cli/
 output/playwright/
+output/web-game/
 
 # Local AI-generated/reference images
 ai/

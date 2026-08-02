@@ -1,6 +1,8 @@
 # mir2-web3 Agent Instructions
 
-Primary project: `E:\mir2\mir2-web3`
+Primary project: `mir2-web3`, resolved relative to this repository root on
+Windows, macOS, and Linux. Never assume a drive letter, home directory, or
+absolute checkout path.
 
 Use `docs/AGENT-ORCHESTRATION.md` as the source of truth for multi-agent coordination.
 
@@ -14,11 +16,11 @@ Do not ask for routine confirmation. Proceed autonomously through the current ta
 
 Before planning substantial work, read:
 
-- `E:\mir2\mir2-web3\docs\AGENT-ORCHESTRATION.md`
-- `E:\mir2\mir2-web3\docs\AGENT-TASK-QUEUE.md`
-- `E:\mir2\mir2-web3\docs\CRYSTAL-1TO1-ROADMAP.md`
-- `E:\mir2\mir2-web3\docs\BACKEND-1TO1-PROGRESS.md`
-- `E:\mir2\mir2-web3\docs\CRYSTAL-SERVER-PARITY.md`
+- `mir2-web3/docs/AGENT-ORCHESTRATION.md`
+- `mir2-web3/docs/AGENT-TASK-QUEUE.md`
+- `mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md`
+- `mir2-web3/docs/BACKEND-1TO1-PROGRESS.md`
+- `mir2-web3/docs/CRYSTAL-SERVER-PARITY.md`
 
 ## Coordination
 
@@ -30,7 +32,10 @@ Before planning substantial work, read:
 
 ## Model Policy
 
-Current preferred worker model is `gpt-5.3-codex-spark`.
+Use `gpt-5.3-codex-spark` for bounded implementation, tests, documentation,
+and mechanical repository maintenance. Cross-branch integration, auth/security
+changes, schema migrations, production rollout, and destructive cleanup require
+a frontier reasoning model to lead and verify the result.
 
 - `xhigh`: bounded high-risk implementation.
 - `high`: normal implementation.

@@ -200,8 +200,14 @@ export function ServiceTraceConsole({
             placeholder={copy.placeholder}
             value={input}
           />
-          <button className="dubhe-button" disabled={loading} type="submit">
-            {copy.search}
+          <button
+            aria-busy={loading}
+            className="dubhe-button"
+            disabled={loading}
+            type="submit"
+          >
+            {loading ? <span aria-hidden="true" className="button-spinner" /> : null}
+            <span aria-live="polite">{loading ? copy.refreshing : copy.search}</span>
           </button>
         </form>
         <label className="trace-sensitive">

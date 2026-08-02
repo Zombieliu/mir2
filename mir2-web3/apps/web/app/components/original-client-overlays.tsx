@@ -353,12 +353,18 @@ export type SelectOverlayProps = {
   characters: SelectCharacterEntryLike[];
   selectedCharacterIndex: number;
   accountId: string;
+  identityProvider: string | null;
+  identityLinkBusy: boolean;
+  identityLinkStatus: string | null;
+  suiWallets: SuiWalletSummary[];
   selectedPortraitFrames: SelectPortraitFrame[];
   onLanguageChange: (language: Mir2Language) => void;
   onSelectCharacter: (index: number) => void;
   onEnterWorld: () => void;
   onCreateCharacter: (draft: CreateCharacterDraft) => void;
   onDeleteCharacter: () => void;
+  onIdentityLinkPasskey: () => void;
+  onIdentityLinkWallet: (walletId?: string) => void;
   onExit: () => void;
 };
 
@@ -368,12 +374,18 @@ export function SelectOverlay({
   characters,
   selectedCharacterIndex,
   accountId,
+  identityProvider,
+  identityLinkBusy,
+  identityLinkStatus,
+  suiWallets,
   selectedPortraitFrames,
   onLanguageChange,
   onSelectCharacter,
   onEnterWorld,
   onCreateCharacter,
   onDeleteCharacter,
+  onIdentityLinkPasskey,
+  onIdentityLinkWallet,
   onExit,
 }: SelectOverlayProps) {
   const selectedRaw = characters[selectedCharacterIndex] ?? null;
@@ -382,6 +394,7 @@ export function SelectOverlay({
   const [showCreditsPanel, setShowCreditsPanel] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCreatePanel, setShowCreatePanel] = useState(false);
+  const [showIdentityPanel, setShowIdentityPanel] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createClassKey, setCreateClassKey] = useState<EntityClassKey>("warrior");
   const [createGender, setCreateGender] = useState<EntityGenderKey>("male");
@@ -458,6 +471,15 @@ export function SelectOverlay({
           onLanguageChange={onLanguageChange}
         />
         <OriginalAudioSettingsControls t={t} compact className="select-audio-settings" />
+        {accountId.startsWith("obl_") && !identityProvider?.startsWith("crazyGames") ? (
+          <button
+            type="button"
+            className="select-identity-trigger"
+            onClick={() => setShowIdentityPanel((current) => !current)}
+          >
+            Obelisk ID · {identityProvider ?? "channel"}
+          </button>
+        ) : null}
         <img className="select-background-frame" src={ORIGINAL_UI.select.background} alt="" draggable={false} />
         <img className="select-title" src={ORIGINAL_UI.select.title} alt="" draggable={false} />
         <div className="select-server-name">{t("client.GameName", [], "Legend of Mir 2")}</div>
@@ -535,6 +557,31 @@ export function SelectOverlay({
           />
         </div>
         <div className="select-action exit"><SpriteButton sprite={ORIGINAL_UI.select.buttons.exit} label={t("ui.exit")} onClick={onExit} /></div>
+        {showIdentityPanel ? (
+          <div className="select-identity-panel">
+            <strong>{identityPanelText(language, "title")}</strong>
+            <span className="select-identity-id">{accountId}</span>
+            <span>{identityPanelText(language, "description")}</span>
+            <div className="select-identity-actions">
+              <button type="button" disabled={identityLinkBusy} onClick={onIdentityLinkPasskey}>
+                {identityLinkBusy
+                  ? identityPanelText(language, "linking")
+                  : identityPanelText(language, "passkey")}
+              </button>
+              <button
+                type="button"
+                disabled={identityLinkBusy || suiWallets.length === 0}
+                onClick={() => onIdentityLinkWallet(suiWallets[0]?.id)}
+              >
+                {identityPanelText(language, "wallet")}
+              </button>
+            </div>
+            {suiWallets.length === 0 ? (
+              <span>{identityPanelText(language, "noWallet")}</span>
+            ) : null}
+            {identityLinkStatus ? <span className="select-identity-status">{identityLinkStatus}</span> : null}
+          </div>
+        ) : null}
         {showCreatePanel ? (
           <div className="select-create-panel">
             <div className="select-create-title">{t("ui.newCharacter")}</div>
@@ -972,6 +1019,29 @@ function createPanelText(language: Mir2Language, key: "name" | "gender" | "class
     },
   };
   return dictionary[language]?.[key] ?? dictionary.en[key];
+}
+
+function identityPanelText(
+  language: Mir2Language,
+  key: "title" | "description" | "linking" | "passkey" | "wallet" | "noWallet",
+) {
+  const english = {
+    title: "Character ownership",
+    description: "Bind a Passkey to keep using these characters across supported channels.",
+    linking: "Linking...",
+    passkey: "Link Sui Passkey",
+    wallet: "Link Dubhe / Sui Wallet",
+    noWallet: "No Sui wallet detected. Passkey is recommended.",
+  };
+  const chinese: typeof english = {
+    title: "角色归属",
+    description: "绑定 Passkey 后，可在支持的渠道继续使用这些角色。",
+    linking: "绑定中…",
+    passkey: "绑定 Sui Passkey",
+    wallet: "绑定 Dubhe / Sui Wallet",
+    noWallet: "未检测到 Sui 钱包；建议优先使用 Passkey。",
+  };
+  return (language === "zh-CN" ? chinese : english)[key];
 }
 
 function selectClassLabel(t: TranslateFn, classKey: EntityClassKey) {

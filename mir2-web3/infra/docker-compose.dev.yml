@@ -144,6 +144,36 @@ services:
     depends_on:
       - loki
 
+  ai-live:
+    build:
+      context: ..
+      dockerfile: infra/ai-live/Dockerfile
+    container_name: mir2-ai-live
+    profiles: ["ai-live"]
+    init: true
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      MIR2_AI_LIVE_RENDER_URL: ${MIR2_AI_LIVE_RENDER_URL:-http://host.docker.internal:3002/spectate?aiLive=1&aiLiveAudio=1&spectateMode=director}
+      MIR2_AI_LIVE_OUTPUT_URL: ${MIR2_AI_LIVE_OUTPUT_URL:-}
+      MIR2_AI_LIVE_OUTPUT_FORMAT: ${MIR2_AI_LIVE_OUTPUT_FORMAT:-hls}
+      MIR2_AI_LIVE_VIDEO_SIZE: ${MIR2_AI_LIVE_VIDEO_SIZE:-1920x1080}
+      MIR2_AI_LIVE_FRAME_RATE: ${MIR2_AI_LIVE_FRAME_RATE:-30}
+      MIR2_AI_LIVE_VIDEO_BITRATE: ${MIR2_AI_LIVE_VIDEO_BITRATE:-4500k}
+      MIR2_AI_LIVE_AUDIO_BITRATE: ${MIR2_AI_LIVE_AUDIO_BITRATE:-128k}
+      MIR2_AI_DISTRIBUTION_HEARTBEAT_URL: ${MIR2_AI_DISTRIBUTION_HEARTBEAT_URL:-}
+      MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN: ${MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN:-}
+      MIR2_AI_DISTRIBUTION_RTMP_PLATFORM: ${MIR2_AI_DISTRIBUTION_RTMP_PLATFORM:-youtube}
+      MIR2_AI_DISTRIBUTION_WORKER_ID: ${MIR2_AI_DISTRIBUTION_WORKER_ID:-local-ai-live-01}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../artifacts/ai-live/hls:/output
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
 volumes:
   postgres-data:
   redis-data:

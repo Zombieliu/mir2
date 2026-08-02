@@ -294,12 +294,16 @@ export function DubheNodeConsole({
           {labels.auto}
         </label>
         <button
+          aria-busy={refreshing}
           className="dubhe-button primary"
           disabled={refreshing}
           onClick={() => void refresh().catch(() => undefined)}
           type="button"
         >
-          {refreshing ? labels.refreshing : labels.refresh}
+          {refreshing ? <span aria-hidden="true" className="button-spinner" /> : null}
+          <span aria-live="polite">
+            {refreshing ? labels.refreshing : labels.refresh}
+          </span>
         </button>
       </div>
 

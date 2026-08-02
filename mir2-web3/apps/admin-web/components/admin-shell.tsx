@@ -3,12 +3,14 @@ import { logoutAction } from "../app/login/actions";
 import { adminGet, type AdminAuthMeResponse } from "../lib/admin-api";
 import { getAdminI18n } from "../lib/i18n";
 import { LanguageSwitcher } from "./language-switcher";
+import { SubmitButton } from "./submit-button";
 
 const navItems = [
   { href: "/", labelKey: "shell.nav.dashboard", count: "Live" },
   { href: "/console", labelKey: "shell.nav.console", count: "Ops" },
   { href: "/network", labelKey: "shell.nav.network", count: "Live" },
   { href: "/accounts", labelKey: "shell.nav.accounts", count: "GM" },
+  { href: "/identity-security", labelKey: "shell.nav.identitySecurity", count: "IAM" },
   { href: "/players", labelKey: "shell.nav.players", count: "Read" },
   { href: "/service-trace", labelKey: "shell.nav.serviceTrace", count: "Trace" },
   { href: "/economy", labelKey: "shell.nav.economy", count: "Read" },
@@ -17,6 +19,8 @@ const navItems = [
   { href: "/namelists", labelKey: "shell.nav.namelists", count: "NPC" },
   { href: "/content", labelKey: "shell.nav.content", count: "DB" },
   { href: "/activities", labelKey: "shell.nav.activities", count: "Empty" },
+  { href: "/world-director", labelKey: "shell.nav.worldDirector", count: "AI" },
+  { href: "/daily-reports", labelKey: "shell.nav.dailyReports", count: "AI" },
   { href: "/servers", labelKey: "shell.nav.servers", count: "Health" },
   { href: "/dubhe-nodes", labelKey: "shell.nav.dubheNodes", count: "Nodes" },
   { href: "/risk", labelKey: "shell.nav.risk", count: "Bans" },
@@ -78,9 +82,11 @@ export async function AdminShell({
             </Link>
             {auth.ok ? (
               <form action={logoutAction}>
-                <button className="user-chip user-chip-button" type="submit">
-                  {t("shell.logout")}
-                </button>
+                <SubmitButton
+                  className="user-chip user-chip-button"
+                  idle={t("shell.logout")}
+                  pending={t("common.working")}
+                />
               </form>
             ) : null}
           </div>

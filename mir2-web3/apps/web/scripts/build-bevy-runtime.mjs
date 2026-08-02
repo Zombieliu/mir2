@@ -115,7 +115,6 @@ function buildRuntimeFromSource() {
   for (const runtimePackage of runtimePackages) {
     buildRuntimePackage(runtimePackage, publishLayout.stagedPkgParentDir);
   }
-  mirrorLegacyWebGl2Package(publishLayout.stagedPkgParentDir);
   writeRuntimeVersionManifest({
     sourcePkgParentDir: publishLayout.stagedPkgParentDir,
     outputPath: publishLayout.stagedManifestPath,
@@ -214,12 +213,6 @@ function buildRuntimePackage(runtimePackage, stagedPkgParentDir) {
   );
 }
 
-function mirrorLegacyWebGl2Package(stagedPkgParentDir) {
-  const webgl2Package = path.join(stagedPkgParentDir, "pkg-webgl2");
-  const legacyPackage = path.join(stagedPkgParentDir, "pkg");
-  fs.cpSync(webgl2Package, legacyPackage, { recursive: true });
-}
-
 function runtimeOutputFiles(packageDir) {
   return [
     path.join(packageDir, "mir2_bevy_runtime.js"),
@@ -228,12 +221,7 @@ function runtimeOutputFiles(packageDir) {
 }
 
 function runtimeArtifactRecords(sourcePkgParentDir, publishedPkgParentDir, manifestRootDir) {
-  const packageDescriptors = [
-    ...runtimePackages.map(({ backend, packageDirName }) => ({ backend, packageDirName })),
-    { backend: "legacy-webgl2", packageDirName: "pkg" },
-  ];
-
-  return packageDescriptors.flatMap(({ backend, packageDirName }) => {
+  return runtimePackages.flatMap(({ backend, packageDirName }) => {
     const sourceFiles = runtimeOutputFiles(path.join(sourcePkgParentDir, packageDirName));
     const publishedFiles = runtimeOutputFiles(path.join(publishedPkgParentDir, packageDirName));
     return sourceFiles.map((sourcePath, index) => ({
@@ -1125,7 +1113,7 @@ function selfCheckPublication(tempRoot) {
 }
 
 function writeFakeRuntimeBundle(root, marker) {
-  const packageNames = [...runtimePackages.map(({ packageDirName }) => packageDirName), "pkg"];
+  const packageNames = runtimePackages.map(({ packageDirName }) => packageDirName);
   const minimalWasm = Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
   for (const packageDirName of packageNames) {
     const packageDir = path.join(root, packageDirName);

@@ -502,6 +502,9 @@ export function OriginalClientShell({
   suiWallets,
   walletPickerOpen,
   dubheWalletUrl,
+  identityProvider,
+  identityLinkBusy,
+  identityLinkStatus,
   characters,
   selectedCharacterIndex,
   showInventory,
@@ -518,6 +521,8 @@ export function OriginalClientShell({
   onPasskeyLogin,
   onWalletPickerToggle,
   onWalletLogin,
+  onIdentityLinkPasskey,
+  onIdentityLinkWallet,
   onQuickEnter,
   onResetClient,
   onExitSelect,
@@ -3227,12 +3232,18 @@ export function OriginalClientShell({
               characters={characters}
               selectedCharacterIndex={selectedCharacterIndex}
               accountId={accountId}
+              identityProvider={identityProvider}
+              identityLinkBusy={identityLinkBusy}
+              identityLinkStatus={identityLinkStatus}
+              suiWallets={suiWallets}
               selectedPortraitFrames={selectedPortraitFrames}
               onLanguageChange={onLanguageChange}
               onSelectCharacter={onSelectCharacter}
               onEnterWorld={onEnterWorld}
               onCreateCharacter={onCreateCharacter}
               onDeleteCharacter={onDeleteCharacter}
+              onIdentityLinkPasskey={onIdentityLinkPasskey}
+              onIdentityLinkWallet={onIdentityLinkWallet}
               onExit={onExitSelect}
             />
           ) : null}

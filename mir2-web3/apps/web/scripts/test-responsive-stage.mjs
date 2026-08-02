@@ -5,6 +5,11 @@ import ts from "typescript";
 
 const sourcePath = new URL("../app/components/original-client-stage-presentation.ts", import.meta.url);
 const source = readFileSync(sourcePath, "utf8");
+const mobileControlsSource = readFileSync(
+  new URL("../app/components/original-client-mobile-controls.tsx", import.meta.url),
+  "utf8",
+);
+const globalCss = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
     module: ts.ModuleKind.CommonJS,
@@ -128,5 +133,11 @@ assert.deepEqual(calculateMir2StagePresentation(tv), {
   left: 240,
   top: 0,
 });
+
+assert.match(mobileControlsSource, /data-testid="mobile-orientation-gate"/);
+assert.match(mobileControlsSource, /data-secondary-open=/);
+assert.match(mobileControlsSource, /TUTORIAL_STEP_EVENT/);
+assert.match(globalCss, /@media \(orientation: portrait\)/);
+assert.match(globalCss, /data-secondary-open="false"/);
 
 console.log("responsive stage tests passed");

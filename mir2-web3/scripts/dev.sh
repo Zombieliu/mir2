@@ -504,7 +504,7 @@ case "${command}" in
     release_lock_check
     prepare_runtime_image
     compose run --rm --no-deps workspace bash -lc \
-      'npm ci --prefix apps/web && npm --prefix apps/web run typecheck && cargo +1.89.0 check --locked -p mir2-gateway'
+      'node scripts/check-developer-release.mjs && cargo +1.89.0 fmt --all -- --check && npm ci --prefix apps/web && npm ci --prefix apps/admin-web && npm --prefix apps/web run typecheck && npm --prefix apps/admin-web run typecheck && cargo +1.89.0 check --locked -p mir2-gateway -p mir2-admin-api'
     ;;
   assets)
     release_lock_check

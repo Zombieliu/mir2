@@ -284,14 +284,20 @@ Gateway。生产玩家仍通过正常升级、寻路和地图传送进入活动�
 
 MVP 之后不应立即增加大量“AI 玩法”。推荐依次完成：
 
-1. **Live Telemetry**：将 Gateway/Redpanda 聚合器接到
-   `WorldTelemetrySnapshot`，并保存输入快照和决策记录；
+1. **Live Telemetry**：Approval Beta 已将 Admin API 的 Gateway presence、
+   ClickHouse gameplay summary、Postgres/账号读模型聚合成
+   `WorldTelemetrySnapshot`，并持久化输入快照和决策记录；经济 mint/burn
+   流量仍需补齐；
 2. **Live Player Acceptance**：D022 的广播、怪物可见、真实战斗和重连恢复
    已自动化通过；下一步补 D024 Boss 死亡、掉落和多人争抢验收；
-3. **Operator Console**：后端状态和指标已经具备；仍需制作展示提案、拒绝
-   原因、预算、签名、Commonware 高度和 Zone 回执的管理 UI，并加入暂停/回滚；
+3. **Operator Console**：`/world-director` 已展示提案、压力证据、预算、签名、
+   远程 Commonware 高度、Zone 回执，并支持修改、批准、拒绝、Finality 前取消、
+   全局暂停和失败重试；活动中事件的补偿型撤场命令仍需后续完成；
 4. **Shadow Mode**：AI 只提案、不执行，连续观察 7–14 天，比较运营人员判断；
 5. **Limited Auto Mode**：只自动执行零资产或低预算模板，逐步扩大范围。
+
+人工审批生产 Beta 的部署与验收见
+`docs/AI-WORLD-DIRECTOR-APPROVAL-BETA.zh-CN.md`。
 
 目前已证明事件怪物进入真实 ZoneRuntime，在线玩家会收到 `ObjectMonster`，
 能对动态移动后的事件怪造成真实伤害，并在重连后继续看到相同权威对象。尚未

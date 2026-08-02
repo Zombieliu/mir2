@@ -33,7 +33,7 @@ services:
       MIR2_ZONE_HOST_MAX_CONNECTIONS: "64"
       MIR2_ZONE_HOST_MAX_SESSIONS: "32"
       MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE: "16"
-      MIR2_ZONE_HOST_TOKEN: "gate24-zone-rpc-token"
+      MIR2_ZONE_HOST_TOKEN: "gate24-node-local-zone-rpc"
       MIR2_ACCOUNT_STORE_PATH: "/var/lib/obelisk/accounts.json"
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=32m,uid=65534,gid=65534
@@ -88,7 +88,7 @@ services:
       MIR2_HOME_RELAY_ADDR: "home-relay:7443"
       MIR2_HOME_RELAY_SERVER_NAME: "relay.test"
       MIR2_HOME_LOCAL_ZONE_RPC_ADDR: "zone-host:7020"
-      MIR2_HOME_LOCAL_ZONE_RPC_TOKEN: "gate24-zone-rpc-token"
+      MIR2_HOME_LOCAL_ZONE_RPC_TOKEN: "gate24-node-local-zone-rpc"
       MIR2_HOME_AGENT_TLS_CA_DER: "/run/gate22/ca.der"
       MIR2_HOME_AGENT_TLS_CERT_CHAIN_DER: "/run/gate22/agent.der"
       MIR2_HOME_AGENT_TLS_KEY_DER: "/run/gate22/agent-key.der"
