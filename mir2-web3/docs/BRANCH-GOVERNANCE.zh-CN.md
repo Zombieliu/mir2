@@ -85,15 +85,37 @@ archive/ai-branches/2026-08-02/*
 
 恢复归档实现时，应从最新 `main` 新建功能分支，再按需 Cherry-pick 或手工移植；不要直接把旧 Tag 当作新开发基线。
 
-## 必须保留到主线收口完成的分支
+## 2026-08-02 主线收口
 
-- `feat/mobile-ux-final`：PR #200。
-- `feat/commercial-identity-gate`：PR #201，早期主线身份实现。
-- `feat/ucloud-commercial-identity`：PR #202，当前生产身份实现与验收证据。
-- `codex/world-director-approval-beta`：PR #202 的当前 Base，也是生产功能线。
-- `hotfix/ucloud-gate15-new-player-20260802`：UCloud/Gate15 回滚依据。
-- `feat/responsive-ui-gamepad`：合并 #193 后仍包含独有提交，需先审计。
-- `codex/pwa-mobile-fullscreen`：尚无 PR 的最新独有提交，需先收口。
+PR #203 将 PR #200、#201、#202 以及 PWA、World Director、移动端、观战、商业身份和薄客户端等生产功能统一整合到 `main`。合并前已通过：
+
+- Windows、macOS Intel、macOS Apple Silicon 和 Linux 桌面构建；
+- Windows、macOS 与 Ubuntu 干净检出开发环境验收；
+- Gateway、Home Agent Gate 22–25、Rust 工作区和 Web 资源门；
+- 真实开发镜像及 Docker Compose 健康检查。
+
+PR #203 以 Squash 方式合并为 `2aead73e6e9cb69ed0e6d915e731e75b06f37988`。PR #200、#201、#202 随后以“已被 #203 替代”关闭。
+
+下列剩余旧分支均先创建并验证远程 Annotated Tag，再删除远程 Head：
+
+| 已删除分支 | 可恢复 Tag | 原 HEAD |
+|---|---|---|
+| `codex/pwa-mobile-fullscreen` | `archive/superseded-prs/2026-08-02/codex-pwa-mobile-fullscreen` | `5e0408430ac9c7b9208c85172927861378bd709c` |
+| `codex/world-director-approval-beta` | `archive/superseded-prs/2026-08-02/codex-world-director-approval-beta` | `b6e0b21ea1d18446b7b2567a6d4156ac2217a854` |
+| `feat/commercial-identity-gate` | `archive/superseded-prs/2026-08-02/feat-commercial-identity-gate` | `e7bc8899f5ac338c654ca02c09616a535afed7c5` |
+| `feat/mobile-ux-final` | `archive/superseded-prs/2026-08-02/feat-mobile-ux-final` | `cd3b4f356ca1d13cc2a6c883c6e3ca3b4bbdbd91` |
+| `feat/responsive-ui-gamepad` | `archive/superseded-prs/2026-08-02/feat-responsive-ui-gamepad` | `57fe4518c09d22b6d62f8b0b87d2ae4ae0a8eb3a` |
+| `feat/ucloud-commercial-identity` | `archive/superseded-prs/2026-08-02/feat-ucloud-commercial-identity` | `60d0cf6aa331c944f4d0e05c6df729395d9cef4d` |
+| `hotfix/ucloud-gate15-new-player-20260802` | `archive/superseded-prs/2026-08-02/hotfix-ucloud-gate15-new-player-20260802` | `8681d9451c2a1934e68696c05a66afde5a86e1dc` |
+
+收口后远程 Head 仅保留 `main`。如需恢复旧实现：
+
+```bash
+git fetch origin --tags
+git switch -c recovery/<name> <archive-tag>
+```
+
+恢复分支仅用于审计或按需移植；新开发仍应从最新 `main` 创建分支。
 
 ## 后续分支处置标准
 
