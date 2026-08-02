@@ -5113,6 +5113,31 @@ button.character-spell-value:hover {
   z-index: 58;
 }
 
+/* Resource prewarm is useful during loading, but it must not compete with the
+   portrait rotate gate or occupy the tiny side gutters of a short landscape
+   phone. The cache keeps warming in the background while the indicator stays
+   out of the play surface. */
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 900px) {
+  .mir-cache-progress-panel {
+    display: none !important;
+  }
+}
+
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 430px) {
+  .mir-cache-progress-panel {
+    left: 8px !important;
+    bottom: 8px !important;
+    width: min(190px, calc(100vw - 16px)) !important;
+    padding: 6px 7px !important;
+    font-size: 10px !important;
+  }
+
+  .mir-cache-progress-panel > div:nth-child(3),
+  .mir-cache-progress-panel > div:nth-child(4) {
+    display: none;
+  }
+}
+
 /* TV layout uses an inset UI plane over the full-resolution game scene. This
    gives controller focus and edge HUD elements a conservative overscan margin. */
 .mir-client-page[data-layout-profile="tv"] .game-ui-scene,
