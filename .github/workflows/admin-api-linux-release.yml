@@ -1,0 +1,52 @@
+name: Admin API Linux release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-api-linux-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Linux x86_64 Admin API
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mir2-web3
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust 1.89
+        uses: dtolnay/rust-toolchain@1.89.0
+
+      - name: Restore Rust build cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: mir2-web3
+          cache-on-failure: true
+
+      - name: Test World Director
+        run: cargo test --locked -p mir2-admin-api world_director_approval -- --test-threads=1
+
+      - name: Build release binary
+        run: cargo build --locked --release -p mir2-admin-api --bin mir2-admin-api
+
+      - name: Package checksummed artifact
+        run: |
+          install -Dm755 target/release/mir2-admin-api dist/mir2-admin-api
+          strip dist/mir2-admin-api
+          sha256sum dist/mir2-admin-api > dist/mir2-admin-api.sha256
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mir2-admin-api-linux-x86_64-${{ github.sha }}
+          path: mir2-web3/dist/
+          if-no-files-found: error
+          retention-days: 14

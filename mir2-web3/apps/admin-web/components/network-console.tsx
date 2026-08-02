@@ -93,12 +93,16 @@ export function NetworkConsole({
           <p>{copy.subtitle}</p>
           <div className="network-intro-actions">
             <button
+              aria-busy={refreshing}
               className="network-action"
               disabled={refreshing}
               onClick={() => void refresh()}
               type="button"
             >
-              {refreshing ? copy.refreshing : copy.refresh}
+              {refreshing ? <span aria-hidden="true" className="button-spinner" /> : null}
+              <span aria-live="polite">
+                {refreshing ? copy.refreshing : copy.refresh}
+              </span>
             </button>
             <Link className="network-action ghost" href="/service-trace">
               {copy.tracePlayer}

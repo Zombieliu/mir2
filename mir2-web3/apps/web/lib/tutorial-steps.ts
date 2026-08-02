@@ -20,6 +20,7 @@ export type TutorialGamepadFamily = "xbox" | "playstation" | "generic";
 
 export const TUTORIAL_VERSION = 3;
 export const TUTORIAL_CONTROL_EVENT = "mir2:tutorial-control";
+export const TUTORIAL_STEP_EVENT = "mir2:tutorial-step";
 
 export type TutorialWindow = "inventory" | "character" | "questLog";
 

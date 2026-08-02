@@ -84,6 +84,19 @@ if [ ! -x "$unpack/mir2-gateway" ]; then
   exit 1
 fi
 
+if [ -f "$unpack/RELEASE.json" ]; then
+  manifest_binary_sha256="$(sed -n 's/.*"binarySha256": *"\([0-9a-fA-F]*\)".*/\1/p' "$unpack/RELEASE.json" | head -n 1)"
+  if [ -z "$manifest_binary_sha256" ]; then
+    echo "RELEASE.json does not contain binarySha256" >&2
+    exit 1
+  fi
+  unpacked_binary_sha256="$(sha256_file "$unpack/mir2-gateway")"
+  if [ "$unpacked_binary_sha256" != "$manifest_binary_sha256" ]; then
+    echo "gateway binary sha256 does not match RELEASE.json" >&2
+    exit 1
+  fi
+fi
+
 release_tag="${MIR2_GATEWAY_RELEASE_TAG:-}"
 if [ -z "$release_tag" ] && [ -f "$unpack/RELEASE.json" ]; then
   release_tag="$(sed -n 's/.*"tag": *"\([^"]*\)".*/\1/p' "$unpack/RELEASE.json" | head -n 1)"
@@ -114,12 +127,21 @@ if [ ! -f "$env_path" ]; then
     exit 1
   fi
   "${sudo_cmd[@]}" cp "$release_dir/systemd/mir2-gateway.env.example" "$env_path"
-  if command -v openssl >/dev/null 2>&1; then
-    secret="$(openssl rand -hex 32)"
-  else
-    secret="$(date +%s%N | sha256sum | awk '{print $1}')"
-  fi
-  "${sudo_cmd[@]}" sed -i "s/replace-with-random-32-byte-secret/$secret/g" "$env_path"
+  random_secret() {
+    if command -v openssl >/dev/null 2>&1; then
+      openssl rand -hex 32
+    else
+      head -c 64 /dev/urandom | sha256sum | awk '{print $1}'
+    fi
+  }
+  passkey_secret="$(random_secret)"
+  identity_session_secret="$(random_secret)"
+  identity_recovery_pepper="$(random_secret)"
+  "${sudo_cmd[@]}" sed -i \
+    -e "s/replace-with-random-32-byte-secret/$passkey_secret/g" \
+    -e "s/replace-with-independent-random-32-byte-secret/$identity_session_secret/g" \
+    -e "s/replace-with-independent-random-32-byte-pepper/$identity_recovery_pepper/g" \
+    "$env_path"
   "${sudo_cmd[@]}" chmod 0600 "$env_path"
   "${sudo_cmd[@]}" chown root:root "$env_path"
 fi

@@ -87,6 +87,29 @@ flowchart LR
 
 后一种路径延迟过高，不适合实时 MMO。
 
+## 网页观战、导播与录像
+
+项目已实现独立只读观战通道。观众不会创建玩家 Session，无法发送移动、
+战斗、交易或聊天指令；公开观战默认由服务器强制延迟 30 秒。网页
+`/spectate` 支持赛事/地图选择、玩家跟随、内部导播自由镜头，以及持久录像
+的播放、倍速和时间轴跳转。录像会剔除背包、仓库、任务和技能等私密字段，
+同时记录移动、血量、死亡、掉落等赛事事件。
+
+启动、配置、安全边界和人工验收详见
+[`docs/SPECTATOR-MODE.zh-CN.md`](docs/SPECTATOR-MODE.zh-CN.md)。
+
+## 跨发行渠道角色归属
+
+官网、itch 和 CrazyGames 不再各自创建一套角色主键。Gateway 为玩家生成稳定的
+`Obelisk Player ID`，所有角色、背包和公会数据只归属于这个 ID；Sui Passkey 是推荐
+的主恢复凭证，Dubhe/Sui Wallet 与渠道账号作为可选绑定。这样玩家更换发行渠道时
+不需要迁移角色，也不要求普通玩家先安装钱包。
+
+当前已实现 itch 游客进入、CrazyGames SDK 自动登录、渠道身份变化监听、真实
+CrazyGames JWT 服务端验签、Sui Passkey/Wallet 绑定，以及 PostgreSQL 多 Gateway
+共享身份注册表。完整架构、生产配置、API、安全边界和验收方法见
+[`docs/DISTRIBUTION-CHANNEL-INTEGRATION.zh-CN.md`](docs/DISTRIBUTION-CHANNEL-INTEGRATION.zh-CN.md)。
+
 ## 一个玩家从登录到走一步
 
 ```mermaid

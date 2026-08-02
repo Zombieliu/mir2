@@ -1,0 +1,15 @@
+{
+  "schema": "obelisk.mir2.spectator-smoke.v1",
+  "generatedAt": "2026-07-28T16:31:28.650Z",
+  "map": "0",
+  "readOnly": true,
+  "directorAuthorized": true,
+  "delayMs": 0,
+  "invalidGameplayCommandRejected": true,
+  "privateFieldsRedacted": true,
+  "timelineEvents": 25,
+  "activeViewers": 1,
+  "persistedFrames": 1,
+  "recordingId": "0-495904",
+  "replayFrames": 1
+}

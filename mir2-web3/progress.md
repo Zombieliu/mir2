@@ -1,5 +1,71 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-07-30 — Thin player client / R2 asset boundary
+
+- Goal: separate the complete local Crystal source corpus from the player distribution, verify the real R2 boundary, remove duplicate runtime bytes, and produce a production-verifiable standalone thin client.
+- Root cause: `apps/web/public` is a deterministic source/generation corpus (429,070,362 logical bytes), while `.next/cache` and `.next/dev` contribute another ~1.1 GB of compiler state. Neither is the player download.
+- R2 audit: the immutable prefix contains 86,447 objects / 443,736,598 bytes, but its online release manifest contains only 188 historical entries and several current starter-map/HUD paths are absent. The build now preserves the 39,409-entry filesystem manifest instead of allowing the stale remote manifest to shrink it to 184 entries.
+- Implemented: conditional Next standalone output, a 360 MiB thin-package budget/report, R2/local asset smoke, runtime same-origin fallback, local map/entity atlases, explicit tiny compatibility assets, removal of the 37 MiB legacy WebGL2 mirror, and tier-aware prewarming that no longer downloads raw map frames on packed-atlas tiers.
+- Final artifact: `.mir2-thin-client` is 348,608,686 logical bytes (332.46 MiB), contains both selectable Bevy backends, and passes 13 local package checks plus 12 live R2 checks.
+- Browser acceptance: `demo/demo` logged in through the real local Gateway, entered BichonProvince, rendered via WebGPU Bevy with scene interaction ready, completed cache prewarm 215/215 with 0 failures, and moved authoritatively from `(288,616)` to `(289,616)`.
+- Known remote-release advisory: optional `Monster/006` metadata and the private full Crystal pack index remain unavailable in the historical R2 prefix. They are graceful optional fallbacks and do not block the verified starter gameplay path; a future R2 republish must use a new immutable version rather than overwriting the current prefix.
+
+## 2026-07-29 — Launch Channel Pack v1
+
+- Goal: land the first production-oriented AI distribution loop across Web/HLS, Discord Webhook, YouTube RTMPS, and a lightweight in-game AI event entry.
+- Acceptance boundary: channel health must reflect real runtime evidence; missing YouTube/Discord credentials remain visibly waiting rather than reporting false readiness.
+- Deferred by design: Discord Go Live, clip export, Twitch, and Bilibili remain disabled for this launch pack.
+- Verification will cover the player-facing game entry, operator controls, gateway tests, production web build, and the web-game Playwright client.
+- Implemented the in-process player WebSocket event entry with a 60-second freshness boundary and a dismissible “立即观战” card.
+- Added launch-v1 readiness for Game, Web/HLS, Discord, and YouTube RTMPS. YouTube now requires an authenticated live encoder heartbeat; stale or failed heartbeats degrade instead of reporting false readiness.
+- Added the YouTube encoder secret template, runtime heartbeat loop, acceptance probe, non-technical launch readiness UI, and Chinese production/manual acceptance guide. Discord Go Live, Clip, Twitch, and Bilibili remain explicitly deferred.
+- Verified: AI distribution tests 6/6, AI Live tests 7/7, Web `typecheck`, production Next build, shell syntax, Docker Compose config, `git diff --check`, authenticated 3/4 local launch probe, and the required web-game Playwright client with no browser console errors.
+
+2026-07-29 production AI live goal:
+
+- New user goal: land a production-grade AI live broadcast system on top of the completed
+  read-only spectator transport.
+- Scope: deterministic highlight scoring, bounded AI commentary, TTS clips, AI camera target
+  decisions, durable segment evidence, live/shadow/pause controls, a player-safe broadcast
+  overlay, an isolated Chromium/FFmpeg encoder container, Discord highlight delivery,
+  observability, tests, Chinese operations documentation, browser acceptance, commit, and push.
+- Architectural decision: the Gateway only produces a sanitized broadcast program feed. The
+  encoder runs as a separate disposable service, and no model, TTS, webhook, or streaming
+  failure is allowed to block Zone ticks or player WebSocket sessions.
+- Backend landed: deterministic highlight scoring, strict model JSON and target allowlist,
+  deterministic fallback, OpenAI-compatible TTS, AI director target, JSONL segment evidence,
+  restart-durable Discord retry/dead-letter state, live/shadow/pause controls, redacted status,
+  audio serving, JSON metrics, and Prometheus metrics.
+- Frontend and broadcast landed: responsive `/ai-live` operations console, same-origin
+  server-side control proxy, WebSocket `aiLiveStatus`, clean `/spectate?aiLive=1` lower thirds,
+  optional AI audio, and an isolated Chromium/PulseAudio/FFmpeg HLS/RTMP container profile.
+- Verification: Gateway 400/400 library tests, AI Live 7/7 focused tests including mock
+  model/TTS/Discord, Web TypeScript and production build, real spectator smoke, desktop
+  operations/broadcast browser passes, 390x844 mobile pass, Compose/shell validation, and local
+  H.264/AAC HLS encoding passed. Docker Desktop itself returned HTTP 500 before image build;
+  third-party RTMP was not attempted because no platform ingest key was provided.
+
+2026-07-29 production AI daily report goal:
+
+- New user goal: land a production-grade AI daily reporting system and publish approved player-facing reports to Discord.
+- Scope: real gameplay/account/infrastructure aggregation, deterministic metrics before AI prose, PostgreSQL persistence, idempotent scheduling/backfill, evidence and model audit, operator review/publish workflow, durable Discord retries/dead-letter handling, admin UI, player world-report page, metrics, tests, Chinese runbook, commit, and push.
+- Architectural decision: daily metrics remain authoritative and deterministic; the model only writes bounded narrative JSON. Discord is an outbound publication channel, never the source of truth, and its webhook secret remains environment-only.
+- Backend landed: migration `0008_ai_daily_reports`, complete date-window aggregation, OpenAI-compatible strict narrative adapter, deterministic fallback, immutable published reports, draft/approve/publish state machine, scheduler, public player edition, Prometheus metrics, and durable Discord retry/dead-letter state.
+- Frontend landed: Admin Web `/daily-reports` and Player Web `/world-report`, both responsive and backed by the published report API.
+- Real acceptance passed against an isolated Homebrew PostgreSQL cluster plus mock model and mock Discord: `ok=true`, AI request 1, Discord delivery 1, delivery `delivered`, public response redaction and Prometheus metrics verified.
+- Browser acceptance passed for the Chinese Admin report page and player newspaper at 1280px with no horizontal overflow and no browser console warnings/errors. The skill-local generic Playwright client remains unavailable because its own install cannot resolve `playwright`; the in-app browser Playwright surface covered the live pages instead.
+
+2026-07-28 production spectator goal:
+
+- New user goal: fully land a production-verifiable spectator system instead of leaving the
+  existing `Observe` packet and GM flags as protocol-only shells.
+- Scope: a mutation-free spectator transport, live map/target following, director/free-camera
+  controls, configurable public delay, durable recordings and timeline playback, metrics/audit
+  surfaces, browser UI, automated tests, human acceptance documentation, commit, and push.
+- Architectural decision: spectator sockets are separate from player `/ws` sessions. They consume
+  sanitized Zone-derived frames and never own a `GatewaySession`, so movement/combat/economy
+  commands cannot cross the spectator boundary.
+
 2026-05-25 Bevy entity atlas prebuild/cache goal:
 
 - New user goal: move the expensive Bevy entity atlas cold path out of page live packing where possible, using prebuilt atlas packs and persistent browser cache so mobile/input feel is not blocked by hundreds of image decodes and canvas packing.
@@ -206,3 +272,41 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - Production deployment `dpl_8hgZxTUoDTUokZ1tkTkpVQeU2uwf` is live behind `https://mir2.obelisk.build`. Public probes passed for `/health`, the WebGPU/WebGL2 `bevy-6732ca9f6ab18f6d` runtime JS files, and `/bevy-entity-atlases/manifest.json`.
 - Production evidence: `docs/generated/player-qa/movement-jitter/prod-mobile-dom-fallback-canvas-hidden-finalready-20260525.json` / `.png` passed with mobile controls, selected/compiled backend `webgpu`, Bevy entity renderer `enabled=false`, `canvasHidden=true`, one Walk send, one UserLocation ACK, visible ground/entities, no critical console errors, and no non-favicon 404s. `docs/generated/player-qa/movement-jitter/prod-desktop-webgpu-transparent-guard-finalready-20260525.json` / `.png` passed with Bevy entity renderer `enabled=true`, `canvasHidden=false`, prebuilt atlas source, one Walk send, one UserLocation ACK, and visible ground. `docs/generated/player-qa/movement-jitter/prod-bevy-canvas-off-dom-fallback-finalready-20260525.json` / `.png` passed as the explicit `?bevyCanvas=0` escape hatch.
 - QA harness note: `apps/web/scripts/capture-web-movement-jitter.mjs` now supports `--finalSceneReadyTimeoutMs` so post-movement screenshots wait for the refreshed scene asset key before capture. This avoids treating the transient resource-cache overlay frame as final visual evidence.
+
+2026-07-28 production spectator goal:
+
+- Added a structurally read-only `SpectatorHub` and `/spectator/ws`; spectators never receive a `GatewaySession`, and gameplay commands cannot enter the authoritative command path.
+- Added server-enforced public delay, public-map allowlisting, constant-time director-token authorization, follow target, auto-director, free camera, bounded buffers, WebSocket capacity accounting, active-viewer metrics, and audit logs.
+- Added sanitized hourly JSONL recording and replay. Inventory, storage, quests, skills, buffs, equipment, NPC dialog, and other private character state are stripped.
+- Added a bounded all-map event timeline for spawn/despawn, movement, health, death/revive, and ground-drop changes, plus stale entity pruning for merged AOI snapshots.
+- Added `/spectator/matches`, `/spectator/recordings`, `/spectator/replay`, `/spectator/metrics`, and spectator metrics in `/health`.
+- Added `/spectate` Player Web entry, read-only spectator overlay, map/target selection, director controls, replay timeline/speed, event feed, reconnect, `render_game_to_text`, and `advanceTime`.
+- Added backend smoke `npm run smoke:spectator`, browser CDP smoke `npm run smoke:spectator-ui`, and Chinese production/operations/manual acceptance guide `docs/SPECTATOR-MODE.zh-CN.md`.
+- Local evidence before the final event-timeline pass: backend smoke verified read-only rejection, privacy redaction, one active viewer, persistence, and replay; browser smoke rendered the real Bichon scene with `Scout`, director and replay controls, no critical browser errors, and captured `apps/web/artifacts/spectator/spectator-ui.png`.
+- The generic `develop-web-game` Playwright client was attempted but its skill-local script could not resolve `playwright`; the project CDP smoke exercised the actual browser path instead.
+
+2026-07-30 distribution-channel identity goal:
+
+- Chose a stable internal `obl_<128-bit>` Obelisk Player ID as the owner of characters. Sui Passkey is the recommended primary credential; Dubhe/Sui Wallet and CrazyGames identities are optional credentials bound to the same player. A wallet address is no longer required to be the game-account primary key.
+- Added Gateway channel session exchange and guarded identity-link endpoints. Sui proofs retain the distinction between Passkey and Wallet, and the server rejects a normal wallet signature that claims to be a Passkey. CrazyGames JWTs are checked with RS256, official game ID, expiry, and a bounded public-key cache.
+- Added signed HttpOnly-cookie guest identity for itch and CrazyGames guests, plus a Channel Bridge for direct/itch/CrazyGames loading, gameplay, user-token, and rewarded-ad lifecycle hooks.
+- Added durable PostgreSQL identity tables, advisory-lock concurrency control, an r2d2 connection pool, raw-provider-ID hashing, and an operator-only player identity lookup. JSON and memory backends remain development fallbacks.
+- Added the character-select identity panel so a channel guest can bind Sui Passkey or Dubhe/Sui Wallet without losing the existing Obelisk Player ID and characters. Passkey binding promotes the account's primary recovery provider while preserving its channel binding.
+- Added an uploadable itch HTML5 launcher with a new-tab WebAuthn fallback, plus a Chinese production configuration, API, security, rollout, and manual-acceptance guide.
+- Browser evidence: itch guest login remained stable across reload; CrazyGames SDK v3 automatically entered the verified channel account with no external-login controls and no console errors; a Chromium virtual platform authenticator completed a real WebAuthn/Sui Passkey registration and linked it to the existing itch Player ID.
+- Data evidence: operator lookup returned `primaryProvider=suiPasskey`, `lastAuthenticatedProvider=suiPasskey`, and both `itch`/`suiPasskey` bindings for the same Player ID; `/health` returned `ok=true`, `backend=postgres`, and `durable=true`.
+- Verification: Gateway full library suite `413 passed / 0 failed / 1 ignored`; focused channel suite `4 passed / 0 failed / 1 ignored`; ignored two-independent-Gateway PostgreSQL test passed separately; Web typecheck and optimized Next production build passed; the negative authentication probe returned HTTP 401 when an Ed25519 wallet signature claimed `suiPasskey`.
+2026-07-30 thin player client / R2 asset boundary goal:
+
+- New user goal: explain and eliminate the ~700 MB Mir2 client build while keeping the full local
+  source corpus available for development and offline asset generation.
+- Cloudflare read-only inventory verified that `mir2/v/37596e16d64fde7c/` still contains 86,447
+  objects / 443,736,598 bytes (69,885 map objects and 16,551 UI objects), while the currently
+  published `remote-asset-release.json` has drifted down to a 188-file runtime sample.
+- Local size diagnosis: `apps/web/public` is ~563 MB of source/runtime assets; `.next` is ~877 MB
+  only because it combines ~456 MB production webpack cache and ~405 MB development cache with
+  the real ~15 MB production server/static output. Neither cache is a player distribution.
+- Architectural decision: keep source assets in git for deterministic generation and local/offline
+  development, but make production packaging a measured thin-client boundary: only the two
+  same-origin Bevy runtimes plus explicit bootstrap/generated packs may ship; R2-backed original
+  UI/map media must be excluded and fetched through the existing versioned Service Worker cache.

@@ -8,6 +8,7 @@ import {
   type WalletAccount,
   type SuiSignPersonalMessageFeature,
 } from "@mysten/wallet-standard";
+import { normalizeSuiAddress } from "@mysten/sui/utils";
 
 const PASSKEY_STORAGE_KEY = "mir2.suiPasskey";
 const SUI_LOGIN_PURPOSE = "mir2-sui-login";
@@ -27,7 +28,27 @@ type StoredPasskey = {
 
 export type SuiLoginToken = {
   accountId: string;
+  playerId?: string;
+  provider?:
+    | "suiPasskey"
+    | "suiWallet"
+    | "crazyGames"
+    | "crazyGamesGuest"
+    | "directGuest"
+    | "itch";
   token: string;
+  expiresAt: number;
+};
+
+export type SuiIdentityCredential = {
+  provider: "suiPasskey" | "suiWallet";
+  credential: string;
+};
+
+type SuiLoginChallenge = {
+  challenge: string;
+  challengeId: string;
+  issuedAt: number;
   expiresAt: number;
 };
 
@@ -85,6 +106,11 @@ function retainWalletSession(wallet: Wallet, account: WalletAccount): ActiveSuiW
 }
 
 export async function requestPasskeyLoginToken(): Promise<SuiLoginToken> {
+  const identity = await requestPasskeyIdentityCredential();
+  return exchangeChannelSession(identity.provider, identity.credential);
+}
+
+export async function requestPasskeyIdentityCredential(): Promise<SuiIdentityCredential> {
   if (!("credentials" in navigator) || !window.PublicKeyCredential) {
     throw new Error("Passkey is not supported by this browser");
   }
@@ -114,14 +140,23 @@ export async function requestPasskeyLoginToken(): Promise<SuiLoginToken> {
     });
   }
 
-  const address = keypair.getPublicKey().toSuiAddress();
-  const message = buildSuiLoginMessage(address);
+  const address = normalizeSuiAddress(keypair.getPublicKey().toSuiAddress());
+  const challenge = await requestSuiLoginChallenge(address, "passkey");
+  const message = buildSuiLoginMessage(address, challenge, "passkey");
   const { signature } = await keypair.signPersonalMessage(new TextEncoder().encode(message));
 
-  return requestSuiLoginToken(address, message, signature);
+  const proof = await requestSuiLoginToken(address, message, signature);
+  return { provider: "suiPasskey", credential: proof.token };
 }
 
 export async function requestWalletLoginToken(walletId?: string): Promise<SuiLoginToken> {
+  const identity = await requestWalletIdentityCredential(walletId);
+  return exchangeChannelSession(identity.provider, identity.credential);
+}
+
+export async function requestWalletIdentityCredential(
+  walletId?: string,
+): Promise<SuiIdentityCredential> {
   const wallets = discoverSuiWallets();
   const wallet = selectSuiWallet(wallets, walletId);
   if (!wallet) {
@@ -133,7 +168,9 @@ export async function requestWalletLoginToken(walletId?: string): Promise<SuiLog
   // Retain the connected wallet so on-chain mining can sign with it later (M4, WF-6).
   retainWalletSession(wallet, account);
 
-  const message = buildSuiLoginMessage(account.address);
+  const address = normalizeSuiAddress(account.address);
+  const challenge = await requestSuiLoginChallenge(address, "wallet");
+  const message = buildSuiLoginMessage(address, challenge, "wallet");
   const chain = account.chains?.find((entry) => entry.startsWith("sui:"));
   const { signature } = await wallet.features[SuiSignPersonalMessage].signPersonalMessage({
     account,
@@ -141,7 +178,8 @@ export async function requestWalletLoginToken(walletId?: string): Promise<SuiLog
     chain,
   });
 
-  return requestSuiLoginToken(account.address, message, signature);
+  const proof = await requestSuiLoginToken(address, message, signature);
+  return { provider: "suiWallet", credential: proof.token };
 }
 
 export function getSuiWalletSummaries(): SuiWalletSummary[] {
@@ -168,17 +206,41 @@ export function subscribeToSuiWalletChanges(listener: () => void) {
   };
 }
 
-function buildSuiLoginMessage(address: string) {
-  const now = Date.now();
+function buildSuiLoginMessage(
+  address: string,
+  challenge: SuiLoginChallenge,
+  authMethod: "passkey" | "wallet",
+) {
   return JSON.stringify({
     purpose: SUI_LOGIN_PURPOSE,
     accountId: `sui:${address}`,
     address,
     origin: window.location.origin,
-    issuedAt: now,
-    expiresAt: now + 60_000,
-    nonce: crypto.randomUUID(),
+    issuedAt: challenge.issuedAt,
+    expiresAt: challenge.expiresAt,
+    nonce: challenge.challengeId,
+    challenge: challenge.challenge,
+    authMethod,
   });
+}
+
+async function requestSuiLoginChallenge(
+  address: string,
+  authMethod: "passkey" | "wallet",
+): Promise<SuiLoginChallenge> {
+  const response = await fetch("/api/passkey/challenge", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ address, authMethod }),
+  });
+  const body = (await response.json().catch(() => null)) as
+    | SuiLoginChallenge
+    | { error?: string }
+    | null;
+  if (!response.ok || !body || !("challenge" in body)) {
+    throw new Error(body && "error" in body && body.error ? body.error : "Sui login challenge failed");
+  }
+  return body;
 }
 
 async function requestSuiLoginToken(address: string, message: string, signature: string) {
@@ -190,6 +252,101 @@ async function requestSuiLoginToken(address: string, message: string, signature:
   const body = (await response.json().catch(() => null)) as SuiLoginToken | { error?: string } | null;
   if (!response.ok || !body || !("token" in body)) {
     throw new Error(body && "error" in body && body.error ? body.error : "Sui login failed");
+  }
+  return body;
+}
+
+async function exchangeChannelSession(
+  provider:
+    | "suiPasskey"
+    | "suiWallet"
+    | "crazyGames"
+    | "crazyGamesGuest"
+    | "directGuest"
+    | "itch",
+  credential: string,
+): Promise<SuiLoginToken> {
+  const response = await fetch("/api/channels/session/exchange", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ provider, credential }),
+  });
+  const body = (await response.json().catch(() => null)) as
+    | SuiLoginToken
+    | { error?: string }
+    | null;
+  if (!response.ok || !body || !("token" in body) || !("accountId" in body)) {
+    throw new Error(
+      body && "error" in body && body.error ? body.error : "channel session exchange failed",
+    );
+  }
+  return body;
+}
+
+export function requestChannelSessionToken(
+  provider:
+    | "suiPasskey"
+    | "suiWallet"
+    | "crazyGames"
+    | "crazyGamesGuest"
+    | "directGuest"
+    | "itch",
+  credential: string,
+) {
+  return exchangeChannelSession(provider, credential);
+}
+
+export async function requestGuestChannelSessionToken(
+  provider: "crazyGamesGuest" | "directGuest" | "itch",
+) {
+  const proofResponse = await fetch("/api/channels/guest", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ provider }),
+  });
+  const proof = (await proofResponse.json().catch(() => null)) as
+    | { credential?: string; error?: string }
+    | null;
+  if (!proofResponse.ok || !proof?.credential) {
+    throw new Error(proof?.error ?? "guest channel proof failed");
+  }
+  return exchangeChannelSession(provider, proof.credential);
+}
+
+export async function linkSuiIdentity(
+  accountId: string,
+  sessionToken: string,
+  identity: SuiIdentityCredential,
+) {
+  return linkChannelIdentity(
+    accountId,
+    sessionToken,
+    identity.provider,
+    identity.credential,
+  );
+}
+
+export async function linkChannelIdentity(
+  accountId: string,
+  sessionToken: string,
+  provider: "suiPasskey" | "suiWallet" | "crazyGames",
+  credential: string,
+) {
+  const response = await fetch("/api/channels/identity/link", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      accountId,
+      sessionToken,
+      provider,
+      credential,
+    }),
+  });
+  const body = (await response.json().catch(() => null)) as
+    | { accountId?: string; linkedProvider?: string; identityCount?: number; error?: string }
+    | null;
+  if (!response.ok || !body?.linkedProvider) {
+    throw new Error(body?.error ?? "identity link failed");
   }
   return body;
 }

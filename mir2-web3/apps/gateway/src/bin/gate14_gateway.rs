@@ -6,13 +6,13 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use axum::extract::{Path, State};
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use mir2_gateway::{
     Gate14AuthoritativeState, Gate14Command, Gate14CommandEnvelope, Gate14Placement,
-    Gate14QuorumClient, Gate14SessionLease,
+    Gate14QuorumClient, Gate14SessionLease, Gate14WorldDirectorAnchor,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
@@ -49,6 +49,7 @@ struct GatewayState {
     observed: Arc<RwLock<ObservedState>>,
     submit_lock: Arc<Mutex<()>>,
     redis_url: Option<String>,
+    control_token: Option<String>,
     started_at_ms: u64,
 }
 
@@ -111,6 +112,15 @@ struct CommandResponse {
     state_root: String,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct WorldDirectorAnchorResponse {
+    gateway_id: String,
+    finalized_height: u64,
+    state_root: String,
+    anchor: Gate14WorldDirectorAnchor,
+}
+
 #[derive(Debug)]
 struct ApiError {
     status: StatusCode,
@@ -128,6 +138,20 @@ impl ApiError {
     fn unavailable(message: impl Into<String>) -> Self {
         Self {
             status: StatusCode::SERVICE_UNAVAILABLE,
+            message: message.into(),
+        }
+    }
+
+    fn not_found(message: impl Into<String>) -> Self {
+        Self {
+            status: StatusCode::NOT_FOUND,
+            message: message.into(),
+        }
+    }
+
+    fn unauthorized(message: impl Into<String>) -> Self {
+        Self {
+            status: StatusCode::UNAUTHORIZED,
             message: message.into(),
         }
     }
@@ -171,12 +195,30 @@ async fn run() -> Result<(), String> {
     let redis_url = env::var("GATE14_REDIS_URL")
         .ok()
         .filter(|value| !value.trim().is_empty());
+    let control_token = env::var("GATE14_CONTROL_TOKEN")
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+    let require_control_token = env_flag("GATE14_REQUIRE_CONTROL_TOKEN")
+        || env::var("MIR2_DEPLOYMENT_ENV").is_ok_and(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "production" | "prod"
+            )
+        });
+    if require_control_token && control_token.is_none() {
+        return Err(
+            "GATE14_CONTROL_TOKEN is required when Gate 14 control authentication is enabled"
+                .to_string(),
+        );
+    }
     let state = GatewayState {
         gateway_id,
         quorum,
         observed: Arc::new(RwLock::new(ObservedState::default())),
         submit_lock: Arc::new(Mutex::new(())),
         redis_url,
+        control_token,
         started_at_ms: now_ms(),
     };
     let watcher = state.clone();
@@ -191,6 +233,10 @@ async fn run() -> Result<(), String> {
         .route("/metrics", get(metrics))
         .route("/v1/status", get(status))
         .route("/v1/control/commands", post(submit_command))
+        .route(
+            "/v1/world-director/anchors/{command_id}",
+            get(world_director_anchor),
+        )
         .route("/v1/routes/{zone_id}", get(route))
         .route("/v1/sessions/acquire", post(acquire_session))
         .route("/v1/sessions/{session_id}", get(session))
@@ -292,8 +338,10 @@ async fn session(
 
 async fn submit_command(
     State(state): State<GatewayState>,
+    headers: HeaderMap,
     Json(command): Json<Gate14CommandEnvelope>,
 ) -> Result<Json<CommandResponse>, ApiError> {
+    require_control_token(&headers, state.control_token.as_deref())?;
     let _guard = state.submit_lock.lock().await;
     let observed_height = state.observed.read().await.state.finalized_height;
     if command.sequence != observed_height.saturating_add(1) {
@@ -320,6 +368,67 @@ async fn submit_command(
         finalized_height: snapshot.state.finalized_height,
         state_root: snapshot.state_root,
     }))
+}
+
+async fn world_director_anchor(
+    State(state): State<GatewayState>,
+    Path(command_id): Path<String>,
+    headers: HeaderMap,
+) -> Result<Json<WorldDirectorAnchorResponse>, ApiError> {
+    require_control_token(&headers, state.control_token.as_deref())?;
+    let observed = state.observed.read().await;
+    let anchor = observed
+        .state
+        .world_director_anchors
+        .get(&command_id)
+        .cloned()
+        .ok_or_else(|| {
+            ApiError::not_found(format!("world director anchor not found: {command_id}"))
+        })?;
+    Ok(Json(WorldDirectorAnchorResponse {
+        gateway_id: state.gateway_id.clone(),
+        finalized_height: observed.state.finalized_height,
+        state_root: observed.state_root.clone(),
+        anchor,
+    }))
+}
+
+fn require_control_token(headers: &HeaderMap, expected: Option<&str>) -> Result<(), ApiError> {
+    let Some(expected) = expected else {
+        return Ok(());
+    };
+    let supplied = headers
+        .get("authorization")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim)
+        .unwrap_or_default();
+    if !constant_time_equal(supplied.as_bytes(), expected.as_bytes()) {
+        return Err(ApiError::unauthorized(
+            "valid Gate 14 control bearer token is required",
+        ));
+    }
+    Ok(())
+}
+
+fn constant_time_equal(left: &[u8], right: &[u8]) -> bool {
+    let mut difference = left.len() ^ right.len();
+    for index in 0..left.len().max(right.len()) {
+        difference |= usize::from(
+            left.get(index).copied().unwrap_or_default()
+                ^ right.get(index).copied().unwrap_or_default(),
+        );
+    }
+    difference == 0
+}
+
+fn env_flag(name: &str) -> bool {
+    env::var(name).is_ok_and(|value| {
+        matches!(
+            value.trim().to_ascii_lowercase().as_str(),
+            "1" | "true" | "yes"
+        )
+    })
 }
 
 async fn acquire_session(
@@ -516,6 +625,34 @@ fn resp_command(parts: &[&[u8]]) -> Vec<u8> {
 
 fn metric_label(value: &str) -> String {
     value.replace(['\\', '"', '\n', '\r'], "_")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::http::HeaderValue;
+
+    #[test]
+    fn control_token_rejects_missing_and_wrong_bearer_values() {
+        let expected = Some("director-control-secret");
+        assert!(require_control_token(&HeaderMap::new(), expected).is_err());
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "authorization",
+            HeaderValue::from_static("Bearer wrong-secret"),
+        );
+        assert!(require_control_token(&headers, expected).is_err());
+        headers.insert(
+            "authorization",
+            HeaderValue::from_static("Bearer director-control-secret"),
+        );
+        assert!(require_control_token(&headers, expected).is_ok());
+    }
+
+    #[test]
+    fn absent_control_token_keeps_local_development_compatible() {
+        assert!(require_control_token(&HeaderMap::new(), None).is_ok());
+    }
 }
 
 fn now_ms() -> u64 {

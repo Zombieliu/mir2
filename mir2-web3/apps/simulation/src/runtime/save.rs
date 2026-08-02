@@ -1,7 +1,10 @@
 use std::collections::BTreeSet;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
 use sha2::{Digest, Sha256};
 
 use bevy_ecs::prelude::World;
@@ -343,32 +346,12 @@ pub(super) fn account_characters(
         .unwrap_or_default()
 }
 
-/// Hashed-password marker. Stored form: `sha256$<salt_hex>$<hash_hex>`.
-const PASSWORD_HASH_PREFIX: &str = "sha256$";
+/// Legacy hashed-password marker. New writes use a standard Argon2id PHC string.
+const LEGACY_PASSWORD_HASH_PREFIX: &str = "sha256$";
+const ARGON2ID_PASSWORD_HASH_PREFIX: &str = "$argon2id$";
 /// Iteration count for the stretched SHA-256 password hash. Not as strong as
-/// argon2/bcrypt, but removes plaintext-at-rest using only vendored deps and
-/// adds a meaningful work factor.
+/// Argon2id; retained only to verify and transparently migrate existing rows.
 const PASSWORD_HASH_ITERATIONS: u32 = 100_000;
-
-/// Derive a unique 16-byte salt. Salts must be unique per account (to defeat
-/// shared rainbow tables) but need not be secret, so a high-resolution clock,
-/// a process-wide counter, and the account id are mixed together.
-fn derive_password_salt(account_id: &str) -> [u8; 16] {
-    static SALT_COUNTER: AtomicU64 = AtomicU64::new(0);
-    let counter = SALT_COUNTER.fetch_add(1, Ordering::Relaxed);
-    let nanos = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|duration| duration.as_nanos())
-        .unwrap_or_default();
-    let mut hasher = Sha256::new();
-    hasher.update(nanos.to_le_bytes());
-    hasher.update(counter.to_le_bytes());
-    hasher.update(account_id.as_bytes());
-    let digest = hasher.finalize();
-    let mut salt = [0_u8; 16];
-    salt.copy_from_slice(&digest[..16]);
-    salt
-}
 
 fn stretch_password(salt: &[u8], password: &str) -> [u8; 32] {
     let mut digest = [0_u8; 32];
@@ -385,14 +368,6 @@ fn stretch_password(salt: &[u8], password: &str) -> [u8; 32] {
     digest
 }
 
-fn hex_encode(bytes: &[u8]) -> String {
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        out.push_str(&format!("{byte:02x}"));
-    }
-    out
-}
-
 fn hex_decode(text: &str) -> Option<Vec<u8>> {
     if text.len() % 2 != 0 {
         return None;
@@ -403,15 +378,13 @@ fn hex_decode(text: &str) -> Option<Vec<u8>> {
         .collect()
 }
 
-/// Hash an account password for storage.
-pub(super) fn hash_account_password(account_id: &str, password: &str) -> String {
-    let salt = derive_password_salt(account_id);
-    let hash = stretch_password(&salt, password);
-    format!(
-        "{PASSWORD_HASH_PREFIX}{}${}",
-        hex_encode(&salt),
-        hex_encode(&hash)
-    )
+/// Hash an account password with Argon2id and a CSPRNG-generated salt.
+fn hash_account_password(password: &str) -> Result<String, String> {
+    let salt = SaltString::generate(&mut OsRng);
+    Argon2::default()
+        .hash_password(password.as_bytes(), &salt)
+        .map(|hash| hash.to_string())
+        .map_err(|error| format!("argon2id password hashing failed: {error}"))
 }
 
 /// Constant-time byte comparison to avoid leaking match length via timing.
@@ -426,23 +399,85 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
     diff == 0
 }
 
-/// Verify a candidate against a stored password value. Accepts both the hashed
-/// format and legacy plaintext (so pre-existing stores keep working), using a
-/// constant-time comparison in both cases.
-pub(super) fn account_password_matches(stored: &str, candidate: &str) -> bool {
-    if let Some(rest) = stored.strip_prefix(PASSWORD_HASH_PREFIX) {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PasswordVerification {
+    Invalid,
+    Current,
+    LegacyNeedsMigration,
+}
+
+/// Verify the current Argon2id PHC format and the two historical formats.
+/// Historical successful logins are immediately rewritten through Argon2id.
+fn verify_account_password(stored: &str, candidate: &str) -> PasswordVerification {
+    if stored.starts_with(ARGON2ID_PASSWORD_HASH_PREFIX) {
+        let Ok(parsed) = PasswordHash::new(stored) else {
+            return PasswordVerification::Invalid;
+        };
+        return if Argon2::default()
+            .verify_password(candidate.as_bytes(), &parsed)
+            .is_ok()
+        {
+            PasswordVerification::Current
+        } else {
+            PasswordVerification::Invalid
+        };
+    }
+
+    if let Some(rest) = stored.strip_prefix(LEGACY_PASSWORD_HASH_PREFIX) {
         let mut parts = rest.splitn(2, '$');
         let (Some(salt_hex), Some(hash_hex)) = (parts.next(), parts.next()) else {
-            return false;
+            return PasswordVerification::Invalid;
         };
         let (Some(salt), Some(expected)) = (hex_decode(salt_hex), hex_decode(hash_hex)) else {
-            return false;
+            return PasswordVerification::Invalid;
         };
         let actual = stretch_password(&salt, candidate);
-        constant_time_eq(&expected, &actual)
+        if constant_time_eq(&expected, &actual) {
+            PasswordVerification::LegacyNeedsMigration
+        } else {
+            PasswordVerification::Invalid
+        }
+    } else if constant_time_eq(stored.as_bytes(), candidate.as_bytes()) {
+        PasswordVerification::LegacyNeedsMigration
     } else {
-        constant_time_eq(stored.as_bytes(), candidate.as_bytes())
+        PasswordVerification::Invalid
     }
+}
+
+fn production_identity_policy_enabled() -> bool {
+    if std::env::var("MIR2_IDENTITY_POLICY")
+        .is_ok_and(|value| value.trim().eq_ignore_ascii_case("commercial"))
+    {
+        return true;
+    }
+    ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
+        .into_iter()
+        .filter_map(|name| std::env::var(name).ok())
+        .any(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "production" | "prod" | "staging"
+            )
+        })
+}
+
+fn commercial_account_id_is_valid(account_id: &str) -> bool {
+    let length = account_id.len();
+    (3..=32).contains(&length)
+        && account_id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-' | b'.'))
+}
+
+fn commercial_password_is_valid(account_id: &str, password: &str) -> bool {
+    let length = password.chars().count();
+    (10..=128).contains(&length)
+        && !password.chars().any(char::is_control)
+        && !password.eq_ignore_ascii_case(account_id)
+        && !matches!(
+            password.to_ascii_lowercase().as_str(),
+            "1234567890" | "password123" | "qwerty12345" | "mir2password"
+        )
 }
 
 pub(super) fn create_account_with_password(
@@ -450,6 +485,14 @@ pub(super) fn create_account_with_password(
     account_id: &str,
     password: &str,
 ) -> u8 {
+    if production_identity_policy_enabled() {
+        if !commercial_account_id_is_valid(account_id) {
+            return 1;
+        }
+        if !commercial_password_is_valid(account_id, password) {
+            return 2;
+        }
+    }
     let mut store = config
         .account_store
         .lock()
@@ -458,7 +501,10 @@ pub(super) fn create_account_with_password(
         return 7;
     }
     let mut account = AccountRecord::empty();
-    account.password = hash_account_password(account_id, password);
+    let Ok(password_hash) = hash_account_password(password) else {
+        return 0;
+    };
+    account.password = password_hash;
     store.accounts.insert(account_id.to_string(), account);
     drop(store);
     if let Err(error) = config.save_account_store_account(account_id) {
@@ -481,21 +527,38 @@ pub(super) fn login_account(
     if let Err(error) = config.refresh_account_store_account(account_id) {
         eprintln!("failed to refresh postgres account {account_id}: {error}");
     }
-    let store = config
+    if production_identity_policy_enabled() && !commercial_account_id_is_valid(account_id) {
+        return AccountLoginResult::InvalidCredentials;
+    }
+    let mut store = config
         .account_store
         .lock()
         .expect("account store mutex should not be poisoned");
-    let Some(account) = store.accounts.get(account_id) else {
+    let Some(account) = store.accounts.get_mut(account_id) else {
         return AccountLoginResult::InvalidCredentials;
     };
     let now_ms = unix_now_ms();
     if let Some(ban) = account.active_ban(now_ms) {
         return AccountLoginResult::Banned(ban);
     }
-    if account_password_matches(&account.password, password) {
-        AccountLoginResult::Success(account.characters.clone())
-    } else {
-        AccountLoginResult::InvalidCredentials
+    match verify_account_password(&account.password, password) {
+        PasswordVerification::Invalid => AccountLoginResult::InvalidCredentials,
+        PasswordVerification::Current => AccountLoginResult::Success(account.characters.clone()),
+        PasswordVerification::LegacyNeedsMigration => {
+            let Ok(password_hash) = hash_account_password(password) else {
+                return AccountLoginResult::InvalidCredentials;
+            };
+            account.password = password_hash;
+            let characters = account.characters.clone();
+            drop(store);
+            if let Err(error) = config.save_account_store_account(account_id) {
+                eprintln!(
+                    "failed to persist Argon2id password migration for {account_id}: {error}"
+                );
+                return AccountLoginResult::InvalidCredentials;
+            }
+            AccountLoginResult::Success(characters)
+        }
     }
 }
 
@@ -565,6 +628,12 @@ pub(super) fn change_account_password(
     if new_password.trim().is_empty() {
         return 3;
     }
+    if production_identity_policy_enabled()
+        && (!commercial_account_id_is_valid(account_id)
+            || !commercial_password_is_valid(account_id, new_password))
+    {
+        return 3;
+    }
 
     let mut store = config
         .account_store
@@ -573,16 +642,58 @@ pub(super) fn change_account_password(
     let Some(account) = store.accounts.get_mut(account_id) else {
         return 4;
     };
-    if !account_password_matches(&account.password, current_password) {
+    if verify_account_password(&account.password, current_password) == PasswordVerification::Invalid
+    {
         return 5;
     }
 
-    account.password = hash_account_password(account_id, new_password);
+    let Ok(password_hash) = hash_account_password(new_password) else {
+        return 0;
+    };
+    account.password = password_hash;
     drop(store);
     if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");
     }
     6
+}
+
+/// Recovery-only password reset used by the authenticated Gateway identity
+/// service after it atomically consumes a one-time recovery code.  This path
+/// always applies the commercial password policy, regardless of the local
+/// fixture compatibility mode used by legacy protocol tests.
+pub fn reset_account_password_after_recovery(
+    config: &SimulationConfig,
+    account_id: &str,
+    new_password: &str,
+) -> Result<(), String> {
+    validate_commercial_identity_credentials(account_id, new_password)?;
+    config.refresh_account_store_account(account_id)?;
+    let password_hash = hash_account_password(new_password)?;
+    let mut store = config
+        .account_store
+        .lock()
+        .map_err(|_| "account store lock poisoned".to_string())?;
+    let account = store
+        .accounts
+        .get_mut(account_id)
+        .ok_or_else(|| "account was not found".to_string())?;
+    account.password = password_hash;
+    drop(store);
+    config.save_account_store_account(account_id)
+}
+
+pub fn validate_commercial_identity_credentials(
+    account_id: &str,
+    password: &str,
+) -> Result<(), String> {
+    if commercial_account_id_is_valid(account_id)
+        && commercial_password_is_valid(account_id, password)
+    {
+        Ok(())
+    } else {
+        Err("account id or password does not meet commercial policy".to_string())
+    }
 }
 
 pub(super) fn add_character_to_account(

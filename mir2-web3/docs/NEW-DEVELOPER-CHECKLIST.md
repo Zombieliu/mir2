@@ -61,6 +61,20 @@ cd mir2/mir2-web3
 
 ## 提交前门禁
 
+跨平台统一门禁（推荐）：
+
+```powershell
+.\scripts\dev.cmd verify
+```
+
+```bash
+./scripts/dev.sh verify
+```
+
+它们在同一个锁定容器中检查发布锁、Rust 格式、Player/Admin TypeScript、Gateway 与 Admin API，避免 Windows 与 Mac 使用不同本机工具链得出不同结果。
+
+Windows 无 Docker 原生调试路径的扩展门禁：
+
 ```powershell
 .\scripts\verify-developer-setup.ps1 -RunCoreTests
 git diff --check

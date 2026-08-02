@@ -44,6 +44,7 @@ pub use map::set_crystal_full_world_zone_collision;
 pub use monsters::crystal_world_respawn_spawns;
 pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
+pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
     ActiveSessionIdentity, SharedItemRentalAgreement, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedSkillItemConsumptionComponent,

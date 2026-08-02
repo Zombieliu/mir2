@@ -1,0 +1,346 @@
+{
+  "schema": "obelisk.mir2.spectator-ui-smoke.v1",
+  "generatedAt": "2026-07-28T16:34:15.934Z",
+  "url": "http://127.0.0.1:3000/spectate?spectateToken=[redacted]&spectateDelayMs=0&spectateMode=director&replayId=0-495904",
+  "readOnlyLabel": "● 只读安全",
+  "mapOptions": [
+    "BichonProvince · 1 玩家"
+  ],
+  "targetOptions": [
+    "自动选择",
+    "Scout · HP 60/60"
+  ],
+  "directorVisible": true,
+  "replayVisible": true,
+  "renderState": {
+    "mode": "spectator",
+    "connection": "open",
+    "status": {
+      "camera": null,
+      "capturedAtMs": 1785256288487,
+      "delayMs": 0,
+      "director": true,
+      "directorAuthorized": true,
+      "events": [
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Teleport_Gilbert",
+          "objectId": 1,
+          "payload": {
+            "entityKind": "npc",
+            "x": 287,
+            "y": 615
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "BorderVillage_Board",
+          "objectId": 2,
+          "payload": {
+            "entityKind": "npc",
+            "x": 284,
+            "y": 615
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Assistant_Jane",
+          "objectId": 3,
+          "payload": {
+            "entityKind": "npc",
+            "x": 284,
+            "y": 606
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "CraftsLady_Jude",
+          "objectId": 4,
+          "payload": {
+            "entityKind": "npc",
+            "x": 294,
+            "y": 619
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Blacksmith_Smith",
+          "objectId": 5,
+          "payload": {
+            "entityKind": "npc",
+            "x": 296,
+            "y": 613
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Merchant_John",
+          "objectId": 6,
+          "payload": {
+            "entityKind": "npc",
+            "x": 292,
+            "y": 603
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Merchant_Ruben",
+          "objectId": 8,
+          "payload": {
+            "entityKind": "npc",
+            "x": 288,
+            "y": 608
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Merchant_Scott",
+          "objectId": 42,
+          "payload": {
+            "entityKind": "npc",
+            "x": 291,
+            "y": 610
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "MaterialDealer_Reece",
+          "objectId": 43,
+          "payload": {
+            "entityKind": "npc",
+            "x": 295,
+            "y": 605
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Scout",
+          "objectId": 1000,
+          "payload": {
+            "entityKind": "selfPlayer",
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "ArcherGuard",
+          "objectId": 200325,
+          "payload": {
+            "entityKind": "monster",
+            "x": 295,
+            "y": 624
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Royal_Guard",
+          "objectId": 200339,
+          "payload": {
+            "entityKind": "monster",
+            "x": 276,
+            "y": 604
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Royal_Guard",
+          "objectId": 200340,
+          "payload": {
+            "entityKind": "monster",
+            "x": 280,
+            "y": 600
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Guard",
+          "objectId": 200716,
+          "payload": {
+            "entityKind": "monster",
+            "x": 291,
+            "y": 620
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206327,
+          "payload": {
+            "entityKind": "monster",
+            "x": 273,
+            "y": 614
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206509,
+          "payload": {
+            "entityKind": "monster",
+            "x": 280,
+            "y": 607
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206510,
+          "payload": {
+            "entityKind": "monster",
+            "x": 284,
+            "y": 625
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206542,
+          "payload": {
+            "entityKind": "monster",
+            "x": 284,
+            "y": 617
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206549,
+          "payload": {
+            "entityKind": "monster",
+            "x": 292,
+            "y": 627
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Scarecrow",
+          "objectId": 206615,
+          "payload": {
+            "entityKind": "monster",
+            "x": 290,
+            "y": 613
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Scarecrow",
+          "objectId": 206635,
+          "payload": {
+            "entityKind": "monster",
+            "x": 290,
+            "y": 623
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206711,
+          "payload": {
+            "entityKind": "monster",
+            "x": 280,
+            "y": 630
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206713,
+          "payload": {
+            "entityKind": "monster",
+            "x": 302,
+            "y": 603
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Deer",
+          "objectId": 206719,
+          "payload": {
+            "entityKind": "monster",
+            "x": 283,
+            "y": 621
+          }
+        },
+        {
+          "atMs": 1785256288487,
+          "kind": "spawn",
+          "name": "Hen",
+          "objectId": 271806,
+          "payload": {
+            "entityKind": "monster",
+            "x": 279,
+            "y": 613
+          }
+        }
+      ],
+      "map": "0",
+      "matches": [
+        {
+          "entityCount": 25,
+          "latestCapturedAtMs": 1785256288487,
+          "latestSequence": 1,
+          "mapFileName": "0",
+          "mapTitle": "BichonProvince",
+          "playerCount": 1,
+          "recordingId": "0-495904"
+        }
+      ],
+      "readOnly": true,
+      "recordingId": "0-495904",
+      "replay": {
+        "active": true,
+        "currentAtMs": 1785256288487,
+        "endAtMs": 1785256288487,
+        "playing": false,
+        "speed": 1,
+        "startAtMs": 1785256288487
+      },
+      "sequence": 1,
+      "target": null,
+      "targets": [
+        {
+          "hp": 60,
+          "maxHp": 60,
+          "name": "Scout",
+          "objectId": 1000,
+          "x": 288,
+          "y": 616
+        }
+      ]
+    },
+    "world": {
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "tick": 2,
+      "playerObjectId": "1000",
+      "entityCount": 25
+    }
+  },
+  "criticalBrowserErrors": [],
+  "screenshot": "artifacts/spectator/spectator-ui.png"
+}

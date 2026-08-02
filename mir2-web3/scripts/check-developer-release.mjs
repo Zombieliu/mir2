@@ -652,7 +652,10 @@ function checkBevyRuntimeLock() {
   assertTracked(`mir2-web3/${manifestRelativePath}`);
   const manifest = readJson(projectPath(manifestRelativePath), "Bevy runtime version manifest");
   assert(/^bevy-[a-f0-9]{16}$/.test(manifest.version), "Bevy runtime version is invalid");
-  assert(Array.isArray(manifest.files) && manifest.files.length === 6, "Bevy runtime file set is incomplete");
+  assert(
+    Array.isArray(manifest.files) && manifest.files.length === 4,
+    "Bevy runtime file set is incomplete",
+  );
 
   const combined = createHash("sha256");
   const records = new Map();
@@ -681,14 +684,11 @@ function checkBevyRuntimeLock() {
   const expectedVersion = `bevy-${combined.digest("hex").slice(0, 16)}`;
   assert(manifest.version === expectedVersion, `Bevy runtime version should be ${expectedVersion}`);
   assert(
-    records.get("public/bevy-runtime/pkg/mir2_bevy_runtime.js") ===
-      records.get("public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js"),
-    "legacy and WebGL2 JavaScript runtimes differ",
-  );
-  assert(
-    records.get("public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm") ===
-      records.get("public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"),
-    "legacy and WebGL2 WASM runtimes differ",
+    records.has("public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js") &&
+      records.has("public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm") &&
+      records.has("public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js") &&
+      records.has("public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"),
+    "WebGPU/WebGL2 runtime variants are incomplete",
   );
   record("Bevy runtime lock", `${manifest.version} / ${manifest.files.length} hashed files`);
 }

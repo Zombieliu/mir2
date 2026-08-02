@@ -21,6 +21,15 @@ import {
   type MailComposeDraft,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
+import {
+  SpectatorOverlay,
+  type SpectatorStatus,
+} from "./components/spectator-overlay";
+import {
+  AiLiveOverlay,
+  type AiLiveStatus,
+} from "./components/ai-live-overlay";
+import { AiLiveGameHighlight } from "./components/ai-live-game-highlight";
 
 import {
   buildTranslator,
@@ -64,7 +73,13 @@ import {
   DUBHE_WALLET_URL,
   getActiveSuiWalletSession,
   getSuiWalletSummaries,
+  linkChannelIdentity,
+  linkSuiIdentity,
+  requestPasskeyIdentityCredential,
+  requestChannelSessionToken,
+  requestGuestChannelSessionToken,
   requestSuiLoginToken,
+  requestWalletIdentityCredential,
   sendBootstrapSequence as sendGatewayBootstrapSequence,
   sendNewAccountCommand as sendGatewayNewAccountCommand,
   sendPasswordLoginCommand,
@@ -75,6 +90,14 @@ import {
   type SuiLoginToken,
   type SuiWalletSummary,
 } from "../lib/client-login-runtime";
+import {
+  channelGameplayStart,
+  channelGameplayStop,
+  channelIdentity,
+  channelLoadingFinished,
+  initializeChannelBridge,
+  subscribeChannelIdentityChanges,
+} from "../lib/channel-bridge";
 // Pure config only — the @mysten/sui PTB builders + wallet session are imported
 // DYNAMICALLY inside the handlers so the SDK stays out of the main bundle.
 import {
@@ -102,6 +125,10 @@ import {
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
 import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
+import {
+  IdentitySecurityPanel,
+  type BrowserIdentitySession,
+} from "./components/identity-security-panel";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -298,7 +325,10 @@ type CrystalBootstrapChatLine = {
 type GatewayEvent =
   | { type: "packet"; packet: string; payload?: Record<string, unknown> }
   | { type: "worldSnapshot"; payload: GatewayWorldSnapshot }
+  | { type: "spectatorStatus"; payload: SpectatorStatus }
+  | { type: "aiLiveStatus"; payload: AiLiveStatus }
   | { type: "error"; message?: string }
+  | { type: "identitySession"; token: string; session: BrowserIdentitySession }
   | { type: string; packet?: string; payload?: Record<string, unknown>; message?: string };
 
 type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
@@ -1143,6 +1173,18 @@ function isLocalWebHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
 
+function isSpectatorBrowserMode() {
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("spectate") === "1";
+}
+
+function isAiLiveBrowserMode() {
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("aiLive") === "1";
+}
+
+function isAiLiveAudioEnabled() {
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("aiLiveAudio") === "1";
+}
+
 function resolveGatewayWebSocketUrl() {
   if (typeof window === "undefined") return CONFIGURED_GATEWAY_WS_URL || LOCAL_GATEWAY_WS_URL;
   const onLocalHost = isLocalWebHost(window.location.hostname);
@@ -1150,12 +1192,43 @@ function resolveGatewayWebSocketUrl() {
   // Honoring it on a hosted origin would let a crafted link silently redirect a
   // player's WebSocket — and the login credentials sent over it — to an
   // attacker-controlled gateway, so it is ignored outside localhost.
+  let resolved: string | null = null;
   if (onLocalHost) {
     const queryValue = new URLSearchParams(window.location.search).get("gatewayWs");
-    if (queryValue && /^wss?:\/\//.test(queryValue)) return queryValue;
+    if (queryValue && /^wss?:\/\//.test(queryValue)) resolved = queryValue;
   }
-  if (CONFIGURED_GATEWAY_WS_URL) return CONFIGURED_GATEWAY_WS_URL;
-  return onLocalHost ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL;
+  resolved ??= CONFIGURED_GATEWAY_WS_URL || (onLocalHost ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL);
+  if (!isSpectatorBrowserMode()) return resolved;
+
+  const pageQuery = new URLSearchParams(window.location.search);
+  const spectatorUrl = new URL(resolved, window.location.href);
+  spectatorUrl.pathname = spectatorUrl.pathname.replace(/\/ws\/?$/, "/spectator/ws");
+  if (!spectatorUrl.pathname.endsWith("/spectator/ws")) {
+    spectatorUrl.pathname = "/spectator/ws";
+  }
+  const mappings = [
+    ["spectateMap", "map"],
+    ["spectateTarget", "target"],
+    ["spectateDelayMs", "delayMs"],
+    ["spectateMode", "mode"],
+    ["spectateToken", "token"],
+    ["replayId", "replayId"],
+  ] as const;
+  for (const [source, target] of mappings) {
+    const value = pageQuery.get(source);
+    if (value) spectatorUrl.searchParams.set(target, value);
+  }
+  return spectatorUrl.toString();
+}
+
+function safeGatewayUrlForDiagnostics(url: string) {
+  try {
+    const safe = new URL(url);
+    if (safe.searchParams.has("token")) safe.searchParams.set("token", "[redacted]");
+    return safe.toString();
+  } catch {
+    return url;
+  }
 }
 
 function markMir2CacheMilestone(name: string, detail?: Record<string, unknown>) {
@@ -1889,6 +1962,12 @@ export default function HomePage() {
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  const [identityProvider, setIdentityProvider] = useState<string | null>(null);
+  const [identityLinkBusy, setIdentityLinkBusy] = useState(false);
+  const [identityLinkStatus, setIdentityLinkStatus] = useState<string | null>(null);
+  // Commercial identity bearer stays in React memory only. It is never written
+  // to localStorage/sessionStorage, so closing or reloading the tab discards it.
+  const [identitySessionToken, setIdentitySessionToken] = useState<string | null>(null);
   // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
   const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
   const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
@@ -1907,6 +1986,11 @@ export default function HomePage() {
   const [characters, setCharacters] = useState<SelectCharacterEntry[]>(() => [fallbackCharacter("en")]);
   const [selectedCharacterIndex, setSelectedCharacterIndex] = useState(0);
   const [wsState, setWsState] = useState("closed");
+  const [spectatorMode, setSpectatorMode] = useState(false);
+  const [spectatorStatus, setSpectatorStatus] = useState<SpectatorStatus | null>(null);
+  const [aiLiveBrowserMode, setAiLiveBrowserMode] = useState(false);
+  const [aiLiveAudioEnabled, setAiLiveAudioEnabled] = useState(false);
+  const [aiLiveStatus, setAiLiveStatus] = useState<AiLiveStatus | null>(null);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
@@ -2043,21 +2127,47 @@ export default function HomePage() {
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
   }, []);
+  const closeTouchSecondaryWindows = useCallback((
+    except?: "character" | "inventory",
+    force = false,
+  ) => {
+    if (!force && clientProfile.layout !== "touch") return;
+    if (except !== "inventory") setShowInventory(false);
+    if (except !== "character") setShowCharacter(false);
+    setShowQuestLog(false);
+    setShowHeroPet(false);
+    setShowGuild(false);
+    setShowGroup(false);
+    setShowFriends(false);
+    setShowBonds(false);
+    setShowRanking(false);
+    setShowMarket(false);
+    setShowConquest(false);
+    setShowTrade(false);
+    setShowBuffs(false);
+    setShowMail(false);
+    setShowWorldMap(false);
+    setShowHelp(false);
+    setShowHotkeys(false);
+    setShowChatSettings(false);
+  }, [clientProfile.layout]);
+
   const startTutorial = useCallback((
     input: TutorialInputProfile,
     gamepadFamily: TutorialGamepadFamily = "generic",
   ) => {
+    if (input === "touch") closeTouchSecondaryWindows(undefined, true);
     setTutorialInput(input);
     setTutorialGamepadFamily(gamepadFamily);
     setTutorialRunId((current) => current + 1);
     setShowTutorial(true);
-  }, []);
+  }, [closeTouchSecondaryWindows]);
 
   // Auto-start each input-specific tutorial once. The legacy completion flag
   // suppresses only the keyboard/mouse tour; touch and gamepad users still see
   // their new control guide even if they completed the old desktop tutorial.
   useEffect(() => {
-    if (screen !== "game") return;
+    if (screen !== "game" || spectatorMode) return;
     let alreadySeen = false;
     try {
       alreadySeen =
@@ -2070,7 +2180,7 @@ export default function HomePage() {
       alreadySeen = false;
     }
     if (!alreadySeen) startTutorial(clientProfile.input, clientProfile.gamepad.family);
-  }, [clientProfile.gamepad.family, clientProfile.input, screen, startTutorial]);
+  }, [clientProfile.gamepad.family, clientProfile.input, screen, spectatorMode, startTutorial]);
   // When the hero/pet window opens, ask the server to start streaming intelligent
   // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).
   useEffect(() => {
@@ -4902,6 +5012,10 @@ export default function HomePage() {
   }
 
   function send(command: Record<string, unknown>, options?: { quiet?: boolean }) {
+    // Spectator sockets are structurally read-only and accept only the explicit
+    // controls sent through sendSpectatorControl below. Drop every gameplay
+    // command before it reaches the network or local prediction pipeline.
+    if (isSpectatorBrowserMode()) return false;
     if (socketRef.current?.readyState !== WebSocket.OPEN) return false;
     lastCommandRef.current = command;
     const commandNow = Date.now();
@@ -4972,6 +5086,11 @@ export default function HomePage() {
     }
     if (!options?.quiet) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
+  }
+
+  function sendSpectatorControl(command: Record<string, unknown>) {
+    if (!isSpectatorBrowserMode() || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    socketRef.current.send(JSON.stringify(command));
   }
 
   function sendGatewayTick() {
@@ -5535,13 +5654,14 @@ export default function HomePage() {
       return;
     }
 
+    const gatewayUrl = resolveGatewayWebSocketUrl();
     markMir2CacheMilestone("gatewayConnectStart", {
-      url: resolveGatewayWebSocketUrl(),
+      url: safeGatewayUrlForDiagnostics(gatewayUrl),
       bootstrapAfterOpen,
     });
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
-    const socket = new WebSocket(resolveGatewayWebSocketUrl());
+    const socket = new WebSocket(gatewayUrl);
     socketRef.current = socket;
     setWsState("connecting");
 
@@ -5567,7 +5687,13 @@ export default function HomePage() {
       markMir2CacheMilestone("gatewayClosed");
       updateWorld((current) => ({ ...current, connected: false }));
       appendLog(t("log.gatewayWsClosed"), "network");
-      if (!closedManually && reconnectStatusRef.current.mode !== "failed") {
+      if (!closedManually && isSpectatorBrowserMode()) {
+        clearGatewayReconnectTimer();
+        reconnectTimerRef.current = window.setTimeout(() => {
+          reconnectTimerRef.current = null;
+          connectGateway();
+        }, 1_000);
+      } else if (!closedManually && reconnectStatusRef.current.mode !== "failed") {
         scheduleGatewayReconnect(reconnectSnapshotRef.current ?? captureGatewayReconnectSnapshot());
       }
     });
@@ -5590,6 +5716,154 @@ export default function HomePage() {
       }
     });
   }
+
+  useEffect(() => {
+    if (!isSpectatorBrowserMode()) return;
+    setSpectatorMode(true);
+    setAiLiveBrowserMode(isAiLiveBrowserMode());
+    setAiLiveAudioEnabled(isAiLiveAudioEnabled());
+    setShowTutorial(false);
+    screenRef.current = "game";
+    setScreen("game");
+    connectGateway();
+    // connectGateway is a hoisted closure over refs; this mount-only effect is
+    // intentionally responsible for the dedicated spectator bootstrap.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isSpectatorBrowserMode()) return;
+    let cancelled = false;
+    let unsubscribeIdentity = () => {};
+    let identityChangeInFlight = false;
+    void (async () => {
+      try {
+        const context = await initializeChannelBridge();
+        await channelLoadingFinished();
+        if (cancelled || context.channel === "direct") return;
+        const identity = await channelIdentity();
+        if (cancelled) return;
+        const login =
+          identity.kind === "authenticated"
+            ? await requestChannelSessionToken(identity.provider, identity.credential)
+            : await requestGuestChannelSessionToken(identity.provider);
+        if (cancelled) return;
+        submitIdentitySession(login, context.channel === "crazyGames" ? "crazyGames" : "itch");
+        if (context.channel === "crazyGames") {
+          unsubscribeIdentity = await subscribeChannelIdentityChanges(() => {
+            if (identityChangeInFlight) return;
+            identityChangeInFlight = true;
+            void (async () => {
+              try {
+                const changed = await channelIdentity();
+                const currentAuth = activeReconnectAuthRef.current;
+                if (cancelled) return;
+                if (changed.kind === "guest") {
+                  const guestLogin = await requestGuestChannelSessionToken(changed.provider);
+                  if (!cancelled) {
+                    submitIdentitySession(guestLogin, "crazyGames");
+                    setIdentityLinkStatus("CrazyGames 已退出，已切换到游客角色归属。");
+                  }
+                  return;
+                }
+
+                if (
+                  currentAuth?.kind === "sui" &&
+                  currentAuth.accountId.startsWith("obl_")
+                ) {
+                  try {
+                    const linked = await linkChannelIdentity(
+                      currentAuth.accountId,
+                      currentAuth.token,
+                      changed.provider,
+                      changed.credential,
+                    );
+                    if (cancelled) return;
+                    setIdentityProvider(changed.provider);
+                    setIdentityLinkStatus(
+                      `CrazyGames 已绑定（共 ${linked.identityCount ?? 1} 个身份）`,
+                    );
+                    return;
+                  } catch {
+                    // The CrazyGames identity may already own another Player ID.
+                    // Never merge progress implicitly; switch to that verified
+                    // identity instead and leave both accounts intact.
+                  }
+                }
+
+                const authenticatedLogin = await requestChannelSessionToken(
+                  changed.provider,
+                  changed.credential,
+                );
+                if (!cancelled) {
+                  submitIdentitySession(authenticatedLogin, "crazyGames");
+                  setIdentityLinkStatus("CrazyGames 身份已切换。");
+                }
+              } catch (error) {
+                if (!cancelled) {
+                  setIdentityLinkStatus(
+                    `CrazyGames 账号切换失败：${error instanceof Error ? error.message : String(error)}`,
+                  );
+                }
+              } finally {
+                identityChangeInFlight = false;
+              }
+            })();
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoginBusy(false);
+          setLoginErrorKey(
+            `Channel login failed: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+      unsubscribeIdentity();
+    };
+    // The channel bootstrap runs once. Login submission is routed through refs
+    // and the existing reconnect-safe Gateway path.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (screen === "game") {
+      void channelGameplayStart();
+    } else {
+      void channelGameplayStop();
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    if (!spectatorMode && screen !== "game") return;
+    const debugWindow = window as typeof window & {
+      render_game_to_text?: () => string;
+      advanceTime?: (milliseconds: number) => Promise<void>;
+    };
+    debugWindow.render_game_to_text = () =>
+      JSON.stringify({
+        mode: spectatorMode ? "spectator" : "player",
+        connection: wsState,
+        status: spectatorMode ? spectatorStatus : null,
+        aiLive: aiLiveStatus,
+        world: {
+          mapFileName: worldRef.current.mapFileName,
+          mapTitle: worldRef.current.mapTitle,
+          tick: worldRef.current.worldTick,
+          playerObjectId: worldRef.current.playerObjectId,
+          entityCount: worldRef.current.entities.length,
+        },
+      });
+    debugWindow.advanceTime = (milliseconds) =>
+      new Promise((resolve) => window.setTimeout(resolve, Math.max(0, milliseconds)));
+    return () => {
+      delete debugWindow.render_game_to_text;
+      delete debugWindow.advanceTime;
+    };
+  }, [aiLiveStatus, screen, spectatorMode, spectatorStatus, wsState]);
 
   useEffect(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current) {
@@ -5621,6 +5895,7 @@ export default function HomePage() {
     passwordRef.current = nextPassword;
     setAccountId(normalizedAccountId);
     setPassword(nextPassword);
+    setIdentityProvider(null);
     activeReconnectAuthRef.current = {
       kind: "password",
       accountId: normalizedAccountId,
@@ -5651,24 +5926,36 @@ export default function HomePage() {
 
     try {
       const login = await requestSuiLoginToken(kind, walletId);
-      activeReconnectAuthRef.current = {
-        kind: "sui",
-        accountId: login.accountId,
-        token: login.token,
-        expiresAt: login.expiresAt,
-      };
-      setAccountId(login.accountId);
-      if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
-        pendingGatewayProtocolActionRef.current = { kind: "suiLogin", login };
-        connectGateway();
-        return;
-      }
-      sendSuiLoginCommand(send, login.accountId, login.token);
+      submitIdentitySession(login, kind);
     } catch (error) {
       setLoginBusy(false);
       const label = kind === "passkey" ? "Passkey" : "Wallet";
       setLoginErrorKey(`${label} login failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  function submitIdentitySession(
+    login: SuiLoginToken,
+    method: SuiLoginKind | "crazyGames" | "itch",
+  ) {
+    resetGatewayReconnectState();
+    activeReconnectAuthRef.current = {
+      kind: "sui",
+      accountId: login.accountId,
+      token: login.token,
+      expiresAt: login.expiresAt,
+    };
+    setAccountId(login.accountId);
+    setIdentityProvider(login.provider ?? method);
+    setLoginBusy(true);
+    setLoginErrorKey(null);
+    markMir2CacheMilestone("loginSubmit", { method });
+    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
+      pendingGatewayProtocolActionRef.current = { kind: "suiLogin", login };
+      connectGateway();
+      return;
+    }
+    sendSuiLoginCommand(send, login.accountId, login.token);
   }
 
   function submitPasskeyLogin() {
@@ -5683,6 +5970,41 @@ export default function HomePage() {
   function submitWalletLogin(walletId: string) {
     setWalletPickerOpen(false);
     void submitSuiLogin("wallet", walletId);
+  }
+
+  async function linkCurrentSuiIdentity(kind: SuiLoginKind, walletId?: string) {
+    const currentAuth = activeReconnectAuthRef.current;
+    if (
+      !accountId.startsWith("obl_") ||
+      currentAuth?.kind !== "sui" ||
+      currentAuth.accountId !== accountId
+    ) {
+      setIdentityLinkStatus("当前会话不能绑定身份，请重新通过渠道进入。");
+      return;
+    }
+    if (currentAuth.expiresAt <= Date.now()) {
+      setIdentityLinkStatus("绑定授权已过期，请退出后重新进入再绑定。");
+      return;
+    }
+    setIdentityLinkBusy(true);
+    setIdentityLinkStatus(null);
+    try {
+      const identity =
+        kind === "passkey"
+          ? await requestPasskeyIdentityCredential()
+          : await requestWalletIdentityCredential(walletId);
+      const linked = await linkSuiIdentity(accountId, currentAuth.token, identity);
+      setIdentityLinkStatus(
+        `${identity.provider === "suiPasskey" ? "Sui Passkey" : "Dubhe / Sui Wallet"} 已绑定（共 ${linked.identityCount ?? 1} 个身份）`,
+      );
+      setIdentityProvider(identity.provider);
+    } catch (error) {
+      setIdentityLinkStatus(
+        `绑定失败：${error instanceof Error ? error.message : String(error)}`,
+      );
+    } finally {
+      setIdentityLinkBusy(false);
+    }
   }
 
   function startSelectedCharacter() {
@@ -7226,13 +7548,27 @@ export default function HomePage() {
   }
 
   function openCharacter(tab: "char" | "stats1" | "stats2" | "spells") {
+    closeTouchSecondaryWindows("character");
     setActiveCharacterTab(tab);
     setShowCharacter(true);
   }
 
   function openInventory(tab: "bag1" | "bag2" | "quest") {
+    closeTouchSecondaryWindows("inventory");
     setActiveInventoryTab(tab);
     setShowInventory(true);
+  }
+
+  function toggleCharacterWindow() {
+    const opening = !showCharacter;
+    if (opening) closeTouchSecondaryWindows("character");
+    setShowCharacter(opening);
+  }
+
+  function toggleInventoryWindow() {
+    const opening = !showInventory;
+    if (opening) closeTouchSecondaryWindows("inventory");
+    setShowInventory(opening);
   }
 
   function handleViewportTileAction(x: number, y: number, mode: "walk" | "run") {
@@ -7574,6 +7910,25 @@ export default function HomePage() {
     gatewayHistory.unshift(debugEvent);
     if (gatewayHistory.length > 50) gatewayHistory.length = 50;
     debugWindow.__mir2GatewayEventHistory = gatewayHistory;
+    if (event.type === "spectatorStatus") {
+      const status = event.payload as SpectatorStatus;
+      setSpectatorStatus(status);
+      setSpectatorMode(true);
+      screenRef.current = "game";
+      setScreen("game");
+      return;
+    }
+    if (event.type === "aiLiveStatus") {
+      setAiLiveStatus(event.payload as AiLiveStatus);
+      return;
+    }
+    if (event.type === "identitySession") {
+      const identityToken = "token" in event ? event.token : undefined;
+      if (typeof identityToken === "string" && identityToken.length <= 4096) {
+        setIdentitySessionToken(identityToken);
+    }
+      return;
+    }
     if (event.type === "error") {
       const message = event.message ?? t("error.unknown");
       pendingGatewayProtocolActionRef.current = null;
@@ -7654,6 +8009,7 @@ export default function HomePage() {
         }
         break;
       case "Disconnect":
+        setIdentitySessionToken(null);
         gatewayProtocolReadyRef.current = false;
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -8458,6 +8814,7 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
+        setIdentitySessionToken(null);
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
         screenRef.current = "login";
@@ -12797,6 +13154,9 @@ export default function HomePage() {
       suiWallets={suiWallets}
       walletPickerOpen={walletPickerOpen}
       dubheWalletUrl={DUBHE_WALLET_URL}
+      identityProvider={identityProvider}
+      identityLinkBusy={identityLinkBusy}
+      identityLinkStatus={identityLinkStatus}
       characters={characters}
       selectedCharacterIndex={selectedCharacterIndex}
       showInventory={showInventory}
@@ -12813,6 +13173,8 @@ export default function HomePage() {
       onPasskeyLogin={submitPasskeyLogin}
       onWalletPickerToggle={toggleWalletPicker}
       onWalletLogin={submitWalletLogin}
+      onIdentityLinkPasskey={() => void linkCurrentSuiIdentity("passkey")}
+      onIdentityLinkWallet={(walletId) => void linkCurrentSuiIdentity("wallet", walletId)}
       onQuickEnter={quickEnterWorld}
       onResetClient={resetClient}
       onSendChat={(message) => send({ type: "chat", message })}
@@ -12847,8 +13209,8 @@ export default function HomePage() {
       onSendClientCommand={sendClientCommand}
       transferOptions={QUICK_TRANSFER_OPTIONS}
       onStartTutorial={startTutorial}
-      onToggleCharacter={() => setShowCharacter((current) => !current)}
-      onToggleInventory={() => setShowInventory((current) => !current)}
+      onToggleCharacter={toggleCharacterWindow}
+      onToggleInventory={toggleInventoryWindow}
       onCloseCharacter={() => setShowCharacter(false)}
       onCloseInventory={() => setShowInventory(false)}
       onOpenCharacterTab={openCharacter}
@@ -12891,6 +13253,32 @@ export default function HomePage() {
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
+    {spectatorMode && !aiLiveBrowserMode ? (
+      <SpectatorOverlay
+        status={spectatorStatus}
+        connectionState={wsState}
+        onControl={sendSpectatorControl}
+      />
+    ) : null}
+    {spectatorMode && aiLiveBrowserMode ? (
+      <AiLiveOverlay
+        status={aiLiveStatus}
+        gatewayWebSocketUrl={resolveGatewayWebSocketUrl()}
+        audioEnabled={aiLiveAudioEnabled}
+      />
+    ) : null}
+    {screen === "game" && !spectatorMode ? (
+      <AiLiveGameHighlight status={aiLiveStatus} />
+    ) : null}
+    <IdentitySecurityPanel
+      token={identitySessionToken}
+      accountId={accountId}
+      language={language}
+      onCurrentSessionRevoked={() => {
+        setIdentitySessionToken(null);
+        send({ type: "logOut" });
+      }}
+    />
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
         <span>{debugSnapshotNotice.message}</span>
@@ -12919,6 +13307,8 @@ export default function HomePage() {
     {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
       <OnchainMinePanelWithStore
         store={worldStoreRef.current}
+        compactMode={clientProfile.layout === "touch"}
+        suppressed={clientProfile.layout === "touch" && showTutorial}
         walletAddress={onchainWallet?.account.address ?? null}
         walletBusy={onchainWalletBusy}
         pendingSwings={onchainMine.pendingSwings}

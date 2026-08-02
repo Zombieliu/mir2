@@ -38,6 +38,7 @@ const mod = loadTypeScriptModule(new URL("../lib/tutorial-steps.ts", import.meta
 
 const {
   TUTORIAL_STEPS,
+  TUTORIAL_STEP_EVENT,
   TUTORIAL_VERSION,
   createTutorialState,
   currentStep,
@@ -65,6 +66,10 @@ function indexOf(id) {
 function run(events, input = "keyboardMouse") {
   return events.reduce((state, event) => reduceTutorial(state, event), createTutorialState(input));
 }
+
+check("tutorial exposes a presentation-only step event for adaptive controls", () => {
+  assert.equal(TUTORIAL_STEP_EVENT, "mir2:tutorial-step");
+});
 
 check("initial state starts at step 0, not done", () => {
   const state = createTutorialState();

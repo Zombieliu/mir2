@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 use std::env;
 use std::io;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::{Query, State};
+use axum::extract::{ConnectInfo, Path as AxumPath, Query, State};
+use axum::http::header::{AUTHORIZATION, CACHE_CONTROL, CONTENT_TYPE};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
@@ -29,7 +31,12 @@ use tokio::sync::{mpsc, Mutex as AsyncMutex, RwLock as AsyncRwLock};
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
-use crate::auth::verify_passkey_gateway_token;
+use crate::ai_live::{AiLiveHub, AiLiveMode};
+use crate::auth::{
+    issue_gateway_identity_token_for_subject, verify_channel_guest_proof,
+    verify_gateway_identity_token, verify_operator_token, verify_passkey_gateway_token,
+    verify_sui_login_proof,
+};
 use crate::browser_commands::{
     default_drop_count, default_market_max_shape, parse_class, parse_direction, parse_gender,
     parse_grid, parse_move_mode, parse_spell, parse_spell_name,
@@ -40,12 +47,18 @@ use crate::cache::{
     session_cache_record, GatewaySessionCacheKey, GatewaySessionCacheRecord,
     GatewaySessionCacheStatus, GatewaySessionTraceEvent, SharedGatewaySessionCache,
 };
+use crate::channel_identity::{
+    verify_crazygames_token, ChannelIdentityProvider, ChannelIdentityRegistry,
+    ChannelIdentityRegistryStatus, PlayerIdentityAccount,
+};
 use crate::events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
     SharedGameplayEventSink,
 };
+use crate::identity::{IdentityService, VerifiedIdentitySession};
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
+use crate::spectator::{SpectatorFrame, SpectatorHub};
 use crate::tcp::chat_broadcast::{
     recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
 };
@@ -136,8 +149,79 @@ struct WebState {
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
+    identity: Arc<IdentityService>,
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
+    spectator: SpectatorHub,
+    ai_live: AiLiveHub,
+    channel_identity: ChannelIdentityRegistry,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorAccessQuery {
+    map: Option<String>,
+    target: Option<String>,
+    delay_ms: Option<u64>,
+    token: Option<String>,
+    mode: Option<String>,
+    replay_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+enum SpectatorControl {
+    Follow { target: Option<String> },
+    Map { map: String },
+    Director { enabled: bool },
+    Camera { x: i32, y: i32 },
+    CameraClear,
+    ReplayPlay,
+    ReplayPause,
+    ReplaySeek { captured_at_ms: u64 },
+    ReplaySpeed { speed: f64 },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AiLiveControlRequest {
+    action: String,
+    token: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AiDistributionControlRequest {
+    channel: String,
+    action: String,
+    token: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorDirectoryResponse {
+    source: String,
+    generated_at_ms: u64,
+    public_delay_ms: u64,
+    max_delay_ms: u64,
+    matches: Vec<crate::spectator::SpectatorMatch>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorRecordingsResponse {
+    source: String,
+    generated_at_ms: u64,
+    recordings: Vec<crate::spectator::SpectatorRecording>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SpectatorReplayResponse {
+    source: String,
+    generated_at_ms: u64,
+    recording_id: String,
+    frames: Vec<SpectatorFrame>,
 }
 
 #[derive(Debug)]
@@ -195,11 +279,14 @@ impl GatewayCapacityState {
             max_ws_connections: positive_usize_env("MIR2_GATEWAY_MAX_WS_CONNECTIONS"),
             max_active_sessions: positive_usize_env("MIR2_GATEWAY_MAX_ACTIVE_SESSIONS"),
             max_reconnect_leases: positive_usize_env("MIR2_GATEWAY_MAX_RECONNECT_LEASES"),
-            max_login_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT"),
+            max_login_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT")
+                .or_else(|| gateway_prod_like_env().then_some(8)),
             max_new_character_in_flight: positive_usize_env(
                 "MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT",
-            ),
-            max_start_game_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT"),
+            )
+            .or_else(|| gateway_prod_like_env().then_some(4)),
+            max_start_game_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT")
+                .or_else(|| gateway_prod_like_env().then_some(4)),
             current_ws_connections: AtomicUsize::new(0),
             current_active_sessions: AtomicUsize::new(0),
             current_reconnect_leases: AtomicUsize::new(0),
@@ -313,6 +400,29 @@ impl GatewayCapacityState {
                 | GatewayCapacityKind::StartGame
         ));
         self.try_acquire(kind)
+    }
+
+    async fn acquire_action_with_wait(
+        self: &Arc<Self>,
+        kind: GatewayCapacityKind,
+        maximum_wait: Duration,
+    ) -> Result<GatewayCapacityPermit, String> {
+        let started_at = Instant::now();
+        loop {
+            match self.try_acquire_action(kind) {
+                Ok(permit) => return Ok(permit),
+                Err(error) if maximum_wait.is_zero() => return Err(error),
+                Err(error) => {
+                    let Some(remaining) = maximum_wait.checked_sub(started_at.elapsed()) else {
+                        return Err(format!(
+                            "{error}; queue wait timed out after {}ms",
+                            maximum_wait.as_millis()
+                        ));
+                    };
+                    tokio::time::sleep(remaining.min(Duration::from_millis(100))).await;
+                }
+            }
+        }
     }
 
     fn try_acquire(
@@ -1271,6 +1381,7 @@ enum SessionAction {
     Packet(ClientPacket),
     PasskeyLogin {
         account_id: String,
+        proof_account_id: String,
         token: String,
     },
     MoveTo {
@@ -1337,6 +1448,88 @@ struct HealthResponse {
     session_cache: GatewaySessionCacheStatus,
     capacity: GatewayCapacityStatus,
     gameplay_events: GameplayEventSinkStatus,
+    spectator: crate::spectator::SpectatorMetrics,
+    ai_live: crate::ai_live::AiLiveMetrics,
+    channel_identity: ChannelIdentityRegistryStatus,
+    identity_backend: &'static str,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityOverviewResponse {
+    account_id: String,
+    current_session_id: String,
+    sessions: Vec<crate::identity::IdentitySessionView>,
+    credentials: Vec<crate::identity::IdentityCredentialView>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRevokeSessionRequest {
+    session_id: String,
+    #[serde(default)]
+    reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRevokeCredentialRequest {
+    credential_id: String,
+    #[serde(default)]
+    reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityBindSuiCredentialRequest {
+    address: String,
+    proof_token: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRecoverRequest {
+    account_id: String,
+    recovery_code: String,
+    new_password: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityMutationReceipt {
+    accepted: bool,
+    affected: u64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct IdentityRecoveryCodesResponse {
+    recovery_codes: Vec<String>,
+    warning: &'static str,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminIdentityQuery {
+    account_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminIdentityRevokeRequest {
+    account_id: String,
+    session_id: Option<String>,
+    reason: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminIdentityResponse {
+    source: &'static str,
+    account_id: String,
+    sessions: Vec<crate::identity::IdentitySessionView>,
+    credentials: Vec<crate::identity::IdentityCredentialView>,
+    audit_events: Vec<Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1419,6 +1612,47 @@ struct AdminErrorResponse {
     error: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelSessionExchangeRequest {
+    provider: String,
+    credential: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelSessionExchangeResponse {
+    account_id: String,
+    player_id: String,
+    provider: String,
+    token: String,
+    expires_at: u64,
+    created: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelIdentityLinkRequest {
+    account_id: String,
+    session_token: String,
+    provider: String,
+    credential: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ChannelIdentityLinkResponse {
+    account_id: String,
+    linked_provider: String,
+    identity_count: usize,
+}
+
+struct VerifiedChannelSubject {
+    subject: String,
+    token_id: Option<String>,
+    expires_at_ms: Option<u64>,
+}
+
 pub async fn run_web_gateway(
     addr: &str,
     config: GatewayConfig,
@@ -1432,6 +1666,18 @@ pub async fn run_web_gateway(
     }
     let topology = ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let spectator = SpectatorHub::from_env();
+    let ai_live = AiLiveHub::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    ai_live.spawn(spectator.clone());
+    let channel_identity =
+        run_blocking_component_initializer("channel identity", ChannelIdentityRegistry::from_env)
+            .await?;
+    let identity_database_url = config.account_store_database_url.clone();
+    let identity = run_blocking_component_initializer("commercial identity", move || {
+        IdentityService::from_env(identity_database_url)
+    })
+    .await?;
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
@@ -1445,7 +1691,11 @@ pub async fn run_web_gateway(
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
+        identity: Arc::new(identity),
         injector: crate::inject::LiveSessionInjector::default(),
+        spectator,
+        ai_live,
+        channel_identity,
     };
 
     let app = Router::new()
@@ -1454,18 +1704,90 @@ pub async fn run_web_gateway(
         .route("/admin/system-mail", post(admin_system_mail))
         .route("/admin/sessions", get(admin_sessions))
         .route("/admin/session-trace", get(admin_session_trace))
+        .route(
+            "/admin/channel-identities/{player_id}",
+            get(admin_channel_identity),
+        )
+        .route("/admin/identity", get(admin_identity_overview))
+        .route("/admin/identity/revoke", post(admin_identity_revoke))
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
+        .route("/v1/identity/me", get(identity_overview))
+        .route(
+            "/v1/identity/sessions/revoke",
+            post(identity_revoke_session),
+        )
+        .route(
+            "/v1/identity/sessions/revoke-others",
+            post(identity_revoke_other_sessions),
+        )
+        .route(
+            "/v1/identity/recovery-codes/rotate",
+            post(identity_rotate_recovery_codes),
+        )
+        .route(
+            "/v1/identity/credentials/revoke",
+            post(identity_revoke_credential),
+        )
+        .route(
+            "/v1/identity/credentials/bind-sui",
+            post(identity_bind_sui_credential),
+        )
+        .route("/v1/identity/recover", post(identity_recover_account))
         .route("/onchain/inject", post(onchain_inject))
+        .route(
+            "/v1/channels/session/exchange",
+            post(channel_session_exchange),
+        )
+        .route("/v1/channels/identity/link", post(channel_identity_link))
+        .route("/spectator/matches", get(spectator_matches))
+        .route("/spectator/recordings", get(spectator_recordings))
+        .route("/spectator/replay", get(spectator_replay))
+        .route("/spectator/metrics", get(spectator_metrics))
+        .route("/spectator/ws", get(spectator_ws_upgrade))
+        .route("/ai-live/status", get(ai_live_status))
+        .route("/ai-live/metrics", get(ai_live_metrics))
+        .route("/ai-live/metrics/prometheus", get(ai_live_prometheus))
+        .route("/ai-live/control", post(ai_live_control))
+        .route(
+            "/ai-live/distribution",
+            get(ai_distribution_status).post(ai_distribution_control),
+        )
+        .route(
+            "/ai-live/distribution/heartbeat",
+            post(ai_distribution_heartbeat),
+        )
+        .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
     let listener = TcpListener::bind(addr).await?;
     eprintln!("mir2-gateway web listening on http://{addr}");
 
-    axum::serve(listener, app)
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .map_err(|error| io::Error::new(io::ErrorKind::Other, error.to_string()))
+}
+
+async fn run_blocking_component_initializer<T>(
+    component: &'static str,
+    initializer: impl FnOnce() -> Result<T, String> + Send + 'static,
+) -> io::Result<T>
+where
+    T: Send + 'static,
+{
+    tokio::task::spawn_blocking(initializer)
         .await
-        .map_err(|error| io::Error::new(io::ErrorKind::Other, error.to_string()))
+        .map_err(|error| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                format!("{component} initialization task failed: {error}"),
+            )
+        })?
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))
 }
 
 async fn manual_ui() -> Html<&'static str> {
@@ -1495,8 +1817,20 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
                 healthy: false,
                 last_error: Some(format!("session-cache health task failed: {error}")),
             });
+    let channel_identity = state.channel_identity.clone();
+    let channel_identity_status = tokio::task::spawn_blocking(move || channel_identity.status())
+        .await
+        .ok()
+        .and_then(Result::ok)
+        .unwrap_or(ChannelIdentityRegistryStatus {
+            backend: "error".to_string(),
+            durable: false,
+            account_count: 0,
+            identity_count: 0,
+        });
+    let channel_identity_healthy = channel_identity_status.backend != "error";
     Json(HealthResponse {
-        ok: true,
+        ok: channel_identity_healthy,
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
@@ -1505,7 +1839,761 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         session_cache: session_cache_status,
         capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
+        spectator: state.spectator.metrics(),
+        ai_live: state.ai_live.metrics(),
+        channel_identity: channel_identity_status,
+        identity_backend: state.identity.backend_label(),
     })
+}
+
+async fn channel_session_exchange(
+    State(state): State<WebState>,
+    Json(request): Json<ChannelSessionExchangeRequest>,
+) -> Result<Json<ChannelSessionExchangeResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let _login_permit = state
+        .capacity
+        .try_acquire_action(GatewayCapacityKind::Login)
+        .map_err(|error| channel_exchange_error(StatusCode::TOO_MANY_REQUESTS, error))?;
+    let provider = ChannelIdentityProvider::parse(&request.provider)
+        .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?;
+    let verified = verified_channel_subject(provider, &request.credential).await?;
+    consume_channel_subject_proof(state.session_cache.as_ref(), &verified)?;
+    let subject = verified.subject;
+    let credential_subject = subject.clone();
+
+    let registry = state.channel_identity.clone();
+    let (account, created) = tokio::task::spawn_blocking(move || {
+        registry.resolve_or_create_with_outcome(provider, &subject)
+    })
+    .await
+    .map_err(|error| {
+        channel_exchange_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("channel identity task failed: {error}"),
+        )
+    })?
+    .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
+    let expires_at = gateway_now_ms().saturating_add(channel_session_token_ttl_ms());
+    let token = issue_gateway_identity_token_for_subject(
+        &account.player_id,
+        provider.as_str(),
+        Some(&credential_subject),
+        expires_at,
+    )
+    .map_err(|error| channel_exchange_error(StatusCode::INTERNAL_SERVER_ERROR, error))?;
+    Ok(Json(ChannelSessionExchangeResponse {
+        account_id: account.player_id.clone(),
+        player_id: account.player_id,
+        provider: provider.as_str().to_string(),
+        token,
+        expires_at,
+        created,
+    }))
+}
+
+async fn channel_identity_link(
+    State(state): State<WebState>,
+    Json(request): Json<ChannelIdentityLinkRequest>,
+) -> Result<Json<ChannelIdentityLinkResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let _login_permit = state
+        .capacity
+        .try_acquire_action(GatewayCapacityKind::Login)
+        .map_err(|error| channel_exchange_error(StatusCode::TOO_MANY_REQUESTS, error))?;
+    verify_gateway_identity_token(&request.account_id, &request.session_token)
+        .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+    let provider = ChannelIdentityProvider::parse(&request.provider)
+        .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?;
+    if !provider.is_primary_capable() {
+        return Err(channel_exchange_error(
+            StatusCode::BAD_REQUEST,
+            "guest channel identities cannot be linked as ownership credentials".to_string(),
+        ));
+    }
+    let verified = verified_channel_subject(provider, &request.credential).await?;
+    consume_channel_subject_proof(state.session_cache.as_ref(), &verified)?;
+    let subject = verified.subject;
+    let registry = state.channel_identity.clone();
+    let player_id = request.account_id.clone();
+    let account =
+        tokio::task::spawn_blocking(move || registry.link_identity(&player_id, provider, &subject))
+            .await
+            .map_err(|error| {
+                channel_exchange_error(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("channel identity task failed: {error}"),
+                )
+            })?
+            .map_err(|error| {
+                let status = if error.contains("another player") {
+                    StatusCode::CONFLICT
+                } else if error.contains("not found") {
+                    StatusCode::NOT_FOUND
+                } else {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                };
+                channel_exchange_error(status, error)
+            })?;
+    Ok(Json(ChannelIdentityLinkResponse {
+        account_id: account.player_id,
+        linked_provider: provider.as_str().to_string(),
+        identity_count: account.identities.len(),
+    }))
+}
+
+async fn admin_channel_identity(
+    State(state): State<WebState>,
+    AxumPath(player_id): AxumPath<String>,
+    headers: HeaderMap,
+) -> Result<Json<PlayerIdentityAccount>, (StatusCode, Json<AdminErrorResponse>)> {
+    let token = bearer_token(&headers).ok_or_else(|| {
+        channel_exchange_error(
+            StatusCode::UNAUTHORIZED,
+            "missing operator bearer token".to_string(),
+        )
+    })?;
+    verify_operator_token(token)
+        .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+    let registry = state.channel_identity.clone();
+    let account = tokio::task::spawn_blocking(move || registry.account(&player_id))
+        .await
+        .map_err(|error| {
+            channel_exchange_error(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("channel identity task failed: {error}"),
+            )
+        })?
+        .map_err(|error| channel_exchange_error(StatusCode::BAD_REQUEST, error))?
+        .ok_or_else(|| {
+            channel_exchange_error(
+                StatusCode::NOT_FOUND,
+                "Obelisk player identity was not found".to_string(),
+            )
+        })?;
+    Ok(Json(account))
+}
+
+async fn verified_channel_subject(
+    provider: ChannelIdentityProvider,
+    credential: &str,
+) -> Result<VerifiedChannelSubject, (StatusCode, Json<AdminErrorResponse>)> {
+    if credential.is_empty() || credential.len() > 64 * 1024 {
+        return Err(channel_exchange_error(
+            StatusCode::BAD_REQUEST,
+            "channel credential size is invalid".to_string(),
+        ));
+    }
+    match provider {
+        ChannelIdentityProvider::SuiPasskey | ChannelIdentityProvider::SuiWallet => {
+            let proof = verify_sui_login_proof(credential)
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+            if proof.provider != provider.as_str() {
+                return Err(channel_exchange_error(
+                    StatusCode::UNAUTHORIZED,
+                    "Sui login proof provider mismatch".to_string(),
+                ));
+            }
+            Ok(VerifiedChannelSubject {
+                subject: proof.subject,
+                token_id: proof.token_id,
+                expires_at_ms: Some(proof.expires_at_ms),
+            })
+        }
+        ChannelIdentityProvider::CrazyGames => Ok(VerifiedChannelSubject {
+            subject: verify_crazygames_token(credential)
+                .await
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?
+                .user_id,
+            token_id: None,
+            expires_at_ms: None,
+        }),
+        ChannelIdentityProvider::Itch
+        | ChannelIdentityProvider::DirectGuest
+        | ChannelIdentityProvider::CrazyGamesGuest => {
+            let proof = verify_channel_guest_proof(credential)
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+            if proof.provider != provider.as_str() {
+                return Err(channel_exchange_error(
+                    StatusCode::UNAUTHORIZED,
+                    "channel guest proof provider mismatch".to_string(),
+                ));
+            }
+            Ok(VerifiedChannelSubject {
+                subject: proof.subject,
+                token_id: None,
+                expires_at_ms: Some(proof.exp_ms),
+            })
+        }
+    }
+}
+
+fn consume_channel_subject_proof(
+    session_cache: &dyn crate::GatewaySessionCache,
+    proof: &VerifiedChannelSubject,
+) -> Result<(), (StatusCode, Json<AdminErrorResponse>)> {
+    let Some(token_id) = proof.token_id.as_deref() else {
+        return Ok(());
+    };
+    let ttl_seconds = proof
+        .expires_at_ms
+        .unwrap_or_else(gateway_now_ms)
+        .saturating_sub(gateway_now_ms())
+        .saturating_add(999)
+        / 1_000;
+    match session_cache
+        .consume_auth_token(token_id, ttl_seconds.max(1))
+        .map_err(|error| channel_exchange_error(StatusCode::SERVICE_UNAVAILABLE, error))?
+    {
+        true => Ok(()),
+        false => Err(channel_exchange_error(
+            StatusCode::UNAUTHORIZED,
+            "channel identity proof was already used".to_string(),
+        )),
+    }
+}
+
+fn channel_exchange_error(
+    status: StatusCode,
+    error: String,
+) -> (StatusCode, Json<AdminErrorResponse>) {
+    (status, Json(AdminErrorResponse { error }))
+}
+
+fn channel_session_token_ttl_ms() -> u64 {
+    env::var("MIR2_CHANNEL_SESSION_TOKEN_TTL_SECONDS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .unwrap_or(3_600)
+        .clamp(60, 43_200)
+        .saturating_mul(1_000)
+}
+
+fn gateway_now_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
+}
+
+async fn ai_live_status(State(state): State<WebState>) -> Json<crate::ai_live::AiLiveStatus> {
+    Json(state.ai_live.status())
+}
+
+async fn ai_distribution_status(
+    State(state): State<WebState>,
+) -> Json<crate::ai_distribution::AiDistributionStatus> {
+    Json(state.ai_live.distribution_status())
+}
+
+async fn ai_live_metrics(State(state): State<WebState>) -> Json<crate::ai_live::AiLiveMetrics> {
+    Json(state.ai_live.metrics())
+}
+
+async fn ai_live_prometheus(State(state): State<WebState>) -> Response {
+    let metrics = state.ai_live.metrics();
+    let mode = match metrics.mode {
+        AiLiveMode::Live => 2,
+        AiLiveMode::Shadow => 1,
+        AiLiveMode::Paused => 0,
+    };
+    let body = format!(
+        concat!(
+            "# HELP mir2_ai_live_mode AI live mode: paused=0 shadow=1 live=2.\n",
+            "# TYPE mir2_ai_live_mode gauge\n",
+            "mir2_ai_live_mode {mode}\n",
+            "# HELP mir2_ai_live_processed_frames_total Sanitized spectator frames inspected.\n",
+            "# TYPE mir2_ai_live_processed_frames_total counter\n",
+            "mir2_ai_live_processed_frames_total {processed}\n",
+            "# HELP mir2_ai_live_generated_segments_total Broadcast segments generated.\n",
+            "# TYPE mir2_ai_live_generated_segments_total counter\n",
+            "mir2_ai_live_generated_segments_total {segments}\n",
+            "# HELP mir2_ai_live_model_failures_total Model failures handled by fallback.\n",
+            "# TYPE mir2_ai_live_model_failures_total counter\n",
+            "mir2_ai_live_model_failures_total {model_failures}\n",
+            "# HELP mir2_ai_live_tts_failures_total TTS failures handled without blocking broadcast.\n",
+            "# TYPE mir2_ai_live_tts_failures_total counter\n",
+            "mir2_ai_live_tts_failures_total {tts_failures}\n",
+            "# HELP mir2_ai_distribution_delivered_total Successful channel deliveries.\n",
+            "# TYPE mir2_ai_distribution_delivered_total counter\n",
+            "mir2_ai_distribution_delivered_total {distribution_delivered}\n",
+            "# HELP mir2_ai_distribution_failures_total Failed channel delivery attempts.\n",
+            "# TYPE mir2_ai_distribution_failures_total counter\n",
+            "mir2_ai_distribution_failures_total {distribution_failures}\n",
+            "# HELP mir2_ai_distribution_queue Pending channel-neutral delivery jobs.\n",
+            "# TYPE mir2_ai_distribution_queue gauge\n",
+            "mir2_ai_distribution_queue {distribution_queue}\n",
+            "# HELP mir2_ai_distribution_dead_letters_total Exhausted channel deliveries.\n",
+            "# TYPE mir2_ai_distribution_dead_letters_total counter\n",
+            "mir2_ai_distribution_dead_letters_total {distribution_dead_letters}\n",
+            "# HELP mir2_ai_live_discord_queue Pending Discord highlight deliveries.\n",
+            "# TYPE mir2_ai_live_discord_queue gauge\n",
+            "mir2_ai_live_discord_queue {discord_queue}\n",
+            "# HELP mir2_ai_live_discord_dead_letters_total Exhausted Discord deliveries.\n",
+            "# TYPE mir2_ai_live_discord_dead_letters_total counter\n",
+            "mir2_ai_live_discord_dead_letters_total {discord_dead_letters}\n"
+        ),
+        mode = mode,
+        processed = metrics.processed_frames_total,
+        segments = metrics.generated_segments_total,
+        model_failures = metrics.model_failure_total,
+        tts_failures = metrics.tts_failure_total,
+        distribution_delivered = metrics.distribution_success_total,
+        distribution_failures = metrics.distribution_failure_total,
+        distribution_queue = metrics.queued_distribution_deliveries,
+        distribution_dead_letters = metrics.distribution_dead_letters_total,
+        discord_queue = metrics.queued_discord_deliveries,
+        discord_dead_letters = metrics.discord_dead_letters_total,
+    );
+    (
+        StatusCode::OK,
+        [(CONTENT_TYPE, "text/plain; version=0.0.4; charset=utf-8")],
+        body,
+    )
+        .into_response()
+}
+
+async fn ai_distribution_control(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<AiDistributionControlRequest>,
+) -> Result<
+    Json<crate::ai_distribution::AiDistributionStatus>,
+    (StatusCode, Json<AdminErrorResponse>),
+> {
+    let channel = crate::ai_distribution::AiDistributionChannel::parse(&request.channel)
+        .ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(AdminErrorResponse {
+                    error: "unsupported AI distribution channel".to_string(),
+                }),
+            )
+        })?;
+    let bearer = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim);
+    let token = request.token.as_deref().or(bearer);
+    let result = match request.action.trim().to_ascii_lowercase().as_str() {
+        "enable" | "start" => state.ai_live.set_distribution_channel(token, channel, true),
+        "disable" | "pause" | "stop" => state
+            .ai_live
+            .set_distribution_channel(token, channel, false),
+        "retry" => state.ai_live.retry_distribution_channel(token, channel),
+        _ => Err("action must be enable, disable, or retry".to_string()),
+    };
+    result.map(Json).map_err(|error| {
+        let status = if error.contains("token") {
+            StatusCode::FORBIDDEN
+        } else {
+            StatusCode::BAD_REQUEST
+        };
+        (status, Json(AdminErrorResponse { error }))
+    })
+}
+
+async fn ai_distribution_heartbeat(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<crate::ai_distribution::AiRuntimeHeartbeatRequest>,
+) -> Result<
+    Json<crate::ai_distribution::AiDistributionStatus>,
+    (StatusCode, Json<AdminErrorResponse>),
+> {
+    let bearer = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim);
+    state
+        .ai_live
+        .record_distribution_runtime_heartbeat(bearer, request)
+        .map(Json)
+        .map_err(|error| {
+            let status = if error.contains("token") {
+                StatusCode::FORBIDDEN
+            } else {
+                StatusCode::BAD_REQUEST
+            };
+            (status, Json(AdminErrorResponse { error }))
+        })
+}
+
+async fn ai_live_control(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<AiLiveControlRequest>,
+) -> Result<Json<crate::ai_live::AiLiveStatus>, (StatusCode, Json<AdminErrorResponse>)> {
+    let mode = match request.action.trim().to_ascii_lowercase().as_str() {
+        "live" | "start" => AiLiveMode::Live,
+        "shadow" => AiLiveMode::Shadow,
+        "pause" | "paused" | "stop" => AiLiveMode::Paused,
+        _ => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(AdminErrorResponse {
+                    error: "action must be live, shadow, or pause".to_string(),
+                }),
+            ))
+        }
+    };
+    let bearer = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .map(str::trim);
+    state
+        .ai_live
+        .set_mode(request.token.as_deref().or(bearer), mode)
+        .map(Json)
+        .map_err(|error| (StatusCode::FORBIDDEN, Json(AdminErrorResponse { error })))
+}
+
+async fn ai_live_audio(
+    State(state): State<WebState>,
+    AxumPath(clip): AxumPath<String>,
+) -> Response {
+    let path = match state.ai_live.audio_path(&clip) {
+        Ok(path) => path,
+        Err(error) => {
+            return (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })).into_response()
+        }
+    };
+    let result = tokio::task::spawn_blocking(move || std::fs::read(path)).await;
+    match result {
+        Ok(Ok(bytes)) => (
+            StatusCode::OK,
+            [
+                (CONTENT_TYPE, "audio/mpeg"),
+                (CACHE_CONTROL, "public, max-age=86400, immutable"),
+            ],
+            bytes,
+        )
+            .into_response(),
+        Ok(Err(error)) if error.kind() == io::ErrorKind::NotFound => (
+            StatusCode::NOT_FOUND,
+            Json(AdminErrorResponse {
+                error: "AI live audio clip not found".to_string(),
+            }),
+        )
+            .into_response(),
+        Ok(Err(error)) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(AdminErrorResponse {
+                error: format!("read AI live audio clip failed: {error}"),
+            }),
+        )
+            .into_response(),
+        Err(error) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(AdminErrorResponse {
+                error: format!("AI live audio task failed: {error}"),
+            }),
+        )
+            .into_response(),
+    }
+}
+
+async fn identity_overview(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+) -> Result<Json<IdentityOverviewResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let sessions = identity
+            .list_sessions(&verified)
+            .map_err(identity_unavailable)?;
+        let credentials = identity
+            .list_credentials(&verified)
+            .map_err(identity_unavailable)?;
+        Ok(Json(IdentityOverviewResponse {
+            account_id: verified.account_id,
+            current_session_id: verified.session_id,
+            sessions,
+            credentials,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_revoke_session(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityRevokeSessionRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let changed = identity
+            .revoke_session(&verified, &request.session_id, &request.reason)
+            .map_err(identity_unavailable)?;
+        if changed {
+            session_cache
+                .revoke_identity_session(&request.session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: changed,
+            affected: u64::from(changed),
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_revoke_other_sessions(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let target_sessions = identity
+            .list_sessions(&verified)
+            .map_err(identity_unavailable)?
+            .into_iter()
+            .filter(|session| {
+                session.session_id != verified.session_id && session.revoked_at_ms.is_none()
+            })
+            .map(|session| session.session_id)
+            .collect::<Vec<_>>();
+        let affected = identity
+            .revoke_all_other_sessions(&verified)
+            .map_err(identity_unavailable)?;
+        for session_id in target_sessions {
+            session_cache
+                .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_rotate_recovery_codes(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+) -> Result<Json<IdentityRecoveryCodesResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let recovery_codes = identity
+            .generate_recovery_codes(&verified)
+            .map_err(identity_bad_request)?;
+        Ok(Json(IdentityRecoveryCodesResponse {
+            recovery_codes,
+            warning: "These recovery codes are shown once. Store them offline.",
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_revoke_credential(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityRevokeCredentialRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let token = identity_bearer_token(&headers)?;
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        let target_sessions = identity
+            .list_sessions(&verified)
+            .map_err(identity_unavailable)?
+            .into_iter()
+            .filter(|session| {
+                session.credential_id.as_deref() == Some(request.credential_id.as_str())
+            })
+            .map(|session| session.session_id)
+            .collect::<Vec<_>>();
+        let changed = identity
+            .revoke_credential(&verified, &request.credential_id, &request.reason)
+            .map_err(identity_bad_request)?;
+        if changed {
+            for session_id in target_sessions {
+                session_cache
+                    .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                    .map_err(identity_unavailable)?;
+            }
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: changed,
+            affected: u64::from(changed),
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_bind_sui_credential(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityBindSuiCredentialRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let token = identity_bearer_token(&headers)?;
+    let proof_account_id = format!("sui:{}", request.address.trim());
+    let proof = verify_passkey_gateway_token(&proof_account_id, &request.proof_token)
+        .map_err(identity_unauthorized)?;
+    let ttl_seconds = proof
+        .expires_at_ms
+        .saturating_sub(gateway_unix_ms())
+        .saturating_add(999)
+        / 1_000;
+    match state
+        .session_cache
+        .consume_auth_token(&proof.token_id, ttl_seconds.max(1))
+        .map_err(identity_unavailable)?
+    {
+        true => {}
+        false => {
+            return Err(identity_unauthorized(
+                "Sui credential proof was already used",
+            ))
+        }
+    }
+    let identity = Arc::clone(&state.identity);
+    tokio::task::spawn_blocking(move || {
+        let verified = identity
+            .verify_session_token(&token)
+            .map_err(identity_unauthorized)?;
+        identity
+            .bind_sui_credential(&verified, proof.auth_method, request.address.trim())
+            .map_err(identity_bad_request)?;
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected: 1,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn identity_recover_account(
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<IdentityRecoverRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let peer_address = trusted_client_address(&headers, peer);
+    let user_agent = headers
+        .get(axum::http::header::USER_AGENT)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("")
+        .to_string();
+    let context = AuthSecurityContext {
+        account_id: request.account_id.clone(),
+        action: AuthSecurityAction::Recovery,
+    };
+    enforce_auth_rate_limits(
+        state.session_cache.as_ref(),
+        &state.identity,
+        &peer_address,
+        &user_agent,
+        &context,
+    )
+    .map_err(|_| identity_unauthorized("account recovery could not be completed"))?;
+    mir2_simulation::validate_commercial_identity_credentials(
+        &request.account_id,
+        &request.new_password,
+    )
+    .map_err(identity_bad_request)?;
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    let config = Arc::clone(&state.config);
+    tokio::task::spawn_blocking(move || {
+        if !identity
+            .consume_recovery_code(&request.account_id, &request.recovery_code)
+            .map_err(identity_unavailable)?
+        {
+            return Err(identity_unauthorized(
+                "account recovery could not be completed",
+            ));
+        }
+        let target_sessions = identity
+            .list_account_session_ids(&request.account_id)
+            .map_err(identity_unavailable)?;
+        mir2_simulation::reset_account_password_after_recovery(
+            config.as_ref(),
+            &request.account_id,
+            &request.new_password,
+        )
+        .map_err(identity_unavailable)?;
+        identity
+            .revoke_all_account_sessions(&request.account_id, "password_recovered")
+            .map_err(identity_unavailable)?;
+        for session_id in target_sessions {
+            session_cache
+                .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected: 1,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+fn identity_bearer_token(
+    headers: &HeaderMap,
+) -> Result<String, (StatusCode, Json<AdminErrorResponse>)> {
+    bearer_token(headers)
+        .map(str::trim)
+        .filter(|token| !token.is_empty() && token.len() <= 4096)
+        .map(str::to_string)
+        .ok_or_else(|| identity_unauthorized("missing identity bearer token"))
+}
+
+fn identity_unauthorized(error: impl Into<String>) -> (StatusCode, Json<AdminErrorResponse>) {
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(AdminErrorResponse {
+            error: error.into(),
+        }),
+    )
+}
+
+fn identity_bad_request(error: impl Into<String>) -> (StatusCode, Json<AdminErrorResponse>) {
+    (
+        StatusCode::BAD_REQUEST,
+        Json(AdminErrorResponse {
+            error: error.into(),
+        }),
+    )
+}
+
+fn identity_unavailable(error: impl Into<String>) -> (StatusCode, Json<AdminErrorResponse>) {
+    (
+        StatusCode::SERVICE_UNAVAILABLE,
+        Json(AdminErrorResponse {
+            error: error.into(),
+        }),
+    )
 }
 
 async fn admin_system_mail(
@@ -1717,6 +2805,94 @@ async fn admin_session_trace(
     }))
 }
 
+async fn admin_identity_overview(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Query(query): Query<AdminIdentityQuery>,
+) -> Result<Json<AdminIdentityResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    require_gateway_admin_trace_token(&headers)?;
+    let account_id = query.account_id.trim().to_string();
+    if account_id.is_empty() || account_id.len() > 160 {
+        return Err(identity_bad_request("accountId is required"));
+    }
+    let identity = Arc::clone(&state.identity);
+    tokio::task::spawn_blocking(move || {
+        let (sessions, credentials, audit_events) = identity
+            .operator_account_security(&account_id)
+            .map_err(identity_unavailable)?;
+        Ok(Json(AdminIdentityResponse {
+            source: "commercial_identity",
+            account_id,
+            sessions,
+            credentials,
+            audit_events,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
+async fn admin_identity_revoke(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<AdminIdentityRevokeRequest>,
+) -> Result<Json<IdentityMutationReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    require_gateway_admin_trace_token(&headers)?;
+    let account_id = request.account_id.trim().to_string();
+    let reason = request.reason.trim().to_string();
+    if account_id.is_empty() || account_id.len() > 160 || reason.len() < 4 || reason.len() > 160 {
+        return Err(identity_bad_request(
+            "accountId and a reason of 4-160 characters are required",
+        ));
+    }
+    let identity = Arc::clone(&state.identity);
+    let session_cache = Arc::clone(&state.session_cache);
+    tokio::task::spawn_blocking(move || {
+        let (affected, targets) = if let Some(session_id) = request
+            .session_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+        {
+            let operator = VerifiedIdentitySession {
+                account_id: account_id.clone(),
+                session_id: String::new(),
+                expires_at_ms: u64::MAX,
+            };
+            let changed = identity
+                .revoke_session(&operator, session_id, &reason)
+                .map_err(identity_unavailable)?;
+            (
+                u64::from(changed),
+                if changed {
+                    vec![session_id.to_string()]
+                } else {
+                    Vec::new()
+                },
+            )
+        } else {
+            let targets = identity
+                .list_account_session_ids(&account_id)
+                .map_err(identity_unavailable)?;
+            let affected = identity
+                .revoke_all_account_sessions(&account_id, &reason)
+                .map_err(identity_unavailable)?;
+            (affected, targets)
+        };
+        for session_id in targets {
+            session_cache
+                .revoke_identity_session(&session_id, 30 * 24 * 60 * 60)
+                .map_err(identity_unavailable)?;
+        }
+        Ok(Json(IdentityMutationReceipt {
+            accepted: true,
+            affected,
+        }))
+    })
+    .await
+    .map_err(|error| identity_unavailable(format!("identity task failed: {error}")))?
+}
+
 fn require_gateway_admin_trace_token(
     headers: &HeaderMap,
 ) -> Result<(), (StatusCode, Json<AdminErrorResponse>)> {
@@ -1724,9 +2900,22 @@ fn require_gateway_admin_trace_token(
         .ok()
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty());
+    if gateway_prod_like_env() && expected.as_ref().is_some_and(|value| value.len() < 32) {
+        return Err((
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(AdminErrorResponse {
+                error: "MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN must contain at least 32 characters in production"
+                    .to_string(),
+            }),
+        ));
+    }
     let provided = bearer_token(headers).map(str::trim);
     match (expected.as_deref(), provided) {
-        (Some(expected), Some(provided)) if expected == provided => Ok(()),
+        (Some(expected), Some(provided))
+            if constant_time_text_eq(expected.as_bytes(), provided.as_bytes()) =>
+        {
+            Ok(())
+        }
         (Some(_), _) => Err((
             StatusCode::UNAUTHORIZED,
             Json(AdminErrorResponse {
@@ -1743,6 +2932,18 @@ fn require_gateway_admin_trace_token(
     }
 }
 
+fn constant_time_text_eq(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    left.iter()
+        .zip(right)
+        .fold(0_u8, |difference, (left, right)| {
+            difference | (left ^ right)
+        })
+        == 0
+}
+
 fn gateway_prod_like_env() -> bool {
     ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
         .into_iter()
@@ -1753,6 +2954,61 @@ fn gateway_prod_like_env() -> bool {
                 "production" | "prod" | "staging"
             )
         })
+}
+
+fn validate_websocket_origin(headers: &HeaderMap) -> Result<(), String> {
+    let origin = headers
+        .get(axum::http::header::ORIGIN)
+        .and_then(|value| value.to_str().ok())
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let configured = env::var("MIR2_ALLOWED_WEB_ORIGINS")
+        .ok()
+        .map(|value| {
+            value
+                .split(',')
+                .map(str::trim)
+                .filter(|entry| !entry.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if configured.is_empty() {
+        return if gateway_prod_like_env() {
+            Err("MIR2_ALLOWED_WEB_ORIGINS is required in production".to_string())
+        } else {
+            Ok(())
+        };
+    }
+    let Some(origin) = origin else {
+        return Err("WebSocket Origin header is required".to_string());
+    };
+    if configured.iter().any(|allowed| allowed == origin) {
+        Ok(())
+    } else {
+        Err("WebSocket origin is not allowed".to_string())
+    }
+}
+
+fn trusted_client_address(headers: &HeaderMap, peer: SocketAddr) -> String {
+    if env::var("MIR2_TRUST_CF_CONNECTING_IP")
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes"
+            )
+        })
+        .unwrap_or(false)
+    {
+        if let Some(address) = headers
+            .get("cf-connecting-ip")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.trim().parse::<IpAddr>().ok())
+        {
+            return address.to_string();
+        }
+    }
+    peer.ip().to_string()
 }
 
 fn gateway_unix_ms() -> u64 {
@@ -1830,7 +3086,99 @@ fn canonical_admin_control_action(action: &str) -> Result<String, String> {
     Ok(canonical.to_string())
 }
 
-async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
+async fn spectator_matches(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<SpectatorDirectoryResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let authorization = state
+        .spectator
+        .config()
+        .authorize(query.map.as_deref(), query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    Ok(Json(SpectatorDirectoryResponse {
+        source: "gateway-spectator".to_string(),
+        generated_at_ms: gateway_unix_ms(),
+        public_delay_ms: authorization.delay_ms,
+        max_delay_ms: state.spectator.config().max_delay_ms,
+        matches: state.spectator.matches(authorization.director),
+    }))
+}
+
+async fn spectator_recordings(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<SpectatorRecordingsResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let authorization = state
+        .spectator
+        .config()
+        .authorize(None, query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    Ok(Json(SpectatorRecordingsResponse {
+        source: "gateway-spectator".to_string(),
+        generated_at_ms: gateway_unix_ms(),
+        recordings: state.spectator.recordings(authorization.director),
+    }))
+}
+
+async fn spectator_replay(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<SpectatorReplayResponse>, (StatusCode, Json<AdminErrorResponse>)> {
+    let recording_id = query
+        .replay_id
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(AdminErrorResponse {
+                    error: "replayId is required".to_string(),
+                }),
+            )
+        })?;
+    let authorization = state
+        .spectator
+        .config()
+        .authorize(None, query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    let frames = state
+        .spectator
+        .load_replay(
+            recording_id,
+            authorization.director,
+            gateway_unix_ms().saturating_sub(authorization.delay_ms),
+        )
+        .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
+    Ok(Json(SpectatorReplayResponse {
+        source: "gateway-spectator".to_string(),
+        generated_at_ms: gateway_unix_ms(),
+        recording_id: recording_id.to_string(),
+        frames,
+    }))
+}
+
+async fn spectator_metrics(
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Result<Json<crate::spectator::SpectatorMetrics>, (StatusCode, Json<AdminErrorResponse>)> {
+    state
+        .spectator
+        .config()
+        .authorize(None, query.delay_ms, query.token.as_deref())
+        .map_err(spectator_access_error)?;
+    Ok(Json(state.spectator.metrics()))
+}
+
+fn spectator_access_error(error: String) -> (StatusCode, Json<AdminErrorResponse>) {
+    (StatusCode::FORBIDDEN, Json(AdminErrorResponse { error }))
+}
+
+async fn spectator_ws_upgrade(
+    ws: WebSocketUpgrade,
+    State(state): State<WebState>,
+    Query(query): Query<SpectatorAccessQuery>,
+) -> Response {
     let ws_connection_permit = match state.capacity.try_acquire_ws_connection() {
         Ok(permit) => permit,
         Err(error) => {
@@ -1841,13 +3189,388 @@ async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Resp
                 .into_response();
         }
     };
-    ws.on_upgrade(move |socket| handle_socket(socket, state, ws_connection_permit))
+    let authorization = match state.spectator.config().authorize(
+        query.map.as_deref(),
+        query.delay_ms,
+        query.token.as_deref(),
+    ) {
+        Ok(authorization) => authorization,
+        Err(error) => return spectator_access_error(error).into_response(),
+    };
+    ws.on_upgrade(move |socket| {
+        handle_spectator_socket(
+            socket,
+            state.spectator,
+            state.ai_live,
+            query,
+            authorization,
+            ws_connection_permit,
+        )
+    })
+}
+
+async fn handle_spectator_socket(
+    socket: WebSocket,
+    hub: SpectatorHub,
+    ai_live: AiLiveHub,
+    query: SpectatorAccessQuery,
+    authorization: crate::spectator::SpectatorAuthorization,
+    _ws_connection_permit: GatewayCapacityPermit,
+) {
+    let _viewer_guard = hub.viewer_connected();
+    let (mut sender, mut receiver) = socket.split();
+    let mut tick = tokio::time::interval(Duration::from_millis(100));
+    tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut map = query
+        .map
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .or_else(|| hub.latest_map(authorization.director))
+        .unwrap_or_else(|| "0".to_string());
+    let mut target = query
+        .target
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string);
+    let mut director = authorization.director
+        && query
+            .mode
+            .as_deref()
+            .is_some_and(|mode| mode.eq_ignore_ascii_case("director"));
+    let mut camera: Option<(i32, i32)> = None;
+    let mut last_sequence = 0u64;
+    let replay_frames = match query.replay_id.as_deref() {
+        Some(recording_id) => hub
+            .load_replay(
+                recording_id,
+                authorization.director,
+                gateway_unix_ms().saturating_sub(authorization.delay_ms),
+            )
+            .unwrap_or_default(),
+        None => Vec::new(),
+    };
+    let mut replay_index = 0usize;
+    let mut replay_playing = !replay_frames.is_empty();
+    let mut replay_speed = 1.0f64;
+    let mut replay_due = Instant::now();
+    eprintln!(
+        "spectator audit event=connect map={} director={} delay_ms={} replay={}",
+        map,
+        authorization.director,
+        authorization.delay_ms,
+        query.replay_id.as_deref().unwrap_or("-")
+    );
+
+    let initial_status_frame = replay_frames.first().cloned().or_else(|| {
+        hub.frame_at(
+            &map,
+            gateway_unix_ms().saturating_sub(authorization.delay_ms),
+            0,
+        )
+    });
+    if send_spectator_status(
+        &mut sender,
+        &hub,
+        &ai_live,
+        &map,
+        target.as_deref(),
+        authorization,
+        director,
+        camera,
+        replay_frames.as_slice(),
+        replay_index,
+        replay_playing,
+        replay_speed,
+        initial_status_frame.as_ref(),
+    )
+    .await
+    .is_err()
+    {
+        return;
+    }
+
+    loop {
+        tokio::select! {
+            inbound = receiver.next() => {
+                let Some(inbound) = inbound else { return; };
+                let message = match inbound {
+                    Ok(Message::Text(text)) => text,
+                    Ok(Message::Close(_)) => return,
+                    Ok(_) => continue,
+                    Err(_) => return,
+                };
+                let control = match serde_json::from_str::<SpectatorControl>(&message) {
+                    Ok(control) => control,
+                    Err(error) => {
+                        let _ = sender.send(Message::Text(json!({
+                            "type": "error",
+                            "message": format!("invalid spectator control: {error}")
+                        }).to_string().into())).await;
+                        continue;
+                    }
+                };
+                eprintln!(
+                    "spectator audit event=control map={} director={} control={control:?}",
+                    map, authorization.director
+                );
+                match control {
+                    SpectatorControl::Follow { target: next_target } => {
+                        target = next_target
+                            .map(|value| value.trim().to_string())
+                            .filter(|value| !value.is_empty());
+                        camera = None;
+                        director = false;
+                    }
+                    SpectatorControl::Map { map: next_map } => {
+                        let next_map = next_map.trim();
+                        if !authorization.director && !hub.config().is_public_map(next_map) {
+                            let _ = sender.send(Message::Text(json!({
+                                "type": "error",
+                                "message": format!("map {next_map} is not public for spectators")
+                            }).to_string().into())).await;
+                            continue;
+                        }
+                        map = next_map.to_string();
+                        last_sequence = 0;
+                        target = None;
+                        camera = None;
+                    }
+                    SpectatorControl::Director { enabled } => {
+                        if authorization.director {
+                            director = enabled;
+                            camera = None;
+                        }
+                    }
+                    SpectatorControl::Camera { x, y } => {
+                        if authorization.director {
+                            camera = Some((x, y));
+                            director = false;
+                        }
+                    }
+                    SpectatorControl::CameraClear => camera = None,
+                    SpectatorControl::ReplayPlay => replay_playing = true,
+                    SpectatorControl::ReplayPause => replay_playing = false,
+                    SpectatorControl::ReplaySeek { captured_at_ms } => {
+                        replay_index = replay_frames
+                            .iter()
+                            .position(|frame| frame.captured_at_ms >= captured_at_ms)
+                            .unwrap_or_else(|| replay_frames.len().saturating_sub(1));
+                        replay_due = Instant::now();
+                    }
+                    SpectatorControl::ReplaySpeed { speed } => {
+                        replay_speed = speed.clamp(0.25, 8.0);
+                    }
+                }
+                let status_frame = if replay_frames.is_empty() {
+                    hub.frame_at(
+                        &map,
+                        gateway_unix_ms().saturating_sub(authorization.delay_ms),
+                        0,
+                    )
+                } else {
+                    replay_frames
+                        .get(replay_index.min(replay_frames.len().saturating_sub(1)))
+                        .cloned()
+                };
+                if send_spectator_status(
+                    &mut sender,
+                    &hub,
+                    &ai_live,
+                    &map,
+                    target.as_deref(),
+                    authorization,
+                    director,
+                    camera,
+                    replay_frames.as_slice(),
+                    replay_index,
+                    replay_playing,
+                    replay_speed,
+                    status_frame.as_ref(),
+                ).await.is_err() {
+                    return;
+                }
+            }
+            _ = tick.tick() => {
+                let frame = if replay_frames.is_empty() {
+                    hub.frame_at(
+                        &map,
+                        gateway_unix_ms().saturating_sub(authorization.delay_ms),
+                        last_sequence,
+                    )
+                } else if replay_playing && Instant::now() >= replay_due {
+                    let current = replay_frames.get(replay_index).cloned();
+                    if let Some(current) = current.as_ref() {
+                        let next_delta_ms = replay_frames
+                            .get(replay_index.saturating_add(1))
+                            .map(|next| next.captured_at_ms.saturating_sub(current.captured_at_ms))
+                            .unwrap_or(250)
+                            .clamp(25, 5_000);
+                        replay_due = Instant::now()
+                            + Duration::from_millis(
+                                ((next_delta_ms as f64) / replay_speed).max(10.0) as u64,
+                            );
+                        replay_index = (replay_index + 1).min(replay_frames.len().saturating_sub(1));
+                        if replay_index + 1 >= replay_frames.len() {
+                            replay_playing = false;
+                        }
+                    }
+                    current
+                } else {
+                    None
+                };
+                let Some(frame) = frame else { continue; };
+                last_sequence = frame.sequence;
+                let ai_target = if director {
+                    ai_live
+                        .status()
+                        .latest_segment
+                        .filter(|segment| segment.map_file_name == frame.map_file_name)
+                        .and_then(|segment| segment.target)
+                } else {
+                    None
+                };
+                let world = frame.world_for_view(
+                    target.as_deref().or(ai_target.as_deref()),
+                    director,
+                    camera,
+                );
+                if sender.send(Message::Text(json!({
+                    "type": "worldSnapshot",
+                    "payload": world
+                }).to_string().into())).await.is_err() {
+                    return;
+                }
+                if send_spectator_status(
+                    &mut sender,
+                    &hub,
+                    &ai_live,
+                    &map,
+                    target.as_deref(),
+                    authorization,
+                    director,
+                    camera,
+                    replay_frames.as_slice(),
+                    replay_index,
+                    replay_playing,
+                    replay_speed,
+                    Some(&frame),
+                ).await.is_err() {
+                    return;
+                }
+            }
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn send_spectator_status(
+    sender: &mut WebSocketSender,
+    hub: &SpectatorHub,
+    ai_live: &AiLiveHub,
+    map: &str,
+    target: Option<&str>,
+    authorization: crate::spectator::SpectatorAuthorization,
+    director: bool,
+    camera: Option<(i32, i32)>,
+    replay_frames: &[SpectatorFrame],
+    replay_index: usize,
+    replay_playing: bool,
+    replay_speed: f64,
+    frame: Option<&SpectatorFrame>,
+) -> Result<(), axum::Error> {
+    let replay_cursor = replay_index.min(replay_frames.len().saturating_sub(1));
+    sender
+        .send(Message::Text(
+            json!({
+                "type": "spectatorStatus",
+                "payload": {
+                    "readOnly": true,
+                    "directorAuthorized": authorization.director,
+                    "director": director,
+                    "delayMs": authorization.delay_ms,
+                    "map": map,
+                    "target": target,
+                    "camera": camera.map(|(x, y)| json!({"x": x, "y": y})),
+                    "matches": hub.matches(authorization.director),
+                    "targets": frame.map(SpectatorFrame::targets).unwrap_or_default(),
+                    "events": frame.map(|frame| frame.events.clone()).unwrap_or_default(),
+                    "recordingId": frame.map(|frame| frame.recording_id.clone()),
+                    "sequence": frame.map(|frame| frame.sequence),
+                    "capturedAtMs": frame.map(|frame| frame.captured_at_ms),
+                    "replay": {
+                        "active": !replay_frames.is_empty(),
+                        "playing": replay_playing,
+                        "speed": replay_speed,
+                        "startAtMs": replay_frames.first().map(|frame| frame.captured_at_ms),
+                        "endAtMs": replay_frames.last().map(|frame| frame.captured_at_ms),
+                        "currentAtMs": replay_frames.get(replay_cursor).map(|frame| frame.captured_at_ms)
+                    }
+                }
+            })
+            .to_string()
+            .into(),
+        ))
+        .await?;
+    sender
+        .send(Message::Text(
+            json!({
+                "type": "aiLiveStatus",
+                "payload": ai_live.status()
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+}
+
+async fn ws_upgrade(
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    ws: WebSocketUpgrade,
+    State(state): State<WebState>,
+) -> Response {
+    if let Err(error) = validate_websocket_origin(&headers) {
+        return (StatusCode::FORBIDDEN, Json(AdminErrorResponse { error })).into_response();
+    }
+    let ws_connection_permit = match state.capacity.try_acquire_ws_connection() {
+        Ok(permit) => permit,
+        Err(error) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(AdminErrorResponse { error }),
+            )
+                .into_response();
+        }
+    };
+    let peer_address = trusted_client_address(&headers, peer);
+    let user_agent = headers
+        .get(axum::http::header::USER_AGENT)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("unknown")
+        .chars()
+        .filter(|ch| !ch.is_control())
+        .take(160)
+        .collect::<String>();
+    ws.on_upgrade(move |socket| {
+        handle_socket(
+            socket,
+            state,
+            ws_connection_permit,
+            peer_address,
+            user_agent,
+        )
+    })
 }
 
 async fn handle_socket(
     socket: WebSocket,
     state: WebState,
     _ws_connection_permit: GatewayCapacityPermit,
+    peer_address: String,
+    user_agent: String,
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
     let mut session = new_gateway_session_for_web(&state);
@@ -1860,12 +3583,17 @@ async fn handle_socket(
         Arc::clone(&state.session_cache),
         Arc::clone(&state.reconnect_sessions),
         Arc::clone(&state.capacity),
+        Arc::clone(&state.identity),
         &mut active_session_permit,
         &mut save_queue,
         &mut route_refresh,
         state.injector.clone(),
         realm_info,
         state.chat_hub.clone(),
+        state.spectator.clone(),
+        state.ai_live.clone(),
+        peer_address,
+        user_agent,
     )
     .await;
     let _ = tokio::task::block_in_place(|| {
@@ -2167,12 +3895,17 @@ async fn handle_socket_inner(
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
+    identity: Arc<IdentityService>,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
+    spectator: SpectatorHub,
+    ai_live: AiLiveHub,
+    peer_address: String,
+    user_agent: String,
 ) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
@@ -2187,10 +3920,20 @@ async fn handle_socket_inner(
     }
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
     runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut spectator_publish_tick = tokio::time::interval(Duration::from_millis(
+        spectator.config().capture_interval_ms,
+    ));
+    spectator_publish_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut ai_live_tick = tokio::time::interval(Duration::from_secs(1));
+    ai_live_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut last_ai_live_segment_id: Option<String> = None;
     let mut runtime_tick_deferred_until = Instant::now();
     let enforce_player_command_safety = production_player_command_safety_enabled();
     let mut authenticated = false;
     let mut authenticated_account_id: Option<String> = None;
+    let mut active_identity_session: Option<VerifiedIdentitySession> = None;
+    let mut last_identity_revocation_check = Instant::now();
+    let mut last_identity_database_check = Instant::now();
     // M4 WF-5: this socket task registers an injection channel keyed by its account so the
     // /onchain/inject HTTP handler can hand chain-confirmed commands to it. The RAII guard
     // unregisters on every exit path (the loop has many early returns).
@@ -2271,7 +4014,7 @@ async fn handle_socket_inner(
                     let _ = send_error_message(&sender, &error).await;
                     continue;
                 }
-                let action = match queued_input.take_input() {
+                let mut action = match queued_input.take_input() {
                     ParsedSocketInput::Action(action) => action,
                     ParsedSocketInput::ProtocolError(error) => {
                         if send_error_message(&sender, &error).await.is_err() {
@@ -2293,7 +4036,20 @@ async fn handle_socket_inner(
                 let low_latency_action = is_low_latency_action(&action);
                 let should_queue_save_by_action = should_queue_save_for_action(&action);
                 let runtime_tick_defer_duration = runtime_tick_defer_duration_for_action(&action);
-                let login_account_id = login_account_id_for_action(&action).map(str::to_string);
+                let mut login_account_id = login_account_id_for_action(&action).map(str::to_string);
+                let mut login_identity_context = login_identity_context_for_action(&action);
+                if let Some(context) = auth_security_context_for_action(&action) {
+                    if let Err(error) = enforce_auth_rate_limits(
+                        session_cache.as_ref(),
+                        &identity,
+                        &peer_address,
+                        &user_agent,
+                        &context,
+                    ) {
+                        let _ = send_error_message(&sender, &error).await;
+                        continue;
+                    }
+                }
                 let keep_alive_time = keep_alive_time_for_action(&action);
                 if let Some(time) = keep_alive_time {
                     if send_server_packet(&sender, &ServerPacket::KeepAlive { time })
@@ -2374,8 +4130,83 @@ async fn handle_socket_inner(
                         }
                     }
                 }
+                if let SessionAction::PasskeyLogin {
+                    account_id,
+                    proof_account_id,
+                    token,
+                } = &mut action
+                {
+                    let verified = match verify_passkey_gateway_token(proof_account_id, token) {
+                        Ok(verified) => verified,
+                        Err(error) => {
+                            let _ = send_error_message(&sender, &error).await;
+                            continue;
+                        }
+                    };
+                    if let Some(context) = login_identity_context.as_mut() {
+                        context.auth_method = verified.auth_method;
+                        context.credential_subject = verified
+                            .credential_subject
+                            .clone()
+                            .unwrap_or_else(|| {
+                                proof_account_id
+                                    .strip_prefix("sui:")
+                                    .unwrap_or(proof_account_id)
+                                    .to_string()
+                            });
+                        let resolved_account = match tokio::task::block_in_place(|| {
+                            identity.resolve_sui_account(
+                                verified.auth_method,
+                                &context.credential_subject,
+                            )
+                        }) {
+                            Ok(Some(resolved)) => resolved,
+                            Ok(None) => proof_account_id.clone(),
+                            Err(error) => {
+                                let _ = send_error_message(
+                                    &sender,
+                                    &format!("identity credential lookup unavailable: {error}"),
+                                )
+                                .await;
+                                continue;
+                            }
+                        };
+                        *account_id = resolved_account.clone();
+                        context.account_id = resolved_account.clone();
+                        login_account_id = Some(resolved_account);
+                    }
+                    let ttl_seconds = verified
+                        .expires_at_ms
+                        .saturating_sub(gateway_unix_ms())
+                        .saturating_add(999)
+                        / 1_000;
+                    match session_cache
+                        .consume_auth_token(&verified.token_id, ttl_seconds.max(1))
+                    {
+                        Ok(true) => {}
+                        Ok(false) => {
+                            let _ = send_error_message(
+                                &sender,
+                                "passkey login token was already consumed",
+                            )
+                            .await;
+                            continue;
+                        }
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("passkey replay protection unavailable: {error}"),
+                            )
+                            .await;
+                            continue;
+                        }
+                    }
+                }
                 let action_capacity_permit = match inflight_capacity_kind_for_action(&action) {
-                    Some(kind) => match capacity.try_acquire_action(kind) {
+                    Some(kind) => match capacity
+                        .acquire_action_with_wait(kind, gateway_action_queue_wait(kind))
+                        .await
+                    {
                         Ok(permit) => Some(permit),
                         Err(error) => {
                             release_pending_start_game_route_lease(
@@ -2469,6 +4300,71 @@ async fn handle_socket_inner(
                 }
                 let force_route_refresh = start_game_character_index.is_some();
                 let next_authenticated = update_authenticated_state(authenticated, &responses);
+                if !authenticated && !next_authenticated {
+                    if let Some(context) = login_identity_context.as_ref() {
+                        let _ = tokio::task::block_in_place(|| {
+                            identity.record_auth_security_event(
+                                Some(&context.account_id),
+                                "login_attempt",
+                                "failure",
+                                "invalid_credentials_or_policy",
+                                &peer_address,
+                                &user_agent,
+                            )
+                        });
+                    }
+                }
+                if !authenticated && next_authenticated {
+                    let Some(context) = login_identity_context.as_ref() else {
+                        let _ = send_error_message(
+                            &sender,
+                            "identity session cannot be issued for this login",
+                        )
+                        .await;
+                        return;
+                    };
+                    clear_successful_login_rate_limits(
+                        session_cache.as_ref(),
+                        &identity,
+                        &peer_address,
+                        &context.account_id,
+                    );
+                    let grant = match tokio::task::block_in_place(|| {
+                        identity.issue_session(
+                            &context.account_id,
+                            context.auth_method,
+                            &context.credential_subject,
+                            &peer_address,
+                            &user_agent,
+                        )
+                    }) {
+                        Ok(grant) => grant,
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity session unavailable: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    };
+                    active_identity_session = match tokio::task::block_in_place(|| {
+                        identity.verify_session_token(&grant.token)
+                    }) {
+                        Ok(verified) => Some(verified),
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity session unavailable: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    };
+                    if send_identity_session_grant(&sender, &grant).await.is_err() {
+                        return;
+                    }
+                }
                 if next_authenticated {
                     if let Some(account_id) = login_account_id {
                         _injection_registration = Some(crate::inject::InjectionRegistration::new(
@@ -2479,6 +4375,11 @@ async fn handle_socket_inner(
                         authenticated_account_id = Some(account_id);
                     }
                 } else if authenticated {
+                    if let Some(verified) = active_identity_session.take() {
+                        let _ = tokio::task::block_in_place(|| {
+                            identity.revoke_session(&verified, &verified.session_id, "player_logout")
+                        });
+                    }
                     authenticated_account_id = None;
                     _injection_registration = None;
                 }
@@ -2601,8 +4502,101 @@ async fn handle_socket_inner(
                 }
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
             }
+            _ = spectator_publish_tick.tick() => {
+                if tokio::task::block_in_place(|| session.active_identity()).is_none() {
+                    continue;
+                }
+                let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
+                if let Err(error) = spectator.publish(&snapshot) {
+                    eprintln!("spectator frame publish skipped: {error}");
+                }
+            }
+            _ = ai_live_tick.tick(), if authenticated => {
+                let status = ai_live.status();
+                let game_overlay_ready = status.distribution.channels.iter().any(|channel| {
+                    channel.channel
+                        == crate::ai_distribution::AiDistributionChannel::GameOverlay
+                        && channel.enabled
+                        && channel.state == "ready"
+                });
+                let latest_segment_id = status
+                    .latest_segment
+                    .as_ref()
+                    .map(|segment| segment.segment_id.clone());
+                let latest_segment_is_fresh = status.latest_segment.as_ref().is_some_and(|segment| {
+                    gateway_unix_ms().saturating_sub(segment.created_at_ms) <= 60_000
+                });
+                if status.mode == AiLiveMode::Live
+                    && game_overlay_ready
+                    && latest_segment_is_fresh
+                    && latest_segment_id.is_some()
+                    && latest_segment_id != last_ai_live_segment_id
+                {
+                    if sender
+                        .lock()
+                        .await
+                        .send(Message::Text(
+                            json!({
+                                "type": "aiLiveStatus",
+                                "payload": status
+                            })
+                            .to_string()
+                            .into(),
+                        ))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    last_ai_live_segment_id = latest_segment_id;
+                }
+            }
             _ = runtime_tick.tick() => {
                 let now = Instant::now();
+                if authenticated
+                    && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
+                {
+                    last_identity_revocation_check = now;
+                    let Some(verified) = active_identity_session.as_ref() else {
+                        let _ = send_error_message(&sender, "identity session is missing").await;
+                        return;
+                    };
+                    if verified.expires_at_ms <= gateway_unix_ms() {
+                        let _ = send_error_message(&sender, "identity session expired").await;
+                        return;
+                    }
+                    match session_cache.identity_session_is_revoked(&verified.session_id) {
+                        Ok(false) => {}
+                        Ok(true) => {
+                            let _ = send_error_message(&sender, "identity session was revoked").await;
+                            return;
+                        }
+                        Err(error) => {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity revocation check unavailable: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    }
+                    if now.duration_since(last_identity_database_check)
+                        >= Duration::from_secs(60)
+                    {
+                        last_identity_database_check = now;
+                        let database_check = tokio::task::block_in_place(|| {
+                            identity.touch_session(verified)
+                        });
+                        if let Err(error) = database_check {
+                            let _ = send_error_message(
+                                &sender,
+                                &format!("identity session is no longer active: {error}"),
+                            )
+                            .await;
+                            return;
+                        }
+                    }
+                }
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
@@ -2854,6 +4848,27 @@ fn gateway_zone_owner_heartbeat_interval_ms() -> u64 {
     .min(u128::from(u64::MAX)) as u64
 }
 
+fn gateway_action_queue_wait(kind: GatewayCapacityKind) -> Duration {
+    let (name, production_default_ms) = match kind {
+        GatewayCapacityKind::Login => ("MIR2_GATEWAY_LOGIN_QUEUE_WAIT_MS", 30_000),
+        GatewayCapacityKind::NewCharacter => ("MIR2_GATEWAY_NEW_CHARACTER_QUEUE_WAIT_MS", 30_000),
+        GatewayCapacityKind::StartGame => ("MIR2_GATEWAY_START_GAME_QUEUE_WAIT_MS", 300_000),
+        GatewayCapacityKind::WebSocketConnection
+        | GatewayCapacityKind::ActiveSession
+        | GatewayCapacityKind::ReconnectLease => return Duration::ZERO,
+    };
+    duration_from_millis_env(
+        name,
+        if gateway_prod_like_env() {
+            production_default_ms
+        } else {
+            0
+        },
+        0,
+        600_000,
+    )
+}
+
 fn duration_from_millis_env(name: &str, default_ms: u64, min_ms: u64, max_ms: u64) -> Duration {
     Duration::from_millis(
         std::env::var(name)
@@ -2899,6 +4914,152 @@ fn login_account_id_for_action(action: &SessionAction) -> Option<&str> {
         SessionAction::Packet(ClientPacket::Login { account_id, .. }) => Some(account_id),
         SessionAction::PasskeyLogin { account_id, .. } => Some(account_id),
         _ => None,
+    }
+}
+
+#[derive(Debug, Clone)]
+struct LoginIdentityContext {
+    account_id: String,
+    auth_method: &'static str,
+    credential_subject: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AuthSecurityAction {
+    Login,
+    Registration,
+    PasswordChange,
+    Recovery,
+}
+
+#[derive(Debug, Clone)]
+struct AuthSecurityContext {
+    account_id: String,
+    action: AuthSecurityAction,
+}
+
+fn login_identity_context_for_action(action: &SessionAction) -> Option<LoginIdentityContext> {
+    match action {
+        SessionAction::Packet(ClientPacket::Login { account_id, .. }) => {
+            Some(LoginIdentityContext {
+                account_id: account_id.clone(),
+                auth_method: "password",
+                credential_subject: account_id.clone(),
+            })
+        }
+        SessionAction::PasskeyLogin { account_id, .. } => Some(LoginIdentityContext {
+            account_id: account_id.clone(),
+            auth_method: "sui_passkey",
+            credential_subject: account_id
+                .strip_prefix("sui:")
+                .unwrap_or(account_id)
+                .to_string(),
+        }),
+        _ => None,
+    }
+}
+
+fn auth_security_context_for_action(action: &SessionAction) -> Option<AuthSecurityContext> {
+    match action {
+        SessionAction::Packet(ClientPacket::Login { account_id, .. })
+        | SessionAction::PasskeyLogin { account_id, .. } => Some(AuthSecurityContext {
+            account_id: account_id.clone(),
+            action: AuthSecurityAction::Login,
+        }),
+        SessionAction::Packet(ClientPacket::NewAccount { account_id, .. }) => {
+            Some(AuthSecurityContext {
+                account_id: account_id.clone(),
+                action: AuthSecurityAction::Registration,
+            })
+        }
+        SessionAction::Packet(ClientPacket::ChangePassword { account_id, .. }) => {
+            Some(AuthSecurityContext {
+                account_id: account_id.clone(),
+                action: AuthSecurityAction::PasswordChange,
+            })
+        }
+        _ => None,
+    }
+}
+
+fn enforce_auth_rate_limits(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    user_agent: &str,
+    context: &AuthSecurityContext,
+) -> Result<(), String> {
+    let peer = identity.peer_fingerprint(peer_address)?;
+    let device = identity.peer_fingerprint(&format!("device:{}", user_agent.trim()))?;
+    let account = context.account_id.trim().to_ascii_lowercase();
+    if account.is_empty() || account.len() > 160 {
+        return Err("invalid authentication request".to_string());
+    }
+    let policies: Vec<(String, u64, u64)> = match context.action {
+        AuthSecurityAction::Login => vec![
+            (format!("login:pair:{peer}:{account}"), 8, 15 * 60),
+            (format!("login:peer:{peer}"), 30, 15 * 60),
+            (format!("login:device:{device}"), 30, 15 * 60),
+            (format!("login:account:{account}"), 50, 15 * 60),
+        ],
+        AuthSecurityAction::Registration => vec![
+            (format!("register:peer:{peer}"), 5, 60 * 60),
+            (format!("register:device:{device}"), 5, 60 * 60),
+            (format!("register:account:{account}"), 3, 60 * 60),
+        ],
+        AuthSecurityAction::PasswordChange => vec![
+            (format!("password-change:pair:{peer}:{account}"), 5, 60 * 60),
+            (format!("password-change:device:{device}"), 10, 60 * 60),
+            (format!("password-change:account:{account}"), 20, 60 * 60),
+        ],
+        AuthSecurityAction::Recovery => vec![
+            (format!("recovery:pair:{peer}:{account}"), 5, 60 * 60),
+            (format!("recovery:peer:{peer}"), 15, 60 * 60),
+            (format!("recovery:device:{device}"), 10, 60 * 60),
+            (format!("recovery:account:{account}"), 20, 60 * 60),
+        ],
+    };
+    for (scope, limit, window_seconds) in policies {
+        let (attempts, ttl_ms) = cache.record_auth_attempt(&scope, window_seconds)?;
+        if attempts > limit {
+            let backoff = 1u64
+                .checked_shl((attempts - limit).min(8) as u32)
+                .unwrap_or(300)
+                .clamp(2, 300);
+            let retry_after = backoff.max(ttl_ms.saturating_add(999) / 1_000).min(3_600);
+            let _ = identity.record_auth_security_event(
+                Some(&context.account_id),
+                "authentication_rate_limited",
+                "blocked",
+                "rate_limit_exceeded",
+                peer_address,
+                user_agent,
+            );
+            return Err(format!(
+                "too many authentication attempts; retry after {retry_after} seconds"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn clear_successful_login_rate_limits(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    account_id: &str,
+) {
+    let Ok(peer) = identity.peer_fingerprint(peer_address) else {
+        return;
+    };
+    let account = account_id.trim().to_ascii_lowercase();
+    for scope in [
+        format!("login:pair:{peer}:{account}"),
+        format!("login:account:{account}"),
+    ] {
+        if let Err(error) = cache.clear_auth_attempt(&scope) {
+            eprintln!("failed to clear successful authentication counter: {error}");
+        }
     }
 }
 
@@ -3030,8 +5191,12 @@ fn execute_session_action(
             log_move_action(move_log, &responses);
             Ok(responses)
         }
-        SessionAction::PasskeyLogin { account_id, token } => {
-            verify_passkey_gateway_token(&account_id, &token)?;
+        SessionAction::PasskeyLogin {
+            account_id,
+            proof_account_id,
+            token,
+        } => {
+            verify_passkey_gateway_token(&proof_account_id, &token)?;
             Ok(session.passkey_login(&account_id))
         }
         SessionAction::MoveTo { x, y, running } => {
@@ -3071,8 +5236,12 @@ fn execute_production_session_action(
                 authenticated,
                 WorldCommand::ClientPacket(packet),
             )?,
-        SessionAction::PasskeyLogin { account_id, token } => {
-            verify_passkey_gateway_token(&account_id, &token)?;
+        SessionAction::PasskeyLogin {
+            account_id,
+            proof_account_id,
+            token,
+        } => {
+            verify_passkey_gateway_token(&proof_account_id, &token)?;
             return Ok(session.passkey_login(&account_id));
         }
         SessionAction::MoveTo { x, y, running } => session
@@ -3395,9 +5564,11 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             account_id,
             password,
         })),
-        BrowserCommand::PasskeyLogin { account_id, token } => {
-            Ok(SessionAction::PasskeyLogin { account_id, token })
-        }
+        BrowserCommand::PasskeyLogin { account_id, token } => Ok(SessionAction::PasskeyLogin {
+            proof_account_id: account_id.clone(),
+            account_id,
+            token,
+        }),
         BrowserCommand::NewAccount {
             account_id,
             password,
@@ -4222,6 +6393,25 @@ async fn send_error_message(
             json!({
                 "type": "error",
                 "message": message
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+}
+
+async fn send_identity_session_grant(
+    sender: &SharedWebSocketSender,
+    grant: &crate::identity::IdentitySessionGrant,
+) -> Result<(), axum::Error> {
+    sender
+        .lock()
+        .await
+        .send(Message::Text(
+            json!({
+                "type": "identitySession",
+                "token": grant.token,
+                "session": grant.session,
             })
             .to_string()
             .into(),
@@ -6999,6 +9189,21 @@ mod tests {
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn blocking_component_initializer_supports_sync_clients_with_own_runtime() {
+        let value = super::run_blocking_component_initializer("test sync client", || {
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|error| error.to_string())?;
+            Ok(runtime.block_on(async { 17_u8 }))
+        })
+        .await
+        .expect("blocking initialization must not nest runtimes on a Tokio worker");
+
+        assert_eq!(value, 17);
+    }
+
     #[test]
     fn realm_info_exposes_platinum_176_release_identity() {
         let config = SimulationConfig::default().with_platinum_176_profile();
@@ -7021,6 +9226,20 @@ mod tests {
             event["payload"]["bundleHash"].as_str().map(str::len),
             Some(64)
         );
+    }
+
+    #[test]
+    fn channel_identity_proofs_are_consumed_once() {
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        let proof = super::VerifiedChannelSubject {
+            subject: "sui:0xonce".to_string(),
+            token_id: Some("channel-proof-once".to_string()),
+            expires_at_ms: Some(super::gateway_now_ms().saturating_add(60_000)),
+        };
+        assert!(super::consume_channel_subject_proof(&cache, &proof).is_ok());
+        let replay = super::consume_channel_subject_proof(&cache, &proof)
+            .expect_err("the same channel proof must not be accepted twice");
+        assert_eq!(replay.0, axum::http::StatusCode::UNAUTHORIZED);
     }
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
@@ -7151,7 +9370,16 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
+            spectator: crate::spectator::SpectatorHub::from_env(),
+            ai_live: crate::ai_live::AiLiveHub::new(
+                crate::ai_live::AiLiveConfig::disabled_for_tests(
+                    std::env::temp_dir().join("mir2-ai-live-web-mail-test"),
+                ),
+            )
+            .expect("test AI live hub"),
+            channel_identity: crate::ChannelIdentityRegistry::in_memory(),
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -7204,7 +9432,16 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
+            spectator: crate::spectator::SpectatorHub::from_env(),
+            ai_live: crate::ai_live::AiLiveHub::new(
+                crate::ai_live::AiLiveConfig::disabled_for_tests(
+                    std::env::temp_dir().join("mir2-ai-live-web-health-test"),
+                ),
+            )
+            .expect("test AI live hub"),
+            channel_identity: crate::ChannelIdentityRegistry::in_memory(),
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -7242,57 +9479,6 @@ mod tests {
             response.gameplay_events.topic.as_deref(),
             Some(crate::events::DEFAULT_GAMEPLAY_EVENT_TOPIC)
         );
-    }
-
-    #[tokio::test]
-    async fn health_reports_configured_deploy_revision() {
-        let state = super::WebState {
-            config: Arc::new(crate::GatewayConfig::default()),
-            deploy_revision: Some("681bc20a01fe9892fa7cbe285f5e747ead696a93".to_string()),
-            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
-            chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
-            session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
-            reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
-            capacity: Arc::new(super::GatewayCapacityState::unlimited()),
-            gameplay_event_sink: None,
-            injector: crate::inject::LiveSessionInjector::default(),
-        };
-
-        let Json(response) = super::health(State(state)).await;
-        let serialized = serde_json::to_value(&response).expect("health response should serialize");
-
-        assert_eq!(
-            response.revision.as_deref(),
-            Some("681bc20a01fe9892fa7cbe285f5e747ead696a93")
-        );
-        assert_eq!(
-            serialized.get("revision"),
-            Some(&json!("681bc20a01fe9892fa7cbe285f5e747ead696a93"))
-        );
-    }
-
-    #[test]
-    fn deploy_revision_from_env_trims_values_and_ignores_blanks() {
-        let configured = with_env_var(
-            "MIR2_DEPLOY_REVISION",
-            Some("  acceptance-revision-42  "),
-            super::deploy_revision_from_env,
-        );
-        assert_eq!(configured.as_deref(), Some("acceptance-revision-42"));
-
-        let blank = with_env_var(
-            "MIR2_DEPLOY_REVISION",
-            Some("  "),
-            super::deploy_revision_from_env,
-        );
-        assert_eq!(blank, None);
-
-        let missing = with_env_var(
-            "MIR2_DEPLOY_REVISION",
-            None,
-            super::deploy_revision_from_env,
-        );
-        assert_eq!(missing, None);
     }
 
     #[tokio::test]
@@ -7337,7 +9523,16 @@ mod tests {
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
+            identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
+            spectator: crate::spectator::SpectatorHub::from_env(),
+            ai_live: crate::ai_live::AiLiveHub::new(
+                crate::ai_live::AiLiveConfig::disabled_for_tests(
+                    std::env::temp_dir().join("mir2-ai-live-web-admin-test"),
+                ),
+            )
+            .expect("test AI live hub"),
+            channel_identity: crate::ChannelIdentityRegistry::in_memory(),
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;
@@ -7415,6 +9610,22 @@ mod tests {
                     .expect("matching token should be accepted");
             },
         );
+    }
+
+    #[test]
+    fn production_admin_operator_token_rejects_short_secrets() {
+        with_env_var("MIR2_RUNTIME_ENV", Some("production"), || {
+            let previous = std::env::var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN").ok();
+            std::env::set_var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN", "too-short");
+            let rejected = super::require_gateway_admin_trace_token(&axum::http::HeaderMap::new())
+                .expect_err("production must fail closed for a short operator token");
+            assert_eq!(rejected.0, axum::http::StatusCode::SERVICE_UNAVAILABLE);
+            assert!(rejected.1 .0.error.contains("at least 32 characters"));
+            match previous {
+                Some(value) => std::env::set_var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN", value),
+                None => std::env::remove_var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN"),
+            }
+        });
     }
 
     #[test]
@@ -9662,6 +11873,38 @@ mod tests {
         assert_eq!(capacity.status().current_start_game_in_flight, 0);
     }
 
+    #[tokio::test]
+    async fn action_capacity_waits_for_a_released_slot() {
+        let capacity = Arc::new(super::GatewayCapacityState::with_action_limits(
+            None,
+            None,
+            Some(1),
+        ));
+        let first = capacity
+            .try_acquire_action(super::GatewayCapacityKind::StartGame)
+            .expect("first StartGame should fit capacity");
+        let waiting_capacity = Arc::clone(&capacity);
+        let waiting = tokio::spawn(async move {
+            waiting_capacity
+                .acquire_action_with_wait(
+                    super::GatewayCapacityKind::StartGame,
+                    std::time::Duration::from_millis(500),
+                )
+                .await
+        });
+
+        tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        assert!(!waiting.is_finished());
+        drop(first);
+        let second = waiting
+            .await
+            .expect("capacity waiter should not panic")
+            .expect("capacity waiter should acquire the released slot");
+        assert_eq!(capacity.status().current_start_game_in_flight, 1);
+        drop(second);
+        assert_eq!(capacity.status().current_start_game_in_flight, 0);
+    }
+
     #[test]
     fn web_session_save_queue_debounces_until_due_or_limit() {
         let start = std::time::Instant::now();
@@ -9917,6 +12160,7 @@ mod tests {
 
         let passkey = SessionAction::PasskeyLogin {
             account_id: "wallet-demo".to_string(),
+            proof_account_id: "wallet-demo".to_string(),
             token: "token".to_string(),
         };
         assert_eq!(

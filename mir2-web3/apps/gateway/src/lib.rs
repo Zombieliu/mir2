@@ -1,7 +1,10 @@
+pub mod ai_distribution;
+pub mod ai_live;
 mod auth;
 pub mod beta;
 mod browser_commands;
 pub mod cache;
+pub mod channel_identity;
 pub mod consensus_log;
 pub mod control_plane;
 pub mod economy;
@@ -31,6 +34,7 @@ pub mod home_tunnel {
 }
 pub mod home_tunnel_transport;
 pub mod hotspot;
+pub mod identity;
 mod inject;
 pub mod mir2_workload;
 pub mod node_identity {
@@ -44,6 +48,7 @@ pub mod rewards {
 }
 pub mod routing;
 mod session;
+pub mod spectator;
 pub mod tcp;
 pub mod topology;
 pub mod web;
@@ -52,6 +57,15 @@ pub mod zone_lease;
 pub mod zone_replication;
 pub mod zone_rpc;
 
+pub use ai_distribution::{
+    AiChannelStatus, AiContentAssets, AiContentContext, AiContentKind, AiContentPackage,
+    AiDeliveryReceipt, AiDistributionChannel, AiDistributionConfig, AiDistributionHub,
+    AiDistributionMetrics, AiDistributionStatus,
+};
+pub use ai_live::{
+    AiLiveConfig, AiLiveHub, AiLiveMetrics, AiLiveMode, AiLiveNarrativeSource, AiLiveSegment,
+    AiLiveStatus,
+};
 pub use beta::{
     run_gate10_acceptance, BetaReadinessCheck, BetaReadinessReport, BetaReadinessRequirements,
     Gate10AcceptanceEvidence, ProductionBetaReadinessProbe,
@@ -66,6 +80,10 @@ pub use cache::{
     GatewaySessionCacheRuntimeBackend, GatewaySessionCacheStatus, GatewaySessionRoute,
     GatewaySessionTraceEvent, InMemoryGatewaySessionCache, RedisGatewaySessionCache,
     SharedGatewaySessionCache,
+};
+pub use channel_identity::{
+    ChannelIdentityBinding, ChannelIdentityProvider, ChannelIdentityRegistry,
+    ChannelIdentityRegistryStatus, PlayerIdentityAccount,
 };
 pub use consensus_log::{
     CommonwareControlLog, ConsensusEquivocationEvidence, ControlBlock, ControlCommandEnvelope,
@@ -86,7 +104,7 @@ pub use gate14::{
     replay_gate14_records, Gate14Account, Gate14ApplyOutcome, Gate14AuthoritativeState,
     Gate14Character, Gate14Command, Gate14CommandEnvelope, Gate14FinalizedRecord, Gate14Placement,
     Gate14QuorumClient, Gate14QuorumSnapshot, Gate14SessionLease, Gate14ValidatorStatus,
-    Gate14ZoneHost,
+    Gate14WorldDirectorAnchor, Gate14ZoneHost,
 };
 pub use gate15::{Gate15Health, Gate15PlayerLease};
 pub use guild_node_foundation::{
@@ -181,6 +199,10 @@ pub use routing::{
     ZoneRegistry, ZoneRuntimeFactory,
 };
 pub use session::{GatewayConfig, GatewaySession};
+pub use spectator::{
+    SpectatorAuthorization, SpectatorConfig, SpectatorFrame, SpectatorHub, SpectatorMatch,
+    SpectatorMetrics, SpectatorRecording, SpectatorTarget,
+};
 pub use topology::{ZoneTopology, ZoneTopologyMode};
 pub use world_director::{
     director_commands_from_finalized, AiDirectorProposalAdapter, AiDirectorProposalRequest,
