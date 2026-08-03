@@ -27,8 +27,16 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 ## 2026-08-02 wide mobile camera/HUD experiment
 
 - Created isolated branch `feat/mobile-wide-camera-hud` from `main` so the production 4:3 path remains unchanged.
-- Added opt-in `?wideMobile=1` virtual-stage mode: touch landscape stages expand their virtual width to the device aspect ratio, while the captured 4:3 height and default mode stay intact.
+- Added automatic touch-landscape wide mode: touch landscape stages expand their virtual width to the device aspect ratio, while the captured 4:3 height and default non-touch mode stay intact.
 - Reflow foundation: stage, game HUD, select scene, WebGL map state, Bevy entity state, and touch control deck now share the virtual stage dimensions; the original HUD cluster remains centered while edge-anchored surfaces can use the expanded width.
 - Stage B now threads one `ViewportLayout` through the page viewport, scene request window, map prefetch, DOM/WebGL2/Bevy origins, overlays, and pointer-to-tile conversion.
 - The wide band is map-only: authoritative entity and ground-drop visibility stays at the legacy 1024x768 combat radius, so a wider phone does not gain extra PvP scouting or targeting information.
-- Real-device walking, two-player visibility, and PWA standalone screenshots remain acceptance items before enabling the flag by default.
+- `?wideMobile=0` and `localStorage.mir2-wide-mobile = "0"` remain emergency rollback controls; real-device walking, two-player visibility, and PWA standalone screenshots remain acceptance items.
+
+## 2026-08-02 mobile PWA follow-up
+
+- Production mobile QA reproduced two concrete overlay issues: portrait showed the rotate gate together with the install guide and cache progress panel, while short landscape could let those panels cover the login/select surface.
+- The PWA guide now stays closed while the device is portrait and reopens as a compact hint after rotation to landscape. The resource prewarm indicator is hidden in portrait and compacted into a small side gutter on short landscape phones.
+- The original 4:3 game stage remains contained and uncropped; the remaining side bars on a wide/short phone are intentional preservation of the original HUD rather than document overflow.
+- Follow-up branch: `fix/mobile-pwa-layout-overlays`.
+- The ultra-wide touch presentation now adds a low-contrast blurred letterbox backdrop in the side gutters. The 4:3 stage itself remains untouched, so this improves the phone composition without introducing crop or HUD distortion.

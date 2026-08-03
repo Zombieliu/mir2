@@ -522,6 +522,7 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
 
   return (
     <section
+      className="mir-cache-progress-panel"
       aria-label="Mir2 resource loading status"
       style={{
         position: "fixed",
