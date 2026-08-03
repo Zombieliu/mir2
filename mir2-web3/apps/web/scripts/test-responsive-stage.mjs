@@ -49,8 +49,37 @@ const {
   calculateMir2TouchControlDeck,
   calculateMir2TouchControlMetrics,
   MIR2_TOUCH_GAME_RAIL_CSS_PX,
+  wideMobileRequestedForClientProfile,
 } = module.exports;
 const { DEFAULT_VIEWPORT_LAYOUT, viewportLayoutForStage } = layoutModule.exports;
+
+const previousWindow = globalThis.window;
+const testWindow = {
+  location: { search: "" },
+  localStorage: {
+    value: null,
+    getItem() {
+      return this.value;
+    },
+  },
+};
+globalThis.window = testWindow;
+assert.equal(wideMobileRequestedForClientProfile("touch", "touch"), true);
+assert.equal(wideMobileRequestedForClientProfile("desktop", "keyboardMouse"), false);
+testWindow.location.search = "?wideMobile=0";
+assert.equal(wideMobileRequestedForClientProfile("touch", "touch"), false);
+testWindow.location.search = "?wideMobile=1";
+assert.equal(wideMobileRequestedForClientProfile("desktop", "keyboardMouse"), true);
+testWindow.location.search = "";
+testWindow.localStorage.value = "0";
+assert.equal(wideMobileRequestedForClientProfile("touch", "touch"), false);
+testWindow.localStorage.value = "1";
+assert.equal(wideMobileRequestedForClientProfile("desktop", "keyboardMouse"), true);
+if (previousWindow === undefined) {
+  delete globalThis.window;
+} else {
+  globalThis.window = previousWindow;
+}
 
 function assertContained(input, presentation) {
   const stageWidth = 1024 * presentation.scale;

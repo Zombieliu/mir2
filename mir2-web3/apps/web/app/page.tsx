@@ -55,7 +55,10 @@ import {
   viewportLayoutForStage,
   type ViewportLayout,
 } from "./components/original-client-scene-rendering";
-import { wideMobileVirtualWidth } from "./components/original-client-stage-presentation";
+import {
+  wideMobileRequestedForClientProfile,
+  wideMobileVirtualWidth,
+} from "./components/original-client-stage-presentation";
 import {
   createSnapshotEmitter,
   createWorldStore,
@@ -1739,12 +1742,8 @@ export default function HomePage() {
   const clientProfile = useOriginalClientDeviceProfile();
   const [wideMobileViewport, setWideMobileViewport] = useState({ width: 1024, height: 768 });
   const wideMobileRequested = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("wideMobile") === "0") return false;
-    if (params.get("wideMobile") === "1") return true;
-    return window.localStorage.getItem("mir2-wide-mobile") === "1";
-  }, []);
+    return wideMobileRequestedForClientProfile(clientProfile.layout, clientProfile.input);
+  }, [clientProfile.input, clientProfile.layout]);
   const updateWideMobileViewport = useCallback(() => {
     if (typeof window === "undefined") return;
     const visualViewport = window.visualViewport;

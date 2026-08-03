@@ -55,6 +55,7 @@ import {
   calculateMir2StagePresentation,
   calculateMir2TouchControlDeck,
   calculateMir2TouchControlMetrics,
+  wideMobileRequestedForClientProfile,
 } from "./components/original-client-stage-presentation";
 import type {
   BevyEntityRenderState,
@@ -583,11 +584,12 @@ export function OriginalClientShell({
   // memo on each 30 Hz motionNow tick. Language changes only on user action (rare).
   const t = useMemo(() => buildTranslator(language), [language]);
   const locale = useMemo(() => languageLocale(language), [language]);
+  const clientProfile = useOriginalClientDeviceProfile();
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
   const runtimeMessageLabel = formatRuntimeMessage(language, runtimeMessage);
   const wideMobileRequested = useMemo(
-    () => clientFeatureFlagEnabled("wideMobile", "mir2-wide-mobile", false),
-    [],
+    () => wideMobileRequestedForClientProfile(clientProfile.layout, clientProfile.input),
+    [clientProfile.input, clientProfile.layout],
   );
   // Shown over the (black) stage while the map tiles preload after entering the world. The
   // condition reuses sceneInteractionReady, which preloadSceneAssetUrls() flips true on
@@ -608,7 +610,6 @@ export function OriginalClientShell({
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
-  const clientProfile = useOriginalClientDeviceProfile();
   const gamepadLabels = useMemo(
     () => mir2GamepadLabels(clientProfile.gamepad.family),
     [clientProfile.gamepad.family],

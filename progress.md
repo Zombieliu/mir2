@@ -27,11 +27,11 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 ## 2026-08-02 wide mobile camera/HUD experiment
 
 - Created isolated branch `feat/mobile-wide-camera-hud` from `main` so the production 4:3 path remains unchanged.
-- Added opt-in `?wideMobile=1` virtual-stage mode: touch landscape stages expand their virtual width to the device aspect ratio, while the captured 4:3 height and default mode stay intact.
+- Added automatic touch-landscape wide mode: touch landscape stages expand their virtual width to the device aspect ratio, while the captured 4:3 height and default non-touch mode stay intact.
 - Reflow foundation: stage, game HUD, select scene, WebGL map state, Bevy entity state, and touch control deck now share the virtual stage dimensions; the original HUD cluster remains centered while edge-anchored surfaces can use the expanded width.
 - Stage B now threads one `ViewportLayout` through the page viewport, scene request window, map prefetch, DOM/WebGL2/Bevy origins, overlays, and pointer-to-tile conversion.
 - The wide band is map-only: authoritative entity and ground-drop visibility stays at the legacy 1024x768 combat radius, so a wider phone does not gain extra PvP scouting or targeting information.
-- Real-device walking, two-player visibility, and PWA standalone screenshots remain acceptance items before enabling the flag by default.
+- `?wideMobile=0` and `localStorage.mir2-wide-mobile = "0"` remain emergency rollback controls; real-device walking, two-player visibility, and PWA standalone screenshots remain acceptance items.
 
 ## 2026-08-02 mobile PWA follow-up
 

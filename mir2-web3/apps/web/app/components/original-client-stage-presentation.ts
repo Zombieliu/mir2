@@ -46,6 +46,26 @@ export function wideMobileVirtualWidth(cssWidth: number, cssHeight: number, virt
   const requestedWidth = Math.max(1024, Math.ceil((safeCssWidth / safeCssHeight) * virtualHeight));
   return Math.max(1024, Math.ceil(requestedWidth / 4) * 4);
 }
+
+/**
+ * Wide mobile framing is the default for touch-first landscape devices. The
+ * query/localStorage values remain explicit rollout controls: `1` forces the
+ * mode on and `0` is an emergency opt-out for a broken device or cached build.
+ */
+export function wideMobileRequestedForClientProfile(
+  layout: Mir2StageLayout,
+  input: Mir2StageInput,
+) {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("wideMobile") === "0") return false;
+  if (params.get("wideMobile") === "1") return true;
+  const storedValue = window.localStorage.getItem("mir2-wide-mobile");
+  if (storedValue === "0") return false;
+  if (storedValue === "1") return true;
+  return layout === "touch" && input === "touch";
+}
+
 export const MIR2_TOUCH_COMPACT_HEIGHT_CSS_PX = 360;
 
 const REGULAR_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
