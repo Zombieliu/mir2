@@ -82,6 +82,7 @@ export function PwaGameShell() {
 
     const detectedIos = isIosDevice();
     const coarsePointer = window.matchMedia("(pointer: coarse)");
+    const orientationQuery = window.matchMedia("(orientation: portrait)");
     const standaloneQuery = window.matchMedia("(display-mode: standalone)");
     const fullscreenQuery = window.matchMedia("(display-mode: fullscreen)");
     const handleInstallPrompt = (event: Event) => {
@@ -94,6 +95,20 @@ export function PwaGameShell() {
       refreshDisplayMode();
     };
     const updateMobile = () => setMobileBrowser(coarsePointer.matches || detectedIos);
+    const maybeOpenGuide = () => {
+      if (orientationQuery.matches || isStandaloneDisplay() || installHintWasDismissed()) {
+        setGuideOpen(false);
+        return;
+      }
+      setGuideOpen(true);
+    };
+    const handleOrientationChange = () => {
+      if (orientationQuery.matches) {
+        setGuideOpen(false);
+        return;
+      }
+      window.setTimeout(maybeOpenGuide, 350);
+    };
 
     setIos(detectedIos);
     updateMobile();
@@ -102,13 +117,12 @@ export function PwaGameShell() {
     window.addEventListener("appinstalled", handleInstalled);
     document.addEventListener("fullscreenchange", refreshDisplayMode);
     coarsePointer.addEventListener("change", updateMobile);
+    orientationQuery.addEventListener("change", handleOrientationChange);
     standaloneQuery.addEventListener("change", refreshDisplayMode);
     fullscreenQuery.addEventListener("change", refreshDisplayMode);
 
     const hintTimer = window.setTimeout(() => {
-      if (!isStandaloneDisplay() && !installHintWasDismissed()) {
-        setGuideOpen(true);
-      }
+      maybeOpenGuide();
     }, 5000);
 
     return () => {
@@ -117,6 +131,7 @@ export function PwaGameShell() {
       window.removeEventListener("appinstalled", handleInstalled);
       document.removeEventListener("fullscreenchange", refreshDisplayMode);
       coarsePointer.removeEventListener("change", updateMobile);
+      orientationQuery.removeEventListener("change", handleOrientationChange);
       standaloneQuery.removeEventListener("change", refreshDisplayMode);
       fullscreenQuery.removeEventListener("change", refreshDisplayMode);
     };
