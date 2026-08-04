@@ -164,7 +164,9 @@ async function main() {
       headed ? "" : "--headless=new",
       `--remote-debugging-port=${debugPort}`,
       `--user-data-dir=${userDataDir}`,
-      "--disable-gpu",
+      // Playable acceptance validates the GPU atlas path, so disabling GPU here
+      // makes the browser latch the documented DOM fallback before pages can load.
+      playableMode ? "" : "--disable-gpu",
       "--no-first-run",
       "--no-default-browser-check",
       "--enable-features=NetworkService,NetworkServiceInProcess",
@@ -247,6 +249,20 @@ async function main() {
         typeof cold.summary.firstPlayableMs === "number" && cold.summary.firstPlayableMs <= coldFirstPlayableBudgetMs;
       report.assertions.warmFirstPlayableWithinBudget =
         typeof warm.summary.firstPlayableMs === "number" && warm.summary.firstPlayableMs <= warmFirstPlayableBudgetMs;
+      report.assertions.coldAssetOrchestratorSettled = assetOrchestratorSettled(cold.assetOrchestrator);
+      report.assertions.warmAssetOrchestratorSettled = assetOrchestratorSettled(warm.assetOrchestrator);
+      report.assertions.coldMapRendererAvailable = cold.mapRendererEvidence?.observed === true;
+      report.assertions.warmMapRendererAvailable = warm.mapRendererEvidence?.observed === true;
+      report.assertions.coldMapAtlasManifestPresent = cold.responses.mapAtlasManifestCount > 0;
+      report.assertions.coldMapAtlasPagesPresent = cold.responses.mapAtlasPageCount > 0;
+      report.assertions.noLegacyMapAtlasManifest =
+        cold.responses.mapAtlasLegacyManifestCount === 0 &&
+        warm.responses.mapAtlasLegacyManifestCount === 0;
+      report.assertions.mapAtlasUsesContentAddressedPages =
+        cold.responses.mapAtlasContentAddressedPageCount === cold.responses.mapAtlasPageCount &&
+        warm.responses.mapAtlasContentAddressedPageCount === warm.responses.mapAtlasPageCount;
+      report.assertions.noLegacyMapAtlasPages =
+        cold.responses.mapAtlasLegacyPageCount === 0 && warm.responses.mapAtlasLegacyPageCount === 0;
     }
     report.ok = Object.values(report.assertions).every(Boolean);
 
@@ -289,6 +305,13 @@ async function runMetricsPass(client, label, url) {
     await drivePlayableFlow(client);
     await waitForFirstPlayable(client, waitTimeoutMs);
   }
+  const mapRendererEvidence = playableMode
+    ? await waitForMapRendererEvidence(
+        client,
+        responseStart,
+        Math.min(waitTimeoutMs, 30_000),
+      )
+    : null;
   await waitForMetricsReady(client, waitTimeoutMs);
   const metrics = await readMetrics(client);
   return {
@@ -296,10 +319,44 @@ async function runMetricsPass(client, label, url) {
     url,
     elapsedMs: Date.now() - startedAt,
     assetCache: await readAssetCache(client),
+    assetOrchestrator: await readAssetOrchestrator(client),
+    mapRendererEvidence,
+    mapRenderers: await readMapRenderers(client),
     metrics,
     summary: metrics?.summary ?? emptySummary(),
     responses: summarizeResponses(client.responses.slice(responseStart)),
   };
+}
+
+async function waitForMapRendererEvidence(client, responseStart, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let renderers = null;
+  while (Date.now() < deadline) {
+    renderers = await readMapRenderers(client);
+    const responseSummary = summarizeResponses(client.responses.slice(responseStart));
+    if (mapRendererAvailable(renderers) || responseSummary.mapAtlasPageCount > 0) {
+      return {
+        observed: true,
+        renderers,
+        mapAtlasPageCount: responseSummary.mapAtlasPageCount,
+      };
+    }
+    await delay(250);
+  }
+  return { observed: false, renderers, mapAtlasPageCount: 0 };
+}
+
+async function readMapRenderers(client) {
+  return client.evaluate(`
+    (() => ({
+      bevy: window.__mir2BevyMapRendererDebug
+        ? JSON.parse(JSON.stringify(window.__mir2BevyMapRendererDebug))
+        : null,
+      webgl2: window.__mir2WebGl2MapRendererDebug
+        ? JSON.parse(JSON.stringify(window.__mir2WebGl2MapRendererDebug))
+        : null
+    }))()
+  `);
 }
 
 async function exerciseCacheMaintenance(client, url) {
@@ -520,14 +577,20 @@ async function waitForMetricsReady(client, timeoutMs) {
             const running = (snapshot.prewarmRuns ?? []).some((run) => run.status === "running" || run.status === "pending");
             const requested = summary.prewarmRequested ?? 0;
             const completed = (summary.prewarmOk ?? 0) + (summary.prewarmFailed ?? 0);
+            const orchestrator = window.__mir2AssetOrchestrator?.snapshot?.() ?? null;
             return {
               ready: requested > 0 && completed >= requested && !running,
+              orchestratorReady: Boolean(
+                orchestrator?.firstPlayable &&
+                !orchestrator?.pendingBackgroundStage &&
+                !orchestrator?.activeBackgroundStage
+              ),
               requested,
               completed,
             };
           })()
         `);
-        return Boolean(status?.ready);
+        return Boolean(status?.ready && (!playableMode || status?.orchestratorReady));
       },
       timeoutMs,
       "cache metrics prewarm completion",
@@ -552,6 +615,15 @@ async function readMetrics(client) {
 async function readAssetCache(client) {
   return client.evaluate(`
     (() => window.__mir2AssetCache ? JSON.parse(JSON.stringify(window.__mir2AssetCache)) : null)()
+  `);
+}
+
+async function readAssetOrchestrator(client) {
+  return client.evaluate(`
+    (() => {
+      const snapshot = window.__mir2AssetOrchestrator?.snapshot?.();
+      return snapshot ? JSON.parse(JSON.stringify(snapshot)) : null;
+    })()
   `);
 }
 
@@ -580,6 +652,7 @@ async function readFirstPlayableDiagnostics(client) {
         metricsSummary: snapshot?.summary ?? null,
         milestones: snapshot?.milestones ?? [],
         assetCache: window.__mir2AssetCache ?? null,
+        assetOrchestrator: window.__mir2AssetOrchestrator?.snapshot?.() ?? null,
       };
     })()
   `);
@@ -595,9 +668,26 @@ async function readPrewarmDiagnostics(client) {
         cacheStorage: snapshot?.cacheStorage ?? null,
         milestones: snapshot?.milestones ?? [],
         assetCache: window.__mir2AssetCache ?? null,
+        assetOrchestrator: window.__mir2AssetOrchestrator?.snapshot?.() ?? null,
       };
     })()
   `);
+}
+
+function assetOrchestratorSettled(snapshot) {
+  return Boolean(
+    snapshot?.firstPlayable &&
+    !snapshot?.pendingBackgroundStage &&
+    !snapshot?.activeBackgroundStage,
+  );
+}
+
+function mapRendererAvailable(renderers) {
+  return Boolean(
+    renderers?.bevy?.pipelineActive ||
+      renderers?.bevy?.active ||
+      (renderers?.webgl2?.supported === true && renderers?.webgl2?.reason === "rendered"),
+  );
 }
 
 function compareRuns(cold, warm) {
@@ -616,12 +706,31 @@ function compareRuns(cold, warm) {
 
 function summarizeResponses(responses) {
   const sceneResponses = responses.filter((response) => new URL(response.url).pathname === "/api/scene/crystal");
+  const mapAtlasResponses = responses.filter((response) =>
+    new URL(response.url).pathname.includes("/generated/map-atlas/"),
+  );
+  const mapAtlasPageResponses = mapAtlasResponses.filter((response) =>
+    /\/p\d+(?:\.[a-f0-9]{16})?\.png$/i.test(new URL(response.url).pathname),
+  );
   return {
     count: responses.length,
     fromServiceWorker: responses.filter((response) => response.fromServiceWorker).length,
     fromDiskCache: responses.filter((response) => response.fromDiskCache).length,
     sceneHits: sceneResponses.filter((response) => response.sceneCache === "hit").length,
     sceneMisses: sceneResponses.filter((response) => response.sceneCache === "miss").length,
+    mapAtlasManifestCount: mapAtlasResponses.filter((response) =>
+      /\/manifest\.[a-f0-9]{64}\.json$/i.test(new URL(response.url).pathname),
+    ).length,
+    mapAtlasLegacyManifestCount: mapAtlasResponses.filter(
+      (response) => new URL(response.url).pathname.endsWith("/generated/map-atlas/manifest.json"),
+    ).length,
+    mapAtlasPageCount: mapAtlasPageResponses.length,
+    mapAtlasContentAddressedPageCount: mapAtlasPageResponses.filter((response) =>
+      /\/p\d+\.[a-f0-9]{16}\.png$/i.test(new URL(response.url).pathname),
+    ).length,
+    mapAtlasLegacyPageCount: mapAtlasPageResponses.filter((response) =>
+      /\/p\d+\.png$/i.test(new URL(response.url).pathname),
+    ).length,
     statusCounts: responses.reduce((counts, response) => {
       counts[response.status] = (counts[response.status] ?? 0) + 1;
       return counts;
@@ -640,6 +749,11 @@ function pickSummary(summary) {
     sceneRequests: summary.sceneRequests,
     sceneHits: summary.sceneHits,
     sceneMisses: summary.sceneMisses,
+    mapAtlasManifestCount: summary.mapAtlasManifestCount,
+    mapAtlasLegacyManifestCount: summary.mapAtlasLegacyManifestCount,
+    mapAtlasPageCount: summary.mapAtlasPageCount,
+    mapAtlasContentAddressedPageCount: summary.mapAtlasContentAddressedPageCount,
+    mapAtlasLegacyPageCount: summary.mapAtlasLegacyPageCount,
     prewarmRequested: summary.prewarmRequested,
     prewarmOk: summary.prewarmOk,
     prewarmFailed: summary.prewarmFailed,
@@ -685,6 +799,11 @@ function emptySummary() {
     sceneRequests: 0,
     sceneHits: 0,
     sceneMisses: 0,
+    mapAtlasManifestCount: 0,
+    mapAtlasLegacyManifestCount: 0,
+    mapAtlasPageCount: 0,
+    mapAtlasContentAddressedPageCount: 0,
+    mapAtlasLegacyPageCount: 0,
     prewarmRequested: 0,
     prewarmOk: 0,
     prewarmFailed: 0,
@@ -801,6 +920,7 @@ function isCacheRelevantUrl(rawUrl) {
     return (
       url.pathname.startsWith("/original-ui/") ||
       url.pathname.startsWith("/original-map/") ||
+      url.pathname.includes("/generated/map-atlas/") ||
       url.pathname.startsWith("/bevy-runtime/") ||
       url.pathname === "/api/asset-manifest" ||
       url.pathname === "/api/original-ui-meta" ||

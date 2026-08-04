@@ -21,3 +21,8 @@ MIR2_R2_UPLOAD_WORKER_URL=https://mir2-r2-bulk-upload.<workers-subdomain>.worker
 MIR2_R2_UPLOAD_SECRET=<secret> \
 npm run assets:r2:upload -- --driver worker
 ```
+
+For a one-off Worker mounted behind a path-specific route, set
+`MIR2_R2_UPLOAD_WORKER_PATH=/unique-upload-path`. The default remains
+`/upload`; the explicit override lets a temporary publisher coexist with the
+production read route without changing its credentials or bindings.

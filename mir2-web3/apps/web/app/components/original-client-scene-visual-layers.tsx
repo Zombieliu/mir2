@@ -372,9 +372,10 @@ function collectViewportMapLights(
   return lights;
 }
 
-function useEffectAssets(): EffectAssets | null {
+function useEffectAssets(enabled: boolean): EffectAssets | null {
   const [assets, setAssets] = useState<EffectAssets | null>(null);
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     void loadEffectAssetsOnce().then((value) => {
       if (!cancelled) {
@@ -384,7 +385,7 @@ function useEffectAssets(): EffectAssets | null {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
   return assets;
 }
 
@@ -541,7 +542,7 @@ function OriginalClientSceneVisualLayersInner({
   // CSS effects from the SAME viewport-delta data the projectiles use, so casting and skills are
   // visibly distinct instead of inert. collectViewportFallbackVfx returns [] on idle frames, so
   // this costs nothing when nothing is casting and no projectiles are live.
-  const effectAssets = useEffectAssets();
+  const effectAssets = useEffectAssets(screen === "game");
   const resolvedEffectFrames = collectResolvedSceneEffectFrames(
     effectAssets,
     world.effects,

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "mir2-asset-cache";
-const CACHE_SCHEMA_VERSION = "sw5";
+const CACHE_SCHEMA_VERSION = "sw6";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
@@ -12,6 +12,7 @@ let runtimeConfig = {
   sceneBlueprintMaxEntries: 512,
   apiMetadataMaxEntries: 512,
   remoteAssetBaseUrl: "",
+  remoteAssetBaseUrls: [],
 };
 let staticAssetTiers = new Map();
 
@@ -81,6 +82,16 @@ self.addEventListener("message", (event) => {
   const remoteAssets = manifest.remoteAssets || {};
   const staticAssetMaxEntries = positiveNumber(caches.staticAssetMaxEntries, 20000);
   const assetVersion = String(data.manifestVersion || manifest.version || DEFAULT_VERSION);
+  const remoteAssetBaseUrl = normalizeAssetBaseUrl(
+    data.assetBaseUrl || remoteAssets.assetBaseUrl || manifest.assetBaseUrl || "",
+  );
+  const remoteAssetBaseUrls = normalizeAssetBaseUrls([
+    ...(Array.isArray(data.browserFallbackBaseUrls) ? data.browserFallbackBaseUrls : []),
+    ...(Array.isArray(remoteAssets.browserFallbackBaseUrls)
+      ? remoteAssets.browserFallbackBaseUrls
+      : []),
+    remoteAssetBaseUrl,
+  ]);
   runtimeConfig = {
     version: String(data.cacheNamespace || manifest.cacheNamespace || assetVersion || DEFAULT_VERSION),
     assetVersion,
@@ -90,9 +101,8 @@ self.addEventListener("message", (event) => {
     staticRuntimeMaxEntries: positiveNumber(caches.staticRuntimeMaxEntries, staticAssetMaxEntries),
     sceneBlueprintMaxEntries: positiveNumber(caches.sceneBlueprintMaxEntries, 512),
     apiMetadataMaxEntries: positiveNumber(caches.apiMetadataMaxEntries, 512),
-    remoteAssetBaseUrl: normalizeAssetBaseUrl(
-      data.assetBaseUrl || remoteAssets.assetBaseUrl || manifest.assetBaseUrl || "",
-    ),
+    remoteAssetBaseUrl,
+    remoteAssetBaseUrls,
   };
   staticAssetTiers = buildStaticAssetTierIndex(manifest.resourcePacks || []);
 
@@ -104,6 +114,7 @@ self.addEventListener("message", (event) => {
         assetVersion: runtimeConfig.assetVersion,
         cacheNamespace: runtimeConfig.version,
         remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
+        remoteAssetBaseUrls: runtimeConfig.remoteAssetBaseUrls,
         staticAssetTiers: summarizeStaticAssetTiers(),
       });
     }),
@@ -186,7 +197,12 @@ async function cacheFirst(request, name, maxEntries, event) {
 
   const response = await coalescedStaticAssetFetch(request);
   if (cache && response && response.ok) {
-    await putCacheEntry(cache, request, response, maxEntries);
+    // Never make first paint wait for CacheStorage to consume the complete
+    // response body. Atlas pages can be several MiB: returning the network
+    // stream immediately while event.waitUntil owns a cloned cache write keeps
+    // cold-start latency equal to download latency instead of download + disk.
+    const cacheWrite = putCacheEntry(cache, request, response.clone(), maxEntries);
+    event?.waitUntil(cacheWrite.catch(() => null));
   }
   return response;
 }
@@ -214,18 +230,19 @@ async function fetchStaticAsset(request) {
   originResponse = await fetchWithTransientRetries(freshStaticAssetRequest(request));
   if (originResponse?.ok) return originResponse;
 
-  const remoteRequest = createRemoteAssetRequest(request);
-  if (remoteRequest) {
+  let lastRemoteResponse = null;
+  for (const remoteRequest of createRemoteAssetRequests(request)) {
     const remoteResponse = await fetchWithTransientRetries(freshStaticAssetRequest(remoteRequest));
-    if (remoteResponse) {
-      if (remoteResponse.ok) return remoteResponse;
-      if (remoteResponse.status === 404 || !originResponse) {
-        if (remoteResponse.status === 404 || remoteResponse.status === 410) {
-          rememberNegativeResult(negativeKey, remoteResponse.status);
-        }
-        return remoteResponse;
-      }
+    if (!remoteResponse) continue;
+    lastRemoteResponse = remoteResponse;
+    if (remoteResponse.ok) return remoteResponse;
+  }
+
+  if (lastRemoteResponse && (lastRemoteResponse.status === 404 || !originResponse)) {
+    if (lastRemoteResponse.status === 404 || lastRemoteResponse.status === 410) {
+      rememberNegativeResult(negativeKey, lastRemoteResponse.status);
     }
+    return lastRemoteResponse;
   }
 
   if (originResponse) {
@@ -336,25 +353,29 @@ function rememberNegativeResult(key, status) {
   }
 }
 
-function createRemoteAssetRequest(request) {
-  if (!runtimeConfig.remoteAssetBaseUrl) return null;
+function createRemoteAssetRequests(request) {
+  if (!runtimeConfig.remoteAssetBaseUrls.length) return [];
 
   const localUrl = new URL(request.url);
-  if (!isRemoteBackedStaticGameAsset(localUrl)) return null;
+  if (!isRemoteBackedStaticGameAsset(localUrl)) return [];
 
   const relativePath = localUrl.pathname.replace(/^\/+/, "");
-  const remoteUrl = new URL(relativePath, `${runtimeConfig.remoteAssetBaseUrl}/`);
-  remoteUrl.search = localUrl.search;
+  return runtimeConfig.remoteAssetBaseUrls.flatMap((baseUrl) => {
+    const remoteUrl = new URL(relativePath, `${baseUrl}/`);
+    remoteUrl.search = localUrl.search;
 
-  if (remoteUrl.origin === localUrl.origin && remoteUrl.pathname === localUrl.pathname) {
-    return null;
-  }
+    if (remoteUrl.origin === localUrl.origin && remoteUrl.pathname === localUrl.pathname) {
+      return [];
+    }
 
-  return new Request(remoteUrl.href, {
-    method: "GET",
-    mode: "cors",
-    credentials: "omit",
-    redirect: "follow",
+    return [
+      new Request(remoteUrl.href, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+        redirect: "follow",
+      }),
+    ];
   });
 }
 
@@ -485,6 +506,7 @@ async function readCacheStatus() {
   return {
     version: runtimeConfig.version,
     remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
+    remoteAssetBaseUrls: runtimeConfig.remoteAssetBaseUrls,
     staticAssetTiers: summarizeStaticAssetTiers(),
     cacheCount: entries.length,
     entryCount: entries.reduce((sum, entry) => sum + entry.entries, 0),
@@ -597,6 +619,15 @@ function positiveNumber(value, fallback) {
 function normalizeAssetBaseUrl(value) {
   if (typeof value !== "string") return "";
   return value.trim().replace(/\/+$/, "");
+}
+
+function normalizeAssetBaseUrls(values) {
+  const normalized = [];
+  for (const value of values) {
+    const baseUrl = normalizeAssetBaseUrl(value);
+    if (baseUrl && !normalized.includes(baseUrl)) normalized.push(baseUrl);
+  }
+  return normalized;
 }
 
 function postClientMessage(event, type, payload) {

@@ -161,6 +161,8 @@ import {
   removeItemByUniqueId,
 } from "../lib/extended-server-packets";
 import bevyRuntimeVersion from "../lib/generated/bevy_runtime_version.json";
+import { signalAssetFirstPlayable } from "../lib/asset-orchestrator";
+import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
 import {
   CRYSTAL_MONSTER_SPRITES,
   CRYSTAL_NPC_SPRITES,
@@ -1886,6 +1888,7 @@ export default function HomePage() {
   const perfDiagRef = useRef<PerfDiagState | null>(null);
   const sceneSpritesReadyKeyRef = useRef<string | null>(null);
   const firstPlayableFrameMarkedRef = useRef(false);
+  const firstPlayableFrameRequestRef = useRef<number | null>(null);
   const initialSceneAssetsReadyRef = useRef(false);
   const sceneAssetReadinessRef = useRef<SceneAssetReadiness | null>(null);
   const lastSceneAssetMilestoneKeyRef = useRef<string | null>(null);
@@ -1951,6 +1954,7 @@ export default function HomePage() {
     }
   }, []);
   const [screen, setScreen] = useState<ClientScreen>("login");
+  const shouldBootBevyRuntime = screen !== "login";
   useEffect(() => {
     requestAssetPrewarmStage(
       screen === "select" ? "character-select" : screen === "game" ? "game" : "login",
@@ -2426,6 +2430,10 @@ export default function HomePage() {
   useEffect(() => {
     screenRef.current = screen;
     if (screen !== "game") {
+      if (firstPlayableFrameRequestRef.current !== null) {
+        window.cancelAnimationFrame(firstPlayableFrameRequestRef.current);
+        firstPlayableFrameRequestRef.current = null;
+      }
       firstPlayableFrameMarkedRef.current = false;
       initialSceneAssetsReadyRef.current = false;
       sceneAssetReadinessRef.current = null;
@@ -4309,6 +4317,15 @@ export default function HomePage() {
     let disposed = false;
     setBevyRuntimeStarted(false);
 
+    if (!shouldBootBevyRuntime) {
+      setRuntimePhase("deferred");
+      setRuntimeMessage("Bevy runtime waits until login completes.");
+      markMir2CacheMilestone("bevyRuntimeDeferred", { screen: "login" });
+      return () => {
+        disposed = true;
+      };
+    }
+
     async function bootRuntime() {
       try {
         markMir2CacheMilestone("bevyRuntimeStart");
@@ -4498,12 +4515,20 @@ export default function HomePage() {
 
     return () => {
       disposed = true;
+    };
+  }, [shouldBootBevyRuntime]);
+
+  useEffect(() => {
+    return () => {
       socketRef.current?.close();
       socketRef.current = null;
     };
   }, []);
 
   useEffect(() => {
+    if (screen !== "game") {
+      return;
+    }
     const center = self ?? world.sceneView?.center ?? { x: 330, y: 270 };
     const normalizedMapFileName = normalizeMapFileName(world.mapFileName);
     const sceneChunkWidth = Math.max(viewportLayout.rangeX, 1);
@@ -4636,7 +4661,7 @@ export default function HomePage() {
         loadingSceneKeyRef.current = null;
       }
     };
-  }, [self?.x, self?.y, world.mapFileName, viewportLayout]);
+  }, [screen, self?.x, self?.y, world.mapFileName, viewportLayout]);
 
   // Drive world->Bevy snapshot pushes from a fixed-cadence emitter rather than
   // React reconciliation. The emitter reads the world-model store (kept in sync
@@ -4678,26 +4703,45 @@ export default function HomePage() {
   }, [world.originalMapRegion]);
 
   useEffect(() => {
-    if (screen !== "game" || firstPlayableFrameMarkedRef.current) return;
+    if (
+      screen !== "game" ||
+      firstPlayableFrameMarkedRef.current ||
+      firstPlayableFrameRequestRef.current !== null
+    ) return;
     const currentSelf =
       world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
     if (!currentSelf || !world.originalMapRegion) return;
-    const runtimeReady = bevyRuntimeStarted || runtimePhase === "dom-only";
+    const runtimeReady =
+      bevyRuntimeStarted || runtimePhase === "dom-only" || runtimePhase === "boot-error";
     if (!runtimeReady) return;
     if (!initialSceneAssetsReady) return;
-    markMir2CacheMilestone("gameScreenReady", {
-      mapFileName: world.mapFileName,
-      player: { x: currentSelf.x, y: currentSelf.y },
-      runtimePhase,
-      sceneAssets: sceneAssetReadinessRef.current,
-    });
-    firstPlayableFrameMarkedRef.current = true;
-    markMir2CacheMilestone("firstPlayableFrame", {
-      mapFileName: world.mapFileName,
-      playerObjectId: world.playerObjectId,
-      worldTick: world.worldTick,
-      runtimePhase,
-      sceneAssets: sceneAssetReadinessRef.current,
+    // This effect runs after React commits; wait one more animation frame so the
+    // lifecycle signal represents a frame the browser was able to present, not
+    // merely data readiness. Background downloads are released only after this.
+    firstPlayableFrameRequestRef.current = window.requestAnimationFrame(() => {
+      firstPlayableFrameRequestRef.current = null;
+      if (
+        screenRef.current !== "game" ||
+        firstPlayableFrameMarkedRef.current ||
+        !initialSceneAssetsReadyRef.current
+      ) return;
+
+      const currentWorld = worldRef.current;
+      const renderedSelf =
+        currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+      if (!renderedSelf || !currentWorld.originalMapRegion) return;
+      const detail = {
+        mapFileName: currentWorld.mapFileName,
+        player: { x: renderedSelf.x, y: renderedSelf.y },
+        playerObjectId: currentWorld.playerObjectId,
+        worldTick: currentWorld.worldTick,
+        runtimePhase,
+        sceneAssets: sceneAssetReadinessRef.current,
+      };
+      markMir2CacheMilestone("gameScreenReady", detail);
+      firstPlayableFrameMarkedRef.current = true;
+      markMir2CacheMilestone("firstPlayableFrame", detail);
+      signalAssetFirstPlayable(detail);
     });
   }, [
     screen,
@@ -13772,10 +13816,10 @@ async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
 }
 
 async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<RuntimeModule> {
-  const runtimeVersionQuery = encodeURIComponent(BEVY_RUNTIME_VERSION);
-  const runtimePackageDir = bevyRuntimePackageDir(backend);
-  const runtimePath = `/bevy-runtime/${runtimePackageDir}/mir2_bevy_runtime.js?v=${runtimeVersionQuery}`;
-  const runtimeWasmPath = `/bevy-runtime/${runtimePackageDir}/mir2_bevy_runtime_bg.wasm?v=${runtimeVersionQuery}`;
+  const { moduleUrl: runtimePath, wasmUrl: runtimeWasmPath } = createBevyRuntimeUrls(
+    BEVY_RUNTIME_VERSION,
+    backend,
+  );
   const runtime = (await import(
     /* webpackIgnore: true */ runtimePath
   )) as RuntimeModule;
@@ -13788,10 +13832,6 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
   }
 
   return runtime;
-}
-
-function bevyRuntimePackageDir(backend: BevyRuntimeBackend) {
-  return backend === "webgpu" ? "pkg-webgpu" : "pkg-webgl2";
 }
 
 function selectBevyRuntimeBackend(
