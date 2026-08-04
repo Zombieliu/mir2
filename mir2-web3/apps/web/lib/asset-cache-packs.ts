@@ -53,9 +53,6 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
       "/original-ui/MMap/0.png",
       "/bevy-entity-atlases/manifest.json",
       "/bevy-entity-atlases/starter-bichon-base.png",
-      // Map-atlas index (opt-in GPU map rendering). Atlas pages are SW cache-first on
-      // first use; the index is tiny and lets the renderer resolve tiles immediately.
-      "/generated/map-atlas/manifest.json",
     ],
     scenes: [
       {

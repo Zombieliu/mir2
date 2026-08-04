@@ -5,6 +5,7 @@ export interface Env {
 }
 
 const DEFAULT_ALLOWED_PREFIX = "mir2/";
+const HOTLINK_SAFE_PREFIX = "hotlink-ok/";
 const DEFAULT_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const RELEASE_MANIFEST_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 const CORS_EXPOSE_HEADERS =
@@ -42,7 +43,7 @@ export default {
     }
 
     const cache = caches.default;
-    const cacheKey = new Request(cacheUrl(url), { method: "GET" });
+    const cacheKey = new Request(cacheUrl(url, key), { method: "GET" });
     const cached = await cache.match(cacheKey);
     if (cached) return withCacheHeader(cached, request.method, "HIT");
 
@@ -131,15 +132,20 @@ function inferContentType(key: string): string {
   return CONTENT_TYPES[extension] || "application/octet-stream";
 }
 
-function cacheUrl(url: URL): string {
+function cacheUrl(url: URL, objectKey: string): string {
   const normalized = new URL(url.href);
+  // The browser-safe /hotlink-ok alias and canonical asset URL share the same
+  // Worker Cache API entry. Cloudflare evaluates Hotlink Protection before the
+  // Worker, so external channels use the alias while first-party traffic keeps
+  // the shorter canonical URL.
+  normalized.pathname = `/${objectKey}`;
   normalized.search = "";
   normalized.hash = "";
   return normalized.href;
 }
 
 function decodeObjectKey(pathname: string): string {
-  const key = pathname
+  let key = pathname
     .split("/")
     .filter(Boolean)
     .map((segment) => {
@@ -150,6 +156,9 @@ function decodeObjectKey(pathname: string): string {
       }
     })
     .join("/");
+  if (key.startsWith(HOTLINK_SAFE_PREFIX)) {
+    key = key.slice(HOTLINK_SAFE_PREFIX.length);
+  }
   if (!key || key.includes("..") || key.includes("\\")) return "";
   return key;
 }

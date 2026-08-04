@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | Starter | 不存在 | 可离线 | Gateway/Simulation、普通 UI、新手流程 |
 | GitHub 私有开发素材包 | 存在 | 仅安装时需要，可离线开发 | 全图集开发、调试和离线视觉验收 |
-| R2 CDN | 不需要 | 游戏时按需请求 | 维护者模板；当前尚未发布可用 URL |
+| R2 CDN | 不需要 | 游戏时按需请求 | 生产按需加载、远程验收和 CDN 缓存测试 |
 
 运行时全量图集路径固定为：
 
@@ -131,18 +131,24 @@ $Index.contentHash
 
 ## R2 CDN
 
-**状态：当前 R2 完整素材尚未发布。以下为维护者模板，不是新开发者可直接使用的地址。**
+**状态：完整图集与紧凑地图 Atlas 已发布，并通过不可变对象闭包验收。**
 
-未来 R2 适合不需要把约 9.08 GiB 全量包永久放在本机的开发者。素材必须放在不可变版本目录，例如：
+当前生产发布适合不需要把约 9.08 GiB 全量包永久放在本机的开发者：
 
 ```text
-https://assets.example.com/mir2/v/<version>
+https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1
 ```
+
+完整图集内容哈希为
+`f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`；紧凑地图 Atlas
+内容哈希为 `732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7`，包含
+57 张内容寻址页面。生产能力声明由 `config/production-web-assets.json` 固定，并通过
+`/api/asset-manifest` 暴露给运行时。
 
 消费：
 
 ```powershell
-$AssetBaseUrl = "https://assets.example.com/mir2/v/<version>"
+$AssetBaseUrl = "https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
 .\scripts\verify-developer-setup.ps1 -AssetBaseUrl $AssetBaseUrl -SkipBuild
 .\scripts\start-developer.ps1 -AssetBaseUrl $AssetBaseUrl -OpenBrowser
 ```
@@ -154,7 +160,7 @@ Invoke-WebRequest -UseBasicParsing -Method Head `
   "$AssetBaseUrl/generated/crystal-packs/full/index.json"
 ```
 
-正式验收必须运行上面的 `verify-developer-setup.ps1 -AssetBaseUrl ...`。该命令读取远程 `remote-asset-release.json`，校验精确对象集合，并发探测全部 5,887 个 full-pack 对象；只看到 `index.json` 返回 200 不能代表全量素材已经发布完整。
+正式验收必须运行上面的 `verify-developer-setup.ps1 -AssetBaseUrl ...`。该命令读取远程 `remote-asset-release.json`，校验精确对象集合，并发探测全部 5,887 个 full-pack 对象；只看到 `index.json` 返回 200 不能代表全量素材已经发布完整。地图 Atlas 应另运行 `npm --prefix apps/web run verify:map-atlas-release`，验证 58 个文件的大小、SHA-256、CORS 与一年不可变缓存策略。
 
 浏览器只按当前场景和当前实体请求需要的 shards/pages；不要增加“启动时下载整个 full pack”的逻辑。Service Worker 使用同源请求作为缓存键，并从配置的 R2 URL 回源。
 
@@ -164,7 +170,7 @@ Invoke-WebRequest -UseBasicParsing -Method Head `
 
 ```dotenv
 NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=ws://127.0.0.1:7110/ws
-NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.example.com/mir2/v/<version>
+NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1
 ```
 
 `.env.local` 被 Git 忽略，不要提交。开发环境设置素材 URL 后会自动启用 Asset Service Worker；可用 `?assetCache=0` 临时禁用。

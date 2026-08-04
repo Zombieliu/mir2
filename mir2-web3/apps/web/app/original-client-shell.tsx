@@ -21,6 +21,7 @@ import {
 import { createAssetResidency } from "../lib/asset-residency";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
+import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
 import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
 import { shouldLoadCrystalFullPack } from "../lib/crystal-full-pack-capability";
 import { loadCrystalFullPackIndex } from "../lib/crystal-full-pack-index";
@@ -1570,10 +1571,10 @@ export function OriginalClientShell({
 
   // GPU map-atlas rendering (DEFAULT ON; escape hatch ?mapAtlas=0 or localStorage mir2-map-atlas=0).
   // Loads the packed atlas manifest once; when present, map tiles render from a few resident atlas
-  // textures on the WebGl2MapAtlasLayer instead of ~450-510 per-frame DOM <img>/R2 GETs. The atlas
-  // pages ship same-origin in the Vercel output (not pruned), so this needs no R2. If the manifest
-  // is absent (404) or WebGL2 can't draw, mapGpuFailed/empty index force the DOM tile path — the map
-  // is never left blank.
+  // textures on the WebGl2MapAtlasLayer instead of ~450-510 per-frame DOM <img>/R2 GETs. Production
+  // accepts only the verified, content-addressed manifest advertised by /api/asset-manifest; the
+  // Service Worker resolves its pages through the immutable R2 release. If capability validation or
+  // GPU drawing fails, mapGpuFailed/empty index force the DOM tile path — the map is never blank.
   const mapAtlasRequested = useMemo(() => {
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);
@@ -1604,15 +1605,23 @@ export function OriginalClientShell({
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
+    if (screen !== "game") return;
     if (!mapAtlasRequested && !bevyMapRequested) return;
     let cancelled = false;
-    void loadMapAtlasIndex().then((index) => {
-      if (!cancelled) setMapAtlasIndex(index);
-    });
+    void loadAssetReleaseCapabilities()
+      .then((capabilities) => {
+        const manifestPath = capabilities.mapAtlas.enabled
+          ? capabilities.mapAtlas.manifestPath
+          : null;
+        return manifestPath ? loadMapAtlasIndex(manifestPath) : null;
+      })
+      .then((index) => {
+        if (!cancelled) setMapAtlasIndex(index);
+      });
     return () => {
       cancelled = true;
     };
-  }, [mapAtlasRequested, bevyMapRequested]);
+  }, [screen, mapAtlasRequested, bevyMapRequested]);
   const decodedStandaloneMapImagesRef = useRef<Map<string, DecodedStandaloneMapImage>>(new Map());
   const standaloneMapImageDecodeRequestedRef = useRef<
     Map<string, StandaloneMapImageDecodeRequest>
@@ -4343,11 +4352,12 @@ async function loadCrystalFullPackBevyEntityAtlasSnapshot(
   key: string,
 ): Promise<BevyEntityAtlasSnapshot | null> {
   if (typeof window === "undefined") return null;
+  const releaseCapabilities = await loadAssetReleaseCapabilities();
   if (
     !shouldLoadCrystalFullPack({
       queryValue: new URLSearchParams(window.location.search).get("crystalFullPack"),
-      configuredValue: process.env.NEXT_PUBLIC_MIR2_CRYSTAL_FULL_PACK_ENABLED,
       remoteAssetBaseUrl: process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL,
+      releaseCapability: releaseCapabilities.crystalFullPack.enabled,
     })
   ) {
     return null;

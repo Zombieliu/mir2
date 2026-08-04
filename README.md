@@ -68,7 +68,7 @@ Player Web 使用同一个链接自动适配桌面、手机横屏和支持 Web G
 | --- | --- | --- | --- |
 | Starter | Git 仓库自带 | 首次启动、协议/玩法开发、登录与新手流程 | 可进入游戏，但不是全角色/怪物/装备素材验收 |
 | GitHub 私有开发素材包 | 私有 GitHub Release 分卷下载并安装到本地 | 核心开发者、离线开发、完整素材调试 | 完整图集；默认缓存加安装约 18.2 GiB，安装前需至少 40 GiB 空闲 |
-| R2 CDN | 启动时传入版本化素材 URL | 未来的远程验收、低端设备和 CDN 测试 | 维护者模板，当前尚未发布可用 URL |
+| R2 CDN | 启动时传入版本化素材 URL | 远程验收、生产按需加载和 CDN 缓存测试 | 已发布并完成 full pack 与地图 Atlas 闭包验收 |
 
 全量素材不会提交进 Git。Starter、私有包和 R2 的详细边界见 [`mir2-web3/docs/ASSET-CONSUMER-SETUP.md`](mir2-web3/docs/ASSET-CONSUMER-SETUP.md)。
 
@@ -169,10 +169,20 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ### R2 CDN
 
-当前没有已发布并通过全对象验收的 R2 URL。以下命令只供维护者完成未来发布后使用，不能把示例域名用于验收：
+当前经过验收的不可变发布为：
+
+```text
+https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1
+```
+
+该版本包含内容哈希为
+`f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e`
+的完整图集（1,440 个 library shards、4,446 张唯一 PNG pages），以及 57 页、内容寻址的
+紧凑地图 Atlas。生产构建从 `mir2-web3/config/production-web-assets.json` 固定版本与能力，
+浏览器仍然只按当前场景请求所需对象。
 
 ```powershell
-$AssetBaseUrl = "https://assets.example.com/mir2/v/<version>"
+$AssetBaseUrl = "https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
 .\scripts\start-developer.ps1 -AssetBaseUrl $AssetBaseUrl -OpenBrowser
 ```
 
@@ -182,6 +192,11 @@ $AssetBaseUrl = "https://assets.example.com/mir2/v/<version>"
 Invoke-WebRequest -Method Head `
   "$AssetBaseUrl/generated/crystal-packs/full/index.json"
 ```
+
+单个 `HEAD` 只适合排障。正式验收应运行
+`.\scripts\verify-developer-setup.ps1 -AssetBaseUrl $AssetBaseUrl`；地图 Atlas 的发布清单、
+哈希、CORS 与一年不可变缓存由
+`npm --prefix mir2-web3/apps/web run verify:map-atlas-release` 验证。
 
 ## 验证开发环境
 

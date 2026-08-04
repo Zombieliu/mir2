@@ -9,18 +9,31 @@ import {
   type BackgroundPrewarmMode,
 } from "../../lib/asset-prewarm-policy";
 import {
+  AssetPrewarmOrchestrator,
+  MIR2_ASSET_FIRST_PLAYABLE_EVENT,
+  isAbortError,
+  type AssetOrchestratorSnapshot,
+  type AssetPrewarmLane,
+} from "../../lib/asset-orchestrator";
+import {
   selectAssetCachePacksForStage,
   type AssetCachePack,
   type AssetPrewarmStage,
 } from "../../lib/asset-cache-packs";
+import {
+  setAssetReleaseCapabilities,
+  type AssetReleaseCapabilities,
+} from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
 
 type AssetManifest = {
   version?: string;
   cacheNamespace?: string;
+  capabilities?: Omit<AssetReleaseCapabilities, "releaseId">;
   remoteAssets?: {
     enabled?: boolean;
     assetBaseUrl?: string | null;
+    browserFallbackBaseUrls?: string[];
     objectPrefix?: string | null;
   };
   runtimeCaches?: {
@@ -84,7 +97,7 @@ type CachePrewarmMetric = {
   durationMs: number;
   sceneCacheHits: number;
   sceneCacheMisses: number;
-  status: "pending" | "running" | "done" | "error";
+  status: "pending" | "running" | "done" | "error" | "cancelled";
 };
 
 type CacheMilestone = {
@@ -201,13 +214,18 @@ declare global {
         transferBytes: number;
       };
       remoteAssetBaseUrl?: string | null;
+      remoteAssetFallbackBaseUrls?: string[];
       staticAssetTiers?: Record<string, number> | null;
       renderTier?: "low" | "medium" | "high";
       prewarmPolicy?: AssetPrewarmPolicy;
+      releaseCapabilities?: AssetReleaseCapabilities;
     };
     __mir2AssetCacheReset?: (options?: AssetCacheResetOptions) => Promise<AssetCacheResetResult>;
     __mir2AssetCachePrewarmStage?: (stage: AssetPrewarmStage) => Promise<void>;
     __mir2PendingAssetPrewarmStage?: AssetPrewarmStage;
+    __mir2AssetOrchestrator?: {
+      snapshot: () => AssetOrchestratorSnapshot;
+    };
     __mir2CacheMetrics?: CacheMetricsHandle;
     __mir2ActiveCacheMetrics?: CacheMetricsHandle;
     __mir2PendingCacheMilestones?: Array<{ name: string; detail?: Record<string, unknown> }>;
@@ -274,6 +292,11 @@ export function AssetCacheRegistrar() {
     let disposed = false;
     let debugInterval = 0;
     let installedStagePrewarm: ((stage: AssetPrewarmStage) => Promise<void>) | null = null;
+    let prewarmOrchestrator: AssetPrewarmOrchestrator | null = null;
+    const handleFirstPlayable = () => {
+      void prewarmOrchestrator?.markFirstPlayable();
+    };
+    window.addEventListener(MIR2_ASSET_FIRST_PLAYABLE_EVENT, handleFirstPlayable);
 
     async function bootCacheLayer() {
       try {
@@ -281,14 +304,23 @@ export function AssetCacheRegistrar() {
         const manifestResponse = await fetch("/api/asset-manifest", {
           cache: "no-cache",
         });
+        if (!manifestResponse.ok) {
+          throw new Error(`asset manifest returned ${manifestResponse.status}`);
+        }
         const manifest = (await manifestResponse.json()) as AssetManifest;
         const cacheNamespace = manifest.cacheNamespace || manifest.version || "";
+        const releaseCapabilities = setAssetReleaseCapabilities({
+          releaseId: manifest.version,
+          ...(manifest.capabilities ?? {}),
+        });
         metrics.markMilestone("assetManifestReady", {
           version: manifest.version,
           cacheNamespace,
           packCount: manifest.resourcePacks?.length ?? 0,
           remoteAssetsEnabled: Boolean(manifest.remoteAssets?.enabled),
           remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+          remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
+          crystalFullPackEnabled: releaseCapabilities.crystalFullPack.enabled,
         });
         logCacheEvent(metrics, "manifest", {
           version: manifest.version,
@@ -352,18 +384,21 @@ export function AssetCacheRegistrar() {
             version: manifest.version,
             cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
             staticAssetTiers:
               typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
                 ? (configured.staticAssetTiers as Record<string, number>)
                 : null,
             renderTier,
             prewarmPolicy,
+            releaseCapabilities,
           };
           logCacheEvent(metrics, "service-worker", {
             status: window.__mir2AssetCache.status,
             version: manifest.version,
             cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
             deletedCaches: deletedCaches.length,
           });
           maybeReloadAfterCacheNamespaceChange(cacheNamespace, deletedCaches);
@@ -398,8 +433,10 @@ export function AssetCacheRegistrar() {
             version: manifest.version,
             cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
             renderTier,
             prewarmPolicy,
+            releaseCapabilities,
           };
           metrics.markMilestone("serviceWorkerSkipped", {
             status: window.__mir2AssetCache.status,
@@ -411,33 +448,39 @@ export function AssetCacheRegistrar() {
         }
 
         // Expose stage prewarming only after the Service Worker has received its
-        // manifest/cache-tier configuration. A single queue prevents select and
-        // game packs from competing for bandwidth during a fast transition.
-        const stagePrewarmPromises = new Map<AssetPrewarmStage, Promise<void>>();
-        const completedPrewarmStages = new Set<AssetPrewarmStage>();
-        let stagePrewarmQueue = Promise.resolve();
+        // manifest/cache-tier configuration. The orchestrator is the single owner
+        // of lifecycle gating and cancellation: critical work runs immediately,
+        // while stale background work is replaced and afterPlayable really waits
+        // for the renderer-backed first-playable signal.
+        const manifestPacks = manifest.resourcePacks ?? [];
+        prewarmOrchestrator = new AssetPrewarmOrchestrator({
+          backgroundMode: prewarmPolicy.backgroundMode,
+          hasWork: (stage, lane) =>
+            selectAssetCachePacksForStage(stage, manifestPacks).some((pack) =>
+              lane === "background" ? pack.phase === "background" : pack.phase !== "background",
+            ),
+          run: async (stage, lane, signal) => {
+            await prewarmAssetPacks(manifest, metrics, prewarmPolicy, stage, lane, signal);
+            if (!disposed) setSnapshot(metrics.snapshot());
+          },
+        });
+        window.__mir2AssetOrchestrator = {
+          snapshot: () => prewarmOrchestrator?.snapshot() ?? {
+            backgroundMode: prewarmPolicy.backgroundMode,
+            firstPlayable: Boolean(window.__mir2AssetFirstPlayable),
+            requestedStage: null,
+            pendingBackgroundStage: null,
+            activeBackgroundStage: null,
+            completed: [],
+            disposed: true,
+          },
+        };
+        if (window.__mir2AssetFirstPlayable) {
+          void prewarmOrchestrator.markFirstPlayable();
+        }
         installedStagePrewarm = (stage) => {
           if (!shouldPrewarm) return Promise.resolve();
-          if (completedPrewarmStages.has(stage)) return Promise.resolve();
-          const existing = stagePrewarmPromises.get(stage);
-          if (existing) return existing;
-          let promise: Promise<void>;
-          promise = stagePrewarmQueue
-            .catch(() => {})
-            .then(async () => {
-              if (stage !== "login" && window.__mir2PendingAssetPrewarmStage !== stage) return;
-              await prewarmAssetPacks(manifest, metrics, prewarmPolicy, stage);
-              completedPrewarmStages.add(stage);
-              if (!disposed) setSnapshot(metrics.snapshot());
-            })
-            .finally(() => {
-              if (stagePrewarmPromises.get(stage) === promise) {
-                stagePrewarmPromises.delete(stage);
-              }
-            });
-          stagePrewarmQueue = promise;
-          stagePrewarmPromises.set(stage, promise);
-          return promise;
+          return prewarmOrchestrator?.requestStage(stage) ?? Promise.resolve();
         };
         window.__mir2AssetCachePrewarmStage = installedStagePrewarm;
 
@@ -495,6 +538,9 @@ export function AssetCacheRegistrar() {
       if (window.__mir2AssetCachePrewarmStage === installedStagePrewarm) {
         delete window.__mir2AssetCachePrewarmStage;
       }
+      prewarmOrchestrator?.dispose();
+      delete window.__mir2AssetOrchestrator;
+      window.removeEventListener(MIR2_ASSET_FIRST_PLAYABLE_EVENT, handleFirstPlayable);
       if (debugInterval) window.clearInterval(debugInterval);
     };
   }, []);
@@ -602,6 +648,7 @@ function CacheDebugPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
       <div style={{ color: "#ffffff", fontWeight: 700, marginBottom: 6 }}>Mir2 Cache Debug</div>
       <div>SW: {assetCache?.status ?? "pending"} {assetCache?.version ? `(${assetCache.version})` : ""}</div>
       <div>CDN: {assetCache?.remoteAssetBaseUrl ? shortPath(assetCache.remoteAssetBaseUrl) : "off"}</div>
+      <div>Browser fallback: {assetCache?.remoteAssetFallbackBaseUrls?.length ?? 0}</div>
       <div>Tiers: {formatStaticAssetTiers(assetCache?.staticAssetTiers)}</div>
       <div>Resources: {summary.gameResourceCount}/{summary.resourceCount}</div>
       <div>Transfer: {formatBytes(summary.transferBytes)} / encoded {formatBytes(summary.encodedBytes)}</div>
@@ -860,14 +907,17 @@ async function prewarmAssetPacks(
   metrics: CacheMetricsHandle,
   options: AssetPrewarmPolicy,
   stage: AssetPrewarmStage,
+  lane: AssetPrewarmLane,
+  signal: AbortSignal,
 ) {
   const stagePacks = selectAssetCachePacksForStage(stage, manifest.resourcePacks ?? []);
-  const packs = stagePacks.filter(
-    (pack) => options.backgroundMode !== "off" || pack.name !== "login-audio",
+  const packs = stagePacks.filter((pack) =>
+    lane === "background" ? pack.phase === "background" : pack.phase !== "background",
   );
-  const includeSceneFrames = options.backgroundMode !== "off";
-  metrics.markMilestone(`prewarmStart:${stage}`, {
+  const includeSceneFrames = lane === "background";
+  metrics.markMilestone(`prewarmStart:${stage}:${lane}`, {
     stage,
+    lane,
     packCount: packs.length,
     skippedPackCount: stagePacks.length - packs.length,
     includeSceneFrames,
@@ -879,20 +929,35 @@ async function prewarmAssetPacks(
   });
   publishPrewarmProgress(metrics, "running");
   await requestPersistentStorage(metrics);
-  const concurrency = stage === "login" ? options.criticalConcurrency : options.backgroundConcurrency;
-  for (const pack of packs) {
-    await prewarmPack(
-      pack,
-      metrics,
-      concurrency,
-      options.maxSceneFrames,
-      options.tier,
-      undefined,
-      includeSceneFrames,
-    );
+  const concurrency = lane === "critical" ? options.criticalConcurrency : options.backgroundConcurrency;
+  try {
+    for (const pack of packs) {
+      if (signal.aborted) throw createAbortError();
+      await prewarmPack(
+        pack,
+        metrics,
+        concurrency,
+        options.maxSceneFrames,
+        options.tier,
+        undefined,
+        includeSceneFrames,
+        signal,
+      );
+    }
+  } catch (error) {
+    if (signal.aborted || isAbortError(error)) {
+      metrics.markMilestone(`prewarmCancelled:${stage}:${lane}`, {
+        stage,
+        lane,
+        reason: signal.reason == null ? null : String(signal.reason),
+      });
+      throw error;
+    }
+    throw error;
+  } finally {
+    await refreshCacheStorageMetrics(metrics);
   }
-  await refreshCacheStorageMetrics(metrics);
-  metrics.markMilestone(`prewarmDone:${stage}`, summarizeMetrics(metrics));
+  metrics.markMilestone(`prewarmDone:${stage}:${lane}`, summarizeMetrics(metrics));
   publishPrewarmProgress(metrics, "done");
 }
 
@@ -923,6 +988,7 @@ async function prewarmPack(
   renderTier: AssetPrewarmPolicy["tier"],
   existingMetric?: CachePrewarmMetric,
   includeScenes = true,
+  signal?: AbortSignal,
 ) {
   const startedAt = performance.now();
   const packMetric = existingMetric ?? createPrewarmMetric(pack, "running", includeScenes);
@@ -931,14 +997,17 @@ async function prewarmPack(
   publishPrewarmProgress(metrics, "running");
 
   try {
+    if (signal?.aborted) throw createAbortError();
     await hintAssetCacheTier(pack.urls, cacheTierForPack(pack));
-    await prewarmUrls(pack.urls, packMetric, metrics, concurrency);
+    await prewarmUrls(pack.urls, packMetric, metrics, concurrency, signal);
 
     for (const scene of includeScenes ? (pack.scenes ?? []) : []) {
+      if (signal?.aborted) throw createAbortError();
       let response: Response;
       try {
-        response = await fetchWithRetry(scene.url, { cache: "force-cache" });
-      } catch {
+        response = await fetchWithRetry(scene.url, { cache: "force-cache", signal }, signal);
+      } catch (error) {
+        if (signal?.aborted || isAbortError(error)) throw error;
         packMetric.failed += 1;
         packMetric.failedUrls.push(scene.url);
         continue;
@@ -966,11 +1035,15 @@ async function prewarmPack(
       packMetric.requested += frameUrls.length;
       publishPrewarmProgress(metrics, "running");
       await hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
-      await prewarmUrls(frameUrls, packMetric, metrics, concurrency);
+      await prewarmUrls(frameUrls, packMetric, metrics, concurrency, signal);
     }
 
     packMetric.status = "done";
   } catch (error) {
+    if (signal?.aborted || isAbortError(error)) {
+      packMetric.status = "cancelled";
+      throw error;
+    }
     packMetric.status = "error";
     packMetric.failed += 1;
     console.warn("[mir2] asset prewarm failed", pack.name, error);
@@ -1005,6 +1078,7 @@ async function prewarmUrls(
   metric: CachePrewarmMetric,
   metrics: CacheMetricsHandle,
   concurrency: number,
+  signal?: AbortSignal,
 ) {
   const queue = [...new Set(urls)].filter(Boolean);
   let index = 0;
@@ -1013,16 +1087,18 @@ async function prewarmUrls(
 
   async function worker() {
     while (index < queue.length) {
+      if (signal?.aborted) throw createAbortError();
       const url = queue[index];
       index += 1;
       try {
-        const response = await fetchWithRetry(url, { cache: "force-cache" });
+        const response = await fetchWithRetry(url, { cache: "force-cache", signal }, signal);
         if (response.ok) metric.ok += 1;
         else {
           metric.failed += 1;
           metric.failedUrls.push(url);
         }
-      } catch {
+      } catch (error) {
+        if (signal?.aborted || isAbortError(error)) throw error;
         metric.failed += 1;
         metric.failedUrls.push(url);
       }
@@ -1040,18 +1116,24 @@ async function prewarmUrls(
   publishPrewarmProgress(metrics, "running");
 }
 
-async function fetchWithRetry(url: string, init: RequestInit) {
+async function fetchWithRetry(url: string, init: RequestInit, signal?: AbortSignal) {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (signal?.aborted) throw createAbortError();
     try {
       const response = await fetch(url, init);
       if (response.ok || attempt === 2) return response;
     } catch (error) {
+      if (signal?.aborted || isAbortError(error)) throw error;
       lastError = error;
     }
-    await sleep(150 * (attempt + 1));
+    await sleep(150 * (attempt + 1), signal);
   }
   throw lastError;
+}
+
+function createAbortError() {
+  return new DOMException("Asset prewarm aborted", "AbortError");
 }
 
 function extractSceneFrameUrls(
@@ -1355,9 +1437,13 @@ function summarizeMetrics(metrics: CacheMetricsHandle): CacheMetricsSummary {
   const sceneMisses = sceneRequests.filter((entry) => entry.sceneCache === "miss").length;
   const latestSceneRequest = sceneRequests.at(-1) ?? null;
   const resourceRuntime = currentResourceRuntimeMetrics();
-  const prewarmRequested = metrics.prewarmRuns.reduce((sum, run) => sum + run.requested, 0);
-  const prewarmOk = metrics.prewarmRuns.reduce((sum, run) => sum + run.ok, 0);
-  const prewarmFailed = metrics.prewarmRuns.reduce((sum, run) => sum + run.failed, 0);
+  // Superseded background runs are intentionally aborted. Excluding them keeps
+  // current-screen progress truthful instead of permanently pinning it below
+  // 100% after an obsolete pack was cancelled halfway through.
+  const activePrewarmRuns = metrics.prewarmRuns.filter((run) => run.status !== "cancelled");
+  const prewarmRequested = activePrewarmRuns.reduce((sum, run) => sum + run.requested, 0);
+  const prewarmOk = activePrewarmRuns.reduce((sum, run) => sum + run.ok, 0);
+  const prewarmFailed = activePrewarmRuns.reduce((sum, run) => sum + run.failed, 0);
   const slowest = [...gameResources]
     .sort((a, b) => b.durationMs - a.durationMs)
     .slice(0, 5)
@@ -1499,6 +1585,8 @@ function logCacheProgress(
       persistGranted: summary.storagePersistGranted,
     },
     remoteAssetBaseUrl: window.__mir2AssetCache?.remoteAssetBaseUrl ?? null,
+    remoteAssetFallbackBaseUrls:
+      window.__mir2AssetCache?.remoteAssetFallbackBaseUrls ?? [],
     failedUrls: activeRun?.failedUrls.slice(0, 5) ?? [],
     atMs: Math.round(performance.now() - metrics.startedAt),
   };
@@ -1613,8 +1701,21 @@ function resolveBackgroundPrewarmModeOverride(params: URLSearchParams): Backgrou
   return null;
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
+function sleep(ms: number, signal?: AbortSignal) {
+  if (!signal) return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+  if (signal.aborted) return Promise.reject(createAbortError());
+  return new Promise<void>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      window.clearTimeout(timer);
+      signal.removeEventListener("abort", onAbort);
+      reject(createAbortError());
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 function isServiceWorkerSafeOrigin() {

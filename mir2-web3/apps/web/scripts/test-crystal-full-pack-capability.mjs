@@ -22,6 +22,20 @@ assert.equal(shouldLoadCrystalFullPack({}), true);
 assert.equal(shouldLoadCrystalFullPack({ remoteAssetBaseUrl: "https://assets.example.test/release" }), false);
 assert.equal(
   shouldLoadCrystalFullPack({
+    remoteAssetBaseUrl: "https://assets.example.test/release",
+    releaseCapability: true,
+  }),
+  true,
+);
+assert.equal(
+  shouldLoadCrystalFullPack({
+    remoteAssetBaseUrl: "https://assets.example.test/release",
+    releaseCapability: false,
+  }),
+  false,
+);
+assert.equal(
+  shouldLoadCrystalFullPack({
     configuredValue: "1",
     remoteAssetBaseUrl: "https://assets.example.test/release",
   }),

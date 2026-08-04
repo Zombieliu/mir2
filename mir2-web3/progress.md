@@ -310,3 +310,46 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   development, but make production packaging a measured thin-client boundary: only the two
   same-origin Bevy runtimes plus explicit bootstrap/generated packs may ship; R2-backed original
   UI/map media must be excluded and fetched through the existing versioned Service Worker cache.
+
+## 2026-08-04 Asset Delivery v2 implementation
+
+- Goal: replace screen-name-only prewarming with a single lifecycle boundary that protects login
+  and first playable, then make runtime/full-pack delivery content-versioned and release-driven.
+- Created isolated branch `feat/asset-delivery-v2` from `origin/main@162d69edb`; the pre-existing
+  generated runtime/atlas changes in `mir2-mainline-dev-environment` remain untouched.
+- Added `AssetPrewarmOrchestrator`: critical/background lanes, a real first-playable gate,
+  latest-screen replacement, abortable stale background fetches, deduplication, and debug state.
+- Moved Crystal scene API loading and Bevy WASM boot out of the login screen. First playable is now
+  emitted only on a browser animation frame after scene interaction readiness.
+- Bevy module/WASM URLs now use `/bevy-runtime/v/<runtime-version>/...` with a rewrite-backed
+  immutable cache contract instead of stable paths plus query strings.
+- The verified production full Crystal pack is declared in `production-web-assets.json` and
+  surfaced by `/api/asset-manifest`; runtime selection reads that release capability instead of a
+  browser build-time feature flag.
+- Added verified map-atlas release capabilities, a compact schema-v2 atlas builder, immutable
+  page names, a release-manifest builder, and a remote verifier. The production atlas now contains
+  13 floor libraries / 2,305 frames / 57 pages; the coordinate manifest fell from 1,857,185 to
+  52,997 bytes and the largest page from 7,650,614 to 468,963 bytes.
+- Uploaded the 58 immutable atlas objects (hashed manifest plus 57 pages, 17,463,398 bytes total)
+  under `mir2/v/20260730-fullcrystal-f71b89aa-gzip1/`. Full SHA-256 verification passed through
+  the hotlink-safe Cloudflare alias; the public R2 fallback passed all-object HEAD verification and
+  manifest SHA-256 verification. The temporary upload Worker and route were removed afterward.
+- Updated the read Worker so `/hotlink-ok/` and canonical requests share a single Cache API key,
+  and updated the Service Worker to try browser-safe R2 origins before the referer-sensitive
+  canonical origin while streaming cold responses before asynchronous CacheStorage completion.
+- Removed the background request for the legacy mutable map-atlas manifest. Runtime now refuses an
+  unverified/non-content-addressed atlas capability and falls back to the established DOM path.
+- Fixed the playable cache harness itself: GPU acceptance no longer starts Chrome with
+  `--disable-gpu`, reports Bevy/WebGL2 renderer evidence, and rejects legacy manifest/page traffic.
+- Pre-ship review hardened the temporary R2 uploader path so it cannot switch origins while carrying
+  credentials, and made repeated atlas builds remove only stale hashed manifests/pages. Both cases
+  now have regression coverage.
+- Final production build passed. With the local atlas directory deliberately removed, real Gateway
+  cold/warm acceptance passed `ok=true`: first playable 15,565/15,415 ms, prewarm 146/146 with zero
+  failures, verified hashed manifest/pages present, legacy manifest/pages zero, no critical console
+  errors, and no non-favicon 404s. Direct final browser acceptance entered BichonProvince as Scout,
+  reported `sceneInteractionReady=true`, Bevy map pipeline active with 675 packed tiles and seven
+  atlas pages, rendered a visually complete map, and produced no console errors.
+- Delivery boundary at commit time: Cloudflare/R2 asset infrastructure is live and the Player Web
+  production build passes; PR merge and the corresponding Vercel production deployment remain the
+  release gates. Real phone/network acceptance remains separate from automated desktop Chromium proof.

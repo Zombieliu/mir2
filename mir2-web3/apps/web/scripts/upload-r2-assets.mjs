@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { constants as zlibConstants, createGzip } from "node:zlib";
 
 import { loadCasUploadPlan } from "./asset-pipeline/cas-release.mjs";
+import { normalizeWorkerUploadPath } from "./asset-pipeline/upload-safety.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
@@ -53,6 +54,9 @@ const cloudflareApiBaseUrl = normalizeOptionalUrl(
     "https://api.cloudflare.com/client/v4",
 );
 const workerUploadUrl = normalizeOptionalUrl(args.workerUrl ?? process.env.MIR2_R2_UPLOAD_WORKER_URL ?? "");
+const workerUploadPath = normalizeWorkerUploadPath(
+  args.workerPath ?? process.env.MIR2_R2_UPLOAD_WORKER_PATH ?? "/upload",
+);
 const workerUploadSecret = process.env.MIR2_R2_UPLOAD_SECRET ?? "";
 const s3Endpoint = normalizeOptionalUrl(
   args.s3Endpoint ??
@@ -416,7 +420,7 @@ async function uploadViaWorker(upload) {
   const body = upload.contentEncoding === "gzip"
     ? source.pipe(createGzip(FULL_PACK_GZIP_OPTIONS))
     : source;
-  const endpoint = new URL("/upload", workerUploadUrl);
+  const endpoint = new URL(workerUploadPath, workerUploadUrl);
   endpoint.searchParams.set("key", upload.objectKey);
   const response = await fetch(endpoint, {
     method: "PUT",

@@ -678,9 +678,8 @@ export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[]
   add(url);
   add(cacheBustedSceneAssetUrl(url, retryAttempt));
 
-  const remoteUrl = remoteSceneAssetUrl(url);
-  add(remoteUrl);
-  if (remoteUrl) {
+  for (const remoteUrl of remoteSceneAssetUrls(url)) {
+    add(remoteUrl);
     add(cacheBustedSceneAssetUrl(remoteUrl, retryAttempt));
   }
 
@@ -1011,6 +1010,7 @@ function blendObjectFrameKey(path: string): string | null {
 type SceneAssetCacheWindow = Window & {
   __mir2AssetCache?: {
     remoteAssetBaseUrl?: string | null;
+    remoteAssetFallbackBaseUrls?: string[];
   };
 };
 
@@ -1034,28 +1034,34 @@ function cacheBustedSceneAssetUrl(url: string, retryAttempt = 1) {
   }
 }
 
-function remoteSceneAssetUrl(url: string) {
+function remoteSceneAssetUrls(url: string) {
   if (typeof window === "undefined") {
-    return null;
+    return [];
   }
 
-  const remoteAssetBaseUrl = (window as SceneAssetCacheWindow).__mir2AssetCache?.remoteAssetBaseUrl;
-  if (!remoteAssetBaseUrl) {
-    return null;
-  }
+  const assetCache = (window as SceneAssetCacheWindow).__mir2AssetCache;
+  const remoteAssetBaseUrls = [
+    ...(assetCache?.remoteAssetFallbackBaseUrls ?? []),
+    assetCache?.remoteAssetBaseUrl,
+  ].filter((value): value is string => Boolean(value));
 
   try {
     const parsed = new URL(url, window.location.href);
-    const normalizedBase = remoteAssetBaseUrl.replace(/\/+$/, "");
-    if (parsed.href.startsWith(`${normalizedBase}/`)) {
-      return null;
-    }
     if (!isRemoteBackedSceneAssetPath(parsed.pathname)) {
-      return null;
+      return [];
     }
-    return `${normalizedBase}/${parsed.pathname.replace(/^\/+/, "")}`;
+    return Array.from(
+      new Set(
+        remoteAssetBaseUrls.flatMap((baseUrl) => {
+          const normalizedBase = baseUrl.replace(/\/+$/, "");
+          return parsed.href.startsWith(`${normalizedBase}/`)
+            ? []
+            : [`${normalizedBase}/${parsed.pathname.replace(/^\/+/, "")}`];
+        }),
+      ),
+    );
   } catch {
-    return null;
+    return [];
   }
 }
 

@@ -120,6 +120,7 @@ export async function GET() {
   const version = createAssetVersion(inputs);
   const remoteAssets = createRemoteAssetConfig(version);
   const cacheNamespace = createCacheNamespace(version, inputs, remoteAssets);
+  const capabilities = createReleaseCapabilities(version, inputs);
   const response = {
     schemaVersion: 1,
     version,
@@ -147,6 +148,7 @@ export async function GET() {
       sceneBlueprintMaxEntries: 512,
       apiMetadataMaxEntries: 512,
     },
+    capabilities,
     remoteAssets,
     resourcePacks: ASSET_CACHE_PACKS,
     inputs,
@@ -160,6 +162,61 @@ export async function GET() {
       "X-Mir2-Asset-Manifest-Version": version,
     },
   });
+}
+
+function createReleaseCapabilities(version: string, inputs: ManifestInputState[]) {
+  const localFullPack = inputs.find((input) => input.name === "crystal-full-pack-index");
+  const pinnedEnabled = process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_ENABLED === "1";
+  const pinnedVerified = process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_VERIFIED === "1";
+  const pinnedHash = normalizeSha256(
+    process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_CONTENT_HASH,
+  );
+  const localHash = normalizeSha256(localFullPack?.contentSha256);
+  const contentHash = pinnedHash ?? localHash;
+  const indexPath = normalizeFullPackIndexPath(
+    process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_PATH,
+  ) ?? (localFullPack?.exists ? "/generated/crystal-packs/full/index.json" : null);
+  const verified = (pinnedEnabled && pinnedVerified) || Boolean(localFullPack?.exists && localHash);
+  const enabled = verified && Boolean(contentHash && indexPath);
+  const pinnedMapAtlasEnabled = process.env.MIR2_PINNED_MAP_ATLAS_ENABLED === "1";
+  const pinnedMapAtlasVerified = process.env.MIR2_PINNED_MAP_ATLAS_VERIFIED === "1";
+  const pinnedMapAtlasHash = normalizeSha256(
+    process.env.MIR2_PINNED_MAP_ATLAS_CONTENT_HASH,
+  );
+  const pinnedMapAtlasManifestPath = normalizeMapAtlasManifestPath(
+    process.env.MIR2_PINNED_MAP_ATLAS_MANIFEST_PATH,
+    pinnedMapAtlasHash,
+  );
+  const mapAtlasEnabled =
+    pinnedMapAtlasEnabled &&
+    pinnedMapAtlasVerified &&
+    Boolean(pinnedMapAtlasHash && pinnedMapAtlasManifestPath);
+
+  return {
+    releaseId: version,
+    crystalFullPack: {
+      enabled,
+      verified,
+      indexPath,
+      contentHash,
+      libraryCount: normalizePositiveInteger(
+        process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_LIBRARY_COUNT,
+      ),
+      pageCount: normalizePositiveInteger(
+        process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_PAGE_COUNT,
+      ),
+    },
+    mapAtlas: {
+      enabled: mapAtlasEnabled,
+      verified: pinnedMapAtlasVerified,
+      manifestPath: pinnedMapAtlasManifestPath,
+      contentHash: pinnedMapAtlasHash,
+      pageCount: normalizePositiveInteger(process.env.MIR2_PINNED_MAP_ATLAS_PAGE_COUNT),
+      maxPageBytes: normalizePositiveInteger(
+        process.env.MIR2_PINNED_MAP_ATLAS_MAX_PAGE_BYTES,
+      ),
+    },
+  };
 }
 
 async function readInputState(input: ManifestInput): Promise<ManifestInputState> {
@@ -264,6 +321,9 @@ function createCacheNamespace(
   // worker actually change; MIR2_ASSET_CACHE_BUSTER remains the manual force-refresh escape hatch.
   hash.update(version);
   hash.update(remoteAssets.assetBaseUrl ?? "");
+  for (const fallbackBaseUrl of remoteAssets.browserFallbackBaseUrls) {
+    hash.update(fallbackBaseUrl);
+  }
   hash.update(remoteAssets.objectPrefix ?? "");
   for (const input of inputs) {
     hash.update(input.name);
@@ -320,6 +380,27 @@ function normalizeAssetVersion(value: string) {
   return normalized.slice(0, 80);
 }
 
+function normalizeSha256(value: string | undefined) {
+  const normalized = value?.trim() ?? "";
+  return /^[a-f0-9]{64}$/i.test(normalized) ? normalized.toLowerCase() : null;
+}
+
+function normalizeFullPackIndexPath(value: string | undefined) {
+  const normalized = value?.trim() ?? "";
+  return normalized.startsWith("/generated/crystal-packs/full/") ? normalized : null;
+}
+
+function normalizeMapAtlasManifestPath(value: string | undefined, contentHash: string | null) {
+  const normalized = value?.trim() ?? "";
+  const match = /^\/generated\/map-atlas\/manifest\.([a-f0-9]{64})\.json$/i.exec(normalized);
+  return match && contentHash && match[1].toLowerCase() === contentHash ? normalized : null;
+}
+
+function normalizePositiveInteger(value: string | undefined) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 function createRemoteAssetConfig(version: string) {
   const configuredBaseUrl =
     process.env.MIR2_PINNED_ASSET_BASE_URL ??
@@ -332,10 +413,17 @@ function createRemoteAssetConfig(version: string) {
     "mir2/v/{version}";
   const objectPrefix = normalizeObjectPrefix(resolveTemplate(objectPrefixTemplate, version));
   const assetBaseUrl = normalizeAssetBaseUrl(resolveTemplate(configuredBaseUrl, version));
+  const browserFallbackBaseUrls = normalizeAssetBaseUrlList(
+    process.env.MIR2_PINNED_ASSET_BROWSER_FALLBACK_BASE_URLS ??
+      process.env.MIR2_ASSET_BROWSER_FALLBACK_BASE_URLS ??
+      "",
+    version,
+  ).filter((fallbackBaseUrl) => fallbackBaseUrl !== assetBaseUrl);
 
   return {
-    enabled: Boolean(assetBaseUrl),
+    enabled: Boolean(assetBaseUrl || browserFallbackBaseUrls.length),
     assetBaseUrl: assetBaseUrl || null,
+    browserFallbackBaseUrls,
     objectPrefix,
     pathMode: "mirror-local-public-path",
     cacheKeyMode: "same-origin-request",
@@ -350,7 +438,40 @@ function resolveTemplate(value: string, version: string) {
 function normalizeAssetBaseUrl(value: string) {
   const trimmed = value.trim();
   if (!trimmed) return "";
-  return trimmed.replace(/\/+$/, "");
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+    if (parsed.username || parsed.password) return "";
+    parsed.search = "";
+    parsed.hash = "";
+    return parsed.href.replace(/\/+$/, "");
+  } catch {
+    return "";
+  }
+}
+
+function normalizeAssetBaseUrlList(value: string, version: string) {
+  const resolved = resolveTemplate(value, version).trim();
+  if (!resolved) return [];
+
+  let candidates: unknown = resolved.split(",");
+  if (resolved.startsWith("[")) {
+    try {
+      candidates = JSON.parse(resolved);
+    } catch {
+      candidates = [];
+    }
+  }
+  if (!Array.isArray(candidates)) return [];
+
+  return Array.from(
+    new Set(
+      candidates
+        .filter((candidate): candidate is string => typeof candidate === "string")
+        .map(normalizeAssetBaseUrl)
+        .filter(Boolean),
+    ),
+  );
 }
 
 function normalizeObjectPrefix(value: string) {
