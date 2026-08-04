@@ -50,12 +50,22 @@ const bevyRuntimePath = new URL("../../game-client/runtime/src/lib.rs", import.m
 const atlasSource = readFileSync(atlasPath, "utf8");
 assert.match(
   atlasSource,
-  /MAP_ATLAS_MANIFEST_URL,\s*\{\s*cache:\s*"no-cache"\s*\}/,
+  /fetch\(safeManifestUrl,\s*\{\s*cache:\s*"no-cache"\s*\}\)/,
   "the atlas coordinate manifest must revalidate against regenerated PNG pages",
 );
 
 const assetWorkerSource = readFileSync(assetWorkerPath, "utf8");
-assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw5"/);
+assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw6"/);
+assert.match(
+  assetWorkerSource,
+  /for \(const remoteRequest of createRemoteAssetRequests\(request\)\)/,
+  "browser-safe R2 fallbacks must be attempted before the canonical CDN",
+);
+assert.match(
+  assetWorkerSource,
+  /event\?\.waitUntil\(cacheWrite\.catch\(\(\) => null\)\)/,
+  "cold atlas delivery must not block on a complete CacheStorage write",
+);
 assert.match(
   assetWorkerSource,
   /new Request\(source,\s*\{\s*cache:\s*"reload"\s*\}\)/,
@@ -80,7 +90,7 @@ assert.match(
 );
 assert.match(assetCacheRegistrarSource, /waitForServiceWorkerActivation\(registration\.waiting, 3000\)/);
 
-const { mapAtlasPathRequiresAlphaKey } = loadTypeScriptModule(atlasPath);
+const { buildMapAtlasIndex, mapAtlasPathRequiresAlphaKey } = loadTypeScriptModule(atlasPath);
 const {
   crystalFrontMapBlendMode,
   crystalMiddleMapBlendMode,
@@ -100,6 +110,32 @@ assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir2/Tiles/0.png"
 assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir2/SmTiles/0.png"), false);
 assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir3/Sand/Dungeonsc/1659.png"), true);
 assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir3/Sand/Tilesc/1659.png"), false);
+
+const compactMapAtlas = buildMapAtlasIndex({
+  schemaVersion: 2,
+  pages: [
+    {
+      l: "WemadeMir2/Tiles",
+      p: 3,
+      w: 1024,
+      h: 256,
+      b: 123456,
+      u: "/generated/map-atlas/WemadeMir2-Tiles/p3.hash.png",
+      r: [[901, 1, 2, 96, 64]],
+    },
+  ],
+});
+assert.equal(
+  compactMapAtlas?.rectToAtlas.get("WemadeMir2/Tiles#901"),
+  "map:WemadeMir2/Tiles#p3",
+);
+assert.deepEqual(compactMapAtlas?.rect.get("WemadeMir2/Tiles#901"), {
+  key: "WemadeMir2/Tiles#901",
+  x: 1,
+  y: 2,
+  width: 96,
+  height: 64,
+});
 
 assert.equal(crystalFrontMapBlendMode(0x88), "additive");
 assert.equal(decodeCrystalFrontAnimationCount(0x88), 8);
@@ -235,7 +271,7 @@ assert.doesNotMatch(
 );
 assert.match(
   mapRenderingSource,
-  /viewportFloorDepthForCell\(cell\.x, cell\.y, player, FLOOR_LAYER_ORDERS\[sprite\.kind\]\)/,
+  /viewportFloorDepthForCell\([\s\S]{0,160}FLOOR_LAYER_ORDERS\[sprite\.kind\],[\s\S]{0,40}viewportLayout/,
   "all Crystal floor layers must stay in the floor depth band below objects and entities",
 );
 assert.doesNotMatch(

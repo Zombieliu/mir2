@@ -2,6 +2,7 @@ type CrystalFullPackCapabilityOptions = {
   queryValue?: string | null;
   configuredValue?: string | null;
   remoteAssetBaseUrl?: string | null;
+  releaseCapability?: boolean | null;
 };
 
 const ENABLED_VALUES = new Set(["1", "true", "on"]);
@@ -16,6 +17,7 @@ export function shouldLoadCrystalFullPack({
   queryValue,
   configuredValue,
   remoteAssetBaseUrl,
+  releaseCapability,
 }: CrystalFullPackCapabilityOptions): boolean {
   const query = normalizeFlag(queryValue);
   if (ENABLED_VALUES.has(query)) return true;
@@ -24,6 +26,8 @@ export function shouldLoadCrystalFullPack({
   const configured = normalizeFlag(configuredValue);
   if (ENABLED_VALUES.has(configured)) return true;
   if (DISABLED_VALUES.has(configured)) return false;
+
+  if (typeof releaseCapability === "boolean") return releaseCapability;
 
   return !remoteAssetBaseUrl?.trim();
 }

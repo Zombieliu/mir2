@@ -21,9 +21,9 @@ the authorized Windows asset workstation.
 - Cleanup deletes objects, not the R2 bucket.
 - Do not commit R2 credentials or generated full-pack files.
 
-## Current Candidate
+## Current Verified Release
 
-The locally generated candidate at the time this runbook was added is:
+The current immutable asset release is:
 
 ```text
 version:       20260730-fullcrystal-f71b89aa-gzip1
@@ -34,10 +34,14 @@ objects:       46,003 assets plus remote-asset-release.json
 raw bytes:     10,293,455,313
 stored bytes:  7,922,261,854 before the release manifest
 missing:       0
+map atlas:     57 pages / 17,463,398 bytes including manifest
+atlas hash:    732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7
 ```
 
-This is a candidate, not proof that production has switched. The live
-manifest and R2 object checks below are authoritative.
+The R2 full-pack and map-atlas object closures have passed remote verification,
+and `config/production-web-assets.json` pins this release. That still does not
+prove a particular Web deployment has switched: the live `/api/asset-manifest`
+and the production browser smoke below remain authoritative.
 
 ## Credentials
 
@@ -90,6 +94,21 @@ npm run assets:r2:upload
 The uploader sends all assets first and publishes
 `remote-asset-release.json` last.
 
+Build and upload the compact map atlas under the same immutable prefix. The
+atlas-only manifest must **not** replace the full release's
+`remote-asset-release.json`:
+
+```powershell
+npm run assets:map-atlas:build
+$MapAtlasRelease = Join-Path $env:TEMP "mir2-map-atlas-release.json"
+npm run assets:map-atlas:release -- `
+  --objectPrefix $env:MIR2_ASSET_OBJECT_PREFIX `
+  --output $MapAtlasRelease
+npm run assets:r2:upload -- `
+  --manifest $MapAtlasRelease `
+  --includeReleaseManifest false
+```
+
 ## 3. Verify The R2 Closure
 
 ```powershell
@@ -108,6 +127,16 @@ This checks the required UI/map/entity assets, all 5,887 full-pack objects,
 all map-atlas pages, and the gzip response headers. Each probe is bounded by
 `probeTimeoutMs` so a stalled TLS request is retried instead of hanging the
 release indefinitely.
+
+Verify the content-addressed atlas through every configured browser fallback:
+
+```powershell
+npm run verify:map-atlas-release -- --release $MapAtlasRelease
+```
+
+This downloads and SHA-256 checks every atlas file from the primary browser-safe
+origin, checks the alternate fallback closures, and requires CORS plus a
+one-year immutable cache policy.
 
 ## 4. Switch Worker And Vercel
 

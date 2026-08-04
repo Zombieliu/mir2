@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -19,9 +20,11 @@ const DEFAULT_OUT_DIR = path.join(PUBLIC_ROOT, "generated", "map-atlas");
 const ATLAS_PADDING = 1;
 const INITIAL_WIDTH = 1024;
 export const MAX_SIZE = 4096;
+export const DEFAULT_MAX_PAGE_PIXELS = 1024 * 256;
 
 const args = parseArgs(process.argv.slice(2));
 const outDir = path.resolve(args.outDir ?? DEFAULT_OUT_DIR);
+const maxPagePixels = positiveInteger(args.maxPagePixels) || DEFAULT_MAX_PAGE_PIXELS;
 // Optional comma-separated allowlist of library keys (e.g. "WemadeMir2/Tiles,WemadeMir2/Objects").
 // Default: every leaf library directory under original-map that contains PNGs.
 const onlyLibraries = parseListArg(args.libraries, null);
@@ -49,12 +52,13 @@ async function main() {
   const libraries = await discoverLibraries();
   const selected = onlyLibraries
     ? libraries.filter((lib) => onlyLibraries.includes(lib.libraryKey))
-    : libraries;
+    : libraries.filter((lib) => mapAtlasLibrarySupportsRawUpload(lib.libraryKey));
   if (!selected.length) {
     throw new Error("No map-library PNG directories found under public/original-map");
   }
 
   await fs.mkdir(outDir, { recursive: true });
+  await removeStaleMapAtlasArtifacts(outDir);
   const atlases = [];
   let totalSources = 0;
   let totalImageBytes = 0;
@@ -65,57 +69,61 @@ async function main() {
     totalSources += sources.length;
 
     // One library may need multiple pages if its frames exceed the texture budget.
-    const pages = packIntoPages(sources);
+    const pages = packIntoPages(sources, maxPagePixels);
     for (let pageIndex = 0; pageIndex < pages.length; pageIndex += 1) {
       const page = pages[pageIndex];
-      const atlasKey = `map:${lib.libraryKey}#p${pageIndex}`;
-      const safeName = `${lib.libraryKey.replace(/[^a-z0-9]+/gi, "-")}-p${pageIndex}.png`;
-      const imageRelDir = path.join("generated", "map-atlas", lib.dirParts.join("-"));
-      const imageAbsDir = path.join(PUBLIC_ROOT, imageRelDir);
+      const imageAbsDir = path.join(outDir, lib.dirParts.join("-"));
       await fs.mkdir(imageAbsDir, { recursive: true });
-      const imageAbsPath = path.join(imageAbsDir, `p${pageIndex}.png`);
-      const imageUrl = `/${path.join(imageRelDir, `p${pageIndex}.png`).split(path.sep).join("/")}`;
-
-      await sharp({
+      const imageBuffer = await sharp({
         create: { width: page.width, height: page.height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
       })
         .composite(page.sources.map((s) => ({ input: s.filePath, left: s.x, top: s.y })))
         .png({ compressionLevel: 9, adaptiveFiltering: true })
-        .toFile(imageAbsPath);
+        .toBuffer();
+      const imageHash = createHash("sha256").update(imageBuffer).digest("hex");
+      const imageFileName = `p${pageIndex}.${imageHash.slice(0, 16)}.png`;
+      const imageAbsPath = path.join(imageAbsDir, imageFileName);
+      await fs.writeFile(imageAbsPath, imageBuffer);
+      const imageRelativePath = path.relative(PUBLIC_ROOT, imageAbsPath);
+      if (imageRelativePath.startsWith("..") || path.isAbsolute(imageRelativePath)) {
+        throw new Error(`Map atlas output must stay under ${PUBLIC_ROOT}: ${imageAbsPath}`);
+      }
+      const imageUrl = `/${imageRelativePath.split(path.sep).join("/")}`;
 
-      const imageStat = await fs.stat(imageAbsPath);
-      totalImageBytes += imageStat.size;
-      void safeName;
+      totalImageBytes += imageBuffer.length;
       atlases.push({
-        key: atlasKey,
-        library: lib.libraryKey,
-        page: pageIndex,
-        width: page.width,
-        height: page.height,
-        sourceCount: page.sources.length,
-        imageBytes: imageStat.size,
-        imageUrl,
-        rects: page.sources
-          .map((s) => ({ key: `${lib.libraryKey}#${s.frame}`, x: s.x, y: s.y, width: s.width, height: s.height }))
-          .sort((a, b) => a.key.localeCompare(b.key)),
+        l: lib.libraryKey,
+        p: pageIndex,
+        w: page.width,
+        h: page.height,
+        b: imageBuffer.length,
+        u: imageUrl,
+        r: page.sources
+          .map((s) => [Number(s.frame), s.x, s.y, s.width, s.height])
+          .sort((a, b) => a[0] - b[0]),
       });
     }
   }
 
   const manifestPath = path.join(outDir, "manifest.json");
   const manifest = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: "mir2-map-atlas-manifest",
-    generatedAt: args.generatedAt ?? null, // stamped by caller/CI; null keeps the file deterministic
-    atlases: atlases.sort((a, b) => a.key.localeCompare(b.key)),
+    pages: atlases.sort((a, b) => a.l.localeCompare(b.l) || a.p - b.p),
     stats: {
-      libraryCount: new Set(atlases.map((a) => a.library)).size,
+      libraryCount: new Set(atlases.map((a) => a.l)).size,
       atlasPageCount: atlases.length,
       sourceCount: totalSources,
       imageBytes: totalImageBytes,
+      maxPageBytes: Math.max(...atlases.map((a) => a.b)),
+      maxPagePixels,
     },
   };
-  await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  const manifestJson = `${JSON.stringify(manifest)}\n`;
+  const contentHash = createHash("sha256").update(manifestJson).digest("hex");
+  const releaseManifestPath = path.join(outDir, `manifest.${contentHash}.json`);
+  await fs.writeFile(manifestPath, manifestJson, "utf8");
+  await fs.writeFile(releaseManifestPath, manifestJson, "utf8");
 
   console.log(
     JSON.stringify(
@@ -125,7 +133,11 @@ async function main() {
         atlasPageCount: manifest.stats.atlasPageCount,
         sourceCount: totalSources,
         imageBytes: totalImageBytes,
+        maxPageBytes: manifest.stats.maxPageBytes,
+        maxPagePixels,
+        contentHash,
         manifestPath,
+        releaseManifestPath,
       },
       null,
       2,
@@ -177,10 +189,16 @@ async function collectLibrarySources(lib) {
 
 // Shelf-pack into one or more pages (each <= MAX_SIZE). Tall/wide frames that don't fit a row
 // wrap to the next row; when the page height would exceed MAX_SIZE, start a new page.
-export function packIntoPages(sources) {
+export function packIntoPages(sources, pagePixelBudget = DEFAULT_MAX_PAGE_PIXELS) {
   const sorted = [...sources].sort((a, b) => b.height - a.height || b.width - a.width || a.frame.localeCompare(b.frame));
   const widest = sorted.reduce((max, s) => Math.max(max, s.width + ATLAS_PADDING * 2), 1);
   const width = Math.min(MAX_SIZE, Math.max(INITIAL_WIDTH, nextPowerOfTwo(widest)));
+  const tallest = sorted.reduce((max, s) => Math.max(max, s.height + ATLAS_PADDING * 2), 1);
+  const budgetHeight = previousPowerOfTwo(Math.max(1, Math.floor(pagePixelBudget / width)));
+  const maxPageHeight = Math.min(
+    MAX_SIZE,
+    Math.max(nextPowerOfTwo(tallest), budgetHeight),
+  );
 
   const pages = [];
   let current = newPage();
@@ -194,7 +212,7 @@ export function packIntoPages(sources) {
   };
 
   for (const s of sorted) {
-    if (s.width + ATLAS_PADDING * 2 > width || s.height + ATLAS_PADDING * 2 > MAX_SIZE) {
+    if (s.width + ATLAS_PADDING * 2 > width || s.height + ATLAS_PADDING * 2 > maxPageHeight) {
       throw new Error(`Frame ${s.filePath} (${s.width}x${s.height}) exceeds ${MAX_SIZE}px atlas budget`);
     }
     if (current.cursorX + s.width + ATLAS_PADDING > width) {
@@ -203,7 +221,7 @@ export function packIntoPages(sources) {
       current.rowHeight = 0;
     }
     // Would this row overflow the page? Roll to a new page.
-    if (current.cursorY + s.height + ATLAS_PADDING > MAX_SIZE) {
+    if (current.cursorY + s.height + ATLAS_PADDING > maxPageHeight) {
       flush();
       current = newPage();
     }
@@ -217,20 +235,54 @@ export function packIntoPages(sources) {
 }
 
 export function mapAtlasManifestFitsBudget(manifest, maxSize = MAX_SIZE) {
+  const pages = manifest?.schemaVersion === 2 ? manifest.pages : null;
   return Boolean(
-    manifest &&
-      Array.isArray(manifest.atlases) &&
-      manifest.atlases.length > 0 &&
-      manifest.atlases.every(
-        (atlas) =>
-          Number.isFinite(atlas?.width) &&
-          Number.isFinite(atlas?.height) &&
-          atlas.width > 0 &&
-          atlas.height > 0 &&
-          atlas.width <= maxSize &&
-          atlas.height <= maxSize,
+    Array.isArray(pages) &&
+      pages.length > 0 &&
+      pages.every(
+        (page) =>
+          Number.isFinite(page?.w) &&
+          Number.isFinite(page?.h) &&
+          page.w > 0 &&
+          page.h > 0 &&
+          page.w <= maxSize &&
+          page.h <= maxSize &&
+          Number.isFinite(page?.b) &&
+          page.b > 0,
       ),
   );
+}
+
+export function mapAtlasLibrarySupportsRawUpload(libraryKey) {
+  const leaf = String(libraryKey).split("/").filter(Boolean).at(-1) ?? "";
+  return /^(?:sm)?tiles\d*c?$/i.test(leaf);
+}
+
+export async function removeStaleMapAtlasArtifacts(root) {
+  let removed = 0;
+  async function walk(directory, isRoot = false) {
+    let entries;
+    try {
+      entries = await fs.readdir(directory, { withFileTypes: true });
+    } catch (error) {
+      if (error?.code === "ENOENT") return;
+      throw error;
+    }
+    for (const entry of entries) {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        await walk(entryPath);
+        continue;
+      }
+      const staleManifest = isRoot && /^manifest\.[0-9a-f]{64}\.json$/.test(entry.name);
+      const stalePage = /^p\d+\.[0-9a-f]{16}\.png$/.test(entry.name);
+      if (!entry.isFile() || (!staleManifest && !stalePage)) continue;
+      await fs.rm(entryPath, { force: true });
+      removed += 1;
+    }
+  }
+  await walk(path.resolve(root), true);
+  return removed;
 }
 
 function newPage() {
@@ -247,6 +299,9 @@ function newPage() {
 
 function nextPowerOfTwo(value) {
   return 2 ** Math.ceil(Math.log2(Math.max(1, value)));
+}
+function previousPowerOfTwo(value) {
+  return 2 ** Math.floor(Math.log2(Math.max(1, value)));
 }
 function positiveInteger(value) {
   return Number.isFinite(value) && value > 0 ? Math.trunc(value) : 0;

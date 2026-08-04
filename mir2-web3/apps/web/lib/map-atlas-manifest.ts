@@ -26,6 +26,17 @@ export type MapAtlasManifest = {
   schemaVersion?: number;
   kind?: string;
   atlases?: MapAtlasPage[];
+  pages?: MapAtlasCompactPage[];
+};
+
+export type MapAtlasCompactPage = {
+  l: string;
+  p: number;
+  w: number;
+  h: number;
+  b?: number;
+  u: string;
+  r: Array<[number | string, number, number, number, number]>;
 };
 
 export type MapAtlasIndex = {
@@ -36,16 +47,17 @@ export type MapAtlasIndex = {
 
 export const MAP_ATLAS_MANIFEST_URL = "/generated/map-atlas/manifest.json";
 
-let manifestPromise: Promise<MapAtlasIndex | null> | null = null;
+const manifestPromises = new Map<string, Promise<MapAtlasIndex | null>>();
 
 export function buildMapAtlasIndex(manifest: MapAtlasManifest | null): MapAtlasIndex | null {
-  if (!manifest?.atlases?.length) {
+  const atlasPages = normalizeMapAtlasPages(manifest);
+  if (!atlasPages.length) {
     return null;
   }
   const pages = new Map<string, MapAtlasPage>();
   const rectToAtlas = new Map<string, string>();
   const rect = new Map<string, MapAtlasRect>();
-  for (const page of manifest.atlases) {
+  for (const page of atlasPages) {
     if (!page?.key || !page.imageUrl || !Array.isArray(page.rects)) {
       continue;
     }
@@ -61,16 +73,69 @@ export function buildMapAtlasIndex(manifest: MapAtlasManifest | null): MapAtlasI
   return pages.size ? { pages, rectToAtlas, rect } : null;
 }
 
-/** Fetch + index the map-atlas manifest once. Returns null if absent/unparseable (DOM fallback). */
-export function loadMapAtlasIndex(): Promise<MapAtlasIndex | null> {
-  if (manifestPromise) {
-    return manifestPromise;
+function normalizeMapAtlasPages(manifest: MapAtlasManifest | null): MapAtlasPage[] {
+  if (manifest?.schemaVersion === 2 && Array.isArray(manifest.pages)) {
+    return manifest.pages.flatMap((page) => {
+      if (
+        !page ||
+        typeof page.l !== "string" ||
+        !page.l ||
+        !Number.isInteger(page.p) ||
+        page.p < 0 ||
+        !Number.isFinite(page.w) ||
+        page.w <= 0 ||
+        !Number.isFinite(page.h) ||
+        page.h <= 0 ||
+        typeof page.u !== "string" ||
+        !page.u.startsWith("/generated/map-atlas/") ||
+        !Array.isArray(page.r)
+      ) {
+        return [];
+      }
+      const rects = page.r.flatMap((rect): MapAtlasRect[] => {
+        if (
+          !Array.isArray(rect) ||
+          rect.length !== 5 ||
+          !Number.isFinite(Number(rect[0])) ||
+          !rect.slice(1).every((value) => Number.isFinite(value) && Number(value) >= 0)
+        ) {
+          return [];
+        }
+        return [{
+          key: `${page.l}#${Number(rect[0])}`,
+          x: Number(rect[1]),
+          y: Number(rect[2]),
+          width: Number(rect[3]),
+          height: Number(rect[4]),
+        }];
+      });
+      return [{
+        key: `map:${page.l}#p${page.p}`,
+        library: page.l,
+        page: page.p,
+        width: page.w,
+        height: page.h,
+        imageUrl: page.u,
+        rects,
+      }];
+    });
   }
-  manifestPromise = (async () => {
+  return Array.isArray(manifest?.atlases) ? manifest.atlases : [];
+}
+
+/** Fetch + index the map-atlas manifest once. Returns null if absent/unparseable (DOM fallback). */
+export function loadMapAtlasIndex(
+  manifestUrl = MAP_ATLAS_MANIFEST_URL,
+): Promise<MapAtlasIndex | null> {
+  const safeManifestUrl = normalizeMapAtlasManifestUrl(manifestUrl);
+  const existing = manifestPromises.get(safeManifestUrl);
+  if (existing) return existing;
+
+  const pending = (async () => {
     try {
       // The URL is stable while atlas coordinates change whenever the pack is
       // regenerated. Revalidate it so rects cannot outlive their matching PNG.
-      const response = await fetch(MAP_ATLAS_MANIFEST_URL, { cache: "no-cache" });
+      const response = await fetch(safeManifestUrl, { cache: "no-cache" });
       if (!response.ok) {
         return null;
       }
@@ -80,7 +145,15 @@ export function loadMapAtlasIndex(): Promise<MapAtlasIndex | null> {
       return null;
     }
   })();
-  return manifestPromise;
+  manifestPromises.set(safeManifestUrl, pending);
+  return pending;
+}
+
+function normalizeMapAtlasManifestUrl(value: string) {
+  const normalized = value.trim();
+  return normalized.startsWith("/generated/map-atlas/") && normalized.endsWith(".json")
+    ? normalized
+    : MAP_ATLAS_MANIFEST_URL;
 }
 
 /** "/original-map/WemadeMir2/Tiles/901.png" -> rect key "WemadeMir2/Tiles#901" (matches the packer). */

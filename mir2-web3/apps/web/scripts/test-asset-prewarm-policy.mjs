@@ -18,6 +18,15 @@ const assetCacheRegistrarPath = fileURLToPath(
   new URL("../app/components/asset-cache-registrar.tsx", import.meta.url),
 );
 const pagePath = fileURLToPath(new URL("../app/page.tsx", import.meta.url));
+const originalClientShellPath = fileURLToPath(
+  new URL("../app/original-client-shell.tsx", import.meta.url),
+);
+const sceneVisualLayersPath = fileURLToPath(
+  new URL("../app/components/original-client-scene-visual-layers.tsx", import.meta.url),
+);
+const playableSmokePath = fileURLToPath(
+  new URL("./smoke-cache-metrics.mjs", import.meta.url),
+);
 
 function loadTypeScriptModule(sourcePath, dependencies = {}) {
   const compiled = ts.transpileModule(readFileSync(sourcePath, "utf8"), {
@@ -127,6 +136,13 @@ test("deferred scene stages expose deterministic follow-up pack selections", () 
   );
   assert.ok(deferredPacks.every((pack) => pack.phase === "background"));
   assert.ok(deferredPacks.every((pack) => pack.cacheTier === "background"));
+  assert.equal(
+    deferredPacks.some((pack) =>
+      pack.urls.includes("/generated/map-atlas/manifest.json"),
+    ),
+    false,
+    "production prewarm must not redownload the legacy mutable atlas manifest",
+  );
 });
 
 test("the UI lifecycle requests each deferred prewarm stage", () => {
@@ -135,8 +151,11 @@ test("the UI lifecycle requests each deferred prewarm stage", () => {
 
   assert.match(registrarSource, /selectAssetCachePacksForStage\(stage,/);
   assert.match(registrarSource, /installedStagePrewarm\?\.\("login"\)/);
-  assert.match(registrarSource, /options\.backgroundMode !== "off" \|\| pack\.name !== "login-audio"/);
-  assert.match(registrarSource, /const includeSceneFrames = options\.backgroundMode !== "off"/);
+  assert.match(registrarSource, /new AssetPrewarmOrchestrator/);
+  assert.match(registrarSource, /const includeSceneFrames = lane === "background"/);
+  assert.match(registrarSource, /run\.status !== "cancelled"/);
+  assert.match(registrarSource, /if \(!manifestResponse\.ok\)/);
+  assert.doesNotMatch(registrarSource, /pack\.name !== "login-audio"/);
   assert.ok(
     registrarSource.indexOf("window.__mir2AssetCachePrewarmStage = installedStagePrewarm") >
       registrarSource.indexOf('metrics.markMilestone("serviceWorkerSkipped"'),
@@ -145,10 +164,37 @@ test("the UI lifecycle requests each deferred prewarm stage", () => {
   assert.match(pageSource, /screen === "select" \? "character-select"/);
   assert.match(pageSource, /screen === "game" \? "game" : "login"/);
   assert.match(pageSource, /__mir2AssetCachePrewarmStage\?\.\(stage\)/);
+  assert.match(pageSource, /signalAssetFirstPlayable\(detail\)/);
+  assert.match(pageSource, /if \(screen !== "game"\)/);
+  assert.match(pageSource, /const shouldBootBevyRuntime = screen !== "login"/);
 });
 
 test("only the low tier prewarms raw map frames for the DOM compatibility path", () => {
   assert.equal(shouldPrewarmRawMapFrames("low"), true);
   assert.equal(shouldPrewarmRawMapFrames("medium"), false);
   assert.equal(shouldPrewarmRawMapFrames("high"), false);
+});
+
+test("heavy map and effect metadata loaders stay behind the game screen boundary", () => {
+  const shellSource = readFileSync(originalClientShellPath, "utf8");
+  const visualLayersSource = readFileSync(sceneVisualLayersPath, "utf8");
+
+  assert.match(
+    shellSource,
+    /useEffect\(\(\) => \{\s+if \(screen !== "game"\) return;\s+if \(!mapAtlasRequested/,
+  );
+  assert.match(visualLayersSource, /function useEffectAssets\(enabled: boolean\)/);
+  assert.match(visualLayersSource, /if \(!enabled\) return;/);
+  assert.match(visualLayersSource, /useEffectAssets\(screen === "game"\)/);
+});
+
+test("playable cache acceptance waits for lifecycle background work to settle", () => {
+  const smokeSource = readFileSync(playableSmokePath, "utf8");
+  assert.match(smokeSource, /window\.__mir2AssetOrchestrator\?\.snapshot\?\.\(\)/);
+  assert.match(smokeSource, /!playableMode \|\| status\?\.orchestratorReady/);
+  assert.match(smokeSource, /coldAssetOrchestratorSettled/);
+  assert.match(smokeSource, /warmAssetOrchestratorSettled/);
+  assert.match(smokeSource, /playableMode \? "" : "--disable-gpu"/);
+  assert.match(smokeSource, /coldMapRendererAvailable/);
+  assert.match(smokeSource, /noLegacyMapAtlasManifest/);
 });

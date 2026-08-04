@@ -18,6 +18,23 @@ const productionAssetRelease = isVercelProduction
       version: string;
       objectPrefix: string;
       assetBaseUrl: string;
+      browserFallbackBaseUrls?: string[];
+      mapAtlas?: {
+        enabled?: boolean;
+        verified?: boolean;
+        manifestPath?: string;
+        contentHash?: string;
+        pageCount?: number;
+        maxPageBytes?: number;
+      };
+      fullCrystalPack?: {
+        enabled?: boolean;
+        verified?: boolean;
+        path?: string;
+        contentHash?: string;
+        libraryCount?: number;
+        pageCount?: number;
+      };
     }
   : null;
 const immutableGameAssetCache = isDevelopment
@@ -26,6 +43,9 @@ const immutableGameAssetCache = isDevelopment
 const shortRuntimeCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=0, must-revalidate";
+const immutableVersionedRuntimeCache = isDevelopment
+  ? "public, max-age=0, must-revalidate"
+  : "public, max-age=31536000, immutable";
 const clearAltSvcHeader = { key: "Alt-Svc", value: "clear" };
 const buildRevision =
   process.env.MIR2_DEPLOY_REVISION?.trim() ||
@@ -78,6 +98,33 @@ const nextConfig: NextConfig = {
     MIR2_PINNED_ASSET_VERSION: productionAssetRelease?.version ?? "",
     MIR2_PINNED_ASSET_OBJECT_PREFIX: productionAssetRelease?.objectPrefix ?? "",
     MIR2_PINNED_ASSET_BASE_URL: productionAssetRelease?.assetBaseUrl ?? "",
+    MIR2_PINNED_ASSET_BROWSER_FALLBACK_BASE_URLS: JSON.stringify(
+      productionAssetRelease?.browserFallbackBaseUrls ?? [],
+    ),
+    MIR2_PINNED_MAP_ATLAS_ENABLED:
+      productionAssetRelease?.mapAtlas?.enabled === true ? "1" : "",
+    MIR2_PINNED_MAP_ATLAS_VERIFIED:
+      productionAssetRelease?.mapAtlas?.verified === true ? "1" : "",
+    MIR2_PINNED_MAP_ATLAS_MANIFEST_PATH:
+      productionAssetRelease?.mapAtlas?.manifestPath ?? "",
+    MIR2_PINNED_MAP_ATLAS_CONTENT_HASH:
+      productionAssetRelease?.mapAtlas?.contentHash ?? "",
+    MIR2_PINNED_MAP_ATLAS_PAGE_COUNT:
+      String(productionAssetRelease?.mapAtlas?.pageCount ?? ""),
+    MIR2_PINNED_MAP_ATLAS_MAX_PAGE_BYTES:
+      String(productionAssetRelease?.mapAtlas?.maxPageBytes ?? ""),
+    MIR2_PINNED_CRYSTAL_FULL_PACK_ENABLED:
+      productionAssetRelease?.fullCrystalPack?.enabled === true ? "1" : "",
+    MIR2_PINNED_CRYSTAL_FULL_PACK_VERIFIED:
+      productionAssetRelease?.fullCrystalPack?.verified === true ? "1" : "",
+    MIR2_PINNED_CRYSTAL_FULL_PACK_PATH:
+      productionAssetRelease?.fullCrystalPack?.path ?? "",
+    MIR2_PINNED_CRYSTAL_FULL_PACK_CONTENT_HASH:
+      productionAssetRelease?.fullCrystalPack?.contentHash ?? "",
+    MIR2_PINNED_CRYSTAL_FULL_PACK_LIBRARY_COUNT:
+      String(productionAssetRelease?.fullCrystalPack?.libraryCount ?? ""),
+    MIR2_PINNED_CRYSTAL_FULL_PACK_PAGE_COUNT:
+      String(productionAssetRelease?.fullCrystalPack?.pageCount ?? ""),
   },
   // Normal local/Vercel builds keep incremental caches. Downloadable bundles
   // opt into standalone output so only traced runtime dependencies ship.
@@ -159,6 +206,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/bevy-runtime/v/:version/:path*",
+        headers: [
+          { key: "Cache-Control", value: immutableVersionedRuntimeCache },
+          { key: "X-Mir2-Asset-Cache", value: "bevy-runtime-versioned" },
+          clearAltSvcHeader,
+        ],
+      },
+      {
         source: "/api/asset-manifest",
         headers: [
           { key: "Cache-Control", value: shortRuntimeCache },
@@ -188,6 +243,12 @@ const nextConfig: NextConfig = {
     // hotlink protection then 403s it. The handler does its own server-side fetch
     // (Node fetch sends no Referer) so R2 returns 200.
     return {
+      beforeFiles: [
+        {
+          source: "/bevy-runtime/v/:version/:backend/:path*",
+          destination: "/bevy-runtime/:backend/:path*",
+        },
+      ],
       fallback: assetPrefixes.map((prefix) => ({
         source: `/${prefix}/:path*`,
         destination: `/api/r2-proxy/${prefix}/:path*`,
