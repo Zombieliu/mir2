@@ -190,6 +190,13 @@ pack:
 | Private GitHub bundle | `.\scripts\install-developer-assets.ps1 -Download` | Full offline developer assets |
 | R2 CDN | `.\scripts\start-developer.ps1 -AssetBaseUrl <url>` | Remote acceptance and CDN/cache testing |
 
+The verified production asset base is
+`https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1`.
+`config/production-web-assets.json` pins the immutable version and advertises the
+verified full-pack and content-addressed map-atlas capabilities through
+`/api/asset-manifest`. Browsers request only the shards and pages needed by the
+current scene; they do not download the multi-gigabyte full pack at startup.
+
 Maintainers should use
 [`docs/R2-ASSET-RELEASE-RUNBOOK.md`](docs/R2-ASSET-RELEASE-RUNBOOK.md) for the
 versioned upload, production switch, rollback window, and guarded bucket
@@ -215,6 +222,14 @@ For a faster iteration that skips only the production Web build:
 The complete verification checks the Crystal handoff branch, tracked Starter
 assets, Gateway compilation, asset-release safety tests, TypeScript, and the
 production Web build.
+
+The focused Asset Delivery v2 regression suite is:
+
+```bash
+npm --prefix apps/web run test:asset-delivery
+npm --prefix apps/web run test:map-render-routing
+npm --prefix apps/web run test:map-atlas-budget
+```
 
 ## Optional Infrastructure
 

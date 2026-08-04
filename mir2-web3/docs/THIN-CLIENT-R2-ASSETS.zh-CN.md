@@ -4,7 +4,8 @@
 
 `apps/web/public` 是可重复生成游戏内容的源码素材库，不等于要交付给玩家的客户端。
 生产交付应使用 `npm run build:thin` 生成 `.mir2-thin-client`，再让浏览器从版本化
-R2/CDN 按需获取登录、HUD、角色、怪物和声音素材。
+R2/CDN 按需获取登录、HUD、角色、怪物和声音素材。当前生产构建还会通过
+`/api/asset-manifest` 声明经过验证的完整图集与内容寻址地图 Atlas 能力。
 
 当前仓库的本地素材多，主要有三个原因：
 
@@ -33,21 +34,22 @@ R2/CDN 按需获取登录、HUD、角色、怪物和声音素材。
 
 ## 为什么不能直接删除全部本地素材
 
-R2 的 `mir2/v/37596e16d64fde7c/` 前缀目前确实有大量历史对象：
+历史 R2 前缀 `mir2/v/37596e16d64fde7c/` 曾有大量对象：
 
 - 86,447 个对象；
 - 443,736,598 B；
 - 其中 `original-map` 69,885 个对象，`original-ui` 16,551 个对象。
 
-但对象数量多不等于“当前发布完整”。在线
+但对象数量多不等于“发布完整”。该历史前缀的
 `remote-asset-release.json` 只登记 188 个文件，并且生成于 2026-05-22；当前新手地图
 引用的部分原始帧（例如 `WemadeMir2/Objects/200.png`）在这个前缀下返回 404。
-所以当前状态应描述为：
+它已被新的不可变生产发布替代：
 
-- R2 足以承载已验证的登录、角色、HUD 和声音路径；
-- 当前发布清单已经漂移，不能作为 R2 全量事实来源；
-- 生产默认地图渲染使用同包携带的 `generated/map-atlas`，不会依赖上述缺失原始帧；
-- 低配 DOM 原始图片回退仍属于兼容边界，修复 R2 清单/缺失对象后才能宣称全量远程化。
+- 当前版本为 `20260730-fullcrystal-f71b89aa-gzip1`；
+- full pack 已验证 1,440 个 library shards 与 4,446 张唯一页面；
+- 紧凑地图 Atlas 已验证 57 张内容寻址页面，运行时拒绝未验证或可变 manifest；
+- 同源产物存在时优先命中，同源缺失时 Service Worker 按浏览器安全的 R2 fallback 顺序回源；
+- DOM 原始图片路径仍保留为低配/兼容回退，不会阻塞默认 GPU 地图渲染。
 
 ## 瘦包包含什么
 
@@ -78,8 +80,8 @@ WebGPU 与 WebGL2 都保留是为了浏览器兼容，不是重复下载。页�
 
 ```bash
 cd apps/web
-NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c \
-MIR2_ASSET_VERSION=37596e16d64fde7c \
+NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1 \
+MIR2_ASSET_VERSION=20260730-fullcrystal-f71b89aa-gzip1 \
 npm run build:thin
 ```
 
@@ -103,7 +105,7 @@ docs/generated/remote-assets/latest-thin-client-size.json
 
 ```bash
 npm run smoke:thin-client-assets -- \
-  --assetBaseUrl https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c
+  --assetBaseUrl https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1
 ```
 
 该命令同时检查：
@@ -111,11 +113,11 @@ npm run smoke:thin-client-assets -- \
 - 两套 Bevy 运行时、地图 Atlas、实体 Atlas 和 Service Worker 是否存在于瘦包；
 - 登录、选角、HUD、小地图和登录声音的代表性 R2 对象是否返回 200；
 - CDN 是否提供一年缓存；
-- 在线发布清单是否疑似过期或不完整。
+- 在线发布清单是否与当前不可变版本匹配。
 
-当前命令会通过玩家关键路径检查，同时明确提示 188 文件的在线发布清单是旧的/局部的。
-后续重新发布 R2 时，应生成全量清单、上传缺失对象、切换到新的不可变版本号，而不是覆盖
-`37596e16d64fde7c`。
+Asset Delivery v2 还应运行 `npm run test:asset-delivery` 与
+`npm run verify:map-atlas-release`。前者覆盖生命周期调度、release capability 与 Worker fallback；
+后者逐文件核对内容寻址地图 Atlas。升级素材时必须创建新的不可变版本，不能覆盖当前前缀。
 
 ## 运行
 
@@ -123,8 +125,8 @@ npm run smoke:thin-client-assets -- \
 cd apps/web/.mir2-thin-client
 PORT=3002 \
 HOSTNAME=127.0.0.1 \
-MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c \
-MIR2_R2_PROXY_BASE=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c \
+MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1 \
+MIR2_R2_PROXY_BASE=https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1 \
 node server.js
 ```
 
@@ -134,7 +136,7 @@ node server.js
 ## 发布前验收清单
 
 1. `npm run typecheck`；
-2. `npm run test:asset-prewarm-policy`；
+2. `npm run test:asset-delivery`；
 3. `npm run build:thin`；
 4. `npm run smoke:thin-client-assets -- --assetBaseUrl <不可变 R2 根路径>`；
 5. 使用真实 Gateway 登录、选角、进入比奇地图并移动；

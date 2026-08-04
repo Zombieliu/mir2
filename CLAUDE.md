@@ -54,10 +54,11 @@ CI on PRs: `rust-workspace`, `web-resource-gate`, `local-candidate-gate` (= `car
 
 ## ⚠️ Gotchas that have bitten us
 
-- **Assets are in git but NOT served from Vercel.** `.vercelignore` + `prune-vercel-output-assets.mjs`
-  strip `public/original-ui/**` and `public/original-map/**` from the Vercel build →
-  those PNG frames are served **only from R2** (`mir2.obelisk.build`). If a frame `net::ERR_FAILED`
-  in-game but exists in git, the **R2 release is stale/incomplete** — not a code bug.
+- **Source assets are not the production payload.** `.vercelignore` +
+  `prune-vercel-output-assets.mjs` remove the large R2-backed UI/map/full-pack roots while retaining
+  the explicit same-origin runtime/entity/map-atlas fast paths. The Service Worker falls back to the
+  browser-safe R2 origins declared by `config/production-web-assets.json`. A missing production frame
+  must therefore be diagnosed against both the Vercel output and the pinned immutable R2 release.
 - **R2 republish is a MANUAL workflow_dispatch.** `.github/workflows/web-assets-r2-release.yml`;
   the push trigger is a gated no-op. To actually publish, dispatch it with
   `publish_r2=true deploy_worker=true deploy_vercel=true`. See `docs/ASSET-RELEASE-RUNBOOK.md`.
@@ -82,9 +83,12 @@ on-demand monster pool (#83), Crystal-faithful zone-authoritative combat numeric
 (`Random(MinDC..=MaxDC)` + AC/MAC + crit), mining, the full GM @-command set, security
 remediation (#77), and on-chain mine M1–M4 (#92).
 
-The active R2 release `mir2/v/20260601-fullcrystal-a2f10be0` is a **complete**
-full-Crystal upload (0 missing) — the old "live sprite serving / 404" blocker is
-**closed**. Remaining gaps: **per-monster AI breadth** (~35 handlers vs Crystal's 212 —
+The pinned production R2 release
+`mir2/v/20260730-fullcrystal-f71b89aa-gzip1` is a verified full-Crystal upload
+(1,440 library shards / 4,446 pages) and now also carries a verified 57-page,
+content-addressed compact map atlas. Release capability is served by
+`/api/asset-manifest`; the old "live sprite serving / 404" blocker is **closed**.
+Remaining gaps: **per-monster AI breadth** (~35 handlers vs Crystal's 212 —
 now the largest gameplay-depth gap), VFX real atlases + audio *bytes* (still
 R2/extraction-gated), cross-process Zone sharding + persistence normalization, and a
 few unwirable window actions (conquest gate/tax, hero dismiss/recall — no Crystal packet).
