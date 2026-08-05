@@ -603,11 +603,11 @@ jobs:
             --webBaseUrl "https://mir2.obelisk.build" \
             --timeoutMs 180000
 
-      - name: Smoke bevy runtime assets on web
+      - name: Smoke browser Bevy runtime assets on immutable R2 origin
         if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
         run: |
           npm run --prefix mir2-web3/apps/web smoke:production-bevy-runtime -- \
-            --webBaseUrl "https://mir2.obelisk.build" \
+            --assetBaseUrl "https://assets.mir2.obelisk.build/mir2/v/$MIR2_ASSET_VERSION" \
             --requireR2 true
 
       - name: Upload remote asset release manifest
