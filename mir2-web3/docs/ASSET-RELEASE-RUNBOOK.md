@@ -109,6 +109,12 @@ not treated as an R2 object credential; a 401 response is non-retryable and
 fails immediately. Keep `r2-s3` for local full-pack publication where dedicated
 R2 S3 credentials are available.
 
+`deploy_worker` and `deploy_vercel` are independent release actions. When a
+compatible Worker version is already live, run with `deploy_worker=false` and
+`deploy_vercel=true`; the workflow still republishes the immutable runtime and
+must pass same-origin asset and full-pack closure checks before Vercel starts.
+Use `deploy_worker=true` only when the Worker code or bindings actually changed.
+
 When repairing static original UI coverage, include both the PNG/WAV/CUR
 objects and their metadata. Uploading every local `original-ui/**/meta.json`
 plus `manifest.generated.json`, `source-libraries.generated.json`, and

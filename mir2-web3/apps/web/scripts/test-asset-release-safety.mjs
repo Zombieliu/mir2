@@ -562,6 +562,27 @@ await test("immutable runtime workflow serializes and retries R2 uploads", async
   assert.equal((workflow.match(/MIR2_R2_UPLOAD_SECRET:/g) ?? []).length, 2);
 });
 
+await test("Vercel release can verify a pre-deployed Worker", async () => {
+  const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
+  assert.doesNotMatch(workflow, /deploy_vercel requires deploy_worker/);
+  assert.match(
+    workflow,
+    /name: Deploy Player Web to Vercel\n\s+if: \$\{\{ \(inputs\.publish_r2 \|\| inputs\.use_existing_release\) && inputs\.deploy_vercel \}\}/,
+  );
+  assert.match(
+    workflow,
+    /name: Smoke current same-origin original assets\n\s+if: \$\{\{ \(inputs\.publish_r2 \|\| inputs\.use_existing_release\) && \(inputs\.deploy_worker \|\| inputs\.deploy_vercel\) \}\}/,
+  );
+  assert.match(
+    workflow,
+    /name: Verify full-pack closure through same-origin Worker\n\s+if: \$\{\{ inputs\.use_existing_release && \(inputs\.deploy_worker \|\| inputs\.deploy_vercel\)/,
+  );
+  assert.match(
+    workflow,
+    /name: Deploy same-origin asset Worker proxy\n\s+if: \$\{\{ \(inputs\.publish_r2 \|\| inputs\.use_existing_release\) && inputs\.deploy_worker \}\}/,
+  );
+});
+
 await test("Cloudflare OAuth API fails fast on authentication errors", async () => {
   await withTempDir(async (root) => {
     let requestCount = 0;
@@ -717,7 +738,7 @@ await test("runtime-only releases do not overwrite the full release manifest by 
   });
 });
 
-console.log("asset release safety tests passed (10/10)");
+console.log("asset release safety tests passed (11/11)");
 
 async function test(name, fn) {
   try {
