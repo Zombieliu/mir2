@@ -412,12 +412,23 @@ async function uploadWithRetry(upload) {
     } catch (error) {
       lastError = error;
       if (attempt >= maxAttempts) break;
-      const delayMs = 750 * attempt;
-      console.warn(`[mir2-r2] retry ${attempt + 1}/${maxAttempts} ${upload.objectKey}`);
+      const delayMs = uploadRetryDelayMs(error, attempt);
+      console.warn(
+        `[mir2-r2] retry ${attempt + 1}/${maxAttempts} in ${delayMs}ms ${upload.objectKey}`,
+      );
       await sleep(delayMs);
     }
   }
   throw lastError;
+}
+
+function uploadRetryDelayMs(error, attempt) {
+  const retryAfterMs = Number(error?.retryAfterMs);
+  if (Number.isFinite(retryAfterMs) && retryAfterMs >= 0) {
+    return Math.min(Math.max(Math.ceil(retryAfterMs), 1_000), 60_000);
+  }
+  const baseDelayMs = Number(error?.status) === 429 ? 5_000 : 750;
+  return Math.min(baseDelayMs * (2 ** Math.max(attempt - 1, 0)), 30_000);
 }
 
 async function uploadViaWorker(upload) {
@@ -443,8 +454,9 @@ async function uploadViaWorker(upload) {
   });
   const text = await response.text();
   if (!response.ok) {
-    throw new Error(
+    throw createUploadHttpError(
       `R2 upload Worker failed for ${upload.objectKey}: HTTP ${response.status} ${text || response.statusText}`,
+      response,
     );
   }
 }
@@ -545,8 +557,30 @@ async function uploadViaCloudflareApi(upload) {
   }
   if (!response.ok || payload?.success === false) {
     const message = payload?.errors?.map((error) => error.message).join("; ") || text || response.statusText;
-    throw new Error(`Cloudflare R2 API upload failed for ${upload.objectKey}: HTTP ${response.status} ${message}`);
+    throw createUploadHttpError(
+      `Cloudflare R2 API upload failed for ${upload.objectKey}: HTTP ${response.status} ${message}`,
+      response,
+    );
   }
+}
+
+function createUploadHttpError(message, response) {
+  const error = new Error(message);
+  error.status = response.status;
+  error.retryAfterMs = parseRetryAfterMs(response.headers.get("retry-after"));
+  return error;
+}
+
+function parseRetryAfterMs(value) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return null;
+  const seconds = Number(normalized);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.ceil(seconds * 1_000);
+  }
+  const timestamp = Date.parse(normalized);
+  if (!Number.isFinite(timestamp)) return null;
+  return Math.max(0, timestamp - Date.now());
 }
 
 function encodeObjectKey(objectKey) {
