@@ -179,13 +179,12 @@ jobs:
             echo "deploy_worker requires publish_r2 or use_existing_release first." >&2
             exit 1
           fi
-          if [ "$deploy_vercel" = "true" ] && [ "$deploy_worker" != "true" ]; then
-            echo "deploy_vercel requires deploy_worker to run first." >&2
-            exit 1
-          fi
           if [ "$deploy_vercel" = "true" ] && [ "$publish_r2" != "true" ] && [ "$use_existing_release" != "true" ]; then
             echo "deploy_vercel requires publish_r2 or use_existing_release first." >&2
             exit 1
+          fi
+          if [ "$deploy_vercel" = "true" ] && [ "$deploy_worker" != "true" ]; then
+            echo "deploy_vercel will verify the currently deployed same-origin Worker before publishing Player Web."
           fi
 
       - name: Validate existing remote asset release
@@ -370,7 +369,7 @@ jobs:
           MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
 
       - name: Stage immutable Bevy runtime release
-        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && inputs.deploy_worker) }}
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
         working-directory: mir2-web3/apps/web
         run: |
           set -euo pipefail
@@ -383,14 +382,14 @@ jobs:
           echo "MIR2_BEVY_RUNTIME_RELEASE_MANIFEST=$runtime_manifest" >> "$GITHUB_ENV"
 
       - name: Dry run immutable Bevy runtime upload
-        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && inputs.deploy_worker) }}
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
         working-directory: mir2-web3/apps/web
         run: |
           MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
             npm run assets:r2:dry-run
 
       - name: Publish immutable Bevy runtime to R2
-        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && inputs.deploy_worker) }}
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
         working-directory: mir2-web3/apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -475,8 +474,8 @@ jobs:
           NODE
           npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
 
-      - name: Smoke same-origin original assets after worker deploy
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
+      - name: Smoke current same-origin original assets
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && (inputs.deploy_worker || inputs.deploy_vercel) }}
         run: |
           set -euo pipefail
           npm run --prefix mir2-web3/apps/web smoke:production-original-assets -- \
@@ -484,7 +483,7 @@ jobs:
             --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Verify full-pack closure through same-origin Worker
-        if: ${{ inputs.use_existing_release && inputs.deploy_worker && inputs.require_full_crystal_pack }}
+        if: ${{ inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel) && inputs.require_full_crystal_pack }}
         working-directory: mir2-web3/apps/web
         env:
           EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
@@ -500,7 +499,7 @@ jobs:
             --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Deploy Player Web to Vercel
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
         working-directory: mir2-web3/apps/web
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -547,7 +546,7 @@ jobs:
           npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes --token "$VERCEL_TOKEN"
 
       - name: Smoke app manifest after deploy
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
         working-directory: mir2-web3/apps/web
         run: |
           set -euo pipefail
@@ -577,7 +576,7 @@ jobs:
           NODE
 
       - name: Warm canonical first-playable scenes after deploy
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
         working-directory: mir2-web3/apps/web
         run: |
           npm run warm:production-scenes -- \
@@ -585,7 +584,7 @@ jobs:
             --timeoutMs 180000
 
       - name: Smoke bevy runtime assets on web
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
         run: |
           npm run --prefix mir2-web3/apps/web smoke:production-bevy-runtime -- \
             --webBaseUrl "https://mir2.obelisk.build" \
