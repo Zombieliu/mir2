@@ -51,3 +51,11 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
   web-game Playwright screenshot/text-state pass, and the full 265 MB thin production build pass.
 - Remaining release gates: merge, R2 runtime publication, Worker/Vercel production deployment, and
   same-origin production gameplay timing verification.
+
+## 2026-08-05 full-release probe hotfix
+
+- The first production release attempt stopped before deployment because two legacy representative
+  paths in the workflow were not members of the verified `20260730-fullcrystal-f71b89aa-gzip1`
+  manifest. The release itself reports 46,003 files, `missingCount=0`, and a verified 5,887-file full
+  Crystal pack. Replaced the stale probes with manifest-backed WemadeMir2 Objects and Tiles paths;
+  no R2 object or release manifest was deleted or replaced.
