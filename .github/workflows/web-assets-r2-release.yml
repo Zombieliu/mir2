@@ -222,8 +222,8 @@ jobs:
             });
             const required = [
               "original-map/WemadeMir2/Objects/5240.png",
-              "original-map/WemadeMir2/Objects10/5493.png",
-              "original-map/WemadeMir2/Tiles/1504.png",
+              "original-map/WemadeMir2/Objects21/1504.png",
+              "original-map/WemadeMir2/Tiles/1000.png",
               "original-ui/Sound/Login2.wav",
               "generated/map-atlas/manifest.json",
             ];

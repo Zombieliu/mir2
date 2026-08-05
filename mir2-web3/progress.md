@@ -413,3 +413,11 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   rendered the login UI and exported `render_game_to_text`; local gameplay login is blocked only by
   the production Gateway's localhost Origin policy, so final gameplay timing remains a post-deploy
   same-origin acceptance gate.
+
+## 2026-08-05 full-release probe hotfix
+
+- The first production release attempt stopped before deployment because two legacy representative
+  paths in the workflow were not members of the verified `20260730-fullcrystal-f71b89aa-gzip1`
+  manifest. The release itself reports 46,003 files, `missingCount=0`, and a verified 5,887-file full
+  Crystal pack. Replaced the stale probes with manifest-backed WemadeMir2 Objects and Tiles paths;
+  no R2 object or release manifest was deleted or replaced.
