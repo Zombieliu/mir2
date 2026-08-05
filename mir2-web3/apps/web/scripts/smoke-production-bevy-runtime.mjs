@@ -1,22 +1,29 @@
+import runtimeManifest from "../lib/generated/bevy_runtime_version.json" with { type: "json" };
+
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
+const args = parseArgs(process.argv.slice(2));
+const requireR2 = booleanArg(args.requireR2 ?? process.env.MIR2_REQUIRE_BEVY_RUNTIME_R2, false);
+const runtimeVersion = String(args.runtimeVersion ?? runtimeManifest.version ?? "").trim();
+if (!/^bevy-[a-f0-9]{16}$/i.test(runtimeVersion)) {
+  throw new Error(`Invalid Bevy runtime version: ${runtimeVersion || "empty"}`);
+}
 const BEVY_RUNTIME_BACKENDS = [
   {
     label: "webgpu",
     paths: [
-      "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
-      "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      `/bevy-runtime/v/${runtimeVersion}/pkg-webgpu/mir2_bevy_runtime.js`,
+      `/bevy-runtime/v/${runtimeVersion}/pkg-webgpu/mir2_bevy_runtime_bg.wasm`,
     ],
   },
   {
     label: "webgl2",
     paths: [
-      "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
-      "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      `/bevy-runtime/v/${runtimeVersion}/pkg-webgl2/mir2_bevy_runtime.js`,
+      `/bevy-runtime/v/${runtimeVersion}/pkg-webgl2/mir2_bevy_runtime_bg.wasm`,
     ],
   },
 ];
 
-const args = parseArgs(process.argv.slice(2));
 const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
 
 const results = [];
@@ -27,7 +34,7 @@ for (const backend of BEVY_RUNTIME_BACKENDS) {
   for (const path of backend.paths) {
     const result = await probe(`${webBaseUrl}${path}`);
     results.push({ kind: "bevy-runtime", backend: backend.label, path, ...result });
-    if (!result.ok) {
+    if (!result.ok || (requireR2 && result.xMir2DomainProxy !== "r2-asset")) {
       backendOk = false;
       logFailure({ baseUrl: webBaseUrl, path, ...result });
     }
@@ -43,6 +50,7 @@ console.log(
     {
       ok,
       webBaseUrl,
+      requireR2,
       results,
     },
     null,
@@ -124,6 +132,11 @@ function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir
 
 function normalizeBaseUrl(value) {
   return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function booleanArg(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
 }
 
 function parseArgs(argv) {

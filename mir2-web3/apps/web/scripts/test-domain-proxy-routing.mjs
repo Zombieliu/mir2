@@ -52,7 +52,7 @@ try {
       "mir2/v/release",
       "bevy-9a5cbecc8f85ff75",
     ),
-    "mir2/v/release/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+    "mir2/v/release/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
   );
   assert.equal(
     worker.bevyRuntimeObjectKeyForPath(

@@ -82,7 +82,7 @@ export function bevyRuntimeObjectKeyForPath(
     return "";
   }
   if (requestedVersion !== expectedRuntimeVersion) return "";
-  return `${prefix}/bevy-runtime/${match[2]}`;
+  return `${prefix}/bevy-runtime/v/${expectedRuntimeVersion}/${match[2]}`;
 }
 
 function originalUiMetaLibrary(url: URL): string | null {
@@ -442,7 +442,7 @@ function isStoredGzipJsonPath(objectKey: string): boolean {
 }
 
 function isStoredGzipWasmPath(objectKey: string): boolean {
-  return objectKey.includes("/bevy-runtime/pkg-") && objectKey.endsWith("_bg.wasm");
+  return objectKey.includes("/bevy-runtime/v/") && objectKey.endsWith("_bg.wasm");
 }
 
 type AssetReleaseConfigResult = {

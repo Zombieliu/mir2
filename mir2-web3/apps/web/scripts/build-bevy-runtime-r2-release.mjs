@@ -49,11 +49,13 @@ for (const entry of runtimeManifest.files ?? []) {
   }
   const wasm = relativePath.endsWith(".wasm");
   const encoded = wasm ? gzipSync(bytes, gzipOptions) : null;
+  const packagePath = relativePath.replace(/^bevy-runtime\//, "");
+  const versionedRelativePath = `bevy-runtime/v/${runtimeVersion}/${packagePath}`;
   files.push({
-    path: `/${relativePath}`,
-    relativePath,
+    path: `/${versionedRelativePath}`,
+    relativePath: versionedRelativePath,
     stagePath,
-    objectKey: `${objectPrefix}/${relativePath}`,
+    objectKey: `${objectPrefix}/${versionedRelativePath}`,
     size: bytes.byteLength,
     sha256,
     contentType: wasm ? "application/wasm" : "text/javascript; charset=utf-8",

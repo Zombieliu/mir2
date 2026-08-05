@@ -6,6 +6,7 @@ import {
   isCrystalResourceMissingError,
 } from "../../../../lib/crystal-map-loader";
 import { loadCachedCrystalSceneBlueprint } from "../../../../lib/scene-blueprint-cache";
+import { SCENE_BLUEPRINT_SCHEMA_VERSION } from "../../../../lib/scene-blueprint-request";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -64,7 +65,8 @@ export async function GET(request: Request) {
     headers: {
       "Cache-Control": isDevelopment
         ? "public, max-age=0, must-revalidate"
-        : "public, max-age=300, stale-while-revalidate=3600",
+        : "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800",
+      "X-Mir2-Scene-Schema-Version": SCENE_BLUEPRINT_SCHEMA_VERSION,
       "X-Mir2-Scene-Cache": result.cacheStatus,
       "X-Mir2-Scene-Cache-Key": result.cacheKey,
       "X-Mir2-Original-Map-Sprite-Count": String(

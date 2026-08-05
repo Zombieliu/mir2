@@ -40,3 +40,14 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - The original 4:3 game stage remains contained and uncropped; the remaining side bars on a wide/short phone are intentional preservation of the original HUD rather than document overflow.
 - Follow-up branch: `fix/mobile-pwa-layout-overlays`.
 - The ultra-wide touch presentation now adds a low-contrast blurred letterbox backdrop in the side gutters. The 4:3 stage itself remains untouched, so this improves the phone composition without introducing crop or HUD distortion.
+
+## 2026-08-05 production asset-loading repair
+
+- New prompt: `OK开始修复吧` after live diagnosis of slow resources on `mir2.obelisk.build`.
+- Implemented authoritative/canonical scene requests, stale-request cancellation, bounded visible and
+  idle image preloading, post-first-playable Bevy boot, immutable versioned Bevy R2 object keys,
+  release-workflow upload/Worker version wiring, and canonical production scene warmup.
+- Targeted regressions, TypeScript, domain/R2 release tests, local scene cold/warm probes, the generic
+  web-game Playwright screenshot/text-state pass, and the full 265 MB thin production build pass.
+- Remaining release gates: merge, R2 runtime publication, Worker/Vercel production deployment, and
+  same-origin production gameplay timing verification.

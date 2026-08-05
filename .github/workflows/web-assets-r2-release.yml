@@ -367,6 +367,51 @@ jobs:
           fi
           MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
 
+      - name: Stage immutable Bevy runtime release
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && inputs.deploy_worker) }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+          runtime_manifest="$RUNNER_TEMP/mir2-bevy-runtime-r2-release.json"
+          npm run runtime:r2:build -- \
+            --assetVersion "$MIR2_ASSET_VERSION" \
+            --objectPrefix "$MIR2_ASSET_OBJECT_PREFIX" \
+            --assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL" \
+            --output "$runtime_manifest"
+          echo "MIR2_BEVY_RUNTIME_RELEASE_MANIFEST=$runtime_manifest" >> "$GITHUB_ENV"
+
+      - name: Dry run immutable Bevy runtime upload
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && inputs.deploy_worker) }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
+            npm run assets:r2:dry-run
+
+      - name: Publish immutable Bevy runtime to R2
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && inputs.deploy_worker) }}
+        working-directory: mir2-web3/apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
+          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'r2-s3' }}
+          MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
+          MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
+          MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
+          MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
+          MIR2_R2_VERIFY_ORIGINAL_ASSETS: "0"
+        run: |
+          set -euo pipefail
+          bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
+          if [ -z "$bucket" ]; then
+            echo "Bevy runtime publish requires MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET." >&2
+            exit 1
+          fi
+          MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
+            MIR2_R2_BUCKET="$bucket" \
+            npm run assets:r2:upload
+
       - name: "Release doctor: manifest + R2 asset checks"
         if: ${{ inputs.publish_r2 }}
         working-directory: mir2-web3/apps/web
@@ -397,9 +442,6 @@ jobs:
             echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
             exit 1
           fi
-          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
-            export MIR2_SKIP_WORKER_ROUTE_DEPLOY="1"
-          fi
           node - <<'NODE'
           const fs = require("node:fs");
           const { MIR2_ASSET_VERSION, MIR2_ASSET_OBJECT_PREFIX, NEXT_PUBLIC_MIR2_ASSET_BASE_URL } = process.env;
@@ -409,15 +451,20 @@ jobs:
           }
           const configPath = "infra/cloudflare/mir2-domain-proxy/wrangler.jsonc";
           const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+          const runtime = JSON.parse(
+            fs.readFileSync("apps/web/lib/generated/bevy_runtime_version.json", "utf8"),
+          );
+          if (!/^bevy-[a-f0-9]{16}$/i.test(runtime.version ?? "")) {
+            console.error("deploy_worker could not resolve a valid Bevy runtime version");
+            process.exit(1);
+          }
           config.vars = {
             ...(config.vars ?? {}),
             ASSET_ORIGIN_URL: process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL,
             MIR2_ASSET_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
             MIR2_ASSET_VERSION: process.env.MIR2_ASSET_VERSION,
+            MIR2_BEVY_RUNTIME_VERSION: runtime.version,
           };
-          if (process.env.MIR2_SKIP_WORKER_ROUTE_DEPLOY === "1") {
-            delete config.routes;
-          }
           fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
           NODE
           npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
@@ -523,11 +570,20 @@ jobs:
           });
           NODE
 
+      - name: Warm canonical first-playable scenes after deploy
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          npm run warm:production-scenes -- \
+            --webBaseUrl "https://mir2.obelisk.build" \
+            --timeoutMs 180000
+
       - name: Smoke bevy runtime assets on web
         if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker && inputs.deploy_vercel }}
         run: |
           npm run --prefix mir2-web3/apps/web smoke:production-bevy-runtime -- \
-            --webBaseUrl "https://mir2.obelisk.build"
+            --webBaseUrl "https://mir2.obelisk.build" \
+            --requireR2 true
 
       - name: Upload remote asset release manifest
         if: ${{ inputs.publish_r2 }}
