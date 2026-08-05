@@ -32,7 +32,8 @@ const dryRun = booleanArg(args.dryRun ?? process.env.MIR2_R2_DRY_RUN, false);
 const bucket = args.bucket ?? process.env.MIR2_R2_BUCKET ?? "";
 const ensureBucket = booleanArg(args.ensureBucket ?? process.env.MIR2_R2_ENSURE_BUCKET, false);
 const concurrency = numberArg(args.concurrency ?? process.env.MIR2_R2_UPLOAD_CONCURRENCY, 4);
-const includeReleaseManifest = booleanArg(args.includeReleaseManifest ?? process.env.MIR2_R2_UPLOAD_RELEASE_MANIFEST, true);
+const includeReleaseManifestOverride =
+  args.includeReleaseManifest ?? process.env.MIR2_R2_UPLOAD_RELEASE_MANIFEST;
 const remote = booleanArg(args.remote ?? process.env.MIR2_R2_REMOTE, true);
 const maxAttempts = numberArg(args.maxAttempts ?? process.env.MIR2_R2_UPLOAD_ATTEMPTS, 3);
 const progressEvery = numberArg(args.progressEvery ?? process.env.MIR2_R2_UPLOAD_PROGRESS_EVERY, 25);
@@ -81,6 +82,10 @@ let s3Client;
 
 async function main() {
   const release = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+  const includeReleaseManifest = booleanArg(
+    includeReleaseManifestOverride,
+    release.publishReleaseManifest !== false,
+  );
   if (release.fullCrystalPack?.enabled === true && !["api", "s3", "worker"].includes(uploadDriver)) {
     throw new Error(
       "Verified full Crystal packs must use MIR2_R2_UPLOAD_DRIVER=api, worker, or r2-s3 " +

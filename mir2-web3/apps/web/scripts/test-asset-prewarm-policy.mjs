@@ -156,11 +156,9 @@ test("the UI lifecycle requests each deferred prewarm stage", () => {
   assert.match(registrarSource, /run\.status !== "cancelled"/);
   assert.match(registrarSource, /if \(!manifestResponse\.ok\)/);
   assert.doesNotMatch(registrarSource, /pack\.name !== "login-audio"/);
-  assert.ok(
-    registrarSource.indexOf("window.__mir2AssetCachePrewarmStage = installedStagePrewarm") >
-      registrarSource.indexOf('metrics.markMilestone("serviceWorkerSkipped"'),
-    "the stage prewarm API must be exposed only after Service Worker setup completes",
-  );
+  assert.match(registrarSource, /void configureServiceWorkerInBackground\(/);
+  assert.doesNotMatch(registrarSource, /await registration\.update\(\)/);
+  assert.doesNotMatch(registrarSource, /await navigator\.serviceWorker\.ready/);
   assert.match(pageSource, /screen === "select" \? "character-select"/);
   assert.match(pageSource, /screen === "game" \? "game" : "login"/);
   assert.match(pageSource, /__mir2AssetCachePrewarmStage\?\.\(stage\)/);

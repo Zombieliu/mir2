@@ -353,3 +353,31 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - Delivery boundary at commit time: Cloudflare/R2 asset infrastructure is live and the Player Web
   production build passes; PR merge and the corresponding Vercel production deployment remain the
   release gates. Real phone/network acceptance remains separate from automated desktop Chromium proof.
+
+## 2026-08-05 Mobile startup and runtime delivery follow-up
+
+- Reproduced the reported red `Runtime boot failed: Load failed` path: production served each Bevy
+  WASM uncompressed at 27.6/29.0 MB, while a China-to-Singapore range probe sustained only about
+  120 KB/s. The same cold run also spent tens of seconds awaiting Service Worker update/readiness.
+- Touch-first phones/tablets now enter the already-supported DOM/WebGL2 compatibility renderer by
+  default and do not download Bevy WASM. `?bevyRuntime=1` remains the explicit QA override. Runtime
+  network failures degrade silently to the playable renderer and never trigger a second full backend
+  download or add a red failure line to player chat.
+- Service Worker registration/configuration/update are now background lifecycle work. Critical
+  prewarm is exposed immediately after the manifest arrives, cache hints never await
+  `navigator.serviceWorker.ready`, configuration ACK is bounded to 750 ms, and each stage has its
+  own cache milestone for production diagnosis.
+- Replaced the login critical-path 2,497,741-byte PNG with committed same-origin bootstrap WebP
+  variants: 176,866 bytes on coarse-pointer/mobile and 305,924 bytes on desktop. A deterministic
+  Sharp generator and byte/dimension budget test protect this boundary.
+- Added a compressed Bevy runtime R2 release path and Cloudflare route. The two logical WASM files
+  total 56.6 MB but gzip to 12.2 MB combined (5.86/6.34 MB). Runtime URLs are version-checked before
+  mapping to the release object prefix, preventing stale immutable URLs from receiving current bytes.
+  Runtime-only uploads explicitly suppress `remote-asset-release.json`, so an incremental runtime
+  publication cannot replace the current full Crystal release manifest.
+- Current automated evidence: startup budget (3/3), runtime policy (5/5), runtime byte budget,
+  domain-proxy routing, asset prewarm policy (9/9), full asset-delivery regression, Web TypeScript,
+  and a full production build all pass. Local touch/mobile Chromium at 844x390 fetched only the
+  176,866-byte bootstrap image, made zero Bevy requests, emitted no console errors, and completed
+  login-critical prewarm at about 224 ms. The cold/warm cache smoke also passed every assertion;
+  production publication and real-phone verification remain separate release gates.
