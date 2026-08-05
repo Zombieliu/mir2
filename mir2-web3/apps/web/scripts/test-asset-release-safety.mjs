@@ -708,6 +708,62 @@ await test("upload Worker streams deterministic gzip bytes with integrity header
   });
 });
 
+await test("upload Worker omits optional representation headers for identity assets", async () => {
+  await withTempDir(async (root) => {
+    const requests = [];
+    const server = await listen((request, response) => {
+      const chunks = [];
+      request.on("data", (chunk) => chunks.push(chunk));
+      request.on("end", () => {
+        requests.push({
+          headers: request.headers,
+          body: Buffer.concat(chunks),
+        });
+        response.statusCode = 200;
+        response.end(JSON.stringify({ ok: true }));
+      });
+    });
+
+    try {
+      const stagePath = path.join(root, "mir2_bevy_runtime.js");
+      const manifestPath = path.join(root, "runtime-release.json");
+      const bytes = Buffer.from("runtime-fixture");
+      const sha256 = createHash("sha256").update(bytes).digest("hex");
+      await fs.writeFile(stagePath, bytes);
+      await fs.writeFile(manifestPath, JSON.stringify({
+        schemaVersion: 1,
+        kind: "mir2-bevy-runtime-r2-release",
+        publishReleaseManifest: false,
+        objectPrefix: "mir2/v/runtime-fixture",
+        files: [{
+          relativePath: "bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+          stagePath,
+          size: bytes.byteLength,
+          sha256,
+          contentType: "text/javascript; charset=utf-8",
+        }],
+      }));
+
+      await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "worker",
+        "--workerUrl", server.url,
+        "--includeReleaseManifest", "false",
+        "--maxAttempts", "1",
+      ], { MIR2_R2_UPLOAD_SECRET: "fixture-worker-token" });
+
+      assert.equal(requests.length, 1);
+      assert.equal(requests[0].headers["x-mir2-content-encoding"], undefined);
+      assert.equal(requests[0].headers["x-mir2-encoded-sha256"], undefined);
+      assert.equal(requests[0].headers["x-mir2-sha256"], sha256);
+      assert.deepEqual(requests[0].body, bytes);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
 await test("runtime-only releases do not overwrite the full release manifest by default", async () => {
   await withTempDir(async (root) => {
     const stagePath = path.join(root, "mir2_bevy_runtime.js");
@@ -743,7 +799,7 @@ await test("runtime-only releases do not overwrite the full release manifest by 
   });
 });
 
-console.log("asset release safety tests passed (11/11)");
+console.log("asset release safety tests passed (12/12)");
 
 async function test(name, fn) {
   try {
