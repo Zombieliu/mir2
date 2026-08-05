@@ -1067,8 +1067,9 @@ fn sync_entities(
     // (first snapshot, or only one received so far) we fall through to the
     // plain snap path so there is no regression.
     let interp_params: Option<(f32, &interpolation::BufferedSnapshot)> = if snap_buf.ready() {
-        let prev = snap_buf.prev.as_ref().unwrap();
-        let next = snap_buf.next.as_ref().unwrap();
+        let (prev, next) = snap_buf
+            .bracket()
+            .expect("ready snapshot buffer must contain a complete bracket");
         let render_t = time.elapsed_secs_f64() - interpolation::INTERP_DELAY_SECS;
         let alpha =
             interpolation::interpolation_alpha(prev.receipt_secs, next.receipt_secs, render_t);

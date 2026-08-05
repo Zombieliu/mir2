@@ -30,6 +30,7 @@ use std::collections::HashMap;
 
 use bevy::math::Vec2;
 use bevy::prelude::*;
+use mir2_client_core::motion as core_motion;
 
 use crate::RuntimeWorldState;
 
@@ -54,19 +55,7 @@ const MAX_FUTURE_SKEW_MS: f64 = 5000.0;
 /// The linear motion window for a single entity, expressed in wall-clock
 /// milliseconds.  Mirrors `EntityMotionSnapshot` in
 /// `original-client-scene-motion.ts`.
-#[derive(Debug, Clone, PartialEq)]
-pub struct EntityMotionEntry {
-    /// Grid cell the entity is moving *from* (previous position).
-    pub from_x: i32,
-    pub from_y: i32,
-    /// Grid cell the entity is moving *to* (current target position).
-    pub to_x: i32,
-    pub to_y: i32,
-    /// Wall-clock `Date.now()` milliseconds at which the step began.
-    pub started_ms: f64,
-    /// Wall-clock `Date.now()` milliseconds at which the step completes.
-    pub expires_ms: f64,
-}
+pub use core_motion::MotionWindow as EntityMotionEntry;
 
 /// Per-entity motion table, held as a Bevy [`Resource`].
 ///
@@ -127,20 +116,8 @@ pub fn compute_motion_offset(
     cell_width_px: f32,
     cell_height_px: f32,
 ) -> Vec2 {
-    let span = entry.expires_ms - entry.started_ms;
-    // Degenerate: zero-duration step → snap to target (remaining = 0).
-    let remaining = if span <= 0.0 {
-        0.0_f64
-    } else {
-        let elapsed = now_ms - entry.started_ms;
-        (1.0 - elapsed / span).clamp(0.0, 1.0)
-    };
-
-    let remaining = remaining as f32;
-    Vec2::new(
-        (entry.from_x - entry.to_x) as f32 * cell_width_px * remaining,
-        (entry.from_y - entry.to_y) as f32 * cell_height_px * remaining,
-    )
+    let offset = core_motion::compute_motion_offset(entry, now_ms, cell_width_px, cell_height_px);
+    Vec2::new(offset.x, offset.y)
 }
 
 // ---------------------------------------------------------------------------
