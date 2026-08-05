@@ -31,10 +31,17 @@ export default {
       return json({ ok: false, error: "object_too_large" }, 413);
     }
 
+    const contentEncoding = normalizeContentEncoding(
+      request.headers.get("x-mir2-content-encoding") ?? request.headers.get("content-encoding"),
+    );
+    if (contentEncoding.errorResponse) {
+      return contentEncoding.errorResponse;
+    }
+
     await env.MIR2_ASSETS.put(key, request.body, {
       httpMetadata: {
         contentType: request.headers.get("content-type") ?? undefined,
-        contentEncoding: request.headers.get("content-encoding") ?? undefined,
+        contentEncoding: contentEncoding.value,
         cacheControl: request.headers.get("cache-control") ?? undefined,
       },
       customMetadata: uploadMetadata(request),
@@ -43,6 +50,23 @@ export default {
     return json({ ok: true, key });
   },
 };
+
+function normalizeContentEncoding(value: string | null): {
+  value: "gzip" | undefined;
+  errorResponse?: Response;
+} {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized || normalized === "identity") {
+    return { value: undefined };
+  }
+  if (normalized === "gzip") {
+    return { value: "gzip" };
+  }
+  return {
+    value: undefined,
+    errorResponse: json({ ok: false, error: "unsupported_content_encoding" }, 400),
+  };
+}
 
 function uploadMetadata(request: Request): Record<string, string> {
   const metadata: Record<string, string> = {};

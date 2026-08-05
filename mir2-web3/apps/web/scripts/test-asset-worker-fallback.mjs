@@ -198,3 +198,103 @@ test("a cold asset streams before its background CacheStorage write completes", 
   releaseCacheWrite();
   await Promise.all(waitUntilPromises);
 });
+
+test("a warm asset cache hit does not rewrite or scan CacheStorage", async () => {
+  let putCount = 0;
+  let keyScanCount = 0;
+  const waitUntilPromises = [];
+  const cache = {
+    async match() {
+      return new Response(new Uint8Array([7, 8, 9]), {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      });
+    },
+    async put() {
+      putCount += 1;
+    },
+    async keys() {
+      keyScanCount += 1;
+      return [];
+    },
+  };
+  const { context } = createWorkerContext(
+    async () => {
+      throw new Error("network must not run on a cache hit");
+    },
+    {
+      async delete() {
+        return true;
+      },
+      async keys() {
+        return [];
+      },
+      async open() {
+        return cache;
+      },
+    },
+  );
+  context.captureWaitUntil = (promise) => waitUntilPromises.push(promise);
+
+  const response = await vm.runInContext(
+    `cacheFirst(
+      new Request("https://preview.example.test/original-map/Tiles/1.png"),
+      "warm-cache-test",
+      100,
+      { waitUntil: captureWaitUntil }
+    )`,
+    context,
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal((await response.arrayBuffer()).byteLength, 3);
+  assert.equal(putCount, 0);
+  assert.equal(keyScanCount, 0);
+  assert.equal(waitUntilPromises.length, 0);
+});
+
+test("cache trimming is amortized across a burst of writes", async () => {
+  let putCount = 0;
+  let keyScanCount = 0;
+  const cache = {
+    async put() {
+      putCount += 1;
+    },
+    async keys() {
+      keyScanCount += 1;
+      return [];
+    },
+  };
+  const { context } = createWorkerContext(async () => new Response(null, { status: 200 }));
+  context.testCache = cache;
+
+  for (let index = 0; index < 63; index += 1) {
+    context.testIndex = index;
+    await vm.runInContext(
+      `putCacheEntry(
+        testCache,
+        new Request("https://preview.example.test/original-ui/Test/" + testIndex + ".png"),
+        new Response(new Uint8Array([1]), { status: 200 }),
+        1000,
+        "burst-cache-test"
+      )`,
+      context,
+    );
+  }
+  assert.equal(putCount, 63);
+  assert.equal(keyScanCount, 0);
+
+  context.testIndex = 63;
+  await vm.runInContext(
+    `putCacheEntry(
+      testCache,
+      new Request("https://preview.example.test/original-ui/Test/" + testIndex + ".png"),
+      new Response(new Uint8Array([1]), { status: 200 }),
+      1000,
+      "burst-cache-test"
+    )`,
+    context,
+  );
+  assert.equal(putCount, 64);
+  assert.equal(keyScanCount, 1);
+});
