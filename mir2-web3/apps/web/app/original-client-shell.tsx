@@ -154,6 +154,9 @@ import {
   evictStandaloneTilePixels,
 } from "../lib/standalone-tile-decode";
 
+const LOGIN_BACKGROUND_MOBILE_WEBP = "/bootstrap/login/chrsel-0-768.webp";
+const LOGIN_BACKGROUND_DESKTOP_WEBP = "/bootstrap/login/chrsel-0-1024.webp";
+
 type HeldScenePointer = {
   button: 0 | 2;
   sceneX: number;
@@ -3130,7 +3133,10 @@ export function OriginalClientShell({
         style={
           {
             "--mir-stage-letterbox-image":
-              screen === "login" ? `url("${loginBackgroundFrame}")` : undefined,
+              // This pseudo-element exists only inside the coarse-pointer media
+              // query, so pinning it to the mobile variant avoids an SSR-time
+              // desktop request followed by a second mobile request on hydration.
+              screen === "login" ? `url("${LOGIN_BACKGROUND_MOBILE_WEBP}")` : undefined,
           } as CSSProperties
         }
       >
@@ -3170,12 +3176,21 @@ export function OriginalClientShell({
         >
           {screen === "login" ? (
             <div className="client-scene-overlay">
-              <img
-                className="client-scene-background"
-                src={loginBackgroundFrame}
-                alt=""
-                draggable={false}
-              />
+              <picture className="client-scene-background-picture">
+                <source
+                  media="(pointer: coarse)"
+                  srcSet={LOGIN_BACKGROUND_MOBILE_WEBP}
+                  type="image/webp"
+                />
+                <img
+                  className="client-scene-background"
+                  src={LOGIN_BACKGROUND_DESKTOP_WEBP}
+                  alt=""
+                  draggable={false}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </picture>
             </div>
           ) : null}
           {loginTransitionBackground ? (

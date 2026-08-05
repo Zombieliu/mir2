@@ -25,6 +25,7 @@
     "GATEWAY_ORIGIN_URL": "https://165.154.65.136.sslip.io",
     "MIR2_ASSET_OBJECT_PREFIX": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
     "MIR2_ASSET_VERSION": "20260730-fullcrystal-f71b89aa-gzip1",
+    "MIR2_BEVY_RUNTIME_VERSION": "bevy-9a5cbecc8f85ff75",
     "ORIGIN_URL": "https://mir2-web3-web.vercel.app"
   }
 }

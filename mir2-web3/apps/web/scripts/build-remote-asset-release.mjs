@@ -14,6 +14,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(WEB_ROOT, "..", "..");
 const ORIGINAL_ASSET_MANIFEST_PATH = path.join(WEB_ROOT, "public", "original-asset-manifest.generated.json");
+const BEVY_RUNTIME_MANIFEST_PATH = path.join(WEB_ROOT, "lib", "generated", "bevy_runtime_version.json");
 const FULL_CRYSTAL_PACK_ROOT = path.join(WEB_ROOT, "public", "generated", "crystal-packs", "full");
 const FULL_CRYSTAL_PACK_INDEX_PATH = "/generated/crystal-packs/full/index.json";
 const FULL_CRYSTAL_PACK_COVERAGE_PATH = path.join(
@@ -71,11 +72,13 @@ const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".jpeg",
   ".jpg",
   ".json",
+  ".js",
   ".mp3",
   ".ogg",
   ".png",
   ".wav",
   ".webp",
+  ".wasm",
 ]);
 const REQUIRED_MANIFEST_PATHS = [
   ...LOGIN_TITLE_PATHS,
@@ -108,6 +111,10 @@ const includeFullCrystalPack = booleanArg(
   args.includeFullCrystalPack ?? process.env.MIR2_REMOTE_ASSET_INCLUDE_FULL_CRYSTAL_PACK,
   false,
 );
+const includeBevyRuntime = booleanArg(
+  args.includeBevyRuntime ?? process.env.MIR2_REMOTE_ASSET_INCLUDE_BEVY_RUNTIME,
+  false,
+);
 const publicAssetRoots = parseListArg(
   args.publicAssetRoots ?? process.env.MIR2_REMOTE_ASSET_PUBLIC_ROOTS,
   DEFAULT_PUBLIC_ASSET_ROOTS,
@@ -126,6 +133,10 @@ const gzipFullCrystalPackJson = booleanArg(
   args.gzipFullCrystalPackJson ?? process.env.MIR2_REMOTE_ASSET_GZIP_FULL_PACK_JSON,
   includeFullCrystalPack,
 );
+const gzipBevyRuntimeWasm = booleanArg(
+  args.gzipBevyRuntimeWasm ?? process.env.MIR2_REMOTE_ASSET_GZIP_BEVY_RUNTIME_WASM,
+  includeBevyRuntime,
+);
 const gzipConcurrency = positiveIntegerArg(
   args.gzipConcurrency ?? process.env.MIR2_REMOTE_ASSET_GZIP_CONCURRENCY,
   4,
@@ -137,6 +148,12 @@ async function main() {
   }
   if (gzipFullCrystalPackJson && casEnabled) {
     throw new Error("Compressed full-pack releases require --cas false to avoid uploading duplicate raw CAS objects.");
+  }
+  if (gzipBevyRuntimeWasm && !includeBevyRuntime) {
+    throw new Error("Bevy runtime compression requires --includeBevyRuntime true.");
+  }
+  if (gzipBevyRuntimeWasm && casEnabled) {
+    throw new Error("Compressed Bevy runtime releases require --cas false.");
   }
 
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);
@@ -174,9 +191,14 @@ async function main() {
     concurrency: stageConcurrency,
   });
   await annotateStoredRepresentations(staged.files);
-  const requiredManifestPaths = includeFullCrystalPack
-    ? [...REQUIRED_MANIFEST_PATHS, FULL_CRYSTAL_PACK_INDEX_PATH]
-    : REQUIRED_MANIFEST_PATHS;
+  const bevyRuntime = includeBevyRuntime
+    ? await readBevyRuntimeReleaseRecord()
+    : { enabled: false, version: null, contentEncoding: null, files: [] };
+  const requiredManifestPaths = [
+    ...REQUIRED_MANIFEST_PATHS,
+    ...(includeFullCrystalPack ? [FULL_CRYSTAL_PACK_INDEX_PATH] : []),
+    ...bevyRuntime.files.map((file) => file.path),
+  ];
   const requiredReleasePaths = requiredManifestPaths.filter((requiredPath) =>
     staged.files.some((file) => file.path === requiredPath),
   );
@@ -232,6 +254,7 @@ async function main() {
     sceneSpriteRoots: collected.sceneSpriteRoots,
     publicAssetRoots: collected.publicAssetRoots,
     fullCrystalPack: collected.fullCrystalPack,
+    bevyRuntime,
     files: compactFiles ? staged.files.map(compactReleaseFile) : staged.files,
     missing: staged.missing,
     requiredManifestPaths,
@@ -379,8 +402,12 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     sceneSpriteRootRecords.push(...(await collectSceneSpriteStaticUrls(staticUrls, sceneSpriteRoots)));
   }
 
-  if (includePublicAssetRoots) {
-    publicAssetRootRecords.push(...(await collectPublicAssetRootStaticUrls(staticUrls, publicAssetRoots)));
+  if (includePublicAssetRoots || includeBevyRuntime) {
+    const roots = [...new Set([
+      ...(includePublicAssetRoots ? publicAssetRoots : []),
+      ...(includeBevyRuntime ? ["bevy-runtime"] : []),
+    ])];
+    publicAssetRootRecords.push(...(await collectPublicAssetRootStaticUrls(staticUrls, roots)));
   }
 
   if (includeFullCrystalPack) {
@@ -601,11 +628,18 @@ async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissi
 }
 
 async function annotateStoredRepresentations(files) {
-  if (!gzipFullCrystalPackJson) return;
-  const encodedFiles = files.filter((file) =>
-    file.relativePath.startsWith("generated/crystal-packs/full/") &&
-    file.relativePath.toLowerCase().endsWith(".json"),
-  );
+  const encodedFiles = files.filter((file) => {
+    const relativePath = file.relativePath.toLowerCase();
+    return (
+      (gzipFullCrystalPackJson &&
+        relativePath.startsWith("generated/crystal-packs/full/") &&
+        relativePath.endsWith(".json")) ||
+      (gzipBevyRuntimeWasm &&
+        relativePath.startsWith("bevy-runtime/pkg-") &&
+        relativePath.endsWith("_bg.wasm"))
+    );
+  });
+  if (!encodedFiles.length) return;
   let completed = 0;
   await mapWithConcurrency(encodedFiles, gzipConcurrency, async (file) => {
     const encoded = await gzipFileMetadata(file.stagePath);
@@ -617,6 +651,34 @@ async function annotateStoredRepresentations(files) {
       console.error(`[remote-asset-release] measured gzip ${completed}/${encodedFiles.length}`);
     }
   });
+}
+
+async function readBevyRuntimeReleaseRecord() {
+  const manifest = await readJsonFile(BEVY_RUNTIME_MANIFEST_PATH);
+  const version = String(manifest?.version ?? "").trim();
+  const files = Array.isArray(manifest?.files)
+    ? manifest.files.map((file) => ({
+        path: `/${String(file.path ?? "").replace(/^public\//, "").replace(/^\/+/, "")}`,
+        sha256: String(file.sha256 ?? ""),
+      }))
+    : [];
+  if (!/^bevy-[a-f0-9]{16}$/i.test(version) || files.length !== 4) {
+    throw new Error(`Invalid Bevy runtime manifest: ${BEVY_RUNTIME_MANIFEST_PATH}`);
+  }
+  for (const file of files) {
+    if (
+      !/^\/bevy-runtime\/pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(file.path) ||
+      !/^[a-f0-9]{64}$/i.test(file.sha256)
+    ) {
+      throw new Error(`Invalid Bevy runtime file entry: ${JSON.stringify(file)}`);
+    }
+  }
+  return {
+    enabled: true,
+    version,
+    contentEncoding: gzipBevyRuntimeWasm ? "gzip" : null,
+    files,
+  };
 }
 
 async function gzipFileMetadata(filePath) {
@@ -988,7 +1050,8 @@ function normalizePublicAssetRoot(value) {
     root !== "original-map" &&
     root !== "generated/original-map-blend" &&
     root !== "generated/map-atlas" &&
-    root !== "bevy-entity-atlases"
+    root !== "bevy-entity-atlases" &&
+    root !== "bevy-runtime"
   ) {
     return "";
   }
