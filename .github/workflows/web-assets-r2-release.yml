@@ -401,6 +401,8 @@ jobs:
           MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
           MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
           MIR2_R2_VERIFY_ORIGINAL_ASSETS: "0"
+          MIR2_R2_UPLOAD_CONCURRENCY: "1"
+          MIR2_R2_UPLOAD_ATTEMPTS: "6"
         run: |
           set -euo pipefail
           bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"

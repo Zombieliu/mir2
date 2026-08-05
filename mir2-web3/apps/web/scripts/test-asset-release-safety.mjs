@@ -15,6 +15,16 @@ const BUILD_SCRIPT = path.join(SCRIPT_DIR, "build-remote-asset-release.mjs");
 const UPLOAD_SCRIPT = path.join(SCRIPT_DIR, "upload-r2-assets.mjs");
 const CAS_RELEASE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "cas-release.mjs");
 const FULL_PACK_CLOSURE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "full-pack-closure.mjs");
+const R2_RELEASE_WORKFLOW = path.resolve(
+  SCRIPT_DIR,
+  "..",
+  "..",
+  "..",
+  "..",
+  ".github",
+  "workflows",
+  "web-assets-r2-release.yml",
+);
 
 await test("map-atlas pages accompany a referenced map-atlas manifest", async () => {
   await withTempDir(async (root) => {
@@ -481,6 +491,74 @@ await test("Cloudflare OAuth API streams deterministic gzip bytes with HTTP meta
   });
 });
 
+await test("Cloudflare OAuth API honors Retry-After on rate limits", async () => {
+  await withTempDir(async (root) => {
+    const requests = [];
+    const server = await listen((request, response) => {
+      const chunks = [];
+      request.on("data", (chunk) => chunks.push(chunk));
+      request.on("end", () => {
+        requests.push({
+          method: request.method,
+          url: request.url,
+          body: Buffer.concat(chunks),
+        });
+        response.setHeader("content-type", "application/json");
+        if (requests.length === 1) {
+          response.statusCode = 429;
+          response.setHeader("retry-after", "0");
+          response.end(JSON.stringify({ success: false, errors: [{ message: "rate limited" }] }));
+          return;
+        }
+        response.statusCode = 200;
+        response.end(JSON.stringify({ success: true }));
+      });
+    });
+
+    try {
+      const stagePath = path.join(root, "runtime.js");
+      const manifestPath = path.join(root, "release.json");
+      const raw = Buffer.from("export const runtime = true;\n");
+      await fs.writeFile(stagePath, raw);
+      await fs.writeFile(manifestPath, JSON.stringify({
+        objectPrefix: "mir2/v/oauth-api-rate-limit-fixture",
+        publishReleaseManifest: false,
+        files: [{
+          relativePath: "bevy-runtime/v/bevy-fixture/pkg/runtime.js",
+          stagePath,
+          size: raw.byteLength,
+          sha256: createHash("sha256").update(raw).digest("hex"),
+          contentType: "text/javascript; charset=utf-8",
+        }],
+      }));
+
+      const result = await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "api",
+        "--accountId", "fixture-account",
+        "--apiBaseUrl", server.url,
+        "--includeReleaseManifest", "false",
+        "--concurrency", "1",
+        "--maxAttempts", "2",
+      ], { CLOUDFLARE_API_TOKEN: "fixture-oauth-token" });
+
+      assert.equal(requests.length, 2);
+      assert.deepEqual(requests[0].body, raw);
+      assert.deepEqual(requests[1].body, raw);
+      assert.match(result.stderr, /retry 2\/2 in 1000ms/);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+await test("immutable runtime workflow serializes and retries R2 uploads", async () => {
+  const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
+  assert.match(workflow, /MIR2_R2_UPLOAD_CONCURRENCY:\s*"1"/);
+  assert.match(workflow, /MIR2_R2_UPLOAD_ATTEMPTS:\s*"6"/);
+});
+
 await test("upload Worker streams deterministic gzip bytes with integrity headers", async () => {
   await withTempDir(async (root) => {
     const requests = [];
@@ -587,7 +665,7 @@ await test("runtime-only releases do not overwrite the full release manifest by 
   });
 });
 
-console.log("asset release safety tests passed (7/7)");
+console.log("asset release safety tests passed (9/9)");
 
 async function test(name, fn) {
   try {

@@ -421,3 +421,11 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   manifest. The release itself reports 46,003 files, `missingCount=0`, and a verified 5,887-file full
   Crystal pack. Replaced the stale probes with manifest-backed WemadeMir2 Objects and Tiles paths;
   no R2 object or release manifest was deleted or replaced.
+
+## 2026-08-05 Cloudflare R2 API rate-limit hardening
+
+- The API-backed runtime upload reached Cloudflare but four concurrent PUTs received HTTP 429.
+  Runtime publication is now serialized with six attempts, and the uploader honors `Retry-After`
+  before falling back to capped exponential delay. Added a deterministic 429-then-success regression
+  test; immutable object keys keep partial retries idempotent and the full release manifest remains
+  untouched.
