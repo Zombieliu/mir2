@@ -298,16 +298,14 @@ async function serveStaticAssetFromR2(
 
   const decompressStoredGzip = isStoredGzipJsonPath(objectKey);
   const preserveStoredGzip = isStoredGzipWasmPath(objectKey);
+  // Cloudflare's Cache API changes the content-coding semantics of a manually
+  // encoded stream on a warm hit, so WASM deliberately bypasses caches.default.
+  // Browsers still retain the immutable response and R2 remains the compressed,
+  // same-network source of truth.
+  const useAssetEdgeCache = !decompressStoredGzip && !preserveStoredGzip;
   const cacheKeyUrl = new URL(`https://mir2-r2-cache.local/${objectKey}`);
-  if (preserveStoredGzip) {
-    // The previous runtime transport accidentally cached gzip bytes without a
-    // Content-Encoding header. A representation-qualified key permanently
-    // bypasses those immutable corrupt edge entries without purging unrelated
-    // game assets.
-    cacheKeyUrl.searchParams.set("representation", "stored-gzip-v1");
-  }
   const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
-  if (request.method === "GET" && !decompressStoredGzip) {
+  if (request.method === "GET" && useAssetEdgeCache) {
     const cached = await caches.default.match(cacheKey);
     if (cached) {
       const cachedHeaders = new Headers(cached.headers);
@@ -340,8 +338,11 @@ async function serveStaticAssetFromR2(
   if (runtimeRequest) {
     headers.set("x-mir2-runtime-version", env.MIR2_BEVY_RUNTIME_VERSION || "");
   }
-  if (preserveStoredGzip && object.httpMetadata?.contentEncoding === "gzip") {
+  if (preserveStoredGzip) {
+    headers.set("cache-control", appendCacheControlDirective(headers.get("cache-control"), "no-transform"));
     headers.set("content-encoding", "gzip");
+    headers.set("content-length", String(object.size));
+    headers.set("x-mir2-runtime-transport", "stored-gzip-no-transform");
     headers.set("vary", "Accept-Encoding");
   }
   const body = request.method === "HEAD"
@@ -354,7 +355,7 @@ async function serveStaticAssetFromR2(
     status: 200,
     ...(preserveStoredGzip ? { encodeBody: "manual" as const } : {}),
   });
-  if (request.method === "GET" && !decompressStoredGzip) {
+  if (request.method === "GET" && useAssetEdgeCache) {
     ctx.waitUntil(caches.default.put(cacheKey, response.clone()));
   }
   return response;
@@ -462,6 +463,15 @@ function isStoredGzipJsonPath(objectKey: string): boolean {
 
 function isStoredGzipWasmPath(objectKey: string): boolean {
   return objectKey.includes("/bevy-runtime/v/") && objectKey.endsWith("_bg.wasm");
+}
+
+function appendCacheControlDirective(value: string | null, directive: string): string {
+  const current = String(value ?? "").trim();
+  if (!current) return directive;
+  if (current.split(",").some((entry) => entry.trim().toLowerCase() === directive.toLowerCase())) {
+    return current;
+  }
+  return `${current}, ${directive}`;
 }
 
 type AssetReleaseConfigResult = {

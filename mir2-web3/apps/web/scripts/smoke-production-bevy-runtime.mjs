@@ -1,6 +1,6 @@
 import runtimeManifest from "../lib/generated/bevy_runtime_version.json" with { type: "json" };
+import productionAssets from "../../../config/production-web-assets.json" with { type: "json" };
 
-const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 const args = parseArgs(process.argv.slice(2));
 const requireR2 = booleanArg(args.requireR2 ?? process.env.MIR2_REQUIRE_BEVY_RUNTIME_R2, false);
 const runtimeVersion = String(args.runtimeVersion ?? runtimeManifest.version ?? "").trim();
@@ -24,7 +24,19 @@ const BEVY_RUNTIME_BACKENDS = [
   },
 ];
 
-const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
+const runtimeBaseUrl = normalizeBaseUrl(
+  args.runtimeBaseUrl ??
+    args.assetBaseUrl ??
+    args.webBaseUrl ??
+    process.env.MIR2_BEVY_RUNTIME_BASE_URL ??
+    process.env.MIR2_ASSET_BASE_URL ??
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ??
+    process.env.MIR2_WEB_BASE_URL ??
+    productionAssets.assetBaseUrl,
+);
+if (!runtimeBaseUrl) {
+  throw new Error("A production Bevy runtime base URL is required.");
+}
 
 const results = [];
 let ok = true;
@@ -33,18 +45,20 @@ for (const backend of BEVY_RUNTIME_BACKENDS) {
   let backendOk = true;
   for (const path of backend.paths) {
     const isWasm = path.endsWith(".wasm");
-    const result = await probe(`${webBaseUrl}${path}`, isWasm);
+    const result = await probe(`${runtimeBaseUrl}${path}`, isWasm);
     results.push({ kind: "bevy-runtime", backend: backend.label, path, ...result });
     if (
       !result.ok ||
-      (requireR2 && result.xMir2DomainProxy !== "r2-asset") ||
+      (requireR2 && !isR2Response(result)) ||
       (isWasm &&
         (result.contentEncoding !== "gzip" ||
           result.storageContentEncoding !== "gzip" ||
+          (result.xMir2DomainProxy === "r2-asset" &&
+            result.runtimeTransport !== "stored-gzip-no-transform") ||
           result.wasmMagicOk !== true))
     ) {
       backendOk = false;
-      logFailure({ baseUrl: webBaseUrl, path, ...result });
+      logFailure({ baseUrl: runtimeBaseUrl, path, ...result });
     }
   }
 
@@ -55,7 +69,7 @@ console.log(
   JSON.stringify(
     {
       ok,
-      webBaseUrl,
+      runtimeBaseUrl,
       requireR2,
       results,
     },
@@ -72,9 +86,13 @@ async function probe(url, verifyWasm = false) {
   const startedAt = Date.now();
   let response;
   try {
-    response = await fetch(url, { method: "HEAD", cache: "no-store" });
-    if (response.status === 405 || response.status === 501) {
+    if (verifyWasm) {
       response = await fetch(url, { method: "GET", cache: "no-store" });
+    } else {
+      response = await fetch(url, { method: "HEAD", cache: "no-store" });
+      if (response.status === 405 || response.status === 501) {
+        response = await fetch(url, { method: "GET", cache: "no-store" });
+      }
     }
   } catch (error) {
     return {
@@ -84,10 +102,12 @@ async function probe(url, verifyWasm = false) {
       contentType: null,
       cacheControl: null,
       xMir2DomainProxy: null,
+      xMir2EdgeCache: null,
       xMir2AssetKey: null,
       xMir2AssetVersion: null,
       contentEncoding: null,
       storageContentEncoding: null,
+      runtimeTransport: null,
       wasmMagicOk: verifyWasm ? false : null,
       bodyPreview: null,
       error: error instanceof Error ? error.message : String(error),
@@ -101,21 +121,19 @@ async function probe(url, verifyWasm = false) {
     contentType: response.headers.get("content-type"),
     cacheControl: response.headers.get("cache-control"),
     xMir2DomainProxy: response.headers.get("x-mir2-domain-proxy"),
+    xMir2EdgeCache: response.headers.get("x-mir2-edge-cache"),
     xMir2AssetKey: response.headers.get("x-mir2-asset-key"),
     xMir2AssetVersion: response.headers.get("x-mir2-asset-version"),
     contentEncoding: response.headers.get("content-encoding"),
     storageContentEncoding: response.headers.get("x-mir2-storage-content-encoding"),
+    runtimeTransport: response.headers.get("x-mir2-runtime-transport"),
     wasmMagicOk: verifyWasm ? false : null,
     bodyPreview: null,
   };
 
-  if (
-    result.ok &&
-    verifyWasm &&
-    result.contentEncoding === "gzip" &&
-    result.storageContentEncoding === "gzip"
-  ) {
-    result.wasmMagicOk = await probeWasmMagic(url);
+  if (result.ok && verifyWasm) {
+    result.wasmMagicOk = await readWasmMagic(response);
+    result.elapsedMs = Date.now() - startedAt;
   }
 
   if (!result.ok) {
@@ -125,11 +143,9 @@ async function probe(url, verifyWasm = false) {
   return result;
 }
 
-async function probeWasmMagic(url) {
-  let response;
+async function readWasmMagic(response) {
   try {
-    response = await fetch(url, { method: "GET", cache: "no-store" });
-    if (!response.ok || !response.body) return false;
+    if (!response.body) return false;
     const reader = response.body.getReader();
     const prefix = [];
     while (prefix.length < 4) {
@@ -145,6 +161,14 @@ async function probeWasmMagic(url) {
   } catch {
     return false;
   }
+}
+
+function isR2Response(result) {
+  return (
+    result.xMir2DomainProxy === "r2-asset" ||
+    result.xMir2EdgeCache === "HIT" ||
+    result.xMir2EdgeCache === "MISS"
+  );
 }
 
 async function readBodyPreview(url, maxChars) {
@@ -164,8 +188,10 @@ function logFailure({
   contentType,
   contentEncoding,
   storageContentEncoding,
+  runtimeTransport,
   wasmMagicOk,
   xMir2DomainProxy,
+  xMir2EdgeCache,
   xMir2AssetKey,
   xMir2AssetVersion,
   error,
@@ -179,10 +205,12 @@ function logFailure({
   console.log(`content-type: ${contentType ?? ""}`);
   console.log(`content-encoding: ${contentEncoding ?? ""}`);
   console.log(`x-mir2-storage-content-encoding: ${storageContentEncoding ?? ""}`);
+  console.log(`x-mir2-runtime-transport: ${runtimeTransport ?? ""}`);
   if (path.endsWith(".wasm")) {
     console.log(`wasm-magic-ok: ${String(wasmMagicOk)}`);
   }
   console.log(`x-mir2-domain-proxy: ${xMir2DomainProxy ?? ""}`);
+  console.log(`x-mir2-edge-cache: ${xMir2EdgeCache ?? ""}`);
   console.log(`x-mir2-asset-key: ${xMir2AssetKey ?? ""}`);
   console.log(`x-mir2-asset-version: ${xMir2AssetVersion ?? ""}`);
   if (error) {

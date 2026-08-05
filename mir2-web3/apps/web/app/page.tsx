@@ -311,6 +311,7 @@ type BevyRuntimeDebug = {
   webgpuSupported: boolean;
   webgl2Supported: boolean;
   runtimeVersion: string;
+  runtimeAssetBaseUrl: string | null;
 };
 
 type UiLogTone = "chat" | "system" | "network";
@@ -1166,6 +1167,12 @@ const ONCHAIN_MINE_SWING_INTERVAL_MS = Math.max(
 // Do not append the web commit SHA: unchanged runtime bytes must keep one public
 // URL across frontend deploys, and the edge Worker validates this exact value.
 const BEVY_RUNTIME_VERSION = bevyRuntimeVersion.version || "local";
+// Production builds pin this to the content-versioned R2 release root. Keeping
+// the runtime off the main application origin avoids historical CDN entries
+// changing the stored gzip representation before WebAssembly sees it. Local
+// development leaves it empty and continues to use the Next rewrite.
+const BEVY_RUNTIME_ASSET_BASE_URL =
+  process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL?.trim() || null;
 // Runtime loading happens after the compatibility scene is already playable.
 // Allow enough headroom for the ~6 MiB compressed WASM on slower mobile/Asian
 // routes instead of aborting at the exact boundary of an otherwise valid load.
@@ -4344,7 +4351,10 @@ export default function HomePage() {
 
     async function bootRuntime() {
       try {
-        markMir2CacheMilestone("bevyRuntimeStart");
+        markMir2CacheMilestone("bevyRuntimeStart", {
+          runtimeVersion: BEVY_RUNTIME_VERSION,
+          runtimeAssetBaseUrl: BEVY_RUNTIME_ASSET_BASE_URL,
+        });
         const runtimeWindow = window as typeof window & {
           __mir2BevyRuntime?: RuntimeModule;
           __mir2BevyRuntimeBooted?: boolean;
@@ -4485,6 +4495,7 @@ export default function HomePage() {
             webgpuSupported: runtimeSupport.webgpu,
             webgl2Supported: runtimeSupport.webgl2,
             runtimeVersion: BEVY_RUNTIME_VERSION,
+            runtimeAssetBaseUrl: BEVY_RUNTIME_ASSET_BASE_URL,
           };
           setBevyEntityRendererReady(Boolean(loadedRuntime.setMir2EntityRenderState));
           setBevyRuntimeBackend(backend);
@@ -13867,6 +13878,7 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
   const { moduleUrl: runtimePath, wasmUrl: runtimeWasmPath } = createBevyRuntimeUrls(
     BEVY_RUNTIME_VERSION,
     backend,
+    BEVY_RUNTIME_ASSET_BASE_URL,
   );
   const runtime = (await import(
     /* webpackIgnore: true */ runtimePath
