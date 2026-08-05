@@ -16,6 +16,13 @@ const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const PUBLIC_ROOT = path.join(WEB_ROOT, "public");
 const ORIGINAL_MAP_ROOT = path.join(PUBLIC_ROOT, "original-map");
 const DEFAULT_OUT_DIR = path.join(PUBLIC_ROOT, "generated", "map-atlas");
+const PRODUCTION_ASSET_CONFIG = path.resolve(
+  WEB_ROOT,
+  "..",
+  "..",
+  "config",
+  "production-web-assets.json",
+);
 
 const ATLAS_PADDING = 1;
 const INITIAL_WIDTH = 1024;
@@ -30,6 +37,19 @@ const maxPagePixels = positiveInteger(args.maxPagePixels) || DEFAULT_MAX_PAGE_PI
 const onlyLibraries = parseListArg(args.libraries, null);
 
 async function main() {
+  if (isRemoteReleaseBuild()) {
+    const pinned = await readVerifiedRemoteMapAtlasRelease();
+    console.log(
+      JSON.stringify({
+        ok: true,
+        skipped: true,
+        reason: "verified remote map-atlas release is pinned",
+        ...pinned,
+      }),
+    );
+    return;
+  }
+
   // `--skipIfPresent` (used by the `dev` hook) short-circuits when a manifest already exists, so a
   // warm `npm run dev` doesn't pay the ~48s repack every start. CI/`build` calls it without the flag
   // to always produce a fresh atlas from the committed source PNGs.
@@ -256,6 +276,51 @@ export function mapAtlasManifestFitsBudget(manifest, maxSize = MAX_SIZE) {
 export function mapAtlasLibrarySupportsRawUpload(libraryKey) {
   const leaf = String(libraryKey).split("/").filter(Boolean).at(-1) ?? "";
   return /^(?:sm)?tiles\d*c?$/i.test(leaf);
+}
+
+export function isRemoteReleaseBuild(environment = process.env) {
+  return environment.MIR2_ORIGINAL_ASSET_MANIFEST_MODE === "remote-release";
+}
+
+export async function readVerifiedRemoteMapAtlasRelease(
+  configPath = PRODUCTION_ASSET_CONFIG,
+) {
+  let release;
+  try {
+    release = JSON.parse(await fs.readFile(configPath, "utf8"));
+  } catch (error) {
+    throw new Error(
+      `Unable to read production asset release ${configPath}: ${error?.message ?? error}`,
+    );
+  }
+
+  const mapAtlas = release?.mapAtlas;
+  const contentHash = String(mapAtlas?.contentHash ?? "").toLowerCase();
+  const manifestPath = String(mapAtlas?.manifestPath ?? "");
+  const manifestMatch =
+    /^\/generated\/map-atlas\/manifest\.([a-f0-9]{64})\.json$/i.exec(manifestPath);
+  const pageCount = positiveInteger(mapAtlas?.pageCount);
+  const maxPageBytes = positiveInteger(mapAtlas?.maxPageBytes);
+  if (
+    mapAtlas?.enabled !== true ||
+    mapAtlas?.verified !== true ||
+    !/^[a-f0-9]{64}$/.test(contentHash) ||
+    manifestMatch?.[1]?.toLowerCase() !== contentHash ||
+    !pageCount ||
+    !maxPageBytes
+  ) {
+    throw new Error(
+      `Production map-atlas release is not complete or verified: ${configPath}`,
+    );
+  }
+
+  return {
+    releaseVersion: String(release.version ?? ""),
+    manifestPath,
+    contentHash,
+    pageCount,
+    maxPageBytes,
+  };
 }
 
 export async function removeStaleMapAtlasArtifacts(root) {

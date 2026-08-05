@@ -8,18 +8,22 @@ import { fileURLToPath } from "node:url";
 import {
   DEFAULT_MAX_PAGE_PIXELS,
   MAX_SIZE,
+  isRemoteReleaseBuild,
   mapAtlasLibrarySupportsRawUpload,
   mapAtlasManifestFitsBudget,
   packIntoPages,
+  readVerifiedRemoteMapAtlasRelease,
   removeStaleMapAtlasArtifacts,
 } from "./build-map-atlas-pack.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = path.resolve(
-  SCRIPT_DIR,
-  "../public/generated/map-atlas/manifest.json",
+  process.env.MIR2_MAP_ATLAS_MANIFEST_PATH ??
+    path.resolve(SCRIPT_DIR, "../public/generated/map-atlas/manifest.json"),
 );
-const requireManifest = process.argv.includes("--requireManifest");
+const requireManifest =
+  process.argv.includes("--requireManifest") ||
+  process.env.npm_lifecycle_event === "verify:map-atlas-budget";
 
 test("floor atlases are split into bounded streaming pages", () => {
   const sources = Array.from({ length: 630 }, (_, index) => ({
@@ -68,6 +72,18 @@ test("the packed index contains only raw-upload-safe floor libraries", () => {
   assert.equal(mapAtlasLibrarySupportsRawUpload("WemadeMir3/Sand/Dungeonsc"), false);
 });
 
+test("remote production builds require a verified content-addressed map atlas", async () => {
+  const pinned = await readVerifiedRemoteMapAtlasRelease();
+  assert.match(pinned.releaseVersion, /^[a-zA-Z0-9._-]+$/);
+  assert.match(pinned.contentHash, /^[a-f0-9]{64}$/);
+  assert.equal(
+    pinned.manifestPath,
+    `/generated/map-atlas/manifest.${pinned.contentHash}.json`,
+  );
+  assert.ok(pinned.pageCount > 0);
+  assert.ok(pinned.maxPageBytes > 0);
+});
+
 test("repeat builds remove only stale content-addressed atlas artifacts", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-map-atlas-clean-"));
   const libraryDir = path.join(root, "WemadeMir2-Tiles");
@@ -99,6 +115,16 @@ test("the generated map atlas never exceeds the WebGL2 compatibility budget", as
   try {
     manifest = JSON.parse(await fs.readFile(MANIFEST_PATH, "utf8"));
   } catch (error) {
+    if (
+      error?.code === "ENOENT" &&
+      requireManifest &&
+      isRemoteReleaseBuild()
+    ) {
+      const pinned = await readVerifiedRemoteMapAtlasRelease();
+      assert.match(pinned.contentHash, /^[a-f0-9]{64}$/);
+      assert.ok(pinned.pageCount > 0);
+      return;
+    }
     if (error?.code === "ENOENT" && !requireManifest) {
       context.skip(
         "generated map atlas is absent; build creates it before release verification",

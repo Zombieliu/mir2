@@ -38,6 +38,7 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
     node -p "require(process.argv[1]).remoteReleaseUrl" "$PRODUCTION_ASSET_CONFIG"
   )"
   export MIR2_USE_PREBUILT_BEVY_RUNTIME="${MIR2_USE_PREBUILT_BEVY_RUNTIME:-1}"
+  export MIR2_REUSE_ORIGINAL_ASSET_MANIFEST="${MIR2_REUSE_ORIGINAL_ASSET_MANIFEST:-1}"
 
   npm run generate:original-asset-manifest
   echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."
@@ -52,8 +53,29 @@ PREBUILT_RUNTIME_WEBGPU_WASM="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_ru
 PREBUILT_RUNTIME_WEBGL2_JS="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js"
 PREBUILT_RUNTIME_WEBGL2_WASM="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
 
+prebuilt_runtime_ready() {
+  [ -s "$PREBUILT_RUNTIME_WEBGPU_JS" ] \
+    && [ -s "$PREBUILT_RUNTIME_WEBGPU_WASM" ] \
+    && [ -s "$PREBUILT_RUNTIME_WEBGL2_JS" ] \
+    && [ -s "$PREBUILT_RUNTIME_WEBGL2_WASM" ]
+}
+
+# Hosted production releases pin immutable WebGPU/WebGL2 packages that were
+# already built and uploaded by the asset release gate. Do not install a Rust
+# toolchain merely because the source tree is present in the deployment
+# archive; `npm run runtime:build:release` validates and reuses these packages.
+if [ "${MIR2_USE_PREBUILT_BEVY_RUNTIME:-0}" = "1" ]; then
+  if ! prebuilt_runtime_ready; then
+    echo "[vercel-build] MIR2_USE_PREBUILT_BEVY_RUNTIME=1 but one or more runtime packages are missing." >&2
+    exit 1
+  fi
+  echo "[vercel-build] Using pinned prebuilt WebGPU/WebGL2 packages; skipping Rust toolchain installation."
+  npm run build
+  exit 0
+fi
+
 if [ ! -f "$RUNTIME_LOCK" ]; then
-  if [ -s "$PREBUILT_RUNTIME_WEBGPU_JS" ] && [ -s "$PREBUILT_RUNTIME_WEBGPU_WASM" ] && [ -s "$PREBUILT_RUNTIME_WEBGL2_JS" ] && [ -s "$PREBUILT_RUNTIME_WEBGL2_WASM" ]; then
+  if prebuilt_runtime_ready; then
     echo "[vercel-build] Rust runtime source is not present in this deployment archive; using prebuilt WebGPU/WebGL2 packages."
     export MIR2_USE_PREBUILT_BEVY_RUNTIME=1
     npm run build
