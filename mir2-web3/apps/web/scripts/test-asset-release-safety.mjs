@@ -581,6 +581,10 @@ await test("Vercel release can verify a pre-deployed Worker", async () => {
     workflow,
     /name: Deploy same-origin asset Worker proxy\n\s+if: \$\{\{ \(inputs\.publish_r2 \|\| inputs\.use_existing_release\) && inputs\.deploy_worker \}\}/,
   );
+  assert.match(
+    workflow,
+    /--build-env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST=1"/,
+  );
 });
 
 await test("Cloudflare OAuth API fails fast on authentication errors", async () => {
