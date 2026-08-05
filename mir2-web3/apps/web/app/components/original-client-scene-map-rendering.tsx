@@ -15,6 +15,11 @@ import {
   keyMapObjectImageOffThread,
   offThreadAlphaKeyAvailable,
 } from "../../lib/scene-alpha-key";
+import {
+  buildSceneAssetCandidateUrls,
+  sceneAssetRetryUrl,
+  sceneAssetStalledRetryDecision,
+} from "../../lib/scene-asset-retry-policy";
 import type { DisplayEntity, DisplayWorld } from "./original-client-types";
 import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import {
@@ -648,8 +653,7 @@ export function mapSpriteRenderPath(path: string) {
   return key ? `/generated/original-map-blend/${BLEND_MANIFEST_LIB}/${key}.png` : path;
 }
 
-const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
-const SCENE_ASSET_STALLED_RETRY_DELAYS_MS = [2500, 5000, 10000, 15000];
+const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [750, 2500, 7000];
 // Once a scene asset has exhausted its retries it is negatively cached briefly. These assets are
 // immutable, but the failure mode we see in production is usually a transient fetch/load miss while
 // a scene asks for hundreds of small PNGs at once, not an actual absent R2 object.
@@ -667,23 +671,21 @@ const failedStaticSceneAssetUrls = new Map<string, number>();
 const loggedStaticSceneAssetFailures = new Set<string>();
 let alphaKeyedSceneAssetBytes = 0;
 
-export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[] {
-  const candidates: string[] = [];
-  const add = (candidate: string | null) => {
-    if (candidate && !candidates.includes(candidate)) {
-      candidates.push(candidate);
-    }
-  };
-
-  add(url);
-  add(cacheBustedSceneAssetUrl(url, retryAttempt));
-
-  for (const remoteUrl of remoteSceneAssetUrls(url)) {
-    add(remoteUrl);
-    add(cacheBustedSceneAssetUrl(remoteUrl, retryAttempt));
+export function sceneAssetCandidateUrls(url: string): string[] {
+  if (typeof window === "undefined") {
+    return [url];
   }
 
-  return candidates;
+  const assetCache = (window as SceneAssetCacheWindow).__mir2AssetCache;
+  return buildSceneAssetCandidateUrls({
+    url,
+    pageUrl: window.location.href,
+    remoteAssetBaseUrls: [
+      ...(assetCache?.remoteAssetFallbackBaseUrls ?? []),
+      assetCache?.remoteAssetBaseUrl,
+    ].filter((value): value is string => Boolean(value)),
+    isRemoteBackedPath: isRemoteBackedSceneAssetPath,
+  });
 }
 
 export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElement>) {
@@ -695,7 +697,13 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   }
 
   image.dataset.mir2OriginalSrc = originalSrc;
+  if (staticSceneAssetRecentlyFailed(originalSrc)) {
+    image.dataset.mir2LoadFailed = "true";
+    image.style.visibility = "hidden";
+    return;
+  }
   if (image.dataset.mir2RetryOriginalSrc !== originalSrc) {
+    delete image.dataset.mir2LoadFailed;
     delete image.dataset.mir2DelayedRetryCount;
     delete image.dataset.mir2IncompleteSince;
     delete image.dataset.mir2StalledRetryCount;
@@ -721,6 +729,10 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
 
 export function handleSceneAssetImageLoad(event: SyntheticEvent<HTMLImageElement>) {
   const image = event.currentTarget;
+  const originalSrc = image.dataset.mir2OriginalSrc;
+  if (originalSrc) {
+    clearStaticSceneAssetFailure(originalSrc);
+  }
   clearSceneAssetRetryState(image);
   void applyMapObjectAlphaKey(image);
 }
@@ -741,10 +753,6 @@ export function rescueStalledSceneAssetImages(root: ParentNode = document) {
       clearSceneAssetRetryState(image);
       continue;
     }
-    if (image.dataset.mir2LoadFailed === "retrying") {
-      continue;
-    }
-
     const originalSrc = image.dataset.mir2OriginalSrc ?? image.getAttribute("src") ?? "";
     if (!originalSrc) {
       continue;
@@ -763,21 +771,30 @@ export function rescueStalledSceneAssetImages(root: ParentNode = document) {
 
     const stalledRetryCount = Number.parseInt(image.dataset.mir2StalledRetryCount ?? "0", 10);
     const retryCount = Number.isFinite(stalledRetryCount) ? stalledRetryCount : 0;
-    const delay =
-      SCENE_ASSET_STALLED_RETRY_DELAYS_MS[
-        Math.min(retryCount, SCENE_ASSET_STALLED_RETRY_DELAYS_MS.length - 1)
-      ];
-    if (now - firstIncompleteAt < delay) {
+    const decision = sceneAssetStalledRetryDecision({
+      elapsedMs: now - firstIncompleteAt,
+      retryCount,
+      loadState: image.dataset.mir2LoadFailed,
+    });
+    if (decision === "skip" || decision === "wait") {
+      continue;
+    }
+    if (decision === "fail") {
+      markStaticSceneAssetFailed(image, originalSrc);
       continue;
     }
 
-    const retrySrc = sceneAssetDelayedRetryUrl(originalSrc, retryCount + 10);
+    const candidates = sceneAssetCandidateUrls(originalSrc);
+    // The native request has already had thirty seconds. A single rescue moves to the
+    // next stable origin (or retries the same stable URL when no fallback exists).
+    const retrySrc = sceneAssetRetryUrl(candidates, retryCount + 2);
     if (!retrySrc) continue;
 
     image.dataset.mir2IncompleteSince = String(now);
     image.dataset.mir2StalledRetryCount = String(retryCount + 1);
     image.dataset.mir2RetryOriginalSrc = originalSrc;
-    image.dataset.mir2RetryIndex = String(sceneAssetCandidateUrls(originalSrc).length + retryCount);
+    image.dataset.mir2RetryIndex = String(Math.max(0, candidates.indexOf(retrySrc)));
+    delete image.dataset.mir2LoadFailed;
     image.style.visibility = "";
     image.src = retrySrc;
     retried += 1;
@@ -948,8 +965,7 @@ function scheduleSceneAssetImageDelayedRetry(image: HTMLImageElement, originalSr
   const delay = SCENE_ASSET_DELAYED_RETRY_DELAYS_MS[nextRetryCount - 1];
 
   if (delay === undefined) {
-    image.dataset.mir2LoadFailed = "true";
-    image.style.visibility = "hidden";
+    markStaticSceneAssetFailed(image, originalSrc);
     return;
   }
 
@@ -963,25 +979,20 @@ function scheduleSceneAssetImageDelayedRetry(image: HTMLImageElement, originalSr
     }
     const retrySrc = sceneAssetDelayedRetryUrl(originalSrc, nextRetryCount);
     if (!retrySrc) {
-      image.dataset.mir2LoadFailed = "true";
-      image.style.visibility = "hidden";
+      markStaticSceneAssetFailed(image, originalSrc);
       return;
     }
     image.dataset.mir2RetryOriginalSrc = originalSrc;
     image.dataset.mir2RetryIndex = String(sceneAssetCandidateUrls(originalSrc).length);
+    image.dataset.mir2IncompleteSince = String(Date.now());
+    delete image.dataset.mir2LoadFailed;
     image.style.visibility = "";
     image.src = retrySrc;
   }, delay);
 }
 
 function sceneAssetDelayedRetryUrl(originalSrc: string, retryCount: number) {
-  const retryCandidates = sceneAssetCandidateUrls(originalSrc, retryCount + 1).filter(
-    (candidate) => candidate !== originalSrc,
-  );
-  if (!retryCandidates.length) {
-    return cacheBustedSceneAssetUrl(originalSrc, retryCount + 1);
-  }
-  return retryCandidates[(retryCount - 1) % retryCandidates.length] ?? retryCandidates[0] ?? null;
+  return sceneAssetRetryUrl(sceneAssetCandidateUrls(originalSrc), retryCount);
 }
 
 // Crystal blends glow objects ADDITIVELY (DXManager.SetBlend: SourceAlpha + One). On the DOM
@@ -1013,57 +1024,6 @@ type SceneAssetCacheWindow = Window & {
     remoteAssetFallbackBaseUrls?: string[];
   };
 };
-
-function cacheBustedSceneAssetUrl(url: string, retryAttempt = 1) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const parsed = new URL(url, window.location.href);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return null;
-    }
-    parsed.searchParams.set("mir2ImgRetry", String(Math.max(1, retryAttempt)));
-    parsed.searchParams.set("mir2ImgRetryTs", Date.now().toString(36));
-    return parsed.origin === window.location.origin
-      ? `${parsed.pathname}${parsed.search}${parsed.hash}`
-      : parsed.toString();
-  } catch {
-    return null;
-  }
-}
-
-function remoteSceneAssetUrls(url: string) {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  const assetCache = (window as SceneAssetCacheWindow).__mir2AssetCache;
-  const remoteAssetBaseUrls = [
-    ...(assetCache?.remoteAssetFallbackBaseUrls ?? []),
-    assetCache?.remoteAssetBaseUrl,
-  ].filter((value): value is string => Boolean(value));
-
-  try {
-    const parsed = new URL(url, window.location.href);
-    if (!isRemoteBackedSceneAssetPath(parsed.pathname)) {
-      return [];
-    }
-    return Array.from(
-      new Set(
-        remoteAssetBaseUrls.flatMap((baseUrl) => {
-          const normalizedBase = baseUrl.replace(/\/+$/, "");
-          return parsed.href.startsWith(`${normalizedBase}/`)
-            ? []
-            : [`${normalizedBase}/${parsed.pathname.replace(/^\/+/, "")}`];
-        }),
-      ),
-    );
-  } catch {
-    return [];
-  }
-}
 
 function isRemoteBackedSceneAssetPath(path: string) {
   return (
@@ -1113,6 +1073,12 @@ function staticSceneAssetRecentlyFailed(url: string) {
   failedStaticSceneAssetUrls.delete(key);
   loggedStaticSceneAssetFailures.delete(key);
   return false;
+}
+
+function clearStaticSceneAssetFailure(url: string) {
+  const key = staticSceneAssetFailureKey(url);
+  failedStaticSceneAssetUrls.delete(key);
+  loggedStaticSceneAssetFailures.delete(key);
 }
 
 function markStaticSceneAssetFailed(image: HTMLImageElement, originalSrc: string) {
