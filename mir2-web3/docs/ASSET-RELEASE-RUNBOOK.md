@@ -103,6 +103,12 @@ spawning one Wrangler process per object. Use
 and a freshly deployed `MIR2_R2_UPLOAD_SECRET` when uploading focused repair
 manifests.
 
+The hosted production workflow defaults to this Worker driver and reads both
+values from GitHub Actions secrets. The Cloudflare OAuth token is deliberately
+not treated as an R2 object credential; a 401 response is non-retryable and
+fails immediately. Keep `r2-s3` for local full-pack publication where dedicated
+R2 S3 credentials are available.
+
 When repairing static original UI coverage, include both the PNG/WAV/CUR
 objects and their metadata. Uploading every local `original-ui/**/meta.json`
 plus `manifest.generated.json`, `source-libraries.generated.json`, and

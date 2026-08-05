@@ -67,3 +67,13 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
   before falling back to capped exponential delay. Added a deterministic 429-then-success regression
   test; immutable object keys keep partial retries idempotent and the full release manifest remains
   untouched.
+
+## 2026-08-05 authenticated R2 Worker release path
+
+- The subsequent OAuth object upload proved that the repository Cloudflare token is control-plane
+  only (`HTTP 401 Authentication error`). The already-deployed `mir2-r2-bulk-upload` Worker and
+  `assets.mir2.obelisk.build/upload*` route are healthy, so its upload secret was rotated and copied
+  into GitHub Actions together with the Worker URL.
+- Hosted releases now default to the authenticated Worker driver and expose its two secrets to both
+  asset and immutable-runtime upload steps. Authentication failures no longer waste retry attempts;
+  transient rate limits and server failures retain bounded retries.

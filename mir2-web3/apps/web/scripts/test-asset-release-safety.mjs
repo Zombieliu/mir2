@@ -557,6 +557,58 @@ await test("immutable runtime workflow serializes and retries R2 uploads", async
   const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
   assert.match(workflow, /MIR2_R2_UPLOAD_CONCURRENCY:\s*"1"/);
   assert.match(workflow, /MIR2_R2_UPLOAD_ATTEMPTS:\s*"6"/);
+  assert.match(workflow, /upload_driver:[\s\S]*?default:\s*worker/);
+  assert.equal((workflow.match(/MIR2_R2_UPLOAD_WORKER_URL:/g) ?? []).length, 2);
+  assert.equal((workflow.match(/MIR2_R2_UPLOAD_SECRET:/g) ?? []).length, 2);
+});
+
+await test("Cloudflare OAuth API fails fast on authentication errors", async () => {
+  await withTempDir(async (root) => {
+    let requestCount = 0;
+    const server = await listen((request, response) => {
+      requestCount += 1;
+      request.resume();
+      request.on("end", () => {
+        response.statusCode = 401;
+        response.setHeader("content-type", "application/json");
+        response.end(JSON.stringify({ success: false, errors: [{ message: "authentication error" }] }));
+      });
+    });
+
+    try {
+      const stagePath = path.join(root, "runtime.js");
+      const manifestPath = path.join(root, "release.json");
+      const raw = Buffer.from("export const runtime = true;\n");
+      await fs.writeFile(stagePath, raw);
+      await fs.writeFile(manifestPath, JSON.stringify({
+        objectPrefix: "mir2/v/oauth-api-auth-fixture",
+        publishReleaseManifest: false,
+        files: [{
+          relativePath: "bevy-runtime/v/bevy-fixture/pkg/runtime.js",
+          stagePath,
+          size: raw.byteLength,
+          sha256: createHash("sha256").update(raw).digest("hex"),
+          contentType: "text/javascript; charset=utf-8",
+        }],
+      }));
+
+      await assert.rejects(
+        runNode(UPLOAD_SCRIPT, [
+          "--manifest", manifestPath,
+          "--bucket", "fixture",
+          "--driver", "api",
+          "--accountId", "fixture-account",
+          "--apiBaseUrl", server.url,
+          "--includeReleaseManifest", "false",
+          "--maxAttempts", "6",
+        ], { CLOUDFLARE_API_TOKEN: "invalid-fixture-token" }),
+        /HTTP 401 authentication error/,
+      );
+      assert.equal(requestCount, 1);
+    } finally {
+      await server.close();
+    }
+  });
 });
 
 await test("upload Worker streams deterministic gzip bytes with integrity headers", async () => {
@@ -665,7 +717,7 @@ await test("runtime-only releases do not overwrite the full release manifest by 
   });
 });
 
-console.log("asset release safety tests passed (9/9)");
+console.log("asset release safety tests passed (10/10)");
 
 async function test(name, fn) {
   try {

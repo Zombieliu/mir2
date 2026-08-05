@@ -36,7 +36,7 @@ on:
       upload_driver:
         description: Upload driver for R2 publish (wrangler, api, worker, r2-s3)
         required: false
-        default: r2-s3
+        default: worker
         type: string
       require_full_crystal_pack:
         description: Require an existing release to contain the verified full Crystal pack
@@ -352,7 +352,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
-          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'r2-s3' }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'worker' }}
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
           MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
           MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
           MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
@@ -395,7 +397,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
-          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'r2-s3' }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'worker' }}
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
           MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
           MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
           MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
