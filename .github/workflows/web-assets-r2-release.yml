@@ -343,6 +343,20 @@ jobs:
         working-directory: mir2-web3/apps/web
         run: npm run assets:r2:dry-run
 
+      - name: Deploy authenticated R2 upload Worker
+        if: ${{ (inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel))) && (inputs.upload_driver == 'worker' || inputs.upload_driver == '') }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "R2 upload Worker deploy requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID." >&2
+            exit 1
+          fi
+          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-bulk-upload/wrangler.jsonc
+
       - name: Publish Web assets to R2
         if: ${{ inputs.publish_r2 }}
         working-directory: mir2-web3/apps/web

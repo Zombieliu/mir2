@@ -216,6 +216,8 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(domainProxySource, /representation", "stored-gzip-v1"/);
   assert.match(domainProxySource, /runtime_storage_encoding_missing/);
   assert.match(domainProxySource, /encodeBody: "manual"/);
+  assert.match(releaseWorkflowSource, /Deploy authenticated R2 upload Worker/);
+  assert.match(releaseWorkflowSource, /mir2-r2-bulk-upload\/wrangler\.jsonc/);
   assert.match(releaseWorkflowSource, /npm run runtime:r2:build/);
   assert.match(releaseWorkflowSource, /MIR2_BEVY_RUNTIME_VERSION: runtime\.version/);
   assert.doesNotMatch(releaseWorkflowSource, /delete config\.routes/);
