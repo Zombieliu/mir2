@@ -35,7 +35,7 @@ try {
   const worker = await import(`${pathToFileURL(temporaryModule).href}?v=${Date.now()}`);
   for (const assetPath of [
     "/original-ui/Title/30.png",
-    "/original-map/WemadeMir2/Tiles/1504.png",
+    "/original-map/WemadeMir2/Tiles/1000.png",
     "/generated/original-map-blend/WemadeMir2/Objects/1.png",
     "/generated/map-atlas/manifest.json",
     "/generated/crystal-packs/full/index.json",
