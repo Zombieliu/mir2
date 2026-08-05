@@ -22,6 +22,7 @@ export interface Env {
   GATEWAY_ORIGIN_URL?: string;
   MIR2_ASSET_OBJECT_PREFIX?: string;
   MIR2_ASSET_VERSION?: string;
+  MIR2_BEVY_RUNTIME_VERSION?: string;
   MIR2_ASSETS?: R2Bucket;
   ORIGIN_URL?: string;
   VERCEL_BYPASS_SECRET?: string;
@@ -36,6 +37,8 @@ const ASSET_CONTENT_TYPES: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+  ".js": "text/javascript; charset=utf-8",
+  ".wasm": "application/wasm",
 };
 
 function canHaveRequestBody(method: string): boolean {
@@ -52,8 +55,34 @@ export function isStaticAssetRequest(url: URL): boolean {
     url.pathname.startsWith("/original-map/") ||
     url.pathname.startsWith("/generated/original-map-blend/") ||
     url.pathname.startsWith("/generated/map-atlas/") ||
-    url.pathname.startsWith("/generated/crystal-packs/full/")
+    url.pathname.startsWith("/generated/crystal-packs/full/") ||
+    isVersionedBevyRuntimeRequest(url)
   );
+}
+
+export function isVersionedBevyRuntimeRequest(url: URL): boolean {
+  return /^\/bevy-runtime\/v\/[^/]+\/pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(
+    url.pathname,
+  );
+}
+
+export function bevyRuntimeObjectKeyForPath(
+  pathname: string,
+  prefix: string,
+  expectedRuntimeVersion: string,
+): string {
+  const match = /^\/bevy-runtime\/v\/([^/]+)\/(pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js))$/.exec(
+    pathname,
+  );
+  if (!match || !prefix || !expectedRuntimeVersion) return "";
+  let requestedVersion = "";
+  try {
+    requestedVersion = decodeURIComponent(match[1]);
+  } catch {
+    return "";
+  }
+  if (requestedVersion !== expectedRuntimeVersion) return "";
+  return `${prefix}/bevy-runtime/${match[2]}`;
 }
 
 function originalUiMetaLibrary(url: URL): string | null {
@@ -249,14 +278,28 @@ async function serveStaticAssetFromR2(
     return cleanAssetResponse(assetResponse);
   }
 
-  const objectKey = assetObjectKeyForPath(publicUrl.pathname, assetObjectPrefix);
+  const runtimeRequest = isVersionedBevyRuntimeRequest(publicUrl);
+  const objectKey = runtimeRequest
+    ? bevyRuntimeObjectKeyForPath(
+        publicUrl.pathname,
+        assetObjectPrefix,
+        normalizeAssetVersion(env.MIR2_BEVY_RUNTIME_VERSION || ""),
+      )
+    : assetObjectKeyForPath(publicUrl.pathname, assetObjectPrefix);
   if (!objectKey) {
-    return assetError("asset_not_found", 404, "invalid_asset_path", publicUrl.pathname, null);
+    return assetError(
+      "asset_not_found",
+      404,
+      runtimeRequest ? "runtime_version_mismatch" : "invalid_asset_path",
+      publicUrl.pathname,
+      null,
+    );
   }
 
-  const storedGzip = isStoredGzipPath(objectKey);
+  const decompressStoredGzip = isStoredGzipJsonPath(objectKey);
+  const preserveStoredGzip = isStoredGzipWasmPath(objectKey);
   const cacheKey = new Request(`https://mir2-r2-cache.local/${objectKey}`, { method: "GET" });
-  if (request.method === "GET" && !storedGzip) {
+  if (request.method === "GET" && !decompressStoredGzip) {
     const cached = await caches.default.match(cacheKey);
     if (cached) {
       const cachedHeaders = new Headers(cached.headers);
@@ -276,16 +319,23 @@ async function serveStaticAssetFromR2(
   }
 
   const headers = assetObjectHeaders(objectKey, object, env, assetVersion, "MISS");
+  if (runtimeRequest) {
+    headers.set("x-mir2-runtime-version", env.MIR2_BEVY_RUNTIME_VERSION || "");
+  }
+  if (preserveStoredGzip && object.httpMetadata?.contentEncoding === "gzip") {
+    headers.set("content-encoding", "gzip");
+    headers.set("vary", "Accept-Encoding");
+  }
   const body = request.method === "HEAD"
     ? null
-    : object.httpMetadata?.contentEncoding === "gzip"
+    : decompressStoredGzip && object.httpMetadata?.contentEncoding === "gzip"
       ? object.body.pipeThrough(new DecompressionStream("gzip"))
       : object.body;
   const response = new Response(body, {
     headers,
     status: 200,
   });
-  if (request.method === "GET" && !storedGzip) {
+  if (request.method === "GET" && !decompressStoredGzip) {
     ctx.waitUntil(caches.default.put(cacheKey, response.clone()));
   }
   return response;
@@ -387,8 +437,12 @@ function normalizeAssetObjectPrefix(value: string | undefined): string {
   return String(value ?? "").trim().replace(/^\/+|\/+$/g, "");
 }
 
-function isStoredGzipPath(objectKey: string): boolean {
+function isStoredGzipJsonPath(objectKey: string): boolean {
   return objectKey.includes("/generated/crystal-packs/full/") && objectKey.endsWith(".json");
+}
+
+function isStoredGzipWasmPath(objectKey: string): boolean {
+  return objectKey.includes("/bevy-runtime/pkg-") && objectKey.endsWith("_bg.wasm");
 }
 
 type AssetReleaseConfigResult = {

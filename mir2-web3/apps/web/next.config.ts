@@ -40,6 +40,9 @@ const productionAssetRelease = isVercelProduction
 const immutableGameAssetCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=31536000, immutable";
+const bootstrapAssetCache = isDevelopment
+  ? "public, max-age=0, must-revalidate"
+  : "public, max-age=86400, stale-while-revalidate=604800";
 const shortRuntimeCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=0, must-revalidate";
@@ -165,6 +168,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/bootstrap/:path*",
+        headers: [
+          { key: "Cache-Control", value: bootstrapAssetCache },
+          { key: "X-Mir2-Asset-Cache", value: "bootstrap" },
+          clearAltSvcHeader,
+        ],
+      },
       {
         source: "/original-ui/:path*",
         headers: [

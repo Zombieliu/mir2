@@ -552,7 +552,42 @@ await test("upload Worker streams deterministic gzip bytes with integrity header
   });
 });
 
-console.log("asset release safety tests passed (6/6)");
+await test("runtime-only releases do not overwrite the full release manifest by default", async () => {
+  await withTempDir(async (root) => {
+    const stagePath = path.join(root, "mir2_bevy_runtime.js");
+    const manifestPath = path.join(root, "runtime-release.json");
+    const bytes = Buffer.from("runtime-fixture");
+    await fs.writeFile(stagePath, bytes);
+    await fs.writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      kind: "mir2-bevy-runtime-r2-release",
+      publishReleaseManifest: false,
+      objectPrefix: "mir2/v/runtime-fixture",
+      files: [{
+        path: "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+        relativePath: "bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+        stagePath,
+        size: bytes.byteLength,
+        sha256: createHash("sha256").update(bytes).digest("hex"),
+        contentType: "text/javascript; charset=utf-8",
+      }],
+    }));
+
+    const { stdout } = await runNode(UPLOAD_SCRIPT, [
+      "--manifest", manifestPath,
+      "--dryRun", "true",
+    ]);
+    const report = JSON.parse(stdout);
+    assert.equal(report.uploadCount, 1);
+    assert.equal(report.publishOrder.legacyReleaseManifest, 0);
+    assert.equal(
+      report.sample.some((entry) => entry.objectKey.endsWith("/remote-asset-release.json")),
+      false,
+    );
+  });
+});
+
+console.log("asset release safety tests passed (7/7)");
 
 async function test(name, fn) {
   try {

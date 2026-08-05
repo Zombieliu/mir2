@@ -287,6 +287,12 @@ html[data-display-mode="standalone"] .mir-client-page {
   object-fit: fill;
 }
 
+.client-scene-background-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .gateway-reconnect-overlay {
   position: absolute;
   left: 50%;

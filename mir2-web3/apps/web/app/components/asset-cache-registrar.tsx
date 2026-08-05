@@ -238,6 +238,7 @@ declare global {
 const MAX_RESOURCE_METRICS = 2000;
 const MAX_API_METRICS = 500;
 const CACHE_NAMESPACE_STORAGE_KEY = "mir2.assetCacheNamespace";
+const SERVICE_WORKER_CONFIG_ACK_TIMEOUT_MS = 750;
 
 export function AssetCacheRegistrar() {
   const [mounted, setMounted] = useState(false);
@@ -293,10 +294,227 @@ export function AssetCacheRegistrar() {
     let debugInterval = 0;
     let installedStagePrewarm: ((stage: AssetPrewarmStage) => Promise<void>) | null = null;
     let prewarmOrchestrator: AssetPrewarmOrchestrator | null = null;
+    let serviceWorkerCleanup: (() => void) | null = null;
     const handleFirstPlayable = () => {
       void prewarmOrchestrator?.markFirstPlayable();
     };
     window.addEventListener(MIR2_ASSET_FIRST_PLAYABLE_EVENT, handleFirstPlayable);
+
+    async function configureServiceWorkerInBackground(
+      manifest: AssetManifest,
+      cacheNamespace: string,
+      releaseCapabilities: AssetReleaseCapabilities,
+    ) {
+      const registerStartedAt = performance.now();
+      metrics.markMilestone("serviceWorkerRegisterStart");
+
+      try {
+        const registration = await navigator.serviceWorker.register(
+          "/mir2-asset-worker.js",
+          { scope: "/", updateViaCache: "none" },
+        );
+        if (disposed) return;
+
+        metrics.markMilestone("serviceWorkerRegistered", {
+          durationMs: Math.round(performance.now() - registerStartedAt),
+          active: Boolean(registration.active),
+          waiting: Boolean(registration.waiting),
+          installing: Boolean(registration.installing),
+        });
+
+        const payload = {
+          type: "MIR2_ASSET_CACHE_CONFIG",
+          manifest,
+          manifestVersion: manifest.version,
+          cacheNamespace,
+        };
+        const workerStateListeners = new Map<ServiceWorker, () => void>();
+        const postToWorker = (
+          worker: ServiceWorker,
+          message: Record<string, unknown>,
+          reason: string,
+        ) => {
+          try {
+            worker.postMessage(message);
+            return true;
+          } catch (error) {
+            metrics.markMilestone("serviceWorkerPostMessageFailed", {
+              reason,
+              state: worker.state,
+              message: error instanceof Error ? error.message : String(error),
+            });
+            return false;
+          }
+        };
+
+        const applyConfiguredState = (
+          configured: Record<string, unknown> | null,
+          reason: string,
+        ) => {
+          if (disposed) return;
+          const deletedCaches = Array.isArray(configured?.deletedCaches)
+            ? configured.deletedCaches.map(String)
+            : [];
+          const acknowledged = configured !== null;
+          metrics.markMilestone(
+            acknowledged ? "serviceWorkerConfigured" : "serviceWorkerConfigUnconfirmed",
+            {
+              reason,
+              version: manifest.version,
+              cacheNamespace,
+              remoteAssetsEnabled: Boolean(manifest.remoteAssets?.enabled),
+              deletedCaches: deletedCaches.length,
+              staticAssetTiers: configured?.staticAssetTiers ?? null,
+            },
+          );
+
+          window.__mir2AssetCache = {
+            ...(window.__mir2AssetCache ?? { enabled: true, status: "registering" }),
+            enabled: true,
+            status: acknowledged ? "registered" : "registered-unconfirmed",
+            version: manifest.version,
+            cacheNamespace,
+            remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
+            staticAssetTiers:
+              typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
+                ? (configured.staticAssetTiers as Record<string, number>)
+                : window.__mir2AssetCache?.staticAssetTiers ?? null,
+            renderTier,
+            prewarmPolicy,
+            releaseCapabilities,
+          };
+          logCacheEvent(metrics, "service-worker", {
+            status: window.__mir2AssetCache.status,
+            reason,
+            version: manifest.version,
+            cacheNamespace,
+            remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
+            deletedCaches: deletedCaches.length,
+          });
+          maybeReloadAfterCacheNamespaceChange(cacheNamespace, deletedCaches);
+          void refreshCacheStorageMetrics(metrics).then(() => {
+            if (!disposed && debug) setSnapshot(metrics.snapshot());
+          });
+        };
+
+        const sendConfiguration = async (reason: string) => {
+          if (disposed) return;
+          const workers = [registration.active, registration.waiting, registration.installing]
+            .filter((worker): worker is ServiceWorker => Boolean(worker))
+            .filter((worker, index, list) => list.indexOf(worker) === index);
+          if (workers.length === 0) {
+            metrics.markMilestone("serviceWorkerConfigPending", { reason });
+            return;
+          }
+
+          const configuredMessage = waitForServiceWorkerMessage(
+            "MIR2_ASSET_CACHE_CONFIGURED",
+            SERVICE_WORKER_CONFIG_ACK_TIMEOUT_MS,
+          );
+          const dispatchedWorkers = workers.filter((worker) =>
+            postToWorker(worker, payload, `${reason}:config`),
+          );
+          metrics.markMilestone("serviceWorkerConfigDispatched", {
+            reason,
+            workerCount: dispatchedWorkers.length,
+          });
+          applyConfiguredState(await configuredMessage, reason);
+        };
+
+        const observeInstallingWorker = () => {
+          const worker = registration.installing;
+          if (!worker || workerStateListeners.has(worker)) return;
+          const onStateChange = () => {
+            if (disposed) return;
+            if (worker.state === "installed" && registration.waiting) {
+              postToWorker(
+                registration.waiting,
+                { type: "MIR2_ASSET_WORKER_ACTIVATE" },
+                "worker-installed:activate",
+              );
+            }
+            if (worker.state === "installed" || worker.state === "activated") {
+              void sendConfiguration(`worker-${worker.state}`);
+            }
+            if (worker.state === "activated" || worker.state === "redundant") {
+              worker.removeEventListener("statechange", onStateChange);
+              workerStateListeners.delete(worker);
+            }
+          };
+          worker.addEventListener("statechange", onStateChange);
+          workerStateListeners.set(worker, onStateChange);
+          postToWorker(worker, payload, "installing-worker:config");
+        };
+        const onUpdateFound = () => observeInstallingWorker();
+        const onControllerChange = () => {
+          void sendConfiguration("controller-change");
+        };
+        registration.addEventListener("updatefound", onUpdateFound);
+        navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+        serviceWorkerCleanup = () => {
+          registration.removeEventListener("updatefound", onUpdateFound);
+          navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+          for (const [worker, listener] of workerStateListeners) {
+            worker.removeEventListener("statechange", listener);
+          }
+          workerStateListeners.clear();
+        };
+
+        if (registration.waiting) {
+          postToWorker(
+            registration.waiting,
+            { type: "MIR2_ASSET_WORKER_ACTIVATE" },
+            "registered:activate",
+          );
+        }
+        observeInstallingWorker();
+        void sendConfiguration("registered");
+
+        // A network update check is useful, but it must never sit on the player's
+        // startup critical path. Run it in an idle slot and report it separately.
+        scheduleIdle(() => {
+          if (disposed) return;
+          const updateStartedAt = performance.now();
+          metrics.markMilestone("serviceWorkerUpdateStart");
+          void registration.update().then(
+            () => {
+              if (disposed) return;
+              metrics.markMilestone("serviceWorkerUpdateDone", {
+                durationMs: Math.round(performance.now() - updateStartedAt),
+              });
+              observeInstallingWorker();
+              void sendConfiguration("update-complete");
+            },
+            (error) => {
+              if (disposed) return;
+              metrics.markMilestone("serviceWorkerUpdateFailed", {
+                durationMs: Math.round(performance.now() - updateStartedAt),
+                message: error instanceof Error ? error.message : String(error),
+              });
+            },
+          );
+        });
+
+        metrics.markMilestone("serviceWorkerReady", {
+          version: manifest.version,
+          controlled: Boolean(navigator.serviceWorker.controller),
+          startupBlocked: false,
+        });
+      } catch (error) {
+        if (disposed) return;
+        const message = error instanceof Error ? error.message : String(error);
+        window.__mir2AssetCache = {
+          ...(window.__mir2AssetCache ?? { enabled: true, status: "network-only" }),
+          enabled: true,
+          status: "network-only",
+          message,
+        };
+        metrics.markMilestone("serviceWorkerUnavailable", { message });
+        console.warn("[mir2] asset worker unavailable; continuing with direct asset delivery", error);
+      }
+    }
 
     async function bootCacheLayer() {
       try {
@@ -338,82 +556,24 @@ export function AssetCacheRegistrar() {
         });
 
         if (shouldRegisterServiceWorker && "serviceWorker" in navigator && isServiceWorkerSafeOrigin()) {
-          metrics.markMilestone("serviceWorkerRegisterStart");
-          const registration = await navigator.serviceWorker.register(
-            "/mir2-asset-worker.js",
-            { scope: "/", updateViaCache: "none" },
-          );
-          try {
-            await registration.update();
-          } catch {
-            // The active worker can still serve from cache if the update check is transiently unavailable.
-          }
-          if (registration.waiting) {
-            registration.waiting.postMessage({ type: "MIR2_ASSET_WORKER_ACTIVATE" });
-            await waitForServiceWorkerActivation(registration.waiting, 3000);
-          }
-          const readyRegistration = await navigator.serviceWorker.ready;
-
-          if (disposed) return;
-
-          const payload = {
-            type: "MIR2_ASSET_CACHE_CONFIG",
-            manifest,
-            manifestVersion: manifest.version,
-            cacheNamespace,
-          };
-          const configuredMessage = waitForServiceWorkerMessage("MIR2_ASSET_CACHE_CONFIGURED", 3000);
-          readyRegistration.active?.postMessage(payload);
-          registration.waiting?.postMessage(payload);
-          registration.installing?.postMessage(payload);
-          const configured = await configuredMessage;
-          const deletedCaches = Array.isArray(configured?.deletedCaches)
-            ? configured.deletedCaches.map(String)
-            : [];
-          metrics.markMilestone("serviceWorkerConfigured", {
-            version: manifest.version,
-            cacheNamespace,
-            remoteAssetsEnabled: Boolean(manifest.remoteAssets?.enabled),
-            deletedCaches: deletedCaches.length,
-            staticAssetTiers: configured?.staticAssetTiers ?? null,
-          });
-
           window.__mir2AssetCache = {
             enabled: true,
-            status: "registered",
+            status: "registering",
             version: manifest.version,
             cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
             remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
-            staticAssetTiers:
-              typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
-                ? (configured.staticAssetTiers as Record<string, number>)
-                : null,
+            staticAssetTiers: null,
             renderTier,
             prewarmPolicy,
             releaseCapabilities,
           };
-          logCacheEvent(metrics, "service-worker", {
-            status: window.__mir2AssetCache.status,
+          metrics.markMilestone("serviceWorkerSetupQueued", {
             version: manifest.version,
             cacheNamespace,
-            remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
-            remoteAssetFallbackBaseUrls: manifest.remoteAssets?.browserFallbackBaseUrls ?? [],
-            deletedCaches: deletedCaches.length,
           });
-          maybeReloadAfterCacheNamespaceChange(cacheNamespace, deletedCaches);
-          void refreshCacheStorageMetrics(metrics).then(() => {
-            if (!disposed && debug) setSnapshot(metrics.snapshot());
-          });
-          // Request persistent storage EARLY (before prewarm fills the cache) so the
-          // browser is more likely to grant it and CacheStorage isn't evicted between
-          // loads. Non-blocking + idempotent; the later await inside prewarmAssetPacks
-          // then no-ops instead of stalling prewarm progress at requested:0.
+          void configureServiceWorkerInBackground(manifest, cacheNamespace, releaseCapabilities);
           void requestPersistentStorage(metrics);
-          metrics.markMilestone("serviceWorkerReady", {
-            version: manifest.version,
-            controlled: Boolean(navigator.serviceWorker.controller),
-          });
         } else {
           // Explicit ?assetCache=0: actively tear down any worker + mir2 CacheStorage
           // a prior load left, so a stale (e.g. pre-proxy-fix) build stops being
@@ -447,11 +607,9 @@ export function AssetCacheRegistrar() {
           });
         }
 
-        // Expose stage prewarming only after the Service Worker has received its
-        // manifest/cache-tier configuration. The orchestrator is the single owner
-        // of lifecycle gating and cancellation: critical work runs immediately,
-        // while stale background work is replaced and afterPlayable really waits
-        // for the renderer-backed first-playable signal.
+        // Prewarming is intentionally independent from Service Worker registration.
+        // Browser HTTP cache/direct R2 delivery can make the client playable while
+        // a slow update check or worker activation completes in the background.
         const manifestPacks = manifest.resourcePacks ?? [];
         prewarmOrchestrator = new AssetPrewarmOrchestrator({
           backgroundMode: prewarmPolicy.backgroundMode,
@@ -539,6 +697,7 @@ export function AssetCacheRegistrar() {
         delete window.__mir2AssetCachePrewarmStage;
       }
       prewarmOrchestrator?.dispose();
+      serviceWorkerCleanup?.();
       delete window.__mir2AssetOrchestrator;
       window.removeEventListener(MIR2_ASSET_FIRST_PLAYABLE_EVENT, handleFirstPlayable);
       if (debugInterval) window.clearInterval(debugInterval);
@@ -846,30 +1005,6 @@ function waitForServiceWorkerMessage(type: string, timeoutMs: number) {
   });
 }
 
-function waitForServiceWorkerActivation(worker: ServiceWorker, timeoutMs: number) {
-  if (worker.state === "activated" || worker.state === "redundant") {
-    return Promise.resolve();
-  }
-
-  return new Promise<void>((resolve) => {
-    let timeout = 0;
-    const cleanup = () => {
-      worker.removeEventListener("statechange", onStateChange);
-      if (timeout) window.clearTimeout(timeout);
-    };
-    const finish = () => {
-      cleanup();
-      resolve();
-    };
-    const onStateChange = () => {
-      if (worker.state === "activated" || worker.state === "redundant") finish();
-    };
-
-    timeout = window.setTimeout(finish, timeoutMs);
-    worker.addEventListener("statechange", onStateChange);
-  });
-}
-
 function maybeReloadAfterCacheNamespaceChange(cacheNamespace: string, deletedCaches: string[]) {
   if (!cacheNamespace || deletedCaches.length === 0) return;
 
@@ -998,7 +1133,7 @@ async function prewarmPack(
 
   try {
     if (signal?.aborted) throw createAbortError();
-    await hintAssetCacheTier(pack.urls, cacheTierForPack(pack));
+    hintAssetCacheTier(pack.urls, cacheTierForPack(pack));
     await prewarmUrls(pack.urls, packMetric, metrics, concurrency, signal);
 
     for (const scene of includeScenes ? (pack.scenes ?? []) : []) {
@@ -1034,7 +1169,7 @@ async function prewarmPack(
       });
       packMetric.requested += frameUrls.length;
       publishPrewarmProgress(metrics, "running");
-      await hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
+      hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
       await prewarmUrls(frameUrls, packMetric, metrics, concurrency, signal);
     }
 
@@ -1057,13 +1192,11 @@ function cacheTierForPack(pack: AssetCachePack) {
   return pack.cacheTier ?? (pack.phase === "background" ? "background" : "critical");
 }
 
-async function hintAssetCacheTier(urls: string[], tier: "critical" | "background") {
+function hintAssetCacheTier(urls: string[], tier: "critical" | "background") {
   if (!urls.length || !("serviceWorker" in navigator)) return;
   if (window.__mir2AssetCache?.enabled !== true) return;
   try {
-    const registration = await navigator.serviceWorker.ready;
-    const worker = navigator.serviceWorker.controller ?? registration.active;
-    worker?.postMessage({
+    navigator.serviceWorker.controller?.postMessage({
       type: "MIR2_ASSET_CACHE_HINT",
       cacheTier: tier,
       urls,

@@ -164,6 +164,11 @@ import bevyRuntimeVersion from "../lib/generated/bevy_runtime_version.json";
 import { signalAssetFirstPlayable } from "../lib/asset-orchestrator";
 import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
 import {
+  isBevyRuntimeNetworkFailure,
+  resolveBevyRuntimeBootDecision,
+  shouldRetryBevyRuntimeWithWebGl2,
+} from "../lib/bevy-runtime-policy";
+import {
   CRYSTAL_MONSTER_SPRITES,
   CRYSTAL_NPC_SPRITES,
   type CrystalMonsterSpriteEntry,
@@ -4336,16 +4341,31 @@ export default function HomePage() {
           __mir2BevyRuntimeDebug?: BevyRuntimeDebug;
         };
         const params = new URLSearchParams(window.location.search);
-        if (params.get("skipRuntime") === "1") {
-          const message = "Bevy runtime skipped by query parameter.";
+        const runtimeBootDecision = resolveBevyRuntimeBootDecision({
+          layout: clientProfile.layout,
+          input: clientProfile.input,
+          coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+          maxTouchPoints: navigator.maxTouchPoints ?? 0,
+          userAgent: navigator.userAgent,
+          params,
+        });
+        if (runtimeBootDecision.mode !== "eager") {
+          const message =
+            runtimeBootDecision.mode === "compatibility"
+              ? "Compatibility renderer active; high-performance runtime is deferred on touch devices."
+              : "Compatibility renderer active; high-performance runtime is disabled.";
           resetBevyMapImageResidency();
           setRuntimePhase("dom-only");
           setRuntimeMessage(message);
           setBevyRuntimeStarted(false);
           setBevyEntityRendererReady(false);
           setBevyRuntimeBackend(null);
-          appendLog(message, "network");
-          markMir2CacheMilestone("bevyRuntimeSkipped", { reason: "skipRuntime" });
+          markMir2CacheMilestone("bevyRuntimeSkipped", {
+            reason: runtimeBootDecision.reason,
+            mode: runtimeBootDecision.mode,
+            layout: clientProfile.layout,
+            input: clientProfile.input,
+          });
           return;
         }
         if (runtimeWindow.__mir2BevyRuntimeBooted && runtimeWindow.__mir2BevyRuntime) {
@@ -4399,7 +4419,7 @@ export default function HomePage() {
         try {
           runtime = await loadBevyRuntimeModule(runtimeBackend);
         } catch (error) {
-          if (runtimeBackend === "webgpu" && runtimeSupport.webgl2) {
+          if (shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, error)) {
             fallbackFrom = runtimeBackend;
             runtimeBackend = "webgl2";
             // A stale persisted preference must not pin the broken backend on reload.
@@ -4476,7 +4496,7 @@ export default function HomePage() {
           // A GPU-init panic inside bootMir2Runtime ("Unable to find a GPU", from
           // bevy_render) lands here. If we booted WebGPU and WebGL2 is available, recover by
           // loading + booting the WebGL2 backend rather than black-screening on boot-error.
-          if (runtimeBackend !== "webgpu" || !runtimeSupport.webgl2) {
+          if (!shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, bootError)) {
             throw bootError;
           }
           const bootMessage = bootError instanceof Error ? bootError.message : String(bootError);
@@ -4498,15 +4518,18 @@ export default function HomePage() {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         resetBevyMapImageResidency();
-        setRuntimePhase("boot-error");
-        setRuntimeMessage(message);
+        setRuntimePhase("dom-only");
+        setRuntimeMessage("Compatibility renderer active; high-performance runtime is unavailable.");
         setBevyRuntimeStarted(false);
         setBevyEntityRendererReady(false);
         setBevyRuntimeBackend(null);
-        appendLog(t("runtime.bootFailed", [message]));
-        markMir2CacheMilestone("bevyRuntimeError", { message });
+        markMir2CacheMilestone("bevyRuntimeDegraded", {
+          message,
+          networkFailure: isBevyRuntimeNetworkFailure(error),
+        });
+        console.warn("[mir2] Bevy runtime unavailable; compatibility renderer remains active", error);
         if (scheduleBevyRuntimeCacheRecovery(message)) {
-          appendLog("Runtime cache mismatch detected; refreshing runtime files once.");
+          console.info("[mir2] runtime cache mismatch detected; refreshing runtime files once");
         }
       }
     }
@@ -4516,7 +4539,7 @@ export default function HomePage() {
     return () => {
       disposed = true;
     };
-  }, [shouldBootBevyRuntime]);
+  }, [clientProfile.input, clientProfile.layout, shouldBootBevyRuntime]);
 
   useEffect(() => {
     return () => {
@@ -13828,7 +13851,15 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
     // The runtime attaches to #mir2-web3-canvas on boot; make sure it exists first
     // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
     await waitForBevyCanvas();
-    await runtime.default({ module_or_path: runtimeWasmPath });
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 60_000);
+    try {
+      await runtime.default({
+        module_or_path: new Request(runtimeWasmPath, { signal: controller.signal }),
+      });
+    } finally {
+      window.clearTimeout(timeout);
+    }
   }
 
   return runtime;

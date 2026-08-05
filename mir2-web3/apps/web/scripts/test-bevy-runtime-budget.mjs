@@ -46,14 +46,10 @@ for (const runtimePackage of packages) {
   );
 }
 
-const webGl2Wasm = readAndVerifyManifestFile(
-  "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
-);
-const legacyWasm = readAndVerifyManifestFile("public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm");
 assert.equal(
-  sha256(legacyWasm),
-  sha256(webGl2Wasm),
-  "legacy Bevy package must mirror the WebGL2 runtime",
+  filesByPath.has("public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm"),
+  false,
+  "the legacy WebGL2 mirror must stay out of the runtime manifest and deployments",
 );
 
 console.log(`bevy runtime budget passed (${manifest.version})`);

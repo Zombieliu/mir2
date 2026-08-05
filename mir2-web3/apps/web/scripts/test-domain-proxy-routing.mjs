@@ -41,9 +41,28 @@ try {
     "/generated/crystal-packs/full/index.json",
     "/generated/crystal-packs/full/libraries/entities/example.json",
     "/generated/crystal-packs/full/pages/aa/example.png",
+    "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgpu/mir2_bevy_runtime.js",
+    "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
   ]) {
     assert.equal(worker.isStaticAssetRequest(new URL(`https://mir2.example${assetPath}`)), true, assetPath);
   }
+  assert.equal(
+    worker.bevyRuntimeObjectKeyForPath(
+      "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "mir2/v/release",
+      "bevy-9a5cbecc8f85ff75",
+    ),
+    "mir2/v/release/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+  );
+  assert.equal(
+    worker.bevyRuntimeObjectKeyForPath(
+      "/bevy-runtime/v/stale/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "mir2/v/release",
+      "bevy-9a5cbecc8f85ff75",
+    ),
+    "",
+    "a stale immutable runtime URL must never receive bytes from the current release",
+  );
   for (const applicationPath of ["/", "/api/asset-manifest", "/ws", "/generated/not-an-asset/file.json"]) {
     assert.equal(worker.isStaticAssetRequest(new URL(`https://mir2.example${applicationPath}`)), false, applicationPath);
   }
