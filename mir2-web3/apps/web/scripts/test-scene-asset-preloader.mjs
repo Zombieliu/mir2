@@ -82,3 +82,43 @@ test("a timeout with no loaded image cannot masquerade as interaction-ready", as
   assert.equal(result.status, "timeout");
   assert.equal(result.pending, 1);
 });
+
+test("default image loading coalesces concurrent requests for the same stable URL", async () => {
+  const previousWindow = globalThis.window;
+  const previousImage = globalThis.Image;
+  let imageCount = 0;
+
+  class FakeImage {
+    complete = false;
+    naturalWidth = 0;
+    onload = null;
+    onerror = null;
+    decoding = "auto";
+
+    set src(_url) {
+      imageCount += 1;
+      setTimeout(() => {
+        this.complete = true;
+        this.naturalWidth = 32;
+        this.onload?.();
+      }, 5);
+    }
+  }
+
+  globalThis.window = { setTimeout, clearTimeout };
+  globalThis.Image = FakeImage;
+  try {
+    const [first, second] = await Promise.all([
+      preloadSceneAssetUrls(["/shared-stable.png"], 500),
+      preloadSceneAssetUrls(["/shared-stable.png"], 500),
+    ]);
+    assert.equal(first.loaded, 1);
+    assert.equal(second.loaded, 1);
+    assert.equal(imageCount, 1);
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+    if (previousImage === undefined) delete globalThis.Image;
+    else globalThis.Image = previousImage;
+  }
+});

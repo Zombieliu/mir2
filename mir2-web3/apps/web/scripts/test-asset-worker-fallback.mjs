@@ -120,6 +120,26 @@ test("remote candidates are deduplicated and preserve fallback-first order", () 
   ]);
 });
 
+test("legacy image retry query parameters collapse to one stable cache key", () => {
+  const { context } = createWorkerContext(async () => new Response(null, { status: 404 }));
+  const stableUrls = vm.runInContext(
+    `[
+      stableStaticAssetRequest(new Request(
+        "https://preview.example.test/original-ui/Prguse/2090.png?mir2ImgRetry=3&mir2ImgRetryTs=one"
+      )).url,
+      stableStaticAssetRequest(new Request(
+        "https://preview.example.test/original-ui/Prguse/2090.png?mir2ImgRetry=13&mir2ImgRetryTs=two"
+      )).url
+    ]`,
+    context,
+  );
+
+  assert.deepEqual(Array.from(stableUrls), [
+    "https://preview.example.test/original-ui/Prguse/2090.png",
+    "https://preview.example.test/original-ui/Prguse/2090.png",
+  ]);
+});
+
 test("a cold asset streams before its background CacheStorage write completes", async () => {
   let releaseCacheWrite;
   const blockedCacheWrite = new Promise((resolve) => {
