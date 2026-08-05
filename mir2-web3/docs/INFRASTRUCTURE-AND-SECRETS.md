@@ -156,6 +156,7 @@ Gateway 主机 (UCloud 香港 VPS, 4H8G)
 | Secret 名 | Worker | 用途 |
 |---|---|---|
 | 🔒 `MIR2_R2_UPLOAD_SECRET` | `mir2-r2-bulk-upload` | 鉴权批量上传 |
+| 🔒 `MIR2_R2_UPLOAD_WORKER_URL`（GitHub Actions） | `mir2-r2-bulk-upload` | CI 上传入口；生产值为 `https://assets.mir2.obelisk.build` |
 | 🔒 `VERCEL_BYPASS_SECRET` | `mir2-web3-domain-proxy` | 注入 Vercel SSO 绕过 |
 
 ### 4f. 链上挖矿（`onchain/.env`、`onchain/relayer/.env`，均 gitignored）
@@ -173,7 +174,9 @@ Gateway 主机 (UCloud 香港 VPS, 4H8G)
 ## 5. 一键对照：要发一次完整生产，需要什么
 
 1. **R2 上有当前版本资产**（`mir2/v/<version>`，0 缺失）。
-2. **Cloudflare 凭据**：`CLOUDFLARE_API_TOKEN` + 账号 `85bf64d86ea9221e172d26feba9fd47e` + R2 S3 凭据。
+2. **Cloudflare 凭据**：托管 CI 默认使用 `MIR2_R2_UPLOAD_WORKER_URL` +
+   `MIR2_R2_UPLOAD_SECRET` 写 R2；`CLOUDFLARE_API_TOKEN` 只负责 Worker 控制面。
+   本地发布 10 GB 级完整包时仍优先使用独立 R2 S3 凭据。
 3. **Vercel 凭据**：`VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`，且项目环境变量里
    `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` / `MIR2_ASSET_OBJECT_PREFIX` 指向同一版本。
 4. **Gateway 主机**在线（`https://165.154.65.136.sslip.io/health` OK），且
