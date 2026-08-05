@@ -33,6 +33,9 @@ const { normalizeAssetReleaseCapabilities } = loadTypeScriptModule(
 const { createBevyRuntimeUrls } = loadTypeScriptModule(
   new URL("../lib/bevy-runtime-url.ts", import.meta.url),
 );
+const bulkUploadWorker = loadTypeScriptModule(
+  new URL("../../../infra/cloudflare/mir2-r2-bulk-upload/src/index.ts", import.meta.url),
+).default;
 
 test("a full pack is enabled only by a verified content-addressed release capability", () => {
   const valid = normalizeAssetReleaseCapabilities({
@@ -125,6 +128,33 @@ test("R2 upload Worker paths cannot escape the configured origin", () => {
   }
 });
 
+test("R2 upload Worker persists the private gzip representation header", async () => {
+  let stored = null;
+  const request = new Request("https://assets.example.test/upload?key=mir2%2Fv%2Frelease%2Fruntime.wasm", {
+    method: "PUT",
+    headers: {
+      authorization: "Bearer fixture-secret",
+      "content-type": "application/wasm",
+      "content-length": "4",
+      "x-mir2-content-encoding": "gzip",
+    },
+    body: new Uint8Array([1, 2, 3, 4]),
+    duplex: "half",
+  });
+  const response = await bulkUploadWorker.fetch(request, {
+    MIR2_R2_UPLOAD_SECRET: "fixture-secret",
+    MIR2_ASSETS: {
+      async put(key, body, options) {
+        stored = { key, body, options };
+      },
+    },
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(stored.key, "mir2/v/release/runtime.wasm");
+  assert.equal(stored.options.httpMetadata.contentEncoding, "gzip");
+});
+
 test("production release and Next routing expose the pinned capability and immutable runtime", () => {
   const productionConfig = JSON.parse(
     readFileSync(new URL("../../../config/production-web-assets.json", import.meta.url), "utf8"),
@@ -161,6 +191,11 @@ test("production release and Next routing expose the pinned capability and immut
     new URL("../../../infra/cloudflare/mir2-r2-asset-cache/src/index.ts", import.meta.url),
     "utf8",
   );
+  const domainProxySource = readFileSync(
+    new URL("../../../infra/cloudflare/mir2-domain-proxy/src/index.ts", import.meta.url),
+    "utf8",
+  );
+  const uploadScriptSource = readFileSync(new URL("./upload-r2-assets.mjs", import.meta.url), "utf8");
   const releaseWorkflowSource = readFileSync(
     new URL("../../../../.github/workflows/web-assets-r2-release.yml", import.meta.url),
     "utf8",
@@ -177,6 +212,12 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(assetWorkerSource, /const HOTLINK_SAFE_PREFIX = "hotlink-ok\/"/);
   assert.match(assetWorkerSource, /key = key\.slice\(HOTLINK_SAFE_PREFIX\.length\)/);
   assert.match(assetWorkerSource, /cacheUrl\(url, key\)/);
+  assert.match(uploadScriptSource, /"X-Mir2-Content-Encoding": upload\.contentEncoding/);
+  assert.match(domainProxySource, /representation", "stored-gzip-v1"/);
+  assert.match(domainProxySource, /runtime_storage_encoding_missing/);
+  assert.match(domainProxySource, /encodeBody: "manual"/);
+  assert.match(releaseWorkflowSource, /Deploy authenticated R2 upload Worker/);
+  assert.match(releaseWorkflowSource, /mir2-r2-bulk-upload\/wrangler\.jsonc/);
   assert.match(releaseWorkflowSource, /npm run runtime:r2:build/);
   assert.match(releaseWorkflowSource, /MIR2_BEVY_RUNTIME_VERSION: runtime\.version/);
   assert.doesNotMatch(releaseWorkflowSource, /delete config\.routes/);

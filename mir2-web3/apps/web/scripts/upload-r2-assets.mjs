@@ -449,7 +449,11 @@ async function uploadViaWorker(upload) {
     headers: {
       Authorization: `Bearer ${workerUploadSecret}`,
       "Content-Type": upload.contentType,
-      "Content-Encoding": upload.contentEncoding || undefined,
+      // This request body is an opaque storage representation, not an HTTP
+      // representation for Cloudflare to decode. A private header prevents
+      // edge request normalization from stripping Content-Encoding or
+      // transparently decoding the bytes before the upload Worker stores them.
+      "X-Mir2-Content-Encoding": upload.contentEncoding || undefined,
       "Content-Length": String(upload.size),
       "Cache-Control": upload.cacheControl,
       "X-Mir2-Sha256": upload.sha256 || undefined,

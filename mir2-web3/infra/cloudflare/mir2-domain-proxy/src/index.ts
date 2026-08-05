@@ -298,7 +298,15 @@ async function serveStaticAssetFromR2(
 
   const decompressStoredGzip = isStoredGzipJsonPath(objectKey);
   const preserveStoredGzip = isStoredGzipWasmPath(objectKey);
-  const cacheKey = new Request(`https://mir2-r2-cache.local/${objectKey}`, { method: "GET" });
+  const cacheKeyUrl = new URL(`https://mir2-r2-cache.local/${objectKey}`);
+  if (preserveStoredGzip) {
+    // The previous runtime transport accidentally cached gzip bytes without a
+    // Content-Encoding header. A representation-qualified key permanently
+    // bypasses those immutable corrupt edge entries without purging unrelated
+    // game assets.
+    cacheKeyUrl.searchParams.set("representation", "stored-gzip-v1");
+  }
+  const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
   if (request.method === "GET" && !decompressStoredGzip) {
     const cached = await caches.default.match(cacheKey);
     if (cached) {
@@ -309,6 +317,7 @@ async function serveStaticAssetFromR2(
         headers: cachedHeaders,
         status: cached.status,
         statusText: cached.statusText,
+        ...(preserveStoredGzip ? { encodeBody: "manual" as const } : {}),
       });
     }
   }
@@ -316,6 +325,15 @@ async function serveStaticAssetFromR2(
   const object = await env.MIR2_ASSETS.get(objectKey);
   if (!object) {
     return assetError("asset_not_found", 404, "asset_not_found", publicUrl.pathname, objectKey);
+  }
+  if (preserveStoredGzip && object.httpMetadata?.contentEncoding !== "gzip") {
+    return assetError(
+      "runtime_encoding_mismatch",
+      503,
+      "runtime_storage_encoding_missing",
+      publicUrl.pathname,
+      objectKey,
+    );
   }
 
   const headers = assetObjectHeaders(objectKey, object, env, assetVersion, "MISS");
@@ -334,6 +352,7 @@ async function serveStaticAssetFromR2(
   const response = new Response(body, {
     headers,
     status: 200,
+    ...(preserveStoredGzip ? { encodeBody: "manual" as const } : {}),
   });
   if (request.method === "GET" && !decompressStoredGzip) {
     ctx.waitUntil(caches.default.put(cacheKey, response.clone()));

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "mir2-asset-cache";
-const CACHE_SCHEMA_VERSION = "sw7";
+const CACHE_SCHEMA_VERSION = "sw8";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
@@ -24,6 +24,14 @@ const NEGATIVE_CACHE_MAX_ENTRIES = 2000;
 const staticAssetNegativeCache = new Map();
 const staticAssetInflightFetches = new Map();
 const sceneBlueprintInflightFetches = new Map();
+// CacheStorage operations are serialized by browsers much more aggressively
+// than ordinary HTTP/2 requests. Rewriting every cache hit and calling
+// cache.keys() after every miss turns a few hundred scene images into a
+// minutes-long storage queue. Hits are already immutable/versioned, so they do
+// not need a recency write. Misses amortize the O(n) trim scan instead.
+const CACHE_TRIM_WRITE_INTERVAL = 64;
+const cacheWritesSinceTrim = new Map();
+const cacheTrimInflight = new Map();
 const TRANSIENT_FETCH_RETRY_DELAYS_MS = [120, 350];
 const TRANSIENT_FETCH_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 
@@ -209,7 +217,6 @@ async function cacheFirst(request, name, maxEntries, event) {
     cache = await caches.open(name);
     const cached = await cache.match(request);
     if (cached) {
-      event?.waitUntil(touchCacheEntry(cache, request, cached, maxEntries));
       return cached;
     }
   } catch {
@@ -224,19 +231,10 @@ async function cacheFirst(request, name, maxEntries, event) {
     // response body. Atlas pages can be several MiB: returning the network
     // stream immediately while event.waitUntil owns a cloned cache write keeps
     // cold-start latency equal to download latency instead of download + disk.
-    const cacheWrite = putCacheEntry(cache, request, response.clone(), maxEntries);
+    const cacheWrite = putCacheEntry(cache, request, response.clone(), maxEntries, name);
     event?.waitUntil(cacheWrite.catch(() => null));
   }
   return response;
-}
-
-async function touchCacheEntry(cache, request, response, maxEntries) {
-  try {
-    await cache.put(request, response.clone());
-    await trimCache(cache, maxEntries);
-  } catch {
-    // Cache recency updates are opportunistic.
-  }
 }
 
 async function fetchStaticAsset(request) {
@@ -426,7 +424,7 @@ async function staleWhileRevalidate(request, name, maxEntries, event) {
   const refresh = coalescedSceneBlueprintFetch(request)
     .then(async (response) => {
       if (cache) {
-        await putCacheEntry(cache, request, response, maxEntries);
+        await putCacheEntry(cache, request, response, maxEntries, name);
       }
       return response;
     })
@@ -459,7 +457,7 @@ async function networkFirst(request, name, maxEntries) {
   const cache = await caches.open(name);
   try {
     const response = await fetch(request);
-    await putCacheEntry(cache, request, response, maxEntries);
+    await putCacheEntry(cache, request, response, maxEntries, name);
     return response;
   } catch (error) {
     const cached = await cache.match(request);
@@ -468,11 +466,11 @@ async function networkFirst(request, name, maxEntries) {
   }
 }
 
-async function putCacheEntry(cache, request, response, maxEntries) {
+async function putCacheEntry(cache, request, response, maxEntries, cacheIdentity = "") {
   if (!response || !response.ok) return;
   try {
     await cache.put(request, response.clone());
-    await trimCache(cache, maxEntries);
+    await maybeTrimCache(cache, maxEntries, cacheIdentity);
   } catch (error) {
     await trimCache(cache, Math.max(32, Math.floor(maxEntries / 2)));
     try {
@@ -481,6 +479,27 @@ async function putCacheEntry(cache, request, response, maxEntries) {
       // Quota pressure should never break gameplay.
     }
   }
+}
+
+async function maybeTrimCache(cache, maxEntries, cacheIdentity) {
+  const identity = cacheIdentity || `anonymous:${maxEntries}`;
+  const writes = (cacheWritesSinceTrim.get(identity) || 0) + 1;
+  if (writes < CACHE_TRIM_WRITE_INTERVAL) {
+    cacheWritesSinceTrim.set(identity, writes);
+    return;
+  }
+  cacheWritesSinceTrim.set(identity, 0);
+
+  const existing = cacheTrimInflight.get(identity);
+  if (existing) return existing;
+
+  const pending = trimCache(cache, maxEntries).finally(() => {
+    if (cacheTrimInflight.get(identity) === pending) {
+      cacheTrimInflight.delete(identity);
+    }
+  });
+  cacheTrimInflight.set(identity, pending);
+  return pending;
 }
 
 async function trimCache(cache, maxEntries) {
