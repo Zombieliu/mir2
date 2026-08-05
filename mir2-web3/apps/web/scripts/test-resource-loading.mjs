@@ -88,8 +88,12 @@ const loaderExports = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts
   "./crystal-map-blend": mapBlendExports,
   "./generated/crystal-minimap-transforms": minimapTransformExports,
 });
+const sceneRequestExports = loadTypeScriptModule(
+  new URL("../lib/scene-blueprint-request.ts", import.meta.url),
+);
 const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-cache.ts", import.meta.url), {
   "./crystal-map-loader": { loadCrystalSceneBlueprint: async () => ({}) },
+  "./scene-blueprint-request": sceneRequestExports,
   "./scene-types": {},
 });
 const originalAssetManifest = readOriginalAssetManifest();
@@ -163,7 +167,7 @@ const fullBichonMapDataAvailable =
     height: 34,
   });
   assert.equal(a, b, "same scene chunk and size bucket should share one blueprint cache key");
-  assert.match(a, /^2026-07-13-v4-map-blend-0-cx\d+-cy\d+-w40-h40-default$/);
+  assert.match(a, /^2026-08-05-v5-canonical-request-0-cx\d+-cy\d+-w40-h40-default$/);
 }
 
 {

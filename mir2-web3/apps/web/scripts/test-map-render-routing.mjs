@@ -85,10 +85,14 @@ assert.match(
 const assetCacheRegistrarSource = readFileSync(assetCacheRegistrarPath, "utf8");
 assert.match(
   assetCacheRegistrarSource,
-  /registration\.waiting\.postMessage\(\{ type: "MIR2_ASSET_WORKER_ACTIVATE" \}\)/,
+  /postToWorker\(\s*registration\.waiting,\s*\{ type: "MIR2_ASSET_WORKER_ACTIVATE" \}/,
   "the cache registrar must promote a waiting worker before prewarming assets",
 );
-assert.match(assetCacheRegistrarSource, /waitForServiceWorkerActivation\(registration\.waiting, 3000\)/);
+assert.doesNotMatch(
+  assetCacheRegistrarSource,
+  /waitForServiceWorkerActivation\(/,
+  "service-worker activation must stay off the first-playable path",
+);
 
 const { buildMapAtlasIndex, mapAtlasPathRequiresAlphaKey } = loadTypeScriptModule(atlasPath);
 const {
@@ -331,7 +335,7 @@ assert.ok(
 const sceneCacheSource = readFileSync(sceneCachePath, "utf8");
 assert.match(
   sceneCacheSource,
-  /SCENE_CACHE_SCHEMA_VERSION = "[^"]*map-blend"/,
+  /normalizeCrystalSceneBlueprintRequest/,
   "cached blueprints without per-cell blend metadata must be invalidated",
 );
 

@@ -164,7 +164,8 @@ test("the UI lifecycle requests each deferred prewarm stage", () => {
   assert.match(pageSource, /__mir2AssetCachePrewarmStage\?\.\(stage\)/);
   assert.match(pageSource, /signalAssetFirstPlayable\(detail\)/);
   assert.match(pageSource, /if \(screen !== "game"\)/);
-  assert.match(pageSource, /const shouldBootBevyRuntime = screen !== "login"/);
+  assert.match(pageSource, /const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable/);
+  assert.match(pageSource, /setAssetFirstPlayable\(true\)/);
 });
 
 test("only the low tier prewarms raw map frames for the DOM compatibility path", () => {

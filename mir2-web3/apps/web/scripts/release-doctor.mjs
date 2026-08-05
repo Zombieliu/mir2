@@ -12,6 +12,10 @@ const DEFAULT_MANIFEST = path.resolve(
   "latest-remote-asset-release.json",
 );
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
+const BEVY_RUNTIME_MANIFEST = JSON.parse(
+  await fs.readFile(path.resolve(SCRIPT_DIR, "..", "lib", "generated", "bevy_runtime_version.json"), "utf8"),
+);
+const BEVY_RUNTIME_VERSION = String(BEVY_RUNTIME_MANIFEST.version ?? "").trim();
 
 const LOGIN_TITLE_PATHS = [
   ...makeRange(30, 32),
@@ -46,8 +50,8 @@ const REQUIRED_ASSETS = [
   MAP_ATLAS_MANIFEST_PATH,
 ];
 const BEVY_RUNTIME_PATHS = [
-  "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
-  "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+  `/bevy-runtime/v/${BEVY_RUNTIME_VERSION}/pkg-webgpu/mir2_bevy_runtime.js`,
+  `/bevy-runtime/v/${BEVY_RUNTIME_VERSION}/pkg-webgl2/mir2_bevy_runtime.js`,
 ];
 
 const args = parseArgs(process.argv.slice(2));

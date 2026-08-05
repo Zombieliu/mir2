@@ -152,6 +152,7 @@ test("production release and Next routing expose the pinned capability and immut
     "utf8",
   );
   const nextConfigSource = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
+  const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
   const shellSource = readFileSync(
     new URL("../app/original-client-shell.tsx", import.meta.url),
     "utf8",
@@ -160,14 +161,23 @@ test("production release and Next routing expose the pinned capability and immut
     new URL("../../../infra/cloudflare/mir2-r2-asset-cache/src/index.ts", import.meta.url),
     "utf8",
   );
+  const releaseWorkflowSource = readFileSync(
+    new URL("../../../../.github/workflows/web-assets-r2-release.yml", import.meta.url),
+    "utf8",
+  );
   assert.match(routeSource, /capabilities,/);
   assert.match(routeSource, /MIR2_PINNED_CRYSTAL_FULL_PACK_CONTENT_HASH/);
   assert.match(routeSource, /MIR2_PINNED_MAP_ATLAS_CONTENT_HASH/);
   assert.match(routeSource, /browserFallbackBaseUrls/);
   assert.match(nextConfigSource, /\/bevy-runtime\/v\/:version/);
   assert.match(nextConfigSource, /max-age=31536000, immutable/);
+  assert.match(pageSource, /const BEVY_RUNTIME_VERSION = bevyRuntimeVersion\.version \|\| "local"/);
+  assert.doesNotMatch(pageSource, /bevyRuntimeVersion\.version, process\.env\.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA/);
   assert.match(shellSource, /return manifestPath \? loadMapAtlasIndex\(manifestPath\) : null/);
   assert.match(assetWorkerSource, /const HOTLINK_SAFE_PREFIX = "hotlink-ok\/"/);
   assert.match(assetWorkerSource, /key = key\.slice\(HOTLINK_SAFE_PREFIX\.length\)/);
   assert.match(assetWorkerSource, /cacheUrl\(url, key\)/);
+  assert.match(releaseWorkflowSource, /npm run runtime:r2:build/);
+  assert.match(releaseWorkflowSource, /MIR2_BEVY_RUNTIME_VERSION: runtime\.version/);
+  assert.doesNotMatch(releaseWorkflowSource, /delete config\.routes/);
 });

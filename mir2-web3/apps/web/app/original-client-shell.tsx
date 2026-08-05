@@ -21,6 +21,7 @@ import {
 import { createAssetResidency } from "../lib/asset-residency";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
+import { preloadSceneAssetUrls } from "../lib/scene-asset-preloader";
 import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
 import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
 import { shouldLoadCrystalFullPack } from "../lib/crystal-full-pack-capability";
@@ -2597,7 +2598,12 @@ export function OriginalClientShell({
         ]),
       ).filter((url) => !visible.has(url));
       if (ringUrls.length) {
-        void preloadSceneAssetUrls(ringUrls, SCENE_TILE_PREFETCH_TIMEOUT_MS, { allowPartialReady: true });
+        void preloadSceneAssetUrls(ringUrls, SCENE_TILE_PREFETCH_TIMEOUT_MS, {
+          allowPartialReady: true,
+          minLoaded: SCENE_INTERACTION_MIN_PRELOADED_URLS,
+          concurrency: 4,
+          resolveCandidates: sceneAssetCandidateUrls,
+        });
       }
     };
     const idleWindow = window as typeof window & {
@@ -2754,9 +2760,14 @@ export function OriginalClientShell({
 
     let disposed = false;
     setSceneAssetPreloadReadiness(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length));
-    void preloadSceneAssetUrls(urls, 2_500, { allowPartialReady: true }).then((readiness) => {
+    void preloadSceneAssetUrls(urls, 2_500, {
+      allowPartialReady: true,
+      minLoaded: SCENE_INTERACTION_MIN_PRELOADED_URLS,
+      concurrency: 8,
+      resolveCandidates: sceneAssetCandidateUrls,
+    }).then((readiness) => {
       if (disposed) return;
-      const visualReady = readiness.failed === 0;
+      const visualReady = readiness.visualReady;
       const interactionReady = readiness.ready;
       setSceneAssetPreloadReadiness({
         ...readiness,
@@ -4873,122 +4884,4 @@ function createSceneAssetReadiness(
     durationMs: 0,
     failedUrls: [],
   };
-}
-
-type SceneAssetPreloadOptions = {
-  allowPartialReady?: boolean;
-  minLoaded?: number;
-};
-
-async function preloadSceneAssetUrls(
-  urls: string[],
-  timeoutMs: number,
-  options: SceneAssetPreloadOptions = {},
-): Promise<SceneAssetReadiness> {
-  const startedAt = performance.now();
-  const minimumLoaded = Math.min(urls.length, options.minLoaded ?? SCENE_INTERACTION_MIN_PRELOADED_URLS);
-  let loaded = 0;
-  let pending = urls.length;
-  const failedUrls: string[] = [];
-
-  // Resolve as soon as enough tiles are ready for interaction (partialReady)
-  // instead of awaiting every URL: a few slow/failed tiles must NOT hold the
-  // "Loading map…" overlay for the full timeout. The timeout is only the hard
-  // ceiling; remaining tiles keep loading in the background after we resolve.
-  return await new Promise<SceneAssetReadiness>((resolve) => {
-    let settled = false;
-    const build = (timedOut: boolean): SceneAssetReadiness => {
-      const partialReady = options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
-      const ready = failedUrls.length === 0 || partialReady;
-      return {
-        key: "scene-assets",
-        ready,
-        interactionReady: ready,
-        visualReady: pending === 0 && failedUrls.length === 0,
-        status: ready ? "ready" : timedOut ? "timeout" : "loading",
-        total: urls.length,
-        loaded,
-        failed: failedUrls.length,
-        pending,
-        durationMs: Math.round(performance.now() - startedAt),
-        failedUrls: failedUrls.slice(0, 20),
-      };
-    };
-    const finish = (timedOut: boolean) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolve(build(timedOut));
-    };
-    const timer = setTimeout(() => finish(true), timeoutMs);
-    if (urls.length === 0) {
-      finish(false);
-      return;
-    }
-    for (const url of urls) {
-      void preloadSceneImage(url, timeoutMs).then((result) => {
-        if (result.loaded) loaded += 1;
-        else failedUrls.push(result.url);
-        pending -= 1;
-        // Early-out the moment we have enough loaded for interaction, else once all settle.
-        if (options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded) {
-          finish(false);
-        } else if (pending === 0) {
-          finish(false);
-        }
-      });
-    }
-  });
-}
-
-async function preloadSceneImage(url: string, timeoutMs: number): Promise<{ url: string; loaded: boolean }> {
-  const startedAt = performance.now();
-  const candidates = sceneAssetCandidateUrls(url);
-
-  for (const candidate of candidates) {
-    const remainingMs = timeoutMs - (performance.now() - startedAt);
-    if (remainingMs <= 0) {
-      break;
-    }
-    const loaded = await preloadSceneImageCandidate(candidate, Math.max(250, remainingMs));
-    if (loaded) {
-      return { url, loaded: true };
-    }
-  }
-
-  return { url, loaded: false };
-}
-
-function preloadSceneImageCandidate(url: string, timeoutMs: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const image = new Image();
-    let settled = false;
-    const timer = window.setTimeout(() => finish(false), timeoutMs);
-
-    const finish = (loaded: boolean) => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      window.clearTimeout(timer);
-      resolve(loaded);
-    };
-
-    image.onload = () => {
-      if (typeof image.decode === "function") {
-        image
-          .decode()
-          .then(() => finish(image.naturalWidth > 0))
-          .catch(() => finish(image.naturalWidth > 0));
-        return;
-      }
-      finish(image.naturalWidth > 0);
-    };
-    image.onerror = () => finish(false);
-    image.decoding = "async";
-    image.src = url;
-    if (image.complete) {
-      finish(image.naturalWidth > 0);
-    }
-  });
 }
