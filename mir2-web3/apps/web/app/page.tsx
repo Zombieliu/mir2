@@ -161,7 +161,7 @@ import {
   removeItemByUniqueId,
 } from "../lib/extended-server-packets";
 import bevyRuntimeVersion from "../lib/generated/bevy_runtime_version.json";
-import { signalAssetFirstPlayable } from "../lib/asset-orchestrator";
+import { isAbortError, signalAssetFirstPlayable } from "../lib/asset-orchestrator";
 import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
 import {
   isBevyRuntimeNetworkFailure,
@@ -178,6 +178,11 @@ import {
   reconcileBevyMapImageResidency,
   shouldUploadBevyMapImage,
 } from "../lib/bevy-map-image-residency";
+import {
+  createCrystalSceneBlueprintRequestKey,
+  createCrystalSceneBlueprintRequestUrl,
+  normalizeCrystalSceneBlueprintRequest,
+} from "../lib/scene-blueprint-request";
 import crystalFrameSetCatalog from "../public/original-ui/frame-sets.generated.json";
 import type { OriginalSceneFrameSet } from "../lib/original-scene-sprite-meta";
 import { crystalFrameSetActionForState } from "./components/original-client-entity-frames";
@@ -1157,10 +1162,10 @@ const ONCHAIN_MINE_SWING_INTERVAL_MS = Math.max(
   200,
   Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_SWING_INTERVAL_MS ?? "900"),
 );
-const BEVY_RUNTIME_VERSION =
-  [bevyRuntimeVersion.version, process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA]
-    .filter((value): value is string => Boolean(value))
-    .join("-") || "local";
+// The runtime manifest version is already derived from the four JS/WASM bytes.
+// Do not append the web commit SHA: unchanged runtime bytes must keep one public
+// URL across frontend deploys, and the edge Worker validates this exact value.
+const BEVY_RUNTIME_VERSION = bevyRuntimeVersion.version || "local";
 const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
   { key: "crystal:0:330:270", label: "Bichon Province (0)" },
   { key: "crystal:1:315:82", label: "Woomyon Woods S (1)" },
@@ -1959,7 +1964,6 @@ export default function HomePage() {
     }
   }, []);
   const [screen, setScreen] = useState<ClientScreen>("login");
-  const shouldBootBevyRuntime = screen !== "login";
   useEffect(() => {
     requestAssetPrewarmStage(
       screen === "select" ? "character-select" : screen === "game" ? "game" : "login",
@@ -2241,6 +2245,8 @@ export default function HomePage() {
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
   const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<PredictedPlayerMotion | null>(null);
   const [initialSceneAssetsReady, setInitialSceneAssetsReady] = useState(false);
+  const [assetFirstPlayable, setAssetFirstPlayable] = useState(false);
+  const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable;
   const [isClientReady, setIsClientReady] = useState(false);
   const t = buildTranslator(language);
   const locale = languageLocale(language);
@@ -2444,6 +2450,7 @@ export default function HomePage() {
       sceneAssetReadinessRef.current = null;
       lastSceneAssetMilestoneKeyRef.current = null;
       setInitialSceneAssetsReady(false);
+      setAssetFirstPlayable(false);
     }
   }, [screen]);
 
@@ -4324,8 +4331,8 @@ export default function HomePage() {
 
     if (!shouldBootBevyRuntime) {
       setRuntimePhase("deferred");
-      setRuntimeMessage("Bevy runtime waits until login completes.");
-      markMir2CacheMilestone("bevyRuntimeDeferred", { screen: "login" });
+      setRuntimeMessage("Bevy runtime waits until the first playable map frame.");
+      markMir2CacheMilestone("bevyRuntimeDeferred", { screen });
       return () => {
         disposed = true;
       };
@@ -4539,7 +4546,7 @@ export default function HomePage() {
     return () => {
       disposed = true;
     };
-  }, [clientProfile.input, clientProfile.layout, shouldBootBevyRuntime]);
+  }, [clientProfile.input, clientProfile.layout, screen, shouldBootBevyRuntime]);
 
   useEffect(() => {
     return () => {
@@ -4548,83 +4555,99 @@ export default function HomePage() {
     };
   }, []);
 
+  const sceneBlueprintRequest =
+    screen === "game" && self
+      ? normalizeCrystalSceneBlueprintRequest({
+          mapFileName: normalizeMapFileName(world.mapFileName),
+          centerX: self.x,
+          centerY: self.y,
+          width:
+            viewportLayout.rangeX * 2 +
+            Math.max(8, Math.floor(viewportLayout.rangeX * 0.75)) * 2,
+          height:
+            viewportLayout.rangeY * 2 +
+            Math.max(10, viewportLayout.rangeY) * 2,
+        })
+      : null;
+  const sceneBlueprintRequestKey = sceneBlueprintRequest
+    ? createCrystalSceneBlueprintRequestKey(sceneBlueprintRequest)
+    : null;
+
   useEffect(() => {
-    if (screen !== "game") {
-      return;
-    }
-    const center = self ?? world.sceneView?.center ?? { x: 330, y: 270 };
-    const normalizedMapFileName = normalizeMapFileName(world.mapFileName);
-    const sceneChunkWidth = Math.max(viewportLayout.rangeX, 1);
-    const sceneChunkHeight = Math.max(viewportLayout.rangeY, 1);
-    const scenePrefetchMarginX = Math.max(8, Math.floor(viewportLayout.rangeX * 0.75));
-    const scenePrefetchMarginY = Math.max(10, viewportLayout.rangeY);
-    const sceneRequestWidth = viewportLayout.rangeX * 2 + scenePrefetchMarginX * 2;
-    const sceneRequestHeight = viewportLayout.rangeY * 2 + scenePrefetchMarginY * 2;
-    const sceneKey = `${normalizedMapFileName}:${Math.floor(center.x / sceneChunkWidth)}:${Math.floor(
-      center.y / sceneChunkHeight,
-    )}`;
+    if (screen !== "game" || !sceneBlueprintRequest || !sceneBlueprintRequestKey) return;
+
+    const request = sceneBlueprintRequest;
+    const sceneKey = sceneBlueprintRequestKey;
     if (loadingSceneKeyRef.current === sceneKey) {
       return;
     }
-    if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center, viewportLayout)) {
+    if (
+      !shouldReloadCrystalScene(
+        world.originalMapRegion,
+        request.mapFileName,
+        { x: request.centerX, y: request.centerY },
+        viewportLayout,
+      )
+    ) {
       return;
     }
 
     let disposed = false;
+    const controller = new AbortController();
 
-      async function loadSceneBlueprint() {
-        function applySceneBlueprint(blueprint: SceneBlueprint, key: string) {
-          markMir2CacheMilestone("sceneBlueprintReady", {
-            sceneKey,
-            sceneCache: key,
-            spriteCount: blueprint.originalMapRegion ? Object.keys(blueprint.originalMapRegion.sprites).length : 0,
-            cellCount: blueprint.originalMapRegion?.cells.length ?? 0,
-          });
-          loadedSceneKeyRef.current = sceneKey;
-          loadingSceneKeyRef.current = null;
-          updateWorld((current) => ({
-            ...current,
-            mapTitle: blueprint.mapTitle ?? current.mapTitle,
-            mapFileName: current.mapFileName ?? normalizedMapFileName,
-            miniMapIndex: blueprint.miniMapIndex ?? current.miniMapIndex,
-            bigMapIndex: blueprint.bigMapIndex ?? current.bigMapIndex,
-            sceneView: blueprint.sceneView,
-            terrainPatches: blueprint.terrainPatches,
-            decorObjects: blueprint.decorObjects,
-            originalMapRegion: blueprint.originalMapRegion,
-          }));
-        }
-
-        async function applyStarterFallback() {
-          const fallbackResponse = await fetch("/api/scene/starter");
-          if (!fallbackResponse.ok) {
-            throw new Error(`scene starter route returned ${fallbackResponse.status}`);
-          }
-          const fallbackBlueprint = (await fallbackResponse.json()) as SceneBlueprint;
-          if (!fallbackBlueprint?.originalMapRegion) {
-            throw new Error("starter scene missing originalMapRegion");
-          }
-          applySceneBlueprint(fallbackBlueprint, "starter");
-        }
-
-        try {
-          loadingSceneKeyRef.current = sceneKey;
-          const params = new URLSearchParams({
-            map: normalizedMapFileName,
-            x: String(center.x),
-          y: String(center.y),
-          width: String(sceneRequestWidth),
-          height: String(sceneRequestHeight),
+    async function loadSceneBlueprint() {
+      function applySceneBlueprint(blueprint: SceneBlueprint, cacheStatus: string) {
+        if (disposed || controller.signal.aborted) return;
+        markMir2CacheMilestone("sceneBlueprintReady", {
+          sceneKey,
+          sceneCache: cacheStatus,
+          spriteCount: blueprint.originalMapRegion ? Object.keys(blueprint.originalMapRegion.sprites).length : 0,
+          cellCount: blueprint.originalMapRegion?.cells.length ?? 0,
         });
+        loadedSceneKeyRef.current = sceneKey;
+        updateWorld((current) => ({
+          ...current,
+          mapTitle: blueprint.mapTitle ?? current.mapTitle,
+          mapFileName: current.mapFileName ?? request.mapFileName,
+          miniMapIndex: blueprint.miniMapIndex ?? current.miniMapIndex,
+          bigMapIndex: blueprint.bigMapIndex ?? current.bigMapIndex,
+          sceneView: blueprint.sceneView,
+          terrainPatches: blueprint.terrainPatches,
+          decorObjects: blueprint.decorObjects,
+          originalMapRegion: blueprint.originalMapRegion,
+        }));
+      }
+
+      async function applyStarterFallback() {
+        const fallbackResponse = await fetch("/api/scene/starter", {
+          signal: controller.signal,
+          cache: "force-cache",
+        });
+        if (!fallbackResponse.ok) {
+          throw new Error(`scene starter route returned ${fallbackResponse.status}`);
+        }
+        const fallbackBlueprint = (await fallbackResponse.json()) as SceneBlueprint;
+        if (!fallbackBlueprint?.originalMapRegion) {
+          throw new Error("starter scene missing originalMapRegion");
+        }
+        applySceneBlueprint(fallbackBlueprint, "starter");
+      }
+
+      try {
+        loadingSceneKeyRef.current = sceneKey;
+        const requestUrl = createCrystalSceneBlueprintRequestUrl(request);
         markMir2CacheMilestone("sceneBlueprintStart", {
           sceneKey,
-          map: normalizedMapFileName,
-          x: center.x,
-          y: center.y,
-          width: sceneRequestWidth,
-          height: sceneRequestHeight,
+          map: request.mapFileName,
+          x: request.centerX,
+          y: request.centerY,
+          width: request.width,
+          height: request.height,
         });
-        const response = await fetch(`/api/scene/crystal?${params.toString()}`);
+        const response = await fetch(requestUrl, {
+          signal: controller.signal,
+          cache: "force-cache",
+        });
         if (!response.ok) {
           if (response.status === 424) {
             try {
@@ -4646,7 +4669,9 @@ export default function HomePage() {
                   );
                 }
 
-                const resourceMissingMapName = normalizeMapFileName(String(body?.mapFileName ?? body?.resource?.mapFileName ?? normalizedMapFileName));
+                const resourceMissingMapName = normalizeMapFileName(
+                  String(body?.mapFileName ?? body?.resource?.mapFileName ?? request.mapFileName),
+                );
                 if (resourceMissingMapName === "0") {
                   await applyStarterFallback();
                   return;
@@ -4660,17 +4685,12 @@ export default function HomePage() {
         }
 
         const blueprint = (await response.json()) as SceneBlueprint;
-        // Apply regardless of `disposed`. This effect re-runs on every self-position /
-        // world update (frequent on a fast gateway); dropping the in-flight blueprint
-        // here left world.originalMapRegion null forever — and because loadingSceneKeyRef
-        // stayed set, re-runs skipped re-fetching (line ~3488), so the "Loading map…"
-        // overlay hung permanently. A fetched blueprint for this sceneKey is always valid
-        // to apply; a genuine map change re-triggers a fresh load that supersedes it.
         applySceneBlueprint(blueprint, response.headers.get("x-mir2-scene-cache") ?? "crystal");
       } catch (error) {
-        if (!disposed) {
+        if (!disposed && !isAbortError(error)) {
           appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
         }
+      } finally {
         if (loadingSceneKeyRef.current === sceneKey) {
           loadingSceneKeyRef.current = null;
         }
@@ -4680,11 +4700,15 @@ export default function HomePage() {
     void loadSceneBlueprint();
     return () => {
       disposed = true;
+      controller.abort("scene-request-superseded");
       if (loadingSceneKeyRef.current === sceneKey) {
         loadingSceneKeyRef.current = null;
       }
     };
-  }, [screen, self?.x, self?.y, world.mapFileName, viewportLayout]);
+    // The canonical request key includes map, chunk and viewport buckets. Raw
+    // self coordinates deliberately do not restart an in-flight request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneBlueprintRequestKey, screen]);
 
   // Drive world->Bevy snapshot pushes from a fixed-cadence emitter rather than
   // React reconciliation. The emitter reads the world-model store (kept in sync
@@ -4734,9 +4758,6 @@ export default function HomePage() {
     const currentSelf =
       world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
     if (!currentSelf || !world.originalMapRegion) return;
-    const runtimeReady =
-      bevyRuntimeStarted || runtimePhase === "dom-only" || runtimePhase === "boot-error";
-    if (!runtimeReady) return;
     if (!initialSceneAssetsReady) return;
     // This effect runs after React commits; wait one more animation frame so the
     // lifecycle signal represents a frame the browser was able to present, not
@@ -4763,12 +4784,12 @@ export default function HomePage() {
       };
       markMir2CacheMilestone("gameScreenReady", detail);
       firstPlayableFrameMarkedRef.current = true;
+      setAssetFirstPlayable(true);
       markMir2CacheMilestone("firstPlayableFrame", detail);
       signalAssetFirstPlayable(detail);
     });
   }, [
     screen,
-    bevyRuntimeStarted,
     runtimePhase,
     initialSceneAssetsReady,
     world.entities,

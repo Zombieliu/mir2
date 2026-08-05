@@ -14,6 +14,7 @@ bucket. The Worker maps:
 /original-map/*
 /original-ui/*
 /generated/original-map-blend/*
+/bevy-runtime/v/<runtime-version>/*
 ```
 
 to:
@@ -26,6 +27,11 @@ Set `MIR2_ASSET_VERSION` and `MIR2_ASSET_OBJECT_PREFIX` to the same release
 version used by `/api/asset-manifest`, the R2 upload, and the Vercel build.
 Missing R2 objects return a JSON 404 with the exact object key, so Bevy and DOM
 asset failures are diagnosable from the browser network panel.
+
+Bevy runtime objects keep their runtime version in both the public URL and R2
+key (`.../bevy-runtime/v/<runtime-version>/...`). Set
+`MIR2_BEVY_RUNTIME_VERSION` from `apps/web/lib/generated/bevy_runtime_version.json`;
+the release workflow uploads the four runtime files before deploying this Worker.
 
 The checked-in production pin is currently:
 

@@ -381,3 +381,35 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   176,866-byte bootstrap image, made zero Bevy requests, emitted no console errors, and completed
   login-critical prewarm at about 224 ms. The cold/warm cache smoke also passed every assertion;
   production publication and real-phone verification remain separate release gates.
+
+## 2026-08-05 First-playable asset scheduling repair
+
+- Original prompt: `OK开始修复吧`. Goal: fix the production report that map resources remain slow
+  after the Asset Delivery v2/mobile startup work, while preserving the complete Crystal/R2 corpus.
+- Production diagnosis isolated two serialized blockers: the 5.2 MB encoded Bevy WASM occupied the
+  slow link for about 45 seconds, then two scene requests (one incorrect default coordinate and one
+  authoritative player coordinate) waited behind a cold scene function. The browser later launched
+  a large unbounded tile-preload tail that competed with visible resources.
+- Scene requests now require an authoritative self entity, use one shared canonical chunk/bucket
+  identity in client and server, carry a schema-versioned URL, abort superseded requests, and refuse
+  to apply stale responses. Production scene responses keep a five-minute browser TTL but a one-day
+  shared CDN TTL plus one-week stale revalidation.
+- Visible scene preloading is bounded to eight concurrent images; idle outer-ring prefetch is bounded
+  to four. Once 24 visible resources are ready, queued speculative work is abandoned instead of
+  flooding the connection. A timeout with zero loaded images no longer reports interaction-ready.
+- Bevy boot moved behind the first browser-presented playable map frame. The DOM/WebGL2 compatibility
+  renderer therefore owns the critical path; unchanged runtime bytes reuse the manifest content hash
+  and no longer append the Vercel commit SHA.
+- Bevy R2 objects are now immutable at
+  `bevy-runtime/v/<runtime-version>/...`. The release workflow builds, dry-runs, uploads, and verifies
+  the four runtime objects before deploying the Worker, and injects the same runtime version into the
+  Worker config. Runtime-only publication still cannot replace `remote-asset-release.json`.
+- Added a deploy warmup for three canonical Bichon first-playable chunks. Local production cold
+  assembly measured 381/68/61 ms and the immediate warm pass 29/12/9 ms with complete cell/sprite
+  data. The full thin production build passed at 265,239,558 bytes.
+- Automated evidence passed: scene request/preloader tests, asset-delivery suite, resource loading,
+  map routing, domain-proxy routing, R2 release safety, TypeScript, YAML parse, runtime R2 build/dry
+  run, and optimized Next/thin-client production build. The generic web-game Playwright client
+  rendered the login UI and exported `render_game_to_text`; local gameplay login is blocked only by
+  the production Gateway's localhost Origin policy, so final gameplay timing remains a post-deploy
+  same-origin acceptance gate.

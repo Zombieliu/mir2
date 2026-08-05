@@ -36,6 +36,16 @@ test("mobile runtime failures stay on the playable compatibility path", () => {
   assert.match(pageSource, /new Request\(runtimeWasmPath, \{ signal: controller\.signal \}\)/);
 });
 
+test("the large Bevy runtime and speculative scene assets stay off the first-playable path", () => {
+  assert.match(pageSource, /const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable/);
+  assert.match(pageSource, /if \(screen !== "game" \|\| !sceneBlueprintRequest/);
+  assert.match(pageSource, /controller\.abort\("scene-request-superseded"\)/);
+  assert.match(shellSource, /concurrency: 8/);
+  assert.match(shellSource, /concurrency: 4/);
+  assert.match(shellSource, /const visualReady = readiness\.visualReady/);
+  assert.doesNotMatch(shellSource, /for \(const url of urls\)/);
+});
+
 test("login bootstrap images stay below the critical-path byte budget", async () => {
   const variants = [
     { name: "chrsel-0-768.webp", width: 768, maxBytes: 240 * 1024 },
