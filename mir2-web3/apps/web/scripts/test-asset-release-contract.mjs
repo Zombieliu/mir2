@@ -111,6 +111,24 @@ test("Bevy runtime URLs use an immutable version path instead of a cache-busting
     wasmUrl: "/bevy-runtime/v/bevy-abc%2F123/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
   });
   assert.equal(createBevyRuntimeUrls("", "webgl2").moduleUrl.includes("?"), false);
+
+  assert.deepEqual(
+    createBevyRuntimeUrls(
+      "bevy-abc123",
+      "webgl2",
+      "https://assets.example.test/mir2/v/release-1/?ignored=1#fragment",
+    ),
+    {
+      moduleUrl:
+        "https://assets.example.test/mir2/v/release-1/bevy-runtime/v/bevy-abc123/pkg-webgl2/mir2_bevy_runtime.js",
+      wasmUrl:
+        "https://assets.example.test/mir2/v/release-1/bevy-runtime/v/bevy-abc123/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+    },
+  );
+  assert.equal(
+    createBevyRuntimeUrls("bevy-abc123", "webgpu", "javascript:alert(1)").moduleUrl,
+    "/bevy-runtime/v/bevy-abc123/pkg-webgpu/mir2_bevy_runtime.js",
+  );
 });
 
 test("R2 upload Worker paths cannot escape the configured origin", () => {
@@ -207,19 +225,25 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(nextConfigSource, /\/bevy-runtime\/v\/:version/);
   assert.match(nextConfigSource, /max-age=31536000, immutable/);
   assert.match(pageSource, /const BEVY_RUNTIME_VERSION = bevyRuntimeVersion\.version \|\| "local"/);
+  assert.match(pageSource, /process\.env\.NEXT_PUBLIC_MIR2_ASSET_BASE_URL\?\.trim\(\) \|\| null/);
+  assert.match(pageSource, /BEVY_RUNTIME_ASSET_BASE_URL,/);
   assert.doesNotMatch(pageSource, /bevyRuntimeVersion\.version, process\.env\.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA/);
   assert.match(shellSource, /return manifestPath \? loadMapAtlasIndex\(manifestPath\) : null/);
   assert.match(assetWorkerSource, /const HOTLINK_SAFE_PREFIX = "hotlink-ok\/"/);
   assert.match(assetWorkerSource, /key = key\.slice\(HOTLINK_SAFE_PREFIX\.length\)/);
   assert.match(assetWorkerSource, /cacheUrl\(url, key\)/);
   assert.match(uploadScriptSource, /headers\.set\("X-Mir2-Content-Encoding", upload\.contentEncoding\)/);
-  assert.match(domainProxySource, /representation", "stored-gzip-v1"/);
   assert.match(domainProxySource, /runtime_storage_encoding_missing/);
+  assert.match(domainProxySource, /x-mir2-runtime-transport", "stored-gzip-no-transform"/);
+  assert.match(domainProxySource, /new DecompressionStream\("gzip"\)/);
   assert.match(domainProxySource, /encodeBody: "manual"/);
+  assert.match(domainProxySource, /appendCacheControlDirective\(headers\.get\("cache-control"\), "no-transform"\)/);
+  assert.match(domainProxySource, /useAssetEdgeCache = !decompressStoredGzip && !preserveStoredGzip/);
   assert.match(releaseWorkflowSource, /Deploy authenticated R2 upload Worker/);
   assert.match(releaseWorkflowSource, /inputs\.deploy_upload_worker/);
   assert.match(releaseWorkflowSource, /mir2-r2-bulk-upload\/wrangler\.jsonc/);
   assert.match(releaseWorkflowSource, /npm run runtime:r2:build/);
   assert.match(releaseWorkflowSource, /MIR2_BEVY_RUNTIME_VERSION: runtime\.version/);
+  assert.match(releaseWorkflowSource, /--assetBaseUrl "https:\/\/assets\.mir2\.obelisk\.build\/mir2\/v\/\$MIR2_ASSET_VERSION"/);
   assert.doesNotMatch(releaseWorkflowSource, /delete config\.routes/);
 });
