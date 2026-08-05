@@ -77,3 +77,14 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - Hosted releases now default to the authenticated Worker driver and expose its two secrets to both
   asset and immutable-runtime upload steps. Authentication failures no longer waste retry attempts;
   transient rate limits and server failures retain bounded retries.
+
+## 2026-08-05 independent Worker and Vercel release gates
+
+- The repository's legacy Cloudflare deployment token is invalid, but the authorized Cloudflare
+  control-plane connection successfully deployed Worker version
+  `d3fb6577-ce6d-4383-9902-ac4eb8818a69` while strictly inheriting the existing Vercel bypass secret
+  and preserving the R2 binding. All four versioned WebGPU/WebGL2 JS/WASM probes now return
+  `x-mir2-domain-proxy: r2-asset`.
+- The workflow no longer requires a redundant Worker deployment for every Vercel release. A
+  Vercel-only run still uploads the immutable runtime and must pass current-Worker original-asset and
+  full-pack closure checks first, so decoupling the actions does not weaken release ordering.
