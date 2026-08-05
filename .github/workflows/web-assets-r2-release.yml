@@ -38,6 +38,11 @@ on:
         required: false
         default: worker
         type: string
+      deploy_upload_worker:
+        description: Deploy the authenticated R2 upload Worker before publishing
+        required: false
+        default: false
+        type: boolean
       require_full_crystal_pack:
         description: Require an existing release to contain the verified full Crystal pack
         required: false
@@ -344,7 +349,7 @@ jobs:
         run: npm run assets:r2:dry-run
 
       - name: Deploy authenticated R2 upload Worker
-        if: ${{ (inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel))) && (inputs.upload_driver == 'worker' || inputs.upload_driver == '') }}
+        if: ${{ inputs.deploy_upload_worker && (inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel))) && (inputs.upload_driver == 'worker' || inputs.upload_driver == '') }}
         working-directory: mir2-web3
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

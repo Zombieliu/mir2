@@ -444,21 +444,27 @@ async function uploadViaWorker(upload) {
     : source;
   const endpoint = new URL(workerUploadPath, workerUploadUrl);
   endpoint.searchParams.set("key", upload.objectKey);
+  const headers = new Headers({
+    Authorization: `Bearer ${workerUploadSecret}`,
+    "Content-Type": upload.contentType,
+    "Content-Length": String(upload.size),
+    "Cache-Control": upload.cacheControl,
+  });
+  // Headers stringifies `undefined` instead of omitting it. Only attach
+  // optional representation metadata when a real value exists, otherwise an
+  // identity asset becomes the literal unsupported encoding "undefined".
+  if (upload.contentEncoding) {
+    // This request body is an opaque storage representation, not an HTTP
+    // representation for Cloudflare to decode. A private header prevents edge
+    // request normalization from stripping Content-Encoding or transparently
+    // decoding the bytes before the upload Worker stores them.
+    headers.set("X-Mir2-Content-Encoding", upload.contentEncoding);
+  }
+  if (upload.sha256) headers.set("X-Mir2-Sha256", upload.sha256);
+  if (upload.encodedSha256) headers.set("X-Mir2-Encoded-Sha256", upload.encodedSha256);
   const response = await fetch(endpoint, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${workerUploadSecret}`,
-      "Content-Type": upload.contentType,
-      // This request body is an opaque storage representation, not an HTTP
-      // representation for Cloudflare to decode. A private header prevents
-      // edge request normalization from stripping Content-Encoding or
-      // transparently decoding the bytes before the upload Worker stores them.
-      "X-Mir2-Content-Encoding": upload.contentEncoding || undefined,
-      "Content-Length": String(upload.size),
-      "Cache-Control": upload.cacheControl,
-      "X-Mir2-Sha256": upload.sha256 || undefined,
-      "X-Mir2-Encoded-Sha256": upload.encodedSha256 || undefined,
-    },
+    headers,
     body,
     duplex: "half",
   });
