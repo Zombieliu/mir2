@@ -1,19 +1,35 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
 import sharp from "sharp";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
+const execFileAsync = promisify(execFile);
+const loginBackgroundScript = path.join(
+  scriptDir,
+  "generate-login-background-assets.mjs",
+);
+const originalAssetManifestScript = path.join(
+  scriptDir,
+  "generate-original-asset-manifest.mjs",
+);
 const registrarSource = await fs.readFile(
   path.join(webRoot, "app", "components", "asset-cache-registrar.tsx"),
   "utf8",
 );
 const pageSource = await fs.readFile(path.join(webRoot, "app", "page.tsx"), "utf8");
 const shellSource = await fs.readFile(path.join(webRoot, "app", "original-client-shell.tsx"), "utf8");
+const vercelBuildSource = await fs.readFile(
+  path.join(scriptDir, "vercel-build.sh"),
+  "utf8",
+);
 
 test("Service Worker lifecycle work cannot block prewarm or first play", () => {
   assert.match(registrarSource, /void configureServiceWorkerInBackground\(/);
@@ -69,4 +85,107 @@ test("login bootstrap images stay below the critical-path byte budget", async ()
     ),
     "the coarse-pointer letterbox must reuse the mobile bootstrap request during hydration",
   );
+});
+
+test("remote production builds reuse validated bootstrap images without original UI source", async () => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-login-bootstrap-"));
+  const outputRoot = path.join(tempRoot, "bootstrap", "login");
+  await fs.mkdir(outputRoot, { recursive: true });
+
+  try {
+    for (const width of [768, 1024]) {
+      await fs.copyFile(
+        path.join(webRoot, "public", "bootstrap", "login", `chrsel-0-${width}.webp`),
+        path.join(outputRoot, `chrsel-0-${width}.webp`),
+      );
+    }
+
+    const { stdout } = await execFileAsync(process.execPath, [loginBackgroundScript], {
+      env: {
+        ...process.env,
+        MIR2_ORIGINAL_ASSET_MANIFEST_MODE: "remote-release",
+        MIR2_LOGIN_BACKGROUND_SOURCE: path.join(tempRoot, "missing", "ChrSel", "0.png"),
+        MIR2_LOGIN_BACKGROUND_OUTPUT_ROOT: outputRoot,
+      },
+      maxBuffer: 1024 * 1024,
+    });
+    const report = JSON.parse(stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.mode, "prebuilt");
+    assert.deepEqual(report.generated.map((entry) => entry.width), [768, 1024]);
+  } finally {
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("prebuilt Vercel releases skip Rust toolchain installation", () => {
+  const prebuiltGuard = vercelBuildSource.indexOf(
+    'if [ "${MIR2_USE_PREBUILT_BEVY_RUNTIME:-0}" = "1" ]; then',
+  );
+  const rustupInstall = vercelBuildSource.indexOf(
+    'rustup toolchain install "$TOOLCHAIN"',
+  );
+  assert.ok(prebuiltGuard >= 0, "prebuilt runtime guard is present");
+  assert.ok(rustupInstall > prebuiltGuard, "prebuilt runtime guard runs before rustup");
+  assert.match(
+    vercelBuildSource.slice(prebuiltGuard, rustupInstall),
+    /skipping Rust toolchain installation/,
+  );
+});
+
+test("Vercel reuses a validated immutable original-asset manifest", async () => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-original-manifest-"));
+  const outputPath = path.join(tempRoot, "original-asset-manifest.generated.json");
+  const remoteRelease = "https://127.0.0.1:1/mir2/v/fixture-v1/remote-asset-release.json";
+  await fs.writeFile(
+    outputPath,
+    JSON.stringify({
+      schemaVersion: 1,
+      kind: "mir2-original-asset-manifest",
+      generatedAt: "2026-08-05T00:00:00.000Z",
+      collectionMode: "remote-release",
+      assetHash: "a".repeat(64),
+      stats: {
+        assetCount: 1,
+        originalMapPngCount: 1,
+        originalUiPngCount: 0,
+        totalBytes: 7,
+      },
+      remoteRelease: {
+        source: remoteRelease,
+        version: "fixture-v1",
+        assetBaseUrl: "https://127.0.0.1:1/mir2/v/fixture-v1",
+        objectPrefix: "mir2/v/fixture-v1",
+        fileCount: 1,
+        missingCount: 0,
+      },
+      assets: {
+        "/original-map/fixture.png": {
+          size: 7,
+          source: "original-map",
+          sha256: "b".repeat(64),
+        },
+      },
+    }),
+  );
+
+  try {
+    const { stdout } = await execFileAsync(process.execPath, [originalAssetManifestScript], {
+      env: {
+        ...process.env,
+        MIR2_ASSET_VERSION: "fixture-v1",
+        MIR2_ORIGINAL_ASSET_MANIFEST_MODE: "remote-release",
+        MIR2_ORIGINAL_ASSET_REMOTE_RELEASE: remoteRelease,
+        MIR2_ORIGINAL_ASSET_MANIFEST_PATH: outputPath,
+        MIR2_REUSE_ORIGINAL_ASSET_MANIFEST: "1",
+      },
+      maxBuffer: 1024 * 1024,
+    });
+    const report = JSON.parse(stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.reused, true);
+    assert.equal(report.assetCount, 1);
+  } finally {
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  }
 });

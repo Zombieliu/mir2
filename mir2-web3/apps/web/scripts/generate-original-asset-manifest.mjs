@@ -47,6 +47,17 @@ async function main() {
     throw new Error(`Unsupported --mode ${collectionMode}; expected "filesystem", "git", or "remote-release".`);
   }
 
+  if (
+    collectionMode === "remote-release" &&
+    process.env.MIR2_REUSE_ORIGINAL_ASSET_MANIFEST === "1"
+  ) {
+    const reusableManifest = await readReusableRemoteAssetManifest();
+    if (reusableManifest) {
+      printManifestReport(reusableManifest, { reused: true });
+      return;
+    }
+  }
+
   const { records, remoteRelease } =
     collectionMode === "remote-release"
       ? await collectRemoteReleaseAssetRecords()
@@ -95,23 +106,76 @@ async function main() {
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  printManifestReport(manifest, { reused: false });
+}
+
+function printManifestReport(manifest, { reused }) {
   console.log(
     JSON.stringify(
       {
         ok: true,
         outputPath,
-        collectionMode,
+        collectionMode: manifest.collectionMode,
+        reused,
         assetCount: manifest.stats.assetCount,
         originalMapPngCount: manifest.stats.originalMapPngCount,
         originalUiPngCount: manifest.stats.originalUiPngCount,
-        totalBytes,
+        totalBytes: manifest.stats.totalBytes,
         assetHash: manifest.assetHash,
-        remoteRelease,
+        remoteRelease: manifest.remoteRelease ?? null,
       },
       null,
       2,
     ),
   );
+}
+
+async function readReusableRemoteAssetManifest() {
+  let manifest;
+  try {
+    manifest = JSON.parse(await fs.readFile(outputPath, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    console.error(
+      `[original-asset-manifest] ignoring unreadable reusable manifest ${outputPath}: ${error?.message ?? error}`,
+    );
+    return null;
+  }
+
+  const expectedSource = resolveRemoteReleaseManifestSource();
+  const stats = manifest?.stats;
+  const assets = manifest?.assets;
+  const reusable =
+    manifest?.schemaVersion === SCHEMA_VERSION &&
+    manifest?.kind === "mir2-original-asset-manifest" &&
+    manifest?.collectionMode === "remote-release" &&
+    /^[a-f0-9]{64}$/i.test(String(manifest?.assetHash ?? "")) &&
+    manifest?.remoteRelease?.source === expectedSource &&
+    (!assetVersion || manifest?.remoteRelease?.version === assetVersion) &&
+    Number(manifest?.remoteRelease?.missingCount) === 0 &&
+    Number.isInteger(manifest?.remoteRelease?.fileCount) &&
+    manifest.remoteRelease.fileCount > 0 &&
+    Number.isInteger(stats?.assetCount) &&
+    stats.assetCount > 0 &&
+    Number.isInteger(stats?.originalMapPngCount) &&
+    stats.originalMapPngCount >= 0 &&
+    Number.isInteger(stats?.originalUiPngCount) &&
+    stats.originalUiPngCount >= 0 &&
+    stats.originalMapPngCount + stats.originalUiPngCount === stats.assetCount &&
+    Number.isFinite(stats?.totalBytes) &&
+    stats.totalBytes > 0 &&
+    assets &&
+    typeof assets === "object" &&
+    !Array.isArray(assets) &&
+    Object.keys(assets).length === stats.assetCount;
+
+  if (!reusable) {
+    console.error(
+      `[original-asset-manifest] reusable manifest does not match ${expectedSource}; regenerating`,
+    );
+    return null;
+  }
+  return manifest;
 }
 
 async function collectLocalAssetRecords() {
