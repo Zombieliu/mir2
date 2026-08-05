@@ -373,6 +373,8 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - Added a compressed Bevy runtime R2 release path and Cloudflare route. The two logical WASM files
   total 56.6 MB but gzip to 12.2 MB combined (5.86/6.34 MB). Runtime URLs are version-checked before
   mapping to the release object prefix, preventing stale immutable URLs from receiving current bytes.
+  Runtime-only uploads explicitly suppress `remote-asset-release.json`, so an incremental runtime
+  publication cannot replace the current full Crystal release manifest.
 - Current automated evidence: startup budget (3/3), runtime policy (5/5), runtime byte budget,
   domain-proxy routing, asset prewarm policy (9/9), full asset-delivery regression, Web TypeScript,
   and a full production build all pass. Local touch/mobile Chromium at 844x390 fetched only the

@@ -76,6 +76,7 @@ if (files.length !== 4) {
 const release = {
   schemaVersion: 1,
   kind: "mir2-bevy-runtime-r2-release",
+  publishReleaseManifest: false,
   version: assetVersion,
   generatedAt: new Date().toISOString(),
   assetBaseUrl: assetBaseUrl || null,
