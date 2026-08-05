@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "mir2-asset-cache";
-const CACHE_SCHEMA_VERSION = "sw6";
+const CACHE_SCHEMA_VERSION = "sw7";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
@@ -135,9 +135,10 @@ self.addEventListener("fetch", (event) => {
   if (runtimeConfig.version === DEFAULT_VERSION) return;
 
   if (isStaticGameAsset(url)) {
-    const policy = staticAssetCachePolicy(request);
+    const stableRequest = stableStaticAssetRequest(request);
+    const policy = staticAssetCachePolicy(stableRequest);
     event.respondWith(
-      cacheFirst(request, cacheName(policy.cacheKind), policy.maxEntries, event),
+      cacheFirst(stableRequest, cacheName(policy.cacheKind), policy.maxEntries, event),
     );
     return;
   }
@@ -170,6 +171,28 @@ function isStaticGameAsset(url) {
     url.pathname.startsWith("/generated/crystal-packs/full/") ||
     url.pathname.startsWith("/bevy-entity-atlases/")
   );
+}
+
+function stableStaticAssetRequest(request) {
+  const url = new URL(request.url);
+  const hadLegacyRetryQuery =
+    url.searchParams.has("mir2ImgRetry") || url.searchParams.has("mir2ImgRetryTs");
+  if (!hadLegacyRetryQuery) return request;
+
+  url.searchParams.delete("mir2ImgRetry");
+  url.searchParams.delete("mir2ImgRetryTs");
+  return new Request(url.href, {
+    method: request.method,
+    headers: request.headers,
+    mode: request.mode,
+    credentials: request.credentials,
+    cache: request.cache,
+    redirect: request.redirect,
+    referrer: request.referrer,
+    referrerPolicy: request.referrerPolicy,
+    integrity: request.integrity,
+    keepalive: request.keepalive,
+  });
 }
 
 function cacheName(kind) {

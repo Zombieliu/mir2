@@ -23,6 +23,10 @@ export type SceneAssetPreloadOptions = {
 
 const DEFAULT_MINIMUM_LOADED = 24;
 const DEFAULT_CONCURRENCY = 8;
+const SHARED_IMAGE_LOAD_TIMEOUT_MS = 30_000;
+const SUCCESSFUL_IMAGE_LOAD_MAX_ENTRIES = 4_096;
+const inFlightSceneImageLoads = new Map<string, Promise<boolean>>();
+const successfulSceneImageLoads = new Set<string>();
 
 /**
  * Preloads a bounded set of scene images. Once enough images are available for
@@ -127,15 +131,40 @@ async function preloadSceneImage(
 }
 
 function preloadSceneImageCandidate(url: string, timeoutMs: number): Promise<boolean> {
+  if (successfulSceneImageLoads.has(url)) {
+    return Promise.resolve(true);
+  }
+
+  let sharedLoad = inFlightSceneImageLoads.get(url);
+  if (!sharedLoad) {
+    sharedLoad = startSceneImageCandidateLoad(url).finally(() => {
+      inFlightSceneImageLoads.delete(url);
+    });
+    inFlightSceneImageLoads.set(url, sharedLoad);
+  }
+
+  return settleSceneImageLoadWithin(sharedLoad, timeoutMs);
+}
+
+function startSceneImageCandidateLoad(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     const image = new Image();
     let settled = false;
-    const timer = window.setTimeout(() => finish(false), timeoutMs);
+    const timer = window.setTimeout(() => finish(false), SHARED_IMAGE_LOAD_TIMEOUT_MS);
 
     const finish = (loaded: boolean) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(timer);
+      if (loaded) {
+        successfulSceneImageLoads.delete(url);
+        successfulSceneImageLoads.add(url);
+        while (successfulSceneImageLoads.size > SUCCESSFUL_IMAGE_LOAD_MAX_ENTRIES) {
+          const oldest = successfulSceneImageLoads.values().next().value as string | undefined;
+          if (!oldest) break;
+          successfulSceneImageLoads.delete(oldest);
+        }
+      }
       resolve(loaded);
     };
 
@@ -153,6 +182,20 @@ function preloadSceneImageCandidate(url: string, timeoutMs: number): Promise<boo
     image.decoding = "async";
     image.src = url;
     if (image.complete) finish(image.naturalWidth > 0);
+  });
+}
+
+function settleSceneImageLoadWithin(load: Promise<boolean>, timeoutMs: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const timer = window.setTimeout(() => finish(false), Math.max(1, timeoutMs));
+    const finish = (loaded: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      resolve(loaded);
+    };
+    void load.then(finish, () => finish(false));
   });
 }
 

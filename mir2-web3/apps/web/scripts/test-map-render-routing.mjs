@@ -55,7 +55,12 @@ assert.match(
 );
 
 const assetWorkerSource = readFileSync(assetWorkerPath, "utf8");
-assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw6"/);
+assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw7"/);
+assert.match(
+  assetWorkerSource,
+  /const stableRequest = stableStaticAssetRequest\(request\)/,
+  "legacy image retry URLs must collapse before CacheStorage and in-flight coalescing",
+);
 assert.match(
   assetWorkerSource,
   /for \(const remoteRequest of createRemoteAssetRequests\(request\)\)/,
@@ -214,6 +219,16 @@ for (let phase = 0; phase < 20; phase += 1) {
 }
 
 const mapRenderingSource = readFileSync(mapRenderingPath, "utf8");
+assert.doesNotMatch(
+  mapRenderingSource,
+  /searchParams\.set\("mir2ImgRetry(?:Ts)?"/,
+  "immutable scene images must not create unique cache-busting retry URLs",
+);
+assert.match(
+  mapRenderingSource,
+  /sceneAssetStalledRetryDecision\(/,
+  "stalled DOM image recovery must use the bounded retry policy",
+);
 assert.match(
   mapRenderingSource,
   /resolvedMapSpriteBlendMode\(sprite\) \|\| mapAtlasPathRequiresAlphaKey\(sprite\.path\)/,
