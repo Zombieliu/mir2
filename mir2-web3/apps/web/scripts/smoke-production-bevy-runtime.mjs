@@ -27,22 +27,28 @@ const BEVY_RUNTIME_BACKENDS = [
 const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
 
 const results = [];
-let ok = false;
+let ok = true;
 
 for (const backend of BEVY_RUNTIME_BACKENDS) {
   let backendOk = true;
   for (const path of backend.paths) {
-    const result = await probe(`${webBaseUrl}${path}`);
+    const isWasm = path.endsWith(".wasm");
+    const result = await probe(`${webBaseUrl}${path}`, isWasm);
     results.push({ kind: "bevy-runtime", backend: backend.label, path, ...result });
-    if (!result.ok || (requireR2 && result.xMir2DomainProxy !== "r2-asset")) {
+    if (
+      !result.ok ||
+      (requireR2 && result.xMir2DomainProxy !== "r2-asset") ||
+      (isWasm &&
+        (result.contentEncoding !== "gzip" ||
+          result.storageContentEncoding !== "gzip" ||
+          result.wasmMagicOk !== true))
+    ) {
       backendOk = false;
       logFailure({ baseUrl: webBaseUrl, path, ...result });
     }
   }
 
-  if (backendOk) {
-    ok = true;
-  }
+  if (!backendOk) ok = false;
 }
 
 console.log(
@@ -62,7 +68,7 @@ if (!ok) {
   process.exitCode = 1;
 }
 
-async function probe(url) {
+async function probe(url, verifyWasm = false) {
   const startedAt = Date.now();
   let response;
   try {
@@ -80,6 +86,9 @@ async function probe(url) {
       xMir2DomainProxy: null,
       xMir2AssetKey: null,
       xMir2AssetVersion: null,
+      contentEncoding: null,
+      storageContentEncoding: null,
+      wasmMagicOk: verifyWasm ? false : null,
       bodyPreview: null,
       error: error instanceof Error ? error.message : String(error),
     };
@@ -94,14 +103,48 @@ async function probe(url) {
     xMir2DomainProxy: response.headers.get("x-mir2-domain-proxy"),
     xMir2AssetKey: response.headers.get("x-mir2-asset-key"),
     xMir2AssetVersion: response.headers.get("x-mir2-asset-version"),
+    contentEncoding: response.headers.get("content-encoding"),
+    storageContentEncoding: response.headers.get("x-mir2-storage-content-encoding"),
+    wasmMagicOk: verifyWasm ? false : null,
     bodyPreview: null,
   };
+
+  if (
+    result.ok &&
+    verifyWasm &&
+    result.contentEncoding === "gzip" &&
+    result.storageContentEncoding === "gzip"
+  ) {
+    result.wasmMagicOk = await probeWasmMagic(url);
+  }
 
   if (!result.ok) {
     result.bodyPreview = await readBodyPreview(url, 500);
   }
 
   return result;
+}
+
+async function probeWasmMagic(url) {
+  let response;
+  try {
+    response = await fetch(url, { method: "GET", cache: "no-store" });
+    if (!response.ok || !response.body) return false;
+    const reader = response.body.getReader();
+    const prefix = [];
+    while (prefix.length < 4) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const byte of value) {
+        prefix.push(byte);
+        if (prefix.length === 4) break;
+      }
+    }
+    await reader.cancel().catch(() => undefined);
+    return prefix.length === 4 && prefix[0] === 0 && prefix[1] === 97 && prefix[2] === 115 && prefix[3] === 109;
+  } catch {
+    return false;
+  }
 }
 
 async function readBodyPreview(url, maxChars) {
@@ -114,13 +157,31 @@ async function readBodyPreview(url, maxChars) {
   }
 }
 
-function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir2AssetKey, xMir2AssetVersion, error, bodyPreview }) {
+function logFailure({
+  baseUrl,
+  path,
+  status,
+  contentType,
+  contentEncoding,
+  storageContentEncoding,
+  wasmMagicOk,
+  xMir2DomainProxy,
+  xMir2AssetKey,
+  xMir2AssetVersion,
+  error,
+  bodyPreview,
+}) {
   console.log("");
   const url = `${baseUrl}${path}`;
   console.log(`FAIL: ${url}`);
   console.log(`url: ${url}`);
   console.log(`status: ${String(status)}`);
   console.log(`content-type: ${contentType ?? ""}`);
+  console.log(`content-encoding: ${contentEncoding ?? ""}`);
+  console.log(`x-mir2-storage-content-encoding: ${storageContentEncoding ?? ""}`);
+  if (path.endsWith(".wasm")) {
+    console.log(`wasm-magic-ok: ${String(wasmMagicOk)}`);
+  }
   console.log(`x-mir2-domain-proxy: ${xMir2DomainProxy ?? ""}`);
   console.log(`x-mir2-asset-key: ${xMir2AssetKey ?? ""}`);
   console.log(`x-mir2-asset-version: ${xMir2AssetVersion ?? ""}`);

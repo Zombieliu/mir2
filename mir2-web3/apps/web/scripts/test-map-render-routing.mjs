@@ -55,7 +55,7 @@ assert.match(
 );
 
 const assetWorkerSource = readFileSync(assetWorkerPath, "utf8");
-assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw7"/);
+assert.match(assetWorkerSource, /CACHE_SCHEMA_VERSION = "sw8"/);
 assert.match(
   assetWorkerSource,
   /const stableRequest = stableStaticAssetRequest\(request\)/,

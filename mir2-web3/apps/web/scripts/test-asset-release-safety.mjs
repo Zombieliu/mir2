@@ -696,7 +696,8 @@ await test("upload Worker streams deterministic gzip bytes with integrity header
       assert.equal(requests[0].method, "PUT");
       assert.match(requests[0].url, /^\/upload\?key=mir2%2Fv%2Fworker-fixture%2F/);
       assert.equal(requests[0].headers.authorization, "Bearer fixture-worker-token");
-      assert.equal(requests[0].headers["content-encoding"], "gzip");
+      assert.equal(requests[0].headers["content-encoding"], undefined);
+      assert.equal(requests[0].headers["x-mir2-content-encoding"], "gzip");
       assert.equal(requests[0].headers["x-mir2-sha256"], rawSha256);
       assert.equal(requests[0].headers["x-mir2-encoded-sha256"], encodedSha256);
       assert.equal(Number(requests[0].headers["content-length"]), encoded.byteLength);

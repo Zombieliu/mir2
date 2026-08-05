@@ -1166,6 +1166,10 @@ const ONCHAIN_MINE_SWING_INTERVAL_MS = Math.max(
 // Do not append the web commit SHA: unchanged runtime bytes must keep one public
 // URL across frontend deploys, and the edge Worker validates this exact value.
 const BEVY_RUNTIME_VERSION = bevyRuntimeVersion.version || "local";
+// Runtime loading happens after the compatibility scene is already playable.
+// Allow enough headroom for the ~6 MiB compressed WASM on slower mobile/Asian
+// routes instead of aborting at the exact boundary of an otherwise valid load.
+const BEVY_RUNTIME_BOOT_TIMEOUT_MS = 120_000;
 const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
   { key: "crystal:0:330:270", label: "Bichon Province (0)" },
   { key: "crystal:1:315:82", label: "Woomyon Woods S (1)" },
@@ -13873,7 +13877,7 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
     // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
     await waitForBevyCanvas();
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 60_000);
+    const timeout = window.setTimeout(() => controller.abort(), BEVY_RUNTIME_BOOT_TIMEOUT_MS);
     try {
       await runtime.default({
         module_or_path: new Request(runtimeWasmPath, { signal: controller.signal }),
