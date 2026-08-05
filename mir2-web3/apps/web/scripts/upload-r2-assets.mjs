@@ -411,7 +411,7 @@ async function uploadWithRetry(upload) {
       return;
     } catch (error) {
       lastError = error;
-      if (attempt >= maxAttempts) break;
+      if (attempt >= maxAttempts || !isRetryableUploadError(error)) break;
       const delayMs = uploadRetryDelayMs(error, attempt);
       console.warn(
         `[mir2-r2] retry ${attempt + 1}/${maxAttempts} in ${delayMs}ms ${upload.objectKey}`,
@@ -420,6 +420,12 @@ async function uploadWithRetry(upload) {
     }
   }
   throw lastError;
+}
+
+function isRetryableUploadError(error) {
+  const status = Number(error?.status ?? error?.$metadata?.httpStatusCode);
+  if (!Number.isFinite(status) || status <= 0) return true;
+  return status === 408 || status === 425 || status === 429 || status >= 500;
 }
 
 function uploadRetryDelayMs(error, attempt) {
