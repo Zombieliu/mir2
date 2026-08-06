@@ -1,5 +1,14 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-08-06 — Repository slimming Phase 1
+
+- Goal: remove reproducible runtime binaries and run-specific QA evidence from the current Git tree without breaking local, Vercel, or itch delivery; preserve all removed evidence outside Git objects before deletion.
+- Bevy runtime delivery: added a strict four-file downloader that reads the pinned `bevy_runtime_version.json`, accepts only the WebGPU/WebGL2 JS/WASM paths, downloads from the immutable production R2 prefix, verifies logical SHA-256, rejects symlink/path traversal inputs, and publishes through a staged atomic directory swap. `MIR2_USE_PREBUILT_BEVY_RUNTIME=1` now fetches automatically when the local package is absent.
+- QA evidence delivery: added deterministic evidence inventory hashing and Candidate workflow Artifact upload with 14-day retention. Large-file policy now keeps run-specific captures, packet traces, stage screenshots, and Bevy runtime outputs outside Git.
+- Preservation gate: archived the four evidence roots from main commit `052c4c2720f773d95ff0c288be69cd0c57810033` to GitHub Release `repository-evidence-052c4c27`. The five assets total 465,730,381 bytes; the reassembled archive SHA-256 is `22098609d7baa4161b4b001e49e0640e0c212daf39a7f8411eed7863b45c1941`.
+- Tree result: removed 1,162 tracked files from five exact paths. The tracked snapshot is projected to fall from 1,022,179,705 bytes to 381,654,811 bytes, a 640,524,894-byte reduction. This normal PR reduces checkout/current-tree size; historical GitHub storage requires a separate approved Phase 2 history rewrite.
+- Verification: runtime downloader 3/3, evidence summarizer 2/2, Bevy build self-check, actual 56,815,790-byte R2 download/hash gate, startup budget 7/7, asset-release contract 6/6, production WebGPU/WebGL2 probes 4/4, TypeScript, full Next production build, Vercel production build from a missing runtime directory, itch HTML5 package/certificate, health endpoint, and the required web-game Playwright capture all passed. Browser state reported `screen=login`, `sceneInteractionReady=true`, and zero captured console/page errors; the login screenshot was visually inspected.
+
 ## 2026-07-30 — Thin player client / R2 asset boundary
 
 - Goal: separate the complete local Crystal source corpus from the player distribution, verify the real R2 boundary, remove duplicate runtime bytes, and produce a production-verifiable standalone thin client.

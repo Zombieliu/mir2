@@ -38,3 +38,21 @@ jobs:
 
       - name: Run local Candidate gate
         run: cd mir2-web3 && MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh
+
+      - name: Inventory Candidate evidence
+        if: ${{ always() }}
+        run: node mir2-web3/scripts/summarize-qa-evidence.mjs
+
+      - name: Upload Candidate evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mir2-candidate-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            mir2-web3/artifacts/qa-evidence/summary.json
+            mir2-web3/docs/generated/player-qa/
+            mir2-web3/docs/generated/packet-traces/
+            mir2-web3/docs/stage2-screenshots/
+            mir2-web3/docs/stage5-screenshots/

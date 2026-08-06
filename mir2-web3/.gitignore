@@ -7,7 +7,13 @@ out/
 .mir2-remote-assets/
 .mir2-thin-client/
 docs/generated/remote-assets/
+docs/generated/player-qa/
+docs/generated/packet-traces/
+docs/stage2-screenshots/
+docs/stage5-screenshots/
+artifacts/qa-evidence/
 apps/web/public/original-asset-manifest.generated.json
+apps/web/public/bevy-runtime/
 # Full Crystal conversion is reproducible from the local client. Do not commit
 # multi-gigabyte CAS pages or per-library manifests.
 apps/web/public/generated/crystal-packs/full/
