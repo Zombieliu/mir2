@@ -20,6 +20,7 @@ build=0
 full_assets=0
 remove_volumes=0
 runtime_image_prepared=0
+bevy_runtime_prepared=0
 asset_image_prepared=0
 developer_revision=""
 local_developer_image=""
@@ -212,6 +213,20 @@ prepare_runtime_image() {
   fi
 
   runtime_image_prepared=1
+}
+
+prepare_bevy_runtime() {
+  if [[ "${bevy_runtime_prepared}" -eq 1 ]]; then
+    return
+  fi
+
+  prepare_runtime_image
+  compose run --rm --no-deps \
+    --user "$(id -u):$(id -g)" \
+    --entrypoint node \
+    workspace \
+    apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs
+  bevy_runtime_prepared=1
 }
 
 verify_published_image_witness() {
@@ -474,7 +489,7 @@ case "${command}" in
         runtime_image_prepared=0
       fi
     fi
-    prepare_runtime_image
+    prepare_bevy_runtime
     up_args=(up -d)
     up_args+=(gateway web)
     compose "${up_args[@]}"
@@ -502,7 +517,7 @@ case "${command}" in
     ;;
   verify)
     release_lock_check
-    prepare_runtime_image
+    prepare_bevy_runtime
     compose run --rm --no-deps workspace bash -lc \
       'node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs && cargo +1.89.0 fmt --all -- --check && npm ci --prefix apps/web && npm ci --prefix apps/admin-web && npm --prefix apps/web run typecheck && npm --prefix apps/admin-web run typecheck && cargo +1.89.0 check --locked -p mir2-gateway -p mir2-admin-api'
     ;;
