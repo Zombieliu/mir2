@@ -81,6 +81,9 @@ jobs:
           rustup toolchain install 1.89.0 --profile minimal --component rustfmt
           test "$(rustc +1.89.0 --version | awk '{print $2}')" = "1.89.0"
 
+      - name: Fetch pinned Bevy runtime
+        run: node mir2-web3/apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs
+
       - name: Verify developer release locks and Starter resources
         run: node mir2-web3/scripts/check-developer-release.mjs
 
