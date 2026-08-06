@@ -387,6 +387,11 @@ function checkDeveloperReleaseLock() {
 
   const bashLauncher = readFileSync(projectPath("scripts/dev.sh"), "utf8");
   const powerShellLauncher = readFileSync(projectPath("scripts/dev.ps1"), "utf8");
+  const developerCompose = readFileSync(projectPath("infra/compose.developer.yml"), "utf8");
+  assert(
+    developerCompose.includes("node ./scripts/fetch-prebuilt-bevy-runtime.mjs &&"),
+    "developer Web startup must fetch the pinned externalized Bevy runtime",
+  );
   for (const [label, launcher, needles] of [
     [
       "scripts/dev.sh",
@@ -396,6 +401,7 @@ function checkDeveloperReleaseLock() {
         'published_image}" != "ghcr.io/zombieliu/mir2-developer"',
         "DOCKER_CONFIG",
         "compose run --rm --no-deps -T asset-fetch",
+        "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs",
       ],
     ],
     [
@@ -406,6 +412,7 @@ function checkDeveloperReleaseLock() {
         '$script:PublishedImage -ne "ghcr.io/zombieliu/mir2-developer"',
         "DOCKER_CONFIG",
         '"run", "--rm", "--no-deps", "-T", "asset-fetch"',
+        "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs",
       ],
     ],
   ]) {
