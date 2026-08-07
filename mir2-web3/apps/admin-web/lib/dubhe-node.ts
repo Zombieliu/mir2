@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, createPublicKey, verify } from "node:crypto";
 import testnetSnapshot from "../data/dubhe-node-testnet.json";
+import { mergeDubheNodeOperatorRecords } from "./dubhe-node-merge";
 
 const NODE_ID_DOMAIN = Buffer.from("obelisk.guild-node.ed25519.v1\0", "utf8");
 const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
@@ -210,9 +211,23 @@ type HomeOperatorSnapshot = {
 export async function readDubheNodeConsole(): Promise<DubheNodeConsoleSnapshot> {
   const homeTelemetryUrl = process.env.DUBHE_HOME_TELEMETRY_URL?.trim();
   if (homeTelemetryUrl) {
-    return readHomeTelemetryConsole(homeTelemetryUrl);
+    const operatorUrls = configuredOperatorUrls(false);
+    const [homeSnapshot, probes] = await Promise.all([
+      readHomeTelemetryConsole(homeTelemetryUrl),
+      Promise.all(operatorUrls.map(probeOperator))
+    ]);
+    const operatorNodes = probes
+      .filter((probe): probe is OperatorProbe & { telemetry: ZoneHostTelemetry } =>
+        Boolean(probe.telemetry)
+      )
+      .map(recordFromProbe);
+    return mergeDubheNodeOperatorRecords(
+      homeSnapshot,
+      operatorNodes,
+      operatorUrls.length
+    );
   }
-  const operatorUrls = configuredOperatorUrls();
+  const operatorUrls = configuredOperatorUrls(true);
   const probes = await Promise.all(operatorUrls.map(probeOperator));
   const liveRecords = probes
     .filter((probe): probe is OperatorProbe & { telemetry: ZoneHostTelemetry } =>
@@ -482,24 +497,48 @@ function zoneWorkload(zoneId: string): Omit<ZoneHostZone, "sessionCount"> {
   };
 }
 
-function configuredOperatorUrls() {
+function configuredOperatorUrls(includeDefaults: boolean) {
   const configured = process.env.DUBHE_NODE_OPERATOR_URLS?.split(",")
     .map((value) => value.trim().replace(/\/+$/, ""))
     .filter(Boolean);
-  return configured?.length ? configured : DEFAULT_OPERATOR_URLS;
+  return configured?.length
+    ? configured
+    : includeDefaults
+      ? DEFAULT_OPERATOR_URLS
+      : [];
 }
 
 async function probeOperator(operatorUrl: string): Promise<OperatorProbe> {
+  const operatorToken = process.env.DUBHE_NODE_OPERATOR_TOKEN?.trim();
+  const init = operatorToken
+    ? {
+        headers: {
+          "x-mir2-zone-operator-token": operatorToken
+        }
+      }
+    : {};
   try {
-    const [telemetry, heartbeat] = await Promise.all([
-      fetchJson<ZoneHostTelemetry>(`${operatorUrl}/healthz`),
-      fetchJson<ZoneHostHeartbeat>(`${operatorUrl}/v1/heartbeat`)
-    ]);
+    const telemetry = await fetchJson<ZoneHostTelemetry>(
+      `${operatorUrl}/healthz`,
+      init
+    );
+    let heartbeat: ZoneHostHeartbeat | undefined;
+    let heartbeatError: string | undefined;
+    try {
+      heartbeat = await fetchJson<ZoneHostHeartbeat>(
+        `${operatorUrl}/v1/heartbeat`,
+        init
+      );
+    } catch (error) {
+      heartbeatError =
+        error instanceof Error ? error.message : "Heartbeat endpoint unavailable";
+    }
     return {
       operatorUrl,
       telemetry,
       heartbeat,
-      heartbeatVerified: verifyHeartbeat(heartbeat)
+      heartbeatVerified: heartbeat ? verifyHeartbeat(heartbeat) : false,
+      error: heartbeatError
     };
   } catch (error) {
     return {
@@ -577,12 +616,15 @@ function recordFromProbe(probe: OperatorProbe & { telemetry: ZoneHostTelemetry }
     rpcRequestsTotal: probe.telemetry.rpcRequestsTotal,
     rpcErrorsTotal: probe.telemetry.rpcErrorsTotal,
     observedAtMs: heartbeat?.observedAtMs,
+    workMode: health.draining ? "draining" : "serving",
     stakeMist: claimsRegisteredNode ? activeRegistration.stakeMist : 0,
     operatorSuiAddress: claimsRegisteredNode
       ? activeRegistration.operatorSuiAddress
       : undefined,
     publicKey: heartbeat?.publicKey,
-    error: probe.heartbeatVerified ? undefined : "Heartbeat signature verification failed"
+    error: probe.heartbeatVerified
+      ? undefined
+      : probe.error ?? "Heartbeat signature verification failed"
   };
 }
 

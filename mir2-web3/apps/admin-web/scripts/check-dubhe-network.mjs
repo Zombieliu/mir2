@@ -30,6 +30,32 @@ new Function("exports", "module", "require", compiled.outputText)(
 
 const { buildDubheNetworkSnapshot } = loaded.exports;
 
+const mergeSourceUrl = new URL("../lib/dubhe-node-merge.ts", import.meta.url);
+const mergeSource = readFileSync(mergeSourceUrl, "utf8");
+const compiledMerge = ts.transpileModule(mergeSource, {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    strict: true,
+    skipLibCheck: true
+  },
+  fileName: mergeSourceUrl.pathname,
+  reportDiagnostics: true
+});
+const mergeDiagnostics = (compiledMerge.diagnostics ?? []).filter(
+  (diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error
+);
+assert.deepEqual(mergeDiagnostics, []);
+const loadedMerge = { exports: {} };
+new Function("exports", "module", "require", compiledMerge.outputText)(
+  loadedMerge.exports,
+  loadedMerge,
+  () => {
+    throw new Error("dubhe-node-merge must not have runtime dependencies");
+  }
+);
+const { mergeDubheNodeOperatorRecords } = loadedMerge.exports;
+
 test("aggregates node-reported regions without exposing endpoints or IPs", () => {
   const snapshot = buildDubheNetworkSnapshot(
     fleet([
@@ -98,6 +124,51 @@ test("keeps nodes unlocated when neither a coarse region nor Relay region exists
   assert.equal(snapshot.unlocatedNodes.length, 1);
   assert.equal(snapshot.totals.unlocatedNodes, 1);
   assert.equal(JSON.stringify(snapshot).includes("198.51.100.9"), false);
+});
+
+test("merges a live official Zone Host with stale Home telemetry", () => {
+  const staleHome = fleet([
+    node({
+      nodeId: "home-node",
+      telemetryState: "offline",
+      sessions: 0,
+      sessionCapacity: 128,
+      zones: 0,
+      zoneCapacity: 8
+    })
+  ]);
+  staleHome.mode = "offline";
+  staleHome.liveNodeCount = 0;
+  staleHome.totalSessionCapacity = 0;
+  staleHome.totalZoneCapacity = 0;
+
+  const merged = mergeDubheNodeOperatorRecords(
+    staleHome,
+    [
+      node({
+        nodeId: "ucloud-hk-zone-1",
+        advertisedEndpoint: "https://relay-hk.obelisk.build/zone/ucloud",
+        coarseRegion: undefined,
+        providerCode: "ucloud",
+        sessionCapacity: 30,
+        zones: 0,
+        zoneCapacity: 8,
+        workMode: "serving"
+      })
+    ],
+    1,
+    2_000_000
+  );
+  const snapshot = buildDubheNetworkSnapshot(merged);
+
+  assert.equal(merged.mode, "degraded");
+  assert.equal(merged.liveNodeCount, 1);
+  assert.equal(merged.totalSessionCapacity, 30);
+  assert.equal(merged.totalZoneCapacity, 8);
+  assert.equal(snapshot.totals.liveNodes, 1);
+  assert.equal(snapshot.totals.servingNodes, 1);
+  assert.equal(snapshot.totals.sessionCapacity, 30);
+  assert.equal(snapshot.regions[0].code, "HK-HKG");
 });
 
 function fleet(nodes) {
