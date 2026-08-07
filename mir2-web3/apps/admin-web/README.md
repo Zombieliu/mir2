@@ -125,6 +125,24 @@ DUBHE_NODE_PROMETHEUS_URL=http://127.0.0.1:19090 \
 npm run dev
 ```
 
+### AI World Director spectator
+
+Open `http://127.0.0.1:3020/world-director` for the authenticated, read-only
+World Director spectator. The browser polls the dashboard's protected
+`/api/world-director` route; only the Next.js server connects to the Zone Host
+operator endpoint, so the management token is never included in client code or
+responses.
+
+```bash
+MIR2_WORLD_DIRECTOR_OPERATOR_URL=http://127.0.0.1:19100 \
+MIR2_WORLD_DIRECTOR_MANAGEMENT_TOKEN=<zone-host-management-token> \
+npm run dev
+```
+
+For local development the operator URL falls back to
+`DUBHE_NODE_OPERATOR_URLS` and then `http://127.0.0.1:19100`. Production
+requires an explicit reachable operator URL and management token.
+
 The page cryptographically verifies Ed25519-ZIP215 heartbeat signatures and
 checks that the live identity matches the active Sui registration. Key rotation
 and revocation remain intentionally read-only in the web UI; they require the

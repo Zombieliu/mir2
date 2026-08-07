@@ -21,11 +21,13 @@ const OUTPUT_PATH = path.resolve(
   process.env.MIR2_WS_LOAD_OUT ?? "docs/generated/load/latest-ws.json",
 );
 const CLIENTS = numberFromEnv("MIR2_WS_LOAD_CLIENTS", 64);
+const CLIENT_INDICES = integerListFromEnv("MIR2_WS_LOAD_CLIENT_INDICES");
 const POOL = numberFromEnv("MIR2_WS_LOAD_POOL", Math.min(32, CLIENTS));
 const ACTIONS = numberFromEnv("MIR2_WS_LOAD_ACTIONS", 20);
 const THINK_MS = numberFromEnv("MIR2_WS_LOAD_THINK_MS", 20);
 const HOLD_OPEN_MS = numberFromEnv("MIR2_WS_LOAD_HOLD_OPEN_MS", 250);
 const PRE_PLAY_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_PRE_PLAY_SETTLE_MS", 0);
+const ACCOUNT_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_ACCOUNT_SETTLE_MS", 100);
 const CHAT_EVERY = numberFromEnv("MIR2_WS_LOAD_CHAT_EVERY", 10);
 const READY_TIMEOUT_MS = numberFromEnv("MIR2_WS_LOAD_READY_TIMEOUT_MS", 15_000);
 const READY_BARRIER = booleanFromEnv("MIR2_WS_LOAD_READY_BARRIER", false);
@@ -54,8 +56,12 @@ const REUSE_EXISTING_ACCOUNTS = booleanFromEnv(
   "MIR2_WS_LOAD_REUSE_EXISTING_ACCOUNTS",
   false,
 );
+const SKIP_ACCOUNT_CREATE = booleanFromEnv("MIR2_WS_LOAD_SKIP_ACCOUNT_CREATE", false);
+const BOOTSTRAP_ONLY = booleanFromEnv("MIR2_WS_LOAD_BOOTSTRAP_ONLY", false);
 const ACCOUNT_PREFIX = process.env.MIR2_WS_LOAD_ACCOUNT_PREFIX ?? null;
 const CHARACTER_INDEX = optionalNumberFromEnv("MIR2_WS_LOAD_CHARACTER_INDEX");
+const CHARACTER_INDICES = integerListFromEnv("MIR2_WS_LOAD_CHARACTER_INDICES");
+const MAP_TARGETS = mapTargetsFromEnv("MIR2_WS_LOAD_MAP_TARGETS");
 const CHECKPOINT_MS = numberFromEnv("MIR2_WS_LOAD_CHECKPOINT_MS", 0);
 const PARTIAL_OUTPUT_PATH = OUTPUT_PATH.endsWith(".json")
   ? OUTPUT_PATH.replace(/\.json$/, ".partial.json")
@@ -63,12 +69,17 @@ const PARTIAL_OUTPUT_PATH = OUTPUT_PATH.endsWith(".json")
 
 async function main() {
   const runId = `${Date.now().toString(36)}-${process.pid}`;
+  const clientIndices =
+    CLIENT_INDICES.length > 0
+      ? CLIENT_INDICES
+      : Array.from({ length: CLIENTS }, (_, index) => index);
   const metrics = {
     type: "websocket",
     wsUrl: WS_URL,
     runId,
     host: os.hostname(),
-    clients: CLIENTS,
+    clients: clientIndices.length,
+    clientIndices,
     pool: POOL,
     actionsPerClient: ACTIONS,
     thinkMs: THINK_MS,
@@ -76,19 +87,26 @@ async function main() {
     prePlaySettleMs: PRE_PLAY_SETTLE_MS,
     readyBarrierEnabled: READY_BARRIER,
     readyBarrierTimeoutMs: READY_BARRIER_TIMEOUT_MS,
+    accountSettleMs: ACCOUNT_SETTLE_MS,
     chatEvery: CHAT_EVERY,
-    expectedReady: EXPECT_READY ?? CLIENTS,
+    expectedReady: EXPECT_READY ?? clientIndices.length,
     expectedCapacityRejected: EXPECT_REJECTED ?? 0,
     expectedKeepAliveAckRatio: EXPECT_KEEPALIVE_ACK_RATIO,
     expectedKeepAliveP95MaxMs: EXPECT_KEEPALIVE_P95_MAX_MS,
+    readyBarrier: READY_BARRIER,
+    readyBarrierTimeoutMs: READY_BARRIER_TIMEOUT_MS,
     sendKeepAlive: SEND_KEEPALIVE,
     sendMovement: SEND_MOVEMENT,
     sendChat: SEND_CHAT,
     stage5CommandsEnabled: ENABLE_STAGE5_COMMANDS,
     reuseExistingAccounts: REUSE_EXISTING_ACCOUNTS,
+    skipAccountCreate: SKIP_ACCOUNT_CREATE,
+    bootstrapOnly: BOOTSTRAP_ONLY,
     accountPrefix: ACCOUNT_PREFIX,
     characterIndex: CHARACTER_INDEX,
     checkpointMs: CHECKPOINT_MS,
+    characterIndices: CHARACTER_INDICES,
+    mapTargets: MAP_TARGETS,
     startedAt: new Date().toISOString(),
     finishedAt: null,
     durationMs: 0,
@@ -99,17 +117,22 @@ async function main() {
     loginSuccess: 0,
     charactersCreated: 0,
     startedGames: 0,
+    targetMapsReady: 0,
+    targetMapReadyCounts: {},
     closed: 0,
     errors: 0,
     failedBeforeReady: 0,
     capacityRejected: 0,
     messages: 0,
+    messageCounts: {},
+    serverErrors: [],
+    newAccountReplies: [],
+    startGameReplies: [],
     commandsSent: 0,
     keepAliveCommandsSent: 0,
     movementCommandsSent: 0,
     chatCommandsSent: 0,
     stage5CommandsSent: 0,
-    serverErrors: [],
     keepAliveLatenciesMs: [],
     clientFailures: [],
     capacityRejections: [],
@@ -145,7 +168,7 @@ async function main() {
   const started = Date.now();
   try {
     await runPool(
-      Array.from({ length: CLIENTS }, (_, index) => index),
+      clientIndices,
       POOL,
       async (index) => {
         try {
@@ -207,16 +230,21 @@ async function main() {
   metrics.assertions = {
     readyMatchesExpectation: metrics.ready === metrics.expectedReady,
     concurrentReadyMatchesExpectation:
-      !READY_BARRIER || metrics.peakReady === metrics.expectedReady,
+      BOOTSTRAP_ONLY || !READY_BARRIER || metrics.peakReady === metrics.expectedReady,
     capacityRejectedMatchesExpectation:
       metrics.capacityRejected === metrics.expectedCapacityRejected,
     noUnexpectedErrors: metrics.errors === 0,
     noUnexpectedClientFailures: metrics.clientFailures.length === 0,
     gameplayCommandsSentWhenReady:
+      BOOTSTRAP_ONLY ||
       metrics.ready === 0 ||
       ((!SEND_KEEPALIVE || metrics.keepAliveCommandsSent >= metrics.ready) &&
         (!SEND_MOVEMENT || metrics.movementCommandsSent >= metrics.ready) &&
         (!SEND_CHAT || metrics.chatCommandsSent >= metrics.ready)),
+    targetMapsMatchExpectation:
+      BOOTSTRAP_ONLY ||
+      MAP_TARGETS.length === 0 ||
+      metrics.targetMapsReady === metrics.ready,
     keepAliveAckRatioMatchesExpectation:
       EXPECT_KEEPALIVE_ACK_RATIO === null ||
       metrics.keepAliveAckRatio >= EXPECT_KEEPALIVE_ACK_RATIO,
@@ -230,7 +258,7 @@ async function main() {
   await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(metrics, null, 2)}\n`);
   await fs.rm(PARTIAL_OUTPUT_PATH, { force: true });
   console.log(
-    `WS load completed: ready=${metrics.ready}/${CLIENTS}, capacityRejected=${metrics.capacityRejected}, errors=${metrics.errors}, messages=${metrics.messages}, ok=${metrics.ok}`,
+    `WS load completed: ready=${metrics.ready}/${clientIndices.length}, capacityRejected=${metrics.capacityRejected}, errors=${metrics.errors}, messages=${metrics.messages}, ok=${metrics.ok}`,
   );
   console.log(`Wrote ${OUTPUT_PATH}`);
 
@@ -286,6 +314,7 @@ async function runClient(index, runId, metrics) {
   const password = "load-pass";
   const pendingKeepAlives = new Map();
   let loginSuccess = false;
+  let newAccountProcessed = false;
   let userInformation = false;
   let createdCharacterIndex = null;
   let loginCharacterIndex = null;
@@ -293,6 +322,8 @@ async function runClient(index, runId, metrics) {
   let capacityError = null;
   let serverError = null;
   let countedReady = false;
+  let currentMapFileName = null;
+  let mapInformationCount = 0;
 
   const ws = new RawWebSocketClient(
     WS_URL,
@@ -304,6 +335,9 @@ async function runClient(index, runId, metrics) {
       } catch {
         return;
       }
+      const messageKey = String(payload.packet ?? payload.type ?? "unknown");
+      metrics.messageCounts[messageKey] =
+        (metrics.messageCounts[messageKey] ?? 0) + 1;
       if (payload.type === "error") {
         const message = String(payload.message ?? "");
         if (isCapacityError(message)) {
@@ -311,8 +345,8 @@ async function runClient(index, runId, metrics) {
           capacityError = message;
         } else if (serverError === null) {
           serverError = message || "gateway returned an unspecified error";
-          metrics.serverErrors.push({ index, message: serverError });
         }
+        metrics.serverErrors.push({ index, message: message || "gateway returned an unspecified error" });
       }
       if (
         payload.packet === "NewCharacter" &&
@@ -321,6 +355,19 @@ async function runClient(index, runId, metrics) {
       ) {
         serverError = `NewCharacter rejected with result ${payload.payload?.result}`;
         metrics.serverErrors.push({ index, message: serverError });
+      }
+      if (payload.packet === "StartGame") {
+        metrics.startGameReplies.push({
+          index,
+          result: payload.payload?.result ?? null,
+        });
+      }
+      if (payload.packet === "NewAccount") {
+        newAccountProcessed = true;
+        metrics.newAccountReplies.push({
+          index,
+          result: payload.payload?.result ?? null,
+        });
       }
       if (payload.packet === "LoginSuccess" && !loginSuccess) {
         const firstCharacterIndex = payload.payload?.characters?.[0]?.index;
@@ -337,6 +384,17 @@ async function runClient(index, runId, metrics) {
       if (payload.packet === "UserInformation" && !userInformation) {
         userInformation = true;
         metrics.startedGames += 1;
+      }
+      if (payload.packet === "MapInformation") {
+        mapInformationCount += 1;
+        currentMapFileName =
+          payload.payload?.fileName ??
+          payload.payload?.mapFileName ??
+          currentMapFileName;
+      }
+      if (payload.type === "worldSnapshot") {
+        currentMapFileName =
+          payload.payload?.mapFileName ?? currentMapFileName;
       }
       const keepAliveTime = payload.payload?.time;
       if (payload.packet === "KeepAlive" && pendingKeepAlives.has(keepAliveTime)) {
@@ -359,7 +417,10 @@ async function runClient(index, runId, metrics) {
     metrics.opened += 1;
 
     send(ws, metrics, { type: "clientVersion" });
-    if (!REUSE_EXISTING_ACCOUNTS) {
+    if (ACCOUNT_SETTLE_MS > 0) {
+      await delay(ACCOUNT_SETTLE_MS);
+    }
+    if (!REUSE_EXISTING_ACCOUNTS && !SKIP_ACCOUNT_CREATE) {
       send(ws, metrics, {
         type: "newAccount",
         accountId,
@@ -370,6 +431,14 @@ async function runClient(index, runId, metrics) {
         secretAnswer: "",
         emailAddress: "",
       });
+      await waitFor(
+        () => newAccountProcessed,
+        READY_TIMEOUT_MS,
+        `newAccount ${index}`,
+      );
+      if (ACCOUNT_SETTLE_MS > 0) {
+        await delay(ACCOUNT_SETTLE_MS);
+      }
     }
     send(ws, metrics, { type: "login", accountId, password });
     await waitFor(
@@ -387,7 +456,8 @@ async function runClient(index, runId, metrics) {
     }
     if (serverError !== null) throw new Error(serverError);
     if (REUSE_EXISTING_ACCOUNTS) {
-      createdCharacterIndex = CHARACTER_INDEX ?? loginCharacterIndex;
+      createdCharacterIndex =
+        CHARACTER_INDICES[index] ?? CHARACTER_INDEX ?? loginCharacterIndex;
       if (createdCharacterIndex === null) {
         throw new Error(
           `login ${index} returned no characters; seed the account or set MIR2_WS_LOAD_CHARACTER_INDEX`,
@@ -418,6 +488,16 @@ async function runClient(index, runId, metrics) {
       }
       if (serverError !== null) throw new Error(serverError);
     }
+    if (BOOTSTRAP_ONLY) {
+      metrics.ready += 1;
+      return {
+        index,
+        ready: true,
+        accountId,
+        characterIndex: createdCharacterIndex,
+        characterName,
+      };
+    }
     send(ws, metrics, { type: "startGame", characterIndex: createdCharacterIndex });
     await waitFor(
       () => userInformation || capacityRejected || serverError !== null,
@@ -433,6 +513,29 @@ async function runClient(index, runId, metrics) {
         error: capacityError,
       };
     }
+    const targetMap = MAP_TARGETS[index % MAP_TARGETS.length];
+    if (targetMap) {
+      const previousMapInformationCount = mapInformationCount;
+      if (
+        currentMapFileName !== targetMap.mapFileName ||
+        mapInformationCount === 0
+      ) {
+        send(ws, metrics, {
+          type: "transferMap",
+          key: `crystal:${targetMap.mapFileName}:${targetMap.x}:${targetMap.y}`,
+        });
+        await waitFor(
+          () =>
+            currentMapFileName === targetMap.mapFileName &&
+            mapInformationCount > previousMapInformationCount,
+          READY_TIMEOUT_MS,
+          `target map ${targetMap.mapFileName} for client ${index}`,
+        );
+      }
+      metrics.targetMapsReady += 1;
+      metrics.targetMapReadyCounts[targetMap.mapFileName] =
+        (metrics.targetMapReadyCounts[targetMap.mapFileName] ?? 0) + 1;
+    }
     if (PRE_PLAY_SETTLE_MS > 0) {
       await delay(PRE_PLAY_SETTLE_MS);
     }
@@ -447,7 +550,7 @@ async function runClient(index, runId, metrics) {
       await waitFor(
         () =>
           metrics.ready + metrics.capacityRejected + metrics.failedBeforeReady >=
-          CLIENTS,
+          metrics.clients,
         READY_BARRIER_TIMEOUT_MS,
         `ready barrier ${index}`,
       );
@@ -902,6 +1005,43 @@ function booleanFromEnv(name, fallback) {
   const raw = process.env[name];
   if (raw === undefined || raw === "") return fallback;
   return /^(1|true|yes|on)$/i.test(raw);
+}
+
+function mapTargetsFromEnv(name) {
+  const raw = process.env[name]?.trim();
+  if (!raw) return [];
+  return raw.split(",").map((entry) => {
+    const [mapFileName, rawX, rawY, ...extra] = entry
+      .split(":")
+      .map((value) => value.trim());
+    const x = Number(rawX);
+    const y = Number(rawY);
+    if (
+      !mapFileName ||
+      extra.length > 0 ||
+      !Number.isInteger(x) ||
+      !Number.isInteger(y) ||
+      x < 0 ||
+      y < 0
+    ) {
+      throw new Error(
+        `${name} entries must use mapFileName:x:y with non-negative integer coordinates`,
+      );
+    }
+    return { mapFileName, x, y };
+  });
+}
+
+function integerListFromEnv(name) {
+  const raw = process.env[name]?.trim();
+  if (!raw) return [];
+  return raw.split(",").map((value, index) => {
+    const parsed = Number.parseInt(value.trim(), 10);
+    if (!Number.isSafeInteger(parsed) || parsed < 0) {
+      throw new Error(`${name}[${index}] must be a non-negative integer`);
+    }
+    return parsed;
+  });
 }
 
 function delay(ms) {
