@@ -3,6 +3,7 @@
 import { type CSSProperties } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
 import { OriginalItemTooltip, type ItemTooltipGrade } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -370,7 +371,7 @@ const HEADER_GUILD_STYLE: CSSProperties = {
 };
 
 function originalItemIconPath(icon: number) {
-  return `/original-ui/Items/${icon}.png`;
+  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 function statCell(label: string, value: string): StatCell {

@@ -1,10 +1,12 @@
 use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::config::{AccountRecord, EquipmentSlot, ItemContainer, ItemGrade, SimulationConfig};
+use crate::config::{
+    AccountRecord, CharacterRecord, EquipmentSlot, ItemContainer, ItemGrade, SimulationConfig,
+};
 use bevy_ecs::prelude::World;
-use mir2_game_data::localized_text_or_fallback;
-use mir2_protocol::{ChatType, MirGridType, ServerPacket, UserItemStat};
+use mir2_game_data::{crystal_item_manifest, localized_text_or_fallback};
+use mir2_protocol::{ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItemStat};
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
@@ -13,9 +15,10 @@ use super::crystal_compat::{
 };
 use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
-    crystal_item_has_bind_flag, crystal_item_stat_value, crystal_item_template_for_item_key,
-    crystal_stack_size_for_item_key, default_item_unique_id, item_has_rental_bind_flag,
-    item_icon_for_key, item_unique_id, user_item_from_item_state, ItemState,
+    crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
+    crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
+    default_item_unique_id, item_has_rental_bind_flag, item_icon_for_key, item_unique_id,
+    user_item_from_item_state, ItemState,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
@@ -75,6 +78,81 @@ fn seed_item(
         heal_hp,
         heal_mp,
     }
+}
+
+/// Reproduce Crystal's `Envir.StartItems` / `HumanObject.NewCharacter` path.
+pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<ItemState> {
+    let required_class = match character.class {
+        MirClass::Warrior => 1,
+        MirClass::Wizard => 2,
+        MirClass::Taoist => 4,
+        MirClass::Assassin => 8,
+        MirClass::Archer => 16,
+    };
+    let required_gender = match character.gender {
+        MirGender::Male => 1,
+        MirGender::Female => 2,
+    };
+
+    crystal_item_manifest()
+        .items
+        .into_iter()
+        .filter(|template| {
+            template.start_item
+                && template.required_class & required_class != 0
+                && template.required_gender & required_gender != 0
+        })
+        .enumerate()
+        .map(|(slot, template)| {
+            let key = crystal_item_key_for_template(&template);
+            let equip_slot = crystal_equipment_slot_for_template(&template);
+            let durability = (template.durability > 0).then_some(template.durability);
+            let description = template
+                .tooltip
+                .unwrap_or_else(|| "Crystal start item.".to_string());
+            ItemState {
+                key,
+                name: template.name,
+                icon: template.image,
+                slot: u8::try_from(slot).expect("Crystal start item slot should fit in u8"),
+                unique_id: 0,
+                container: ItemContainer::Bag1,
+                quantity: 1,
+                description,
+                durability_current: durability,
+                durability_max: durability,
+                weight: u16::from(template.weight),
+                equip_slot,
+                grade: match template.grade {
+                    1 => ItemGrade::Common,
+                    2 => ItemGrade::Rare,
+                    3 => ItemGrade::Legendary,
+                    4 => ItemGrade::Mythical,
+                    5 => ItemGrade::Heroic,
+                    _ => ItemGrade::None,
+                },
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                socketed: Vec::new(),
+                cursed: false,
+                socket_slots: template.slots,
+                gem_count: 0,
+                identified: (!template.need_identify).then_some(true),
+                soul_bound_id: None,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
+                rental_owner_name: String::new(),
+                rental_expiry_binary_datetime: 0,
+                rental_locked: false,
+                attack: 0,
+                defence: 0,
+                heal_hp: 0,
+                heal_mp: 0,
+            }
+        })
+        .collect()
 }
 
 pub(super) fn seed_inventory_items() -> Vec<ItemState> {

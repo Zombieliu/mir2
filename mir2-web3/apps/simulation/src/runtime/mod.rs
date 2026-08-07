@@ -52,9 +52,9 @@ pub use session::{
 };
 pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
-    ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin,
-    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
+    ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
+    ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward,
+    ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
     ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };

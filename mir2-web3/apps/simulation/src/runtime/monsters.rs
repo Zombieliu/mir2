@@ -109,11 +109,16 @@ pub(super) fn build_crystal_current_map_spawn_table(
     config: &SimulationConfig,
     map_file_name: &str,
 ) -> MonsterSpawnTable {
+    if !config.map_is_allowed(map_file_name) {
+        return MonsterSpawnTable { rules: Vec::new() };
+    }
+
     let mut next_object_id = 60_000_u32;
     let rules = crystal_map_respawns_by_file_name(map_file_name)
         .map(|map| map.respawns)
         .unwrap_or_default()
         .into_iter()
+        .filter(|respawn| config.monster_is_allowed(&respawn.monster_name))
         .take(96)
         .enumerate()
         .map(|(rule_index, respawn)| {
@@ -141,12 +146,15 @@ pub(super) fn build_crystal_current_map_spawn_table(
                 .collect();
 
             MonsterSpawnRule {
-                name: respawn.monster_name,
+                name: respawn.monster_name.clone(),
                 image: respawn.monster_image,
                 direction: respawn.direction,
                 respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
                     delay_minutes: respawn.delay_minutes,
-                    random_delay_minutes: respawn.random_delay_minutes,
+                    random_delay_minutes: config.monster_respawn_random_delay_minutes(
+                        &respawn.monster_name,
+                        respawn.random_delay_minutes,
+                    ),
                 },
                 ai: respawn.monster_ai,
                 disposition: monster_disposition_for_ai(respawn.monster_ai),
@@ -173,8 +181,15 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
 ) -> MonsterSpawnTable {
     let mut rules = Vec::new();
 
+    if !config.map_is_allowed(map_file_name) {
+        return MonsterSpawnTable { rules };
+    }
+
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
         for respawn in map.respawns {
+            if !config.monster_is_allowed(&respawn.monster_name) {
+                continue;
+            }
             let visible_spawns =
                 start_game_visible_respawn_spawns(map_file_name, &respawn, player_position);
             if visible_spawns.is_empty() {
@@ -190,7 +205,10 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
                     direction,
                     respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
                         delay_minutes: respawn.delay_minutes,
-                        random_delay_minutes: respawn.random_delay_minutes,
+                        random_delay_minutes: config.monster_respawn_random_delay_minutes(
+                            &respawn.monster_name,
+                            respawn.random_delay_minutes,
+                        ),
                     },
                     ai: respawn.monster_ai,
                     disposition: monster_disposition_for_ai(respawn.monster_ai),
@@ -290,8 +308,15 @@ pub(super) fn build_crystal_current_map_full_spawn_table(
 ) -> MonsterSpawnTable {
     let mut rules = Vec::new();
 
+    if !config.map_is_allowed(map_file_name) {
+        return MonsterSpawnTable { rules };
+    }
+
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
         for respawn in map.respawns {
+            if !config.monster_is_allowed(&respawn.monster_name) {
+                continue;
+            }
             let spawns = crystal_world_respawn_spawns(map_file_name, &respawn);
             if spawns.is_empty() {
                 continue;
@@ -305,7 +330,10 @@ pub(super) fn build_crystal_current_map_full_spawn_table(
                     direction,
                     respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
                         delay_minutes: respawn.delay_minutes,
-                        random_delay_minutes: respawn.random_delay_minutes,
+                        random_delay_minutes: config.monster_respawn_random_delay_minutes(
+                            &respawn.monster_name,
+                            respawn.random_delay_minutes,
+                        ),
                     },
                     ai: respawn.monster_ai,
                     disposition: monster_disposition_for_ai(respawn.monster_ai),
@@ -327,8 +355,77 @@ pub(super) fn build_crystal_current_map_full_spawn_table(
             }
         }
     }
+    append_platinum_176_sabuk_battlefield_rules(config, map_file_name, &mut rules);
 
     MonsterSpawnTable { rules }
+}
+
+fn append_platinum_176_sabuk_battlefield_rules(
+    config: &SimulationConfig,
+    map_file_name: &str,
+    rules: &mut Vec<MonsterSpawnRule>,
+) {
+    let normalized_map = map_file_name
+        .trim()
+        .trim_end_matches(".map")
+        .trim_end_matches(".MAP");
+    if normalized_map != "3" {
+        return;
+    }
+
+    let placements = [
+        ("SabukGate", 672, 330),
+        ("SabukGate", 631, 274),
+        ("PalaceWallLeft", 624, 278),
+        ("PalaceWall1", 627, 278),
+        ("PalaceWall2", 634, 271),
+        ("ArcherGuard3", 662, 333),
+        ("ArcherGuard3", 664, 331),
+        ("ArcherGuard3", 666, 329),
+        ("ArcherGuard3", 676, 319),
+        ("ArcherGuard3", 678, 317),
+        ("ArcherGuard3", 681, 314),
+        ("ArcherGuard3", 628, 271),
+        ("ArcherGuard3", 632, 267),
+        ("ArcherGuard3", 670, 335),
+        ("ArcherGuard3", 671, 334),
+        ("ArcherGuard3", 675, 330),
+        ("ArcherGuard3", 676, 329),
+    ];
+    for (placement_index, (name, x, y)) in placements.into_iter().enumerate() {
+        if !config.monster_is_allowed(name) {
+            continue;
+        }
+        let Some(template) = crystal_monster_by_name(name) else {
+            continue;
+        };
+        rules.push(MonsterSpawnRule {
+            name: template.name,
+            image: template.image,
+            direction: MirDirection::Up,
+            respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
+                delay_minutes: 5,
+                random_delay_minutes: 0,
+            },
+            ai: template.ai,
+            disposition: monster_disposition_for_ai(template.ai),
+            hostile_to_player: monster_targets_players(template.ai),
+            view_range: i32::from(template.view_range),
+            can_wander: false,
+            move_interval_ticks: crystal_speed_to_ticks(template.move_speed),
+            attack_interval_ticks: crystal_speed_to_ticks(template.attack_speed),
+            max_hp: template.hp.max(1),
+            agility: template.agility,
+            route: Vec::new(),
+            slots: vec![MonsterSpawnSlot {
+                entity: None,
+                object_id: 0x7f00_0000_u32
+                    .saturating_add(u32::try_from(placement_index).unwrap_or_default()),
+                spawn_position: Point { x, y },
+                next_respawn_tick: None,
+            }],
+        });
+    }
 }
 
 pub(super) fn build_starter_spawn_table(config: &SimulationConfig) -> MonsterSpawnTable {
@@ -391,6 +488,7 @@ pub(super) fn build_crystal_starter_region_spawn_table(
     let mut next_object_id = 60_000_u32;
     let rules = crystal_starter_region_respawns()
         .into_iter()
+        .filter(|respawn| config.monster_is_allowed(&respawn.monster_name))
         .enumerate()
         .map(|(rule_index, respawn)| {
             let route = normalized_route_steps(config, &respawn.route);
@@ -416,12 +514,15 @@ pub(super) fn build_crystal_starter_region_spawn_table(
                 .collect();
 
             MonsterSpawnRule {
-                name: respawn.monster_name,
+                name: respawn.monster_name.clone(),
                 image: respawn.monster_image,
                 direction: respawn.direction,
                 respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
                     delay_minutes: respawn.delay_minutes,
-                    random_delay_minutes: respawn.random_delay_minutes,
+                    random_delay_minutes: config.monster_respawn_random_delay_minutes(
+                        &respawn.monster_name,
+                        respawn.random_delay_minutes,
+                    ),
                 },
                 ai: respawn.monster_ai,
                 disposition: monster_disposition_for_ai(respawn.monster_ai),
@@ -1449,6 +1550,64 @@ pub(super) fn schedule_monster_respawn(
         spawn_ref.rule_index,
         spawn_ref.slot_index,
     ));
+}
+
+pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+    if !matches!(ai, 80..=82) || asset_id == 0 {
+        return false;
+    }
+    let current_tick = super::session::runtime_tick(world);
+    let target = {
+        let mut ordinal = 0_u8;
+        let mut spawn_table = world.resource_mut::<MonsterSpawnTable>();
+        let mut target = None;
+        'rules: for rule in &mut spawn_table.rules {
+            if rule.ai != ai {
+                continue;
+            }
+            for slot in &mut rule.slots {
+                ordinal = ordinal.saturating_add(1);
+                if ordinal != asset_id {
+                    continue;
+                }
+                slot.next_respawn_tick = Some(current_tick);
+                target = slot.entity.map(|entity| (entity, rule.max_hp.max(1)));
+                break 'rules;
+            }
+        }
+        target
+    };
+    let Some((entity, max_hp)) = target else {
+        return false;
+    };
+    if world.get_entity(entity).is_err() {
+        return false;
+    }
+    let is_dead = world
+        .entity(entity)
+        .get::<MonsterAgent>()
+        .is_some_and(|agent| agent.dead);
+    if !is_dead {
+        if let Some(mut vitals) = world.entity_mut(entity).get_mut::<MonsterVitals>() {
+            vitals.hp = max_hp;
+            vitals.max_hp = max_hp;
+        }
+        let mut spawn_table = world.resource_mut::<MonsterSpawnTable>();
+        let mut ordinal = 0_u8;
+        'rules: for rule in &mut spawn_table.rules {
+            if rule.ai != ai {
+                continue;
+            }
+            for slot in &mut rule.slots {
+                ordinal = ordinal.saturating_add(1);
+                if ordinal == asset_id {
+                    slot.next_respawn_tick = None;
+                    break 'rules;
+                }
+            }
+        }
+    }
+    true
 }
 
 pub(super) fn monster_route_target(

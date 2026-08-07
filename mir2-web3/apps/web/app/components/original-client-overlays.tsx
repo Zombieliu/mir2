@@ -712,6 +712,7 @@ export type MainHudProps = {
   onLogout: () => void;
   showGameShop: boolean;
   onToggleGameShop: () => void;
+  showGameShopAction?: boolean;
   showMenu: boolean;
   onToggleMenu: () => void;
 };
@@ -732,6 +733,7 @@ export function MainHud({
   onOpenInventoryTab,
   showGameShop,
   onToggleGameShop,
+  showGameShopAction = true,
   showMenu,
   onToggleMenu,
 }: MainHudProps) {
@@ -834,9 +836,11 @@ export function MainHud({
         <div className="hud-weight-label">{remainingBagWeight}</div>
         <div className="hud-space-label">{crystalFreeSlots}</div>
 
-        <div className="hud-button shop">
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.gameShop} label={t("ui.gameShop")} onClick={onToggleGameShop} active={showGameShop} />
-        </div>
+        {showGameShopAction ? (
+          <div className="hud-button shop">
+            <SpriteButton sprite={ORIGINAL_UI.hud.buttons.gameShop} label={t("ui.gameShop")} onClick={onToggleGameShop} active={showGameShop} />
+          </div>
+        ) : null}
         <div className="hud-button menu">
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.menu} label={t("ui.menu")} onClick={onToggleMenu} active={showMenu} />
         </div>

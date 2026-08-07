@@ -96,10 +96,41 @@ const CRYSTAL_PLAYER_STATUS_DAMAGE_TICK_INTERVAL: u64 = 2;
 const CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE: i32 = 5;
 const CRYSTAL_PLAYER_BLEEDING_TICK_DAMAGE: i32 = 3;
 const CRYSTAL_RED_POISON_DAMAGE_BONUS_PERCENT: i32 = 25;
+const QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV: &str = "MIR2_QA_NATURAL_KILL_DAMAGE_MULTIPLIER";
+const MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER: i32 = 1_000;
 /// Passive regeneration cadence and tuning. The combat delay ensures regen
 /// pauses while the player is actively taking damage.
 const CRYSTAL_PLAYER_REGEN_INTERVAL_TICKS: u64 = 10;
 const CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_TICKS: u64 = 10;
+
+fn qa_natural_kill_damage_multiplier_from(raw: Option<&str>) -> i32 {
+    raw.and_then(|value| value.trim().parse::<i32>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(1)
+        .min(MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER)
+}
+
+fn qa_natural_kill_damage_multiplier() -> i32 {
+    qa_natural_kill_damage_multiplier_from(
+        std::env::var(QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV)
+            .ok()
+            .as_deref(),
+    )
+}
+
+#[cfg(test)]
+mod qa_natural_kill_damage_multiplier_tests {
+    use super::qa_natural_kill_damage_multiplier_from;
+
+    #[test]
+    fn defaults_to_exact_local_damage_and_bounds_explicit_qa_acceleration() {
+        assert_eq!(qa_natural_kill_damage_multiplier_from(None), 1);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("invalid")), 1);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("0")), 1);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("100")), 100);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("1001")), 1_000);
+    }
+}
 
 fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
     let key = normalize_crystal_skill_key(spell_name);
@@ -3127,6 +3158,7 @@ impl SimulationSession {
             }
         }
 
+        damage = damage.saturating_mul(qa_natural_kill_damage_multiplier());
         if let Some(packet) = object_attack_packet_for_player(
             self.app.world(),
             player_entity,

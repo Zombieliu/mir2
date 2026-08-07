@@ -129,7 +129,8 @@ use super::rental::{process_expired_rental_items, return_rented_items_on_player_
 use super::resources::{
     advance_runtime_tick, crystal_movement_retry_pending, crystal_packet_move_delay_ticks,
     current_language, is_in_world, mark_crystal_packet_action,
-    take_crystal_movement_retry_if_ready, PlayerActionKind,
+    take_crystal_movement_retry_if_ready, PlayerActionKind, PlayerRuntimeResource,
+    Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 use super::skills::tick_ground_spell_actions;
@@ -594,8 +595,9 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     }
 
     let tick = advance_runtime_tick(world);
-    process_crystal_npc_goods_expiry(world);
     let mut packets = Vec::new();
+    tick_player_pk_decay(world, &mut packets);
+    process_crystal_npc_goods_expiry(world);
     process_expired_rental_items(world, &mut packets);
     if current_player_is_dead(world) {
         return_rented_items_on_player_death(world, &mut packets);
@@ -2681,6 +2683,45 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     }
 
     packets
+}
+
+fn tick_player_pk_decay(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    const PK_DECAY_TICKS_PER_POINT: u64 = 60;
+
+    let pk_points = world.resource::<PlayerRuntimeResource>().pk_points.max(0);
+    if pk_points == 0 {
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .pk_decay_elapsed_ticks = 0;
+        return;
+    }
+
+    let points_to_decay = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let elapsed = stage5
+            .stage5_systems
+            .pk_decay_elapsed_ticks
+            .saturating_add(1);
+        let points = elapsed / PK_DECAY_TICKS_PER_POINT;
+        stage5.stage5_systems.pk_decay_elapsed_ticks = elapsed % PK_DECAY_TICKS_PER_POINT;
+        points
+    };
+    if points_to_decay == 0 {
+        return;
+    }
+
+    let colour_before = current_player_name_colour_argb(world);
+    let points_to_decay = i32::try_from(points_to_decay).unwrap_or(i32::MAX);
+    let mut player = world.resource_mut::<PlayerRuntimeResource>();
+    player.pk_points = player.pk_points.saturating_sub(points_to_decay).max(0);
+    drop(player);
+    let colour_after = current_player_name_colour_argb(world);
+    if colour_after != colour_before {
+        packets.push(ServerPacket::ColourChanged {
+            name_colour_argb: colour_after,
+        });
+    }
 }
 
 impl SimulationSession {

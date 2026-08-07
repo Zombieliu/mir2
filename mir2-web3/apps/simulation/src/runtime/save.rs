@@ -25,8 +25,9 @@ use super::components::{
 use super::crystal_compat::BASE_STORAGE_SLOTS;
 use super::equipment::{seed_equipment_items_for_character, EquipmentState};
 use super::inventory::{
-    normalize_inventory_known_item_metadata, normalize_inventory_unique_ids,
-    refresh_storage_password_state, seed_belt_items, seed_inventory_items, seed_storage_items,
+    crystal_start_inventory_items, normalize_inventory_known_item_metadata,
+    normalize_inventory_unique_ids, refresh_storage_password_state, seed_belt_items,
+    seed_inventory_items, seed_storage_items,
 };
 use super::map::{
     clear_non_player_world_entities, rebuild_world, refresh_runtime_map_collision,
@@ -56,8 +57,17 @@ pub(super) fn default_save_for_character(
     config: &SimulationConfig,
     character: CharacterRecord,
 ) -> CharacterSaveRecord {
-    let starter_equipment = seed_equipment_items_for_character(character.class, character.gender);
+    let starter_equipment = if config.content_profile.is_some() {
+        Vec::new()
+    } else {
+        seed_equipment_items_for_character(character.class, character.gender)
+    };
     let mut save = CharacterSaveRecord::new(character);
+    let starter_inventory = if config.content_profile.is_some() {
+        crystal_start_inventory_items(&save.character)
+    } else {
+        Vec::new()
+    };
     let (max_hp, mp) = crystal_base_vitals(save.character.class, save.character.level);
     save.position = config.spawn.clone();
     save.map_file_name = config.map.file_name.clone();
@@ -68,15 +78,15 @@ pub(super) fn default_save_for_character(
     save.mp = mp;
     save.max_mp = mp;
     save.experience = 0;
-    save.max_experience = 100;
+    save.max_experience = config.experience_required_for_level(save.character.level);
     save.gold = 0;
     save.credit = 0;
     save.city_currencies.clear();
-    save.inventory_items_json = Vec::new();
+    save.inventory_items_json = encode_state_vec(&starter_inventory);
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
     save.equipment_items_json = encode_state_vec(&starter_equipment);
-    save.equipment_items_explicit_empty = false;
+    save.equipment_items_explicit_empty = config.content_profile.is_some();
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
     save.npc_flag_states_json = Vec::new();
@@ -712,7 +722,7 @@ pub(super) fn add_character_to_account(
         .or_insert_with(AccountRecord::empty);
     account.saves.insert(
         character.index,
-        crystal_new_character_save(character.clone()),
+        crystal_new_character_save(config, character.clone()),
     );
     account.characters.push(character.clone());
     drop(store);
@@ -794,15 +804,27 @@ pub(super) fn character_save_for_start(
     Some(save)
 }
 
-pub(super) fn crystal_new_character_save(character: CharacterRecord) -> CharacterSaveRecord {
-    let starter_equipment = seed_equipment_items_for_character(character.class, character.gender);
+pub(super) fn crystal_new_character_save(
+    config: &SimulationConfig,
+    character: CharacterRecord,
+) -> CharacterSaveRecord {
+    let starter_equipment = if config.content_profile.is_some() {
+        Vec::new()
+    } else {
+        seed_equipment_items_for_character(character.class, character.gender)
+    };
     let mut save = CharacterSaveRecord::new(character);
+    save.max_experience = config.experience_required_for_level(save.character.level);
     save.gold = 0;
-    save.inventory_items_json = Vec::new();
+    save.inventory_items_json = if config.content_profile.is_some() {
+        encode_state_vec(&crystal_start_inventory_items(&save.character))
+    } else {
+        Vec::new()
+    };
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
     save.equipment_items_json = encode_state_vec(&starter_equipment);
-    save.equipment_items_explicit_empty = false;
+    save.equipment_items_explicit_empty = config.content_profile.is_some();
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
     save.item_rental_records_json = Vec::new();
@@ -1060,13 +1082,17 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
             crate::config::crystal_base_vitals(save.character.class, save.character.level).1
         };
         player_runtime.player_vitals = PlayerVitals {
-            hp: save.hp.max(1),
+            hp: save.hp.clamp(0, save.max_hp.max(1)),
             max_hp: save.max_hp.max(1),
             mp: save.mp.max(0),
             max_mp: restored_max_mp.max(save.mp.max(0)),
         };
         player_runtime.experience = save.experience.max(0);
-        player_runtime.max_experience = save.max_experience.max(1);
+        player_runtime.max_experience = if config.content_profile.is_some() {
+            config.experience_required_for_level(save.character.level)
+        } else {
+            save.max_experience.max(1)
+        };
         player_runtime.gold = save.gold;
         player_runtime.credit = save.credit;
         player_runtime.city_currencies = save.city_currencies.clone();

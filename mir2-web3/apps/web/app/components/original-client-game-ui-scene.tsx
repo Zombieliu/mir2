@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from "react";
 import { useWorldSelector } from "../../lib/world-model";
 import type { WorldStore } from "../../lib/world-model";
 import type { CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
+import { IS_PLATINUM_176_PROFILE } from "../../lib/content-profile";
 import { MainHud } from "./original-client-overlays";
 import {
   BeltDialog,
@@ -19,7 +20,7 @@ import {
 import { MailPanel, NpcDialogPanel, ReportPanel } from "./original-client-dialogs";
 import { ObjectiveTracker } from "./original-client-objective-tracker";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
-import { GameShopWindow } from "./original-client-game-shop";
+import { GameShopWindow, NpcShopWindow } from "./original-client-game-shop";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
@@ -55,6 +56,7 @@ type GameUiSceneProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  npcRepairService: "repair" | "special" | null;
   defaultChatExpanded?: boolean;
   onChatMessageChange: (value: string) => void;
   onSendChat: (message: string) => void;
@@ -65,6 +67,7 @@ type GameUiSceneProps = {
   onToggleInventory: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onSelectNpcDialogTarget: (target: string) => void;
@@ -111,6 +114,7 @@ function GameUiSceneInner({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  npcRepairService,
   defaultChatExpanded = true,
   onChatMessageChange,
   onSendChat,
@@ -121,6 +125,7 @@ function GameUiSceneInner({
   onToggleInventory,
   onCloseCharacter,
   onCloseInventory,
+  onCloseNpcRepairService,
   onOpenCharacterTab,
   onOpenInventoryTab,
   onSelectNpcDialogTarget,
@@ -170,7 +175,14 @@ function GameUiSceneInner({
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
 
   const dialogKey = world.activeNpcDialog
-    ? `${world.activeNpcDialog.npcObjectId}:${world.activeNpcDialog.title}:${world.worldTick}`
+    ? JSON.stringify([
+        world.activeNpcDialog.npcObjectId,
+        world.activeNpcDialog.title,
+        world.activeNpcDialog.body,
+        world.activeNpcDialog.footer,
+        world.activeNpcDialog.links,
+        world.activeNpcDialog.input ?? null,
+      ])
     : null;
   const visibleDialog =
     world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
@@ -247,6 +259,7 @@ function GameUiSceneInner({
         showBigMap={showBigMap}
         onToggleMail={() => setShowMailPanel((current) => !current)}
         onToggleBigMap={() => setShowBigMap((current) => !current)}
+        showMailAction={!IS_PLATINUM_176_PROFILE}
       />
       <DuraPanel
         t={t}
@@ -311,6 +324,7 @@ function GameUiSceneInner({
         onLogout={onLogout}
         showGameShop={showGameShop}
         onToggleGameShop={() => setShowGameShop((current) => !current)}
+        showGameShopAction={!IS_PLATINUM_176_PROFILE}
         showMenu={showSystemMenu}
         onToggleMenu={() => setShowSystemMenu((current) => !current)}
       />
@@ -357,6 +371,7 @@ function GameUiSceneInner({
             onTransferMap(transferKey);
             setShowSystemMenu(false);
           }}
+          isPlatinum176={IS_PLATINUM_176_PROFILE}
         />
       ) : null}
       {showSystemMenuFeaturePanel ? (
@@ -381,6 +396,53 @@ function GameUiSceneInner({
           playerClass={player?.classKey ?? "warrior"}
           onBuy={onBuyGameShopItem}
           onClose={() => setShowGameShop(false)}
+        />
+      ) : null}
+      {npcRepairService ? (
+        <NpcShopWindow
+          key={npcRepairService}
+          t={t}
+          npcName={npcRepairService === "special" ? t("ui.shopSpecialRepair", [], "Special Repair") : t("ui.shopRepair", [], "Repair")}
+          gold={world.gold}
+          initialTab={npcRepairService}
+          availableTabs={[npcRepairService]}
+          repairItems={
+            npcRepairService === "repair"
+              ? world.equipmentItems.map((item) => ({
+                  id: item.slot,
+                  name: item.name,
+                  icon: item.icon,
+                  price: 0,
+                  description: item.description,
+                  durabilityCurrent: item.durabilityCurrent,
+                  durabilityMax: item.durabilityMax,
+                  disabled: item.durabilityMax <= 0 || item.durabilityCurrent >= item.durabilityMax,
+                }))
+              : undefined
+          }
+          specialRepairItems={
+            npcRepairService === "special"
+              ? world.equipmentItems.map((item) => ({
+                  id: item.slot,
+                  name: item.name,
+                  icon: item.icon,
+                  price: 0,
+                  description: item.description,
+                  durabilityCurrent: item.durabilityCurrent,
+                  durabilityMax: item.durabilityMax,
+                  disabled: item.durabilityMax <= 0 || item.durabilityCurrent >= item.durabilityMax,
+                }))
+              : undefined
+          }
+          onRepair={(id) => {
+            const item = world.equipmentItems.find((entry) => entry.slot === id);
+            if (item) onRepairItem({ slot: item.slot });
+          }}
+          onSpecialRepair={(id) => {
+            const item = world.equipmentItems.find((entry) => entry.slot === id);
+            if (item) onSpecialRepairItem({ slot: item.slot });
+          }}
+          onClose={onCloseNpcRepairService}
         />
       ) : null}
       {visibleDialog ? (

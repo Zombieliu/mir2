@@ -77,8 +77,9 @@ class CdpClient {
   handleMessage(raw) {
     const message = JSON.parse(raw);
     if (message.id && this.pending.has(message.id)) {
-      const { resolve, reject } = this.pending.get(message.id);
+      const { resolve, reject, timeout } = this.pending.get(message.id);
       this.pending.delete(message.id);
+      clearTimeout(timeout);
       if (message.error) {
         reject(new Error(`${message.error.message}: ${message.error.data ?? ""}`));
       } else {
@@ -132,7 +133,7 @@ class CdpClient {
     }
   }
 
-  send(method, params = {}) {
+  send(method, params = {}, timeoutMs = 15_000) {
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -160,19 +161,35 @@ class CdpClient {
   }
 
   async evaluate(expression) {
-    const result = await this.send("Runtime.evaluate", {
-      expression,
-      awaitPromise: true,
-      returnByValue: true,
-      userGesture: true,
-    });
-    if (result.exceptionDetails) {
-      throw new Error(`${this.label} evaluate failed: ${result.exceptionDetails.text ?? JSON.stringify(result.exceptionDetails)}`);
+    let lastError;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        const result = await this.send("Runtime.evaluate", {
+          expression,
+          awaitPromise: true,
+          returnByValue: true,
+          userGesture: true,
+        });
+        if (result.exceptionDetails) {
+          throw new Error(`${this.label} evaluate failed: ${result.exceptionDetails.text ?? JSON.stringify(result.exceptionDetails)}`);
+        }
+        return result.result?.value;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 3) {
+          await delay(250 * attempt);
+        }
+      }
     }
-    return result.result?.value;
+    throw lastError;
   }
 
   close() {
+    for (const { reject, timeout } of this.pending.values()) {
+      clearTimeout(timeout);
+      reject(new Error(`${this.label} CDP connection closed`));
+    }
+    this.pending.clear();
     this.ws?.close();
   }
 }
@@ -203,18 +220,23 @@ async function main() {
     }
     await pulseBoth(clients, 4);
 
-    await waitUntilClient(
-      clients[0],
-      `(() => (window.__mir2Stage5?.state?.entities ?? []).some((entity) => entity?.name === ${JSON.stringify(characterB)} && entity?.kind === "player"))()`,
-      "A sees B",
-      15_000,
-    );
-    await waitUntilClient(
-      clients[1],
-      `(() => (window.__mir2Stage5?.state?.entities ?? []).some((entity) => entity?.name === ${JSON.stringify(characterA)} && entity?.kind === "player"))()`,
-      "B sees A",
-      15_000,
-    );
+    let social = null;
+    if (socialAcceptance) {
+      social = await runSocialAcceptance(clients);
+    } else {
+      await waitUntilClient(
+        clients[0],
+        `(() => (window.__mir2Stage5?.state?.entities ?? []).some((entity) => entity?.name === ${JSON.stringify(characterB)} && entity?.kind === "player"))()`,
+        "A sees B",
+        15_000,
+      );
+      await waitUntilClient(
+        clients[1],
+        `(() => (window.__mir2Stage5?.state?.entities ?? []).some((entity) => entity?.name === ${JSON.stringify(characterA)} && entity?.kind === "player"))()`,
+        "B sees A",
+        15_000,
+      );
+    }
 
     const movementSentAt = Date.now();
     await sendClientCommand(clients[0], { type: "walk", direction: "Right" }, "A walk right");
@@ -275,11 +297,19 @@ async function main() {
         client: client.label,
         frames: client.packetFrames.slice(-16),
       })),
+      observations: {
+        aSeesB: summaries[0].entities.some((entity) => entity.name === characterB && entity.kind === "player"),
+        bSeesA: summaries[1].entities.some((entity) => entity.name === characterA && entity.kind === "player"),
+      },
     };
     report.assertions = {
       bothGame: summaries.every((summary) => summary.screen === "game"),
-      aSeesB: summaries[0].entities.some((entity) => entity.name === characterB && entity.kind === "player"),
-      bSeesA: summaries[1].entities.some((entity) => entity.name === characterA && entity.kind === "player"),
+      ...(!socialAcceptance
+        ? {
+            aSeesB: report.observations.aSeesB,
+            bSeesA: report.observations.bSeesA,
+          }
+        : {}),
       bSawMovementBroadcast: clients[1].packetFrames.some((frame) => /ObjectWalk|ObjectRun/.test(frame.payloadData)),
       bMovementWithoutPulseWithinBudget:
         observerPulseAfterMove ||
@@ -295,6 +325,7 @@ async function main() {
         summaries[1].bevyMovementShadow?.presentation?.decodeErrorCount === 0 &&
         summaries[1].bevyMovementShadow?.presentation?.pendingEventDropCount === 0,
       aSawChatBroadcast: clients[0].packetFrames.some((frame) => frame.payloadData.includes("ObjectChat") && frame.payloadData.includes(chatMessage)),
+      socialAcceptancePassed: !socialAcceptance || social?.ok === true,
       noConsoleErrors: report.consoleErrors.length === 0,
       noNonFavicon404s: report.nonFaviconNetwork404s.length === 0,
     };
@@ -470,6 +501,434 @@ async function pulseBoth(clients, count) {
   }
 }
 
+async function runSocialAcceptance(clients) {
+  const [leader, recruit] = clients;
+  const guildName = `P176${runId.slice(-6)}`.slice(0, 20);
+  const rivalGuildName = `R176${runId.slice(-6)}`.slice(0, 20);
+  const campaignId = `sabuk-live-${runId}`;
+  const guildMessage = `guild acceptance ${runId}`;
+
+  await sendClientCommand(leader, { type: "switchGroup", allowGroup: true }, "leader enables group");
+  await sendClientCommand(recruit, { type: "switchGroup", allowGroup: true }, "recruit enables group");
+  await sendClientCommand(leader, { type: "addMember", name: characterB }, "leader adds group member");
+  await sendClientCommand(recruit, { type: "addMember", name: characterA }, "recruit confirms two-sided group roster");
+  await waitForGatewayPacket(leader, "AddMember", "leader group roster packet");
+  await waitForGatewayPacket(recruit, "AddMember", "recruit group roster packet");
+  await waitUntilClient(
+    leader,
+    `(window.__mir2Stage5?.state?.stage5Systems?.group?.members ?? []).some((member) => (typeof member === "string" ? member : member?.name) === ${JSON.stringify(characterB)})`,
+    "leader sees accepted group member",
+    15_000,
+  );
+  await waitUntilClient(
+    recruit,
+    `(window.__mir2Stage5?.state?.stage5Systems?.group?.members ?? []).some((member) => (typeof member === "string" ? member : member?.name) === ${JSON.stringify(characterA)})`,
+    "recruit sees accepted group leader",
+    15_000,
+  );
+  await pulseBoth(clients, 3);
+
+  await sendClientCommand(
+    leader,
+    { type: "stage5Command", action: "guild.create", args: [guildName] },
+    "leader creates guild",
+  );
+  await pulseBoth(clients, 2);
+  await sendClientCommand(
+    leader,
+    { type: "editGuildMember", changeType: 0, rankIndex: 0, name: characterB, rankName: "" },
+    "leader guild invite",
+  );
+  await pulseBoth(clients, 2);
+  await waitForGatewayPacket(recruit, "GuildInvite", "recruit guild invite");
+  await sendClientCommand(recruit, { type: "guildInvite", acceptInvite: true }, "recruit accepts guild");
+  await pulseBoth(clients, 3);
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.stage5Systems?.guild?.name === ${JSON.stringify(guildName)}`,
+    "recruit guild membership",
+    15_000,
+  );
+
+  await sendClientCommand(recruit, { type: "chat", message: `!~${guildMessage}` }, "recruit guild chat");
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    leader,
+    `(window.__mir2GatewayEventHistory ?? []).some((event) => event?.packet === "Chat" && JSON.stringify(event?.payload ?? {}).includes(${JSON.stringify(guildMessage)}))`,
+    "leader receives guild chat",
+    15_000,
+  );
+  const guildChatDelivered = true;
+
+  // Fresh characters spawn on the same tile. Move the leader one normal step
+  // so the Crystal trade request has an adjacent remote partner.
+  await sendClientCommand(leader, { type: "walk", direction: "Right" }, "leader adjacent trade step");
+  await pulseBoth(clients, 2);
+  await sendClientCommand(leader, { type: "tradeRequest" }, "leader trade request");
+  await pulseBoth(clients, 2);
+  await waitForGatewayPacket(recruit, "TradeRequest", "recruit trade request");
+  const tradeRequestDelivered = true;
+  await sendClientCommand(recruit, { type: "tradeReply", acceptInvite: true }, "recruit accepts trade");
+  await pulseBoth(clients, 2);
+  await waitForGatewayPacket(leader, "TradeAccept", "leader trade acceptance");
+  const tradeAccepted = true;
+  await sendClientCommand(leader, { type: "tradeCancel" }, "leader cancels empty acceptance trade");
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    leader,
+    `window.__mir2Stage5?.state?.stage5Systems?.trade == null`,
+    "leader trade cancel projection",
+    15_000,
+  );
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.stage5Systems?.trade == null`,
+    "recruit trade cancel projection",
+    15_000,
+  );
+
+  const acceptedGuildSummaries = await Promise.all(clients.map((client) => readSummary(client)));
+
+  // Party members are intentionally protected from ordinary PK. Disband the
+  // live group before splitting into rival guilds so this phase exercises
+  // hostile player combat rather than repeatedly hitting a friendly target.
+  await sendClientCommand(leader, { type: "switchGroup", allowGroup: false }, "leader leaves group before PK");
+  await sendClientCommand(recruit, { type: "switchGroup", allowGroup: false }, "recruit leaves group before PK");
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    leader,
+    `(window.__mir2Stage5?.state?.stage5Systems?.group?.members ?? []).length === 0`,
+    "leader group cleared before PK",
+    15_000,
+  );
+  await waitUntilClient(
+    recruit,
+    `(window.__mir2Stage5?.state?.stage5Systems?.group?.members ?? []).length === 0`,
+    "recruit group cleared before PK",
+    15_000,
+  );
+
+  // Split the accepted member into a second authoritative guild so the same
+  // two live browser sessions can exercise both ordinary PK and a two-guild
+  // Sabuk campaign instead of merely replaying a single-session fixture.
+  await sendClientCommand(
+    leader,
+    { type: "editGuildMember", changeType: 1, rankIndex: 0, name: characterB, rankName: "" },
+    "leader removes recruit for rival guild",
+  );
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    leader,
+    `(window.__mir2GatewayEventHistory ?? []).some((event) => event?.packet === "GuildMemberChange" && Number(event?.payload?.status) === 1 && event?.payload?.name === ${JSON.stringify(characterB)})`,
+    "leader authoritative guild removal packet",
+    15_000,
+  );
+  await sendClientCommand(recruit, { type: "requestGuildInfo", infoType: 1 }, "recruit refreshes guild after removal");
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.stage5Systems?.guild?.name === ""`,
+    "recruit authoritative guild removal",
+    15_000,
+  );
+  await sendClientCommand(
+    recruit,
+    { type: "stage5Command", action: "guild.create", args: [rivalGuildName] },
+    "recruit creates rival guild",
+  );
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.stage5Systems?.guild?.name === ${JSON.stringify(rivalGuildName)}`,
+    "recruit rival guild creation",
+    15_000,
+  );
+
+  const recruitObjectId = await leader.evaluate(`
+    (window.__mir2Stage5?.state?.entities ?? [])
+      .find((entity) => entity?.kind === "player" && entity?.name === ${JSON.stringify(characterB)})
+      ?.objectId ?? null
+  `);
+  if (recruitObjectId === null || recruitObjectId === undefined) {
+    throw new Error("Leader could not resolve the live recruit object id for PK acceptance.");
+  }
+  let hasEquippedWeapon = await leader.evaluate(`
+    (window.__mir2Stage5?.state?.equipmentItems ?? [])
+      .some((item) => item?.slot === "weapon" || item?.equipSlot === "weapon")
+  `);
+  if (!hasEquippedWeapon) {
+    const starterWeapon = await leader.evaluate(`
+      (window.__mir2Stage5?.state?.inventoryItems ?? [])
+        .find((item) =>
+          item?.equipSlot === "weapon" || /wooden.?sword/i.test(String(item?.name ?? item?.key ?? ""))
+        ) ?? null
+    `);
+    if (starterWeapon?.uniqueId === undefined || starterWeapon?.uniqueId === null) {
+      throw new Error("Leader has neither an equipped weapon nor a Wooden Sword in inventory for PK acceptance.");
+    }
+    await sendClientCommand(
+      leader,
+      { type: "equipItem", uniqueId: Number(starterWeapon.uniqueId), grid: "inventory", to: 0 },
+      "leader equips starter weapon for PK",
+    );
+    await pulseBoth(clients, 2);
+    await waitUntilClient(
+      leader,
+      `(window.__mir2Stage5?.state?.equipmentItems ?? []).some((item) => item?.slot === "weapon" || item?.equipSlot === "weapon")`,
+      "leader authoritative starter weapon equip",
+      15_000,
+    );
+    hasEquippedWeapon = true;
+  }
+  // Crystal mode 5 is the unrestricted all-target PK mode (mode 4 is the
+  // red/brown-name filter and correctly refuses a fresh lawful character).
+  await sendClientCommand(leader, { type: "changeAMode", mode: 5 }, "leader enables all-target attack mode");
+  await pulseBoth(clients, 1);
+  await waitUntilClient(
+    leader,
+    `Number(window.__mir2Stage5?.state?.stage5Systems?.attackMode) === 5`,
+    "leader all-target attack mode",
+    15_000,
+  );
+  let recruitDied = false;
+  // Level-1 accuracy is intentionally low against another player; allow a
+  // deterministic upper bound large enough to finish the real 18 HP target.
+  for (let strike = 0; strike < 40 && !recruitDied; strike += 1) {
+    await sendClientCommand(
+      leader,
+      { type: "attack", objectId: Number(recruitObjectId) },
+      `leader PK strike ${strike + 1}`,
+    );
+    await pulseBoth(clients, 1);
+    // Vary the sampling phase of the deterministic Crystal accuracy roll;
+    // a fixed 900 ms cadence can repeatedly land on the same miss bucket.
+    await delay(137 + (strike % 5) * 47);
+    recruitDied = await recruit.evaluate(`
+      window.__mir2Stage5?.state?.player?.dead === true ||
+        Number(window.__mir2Stage5?.state?.playerHp ?? 1) <= 0
+    `);
+  }
+  if (!recruitDied) {
+    const combatDebug = await Promise.all(
+      clients.map((client) =>
+        client.evaluate(`
+          (() => {
+            const state = window.__mir2Stage5?.state ?? {};
+            return {
+              label: ${JSON.stringify("browser")},
+              player: state.player ?? null,
+              inSafeZone: state.inSafeZone ?? null,
+              attackMode: state.stage5Systems?.attackMode ?? null,
+              group: state.stage5Systems?.group ?? null,
+              guild: state.stage5Systems?.guild ?? null,
+              trade: state.stage5Systems?.trade ?? null,
+              equipmentItems: state.equipmentItems ?? [],
+              remotePlayers: (state.entities ?? []).filter((entity) => entity?.kind === "player"),
+              combatEvents: (window.__mir2GatewayEventHistory ?? [])
+                .filter((event) => ["ObjectAttack", "ObjectStruck", "ObjectHealth", "ObjectDied"].includes(event?.packet))
+                .slice(0, 20),
+            };
+          })()
+        `),
+      ),
+    );
+    throw new Error(`PK attacks did not kill the recruit: ${JSON.stringify(combatDebug)}`);
+  }
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.player?.dead === true || Number(window.__mir2Stage5?.state?.playerHp ?? 1) <= 0`,
+    "recruit PK death",
+    15_000,
+  );
+  await waitUntilClient(
+    leader,
+    `Number(window.__mir2Stage5?.state?.playerPkPoints ?? 0) > 0`,
+    "leader PK point award",
+    15_000,
+  );
+  const pkEvidence = {
+    configuredDamageMultiplier,
+    attackerPkPoints: await leader.evaluate(`Number(window.__mir2Stage5?.state?.playerPkPoints ?? 0)`),
+    victimDead: await recruit.evaluate(`Boolean(window.__mir2Stage5?.state?.player?.dead)`),
+    victimSawDeathPacket: await recruit.evaluate(`
+      (window.__mir2GatewayEventHistory ?? []).some((event) => event?.packet === "ObjectDied")
+    `),
+  };
+  await sendClientCommand(recruit, { type: "townRevive" }, "recruit town revive after PK");
+  await pulseBoth(clients, 3);
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.player?.dead === false && Number(window.__mir2Stage5?.state?.playerHp ?? 0) > 0`,
+    "recruit revived after PK",
+    15_000,
+  );
+
+  const conquestBaseTick = await leader.evaluate(
+    `Number(window.__mir2Stage5?.state?.stage5Systems?.conquest?.currentTick ?? 0)`,
+  );
+  const registrationClosesTick = conquestBaseTick + 50;
+  const startsAtTick = conquestBaseTick + 100;
+  const endsAtTick = conquestBaseTick + 200;
+  await sendClientCommand(
+    leader,
+    {
+      type: "stage5Command",
+      action: "conquest.schedule",
+      args: [
+        "Sabuk",
+        "5",
+        String(registrationClosesTick),
+        String(startsAtTick),
+        String(endsAtTick),
+        "2500",
+        "2",
+        campaignId,
+        "0150",
+        map,
+      ],
+    },
+    "leader schedules live Sabuk campaign",
+  );
+  await pulseBoth(clients, 2);
+  await sendClientCommand(
+    leader,
+    { type: "stage5Command", action: "conquest.register", args: ["Sabuk"] },
+    "leader guild registers for Sabuk",
+  );
+  await sendClientCommand(
+    recruit,
+    { type: "stage5Command", action: "conquest.register", args: ["Sabuk"] },
+    "rival guild registers for Sabuk",
+  );
+  await pulseBoth(clients, 6);
+  const bothGuildsRegisteredExpression = `(() => {
+    const guilds = window.__mir2Stage5?.state?.stage5Systems?.conquest?.campaigns?.sabuk?.registeredGuilds ?? [];
+    return guilds.includes(${JSON.stringify(guildName)}) && guilds.includes(${JSON.stringify(rivalGuildName)});
+  })()`;
+  await waitUntilClient(
+    leader,
+    bothGuildsRegisteredExpression,
+    "leader observes both Sabuk registrations",
+    30_000,
+  );
+  await waitUntilClient(
+    recruit,
+    bothGuildsRegisteredExpression,
+    "rival observes both Sabuk registrations",
+    30_000,
+  );
+  await sendClientCommand(
+    leader,
+    { type: "stage5Command", action: "conquest.advance", args: [String(startsAtTick)] },
+    "leader starts live Sabuk campaign",
+  );
+  await pulseBoth(clients, 6);
+  await waitUntilClient(
+    recruit,
+    `(window.__mir2Stage5?.state?.stage5Systems?.conquest?.activeWars ?? []).includes("Sabuk")`,
+    "rival observes active Sabuk war",
+    30_000,
+  );
+  await sendClientCommand(
+    recruit,
+    { type: "transferMap", key: "crystal:0150:10:13" },
+    "rival enters Sabuk palace",
+  );
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.mapFileName === "0150" && window.__mir2Stage5?.state?.player?.x === 10 && window.__mir2Stage5?.state?.player?.y === 13`,
+    "rival arrives in Sabuk palace",
+    30_000,
+  );
+  await pulseBoth(clients, 6);
+  await waitUntilClient(
+    recruit,
+    `(() => {
+      const campaign = window.__mir2Stage5?.state?.stage5Systems?.conquest?.campaigns?.sabuk;
+      return campaign?.captureCandidateGuild === ${JSON.stringify(rivalGuildName)} && Number(campaign?.captureProgressTicks ?? 0) >= 2;
+    })()`,
+    "rival Sabuk capture becomes authoritative",
+    30_000,
+  );
+  await sendClientCommand(
+    leader,
+    { type: "stage5Command", action: "conquest.advance", args: [String(endsAtTick)] },
+    "leader settles live Sabuk campaign",
+  );
+  await pulseBoth(clients, 6);
+  await waitUntilClient(
+    leader,
+    `window.__mir2Stage5?.state?.stage5Systems?.conquest?.castleOwner === ${JSON.stringify(rivalGuildName)}`,
+    "leader observes rival Sabuk ownership",
+    30_000,
+  );
+  await waitUntilClient(
+    recruit,
+    `window.__mir2Stage5?.state?.stage5Systems?.conquest?.castleOwner === ${JSON.stringify(rivalGuildName)}`,
+    "rival observes Sabuk ownership",
+    30_000,
+  );
+  await sendClientCommand(
+    recruit,
+    { type: "stage5Command", action: "conquest.claimReward", args: ["Sabuk"] },
+    "rival claims Sabuk reward",
+  );
+  await pulseBoth(clients, 2);
+  await waitUntilClient(
+    recruit,
+    `Number(window.__mir2Stage5?.state?.stage5Systems?.guild?.storageGold ?? 0) >= 2500`,
+    "rival receives Sabuk reward",
+    15_000,
+  );
+  // The generic two-client movement/chat checks that follow this social loop
+  // intentionally exercise same-map visibility. Return the palace occupant to
+  // the original test map after the conquest evidence has been committed.
+  await transferTo(recruit, startBx, startBy);
+  await pulseBoth(clients, 3);
+
+  const summaries = await Promise.all(clients.map((client) => readSummary(client)));
+  const assertions = {
+    acceptedGroupVisible: acceptedGuildSummaries.every(
+      (summary) => summary.groupMembers.includes(characterA) && summary.groupMembers.includes(characterB),
+    ),
+    acceptedGuildVisible: acceptedGuildSummaries.every((summary) => summary.guildName === guildName),
+    guildChatDelivered,
+    tradeRequestDelivered,
+    tradeAccepted,
+    rivalGuildVisible: summaries[0].guildName === guildName && summaries[1].guildName === rivalGuildName,
+    livePkDeath: pkEvidence.victimDead && pkEvidence.victimSawDeathPacket,
+    livePkPoints: pkEvidence.attackerPkPoints > 0,
+    livePkRevive: summaries[1].player?.dead === false && Number(summaries[1].playerHp ?? 0) > 0,
+    sabukSharedOwner: summaries.every((summary) => summary.conquest?.castleOwner === rivalGuildName),
+    sabukSettled: summaries.every(
+      (summary) => summary.conquest?.campaigns?.sabuk?.phase === "settled",
+    ),
+    sabukRewardClaimed:
+      summaries[1].conquest?.campaigns?.sabuk?.rewardClaimed === true &&
+      Number(summaries[1].guildStorageGold ?? 0) >= 2500,
+  };
+  return {
+    ok: Object.values(assertions).every(Boolean),
+    guildName,
+    rivalGuildName,
+    guildMessage,
+    campaignId,
+    pkEvidence,
+    acceptedGuildSummaries,
+    assertions,
+    summaries,
+  };
+}
+
+async function waitForGatewayPacket(client, packet, label) {
+  await waitUntilClient(
+    client,
+    `(window.__mir2GatewayEventHistory ?? []).some((event) => event?.packet === ${JSON.stringify(packet)})`,
+    label,
+    15_000,
+  );
+}
+
 async function sendClientCommand(client, command, label) {
   const ok = await client.evaluate(`window.__mir2Stage5?.send?.(${JSON.stringify(command)}) === true`);
   if (!ok) {
@@ -486,6 +945,9 @@ async function readSummary(client) {
         wsState: state.wsState ?? null,
         accountId: state.accountId ?? null,
         player: state.player ?? null,
+        playerHp: state.playerHp ?? null,
+        playerMaxHp: state.playerMaxHp ?? null,
+        playerPkPoints: state.playerPkPoints ?? null,
         playerObjectId: state.playerObjectId ?? null,
         mapFileName: state.mapFileName ?? null,
         worldTick: state.worldTick ?? null,
@@ -493,6 +955,13 @@ async function readSummary(client) {
         bevyEntityRenderer: window.__mir2BevyEntityRendererDebug ?? null,
         bevyMovementShadow: state.bevyMovementShadow ?? null,
         logsTail: (state.logs ?? []).slice(-8).map((line) => line?.text ?? String(line)),
+        groupMembers: (state.stage5Systems?.group?.members ?? []).map((member) =>
+          typeof member === "string" ? member : member?.name,
+        ),
+        guildName: state.stage5Systems?.guild?.name ?? "",
+        guildStorageGold: state.stage5Systems?.guild?.storageGold ?? 0,
+        conquest: state.stage5Systems?.conquest ?? null,
+        tradeState: state.stage5Systems?.trade ?? null,
         entities: (state.entities ?? [])
           .map((entity) => ({
             kind: entity.kind,
@@ -501,6 +970,9 @@ async function readSummary(client) {
             x: entity.x,
             y: entity.y,
             direction: entity.direction,
+            hp: entity.hp,
+            maxHp: entity.maxHp,
+            dead: entity.dead,
           }))
           .sort((left, right) => String(left.name).localeCompare(String(right.name))),
       };
@@ -604,6 +1076,9 @@ async function launchChrome() {
       `--user-data-dir=${userDataDir}`,
       ...(headed ? [] : ["--headless=new"]),
       "--disable-gpu",
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding",
       "--no-proxy-server",
       "--proxy-bypass-list=*",
       "--no-first-run",
@@ -686,7 +1161,7 @@ function buildBaseUrl(rawBaseUrl, wsUrl) {
 }
 
 function isZonePacketPayload(payloadData) {
-  return /ObjectPlayer|ObjectWalk|ObjectRun|ObjectTurn|ObjectChat|ObjectRemove|UserLocation/.test(payloadData);
+  return /ObjectPlayer|ObjectWalk|ObjectRun|ObjectTurn|ObjectChat|ObjectRemove|UserLocation|GroupInvite|GuildInvite|TradeRequest|TradeAccept|DeleteGroup|GuildMemberChange/.test(payloadData);
 }
 
 function findChromePath() {

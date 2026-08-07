@@ -1,7 +1,579 @@
 use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentProfile {
+    pub profile_id: String,
+    pub version: u32,
+    pub source: String,
+    pub allowed_classes: Vec<MirClass>,
+    pub acceptance_level: u16,
+    pub rate_policy: ContentRatePolicy,
+    pub experience_curve: Vec<ExperienceLevel>,
+    pub map_whitelist: Vec<ContentMapRule>,
+    pub monster_whitelist: Vec<String>,
+    pub boss_monsters: Vec<String>,
+    pub boss_respawn_jitter_minutes: u16,
+    #[serde(default)]
+    pub drop_overrides: Vec<ContentMonsterDropRule>,
+    pub item_whitelist: Vec<String>,
+    pub skills: Vec<ContentSkillRule>,
+    pub npc_script_whitelist: Vec<String>,
+    #[serde(default)]
+    pub disabled_stage5_action_prefixes: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentRatePolicy {
+    pub label: String,
+    pub monster_experience_tiers: Vec<ContentLevelRate>,
+    pub gold_multiplier: u16,
+    pub drop_multiplier: u16,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentLevelRate {
+    pub min_level: u16,
+    pub max_level: u16,
+    pub multiplier: u16,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExperienceLevel {
+    /// The current character level.
+    pub level: u16,
+    /// Experience required to advance from `level` to `level + 1`.
+    pub required_experience: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentMapRule {
+    pub file_name: String,
+    pub tier: String,
+    pub recommended_min_level: u16,
+    pub recommended_max_level: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentSkillRule {
+    pub spell: String,
+    pub class: MirClass,
+    pub required_level: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentMonsterDropRule {
+    pub monster: String,
+    pub item: String,
+    pub chance_numerator: u32,
+    pub chance_denominator: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentProfileBundle {
+    pub schema: String,
+    pub profile_id: String,
+    pub profile_version: u32,
+    pub acceptance_level: u16,
+    pub source: String,
+    pub source_data: ContentProfileBundleSourceData,
+    pub built_at: String,
+    pub hash_algorithm: String,
+    pub content_hash: String,
+    pub files: Vec<ContentProfileBundleFile>,
+    pub summary: ContentProfileBundleSummary,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentProfileBundleSourceData {
+    pub crystal_database_version: i32,
+    pub crystal_database_custom_version: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentProfileBundleFile {
+    pub path: String,
+    pub bytes: u64,
+    pub sha256: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentProfileBundleSummary {
+    pub maps: usize,
+    pub monsters: usize,
+    pub items: usize,
+    pub skills: usize,
+    pub npc_scripts: usize,
+    pub drop_overrides: usize,
+}
+
+pub fn platinum_176_profile() -> ContentProfile {
+    static PROFILE: OnceLock<ContentProfile> = OnceLock::new();
+    PROFILE
+        .get_or_init(|| {
+            serde_json::from_str(include_str!("../data/content_profiles/platinum_176.json"))
+                .expect("platinum_176 content profile json should be valid")
+        })
+        .clone()
+}
+
+pub fn platinum_176_profile_bundle() -> ContentProfileBundle {
+    static BUNDLE: OnceLock<ContentProfileBundle> = OnceLock::new();
+    BUNDLE
+        .get_or_init(|| {
+            let bundle: ContentProfileBundle =
+                serde_json::from_str(include_str!("../data/generated/platinum_176_bundle.json"))
+                    .expect("platinum_176 content profile bundle json should be valid");
+            let profile = platinum_176_profile();
+            assert_eq!(
+                (bundle.profile_id.as_str(), bundle.profile_version),
+                (profile.profile_id.as_str(), profile.version),
+                "platinum_176 bundle must describe the compiled content profile"
+            );
+            bundle
+        })
+        .clone()
+}
+
+pub fn content_profile_experience_required(profile: &ContentProfile, level: u16) -> Option<i64> {
+    profile
+        .experience_curve
+        .iter()
+        .find(|entry| entry.level == level)
+        .map(|entry| entry.required_experience)
+}
+
+pub fn content_profile_monster_experience_multiplier(profile: &ContentProfile, level: u16) -> u16 {
+    profile
+        .rate_policy
+        .monster_experience_tiers
+        .iter()
+        .find(|tier| tier.min_level <= level && level <= tier.max_level)
+        .map(|tier| tier.multiplier)
+        .unwrap_or(1)
+        .max(1)
+}
+
+pub fn content_profile_monster_is_boss(profile: &ContentProfile, monster_name: &str) -> bool {
+    profile
+        .boss_monsters
+        .iter()
+        .any(|boss| boss.eq_ignore_ascii_case(monster_name))
+}
+
+pub fn platinum_176_monster_is_boss(monster_name: &str) -> bool {
+    content_profile_monster_is_boss(&platinum_176_profile(), monster_name)
+}
+
+pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<String>> {
+    let mut errors = Vec::new();
+
+    if profile.profile_id.trim().is_empty() {
+        errors.push("profileId must not be empty".to_string());
+    }
+    if profile.version == 0 {
+        errors.push("version must be greater than zero".to_string());
+    }
+    if profile.acceptance_level < 2 {
+        errors.push("acceptanceLevel must be at least 2".to_string());
+    }
+    if profile.boss_respawn_jitter_minutes == 0 {
+        errors.push("bossRespawnJitterMinutes must be greater than zero".to_string());
+    }
+    if profile.rate_policy.label.trim().is_empty() {
+        errors.push("ratePolicy.label must not be empty".to_string());
+    }
+    for (name, multiplier) in [
+        (
+            "ratePolicy.goldMultiplier",
+            profile.rate_policy.gold_multiplier,
+        ),
+        (
+            "ratePolicy.dropMultiplier",
+            profile.rate_policy.drop_multiplier,
+        ),
+    ] {
+        if !(1..=100).contains(&multiplier) {
+            errors.push(format!("{name} must be between 1 and 100"));
+        }
+    }
+    let mut expected_rate_level = 1_u16;
+    for tier in &profile.rate_policy.monster_experience_tiers {
+        if tier.min_level != expected_rate_level {
+            errors.push(format!(
+                "ratePolicy.monsterExperienceTiers must be contiguous: expected level {expected_rate_level}, found {}",
+                tier.min_level
+            ));
+        }
+        if tier.max_level < tier.min_level {
+            errors.push(format!(
+                "ratePolicy.monsterExperienceTiers {}-{} has an invalid range",
+                tier.min_level, tier.max_level
+            ));
+        }
+        if !(1..=100).contains(&tier.multiplier) {
+            errors.push(format!(
+                "ratePolicy.monsterExperienceTiers {}-{} multiplier must be between 1 and 100",
+                tier.min_level, tier.max_level
+            ));
+        }
+        expected_rate_level = tier.max_level.saturating_add(1);
+    }
+    if profile
+        .rate_policy
+        .monster_experience_tiers
+        .last()
+        .is_none_or(|tier| tier.max_level < profile.acceptance_level)
+    {
+        errors.push(format!(
+            "ratePolicy.monsterExperienceTiers must cover acceptance level {}",
+            profile.acceptance_level
+        ));
+    }
+
+    let expected_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist];
+    if profile.allowed_classes.as_slice() != expected_classes {
+        errors.push(
+            "allowedClasses must contain exactly Warrior, Wizard, Taoist in canonical order"
+                .to_string(),
+        );
+    }
+
+    let mut expected_level = 1_u16;
+    for entry in &profile.experience_curve {
+        if entry.level != expected_level {
+            errors.push(format!(
+                "experienceCurve must be contiguous: expected level {expected_level}, found {}",
+                entry.level
+            ));
+            expected_level = entry.level;
+        }
+        if entry.required_experience <= 0 {
+            errors.push(format!(
+                "experienceCurve level {} must require positive experience",
+                entry.level
+            ));
+        }
+        expected_level = expected_level.saturating_add(1);
+    }
+    if profile
+        .experience_curve
+        .last()
+        .is_none_or(|entry| entry.level < profile.acceptance_level)
+    {
+        errors.push(format!(
+            "experienceCurve must cover acceptance level {}",
+            profile.acceptance_level
+        ));
+    }
+
+    validate_unique_strings(
+        "mapWhitelist.fileName",
+        profile
+            .map_whitelist
+            .iter()
+            .map(|entry| entry.file_name.as_str()),
+        &mut errors,
+    );
+    validate_unique_strings(
+        "monsterWhitelist",
+        profile.monster_whitelist.iter().map(String::as_str),
+        &mut errors,
+    );
+    validate_unique_strings(
+        "bossMonsters",
+        profile.boss_monsters.iter().map(String::as_str),
+        &mut errors,
+    );
+    let mut drop_override_keys = BTreeSet::new();
+    for entry in &profile.drop_overrides {
+        let key = format!("{}/{}", entry.monster, entry.item);
+        if !drop_override_keys.insert(key.clone()) {
+            errors.push(format!(
+                "dropOverrides.monster+item contains duplicate value {key}"
+            ));
+        }
+    }
+    validate_unique_strings(
+        "itemWhitelist",
+        profile.item_whitelist.iter().map(String::as_str),
+        &mut errors,
+    );
+    validate_unique_strings(
+        "skills.spell",
+        profile.skills.iter().map(|entry| entry.spell.as_str()),
+        &mut errors,
+    );
+    validate_unique_strings(
+        "npcScriptWhitelist",
+        profile.npc_script_whitelist.iter().map(String::as_str),
+        &mut errors,
+    );
+    validate_unique_strings(
+        "disabledStage5ActionPrefixes",
+        profile
+            .disabled_stage5_action_prefixes
+            .iter()
+            .map(String::as_str),
+        &mut errors,
+    );
+
+    let crystal_map_manifest = crystal_respawn_manifest();
+    let crystal_maps: BTreeSet<_> = crystal_map_manifest
+        .maps
+        .iter()
+        .map(|map| map.map_file_name.clone())
+        .collect();
+    for map in &profile.map_whitelist {
+        if map.recommended_min_level == 0 || map.recommended_min_level > map.recommended_max_level {
+            errors.push(format!(
+                "map {} has invalid recommended level range {}-{}",
+                map.file_name, map.recommended_min_level, map.recommended_max_level
+            ));
+        }
+        if !crystal_maps.contains(&map.file_name) {
+            errors.push(format!(
+                "mapWhitelist references missing Crystal map {}",
+                map.file_name
+            ));
+        }
+    }
+
+    let crystal_monsters: BTreeSet<_> = crystal_monster_manifest()
+        .monsters
+        .into_iter()
+        .map(|monster| monster.name)
+        .collect();
+    for monster in &profile.monster_whitelist {
+        if !crystal_monsters.contains(monster) {
+            errors.push(format!(
+                "monsterWhitelist references missing Crystal monster {monster}"
+            ));
+        }
+    }
+    for boss in &profile.boss_monsters {
+        if !crystal_monsters.contains(boss) {
+            errors.push(format!(
+                "bossMonsters references missing Crystal monster {boss}"
+            ));
+        }
+        if !profile
+            .monster_whitelist
+            .iter()
+            .any(|monster| monster.eq_ignore_ascii_case(boss))
+        {
+            errors.push(format!(
+                "bossMonsters entry {boss} must also appear in monsterWhitelist"
+            ));
+        }
+        let has_allowed_spawn = crystal_map_manifest.maps.iter().any(|map| {
+            profile
+                .map_whitelist
+                .iter()
+                .any(|allowed| allowed.file_name == map.map_file_name)
+                && map
+                    .respawns
+                    .iter()
+                    .any(|respawn| respawn.monster_name.eq_ignore_ascii_case(boss))
+        });
+        if !has_allowed_spawn {
+            errors.push(format!(
+                "bossMonsters entry {boss} has no spawn on an allowed map"
+            ));
+        }
+    }
+    for drop_rule in &profile.drop_overrides {
+        if !profile
+            .monster_whitelist
+            .iter()
+            .any(|monster| monster.eq_ignore_ascii_case(&drop_rule.monster))
+        {
+            errors.push(format!(
+                "dropOverrides monster {} must appear in monsterWhitelist",
+                drop_rule.monster
+            ));
+        }
+        if !profile
+            .item_whitelist
+            .iter()
+            .any(|item| item.eq_ignore_ascii_case(&drop_rule.item))
+        {
+            errors.push(format!(
+                "dropOverrides item {} must appear in itemWhitelist",
+                drop_rule.item
+            ));
+        }
+        if drop_rule.chance_numerator == 0
+            || drop_rule.chance_denominator == 0
+            || drop_rule.chance_numerator > drop_rule.chance_denominator
+        {
+            errors.push(format!(
+                "dropOverrides {}/{} has invalid chance {}/{}",
+                drop_rule.monster,
+                drop_rule.item,
+                drop_rule.chance_numerator,
+                drop_rule.chance_denominator
+            ));
+        }
+    }
+
+    let allowed_maps: BTreeSet<_> = profile
+        .map_whitelist
+        .iter()
+        .map(|map| map.file_name.as_str())
+        .collect();
+    let allowed_monsters: BTreeSet<_> = profile
+        .monster_whitelist
+        .iter()
+        .map(String::as_str)
+        .collect();
+    for level in 1..=profile.acceptance_level {
+        let has_hunting_map = profile.map_whitelist.iter().any(|rule| {
+            rule.tier != "service"
+                && rule.recommended_min_level <= level
+                && level <= rule.recommended_max_level
+                && crystal_map_manifest.maps.iter().any(|map| {
+                    map.map_file_name == rule.file_name
+                        && map
+                            .respawns
+                            .iter()
+                            .any(|respawn| allowed_monsters.contains(respawn.monster_name.as_str()))
+                })
+        });
+        if !has_hunting_map {
+            errors.push(format!(
+                "level {level} has no recommended map with an allowed monster spawn"
+            ));
+        }
+    }
+
+    let map_file_name_by_index: BTreeMap<_, _> = crystal_map_manifest
+        .maps
+        .iter()
+        .map(|map| (map.map_index, map.map_file_name.as_str()))
+        .collect();
+    let mut reachable_maps = BTreeSet::from(["0"]);
+    loop {
+        let before = reachable_maps.len();
+        for map in &crystal_map_manifest.maps {
+            if !allowed_maps.contains(map.map_file_name.as_str())
+                || !reachable_maps.contains(map.map_file_name.as_str())
+            {
+                continue;
+            }
+            for movement in &map.movements {
+                if let Some(destination) = map_file_name_by_index.get(&movement.map_index) {
+                    if allowed_maps.contains(destination) {
+                        reachable_maps.insert(destination);
+                    }
+                }
+            }
+        }
+        if reachable_maps.len() == before {
+            break;
+        }
+    }
+    for map in &profile.map_whitelist {
+        if !reachable_maps.contains(map.file_name.as_str()) {
+            errors.push(format!(
+                "mapWhitelist map {} is not reachable from map 0 through whitelisted movements",
+                map.file_name
+            ));
+        }
+    }
+
+    let crystal_items: BTreeSet<_> = crystal_item_manifest()
+        .items
+        .into_iter()
+        .map(|item| item.name)
+        .collect();
+    for item in &profile.item_whitelist {
+        if !crystal_items.contains(item) {
+            errors.push(format!(
+                "itemWhitelist references missing Crystal item {item}"
+            ));
+        }
+    }
+
+    let crystal_spells: BTreeSet<_> = crystal_magic_manifest()
+        .magics
+        .into_iter()
+        .map(|magic| magic.spell)
+        .collect();
+    for skill in &profile.skills {
+        if !expected_classes.contains(&skill.class) {
+            errors.push(format!(
+                "skill {} references a class outside platinum_176",
+                skill.spell
+            ));
+        }
+        if skill.required_level == 0 || skill.required_level > profile.acceptance_level {
+            errors.push(format!(
+                "skill {} has invalid required level {}",
+                skill.spell, skill.required_level
+            ));
+        }
+        if !crystal_spells.contains(&skill.spell) {
+            errors.push(format!(
+                "skills references missing Crystal spell {}",
+                skill.spell
+            ));
+        }
+        if !profile.item_whitelist.contains(&skill.spell) {
+            errors.push(format!(
+                "skill {} has no matching book in itemWhitelist",
+                skill.spell
+            ));
+        }
+    }
+
+    let crystal_npc_scripts: BTreeSet<_> = crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .map(|npc| npc.script_key)
+        .collect();
+    for script in &profile.npc_script_whitelist {
+        if !crystal_npc_scripts.contains(script) {
+            errors.push(format!(
+                "npcScriptWhitelist references missing Crystal NPC script {script}"
+            ));
+        }
+    }
+
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
+}
+
+fn validate_unique_strings<'a>(
+    field: &str,
+    values: impl Iterator<Item = &'a str>,
+    errors: &mut Vec<String>,
+) {
+    let mut seen = BTreeSet::new();
+    for value in values {
+        if value.trim().is_empty() {
+            errors.push(format!("{field} must not contain empty values"));
+        } else if !seen.insert(value) {
+            errors.push(format!("{field} contains duplicate value {value}"));
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SceneView {
@@ -1818,9 +2390,9 @@ fn hex_nibble(byte: u8) -> Result<u8, String> {
 #[cfg(test)]
 mod tests {
     use super::{
-        crystal_base_stats_info_packet_payload, crystal_base_stats_packet_manifest,
-        crystal_buff_by_type, crystal_buff_manifest, crystal_drop_manifest,
-        crystal_drop_table_by_key, crystal_drop_table_for_monster_name,
+        content_profile_experience_required, crystal_base_stats_info_packet_payload,
+        crystal_base_stats_packet_manifest, crystal_buff_by_type, crystal_buff_manifest,
+        crystal_drop_manifest, crystal_drop_table_by_key, crystal_drop_table_for_monster_name,
         crystal_game_shop_info_packet_payloads, crystal_game_shop_packet_manifest,
         crystal_guild_buff_list_packet_payload, crystal_guild_buff_packet_manifest,
         crystal_item_by_index, crystal_item_by_name, crystal_item_manifest, crystal_magic_by_spell,
@@ -1832,8 +2404,10 @@ mod tests {
         crystal_random_item_stat_profile, crystal_random_item_stats_manifest,
         crystal_recipe_bootstrap_packets, crystal_recipe_packet_manifest, crystal_recipes,
         crystal_respawn_manifest, crystal_starter_region_respawns, format_localized_text,
-        localization_bundle, localized_text, starter_map_collision, starter_scene,
-        starter_server_data, DropTemplate, LanguageCode, MapCellAttribute, SkillEffectTemplate,
+        localization_bundle, localized_text, platinum_176_profile, platinum_176_profile_bundle,
+        starter_map_collision, starter_scene, starter_server_data, validate_content_profile,
+        ContentLevelRate, ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
+        SkillEffectTemplate,
     };
     use mir2_protocol::{MirClass, Point};
 
@@ -1848,6 +2422,113 @@ mod tests {
         assert_eq!(scene.visible_players.len(), 1);
         assert_eq!(scene.visible_monsters.len(), 2);
         assert_eq!(scene.visible_npcs.len(), 1);
+    }
+
+    #[test]
+    fn platinum_176_profile_is_reference_complete_and_has_a_1_to_50_curve() {
+        let profile = platinum_176_profile();
+
+        assert_eq!(profile.profile_id, "platinum_176");
+        assert_eq!(profile.version, 6);
+        assert_eq!(
+            profile.allowed_classes,
+            [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]
+        );
+        assert_eq!(profile.acceptance_level, 50);
+        assert_eq!(
+            profile.rate_policy,
+            ContentRatePolicy {
+                label: "launch_candidate_tiered_xp_1x_economy".to_string(),
+                monster_experience_tiers: vec![
+                    ContentLevelRate {
+                        min_level: 1,
+                        max_level: 21,
+                        multiplier: 2,
+                    },
+                    ContentLevelRate {
+                        min_level: 22,
+                        max_level: 35,
+                        multiplier: 3,
+                    },
+                    ContentLevelRate {
+                        min_level: 36,
+                        max_level: 50,
+                        multiplier: 4,
+                    },
+                ],
+                gold_multiplier: 1,
+                drop_multiplier: 1,
+            }
+        );
+        assert_eq!(profile.boss_monsters.len(), 7);
+        assert_eq!(profile.boss_respawn_jitter_minutes, 30);
+        assert_eq!(profile.drop_overrides.len(), 21);
+        assert_eq!(
+            profile.disabled_stage5_action_prefixes,
+            [
+                "auction.",
+                "craft",
+                "gameShop.",
+                "hero.",
+                "item.addSocket",
+                "item.seal",
+                "mail.",
+                "qa.",
+                "shop.buyCredit",
+            ]
+        );
+        assert!(profile.drop_overrides.iter().any(|rule| {
+            rule.monster == "WhiteBoar"
+                && rule.item == "GreatFireBall"
+                && rule.chance_numerator == 1
+                && rule.chance_denominator == 3
+        }));
+        assert!(profile.drop_overrides.iter().any(|rule| {
+            rule.monster == "EvilCentipede"
+                && rule.item == "SummonShinsu"
+                && rule.chance_numerator == 1
+                && rule.chance_denominator == 3
+        }));
+        assert_eq!(profile.experience_curve.len(), 50);
+        assert_eq!(content_profile_experience_required(&profile, 1), Some(100));
+        assert_eq!(
+            content_profile_experience_required(&profile, 49),
+            Some(300_000_000)
+        );
+        assert_eq!(
+            content_profile_experience_required(&profile, 50),
+            Some(350_000_000)
+        );
+        assert_eq!(validate_content_profile(&profile), Ok(()));
+    }
+
+    #[test]
+    fn platinum_176_profile_bundle_matches_the_compiled_profile() {
+        let profile = platinum_176_profile();
+        let bundle = platinum_176_profile_bundle();
+
+        assert_eq!(bundle.schema, "mir2-content-profile-bundle/1");
+        assert_eq!(bundle.profile_id, profile.profile_id);
+        assert_eq!(bundle.profile_version, profile.version);
+        assert_eq!(bundle.acceptance_level, profile.acceptance_level);
+        assert_eq!(bundle.source, profile.source);
+        assert_eq!(bundle.hash_algorithm, "sha256");
+        assert_eq!(bundle.content_hash.len(), 64);
+        assert!(bundle
+            .content_hash
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit()));
+        assert_eq!(bundle.source_data.crystal_database_version, 117);
+        assert_eq!(bundle.summary.maps, profile.map_whitelist.len());
+        assert_eq!(bundle.summary.monsters, profile.monster_whitelist.len());
+        assert_eq!(bundle.summary.items, profile.item_whitelist.len());
+        assert_eq!(bundle.summary.skills, profile.skills.len());
+        assert_eq!(
+            bundle.summary.npc_scripts,
+            profile.npc_script_whitelist.len()
+        );
+        assert_eq!(bundle.summary.drop_overrides, profile.drop_overrides.len());
+        assert_eq!(bundle.files.len(), 13);
     }
 
     #[test]

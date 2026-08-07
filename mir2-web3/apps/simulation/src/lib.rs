@@ -32,12 +32,12 @@ pub use runtime::{
     SharedGroundDropPickupCommit, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer,
-    SharedTradeOfferItem, SimulationSession, ZoneBounds, ZoneChatItem, ZoneChatProfile,
-    ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneOutput,
-    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
-    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
-    CRYSTAL_OBJECT_DATA_RANGE,
+    SharedTradeOfferItem, SimulationSession, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem,
+    ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
+    ZoneOutbound, ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand,
+    ZoneReplayEngine, ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime,
+    ZoneStandbyReplica, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, WorldCommand, WorldCommandExecution,

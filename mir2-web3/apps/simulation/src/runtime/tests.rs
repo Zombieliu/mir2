@@ -59901,3 +59901,106 @@ fn auction_buy_settles_own_city_currency_listing() {
 
     assert_eq!(city_currency_balance(&session, "bichon"), 300);
 }
+
+#[test]
+fn platinum_176_ghoul_drop_overrides_supply_level_19_to_21_books() {
+    let config = SimulationConfig::default().with_platinum_176_profile();
+
+    for expected_item in ["Teleport", "SummonSkeleton", "Hiding", "MassHiding"] {
+        let appeared = (60_000..60_256).any(|object_id| {
+            (0..256).any(|tick| {
+                super::content_profile_monster_drop_templates(&config, object_id, "Ghoul", tick)
+                    .iter()
+                    .any(|drop| {
+                        matches!(
+                            drop,
+                            super::ResolvedDropTemplate::Item { name, .. } if name == expected_item
+                        )
+                    })
+            })
+        });
+        assert!(
+            appeared,
+            "{expected_item} should be produced by the authoritative Ghoul override"
+        );
+    }
+
+    assert!(
+        super::content_profile_monster_drop_templates(&config, 118, "Zombie2", 0).is_empty(),
+        "Ghoul-specific overrides must not leak to ordinary monsters"
+    );
+    assert!(
+        super::content_profile_monster_drop_templates(
+            &SimulationConfig::default(),
+            118,
+            "Ghoul",
+            0,
+        )
+        .is_empty(),
+        "the base Crystal rules must remain unchanged without the profile"
+    );
+}
+
+#[test]
+fn platinum_176_midgame_boss_overrides_supply_level_22_to_35_books() {
+    let config = SimulationConfig::default().with_platinum_176_profile();
+
+    for (monster, expected_items) in [
+        (
+            "WhiteBoar",
+            &[
+                "GreatFireBall",
+                "SoulShield",
+                "FireBang",
+                "Thrusting",
+                "BlessedArmour",
+                "FireWall",
+                "Revelation",
+            ][..],
+        ),
+        (
+            "EvilCentipede",
+            &[
+                "HalfMoon",
+                "TrapHexagon",
+                "ShoulderDash",
+                "ThunderStorm",
+                "MagicShield",
+                "TurnUndead",
+                "MassHealing",
+                "FlamingSword",
+                "IceStorm",
+                "SummonShinsu",
+            ][..],
+        ),
+    ] {
+        for expected_item in expected_items {
+            let appeared = (61_000..61_064).any(|object_id| {
+                (0..64).any(|tick| {
+                    super::content_profile_monster_drop_templates(
+                        &config,
+                        object_id,
+                        monster,
+                        tick,
+                    )
+                    .iter()
+                    .any(|drop| {
+                        matches!(
+                            drop,
+                            super::ResolvedDropTemplate::Item { name, .. } if name == expected_item
+                        )
+                    })
+                })
+            });
+            assert!(
+                appeared,
+                "{expected_item} should be produced by the authoritative {monster} override"
+            );
+        }
+    }
+
+    assert!(
+        super::content_profile_monster_drop_templates(&config, 119, "Scarecrow", 0).is_empty(),
+        "midgame Boss overrides must not leak to starter monsters"
+    );
+}

@@ -4,14 +4,15 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::combat::combat_delay_ticks;
+use super::combat::{apply_damage_to_current_player, combat_delay_ticks};
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
     MonsterAgent, MonsterVitals, PlayerVitals, Position,
 };
 use super::crystal_compat::*;
 use super::drops::{
-    zone_ground_drop_snapshots_for_monster, SharedAccountInventoryTransactionReceipt,
+    drop_player_death_penalty, zone_ground_drop_snapshots_for_monster,
+    SharedAccountInventoryTransactionReceipt,
 };
 use super::equipment::*;
 use super::inventory::*;
@@ -454,6 +455,7 @@ impl SimulationSession {
             .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)?;
         let stage5 = self.app.world().resource::<Stage5SystemsResource>();
         let permissions = self.app.world().resource::<PlayerPermissionResource>();
+        let player_runtime = self.app.world().resource::<PlayerRuntimeResource>();
         let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
             .then(|| stage5.stage5_systems.guild.name.clone());
         let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
@@ -486,12 +488,16 @@ impl SimulationSession {
             chat_profile: ZoneChatProfile {
                 group_members: stage5.stage5_systems.group.members.clone(),
                 guild_name,
+                active_guild_wars: stage5.stage5_systems.guild.active_wars.clone(),
                 blocked_names: stage5.stage5_systems.social.blocked.clone(),
                 mentor_name,
                 relationship_name,
                 is_gm: false,
                 free_map_shout: permissions.free_map_shout,
                 free_server_shout: permissions.free_server_shout,
+                attack_mode: stage5.stage5_systems.attack_mode,
+                pk_points: player_runtime.pk_points,
+                in_safe_zone: snapshot.in_safe_zone,
             },
             combat_stats: self.zone_player_combat_stats(),
         })
@@ -577,25 +583,16 @@ impl SimulationSession {
         super::onchain::credit_gold_from_ore(self.app.world_mut(), gold, idempotency_key)
     }
 
-    pub fn apply_zone_player_damage(&mut self, damage: i32) {
+    pub fn apply_zone_player_damage(&mut self, damage: i32) -> bool {
         if damage <= 0 || !is_in_world(self.app.world()) {
-            return;
+            return false;
         }
         let world = self.app.world_mut();
-        let Some(player) = player_entity(world) else {
-            return;
-        };
-        let updated_vitals = {
-            let mut entity = world.entity_mut(player);
-            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
-                vitals.hp = vitals.hp.saturating_sub(damage).max(0);
-                *vitals
-            })
-        };
-        if let Some(vitals) = updated_vitals {
-            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+        let outcome = apply_damage_to_current_player(world, damage, &mut Vec::new());
+        if outcome.applied {
             advance_runtime_tick(world);
         }
+        outcome.died
     }
 
     pub fn apply_zone_player_heal(&mut self, amount: i32) {
@@ -617,6 +614,38 @@ impl SimulationSession {
             world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
             advance_runtime_tick(world);
         }
+    }
+
+    pub fn apply_zone_unlawful_player_kill(&mut self, points: i32) -> i32 {
+        if points <= 0 || !is_in_world(self.app.world()) {
+            return 0;
+        }
+        let world = self.app.world_mut();
+        let pk_points = {
+            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+            runtime.pk_points = runtime.pk_points.saturating_add(points);
+            runtime.pk_points
+        };
+        advance_runtime_tick(world);
+        pk_points
+    }
+
+    pub fn zone_player_name_colour_argb(&self) -> i32 {
+        if !is_in_world(self.app.world()) {
+            return -1;
+        }
+        current_player_name_colour_argb(self.app.world())
+    }
+
+    pub fn apply_zone_player_death_penalty(&mut self) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        let packets = drop_player_death_penalty(self.app.world_mut());
+        if !packets.is_empty() {
+            advance_runtime_tick(self.app.world_mut());
+        }
+        packets
     }
 
     pub fn apply_zone_player_magic_spend(&mut self, spell: Spell, mp_cost: i32, cooldown_ms: u64) {
@@ -831,6 +860,7 @@ impl SimulationSession {
             .unwrap_or(mir2_protocol::MirDirection::Down);
         let name = entity_name(world, entity).unwrap_or_else(|| "Monster".to_string());
         let template = crystal_monster_by_name(&name);
+        let is_conquest_battlefield_object = matches!(agent.ai, 80..=82);
         let object_id = entity_object_id(world, entity).unwrap_or(object_id);
         let max_hp = vitals.max_hp.max(1);
 
@@ -843,17 +873,26 @@ impl SimulationSession {
             level: template.as_ref().map(|monster| monster.level).unwrap_or(1),
             max_hp,
             hp: vitals.hp.clamp(0, max_hp),
-            experience: template
-                .as_ref()
-                .map(|monster| monster.experience)
-                .unwrap_or(0),
+            experience: if is_conquest_battlefield_object {
+                0
+            } else {
+                template
+                    .as_ref()
+                    .map(|monster| monster.experience)
+                    .unwrap_or(0)
+            },
+            friendly_guild: None,
             defense: template
                 .as_ref()
                 .map(zone_monster_defense_from_template)
                 .unwrap_or_default(),
             position,
             direction,
-            drops: zone_ground_drop_snapshots_for_monster(world, object_id, &name),
+            drops: if is_conquest_battlefield_object {
+                Vec::new()
+            } else {
+                zone_ground_drop_snapshots_for_monster(world, object_id, &name)
+            },
         })
     }
 }

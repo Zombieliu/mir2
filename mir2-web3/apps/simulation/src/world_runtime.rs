@@ -477,8 +477,20 @@ impl InProcessWorldRuntime {
         self.session.force_authoritative_player_vitals(hp, mp);
     }
 
-    pub fn apply_zone_player_damage(&mut self, damage: i32) {
-        self.session.apply_zone_player_damage(damage);
+    pub fn apply_zone_player_damage(&mut self, damage: i32) -> bool {
+        self.session.apply_zone_player_damage(damage)
+    }
+
+    pub fn apply_zone_unlawful_player_kill(&mut self, points: i32) -> i32 {
+        self.session.apply_zone_unlawful_player_kill(points)
+    }
+
+    pub fn zone_player_name_colour_argb(&self) -> i32 {
+        self.session.zone_player_name_colour_argb()
+    }
+
+    pub fn apply_zone_player_death_penalty(&mut self) -> Vec<ServerPacket> {
+        self.session.apply_zone_player_death_penalty()
     }
 
     pub fn apply_zone_player_heal(&mut self, amount: i32) {

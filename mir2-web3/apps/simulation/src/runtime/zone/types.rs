@@ -69,12 +69,20 @@ impl ZoneKey {
 pub struct ZoneChatProfile {
     pub group_members: Vec<String>,
     pub guild_name: Option<String>,
+    #[serde(default)]
+    pub active_guild_wars: Vec<String>,
     pub blocked_names: Vec<String>,
     pub mentor_name: Option<String>,
     pub relationship_name: Option<String>,
     pub is_gm: bool,
     pub free_map_shout: bool,
     pub free_server_shout: bool,
+    #[serde(default)]
+    pub attack_mode: u8,
+    #[serde(default)]
+    pub pk_points: i32,
+    #[serde(default)]
+    pub in_safe_zone: bool,
 }
 
 impl Default for ZoneChatProfile {
@@ -82,12 +90,16 @@ impl Default for ZoneChatProfile {
         Self {
             group_members: Vec::new(),
             guild_name: None,
+            active_guild_wars: Vec::new(),
             blocked_names: Vec::new(),
             mentor_name: None,
             relationship_name: None,
             is_gm: false,
             free_map_shout: false,
             free_server_shout: false,
+            attack_mode: 0,
+            pk_points: 0,
+            in_safe_zone: false,
         }
     }
 }
@@ -199,6 +211,9 @@ pub struct ZoneMonsterSpawn {
     pub max_hp: i32,
     pub hp: i32,
     pub experience: u32,
+    /// Optional guild protected by this conquest guard. Ordinary monsters and
+    /// non-conquest structures leave this unset.
+    pub friendly_guild: Option<String>,
     pub position: Point,
     pub direction: MirDirection,
     /// Authoritative defensive stats so the zone can resolve incoming player
@@ -207,6 +222,13 @@ pub struct ZoneMonsterSpawn {
     /// and applies trusted damage unchanged (legacy behaviour).
     pub defense: ZoneMonsterDefense,
     pub drops: Vec<GroundDropSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneBossRewardAudit {
+    pub reward_owner_session_id: SessionId,
+    pub last_hit_session_id: SessionId,
+    pub damage_contributions: BTreeMap<SessionId, u64>,
 }
 
 /// Authoritative defensive stats for a shared-zone monster.
@@ -248,6 +270,8 @@ pub struct ZoneMonsterKillAward {
     pub monster_name: String,
     pub experience: u32,
     pub drops: Vec<GroundDropSnapshot>,
+    #[serde(default)]
+    pub boss_audit: Option<ZoneBossRewardAudit>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -492,6 +516,8 @@ pub(crate) struct ZoneNativeMonster {
     pub max_hp: i32,
     pub hp: i32,
     pub experience: u32,
+    #[serde(default)]
+    pub friendly_guild: Option<String>,
     pub defense: ZoneMonsterDefense,
     pub position: Point,
     pub direction: MirDirection,
@@ -507,6 +533,10 @@ pub(crate) struct ZoneNativeMonster {
     pub damage_poison_expires_at_ms: u64,
     pub damage_poison_owner_session_id: Option<SessionId>,
     pub damage_poison_owner_object_id: u32,
+    /// Authoritative damage credited to player sessions for Boss ownership.
+    /// Summon and damage-over-time attacks use their owning player's session.
+    #[serde(default)]
+    pub damage_contributions: BTreeMap<SessionId, u64>,
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
 }
 
@@ -538,6 +568,7 @@ impl ZoneNativeMonster {
             max_hp,
             hp,
             experience: spawn.experience,
+            friendly_guild: spawn.friendly_guild.clone(),
             defense: spawn.defense,
             position: spawn.position.clone(),
             direction: spawn.direction,
@@ -553,12 +584,13 @@ impl ZoneNativeMonster {
             damage_poison_expires_at_ms: 0,
             damage_poison_owner_session_id: None,
             damage_poison_owner_object_id: 0,
+            damage_contributions: BTreeMap::new(),
             buffs: BTreeMap::new(),
         }
     }
 }
 
-fn zone_native_monster_targets_players(ai: u8) -> bool {
+pub(crate) fn zone_native_monster_targets_players(ai: u8) -> bool {
     !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113)
 }
 

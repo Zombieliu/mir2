@@ -344,8 +344,34 @@ type CrystalBootstrapChatLine = {
   channel: UiLogChannel;
 };
 
+type GatewayRealmInfo = {
+  schema: string;
+  realmId: string;
+  profileId: string;
+  profileVersion: number;
+  acceptanceLevel: number | null;
+  source: string | null;
+  bundleHash: string | null;
+  bundleBuiltAt: string | null;
+  sourceData: {
+    crystalDatabaseVersion: number;
+    crystalDatabaseCustomVersion: number;
+  } | null;
+  ratePolicy: {
+    label: string;
+    monsterExperienceTiers: Array<{
+      minLevel: number;
+      maxLevel: number;
+      multiplier: number;
+    }>;
+    goldMultiplier: number;
+    dropMultiplier: number;
+  } | null;
+};
+
 type GatewayEvent =
   | { type: "packet"; packet: string; payload?: Record<string, unknown> }
+  | { type: "realmInfo"; payload: GatewayRealmInfo }
   | { type: "worldSnapshot"; payload: GatewayWorldSnapshot }
   | { type: "spectatorStatus"; payload: SpectatorStatus }
   | { type: "aiLiveStatus"; payload: AiLiveStatus }
@@ -446,6 +472,9 @@ type GatewayWorldItem = {
   description: string;
   durabilityCurrent?: number | null;
   durabilityMax?: number | null;
+  equipSlot?: EquipmentSlot | null;
+  addedAttack?: number;
+  addedDefence?: number;
 };
 
 type GatewayEquipmentItem = {
@@ -578,6 +607,7 @@ type GatewayWorldSnapshot = {
   playerMaxHp?: number | null;
   playerMp?: number | null;
   playerMaxMp?: number | null;
+  playerPkPoints?: number;
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;
@@ -717,6 +747,9 @@ type WorldItem = {
   description: string;
   durabilityCurrent?: number;
   durabilityMax?: number;
+  equipSlot?: EquipmentSlot | null;
+  attack?: number;
+  defence?: number;
 };
 
 type ItemCommandRef = {
@@ -863,6 +896,7 @@ type WorldState = {
   playerMaxHp?: number;
   playerMp?: number;
   playerMaxMp?: number;
+  playerPkPoints: number;
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;
@@ -1014,6 +1048,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   playerMaxHp: undefined,
   playerMp: undefined,
   playerMaxMp: undefined,
+  playerPkPoints: 0,
   playerExperience: 0,
   playerMaxExperience: 100,
   gold: 0,
@@ -1081,6 +1116,7 @@ const MOVEMENT_TURN_VISUAL_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS;
 const MOVEMENT_QUEUE_INPUT_LEAD_MS = 0;
 const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 1000;
 const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = MOVEMENT_PENDING_MAX_AGE_MS;
+const MAX_UPLOADED_BEVY_ENTITY_ATLAS_KEYS = 8;
 const MOVEMENT_OUTSTANDING_ACTION_SETTLE_GRACE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_PENDING_ACTION_RECOVERY_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const MOVEMENT_PREDICTED_CORRECTION_HOLD_MS = CRYSTAL_INPUT_CORRECTION_DELAY_MS;
@@ -1808,6 +1844,10 @@ export default function HomePage() {
   }
   const socketRef = useRef<WebSocket | null>(null);
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  // Shared-zone packets address this client with its authoritative zone object
+  // id, while the local Crystal-compatible snapshot keeps self at object 1000.
+  // Learn that alias from the first struck packet at the self position.
+  const sharedZoneSelfObjectIdRef = useRef<string | null>(null);
   // The world-model store is the serialization source for Bevy. It is kept in
   // sync with React `world` state (see the worldRef sync effect) and read by the
   // fixed-cadence snapshot emitter, decoupling the Bevy push from React renders.
@@ -1817,6 +1857,10 @@ export default function HomePage() {
   }
   // Pending rAF id for coalescing world->React flushes (see updateWorld below).
   const worldFlushFrameRef = useRef(0);
+  // Browsers may suspend rAF completely for a background multiplayer tab.
+  // Keep a short timer fallback so server-authoritative state still reaches
+  // React/debug consumers while that tab is not foregrounded.
+  const worldFlushTimerRef = useRef<number | null>(null);
   const gameBusRef = useRef<GameEventBus | null>(null);
   if (gameBusRef.current === null) {
     gameBusRef.current = createGameEventBus();
@@ -2009,6 +2053,14 @@ export default function HomePage() {
           // coalesces packet bursts, so commit the game state at normal priority.
           setWorld(latestWorld);
         });
+        worldFlushTimerRef.current = window.setTimeout(() => {
+          if (worldFlushFrameRef.current !== 0) {
+            window.cancelAnimationFrame(worldFlushFrameRef.current);
+            worldFlushFrameRef.current = 0;
+          }
+          worldFlushTimerRef.current = null;
+          setWorld(worldRef.current);
+        }, 100);
       }
     },
     [],
@@ -2050,9 +2102,11 @@ export default function HomePage() {
   const [aiLiveBrowserMode, setAiLiveBrowserMode] = useState(false);
   const [aiLiveAudioEnabled, setAiLiveAudioEnabled] = useState(false);
   const [aiLiveStatus, setAiLiveStatus] = useState<AiLiveStatus | null>(null);
+  const [realmInfo, setRealmInfo] = useState<GatewayRealmInfo | null>(null);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
+  const [npcRepairService, setNpcRepairService] = useState<"repair" | "special" | null>(null);
   const [showQuestLog, setShowQuestLog] = useState(false);
   // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
   const [showTutorial, setShowTutorial] = useState(false);
@@ -2512,6 +2566,13 @@ export default function HomePage() {
       }
       runtime.setMir2EntityRenderAtlas?.(atlas.key, atlas.width, atlas.height, atlas.pixels);
       uploadedBevyEntityAtlasKeysRef.current.add(atlas.key);
+      while (
+        uploadedBevyEntityAtlasKeysRef.current.size > MAX_UPLOADED_BEVY_ENTITY_ATLAS_KEYS
+      ) {
+        const oldestKey = uploadedBevyEntityAtlasKeysRef.current.values().next().value;
+        if (typeof oldestKey !== "string") break;
+        uploadedBevyEntityAtlasKeysRef.current.delete(oldestKey);
+      }
     }
 
     const { atlasImages: _atlasImages, ...serializableState } = state;
@@ -5343,6 +5404,7 @@ export default function HomePage() {
           wsState: string;
           gatewayProtocolReady: boolean;
           reconnectStatus: ReconnectStatus;
+          realmInfo: GatewayRealmInfo | null;
           loginBusy: boolean;
           selectedCharacterIndex: number;
           characters: SelectCharacterEntry[];
@@ -5433,6 +5495,7 @@ export default function HomePage() {
           return false;
         }
         manualSocketCloseRef.current = false;
+        setWsState("closing");
         socket.close();
         return true;
       },
@@ -5445,6 +5508,7 @@ export default function HomePage() {
           return gatewayProtocolReadyRef.current;
         },
         reconnectStatus,
+        realmInfo,
         loginBusy,
         selectedCharacterIndex,
         characters,
@@ -8089,6 +8153,20 @@ export default function HomePage() {
       appendLog(t("log.gatewayError", [message]), "system");
       return;
     }
+    if (event.type === "realmInfo") {
+      const info = event.payload as GatewayRealmInfo;
+      setRealmInfo(info);
+      (
+        window as typeof window & {
+          __mir2RealmInfo?: GatewayRealmInfo;
+        }
+      ).__mir2RealmInfo = info;
+      appendLog(
+        `Realm ${info.realmId} · ${info.profileId} v${info.profileVersion}`,
+        "system",
+      );
+      return;
+    }
     if (event.type === "worldSnapshot") {
       worldSnapshotVersionRef.current += 1;
       const snapshot = event.payload as GatewayWorldSnapshot;
@@ -8251,7 +8329,7 @@ export default function HomePage() {
           const removedIndex = numberOrUndefined(payload.characterIndex);
           const nextCharacters = current.filter((character) => character.index !== removedIndex);
           setSelectedCharacterIndex(Math.max(0, Math.min(selectedCharacterIndex, nextCharacters.length - 1)));
-          return nextCharacters.length ? nextCharacters : [fallbackCharacter(language, accountId)];
+          return nextCharacters;
         });
         appendLog(t("ui.characterDeleted", [], "Character deleted."), "system");
         break;
@@ -8795,13 +8873,13 @@ export default function HomePage() {
         restoreObjectSelection(stringifyId(payload.attackerId));
         break;
       case "ObjectDied":
-        markWorldEntityDead(payload);
+        markWorldEntityDead(normalizeSharedZoneSelfTargetPayload(payload));
         break;
       case "ObjectRevived":
-        markWorldEntityRevived(payload);
+        markWorldEntityRevived(normalizeSharedZoneSelfTargetPayload(payload));
         break;
       case "ObjectHealth":
-        applyObjectHealthPacket(payload);
+        applyObjectHealthPacket(normalizeSharedZoneSelfTargetPayload(payload));
         break;
       case "ObjectMana":
         applyObjectManaPacket(payload);
@@ -8928,6 +9006,7 @@ export default function HomePage() {
         break;
       }
       case "NPCStorage":
+        updateWorld((current) => ({ ...current, activeNpcDialog: null }));
         setShowInventory(true);
         setActiveInventoryTab("bag1");
         setStorageServiceOpenVersion((current) => current + 1);
@@ -9444,6 +9523,11 @@ export default function HomePage() {
             ...current.stage5Systems,
             group: {
               ...(current.stage5Systems.group ?? {}),
+              // GroupMemberInfo is the authoritative full roster. Mirror its
+              // names into the legacy `members` projection as well so a
+              // following stale snapshot cannot erase the party before the
+              // incremental AddMember packets arrive.
+              members: memberInfos.map((member) => member.name),
               memberInfos,
               leaderName: leaderName || undefined,
             },
@@ -9719,13 +9803,22 @@ export default function HomePage() {
       case "NPCGoods":
       case "NPCPearlGoods":
       case "NPCSell":
-      case "NPCRepair":
-      case "NPCSRepair":
       case "NPCRefine":
       case "NPCReplaceWedRing":
         // Opening an NPC service panel: reuse the inventory surface used by NPCStorage.
+        updateWorld((current) => ({ ...current, activeNpcDialog: null }));
+        setNpcRepairService(null);
         setShowInventory(true);
         setActiveInventoryTab("bag1");
+        break;
+      case "NPCRepair":
+      case "NPCSRepair":
+        // Crystal repairs are NPC-driven. Surface the dedicated repair list
+        // instead of the generic inventory/character windows.
+        updateWorld((current) => ({ ...current, activeNpcDialog: null }));
+        setNpcRepairService(event.packet === "NPCSRepair" ? "special" : "repair");
+        setShowInventory(false);
+        setShowCharacter(false);
         break;
       case "NPCResponse": {
         const page = Array.isArray(payload.page)
@@ -9802,8 +9895,17 @@ export default function HomePage() {
             ...current.stage5Systems,
             guild: {
               ...(current.stage5Systems.guild ?? {}),
-              name: stringOrFallback(payload.guildName, current.stage5Systems.guild?.name ?? ""),
-              rank: stringOrFallback(payload.guildRankName, current.stage5Systems.guild?.rank ?? ""),
+              // An empty GuildStatus name/rank is authoritative after leaving
+              // or being kicked; treating it as a fallback kept stale guild
+              // membership visible forever on the removed player's client.
+              name:
+                typeof payload.guildName === "string"
+                  ? payload.guildName
+                  : current.stage5Systems.guild?.name ?? "",
+              rank:
+                typeof payload.guildRankName === "string"
+                  ? payload.guildRankName
+                  : current.stage5Systems.guild?.rank ?? "",
             },
           },
         }));
@@ -10995,6 +11097,36 @@ export default function HomePage() {
     }));
   }
 
+  function normalizeSharedZoneSelfTargetPayload(
+    payload: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const rawObjectId = stringifyId(payload.objectId);
+    const current = worldRef.current;
+    const localSelfObjectId = current.playerObjectId;
+    if (!localSelfObjectId || rawObjectId === "0" || rawObjectId === localSelfObjectId) {
+      return payload;
+    }
+    if (sharedZoneSelfObjectIdRef.current === rawObjectId) {
+      return { ...payload, objectId: localSelfObjectId };
+    }
+
+    const location = payload.location as { x?: number; y?: number } | undefined;
+    const selfEntity = current.entities.find((entity) => entity.objectId === localSelfObjectId);
+    const rawObjectIsKnown = current.entities.some((entity) => entity.objectId === rawObjectId);
+    if (
+      !rawObjectIsKnown &&
+      selfEntity &&
+      typeof location?.x === "number" &&
+      typeof location?.y === "number" &&
+      location.x === selfEntity.x &&
+      location.y === selfEntity.y
+    ) {
+      sharedZoneSelfObjectIdRef.current = rawObjectId;
+      return { ...payload, objectId: localSelfObjectId };
+    }
+    return payload;
+  }
+
   function updateWorldEntityFromLocationPacket(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
@@ -11671,6 +11803,9 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      equipSlot: item.equipSlot ?? null,
+      attack: item.addedAttack ?? 0,
+      defence: item.addedDefence ?? 0,
     }));
     const beltItems = snapshot.beltItems.map((item) => ({
       key: item.key,
@@ -11954,6 +12089,7 @@ export default function HomePage() {
         playerMaxHp: snapshot.playerMaxHp ?? undefined,
         playerMp: snapshot.playerMp ?? undefined,
         playerMaxMp: snapshot.playerMaxMp ?? undefined,
+        playerPkPoints: snapshot.playerPkPoints ?? current.playerPkPoints,
         playerExperience: snapshot.playerExperience,
         playerMaxExperience: Math.max(snapshot.playerMaxExperience, 1),
         gold: snapshot.gold,
@@ -12002,7 +12138,22 @@ export default function HomePage() {
         activeNpcDialog,
         knownSkills,
         activeBuffs,
-        stage5Systems: snapshot.stage5Systems ?? current.stage5Systems,
+        stage5Systems: snapshot.stage5Systems
+          ? {
+              ...snapshot.stage5Systems,
+              // Social packets are emitted before the following world snapshot.
+              // A snapshot captured just before AddMember may therefore carry an
+              // empty roster and must not erase the newer packet-authoritative
+              // group state. DeleteMember/DeleteGroup explicitly clear it.
+              group:
+                ((current.stage5Systems.group?.members?.length ?? 0) > 0 ||
+                  (current.stage5Systems.group?.memberInfos?.length ?? 0) > 0) &&
+                (snapshot.stage5Systems.group?.members?.length ?? 0) === 0 &&
+                (snapshot.stage5Systems.group?.memberInfos?.length ?? 0) === 0
+                  ? current.stage5Systems.group
+                  : snapshot.stage5Systems.group,
+            }
+          : current.stage5Systems,
         mapTransfers,
         interactionHints: snapshot.interactionHints,
         projectiles: current.projectiles.filter((projectile) => projectile.expiresAt > currentTime),
@@ -13311,6 +13462,7 @@ export default function HomePage() {
       activeInventoryTab={activeInventoryTab}
       activeCharacterTab={activeCharacterTab}
       storageServiceOpenVersion={storageServiceOpenVersion}
+      npcRepairService={npcRepairService}
       onAccountIdChange={setAccountId}
       onPasswordChange={setPassword}
       onLanguageChange={setLanguage}
@@ -13360,6 +13512,7 @@ export default function HomePage() {
       onToggleInventory={toggleInventoryWindow}
       onCloseCharacter={() => setShowCharacter(false)}
       onCloseInventory={() => setShowInventory(false)}
+      onCloseNpcRepairService={() => setNpcRepairService(null)}
       onOpenCharacterTab={openCharacter}
       onOpenInventoryTab={openInventory}
       onViewportTileClick={onViewportTileClick}
@@ -15037,6 +15190,8 @@ function parseCharacters(
   fallbackName: string,
   language: Mir2Language,
 ): SelectCharacterEntry[] {
+  const hasAuthoritativeCharacterList =
+    Array.isArray(payload.characters) || Array.isArray(payload.Characters);
   const candidates = Array.isArray(payload.characters)
     ? payload.characters
     : Array.isArray(payload.Characters)
@@ -15049,6 +15204,14 @@ function parseCharacters(
 
   if (parsed.length > 0) {
     return parsed;
+  }
+
+  // An explicit empty list from LoginSuccess means this account genuinely has
+  // no characters. Rendering a synthetic index-0 Warrior makes StartGame target
+  // a save that does not exist and prevents first-character creation from being
+  // a truthful product flow.
+  if (hasAuthoritativeCharacterList) {
+    return [];
   }
 
   return [fallbackCharacter(language, fallbackName)];

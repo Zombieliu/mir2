@@ -3,6 +3,7 @@
 import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
 import type { EffectAnimation, EffectAssets } from "../../lib/crystal-magic-effects";
 import { loadEffectAssets } from "../../lib/crystal-magic-effects";
 import {
@@ -121,10 +122,10 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
       {!useBevyEntityRenderer && sprite?.mount ? (
         <img
           className="entity-sprite-layer mount"
-          src={sprite.mount.path}
+          src={originalAssetPath(sprite.mount.path)}
           alt=""
           draggable={false}
-          data-mir2-original-src={sprite.mount.path}
+          data-mir2-original-src={originalAssetPath(sprite.mount.path)}
           onError={handleSceneAssetImageError}
           onLoad={handleSceneAssetImageLoad}
           style={{
@@ -140,10 +141,10 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
           <img
             key={`rear-${objectId}-${index}-${weapon.path}`}
             className="entity-sprite-layer weapon rear"
-            src={weapon.path}
+            src={originalAssetPath(weapon.path)}
             alt=""
             draggable={false}
-            data-mir2-original-src={weapon.path}
+            data-mir2-original-src={originalAssetPath(weapon.path)}
             onError={handleSceneAssetImageError}
             onLoad={handleSceneAssetImageLoad}
             style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
@@ -152,10 +153,10 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
       {!useBevyEntityRenderer && sprite?.body ? (
         <img
           className="entity-sprite-layer body"
-          src={sprite.body.path}
+          src={originalAssetPath(sprite.body.path)}
           alt=""
           draggable={false}
-          data-mir2-original-src={sprite.body.path}
+          data-mir2-original-src={originalAssetPath(sprite.body.path)}
           onError={handleSceneAssetImageError}
           onLoad={handleSceneAssetImageLoad}
           style={{
@@ -169,10 +170,10 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
       {!useBevyEntityRenderer && sprite?.hair ? (
         <img
           className="entity-sprite-layer hair"
-          src={sprite.hair.path}
+          src={originalAssetPath(sprite.hair.path)}
           alt=""
           draggable={false}
-          data-mir2-original-src={sprite.hair.path}
+          data-mir2-original-src={originalAssetPath(sprite.hair.path)}
           onError={handleSceneAssetImageError}
           onLoad={handleSceneAssetImageLoad}
           style={{
@@ -188,10 +189,10 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
           <img
             key={`front-${objectId}-${index}-${weapon.path}`}
             className="entity-sprite-layer weapon front"
-            src={weapon.path}
+            src={originalAssetPath(weapon.path)}
             alt=""
             draggable={false}
-            data-mir2-original-src={weapon.path}
+            data-mir2-original-src={originalAssetPath(weapon.path)}
             onError={handleSceneAssetImageError}
             onLoad={handleSceneAssetImageLoad}
             style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}

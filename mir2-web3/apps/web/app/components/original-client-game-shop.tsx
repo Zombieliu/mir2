@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
 import {
   CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX,
   CRYSTAL_GAME_SHOP_ITEMS,
@@ -399,7 +400,7 @@ function formatGameShopStock(stock: number) {
 }
 
 function originalItemIconPath(icon: number) {
-  return `/original-ui/Items/${icon}.png`;
+  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 /* ========================================================================= */
@@ -589,10 +590,10 @@ export function NpcShopWindow({
   const confirmEnabled = Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable;
 
   return (
-    <section aria-label={t("ui.shopTitle", [], "Shop")} data-shop-tab={tab} style={shopStyle.window}>
+    <section className="npc-shop-window" aria-label={t("ui.shopTitle", [], "Shop")} data-shop-tab={tab} style={shopStyle.window}>
       <div style={shopStyle.header}>
         <strong style={shopStyle.title}>{npcName?.trim() || t("ui.shopTitle", [], "Shop")}</strong>
-        <div style={shopStyle.close}>
+        <div className="npc-shop-close" style={shopStyle.close}>
           <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
         </div>
       </div>
@@ -602,6 +603,7 @@ export function NpcShopWindow({
           <button
             key={entry}
             type="button"
+            className="npc-shop-tab"
             style={{ ...shopStyle.tab, ...(entry === tab ? shopStyle.tabOn : null) }}
             aria-pressed={entry === tab}
             onClick={() => {
@@ -660,6 +662,9 @@ export function NpcShopWindow({
               <button
                 key={`shop-row-${row.id}`}
                 type="button"
+                className="npc-shop-row"
+                data-item-id={String(row.id)}
+                aria-label={row.name}
                 style={{
                   ...shopStyle.row,
                   ...(isSelected ? shopStyle.rowSelected : null),
@@ -759,6 +764,7 @@ export function NpcShopWindow({
 
         <button
           type="button"
+          className="npc-shop-confirm"
           style={{ ...shopStyle.confirmButton, ...(!confirmEnabled ? shopStyle.confirmDisabled : null) }}
           disabled={!confirmEnabled}
           title={!affordable ? t("client.LowGold", [], "Not enough gold.") : undefined}

@@ -284,9 +284,19 @@ export type MiniMapPanelProps = {
   showBigMap: boolean;
   onToggleMail: () => void;
   onToggleBigMap: () => void;
+  showMailAction?: boolean;
 };
 
-export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onToggleMail, onToggleBigMap }: MiniMapPanelProps) {
+export function MiniMapPanel({
+  t,
+  world,
+  player,
+  showMailPanel,
+  showBigMap,
+  onToggleMail,
+  onToggleBigMap,
+  showMailAction = true,
+}: MiniMapPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
   const miniMapAsset = originalMiniMapAssetPath(world.miniMapIndex);
   const hasRasterMiniMap = Boolean(miniMapAsset);

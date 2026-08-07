@@ -95,6 +95,7 @@ export function SystemMenuPanel({
   onClose,
   onLogout,
   onTransferMap,
+  isPlatinum176 = false,
 }: {
   t: TranslateFn;
   playerName: string | null;
@@ -110,6 +111,7 @@ export function SystemMenuPanel({
   onClose: () => void;
   onLogout: () => void;
   onTransferMap: (transferKey: string) => void;
+  isPlatinum176?: boolean;
 }) {
   const [qaMap, setQaMap] = useState(() => normalizeMapInput(mapFileName ?? "0"));
   const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
@@ -121,7 +123,7 @@ export function SystemMenuPanel({
   const noop = () => undefined;
   const toggleInfoOverlay = (next: "help" | "keyboard") =>
     setInfoOverlay((current) => (current === next ? null : next));
-  const menuButtons: SystemMenuButtonDefinition[] = [
+  const allMenuButtons: SystemMenuButtonDefinition[] = [
     { key: "exit", label: t("ui.exit"), onClick: onLogout },
     { key: "logout", label: t("ui.logout", [], "Log Out"), onClick: onLogout },
     { key: "help", label: t("ui.help", [], "Help"), onClick: () => toggleInfoOverlay("help") },
@@ -136,13 +138,20 @@ export function SystemMenuPanel({
     { key: "group", label: t("ui.group", [], "Group"), panel: "group" as const },
     { key: "guild", label: t("ui.guild", [], "Guild"), panel: "guild" as const },
   ];
-  const lateSystemButtons: Array<{ panel: SystemMenuSocialPanel; label: string }> = [
+  const menuButtons = allMenuButtons.filter((button) =>
+    !isPlatinum176
+    || ["exit", "logout", "help", "keyboard", "friend", "group", "guild"].includes(button.key),
+  );
+  const allLateSystemButtons: Array<{ panel: SystemMenuSocialPanel; label: string }> = [
     { panel: "hero", label: t("ui.hero", [], "Hero") },
     { panel: "trade", label: t("ui.trade", [], "Trade") },
     { panel: "market", label: t("ui.market", [], "Market") },
     { panel: "marriage", label: t("ui.marriage", [], "Marriage") },
     { panel: "itemRental", label: t("ui.itemRental", [], "Item Rental") },
   ];
+  const lateSystemButtons = allLateSystemButtons.filter(
+    (button) => !isPlatinum176 || button.panel === "trade",
+  );
 
   function submitQaTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -181,6 +190,7 @@ export function SystemMenuPanel({
         </section>
         <button type="button" className="system-menu-close-hit" onClick={onClose} aria-label={t("ui.close")} />
       </section>
+      {!isPlatinum176 ? (
       <section className="system-menu-qa-panel" aria-label={t("ui.transfer", [], "Transfer controls")}>
         <div className="system-menu-meta">
           <span>{playerName ?? "-"}</span>
@@ -242,6 +252,7 @@ export function SystemMenuPanel({
           ))}
         </div>
       </section>
+      ) : null}
       {infoOverlay ? (
         <SystemMenuInfoOverlay
           t={t}

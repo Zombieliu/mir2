@@ -276,6 +276,17 @@ impl SimulationSession {
     }
 
     fn stage5_command_impl(&mut self, action: &str, args: Vec<String>) -> Vec<ServerPacket> {
+        if !self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .stage5_action_is_allowed(action)
+        {
+            return vec![system_message(
+                "This feature is unavailable in the active content profile.",
+            )];
+        }
         match action {
             "group.create" => self.stage5_group_create(args),
             "group.loot" => self.stage5_group_loot(args),

@@ -36,7 +36,8 @@ use super::items::{
 use super::movement::tile_distance;
 use super::npc_script::{crystal_npc_label_base, crystal_npc_labels_match, crystal_npc_section};
 use super::resources::{
-    InventoryResource, NpcStateResource, PlayerRuntimeResource, SessionResource,
+    InventoryResource, NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource,
+    SessionResource,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -593,6 +594,21 @@ pub(super) fn crystal_npc_goods_packet(
     }
 }
 
+fn crystal_npc_profile_allows_item(world: &World, item: &UserItem) -> bool {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    config.content_profile.is_none()
+        || crystal_item_by_index(item.item_index)
+            .is_some_and(|template| config.item_is_allowed(&template.name))
+}
+
+pub(super) fn filter_crystal_npc_goods_for_profile(world: &World, packets: &mut [ServerPacket]) {
+    for packet in packets {
+        if let ServerPacket::NPCGoods { list, .. } = packet {
+            list.retain(|item| crystal_npc_profile_allows_item(world, item));
+        }
+    }
+}
+
 pub(super) fn crystal_npc_price_rate_for_script(script: Option<&CrystalNpcScript>) -> f32 {
     script
         .and_then(|script| crystal_npc_info_by_script_key(&script.script_key))
@@ -881,6 +897,7 @@ pub(super) fn buy_item_impl(
         }
         CrystalNpcPurchaseSource::Trade => {}
     }
+    filter_crystal_npc_goods_for_profile(world, &mut packets);
     packets
 }
 
@@ -892,6 +909,7 @@ pub(super) fn crystal_npc_service_item_for_purchase(
     if service.label_key == "BUYBACK" {
         return crystal_npc_buy_back_items_for_script(world, &service.script_key)
             .into_iter()
+            .filter(|item| crystal_npc_profile_allows_item(world, item))
             .find(|item| item.unique_id == item_index)
             .map(|item| CrystalNpcPurchaseItem {
                 item,
@@ -904,6 +922,7 @@ pub(super) fn crystal_npc_service_item_for_purchase(
             .map(|script| crystal_npc_trade_goods_for_script(&script))
             .unwrap_or_default()
             .into_iter()
+            .filter(|item| crystal_npc_profile_allows_item(world, item))
             .find(|item| item.unique_id == item_index)
         {
             return Some(CrystalNpcPurchaseItem {
@@ -915,6 +934,7 @@ pub(super) fn crystal_npc_service_item_for_purchase(
 
     crystal_npc_used_goods_for_script(world, &service.script_key)
         .into_iter()
+        .filter(|item| crystal_npc_profile_allows_item(world, item))
         .find(|item| item.unique_id == item_index)
         .map(|item| CrystalNpcPurchaseItem {
             item,

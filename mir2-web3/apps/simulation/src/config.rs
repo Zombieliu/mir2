@@ -13,8 +13,11 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::os::windows::ffi::OsStrExt;
 
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, starter_map_collision, starter_scene, DecorObjectTemplate,
-    MapBounds, SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
+    content_profile_experience_required, content_profile_monster_is_boss,
+    crystal_map_respawns_by_file_name, crystal_respawn_manifest, platinum_176_profile,
+    platinum_176_profile_bundle, starter_map_collision, starter_scene, validate_content_profile,
+    ContentProfile, ContentSkillRule, DecorObjectTemplate, MapBounds, SceneBootstrap, SceneView,
+    StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
@@ -2382,43 +2385,39 @@ pub struct ContentProfileRuntime {
     pub bundle_built_at: String,
     pub crystal_database_version: i32,
     pub crystal_database_custom_version: i32,
+    pub profile: ContentProfile,
 }
 
 impl ContentProfileRuntime {
     pub fn platinum_176() -> Self {
+        let profile = platinum_176_profile();
+        let bundle = platinum_176_profile_bundle();
+        debug_assert!(validate_content_profile(&profile).is_ok());
         Self {
-            profile_id: "platinum_176".to_string(),
-            version: 6,
-            acceptance_level: 50,
-            source: "Crystal.Database-29.01.25/Jev with classic three-class 1.76 overrides"
-                .to_string(),
+            profile_id: profile.profile_id.clone(),
+            version: profile.version,
+            acceptance_level: profile.acceptance_level,
+            source: profile.source.clone(),
             rate_policy: ContentRatePolicy {
-                label: "launch_candidate_tiered_xp_1x_economy".to_string(),
-                monster_experience_tiers: vec![
-                    ContentLevelRate {
-                        min_level: 1,
-                        max_level: 21,
-                        multiplier: 2,
-                    },
-                    ContentLevelRate {
-                        min_level: 22,
-                        max_level: 35,
-                        multiplier: 3,
-                    },
-                    ContentLevelRate {
-                        min_level: 36,
-                        max_level: 50,
-                        multiplier: 4,
-                    },
-                ],
-                gold_multiplier: 1,
-                drop_multiplier: 1,
+                label: profile.rate_policy.label.clone(),
+                monster_experience_tiers: profile
+                    .rate_policy
+                    .monster_experience_tiers
+                    .iter()
+                    .map(|tier| ContentLevelRate {
+                        min_level: tier.min_level,
+                        max_level: tier.max_level,
+                        multiplier: u32::from(tier.multiplier),
+                    })
+                    .collect(),
+                gold_multiplier: u32::from(profile.rate_policy.gold_multiplier),
+                drop_multiplier: u32::from(profile.rate_policy.drop_multiplier),
             },
-            bundle_hash: "2d00329bf7feb071e8e2e4ade557112897ac4be7f0d88491934c609f6913c29a"
-                .to_string(),
-            bundle_built_at: "2026-07-29T23:32:34.770Z".to_string(),
-            crystal_database_version: 117,
-            crystal_database_custom_version: 0,
+            bundle_hash: bundle.content_hash,
+            bundle_built_at: bundle.built_at,
+            crystal_database_version: bundle.source_data.crystal_database_version,
+            crystal_database_custom_version: bundle.source_data.crystal_database_custom_version,
+            profile,
         }
     }
 
@@ -2430,6 +2429,83 @@ impl ContentProfileRuntime {
             .map(|tier| tier.multiplier)
             .unwrap_or(1)
             .max(1)
+    }
+
+    pub fn experience_required_for_level(&self, level: u16) -> i64 {
+        content_profile_experience_required(&self.profile, level)
+            .or_else(|| {
+                self.profile
+                    .experience_curve
+                    .last()
+                    .map(|entry| entry.required_experience)
+            })
+            .unwrap_or(100)
+            .max(1)
+    }
+
+    pub fn class_is_allowed(&self, class: MirClass) -> bool {
+        self.profile.allowed_classes.contains(&class)
+    }
+
+    pub fn map_is_allowed(&self, file_name: &str) -> bool {
+        let requested = normalize_content_map_file_name(file_name);
+        self.profile
+            .map_whitelist
+            .iter()
+            .any(|map| normalize_content_map_file_name(&map.file_name) == requested)
+    }
+
+    pub fn monster_is_allowed(&self, monster_name: &str) -> bool {
+        self.profile
+            .monster_whitelist
+            .iter()
+            .any(|allowed| allowed.eq_ignore_ascii_case(monster_name))
+    }
+
+    pub fn monster_respawn_random_delay_minutes(
+        &self,
+        monster_name: &str,
+        imported_random_delay_minutes: u16,
+    ) -> u16 {
+        if content_profile_monster_is_boss(&self.profile, monster_name) {
+            imported_random_delay_minutes.max(self.profile.boss_respawn_jitter_minutes)
+        } else {
+            imported_random_delay_minutes
+        }
+    }
+
+    pub fn item_is_allowed(&self, item_name: &str) -> bool {
+        self.profile
+            .item_whitelist
+            .iter()
+            .any(|allowed| allowed.eq_ignore_ascii_case(item_name))
+    }
+
+    pub fn npc_script_is_allowed(&self, script_key: &str) -> bool {
+        let requested = normalize_content_npc_script_key(script_key);
+        self.profile
+            .npc_script_whitelist
+            .iter()
+            .any(|allowed| normalize_content_npc_script_key(allowed) == requested)
+    }
+
+    pub fn content_skill_rule(&self, spell: &str) -> Option<&ContentSkillRule> {
+        self.profile.skills.iter().find(|rule| {
+            normalize_content_identifier(&rule.spell) == normalize_content_identifier(spell)
+        })
+    }
+
+    pub fn skill_is_allowed(&self, spell: &str, class: MirClass, level: u16) -> bool {
+        self.content_skill_rule(spell)
+            .is_some_and(|rule| rule.class == class && level >= rule.required_level)
+    }
+
+    pub fn stage5_action_is_allowed(&self, action: &str) -> bool {
+        !self
+            .profile
+            .disabled_stage5_action_prefixes
+            .iter()
+            .any(|prefix| action.starts_with(prefix))
     }
 }
 
@@ -2684,8 +2760,40 @@ impl SimulationConfig {
     }
 
     pub fn with_platinum_176_profile(mut self) -> Self {
-        self.content_profile = Some(ContentProfileRuntime::platinum_176());
+        let runtime = ContentProfileRuntime::platinum_176();
+        if let Some(starter_map_rule) = runtime
+            .profile
+            .map_whitelist
+            .iter()
+            .find(|map| map.tier.eq_ignore_ascii_case("starter"))
+        {
+            let normalized_starter = normalize_content_map_file_name(&starter_map_rule.file_name);
+            if let Some(starter_map) = crystal_respawn_manifest().maps.into_iter().find(|map| {
+                normalize_content_map_file_name(&map.map_file_name) == normalized_starter
+            }) {
+                if let Some(start_point) = starter_map
+                    .safe_zones
+                    .iter()
+                    .find(|safe_zone| safe_zone.start_point)
+                {
+                    self.map.map_index = starter_map.map_index;
+                    self.map.file_name = starter_map.map_file_name;
+                    self.map.title = starter_map.map_title;
+                    self.spawn = start_point.location.clone();
+                    self.scene_view.center = start_point.location.clone();
+                    apply_crystal_map_metadata(&mut self.map);
+                }
+            }
+        }
+        self.content_profile = Some(runtime);
         self
+    }
+
+    pub fn experience_required_for_level(&self, level: u16) -> i64 {
+        self.content_profile
+            .as_ref()
+            .map(|profile| profile.experience_required_for_level(level))
+            .unwrap_or(100)
     }
 
     pub fn monster_experience_multiplier(&self, level: u16) -> u32 {
@@ -2693,6 +2801,70 @@ impl SimulationConfig {
             .as_ref()
             .map(|profile| profile.monster_experience_multiplier(level))
             .unwrap_or(1)
+    }
+
+    pub fn class_is_allowed(&self, class: MirClass) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.class_is_allowed(class))
+    }
+
+    pub fn map_is_allowed(&self, file_name: &str) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.map_is_allowed(file_name))
+    }
+
+    pub fn monster_is_allowed(&self, monster_name: &str) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.monster_is_allowed(monster_name))
+    }
+
+    pub fn monster_respawn_random_delay_minutes(
+        &self,
+        monster_name: &str,
+        imported_random_delay_minutes: u16,
+    ) -> u16 {
+        self.content_profile
+            .as_ref()
+            .map(|profile| {
+                profile.monster_respawn_random_delay_minutes(
+                    monster_name,
+                    imported_random_delay_minutes,
+                )
+            })
+            .unwrap_or(imported_random_delay_minutes)
+    }
+
+    pub fn item_is_allowed(&self, item_name: &str) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.item_is_allowed(item_name))
+    }
+
+    pub fn npc_script_is_allowed(&self, script_key: &str) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.npc_script_is_allowed(script_key))
+    }
+
+    pub fn content_skill_rule(&self, spell: &str) -> Option<&ContentSkillRule> {
+        self.content_profile
+            .as_ref()
+            .and_then(|profile| profile.content_skill_rule(spell))
+    }
+
+    pub fn skill_is_allowed(&self, spell: &str, class: MirClass, level: u16) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.skill_is_allowed(spell, class, level))
+    }
+
+    pub fn stage5_action_is_allowed(&self, action: &str) -> bool {
+        self.content_profile
+            .as_ref()
+            .is_none_or(|profile| profile.stage5_action_is_allowed(action))
     }
 
     pub fn with_account_store_path(mut self, path: impl Into<PathBuf>) -> Self {
@@ -2993,6 +3165,31 @@ impl SimulationConfig {
 
         self.save_account_store()
     }
+}
+
+fn normalize_content_map_file_name(file_name: &str) -> String {
+    file_name
+        .trim()
+        .trim_end_matches(".map")
+        .trim_end_matches(".MAP")
+        .to_ascii_lowercase()
+}
+
+fn normalize_content_identifier(value: &str) -> String {
+    value
+        .chars()
+        .filter(|ch| ch.is_ascii_alphanumeric())
+        .flat_map(char::to_lowercase)
+        .collect()
+}
+
+fn normalize_content_npc_script_key(value: &str) -> String {
+    let normalized = value.trim().replace('\\', "/").to_ascii_lowercase();
+    normalized
+        .rsplit_once('-')
+        .filter(|(_, suffix)| !suffix.is_empty() && suffix.chars().all(|ch| ch.is_ascii_digit()))
+        .map(|(base, _)| base.to_string())
+        .unwrap_or(normalized)
 }
 
 pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {
@@ -3873,6 +4070,9 @@ pub struct Stage5SystemsState {
     /// echoes `S.ChangePMode`.
     #[serde(default)]
     pub pet_mode: u8,
+    /// Elapsed world ticks toward the next lawful PK-point decay.
+    #[serde(default)]
+    pub pk_decay_elapsed_ticks: u64,
 }
 
 impl Default for Stage5SystemsState {
@@ -3898,6 +4098,7 @@ impl Default for Stage5SystemsState {
             item_rental: Stage5ItemRentalSnapshot::default(),
             attack_mode: 0,
             pet_mode: 0,
+            pk_decay_elapsed_ticks: 0,
         }
     }
 }
@@ -4509,6 +4710,8 @@ pub struct WorldSnapshot {
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
     pub player_max_mp: Option<i32>,
+    #[serde(default)]
+    pub player_pk_points: i32,
     pub player_experience: i64,
     pub player_max_experience: i64,
     pub gold: u32,

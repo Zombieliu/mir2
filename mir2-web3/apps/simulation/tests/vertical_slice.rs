@@ -1002,16 +1002,14 @@ fn packets_for(outbounds: &[ZoneOutbound], session_id: &SessionId) -> Vec<Server
 }
 
 #[test]
-fn all_five_classes_create_into_crystal_empty_initial_state() {
+fn platinum_classes_create_with_filtered_crystal_start_items() {
     for (class, gender) in [
         (MirClass::Warrior, MirGender::Male),
         (MirClass::Wizard, MirGender::Female),
         (MirClass::Taoist, MirGender::Male),
-        (MirClass::Assassin, MirGender::Female),
-        (MirClass::Archer, MirGender::Male),
     ] {
         let account_id = format!("slice-create-{:?}-{:?}", class, gender);
-        let config = SimulationConfig::default();
+        let config = SimulationConfig::default().with_platinum_176_profile();
         {
             let mut store = config
                 .account_store
@@ -1054,18 +1052,26 @@ fn all_five_classes_create_into_crystal_empty_initial_state() {
         assert_eq!(snapshot.player_max_hp, Some(expected.max_hp));
         assert_eq!(snapshot.player_mp, Some(expected.mp));
         assert_eq!(snapshot.gold, 0);
-        assert!(snapshot.inventory_items.is_empty());
+        let expected_weapon = "WoodenSword";
+        let expected_dress = match gender {
+            MirGender::Male => "BaseDress(M)",
+            MirGender::Female => "BaseDress(F)",
+        };
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .map(|item| item.name.as_str())
+                .collect::<Vec<_>>(),
+            vec![expected_weapon, expected_dress, "(HP)DrugSmall", "Candle"]
+        );
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .all(|item| item.key.starts_with("crystal-item-")));
         assert!(snapshot.belt_items.is_empty());
         assert!(snapshot.storage_items.is_empty());
-        assert_eq!(snapshot.equipment_items.len(), 2);
-        assert!(snapshot
-            .equipment_items
-            .iter()
-            .any(|item| item.slot == EquipmentSlot::Weapon));
-        assert!(snapshot
-            .equipment_items
-            .iter()
-            .any(|item| item.slot == EquipmentSlot::Armour));
+        assert!(snapshot.equipment_items.is_empty());
         assert!(snapshot.quest_log.iter().all(|quest| {
             quest.stage == QuestStage::Available
                 && quest.current == 0

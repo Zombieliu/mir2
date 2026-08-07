@@ -2,7 +2,9 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
 
-use mir2_game_data::{crystal_magic_by_spell, crystal_monster_by_name};
+use mir2_game_data::{
+    crystal_magic_by_spell, crystal_monster_by_name, platinum_176_monster_is_boss,
+};
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, MirDirection, MonsterInfo, ObjectAttackInfo, ObjectDiedInfo,
     ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo,
@@ -30,9 +32,10 @@ use super::packets::{
     user_location_packet,
 };
 use super::types::{
-    PlayerId, SessionId, ZoneCommand, ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction, ZoneMovementActionKind,
-    ZoneNativeMonster, ZoneNativeMonsterSnapshot, ZoneObject, ZoneOutbound, ZonePlayer,
+    zone_native_monster_targets_players, PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand,
+    ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneMovementAction, ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot,
+    ZoneObject, ZoneOutbound, ZonePlayer,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
@@ -48,6 +51,9 @@ const ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX: i32 = 9;
 const ZONE_NATIVE_PLAYER_MAGIC_MAX: i32 = 12;
 const ZONE_NATIVE_PLAYER_ATTACK_ACTION_MS: u64 = 600;
 const ZONE_NATIVE_PLAYER_SPELL_ACTION_MS: u64 = 300;
+const QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV: &str = "MIR2_QA_NATURAL_KILL_DAMAGE_MULTIPLIER";
+const MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER: i32 = 1_000;
+const QA_NATURAL_MOVEMENT_DELAY_MS_ENV: &str = "MIR2_QA_NATURAL_MOVEMENT_DELAY_MS";
 const ZONE_CRYSTAL_STATUS_TICK_MS: u64 = 1_000;
 /// Crystal auto-closes doors 5000 ms after they are opened (`Map.Process`).
 const ZONE_DOOR_OPEN_MS: u64 = 5_000;
@@ -366,6 +372,12 @@ impl ZoneRuntime {
 
     pub fn player_direction(&self, session_id: &SessionId) -> Option<MirDirection> {
         self.players.get(session_id).map(|player| player.direction)
+    }
+
+    pub fn player_chat_profile(&self, session_id: &SessionId) -> Option<super::ZoneChatProfile> {
+        self.players
+            .get(session_id)
+            .map(|player| player.chat_profile.clone())
     }
 
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
@@ -1780,7 +1792,10 @@ impl ZoneRuntime {
         now_ms: u64,
     ) -> (bool, Vec<ZoneOutbound>) {
         let requested_object_id = spawn.object_id;
-        if self.native_monsters.contains_key(&requested_object_id) {
+        if let Some(monster) = self.native_monsters.get_mut(&requested_object_id) {
+            monster.ai = spawn.ai;
+            monster.hostile_to_player = zone_native_monster_targets_players(spawn.ai);
+            monster.friendly_guild = spawn.friendly_guild.clone();
             return (false, Vec::new());
         }
         let object_id = if requested_object_id != 0
@@ -1836,6 +1851,23 @@ impl ZoneRuntime {
             return self.correct_player_location(session_id, now_ms);
         }
 
+        if let Some(target_session_id) =
+            self.players.iter().find_map(|(target_session_id, target)| {
+                (target.object_id == object_id).then(|| target_session_id.clone())
+            })
+        {
+            return self.player_attack_native_player(
+                session_id,
+                &target_session_id,
+                direction,
+                spell,
+                level,
+                attack_type,
+                damage,
+                now_ms,
+            );
+        }
+
         let Some(monster) = self
             .native_monsters
             .get(&object_id)
@@ -1889,6 +1921,165 @@ impl ZoneRuntime {
         }]
     }
 
+    fn player_attack_native_player(
+        &mut self,
+        session_id: &SessionId,
+        target_session_id: &SessionId,
+        direction: MirDirection,
+        spell: u8,
+        level: u8,
+        attack_type: u8,
+        fallback_damage: i32,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(attacker) = self.players.get(session_id).cloned() else {
+            return Vec::new();
+        };
+        let Some(target) = self.players.get(target_session_id).cloned() else {
+            return Vec::new();
+        };
+        if !zone_player_can_attack_player(&attacker, &target)
+            || !points_within_action_range(&attacker.position, &target.position, 1)
+        {
+            return Vec::new();
+        }
+
+        let resolved_damage =
+            zone_resolve_player_pvp_physical_attack(&attacker, &target, fallback_damage, now_ms)
+                .unwrap_or_default();
+        let (applied_damage, killed, health_percent) = {
+            let Some(target) = self.players.get_mut(target_session_id) else {
+                return Vec::new();
+            };
+            let applied_damage = resolved_damage.max(0).min(target.hp);
+            target.hp = target.hp.saturating_sub(applied_damage).max(0);
+            target.dead = target.hp == 0;
+            (
+                applied_damage,
+                target.dead,
+                native_player_health_percent(target.hp, target.max_hp),
+            )
+        };
+        if let Some(attacker) = self.players.get_mut(session_id) {
+            attacker.direction = direction;
+            attacker.next_attack_ready_at_ms =
+                now_ms.saturating_add(ZONE_NATIVE_PLAYER_ATTACK_ACTION_MS);
+        }
+
+        let mut packets = vec![
+            ServerPacket::ObjectAttack {
+                info: ObjectAttackInfo {
+                    object_id: attacker.object_id,
+                    location: attacker.position.clone(),
+                    direction,
+                    spell,
+                    level,
+                    attack_type,
+                },
+            },
+            ServerPacket::ObjectStruck {
+                info: ObjectStruckInfo {
+                    object_id: target.object_id,
+                    attacker_id: attacker.object_id,
+                    location: target.position.clone(),
+                    direction: target.direction,
+                },
+            },
+            ServerPacket::DamageIndicator {
+                damage: applied_damage,
+                damage_type: 0,
+                object_id: target.object_id,
+            },
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: target.object_id,
+                    percent: health_percent,
+                    expire: 0,
+                },
+            },
+        ];
+        if killed {
+            packets.push(ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: target.object_id,
+                    location: target.position,
+                    direction: target.direction,
+                    kind: 0,
+                },
+            });
+        }
+
+        let mut outbounds = vec![ZoneOutbound::ToAll { packets }];
+        if applied_damage > 0 {
+            outbounds.push(ZoneOutbound::PlayerDamaged {
+                session_id: target_session_id.clone(),
+                damage: applied_damage,
+            });
+        }
+        outbounds
+    }
+
+    fn apply_native_player_pvp_damage(
+        &mut self,
+        target_session_id: &SessionId,
+        attacker_object_id: u32,
+        resolved_damage: i32,
+        damage_type: u8,
+    ) -> Option<(Vec<ServerPacket>, Vec<ZoneOutbound>)> {
+        let (target, applied_damage, killed, health_percent) = {
+            let target = self.players.get_mut(target_session_id)?;
+            let applied_damage = resolved_damage.max(0).min(target.hp);
+            target.hp = target.hp.saturating_sub(applied_damage).max(0);
+            target.dead = target.hp == 0;
+            (
+                target.clone(),
+                applied_damage,
+                target.dead,
+                native_player_health_percent(target.hp, target.max_hp),
+            )
+        };
+        let mut packets = vec![
+            ServerPacket::ObjectStruck {
+                info: ObjectStruckInfo {
+                    object_id: target.object_id,
+                    attacker_id: attacker_object_id,
+                    location: target.position.clone(),
+                    direction: target.direction,
+                },
+            },
+            ServerPacket::DamageIndicator {
+                damage: applied_damage,
+                damage_type,
+                object_id: target.object_id,
+            },
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: target.object_id,
+                    percent: health_percent,
+                    expire: 0,
+                },
+            },
+        ];
+        if killed {
+            packets.push(ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: target.object_id,
+                    location: target.position,
+                    direction: target.direction,
+                    kind: 0,
+                },
+            });
+        }
+        let outbounds = (applied_damage > 0)
+            .then(|| ZoneOutbound::PlayerDamaged {
+                session_id: target_session_id.clone(),
+                damage: applied_damage,
+            })
+            .into_iter()
+            .collect();
+        Some((packets, outbounds))
+    }
+
     fn player_range_attack_native_object(
         &mut self,
         session_id: &SessionId,
@@ -1906,6 +2097,26 @@ impl ZoneRuntime {
         };
         if now_ms < player.next_attack_ready_at_ms {
             return self.correct_player_location(session_id, now_ms);
+        }
+
+        if let Some(target_session_id) =
+            self.players
+                .iter()
+                .find_map(|(target_session_id, target_player)| {
+                    (target_player.object_id == object_id).then(|| target_session_id.clone())
+                })
+        {
+            return self.player_range_attack_native_player(
+                session_id,
+                &target_session_id,
+                direction,
+                target,
+                spell,
+                level,
+                attack_type,
+                damage,
+                now_ms,
+            );
         }
 
         let Some(monster) = self
@@ -1997,6 +2208,98 @@ impl ZoneRuntime {
         outbounds
     }
 
+    #[allow(clippy::too_many_arguments)]
+    fn player_range_attack_native_player(
+        &mut self,
+        session_id: &SessionId,
+        target_session_id: &SessionId,
+        direction: MirDirection,
+        target_point: Point,
+        spell: Spell,
+        level: u8,
+        attack_type: u8,
+        fallback_damage: i32,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(attacker) = self.players.get(session_id).cloned() else {
+            return Vec::new();
+        };
+        let Some(target) = self.players.get(target_session_id).cloned() else {
+            return Vec::new();
+        };
+        if !zone_player_can_attack_player(&attacker, &target)
+            || target_point != target.position
+            || !points_within_action_range(
+                &attacker.position,
+                &target.position,
+                ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX,
+            )
+        {
+            return Vec::new();
+        }
+
+        let resolved_damage =
+            zone_resolve_player_pvp_physical_attack(&attacker, &target, fallback_damage, now_ms)
+                .unwrap_or_default();
+        if let Some(attacker) = self.players.get_mut(session_id) {
+            attacker.direction = direction;
+            attacker.next_attack_ready_at_ms =
+                now_ms.saturating_add(ZONE_NATIVE_PLAYER_ATTACK_ACTION_MS);
+        }
+        let owner_packets = vec![
+            user_location_packet(&attacker),
+            ServerPacket::RangeAttack {
+                target_id: target.object_id,
+                target: target_point.clone(),
+                spell,
+            },
+        ];
+        let mut action_packets = vec![
+            ServerPacket::ObjectAttack {
+                info: ObjectAttackInfo {
+                    object_id: attacker.object_id,
+                    location: attacker.position.clone(),
+                    direction,
+                    spell: Spell::None as u8,
+                    level: 0,
+                    attack_type,
+                },
+            },
+            ServerPacket::ObjectRangeAttack {
+                info: ObjectRangeAttackInfo {
+                    object_id: attacker.object_id,
+                    location: attacker.position.clone(),
+                    direction,
+                    target_id: target.object_id,
+                    target: target_point,
+                    attack_type,
+                    spell: spell as u8,
+                    level,
+                },
+            },
+        ];
+        let Some((damage_packets, damage_outbounds)) = self.apply_native_player_pvp_damage(
+            target_session_id,
+            attacker.object_id,
+            resolved_damage,
+            0,
+        ) else {
+            return Vec::new();
+        };
+        action_packets.extend(damage_packets);
+        let mut outbounds = vec![
+            ZoneOutbound::ToSession {
+                session_id: session_id.clone(),
+                packets: owner_packets,
+            },
+            ZoneOutbound::ToAll {
+                packets: action_packets,
+            },
+        ];
+        outbounds.extend(damage_outbounds);
+        outbounds
+    }
+
     fn player_cast_native_magic(
         &mut self,
         session_id: &SessionId,
@@ -2075,6 +2378,28 @@ impl ZoneRuntime {
             return self.player_cast_native_self_magic(
                 session_id,
                 object_id,
+                spell,
+                direction,
+                target,
+                cast,
+                level,
+                damage,
+                mp_cost,
+                cooldown_ms,
+                now_ms,
+            );
+        }
+
+        if let Some(target_session_id) =
+            self.players
+                .iter()
+                .find_map(|(target_session_id, target_player)| {
+                    (target_player.object_id == object_id).then(|| target_session_id.clone())
+                })
+        {
+            return self.player_cast_native_player_magic(
+                session_id,
+                &target_session_id,
                 spell,
                 direction,
                 target,
@@ -2267,6 +2592,137 @@ impl ZoneRuntime {
                 packets: action_packets,
             });
         }
+        outbounds
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn player_cast_native_player_magic(
+        &mut self,
+        session_id: &SessionId,
+        target_session_id: &SessionId,
+        spell: Spell,
+        direction: MirDirection,
+        target_point: Point,
+        cast: bool,
+        level: u8,
+        damage: i32,
+        mp_cost: i32,
+        cooldown_ms: u64,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(attacker) = self.players.get(session_id).cloned() else {
+            return Vec::new();
+        };
+        let Some(target) = self.players.get(target_session_id).cloned() else {
+            return Vec::new();
+        };
+        if !zone_player_can_attack_player(&attacker, &target)
+            || target_point != target.position
+            || !points_within_action_range(
+                &attacker.position,
+                &target.position,
+                ZONE_NATIVE_PLAYER_MAGIC_MAX,
+            )
+        {
+            return Vec::new();
+        }
+        if cast {
+            let spell_key = spell as u8;
+            let ready_at_ms = attacker
+                .magic_ready_at_ms
+                .get(&spell_key)
+                .copied()
+                .unwrap_or_default();
+            if attacker.mp < mp_cost.max(0) || now_ms < ready_at_ms {
+                return self.correct_player_location(session_id, now_ms);
+            }
+        }
+        let Some(live_attacker) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        live_attacker.direction = direction;
+        if cast {
+            let spell_key = spell as u8;
+            live_attacker.mp = live_attacker.mp.saturating_sub(mp_cost.max(0)).max(0);
+            live_attacker.next_spell_ready_at_ms =
+                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+            live_attacker
+                .magic_ready_at_ms
+                .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
+        }
+        let attacker = live_attacker.clone();
+        let owner_packets = vec![
+            user_location_packet(&attacker),
+            ServerPacket::Magic {
+                spell,
+                target_id: target.object_id,
+                target: target_point.clone(),
+                cast,
+                level,
+                secondary_target_ids: Vec::new(),
+            },
+        ];
+        let mut action_packets = vec![ServerPacket::ObjectMagic {
+            object_id: attacker.object_id,
+            location: attacker.position.clone(),
+            direction,
+            spell,
+            target_id: target.object_id,
+            target: target_point,
+            cast,
+            level,
+            self_broadcast: false,
+            secondary_target_ids: Vec::new(),
+        }];
+        if cast {
+            action_packets.push(ServerPacket::ObjectMana {
+                info: ObjectManaInfo {
+                    object_id: attacker.object_id,
+                    percent: zone_mana_percent(attacker.mp),
+                },
+            });
+        }
+        if cast && zone_magic_uses_projectile(spell) {
+            action_packets.push(ServerPacket::ObjectProjectile {
+                spell,
+                source_id: attacker.object_id,
+                destination_id: target.object_id,
+            });
+        }
+
+        let mut outbounds = vec![ZoneOutbound::ToSession {
+            session_id: session_id.clone(),
+            packets: owner_packets,
+        }];
+        if cast {
+            let resolved_damage = zone_player_native_incoming_damage(
+                &target,
+                zone_player_native_damage(&attacker, damage),
+                true,
+                now_ms,
+            );
+            let Some((damage_packets, damage_outbounds)) = self.apply_native_player_pvp_damage(
+                target_session_id,
+                attacker.object_id,
+                resolved_damage,
+                1,
+            ) else {
+                return Vec::new();
+            };
+            action_packets.extend(damage_packets);
+            outbounds.extend(damage_outbounds);
+            if spell == Spell::VampireShot && resolved_damage > 0 {
+                self.pending_native_player_heals
+                    .push(PendingNativePlayerHeal {
+                        ready_at_ms: now_ms,
+                        session_id: session_id.clone(),
+                        amount: zone_vampire_shot_heal_amount(resolved_damage, level),
+                    });
+            }
+        }
+        outbounds.push(ZoneOutbound::ToAll {
+            packets: action_packets,
+        });
         outbounds
     }
 
@@ -3829,8 +4285,10 @@ impl ZoneRuntime {
             experience,
             position,
             monster_direction,
+            reward_owner_session_id,
             drops,
-        )) = self.apply_native_monster_damage(object_id, damage)
+            boss_audit,
+        )) = self.apply_native_monster_damage(object_id, damage, owner_session_id.as_ref())
         else {
             return Vec::new();
         };
@@ -3871,24 +4329,30 @@ impl ZoneRuntime {
         }
 
         if killed {
-            if let Some(owner_session_id) = owner_session_id {
+            if let Some(reward_owner_session_id) = reward_owner_session_id {
+                let drop_owner_object_id = self
+                    .players
+                    .get(&reward_owner_session_id)
+                    .map(|player| player.object_id)
+                    .unwrap_or(owner_object_id);
                 let spawned_drops = self.spawn_native_monster_drops(
                     &monster_name,
                     &position,
-                    owner_object_id,
+                    drop_owner_object_id,
                     drops,
                     now_ms,
                 );
                 outbounds.extend(self.diff_all_zone_object_visibility());
-                outbounds.push(ZoneOutbound::MonsterKillAward {
-                    session_id: owner_session_id,
-                    award: ZoneMonsterKillAward {
+                outbounds.extend(self.group_monster_kill_awards(
+                    &reward_owner_session_id,
+                    ZoneMonsterKillAward {
                         monster_object_id: object_id,
                         monster_name,
                         experience,
                         drops: spawned_drops,
+                        boss_audit,
                     },
-                });
+                ));
             }
         }
 
@@ -4113,8 +4577,10 @@ impl ZoneRuntime {
             experience,
             position,
             monster_direction,
+            reward_owner_session_id,
             drops,
-        )) = self.apply_native_monster_damage(hit.object_id, hit.damage)
+            boss_audit,
+        )) = self.apply_native_monster_damage(hit.object_id, hit.damage, Some(&hit.session_id))
         else {
             return Vec::new();
         };
@@ -4187,12 +4653,19 @@ impl ZoneRuntime {
         }
 
         if killed {
+            let reward_owner_session_id =
+                reward_owner_session_id.unwrap_or_else(|| hit.session_id.clone());
             let drop_owner_object_id = self
-                .native_monsters
-                .get(&hit.attacker_object_id)
-                .filter(|monster| zone_native_summon_owner_player_object_id(monster) != 0)
-                .map(zone_native_summon_owner_player_object_id)
-                .unwrap_or(hit.attacker_object_id);
+                .players
+                .get(&reward_owner_session_id)
+                .map(|player| player.object_id)
+                .unwrap_or_else(|| {
+                    self.native_monsters
+                        .get(&hit.attacker_object_id)
+                        .filter(|monster| zone_native_summon_owner_player_object_id(monster) != 0)
+                        .map(zone_native_summon_owner_player_object_id)
+                        .unwrap_or(hit.attacker_object_id)
+                });
             let spawned_drops = self.spawn_native_monster_drops(
                 &monster_name,
                 &position,
@@ -4201,17 +4674,84 @@ impl ZoneRuntime {
                 now_ms,
             );
             outbounds.extend(self.diff_all_zone_object_visibility());
-            outbounds.push(ZoneOutbound::MonsterKillAward {
-                session_id: hit.session_id.clone(),
-                award: ZoneMonsterKillAward {
+            outbounds.extend(self.group_monster_kill_awards(
+                &reward_owner_session_id,
+                ZoneMonsterKillAward {
                     monster_object_id: hit.object_id,
                     monster_name,
                     experience,
                     drops: spawned_drops,
+                    boss_audit,
                 },
-            });
+            ));
         }
         outbounds
+    }
+
+    /// Split one authoritative monster reward across the killer's eligible
+    /// group without creating or losing base experience. A group member must
+    /// still be present in this map-owned zone and alive when the monster dies;
+    /// offline, cross-map, and dead members receive neither experience nor
+    /// quest-kill credit. The deterministic remainder goes to the killer when
+    /// eligible, otherwise to the first eligible session.
+    fn group_monster_kill_awards(
+        &self,
+        owner_session_id: &SessionId,
+        award: ZoneMonsterKillAward,
+    ) -> Vec<ZoneOutbound> {
+        let Some(owner) = self.players.get(owner_session_id) else {
+            return Vec::new();
+        };
+        let owner_group_members = &owner.chat_profile.group_members;
+        let mut recipients = self
+            .players
+            .iter()
+            .filter_map(|(session_id, player)| {
+                if player.dead || player.hp <= 0 {
+                    return None;
+                }
+                let is_owner = session_id == owner_session_id;
+                let is_named_group_member = owner_group_members
+                    .iter()
+                    .any(|name| name.eq_ignore_ascii_case(&player.name));
+                (is_owner || (!owner_group_members.is_empty() && is_named_group_member))
+                    .then(|| session_id.clone())
+            })
+            .collect::<Vec<_>>();
+        if recipients.is_empty() {
+            return Vec::new();
+        }
+        recipients.sort();
+
+        let recipient_count = u32::try_from(recipients.len()).unwrap_or(u32::MAX).max(1);
+        let base_share = award.experience / recipient_count;
+        let remainder = award.experience % recipient_count;
+        let remainder_recipient = recipients
+            .iter()
+            .find(|session_id| *session_id == owner_session_id)
+            .cloned()
+            .unwrap_or_else(|| recipients[0].clone());
+        recipients
+            .into_iter()
+            .map(|session_id| {
+                let is_owner = &session_id == owner_session_id;
+                let mut recipient_award = award.clone();
+                recipient_award.experience =
+                    base_share.saturating_add(if session_id == remainder_recipient {
+                        remainder
+                    } else {
+                        0
+                    });
+                if !is_owner {
+                    recipient_award.drops.clear();
+                    recipient_award.boss_audit = None;
+                }
+                ZoneOutbound::MonsterKillAward {
+                    session_id,
+                    award: recipient_award,
+                }
+            })
+            .collect()
     }
 
     fn resolve_pending_native_player_hits(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
@@ -4240,7 +4780,13 @@ impl ZoneRuntime {
             let Some(target) = self.players.get_mut(&hit.target_session_id) else {
                 return Vec::new();
             };
-            if target.object_id != hit.target_object_id || target.dead {
+            // A TownRevive can move the same session back into a safe zone while
+            // a pre-revive monster swing is still queued. Re-check protection at
+            // impact time so that stale attacks cannot damage the revived player.
+            if target.object_id != hit.target_object_id
+                || target.dead
+                || target.chat_profile.in_safe_zone
+            {
                 return Vec::new();
             }
             let damage = zone_player_native_incoming_damage(target, hit.damage, hit.magic, now_ms)
@@ -4526,6 +5072,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            friendly_guild: None,
             defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position,
             direction: summon.direction,
@@ -5086,7 +5633,9 @@ impl ZoneRuntime {
             }
             return outbounds;
         }
-        let Some(target) = self.nearest_native_monster_target(&monster.position) else {
+        let Some(target) = self
+            .nearest_native_monster_target(&monster.position, monster.friendly_guild.as_deref())
+        else {
             if let Some(monster) = self.native_monsters.get_mut(&object_id) {
                 monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);
             }
@@ -5277,6 +5826,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            friendly_guild: None,
             defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position: spawn_position,
             direction,
@@ -5649,10 +6199,23 @@ impl ZoneRuntime {
         }]
     }
 
-    fn nearest_native_monster_target(&self, position: &Point) -> Option<NativeMonsterTarget> {
+    fn nearest_native_monster_target(
+        &self,
+        position: &Point,
+        friendly_guild: Option<&str>,
+    ) -> Option<NativeMonsterTarget> {
         self.players
             .values()
-            .filter(|player| !player.dead && !player.hidden)
+            .filter(|player| !player.dead && !player.hidden && !player.chat_profile.in_safe_zone)
+            .filter(|player| {
+                !friendly_guild.is_some_and(|friendly| {
+                    player
+                        .chat_profile
+                        .guild_name
+                        .as_deref()
+                        .is_some_and(|guild| guild.eq_ignore_ascii_case(friendly))
+                })
+            })
             .filter(|player| {
                 (player.position.x - position.x).abs() <= ZONE_NATIVE_MONSTER_AGGRO_X
                     && (player.position.y - position.y).abs() <= ZONE_NATIVE_MONSTER_AGGRO_Y
@@ -5799,6 +6362,7 @@ impl ZoneRuntime {
         &mut self,
         object_id: u32,
         damage: i32,
+        attacker_session_id: Option<&SessionId>,
     ) -> Option<(
         i32,
         u8,
@@ -5807,34 +6371,157 @@ impl ZoneRuntime {
         u32,
         Point,
         MirDirection,
+        Option<SessionId>,
         Vec<GroundDropSnapshot>,
+        Option<ZoneBossRewardAudit>,
     )> {
-        let monster = self.native_monsters.get_mut(&object_id)?;
-        if monster.dead {
-            return None;
-        }
+        let (
+            damage,
+            health_percent,
+            killed,
+            monster_name,
+            experience,
+            position,
+            direction,
+            drops,
+            is_boss,
+            contributions,
+        ) = {
+            let monster = self.native_monsters.get_mut(&object_id)?;
+            if monster.dead {
+                return None;
+            }
 
-        let damage = damage.max(0).min(monster.hp);
-        monster.hp = monster.hp.saturating_sub(damage);
-        let killed = monster.hp <= 0;
-        if killed {
-            monster.hp = 0;
-            monster.dead = true;
-        }
+            let damage = damage.max(0).min(monster.hp);
+            let is_boss = crystal_monster_by_name(&monster.name)
+                .is_some_and(|template| template.is_boss)
+                || platinum_176_monster_is_boss(&monster.name);
+            if is_boss && damage > 0 {
+                if let Some(attacker_session_id) = attacker_session_id {
+                    let credited = monster
+                        .damage_contributions
+                        .entry(attacker_session_id.clone())
+                        .or_default();
+                    *credited = credited.saturating_add(u64::try_from(damage).unwrap_or_default());
+                }
+            }
+            monster.hp = monster.hp.saturating_sub(damage);
+            let killed = monster.hp <= 0;
+            if killed {
+                monster.hp = 0;
+                monster.dead = true;
+            }
+            (
+                damage,
+                native_monster_health_percent(monster.hp, monster.max_hp),
+                killed,
+                monster.name.clone(),
+                monster.experience,
+                monster.position.clone(),
+                monster.direction,
+                if killed {
+                    monster.drops.clone()
+                } else {
+                    Vec::new()
+                },
+                is_boss,
+                (killed && is_boss).then(|| monster.damage_contributions.clone()),
+            )
+        };
+        let reward_owner_session_id =
+            killed
+                .then(|| attacker_session_id.cloned())
+                .flatten()
+                .map(|last_hit_session_id| {
+                    if is_boss {
+                        self.boss_reward_owner(
+                            &last_hit_session_id,
+                            contributions.as_ref().expect("Boss contributions captured"),
+                        )
+                    } else {
+                        last_hit_session_id
+                    }
+                });
+        let boss_audit = if killed && is_boss {
+            reward_owner_session_id
+                .clone()
+                .zip(attacker_session_id.cloned())
+                .zip(contributions)
+                .map(
+                    |((reward_owner_session_id, last_hit_session_id), damage_contributions)| {
+                        ZoneBossRewardAudit {
+                            reward_owner_session_id,
+                            last_hit_session_id,
+                            damage_contributions,
+                        }
+                    },
+                )
+        } else {
+            None
+        };
         Some((
             damage,
-            native_monster_health_percent(monster.hp, monster.max_hp),
+            health_percent,
             killed,
-            monster.name.clone(),
-            monster.experience,
-            monster.position.clone(),
-            monster.direction,
-            if killed {
-                monster.drops.clone()
-            } else {
-                Vec::new()
-            },
+            monster_name,
+            experience,
+            position,
+            direction,
+            reward_owner_session_id,
+            drops,
+            boss_audit,
         ))
+    }
+
+    /// Select the representative of the highest-contributing live Boss group.
+    /// Group totals are derived from the representative's authoritative roster;
+    /// ties prefer the larger individual contribution and then the stable
+    /// session id. Pet and DoT damage already arrive under the owner's session.
+    fn boss_reward_owner(
+        &self,
+        last_hit_session_id: &SessionId,
+        contributions: &BTreeMap<SessionId, u64>,
+    ) -> SessionId {
+        let mut best: Option<(u64, u64, SessionId)> = None;
+        for (candidate_session_id, candidate) in &self.players {
+            if candidate.dead || candidate.hp <= 0 {
+                continue;
+            }
+            let individual = contributions
+                .get(candidate_session_id)
+                .copied()
+                .unwrap_or_default();
+            let group_total = contributions
+                .iter()
+                .filter_map(|(contributor_session_id, damage)| {
+                    let contributor = self.players.get(contributor_session_id)?;
+                    let same_group = contributor_session_id == candidate_session_id
+                        || candidate
+                            .chat_profile
+                            .group_members
+                            .iter()
+                            .any(|name| name.eq_ignore_ascii_case(&contributor.name));
+                    same_group.then_some(*damage)
+                })
+                .fold(0_u64, u64::saturating_add);
+            if group_total == 0 {
+                continue;
+            }
+            let replace =
+                best.as_ref()
+                    .is_none_or(|(best_group_total, best_individual, best_session_id)| {
+                        group_total > *best_group_total
+                            || (group_total == *best_group_total && individual > *best_individual)
+                            || (group_total == *best_group_total
+                                && individual == *best_individual
+                                && candidate_session_id < best_session_id)
+                    });
+            if replace {
+                best = Some((group_total, individual, candidate_session_id.clone()));
+            }
+        }
+        best.map(|(_, _, session_id)| session_id)
+            .unwrap_or_else(|| last_hit_session_id.clone())
     }
 
     fn native_monster_action_recipients(
@@ -7359,6 +8046,13 @@ impl ZoneRuntime {
         {
             return false;
         }
+        if self
+            .native_monsters
+            .values()
+            .any(|monster| !monster.dead && monster.hp > 0 && monster.position == *point)
+        {
+            return false;
+        }
         self.occupancy
             .get(&tile_key(point))
             .map(|owner| Some(owner) == ignore_session)
@@ -7377,6 +8071,13 @@ impl ZoneRuntime {
             .objects
             .values()
             .any(|object| retained_zone_object_blocks_tile(object, point))
+        {
+            return false;
+        }
+        if self
+            .native_monsters
+            .values()
+            .any(|monster| !monster.dead && monster.hp > 0 && monster.position == *point)
         {
             return false;
         }
@@ -7721,9 +8422,17 @@ fn zone_resolve_player_physical_attack(
     fallback_damage: i32,
     now_ms: u64,
 ) -> Option<i32> {
+    // The browser acceptance gate accelerates the real authoritative hit
+    // result. Applying this after accuracy, attack-power, and armour
+    // resolution is important: characters with authoritative combat stats do
+    // not use the legacy fallback scalar passed by the Gateway. Production is
+    // exact because the opt-in environment variable defaults to one.
+    let qa_damage_multiplier = qa_natural_kill_damage_multiplier();
     let stats = player.combat_stats;
     if !stats.has_authoritative_damage() {
-        return Some(zone_player_native_damage(player, fallback_damage));
+        return Some(
+            zone_player_native_damage(player, fallback_damage).saturating_mul(qa_damage_multiplier),
+        );
     }
 
     let agility = monster.defense.agility.max(0);
@@ -7756,7 +8465,126 @@ fn zone_resolve_player_physical_attack(
         player.object_id,
         0x0AC,
     );
-    Some(base.saturating_sub(armour).max(0))
+    Some(
+        base.saturating_sub(armour)
+            .max(0)
+            .saturating_mul(qa_damage_multiplier),
+    )
+}
+
+fn qa_natural_kill_damage_multiplier_from(raw: Option<&str>) -> i32 {
+    raw.and_then(|value| value.trim().parse::<i32>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(1)
+        .min(MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER)
+}
+
+fn qa_natural_kill_damage_multiplier() -> i32 {
+    qa_natural_kill_damage_multiplier_from(
+        std::env::var(QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV)
+            .ok()
+            .as_deref(),
+    )
+}
+
+#[cfg(test)]
+mod qa_natural_kill_damage_multiplier_tests {
+    use super::qa_natural_kill_damage_multiplier_from;
+
+    #[test]
+    fn defaults_to_exact_combat_damage_and_bounds_explicit_qa_acceleration() {
+        assert_eq!(qa_natural_kill_damage_multiplier_from(None), 1);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("invalid")), 1);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("0")), 1);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("100")), 100);
+        assert_eq!(qa_natural_kill_damage_multiplier_from(Some("1001")), 1_000);
+    }
+}
+
+fn zone_player_can_attack_player(attacker: &ZonePlayer, target: &ZonePlayer) -> bool {
+    if attacker.session_id == target.session_id
+        || attacker.dead
+        || target.dead
+        || attacker.hp <= 0
+        || target.hp <= 0
+        || attacker.chat_profile.in_safe_zone
+        || target.chat_profile.in_safe_zone
+    {
+        return false;
+    }
+    match attacker.chat_profile.attack_mode {
+        0 => false,
+        1 => !attacker
+            .chat_profile
+            .group_members
+            .iter()
+            .any(|name| name.eq_ignore_ascii_case(&target.name)),
+        2 => attacker
+            .chat_profile
+            .guild_name
+            .as_deref()
+            .zip(target.chat_profile.guild_name.as_deref())
+            .is_none_or(|(attacker_guild, target_guild)| {
+                !attacker_guild.eq_ignore_ascii_case(target_guild)
+            }),
+        3 => target
+            .chat_profile
+            .guild_name
+            .as_deref()
+            .is_some_and(|target_guild| {
+                attacker
+                    .chat_profile
+                    .active_guild_wars
+                    .iter()
+                    .any(|war| war.eq_ignore_ascii_case(target_guild))
+            }),
+        4 => target.chat_profile.pk_points >= 100,
+        5 => true,
+        _ => false,
+    }
+}
+
+fn zone_resolve_player_pvp_physical_attack(
+    attacker: &ZonePlayer,
+    target: &ZonePlayer,
+    fallback_damage: i32,
+    now_ms: u64,
+) -> Option<i32> {
+    let stats = attacker.combat_stats;
+    if stats.has_authoritative_damage() && target.combat_stats.agility > 0 {
+        let roll = zone_deterministic_roll(
+            now_ms,
+            usize::try_from(attacker.object_id).unwrap_or_default(),
+            usize::try_from(target.object_id).unwrap_or_default(),
+            u64::try_from(target.combat_stats.agility.saturating_add(1)).unwrap_or(1),
+        );
+        if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
+            return None;
+        }
+    }
+
+    let base = if stats.has_authoritative_damage() {
+        let base = zone_roll_attack_power(
+            stats.min_dc,
+            stats.max_dc,
+            stats.luck,
+            now_ms,
+            attacker.object_id,
+            0x5DC,
+        )
+        .saturating_add(zone_player_buff_stat_total(attacker, CRYSTAL_STAT_MAX_DC));
+        zone_apply_player_critical(base, &stats, attacker.object_id, now_ms)
+    } else {
+        zone_player_native_damage(attacker, fallback_damage)
+    };
+    // Keep the browser acceptance accelerator consistent for native monsters
+    // and PvP. Production remains exact because the explicit QA environment
+    // variable defaults to one; accuracy and armour are still resolved before
+    // the accepted hit is amplified.
+    Some(
+        zone_player_native_incoming_damage(target, base, false, now_ms)
+            .saturating_mul(qa_natural_kill_damage_multiplier()),
+    )
 }
 
 /// Crystal critical hit (HumanObject.cs:7156-7161, MonsterObject.cs:2594-2599):
@@ -8058,7 +8886,37 @@ fn zone_player_move_delay_ms(player: &ZonePlayer, running: bool, now_ms: u64) ->
     if zone_player_slowed(player, now_ms) {
         delay = delay.saturating_mul(2);
     }
-    delay.max(1)
+    qa_natural_movement_delay_ms(delay.max(1))
+}
+
+fn qa_natural_movement_delay_ms(production_delay_ms: u64) -> u64 {
+    qa_natural_movement_delay_ms_from(
+        production_delay_ms,
+        std::env::var(QA_NATURAL_MOVEMENT_DELAY_MS_ENV)
+            .ok()
+            .as_deref(),
+    )
+}
+
+fn qa_natural_movement_delay_ms_from(production_delay_ms: u64, raw: Option<&str>) -> u64 {
+    raw.and_then(|value| value.trim().parse::<u64>().ok())
+        .filter(|value| *value > 0)
+        .map(|value| value.min(production_delay_ms))
+        .unwrap_or(production_delay_ms)
+}
+
+#[cfg(test)]
+mod qa_natural_movement_delay_tests {
+    use super::qa_natural_movement_delay_ms_from;
+
+    #[test]
+    fn defaults_to_production_and_only_shortens_when_explicitly_enabled() {
+        assert_eq!(qa_natural_movement_delay_ms_from(600, None), 600);
+        assert_eq!(qa_natural_movement_delay_ms_from(600, Some("invalid")), 600);
+        assert_eq!(qa_natural_movement_delay_ms_from(600, Some("0")), 600);
+        assert_eq!(qa_natural_movement_delay_ms_from(600, Some("20")), 20);
+        assert_eq!(qa_natural_movement_delay_ms_from(600, Some("900")), 600);
+    }
 }
 
 fn zone_player_movement_distance(player: &ZonePlayer, running: bool, now_ms: u64) -> i32 {
@@ -8881,6 +9739,538 @@ mod door_tests {
             now_ms: 1_000,
         });
         assert!(out.is_empty(), "opening a non-existent door is a no-op");
+    }
+}
+
+#[cfg(test)]
+mod group_experience_tests {
+    use super::*;
+    use crate::runtime::zone::types::{ZoneChatProfile, ZonePlayerCombatStats};
+    use mir2_game_data::{crystal_monster_manifest, platinum_176_profile};
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn join_player(
+        zone: &mut ZoneRuntime,
+        id: &str,
+        object_id: u32,
+        group_members: &[&str],
+    ) -> SessionId {
+        let session_id = SessionId::new(id);
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: format!("acct-{id}"),
+            character_index: object_id as i32,
+            object_id,
+            name: id.to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 20,
+            hp: 200,
+            max_hp: 200,
+            mp: 100,
+            map_file_name: "0".to_string(),
+            position: Point { x: 10, y: 10 },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile {
+                group_members: group_members
+                    .iter()
+                    .map(|name| (*name).to_string())
+                    .collect(),
+                ..ZoneChatProfile::default()
+            },
+            combat_stats: ZonePlayerCombatStats::default(),
+        }));
+        session_id
+    }
+
+    fn test_award(experience: u32) -> ZoneMonsterKillAward {
+        ZoneMonsterKillAward {
+            monster_object_id: 9001,
+            monster_name: "Test Monster".to_string(),
+            experience,
+            drops: Vec::new(),
+            boss_audit: None,
+        }
+    }
+
+    fn awarded_experience(outbounds: &[ZoneOutbound], session: &SessionId) -> Option<u32> {
+        outbounds.iter().find_map(|outbound| match outbound {
+            ZoneOutbound::MonsterKillAward { session_id, award } if session_id == session => {
+                Some(award.experience)
+            }
+            _ => None,
+        })
+    }
+
+    #[test]
+    fn group_monster_kill_award_preserves_experience_and_excludes_ineligible_players() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let alice = join_player(
+            &mut zone,
+            "Alice",
+            101,
+            &["Alice", "Bob", "Dead", "Offline", "CrossMap"],
+        );
+        let bob = join_player(&mut zone, "Bob", 102, &[]);
+        let dead = join_player(&mut zone, "Dead", 103, &[]);
+        let stranger = join_player(&mut zone, "Stranger", 104, &[]);
+        let dead_player = zone.players.get_mut(&dead).expect("dead player joined");
+        dead_player.dead = true;
+        dead_player.hp = 0;
+
+        let outbounds = zone.group_monster_kill_awards(&alice, test_award(101));
+
+        assert_eq!(awarded_experience(&outbounds, &alice), Some(51));
+        assert_eq!(awarded_experience(&outbounds, &bob), Some(50));
+        assert_eq!(awarded_experience(&outbounds, &dead), None);
+        assert_eq!(awarded_experience(&outbounds, &stranger), None);
+        assert_eq!(
+            outbounds
+                .iter()
+                .filter_map(|outbound| match outbound {
+                    ZoneOutbound::MonsterKillAward { award, .. } => Some(award.experience),
+                    _ => None,
+                })
+                .sum::<u32>(),
+            101,
+            "group split must conserve authoritative base experience"
+        );
+    }
+
+    #[test]
+    fn group_monster_kill_award_conserves_remainder_when_owner_is_dead() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let alice = join_player(&mut zone, "Alice", 101, &["Alice", "Bob", "Carol"]);
+        let bob = join_player(&mut zone, "Bob", 102, &[]);
+        let carol = join_player(&mut zone, "Carol", 103, &[]);
+        let owner = zone.players.get_mut(&alice).expect("owner joined");
+        owner.dead = true;
+        owner.hp = 0;
+
+        let outbounds = zone.group_monster_kill_awards(&alice, test_award(5));
+
+        assert_eq!(awarded_experience(&outbounds, &alice), None);
+        assert_eq!(awarded_experience(&outbounds, &bob), Some(3));
+        assert_eq!(awarded_experience(&outbounds, &carol), Some(2));
+        assert_eq!(
+            outbounds
+                .iter()
+                .filter_map(|outbound| match outbound {
+                    ZoneOutbound::MonsterKillAward { award, .. } => Some(award.experience),
+                    _ => None,
+                })
+                .sum::<u32>(),
+            5
+        );
+    }
+
+    #[test]
+    fn group_monster_kill_award_keeps_solo_or_pet_owner_reward_whole() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let owner = join_player(&mut zone, "Taoist", 101, &[]);
+        let bystander = join_player(&mut zone, "Bystander", 102, &[]);
+
+        // Native summon hits carry their player owner's session id into this
+        // same reward path, so an ungrouped pet kill must remain a full award.
+        let outbounds = zone.group_monster_kill_awards(&owner, test_award(77));
+
+        assert_eq!(awarded_experience(&outbounds, &owner), Some(77));
+        assert_eq!(awarded_experience(&outbounds, &bystander), None);
+        assert_eq!(outbounds.len(), 1);
+    }
+
+    #[test]
+    fn boss_reward_uses_group_contribution_instead_of_last_hit() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let alice = join_player(&mut zone, "Alice", 101, &["Alice", "Bob"]);
+        let bob = join_player(&mut zone, "Bob", 102, &["Alice", "Bob"]);
+        let carol = join_player(&mut zone, "Carol", 103, &[]);
+        let boss_name = platinum_176_profile()
+            .boss_monsters
+            .into_iter()
+            .next()
+            .expect("platinum profile should contain a Boss");
+        let template = crystal_monster_manifest()
+            .monsters
+            .into_iter()
+            .find(|monster| monster.name.eq_ignore_ascii_case(&boss_name))
+            .expect("profile Boss should exist in Crystal data");
+        let object_id = 9001;
+        zone.handle(ZoneCommand::SpawnMonster {
+            session_id: alice.clone(),
+            monster: ZoneMonsterSpawn {
+                object_id,
+                name: template.name,
+                name_colour_argb: -1,
+                image: template.image,
+                ai: template.ai,
+                level: template.level,
+                max_hp: 100,
+                hp: 100,
+                experience: 1_000,
+                friendly_guild: None,
+                position: Point { x: 11, y: 10 },
+                direction: MirDirection::Down,
+                defense: Default::default(),
+                drops: Vec::new(),
+            },
+            now_ms: 0,
+        });
+
+        let first = zone
+            .apply_native_monster_damage(object_id, 30, Some(&alice))
+            .expect("Alice should damage Boss");
+        assert!(!first.2);
+        let second = zone
+            .apply_native_monster_damage(object_id, 25, Some(&bob))
+            .expect("Bob should damage Boss");
+        assert!(!second.2);
+        let third = zone
+            .apply_native_monster_damage(object_id, 44, Some(&carol))
+            .expect("Carol should damage Boss");
+        assert!(!third.2);
+        let killed = zone
+            .apply_native_monster_damage(object_id, 1, Some(&carol))
+            .expect("Carol should land the final hit");
+
+        assert!(killed.2);
+        assert_eq!(
+            killed.7,
+            Some(alice.clone()),
+            "Alice and Bob contributed 55 damage together, so Carol's 45 damage and final hit must not steal ownership"
+        );
+        let audit = killed.9.expect("Boss kill should carry an audit record");
+        assert_eq!(audit.reward_owner_session_id, alice);
+        assert_eq!(audit.last_hit_session_id, carol.clone());
+        assert_eq!(audit.damage_contributions.get(&bob), Some(&25));
+        assert_eq!(audit.damage_contributions.get(&carol), Some(&45));
+        assert_eq!(
+            audit.damage_contributions.values().copied().sum::<u64>(),
+            100
+        );
+    }
+
+    #[test]
+    fn boss_group_keeps_contribution_from_a_member_who_dies_before_kill() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let alice = join_player(&mut zone, "Alice", 101, &["Alice", "Bob"]);
+        let bob = join_player(&mut zone, "Bob", 102, &["Alice", "Bob"]);
+        let carol = join_player(&mut zone, "Carol", 103, &[]);
+        let bob_player = zone.players.get_mut(&bob).expect("Bob joined");
+        bob_player.dead = true;
+        bob_player.hp = 0;
+
+        let contributions = BTreeMap::from([
+            (alice.clone(), 0_u64),
+            (bob, 80_u64),
+            (carol.clone(), 60_u64),
+        ]);
+        assert_eq!(
+            zone.boss_reward_owner(&carol, &contributions),
+            alice,
+            "the live group representative should retain its dead member's pre-death contribution"
+        );
+    }
+}
+
+#[cfg(test)]
+mod pvp_tests {
+    use super::*;
+    use crate::runtime::zone::types::{ZoneChatProfile, ZonePlayerCombatStats};
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn join_player(
+        zone: &mut ZoneRuntime,
+        id: &str,
+        object_id: u32,
+        x: i32,
+        chat_profile: ZoneChatProfile,
+        combat_stats: ZonePlayerCombatStats,
+        hp: i32,
+    ) -> SessionId {
+        let session_id = SessionId::new(id);
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: format!("acct-{id}"),
+            character_index: object_id as i32,
+            object_id,
+            name: id.to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 30,
+            hp,
+            max_hp: hp,
+            mp: 100,
+            map_file_name: "0".to_string(),
+            position: Point { x, y: 10 },
+            direction: MirDirection::Right,
+            chat_profile,
+            combat_stats,
+        }));
+        session_id
+    }
+
+    #[test]
+    fn peace_mode_and_safe_zones_block_shared_player_damage() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let attacker = join_player(
+            &mut zone,
+            "Attacker",
+            101,
+            10,
+            ZoneChatProfile::default(),
+            ZonePlayerCombatStats::default(),
+            100,
+        );
+        let target = join_player(
+            &mut zone,
+            "Target",
+            102,
+            11,
+            ZoneChatProfile::default(),
+            ZonePlayerCombatStats::default(),
+            100,
+        );
+
+        assert!(zone
+            .player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 50, 1,)
+            .is_empty());
+        assert_eq!(zone.players[&target].hp, 100);
+
+        zone.handle(ZoneCommand::UpdateChatProfile {
+            session_id: attacker.clone(),
+            profile: ZoneChatProfile {
+                attack_mode: 5,
+                in_safe_zone: true,
+                ..ZoneChatProfile::default()
+            },
+        });
+        assert!(zone
+            .player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 50, 2,)
+            .is_empty());
+        assert_eq!(zone.players[&target].hp, 100);
+    }
+
+    #[test]
+    fn all_mode_shared_melee_can_kill_and_routes_authoritative_damage() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let attacker = join_player(
+            &mut zone,
+            "Attacker",
+            101,
+            10,
+            ZoneChatProfile {
+                attack_mode: 5,
+                ..ZoneChatProfile::default()
+            },
+            ZonePlayerCombatStats {
+                min_dc: 50,
+                max_dc: 50,
+                accuracy: 100,
+                ..ZonePlayerCombatStats::default()
+            },
+            100,
+        );
+        let target = join_player(
+            &mut zone,
+            "Target",
+            102,
+            11,
+            ZoneChatProfile::default(),
+            ZonePlayerCombatStats::default(),
+            40,
+        );
+
+        let outbounds =
+            zone.player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 1, 100);
+
+        assert_eq!(zone.players[&target].hp, 0);
+        assert!(zone.players[&target].dead);
+        assert!(outbounds.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::PlayerDamaged { session_id, damage }
+                if session_id == &target && *damage == 40
+        )));
+        assert!(outbounds.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::ToAll { packets }
+                if packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::ObjectDied { info } if info.object_id == 102
+                ))
+        )));
+    }
+
+    #[test]
+    fn all_mode_shared_range_attack_damages_remote_player() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let attacker = join_player(
+            &mut zone,
+            "Archer",
+            101,
+            10,
+            ZoneChatProfile {
+                attack_mode: 5,
+                ..ZoneChatProfile::default()
+            },
+            ZonePlayerCombatStats {
+                min_dc: 50,
+                max_dc: 50,
+                accuracy: 100,
+                ..ZonePlayerCombatStats::default()
+            },
+            100,
+        );
+        let target = join_player(
+            &mut zone,
+            "Target",
+            102,
+            14,
+            ZoneChatProfile::default(),
+            ZonePlayerCombatStats::default(),
+            40,
+        );
+
+        let outbounds = zone.player_range_attack_native_object(
+            &attacker,
+            102,
+            MirDirection::Right,
+            Point { x: 14, y: 10 },
+            Spell::None,
+            0,
+            0,
+            1,
+            100,
+        );
+
+        assert_eq!(zone.players[&target].hp, 0);
+        assert!(outbounds.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::PlayerDamaged { session_id, damage }
+                if session_id == &target && *damage == 40
+        )));
+        assert!(outbounds.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::ToAll { packets }
+                if packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::ObjectRangeAttack { info } if info.target_id == 102
+                ))
+        )));
+    }
+
+    #[test]
+    fn all_mode_shared_magic_damages_remote_player_and_spends_mana() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let attacker = join_player(
+            &mut zone,
+            "Wizard",
+            101,
+            10,
+            ZoneChatProfile {
+                attack_mode: 5,
+                ..ZoneChatProfile::default()
+            },
+            ZonePlayerCombatStats {
+                min_dc: 50,
+                max_dc: 50,
+                ..ZonePlayerCombatStats::default()
+            },
+            100,
+        );
+        let target = join_player(
+            &mut zone,
+            "Target",
+            102,
+            14,
+            ZoneChatProfile::default(),
+            ZonePlayerCombatStats::default(),
+            40,
+        );
+
+        let outbounds = zone.player_cast_native_magic(
+            &attacker,
+            102,
+            Spell::FireBall,
+            MirDirection::Right,
+            Point { x: 14, y: 10 },
+            true,
+            3,
+            50,
+            5,
+            500,
+            100,
+        );
+
+        assert_eq!(zone.players[&target].hp, 0);
+        assert_eq!(zone.players[&attacker].mp, 95);
+        assert!(outbounds.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::PlayerDamaged { session_id, damage }
+                if session_id == &target && *damage == 40
+        )));
+        assert!(outbounds.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::ToAll { packets }
+                if packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::ObjectMagic { target_id, .. } if *target_id == 102
+                ))
+        )));
+    }
+
+    #[test]
+    fn group_guild_and_enemy_guild_modes_respect_relationships() {
+        let attacker = ZonePlayer::from_join(
+            ZoneJoin {
+                session_id: SessionId::new("attacker"),
+                account_id: "a".to_string(),
+                character_index: 1,
+                object_id: 101,
+                name: "Attacker".to_string(),
+                class: MirClass::Warrior,
+                gender: MirGender::Male,
+                level: 30,
+                hp: 100,
+                max_hp: 100,
+                mp: 0,
+                map_file_name: "0".to_string(),
+                position: Point { x: 10, y: 10 },
+                direction: MirDirection::Right,
+                chat_profile: ZoneChatProfile {
+                    group_members: vec!["Target".to_string()],
+                    guild_name: Some("Wolves".to_string()),
+                    active_guild_wars: vec!["Tigers".to_string()],
+                    attack_mode: 1,
+                    ..ZoneChatProfile::default()
+                },
+                combat_stats: ZonePlayerCombatStats::default(),
+            },
+            101,
+        );
+        let mut target = attacker.clone();
+        target.session_id = SessionId::new("target");
+        target.object_id = 102;
+        target.name = "Target".to_string();
+        target.chat_profile.guild_name = Some("Wolves".to_string());
+
+        assert!(!zone_player_can_attack_player(&attacker, &target));
+        let mut guild_attacker = attacker.clone();
+        guild_attacker.chat_profile.attack_mode = 2;
+        assert!(!zone_player_can_attack_player(&guild_attacker, &target));
+        let mut enemy_attacker = attacker;
+        enemy_attacker.chat_profile.attack_mode = 3;
+        target.chat_profile.guild_name = Some("Tigers".to_string());
+        assert!(zone_player_can_attack_player(&enemy_attacker, &target));
     }
 }
 

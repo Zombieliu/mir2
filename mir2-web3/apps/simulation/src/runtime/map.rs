@@ -613,6 +613,16 @@ pub(super) fn relocate_player_to_map(
     direction: MirDirection,
     system_message_text: Option<String>,
 ) -> Vec<ServerPacket> {
+    if !world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .map_is_allowed(&map_info.file_name)
+    {
+        return vec![system_message(
+            "This map is unavailable in the active content profile.",
+        )];
+    }
+
     let Some(player) = player_entity(world) else {
         let language = super::session::current_language(world);
         return vec![super::session::system_message(&localized_text_or_fallback(
@@ -744,6 +754,19 @@ pub(super) fn spawn_config_visible_npcs(world: &mut World) {
         .visible_npcs
         .clone();
     for record in &records {
+        if record.script_key.as_deref().is_none_or(|script_key| {
+            !world
+                .resource::<RuntimeConfigResource>()
+                .config
+                .npc_script_is_allowed(script_key)
+        }) && world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .content_profile
+            .is_some()
+        {
+            continue;
+        }
         world.spawn((
             WorldObject,
             Npc,
@@ -1092,6 +1115,7 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
         )
     };
     let quest_ids_by_npc = super::npc::crystal_quest_ids_by_npc();
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
 
     for npc in crystal_npc_info_manifest().npcs {
         let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
@@ -1099,6 +1123,9 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
             continue;
         }
         if !super::npc::crystal_npc_visible_to_character(&npc, &character) {
+            continue;
+        }
+        if !config.npc_script_is_allowed(&npc.script_key) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
 import { CITY_CURRENCY_LABELS } from "../../lib/stage5-window-adapters";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -514,7 +515,7 @@ function priceOf(listing: MarketListing): number {
 }
 
 function iconPath(icon: number) {
-  return `/original-ui/Items/${icon}.png`;
+  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 function formatNumber(value: number) {

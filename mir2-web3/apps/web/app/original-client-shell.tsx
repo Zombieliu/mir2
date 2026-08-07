@@ -354,7 +354,7 @@ function createNullPersistentStore(): PersistentStore {
 }
 
 // In-memory atlas residency — replaces the old bevyEntityAtlasCache Map + manual
-// LRU loop. Same budget (24); the cold path stays in the resolve fetcher.
+// LRU loop. The cold path stays in the resolve fetcher.
 const bevyAtlasResidency = createAssetResidency({
   memoryBudget: BEVY_ENTITY_ATLAS_CACHE_LIMIT,
   persistentBudget: BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT,
@@ -513,6 +513,7 @@ export function OriginalClientShell({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  npcRepairService,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -562,6 +563,7 @@ export function OriginalClientShell({
   onToggleInventory,
   onCloseCharacter,
   onCloseInventory,
+  onCloseNpcRepairService,
   onOpenCharacterTab,
   onOpenInventoryTab,
   onViewportTileClick,
@@ -3357,6 +3359,7 @@ export function OriginalClientShell({
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
+                  npcRepairService,
                   defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
                   onSendChat,
@@ -3367,6 +3370,7 @@ export function OriginalClientShell({
                   onToggleInventory,
                   onCloseCharacter,
                   onCloseInventory,
+                  onCloseNpcRepairService,
                   onOpenCharacterTab,
                   onOpenInventoryTab,
                   onSelectNpcDialogTarget,
@@ -3907,7 +3911,14 @@ function shouldUseBevyEntityAtlas() {
   if (params.get("bevyAtlas") === "0" || window.localStorage.getItem("mir2-bevy-atlas") === "0") {
     return false;
   }
-  return true;
+  if (params.get("bevyAtlas") === "1" || window.localStorage.getItem("mir2-bevy-atlas") === "1") {
+    return true;
+  }
+  // Dynamic packed atlases currently rebuild for animation-frame changes and
+  // can make Chromium's WebGPU renderer exceed 2 GiB during long sessions.
+  // Ship the stable single-image Bevy path by default; keep the packed path as
+  // an explicit opt-in while its upload pipeline is further optimized.
+  return false;
 }
 
 function shouldUseRawWebGl2EntityRenderer() {
@@ -4299,7 +4310,10 @@ async function resolveBevyEntityAtlasSnapshot(
   }
 
   const live = await buildBevyEntityAtlasSnapshot(sources, key);
-  void persistBevyEntityAtlas(live);
+  // Live atlases encode the current animation frames and normally have a
+  // one-frame lifetime. Persisting every unique key cloned 4-8 MiB buffers into
+  // overlapping IndexedDB transactions, then read all cached buffers again for
+  // every trim. Keep persistence for stable prebuilt pages only.
   return {
     atlas: live,
     source: "live",

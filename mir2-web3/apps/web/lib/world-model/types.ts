@@ -381,6 +381,7 @@ export type WorldState = {
   playerMaxHp?: number;
   playerMp?: number;
   playerMaxMp?: number;
+  playerPkPoints: number;
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;
@@ -450,6 +451,7 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   playerMaxHp: undefined,
   playerMp: undefined,
   playerMaxMp: undefined,
+  playerPkPoints: 0,
   playerExperience: 0,
   playerMaxExperience: 100,
   gold: 0,

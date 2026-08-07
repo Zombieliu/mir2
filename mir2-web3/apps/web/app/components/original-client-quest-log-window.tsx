@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
+import { originalAssetPath } from "../../lib/asset-url";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
 import { SpriteButton } from "./original-client-overlays";
@@ -402,7 +403,7 @@ function RewardItems({ items }: { items: QuestRewardItem[] }) {
       {items.map((item, index) => (
         <div key={index} role="listitem" title={item.name} style={style.rewardItemCell}>
           {typeof item.icon === "number" ? (
-            <img style={style.rewardItemIcon} src={`/original-ui/Items/${item.icon}.png`} alt="" draggable={false} />
+            <img style={style.rewardItemIcon} src={originalAssetPath(`/original-ui/Items/${item.icon}.png`)} alt="" draggable={false} />
           ) : (
             <span style={style.rewardItemText}>{item.name.slice(0, 3)}</span>
           )}

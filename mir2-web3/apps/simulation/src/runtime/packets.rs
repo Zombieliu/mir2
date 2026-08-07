@@ -49,9 +49,9 @@ use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_BOOTS, CRYSTAL_ITEM_TYPE_BRACELET, CRYSTAL_ITEM_TYPE_HELMET,
     CRYSTAL_ITEM_TYPE_NECKLACE, CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_ITEM_TYPE_RING,
     CRYSTAL_ITEM_TYPE_WEAPON, CRYSTAL_POTION_SHAPE_NORMAL, CRYSTAL_POTION_SHAPE_SUN_POTION,
-    CRYSTAL_STAT_HP, CRYSTAL_STAT_LUCK, CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MAX_MC,
-    CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MIN_SC,
-    CRYSTAL_STAT_MP,
+    CRYSTAL_RED_NAME_PK_POINTS, CRYSTAL_STAT_HP, CRYSTAL_STAT_LUCK, CRYSTAL_STAT_MAX_DC,
+    CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC,
+    CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MP,
 };
 use super::drops::*;
 use super::drops::{
@@ -1690,6 +1690,8 @@ const STAGE5_GUILD_WAR_TICK_INTERVAL: u64 = 60;
 const STAGE5_GUILD_WAR_DURATION_TICKS: u64 = 180 * STAGE5_GUILD_WAR_TICK_INTERVAL;
 const STAGE5_GUILD_WAR_SELF_COLOUR_ARGB: i32 = 0xFF00_00FFu32 as i32;
 const STAGE5_GUILD_NORMAL_COLOUR_ARGB: i32 = -1;
+const PLAYER_BROWN_NAME_COLOUR_ARGB: i32 = 0xFFFF_8000u32 as i32;
+const PLAYER_RED_NAME_COLOUR_ARGB: i32 = 0xFFFF_0000u32 as i32;
 const STAGE5_GUILD_TERRITORY_PAGE_SIZE: usize = 7;
 
 fn stage5_guild_rank_is_leader(rank: &str) -> bool {
@@ -1845,8 +1847,13 @@ fn stage5_current_guild_is_at_war(world: &World) -> bool {
         .is_empty()
 }
 
-fn stage5_guild_current_colour_argb(world: &World) -> i32 {
-    if stage5_current_guild_is_at_war(world) {
+pub(super) fn current_player_name_colour_argb(world: &World) -> i32 {
+    let pk_points = world.resource::<PlayerRuntimeResource>().pk_points;
+    if pk_points >= CRYSTAL_RED_NAME_PK_POINTS {
+        PLAYER_RED_NAME_COLOUR_ARGB
+    } else if pk_points >= 100 {
+        PLAYER_BROWN_NAME_COLOUR_ARGB
+    } else if stage5_current_guild_is_at_war(world) {
         STAGE5_GUILD_WAR_SELF_COLOUR_ARGB
     } else {
         STAGE5_GUILD_NORMAL_COLOUR_ARGB
@@ -1888,7 +1895,7 @@ fn stage5_guild_end_war_packet(
         chat_type: ChatType::Guild,
     });
     packets.push(ServerPacket::ColourChanged {
-        name_colour_argb: stage5_guild_current_colour_argb(world),
+        name_colour_argb: current_player_name_colour_argb(world),
     });
 }
 
@@ -1998,7 +2005,7 @@ fn stage5_guild_war_return_packet(world: &mut World, name: String) -> Vec<Server
             name: player_name,
         },
         ServerPacket::ColourChanged {
-            name_colour_argb: stage5_guild_current_colour_argb(world),
+            name_colour_argb: current_player_name_colour_argb(world),
         },
     ]
 }
@@ -5171,6 +5178,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
         player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
+        player_pk_points: player_runtime.pk_points,
         player_experience: player_runtime.experience,
         player_max_experience: player_runtime.max_experience,
         gold: player_runtime.gold,
@@ -7396,6 +7404,9 @@ impl SimulationSession {
                     .resource::<RuntimeConfigResource>()
                     .config
                     .clone();
+                if !config.class_is_allowed(class) {
+                    return vec![ServerPacket::NewCharacter { result: 1 }];
+                }
                 let account_id = self
                     .app
                     .world()
@@ -7426,7 +7437,19 @@ impl SimulationSession {
                 name,
                 gender,
                 class,
-            } => stage5_new_hero_packet(self.app.world_mut(), name, gender, class),
+            } => {
+                let hero_is_allowed = self
+                    .app
+                    .world()
+                    .resource::<RuntimeConfigResource>()
+                    .config
+                    .stage5_action_is_allowed("hero.create");
+                if hero_is_allowed {
+                    stage5_new_hero_packet(self.app.world_mut(), name, gender, class)
+                } else {
+                    vec![ServerPacket::NewHero { result: 1 }]
+                }
+            }
             ClientPacket::DeleteCharacter { character_index } => {
                 self.delete_character_impl(character_index)
             }

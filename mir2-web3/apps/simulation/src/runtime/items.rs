@@ -51,7 +51,8 @@ use super::packets::{
 };
 use super::resources::{
     BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
-    PlayerRuntimeResource, SessionResource, SkillResource, Stage5SystemsResource,
+    PlayerRuntimeResource, RuntimeConfigResource, SessionResource, SkillResource,
+    Stage5SystemsResource,
 };
 use super::session::{
     current_language, hint_chat_key, hint_chat_key_args, is_in_world, runtime_tick,
@@ -2113,6 +2114,28 @@ pub(super) fn crystal_use_item_eligibility(
         return CrystalUseItemEligibility::Rejected(Some(super::session::system_message_key(
             world, key,
         )));
+    }
+
+    if template.item_type == CRYSTAL_ITEM_TYPE_BOOK {
+        let Some(skill) = crystal_book_skill_state(template) else {
+            return CrystalUseItemEligibility::Rejected(None);
+        };
+        let Some(character) = world
+            .resource::<SessionResource>()
+            .selected_character
+            .as_ref()
+        else {
+            return CrystalUseItemEligibility::Rejected(None);
+        };
+        if !world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .skill_is_allowed(&skill.key, character.class, character.level)
+        {
+            return CrystalUseItemEligibility::Rejected(Some(super::session::system_message(
+                "This skill is unavailable in the active content profile.",
+            )));
+        }
     }
 
     if template.item_type == CRYSTAL_ITEM_TYPE_BOOK
