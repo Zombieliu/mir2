@@ -36,7 +36,8 @@ use super::items::{
 use super::movement::tile_distance;
 use super::npc_script::{crystal_npc_label_base, crystal_npc_labels_match, crystal_npc_section};
 use super::resources::{
-    InventoryResource, NpcStateResource, PlayerRuntimeResource, SessionResource,
+    InventoryResource, NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource,
+    SessionResource, Stage5SystemsResource,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -593,6 +594,37 @@ pub(super) fn crystal_npc_goods_packet(
     }
 }
 
+fn crystal_npc_profile_allows_item(world: &World, item: &UserItem) -> bool {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    config.content_profile.is_none()
+        || crystal_item_by_index(item.item_index)
+            .is_some_and(|template| config.item_is_allowed(&template.name))
+}
+
+pub(super) fn filter_crystal_npc_goods_for_profile(world: &World, packets: &mut [ServerPacket]) {
+    for packet in packets {
+        if let ServerPacket::NPCGoods { list, .. } = packet {
+            list.retain(|item| crystal_npc_profile_allows_item(world, item));
+        }
+    }
+}
+
+pub(super) fn apply_crystal_conquest_tax_to_service_packets(
+    world: &World,
+    packets: &mut [ServerPacket],
+) {
+    let (total, _) = crystal_conquest_purchase_total(world, 10_000);
+    let multiplier = total as f32 / 10_000.0;
+    if multiplier <= 1.0 {
+        return;
+    }
+    for packet in packets {
+        if let ServerPacket::NPCGoods { rate, .. } = packet {
+            *rate *= multiplier;
+        }
+    }
+}
+
 pub(super) fn crystal_npc_price_rate_for_script(script: Option<&CrystalNpcScript>) -> f32 {
     script
         .and_then(|script| crystal_npc_info_by_script_key(&script.script_key))
@@ -791,7 +823,8 @@ pub(super) fn buy_item_impl(
     }
 
     let key = crystal_item_key_for_template(&template);
-    let cost = crystal_npc_purchase_cost(&template, buy_count, rate);
+    let base_cost = crystal_npc_purchase_cost(&template, buy_count, rate);
+    let (cost, conquest_tax) = crystal_conquest_purchase_total(world, base_cost);
     let player_name = world
         .resource::<SessionResource>()
         .selected_character
@@ -810,6 +843,19 @@ pub(super) fn buy_item_impl(
 
     {
         world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
+    }
+    if conquest_tax > 0 {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        stage5.stage5_systems.conquest.gold = stage5
+            .stage5_systems
+            .conquest
+            .gold
+            .saturating_add(conquest_tax);
+        stage5
+            .stage5_systems
+            .conquest
+            .event_log
+            .push(format!("NPC tax collected: {conquest_tax}"));
     }
     match purchase_item.source {
         CrystalNpcPurchaseSource::BuyBack => {
@@ -881,7 +927,56 @@ pub(super) fn buy_item_impl(
         }
         CrystalNpcPurchaseSource::Trade => {}
     }
+    filter_crystal_npc_goods_for_profile(world, &mut packets);
     packets
+}
+
+pub(super) fn crystal_conquest_purchase_total(world: &World, base_cost: u32) -> (u32, u32) {
+    let stage5 = &world.resource::<Stage5SystemsResource>().stage5_systems;
+    let conquest = &stage5.conquest;
+    let rate = u32::from(conquest.tax_rate_percent.min(100));
+    let owner = conquest.castle_owner.trim();
+    if rate == 0 || owner.is_empty() {
+        return (base_cost, 0);
+    }
+    let player_guild = stage5.guild.name.trim();
+    if !player_guild.is_empty() && owner.eq_ignore_ascii_case(player_guild) {
+        return (base_cost, 0);
+    }
+    let map_file_name = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .map
+        .file_name
+        .trim()
+        .trim_end_matches(".map")
+        .trim_end_matches(".MAP")
+        .to_ascii_lowercase();
+    let is_conquest_map = conquest.campaigns.values().any(|campaign| {
+        let battlefield = campaign
+            .battlefield_map_file_name
+            .trim()
+            .trim_end_matches(".map")
+            .trim_end_matches(".MAP")
+            .to_ascii_lowercase();
+        let battlefield = if battlefield.is_empty() {
+            "3"
+        } else {
+            battlefield.as_str()
+        };
+        let palace = campaign
+            .palace_map_file_name
+            .trim()
+            .trim_end_matches(".map")
+            .trim_end_matches(".MAP")
+            .to_ascii_lowercase();
+        map_file_name == battlefield || map_file_name == palace
+    });
+    if !is_conquest_map {
+        return (base_cost, 0);
+    }
+    let tax = base_cost.saturating_mul(rate).saturating_add(99) / 100;
+    (base_cost.saturating_add(tax), tax)
 }
 
 pub(super) fn crystal_npc_service_item_for_purchase(
@@ -892,6 +987,7 @@ pub(super) fn crystal_npc_service_item_for_purchase(
     if service.label_key == "BUYBACK" {
         return crystal_npc_buy_back_items_for_script(world, &service.script_key)
             .into_iter()
+            .filter(|item| crystal_npc_profile_allows_item(world, item))
             .find(|item| item.unique_id == item_index)
             .map(|item| CrystalNpcPurchaseItem {
                 item,
@@ -904,6 +1000,7 @@ pub(super) fn crystal_npc_service_item_for_purchase(
             .map(|script| crystal_npc_trade_goods_for_script(&script))
             .unwrap_or_default()
             .into_iter()
+            .filter(|item| crystal_npc_profile_allows_item(world, item))
             .find(|item| item.unique_id == item_index)
         {
             return Some(CrystalNpcPurchaseItem {
@@ -915,6 +1012,7 @@ pub(super) fn crystal_npc_service_item_for_purchase(
 
     crystal_npc_used_goods_for_script(world, &service.script_key)
         .into_iter()
+        .filter(|item| crystal_npc_profile_allows_item(world, item))
         .find(|item| item.unique_id == item_index)
         .map(|item| CrystalNpcPurchaseItem {
             item,

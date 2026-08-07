@@ -1002,7 +1002,7 @@ fn packets_for(outbounds: &[ZoneOutbound], session_id: &SessionId) -> Vec<Server
 }
 
 #[test]
-fn all_five_classes_create_into_crystal_empty_initial_state() {
+fn all_five_classes_create_with_filtered_crystal_start_items() {
     for (class, gender) in [
         (MirClass::Warrior, MirGender::Male),
         (MirClass::Wizard, MirGender::Female),
@@ -1054,7 +1054,27 @@ fn all_five_classes_create_into_crystal_empty_initial_state() {
         assert_eq!(snapshot.player_max_hp, Some(expected.max_hp));
         assert_eq!(snapshot.player_mp, Some(expected.mp));
         assert_eq!(snapshot.gold, 0);
-        assert!(snapshot.inventory_items.is_empty());
+        let expected_weapon = match class {
+            MirClass::Warrior | MirClass::Wizard | MirClass::Taoist => "WoodenSword",
+            MirClass::Assassin => "HoaSword",
+            MirClass::Archer => "WoodenBow",
+        };
+        let expected_dress = match gender {
+            MirGender::Male => "BaseDress(M)",
+            MirGender::Female => "BaseDress(F)",
+        };
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .map(|item| item.name.as_str())
+                .collect::<Vec<_>>(),
+            vec![expected_weapon, expected_dress, "(HP)DrugSmall", "Candle"]
+        );
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .all(|item| item.key.starts_with("crystal-item-")));
         assert!(snapshot.belt_items.is_empty());
         assert!(snapshot.storage_items.is_empty());
         assert_eq!(snapshot.equipment_items.len(), 2);

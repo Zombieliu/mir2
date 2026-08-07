@@ -168,6 +168,7 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
         max_hp: 20,
         hp: 20,
         experience: 6,
+        friendly_guild: None,
         position: Point { x, y },
         direction: MirDirection::Down,
         defense: Default::default(),
@@ -3442,6 +3443,38 @@ fn retained_zone_npc_blocks_player_walk() {
         ServerPacket::UserLocation { location }
             if location.position == (Point { x: 330, y: 270 })
                 && location.direction == MirDirection::Down
+    )));
+}
+
+#[test]
+fn living_native_monster_blocks_player_walk_into_its_tile() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn(9100, 331, 270),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    let outbounds = zone.tick(0);
+
+    assert_eq!(zone.player_position(&first), Some(Point { x: 330, y: 270 }));
+    assert!(has_packet(&outbounds, &first, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 330, y: 270 })
+                && location.direction == MirDirection::Down
+    )));
+    assert!(!has_packet(&outbounds, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == 101
     )));
 }
 
@@ -7410,6 +7443,53 @@ fn zone_native_monster_tick_attacks_adjacent_player_with_delayed_hit() {
         outbound,
         ZoneOutbound::PlayerDamaged { session_id, damage }
             if session_id == &first && *damage == 7
+    )));
+}
+
+#[test]
+fn conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild() {
+    let mut zone = zone();
+    let defender = session("defender");
+    let attacker = session("attacker");
+    zone.handle(ZoneCommand::Join(join_with_profile(
+        "defender",
+        101,
+        "WolfBlade",
+        330,
+        270,
+        |profile| profile.guild_name = Some("Wolves".to_string()),
+    )));
+    zone.handle(ZoneCommand::Join(join_with_profile(
+        "attacker",
+        102,
+        "TigerBlade",
+        332,
+        270,
+        |profile| profile.guild_name = Some("Tigers".to_string()),
+    )));
+    let mut guard = native_monster_spawn(9100, 331, 270);
+    guard.name = "ArcherGuard3".to_string();
+    guard.ai = 80;
+    guard.friendly_guild = Some("Wolves".to_string());
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: defender.clone(),
+        monster: guard,
+        now_ms: 0,
+    });
+
+    let mut outbounds = zone.tick(0);
+    for now_ms in [300, 600, 900, 1_200, 1_800, 2_400] {
+        outbounds.extend(zone.tick(now_ms));
+    }
+
+    assert!(!outbounds.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::PlayerDamaged { session_id, .. } if session_id == &defender
+    )));
+    assert!(outbounds.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::PlayerDamaged { session_id, damage }
+            if session_id == &attacker && *damage > 0
     )));
 }
 

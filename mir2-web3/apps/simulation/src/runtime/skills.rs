@@ -661,6 +661,22 @@ pub(super) fn skill_cast_preflight_for_key(
     }
     let spell = metadata.spell.and_then(Spell::from_crystal_name);
     let magic = crystal_magic_for_skill_key(key);
+    if let Some(magic) = magic.as_ref() {
+        let Some(character) = world
+            .resource::<SessionResource>()
+            .selected_character
+            .as_ref()
+        else {
+            return false;
+        };
+        if !world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .skill_is_allowed(&magic.spell, character.class, character.level)
+        {
+            return false;
+        }
+    }
     crystal_skill_context_preflight(world, player, spell, magic.as_ref(), metadata, context)
 }
 
