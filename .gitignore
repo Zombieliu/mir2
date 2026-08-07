@@ -77,3 +77,5 @@ Desktop.ini
 
 # Claude Code agent worktrees (ephemeral)
 .claude/worktrees/
+.vercel
+.env*
