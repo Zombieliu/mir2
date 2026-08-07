@@ -210,6 +210,7 @@ export type OriginalClientShellProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  npcRepairService: "repair" | "special" | null;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -259,6 +260,7 @@ export type OriginalClientShellProps = {
   onToggleInventory: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onViewportTileClick: (x: number, y: number) => void;

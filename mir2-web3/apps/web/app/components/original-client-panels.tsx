@@ -8,6 +8,8 @@ import {
   type CrystalChatType as CrystalChatTypeValue,
 } from "../../lib/crystal-chat-history";
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
+import { IS_PLATINUM_176_PROFILE } from "../../lib/content-profile";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
@@ -99,6 +101,9 @@ const CHAT_FILTER_BUTTONS: Array<{ key: ChatFilterKey; left: number; labelKey: s
   { key: "group", left: 122, labelKey: "client.Chat_Group" },
   { key: "guild", left: 144, labelKey: "client.Chat_Guild" },
 ];
+const VISIBLE_CHAT_FILTER_BUTTONS = CHAT_FILTER_BUTTONS.filter(
+  ({ key }) => !IS_PLATINUM_176_PROFILE || (key !== "lover" && key !== "mentor"),
+);
 
 export const CHAT_FILTER_PREFIX: Record<ChatFilterKey, string> = {
   all: "",
@@ -124,6 +129,9 @@ const CHAT_OPTION_FILTER_BUTTONS: Array<{
   { key: "group", labelKey: "client.Chat_Group", fallback: "Group" },
   { key: "guild", labelKey: "client.Chat_Guild", fallback: "Guild" },
 ];
+const VISIBLE_CHAT_OPTION_FILTER_BUTTONS = CHAT_OPTION_FILTER_BUTTONS.filter(
+  ({ key }) => !IS_PLATINUM_176_PROFILE || (key !== "lover" && key !== "mentor"),
+);
 
 export function chatPrefixForFilter(filter: ChatFilterKey) {
   return CHAT_FILTER_PREFIX[filter];
@@ -258,7 +266,7 @@ export function ChatFrame({
             >
               {t("client.Chat_All", [], "All")}
             </button>
-            {CHAT_OPTION_FILTER_BUTTONS.map(({ key, labelKey, fallback }) => (
+            {VISIBLE_CHAT_OPTION_FILTER_BUTTONS.map(({ key, labelKey, fallback }) => (
               <button
                 key={key}
                 type="button"
@@ -321,7 +329,7 @@ export function ChatFilterBar({
   return (
     <section className="chat-filter-bar">
       <img className="chat-filter-bg" src={ORIGINAL_UI.game.chatControlBar} alt="" draggable={false} />
-      {CHAT_FILTER_BUTTONS.map(({ key, left, labelKey }) => (
+      {VISIBLE_CHAT_FILTER_BUTTONS.map(({ key, left, labelKey }) => (
         <div
           key={key}
           className="chat-filter-button"
@@ -676,7 +684,7 @@ function matchesChatVisibility(line: DisplayLogLineLike, hiddenFilters: ChatOpti
 }
 
 function originalItemIconPath(icon: number) {
-  return `/original-ui/Items/${icon}.png`;
+  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 function duraIconForSlot(slot: EquipmentSlot, equipmentItems: DisplayEquipmentItemLike[]) {

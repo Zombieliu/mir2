@@ -36,6 +36,7 @@ export type DiagnosticSnapshot = {
   events: DebugEvent[];
   movement?: unknown;
   assetCache?: unknown;
+  realmInfo?: unknown;
   renderState?: unknown;
   sceneGate?: unknown;
 };
@@ -158,6 +159,7 @@ export function captureSnapshot(subsystem: string, context?: Record<string, unkn
         ? { diagnostics: movementDiagnostics, recent: movementRecent }
         : undefined,
     assetCache: readWindowGlobal("__mir2AssetCache"),
+    realmInfo: readWindowGlobal("__mir2RealmInfo"),
     renderState,
     sceneGate: readWindowGlobal("__mir2SceneGate"),
   };

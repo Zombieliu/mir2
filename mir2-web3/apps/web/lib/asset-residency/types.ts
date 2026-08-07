@@ -137,7 +137,7 @@ export type AssetResidencyConfig = {
   persistentBudget: number;
   /**
    * Maximum number of entries kept in the in-memory (hot) tier.
-   * Mirrors BEVY_ENTITY_ATLAS_CACHE_LIMIT = 24 in the shell.
+   * Mirrors BEVY_ENTITY_ATLAS_CACHE_LIMIT = 8 in the shell.
    */
   memoryBudget: number;
   /** Maximum estimated resident bytes in the hot tier. */

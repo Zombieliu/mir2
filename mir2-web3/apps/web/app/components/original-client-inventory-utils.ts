@@ -1,7 +1,8 @@
 import type { EquipmentSlot } from "./original-client-types";
+import { originalAssetPath } from "../../lib/asset-url";
 
 export function originalItemIconPath(icon: number) {
-  return `/original-ui/Items/${icon}.png`;
+  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 export function formatBinaryDateTimeLabel(locale: string, value: number, template: string) {

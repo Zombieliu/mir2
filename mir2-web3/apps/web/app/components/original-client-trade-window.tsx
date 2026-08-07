@@ -3,6 +3,7 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -323,7 +324,7 @@ function sumValue(items: TradeItemSlot[]): number {
 }
 
 function iconPath(icon: number) {
-  return `/original-ui/Items/${icon}.png`;
+  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 function formatNumber(value: number) {

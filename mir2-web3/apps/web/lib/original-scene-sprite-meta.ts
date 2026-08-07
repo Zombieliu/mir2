@@ -71,9 +71,11 @@ const availableSceneSpriteLibraries = new Set(
   ),
 );
 const sourceSceneSpriteLibraries = new Set(
-  Object.keys((originalSceneSpriteSourceIndex as OriginalSceneSpriteManifestPayload).libraries ?? {})
-    .map(normalizeSceneSpriteLibraryKey)
-    .filter((libraryKey) => !libraryKey.startsWith("Map/")),
+  process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL?.trim()
+    ? Object.keys((originalSceneSpriteSourceIndex as OriginalSceneSpriteManifestPayload).libraries ?? {})
+        .map(normalizeSceneSpriteLibraryKey)
+        .filter((libraryKey) => !libraryKey.startsWith("Map/"))
+    : [],
 );
 
 export function normalizeSceneSpriteLibraryKey(libraryKey: string) {

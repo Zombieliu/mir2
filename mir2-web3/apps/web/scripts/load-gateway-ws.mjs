@@ -10,6 +10,10 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 const WS_URL = process.env.MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws";
+const GATEWAY_METRICS_URL =
+  process.env.MIR2_GATEWAY_METRICS_URL ?? gatewayHttpUrl("/metrics");
+const GATEWAY_HEALTH_URL =
+  process.env.MIR2_GATEWAY_HEALTH_URL ?? gatewayHttpUrl("/health");
 const OUTPUT_PATH = path.resolve(
   process.cwd(),
   "..",
@@ -24,6 +28,11 @@ const HOLD_OPEN_MS = numberFromEnv("MIR2_WS_LOAD_HOLD_OPEN_MS", 250);
 const PRE_PLAY_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_PRE_PLAY_SETTLE_MS", 0);
 const CHAT_EVERY = numberFromEnv("MIR2_WS_LOAD_CHAT_EVERY", 10);
 const READY_TIMEOUT_MS = numberFromEnv("MIR2_WS_LOAD_READY_TIMEOUT_MS", 15_000);
+const READY_BARRIER = booleanFromEnv("MIR2_WS_LOAD_READY_BARRIER", false);
+const READY_BARRIER_TIMEOUT_MS = numberFromEnv(
+  "MIR2_WS_LOAD_READY_BARRIER_TIMEOUT_MS",
+  READY_TIMEOUT_MS * 2,
+);
 const CLOSE_TIMEOUT_MS = numberFromEnv("MIR2_WS_LOAD_CLOSE_TIMEOUT_MS", 5_000);
 const EXPECT_READY = optionalNumberFromEnv("MIR2_WS_LOAD_EXPECT_READY");
 const EXPECT_REJECTED = optionalNumberFromEnv("MIR2_WS_LOAD_EXPECT_REJECTED");
@@ -46,7 +55,11 @@ const REUSE_EXISTING_ACCOUNTS = booleanFromEnv(
   false,
 );
 const ACCOUNT_PREFIX = process.env.MIR2_WS_LOAD_ACCOUNT_PREFIX ?? null;
-const CHARACTER_INDEX = numberFromEnv("MIR2_WS_LOAD_CHARACTER_INDEX", 0);
+const CHARACTER_INDEX = optionalNumberFromEnv("MIR2_WS_LOAD_CHARACTER_INDEX");
+const CHECKPOINT_MS = numberFromEnv("MIR2_WS_LOAD_CHECKPOINT_MS", 0);
+const PARTIAL_OUTPUT_PATH = OUTPUT_PATH.endsWith(".json")
+  ? OUTPUT_PATH.replace(/\.json$/, ".partial.json")
+  : `${OUTPUT_PATH}.partial.json`;
 
 async function main() {
   const runId = `${Date.now().toString(36)}-${process.pid}`;
@@ -61,6 +74,8 @@ async function main() {
     thinkMs: THINK_MS,
     holdOpenMs: HOLD_OPEN_MS,
     prePlaySettleMs: PRE_PLAY_SETTLE_MS,
+    readyBarrierEnabled: READY_BARRIER,
+    readyBarrierTimeoutMs: READY_BARRIER_TIMEOUT_MS,
     chatEvery: CHAT_EVERY,
     expectedReady: EXPECT_READY ?? CLIENTS,
     expectedCapacityRejected: EXPECT_REJECTED ?? 0,
@@ -73,16 +88,20 @@ async function main() {
     reuseExistingAccounts: REUSE_EXISTING_ACCOUNTS,
     accountPrefix: ACCOUNT_PREFIX,
     characterIndex: CHARACTER_INDEX,
+    checkpointMs: CHECKPOINT_MS,
     startedAt: new Date().toISOString(),
     finishedAt: null,
     durationMs: 0,
     opened: 0,
     ready: 0,
+    currentReady: 0,
+    peakReady: 0,
     loginSuccess: 0,
     charactersCreated: 0,
     startedGames: 0,
     closed: 0,
     errors: 0,
+    failedBeforeReady: 0,
     capacityRejected: 0,
     messages: 0,
     commandsSent: 0,
@@ -90,6 +109,7 @@ async function main() {
     movementCommandsSent: 0,
     chatCommandsSent: 0,
     stage5CommandsSent: 0,
+    serverErrors: [],
     keepAliveLatenciesMs: [],
     clientFailures: [],
     capacityRejections: [],
@@ -107,12 +127,21 @@ async function main() {
     rssSamples: [],
     rss: null,
     cpuPercent: null,
+    gateway: {
+      metricsUrl: GATEWAY_METRICS_URL,
+      healthUrl: GATEWAY_HEALTH_URL,
+      metricsBefore: await fetchJsonSnapshot(GATEWAY_METRICS_URL),
+      metricsAfter: null,
+      healthAfter: null,
+    },
     assertions: null,
     ok: false,
   };
 
   let sampling = true;
+  let checkpointing = CHECKPOINT_MS > 0;
   const sampler = sampleGatewayRss(metrics, () => sampling);
+  const checkpointer = checkpointGatewayLoad(metrics, () => checkpointing);
   const started = Date.now();
   try {
     await runPool(
@@ -134,6 +163,7 @@ async function main() {
             metrics.capacityRejections.push(failure);
           } else {
             metrics.errors += 1;
+            metrics.failedBeforeReady += 1;
             metrics.clientFailures.push(failure);
           }
         }
@@ -141,7 +171,9 @@ async function main() {
     );
   } finally {
     sampling = false;
+    checkpointing = false;
     await sampler;
+    await checkpointer;
   }
 
   metrics.finishedAt = new Date().toISOString();
@@ -159,6 +191,8 @@ async function main() {
   );
   metrics.rss = summarize(metrics.rssSamples.map((sample) => sample.workingSetBytes));
   metrics.cpuPercent = summarize(metrics.rssSamples.map((sample) => sample.cpuPercent));
+  metrics.gateway.metricsAfter = await fetchJsonSnapshot(GATEWAY_METRICS_URL);
+  metrics.gateway.healthAfter = await fetchJsonSnapshot(GATEWAY_HEALTH_URL);
   if (metrics.ready > 0 && metrics.network.playDurationMs > 0) {
     metrics.network.avgPlayBytesPerSecondPerReadyClient =
       Math.round(
@@ -172,6 +206,8 @@ async function main() {
   }
   metrics.assertions = {
     readyMatchesExpectation: metrics.ready === metrics.expectedReady,
+    concurrentReadyMatchesExpectation:
+      !READY_BARRIER || metrics.peakReady === metrics.expectedReady,
     capacityRejectedMatchesExpectation:
       metrics.capacityRejected === metrics.expectedCapacityRejected,
     noUnexpectedErrors: metrics.errors === 0,
@@ -192,6 +228,7 @@ async function main() {
 
   await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(metrics, null, 2)}\n`);
+  await fs.rm(PARTIAL_OUTPUT_PATH, { force: true });
   console.log(
     `WS load completed: ready=${metrics.ready}/${CLIENTS}, capacityRejected=${metrics.capacityRejected}, errors=${metrics.errors}, messages=${metrics.messages}, ok=${metrics.ok}`,
   );
@@ -199,6 +236,41 @@ async function main() {
 
   if (!metrics.ok) {
     process.exitCode = 1;
+  }
+}
+
+function gatewayHttpUrl(pathName) {
+  const url = new URL(WS_URL);
+  url.protocol = url.protocol === "wss:" ? "https:" : "http:";
+  url.pathname = pathName;
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
+
+async function fetchJsonSnapshot(url) {
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        error: `HTTP ${response.status}`,
+      };
+    }
+    return {
+      ok: true,
+      status: response.status,
+      value: await response.json(),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      status: null,
+      error: String(error?.message ?? error),
+    };
   }
 }
 
@@ -216,8 +288,11 @@ async function runClient(index, runId, metrics) {
   let loginSuccess = false;
   let userInformation = false;
   let createdCharacterIndex = null;
+  let loginCharacterIndex = null;
   let capacityRejected = false;
   let capacityError = null;
+  let serverError = null;
+  let countedReady = false;
 
   const ws = new RawWebSocketClient(
     WS_URL,
@@ -234,9 +309,24 @@ async function runClient(index, runId, metrics) {
         if (isCapacityError(message)) {
           capacityRejected = true;
           capacityError = message;
+        } else if (serverError === null) {
+          serverError = message || "gateway returned an unspecified error";
+          metrics.serverErrors.push({ index, message: serverError });
         }
       }
+      if (
+        payload.packet === "NewCharacter" &&
+        Number(payload.payload?.result ?? 0) !== 0 &&
+        serverError === null
+      ) {
+        serverError = `NewCharacter rejected with result ${payload.payload?.result}`;
+        metrics.serverErrors.push({ index, message: serverError });
+      }
       if (payload.packet === "LoginSuccess" && !loginSuccess) {
+        const firstCharacterIndex = payload.payload?.characters?.[0]?.index;
+        if (Number.isInteger(firstCharacterIndex)) {
+          loginCharacterIndex = firstCharacterIndex;
+        }
         loginSuccess = true;
         metrics.loginSuccess += 1;
       }
@@ -282,9 +372,27 @@ async function runClient(index, runId, metrics) {
       });
     }
     send(ws, metrics, { type: "login", accountId, password });
-    await waitFor(() => loginSuccess, READY_TIMEOUT_MS, `login ${index}`);
+    await waitFor(
+      () => loginSuccess || capacityRejected || serverError !== null,
+      READY_TIMEOUT_MS,
+      `login ${index}`,
+    );
+    if (capacityRejected) {
+      return {
+        index,
+        ready: false,
+        capacityRejected: true,
+        error: capacityError,
+      };
+    }
+    if (serverError !== null) throw new Error(serverError);
     if (REUSE_EXISTING_ACCOUNTS) {
-      createdCharacterIndex = CHARACTER_INDEX;
+      createdCharacterIndex = CHARACTER_INDEX ?? loginCharacterIndex;
+      if (createdCharacterIndex === null) {
+        throw new Error(
+          `login ${index} returned no characters; seed the account or set MIR2_WS_LOAD_CHARACTER_INDEX`,
+        );
+      }
     } else {
       send(ws, metrics, {
         type: "newCharacter",
@@ -293,17 +401,30 @@ async function runClient(index, runId, metrics) {
         class: ["Warrior", "Wizard", "Taoist"][index % 3],
       });
       await waitFor(
-        () => createdCharacterIndex !== null,
+        () =>
+          createdCharacterIndex !== null ||
+          capacityRejected ||
+          serverError !== null,
         READY_TIMEOUT_MS,
         `newCharacter ${index}`,
       );
+      if (capacityRejected) {
+        return {
+          index,
+          ready: false,
+          capacityRejected: true,
+          error: capacityError,
+        };
+      }
+      if (serverError !== null) throw new Error(serverError);
     }
     send(ws, metrics, { type: "startGame", characterIndex: createdCharacterIndex });
     await waitFor(
-      () => userInformation || capacityRejected,
+      () => userInformation || capacityRejected || serverError !== null,
       READY_TIMEOUT_MS,
       `startGame ${index}`,
     );
+    if (serverError !== null) throw new Error(serverError);
     if (capacityRejected) {
       return {
         index,
@@ -319,6 +440,18 @@ async function runClient(index, runId, metrics) {
     const bytesReceivedAtReady = ws.bytesReceived;
     const playStartedAt = Date.now();
     metrics.ready += 1;
+    metrics.currentReady += 1;
+    metrics.peakReady = Math.max(metrics.peakReady, metrics.currentReady);
+    countedReady = true;
+    if (READY_BARRIER) {
+      await waitFor(
+        () =>
+          metrics.ready + metrics.capacityRejected + metrics.failedBeforeReady >=
+          CLIENTS,
+        READY_BARRIER_TIMEOUT_MS,
+        `ready barrier ${index}`,
+      );
+    }
 
     const directions = ["Right", "Down", "Left", "Up"];
     for (let action = 0; action < ACTIONS; action += 1) {
@@ -364,6 +497,9 @@ async function runClient(index, runId, metrics) {
     });
     return { index, ready: true };
   } finally {
+    if (countedReady) {
+      metrics.currentReady = Math.max(0, metrics.currentReady - 1);
+    }
     if (!ws.closed) {
       ws.close();
       await waitFor(() => ws.closed, CLOSE_TIMEOUT_MS, `close ${index}`).catch(() => {});
@@ -636,6 +772,41 @@ async function sampleGatewayRss(metrics, keepGoing) {
   }
   const sample = await gatewayRssSample();
   if (sample) metrics.rssSamples.push(sample);
+}
+
+async function checkpointGatewayLoad(metrics, keepGoing) {
+  if (CHECKPOINT_MS <= 0) return;
+  await fs.mkdir(path.dirname(PARTIAL_OUTPUT_PATH), { recursive: true });
+  while (keepGoing()) {
+    await delay(CHECKPOINT_MS);
+    if (!keepGoing()) break;
+    const checkpoint = {
+      schema: "mir2-websocket-load-checkpoint/1",
+      capturedAt: new Date().toISOString(),
+      outputPath: OUTPUT_PATH,
+      wsUrl: metrics.wsUrl,
+      runId: metrics.runId,
+      clients: metrics.clients,
+      opened: metrics.opened,
+      ready: metrics.ready,
+      currentReady: metrics.currentReady,
+      peakReady: metrics.peakReady,
+      errors: metrics.errors,
+      failedBeforeReady: metrics.failedBeforeReady,
+      capacityRejected: metrics.capacityRejected,
+      messages: metrics.messages,
+      commandsSent: metrics.commandsSent,
+      keepAliveCommandsSent: metrics.keepAliveCommandsSent,
+      keepAliveAcknowledged: metrics.keepAliveLatenciesMs.length,
+      latestRssSample: metrics.rssSamples.at(-1) ?? null,
+      serverErrors: metrics.serverErrors.slice(-20),
+      clientFailures: metrics.clientFailures.slice(-20),
+    };
+    await fs.writeFile(
+      PARTIAL_OUTPUT_PATH,
+      `${JSON.stringify(checkpoint, null, 2)}\n`,
+    );
+  }
 }
 
 async function gatewayRssSample() {

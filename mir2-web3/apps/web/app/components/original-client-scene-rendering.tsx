@@ -1,5 +1,6 @@
 "use client";
 
+import { originalAssetPath } from "../../lib/asset-url";
 import { ORIGINAL_UI, type ClientScreen } from "../../lib/original-ui";
 import {
   frameMetaForIndex,
@@ -327,6 +328,10 @@ export function buildViewportEntitySprite(
     fallbackWeaponFrameIndex,
     fallbackMountFrameIndex,
   });
+  const resolvedPreloadFrames = preloadFrames.map((frame) => ({
+    ...frame,
+    path: originalAssetPath(frame.path),
+  }));
 
   return {
     mount: viewportSpriteLayer(mountFrame),
@@ -484,7 +489,7 @@ function viewportSpriteLayer(frame: OriginalSceneSpriteFrameMeta | null): Viewpo
   }
 
   return {
-    path: frame.path,
+    path: originalAssetPath(frame.path),
     width: frame.width,
     height: frame.height,
     x: frame.x,

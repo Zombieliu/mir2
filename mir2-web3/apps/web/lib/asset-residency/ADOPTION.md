@@ -40,7 +40,7 @@ import { createBrowserIdbStore, createBrowserAtlasFetcher } from
   "../lib/asset-residency/browser-adapters";
 
 const bevyAtlasResidency = createAssetResidency({
-  memoryBudget: BEVY_ENTITY_ATLAS_CACHE_LIMIT,        // 24
+  memoryBudget: BEVY_ENTITY_ATLAS_CACHE_LIMIT,        // 8
   persistentBudget: BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT, // 8
   persistent: createBrowserIdbStore({
     namespace: BEVY_ENTITY_ATLAS_CACHE_NAMESPACE,       // "bevy-entity-atlas-v1"

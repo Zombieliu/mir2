@@ -73,6 +73,11 @@ async function main() {
 
   const libraryEntries = exportAllLibraries
     ? (await discoverCrystalUiLibraries(dataDir)).map((libraryName) => [libraryName, {}])
+    : onlyLibraries
+      ? Array.from(onlyLibraries).map((libraryName) => [
+          libraryName,
+          manifest.libraries[libraryName] ?? {},
+        ])
     : Object.entries(manifest.libraries);
   let libraryOrdinal = 0;
 
