@@ -14615,6 +14615,422 @@ fn general_meow_meow_shield_phase_reduces_incoming_damage_and_broadcasts_buff() 
     );
 }
 
+/// Task 1 (HornedCommander, AI 171): while the boss is in its Crystal `_Immune`
+/// window (`ai_state.mode`, set during the <10% shield phase and the rock-fall /
+/// spin wind-ups) every incoming hit must be ignored — otherwise the boss is
+/// *easier* while invulnerable, the opposite of intended. Once the flag clears the
+/// same hit lands. Drives the shared `damage_monster_entity` choke point directly.
+#[test]
+fn horned_commander_ignores_damage_while_immune() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let object_id = 99_171_u32;
+    let boss = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "HornedCommander",
+        Point { x: 900, y: 900 },
+        MirDirection::Left,
+        true,
+    );
+    let tick = runtime_tick(session.app.world());
+
+    // Immune (`mode = true`): the hit is fully ignored — no HP loss, no ObjectHealth.
+    {
+        let mut entry = session.app.world_mut().entity_mut(boss);
+        entry.insert(MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        });
+        entry.insert(MonsterAiState {
+            mode: true,
+            ..MonsterAiState::default()
+        });
+    }
+    let mut packets = Vec::new();
+    let died = super::damage_monster_entity(session.app.world_mut(), boss, 500, tick, &mut packets);
+    assert!(!died, "an immune HornedCommander must not die");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(boss)
+            .get::<MonsterVitals>()
+            .expect("boss vitals")
+            .hp,
+        100_000,
+        "an immune HornedCommander (mode = true) must take no damage"
+    );
+    assert!(
+        !packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == object_id
+        )),
+        "no ObjectHealth should be broadcast for an immune boss"
+    );
+
+    // Not immune (`mode = false`): the same hit now lands.
+    session
+        .app
+        .world_mut()
+        .entity_mut(boss)
+        .insert(MonsterAiState::default());
+    let mut packets = Vec::new();
+    super::damage_monster_entity(session.app.world_mut(), boss, 500, tick, &mut packets);
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(boss)
+            .get::<MonsterVitals>()
+            .expect("boss vitals")
+            .hp,
+        100_000 - 500,
+        "a non-immune HornedCommander takes full damage"
+    );
+}
+
+/// Task 1 (HornedSorceror, AI 169): its charged-stomp `_Immune` window lives in a
+/// LOCAL `HornedSorcerorTimers` timer (not `ai_state.mode`), and the shared
+/// `monster_ignores_damage` predicate must honour it on every damage path — even
+/// without the `ai_state.hidden` flag the AI also sets. While `runtime_tick <
+/// immune_until_tick` the boss takes no damage; past the deadline it does.
+#[test]
+fn horned_sorceror_ignores_damage_during_charged_stomp_immune_window() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let object_id = 99_169_u32;
+    let boss = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "HornedSorceror",
+        Point { x: 900, y: 900 },
+        MirDirection::Left,
+        true,
+    );
+    let tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(boss);
+        entry.insert(MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        });
+        // Immune deadline 10 ticks out; no `hidden`, so this isolates the timer path.
+        entry.insert(super::super::monster_ai::HornedSorcerorTimers {
+            stomp_ready_tick: 0,
+            tornado_ready_tick: 0,
+            immune_until_tick: tick + 10,
+        });
+    }
+
+    // Before the deadline: undamageable.
+    super::set_runtime_tick(session.app.world_mut(), tick);
+    let mut packets = Vec::new();
+    let died = super::damage_monster_entity(session.app.world_mut(), boss, 500, tick, &mut packets);
+    assert!(!died, "an immune HornedSorceror must not die");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(boss)
+            .get::<MonsterVitals>()
+            .expect("boss vitals")
+            .hp,
+        100_000,
+        "HornedSorceror must take no damage while tick < immune_until_tick"
+    );
+
+    // At/after the deadline: the immune window has resolved, the hit lands.
+    super::set_runtime_tick(session.app.world_mut(), tick + 10);
+    let mut packets = Vec::new();
+    super::damage_monster_entity(session.app.world_mut(), boss, 500, tick + 10, &mut packets);
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(boss)
+            .get::<MonsterVitals>()
+            .expect("boss vitals")
+            .hp,
+        100_000 - 500,
+        "HornedSorceror must be damageable again once the immune window elapses"
+    );
+}
+
+/// Task 2 (HornedWarrior, AI 165): while its shield window holds (`ai_state.mode` +
+/// `next_state_tick`) incoming damage is reduced by Crystal's
+/// `BuffType.HornedWarriorShield` flat +500 AC (`HornedWarrior.cs:55-63`). A hit
+/// equal to the shield AC is fully absorbed; a larger hit lands the overflow; with
+/// the shield down the full hit lands. Mirrors the General-MeowMeow shield test.
+#[test]
+fn horned_warrior_shield_window_subtracts_500_ac_from_incoming_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let object_id = 99_165_u32;
+    let boss = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "HornedWarrior",
+        Point { x: 900, y: 900 },
+        MirDirection::Left,
+        true,
+    );
+    let tick = runtime_tick(session.app.world());
+
+    // Shield up: window in the future, `mode = true`.
+    {
+        let mut entry = session.app.world_mut().entity_mut(boss);
+        entry.insert(MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        });
+        entry.insert(MonsterAiState {
+            mode: true,
+            next_state_tick: tick + 10,
+            ..MonsterAiState::default()
+        });
+    }
+
+    // A hit of exactly the shield AC is fully absorbed: no HP loss, no ObjectHealth.
+    let mut packets = Vec::new();
+    let died = super::damage_monster_entity(
+        session.app.world_mut(),
+        boss,
+        super::HORNED_WARRIOR_SHIELD_ARMOUR,
+        tick,
+        &mut packets,
+    );
+    assert!(
+        !died,
+        "a fully-absorbed hit must not kill the HornedWarrior"
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(boss)
+            .get::<MonsterVitals>()
+            .expect("boss vitals")
+            .hp,
+        100_000,
+        "the shield must fully absorb a hit equal to its +500 AC"
+    );
+    assert!(
+        !packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == object_id
+        )),
+        "a fully-absorbed hit broadcasts no ObjectHealth"
+    );
+
+    // A hit above the shield AC lands only the overflow (here +20).
+    let mut packets = Vec::new();
+    super::damage_monster_entity(
+        session.app.world_mut(),
+        boss,
+        super::HORNED_WARRIOR_SHIELD_ARMOUR + 20,
+        tick,
+        &mut packets,
+    );
+    assert_eq!(
+        100_000
+            - session
+                .app
+                .world()
+                .entity(boss)
+                .get::<MonsterVitals>()
+                .expect("boss vitals")
+                .hp,
+        20,
+        "the shield must absorb +500 AC and let the overflow through"
+    );
+
+    // Shield down (`mode = false`): the full hit lands, unmitigated.
+    {
+        let mut entry = session.app.world_mut().entity_mut(boss);
+        entry.insert(MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        });
+        entry.insert(MonsterAiState::default());
+    }
+    let mut packets = Vec::new();
+    super::damage_monster_entity(
+        session.app.world_mut(),
+        boss,
+        super::HORNED_WARRIOR_SHIELD_ARMOUR,
+        tick,
+        &mut packets,
+    );
+    assert_eq!(
+        100_000
+            - session
+                .app
+                .world()
+                .entity(boss)
+                .get::<MonsterVitals>()
+                .expect("boss vitals")
+                .hp,
+        super::HORNED_WARRIOR_SHIELD_ARMOUR,
+        "with the shield down the full hit lands"
+    );
+}
+
+/// Task 3 (HornedSorceror dust tornado): the persistent `HornedSorcererDustTornado`
+/// field (Crystal `Tornado()` — a 5x5 grid of SpellObjects ticking MC every second
+/// for 15 s) must damage the PLAYER on every tick for its whole lifetime, then stop
+/// and be cleaned up. Drives `tick_ground_spell_actions` + the combat resolver
+/// directly (no AI/regen noise) with MC = 500 so the per-tick hit is observable
+/// (the stock manifest MC is 0). The caster id has no live entity, exercising the
+/// "field outlives the caster" path.
+#[test]
+fn horned_sorceror_dust_tornado_field_damages_player_every_tick_until_expiry() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Player on a guaranteed non-safe-zone tile (else the safe-zone shield blocks
+    // the hit), with inflated HP so 15 ticks stay visible.
+    let player = player_entity(session.app.world()).expect("player entity");
+    let player_origin = find_combat_origin_line(&session, player, MirDirection::Right, 1);
+    set_player_position(&mut session, player_origin.clone());
+    assert!(
+        is_combat_position(&session, &player_origin),
+        "player tile must be outside any safe zone"
+    );
+    {
+        let current = session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .copied()
+            .expect("player vitals");
+        session
+            .app
+            .world_mut()
+            .entity_mut(player)
+            .insert(PlayerVitals {
+                hp: 100_000,
+                max_hp: 100_000,
+                ..current
+            });
+    }
+
+    // Register the field exactly as `dust_tornado` does: a 5x5 box covering the
+    // player, MC damage, first tick +1, expiring at +16 (Crystal `time + start`).
+    let field_damage = 500_i32;
+    let centre = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let locations: Vec<Point> = (-2..=2)
+        .flat_map(|dy| (-2..=2).map(move |dx| (dx, dy)))
+        .map(|(dx, dy)| Point {
+            x: centre.x + dx,
+            y: centre.y + dy,
+        })
+        .collect();
+    assert!(
+        locations.contains(&player_origin),
+        "player must stand on a field cell"
+    );
+    let start_tick = runtime_tick(session.app.world());
+    session
+        .app
+        .world_mut()
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(super::super::resources::PendingGroundSpellAction {
+            spell: Spell::HornedSorcererDustTornado,
+            caster_object_id: 99_169,
+            locations,
+            damage: field_damage,
+            next_tick: start_tick + 1,
+            expires_at_tick: start_tick + 16,
+            tick_interval: 1,
+        });
+
+    let player_hp = |session: &SimulationSession| {
+        session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .expect("player vitals")
+            .hp
+    };
+    let hp_before = player_hp(&session);
+
+    // Each active tick the field schedules an MC hit the combat pass resolves the
+    // same tick — so the player loses a fixed amount EVERY tick (persistent), not
+    // once. Capture the per-tick amount instead of hard-coding any status math.
+    let mut last_hp = hp_before;
+    let mut per_tick = 0;
+    for offset in 1..=5u64 {
+        let tick = start_tick + offset;
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        let mut packets = Vec::new();
+        super::super::skills::tick_ground_spell_actions(
+            session.app.world_mut(),
+            tick,
+            &mut packets,
+        );
+        super::super::combat::resolve_pending_combat_actions(
+            session.app.world_mut(),
+            tick,
+            &mut packets,
+        );
+        let hp_now = player_hp(&session);
+        let drop = last_hp - hp_now;
+        assert!(
+            drop > 0,
+            "dust-tornado field tick {offset} must damage the player"
+        );
+        if offset == 1 {
+            per_tick = drop;
+        } else {
+            assert_eq!(drop, per_tick, "the field must deal the same MC each tick");
+        }
+        last_hp = hp_now;
+    }
+
+    // Run past the 15 s expiry; ticks 16.. fire nothing and the field is removed.
+    for offset in 6..=20u64 {
+        let tick = start_tick + offset;
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        let mut packets = Vec::new();
+        super::super::skills::tick_ground_spell_actions(
+            session.app.world_mut(),
+            tick,
+            &mut packets,
+        );
+        super::super::combat::resolve_pending_combat_actions(
+            session.app.world_mut(),
+            tick,
+            &mut packets,
+        );
+    }
+    let hp_settled = player_hp(&session);
+    assert_eq!(
+        hp_before - hp_settled,
+        per_tick * 15,
+        "the field must hit the player on each of its 15 active ticks, then stop"
+    );
+    assert!(
+        session
+            .app
+            .world()
+            .resource::<RuntimeQueueResource>()
+            .pending_ground_spell_actions
+            .iter()
+            .all(|action| action.spell != Spell::HornedSorcererDustTornado),
+        "the expired dust-tornado field must be removed from the queue"
+    );
+}
+
 #[test]
 fn general_meow_meow_shield_phase_casts_mass_thunder_spell_objects() {
     let mut session = SimulationSession::new(SimulationConfig::default());

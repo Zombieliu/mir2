@@ -19,15 +19,15 @@ use super::buffs::{
     BuffState,
 };
 use super::combat::{
-    apply_player_monster_poison, combat_delay_ticks, damage_player_owned_monster_entity,
-    queue_due_packet, queued_before_world_tick_due_tick, ranged_attack_delay_ticks,
-    schedule_damage_to_monster, schedule_heal_to_player, set_cast_defence, CrystalDefence,
-    PendingMonsterDefeatAction,
+    apply_player_monster_poison, combat_delay_ticks, damage_monster_entity,
+    damage_player_owned_monster_entity, queue_due_packet, queued_before_world_tick_due_tick,
+    ranged_attack_delay_ticks, schedule_damage_to_monster, schedule_damage_to_player,
+    schedule_heal_to_player, set_cast_defence, CrystalDefence, PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
     entity_player_vitals, entity_position, hero_entity, player_entity, CharacterBody, DisplayName,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
+    Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
 use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_AGILITY,
@@ -48,6 +48,7 @@ use super::items::{
 use super::map::{
     current_map_disallows_random_teleport, current_map_disallows_reincarnation, is_safe_zone_point,
 };
+use super::monster_ai::nearby_opposing_monster_targets;
 use super::monsters::{
     active_summoned_monster_count, allocate_runtime_monster_object_id,
     crystal_dynamic_monster_template, deterministic_roll, queue_pending_monster_spawn,
@@ -4390,6 +4391,12 @@ pub(super) fn tick_ground_spell_actions(
                     }
                 }
                 set_cast_defence(world, previous_ground_defence);
+            } else if action.spell == Spell::HornedSorcererDustTornado {
+                // Monster-cast persistent MC field (Crystal HornedSorceror
+                // `Tornado()`). Unlike the player-cast spells above, it damages the
+                // PLAYER (the boss's target) plus any monster opposing the caster on
+                // each occupied cell — see `tick_dust_tornado_field`.
+                tick_dust_tornado_field(world, &action, tick, packets);
             }
             if detonated_trap {
                 continue;
@@ -4404,6 +4411,77 @@ pub(super) fn tick_ground_spell_actions(
     world
         .resource_mut::<RuntimeQueueResource>()
         .pending_ground_spell_actions = retained;
+}
+
+/// Tick one cell-set of a monster-spawned dust-tornado field (Crystal HornedSorceror
+/// `Tornado()` SpellObject grid, HornedSorceror.cs:154-198). Unlike the player-cast
+/// ground spells, this field is cast BY a monster, so it damages the PLAYER (the
+/// boss's target) and any monster opposing the caster on every occupied cell. The
+/// field keeps ticking for its full 15 s even if the caster dies (Crystal's
+/// SpellObject persists), so the player is hit whether or not the caster still
+/// exists. `MC` damage uses DefenceType MC, so the magic DefenceType is set for the
+/// monster ticks (the player hit is resolved by the combat queue, which applies the
+/// safe-zone shield + damage indicator like every other monster hit).
+fn tick_dust_tornado_field(
+    world: &mut World,
+    action: &PendingGroundSpellAction,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if action.damage <= 0 {
+        return;
+    }
+
+    let caster = entity_by_object_id(world, action.caster_object_id);
+    let caster_name = caster
+        .and_then(|entity| entity_name(world, entity))
+        .unwrap_or_else(|| "HornedSorceror".to_string());
+
+    // Player: a scheduled MC hit when standing on any field cell.
+    if let Some(player) = player_entity(world) {
+        if let Some(player_position) = entity_position(world, player) {
+            if action.locations.iter().any(|cell| cell == &player_position) {
+                schedule_damage_to_player(
+                    world,
+                    tick,
+                    action.caster_object_id,
+                    caster_name,
+                    action.damage,
+                );
+            }
+        }
+    }
+
+    // Opposing monsters (e.g. charmed pets) on a field cell. Needs the caster to
+    // know which side it opposes; if the boss is already despawned the field above
+    // still hits the player, just not other monsters.
+    let Some(caster) = caster else {
+        return;
+    };
+    let Some(caster_agent) = world.entity(caster).get::<MonsterAgent>().cloned() else {
+        return;
+    };
+    let monster_entities: Vec<Entity> = world
+        .query_filtered::<Entity, bevy_ecs::query::With<Monster>>()
+        .iter(world)
+        .collect();
+    let previous_defence = set_cast_defence(world, Some(CrystalDefence::Mac));
+    for cell in &action.locations {
+        for target in nearby_opposing_monster_targets(
+            world,
+            &monster_entities,
+            caster,
+            cell,
+            &caster_agent,
+            0,
+        ) {
+            if let Some(packet) = object_struck_packet(world, target, action.caster_object_id) {
+                packets.push(packet);
+            }
+            damage_monster_entity(world, target, action.damage, tick, packets);
+        }
+    }
+    set_cast_defence(world, previous_defence);
 }
 
 fn fire_wall_cross_locations(world: &World, target: &Point) -> Vec<Point> {

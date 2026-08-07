@@ -27,10 +27,10 @@ use super::monster_ai::{
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_monster_ac_range, crystal_monster_attack_damage,
     crystal_monster_effect_for_name, crystal_monster_mac_range, crystal_monster_raw_attack_damage,
-    crystal_respawn_template_from_monster, deterministic_roll, ignores_monster_damage,
-    is_hidden_or_sleeping_target, monster_ignores_damage, monster_is_damageable,
-    monster_is_stoned_zuma, monster_locks_player_target_on_hit, monster_melee_attack_packet,
-    queue_pending_monster_spawn, schedule_monster_respawn, PendingMonsterSpawnAction,
+    crystal_respawn_template_from_monster, deterministic_roll, is_hidden_or_sleeping_target,
+    monster_ignores_damage, monster_is_damageable, monster_is_stoned_zuma,
+    monster_locks_player_target_on_hit, monster_melee_attack_packet, queue_pending_monster_spawn,
+    schedule_monster_respawn, PendingMonsterSpawnAction,
 };
 use super::movement::{
     current_location, current_movement, direction_toward, directional_destination, offset_point,
@@ -2135,7 +2135,12 @@ pub(super) fn damage_monster_entity(
         return false;
     }
 
-    if ignores_monster_damage(&agent) || (agent.ai == 98 && ai_state.extra_byte < 4) {
+    // Centralised damage-ignore gate. Besides AI 48/49/99/255 and the AI-98 stoning
+    // window, `monster_ignores_damage` also covers boss immune windows
+    // (HornedCommander `ai_state.mode`, HornedSorceror charged-stomp timer), so every
+    // DIRECT caller of `damage_monster_entity` (ground-spell ticks, skills, instant
+    // kills) honours boss invulnerability — not just the scheduled-combat path.
+    if monster_ignores_damage(world, monster_entity) {
         return false;
     }
 
@@ -2200,12 +2205,25 @@ pub(super) fn damage_monster_entity(
         0
     };
 
+    // HornedWarrior (AI 165) grants itself `BuffType.HornedWarriorShield`
+    // (MinAC = MaxAC = 500) below 50% HP (`HornedWarrior.cs:51-66`). While the shield
+    // window holds (`ai_state.mode` + `next_state_tick`), subtract that flat +500 AC
+    // from the incoming hit — exactly like the General-MeowMeow shield above.
+    let horned_warrior_shield_armour =
+        if agent.ai == 165 && ai_state.mode && current_tick < ai_state.next_state_tick {
+            HORNED_WARRIOR_SHIELD_ARMOUR
+        } else {
+            0
+        };
+
     let applied_damage = if trap_rock_first_hit_collapse {
         current_hp
     } else if matches!(agent.ai, 3 | 128) {
         1
     } else {
-        damage.saturating_sub(general_meow_meow_shield_armour)
+        damage
+            .saturating_sub(general_meow_meow_shield_armour)
+            .saturating_sub(horned_warrior_shield_armour)
     };
     if applied_damage <= 0 {
         return false;
