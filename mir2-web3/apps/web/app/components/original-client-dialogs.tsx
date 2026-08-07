@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
+import { parseCrystalColourSpans, stripCrystalDialogMarkup } from "../../lib/crystal-dialog-markup";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -339,7 +340,17 @@ export function NpcDialogPanel({
       </div>
       <div className="npc-dialog-body" style={{ maxHeight: 168, overflowY: "auto" }}>
         {bodyLines.map((line, index) => (
-          <p key={`${dialog.npcObjectId}-${index}`}>{line}</p>
+          <p key={`${dialog.npcObjectId}-${index}`}>
+            {parseCrystalColourSpans(line).map((segment, segmentIndex) =>
+              segment.colour ? (
+                <span key={segmentIndex} style={{ color: segment.colour }}>
+                  {segment.text}
+                </span>
+              ) : (
+                <Fragment key={segmentIndex}>{segment.text}</Fragment>
+              ),
+            )}
+          </p>
         ))}
         {dialog.links.length ? (
           <div className="npc-dialog-links">
@@ -399,13 +410,4 @@ export function NpcDialogPanel({
 
 function trimLogTimestamp(text: string) {
   return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
-}
-
-function stripCrystalDialogMarkup(text: string) {
-  return text
-    .replace(/\{\/?[A-Z]+\}/gi, "")
-    .replace(/<\$[^>]+>/g, "")
-    .replace(/%[A-Z0-9_()]+/gi, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
 }

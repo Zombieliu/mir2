@@ -3426,7 +3426,25 @@ export function OriginalClientShell({
               <span className="gateway-reconnect-text">{reconnectMessage}</span>
             </div>
           ) : null}
-          {screen === "game" && !sceneInteractionReady ? (
+          {/*
+            Map-entry sprite gap: when Bevy is the sole entity drawer, its render
+            snapshot is momentarily empty right after the map appears (no layers
+            packed yet) while the DOM nameplate overlay — fed straight from world
+            state — already shows, producing a "floating name with no body" for a
+            few frames (~280ms, measured). interactionReady is deliberately
+            decoupled from entity rendering (the "can't move" fix above), so the
+            overlay that keys on it clears too early. Keep the overlay up until at
+            least the player's sprite is in the snapshot. Guarded by
+            useBevyEntityRenderer (DOM-fallback paths draw the sprite immediately,
+            so they have no gap and must not incur extra latency) and bounded by
+            readinessSafetyExpired so an empty/stuck snapshot can't hang it.
+          */}
+          {screen === "game" &&
+          (!sceneInteractionReady ||
+            (useBevyEntityRenderer &&
+              entityRenderState.enabled &&
+              entityRenderState.entities.length === 0 &&
+              !readinessSafetyExpired)) ? (
             <div className="scene-loading-overlay" role="status" aria-live="polite">
               <span className="scene-loading-spinner" aria-hidden="true" />
               <span className="scene-loading-text">{sceneLoadingLabel}</span>

@@ -77,6 +77,14 @@ const sourceSceneSpriteLibraries = new Set(
         .filter((libraryKey) => !libraryKey.startsWith("Map/"))
     : [],
 );
+// True when an R2 asset base is configured, so the asset Service Worker can backfill
+// frame PNGs that are absent same-origin (mir2-asset-worker.js). The kept actor libraries
+// (CArmour/Monster/...) ship only their movement frames same-origin; the action frames
+// (attack/struck/die/dead) live on the R2 release. Without an R2 base those PNGs would 404,
+// so we only reach for the fuller R2 meta when this is set.
+const REMOTE_ASSET_BASE_CONFIGURED =
+  typeof process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL === "string" &&
+  process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL.trim().length > 0;
 
 export function normalizeSceneSpriteLibraryKey(libraryKey: string) {
   return libraryKey.replaceAll("\\", "/");
@@ -138,11 +146,34 @@ export function loadOriginalSceneSpriteLibrary(
 
 export async function fetchOriginalSceneSpriteMeta(normalizedKey: string) {
   const staticResponse = await fetch(`/original-ui/${normalizedKey}/meta.json`);
-  if (staticResponse.ok || !sourceSceneSpriteLibraries.has(normalizedKey)) {
+  if (staticResponse.ok) {
+    // The kept same-origin actor libraries can ship a TRUNCATED meta (movement frames
+    // only). When it is incomplete AND an R2 base is configured, fall through to the API
+    // route, which resolves the complete meta from R2; the missing-frame PNGs are then
+    // backfilled by the asset Service Worker. Without an R2 base we keep the truncated meta
+    // (those PNGs would 404) and skip the redundant fetch.
+    if (!REMOTE_ASSET_BASE_CONFIGURED || (await spriteMetaResponseIsComplete(staticResponse))) {
+      return staticResponse;
+    }
+  } else if (!sourceSceneSpriteLibraries.has(normalizedKey)) {
     return staticResponse;
   }
 
   return fetch(`/api/original-ui-meta?library=${encodeURIComponent(normalizedKey)}`);
+}
+
+// Peek a meta response without consuming the caller's body: truncated actor metas declare
+// `count` (the full frame total) but list fewer `frames`. Unparseable bodies are treated as
+// complete so an odd payload never breaks the same-origin fast path.
+async function spriteMetaResponseIsComplete(response: Response) {
+  try {
+    const meta = (await response.clone().json()) as { count?: number; frames?: unknown[] };
+    const count = typeof meta.count === "number" ? meta.count : 0;
+    const frames = Array.isArray(meta.frames) ? meta.frames.length : 0;
+    return frames >= count;
+  } catch {
+    return true;
+  }
 }
 
 export function frameMetaForIndex(
