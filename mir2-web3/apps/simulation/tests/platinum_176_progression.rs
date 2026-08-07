@@ -103,9 +103,7 @@ struct HuntingRoute {
 }
 
 fn platinum_config() -> SimulationConfig {
-    SimulationConfig::default()
-        .with_platinum_176_profile()
-        .expect("embedded platinum_176 profile should validate")
+    SimulationConfig::default().with_platinum_176_profile()
 }
 
 fn create_and_start_level_one_character(

@@ -239,8 +239,7 @@ fn start_milestone_session(
 
     let config = SimulationConfig::default()
         .with_crystal_world_runtime()
-        .with_platinum_176_profile()
-        .expect("embedded platinum_176 profile should validate");
+        .with_platinum_176_profile();
     let mut account = AccountRecord::empty();
     account.characters.push(character);
     account.saves.insert(0, save);

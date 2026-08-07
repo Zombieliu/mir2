@@ -128,7 +128,6 @@ impl ItemState {
             description: localized_item_description(language, &self.key, &self.description),
             durability_current: self.durability_current,
             durability_max: self.durability_max,
-            equip_slot: self.equip_slot,
             grade: self.grade,
             added_attack: self.added_attack,
             added_defence: self.added_defence,

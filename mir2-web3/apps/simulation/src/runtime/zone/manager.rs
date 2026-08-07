@@ -131,7 +131,6 @@ impl ZoneManager {
             | ZoneCommand::BroadcastSharedObjectPackets { session_id, .. }
             | ZoneCommand::SyncGroundDrops { session_id, .. }
             | ZoneCommand::SpawnMonster { session_id, .. }
-            | ZoneCommand::DespawnMonster { session_id, .. }
             | ZoneCommand::PlayerAttackObject { session_id, .. }
             | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }

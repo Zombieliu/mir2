@@ -400,28 +400,15 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
     if conquest_index <= 0 {
         return true;
     }
-    let stage5 = &world.resource::<Stage5SystemsResource>().stage5_systems;
-    let guild = stage5.guild.name.trim().to_string();
+    let guild = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .name
+        .trim()
+        .to_string();
     if guild.is_empty() {
         return false;
-    }
-    if stage5
-        .conquest
-        .campaigns
-        .values()
-        .filter(|campaign| {
-            campaign.conquest_index == conquest_index
-                && campaign.phase == crate::Stage5ConquestPhase::Active
-        })
-        .any(|campaign| {
-            campaign.defender_guild.eq_ignore_ascii_case(&guild)
-                || campaign
-                    .registered_guilds
-                    .iter()
-                    .any(|registered| registered.eq_ignore_ascii_case(&guild))
-        })
-    {
-        return true;
     }
     world
         .resource::<MapRuntimeResource>()
