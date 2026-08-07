@@ -6545,12 +6545,7 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn local_self_object_id(&self) -> Option<u32> {
-        self.inner
-            .world_snapshot()
-            .entities
-            .into_iter()
-            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-            .map(|entity| entity.object_id)
+        self.inner.local_player_object_id()
     }
 
     fn dispatch_zone_observer_packets(
@@ -7980,6 +7975,9 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn auto_pick_up_shared_drop_with_intelligent_creature(&mut self) -> Vec<ServerPacket> {
+        if !self.inner.has_active_intelligent_creature_auto_pickup() {
+            return Vec::new();
+        }
         let snapshot = self.inner.world_snapshot();
         let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
             return Vec::new();

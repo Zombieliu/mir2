@@ -13,6 +13,13 @@ pub(super) const CRYSTAL_GOODS_MAX_STORED_PER_ITEM: usize = 20;
 pub(super) const MONSTER_PLAYER_TARGET_RANGE: i32 = CRYSTAL_DATA_RANGE;
 pub(super) const CRYSTAL_RED_NAME_PK_POINTS: i32 = 200;
 pub(super) const SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS: u64 = 5;
+/// Per-tick green-poison damage a `SpittingSpider` (AI 4) inflicts on a victim
+/// it hits with its line attack. Crystal `PoisonTarget` derives the tick value
+/// from the spider's `MinSC..MaxSC`; we mirror the flat figure the player-facing
+/// green poison already uses (`CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE`) so a
+/// monster line-victim and the player are poisoned by the identical
+/// `PoisonTarget(target, 8, 5, PoisonType.Green, 2000)` call.
+pub(super) const SPITTING_SPIDER_GREEN_POISON_TICK_DAMAGE: i32 = 5;
 pub(super) const BUG_BAT_IMAGE: u16 = 42;
 pub(super) const BUG_BAT_FALLBACK_VIEW_RANGE: u8 = 7;
 pub(super) const BUG_BAT_FALLBACK_HP: i32 = 3;

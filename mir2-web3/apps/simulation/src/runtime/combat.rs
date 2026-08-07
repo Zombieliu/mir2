@@ -948,6 +948,24 @@ pub(super) struct PendingMonsterDefeatAction {
     pub(super) name: String,
 }
 
+/// On-hit poison a scheduled monster-damage action applies to its victim once the
+/// delayed hit actually lands (`net_damage > 0`). Mirrors Crystal monsters whose
+/// `CompleteAttack` poisons the struck target only after `Attacked() > 0` — e.g.
+/// `SpittingSpider.CompleteAttack` → `PoisonTarget(target, 8, 5, PoisonType.Green, 2000)`
+/// (Crystal/Server/MirObjects/Monsters/SpittingSpider.cs:58). The player victim of
+/// the same attack is poisoned via [`PendingPlayerStatusEffect`]; this carries the
+/// equivalent payload for monster line-victims.
+#[derive(Debug, Clone, Copy)]
+pub(super) struct PendingMonsterOnHitPoison {
+    /// Crystal `PoisonType` bitmask understood by [`apply_monster_poison`] /
+    /// [`tick_monster_poisons`] (bit 0 = Green).
+    pub(super) poison: u16,
+    /// Per-tick green-poison damage.
+    pub(super) green_damage: i32,
+    /// Lifetime of the poison in ticks.
+    pub(super) duration_ticks: u64,
+}
+
 #[derive(Debug, Clone)]
 pub(super) struct PendingPlayerMovement {
     pub(super) direction: MirDirection,
@@ -966,6 +984,10 @@ pub(super) struct PendingCombatAction {
     pub(super) on_monster_defeat: Option<PendingMonsterDefeatAction>,
     /// Crystal `DefenceType` used to roll target armour when this damage resolves.
     pub(super) defence: CrystalDefence,
+    /// Green/red poison applied to a [`PendingCombatTarget::Monster`] victim when
+    /// the delayed hit lands (`net_damage > 0`). `None` for the vast majority of
+    /// scheduled hits; set for Crystal `CompleteAttack` poison-on-hit monsters.
+    pub(super) on_hit_poison: Option<PendingMonsterOnHitPoison>,
 }
 
 pub(super) fn queue_pending_combat_action(world: &mut World, action: PendingCombatAction) {
@@ -988,6 +1010,7 @@ pub(super) fn queue_due_packet(world: &mut World, due_tick: u64, packet: ServerP
             player_movement: None,
             on_monster_defeat: None,
             defence: CrystalDefence::default(),
+            on_hit_poison: None,
         },
     );
 }
@@ -1009,6 +1032,7 @@ pub(super) fn schedule_heal_to_player(world: &mut World, due_tick: u64, heal: i3
             player_movement: None,
             on_monster_defeat: None,
             defence: CrystalDefence::default(),
+            on_hit_poison: None,
         },
     );
 }
@@ -1092,6 +1116,7 @@ pub(super) fn schedule_damage_to_player_with_effect_due_packet_and_movement(
             player_movement,
             on_monster_defeat: None,
             defence: CrystalDefence::default(),
+            on_hit_poison: None,
         },
     );
 }
@@ -1114,6 +1139,7 @@ pub(super) fn schedule_player_status_effect(
             player_movement: None,
             on_monster_defeat: None,
             defence: CrystalDefence::default(),
+            on_hit_poison: None,
         },
     );
 }
@@ -1162,8 +1188,58 @@ pub(super) fn schedule_damage_to_monster_with_due_packet(
             player_movement: None,
             on_monster_defeat: defeat_action,
             defence,
+            on_hit_poison: None,
         },
     );
+}
+
+/// Schedule delayed damage to a monster victim that also applies an on-hit poison
+/// when the blow lands (`net_damage > 0`). Mirrors Crystal monsters whose
+/// `CompleteAttack` poisons the struck target after `Attacked() > 0` (see
+/// [`PendingMonsterOnHitPoison`]); `on_hit_poison = None` is equivalent to
+/// [`schedule_damage_to_monster`].
+pub(super) fn schedule_damage_to_monster_with_poison(
+    world: &mut World,
+    due_tick: u64,
+    attacker_id: u32,
+    target_entity: Entity,
+    damage: i32,
+    defeat_action: Option<PendingMonsterDefeatAction>,
+    on_hit_poison: Option<PendingMonsterOnHitPoison>,
+) {
+    let defence = current_cast_defence(world);
+    queue_pending_combat_action(
+        world,
+        PendingCombatAction {
+            due_tick,
+            attacker_id,
+            target: PendingCombatTarget::Monster(target_entity),
+            damage,
+            player_status_effect: None,
+            due_packet: None,
+            player_movement: None,
+            on_monster_defeat: defeat_action,
+            defence,
+            on_hit_poison,
+        },
+    );
+}
+
+/// The on-hit green poison Crystal `SpittingSpider.CompleteAttack` (AI 4) applies
+/// to every line target whose hit lands:
+/// `PoisonTarget(target, 8, 5, PoisonType.Green, 2000)`
+/// (Crystal/Server/MirObjects/Monsters/SpittingSpider.cs:58). The player-facing
+/// path models this as deterministic-on-hit green poison (see
+/// `monster_player_status_effect` AI-4 and the
+/// `crystal_ai4_spitting_spider_poisons_player_on_hit` test); a monster line-victim
+/// gets the identical poison so the same Crystal `PoisonTarget` call hits players
+/// and monsters alike.
+pub(super) fn spitting_spider_on_hit_poison() -> PendingMonsterOnHitPoison {
+    PendingMonsterOnHitPoison {
+        poison: 1, // Crystal PoisonType.Green (bit 0)
+        green_damage: SPITTING_SPIDER_GREEN_POISON_TICK_DAMAGE,
+        duration_ticks: SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS,
+    }
 }
 
 pub(super) fn apply_monster_poison(
@@ -1967,6 +2043,29 @@ pub(super) fn resolve_pending_combat_actions(
                 }
                 let monster_dead =
                     damage_monster_entity(world, target_entity, net_damage, current_tick, packets);
+                // Crystal `CompleteAttack` poison-on-hit (e.g. SpittingSpider's
+                // `PoisonTarget` Green): the poison lands only when the blow itself
+                // landed (`Attacked() > 0`). Apply it to the surviving victim after
+                // the hit reduced its HP; poisoning a corpse is a no-op
+                // (`tick_monster_poisons` drops dead-agent state) so skip it.
+                if let Some(poison) = action.on_hit_poison {
+                    if net_damage > 0 && !monster_dead {
+                        apply_monster_poison(
+                            world,
+                            target_entity,
+                            poison.poison,
+                            poison.green_damage,
+                            current_tick,
+                            poison.duration_ticks,
+                        );
+                        if let Some(object_id) = entity_object_id(world, target_entity) {
+                            packets.push(ServerPacket::ObjectPoisoned {
+                                object_id,
+                                poison: poison.poison,
+                            });
+                        }
+                    }
+                }
                 if monster_dead {
                     if let Some(defeat_action) = action.on_monster_defeat {
                         handle_monster_defeat(

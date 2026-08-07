@@ -777,6 +777,16 @@ pub(super) fn execute_crystal_npc_section(
             continue;
         }
 
+        // Crystal treats `;`-prefixed lines as script comments and skips them while
+        // building a segment, so they never become say/act text. See
+        // Crystal/Server/MirObjects/NPC/NPCScript.cs:530 (`ParseSegment`:
+        // `if (lines[i].StartsWith(";")) continue;`). Without this, a trailing comment
+        // line in a #SAY/#ELSESAY block (e.g. Premium_Elijah's `;;Premium Cave Menu.`)
+        // leaks into the dialog body.
+        if line.starts_with(';') {
+            continue;
+        }
+
         if line.starts_with('[') && line.ends_with(']') {
             break;
         }
