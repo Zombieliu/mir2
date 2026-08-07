@@ -421,14 +421,19 @@ fn write_acceptance_artifacts_if_requested(report: &ProgressionCertificationRepo
 fn platinum_profile_rejects_post_176_classes_and_heroes() {
     let mut session = SimulationSession::new(platinum_config());
 
-    assert_eq!(
-        session.handle_packet(ClientPacket::NewCharacter {
-            name: "AssassinBlocked".to_string(),
-            gender: MirGender::Male,
-            class: MirClass::Assassin,
-        }),
-        vec![ServerPacket::NewCharacter { result: 1 }]
-    );
+    for (name, gender, class) in [
+        ("AssassinBlocked", MirGender::Male, MirClass::Assassin),
+        ("ArcherBlocked", MirGender::Female, MirClass::Archer),
+    ] {
+        assert_eq!(
+            session.handle_packet(ClientPacket::NewCharacter {
+                name: name.to_string(),
+                gender,
+                class,
+            }),
+            vec![ServerPacket::NewCharacter { result: 1 }]
+        );
+    }
     assert_eq!(
         session.handle_packet(ClientPacket::NewHero {
             name: "HeroBlocked".to_string(),
