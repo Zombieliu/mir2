@@ -455,6 +455,7 @@ impl SimulationSession {
             .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)?;
         let stage5 = self.app.world().resource::<Stage5SystemsResource>();
         let permissions = self.app.world().resource::<PlayerPermissionResource>();
+        let player_runtime = self.app.world().resource::<PlayerRuntimeResource>();
         let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
             .then(|| stage5.stage5_systems.guild.name.clone());
         let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
@@ -487,12 +488,16 @@ impl SimulationSession {
             chat_profile: ZoneChatProfile {
                 group_members: stage5.stage5_systems.group.members.clone(),
                 guild_name,
+                active_guild_wars: stage5.stage5_systems.guild.active_wars.clone(),
                 blocked_names: stage5.stage5_systems.social.blocked.clone(),
                 mentor_name,
                 relationship_name,
                 is_gm: false,
                 free_map_shout: permissions.free_map_shout,
                 free_server_shout: permissions.free_server_shout,
+                attack_mode: stage5.stage5_systems.attack_mode,
+                pk_points: player_runtime.pk_points,
+                in_safe_zone: snapshot.in_safe_zone,
             },
             combat_stats: self.zone_player_combat_stats(),
         })
@@ -855,6 +860,7 @@ impl SimulationSession {
             .unwrap_or(mir2_protocol::MirDirection::Down);
         let name = entity_name(world, entity).unwrap_or_else(|| "Monster".to_string());
         let template = crystal_monster_by_name(&name);
+        let is_conquest_battlefield_object = matches!(agent.ai, 80..=82);
         let object_id = entity_object_id(world, entity).unwrap_or(object_id);
         let max_hp = vitals.max_hp.max(1);
 
@@ -867,17 +873,26 @@ impl SimulationSession {
             level: template.as_ref().map(|monster| monster.level).unwrap_or(1),
             max_hp,
             hp: vitals.hp.clamp(0, max_hp),
-            experience: template
-                .as_ref()
-                .map(|monster| monster.experience)
-                .unwrap_or(0),
+            experience: if is_conquest_battlefield_object {
+                0
+            } else {
+                template
+                    .as_ref()
+                    .map(|monster| monster.experience)
+                    .unwrap_or(0)
+            },
+            friendly_guild: None,
             defense: template
                 .as_ref()
                 .map(zone_monster_defense_from_template)
                 .unwrap_or_default(),
             position,
             direction,
-            drops: zone_ground_drop_snapshots_for_monster(world, object_id, &name),
+            drops: if is_conquest_battlefield_object {
+                Vec::new()
+            } else {
+                zone_ground_drop_snapshots_for_monster(world, object_id, &name)
+            },
         })
     }
 }

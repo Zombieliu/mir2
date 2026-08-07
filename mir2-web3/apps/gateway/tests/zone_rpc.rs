@@ -127,6 +127,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
         max_hp: 285,
         hp: 285,
         experience: 310,
+        friendly_guild: None,
         position: Point { x: 168, y: 155 },
         direction: MirDirection::Down,
         defense: ZoneMonsterDefense::default(),

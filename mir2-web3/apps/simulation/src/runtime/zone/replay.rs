@@ -228,6 +228,7 @@ impl ZoneReplayCommand {
                     max_hp,
                     hp,
                     experience,
+                    friendly_guild: None,
                     position,
                     direction,
                     defense: ZoneMonsterDefense {
