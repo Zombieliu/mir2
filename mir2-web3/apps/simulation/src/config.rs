@@ -4710,6 +4710,8 @@ pub struct WorldSnapshot {
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
     pub player_max_mp: Option<i32>,
+    #[serde(default)]
+    pub player_pk_points: i32,
     pub player_experience: i64,
     pub player_max_experience: i64,
     pub gold: u32,

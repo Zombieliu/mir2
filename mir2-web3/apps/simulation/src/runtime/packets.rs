@@ -5178,6 +5178,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
         player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
+        player_pk_points: player_runtime.pk_points,
         player_experience: player_runtime.experience,
         player_max_experience: player_runtime.max_experience,
         gold: player_runtime.gold,

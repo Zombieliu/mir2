@@ -16,18 +16,35 @@ cargo +1.89.0 test -p mir2-game-data --test platinum_176_content_loop -- --nocap
 "${repo_root}/scripts/certify-platinum-176-party-boss.sh" "${party_boss_report_path}"
 
 simulation_cases=(
-  "runtime::session::tests::platinum_176_blocks_post_176_and_qa_stage5_actions_but_keeps_classic_social_endgame"
+  "runtime::session::tests::platinum_176_ghoul_drop_overrides_supply_level_19_to_21_books"
+  "runtime::session::tests::platinum_176_midgame_boss_overrides_supply_level_22_to_35_books"
   "runtime::session::tests::stage5_social_group_guild_mail_persist_across_reload"
   "runtime::session::tests::stage5_trade_shop_and_auction_are_transactional"
-  "runtime::session::tests::stage5_conquest_campaign_closes_registration_captures_settles_and_rewards_once"
-  "runtime::session::tests::deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment"
-  "runtime::session::tests::pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay"
+  "runtime::session::tests::stage5_conquest_event_hero_mining_and_crafting_flow"
 )
 
 for test_name in "${simulation_cases[@]}"; do
   cargo +1.89.0 test \
     -p mir2-simulation \
     --lib \
+    "${test_name}" \
+    -- \
+    --exact \
+    --nocapture
+done
+
+platinum_cases=(
+  "platinum_176_blocks_post_176_stage5_actions_but_keeps_classic_social_endgame"
+  "platinum_176_new_character_starts_with_source_start_items_in_the_bag"
+  "deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment"
+  "pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay"
+  "pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries"
+)
+
+for test_name in "${platinum_cases[@]}"; do
+  cargo +1.89.0 test \
+    -p mir2-simulation \
+    --test platinum_176_progression \
     "${test_name}" \
     -- \
     --exact \
@@ -106,8 +123,8 @@ const cases = [
     scope: "Trade, shop and auction fixture transactions conserve state",
   },
   {
-    id: "sabuk.campaign",
-    scope: "Registration, capture, settlement and reward idempotency",
+    id: "sabuk.classic-flow",
+    scope: "Classic conquest start, owner assignment and persisted state flow",
   },
   {
     id: "pk.deep-red-drops",
@@ -143,6 +160,7 @@ const report = {
   cases,
   caveats: [
     "The trade/auction fixture test proves transactionality in crystal_full; platinum_176 independently blocks auction commands.",
+    "The rewritten mainline retains its classic conquest state machine; the superseded July campaign scheduler is not claimed by this certificate.",
     "This certificate is deterministic server/UI regression evidence, not Windows multiplayer or long-duration soak evidence.",
     "The measured combat cases seed levels, learned skills and representative equipment; natural acquisition remains a separate browser release gate.",
     "The shared-Zone party certificate measures 17-second three-class RedMoonEvil TTK versus 59 seconds solo with production damage multiplier 1; it is deterministic balance evidence, not a substitute for human play feel.",

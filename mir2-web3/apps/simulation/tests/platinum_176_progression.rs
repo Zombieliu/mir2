@@ -745,3 +745,175 @@ fn natural_level_and_experience_survive_logout_and_fresh_session_reload() {
     assert_eq!(snapshot.player_experience, 26);
     assert_eq!(snapshot.player_max_experience, 200);
 }
+
+#[test]
+fn platinum_176_blocks_post_176_stage5_actions_but_keeps_classic_social_endgame() {
+    let mut session = SimulationSession::new(platinum_config());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before = session.world_snapshot();
+
+    for (action, args) in [
+        ("auction.list", vec!["WoodenSword".to_string()]),
+        ("craft", vec!["WoodenSword".to_string()]),
+        ("gameShop.buyGold", vec!["1".to_string()]),
+        ("hero.recruit", vec!["Taoist".to_string()]),
+        ("item.addSocket", vec!["WoodenSword".to_string()]),
+        ("item.seal", vec!["WoodenSword".to_string()]),
+        ("mail.send", vec!["Other".to_string()]),
+        ("qa.advanceToLevel", vec!["50".to_string()]),
+        ("shop.buyCredit", vec!["WoodenSword".to_string()]),
+    ] {
+        let packets = session.stage5_command(action, args);
+        assert!(
+            packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::Chat { message, .. }
+                    if message.contains("unavailable in the active content profile")
+            )),
+            "{action} should be rejected by the Platinum 1.76 profile"
+        );
+    }
+
+    let blocked = session.world_snapshot();
+    assert_eq!(blocked.player_experience, before.player_experience);
+    assert_eq!(blocked.player_max_experience, before.player_max_experience);
+    assert_eq!(blocked.gold, before.gold);
+    assert_eq!(blocked.credit, before.credit);
+    assert_eq!(blocked.inventory_items, before.inventory_items);
+    assert_eq!(blocked.stage5_systems, before.stage5_systems);
+
+    session.stage5_command("group.create", vec!["Companion".to_string()]);
+    session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
+    session.stage5_command("trade.start", vec!["Trader".to_string()]);
+    session.stage5_command("conquest.start", vec!["Sabuk".to_string()]);
+    session.stage5_command("conquest.owner", Vec::new());
+    let classic = session.world_snapshot().stage5_systems;
+    assert_eq!(classic.group.members.len(), 2);
+    assert_eq!(classic.guild.name, "BichonGuard");
+    assert!(classic.trade.is_some());
+    assert_eq!(classic.conquest.castle_owner, "BichonGuard");
+}
+
+#[test]
+fn platinum_176_new_character_starts_with_source_start_items_in_the_bag() {
+    let mut session = SimulationSession::new(platinum_config());
+    create_and_start_level_one_character(&mut session, "SourceStarter", MirClass::Warrior);
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(
+        snapshot
+            .inventory_items
+            .iter()
+            .map(|item| item.name.as_str())
+            .collect::<Vec<_>>(),
+        vec!["WoodenSword", "BaseDress(M)", "(HP)DrugSmall", "Candle"]
+    );
+    assert!(snapshot
+        .inventory_items
+        .iter()
+        .all(|item| item.key.starts_with("crystal-item-")));
+    assert!(snapshot.equipment_items.is_empty());
+    assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
+}
+
+#[test]
+fn deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.stage5_command("qa.giveItem", vec!["red-potion".to_string()]);
+    session.apply_zone_unlawful_player_kill(300);
+    let before = session.world_snapshot();
+    let before_items = before.inventory_items.len() + before.equipment_items.len();
+    assert!(
+        before.equipment_items.len() >= 2,
+        "deep-red fixture should expose two droppable equipped items"
+    );
+
+    assert!(session.apply_zone_player_damage(i32::MAX));
+    let packets = session.apply_zone_player_death_penalty();
+    let after = session.world_snapshot();
+    assert_eq!(
+        after.inventory_items.len() + after.equipment_items.len(),
+        before_items - 2
+    );
+    assert_eq!(after.ground_drops.len(), before.ground_drops.len() + 2);
+    assert_eq!(
+        packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::DeleteItem { count: 1, .. }))
+            .count(),
+        2
+    );
+}
+
+#[test]
+fn pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay() {
+    let config = SimulationConfig::default();
+    let mut first = SimulationSession::new(config.clone());
+    first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    first.apply_zone_unlawful_player_kill(2);
+    for _ in 0..30 {
+        first.tick();
+    }
+    assert_eq!(first.world_snapshot().player_pk_points, 2);
+    assert_eq!(
+        first.world_snapshot().stage5_systems.pk_decay_elapsed_ticks,
+        30
+    );
+    first.save_active_character();
+
+    let mut second = SimulationSession::new(config);
+    second.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(second.world_snapshot().player_pk_points, 2);
+    assert_eq!(
+        second
+            .world_snapshot()
+            .stage5_systems
+            .pk_decay_elapsed_ticks,
+        30
+    );
+    for _ in 0..30 {
+        second.tick();
+    }
+    assert_eq!(second.world_snapshot().player_pk_points, 1);
+    assert_eq!(
+        second
+            .world_snapshot()
+            .stage5_systems
+            .pk_decay_elapsed_ticks,
+        0
+    );
+}
+
+#[test]
+fn pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries() {
+    let mut red = SimulationSession::new(SimulationConfig::default());
+    red.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    red.apply_zone_unlawful_player_kill(200);
+    assert_eq!(red.zone_player_name_colour_argb(), 0xFFFF_0000u32 as i32);
+    let mut red_decay_packets = Vec::new();
+    for _ in 0..60 {
+        red_decay_packets.extend(red.tick());
+    }
+    assert_eq!(red.world_snapshot().player_pk_points, 199);
+    assert_eq!(red.zone_player_name_colour_argb(), 0xFFFF_8000u32 as i32);
+    assert!(red_decay_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ColourChanged { name_colour_argb }
+            if *name_colour_argb == 0xFFFF_8000u32 as i32
+    )));
+
+    let mut brown = SimulationSession::new(SimulationConfig::default());
+    brown.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    brown.apply_zone_unlawful_player_kill(100);
+    let mut brown_decay_packets = Vec::new();
+    for _ in 0..60 {
+        brown_decay_packets.extend(brown.tick());
+    }
+    assert_eq!(brown.world_snapshot().player_pk_points, 99);
+    assert_eq!(brown.zone_player_name_colour_argb(), -1);
+    assert!(brown_decay_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ColourChanged { name_colour_argb } if *name_colour_argb == -1
+    )));
+}

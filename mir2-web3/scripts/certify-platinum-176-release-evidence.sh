@@ -58,6 +58,28 @@ run_zone_case() {
   fi
 }
 
+run_platinum_case() {
+  local test_name="$1"
+  local output
+  if ! output="$(
+    cargo +1.89.0 test \
+      -p mir2-simulation \
+      --test platinum_176_progression \
+      "${test_name}" \
+      -- \
+      --exact \
+      --nocapture 2>&1
+  )"; then
+    printf '%s\n' "${output}"
+    return 1
+  fi
+  printf '%s\n' "${output}"
+  if [[ "${output}" != *"test ${test_name} ... ok"* ]]; then
+    echo "expected exactly named Platinum test did not run: ${test_name}" >&2
+    return 1
+  fi
+}
+
 # Real shared-zone combat: the poison case runs through the final tick, death,
 # kill award and ground drop. The summon cases verify owned pets attack hostile
 # monsters without damaging players.
@@ -84,14 +106,25 @@ for test_name in "${social_cases[@]}"; do
 done
 
 social_lib_cases=(
+  "platinum_176_ghoul_drop_overrides_supply_level_19_to_21_books"
+  "platinum_176_midgame_boss_overrides_supply_level_22_to_35_books"
   "stage5_social_group_guild_mail_persist_across_reload"
   "guild_war_return_starts_two_guild_war_after_cost_and_blocks_duplicate_rollback"
-  "stage5_conquest_campaign_closes_registration_captures_settles_and_rewards_once"
-  "deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment"
-  "pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay"
+  "stage5_conquest_event_hero_mining_and_crafting_flow"
 )
 for test_name in "${social_lib_cases[@]}"; do
   run_lib_case "${test_name}"
+done
+
+platinum_cases=(
+  "platinum_176_blocks_post_176_stage5_actions_but_keeps_classic_social_endgame"
+  "platinum_176_new_character_starts_with_source_start_items_in_the_bag"
+  "deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment"
+  "pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay"
+  "pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries"
+)
+for test_name in "${platinum_cases[@]}"; do
+  run_platinum_case "${test_name}"
 done
 
 # Gold/item conservation, potion recovery and both field-oil/NPC durability
@@ -128,6 +161,15 @@ const fs = require("node:fs");
 const [reportPath, startedAt] = process.argv.slice(2);
 const categories = [
   {
+    id: "progression.source-backed-start-and-drops",
+    cases: [
+      "platinum_176_new_character_starts_with_source_start_items_in_the_bag",
+      "platinum_176_ghoul_drop_overrides_supply_level_19_to_21_books",
+      "platinum_176_midgame_boss_overrides_supply_level_22_to_35_books",
+    ],
+    claim: "Platinum characters start from source StartItems and milestone skill books come from profile monster drops.",
+  },
+  {
     id: "combat.native-dot-kill",
     cases: ["zone_native_player_poison_shot_ticks_green_damage_and_awards_kill"],
     claim: "Poison reaches authoritative death, kill award and ground drop.",
@@ -152,7 +194,7 @@ const categories = [
       "conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild",
       "stage5_social_group_guild_mail_persist_across_reload",
       "guild_war_return_starts_two_guild_war_after_cost_and_blocks_duplicate_rollback",
-      "stage5_conquest_campaign_closes_registration_captures_settles_and_rewards_once",
+      "stage5_conquest_event_hero_mining_and_crafting_flow",
     ],
     claim: "Multi-session guild visibility, guild war and Sabuk lifecycle remain coherent.",
   },
@@ -162,6 +204,7 @@ const categories = [
       "zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires",
       "deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment",
       "pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay",
+      "pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries",
     ],
     claim: "Loot ownership, red-name death loss and reconnect-safe PK decay are enforced.",
   },
@@ -197,6 +240,7 @@ const report = {
     "The summon cases prove owned-pet attacks and safety; representative live party TTK is still a separate balance gate.",
     "Potion, repair and transaction correctness do not by themselves lock seven-day inflation or live-player consumption rates.",
     "Levels 22-50 natural browser acquisition remains a separate release gate and is not claimed by this report.",
+    "The rewritten mainline retains its classic conquest state machine; the superseded July campaign scheduler is not claimed by this report.",
   ],
 };
 

@@ -6,7 +6,9 @@ use mir2_game_data::{
 };
 use mir2_protocol::{ChatType, MirDirection, ObjectGoldInfo, Point, ServerPacket, UserItemStat};
 
-use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage};
+use crate::config::{
+    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
+};
 
 use super::components::{
     current_player_is_dead, entity_by_object_id, entity_name, entity_object_id, entity_position,
@@ -14,14 +16,16 @@ use super::components::{
     HarvestOwnership, MonsterAgent, MonsterAiState, ObjectId, Position, WorldObject, YimoogiState,
 };
 use super::crystal_compat::*;
+use super::equipment::equipment_slot_unique_id;
 use super::inventory::{
     add_or_increment_item_with_durability, add_or_increment_item_with_random_metadata,
-    can_gain_item_quantity, item_matches_inventory_unique_id,
+    can_gain_item_quantity, equipment_index_for_client_reference, item_matches_inventory_unique_id,
 };
 use super::items::{
     crystal_item_has_bind_flag, crystal_item_key_for_template, crystal_item_template_for_item_key,
-    item_has_crystal_or_rental_bind_flag, item_icon_for_key, localized_drop_name_key,
-    localized_item_name, normalize_crystal_item_key, user_item_from_item_state,
+    equipment_has_crystal_or_rental_bind_flag, item_has_crystal_or_rental_bind_flag,
+    item_icon_for_key, localized_drop_name_key, localized_item_name, normalize_crystal_item_key,
+    user_item_from_item_state,
 };
 use super::map::{
     crystal_movement_transfer_records_for_map, current_map_disallows_monster_drop,
@@ -225,7 +229,90 @@ pub(super) fn resolved_monster_drop_templates(
     monster_name: &str,
 ) -> Vec<ResolvedDropTemplate> {
     let current_tick = runtime_tick(world);
-    resolved_monster_drop_templates_at_tick(monster_object_id, monster_name, current_tick)
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let profile_drop_multiplier = config
+        .content_profile
+        .as_ref()
+        .map(|profile| profile.rate_policy.drop_multiplier)
+        .unwrap_or(1);
+    let profile_gold_multiplier = config
+        .content_profile
+        .as_ref()
+        .map(|profile| profile.rate_policy.gold_multiplier)
+        .unwrap_or(1);
+    let drop_sample_multiplier = profile_drop_multiplier
+        .saturating_mul(u32::from(qa_natural_kill_drop_sample_multiplier()))
+        .clamp(1, u32::from(MAX_NATURAL_KILL_DROP_SAMPLE_MULTIPLIER));
+    let mut drops = Vec::new();
+    for sample_index in 0..drop_sample_multiplier {
+        let sample_tick = current_tick.wrapping_add(u64::from(sample_index).wrapping_mul(104_729));
+        drops.extend(resolved_monster_drop_templates_at_tick(
+            monster_object_id,
+            monster_name,
+            sample_tick,
+        ));
+        drops.extend(content_profile_monster_drop_templates(
+            config,
+            monster_object_id,
+            monster_name,
+            sample_tick,
+        ));
+    }
+    if profile_gold_multiplier > 1 {
+        for drop in &mut drops {
+            if let ResolvedDropTemplate::Gold { amount, .. } = drop {
+                *amount = amount.saturating_mul(profile_gold_multiplier);
+            }
+        }
+    }
+    drops
+        .into_iter()
+        .filter(|drop| match drop {
+            ResolvedDropTemplate::Gold { .. } => true,
+            ResolvedDropTemplate::Item { name, .. } => config.item_is_allowed(name),
+        })
+        .collect()
+}
+
+pub(super) fn content_profile_monster_drop_templates(
+    config: &SimulationConfig,
+    monster_object_id: u32,
+    monster_name: &str,
+    current_tick: u64,
+) -> Vec<ResolvedDropTemplate> {
+    let Some(profile) = config.content_profile.as_ref() else {
+        return Vec::new();
+    };
+
+    profile
+        .profile
+        .drop_overrides
+        .iter()
+        .enumerate()
+        .filter(|(_, rule)| rule.monster.eq_ignore_ascii_case(monster_name))
+        .filter_map(|(index, rule)| {
+            let entry = CrystalDropEntry {
+                raw_line: format!(
+                    "{}/{} {}",
+                    rule.chance_numerator, rule.chance_denominator, rule.item
+                ),
+                chance_raw: format!("{}/{}", rule.chance_numerator, rule.chance_denominator),
+                chance_numerator: Some(rule.chance_numerator),
+                chance_denominator: Some(rule.chance_denominator),
+                item_name: rule.item.clone(),
+                amount: None,
+                modifiers: Vec::new(),
+                group: None,
+            };
+            crystal_attempt_drop_entry(
+                &entry,
+                current_tick,
+                monster_object_id,
+                9_000_000_usize.saturating_add(index),
+            )
+        })
+        .flatten()
+        .collect()
 }
 
 pub(super) fn resolved_monster_drop_templates_at_tick(
@@ -1686,6 +1773,7 @@ pub(super) fn handle_monster_defeat(
             .config
             .monster_experience_multiplier(player_level);
         let experience = experience.saturating_mul(experience_multiplier);
+        let experience = experience.saturating_mul(qa_natural_kill_experience_multiplier());
         let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
         packets.extend(super::leveling::apply_experience_gain(
             world,
@@ -2374,6 +2462,232 @@ pub(super) fn drop_item_packet(
     }]
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PlayerDeathDropCandidate {
+    Inventory(u64),
+    Equipment(u64),
+}
+
+/// Apply the Platinum 1.76 player-death item risk after authoritative PvP
+/// damage has reduced the player to zero HP.
+pub(super) fn drop_player_death_penalty(world: &mut World) -> Vec<ServerPacket> {
+    if !current_player_is_dead(world) {
+        return Vec::new();
+    }
+    let tick = runtime_tick(world);
+    let player_object_id = player_entity(world)
+        .and_then(|player| entity_object_id(world, player))
+        .unwrap_or_default();
+    let pk_points = world.resource::<PlayerRuntimeResource>().pk_points.max(0);
+    let requested_count = if pk_points >= 300 {
+        2
+    } else if pk_points >= 100 {
+        1
+    } else if deterministic_roll(
+        tick,
+        usize::try_from(player_object_id).unwrap_or_default(),
+        0x176,
+        8,
+    ) == 0
+    {
+        1
+    } else {
+        0
+    };
+    if requested_count == 0 {
+        return Vec::new();
+    }
+
+    let (mut inventory, mut equipment) = {
+        let resources = world.resource::<InventoryResource>();
+        let mut inventory = resources
+            .inventory_items
+            .iter()
+            .filter(|item| {
+                matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                    && !item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP)
+            })
+            .map(|item| PlayerDeathDropCandidate::Inventory(super::items::item_unique_id(item)))
+            .collect::<Vec<_>>();
+        let mut equipment = resources
+            .equipment_items
+            .iter()
+            .filter(|item| !equipment_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP))
+            .filter_map(|item| {
+                equipment_slot_unique_id(item.slot).map(PlayerDeathDropCandidate::Equipment)
+            })
+            .collect::<Vec<_>>();
+        inventory.sort_by_key(|candidate| match candidate {
+            PlayerDeathDropCandidate::Inventory(unique_id) => *unique_id,
+            PlayerDeathDropCandidate::Equipment(_) => 0,
+        });
+        equipment.sort_by_key(|candidate| match candidate {
+            PlayerDeathDropCandidate::Equipment(unique_id) => *unique_id,
+            PlayerDeathDropCandidate::Inventory(_) => 0,
+        });
+        (inventory, equipment)
+    };
+    let mut candidates = if pk_points >= 300 {
+        equipment.append(&mut inventory);
+        equipment
+    } else {
+        inventory.append(&mut equipment);
+        inventory
+    };
+    if candidates.is_empty() {
+        return Vec::new();
+    }
+    if pk_points < 300 {
+        let start = deterministic_roll(
+            tick,
+            usize::try_from(player_object_id).unwrap_or_default(),
+            0xD1E,
+            candidates.len() as u64,
+        ) as usize;
+        candidates.rotate_left(start);
+    }
+
+    let mut packets = Vec::new();
+    for candidate in candidates.into_iter().take(requested_count) {
+        packets.extend(match candidate {
+            PlayerDeathDropCandidate::Inventory(unique_id) => {
+                drop_player_death_inventory_item(world, unique_id)
+            }
+            PlayerDeathDropCandidate::Equipment(unique_id) => {
+                drop_player_death_equipment(world, unique_id)
+            }
+        });
+    }
+    packets
+}
+
+fn drop_player_death_inventory_item(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
+    let item_index = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .position(|item| item_matches_inventory_unique_id(item, unique_id));
+    let Some(index) = item_index else {
+        return Vec::new();
+    };
+    let item = world.resource::<InventoryResource>().inventory_items[index].clone();
+    if item.quantity == 0 || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_DROP) {
+        return Vec::new();
+    }
+    let destroy_on_drop = crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DESTROY_ON_DROP);
+    let Some(player_position) =
+        player_entity(world).and_then(|player| entity_position(world, player))
+    else {
+        return Vec::new();
+    };
+    if !destroy_on_drop
+        && drop_ground_drop(
+            world,
+            player_position,
+            CRYSTAL_PLAYER_DROP_ITEM_RANGE,
+            "",
+            None,
+            DropLoot::InventoryItem {
+                key: item.key.clone(),
+                name: item.name.clone(),
+                description: item.description.clone(),
+                weight: item.weight,
+                durability_current: item.durability_current,
+                durability_max: item.durability_max,
+                added_attack: item.added_attack,
+                added_defence: item.added_defence,
+                added_stats: item.added_stats.clone(),
+                cursed: item.cursed,
+                socket_slots: item.socket_slots,
+                show_group_pickup: crystal_item_template_for_item_key(&item.key)
+                    .map(|template| template.show_group_pickup)
+                    .unwrap_or(false),
+            },
+            1,
+            item.name.clone(),
+        )
+        .is_none()
+    {
+        return Vec::new();
+    }
+    {
+        let mut resources = world.resource_mut::<InventoryResource>();
+        if item.quantity == 1 {
+            resources.inventory_items.remove(index);
+        } else {
+            resources.inventory_items[index].quantity -= 1;
+        }
+    }
+    vec![ServerPacket::DeleteItem {
+        unique_id,
+        count: 1,
+    }]
+}
+
+fn drop_player_death_equipment(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
+    let equipment_index = {
+        let resources = world.resource::<InventoryResource>();
+        equipment_index_for_client_reference(resources, unique_id)
+    };
+    let Some(index) = equipment_index else {
+        return Vec::new();
+    };
+    let equipment = world.resource::<InventoryResource>().equipment_items[index].clone();
+    if equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_DONT_DROP) {
+        return Vec::new();
+    }
+    let destroy_on_drop = crystal_item_has_bind_flag(&equipment.key, CRYSTAL_BIND_DESTROY_ON_DROP);
+    let Some(player_position) =
+        player_entity(world).and_then(|player| entity_position(world, player))
+    else {
+        return Vec::new();
+    };
+    let template = crystal_item_template_for_item_key(&equipment.key);
+    if !destroy_on_drop
+        && drop_ground_drop(
+            world,
+            player_position,
+            CRYSTAL_PLAYER_DROP_ITEM_RANGE,
+            "",
+            None,
+            DropLoot::InventoryItem {
+                key: equipment.key.clone(),
+                name: equipment.name.clone(),
+                description: equipment.description.clone(),
+                weight: template
+                    .as_ref()
+                    .map(|item| u16::from(item.weight))
+                    .unwrap_or_default(),
+                durability_current: Some(equipment.durability_current),
+                durability_max: Some(equipment.durability_max),
+                added_attack: equipment.added_attack,
+                added_defence: equipment.added_defence,
+                added_stats: equipment.added_stats.clone(),
+                cursed: equipment.cursed,
+                socket_slots: equipment.socket_slots,
+                show_group_pickup: template
+                    .as_ref()
+                    .map(|item| item.show_group_pickup)
+                    .unwrap_or(false),
+            },
+            1,
+            equipment.name.clone(),
+        )
+        .is_none()
+    {
+        return Vec::new();
+    }
+    world
+        .resource_mut::<InventoryResource>()
+        .equipment_items
+        .remove(index);
+    super::stats::refresh_player_stats(world);
+    vec![ServerPacket::DeleteItem {
+        unique_id,
+        count: 1,
+    }]
+}
+
 pub(super) fn tick_ground_drop_expiry(world: &mut World, tick: u64) {
     let expired_entities: Vec<Entity> = world
         .query_filtered::<(Entity, &DropExpiry), With<GroundDrop>>()
@@ -2626,6 +2940,7 @@ impl SimulationSession {
             .config
             .monster_experience_multiplier(player_level);
         let experience = experience.saturating_mul(experience_multiplier);
+        let experience = experience.saturating_mul(qa_natural_kill_experience_multiplier());
         let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
         super::leveling::experience_balance_delta_for_gain(world, i64::from(experience))
     }
@@ -2709,6 +3024,7 @@ impl SimulationSession {
                 .config
                 .monster_experience_multiplier(player_level);
             let experience = experience.saturating_mul(experience_multiplier);
+            let experience = experience.saturating_mul(qa_natural_kill_experience_multiplier());
             // Marriage / mentorship / guild membership grant a Crystal-style
             // experience-rate bonus (no-op for an unattached player).
             let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
@@ -2823,5 +3139,79 @@ impl SimulationSession {
                 SharedAccountInventoryTransactionReceipt::ground_drop_pickup(true, packets)
             }
         }
+    }
+}
+
+const QA_NATURAL_KILL_EXPERIENCE_MULTIPLIER_ENV: &str =
+    "MIR2_QA_NATURAL_KILL_EXPERIENCE_MULTIPLIER";
+const MAX_QA_NATURAL_KILL_EXPERIENCE_MULTIPLIER: u32 = 1_000_000;
+const QA_NATURAL_KILL_DROP_SAMPLE_MULTIPLIER_ENV: &str =
+    "MIR2_QA_NATURAL_KILL_DROP_SAMPLE_MULTIPLIER";
+const MAX_NATURAL_KILL_DROP_SAMPLE_MULTIPLIER: u16 = 100;
+
+fn qa_natural_kill_drop_sample_multiplier_from(raw: Option<&str>) -> u16 {
+    raw.and_then(|value| value.trim().parse::<u16>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(1)
+        .min(MAX_NATURAL_KILL_DROP_SAMPLE_MULTIPLIER)
+}
+
+fn qa_natural_kill_drop_sample_multiplier() -> u16 {
+    qa_natural_kill_drop_sample_multiplier_from(
+        std::env::var(QA_NATURAL_KILL_DROP_SAMPLE_MULTIPLIER_ENV)
+            .ok()
+            .as_deref(),
+    )
+}
+
+fn qa_natural_kill_experience_multiplier_from(raw: Option<&str>) -> u32 {
+    raw.and_then(|value| value.trim().parse::<u32>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(1)
+        .min(MAX_QA_NATURAL_KILL_EXPERIENCE_MULTIPLIER)
+}
+
+fn qa_natural_kill_experience_multiplier() -> u32 {
+    qa_natural_kill_experience_multiplier_from(
+        std::env::var(QA_NATURAL_KILL_EXPERIENCE_MULTIPLIER_ENV)
+            .ok()
+            .as_deref(),
+    )
+}
+
+#[cfg(test)]
+mod qa_natural_kill_experience_multiplier_tests {
+    use super::{
+        qa_natural_kill_drop_sample_multiplier_from, qa_natural_kill_experience_multiplier_from,
+    };
+
+    #[test]
+    fn defaults_to_exact_source_experience_and_bounds_explicit_qa_acceleration() {
+        assert_eq!(qa_natural_kill_experience_multiplier_from(None), 1);
+        assert_eq!(
+            qa_natural_kill_experience_multiplier_from(Some("invalid")),
+            1
+        );
+        assert_eq!(qa_natural_kill_experience_multiplier_from(Some("0")), 1);
+        assert_eq!(qa_natural_kill_experience_multiplier_from(Some("300")), 300);
+        assert_eq!(
+            qa_natural_kill_experience_multiplier_from(Some("1000001")),
+            1_000_000
+        );
+    }
+
+    #[test]
+    fn defaults_to_one_drop_sample_and_bounds_explicit_qa_acceleration() {
+        assert_eq!(qa_natural_kill_drop_sample_multiplier_from(None), 1);
+        assert_eq!(
+            qa_natural_kill_drop_sample_multiplier_from(Some("invalid")),
+            1
+        );
+        assert_eq!(qa_natural_kill_drop_sample_multiplier_from(Some("0")), 1);
+        assert_eq!(qa_natural_kill_drop_sample_multiplier_from(Some("25")), 25);
+        assert_eq!(
+            qa_natural_kill_drop_sample_multiplier_from(Some("101")),
+            100
+        );
     }
 }

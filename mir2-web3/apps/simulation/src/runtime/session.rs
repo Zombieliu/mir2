@@ -4,14 +4,15 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::combat::combat_delay_ticks;
+use super::combat::{apply_damage_to_current_player, combat_delay_ticks};
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
     MonsterAgent, MonsterVitals, PlayerVitals, Position,
 };
 use super::crystal_compat::*;
 use super::drops::{
-    zone_ground_drop_snapshots_for_monster, SharedAccountInventoryTransactionReceipt,
+    drop_player_death_penalty, zone_ground_drop_snapshots_for_monster,
+    SharedAccountInventoryTransactionReceipt,
 };
 use super::equipment::*;
 use super::inventory::*;
@@ -577,25 +578,16 @@ impl SimulationSession {
         super::onchain::credit_gold_from_ore(self.app.world_mut(), gold, idempotency_key)
     }
 
-    pub fn apply_zone_player_damage(&mut self, damage: i32) {
+    pub fn apply_zone_player_damage(&mut self, damage: i32) -> bool {
         if damage <= 0 || !is_in_world(self.app.world()) {
-            return;
+            return false;
         }
         let world = self.app.world_mut();
-        let Some(player) = player_entity(world) else {
-            return;
-        };
-        let updated_vitals = {
-            let mut entity = world.entity_mut(player);
-            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
-                vitals.hp = vitals.hp.saturating_sub(damage).max(0);
-                *vitals
-            })
-        };
-        if let Some(vitals) = updated_vitals {
-            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+        let outcome = apply_damage_to_current_player(world, damage, &mut Vec::new());
+        if outcome.applied {
             advance_runtime_tick(world);
         }
+        outcome.died
     }
 
     pub fn apply_zone_player_heal(&mut self, amount: i32) {
@@ -617,6 +609,38 @@ impl SimulationSession {
             world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
             advance_runtime_tick(world);
         }
+    }
+
+    pub fn apply_zone_unlawful_player_kill(&mut self, points: i32) -> i32 {
+        if points <= 0 || !is_in_world(self.app.world()) {
+            return 0;
+        }
+        let world = self.app.world_mut();
+        let pk_points = {
+            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+            runtime.pk_points = runtime.pk_points.saturating_add(points);
+            runtime.pk_points
+        };
+        advance_runtime_tick(world);
+        pk_points
+    }
+
+    pub fn zone_player_name_colour_argb(&self) -> i32 {
+        if !is_in_world(self.app.world()) {
+            return -1;
+        }
+        current_player_name_colour_argb(self.app.world())
+    }
+
+    pub fn apply_zone_player_death_penalty(&mut self) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        let packets = drop_player_death_penalty(self.app.world_mut());
+        if !packets.is_empty() {
+            advance_runtime_tick(self.app.world_mut());
+        }
+        packets
     }
 
     pub fn apply_zone_player_magic_spend(&mut self, spell: Spell, mp_cost: i32, cooldown_ms: u64) {
