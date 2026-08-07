@@ -363,6 +363,33 @@ const ARGON2ID_PASSWORD_HASH_PREFIX: &str = "$argon2id$";
 /// Argon2id; retained only to verify and transparently migrate existing rows.
 const PASSWORD_HASH_ITERATIONS: u32 = 100_000;
 
+/// Account-id namespace reserved for wallet/passkey accounts. Accounts in this
+/// namespace authenticate out-of-band through the HMAC-token-verified passkey
+/// path (gateway `verify_passkey_gateway_token` -> [`login_passkey_account`]) and
+/// must NEVER be reachable through the classic account/password operations
+/// ([`login_account`], [`create_account_with_password`],
+/// [`change_account_password`]). A Sui address is public on-chain, so letting the
+/// password path touch this namespace would let anyone who knows a victim's
+/// address take over their wallet account.
+const WALLET_ACCOUNT_PREFIX: &str = "sui:";
+
+/// Stored-password sentinel for wallet/passkey accounts. [`account_password_matches`]
+/// special-cases it to always return `false`, so even if such an account is ever
+/// reached by the classic password path (e.g. a record persisted before this
+/// hardening), no candidate — including a literal copy of the sentinel string —
+/// can authenticate. Wallet accounts have no password; they authenticate via the
+/// passkey token.
+pub(super) const LOCKED_ACCOUNT_PASSWORD: &str = "\u{0}wallet-locked";
+
+/// Whether `account_id` belongs to the reserved wallet/passkey namespace and must
+/// therefore bypass every classic password operation. Panic-safe and
+/// ASCII-case-insensitive on the reserved prefix.
+pub(super) fn is_wallet_namespaced_account(account_id: &str) -> bool {
+    account_id
+        .get(..WALLET_ACCOUNT_PREFIX.len())
+        .is_some_and(|head| head.eq_ignore_ascii_case(WALLET_ACCOUNT_PREFIX))
+}
+
 fn stretch_password(salt: &[u8], password: &str) -> [u8; 32] {
     let mut digest = [0_u8; 32];
     let mut hasher = Sha256::new();
@@ -419,6 +446,9 @@ enum PasswordVerification {
 /// Verify the current Argon2id PHC format and the two historical formats.
 /// Historical successful logins are immediately rewritten through Argon2id.
 fn verify_account_password(stored: &str, candidate: &str) -> PasswordVerification {
+    if stored == LOCKED_ACCOUNT_PASSWORD {
+        return PasswordVerification::Invalid;
+    }
     if stored.starts_with(ARGON2ID_PASSWORD_HASH_PREFIX) {
         let Ok(parsed) = PasswordHash::new(stored) else {
             return PasswordVerification::Invalid;
@@ -432,7 +462,6 @@ fn verify_account_password(stored: &str, candidate: &str) -> PasswordVerificatio
             PasswordVerification::Invalid
         };
     }
-
     if let Some(rest) = stored.strip_prefix(LEGACY_PASSWORD_HASH_PREFIX) {
         let mut parts = rest.splitn(2, '$');
         let (Some(salt_hex), Some(hash_hex)) = (parts.next(), parts.next()) else {
@@ -452,6 +481,11 @@ fn verify_account_password(stored: &str, candidate: &str) -> PasswordVerificatio
     } else {
         PasswordVerification::Invalid
     }
+}
+
+#[cfg(test)]
+pub(super) fn account_password_matches(stored: &str, candidate: &str) -> bool {
+    verify_account_password(stored, candidate) != PasswordVerification::Invalid
 }
 
 fn production_identity_policy_enabled() -> bool {
@@ -495,6 +529,9 @@ pub(super) fn create_account_with_password(
     account_id: &str,
     password: &str,
 ) -> u8 {
+    if is_wallet_namespaced_account(account_id) {
+        return 0;
+    }
     if production_identity_policy_enabled() {
         if !commercial_account_id_is_valid(account_id) {
             return 1;
@@ -534,6 +571,9 @@ pub(super) fn login_account(
     account_id: &str,
     password: &str,
 ) -> AccountLoginResult {
+    if is_wallet_namespaced_account(account_id) {
+        return AccountLoginResult::InvalidCredentials;
+    }
     if let Err(error) = config.refresh_account_store_account(account_id) {
         eprintln!("failed to refresh postgres account {account_id}: {error}");
     }
@@ -592,9 +632,17 @@ pub(super) fn login_passkey_account(
     if let Some(ban) = account.active_ban(now_ms) {
         return AccountLoginResult::Banned(ban);
     }
+    // Wallet/passkey accounts authenticate via the passkey token, never a
+    // password. Stamp the locked sentinel so the classic password path can never
+    // match — this also heals any legacy record persisted with the guessable
+    // default password before this hardening.
+    let password_locked = account.password != LOCKED_ACCOUNT_PASSWORD;
+    if password_locked {
+        account.password = LOCKED_ACCOUNT_PASSWORD.to_string();
+    }
     let characters = account.characters.clone();
     drop(store);
-    if created {
+    if created || password_locked {
         if let Err(error) = config.save_account_store_account(account_id) {
             eprintln!("failed to persist passkey account store: {error}");
         }
@@ -629,6 +677,12 @@ pub(super) fn change_account_password(
     current_password: &str,
     new_password: &str,
 ) -> u8 {
+    // Wallet/passkey accounts have no classic password to change; refuse the
+    // operation rather than letting a legacy default password be mutated. (5 =
+    // current password rejected, per the Crystal ChangePassword result codes.)
+    if is_wallet_namespaced_account(account_id) {
+        return 5;
+    }
     if account_id.trim().is_empty() {
         return 1;
     }

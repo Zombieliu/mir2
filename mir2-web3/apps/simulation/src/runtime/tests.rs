@@ -2112,6 +2112,176 @@ fn passkey_first_login_starts_with_empty_crystal_character_list() {
 }
 
 #[test]
+fn classic_login_rejects_wallet_namespaced_account() {
+    // A Sui address is public on-chain. The classic account/password path must
+    // never authenticate a `sui:`-namespaced account, even with the historical
+    // guessable default password — otherwise anyone who knows a victim's wallet
+    // address could take over their account without a wallet signature.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let login = session.handle_packet(ClientPacket::Login {
+        account_id: "sui:0xvictimwallet".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(
+        matches!(login[0], ServerPacket::Login { result: 4 }),
+        "classic login into a wallet namespace must fail with InvalidCredentials, got {:?}",
+        login[0]
+    );
+}
+
+#[test]
+fn passkey_account_cannot_be_taken_over_via_password_path() {
+    // Reproduces the auth-bypass: provision a wallet account through the
+    // HMAC-verified passkey path (as the gateway does after verifying the token),
+    // give it a character, then prove no classic password — the legacy default,
+    // empty, or the internal locked sentinel — can log into it, while the real
+    // owner's passkey login keeps working and still sees the character.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let account_id = "sui:0xvictimwallet";
+
+    let login = session.passkey_login(account_id);
+    assert!(matches!(login[0], ServerPacket::LoginSuccess { .. }));
+
+    let created = session.handle_packet(ClientPacket::NewCharacter {
+        name: "WalletHero".to_string(),
+        gender: MirGender::Male,
+        class: MirClass::Warrior,
+    });
+    assert!(matches!(
+        created[0],
+        ServerPacket::NewCharacterSuccess { .. }
+    ));
+
+    for candidate in ["demo", "", "\u{0}wallet-locked", "anything"] {
+        let attempt = session.handle_packet(ClientPacket::Login {
+            account_id: account_id.to_string(),
+            password: candidate.to_string(),
+        });
+        assert!(
+            matches!(attempt[0], ServerPacket::Login { result: 4 }),
+            "password {candidate:?} must not authenticate wallet account, got {:?}",
+            attempt[0]
+        );
+    }
+
+    // The legitimate owner can still authenticate via the passkey path and still
+    // sees the character they created.
+    let relogin = session.passkey_login(account_id);
+    match &relogin[0] {
+        ServerPacket::LoginSuccess { characters } => {
+            assert_eq!(characters.len(), 1);
+            assert_eq!(characters[0].name, "WalletHero");
+        }
+        other => panic!("legitimate passkey relogin must succeed, got {other:?}"),
+    }
+}
+
+#[test]
+fn new_account_refuses_wallet_namespace() {
+    // The classic account-creation path must not mint or squat a `sui:` account.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let created = session.handle_packet(ClientPacket::NewAccount {
+        account_id: "sui:0xsquatter".to_string(),
+        password: "Tracepass1".to_string(),
+        birth_date_binary: 630_822_816_000_000_000,
+        user_name: "Squat".to_string(),
+        secret_question: "q".to_string(),
+        secret_answer: "a".to_string(),
+        email_address: "squat@example.test".to_string(),
+    });
+    assert!(
+        matches!(created[0], ServerPacket::NewAccount { result: 0 }),
+        "wallet-namespaced account creation must be refused, got {:?}",
+        created[0]
+    );
+
+    // And it really did not create anything the password path could later use.
+    let login = session.handle_packet(ClientPacket::Login {
+        account_id: "sui:0xsquatter".to_string(),
+        password: "Tracepass1".to_string(),
+    });
+    assert!(matches!(login[0], ServerPacket::Login { result: 4 }));
+}
+
+#[test]
+fn change_password_refuses_wallet_namespace() {
+    // Even the legacy default password must not be mutable on a wallet account
+    // through the classic ChangePassword path.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.passkey_login("sui:0xvictimwallet");
+
+    let changed = session.handle_packet(ClientPacket::ChangePassword {
+        account_id: "sui:0xvictimwallet".to_string(),
+        current_password: "demo".to_string(),
+        new_password: "Tracepass1".to_string(),
+    });
+    assert!(
+        matches!(changed[0], ServerPacket::ChangePassword { result: 5 }),
+        "wallet-namespaced password change must be refused, got {:?}",
+        changed[0]
+    );
+
+    // The change did not take: classic login still fails for the attempted new
+    // password.
+    let login = session.handle_packet(ClientPacket::Login {
+        account_id: "sui:0xvictimwallet".to_string(),
+        password: "Tracepass1".to_string(),
+    });
+    assert!(matches!(login[0], ServerPacket::Login { result: 4 }));
+}
+
+#[test]
+fn classic_login_still_works_for_non_wallet_accounts() {
+    // Positive control: the guard is scoped to the reserved `sui:` prefix (colon
+    // included), so ordinary classic accounts — even one whose id merely starts
+    // with "sui" — keep working and are not over-blocked.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::NewAccount {
+        account_id: "suihero".to_string(),
+        password: "Tracepass1".to_string(),
+        birth_date_binary: 630_822_816_000_000_000,
+        user_name: "Sui".to_string(),
+        secret_question: "q".to_string(),
+        secret_answer: "a".to_string(),
+        email_address: "sui@example.test".to_string(),
+    });
+    let login = session.handle_packet(ClientPacket::Login {
+        account_id: "suihero".to_string(),
+        password: "Tracepass1".to_string(),
+    });
+    assert!(
+        matches!(login[0], ServerPacket::LoginSuccess { .. }),
+        "ordinary classic login must keep working, got {:?}",
+        login[0]
+    );
+}
+
+#[test]
+fn wallet_namespace_detection_and_locked_password_sentinel() {
+    use crate::runtime::save::{
+        account_password_matches, is_wallet_namespaced_account, LOCKED_ACCOUNT_PASSWORD,
+    };
+
+    // The reserved namespace requires the `sui:` prefix (colon included) and is
+    // ASCII-case-insensitive; classic ids that merely start with "sui" are not
+    // reserved.
+    assert!(is_wallet_namespaced_account("sui:0xabc"));
+    assert!(is_wallet_namespaced_account("SUI:0xABC"));
+    assert!(!is_wallet_namespaced_account("suihero"));
+    assert!(!is_wallet_namespaced_account("demo"));
+    assert!(!is_wallet_namespaced_account("su"));
+
+    // Defense-in-depth: the locked sentinel never matches via the password
+    // comparator, even against a literal copy of itself.
+    assert!(!account_password_matches(
+        LOCKED_ACCOUNT_PASSWORD,
+        LOCKED_ACCOUNT_PASSWORD
+    ));
+    assert!(!account_password_matches(LOCKED_ACCOUNT_PASSWORD, "demo"));
+    assert!(!account_password_matches(LOCKED_ACCOUNT_PASSWORD, ""));
+}
+
+#[test]
 fn duplicate_new_account_returns_crystal_duplicate_result() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let first = session.handle_packet(ClientPacket::NewAccount {
@@ -24636,6 +24806,79 @@ fn crystal_npc_goto_loop_stops_at_section_hop_limit() {
             && diagnostic.command == "GOTO"
             && diagnostic.message.contains("section hop limit")
     }));
+}
+
+#[test]
+fn crystal_npc_say_section_strips_comment_lines() {
+    // Mirrors Premium_Elijah's @CHECKPASS4 #ELSESAY block: a `;`-prefixed comment line
+    // trailing the say text must never reach the dialog body. Crystal strips it in
+    // NPCScript.ParseSegment (Crystal/Server/MirObjects/NPC/NPCScript.cs:530). The
+    // `{text/colour}` directive, by contrast, is rendered client-side (MirScrollingLabel)
+    // so the sim passes it through unchanged.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let script = CrystalNpcScript {
+        script_key: "Test/Comment".to_string(),
+        relative_path: "Test/Comment.txt".to_string(),
+        raw_text: String::new(),
+        lines: Vec::new(),
+        line_count: 0,
+        non_empty_line_count: 0,
+        label_count: 1,
+        insert_count: 0,
+        command_directives: Vec::new(),
+        labels: Vec::new(),
+        sections: vec![CrystalNpcSection {
+            label: "@Main".to_string(),
+            line_number: 1,
+            lines: vec![
+                "#SAY".to_string(),
+                "You dont have a {Premium Pass/LightSteelBlue}.".to_string(),
+                ";;Premium Cave Menu.".to_string(),
+            ],
+        }],
+        inserts: Vec::new(),
+    };
+    let context = NpcInteractionContext {
+        object_id: 4991,
+        name: "Comment Tester".to_string(),
+        name_key: None,
+        position: Point { x: 331, y: 270 },
+        quest_ids: Vec::new(),
+        script_key: Some("Test/Comment".to_string()),
+        args: Vec::new(),
+        input: None,
+    };
+
+    let result =
+        super::run_crystal_npc_script_impl(session.app.world_mut(), &context, &script, "@Main")
+            .expect("a #SAY section should return a dialog");
+    let dialog = result.dialog.expect("say text should yield a dialog body");
+
+    assert!(
+        dialog
+            .body
+            .iter()
+            .any(|line| line.contains("You dont have a")),
+        "say text should survive: {:?}",
+        dialog.body
+    );
+    assert!(
+        !dialog
+            .body
+            .iter()
+            .any(|line| line.contains(';') || line.contains("Premium Cave Menu")),
+        "`;` comment lines must be stripped from the dialog body: {:?}",
+        dialog.body
+    );
+    assert!(
+        dialog
+            .body
+            .iter()
+            .any(|line| line.contains("{Premium Pass/LightSteelBlue}")),
+        "colour directives are rendered client-side and must pass through unchanged: {:?}",
+        dialog.body
+    );
 }
 
 #[test]
@@ -58602,6 +58845,135 @@ fn crystal_ai4_spitting_spider_poisons_player_on_hit() {
 }
 
 // ---------------------------------------------------------------------------
+// Monster AI: AI 4 SpittingSpider also poisons MONSTER line-victims. Crystal
+// `SpittingSpider.CompleteAttack` calls `PoisonTarget(target, 8, 5,
+// PoisonType.Green, 2000)` on ANY target whose hit lands (`Attacked() > 0`) —
+// including opposing monsters caught by its 2-tile LineAttack, not just the
+// player. The `crystal_ai4_spitting_spider_poisons_player_on_hit` test covers the
+// player; this proves a friendly-opposite monster on the line takes the identical
+// green poison. AI 29 BoneSpearman / AI 35 SandWorm share the same line branch but
+// have no `CompleteAttack` poison override, so they must NOT poison line-victims
+// (`crystal_ai29_bone_spearman_splashes_line_target` asserts only HP loss).
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai4_spitting_spider_poisons_monster_line_victim() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let spider_object_id = 98_944_u32;
+    let secondary_object_id = 98_945_u32;
+    let current_tick = runtime_tick(session.app.world());
+
+    set_player_position(&mut session, player_origin.clone());
+
+    // Spider 2 tiles east of the player; its line attack (direction Left) runs
+    // through (spider_x-1, y) and (spider_x-2, y == player), so a monster on the
+    // intermediate tile is splashed.
+    let spider_position = Point {
+        x: player_origin.x + 2,
+        y: player_origin.y,
+    };
+    session.app.world_mut().spawn((
+        ObjectId(spider_object_id),
+        DisplayName::literal("Spitting Spider Poison-Splash Test"),
+        Position(spider_position.clone()),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals { hp: 50, max_hp: 50 },
+        MonsterAgent {
+            image: 43,
+            dead: false,
+            patrol_origin: spider_position.clone(),
+            ai: 4,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+
+    // Friendly-to-player (hostile_to_player=false) monster on the line tile
+    // between spider and player — opposing-faction to the spider, so the line
+    // attack splashes it. Generous HP so it survives long enough to observe the
+    // poison state.
+    let secondary_position = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let secondary_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(secondary_object_id),
+            DisplayName::literal("Poison Splash Target"),
+            Position(secondary_position.clone()),
+            Facing(MirDirection::Right),
+            Monster,
+            MonsterVitals {
+                hp: 300,
+                max_hp: 300,
+            },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: secondary_position,
+                ai: 0,
+                disposition: WorldEntityDisposition::Neutral,
+                hostile_to_player: false,
+                tracking_player: false,
+                view_range: 0,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    // Tick until the spider attacks and its delayed line hit resolves, applying
+    // green poison to the splashed monster (Crystal CompleteAttack PoisonTarget).
+    let mut saw_green_poison = false;
+    for _ in 0..10 {
+        let _ = session.tick();
+        if let Some(state) = session
+            .app
+            .world()
+            .entity(secondary_entity)
+            .get::<MonsterPoisonState>()
+        {
+            // Green poison is bit 0 of the Crystal poison bitmask.
+            if state.poison & 1 != 0 && state.green_damage > 0 {
+                saw_green_poison = true;
+                break;
+            }
+        }
+    }
+    assert!(
+        saw_green_poison,
+        "AI-4 SpittingSpider should green-poison a monster caught by its line attack \
+         (Crystal CompleteAttack: PoisonTarget Green on Attacked() > 0)"
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Monster AI: AI 29 is Crystal's `BoneSpearman` — `LineAttack(damage, 2, 250)`,
 // a 2-tile line splash that damages the direct target and any friendly-opposite
 // targets in line. Existing `bone_spearman_ai_hits_from_two_tiles_like_line_attack`
@@ -58719,6 +59091,19 @@ fn crystal_ai29_bone_spearman_splashes_line_target() {
     assert!(
         after_secondary_hp < before_secondary_hp,
         "AI-29 BoneSpearman line attack should splash a friendly-opposite monster on the line (Crystal LineAttack(damage, 2, 250)); before={before_secondary_hp} after={after_secondary_hp}"
+    );
+    // Unlike AI 4 SpittingSpider, BoneSpearman has no `CompleteAttack` poison
+    // override — its line splash deals damage only. Guard that the shared spider
+    // line branch does not leak green poison onto AI 29's victims (the hit landed,
+    // proven above, so a poison-on-hit would already be present here).
+    assert!(
+        session
+            .app
+            .world()
+            .entity(secondary_entity)
+            .get::<MonsterPoisonState>()
+            .is_none(),
+        "AI-29 BoneSpearman line splash must NOT poison its victim (poison is AI-4 SpittingSpider only)"
     );
 }
 

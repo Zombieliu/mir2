@@ -2533,15 +2533,17 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                                 None,
                             );
                         }
+                        let spider_line_on_hit_poison =
+                            (agent.ai == 4).then(spitting_spider_on_hit_poison);
                         for line_target in spider_line_targets {
-                            schedule_damage_to_monster(
+                            schedule_damage_to_monster_with_poison(
                                 world,
                                 due_tick,
                                 attacker_id,
                                 line_target,
                                 final_damage,
                                 None,
-                                None,
+                                spider_line_on_hit_poison,
                             );
                         }
                         for area_target in red_moon_evil_area_targets {

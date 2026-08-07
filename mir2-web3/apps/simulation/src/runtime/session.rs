@@ -398,6 +398,26 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    pub fn local_player_object_id(&self) -> Option<u32> {
+        let world = self.app.world();
+        player_entity(world).and_then(|entity| entity_object_id(world, entity))
+    }
+
+    pub fn has_active_intelligent_creature_auto_pickup(&self) -> bool {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .intelligent_creatures
+            .iter()
+            .any(|creature| {
+                creature.pet_mode != 0
+                    && creature.creature_rules.auto_pickup_enabled
+                    && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
+                    && creature.creature_rules.auto_pickup_range > 0
+            })
+    }
+
     pub fn prepare_chat_packet_for_zone(
         &mut self,
         message: String,

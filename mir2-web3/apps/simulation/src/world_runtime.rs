@@ -291,6 +291,14 @@ impl InProcessWorldRuntime {
         self.session
     }
 
+    pub fn local_player_object_id(&self) -> Option<u32> {
+        self.session.local_player_object_id()
+    }
+
+    pub fn has_active_intelligent_creature_auto_pickup(&self) -> bool {
+        self.session.has_active_intelligent_creature_auto_pickup()
+    }
+
     pub fn apply_shared_ground_drop_pickup(
         &mut self,
         drop: &GroundDropSnapshot,
