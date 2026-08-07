@@ -80,6 +80,52 @@ run_platinum_case() {
   fi
 }
 
+run_zone_lib_case() {
+  local test_name="$1"
+  local full_name="runtime::zone::runtime::${test_name}"
+  local output
+  if ! output="$(
+    cargo +1.89.0 test \
+      -p mir2-simulation \
+      --lib \
+      "${full_name}" \
+      -- \
+      --exact \
+      --nocapture 2>&1
+  )"; then
+    printf '%s\n' "${output}"
+    return 1
+  fi
+  printf '%s\n' "${output}"
+  if [[ "${output}" != *"test ${full_name} ... ok"* ]]; then
+    echo "expected exactly named Zone runtime test did not run: ${full_name}" >&2
+    return 1
+  fi
+}
+
+run_gateway_case() {
+  local test_name="$1"
+  local full_name="routing::tests::${test_name}"
+  local output
+  if ! output="$(
+    cargo +1.89.0 test \
+      -p mir2-gateway \
+      --lib \
+      "${full_name}" \
+      -- \
+      --exact \
+      --nocapture 2>&1
+  )"; then
+    printf '%s\n' "${output}"
+    return 1
+  fi
+  printf '%s\n' "${output}"
+  if [[ "${output}" != *"test ${full_name} ... ok"* ]]; then
+    echo "expected exactly named Gateway test did not run: ${full_name}" >&2
+    return 1
+  fi
+}
+
 # Real shared-zone combat: the poison case runs through the final tick, death,
 # kill award and ground drop. The summon cases verify owned pets attack hostile
 # monsters without damaging players.
@@ -103,6 +149,25 @@ social_cases=(
 )
 for test_name in "${social_cases[@]}"; do
   run_zone_case "${test_name}"
+done
+
+zone_runtime_cases=(
+  "group_experience_tests::boss_reward_uses_group_contribution_instead_of_last_hit"
+  "group_experience_tests::group_monster_kill_award_preserves_experience_and_excludes_ineligible_players"
+  "pvp_tests::all_mode_shared_melee_can_kill_and_routes_authoritative_damage"
+  "pvp_tests::peace_mode_and_safe_zones_block_shared_player_damage"
+)
+for test_name in "${zone_runtime_cases[@]}"; do
+  run_zone_lib_case "${test_name}"
+done
+
+gateway_cases=(
+  "in_process_account_inventory_service_deduplicates_committed_zone_rewards"
+  "shared_in_process_registry_routes_melee_pvp_and_accrues_unlawful_pk"
+  "shared_pvp_red_name_death_applies_two_item_penalty_without_penalizing_killer"
+)
+for test_name in "${gateway_cases[@]}"; do
+  run_gateway_case "${test_name}"
 done
 
 social_lib_cases=(
@@ -188,6 +253,15 @@ const categories = [
     claim: "Shared-zone combat owns monster death and drop generation.",
   },
   {
+    id: "combat.party-reward-and-boss-audit",
+    cases: [
+      "group_experience_tests::boss_reward_uses_group_contribution_instead_of_last_hit",
+      "group_experience_tests::group_monster_kill_award_preserves_experience_and_excludes_ineligible_players",
+      "in_process_account_inventory_service_deduplicates_committed_zone_rewards",
+    ],
+    claim: "Shared-Zone group XP is conserved, Boss ownership follows group contribution and the audit commits exactly once.",
+  },
+  {
     id: "multiplayer.social-and-endgame",
     cases: [
       "zone_guild_chat_routes_same_guild",
@@ -202,6 +276,10 @@ const categories = [
     id: "pk-and-loot-ownership",
     cases: [
       "zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires",
+      "pvp_tests::all_mode_shared_melee_can_kill_and_routes_authoritative_damage",
+      "pvp_tests::peace_mode_and_safe_zones_block_shared_player_damage",
+      "shared_in_process_registry_routes_melee_pvp_and_accrues_unlawful_pk",
+      "shared_pvp_red_name_death_applies_two_item_penalty_without_penalizing_killer",
       "deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment",
       "pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay",
       "pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries",

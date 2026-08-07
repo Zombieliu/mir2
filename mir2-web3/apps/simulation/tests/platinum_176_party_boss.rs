@@ -224,6 +224,7 @@ fn boss_spawn() -> ZoneMonsterSpawn {
         max_hp: template.hp,
         hp: template.hp,
         experience: template.experience,
+        friendly_guild: None,
         position: Point { x: 23, y: 18 },
         direction: MirDirection::Left,
         defense: ZoneMonsterDefense::from_crystal_template(template),

@@ -8,9 +8,9 @@
     "crystalDatabaseVersion": 117,
     "crystalDatabaseCustomVersion": 0
   },
-  "builtAt": "2026-07-29T23:32:34.770Z",
+  "builtAt": "2026-08-07T07:37:07.457Z",
   "hashAlgorithm": "sha256",
-  "contentHash": "2d00329bf7feb071e8e2e4ade557112897ac4be7f0d88491934c609f6913c29a",
+  "contentHash": "3bbd9685bd026d434e83f9a13b431e2363921ee72b97c72bc5d8ebc222286c2a",
   "files": [
     {
       "path": "packages/game-data/data/content_profiles/platinum_176.json",
@@ -19,8 +19,8 @@
     },
     {
       "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
-      "bytes": 6368586,
-      "sha256": "61e5fc026d81010f02934a8509207ff07191e4b4c6574352609ddde67a740adf"
+      "bytes": 6394977,
+      "sha256": "2f3436064a1cca763718d1724960274bb1fd2c6e4c8b54f15a0aeeb1c7e9b16f"
     },
     {
       "path": "packages/game-data/data/generated/crystal_monster_manifest.json",

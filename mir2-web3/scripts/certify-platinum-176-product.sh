@@ -66,6 +66,39 @@ for test_name in "${shared_zone_cases[@]}"; do
     --nocapture
 done
 
+zone_runtime_cases=(
+  "runtime::zone::runtime::group_experience_tests::boss_reward_uses_group_contribution_instead_of_last_hit"
+  "runtime::zone::runtime::group_experience_tests::group_monster_kill_award_preserves_experience_and_excludes_ineligible_players"
+  "runtime::zone::runtime::pvp_tests::all_mode_shared_melee_can_kill_and_routes_authoritative_damage"
+  "runtime::zone::runtime::pvp_tests::peace_mode_and_safe_zones_block_shared_player_damage"
+)
+
+for test_name in "${zone_runtime_cases[@]}"; do
+  cargo +1.89.0 test \
+    -p mir2-simulation \
+    --lib \
+    "${test_name}" \
+    -- \
+    --exact \
+    --nocapture
+done
+
+gateway_cases=(
+  "routing::tests::in_process_account_inventory_service_deduplicates_committed_zone_rewards"
+  "routing::tests::shared_in_process_registry_routes_melee_pvp_and_accrues_unlawful_pk"
+  "routing::tests::shared_pvp_red_name_death_applies_two_item_penalty_without_penalizing_killer"
+)
+
+for test_name in "${gateway_cases[@]}"; do
+  cargo +1.89.0 test \
+    -p mir2-gateway \
+    --lib \
+    "${test_name}" \
+    -- \
+    --exact \
+    --nocapture
+done
+
 (
   cd apps/web
   npx tsc --noEmit
@@ -111,6 +144,14 @@ const cases = [
     evidence: path.relative(path.dirname(reportPath), partyBossReportPath),
   },
   {
+    id: "combat.party-reward-conservation",
+    scope: "Shared-Zone group XP is conserved and Boss ownership follows live group damage contribution instead of last hit",
+  },
+  {
+    id: "combat.boss-audit-idempotency",
+    scope: "Boss contribution audit is persisted exactly once across idempotent reward retries",
+  },
+  {
     id: "profile.feature-boundary",
     scope: "Block post-1.76 and QA mutations while preserving classic social/endgame actions",
   },
@@ -129,6 +170,10 @@ const cases = [
   {
     id: "pk.deep-red-drops",
     scope: "Deep-red death drops two eligible equipment items and recalculates stats",
+  },
+  {
+    id: "pk.shared-zone-enforcement",
+    scope: "Shared melee PvP accrues unlawful PK, respects peace/safe-zone gates and applies red-name death loss",
   },
   {
     id: "pk.decay.persistence",
