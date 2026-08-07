@@ -34,7 +34,8 @@ use super::map::{
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
 use super::packets::object_movement;
 use super::resources::{
-    MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource, RuntimeQueueResource,
+    runtime_tick, MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource,
+    RuntimeQueueResource,
 };
 use super::stats::deterministic_range_roll;
 
@@ -997,7 +998,41 @@ pub(super) fn monster_ignores_damage(world: &World, monster_entity: Entity) -> b
     };
     let ai_state = entry.get::<MonsterAiState>().copied().unwrap_or_default();
 
-    ignores_monster_damage(agent) || (agent.ai == 98 && ai_state.extra_byte < 4)
+    ignores_monster_damage(agent)
+        || (agent.ai == 98 && ai_state.extra_byte < 4)
+        || monster_is_immune(world, monster_entity, agent, &ai_state)
+}
+
+/// True while a boss sits in a Crystal `_Immune`/invulnerability window and must
+/// ignore ALL incoming damage. Every damage path funnels through
+/// `monster_ignores_damage` (and thus `damage_monster_entity`), so adding one arm
+/// here makes a boss undamageable on the scheduled, ground-spell, and direct paths
+/// at once — instead of special-casing each site. Future immune bosses extend this.
+pub(super) fn monster_is_immune(
+    world: &World,
+    monster_entity: Entity,
+    agent: &MonsterAgent,
+    ai_state: &MonsterAiState,
+) -> bool {
+    // HornedCommander (AI 171): the immune flag is packed into `ai_state.mode`
+    // during the <10% shield phase and the rock-fall / spin wind-ups (Crystal
+    // `HornedCommander.cs` `_Immune`).
+    if agent.ai == 171 && ai_state.mode {
+        return true;
+    }
+    // HornedSorceror (AI 169): the charged-stomp immune deadline lives in a local
+    // per-entity timer (Crystal `HornedSorceror.cs` `_Immune`, set during the stomp
+    // and cleared in `CompleteAttack`). Honour it on every damage path — Crystal
+    // makes the boss untargetable via `IsAttackTarget`, so the hit never lands.
+    if let Some(timers) = world
+        .entity(monster_entity)
+        .get::<super::monster_ai::HornedSorcerorTimers>()
+    {
+        if runtime_tick(world) < timers.immune_until_tick {
+            return true;
+        }
+    }
+    false
 }
 
 pub(super) fn queue_pending_monster_spawn(world: &mut World, action: PendingMonsterSpawnAction) {

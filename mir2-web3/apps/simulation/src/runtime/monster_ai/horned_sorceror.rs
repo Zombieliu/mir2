@@ -17,7 +17,9 @@
 
 use bevy_ecs::{component::Component, entity::Entity, prelude::World};
 use mir2_game_data::crystal_monster_by_name;
-use mir2_protocol::{MirDirection, ObjectAttackInfo, ObjectMovement, Point, ServerPacket};
+use mir2_protocol::{
+    MirDirection, ObjectAttackInfo, ObjectMovement, ObjectSpellInfo, Point, ServerPacket, Spell,
+};
 
 use super::super::combat::*;
 use super::super::components::{
@@ -27,7 +29,7 @@ use super::super::components::{
 use super::super::monsters::*;
 use super::super::movement::*;
 use super::super::packets::*;
-use super::super::resources::current_language;
+use super::super::resources::{current_language, PendingGroundSpellAction, RuntimeQueueResource};
 
 use super::common::*;
 
@@ -366,11 +368,14 @@ fn charged_stomp(
 }
 
 /// Crystal `Dust Tornado` / `Tornado()` (HornedSorceror.cs:81-87, 154-198).
-/// Broadcasts `ObjectAttack Type=3` and lays a 5x5 MC-damage field centred on
-/// the boss. The sim has no persistent monster-cast ground hazard for this
-/// spell, so we reproduce the field's *damage* by scheduling one MC hit per
-/// occupied tile in the 5x5 box (see module deferral note); the persistent
-/// 15 s ticking visual field is the deferred part.
+/// Broadcasts `ObjectAttack Type=3`, then spawns a 5x5 grid of
+/// `HornedSorcererDustTornado` SpellObjects centred on the boss — each ticks `MC`
+/// damage every second for 15 s, starting 1 s after the cast. We register one
+/// persistent ground-spell field over the whole box; `tick_ground_spell_actions`
+/// then drives the per-second `MC` ticks against the player + opposing monsters
+/// (replacing the previous single-impact approximation). Like Crystal we lay the
+/// field unconditionally (the visual always shows); the tick damage is `MC`, which
+/// is 0 in the stock manifest and scales up for future bosses.
 #[allow(clippy::too_many_arguments)]
 fn dust_tornado(
     world: &mut World,
@@ -391,62 +396,45 @@ fn dust_tornado(
     face_direction(world, entity, direction);
     push_attack_packet(world, entity, position, direction, 3, 0, packets);
 
+    // 5x5 box centred on the boss (Crystal `location.X/Y - 2 ..= + 2`).
     let damage = crystal_monster_raw_magic_damage(monster_name);
-    if damage > 0 {
-        // Crystal lays the field 1000 ms after the cast (DelayedType.Spawn at
-        // `now + start`), then it ticks for 15 s. We deliver a single MC hit at
-        // that spawn moment to every occupant of the 5x5 box.
-        let due_tick = tick + combat_delay_ticks(1_000);
-        let monster_entities: Vec<Entity> = world
-            .query_filtered::<Entity, bevy_ecs::query::With<Monster>>()
-            .iter(world)
-            .collect();
-        let player = player_entity(world);
-        let mut player_hit = false;
-        for dy in -2..=2 {
-            for dx in -2..=2 {
-                let cell = Point {
-                    x: position.x + dx,
-                    y: position.y + dy,
-                };
-                if agent.hostile_to_player && !player_hit {
-                    if let Some(player) = player {
-                        if entity_position(world, player)
-                            .map(|p| p == cell)
-                            .unwrap_or(false)
-                        {
-                            schedule_damage_to_player(
-                                world,
-                                due_tick,
-                                attacker_id,
-                                monster_name.to_string(),
-                                damage,
-                            );
-                            player_hit = true;
-                        }
-                    }
-                }
-                for target in nearby_opposing_monster_targets(
-                    world,
-                    &monster_entities,
-                    entity,
-                    &cell,
-                    agent,
-                    0,
-                ) {
-                    schedule_damage_to_monster(
-                        world,
-                        due_tick,
-                        attacker_id,
-                        target,
-                        damage,
-                        None,
-                        None,
-                    );
-                }
-            }
-        }
-    }
+    let locations: Vec<Point> = (-2..=2)
+        .flat_map(|dy| (-2..=2).map(move |dx| (dx, dy)))
+        .map(|(dx, dy)| Point {
+            x: position.x + dx,
+            y: position.y + dy,
+        })
+        .collect();
+    // Crystal `start = 1000`, `time = Settings.Second * 15`, `TickSpeed = 1000`,
+    // `ExpireTime = now + time + start` (HornedSorceror.cs:176-183).
+    let start_delay = combat_delay_ticks(1_000);
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(PendingGroundSpellAction {
+            spell: Spell::HornedSorcererDustTornado,
+            caster_object_id: attacker_id,
+            locations,
+            damage,
+            next_tick: tick + start_delay,
+            expires_at_tick: tick + combat_delay_ticks(16_000),
+            tick_interval: combat_delay_ticks(1_000),
+        });
+    // Crystal shows only the centre cell's tornado (`Show = location == cell`).
+    let visual_object_id = allocate_runtime_monster_object_id(world);
+    queue_due_packet(
+        world,
+        tick + start_delay,
+        ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id: visual_object_id,
+                location: position.clone(),
+                spell: Spell::HornedSorcererDustTornado,
+                direction,
+                param: false,
+            },
+        },
+    );
 
     world.entity_mut(entity).insert(agent.clone());
     true
@@ -968,5 +956,78 @@ mod tests {
             monster_is_damageable(session.app.world(), entity),
             "HornedSorceror must be damageable again after the immune window resolves"
         );
+    }
+
+    /// Task 3: the dust tornado registers a PERSISTENT MC ground field (Crystal
+    /// `Tornado()` lays a 5x5 grid of `HornedSorcererDustTornado` SpellObjects that
+    /// tick every second for 15 s) instead of a single impact. Drive the real AI
+    /// until the 1/4 tornado roll fires — the charged stomp is gated off so the only
+    /// reachable field-laying branch is the tornado — then assert the queued field's
+    /// 5x5 shape, caster, and Crystal timing.
+    #[test]
+    fn dust_tornado_registers_a_persistent_mc_field() {
+        let mut session = session_with_player();
+        let object_id = 99_172_u32;
+        let entity = spawn_boss(&mut session, object_id, Point { x: 920, y: 920 }, 50, 100);
+        // Gate OFF the charged stomp (cooldown far in the future) so the only
+        // field-laying branch the AI can reach is the dust tornado (ready now).
+        session
+            .app
+            .world_mut()
+            .entity_mut(entity)
+            .insert(HornedSorcerorTimers {
+                stomp_ready_tick: u64::MAX,
+                tornado_ready_tick: 0,
+                immune_until_tick: 0,
+            });
+
+        let mut fired = None;
+        for tick in 1..400u64 {
+            // Keep the player adjacent to the boss (which may dash/step) so it stays
+            // in attack range and rolls the tornado each tick; reset the attack
+            // cooldown so `Attack()` runs.
+            let boss_position =
+                entity_position(session.app.world(), entity).expect("boss position");
+            place_player(
+                &mut session,
+                Point {
+                    x: boss_position.x + 1,
+                    y: boss_position.y,
+                },
+            );
+            session
+                .app
+                .world_mut()
+                .entity_mut(entity)
+                .get_mut::<MonsterAgent>()
+                .expect("agent")
+                .next_attack_tick = 0;
+            let _ = run_tick(&mut session, entity, tick);
+            let field = session
+                .app
+                .world()
+                .resource::<RuntimeQueueResource>()
+                .pending_ground_spell_actions
+                .iter()
+                .find(|action| action.spell == Spell::HornedSorcererDustTornado)
+                .cloned();
+            if let Some(field) = field {
+                fired = Some((tick, field));
+                break;
+            }
+        }
+
+        let (tick, field) = fired.expect("the dust tornado must register a persistent field");
+        let boss_position = entity_position(session.app.world(), entity).expect("boss position");
+        assert_eq!(field.caster_object_id, object_id, "field owned by the boss");
+        assert_eq!(field.locations.len(), 25, "Crystal Tornado lays a 5x5 grid");
+        assert!(
+            field.locations.contains(&boss_position),
+            "the field must be centred on the boss"
+        );
+        // Crystal: first tick +1000ms, TickSpeed 1000ms, ExpireTime now + 15s + 1s.
+        assert_eq!(field.next_tick, tick + combat_delay_ticks(1_000));
+        assert_eq!(field.tick_interval, combat_delay_ticks(1_000));
+        assert_eq!(field.expires_at_tick, tick + combat_delay_ticks(16_000));
     }
 }

@@ -95,6 +95,10 @@ pub(super) const GENERAL_MEOW_MEOW_SLAVE_SPAWN_INTERVAL_TICKS: u64 = 60;
 pub(super) const GENERAL_MEOW_MEOW_SLAVE_SPAWN_COUNT: usize = 3;
 pub(super) const GENERAL_MEOW_MEOW_MAX_SLAVES: usize = 6;
 pub(super) const GENERAL_MEOW_MEOW_SHIELD_ARMOUR: i32 = 100;
+/// Crystal `HornedWarrior` raises `BuffType.HornedWarriorShield` below 50% HP with
+/// `[Stat.MinAC] = [Stat.MaxAC] = 500` (`HornedWarrior.cs:55-63`); while the shield
+/// window is active that flat +500 AC is subtracted from every incoming hit.
+pub(super) const HORNED_WARRIOR_SHIELD_ARMOUR: i32 = 500;
 pub(super) const GENERAL_MEOW_MEOW_THUNDER_SPAWN_DELAY_TICKS: u64 = 2;
 pub(super) const GENERAL_MEOW_MEOW_THUNDER_MIN_COOLDOWN_TICKS: u64 = 1;
 pub(super) const GENERAL_MEOW_MEOW_THUNDER_RANDOM_COOLDOWN_TICKS: u64 = 4;
