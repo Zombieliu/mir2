@@ -60,19 +60,32 @@ export async function readStaticOriginalUiLibraryMeta(
     .split("/")
     .map((segment) => encodeURIComponent(segment))
     .join("/");
-  const candidates = [
-    new URL(`/original-ui/${encodedPath}/meta.json`, request.url).toString(),
-    ...remoteOriginalUiMetaUrls(encodedPath),
-  ];
+  const localUrl = new URL(`/original-ui/${encodedPath}/meta.json`, request.url).toString();
 
-  for (const url of uniqueUrls(candidates)) {
-    const meta = await readOriginalUiMetaUrl(url);
-    if (meta) {
-      return meta;
+  const local = await readOriginalUiMetaUrl(localUrl);
+  // A complete same-origin meta wins outright — no R2 round-trip.
+  if (local && isCompleteOriginalUiMeta(local)) {
+    return local;
+  }
+
+  // The same-origin meta is missing or TRUNCATED (frames.length < count). The kept actor
+  // libraries (CArmour/Monster/...) ship only their movement frames same-origin; the action
+  // frames (attack/struck/die/dead) live on the R2 release. Prefer the most complete remote
+  // meta — the frame PNGs themselves are backfilled by the asset Service Worker's R2 fallback.
+  let best = local;
+  for (const url of uniqueUrls(remoteOriginalUiMetaUrls(encodedPath))) {
+    const remote = await readOriginalUiMetaUrl(url);
+    if (remote && (!best || remote.frames.length > best.frames.length)) {
+      best = remote;
+      if (isCompleteOriginalUiMeta(best)) break;
     }
   }
 
-  return null;
+  return best;
+}
+
+function isCompleteOriginalUiMeta(meta: OriginalUiLibraryMeta) {
+  return meta.frames.length >= meta.count;
 }
 
 function remoteOriginalUiMetaUrls(encodedPath: string) {

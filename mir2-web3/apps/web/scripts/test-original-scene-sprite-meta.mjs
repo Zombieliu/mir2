@@ -3,6 +3,9 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
+const originalAssetBaseUrl = process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
+process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL = "https://assets.example.test";
+
 const sourcePath = new URL("../lib/original-scene-sprite-meta.ts", import.meta.url);
 const source = readFileSync(sourcePath, "utf8");
 const compiled = ts.transpileModule(source, {
@@ -64,6 +67,20 @@ try {
     "/api/original-ui-meta?library=Monster%2F139",
   ]);
 
+  const truncatedRequests = [];
+  globalThis.fetch = async (url) => {
+    truncatedRequests.push(String(url));
+    return truncatedRequests.length === 1
+      ? Response.json({ count: 2, frames: [{ index: 0 }] })
+      : Response.json({ count: 2, frames: [{ index: 0 }, { index: 1 }] });
+  };
+  const truncatedResponse = await fetchOriginalSceneSpriteMeta("Monster/139");
+  assert.equal(truncatedResponse.status, 200);
+  assert.deepEqual(truncatedRequests, [
+    "/original-ui/Monster/139/meta.json",
+    "/api/original-ui-meta?library=Monster%2F139",
+  ]);
+
   const exportedOnlyRequests = [];
   globalThis.fetch = async (url) => {
     exportedOnlyRequests.push(String(url));
@@ -74,6 +91,11 @@ try {
   assert.deepEqual(exportedOnlyRequests, ["/original-ui/Title/000/meta.json"]);
 } finally {
   globalThis.fetch = originalFetch;
+  if (originalAssetBaseUrl === undefined) {
+    delete process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
+  } else {
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL = originalAssetBaseUrl;
+  }
 }
 
 console.log("original scene sprite metadata tests passed");
