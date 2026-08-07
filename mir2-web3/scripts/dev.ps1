@@ -34,6 +34,7 @@ $GatewayHealthUrl = "http://127.0.0.1:$GatewayWebPort/health"
 $script:DeveloperRevision = ""
 $script:LocalDeveloperImage = ""
 $script:RuntimeImagePrepared = $false
+$script:BevyRuntimePrepared = $false
 $script:AssetImagePrepared = $false
 $script:PublishedImage = ""
 $script:PublishedDigest = ""
@@ -266,6 +267,22 @@ function Prepare-RuntimeImage {
     $script:RuntimeImagePrepared = $true
 }
 
+function Prepare-BevyRuntime {
+    if ($script:BevyRuntimePrepared) {
+        return
+    }
+
+    Prepare-RuntimeImage
+    Invoke-Compose -Arguments @(
+        "run", "--rm", "--no-deps",
+        "--user", "node",
+        "--entrypoint", "node",
+        "workspace",
+        "apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs"
+    )
+    $script:BevyRuntimePrepared = $true
+}
+
 function Prepare-AssetImage {
     if ($script:AssetImagePrepared) {
         return
@@ -496,7 +513,7 @@ try {
                     $script:RuntimeImagePrepared = $false
                 }
             }
-            Prepare-RuntimeImage
+            Prepare-BevyRuntime
             $UpArguments = @("up", "-d")
             $UpArguments += @("gateway", "web")
             Invoke-Compose -Arguments $UpArguments
@@ -528,11 +545,11 @@ try {
         }
         "verify" {
             Test-ReleaseLock
-            Prepare-RuntimeImage
+            Prepare-BevyRuntime
             Invoke-Compose -Arguments @(
                 "run", "--rm", "--no-deps", "workspace",
                 "bash", "-lc",
-                "node scripts/check-developer-release.mjs && cargo +1.89.0 fmt --all -- --check && npm ci --prefix apps/web && npm ci --prefix apps/admin-web && npm --prefix apps/web run typecheck && npm --prefix apps/admin-web run typecheck && cargo +1.89.0 check --locked -p mir2-gateway -p mir2-admin-api"
+                "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs && cargo +1.89.0 fmt --all -- --check && npm ci --prefix apps/web && npm ci --prefix apps/admin-web && npm --prefix apps/web run typecheck && npm --prefix apps/admin-web run typecheck && cargo +1.89.0 check --locked -p mir2-gateway -p mir2-admin-api"
             )
         }
         "assets" {

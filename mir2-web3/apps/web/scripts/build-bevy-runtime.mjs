@@ -133,6 +133,10 @@ function buildRuntimeFromSource() {
 }
 
 function usePrebuiltRuntime() {
+  const fetchScript = path.join(scriptDir, "fetch-prebuilt-bevy-runtime.mjs");
+  const fetchReason = prebuiltRuntimeReady() ? "verifying" : "fetching";
+  console.log(`[bevy-runtime] ${fetchReason} the pinned prebuilt packages with ${fetchScript}`);
+  runChecked(process.execPath, [fetchScript], { cwd: webRoot, label: "verify or fetch pinned prebuilt runtime" });
   ensurePrebuiltRuntime();
   fs.mkdirSync(publishLayout.stagingParentDir, { recursive: true });
   const manifest = writeRuntimeVersionManifest({
@@ -322,6 +326,11 @@ function ensurePrebuiltRuntime() {
   if (missing.length > 0) {
     fail(`MIR2_USE_PREBUILT_BEVY_RUNTIME=1 but required files are missing: ${missing.join(", ")}`);
   }
+}
+
+function prebuiltRuntimeReady() {
+  return runtimeArtifactRecords(pkgParentDir, pkgParentDir, webRoot)
+    .every(({ sourcePath }) => isNonEmptyFile(sourcePath));
 }
 
 function resolveCargoTargetRoot(root, env) {

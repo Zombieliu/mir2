@@ -144,6 +144,18 @@ function assertTracked(relativePath) {
   git(["ls-files", "--error-unmatch", "--", relativePath]);
 }
 
+function assertExternalized(relativePath) {
+  assert(
+    git(["ls-files", "--", relativePath]) === "",
+    `externalized file must not be tracked: ${relativePath}`,
+  );
+  const ignoredPath = git(["check-ignore", "--no-index", "--", relativePath]);
+  assert(
+    ignoredPath.replaceAll("\\", "/") === relativePath.replaceAll("\\", "/"),
+    `externalized file is not covered by .gitignore: ${relativePath}`,
+  );
+}
+
 function sha256(absolutePath) {
   return createHash("sha256").update(readFileSync(absolutePath)).digest("hex");
 }
@@ -375,6 +387,11 @@ function checkDeveloperReleaseLock() {
 
   const bashLauncher = readFileSync(projectPath("scripts/dev.sh"), "utf8");
   const powerShellLauncher = readFileSync(projectPath("scripts/dev.ps1"), "utf8");
+  const developerCompose = readFileSync(projectPath("infra/compose.developer.yml"), "utf8");
+  assert(
+    developerCompose.includes("node ./scripts/fetch-prebuilt-bevy-runtime.mjs &&"),
+    "developer Web startup must fetch the pinned externalized Bevy runtime",
+  );
   for (const [label, launcher, needles] of [
     [
       "scripts/dev.sh",
@@ -384,6 +401,9 @@ function checkDeveloperReleaseLock() {
         'published_image}" != "ghcr.io/zombieliu/mir2-developer"',
         "DOCKER_CONFIG",
         "compose run --rm --no-deps -T asset-fetch",
+        "compose run --rm --no-deps \\",
+        '--user "$(id -u):$(id -g)"',
+        "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs",
       ],
     ],
     [
@@ -394,6 +414,8 @@ function checkDeveloperReleaseLock() {
         '$script:PublishedImage -ne "ghcr.io/zombieliu/mir2-developer"',
         "DOCKER_CONFIG",
         '"run", "--rm", "--no-deps", "-T", "asset-fetch"',
+        '"--user", "node"',
+        "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs",
       ],
     ],
   ]) {
@@ -650,6 +672,8 @@ function checkDeveloperAssetManifest() {
 function checkBevyRuntimeLock() {
   const manifestRelativePath = "apps/web/lib/generated/bevy_runtime_version.json";
   assertTracked(`mir2-web3/${manifestRelativePath}`);
+  assertTracked("mir2-web3/apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs");
+  assertTracked("mir2-web3/config/production-web-assets.json");
   const manifest = readJson(projectPath(manifestRelativePath), "Bevy runtime version manifest");
   assert(/^bevy-[a-f0-9]{16}$/.test(manifest.version), "Bevy runtime version is invalid");
   assert(
@@ -668,7 +692,7 @@ function checkBevyRuntimeLock() {
     assert(SHA256_PATTERN.test(record.sha256), `invalid Bevy runtime SHA-256: ${record.path}`);
     const absolutePath = path.resolve(WEB_ROOT, ...normalized.split("/"));
     fileInfo(absolutePath, `Bevy runtime ${record.path}`);
-    assertTracked(`mir2-web3/apps/web/${normalized}`);
+    assertExternalized(`mir2-web3/apps/web/${normalized}`);
     const actualHash = sha256(absolutePath);
     assert(actualHash === record.sha256, `Bevy runtime hash mismatch: ${record.path}`);
     if (record.path.endsWith(".wasm")) {

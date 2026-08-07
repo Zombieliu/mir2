@@ -92,6 +92,7 @@ services:
         lock_hash="$$(sha256sum package-lock.json | cut -d ' ' -f 1)";
         if [ "$$(cat node_modules/.mir2-package-lock.sha256 2>/dev/null || true)" != "$$lock_hash" ];
         then npm ci && printf '%s' "$$lock_hash" > node_modules/.mir2-package-lock.sha256; fi;
+        node ./scripts/fetch-prebuilt-bevy-runtime.mjs &&
         npm run assets:map-atlas:ensure &&
         npm exec -- next dev --hostname 0.0.0.0 --port 3002
     working_dir: /workspace/mir2-web3/apps/web

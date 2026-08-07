@@ -66,8 +66,7 @@ prebuilt_runtime_ready() {
 # archive; `npm run runtime:build:release` validates and reuses these packages.
 if [ "${MIR2_USE_PREBUILT_BEVY_RUNTIME:-0}" = "1" ]; then
   if ! prebuilt_runtime_ready; then
-    echo "[vercel-build] MIR2_USE_PREBUILT_BEVY_RUNTIME=1 but one or more runtime packages are missing." >&2
-    exit 1
+    echo "[vercel-build] Prebuilt runtime is absent from Git; the pinned package will be fetched and verified during npm build."
   fi
   echo "[vercel-build] Using pinned prebuilt WebGPU/WebGL2 packages; skipping Rust toolchain installation."
   npm run build
