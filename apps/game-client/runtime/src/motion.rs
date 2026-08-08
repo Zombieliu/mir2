@@ -1,0 +1,1028 @@
+//! Wall-clock entity motion authority for the Bevy runtime.
+//!
+//! # Why this module exists
+//!
+//! Before this module, the TypeScript DOM shell was the sole authority for
+//! entity motion: it ran a 60 Hz `requestAnimationFrame` loop, computed
+//! per-frame pixel offsets for every entity, and handed pre-computed absolute
+//! CSS-px positions to Bevy via `setMir2EntityRenderState`.  That loop forced
+//! a full React re-render of the ~3000-line shell every animation frame.
+//!
+//! This module moves motion authority into Bevy.  Each entity's movement step
+//! is described by a wall-clock window (`started_ms`..`expires_ms`) carried in
+//! the [`EntityMotionTable`] Bevy resource.  The table is updated by
+//! [`update_entity_motion_table`] from the latest `WorldSnapshot`, then read
+//! each frame by `sync_entities` via [`world_position_with_motion`].
+//!
+//! # Design reference
+//!
+//! See `docs/BEVY-OWNS-MOTION-DESIGN.md` §3 for the full specification.
+//!
+//! # Gating / additive nature
+//!
+//! The table is only populated when the TypeScript producer sends
+//! `movementStartedMs` / `movementDurationMs` on `WorldEntity`.  Until then
+//! every table lookup returns `None`, falling through to the Phase 0.4
+//! snapshot-lerp path in `sync_entities`.  Existing behaviour is fully
+//! preserved.
+
+use std::collections::HashMap;
+
+use bevy::math::Vec2;
+use bevy::prelude::*;
+
+use crate::RuntimeWorldState;
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/// Crystal's nominal walk step duration in milliseconds.  Used as the
+/// `expires_ms` fallback when the TS producer does not send
+/// `movementDurationMs` (Steps 1–4 of the migration plan).
+pub const DEFAULT_STEP_DURATION_MS: f64 = 600.0;
+
+/// Crystal walking/running actions use 6 movement frames.
+pub const CRYSTAL_MOVE_FRAME_COUNT: f64 = 6.0;
+
+/// `GameScene.CanMove` advances movement frames on a 100 ms cadence.
+pub const CRYSTAL_MOVE_FRAME_INTERVAL_MS: f64 = 100.0;
+
+/// Wall-clock tolerance (ms) for `started_ms` sanity check.  If the timestamp
+/// supplied by the TS producer is more than this many milliseconds in the future
+/// relative to `now_ms`, we treat the field as absent and fall back to `now_ms`.
+const MAX_FUTURE_SKEW_MS: f64 = 5000.0;
+
+/// Shared `GameScene.CanMove` pulse for every Bevy-owned movement source.
+/// Crystal advances all actors from one scene clock instead of giving each
+/// movement segment an independent 100 ms timer.
+#[derive(Debug, Clone, Resource)]
+pub(crate) struct CrystalMoveClock {
+    now_ms: f64,
+    next_pulse_ms: f64,
+    pulse_id: u64,
+    initialized: bool,
+}
+
+impl Default for CrystalMoveClock {
+    fn default() -> Self {
+        Self {
+            now_ms: 0.0,
+            next_pulse_ms: CRYSTAL_MOVE_FRAME_INTERVAL_MS,
+            pulse_id: 0,
+            initialized: false,
+        }
+    }
+}
+
+impl CrystalMoveClock {
+    pub(crate) fn tick_at(&mut self, now_ms: f64) -> bool {
+        if !now_ms.is_finite() {
+            return false;
+        }
+        self.now_ms = now_ms;
+        if !self.initialized {
+            self.initialized = true;
+            self.next_pulse_ms = now_ms + CRYSTAL_MOVE_FRAME_INTERVAL_MS;
+            return false;
+        }
+        if now_ms < self.next_pulse_ms {
+            return false;
+        }
+
+        // Crystal processes at most one CanMove pulse per display iteration.
+        // A stalled frame extends the action instead of catching up phases.
+        self.pulse_id = self.pulse_id.saturating_add(1);
+        self.next_pulse_ms = now_ms + CRYSTAL_MOVE_FRAME_INTERVAL_MS;
+        true
+    }
+
+    pub(crate) fn now_ms(&self) -> f64 {
+        self.now_ms
+    }
+
+    pub(crate) fn next_pulse_ms(&self) -> f64 {
+        self.next_pulse_ms
+    }
+
+    pub(crate) fn pulse_id(&self) -> u64 {
+        self.pulse_id
+    }
+}
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct CrystalMoveClockSet;
+
+fn tick_crystal_move_clock_system(mut clock: ResMut<CrystalMoveClock>) {
+    clock.tick_at(now_ms_wall_clock());
+}
+
+pub(crate) struct CrystalMoveClockPlugin;
+
+impl Plugin for CrystalMoveClockPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<CrystalMoveClock>().add_systems(
+            PreUpdate,
+            tick_crystal_move_clock_system.in_set(CrystalMoveClockSet),
+        );
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Data types
+// ---------------------------------------------------------------------------
+
+/// The Crystal-timed motion window for a single entity, expressed in wall-clock
+/// milliseconds.  Mirrors `EntityMotionSnapshot` in
+/// `original-client-scene-motion.ts`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntityMotionEntry {
+    /// Grid cell the entity is moving *from* (previous position).
+    pub from_x: i32,
+    pub from_y: i32,
+    /// Grid cell the entity is moving *to* (current target position).
+    pub to_x: i32,
+    pub to_y: i32,
+    /// Wall-clock `Date.now()` milliseconds at which the step began.
+    pub started_ms: f64,
+    /// Wall-clock `Date.now()` milliseconds at which the step completes.
+    pub expires_ms: f64,
+}
+
+/// Per-entity motion table, held as a Bevy [`Resource`].
+///
+/// Updated once per frame by [`update_entity_motion_table`] immediately after
+/// `ingest_pending_world_state` runs.  Read each frame by `sync_entities` via
+/// [`world_position_with_motion`].
+#[derive(Resource, Default)]
+pub struct EntityMotionTable {
+    entries: HashMap<String, EntityMotionEntry>,
+    /// Wall-clock milliseconds at the start of the current Bevy frame, set by
+    /// [`update_entity_motion_table`] via `js_sys::Date::now()` on WASM or
+    /// `std::time` on native.  `sync_entities` reads this field so it uses the
+    /// same clock snapshot for every entity in the frame.
+    pub now_ms: f64,
+}
+
+impl EntityMotionTable {
+    /// Look up the motion entry for an entity by its `object_id`.
+    ///
+    /// Returns `None` if the entity has no active entry (i.e., the TS producer
+    /// has not yet sent timing metadata for it).
+    #[inline]
+    pub fn get(&self, object_id: &str) -> Option<&EntityMotionEntry> {
+        self.entries.get(object_id)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Pure math
+// ---------------------------------------------------------------------------
+
+/// Compute the sub-tile pixel offset for an entity at `now_ms`.
+///
+/// Mirrors `entityMotionOffsetForEntity` in
+/// `apps/web/app/components/original-client-scene-motion.ts:86-105`.
+///
+/// Crystal does not use a free-running linear lerp here: walking/running
+/// offsets advance on the same 6-frame / 100 ms cadence as
+/// `PlayerObject.OffSetMove`, then truncate to Crystal's even-pixel movement
+/// shape.
+///
+/// The motion goes **from the old cell toward the new cell**: as `remaining`
+/// runs 1→0 the offset shrinks from full-cell displacement to zero.
+///
+/// # Parameters
+///
+/// * `cell_width_px`  — pixel (world-unit) width of one grid cell.  Use 32.0
+///   for Bevy world space; use 48.0 when computing DOM CSS offsets.
+/// * `cell_height_px` — pixel (world-unit) height of one grid cell.  Use 32.0
+///   for Bevy world space; use 32.0 for DOM CSS (same in the DOM case).
+///
+/// Returns a [`Vec2`] containing the `(dx, dy)` offset in the same unit as the
+/// `cell_*_px` parameters.
+pub fn compute_motion_offset(
+    entry: &EntityMotionEntry,
+    now_ms: f64,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    let remaining = crystal_motion_remaining_ratio(entry.started_ms, entry.expires_ms, now_ms);
+    Vec2::new(
+        crystal_movement_pixel_offset(
+            (entry.from_x - entry.to_x) as f32 * cell_width_px * remaining,
+        ),
+        crystal_movement_pixel_offset(
+            (entry.from_y - entry.to_y) as f32 * cell_height_px * remaining,
+        ),
+    )
+}
+
+/// Sub-tile pixel offset for a motion window whose `from`/`to` endpoints may be
+/// **fractional** cell coordinates — unlike [`compute_motion_offset`], which
+/// takes integer grid cells.
+///
+/// The entity-interpolation wire path (`?bevyEntityInterp=1`) needs this: when a
+/// move begins while the previous step is still gliding, the TypeScript producer
+/// records a fractional `from` coordinate (`currentMotionCoordinate` in
+/// `original-client-scene-motion.ts`, e.g. `9.5`). Truncating that to the integer
+/// [`EntityMotionEntry`] would mis-place the glide start (a visible jump), and a
+/// fractional value cannot even round-trip through an `i32` serde field. So this
+/// variant keeps the endpoints as `f32`.
+///
+/// Identical Crystal stepped cadence to [`compute_motion_offset`] and the DOM
+/// `entityMotionOffsetForEntity`.
+///
+/// Timestamps stay `f64`: `Date.now()` (~1.7e12 ms) loses millisecond resolution
+/// in `f32`, which would corrupt the `remaining` ratio. The returned offset is in
+/// the same unit as the `cell_*_px` parameters (CSS-px when called with 48 × 32).
+#[allow(clippy::too_many_arguments)]
+pub fn compute_motion_offset_fractional(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    started_ms: f64,
+    expires_ms: f64,
+    now_ms: f64,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    compute_motion_offset_fractional_with_phase_count(
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        started_ms,
+        expires_ms,
+        now_ms,
+        CRYSTAL_MOVE_FRAME_COUNT as u8,
+        cell_width_px,
+        cell_height_px,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn compute_motion_offset_fractional_with_phase_count(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    started_ms: f64,
+    expires_ms: f64,
+    now_ms: f64,
+    phase_count: u8,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    let remaining = crystal_motion_remaining_ratio_with_phase_count(
+        started_ms,
+        expires_ms,
+        now_ms,
+        phase_count,
+    );
+
+    Vec2::new(
+        crystal_movement_pixel_offset((from_x - to_x) * cell_width_px * remaining),
+        crystal_movement_pixel_offset((from_y - to_y) * cell_height_px * remaining),
+    )
+}
+
+/// Compute the exact Crystal offset for a latched movement phase. Unlike the
+/// wall-clock helpers, callers own phase advancement and can preserve every
+/// 100 ms phase across a delayed render tick.
+#[allow(dead_code)]
+pub fn compute_motion_offset_fractional_for_phase(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    phase_index: u8,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    compute_motion_offset_fractional_for_phase_count(
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        phase_index,
+        CRYSTAL_MOVE_FRAME_COUNT as u8,
+        cell_width_px,
+        cell_height_px,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn compute_motion_offset_fractional_for_phase_count(
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    phase_index: u8,
+    phase_count: u8,
+    cell_width_px: f32,
+    cell_height_px: f32,
+) -> Vec2 {
+    let phase_count = phase_count.max(1);
+    let phase_index = phase_index.min(phase_count - 1);
+    let progress = (f32::from(phase_index) + 1.0) / f32::from(phase_count);
+    let remaining = (1.0 - progress).clamp(0.0, 1.0);
+
+    Vec2::new(
+        crystal_movement_pixel_offset((from_x - to_x) * cell_width_px * remaining),
+        crystal_movement_pixel_offset((from_y - to_y) * cell_height_px * remaining),
+    )
+}
+
+pub fn crystal_motion_remaining_ratio(started_ms: f64, expires_ms: f64, now_ms: f64) -> f32 {
+    crystal_motion_remaining_ratio_with_phase_count(
+        started_ms,
+        expires_ms,
+        now_ms,
+        CRYSTAL_MOVE_FRAME_COUNT as u8,
+    )
+}
+
+pub fn crystal_motion_remaining_ratio_with_phase_count(
+    started_ms: f64,
+    expires_ms: f64,
+    now_ms: f64,
+    phase_count: u8,
+) -> f32 {
+    let span = expires_ms - started_ms;
+    if span <= 0.0 {
+        return 0.0;
+    }
+
+    let elapsed = (now_ms - started_ms).clamp(0.0, span);
+    if elapsed >= span {
+        return 0.0;
+    }
+
+    let phase_count = f64::from(phase_count.max(1));
+    let frame_index = (elapsed / CRYSTAL_MOVE_FRAME_INTERVAL_MS).floor();
+    // Crystal applies the first movement increment while drawing frame zero.
+    let progress = ((frame_index + 1.0) / phase_count).clamp(0.0, 1.0);
+    (1.0 - progress) as f32
+}
+
+fn crystal_movement_pixel_offset(value: f32) -> f32 {
+    if !value.is_finite() || value.abs() < 0.001 {
+        return 0.0;
+    }
+
+    let crystal_value = value.trunc() as i32;
+    let even_crystal_value = crystal_value + (crystal_value % 2);
+    if even_crystal_value == 0 {
+        0.0
+    } else {
+        even_crystal_value as f32
+    }
+}
+// ---------------------------------------------------------------------------
+// Bevy world-space helper
+// ---------------------------------------------------------------------------
+
+/// Compute the Bevy world-space [`Vec3`] for an entity, applying the motion
+/// offset from the [`EntityMotionTable`] entry.
+///
+/// The z-component is always `1.0` (entity layer), matching `tile_to_world` in
+/// `lib.rs`.
+///
+/// Called by `sync_entities` when a motion table entry exists for the entity
+/// (Priority 1 path).  When no entry exists, `sync_entities` falls through to
+/// the Phase 0.4 snapshot-lerp path.
+///
+/// Note: both x and y use the same `tile_size` because Bevy's scene uses a
+/// flat (non-isometric) coordinate system, unlike the DOM's 48 × 32 CSS grid.
+pub fn world_position_with_motion(
+    grid_x: i32,
+    grid_y: i32,
+    entry: &EntityMotionEntry,
+    now_ms: f64,
+    tile_size: f32,
+) -> Vec3 {
+    let offset = compute_motion_offset(entry, now_ms, tile_size, tile_size);
+    Vec3::new(
+        grid_x as f32 * tile_size + offset.x,
+        -(grid_y as f32 * tile_size) - offset.y,
+        1.0,
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Bevy system
+// ---------------------------------------------------------------------------
+
+/// Bevy system that refreshes [`EntityMotionTable`] from the latest
+/// `WorldSnapshot`.
+///
+/// Runs every frame, **after** `ingest_pending_world_state` in the `.chain()`
+/// ordering in `boot_mir2_runtime`.
+///
+/// For each entity in the snapshot:
+/// - If the entity's grid position changed since the last entry (or no entry
+///   exists), a new [`EntityMotionEntry`] is created.
+/// - If the TS producer supplied `movement_started_ms`, that value is used as
+///   `started_ms` (after a future-skew sanity check).  Otherwise `now_ms` is
+///   used (snap fallback, same as the DOM).
+/// - `expires_ms` = `started_ms + movement_duration_ms` (defaulting to
+///   [`DEFAULT_STEP_DURATION_MS`] = 600 ms).
+/// - The previous entry's `to_x`/`to_y` becomes the new `from_x`/`from_y` so
+///   the entity continues gliding from wherever it currently is, not from the
+///   stale grid cell.  (Matches the DOM's `currentMotionCoordinate` logic in
+///   `original-client-scene-motion.ts`.)
+/// - Entries for entities absent from the snapshot are removed.
+pub fn update_entity_motion_table(
+    state: Res<RuntimeWorldState>,
+    clock: Res<CrystalMoveClock>,
+    mut table: ResMut<EntityMotionTable>,
+) {
+    // Every renderer path reads the same frame-level clock snapshot.
+    table.now_ms = clock.now_ms();
+
+    let Some(snapshot) = &state.snapshot else {
+        return;
+    };
+
+    let now_ms = table.now_ms;
+    let mut alive: std::collections::HashSet<String> =
+        std::collections::HashSet::with_capacity(snapshot.entities.len());
+
+    for entity in &snapshot.entities {
+        alive.insert(entity.object_id.clone());
+
+        let existing = table.entries.get(&entity.object_id);
+
+        // Only create/update an entry when the TS producer sends timing data
+        // OR the entity changed grid cell.  Without timing data and without a
+        // position change there is nothing new to record.
+        let position_changed = existing
+            .map(|e| e.to_x != entity.x || e.to_y != entity.y)
+            .unwrap_or(true); // new entity → treat as changed
+
+        let has_timing = entity.movement_started_ms.is_some();
+
+        if !position_changed && !has_timing {
+            // No change and no new timing metadata — leave existing entry as-is.
+            continue;
+        }
+
+        // `from` = wherever the entity currently appears to be.  If an entry
+        // exists, start from its current `to` (the destination it was heading
+        // toward); otherwise snap from the current grid cell.
+        let (from_x, from_y) = existing
+            .map(|e| (e.to_x, e.to_y))
+            .unwrap_or((entity.x, entity.y));
+
+        // Sanitise `movement_started_ms`: reject values far in the future.
+        let started_ms = match entity.movement_started_ms {
+            Some(ts) if ts <= now_ms + MAX_FUTURE_SKEW_MS => ts,
+            _ => now_ms,
+        };
+
+        let duration_ms = entity
+            .movement_duration_ms
+            .filter(|&d| d > 0.0)
+            .unwrap_or(DEFAULT_STEP_DURATION_MS);
+
+        let expires_ms = started_ms + duration_ms;
+
+        table.entries.insert(
+            entity.object_id.clone(),
+            EntityMotionEntry {
+                from_x,
+                from_y,
+                to_x: entity.x,
+                to_y: entity.y,
+                started_ms,
+                expires_ms,
+            },
+        );
+    }
+
+    // Remove stale entries for entities no longer in the snapshot.
+    table.entries.retain(|id, _| alive.contains(id));
+}
+
+// ---------------------------------------------------------------------------
+// Platform-specific wall-clock helper
+// ---------------------------------------------------------------------------
+
+/// Returns the current wall-clock time in milliseconds.
+///
+/// On WASM targets this calls `js_sys::Date::now()` which maps to the
+/// browser's `Date.now()` — the exact same clock the TypeScript producer uses
+/// for `movementStartedMs`.  On native (tests, dev builds) it falls back to
+/// `std::time::SystemTime`.
+#[cfg(target_arch = "wasm32")]
+fn now_ms_wall_clock() -> f64 {
+    js_sys::Date::now()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn now_ms_wall_clock() -> f64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs_f64() * 1000.0)
+        .unwrap_or(0.0)
+}
+
+// ---------------------------------------------------------------------------
+// Unit tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shared_move_clock_uses_one_pulse_per_display_tick() {
+        let mut clock = CrystalMoveClock::default();
+        assert!(!clock.tick_at(250.0));
+        assert_eq!(clock.pulse_id(), 0);
+        assert_eq!(clock.next_pulse_ms(), 350.0);
+        assert!(!clock.tick_at(349.0));
+        assert!(clock.tick_at(350.0));
+        assert_eq!(clock.pulse_id(), 1);
+        assert_eq!(clock.next_pulse_ms(), 450.0);
+
+        // A delayed display frame advances exactly once, matching CanMove.
+        assert!(clock.tick_at(900.0));
+        assert_eq!(clock.pulse_id(), 2);
+        assert_eq!(clock.next_pulse_ms(), 1000.0);
+    }
+
+    // -----------------------------------------------------------------------
+    // compute_motion_offset
+    // -----------------------------------------------------------------------
+
+    /// Helper: build a trivial entry moving from (0,0) to (1,0).
+    fn entry_x_step() -> EntityMotionEntry {
+        EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 1,
+            to_y: 0,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        }
+    }
+
+    #[test]
+    fn offset_at_t0_has_applied_crystals_first_frame_increment() {
+        let entry = entry_x_step();
+        let offset = compute_motion_offset(&entry, 0.0, 32.0, 32.0);
+        assert!((offset.x + 26.0).abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn offset_at_300ms_has_applied_four_of_six_frames() {
+        let entry = entry_x_step();
+        let offset = compute_motion_offset(&entry, 300.0, 32.0, 32.0);
+        assert!((offset.x + 10.0).abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn offset_at_expiry_is_zero() {
+        let entry = entry_x_step();
+        let offset = compute_motion_offset(&entry, 600.0, 32.0, 32.0);
+        // remaining = 0.0; offset = (0, 0)
+        assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn offset_past_expiry_clamps_to_zero() {
+        let entry = entry_x_step();
+        let offset = compute_motion_offset(&entry, 1200.0, 32.0, 32.0);
+        assert!(offset.x.abs() < 1e-4, "offset past expiry should be 0");
+        assert!(offset.y.abs() < 1e-4);
+    }
+
+    #[test]
+    fn offset_y_step() {
+        let entry = EntityMotionEntry {
+            from_x: 5,
+            from_y: 3,
+            to_x: 5,
+            to_y: 4,
+            started_ms: 100.0,
+            expires_ms: 700.0,
+        };
+        let offset = compute_motion_offset(&entry, 100.0, 32.0, 32.0);
+        assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.y + 26.0).abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn offset_degenerate_zero_duration() {
+        let entry = EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 1,
+            to_y: 0,
+            started_ms: 500.0,
+            expires_ms: 500.0, // zero duration
+        };
+        let offset = compute_motion_offset(&entry, 500.0, 32.0, 32.0);
+        // Should snap to target: offset = (0, 0)
+        assert!(offset.x.abs() < 1e-4, "degenerate: offset.x should be 0");
+        assert!(offset.y.abs() < 1e-4, "degenerate: offset.y should be 0");
+    }
+
+    #[test]
+    fn offset_asymmetric_cell_dims() {
+        // DOM uses 48 wide × 32 tall.
+        let entry = EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 1,
+            to_y: 1,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        };
+        let offset = compute_motion_offset(&entry, 0.0, 48.0, 32.0);
+        // from_x - to_x = -1, from_y - to_y = -1, remaining = 1
+        assert!((offset.x + 40.0).abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.y + 26.0).abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn offset_uses_crystal_100ms_step_cadence() {
+        let entry = entry_x_step();
+
+        let at_99 = compute_motion_offset(&entry, 99.0, 48.0, 32.0);
+        assert!((at_99.x + 40.0).abs() < 1e-4, "at_99.x = {}", at_99.x);
+
+        let at_100 = compute_motion_offset(&entry, 100.0, 48.0, 32.0);
+        assert!((at_100.x + 32.0).abs() < 1e-4, "at_100.x = {}", at_100.x);
+
+        let at_500 = compute_motion_offset(&entry, 500.0, 48.0, 32.0);
+        assert!(at_500.x.abs() < 1e-4, "at_500.x = {}", at_500.x);
+
+        let at_600 = compute_motion_offset(&entry, 600.0, 48.0, 32.0);
+        assert!(at_600.x.abs() < 1e-4, "at_600.x = {}", at_600.x);
+    }
+
+    // -----------------------------------------------------------------------
+    // compute_motion_offset_fractional
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn fractional_matches_integer_path_for_whole_cells() {
+        // With whole-number endpoints the fractional variant must produce exactly
+        // the same offset as the integer `compute_motion_offset` (48 × 32 CSS-px).
+        let entry = EntityMotionEntry {
+            from_x: 9,
+            from_y: 5,
+            to_x: 11,
+            to_y: 6,
+            started_ms: 1000.0,
+            expires_ms: 1600.0,
+        };
+        let int_offset = compute_motion_offset(&entry, 1300.0, 48.0, 32.0);
+        let frac_offset = compute_motion_offset_fractional(
+            9.0, 5.0, 11.0, 6.0, 1000.0, 1600.0, 1300.0, 48.0, 32.0,
+        );
+        assert!((int_offset.x - frac_offset.x).abs() < 1e-4, "x mismatch");
+        assert!((int_offset.y - frac_offset.y).abs() < 1e-4, "y mismatch");
+    }
+
+    #[test]
+    fn fractional_from_glide_start_is_preserved() {
+        // A move that began mid-glide records from_x = 9.5 (NOT 9 or 10). At t=0
+        // (remaining = 1) the offset must be the full fractional displacement
+        // (9.5 - 11) * 48 = -72 px — truncating from_x to 9 would give -96, to 10
+        // would give -48; both are visibly wrong.
+        let offset =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 0.0, 600.0, 0.0, 48.0, 32.0);
+        assert!((offset.x + 60.0).abs() < 1e-3, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn fractional_downward_move_offset_is_negative_y() {
+        // Moving DOWN (to_y > from_y) at t=0 must yield a negative screen-space y
+        // offset, so when added to `layer.top` the sprite starts at its OLD (higher)
+        // row and glides down — the sign the DOM fold produces. Guards the one axis
+        // that bit prior camera attempts.
+        let offset =
+            compute_motion_offset_fractional(4.0, 3.0, 4.0, 4.0, 0.0, 600.0, 0.0, 48.0, 32.0);
+        assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!((offset.y + 26.0).abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn fractional_offset_at_expiry_is_zero() {
+        let offset =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 0.0, 600.0, 600.0, 48.0, 32.0);
+        assert!(offset.x.abs() < 1e-4, "offset.x = {}", offset.x);
+        assert!(offset.y.abs() < 1e-4, "offset.y = {}", offset.y);
+    }
+
+    #[test]
+    fn fractional_offset_inverted_or_zero_span_is_zero() {
+        // expires <= started (e.g. a standing snapshot's {startedAt: now, expiresAt: 0}
+        // → negative span) must clamp to a zero offset, never explode.
+        let zero_span =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 500.0, 500.0, 500.0, 48.0, 32.0);
+        assert!(zero_span.x.abs() < 1e-4 && zero_span.y.abs() < 1e-4);
+        let inverted =
+            compute_motion_offset_fractional(9.5, 5.0, 11.0, 5.0, 500.0, 0.0, 500.0, 48.0, 32.0);
+        assert!(inverted.x.abs() < 1e-4 && inverted.y.abs() < 1e-4);
+    }
+
+    // -----------------------------------------------------------------------
+    // world_position_with_motion
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn world_position_at_t0_has_advanced_one_crystal_frame() {
+        // Entity at grid (1, 0) having moved from (0, 0), at t=0 of a 600ms step.
+        let entry = EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 1,
+            to_y: 0,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        };
+        let pos = world_position_with_motion(1, 0, &entry, 0.0, 32.0);
+        // grid (1,0) → base = (32, 0, 1)
+        // offset at t=0: remaining=1; from_x - to_x = -1; offset.x = -32
+        // final: (32 + (-32), -0 - (-0), 1) = (0, 0, 1) — entity appears at old cell
+        assert!((pos.x - 6.0).abs() < 1e-4, "pos.x = {}", pos.x);
+        assert!(pos.y.abs() < 1e-4, "pos.y = {}", pos.y);
+        assert!((pos.z - 1.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn world_position_at_expiry_is_target_cell() {
+        let entry = EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 1,
+            to_y: 0,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        };
+        let pos = world_position_with_motion(1, 0, &entry, 600.0, 32.0);
+        // At expiry, offset = (0,0); entity snaps to grid (1,0) = (32, 0, 1)
+        assert!((pos.x - 32.0).abs() < 1e-4, "pos.x = {}", pos.x);
+        assert!((pos.y - 0.0).abs() < 1e-4, "pos.y = {}", pos.y);
+        assert!((pos.z - 1.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn world_position_y_axis_inverted() {
+        // Bevy Y increases upward; grid Y increases downward.
+        let entry = EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 0,
+            to_y: 1,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        };
+        // At t=0 (remaining=1), entity appears at old cell (0,0):
+        let pos = world_position_with_motion(0, 1, &entry, 0.0, 32.0);
+        // grid (0,1) base = (0, -32, 1)
+        // offset: from_y - to_y = -1; offset.y = -32; subtracted: -(-32) = +32
+        // result: y = -32 + 32 = 0  → entity at old row 0 in world coords ✓
+        assert!((pos.x - 0.0).abs() < 1e-4, "pos.x = {}", pos.x);
+        assert!((pos.y + 6.0).abs() < 1e-4, "pos.y = {}", pos.y);
+    }
+
+    // -----------------------------------------------------------------------
+    // EntityMotionTable helpers
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn table_get_returns_none_when_empty() {
+        let table = EntityMotionTable::default();
+        assert!(table.get("player-1").is_none());
+    }
+
+    #[test]
+    fn table_get_returns_entry_after_insert() {
+        let mut table = EntityMotionTable::default();
+        table.entries.insert(
+            "player-1".to_owned(),
+            EntityMotionEntry {
+                from_x: 0,
+                from_y: 0,
+                to_x: 1,
+                to_y: 0,
+                started_ms: 0.0,
+                expires_ms: 600.0,
+            },
+        );
+        assert!(table.get("player-1").is_some());
+        assert!(table.get("player-2").is_none());
+    }
+
+    // -----------------------------------------------------------------------
+    // update_entity_motion_table logic (tested via direct function calls,
+    // bypassing Bevy's ECS scheduler which isn't available in unit tests)
+    // -----------------------------------------------------------------------
+
+    /// Build a minimal `RuntimeWorldState` with one entity for table-update tests.
+    fn state_with_entity(
+        object_id: &str,
+        x: i32,
+        y: i32,
+        started: Option<f64>,
+        duration: Option<f64>,
+    ) -> crate::RuntimeWorldState {
+        use crate::{EntityKind, WorldEntity, WorldSnapshot};
+        crate::RuntimeWorldState {
+            snapshot: Some(WorldSnapshot {
+                map_title: None,
+                player_object_id: None,
+                selected_object_id: None,
+                scene_view: None,
+                terrain_patches: vec![],
+                decor_objects: vec![],
+                entities: vec![WorldEntity {
+                    object_id: object_id.to_owned(),
+                    kind: EntityKind::Monster,
+                    name: "Test".to_owned(),
+                    x,
+                    y,
+                    direction: None,
+                    level: None,
+                    movement_started_ms: started,
+                    movement_duration_ms: duration,
+                }],
+                mine_nodes: vec![],
+                client_time_ms: None,
+            }),
+        }
+    }
+
+    /// Run the table-update logic extracted from the system into a testable form.
+    ///
+    /// We call the inner logic directly since we cannot spin up a full Bevy app
+    /// in unit tests.
+    fn run_update(table: &mut EntityMotionTable, state: &crate::RuntimeWorldState, now_ms: f64) {
+        let Some(snapshot) = &state.snapshot else {
+            return;
+        };
+        table.now_ms = now_ms;
+
+        let mut alive: std::collections::HashSet<String> =
+            std::collections::HashSet::with_capacity(snapshot.entities.len());
+
+        for entity in &snapshot.entities {
+            alive.insert(entity.object_id.clone());
+
+            let existing = table.entries.get(&entity.object_id);
+
+            let position_changed = existing
+                .map(|e| e.to_x != entity.x || e.to_y != entity.y)
+                .unwrap_or(true);
+
+            let has_timing = entity.movement_started_ms.is_some();
+
+            if !position_changed && !has_timing {
+                continue;
+            }
+
+            let (from_x, from_y) = existing
+                .map(|e| (e.to_x, e.to_y))
+                .unwrap_or((entity.x, entity.y));
+
+            let started_ms = match entity.movement_started_ms {
+                Some(ts) if ts <= now_ms + MAX_FUTURE_SKEW_MS => ts,
+                _ => now_ms,
+            };
+
+            let duration_ms = entity
+                .movement_duration_ms
+                .filter(|&d| d > 0.0)
+                .unwrap_or(DEFAULT_STEP_DURATION_MS);
+
+            table.entries.insert(
+                entity.object_id.clone(),
+                EntityMotionEntry {
+                    from_x,
+                    from_y,
+                    to_x: entity.x,
+                    to_y: entity.y,
+                    started_ms,
+                    expires_ms: started_ms + duration_ms,
+                },
+            );
+        }
+
+        table.entries.retain(|id, _| alive.contains(id));
+    }
+
+    #[test]
+    fn new_entity_creates_entry() {
+        let mut table = EntityMotionTable::default();
+        let state = state_with_entity("mob-1", 3, 4, Some(1000.0), Some(600.0));
+        run_update(&mut table, &state, 1000.0);
+        let entry = table.get("mob-1").expect("entry should exist");
+        assert_eq!(entry.to_x, 3);
+        assert_eq!(entry.to_y, 4);
+        assert!((entry.started_ms - 1000.0).abs() < 1e-6);
+        assert!((entry.expires_ms - 1600.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn new_entity_without_timing_uses_fallback_started() {
+        let mut table = EntityMotionTable::default();
+        let state = state_with_entity("mob-1", 3, 4, None, None);
+        run_update(&mut table, &state, 5000.0);
+        let entry = table.get("mob-1").expect("entry should exist");
+        // No timing → started_ms = now_ms
+        assert!((entry.started_ms - 5000.0).abs() < 1e-6);
+        // No duration → DEFAULT_STEP_DURATION_MS
+        assert!((entry.expires_ms - (5000.0 + DEFAULT_STEP_DURATION_MS)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn position_change_updates_from_to_previous_to() {
+        let mut table = EntityMotionTable::default();
+        // First: entity at (3, 4)
+        let state1 = state_with_entity("mob-1", 3, 4, Some(0.0), Some(600.0));
+        run_update(&mut table, &state1, 0.0);
+
+        // Second: entity moved to (4, 4)
+        let state2 = state_with_entity("mob-1", 4, 4, Some(600.0), Some(600.0));
+        run_update(&mut table, &state2, 600.0);
+
+        let entry = table.get("mob-1").expect("entry should exist");
+        // from_x/from_y should be the previous to_x/to_y = (3, 4)
+        assert_eq!(entry.from_x, 3);
+        assert_eq!(entry.from_y, 4);
+        assert_eq!(entry.to_x, 4);
+        assert_eq!(entry.to_y, 4);
+    }
+
+    #[test]
+    fn entity_removal_clears_entry() {
+        use crate::WorldSnapshot;
+        let mut table = EntityMotionTable::default();
+
+        // Seed with mob-1 present.
+        let state = state_with_entity("mob-1", 3, 4, Some(0.0), Some(600.0));
+        run_update(&mut table, &state, 0.0);
+        assert!(table.get("mob-1").is_some());
+
+        // New snapshot with mob-1 gone.
+        let empty_state = crate::RuntimeWorldState {
+            snapshot: Some(WorldSnapshot {
+                map_title: None,
+                player_object_id: None,
+                selected_object_id: None,
+                scene_view: None,
+                terrain_patches: vec![],
+                decor_objects: vec![],
+                entities: vec![],
+                mine_nodes: vec![],
+                client_time_ms: None,
+            }),
+        };
+        run_update(&mut table, &empty_state, 600.0);
+        assert!(table.get("mob-1").is_none());
+    }
+
+    #[test]
+    fn future_timestamp_skew_falls_back_to_now() {
+        let mut table = EntityMotionTable::default();
+        let now_ms = 1000.0;
+        // Timestamp far in the future (> MAX_FUTURE_SKEW_MS = 5000 ms ahead)
+        let state = state_with_entity("mob-1", 1, 1, Some(now_ms + 10_000.0), Some(600.0));
+        run_update(&mut table, &state, now_ms);
+        let entry = table.get("mob-1").expect("entry should exist");
+        // Should have fallen back to now_ms
+        assert!(
+            (entry.started_ms - now_ms).abs() < 1e-6,
+            "started_ms = {}, expected {}",
+            entry.started_ms,
+            now_ms
+        );
+    }
+
+    #[test]
+    fn no_change_and_no_timing_does_not_update_existing_entry() {
+        let mut table = EntityMotionTable::default();
+        // First insert.
+        let state = state_with_entity("mob-1", 3, 4, Some(0.0), Some(600.0));
+        run_update(&mut table, &state, 0.0);
+        let original_entry = table.get("mob-1").cloned().expect("entry should exist");
+
+        // Same position, no timing → should not update.
+        let state2 = state_with_entity("mob-1", 3, 4, None, None);
+        run_update(&mut table, &state2, 300.0);
+        let same_entry = table.get("mob-1").expect("entry should still exist");
+        assert_eq!(*same_entry, original_entry, "entry should not have changed");
+    }
+}

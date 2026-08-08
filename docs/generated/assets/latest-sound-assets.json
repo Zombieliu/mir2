@@ -1,0 +1,3640 @@
+{
+  "generatedAt": "2026-07-12T23:44:17.669Z",
+  "clientRoot": "E:\\mir2\\Crystal\\Build\\Client\\Debug",
+  "soundDir": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound",
+  "soundListPath": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound\\SoundList.lst",
+  "soundListEntryCount": 450,
+  "exportedSoundCount": 450,
+  "fallbackSoundCount": 3,
+  "sourceWavCount": 1607,
+  "missingSoundCount": 0,
+  "missingSounds": [],
+  "fallbackSounds": [
+    {
+      "id": 10022,
+      "fileName": "22.wav",
+      "fallbackSourceFileName": "23.wav",
+      "fallbackReason": "SoundList movement clip 22.wav is absent from the current Crystal source; adjacent movement clip 23.wav keeps id 10022 playable."
+    },
+    {
+      "id": 10109,
+      "fileName": "109.wav",
+      "fallbackSourceFileName": "110.wav",
+      "fallbackReason": "SoundList struck clip 109.wav is absent from the current Crystal source; adjacent struck clip 110.wav keeps id 10109 playable."
+    },
+    {
+      "id": 705,
+      "fileName": "ZombieRevive.wav",
+      "fallbackSourceFileName": "64.wav",
+      "fallbackReason": "ClZombie revive clip ZombieRevive.wav is absent from the current Crystal source; nearby undead BoneFamiliar clip 64.wav keeps id 705 playable until the exact source appears."
+    }
+  ],
+  "sounds": {
+    "70": {
+      "fileName": "006-0.wav",
+      "path": "/original-ui/Sound/006-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 279330
+    },
+    "264": {
+      "fileName": "026-1.wav",
+      "path": "/original-ui/Sound/026-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 94518
+    },
+    "310": {
+      "fileName": "030-0.wav",
+      "path": "/original-ui/Sound/030-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 115696
+    },
+    "311": {
+      "fileName": "030-1.wav",
+      "path": "/original-ui/Sound/030-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 114706
+    },
+    "312": {
+      "fileName": "030-2.wav",
+      "path": "/original-ui/Sound/030-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 89150
+    },
+    "313": {
+      "fileName": "030-3.wav",
+      "path": "/original-ui/Sound/030-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 174404
+    },
+    "490": {
+      "fileName": "047-0.wav",
+      "path": "/original-ui/Sound/047-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 132382
+    },
+    "491": {
+      "fileName": "047-1.wav",
+      "path": "/original-ui/Sound/047-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 65112
+    },
+    "492": {
+      "fileName": "047-2.wav",
+      "path": "/original-ui/Sound/047-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 48866
+    },
+    "493": {
+      "fileName": "047-3.wav",
+      "path": "/original-ui/Sound/047-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 143538
+    },
+    "534": {
+      "fileName": "052-4.wav",
+      "path": "/original-ui/Sound/052-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 189776
+    },
+    "544": {
+      "fileName": "052-4.wav",
+      "path": "/original-ui/Sound/052-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 189776
+    },
+    "564": {
+      "fileName": "052-4.wav",
+      "path": "/original-ui/Sound/052-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 189776
+    },
+    "590": {
+      "fileName": "058-0.wav",
+      "path": "/original-ui/Sound/058-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 230702
+    },
+    "591": {
+      "fileName": "058-1.wav",
+      "path": "/original-ui/Sound/058-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 121526
+    },
+    "592": {
+      "fileName": "058-2.wav",
+      "path": "/original-ui/Sound/058-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 140582
+    },
+    "593": {
+      "fileName": "058-3.wav",
+      "path": "/original-ui/Sound/058-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 333150
+    },
+    "594": {
+      "fileName": "058-4.wav",
+      "path": "/original-ui/Sound/058-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 108290
+    },
+    "600": {
+      "fileName": "058-0.wav",
+      "path": "/original-ui/Sound/058-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 230702
+    },
+    "601": {
+      "fileName": "058-1.wav",
+      "path": "/original-ui/Sound/058-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 121526
+    },
+    "602": {
+      "fileName": "058-2.wav",
+      "path": "/original-ui/Sound/058-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 140582
+    },
+    "603": {
+      "fileName": "058-3.wav",
+      "path": "/original-ui/Sound/058-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 333150
+    },
+    "604": {
+      "fileName": "058-4.wav",
+      "path": "/original-ui/Sound/058-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 108290
+    },
+    "705": {
+      "fileName": "ZombieRevive.wav",
+      "path": "/original-ui/Sound/ZombieRevive.wav",
+      "sourceExists": true,
+      "exactSourceExists": false,
+      "fallback": true,
+      "fallbackSourceFileName": "64.wav",
+      "fallbackReason": "ClZombie revive clip ZombieRevive.wav is absent from the current Crystal source; nearby undead BoneFamiliar clip 64.wav keeps id 705 playable until the exact source appears.",
+      "sourceBytes": 70818
+    },
+    "781": {
+      "fileName": "54.wav",
+      "path": "/original-ui/Sound/54.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 50988
+    },
+    "784": {
+      "fileName": "64.wav",
+      "path": "/original-ui/Sound/64.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 70818
+    },
+    "1620": {
+      "fileName": "161-0.wav",
+      "path": "/original-ui/Sound/161-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 37762
+    },
+    "1621": {
+      "fileName": "161-1.wav",
+      "path": "/original-ui/Sound/161-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 61766
+    },
+    "1622": {
+      "fileName": "161-2.wav",
+      "path": "/original-ui/Sound/161-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 30528
+    },
+    "1623": {
+      "fileName": "161-3.wav",
+      "path": "/original-ui/Sound/161-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 125440
+    },
+    "1690": {
+      "fileName": "046-0.wav",
+      "path": "/original-ui/Sound/046-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 97570
+    },
+    "1691": {
+      "fileName": "071-1.wav",
+      "path": "/original-ui/Sound/071-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 63344
+    },
+    "1692": {
+      "fileName": "020-2.wav",
+      "path": "/original-ui/Sound/020-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 83866
+    },
+    "1693": {
+      "fileName": "073-3.wav",
+      "path": "/original-ui/Sound/073-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 287470
+    },
+    "1700": {
+      "fileName": "046-0.wav",
+      "path": "/original-ui/Sound/046-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 97570
+    },
+    "1701": {
+      "fileName": "071-1.wav",
+      "path": "/original-ui/Sound/071-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 63344
+    },
+    "1702": {
+      "fileName": "020-2.wav",
+      "path": "/original-ui/Sound/020-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 83866
+    },
+    "1703": {
+      "fileName": "073-3.wav",
+      "path": "/original-ui/Sound/073-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 287470
+    },
+    "1710": {
+      "fileName": "046-0.wav",
+      "path": "/original-ui/Sound/046-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 97570
+    },
+    "1711": {
+      "fileName": "071-1.wav",
+      "path": "/original-ui/Sound/071-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 63344
+    },
+    "1712": {
+      "fileName": "020-2.wav",
+      "path": "/original-ui/Sound/020-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 83866
+    },
+    "1713": {
+      "fileName": "073-3.wav",
+      "path": "/original-ui/Sound/073-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 287470
+    },
+    "1790": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "1791": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "1792": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "1793": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "1794": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "1795": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "1797": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "1799": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "1830": {
+      "fileName": "102-0.wav",
+      "path": "/original-ui/Sound/102-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 304502
+    },
+    "1831": {
+      "fileName": "102-1.wav",
+      "path": "/original-ui/Sound/102-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 114706
+    },
+    "1832": {
+      "fileName": "102-2.wav",
+      "path": "/original-ui/Sound/102-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 95902
+    },
+    "1833": {
+      "fileName": "102-3.wav",
+      "path": "/original-ui/Sound/102-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 330772
+    },
+    "1835": {
+      "fileName": "102-5.wav",
+      "path": "/original-ui/Sound/102-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 86900
+    },
+    "1850": {
+      "fileName": "030-0.wav",
+      "path": "/original-ui/Sound/030-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 115696
+    },
+    "1851": {
+      "fileName": "030-1.wav",
+      "path": "/original-ui/Sound/030-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 114706
+    },
+    "1852": {
+      "fileName": "030-2.wav",
+      "path": "/original-ui/Sound/030-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 89150
+    },
+    "1853": {
+      "fileName": "030-3.wav",
+      "path": "/original-ui/Sound/030-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 174404
+    },
+    "1860": {
+      "fileName": "030-0.wav",
+      "path": "/original-ui/Sound/030-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 115696
+    },
+    "1861": {
+      "fileName": "030-1.wav",
+      "path": "/original-ui/Sound/030-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 114706
+    },
+    "1862": {
+      "fileName": "030-2.wav",
+      "path": "/original-ui/Sound/030-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 89150
+    },
+    "1863": {
+      "fileName": "030-3.wav",
+      "path": "/original-ui/Sound/030-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 174404
+    },
+    "1870": {
+      "fileName": "065-0.wav",
+      "path": "/original-ui/Sound/065-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 101420
+    },
+    "1871": {
+      "fileName": "065-1.wav",
+      "path": "/original-ui/Sound/065-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 85036
+    },
+    "1872": {
+      "fileName": "065-2.wav",
+      "path": "/original-ui/Sound/065-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 70700
+    },
+    "1873": {
+      "fileName": "065-3.wav",
+      "path": "/original-ui/Sound/065-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 103468
+    },
+    "1876": {
+      "fileName": "065-1.wav",
+      "path": "/original-ui/Sound/065-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 85036
+    },
+    "1880": {
+      "fileName": "029-0.wav",
+      "path": "/original-ui/Sound/029-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 86076
+    },
+    "1881": {
+      "fileName": "029-1.wav",
+      "path": "/original-ui/Sound/029-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 68062
+    },
+    "1882": {
+      "fileName": "029-2.wav",
+      "path": "/original-ui/Sound/029-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 77070
+    },
+    "1883": {
+      "fileName": "029-3.wav",
+      "path": "/original-ui/Sound/029-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 143396
+    },
+    "1890": {
+      "fileName": "029-0.wav",
+      "path": "/original-ui/Sound/029-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 86076
+    },
+    "1891": {
+      "fileName": "029-1.wav",
+      "path": "/original-ui/Sound/029-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 68062
+    },
+    "1892": {
+      "fileName": "029-2.wav",
+      "path": "/original-ui/Sound/029-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 77070
+    },
+    "1893": {
+      "fileName": "029-3.wav",
+      "path": "/original-ui/Sound/029-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 143396
+    },
+    "1896": {
+      "fileName": "029-1.wav",
+      "path": "/original-ui/Sound/029-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 68062
+    },
+    "1900": {
+      "fileName": "119-0.wav",
+      "path": "/original-ui/Sound/119-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 132434
+    },
+    "1901": {
+      "fileName": "119-1.wav",
+      "path": "/original-ui/Sound/119-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 150166
+    },
+    "1902": {
+      "fileName": "119-2.wav",
+      "path": "/original-ui/Sound/119-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 158694
+    },
+    "1903": {
+      "fileName": "119-3.wav",
+      "path": "/original-ui/Sound/119-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 158906
+    },
+    "1910": {
+      "fileName": "118-0.wav",
+      "path": "/original-ui/Sound/118-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 132344
+    },
+    "1911": {
+      "fileName": "118-1.wav",
+      "path": "/original-ui/Sound/118-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 150166
+    },
+    "1912": {
+      "fileName": "118-2.wav",
+      "path": "/original-ui/Sound/118-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 150556
+    },
+    "1913": {
+      "fileName": "118-3.wav",
+      "path": "/original-ui/Sound/118-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 158904
+    },
+    "1920": {
+      "fileName": "120-0.wav",
+      "path": "/original-ui/Sound/120-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 132344
+    },
+    "1921": {
+      "fileName": "120-1.wav",
+      "path": "/original-ui/Sound/120-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 150166
+    },
+    "1922": {
+      "fileName": "120-2.wav",
+      "path": "/original-ui/Sound/120-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 154982
+    },
+    "1923": {
+      "fileName": "120-3.wav",
+      "path": "/original-ui/Sound/120-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 158904
+    },
+    "1930": {
+      "fileName": "121-0.wav",
+      "path": "/original-ui/Sound/121-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 127608
+    },
+    "1931": {
+      "fileName": "121-1.wav",
+      "path": "/original-ui/Sound/121-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 141034
+    },
+    "1932": {
+      "fileName": "121-2.wav",
+      "path": "/original-ui/Sound/121-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 135172
+    },
+    "1933": {
+      "fileName": "121-3.wav",
+      "path": "/original-ui/Sound/121-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 171650
+    },
+    "1934": {
+      "fileName": "121-4.wav",
+      "path": "/original-ui/Sound/121-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 69402
+    },
+    "1940": {
+      "fileName": "026-0.wav",
+      "path": "/original-ui/Sound/026-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 208022
+    },
+    "1941": {
+      "fileName": "026-1.wav",
+      "path": "/original-ui/Sound/026-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 94518
+    },
+    "1942": {
+      "fileName": "026-2.wav",
+      "path": "/original-ui/Sound/026-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 129542
+    },
+    "1943": {
+      "fileName": "026-3.wav",
+      "path": "/original-ui/Sound/026-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 170452
+    },
+    "1950": {
+      "fileName": "012-0.wav",
+      "path": "/original-ui/Sound/012-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 78380
+    },
+    "1951": {
+      "fileName": "012-1.wav",
+      "path": "/original-ui/Sound/012-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 58666
+    },
+    "1952": {
+      "fileName": "012-2.wav",
+      "path": "/original-ui/Sound/012-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 63402
+    },
+    "1953": {
+      "fileName": "012-3.wav",
+      "path": "/original-ui/Sound/012-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 128004
+    },
+    "1960": {
+      "fileName": "109-0.wav",
+      "path": "/original-ui/Sound/109-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 103744
+    },
+    "1961": {
+      "fileName": "109-1.wav",
+      "path": "/original-ui/Sound/109-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 81440
+    },
+    "1962": {
+      "fileName": "109-2.wav",
+      "path": "/original-ui/Sound/109-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 105700
+    },
+    "1963": {
+      "fileName": "109-3.wav",
+      "path": "/original-ui/Sound/109-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 47004
+    },
+    "1971": {
+      "fileName": "027-1.wav",
+      "path": "/original-ui/Sound/027-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118386
+    },
+    "1972": {
+      "fileName": "027-2.wav",
+      "path": "/original-ui/Sound/027-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 73324
+    },
+    "1973": {
+      "fileName": "027-3.wav",
+      "path": "/original-ui/Sound/027-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 128498
+    },
+    "1980": {
+      "fileName": "020-0.wav",
+      "path": "/original-ui/Sound/020-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 55456
+    },
+    "1981": {
+      "fileName": "020-1.wav",
+      "path": "/original-ui/Sound/020-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 104822
+    },
+    "1982": {
+      "fileName": "020-2.wav",
+      "path": "/original-ui/Sound/020-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 83866
+    },
+    "1983": {
+      "fileName": "020-3.wav",
+      "path": "/original-ui/Sound/020-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 153706
+    },
+    "1990": {
+      "fileName": "008-0.wav",
+      "path": "/original-ui/Sound/008-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 74268
+    },
+    "1991": {
+      "fileName": "008-1.wav",
+      "path": "/original-ui/Sound/008-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 65106
+    },
+    "1992": {
+      "fileName": "008-2.wav",
+      "path": "/original-ui/Sound/008-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 78904
+    },
+    "1993": {
+      "fileName": "008-3.wav",
+      "path": "/original-ui/Sound/008-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 110558
+    },
+    "2030": {
+      "fileName": "062-0.wav",
+      "path": "/original-ui/Sound/062-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 441044
+    },
+    "2031": {
+      "fileName": "062-1.wav",
+      "path": "/original-ui/Sound/062-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 352844
+    },
+    "2032": {
+      "fileName": "062-2.wav",
+      "path": "/original-ui/Sound/062-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 352848
+    },
+    "2033": {
+      "fileName": "062-3.wav",
+      "path": "/original-ui/Sound/062-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 529248
+    },
+    "2034": {
+      "fileName": "062-4.wav",
+      "path": "/original-ui/Sound/062-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 290068
+    },
+    "2040": {
+      "fileName": "054-0.wav",
+      "path": "/original-ui/Sound/054-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 223280
+    },
+    "2041": {
+      "fileName": "054-1.wav",
+      "path": "/original-ui/Sound/054-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 230656
+    },
+    "2042": {
+      "fileName": "054-2.wav",
+      "path": "/original-ui/Sound/054-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 223280
+    },
+    "2043": {
+      "fileName": "054-3.wav",
+      "path": "/original-ui/Sound/054-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 295908
+    },
+    "2050": {
+      "fileName": "053-0.wav",
+      "path": "/original-ui/Sound/053-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 230448
+    },
+    "2051": {
+      "fileName": "053-1.wav",
+      "path": "/original-ui/Sound/053-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 236292
+    },
+    "2052": {
+      "fileName": "053-2.wav",
+      "path": "/original-ui/Sound/053-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 244592
+    },
+    "2053": {
+      "fileName": "053-3.wav",
+      "path": "/original-ui/Sound/053-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 371964
+    },
+    "2060": {
+      "fileName": "055-0.wav",
+      "path": "/original-ui/Sound/055-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 168342
+    },
+    "2061": {
+      "fileName": "055-1.wav",
+      "path": "/original-ui/Sound/055-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 168340
+    },
+    "2062": {
+      "fileName": "055-2.wav",
+      "path": "/original-ui/Sound/055-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 176168
+    },
+    "2063": {
+      "fileName": "055-3.wav",
+      "path": "/original-ui/Sound/055-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 198088
+    },
+    "2070": {
+      "fileName": "056-0.wav",
+      "path": "/original-ui/Sound/056-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 365004
+    },
+    "2071": {
+      "fileName": "056-1.wav",
+      "path": "/original-ui/Sound/056-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 358852
+    },
+    "2072": {
+      "fileName": "056-2.wav",
+      "path": "/original-ui/Sound/056-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 371484
+    },
+    "2073": {
+      "fileName": "056-3.wav",
+      "path": "/original-ui/Sound/056-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 676716
+    },
+    "2080": {
+      "fileName": "061-0.wav",
+      "path": "/original-ui/Sound/061-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 419720
+    },
+    "2081": {
+      "fileName": "061-1.wav",
+      "path": "/original-ui/Sound/061-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 223880
+    },
+    "2082": {
+      "fileName": "061-2.wav",
+      "path": "/original-ui/Sound/061-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 54126
+    },
+    "2083": {
+      "fileName": "061-3.wav",
+      "path": "/original-ui/Sound/061-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 357252
+    },
+    "2086": {
+      "fileName": "061-6.wav",
+      "path": "/original-ui/Sound/061-6.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 260800
+    },
+    "2090": {
+      "fileName": "065-0.wav",
+      "path": "/original-ui/Sound/065-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 101420
+    },
+    "2091": {
+      "fileName": "065-1.wav",
+      "path": "/original-ui/Sound/065-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 85036
+    },
+    "2092": {
+      "fileName": "065-2.wav",
+      "path": "/original-ui/Sound/065-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 70700
+    },
+    "2093": {
+      "fileName": "065-3.wav",
+      "path": "/original-ui/Sound/065-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 103468
+    },
+    "2100": {
+      "fileName": "066-0.wav",
+      "path": "/original-ui/Sound/066-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 225324
+    },
+    "2101": {
+      "fileName": "066-1.wav",
+      "path": "/original-ui/Sound/066-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 108588
+    },
+    "2102": {
+      "fileName": "066-2.wav",
+      "path": "/original-ui/Sound/066-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 73600
+    },
+    "2103": {
+      "fileName": "066-3.wav",
+      "path": "/original-ui/Sound/066-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 146590
+    },
+    "2110": {
+      "fileName": "067-0.wav",
+      "path": "/original-ui/Sound/067-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 231160
+    },
+    "2111": {
+      "fileName": "067-1.wav",
+      "path": "/original-ui/Sound/067-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51364
+    },
+    "2112": {
+      "fileName": "067-2.wav",
+      "path": "/original-ui/Sound/067-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 143468
+    },
+    "2113": {
+      "fileName": "067-3.wav",
+      "path": "/original-ui/Sound/067-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 128020
+    },
+    "2115": {
+      "fileName": "067-5.wav",
+      "path": "/original-ui/Sound/067-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 143376
+    },
+    "2116": {
+      "fileName": "067-6.wav",
+      "path": "/original-ui/Sound/067-6.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 209748
+    },
+    "2120": {
+      "fileName": "051-0.wav",
+      "path": "/original-ui/Sound/051-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 259384
+    },
+    "2121": {
+      "fileName": "051-1.wav",
+      "path": "/original-ui/Sound/051-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 259384
+    },
+    "2122": {
+      "fileName": "051-2.wav",
+      "path": "/original-ui/Sound/051-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 259386
+    },
+    "2123": {
+      "fileName": "051-3.wav",
+      "path": "/original-ui/Sound/051-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 370634
+    },
+    "2260": {
+      "fileName": "225-0.wav",
+      "path": "/original-ui/Sound/225-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 142822
+    },
+    "2261": {
+      "fileName": "225-1.wav",
+      "path": "/original-ui/Sound/225-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 78142
+    },
+    "2262": {
+      "fileName": "225-2.wav",
+      "path": "/original-ui/Sound/225-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 86396
+    },
+    "2263": {
+      "fileName": "225-3.wav",
+      "path": "/original-ui/Sound/225-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 176128
+    },
+    "2270": {
+      "fileName": "225-0.wav",
+      "path": "/original-ui/Sound/225-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 142822
+    },
+    "2271": {
+      "fileName": "225-1.wav",
+      "path": "/original-ui/Sound/225-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 78142
+    },
+    "2272": {
+      "fileName": "225-2.wav",
+      "path": "/original-ui/Sound/225-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 86396
+    },
+    "2273": {
+      "fileName": "225-3.wav",
+      "path": "/original-ui/Sound/225-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 176128
+    },
+    "2320": {
+      "fileName": "011-0.wav",
+      "path": "/original-ui/Sound/011-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 100396
+    },
+    "2321": {
+      "fileName": "011-1.wav",
+      "path": "/original-ui/Sound/011-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 74784
+    },
+    "2322": {
+      "fileName": "011-2.wav",
+      "path": "/original-ui/Sound/011-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 119212
+    },
+    "2323": {
+      "fileName": "011-3.wav",
+      "path": "/original-ui/Sound/011-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 146988
+    },
+    "2381": {
+      "fileName": "129-1.wav",
+      "path": "/original-ui/Sound/129-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 81920
+    },
+    "2390": {
+      "fileName": "238-0.wav",
+      "path": "/original-ui/Sound/238-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 34404
+    },
+    "2392": {
+      "fileName": "238-2.wav",
+      "path": "/original-ui/Sound/238-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 30634
+    },
+    "2393": {
+      "fileName": "238-3.wav",
+      "path": "/original-ui/Sound/238-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 77622
+    },
+    "2400": {
+      "fileName": "238-0.wav",
+      "path": "/original-ui/Sound/238-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 34404
+    },
+    "2401": {
+      "fileName": "56.wav",
+      "path": "/original-ui/Sound/56.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 27052
+    },
+    "2402": {
+      "fileName": "238-2.wav",
+      "path": "/original-ui/Sound/238-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 30634
+    },
+    "2403": {
+      "fileName": "238-3.wav",
+      "path": "/original-ui/Sound/238-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 77622
+    },
+    "2410": {
+      "fileName": "238-0.wav",
+      "path": "/original-ui/Sound/238-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 34404
+    },
+    "2411": {
+      "fileName": "56.wav",
+      "path": "/original-ui/Sound/56.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 27052
+    },
+    "2412": {
+      "fileName": "238-2.wav",
+      "path": "/original-ui/Sound/238-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 30634
+    },
+    "2413": {
+      "fileName": "238-3.wav",
+      "path": "/original-ui/Sound/238-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 77622
+    },
+    "2420": {
+      "fileName": "242-0.wav",
+      "path": "/original-ui/Sound/242-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 90112
+    },
+    "2421": {
+      "fileName": "53.wav",
+      "path": "/original-ui/Sound/53.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51170
+    },
+    "2422": {
+      "fileName": "242-2.wav",
+      "path": "/original-ui/Sound/242-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 42350
+    },
+    "2423": {
+      "fileName": "242-3.wav",
+      "path": "/original-ui/Sound/242-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 131072
+    },
+    "2430": {
+      "fileName": "242-0.wav",
+      "path": "/original-ui/Sound/242-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 90112
+    },
+    "2431": {
+      "fileName": "228-1.wav",
+      "path": "/original-ui/Sound/228-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 82680
+    },
+    "2435": {
+      "fileName": "130-0.wav",
+      "path": "/original-ui/Sound/130-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 204622
+    },
+    "2440": {
+      "fileName": "242-0.wav",
+      "path": "/original-ui/Sound/242-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 90112
+    },
+    "2441": {
+      "fileName": "228-1.wav",
+      "path": "/original-ui/Sound/228-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 82680
+    },
+    "2442": {
+      "fileName": "243-2.wav",
+      "path": "/original-ui/Sound/243-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 45694
+    },
+    "2443": {
+      "fileName": "243-3.wav",
+      "path": "/original-ui/Sound/243-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 180976
+    },
+    "2445": {
+      "fileName": "130-0.wav",
+      "path": "/original-ui/Sound/130-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 204622
+    },
+    "2450": {
+      "fileName": "242-0.wav",
+      "path": "/original-ui/Sound/242-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 90112
+    },
+    "2451": {
+      "fileName": "228-1.wav",
+      "path": "/original-ui/Sound/228-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 82680
+    },
+    "2452": {
+      "fileName": "243-2.wav",
+      "path": "/original-ui/Sound/243-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 45694
+    },
+    "2453": {
+      "fileName": "243-3.wav",
+      "path": "/original-ui/Sound/243-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 180976
+    },
+    "2455": {
+      "fileName": "130-0.wav",
+      "path": "/original-ui/Sound/130-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 204622
+    },
+    "2460": {
+      "fileName": "242-0.wav",
+      "path": "/original-ui/Sound/242-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 90112
+    },
+    "2461": {
+      "fileName": "228-1.wav",
+      "path": "/original-ui/Sound/228-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 82680
+    },
+    "2462": {
+      "fileName": "243-2.wav",
+      "path": "/original-ui/Sound/243-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 45694
+    },
+    "2463": {
+      "fileName": "243-3.wav",
+      "path": "/original-ui/Sound/243-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 180976
+    },
+    "2465": {
+      "fileName": "130-0.wav",
+      "path": "/original-ui/Sound/130-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 204622
+    },
+    "2530": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2531": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2532": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2533": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2534": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2535": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2537": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2539": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2540": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2541": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2542": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2543": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2544": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2545": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2547": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2549": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2550": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2551": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2552": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2553": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2554": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2555": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2557": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2559": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2560": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2561": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2562": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2563": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2564": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2565": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2567": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2569": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2570": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2571": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2572": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2573": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2574": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2575": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2577": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2579": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2580": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2581": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2582": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2583": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2584": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2585": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2587": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2589": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2590": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2591": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2592": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2593": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2594": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2595": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2597": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2599": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "2600": {
+      "fileName": "113-0.wav",
+      "path": "/original-ui/Sound/113-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 385024
+    },
+    "2601": {
+      "fileName": "113-1.wav",
+      "path": "/original-ui/Sound/113-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 221184
+    },
+    "2602": {
+      "fileName": "113-2.wav",
+      "path": "/original-ui/Sound/113-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2603": {
+      "fileName": "113-3.wav",
+      "path": "/original-ui/Sound/113-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 684032
+    },
+    "2604": {
+      "fileName": "113-4.wav",
+      "path": "/original-ui/Sound/113-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118784
+    },
+    "2605": {
+      "fileName": "113-5.wav",
+      "path": "/original-ui/Sound/113-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 335872
+    },
+    "2607": {
+      "fileName": "113-7.wav",
+      "path": "/original-ui/Sound/113-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 495616
+    },
+    "2609": {
+      "fileName": "113-9.wav",
+      "path": "/original-ui/Sound/113-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 200704
+    },
+    "8301": {
+      "fileName": "8300-1.wav",
+      "path": "/original-ui/Sound/8300-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 209748
+    },
+    "8302": {
+      "fileName": "8300-2.wav",
+      "path": "/original-ui/Sound/8300-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 343632
+    },
+    "8303": {
+      "fileName": "8300-3.wav",
+      "path": "/original-ui/Sound/8300-3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 175114
+    },
+    "8304": {
+      "fileName": "8300-4.wav",
+      "path": "/original-ui/Sound/8300-4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 222932
+    },
+    "8305": {
+      "fileName": "8300-5.wav",
+      "path": "/original-ui/Sound/8300-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 216620
+    },
+    "8306": {
+      "fileName": "8300-6.wav",
+      "path": "/original-ui/Sound/8300-6.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 143166
+    },
+    "8321": {
+      "fileName": "284-8.wav",
+      "path": "/original-ui/Sound/284-8.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 102356
+    },
+    "8322": {
+      "fileName": "284-9.wav",
+      "path": "/original-ui/Sound/284-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 181076
+    },
+    "8331": {
+      "fileName": "305-5.wav",
+      "path": "/original-ui/Sound/305-5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 226790
+    },
+    "8341": {
+      "fileName": "307-7.wav",
+      "path": "/original-ui/Sound/307-7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 252812
+    },
+    "8342": {
+      "fileName": "307-8.wav",
+      "path": "/original-ui/Sound/307-8.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 107824
+    },
+    "8343": {
+      "fileName": "307-9.wav",
+      "path": "/original-ui/Sound/307-9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 331714
+    },
+    "8451": {
+      "fileName": "348-21.wav",
+      "path": "/original-ui/Sound/348-21.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 92936
+    },
+    "8452": {
+      "fileName": "348-22.wav",
+      "path": "/original-ui/Sound/348-22.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 65536
+    },
+    "8453": {
+      "fileName": "348-31.wav",
+      "path": "/original-ui/Sound/348-31.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 79862
+    },
+    "8454": {
+      "fileName": "348-32.wav",
+      "path": "/original-ui/Sound/348-32.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 229170
+    },
+    "8455": {
+      "fileName": "348-41.wav",
+      "path": "/original-ui/Sound/348-41.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 65536
+    },
+    "8456": {
+      "fileName": "348-51.wav",
+      "path": "/original-ui/Sound/348-51.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 68190
+    },
+    "8457": {
+      "fileName": "348-61.wav",
+      "path": "/original-ui/Sound/348-61.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 105524
+    },
+    "10001": {
+      "fileName": "1.wav",
+      "path": "/original-ui/Sound/1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 35328
+    },
+    "10002": {
+      "fileName": "2.wav",
+      "path": "/original-ui/Sound/2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 38696
+    },
+    "10003": {
+      "fileName": "3.wav",
+      "path": "/original-ui/Sound/3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 26948
+    },
+    "10004": {
+      "fileName": "4.wav",
+      "path": "/original-ui/Sound/4.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 27740
+    },
+    "10005": {
+      "fileName": "5.wav",
+      "path": "/original-ui/Sound/5.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 31844
+    },
+    "10006": {
+      "fileName": "6.wav",
+      "path": "/original-ui/Sound/6.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 33600
+    },
+    "10007": {
+      "fileName": "7.wav",
+      "path": "/original-ui/Sound/7.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 23544
+    },
+    "10008": {
+      "fileName": "8.wav",
+      "path": "/original-ui/Sound/8.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 24036
+    },
+    "10009": {
+      "fileName": "9.wav",
+      "path": "/original-ui/Sound/9.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51398
+    },
+    "10010": {
+      "fileName": "10.wav",
+      "path": "/original-ui/Sound/10.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 50136
+    },
+    "10011": {
+      "fileName": "11.wav",
+      "path": "/original-ui/Sound/11.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 29482
+    },
+    "10012": {
+      "fileName": "12.wav",
+      "path": "/original-ui/Sound/12.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 28760
+    },
+    "10013": {
+      "fileName": "13.wav",
+      "path": "/original-ui/Sound/13.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 47026
+    },
+    "10014": {
+      "fileName": "14.wav",
+      "path": "/original-ui/Sound/14.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 50246
+    },
+    "10015": {
+      "fileName": "15.wav",
+      "path": "/original-ui/Sound/15.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 29532
+    },
+    "10016": {
+      "fileName": "16.wav",
+      "path": "/original-ui/Sound/16.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 31294
+    },
+    "10017": {
+      "fileName": "17.wav",
+      "path": "/original-ui/Sound/17.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 41188
+    },
+    "10018": {
+      "fileName": "18.wav",
+      "path": "/original-ui/Sound/18.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 46832
+    },
+    "10019": {
+      "fileName": "19.wav",
+      "path": "/original-ui/Sound/19.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 25196
+    },
+    "10020": {
+      "fileName": "20.wav",
+      "path": "/original-ui/Sound/20.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 25936
+    },
+    "10021": {
+      "fileName": "21.wav",
+      "path": "/original-ui/Sound/21.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 58632
+    },
+    "10022": {
+      "fileName": "22.wav",
+      "path": "/original-ui/Sound/22.wav",
+      "sourceExists": true,
+      "exactSourceExists": false,
+      "fallback": true,
+      "fallbackSourceFileName": "23.wav",
+      "fallbackReason": "SoundList movement clip 22.wav is absent from the current Crystal source; adjacent movement clip 23.wav keeps id 10022 playable.",
+      "sourceBytes": 29672
+    },
+    "10023": {
+      "fileName": "23.wav",
+      "path": "/original-ui/Sound/23.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 29672
+    },
+    "10024": {
+      "fileName": "24.wav",
+      "path": "/original-ui/Sound/24.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 33740
+    },
+    "10025": {
+      "fileName": "25.wav",
+      "path": "/original-ui/Sound/25.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 35312
+    },
+    "10026": {
+      "fileName": "26.wav",
+      "path": "/original-ui/Sound/26.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 38680
+    },
+    "10027": {
+      "fileName": "27.wav",
+      "path": "/original-ui/Sound/27.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 25168
+    },
+    "10028": {
+      "fileName": "28.wav",
+      "path": "/original-ui/Sound/28.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 24352
+    },
+    "10029": {
+      "fileName": "29.wav",
+      "path": "/original-ui/Sound/29.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 65062
+    },
+    "10030": {
+      "fileName": "30.wav",
+      "path": "/original-ui/Sound/30.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 73672
+    },
+    "10031": {
+      "fileName": "31.wav",
+      "path": "/original-ui/Sound/31.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 35964
+    },
+    "10032": {
+      "fileName": "32.wav",
+      "path": "/original-ui/Sound/32.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 36112
+    },
+    "10050": {
+      "fileName": "50.wav",
+      "path": "/original-ui/Sound/50.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 41004
+    },
+    "10051": {
+      "fileName": "51.wav",
+      "path": "/original-ui/Sound/51.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 43986
+    },
+    "10052": {
+      "fileName": "52.wav",
+      "path": "/original-ui/Sound/52.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51108
+    },
+    "10053": {
+      "fileName": "53.wav",
+      "path": "/original-ui/Sound/53.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51170
+    },
+    "10054": {
+      "fileName": "54.wav",
+      "path": "/original-ui/Sound/54.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 50988
+    },
+    "10055": {
+      "fileName": "55.wav",
+      "path": "/original-ui/Sound/55.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 56534
+    },
+    "10056": {
+      "fileName": "56.wav",
+      "path": "/original-ui/Sound/56.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 27052
+    },
+    "10057": {
+      "fileName": "57.wav",
+      "path": "/original-ui/Sound/57.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 35912
+    },
+    "10060": {
+      "fileName": "60.wav",
+      "path": "/original-ui/Sound/60.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 71200
+    },
+    "10061": {
+      "fileName": "61.wav",
+      "path": "/original-ui/Sound/61.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 47674
+    },
+    "10062": {
+      "fileName": "62.wav",
+      "path": "/original-ui/Sound/62.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 58252
+    },
+    "10063": {
+      "fileName": "63.wav",
+      "path": "/original-ui/Sound/63.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 67092
+    },
+    "10064": {
+      "fileName": "64.wav",
+      "path": "/original-ui/Sound/64.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 70818
+    },
+    "10065": {
+      "fileName": "65.wav",
+      "path": "/original-ui/Sound/65.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 68848
+    },
+    "10070": {
+      "fileName": "70.wav",
+      "path": "/original-ui/Sound/70.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 43452
+    },
+    "10071": {
+      "fileName": "71.wav",
+      "path": "/original-ui/Sound/71.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 54204
+    },
+    "10072": {
+      "fileName": "72.wav",
+      "path": "/original-ui/Sound/72.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 32342
+    },
+    "10073": {
+      "fileName": "73.wav",
+      "path": "/original-ui/Sound/73.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 31778
+    },
+    "10080": {
+      "fileName": "80.wav",
+      "path": "/original-ui/Sound/80.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 55944
+    },
+    "10081": {
+      "fileName": "81.wav",
+      "path": "/original-ui/Sound/81.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 64106
+    },
+    "10082": {
+      "fileName": "82.wav",
+      "path": "/original-ui/Sound/82.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 38922
+    },
+    "10083": {
+      "fileName": "83.wav",
+      "path": "/original-ui/Sound/83.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 34356
+    },
+    "10090": {
+      "fileName": "900-struck.wav",
+      "path": "/original-ui/Sound/900-struck.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 100356
+    },
+    "10091": {
+      "fileName": "91.wav",
+      "path": "/original-ui/Sound/91.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 164642
+    },
+    "10092": {
+      "fileName": "92.wav",
+      "path": "/original-ui/Sound/92.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 181522
+    },
+    "10100": {
+      "fileName": "100.wav",
+      "path": "/original-ui/Sound/100.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 724992
+    },
+    "10103": {
+      "fileName": "103.wav",
+      "path": "/original-ui/Sound/103.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 26546
+    },
+    "10104": {
+      "fileName": "104.wav",
+      "path": "/original-ui/Sound/104.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 35394
+    },
+    "10105": {
+      "fileName": "105.wav",
+      "path": "/original-ui/Sound/105.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 39004
+    },
+    "10106": {
+      "fileName": "106.wav",
+      "path": "/original-ui/Sound/106.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 65364
+    },
+    "10107": {
+      "fileName": "107.wav",
+      "path": "/original-ui/Sound/107.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 132572
+    },
+    "10108": {
+      "fileName": "108.wav",
+      "path": "/original-ui/Sound/108.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 92008
+    },
+    "10109": {
+      "fileName": "109.wav",
+      "path": "/original-ui/Sound/109.wav",
+      "sourceExists": true,
+      "exactSourceExists": false,
+      "fallback": true,
+      "fallbackSourceFileName": "110.wav",
+      "fallbackReason": "SoundList struck clip 109.wav is absent from the current Crystal source; adjacent struck clip 110.wav keeps id 10109 playable.",
+      "sourceBytes": 86956
+    },
+    "10110": {
+      "fileName": "110.wav",
+      "path": "/original-ui/Sound/110.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 86956
+    },
+    "10111": {
+      "fileName": "111.wav",
+      "path": "/original-ui/Sound/111.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 32716
+    },
+    "10112": {
+      "fileName": "112.wav",
+      "path": "/original-ui/Sound/112.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 48482
+    },
+    "10113": {
+      "fileName": "113.wav",
+      "path": "/original-ui/Sound/113.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 31610
+    },
+    "10114": {
+      "fileName": "114.wav",
+      "path": "/original-ui/Sound/114.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 17848
+    },
+    "10115": {
+      "fileName": "115.wav",
+      "path": "/original-ui/Sound/115.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 34944
+    },
+    "10116": {
+      "fileName": "116.wav",
+      "path": "/original-ui/Sound/116.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 19058
+    },
+    "10117": {
+      "fileName": "117.wav",
+      "path": "/original-ui/Sound/117.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 37902
+    },
+    "10118": {
+      "fileName": "118.wav",
+      "path": "/original-ui/Sound/118.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 10382
+    },
+    "10125": {
+      "fileName": "125.wav",
+      "path": "/original-ui/Sound/125.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 48540
+    },
+    "10126": {
+      "fileName": "126.wav",
+      "path": "/original-ui/Sound/126.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 44316
+    },
+    "10138": {
+      "fileName": "138.wav",
+      "path": "/original-ui/Sound/138.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 32684
+    },
+    "10139": {
+      "fileName": "139.wav",
+      "path": "/original-ui/Sound/139.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 57004
+    },
+    "10144": {
+      "fileName": "144.wav",
+      "path": "/original-ui/Sound/144.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 74218
+    },
+    "10145": {
+      "fileName": "145.wav",
+      "path": "/original-ui/Sound/145.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 85414
+    },
+    "10146": {
+      "fileName": "Login2.wav",
+      "path": "/original-ui/Sound/Login2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 12094764
+    },
+    "10147": {
+      "fileName": "Select2.wav",
+      "path": "/original-ui/Sound/Select2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6345596
+    },
+    "10148": {
+      "fileName": "Login3.wav",
+      "path": "/original-ui/Sound/Login3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 2813980
+    },
+    "10149": {
+      "fileName": "Select3.wav",
+      "path": "/original-ui/Sound/Select3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 2469646
+    },
+    "10156": {
+      "fileName": "levelup.wav",
+      "path": "/original-ui/Sound/levelup.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 707628
+    },
+    "10160": {
+      "fileName": "WarMSel.wav",
+      "path": "/original-ui/Sound/WarMSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 273088
+    },
+    "10161": {
+      "fileName": "WarFSel.wav",
+      "path": "/original-ui/Sound/WarFSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 206680
+    },
+    "10162": {
+      "fileName": "WizMSel.wav",
+      "path": "/original-ui/Sound/WizMSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 230888
+    },
+    "10163": {
+      "fileName": "WizFSel.wav",
+      "path": "/original-ui/Sound/WizFSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 321436
+    },
+    "10164": {
+      "fileName": "TaoMSel.wav",
+      "path": "/original-ui/Sound/TaoMSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 115820
+    },
+    "10165": {
+      "fileName": "TaoFSel.wav",
+      "path": "/original-ui/Sound/TaoFSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 247000
+    },
+    "10166": {
+      "fileName": "AssMSel.wav",
+      "path": "/original-ui/Sound/AssMSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 223202
+    },
+    "10167": {
+      "fileName": "AssFSel.wav",
+      "path": "/original-ui/Sound/AssFSel.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 197812
+    },
+    "10168": {
+      "fileName": "NewChar.wav",
+      "path": "/original-ui/Sound/NewChar.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 178962
+    },
+    "10176": {
+      "fileName": "ride_walk_l.wav",
+      "path": "/original-ui/Sound/ride_walk_l.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 16236
+    },
+    "10177": {
+      "fileName": "ride_walk_r.wav",
+      "path": "/original-ui/Sound/ride_walk_r.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 17390
+    },
+    "10178": {
+      "fileName": "ride_run.wav",
+      "path": "/original-ui/Sound/ride_run.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 26420
+    },
+    "10179": {
+      "fileName": "tiger_struck_1.wav",
+      "path": "/original-ui/Sound/tiger_struck_1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 49140
+    },
+    "10180": {
+      "fileName": "tiger_struck_2.wav",
+      "path": "/original-ui/Sound/tiger_struck_2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 48650
+    },
+    "10181": {
+      "fileName": "tiger_attack_1.wav",
+      "path": "/original-ui/Sound/tiger_attack_1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51686
+    },
+    "10182": {
+      "fileName": "tiger_attack_2.wav",
+      "path": "/original-ui/Sound/tiger_attack_2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 56678
+    },
+    "10183": {
+      "fileName": "tiger_attack_3.wav",
+      "path": "/original-ui/Sound/tiger_attack_3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 46110
+    },
+    "10184": {
+      "fileName": "fishing_throw.wav",
+      "path": "/original-ui/Sound/fishing_throw.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 43742
+    },
+    "10185": {
+      "fileName": "fishing_pull.wav",
+      "path": "/original-ui/Sound/fishing_pull.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 46132
+    },
+    "10186": {
+      "fileName": "fishing.wav",
+      "path": "/original-ui/Sound/fishing.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 20696
+    },
+    "10188": {
+      "fileName": "wolf_ride01.wav",
+      "path": "/original-ui/Sound/wolf_ride01.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 133660
+    },
+    "10189": {
+      "fileName": "wolf_ride02.wav",
+      "path": "/original-ui/Sound/wolf_ride02.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 202786
+    },
+    "10190": {
+      "fileName": "wolf_attack1.wav",
+      "path": "/original-ui/Sound/wolf_attack1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 54274
+    },
+    "10191": {
+      "fileName": "wolf_attack2.wav",
+      "path": "/original-ui/Sound/wolf_attack2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 44062
+    },
+    "10192": {
+      "fileName": "wolf_attack3.wav",
+      "path": "/original-ui/Sound/wolf_attack3.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 60656
+    },
+    "10193": {
+      "fileName": "wolf_struck1.wav",
+      "path": "/original-ui/Sound/wolf_struck1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 32298
+    },
+    "10194": {
+      "fileName": "wolf_struck1.wav",
+      "path": "/original-ui/Sound/wolf_struck1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 32298
+    },
+    "10217": {
+      "fileName": "tiger_target_struck.wav",
+      "path": "/original-ui/Sound/tiger_target_struck.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 37714
+    },
+    "10218": {
+      "fileName": "tiger_ride_1.wav",
+      "path": "/original-ui/Sound/tiger_ride_1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 158074
+    },
+    "10219": {
+      "fileName": "tiger_ride_2.wav",
+      "path": "/original-ui/Sound/tiger_ride_2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 171424
+    },
+    "10500": {
+      "fileName": "pet_pig.wav",
+      "path": "/original-ui/Sound/pet_pig.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 62344
+    },
+    "10501": {
+      "fileName": "pet_chick.wav",
+      "path": "/original-ui/Sound/pet_chick.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 51954
+    },
+    "10502": {
+      "fileName": "pet_kitty.wav",
+      "path": "/original-ui/Sound/pet_kitty.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 79788
+    },
+    "10503": {
+      "fileName": "pet_skeleton.wav",
+      "path": "/original-ui/Sound/pet_skeleton.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 57572
+    },
+    "10504": {
+      "fileName": "pet_pigman.wav",
+      "path": "/original-ui/Sound/pet_pigman.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 46480
+    },
+    "10505": {
+      "fileName": "pet_weman.wav",
+      "path": "/original-ui/Sound/pet_weman.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 37346
+    },
+    "10506": {
+      "fileName": "pet_kitty.wav",
+      "path": "/original-ui/Sound/pet_kitty.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 79788
+    },
+    "10507": {
+      "fileName": "pet_blackdragon.wav",
+      "path": "/original-ui/Sound/pet_blackdragon.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 118060
+    },
+    "10508": {
+      "fileName": "pet_olympicmascot.wav",
+      "path": "/original-ui/Sound/pet_olympicmascot.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 44156
+    },
+    "10510": {
+      "fileName": "pet_frog.wav",
+      "path": "/original-ui/Sound/pet_frog.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 1187928
+    },
+    "10511": {
+      "fileName": "pet_monkey.wav",
+      "path": "/original-ui/Sound/pet_monkey.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 113616
+    },
+    "10520": {
+      "fileName": "pet_pickup.wav",
+      "path": "/original-ui/Sound/pet_pickup.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 14030
+    },
+    "10600": {
+      "fileName": "dice.wav",
+      "path": "/original-ui/Sound/dice.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 218566
+    },
+    "10601": {
+      "fileName": "yut_sticks.wav",
+      "path": "/original-ui/Sound/yut_sticks.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 77774
+    },
+    "20710": {
+      "fileName": "M69-0.wav",
+      "path": "/original-ui/Sound/M69-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 152196
+    },
+    "30001": {
+      "fileName": "30001.wav",
+      "path": "/original-ui/Sound/30001.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5313978
+    },
+    "30002": {
+      "fileName": "30002.wav",
+      "path": "/original-ui/Sound/30002.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5057350
+    },
+    "30003": {
+      "fileName": "30003.wav",
+      "path": "/original-ui/Sound/30003.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 11422032
+    },
+    "30004": {
+      "fileName": "30004.wav",
+      "path": "/original-ui/Sound/30004.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5313978
+    },
+    "30005": {
+      "fileName": "30005.wav",
+      "path": "/original-ui/Sound/30005.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5410108
+    },
+    "30006": {
+      "fileName": "30006.wav",
+      "path": "/original-ui/Sound/30006.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5057350
+    },
+    "30007": {
+      "fileName": "30007.wav",
+      "path": "/original-ui/Sound/30007.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 4769794
+    },
+    "30008": {
+      "fileName": "30008.wav",
+      "path": "/original-ui/Sound/30008.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5505402
+    },
+    "30009": {
+      "fileName": "30009.wav",
+      "path": "/original-ui/Sound/30009.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 11695300
+    },
+    "30010": {
+      "fileName": "30010.wav",
+      "path": "/original-ui/Sound/30010.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 11836916
+    },
+    "30011": {
+      "fileName": "30011.wav",
+      "path": "/original-ui/Sound/30011.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5158216
+    },
+    "30101": {
+      "fileName": "30101.wav",
+      "path": "/original-ui/Sound/30101.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5345742
+    },
+    "30102": {
+      "fileName": "30102.wav",
+      "path": "/original-ui/Sound/30102.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 7458108
+    },
+    "30103": {
+      "fileName": "30103.wav",
+      "path": "/original-ui/Sound/30103.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6113950
+    },
+    "30104": {
+      "fileName": "30104.wav",
+      "path": "/original-ui/Sound/30104.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6081350
+    },
+    "30105": {
+      "fileName": "30105.wav",
+      "path": "/original-ui/Sound/30105.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 4673664
+    },
+    "30106": {
+      "fileName": "30106.wav",
+      "path": "/original-ui/Sound/30106.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6145716
+    },
+    "30107": {
+      "fileName": "30107.wav",
+      "path": "/original-ui/Sound/30107.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6145716
+    },
+    "30108": {
+      "fileName": "30108.wav",
+      "path": "/original-ui/Sound/30108.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 5057350
+    },
+    "30109": {
+      "fileName": "30109.wav",
+      "path": "/original-ui/Sound/30109.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 4673664
+    },
+    "30110": {
+      "fileName": "30110.wav",
+      "path": "/original-ui/Sound/30110.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 9695024
+    },
+    "30111": {
+      "fileName": "30111.wav",
+      "path": "/original-ui/Sound/30111.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6033704
+    },
+    "30112": {
+      "fileName": "30112.wav",
+      "path": "/original-ui/Sound/30112.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 14024748
+    },
+    "30113": {
+      "fileName": "30113.wav",
+      "path": "/original-ui/Sound/30113.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 10701100
+    },
+    "31001": {
+      "fileName": "31001.wav",
+      "path": "/original-ui/Sound/31001.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 6332960
+    },
+    "31002": {
+      "fileName": "31002.wav",
+      "path": "/original-ui/Sound/31002.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 4390288
+    },
+    "31003": {
+      "fileName": "31003.wav",
+      "path": "/original-ui/Sound/31003.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 1937832
+    },
+    "31004": {
+      "fileName": "31004.wav",
+      "path": "/original-ui/Sound/31004.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 1982240
+    },
+    "31005": {
+      "fileName": "31005.wav",
+      "path": "/original-ui/Sound/31005.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 1946732
+    },
+    "31006": {
+      "fileName": "31006.wav",
+      "path": "/original-ui/Sound/31006.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 1934860
+    }
+  }
+}

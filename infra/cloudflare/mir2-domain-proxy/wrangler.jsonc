@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "mir2-web3-domain-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-18",
+  "account_id": "85bf64d86ea9221e172d26feba9fd47e",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "mir2.obelisk.build/*",
+      "zone_name": "obelisk.build"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "r2_buckets": [
+    {
+      "binding": "MIR2_ASSETS",
+      "bucket_name": "mir2-web3-assets"
+    }
+  ],
+  "vars": {
+    "ASSET_ORIGIN_URL": "https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+    "GATEWAY_ORIGIN_URL": "https://165.154.65.136.sslip.io",
+    "MIR2_ASSET_OBJECT_PREFIX": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+    "MIR2_ASSET_VERSION": "20260730-fullcrystal-f71b89aa-gzip1",
+    "MIR2_BEVY_RUNTIME_VERSION": "bevy-9a5cbecc8f85ff75",
+    "ORIGIN_URL": "https://mir2-web3-web.vercel.app"
+  }
+}

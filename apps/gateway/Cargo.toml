@@ -1,0 +1,66 @@
+[package]
+name = "mir2-gateway"
+version = "0.1.0"
+edition = "2021"
+description = "Local Crystal-wire gateway stub for the Mir2 web3 rewrite"
+license = "MIT"
+
+[[bin]]
+name = "gate14_validator"
+path = "src/bin/gate14_validator.rs"
+required-features = ["commonware-2026-2"]
+
+[features]
+default = []
+commonware-2026-2 = [
+    "dep:commonware-codec",
+    "dep:commonware-consensus",
+    "dep:commonware-cryptography",
+    "dep:commonware-p2p",
+    "dep:commonware-parallel",
+    "dep:commonware-runtime",
+    "dep:commonware-utils",
+    "dep:tracing",
+    "dep:tracing-subscriber",
+]
+
+[dependencies]
+axum = { version = "0.8", features = ["http1", "json", "tokio", "ws"] }
+base64 = "0.22"
+dubhe-network-core = { path = "../../vendor/dubhe-network-core" }
+commonware-codec = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+commonware-consensus = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+commonware-cryptography = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+commonware-p2p = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+commonware-parallel = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+commonware-runtime = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+commonware-utils = { git = "https://github.com/commonwarexyz/monorepo.git", tag = "v2026.2.0", optional = true }
+ed25519-consensus = "2.1"
+futures-util = "0.3"
+flate2 = "1"
+hmac = "0.13"
+jsonwebtoken = "9.3"
+keyring = { version = "3.6.3", features = ["apple-native", "windows-native", "sync-secret-service", "vendored"] }
+mir2-game-data = { path = "../../packages/game-data" }
+mir2-protocol = { path = "../../packages/protocol" }
+mir2-simulation = { path = "../simulation" }
+postgres = { version = "0.19", features = ["with-serde_json-1"] }
+r2d2 = "0.8"
+r2d2_postgres = "0.18"
+quinn = { version = "0.11", default-features = false, features = ["runtime-tokio", "rustls-ring"] }
+rand = "0.8"
+rcgen = { version = "0.13", features = ["x509-parser"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+rmp-serde = "1.3"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+rustls-pki-types = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+semver = "1"
+sha2 = "0.11"
+sysinfo = "=0.37.2"
+tar = "0.4"
+time = "0.3"
+tokio = { version = "1", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"] }
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"], optional = true }

@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mir2-game-url" content="https://mir2.obelisk.build/?source=itch" />
+    <title>Mir2 Platinum 1.76 Web Alpha</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #070706;
+        color: #f4ead0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-width: 320px;
+        height: 100%;
+        min-height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 18%, rgb(104 70 24 / 28%), transparent 38%),
+          linear-gradient(180deg, #16130e 0%, #070706 64%);
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      .launcher {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 420px;
+        isolation: isolate;
+      }
+
+      .splash {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        padding: clamp(18px, 4vw, 48px);
+        transition:
+          opacity 180ms ease,
+          visibility 180ms ease;
+      }
+
+      .launcher[data-mode="playing"] .splash {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .panel {
+        width: min(620px, 100%);
+        padding: clamp(24px, 5vw, 48px);
+        border: 1px solid rgb(218 174 86 / 38%);
+        border-radius: 4px;
+        background:
+          linear-gradient(180deg, rgb(42 35 24 / 94%), rgb(13 12 10 / 96%)),
+          #12100c;
+        box-shadow:
+          0 28px 90px rgb(0 0 0 / 62%),
+          inset 0 1px rgb(255 234 184 / 9%);
+        text-align: center;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: #c8a55e;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        color: #fff4d8;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(32px, 8vw, 62px);
+        font-weight: 500;
+        letter-spacing: 0.035em;
+        line-height: 0.94;
+        text-shadow: 0 3px 22px rgb(235 174 56 / 25%);
+      }
+
+      .subtitle {
+        margin: 16px 0 0;
+        color: #c9bfa9;
+        font-size: clamp(14px, 2.5vw, 17px);
+        line-height: 1.65;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .primary,
+      .secondary {
+        min-height: 48px;
+        padding: 0 22px;
+        border-radius: 3px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .primary {
+        border: 1px solid #d9b05d;
+        background: linear-gradient(180deg, #c99b43, #8e6421);
+        color: #130e06;
+        font-weight: 800;
+        box-shadow: 0 8px 28px rgb(217 176 93 / 18%);
+      }
+
+      .primary:hover,
+      .primary:focus-visible {
+        background: linear-gradient(180deg, #e1ba68, #a87929);
+      }
+
+      .secondary {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgb(224 201 156 / 32%);
+        background: rgb(255 255 255 / 4%);
+        color: #eadfca;
+      }
+
+      .status {
+        min-height: 20px;
+        margin: 18px 0 0;
+        color: #9f9685;
+        font-size: 12px;
+      }
+
+      .status[data-level="good"] {
+        color: #9fcf9a;
+      }
+
+      .status[data-level="warn"] {
+        color: #e2b970;
+      }
+
+      .notes {
+        margin: 18px 0 0;
+        color: #837b6d;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .game-frame {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #050505;
+      }
+
+      .frame-toolbar {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        z-index: 3;
+        display: none;
+        gap: 8px;
+        opacity: 0.22;
+        transition: opacity 120ms ease;
+      }
+
+      .launcher[data-mode="playing"] .frame-toolbar {
+        display: flex;
+      }
+
+      .frame-toolbar:hover,
+      .frame-toolbar:focus-within {
+        opacity: 1;
+      }
+
+      .frame-toolbar button,
+      .frame-toolbar a {
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid rgb(233 211 170 / 34%);
+        border-radius: 3px;
+        background: rgb(14 12 9 / 88%);
+        color: #eee2ca;
+        cursor: pointer;
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      @media (max-height: 520px) {
+        .panel {
+          padding: 20px 28px;
+        }
+
+        .subtitle {
+          margin-top: 10px;
+        }
+
+        .actions {
+          margin-top: 18px;
+        }
+
+        .notes {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="launcher" id="launcher" data-mode="ready">
+      <section class="splash" aria-labelledby="game-title">
+        <div class="panel">
+          <p class="eyebrow">Web Alpha · In Development</p>
+          <h1 id="game-title">Mir2<br />Platinum 1.76</h1>
+          <p class="subtitle">
+            白金 1.76 浏览器 Alpha。当前版本优先保证登录、战斗、掉落、装备、
+            地图切换和角色持久化；22–50 级内容仍在持续校准。
+          </p>
+          <div class="actions">
+            <button class="primary" id="launch-game" type="button">进入游戏</button>
+            <a
+              class="secondary"
+              id="open-external"
+              href="https://mir2.obelisk.build/?source=itch"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              新窗口打开
+            </a>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite">
+            正在检查游戏服务器……
+          </p>
+          <p class="notes">
+            推荐桌面版 Chrome / Edge。按 F 可切换全屏；如果嵌入窗口无法加载，请使用“新窗口打开”。
+          </p>
+        </div>
+      </section>
+
+      <iframe
+        class="game-frame"
+        id="game-frame"
+        title="Mir2 Platinum 1.76 Web Alpha"
+        allow="autoplay; fullscreen; gamepad; clipboard-write"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+
+      <nav class="frame-toolbar" aria-label="游戏窗口工具">
+        <button id="fullscreen-game" type="button">全屏 (F)</button>
+        <a
+          id="open-external-toolbar"
+          href="https://mir2.obelisk.build/?source=itch"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          新窗口
+        </a>
+      </nav>
+    </main>
+
+    <script>
+      (() => {
+        const gameUrl =
+          document.querySelector('meta[name="mir2-game-url"]')?.content ||
+          "https://mir2.obelisk.build/?source=itch";
+        const healthUrl = new URL("/health", gameUrl).toString();
+        const launcher = document.getElementById("launcher");
+        const frame = document.getElementById("game-frame");
+        const launchButton = document.getElementById("launch-game");
+        const fullscreenButton = document.getElementById("fullscreen-game");
+        const status = document.getElementById("status");
+        const externalLinks = [
+          document.getElementById("open-external"),
+          document.getElementById("open-external-toolbar"),
+        ];
+        const state = {
+          mode: "ready",
+          health: "checking",
+          iframeLoaded: false,
+          gameUrl,
+        };
+
+        for (const link of externalLinks) {
+          link.href = gameUrl;
+        }
+
+        function setStatus(message, level = "") {
+          status.textContent = message;
+          status.dataset.level = level;
+        }
+
+        function launchGame() {
+          if (!frame.src) {
+            frame.src = gameUrl;
+          }
+          state.mode = "playing";
+          launcher.dataset.mode = "playing";
+        }
+
+        async function toggleFullscreen() {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+            return;
+          }
+          if (launcher.requestFullscreen) {
+            await launcher.requestFullscreen();
+          }
+        }
+
+        async function checkHealth() {
+          const controller = new AbortController();
+          const timeout = window.setTimeout(() => controller.abort(), 6000);
+          try {
+            // The production health route intentionally has no cross-origin
+            // response body access. An opaque no-cors response still proves
+            // that the HTTPS endpoint is reachable from the launcher.
+            await fetch(healthUrl, {
+              cache: "no-store",
+              credentials: "omit",
+              mode: "no-cors",
+              signal: controller.signal,
+            });
+            state.health = "online";
+            setStatus("服务器在线，可以进入游戏。", "good");
+          } catch (error) {
+            state.health = "unavailable";
+            setStatus("未能完成服务器预检；仍可尝试进入或在新窗口打开。", "warn");
+          } finally {
+            window.clearTimeout(timeout);
+          }
+        }
+
+        launchButton.addEventListener("click", launchGame);
+        fullscreenButton.addEventListener("click", () => {
+          toggleFullscreen().catch(() => {
+            setStatus("浏览器拒绝了全屏请求，请使用 itch.io 的全屏按钮。", "warn");
+          });
+        });
+        frame.addEventListener("load", () => {
+          state.iframeLoaded = true;
+        });
+        document.addEventListener("keydown", (event) => {
+          const target = event.target;
+          if (
+            event.key.toLowerCase() === "f" &&
+            !(target instanceof HTMLInputElement) &&
+            !(target instanceof HTMLTextAreaElement)
+          ) {
+            event.preventDefault();
+            toggleFullscreen().catch(() => {});
+          }
+        });
+
+        window.render_game_to_text = () =>
+          JSON.stringify({
+            ...state,
+            coordinateSystem: "Launcher DOM; embedded game owns its own world coordinates.",
+          });
+        window.advanceTime = (milliseconds) => {
+          window.dispatchEvent(
+            new CustomEvent("mir2-itch-advance-time", {
+              detail: { milliseconds: Number(milliseconds) || 0 },
+            }),
+          );
+        };
+
+        checkHealth();
+      })();
+    </script>
+  </body>
+</html>

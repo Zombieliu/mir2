@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "profileId": "mir2-regional-v1-3000-15m",
+  "region": "sa-east-1",
+  "maximumMeasuredInterNodeRttMs": 2,
+  "nodes": [
+    {"id":"gateway-1","role":"gateway","failureDomain":"az-a","cpu":4,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"gateway-2","role":"gateway","failureDomain":"az-b","cpu":4,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"gateway-3","role":"gateway","failureDomain":"az-c","cpu":4,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+
+    {"id":"zone-a1","role":"zone-active","pair":"zone-1","failureDomain":"az-a","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-a2","role":"zone-active","pair":"zone-2","failureDomain":"az-b","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-a3","role":"zone-active","pair":"zone-3","failureDomain":"az-c","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-a4","role":"zone-active","pair":"zone-4","failureDomain":"az-a","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-b1","role":"zone-standby","pair":"zone-1","failureDomain":"az-b","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-b2","role":"zone-standby","pair":"zone-2","failureDomain":"az-c","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-b3","role":"zone-standby","pair":"zone-3","failureDomain":"az-a","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+    {"id":"zone-b4","role":"zone-standby","pair":"zone-4","failureDomain":"az-b","cpu":8,"memoryGiB":16,"diskGiB":200,"nvme":true,"networkMbps":1000},
+
+    {"id":"postgres-1","role":"postgres","failureDomain":"az-a","cpu":8,"memoryGiB":32,"diskGiB":500,"nvme":true,"networkMbps":1000},
+    {"id":"postgres-2","role":"postgres","failureDomain":"az-b","cpu":8,"memoryGiB":32,"diskGiB":500,"nvme":true,"networkMbps":1000},
+
+    {"id":"redis-1","role":"redis","failureDomain":"az-a","cpu":2,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"redis-2","role":"redis","failureDomain":"az-b","cpu":2,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"redis-3","role":"redis","failureDomain":"az-c","cpu":2,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+
+    {"id":"validator-1","role":"commonware","failureDomain":"az-a","cpu":2,"memoryGiB":2,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"validator-2","role":"commonware","failureDomain":"az-b","cpu":2,"memoryGiB":2,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"validator-3","role":"commonware","failureDomain":"az-c","cpu":2,"memoryGiB":2,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"validator-4","role":"commonware","failureDomain":"az-d","cpu":2,"memoryGiB":2,"diskGiB":100,"nvme":true,"networkMbps":1000},
+
+    {"id":"load-generator","role":"load-generator","failureDomain":"harness","cpu":4,"memoryGiB":8,"diskGiB":100,"nvme":true,"networkMbps":1000},
+    {"id":"zone-replicator","role":"zone-replicator","failureDomain":"az-c","cpu":2,"memoryGiB":4,"diskGiB":500,"nvme":true,"networkMbps":1000}
+  ]
+}

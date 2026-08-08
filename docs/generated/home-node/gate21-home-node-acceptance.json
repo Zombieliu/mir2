@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1785092545000,
+  "sourceCommitBeforeChanges": "39b291115fffed381dd1cb70b255e2218c3c835f",
+  "node": {
+    "nodeId": "ed25519:cc0993651c112ce0b10bafd2a1ee633589d0bc0ae781c8ecacb4fadd810d5c41",
+    "publicKey": "-HNoPVahQNmlDB26JQTGR1N61XGVzaMGlk3KeiL9ueU",
+    "capacityMaxSessions": 128,
+    "capacityMaxZones": 8
+  },
+  "suiFinality": {
+    "evidence": "docs/generated/gate13/testnet/dubhe-desktop-registration.json",
+    "network": "testnet",
+    "packageId": "0x4201a90b22b8a6e000a032fff075be6bc6fdd531c6163465c902107ea285c53e",
+    "operatorSuiAddress": "0xf5fbee0ef2ad68b0340bfdc30af133c2bbaa7ab815944e04561d53ce4669b74f",
+    "transactionDigest": "Ft3HrGfQUFs37geSssVJuHMcTzo2vKVD8vpMBLXCohNH",
+    "checkpoint": 364647783
+  },
+  "liveDesktop": {
+    "observedAtUnixMs": 1785091667279,
+    "mode": "serving",
+    "acceptNewSessions": true,
+    "relayConnected": true,
+    "telemetryAccepted": true,
+    "telemetrySequence": 12,
+    "zoneReachable": true,
+    "zoneDraining": false
+  },
+  "livePlayerPath": {
+    "evidence": "docs/generated/home-node/live-player-probe.json",
+    "gatewayAddress": "127.0.0.1:17000",
+    "success": true,
+    "totalLatencyMs": 13481,
+    "steps": [
+      {
+        "name": "connect",
+        "latencyMs": 10309,
+        "matchedPacket": "Connected"
+      },
+      {
+        "name": "login",
+        "latencyMs": 26,
+        "matchedPacket": "LoginSuccess"
+      },
+      {
+        "name": "startGame",
+        "latencyMs": 2781,
+        "matchedPacket": "StartGame"
+      },
+      {
+        "name": "keepAlive",
+        "latencyMs": 361,
+        "matchedPacket": "KeepAlive"
+      }
+    ],
+    "latencyClassification": "debug correctness evidence, not a Regional production SLO"
+  },
+  "relayFailureRecovery": {
+    "test": "home_agent_process_reconnects_after_relay_restart",
+    "result": "pass",
+    "assertions": [
+      "relayConnected becomes false after Relay shutdown",
+      "Home Agent process remains alive while Relay is unavailable",
+      "Relay rebinds its original QUIC and Gateway addresses",
+      "Home Agent increments registration sequence and reconnects automatically",
+      "relayConnected becomes true after Relay restart"
+    ]
+  },
+  "credentialIsolation": {
+    "test": "public_player_gateway_crosses_outbound_mtls_quic_and_survives_udp_rebind",
+    "result": "pass",
+    "officialGatewayTokenTerminatesAtRelay": true,
+    "nodeLocalZoneTokenIsDistinct": true
+  },
+  "repositoryAcceptance": {
+    "command": "npm --prefix apps/dubhe-node-desktop run acceptance",
+    "result": "DUBHE_NODE_ACCEPTANCE_OK"
+  },
+  "limitations": [
+    "The recorded player latency is from a debug build with per-session Mir2 world initialization.",
+    "A rebuilt ad-hoc macOS debug app requires renewed Keychain authorization; production releases must use a stable signed identity."
+  ]
+}

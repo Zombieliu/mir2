@@ -1,0 +1,473 @@
+{
+  "ok": true,
+  "generatedAt": "2026-07-24T19:50:38Z",
+  "gate": "15.1-15.4",
+  "assertions": {
+    "twoRealPlayersStarted": true,
+    "playersSurvivedZoneFailure": true,
+    "placementFinalizedOnDubheB": true,
+    "allValidatorsAgree": true,
+    "bothRealGatewaysObserveQuorum": true,
+    "twoFencedPlayerLeasesFinalized": true,
+    "forwardStandbyInstalledV5Base": true,
+    "recoveredAInstalledReverseV5Base": true,
+    "forwardMutationWalDurable": true,
+    "reverseMutationWalDurable": true,
+    "forwardBaseSnapshotDurable": true,
+    "reverseBaseSnapshotDurable": true,
+    "bothProjectorsHealthy": true,
+    "activeQuiescedAtExactHead": true,
+    "standbyReadinessPassed": true,
+    "standbyPromotedUnderGeneration2": true,
+    "promotionRejectedBeforeFinalizedFence": true
+  },
+  "initialPlayers": {
+    "ready": true,
+    "pid": 84161,
+    "players": [
+      {
+        "index": 0,
+        "url": "ws://127.0.0.1:19710/ws",
+        "accountId": "gate15-player-0",
+        "characterIndex": 1,
+        "inGame": true,
+        "markerSeen": false,
+        "closedUnexpectedly": false,
+        "messages": 627,
+        "zoneResponses": 0,
+        "zoneResponsesAfterFailover": 0,
+        "errors": [],
+        "bytesSent": 422,
+        "bytesReceived": 755373
+      },
+      {
+        "index": 1,
+        "url": "ws://127.0.0.1:19711/ws",
+        "accountId": "gate15-player-1",
+        "characterIndex": 2,
+        "inGame": true,
+        "markerSeen": false,
+        "closedUnexpectedly": false,
+        "messages": 143,
+        "zoneResponses": 0,
+        "zoneResponsesAfterFailover": 0,
+        "errors": [],
+        "bytesSent": 423,
+        "bytesReceived": 335983
+      }
+    ]
+  },
+  "playerFaultRun": {
+    "ok": true,
+    "startedAt": "2026-07-24T19:49:59.834Z",
+    "finishedAt": "2026-07-24T19:50:34.923Z",
+    "durationMs": 35089,
+    "assertions": {
+      "bothReachedGame": true,
+      "bothObservedFailover": true,
+      "bothStayedConnected": true,
+      "bothExecutedZoneCommandsAfterFailover": true
+    },
+    "players": [
+      {
+        "index": 0,
+        "url": "ws://127.0.0.1:19710/ws",
+        "accountId": "gate15-player-0",
+        "characterIndex": 1,
+        "inGame": true,
+        "markerSeen": true,
+        "closedUnexpectedly": false,
+        "messages": 867,
+        "zoneResponses": 114,
+        "zoneResponsesAfterFailover": 105,
+        "errors": [
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations"
+        ],
+        "bytesSent": 7024,
+        "bytesReceived": 782613
+      },
+      {
+        "index": 1,
+        "url": "ws://127.0.0.1:19711/ws",
+        "accountId": "gate15-player-1",
+        "characterIndex": 2,
+        "inGame": true,
+        "markerSeen": true,
+        "closedUnexpectedly": false,
+        "messages": 860,
+        "zoneResponses": 54,
+        "zoneResponsesAfterFailover": 48,
+        "errors": [
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations",
+          "zone RPC zone_quiesced: Zone mir2-map-0 is quiesced for a safe promotion and rejects new mutations"
+        ],
+        "bytesSent": 6727,
+        "bytesReceived": 783005
+      }
+    ]
+  },
+  "playerHarnessOutput": "Gate 15 players completed: postFailover=105/48 ok=true\n",
+  "finalRoute": {
+    "gatewayId": "gateway-b",
+    "finalizedHeight": 16,
+    "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+    "placement": {
+      "zoneId": "mir2-map-0",
+      "generation": 2,
+      "primaryHostId": "dubhe-b",
+      "replicaHostIds": [
+        "dubhe-a"
+      ],
+      "expiresAtMs": 1784926203431
+    },
+    "primaryEndpoint": "dubhe-b:7020",
+    "replicaEndpoints": [
+      "dubhe-a:7020"
+    ]
+  },
+  "gatewayHealth": [
+    {
+      "ok": true,
+      "http": "ready",
+      "ws": "ready",
+      "tcp_stub": "ready",
+      "gate15": {
+        "enabled": true,
+        "healthy": true,
+        "gatewayId": "player-gateway-a",
+        "finalizedHeight": 16,
+        "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 2,
+        "observedAtMs": 1784922638480,
+        "lastError": null
+      },
+      "session_cache": {
+        "configured": true,
+        "backend": "in_memory",
+        "ttlSeconds": null,
+        "recordCount": 1,
+        "staleRecordCount": 0,
+        "routeLeaseCount": 1,
+        "healthy": true,
+        "lastError": null
+      },
+      "capacity": {
+        "maxWsConnections": null,
+        "maxActiveSessions": null,
+        "maxReconnectLeases": null,
+        "maxLoginInFlight": null,
+        "maxNewCharacterInFlight": null,
+        "maxStartGameInFlight": null,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 1,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "gameplay_events": {
+        "configured": false,
+        "sink": "none",
+        "topic": null,
+        "accepted": 0,
+        "published": 0,
+        "failed": 0,
+        "dropped": 0,
+        "lastError": null
+      }
+    },
+    {
+      "ok": true,
+      "http": "ready",
+      "ws": "ready",
+      "tcp_stub": "ready",
+      "gate15": {
+        "enabled": true,
+        "healthy": true,
+        "gatewayId": "player-gateway-b",
+        "finalizedHeight": 16,
+        "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+        "agreeingValidators": [
+          "validator-0",
+          "validator-1",
+          "validator-2",
+          "validator-3"
+        ],
+        "respondingValidators": 4,
+        "placementCount": 1,
+        "sessionLeaseCount": 2,
+        "observedAtMs": 1784922638553,
+        "lastError": null
+      },
+      "session_cache": {
+        "configured": true,
+        "backend": "in_memory",
+        "ttlSeconds": null,
+        "recordCount": 1,
+        "staleRecordCount": 0,
+        "routeLeaseCount": 1,
+        "healthy": true,
+        "lastError": null
+      },
+      "capacity": {
+        "maxWsConnections": null,
+        "maxActiveSessions": null,
+        "maxReconnectLeases": null,
+        "maxLoginInFlight": null,
+        "maxNewCharacterInFlight": null,
+        "maxStartGameInFlight": null,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 1,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "gameplay_events": {
+        "configured": false,
+        "sink": "none",
+        "topic": null,
+        "accepted": 0,
+        "published": 0,
+        "failed": 0,
+        "dropped": 0,
+        "lastError": null
+      }
+    }
+  ],
+  "projectorHealth": [
+    {
+      "role": "disposable-postgres-projector",
+      "projectorId": "projector-a",
+      "healthy": true,
+      "finalizedHeight": 16,
+      "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+      "postgresAuthoritative": false,
+      "databaseAvailable": true,
+      "redisAuthoritative": false,
+      "redisAvailable": true,
+      "rebuiltCount": 1,
+      "projectedAtMs": 1784922638284,
+      "startedAtMs": 1784922638269,
+      "lastError": null
+    },
+    {
+      "role": "disposable-postgres-projector",
+      "projectorId": "projector-b",
+      "healthy": true,
+      "finalizedHeight": 16,
+      "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+      "postgresAuthoritative": false,
+      "databaseAvailable": true,
+      "redisAuthoritative": false,
+      "redisAvailable": true,
+      "rebuiltCount": 1,
+      "projectedAtMs": 1784922638244,
+      "startedAtMs": 1784922638229,
+      "lastError": null
+    }
+  ],
+  "validatorStatuses": [
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-0",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784922546347
+    },
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-1",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784922546399
+    },
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-2",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784922546415
+    },
+    {
+      "role": "commonware-validator",
+      "nodeId": "validator-3",
+      "commonwareRelease": "v2026.2.0",
+      "committeeSize": 4,
+      "quorum": 3,
+      "finalizedHeight": 16,
+      "lastSequence": 16,
+      "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+      "preparedCount": 16,
+      "pendingCount": 0,
+      "startedAtMs": 1784922546374
+    }
+  ],
+  "finalizedHeight": 16,
+  "stateRoot": "d2f12063f7794b49978d6cab1c32937db4d6200fd40e951802016ee8384d5de0",
+  "sessionLeases": {
+    "player:gate15-player-0:1": {
+      "sessionId": "player:gate15-player-0:1",
+      "accountId": "gate15-player-0",
+      "characterId": "gate15-player-0:1",
+      "gatewayId": "player-gateway-a",
+      "zoneId": "mir2-map-0",
+      "fencingToken": 1,
+      "expiresAtMs": 1784922659973
+    },
+    "player:gate15-player-1:2": {
+      "sessionId": "player:gate15-player-1:2",
+      "accountId": "gate15-player-1",
+      "characterId": "gate15-player-1:2",
+      "gatewayId": "player-gateway-b",
+      "zoneId": "mir2-map-0",
+      "fencingToken": 1,
+      "expiresAtMs": 1784922661090
+    }
+  },
+  "quiesceReceipt": {
+    "version": 1,
+    "zoneId": "mir2-map-0",
+    "hostId": "ed25519:5c5a6fd60cca945b756802a5dfed06f330b7506cd9cfd7ec53d2272f3f2ba6ea",
+    "ownerId": "dubhe-a",
+    "generation": 1,
+    "quiescedAtMs": 1784922602629,
+    "head": {
+      "version": 5,
+      "zoneId": "mir2-map-0",
+      "buildId": "mir2-gateway/0.1.0",
+      "mutationCoverage": "commandJournal",
+      "promotionReady": false,
+      "baseSnapshotId": null,
+      "baseSequence": 0,
+      "oldestAvailableSequence": 0,
+      "entryCount": 53,
+      "nextSequence": 53,
+      "lastSequence": 52,
+      "latestDigest": "8f5ee3ef69e4589318ec76030202504b9918dff0c80e8b14f5bdf5303621177e"
+    }
+  },
+  "promotionReadiness": {
+    "version": 1,
+    "readinessId": "aa39b5f7632774b59a51366586ee2ed5766146fae556a6da24b5cdee972b5b99",
+    "zoneId": "mir2-map-0",
+    "standbyHostId": "ed25519:29c522e4b59c3f58f157538530098d9d2e3b3e74269d3dba41b74df16b81e4ce",
+    "activeBuildId": "mir2-gateway/0.1.0",
+    "standbyBuildId": "mir2-gateway/0.1.0",
+    "activeNextSequence": 53,
+    "standbyNextSequence": 53,
+    "activeLatestDigest": "8f5ee3ef69e4589318ec76030202504b9918dff0c80e8b14f5bdf5303621177e",
+    "standbyLatestDigest": "8f5ee3ef69e4589318ec76030202504b9918dff0c80e8b14f5bdf5303621177e",
+    "sourceObservedAtMs": 1784922602984,
+    "assessedAtMs": 1784922602988,
+    "observedLagMs": 4,
+    "maxLagMs": 250,
+    "expiresAtMs": 1784922632988,
+    "sessionCount": 2,
+    "sessionCapacity": 32,
+    "zoneCount": 1,
+    "zoneCapacity": 8,
+    "buildMatches": true,
+    "cursorMatches": true,
+    "digestMatches": true,
+    "baseMatches": true,
+    "replicaClockDisabled": true,
+    "capacityAvailable": true,
+    "ready": true,
+    "reason": null
+  },
+  "promotionReceipt": {
+    "version": 1,
+    "readinessId": "aa39b5f7632774b59a51366586ee2ed5766146fae556a6da24b5cdee972b5b99",
+    "zoneId": "mir2-map-0",
+    "promotedHostId": "ed25519:29c522e4b59c3f58f157538530098d9d2e3b3e74269d3dba41b74df16b81e4ce",
+    "ownerId": "dubhe-b",
+    "generation": 2,
+    "promotedAtMs": 1784922604624,
+    "head": {
+      "version": 5,
+      "zoneId": "mir2-map-0",
+      "buildId": "mir2-gateway/0.1.0",
+      "mutationCoverage": "commandJournal",
+      "promotionReady": false,
+      "baseSnapshotId": "b744cbee59eea999f2dfdc7ebea9d6af941d5443b2fb3af4c63df383155239f5",
+      "baseSequence": 0,
+      "oldestAvailableSequence": 0,
+      "entryCount": 53,
+      "nextSequence": 53,
+      "lastSequence": 52,
+      "latestDigest": "8f5ee3ef69e4589318ec76030202504b9918dff0c80e8b14f5bdf5303621177e"
+    }
+  },
+  "preFencePromotionRejection": {
+    "output": "zone-promoter failed: zone RPC promotion_fence_rejected: Zone mir2-map-0 is finalized on dubhe-a, local host dubhe-b is a standby\n\n",
+    "returncode": 1
+  },
+  "forwardReplicatorLogTail": [
+    "gate15-zone-replicator  | zone-replicator mutation WAL ready at /var/lib/obelisk/replication-wal/mutation-batches-v5.jsonl (cursor=0, base=none)",
+    "gate15-zone-replicator  | zone-replicator persisted base snapshot b744cbee59eea999f2dfdc7ebea9d6af941d5443b2fb3af4c63df383155239f5 at cursor 0 (compressed=133 bytes, raw=156 bytes, applyReady=true)",
+    "gate15-zone-replicator  | zone-replicator installed v5 base b744cbee59eea999f2dfdc7ebea9d6af941d5443b2fb3af4c63df383155239f5 at cursor 0",
+    "gate15-zone-replicator  | zone-replicator idle cadence: 5000ms (sessions=0)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 26 (4d74fc8fdf0d0f96baf651bbf3610dd6e7d877e13b43b5cef0a80fab74ca9578)",
+    "gate15-zone-replicator  | zone-replicator active cadence: 100ms (sessions=2)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 28 (751d069e272dd4c9bce416ae26817d2b42d5f583c1aac650cb74a15e0b21b78e)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 29 (c30a923ca2768b91beaf578930b1892b22f8eaa9024baba1d44bb60485920109)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 30 (c96ddc157f5c27b6dea3b2df439c820bc3266f58c3db106f6979c248c912ecc3)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 32 (e05e8b5befe82f03d7b338a3f34c16142b48834b59c28dedcbc5b9bd0bf04cbd)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 38 (d10267763d2abe4c4b170fe6afde4abee75681e8b90c67dcfceea47c2d119670)",
+    "gate15-zone-replicator  | zone-replicator persisted mutation WAL through cursor 41 (78b13421ba7f714e6c57312f8efe51c0e0dcea2d06fc03cfa01f95566e0e1002)"
+  ],
+  "reverseReplicatorLogTail": [
+    "gate15-zone-replicator-b-to-a  | zone-replicator mutation WAL ready at /var/lib/obelisk/replication-wal/mutation-batches-v5.jsonl (cursor=0, base=none)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator persisted mutation WAL through cursor 1017 (414ce2d2a47d450229dcdd10a0805e8840cd56b3943659a0881418fdea3010b8)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator persisted base snapshot da0a5dc6c895599c1fed0ba7e43e55fe9615e04d083da9479486cda03455fb45 at cursor 1017 (compressed=21736 bytes, raw=303330 bytes, applyReady=true)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator installed v5 base da0a5dc6c895599c1fed0ba7e43e55fe9615e04d083da9479486cda03455fb45 at cursor 1017",
+    "gate15-zone-replicator-b-to-a  | zone-replicator active cadence: 100ms (sessions=2)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator persisted mutation WAL through cursor 1021 (45b84388ec93ac77a9e0395fb8e7737ec6e6e898581bcf5669617068990ddbf4)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator persisted mutation WAL through cursor 1022 (1c7983431fcb38d19e8616e4e81c4519d6da957ebec3a3ef0ffb53a7841fb14f)",
+    "gate15-zone-replicator-b-to-a  | zone-replicator persisted mutation WAL through cursor 1023 (a86c8d468c84bc892447161e30ac47580289714dca1834468dfe34a6f26ef39d)"
+  ]
+}

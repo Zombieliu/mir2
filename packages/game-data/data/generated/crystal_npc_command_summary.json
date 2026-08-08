@@ -1,0 +1,2276 @@
+{
+  "generated_at": "2026-04-21T18:11:19.738Z",
+  "source_file": "packages/game-data/data/generated/crystal_npc_manifest.json",
+  "total_scripts": 634,
+  "total_commands": 81,
+  "implemented_commands": 81,
+  "unimplemented_commands": 0,
+  "implemented_occurrences": 7044,
+  "unimplemented_occurrences": 0,
+  "commands": [
+    {
+      "kind": "action",
+      "command": "GOTO",
+      "count": 1014,
+      "scriptCount": 350,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 10,
+          "line": "GOTO @MAIN-1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 5,
+          "line": "GOTO @MAIN-1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 8,
+          "line": "GOTO @Check2"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 10,
+          "line": "GOTO @Check2"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 16,
+          "line": "GOTO @MAIN-1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "LEVEL",
+      "count": 801,
+      "scriptCount": 26,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 28,
+          "line": "LEVEL > 9"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 29,
+          "line": "LEVEL < 22"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 11,
+          "line": "LEVEL > 47"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 12,
+          "line": "LEVEL < 56"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 22,
+          "line": "LEVEL > 21"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "MOVE",
+      "count": 670,
+      "scriptCount": 141,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 31,
+          "line": "MOVE D001A"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 30,
+          "line": "MOVE D2051A 113 174"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 41,
+          "line": "MOVE D710A 29 17"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientWooma-D023",
+          "lineNumber": 30,
+          "line": "MOVE D022A 340 358"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientZuma-D504",
+          "lineNumber": 30,
+          "line": "MOVE 0157A 18 17"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "SET",
+      "count": 394,
+      "scriptCount": 47,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 19,
+          "line": "SET [536] 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 5,
+          "line": "SET [525] 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Blacksmith-0103",
+          "lineNumber": 100,
+          "line": "SET [539] 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Blacksmith1",
+          "lineNumber": 102,
+          "line": "SET [539] 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 119,
+          "line": "SET [993] 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GIVEPET",
+      "count": 384,
+      "scriptCount": 8,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 51,
+          "line": "GIVEPET RedViper 5"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 63,
+          "line": "GIVEPET WickedTong 5"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 75,
+          "line": "GIVEPET WildBeast 5"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 87,
+          "line": "GIVEPET BloodRat 5"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 99,
+          "line": "GIVEPET SeaCreature 5"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKGOLD",
+      "count": 352,
+      "scriptCount": 33,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 36,
+          "line": "CHECKGOLD > 1999"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 45,
+          "line": "CHECKGOLD > 1999"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 54,
+          "line": "CHECKGOLD > 1999"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 63,
+          "line": "CHECKGOLD > 1999"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 72,
+          "line": "CHECKGOLD > 1999"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "TAKEGOLD",
+      "count": 346,
+      "scriptCount": 32,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 39,
+          "line": "TAKEGOLD 2000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 48,
+          "line": "TAKEGOLD 2000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 57,
+          "line": "TAKEGOLD 2000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 66,
+          "line": "TAKEGOLD 2000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Bichon_Teleport1",
+          "lineNumber": 75,
+          "line": "TAKEGOLD 2000"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKITEM",
+      "count": 321,
+      "scriptCount": 38,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 27,
+          "line": "CHECKITEM PrajnaHeart 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 38,
+          "line": "CHECKITEM StoneHeart 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientWooma-D023",
+          "lineNumber": 27,
+          "line": "CHECKITEM WoomaHeart 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientZuma-D504",
+          "lineNumber": 27,
+          "line": "CHECKITEM ZumaHeart 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 14,
+          "line": "CHECKITEM PremiumPass[1d]"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "TAKEITEM",
+      "count": 309,
+      "scriptCount": 35,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 29,
+          "line": "TAKEITEM PrajnaHeart 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 40,
+          "line": "TAKEITEM StoneHeart 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientWooma-D023",
+          "lineNumber": 29,
+          "line": "TAKEITEM WoomaHeart 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientZuma-D504",
+          "lineNumber": 29,
+          "line": "TAKEITEM ZumaHeart 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Far-0122",
+          "lineNumber": 12,
+          "line": "TAKEITEM Wine 1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKPKPOINT",
+      "count": 294,
+      "scriptCount": 294,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 3,
+          "line": "CHECKPKPOINT > 199"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Administrator-0122",
+          "lineNumber": 2,
+          "line": "CHECKPKPOINT > 199"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Administrator",
+          "lineNumber": 2,
+          "line": "CHECKPKPOINT > 199"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Awakening-0",
+          "lineNumber": 2,
+          "line": "CHECKPKPOINT > 199"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Awakening",
+          "lineNumber": 2,
+          "line": "CHECKPKPOINT > 199"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GIVEITEM",
+      "count": 201,
+      "scriptCount": 18,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 59,
+          "line": "GIVEITEM TownTeleport 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 64,
+          "line": "GIVEITEM TownTeleport 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 69,
+          "line": "GIVEITEM TownTeleport 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 74,
+          "line": "GIVEITEM TownTeleport 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/14Wr-0",
+          "lineNumber": 79,
+          "line": "GIVEITEM TownTeleport 1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECK",
+      "count": 198,
+      "scriptCount": 36,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 17,
+          "line": "CHECK [535] 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Blacksmith-0103",
+          "lineNumber": 73,
+          "line": "CHECK [539] 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Blacksmith1",
+          "lineNumber": 75,
+          "line": "CHECK [539] 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 107,
+          "line": "CHECK [993] 0"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 139,
+          "line": "CHECK [994] 0"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GIVESKILL",
+      "count": 183,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Book",
+          "lineNumber": 27,
+          "line": "GIVESKILL Fencing 3"
+        },
+        {
+          "scriptKey": "GM/GM-Book",
+          "lineNumber": 28,
+          "line": "GIVESKILL Slaying 3"
+        },
+        {
+          "scriptKey": "GM/GM-Book",
+          "lineNumber": 29,
+          "line": "GIVESKILL Thrusting 3"
+        },
+        {
+          "scriptKey": "GM/GM-Book",
+          "lineNumber": 30,
+          "line": "GIVESKILL HalfMoon 3"
+        },
+        {
+          "scriptKey": "GM/GM-Book",
+          "lineNumber": 31,
+          "line": "GIVESKILL ShoulderDash 3"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "MONGEN",
+      "count": 168,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 319,
+          "line": "MonGen SpittingSpider 1"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 320,
+          "line": "MonGen Oma 2"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 321,
+          "line": "MonGen RakingCat 2"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 349,
+          "line": "MonGen CaveMaggot 1"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 350,
+          "line": "MonGen AxeSkeleton 1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "PETCOUNT",
+      "count": 168,
+      "scriptCount": 8,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 19,
+          "line": "PETCOUNT == 0"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 169,
+          "line": "PETCOUNT == 0"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 317,
+          "line": "PETCOUNT == 0"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 434,
+          "line": "PETCOUNT == 0"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 577,
+          "line": "PETCOUNT == 5"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CLEARPETS",
+      "count": 129,
+      "scriptCount": 9,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 44,
+          "line": "CLEARPETS"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 579,
+          "line": "CLEARPETS"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 591,
+          "line": "CLEARPETS"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 603,
+          "line": "CLEARPETS"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 615,
+          "line": "CLEARPETS"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKPET",
+      "count": 128,
+      "scriptCount": 8,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 575,
+          "line": "CHECKPET RedViper"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 587,
+          "line": "CHECKPET WickedTong"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 599,
+          "line": "CHECKPET WildBeast"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 611,
+          "line": "CHECKPET BloodRat"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 623,
+          "line": "CHECKPET SeaCreature"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "PETLEVEL",
+      "count": 128,
+      "scriptCount": 8,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 576,
+          "line": "PETLEVEL == 7"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 588,
+          "line": "PETLEVEL == 7"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 600,
+          "line": "PETLEVEL == 7"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 612,
+          "line": "PETLEVEL == 7"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 624,
+          "line": "PETLEVEL == 7"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "LOCALMESSAGE",
+      "count": 98,
+      "scriptCount": 31,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 6,
+          "line": "LocalMessage \"You've found the Stone in StoneTemple\" Hint"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 7,
+          "line": "LocalMessage \"Return to the MongchonDelegate\" Hint"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Luke-0",
+          "lineNumber": 41,
+          "line": "LOCALMESSAGE \"[Commander Luke] Take some time to think.\" Hint"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Luke",
+          "lineNumber": 41,
+          "line": "LOCALMESSAGE \"[Commander Luke] Take some time to think.\" Hint"
+        },
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard-0",
+          "lineNumber": 30,
+          "line": "LocalMessage \"Congratulations, You have joined the NewbieGuild.\" Hint"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "BREAK",
+      "count": 61,
+      "scriptCount": 30,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 32,
+          "line": "BREAK"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 43,
+          "line": "BREAK"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 54,
+          "line": "BREAK"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 65,
+          "line": "BREAK"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 76,
+          "line": "BREAK"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "PARAM1",
+      "count": 60,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 316,
+          "line": "Param1 EM001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 346,
+          "line": "Param1 EM001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 377,
+          "line": "Param1 EM001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 408,
+          "line": "Param1 EM001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 438,
+          "line": "Param1 EM001"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "PARAM2",
+      "count": 60,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 317,
+          "line": "Param2 13"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 347,
+          "line": "Param2 13"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 378,
+          "line": "Param2 13"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 409,
+          "line": "Param2 13"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 439,
+          "line": "Param2 13"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "PARAM3",
+      "count": 60,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 318,
+          "line": "Param3 16"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 348,
+          "line": "Param3 16"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 379,
+          "line": "Param3 16"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 410,
+          "line": "Param3 16"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 440,
+          "line": "Param3 16"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKMON",
+      "count": 60,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 324,
+          "line": "CHECKMON >= 1 em001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 355,
+          "line": "CHECKMON >= 1 em001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 386,
+          "line": "CHECKMON >= 1 em001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 416,
+          "line": "CHECKMON >= 1 em001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 447,
+          "line": "CHECKMON >= 1 em001"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "MOV",
+      "count": 42,
+      "scriptCount": 14,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 20,
+          "line": "MOV B3 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 29,
+          "line": "MOV B3 2"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 38,
+          "line": "MOV B3 3"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 47,
+          "line": "MOV B3 4"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 56,
+          "line": "MOV B3 5"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CLOSE",
+      "count": 40,
+      "scriptCount": 21,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/14Qas-D604",
+          "lineNumber": 11,
+          "line": "CLOSE"
+        },
+        {
+          "scriptKey": "MongchonProvince/14Qp1-D701",
+          "lineNumber": 11,
+          "line": "CLOSE"
+        },
+        {
+          "scriptKey": "MongchonProvince/14Qp2-D701",
+          "lineNumber": 11,
+          "line": "CLOSE"
+        },
+        {
+          "scriptKey": "MongchonProvince/14Qp3-D701",
+          "lineNumber": 11,
+          "line": "CLOSE"
+        },
+        {
+          "scriptKey": "MongchonProvince/Ashes",
+          "lineNumber": 11,
+          "line": "CLOSE"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CONQUESTGUARD",
+      "count": 36,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 185,
+          "line": "CONQUESTGUARD 1 1"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 186,
+          "line": "CONQUESTGUARD 1 2"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 187,
+          "line": "CONQUESTGUARD 1 3"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 188,
+          "line": "CONQUESTGUARD 1 4"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 189,
+          "line": "CONQUESTGUARD 1 5"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "RANDOM",
+      "count": 36,
+      "scriptCount": 6,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 18,
+          "line": "RANDOM 10"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 27,
+          "line": "RANDOM 9"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 36,
+          "line": "RANDOM 8"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 45,
+          "line": "RANDOM 7"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 54,
+          "line": "RANDOM 6"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GIVEGOLD",
+      "count": 32,
+      "scriptCount": 16,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 134,
+          "line": "GIVEGOLD 100000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery",
+          "lineNumber": 134,
+          "line": "GIVEGOLD 100000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Warehouse-0125",
+          "lineNumber": 49,
+          "line": "GIVEGOLD 998000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Warehouse-0125",
+          "lineNumber": 61,
+          "line": "GIVEGOLD 4990000"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Warehouse-0125",
+          "lineNumber": 73,
+          "line": "GIVEGOLD 9980000"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKQUEST",
+      "count": 32,
+      "scriptCount": 30,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "AncientCaves/AncientNatural-D003",
+          "lineNumber": 4,
+          "line": "CHECKQUEST 153 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientPrajna-D2074",
+          "lineNumber": 3,
+          "line": "CHECKQUEST 153 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 3,
+          "line": "CHECKQUEST 135 0"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientStone-D715",
+          "lineNumber": 14,
+          "line": "CHECKQUEST 153 1"
+        },
+        {
+          "scriptKey": "AncientCaves/AncientWooma-D023",
+          "lineNumber": 3,
+          "line": "CHECKQUEST 153 1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "ISADMIN",
+      "count": 24,
+      "scriptCount": 24,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Armour",
+          "lineNumber": 2,
+          "line": "ISADMIN"
+        },
+        {
+          "scriptKey": "GM/GM-Awakening",
+          "lineNumber": 2,
+          "line": "ISADMIN"
+        },
+        {
+          "scriptKey": "GM/GM-Belt",
+          "lineNumber": 2,
+          "line": "ISADMIN"
+        },
+        {
+          "scriptKey": "GM/GM-Book",
+          "lineNumber": 2,
+          "line": "ISADMIN"
+        },
+        {
+          "scriptKey": "GM/GM-Boot",
+          "lineNumber": 2,
+          "line": "ISADMIN"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "LINEMESSAGE",
+      "count": 22,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 45,
+          "line": "LINEMESSAGE \"Your pets are now dead as you requested.\" Hint"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 74,
+          "line": "LINEMESSAGE \"All quest flags have been reset.\" Hint"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 58,
+          "line": "LINEMESSAGE \"You have forged AncientHeavyArmour.\" Hint"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 85,
+          "line": "LINEMESSAGE \"You have forged AncientHeavyArmour.\" Hint"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 140,
+          "line": "LINEMESSAGE \"You have forged AncientRobe.\" Hint"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "AFFORDGUARD",
+      "count": 12,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 197,
+          "line": "AFFORDGUARD 1 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 206,
+          "line": "AFFORDGUARD 1 2"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 215,
+          "line": "AFFORDGUARD 1 3"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 224,
+          "line": "AFFORDGUARD 1 4"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 233,
+          "line": "AFFORDGUARD 1 5"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKCLASS",
+      "count": 12,
+      "scriptCount": 9,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTPetNPC",
+          "lineNumber": 2,
+          "line": "CHECKCLASS Wizard"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA1/GTPetNPC",
+          "lineNumber": 2,
+          "line": "CHECKCLASS Wizard"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA2/GTPetNPC",
+          "lineNumber": 2,
+          "line": "CHECKCLASS Wizard"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA3/GTPetNPC",
+          "lineNumber": 2,
+          "line": "CHECKCLASS Wizard"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA4/GTPetNPC",
+          "lineNumber": 2,
+          "line": "CHECKCLASS Wizard"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "EXTENDGT",
+      "count": 10,
+      "scriptCount": 10,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTAdmin-GA10",
+          "lineNumber": 33,
+          "line": "EXTENDGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA1/GTAdmin-GA11",
+          "lineNumber": 33,
+          "line": "EXTENDGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA2/GTAdmin-GA12",
+          "lineNumber": 33,
+          "line": "EXTENDGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA3/GTAdmin-GA13",
+          "lineNumber": 33,
+          "line": "EXTENDGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA4/GTAdmin-GA14",
+          "lineNumber": 33,
+          "line": "EXTENDGT"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GTALLRECALL",
+      "count": 10,
+      "scriptCount": 10,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTAdmin-GA10",
+          "lineNumber": 38,
+          "line": "GTALLRECALL"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA1/GTAdmin-GA11",
+          "lineNumber": 38,
+          "line": "GTALLRECALL"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA2/GTAdmin-GA12",
+          "lineNumber": 38,
+          "line": "GTALLRECALL"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA3/GTAdmin-GA13",
+          "lineNumber": 38,
+          "line": "GTALLRECALL"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA4/GTAdmin-GA14",
+          "lineNumber": 38,
+          "line": "GTALLRECALL"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GTRECALL",
+      "count": 10,
+      "scriptCount": 10,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTAdmin-GA10",
+          "lineNumber": 46,
+          "line": "GTRECALL <$OUTPUT(A1)>"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA1/GTAdmin-GA11",
+          "lineNumber": 46,
+          "line": "GTRECALL <$OUTPUT(A1)>"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA2/GTAdmin-GA12",
+          "lineNumber": 46,
+          "line": "GTRECALL <$OUTPUT(A1)>"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA3/GTAdmin-GA13",
+          "lineNumber": 46,
+          "line": "GTRECALL <$OUTPUT(A1)>"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA4/GTAdmin-GA14",
+          "lineNumber": 46,
+          "line": "GTRECALL <$OUTPUT(A1)>"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "GENDER",
+      "count": 10,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 39,
+          "line": "GENDER MALE"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 121,
+          "line": "GENDER MALE"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 204,
+          "line": "GENDER MALE"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 287,
+          "line": "GENDER MALE"
+        },
+        {
+          "scriptKey": "WasteLand/20Qah-NAMMAND_1",
+          "lineNumber": 369,
+          "line": "GENDER MALE"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "HASGT",
+      "count": 10,
+      "scriptCount": 10,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GuildTerritory/GA0/GTAdmin-GA10",
+          "lineNumber": 31,
+          "line": "HASGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA1/GTAdmin-GA11",
+          "lineNumber": 31,
+          "line": "HASGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA2/GTAdmin-GA12",
+          "lineNumber": 31,
+          "line": "HASGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA3/GTAdmin-GA13",
+          "lineNumber": 31,
+          "line": "HASGT"
+        },
+        {
+          "scriptKey": "GuildTerritory/GA4/GTAdmin-GA14",
+          "lineNumber": 31,
+          "line": "HASGT"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CONQUESTWALL",
+      "count": 9,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 158,
+          "line": "CONQUESTWALL 1 1"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 159,
+          "line": "CONQUESTWALL 1 2"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 160,
+          "line": "CONQUESTWALL 1 3"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 165,
+          "line": "CONQUESTWALL 1 1"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 170,
+          "line": "CONQUESTWALL 1 2"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CONQUESTOWNER",
+      "count": 7,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 2,
+          "line": "CONQUESTOWNER 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 45,
+          "line": "CONQUESTOWNER 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 53,
+          "line": "CONQUESTOWNER 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 61,
+          "line": "CONQUESTOWNER 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 69,
+          "line": "CONQUESTOWNER 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CHANGEHAIR",
+      "count": 6,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 31,
+          "line": "CHANGEHAIR 0"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 42,
+          "line": "CHANGEHAIR 1"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 53,
+          "line": "CHANGEHAIR 2"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 64,
+          "line": "CHANGEHAIR 3"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Hairdresser",
+          "lineNumber": 75,
+          "line": "CHANGEHAIR 4"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "ADDNAMELIST",
+      "count": 5,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 121,
+          "line": "ADDNAMELIST ../NameLists/Rebirth1.txt"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 154,
+          "line": "ADDNAMELIST ../NameLists/Rebirth2.txt"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 187,
+          "line": "ADDNAMELIST ../NameLists/Rebirth3.txt"
+        },
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard-0",
+          "lineNumber": 29,
+          "line": "ADDNAMELIST NewbieGuild"
+        },
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard",
+          "lineNumber": 26,
+          "line": "ADDNAMELIST ../NameLists/NewbieGuild.txt"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKPERMISSION",
+      "count": 5,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 29,
+          "line": "CHECKPERMISSION 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 46,
+          "line": "CHECKPERMISSION 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 54,
+          "line": "CHECKPERMISSION 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 62,
+          "line": "CHECKPERMISSION 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 70,
+          "line": "CHECKPERMISSION 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GLOBALMESSAGE",
+      "count": 4,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 49,
+          "line": "GLOBALMESSAGE \"By the order of <$CONQUESTOWNER(1)> Sabuk Taxes are <$CONQUESTRATE(1)>! \" Announcement"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 57,
+          "line": "GLOBALMESSAGE \"By the order of <$CONQUESTOWNER(1)> Sabuk Taxes are <$CONQUESTRATE(1)>! \" Announcement"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 65,
+          "line": "GLOBALMESSAGE \"By the order of <$CONQUESTOWNER(1)> Sabuk Taxes are <$CONQUESTRATE(1)>! \" Announcement"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 73,
+          "line": "GLOBALMESSAGE \"By the order of <$CONQUESTOWNER(1)> Sabuk Taxes are <$CONQUESTRATE(1)>! \" Announcement"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "SETCONQUESTRATE",
+      "count": 4,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 48,
+          "line": "SETCONQUESTRATE 1 10"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 56,
+          "line": "SETCONQUESTRATE 1 15"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 64,
+          "line": "SETCONQUESTRATE 1 20"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 72,
+          "line": "SETCONQUESTRATE 1 25"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKCALC",
+      "count": 4,
+      "scriptCount": 4,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery-0",
+          "lineNumber": 119,
+          "line": "CHECKCALC %B3 == %ARG(0)"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Lottery",
+          "lineNumber": 119,
+          "line": "CHECKCALC %B3 == %ARG(0)"
+        },
+        {
+          "scriptKey": "MongchonProvince/MudWall/9Mlo-3",
+          "lineNumber": 119,
+          "line": "CHECKCALC %B3 == %ARG(0)"
+        },
+        {
+          "scriptKey": "MongchonProvince/MudWall/Lottery",
+          "lineNumber": 119,
+          "line": "CHECKCALC %B3 == %ARG(0)"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "DAYOFWEEK",
+      "count": 4,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "SerpentValley/ConnectionPath/MysteriousYu",
+          "lineNumber": 10,
+          "line": "DAYOFWEEK SUNDAY"
+        },
+        {
+          "scriptKey": "SerpentValley/ConnectionPath/MysteriousYu",
+          "lineNumber": 16,
+          "line": "DAYOFWEEK SATURADAY"
+        },
+        {
+          "scriptKey": "SerpentValley/MysteriousYu-E603",
+          "lineNumber": 10,
+          "line": "DAYOFWEEK SUNDAY"
+        },
+        {
+          "scriptKey": "SerpentValley/MysteriousYu-E603",
+          "lineNumber": 16,
+          "line": "DAYOFWEEK SATURADAY"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "HOUR",
+      "count": 4,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "SerpentValley/ConnectionPath/MysteriousYu",
+          "lineNumber": 11,
+          "line": "HOUR 20"
+        },
+        {
+          "scriptKey": "SerpentValley/ConnectionPath/MysteriousYu",
+          "lineNumber": 17,
+          "line": "HOUR 20"
+        },
+        {
+          "scriptKey": "SerpentValley/MysteriousYu-E603",
+          "lineNumber": 11,
+          "line": "HOUR 20"
+        },
+        {
+          "scriptKey": "SerpentValley/MysteriousYu-E603",
+          "lineNumber": 17,
+          "line": "HOUR 20"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "MIN",
+      "count": 4,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "SerpentValley/ConnectionPath/MysteriousYu",
+          "lineNumber": 12,
+          "line": "MIN 20"
+        },
+        {
+          "scriptKey": "SerpentValley/ConnectionPath/MysteriousYu",
+          "lineNumber": 18,
+          "line": "MIN 20"
+        },
+        {
+          "scriptKey": "SerpentValley/MysteriousYu-E603",
+          "lineNumber": 12,
+          "line": "MIN 20"
+        },
+        {
+          "scriptKey": "SerpentValley/MysteriousYu-E603",
+          "lineNumber": 18,
+          "line": "MIN 20"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "BREAKTIMERECALL",
+      "count": 3,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder30-EM001",
+          "lineNumber": 908,
+          "line": "breaktimerecall"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder40-EM002",
+          "lineNumber": 914,
+          "line": "breaktimerecall"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/Proceeder41-EM003",
+          "lineNumber": 921,
+          "line": "breaktimerecall"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "ELSESAY",
+      "count": 3,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "Test",
+          "lineNumber": 11,
+          "line": "ELSESAY"
+        },
+        {
+          "scriptKey": "Test",
+          "lineNumber": 16,
+          "line": "ELSESAY"
+        },
+        {
+          "scriptKey": "Test",
+          "lineNumber": 21,
+          "line": "ELSESAY"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "MONCLEAR",
+      "count": 3,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/MissDo-EM000",
+          "lineNumber": 61,
+          "line": "MONCLEAR EM001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/MissMi-EM000",
+          "lineNumber": 61,
+          "line": "MONCLEAR EM002"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/MissRe-EM000",
+          "lineNumber": 61,
+          "line": "MONCLEAR EM003"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "REVIVEHERO",
+      "count": 3,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 78,
+          "line": "ReviveHero"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Signpost-0",
+          "lineNumber": 82,
+          "line": "ReviveHero"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 288,
+          "line": "ReviveHero"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "SEALHERO",
+      "count": 3,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 82,
+          "line": "SealHero"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Signpost-0",
+          "lineNumber": 86,
+          "line": "SealHero"
+        },
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 292,
+          "line": "SealHero"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "TIMERECALL",
+      "count": 3,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/MissDo-EM000",
+          "lineNumber": 62,
+          "line": "TIMERECALL 3600"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/MissMi-EM000",
+          "lineNumber": 62,
+          "line": "TIMERECALL 3600"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/MissRe-EM000",
+          "lineNumber": 62,
+          "line": "TIMERECALL 3600"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "AFFORDWALL",
+      "count": 3,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 135,
+          "line": "AFFORDWALL 1 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 145,
+          "line": "AFFORDWALL 1 3"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 154,
+          "line": "AFFORDWALL 1 2"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKHUM",
+      "count": 3,
+      "scriptCount": 3,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/Event/MissDo-EM000",
+          "lineNumber": 17,
+          "line": "CHECKHUM >= 1 EM001"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/MissMi-EM000",
+          "lineNumber": 17,
+          "line": "CHECKHUM 1 EM002"
+        },
+        {
+          "scriptKey": "BichonProvince/Event/MissRe-EM000",
+          "lineNumber": 17,
+          "line": "CHECKHUM 1 EM003"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "ADDTOGUILD",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard-0",
+          "lineNumber": 28,
+          "line": "AddToGuild NewbieGuild"
+        },
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard",
+          "lineNumber": 25,
+          "line": "ADDTOGUILD NewbieGuild"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "BUYGT",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/GTMerchant-0",
+          "lineNumber": 36,
+          "line": "BUYGT"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/GTMerchant",
+          "lineNumber": 36,
+          "line": "BUYGT"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CHANGELEVEL",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 28,
+          "line": "CHANGELEVEL 22"
+        },
+        {
+          "scriptKey": "Test",
+          "lineNumber": 187,
+          "line": "CHANGELEVEL 55"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CLOSEGATE",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 153,
+          "line": "CLOSEGATE 1 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 96,
+          "line": "CLOSEGATE 1 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CONQUESTGATE",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 180,
+          "line": "CONQUESTGATE 1 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 128,
+          "line": "CONQUESTGATE 1 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "DELNAMELIST",
+      "count": 2,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 153,
+          "line": "DELNAMELIST ../NameLists/Rebirth1.txt"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Board",
+          "lineNumber": 186,
+          "line": "DELNAMELIST ../NameLists/Rebirth2.txt"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GIVEBUFF",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/Luke-0",
+          "lineNumber": 39,
+          "line": "GIVEBUFF PRISON 3600"
+        },
+        {
+          "scriptKey": "BichonProvince/BichonWall/Luke",
+          "lineNumber": 39,
+          "line": "GIVEBUFF PRISON 3600"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GROUPGOTO",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/FoxCave/Rock",
+          "lineNumber": 4,
+          "line": "GROUPGOTO @grouphere"
+        },
+        {
+          "scriptKey": "MongchonProvince/Rock-FOX02",
+          "lineNumber": 4,
+          "line": "GROUPGOTO @grouphere"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "GROUPTELEPORT",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/FoxCave/Rock",
+          "lineNumber": 41,
+          "line": "GROUPTELEPORT FOX03 47 21"
+        },
+        {
+          "scriptKey": "MongchonProvince/Rock-FOX02",
+          "lineNumber": 41,
+          "line": "GROUPTELEPORT FOX03 47 21"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "OPENGATE",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 148,
+          "line": "OPENGATE 1 1"
+        },
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 88,
+          "line": "OPENGATE 1 1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKBUFF",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BorderVillage/Prison-0127",
+          "lineNumber": 2,
+          "line": "CHECKBUFF PRISON"
+        },
+        {
+          "scriptKey": "BichonProvince/BorderVillage/Prison",
+          "lineNumber": 2,
+          "line": "CHECKBUFF PRISON"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKMAP",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/FoxCave/Rock",
+          "lineNumber": 13,
+          "line": "CHECKMAP FOX02"
+        },
+        {
+          "scriptKey": "MongchonProvince/Rock-FOX02",
+          "lineNumber": 13,
+          "line": "CHECKMAP FOX02"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKRANGE",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/FoxCave/Rock",
+          "lineNumber": 14,
+          "line": "CHECKRANGE 223 304 5"
+        },
+        {
+          "scriptKey": "MongchonProvince/Rock-FOX02",
+          "lineNumber": 14,
+          "line": "CHECKRANGE 223 304 5"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "GROUPCOUNT",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/FoxCave/Rock",
+          "lineNumber": 12,
+          "line": "GROUPCOUNT > 4"
+        },
+        {
+          "scriptKey": "MongchonProvince/Rock-FOX02",
+          "lineNumber": 12,
+          "line": "GROUPCOUNT > 4"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "GROUPLEADER",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/FoxCave/Rock",
+          "lineNumber": 2,
+          "line": "GROUPLEADER"
+        },
+        {
+          "scriptKey": "MongchonProvince/Rock-FOX02",
+          "lineNumber": 2,
+          "line": "GROUPLEADER"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "INGUILD",
+      "count": 2,
+      "scriptCount": 2,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard-0",
+          "lineNumber": 22,
+          "line": "INGUILD NewbieGuild"
+        },
+        {
+          "scriptKey": "BichonProvince/BorderVillage/BountyBoard",
+          "lineNumber": 20,
+          "line": "INGUILD"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CHECKITEM",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 35,
+          "line": "CHECKITEM WoomaHorn 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "CONQUESTREPAIRALL",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 261,
+          "line": "CONQUESTREPAIRALL 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "STARTCONQUEST",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "GM/GM-Manager",
+          "lineNumber": 105,
+          "line": "STARTCONQUEST 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "TAKECONQUESTGOLD",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 32,
+          "line": "TAKECONQUESTGOLD 1"
+        }
+      ]
+    },
+    {
+      "kind": "action",
+      "command": "TELEPORTGT",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "BichonProvince/BichonWall/GTMerchant",
+          "lineNumber": 51,
+          "line": "TeleportGT"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "AFFORDGATE",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "MongchonProvince/SabukWall/Conquest",
+          "lineNumber": 126,
+          "line": "AFFORDGATE 1 1"
+        }
+      ]
+    },
+    {
+      "kind": "condition",
+      "command": "CHECKEXACTMON",
+      "count": 1,
+      "scriptCount": 1,
+      "runtimeStatus": "implemented",
+      "examples": [
+        {
+          "scriptKey": "WhiteValley/SnowMonument",
+          "lineNumber": 11,
+          "line": "CHECKEXACTMON SinseokMiner >= 1 SnowCave_BOSS"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "profileId": "mir2-early-100ccu-v1",
+  "capacity": {
+    "maximumConcurrentPlayers": 100,
+    "catalogMaps": 700,
+    "maximumActiveMaps": 32,
+    "hotMapTargetPlayersPerLine": 50,
+    "hotMapMaximumPlayersPerLine": 64,
+    "hotMapMaximumLines": 2
+  },
+  "host": {
+    "minimumCpu": 4,
+    "minimumUsableMemoryGiB": 7.5,
+    "minimumNvmeGiB": 100,
+    "recommendedNetworkMbps": 100
+  },
+  "limits": {
+    "scaleOutCpuPercent": 65,
+    "scaleOutMemoryPercent": 70,
+    "scaleOutCommandP95Ms": 150,
+    "scaleOutSustainedCcu": 80
+  },
+  "availability": {
+    "mode": "single-host",
+    "automaticHostFailover": false,
+    "offHostBackupRequired": true,
+    "maximumBackupAgeHours": 24
+  }
+}

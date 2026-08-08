@@ -1,0 +1,156 @@
+.mir-pwa-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  pointer-events: none;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.mir-pwa-actions {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  display: flex;
+  gap: 7px;
+  pointer-events: auto;
+}
+
+.mir-pwa-action {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid rgba(218, 184, 107, 0.68);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(73, 51, 26, 0.96), rgba(18, 12, 7, 0.97)),
+    #160e08;
+  box-shadow:
+    inset 0 1px rgba(255, 236, 184, 0.22),
+    0 5px 18px rgba(0, 0, 0, 0.58);
+  color: #f2dca8;
+  font: 600 13px/1 Georgia, "Times New Roman", serif;
+  text-shadow: 1px 1px #000;
+  touch-action: manipulation;
+}
+
+.mir-pwa-action-mark {
+  display: inline-block;
+  margin-right: 6px;
+  color: #d7ad52;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.mir-pwa-guide {
+  position: absolute;
+  left: max(14px, env(safe-area-inset-left));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  width: min(430px, calc(100vw - 28px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  padding: 16px 17px 14px;
+  pointer-events: auto;
+  border: 1px solid rgba(211, 176, 94, 0.72);
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(138, 91, 36, 0.22), transparent 44%),
+    linear-gradient(180deg, rgba(22, 15, 9, 0.98), rgba(5, 4, 3, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 231, 166, 0.06),
+    0 12px 32px rgba(0, 0, 0, 0.72);
+  color: #ead7ad;
+  text-shadow: 1px 1px #000;
+}
+
+.mir-pwa-guide-kicker {
+  margin-bottom: 4px;
+  color: #b99451;
+  font: 700 9px/1.2 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.18em;
+}
+
+.mir-pwa-guide strong {
+  display: block;
+  color: #ffe4aa;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.mir-pwa-guide p {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.mir-pwa-guide-steps {
+  color: #cdbb96;
+}
+
+.mir-pwa-guide-status {
+  color: #f0bd72;
+}
+
+.mir-pwa-guide-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mir-pwa-guide-buttons button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border-radius: 3px;
+  touch-action: manipulation;
+}
+
+.mir-pwa-guide-primary {
+  border: 1px solid #d5ad59;
+  background: linear-gradient(180deg, #6e4a23, #2a1a0d);
+  color: #fff0c8;
+}
+
+.mir-pwa-guide-dismiss {
+  border: 1px solid rgba(189, 162, 107, 0.42);
+  background: rgba(15, 11, 7, 0.88);
+  color: #bca984;
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .mir-pwa-actions,
+  .mir-pwa-guide {
+    display: none;
+  }
+
+  .mir-pwa-actions {
+    top: auto;
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .mir-pwa-guide {
+    left: 50%;
+    bottom: calc(max(62px, env(safe-area-inset-bottom) + 54px));
+    transform: translateX(-50%);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .mir-pwa-guide {
+    width: min(230px, calc(100vw - 28px));
+    padding: 8px 10px;
+  }
+
+  .mir-pwa-guide strong {
+    font-size: 13px;
+  }
+
+  .mir-pwa-guide p:not(.mir-pwa-guide-status) {
+    display: none;
+  }
+
+  .mir-pwa-guide-buttons {
+    margin-top: 7px;
+  }
+
+  .mir-pwa-guide-buttons button {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+}

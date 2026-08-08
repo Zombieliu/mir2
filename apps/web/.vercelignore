@@ -1,0 +1,35 @@
+.next/
+.vercel/
+docs/generated/
+node_modules/
+tsconfig.tsbuildinfo
+
+# The repository keeps the full source corpus for deterministic asset generation
+# and offline development. Production archives do not need media already present
+# under the immutable R2 release prefix.
+#
+# Entity sprite libraries (CArmour/CHair/CWeapon, A*/AR* class sets, NPC,
+# Monster and Mount) remain same-origin until the remote-release manifest proves
+# complete coverage for every runtime frame. Do not broaden this list merely
+# because an R2 bucket contains a partial historical upload.
+public/original-map/**/*.png
+public/original-ui/ChrSel/**/*.png
+public/original-ui/Cursors/**/*.png
+public/original-ui/Items/**/*.png
+public/original-ui/MMap/**/*.png
+public/original-ui/MapLinkIcon/**/*.png
+public/original-ui/Prguse/**/*.png
+public/original-ui/Prguse2/**/*.png
+public/original-ui/Title/**/*.png
+public/original-ui/**/*.wav
+
+# The player selects pkg-webgpu or pkg-webgl2 explicitly. `pkg` was a byte-for-
+# byte legacy WebGL2 mirror and is not referenced by the runtime loader.
+public/bevy-runtime/pkg/**
+
+# QA captures and inspection fixtures are not player runtime assets. Two tiny
+# map samples are also the deterministic CSS/DOM terrain fallback and must stay.
+public/debug/**
+!public/debug/map-samples/
+!public/debug/map-samples/smtile-72.png
+!public/debug/map-samples/smtile-80.png

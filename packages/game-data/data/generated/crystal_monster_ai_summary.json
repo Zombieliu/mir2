@@ -1,0 +1,4482 @@
+{
+  "generated_at": "2026-04-22T05:31:18.732Z",
+  "source_files": {
+    "monster_manifest": "packages/game-data/data/generated/crystal_monster_manifest.json",
+    "respawn_manifest": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+    "crystal_monster_object": "Crystal/Server/MirObjects/MonsterObject.cs"
+  },
+  "total_monsters": 555,
+  "total_ai_families": 212,
+  "spawned_ai_families": 87,
+  "implemented_runtime_families": 95,
+  "generic_runtime_families": 0,
+  "data_only_families": 117,
+  "unknown_source_ai_values": [],
+  "remaining_runtime_priorities": [],
+  "families": [
+    {
+      "ai": 0,
+      "crystal_class": "MonsterObject",
+      "crystal_notes": [
+        "Default generic MonsterObject fallback."
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Default MonsterObject branch is covered as the imported generic runtime baseline: Crystal template stats, hostile movement/chase, adjacent ObjectAttack melee, delayed struck damage, respawn, drops, and packet visibility are covered; per-family subclasses remain tracked by their own AI entries."
+      ],
+      "monster_count": 283,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3588,
+      "respawn_entity_count": 48155,
+      "map_count": 213,
+      "example_monsters": [
+        "Yob",
+        "Yob0",
+        "Scarecrow",
+        "Scarecrow0",
+        "Scarecrow1",
+        "HookingCat",
+        "HookingCat0",
+        "RakingCat"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "D011 NaturalCave",
+        "D012 NaturalCave",
+        "E001 ConnectionPath",
+        "E002 ConnectionPath",
+        "D001 OmaCave_1F",
+        "D002 OmaCave_2F",
+        "DM002 KingsTomb"
+      ]
+    },
+    {
+      "ai": 1,
+      "crystal_class": "Deer",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Hen/Pig/Bull style HarvestMonster baseline is covered: neutral/passive no-player-target behavior, no normal attacks, and Crystal two-pass harvest skin count."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 5,
+      "respawn_entity_count": 30,
+      "map_count": 1,
+      "example_monsters": [
+        "Hen",
+        "Pig",
+        "Bull"
+      ],
+      "example_maps": [
+        "0 BichonProvince"
+      ]
+    },
+    {
+      "ai": 2,
+      "crystal_class": "Deer",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Deer/Sheep passive no-player-target baseline, Crystal five-pass harvest skin count, deterministic run-away mode selection, and flee movement are covered; exact Quality randomization remains pending with item/drop quality parity."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 18,
+      "respawn_entity_count": 344,
+      "map_count": 3,
+      "example_monsters": [
+        "Deer",
+        "Deer1",
+        "Sheep"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "M001 MysteryCave",
+        "3 MongchonProvince"
+      ]
+    },
+    {
+      "ai": 3,
+      "crystal_class": "Tree",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Tree-style static object behavior is covered: neutral/passive targeting, no movement/route/chase/patrol, no normal attacks, fixed one-HP damage intake, and Crystal upward-facing runtime spawns."
+      ],
+      "monster_count": 7,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 365,
+      "respawn_entity_count": 778,
+      "map_count": 7,
+      "example_monsters": [
+        "ChestnutTree",
+        "ChestnutTree1",
+        "ChestnutTree2",
+        "EbonyTree",
+        "CherryTree",
+        "LargeMushroom",
+        "TreasureBox"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "1 WoomyonWoods(S)",
+        "11 WoomyonWoods(N)",
+        "LABY01 ViperMaze",
+        "LABY02 ViperMaze",
+        "LABY03 ViperMaze",
+        "LABY04 ViperMaze"
+      ]
+    },
+    {
+      "ai": 4,
+      "crystal_class": "SpittingSpider",
+      "crystal_notes": [
+        "Common AI: 1 Line Attack with Poison"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Two-tile line/diagonal attack range and delayed hit timing are covered."
+      ],
+      "monster_count": 8,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 48,
+      "respawn_entity_count": 1056,
+      "map_count": 15,
+      "example_monsters": [
+        "SpittingSpider",
+        "VenomSpider",
+        "VenomSpider0",
+        "VenomSpider3",
+        "LureSpider",
+        "LureSpider0",
+        "LureSpider3",
+        "BloodyLureSpider"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "1 WoomyonWoods(S)",
+        "11 WoomyonWoods(N)",
+        "12 Treepath",
+        "D10011 RedValley_1F",
+        "D10012 RedValley_1F",
+        "D10013 RedValley_1F",
+        "D1002 RedValley_2F"
+      ]
+    },
+    {
+      "ai": 5,
+      "crystal_class": "CannibalPlant",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Hidden plant spawn, reveal, ObjectShow/ObjectHide, and untargetable hidden state are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 9,
+      "respawn_entity_count": 320,
+      "map_count": 5,
+      "example_monsters": [
+        "CannibalPlant"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "1 WoomyonWoods(S)",
+        "11 WoomyonWoods(N)",
+        "2 SerpentValley",
+        "5 PrajnaIsland"
+      ]
+    },
+    {
+      "ai": 6,
+      "crystal_class": "Guard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "neutral_guard_baseline",
+      "runtime_notes": [
+        "Neutral guard disposition, hostile-monster target selection, target-back melee packet shape, and deer/hen/tree ignore rules are covered."
+      ],
+      "monster_count": 6,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 77,
+      "respawn_entity_count": 76,
+      "map_count": 8,
+      "example_monsters": [
+        "Guard",
+        "Guard2",
+        "Sentry",
+        "Guard3",
+        "Royal_Guard",
+        "Royal_Lieutenant"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "1 WoomyonWoods(S)",
+        "UMM SeokchoValley",
+        "2 SerpentValley",
+        "3 MongchonProvince",
+        "6 PastBichon",
+        "HELL00 WasteLands",
+        "WhiteVillage WhiteValley"
+      ]
+    },
+    {
+      "ai": 7,
+      "crystal_class": "CaveMaggot",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "CaveMaggot Crystal melee timing, DC-based damage, 1/20 five-second paralysis status, and shared HarvestMonster two-pass corpse harvest are covered."
+      ],
+      "monster_count": 6,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 233,
+      "respawn_entity_count": 3433,
+      "map_count": 100,
+      "example_monsters": [
+        "CaveMaggot",
+        "WedgeMoth",
+        "Dung",
+        "Dung0",
+        "SpiderBat",
+        "WedgeMoth22"
+      ],
+      "example_maps": [
+        "D011 NaturalCave",
+        "D012 NaturalCave",
+        "E001 ConnectionPath",
+        "E002 ConnectionPath",
+        "D001 OmaCave_1F",
+        "D002 OmaCave_2F",
+        "D003 OmaCave_3F",
+        "D001A AncientNaturalCave"
+      ]
+    },
+    {
+      "ai": 8,
+      "crystal_class": "AxeSkeleton",
+      "crystal_notes": [
+        "Common AI: 1 Range Projectile Attack with Fear"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Six-tile ranged packet pressure and Crystal fear-window close/kite movement are covered."
+      ],
+      "monster_count": 23,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 306,
+      "respawn_entity_count": 2694,
+      "map_count": 72,
+      "example_monsters": [
+        "AxeSkeleton",
+        "AxeSkeleton0",
+        "AxeSkeleton9",
+        "Ancient_AxeSkeleton",
+        "Ancient_AxeSkeleton0",
+        "EliteArcher",
+        "ZumaArcher",
+        "ZumaArcher0"
+      ],
+      "example_maps": [
+        "D012 NaturalCave",
+        "E001 ConnectionPath",
+        "E002 ConnectionPath",
+        "D002 OmaCave_2F",
+        "D003 OmaCave_3F",
+        "D002A AncientNaturalCave",
+        "D003A AncientNaturalCave",
+        "E401 ConnectionPath"
+      ]
+    },
+    {
+      "ai": 9,
+      "crystal_class": "HarvestMonster",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HarvestMonster corpse-drop semantics are covered: no immediate death drops, Crystal Harvest/ObjectHarvested packets, two skin-count passes, and configured harvest rewards are resolved from the corpse."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 18,
+      "respawn_entity_count": 595,
+      "map_count": 11,
+      "example_monsters": [
+        "Wolf",
+        "Currish",
+        "Scorpion"
+      ],
+      "example_maps": [
+        "D011 NaturalCave",
+        "D012 NaturalCave",
+        "D001 OmaCave_1F",
+        "D001A AncientNaturalCave",
+        "2 SerpentValley",
+        "3 MongchonProvince",
+        "D2061 PrajnaStoneCave_1F",
+        "D2062 PrajnaStoneCave_2F"
+      ]
+    },
+    {
+      "ai": 10,
+      "crystal_class": "FlamingWooma",
+      "crystal_notes": [
+        "Common AI: 1 Magic Attack"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "FlamingWooma Crystal melee baseline is covered: ObjectAttack packet shape, 300 ms delayed hit timing, and imported DC-based damage for the magic-melee branch."
+      ],
+      "monster_count": 4,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 25,
+      "respawn_entity_count": 213,
+      "map_count": 6,
+      "example_monsters": [
+        "FlamingWooma",
+        "FlamingWooma0",
+        "FlamingWooma2",
+        "Ancient_FlamingWooma"
+      ],
+      "example_maps": [
+        "D022 WoomaTemple_1F",
+        "D023 WoomaTemple_2F",
+        "D024 WoomaTemple",
+        "D022A AncientTemple_1F",
+        "D023A AncientTemple_2F",
+        "D024A AncientTemple"
+      ]
+    },
+    {
+      "ai": 11,
+      "crystal_class": "WoomaTaurus",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "WoomaTaurus FlamingWooma melee timing/DC damage, HP-threshold mad speed phase, surrounded teleport baseline, and ObjectTeleportOut/ObjectTeleportIn effect packets are covered."
+      ],
+      "monster_count": 5,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 5,
+      "respawn_entity_count": 412,
+      "map_count": 4,
+      "example_monsters": [
+        "WoomaTaurus",
+        "WoomaTaurus1",
+        "WoomaTaurus9",
+        "Ancient_WoomaTaurus",
+        "IncarnatedWT"
+      ],
+      "example_maps": [
+        "D024 WoomaTemple",
+        "D024A AncientTemple",
+        "D2006 WoomaPalace",
+        "M001 MysteryCave"
+      ]
+    },
+    {
+      "ai": 12,
+      "crystal_class": "BugBagMaggot",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "BugBagMaggot summon timing, cap, and DB-backed BugBat body import are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 189,
+      "respawn_entity_count": 532,
+      "map_count": 62,
+      "example_monsters": [
+        "BugBatMaggot"
+      ],
+      "example_maps": [
+        "D2003 BlackDragonDungeon_1F",
+        "D2004 BlackDragonDungeon_2F",
+        "D2005 PurgatoryHall",
+        "D2006 WoomaPalace",
+        "D2007 HwanMaJin",
+        "D2008 NobleHogPalace",
+        "D2009 SoleSpiritHall",
+        "D2010 HwanMaJin"
+      ]
+    },
+    {
+      "ai": 13,
+      "crystal_class": "RedMoonEvil",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RedMoonEvil static view-range ObjectAttack baseline is covered with 300 ms delayed imported DC damage, Crystal's multi-target fanout across opposing targets in view range, and ObjectEffect RedMoonEvil broadcasts for each target."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "RedMoonEvil",
+        "RedMoonEvil1"
+      ],
+      "example_maps": [
+        "D10062 RedMoonRoom"
+      ]
+    },
+    {
+      "ai": 14,
+      "crystal_class": "EvilCentipede",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "EvilCentipede hidden reveal/hide baseline and static view-range ObjectAttack branch are covered with 500 ms delayed imported DC damage, seven-tile multi-target fanout, and Crystal green/paralysis poison rolls on successful player hit."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "EvilCentipede"
+      ],
+      "example_maps": [
+        "D606 LifeDeathCoffin"
+      ]
+    },
+    {
+      "ai": 15,
+      "crystal_class": "ZumaMonster",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Stoned Zuma extra state, wake, wake propagation, and respawn state reset are covered."
+      ],
+      "monster_count": 22,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 363,
+      "respawn_entity_count": 1888,
+      "map_count": 32,
+      "example_monsters": [
+        "EliteStatue",
+        "EliteGuardian",
+        "ZumaStatue",
+        "ZumaStatue0",
+        "ZumaStatue3",
+        "ZumaGuardian",
+        "ZumaGuardian0",
+        "ZumaGuardian3"
+      ],
+      "example_maps": [
+        "D2007 HwanMaJin",
+        "D2008 NobleHogPalace",
+        "D2009 SoleSpiritHall",
+        "D2010 HwanMaJin",
+        "D2011 ZumaPalace",
+        "D2012 PrisonHall",
+        "D2013 DarkDevilPalace",
+        "Hell301s Lunar_1F"
+      ]
+    },
+    {
+      "ai": 16,
+      "crystal_class": "RedThunderZuma",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RedThunderZuma stoned wake state, nine-tile range, non-adjacent ObjectRangeAttack, fixed ranged delay, and DC damage with zero-DC no-damage gating are covered."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 9,
+      "respawn_entity_count": 18,
+      "map_count": 8,
+      "example_monsters": [
+        "RedThunderZuma",
+        "Ancient_RedThunderZuma",
+        "Frozen_RedZuma"
+      ],
+      "example_maps": [
+        "Hell301s Lunar_1F",
+        "Hell302s Lunar_2F",
+        "Hell303s Lunar_3F",
+        "Hell304s Lunar_4F",
+        "Hell_Bosss LunarRoom",
+        "D504 ZumaTemple_4F",
+        "D5073 ZumaTemple_7F",
+        "D503A AncientZuma_3F"
+      ]
+    },
+    {
+      "ai": 17,
+      "crystal_class": "ZumaTaurus",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ZumaTaurus stoned wake state and adjacent ObjectAttack melee branch are covered with imported DC damage; HP-stage Zuma slave spawning now uses the Crystal 7-stage tracker, 8-per-wave / 40-slave cap, and configured Zuma minion set."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 2,
+      "map_count": 2,
+      "example_monsters": [
+        "ZumaTaurus",
+        "ZumaTaurus9",
+        "Ancient_ZumaTaurus"
+      ],
+      "example_maps": [
+        "D515 ZumaTemple",
+        "D503A AncientZuma_3F"
+      ]
+    },
+    {
+      "ai": 18,
+      "crystal_class": "Shinsu",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Shinsu target-driven show/hide mode and two-tile pressure are covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "Shinsu",
+        "Shinsu1"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 19,
+      "crystal_class": "KingScorpion",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "KingScorpion two-tile line/range branch is covered with ObjectRangeAttack, delayed MC damage, Crystal's line-shaped reach, line fanout, adjacent ObjectAttack DC fallback, and adjacent random/second-tile range override."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 3,
+      "map_count": 2,
+      "example_monsters": [
+        "KingScorpion"
+      ],
+      "example_maps": [
+        "D2001 BlackDragonDungeon",
+        "D2002 BlackSnakePalace"
+      ]
+    },
+    {
+      "ai": 20,
+      "crystal_class": "DarkDevil",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "DarkDevil three-tile ObjectRangeAttack area branch is covered with 500 ms delayed imported DC*3 damage, Crystal's 2-4 second area cooldown, and one-tile fanout around the point two tiles in front of the monster."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "DarkDevil"
+      ],
+      "example_maps": [
+        "D2013 DarkDevilPalace"
+      ]
+    },
+    {
+      "ai": 21,
+      "crystal_class": "IncarnatedGhoul",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 22,
+      "crystal_class": "IncarnatedZT",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "IncarnatedZT non-stoned Zuma melee baseline is covered with ObjectAttack, 300 ms delayed imported DC damage, and Crystal's 1/12 paralysis poison chance."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "IncarnatedZT"
+      ],
+      "example_maps": [
+        "D2011 ZumaPalace"
+      ]
+    },
+    {
+      "ai": 23,
+      "crystal_class": "BoneFamiliar",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "BoneFamiliar",
+        "GameShop_Guard"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 24,
+      "crystal_class": "DigOutZombie",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "DigOutZombie hidden/non-blocking initial state and near-player ObjectShow reveal are covered."
+      ],
+      "monster_count": 9,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 77,
+      "respawn_entity_count": 1196,
+      "map_count": 21,
+      "example_monsters": [
+        "Zombie2",
+        "Zombie20",
+        "PriestZombie",
+        "PriestZombie0",
+        "BloodPriest",
+        "BloodPriest0",
+        "CursedPriest",
+        "CursedPriest0"
+      ],
+      "example_maps": [
+        "D401 DeadMineEntrance",
+        "D411 B1ofMine",
+        "D402 EastofDeadMine",
+        "D403 1FofDeadMine",
+        "D406 SouthofDeadMine",
+        "E402 ConnectionPath",
+        "E403 ConnectionPath",
+        "E404 ConnectionPath"
+      ]
+    },
+    {
+      "ai": 25,
+      "crystal_class": "RevivingZombie",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RevivingZombie delayed two-revival baseline and reduced-health ObjectRevived flow are covered."
+      ],
+      "monster_count": 14,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 72,
+      "respawn_entity_count": 2228,
+      "map_count": 23,
+      "example_monsters": [
+        "Zombie3",
+        "Zombie30",
+        "Zombie4",
+        "Zombie40",
+        "Zombie5",
+        "Zombie50",
+        "ClZombie",
+        "ClZombie0"
+      ],
+      "example_maps": [
+        "D401 DeadMineEntrance",
+        "D413 B1ofMine",
+        "D402 EastofDeadMine",
+        "D404 B2ofDeadMine",
+        "D416 OverPass",
+        "D403 1FofDeadMine",
+        "D412 OverPass",
+        "D405 OreStoragePlace"
+      ]
+    },
+    {
+      "ai": 26,
+      "crystal_class": "ShamanZombie",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ShamanZombie six-tile line/diagonal ObjectRangeAttack and delayed hit timing are covered."
+      ],
+      "monster_count": 8,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 70,
+      "respawn_entity_count": 913,
+      "map_count": 19,
+      "example_monsters": [
+        "Zombie1",
+        "Zombie10",
+        "ShamanZombie",
+        "ShamanZombie0",
+        "RotShamanZombie",
+        "Zombie51",
+        "CursedShaman",
+        "CursedShaman0"
+      ],
+      "example_maps": [
+        "D404 B2ofDeadMine",
+        "D405 OreStoragePlace",
+        "D406 SouthofDeadMine",
+        "E402 ConnectionPath",
+        "E403 ConnectionPath",
+        "E404 ConnectionPath",
+        "D2031 MineralMine_1F",
+        "D2032 MineralMine_2F"
+      ]
+    },
+    {
+      "ai": 27,
+      "crystal_class": "Khazard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Khazard four-tile line/diagonal ObjectRangeAttack pull branch is covered with no direct player damage, immediate player pull movement toward Khazard, and 5s PullTime cooldown; exact magic-resist checks remain pending."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 2,
+      "map_count": 1,
+      "example_monsters": [
+        "Khazard"
+      ],
+      "example_maps": [
+        "D2044 InsectCave_4F"
+      ]
+    },
+    {
+      "ai": 28,
+      "crystal_class": "ToxicGhoul",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ToxicGhoul Crystal melee timing, DC-based damage, 1/8 five-second green poison status, and shared HarvestMonster two-pass corpse harvest are covered; death explosion remains data-gated because current imported AI28 rows have Effect=0."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 56,
+      "respawn_entity_count": 794,
+      "map_count": 10,
+      "example_monsters": [
+        "ToxicGhoul",
+        "ToxicGhoul0",
+        "Ancient_ToxicGhoul"
+      ],
+      "example_maps": [
+        "5 PrajnaIsland",
+        "D2061 PrajnaStoneCave_1F",
+        "D2062 PrajnaStoneCave_2F",
+        "D2063 PrajnaStoneCave(E)_3F",
+        "D2064 PrajnaStoneCave(W)_3F",
+        "D2065 PrajnaStoneCave_4F",
+        "D2066 PrajnaStoneCave_5F",
+        "D2051A AncientPrajna_1F"
+      ]
+    },
+    {
+      "ai": 29,
+      "crystal_class": "BoneSpearman",
+      "crystal_notes": [
+        "Common AI: 1 Line Attack"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Two-tile line attack range and delayed damage are covered."
+      ],
+      "monster_count": 4,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 51,
+      "respawn_entity_count": 611,
+      "map_count": 10,
+      "example_monsters": [
+        "BoneSpearman",
+        "BoneSpearman0",
+        "Ancient_BoneSpearman",
+        "BoneSpearman22"
+      ],
+      "example_maps": [
+        "D2061 PrajnaStoneCave_1F",
+        "D2062 PrajnaStoneCave_2F",
+        "D2063 PrajnaStoneCave(E)_3F",
+        "D2064 PrajnaStoneCave(W)_3F",
+        "D2065 PrajnaStoneCave_4F",
+        "D2066 PrajnaStoneCave_5F",
+        "D2067 PrajnaStoneCave_6F",
+        "D2051A AncientPrajna_1F"
+      ]
+    },
+    {
+      "ai": 30,
+      "crystal_class": "BoneLord",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "BoneLord seven-tile ObjectRangeAttack branch is covered with distance-scaled delayed DC damage, and HP-stage ObjectAttack type-1 slave spawning now summons the Crystal bone minion set with the original 8-per-wave / 40-slave cap."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 2,
+      "map_count": 2,
+      "example_monsters": [
+        "BoneLord",
+        "Ancient_BoneLord"
+      ],
+      "example_maps": [
+        "D2067 PrajnaStoneCave_6F",
+        "D2055A AncientPrajna_3F"
+      ]
+    },
+    {
+      "ai": 31,
+      "crystal_class": "RightGuard",
+      "crystal_notes": [
+        "Common AI: 2 Magic Attacks, 1 Close, 1 Range"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RightGuard adjacent melee vs ranged packet switching is covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 34,
+      "respawn_entity_count": 150,
+      "map_count": 9,
+      "example_monsters": [
+        "RightGuard",
+        "RightGuard0"
+      ],
+      "example_maps": [
+        "D2071 PrajnaTemple_1F",
+        "D2072 PrajnaTemple_2F",
+        "D2073 PrajnaTemple_3F",
+        "D2074 PrajnaTemple_4F",
+        "D2075 PrajnaTemple(E)_5F",
+        "D2076 PrajnaTemple(W)_5F",
+        "D2077 PrajnaTemple_6F",
+        "D2078 PrajnaTemple_7F"
+      ]
+    },
+    {
+      "ai": 32,
+      "crystal_class": "LeftGuard",
+      "crystal_notes": [
+        "Common AI: 2 Magic Attacks, 1 Close, 1 Range Projectile"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "LeftGuard ranged/near attack family is wired through the shared guard range logic."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 35,
+      "respawn_entity_count": 145,
+      "map_count": 9,
+      "example_monsters": [
+        "LeftGuard",
+        "LeftGuard0"
+      ],
+      "example_maps": [
+        "D2071 PrajnaTemple_1F",
+        "D2072 PrajnaTemple_2F",
+        "D2073 PrajnaTemple_3F",
+        "D2074 PrajnaTemple_4F",
+        "D2075 PrajnaTemple(E)_5F",
+        "D2076 PrajnaTemple(W)_5F",
+        "D2077 PrajnaTemple_6F",
+        "D2078 PrajnaTemple_7F"
+      ]
+    },
+    {
+      "ai": 33,
+      "crystal_class": "MinotaurKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "MinotaurKing RightGuard-derived six-tile ObjectRangeAttack branch is covered with 500 ms delayed imported DC damage and Crystal's three-tile range-damage fanout around the target."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "MinotaurKing"
+      ],
+      "example_maps": [
+        "D2079 PrajnaTemple"
+      ]
+    },
+    {
+      "ai": 34,
+      "crystal_class": "FrostTiger",
+      "crystal_notes": [
+        "Effect 0/1"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "FrostTiger passive-until-targeted acquisition, six-tile range, non-adjacent ObjectRangeAttack, distance-scaled ranged delay, DC damage gating, effect-driven ranged bleeding/slow poison rolls, and ObjectSitDown sitting/standing presentation are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 7,
+      "respawn_entity_count": 7,
+      "map_count": 5,
+      "example_monsters": [
+        "FrostTiger"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "1 WoomyonWoods(S)",
+        "4 CastleGi-Ryoong",
+        "5 PrajnaIsland",
+        "6 PastBichon"
+      ]
+    },
+    {
+      "ai": 35,
+      "crystal_class": "SandWorm",
+      "crystal_notes": [
+        "Common AI: 1 Line Attack"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SandWorm SpittingSpider-style two-tile line ObjectAttack, 300 ms delayed hit timing, imported DC damage, forward-line multi-target fanout, and shared harvest-corpse baseline are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 30,
+      "map_count": 1,
+      "example_monsters": [
+        "SandWorm"
+      ],
+      "example_maps": [
+        "3 MongchonProvince"
+      ]
+    },
+    {
+      "ai": 36,
+      "crystal_class": "Yimoogi",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Yimoogi seven-tile ObjectRangeAttack branch is covered with 500 ms delayed imported DC damage; the four-tile type-1 red-poison branch, four-second sister child spawn, final teleport with WhiteSerpent spawns, and paired drop suppression are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 2,
+      "map_count": 1,
+      "example_monsters": [
+        "Yimoogi"
+      ],
+      "example_maps": [
+        "SNAKE YimoogiNest"
+      ]
+    },
+    {
+      "ai": 37,
+      "crystal_class": "CrystalSpider",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "CrystalSpider three-tile row/column/diagonal ObjectAttack type-1 branch, distance-scaled delayed DC damage, forward-line multi-target fanout, and 1/8 green poison baseline are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 5,
+      "respawn_entity_count": 5,
+      "map_count": 5,
+      "example_monsters": [
+        "CrystalSpider"
+      ],
+      "example_maps": [
+        "12 Treepath",
+        "D1004 RedValley_4F",
+        "D10051 RedValley_5F",
+        "D10053 RedValley_5F",
+        "D10054 RedValley_5F"
+      ]
+    },
+    {
+      "ai": 38,
+      "crystal_class": "HolyDeva",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HolyDeva six-tile ObjectRangeAttack, summoned extra presentation, 500 ms delayed hit timing, imported DC damage, and Crystal fear-window kiting movement are covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 100,
+      "map_count": 1,
+      "example_monsters": [
+        "HolyDeva",
+        "PKSpirit"
+      ],
+      "example_maps": [
+        "D1801 PenalCavern"
+      ]
+    },
+    {
+      "ai": 39,
+      "crystal_class": "RootSpider",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RootSpider delayed BombSpider summon with back-offset spawn semantics is covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 18,
+      "respawn_entity_count": 165,
+      "map_count": 12,
+      "example_monsters": [
+        "RootSpider"
+      ],
+      "example_maps": [
+        "12 Treepath",
+        "D10011 RedValley_1F",
+        "D10012 RedValley_1F",
+        "D10013 RedValley_1F",
+        "D1002 RedValley_2F",
+        "D10031 RedValley_3F",
+        "D10032 RedValley_3F",
+        "D1004 RedValley_4F"
+      ]
+    },
+    {
+      "ai": 40,
+      "crystal_class": "BombSpider",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "BombSpider adjacency/timeout self-destruct and delayed explosion damage are covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "BombSpider",
+        "MutatedHugger"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 41,
+      "crystal_class": "YinDevilNode",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 42,
+      "crystal_class": "YinDevilNode",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Yin/Yang Devil Node immobility and no-player-attack support-node baseline are covered; friendly buff details remain pending."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 55,
+      "respawn_entity_count": 174,
+      "map_count": 14,
+      "example_monsters": [
+        "YinDevilNode",
+        "YangDevilNode"
+      ],
+      "example_maps": [
+        "6 PastBichon",
+        "61 WestOmaGorge",
+        "611 WestOmaPass",
+        "612 OmaGorge",
+        "613 EastOmaPass",
+        "62 WestOmaValley",
+        "621 OmaValley",
+        "622 EastOmaValley"
+      ]
+    },
+    {
+      "ai": 43,
+      "crystal_class": "OmaKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "OmaKing seven-tile type-1 ObjectAttack magic branch is covered with 500 ms delayed imported MC damage; close Crystal split is also covered with type-0 push/paralysis handling and two-tile line fanout using imported DC damage."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "OmaKing"
+      ],
+      "example_maps": [
+        "66 BloodLand"
+      ]
+    },
+    {
+      "ai": 44,
+      "crystal_class": "BlackFoxman",
+      "crystal_notes": [
+        "Common AI: 2 Attacks, 1 Close, 1 Line Attack"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "BlackFoxman two-tile type-1 line attack packet and delayed hit timing are covered."
+      ],
+      "monster_count": 5,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 65,
+      "respawn_entity_count": 918,
+      "map_count": 9,
+      "example_monsters": [
+        "BlackFoxMan",
+        "Chieftain_Rouge",
+        "FireCat",
+        "TucsonFighter",
+        "FrozenFighter"
+      ],
+      "example_maps": [
+        "UMM SeokchoValley",
+        "hyunwol3 DarkForest",
+        "hyunwolboss TownHall",
+        "Fox01 SealedMaze",
+        "Fox02 SacredFoxHill",
+        "Fox03 SacredFoxTemple",
+        "EBEE03 Swamp",
+        "EBEEBOSS DarkSwamp"
+      ]
+    },
+    {
+      "ai": 45,
+      "crystal_class": "RedFoxman",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RedFoxman six-tile ObjectRangeAttack baseline is covered with imported DC damage, 500 ms delayed hit timing, deterministic coverage for Crystal's type-0/type-1 ranged packet split, fear-window kiting movement, and adjacent fear-window teleport with ObjectTeleportOut/ObjectTeleportIn effect type 2."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 41,
+      "respawn_entity_count": 470,
+      "map_count": 3,
+      "example_monsters": [
+        "RedFoxMan"
+      ],
+      "example_maps": [
+        "Fox01 SealedMaze",
+        "Fox02 SacredFoxHill",
+        "Fox03 SacredFoxTemple"
+      ]
+    },
+    {
+      "ai": 46,
+      "crystal_class": "WhiteFoxman",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "WhiteFoxman six-tile ObjectRangeAttack baseline is covered with imported DC damage, delayed hit timing, the 1-in-8 type-1 slow branch as a delayed status-only action, and fear-window kiting movement."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 51,
+      "respawn_entity_count": 610,
+      "map_count": 3,
+      "example_monsters": [
+        "WhiteFoxMan"
+      ],
+      "example_maps": [
+        "Fox01 SealedMaze",
+        "Fox02 SacredFoxHill",
+        "Fox03 SacredFoxTemple"
+      ]
+    },
+    {
+      "ai": 47,
+      "crystal_class": "TrapRock",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "TrapRock hidden reveal baseline is covered: starts hidden/non-visible, blocks route/chase/patrol movement, reveals near a target after the Crystal visibility delay, uses deterministic SpawnCorner ordering to choose the adjacent target tile, emits ObjectShow, spawns the other three cardinal child rocks around the trapped target, applies reveal paralysis, parent TrapRock uses ObjectRangeAttack with no direct damage, child rocks use ObjectAttack, child hits clear the parent FirstAttack state, visible parent rocks die when the trapped target moves, the first player hit collapses the parent, and parent repeated attacks roll the Crystal 1-in-8 paralysis poison."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 34,
+      "respawn_entity_count": 72,
+      "map_count": 2,
+      "example_monsters": [
+        "TrapRock",
+        "TrapRock1"
+      ],
+      "example_maps": [
+        "Fox01 SealedMaze",
+        "Fox02 SacredFoxHill"
+      ]
+    },
+    {
+      "ai": 48,
+      "crystal_class": "GuardianRock",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "GuardianRock static range-pull baseline is covered: no route/chase/patrol movement, normal damage immunity, 500 ms delayed ObjectRangeAttack visibility, no direct player damage, and Crystal pull distance toward the rock capped at four tiles; magic-resist handling remains pending."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 4,
+      "respawn_entity_count": 4,
+      "map_count": 1,
+      "example_monsters": [
+        "GuardianRock"
+      ],
+      "example_maps": [
+        "Fox03 SacredFoxTemple"
+      ]
+    },
+    {
+      "ai": 49,
+      "crystal_class": "ThunderElement",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ThunderElement two-tile CompleteAttack baseline, delayed due-time ObjectAttack packet, DC-based damage, random near-target repositioning, nearby opposing-target fanout, normal-damage immunity, and player Repulsion-family ObjectPushed push-damage are covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 116,
+      "respawn_entity_count": 641,
+      "map_count": 3,
+      "example_monsters": [
+        "ElectricElement",
+        "CloudElement"
+      ],
+      "example_maps": [
+        "Fox01 SealedMaze",
+        "Fox02 SacredFoxHill",
+        "Fox03 SacredFoxTemple"
+      ]
+    },
+    {
+      "ai": 50,
+      "crystal_class": "GreatFoxSpirit",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "GreatFoxSpirit static seven-tile ObjectRangeAttack branch is covered with 300 ms delayed imported DC damage, Crystal FindAllTargets fanout, ObjectEffect GreatFoxSpirit broadcasts on ranged targets, slow/paralysis poison rolls, HP-stage extra-byte broadcasts, nearby GuardianRock activation/deactivation, and 10s-cooldown far-target recall-to-nearby-tile movement with ObjectTeleportOut/ObjectTeleportIn effect 11; multi-target/MagicResist recall details remain pending."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "GreatFoxSpirit"
+      ],
+      "example_maps": [
+        "Fox03 SacredFoxTemple"
+      ]
+    },
+    {
+      "ai": 51,
+      "crystal_class": "HedgeKekTal",
+      "crystal_notes": [
+        "Common AI: 2 Physical Attacks, 1 Close, 1 Range"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HedgeKekTal near-vs-range switching is covered: eight-tile attack range, ObjectRangeAttack when non-adjacent, distance-scaled delayed ranged damage, adjacent ObjectAttack, and imported DC-based damage."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 8,
+      "respawn_entity_count": 116,
+      "map_count": 2,
+      "example_monsters": [
+        "HedgeKekTal",
+        "BigHedgeKekTal"
+      ],
+      "example_maps": [
+        "Fox01 SealedMaze",
+        "Fox02 SacredFoxHill"
+      ]
+    },
+    {
+      "ai": 52,
+      "crystal_class": "EvilMir",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "EvilMir"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 53,
+      "crystal_class": "EvilMirBody",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "00"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 54,
+      "crystal_class": "DragonStatue",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "MirStatue/DragonStatue static delayed ObjectRangeAttack baseline is covered with view-range reach, 500 ms due-time packet emission, imported DC damage, FindAllTargets(2)-style fanout around the player target, lethal-damage sleep instead of death, sleeping damage immunity, and 15-minute full-HP wake."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 6,
+      "respawn_entity_count": 6,
+      "map_count": 1,
+      "example_monsters": [
+        "MirStatue"
+      ],
+      "example_maps": [
+        "D2083 EvilMirPalace"
+      ]
+    },
+    {
+      "ai": 55,
+      "crystal_class": "HumanWizard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "Clone"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 56,
+      "crystal_class": "Trainer",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Trainer static target-dummy baseline is covered: neutral/passive targeting, no movement/route/chase/patrol, no normal attacks, no HP loss/death from ordinary damage, and Crystal ChatType.Trainer damage/DPS plus idle average reporting."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 25,
+      "respawn_entity_count": 25,
+      "map_count": 24,
+      "example_monsters": [
+        "Trainer",
+        "TrainingMob"
+      ],
+      "example_maps": [
+        "0110 Academy",
+        "0111 Academy",
+        "0112 Academy",
+        "0137 ContestGround",
+        "GA0 GTCourt",
+        "GA1 GTCourt",
+        "GA2 GTCourt",
+        "GA3 GTCourt"
+      ]
+    },
+    {
+      "ai": 57,
+      "crystal_class": "TownArcher",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "neutral_guard_baseline",
+      "runtime_notes": [
+        "TownArcher/archer ranged packet behavior and neutral non-chasing baseline are covered."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 62,
+      "respawn_entity_count": 62,
+      "map_count": 8,
+      "example_monsters": [
+        "ArcherGuard",
+        "ArcherGuard1",
+        "Royal_Archer"
+      ],
+      "example_maps": [
+        "0 BichonProvince",
+        "2 SerpentValley",
+        "D422 S_ValleyDeadMine",
+        "E601 ConnectionPath",
+        "E605 ConnectionPath",
+        "3 MongchonProvince",
+        "D601 S_1FofDungeon",
+        "WhiteVillage WhiteValley"
+      ]
+    },
+    {
+      "ai": 58,
+      "crystal_class": "Guard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "neutral_guard_baseline",
+      "runtime_notes": [
+        "Neutral TaoGuard disposition is imported; pet-specific Crystal targeting is pending."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 48,
+      "respawn_entity_count": 48,
+      "map_count": 16,
+      "example_monsters": [
+        "Guard1"
+      ],
+      "example_maps": [
+        "0110 Academy",
+        "0111 Academy",
+        "0112 Academy",
+        "4 CastleGi-Ryoong",
+        "11 WoomyonWoods(N)",
+        "5 PrajnaIsland",
+        "GA30 GT3F",
+        "GA31 GT3F"
+      ]
+    },
+    {
+      "ai": 59,
+      "crystal_class": "HumanAssassin",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "AssassinClone"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 60,
+      "crystal_class": "VampireSpider",
+      "crystal_notes": [
+        "TODO - Clean up"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "VampireSpider death explosion uses delayed summon-vs-monster damage path."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "VampireSpider"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 61,
+      "crystal_class": "SpittingToad",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SpittingToad long-range packet pressure is covered for friendly summon combat."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "SpittingToad"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 62,
+      "crystal_class": "SnakeTotem",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SnakeTotem friendly summon ownership, minion cap, and CharmedSnake spawning are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "SnakeTotem"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 63,
+      "crystal_class": "CharmedSnake",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "CharmedSnake owner tracking, out-of-range cleanup, and death explosion are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "CharmedSnake"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 64,
+      "crystal_class": "IntelligentCreatureObject",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 11,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "BabyPig",
+        "Chick",
+        "Kitten",
+        "BabySkeleton",
+        "Baekdon",
+        "Wimaen",
+        "BlackKitten",
+        "BabyDragon"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 65,
+      "crystal_class": "MutatedManworm",
+      "crystal_notes": [
+        "Common AI: 2 Close attacks with WeakerTeleport"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 66,
+      "crystal_class": "CrazyManworm",
+      "crystal_notes": [
+        "Common AI: 2 Close Attacks"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 67,
+      "crystal_class": "DarkDevourer",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 68,
+      "crystal_class": "Football",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "Football"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 69,
+      "crystal_class": "PoisonHugger",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "PoisonHugger"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 70,
+      "crystal_class": "Hugger",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "Hugger"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 71,
+      "crystal_class": "Behemoth",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 72,
+      "crystal_class": "FinialTurtle",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "FinialTurtle"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 73,
+      "crystal_class": "TurtleKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 74,
+      "crystal_class": "LightTurtle",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 75,
+      "crystal_class": "WitchDoctor",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 76,
+      "crystal_class": "HellSlasher",
+      "crystal_notes": [
+        "Common AI: 2 Close Attacks, 1 Normal, 1 Halfmoon"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 77,
+      "crystal_class": "HellPirate",
+      "crystal_notes": [
+        "Common AI: 2 Close Attacks, 1 Normal, 1 Fullmoon"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 78,
+      "crystal_class": "HellCannibal",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 79,
+      "crystal_class": "HellKeeper",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HellKeeper static view-range ObjectAttack branches are covered with no route/chase/patrol movement, locked attack facing, 300 ms delayed imported DC damage for type 0, raw-MC gating plus defence mitigation and Dazed for nonzero-MC type 1, and FindAllTargets-style fanout to view-range opposing targets; current zero-MC HellKeeper data still emits type 1 without damage/dazed."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "HellKeeper"
+      ],
+      "example_maps": [
+        "HELL03 HellOverpass"
+      ]
+    },
+    {
+      "ai": 80,
+      "crystal_class": "ConquestArcher",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "ArcherGuard3"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 81,
+      "crystal_class": "Gate",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "SabukGate"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 82,
+      "crystal_class": "Wall",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "PalaceWallLeft",
+        "PalaceWall1",
+        "PalaceWall2"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 83,
+      "crystal_class": "Tornado",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 84,
+      "crystal_class": "WingedTigerLord",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 85,
+      "crystal_class": "FlamingMutant",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 86,
+      "crystal_class": "ManectricClaw",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ManectricClaw/AI 86 three-tile ObjectRangeAttack thrust baseline is covered with Crystal's random pre-thrust step-toward-target branch, 500 ms delayed near-DC/far-MC damage, player slow/frozen poison rolls, and full three-column cone fanout to opposing monsters."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 4,
+      "map_count": 2,
+      "example_monsters": [
+        "Chieftain_Priest"
+      ],
+      "example_maps": [
+        "hyunwol3 DarkForest",
+        "hyunwolboss TownHall"
+      ]
+    },
+    {
+      "ai": 87,
+      "crystal_class": "ManectricBlest",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 88,
+      "crystal_class": "ManectricKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ManectricKing/Master_DragonYang three-tile row/column/diagonal ObjectAttack magic line branch is covered with 500 ms delayed imported MC damage, the close type-1 DC push line branch is covered, and the low-HP ObjectRangeAttack mass attack now hits nearby targets with distance-delayed imported MC damage."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "Master_DragonYang"
+      ],
+      "example_maps": [
+        "hyunwolboss TownHall"
+      ]
+    },
+    {
+      "ai": 89,
+      "crystal_class": "IcePillar",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 90,
+      "crystal_class": "TrollBomber",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 91,
+      "crystal_class": "TrollKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 92,
+      "crystal_class": "FlameSpear",
+      "crystal_notes": [
+        "Common AI: 2 Attacks with Fear, 1 Normal, 1 Long Line"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 93,
+      "crystal_class": "FlameMage",
+      "crystal_notes": [
+        "Common AI: 2 Magic Attacks with Fear, 1 Close, 1 Range AOE"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 94,
+      "crystal_class": "FlameScythe",
+      "crystal_notes": [
+        "Common AI: 2 Magic Attacks with Fear, 1 Close, 1 Close AOE"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 95,
+      "crystal_class": "FlameAssassin",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 96,
+      "crystal_class": "FlameQueen",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 97,
+      "crystal_class": "HellKnight",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HellKnight spawned extra presentation and HellLord stage-advance hook are covered."
+      ],
+      "monster_count": 4,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 7,
+      "respawn_entity_count": 1070,
+      "map_count": 4,
+      "example_monsters": [
+        "HellKnight1",
+        "HellKnight2",
+        "HellKnight3",
+        "HellKnight4"
+      ],
+      "example_maps": [
+        "HF1 HellFire_1F",
+        "HF2 HellFire_2F",
+        "HF3 HellFire_3F",
+        "HKR HellFire_KingsRoom"
+      ]
+    },
+    {
+      "ai": 98,
+      "crystal_class": "HellLord",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HellLord immobility, stage-gated damage immunity, knight spawning, bomb spawning, and stage update packets are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "HellLord"
+      ],
+      "example_maps": [
+        "HKR HellFire_KingsRoom"
+      ]
+    },
+    {
+      "ai": 99,
+      "crystal_class": "HellBomb",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "HellBomb immobility, damage immunity, timeout attack/death packets, delayed radius damage, and HellBomb1/HellBomb2/HellBomb3 Frozen/Dazed/Bleeding poison variants on successful player explosion hits are covered."
+      ],
+      "monster_count": 3,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 6,
+      "respawn_entity_count": 1010,
+      "map_count": 4,
+      "example_monsters": [
+        "HellBomb1",
+        "HellBomb2",
+        "HellBomb3"
+      ],
+      "example_maps": [
+        "HF1 HellFire_1F",
+        "HF2 HellFire_2F",
+        "HF3 HellFire_3F",
+        "HKR HellFire_KingsRoom"
+      ]
+    },
+    {
+      "ai": 100,
+      "crystal_class": "VenomSpider",
+      "crystal_notes": [
+        "Common AI: 1 Magic Line Attack with Poison"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 101,
+      "crystal_class": "AncientBringer",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 102,
+      "crystal_class": "IceGuard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "IceGuard eight-tile range, adjacent ObjectAttack vs non-adjacent ObjectRangeAttack switching, fixed ranged delay, imported MC ranged damage, DC melee gating, fire ObjectRangeAttack type-1 branch, and ice-branch slow/frozen poison rolls are covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 71,
+      "map_count": 3,
+      "example_monsters": [
+        "IceCrystalSolider",
+        "SinseokMiner"
+      ],
+      "example_maps": [
+        "SnowCave_1F SnowCavern_1F",
+        "SnowCave_2F SnowCavern_2F",
+        "SnowCave_BOSS TheSnowLair"
+      ]
+    },
+    {
+      "ai": 103,
+      "crystal_class": "ElementGuard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 104,
+      "crystal_class": "DemonGuard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 105,
+      "crystal_class": "KingGuard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 106,
+      "crystal_class": "DeathCrawler",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 107,
+      "crystal_class": "BurningZombie",
+      "crystal_notes": [
+        "Common AI: 2 Magic Attacks with Rush, 1 Close, 1 Range"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 108,
+      "crystal_class": "MudZombie",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "MudZombie"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 109,
+      "crystal_class": "HardenRhino",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 110,
+      "crystal_class": "DemonWolf",
+      "crystal_notes": [
+        "Effect 0/1"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 111,
+      "crystal_class": "WhiteMammoth",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 112,
+      "crystal_class": "DarkBeast",
+      "crystal_notes": [
+        "Common AI: 2 Close attacks",
+        "Effect 0/1"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "DarkBeast primary Crystal melee timing and DC-based damage baseline are covered; secondary type-1 branch and bleeding hook are covered, with current spawned CatWidow data correctly gating damage/bleed because MC=0 and Effect=0."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 15,
+      "respawn_entity_count": 412,
+      "map_count": 2,
+      "example_monsters": [
+        "CatWidow"
+      ],
+      "example_maps": [
+        "UMM SeokchoValley",
+        "SG001 TrollMine_1F"
+      ]
+    },
+    {
+      "ai": 113,
+      "crystal_class": "ArcherGuard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "neutral_guard_baseline",
+      "runtime_notes": [
+        "ArcherGuard neutral guard targeting, ranged attacks, and no-route behavior are covered."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 114,
+      "crystal_class": "Mandrill",
+      "crystal_notes": [
+        "Common AI: 1 Close attack with WeakerTeleport"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 115,
+      "crystal_class": "SandSnail",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SandSnail adjacent attack split is covered: primary type-0 DC ObjectAttack, type-1 DC halfmoon arc fanout, and type-2 MC one-tile area fanout with Green poison on player hit, all using Crystal 300 ms delayed timing."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 120,
+      "map_count": 2,
+      "example_monsters": [
+        "SandSnail"
+      ],
+      "example_maps": [
+        "EBEE01 SwampCavern_1F",
+        "EBEE02 SwampCavern_2F"
+      ]
+    },
+    {
+      "ai": 116,
+      "crystal_class": "BlackHammerCat",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "BlackHammerCat two-tile type-1 line attack packet and delayed hit timing are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 4,
+      "respawn_entity_count": 240,
+      "map_count": 4,
+      "example_monsters": [
+        "BlackHammerCat"
+      ],
+      "example_maps": [
+        "SG001 TrollMine_1F",
+        "SG002 TrollMine_2F",
+        "SG003 TrollMine_3F",
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 117,
+      "crystal_class": "StrayCat",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "StrayCat two-tile type-2 line attack packet and delayed hit timing are covered; the close type-1 push variant is covered and current imported MC=0 data correctly gates follow-up line damage."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 180,
+      "map_count": 3,
+      "example_monsters": [
+        "StrayCat"
+      ],
+      "example_maps": [
+        "SG002 TrollMine_2F",
+        "SG003 TrollMine_3F",
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 118,
+      "crystal_class": "CatShaman",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "CatShaman six-tile ObjectRangeAttack baseline and delayed hit timing are covered; the 1-in-5 type-1 red-poison packet/hook is covered and current imported MC=0 data correctly gates damage and poison."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 180,
+      "map_count": 3,
+      "example_monsters": [
+        "CatShaman"
+      ],
+      "example_maps": [
+        "SG002 TrollMine_2F",
+        "SG003 TrollMine_3F",
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 119,
+      "crystal_class": "Jar1",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Jar1 static one-tile attack baseline is covered, including no movement/chase and delayed regular-monster slave spawn on death; exact Crystal global RNG selection remains a deterministic runtime approximation."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 4,
+      "respawn_entity_count": 125,
+      "map_count": 4,
+      "example_monsters": [
+        "Jar1"
+      ],
+      "example_maps": [
+        "SG001 TrollMine_1F",
+        "SG002 TrollMine_2F",
+        "SG003 TrollMine_3F",
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 120,
+      "crystal_class": "Jar2",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Jar2 static six-tile ObjectRangeAttack baseline is covered, including no movement/chase, zero-MC data gating, adjacent 1/3 DC ObjectAttack, adjacent 2/3 ObjectRangeAttack, and the Frozen poison hook for successful ranged hits; current generated Jar2 rows have MC=0 so ranged damage and poison remain data-gated."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 4,
+      "respawn_entity_count": 145,
+      "map_count": 4,
+      "example_monsters": [
+        "Jar2"
+      ],
+      "example_maps": [
+        "SG001 TrollMine_1F",
+        "SG002 TrollMine_2F",
+        "SG003 TrollMine_3F",
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 121,
+      "crystal_class": "SeedingsGeneral",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SeedingsGeneral two-tile ObjectRangeAttack magic branch is covered with 300 ms delayed imported MC damage, including type-0 Echo Shout slow poison and type-1 Stomp frozen poison plus adjacent opposing-target fanout; close mixed melee is covered with type-0 DC Blood Attack and type-1 MC Green Splash."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "SeedingsGeneral"
+      ],
+      "example_maps": [
+        "UMM SeokchoValley"
+      ]
+    },
+    {
+      "ai": 122,
+      "crystal_class": "RestlessJar",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "RestlessJar static six-tile ObjectRangeAttack branch is covered, including no movement/chase, Crystal ProjectileAttack distance*50+500ms ranged timing, and zero-MC no-damage gating for current imported data; adjacent spin fanout, tornado/blindness, and low-HP stomp push/fanout are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "RestlessJar"
+      ],
+      "example_maps": [
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 123,
+      "crystal_class": "GeneralMeowMeow",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "GeneralMeowMeow twelve-tile range branch is covered with ObjectRangeAttack type 0, 500 ms delayed imported MC damage, two-tile target-area fanout, and close two-tile ObjectAttack/DC switching including the 1-in-9 type-1 triple-DC slam; HP shield windows now apply GeneralMeowMeowShield presentation and 100-AC damage absorption, shield-phase mass thunder emits ObjectSpell GeneralMeowMeowThunder packets with delayed MC damage to the player and opposing monsters near the target, and the 60s periodic slave spawn now uses the Crystal cat minion set with the original 3-per-wave / 6-slave cap."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "GeneralMeowMeow"
+      ],
+      "example_maps": [
+        "SG004 TrollMine_4F"
+      ]
+    },
+    {
+      "ai": 124,
+      "crystal_class": "Armadillo",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Armadillo DigOutZombie-style hidden reveal, DigOutArmadillo ObjectSpell presentation, primary ObjectAttack/DC melee branch, type-1 three-hit combo branch, retreat ObjectBackStep, retreat area range-damage, and run-away after failed retreat damage are covered with imported DC timing."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 240,
+      "map_count": 2,
+      "example_monsters": [
+        "Armadillo"
+      ],
+      "example_maps": [
+        "EBEE01 SwampCavern_1F",
+        "EBEE02 SwampCavern_2F"
+      ]
+    },
+    {
+      "ai": 125,
+      "crystal_class": "ArmadilloElder",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ArmadilloElder DigOutZombie-style hidden reveal, DigOutArmadillo ObjectSpell presentation, primary ObjectAttack branch with imported DC*2 damage, type-1 two-tile push/no-direct-damage branch, retreat ObjectBackStep no-damage branch, and run-away movement are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 160,
+      "map_count": 2,
+      "example_monsters": [
+        "ArmadilloElder"
+      ],
+      "example_maps": [
+        "EBEE01 SwampCavern_1F",
+        "EBEE02 SwampCavern_2F"
+      ]
+    },
+    {
+      "ai": 126,
+      "crystal_class": "TucsonMage",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "TucsonMage three-tile ObjectAttack type-1 WideLine branch is covered, including zero-MC no-damage gating for current imported data, adjacent 1-in-3 branch selection, and fanout to the forward plus three-lane two-step line when MC is available."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 75,
+      "map_count": 2,
+      "example_monsters": [
+        "TucsonMage"
+      ],
+      "example_maps": [
+        "EBEE03 Swamp",
+        "EBEEBOSS DarkSwamp"
+      ]
+    },
+    {
+      "ai": 127,
+      "crystal_class": "TucsonWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "TucsonWarrior two-tile non-adjacent ObjectAttack type-1 smash branch is covered with imported MC damage; adjacent 4/5 halfmoon DC fanout, adjacent 1/5 type-1 MC smash, and target-area multi-target coverage are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 20,
+      "map_count": 1,
+      "example_monsters": [
+        "TucsonWarrior"
+      ],
+      "example_maps": [
+        "EBEEBOSS DarkSwamp"
+      ]
+    },
+    {
+      "ai": 128,
+      "crystal_class": "TucsonEgg",
+      "crystal_notes": [
+        "Effect 0/1"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "TucsonEgg immobile/no-turn/no-walk baseline, fixed one-HP damage intake, and delayed death poison/spawn hook are covered; current generated TucsonEgg rows have Effect=0/DC=0 so slave spawn and poison damage remain data-gated."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 350,
+      "map_count": 2,
+      "example_monsters": [
+        "TucsonEgg"
+      ],
+      "example_maps": [
+        "EBEE03 Swamp",
+        "EBEEBOSS DarkSwamp"
+      ]
+    },
+    {
+      "ai": 129,
+      "crystal_class": "SwampWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 130,
+      "crystal_class": "CannibalTentacles",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "CannibalTentacles non-adjacent range branch is covered with view-range ObjectRangeAttack, distance-scaled delayed hit timing, and imported MC-based damage; adjacent Crystal type-1 halfmoon is also covered with fixed 500 damage, green poison on player hit, and arc fanout to adjacent opposing monsters."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 180,
+      "map_count": 3,
+      "example_monsters": [
+        "CannibalTentacles"
+      ],
+      "example_maps": [
+        "EBEE01 SwampCavern_1F",
+        "EBEE02 SwampCavern_2F",
+        "EBEE03 Swamp"
+      ]
+    },
+    {
+      "ai": 131,
+      "crystal_class": "TucsonGeneral",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "TucsonGeneral opening rage ObjectRangeAttack type-0 packet is covered with no direct damage plus 20-second rage cooldown/8-second attack pause; the rage branch now also spawns 15 delayed TucsonGeneralRock ObjectSpell objects with deterministic target-biased scatter and raw-DC impact damage. Normal >2 tile ObjectRangeAttack type-1, 1-in-4 type-2 ranged SC*2, and close type-1 MC stomp/paralysis area branches are covered; exact Crystal global RNG ordering remains approximated."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 1,
+      "respawn_entity_count": 1,
+      "map_count": 1,
+      "example_monsters": [
+        "TucsonGeneral"
+      ],
+      "example_maps": [
+        "EBEEBOSS DarkSwamp"
+      ]
+    },
+    {
+      "ai": 132,
+      "crystal_class": "GasToad",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 133,
+      "crystal_class": "Mantis",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 134,
+      "crystal_class": "AssassinBird",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 135,
+      "crystal_class": "StoningStatue",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 136,
+      "crystal_class": "FlyingStatue",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 137,
+      "crystal_class": "RhinoPriest",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 138,
+      "crystal_class": "ElephantMan",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 139,
+      "crystal_class": "StoneGolem",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 140,
+      "crystal_class": "EarthGolem",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 141,
+      "crystal_class": "TreeGuardian",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 142,
+      "crystal_class": "TreeQueen",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "TreeQueen"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 143,
+      "crystal_class": "PeacockSpider",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 144,
+      "crystal_class": "OmaCannibal",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 145,
+      "crystal_class": "OmaBlest",
+      "crystal_notes": [
+        "Common AI: 2 Attacks, 1 Close, 1 Close AOE"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 146,
+      "crystal_class": "OmaSlasher",
+      "crystal_notes": [
+        "Common AI: 1 Halfmoon Attack"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 147,
+      "crystal_class": "OmaMage",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 148,
+      "crystal_class": "OmaWitchDoctor",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 149,
+      "crystal_class": "PowerBead",
+      "crystal_notes": [
+        "Effect 0/1/2"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 150,
+      "crystal_class": "DarkOmaKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 151,
+      "crystal_class": "CaveStatue",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 152,
+      "crystal_class": "PlagueCrab",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 153,
+      "crystal_class": "CreeperPlant",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 154,
+      "crystal_class": "Nadz",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 155,
+      "crystal_class": "AvengingSpirit",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 156,
+      "crystal_class": "AvengingWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 157,
+      "crystal_class": "AxePlant",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 158,
+      "crystal_class": "WoodBox",
+      "crystal_notes": [
+        "Common AI: None With Attack On Death"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 159,
+      "crystal_class": "DarkCaptain",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 160,
+      "crystal_class": "BlueSoul",
+      "crystal_notes": [
+        "Common AI: 1 Range Attack with Fear"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 161,
+      "crystal_class": "SackWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 162,
+      "crystal_class": "KingHydrax",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 163,
+      "crystal_class": "HornedMage",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "HornedMage"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 164,
+      "crystal_class": "HornedArcher",
+      "crystal_notes": [
+        "Effect 0/1"
+      ],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "HornedArcher"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 165,
+      "crystal_class": "HornedWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "HornedWarrior"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 166,
+      "crystal_class": "FloatingRock",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 167,
+      "crystal_class": "ScalyBeast",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 168,
+      "crystal_class": "WereTiger",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 169,
+      "crystal_class": "HornedSorceror",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "HornedSorceror"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 170,
+      "crystal_class": "BoulderSpirit",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "BoulderSpirit"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 171,
+      "crystal_class": "HornedCommander",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "HornedCommander"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 173,
+      "crystal_class": "TurtleGrass",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "TurtleGrass Zuma-style stone/wake state, two-tile Crystal attack shape, ObjectAttack packet baseline, imported DC damage, and the type-1 single-push branch with three-tile displacement plus delayed DC damage are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 150,
+      "map_count": 3,
+      "example_monsters": [
+        "TurtleGrass"
+      ],
+      "example_maps": [
+        "hyunwol1 DarkForest",
+        "hyunwol2 DarkForest",
+        "hyunwol3 DarkForest"
+      ]
+    },
+    {
+      "ai": 174,
+      "crystal_class": "ManTree",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "ManTree/FineSoul Zuma-style stone/wake state and adjacent ObjectAttack packet branches are covered, including type-0, type-1 halfmoon, and type-2 boulder/Stun hook; current generated FineSoul rows have DC=0/MC=0 so delayed damage, halfmoon fanout, and Stun remain data-gated."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 150,
+      "map_count": 3,
+      "example_monsters": [
+        "FineSoul"
+      ],
+      "example_maps": [
+        "hyunwol1 DarkForest",
+        "hyunwol2 DarkForest",
+        "hyunwol3 DarkForest"
+      ]
+    },
+    {
+      "ai": 175,
+      "crystal_class": "ChieftainArcher",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 177,
+      "crystal_class": "FrozenKnight",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 178,
+      "crystal_class": "IcePhantom",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 179,
+      "crystal_class": "SnowWolf",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SnowWolf primary ObjectAttack branch is covered with 350 ms delayed timing and imported DC damage; the type-1 ObjectAttack branch follows raw-MC gating with defence mitigation, keeps current zero-MC data damage-free, and covers nonzero-MC Slow/Frozen poison plus FindAllTargets(2)-style fanout."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 5,
+      "respawn_entity_count": 85,
+      "map_count": 1,
+      "example_monsters": [
+        "SnowWolf"
+      ],
+      "example_maps": [
+        "WhiteVillage WhiteValley"
+      ]
+    },
+    {
+      "ai": 180,
+      "crystal_class": "SnowWolfKing",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "FrozenWarewolf/SnowWolfKing ObjectAttack type 0/1/2/3 branches are covered with 500 ms delayed imported DC damage, the below-70% SnowWolf slave spawn is covered, and delayed one-tile death explosion damage is covered; teleport retarget and pet transfer remain pending."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 3,
+      "respawn_entity_count": 3,
+      "map_count": 1,
+      "example_monsters": [
+        "FrozenWarewolf"
+      ],
+      "example_maps": [
+        "WhiteVillage WhiteValley"
+      ]
+    },
+    {
+      "ai": 181,
+      "crystal_class": "WaterDragon",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "WaterDragon non-adjacent ObjectRangeAttack baseline, delayed hit timing, imported MC damage, and 1-in-7 five-tick green poison on successful ranged hits are covered."
+      ],
+      "monster_count": 2,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 14,
+      "respawn_entity_count": 425,
+      "map_count": 6,
+      "example_monsters": [
+        "Hydra",
+        "DarkSpirit"
+      ],
+      "example_maps": [
+        "bonguk1 WhiteDragonPassage",
+        "bonguk2 WhiteDragonPassage",
+        "bonguk4 WhiteDragonPassage",
+        "bonguk5 WhiteDragonPassage",
+        "SnowCave_2F SnowCavern_2F",
+        "SnowCave_BOSS TheSnowLair"
+      ]
+    },
+    {
+      "ai": 182,
+      "crystal_class": "BlackTortoise",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "BlackTortoise non-adjacent ObjectRangeAttack baseline, delayed hit timing, green-poison hook with current SmallDrake MC=0 damage/poison gating, and close 1-in-5 type-1 halfmoon fanout are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 12,
+      "respawn_entity_count": 375,
+      "map_count": 4,
+      "example_monsters": [
+        "SmallDrake"
+      ],
+      "example_maps": [
+        "bonguk1 WhiteDragonPassage",
+        "bonguk2 WhiteDragonPassage",
+        "bonguk4 WhiteDragonPassage",
+        "bonguk5 WhiteDragonPassage"
+      ]
+    },
+    {
+      "ai": 184,
+      "crystal_class": "DragonWarrior",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 186,
+      "crystal_class": "Kirin",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "Lamia/Kirin two-tile row/diagonal ObjectAttack baseline is covered with imported DC damage, including the type-1 500 ms DC branch; the nonzero-MC type-2 IceThrust cone, slow poison, and opposing-target fanout are supported, while current Lamia MC=0 data naturally gates that branch."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 2,
+      "map_count": 1,
+      "example_monsters": [
+        "Lamia"
+      ],
+      "example_maps": [
+        "bonguk3 WhiteDragonHillSide"
+      ]
+    },
+    {
+      "ai": 187,
+      "crystal_class": "FrozenMiner",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "FrozenMiner primary ObjectAttack branch is covered with Crystal 600 ms delayed timing and imported DC damage; type-1 ObjectAttack area branch is covered with 1000 ms delayed imported 80% DC damage for the player target plus adjacent opposing-monster FindAllTargets(1)-style fanout."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 80,
+      "map_count": 2,
+      "example_monsters": [
+        "FrozenMiner"
+      ],
+      "example_maps": [
+        "SnowCave_1F SnowCavern_1F",
+        "SnowCave_2F SnowCavern_2F"
+      ]
+    },
+    {
+      "ai": 188,
+      "crystal_class": "FrozenAxeman",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "FrozenAxeman two-tile line/diagonal type-1 ObjectAttack branch is covered with 500 ms delayed timing and imported DC*2 damage; adjacent type-2 pull/push branch is covered with a Crystal-shaped 2/3 deterministic trigger, 10s cooldown, 2-4 tile player push, and 500 ms imported DC hit."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 80,
+      "map_count": 2,
+      "example_monsters": [
+        "FrozenAxeman"
+      ],
+      "example_maps": [
+        "SnowCave_1F SnowCavern_1F",
+        "SnowCave_2F SnowCavern_2F"
+      ]
+    },
+    {
+      "ai": 189,
+      "crystal_class": "FrozenMagician",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "FrozenMagician nine-tile non-adjacent ObjectRangeAttack branches are covered: type-0 uses distance-scaled 600 ms base delay with imported MC damage, and type-1 uses the boosted 750 ms base delay with imported MC*3/2 damage."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 80,
+      "map_count": 2,
+      "example_monsters": [
+        "FrozenMagician"
+      ],
+      "example_maps": [
+        "SnowCave_1F SnowCavern_1F",
+        "SnowCave_2F SnowCavern_2F"
+      ]
+    },
+    {
+      "ai": 190,
+      "crystal_class": "SnowYeti",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "SnowYeti nine-tile non-adjacent ObjectRangeAttack branch is covered with distance-scaled delayed timing, imported DC damage, and the Crystal frozen poison roll; the adjacent ObjectAttack double-hit branch is covered with type-0/type-1 packets plus 500/1500 ms imported DC hits."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 60,
+      "map_count": 2,
+      "example_monsters": [
+        "SnowYeti"
+      ],
+      "example_maps": [
+        "SnowCave_1F SnowCavern_1F",
+        "SnowCave_2F SnowCavern_2F"
+      ]
+    },
+    {
+      "ai": 191,
+      "crystal_class": "IceCrystalSoldier",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 192,
+      "crystal_class": "DarkWraith",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "DarkWraith four-tile line/diagonal ObjectAttack type-2 branch is covered with imported DC*3 damage, four-tile line fanout, and Crystal's 3-7s line cooldown approximation; the adjacent type-1 area branch is covered with 600 ms imported DC damage plus adjacent opposing-target fanout."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 2,
+      "respawn_entity_count": 50,
+      "map_count": 2,
+      "example_monsters": [
+        "DarkWraith"
+      ],
+      "example_maps": [
+        "SnowCave_2F SnowCavern_2F",
+        "SnowCave_BOSS TheSnowLair"
+      ]
+    },
+    {
+      "ai": 196,
+      "crystal_class": "AntCommander",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 197,
+      "crystal_class": "GlacierSnail",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 198,
+      "crystal_class": "FurbolgWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 199,
+      "crystal_class": "FurbolgArcher",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 200,
+      "crystal_class": "FurbolgCommander",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 201,
+      "crystal_class": "FurbolgGuard",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 202,
+      "crystal_class": "GlacierBeast",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 203,
+      "crystal_class": "GlacierWarrior",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 210,
+      "crystal_class": "HoodedSummonerScrolls",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 4,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "WarriorScroll",
+        "TaoistScroll",
+        "WizardScroll",
+        "AssassinScroll"
+      ],
+      "example_maps": []
+    },
+    {
+      "ai": 211,
+      "crystal_class": "HoodedSummoner",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 212,
+      "crystal_class": "PurpleFaeFlower",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 213,
+      "crystal_class": "Siege",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 214,
+      "crystal_class": "SepWarrior",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 215,
+      "crystal_class": "SepWizard",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 216,
+      "crystal_class": "SepTaoist",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 217,
+      "crystal_class": "SepAssassin",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 218,
+      "crystal_class": "SepArcher",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 219,
+      "crystal_class": "SepHighWarrior",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 220,
+      "crystal_class": "SepHighWizard",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 221,
+      "crystal_class": "SepHighTaoist",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 222,
+      "crystal_class": "SepHighAssassin",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 223,
+      "crystal_class": "SepHighArcher",
+      "crystal_notes": [
+        "TODO"
+      ],
+      "crystal_todo": true,
+      "runtime_status": "data_only",
+      "runtime_notes": [
+        "Imported in Crystal monster manifest, but not referenced by current respawn data."
+      ],
+      "monster_count": 0,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [],
+      "example_maps": []
+    },
+    {
+      "ai": 255,
+      "crystal_class": "StoneTrap",
+      "crystal_notes": [],
+      "crystal_todo": false,
+      "runtime_status": "implemented_special",
+      "runtime_notes": [
+        "StoneTrap immobility, trap-priority hostile targeting, owner binding, and struck immunity are covered."
+      ],
+      "monster_count": 1,
+      "boss_monster_count": 0,
+      "respawn_rule_count": 0,
+      "respawn_entity_count": 0,
+      "map_count": 0,
+      "example_monsters": [
+        "StoneTrap"
+      ],
+      "example_maps": []
+    }
+  ]
+}

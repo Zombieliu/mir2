@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1785023603000,
+  "profileId": "mir2-regional-v1-3000-15m",
+  "source": "docker-info",
+  "host": {
+    "architecture": "aarch64",
+    "operatingSystem": "Docker Desktop",
+    "dockerVersion": "29.1.3",
+    "availableCpu": 10,
+    "availableMemoryBytes": 8322101248
+  },
+  "referenceDeployment": {
+    "cpu": 98,
+    "memoryGiB": 240
+  },
+  "certificationHarness": {
+    "cpu": 14.75,
+    "memoryGiB": 20.375,
+    "components": [
+      "load-generator=4CPU/8GiB",
+      "zone-replicator=2CPU/4GiB",
+      "redis-sentinels=0.75CPU/0.375GiB",
+      "commonware-validators=8CPU/8GiB"
+    ]
+  },
+  "requiredHost": {
+    "cpu": 113,
+    "memoryBytes": 279575527424
+  },
+  "assertions": {
+    "cpuMeetsReferenceAndHarness": false,
+    "memoryMeetsReferenceAndHarness": false
+  },
+  "success": false
+}

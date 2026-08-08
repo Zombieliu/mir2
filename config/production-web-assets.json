@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "version": "20260730-fullcrystal-f71b89aa-gzip1",
+  "objectPrefix": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+  "assetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+  "browserFallbackBaseUrls": [
+    "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+    "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
+  ],
+  "remoteReleaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/remote-asset-release.json",
+  "fullCrystalPack": {
+    "enabled": true,
+    "verified": true,
+    "path": "/generated/crystal-packs/full/index.json",
+    "contentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+    "libraryCount": 1440,
+    "pageCount": 4446
+  },
+  "mapAtlas": {
+    "enabled": true,
+    "verified": true,
+    "manifestPath": "/generated/map-atlas/manifest.732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7.json",
+    "contentHash": "732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7",
+    "pageCount": 57,
+    "maxPageBytes": 468963
+  }
+}

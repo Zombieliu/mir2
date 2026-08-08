@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784997340650,
+  "accountId": "g19s784997338658",
+  "characterName": "S84997338658",
+  "characterIndex": 2,
+  "sessionId": "gateway-1-1784997338715-1",
+  "zoneId": "map:0",
+  "initialOwner": "gate19-active",
+  "initialGeneration": 1,
+  "promotedOwner": "gate19-standby",
+  "promotedGeneration": 2,
+  "initialTick": 3,
+  "promotedTick": 1,
+  "initialMap": "0",
+  "promotedMap": "0",
+  "identityPreserved": true,
+  "observedFailures": 0,
+  "waitingForPromotionMs": 1604.7707930000001,
+  "resumeCommandMs": 55.057208,
+  "success": true
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-developer-release",
+  "channel": "main",
+  "repository": "Zombieliu/mir2",
+  "projectDirectory": "mir2-web3",
+  "crystal": {
+    "path": "Crystal",
+    "repository": "Zombieliu/Crystal",
+    "commit": "484983404e3d6afa584e93801f8006ae3429bea9"
+  },
+  "toolchains": {
+    "node": "22.18.0",
+    "npm": "11.13.0",
+    "rust": "1.89.0",
+    "githubCli": "2.96.0"
+  },
+  "container": {
+    "baseImage": "node:22.18.0-bookworm-slim@sha256:752ea8a2f758c34002a0461bd9f1cee4f9a3c36d48494586f60ffce1fc708e0e",
+    "publishedImage": "ghcr.io/zombieliu/mir2-developer",
+    "publishedDigest": null,
+    "publishedRevision": null,
+    "platforms": [
+      "linux/amd64",
+      "linux/arm64"
+    ]
+  },
+  "assets": {
+    "manifest": "mir2-web3/config/developer-assets.json",
+    "releaseTag": "developer-assets-f71b89aa3850",
+    "contentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+    "remoteBaseUrl": null
+  },
+  "services": {
+    "playerWeb": "http://127.0.0.1:3002/",
+    "gatewayHealth": "http://127.0.0.1:7110/health",
+    "gatewayWebSocket": "ws://127.0.0.1:7110/ws",
+    "gatewayTcp": "127.0.0.1:7000"
+  }
+}

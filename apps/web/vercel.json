@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bash ./scripts/vercel-build.sh",
+  "headers": [
+    {
+      "source": "/mir2-asset-worker.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "Service-Worker-Allowed", "value": "/" },
+        { "key": "Alt-Svc", "value": "clear" }
+      ]
+    }
+  ]
+}

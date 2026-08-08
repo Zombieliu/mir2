@@ -1,0 +1,33 @@
+{
+  "name": "mir2-admin-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3020",
+    "build": "next build",
+    "start": "next start -p 3020",
+    "typecheck": "next typegen && tsc --noEmit --pretty false",
+    "check:admin-api-response": "node --test scripts/check-admin-api-response.mjs",
+    "check:submit-buttons": "node scripts/check-submit-buttons.mjs",
+    "check:dubhe-node-snapshot": "node scripts/check-dubhe-node-snapshot.mjs",
+    "check:dubhe-network": "node --test scripts/check-dubhe-network.mjs"
+  },
+  "dependencies": {
+    "next": "16.2.11",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "postcss": "8.5.21",
+    "sharp": "0.35.3"
+  }
+}

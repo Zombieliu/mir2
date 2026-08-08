@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "resources": {
+    "config": {
+      "mine_id": "u64",
+      "map_id": "u32",
+      "mine_set": "u8",
+      "max_stones": "u32",
+      "regen_secs": "u32",
+      "hit_rate": "u8",
+      "drop_rate": "u8"
+    },
+    "stones_left": {
+      "mine_id": "u64",
+      "stones": "u32"
+    },
+    "next_regen_ms": {
+      "mine_id": "u64",
+      "at_ms": "u64"
+    },
+    "emitted_this_epoch": {
+      "value": "u64"
+    },
+    "treasury_mist": {
+      "value": "u64"
+    },
+    "treasury_addr": {
+      "value": "address"
+    },
+    "per_swing_fee": {
+      "value": "u64"
+    },
+    "epoch_emission_cap": {
+      "value": "u64"
+    },
+    "ore_balance": {
+      "ore_kind": "OreKind",
+      "amount": "u64"
+    },
+    "miner_nonce": {
+      "value": "u64"
+    }
+  },
+  "objects": {},
+  "scenes": {}
+}

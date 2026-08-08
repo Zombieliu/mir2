@@ -1,0 +1,76 @@
+services:
+  gateway:
+    restart: unless-stopped
+    environment:
+      MIR2_DEPLOY_REVISION: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+    labels:
+      com.mir2.acceptance.revision: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+      org.opencontainers.image.revision: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+    ports: !override
+      - "127.0.0.1:${MIR2_GATEWAY_WEB_PORT:-7110}:7110"
+      - "127.0.0.1:${MIR2_GATEWAY_TCP_PORT:-7000}:7000"
+
+  web:
+    restart: unless-stopped
+    command:
+      - bash
+      - -lc
+      - >-
+        revision="$${MIR2_DEPLOY_REVISION:?}";
+        lock_hash="$$(sha256sum package-lock.json | cut -d ' ' -f 1)";
+        if [ "$$(cat node_modules/.mir2-package-lock.sha256 2>/dev/null || true)" != "$$lock_hash" ];
+        then npm ci --include=dev && printf '%s' "$$lock_hash" > node_modules/.mir2-package-lock.sha256; fi;
+        if [ ! -s .next/BUILD_ID ] ||
+        [ "$$(cat .next/.mir2-acceptance-revision 2>/dev/null || true)" != "$$revision" ];
+        then rm -f .next/.mir2-acceptance-revision &&
+        npm run build &&
+        printf '%s' "$$revision" > .next/.mir2-acceptance-revision; fi;
+        exec npm run start -- --hostname 0.0.0.0 --port 3002
+    environment:
+      NODE_ENV: production
+      MIR2_DEPLOY_REVISION: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+    labels:
+      com.mir2.acceptance.revision: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+      org.opencontainers.image.revision: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+    ports: !override
+      - "127.0.0.1:${MIR2_WEB_PORT:-3002}:3002"
+
+  caddy:
+    image: caddy:2.10.0-alpine@sha256:ae4458638da8e1a91aafffb231c5f8778e964bca650c8a8cb23a7e8ac557aa3c
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -ec
+    command:
+      - |
+        MIR2_ACCEPTANCE_BASIC_AUTH_HASH="$$(printf '%s' "$$MIR2_ACCEPTANCE_BASIC_AUTH_HASH_B64" | base64 -d)"
+        export MIR2_ACCEPTANCE_BASIC_AUTH_HASH
+        unset MIR2_ACCEPTANCE_BASIC_AUTH_HASH_B64
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    environment:
+      - MIR2_ACCEPTANCE_DOMAIN=${MIR2_ACCEPTANCE_DOMAIN:?Set MIR2_ACCEPTANCE_DOMAIN to a DNS name}
+      - MIR2_ACCEPTANCE_BASIC_AUTH_USER=${MIR2_ACCEPTANCE_BASIC_AUTH_USER:?Set the acceptance Basic Auth username}
+      # Base64 is transport encoding only; it prevents Compose from reinterpreting '$'.
+      - MIR2_ACCEPTANCE_BASIC_AUTH_HASH_B64=${MIR2_ACCEPTANCE_BASIC_AUTH_HASH_B64:?Set the encoded Caddy password hash}
+      - MIR2_ACCEPTANCE_BASIC_AUTH_ALGORITHM=${MIR2_ACCEPTANCE_BASIC_AUTH_ALGORITHM:?Set the Caddy password hash algorithm}
+      - MIR2_DEPLOY_REVISION=${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+    labels:
+      com.mir2.acceptance.revision: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+      org.opencontainers.image.revision: ${MIR2_DEPLOY_REVISION:?Set MIR2_DEPLOY_REVISION to the Git revision being deployed}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile.acceptance:/etc/caddy/Caddyfile:ro
+      - acceptance-caddy-data:/data
+      - acceptance-caddy-config:/config
+    depends_on:
+      gateway:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+volumes:
+  acceptance-caddy-data:
+  acceptance-caddy-config:

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.obelisk-labs.dubhe-home-agent</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__INSTALL_ROOT__/bin/home_agent_launcher</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>MIR2_HOME_MANAGE_CHILDREN</key>
+    <string>true</string>
+    <key>MIR2_HOME_BIN_DIR</key>
+    <string>__INSTALL_ROOT__/bin</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>StandardOutPath</key>
+  <string>__INSTALL_ROOT__/supervisor.log</string>
+  <key>StandardErrorPath</key>
+  <string>__INSTALL_ROOT__/supervisor-error.log</string>
+</dict>
+</plist>

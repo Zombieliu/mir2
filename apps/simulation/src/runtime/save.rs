@@ -1,0 +1,1448 @@
+use std::collections::BTreeSet;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
+use sha2::{Digest, Sha256};
+
+use bevy_ecs::prelude::World;
+use mir2_game_data::{
+    crystal_quest_packet_payloads, format_localized_text, localized_text_or_fallback,
+};
+use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket, ServerPacketId};
+use serde::{Deserialize, Serialize};
+
+use crate::config::{
+    apply_crystal_map_metadata, crystal_base_vitals, AccountBanStatus, AccountRecord,
+    CharacterRecord, CharacterSaveRecord, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+};
+
+use super::components::{
+    entity_facing, entity_player_vitals, entity_position, player_entity, PlayerVitals,
+};
+use super::crystal_compat::BASE_STORAGE_SLOTS;
+use super::equipment::{seed_equipment_items_for_character, EquipmentState};
+use super::inventory::{
+    crystal_start_inventory_items, normalize_inventory_known_item_metadata,
+    normalize_inventory_unique_ids, refresh_storage_password_state, seed_belt_items,
+    seed_inventory_items, seed_storage_items,
+};
+use super::map::{
+    clear_non_player_world_entities, rebuild_world, refresh_runtime_map_collision,
+    should_use_crystal_current_map_world, spawn_config_visible_npcs,
+    spawn_visible_world_for_current_map,
+};
+use super::packets::*;
+use super::quests::QuestState;
+use super::resources::{
+    current_language, runtime_tick, set_runtime_tick, BuffResource, HeroInventoryResource,
+    InventoryResource, ItemRentalResource, MapRuntimeResource, NpcStateResource,
+    ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
+    PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
+    SessionResource, SkillResource, Stage5SystemsResource,
+};
+use super::session::SimulationSession;
+use super::skills::seed_skills;
+
+#[derive(Debug, Clone)]
+pub(super) struct ActiveCharacterRuntimeState {
+    pub(super) position: Point,
+    pub(super) direction: MirDirection,
+    pub(super) vitals: PlayerVitals,
+}
+
+pub(super) fn default_save_for_character(
+    config: &SimulationConfig,
+    character: CharacterRecord,
+) -> CharacterSaveRecord {
+    let starter_equipment = if config.content_profile.is_some() {
+        Vec::new()
+    } else {
+        seed_equipment_items_for_character(character.class, character.gender)
+    };
+    let mut save = CharacterSaveRecord::new(character);
+    let starter_inventory = if config.content_profile.is_some() {
+        crystal_start_inventory_items(&save.character)
+    } else {
+        Vec::new()
+    };
+    let (max_hp, mp) = crystal_base_vitals(save.character.class, save.character.level);
+    save.position = config.spawn.clone();
+    save.map_file_name = config.map.file_name.clone();
+    save.map_title = config.map.title.clone();
+    save.direction = MirDirection::Down;
+    save.hp = max_hp;
+    save.max_hp = max_hp;
+    save.mp = mp;
+    save.max_mp = mp;
+    save.experience = 0;
+    save.max_experience = config.experience_required_for_level(save.character.level);
+    save.gold = 0;
+    save.credit = 0;
+    save.city_currencies.clear();
+    save.inventory_items_json = encode_state_vec(&starter_inventory);
+    save.belt_items_json = Vec::new();
+    save.storage_items_json = Vec::new();
+    save.equipment_items_json = encode_state_vec(&starter_equipment);
+    save.equipment_items_explicit_empty = config.content_profile.is_some();
+    save.quest_states_json = Vec::new();
+    save.skill_states_json = Vec::new();
+    save.npc_flag_states_json = Vec::new();
+    save.npc_saved_values_json = Vec::new();
+    save.npc_buy_back_items_json = Vec::new();
+    save.npc_used_goods_items_json = Vec::new();
+    save.item_rental_records_json = Vec::new();
+    save.has_rented_item = false;
+    save.stage5_systems_json = Some(
+        serde_json::to_string(&Stage5SystemsState::default())
+            .expect("stage5 systems state should serialize"),
+    );
+    save
+}
+
+pub(super) fn active_character_runtime_state(world: &World) -> Option<ActiveCharacterRuntimeState> {
+    let player = player_entity(world)?;
+    Some(ActiveCharacterRuntimeState {
+        position: entity_position(world, player)?,
+        direction: entity_facing(world, player)?,
+        vitals: entity_player_vitals(world, player)?,
+    })
+}
+
+pub(super) fn encode_state_vec<T>(items: &[T]) -> Vec<String>
+where
+    T: Serialize,
+{
+    items
+        .iter()
+        .map(|item| serde_json::to_string(item).expect("save state should serialize"))
+        .collect()
+}
+
+pub(super) fn decode_state_vec<T>(items: &[String]) -> Option<Vec<T>>
+where
+    T: for<'de> Deserialize<'de>,
+{
+    items
+        .iter()
+        .map(|item| serde_json::from_str(item).ok())
+        .collect()
+}
+
+pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
+    let resources = world.resource::<InventoryResource>();
+    let hero_inventory = world.resource::<HeroInventoryResource>();
+    let player_runtime = world.resource::<PlayerRuntimeResource>();
+    let map = world.resource::<MapRuntimeResource>();
+    let quests = world.resource::<QuestResource>();
+    let skills = world.resource::<SkillResource>();
+    let npc_state = world.resource::<NpcStateResource>();
+    let rental = world.resource::<ItemRentalResource>();
+    let stage5 = world.resource::<Stage5SystemsResource>();
+    let character = world
+        .resource::<SessionResource>()
+        .selected_character
+        .clone()?;
+    let player = player_entity(world)?;
+    let position = entity_position(world, player)?;
+    let direction = entity_facing(world, player)?;
+    let vitals = entity_player_vitals(world, player)?;
+
+    Some(CharacterSaveRecord {
+        character,
+        map_file_name: map.current_map.file_name.clone(),
+        map_title: map.current_map.title.clone(),
+        position,
+        direction,
+        hp: vitals.hp,
+        max_hp: vitals.max_hp,
+        mp: vitals.mp,
+        max_mp: vitals.max_mp,
+        experience: player_runtime.experience,
+        max_experience: player_runtime.max_experience.max(1),
+        gold: player_runtime.gold,
+        credit: player_runtime.credit,
+        city_currencies: player_runtime.city_currencies.clone(),
+        pk_points: player_runtime.pk_points,
+        chat_banned: player_runtime.chat_banned,
+        chat_ban_until_ms: player_runtime.chat_ban_until_ms,
+        inventory_items_json: encode_state_vec(&resources.inventory_items),
+        belt_items_json: encode_state_vec(&resources.belt_items),
+        hero_inventory_items_json: encode_state_vec(&hero_inventory.items),
+        storage_items_json: encode_state_vec(&resources.storage_items),
+        equipment_items_json: encode_state_vec(&resources.equipment_items),
+        equipment_items_explicit_empty: resources.equipment_items.is_empty(),
+        quest_states_json: encode_state_vec(&quests.quests),
+        skill_states_json: encode_state_vec(&skills.skills),
+        npc_flag_states_json: encode_state_vec(&npc_state.npc_flags),
+        npc_saved_values_json: encode_state_vec(&npc_state.npc_saved_values),
+        npc_buy_back_items_json: encode_state_vec(&npc_state.npc_buy_back_items),
+        npc_used_goods_items_json: encode_state_vec(&npc_state.npc_used_goods_items),
+        item_rental_records_json: encode_state_vec(&rental.rented_items),
+        has_rented_item: rental.has_rented_item,
+        stage5_systems_json: Some(
+            serde_json::to_string(&stage5.stage5_systems)
+                .expect("stage5 systems state should serialize"),
+        ),
+    })
+}
+
+pub(super) fn persist_active_character_save(world: &World) {
+    let Some(save) = snapshot_active_character_save(world) else {
+        return;
+    };
+    let account_id = world
+        .resource::<SessionResource>()
+        .account_id
+        .clone()
+        .unwrap_or_else(|| "demo".to_string());
+    persist_character_save(world, &account_id, save);
+}
+
+impl SimulationSession {
+    /// Capture the exact durable private state for the active character without
+    /// mutating the configured account store.
+    pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        snapshot_active_character_save(self.app.world())
+    }
+
+    /// Restore the active character's durable private state after journal
+    /// replay. Shared Zone state is restored separately by the Gateway and
+    /// remains authoritative for map entities, position, and vitals.
+    pub fn restore_active_character_checkpoint(
+        &mut self,
+        save: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let identity = self
+            .active_identity()
+            .ok_or_else(|| "active character checkpoint requires an active identity".to_string())?;
+        if identity.character_index != save.character.index
+            || identity.character_name != save.character.name
+        {
+            return Err(format!(
+                "active character checkpoint identity mismatch: runtime={}/{}, checkpoint={}/{}",
+                identity.character_index,
+                identity.character_name,
+                save.character.index,
+                save.character.name
+            ));
+        }
+
+        let replay_tick = runtime_tick(self.app.world());
+        apply_character_save(self.app.world_mut(), save);
+        refresh_runtime_map_collision(self.app.world_mut());
+        refresh_storage_password_state(self.app.world_mut());
+        rebuild_world(self.app.world_mut());
+        if should_use_crystal_current_map_world(self.app.world()) {
+            clear_non_player_world_entities(self.app.world_mut());
+            spawn_visible_world_for_current_map(self.app.world_mut());
+            spawn_config_visible_npcs(self.app.world_mut());
+        }
+        self.visible_objects = collect_visible_objects(self.app.world())
+            .keys()
+            .copied()
+            .collect();
+        set_runtime_tick(self.app.world_mut(), replay_tick);
+        Ok(())
+    }
+}
+
+pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
+    let (config, account_id, character_index) = {
+        let config = world.resource::<RuntimeConfigResource>().config.clone();
+        let session = world.resource::<SessionResource>();
+        let Some(account_id) = session.account_id.clone() else {
+            return false;
+        };
+        let Some(character) = session.selected_character.as_ref() else {
+            return false;
+        };
+        (config, account_id, character.index)
+    };
+
+    let external_mail = {
+        let Ok(store) = config.account_store.lock() else {
+            return false;
+        };
+        let Some(save) = store
+            .accounts
+            .get(&account_id)
+            .and_then(|account| account.saves.get(&character_index))
+        else {
+            return false;
+        };
+        save.stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
+            .map(|systems| systems.mail)
+            .unwrap_or_default()
+    };
+
+    if external_mail.is_empty() {
+        return false;
+    }
+
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    merge_external_stage5_mail(&mut stage5.stage5_systems.mail, external_mail)
+}
+
+pub(super) fn merge_external_stage5_mail(
+    local_mail: &mut Vec<Stage5MailMessage>,
+    external_mail: Vec<Stage5MailMessage>,
+) -> bool {
+    let mut changed = false;
+    for external in external_mail {
+        if let Some(local) = local_mail.iter_mut().find(|mail| mail.id == external.id) {
+            let merged = Stage5MailMessage {
+                claimed: local.claimed || external.claimed,
+                deleted: local.deleted || external.deleted,
+                ..external
+            };
+            if local != &merged {
+                *local = merged;
+                changed = true;
+            }
+        } else {
+            local_mail.push(external);
+            changed = true;
+        }
+    }
+    changed
+}
+
+pub(super) fn persist_character_save(world: &World, account_id: &str, save: CharacterSaveRecord) {
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let account = store
+        .accounts
+        .entry(account_id.to_string())
+        .or_insert_with(AccountRecord::empty);
+
+    if let Some(character) = account
+        .characters
+        .iter_mut()
+        .find(|character| character.index == save.character.index)
+    {
+        *character = save.character.clone();
+    } else {
+        account.characters.push(save.character.clone());
+        account.characters.sort_by_key(|character| character.index);
+    }
+
+    account.saves.insert(save.character.index, save);
+    drop(store);
+    if let Err(error) = config.save_account_store_account(account_id) {
+        eprintln!("failed to persist account store: {error}");
+    }
+}
+
+pub(super) fn account_characters(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> Vec<CharacterRecord> {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    store
+        .accounts
+        .get(account_id)
+        .map(|account| account.characters.clone())
+        .unwrap_or_default()
+}
+
+/// Legacy hashed-password marker. New writes use a standard Argon2id PHC string.
+const LEGACY_PASSWORD_HASH_PREFIX: &str = "sha256$";
+const ARGON2ID_PASSWORD_HASH_PREFIX: &str = "$argon2id$";
+/// Iteration count for the stretched SHA-256 password hash. Not as strong as
+/// Argon2id; retained only to verify and transparently migrate existing rows.
+const PASSWORD_HASH_ITERATIONS: u32 = 100_000;
+
+/// Account-id namespace reserved for wallet/passkey accounts. Accounts in this
+/// namespace authenticate out-of-band through the HMAC-token-verified passkey
+/// path (gateway `verify_passkey_gateway_token` -> [`login_passkey_account`]) and
+/// must NEVER be reachable through the classic account/password operations
+/// ([`login_account`], [`create_account_with_password`],
+/// [`change_account_password`]). A Sui address is public on-chain, so letting the
+/// password path touch this namespace would let anyone who knows a victim's
+/// address take over their wallet account.
+const WALLET_ACCOUNT_PREFIX: &str = "sui:";
+
+/// Stored-password sentinel for wallet/passkey accounts. [`account_password_matches`]
+/// special-cases it to always return `false`, so even if such an account is ever
+/// reached by the classic password path (e.g. a record persisted before this
+/// hardening), no candidate — including a literal copy of the sentinel string —
+/// can authenticate. Wallet accounts have no password; they authenticate via the
+/// passkey token.
+pub(super) const LOCKED_ACCOUNT_PASSWORD: &str = "\u{0}wallet-locked";
+
+/// Whether `account_id` belongs to the reserved wallet/passkey namespace and must
+/// therefore bypass every classic password operation. Panic-safe and
+/// ASCII-case-insensitive on the reserved prefix.
+pub(super) fn is_wallet_namespaced_account(account_id: &str) -> bool {
+    account_id
+        .get(..WALLET_ACCOUNT_PREFIX.len())
+        .is_some_and(|head| head.eq_ignore_ascii_case(WALLET_ACCOUNT_PREFIX))
+}
+
+fn stretch_password(salt: &[u8], password: &str) -> [u8; 32] {
+    let mut digest = [0_u8; 32];
+    let mut hasher = Sha256::new();
+    hasher.update(salt);
+    hasher.update(password.as_bytes());
+    digest.copy_from_slice(&hasher.finalize());
+    for _ in 1..PASSWORD_HASH_ITERATIONS {
+        let mut hasher = Sha256::new();
+        hasher.update(salt);
+        hasher.update(digest);
+        digest.copy_from_slice(&hasher.finalize());
+    }
+    digest
+}
+
+fn hex_decode(text: &str) -> Option<Vec<u8>> {
+    if text.len() % 2 != 0 {
+        return None;
+    }
+    (0..text.len())
+        .step_by(2)
+        .map(|index| u8::from_str_radix(&text[index..index + 2], 16).ok())
+        .collect()
+}
+
+/// Hash an account password with Argon2id and a CSPRNG-generated salt.
+fn hash_account_password(password: &str) -> Result<String, String> {
+    let salt = SaltString::generate(&mut OsRng);
+    Argon2::default()
+        .hash_password(password.as_bytes(), &salt)
+        .map(|hash| hash.to_string())
+        .map_err(|error| format!("argon2id password hashing failed: {error}"))
+}
+
+/// Constant-time byte comparison to avoid leaking match length via timing.
+fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    let mut diff = 0_u8;
+    for (a, b) in left.iter().zip(right.iter()) {
+        diff |= a ^ b;
+    }
+    diff == 0
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PasswordVerification {
+    Invalid,
+    Current,
+    LegacyNeedsMigration,
+}
+
+/// Verify the current Argon2id PHC format and the two historical formats.
+/// Historical successful logins are immediately rewritten through Argon2id.
+fn verify_account_password(stored: &str, candidate: &str) -> PasswordVerification {
+    if stored == LOCKED_ACCOUNT_PASSWORD {
+        return PasswordVerification::Invalid;
+    }
+    if stored.starts_with(ARGON2ID_PASSWORD_HASH_PREFIX) {
+        let Ok(parsed) = PasswordHash::new(stored) else {
+            return PasswordVerification::Invalid;
+        };
+        return if Argon2::default()
+            .verify_password(candidate.as_bytes(), &parsed)
+            .is_ok()
+        {
+            PasswordVerification::Current
+        } else {
+            PasswordVerification::Invalid
+        };
+    }
+    if let Some(rest) = stored.strip_prefix(LEGACY_PASSWORD_HASH_PREFIX) {
+        let mut parts = rest.splitn(2, '$');
+        let (Some(salt_hex), Some(hash_hex)) = (parts.next(), parts.next()) else {
+            return PasswordVerification::Invalid;
+        };
+        let (Some(salt), Some(expected)) = (hex_decode(salt_hex), hex_decode(hash_hex)) else {
+            return PasswordVerification::Invalid;
+        };
+        let actual = stretch_password(&salt, candidate);
+        if constant_time_eq(&expected, &actual) {
+            PasswordVerification::LegacyNeedsMigration
+        } else {
+            PasswordVerification::Invalid
+        }
+    } else if constant_time_eq(stored.as_bytes(), candidate.as_bytes()) {
+        PasswordVerification::LegacyNeedsMigration
+    } else {
+        PasswordVerification::Invalid
+    }
+}
+
+#[cfg(test)]
+pub(super) fn account_password_matches(stored: &str, candidate: &str) -> bool {
+    verify_account_password(stored, candidate) != PasswordVerification::Invalid
+}
+
+fn production_identity_policy_enabled() -> bool {
+    if std::env::var("MIR2_IDENTITY_POLICY")
+        .is_ok_and(|value| value.trim().eq_ignore_ascii_case("commercial"))
+    {
+        return true;
+    }
+    ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
+        .into_iter()
+        .filter_map(|name| std::env::var(name).ok())
+        .any(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "production" | "prod" | "staging"
+            )
+        })
+}
+
+fn commercial_account_id_is_valid(account_id: &str) -> bool {
+    let length = account_id.len();
+    (3..=32).contains(&length)
+        && account_id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-' | b'.'))
+}
+
+fn commercial_password_is_valid(account_id: &str, password: &str) -> bool {
+    let length = password.chars().count();
+    (10..=128).contains(&length)
+        && !password.chars().any(char::is_control)
+        && !password.eq_ignore_ascii_case(account_id)
+        && !matches!(
+            password.to_ascii_lowercase().as_str(),
+            "1234567890" | "password123" | "qwerty12345" | "mir2password"
+        )
+}
+
+pub(super) fn create_account_with_password(
+    config: &SimulationConfig,
+    account_id: &str,
+    password: &str,
+) -> u8 {
+    if is_wallet_namespaced_account(account_id) {
+        return 0;
+    }
+    if production_identity_policy_enabled() {
+        if !commercial_account_id_is_valid(account_id) {
+            return 1;
+        }
+        if !commercial_password_is_valid(account_id, password) {
+            return 2;
+        }
+    }
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    if store.accounts.contains_key(account_id) {
+        return 7;
+    }
+    let mut account = AccountRecord::empty();
+    let Ok(password_hash) = hash_account_password(password) else {
+        return 0;
+    };
+    account.password = password_hash;
+    store.accounts.insert(account_id.to_string(), account);
+    drop(store);
+    if let Err(error) = config.save_account_store_account(account_id) {
+        eprintln!("failed to persist account store: {error}");
+    }
+    8
+}
+
+pub(super) enum AccountLoginResult {
+    Success(Vec<CharacterRecord>),
+    Banned(AccountBanStatus),
+    InvalidCredentials,
+}
+
+pub(super) fn login_account(
+    config: &SimulationConfig,
+    account_id: &str,
+    password: &str,
+) -> AccountLoginResult {
+    if is_wallet_namespaced_account(account_id) {
+        return AccountLoginResult::InvalidCredentials;
+    }
+    if let Err(error) = config.refresh_account_store_account(account_id) {
+        eprintln!("failed to refresh postgres account {account_id}: {error}");
+    }
+    if production_identity_policy_enabled() && !commercial_account_id_is_valid(account_id) {
+        return AccountLoginResult::InvalidCredentials;
+    }
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let Some(account) = store.accounts.get_mut(account_id) else {
+        return AccountLoginResult::InvalidCredentials;
+    };
+    let now_ms = unix_now_ms();
+    if let Some(ban) = account.active_ban(now_ms) {
+        return AccountLoginResult::Banned(ban);
+    }
+    match verify_account_password(&account.password, password) {
+        PasswordVerification::Invalid => AccountLoginResult::InvalidCredentials,
+        PasswordVerification::Current => AccountLoginResult::Success(account.characters.clone()),
+        PasswordVerification::LegacyNeedsMigration => {
+            let Ok(password_hash) = hash_account_password(password) else {
+                return AccountLoginResult::InvalidCredentials;
+            };
+            account.password = password_hash;
+            let characters = account.characters.clone();
+            drop(store);
+            if let Err(error) = config.save_account_store_account(account_id) {
+                eprintln!(
+                    "failed to persist Argon2id password migration for {account_id}: {error}"
+                );
+                return AccountLoginResult::InvalidCredentials;
+            }
+            AccountLoginResult::Success(characters)
+        }
+    }
+}
+
+pub(super) fn login_passkey_account(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> AccountLoginResult {
+    if let Err(error) = config.refresh_account_store_account(account_id) {
+        eprintln!("failed to refresh postgres passkey account {account_id}: {error}");
+    }
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let created = !store.accounts.contains_key(account_id);
+    let account = store
+        .accounts
+        .entry(account_id.to_string())
+        .or_insert_with(AccountRecord::empty);
+    let now_ms = unix_now_ms();
+    if let Some(ban) = account.active_ban(now_ms) {
+        return AccountLoginResult::Banned(ban);
+    }
+    // Wallet/passkey accounts authenticate via the passkey token, never a
+    // password. Stamp the locked sentinel so the classic password path can never
+    // match — this also heals any legacy record persisted with the guessable
+    // default password before this hardening.
+    let password_locked = account.password != LOCKED_ACCOUNT_PASSWORD;
+    if password_locked {
+        account.password = LOCKED_ACCOUNT_PASSWORD.to_string();
+    }
+    let characters = account.characters.clone();
+    drop(store);
+    if created || password_locked {
+        if let Err(error) = config.save_account_store_account(account_id) {
+            eprintln!("failed to persist passkey account store: {error}");
+        }
+    }
+    AccountLoginResult::Success(characters)
+}
+
+pub(super) fn active_account_ban(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> Option<AccountBanStatus> {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    store
+        .accounts
+        .get(account_id)
+        .and_then(|account| account.active_ban(unix_now_ms()))
+}
+
+pub(super) fn unix_now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or_default()
+}
+
+pub(super) fn change_account_password(
+    config: SimulationConfig,
+    account_id: &str,
+    current_password: &str,
+    new_password: &str,
+) -> u8 {
+    // Wallet/passkey accounts have no classic password to change; refuse the
+    // operation rather than letting a legacy default password be mutated. (5 =
+    // current password rejected, per the Crystal ChangePassword result codes.)
+    if is_wallet_namespaced_account(account_id) {
+        return 5;
+    }
+    if account_id.trim().is_empty() {
+        return 1;
+    }
+    if current_password.trim().is_empty() {
+        return 2;
+    }
+    if new_password.trim().is_empty() {
+        return 3;
+    }
+    if production_identity_policy_enabled()
+        && (!commercial_account_id_is_valid(account_id)
+            || !commercial_password_is_valid(account_id, new_password))
+    {
+        return 3;
+    }
+
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let Some(account) = store.accounts.get_mut(account_id) else {
+        return 4;
+    };
+    if verify_account_password(&account.password, current_password) == PasswordVerification::Invalid
+    {
+        return 5;
+    }
+
+    let Ok(password_hash) = hash_account_password(new_password) else {
+        return 0;
+    };
+    account.password = password_hash;
+    drop(store);
+    if let Err(error) = config.save_account_store_account(account_id) {
+        eprintln!("failed to persist account store: {error}");
+    }
+    6
+}
+
+/// Recovery-only password reset used by the authenticated Gateway identity
+/// service after it atomically consumes a one-time recovery code.  This path
+/// always applies the commercial password policy, regardless of the local
+/// fixture compatibility mode used by legacy protocol tests.
+pub fn reset_account_password_after_recovery(
+    config: &SimulationConfig,
+    account_id: &str,
+    new_password: &str,
+) -> Result<(), String> {
+    validate_commercial_identity_credentials(account_id, new_password)?;
+    config.refresh_account_store_account(account_id)?;
+    let password_hash = hash_account_password(new_password)?;
+    let mut store = config
+        .account_store
+        .lock()
+        .map_err(|_| "account store lock poisoned".to_string())?;
+    let account = store
+        .accounts
+        .get_mut(account_id)
+        .ok_or_else(|| "account was not found".to_string())?;
+    account.password = password_hash;
+    drop(store);
+    config.save_account_store_account(account_id)
+}
+
+pub fn validate_commercial_identity_credentials(
+    account_id: &str,
+    password: &str,
+) -> Result<(), String> {
+    if commercial_account_id_is_valid(account_id)
+        && commercial_password_is_valid(account_id, password)
+    {
+        Ok(())
+    } else {
+        Err("account id or password does not meet commercial policy".to_string())
+    }
+}
+
+pub(super) fn add_character_to_account(
+    config: &SimulationConfig,
+    account_id: &str,
+    mut character: CharacterRecord,
+) -> CharacterRecord {
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    character.index = store.allocate_character_index();
+    let account = store
+        .accounts
+        .entry(account_id.to_string())
+        .or_insert_with(AccountRecord::empty);
+    account.saves.insert(
+        character.index,
+        crystal_new_character_save(config, character.clone()),
+    );
+    account.characters.push(character.clone());
+    drop(store);
+    if let Err(error) = config.save_account_store_account(account_id) {
+        eprintln!("failed to persist account store: {error}");
+    }
+    character
+}
+
+pub(super) fn delete_character_from_account(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+) -> Result<String, String> {
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let Some(account) = store.accounts.get_mut(account_id) else {
+        return Err(format!("account {account_id} not found"));
+    };
+
+    let Some(existing) = account
+        .characters
+        .iter()
+        .find(|character| character.index == character_index)
+        .cloned()
+    else {
+        return Err("Character not found.".to_string());
+    };
+
+    account
+        .characters
+        .retain(|character| character.index != character_index);
+    account.saves.remove(&character_index);
+
+    drop(store);
+    if let Err(error) = config.save_account_store_account(account_id) {
+        eprintln!("failed to persist account store: {error}");
+    }
+    Ok(existing.name)
+}
+
+pub(super) fn character_save_for_start(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+) -> Option<CharacterSaveRecord> {
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let account = store
+        .accounts
+        .entry(account_id.to_string())
+        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+    let character = account
+        .characters
+        .iter()
+        .find(|character| character.index == character_index)
+        .cloned()?;
+    let save = account
+        .saves
+        .entry(character_index)
+        .or_insert_with(|| default_save_for_character(config, character.clone()));
+    let mut changed = false;
+    changed |= normalize_legacy_default_vitals(save);
+    changed |= normalize_legacy_synthetic_starter_equipment(save);
+    changed |= normalize_legacy_default_account_demo_seed_state(save);
+    changed |= normalize_legacy_crystal_new_character_seed_state(save);
+    changed |= normalize_legacy_crystal_level_one_empty_equipment(save);
+    let save = save.clone();
+    drop(store);
+    if changed {
+        if let Err(error) = config.save_account_store_account(account_id) {
+            eprintln!("failed to persist normalized character save: {error}");
+        }
+    }
+    Some(save)
+}
+
+pub(super) fn crystal_new_character_save(
+    config: &SimulationConfig,
+    character: CharacterRecord,
+) -> CharacterSaveRecord {
+    let starter_equipment = if config.content_profile.is_some() {
+        Vec::new()
+    } else {
+        seed_equipment_items_for_character(character.class, character.gender)
+    };
+    let mut save = CharacterSaveRecord::new(character);
+    save.max_experience = config.experience_required_for_level(save.character.level);
+    save.gold = 0;
+    save.inventory_items_json = if config.content_profile.is_some() {
+        encode_state_vec(&crystal_start_inventory_items(&save.character))
+    } else {
+        Vec::new()
+    };
+    save.belt_items_json = Vec::new();
+    save.storage_items_json = Vec::new();
+    save.equipment_items_json = encode_state_vec(&starter_equipment);
+    save.equipment_items_explicit_empty = config.content_profile.is_some();
+    save.quest_states_json = Vec::new();
+    save.skill_states_json = Vec::new();
+    save.item_rental_records_json = Vec::new();
+    save.has_rented_item = false;
+    save.stage5_systems_json = Some(
+        serde_json::to_string(&Stage5SystemsState::default())
+            .expect("stage5 systems state should serialize"),
+    );
+    save
+}
+
+pub(super) fn normalize_legacy_default_vitals(save: &mut CharacterSaveRecord) -> bool {
+    if save.hp != 120 || save.max_hp != 120 || save.mp != 45 {
+        return false;
+    }
+
+    let (max_hp, mp) = crystal_base_vitals(save.character.class, save.character.level);
+    save.hp = max_hp;
+    save.max_hp = max_hp;
+    save.mp = mp;
+    save.max_mp = mp;
+    true
+}
+
+pub(super) fn normalize_legacy_default_account_demo_seed_state(
+    save: &mut CharacterSaveRecord,
+) -> bool {
+    if save.character.index != 0 || save.character.level != 7 {
+        return false;
+    }
+
+    let mut changed = false;
+    if save.gold == 0 {
+        save.gold = 1280;
+        changed = true;
+    }
+    if save.inventory_items_json.is_empty() {
+        save.inventory_items_json = encode_state_vec(&seed_inventory_items());
+        changed = true;
+    }
+    if save.belt_items_json.is_empty() {
+        save.belt_items_json = encode_state_vec(&seed_belt_items());
+        changed = true;
+    }
+    if save.storage_items_json.is_empty() {
+        save.storage_items_json = encode_state_vec(&seed_storage_items());
+        changed = true;
+    }
+    if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
+        save.equipment_items_json = encode_state_vec(&seed_equipment_items_for_character(
+            save.character.class,
+            save.character.gender,
+        ));
+        changed = true;
+    }
+    if save.quest_states_json.is_empty() {
+        save.quest_states_json = encode_state_vec(&vec![QuestState::guide_training()]);
+        changed = true;
+    }
+    if save.skill_states_json.is_empty() {
+        save.skill_states_json = encode_state_vec(&seed_skills());
+        changed = true;
+    }
+    changed
+}
+
+pub(super) fn normalize_legacy_crystal_new_character_seed_state(
+    save: &mut CharacterSaveRecord,
+) -> bool {
+    let starter_equipment =
+        seed_equipment_items_for_character(save.character.class, save.character.gender);
+    if save.character.level != 1
+        || save.gold != 1280
+        || save.credit != 0
+        || save.city_currencies.values().any(|&amount| amount != 0)
+    {
+        return false;
+    }
+    if !encoded_items_match_seed(&save.inventory_items_json, seed_inventory_items)
+        || !encoded_items_match_seed(&save.belt_items_json, seed_belt_items)
+        || !encoded_items_match_seed(&save.storage_items_json, seed_storage_items)
+        || save.equipment_items_json != encode_state_vec(&starter_equipment)
+        || !encoded_items_match_seed(&save.quest_states_json, || {
+            vec![QuestState::guide_training()]
+        })
+        || !encoded_items_match_seed(&save.skill_states_json, seed_skills)
+    {
+        return false;
+    }
+
+    save.gold = 0;
+    save.inventory_items_json = Vec::new();
+    save.belt_items_json = Vec::new();
+    save.storage_items_json = Vec::new();
+    save.equipment_items_json = encode_state_vec(&starter_equipment);
+    save.equipment_items_explicit_empty = false;
+    save.quest_states_json = Vec::new();
+    save.skill_states_json = Vec::new();
+    true
+}
+
+pub(super) fn normalize_legacy_crystal_level_one_empty_equipment(
+    save: &mut CharacterSaveRecord,
+) -> bool {
+    if save.character.level != 1
+        || save.gold != 0
+        || !save.equipment_items_explicit_empty
+        || !save.equipment_items_json.is_empty()
+        || !save.inventory_items_json.is_empty()
+        || !save.belt_items_json.is_empty()
+        || !save.storage_items_json.is_empty()
+        || !save.skill_states_json.is_empty()
+    {
+        return false;
+    }
+
+    save.equipment_items_json = encode_state_vec(&seed_equipment_items_for_character(
+        save.character.class,
+        save.character.gender,
+    ));
+    save.equipment_items_explicit_empty = false;
+    true
+}
+
+pub(super) fn normalize_legacy_synthetic_starter_equipment(save: &mut CharacterSaveRecord) -> bool {
+    const LEGACY_INVALID_KEYS: [&str; 5] = [
+        "cloth-armour",
+        "copper-necklace",
+        "wood-bracelet-left",
+        "straw-sandals",
+        "rope-belt",
+    ];
+    const LEGACY_STARTER_KEYS: [&str; 6] = [
+        "wooden-sword",
+        "cloth-armour",
+        "copper-necklace",
+        "wood-bracelet-left",
+        "straw-sandals",
+        "rope-belt",
+    ];
+
+    let Some(mut equipment) = decode_state_vec::<EquipmentState>(&save.equipment_items_json) else {
+        return false;
+    };
+    if !equipment
+        .iter()
+        .any(|item| LEGACY_INVALID_KEYS.contains(&item.key.as_str()))
+    {
+        return false;
+    }
+
+    equipment.retain(|item| !LEGACY_STARTER_KEYS.contains(&item.key.as_str()));
+    for starter in seed_equipment_items_for_character(save.character.class, save.character.gender) {
+        if equipment.iter().all(|item| item.slot != starter.slot) {
+            equipment.push(starter);
+        }
+    }
+    equipment.sort_by_key(|item| item.slot as u8);
+    save.equipment_items_json = encode_state_vec(&equipment);
+    save.equipment_items_explicit_empty = equipment.is_empty();
+    true
+}
+
+pub(super) fn encoded_items_match_seed<T, F>(encoded: &[String], seed: F) -> bool
+where
+    T: Serialize + for<'de> Deserialize<'de>,
+    F: FnOnce() -> Vec<T>,
+{
+    encoded == encode_state_vec(&seed())
+}
+
+pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord) {
+    world.resource_mut::<SessionResource>().selected_character = Some(save.character.clone());
+    world
+        .resource_mut::<PlayerPermissionResource>()
+        .unlock_curse = false;
+    world
+        .resource_mut::<PlayerPermissionResource>()
+        .free_map_shout = false;
+    world
+        .resource_mut::<PlayerPermissionResource>()
+        .free_server_shout = false;
+    {
+        // Source GM rank from the authoritative account record (0 for normal
+        // players). Gates the in-game `@` command dispatcher. `MIR2_GM_ACCOUNTS`
+        // can additionally grant GM for the session without mutating the record.
+        let gm_level = {
+            let config = world.resource::<RuntimeConfigResource>().config.clone();
+            let account_id = world.resource::<SessionResource>().account_id.clone();
+            let stored = account_id
+                .as_ref()
+                .and_then(|account_id| {
+                    config
+                        .account_store
+                        .lock()
+                        .ok()
+                        .and_then(|store| store.accounts.get(account_id).map(|a| a.gm_level))
+                })
+                .unwrap_or(0);
+            let env_gm = account_id
+                .as_deref()
+                .map(crate::config::account_is_env_gm)
+                .unwrap_or(false);
+            stored.max(if env_gm { 1 } else { 0 })
+        };
+        world.resource_mut::<PlayerPermissionResource>().gm_level = gm_level;
+    }
+    {
+        let mut recovery = world.resource_mut::<PotionRecoveryResource>();
+        recovery.pending_pot_health_amount = 0;
+        recovery.pending_pot_mana_amount = 0;
+        recovery.hero_pending_pot_health_amount = 0;
+        recovery.hero_pending_pot_mana_amount = 0;
+    }
+    {
+        let mut npc_state = world.resource_mut::<NpcStateResource>();
+        npc_state.npc_variables = Vec::new();
+        npc_state.active_npc_dialog = None;
+        npc_state.active_npc_service = None;
+    }
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_combat_actions = Vec::new();
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_monster_spawns = Vec::new();
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions = Vec::new();
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    {
+        let mut map = world.resource_mut::<MapRuntimeResource>();
+        map.current_map = config.map.clone();
+        if !save.map_file_name.is_empty() {
+            map.current_map.file_name = save.map_file_name.clone();
+        }
+        if !save.map_title.is_empty() {
+            map.current_map.title = save.map_title.clone();
+        }
+        if config.monster_spawn_source.uses_crystal_current_map() {
+            apply_crystal_map_metadata(&mut map.current_map);
+        }
+    }
+    {
+        let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
+        player_runtime.player_position = if save.position == (Point { x: 0, y: 0 }) {
+            config.spawn.clone()
+        } else {
+            save.position.clone()
+        };
+        player_runtime.player_direction = save.direction;
+        let restored_max_mp = if save.max_mp > 0 {
+            save.max_mp
+        } else {
+            crate::config::crystal_base_vitals(save.character.class, save.character.level).1
+        };
+        player_runtime.player_vitals = PlayerVitals {
+            hp: save.hp.clamp(0, save.max_hp.max(1)),
+            max_hp: save.max_hp.max(1),
+            mp: save.mp.max(0),
+            max_mp: restored_max_mp.max(save.mp.max(0)),
+        };
+        player_runtime.experience = save.experience.max(0);
+        player_runtime.max_experience = if config.content_profile.is_some() {
+            config.experience_required_for_level(save.character.level)
+        } else {
+            save.max_experience.max(1)
+        };
+        player_runtime.gold = save.gold;
+        player_runtime.credit = save.credit;
+        player_runtime.city_currencies = save.city_currencies.clone();
+        player_runtime.pk_points = save.pk_points;
+        player_runtime.chat_banned = save.chat_banned;
+        player_runtime.chat_ban_until_ms = save.chat_ban_until_ms;
+        player_runtime.chat_next_allowed_at_ms = 0;
+        player_runtime.chat_spam_tick = 0;
+    }
+    let mut resources = world.resource_mut::<InventoryResource>();
+    resources.inventory_items = decode_state_vec(&save.inventory_items_json).unwrap_or_default();
+    resources.belt_items = decode_state_vec(&save.belt_items_json).unwrap_or_default();
+    resources.storage_items = decode_state_vec(&save.storage_items_json).unwrap_or_default();
+    resources.equipment_items =
+        if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
+            seed_equipment_items_for_character(save.character.class, save.character.gender)
+        } else {
+            decode_state_vec(&save.equipment_items_json).unwrap_or_default()
+        };
+    normalize_inventory_known_item_metadata(&mut resources);
+    normalize_inventory_unique_ids(&mut resources);
+    drop(resources);
+    world.resource_mut::<HeroInventoryResource>().items =
+        decode_state_vec(&save.hero_inventory_items_json).unwrap_or_default();
+    world.resource_mut::<Stage5SystemsResource>().stage5_systems = save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
+        .unwrap_or_default();
+    {
+        let mut npc_state = world.resource_mut::<NpcStateResource>();
+        npc_state.npc_flags = if save.npc_flag_states_json.is_empty() {
+            Vec::new()
+        } else {
+            decode_state_vec(&save.npc_flag_states_json).unwrap_or_default()
+        };
+        npc_state.npc_saved_values = if save.npc_saved_values_json.is_empty() {
+            Vec::new()
+        } else {
+            decode_state_vec(&save.npc_saved_values_json).unwrap_or_default()
+        };
+        npc_state.npc_buy_back_items = if save.npc_buy_back_items_json.is_empty() {
+            Vec::new()
+        } else {
+            decode_state_vec(&save.npc_buy_back_items_json).unwrap_or_default()
+        };
+        npc_state.npc_used_goods_items = if save.npc_used_goods_items_json.is_empty() {
+            Vec::new()
+        } else {
+            decode_state_vec(&save.npc_used_goods_items_json).unwrap_or_default()
+        };
+        npc_state.npc_variables = Vec::new();
+        npc_state.active_npc_dialog = None;
+        npc_state.active_npc_service = None;
+    }
+    {
+        let mut queue = world.resource_mut::<RuntimeQueueResource>();
+        queue.pending_combat_actions = Vec::new();
+        queue.pending_monster_spawns = Vec::new();
+        queue.pending_ground_spell_actions = Vec::new();
+        queue.pending_movement_command = None;
+    }
+    world.resource_mut::<QuestResource>().quests =
+        decode_state_vec(&save.quest_states_json).unwrap_or_default();
+    world.resource_mut::<SkillResource>().skills =
+        decode_state_vec(&save.skill_states_json).unwrap_or_default();
+    world.resource_mut::<BuffResource>().buffs = Vec::new();
+    {
+        let mut rental = world.resource_mut::<ItemRentalResource>();
+        rental.rented_items = decode_state_vec(&save.item_rental_records_json).unwrap_or_default();
+        rental.has_rented_item = save.has_rented_item;
+        rental.active = None;
+    }
+    super::session::set_runtime_tick(world, 0);
+    world.resource_mut::<ObjectIdAllocatorResource>().reset();
+}
+
+impl SimulationSession {
+    pub fn delete_character(&mut self, character_index: i32) -> Vec<ServerPacket> {
+        self.handle_packet(ClientPacket::DeleteCharacter { character_index })
+    }
+    pub(super) fn delete_character_impl(&mut self, character_index: i32) -> Vec<ServerPacket> {
+        let config = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
+        let account_id = self
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .account_id
+            .clone()
+            .unwrap_or_else(|| "demo".to_string());
+
+        match delete_character_from_account(&config, &account_id, character_index) {
+            Ok(deleted_name) => {
+                let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+                session.characters = account_characters(&config, &account_id);
+                if session
+                    .selected_character
+                    .as_ref()
+                    .is_some_and(|character| character.index == character_index)
+                {
+                    session.selected_character = None;
+                    drop(session);
+                    self.app
+                        .world_mut()
+                        .resource_mut::<PlayerPermissionResource>()
+                        .unlock_curse = false;
+                    self.app
+                        .world_mut()
+                        .resource_mut::<NpcStateResource>()
+                        .active_npc_dialog = None;
+                    let mut inventory = self.app.world_mut().resource_mut::<InventoryResource>();
+                    inventory.storage_unlocked =
+                        !inventory.storage_has_password || !config.require_storage_password;
+                }
+
+                let _ = deleted_name;
+                vec![ServerPacket::DeleteCharacterSuccess { character_index }]
+            }
+            Err(_error) => vec![ServerPacket::DeleteCharacter { result: 1 }],
+        }
+    }
+}
+
+impl SimulationSession {
+    pub(super) fn start_game(&mut self, character_index: i32) -> Vec<ServerPacket> {
+        persist_active_character_save(self.app.world());
+        let save = {
+            let config = self
+                .app
+                .world()
+                .resource::<RuntimeConfigResource>()
+                .config
+                .clone();
+            let account_id = self
+                .app
+                .world()
+                .resource::<SessionResource>()
+                .account_id
+                .clone()
+                .unwrap_or_else(|| "demo".to_string());
+            if let Some(ban) = active_account_ban(&config, &account_id) {
+                return vec![ServerPacket::StartGameBanned {
+                    reason: ban.reason,
+                    expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+                }];
+            }
+            character_save_for_start(&config, &account_id, character_index)
+        };
+
+        let Some(save) = save else {
+            return vec![ServerPacket::StartGame {
+                result: 2,
+                resolution: 0,
+            }];
+        };
+        let character = save.character.clone();
+
+        {
+            apply_character_save(self.app.world_mut(), &save);
+        }
+        refresh_runtime_map_collision(self.app.world_mut());
+        refresh_storage_password_state(self.app.world_mut());
+        rebuild_world(self.app.world_mut());
+        if should_use_crystal_current_map_world(self.app.world()) {
+            clear_non_player_world_entities(self.app.world_mut());
+            spawn_visible_world_for_current_map(self.app.world_mut());
+            spawn_config_visible_npcs(self.app.world_mut());
+        }
+
+        let visible_objects = collect_visible_objects(self.app.world());
+        self.visible_objects = visible_objects.keys().copied().collect();
+
+        let resources = self.app.world().resource::<InventoryResource>();
+        let player_runtime = self.app.world().resource::<PlayerRuntimeResource>();
+        let map = self.app.world().resource::<MapRuntimeResource>();
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        let mut sent_item_info_indices = BTreeSet::new();
+        let mut packets = vec![
+            ServerPacket::StartGame {
+                result: 4,
+                resolution: 1920,
+            },
+            ServerPacket::Chat {
+                message: format_localized_text(
+                    current_language(self.app.world()),
+                    "server.Welcome",
+                    [localized_text_or_fallback(
+                        current_language(self.app.world()),
+                        "server.GameName",
+                        "Legend of Mir 2",
+                    )],
+                ),
+                chat_type: ChatType::Hint,
+            },
+        ];
+        packets.extend(start_game_item_info_packets(
+            resources,
+            &mut sent_item_info_indices,
+        ));
+        packets.extend([
+            ServerPacket::MapInformation {
+                info: {
+                    let mut info = map.current_map.clone();
+                    info.title =
+                        localized_map_title(current_language(self.app.world()), &info.title);
+                    info
+                },
+            },
+            ServerPacket::UserInformation {
+                info: build_user_information(
+                    config,
+                    &character,
+                    &entity_position(
+                        self.app.world(),
+                        player_entity(self.app.world()).expect("player"),
+                    )
+                    .expect("player position"),
+                    entity_facing(
+                        self.app.world(),
+                        player_entity(self.app.world()).expect("player"),
+                    )
+                    .expect("player facing"),
+                    entity_player_vitals(
+                        self.app.world(),
+                        player_entity(self.app.world()).expect("player"),
+                    )
+                    .expect("player vitals"),
+                    player_runtime.experience,
+                    player_runtime.max_experience,
+                    player_runtime.gold,
+                    player_runtime.credit,
+                    resources.storage_size,
+                    resources.has_expanded_storage,
+                    resources.storage_has_password,
+                    config.require_storage_password,
+                    resources.storage_password_last_set_binary_datetime,
+                    resources.expanded_storage_expiry_time_binary_datetime,
+                    self.app
+                        .world()
+                        .resource::<Stage5SystemsResource>()
+                        .stage5_systems
+                        .appearance
+                        .hair,
+                    &resources.inventory_items,
+                    &resources.equipment_items,
+                    self.app
+                        .world()
+                        .resource::<Stage5SystemsResource>()
+                        .stage5_systems
+                        .hero
+                        .as_ref(),
+                ),
+            },
+        ]);
+        packets.extend(
+            crystal_quest_packet_payloads()
+                .into_iter()
+                .map(|payload| decode_crystal_payload(ServerPacketId::NewQuestInfo, payload)),
+        );
+        packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
+        packets.extend(start_game_account_social_and_shop_packets());
+        packets.extend(start_game_base_stats_packet(character.class));
+        packets.extend(start_game_static_visible_object_packets(
+            &map.current_map.file_name,
+            &player_runtime.player_position,
+            &character,
+            config.monster_spawn_source,
+        ));
+        if resources.storage_size != BASE_STORAGE_SLOTS
+            || resources.has_expanded_storage
+            || resources.expanded_storage_expiry_time_binary_datetime != 0
+        {
+            packets.push(ServerPacket::ResizeStorage {
+                size: i32::from(resources.storage_size),
+                has_expanded_storage: resources.has_expanded_storage,
+                expiry_time_binary_datetime: resources.expanded_storage_expiry_time_binary_datetime,
+            });
+        }
+        for bundle in visible_objects.into_values() {
+            packets.push(bundle.spawn_packet);
+            if let Some(health_packet) = bundle.health_packet {
+                packets.push(health_packet);
+            }
+        }
+        packets.extend(start_game_post_visible_crystal_bootstrap_packets());
+        // Render mineable veins immediately on entry, not just after the first swing.
+        packets.extend(super::mining::mine_node_state_packets(self.app.world()));
+        // On-chain veins render on entry too, from the last chain-reported stones (M4).
+        packets.extend(super::onchain::onchain_mine_node_state_packets(
+            self.app.world(),
+        ));
+        packets
+    }
+}

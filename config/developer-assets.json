@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-developer-asset-bundle",
+  "repository": "Zombieliu/mir2",
+  "releaseTag": "developer-assets-f71b89aa3850",
+  "contentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+  "sourceContentHash": "514740e5b08ab8ca70b6636072356b9a2f58552cc96ed3b04b084fa1d69cc84c",
+  "destination": "mir2-web3/apps/web/public/generated/crystal-packs/full",
+  "archive": {
+    "name": "mir2-crystal-full-pack-f71b89aa3850.tar",
+    "size": 9751758336,
+    "sha256": "d8dd209e47a5f03eb41b1b03758383b102a9a25d11fedc32bb1d71ec700b0fd9",
+    "format": "ustar"
+  },
+  "summary": {
+    "libraryCount": 1440,
+    "uniquePageCount": 4446,
+    "partCount": 7
+  },
+  "parts": [
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part001",
+      "size": 1610612736,
+      "sha256": "45ac9efa90705e1a7fb339b7c0ba4724361ca05162f4dfe8802bce718f2a781d"
+    },
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part002",
+      "size": 1610612736,
+      "sha256": "a9d1e7c523135d366fbaffe03b63e09a86285eec140e91372c1f67070b0c8c6e"
+    },
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part003",
+      "size": 1610612736,
+      "sha256": "e01d1d200bac2a076f10271e457751494ac79c5cd99331e8ef36b77c9b23341b"
+    },
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part004",
+      "size": 1610612736,
+      "sha256": "f0cf38a90ec1840f000bde4b3d1c09c4388295bdf06b8e104f824abe2b67ae33"
+    },
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part005",
+      "size": 1610612736,
+      "sha256": "9e66dc22c089ce9e419f246641c3aeac7510b06ad5591435cc1d9bd1c63fc69d"
+    },
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part006",
+      "size": 1610612736,
+      "sha256": "9738276abd5b038cc0ad843d717fa6237feaabccd3a3c667cfe33e735a46daa0"
+    },
+    {
+      "name": "mir2-crystal-full-pack-f71b89aa3850.tar.part007",
+      "size": 88081920,
+      "sha256": "337fa0526068138bd0992469ac25e5bfdb59fca7403b90ce97dd402d63aa82e2"
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "type": "websocket",
+  "wsUrl": "wss://165.154.65.136.sslip.io/ws",
+  "runId": "mpmk5uzb-79942",
+  "host": "HenrydeMacBook-Pro-2.local",
+  "clients": 1,
+  "pool": 1,
+  "actionsPerClient": 4,
+  "thinkMs": 120,
+  "holdOpenMs": 3000,
+  "prePlaySettleMs": 0,
+  "chatEvery": 10,
+  "expectedReady": 1,
+  "expectedCapacityRejected": 0,
+  "expectedKeepAliveAckRatio": 1,
+  "expectedKeepAliveP95MaxMs": 1200,
+  "sendKeepAlive": true,
+  "sendMovement": true,
+  "sendChat": true,
+  "stage5CommandsEnabled": false,
+  "reuseExistingAccounts": false,
+  "accountPrefix": null,
+  "characterIndex": 0,
+  "startedAt": "2026-05-26T11:34:50.136Z",
+  "finishedAt": "2026-05-26T11:34:57.129Z",
+  "durationMs": 6991,
+  "opened": 1,
+  "ready": 1,
+  "loginSuccess": 1,
+  "charactersCreated": 1,
+  "startedGames": 1,
+  "closed": 1,
+  "errors": 0,
+  "capacityRejected": 0,
+  "messages": 636,
+  "commandsSent": 14,
+  "keepAliveCommandsSent": 4,
+  "movementCommandsSent": 4,
+  "chatCommandsSent": 1,
+  "stage5CommandsSent": 0,
+  "keepAliveLatenciesMs": [
+    619,
+    623,
+    501,
+    380
+  ],
+  "clientFailures": [],
+  "capacityRejections": [],
+  "network": {
+    "clientBytesSent": 849,
+    "clientBytesReceived": 690891,
+    "bootstrapClientBytesSent": 450,
+    "bootstrapClientBytesReceived": 154028,
+    "playClientBytesSent": 399,
+    "playClientBytesReceived": 536863,
+    "playDurationMs": 3489,
+    "avgPlayBytesPerSecondPerReadyClient": 153873.03,
+    "avgPlayBitsPerSecondPerReadyClient": 1230984.24
+  },
+  "rssSamples": [
+    {
+      "atUnixMs": 1779795290165,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795290697,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795291234,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795291773,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795292308,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795292842,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795293376,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795293914,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795294451,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795294981,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795295510,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795296058,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795296591,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779795297129,
+      "pid": 65055,
+      "workingSetBytes": 27312128,
+      "cpuPercent": 0
+    }
+  ],
+  "rss": {
+    "count": 14,
+    "min": 27312128,
+    "max": 27312128,
+    "avg": 27312128,
+    "p95": 27312128
+  },
+  "cpuPercent": {
+    "count": 14,
+    "min": 0,
+    "max": 0,
+    "avg": 0,
+    "p95": 0
+  },
+  "assertions": {
+    "readyMatchesExpectation": true,
+    "capacityRejectedMatchesExpectation": true,
+    "noUnexpectedErrors": true,
+    "noUnexpectedClientFailures": true,
+    "gameplayCommandsSentWhenReady": true,
+    "keepAliveAckRatioMatchesExpectation": true,
+    "keepAliveP95MatchesExpectation": true
+  },
+  "ok": true,
+  "keepAlive": {
+    "count": 4,
+    "min": 380,
+    "max": 623,
+    "avg": 530.75,
+    "p95": 623
+  },
+  "keepAliveAckRatio": 1,
+  "pendingKeepAliveCount": 0
+}

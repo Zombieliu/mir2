@@ -1,0 +1,2360 @@
+{
+  "generatedAt": "2026-04-16T23:20:23.338Z",
+  "crystalServerRoot": "E:\\mir2\\Crystal\\Server",
+  "moduleCount": 6,
+  "totalFiles": 273,
+  "totalLines": 86337,
+  "modules": [
+    {
+      "module": "MirEnvir",
+      "fileCount": 6,
+      "totalLines": 8559,
+      "sampleClasses": [
+        "Dragon",
+        "MobThread",
+        "RandomProvider",
+        "Envir",
+        "based",
+        "top",
+        "Map",
+        "Cell",
+        "MapRespawn",
+        "RespawnSave",
+        "RespawnTickOption",
+        "RespawnTimer",
+        "Robot",
+        "Timer"
+      ],
+      "files": [
+        {
+          "relativePath": "MirEnvir/Dragon.cs",
+          "lineCount": 233,
+          "classes": [
+            "Dragon"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirEnvir/Envir.cs",
+          "lineCount": 5466,
+          "classes": [
+            "MobThread",
+            "RandomProvider",
+            "Envir",
+            "based",
+            "top"
+          ],
+          "methodCount": 141
+        },
+        {
+          "relativePath": "MirEnvir/Map.cs",
+          "lineCount": 2593,
+          "classes": [
+            "Map",
+            "Cell",
+            "MapRespawn"
+          ],
+          "methodCount": 40
+        },
+        {
+          "relativePath": "MirEnvir/RespawnTimer.cs",
+          "lineCount": 126,
+          "classes": [
+            "RespawnSave",
+            "RespawnTickOption",
+            "RespawnTimer"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirEnvir/Robot.cs",
+          "lineCount": 115,
+          "classes": [
+            "Robot"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirEnvir/Timer.cs",
+          "lineCount": 26,
+          "classes": [
+            "Timer"
+          ],
+          "methodCount": 0
+        }
+      ]
+    },
+    {
+      "module": "MirObjects",
+      "fileCount": 237,
+      "totalLines": 68341,
+      "sampleClasses": [
+        "ConquestObject",
+        "DecoObject",
+        "DelayedAction",
+        "GuildObject",
+        "GuildAtWar",
+        "GuildItemVolume",
+        "ArcherHero",
+        "AssassinHero",
+        "TaoistHero",
+        "WarriorHero",
+        "WizardHero",
+        "HeroObject",
+        "HumanObject",
+        "IntelligentCreatureObject",
+        "ItemObject",
+        "LinkFormatter",
+        "MapObject",
+        "Poison",
+        "MonsterObject",
+        "AncientBringer",
+        "AntCommander",
+        "ArcherGuard",
+        "Armadillo",
+        "ArmadilloElder"
+      ],
+      "files": [
+        {
+          "relativePath": "MirObjects/ConquestObject.cs",
+          "lineCount": 970,
+          "classes": [
+            "ConquestObject"
+          ],
+          "methodCount": 21
+        },
+        {
+          "relativePath": "MirObjects/DecoObject.cs",
+          "lineCount": 163,
+          "classes": [
+            "DecoObject"
+          ],
+          "methodCount": 17
+        },
+        {
+          "relativePath": "MirObjects/DelayedAction.cs",
+          "lineCount": 50,
+          "classes": [
+            "DelayedAction"
+          ],
+          "methodCount": 0
+        },
+        {
+          "relativePath": "MirObjects/GuildObject.cs",
+          "lineCount": 1064,
+          "classes": [
+            "GuildObject",
+            "GuildAtWar",
+            "GuildItemVolume"
+          ],
+          "methodCount": 35
+        },
+        {
+          "relativePath": "MirObjects/Hero/ArcherHero.cs",
+          "lineCount": 193,
+          "classes": [
+            "ArcherHero"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Hero/AssassinHero.cs",
+          "lineCount": 88,
+          "classes": [
+            "AssassinHero"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Hero/TaoistHero.cs",
+          "lineCount": 195,
+          "classes": [
+            "TaoistHero"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Hero/WarriorHero.cs",
+          "lineCount": 101,
+          "classes": [
+            "WarriorHero"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Hero/WizardHero.cs",
+          "lineCount": 206,
+          "classes": [
+            "WizardHero"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/HeroObject.cs",
+          "lineCount": 1320,
+          "classes": [
+            "HeroObject"
+          ],
+          "methodCount": 52
+        },
+        {
+          "relativePath": "MirObjects/HumanObject.cs",
+          "lineCount": 8676,
+          "classes": [
+            "HumanObject"
+          ],
+          "methodCount": 208
+        },
+        {
+          "relativePath": "MirObjects/IntelligentCreatureObject.cs",
+          "lineCount": 860,
+          "classes": [
+            "IntelligentCreatureObject"
+          ],
+          "methodCount": 40
+        },
+        {
+          "relativePath": "MirObjects/ItemObject.cs",
+          "lineCount": 453,
+          "classes": [
+            "ItemObject"
+          ],
+          "methodCount": 19
+        },
+        {
+          "relativePath": "MirObjects/LinkFormatter.cs",
+          "lineCount": 57,
+          "classes": [
+            "LinkFormatter"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/MapObject.cs",
+          "lineCount": 1031,
+          "classes": [
+            "MapObject",
+            "Poison"
+          ],
+          "methodCount": 38
+        },
+        {
+          "relativePath": "MirObjects/MonsterObject.cs",
+          "lineCount": 3871,
+          "classes": [
+            "MonsterObject"
+          ],
+          "methodCount": 86
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AncientBringer.cs",
+          "lineCount": 195,
+          "classes": [
+            "AncientBringer"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AntCommander.cs",
+          "lineCount": 153,
+          "classes": [
+            "AntCommander"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ArcherGuard.cs",
+          "lineCount": 45,
+          "classes": [
+            "ArcherGuard"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Armadillo.cs",
+          "lineCount": 202,
+          "classes": [
+            "Armadillo"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ArmadilloElder.cs",
+          "lineCount": 65,
+          "classes": [
+            "ArmadilloElder"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AssassinBird.cs",
+          "lineCount": 60,
+          "classes": [
+            "AssassinBird"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AvengingSpirit.cs",
+          "lineCount": 82,
+          "classes": [
+            "AvengingSpirit"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AvengingWarrior.cs",
+          "lineCount": 89,
+          "classes": [
+            "AvengingWarrior"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AxePlant.cs",
+          "lineCount": 50,
+          "classes": [
+            "AxePlant"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/AxeSkeleton.cs",
+          "lineCount": 104,
+          "classes": [
+            "AxeSkeleton"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Behemoth.cs",
+          "lineCount": 214,
+          "classes": [
+            "Behemoth"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BlackFoxman.cs",
+          "lineCount": 59,
+          "classes": [
+            "BlackFoxman"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BlackHammerCat.cs",
+          "lineCount": 71,
+          "classes": [
+            "BlackHammerCat"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BlackTortoise.cs",
+          "lineCount": 108,
+          "classes": [
+            "BlackTortoise"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BlockingObject.cs",
+          "lineCount": 76,
+          "classes": [
+            "BlockingObject"
+          ],
+          "methodCount": 11
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BlueSoul.cs",
+          "lineCount": 38,
+          "classes": [
+            "BlueSoul"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BombSpider.cs",
+          "lineCount": 60,
+          "classes": [
+            "BombSpider"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BoneFamiliar.cs",
+          "lineCount": 30,
+          "classes": [
+            "BoneFamiliar"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BoneLord.cs",
+          "lineCount": 124,
+          "classes": [
+            "BoneLord"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BoneSpearman.cs",
+          "lineCount": 49,
+          "classes": [
+            "BoneSpearman"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BoulderSpirit.cs",
+          "lineCount": 54,
+          "classes": [
+            "BoulderSpirit"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BugBagMaggot.cs",
+          "lineCount": 54,
+          "classes": [
+            "BugBagMaggot"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/BurningZombie.cs",
+          "lineCount": 73,
+          "classes": [
+            "BurningZombie"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CannibalPlant.cs",
+          "lineCount": 97,
+          "classes": [
+            "CannibalPlant"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CannibalTentacles.cs",
+          "lineCount": 129,
+          "classes": [
+            "CannibalTentacles"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CargoBox.cs",
+          "lineCount": 26,
+          "classes": [
+            "CargoBox"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CastleGate.cs",
+          "lineCount": 170,
+          "classes": [
+            "CastleGate"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CatShaman.cs",
+          "lineCount": 113,
+          "classes": [
+            "CatShaman"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CaveMaggot.cs",
+          "lineCount": 50,
+          "classes": [
+            "CaveMaggot"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CaveStatue.cs",
+          "lineCount": 38,
+          "classes": [
+            "CaveStatue"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CharmedSnake.cs",
+          "lineCount": 253,
+          "classes": [
+            "CharmedSnake"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ChieftainArcher.cs",
+          "lineCount": 144,
+          "classes": [
+            "ChieftainArcher"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ConquestArcher.cs",
+          "lineCount": 79,
+          "classes": [
+            "ConquestArcher"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CrazyManworm.cs",
+          "lineCount": 50,
+          "classes": [
+            "CrazyManworm"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CreeperPlant.cs",
+          "lineCount": 97,
+          "classes": [
+            "CreeperPlant"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/CrystalSpider.cs",
+          "lineCount": 102,
+          "classes": [
+            "CrystalSpider"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DarkBeast.cs",
+          "lineCount": 71,
+          "classes": [
+            "DarkBeast"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DarkCaptain.cs",
+          "lineCount": 178,
+          "classes": [
+            "DarkCaptain"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DarkDevil.cs",
+          "lineCount": 63,
+          "classes": [
+            "DarkDevil"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DarkDevourer.cs",
+          "lineCount": 91,
+          "classes": [
+            "DarkDevourer"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DarkOmaKing.cs",
+          "lineCount": 193,
+          "classes": [
+            "DarkOmaKing"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DarkWraith.cs",
+          "lineCount": 161,
+          "classes": [
+            "DarkWraith"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DeathCrawler.cs",
+          "lineCount": 44,
+          "classes": [
+            "DeathCrawler"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Deer.cs",
+          "lineCount": 82,
+          "classes": [
+            "Deer"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DemonGuard.cs",
+          "lineCount": 83,
+          "classes": [
+            "DemonGuard"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DemonWolf.cs",
+          "lineCount": 149,
+          "classes": [
+            "DemonWolf"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DigOutZombie.cs",
+          "lineCount": 116,
+          "classes": [
+            "DigOutZombie"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Doe.cs",
+          "lineCount": 100,
+          "classes": [
+            "Doe"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DragonStatue.cs",
+          "lineCount": 120,
+          "classes": [
+            "DragonStatue"
+          ],
+          "methodCount": 15
+        },
+        {
+          "relativePath": "MirObjects/Monsters/DragonWarrior.cs",
+          "lineCount": 60,
+          "classes": [
+            "DragonWarrior"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/EarthGolem.cs",
+          "lineCount": 175,
+          "classes": [
+            "EarthGolem"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ElementGuard.cs",
+          "lineCount": 110,
+          "classes": [
+            "ElementGuard"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ElephantMan.cs",
+          "lineCount": 78,
+          "classes": [
+            "ElephantMan"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/EvilCentipede.cs",
+          "lineCount": 136,
+          "classes": [
+            "EvilCentipede"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirObjects/Monsters/EvilMir.cs",
+          "lineCount": 206,
+          "classes": [
+            "EvilMir"
+          ],
+          "methodCount": 18
+        },
+        {
+          "relativePath": "MirObjects/Monsters/EvilMirBody.cs",
+          "lineCount": 104,
+          "classes": [
+            "EvilMirBody"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FinialTurtle.cs",
+          "lineCount": 95,
+          "classes": [
+            "FinialTurtle"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlameAssassin.cs",
+          "lineCount": 81,
+          "classes": [
+            "FlameAssassin"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlameMage.cs",
+          "lineCount": 86,
+          "classes": [
+            "FlameMage"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlameQueen.cs",
+          "lineCount": 87,
+          "classes": [
+            "FlameQueen"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlameScythe.cs",
+          "lineCount": 117,
+          "classes": [
+            "FlameScythe"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlameSpear.cs",
+          "lineCount": 114,
+          "classes": [
+            "FlameSpear"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlamingMutant.cs",
+          "lineCount": 124,
+          "classes": [
+            "FlamingMutant"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlamingWooma.cs",
+          "lineCount": 36,
+          "classes": [
+            "FlamingWooma"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FloatingRock.cs",
+          "lineCount": 117,
+          "classes": [
+            "FloatingRock"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FlyingStatue.cs",
+          "lineCount": 184,
+          "classes": [
+            "FlyingStatue"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Football.cs",
+          "lineCount": 63,
+          "classes": [
+            "Football"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FrostTiger.cs",
+          "lineCount": 172,
+          "classes": [
+            "FrostTiger"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FrozenAxeman.cs",
+          "lineCount": 83,
+          "classes": [
+            "FrozenAxeman"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FrozenKnight.cs",
+          "lineCount": 81,
+          "classes": [
+            "FrozenKnight"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FrozenMagician.cs",
+          "lineCount": 131,
+          "classes": [
+            "FrozenMagician"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FrozenMiner.cs",
+          "lineCount": 56,
+          "classes": [
+            "FrozenMiner"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FrozenZombie.cs",
+          "lineCount": 73,
+          "classes": [
+            "FrozenZombie"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FurbolgArcher.cs",
+          "lineCount": 122,
+          "classes": [
+            "FurbolgArcher"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FurbolgCommander.cs",
+          "lineCount": 82,
+          "classes": [
+            "FurbolgCommander"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FurbolgGuard.cs",
+          "lineCount": 98,
+          "classes": [
+            "FurbolgGuard"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/FurbolgWarrior.cs",
+          "lineCount": 142,
+          "classes": [
+            "FurbolgWarrior"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GasToad.cs",
+          "lineCount": 99,
+          "classes": [
+            "GasToad"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Gate.cs",
+          "lineCount": 159,
+          "classes": [
+            "Gate"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GeneralMeowMeow.cs",
+          "lineCount": 266,
+          "classes": [
+            "GeneralMeowMeow"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GlacierBeast.cs",
+          "lineCount": 27,
+          "classes": [
+            "GlacierBeast"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GlacierSnail.cs",
+          "lineCount": 50,
+          "classes": [
+            "GlacierSnail"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GlacierWarrior.cs",
+          "lineCount": 82,
+          "classes": [
+            "GlacierWarrior"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GreatFoxSpirit.cs",
+          "lineCount": 187,
+          "classes": [
+            "GreatFoxSpirit"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Guard.cs",
+          "lineCount": 90,
+          "classes": [
+            "Guard"
+          ],
+          "methodCount": 14
+        },
+        {
+          "relativePath": "MirObjects/Monsters/GuardianRock.cs",
+          "lineCount": 96,
+          "classes": [
+            "GuardianRock"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HardenRhino.cs",
+          "lineCount": 118,
+          "classes": [
+            "HardenRhino"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HarvestMonster.cs",
+          "lineCount": 107,
+          "classes": [
+            "HarvestMonster"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HedgeKekTal.cs",
+          "lineCount": 52,
+          "classes": [
+            "HedgeKekTal"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellBomb.cs",
+          "lineCount": 89,
+          "classes": [
+            "HellBomb"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellCannibal.cs",
+          "lineCount": 73,
+          "classes": [
+            "HellCannibal"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellKeeper.cs",
+          "lineCount": 204,
+          "classes": [
+            "HellKeeper"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellKnight.cs",
+          "lineCount": 41,
+          "classes": [
+            "HellKnight"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellLord.cs",
+          "lineCount": 248,
+          "classes": [
+            "HellLord"
+          ],
+          "methodCount": 15
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellPirate.cs",
+          "lineCount": 45,
+          "classes": [
+            "HellPirate"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HellSlasher.cs",
+          "lineCount": 67,
+          "classes": [
+            "HellSlasher"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HolyDeva.cs",
+          "lineCount": 115,
+          "classes": [
+            "HolyDeva"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HoodedSummoner.cs",
+          "lineCount": 201,
+          "classes": [
+            "HoodedSummoner"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HoodedSummonerScrolls.cs",
+          "lineCount": 190,
+          "classes": [
+            "HoodedSummonerScrolls"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HornedArcher.cs",
+          "lineCount": 114,
+          "classes": [
+            "HornedArcher"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HornedCommander.cs",
+          "lineCount": 605,
+          "classes": [
+            "HornedCommander"
+          ],
+          "methodCount": 21
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HornedMage.cs",
+          "lineCount": 113,
+          "classes": [
+            "HornedMage"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HornedSorceror.cs",
+          "lineCount": 282,
+          "classes": [
+            "HornedSorceror"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HornedWarrior.cs",
+          "lineCount": 137,
+          "classes": [
+            "HornedWarrior"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Hugger.cs",
+          "lineCount": 73,
+          "classes": [
+            "Hugger"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HumanAssassin.cs",
+          "lineCount": 371,
+          "classes": [
+            "HumanAssassin"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirObjects/Monsters/HumanWizard.cs",
+          "lineCount": 199,
+          "classes": [
+            "HumanWizard"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirObjects/Monsters/IceCrystalSoldier.cs",
+          "lineCount": 66,
+          "classes": [
+            "IceCrystalSoldier"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/IceGuard.cs",
+          "lineCount": 116,
+          "classes": [
+            "IceGuard"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/IcePhantom.cs",
+          "lineCount": 84,
+          "classes": [
+            "IcePhantom"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/IcePillar.cs",
+          "lineCount": 199,
+          "classes": [
+            "IcePillar"
+          ],
+          "methodCount": 14
+        },
+        {
+          "relativePath": "MirObjects/Monsters/IncarnatedGhoul.cs",
+          "lineCount": 49,
+          "classes": [
+            "IncarnatedGhoul"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/IncarnatedZT.cs",
+          "lineCount": 52,
+          "classes": [
+            "IncarnatedZT"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Jar1.cs",
+          "lineCount": 74,
+          "classes": [
+            "Jar1"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Jar2.cs",
+          "lineCount": 76,
+          "classes": [
+            "Jar2"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Khazard.cs",
+          "lineCount": 106,
+          "classes": [
+            "Khazard"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/KingGuard.cs",
+          "lineCount": 176,
+          "classes": [
+            "KingGuard"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/KingHydrax.cs",
+          "lineCount": 139,
+          "classes": [
+            "KingHydrax"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/KingScorpion.cs",
+          "lineCount": 81,
+          "classes": [
+            "KingScorpion"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Kirin.cs",
+          "lineCount": 192,
+          "classes": [
+            "Kirin"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/LeftGuard.cs",
+          "lineCount": 52,
+          "classes": [
+            "LeftGuard"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/LightTurtle.cs",
+          "lineCount": 58,
+          "classes": [
+            "LightTurtle"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Mandrill.cs",
+          "lineCount": 40,
+          "classes": [
+            "Mandrill"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ManectricBlest.cs",
+          "lineCount": 104,
+          "classes": [
+            "ManectricBlest"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ManectricClaw.cs",
+          "lineCount": 117,
+          "classes": [
+            "ManectricClaw"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ManectricKing.cs",
+          "lineCount": 94,
+          "classes": [
+            "ManectricKing"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Mantis.cs",
+          "lineCount": 54,
+          "classes": [
+            "Mantis"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ManTree.cs",
+          "lineCount": 122,
+          "classes": [
+            "ManTree"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/MinotaurKing.cs",
+          "lineCount": 57,
+          "classes": [
+            "MinotaurKing"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/MudZombie.cs",
+          "lineCount": 103,
+          "classes": [
+            "MudZombie"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/MutatedManworm.cs",
+          "lineCount": 82,
+          "classes": [
+            "MutatedManworm"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Nadz.cs",
+          "lineCount": 90,
+          "classes": [
+            "Nadz"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/OmaBlest.cs",
+          "lineCount": 73,
+          "classes": [
+            "OmaBlest"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/OmaCannibal.cs",
+          "lineCount": 97,
+          "classes": [
+            "OmaCannibal"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/OmaKing.cs",
+          "lineCount": 134,
+          "classes": [
+            "OmaKing"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/OmaMage.cs",
+          "lineCount": 94,
+          "classes": [
+            "OmaMage"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/OmaSlasher.cs",
+          "lineCount": 36,
+          "classes": [
+            "OmaSlasher"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/OmaWitchDoctor.cs",
+          "lineCount": 108,
+          "classes": [
+            "OmaWitchDoctor"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/PeacockSpider.cs",
+          "lineCount": 168,
+          "classes": [
+            "PeacockSpider"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/PlagueCrab.cs",
+          "lineCount": 49,
+          "classes": [
+            "PlagueCrab"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/PoisonHugger.cs",
+          "lineCount": 100,
+          "classes": [
+            "PoisonHugger"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/PowerBead.cs",
+          "lineCount": 173,
+          "classes": [
+            "PowerBead"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/PurpleFaeFlower.cs",
+          "lineCount": 64,
+          "classes": [
+            "PurpleFaeFlower"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RedFoxman.cs",
+          "lineCount": 128,
+          "classes": [
+            "RedFoxman"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RedMoonEvil.cs",
+          "lineCount": 66,
+          "classes": [
+            "RedMoonEvil"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RedThunderZuma.cs",
+          "lineCount": 76,
+          "classes": [
+            "RedThunderZuma"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RestlessJar.cs",
+          "lineCount": 148,
+          "classes": [
+            "RestlessJar"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RevivingZombie.cs",
+          "lineCount": 43,
+          "classes": [
+            "RevivingZombie"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RhinoPriest.cs",
+          "lineCount": 101,
+          "classes": [
+            "RhinoPriest"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RightGuard.cs",
+          "lineCount": 82,
+          "classes": [
+            "RightGuard"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/RootSpider.cs",
+          "lineCount": 57,
+          "classes": [
+            "RootSpider"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SackWarrior.cs",
+          "lineCount": 64,
+          "classes": [
+            "SackWarrior"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SandSnail.cs",
+          "lineCount": 92,
+          "classes": [
+            "SandSnail"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SandWorm.cs",
+          "lineCount": 24,
+          "classes": [
+            "SandWorm"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ScalyBeast.cs",
+          "lineCount": 74,
+          "classes": [
+            "ScalyBeast"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SeedingsGeneral.cs",
+          "lineCount": 126,
+          "classes": [
+            "SeedingsGeneral"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepArcher.cs",
+          "lineCount": 346,
+          "classes": [
+            "SepArcher"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepAssassin.cs",
+          "lineCount": 284,
+          "classes": [
+            "SepAssassin"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepHighArcher.cs",
+          "lineCount": 399,
+          "classes": [
+            "SepHighArcher"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepHighAssassin.cs",
+          "lineCount": 328,
+          "classes": [
+            "SepHighAssassin"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepHighTaoist.cs",
+          "lineCount": 383,
+          "classes": [
+            "SepHighTaoist"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepHighWarrior.cs",
+          "lineCount": 346,
+          "classes": [
+            "SepHighWarrior"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepHighWizard.cs",
+          "lineCount": 331,
+          "classes": [
+            "SepHighWizard"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepTaoist.cs",
+          "lineCount": 355,
+          "classes": [
+            "SepTaoist"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepWarrior.cs",
+          "lineCount": 263,
+          "classes": [
+            "SepWarrior"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SepWizard.cs",
+          "lineCount": 321,
+          "classes": [
+            "SepWizard"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ShamanZombie.cs",
+          "lineCount": 73,
+          "classes": [
+            "ShamanZombie"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Shinsu.cs",
+          "lineCount": 100,
+          "classes": [
+            "Shinsu"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Siege.cs",
+          "lineCount": 123,
+          "classes": [
+            "Siege"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SnakeTotem.cs",
+          "lineCount": 184,
+          "classes": [
+            "SnakeTotem"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SnowWolf.cs",
+          "lineCount": 74,
+          "classes": [
+            "SnowWolf"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SnowWolfKing.cs",
+          "lineCount": 225,
+          "classes": [
+            "SnowWolfKing"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SnowYeti.cs",
+          "lineCount": 143,
+          "classes": [
+            "SnowYeti"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SpittingSpider.cs",
+          "lineCount": 62,
+          "classes": [
+            "SpittingSpider"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SpittingToad.cs",
+          "lineCount": 142,
+          "classes": [
+            "SpittingToad"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirObjects/Monsters/StoneGolem.cs",
+          "lineCount": 100,
+          "classes": [
+            "StoneGolem"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/StoneTrap.cs",
+          "lineCount": 141,
+          "classes": [
+            "StoneTrap"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/StoningStatue.cs",
+          "lineCount": 104,
+          "classes": [
+            "StoningStatue"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/StrayCat.cs",
+          "lineCount": 128,
+          "classes": [
+            "StrayCat"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/SwampWarrior.cs",
+          "lineCount": 102,
+          "classes": [
+            "SwampWarrior"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ThunderElement.cs",
+          "lineCount": 115,
+          "classes": [
+            "ThunderElement"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Tornado.cs",
+          "lineCount": 58,
+          "classes": [
+            "Tornado"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TownArcher.cs",
+          "lineCount": 121,
+          "classes": [
+            "TownArcher"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ToxicGhoul.cs",
+          "lineCount": 77,
+          "classes": [
+            "ToxicGhoul"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Trainer.cs",
+          "lineCount": 270,
+          "classes": [
+            "Trainer"
+          ],
+          "methodCount": 21
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TrapRock.cs",
+          "lineCount": 225,
+          "classes": [
+            "TrapRock"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Tree.cs",
+          "lineCount": 164,
+          "classes": [
+            "Tree"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TreeGuardian.cs",
+          "lineCount": 86,
+          "classes": [
+            "TreeGuardian"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TreeQueen.cs",
+          "lineCount": 337,
+          "classes": [
+            "TreeQueen"
+          ],
+          "methodCount": 14
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TrollBomber.cs",
+          "lineCount": 31,
+          "classes": [
+            "TrollBomber"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TrollKing.cs",
+          "lineCount": 167,
+          "classes": [
+            "TrollKing"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TucsonEgg.cs",
+          "lineCount": 216,
+          "classes": [
+            "TucsonEgg"
+          ],
+          "methodCount": 14
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TucsonGeneral.cs",
+          "lineCount": 174,
+          "classes": [
+            "TucsonGeneral"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TucsonMage.cs",
+          "lineCount": 122,
+          "classes": [
+            "TucsonMage"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TucsonWarrior.cs",
+          "lineCount": 75,
+          "classes": [
+            "TucsonWarrior"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Turtlegrass.cs",
+          "lineCount": 58,
+          "classes": [
+            "TurtleGrass"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/TurtleKing.cs",
+          "lineCount": 197,
+          "classes": [
+            "TurtleKing"
+          ],
+          "methodCount": 7
+        },
+        {
+          "relativePath": "MirObjects/Monsters/VampireSpider.cs",
+          "lineCount": 203,
+          "classes": [
+            "VampireSpider"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirObjects/Monsters/VenomSpider.cs",
+          "lineCount": 62,
+          "classes": [
+            "VenomSpider"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Wall.cs",
+          "lineCount": 95,
+          "classes": [
+            "Wall"
+          ],
+          "methodCount": 10
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WaterDragon.cs",
+          "lineCount": 102,
+          "classes": [
+            "WaterDragon"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WereTiger.cs",
+          "lineCount": 70,
+          "classes": [
+            "WereTiger"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WhiteFoxman.cs",
+          "lineCount": 124,
+          "classes": [
+            "WhiteFoxman"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WhiteMammoth.cs",
+          "lineCount": 87,
+          "classes": [
+            "WhiteMammoth"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WingedTigerLord.cs",
+          "lineCount": 204,
+          "classes": [
+            "WingedTigerLord"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WitchDoctor.cs",
+          "lineCount": 140,
+          "classes": [
+            "WitchDoctor"
+          ],
+          "methodCount": 5
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WoodBox.cs",
+          "lineCount": 46,
+          "classes": [
+            "WoodBox"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirObjects/Monsters/WoomaTaurus.cs",
+          "lineCount": 83,
+          "classes": [
+            "WoomaTaurus"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirObjects/Monsters/Yimoogi.cs",
+          "lineCount": 237,
+          "classes": [
+            "Yimoogi"
+          ],
+          "methodCount": 11
+        },
+        {
+          "relativePath": "MirObjects/Monsters/YinDevilNode.cs",
+          "lineCount": 59,
+          "classes": [
+            "YinDevilNode"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ZumaMonster.cs",
+          "lineCount": 188,
+          "classes": [
+            "ZumaMonster"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirObjects/Monsters/ZumaTaurus.cs",
+          "lineCount": 99,
+          "classes": [
+            "ZumaTaurus"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirObjects/NPC/NPCActions.cs",
+          "lineCount": 120,
+          "classes": [
+            "NPCActions"
+          ],
+          "methodCount": 0
+        },
+        {
+          "relativePath": "MirObjects/NPC/NPCChecks.cs",
+          "lineCount": 70,
+          "classes": [
+            "NPCChecks"
+          ],
+          "methodCount": 0
+        },
+        {
+          "relativePath": "MirObjects/NPC/NPCPage.cs",
+          "lineCount": 43,
+          "classes": [
+            "NPCPage"
+          ],
+          "methodCount": 1
+        },
+        {
+          "relativePath": "MirObjects/NPC/NPCScript.cs",
+          "lineCount": 1461,
+          "classes": [
+            "NPCScript"
+          ],
+          "methodCount": 30
+        },
+        {
+          "relativePath": "MirObjects/NPC/NPCSegment.cs",
+          "lineCount": 5022,
+          "classes": [
+            "NPCSegment"
+          ],
+          "methodCount": 22
+        },
+        {
+          "relativePath": "MirObjects/NPCObject.cs",
+          "lineCount": 484,
+          "classes": [
+            "NPCObject",
+            "NPCSpeech"
+          ],
+          "methodCount": 27
+        },
+        {
+          "relativePath": "MirObjects/Player/Reporting.cs",
+          "lineCount": 244,
+          "classes": [
+            "Reporting"
+          ],
+          "methodCount": 21
+        },
+        {
+          "relativePath": "MirObjects/PlayerObject.cs",
+          "lineCount": 14683,
+          "classes": [
+            "PlayerObject"
+          ],
+          "methodCount": 266
+        },
+        {
+          "relativePath": "MirObjects/SpellObject.cs",
+          "lineCount": 640,
+          "classes": [
+            "SpellObject"
+          ],
+          "methodCount": 21
+        }
+      ]
+    },
+    {
+      "module": "MirDatabase",
+      "fileCount": 23,
+      "totalLines": 6606,
+      "sampleClasses": [
+        "AccountInfo",
+        "AuctionInfo",
+        "BuffInfo",
+        "Buff",
+        "CharacterInfo",
+        "PetInfo",
+        "MountInfo",
+        "FriendInfo",
+        "ConquestGuildInfo",
+        "ConquestGuildSiegeInfo",
+        "ConquestGuildFlagInfo",
+        "ConquestGuildWallInfo",
+        "ConquestGuildGateInfo",
+        "ConquestGuildArcherInfo",
+        "ConquestInfo",
+        "ConquestSiegeInfo",
+        "ConquestWallInfo",
+        "ConquestGateInfo",
+        "ConquestArcherInfo",
+        "ConquestFlagInfo",
+        "DragonInfo",
+        "DropInfo",
+        "GTMap",
+        "GuildInfo"
+      ],
+      "files": [
+        {
+          "relativePath": "MirDatabase/AccountInfo.cs",
+          "lineCount": 303,
+          "classes": [
+            "AccountInfo"
+          ],
+          "methodCount": 6
+        },
+        {
+          "relativePath": "MirDatabase/AuctionInfo.cs",
+          "lineCount": 118,
+          "classes": [
+            "AuctionInfo"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirDatabase/BuffInfo.cs",
+          "lineCount": 273,
+          "classes": [
+            "BuffInfo",
+            "Buff"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirDatabase/CharacterInfo.cs",
+          "lineCount": 772,
+          "classes": [
+            "CharacterInfo",
+            "PetInfo",
+            "MountInfo",
+            "FriendInfo"
+          ],
+          "methodCount": 8
+        },
+        {
+          "relativePath": "MirDatabase/ConquestGuildInfo.cs",
+          "lineCount": 559,
+          "classes": [
+            "ConquestGuildInfo",
+            "ConquestGuildSiegeInfo",
+            "ConquestGuildFlagInfo",
+            "ConquestGuildWallInfo",
+            "ConquestGuildGateInfo",
+            "ConquestGuildArcherInfo"
+          ],
+          "methodCount": 20
+        },
+        {
+          "relativePath": "MirDatabase/ConquestInfo.cs",
+          "lineCount": 422,
+          "classes": [
+            "ConquestInfo",
+            "ConquestSiegeInfo",
+            "ConquestWallInfo",
+            "ConquestGateInfo",
+            "ConquestArcherInfo",
+            "ConquestFlagInfo"
+          ],
+          "methodCount": 12
+        },
+        {
+          "relativePath": "MirDatabase/DragonInfo.cs",
+          "lineCount": 177,
+          "classes": [
+            "DragonInfo",
+            "DropInfo"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirDatabase/GTMap.cs",
+          "lineCount": 70,
+          "classes": [
+            "GTMap"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirDatabase/GuildInfo.cs",
+          "lineCount": 258,
+          "classes": [
+            "GuildInfo"
+          ],
+          "methodCount": 1
+        },
+        {
+          "relativePath": "MirDatabase/HeroInfo.cs",
+          "lineCount": 172,
+          "classes": [
+            "HeroInfo"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirDatabase/IntelligentCreatureInfo.cs",
+          "lineCount": 202,
+          "classes": [
+            "IntelligentCreatureInfo",
+            "UserIntelligentCreature"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirDatabase/MagicInfo.cs",
+          "lineCount": 225,
+          "classes": [
+            "MagicInfo",
+            "UserMagic"
+          ],
+          "methodCount": 13
+        },
+        {
+          "relativePath": "MirDatabase/MailInfo.cs",
+          "lineCount": 168,
+          "classes": [
+            "MailInfo"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirDatabase/MapInfo.cs",
+          "lineCount": 353,
+          "classes": [
+            "MapInfo"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirDatabase/MineInfo.cs",
+          "lineCount": 102,
+          "classes": [
+            "MineSet",
+            "MineSpot",
+            "MineDrop",
+            "MineZone"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "MirDatabase/MonsterInfo.cs",
+          "lineCount": 589,
+          "classes": [
+            "MonsterInfo",
+            "DropRewardInfo",
+            "GroupDropInfo",
+            "DropInfo"
+          ],
+          "methodCount": 9
+        },
+        {
+          "relativePath": "MirDatabase/MovementInfo.cs",
+          "lineCount": 55,
+          "classes": [
+            "MovementInfo"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "MirDatabase/NPCInfo.cs",
+          "lineCount": 237,
+          "classes": [
+            "NPCInfo"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirDatabase/QuestInfo.cs",
+          "lineCount": 512,
+          "classes": [
+            "QuestInfo",
+            "QuestKillTask",
+            "QuestItemTask",
+            "QuestFlagTask"
+          ],
+          "methodCount": 14
+        },
+        {
+          "relativePath": "MirDatabase/QuestProgressInfo.cs",
+          "lineCount": 616,
+          "classes": [
+            "QuestProgressInfo",
+            "QuestKillTaskProgress",
+            "QuestItemTaskProgress",
+            "QuestFlagTaskProgress"
+          ],
+          "methodCount": 17
+        },
+        {
+          "relativePath": "MirDatabase/RecipeInfo.cs",
+          "lineCount": 242,
+          "classes": [
+            "RecipeInfo"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirDatabase/RespawnInfo.cs",
+          "lineCount": 146,
+          "classes": [
+            "RespawnInfo",
+            "RouteInfo"
+          ],
+          "methodCount": 4
+        },
+        {
+          "relativePath": "MirDatabase/SafeZoneInfo.cs",
+          "lineCount": 35,
+          "classes": [
+            "SafeZoneInfo"
+          ],
+          "methodCount": 2
+        }
+      ]
+    },
+    {
+      "module": "MirNetwork",
+      "fileCount": 2,
+      "totalLines": 2505,
+      "sampleClasses": [
+        "MirConnection",
+        "MirConnectionLog",
+        "MirStatusConnection"
+      ],
+      "files": [
+        {
+          "relativePath": "MirNetwork/MirConnection.cs",
+          "lineCount": 2367,
+          "classes": [
+            "MirConnection",
+            "MirConnectionLog"
+          ],
+          "methodCount": 169
+        },
+        {
+          "relativePath": "MirNetwork/MirStatusConnection.cs",
+          "lineCount": 138,
+          "classes": [
+            "MirStatusConnection"
+          ],
+          "methodCount": 5
+        }
+      ]
+    },
+    {
+      "module": "Helpers",
+      "fileCount": 1,
+      "totalLines": 38,
+      "sampleClasses": [
+        "ChatSystem"
+      ],
+      "files": [
+        {
+          "relativePath": "Helpers/ChatSystem.cs",
+          "lineCount": 38,
+          "classes": [
+            "ChatSystem"
+          ],
+          "methodCount": 1
+        }
+      ]
+    },
+    {
+      "module": "Utils",
+      "fileCount": 4,
+      "totalLines": 288,
+      "sampleClasses": [
+        "Crypto",
+        "FixedSizedQueue",
+        "HttpServer",
+        "HttpService"
+      ],
+      "files": [
+        {
+          "relativePath": "Utils/Crypto.cs",
+          "lineCount": 27,
+          "classes": [
+            "Crypto"
+          ],
+          "methodCount": 2
+        },
+        {
+          "relativePath": "Utils/FixedSizedQueue.cs",
+          "lineCount": 30,
+          "classes": [
+            "FixedSizedQueue"
+          ],
+          "methodCount": 0
+        },
+        {
+          "relativePath": "Utils/HttpServer.cs",
+          "lineCount": 123,
+          "classes": [
+            "HttpServer"
+          ],
+          "methodCount": 3
+        },
+        {
+          "relativePath": "Utils/HttpService.cs",
+          "lineCount": 108,
+          "classes": [
+            "HttpService"
+          ],
+          "methodCount": 3
+        }
+      ]
+    }
+  ]
+}

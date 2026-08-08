@@ -1,0 +1,148 @@
+# Current Architecture
+
+Last updated: 2026-06-15
+
+Purpose: describe the architecture that is actually implemented today. This is
+the operational source for current boundaries; 1:1 parity docs remain the source
+for Crystal compatibility status.
+
+## Runtime Shape
+
+```text
+Player Web (Next.js shell + Bevy WASM runtime)
+        |
+        | WebSocket browser commands
+        v
+Gateway (Rust Axum/TCP)
+  auth handoff, command parsing, session lifecycle, routing cache
+        |
+        | in-process WorldRuntime boundary
+        v
+Simulation / World Runtime (Rust)
+  authoritative gameplay packets, saves, snapshots, Stage 5 systems
+        |
+        +--> AccountStoreRepository: file for local, Postgres for production
+        +--> Redis session/routing cache for production/staging
+        +--> Redpanda/ClickHouse gameplay event projection when configured
+```
+
+Admin shape:
+
+```text
+Admin Web (Next.js)
+        |
+Admin API (Rust Axum)
+        |
+RBAC + audited commands + read models
+        |
+Gateway/admin endpoints, account store, Postgres projections, ClickHouse reads
+```
+
+## Implemented Boundaries
+
+- `apps/gateway/src/web.rs` owns browser WebSocket orchestration and JSON event
+  projection.
+- `apps/gateway/src/auth.rs` owns browser auth token verification for Sui
+  Passkey and Sui wallet login.
+- `apps/gateway/src/browser_commands.rs` owns browser command parsing helpers,
+  default values, and protocol enum translation.
+- `apps/web/lib/client-login-runtime.ts` owns login command sequencing for
+  password, new-account, Passkey, and wallet flows.
+- `apps/web/lib/passkey-auth.ts` owns Sui Passkey and wallet personal-message
+  signing plus token exchange.
+- `apps/simulation/src/config.rs` owns the account-store runtime policy.
+- `apps/gateway/src/cache.rs` owns the non-authoritative online session cache
+  and route-lease contract. Local development may use the in-memory cache, but
+  production/staging runtimes require Redis. Authenticated Web `StartGame` must
+  acquire the account/character lease before entering the world, so the cache
+  participates in online uniqueness instead of only listing already-online
+  sessions.
+
+## Account And Auth Policy
+
+- Local development keeps the file-backed account store by default.
+- `MIR2_ACCOUNT_STORE_BACKEND=postgres` makes Postgres the account-store source
+  of truth.
+- `MIR2_RUNTIME_ENV=production`, `MIR2_RUNTIME_ENV=prod`,
+  `MIR2_RUNTIME_ENV=staging`, or the same values in `MIR2_DEPLOYMENT_ENV` /
+  `MIR2_ENV` also require the Postgres source-of-truth path.
+- `MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES=1` forces the same policy regardless of
+  environment name.
+- Production-like runtimes must provide `MIR2_ACCOUNT_STORE_DATABASE_URL`; an
+  explicit file/json backend is rejected in those environments.
+- Production-like Gateway runtimes must also provide
+  `MIR2_GATEWAY_REDIS_CACHE_URL`; missing Redis is rejected before Web Gateway
+  startup falls back to process-local in-memory routing.
+- `MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1` forces the same Redis policy regardless
+  of environment name.
+- Production-like Passkey or wallet login must provide
+  `MIR2_PASSKEY_AUTH_SECRET`; local development may use the built-in fallback
+  secret.
+- Browser Passkey and wallet login both resolve to `sui:<address>` account ids
+  and enter the existing Gateway `passkeyLogin` command path.
+
+## Recently Activated Subsystems (2026-06)
+
+- **Full Crystal world is live.** All maps activate when occupied and go dormant
+  when empty (`feat(sim): activate full Crystal world` #80); a monster pool
+  materializes only monsters near a player (`perf(sim): on-demand monster pool`
+  #83), so the full map set is affordable in one process.
+- **Combat numerics are Crystal-faithful and zone-authoritative.** Damage rolls
+  `Random(MinDC..=MaxDC)`, subtracts `Random(MinAC..=MaxAC)` / MAC by damage
+  type, applies critical hits (`CriticalRate × weight`, amplified damage) and
+  agility-vs-accuracy dodge — all inside the shared zone tick
+  (`apps/simulation/src/runtime/zone/runtime.rs`, `combat.rs`). Player stat
+  blocks stay fresh on equip/buff/level via `ZoneCommand::UpdatePlayerCombatStats`.
+- **Mining** (`Map.CreateMine`, 1:1) is implemented (`runtime/.../mining.rs`):
+  pickaxe-gated, per-tick ore drop rolls, two ore sets. Dynamic doors open via
+  `ZoneCommand::OpenDoor`.
+- **GM @-command set** (~78 commands) is implemented in the simulation
+  (`gm_commands.rs`, dispatched via `dispatch_gm_command`); zero-config GM
+  provisioning via `MIR2_GM_ACCOUNTS` / `MIR2_GM_PASSWORD`.
+- **Rendering** runs GPU map-tile + entity atlases served same-origin (no hard
+  R2 dependency at first paint; #74/#85), with off-main-thread alpha-keying.
+- **Security remediation** landed (#77): salted password hashing, packet
+  size/DoS bounds, trade-dupe guard, admin auth + rate limiting. Open items in
+  `SECURITY-AUDIT-2026-06.md` (some admin read endpoints, a stronger password
+  KDF) are post-remediation follow-ups, not the pre-#77 gaps.
+- **On-chain mine (Sui/Dubhe)** milestones M1–M4 + session keys SK0–SK2 landed
+  (#92) on the testnet track; the relayer bridges chain-confirmed events into the
+  gateway inject route. Gameplay assets remain off-chain except this opt-in mine.
+
+## Engineering Gates
+
+Use the lightweight repo gate before handing off work:
+
+```bash
+scripts/quality-gate.sh
+```
+
+The gate runs Rust formatting and checks for the touched backend packages,
+player web typecheck, optional Admin Web typecheck when dependencies are
+installed, and `git diff --check`.
+
+Use the full version when a change may affect runtime behavior broadly:
+
+```bash
+MIR2_QUALITY_FULL=1 scripts/quality-gate.sh
+```
+
+## Open Architecture Risks
+
+- World authority is now substantially in the shared zone: it owns monster
+  HP/AI and resolves **bidirectional combat** (player→monster and monster→player
+  hit/miss, `Random(MinDC..=MaxDC)` damage, and AC/MAC armour by damage type)
+  plus **magic/skill damage values** (`crystal_magic_damage_from_base` recomputed
+  in the zone), all from an authoritative player stat block kept fresh on
+  equip/buff/level changes — see `docs/WORLD-AUTHORITY-STATUS.md`. NPC shared
+  state (cross-map saved values, random seed, entity side-effects) is committed
+  transactionally and is intentionally **not** in the per-map zone. The main
+  outstanding item is cross-process single-owner handoff (a distributed-systems
+  infra track), plus minor refinements (monster MAC on magic, NPC single-writer
+  concurrency).
+- Gameplay persistence is not fully normalized. Accounts can be source-of-truth
+  in Postgres, while inventory/mail/economy normalization remains staged work.
+- Redpanda and ClickHouse are read-side/event projections only. They are not part
+  of authoritative gameplay commits.
+- Passkey and wallet login are browser/Sui account binding flows. They do not
+  make gameplay assets on-chain.

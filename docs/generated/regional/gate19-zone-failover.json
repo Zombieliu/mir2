@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "generatedAtMs": 1784983460422,
+  "zoneId": "map:0",
+  "activeEndpoint": "zone-active:7020",
+  "standbyEndpoint": "zone-standby:7020",
+  "activeOwner": "gate19-active",
+  "standbyOwner": "gate19-standby",
+  "initialBaseSnapshotId": "7c2324032a1a4f9a7ebe86cf6f6baf1aee3364d4316458e645ac9dadd546e910",
+  "synchronizedCursor": 230,
+  "synchronizedDigest": "4de6d8221e46a9e2d7d3057a85ff0afbc52d789892ca186cecf6e366250196e4",
+  "synchronizedAtMs": 1784983460270,
+  "activeFailureDetectedAtMs": 1784983460414,
+  "promotedAtMs": 1784983460422,
+  "failoverRtoMs": 7.7950420000000005,
+  "oldGeneration": 1,
+  "newGeneration": 2,
+  "readinessId": "b3ad7bcb2c660b5a363f977452feaa1e16e6ab4803bc31a0460b413b680a784a",
+  "readinessLagMs": 144,
+  "promotedCursor": 230,
+  "promotedDigest": "4de6d8221e46a9e2d7d3057a85ff0afbc52d789892ca186cecf6e366250196e4",
+  "postPromotionProbeSucceeded": true,
+  "assertions": {
+    "postPromotionProbeSucceeded": true,
+    "promotionAdvancedOwnerGeneration": true,
+    "standbyMatchedLastObservedCursorAndDigest": true,
+    "zoneFailoverMetRto": true
+  },
+  "success": true
+}

@@ -1,0 +1,40 @@
+# onchain/ — keep secrets and build artifacts out of git.
+# (The repo-root .gitignore already covers node_modules/, dist/, *.tsbuildinfo,
+#  and .env/.env.* — this file adds onchain-specific + secret patterns on top.)
+
+# --- Secrets — NEVER commit (private keys, mnemonics, operator tokens) ---
+.env
+.env.*
+!.env.example
+*.key
+*.keystore
+*.mnemonic
+sui.keystore
+.sui/
+deployments.local.json
+.secrets/
+
+# --- Dependencies / TS build ---
+node_modules/
+dist/
+*.tsbuildinfo
+
+# --- Move build artifacts (also covered by contracts/*/.gitignore) ---
+contracts/**/build/
+contracts/**/traces/
+contracts/**/.trace
+contracts/**/.coverage*
+# 1.2.x `dubhe generate` emits the package under src/<name>/ instead of contracts/.
+src/**/build/
+src/**/traces/
+src/**/.trace
+src/**/.coverage*
+**/Pub.*.toml
+# Sui publish state (the deploy ids live in deployments/testnet.json instead).
+**/Published.toml
+
+# Dubhe indexer local db + relayer state (runtime artifacts)
+*.db
+*.sqlite
+*.sqlite3
+relayer/.state/

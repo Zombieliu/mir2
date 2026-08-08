@@ -1,0 +1,32 @@
+{
+  "completeness": {
+    "allFrameSlotsClassified": true,
+    "classifiedFrameCount": 2143132,
+    "frameSlotCount": 2143132,
+    "noDrawFrameCount": 273263,
+    "noDrawMaskCount": 0,
+    "packedFrameCount": 1869869,
+    "packedMaskCount": 120,
+    "sourceLibraryCount": 1440
+  },
+  "evidence": {
+    "catalogContentHash": "514740e5b08ab8ca70b6636072356b9a2f58552cc96ed3b04b084fa1d69cc84c",
+    "contentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+    "elapsedMs": 32375,
+    "pageHashesVerified": true,
+    "verifiedLibraryCount": 1440,
+    "verifiedUniquePageCount": 4446
+  },
+  "kind": "mir2-crystal-full-pack-coverage",
+  "mode": "verify",
+  "schemaVersion": 1,
+  "storage": {
+    "conservativeBuildBytes": null,
+    "estimatedManifestBytes": null,
+    "estimatedNetworkBytes": null,
+    "gpuBytes": 62972592128,
+    "networkBytes": 7342139517,
+    "pageCount": 4459,
+    "rawRgbaBytes": 52434845284
+  }
+}

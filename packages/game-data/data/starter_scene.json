@@ -1,0 +1,179 @@
+{
+  "map": {
+    "map_index": 1,
+    "file_name": "0",
+    "title": "Starter Field",
+    "mini_map": 101,
+    "big_map": 101,
+    "lights": 0,
+    "flags": 0,
+    "map_dark_light": 0,
+    "music": 0,
+    "weather_particles": 0
+  },
+  "spawn": {
+    "x": 330,
+    "y": 270
+  },
+  "scene_view": {
+    "center": {
+      "x": 330,
+      "y": 270
+    },
+    "width": 24,
+    "height": 18
+  },
+  "terrain_patches": [
+    {
+      "x": 318,
+      "y": 261,
+      "width": 24,
+      "height": 18,
+      "kind": "grass"
+    },
+    {
+      "x": 322,
+      "y": 264,
+      "width": 9,
+      "height": 8,
+      "kind": "dirt"
+    },
+    {
+      "x": 329,
+      "y": 261,
+      "width": 3,
+      "height": 18,
+      "kind": "road"
+    },
+    {
+      "x": 318,
+      "y": 268,
+      "width": 24,
+      "height": 3,
+      "kind": "road"
+    },
+    {
+      "x": 337,
+      "y": 262,
+      "width": 4,
+      "height": 4,
+      "kind": "water"
+    },
+    {
+      "x": 324,
+      "y": 272,
+      "width": 6,
+      "height": 3,
+      "kind": "stone"
+    }
+  ],
+  "decor_objects": [
+    {
+      "id": "west-banner",
+      "kind": "banner",
+      "x": 326,
+      "y": 269
+    },
+    {
+      "id": "east-banner",
+      "kind": "banner",
+      "x": 334,
+      "y": 269
+    },
+    {
+      "id": "north-lantern",
+      "kind": "lantern",
+      "x": 328,
+      "y": 267
+    },
+    {
+      "id": "south-lantern",
+      "kind": "lantern",
+      "x": 332,
+      "y": 267
+    },
+    {
+      "id": "campfire-center",
+      "kind": "campfire",
+      "x": 330,
+      "y": 273
+    },
+    {
+      "id": "north-tree",
+      "kind": "tree",
+      "x": 321,
+      "y": 264
+    },
+    {
+      "id": "east-rock",
+      "kind": "rock",
+      "x": 337,
+      "y": 275
+    },
+    {
+      "id": "west-stump",
+      "kind": "stump",
+      "x": 324,
+      "y": 274
+    }
+  ],
+  "default_character": {
+    "name": "Scout",
+    "level": 7,
+    "class": "Warrior",
+    "gender": "Male"
+  },
+  "object_id": 1000,
+  "real_id": 1000,
+  "visible_players": [
+    {
+      "object_id": 2001,
+      "name": "Mentor",
+      "class": "Wizard",
+      "gender": "Female",
+      "level": 18,
+      "position": {
+        "x": 334,
+        "y": 268
+      },
+      "direction": "Left"
+    }
+  ],
+  "visible_monsters": [
+    {
+      "object_id": 3001,
+      "name": "Training Dummy",
+      "image": 10,
+      "position": {
+        "x": 338,
+        "y": 273
+      },
+      "direction": "Left"
+    },
+    {
+      "object_id": 3002,
+      "name": "Field Wasp",
+      "image": 12,
+      "position": {
+        "x": 334,
+        "y": 266
+      },
+      "direction": "Down"
+    }
+  ],
+  "visible_npcs": [
+    {
+      "object_id": 4001,
+      "name": "Village Guide",
+      "image": 5,
+      "colour_argb": -1,
+      "position": {
+        "x": 326,
+        "y": 271
+      },
+      "direction": "Right",
+      "quest_ids": [1001],
+      "script_key": null
+    }
+  ]
+}

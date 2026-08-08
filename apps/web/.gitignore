@@ -1,0 +1,35 @@
+.vercel
+
+# Generated map texture atlases (built by `npm run assets:map-atlas:build`, served from R2).
+# Regenerated before each asset release; kept out of git to avoid ~60MB of derived binaries.
+public/generated/map-atlas/
+
+# Player-QA playthrough run artifacts (reports + screenshot timelines from
+# `npm run qa:playthrough`). Run-specific; not source.
+docs/generated/player-qa/
+
+# Economy-QA run artifacts (reports + screenshot timelines from `npm run
+# qa:economy`). Run-specific; not source.
+docs/generated/economy-qa/
+
+# Soak-QA run artifacts (time-series + report + screenshots from `npm run
+# qa:soak`). Run-specific; not source.
+docs/generated/soak-qa/
+
+# Equip→appearance QA run artifacts (reports + screenshots from `npm run
+# qa:appearance`). Run-specific; not source.
+docs/generated/equip-appearance-qa/
+
+# Audio-QA run artifacts (audio/music loop report + frames from `npm run
+# qa:audio`). Run-specific; not source.
+docs/generated/audio-qa/
+
+# VFX-QA run artifacts (skill-animation atlas/frame report from `npm run
+# qa:vfx`). Run-specific; not source.
+docs/generated/vfx-qa/
+
+# i18n AI-translation scratch (batch-*.json, _write-batch-*.mjs, source.json,
+# flagged.jsonl, glossary.json). The distilled, reviewed outputs are committed
+# instead: lib/generated/localization_bundle.json, lib/generated/i18n-glossary.json,
+# lib/generated/i18n-native-review.json, and packages/game-data/data/i18n-overrides.json.
+docs/generated/i18n-work/

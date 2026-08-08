@@ -1,0 +1,89 @@
+{
+  "schema": "mir2-content-profile-bundle/1",
+  "profileId": "platinum_176",
+  "profileVersion": 6,
+  "acceptanceLevel": 50,
+  "source": "Crystal.Database-29.01.25/Jev with classic three-class 1.76 overrides",
+  "sourceData": {
+    "crystalDatabaseVersion": 117,
+    "crystalDatabaseCustomVersion": 0
+  },
+  "builtAt": "2026-08-07T07:37:07.457Z",
+  "hashAlgorithm": "sha256",
+  "contentHash": "3bbd9685bd026d434e83f9a13b431e2363921ee72b97c72bc5d8ebc222286c2a",
+  "files": [
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_176.json",
+      "bytes": 26809,
+      "sha256": "b547b8af151798a4a4b7d630bd7c4e5a23b0cd345735fb175508c057ca811cfd"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "bytes": 6394977,
+      "sha256": "2f3436064a1cca763718d1724960274bb1fd2c6e4c8b54f15a0aeeb1c7e9b16f"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 384996,
+      "sha256": "29aa645f3293911e42bbd7ede519335cce61af4c074d7a7a2d6cdf495ac982d3"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "bytes": 134815,
+      "sha256": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "bytes": 25753,
+      "sha256": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_magic_manifest.json",
+      "bytes": 52153,
+      "sha256": "b291a04f1d9af7391596059cb2c75aaf5015be2968605250d4db9edc4bf183c2"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_buff_manifest.json",
+      "bytes": 10919,
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_drop_manifest.json",
+      "bytes": 24076631,
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "bytes": 5244108,
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "bytes": 59118,
+      "sha256": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "bytes": 3449,
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4"
+    }
+  ],
+  "summary": {
+    "maps": 118,
+    "monsters": 125,
+    "items": 146,
+    "skills": 32,
+    "npcScripts": 38,
+    "dropOverrides": 21
+  }
+}

@@ -1,0 +1,62 @@
+# Node
+node_modules/
+.next/
+next-env.d.ts
+dist/
+out/
+.mir2-remote-assets/
+.mir2-thin-client/
+docs/generated/remote-assets/
+docs/generated/player-qa/
+docs/generated/packet-traces/
+docs/stage2-screenshots/
+docs/stage5-screenshots/
+artifacts/qa-evidence/
+apps/web/public/original-asset-manifest.generated.json
+apps/web/public/bevy-runtime/
+# Full Crystal conversion is reproducible from the local client. Do not commit
+# multi-gigabyte CAS pages or per-library manifests.
+apps/web/public/generated/crystal-packs/full/
+.tmp-full-pack-*
+apps/web/.tmp-low-tier-qa-account.txt
+apps/web/.tmp-next-build-*.pid
+
+# Rust
+target/
+
+# Editors
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Env
+.env
+.env.local
+.env.*
+!.env.example
+!infra/ai-live/.env.youtube.example
+infra/gate12/.secrets/
+infra/gate13/.secrets/
+infra/gate22/generated/
+
+# Logs
+*.log
+
+# Browser QA
+.playwright-cli/
+output/playwright/
+output/web-game/
+
+# Local AI-generated/reference images
+ai/
+.vercel
+
+# Local debugging/probe scripts created during render debugging (not part of the app).
+# Real tooling lives under apps/web/scripts/.
+apps/web/*.js
+
+# Local runtime data (accounts, spectator logs)
+.mir2-data/

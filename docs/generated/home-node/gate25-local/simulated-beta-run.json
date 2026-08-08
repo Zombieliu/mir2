@@ -1,0 +1,108 @@
+{
+  "payload": {
+    "schema": "obelisk.home-network-beta-run.v1",
+    "runId": "gate25-local-simulated",
+    "environment": "simulatedNetwork",
+    "nodeId": "ed25519:bef5746d0c392c693ca4b72d81dd9f75d3f0b1f34d4081319f27cde5ce2b6aa3",
+    "nodePublicKey": "4oqJcHUzMr1y_vQT5rCy7xtKrdp6osFB8jNxKmh2s1E",
+    "keyGeneration": 1,
+    "providerCode": "simulated-provider",
+    "providerAsn": 64500,
+    "failureDomain": "local-container",
+    "coarseRegion": "local-lab",
+    "cgnatObserved": true,
+    "inboundPortOpened": false,
+    "relayIpHidden": true,
+    "startedAtMs": 1785022628013,
+    "finishedAtMs": 1785023528013,
+    "activeSessionMinutes": 150,
+    "maximumFailoverRtoMs": 1500,
+    "economyDuplicateCount": 0,
+    "faults": [
+      {
+        "kind": "cgnatBaseline",
+        "injectedAtMs": 1785022628013,
+        "recoveredAtMs": 1785022629513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "9e10cc302b02143a4df42b9f61193f84f4ff28bcb3f766e33268284359e9583a"
+      },
+      {
+        "kind": "dynamicIpChange",
+        "injectedAtMs": 1785022638013,
+        "recoveredAtMs": 1785022639513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "901b7a0366cab03c95689756c92499e39d4402431a2ce8f3d3e6521ae9cbe60c"
+      },
+      {
+        "kind": "routerRestart",
+        "injectedAtMs": 1785022648013,
+        "recoveredAtMs": 1785022649513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "36267c28745af2ef633ba8de00ef1930bb1f99c3aef526101be67564b9b52019"
+      },
+      {
+        "kind": "hostSleepWake",
+        "injectedAtMs": 1785022658013,
+        "recoveredAtMs": 1785022659513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "a14f8195e24be1c1ecec720c03560ed5f2c5c38a8e1e58c41a8cfb8245b8bcf8"
+      },
+      {
+        "kind": "packetLoss",
+        "injectedAtMs": 1785022668013,
+        "recoveredAtMs": 1785022669513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "a0a818138b02bc63dc777195149156afe21d10ee4f30ff96e2985a77a80c244a"
+      },
+      {
+        "kind": "bandwidthCongestion",
+        "injectedAtMs": 1785022678013,
+        "recoveredAtMs": 1785022679513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "35810fd0de4c518ba188466bf8227b522d9e3fa775e2ddac22c69e856e38f692"
+      },
+      {
+        "kind": "activeFailureStandbyTakeover",
+        "injectedAtMs": 1785022688013,
+        "recoveredAtMs": 1785022689513,
+        "recoveryRtoMs": 1500,
+        "sessionsBefore": 10,
+        "sessionsRecovered": 10,
+        "economyDuplicateCount": 0,
+        "passed": true,
+        "evidenceSha256": "bb365b655c5a7b51807099d32af378a553719d14db42ccf4d824845e0929439c"
+      }
+    ],
+    "buildCommit": "local-uncommitted",
+    "machineAttestationSha256": "d185c589e15a9d401ed4645319366ae378f21e45245935f4ada0c41e6ee15a87"
+  },
+  "nodeSignatureAlgorithm": "ed25519-zip215",
+  "nodeSignature": "5nFeAQit1RRYX7J6dgUYvXmwHQnJI4a_LGmkgChynnR-iQDKOGgvYoEMHsk6DAqg3WkPC-EwIB4XU887zxsYAA",
+  "operatorPublicKey": "dyyKRCt9sG4WbPvBzLy83m8-unak6Y7z_8UZUCI31u8",
+  "operatorSignatureAlgorithm": "ed25519-zip215",
+  "operatorSignature": "7LzhEQLDyuevHT6IB9Bo2j-C585DlS392Z1708gLqUgammjtvs3JGR1Yp_n79nz4qA1nbowZ7c5agPczMWmXDg"
+}

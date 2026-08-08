@@ -1,0 +1,185 @@
+name: mir2-web3-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mir2-postgres
+    environment:
+      POSTGRES_DB: mir2
+      POSTGRES_USER: mir2
+      POSTGRES_PASSWORD: mir2_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: mir2-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  nats:
+    image: nats:2-alpine
+    container_name: mir2-nats
+    command: ["-js", "-sd", "/data"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'PING\\r\\n' | nc -w 1 127.0.0.1 4222 | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redpanda:
+    image: redpandadata/redpanda:v24.3.6
+    container_name: mir2-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 1G
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://127.0.0.1:9092
+      - --pandaproxy-addr
+      - internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr
+      - internal://redpanda:8082,external://127.0.0.1:8082
+      - --set
+      - redpanda.auto_create_topics_enabled=true
+    ports:
+      - "9092:19092"
+      - "8082:18082"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -Eq 'Healthy:[[:space:]]*true|Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.12-alpine
+    container_name: mir2-clickhouse
+    environment:
+      CLICKHOUSE_DB: mir2_events
+      CLICKHOUSE_USER: mir2
+      CLICKHOUSE_PASSWORD: mir2_dev_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/initdb:/docker-entrypoint-initdb.d:ro
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --user mir2 --password mir2_dev_password --query 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: mir2-meilisearch
+    profiles: ["search"]
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: mir2_dev_master_key
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+
+  loki:
+    image: grafana/loki:latest
+    container_name: mir2-loki
+    profiles: ["observability"]
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mir2-grafana
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - loki
+
+  ai-live:
+    build:
+      context: ..
+      dockerfile: infra/ai-live/Dockerfile
+    container_name: mir2-ai-live
+    profiles: ["ai-live"]
+    init: true
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      MIR2_AI_LIVE_RENDER_URL: ${MIR2_AI_LIVE_RENDER_URL:-http://host.docker.internal:3002/spectate?aiLive=1&aiLiveAudio=1&spectateMode=director}
+      MIR2_AI_LIVE_OUTPUT_URL: ${MIR2_AI_LIVE_OUTPUT_URL:-}
+      MIR2_AI_LIVE_OUTPUT_FORMAT: ${MIR2_AI_LIVE_OUTPUT_FORMAT:-hls}
+      MIR2_AI_LIVE_VIDEO_SIZE: ${MIR2_AI_LIVE_VIDEO_SIZE:-1920x1080}
+      MIR2_AI_LIVE_FRAME_RATE: ${MIR2_AI_LIVE_FRAME_RATE:-30}
+      MIR2_AI_LIVE_VIDEO_BITRATE: ${MIR2_AI_LIVE_VIDEO_BITRATE:-4500k}
+      MIR2_AI_LIVE_AUDIO_BITRATE: ${MIR2_AI_LIVE_AUDIO_BITRATE:-128k}
+      MIR2_AI_DISTRIBUTION_HEARTBEAT_URL: ${MIR2_AI_DISTRIBUTION_HEARTBEAT_URL:-}
+      MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN: ${MIR2_AI_DISTRIBUTION_HEARTBEAT_TOKEN:-}
+      MIR2_AI_DISTRIBUTION_RTMP_PLATFORM: ${MIR2_AI_DISTRIBUTION_RTMP_PLATFORM:-youtube}
+      MIR2_AI_DISTRIBUTION_WORKER_ID: ${MIR2_AI_DISTRIBUTION_WORKER_ID:-local-ai-live-01}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../artifacts/ai-live/hls:/output
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  postgres-data:
+  redis-data:
+  nats-data:
+  redpanda-data:
+  clickhouse-data:
+  meilisearch-data:
+  loki-data:
+  grafana-data:
