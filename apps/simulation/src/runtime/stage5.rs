@@ -40,7 +40,9 @@ use super::monsters::{
     crystal_dynamic_monster_template, crystal_spawn_candidates_on_map, spawn_runtime_monster,
 };
 use super::npc::ActiveNpcServiceState;
-use super::packets::{object_health_info_for_entity, stage5_guild_request_war_packet};
+use super::packets::{
+    localized_npc_name_key_for_name, object_health_info_for_entity, stage5_guild_request_war_packet,
+};
 use super::resources::{
     InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     RuntimeConfigResource, SessionResource, Stage5SystemsResource,
@@ -2126,7 +2128,10 @@ impl SimulationSession {
             world.entity_mut(npc).insert((
                 Npc,
                 Position(npc_position),
-                DisplayName::literal("InnKeeper_Brittney"),
+                match localized_npc_name_key_for_name("InnKeeper_Brittney") {
+                    Some(key) => DisplayName::localized(key, "InnKeeper_Brittney".to_string()),
+                    None => DisplayName::literal("InnKeeper_Brittney"),
+                },
                 NpcAgent {
                     image: 6,
                     colour_argb: 0,
@@ -2140,7 +2145,10 @@ impl SimulationSession {
                 Npc,
                 ObjectId(21),
                 Position(npc_position),
-                DisplayName::literal("InnKeeper_Brittney"),
+                match localized_npc_name_key_for_name("InnKeeper_Brittney") {
+                    Some(key) => DisplayName::localized(key, "InnKeeper_Brittney".to_string()),
+                    None => DisplayName::literal("InnKeeper_Brittney"),
+                },
                 NpcAgent {
                     image: 6,
                     colour_argb: 0,
@@ -2164,7 +2172,10 @@ impl SimulationSession {
             world.entity_mut(npc).insert((
                 Npc,
                 Position(position),
-                DisplayName::literal("InnKeeper_Brittney"),
+                match localized_npc_name_key_for_name("InnKeeper_Brittney") {
+                    Some(key) => DisplayName::localized(key, "InnKeeper_Brittney".to_string()),
+                    None => DisplayName::literal("InnKeeper_Brittney"),
+                },
                 NpcAgent {
                     image: 6,
                     colour_argb: 0,
@@ -2178,7 +2189,10 @@ impl SimulationSession {
                 Npc,
                 ObjectId(21),
                 Position(position),
-                DisplayName::literal("InnKeeper_Brittney"),
+                match localized_npc_name_key_for_name("InnKeeper_Brittney") {
+                    Some(key) => DisplayName::localized(key, "InnKeeper_Brittney".to_string()),
+                    None => DisplayName::literal("InnKeeper_Brittney"),
+                },
                 NpcAgent {
                     image: 6,
                     colour_argb: 0,

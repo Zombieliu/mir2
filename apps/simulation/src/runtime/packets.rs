@@ -6186,6 +6186,7 @@ pub(super) fn collect_world_entities(
                 WorldEntityKind::Monster => {
                     crystal_monster_by_name(&name.value).map(|monster| monster.ai)
                 }
+                WorldEntityKind::Npc => None,
                 _ => None,
             },
             x: position.0.x,

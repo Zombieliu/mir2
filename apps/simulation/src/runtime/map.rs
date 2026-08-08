@@ -1154,7 +1154,10 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
             WorldObject,
             Npc,
             ObjectId(object_id),
-            DisplayName::literal(npc.name),
+            match localized_npc_name_key_for_name(&npc.name) {
+                Some(key) => DisplayName::localized(key, npc.name.clone()),
+                None => DisplayName::literal(npc.name.clone()),
+            },
             Position(npc.location),
             Facing(MirDirection::Up),
             NpcAgent {
