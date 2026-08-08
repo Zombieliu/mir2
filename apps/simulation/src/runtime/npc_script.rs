@@ -28,7 +28,9 @@ use super::map::*;
 use super::monsters::*;
 use super::movement::*;
 use super::npc::*;
-use super::packets::{collect_visible_objects, localized_npc_name_key};
+use super::packets::{
+    collect_visible_objects, localized_npc_name_key, localized_npc_name_key_for_name,
+};
 use super::quests::*;
 use super::resources::*;
 use super::session::SimulationSession;
@@ -3300,8 +3302,10 @@ impl SimulationSession {
 
         let context = NpcInteractionContext {
             object_id,
-            name: npc_name,
-            name_key: localized_npc_name_key(object_id).map(str::to_string),
+            name: npc_name.clone(),
+            name_key: localized_npc_name_key(object_id)
+                .map(str::to_string)
+                .or_else(|| localized_npc_name_key_for_name(&npc_name)),
             position: npc_position,
             quest_ids: npc_quest_ids,
             script_key: npc_script_key,
@@ -3360,6 +3364,8 @@ impl SimulationSession {
             Npc,
             ObjectId(npc.object_id),
             localized_npc_name_key(npc.object_id)
+                .map(str::to_string)
+                .or_else(|| localized_npc_name_key_for_name(&npc.name))
                 .map(|key| DisplayName::localized(key, npc.name.clone()))
                 .unwrap_or_else(|| DisplayName::literal(npc.name.clone())),
             Position(Point { x: npc.x, y: npc.y }),

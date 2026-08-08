@@ -4887,6 +4887,18 @@ pub(super) fn localized_npc_name_key(object_id: u32) -> Option<&'static str> {
     }
 }
 
+/// Localization key for an NPC by its Crystal name. NPCs from the Crystal
+/// manifest (npc_script.rs / map.rs) carry their English name; returning a
+/// per-name key lets the bundle translate any Crystal NPC (not just the guide
+/// Village Guide). Falls back to None when the caller has no name.
+pub(super) fn localized_npc_name_key_for_name(name: &str) -> Option<String> {
+    let trimmed = name.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    Some(format!("content.npc.{trimmed}.name"))
+}
+
 const CRYSTAL_CHAT_INTERVAL_MS: u64 = 2_000;
 const CRYSTAL_CHAT_SPAM_TICKS_BEFORE_BAN: u8 = 5;
 const CRYSTAL_CHAT_SPAM_BAN_MS: u64 = 5 * 60 * 1_000;
