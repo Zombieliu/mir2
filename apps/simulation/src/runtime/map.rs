@@ -27,7 +27,8 @@ use super::monsters::{
 };
 use super::movement::{current_location, point_in_bounds, summon_spawn_position_near, tile_key};
 use super::packets::{
-    localized_monster_name_key, localized_npc_name_key, localized_visible_player_name_key,
+    localized_monster_name_key, localized_monster_name_key_for_name, localized_npc_name_key,
+    localized_visible_player_name_key,
 };
 use super::resources::{
     current_language, is_in_world, reset_crystal_player_movement_timing, MapRuntimeResource,
@@ -2075,6 +2076,8 @@ pub(super) fn rebuild_world(world: &mut World) {
                     Monster,
                     ObjectId(slot.object_id),
                     localized_monster_name_key(slot.object_id)
+                        .map(str::to_string)
+                        .or_else(|| localized_monster_name_key_for_name(&rule.name))
                         .map(|key| DisplayName::localized(key, rule.name.clone()))
                         .unwrap_or_else(|| DisplayName::literal(rule.name.clone())),
                     Position(slot.spawn_position.clone()),

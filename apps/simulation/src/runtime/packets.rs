@@ -4865,6 +4865,21 @@ pub(super) fn localized_monster_name_key(object_id: u32) -> Option<&'static str>
     }
 }
 
+/// Localization key for a monster by its Crystal name. Monsters materialised
+/// from the Crystal respawn manifest (monsters.rs) carry their English template
+/// name; returning a per-name key lets the bundle translate any Crystal monster
+/// (not just the guide-quest 3001/3002). Falls back to None (English literal)
+/// when the caller has no name.
+pub(super) fn localized_monster_name_key_for_name(name: &str) -> Option<String> {
+    let trimmed = name.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    // Use the raw Crystal name as the key segment (already unique, no path
+    // separators); the bundle holds `content.monster.{name}.name`.
+    Some(format!("content.monster.{trimmed}.name"))
+}
+
 pub(super) fn localized_npc_name_key(object_id: u32) -> Option<&'static str> {
     match object_id {
         super::crystal_compat::GUIDE_NPC_ID => Some("content.npc.villageGuide.name"),

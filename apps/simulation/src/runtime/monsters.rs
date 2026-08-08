@@ -32,7 +32,7 @@ use super::map::{
     walkable_point_count_in_rect, walkable_points_in_rect,
 };
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
-use super::packets::object_movement;
+use super::packets::{localized_monster_name_key_for_name, object_movement};
 use super::resources::{
     runtime_tick, MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource,
     RuntimeQueueResource,
@@ -1254,7 +1254,13 @@ pub(super) fn spawn_runtime_monster(
         WorldObject,
         Monster,
         ObjectId(object_id),
-        DisplayName::literal(template.monster_name.clone()),
+        // Localize by Crystal monster name so any manifest monster (not just the
+        // guide-quest 3001/3002) can be translated via content.monster.{name}.name.
+        // Falls back to the English literal when no translation key is present.
+        match localized_monster_name_key_for_name(&template.monster_name) {
+            Some(key) => DisplayName::localized(key, template.monster_name.clone()),
+            None => DisplayName::literal(template.monster_name.clone()),
+        },
         Position(position.clone()),
         Facing(facing),
         agent,
