@@ -100,8 +100,69 @@ pub(super) fn build_spawn_table(config: &SimulationConfig) -> MonsterSpawnTable 
             build_crystal_starter_region_spawn_table(config)
         }
         MonsterSpawnSource::CrystalWorld => {
+            // Guide-quest monsters are appended inside
+            // build_crystal_current_map_full_spawn_table, which both the personal
+            // session and the shared Zone path use for CrystalWorld.
             build_crystal_current_map_full_spawn_table(config, &config.map.file_name)
         }
+    }
+}
+
+/// Guide-quest monsters injected into the CrystalWorld spawn area (see
+/// `append_crystal_world_guide_monsters`): the Training Dummy (3001) and Field
+/// Wasp (3002) that the first quest requires, placed a couple of tiles from the
+/// spawn point. Only applied on the map that contains the player's spawn point.
+fn append_crystal_world_guide_monsters(
+    config: &SimulationConfig,
+    map_file_name: &str,
+    rules: &mut Vec<MonsterSpawnRule>,
+) {
+    if map_file_name != config.map.file_name {
+        return;
+    }
+    let starter_spawns = starter_server_data().monster_spawns;
+    let guide = |key: &str, offset_x: i32, offset_y: i32| -> Option<MonsterSpawnRule> {
+        let spawn = starter_spawns.iter().find(|s| s.key == key)?;
+        let spawn_position = Point {
+            x: config.spawn.x + offset_x,
+            y: config.spawn.y + offset_y,
+        };
+        Some(MonsterSpawnRule {
+            name: spawn.name.clone(),
+            image: spawn.image,
+            direction: spawn.direction,
+            respawn_schedule: MonsterRespawnSchedule::FixedTicks {
+                delay_ticks: spawn.respawn_delay_ticks,
+                random_delay_ticks: spawn.random_delay_ticks,
+            },
+            ai: 0,
+            disposition: if spawn.can_wander {
+                WorldEntityDisposition::Hostile
+            } else {
+                WorldEntityDisposition::Neutral
+            },
+            hostile_to_player: spawn.can_wander,
+            view_range: if spawn.can_wander { 4 } else { 0 },
+            can_wander: spawn.can_wander,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            max_hp: spawn.max_hp,
+            agility: 0,
+            route: Vec::new(),
+            slots: vec![MonsterSpawnSlot {
+                entity: None,
+                object_id: spawn.object_id,
+                spawn_position,
+                next_respawn_tick: None,
+            }],
+        })
+    };
+    // Dummy a couple tiles south, Field Wasp east of spawn (mirrors starter layout).
+    if let Some(rule) = guide("training-dummy", 2, 3) {
+        rules.push(rule);
+    }
+    if let Some(rule) = guide("field-wasp", 4, 0) {
+        rules.push(rule);
     }
 }
 
@@ -357,6 +418,7 @@ pub(super) fn build_crystal_current_map_full_spawn_table(
         }
     }
     append_platinum_176_sabuk_battlefield_rules(config, map_file_name, &mut rules);
+    append_crystal_world_guide_monsters(config, map_file_name, &mut rules);
 
     MonsterSpawnTable { rules }
 }

@@ -754,16 +754,24 @@ pub(super) fn spawn_config_visible_npcs(world: &mut World) {
         .visible_npcs
         .clone();
     for record in &records {
-        if record.script_key.as_deref().is_none_or(|script_key| {
-            !world
+        // [parity-fix] Always spawn the guide NPC (4001): it is injected by
+        // with_crystal_world_runtime at the spawn point so the first quest is
+        // reachable, and it carries no script_key (plain quest giver). Without
+        // this exemption the content-profile whitelist filter below would drop it,
+        // leaving brand-new players with no Village Guide to accept the quest.
+        let is_guide_npc = record.object_id == 4001;
+        if !is_guide_npc
+            && record.script_key.as_deref().is_none_or(|script_key| {
+                !world
+                    .resource::<RuntimeConfigResource>()
+                    .config
+                    .npc_script_is_allowed(script_key)
+            })
+            && world
                 .resource::<RuntimeConfigResource>()
                 .config
-                .npc_script_is_allowed(script_key)
-        }) && world
-            .resource::<RuntimeConfigResource>()
-            .config
-            .content_profile
-            .is_some()
+                .content_profile
+                .is_some()
         {
             continue;
         }

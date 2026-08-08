@@ -532,11 +532,11 @@ mod tests {
             ai_state.next_state_tick > tick,
             "shield window must extend into the future"
         );
-        // Crystal: 15000 + Random(0,5000) ms -> 15..=20 ticks at 1s/tick.
+        // Crystal: 15000 + Random(0,5000) ms -> 50..=67 ticks at 300ms/tick.
         let shield_ticks = ai_state.next_state_tick - tick;
         assert!(
-            (15..=20).contains(&shield_ticks),
-            "shield window {shield_ticks} ticks should be in 15..=20"
+            (50..=67).contains(&shield_ticks),
+            "shield window {shield_ticks} ticks should be in 50..=67"
         );
         assert!(
             packets.iter().any(|packet| matches!(

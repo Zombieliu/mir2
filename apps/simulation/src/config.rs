@@ -1134,7 +1134,17 @@ mod tests {
         );
         assert!(crystal_world_config.visible_players.is_empty());
         assert!(crystal_world_config.visible_monsters.is_empty());
-        assert!(crystal_world_config.visible_npcs.is_empty());
+        // The guide NPC (Village Guide, 4001) is re-injected at the spawn point so
+        // the Field Wasp Trial first quest is reachable in CrystalWorld; the other
+        // hand-authored starter entities stay cleared.
+        assert_eq!(
+            crystal_world_config
+                .visible_npcs
+                .iter()
+                .map(|npc| npc.object_id)
+                .collect::<Vec<_>>(),
+            vec![4001]
+        );
         assert_eq!(crystal_world_config.spawn, Point { x: 288, y: 616 });
     }
 
@@ -2940,6 +2950,30 @@ impl SimulationConfig {
         {
             self.spawn = start_point.location;
         }
+        // [parity-fix] Re-inject the guide quest NPC near the CrystalWorld spawn
+        // point. `with_crystal_world_runtime` clears the hand-authored starter
+        // `visible_npcs` above, which removed the Village Guide (4001) and the
+        // Field Wasp Trial (GUIDE_QUEST_ID=1001) from the world; the starter map
+        // is now the full Bichon map whose manifest has no guide NPC at spawn.
+        // Place the guide beside the spawn point so a brand-new player can find
+        // it and start the first quest (spawn_config_visible_npcs always spawns
+        // configured NPCs even in CrystalWorld).
+        let guide_position = Point {
+            x: self.spawn.x + 2,
+            y: self.spawn.y + 2,
+        };
+        self.visible_npcs.push(VisibleNpcRecord {
+            object_id: 4001,
+            name: "Village Guide".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: guide_position,
+            direction: MirDirection::Right,
+            // GUIDE_QUEST_ID = 1001 (mirrors crystal_compat.rs; kept literal here
+            // so this config builder needs no cross-module runtime import).
+            quest_ids: vec![1001],
+            script_key: None,
+        });
         // On-chain smart-mine veins (M4) are env-gated (off by default).
         self.onchain_mine_nodes
             .extend(onchain_mine_nodes_from_env());

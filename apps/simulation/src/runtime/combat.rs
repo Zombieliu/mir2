@@ -1463,7 +1463,15 @@ pub(super) fn tick_player_vital_regen(
 }
 
 pub(super) fn combat_delay_ticks(delay_ms: u64) -> u64 {
-    delay_ms.max(1).div_ceil(1_000)
+    // [parity-fix] Crystal's AttackTime/MoveTime are millisecond intervals
+    // (`AttackTime = Envir.Time + AttackSpeed`, MonsterObject.cs:2166). The
+    // runtime advances one tick per 300 ms (resources.rs CRYSTAL_PACKET_ACTION_TICK_MS=300,
+    // zone/runtime.rs `ticks*300`), so a ms delay must be divided by 300, not 1000.
+    // The old div_ceil(1000) collapsed every delay <= 1000 ms to 1 tick (300 ms),
+    // making attack/cooldown timing up to ~3x too fast vs Crystal and vs the shared
+    // Zone path (which drives timing in ms directly). All call sites pass ms
+    // semantics; align with monsters.rs crystal_speed_to_ticks (already div_ceil(300)).
+    delay_ms.max(1).div_ceil(300)
 }
 
 pub(super) fn melee_attack_delay_ticks() -> u64 {

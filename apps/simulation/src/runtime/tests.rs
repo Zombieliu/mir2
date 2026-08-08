@@ -4994,12 +4994,21 @@ fn crystal_range_attack_packet_uses_target_id_bridge() {
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == player_object_id
     )));
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == monster_object_id && info.attacker_id == player_object_id
-    )));
+    let mut saw_hit = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == monster_object_id && info.attacker_id == player_object_id
+            )
+        });
+        if saw_hit {
+            break;
+        }
+    }
+    assert!(saw_hit);
 }
 
 #[test]
@@ -5404,11 +5413,20 @@ fn spitting_spider_ai_attacks_from_two_tiles_with_line_timing() {
         before_hp
     );
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == monster_object_id
-    )));
+    let mut saw_hit = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == monster_object_id
+            )
+        });
+        if saw_hit {
+            break;
+        }
+    }
+    assert!(saw_hit);
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
 }
 
@@ -8722,20 +8740,31 @@ fn cannibal_tentacles_adjacent_halfmoon_branch_poisons_and_fans_out() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == tentacles_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == tentacles_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // CannibalTentacles halfmoon damage is at combat_delay_ticks(500) =
+    // 2 ticks at 300ms/tick.
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == tentacles_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == tentacles_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(session
         .world_snapshot()
         .active_buffs
@@ -9970,20 +9999,34 @@ fn dark_devil_range_branch_uses_forward_fanout_and_cooldown() {
             > current_tick
     );
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == devil_object_id
-    )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == devil_object_id
-    )));
-    assert!(!hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectRangeAttack { info } if info.object_id == devil_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // DarkDevil range damage is at combat_delay_ticks(500) = 2 ticks at 300ms.
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == devil_object_id
+            )
+        });
+        saw_ally_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == devil_object_id
+            )
+        });
+        assert!(!hit_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRangeAttack { info } if info.object_id == devil_object_id
+        )));
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 90,
         "DarkDevil forward fanout should preserve imported Crystal DC*3 damage"
@@ -11101,16 +11144,29 @@ fn king_scorpion_line_attack_fans_out_to_forward_targets() {
         ServerPacket::ObjectRangeAttack { info } if info.object_id == scorpion_object_id
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == scorpion_object_id
-    )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == scorpion_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == scorpion_object_id
+            )
+        });
+        saw_ally_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == scorpion_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     let ally_hp_after = session
         .app
         .world()
@@ -11653,14 +11709,22 @@ fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
         )
     }));
 
-    let pull_packets = session.tick();
-    assert!(pull_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectRangeAttack { info }
-                if info.object_id == rock_object_id && info.direction == MirDirection::Left
-        )
-    }));
+    let mut pull_packets = Vec::new();
+    let mut saw_pull = false;
+    for _ in 0..4 {
+        pull_packets = session.tick();
+        saw_pull |= pull_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectRangeAttack { info }
+                    if info.object_id == rock_object_id && info.direction == MirDirection::Left
+            )
+        });
+        if saw_pull {
+            break;
+        }
+    }
+    assert!(saw_pull);
     assert_eq!(
         pull_packets.iter().find_map(|packet| match packet {
             ServerPacket::ObjectWalk { movement } => Some(movement.position.clone()),
@@ -12066,16 +12130,30 @@ fn evil_centipede_attack_fans_out_and_applies_crystal_poisons() {
             if info.object_id == centipede_object_id && info.attack_type == 0
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == centipede_object_id
-    )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == centipede_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // EvilCentipede damage is at combat_delay_ticks(500) = 2 ticks at 300ms.
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == centipede_object_id
+            )
+        });
+        saw_ally_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == centipede_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "EvilCentipede fanout should preserve imported Crystal DC damage"
@@ -12645,13 +12723,18 @@ fn lamia_kirin_type_one_branch_uses_crystal_packet_and_delay() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == lamia_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    // Lamia/Kirin type-1 damage is at combat_delay_ticks(500) = 2 ticks.
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == lamia_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "Lamia/Kirin type-1 branch should apply imported Crystal DC damage"
@@ -12741,16 +12824,29 @@ fn lamia_kirin_nonzero_mc_ice_thrust_uses_type_two_cone_and_slow() {
         ServerPacket::ObjectRangeAttack { info } if info.object_id == lamia_object_id
     )));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == lamia_object_id
-    )));
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == lamia_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == lamia_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == lamia_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "Lamia/Kirin IceThrust should use imported Crystal MC damage when nonzero"
@@ -13066,16 +13162,29 @@ fn minotaur_king_range_hit_fans_out_around_target() {
             if info.object_id == ally_object_id && info.attacker_id == minotaur_object_id
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == minotaur_object_id
-    )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == minotaur_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == minotaur_object_id
+            )
+        });
+        saw_ally_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == minotaur_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "MinotaurKing range fanout should preserve imported Crystal DC damage"
@@ -13230,13 +13339,20 @@ fn manectric_claw_range_thrust_applies_slow_and_frozen_rolls() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == priest_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == priest_object_id
+            )
+        });
+        if saw_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
     let snapshot = session.world_snapshot();
     assert!(snapshot
         .active_buffs
@@ -13323,20 +13439,29 @@ fn manectric_claw_range_thrust_fans_out_to_cone_targets() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == priest_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == priest_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == priest_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == priest_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(
         session
             .app
@@ -13611,11 +13736,19 @@ fn manectric_king_close_push_line_uses_type_one_dc() {
         })
     );
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == king_object_id
-    )));
+    let mut saw_hit = false;
+    // ManectricKing push-line damage is scheduled at the monster attack delay
+    // (AI 88 -> combat_delay_ticks(500) = 2 ticks at 300ms/tick), so loop.
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == king_object_id
+            )
+        });
+    }
+    assert!(saw_hit);
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
 }
 
@@ -13719,20 +13852,31 @@ fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == king_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == king_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // Mass-attack delay is combat_delay_ticks(distance*50+750): 3 tiles ->
+    // 900ms -> 3 ticks at 300ms/tick.
+    for _ in 0..5 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == king_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == king_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert_eq!(
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
         expected_damage
@@ -14583,16 +14727,29 @@ fn general_meow_meow_range_branch_fans_out_around_target() {
             if info.object_id == general_object_id && info.target_id == player_object_id
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == general_object_id
-    )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == general_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == general_object_id
+            )
+        });
+        saw_ally_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == general_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     let ally_hp_after = session
         .app
         .world()
@@ -14665,11 +14822,17 @@ fn general_meow_meow_close_slam_branch_uses_triple_dc() {
         ServerPacket::ObjectRangeAttack { info } if info.object_id == general_object_id
     )));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == general_object_id
-    )));
+    let mut saw_struck = false;
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == general_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert_eq!(
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
         expected_damage.min(before_hp - 1),
@@ -15663,11 +15826,18 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
         ServerPacket::ObjectAttack { info } if info.object_id == general_object_id
     )));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == general_object_id
-    )));
+    let mut saw_struck = false;
+    // TucsonGeneral type-2 damage is at combat_delay_ticks(500) = 2 ticks.
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == general_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert_mitigated_by_armour(
         &session,
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
@@ -15779,16 +15949,30 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
         ServerPacket::ObjectRangeAttack { info } if info.object_id == general_object_id
     )));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == general_object_id
-    )));
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == general_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // TucsonGeneral stomp damage is at combat_delay_ticks(500) = 2 ticks.
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == general_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == general_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert_mitigated_by_armour(
         &session,
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
@@ -16489,7 +16673,9 @@ fn armadillo_type_one_branch_uses_three_half_dc_hits() {
         let mut agent = entry.get_mut::<MonsterAgent>().expect("armadillo agent");
         agent.can_wander = false;
         agent.tracking_player = true;
-        agent.attack_interval_ticks = 1;
+        // Large interval so only one type-1 branch fires while we collect the
+        // three delayed half-DC strikes (400/600/800 ms -> 2/2/3 ticks at 300ms).
+        agent.attack_interval_ticks = 100;
         agent.next_attack_tick = 1;
     }
 
@@ -16504,16 +16690,19 @@ fn armadillo_type_one_branch_uses_three_half_dc_hits() {
         )
     }));
 
-    let damage_packets = session.tick();
-    let struck_count = damage_packets
-        .iter()
-        .filter(|packet| {
-            matches!(
-                packet,
-                ServerPacket::Struck { info } if info.attacker_id == armadillo_object_id
-            )
-        })
-        .count();
+    let mut struck_count = 0;
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        struck_count += damage_packets
+            .iter()
+            .filter(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::Struck { info } if info.attacker_id == armadillo_object_id
+                )
+            })
+            .count();
+    }
     assert_eq!(struck_count, 3);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 30,
@@ -16880,24 +17069,35 @@ fn armadillo_enters_run_away_after_failed_retreat_damage() {
     }
     assert!(saw_backstep);
 
-    let packets = session.tick();
-    assert!(packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == immune_target_object_id
-                    && info.attacker_id == armadillo_object_id
-        )
-    }));
-    assert!(packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectWalk { movement }
-                if movement.object_id == armadillo_object_id
-                    && movement.position == run_away_position
-                    && movement.direction == MirDirection::Right
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_walk = false;
+    // Retreat damage is scheduled at combat_delay_ticks(900) -> 3 ticks at
+    // 300ms/tick, and the kite step lands on the next tick, so loop a few.
+    for _ in 0..6 {
+        let packets = session.tick();
+        saw_struck |= packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == immune_target_object_id
+                        && info.attacker_id == armadillo_object_id
+            )
+        });
+        saw_walk |= packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectWalk { movement }
+                    if movement.object_id == armadillo_object_id
+                        && movement.position == run_away_position
+                        && movement.direction == MirDirection::Right
+            )
+        });
+        if saw_struck && saw_walk {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_walk);
     assert!(
         session
             .app
@@ -16917,9 +17117,15 @@ fn armadillo_enters_run_away_after_failed_retreat_damage() {
             .hp,
         immune_hp_before
     );
-    assert_eq!(
-        entity_position(session.app.world(), armadillo).expect("armadillo position"),
-        run_away_position
+    // The kite keeps running each tick once `mode` is set, so by the time the
+    // delayed retreat strike lands the armadillo has moved past
+    // `run_away_position`; assert it has moved away from the retreat point
+    // along the retreat line (same y, x > retreat x) rather than a fixed tile.
+    let final_position =
+        entity_position(session.app.world(), armadillo).expect("armadillo position");
+    assert!(
+        final_position.y == retreat_position.y && final_position.x > retreat_position.x,
+        "armadillo should have run away from {retreat_position:?}, was {final_position:?}"
     );
 }
 
@@ -17685,13 +17891,20 @@ fn frost_tiger_range_branch_applies_bleeding_roll_for_effect_zero() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == tiger_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    for _ in 0..6 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == tiger_object_id
+            )
+        });
+        if saw_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
     assert!(session
         .world_snapshot()
         .active_buffs
@@ -17846,13 +18059,20 @@ fn ice_guard_ice_range_branch_applies_slow_and_frozen_rolls() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == guard_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    for _ in 0..5 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == guard_object_id
+            )
+        });
+        if saw_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
     let snapshot = session.world_snapshot();
     assert!(snapshot
         .active_buffs
@@ -17916,13 +18136,20 @@ fn ice_guard_fire_range_branch_uses_type_one_without_poison() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == guard_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    for _ in 0..5 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == guard_object_id
+            )
+        });
+        if saw_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
     let snapshot = session.world_snapshot();
     assert!(!snapshot
         .active_buffs
@@ -18030,7 +18257,7 @@ fn frozen_miner_type_one_branch_uses_eighty_percent_dc_damage() {
         let mut agent = entry.get_mut::<MonsterAgent>().expect("frozen miner agent");
         agent.can_wander = false;
         agent.tracking_player = true;
-        agent.attack_interval_ticks = 1;
+        agent.attack_interval_ticks = 100;
         agent.next_attack_tick = 1;
     }
     sync_visible_objects(&mut session);
@@ -18046,13 +18273,19 @@ fn frozen_miner_type_one_branch_uses_eighty_percent_dc_damage() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == miner_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    // FrozenMiner type-1 damage is scheduled at combat_delay_ticks(1_000) =
+    // 4 ticks at 300ms/tick, so loop until it lands.
+    for _ in 0..6 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == miner_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "FrozenMiner type-1 branch should use imported Crystal DC area damage baseline"
@@ -18124,20 +18357,31 @@ fn frozen_miner_type_one_branch_fans_out_to_adjacent_opposing_monsters() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == miner_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == miner_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // FrozenMiner type-1 damage is scheduled at combat_delay_ticks(1_000) =
+    // 4 ticks at 300ms/tick, so loop until both strikes land.
+    for _ in 0..6 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == miner_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == miner_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     let ally_hp_after = session
         .app
         .world()
@@ -18335,13 +18579,19 @@ fn frozen_axeman_adjacent_pull_branch_uses_type_two_and_pushes_player() {
             > current_tick
     );
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == axeman_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    // FrozenAxeman pull damage is scheduled at combat_delay_ticks(500) =
+    // 2 ticks at 300ms/tick.
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == axeman_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "FrozenAxeman pull branch should still apply imported Crystal DC damage"
@@ -18485,7 +18735,9 @@ fn frozen_magician_type_one_range_branch_uses_boosted_mc_damage() {
     }));
 
     let mut saw_struck = false;
-    for _ in 0..3 {
+    // FrozenMagician type-1 damage is combat_delay_ticks(distance*50+750):
+    // 7 tiles -> 1100ms -> 4 ticks at 300ms/tick.
+    for _ in 0..6 {
         let packets = session.tick();
         saw_struck |= packets.iter().any(|packet| {
             matches!(
@@ -18729,20 +18981,30 @@ fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == wolf_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == wolf_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // SnowWolf type-1 damage is at combat_delay_ticks(450) = 2 ticks at 300ms.
+    for _ in 0..5 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == wolf_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == wolf_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert_eq!(
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
         expected_damage
@@ -19182,20 +19444,31 @@ fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == mage_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == mage_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // AI 126 wide-line damage is at combat_delay_ticks(distance*50+500):
+    // 3 tiles -> 650ms -> 3 ticks at 300ms/tick.
+    for _ in 0..5 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == mage_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == mage_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert_eq!(
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
         expected_damage
@@ -19640,13 +19913,20 @@ fn snow_yeti_range_branch_applies_frozen_roll() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == yeti_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    for _ in 0..6 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == yeti_object_id
+            )
+        });
+        if saw_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
     assert!(session
         .world_snapshot()
         .active_buffs
@@ -19717,7 +19997,8 @@ fn snow_yeti_adjacent_branch_uses_crystal_double_hit() {
     }));
 
     let mut struck_count = 0;
-    for _ in 0..4 {
+    // Double-hit is scheduled at [500, 1500]ms -> 2 and 5 ticks at 300ms/tick.
+    for _ in 0..8 {
         let packets = session.tick();
         struck_count += packets
             .iter()
@@ -19988,20 +20269,31 @@ fn dark_wraith_adjacent_area_branch_fans_out_to_nearby_targets() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == wraith_object_id
-        )
-    }));
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::ObjectStruck { info }
-                if info.object_id == ally_object_id && info.attacker_id == wraith_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    // DarkWraith adjacent area damage is at combat_delay_ticks(600) =
+    // 2 ticks at 300ms/tick.
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == wraith_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == wraith_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     let ally_hp_after = session
         .app
         .world()
@@ -20185,16 +20477,29 @@ fn crystal_spider_line_attack_fans_out_to_forward_targets() {
             if info.object_id == spider_object_id && info.attack_type == 1
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == spider_object_id
-    )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == spider_object_id
-    )));
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == spider_object_id
+            )
+        });
+        saw_ally_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == spider_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     let ally_hp_after = session
         .app
         .world()
@@ -20390,13 +20695,17 @@ fn turtle_grass_type_one_branch_pushes_player_before_delayed_damage() {
         )
     }));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| {
-        matches!(
-            packet,
-            ServerPacket::Struck { info } if info.attacker_id == grass_object_id
-        )
-    }));
+    let mut saw_struck = false;
+    for _ in 0..4 {
+        let damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == grass_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "TurtleGrass type-1 branch should still apply imported Crystal DC damage"
@@ -20672,11 +20981,19 @@ fn bone_spearman_ai_hits_from_two_tiles_like_line_attack() {
         before_hp
     );
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == monster_object_id
-    )));
+    let mut saw_hit = false;
+    // AI 29 line attack delays by combat_delay_ticks(distance*50+250) = 2 ticks
+    // at 300ms/tick for a 2-tile range, so loop a few ticks.
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == monster_object_id
+            )
+        });
+    }
+    assert!(saw_hit);
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
 }
 
@@ -20740,11 +21057,17 @@ fn right_guard_uses_ranged_attack_when_not_adjacent() {
         ServerPacket::Struck { info } if info.attacker_id == monster_object_id
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == monster_object_id
-    )));
+    let mut saw_struck = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == monster_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
 }
 
@@ -21024,11 +21347,17 @@ fn red_foxman_type_one_range_branch_uses_imported_dc() {
         ServerPacket::ObjectAttack { info } if info.object_id == fox_object_id
     )));
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == fox_object_id
-    )));
+    let mut saw_struck = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_struck |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == fox_object_id
+            )
+        });
+    }
+    assert!(saw_struck);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "RedFoxMan range branches should use imported Crystal DC damage"
@@ -21511,16 +21840,30 @@ fn black_tortoise_close_halfmoon_branch_hits_arc() {
         ServerPacket::ObjectRangeAttack { info } if info.object_id == drake_object_id
     )));
 
-    let damage_packets = session.tick();
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == drake_object_id
-    )));
-    assert!(damage_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectStruck { info }
-            if info.object_id == ally_object_id && info.attacker_id == drake_object_id
-    )));
+    let mut damage_packets = Vec::new();
+    let mut saw_struck = false;
+    let mut saw_ally_struck = false;
+    for _ in 0..4 {
+        damage_packets = session.tick();
+        saw_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == drake_object_id
+            )
+        });
+        saw_ally_struck |= damage_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectStruck { info }
+                    if info.object_id == ally_object_id && info.attacker_id == drake_object_id
+            )
+        });
+        if saw_struck && saw_ally_struck {
+            break;
+        }
+    }
+    assert!(saw_struck);
+    assert!(saw_ally_struck);
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
     let ally_hp_after = session
         .app
@@ -21862,11 +22205,27 @@ fn bug_bag_maggot_spawns_bug_bat_after_delay() {
     )));
 
     let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info }
-            if info.master_object_id == maggot_object_id && info.name == "BugBat"
-    )));
+    let mut saw_spawn = spawn_packets.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.master_object_id == maggot_object_id && info.name == "BugBat"
+        )
+    });
+    // Spawn is queued at combat_delay_ticks(500) = 2 ticks at 300ms/tick.
+    for _ in 0..3 {
+        if saw_spawn {
+            break;
+        }
+        saw_spawn = session.tick().iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.master_object_id == maggot_object_id && info.name == "BugBat"
+            )
+        });
+    }
+    assert!(saw_spawn);
     #[allow(deprecated)]
     let summoned_bug_bat_exists = session.app.world().iter_entities().any(|entity| {
         entity
@@ -21941,18 +22300,35 @@ fn root_spider_spawns_bomb_spider_from_crystal_template_offset() {
         ServerPacket::ObjectAttack { info } if info.object_id == root_spider_object_id
     )));
 
-    let spawn_packets = session.tick();
     let expected_spawn = Point {
         x: player_origin.x + 3,
         y: player_origin.y + 1,
     };
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info }
-            if info.master_object_id == root_spider_object_id
-                && info.name == "BombSpider"
-                && info.location == expected_spawn
-    )));
+    let mut saw_spawn = session.tick().iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.master_object_id == root_spider_object_id
+                    && info.name == "BombSpider"
+                    && info.location == expected_spawn
+        )
+    });
+    // Spawn is queued at combat_delay_ticks(500) = 2 ticks at 300ms/tick.
+    for _ in 0..3 {
+        if saw_spawn {
+            break;
+        }
+        saw_spawn = session.tick().iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.master_object_id == root_spider_object_id
+                        && info.name == "BombSpider"
+                        && info.location == expected_spawn
+            )
+        });
+    }
+    assert!(saw_spawn);
 }
 
 #[test]
@@ -22099,11 +22475,25 @@ fn bug_bag_maggot_spawn_cap_counts_active_summons_only() {
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == maggot_object_id
     )));
-    let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info } if info.master_object_id == maggot_object_id
-    )));
+    let mut saw_spawn = session.tick().iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::ObjectMonster { info } if info.master_object_id == maggot_object_id
+        )
+    });
+    // Spawn is queued at combat_delay_ticks(500) = 2 ticks at 300ms/tick.
+    for _ in 0..3 {
+        if saw_spawn {
+            break;
+        }
+        saw_spawn = session.tick().iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info } if info.master_object_id == maggot_object_id
+            )
+        });
+    }
+    assert!(saw_spawn);
 }
 
 #[test]
@@ -22350,7 +22740,33 @@ fn hell_lord_spawns_minions_and_advances_stage_when_knight_dies() {
         ServerPacket::ObjectAttack { info } if info.object_id == lord_object_id
     )));
 
-    let spawn_packets = session.tick();
+    let mut saw_spawn = false;
+    // HellLord minions spawn at combat_delay_ticks(500) = 2 ticks at 300ms.
+    for _ in 0..4 {
+        let spawn_packets = session.tick();
+        saw_spawn |= spawn_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.name.starts_with("HellBomb") && info.ai == 99
+            )
+        }) || {
+            #[allow(deprecated)]
+            session.app.world().iter_entities().any(|entity| {
+                entity
+                    .get::<MonsterAgent>()
+                    .map(|agent| agent.ai == 99)
+                    .unwrap_or(false)
+                    && entity
+                        .get::<DisplayName>()
+                        .map(|name| name.value.starts_with("HellBomb"))
+                        .unwrap_or(false)
+            })
+        };
+        if saw_spawn {
+            break;
+        }
+    }
     let hell_knight = find_monster_entity_by(&session, |name, agent, _| {
         name == "HellKnight1" && agent.ai == 97
     });
@@ -22368,24 +22784,7 @@ fn hell_lord_spawns_minions_and_advances_stage_when_knight_dies() {
                 && info.extra
                 && info.master_object_id == lord_object_id
     ));
-    assert!(
-            spawn_packets.iter().any(|packet| matches!(
-                packet,
-                ServerPacket::ObjectMonster { info } if info.name.starts_with("HellBomb") && info.ai == 99
-            )) || {
-                #[allow(deprecated)]
-                session.app.world().iter_entities().any(|entity| {
-                    entity
-                        .get::<MonsterAgent>()
-                        .map(|agent| agent.ai == 99)
-                        .unwrap_or(false)
-                        && entity
-                            .get::<DisplayName>()
-                            .map(|name| name.value.starts_with("HellBomb"))
-                            .unwrap_or(false)
-                })
-            }
-        );
+    assert!(saw_spawn, "HellLord should spawn a HellBomb minion");
     let current_tick = runtime_tick(session.app.world());
     let mut death_packets = Vec::new();
     assert!(super::damage_monster_entity(
@@ -22697,12 +23096,20 @@ fn snake_totem_spawns_charmed_snake_with_extra_flag() {
         ServerPacket::ObjectAttack { info } if info.object_id == 98_997_u32
     )));
 
-    let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info }
-            if info.master_object_id == 98_997_u32 && info.name == "CharmedSnake" && info.extra
-    )));
+    let mut saw_spawn = false;
+    // Snake spawn is queued at combat_delay_ticks(500) = 2 ticks at 300ms.
+    for _ in 0..4 {
+        let spawn_packets = session.tick();
+        saw_spawn |= spawn_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.master_object_id == 98_997_u32 && info.name == "CharmedSnake" && info.extra
+        ));
+        if saw_spawn {
+            break;
+        }
+    }
+    assert!(saw_spawn);
 
     let snake = find_monster_entity_by(&session, |name, _, _| name == "CharmedSnake");
     let snake_agent = session
@@ -23172,11 +23579,20 @@ fn holy_deva_uses_crystal_six_tile_range_attack_and_extra_state() {
         before_hp
     );
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == deva_object_id
-    )));
+    let mut saw_hit = false;
+    for _ in 0..4 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == deva_object_id
+            )
+        });
+        if saw_hit {
+            break;
+        }
+    }
+    assert!(saw_hit);
     assert!(
         before_hp - session.world_snapshot().player_hp.expect("player hp") > 7,
         "HolyDeva should use imported Crystal DC damage"
@@ -23320,11 +23736,22 @@ fn ranged_monster_damage_uses_distance_scaled_delay() {
         before_hp
     );
 
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Struck { info } if info.attacker_id == monster_object_id
-    )));
+    // AI 113 ranged damage is scheduled at ranged_attack_delay_ticks:
+    // 12 tiles -> combat_delay_ticks(1100) = 4 ticks at 300ms/tick.
+    let mut saw_hit = false;
+    for _ in 0..5 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == monster_object_id
+            )
+        });
+        if saw_hit {
+            break;
+        }
+    }
+    assert!(saw_hit);
     assert!(session.world_snapshot().player_hp.expect("player hp") < before_hp);
 }
 
@@ -41348,7 +41775,8 @@ fn buff_expiry_emits_crystal_remove_buff_packet() {
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
 
     let mut removed = false;
-    for _ in 0..95 {
+    // Fury buff is 60s + 10s/level (level 3 -> 90s) -> 300 ticks at 300ms/tick.
+    for _ in 0..320 {
         let packets = session.tick();
         removed |= packets.iter().any(|packet| {
             matches!(
@@ -41857,7 +42285,8 @@ fn magic_packet_crystal_concentration_emits_buff_and_visual_state() {
         .any(|buff| buff.key == "concentration"));
 
     let mut disabled = false;
-    for _ in 0..80 {
+    // Concentration buff at level 2 = 75s -> 250 ticks at 300ms/tick.
+    for _ in 0..270 {
         let tick_packets = session.tick();
         disabled |= tick_packets.iter().any(|packet| {
             matches!(
@@ -41931,7 +42360,9 @@ fn magic_packet_crystal_elemental_shot_gathers_then_spends_orb() {
         .pending_combat_actions
         .is_empty());
 
-    for _ in 0..3 {
+    // ElementalShot delay is 1800ms -> cooldown is 6 ticks at 300ms/tick;
+    // tick past it before the second (spend) cast.
+    for _ in 0..8 {
         session.tick();
     }
     let spend_packets = session.handle_packet(ClientPacket::Magic {
@@ -42022,7 +42453,8 @@ fn magic_packet_crystal_elemental_barrier_gathers_then_applies_buff() {
         } if *id == object_id
     )));
 
-    for _ in 0..3 {
+    // ElementalBarrier delay is 1800ms -> cooldown is 6 ticks at 300ms/tick.
+    for _ in 0..8 {
         session.tick();
     }
     let barrier_packets = session.handle_packet(ClientPacket::Magic {
@@ -43684,7 +44116,8 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
 
     let mut spawned_circle = false;
     let mut healed = false;
-    for _ in 0..5 {
+    // HealingCircle delay is 1800ms -> 6 ticks at 300ms/tick.
+    for _ in 0..10 {
         let tick_packets = session.tick();
         spawned_circle |= tick_packets.iter().any(|packet| {
             matches!(
@@ -44515,7 +44948,8 @@ fn magic_packet_crystal_hiding_hides_until_buff_expires() {
     )));
 
     let mut revealed = false;
-    for _ in 0..16 {
+    // Hiding buff is (10s + 10s/level) -> 34 ticks at level 0 (300ms/tick).
+    for _ in 0..45 {
         let tick_packets = session.tick();
         revealed |= tick_packets.iter().any(|packet| {
             matches!(
@@ -46773,7 +47207,9 @@ fn magic_packet_crystal_delayed_explosion_marks_explodes_and_removes_marker() {
     let mut marked = false;
     let mut exploded = false;
     let mut removed = false;
-    for _ in 0..12 {
+    // Mark lands at due_tick; explosion at due_tick + combat_delay_ticks(4000)
+    // = +14 ticks at 300ms/tick.
+    for _ in 0..22 {
         let packets = session.tick();
         marked |= packets.iter().any(|packet| {
             matches!(
@@ -47928,11 +48364,20 @@ fn magic_packet_crystal_mirroring_spawns_and_recasts_existing_clone() {
         location: origin.clone(),
         spell_target_lock: false,
     });
-    let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info } if info.name == "Clone"
-    )));
+    let mut saw_spawn = false;
+    for _ in 0..6 {
+        let spawn_packets = session.tick();
+        saw_spawn |= spawn_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info } if info.name == "Clone"
+            )
+        });
+        if saw_spawn {
+            break;
+        }
+    }
+    assert!(saw_spawn);
     let clone = find_monster_entity_by(&session, |name, _, _| name == "Clone");
     let clone_object_id =
         entity_object_id(session.app.world(), clone).expect("clone object id should exist");
@@ -49600,12 +50045,23 @@ fn casting_summon_shinsu_spawns_friendly_player_pet() {
         |packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Summon"))
     ));
 
-    let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info }
-            if info.name == "Shinsu" && info.extra
-    )));
+    let mut saw_spawn = false;
+    // Summon is queued at combat_delay_ticks(delay_ms); a 1s delay is 4 ticks
+    // at 300ms/tick, so loop until the ObjectMonster spawn lands.
+    for _ in 0..6 {
+        let spawn_packets = session.tick();
+        saw_spawn |= spawn_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.name == "Shinsu" && info.extra
+            )
+        });
+        if saw_spawn {
+            break;
+        }
+    }
+    assert!(saw_spawn);
 
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     let agent = session
@@ -49639,7 +50095,21 @@ fn casting_summon_shinsu_recalls_existing_pet() {
     set_player_position(&mut session, first_position.clone());
 
     let _ = session.cast_skill("summon-shinsu");
-    let _ = session.tick();
+    let mut saw_spawn = false;
+    for _ in 0..6 {
+        let packets = session.tick();
+        saw_spawn |= packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.name == "Shinsu" && info.extra
+            )
+        });
+        if saw_spawn {
+            break;
+        }
+    }
+    assert!(saw_spawn);
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     let before_recall =
         entity_position(session.app.world(), shinsu).expect("initial shinsu position");
@@ -49698,12 +50168,21 @@ fn casting_stonetrap_spawns_friendly_trap_with_extra() {
         });
 
     let _ = session.cast_skill("stonetrap");
-    let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info }
-            if info.name == "StoneTrap" && info.extra
-    )));
+    let mut saw_spawn = false;
+    for _ in 0..6 {
+        let spawn_packets = session.tick();
+        saw_spawn |= spawn_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.name == "StoneTrap" && info.extra
+            )
+        });
+        if saw_spawn {
+            break;
+        }
+    }
+    assert!(saw_spawn);
 }
 
 #[test]
@@ -49916,7 +50395,17 @@ fn stonetrap_ignores_incoming_damage_and_keeps_full_health() {
         });
 
     let _ = session.cast_skill("stonetrap");
-    let _ = session.tick();
+    for _ in 0..6 {
+        let _ = session.tick();
+        if session.app.world().iter_entities().any(|entity| {
+            entity
+                .get::<DisplayName>()
+                .map(|n| n.value == "StoneTrap")
+                .unwrap_or(false)
+        }) {
+            break;
+        }
+    }
     let trap = find_monster_entity_by(&session, |name, _, _| name == "StoneTrap");
     set_entity_position(
         &mut session,
@@ -49974,12 +50463,21 @@ fn casting_summon_snakes_spawns_friendly_totem_with_skill_level_cap() {
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
     let _ = session.cast_skill("summon-snakes");
-    let spawn_packets = session.tick();
-    assert!(spawn_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectMonster { info }
-            if info.name == "SnakeTotem" && info.extra
-    )));
+    let mut saw_spawn = false;
+    for _ in 0..6 {
+        let spawn_packets = session.tick();
+        saw_spawn |= spawn_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.name == "SnakeTotem" && info.extra
+            )
+        });
+        if saw_spawn {
+            break;
+        }
+    }
+    assert!(saw_spawn);
 
     let totem = find_monster_entity_by(&session, |name, _, _| name == "SnakeTotem");
     let agent = session
@@ -50017,10 +50515,20 @@ fn friendly_snake_totem_spawns_friendly_charmed_snake_against_hostile_monster() 
     );
 
     let _ = session.cast_skill("summon-snakes");
-    let _ = session.tick();
-    let _ = session.tick();
-    let _ = session.tick();
-
+    let mut snake_found = false;
+    for _ in 0..12 {
+        let _ = session.tick();
+        if session.app.world().iter_entities().any(|entity| {
+            entity
+                .get::<DisplayName>()
+                .map(|n| n.value == "CharmedSnake")
+                .unwrap_or(false)
+        }) {
+            snake_found = true;
+            break;
+        }
+    }
+    assert!(snake_found, "charmed snake should spawn");
     let snake = find_monster_entity_by(&session, |name, _, _| name == "CharmedSnake");
     let snake_agent = session
         .app
@@ -50050,7 +50558,20 @@ fn friendly_vampire_spider_death_explosion_has_no_runtime_defeat_chat_and_hits_n
     );
 
     let _ = session.cast_skill("summon-vampire");
-    let _ = session.tick();
+    let mut vampire_found = false;
+    for _ in 0..6 {
+        let _ = session.tick();
+        if session.app.world().iter_entities().any(|entity| {
+            entity
+                .get::<DisplayName>()
+                .map(|n| n.value == "VampireSpider")
+                .unwrap_or(false)
+        }) {
+            vampire_found = true;
+            break;
+        }
+    }
+    assert!(vampire_found, "vampire spider should spawn");
     let vampire = find_monster_entity_by(&session, |name, _, _| name == "VampireSpider");
     set_entity_position(
         &mut session,
@@ -50101,12 +50622,34 @@ fn friendly_spitting_toad_uses_range_attack_against_hostile_monster() {
     );
 
     let _ = session.cast_skill("summon-toad");
-    let _ = session.tick();
-    let packets = session.tick();
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectRangeAttack { info } if info.target_id == 3002
-    )));
+    let mut toad_found = false;
+    for _ in 0..6 {
+        let _ = session.tick();
+        if session.app.world().iter_entities().any(|entity| {
+            entity
+                .get::<DisplayName>()
+                .map(|n| n.value == "SpittingToad")
+                .unwrap_or(false)
+        }) {
+            toad_found = true;
+            break;
+        }
+    }
+    assert!(toad_found, "spitting toad should spawn");
+    let mut saw_range_attack = false;
+    for _ in 0..8 {
+        let packets = session.tick();
+        saw_range_attack |= packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectRangeAttack { info } if info.target_id == 3002
+            )
+        });
+        if saw_range_attack {
+            break;
+        }
+    }
+    assert!(saw_range_attack);
 }
 
 #[test]
@@ -50167,7 +50710,20 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     sync_visible_objects(&mut session);
 
     let _ = session.cast_skill("summon-shinsu");
-    let _ = session.tick();
+    let mut shinsu_found = false;
+    for _ in 0..6 {
+        let _ = session.tick();
+        if session.app.world().iter_entities().any(|entity| {
+            entity
+                .get::<DisplayName>()
+                .map(|n| n.value == "Shinsu")
+                .unwrap_or(false)
+        }) {
+            shinsu_found = true;
+            break;
+        }
+    }
+    assert!(shinsu_found, "shinsu should spawn");
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     set_entity_position(&mut session, shinsu, origin.clone());
     session
@@ -50177,15 +50733,21 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
         .insert(Facing(MirDirection::Right));
 
     let _ = session.tick();
-    let hit_packets = session.tick();
-    assert!(hit_packets.iter().any(|packet| matches!(
+    let mut saw_hit = false;
+    for _ in 0..6 {
+        let hit_packets = session.tick();
+        saw_hit |= hit_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectHealth { info } if info.object_id == second_object_id && info.percent < 100
+            )) && hit_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::ObjectHealth { info } if info.object_id == second_object_id && info.percent < 100
-        )));
-    assert!(hit_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ObjectHealth { info } if info.object_id == 3002 && info.percent < 100
-    )));
+            ServerPacket::ObjectHealth { info } if info.object_id == 3002 && info.percent < 100
+        ));
+        if saw_hit {
+            break;
+        }
+    }
+    assert!(saw_hit);
 }
 
 #[test]
@@ -50415,7 +50977,8 @@ fn friendly_shinsu_hides_after_target_is_gone_and_timeout_expires() {
     );
 
     let mut hide_packets = Vec::new();
-    for _ in 0..35 {
+    // Shinsu hide timeout is combat_delay_ticks(30_000) = 100 ticks at 300ms.
+    for _ in 0..120 {
         hide_packets = session.tick();
         if hide_packets.iter().any(|packet| {
             matches!(
