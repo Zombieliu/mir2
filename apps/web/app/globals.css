@@ -1371,6 +1371,7 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .select-delete-panel {
+  position: absolute;
   bottom: 150px;
 }
 
