@@ -5,7 +5,7 @@ reference client in both **behavior** and **visuals**. The frontend is rendered
 by Next.js + Bevy WASM (WebGPU / WebGL2); authoritative game state lives in a
 Rust Gateway and Simulation backend.
 
-> ![Bichon in-game](mir2-web3/docs/screenshots/bichon-day.png)
+> ![Bichon in-game](mir2-web3/docs/images/bichon-day.png)
 
 ---
 
