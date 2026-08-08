@@ -837,7 +837,10 @@ fn materialize_monster_slot(
             WorldObject,
             Monster,
             ObjectId(slot.object_id),
-            DisplayName::literal(rule.name.clone()),
+            match localized_monster_name_key_for_name(&rule.name) {
+                Some(key) => DisplayName::localized(key, rule.name.clone()),
+                None => DisplayName::literal(rule.name.clone()),
+            },
             Position(slot.spawn_position.clone()),
             Facing(rule.direction),
             SpawnSlotRef {
