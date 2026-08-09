@@ -1786,17 +1786,60 @@ impl ZoneRuntime {
         self.spawn_authoritative_monster(spawn, now_ms)
     }
 
+    /// Install a canonical map population in one single-writer mutation. This
+    /// avoids applying object-grid updates and recomputing every player's AOI
+    /// once per monster when a Zone is first activated.
+    pub fn seed_world_monsters(
+        &mut self,
+        spawns: &[ZoneMonsterSpawn],
+        now_ms: u64,
+    ) -> (usize, Vec<ZoneOutbound>) {
+        let packets = spawns
+            .iter()
+            .filter_map(|spawn| self.upsert_authoritative_monster(spawn))
+            .collect::<Vec<_>>();
+        let installed = packets.len();
+        if packets.is_empty() {
+            return (0, Vec::new());
+        }
+        self.apply_zone_object_packets(&packets, now_ms);
+        (installed, self.diff_all_zone_object_visibility())
+    }
+
+    /// Install canonical non-monster world objects (for example static NPCs)
+    /// into this Zone's retained object table. They then participate in the
+    /// same AOI, collision and checkpoint lifecycle as every other Zone object.
+    pub fn seed_world_objects(
+        &mut self,
+        packets: &[ServerPacket],
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        if packets.is_empty() {
+            return Vec::new();
+        }
+        self.apply_zone_object_packets(packets, now_ms);
+        self.diff_all_zone_object_visibility()
+    }
+
     fn spawn_authoritative_monster(
         &mut self,
         spawn: &ZoneMonsterSpawn,
         now_ms: u64,
     ) -> (bool, Vec<ZoneOutbound>) {
+        let Some(packet) = self.upsert_authoritative_monster(spawn) else {
+            return (false, Vec::new());
+        };
+        self.apply_zone_object_packets(&[packet], now_ms);
+        (true, self.diff_all_zone_object_visibility())
+    }
+
+    fn upsert_authoritative_monster(&mut self, spawn: &ZoneMonsterSpawn) -> Option<ServerPacket> {
         let requested_object_id = spawn.object_id;
         if let Some(monster) = self.native_monsters.get_mut(&requested_object_id) {
             monster.ai = spawn.ai;
             monster.hostile_to_player = zone_native_monster_targets_players(spawn.ai);
             monster.friendly_guild = spawn.friendly_guild.clone();
-            return (false, Vec::new());
+            return None;
         }
         let object_id = if requested_object_id != 0
             && !self
@@ -1816,8 +1859,7 @@ impl ZoneRuntime {
         let monster = ZoneNativeMonster::from_spawn(spawn, object_id);
         let packet = native_monster_spawn_packet(spawn, object_id);
         self.native_monsters.insert(object_id, monster);
-        self.apply_zone_object_packets(&[packet], now_ms);
-        (true, self.diff_all_zone_object_visibility())
+        Some(packet)
     }
 
     pub fn broadcast_world_event_message(&self, message: &str) -> Vec<ZoneOutbound> {

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use bevy_tasks::{ComputeTaskPool, TaskPool};
-use mir2_protocol::{MirDirection, Point, Spell};
+use mir2_protocol::{MirDirection, Point, ServerPacket, Spell};
 use serde::{Deserialize, Serialize};
 
 /// Below this many zones, parallel ticking's task overhead outweighs the gain,
@@ -225,6 +225,30 @@ impl ZoneManager {
             .entry(key.clone())
             .or_insert_with(|| ZoneRuntime::new(key))
             .spawn_world_event_monster(spawn, now_ms)
+    }
+
+    pub fn seed_world_monsters(
+        &mut self,
+        key: ZoneKey,
+        spawns: &[super::types::ZoneMonsterSpawn],
+        now_ms: u64,
+    ) -> (usize, Vec<ZoneOutbound>) {
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| ZoneRuntime::new(key))
+            .seed_world_monsters(spawns, now_ms)
+    }
+
+    pub fn seed_world_objects(
+        &mut self,
+        key: ZoneKey,
+        packets: &[ServerPacket],
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| ZoneRuntime::new(key))
+            .seed_world_objects(packets, now_ms)
     }
 
     pub fn broadcast_world_event_message(

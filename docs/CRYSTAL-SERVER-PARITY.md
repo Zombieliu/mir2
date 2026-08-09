@@ -1,5 +1,26 @@
 # Crystal Server Parity
 
+> Latest single-Zone server parity note: 2026-08-10 makes the production
+> shared-Gateway path use one actor world. `SimulationSession` remains the
+> authenticated character/private-state boundary but, under `SharedZone`, no
+> longer populates or retains NPC, monster, hero, or remote-player actors and
+> no longer accepts a copied shared-monster snapshot. Legacy command adapters
+> discard any short-lived public projection immediately after Zone commit. The
+> canonical Zone seeds Crystal NPCs, activates nearby monster regions, and
+> retains public actor identity,
+> spatial state, observer visibility, vitals/actions, and checkpoint state.
+> Localization is presentation-only: Zone names stay canonical while every
+> recipient receives its configured language, including retained/queued AOI
+> packets and browser snapshots. Chinese sessions now receive `比奇省`,
+> `斯科特商人`, and `训练木桩`; English sessions receive their canonical English
+> forms from the same Zone objects. Known Web system broadcasts are localized
+> per session as well. This does not turn private quests, inventory, or account
+> persistence into shared world state, and automated parity evidence does not
+> replace final browser/human or production acceptance. Current automated
+> evidence is Gateway 437/437, shared Zone 156/156, localization bundle 1/1,
+> locked compile check, Rust fmt, generated-bundle equality, and clean diff
+> whitespace validation.
+
 > Latest map-environment parity note: 2026-08-01 preserves Crystal's separation
 > between server `TimeOfDay` and per-map environment metadata. `Light=Normal`
 > follows global Dawn/Day/Evening/Night, nonzero map Light overrides it, and the

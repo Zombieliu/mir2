@@ -14,7 +14,7 @@ use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
-use mir2_game_data::crystal_item_by_index;
+use mir2_game_data::{crystal_item_by_index, LanguageCode};
 use mir2_protocol::{
     crystal_stat_label, packet_payload_hex, server_packet_display_name,
     server_packet_raw_display_name, ClientAuction, ClientFriend, ClientIntelligentCreature,
@@ -60,7 +60,8 @@ use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
 use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
 use crate::spectator::{SpectatorFrame, SpectatorHub};
 use crate::tcp::chat_broadcast::{
-    recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
+    localize_chat_broadcast_packet, recv_optional_chat, ChatBroadcastHub, ChatPresence,
+    ChatProtocol,
 };
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
@@ -3930,6 +3931,7 @@ async fn handle_socket_inner(
     let mut runtime_tick_deferred_until = Instant::now();
     let enforce_player_command_safety = production_player_command_safety_enabled();
     let mut authenticated = false;
+    let mut presentation_language = LanguageCode::English;
     let mut authenticated_account_id: Option<String> = None;
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
     let mut last_identity_revocation_check = Instant::now();
@@ -4023,6 +4025,11 @@ async fn handle_socket_inner(
                         continue;
                     }
                 };
+                if let SessionAction::SetLanguage { language } = &action {
+                    if let Some(language) = LanguageCode::parse(language) {
+                        presentation_language = language;
+                    }
+                }
                 let starts_game = matches!(
                     &action,
                     SessionAction::Packet(ClientPacket::StartGame { .. })
@@ -4448,6 +4455,8 @@ async fn handle_socket_inner(
             broadcast = recv_optional_chat(&mut chat_presence) => {
                 match broadcast {
                     Ok(packet) => {
+                        let packet =
+                            localize_chat_broadcast_packet(&packet, presentation_language);
                         if send_server_packet(&sender, &packet).await.is_err() {
                             return;
                         }

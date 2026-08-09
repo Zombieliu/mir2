@@ -2343,6 +2343,11 @@ pub enum MonsterSpawnSource {
     /// player arrives, matching Crystal's "load the world, run what's occupied"
     /// behaviour without keeping all ~76k monsters alive at once.
     CrystalWorld,
+    /// The shared Zone is the only world authority. A `SimulationSession`
+    /// created with this source keeps character/account state and the local
+    /// self projection only; NPCs, monsters, heroes, and remote players are
+    /// supplied by the Zone instead of being rebuilt per session.
+    SharedZone,
 }
 
 impl MonsterSpawnSource {
@@ -2977,6 +2982,18 @@ impl SimulationConfig {
         // On-chain smart-mine veins (M4) are env-gated (off by default).
         self.onchain_mine_nodes
             .extend(onchain_mine_nodes_from_env());
+        self
+    }
+
+    /// Convert a session config into the private-state side of the shared-Zone
+    /// architecture. The returned config deliberately cannot populate a
+    /// second NPC/monster world; the caller must retain the original config for
+    /// constructing the authoritative Zone map.
+    pub fn with_shared_zone_authority(mut self) -> Self {
+        self.monster_spawn_source = MonsterSpawnSource::SharedZone;
+        self.visible_players.clear();
+        self.visible_monsters.clear();
+        self.visible_npcs.clear();
         self
     }
 

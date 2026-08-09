@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use super::combat::{apply_damage_to_current_player, combat_delay_ticks};
 use super::components::{
-    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, MonsterAgent,
+    MonsterVitals, PlayerVitals, Position,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -35,8 +35,7 @@ use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{
-    CharacterRecord, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
-    WorldSnapshot,
+    CharacterRecord, ItemContainer, MonsterSpawnSource, SimulationConfig, WorldSnapshot,
 };
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
@@ -542,6 +541,28 @@ impl SimulationSession {
         advance_runtime_tick(world);
     }
 
+    /// Enforce the Shared Zone boundary after a command has emitted its public
+    /// packets. NPC scripts and legacy command handlers may use ECS objects as
+    /// short-lived working state, but a character session must never retain a
+    /// second public actor world between commands.
+    pub fn enforce_shared_zone_private_state_invariant(&mut self) {
+        let shared_zone = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .monster_spawn_source
+            == MonsterSpawnSource::SharedZone;
+        if !shared_zone {
+            return;
+        }
+        clear_non_player_world_entities(self.app.world_mut());
+        self.visible_objects = collect_visible_objects(self.app.world())
+            .keys()
+            .copied()
+            .collect();
+    }
+
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         if (hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
             return;
@@ -818,46 +839,6 @@ impl SimulationSession {
             return None;
         }
         super::skills::zone_magic_inventory_components(self.app.world(), spell)
-    }
-
-    pub fn apply_shared_entity_snapshot(&mut self, snapshot: &WorldEntitySnapshot) -> bool {
-        if snapshot.kind != WorldEntityKind::Monster || !is_in_world(self.app.world()) {
-            return false;
-        }
-        let world = self.app.world_mut();
-        let Some(entity) = entity_by_object_id(world, snapshot.object_id) else {
-            return false;
-        };
-        if !world.entity(entity).contains::<Monster>() {
-            return false;
-        }
-
-        {
-            let mut entity_mut = world.entity_mut(entity);
-            entity_mut.insert((
-                Position(Point {
-                    x: snapshot.x,
-                    y: snapshot.y,
-                }),
-                Facing(snapshot.direction),
-            ));
-            if let Some(mut vitals) = entity_mut.get_mut::<MonsterVitals>() {
-                if let Some(max_hp) = snapshot.max_hp {
-                    vitals.max_hp = max_hp.max(1);
-                }
-                if let Some(hp) = snapshot.hp {
-                    vitals.hp = hp.clamp(0, vitals.max_hp);
-                }
-                if snapshot.dead {
-                    vitals.hp = 0;
-                }
-            }
-            if let Some(mut agent) = entity_mut.get_mut::<MonsterAgent>() {
-                agent.dead = snapshot.dead || snapshot.hp.is_some_and(|hp| hp <= 0);
-            }
-        }
-        advance_runtime_tick(world);
-        true
     }
 
     pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {

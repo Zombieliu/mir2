@@ -1,5 +1,25 @@
 # Backend 1:1 Progress
 
+> Latest shared-world boundary sync: 2026-08-10 deletes the production
+> shared-entity-to-personal-ECS copy path. A Gateway-created runtime now uses
+> `MonsterSpawnSource::SharedZone`: personal `SimulationSession` startup emits
+> no NPC/monster actors and its snapshot contains only the active character
+> projection. A command-boundary invariant also removes any legacy public actor
+> projection immediately after its packets commit. `ZoneManager` seeds
+> canonical static NPCs and lazily activates
+> nearby Crystal monster regions in one retained map state; movement activates
+> newly approached regions without rebuilding a private world. Static actor
+> collision/AOI, monster vitals/actions, object IDs, observer delivery, and
+> checkpoints therefore have one authority. Zone stores canonical names while
+> direct packets, queued observer packets, and browser snapshots localize names
+> per recipient. The same boundary now localizes the Bichon map title and known
+> Web online/welcome/release announcements. Quest/inventory evaluation remains
+> private character state, and NPC-script public actor mutations are committed
+> into Zone rather than establishing a second actor world. Verification passes
+> Gateway library 437/437 (one external-PostgreSQL test ignored), Simulation
+> shared Zone 156/156, localization bundle load 1/1, locked Gateway/Simulation
+> check, Rust fmt, generated-bundle equality, and `git diff --check`.
+
 > Latest map-environment backend sync: 2026-08-01 extends the existing Crystal
 > map import with `MapDarkLight` and `WeatherParticles` without changing Zone
 > authority. Simulation emits those values through its existing typed

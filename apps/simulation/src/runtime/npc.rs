@@ -261,21 +261,30 @@ pub(super) fn crystal_class_name(class: MirClass) -> &'static str {
 }
 
 pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: u32) -> bool {
-    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
-        return false;
-    };
-    if !world.entity(npc_entity).contains::<Npc>() {
-        return false;
-    }
-
     let Some(player) = player_entity(world) else {
         return false;
     };
     let Some(player_position) = entity_position(world, player) else {
         return false;
     };
-    let Some(npc_position) = entity_position(world, npc_entity) else {
-        return false;
+    let npc_position = if let Some(npc_entity) = entity_by_object_id(world, npc_object_id) {
+        if !world.entity(npc_entity).contains::<Npc>() {
+            return false;
+        }
+        let Some(position) = entity_position(world, npc_entity) else {
+            return false;
+        };
+        position
+    } else {
+        let Some(position) = world
+            .resource::<NpcStateResource>()
+            .shared_zone_npc_contexts
+            .get(&npc_object_id)
+            .map(|context| context.position.clone())
+        else {
+            return false;
+        };
+        position
     };
 
     tile_distance(&player_position, &npc_position) <= CRYSTAL_DATA_RANGE

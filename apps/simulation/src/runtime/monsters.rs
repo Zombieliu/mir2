@@ -100,11 +100,13 @@ pub(super) fn build_spawn_table(config: &SimulationConfig) -> MonsterSpawnTable 
             build_crystal_starter_region_spawn_table(config)
         }
         MonsterSpawnSource::CrystalWorld => {
-            // Guide-quest monsters are appended inside
-            // build_crystal_current_map_full_spawn_table, which both the personal
-            // session and the shared Zone path use for CrystalWorld.
+            // Guide-quest monsters are appended inside the canonical full-map
+            // table. Shared Gateway sessions use `SharedZone` below and seed
+            // their authoritative map directly instead of building this ECS
+            // population once per player.
             build_crystal_current_map_full_spawn_table(config, &config.map.file_name)
         }
+        MonsterSpawnSource::SharedZone => MonsterSpawnTable { rules: Vec::new() },
     }
 }
 

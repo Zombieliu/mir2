@@ -3,21 +3,25 @@ use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{
     mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TrySendError},
-    Arc, Condvar, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard,
+    Arc, Condvar, Mutex, OnceLock, RwLock, RwLockReadGuard, RwLockWriteGuard,
 };
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use mir2_game_data::crystal_monster_by_name;
+use mir2_game_data::{
+    crystal_map_respawns_by_file_name, crystal_monster_by_name, crystal_monster_manifest,
+    crystal_npc_info_manifest, localized_text_or_fallback, starter_server_data, LanguageCode,
+};
 use mir2_protocol::{
     decode_server_packet, encode_server_packet, ClientPacket, MirDirection, MonsterInfo, NpcInfo,
     ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectPlayerInfo, Point,
     ServerPacket, Spell,
 };
 use mir2_simulation::{
-    intelligent_creature_allows_ground_drop, zone_ground_drop_snapshots_for_monster_at_tick,
-    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropLootSnapshot,
-    GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
+    crystal_world_respawn_spawns, intelligent_creature_allows_ground_drop,
+    zone_ground_drop_snapshots_for_monster_at_tick, ActiveSessionIdentity, CharacterSaveRecord,
+    ChatPacketPreparation, GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime,
+    MonsterSpawnSource, SessionId, SharedAccountInventoryTransactionKind,
     SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
@@ -1565,6 +1569,8 @@ struct ZonePlayerPresence {
     free_bag_slots: u16,
     #[serde(default)]
     pk_points: i32,
+    #[serde(default)]
+    language_code: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1598,6 +1604,16 @@ impl SharedNpcSavedValueKey {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct ZoneMapSnapshotLayer {
+    /// Static NPC population has been installed from canonical game data. This
+    /// is persisted with Zone checkpoints so a restored Zone never asks a
+    /// player Session to reconstruct the world image.
+    #[serde(default)]
+    canonical_seeded: bool,
+    /// Coarse player-centred activation cells whose canonical Crystal monster
+    /// slots have already been installed. Far map regions remain dormant until
+    /// a player approaches them.
+    #[serde(default)]
+    seeded_monster_regions: BTreeSet<(i32, i32)>,
     entities: BTreeMap<u32, WorldEntitySnapshot>,
     removed_entity_ids: BTreeSet<u32>,
     dead_entity_ids: BTreeMap<u32, SharedDeadEntityState>,
@@ -1931,6 +1947,7 @@ impl SharedInProcessZoneState {
             self_entity,
             free_bag_slots,
             0,
+            LanguageCode::English.code(),
             true,
         )
     }
@@ -1943,6 +1960,7 @@ impl SharedInProcessZoneState {
         self_entity: WorldEntitySnapshot,
         free_bag_slots: u16,
         pk_points: i32,
+        language_code: &str,
         preserve_existing_transform: bool,
     ) -> u32 {
         let existing_presence = self.players.get(&key).cloned();
@@ -1977,6 +1995,7 @@ impl SharedInProcessZoneState {
                 entity,
                 free_bag_slots,
                 pk_points,
+                language_code: language_code.to_string(),
             },
         );
         zone_object_id
@@ -2019,7 +2038,13 @@ impl SharedInProcessZoneState {
         if packets.is_empty() {
             return;
         }
-        for packet in packets {
+        let language = self
+            .players
+            .get(&key)
+            .and_then(|presence| LanguageCode::parse(&presence.language_code))
+            .unwrap_or(LanguageCode::English);
+        for mut packet in packets {
+            localize_shared_world_packets(language, std::slice::from_mut(&mut packet));
             let packet = match self.try_push_live_zone_outbound(&key, packet) {
                 Ok(()) => continue,
                 Err(packet) => packet,
@@ -2419,7 +2444,84 @@ impl SharedInProcessZoneState {
             .collect()
     }
 
-    fn sync_map_layer(
+    fn ensure_canonical_map_seed(
+        &mut self,
+        config: &GatewayConfig,
+        map_file_name: &str,
+        player_position: &Point,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        const MONSTER_ACTIVATION_CELL_SIZE: i32 = 24;
+        let region = (
+            player_position.x.div_euclid(MONSTER_ACTIVATION_CELL_SIZE),
+            player_position.y.div_euclid(MONSTER_ACTIVATION_CELL_SIZE),
+        );
+        let (seed_static_objects, seed_monster_region) = self
+            .maps
+            .get(map_file_name)
+            .map(|map| {
+                (
+                    !map.canonical_seeded,
+                    !map.seeded_monster_regions.contains(&region),
+                )
+            })
+            .unwrap_or((true, true));
+        if !seed_static_objects && !seed_monster_region {
+            return Vec::new();
+        }
+
+        let current_tick = now_ms / SHARED_CRYSTAL_TICK_MS;
+        let SharedZoneMapSeed { entities, monsters } =
+            build_shared_zone_map_seed(config, map_file_name, player_position, current_tick);
+        let mut static_object_packets = Vec::new();
+        let mut monster_spawns = Vec::new();
+        {
+            let map = self.maps.entry(map_file_name.to_string()).or_default();
+            if seed_static_objects {
+                map.canonical_seeded = true;
+            }
+            if seed_monster_region {
+                map.seeded_monster_regions.insert(region);
+            }
+            for mut entity in entities.into_values() {
+                if entity.kind == WorldEntityKind::Npc && !seed_static_objects {
+                    continue;
+                }
+                entity.name = canonical_shared_entity_name(entity.kind, &entity.name);
+                if map.removed_entity_ids.contains(&entity.object_id) {
+                    continue;
+                }
+                let entity = merge_shared_entity_state(map.entities.get(&entity.object_id), entity);
+                if entity.kind == WorldEntityKind::Npc {
+                    if let Some(packet) = shared_entity_spawn_packet(&entity) {
+                        static_object_packets.push(packet);
+                    }
+                }
+                map.entities.insert(entity.object_id, entity);
+            }
+            for mut monster in monsters.into_values() {
+                if map.removed_entity_ids.contains(&monster.object_id) {
+                    continue;
+                }
+                monster.name =
+                    canonical_shared_entity_name(WorldEntityKind::Monster, &monster.name);
+                monster_spawns.push(monster);
+            }
+        }
+
+        let key = ZoneKey::for_map(map_file_name);
+        let mut outbounds =
+            self.zone_manager
+                .seed_world_objects(key.clone(), &static_object_packets, now_ms);
+        let (_, monster_outbounds) =
+            self.zone_manager
+                .seed_world_monsters(key, &monster_spawns, now_ms);
+        outbounds.extend(monster_outbounds);
+        outbounds
+    }
+
+    #[cfg(test)]
+    fn install_test_map_layer(
         &mut self,
         map_file_name: String,
         entities: Vec<WorldEntitySnapshot>,
@@ -2430,6 +2532,7 @@ impl SharedInProcessZoneState {
         let now_ms = shared_gateway_now_ms();
         let map = self.maps.entry(map_file_name).or_default();
         for mut entity in entities {
+            entity.name = canonical_shared_entity_name(entity.kind, &entity.name);
             if !map.removed_entity_ids.contains(&entity.object_id) {
                 if let Some(dead) = map.dead_entity_ids.get(&entity.object_id) {
                     entity.dead = true;
@@ -2943,17 +3046,6 @@ impl SharedInProcessZoneState {
             return true;
         }
         dead_shared_corpses.any(|entity| !map.harvested_entity_ids.contains(&entity.object_id))
-    }
-
-    fn shared_entities(&self, map_file_name: &str) -> Vec<WorldEntitySnapshot> {
-        let Some(map) = self.maps.get(map_file_name) else {
-            return Vec::new();
-        };
-        map.entities
-            .values()
-            .filter(|entity| !map.removed_entity_ids.contains(&entity.object_id))
-            .cloned()
-            .collect()
     }
 
     fn shared_npc_entity(
@@ -4131,6 +4223,15 @@ fn merge_shared_entity_state(
     if incoming.ai.is_none() {
         incoming.ai = existing.ai;
     }
+    if incoming.level.is_none() {
+        incoming.level = existing.level;
+    }
+    if incoming.hp.is_none() {
+        incoming.hp = existing.hp;
+    }
+    if incoming.max_hp.is_none() {
+        incoming.max_hp = existing.max_hp;
+    }
     if existing.dead {
         incoming.dead = true;
         incoming.hp = Some(0);
@@ -4175,6 +4276,417 @@ fn simple_world_entity_sprite_snapshot(
     }
 }
 
+#[derive(Debug, Default)]
+struct SharedZoneMapSeed {
+    entities: BTreeMap<u32, WorldEntitySnapshot>,
+    monsters: BTreeMap<u32, ZoneMonsterSpawn>,
+}
+
+#[derive(Debug, Default)]
+struct SharedEntityCanonicalNameIndex {
+    monsters: BTreeMap<String, String>,
+    npcs: BTreeMap<String, String>,
+}
+
+fn shared_entity_localization_key(kind: WorldEntityKind, canonical_name: &str) -> Option<String> {
+    let canonical_name = canonical_name.trim();
+    if canonical_name.is_empty() {
+        return None;
+    }
+    match kind {
+        WorldEntityKind::Monster => Some(match canonical_name {
+            "Training Dummy" => "content.monster.trainingDummy.name".to_string(),
+            "Field Wasp" => "content.monster.fieldWasp.name".to_string(),
+            _ => format!("content.monster.{canonical_name}.name"),
+        }),
+        WorldEntityKind::Npc => Some(match canonical_name {
+            "Village Guide" => "content.npc.villageGuide.name".to_string(),
+            _ => format!("content.npc.{canonical_name}.name"),
+        }),
+        WorldEntityKind::SelfPlayer | WorldEntityKind::Player => None,
+    }
+}
+
+fn localized_shared_entity_name(
+    language: LanguageCode,
+    kind: WorldEntityKind,
+    canonical_name: &str,
+) -> String {
+    shared_entity_localization_key(kind, canonical_name)
+        .map(|key| localized_text_or_fallback(language, &key, canonical_name))
+        .unwrap_or_else(|| canonical_name.to_string())
+}
+
+fn shared_entity_canonical_name_index() -> &'static SharedEntityCanonicalNameIndex {
+    static INDEX: OnceLock<SharedEntityCanonicalNameIndex> = OnceLock::new();
+    INDEX.get_or_init(|| {
+        let mut index = SharedEntityCanonicalNameIndex::default();
+        let languages = [
+            LanguageCode::English,
+            LanguageCode::ChineseSimplified,
+            LanguageCode::Spanish,
+            LanguageCode::Portuguese,
+        ];
+        let mut add = |kind: WorldEntityKind, canonical_name: String| {
+            let target = match kind {
+                WorldEntityKind::Monster => &mut index.monsters,
+                WorldEntityKind::Npc => &mut index.npcs,
+                WorldEntityKind::SelfPlayer | WorldEntityKind::Player => return,
+            };
+            target
+                .entry(canonical_name.to_ascii_lowercase())
+                .or_insert_with(|| canonical_name.clone());
+            for language in languages {
+                let localized = localized_shared_entity_name(language, kind, &canonical_name);
+                target
+                    .entry(localized.to_ascii_lowercase())
+                    .or_insert_with(|| canonical_name.clone());
+            }
+        };
+        for monster in crystal_monster_manifest().monsters {
+            add(WorldEntityKind::Monster, monster.name);
+        }
+        for monster in starter_server_data().monster_spawns {
+            add(WorldEntityKind::Monster, monster.name);
+        }
+        for npc in crystal_npc_info_manifest().npcs {
+            add(WorldEntityKind::Npc, npc.name);
+        }
+        add(WorldEntityKind::Npc, "Village Guide".to_string());
+        index
+    })
+}
+
+fn canonical_shared_entity_name(kind: WorldEntityKind, name: &str) -> String {
+    let trimmed = name.trim();
+    let index = shared_entity_canonical_name_index();
+    let canonical = match kind {
+        WorldEntityKind::Monster => index.monsters.get(&trimmed.to_ascii_lowercase()),
+        WorldEntityKind::Npc => index.npcs.get(&trimmed.to_ascii_lowercase()),
+        WorldEntityKind::SelfPlayer | WorldEntityKind::Player => None,
+    };
+    canonical.cloned().unwrap_or_else(|| trimmed.to_string())
+}
+
+fn localize_shared_world_packets(language: LanguageCode, packets: &mut [ServerPacket]) {
+    for packet in packets {
+        match packet {
+            ServerPacket::ObjectMonster { info } => {
+                let canonical = canonical_shared_entity_name(WorldEntityKind::Monster, &info.name);
+                info.name =
+                    localized_shared_entity_name(language, WorldEntityKind::Monster, &canonical);
+            }
+            ServerPacket::ObjectNpc { info } => {
+                let canonical = canonical_shared_entity_name(WorldEntityKind::Npc, &info.name);
+                info.name =
+                    localized_shared_entity_name(language, WorldEntityKind::Npc, &canonical);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn shared_zone_respawn_object_id(respawn_index: i32, count: u16, spread: u16, slot: usize) -> u32 {
+    const CRYSTAL_RESPAWN_OBJECT_ID_BASE: u32 = 200_000;
+    if count == 1 && spread == 0 {
+        return CRYSTAL_RESPAWN_OBJECT_ID_BASE + respawn_index.max(0) as u32;
+    }
+    CRYSTAL_RESPAWN_OBJECT_ID_BASE
+        .saturating_add(respawn_index.max(0) as u32 * 100)
+        .saturating_add(u32::try_from(slot).unwrap_or(u32::MAX))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn insert_shared_zone_monster_seed(
+    seed: &mut SharedZoneMapSeed,
+    object_id: u32,
+    name: String,
+    image: u16,
+    ai: u8,
+    level: u16,
+    max_hp: i32,
+    light: u8,
+    position: Point,
+    direction: MirDirection,
+    current_tick: u64,
+) {
+    let name = canonical_shared_entity_name(WorldEntityKind::Monster, &name);
+    let disposition = world_entity_disposition_for_monster_ai(ai);
+    let template = crystal_monster_by_name(&name);
+    let experience = template
+        .as_ref()
+        .map(|monster| monster.experience)
+        .unwrap_or_default();
+    let defense = template
+        .as_ref()
+        .map(ZoneMonsterDefense::from_crystal_template)
+        .unwrap_or_default();
+    let max_hp = max_hp.max(1);
+    seed.entities.insert(
+        object_id,
+        WorldEntitySnapshot {
+            object_id,
+            kind: WorldEntityKind::Monster,
+            name: name.clone(),
+            owner_name: None,
+            ai: Some(ai),
+            x: position.x,
+            y: position.y,
+            direction,
+            class: None,
+            gender: None,
+            level: Some(level),
+            hp: Some(max_hp),
+            max_hp: Some(max_hp),
+            light,
+            name_colour_argb: -1,
+            dead: false,
+            disposition,
+            sprite: Some(simple_world_entity_sprite_snapshot("Monster", image, 3)),
+            quest_ids: Vec::new(),
+        },
+    );
+    seed.monsters.insert(
+        object_id,
+        ZoneMonsterSpawn {
+            object_id,
+            name: name.clone(),
+            name_colour_argb: -1,
+            image,
+            ai,
+            level,
+            max_hp,
+            hp: max_hp,
+            experience,
+            friendly_guild: None,
+            defense,
+            position,
+            direction,
+            drops: zone_ground_drop_snapshots_for_monster_at_tick(object_id, &name, current_tick),
+        },
+    );
+}
+
+fn build_shared_zone_map_seed(
+    config: &GatewayConfig,
+    map_file_name: &str,
+    player_position: &Point,
+    current_tick: u64,
+) -> SharedZoneMapSeed {
+    const MONSTER_ACTIVATION_RANGE: i32 = 30;
+    let mut seed = SharedZoneMapSeed::default();
+    if !config.map_is_allowed(map_file_name) {
+        return seed;
+    }
+    let normalized_map = normalize_gateway_map_file_name(map_file_name);
+    let config_map = normalize_gateway_map_file_name(&config.map.file_name);
+
+    for npc in crystal_npc_info_manifest().npcs {
+        if npc
+            .map_file_name
+            .as_deref()
+            .map(normalize_gateway_map_file_name)
+            .as_deref()
+            != Some(normalized_map.as_str())
+            || npc.flag_needed != 0
+            || npc.time_visible
+        {
+            continue;
+        }
+        let Some(object_id) = npc.loaded_object_id else {
+            continue;
+        };
+        let mut quest_ids = npc.collect_quest_indexes;
+        quest_ids.extend(npc.finish_quest_indexes);
+        quest_ids.sort_unstable();
+        quest_ids.dedup();
+        seed.entities.insert(
+            object_id,
+            WorldEntitySnapshot {
+                object_id,
+                kind: WorldEntityKind::Npc,
+                name: npc.name,
+                owner_name: None,
+                ai: None,
+                x: npc.location.x,
+                y: npc.location.y,
+                direction: MirDirection::Up,
+                class: None,
+                gender: None,
+                level: None,
+                hp: None,
+                max_hp: None,
+                light: 10,
+                name_colour_argb: 0xFF00FF00_u32 as i32,
+                dead: false,
+                disposition: WorldEntityDisposition::Neutral,
+                sprite: Some(simple_world_entity_sprite_snapshot("NPC", npc.image, 2)),
+                quest_ids,
+            },
+        );
+    }
+
+    if normalized_map == config_map {
+        for npc in &config.visible_npcs {
+            seed.entities.insert(
+                npc.object_id,
+                WorldEntitySnapshot {
+                    object_id: npc.object_id,
+                    kind: WorldEntityKind::Npc,
+                    name: npc.name.clone(),
+                    owner_name: None,
+                    ai: None,
+                    x: npc.position.x,
+                    y: npc.position.y,
+                    direction: npc.direction,
+                    class: None,
+                    gender: None,
+                    level: None,
+                    hp: None,
+                    max_hp: None,
+                    light: 10,
+                    name_colour_argb: 0xFF00FF00_u32 as i32,
+                    dead: false,
+                    disposition: WorldEntityDisposition::Neutral,
+                    sprite: Some(simple_world_entity_sprite_snapshot("NPC", npc.image, 2)),
+                    quest_ids: npc.quest_ids.clone(),
+                },
+            );
+        }
+    }
+
+    if matches!(
+        config.monster_spawn_source,
+        MonsterSpawnSource::CrystalStarterRegion | MonsterSpawnSource::CrystalWorld
+    ) {
+        if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
+            for respawn in map.respawns {
+                if !config.monster_is_allowed(&respawn.monster_name) {
+                    continue;
+                }
+                let spread = i32::from(respawn.spread);
+                if player_position.x < respawn.location.x - spread - MONSTER_ACTIVATION_RANGE
+                    || player_position.x > respawn.location.x + spread + MONSTER_ACTIVATION_RANGE
+                    || player_position.y < respawn.location.y - spread - MONSTER_ACTIVATION_RANGE
+                    || player_position.y > respawn.location.y + spread + MONSTER_ACTIVATION_RANGE
+                {
+                    continue;
+                }
+                let template = crystal_monster_by_name(&respawn.monster_name);
+                let level = template.as_ref().map(|monster| monster.level).unwrap_or(1);
+                let light = template
+                    .as_ref()
+                    .map(|monster| monster.light)
+                    .unwrap_or_default();
+                for (slot, position, direction) in
+                    crystal_world_respawn_spawns(map_file_name, &respawn)
+                {
+                    if position.x.abs_diff(player_position.x) > MONSTER_ACTIVATION_RANGE as u32
+                        || position.y.abs_diff(player_position.y) > MONSTER_ACTIVATION_RANGE as u32
+                    {
+                        continue;
+                    }
+                    let object_id = shared_zone_respawn_object_id(
+                        respawn.respawn_index,
+                        respawn.count,
+                        respawn.spread,
+                        slot,
+                    );
+                    insert_shared_zone_monster_seed(
+                        &mut seed,
+                        object_id,
+                        respawn.monster_name.clone(),
+                        respawn.monster_image,
+                        respawn.monster_ai,
+                        level,
+                        respawn.monster_hp,
+                        light,
+                        position,
+                        direction,
+                        current_tick,
+                    );
+                }
+            }
+        }
+    }
+
+    if normalized_map == config_map {
+        for monster in starter_server_data().monster_spawns {
+            if config.monster_spawn_source == MonsterSpawnSource::CrystalStarterRegion {
+                continue;
+            }
+            if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld
+                && !matches!(monster.key.as_str(), "training-dummy" | "field-wasp")
+            {
+                continue;
+            }
+            let ai = if monster.can_wander { 0 } else { 1 };
+            let position = if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+                match monster.key.as_str() {
+                    "training-dummy" => Point {
+                        x: config.spawn.x + 2,
+                        y: config.spawn.y + 3,
+                    },
+                    "field-wasp" => Point {
+                        x: config.spawn.x + 4,
+                        y: config.spawn.y,
+                    },
+                    _ => monster.position.clone(),
+                }
+            } else {
+                monster.position.clone()
+            };
+            if position.x.abs_diff(player_position.x) > MONSTER_ACTIVATION_RANGE as u32
+                || position.y.abs_diff(player_position.y) > MONSTER_ACTIVATION_RANGE as u32
+            {
+                continue;
+            }
+            insert_shared_zone_monster_seed(
+                &mut seed,
+                monster.object_id,
+                monster.name,
+                monster.image,
+                ai,
+                1,
+                monster.max_hp,
+                0,
+                position,
+                monster.direction,
+                current_tick,
+            );
+        }
+        for monster in &config.visible_monsters {
+            // The starter scene mirrors the canonical starter-server monsters
+            // for rendering. Do not let that shallow record overwrite the
+            // authoritative HP/drop/combat data installed above.
+            if seed.monsters.contains_key(&monster.object_id) {
+                continue;
+            }
+            if monster.position.x.abs_diff(player_position.x) > MONSTER_ACTIVATION_RANGE as u32
+                || monster.position.y.abs_diff(player_position.y) > MONSTER_ACTIVATION_RANGE as u32
+            {
+                continue;
+            }
+            let template = crystal_monster_by_name(&monster.name);
+            insert_shared_zone_monster_seed(
+                &mut seed,
+                monster.object_id,
+                monster.name.clone(),
+                monster.image,
+                template.as_ref().map(|value| value.ai).unwrap_or(0),
+                template.as_ref().map(|value| value.level).unwrap_or(1),
+                template.as_ref().map(|value| value.hp).unwrap_or(1),
+                template.as_ref().map(|value| value.light).unwrap_or(0),
+                monster.position.clone(),
+                monster.direction,
+                current_tick,
+            );
+        }
+    }
+
+    seed
+}
+
 fn sprite_image_from_shared_entity(entity: &WorldEntitySnapshot, library_root: &str) -> u16 {
     let Some(sprite) = entity.sprite.as_ref() else {
         return 0;
@@ -4189,10 +4701,13 @@ fn sprite_image_from_shared_entity(entity: &WorldEntitySnapshot, library_root: &
 }
 
 fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
+    let name = canonical_shared_entity_name(WorldEntityKind::Monster, &info.name);
+    let template = crystal_monster_by_name(&name);
+    let max_hp = template.as_ref().map(|monster| monster.hp.max(1));
     WorldEntitySnapshot {
         object_id: info.object_id,
         kind: WorldEntityKind::Monster,
-        name: info.name.clone(),
+        name,
         owner_name: None,
         ai: Some(info.ai),
         x: info.location.x,
@@ -4200,9 +4715,9 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         direction: info.direction,
         class: None,
         gender: None,
-        level: None,
-        hp: None,
-        max_hp: None,
+        level: template.as_ref().map(|monster| monster.level),
+        hp: max_hp.map(|hp| if info.dead { 0 } else { hp }),
+        max_hp,
         light: info.light,
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
@@ -4359,7 +4874,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
     WorldEntitySnapshot {
         object_id: info.object_id,
         kind: WorldEntityKind::Npc,
-        name: info.name.clone(),
+        name: canonical_shared_entity_name(WorldEntityKind::Npc, &info.name),
         owner_name: None,
         ai: None,
         x: info.location.x,
@@ -4699,6 +5214,7 @@ fn death_drop_anchors(
         .collect()
 }
 
+#[cfg(test)]
 fn drop_matches_committed_death(map: &ZoneMapSnapshotLayer, drop: &GroundDropSnapshot) -> bool {
     map.committed_death_drop_anchors.values().any(|anchor| {
         drop_matches_death_anchor(drop, anchor.monster_name.as_deref(), &anchor.location)
@@ -5049,8 +5565,11 @@ fn shared_trade_offer_fits(free_bag_slots: u16, offer: &SharedTradeOffer) -> boo
 impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
         let resources = self.resources_for_zone(zone_id);
+        let shared_world_config = config.clone();
         Box::new(SharedInProcessZoneSessionRuntime {
-            inner: InProcessWorldRuntime::new(config),
+            inner: InProcessWorldRuntime::new(config.with_shared_zone_authority()),
+            shared_world_config,
+            presentation_language: LanguageCode::English,
             zone_state: resources.zone_state.clone(),
             account_inventory_service: self.account_inventory_service.clone(),
             npc_world_service: self.npc_world_service.clone(),
@@ -5061,8 +5580,6 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             ),
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
-            last_shared_entity_ids_by_map: BTreeMap::new(),
-            last_shared_drop_ids_by_map: BTreeMap::new(),
             local_ground_drop_zone_ids: BTreeMap::new(),
             retired_local_ground_drop_ids: BTreeSet::new(),
             owner_dead_entity_ids: BTreeSet::new(),
@@ -5603,6 +6120,11 @@ fn execute_shared_zone_movement(
 
 struct SharedInProcessZoneSessionRuntime {
     inner: InProcessWorldRuntime,
+    /// Immutable content/map configuration used only to construct the shared
+    /// Zone. `inner` receives a `SharedZone` config and therefore cannot build
+    /// a second NPC/monster world.
+    shared_world_config: GatewayConfig,
+    presentation_language: LanguageCode,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
@@ -5610,8 +6132,6 @@ struct SharedInProcessZoneSessionRuntime {
     movement_ingress: SharedZoneMovementIngress,
     shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
-    last_shared_entity_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
-    last_shared_drop_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
     local_ground_drop_zone_ids: BTreeMap<(String, u32), u32>,
     retired_local_ground_drop_ids: BTreeSet<(String, u32)>,
     owner_dead_entity_ids: BTreeSet<u32>,
@@ -5924,6 +6444,55 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
+    fn seed_current_zone_population(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let now_ms = Self::zone_now_ms();
+        let (mut packets, transform, shout_consume, player_damages, player_heals) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let Some(presence) = zone_state.players.get(&key) else {
+                return Vec::new();
+            };
+            let map_file_name = presence.map_file_name.clone();
+            let position = Point {
+                x: presence.entity.x,
+                y: presence.entity.y,
+            };
+            let outbounds = zone_state.ensure_canonical_map_seed(
+                &self.shared_world_config,
+                &map_file_name,
+                &position,
+                now_ms,
+            );
+            let (
+                packets,
+                transform,
+                shout_consume,
+                _ground_drop_claims,
+                _monster_kill_awards,
+                player_damages,
+                player_heals,
+            ) = zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
+            (
+                packets,
+                transform,
+                shout_consume,
+                player_damages,
+                player_heals,
+            )
+        };
+        self.apply_zone_player_buff_packets(&packets);
+        self.apply_zone_transform(transform);
+        self.apply_zone_shout_consume(shout_consume);
+        packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        packets
+    }
+
     fn sync_zone_snapshot(&mut self) -> Vec<ServerPacket> {
         let allow_transform_sync = self.force_next_zone_transform_sync;
         self.force_next_zone_transform_sync = false;
@@ -5952,27 +6521,7 @@ impl SharedInProcessZoneSessionRuntime {
             .iter()
             .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
             .cloned();
-        let shared_entities = snapshot
-            .entities
-            .iter()
-            .filter(|entity| matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Npc))
-            .filter(|entity| !self.owner_dead_entity_ids.contains(&entity.object_id))
-            .cloned()
-            .collect::<Vec<_>>();
-        let native_monster_spawns = shared_entities
-            .iter()
-            .filter(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
-            .filter_map(|entity| self.inner.zone_monster_spawn_snapshot(entity.object_id))
-            .collect::<Vec<_>>();
         let map_hazard_config = self.inner.current_map_hazard_config();
-        let shared_entity_ids = shared_entities
-            .iter()
-            .map(|entity| entity.object_id)
-            .collect::<BTreeSet<_>>();
-        let previous_entity_ids = self
-            .last_shared_entity_ids_by_map
-            .insert(map_file_name.clone(), shared_entity_ids)
-            .unwrap_or_default();
 
         let Some(self_entity) = self_entity else {
             return self.remove_presence();
@@ -5991,16 +6540,6 @@ impl SharedInProcessZoneSessionRuntime {
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
-        let mut shared_ground_drops =
-            self.current_snapshot_ground_drops_for_shared_state(&snapshot, &zone_state, Some(&key));
-        let shared_drop_ids = shared_ground_drops
-            .iter()
-            .map(|drop| drop.object_id)
-            .collect::<BTreeSet<_>>();
-        let previous_drop_ids = self
-            .last_shared_drop_ids_by_map
-            .insert(map_file_name.clone(), shared_drop_ids)
-            .unwrap_or_default();
         let previous_map = zone_state
             .players
             .get(&key)
@@ -6023,27 +6562,40 @@ impl SharedInProcessZoneSessionRuntime {
             self_entity,
             snapshot.free_bag_slots,
             snapshot.player_pk_points,
+            self.presentation_language.code(),
             !allow_transform_sync,
         );
-        let local_self_object_id = snapshot
-            .entities
-            .iter()
-            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-            .map(|entity| entity.object_id);
-        if let Some(local_self_object_id) = local_self_object_id {
-            for drop in &mut shared_ground_drops {
-                if drop.owner_object_id == Some(local_self_object_id) {
-                    drop.owner_object_id = Some(zone_object_id);
-                }
-            }
-        }
-        zone_state.sync_map_layer(
-            map_file_name.clone(),
-            shared_entities,
-            previous_entity_ids,
-            shared_ground_drops,
-            previous_drop_ids,
+        let seed_position = zone_state
+            .players
+            .get(&key)
+            .map(|presence| Point {
+                x: presence.entity.x,
+                y: presence.entity.y,
+            })
+            .expect("upserted shared Zone player should have a position");
+        let now_ms = Self::zone_now_ms();
+        let seed_outbounds = zone_state.ensure_canonical_map_seed(
+            &self.shared_world_config,
+            &map_file_name,
+            &seed_position,
+            now_ms,
         );
+        if !seed_outbounds.is_empty() {
+            let (
+                seed_packets,
+                seed_transform,
+                seed_shout_consume,
+                _,
+                _,
+                seed_player_damages,
+                seed_player_heals,
+            ) = zone_state.dispatch_zone_outbounds(seed_outbounds, Some(&key));
+            packets.extend(seed_packets);
+            transform = seed_transform.or(transform);
+            shout_consume = seed_shout_consume.or(shout_consume);
+            player_damages.extend(seed_player_damages);
+            player_heals.extend(seed_player_heals);
+        }
         let zone_ground_drops = zone_state
             .maps
             .get(&map_file_name)
@@ -6062,7 +6614,6 @@ impl SharedInProcessZoneSessionRuntime {
                     .zone_session_keys
                     .insert(session_id.clone(), key.clone());
                 let mut outbounds = zone_state.zone_manager.join(join.clone());
-                let now_ms = Self::zone_now_ms();
                 outbounds.extend(
                     zone_state
                         .zone_manager
@@ -6072,13 +6623,6 @@ impl SharedInProcessZoneSessionRuntime {
                             now_ms,
                         }),
                 );
-                for monster in &native_monster_spawns {
-                    outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SpawnMonster {
-                        session_id: session_id.clone(),
-                        monster: monster.clone(),
-                        now_ms,
-                    }));
-                }
                 if let Some((lightning, fire, lightning_damage, fire_damage)) = map_hazard_config {
                     outbounds.extend(zone_state.zone_manager.handle(
                         ZoneCommand::ConfigureHazards {
@@ -6107,7 +6651,6 @@ impl SharedInProcessZoneSessionRuntime {
             }
         } else if let Some(join) = join_snapshot.as_ref() {
             let mut outbounds = Vec::new();
-            let now_ms = Self::zone_now_ms();
             let zone_transform = zone_state.zone_manager.player_transform(&session_id);
             if allow_transform_sync
                 && zone_transform.is_some_and(|(position, direction)| {
@@ -6158,13 +6701,6 @@ impl SharedInProcessZoneSessionRuntime {
                         now_ms,
                     }),
             );
-            for monster in &native_monster_spawns {
-                outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SpawnMonster {
-                    session_id: session_id.clone(),
-                    monster: monster.clone(),
-                    now_ms,
-                }));
-            }
             let (
                 zone_packets,
                 zone_transform,
@@ -7294,39 +7830,6 @@ impl SharedInProcessZoneSessionRuntime {
             .shared_harvest_allows_action(map_file_name, self_entity, direction)
     }
 
-    fn apply_shared_action_target_snapshot(&mut self, object_id: u32) {
-        let snapshot = self.inner.world_snapshot();
-        let Some(map_file_name) = snapshot.map_file_name.as_deref() else {
-            return;
-        };
-        let shared_entity = self
-            .zone_state
-            .lock()
-            .expect("shared zone presence mutex should not be poisoned")
-            .shared_entity(map_file_name, object_id);
-        if let Some(entity) = shared_entity {
-            self.inner.apply_shared_entity_snapshot(&entity);
-        }
-    }
-
-    fn apply_shared_current_map_monsters_to_local(&mut self) {
-        let snapshot = self.inner.world_snapshot();
-        let Some(map_file_name) = snapshot.map_file_name.as_deref() else {
-            return;
-        };
-        let shared_entities = self
-            .zone_state
-            .lock()
-            .expect("shared zone presence mutex should not be poisoned")
-            .shared_entities(map_file_name);
-        for entity in shared_entities
-            .iter()
-            .filter(|entity| entity.kind == WorldEntityKind::Monster)
-        {
-            self.inner.apply_shared_entity_snapshot(entity);
-        }
-    }
-
     fn shared_npc_entity(&self, object_id: u32) -> Option<WorldEntitySnapshot> {
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
@@ -7533,6 +8036,7 @@ impl SharedInProcessZoneSessionRuntime {
                 let mut packets = execution.packets;
                 if matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. }) {
                     packets.extend(self.apply_zone_current_position_map_transfer());
+                    packets.extend(self.seed_current_zone_population());
                 }
                 Some(packets)
             }
@@ -8165,6 +8669,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        if let WorldCommand::SetLanguage { language } = &command {
+            self.presentation_language = LanguageCode::parse(language)
+                .ok_or_else(|| format!("unsupported language: {language}"))?;
+        }
         let removes_presence = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::Disconnect | ClientPacket::LogOut)
@@ -8336,27 +8844,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 }
                 _ => false,
             };
-        let shared_action_target_id = match &command {
-            WorldCommand::Attack { object_id } => Some(*object_id),
-            WorldCommand::ClientPacket(ClientPacket::RangeAttack { target_id, .. })
-            | WorldCommand::ClientPacket(ClientPacket::Magic { target_id, .. })
-                if *target_id != 0 =>
-            {
-                Some(*target_id)
-            }
-            _ => None,
-        };
-        let needs_shared_action_snapshot = matches!(
-            &command,
-            WorldCommand::Attack { .. }
-                | WorldCommand::CastSkill { .. }
-                | WorldCommand::ClientPacket(
-                    ClientPacket::Attack { .. }
-                        | ClientPacket::RangeAttack { .. }
-                        | ClientPacket::Harvest { .. }
-                        | ClientPacket::Magic { .. }
-                )
-        ) && !routes_zone_native_player_attack;
         let mut packets = if is_low_latency_zone_packet {
             Vec::new()
         } else {
@@ -8377,19 +8864,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             && self.recent_zone_player_movement_input_window_active(Self::zone_now_ms())
         {
             self.filter_stale_owner_dead_entity_packets(&mut packets);
+            localize_shared_world_packets(self.presentation_language, &mut packets);
             return Ok(packets);
         }
         if removes_presence {
             packets.extend(self.cancel_pending_shared_trade_offers());
             self.cancel_pending_shared_rental_offers();
             packets.extend(self.remove_presence());
-        }
-        if !unavailable_shared_target {
-            if let Some(object_id) = shared_action_target_id {
-                self.apply_shared_action_target_snapshot(object_id);
-            } else if needs_shared_action_snapshot {
-                self.apply_shared_current_map_monsters_to_local();
-            }
         }
         if syncs_shared_npc_world_state {
             self.apply_shared_npc_saved_values_to_local();
@@ -8458,7 +8939,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if command_packets.is_empty() {
             if let Some(object_id) = shared_interact_object_id {
                 command_packets = self.execute_shared_npc_interact(object_id);
-            } else if let Some((object_id, key)) = shared_call_npc {
+            } else if let Some((object_id, ref key)) = shared_call_npc {
                 command_packets = self.execute_shared_npc_call(object_id, &key);
             } else if let Some((mouse_mode, location)) = shared_intelligent_creature_pickup {
                 command_packets =
@@ -8475,6 +8956,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if is_low_latency_zone_packet {
             packets.extend(command_packets);
             self.filter_stale_owner_dead_entity_packets(&mut packets);
+            localize_shared_world_packets(self.presentation_language, &mut packets);
             return Ok(packets);
         }
         if let Some(before) = shared_npc_entity_baseline.as_ref() {
@@ -8564,6 +9046,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }
         self.apply_shared_entity_packets_to_current_map(&packets);
         self.filter_stale_owner_dead_entity_packets(&mut packets);
+        self.inner.enforce_shared_zone_private_state_invariant();
         if !removes_presence && !skip_tail_zone_snapshot {
             packets.extend(self.sync_zone_snapshot());
         }
@@ -8574,6 +9057,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 .filter_stale_dead_entity_packets_for_key(&current_key, &mut packets);
         }
         self.filter_stale_owner_dead_entity_packets(&mut packets);
+        localize_shared_world_packets(self.presentation_language, &mut packets);
         Ok(packets)
     }
 
@@ -8643,6 +9127,16 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 .entities
                 .retain(|entity| visible(entity.x, entity.y));
             snapshot.ground_drops.retain(|drop| visible(drop.x, drop.y));
+        }
+        for entity in &mut snapshot.entities {
+            if matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Npc) {
+                let canonical = canonical_shared_entity_name(entity.kind, &entity.name);
+                entity.name = localized_shared_entity_name(
+                    self.presentation_language,
+                    entity.kind,
+                    &canonical,
+                );
+            }
         }
         snapshot.entities.sort_by_key(|entity| entity.object_id);
         snapshot
@@ -9081,6 +9575,7 @@ mod tests {
         ZoneRuntimeFactory,
     };
     use crate::{GatewayConfig, GatewaySession};
+    use mir2_game_data::LanguageCode;
     use mir2_protocol::{
         ClientBuff, ClientIntelligentCreature, ClientPacket, IntelligentCreatureItemFilter,
         IntelligentCreatureRules, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo,
@@ -9759,11 +10254,204 @@ mod tests {
     }
 
     #[test]
+    fn shared_zone_is_only_public_actor_world_and_localizes_names_per_session() {
+        let config = GatewayConfig::default().with_crystal_world_runtime();
+
+        let mut private_state =
+            InProcessWorldRuntime::new(config.clone().with_shared_zone_authority());
+        private_state
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("private state login should execute");
+        let private_start_packets = private_state
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("private state StartGame should execute");
+        assert!(private_start_packets.iter().all(|packet| !matches!(
+            packet,
+            ServerPacket::ObjectNpc { .. } | ServerPacket::ObjectMonster { .. }
+        )));
+        assert!(private_state
+            .world_snapshot()
+            .entities
+            .iter()
+            .all(|entity| {
+                matches!(
+                    entity.kind,
+                    WorldEntityKind::SelfPlayer | WorldEntityKind::Player
+                )
+            }));
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut chinese = shared_session_runtime_with_config(zone_state.clone(), config.clone());
+        chinese
+            .execute(WorldCommand::SetLanguage {
+                language: "zh-CN".to_string(),
+            })
+            .expect("Chinese language selection should execute");
+        start_demo_runtime(&mut chinese);
+
+        let mut english = shared_session_runtime_with_config(zone_state.clone(), config);
+        start_new_runtime(&mut english, "zone-language-en", "EnglishHero");
+
+        assert!(chinese
+            .inner
+            .world_snapshot()
+            .entities
+            .iter()
+            .all(|entity| {
+                matches!(
+                    entity.kind,
+                    WorldEntityKind::SelfPlayer | WorldEntityKind::Player
+                )
+            }));
+        assert!(english
+            .inner
+            .world_snapshot()
+            .entities
+            .iter()
+            .all(|entity| {
+                matches!(
+                    entity.kind,
+                    WorldEntityKind::SelfPlayer | WorldEntityKind::Player
+                )
+            }));
+
+        let chinese_snapshot = chinese.world_snapshot();
+        let english_snapshot = english.world_snapshot();
+        assert_eq!(chinese_snapshot.map_title.as_deref(), Some("比奇省"));
+        assert_eq!(
+            english_snapshot.map_title.as_deref(),
+            Some("BichonProvince")
+        );
+        assert_eq!(
+            chinese_snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == 42)
+                .map(|entity| entity.name.as_str()),
+            Some("斯科特商人")
+        );
+        assert_eq!(
+            english_snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == 42)
+                .map(|entity| entity.name.as_str()),
+            Some("Merchant_Scott")
+        );
+        assert_eq!(
+            chinese_snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == 3001)
+                .map(|entity| entity.name.as_str()),
+            Some("训练木桩")
+        );
+        assert_eq!(
+            english_snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == 3001)
+                .map(|entity| entity.name.as_str()),
+            Some("Training Dummy")
+        );
+
+        let scott = chinese_snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == 42)
+            .expect("shared Scott should be present");
+        chinese
+            .execute(WorldCommand::TransferMap {
+                key: format!("crystal:0:{}:{}", scott.x.saturating_sub(1), scott.y),
+            })
+            .expect("shared runtime should move beside Scott");
+        chinese
+            .execute(WorldCommand::Interact { object_id: 42 })
+            .expect("shared Scott interaction should execute");
+        assert!(chinese
+            .inner
+            .world_snapshot()
+            .entities
+            .iter()
+            .all(|entity| matches!(
+                entity.kind,
+                WorldEntityKind::SelfPlayer | WorldEntityKind::Player
+            )));
+        let zone = zone_state
+            .lock()
+            .expect("shared Zone state mutex should not be poisoned");
+        let map = zone.maps.get("0").expect("Bichon map should be seeded");
+        assert!(map.canonical_seeded);
+        assert_eq!(
+            map.entities.get(&42).map(|entity| entity.name.as_str()),
+            Some("Merchant_Scott")
+        );
+        assert_eq!(
+            map.entities.get(&3001).map(|entity| entity.name.as_str()),
+            Some("Training Dummy")
+        );
+    }
+
+    #[test]
+    fn shared_runtime_discards_legacy_public_actor_projection_after_zone_commit() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+        let before_ids = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .filter(|entity| entity.kind == WorldEntityKind::Monster)
+            .map(|entity| entity.object_id)
+            .collect::<BTreeSet<_>>();
+
+        let packets = runtime
+            .execute(WorldCommand::Stage5Command {
+                action: "event.spawn".to_string(),
+                args: vec!["RakingCat0".to_string(), "1".to_string()],
+            })
+            .expect("shared event spawn should execute");
+        let object_id = packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::ObjectMonster { info }
+                    if info.name == "RakingCat0" && !before_ids.contains(&info.object_id) =>
+                {
+                    Some(info.object_id)
+                }
+                _ => None,
+            })
+            .expect("shared event spawn should emit a new Zone monster");
+
+        assert!(runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .iter()
+            .all(|entity| matches!(
+                entity.kind,
+                WorldEntityKind::SelfPlayer | WorldEntityKind::Player
+            )));
+        assert!(
+            runtime
+                .world_snapshot()
+                .entities
+                .iter()
+                .any(|entity| entity.object_id == object_id
+                    && entity.kind == WorldEntityKind::Monster)
+        );
+    }
+
+    #[test]
     fn shared_zone_state_keeps_absent_viewport_entities_until_object_remove() {
         let mut state = SharedInProcessZoneState::new();
         let entity = shared_monster_entity(77);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -9776,7 +10464,7 @@ mod tests {
             .entities
             .contains_key(&77));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::from([77]),
@@ -9790,7 +10478,7 @@ mod tests {
             .contains_key(&77));
 
         state.apply_shared_entity_packets("0", &[ServerPacket::ObjectRemove { object_id: 77 }]);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -9954,14 +10642,14 @@ mod tests {
         let mut state = SharedInProcessZoneState::new();
         let picker = shared_picker_entity(9001, 330, 270);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
             vec![shared_gold_drop(88, 330, 270, None, None)],
             BTreeSet::new(),
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -9997,7 +10685,7 @@ mod tests {
     fn shared_zone_state_treats_intelligent_creature_pickup_as_drop_remove() {
         let mut state = SharedInProcessZoneState::new();
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -10014,7 +10702,7 @@ mod tests {
             "0",
             &[ServerPacket::IntelligentCreaturePickup { object_id: 88 }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -10427,7 +11115,7 @@ mod tests {
         let stale_snapshot = shared_monster_entity(501);
         assert!(stale_snapshot.owner_name.is_none());
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![stale_snapshot],
             BTreeSet::new(),
@@ -10471,7 +11159,7 @@ mod tests {
         let mut hero = shared_picker_entity(601, 332, 270);
         hero.kind = WorldEntityKind::Player;
         hero.owner_name = Some("Owner".to_string());
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![summon, hero],
             BTreeSet::new(),
@@ -10552,7 +11240,7 @@ mod tests {
     fn shared_zone_state_applies_object_movement_packets_to_shared_entities() {
         let mut state = SharedInProcessZoneState::new();
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![shared_monster_entity(77)],
             BTreeSet::new(),
@@ -10597,7 +11285,7 @@ mod tests {
     fn shared_zone_state_applies_object_transform_packets_to_shared_entities() {
         let mut state = SharedInProcessZoneState::new();
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![shared_monster_entity(77)],
             BTreeSet::new(),
@@ -10634,7 +11322,7 @@ mod tests {
     fn shared_zone_state_ignores_object_transform_packets_for_dead_entities() {
         let mut state = SharedInProcessZoneState::new();
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![shared_monster_entity(77)],
             BTreeSet::new(),
@@ -10673,7 +11361,7 @@ mod tests {
     fn shared_zone_state_filters_stale_dead_entity_packets_for_owner_stream() {
         let mut state = SharedInProcessZoneState::new();
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![shared_monster_entity(77), shared_monster_entity(88)],
             BTreeSet::new(),
@@ -12430,7 +13118,7 @@ mod tests {
         entity.hp = Some(100);
         entity.max_hp = Some(100);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12447,7 +13135,7 @@ mod tests {
                 },
             }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12471,7 +13159,7 @@ mod tests {
         entity.hp = Some(100);
         entity.max_hp = Some(100);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12515,7 +13203,7 @@ mod tests {
         entity.hp = Some(100);
         entity.max_hp = Some(100);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12532,7 +13220,7 @@ mod tests {
                 },
             }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12556,7 +13244,7 @@ mod tests {
         entity.hp = None;
         entity.max_hp = None;
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12573,7 +13261,7 @@ mod tests {
                 },
             }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12593,7 +13281,7 @@ mod tests {
     fn shared_zone_state_commits_monster_death_drops_once() {
         let mut state = SharedInProcessZoneState::new();
         let entity = shared_monster_entity(77);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12635,7 +13323,7 @@ mod tests {
         assert!(map.ground_drops.contains_key(&88));
         assert!(!map.ground_drops.contains_key(&89));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12653,7 +13341,7 @@ mod tests {
     fn shared_zone_state_death_drop_anchor_survives_corpse_remove() {
         let mut state = SharedInProcessZoneState::new();
         let entity = shared_monster_entity(77);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12678,7 +13366,7 @@ mod tests {
         assert_eq!(committed.len(), 1);
 
         state.apply_shared_entity_packets("0", &[ServerPacket::ObjectRemove { object_id: 77 }]);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::from([77]),
@@ -12697,7 +13385,7 @@ mod tests {
     fn shared_zone_state_commits_zero_health_monster_drops_once() {
         let mut state = SharedInProcessZoneState::new();
         let entity = shared_monster_entity(77);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12732,7 +13420,7 @@ mod tests {
         );
         assert!(duplicate.is_empty());
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12766,7 +13454,7 @@ mod tests {
         entity.hp = Some(100);
         entity.max_hp = Some(100);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12784,7 +13472,7 @@ mod tests {
                 },
             }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12806,7 +13494,7 @@ mod tests {
     #[test]
     fn shared_zone_state_applies_object_died_before_snapshot_arrives() {
         let mut state = SharedInProcessZoneState::new();
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -12829,7 +13517,7 @@ mod tests {
         let mut stale_entity = shared_monster_entity(77);
         stale_entity.hp = Some(12);
         stale_entity.max_hp = Some(12);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![stale_entity],
             BTreeSet::new(),
@@ -12850,7 +13538,7 @@ mod tests {
     #[test]
     fn shared_zone_state_commits_death_drop_without_prior_entity_snapshot() {
         let mut state = SharedInProcessZoneState::new();
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -12894,7 +13582,7 @@ mod tests {
         entity.hp = Some(0);
         entity.dead = true;
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12920,7 +13608,7 @@ mod tests {
                 },
             }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12948,7 +13636,7 @@ mod tests {
         entity.hp = Some(12);
         entity.dead = false;
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -12967,7 +13655,7 @@ mod tests {
                 },
             }],
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -12998,7 +13686,7 @@ mod tests {
         stale_dead.hp = Some(0);
         stale_dead.dead = true;
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![stale_dead],
             BTreeSet::new(),
@@ -13019,7 +13707,7 @@ mod tests {
         let mut state = SharedInProcessZoneState::new();
         let entity = shared_monster_entity(77);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -13027,7 +13715,7 @@ mod tests {
             BTreeSet::new(),
         );
         state.apply_shared_entity_packets("0", &[ServerPacket::ObjectRemove { object_id: 77 }]);
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -13050,7 +13738,7 @@ mod tests {
         entity.hp = Some(100);
         entity.max_hp = Some(100);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -13081,7 +13769,7 @@ mod tests {
         entity.dead = true;
         let picker = shared_picker_entity(101, 328, 269);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity.clone()],
             BTreeSet::new(),
@@ -13102,7 +13790,7 @@ mod tests {
         );
         assert!(!state.shared_harvest_allows_action("0", &picker, MirDirection::Right));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![entity],
             BTreeSet::new(),
@@ -13130,7 +13818,7 @@ mod tests {
         let mut stale_dead = shared_monster_entity(77);
         stale_dead.hp = Some(0);
         stale_dead.dead = true;
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             vec![stale_dead],
             BTreeSet::new(),
@@ -13147,7 +13835,7 @@ mod tests {
         let picker = shared_picker_entity(9001, 330, 270);
         let owned_drop = shared_gold_drop(88, 330, 270, Some(101), Some(60));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -13187,7 +13875,7 @@ mod tests {
         let picker = shared_picker_entity(102, 330, 270);
         let owned_drop = shared_gold_drop(88, 330, 270, Some(owner_zone_object_id), Some(60));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -13207,7 +13895,7 @@ mod tests {
         let picker = shared_picker_entity(9001, 330, 270);
         let expired_drop = shared_gold_drop(88, 330, 270, Some(101), None);
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -13227,7 +13915,7 @@ mod tests {
         let picker = shared_picker_entity(9001, 330, 270);
         let owned_drop = shared_gold_drop(88, 330, 270, Some(101), Some(60));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -13258,7 +13946,7 @@ mod tests {
         let picker = shared_picker_entity(102, 330, 270);
         let owned_drop = shared_gold_drop(88, 331, 270, Some(101), Some(60));
 
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -13315,7 +14003,7 @@ mod tests {
             shared_picker_entity(102, 331, 270),
             80,
         );
-        state.sync_map_layer(
+        state.install_test_map_layer(
             "0".to_string(),
             Vec::new(),
             BTreeSet::new(),
@@ -13639,7 +14327,7 @@ mod tests {
             let mut state = zone_state.lock().expect("shared zone state should lock");
             state.update_player_transform(&first_key, first_position.clone(), MirDirection::Down);
             state.update_player_transform(&second_key, second_position.clone(), MirDirection::Down);
-            state.sync_map_layer(
+            state.install_test_map_layer(
                 "0".to_string(),
                 vec![first_edge_entity, first_outside_entity],
                 BTreeSet::new(),
@@ -14937,7 +15625,6 @@ mod tests {
         start_demo_runtime(&mut first);
         start_new_runtime(&mut second, "second-delayed", "Blade");
         let target = first
-            .inner
             .world_snapshot()
             .entities
             .into_iter()
@@ -15031,7 +15718,7 @@ mod tests {
         zone_state
             .lock()
             .expect("shared zone state should lock")
-            .sync_map_layer(
+            .install_test_map_layer(
                 "0".to_string(),
                 vec![target.clone()],
                 BTreeSet::new(),
@@ -15080,7 +15767,6 @@ mod tests {
         start_demo_runtime(&mut first);
         start_new_runtime(&mut second, "second-range", "Blade");
         let target = first
-            .inner
             .world_snapshot()
             .entities
             .into_iter()
@@ -15152,7 +15838,6 @@ mod tests {
         start_demo_runtime(&mut first);
         start_new_runtime(&mut second, "second-range-window", "Blade");
         let target = first
-            .inner
             .world_snapshot()
             .entities
             .into_iter()
@@ -15226,41 +15911,29 @@ mod tests {
         start_demo_runtime(&mut first);
         start_new_runtime(&mut second, "magic-observer", "Blade");
 
-        let target = first
-            .inner
+        let self_entity = first
             .world_snapshot()
             .entities
             .into_iter()
-            .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
-            })
-            .expect("starter scene should expose a live monster");
-        let attacker_position = Point {
-            x: target.x.saturating_sub(4),
-            y: target.y,
-        };
-        first
-            .inner
-            .force_authoritative_player_transform(attacker_position.clone(), MirDirection::Right);
-        first.sync_zone_snapshot();
-        second.sync_zone_snapshot();
-
-        let self_object_id = first
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("owner should expose self object id");
+        let self_object_id = self_entity.object_id;
+        let observer_target_id = second
             .world_snapshot()
             .entities
             .iter()
-            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .find(|entity| entity.kind == WorldEntityKind::Player && entity.name == "Scout")
             .map(|entity| entity.object_id)
-            .expect("owner should expose self object id");
+            .expect("observer should expose the owner's Zone object id");
         let launch_packets = first
             .execute(WorldCommand::ClientPacket(ClientPacket::Magic {
                 object_id: self_object_id,
                 spell: Spell::Healing,
                 direction: MirDirection::Right,
-                target_id: target.object_id,
+                target_id: self_object_id,
                 location: Point {
-                    x: target.x,
-                    y: target.y,
+                    x: self_entity.x,
+                    y: self_entity.y,
                 },
                 spell_target_lock: true,
             }))
@@ -15272,7 +15945,7 @@ mod tests {
                 spell,
                 target_id,
                 ..
-            } if *spell == Spell::Healing && *target_id == target.object_id
+            } if *spell == Spell::Healing && *target_id == self_object_id
         )));
         assert!(launch_packets.iter().any(|packet| matches!(
             packet,
@@ -15280,63 +15953,43 @@ mod tests {
                 spell,
                 target_id,
                 ..
-            } if *spell == Spell::Healing && *target_id == target.object_id
+            } if *spell == Spell::Healing && *target_id == self_object_id
         )));
 
         let observer_packets = second
             .execute(WorldCommand::Tick)
             .expect("observer tick should drain magic packets");
-        assert!(observer_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::ObjectMagic {
-                spell,
-                target_id,
-                ..
-            } if *spell == Spell::Healing && *target_id == target.object_id
-        )));
+        assert!(
+            observer_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectMagic {
+                    spell,
+                    target_id,
+                    ..
+                } if *spell == Spell::Healing && *target_id == observer_target_id
+            )),
+            "observer packets: {observer_packets:?}"
+        );
     }
 
     #[test]
-    fn shared_in_process_runtime_applies_current_map_shared_monsters_to_local_runtime() {
+    fn shared_in_process_runtime_keeps_zone_monsters_out_of_character_state_session() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
-        let mut runtime = shared_session_runtime(zone_state.clone());
-        runtime
-            .inner
-            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
-                character_index: 0,
-            }))
-            .expect("start game should succeed");
-        let mut monster = runtime
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+
+        assert!(runtime.world_snapshot().entities.iter().any(|entity| {
+            entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+        }));
+        assert!(runtime
             .inner
             .world_snapshot()
             .entities
-            .into_iter()
-            .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
-            })
-            .expect("starter scene should expose a live monster");
-        monster.hp = Some(1);
-
-        zone_state
-            .lock()
-            .expect("shared zone state should lock")
-            .sync_map_layer(
-                "0".to_string(),
-                vec![monster.clone()],
-                BTreeSet::new(),
-                Vec::new(),
-                BTreeSet::new(),
-            );
-        runtime.apply_shared_current_map_monsters_to_local();
-
-        let local_hp = runtime
-            .inner
-            .world_snapshot()
-            .entities
-            .into_iter()
-            .find(|entity| entity.object_id == monster.object_id)
-            .and_then(|entity| entity.hp);
-        assert_eq!(local_hp, Some(1));
+            .iter()
+            .all(|entity| matches!(
+                entity.kind,
+                WorldEntityKind::SelfPlayer | WorldEntityKind::Player
+            )));
     }
 
     #[test]
@@ -15349,7 +16002,7 @@ mod tests {
         zone_state
             .lock()
             .expect("shared zone state should lock")
-            .sync_map_layer(
+            .install_test_map_layer(
                 "0".to_string(),
                 vec![shared_monster_entity(77)],
                 BTreeSet::new(),
@@ -15427,7 +16080,7 @@ mod tests {
         zone_state
             .lock()
             .expect("shared zone state should lock")
-            .sync_map_layer(
+            .install_test_map_layer(
                 "0".to_string(),
                 vec![shared_monster_entity(77)],
                 BTreeSet::new(),
@@ -15815,10 +16468,13 @@ mod tests {
         });
         let snapshot = second.world_snapshot();
 
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::ObjectChat { object_id, .. } if *object_id == shared_guide.object_id
-        )));
+        assert!(
+            packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectChat { object_id, .. } if *object_id == shared_guide.object_id
+            )),
+            "shared NPC packets: {packets:?}"
+        );
         assert_eq!(
             snapshot
                 .active_npc_dialog
@@ -17104,6 +17760,18 @@ mod tests {
         )
     }
 
+    fn shared_session_runtime_with_config(
+        zone_state: Arc<Mutex<SharedInProcessZoneState>>,
+        config: GatewayConfig,
+    ) -> SharedInProcessZoneSessionRuntime {
+        shared_session_runtime_with_config_and_services(
+            zone_state,
+            config,
+            Arc::new(InProcessAccountInventoryService::new()),
+            Arc::new(InProcessNpcWorldService),
+        )
+    }
+
     fn shared_session_runtime_with_account_inventory_service(
         zone_state: Arc<Mutex<SharedInProcessZoneState>>,
         account_inventory_service: SharedAccountInventoryServiceHandle,
@@ -17120,13 +17788,31 @@ mod tests {
         account_inventory_service: SharedAccountInventoryServiceHandle,
         npc_world_service: SharedNpcWorldServiceHandle,
     ) -> SharedInProcessZoneSessionRuntime {
+        shared_session_runtime_with_config_and_services(
+            zone_state,
+            GatewayConfig::default(),
+            account_inventory_service,
+            npc_world_service,
+        )
+    }
+
+    fn shared_session_runtime_with_config_and_services(
+        zone_state: Arc<Mutex<SharedInProcessZoneState>>,
+        shared_world_config: GatewayConfig,
+        account_inventory_service: SharedAccountInventoryServiceHandle,
+        npc_world_service: SharedNpcWorldServiceHandle,
+    ) -> SharedInProcessZoneSessionRuntime {
         let movement_sender = super::spawn_shared_zone_owner_with_cadence(
             &ZoneId::new("test-shared-zone"),
             zone_state.clone(),
             Duration::from_secs(60 * 60),
         );
         SharedInProcessZoneSessionRuntime {
-            inner: InProcessWorldRuntime::new(GatewayConfig::default()),
+            inner: InProcessWorldRuntime::new(
+                shared_world_config.clone().with_shared_zone_authority(),
+            ),
+            shared_world_config,
+            presentation_language: LanguageCode::English,
             zone_state: zone_state.clone(),
             account_inventory_service,
             npc_world_service,
@@ -17134,8 +17820,6 @@ mod tests {
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
-            last_shared_entity_ids_by_map: Default::default(),
-            last_shared_drop_ids_by_map: Default::default(),
             local_ground_drop_zone_ids: Default::default(),
             retired_local_ground_drop_ids: Default::default(),
             owner_dead_entity_ids: Default::default(),

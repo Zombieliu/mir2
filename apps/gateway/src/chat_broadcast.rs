@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use mir2_game_data::{format_localized_text, localized_text_or_fallback, LanguageCode};
 use mir2_protocol::{ChatType, ServerPacket};
 use tokio::sync::broadcast;
 use tokio::task::JoinHandle;
@@ -29,6 +30,33 @@ const DEFAULT_LINE_MESSAGES: &[&str] = &[
     "www.LOMCN.net",
     "Now in Net.8",
 ];
+
+pub fn localize_chat_broadcast_packet(
+    packet: &ServerPacket,
+    language: LanguageCode,
+) -> ServerPacket {
+    let mut localized = packet.clone();
+    let ServerPacket::Chat { message, .. } = &mut localized else {
+        return localized;
+    };
+    if let Some(count) = message
+        .strip_prefix("Online Players: ")
+        .and_then(|count| count.parse::<usize>().ok())
+    {
+        *message = format_localized_text(language, "server.OnlinePlayers", [count.to_string()]);
+        return localized;
+    }
+    let key = match message.as_str() {
+        "Welcome to Crystal Mir 2 released by Suprcode." => "broadcast.welcomeCrystal",
+        "Make sure to follow JevLomcn on github for the latest Database releases." => {
+            "broadcast.followDatabase"
+        }
+        "Now in Net.8" => "broadcast.net8",
+        _ => return localized,
+    };
+    *message = localized_text_or_fallback(language, key, message);
+    localized
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChatProtocol {
@@ -520,6 +548,36 @@ mod tests {
             packet,
             &ServerPacket::Chat {
                 message: "fixed line".to_string(),
+                chat_type: ChatType::LineMessage,
+            }
+        );
+    }
+
+    #[test]
+    fn web_broadcasts_localize_known_server_lines_per_session() {
+        assert_eq!(
+            localize_chat_broadcast_packet(
+                &ServerPacket::Chat {
+                    message: "Online Players: 3".to_string(),
+                    chat_type: ChatType::Hint,
+                },
+                LanguageCode::ChineseSimplified,
+            ),
+            ServerPacket::Chat {
+                message: "在线玩家数：3".to_string(),
+                chat_type: ChatType::Hint,
+            }
+        );
+        assert_eq!(
+            localize_chat_broadcast_packet(
+                &ServerPacket::Chat {
+                    message: DEFAULT_LINE_MESSAGES[1].to_string(),
+                    chat_type: ChatType::LineMessage,
+                },
+                LanguageCode::ChineseSimplified,
+            ),
+            ServerPacket::Chat {
+                message: "请关注 GitHub 上的 JevLomcn，获取最新数据库版本。".to_string(),
                 chat_type: ChatType::LineMessage,
             }
         );

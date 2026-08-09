@@ -639,7 +639,12 @@ pub(super) fn relocate_player_to_map(
         player_runtime.player_position = position.clone();
         player_runtime.player_direction = direction;
     }
-    world.resource_mut::<NpcStateResource>().active_npc_dialog = None;
+    {
+        let mut npc_state = world.resource_mut::<NpcStateResource>();
+        npc_state.active_npc_dialog = None;
+        npc_state.active_npc_service = None;
+        npc_state.shared_zone_npc_contexts.clear();
+    }
     world
         .resource_mut::<RuntimeQueueResource>()
         .pending_combat_actions = Vec::new();
@@ -749,6 +754,14 @@ pub(super) fn clear_non_player_world_entities(world: &mut World) {
 /// `rebuild_world` and again after the crystal world rebuild (which clears all
 /// non-player objects), so configured NPCs also appear on crystal maps.
 pub(super) fn spawn_config_visible_npcs(world: &mut World) {
+    if world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source
+        == MonsterSpawnSource::SharedZone
+    {
+        return;
+    }
     let records = world
         .resource::<RuntimeConfigResource>()
         .config
@@ -964,6 +977,15 @@ pub(super) fn reconcile_monster_activation(world: &mut World) {
 }
 
 pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
+    if world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source
+        == MonsterSpawnSource::SharedZone
+    {
+        world.insert_resource(MonsterSpawnTable { rules: Vec::new() });
+        return;
+    }
     let is_full_world = world
         .resource::<RuntimeConfigResource>()
         .config
@@ -1017,6 +1039,14 @@ pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
 }
 
 pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
+    if world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source
+        == MonsterSpawnSource::SharedZone
+    {
+        return None;
+    }
     let existing: Vec<Entity> = {
         let mut query = world.query_filtered::<Entity, With<Hero>>();
         query.iter(world).collect()
@@ -1114,6 +1144,14 @@ fn despawn_stage5_hero_for_no_hero_map(world: &mut World, packets: &mut Vec<Serv
 }
 
 pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
+    if world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .monster_spawn_source
+        == MonsterSpawnSource::SharedZone
+    {
+        return;
+    }
     let (map_file_name, character) = {
         let map = world.resource::<MapRuntimeResource>();
         let Some(character) = world

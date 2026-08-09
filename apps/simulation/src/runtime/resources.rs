@@ -14,7 +14,7 @@ use super::monsters::PendingMonsterSpawnAction;
 use super::npc::{
     ActiveNpcDialogState, ActiveNpcServiceState, NpcBuyBackState, NpcFlagState, NpcUsedGoodsState,
 };
-use super::npc_script::{CrystalNpcSavedValue, CrystalNpcScriptDiagnostic};
+use super::npc_script::{CrystalNpcSavedValue, CrystalNpcScriptDiagnostic, NpcInteractionContext};
 use super::quests::QuestState;
 use super::skills::SkillState;
 
@@ -837,6 +837,9 @@ pub(super) struct NpcStateResource {
     pub(super) npc_used_goods_items: Vec<NpcUsedGoodsState>,
     pub(super) active_npc_dialog: Option<ActiveNpcDialogState>,
     pub(super) active_npc_service: Option<ActiveNpcServiceState>,
+    /// Presentation/script context for NPCs owned by the shared Zone. This is
+    /// private quest/service input only; it is not an ECS actor replica.
+    pub(super) shared_zone_npc_contexts: BTreeMap<u32, NpcInteractionContext>,
 }
 
 impl NpcStateResource {
@@ -850,6 +853,7 @@ impl NpcStateResource {
             npc_used_goods_items: Vec::new(),
             active_npc_dialog: None,
             active_npc_service: None,
+            shared_zone_npc_contexts: BTreeMap::new(),
         }
     }
 }

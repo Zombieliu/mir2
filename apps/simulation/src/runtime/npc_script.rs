@@ -18,7 +18,7 @@ use mir2_protocol::{
 use super::buffs::*;
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_position,
-    player_entity, CharacterBody, DisplayName, Facing, Monster, MonsterAgent, MonsterVitals, Npc,
+    player_entity, CharacterBody, DisplayName, Facing, Monster, MonsterAgent, MonsterVitals,
     NpcAgent, NpcPetState, ObjectId, Position, RemotePlayer, SummonedMonster, WorldObject,
 };
 use super::crystal_compat::*;
@@ -622,6 +622,30 @@ fn crystal_npc_info_for_loaded_object_id(object_id: u32) -> Option<CrystalNpcInf
         .npcs
         .into_iter()
         .find(|npc| npc.loaded_object_id == Some(object_id))
+}
+
+fn shared_zone_npc_interaction_context(npc: &WorldEntitySnapshot) -> NpcInteractionContext {
+    let npc_info = crystal_npc_info_for_loaded_object_id(npc.object_id);
+    let quest_ids = if npc.quest_ids.is_empty() {
+        crystal_quest_ids_by_npc()
+            .get(&npc.object_id)
+            .map(|ids| ids.iter().copied().collect())
+            .unwrap_or_default()
+    } else {
+        npc.quest_ids.clone()
+    };
+    NpcInteractionContext {
+        object_id: npc.object_id,
+        name: npc.name.clone(),
+        name_key: localized_npc_name_key(npc.object_id)
+            .map(str::to_string)
+            .or_else(|| localized_npc_name_key_for_name(&npc.name)),
+        position: Point { x: npc.x, y: npc.y },
+        quest_ids,
+        script_key: npc_info.map(|info| info.script_key),
+        args: Vec::new(),
+        input: None,
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -3214,7 +3238,7 @@ impl SimulationSession {
 
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
         let packets = self.interact_shared_npc_snapshot_impl(npc);
-        self.finalize_packets(packets)
+        self.finalize_shared_zone_npc_packets(packets)
     }
 
     pub fn call_shared_npc_snapshot(
@@ -3223,7 +3247,25 @@ impl SimulationSession {
         key: &str,
     ) -> Vec<ServerPacket> {
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
-        self.finalize_packets(packets)
+        self.finalize_shared_zone_npc_packets(packets)
+    }
+
+    fn finalize_shared_zone_npc_packets(
+        &mut self,
+        packets: Vec<ServerPacket>,
+    ) -> Vec<ServerPacket> {
+        // The personal ECS deliberately does not track the Zone-owned NPC, so
+        // the ordinary local-visibility filter would drop its ObjectChat and
+        // any public script side-effect packets. Preserve those authoritative
+        // script outputs after applying the normal private-state finalizer.
+        let script_packets = packets.clone();
+        let mut finalized = self.finalize_packets(packets);
+        for packet in script_packets {
+            if !finalized.contains(&packet) {
+                finalized.push(packet);
+            }
+        }
+        finalized
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
@@ -3319,11 +3361,43 @@ impl SimulationSession {
         &mut self,
         npc: &WorldEntitySnapshot,
     ) -> Vec<ServerPacket> {
-        if !self.ensure_shared_npc_snapshot_entity(npc) {
+        if npc.kind != WorldEntityKind::Npc || !is_in_world(self.app.world()) {
             return Vec::new();
         }
 
-        self.interact_impl(npc.object_id)
+        let Some(player_entity) = player_entity(self.app.world()) else {
+            return Vec::new();
+        };
+        let Some(player_position) = entity_position(self.app.world(), player_entity) else {
+            return Vec::new();
+        };
+        let npc_position = Point { x: npc.x, y: npc.y };
+        let Some(direction) = direction_toward(&player_position, &npc_position) else {
+            return Vec::new();
+        };
+
+        let mut packets = Vec::new();
+        {
+            let mut player = self.app.world_mut().entity_mut(player_entity);
+            let mut facing = player.get_mut::<Facing>().expect("player facing");
+            if facing.0 != direction {
+                facing.0 = direction;
+                packets.push(ServerPacket::ObjectTurn {
+                    movement: current_movement(self.app.world()),
+                });
+            }
+        }
+        if tile_distance(&player_position, &npc_position) > 1 {
+            return packets;
+        }
+
+        let context = shared_zone_npc_interaction_context(npc);
+        self.app
+            .world_mut()
+            .resource_mut::<NpcStateResource>()
+            .shared_zone_npc_contexts
+            .insert(npc.object_id, context.clone());
+        handle_npc_interaction(self.app.world_mut(), context, packets)
     }
 
     pub(super) fn call_shared_npc_snapshot_impl(
@@ -3331,54 +3405,35 @@ impl SimulationSession {
         npc: &WorldEntitySnapshot,
         key: &str,
     ) -> Vec<ServerPacket> {
-        if !self.ensure_shared_npc_snapshot_entity(npc) {
-            return Vec::new();
+        let normalized_key = key.trim();
+        let main_call = normalized_key.is_empty() || normalized_key.eq_ignore_ascii_case("@Main");
+        if main_call {
+            return self.interact_shared_npc_snapshot_impl(npc);
         }
 
-        self.call_npc_impl(npc.object_id, key)
-    }
-
-    fn ensure_shared_npc_snapshot_entity(&mut self, npc: &WorldEntitySnapshot) -> bool {
-        if npc.kind != WorldEntityKind::Npc || !is_in_world(self.app.world()) {
-            return false;
+        let active_npc_object_id = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .map(|dialog| dialog.npc_object_id);
+        if active_npc_object_id == Some(npc.object_id) {
+            return self.select_npc_dialog_target_impl(normalized_key);
         }
 
-        if let Some(entity) = entity_by_object_id(self.app.world(), npc.object_id) {
-            return self.app.world().entity(entity).contains::<Npc>();
+        let mut packets = self.interact_shared_npc_snapshot_impl(npc);
+        let active_npc_object_id = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .map(|dialog| dialog.npc_object_id);
+        if active_npc_object_id == Some(npc.object_id) {
+            packets.extend(self.select_npc_dialog_target_impl(normalized_key));
         }
-
-        let npc_info = crystal_npc_info_for_loaded_object_id(npc.object_id);
-        let quest_ids = if npc.quest_ids.is_empty() {
-            crystal_quest_ids_by_npc()
-                .get(&npc.object_id)
-                .map(|ids| ids.iter().copied().collect())
-                .unwrap_or_default()
-        } else {
-            npc.quest_ids.clone()
-        };
-        let script_key = npc_info.as_ref().map(|info| info.script_key.clone());
-        let image = npc_info.as_ref().map(|info| info.image).unwrap_or_default();
-
-        self.app.world_mut().spawn((
-            WorldObject,
-            Npc,
-            ObjectId(npc.object_id),
-            localized_npc_name_key(npc.object_id)
-                .map(str::to_string)
-                .or_else(|| localized_npc_name_key_for_name(&npc.name))
-                .map(|key| DisplayName::localized(key, npc.name.clone()))
-                .unwrap_or_else(|| DisplayName::literal(npc.name.clone())),
-            Position(Point { x: npc.x, y: npc.y }),
-            Facing(npc.direction),
-            NpcAgent {
-                image,
-                colour_argb: npc.name_colour_argb,
-                quest_ids,
-                script_key,
-            },
-        ));
-
-        true
+        packets
     }
 
     pub(super) fn call_npc_impl(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
@@ -3514,27 +3569,43 @@ impl SimulationSession {
             return packets;
         }
 
-        let Some(npc_entity) = entity_by_object_id(self.app.world(), active_dialog.npc_object_id)
-        else {
-            dismiss_dialog(self.app.world_mut());
-            return Vec::new();
+        let mut context = if let Some(npc_entity) =
+            entity_by_object_id(self.app.world(), active_dialog.npc_object_id)
+        {
+            let npc_entry = self.app.world().entity(npc_entity);
+            let npc_agent = npc_entry.get::<NpcAgent>().cloned();
+            NpcInteractionContext {
+                object_id: active_dialog.npc_object_id,
+                name: active_dialog.npc_name.clone(),
+                name_key: active_dialog.npc_name_key.clone(),
+                position: entity_position(self.app.world(), npc_entity)
+                    .unwrap_or(Point { x: 0, y: 0 }),
+                quest_ids: npc_agent
+                    .as_ref()
+                    .map(|agent| agent.quest_ids.clone())
+                    .unwrap_or_default(),
+                script_key: npc_agent.and_then(|agent| agent.script_key),
+                args: Vec::new(),
+                input: None,
+            }
+        } else {
+            let shared_context = self
+                .app
+                .world()
+                .resource::<NpcStateResource>()
+                .shared_zone_npc_contexts
+                .get(&active_dialog.npc_object_id)
+                .cloned();
+            let Some(context) = shared_context else {
+                dismiss_dialog(self.app.world_mut());
+                return Vec::new();
+            };
+            context
         };
-
-        let npc_entry = self.app.world().entity(npc_entity);
-        let npc_agent = npc_entry.get::<NpcAgent>().cloned();
-        let context = NpcInteractionContext {
-            object_id: active_dialog.npc_object_id,
-            name: active_dialog.npc_name.clone(),
-            name_key: active_dialog.npc_name_key.clone(),
-            position: entity_position(self.app.world(), npc_entity).unwrap_or(Point { x: 0, y: 0 }),
-            quest_ids: npc_agent
-                .as_ref()
-                .map(|agent| agent.quest_ids.clone())
-                .unwrap_or_default(),
-            script_key: npc_agent.and_then(|agent| agent.script_key),
-            args: label_args,
-            input: input_value,
-        };
+        context.name = active_dialog.npc_name.clone();
+        context.name_key = active_dialog.npc_name_key.clone();
+        context.args = label_args;
+        context.input = input_value;
 
         let Some(script_key) = context.script_key.clone() else {
             dismiss_dialog(self.app.world_mut());

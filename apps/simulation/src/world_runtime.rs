@@ -485,6 +485,10 @@ impl InProcessWorldRuntime {
         self.session.force_authoritative_player_vitals(hp, mp);
     }
 
+    pub fn enforce_shared_zone_private_state_invariant(&mut self) {
+        self.session.enforce_shared_zone_private_state_invariant();
+    }
+
     pub fn apply_zone_player_damage(&mut self, damage: i32) -> bool {
         self.session.apply_zone_player_damage(damage)
     }
@@ -517,10 +521,6 @@ impl InProcessWorldRuntime {
     ) {
         self.session
             .apply_zone_player_buff_packets(packets, zone_object_id);
-    }
-
-    pub fn apply_shared_entity_snapshot(&mut self, entity: &WorldEntitySnapshot) -> bool {
-        self.session.apply_shared_entity_snapshot(entity)
     }
 
     pub fn item_rental_cancel(&mut self) -> Vec<ServerPacket> {

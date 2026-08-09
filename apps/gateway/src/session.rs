@@ -1828,6 +1828,10 @@ mod tests {
     #[test]
     fn start_game_emits_bootstrap_sequence() {
         let mut session = GatewaySession::new(GatewayConfig::default());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
         let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         assert!(matches!(
@@ -1861,7 +1865,7 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
         assert!(packets
             .iter()
-            .any(|packet| matches!(packet, ServerPacket::ObjectPlayer { .. })));
+            .all(|packet| !matches!(packet, ServerPacket::ObjectPlayer { .. })));
         assert!(packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectMonster { .. })));

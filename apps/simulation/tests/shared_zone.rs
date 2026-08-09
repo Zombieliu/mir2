@@ -2003,6 +2003,24 @@ fn later_joiner_receives_retained_zone_object_spawns() {
 }
 
 #[test]
+fn zone_seeded_static_npc_is_visible_without_a_personal_world_actor() {
+    let mut zone = zone();
+    let npc = npc_spawn_packet(7001, 329, 270);
+
+    assert!(zone.seed_world_objects(&[npc], 0).is_empty());
+
+    let player = session("player");
+    let outbounds = zone.handle(ZoneCommand::Join(join("player", 101, "Scout", 330, 270)));
+    assert!(has_packet(&outbounds, &player, |packet| matches!(
+        packet,
+        ServerPacket::ObjectNpc { info }
+            if info.object_id == 7001
+                && info.name == "Village Guide"
+                && info.quest_ids == vec![1, 2]
+    )));
+}
+
+#[test]
 fn retained_zone_object_spawn_uses_object_aoi_not_actor_aoi() {
     let mut zone = zone();
     let first = session("first");
@@ -8378,41 +8396,6 @@ fn call_npc_packet_opens_runtime_npc_dialog() {
             .map(|dialog| dialog.npc_object_id),
         Some(36)
     );
-}
-
-#[test]
-fn session_applies_shared_monster_snapshot_to_local_runtime() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let mut shared_monster = session
-        .world_snapshot()
-        .entities
-        .into_iter()
-        .find(|entity| entity.kind == WorldEntityKind::Monster && entity.max_hp.is_some())
-        .expect("starter scene should expose a monster");
-    shared_monster.hp = Some(1);
-    shared_monster.dead = false;
-
-    assert!(session.apply_shared_entity_snapshot(&shared_monster));
-    let after_hp = session
-        .world_snapshot()
-        .entities
-        .into_iter()
-        .find(|entity| entity.object_id == shared_monster.object_id)
-        .and_then(|entity| entity.hp);
-    assert_eq!(after_hp, Some(1));
-
-    shared_monster.hp = Some(0);
-    shared_monster.dead = true;
-    assert!(session.apply_shared_entity_snapshot(&shared_monster));
-    let after_dead = session
-        .world_snapshot()
-        .entities
-        .into_iter()
-        .find(|entity| entity.object_id == shared_monster.object_id)
-        .expect("shared monster should remain visible as dead snapshot");
-    assert_eq!(after_dead.hp, Some(0));
-    assert!(after_dead.dead);
 }
 
 #[test]

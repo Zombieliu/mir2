@@ -1,5 +1,28 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest single-world authority roadmap sync: 2026-08-10 removes the last
+> production bridge that copied shared NPC/monster actors into a per-session
+> ECS world. In `SharedZone` mode, `SimulationSession` now owns only
+> authenticated account/character state, private progression/inventory, and
+> the local self projection required for protocol/save compatibility; it does
+> not populate or retain NPCs, monsters, heroes, or remote players. Any
+> short-lived projection produced inside a legacy command adapter is discarded
+> immediately after its public packets commit to Zone. The canonical Zone is
+> the only public actor world: static Crystal NPCs are seeded once, monster
+> regions are activated near players, and Zone owns their retained identity,
+> collision/AOI, movement, combat state, cadence, and checkpoint image.
+> Canonical entity names remain language-neutral in Zone and are localized only
+> at each recipient's packet/snapshot boundary, so the same object can appear
+> as `Merchant_Scott` in English and `斯科特商人` in Chinese without duplicating
+> world state. `BichonProvince` map-title output and known Web system broadcasts
+> are localized by the same session language. NPC scripts may still evaluate
+> private quest/inventory state through `SimulationSession`, but public entity
+> side effects commit back through the shared Zone. Automated Rust regressions
+> establish Candidate behavior: Gateway library 437/437 and Simulation shared
+> Zone 156/156 pass, with one existing external-PostgreSQL Gateway test ignored
+> by configuration. Browser/human and production acceptance remain separate
+> gates.
+
 > Latest map-environment roadmap sync: 2026-08-01 closes the source-to-browser
 > path for Crystal map light overrides, `MapDarkLight`, and `WeatherParticles`.
 > The generated 463-map manifest preserves the real fields, Simulation projects

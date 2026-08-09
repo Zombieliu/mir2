@@ -4843,6 +4843,9 @@ fn stage5_intelligent_creature_filter_allows_drop(
 
 pub(super) fn localized_map_title(language: LanguageCode, fallback: &str) -> String {
     match fallback {
+        "BichonProvince" | "Bichon Province" => {
+            localized_text_or_fallback(language, "content.map.bichonProvince.title", fallback)
+        }
         "Starter Field" | "Starter Zone" => {
             localized_text_or_fallback(language, "content.scene.starterField.title", fallback)
         }
@@ -4875,9 +4878,14 @@ pub(super) fn localized_monster_name_key_for_name(name: &str) -> Option<String> 
     if trimmed.is_empty() {
         return None;
     }
-    // Use the raw Crystal name as the key segment (already unique, no path
-    // separators); the bundle holds `content.monster.{name}.name`.
-    Some(format!("content.monster.{trimmed}.name"))
+    // The two guide monsters predate the generated raw-Crystal-name keys and
+    // intentionally use stable camelCase bundle keys. Every other imported
+    // monster keeps the canonical Crystal name as its key segment.
+    Some(match trimmed {
+        "Training Dummy" => "content.monster.trainingDummy.name".to_string(),
+        "Field Wasp" => "content.monster.fieldWasp.name".to_string(),
+        _ => format!("content.monster.{trimmed}.name"),
+    })
 }
 
 pub(super) fn localized_npc_name_key(object_id: u32) -> Option<&'static str> {
@@ -5760,69 +5768,75 @@ pub(super) fn start_game_static_visible_object_packets(
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
     let mut objects = Vec::<(i32, i32, u32, ServerPacket)>::new();
 
-    for npc in crystal_npc_info_manifest().npcs {
-        if npc
-            .map_file_name
-            .as_deref()
-            .map(normalize_map_file_name)
-            .as_deref()
-            != Some(normalized_map.as_str())
-        {
-            continue;
-        }
-        if !point_in_data_range(&npc.location, player_position) {
-            continue;
-        }
-        if !crystal_npc_visible_to_character(&npc, character) {
-            continue;
-        }
-        let Some(object_id) = npc.loaded_object_id else {
-            continue;
-        };
-        let quest_ids = quest_ids_by_npc
-            .get(&object_id)
-            .map(|ids| ids.iter().copied().collect())
-            .unwrap_or_default();
-        objects.push((
-            npc.location.y,
-            npc.location.x,
-            object_id,
-            ServerPacket::ObjectNpc {
-                info: NpcInfo {
-                    object_id,
-                    name: npc.name,
-                    name_colour_argb: CRYSTAL_NPC_NAME_COLOUR_ARGB,
-                    image: npc.image,
-                    colour_argb: 0,
-                    location: npc.location,
-                    direction: MirDirection::Up,
-                    quest_ids,
+    if spawn_source != MonsterSpawnSource::SharedZone {
+        for npc in crystal_npc_info_manifest().npcs {
+            if npc
+                .map_file_name
+                .as_deref()
+                .map(normalize_map_file_name)
+                .as_deref()
+                != Some(normalized_map.as_str())
+            {
+                continue;
+            }
+            if !point_in_data_range(&npc.location, player_position) {
+                continue;
+            }
+            if !crystal_npc_visible_to_character(&npc, character) {
+                continue;
+            }
+            let Some(object_id) = npc.loaded_object_id else {
+                continue;
+            };
+            let quest_ids = quest_ids_by_npc
+                .get(&object_id)
+                .map(|ids| ids.iter().copied().collect())
+                .unwrap_or_default();
+            objects.push((
+                npc.location.y,
+                npc.location.x,
+                object_id,
+                ServerPacket::ObjectNpc {
+                    info: NpcInfo {
+                        object_id,
+                        name: npc.name,
+                        name_colour_argb: CRYSTAL_NPC_NAME_COLOUR_ARGB,
+                        image: npc.image,
+                        colour_argb: 0,
+                        location: npc.location,
+                        direction: MirDirection::Up,
+                        quest_ids,
+                    },
                 },
-            },
-        ));
+            ));
+        }
     }
 
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
-        for respawn in &map.respawns {
-            // In the fully-activated world the whole map is alive, so the
-            // on-screen subset is the canonical full placement filtered to the
-            // data range — same positions/object-ids the ECS world spawned.
-            let visible_spawns = if spawn_source == MonsterSpawnSource::CrystalWorld {
-                crystal_world_respawn_spawns(map_file_name, respawn)
-                    .into_iter()
-                    .filter(|(_, location, _)| point_in_data_range(location, player_position))
-                    .collect::<Vec<_>>()
-            } else {
-                start_game_visible_respawn_spawns(map_file_name, respawn, player_position)
-            };
-            for (slot_index, location, direction) in visible_spawns {
-                let object_id = crystal_respawn_object_id(respawn, slot_index);
-                objects.push((
-                    location.y,
-                    location.x,
-                    object_id,
-                    crystal_respawn_object_monster_packet(respawn, object_id, location, direction),
-                ));
+        if spawn_source != MonsterSpawnSource::SharedZone {
+            for respawn in &map.respawns {
+                // In the fully-activated world the whole map is alive, so the
+                // on-screen subset is the canonical full placement filtered to the
+                // data range — same positions/object-ids the ECS world spawned.
+                let visible_spawns = if spawn_source == MonsterSpawnSource::CrystalWorld {
+                    crystal_world_respawn_spawns(map_file_name, respawn)
+                        .into_iter()
+                        .filter(|(_, location, _)| point_in_data_range(location, player_position))
+                        .collect::<Vec<_>>()
+                } else {
+                    start_game_visible_respawn_spawns(map_file_name, respawn, player_position)
+                };
+                for (slot_index, location, direction) in visible_spawns {
+                    let object_id = crystal_respawn_object_id(respawn, slot_index);
+                    objects.push((
+                        location.y,
+                        location.x,
+                        object_id,
+                        crystal_respawn_object_monster_packet(
+                            respawn, object_id, location, direction,
+                        ),
+                    ));
+                }
             }
         }
         for spell in map.safe_zone_spells {
@@ -7502,10 +7516,12 @@ impl SimulationSession {
                         .world_mut()
                         .resource_mut::<PlayerPermissionResource>()
                         .unlock_curse = false;
-                    self.app
-                        .world_mut()
-                        .resource_mut::<NpcStateResource>()
-                        .active_npc_dialog = None;
+                    {
+                        let mut npc_state = self.app.world_mut().resource_mut::<NpcStateResource>();
+                        npc_state.active_npc_dialog = None;
+                        npc_state.active_npc_service = None;
+                        npc_state.shared_zone_npc_contexts.clear();
+                    }
                     self.app
                         .world_mut()
                         .resource_mut::<ItemRentalResource>()

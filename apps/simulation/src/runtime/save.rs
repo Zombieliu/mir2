@@ -1098,6 +1098,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         npc_state.npc_variables = Vec::new();
         npc_state.active_npc_dialog = None;
         npc_state.active_npc_service = None;
+        npc_state.shared_zone_npc_contexts.clear();
     }
     world
         .resource_mut::<RuntimeQueueResource>()
@@ -1201,6 +1202,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         npc_state.npc_variables = Vec::new();
         npc_state.active_npc_dialog = None;
         npc_state.active_npc_service = None;
+        npc_state.shared_zone_npc_contexts.clear();
     }
     {
         let mut queue = world.resource_mut::<RuntimeQueueResource>();
@@ -1258,10 +1260,12 @@ impl SimulationSession {
                         .world_mut()
                         .resource_mut::<PlayerPermissionResource>()
                         .unlock_curse = false;
-                    self.app
-                        .world_mut()
-                        .resource_mut::<NpcStateResource>()
-                        .active_npc_dialog = None;
+                    {
+                        let mut npc_state = self.app.world_mut().resource_mut::<NpcStateResource>();
+                        npc_state.active_npc_dialog = None;
+                        npc_state.active_npc_service = None;
+                        npc_state.shared_zone_npc_contexts.clear();
+                    }
                     let mut inventory = self.app.world_mut().resource_mut::<InventoryResource>();
                     inventory.storage_unlocked =
                         !inventory.storage_has_password || !config.require_storage_password;
