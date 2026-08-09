@@ -1,6 +1,19 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-02
+Last updated: 2026-08-09
+
+> 2026-08-09 Bichon scene-cache black-floor closure: walking MIR4R1 across
+> `293,610 -> 293,611 -> 293,612` changed the canonical scene chunk and exposed
+> a poisoned v5 disk blueprint containing 138 explicit null back-layer
+> references. Scene schema v6 now bypasses that entry, and disk/memory cache
+> admission rejects null floor references, dangling sprite IDs, empty frame
+> lists, and invalid frame dimensions. The exact v6 `cx18/cy36/w56/h72`
+> request rebuilt once and then hit with 957 sprites, zero null back layers and
+> zero dangling references. Focused cache/request tests and TypeScript pass; a
+> real browser login plus StartGame had no critical console errors, and the
+> live 610-to-612 boundary walk kept a complete floor with no loading-overlay
+> recurrence. This is a local Candidate repair; deployment remains a separate
+> release gate.
 
 > 2026-08-02 mobile PWA/fullscreen shell closure: Player Web now publishes a
 > standards-based fullscreen/landscape Web App Manifest with 192px, 512px,
