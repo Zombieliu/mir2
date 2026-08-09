@@ -14,7 +14,7 @@ export type NormalizedCrystalSceneBlueprintRequest = {
   height: number;
 };
 
-export const SCENE_BLUEPRINT_SCHEMA_VERSION = "2026-08-05-v5-canonical-request";
+export const SCENE_BLUEPRINT_SCHEMA_VERSION = "2026-08-09-v6-scene-integrity";
 export const SCENE_BLUEPRINT_CHUNK_WIDTH = 16;
 export const SCENE_BLUEPRINT_CHUNK_HEIGHT = 17;
 export const SCENE_BLUEPRINT_WIDTH_BUCKET = 8;

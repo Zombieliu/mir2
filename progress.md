@@ -88,3 +88,32 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
 - The workflow no longer requires a redundant Worker deployment for every Vercel release. A
   Vercel-only run still uploads the immutable runtime and must pass current-Worker original-asset and
   full-pack closure checks first, so decoupling the actions does not weaken release ordering.
+
+## 2026-08-09 Bichon scene-cache black-floor repair
+
+- Current prompt: `开始修复吧`, following the confirmed reproduction where `293,610` is healthy
+  and crossing the canonical scene boundary to `293,612` exposes black floor blocks.
+- Root cause confirmed before editing: the `cx18/cy36/w56/h72` disk blueprint was generated before
+  the required Tiles frames, contains 138 explicit null back-layer references, and remains eligible
+  for both the seven-day server cache and the service worker scene cache.
+- Planned repair: invalidate the old schema, reject incomplete or internally dangling blueprint
+  entries on disk and in memory, add focused regressions, then re-run the coordinate/API and visual
+  verification loop.
+- Added a cache-lifecycle regression that first returns an incomplete floor reference, then requires
+  the next call to rebuild and only the third complete call to become a cache hit. It failed on the
+  old implementation (`hit` instead of `miss`) and passes after the repair.
+- Implemented scene blueprint integrity checks on disk read, disk write, and memory retention, plus
+  schema `2026-08-09-v6-scene-integrity` so both the server cache key and service-worker request URL
+  move away from the already-poisoned v5 entry.
+- Exact v6 API verification for `cx18/cy36/w56/h72` returned `miss` then `hit`, with 957 sprites,
+  zero null back layers, zero dangling references, and the boundary Tiles `130-143` present.
+- `test:resource-loading`, `test:scene-blueprint-request`, and TypeScript pass. The repository Stage 5
+  game-entry smoke also passed StartGame/world bootstrap with no critical console errors.
+- Live browser verification used MIR4R1 on map `0`: both `293,610` and `293,612` rendered complete
+  terrain, and a direct `293,610 -> 293,611 -> 293,612` walk crossed the cache boundary without a
+  black block or a loading-overlay recurrence.
+- Known unrelated baseline gates remain outside this repair: `test:map-render-routing` expects service
+  worker schema `sw8` while the tracked worker is `sw4`, and `test:asset-release-contract` resolves a
+  missing workflow path outside this repository checkout. Neither was changed here.
+- TODO: deploy the v6 request/cache schema through the normal release workflow before production
+  acceptance; no manual browser-cache purge is required because the request URL version changes.
