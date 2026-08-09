@@ -91,12 +91,18 @@ async function main() {
     const inputPath = path.join(dataDir, ...normalizedLibraryName.split("/")) + ".Lib";
     const library = await parseLibrary(inputPath);
     const exportDir = path.join(publicDir, ...normalizedLibraryName.split("/"));
-    const indices = exportAllLibraries || fullLibraries?.has(normalizedLibraryName)
-      ? allPresentFrameIndices(library)
-      : expandIndices(
-          config,
-          normalizedLibraryName.toLowerCase() === "mmap" ? crystalMiniMapIndices : [],
-        );
+    const monsterLibrary = normalizedLibraryName.toLowerCase().startsWith("monster/");
+    const configAllFrames = config.all_frames === true || config.allFrames === true;
+    const indices =
+      exportAllLibraries ||
+      fullLibraries?.has(normalizedLibraryName) ||
+      configAllFrames ||
+      monsterLibrary
+        ? allPresentFrameIndices(library)
+        : expandIndices(
+            config,
+            normalizedLibraryName.toLowerCase() === "mmap" ? crystalMiniMapIndices : [],
+          );
 
     await mkdir(exportDir, { recursive: true });
     console.log(
@@ -206,14 +212,17 @@ function parseArgs(argv) {
     }
 
     const equals = arg.indexOf("=");
-    if (equals !== -1) {
-      parsed[arg.slice(2, equals)] = arg.slice(equals + 1);
-      continue;
-    }
+    const rawKey = equals === -1 ? arg.slice(2) : arg.slice(2, equals);
+    const value = equals === -1 ? undefined : arg.slice(equals + 1);
 
-    const key = arg.slice(2);
+    // Normalise kebab-case flags (`--full-libraries`) to the camelCase keys the
+    // callers read (`args.fullLibraries`) so every documented flag actually works.
+    const key = rawKey.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+
     const next = argv[index + 1];
-    if (next && !next.startsWith("--")) {
+    if (value !== undefined) {
+      parsed[key] = value;
+    } else if (next && !next.startsWith("--")) {
       parsed[key] = next;
       index += 1;
     } else {
