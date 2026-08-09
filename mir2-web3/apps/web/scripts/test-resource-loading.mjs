@@ -167,7 +167,63 @@ const fullBichonMapDataAvailable =
     height: 34,
   });
   assert.equal(a, b, "same scene chunk and size bucket should share one blueprint cache key");
-  assert.match(a, /^2026-08-05-v5-canonical-request-0-cx\d+-cy\d+-w40-h40-default$/);
+  assert.match(a, /^2026-08-09-v6-scene-integrity-0-cx\d+-cy\d+-w40-h40-default$/);
+}
+
+// A degraded blueprint must never become a sticky disk/memory hit. This reproduces the
+// Bichon cx18/cy36 failure: an early request wrote explicit null floor references before the
+// matching Tiles frames were available, then every later request reused that incomplete scene.
+{
+  const tempDir = mkdtempSync(path.join(tmpdir(), "mir2-scene-cache-integrity-test-"));
+  const previousCwd = process.cwd();
+  const previousRequestFileWrites = process.env.MIR2_ENABLE_REQUEST_FILE_WRITES;
+  let loadCount = 0;
+  const incompleteBlueprint = sceneBlueprintWithFloorReference(null);
+  const completeBlueprint = sceneBlueprintWithFloorReference("sprite-floor");
+
+  try {
+    process.chdir(tempDir);
+    process.env.MIR2_ENABLE_REQUEST_FILE_WRITES = "1";
+    const cacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-cache.ts", import.meta.url), {
+      "./crystal-map-loader": {
+        loadCrystalSceneBlueprint: async () => {
+          loadCount += 1;
+          return loadCount === 1 ? incompleteBlueprint : completeBlueprint;
+        },
+      },
+      "./scene-blueprint-request": sceneRequestExports,
+      "./scene-types": {},
+    });
+    const request = {
+      mapFileName: "0",
+      centerX: 293,
+      centerY: 612,
+      width: 56,
+      height: 72,
+    };
+
+    const first = await cacheExports.loadCachedCrystalSceneBlueprint(request);
+    assert.equal(first.cacheStatus, "miss");
+    assert.equal(first.blueprint.originalMapRegion.cells[0].back, null);
+
+    const second = await cacheExports.loadCachedCrystalSceneBlueprint(request);
+    assert.equal(second.cacheStatus, "miss", "incomplete blueprints must be rebuilt, not reused");
+    assert.equal(second.blueprint.originalMapRegion.cells[0].back, "sprite-floor");
+    assert.equal(loadCount, 2, "invalid memory and disk entries must both be discarded");
+
+    const third = await cacheExports.loadCachedCrystalSceneBlueprint(request);
+    assert.equal(third.cacheStatus, "hit", "the rebuilt complete blueprint should be reusable");
+    assert.equal(third.blueprint.originalMapRegion.cells[0].back, "sprite-floor");
+    assert.equal(loadCount, 2);
+  } finally {
+    process.chdir(previousCwd);
+    if (previousRequestFileWrites === undefined) {
+      delete process.env.MIR2_ENABLE_REQUEST_FILE_WRITES;
+    } else {
+      process.env.MIR2_ENABLE_REQUEST_FILE_WRITES = previousRequestFileWrites;
+    }
+    rmSync(tempDir, { recursive: true, force: true });
+  }
 }
 
 {
@@ -340,6 +396,45 @@ function sceneBlueprintOriginalMapFramePaths(blueprint) {
     }
   }
   return [...new Set(paths)].sort((left, right) => left.localeCompare(right));
+}
+
+function sceneBlueprintWithFloorReference(back) {
+  return {
+    mapTitle: "Bichon Province",
+    miniMapIndex: 101,
+    bigMapIndex: 101,
+    sceneView: { center: { x: 296, y: 620 }, width: 48, height: 36 },
+    terrainPatches: [],
+    decorObjects: [],
+    originalMapRegion: {
+      mapFileName: "0.map",
+      mapWidth: 1000,
+      mapHeight: 1000,
+      cellWidth: 48,
+      cellHeight: 32,
+      regionBounds: { minX: 244, maxX: 348, minY: 580, maxY: 681 },
+      playBounds: { minX: 272, maxX: 320, minY: 602, maxY: 638 },
+      sprites: back
+        ? {
+            [back]: {
+              kind: "back",
+              drawMode: "floor",
+              blendMode: "normal",
+              frames: [
+                {
+                  path: "/original-map/WemadeMir2/Tiles/130.png",
+                  width: 96,
+                  height: 64,
+                },
+              ],
+            },
+          }
+        : {},
+      // Optional object layers may be null in a complete Crystal map; only a null
+      // back layer creates a black floor and makes the blueprint non-cacheable.
+      cells: [{ x: 288, y: 612, back, front: null }],
+    },
+  };
 }
 
 function assertOnlyRemoteOriginalMapMisses(missingAssets) {
