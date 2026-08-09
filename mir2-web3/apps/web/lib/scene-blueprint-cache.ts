@@ -50,8 +50,19 @@ export async function loadCachedCrystalSceneBlueprint(
   let pending = memoryBlueprints.get(cacheKey);
   if (!pending) {
     pending = loadCrystalSceneBlueprint(normalizedRequest).then(async (blueprint) => {
+      if (!isCompleteSceneBlueprint(blueprint)) {
+        // A graceful asset miss can leave an explicit null layer reference in the
+        // response. Return that one attempt to the caller, but never make the
+        // degraded result sticky: a later request must be able to rebuild after
+        // the missing library/frame becomes available.
+        memoryBlueprints.delete(cacheKey);
+        return blueprint;
+      }
       await writeDiskBlueprint(cacheKey, blueprint);
       return blueprint;
+    }).catch((error) => {
+      memoryBlueprints.delete(cacheKey);
+      throw error;
     });
     rememberBlueprint(cacheKey, pending);
   }
@@ -79,7 +90,12 @@ async function readDiskBlueprint(cacheKey: string) {
       return null;
     }
     const raw = await readFile(filePath, "utf8");
-    return JSON.parse(raw) as SceneBlueprint;
+    const blueprint = JSON.parse(raw) as SceneBlueprint;
+    if (!isCompleteSceneBlueprint(blueprint)) {
+      await unlink(filePath).catch(() => undefined);
+      return null;
+    }
+    return blueprint;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
       console.warn("[mir2] failed to read scene blueprint cache", error);
@@ -89,7 +105,7 @@ async function readDiskBlueprint(cacheKey: string) {
 }
 
 async function writeDiskBlueprint(cacheKey: string, blueprint: SceneBlueprint) {
-  if (!requestFileWritesEnabled) return;
+  if (!requestFileWritesEnabled || !isCompleteSceneBlueprint(blueprint)) return;
 
   try {
     await mkdir(cacheDir, { recursive: true });
@@ -108,6 +124,49 @@ function createSceneCacheKey(request: CrystalSceneBlueprintRequest) {
     ? createHash("sha1").update(process.env.MIR2_SCENE_CACHE_BUSTER).digest("hex").slice(0, 8)
     : "default";
   return createCrystalSceneBlueprintRequestKey(request, buster);
+}
+
+const ORIGINAL_MAP_SPRITE_REFERENCE_FIELDS = ["back", "middle", "front", "tileAnimation"] as const;
+
+/**
+ * Cached blueprints must be internally closed: every non-null layer reference
+ * names a renderable sprite, and no failed floor registration survives as an
+ * explicit null. Optional object/front layers can legitimately resolve to null,
+ * but a null `back` value exposes the stage clear color as a black floor until
+ * the cache TTL expires.
+ */
+function isCompleteSceneBlueprint(blueprint: SceneBlueprint) {
+  const region = blueprint.originalMapRegion;
+  if (!region) return true;
+
+  for (const sprite of Object.values(region.sprites)) {
+    if (!sprite.frames.length) return false;
+    if (
+      sprite.frames.some(
+        (frame) =>
+          !frame.path ||
+          !Number.isFinite(frame.width) ||
+          frame.width <= 0 ||
+          !Number.isFinite(frame.height) ||
+          frame.height <= 0,
+      )
+    ) {
+      return false;
+    }
+  }
+
+  for (const cell of region.cells) {
+    for (const field of ORIGINAL_MAP_SPRITE_REFERENCE_FIELDS) {
+      if (!Object.prototype.hasOwnProperty.call(cell, field)) continue;
+      const spriteId = cell[field];
+      if (spriteId === null && field !== "back") continue;
+      if (typeof spriteId !== "string" || !spriteId || !region.sprites[spriteId]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 async function trimDiskBlueprintCache() {
