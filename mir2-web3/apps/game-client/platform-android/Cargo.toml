@@ -1,0 +1,18 @@
+[package]
+name = "mir2-platform-android"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Native Android host for the mir2-web3 Bevy client"
+license = "MIT"
+
+# Host crates stay independent from the server workspace while the client tree
+# is migrated incrementally, matching client-core, runtime and platform-windows.
+[workspace]
+
+[[bin]]
+name = "mir2-platform-android"
+path = "src/main.rs"
+
+[dependencies]
+mir2-bevy-runtime = { path = "../runtime" }

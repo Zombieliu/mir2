@@ -1,0 +1,16 @@
+[package]
+name = "mir2-client-core"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Platform-neutral client presentation state for mir2-web3"
+license = "MIT"
+
+# Keep this crate independent from the server workspace while the client tree is
+# migrated incrementally. The Bevy runtime consumes it as a path dependency.
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]

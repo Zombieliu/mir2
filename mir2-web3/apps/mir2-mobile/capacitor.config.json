@@ -1,0 +1,13 @@
+{
+  "appId": "com.obelisklabs.mir2",
+  "appName": "Mir2",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "android": {},
+  "ios": {
+    "contentInset": "automatic"
+  }
+}

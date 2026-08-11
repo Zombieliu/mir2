@@ -1,10 +1,30 @@
 # Platform And Client Strategy
 
-Last updated: 2026-04-26
+Last updated: 2026-08-11
 
-Status: discussion draft.
+Status: implementation baseline; real-device and human acceptance remain open.
 
 Purpose: capture the platform coverage strategy for the post-1:1 MMORPG direction. This document complements `docs/TECH-MODERNIZATION-RFC.md`.
+
+## 2026-08-11 Delivery Status
+
+The first cross-platform implementation slice now follows this strategy without
+moving gameplay authority out of Simulation/Gateway:
+
+- Web remains the primary maintained client.
+- Tauri desktop shells for Windows, macOS, and Linux share the deployed Web
+  client and pass hosted compile gates on all three operating systems.
+- Capacitor shells for Android and iOS share the same Web client; Android APK
+  plus emulator launch and an unsigned iOS simulator build are automated gates.
+- `apps/game-client` now contains renderer-neutral client primitives, shared
+  Bevy read models/UI, a native desktop host, and an Android native compile host.
+- CI keeps Rust/WASM, native Windows assets, Tauri, Android, iOS simulator, and
+  shell security/packaging contracts separate so one shell cannot stand in for
+  another platform's evidence.
+
+This is Candidate delivery evidence, not final platform acceptance. Physical
+Android/iOS lifecycle, touch/virtual-keyboard behavior, thermal/memory soak,
+store packaging/signing, and human visual/feel checks remain explicit gates.
 
 ## Target Platform Stance
 
