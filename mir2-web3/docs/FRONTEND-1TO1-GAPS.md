@@ -2,6 +2,16 @@
 
 Last updated: 2026-08-09
 
+> 2026-08-11 main-based cross-platform client Candidate: the client-core and
+> shared Bevy read-model/UI crates, native desktop/Android hosts, Tauri desktop
+> shells, and Capacitor Android/iOS shells are integrated on top of the current
+> main repository layout. Hosted gates cover shared Rust/WASM, Windows native
+> assets, Tauri on Windows/macOS/Linux, Android APK plus native aarch64 compile,
+> iOS simulator, and shell security contracts. This does not change the existing
+> Crystal visual-parity score or close human Accepted status; physical mobile
+> lifecycle/touch/thermal soak, store signing, and final human visual/feel remain
+> separate gates.
+
 > 2026-08-09 Bichon scene-cache black-floor closure: walking MIR4R1 across
 > `293,610 -> 293,611 -> 293,612` changed the canonical scene chunk and exposed
 > a poisoned v5 disk blueprint containing 138 explicit null back-layer

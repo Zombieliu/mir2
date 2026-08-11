@@ -1,0 +1,24 @@
+{
+  "name": "mir2-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "description": "Capacitor mobile shell (Android / iOS) for mir2-web3",
+  "scripts": {
+    "build": "node scripts/build-web.mjs",
+    "test": "node --test scripts/*.test.mjs",
+    "sync": "npm run build && cap sync",
+    "android": "npm run build && cap open android",
+    "ios": "npm run build && cap open ios",
+    "android:build": "npm run build && cd android && ./gradlew assembleDebug",
+    "ios:build": "npm run build && cd ios/App && xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO"
+  },
+  "dependencies": {
+    "@capacitor/android": "7.6.8",
+    "@capacitor/core": "7.6.8",
+    "@capacitor/ios": "7.6.8"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.6.8"
+  }
+}

@@ -1,0 +1,145 @@
+//! Shared renderer-neutral chat model and Bevy chat panel.
+//!
+//! The Web React chat log and the native Bevy chat consume the same
+//! [`ChatModel`] so messages render identically. The panel is presentational;
+//! chat authorization and delivery stay server-authoritative.
+
+use bevy::prelude::*;
+use bevy::ui::{
+    AlignItems, BackgroundColor, Display, FlexDirection, Node, PositionType, UiRect, Val,
+};
+use serde::{Deserialize, Serialize};
+
+/// Maximum chat lines retained in the model.
+pub const MAX_CHAT_LINES: usize = 200;
+
+/// A single chat message in renderer-neutral form.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatLine {
+    pub text: String,
+    /// `normal` / `shout` / `whisper` / `group` / `system` / `hint` etc.
+    pub channel: String,
+}
+
+/// The renderer-neutral chat read model (most recent last).
+#[derive(Debug, Clone, Default, Resource, Serialize, Deserialize)]
+pub struct ChatModel {
+    pub lines: Vec<ChatLine>,
+}
+
+impl ChatModel {
+    /// Append a message, trimming the oldest lines past the cap.
+    pub fn push(&mut self, line: ChatLine) {
+        self.lines.push(line);
+        if self.lines.len() > MAX_CHAT_LINES {
+            let overflow = self.lines.len() - MAX_CHAT_LINES;
+            self.lines.drain(0..overflow);
+        }
+    }
+
+    /// The most recent `count` lines as strings (renderer-neutral).
+    pub fn recent_text(&self, count: usize) -> Vec<&str> {
+        let skip = self.lines.len().saturating_sub(count);
+        self.lines[skip..]
+            .iter()
+            .map(|line| line.text.as_str())
+            .collect()
+    }
+}
+
+/// Marker on the chat panel root.
+#[derive(Component)]
+pub struct ChatPanelRoot;
+
+/// Marker on the chat text node.
+#[derive(Component)]
+pub struct ChatText;
+
+/// Build the shared Mir2 chat panel.
+pub struct Mir2ChatPlugin;
+
+impl Plugin for Mir2ChatPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<ChatModel>()
+            .add_systems(Startup, spawn_chat_panel)
+            .add_systems(
+                Update,
+                update_chat_panel.run_if(resource_changed::<ChatModel>),
+            );
+    }
+}
+
+fn spawn_chat_panel(mut commands: Commands) {
+    commands
+        .spawn((
+            ChatPanelRoot,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(12.0),
+                bottom: Val::Px(12.0),
+                width: Val::Px(420.0),
+                height: Val::Px(96.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Stretch,
+                justify_content: bevy::ui::JustifyContent::FlexEnd,
+                padding: UiRect::all(Val::Px(6.0)),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.03, 0.04, 0.06, 0.60)),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                ChatText,
+                Text::new(""),
+                TextFont {
+                    font_size: bevy::prelude::FontSize::Px(12.0),
+                    ..default()
+                },
+                TextColor(Color::srgb(0.88, 0.88, 0.84)),
+            ));
+        });
+}
+
+fn update_chat_panel(model: Res<ChatModel>, texts: Query<&mut Text, With<ChatText>>) {
+    let joined = model.recent_text(6).join("\n");
+    for mut text in texts {
+        text.0 = joined.clone();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn chat_model_trims_oldest_past_cap() {
+        let mut model = ChatModel::default();
+        for index in 0..(MAX_CHAT_LINES + 5) {
+            model.push(ChatLine {
+                text: format!("line {index}"),
+                channel: "normal".into(),
+            });
+        }
+        assert_eq!(model.lines.len(), MAX_CHAT_LINES);
+        assert_eq!(model.lines[0].text, "line 5");
+        assert_eq!(
+            model.lines.last().unwrap().text,
+            format!("line {}", MAX_CHAT_LINES + 4)
+        );
+    }
+
+    #[test]
+    fn recent_text_returns_last_n() {
+        let mut model = ChatModel::default();
+        for index in 0..5 {
+            model.push(ChatLine {
+                text: format!("m{index}"),
+                channel: "normal".into(),
+            });
+        }
+        assert_eq!(model.recent_text(3), vec!["m2", "m3", "m4"]);
+        assert_eq!(model.recent_text(10).len(), 5);
+    }
+}

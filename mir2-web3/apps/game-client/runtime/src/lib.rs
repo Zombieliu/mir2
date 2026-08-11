@@ -5,6 +5,7 @@ mod interpolation;
 mod local_motion;
 mod motion;
 mod movement_shadow;
+pub mod native_ingest;
 mod presentation_pose;
 mod remote_motion;
 
@@ -45,11 +46,6 @@ const COMPILED_RENDER_BACKEND: &str = "native";
 const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::PreMultiplied;
 #[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
 const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::Auto;
-
-#[cfg(target_arch = "wasm32")]
-const WINDOW_TRANSPARENT: bool = true;
-#[cfg(not(target_arch = "wasm32"))]
-const WINDOW_TRANSPARENT: bool = false;
 
 thread_local! {
     static STATUS_SINK: RefCell<Option<Function>> = const { RefCell::new(None) };
@@ -762,12 +758,67 @@ pub fn set_mir2_self_camera_motion(
         .with(|cell| cell.set(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms))));
 }
 
-#[wasm_bindgen(js_name = bootMir2Runtime)]
-pub fn boot_mir2_runtime() {
-    console_error_panic_hook::set_once();
+/// Window/surface configuration for a Mir2 runtime host.
+///
+/// Platform-neutral so the same Bevy app can open a Web canvas (WASM host), a
+/// native desktop window (Windows/macOS host) or a future Android surface.
+#[derive(Debug, Clone)]
+pub struct RuntimeWindowSpec {
+    /// Web host: DOM canvas selector (e.g. `#mir2-web3-canvas`). Native hosts
+    /// leave this `None` so winit creates a real OS window.
+    pub canvas_selector: Option<String>,
+    pub title: String,
+    pub width: u32,
+    pub height: u32,
+    pub transparent: bool,
+    pub fit_canvas_to_parent: bool,
+    pub prevent_default_event_handling: bool,
+    pub composite_alpha_mode: CompositeAlphaMode,
+    /// Native hosts: filesystem root the AssetServer resolves relative paths
+    /// against (e.g. the repo `apps/web` so `public/` atlas images load). WASM
+    /// hosts leave this empty (`"."` — asset loading goes through the JS fetch
+    /// path, not the filesystem).
+    pub asset_root: String,
+}
 
-    publish_status("runtime-entered", "Bevy runtime entry reached");
+impl RuntimeWindowSpec {
+    /// Web WASM host: transparent overlay over the DOM map/floor/UI layers.
+    pub fn web() -> Self {
+        Self {
+            canvas_selector: Some("#mir2-web3-canvas".to_owned()),
+            title: "mir2-web3".to_owned(),
+            width: 1280,
+            height: 720,
+            transparent: true,
+            fit_canvas_to_parent: true,
+            prevent_default_event_handling: true,
+            composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
+            asset_root: ".".to_owned(),
+        }
+    }
 
+    /// Native desktop host: a real OS window, opaque surface, no canvas.
+    pub fn native(title: impl Into<String>) -> Self {
+        Self {
+            canvas_selector: None,
+            title: title.into(),
+            width: 1280,
+            height: 720,
+            transparent: false,
+            fit_canvas_to_parent: false,
+            prevent_default_event_handling: false,
+            composite_alpha_mode: CompositeAlphaMode::Auto,
+            asset_root: ".".to_owned(),
+        }
+    }
+}
+
+/// Build the shared Mir2 Bevy app for any host without running it.
+///
+/// The WASM `boot_mir2_runtime` entry and every native host (Windows, macOS,
+/// later Android) call this with their own [`RuntimeWindowSpec`]. No DOM, canvas
+/// selector or wasm API is assumed here.
+pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
     let mut app = App::new();
     app.insert_resource(ClearColor(FLOOR_COLOR))
         .insert_resource(RuntimeWorldState::default())
@@ -780,23 +831,29 @@ pub fn boot_mir2_runtime() {
         .insert_resource(interpolation::SnapshotBuffer::default())
         .insert_resource(motion::EntityMotionTable::default())
         .insert_resource(presentation_pose::PresentationPoseBuffer::default())
+        .insert_resource(mir2_client_bevy::read_model::UiReadModel::default())
+        .insert_resource(mir2_client_bevy::map::MapModel::default())
+        .insert_resource(mir2_client_bevy::entities::EntityModelSet::default())
+        .insert_resource(mir2_client_bevy::inventory::InventoryModel::default())
+        .insert_resource(mir2_client_bevy::chat::ChatModel::default())
+        .insert_resource(native_ingest::NativeInbound::new())
         .add_plugins(
             DefaultPlugins
                 .set(AssetPlugin {
-                    file_path: ".".to_owned(),
+                    file_path: spec.asset_root.clone(),
                     meta_check: AssetMetaCheck::Never,
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        canvas: Some("#mir2-web3-canvas".to_owned()),
-                        composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
-                        fit_canvas_to_parent: true,
-                        prevent_default_event_handling: true,
-                        resolution: WindowResolution::new(1280, 720),
-                        title: "mir2-web3".to_owned(),
-                        transparent: WINDOW_TRANSPARENT,
+                        canvas: spec.canvas_selector.clone(),
+                        composite_alpha_mode: spec.composite_alpha_mode,
+                        fit_canvas_to_parent: spec.fit_canvas_to_parent,
+                        prevent_default_event_handling: spec.prevent_default_event_handling,
+                        resolution: WindowResolution::new(spec.width, spec.height),
+                        title: spec.title,
+                        transparent: spec.transparent,
                         ..default()
                     }),
                     ..default()
@@ -819,6 +876,11 @@ pub fn boot_mir2_runtime() {
                 ingest_pending_entity_render_atlases,
                 ingest_pending_map_render_state,
                 ingest_pending_map_render_images,
+                ingest_pending_ui_read_model,
+                ingest_pending_map_model,
+                ingest_pending_entity_model_set,
+                ingest_pending_inventory_model,
+                ingest_pending_chat_line,
                 sync_map_render,
                 sync_map_scene,
                 sync_entities,
@@ -830,6 +892,16 @@ pub fn boot_mir2_runtime() {
             )
                 .chain(),
         );
+    app
+}
+
+#[wasm_bindgen(js_name = bootMir2Runtime)]
+pub fn boot_mir2_runtime() {
+    console_error_panic_hook::set_once();
+
+    publish_status("runtime-entered", "Bevy runtime entry reached");
+
+    let mut app = build_runtime_app(RuntimeWindowSpec::web());
 
     publish_status("running", "Handing off to Bevy app loop");
     app.run();
@@ -844,45 +916,93 @@ fn ingest_pending_world_state(
     mut state: ResMut<RuntimeWorldState>,
     mut snap_buf: ResMut<interpolation::SnapshotBuffer>,
     time: Res<Time>,
+    native: Res<native_ingest::NativeInbound>,
 ) {
+    // WASM path: thread-local cells written by the JS host.
     PENDING_WORLD_STATE.with(|pending| {
         if let Some(snapshot) = pending.borrow_mut().take() {
-            // Build a buffered entry for interpolation.  The receipt time is
-            // the Bevy elapsed seconds; if the TS producer supplied
-            // `clientTimeMs` we note it but still use local time as the
-            // authoritative clock so browser-clock skew can't distort lerp.
-            let receipt_secs = time.elapsed_secs_f64();
-            let positions = snapshot
-                .entities
-                .iter()
-                .map(|e| {
-                    (
-                        e.object_id.clone(),
-                        interpolation::EntityPos { x: e.x, y: e.y },
-                    )
-                })
-                .collect();
-            snap_buf.push(interpolation::BufferedSnapshot {
-                receipt_secs,
-                positions,
-            });
-
-            state.snapshot = Some(snapshot);
+            apply_world_snapshot(&mut state, &mut snap_buf, time.elapsed_secs_f64(), snapshot);
         }
     });
+    // Native path: cross-thread channel written by the gateway client.
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::WorldState(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::WorldState(json) = message {
+                if let Ok(snapshot) = serde_json::from_str::<WorldSnapshot>(&json) {
+                    apply_world_snapshot(
+                        &mut state,
+                        &mut snap_buf,
+                        time.elapsed_secs_f64(),
+                        snapshot,
+                    );
+                } else {
+                    publish_status("native-decode-error", "invalid native world snapshot");
+                }
+            }
+        },
+    );
 }
 
-fn ingest_pending_entity_render_state(mut state: ResMut<RuntimeEntityRenderState>) {
+fn apply_world_snapshot(
+    state: &mut RuntimeWorldState,
+    snap_buf: &mut interpolation::SnapshotBuffer,
+    receipt_secs: f64,
+    snapshot: WorldSnapshot,
+) {
+    // The receipt time is the Bevy elapsed seconds; if the TS producer
+    // supplied `clientTimeMs` we note it but still use local time as the
+    // authoritative clock so browser-clock skew can't distort lerp.
+    let positions = snapshot
+        .entities
+        .iter()
+        .map(|e| {
+            (
+                e.object_id.clone(),
+                interpolation::EntityPos { x: e.x, y: e.y },
+            )
+        })
+        .collect();
+    snap_buf.push(interpolation::BufferedSnapshot {
+        receipt_secs,
+        positions,
+    });
+
+    state.snapshot = Some(snapshot);
+}
+
+fn ingest_pending_entity_render_state(
+    mut state: ResMut<RuntimeEntityRenderState>,
+    native: Res<native_ingest::NativeInbound>,
+) {
     PENDING_ENTITY_RENDER_STATE.with(|pending| {
         if let Some(snapshot) = pending.borrow_mut().take() {
             state.snapshot = Some(snapshot);
         }
     });
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::EntityRenderState(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::EntityRenderState(json) = message {
+                if let Ok(snapshot) = serde_json::from_str::<EntityRenderState>(&json) {
+                    state.snapshot = Some(snapshot);
+                } else {
+                    publish_status("native-decode-error", "invalid native entity render state");
+                }
+            }
+        },
+    );
 }
 
 fn ingest_pending_entity_render_atlases(
     mut atlas_resource: ResMut<RuntimeEntityRenderAtlases>,
     mut images: ResMut<Assets<Image>>,
+    native: Res<native_ingest::NativeInbound>,
 ) {
     PENDING_ENTITY_RENDER_ATLASES.with(|pending| {
         for atlas in pending.borrow_mut().drain(..) {
@@ -901,17 +1021,193 @@ fn ingest_pending_entity_render_atlases(
             atlas_resource.images.insert(atlas.key, handle);
         }
     });
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::EntityRenderAtlas { .. }
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::EntityRenderAtlas {
+                key,
+                width,
+                height,
+                pixels,
+            } = message
+            {
+                let expected_len = (width as usize)
+                    .checked_mul(height as usize)
+                    .and_then(|pixels| pixels.checked_mul(4));
+                if width == 0 || height == 0 || expected_len != Some(pixels.len()) {
+                    publish_status("entity-render-atlas-error", "invalid native atlas pixels");
+                    return;
+                }
+                let image = Image::new(
+                    Extent3d {
+                        width,
+                        height,
+                        depth_or_array_layers: 1,
+                    },
+                    TextureDimension::D2,
+                    pixels,
+                    TextureFormat::Rgba8UnormSrgb,
+                    RenderAssetUsages::default(),
+                );
+                let handle = images.add(image);
+                atlas_resource.images.insert(key, handle);
+            }
+        },
+    );
+}
+
+fn ingest_pending_ui_read_model(
+    mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::UiReadModel(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::UiReadModel(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::read_model::UiReadModel>(&json) {
+                    Ok(model) => {
+                        *ui = model;
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native ui read model");
+                        eprintln!("[runtime] ui read model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_map_model(
+    mut map: ResMut<mir2_client_bevy::map::MapModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::MapModel(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::MapModel(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::map::MapModel>(&json) {
+                    Ok(model) => {
+                        *map = model;
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native map model");
+                        eprintln!("[runtime] map model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_entity_model_set(
+    mut entities: ResMut<mir2_client_bevy::entities::EntityModelSet>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::EntityModelSet(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::EntityModelSet(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::entities::EntityModelSet>(&json) {
+                    Ok(model) => {
+                        *entities = model;
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native entity model set");
+                        eprintln!("[runtime] entity model set decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_inventory_model(
+    mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::InventoryModel(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::InventoryModel(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::inventory::InventoryModel>(&json) {
+                    Ok(model) => {
+                        *inventory = model;
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native inventory model");
+                        eprintln!("[runtime] inventory model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_chat_line(
+    mut chat: ResMut<mir2_client_bevy::chat::ChatModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::ChatLine(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::ChatLine(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::chat::ChatLine>(&json) {
+                    Ok(line) => {
+                        chat.push(line);
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native chat line");
+                        eprintln!("[runtime] chat line decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
 }
 
 fn ingest_pending_map_render_state(
     mut state: ResMut<RuntimeMapRenderState>,
     mut camera_offset: ResMut<RuntimeMapCameraOffset>,
+    native: Res<native_ingest::NativeInbound>,
 ) {
     PENDING_MAP_RENDER_STATE.with(|pending| {
         if let Some(snapshot) = pending.borrow_mut().take() {
             state.snapshot = Some(snapshot);
         }
     });
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::MapRenderState(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::MapRenderState(json) = message {
+                if let Ok(snapshot) = serde_json::from_str::<MapRenderState>(&json) {
+                    state.snapshot = Some(snapshot);
+                } else {
+                    publish_status("native-decode-error", "invalid native map render state");
+                }
+            }
+        },
+    );
     // The camera offset is a cheap per-frame scalar pair; pull the latest value
     // each frame so `sync_map_render` folds the current value into respawned tiles.
     let (x, y) = PENDING_MAP_CAMERA_OFFSET.with(|cell| cell.get());

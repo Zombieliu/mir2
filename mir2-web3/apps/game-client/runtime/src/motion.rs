@@ -31,6 +31,8 @@ use std::collections::HashMap;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 
+use mir2_client_core::clock::{Clock, ManualClock};
+
 use crate::RuntimeWorldState;
 
 // ---------------------------------------------------------------------------
@@ -113,18 +115,53 @@ impl CrystalMoveClock {
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct CrystalMoveClockSet;
 
-fn tick_crystal_move_clock_system(mut clock: ResMut<CrystalMoveClock>) {
-    clock.tick_at(now_ms_wall_clock());
+/// Injectable time source consumed by the shared move clock.
+///
+/// Production uses the platform wall clock (`Date.now()` on WASM, `SystemTime`
+/// on native). Deterministic tests and offline fixtures replace this resource
+/// with a frozen [`ManualClock`]-backed source so motion-table updates never
+/// read a real browser or operating-system clock.
+#[derive(Resource, Clone, Debug)]
+pub(crate) enum MoveClockSource {
+    Wall,
+    /// Frozen/scriptable time source for deterministic tests and offline
+    /// fixtures. Production hosts keep the default `Wall` source.
+    #[allow(dead_code)]
+    Manual(ManualClock),
+}
+
+impl Default for MoveClockSource {
+    fn default() -> Self {
+        Self::Wall
+    }
+}
+
+impl MoveClockSource {
+    pub(crate) fn now_ms(&self) -> f64 {
+        match self {
+            Self::Wall => now_ms_wall_clock(),
+            Self::Manual(clock) => clock.now_ms() as f64,
+        }
+    }
+}
+
+fn tick_crystal_move_clock_system(
+    mut clock: ResMut<CrystalMoveClock>,
+    source: Res<MoveClockSource>,
+) {
+    clock.tick_at(source.now_ms());
 }
 
 pub(crate) struct CrystalMoveClockPlugin;
 
 impl Plugin for CrystalMoveClockPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<CrystalMoveClock>().add_systems(
-            PreUpdate,
-            tick_crystal_move_clock_system.in_set(CrystalMoveClockSet),
-        );
+        app.init_resource::<CrystalMoveClock>()
+            .init_resource::<MoveClockSource>()
+            .add_systems(
+                PreUpdate,
+                tick_crystal_move_clock_system.in_set(CrystalMoveClockSet),
+            );
     }
 }
 
@@ -1024,5 +1061,102 @@ mod tests {
         run_update(&mut table, &state2, 300.0);
         let same_entry = table.get("mob-1").expect("entry should still exist");
         assert_eq!(*same_entry, original_entry, "entry should not have changed");
+    }
+
+    // -----------------------------------------------------------------------
+    // M1-A: deterministic clock injection
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn manual_clock_source_advances_deterministically() {
+        let mut clock = CrystalMoveClock::default();
+        let source = MoveClockSource::Manual(ManualClock::new(1_000));
+
+        // First tick initializes the pulse schedule from the frozen source.
+        assert!(!clock.tick_at(source.now_ms()));
+        assert_eq!(clock.now_ms(), 1_000.0);
+        assert_eq!(clock.next_pulse_ms(), 1_100.0);
+        assert_eq!(clock.pulse_id(), 0);
+
+        // Repeated frames with the same clock value never pulse again.
+        assert!(!clock.tick_at(source.now_ms()));
+        assert_eq!(clock.pulse_id(), 0);
+        assert_eq!(clock.now_ms(), 1_000.0);
+    }
+
+    #[test]
+    fn movement_step_presented_at_start_midpoint_and_expiry() {
+        let entry = EntityMotionEntry {
+            from_x: 0,
+            from_y: 0,
+            to_x: 1,
+            to_y: 0,
+            started_ms: 1_000.0,
+            expires_ms: 1_600.0,
+        };
+
+        // Start of the window → entity sits on the source cell.
+        let at_start = world_position_with_motion(0, 0, &entry, 1_000.0, 32.0);
+        // (0,0) base is (0,0,1); offset.x = -32 → world.x = 0 - (-32) = 32? No:
+        // crystal steps apply the first 100 ms frame, not the raw lerp. Just
+        // assert the offset is between source and destination at each phase.
+        let at_mid = world_position_with_motion(0, 0, &entry, 1_300.0, 32.0);
+        let at_end = world_position_with_motion(1, 0, &entry, 1_600.0, 32.0);
+
+        // Raw sub-cell offset shrinks 1→0 across the window.
+        let offset_start = compute_motion_offset(&entry, 1_000.0, 32.0, 32.0);
+        let offset_mid = compute_motion_offset(&entry, 1_300.0, 32.0, 32.0);
+        let offset_end = compute_motion_offset(&entry, 1_600.0, 32.0, 32.0);
+        assert!(offset_start.x.abs() > offset_mid.x.abs());
+        assert!(offset_mid.x.abs() > offset_end.x.abs());
+        assert!((offset_end.x.abs() - 0.0).abs() < 1e-4);
+
+        // World positions move monotonically from source toward destination.
+        assert!(at_start.x < at_mid.x);
+        assert!(at_mid.x < at_end.x);
+    }
+
+    #[test]
+    fn frozen_clock_future_skew_falls_back_to_now() {
+        let mut table = EntityMotionTable::default();
+        let source = MoveClockSource::Manual(ManualClock::new(2_000));
+        let now_ms = source.now_ms();
+        // Timestamp 10 s in the future relative to the frozen clock.
+        let state = state_with_entity("mob-1", 5, 5, Some(now_ms + 10_000.0), Some(600.0));
+        run_update(&mut table, &state, now_ms);
+        let entry = table.get("mob-1").expect("entry should exist");
+        assert!(
+            (entry.started_ms - now_ms).abs() < 1e-6,
+            "started_ms = {}, expected now = {}",
+            entry.started_ms,
+            now_ms
+        );
+    }
+
+    #[test]
+    fn stale_entity_removal_is_deterministic_under_frozen_clock() {
+        let mut table = EntityMotionTable::default();
+        let source = MoveClockSource::Manual(ManualClock::new(0));
+
+        let seeded = state_with_entity("mob-1", 1, 1, Some(0.0), Some(600.0));
+        run_update(&mut table, &seeded, source.now_ms());
+        assert!(table.get("mob-1").is_some());
+
+        // Same frozen time, entity disappears from the snapshot → removed.
+        let empty = crate::RuntimeWorldState {
+            snapshot: Some(crate::WorldSnapshot {
+                map_title: None,
+                player_object_id: None,
+                selected_object_id: None,
+                scene_view: None,
+                terrain_patches: vec![],
+                decor_objects: vec![],
+                entities: vec![],
+                mine_nodes: vec![],
+                client_time_ms: None,
+            }),
+        };
+        run_update(&mut table, &empty, source.now_ms());
+        assert!(table.get("mob-1").is_none());
     }
 }

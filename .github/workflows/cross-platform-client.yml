@@ -1,0 +1,242 @@
+name: Cross-platform client
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/cross-platform-client.yml"
+      - "mir2-web3/apps/game-client/**"
+      - "mir2-web3/apps/mir2-launcher-tauri/**"
+      - "mir2-web3/apps/mir2-mobile/**"
+      - "mir2-web3/apps/web/public/bevy-entity-atlases/**"
+      - "mir2-web3/apps/web/public/generated/map-atlas/**"
+      - "mir2-web3/apps/web/lib/generated/crystal-map-pack/**"
+      - "mir2-web3/scripts/test-cross-platform-client-shells.mjs"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cross-platform-client.yml"
+      - "mir2-web3/apps/game-client/**"
+      - "mir2-web3/apps/mir2-launcher-tauri/**"
+      - "mir2-web3/apps/mir2-mobile/**"
+      - "mir2-web3/apps/web/public/bevy-entity-atlases/**"
+      - "mir2-web3/apps/web/public/generated/map-atlas/**"
+      - "mir2-web3/apps/web/lib/generated/crystal-map-pack/**"
+      - "mir2-web3/scripts/test-cross-platform-client-shells.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-platform-client-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUST_TOOLCHAIN: 1.95.0
+  NODE_VERSION: 22
+
+jobs:
+  shell-contracts:
+    name: Shell security and packaging contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: node mir2-web3/scripts/test-cross-platform-client-shells.mjs
+
+  shared-rust:
+    name: Shared Rust and WASM
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Rust
+        run: |
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --component rustfmt
+          rustup target add --toolchain "$RUST_TOOLCHAIN" wasm32-unknown-unknown
+      - name: Formatting
+        run: |
+          cargo "+$RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/client-core/Cargo.toml -- --check
+          cargo "+$RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/client-bevy/Cargo.toml -- --check
+          cargo "+$RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/runtime/Cargo.toml -- --check
+      - name: Unit tests
+        run: |
+          cargo "+$RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/client-core/Cargo.toml
+          cargo "+$RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/client-bevy/Cargo.toml
+          cargo "+$RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/runtime/Cargo.toml
+      - name: WASM compile gate
+        run: >-
+          cargo "+$RUST_TOOLCHAIN" check --locked
+          --manifest-path mir2-web3/apps/game-client/runtime/Cargo.toml
+          --target wasm32-unknown-unknown
+
+  windows-native:
+    name: Windows native host and assets
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+      - name: Generate native map atlas
+        shell: bash
+        working-directory: mir2-web3/apps/web
+        run: |
+          npm ci
+          npm run assets:map-atlas:build
+      - name: Install Rust
+        shell: pwsh
+        run: |
+          rustup toolchain install $env:RUST_TOOLCHAIN --profile minimal --component rustfmt
+      - name: Test and build Windows host
+        shell: pwsh
+        run: |
+          cargo "+$env:RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml -- --check
+          cargo "+$env:RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
+          $cargoHome = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE ".cargo" }
+          $rustupHome = if ($env:RUSTUP_HOME) { $env:RUSTUP_HOME } else { Join-Path $env:USERPROFILE ".rustup" }
+          $env:RUSTFLAGS = "--remap-path-prefix=$env:GITHUB_WORKSPACE=. --remap-path-prefix=$cargoHome=.cargo --remap-path-prefix=$rustupHome=.rustup"
+          cargo "+$env:RUST_TOOLCHAIN" build --locked --release --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
+          New-Item -ItemType Directory -Force mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64 | Out-Null
+          Copy-Item mir2-web3/apps/game-client/platform-windows/target/release/mir2-platform-windows.exe mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
+      - name: Package native maps and atlases
+        shell: bash
+        run: >-
+          mir2-web3/apps/game-client/platform-windows/package-assets.sh
+          mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets
+      - name: Verify Windows artifact
+        shell: pwsh
+        run: |
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-platform-windows.exe
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/bevy-entity-atlases/manifest.json
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/map-atlas/manifest.json
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/crystal-map-pack/0.map.gz
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/original-ui/Monster/000/0.png
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mir2-windows-x86_64
+          path: mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64
+          retention-days: 7
+
+  desktop-shells:
+    name: Tauri ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/mir2-launcher-tauri
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Linux WebKit dependencies
+        if: runner.os == 'Linux'
+        working-directory: .
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/mir2-launcher-tauri/package-lock.json
+      - name: Install Rust
+        shell: bash
+        run: rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --component rustfmt
+      - run: npm ci
+      - name: Test launcher URL policy
+        shell: bash
+        run: >-
+          cargo "+$RUST_TOOLCHAIN" test --locked
+          --manifest-path src-tauri/Cargo.toml
+      - name: Compile platform launcher
+        shell: bash
+        env:
+          RUSTUP_TOOLCHAIN: ${{ env.RUST_TOOLCHAIN }}
+        run: npx tauri build --no-bundle
+
+  android:
+    name: Android Capacitor and native Bevy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/mir2-mobile
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/mir2-mobile/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install Rust Android target
+        working-directory: .
+        run: |
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
+          rustup target add --toolchain "$RUST_TOOLCHAIN" aarch64-linux-android
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Build Capacitor APK
+        run: cd android && ./gradlew assembleDebug
+      - name: Compile native Bevy host
+        working-directory: .
+        run: |
+          NDK_HOME="$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          test -n "$NDK_HOME"
+          ANDROID_NDK_HOME="$NDK_HOME" mir2-web3/apps/game-client/platform-android/build-android.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mir2-android-debug-apk
+          path: mir2-web3/apps/mir2-mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+
+  ios:
+    name: iOS simulator shell
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/mir2-mobile
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/mir2-mobile/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync ios
+      - name: Build unsigned simulator app
+        run: >-
+          cd ios/App &&
+          xcodebuild
+          -workspace App.xcworkspace
+          -scheme App
+          -configuration Debug
+          -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          build
+          CODE_SIGNING_ALLOWED=NO
