@@ -441,3 +441,20 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   before falling back to capped exponential delay. Added a deterministic 429-then-success regression
   test; immutable object keys keep partial retries idempotent and the full release manifest remains
   untouched.
+
+## 2026-08-12 Steam channel on main baseline (server verifier + SDK + packaging)
+
+Replayed the Steam channel work onto the codex-integrated main baseline
+(`origin/codex/cross-platform-client-main` -> branch `codex/steam-main`):
+
+- Gateway `ChannelIdentityProvider::Steam` + `verify_steam_ticket()`
+  (ISteamUserAuth/AuthenticateUserTicket, server-side, SteamID -> Player ID).
+- Web `SteamDesktopChannelAdapter` (Tauri-bridge detection, ticket ->
+  /api/channels/session/exchange provider "steam").
+- Launcher `steam_auth_ticket` command + `steam.rs` (override / Steamworks SDK
+  via raw GetAuthTicketForWebApi + manual dispatch cb168 / None fallback),
+  feature-gated `steam` (default off).
+- Packaging: prepare-steam.sh (steam_appid.txt + steam_api lib), tauri.conf.json
+  bundle.resources, build-desktop.sh 'steam' target.
+- Verified: launcher 7/7 ±steam feature, gateway channel_identity 7/7, web tsc 0
+  errors, steam_appid.txt (480) bundles into Mir2.app.
