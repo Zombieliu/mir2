@@ -27,6 +27,14 @@ case "${TARGET}" in
     echo "[launcher] building host bundle (${TOOLCHAIN})"
     (cd "$LAUNCHER" && npx tauri build --bundles app)
     ;;
+  steam)
+    echo "[launcher] building host bundle WITH Steamworks (${TOOLCHAIN})"
+    if [[ ! -f "$LAUNCHER/src-tauri/resources/steam_appid.txt" ]]; then
+      echo "  steam_appid.txt missing; run ./prepare-steam.sh first" >&2
+      exit 1
+    fi
+    (cd "$LAUNCHER" && npx tauri build --bundles app --features steam --config src-tauri/tauri.steam.conf.json)
+    ;;
   windows)
     export PATH="$(brew --prefix mingw-w64)/bin:${PATH}"
     export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="x86_64-w64-mingw32-gcc"

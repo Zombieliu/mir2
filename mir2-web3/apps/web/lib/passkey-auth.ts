@@ -263,7 +263,8 @@ async function exchangeChannelSession(
     | "crazyGames"
     | "crazyGamesGuest"
     | "directGuest"
-    | "itch",
+    | "itch"
+    | "steam",
   credential: string,
 ): Promise<SuiLoginToken> {
   const response = await fetch("/api/channels/session/exchange", {
@@ -290,7 +291,8 @@ export function requestChannelSessionToken(
     | "crazyGames"
     | "crazyGamesGuest"
     | "directGuest"
-    | "itch",
+    | "itch"
+    | "steam",
   credential: string,
 ) {
   return exchangeChannelSession(provider, credential);
@@ -329,7 +331,7 @@ export async function linkSuiIdentity(
 export async function linkChannelIdentity(
   accountId: string,
   sessionToken: string,
-  provider: "suiPasskey" | "suiWallet" | "crazyGames",
+  provider: "suiPasskey" | "suiWallet" | "crazyGames" | "steam",
   credential: string,
 ) {
   const response = await fetch("/api/channels/identity/link", {

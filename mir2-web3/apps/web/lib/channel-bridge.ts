@@ -1,11 +1,11 @@
 "use client";
 
-export type DistributionChannel = "direct" | "itch" | "crazyGames";
+export type DistributionChannel = "direct" | "itch" | "crazyGames" | "steam";
 
 export type ChannelIdentityCredential =
   | {
       kind: "authenticated";
-      provider: "crazyGames";
+      provider: "crazyGames" | "steam";
       credential: string;
     }
   | {
@@ -105,6 +105,70 @@ class DirectChannelAdapter implements ChannelAdapter {
   }
 }
 
+/// Steam adapter for the Tauri desktop shell.
+///
+/// When the game runs inside the desktop launcher, the launcher exposes a
+/// `steam_auth_ticket` Tauri command. This adapter detects the Tauri bridge,
+/// fetches the ticket, and returns it as the authenticated credential the
+/// Gateway exchanges via `/api/channels/session/exchange` (provider `"steam"`).
+///
+/// Outside the desktop shell (web / mobile / itch / crazyGames), Steam is not a
+/// channel: the game falls back to direct/guest login.
+class SteamDesktopChannelAdapter implements ChannelAdapter {
+  readonly channel = "steam" as const;
+  private ticket: string | null = null;
+
+  async initialize(): Promise<ChannelContext> {
+    this.ticket = await fetchSteamAuthTicket();
+    return {
+      channel: this.channel,
+      sdkAvailable: this.ticket !== null,
+      accountAvailable: this.ticket !== null,
+    };
+  }
+
+  async identity(): Promise<ChannelIdentityCredential> {
+    if (!this.ticket) {
+      return { kind: "guest", provider: "directGuest" };
+    }
+    return { kind: "authenticated", provider: "steam", credential: this.ticket };
+  }
+
+  loadingStart() {}
+  loadingStop() {}
+  gameplayStart() {}
+  gameplayStop() {}
+
+  async showRewardedAd(): Promise<ChannelAdResult> {
+    return { completed: false, error: "rewarded ads are unavailable on Steam" };
+  }
+
+  subscribeIdentityChanges() {
+    return () => {};
+  }
+}
+
+/// Whether the page runs inside the Tauri desktop shell.
+function inTauriShell(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof (window as unknown as { __TAURI__?: unknown }).__TAURI__ !== "undefined"
+  );
+}
+
+/// Fetch the Steam auth ticket from the Tauri launcher, if present.
+async function fetchSteamAuthTicket(): Promise<string | null> {
+  if (!inTauriShell()) return null;
+  try {
+    // @ts-expect-error -- the Tauri global is injected by the desktop shell.
+    const ticket = await window.__TAURI__.core.invoke<string | null>("steam_auth_ticket");
+    return ticket && ticket.trim() ? ticket : null;
+  } catch (error) {
+    console.warn("[channel-bridge] steam_auth_ticket unavailable:", error);
+    return null;
+  }
+}
+
 class CrazyGamesChannelAdapter implements ChannelAdapter {
   readonly channel = "crazyGames" as const;
   private sdk: CrazyGamesSdk | null = null;
@@ -186,10 +250,12 @@ let gameplayActive = false;
 
 export function detectedDistributionChannel(location = window.location): DistributionChannel {
   const requested = new URLSearchParams(location.search).get("channel")?.trim().toLowerCase();
+  if (requested === "steam" || requested === "steamworks") return "steam";
   if (requested === "crazygames" || requested === "crazy-games") return "crazyGames";
   if (requested === "itch" || requested === "itch.io") return "itch";
   if (new URLSearchParams(location.search).get("isCrazyGames") === "true") return "crazyGames";
   if (/itch\.(?:io|zone)$/iu.test(location.hostname)) return "itch";
+  if (inTauriShell()) return "steam";
   return "direct";
 }
 
@@ -199,7 +265,9 @@ export async function channelAdapter(): Promise<ChannelAdapter> {
     adapterPromise = Promise.resolve(
       channel === "crazyGames"
         ? new CrazyGamesChannelAdapter()
-        : new DirectChannelAdapter(channel),
+        : channel === "steam"
+          ? new SteamDesktopChannelAdapter()
+          : new DirectChannelAdapter(channel),
     );
   }
   return adapterPromise;
