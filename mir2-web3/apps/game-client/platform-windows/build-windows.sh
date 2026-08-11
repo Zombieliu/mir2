@@ -15,7 +15,9 @@ cd "$ROOT"
 
 TOOLCHAIN="${MIR2_CLIENT_TOOLCHAIN:-1.95.0}"
 HOST_OS="$(uname -s)"
-export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }--remap-path-prefix=${ROOT}=."
+CARGO_HOME_DIR="${CARGO_HOME:-${HOME}/.cargo}"
+RUSTUP_HOME_DIR="${RUSTUP_HOME:-${HOME}/.rustup}"
+export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }--remap-path-prefix=${ROOT}=. --remap-path-prefix=${CARGO_HOME_DIR}=.cargo --remap-path-prefix=${RUSTUP_HOME_DIR}=.rustup"
 
 if [[ "${HOST_OS}" == "Darwin" ]]; then
   export PATH="$(brew --prefix mingw-w64)/bin:${PATH}"

@@ -1,6 +1,6 @@
 //! Runtime asset-root discovery for relocatable native builds.
 
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 pub const ASSET_ROOT_ENV: &str = "MIR2_NATIVE_ASSET_ROOT";
 
@@ -41,7 +41,14 @@ pub fn asset_root() -> Option<PathBuf> {
 
 pub fn asset_path(web_path: &str) -> Option<PathBuf> {
     let relative = web_path.trim_start_matches('/');
-    if relative.is_empty() || relative.split('/').any(|part| part == "..") {
+    if relative.is_empty() || relative.contains(['\\', ':']) {
+        return None;
+    }
+    let relative = Path::new(relative);
+    if !relative
+        .components()
+        .all(|component| matches!(component, Component::Normal(_)))
+    {
         return None;
     }
     asset_root().map(|root| root.join(relative))
@@ -69,5 +76,9 @@ mod tests {
     #[test]
     fn asset_path_rejects_parent_traversal() {
         assert!(asset_path("../private").is_none());
+        assert!(asset_path("maps/../../private").is_none());
+        assert!(asset_path(r"..\private").is_none());
+        assert!(asset_path(r"C:\private").is_none());
+        assert!(asset_path("./private").is_none());
     }
 }

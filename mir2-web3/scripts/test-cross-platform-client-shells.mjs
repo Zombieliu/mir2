@@ -2,11 +2,13 @@
 
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(projectRoot, "..");
+const require = createRequire(import.meta.url);
 const readProject = (relativePath) =>
   readFile(path.join(projectRoot, relativePath), "utf8");
 const readRepository = (relativePath) =>
@@ -21,6 +23,7 @@ const [
   tauriCapability,
   mobileLoader,
   capacitorConfigSource,
+  androidManifest,
   mobilePackage,
   mobileBuild,
   mobileDeviceBuild,
@@ -34,7 +37,8 @@ const [
   readProject("apps/mir2-launcher-tauri/src/index.html"),
   readProject("apps/mir2-launcher-tauri/src-tauri/capabilities/default.json"),
   readProject("apps/mir2-mobile/scripts/build-web.mjs"),
-  readProject("apps/mir2-mobile/capacitor.config.json"),
+  readProject("apps/mir2-mobile/capacitor.config.js"),
+  readProject("apps/mir2-mobile/android/app/src/main/AndroidManifest.xml"),
   readProject("apps/mir2-mobile/package.json"),
   readProject("apps/mir2-mobile/build-mobile.sh"),
   readProject("apps/mir2-mobile/build-mobile-device.sh"),
@@ -57,6 +61,11 @@ assert.match(
   windowsBuild,
   /--remap-path-prefix/,
   "release artifacts must not expose the build checkout path",
+);
+assert.match(
+  windowsBuild,
+  /CARGO_HOME_DIR.*--remap-path-prefix=.*CARGO_HOME_DIR/s,
+  "release artifacts must not expose the developer Cargo home path",
 );
 
 assert.doesNotMatch(
@@ -98,13 +107,27 @@ assert.doesNotMatch(
   "mobile shells must not ship a protected Vercel preview URL",
 );
 
-const capacitorConfig = JSON.parse(capacitorConfigSource);
+const capacitorConfig = require(
+  path.join(projectRoot, "apps/mir2-mobile/capacitor.config.js"),
+);
 assert.notEqual(capacitorConfig.server?.cleartext, true, "cleartext HTTP must be disabled");
 assert.notEqual(
   capacitorConfig.android?.allowMixedContent,
   true,
   "mixed content must be disabled",
 );
+assert.deepEqual(
+  capacitorConfig.server?.allowNavigation,
+  ["mir2.obelisk.build"],
+  "the production game origin must remain inside the mobile app WebView",
+);
+assert.match(
+  capacitorConfigSource,
+  /createCapacitorConfig/,
+  "Capacitor navigation policy must resolve the same build-time game origin as the loader",
+);
+assert.match(androidManifest, /android:allowBackup="false"/);
+assert.match(androidManifest, /android:usesCleartextTraffic="false"/);
 
 assert.match(mobilePackage, /cd ios\/App && xcodebuild/);
 assert.match(mobileBuild, /cd "\$MOBILE\/ios\/App"/);

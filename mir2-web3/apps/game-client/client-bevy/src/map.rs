@@ -6,6 +6,8 @@
 //! tiles (matching the runtime's Crystal-stepped palette) as the shared
 //! fallback, ready to be swapped for atlas textures.
 
+use std::collections::{HashMap, HashSet};
+
 use bevy::prelude::*;
 use bevy::sprite::Sprite;
 use serde::{Deserialize, Serialize};
@@ -155,46 +157,43 @@ impl Plugin for Mir2MapPlugin {
 fn sync_map_terrain(
     mut commands: Commands,
     model: Res<MapModel>,
-    existing: Query<(Entity, &MapTileKey), With<MirMapRoot>>,
+    mut existing: Query<(Entity, &MapTileKey, &mut Sprite), With<MirMapRoot>>,
 ) {
-    // (Re)build from the model: this is a cheap fallback path — despawn all and
-    // respawn. Atlas-backed rendering will diff by key instead.
-    let mut tile_keys = std::collections::HashSet::new();
+    // Later patches are authoritative when patches overlap, matching
+    // `terrain_at`. Build one desired entry per cell before diffing ECS state.
+    let mut desired = HashMap::new();
     for patch in &model.patches {
         for dx in 0..patch.width {
             for dy in 0..patch.height {
-                tile_keys.insert(MapTileKey {
-                    x: patch.x + i32::from(dx),
-                    y: patch.y + i32::from(dy),
-                });
+                desired.insert(
+                    MapTileKey {
+                        x: patch.x + i32::from(dx),
+                        y: patch.y + i32::from(dy),
+                    },
+                    patch.kind,
+                );
             }
         }
     }
 
-    let mut spawn = Vec::new();
-    for (entity, key) in &existing {
-        if !tile_keys.contains(&key) {
+    let mut live = HashSet::new();
+    for (entity, key, mut sprite) in &mut existing {
+        let Some(kind) = desired.get(key) else {
             commands.entity(entity).despawn();
+            continue;
+        };
+        if !live.insert(key.clone()) {
+            // Heal duplicate entities produced by an earlier overlapping model.
+            commands.entity(entity).despawn();
+            continue;
         }
+        sprite.color = kind.base_color(MapModel::variation(key.x, key.y));
     }
 
-    let live: std::collections::HashSet<MapTileKey> =
-        existing.iter().map(|(_, key)| key.clone()).collect();
-    for patch in &model.patches {
-        for dx in 0..patch.width {
-            for dy in 0..patch.height {
-                let x = patch.x + i32::from(dx);
-                let y = patch.y + i32::from(dy);
-                let key = MapTileKey { x, y };
-                if live.contains(&key) {
-                    continue;
-                }
-                spawn.push((key, patch.kind));
-            }
+    for (key, kind) in desired {
+        if live.contains(&key) {
+            continue;
         }
-    }
-
-    for (key, kind) in spawn {
         commands.spawn((
             MirMapRoot,
             key.clone(),
@@ -290,5 +289,40 @@ mod tests {
         let t = tile_to_world(3, 4);
         assert!((t.x - 96.0).abs() < 1e-5);
         assert!((t.y + 128.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn overlapping_patches_render_one_tile_and_later_patch_wins() {
+        let mut app = App::new();
+        app.add_plugins(Mir2MapPlugin);
+        *app.world_mut().resource_mut::<MapModel>() = MapModel {
+            patches: vec![
+                TerrainPatch {
+                    x: 0,
+                    y: 0,
+                    width: 1,
+                    height: 1,
+                    kind: TerrainKind::Grass,
+                },
+                TerrainPatch {
+                    x: 0,
+                    y: 0,
+                    width: 1,
+                    height: 1,
+                    kind: TerrainKind::Water,
+                },
+            ],
+            ..default()
+        };
+        app.update();
+
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<(&MapTileKey, &Sprite), With<MirMapRoot>>();
+        let tiles = query.iter(world).collect::<Vec<_>>();
+        assert_eq!(tiles.len(), 1);
+        assert_eq!(
+            tiles[0].1.color,
+            TerrainKind::Water.base_color(MapModel::variation(0, 0))
+        );
     }
 }

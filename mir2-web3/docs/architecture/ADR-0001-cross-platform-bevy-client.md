@@ -34,12 +34,14 @@ packages/
 
 apps/game-client/
   client-core                replica/presentation math, intents, reconciliation
-  client-bevy                shared rendering and in-game UI (planned)
+  client-bevy                shared rendering fallbacks and in-game UI
   platform-web               WASM/PWA host (planned extraction)
-  platform-windows           native Bevy host (planned)
-  platform-android           Gradle/Activity host (planned)
+  platform-windows           native Bevy desktop host
+  platform-android           native Android compile gate; Activity still planned
   platform-ios               Swift/Xcode host (planned)
-  launcher-tauri             Windows launcher only (planned)
+
+apps/mir2-launcher-tauri     thin Windows/macOS/Linux WebView shell
+apps/mir2-mobile             Capacitor Android/iOS WebView shells
 ```
 
 The existing `runtime` crate remains the Web production adapter until the

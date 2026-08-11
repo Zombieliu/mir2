@@ -1036,10 +1036,10 @@ fn ingest_pending_entity_render_atlases(
                 pixels,
             } = message
             {
-                if width == 0
-                    || height == 0
-                    || pixels.len() != (width as usize * height as usize * 4)
-                {
+                let expected_len = (width as usize)
+                    .checked_mul(height as usize)
+                    .and_then(|pixels| pixels.checked_mul(4));
+                if width == 0 || height == 0 || expected_len != Some(pixels.len()) {
                     publish_status("entity-render-atlas-error", "invalid native atlas pixels");
                     return;
                 }

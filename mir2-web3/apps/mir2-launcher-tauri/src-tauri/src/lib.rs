@@ -23,6 +23,10 @@ fn resolve_frontend_url(value: Option<&str>, development: bool) -> Result<tauri:
     let url =
         tauri::Url::parse(candidate).map_err(|error| format!("invalid {GAME_URL_ENV}: {error}"))?;
 
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err(format!("{GAME_URL_ENV} must not contain credentials"));
+    }
+
     let is_loopback = matches!(url.host_str(), Some("127.0.0.1" | "localhost" | "::1"));
     match url.scheme() {
         "https" => Ok(url),
@@ -73,5 +77,6 @@ mod tests {
     fn release_rejects_insecure_and_invalid_overrides() {
         assert!(resolve_frontend_url(Some("http://127.0.0.1:3002"), false).is_err());
         assert!(resolve_frontend_url(Some("not a URL"), false).is_err());
+        assert!(resolve_frontend_url(Some("https://user:secret@example.com"), false).is_err());
     }
 }

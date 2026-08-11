@@ -15,7 +15,9 @@ moving gameplay authority out of Simulation/Gateway:
 - Tauri desktop shells for Windows, macOS, and Linux share the deployed Web
   client and pass hosted compile gates on all three operating systems.
 - Capacitor shells for Android and iOS share the same Web client; Android APK
-  plus emulator launch and an unsigned iOS simulator build are automated gates.
+  and unsigned iOS simulator builds are hosted gates. A separate local script
+  can install/launch an Android emulator or selected device, but that smoke is
+  not a hosted or physical-device acceptance substitute.
 - `apps/game-client` now contains renderer-neutral client primitives, shared
   Bevy read models/UI, a native desktop host, and an Android native compile host.
 - CI keeps Rust/WASM, native Windows assets, Tauri, Android, iOS simulator, and

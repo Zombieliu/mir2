@@ -1,8 +1,11 @@
-# Flash handoff: M1-A deterministic motion clock
+# Archived handoff: M1-A deterministic motion clock
 
-Use DeepSeek V4 Flash with high reasoning. Work only in this repository working
-tree, on the current cross-platform baseline branch. Do not reset, rebase,
-clean, amend, push or deploy.
+Status: completed and retained only as implementation history. Do not rerun this
+handoff as an active task. The instructions below describe the original bounded
+M1-A worker assignment.
+
+Work only in this repository working tree, on the current cross-platform
+baseline branch. Do not reset, rebase, clean, amend, push or deploy.
 
 ## Read first
 

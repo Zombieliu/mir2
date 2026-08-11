@@ -2,7 +2,7 @@
   "name": "mir2-mobile",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "type": "commonjs",
   "description": "Capacitor mobile shell (Android / iOS) for mir2-web3",
   "scripts": {
     "build": "node scripts/build-web.mjs",

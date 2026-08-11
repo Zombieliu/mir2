@@ -10,17 +10,22 @@ Current layout:
 - `runtime`: the existing Bevy renderer and its WASM/browser bridge. It now
   consumes `client-core` and remains the production Web runtime during the
   migration.
+- `client-bevy`: shared renderer-neutral read models plus Bevy map/entity
+  fallbacks and HUD, inventory, chat and character UI.
+- `platform-windows`: native desktop window/input/Gateway adapter with packaged
+  Crystal atlases and maps.
+- `platform-android`: Android aarch64 compile-gate host; Activity/surface/touch
+  lifecycle wiring remains a later device slice.
 
-Target layout (created only as each vertical slice becomes executable):
+Remaining target layout (created only as each vertical slice becomes executable):
 
-- `client-bevy`: shared map, entity, animation, effects, camera and in-game UI.
 - `platform-web`: WASM/PWA adapter.
-- `platform-windows`: native window/input/lifecycle adapter.
-- `platform-android`: Android Activity, touch and lifecycle adapter.
 - `platform-ios`: Swift/Xcode, touch and lifecycle adapter.
-- `launcher-tauri`: Windows login, update, announcement and native-game launch.
 - `platform-xbox`: deferred until GDKX partner access and Windows Native are
   stable.
+
+The thin WebView shells live beside this tree in `apps/mir2-launcher-tauri`
+(Windows/macOS/Linux) and `apps/mir2-mobile` (Android/iOS).
 
 The server remains authoritative. Client code can emit intents, keep a local
 replica, interpolate and reconcile presentation, but cannot award XP, decide
@@ -32,13 +37,14 @@ Architecture and execution contracts:
   dependency rules, authority ownership and migration gates.
 - [`M1 client model contract`](../../docs/architecture/M1-CLIENT-MODEL-CONTRACT.md):
   frozen deterministic primitives and the M1-A edit boundary.
-- [`M1 Flash handoff`](./M1-FLASH-HANDOFF.md): focused prompt and acceptance
-  commands for the next implementation slice.
+- [`M1 Flash handoff`](./M1-FLASH-HANDOFF.md): archived implementation prompt
+  retained as M1-A history; the slice is complete.
 
 ## Verification
 
 ```bash
-cargo test --manifest-path apps/game-client/client-core/Cargo.toml
-cargo test --manifest-path apps/game-client/runtime/Cargo.toml
+cargo +1.95.0 test --locked --manifest-path apps/game-client/client-core/Cargo.toml
+cargo +1.95.0 test --locked --manifest-path apps/game-client/client-bevy/Cargo.toml
+cargo +1.95.0 test --locked --manifest-path apps/game-client/runtime/Cargo.toml
 cd apps/web && npm run runtime:build:dev
 ```

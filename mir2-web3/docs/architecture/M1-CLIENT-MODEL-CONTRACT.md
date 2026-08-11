@@ -124,10 +124,10 @@ Forbidden without a new Sol review:
 
 All of the following must pass from the repository project directory:
 
-    cargo +1.89.0 fmt --manifest-path apps/game-client/client-core/Cargo.toml --check
-    cargo +1.89.0 test --manifest-path apps/game-client/client-core/Cargo.toml
-    cargo +1.89.0 fmt --manifest-path apps/game-client/runtime/Cargo.toml --check
-    cargo +1.89.0 test --manifest-path apps/game-client/runtime/Cargo.toml
+    cargo +1.95.0 fmt --manifest-path apps/game-client/client-core/Cargo.toml --check
+    cargo +1.95.0 test --manifest-path apps/game-client/client-core/Cargo.toml
+    cargo +1.95.0 fmt --manifest-path apps/game-client/runtime/Cargo.toml --check
+    cargo +1.95.0 test --manifest-path apps/game-client/runtime/Cargo.toml
     npm --prefix apps/web run runtime:build:dev
     npm --prefix apps/web run smoke:bevy-runtime-backends
     git diff --check

@@ -186,7 +186,7 @@ PLAYWRIGHT_CHROMIUM="$CHROMIUM" node apps/web/<script>.js
 
 ### 6.1 Crate 布局与工具链
 
-- `apps/game-client/client-core`:平台无关表现数学,**零外部依赖**;`cargo +1.89.0 test`(12/12)
+- `apps/game-client/client-core`:平台无关表现数学,**零外部依赖**;统一用 `cargo +1.95.0 test`(12/12)
 - `apps/game-client/runtime`:现有 Bevy WASM 运行时,消费 client-core;crate 内 `rust-toolchain.toml` 是 **1.95.0**(Bevy 0.19 需要),与根目录 1.89.0 不同
 - `apps/game-client/platform-windows`:原生 Windows/macOS 桌面宿主(共享 `build_runtime_app` + gateway WS 客户端)
 - 跨平台 crate 都是独立 `[workspace]`(不带 server workspace),路径依赖链接
@@ -195,11 +195,11 @@ PLAYWRIGHT_CHROMIUM="$CHROMIUM" node apps/web/<script>.js
 
 - **运行时原生编译用 `cargo +1.95.0`**(不是根目录的 1.89.0,否则报 `bevy requires rustc 1.95.0`)
 - macOS 原生宿主冒烟:`apps/game-client/platform-windows` 直接 `cargo +1.95.0 run` 开窗口
-- **原生宿主连本地 gateway**:默认 `ws://127.0.0.1:7110/ws`,demo/demo 账号,字符 index 0;env 覆盖:`MIR2_NATIVE_ACCOUNT` / `MIR2_NATIVE_PASSWORD` / `MIR2_NATIVE_CHARACTER_INDEX` / `MIR2_GATEWAY_WS_URL`
+- **原生宿主连本地 gateway**:gateway 默认 `ws://127.0.0.1:7110/ws`,字符 index 默认 0;账号和密码**没有默认值**,必须显式设置 `MIR2_NATIVE_ACCOUNT` / `MIR2_NATIVE_PASSWORD`;可用 `MIR2_NATIVE_CHARACTER_INDEX` / `MIR2_GATEWAY_WS_URL` 覆盖其余配置。非 loopback 地址必须用 `wss://`
 - 确认进图:日志出现 `LoginSuccess` → `StartGame ack` → `forwarded world snapshot #1..3`
 - **Windows 交叉编译门**:`apps/game-client/platform-windows/build-windows.sh`
   - 前置:`rustup target add --toolchain 1.95.0 x86_64-pc-windows-gnu` + `brew install mingw-w64`
-  - 链接器 `x86_64-w64-mingw32-gcc`;产物 `target/x86_64-pc-windows-gnu/debug/mir2-platform-windows.exe`
+  - 链接器 `x86_64-w64-mingw32-gcc`;产物 `target/x86_64-pc-windows-gnu/release/mir2-platform-windows.exe`
   - gnullvm 目标(llvm clang+lld)在本机缺 mingw CRT/`libunwind`,不推荐,用 GNU 目标
 - **wasm 构建**:`cd apps/web && npm run runtime:build:dev`(构建 webgpu+webgl2 两个后端,产物 gitignore,只有 `apps/web/lib/generated/bevy_runtime_version.json` 提交)
 
@@ -211,7 +211,7 @@ PLAYWRIGHT_CHROMIUM="$CHROMIUM" node apps/web/<script>.js
 ### 6.4 Native 摄取通道(M2 gateway)
 
 - `runtime/src/native_ingest.rs`:进程级 std mpsc,后台 gateway 任务跨线程推送快照 JSON,Bevy 主线程每帧 drain
-- 三个 ingest 系统同时 drain thread-local(WASM 路径)+ 原生 channel;WASM 行为不变
+- 各 typed ingest 系统同时 drain thread-local(WASM 路径)+ 原生 channel;WASM 行为不变
 - 原生宿主入口:`native_ingest::push_native_world_state(json)` / `push_native_entity_render_state` / `push_native_map_render_state`(任何线程可调,app 构建后可用)
 - 新增:`push_native_ui_read_model` / `push_native_map_model` / `push_native_entity_model_set` / `push_native_inventory_model`(client-bevy 各共享 read-model)
 
@@ -229,14 +229,14 @@ PLAYWRIGHT_CHROMIUM="$CHROMIUM" node apps/web/<script>.js
 | `character` | 复用 `UiReadModel` | 角色面板 |
 
 - 数据流:gateway worldSnapshot → platform-windows `transform_*` 提取各模型 JSON → `push_native_*` → runtime ingest → client-bevy resource → 插件渲染
-- **占位色块 vs 真实贴图**:当前是共享彩色占位;真实 Crystal 地图/实体图集是后续资产管线 slice
+- **占位色块 vs 真实贴图**:`client-bevy::map/entities` 保留跨宿主共享彩色 fallback;Windows 原生宿主已通过 runtime 摄取通道接入真实 Crystal 地图/实体图集(见 §6.6/§6.7)
 - **Bevy UI 坑**:`bevy_ui_widgets` feature 的 message 系统未配置即 panic,只用 `bevy_ui`+`bevy_text`;`Text` 需 `TextFont`(`FontSize::Px(...)`)+`TextColor`;`resource_changed` 是系统函数传参不加大括号;两个 `Query<&mut Node>` 冲突需 `ParamSet`
 
 ### 6.6 原生真实精灵图集(atlas)
 
 - **实体图集已落地**:`platform-windows/atlas.rs` 加载本地 `apps/web/public/bevy-entity-atlases/starter-bichon-base.png`(4096x4096 / 4.2MB / 2631 帧真实 Crystal 精灵),png crate 解码 RGBA → `push_native_entity_render_atlas` → runtime 共享实体图集存储
 - `build_entity_render_state` 把 gateway 实体映射到图集 rect(当前按 kind 选静态帧;完整方向/帧解析是后续)
-- **路径坑**:`CARGO_MANIFEST_DIR` 是 `apps/game-client/platform-windows`,到 `apps/web` 是 `../../web`(不是 `../../../web`)
+- **路径坑**:发布包从可执行文件旁的 `mir2-assets` 发现资源;仓库开发模式同时检查 `apps/web/public` 和主仓库布局下的 `mir2-web3/apps/web/public`,不嵌入编译机绝对路径
 - **顺序坑**:`push_native_*` 必须在 `build_runtime_app` 之后调用(注册 channel 才生效)
 
 ### 6.7 原生真实地图渲染(map parser)
@@ -254,15 +254,15 @@ PLAYWRIGHT_CHROMIUM="$CHROMIUM" node apps/web/<script>.js
 ### 6.8 移动真机门
 
 - `apps/mir2-mobile/build-mobile-device.sh`:构建 APK → 启动 Pixel_5_API_31 headless 模拟器 → 安装 → 启动 `com.obelisklabs.mir2` → 验证进程;iOS sim 构建
-- **已验证**:模拟器 boot → APK 安装成功 → Capacitor WebView 全屏激活(1080×2142),无 crash
-- 截图产物 `/tmp/mir2-android.png`;本模型不支持看图,人工确认 UI 渲染
+- **历史 smoke**:原分支曾完成模拟器 boot → APK 安装/启动 → 进程存活;main-based PR 的 hosted gate 重新构建 APK,但不把该历史 smoke 当成最新 head 的视觉或真机 Accepted 证据
+- `capacitor.config.js` 从同一个 `MIR2_MOBILE_GAME_URL` 生成 `server.allowNavigation`,保证 HTTPS 游戏源留在 app WebView;契约测试覆盖默认/自定义 host。最新 head 的模拟器截图、物理真机和人工 UI 确认仍需单独验收
 - 真机:`MIR2_ANDROID_SERIAL=XXXX` 指定设备绕过模拟器;iOS 生命周期由 Capacitor 框架处理(launch storyboard + 双方向)
 
-### 6.4 Windows / Android 交叉编译门
+### 6.9 Windows / Android 交叉编译门
 
 - **Windows**:`apps/game-client/platform-windows/build-windows.sh`
   - `rustup target add --toolchain 1.95.0 x86_64-pc-windows-gnu` + `brew install mingw-w64`
-  - 链接器 `x86_64-w64-mingw32-gcc`,产物 `target/x86_64-pc-windows-gnu/debug/mir2-platform-windows.exe`
+  - 链接器 `x86_64-w64-mingw32-gcc`,产物 `target/x86_64-pc-windows-gnu/release/mir2-platform-windows.exe`
 - **Android**:`apps/game-client/platform-android/build-android.sh`
   - `rustup target add --toolchain 1.95.0 aarch64-linux-android` + Android NDK(默认发现 `~/Library/Android/sdk/ndk/*`)
   - 本机 NDK 是 darwin-x86_64,ARM mac 下经 Rosetta 运行 clang,可用
@@ -281,15 +281,15 @@ PLAYWRIGHT_CHROMIUM="$CHROMIUM" node apps/web/<script>.js
 
 ### 7.1 Tauri 桌面壳
 
-- 发布模式 spawn `apps/web/.mir2-thin-client/server.js`(standalone Next 服务器)到本地端口 13030,就绪后 WebView navigate;dev 模式直接指 `http://127.0.0.1:3002`
-- 前端就是 Web 客户端,壳只负责窗口 + server 生命周期;不需要自己的前端
+- 发布模式直接导航到稳定 HTTPS 游戏源 `https://mir2.obelisk.build`;dev 模式默认 `http://127.0.0.1:3002`,也可用 `MIR2_DESKTOP_GAME_URL` 显式覆盖
+- 壳只负责窗口和导航,不启动本地 Node/standalone server,不依赖源码 checkout;远程页面不获得 shell capability
 - **macOS 构建**:`npx tauri build --bundles app`(.dmg 需要 create-dmg,本机缺,跳过)
 - **Windows**:`build-desktop.sh windows`(需 mingw-w64 + GNU target)
 - **Linux**:需 WebKitGTK 系统库,交叉编译要在 Linux 主机/CI 跑
 
 ### 7.2 Capacitor 移动壳
 
-- WebView 加载**远程部署的游戏 URL**(原生 PWA app),`MIR2_MOBILE_GAME_URL` 配置;gateway WS 通过 query 注入
+- WebView 加载**远程部署的 HTTPS 游戏 URL**(原生 PWA app),`MIR2_MOBILE_GAME_URL` 配置;gateway WS 通过 query 注入。`capacitor.config.js` 会把相同 build-time URL 的 hostname 写入 `server.allowNavigation`,否则 Capacitor 会把顶层跳转交给系统浏览器
 - **Android 构建三坑**(已踩):
   1. **JDK 21 必须**(Capacitor 7 编译 source 21,JDK17 报"无效的源发行版:21")
   2. **gradle 8.11.1 下载慢** → 用腾讯镜像 `https://mirrors.cloud.tencent.com/gradle/gradle-8.11.1-all.zip` 直接下到 `~/.gradle/wrapper/dists/gradle-8.11.1-all/<hash>/` 并解压,~140x 加速
