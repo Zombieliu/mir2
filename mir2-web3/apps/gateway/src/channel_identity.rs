@@ -12,12 +12,17 @@ use r2d2_postgres::PostgresConnectionManager;
 use rand::rngs::OsRng;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sha2::{Digest, Sha256};
 
 const CHANNEL_IDENTITY_SCHEMA_VERSION: u32 = 1;
 const MAX_PROVIDER_SUBJECT_BYTES: usize = 4 * 1024;
 const CRAZYGAMES_PUBLIC_KEY_URL: &str = "https://sdk.crazygames.com/publicKey.json";
 const CRAZYGAMES_PUBLIC_KEY_TTL: Duration = Duration::from_secs(5 * 60);
+/// Steam Web API endpoint for validating a user's auth session ticket. This is
+/// the server-side verifier: it never trusts a client-claimed SteamID.
+const STEAM_AUTH_USER_TICKET_URL: &str =
+    "https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/";
 
 struct CrazyGamesPublicKeyCache {
     public_key: String,
@@ -37,6 +42,7 @@ pub enum ChannelIdentityProvider {
     CrazyGames,
     CrazyGamesGuest,
     Itch,
+    Steam,
     DirectGuest,
 }
 
@@ -50,6 +56,7 @@ impl ChannelIdentityProvider {
             "crazygames" | "crazy-games" => Ok(Self::CrazyGames),
             "crazygamesguest" | "crazy-games-guest" => Ok(Self::CrazyGamesGuest),
             "itch" | "itch.io" => Ok(Self::Itch),
+            "steam" | "steamworks" => Ok(Self::Steam),
             "directguest" | "direct-guest" | "guest" => Ok(Self::DirectGuest),
             _ => Err(format!("unsupported channel identity provider {value}")),
         }
@@ -62,18 +69,23 @@ impl ChannelIdentityProvider {
             Self::CrazyGames => "crazyGames",
             Self::CrazyGamesGuest => "crazyGamesGuest",
             Self::Itch => "itch",
+            Self::Steam => "steam",
             Self::DirectGuest => "directGuest",
         }
     }
 
     pub const fn is_primary_capable(self) -> bool {
-        matches!(self, Self::SuiPasskey | Self::SuiWallet | Self::CrazyGames)
+        matches!(
+            self,
+            Self::SuiPasskey | Self::SuiWallet | Self::CrazyGames | Self::Steam
+        )
     }
 
     const fn primary_rank(self) -> u8 {
         match self {
             Self::SuiPasskey => 3,
             Self::SuiWallet => 2,
+            Self::Steam => 2,
             Self::CrazyGames => 1,
             Self::CrazyGamesGuest | Self::Itch | Self::DirectGuest => 0,
         }
@@ -116,6 +128,12 @@ pub struct ChannelIdentityRegistryStatus {
 pub struct VerifiedCrazyGamesIdentity {
     pub user_id: String,
     pub game_id: String,
+    pub expires_at_seconds: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VerifiedSteamIdentity {
+    pub steam_id: String,
     pub expires_at_seconds: u64,
 }
 
@@ -776,6 +794,73 @@ fn verify_crazygames_token_with_public_key(
     })
 }
 
+/// Verify a Steam auth session ticket via the Steam Web API.
+///
+/// The client submits the raw ticket from Steamworks `GetAuthTicketForWebApi`.
+/// The server calls `ISteamUserAuth/AuthenticateUserTicket` with the publisher
+/// web API key; Steam returns the authoritative SteamID (as 64-bit, then
+/// converted to the 17-digit string) only when the ticket is valid for this
+/// app. A client-claimed SteamID is never trusted.
+///
+/// Requires `MIR2_STEAM_PUBLISHER_WEB_API_KEY` and `MIR2_STEAM_APP_ID`.
+pub async fn verify_steam_ticket(ticket: &str) -> Result<VerifiedSteamIdentity, String> {
+    if ticket.trim().is_empty() || ticket.len() > 4096 {
+        return Err("invalid Steam auth ticket".to_string());
+    }
+    let api_key = env::var("MIR2_STEAM_PUBLISHER_WEB_API_KEY")
+        .map_err(|_| "MIR2_STEAM_PUBLISHER_WEB_API_KEY is required".to_string())?;
+    let app_id =
+        env::var("MIR2_STEAM_APP_ID").map_err(|_| "MIR2_STEAM_APP_ID is required".to_string())?;
+
+    let response = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(8))
+        .build()
+        .map_err(|error| format!("Steam verifier client failed: {error}"))?
+        .post(STEAM_AUTH_USER_TICKET_URL)
+        .form(&[
+            ("key", api_key.as_str()),
+            ("appid", app_id.as_str()),
+            ("ticket", ticket),
+            ("identity", "1"),
+        ])
+        .send()
+        .await
+        .map_err(|error| format!("Steam ticket verification failed: {error}"))?
+        .error_for_status()
+        .map_err(|error| format!("Steam ticket verification rejected: {error}"))?;
+
+    let body: Value = response
+        .json()
+        .await
+        .map_err(|error| format!("Steam ticket verification decode failed: {error}"))?;
+    let params = body
+        .get("response")
+        .and_then(|response| response.get("params"))
+        .ok_or_else(|| "Steam ticket verification returned no params".to_string())?;
+
+    let steam_id: String = params
+        .get("steamid")
+        .and_then(serde_json::Value::as_str)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned)
+        .or_else(|| {
+            params
+                .get("steamid")
+                .and_then(serde_json::Value::as_u64)
+                .map(|value| value.to_string())
+        })
+        .ok_or_else(|| "Steam ticket verification returned no steamid".to_string())?;
+    let expires_at_seconds = params
+        .get("expires")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(0);
+
+    Ok(VerifiedSteamIdentity {
+        steam_id,
+        expires_at_seconds,
+    })
+}
+
 fn channel_identity_store_required() -> bool {
     env::var("MIR2_REQUIRE_CHANNEL_IDENTITY_STORE")
         .map(|value| {
@@ -1067,5 +1152,45 @@ mod tests {
                 &[&created.player_id, &guest.player_id],
             )
             .expect("test player should clean up");
+    }
+
+    #[test]
+    fn steam_provider_parses_and_round_trips() {
+        assert_eq!(
+            ChannelIdentityProvider::parse("steam"),
+            Ok(ChannelIdentityProvider::Steam)
+        );
+        assert_eq!(
+            ChannelIdentityProvider::parse("SteamWorks"),
+            Ok(ChannelIdentityProvider::Steam)
+        );
+        assert_eq!(ChannelIdentityProvider::Steam.as_str(), "steam");
+        assert!(ChannelIdentityProvider::Steam.is_primary_capable());
+    }
+
+    #[test]
+    fn steam_provider_resolves_stable_player_and_links() {
+        let registry = ChannelIdentityRegistry::in_memory();
+        let steam = registry
+            .resolve_or_create(ChannelIdentityProvider::Steam, "76561198000000001")
+            .expect("Steam identity should resolve");
+        let again = registry
+            .resolve_or_create(ChannelIdentityProvider::Steam, "76561198000000001")
+            .expect("second Steam identity should resolve");
+        assert_eq!(steam.player_id, again.player_id);
+        assert_eq!(steam.identities.len(), 1);
+        assert_ne!(steam.identities[0].subject_hash, "76561198000000001");
+
+        // Link a fresh passkey subject (never created independently) to the
+        // Steam account; the account's primary becomes passkey.
+        let linked = registry
+            .link_identity(
+                &steam.player_id,
+                ChannelIdentityProvider::SuiPasskey,
+                "sui:0xsteam-user",
+            )
+            .expect("passkey should link to Steam account");
+        assert_eq!(linked.primary_provider, ChannelIdentityProvider::SuiPasskey);
+        assert_eq!(linked.identities.len(), 2);
     }
 }
