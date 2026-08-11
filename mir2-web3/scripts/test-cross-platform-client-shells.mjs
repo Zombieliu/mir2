@@ -24,6 +24,7 @@ const [
   mobilePackage,
   mobileBuild,
   mobileDeviceBuild,
+  androidNativeBuild,
   clientWorkflow,
 ] = await Promise.all([
   readProject("apps/game-client/platform-windows/src/main.rs"),
@@ -37,6 +38,7 @@ const [
   readProject("apps/mir2-mobile/package.json"),
   readProject("apps/mir2-mobile/build-mobile.sh"),
   readProject("apps/mir2-mobile/build-mobile-device.sh"),
+  readProject("apps/game-client/platform-android/build-android.sh"),
   readRepository(".github/workflows/cross-platform-client.yml"),
 ]);
 
@@ -134,6 +136,11 @@ assert.doesNotMatch(
   clientWorkflow,
   /fix\/local-parity-and-i18n/,
   "main CI must not retain the unrelated historical base branch trigger",
+);
+assert.match(
+  androidNativeBuild,
+  /--manifest-path "\$\{SCRIPT_DIR\}\/Cargo\.toml"/,
+  "Android native build must resolve its manifest from the script directory",
 );
 
 for (const requiredGate of [

@@ -10,6 +10,7 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TOOLCHAIN="${MIR2_CLIENT_TOOLCHAIN:-1.95.0}"
 TARGET="${MIR2_ANDROID_TARGET:-aarch64-linux-android}"
 
@@ -34,7 +35,7 @@ export AR_aarch64_linux_android="${CARGO_TARGET_AARCH64_LINUX_ANDROID_AR}"
 
 echo "[platform-android] compile gate for ${TARGET} (${TOOLCHAIN}, NDK ${NDK_HOME})"
 cargo "+${TOOLCHAIN}" check \
-  --manifest-path apps/game-client/platform-android/Cargo.toml \
+  --manifest-path "${SCRIPT_DIR}/Cargo.toml" \
   --target "${TARGET}"
 
 echo "[platform-android] gate passed"
