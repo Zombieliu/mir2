@@ -1,0 +1,21 @@
+[package]
+name = "mir2-launcher-tauri"
+version = "0.1.0"
+description = "Tauri desktop launcher for mir2-web3 (Windows / macOS / Linux)"
+authors = ["Obelisk Labs"]
+edition = "2021"
+license = "MIT"
+
+# Standalone workspace: the launcher depends only on tauri and a thin Rust
+# shell. It stays out of the server workspace so bundling stays isolated.
+[workspace]
+
+[lib]
+name = "mir2_launcher_tauri_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }

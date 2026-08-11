@@ -1,0 +1,31 @@
+[package]
+name = "mir2-client-bevy"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Shared Bevy rendering and in-game UI for mir2-web3"
+license = "MIT"
+
+# Client crates stay independent from the server workspace while the client
+# tree is migrated incrementally. Consumed by the runtime (Web), the native
+# desktop host, and (later) Android/iOS hosts.
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+bevy = { version = "0.19.0", default-features = false, features = [
+  "bevy_asset",
+  "bevy_ui",
+  "bevy_text",
+  "bevy_core_pipeline",
+  "bevy_render",
+  "bevy_sprite",
+  "bevy_winit",
+  "multi_threaded",
+  "png"
+] }
+mir2-client-core = { path = "../client-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

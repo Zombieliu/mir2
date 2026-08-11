@@ -1,0 +1,23 @@
+# Capacitor
+node_modules/
+www/
+
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties
+android/captures/
+android/.externalNativeBuild/
+
+# iOS build outputs
+ios/App/build/
+ios/App/Pods/
+ios/Pods/
+**/xcuserdata/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store

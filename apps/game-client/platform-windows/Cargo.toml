@@ -1,0 +1,40 @@
+[package]
+name = "mir2-platform-windows"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Native Windows desktop host for the mir2-web3 Bevy client"
+license = "MIT"
+
+# Host crates stay independent from the server workspace while the client tree
+# is migrated incrementally, matching client-core and runtime.
+[workspace]
+
+[[bin]]
+name = "mir2-platform-windows"
+path = "src/main.rs"
+
+[dependencies]
+bevy = { version = "0.19.0", default-features = false, features = [
+  "bevy_asset",
+  "bevy_core_pipeline",
+  "bevy_render",
+  "bevy_sprite",
+  "bevy_sprite_render",
+  "bevy_ui",
+  "bevy_text",
+  "bevy_winit",
+  "multi_threaded",
+  "png",
+  "android-native-activity"
+] }
+console_error_panic_hook = "0.1.7"
+flate2 = "1"
+futures-util = "0.3"
+mir2-bevy-runtime = { path = "../runtime" }
+mir2-client-bevy = { path = "../client-bevy" }
+png = "0.18"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1.52", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio-tungstenite = "0.29"
