@@ -99,11 +99,11 @@ export type QuestLogWindowProps = {
 type QuestStageFilter = "all" | QuestStage;
 
 const QUEST_STAGE_FILTERS: { key: QuestStageFilter; labelKey: string; fallback: string }[] = [
-  { key: "all", labelKey: "ui.questFilterAll", fallback: "All" },
-  { key: "inProgress", labelKey: "ui.questFilterActive", fallback: "Active" },
-  { key: "readyToTurnIn", labelKey: "ui.questFilterReady", fallback: "Ready" },
-  { key: "available", labelKey: "ui.questFilterNew", fallback: "New" },
-  { key: "completed", labelKey: "ui.questFilterDone", fallback: "Done" },
+  { key: "all", labelKey: "ui.questFilter.all", fallback: "All" },
+  { key: "inProgress", labelKey: "ui.questFilter.active", fallback: "Active" },
+  { key: "readyToTurnIn", labelKey: "ui.questFilter.ready", fallback: "Ready" },
+  { key: "available", labelKey: "ui.questFilter.new", fallback: "New" },
+  { key: "completed", labelKey: "ui.questFilter.done", fallback: "Done" },
 ];
 
 const QUEST_LOG_ROWS_PER_PAGE = 8;
@@ -429,14 +429,14 @@ function formatNumber(value: number): string {
 function stageLabel(t: TranslateFn, stage: QuestStage) {
   switch (stage) {
     case "available":
-      return t("ui.questStageAvailable", [], "Available");
+      return t("ui.questStage.available", [], "Available");
     case "inProgress":
-      return t("ui.questStageInProgress", [], "In Progress");
+      return t("ui.questStage.inProgress", [], "In Progress");
     case "readyToTurnIn":
-      return t("ui.questStageReady", [], "Ready");
+      return t("ui.questStage.readyToTurnIn", [], "Ready");
     case "completed":
     default:
-      return t("ui.questStageCompleted", [], "Completed");
+      return t("ui.questStage.completed", [], "Completed");
   }
 }
 

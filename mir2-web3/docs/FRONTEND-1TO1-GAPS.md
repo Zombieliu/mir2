@@ -1,6 +1,19 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-09
+Last updated: 2026-08-12
+
+> 2026-08-12 tracked-quest NPC marker closure: Gateway NPC packets already
+> carried authoritative `questIds`, but the Web packet reducer discarded that
+> field when creating/replacing live entities. Quest tracking could therefore
+> succeed while the golden exclamation/question resolver saw no NPC binding.
+> Packet ingestion now normalizes and preserves the binding, with explicit
+> empty arrays still clearing it; Bichon simulation assertions cover Assistant
+> Jane, Craft Lady Jude, and Blacksmith Smith. A fresh-account live capture saw
+> Assistant Jane bound to quest 1, three quest icons, exact Crystal marker
+> anchoring, one adjacent interaction, zero movement, zero console errors, and
+> zero non-favicon 404s. The authenticated demo session also retained all three
+> icons after tracking `简助理的请求`. This closes the local Candidate marker
+> regression; production publication remains a separate release gate.
 
 > 2026-08-11 main-based cross-platform client Candidate: the client-core and
 > shared Bevy read-model/UI crates, native desktop/Android hosts, Tauri desktop
@@ -2615,3 +2628,81 @@ Human acceptance is still required for:
 - Verification passed:
   `node apps/web/scripts/test-player-frames.mjs`,
   `npm run typecheck --prefix apps/web`, and `git diff --check`.
+
+## 2026-08-12 Quest Window Stage Anchor and Localization
+
+- Original-client extra windows now portal into `.client-stage-frame`, so their
+  1024x768 coordinates inherit the same stage translation and scaling instead
+  of resolving against the browser viewport. This closes the quest-window
+  top-edge drift visible on letterboxed desktop viewports and protects the
+  other extra windows from the same coordinate-space bug.
+- Quest-log filter/stage labels now use the generated dotted localization keys.
+  Quest IDs 1, 2, and 5 are localized at the presentation boundary, preserving
+  canonical gateway quest packets while rendering Chinese titles, summaries,
+  objectives, progress, tracker text, rewards, and structured objective labels.
+- Automated geometry passed at 2208x1812 and 1440x900. At 1440x900 the stage was
+  `(208,66)-(1232,834)` and the quest window was `(770,71)-(1082,515)`, with
+  `.client-stage-frame` as its direct parent and no browser errors. Local
+  screenshots are under `output/quest-window-stage-anchor/`.
+- Verification passed: `npm run test:responsive-stage`,
+  `npm run test:quest-localization`, `npm run typecheck`, and
+  `git diff --check`. This is Candidate automation evidence; authenticated
+  human visual acceptance on the production-shaped game page remains required.
+
+## 2026-08-12 Right Menu Quest Log Button
+
+- The Crystal `Title/567` right-side menu already includes an unused paper
+  slot at `(3,107)`. That slot is now the Quest Log action, preserving the
+  original 36x282 menu geometry and every existing button position.
+- Clicking the paper icon toggles the standalone Quest Log and closes the
+  right-side menu. Reopening the menu exposes the pressed state; clicking the
+  same icon again closes the Quest Log. The existing `Alt+Q` shortcut remains
+  available.
+- Automated browser acceptance covered closed -> open -> closed, verified that
+  the quest window remains parented to `.client-stage-frame`, and recorded zero
+  console or page errors. Evidence is under
+  `output/system-menu-quest-button/quest-button-active.png` and
+  `output/system-menu-quest-button/quest-open.png`.
+- Verification passed: `npm run test:system-menu-quest-button`,
+  `npm run test:responsive-stage`, `npm run test:quest-localization`,
+  `npm run typecheck`, and `git diff --check`. This is Candidate evidence;
+  authenticated human acceptance on the production-shaped game page remains
+  required.
+- Follow-up live-page acceptance exposed a stale portal-host regression after
+  Fast Refresh: `showQuestLog` and the button pressed state were true, but the
+  quest window was still being rendered into a detached pre-refresh stage node.
+  The extra-window registry now re-resolves `.client-stage-frame` after each
+  registry render and refuses disconnected hosts. In the existing authenticated
+  game tab, the same button produced one visible quest window under the current
+  stage, then closed it on the second click, with zero page errors. A forced
+  stage-remount regression capture and text state are archived under
+  `output/system-menu-quest-button/remount-regression/`.
+
+## 2026-08-12 Entity flicker and monster death assets
+
+- Root cause: the packed entity path could rebuild for each changing visible
+  frame set, while actor URLs preferred an older R2 release and local metadata
+  could remain cached at the previous 80-frame export. This combination caused
+  intermittent missing sprites and hid later Attack/Struck/Die/Dead frames.
+- The default is now a stable prebuilt entity atlas. Dynamic repacking requires
+  explicit opt-in; Bevy can use partial prebuilt coverage with per-layer image
+  fallback, while raw WebGL2 only hides DOM sprites when all sources are covered.
+  Actor libraries retained in the web bundle prefer same-origin assets and local
+  metadata uses `no-store`.
+- Original Crystal exports and the atlas were rebuilt. Critical closure is:
+  `000=128/3`, `003=232/8`, `004=232/8`, `005=234/7`, `007=448/7`,
+  `010=164/8`, and `012=224/7` (frames/actions). `007` exposes Die and Dead via
+  the live local metadata endpoint. The entity atlas contains 9,650 frames over
+  seven pages.
+- Forced-Bevy browser evidence:
+  `/tmp/mir2-render-monster-final-20260812/report.json` (map `0`) and
+  `/tmp/mir2-render-field-final-20260812/report.json` (map `1`) both pass with
+  rendered floors, full visible-source coverage, a prebuilt hit, zero live
+  atlas builds, zero asset gaps/404s, and zero console errors.
+- Local Candidate is green. Production remains open until the rebuilt asset
+  release is uploaded to R2 and the matching web build is deployed and observed
+  during real combat.
+- Upload-ready scatter-frame evidence is
+  `docs/generated/remote-assets/20260812-monster-render-death/remote-asset-release.json`:
+  40,944 files, 237,928,682 bytes, zero missing files, with object prefix
+  `mir2/v/20260812-monster-render-death`.

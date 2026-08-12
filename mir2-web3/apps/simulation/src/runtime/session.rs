@@ -901,6 +901,14 @@ impl SimulationSession {
                     .map(|monster| monster.experience)
                     .unwrap_or(0)
             },
+            move_speed_ms: template
+                .as_ref()
+                .map(|monster| u64::from(monster.move_speed))
+                .unwrap_or_else(|| agent.move_interval_ticks.saturating_mul(1_000)),
+            attack_speed_ms: template
+                .as_ref()
+                .map(|monster| u64::from(monster.attack_speed))
+                .unwrap_or_else(|| agent.attack_interval_ticks.saturating_mul(1_000)),
             friendly_guild: None,
             defense: template
                 .as_ref()

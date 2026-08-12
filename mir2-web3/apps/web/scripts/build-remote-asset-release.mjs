@@ -9,6 +9,7 @@ import { constants as zlibConstants, createGzip } from "node:zlib";
 
 import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
 import { inspectFullPackClosure, sha256File } from "./asset-pipeline/full-pack-closure.mjs";
+import { verifyMonsterFrameClosure } from "./verify-monster-frame-closure.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
@@ -154,6 +155,12 @@ async function main() {
   }
   if (gzipBevyRuntimeWasm && casEnabled) {
     throw new Error("Compressed Bevy runtime releases require --cas false.");
+  }
+  if (includeSceneSprites && sceneSpriteRoots.includes("Monster")) {
+    const monsterLibraries = await verifyMonsterFrameClosure();
+    console.log(
+      `[remote-assets] monster frame closure verified (${monsterLibraries.length} libraries)`,
+    );
   }
 
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);

@@ -16,7 +16,8 @@
  * `lib/stage5-window-adapters.ts`, which this module also re-exports.
  */
 
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { BondsWindow, type BondsWindowProps, type MentorSummary, type RelationshipSummary } from "./original-client-bonds-window";
 import { BuffWindow, type BuffEntry, type BuffWindowProps } from "./original-client-buff-window";
@@ -311,7 +312,19 @@ function ExtraWindowsInner({
   hotkeys,
   chatSettings,
 }: ExtraWindowsProps) {
-  return (
+  const [stageRoot, setStageRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    // Fast Refresh and shell/screen remounts can replace the stage element
+    // without remounting this registry. Re-resolve after every registry render
+    // so portals never remain attached to a detached, invisible stage node.
+    const nextStageRoot = document.querySelector<HTMLElement>(".client-stage-frame");
+    setStageRoot((current) => current === nextStageRoot ? current : nextStageRoot);
+  });
+
+  if (!stageRoot?.isConnected) return null;
+
+  return createPortal(
     <>
       {questLog?.open ? (
         <QuestLogWindow
@@ -508,7 +521,8 @@ function ExtraWindowsInner({
           onClose={chatSettings.onClose}
         />
       ) : null}
-    </>
+    </>,
+    stageRoot,
   );
 }
 

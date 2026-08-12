@@ -53,6 +53,7 @@ type GameUiSceneProps = {
   chatMessage: string;
   showInventory: boolean;
   showCharacter: boolean;
+  showQuestLog: boolean;
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
@@ -65,6 +66,7 @@ type GameUiSceneProps = {
   onLogout: () => void;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
+  onToggleQuestLog: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
   onCloseNpcRepairService: () => void;
@@ -111,6 +113,7 @@ function GameUiSceneInner({
   chatMessage,
   showInventory,
   showCharacter,
+  showQuestLog,
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
@@ -123,6 +126,7 @@ function GameUiSceneInner({
   onLogout,
   onToggleCharacter,
   onToggleInventory,
+  onToggleQuestLog,
   onCloseCharacter,
   onCloseInventory,
   onCloseNpcRepairService,
@@ -195,7 +199,8 @@ function GameUiSceneInner({
       showGameShop ||
       visibleDialog ||
       showInventory ||
-      showCharacter,
+      showCharacter ||
+      showQuestLog,
   );
 
   function selectChatFilter(filter: ChatFilterKey) {
@@ -357,12 +362,17 @@ function GameUiSceneInner({
           transferOptions={transferOptions}
           inputProfile={inputProfile}
           gamepadFamily={gamepadFamily}
+          questLogOpen={showQuestLog}
           onStartTutorial={() => {
             setShowSystemMenu(false);
             onStartTutorial();
           }}
           onOpenPanel={(panel) => {
             setShowSystemMenuFeaturePanel(panel);
+            setShowSystemMenu(false);
+          }}
+          onToggleQuestLog={() => {
+            onToggleQuestLog();
             setShowSystemMenu(false);
           }}
           onClose={() => setShowSystemMenu(false)}

@@ -43,7 +43,6 @@ const ZONE_MOVEMENT_ACTION_QUEUE_LIMIT: usize = 8;
 const ZONE_MOVEMENT_INPUT_BUFFER_MS: u64 = 300;
 const ZONE_DROP_EXPIRE_MS: u64 = 30 * 60 * 300;
 const ZONE_NATIVE_MONSTER_THINK_MS: u64 = 600;
-const ZONE_NATIVE_MONSTER_ATTACK_MS: u64 = 1_200;
 const ZONE_NATIVE_MONSTER_AGGRO_X: i32 = 8;
 const ZONE_NATIVE_MONSTER_AGGRO_Y: i32 = 6;
 const ZONE_NATIVE_MONSTER_RANGED_MAX: i32 = 8;
@@ -5072,6 +5071,8 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            move_speed_ms: u64::from(template.move_speed),
+            attack_speed_ms: u64::from(template.attack_speed),
             friendly_guild: None,
             defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position,
@@ -5613,7 +5614,7 @@ impl ZoneRuntime {
                     .expect("native monster id should still exist");
                 monster.position = destination.clone();
                 monster.direction = direction;
-                monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);
+                monster.next_ai_ready_at_ms = now_ms.saturating_add(monster.move_speed_ms);
             }
             let packet = ServerPacket::ObjectWalk {
                 movement: ObjectMovement {
@@ -5670,7 +5671,7 @@ impl ZoneRuntime {
                 .expect("native monster id should still exist");
             monster.position = destination.clone();
             monster.direction = direction;
-            monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);
+            monster.next_ai_ready_at_ms = now_ms.saturating_add(monster.move_speed_ms);
         }
         let packet = ServerPacket::ObjectWalk {
             movement: ObjectMovement {
@@ -5763,7 +5764,7 @@ impl ZoneRuntime {
                 .expect("native summon id should still exist");
             monster.position = destination.clone();
             monster.direction = direction;
-            monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);
+            monster.next_ai_ready_at_ms = now_ms.saturating_add(monster.move_speed_ms);
         }
         let packet = ServerPacket::ObjectWalk {
             movement: ObjectMovement {
@@ -5826,6 +5827,8 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            move_speed_ms: u64::from(template.move_speed),
+            attack_speed_ms: u64::from(template.attack_speed),
             friendly_guild: None,
             defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position: spawn_position,
@@ -5892,7 +5895,7 @@ impl ZoneRuntime {
             return Vec::new();
         };
         monster.direction = direction;
-        monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);
+        monster.next_ai_ready_at_ms = now_ms.saturating_add(monster.move_speed_ms);
         let position = monster.position.clone();
         let packet = ServerPacket::ObjectTurn {
             movement: ObjectMovement {
@@ -5927,7 +5930,7 @@ impl ZoneRuntime {
         if now_ms < monster.next_attack_ready_at_ms {
             return Vec::new();
         }
-        monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
+        monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
         let monster_position = monster.position.clone();
         // Roll the monster's melee damage from its Crystal stats (matching the
         // ranged path) instead of a fixed placeholder of 1, so monster→player
@@ -5985,7 +5988,7 @@ impl ZoneRuntime {
             if now_ms < monster.next_attack_ready_at_ms {
                 return Vec::new();
             }
-            monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
+            monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
             Some((
                 monster.position.clone(),
                 zone_native_monster_range_attack_type(
@@ -6055,7 +6058,7 @@ impl ZoneRuntime {
         if now_ms < monster.next_attack_ready_at_ms {
             return Vec::new();
         }
-        monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
+        monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
         let monster_position = monster.position.clone();
         let packet = ServerPacket::ObjectAttack {
             info: ObjectAttackInfo {
@@ -6095,7 +6098,7 @@ impl ZoneRuntime {
         if now_ms < monster.next_attack_ready_at_ms {
             return Vec::new();
         }
-        monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
+        monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
         let monster_position = monster.position.clone();
         let damage = zone_native_summon_monster_attack_damage(monster, &target.position);
         self.pending_native_hits.push(PendingNativeMonsterHit {
@@ -6148,7 +6151,7 @@ impl ZoneRuntime {
             if now_ms < monster.next_attack_ready_at_ms {
                 return Vec::new();
             }
-            monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
+            monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
             Some((
                 monster.position.clone(),
                 zone_native_monster_range_attack_type(
@@ -9912,6 +9915,8 @@ mod group_experience_tests {
                 max_hp: 100,
                 hp: 100,
                 experience: 1_000,
+                move_speed_ms: u64::from(template.move_speed),
+                attack_speed_ms: u64::from(template.attack_speed),
                 friendly_guild: None,
                 position: Point { x: 11, y: 10 },
                 direction: MirDirection::Down,

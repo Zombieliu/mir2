@@ -3682,6 +3682,12 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
             .all(|info| info.name_colour_argb == 0xFF00_FF00u32 as i32),
         "Crystal NPC spawn paths must agree on the default Lime name colour",
     );
+    assert!(
+        assistant_packets
+            .iter()
+            .all(|info| info.quest_ids.contains(&1) && info.quest_ids.contains(&2)),
+        "Assistant_Jane must advertise quest 1 as giver and quest 2 as finisher",
+    );
     let assistant = snapshot
         .entities
         .iter()
@@ -3691,10 +3697,25 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
     assert_eq!(assistant.name, "Assistant_Jane");
     assert_eq!((assistant.x, assistant.y), (284, 606));
     assert_eq!(assistant.name_colour_argb, 0xFF00_FF00u32 as i32);
+    assert!(assistant.quest_ids.contains(&1));
+    assert!(assistant.quest_ids.contains(&2));
     assert_eq!(
         assistant.light, 10,
         "Crystal merchants always emit light 10"
     );
+    let crafts_lady = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.object_id == 4)
+        .expect("CraftsLady_Jude should exist on the current Crystal map");
+    assert!(crafts_lady.quest_ids.contains(&1));
+    assert!(crafts_lady.quest_ids.contains(&2));
+    let blacksmith = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.object_id == 5)
+        .expect("Blacksmith_Smith should exist on the current Crystal map");
+    assert!(blacksmith.quest_ids.contains(&5));
     assert_eq!(
         snapshot
             .entities

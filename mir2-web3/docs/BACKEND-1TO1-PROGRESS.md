@@ -2102,3 +2102,21 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   `b85aa711db02d6f1bddaf5f128cdae56d68fd67d080e99e6dc10673ad4f2fc0c`
   restored 16 Zones and emitted a 6,378,866-byte world-only factory image,
   down from 49,987,670 bytes.
+## 2026-08-12 Shared monster cadence and corpse authority
+
+- `ZoneMonsterSpawn` now carries Crystal movement and attack intervals in real
+  milliseconds. Session snapshots, shared-map bootstrap, world-director spawns,
+  summons, movement, turning, melee, and ranged attacks use those template
+  values instead of the former fixed Zone cadence.
+- Personal simulation ticks still advance private systems, but Gateway now
+  removes `ObjectWalk`/`ObjectRun`/`ObjectTurn` packets for object ids owned by
+  the shared Zone. This removes the second movement broadcaster that could make
+  monsters appear too fast or visually jump between authorities.
+- The death regression now verifies the authoritative monster remains at HP 0
+  with `dead=true` and is replayed as a dead `ObjectMonster` to a later joiner,
+  in addition to the existing `ObjectDied`, experience, and ground-drop checks.
+- Verification: `cargo test -p mir2-simulation --test shared_zone` passed
+  157/157; focused Crystal 1500 ms Scarecrow cadence and kill/corpse tests pass;
+  `cargo check -p mir2-simulation -p mir2-gateway` passes. A browser QA-spawn is
+  not used as server proof because Stage 5 `event.spawn` remains personal-session
+  state while normal attacks are shared-Zone authoritative.

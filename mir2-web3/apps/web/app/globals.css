@@ -2474,6 +2474,32 @@ html[data-display-mode="standalone"] .mir-client-page {
   height: 18px;
 }
 
+/* Title/567 already contains the paper icon in Crystal's disabled crafting
+   slot. Make that existing slot a first-class Quest Log action without adding
+   another row or stretching the original 36x282 menu frame. */
+.system-menu-embedded-button {
+  display: block;
+  width: 32px;
+  height: 18px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.system-menu-embedded-button:hover,
+.system-menu-embedded-button:focus-visible {
+  background: rgba(104, 151, 219, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(180, 207, 241, 0.72);
+  outline: none;
+}
+
+.system-menu-embedded-button:active,
+.system-menu-embedded-button.active {
+  background: rgba(58, 106, 184, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(218, 232, 255, 0.82);
+}
+
 .system-menu-close-hit {
   position: absolute;
   left: 0;

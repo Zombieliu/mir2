@@ -11,6 +11,10 @@ const mobileControlsSource = readFileSync(
   new URL("../app/components/original-client-mobile-controls.tsx", import.meta.url),
   "utf8",
 );
+const extraWindowsSource = readFileSync(
+  new URL("../app/components/original-client-extra-windows.tsx", import.meta.url),
+  "utf8",
+);
 const globalCss = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
@@ -233,5 +237,8 @@ assert.match(mobileControlsSource, /TUTORIAL_STEP_EVENT/);
 assert.match(globalCss, /@media \(orientation: portrait\)/);
 assert.match(globalCss, /mir-stage::before/);
 assert.match(globalCss, /data-secondary-open="false"/);
+assert.match(extraWindowsSource, /createPortal\(/);
+assert.match(extraWindowsSource, /querySelector<HTMLElement>\("\.client-stage-frame"\)/);
+assert.match(extraWindowsSource, /stageRoot,/);
 
 console.log("responsive stage tests passed");

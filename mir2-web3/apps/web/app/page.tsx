@@ -36,8 +36,11 @@ import {
   formatRuntimeMessage,
   languageLocale,
   normalizeLanguage,
+  text,
   type Mir2Language,
 } from "../lib/localization";
+import { localizeQuestLog } from "../lib/quest-localization";
+import { questIdsFromPacket } from "../lib/quest-entity-binding";
 import {
   CrystalChatType,
   type CrystalChatType as CrystalChatTypeValue,
@@ -2315,6 +2318,17 @@ export default function HomePage() {
   const [isClientReady, setIsClientReady] = useState(false);
   const t = buildTranslator(language);
   const locale = languageLocale(language);
+  const localizedQuestLog = useMemo(
+    () =>
+      localizeQuestLog(world.questLog, (key, params = [], fallback) =>
+        text(language, key, params, fallback),
+      ),
+    [language, world.questLog],
+  );
+  const presentationWorld = useMemo(
+    () => ({ ...world, questLog: localizedQuestLog }),
+    [localizedQuestLog, world],
+  );
 
   const loggedSceneResourceErrorsRef = useRef(new Set<string>());
 
@@ -11032,6 +11046,14 @@ export default function HomePage() {
           dead: payload.dead === true,
           disposition,
           sprite,
+          ...(kind === "npc"
+            ? {
+                questIds: questIdsFromPacket(
+                  payload.questIds,
+                  previousEntity?.questIds,
+                ),
+              }
+            : {}),
           bigMapIcon: numberOrUndefined(payload.bigMapIcon),
           showOnBigMap: payload.showOnBigMap === true ? true : payload.showOnBigMap === false ? false : undefined,
           canTeleportTo: payload.canTeleportTo === true ? true : payload.canTeleportTo === false ? false : undefined,
@@ -13388,7 +13410,7 @@ export default function HomePage() {
       runtimeMessage={runtimeMessage}
       wsState={wsState}
       reconnectStatus={reconnectStatus}
-      world={world}
+      world={presentationWorld}
       worldStore={worldStoreRef.current ?? undefined}
       selectorHud={selectorHudEnabled}
       player={self}
@@ -13459,6 +13481,7 @@ export default function HomePage() {
       selectedCharacterIndex={selectedCharacterIndex}
       showInventory={showInventory}
       showCharacter={showCharacter}
+      showQuestLog={showQuestLog}
       activeInventoryTab={activeInventoryTab}
       activeCharacterTab={activeCharacterTab}
       storageServiceOpenVersion={storageServiceOpenVersion}
@@ -13510,6 +13533,7 @@ export default function HomePage() {
       onStartTutorial={startTutorial}
       onToggleCharacter={toggleCharacterWindow}
       onToggleInventory={toggleInventoryWindow}
+      onToggleQuestLog={() => setShowQuestLog((current) => !current)}
       onCloseCharacter={() => setShowCharacter(false)}
       onCloseInventory={() => setShowInventory(false)}
       onCloseNpcRepairService={() => setNpcRepairService(null)}
@@ -13536,7 +13560,7 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: localizedQuestLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
@@ -13599,7 +13623,7 @@ export default function HomePage() {
           // on its "quest" tab. Treat either as "quests viewed".
           questLog: showQuestLog || (showInventory && activeInventoryTab === "quest"),
         }}
-        questLog={world.questLog}
+        questLog={localizedQuestLog}
         playerClass={self?.classKey ?? null}
         onClose={() => setShowTutorial(false)}
       />

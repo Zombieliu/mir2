@@ -228,6 +228,8 @@ impl ZoneReplayCommand {
                     max_hp,
                     hp,
                     experience,
+                    move_speed_ms: 0,
+                    attack_speed_ms: 0,
                     friendly_guild: None,
                     position,
                     direction,

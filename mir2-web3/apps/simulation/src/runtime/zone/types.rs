@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use crate::config::GroundDropSnapshot;
 
-use mir2_game_data::CrystalMonsterTemplate;
+use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate};
 use mir2_protocol::{
     ChatItem, ClientBuff, MirClass, MirDirection, MirGender, ObjectHealthInfo, ObjectManaInfo,
     Point, ServerPacket, Spell, UserItem,
@@ -211,6 +211,12 @@ pub struct ZoneMonsterSpawn {
     pub max_hp: i32,
     pub hp: i32,
     pub experience: u32,
+    /// Crystal movement cadence, kept in real milliseconds for the shared
+    /// Zone clock. Zero preserves compatibility with old fixtures/checkpoints
+    /// and falls back to template/default data in `ZoneNativeMonster`.
+    pub move_speed_ms: u64,
+    /// Crystal attack cadence in real milliseconds.
+    pub attack_speed_ms: u64,
     /// Optional guild protected by this conquest guard. Ordinary monsters and
     /// non-conquest structures leave this unset.
     pub friendly_guild: Option<String>,
@@ -516,6 +522,10 @@ pub(crate) struct ZoneNativeMonster {
     pub max_hp: i32,
     pub hp: i32,
     pub experience: u32,
+    #[serde(default = "default_zone_monster_move_speed_ms")]
+    pub move_speed_ms: u64,
+    #[serde(default = "default_zone_monster_attack_speed_ms")]
+    pub attack_speed_ms: u64,
     #[serde(default)]
     pub friendly_guild: Option<String>,
     pub defense: ZoneMonsterDefense,
@@ -555,6 +565,7 @@ impl ZoneNativeMonster {
     pub fn from_spawn(spawn: &ZoneMonsterSpawn, _object_id: u32) -> Self {
         let max_hp = spawn.max_hp.max(1);
         let hp = spawn.hp.clamp(0, max_hp);
+        let template = crystal_monster_by_name(&spawn.name);
         Self {
             name: spawn.name.clone(),
             ai: spawn.ai,
@@ -568,6 +579,22 @@ impl ZoneNativeMonster {
             max_hp,
             hp,
             experience: spawn.experience,
+            move_speed_ms: normalize_zone_monster_move_speed_ms(
+                spawn.move_speed_ms.max(
+                    template
+                        .as_ref()
+                        .map(|value| u64::from(value.move_speed))
+                        .unwrap_or_default(),
+                ),
+            ),
+            attack_speed_ms: normalize_zone_monster_attack_speed_ms(
+                spawn.attack_speed_ms.max(
+                    template
+                        .as_ref()
+                        .map(|value| u64::from(value.attack_speed))
+                        .unwrap_or_default(),
+                ),
+            ),
             friendly_guild: spawn.friendly_guild.clone(),
             defense: spawn.defense,
             position: spawn.position.clone(),
@@ -587,6 +614,30 @@ impl ZoneNativeMonster {
             damage_contributions: BTreeMap::new(),
             buffs: BTreeMap::new(),
         }
+    }
+}
+
+const fn default_zone_monster_move_speed_ms() -> u64 {
+    600
+}
+
+const fn default_zone_monster_attack_speed_ms() -> u64 {
+    1_200
+}
+
+fn normalize_zone_monster_move_speed_ms(value: u64) -> u64 {
+    if value == 0 {
+        default_zone_monster_move_speed_ms()
+    } else {
+        value.max(300)
+    }
+}
+
+fn normalize_zone_monster_attack_speed_ms(value: u64) -> u64 {
+    if value == 0 {
+        default_zone_monster_attack_speed_ms()
+    } else {
+        value.max(300)
     }
 }
 

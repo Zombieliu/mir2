@@ -224,6 +224,8 @@ fn boss_spawn() -> ZoneMonsterSpawn {
         max_hp: template.hp,
         hp: template.hp,
         experience: template.experience,
+        move_speed_ms: u64::from(template.move_speed),
+        attack_speed_ms: u64::from(template.attack_speed),
         friendly_guild: None,
         position: Point { x: 23, y: 18 },
         direction: MirDirection::Left,

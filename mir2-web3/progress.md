@@ -441,3 +441,103 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   before falling back to capped exponential delay. Added a deterministic 429-then-success regression
   test; immutable object keys keep partial retries idempotent and the full release manifest remains
   untouched.
+## 2026-08-12 Right-side Quest Log function button
+
+- User goal: make the task window reachable from the mouse so players do not
+  have to remember `Alt+Q`.
+- Reused the original Crystal right-menu paper slot at `(3,107)` as the Quest
+  Log button. This keeps the original menu height and surrounding icon layout
+  unchanged.
+- Clicking the button toggles the standalone Quest Log and closes the right
+  menu. Reopen the right menu and click the active paper slot to close the task
+  window. Keyboard access remains intact.
+- Browser acceptance passed the complete closed -> open -> closed loop, kept
+  the quest window in the Crystal stage coordinate system, and produced zero
+  console/page errors. Screenshots are under
+  `output/system-menu-quest-button/`.
+- Candidate checks: `test:system-menu-quest-button`, `test:responsive-stage`,
+  `test:quest-localization`, TypeScript, and diff whitespace all pass. Final
+  acceptance still requires an authenticated player to click the paper icon on
+  the production-shaped game page.
+- Live follow-up found the real-page-only failure: Fast Refresh had replaced
+  `.client-stage-frame`, while `ExtraWindows` retained the detached original
+  node as its portal host. The task button correctly set `showQuestLog=true`,
+  but the visible document contained no quest window.
+- The registry now reconnects to the current stage after each render and rejects
+  disconnected hosts. A regression assertion failed before the fix and passed
+  afterward. The existing authenticated game tab then passed open -> close with
+  one visible quest window, the current stage as parent, and zero page errors;
+  the forced stage-remount web-game capture also reports
+  `questWindowMounted=true`.
+- The complete `test:frontend-logic` chain passed through the quest, scene,
+  movement, combat, text, player-frame, and Bevy presentation checks, then hit
+  the pre-existing local artifact prerequisite at `test:bevy-runtime-budget`
+  (`public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm` is absent). Every
+  test after that stop was run separately and passed.
+
+## 2026-08-12 Tracked quest NPC marker binding repair
+
+- Root cause: `NewNpcInfo`/`ObjectNpc` carried the authoritative `questIds`, but
+  `setWorldEntityFromPacket` did not copy them into the live Web `WorldEntity`.
+  The quest log and tracker therefore remained correct while the head-marker
+  resolver saw every NPC as unbound and removed the golden exclamation/question
+  icon after normal packet-driven entity replacement.
+- NPC packet ingestion now accepts integer quest IDs, removes duplicates,
+  preserves an existing binding when an incremental packet omits the field,
+  and treats an explicit empty array as an authoritative clear. Simulation
+  coverage asserts the Bichon Assistant/Craft Lady/Blacksmith bindings at both
+  packet and world-snapshot boundaries.
+- Rebuilt and restarted the local Gateway from the current source. The live
+  authenticated demo session retained three `.entity-quest-icon` nodes before
+  and after tracking `简助理的请求`, while its objective tracker opened normally.
+- A fresh-account adjacent-NPC capture independently proved
+  `Assistant_Jane.questIds=[1,2,3,7,10,13,16,19]`, active quest 1, three visible
+  quest icons, exact Crystal marker anchoring, one interaction, zero movement,
+  zero console errors, and zero non-favicon 404s. Evidence is under
+  `output/quest-marker-binding-fix/live-npc/`; the generic web-game client state
+  and screenshot are under `output/quest-marker-binding-fix/web-game-client/`.
+- The NPC capture harness now waits for the React login form after the debug
+  state reaches `login`, removing a first-load mount race exposed during this
+  acceptance run.
+- Candidate checks pass: quest-entity binding, quest localization, system-menu
+  quest button, extended packets (28 groups), StartGame boundary, player frames,
+  Web TypeScript, focused simulation and Gateway Rust tests, Rust formatting,
+  and diff whitespace.
+
+## 2026-08-12 Monster rendering, cadence, and death closure
+
+- Root causes were independent: the client rebuilt an entity atlas for changing
+  visible frames, shared monsters could receive both personal-session and Zone
+  movement, Zone AI used fixed 600/1200 ms constants instead of Crystal template
+  speeds, and the checked-in/R2 monster exports were truncated to 80 frames.
+- Entity rendering now defaults to stable prebuilt atlases. Live repacking is an
+  explicit debug opt-in, same-origin actor assets take precedence over stale R2
+  files, and regenerated local metadata is fetched with `no-store` so an old
+  80-frame payload cannot survive an asset repair.
+- Full original exports now cover `Monster/000`, `003`, `004`, `005`, `007`,
+  `010`, and `012`. In particular `Monster/007.Lib` was exported 448/448 from
+  the original Crystal source and includes Standing, Walking, Attack1, Struck,
+  Die, Dead, and Revive. The release builder now fails before staging if any
+  critical library is truncated or loses required actions.
+- Shared Zone movement and attacks now use Crystal `move_speed` and
+  `attack_speed` in real milliseconds, and Gateway personal ticks suppress
+  duplicate motion for shared monster object ids. The authoritative death test
+  now proves HP=0, retained corpse state, `ObjectDied`, and dead late-join seed.
+- Verification passed: all 157 shared-zone tests, simulation/gateway checks,
+  Rust 1.95 client `Die -> Dead` hold, Web frame/death/atlas/cache/routing tests,
+  TypeScript, and forced-Bevy browser sweeps on maps `0` and `1`. Both browser
+  runs had a rendered floor, prebuilt atlas hit, zero live atlas builds, zero
+  asset gaps/404s, and zero console errors.
+- This is local Candidate evidence. The rebuilt R2 release has not yet been
+  uploaded and the web/gateway changes have not yet been deployed, so production
+  is not claimed fixed by this entry.
+- `assets:remote:build` produced the upload-ready scatter-frame release
+  `20260812-monster-render-death`: 40,944 files, 237,928,682 bytes, zero missing
+  files, object prefix `mir2/v/20260812-monster-render-death`. The manifest
+  includes `Monster/007/meta.json`, frame `447.png`, and all rebuilt atlas pages.
+  `assets:full-release:build` remains separately blocked by the absent local
+  full-pack prerequisite `public/generated/crystal-packs/full/index.json`; it is
+  not required for this requested scatter-frame R2 release.
+- `assets:r2:dry-run` passed for that exact manifest: 40,945 upload objects
+  (40,944 assets plus the release manifest), 246,617,356 bytes, driver `r2-s3`,
+  and the expected immutable object prefix. No R2 write was performed.
