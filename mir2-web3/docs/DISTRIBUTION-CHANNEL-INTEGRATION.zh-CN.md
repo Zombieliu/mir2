@@ -33,7 +33,7 @@ flowchart LR
 | 官网 | 原密码、Passkey 或 Wallet | Sui 签名证明 | Passkey 推荐，Wallet 可选 | 不需要渠道 SDK | 已实现 |
 | itch | 服务端签名游客 | itch 游客命名空间 | 选角页绑定 Passkey/Wallet | 渠道标记、归因 | 已实现首发适配器 |
 | CrazyGames | 未登录也可游客进入 | `getUserToken()` JWT | CrazyGames `userId` 自动映射；登录变化自动绑定 | SDK v3 init、loading、gameplay、rewarded ad | 已实现首发适配器 |
-| Steam | Steam Session Ticket | SteamID | 映射到同一 Player ID | Steamworks | 接口模型可复用，尚未实现适配器 |
+| Steam | Steam Session Ticket | SteamID | 映射到同一 Player ID | Steamworks | 服务端 verifier + 桌面 SDK 票据 + 打包已实现；真机验收为后续 |
 | Epic | EOS Auth/Connect token | Product User ID | 映射到同一 Player ID | EOS | 接口模型可复用，尚未实现适配器 |
 
 itch 的 HTML5 项目运行在 iframe 中；仓库已提供

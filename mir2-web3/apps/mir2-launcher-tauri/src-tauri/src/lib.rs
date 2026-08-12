@@ -7,6 +7,8 @@
 
 use tauri::Manager;
 
+mod steam;
+
 const GAME_URL_ENV: &str = "MIR2_DESKTOP_GAME_URL";
 const DEVELOPMENT_GAME_URL: &str = "http://127.0.0.1:3002";
 const PRODUCTION_GAME_URL: &str = "https://mir2.obelisk.build";
@@ -40,6 +42,7 @@ fn resolve_frontend_url(value: Option<&str>, development: bool) -> Result<tauri:
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![steam_auth_ticket])
         .setup(|app| {
             let configured = std::env::var(GAME_URL_ENV).ok();
             let url = resolve_frontend_url(configured.as_deref(), cfg!(debug_assertions))
@@ -55,6 +58,25 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+/// Steam auth session ticket for the web page.
+///
+/// The remote game page invokes this (via the Tauri bridge when running inside
+/// the desktop shell) to obtain a Steam ticket it can exchange with the Gateway
+/// through `/api/channels/session/exchange` (provider `"steam"`).
+///
+/// Returns `Some(ticket)` when a Steam ticket is available, `None` otherwise
+/// (e.g. the game is not running from Steam, or Steamworks is not linked in
+/// this build). The gateway verifier never trusts a client-claimed SteamID, so
+/// a missing/forged ticket simply falls back to guest/passkey login.
+#[tauri::command]
+fn steam_auth_ticket() -> Result<Option<String>, String> {
+    let ticket = steam::steam_auth_ticket()?;
+    if ticket.is_none() {
+        eprintln!("[launcher] steam_auth_ticket: no ticket available");
+    }
+    Ok(ticket)
 }
 
 #[cfg(test)]
@@ -78,5 +100,26 @@ mod tests {
         assert!(resolve_frontend_url(Some("http://127.0.0.1:3002"), false).is_err());
         assert!(resolve_frontend_url(Some("not a URL"), false).is_err());
         assert!(resolve_frontend_url(Some("https://user:secret@example.com"), false).is_err());
+    }
+
+    #[test]
+    fn steam_auth_ticket_returns_override_when_set() {
+        unsafe {
+            std::env::set_var("MIR2_STEAM_AUTH_TICKET", "ticket-abc");
+        }
+        let ticket = steam_auth_ticket().expect("override should not error");
+        unsafe {
+            std::env::remove_var("MIR2_STEAM_AUTH_TICKET");
+        }
+        assert_eq!(ticket.as_deref(), Some("ticket-abc"));
+    }
+
+    #[test]
+    fn steam_auth_ticket_is_none_when_unset() {
+        unsafe {
+            std::env::remove_var("MIR2_STEAM_AUTH_TICKET");
+        }
+        let ticket = steam_auth_ticket().expect("no override should not error");
+        assert_eq!(ticket, None);
     }
 }

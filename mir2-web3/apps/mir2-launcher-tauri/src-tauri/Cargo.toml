@@ -14,8 +14,17 @@ license = "MIT"
 name = "mir2_launcher_tauri_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[features]
+# Enables the Steamworks SDK integration (GetAuthTicketForWebApi). Requires the
+# Steamworks SDK redistributable at build time and steam_appid.txt + the native
+# steam_api library at runtime. Off by default so dev/CI/other platforms build
+# and test without Steam.
+steam = ["dep:steamworks", "steamworks/raw-bindings"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+hex = "0.4"
+steamworks = { version = "0.13", optional = true }
 tauri = { version = "2", features = [] }

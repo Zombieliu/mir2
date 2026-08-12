@@ -48,7 +48,7 @@ use crate::cache::{
     GatewaySessionCacheStatus, GatewaySessionTraceEvent, SharedGatewaySessionCache,
 };
 use crate::channel_identity::{
-    verify_crazygames_token, ChannelIdentityProvider, ChannelIdentityRegistry,
+    verify_crazygames_token, verify_steam_ticket, ChannelIdentityProvider, ChannelIdentityRegistry,
     ChannelIdentityRegistryStatus, PlayerIdentityAccount,
 };
 use crate::events::{
@@ -2006,6 +2006,16 @@ async fn verified_channel_subject(
             token_id: None,
             expires_at_ms: None,
         }),
+        ChannelIdentityProvider::Steam => {
+            let verified = verify_steam_ticket(credential)
+                .await
+                .map_err(|error| channel_exchange_error(StatusCode::UNAUTHORIZED, error))?;
+            Ok(VerifiedChannelSubject {
+                subject: verified.steam_id,
+                token_id: None,
+                expires_at_ms: Some(verified.expires_at_seconds.saturating_mul(1_000)),
+            })
+        }
         ChannelIdentityProvider::Itch
         | ChannelIdentityProvider::DirectGuest
         | ChannelIdentityProvider::CrazyGamesGuest => {
