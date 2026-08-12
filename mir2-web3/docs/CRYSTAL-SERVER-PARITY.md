@@ -1852,3 +1852,19 @@ authoritative monster movement or combat. A server-only fixed light setting
 normal servers continue to use the Crystal UTC time-of-day formula when the
 override is absent or invalid. Focused AI/light regressions and locked
 Simulation/Gateway checks pass.
+
+## 2026-08-12 Zone Restart and Login Availability Note
+
+Production recovery now distinguishes durable world state from process-local
+session state. World Director checkpoints no longer persist or restore players,
+Zone session mappings, outbound registrations, pending packets, or in-flight
+trade/rental state. Live and restored per-player pending queues are bounded to
+the 1,024-message RPC capacity, and the journal compactor is part of the clean
+source build with per-Zone fencing.
+
+The exact incident checkpoint was verified offline: all 16 Zones restored, 20
+orphan sessions plus 910,015 undrainable packet frames were removed, and the
+embedded factory checkpoint contracted from 49,987,670 to 6,378,866 bytes.
+This is backend availability/persistence hardening; it does not change the
+Crystal gameplay-parity percentage or replace post-deploy WSS, human, device,
+and soak acceptance.

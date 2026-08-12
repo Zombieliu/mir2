@@ -3893,3 +3893,23 @@ transaction unit gates and WebGPU/WebGL runtime smokes remain green. The next
 visual milestone is intentionally narrower: GDI text rasterization,
 deterministic chat content, roaming entity/animation phase, and final human
 visual/feel acceptance.
+
+## 2026-08-12 Production Zone Recovery Hardening
+
+- World Director persistence now stores process-independent world state only.
+  Gateway/Zone sessions, players, live registrations, trades/rentals, and
+  pending per-player packet queues are recreated by live clients instead of
+  being resurrected as ownerless sessions after a Zone restart.
+- Pending Zone packets are capped at the existing 1,024-message RPC outbound
+  capacity during both live enqueue and legacy checkpoint restore.
+- Legacy World Director checkpoints remain restorable across signed game-module
+  collision changes: the verified outer commitment is checked first, then the
+  session-free Zone state is re-anchored to the current module state root.
+- The production journal compactor is now represented in source and uses
+  per-Zone mutation fencing. The incident checkpoint (SHA-256
+  `b85aa711db02d6f1bddaf5f128cdae56d68fd67d080e99e6dc10673ad4f2fc0c`)
+  restored successfully in an offline rehearsal; its embedded factory image
+  dropped from 49,987,670 bytes to 6,378,866 bytes after world-only migration.
+- This closes the production login starvation failure caused by 20 orphan
+  sessions retaining 910,015 undrainable packet frames. Physical-device,
+  human-play, and long-soak acceptance remain separate release gates.
