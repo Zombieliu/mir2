@@ -36,6 +36,14 @@ const { createBevyRuntimeUrls } = loadTypeScriptModule(
 const bulkUploadWorker = loadTypeScriptModule(
   new URL("../../../infra/cloudflare/mir2-r2-bulk-upload/src/index.ts", import.meta.url),
 ).default;
+const assetCdnWorkerModule = loadTypeScriptModule(
+  new URL("../../../infra/cloudflare/mir2-r2-asset-cache/src/index.ts", import.meta.url),
+);
+const { overlayFallbackObjectKey: assetCdnFallbackObjectKey } = assetCdnWorkerModule;
+const domainProxyWorkerModule = loadTypeScriptModule(
+  new URL("../../../infra/cloudflare/mir2-domain-proxy/src/index.ts", import.meta.url),
+);
+const { overlayFallbackObjectKey: domainProxyFallbackObjectKey } = domainProxyWorkerModule;
 
 test("a full pack is enabled only by a verified content-addressed release capability", () => {
   const valid = normalizeAssetReleaseCapabilities({
@@ -173,6 +181,85 @@ test("R2 upload Worker persists the private gzip representation header", async (
   assert.equal(stored.options.httpMetadata.contentEncoding, "gzip");
 });
 
+test("immutable overlay releases fall back only to a pinned Mir2 release prefix", () => {
+  const overlayPrefix = "mir2/v/overlay-v2";
+  const fallbackPrefix = "mir2/v/full-v1";
+  const changedAsset = `${overlayPrefix}/original-ui/Monster/012/223.png`;
+  const fallbackAsset = `${fallbackPrefix}/original-ui/Monster/012/223.png`;
+
+  assert.equal(assetCdnFallbackObjectKey(changedAsset, overlayPrefix, fallbackPrefix), fallbackAsset);
+  assert.equal(domainProxyFallbackObjectKey(changedAsset, overlayPrefix, fallbackPrefix), fallbackAsset);
+
+  for (const relativePath of [
+    "remote-asset-release.json",
+    "bevy-runtime/v/bevy-1234567890abcdef/pkg-webgpu/mir2_bevy_runtime.js",
+  ]) {
+    const objectKey = `${overlayPrefix}/${relativePath}`;
+    assert.equal(assetCdnFallbackObjectKey(objectKey, overlayPrefix, fallbackPrefix), "");
+    assert.equal(domainProxyFallbackObjectKey(objectKey, overlayPrefix, fallbackPrefix), "");
+  }
+
+  for (const unsafePrefix of ["outside/v/full-v1", overlayPrefix, ""]) {
+    assert.equal(assetCdnFallbackObjectKey(changedAsset, overlayPrefix, unsafePrefix), "");
+    assert.equal(domainProxyFallbackObjectKey(changedAsset, overlayPrefix, unsafePrefix), "");
+  }
+});
+
+test("public asset CDN reads an overlay object first and then its pinned base", async () => {
+  const previousCaches = globalThis.caches;
+  const cacheWrites = [];
+  Object.defineProperty(globalThis, "caches", {
+    configurable: true,
+    value: {
+      default: {
+        async match() { return null; },
+        async put(request) { cacheWrites.push(request.url); },
+      },
+    },
+  });
+  try {
+    const reads = [];
+    const body = Uint8Array.from([1, 2, 3]);
+    const env = {
+      MIR2_ALLOWED_PREFIX: "mir2/v/",
+      MIR2_OVERLAY_OBJECT_PREFIX: "mir2/v/overlay-v2",
+      MIR2_FALLBACK_OBJECT_PREFIX: "mir2/v/full-v1",
+      MIR2_ASSETS: {
+        async get(key) {
+          reads.push(key);
+          if (key !== "mir2/v/full-v1/original-ui/Monster/012/223.png") return null;
+          return {
+            body: new Blob([body]).stream(),
+            httpEtag: '"fallback-etag"',
+            size: body.byteLength,
+            httpMetadata: { contentType: "image/png" },
+          };
+        },
+      },
+    };
+    const waitUntil = [];
+    const response = await assetCdnWorkerModule.default.fetch(
+      new Request("https://assets.example/mir2/v/overlay-v2/original-ui/Monster/012/223.png"),
+      env,
+      { waitUntil(promise) { waitUntil.push(promise); } },
+    );
+    assert.equal(response.status, 200);
+    assert.equal(
+      response.headers.get("x-mir2-fallback-object-key"),
+      "mir2/v/full-v1/original-ui/Monster/012/223.png",
+    );
+    assert.deepEqual(reads, [
+      "mir2/v/overlay-v2/original-ui/Monster/012/223.png",
+      "mir2/v/full-v1/original-ui/Monster/012/223.png",
+    ]);
+    assert.deepEqual(new Uint8Array(await response.arrayBuffer()), body);
+    await Promise.all(waitUntil);
+    assert.equal(cacheWrites.length, 1);
+  } finally {
+    Object.defineProperty(globalThis, "caches", { configurable: true, value: previousCaches });
+  }
+});
+
 test("production release and Next routing expose the pinned capability and immutable runtime", () => {
   const productionConfig = JSON.parse(
     readFileSync(new URL("../../../config/production-web-assets.json", import.meta.url), "utf8"),
@@ -181,6 +268,8 @@ test("production release and Next routing expose the pinned capability and immut
   assert.equal(productionConfig.fullCrystalPack.verified, true);
   assert.match(productionConfig.fullCrystalPack.contentHash, /^[a-f0-9]{64}$/);
   assert.ok(productionConfig.browserFallbackBaseUrls.length > 0);
+  assert.match(productionConfig.fallbackObjectPrefix, /^mir2\/v\//);
+  assert.notEqual(productionConfig.fallbackObjectPrefix, productionConfig.objectPrefix);
   assert.match(productionConfig.browserFallbackBaseUrls[0], /\/hotlink-ok\/mir2\/v\//);
   assert.ok(
     productionConfig.browserFallbackBaseUrls.every((baseUrl) =>
@@ -232,6 +321,8 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(assetWorkerSource, /const HOTLINK_SAFE_PREFIX = "hotlink-ok\/"/);
   assert.match(assetWorkerSource, /key = key\.slice\(HOTLINK_SAFE_PREFIX\.length\)/);
   assert.match(assetWorkerSource, /cacheUrl\(url, key\)/);
+  assert.match(assetWorkerSource, /MIR2_FALLBACK_OBJECT_PREFIX/);
+  assert.match(assetWorkerSource, /MIR2_OVERLAY_OBJECT_PREFIX/);
   assert.match(uploadScriptSource, /headers\.set\("X-Mir2-Content-Encoding", upload\.contentEncoding\)/);
   assert.match(domainProxySource, /runtime_storage_encoding_missing/);
   assert.match(domainProxySource, /x-mir2-runtime-transport", "stored-gzip-no-transform"/);
@@ -239,6 +330,8 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(domainProxySource, /encodeBody: "manual"/);
   assert.match(domainProxySource, /appendCacheControlDirective\(headers\.get\("cache-control"\), "no-transform"\)/);
   assert.match(domainProxySource, /useAssetEdgeCache = !decompressStoredGzip && !preserveStoredGzip/);
+  assert.match(domainProxySource, /MIR2_FALLBACK_OBJECT_PREFIX/);
+  assert.match(releaseWorkflowSource, /Deploy public asset CDN Worker/);
   assert.match(releaseWorkflowSource, /Deploy authenticated R2 upload Worker/);
   assert.match(releaseWorkflowSource, /inputs\.deploy_upload_worker/);
   assert.match(releaseWorkflowSource, /mir2-r2-bulk-upload\/wrangler\.jsonc/);

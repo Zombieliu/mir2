@@ -12,6 +12,7 @@ import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const BUILD_SCRIPT = path.join(SCRIPT_DIR, "build-remote-asset-release.mjs");
+const BUILD_OVERLAY_SCRIPT = path.join(SCRIPT_DIR, "build-r2-overlay-release.mjs");
 const UPLOAD_SCRIPT = path.join(SCRIPT_DIR, "upload-r2-assets.mjs");
 const VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT = path.join(
   SCRIPT_DIR,
@@ -29,6 +30,7 @@ const R2_RELEASE_WORKFLOW = path.resolve(
   "workflows",
   "web-assets-r2-release.yml",
 );
+let passedTestCount = 0;
 
 await test("map-atlas pages accompany a referenced map-atlas manifest", async () => {
   await withTempDir(async (root) => {
@@ -599,6 +601,165 @@ await test("Vercel release can verify a pre-deployed Worker", async () => {
   );
 });
 
+await test("new R2 releases bootstrap the original-asset manifest locally before upload", async () => {
+  const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
+  assert.match(
+    workflow,
+    /name: Build Web for asset manifest staging[\s\S]*?MIR2_ORIGINAL_ASSET_MANIFEST_MODE:\s*"filesystem"[\s\S]*?run: npm run build/,
+  );
+  assert.match(
+    workflow,
+    /name: Deploy Player Web to Vercel[\s\S]*?MIR2_ORIGINAL_ASSET_MANIFEST_MODE="remote-release"/,
+  );
+});
+
+await test("existing overlay releases copy the pinned runtime before publishing the new prefix", async () => {
+  const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
+  assert.match(
+    workflow,
+    /name: Prepare pinned Bevy runtime for an existing overlay release[\s\S]*?MIR2_FALLBACK_OBJECT_PREFIX[\s\S]*?npm run runtime:fetch:prebuilt/,
+  );
+  assert.match(
+    workflow,
+    /name: Stage immutable Bevy runtime release[\s\S]*?npm run runtime:r2:build/,
+  );
+});
+
+await test("overlay releases publish only changed objects while preserving the verified full pack", async () => {
+  await withTempDir(async (root) => {
+    const fixtureScript = path.join(root, "apps", "web", "scripts", path.basename(BUILD_OVERLAY_SCRIPT));
+    const publicRoot = path.join(root, "apps", "web", "public");
+    const monsterRoot = path.join(publicRoot, "original-ui", "Monster", "000");
+    const npcRoot = path.join(publicRoot, "original-ui", "NPC", "000");
+    const baseManifestPath = path.join(root, "base-release.json");
+    const originalAssetManifestPath = path.join(root, "original-assets.json");
+    const outputPath = path.join(root, "overlay-release.json");
+    const uploadPlanPath = path.join(root, "overlay-upload-plan.json");
+    const manifestUploadPlanPath = path.join(root, "overlay-manifest-upload-plan.json");
+    const fallbackObjectPrefix = "mir2/v/full-fixture";
+    const overlayObjectPrefix = "mir2/v/overlay-fixture";
+    const oldMonsterBytes = Buffer.from("old-monster-frame");
+    const newMonsterBytes = Buffer.from("new-monster-frame");
+    const npcBytes = Buffer.from("unchanged-npc-frame");
+    const fullPackBytes = Buffer.from("verified-full-pack-index");
+    const metaBytes = Buffer.from('{"frames":[{"index":0}],"frameSet":{"Attack":[0]}}\n');
+    const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
+
+    await fs.mkdir(path.dirname(fixtureScript), { recursive: true });
+    await fs.mkdir(monsterRoot, { recursive: true });
+    await fs.mkdir(npcRoot, { recursive: true });
+    await fs.copyFile(BUILD_OVERLAY_SCRIPT, fixtureScript);
+    await fs.writeFile(path.join(monsterRoot, "0.png"), newMonsterBytes);
+    await fs.writeFile(path.join(monsterRoot, "meta.json"), metaBytes);
+    await fs.writeFile(path.join(npcRoot, "0.png"), npcBytes);
+    await fs.writeFile(baseManifestPath, JSON.stringify({
+      schemaVersion: 2,
+      version: "full-fixture",
+      objectPrefix: fallbackObjectPrefix,
+      assetBaseUrl: `https://assets.example/${fallbackObjectPrefix}`,
+      cacheControl: "public, max-age=31536000, immutable",
+      stats: {
+        fileCount: 3,
+        missingCount: 0,
+        sceneSpriteFileCount: 1,
+        publicAssetFileCount: 2,
+      },
+      fullCrystalPack: {
+        enabled: true,
+        verified: true,
+        fileCount: 1,
+        assetHash: sha256(fullPackBytes),
+      },
+      originalAssetManifest: {
+        schemaVersion: 1,
+        assetHash: "old-original-asset-hash",
+        assetCount: 2,
+        originalMapPngCount: 0,
+        originalUiPngCount: 2,
+      },
+      sceneSpriteRoots: [{ root: "Monster", fileCount: 1 }],
+      publicAssetRoots: [
+        { root: "original-ui", fileCount: 2 },
+        { root: "bevy-entity-atlases", fileCount: 0 },
+      ],
+      files: [
+        {
+          p: "generated/crystal-packs/full/index.json",
+          s: fullPackBytes.length,
+          h: sha256(fullPackBytes),
+          c: "application/json; charset=utf-8",
+        },
+        {
+          p: "original-ui/Monster/000/0.png",
+          s: oldMonsterBytes.length,
+          h: sha256(oldMonsterBytes),
+          c: "image/png",
+        },
+        {
+          p: "original-ui/NPC/000/0.png",
+          s: npcBytes.length,
+          h: sha256(npcBytes),
+          c: "image/png",
+        },
+      ],
+    }));
+    await fs.writeFile(originalAssetManifestPath, JSON.stringify({
+      schemaVersion: 1,
+      assetHash: "current-original-asset-hash",
+      stats: {
+        assetCount: 2,
+        originalMapPngCount: 0,
+        originalUiPngCount: 2,
+      },
+      assets: {
+        "/original-ui/Monster/000/0.png": {
+          size: newMonsterBytes.length,
+          sha256: sha256(newMonsterBytes),
+        },
+        "/original-ui/NPC/000/0.png": {
+          size: npcBytes.length,
+          sha256: sha256(npcBytes),
+        },
+      },
+    }));
+
+    await runNode(fixtureScript, [
+      "--baseManifest", baseManifestPath,
+      "--originalAssetManifest", originalAssetManifestPath,
+      "--version", "overlay-fixture",
+      "--objectPrefix", overlayObjectPrefix,
+      "--fallbackObjectPrefix", fallbackObjectPrefix,
+      "--assetBaseUrl", `https://assets.example/${overlayObjectPrefix}`,
+      "--overlayRoots", "original-ui/Monster/000",
+      "--output", outputPath,
+      "--uploadPlan", uploadPlanPath,
+      "--manifestUploadPlan", manifestUploadPlanPath,
+    ]);
+
+    const release = JSON.parse(await fs.readFile(outputPath, "utf8"));
+    const uploadPlan = JSON.parse(await fs.readFile(uploadPlanPath, "utf8"));
+    const manifestUploadPlan = JSON.parse(await fs.readFile(manifestUploadPlanPath, "utf8"));
+    const logicalFiles = new Map(release.files.map((file) => [file.p, file]));
+    const uploadPaths = uploadPlan.files.map((file) => file.p).sort();
+
+    assert.equal(release.objectPrefix, overlayObjectPrefix);
+    assert.equal(release.fallbackObjectPrefix, fallbackObjectPrefix);
+    assert.equal(release.fullCrystalPack.verified, true);
+    assert.equal(release.fullCrystalPack.assetHash, sha256(fullPackBytes));
+    assert.equal(logicalFiles.get("generated/crystal-packs/full/index.json").h, sha256(fullPackBytes));
+    assert.equal(logicalFiles.get("original-ui/NPC/000/0.png").h, sha256(npcBytes));
+    assert.equal(logicalFiles.get("original-ui/Monster/000/0.png").h, sha256(newMonsterBytes));
+    assert.deepEqual(uploadPaths, [
+      "original-ui/Monster/000/0.png",
+      "original-ui/Monster/000/meta.json",
+    ]);
+    assert.equal(uploadPlan.publishReleaseManifest, false);
+    assert.equal(manifestUploadPlan.files.length, 1);
+    assert.equal(manifestUploadPlan.files[0].p, "remote-asset-release.json");
+    assert.equal(manifestUploadPlan.files[0].stagePath, outputPath);
+  });
+});
+
 await test("Cloudflare OAuth API fails fast on authentication errors", async () => {
   await withTempDir(async (root) => {
     let requestCount = 0;
@@ -811,11 +972,12 @@ await test("runtime-only releases do not overwrite the full release manifest by 
   });
 });
 
-console.log("asset release safety tests passed (12/12)");
+console.log(`asset release safety tests passed (${passedTestCount} total)`);
 
 async function test(name, fn) {
   try {
     await fn();
+    passedTestCount += 1;
     console.log(`ok - ${name}`);
   } catch (error) {
     console.error(`not ok - ${name}`);

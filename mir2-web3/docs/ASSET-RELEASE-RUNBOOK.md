@@ -71,9 +71,40 @@ Release order is strict:
 6. Deploy Vercel with the same `MIR2_ASSET_VERSION`,
    `NEXT_PUBLIC_MIR2_ASSET_BASE_URL`, and `MIR2_ASSET_OBJECT_PREFIX`.
 
+For a brand-new immutable prefix, the staging Web build must set
+`MIR2_ORIGINAL_ASSET_MANIFEST_MODE=filesystem`. The corresponding remote
+`remote-asset-release.json` does not exist until step 3, so using
+`remote-release` (or relying on the asset base URL to infer it) during the
+bootstrap build creates a circular dependency and fails with HTTP 404. After
+R2 upload and verification, the production Vercel build may consume that same
+release through `remote-release` mode.
+
 Do not deploy Vercel before the R2 prefix and Worker proxy are verified.
 
 Do not deploy Vercel alone for production.
+
+### Immutable overlay releases
+
+When a verified full Crystal pack is already published, a small actor/atlas
+repair does not need to duplicate the multi-gigabyte base release. Publish the
+changed objects under a new immutable `objectPrefix`, keep a complete logical
+`remote-asset-release.json`, and set `fallbackObjectPrefix` to the verified
+base release. Both `mir2-r2-asset-cache` and `mir2-domain-proxy` must be
+deployed with the same overlay and fallback prefixes before Vercel.
+
+Fallback is deliberately disabled for `remote-asset-release.json` and
+`bevy-runtime/`: those objects must exist in the overlay itself so a missing or
+mismatched release cannot be hidden by the base pack. Never point an overlay
+at a mutable prefix or at itself.
+
+For an existing overlay release, download and hash-verify the pinned Bevy
+runtime from the base prefix, then publish those four runtime objects under the
+overlay prefix before either Worker or Vercel is switched.
+
+`assets:overlay:build` emits separate upload plans for the changed asset set
+and for `remote-asset-release.json`. Publish the manifest plan last; it is the
+only discovery object for the overlay and must never advertise files before
+their bytes are available.
 `web-assets-r2-release` must run with:
 
 - `publish_r2=true`

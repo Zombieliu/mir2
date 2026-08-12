@@ -156,7 +156,14 @@ function verifyBytes(bytes, record, sourceUrl) {
 
 async function readAssetBaseUrl(configPath) {
   const config = await readJson(configPath, "production asset config");
-  return config?.assetBaseUrl;
+  const assetBaseUrl = normalizeBaseUrl(config?.assetBaseUrl);
+  const fallbackObjectPrefix = normalizeObjectPrefix(config?.fallbackObjectPrefix);
+  if (!fallbackObjectPrefix) return assetBaseUrl;
+  if (!fallbackObjectPrefix.startsWith("mir2/v/")) {
+    throw new Error(`Invalid Bevy runtime fallback object prefix: ${fallbackObjectPrefix}`);
+  }
+  const assetOrigin = new URL(assetBaseUrl).origin;
+  return `${assetOrigin}/${fallbackObjectPrefix}`;
 }
 
 async function readJson(filePath, label) {
@@ -186,6 +193,10 @@ function normalizeBaseUrl(value) {
   }
   if (!/^https?:$/.test(url.protocol)) throw new Error(`Unsupported Bevy runtime URL protocol: ${url.protocol}`);
   return normalized;
+}
+
+function normalizeObjectPrefix(value) {
+  return String(value ?? "").trim().replace(/^\/+|\/+$/g, "");
 }
 
 function positiveInteger(value, fallback) {

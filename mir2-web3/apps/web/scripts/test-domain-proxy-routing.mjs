@@ -64,6 +64,23 @@ try {
     "",
     "a stale immutable runtime URL must never receive bytes from the current release",
   );
+  assert.equal(
+    worker.overlayFallbackObjectKey(
+      "mir2/v/overlay/original-map/WemadeMir2/Tiles/1000.png",
+      "mir2/v/overlay",
+      "mir2/v/full-pack",
+    ),
+    "mir2/v/full-pack/original-map/WemadeMir2/Tiles/1000.png",
+  );
+  assert.equal(
+    worker.overlayFallbackObjectKey(
+      "mir2/v/overlay/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgpu/mir2_bevy_runtime.js",
+      "mir2/v/overlay",
+      "mir2/v/full-pack",
+    ),
+    "",
+    "the overlay must not mix Bevy runtime versions",
+  );
   for (const applicationPath of ["/", "/api/asset-manifest", "/ws", "/generated/not-an-asset/file.json"]) {
     assert.equal(worker.isStaticAssetRequest(new URL(`https://mir2.example${applicationPath}`)), false, applicationPath);
   }
@@ -149,6 +166,47 @@ try {
     assert.equal(secondRuntimeResponse.headers.get("x-mir2-runtime-transport"), "stored-gzip-no-transform");
     assert.equal(WebAssembly.validate(gunzipSync(await secondRuntimeResponse.arrayBuffer())), true);
     assert.equal(r2Reads, 2, "each WASM request should read the immutable compressed R2 object");
+
+    const overlayReads = [];
+    const fallbackBody = Uint8Array.from([9, 8, 7]);
+    const overlayWaitUntil = [];
+    const overlayResponse = await worker.default.fetch(
+      new Request("https://mir2.example/original-ui/Monster/012/223.png"),
+      {
+        ...env,
+        MIR2_ASSET_OBJECT_PREFIX: "mir2/v/overlay-v2",
+        MIR2_ASSET_VERSION: "overlay-v2",
+        MIR2_FALLBACK_OBJECT_PREFIX: "mir2/v/full-v1",
+        MIR2_ASSETS: {
+          async get(key) {
+            overlayReads.push(key);
+            if (key !== "mir2/v/full-v1/original-ui/Monster/012/223.png") return null;
+            return {
+              body: new Blob([fallbackBody]).stream(),
+              customMetadata: {},
+              httpEtag: '"fallback-etag"',
+              size: fallbackBody.byteLength,
+              httpMetadata: {
+                cacheControl: "public, max-age=31536000, immutable",
+                contentType: "image/png",
+              },
+            };
+          },
+        },
+      },
+      { waitUntil(promise) { overlayWaitUntil.push(promise); } },
+    );
+    assert.equal(overlayResponse.status, 200);
+    assert.equal(
+      overlayResponse.headers.get("x-mir2-fallback-object-key"),
+      "mir2/v/full-v1/original-ui/Monster/012/223.png",
+    );
+    assert.deepEqual(overlayReads, [
+      "mir2/v/overlay-v2/original-ui/Monster/012/223.png",
+      "mir2/v/full-v1/original-ui/Monster/012/223.png",
+    ]);
+    assert.deepEqual(new Uint8Array(await overlayResponse.arrayBuffer()), fallbackBody);
+    await Promise.all(overlayWaitUntil);
   } finally {
     Object.defineProperty(globalThis, "caches", {
       configurable: true,
