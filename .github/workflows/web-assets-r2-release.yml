@@ -152,6 +152,7 @@ jobs:
             echo "MIR2_ASSET_VERSION=$asset_version"
             echo "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$asset_base"
             echo "MIR2_ASSET_OBJECT_PREFIX=$object_prefix"
+            echo "MIR2_FALLBACK_OBJECT_PREFIX="
             echo "MIR2_REMOTE_ASSET_RELEASE_MANIFEST=$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json"
           } >> "$GITHUB_ENV"
 
@@ -215,6 +216,13 @@ jobs:
             const fs = await import("node:fs/promises");
             if (release.version !== expectedVersion) {
               throw new Error(`remote release version mismatch: expected ${expectedVersion}, got ${release.version}`);
+            }
+            const fallbackObjectPrefix = String(release.fallbackObjectPrefix ?? "").replace(/^\/+|\/+$/g, "");
+            if (
+              fallbackObjectPrefix &&
+              (!fallbackObjectPrefix.startsWith("mir2/v/") || fallbackObjectPrefix === release.objectPrefix)
+            ) {
+              throw new Error(`invalid remote release fallbackObjectPrefix: ${fallbackObjectPrefix}`);
             }
             if (Number(release.stats?.missingCount ?? 0) !== 0) {
               throw new Error(`remote release missingCount is not zero: ${release.stats?.missingCount}`);
@@ -292,11 +300,17 @@ jobs:
               `${JSON.stringify(release)}\n`,
               "utf8",
             );
+            await fs.appendFile(
+              process.env.GITHUB_ENV,
+              `MIR2_FALLBACK_OBJECT_PREFIX=${fallbackObjectPrefix}\n`,
+              "utf8",
+            );
             console.log(JSON.stringify({
               ok: true,
               version: release.version,
               fileCount: files.length,
               missingCount: release.stats?.missingCount ?? null,
+              fallbackObjectPrefix: fallbackObjectPrefix || null,
               remoteReleaseUrl,
             }, null, 2));
           })().catch((error) => {
@@ -309,6 +323,11 @@ jobs:
         working-directory: mir2-web3/apps/web
         env:
           MIR2_USE_PREBUILT_BEVY_RUNTIME: "0"
+          # This is the bootstrap build for a brand-new immutable R2 prefix.
+          # The remote release manifest does not exist until the later upload
+          # step, so generating it from NEXT_PUBLIC_MIR2_ASSET_BASE_URL here
+          # would introduce a circular dependency and fail with HTTP 404.
+          MIR2_ORIGINAL_ASSET_MANIFEST_MODE: "filesystem"
         run: npm run build
 
       - name: Stage remote asset release
@@ -387,6 +406,23 @@ jobs:
           fi
           MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
 
+      - name: Prepare pinned Bevy runtime for an existing overlay release
+        if: ${{ inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel) }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+          runtime_base_url="$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+          if [ -n "${MIR2_FALLBACK_OBJECT_PREFIX:-}" ]; then
+            runtime_base_url="$(
+              node -e '
+                const current = new URL(process.argv[1]);
+                const fallbackPrefix = process.argv[2].replace(/^\/+|\/+$/g, "");
+                process.stdout.write(`${current.origin}/${fallbackPrefix}`);
+              ' "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL" "$MIR2_FALLBACK_OBJECT_PREFIX"
+            )"
+          fi
+          MIR2_BEVY_RUNTIME_BASE_URL="$runtime_base_url" npm run runtime:fetch:prebuilt
+
       - name: Stage immutable Bevy runtime release
         if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
         working-directory: mir2-web3/apps/web
@@ -454,6 +490,35 @@ jobs:
             --requireFullCrystalPack "${{ inputs.require_full_crystal_pack }}" \
             --assetBaseUrl "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL}"
 
+      - name: Deploy public asset CDN Worker
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const configPath = "infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc";
+          const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+          config.vars = {
+            ...(config.vars ?? {}),
+            MIR2_OVERLAY_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
+          };
+          if (process.env.MIR2_FALLBACK_OBJECT_PREFIX) {
+            config.vars.MIR2_FALLBACK_OBJECT_PREFIX = process.env.MIR2_FALLBACK_OBJECT_PREFIX;
+          } else {
+            delete config.vars.MIR2_FALLBACK_OBJECT_PREFIX;
+          }
+          fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc
+
       - name: Deploy same-origin asset Worker proxy
         if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
         working-directory: mir2-web3
@@ -489,6 +554,11 @@ jobs:
             MIR2_ASSET_VERSION: process.env.MIR2_ASSET_VERSION,
             MIR2_BEVY_RUNTIME_VERSION: runtime.version,
           };
+          if (process.env.MIR2_FALLBACK_OBJECT_PREFIX) {
+            config.vars.MIR2_FALLBACK_OBJECT_PREFIX = process.env.MIR2_FALLBACK_OBJECT_PREFIX;
+          } else {
+            delete config.vars.MIR2_FALLBACK_OBJECT_PREFIX;
+          }
           fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
           NODE
           npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc

@@ -58,6 +58,7 @@
     "warm:production-scenes": "node ./scripts/warm-production-scenes.mjs",
     "release:doctor": "node ./scripts/release-doctor.mjs",
     "assets:remote:build": "node ./scripts/build-remote-asset-release.mjs",
+    "assets:overlay:build": "node ./scripts/build-r2-overlay-release.mjs",
     "verify:monster-frame-closure": "node ./scripts/verify-monster-frame-closure.mjs",
     "test:monster-frame-closure": "node --test ./scripts/test-monster-frame-closure.mjs",
     "test:entity-death-animation": "node --test ./scripts/test-entity-death-animation.mjs",

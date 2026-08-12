@@ -23,6 +23,7 @@ export interface Env {
   MIR2_ASSET_OBJECT_PREFIX?: string;
   MIR2_ASSET_VERSION?: string;
   MIR2_BEVY_RUNTIME_VERSION?: string;
+  MIR2_FALLBACK_OBJECT_PREFIX?: string;
   MIR2_ASSETS?: R2Bucket;
   ORIGIN_URL?: string;
   VERCEL_BYPASS_SECRET?: string;
@@ -320,7 +321,17 @@ async function serveStaticAssetFromR2(
     }
   }
 
-  const object = await env.MIR2_ASSETS.get(objectKey);
+  const fallbackObjectKey = overlayFallbackObjectKey(
+    objectKey,
+    assetObjectPrefix,
+    env.MIR2_FALLBACK_OBJECT_PREFIX,
+  );
+  let servedFallbackObjectKey = "";
+  let object = await env.MIR2_ASSETS.get(objectKey);
+  if (!object && fallbackObjectKey) {
+    object = await env.MIR2_ASSETS.get(fallbackObjectKey);
+    if (object) servedFallbackObjectKey = fallbackObjectKey;
+  }
   if (!object) {
     return assetError("asset_not_found", 404, "asset_not_found", publicUrl.pathname, objectKey);
   }
@@ -335,6 +346,9 @@ async function serveStaticAssetFromR2(
   }
 
   const headers = assetObjectHeaders(objectKey, object, env, assetVersion, "MISS");
+  if (servedFallbackObjectKey) {
+    headers.set("x-mir2-fallback-object-key", servedFallbackObjectKey);
+  }
   if (runtimeRequest) {
     headers.set("x-mir2-runtime-version", env.MIR2_BEVY_RUNTIME_VERSION || "");
   }
@@ -455,6 +469,35 @@ function assetObjectKeyForPath(pathname: string, prefix: string): string {
 
 function normalizeAssetObjectPrefix(value: string | undefined): string {
   return String(value ?? "").trim().replace(/^\/+|\/+$/g, "");
+}
+
+export function overlayFallbackObjectKey(
+  objectKey: string,
+  overlayPrefixValue: string | undefined,
+  fallbackPrefixValue: string | undefined,
+): string {
+  const overlayPrefix = normalizeAssetObjectPrefix(overlayPrefixValue);
+  const fallbackPrefix = normalizeAssetObjectPrefix(fallbackPrefixValue);
+  if (
+    !overlayPrefix ||
+    !fallbackPrefix ||
+    overlayPrefix === fallbackPrefix ||
+    !overlayPrefix.startsWith("mir2/v/") ||
+    !fallbackPrefix.startsWith("mir2/v/") ||
+    !objectKey.startsWith(`${overlayPrefix}/`)
+  ) {
+    return "";
+  }
+
+  const relativePath = objectKey.slice(overlayPrefix.length + 1);
+  if (
+    !relativePath ||
+    relativePath === "remote-asset-release.json" ||
+    relativePath.startsWith("bevy-runtime/")
+  ) {
+    return "";
+  }
+  return `${fallbackPrefix}/${relativePath}`;
 }
 
 function isStoredGzipJsonPath(objectKey: string): boolean {

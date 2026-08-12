@@ -22,6 +22,8 @@
   ],
   "vars": {
     "MIR2_ALLOWED_PREFIX": "mir2/v/",
-    "MIR2_CACHE_CONTROL": "public, max-age=31536000, immutable"
+    "MIR2_CACHE_CONTROL": "public, max-age=31536000, immutable",
+    "MIR2_FALLBACK_OBJECT_PREFIX": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+    "MIR2_OVERLAY_OBJECT_PREFIX": "mir2/v/20260813-actor-closure-f69fd2d9"
   }
 }

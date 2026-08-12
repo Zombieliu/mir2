@@ -117,3 +117,14 @@ Goal: Turn the current functional mobile layout into a polished landscape-first 
   missing workflow path outside this repository checkout. Neither was changed here.
 - TODO: deploy the v6 request/cache schema through the normal release workflow before production
   acceptance; no manual browser-cache purge is required because the request URL version changes.
+
+## 2026-08-13 immutable actor-asset overlay release
+
+- Current prompt: `A`, authorizing the reviewed merge and full production release after the actor/quest closure work.
+- PR #233 is merged at `f69fd2d9d8df047db7629c05a83b1370fe473437`; the exact gateway and Zone binaries are active and healthy.
+- The first hosted R2 release run stopped safely before deployment because a new immutable prefix tried to read its own not-yet-published remote manifest during the bootstrap build.
+- The release workflow now bootstraps new releases from the local filesystem, while existing overlay releases copy and hash-check the pinned Bevy runtime before publishing it under the new prefix.
+- The new `20260813-actor-closure-f69fd2d9` overlay retains the verified full Crystal pack under `20260730-fullcrystal-f71b89aa-gzip1`, uploads only changed actor assets, and resolves unchanged objects through an explicit Worker fallback.
+- Both the public asset Worker and the same-origin Worker forbid fallback for the release manifest and Bevy runtime, so those two integrity anchors must physically exist in the new immutable prefix.
+- Added an isolated overlay-generator regression proving that changed Monster objects are uploaded, unchanged NPC/full-pack objects remain logical members, and the release manifest is published in a separate final plan.
+- Remaining release gates: run the full targeted test set, upload overlay/runtime/manifest in order, deploy and probe both Workers, merge the release PR, run the main workflow/Vercel production deployment, then perform browser and HTTP production acceptance.
