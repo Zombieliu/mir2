@@ -2062,3 +2062,27 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   regressions cover override resolution and visible current-map AI snapshots.
 - This is deterministic QA/snapshot parity, not a production gameplay rule or
   a substitute for the remaining backend expansion queue.
+
+## 2026-08-12 Production Login Incident Closure
+
+- Root cause: a World Director restart restored session-owned Zone state while
+  `ZoneHostServer.sessions` restarted empty. Twenty orphan players then
+  accumulated 910,015 pending packet frames; repeated base-snapshot attempts
+  expanded the 49.99 MB factory payload beyond the 64 MiB bound and held the
+  per-Zone mutation lane long enough for Gateway `on_connect` to time out.
+- `SharedInProcessZoneRuntimeFactory` now has a world-only checkpoint path that
+  strips all session-scoped state without first encoding pending packets.
+  Legacy images are consumed without cloning the large packet-frame vectors.
+- `ZoneManager::leave_all_sessions` removes authoritative player occupancy while
+  preserving map/world state. Strict roots remain mandatory for ordinary Zone
+  checkpoints; only a World Director checkpoint whose enclosing commitment was
+  already verified may re-anchor module-dependent collision roots.
+- Pending packet queues retain only the newest 1,024 messages, including while
+  decoding legacy checkpoints. The Zone Host journal compactor is now a
+  reproducible source feature configured by
+  `MIR2_ZONE_HOST_JOURNAL_COMPACT_ENTRIES` and
+  `MIR2_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS`.
+- Offline replay of the exact production checkpoint SHA-256
+  `b85aa711db02d6f1bddaf5f128cdae56d68fd67d080e99e6dc10673ad4f2fc0c`
+  restored 16 Zones and emitted a 6,378,866-byte world-only factory image,
+  down from 49,987,670 bytes.

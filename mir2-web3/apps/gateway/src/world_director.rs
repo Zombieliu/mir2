@@ -1603,7 +1603,7 @@ fn restore_runtime_checkpoint(
     for finalized in &checkpoint.finalized {
         control_log.import_finalized(finalized.clone())?;
     }
-    factory.install_checkpoint_bytes(&checkpoint.zone_factory_checkpoint)?;
+    factory.install_world_checkpoint_bytes(&checkpoint.zone_factory_checkpoint)?;
     Ok(WorldDirectorRuntimeState {
         control_log,
         adapter: Mir2DirectorSimulationAdapter::restore(
@@ -1638,7 +1638,7 @@ fn persist_runtime_checkpoint(
         version: DIRECTOR_RUNTIME_CHECKPOINT_VERSION,
         finalized: state.control_log.finalized(),
         simulation_checkpoint: state.adapter.checkpoint_bytes()?,
-        zone_factory_checkpoint: factory.checkpoint_bytes()?,
+        zone_factory_checkpoint: factory.world_checkpoint_bytes()?,
         spawned_monsters_total: state.spawned_monsters_total,
         broadcast_messages_total: state.broadcast_messages_total,
         last_advance_at_ms: state.last_advance_at_ms,

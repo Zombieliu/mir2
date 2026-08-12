@@ -21,6 +21,12 @@ const CANONICAL_ZONE_STATE_VERSION: u32 = 1;
 const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v1\0";
 const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum StateRootPolicy {
+    Strict,
+    ReanchorVerifiedWorldCheckpoint,
+}
+
 /// The authoritative portion of a zone. Collision data is selected by the
 /// signed game module and `ZoneKey`; occupancy, AOI grids, and the ECS mirror
 /// are derived indexes rebuilt from these fields and therefore are not hashed.
@@ -182,6 +188,25 @@ impl ZoneRuntime {
     }
 
     pub fn restore_checkpoint(bytes: &[u8]) -> Result<Self, String> {
+        Self::restore_checkpoint_with_policy(bytes, StateRootPolicy::Strict)
+    }
+
+    /// Restore bytes already covered by a verified, higher-level World
+    /// Director checkpoint commitment and re-anchor them to the current signed
+    /// game module. The canonical Zone root includes collision data, which is
+    /// intentionally not duplicated in the checkpoint and can change between
+    /// releases; a strict old root therefore cannot survive a module upgrade.
+    pub(crate) fn restore_verified_world_checkpoint(bytes: &[u8]) -> Result<Self, String> {
+        Self::restore_checkpoint_with_policy(
+            bytes,
+            StateRootPolicy::ReanchorVerifiedWorldCheckpoint,
+        )
+    }
+
+    fn restore_checkpoint_with_policy(
+        bytes: &[u8],
+        state_root_policy: StateRootPolicy,
+    ) -> Result<Self, String> {
         let checkpoint: ZoneRuntimeCheckpoint = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode zone runtime checkpoint: {error}"))?;
         if checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION {
@@ -255,7 +280,7 @@ impl ZoneRuntime {
         }
 
         let restored_root = runtime.canonical_state_root()?;
-        if restored_root != checkpoint.state_root {
+        if restored_root != checkpoint.state_root && state_root_policy == StateRootPolicy::Strict {
             return Err(format!(
                 "zone runtime checkpoint state root mismatch: expected {}, got {restored_root}",
                 checkpoint.state_root
@@ -350,6 +375,21 @@ mod tests {
         let error =
             ZoneRuntime::restore_checkpoint(&tampered).expect_err("tampered state must fail");
         assert!(error.contains("state root mismatch"), "{error}");
+    }
+
+    #[test]
+    fn verified_world_checkpoint_reanchors_a_module_dependent_state_root() {
+        let runtime = ZoneRuntime::new(ZoneKey::for_map("module-upgrade-map"));
+        let bytes = runtime.checkpoint_bytes().expect("checkpoint bytes");
+        let mut checkpoint: ZoneRuntimeCheckpoint =
+            serde_json::from_slice(&bytes).expect("checkpoint JSON");
+        checkpoint.state_root = "0".repeat(64);
+        let previous_module = serde_json::to_vec(&checkpoint).expect("previous module checkpoint");
+
+        assert!(ZoneRuntime::restore_checkpoint(&previous_module).is_err());
+        let restored = ZoneRuntime::restore_verified_world_checkpoint(&previous_module)
+            .expect("outer-verified World checkpoint should re-anchor");
+        assert_ne!(restored.canonical_state_root().unwrap(), "0".repeat(64));
     }
 
     #[test]

@@ -1114,6 +1114,47 @@ fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts
 }
 
 #[test]
+fn zone_host_compactor_builds_a_base_before_the_journal_grows_unbounded() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority.clone());
+    let zone_id = ZoneId::primary();
+    let transport = test_transport(address, zone_id.clone(), "compactor-session");
+    let lease = authority.owner_lease(&zone_id);
+
+    for time in [1, 2] {
+        transport
+            .execute(ZoneOwnerCommandRequest::direct(
+                lease.clone(),
+                WorldCommand::ClientPacket(ClientPacket::KeepAlive { time }),
+            ))
+            .expect("journal mutation should execute");
+    }
+    let before = transport
+        .replication_head()
+        .expect("head before compaction");
+    assert!(before.next_sequence > 1);
+
+    let (compacted_zones, compacted_entries) = server
+        .compact_mutation_journals(1)
+        .expect("local compactor should publish a base snapshot");
+    assert_eq!(compacted_zones, 1);
+    assert!(compacted_entries > 1);
+
+    let after = transport.replication_head().expect("head after compaction");
+    assert!(after.base_snapshot_id.is_some());
+    assert!(after.base_sequence >= before.next_sequence);
+    assert_eq!(
+        server
+            .telemetry_snapshot()
+            .checkpoint
+            .journal_compactions_total,
+        1
+    );
+
+    stop_server(address, stop, handle);
+}
+
+#[test]
 fn installed_replica_rejects_player_mutations_until_promoted() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (active_address, active_server, active_stop, active_handle) =

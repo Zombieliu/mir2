@@ -16,6 +16,7 @@ use mir2_gateway::{
 
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
 const DEFAULT_ACCOUNT_STORE_PATH: &str = ".mir2-data/accounts.json";
+const DEFAULT_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS: u64 = 30_000;
 
 fn main() -> io::Result<()> {
     mir2_gateway::gate15::initialize_from_env()
@@ -72,6 +73,7 @@ fn main() -> io::Result<()> {
         Arc::clone(&runtime_factory),
     ));
     server.configure_zone_map_catalog(topology.zone_map_catalog(), topology.all_maps_zone_ids());
+    start_zone_journal_compactor(Arc::clone(&server))?;
     let operator_config = ZoneHostOperatorConfig::from_env(bound_address, &server.health().host_id)
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let world_director = world_director_from_env(runtime_factory, topology)?;
@@ -108,6 +110,63 @@ fn main() -> io::Result<()> {
         env::var("MIR2_ZONE_HOST_TOKEN").is_ok()
     );
     server.serve(listener)
+}
+
+fn start_zone_journal_compactor(server: Arc<ZoneHostServer>) -> io::Result<()> {
+    let Some(retained_entry_limit) = env::var("MIR2_ZONE_HOST_JOURNAL_COMPACT_ENTRIES")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .map(|value| {
+            value
+                .trim()
+                .parse::<usize>()
+                .ok()
+                .filter(|value| *value > 0)
+                .ok_or_else(|| {
+                    io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        "MIR2_ZONE_HOST_JOURNAL_COMPACT_ENTRIES must be a positive integer",
+                    )
+                })
+        })
+        .transpose()?
+    else {
+        return Ok(());
+    };
+    let interval_ms = env::var("MIR2_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .map(|value| {
+            value
+                .trim()
+                .parse::<u64>()
+                .ok()
+                .filter(|value| (1_000..=3_600_000).contains(value))
+                .ok_or_else(|| {
+                    io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        "MIR2_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS must be within 1000..=3600000",
+                    )
+                })
+        })
+        .transpose()?
+        .unwrap_or(DEFAULT_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS);
+    eprintln!(
+        "zone host journal compactor enabled retained_entry_limit={retained_entry_limit} interval_ms={interval_ms}"
+    );
+    std::thread::Builder::new()
+        .name("mir2-zone-journal-compactor".to_string())
+        .spawn(move || loop {
+            std::thread::sleep(Duration::from_millis(interval_ms));
+            match server.compact_mutation_journals(retained_entry_limit) {
+                Ok((compacted_zones, compacted_entries)) if compacted_entries > 0 => eprintln!(
+                    "zone host journal compaction completed zones={compacted_zones} entries={compacted_entries}"
+                ),
+                Ok(_) => {}
+                Err(error) => eprintln!("zone host journal compaction failed: {error}"),
+            }
+        })?;
+    Ok(())
 }
 
 fn world_director_from_env(

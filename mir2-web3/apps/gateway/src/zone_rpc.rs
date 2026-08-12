@@ -2508,6 +2508,75 @@ impl ZoneHostServer {
         }
     }
 
+    /// Compact every Zone journal whose retained mutation count exceeds the
+    /// configured limit. Each Zone is fenced independently so unrelated maps
+    /// continue serving gameplay while its base snapshot is built.
+    pub fn compact_mutation_journals(
+        &self,
+        retained_entry_limit: usize,
+    ) -> Result<(usize, usize), String> {
+        if retained_entry_limit == 0 {
+            return Err("Zone journal retained entry limit must be positive".to_string());
+        }
+        let zone_ids = self
+            .journal
+            .lock()
+            .map_err(|_| "zone host journal mutex poisoned".to_string())?
+            .replication
+            .cursors
+            .iter()
+            .filter(|(_, cursor)| cursor.host_entry_indexes.len() > retained_entry_limit)
+            .map(|(zone_id, _)| zone_id.clone())
+            .collect::<Vec<_>>();
+
+        let mut compacted_zones = 0usize;
+        let mut compacted_entries = 0usize;
+        for zone_id in zone_ids {
+            let zone_id = ZoneId::new(zone_id);
+            let _operation = self.operation_gate.lock_zone(&zone_id).map_err(|error| {
+                format!("failed to fence Zone {zone_id} for journal compaction: {error}")
+            })?;
+            let still_over_limit = self
+                .journal
+                .lock()
+                .map_err(|_| "zone host journal mutex poisoned".to_string())?
+                .replication
+                .cursors
+                .get(zone_id.as_str())
+                .is_some_and(|cursor| cursor.host_entry_indexes.len() > retained_entry_limit);
+            if !still_over_limit {
+                continue;
+            }
+            let snapshot = match self.export_base_snapshot(&zone_id).map_err(|fault| {
+                format!(
+                    "Zone {} base snapshot export failed during journal compaction: {}: {}",
+                    zone_id, fault.code, fault.message
+                )
+            })? {
+                ZoneRpcPayload::BaseSnapshot { snapshot } => snapshot,
+                payload => {
+                    return Err(unexpected_payload(
+                        "local journal compaction base snapshot",
+                        &payload,
+                    ))
+                }
+            };
+            let compacted = self
+                .compact_mutation_journal(zone_id.as_str(), &snapshot)
+                .map_err(|fault| {
+                    format!(
+                        "Zone {} journal compaction failed: {}: {}",
+                        zone_id, fault.code, fault.message
+                    )
+                })?;
+            if compacted > 0 {
+                compacted_zones = compacted_zones.saturating_add(1);
+                compacted_entries = compacted_entries.saturating_add(compacted);
+            }
+        }
+        Ok((compacted_zones, compacted_entries))
+    }
+
     pub fn replication_head(&self, zone_id: &ZoneId) -> Result<ZoneReplicationHead, String> {
         let mut head = self
             .journal

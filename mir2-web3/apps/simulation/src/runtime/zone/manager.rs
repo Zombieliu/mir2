@@ -53,6 +53,20 @@ impl ZoneManager {
     }
 
     pub fn restore_checkpoint(bytes: &[u8]) -> Result<Self, String> {
+        Self::restore_checkpoint_with(bytes, ZoneRuntime::restore_checkpoint)
+    }
+
+    /// Restore a Zone manager that is already covered by a verified World
+    /// Director checkpoint commitment. Runtime roots are re-anchored to the
+    /// current signed game module before all session-owned players are removed.
+    pub fn restore_verified_world_checkpoint(bytes: &[u8]) -> Result<Self, String> {
+        Self::restore_checkpoint_with(bytes, ZoneRuntime::restore_verified_world_checkpoint)
+    }
+
+    fn restore_checkpoint_with(
+        bytes: &[u8],
+        restore_runtime: impl Fn(&[u8]) -> Result<ZoneRuntime, String>,
+    ) -> Result<Self, String> {
         let checkpoint: ZoneManagerCheckpoint = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode zone manager checkpoint: {error}"))?;
         if checkpoint.version != ZONE_MANAGER_CHECKPOINT_VERSION {
@@ -63,7 +77,7 @@ impl ZoneManager {
         }
         let mut zones = BTreeMap::new();
         for (expected_key, runtime_bytes) in checkpoint.zones {
-            let runtime = ZoneRuntime::restore_checkpoint(&runtime_bytes)?;
+            let runtime = restore_runtime(&runtime_bytes)?;
             if runtime.key() != &expected_key {
                 return Err(format!(
                     "zone manager checkpoint key mismatch for map {}",
@@ -148,6 +162,20 @@ impl ZoneManager {
             }
             ZoneCommand::Tick { now_ms } => self.tick_all(*now_ms),
         }
+    }
+
+    /// Remove every session-owned player while retaining persistent Zone state.
+    ///
+    /// World-level checkpoints must not resurrect Gateway sessions after a
+    /// process restart. The Gateway owns session recovery; the Zone manager only
+    /// contributes persistent map/world state to those checkpoints.
+    pub fn leave_all_sessions(&mut self) -> usize {
+        let session_ids = self.session_zones.keys().cloned().collect::<Vec<_>>();
+        let session_count = session_ids.len();
+        for session_id in session_ids {
+            let _ = self.handle(ZoneCommand::Leave { session_id });
+        }
+        session_count
     }
 
     pub fn handle_for_key(&mut self, key: ZoneKey, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -388,5 +416,16 @@ mod parallel_tick_tests {
         let out = mgr.tick_all(10);
         // One zone: cheap sequential path, still produces the same kind of output.
         assert_eq!(out, populate(1).tick_all_sequential(10));
+    }
+
+    #[test]
+    fn leave_all_sessions_preserves_zones_but_removes_players() {
+        let mut manager = populate(2);
+        assert_eq!(manager.leave_all_sessions(), 4);
+        assert!(manager.session_zones.is_empty());
+        assert_eq!(manager.zones.len(), 2);
+        for zone in manager.zones.values() {
+            assert_eq!(zone.player_count(), 0);
+        }
     }
 }
