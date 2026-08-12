@@ -4492,6 +4492,12 @@ fn zone_monster_spawn_from_shared_entity(
         max_hp,
         hp,
         experience: template_ref.map(|monster| monster.experience).unwrap_or(0),
+        move_speed_ms: template_ref
+            .map(|monster| u64::from(monster.move_speed))
+            .unwrap_or_default(),
+        attack_speed_ms: template_ref
+            .map(|monster| u64::from(monster.attack_speed))
+            .unwrap_or_default(),
         friendly_guild: None,
         defense: template_ref
             .map(|monster| ZoneMonsterDefense::from_crystal_template(monster))
@@ -5047,6 +5053,16 @@ fn coalesced_zone_movement_object_id(packet: &ServerPacket) -> Option<u32> {
         | ServerPacket::ObjectRun { movement } => Some(movement.object_id),
         _ => None,
     }
+}
+
+fn suppress_personal_tick_shared_monster_motion(
+    packets: &mut Vec<ServerPacket>,
+    shared_monster_ids: &BTreeSet<u32>,
+) {
+    packets.retain(|packet| {
+        !coalesced_zone_movement_object_id(packet)
+            .is_some_and(|object_id| shared_monster_ids.contains(&object_id))
+    });
 }
 
 fn is_realtime_zone_live_packet(packet: &ServerPacket) -> bool {
@@ -7015,6 +7031,31 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 
+    /// Personal `SimulationSession` ticks still advance private systems, but
+    /// shared monsters are driven by the single Zone owner cadence. Dropping
+    /// their private motion packets here prevents the same monster from being
+    /// moved and broadcast a second time by every connected session.
+    fn suppress_personal_tick_shared_monster_motion(&self, packets: &mut Vec<ServerPacket>) {
+        let Some(map_file_name) = self.inner.world_snapshot().map_file_name else {
+            return;
+        };
+        let shared_monster_ids = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .maps
+            .get(&map_file_name)
+            .map(|map| {
+                map.entities
+                    .values()
+                    .filter(|entity| entity.kind == WorldEntityKind::Monster)
+                    .map(|entity| entity.object_id)
+                    .collect::<BTreeSet<_>>()
+            })
+            .unwrap_or_default();
+        suppress_personal_tick_shared_monster_motion(packets, &shared_monster_ids);
+    }
+
     fn commit_shared_death_drops_to_current_map(
         &mut self,
         packets: &[ServerPacket],
@@ -8681,6 +8722,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 entity_side_effect,
             ));
         }
+        if is_world_tick {
+            self.suppress_personal_tick_shared_monster_motion(&mut command_packets);
+        }
         self.apply_shared_entity_packets_to_current_map(&command_packets);
         if let Some(current_key) = self.current_presence_key() {
             self.zone_state
@@ -9246,13 +9290,13 @@ mod tests {
         gateway_zone_magic_targets_summon, ground_drop_spawn_packet,
         shared_entity_observer_packet_object_id, shared_gateway_now_ms,
         shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
-        sync_zone_movement_transform, world_entity_from_monster_info,
-        zone_monster_spawn_from_shared_entity, InMemoryZoneOwnerLeaseAuthority,
-        InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
-        MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
-        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
-        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
-        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        suppress_personal_tick_shared_monster_motion, sync_zone_movement_transform,
+        world_entity_from_monster_info, zone_monster_spawn_from_shared_entity,
+        InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
+        InProcessNpcWorldService, InProcessZoneRuntimeFactory, MapZoneSessionRouter,
+        PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
+        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
+        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneRuntimeFactory, SharedInProcessZoneSessionRuntime,
         SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
         SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
@@ -9261,6 +9305,7 @@ mod tests {
         ZoneNativePlayerAttack, ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry,
         ZoneRuntimeFactory,
     };
+
     use crate::{GatewayConfig, GatewaySession};
     use mir2_protocol::{
         ClientBuff, ClientIntelligentCreature, ClientPacket, IntelligentCreatureItemFilter,
@@ -9437,6 +9482,42 @@ mod tests {
             .zone_manager
             .player_transform(&session_id)
             .is_none());
+    }
+
+    #[test]
+    fn personal_tick_drops_shared_monster_motion_but_preserves_other_packets() {
+        let mut packets = vec![
+            ServerPacket::ObjectWalk {
+                movement: ObjectMovement {
+                    object_id: 9_100,
+                    position: Point { x: 10, y: 10 },
+                    direction: MirDirection::Right,
+                },
+            },
+            ServerPacket::ObjectTurn {
+                movement: ObjectMovement {
+                    object_id: 101,
+                    position: Point { x: 8, y: 8 },
+                    direction: MirDirection::Left,
+                },
+            },
+            ServerPacket::Chat {
+                message: "keep me".to_string(),
+                chat_type: mir2_protocol::ChatType::Normal,
+            },
+        ];
+
+        suppress_personal_tick_shared_monster_motion(&mut packets, &BTreeSet::from([9_100]));
+
+        assert_eq!(packets.len(), 2);
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectTurn { movement } if movement.object_id == 101
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == "keep me"
+        )));
     }
 
     #[test]
@@ -10432,6 +10513,8 @@ mod tests {
             max_hp: 285,
             hp: 285,
             experience: 310,
+            move_speed_ms: 0,
+            attack_speed_ms: 0,
             friendly_guild: None,
             position: Point { x: 168, y: 155 },
             direction: MirDirection::Down,
@@ -10501,6 +10584,8 @@ mod tests {
             max_hp: 285,
             hp: 285,
             experience: 310,
+            move_speed_ms: 0,
+            attack_speed_ms: 0,
             friendly_guild: None,
             position: Point { x: 168, y: 155 },
             direction: MirDirection::Down,

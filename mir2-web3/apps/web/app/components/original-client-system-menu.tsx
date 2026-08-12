@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 
+import { playOriginalSoundId } from "../../lib/original-audio";
+import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { DEFAULT_HOTKEY_GROUPS } from "./original-client-hotkey-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
@@ -90,7 +92,9 @@ export function SystemMenuPanel({
   transferOptions,
   inputProfile,
   gamepadFamily,
+  questLogOpen,
   onStartTutorial,
+  onToggleQuestLog,
   onOpenPanel,
   onClose,
   onLogout,
@@ -106,7 +110,9 @@ export function SystemMenuPanel({
   transferOptions: SystemMenuTransferOption[];
   inputProfile: Mir2InputProfile;
   gamepadFamily: Mir2GamepadFamily;
+  questLogOpen: boolean;
   onStartTutorial: () => void;
+  onToggleQuestLog: () => void;
   onOpenPanel: (panel: SystemMenuSurfacePanel) => void;
   onClose: () => void;
   onLogout: () => void;
@@ -187,6 +193,23 @@ export function SystemMenuPanel({
               </div>
             );
           })}
+          <div
+            className="system-menu-icon quest"
+            data-system-menu-action="quest"
+            style={{ left: "3px", top: "107px" }}
+          >
+            <button
+              type="button"
+              className={`system-menu-embedded-button ${questLogOpen ? "active" : ""}`}
+              aria-label={t("ui.quest", [], "Quest Log")}
+              aria-pressed={questLogOpen}
+              title={t("ui.quest", [], "Quest Log")}
+              onClick={() => {
+                playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
+                onToggleQuestLog();
+              }}
+            />
+          </div>
         </section>
         <button type="button" className="system-menu-close-hit" onClick={onClose} aria-label={t("ui.close")} />
       </section>

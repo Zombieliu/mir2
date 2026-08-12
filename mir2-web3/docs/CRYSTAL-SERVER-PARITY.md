@@ -1881,3 +1881,14 @@ embedded factory checkpoint contracted from 49,987,670 to 6,378,866 bytes.
 This is backend availability/persistence hardening; it does not change the
 Crystal gameplay-parity percentage or replace post-deploy WSS, human, device,
 and soak acceptance.
+## 2026-08-12 Monster speed and death-state parity
+
+Shared monsters now retain Crystal `MoveSpeed` and `AttackSpeed` through the
+session/shared-map spawn boundary and schedule Zone AI with those real
+millisecond values. Gateway suppresses duplicate personal-session motion for
+shared monster ids, leaving the Zone as the only packet-visible movement
+authority. Regression coverage locks Scarecrow's 1500 ms movement interval and
+proves a killed monster emits its authoritative death/drop sequence, remains a
+dead corpse, and seeds as dead to a late joiner. All 157 shared-zone integration
+tests and simulation/gateway checks pass. Production rollout remains separate
+from this local parity result.

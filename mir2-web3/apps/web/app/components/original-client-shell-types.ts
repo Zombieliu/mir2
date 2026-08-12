@@ -207,6 +207,7 @@ export type OriginalClientShellProps = {
   selectedCharacterIndex: number;
   showInventory: boolean;
   showCharacter: boolean;
+  showQuestLog: boolean;
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
@@ -258,6 +259,7 @@ export type OriginalClientShellProps = {
   onStartTutorial: (input: Mir2InputProfile, gamepadFamily: Mir2GamepadFamily) => void;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
+  onToggleQuestLog: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
   onCloseNpcRepairService: () => void;

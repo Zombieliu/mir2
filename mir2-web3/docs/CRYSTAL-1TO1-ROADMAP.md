@@ -3928,3 +3928,16 @@ visual/feel acceptance.
 - This closes the production login starvation failure caused by 20 orphan
   sessions retaining 910,015 undrainable packet frames. Physical-device,
   human-play, and long-soak acceptance remain separate release gates.
+## 2026-08-12 Monster temporal/render closure
+
+- Candidate: shared monster movement/attack timing is data-driven from Crystal
+  templates and has one Zone packet authority.
+- Candidate: `ObjectDied` drives the client Die sequence, the terminal Dead
+  frame is held for corpses, and late joins receive the authoritative dead bit.
+- Candidate: critical starter monster exports are release-gated for contiguous
+  PNGs plus required actions. Current local counts are 128 (`000`), 232 (`003`),
+  232 (`004`), 234 (`005`), 448 (`007`), 164 (`010`), and 224 (`012`).
+- Candidate browser evidence: forced-Bevy map `0` and map `1` sweeps rendered
+  through prebuilt atlases with zero live rebuilds, asset gaps, 404s, or console
+  errors. Remaining acceptance boundary is R2 upload/deployment followed by
+  human combat observation of move, attack, Die, and persistent Dead frames.

@@ -1887,6 +1887,8 @@ fn director_monster_spawns(
                 experience: (u64::from(template.experience) * u64::from(reward_modifier_bps)
                     / BASIS_POINTS)
                     .min(u64::from(u32::MAX)) as u32,
+                move_speed_ms: u64::from(template.move_speed),
+                attack_speed_ms: u64::from(template.attack_speed),
                 friendly_guild: None,
                 position: position.clone(),
                 direction: *direction,

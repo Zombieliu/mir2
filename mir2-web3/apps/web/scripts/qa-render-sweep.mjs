@@ -66,6 +66,7 @@ const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? "Mir2test1";
 const characterName = args.characterName ?? defaultName("QR", 10);
 const skipSweep = booleanArg(args.skipSweep, false);
 const skipFallback = booleanArg(args.skipFallback, false);
+const requireBevyEntityRenderer = booleanArg(args.requireBevyEntityRenderer, false);
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9700 + (process.pid % 250));
 const runId = args.runId ?? `${new Date().toISOString().replace(/[:.]/g, "-").replace("Z", "")}-${process.pid}`;
@@ -79,6 +80,7 @@ const VIEWPORT = { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false
 const SCENE_READY_TIMEOUT_MS = numberArg(args.sceneReadyTimeoutMs, 45_000);
 const FALLBACK_SCENE_READY_TIMEOUT_MS = numberArg(args.fallbackSceneReadyTimeoutMs, 75_000); // swiftshader is slow
 const TRANSFER_TIMEOUT_MS = numberArg(args.transferTimeoutMs, 20_000);
+const ENTITY_RENDERER_TIMEOUT_MS = numberArg(args.entityRendererTimeoutMs, 60_000);
 const SETTLE_MS = numberArg(args.settleMs, 1_600); // let the new map's tiles fetch/fail + frames settle
 const BLACK_LUMA_MEAN = 8; // mean luma below this = effectively black (nothing renders — even player/HUD invisible)
 const FLAT_LUMA_VARIANCE = 6; // variance below this = near-uniform (blank) frame
@@ -250,6 +252,8 @@ async function readState(client) {
         }
         return o;
       };
+      const runtimeDebug = window.__mir2BevyRuntimeDebug;
+      const entityDebug = window.__mir2BevyEntityRendererDebug;
       return {
         screen: s.screen ?? null,
         wsState: s.wsState ?? null,
@@ -259,7 +263,16 @@ async function readState(client) {
         sceneAssetReady: s.sceneAssetReadiness?.ready ?? null,
         player: s.player ? { x: s.player.x, y: s.player.y } : null,
         loadingMapVisible: body.includes("Loading map"),
-        bevyRuntime: compact(window.__mir2BevyRuntimeDebug),
+        bevyRuntime: compact(runtimeDebug),
+        bevyEntityRenderer: entityDebug && typeof entityDebug === "object"
+          ? {
+              ...compact(entityDebug),
+              runtime: compact(entityDebug.runtime),
+              atlasStats: compact(entityDebug.atlasStats),
+              spriteLibraryCache: compact(entityDebug.spriteLibraryCache),
+              sceneAssetRuntime: compact(entityDebug.sceneAssetRuntime),
+            }
+          : null,
         bodyText: body.slice(0, 240),
       };
     })()
@@ -408,17 +421,29 @@ async function runMapSweep(client) {
     const arrived = await transferToMap(client, m.map, m.x, m.y, TRANSFER_TIMEOUT_MS).catch(() => false);
     const ready = await waitUntilSoft(client, readyExpr, SCENE_READY_TIMEOUT_MS);
     await delay(SETTLE_MS); // give tiles time to fetch/fail and frames to settle
+    const entityRendererReady = !requireBevyEntityRenderer || await waitUntilSoft(
+      client,
+      `(() => {
+        const debug = window.__mir2BevyEntityRendererDebug;
+        return debug?.ready === true && debug?.enabled === true &&
+          debug?.atlasMode === "packed" && debug?.atlasCoversAllSources === true &&
+          debug?.atlasStats?.lastSource === "prebuilt";
+      })()`,
+      ENTITY_RENDERER_TIMEOUT_MS,
+    );
 
     const state = await readState(client).catch(() => ({}));
     const render = await assessRender(client);
 
     const newFailures = client.networkFailures.slice(netBaseline);
-    const tile404 = newFailures.filter((f) => f.kind === "map");
-    const runtimeFail = newFailures.filter((f) => f.kind === "runtime");
+    const requestAborts = newFailures.filter(isBenignNetworkAbort);
+    const actionableFailures = newFailures.filter((failure) => !isBenignNetworkAbort(failure));
+    const tile404 = actionableFailures.filter((f) => f.kind === "map");
+    const runtimeFail = actionableFailures.filter((f) => f.kind === "runtime");
     // ui / sound / entity / atlas / asset 404s are known dev + R2 asset gaps (NPC
     // libs, dev Sound/*.wav) — recorded for completeness, never a hard fail.
-    const assetGap = newFailures.filter((f) => ["ui", "sound", "entity", "asset", "map-atlas"].includes(f.kind));
-    const unexpectedFail = newFailures.filter((f) => f.kind === "other");
+    const assetGap = actionableFailures.filter((f) => ["ui", "sound", "entity", "asset", "map-atlas"].includes(f.kind));
+    const unexpectedFail = actionableFailures.filter((f) => f.kind === "other");
     const consoleDelta = client.consoleErrors.filter(isCriticalConsoleError).length - consoleBaseline;
     const loadingStuck = Boolean(state.loadingMapVisible);
 
@@ -426,6 +451,7 @@ async function runMapSweep(client) {
     const reasons = [];
     if (!arrived) reasons.push("did-not-arrive");
     if (!ready) reasons.push("scene-not-ready");
+    if (!entityRendererReady) reasons.push("bevy-entity-renderer-not-ready");
     if (loadingStuck) reasons.push("stuck-loading");
     if (render.black) reasons.push("black-canvas");
     if (runtimeFail.length) reasons.push(`runtime-asset-404(${runtimeFail.length})`); // a missing Bevy runtime module breaks rendering
@@ -455,6 +481,7 @@ async function runMapSweep(client) {
       arrived,
       mapFileName: state.mapFileName ?? null,
       sceneReady: Boolean(ready),
+      entityRendererReady,
       loadingStuck,
       lumaMean: render.mean,
       lumaVariance: render.variance,
@@ -465,8 +492,11 @@ async function runMapSweep(client) {
       tile404Sample: tile404.slice(0, 5).map((f) => `${f.status || f.errorText || "ERR"} ${stripBase(f.url)}`),
       runtimeFailCount: runtimeFail.length,
       assetGapCount: assetGap.length,
+      assetGapSample: assetGap.slice(0, 8).map((f) => `${f.status || f.errorText || "ERR"} ${stripBase(f.url)}`),
+      requestAbortCount: requestAborts.length,
       unexpectedFailCount: unexpectedFail.length,
       consoleErrorDelta: consoleDelta,
+      bevyEntityRenderer: state.bevyEntityRenderer ?? null,
       reasons,
       warnings,
     };
@@ -860,6 +890,10 @@ function classifyAssetUrl(url) {
   if (t.includes("entity") || t.includes("atlas")) return "entity";
   if (/\.(png|webp|ktx2|basis)(\?|$)/i.test(t)) return "asset";
   return "other";
+}
+
+function isBenignNetworkAbort(failure) {
+  return failure?.status === 0 && /(?:net::)?ERR_ABORTED/i.test(String(failure?.errorText ?? ""));
 }
 
 // Filter the documented noise: favicon, ResizeObserver, the expected WebGPU-not-

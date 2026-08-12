@@ -24,6 +24,10 @@ import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/t
 import { preloadSceneAssetUrls } from "../lib/scene-asset-preloader";
 import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
 import { buildCrystalFullPackAtlasSnapshot } from "../lib/crystal-full-pack-bevy";
+import {
+  bevyEntityAtlasCandidateHasCoverage,
+  resolveBevyEntityAtlasPolicy,
+} from "../lib/bevy-entity-atlas-policy";
 import { shouldLoadCrystalFullPack } from "../lib/crystal-full-pack-capability";
 import { loadCrystalFullPackIndex } from "../lib/crystal-full-pack-index";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../lib/render-tier";
@@ -295,6 +299,7 @@ const bevyEntityAtlasResolveStats = {
 // The residency fetcher's resolveFn only receives a key; the acquire effect
 // stashes the sources for that key here just before calling acquire(key).
 const bevyEntityAtlasSourcesByKey = new Map<string, BevyEntityAtlasSource[]>();
+const bevyEntityAtlasAllowLiveByKey = new Map<string, boolean>();
 
 // AtlasPagePayload (residency manager) <-> BevyEntityAtlasSnapshot (renderer).
 // imageUrl-only prebuilt atlases carry no pixels; round-trip the empty buffer
@@ -364,8 +369,13 @@ const bevyAtlasResidency = createAssetResidency({
   fetcher: createBrowserAtlasFetcher({
     resolveFn: async (key: string): Promise<AtlasPagePayload> => {
       const sources = bevyEntityAtlasSourcesByKey.get(key) ?? [];
+      const allowLiveBuild = bevyEntityAtlasAllowLiveByKey.get(key) ?? false;
       const startedAt = performance.now();
-      const { atlas, source, prebuiltKey } = await resolveBevyEntityAtlasSnapshot(sources, key);
+      const { atlas, source, prebuiltKey } = await resolveBevyEntityAtlasSnapshot(
+        sources,
+        key,
+        allowLiveBuild,
+      );
       bevyEntityAtlasResolveStats.lastBuildMs = Math.round(performance.now() - startedAt);
       bevyEntityAtlasResolveStats.lastSource = source;
       bevyEntityAtlasResolveStats.lastPrebuiltKey = prebuiltKey ?? null;
@@ -510,6 +520,7 @@ export function OriginalClientShell({
   selectedCharacterIndex,
   showInventory,
   showCharacter,
+  showQuestLog,
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
@@ -561,6 +572,7 @@ export function OriginalClientShell({
   onStartTutorial,
   onToggleCharacter,
   onToggleInventory,
+  onToggleQuestLog,
   onCloseCharacter,
   onCloseInventory,
   onCloseNpcRepairService,
@@ -1927,14 +1939,15 @@ export function OriginalClientShell({
     () => submittedPresentationContextRef.current,
     setBevyLocalSelfMotion,
   );
+  const bevyEntityAtlasPolicy = shouldUseBevyEntityAtlas();
   const useWebGl2EntityAtlasRenderer =
     entityRendererRequested &&
     !foldWebgl2ToBevy &&
     bevyRuntimeBackend === "webgl2" &&
-    shouldUseBevyEntityAtlas() &&
+    bevyEntityAtlasPolicy !== "disabled" &&
     shouldUseRawWebGl2EntityRenderer();
   const useGpuEntityRenderer = useBevyEntityRenderer || useWebGl2EntityAtlasRenderer;
-  const useBevyEntityAtlas = useGpuEntityRenderer && shouldUseBevyEntityAtlas();
+  const useBevyEntityAtlas = useGpuEntityRenderer && bevyEntityAtlasPolicy !== "disabled";
   const bevyEntityAtlasSources =
     useGpuEntityRenderer && useBevyEntityAtlas
       ? collectBevyEntityAtlasSources(viewportEntitySprites)
@@ -1988,10 +2001,17 @@ export function OriginalClientShell({
     webGl2EntityAtlasFailedKey !== null &&
     (webGl2EntityAtlasFailedKey === "__webgl2_entity_error__" ||
       webGl2EntityAtlasFailedKey === (activeBevyEntityAtlas?.key ?? null));
+  const activeBevyEntityAtlasCoversAllSources = Boolean(
+    activeBevyEntityAtlas &&
+      bevyEntityAtlasSources.every((source) => Boolean(activeBevyEntityAtlas.rects[source.key])),
+  );
   const hideDomEntitySpritesForBevy =
     useGpuEntityRenderer &&
     !webGl2EntityAtlasFailed &&
-    (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
+    (!useBevyEntityAtlas ||
+      (Boolean(activeBevyEntityAtlas) &&
+        webGl2EntityTextureReady &&
+        (!useWebGl2EntityAtlasRenderer || activeBevyEntityAtlasCoversAllSources)));
   const entityRenderState = buildBevyEntityRenderState({
     enabled: useGpuEntityRenderer,
     stageWidth: stagePresentation.virtualWidth,
@@ -2520,6 +2540,7 @@ export function OriginalClientShell({
         0,
       ),
       atlasSourceCount: bevyEntityAtlasSources.length,
+      atlasCoversAllSources: activeBevyEntityAtlasCoversAllSources,
       atlasCacheSize: bevyAtlasResidency.stats().memoryCacheSize,
       atlasBudgetProfile: BEVY_ENTITY_ATLAS_BUDGET_PROFILE,
       atlasCurrentKey: bevyEntityAtlasKey,
@@ -2711,6 +2732,7 @@ export function OriginalClientShell({
     const requestId = (bevyEntityAtlasRequestRef.current?.requestId ?? 0) + 1;
     bevyEntityAtlasRequestRef.current = { key: bevyEntityAtlasKey, requestId };
     bevyEntityAtlasSourcesByKey.set(bevyEntityAtlasKey, bevyEntityAtlasSources);
+    bevyEntityAtlasAllowLiveByKey.set(bevyEntityAtlasKey, bevyEntityAtlasPolicy === "dynamic");
     let disposed = false;
     let acquired = false;
 
@@ -2736,6 +2758,7 @@ export function OriginalClientShell({
       .finally(() => {
         if (bevyEntityAtlasSourcesByKey.get(bevyEntityAtlasKey) === bevyEntityAtlasSources) {
           bevyEntityAtlasSourcesByKey.delete(bevyEntityAtlasKey);
+          bevyEntityAtlasAllowLiveByKey.delete(bevyEntityAtlasKey);
         }
       });
 
@@ -2746,7 +2769,7 @@ export function OriginalClientShell({
         acquired = false;
       }
     };
-  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey]);
+  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey, bevyEntityAtlasPolicy]);
 
   useEffect(() => {
     if (screen !== "game" || !renderPlayer || !world.originalMapRegion || !sceneSpriteLibrariesReady) {
@@ -3234,7 +3257,11 @@ export function OriginalClientShell({
               onDebugChange={handleMapAtlasDebug}
             />
             <WebGl2EntityAtlasLayer
-              enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
+              enabled={
+                useWebGl2EntityAtlasRenderer &&
+                Boolean(activeBevyEntityAtlas) &&
+                activeBevyEntityAtlasCoversAllSources
+              }
               state={entityRenderState}
               onDebugChange={handleWebGl2EntityAtlasDebug}
             />
@@ -3356,6 +3383,7 @@ export function OriginalClientShell({
                   chatMessage,
                   showInventory,
                   showCharacter,
+                  showQuestLog,
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
@@ -3368,6 +3396,7 @@ export function OriginalClientShell({
                   onLogout,
                   onToggleCharacter,
                   onToggleInventory,
+                  onToggleQuestLog,
                   onCloseCharacter,
                   onCloseInventory,
                   onCloseNpcRepairService,
@@ -3922,21 +3951,14 @@ function computeMobileGpuEntityCapability() {
 
 function shouldUseBevyEntityAtlas() {
   if (typeof window === "undefined") {
-    return false;
+    return resolveBevyEntityAtlasPolicy({});
   }
 
   const params = new URLSearchParams(window.location.search);
-  if (params.get("bevyAtlas") === "0" || window.localStorage.getItem("mir2-bevy-atlas") === "0") {
-    return false;
-  }
-  if (params.get("bevyAtlas") === "1" || window.localStorage.getItem("mir2-bevy-atlas") === "1") {
-    return true;
-  }
-  // Dynamic packed atlases currently rebuild for animation-frame changes and
-  // can make Chromium's WebGPU renderer exceed 2 GiB during long sessions.
-  // Ship the stable single-image Bevy path by default; keep the packed path as
-  // an explicit opt-in while its upload pipeline is further optimized.
-  return false;
+  return resolveBevyEntityAtlasPolicy({
+    queryValue: params.get("bevyAtlas"),
+    storedValue: window.localStorage.getItem("mir2-bevy-atlas"),
+  });
 }
 
 function shouldUseRawWebGl2EntityRenderer() {
@@ -4308,6 +4330,7 @@ function bevyEntityAtlasKeyForSources(sources: BevyEntityAtlasSource[]) {
 async function resolveBevyEntityAtlasSnapshot(
   sources: BevyEntityAtlasSource[],
   key: string,
+  allowLiveBuild: boolean,
 ): Promise<BevyEntityAtlasResolveResult> {
   const persistent = await loadPersistedBevyEntityAtlas(key);
   if (persistent) {
@@ -4325,6 +4348,10 @@ async function resolveBevyEntityAtlasSnapshot(
       source: "prebuilt",
       prebuiltKey: prebuilt.sourceKey ?? null,
     };
+  }
+
+  if (!allowLiveBuild) {
+    throw new Error("Stable Bevy entity atlas has no matching prebuilt frames");
   }
 
   const live = await buildBevyEntityAtlasSnapshot(sources, key);
@@ -4354,7 +4381,7 @@ async function loadPrebuiltBevyEntityAtlasSnapshot(
 
   const sourceKeys = new Set(sources.map((source) => source.key));
   for (const candidate of manifest.atlases) {
-    if (!prebuiltBevyEntityAtlasCoversSources(candidate, sourceKeys)) {
+    if (!prebuiltBevyEntityAtlasHasCoverage(candidate, sourceKeys)) {
       continue;
     }
 
@@ -4521,20 +4548,17 @@ function loadPrebuiltBevyEntityAtlasCandidatePixels(candidate: PrebuiltBevyEntit
   return promise;
 }
 
-function prebuiltBevyEntityAtlasCoversSources(candidate: PrebuiltBevyEntityAtlasRecord, sourceKeys: Set<string>) {
+function prebuiltBevyEntityAtlasHasCoverage(candidate: PrebuiltBevyEntityAtlasRecord, sourceKeys: Set<string>) {
   if (!candidate.key || candidate.width <= 0 || candidate.height <= 0 || !Array.isArray(candidate.rects)) {
     return false;
   }
   if (!candidate.imageUrl && !candidate.pixelsUrl) {
     return false;
   }
-  const rectKeys = new Set(candidate.rects.map((rect) => rect.key));
-  for (const sourceKey of sourceKeys) {
-    if (!rectKeys.has(sourceKey)) {
-      return false;
-    }
-  }
-  return true;
+  return bevyEntityAtlasCandidateHasCoverage(
+    candidate.rects.map((rect) => rect.key),
+    sourceKeys,
+  );
 }
 
 async function loadBevyEntityAtlasManifest() {

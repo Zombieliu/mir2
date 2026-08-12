@@ -318,6 +318,12 @@ async function login(client, identity) {
 
   let screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
   if (screen === "login") {
+    await waitUntil(
+      client,
+      "Boolean(document.querySelector('.login-input.account') && document.querySelector('.login-input.password'))",
+      "login form mounted",
+      5_000,
+    );
     await fillInput(client, ".login-input.account", identity.account);
     await fillInput(client, ".login-input.password", identity.password);
 

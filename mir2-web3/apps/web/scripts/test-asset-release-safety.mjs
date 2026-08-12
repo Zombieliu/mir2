@@ -13,6 +13,10 @@ import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const BUILD_SCRIPT = path.join(SCRIPT_DIR, "build-remote-asset-release.mjs");
 const UPLOAD_SCRIPT = path.join(SCRIPT_DIR, "upload-r2-assets.mjs");
+const VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT = path.join(
+  SCRIPT_DIR,
+  "verify-monster-frame-closure.mjs",
+);
 const CAS_RELEASE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "cas-release.mjs");
 const FULL_PACK_CLOSURE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "full-pack-closure.mjs");
 const R2_RELEASE_WORKFLOW = path.resolve(
@@ -36,6 +40,10 @@ await test("map-atlas pages accompany a referenced map-atlas manifest", async ()
     await fs.mkdir(path.dirname(atlasManifestPath), { recursive: true });
     await fs.mkdir(path.join(publicRoot, "original-map"), { recursive: true });
     await fs.copyFile(BUILD_SCRIPT, fixtureScript);
+    await fs.copyFile(
+      VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT,
+      path.join(path.dirname(fixtureScript), path.basename(VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT)),
+    );
     await fs.copyFile(CAS_RELEASE_MODULE, path.join(path.dirname(fixtureScript), "asset-pipeline", "cas-release.mjs"));
     await fs.copyFile(
       FULL_PACK_CLOSURE_MODULE,
@@ -124,6 +132,10 @@ await test("verified full Crystal pack files are included only when explicitly r
     await fs.mkdir(path.join(fullRoot, "libraries", "ui"), { recursive: true });
     await fs.mkdir(path.dirname(coveragePath), { recursive: true });
     await fs.copyFile(BUILD_SCRIPT, fixtureScript);
+    await fs.copyFile(
+      VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT,
+      path.join(path.dirname(fixtureScript), path.basename(VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT)),
+    );
     await fs.copyFile(CAS_RELEASE_MODULE, path.join(path.dirname(fixtureScript), "asset-pipeline", "cas-release.mjs"));
     await fs.copyFile(
       FULL_PACK_CLOSURE_MODULE,

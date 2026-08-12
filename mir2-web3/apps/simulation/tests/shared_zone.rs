@@ -168,6 +168,8 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
         max_hp: 20,
         hp: 20,
         experience: 6,
+        move_speed_ms: 600,
+        attack_speed_ms: 1_200,
         friendly_guild: None,
         position: Point { x, y },
         direction: MirDirection::Down,
@@ -186,6 +188,42 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
             loot: GroundDropLootSnapshot::Gold { amount: 8 },
         }],
     }
+}
+
+#[test]
+fn zone_native_monster_preserves_crystal_move_speed_in_real_milliseconds() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    let mut spawn = native_monster_spawn(9_100, 336, 270);
+    spawn.name = "Scarecrow".to_string();
+    spawn.ai = 0;
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn,
+        now_ms: 0,
+    });
+
+    let first_step = zone.tick(0);
+    assert!(has_packet(&first_step, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == 9_100
+    )));
+
+    for now_ms in [300, 600, 900, 1_200, 1_499] {
+        assert!(
+            !has_packet(&zone.tick(now_ms), &first, |packet| matches!(
+                packet,
+                ServerPacket::ObjectWalk { movement } if movement.object_id == 9_100
+            )),
+            "Scarecrow moved before its Crystal 1500ms cadence at {now_ms}ms"
+        );
+    }
+
+    assert!(has_packet(&zone.tick(1_500), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == 9_100
+    )));
 }
 
 fn native_neutral_monster_spawn(
@@ -3808,6 +3846,21 @@ fn zone_native_monster_combat_kill_and_drop_are_authoritative() {
                 && award.drops.iter().any(|drop| drop.object_id == 9200
                     && drop.owner_object_id == Some(101)
                     && drop.ownership_remaining_ticks == Some(100))
+    )));
+    let corpse = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.object_id == 9100)
+        .expect("the authoritative corpse must remain in the zone until cleanup");
+    assert_eq!(corpse.hp, 0);
+    assert!(corpse.dead);
+
+    let late = session("late");
+    let late_join = zone.handle(ZoneCommand::Join(join("late", 103, "Late", 332, 271)));
+    assert!(has_packet(&late_join, &late, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == 9100 && info.dead
     )));
     assert!(zone.has_ground_drop(9200));
 

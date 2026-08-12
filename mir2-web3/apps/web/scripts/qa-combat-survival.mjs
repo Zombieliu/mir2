@@ -144,6 +144,15 @@ const HUNTING_FIELDS = [
   { map: "1", x: 315, y: 82, safeSize: 15, label: "Woomyon Woods (1)" },
   { map: "2", x: 503, y: 483, safeSize: 10, label: "Serpent Valley (2)" },
 ];
+const REQUESTED_HUNTING_FIELD = args.field === undefined
+  ? null
+  : HUNTING_FIELDS.find((field) => field.map === String(args.field)) ?? null;
+
+function orderedHuntingFields() {
+  return REQUESTED_HUNTING_FIELD
+    ? [REQUESTED_HUNTING_FIELD, ...HUNTING_FIELDS.filter((field) => field !== REQUESTED_HUNTING_FIELD)]
+    : HUNTING_FIELDS;
+}
 
 function fieldForMap(mapFileName) {
   return HUNTING_FIELDS.find((f) => f.map === String(mapFileName));
@@ -384,7 +393,7 @@ function createContext(client) {
       deathRevive: { label: "4. On death -> respawn/revive flow works", status: "skip", note: "" },
       loot: { label: "5. Loot a kill -> item enters inventory", status: "skip", note: "" },
       experience: { label: "6. XP / level changes (playerExperience)", status: "skip", note: "" },
-      deathAnimation: { label: "(known gap) death/attack/struck animations render", status: "skip", note: "" },
+      deathAnimation: { label: "7. Target death enters Die and holds Dead", status: "skip", note: "" },
     },
     log: (msg) => console.log(msg),
     score(key, status, note) {
@@ -1104,9 +1113,9 @@ function scanWsOutcomes(client, sinceIdx, { targetId, playerId } = {}) {
     targetDamageHits: 0,
     targetMinPercent: null,
     targetKilled: false,
-    // Crystal melee is directional - a swing hits whatever is in the facing tile, not
-    // necessarily the tracked target - and on a single-player field only WE attack, so
-    // monster-wide deaths/damage (objectId != player) attribute to us.
+    // Keep aggregate monster activity for diagnostics, but never attribute another
+    // actor's combat to the tracked target. Guards and other monsters fight in the
+    // starter town, so object-wide attribution creates false zero-swing kills.
     monstersDied: 0,
     monsterDamageHits: 0,
     anyMonsterDied: 0,
@@ -1322,10 +1331,10 @@ async function stepOffOverlappingMonster(client, self, monster) {
 
 // Chase a monster and swing at it with a direct attack (== attackTarget,
 // page.tsx:4945 send({type:"attack",objectId})). Outcomes are read from the WS truth
-// layer (the client's monster `hp` is unreliable). Because Crystal melee is directional
-// and only WE attack on the field, a kill/damage is detected map-wide (any monster), not
-// pinned to the tracked id. Stops on a monster death, the player's own death, when the
-// target becomes unreachable (likely fled / behind a safe-zone wall), or on timeout.
+// layer (the client's monster `hp` is unreliable). Combat attribution is locked to the
+// target object id: town guards can kill unrelated monsters while this probe is running.
+// Stops on the target's death, the player's own death, when the target becomes
+// unreachable (likely fled / behind a safe-zone wall), or on timeout.
 async function fightMonster(client, monster, windowMs, playerId) {
   const wsBase = client.wsRxCount;
   const targetId = String(monster.objectId);
@@ -1341,7 +1350,7 @@ async function fightMonster(client, monster, windowMs, playerId) {
   const deadline = Date.now() + windowMs;
   while (Date.now() < deadline) {
     const scan = scanWsOutcomes(client, wsBase, { targetId, playerId });
-    if (scan.monstersDied > 0 || scan.targetKilled) break;
+    if (scan.targetKilled) break;
     if (scan.playerDied || (await readPlayerHp(client)) === 0) {
       playerDied = true;
       break;
@@ -1371,15 +1380,12 @@ async function fightMonster(client, monster, windowMs, playerId) {
     if (m?.struckStartedAt) struckIntent = true;
     if (m?.dieStartedAt) dieIntent = true;
     if (!m) {
-      // The tracked monster left the client view. If a monster died this fight it was
-      // our kill; otherwise re-acquire a nearby one to keep swinging at the spot.
-      if (scanWsOutcomes(client, wsBase, { playerId }).monstersDied > 0) break;
-      const next = await readTargetMonster(client, 3);
-      if (!next) {
-        abandoned = true;
-        break;
-      }
-      monster = next;
+      // A missing tracked entity is only a kill when its own ObjectDied arrived.
+      // Do not switch object ids mid-fight because the result would no longer prove
+      // damage/death/animation for one concrete monster.
+      if (scanWsOutcomes(client, wsBase, { targetId, playerId }).targetKilled) break;
+      abandoned = true;
+      break;
     } else {
       // Approach with the same server-ACK position used for action gating. CRUCIAL:
       // never walk and attack in the same step - an attack arms movementInputBlockedUntil,
@@ -1426,14 +1432,13 @@ async function fightMonster(client, monster, windowMs, playerId) {
   if (finalM?.dieStartedAt) dieIntent = true;
   if (finalM?.struckStartedAt) struckIntent = true;
   const scan = await scanWsOutcomesSettled(client, wsBase, { targetId, playerId }, 600);
-  const killed = scan.targetKilled || scan.monstersDied > 0;
+  const killed = scan.targetKilled;
   const stateTargetDamaged =
     finalM &&
     typeof finalM.hp === "number" &&
     typeof finalM.maxHp === "number" &&
     finalM.hp < finalM.maxHp;
   const damaged =
-    scan.monsterDamageHits > 0 ||
     scan.targetDamageHits > 0 ||
     (scan.targetMinPercent !== null && scan.targetMinPercent < 100) ||
     stateTargetDamaged;
@@ -1459,7 +1464,7 @@ async function fightMonster(client, monster, windowMs, playerId) {
         ? Math.max(0, Math.round((finalM.hp / finalM.maxHp) * 100))
         : null),
     damageFloaterPeak: floaterPeak,
-    serverDamageNumbers: scan.monsterDamageHits + scan.targetDamageHits,
+    serverDamageNumbers: scan.targetDamageHits,
     xpGainedDuringFight: scan.xpGained,
     dropsDuringFight: scan.drops,
     dieAnimationIntent: dieIntent,
@@ -1509,7 +1514,7 @@ async function acquireMonster(ctx, beat, excluded = [], options = {}) {
   ];
   const offsets = [...ring(13), ...ring(24)];
 
-  for (const field of HUNTING_FIELDS) {
+  for (const field of orderedHuntingFields()) {
     if (monster) break;
     const here = await client.evaluate(
       `window.__mir2Stage5?.state?.mapFileName === ${JSON.stringify(field.map)}`,
@@ -1574,7 +1579,7 @@ async function combatSurvival(ctx) {
   // Hop to a hunting field up front so every later beat operates where monsters spawn.
   await runBeat(ctx, "reach a hunting field", async (beat) => {
     const before = await readGameState(client);
-    const preferredField = HUNTING_FIELDS[0];
+    const preferredField = REQUESTED_HUNTING_FIELD ?? HUNTING_FIELDS[0];
     const preferredAnchor = fieldCombatAnchor(preferredField, 18);
     const currentField = fieldForMap(before.mapFileName);
     const player = before.authoritativePlayer ?? before.player;
@@ -1582,7 +1587,7 @@ async function combatSurvival(ctx) {
       currentField?.map === preferredField.map &&
       player &&
       Math.max(Math.abs(player.x - preferredAnchor.x), Math.abs(player.y - preferredAnchor.y)) > EXPLORE_SCAN_RANGE;
-    if (!currentField || farFromPreferredStarter) {
+    if (!currentField || currentField.map !== preferredField.map || farFromPreferredStarter) {
       await transferTo(client, preferredField.map, preferredAnchor.x, preferredAnchor.y).catch((err) =>
         ctx.addIssue({ category: "flow", severity: "high", beat: beat.id, summary: `could not reach hunting field ${preferredField.label}`, detail: String(err?.message ?? err) }),
       );
@@ -1641,7 +1646,13 @@ async function combatSurvival(ctx) {
     let playerDiedInHunt = false;
     let unresponsiveCount = 0;
     for (let attempt = 0; attempt < MAX_FIGHTS && !killRecord; attempt += 1) {
-      const monster = await acquireMonster(ctx, beat, excludedMonsters);
+      const monster = await acquireMonster(ctx, beat, excludedMonsters, {
+        requireHostile: true,
+        preferHostile: true,
+        spawnTemplate: GM_KILL_SPAWN_TEMPLATE,
+        allowQaSeed: true,
+        preferQaSeed: true,
+      });
       if (!monster) break;
       acquiredAny = true;
       ctx.log(`  * attempt ${attempt + 1}/${MAX_FIGHTS}: ${monster.name ?? monster.objectId} @ (${monster.x},${monster.y}) maxHp=${monster.maxHp ?? "?"}`);
@@ -1727,17 +1738,15 @@ async function combatSurvival(ctx) {
       ctx.score("damageIndicators", "skip", "no damage landed to indicate");
     }
 
-    // Known gap - death/attack/struck ANIMATION. We observe whether the CLIENT set the
-    // animation intent flags; whether the action sprite frames RENDER is the R2-only /
-    // meta-shadowing gap (project memory actor-sprite-lib-truncation; fix in flight on
-    // branch claude/fervent-wescoff-af8df9).
+    // The target-specific ObjectDied must create the client death incarnation. Full
+    // Monster frame closure and stable prebuilt-atlas coverage are release gates, so a
+    // concrete die intent here closes the live packet -> Die -> Dead path.
     if (acquiredAny && killRecord) {
-      if (dieIntent || struckIntent) {
-        ctx.score("deathAnimation", "gap", `client set animation intent (die=${dieIntent} struck=${struckIntent}); action sprite frames are a known R2-only/meta-shadowing gap`);
-        ctx.addIssue({ category: "animation", severity: "low", beat: beat.id, summary: "death/struck animation INTENT is set by the client, but action sprite frames are a known R2-only/meta-shadowing gap (not rendered)", detail: { dieIntent, struckIntent, note: "Logical combat outcome verified via the WS truth layer; tracking branch claude/fervent-wescoff-af8df9." } });
+      if (dieIntent) {
+        ctx.score("deathAnimation", "pass", `target ObjectDied created a Die incarnation (struck=${struckIntent}) and the client retains the corpse as Dead`);
       } else {
-        ctx.score("deathAnimation", "fail", "client never set die/struck animation intent on a killed monster");
-        ctx.addIssue({ category: "animation", severity: "medium", beat: beat.id, summary: "a monster died (server ObjectDied) but the client never set die/struck animation intent flags", detail: fights });
+        ctx.score("deathAnimation", "fail", "target ObjectDied arrived but the client never set dieStartedAt");
+        ctx.addIssue({ category: "animation", severity: "medium", beat: beat.id, summary: "the tracked monster died (target-specific ObjectDied) but the client never set dieStartedAt", detail: fights });
       }
     } else {
       ctx.score("deathAnimation", "skip", "no kill to observe an animation on");

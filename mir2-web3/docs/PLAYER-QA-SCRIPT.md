@@ -873,3 +873,26 @@ Current strict references:
 Both must retain `ok=true`, 28/28 passing assertions, an empty pending plan,
 the requested renderer backend, zero critical console errors, and zero
 non-favicon 404s.
+
+## Monster movement/death acceptance (2026-08-12 repair)
+
+Run this after the rebuilt R2 release and web/gateway deployment:
+
+1. In Bichon, stand near Deer/Scarecrow/NPCs for at least 60 seconds, then run
+   quickly across the screen. Character and NPC sprites must not blink out and
+   the debug renderer must keep `atlasStats.builds=0` with a prebuilt hit.
+2. Move to Woomyon Woods and observe a Scarecrow or RakingCat over at least five
+   movement intervals. Movement must use the Crystal template cadence without
+   doubled steps, rollback, or two packets competing for the same object.
+3. Attack RakingCat (`Monster/007`) without a QA `event.spawn`. Confirm Attack1
+   and Struck frames appear, the final hit emits one death transition, all Die
+   frames play once, and the Dead corpse frame remains visible until cleanup.
+4. Reconnect or let a second client enter the same AOI before corpse cleanup.
+   The late client must see the same dead corpse, not a standing or revived cat.
+5. Record renderer debug, gateway packet trace, and screenshots. Pass requires
+   zero actor-resource 404s, zero console errors, no live atlas rebuild, one
+   shared-Zone movement authority, and no missing Die/Dead frame.
+
+Do not count the Stage 5 `event.spawn` browser helper as this acceptance: it
+currently creates personal-session state while normal combat is routed through
+the shared Zone. Use naturally spawned shared monsters for the human check.
