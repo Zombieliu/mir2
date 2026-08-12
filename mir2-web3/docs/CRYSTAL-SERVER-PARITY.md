@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> Latest production-login observability note: 2026-08-12 changes only the
+> non-Crystal operator surface. OnConnect now has dedicated inflight,
+> request/error, and latency metrics; World Director exposes durable checkpoint
+> write health, last-success time, file size, and embedded Zone-factory size;
+> and Gate 12 alerts on stalls, failures, staleness, journal growth, and bounded
+> size thresholds. Successful/rejected OnConnect, checkpoint write/restore, and
+> forced write-failure regressions pass, together with Gateway 438/438
+> non-ignored unit tests, Gate 11 workload 2/2, Home Tunnel 4/4, Zone RPC 29/29,
+> Rust fmt/diff checks, and Prometheus 3.5 `promtool` validation of all 17 rules.
+> Crystal TCP/WebSocket packets, login authorization, Zone authority, gameplay,
+> and persistence semantics are unchanged; this does not substitute for an
+> authenticated production-player or long-soak acceptance run.
+
 > Latest map-environment parity note: 2026-08-01 preserves Crystal's separation
 > between server `TimeOfDay` and per-map environment metadata. `Light=Normal`
 > follows global Dawn/Day/Evening/Night, nonzero map Light overrides it, and the

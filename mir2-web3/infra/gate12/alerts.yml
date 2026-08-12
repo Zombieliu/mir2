@@ -40,3 +40,99 @@ groups:
           severity: warning
         annotations:
           summary: "Zone Host {{ $labels.host_id }} is returning repeated RPC errors"
+
+      - alert: ObeliskZoneHostOnConnectStalled
+        expr: obelisk_zone_host_on_connect_inflight > 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} has a stalled login bootstrap"
+
+      - alert: ObeliskZoneHostOnConnectErrors
+        expr: increase(obelisk_zone_host_on_connect_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} rejected one or more login bootstraps"
+
+      - alert: ObeliskZoneHostOnConnectLatency
+        expr: (rate(obelisk_zone_host_on_connect_duration_ns_total[5m]) / clamp_min(rate(obelisk_zone_host_on_connect_requests_total[5m]), 0.001)) > 2000000000 and increase(obelisk_zone_host_on_connect_requests_total[5m]) >= 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} login bootstrap mean latency exceeds 2 seconds"
+
+      - alert: ObeliskZoneHostJournalCompactionStalled
+        expr: obelisk_zone_host_checkpoint_journal_entries > 5000 and increase(obelisk_zone_host_journal_compactions_total[5m]) == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} checkpoint journal is not compacting"
+
+      - alert: ObeliskZoneHostJournalBacklog
+        expr: obelisk_zone_host_checkpoint_journal_entries > 10000
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Zone Host {{ $labels.host_id }} checkpoint journal exceeded 10000 entries"
+
+      - alert: ObeliskWorldDirectorCheckpointWriteFailures
+        expr: increase(obelisk_world_director_checkpoint_write_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "World Director durable checkpoint writes are failing"
+
+      - alert: ObeliskWorldDirectorCheckpointNeverWritten
+        expr: obelisk_world_director_checkpoint_configured == 1 and obelisk_world_director_checkpoint_last_success_timestamp_seconds == 0 and on(instance, job) obelisk_zone_host_uptime_seconds > 120
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "World Director checkpointing is configured but has never succeeded"
+
+      - alert: ObeliskWorldDirectorCheckpointStale
+        expr: obelisk_world_director_checkpoint_configured == 1 and obelisk_world_director_checkpoint_last_success_timestamp_seconds > 0 and (time() - obelisk_world_director_checkpoint_last_success_timestamp_seconds) > 120
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "World Director durable checkpoint is more than 2 minutes stale"
+
+      - alert: ObeliskWorldDirectorCheckpointFileLarge
+        expr: obelisk_world_director_checkpoint_file_bytes > 67108864
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "World Director durable checkpoint file exceeded 64 MiB"
+
+      - alert: ObeliskWorldDirectorCheckpointFileCritical
+        expr: obelisk_world_director_checkpoint_file_bytes > 134217728
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "World Director durable checkpoint file exceeded 128 MiB"
+
+      - alert: ObeliskWorldDirectorZoneFactoryLarge
+        expr: obelisk_world_director_checkpoint_zone_factory_bytes > 8388608
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "World Director embedded Zone checkpoint exceeded 8 MiB"
+
+      - alert: ObeliskWorldDirectorZoneFactoryCritical
+        expr: obelisk_world_director_checkpoint_zone_factory_bytes > 16777216
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "World Director embedded Zone checkpoint exceeded 16 MiB"

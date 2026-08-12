@@ -47,6 +47,14 @@ fn tcp_zone_rpc_round_trips_packets_snapshots_and_isolates_sessions() {
     let connect_packets = first.on_connect().expect("on_connect should use RPC");
     assert!(!connect_packets.is_empty());
     assert_eq!(server.session_count(), 1);
+    let connect_telemetry = server.telemetry_snapshot();
+    assert_eq!(connect_telemetry.on_connect_inflight, 0);
+    assert_eq!(connect_telemetry.on_connect_requests_total, 1);
+    assert_eq!(connect_telemetry.on_connect_errors_total, 0);
+    assert!(
+        connect_telemetry.on_connect_duration_ns_total
+            >= connect_telemetry.on_connect_last_duration_ns
+    );
 
     let lease = authority.owner_lease(&zone_id);
     let execution = first
@@ -1183,6 +1191,10 @@ fn installed_replica_rejects_player_mutations_until_promoted() {
         connect_error.contains("zone_replica_read_only"),
         "{connect_error}"
     );
+    let rejected_connect_telemetry = standby_server.telemetry_snapshot();
+    assert_eq!(rejected_connect_telemetry.on_connect_inflight, 0);
+    assert_eq!(rejected_connect_telemetry.on_connect_requests_total, 1);
+    assert_eq!(rejected_connect_telemetry.on_connect_errors_total, 1);
     let snapshot_error = standby
         .world_snapshot()
         .expect_err("installed replica must reject stale player reads");

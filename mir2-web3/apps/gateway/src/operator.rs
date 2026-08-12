@@ -529,12 +529,56 @@ obelisk_world_director_applied_actions {}\n\
 obelisk_world_director_spawned_monsters_total {}\n\
 # HELP obelisk_world_director_broadcast_messages_total World-event messages broadcast to Zones.\n\
 # TYPE obelisk_world_director_broadcast_messages_total counter\n\
-obelisk_world_director_broadcast_messages_total {}\n",
+obelisk_world_director_broadcast_messages_total {}\n\
+# HELP obelisk_world_director_checkpoint_configured Whether durable world-director checkpointing is configured.\n\
+# TYPE obelisk_world_director_checkpoint_configured gauge\n\
+obelisk_world_director_checkpoint_configured {}\n\
+# HELP obelisk_world_director_checkpoint_file_bytes Current durable world-director checkpoint file size in bytes.\n\
+# TYPE obelisk_world_director_checkpoint_file_bytes gauge\n\
+obelisk_world_director_checkpoint_file_bytes {}\n\
+# HELP obelisk_world_director_checkpoint_zone_factory_bytes Zone factory bytes embedded by the last successful checkpoint write.\n\
+# TYPE obelisk_world_director_checkpoint_zone_factory_bytes gauge\n\
+obelisk_world_director_checkpoint_zone_factory_bytes {}\n\
+# HELP obelisk_world_director_checkpoint_write_attempts_total Durable checkpoint write attempts.\n\
+# TYPE obelisk_world_director_checkpoint_write_attempts_total counter\n\
+obelisk_world_director_checkpoint_write_attempts_total {}\n\
+# HELP obelisk_world_director_checkpoint_writes_total Successful durable checkpoint writes.\n\
+# TYPE obelisk_world_director_checkpoint_writes_total counter\n\
+obelisk_world_director_checkpoint_writes_total {}\n\
+# HELP obelisk_world_director_checkpoint_write_failures_total Failed durable checkpoint writes.\n\
+# TYPE obelisk_world_director_checkpoint_write_failures_total counter\n\
+obelisk_world_director_checkpoint_write_failures_total {}\n\
+# HELP obelisk_world_director_checkpoint_write_bytes_total Bytes published by successful durable checkpoint writes.\n\
+# TYPE obelisk_world_director_checkpoint_write_bytes_total counter\n\
+obelisk_world_director_checkpoint_write_bytes_total {}\n\
+# HELP obelisk_world_director_checkpoint_write_duration_ns_total Nanoseconds spent in durable checkpoint write attempts.\n\
+# TYPE obelisk_world_director_checkpoint_write_duration_ns_total counter\n\
+obelisk_world_director_checkpoint_write_duration_ns_total {}\n\
+# HELP obelisk_world_director_checkpoint_write_last_bytes Bytes published by the last successful durable checkpoint write.\n\
+# TYPE obelisk_world_director_checkpoint_write_last_bytes gauge\n\
+obelisk_world_director_checkpoint_write_last_bytes {}\n\
+# HELP obelisk_world_director_checkpoint_write_last_duration_ns Nanoseconds spent in the most recent durable checkpoint write attempt.\n\
+# TYPE obelisk_world_director_checkpoint_write_last_duration_ns gauge\n\
+obelisk_world_director_checkpoint_write_last_duration_ns {}\n\
+# HELP obelisk_world_director_checkpoint_last_success_timestamp_seconds Unix timestamp of the last successful durable checkpoint write.\n\
+# TYPE obelisk_world_director_checkpoint_last_success_timestamp_seconds gauge\n\
+obelisk_world_director_checkpoint_last_success_timestamp_seconds {}\n",
         status.finalized_height,
         status.installed_command_count,
         status.applied_action_count,
         status.spawned_monsters_total,
         status.broadcast_messages_total,
+        u8::from(status.checkpoint.configured),
+        status.checkpoint.file_bytes,
+        status.checkpoint.last_zone_factory_bytes,
+        status.checkpoint.write_attempts_total,
+        status.checkpoint.writes_total,
+        status.checkpoint.write_failures_total,
+        status.checkpoint.write_bytes_total,
+        status.checkpoint.write_duration_ns_total,
+        status.checkpoint.write_last_bytes,
+        status.checkpoint.write_last_duration_ns,
+        status.checkpoint.last_success_at_ms as f64 / 1_000.0,
     )
 }
 
@@ -900,6 +944,42 @@ fn render_prometheus(snapshot: &ZoneHostTelemetrySnapshot) -> String {
         snapshot.rpc_response_bytes_max
     );
     metric!(
+        "Zone on-connect RPC requests currently in flight.",
+        "gauge",
+        "obelisk_zone_host_on_connect_inflight",
+        snapshot.on_connect_inflight
+    );
+    metric!(
+        "Zone on-connect RPC requests received.",
+        "counter",
+        "obelisk_zone_host_on_connect_requests_total",
+        snapshot.on_connect_requests_total
+    );
+    metric!(
+        "Zone on-connect RPC requests that returned an error.",
+        "counter",
+        "obelisk_zone_host_on_connect_errors_total",
+        snapshot.on_connect_errors_total
+    );
+    metric!(
+        "Nanoseconds spent serving Zone on-connect RPC requests.",
+        "counter",
+        "obelisk_zone_host_on_connect_duration_ns_total",
+        snapshot.on_connect_duration_ns_total
+    );
+    metric!(
+        "Maximum nanoseconds spent serving one Zone on-connect RPC request.",
+        "gauge",
+        "obelisk_zone_host_on_connect_duration_ns_max",
+        snapshot.on_connect_duration_ns_max
+    );
+    metric!(
+        "Nanoseconds spent serving the most recent Zone on-connect RPC request.",
+        "gauge",
+        "obelisk_zone_host_on_connect_last_duration_ns",
+        snapshot.on_connect_last_duration_ns
+    );
+    metric!(
         "Nanoseconds spent waiting for per-Zone mutation lanes.",
         "counter",
         "obelisk_zone_host_zone_gate_wait_duration_ns_total",
@@ -1210,6 +1290,12 @@ mod tests {
             rpc_service_duration_ns_max: 7,
             rpc_response_bytes_total: 13,
             rpc_response_bytes_max: 8,
+            on_connect_inflight: 0,
+            on_connect_requests_total: 4,
+            on_connect_errors_total: 1,
+            on_connect_duration_ns_total: 17,
+            on_connect_duration_ns_max: 10,
+            on_connect_last_duration_ns: 6,
             zone_gate_wait_duration_ns_total: 14,
             zone_gate_wait_duration_ns_max: 9,
             execute_requests_total: 3,
@@ -1220,6 +1306,10 @@ mod tests {
         assert!(output.contains("obelisk_zone_host_sessions{host_id=\"guild-a\\\"node\"} 3"));
         assert!(output.contains("obelisk_zone_host_rpc_requests_total"));
         assert!(output.contains("obelisk_zone_host_rpc_service_duration_ns_total"));
+        assert!(output.contains("obelisk_zone_host_on_connect_inflight"));
+        assert!(output.contains("obelisk_zone_host_on_connect_requests_total"));
+        assert!(output.contains("obelisk_zone_host_on_connect_errors_total"));
+        assert!(output.contains("obelisk_zone_host_on_connect_duration_ns_total"));
         assert!(output.contains("obelisk_zone_host_session_capacity_per_zone"));
         assert!(output.contains("obelisk_zone_host_busiest_zone_sessions"));
         assert!(output.contains("obelisk_zone_host_checkpoint_journal_entries"));
@@ -1330,6 +1420,14 @@ mod tests {
         assert!(metrics.starts_with("HTTP/1.1 200"));
         assert!(metrics.contains("obelisk_world_director_enabled 1"));
         assert!(metrics.contains("obelisk_world_director_finalized_height 0"));
+        assert!(metrics.contains("obelisk_world_director_checkpoint_configured 0"));
+        assert!(metrics.contains("obelisk_world_director_checkpoint_file_bytes 0"));
+        assert!(metrics.contains("obelisk_world_director_checkpoint_zone_factory_bytes 0"));
+        assert!(metrics.contains("obelisk_world_director_checkpoint_write_attempts_total 0"));
+        assert!(metrics.contains("obelisk_world_director_checkpoint_write_failures_total 0"));
+        assert!(
+            metrics.contains("obelisk_world_director_checkpoint_last_success_timestamp_seconds 0")
+        );
     }
 
     #[test]

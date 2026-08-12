@@ -1,5 +1,21 @@
 # Backend 1:1 Progress
 
+> Latest production-login prevention sync: 2026-08-12 closes the monitoring
+> blind spots around the remote Zone OnConnect bootstrap and World Director's
+> durable checkpoint. The Zone Host now publishes inflight, request/error, and
+> latency telemetry specifically for OnConnect. World Director now records
+> durable write attempts, successes, failures, bytes, duration, current file
+> size, embedded Zone-factory size, and last-success time across fresh and
+> restored runtimes. Gate 12 contains 12 new alarms covering login stalls and
+> errors, mean latency, journal backlog/compactor stalls, failed or stale
+> checkpoint writes, and two-stage checkpoint-size thresholds. Regression
+> coverage includes successful and rejected OnConnect, successful persistence,
+> restart restore, and a forced filesystem write failure. Verification passed
+> Rust fmt/diff checks, Gateway 438/438 non-ignored unit tests, Gate 11 workload
+> 2/2, Home Tunnel 4/4, Zone RPC 29/29, and Prometheus 3.5 `promtool` validation
+> of all 17 rules. No production debug command, authentication fallback, or
+> personal-Session-as-world shortcut was introduced.
+
 > Latest map-environment backend sync: 2026-08-01 extends the existing Crystal
 > map import with `MapDarkLight` and `WeatherParticles` without changing Zone
 > authority. Simulation emits those values through its existing typed
