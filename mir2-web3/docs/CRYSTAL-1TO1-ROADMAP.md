@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest production-login observability sync: 2026-08-12 adds operational
+> regression coverage for the remote Zone bootstrap and durable World Director
+> checkpoint paths without changing Crystal gameplay or packet semantics. Zone
+> Host metrics now expose OnConnect inflight, request/error totals, and
+> duration totals/max/last; World Director status and Prometheus output expose
+> checkpoint configuration, file and embedded Zone-factory bytes, write
+> attempts/successes/failures, bytes, duration, and last-success time. Gate 12
+> adds critical/warning alerts for stalled or failing OnConnect, journal
+> backlog/compaction stalls, checkpoint write failure/staleness, and bounded
+> 64/128 MiB file plus 8/16 MiB embedded-Zone thresholds. Verification passed
+> Rust fmt/diff checks, Gateway 438/438 non-ignored unit tests, Gate 11 workload
+> 2/2, Home Tunnel 4/4, Zone RPC 29/29, and Prometheus 3.5 `promtool` validation
+> of all 17 rules. This is automated operational evidence; authenticated human
+> login, physical-device, and long-soak acceptance remain separate gates.
+
 > Latest map-environment roadmap sync: 2026-08-01 closes the source-to-browser
 > path for Crystal map light overrides, `MapDarkLight`, and `WeatherParticles`.
 > The generated 463-map manifest preserves the real fields, Simulation projects

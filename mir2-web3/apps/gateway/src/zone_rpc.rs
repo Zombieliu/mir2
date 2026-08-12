@@ -276,6 +276,18 @@ pub struct ZoneHostTelemetrySnapshot {
     pub rpc_service_duration_ns_max: u64,
     pub rpc_response_bytes_total: u64,
     pub rpc_response_bytes_max: u64,
+    #[serde(default)]
+    pub on_connect_inflight: usize,
+    #[serde(default)]
+    pub on_connect_requests_total: u64,
+    #[serde(default)]
+    pub on_connect_errors_total: u64,
+    #[serde(default)]
+    pub on_connect_duration_ns_total: u64,
+    #[serde(default)]
+    pub on_connect_duration_ns_max: u64,
+    #[serde(default)]
+    pub on_connect_last_duration_ns: u64,
     pub zone_gate_wait_duration_ns_total: u64,
     pub zone_gate_wait_duration_ns_max: u64,
     pub execute_requests_total: u64,
@@ -2202,6 +2214,12 @@ pub struct ZoneHostServer {
     rpc_service_duration_ns_max: AtomicU64,
     rpc_response_bytes_total: AtomicU64,
     rpc_response_bytes_max: AtomicU64,
+    on_connect_inflight: AtomicUsize,
+    on_connect_requests_total: AtomicU64,
+    on_connect_errors_total: AtomicU64,
+    on_connect_duration_ns_total: AtomicU64,
+    on_connect_duration_ns_max: AtomicU64,
+    on_connect_last_duration_ns: AtomicU64,
     zone_gate_wait_duration_ns_total: AtomicU64,
     zone_gate_wait_duration_ns_max: AtomicU64,
     execute_requests_total: AtomicU64,
@@ -2373,6 +2391,12 @@ impl ZoneHostServer {
             rpc_service_duration_ns_max: AtomicU64::new(0),
             rpc_response_bytes_total: AtomicU64::new(0),
             rpc_response_bytes_max: AtomicU64::new(0),
+            on_connect_inflight: AtomicUsize::new(0),
+            on_connect_requests_total: AtomicU64::new(0),
+            on_connect_errors_total: AtomicU64::new(0),
+            on_connect_duration_ns_total: AtomicU64::new(0),
+            on_connect_duration_ns_max: AtomicU64::new(0),
+            on_connect_last_duration_ns: AtomicU64::new(0),
             zone_gate_wait_duration_ns_total: AtomicU64::new(0),
             zone_gate_wait_duration_ns_max: AtomicU64::new(0),
             execute_requests_total: AtomicU64::new(0),
@@ -2492,6 +2516,12 @@ impl ZoneHostServer {
             rpc_service_duration_ns_max: self.rpc_service_duration_ns_max.load(Ordering::Acquire),
             rpc_response_bytes_total: self.rpc_response_bytes_total.load(Ordering::Acquire),
             rpc_response_bytes_max: self.rpc_response_bytes_max.load(Ordering::Acquire),
+            on_connect_inflight: self.on_connect_inflight.load(Ordering::Acquire),
+            on_connect_requests_total: self.on_connect_requests_total.load(Ordering::Acquire),
+            on_connect_errors_total: self.on_connect_errors_total.load(Ordering::Acquire),
+            on_connect_duration_ns_total: self.on_connect_duration_ns_total.load(Ordering::Acquire),
+            on_connect_duration_ns_max: self.on_connect_duration_ns_max.load(Ordering::Acquire),
+            on_connect_last_duration_ns: self.on_connect_last_duration_ns.load(Ordering::Acquire),
             zone_gate_wait_duration_ns_total: self
                 .zone_gate_wait_duration_ns_total
                 .load(Ordering::Acquire),
@@ -3238,12 +3268,35 @@ impl ZoneHostServer {
             let service_started = Instant::now();
             let codec = detect_rpc_codec(&bytes);
             let response = match decode_rpc_envelope(&bytes, codec) {
-                Ok(envelope) => match self.handle_envelope(envelope) {
-                    Ok(payload) => ZoneRpcResponse::Ok {
-                        payload: Box::new(payload),
-                    },
-                    Err(error) => error.into_response(),
-                },
+                Ok(envelope) => {
+                    let is_on_connect = matches!(&envelope.request, ZoneRpcRequest::OnConnect);
+                    let on_connect_started = is_on_connect.then(Instant::now);
+                    let _on_connect_guard = is_on_connect.then(|| {
+                        self.on_connect_requests_total
+                            .fetch_add(1, Ordering::Relaxed);
+                        self.on_connect_inflight.fetch_add(1, Ordering::AcqRel);
+                        InflightCounterGuard(&self.on_connect_inflight)
+                    });
+                    let result = self.handle_envelope(envelope);
+                    if let Some(started) = on_connect_started {
+                        let duration_ns = saturating_duration_ns(started.elapsed());
+                        self.on_connect_duration_ns_total
+                            .fetch_add(duration_ns, Ordering::Relaxed);
+                        self.on_connect_duration_ns_max
+                            .fetch_max(duration_ns, Ordering::Relaxed);
+                        self.on_connect_last_duration_ns
+                            .store(duration_ns, Ordering::Release);
+                        if result.is_err() {
+                            self.on_connect_errors_total.fetch_add(1, Ordering::Relaxed);
+                        }
+                    }
+                    match result {
+                        Ok(payload) => ZoneRpcResponse::Ok {
+                            payload: Box::new(payload),
+                        },
+                        Err(error) => error.into_response(),
+                    }
+                }
                 Err(error) => ZoneRpcResponse::Error {
                     code: "invalid_request".to_string(),
                     message: format!("invalid JSON request: {error}"),
@@ -4599,6 +4652,14 @@ fn zone_replication_entry_digest(
 struct ActiveConnectionGuard<'a>(&'a AtomicUsize);
 
 impl Drop for ActiveConnectionGuard<'_> {
+    fn drop(&mut self) {
+        self.0.fetch_sub(1, Ordering::AcqRel);
+    }
+}
+
+struct InflightCounterGuard<'a>(&'a AtomicUsize);
+
+impl Drop for InflightCounterGuard<'_> {
     fn drop(&mut self) {
         self.0.fetch_sub(1, Ordering::AcqRel);
     }

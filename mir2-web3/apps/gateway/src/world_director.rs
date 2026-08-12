@@ -1,7 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
 use mir2_game_data::{crystal_map_respawns_by_file_name, crystal_monster_by_name};
 use mir2_simulation::{
@@ -1293,6 +1295,22 @@ impl Mir2DirectorSimulationAdapter {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldDirectorCheckpointTelemetry {
+    pub configured: bool,
+    pub file_bytes: u64,
+    pub last_zone_factory_bytes: u64,
+    pub write_attempts_total: u64,
+    pub writes_total: u64,
+    pub write_failures_total: u64,
+    pub write_bytes_total: u64,
+    pub write_duration_ns_total: u64,
+    pub write_last_bytes: u64,
+    pub write_last_duration_ns: u64,
+    pub last_success_at_ms: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldDirectorRuntimeStatus {
@@ -1308,6 +1326,8 @@ pub struct WorldDirectorRuntimeStatus {
     pub broadcast_messages_total: u64,
     pub last_advance_at_ms: u64,
     pub last_advance: Option<DirectorSimulationAdvanceReceipt>,
+    #[serde(default)]
+    pub checkpoint: WorldDirectorCheckpointTelemetry,
     pub state_commitment: String,
 }
 
@@ -1336,6 +1356,11 @@ struct WorldDirectorRuntimeCheckpoint {
     state_commitment: String,
 }
 
+struct PersistedWorldDirectorCheckpoint {
+    file_bytes: u64,
+    zone_factory_bytes: u64,
+}
+
 struct WorldDirectorRuntimeState {
     control_log: CommonwareControlLog,
     adapter: Mir2DirectorSimulationAdapter,
@@ -1359,6 +1384,15 @@ pub struct WorldDirectorRuntimeService {
     runtime_zone_id: SharedDirectorZoneRouter,
     checkpoint_path: Option<PathBuf>,
     state: Mutex<WorldDirectorRuntimeState>,
+    checkpoint_write_attempts_total: AtomicU64,
+    checkpoint_writes_total: AtomicU64,
+    checkpoint_write_failures_total: AtomicU64,
+    checkpoint_write_bytes_total: AtomicU64,
+    checkpoint_write_duration_ns_total: AtomicU64,
+    checkpoint_write_last_bytes: AtomicU64,
+    checkpoint_write_last_zone_factory_bytes: AtomicU64,
+    checkpoint_write_last_duration_ns: AtomicU64,
+    checkpoint_last_success_at_ms: AtomicU64,
 }
 
 impl WorldDirectorRuntimeService {
@@ -1403,6 +1437,12 @@ impl WorldDirectorRuntimeService {
                 factory.as_ref(),
             )?;
         }
+        let restored_checkpoint_at_ms = state.last_checkpoint_at_ms;
+        let restored_checkpoint_bytes = checkpoint_path
+            .as_deref()
+            .and_then(|path| fs::metadata(path).ok())
+            .map(|metadata| metadata.len())
+            .unwrap_or_default();
         Ok(Self {
             committee,
             trusted_director,
@@ -1410,6 +1450,15 @@ impl WorldDirectorRuntimeService {
             runtime_zone_id,
             checkpoint_path,
             state: Mutex::new(state),
+            checkpoint_write_attempts_total: AtomicU64::new(0),
+            checkpoint_writes_total: AtomicU64::new(0),
+            checkpoint_write_failures_total: AtomicU64::new(0),
+            checkpoint_write_bytes_total: AtomicU64::new(0),
+            checkpoint_write_duration_ns_total: AtomicU64::new(0),
+            checkpoint_write_last_bytes: AtomicU64::new(restored_checkpoint_bytes),
+            checkpoint_write_last_zone_factory_bytes: AtomicU64::new(0),
+            checkpoint_write_last_duration_ns: AtomicU64::new(0),
+            checkpoint_last_success_at_ms: AtomicU64::new(restored_checkpoint_at_ms),
         })
     }
 
@@ -1548,6 +1597,30 @@ impl WorldDirectorRuntimeService {
             broadcast_messages_total: state.broadcast_messages_total,
             last_advance_at_ms: state.last_advance_at_ms,
             last_advance: state.last_advance.clone(),
+            checkpoint: WorldDirectorCheckpointTelemetry {
+                configured: self.checkpoint_path.is_some(),
+                file_bytes: self
+                    .checkpoint_path
+                    .as_deref()
+                    .and_then(|path| fs::metadata(path).ok())
+                    .map(|metadata| metadata.len())
+                    .unwrap_or_default(),
+                last_zone_factory_bytes: self
+                    .checkpoint_write_last_zone_factory_bytes
+                    .load(Ordering::Acquire),
+                write_attempts_total: self.checkpoint_write_attempts_total.load(Ordering::Acquire),
+                writes_total: self.checkpoint_writes_total.load(Ordering::Acquire),
+                write_failures_total: self.checkpoint_write_failures_total.load(Ordering::Acquire),
+                write_bytes_total: self.checkpoint_write_bytes_total.load(Ordering::Acquire),
+                write_duration_ns_total: self
+                    .checkpoint_write_duration_ns_total
+                    .load(Ordering::Acquire),
+                write_last_bytes: self.checkpoint_write_last_bytes.load(Ordering::Acquire),
+                write_last_duration_ns: self
+                    .checkpoint_write_last_duration_ns
+                    .load(Ordering::Acquire),
+                last_success_at_ms: self.checkpoint_last_success_at_ms.load(Ordering::Acquire),
+            },
             state_commitment: state.adapter.state_commitment()?,
         })
     }
@@ -1556,7 +1629,34 @@ impl WorldDirectorRuntimeService {
         let Some(path) = self.checkpoint_path.as_deref() else {
             return Ok(());
         };
-        persist_runtime_checkpoint(path, state, self.factory.as_ref())
+        self.checkpoint_write_attempts_total
+            .fetch_add(1, Ordering::Relaxed);
+        let started = Instant::now();
+        let result = persist_runtime_checkpoint(path, state, self.factory.as_ref());
+        let duration_ns = started.elapsed().as_nanos().min(u128::from(u64::MAX)) as u64;
+        self.checkpoint_write_duration_ns_total
+            .fetch_add(duration_ns, Ordering::Relaxed);
+        self.checkpoint_write_last_duration_ns
+            .store(duration_ns, Ordering::Release);
+        match result {
+            Ok(checkpoint) => {
+                self.checkpoint_writes_total.fetch_add(1, Ordering::Relaxed);
+                self.checkpoint_write_bytes_total
+                    .fetch_add(checkpoint.file_bytes, Ordering::Relaxed);
+                self.checkpoint_write_last_bytes
+                    .store(checkpoint.file_bytes, Ordering::Release);
+                self.checkpoint_write_last_zone_factory_bytes
+                    .store(checkpoint.zone_factory_bytes, Ordering::Release);
+                self.checkpoint_last_success_at_ms
+                    .store(state.last_checkpoint_at_ms, Ordering::Release);
+                Ok(())
+            }
+            Err(error) => {
+                self.checkpoint_write_failures_total
+                    .fetch_add(1, Ordering::Relaxed);
+                Err(error)
+            }
+        }
     }
 }
 
@@ -1622,7 +1722,7 @@ fn persist_runtime_checkpoint(
     path: &Path,
     state: &WorldDirectorRuntimeState,
     factory: &SharedInProcessZoneRuntimeFactory,
-) -> Result<(), String> {
+) -> Result<PersistedWorldDirectorCheckpoint, String> {
     if let Some(parent) = path
         .parent()
         .filter(|parent| !parent.as_os_str().is_empty())
@@ -1634,11 +1734,13 @@ fn persist_runtime_checkpoint(
             )
         })?;
     }
+    let zone_factory_checkpoint = factory.world_checkpoint_bytes()?;
+    let zone_factory_bytes = zone_factory_checkpoint.len() as u64;
     let mut checkpoint = WorldDirectorRuntimeCheckpoint {
         version: DIRECTOR_RUNTIME_CHECKPOINT_VERSION,
         finalized: state.control_log.finalized(),
         simulation_checkpoint: state.adapter.checkpoint_bytes()?,
-        zone_factory_checkpoint: factory.world_checkpoint_bytes()?,
+        zone_factory_checkpoint,
         spawned_monsters_total: state.spawned_monsters_total,
         broadcast_messages_total: state.broadcast_messages_total,
         last_advance_at_ms: state.last_advance_at_ms,
@@ -1661,6 +1763,10 @@ fn persist_runtime_checkpoint(
             "failed to publish world director checkpoint {}: {error}",
             path.display()
         )
+    })?;
+    Ok(PersistedWorldDirectorCheckpoint {
+        file_bytes: bytes.len().saturating_add(1) as u64,
+        zone_factory_bytes,
     })
 }
 
@@ -2328,7 +2434,15 @@ mod tests {
         assert_eq!(installed.advance.broadcast_messages, 8);
         let replay = service.install_submission(submission, now_ms + 1).unwrap();
         assert!(!replay.accepted);
-        assert_eq!(service.status().unwrap().finalized_height, 1);
+        let running_status = service.status().unwrap();
+        assert_eq!(running_status.finalized_height, 1);
+        assert!(running_status.checkpoint.configured);
+        assert_eq!(running_status.checkpoint.write_attempts_total, 2);
+        assert_eq!(running_status.checkpoint.writes_total, 2);
+        assert_eq!(running_status.checkpoint.write_failures_total, 0);
+        assert!(running_status.checkpoint.file_bytes > 0);
+        assert!(running_status.checkpoint.last_zone_factory_bytes > 0);
+        assert_eq!(running_status.checkpoint.last_success_at_ms, now_ms + 1);
 
         drop(service);
         drop(factory);
@@ -2340,12 +2454,26 @@ mod tests {
             Some(checkpoint_path.clone()),
         )
         .unwrap();
-        assert_eq!(restored.status().unwrap().installed_command_count, 1);
+        let restored_status = restored.status().unwrap();
+        assert_eq!(restored_status.installed_command_count, 1);
+        assert!(restored_status.checkpoint.configured);
+        assert!(restored_status.checkpoint.file_bytes > 0);
+        assert_eq!(restored_status.checkpoint.write_attempts_total, 0);
+        assert_eq!(restored_status.checkpoint.writes_total, 0);
+        assert_eq!(restored_status.checkpoint.last_success_at_ms, now_ms + 1);
         let incursion = restored.advance(now_ms + 5 * 60 * 1_000).unwrap();
         assert_eq!(incursion.spawned_monsters, 24);
         let status = restored.status().unwrap();
         assert_eq!(status.spawned_monsters_total, 24);
         assert_eq!(status.world_event_monsters_by_zone["map:D022"], 24);
+        assert_eq!(status.checkpoint.write_attempts_total, 1);
+        assert_eq!(status.checkpoint.writes_total, 1);
+        assert_eq!(status.checkpoint.write_failures_total, 0);
+        assert!(status.checkpoint.last_zone_factory_bytes > 0);
+        assert_eq!(
+            status.checkpoint.last_success_at_ms,
+            now_ms + 5 * 60 * 1_000
+        );
         assert_eq!(
             restored_factory
                 .world_event_monster_count(&ZoneId::new("map:D022"), "D022")
@@ -2367,5 +2495,48 @@ mod tests {
             24
         );
         std::fs::remove_file(checkpoint_path).unwrap();
+    }
+
+    #[test]
+    fn runtime_service_reports_durable_checkpoint_write_failures() {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let checkpoint_parent = std::env::temp_dir().join(format!(
+            "mir2-world-director-checkpoint-parent-{}-{nonce}",
+            std::process::id()
+        ));
+        std::fs::write(&checkpoint_parent, b"not-a-directory").unwrap();
+        let checkpoint_path = checkpoint_parent.join("checkpoint.json");
+        let director = NodeSigningIdentity::from_seed([71; 32]);
+        let service = WorldDirectorRuntimeService::new(
+            [
+                "validator-a".to_string(),
+                "validator-b".to_string(),
+                "validator-c".to_string(),
+                "validator-d".to_string(),
+            ],
+            director.public_key(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()),
+            Some(checkpoint_path),
+        )
+        .unwrap();
+
+        let error = service
+            .advance(DIRECTOR_RUNTIME_CHECKPOINT_INTERVAL_MS)
+            .expect_err("a file where the checkpoint directory belongs must reject persistence");
+        assert!(error.contains("failed to create world director checkpoint directory"));
+        let status = service.status().unwrap();
+        assert!(status.checkpoint.configured);
+        assert_eq!(status.checkpoint.file_bytes, 0);
+        assert_eq!(status.checkpoint.write_attempts_total, 1);
+        assert_eq!(status.checkpoint.writes_total, 0);
+        assert_eq!(status.checkpoint.write_failures_total, 1);
+        assert_eq!(status.checkpoint.write_bytes_total, 0);
+        assert_eq!(status.checkpoint.write_last_bytes, 0);
+        assert_eq!(status.checkpoint.last_success_at_ms, 0);
+
+        std::fs::remove_file(checkpoint_parent).unwrap();
     }
 }
