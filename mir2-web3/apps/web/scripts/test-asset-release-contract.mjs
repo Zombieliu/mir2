@@ -268,6 +268,8 @@ test("production release and Next routing expose the pinned capability and immut
   assert.equal(productionConfig.fullCrystalPack.verified, true);
   assert.match(productionConfig.fullCrystalPack.contentHash, /^[a-f0-9]{64}$/);
   assert.ok(productionConfig.browserFallbackBaseUrls.length > 0);
+  assert.match(productionConfig.fallbackObjectPrefix, /^mir2\/v\//);
+  assert.notEqual(productionConfig.fallbackObjectPrefix, productionConfig.objectPrefix);
   assert.match(productionConfig.browserFallbackBaseUrls[0], /\/hotlink-ok\/mir2\/v\//);
   assert.ok(
     productionConfig.browserFallbackBaseUrls.every((baseUrl) =>

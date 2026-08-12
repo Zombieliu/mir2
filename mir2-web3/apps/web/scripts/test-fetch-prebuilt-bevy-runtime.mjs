@@ -64,6 +64,46 @@ test("downloads, verifies, reuses, and repairs the pinned runtime", async (conte
   );
 });
 
+test("clean checkouts fetch an overlay runtime from its pinned base release", async (context) => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-runtime-overlay-fetch-test-"));
+  context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
+  const manifestPath = path.join(tempRoot, "runtime.json");
+  const configPath = path.join(tempRoot, "production-web-assets.json");
+  const outputDir = path.join(tempRoot, "public", "bevy-runtime");
+  await fs.writeFile(manifestPath, JSON.stringify(createManifest()));
+
+  const requests = [];
+  const server = http.createServer((request, response) => {
+    requests.push(request.url);
+    const prefix = `/mir2/v/full-base/bevy-runtime/v/${version}/`;
+    const key = decodeURIComponent(request.url ?? "").replace(prefix, "");
+    const bytes = fixtureFiles.get(key);
+    if (!request.url?.startsWith(prefix) || !bytes) {
+      response.writeHead(404).end();
+      return;
+    }
+    response.writeHead(200, { "content-type": key.endsWith(".wasm") ? "application/wasm" : "text/javascript" });
+    response.end(bytes);
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  context.after(() => new Promise((resolve) => server.close(resolve)));
+  const address = server.address();
+  assert(address && typeof address === "object");
+  await fs.writeFile(configPath, JSON.stringify({
+    assetBaseUrl: `http://127.0.0.1:${address.port}/mir2/v/new-overlay`,
+    objectPrefix: "mir2/v/new-overlay",
+    fallbackObjectPrefix: "mir2/v/full-base",
+  }));
+
+  const result = await installPrebuiltRuntime({ manifestPath, configPath, outputDir, attempts: 1 });
+  assert.equal(result.reused, false);
+  assert.equal(requests.length, 4);
+  assert.ok(requests.every((requestUrl) => requestUrl.startsWith("/mir2/v/full-base/")));
+  for (const [relativePath, expected] of fixtureFiles) {
+    assert.deepEqual(await fs.readFile(path.join(outputDir, relativePath)), expected);
+  }
+});
+
 test("rejects unexpected paths before making a request", async () => {
   const manifest = createManifest();
   manifest.files[0].path = "public/bevy-runtime/../../package.json";
