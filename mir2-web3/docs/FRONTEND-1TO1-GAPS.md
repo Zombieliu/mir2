@@ -2637,9 +2637,12 @@ Human acceptance is still required for:
   top-edge drift visible on letterboxed desktop viewports and protects the
   other extra windows from the same coordinate-space bug.
 - Quest-log filter/stage labels now use the generated dotted localization keys.
-  Quest IDs 1, 2, and 5 are localized at the presentation boundary, preserving
-  canonical gateway quest packets while rendering Chinese titles, summaries,
-  objectives, progress, tracker text, rewards, and structured objective labels.
+  Quest IDs 1, 2, 5, and 154 are localized at the presentation boundary,
+  preserving canonical gateway quest packets while rendering Chinese titles,
+  summaries, objectives, progress, tracker text, rewards, and structured
+  objective labels. Quest 154 now renders `皇帝的难题` consistently across
+  available, in-progress, ready-to-turn-in, and completed states instead of
+  leaking the original `Emperors Problem` title into the Chinese quest log.
 - Automated geometry passed at 2208x1812 and 1440x900. At 1440x900 the stage was
   `(208,66)-(1232,834)` and the quest window was `(770,71)-(1082,515)`, with
   `.client-stage-frame` as its direct parent and no browser errors. Local

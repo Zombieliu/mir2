@@ -28,6 +28,7 @@ const CRYSTAL_QUEST_KEY_BY_ID: Readonly<Record<number, string>> = {
   1: "assistantRequest",
   2: "craftLadyRequest",
   5: "smithFirstTest",
+  154: "emperorsProblem",
 };
 
 /**
