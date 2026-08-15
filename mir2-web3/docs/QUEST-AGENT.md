@@ -146,13 +146,28 @@ gold. The purchase changed authoritative stock from 0 to 10 and gold from 548
 to 148; r43 was then stopped cleanly while beginning the next grind. This
 closes the depleted escape/restock regression, not the open q25/q30 objectives.
 
-Across the 43 finalized local development reports through r43, the harness
-recorded 38,192,223 ms of browser-active runtime, 19,968 physical inputs, 247
-kills, 10 deaths, 9 revives, and zero shortcut violations. These reports span
-multiple runner revisions and include deliberately interrupted or failed
-diagnostic runs; the aggregate is endurance evidence, not one passing run.
-Private reports retain local account and character identifiers for resume and
-must not be published unchanged.
+r44 then advanced the same character from 9,881 to 11,177 EXP while preserving
+10 HP drugs, but evidence review found that its second goal reused object id
+`202215`: a lagging corpse render and the first kill's delayed EXP were split
+into two apparent kill rows. Commit `d35415c16` now retains every
+target-specifically confirmed dead object across goal and supervisor boundaries
+until the object has first left the complete AOI and then reappeared with
+definite positive HP. The r45 replay began while the old `202213` and `202205`
+corpses were still visible, rejected both, and completed six goals against six
+new object ids. It advanced EXP from 11,177 to 13,553 with 161 physical inputs,
+zero deaths, potion uses, shortcut violations, or critical browser/network
+failures. This closes duplicate corpse accounting; level 15 and q25/q30 remain
+open.
+
+Across the 45 finalized local development reports through r45, the harness
+recorded 39,401,509 ms (10 h 56 m 41 s) of browser-active runtime, 20,572
+physical inputs, 257 historical kill rows, 10 deaths, 9 revives, and zero
+shortcut violations. One r44 kill row is now known to duplicate another row's
+object id, so the raw historical kill-row total must not be presented as a
+unique-kill count. These reports span multiple runner revisions and include
+deliberately interrupted or failed diagnostic runs; the aggregate is endurance
+evidence, not one passing run. Private reports retain local account and
+character identifiers for resume and must not be published unchanged.
 
 Profile v14 now admits the q29-q34 data prerequisites and the two authoritative
 q34 boat scripts. Static route tests, simulation tests, and shared-Gateway Zone

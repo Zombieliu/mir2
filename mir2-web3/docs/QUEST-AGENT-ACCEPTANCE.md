@@ -104,12 +104,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 43 finalized development reports
-through `warrior-q30-r43-supervised`:
+The private evidence directory contains 45 finalized development reports
+through `warrior-q30-r45-supervised`:
 
-- 38,192,223 ms (10 h 36 m 32 s) browser-active runtime;
-- 19,968 recorded physical inputs;
-- 247 recorded kills;
+- 39,401,509 ms (10 h 56 m 41 s) browser-active runtime;
+- 20,572 recorded physical inputs;
+- 257 historical kill rows, including one r44 row now proven to repeat the
+  same target object id rather than represent another kill;
 - 10 deaths and 9 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
@@ -139,6 +140,31 @@ death/revive, no shortcut violation, and no critical browser/network
 diagnostic. They prove the depleted recovery and restock path, not q25/q30 or
 level-15 completion.
 
+r44 continued from that stocked field state for 900,323 ms and advanced EXP
+from 9,881 to 11,177 with 443 physical inputs, no death, no potion use, and no
+critical diagnostic. Audit review nevertheless rejected its raw 4-kill count:
+goal rows 1 and 2 both named object id `202215`, and goal 2 completed in 1,846
+ms only because the first death's EXP arrived after the stale corpse was
+selected again. The honest r44 result is three distinct confirmed target ids,
+not four independent kills.
+
+Commit `d35415c16` adds a confirmed-dead object lifecycle across goals and
+resume reports. A target remains ineligible while its corpse persists, even if
+the renderer temporarily reports `dead=false` with no authoritative HP. It may
+be selected again only after a complete AOI snapshot observes its absence and
+a later snapshot observes definite positive HP; a bounded ten-minute hold is
+the defensive fallback. Four new policy/executable contracts bring the full
+Quest Agent gate to 169/169.
+
+r45 is the live replay of the rejected r44 condition. Its first AOI still
+contained the old `202213` and `202205` corpse ids, but the Agent physically
+left them and completed six goals against six distinct ids: `202206`, `202203`,
+`202304`, `202210`, `202302`, and `202308`. The 308,963 ms report records EXP
+11,177 -> 13,553, 161 physical inputs, 0 deaths, 0 potion uses, 0 shortcut
+violations, and 0 critical browser/network failures. The final screenshot
+shows the selected 0/65 corpse and several separate `Down` spiders. This closes
+the duplicate-corpse accounting regression, not level 15, q25, or q30.
+
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
 summary fields; do not attach raw `report.json` files to a PR.
@@ -151,6 +177,14 @@ rotation. The code freeze fixes the distinct corpse bug where authoritative
 occupy collision and target-selection grids. Unit regression coverage and the
 post-fix live smoke confirm that zero-health actors are filtered, but this does
 not certify every crowded-field navigation layout.
+
+The longer soak exposed a second corpse boundary: after a target-specific death
+the retained sprite could temporarily carry neither `dead=true` nor a usable HP
+value, and delayed EXP let the next goal appear to progress after selecting the
+same object id. `d35415c16` makes the prior death itself authoritative instead
+of trusting that stale render. r45 proves the exact old ids are skipped and six
+new ids are selected; historical pre-fix aggregates remain kill-row counts, not
+retrospectively certified unique kills.
 
 The soak also exposed a long-preparation efficiency defect: the planner charged
 the full one-time field walk to every prospective kill, so a character with

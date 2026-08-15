@@ -582,11 +582,12 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   not a Warrior/Wizard/Taoist 1-50 completion. The authoritative resumed state
   is level 14: q22-q24, q28, and q29 complete; q25 remains 6/20, q26/q27 are
   still locked in that snapshot, and q30 remains 0/1.
-- The two-day wall-clock soak contains 43 finalized development reports and
-  38,192,223 ms (10 h 36 m 32 s) of browser-active work: 19,968 physical
-  inputs, 247 kills, 10 deaths, 9 completed revives, and zero shortcut
-  violations. This aggregate spans revisions and is endurance evidence, not a
-  contiguous passing certificate.
+- The two-day wall-clock soak contains 45 finalized development reports and
+  39,401,509 ms (10 h 56 m 41 s) of browser-active work: 20,572 physical
+  inputs, 257 historical kill rows, 10 deaths, 9 completed revives, and zero
+  shortcut violations. r44 contains one proven duplicate target-id row, so the
+  raw kill-row aggregate is not a unique-kill certificate. The soak spans
+  revisions and is endurance evidence, not a contiguous passing certificate.
 - r38 established the old-policy baseline. Review then found that long grind
   selection charged the complete same-map field walk to every future kill,
   repeatedly preferring low-yield village-edge monsters despite more than
@@ -619,3 +620,19 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   10` and gold `548 -> 148`, before a clean supervised stop during the next
   grind. The four new reports add 1,381,150 ms, 809 inputs, one kill, one shop
   purchase, and no shortcut violation or critical browser/network diagnostic.
+- r44 advanced EXP `9,881 -> 11,177`, but audit rejected its nominal four-kill
+  count because goal rows 1 and 2 both selected object id `202215`; a retained
+  stale corpse and delayed EXP split one death across two apparent goals. Its
+  honest evidence is three distinct target ids, 900,323 ms, 443 inputs, and no
+  shortcut violation or critical browser/network diagnostic.
+- `d35415c16` retains target-specifically confirmed deaths across goals and
+  resume reports. A stale actor remains ineligible until the complete AOI first
+  observes it absent and then sees the id return with definite positive HP.
+  Four red/green policy and executable-source contracts raise the complete
+  Quest Agent gate to 169/169; Node syntax and whitespace checks pass.
+- r45 replayed the exact field with old corpses `202213` and `202205` still
+  visible, skipped both, and completed six goals against six new object ids.
+  The 308,963 ms report advanced EXP `11,177 -> 13,553` with 161 physical
+  inputs, zero deaths, potion uses, shortcut violations, or critical
+  browser/network failures. This closes duplicate-corpse accounting, while
+  Warrior level 15, q25, and q30 remain open.
