@@ -577,6 +577,34 @@ export function assessGrindingSourceStall(
 }
 
 /**
+ * Keep only resource-strain observations that have not subsequently been
+ * disproved by a confirmed normal-client kill or an explicit preparation
+ * completion. Ordering matters: a later severe fight must survive an older
+ * recovery, while legacy records without timestamps are resolved by any
+ * timestamped recovery for the same monster.
+ */
+export function unresolvedCombatResourceStrains(strains, recoveries) {
+  const latestRecoveryAt = new Map();
+  for (const recovery of Array.isArray(recoveries) ? recoveries : []) {
+    const monsterKey = normalizePolicyName(recovery?.monsterName);
+    const at = finiteNumber(recovery?.at, Number.NaN);
+    if (!monsterKey || !Number.isFinite(at)) continue;
+    latestRecoveryAt.set(
+      monsterKey,
+      Math.max(finiteNumber(latestRecoveryAt.get(monsterKey), Number.NEGATIVE_INFINITY), at),
+    );
+  }
+  return (Array.isArray(strains) ? strains : []).filter((strain) => {
+    const monsterKey = normalizePolicyName(strain?.monsterName);
+    if (!monsterKey) return false;
+    const recoveryAt = latestRecoveryAt.get(monsterKey);
+    if (!Number.isFinite(recoveryAt)) return true;
+    const strainAt = finiteNumber(strain?.at, Number.NEGATIVE_INFINITY);
+    return strainAt > recoveryAt;
+  });
+}
+
+/**
  * Build a routing halo only for monsters that are meaningfully above the
  * player's level. Ordinary field creatures still occupy their exact server
  * tile, but no longer turn a dense spawn area into one artificial wall.

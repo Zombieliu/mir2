@@ -57,6 +57,7 @@ import {
   shouldFundHealthPotions,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
+  unresolvedCombatResourceStrains,
 } from "./policy.mjs";
 import {
   isTransientQuestAgentFatal,
@@ -513,6 +514,27 @@ test("a grind source cools down only after repeated failed goals without authori
       previousStalls: 2,
     }).cooldownUntil,
     null,
+  );
+});
+
+test("a later confirmed kill resolves only older combat resource strain", () => {
+  const strains = [
+    { monsterName: "CannibalPlant", at: 100, consecutiveStrains: 1 },
+    { monsterName: "CannibalPlant", at: 300, consecutiveStrains: 2 },
+    { monsterName: "RakingCat", at: 100, consecutiveStrains: 1 },
+  ];
+  assert.deepEqual(
+    unresolvedCombatResourceStrains(strains, [
+      { monsterName: "CannibalPlant", at: 200 },
+    ]),
+    [strains[1], strains[2]],
+  );
+  assert.deepEqual(
+    unresolvedCombatResourceStrains(strains, [
+      { monsterName: "CannibalPlant", at: 400 },
+      { monsterName: "RakingCat", at: 150 },
+    ]),
+    [],
   );
 });
 
@@ -2232,6 +2254,14 @@ test("combat resource strain covers navigation and combat for the whole goal", a
   assert.match(
     runner,
     /inheritedCombatResourceStrains:[\s\S]{0,500}resumeEvidence\?\.combatResourceStrains/,
+  );
+  assert.match(
+    runner,
+    /inheritedCombatResourceRecoveries:[\s\S]{0,900}resumeEvidence\?\.kills/,
+  );
+  assert.match(
+    runner,
+    /unresolvedCombatResourceStrains\(allStrains, recoveries\)/,
   );
   assert.match(
     runner,
