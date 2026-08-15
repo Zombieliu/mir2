@@ -112,6 +112,24 @@ export function reconcileConfirmedDeadMonsterObjects(
 }
 
 /**
+ * Produce short, reversible walking targets for a visible safe-room recovery
+ * loop. The runtime still validates Crystal collision before sending any
+ * input; this policy only keeps pacing bounded around the arrival tile.
+ */
+export function safeRecoveryPaceTargets(anchor, distance = 2) {
+  const x = Number(anchor?.x);
+  const y = Number(anchor?.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return [];
+  const offset = Math.max(1, Math.floor(finiteNumber(distance, 2)));
+  return [
+    { x: x + offset, y },
+    { x, y: y + offset },
+    { x: x - offset, y },
+    { x, y: y - offset },
+  ].filter((point) => point.x >= 0 && point.y >= 0);
+}
+
+/**
  * Resolve the same F1-F8 skill-bar choice as the visible client, but admit
  * only an immediately targetable offensive spell. Ground skills need a
  * second physical tile click and self/toggle/passive skills are not attacks,
@@ -704,6 +722,34 @@ export function unresolvedCombatResourceStrains(strains, recoveries) {
     const strainAt = finiteNumber(strain?.at, Number.NEGATIVE_INFINITY);
     return strainAt > recoveryAt;
   });
+}
+
+/**
+ * A severe resource loss is also an unfinished supply action. Preserve that
+ * one-shot recall across supervised process boundaries until later, auditable
+ * combat evidence resolves the strain. Older reports omitted `severe`, but
+ * every row in their strain collection had already passed the same predicate.
+ */
+export function combatMemoryRequiresSupplyRecall(
+  strains,
+  recoveries,
+  {
+    currentPotionQuantity = null,
+    requiredPotionQuantity = null,
+  } = {},
+) {
+  const hasStockBoundary =
+    currentPotionQuantity != null && requiredPotionQuantity != null;
+  const currentStock = finiteNumber(currentPotionQuantity, Number.NaN);
+  const requiredStock = finiteNumber(requiredPotionQuantity, Number.NaN);
+  if (
+    hasStockBoundary &&
+    Number.isFinite(currentStock) &&
+    Number.isFinite(requiredStock) &&
+    currentStock >= Math.max(0, requiredStock)
+  ) return false;
+  return unresolvedCombatResourceStrains(strains, recoveries)
+    .some((strain) => strain?.severe !== false);
 }
 
 /**

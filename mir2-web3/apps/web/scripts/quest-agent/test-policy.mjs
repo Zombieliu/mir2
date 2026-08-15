@@ -22,6 +22,7 @@ import {
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
   continuousCollisionRunAvoidsTransfers,
+  combatMemoryRequiresSupplyRecall,
   dangerousHostileAvoidanceCells,
   denseAdjacentHostileCount,
   duplicateEquippedItemsForSale,
@@ -53,6 +54,7 @@ import {
   respawnTravelAttemptBudget,
   retreatPointFromHostile,
   restorativeSelfSkillHotkey,
+  safeRecoveryPaceTargets,
   selectBestAvailableEquipmentUpgrade,
   selectProgressingCollisionDetour,
   shouldCaptureGoalFrame,
@@ -195,6 +197,22 @@ test("confirmed monster object hold expires defensively", () => {
   );
 
   assert.equal(reconciled.has("202215"), false);
+});
+
+test("safe recovery pacing stays in a bounded cardinal loop around its anchor", () => {
+  assert.deepEqual(safeRecoveryPaceTargets({ x: 2, y: 11 }, 2), [
+    { x: 4, y: 11 },
+    { x: 2, y: 13 },
+    { x: 0, y: 11 },
+    { x: 2, y: 9 },
+  ]);
+  assert.deepEqual(safeRecoveryPaceTargets({ x: 2, y: 11 }, 0), [
+    { x: 3, y: 11 },
+    { x: 2, y: 12 },
+    { x: 1, y: 11 },
+    { x: 2, y: 10 },
+  ]);
+  assert.deepEqual(safeRecoveryPaceTargets(null, 2), []);
 });
 
 test("visible HP-drug selection ignores unrelated and distant drops", () => {
@@ -641,6 +659,47 @@ test("a later confirmed kill resolves only older combat resource strain", () => 
       { monsterName: "RakingCat", at: 150 },
     ]),
     [],
+  );
+});
+
+test("an unresolved severe combat strain restores the one-time supply recall", () => {
+  const strains = [
+    { monsterName: "SpittingSpider", severe: true, at: 300 },
+  ];
+  assert.equal(combatMemoryRequiresSupplyRecall(strains, []), true);
+  assert.equal(
+    combatMemoryRequiresSupplyRecall(strains, [], {
+      currentPotionQuantity: 10,
+      requiredPotionQuantity: 10,
+    }),
+    false,
+  );
+  assert.equal(
+    combatMemoryRequiresSupplyRecall(strains, [], {
+      currentPotionQuantity: 9,
+      requiredPotionQuantity: 10,
+    }),
+    true,
+  );
+  assert.equal(
+    combatMemoryRequiresSupplyRecall(strains, [
+      { monsterName: "SpittingSpider", at: 400 },
+    ]),
+    false,
+  );
+  assert.equal(
+    combatMemoryRequiresSupplyRecall([
+      { monsterName: "SpittingSpider", severe: false, at: 500 },
+    ], []),
+    false,
+  );
+  // Legacy strain rows predate the explicit severe flag but were emitted only
+  // after the severe-strain predicate had already passed.
+  assert.equal(
+    combatMemoryRequiresSupplyRecall([
+      { monsterName: "CannibalPlant", at: 600 },
+    ], []),
+    true,
   );
 });
 
@@ -2062,13 +2121,40 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
     recoveryBody,
     /currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME && shelterActive[\s\S]{0,500}supplyFundingShelterUntil = 0/,
   );
-  assert.match(
-    recoveryBody,
-    /while \(Date\.now\(\) < recoveryDeadline\)[\s\S]{0,500}String\(state\.mapFileName\) === SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,350}supplyFundingShelterUntil = 0[\s\S]{0,120}shelterActive = false/,
+  const recoveryLoopArrivalBody = recoveryBody.slice(
+    recoveryBody.indexOf("while (Date.now() < recoveryDeadline)"),
+    recoveryBody.indexOf("if (state.playerDead || state.deathOverlayVisible)"),
   );
   assert.match(
-    recoveryBody,
-    /const activeShelterThreat = nearestActiveHostile[\s\S]{0,900}String\(transfer\.toMapFileName[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,900}nearestPointInTransferBounds\(state\.player, recoveryTransfer\)[\s\S]{0,650}navigateNear\(retreat, recoveryTransfer \? 0 : 1[\s\S]{0,350}allowTransferToMap: recoveryTransfer[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,220}return true/,
+    recoveryLoopArrivalBody,
+    /String\(state\.mapFileName\) === SAFE_RECOVERY_MAP_FILE_NAME/,
+  );
+  assert.match(recoveryLoopArrivalBody, /supplyFundingShelterUntil = 0/);
+  assert.match(
+    recoveryLoopArrivalBody,
+    /safeRecoveryThreatSettleUntil = Math\.max/,
+  );
+  assert.match(recoveryLoopArrivalBody, /shelterActive = false/);
+  const activeShelterThreatBody = recoveryBody.slice(
+    recoveryBody.indexOf("const activeShelterThreat"),
+    recoveryBody.indexOf("// This interior is the zero-potion funding shelter"),
+  );
+  assert.match(activeShelterThreatBody, /nearestActiveHostile\(state/);
+  assert.match(
+    activeShelterThreatBody,
+    /String\(transfer\.toMapFileName[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /nearestPointInTransferBounds\(state\.player, recoveryTransfer\)/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /allowTransferToMap: recoveryTransfer[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,250}return true/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: 4,[\s\S]{0,500}clearTrivialOccupancy: true/,
   );
   assert.match(
     recoveryBody,
@@ -2083,6 +2169,31 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
     /navigateNear\(retreat, recoveryTransfer \? 0 : 1[\s\S]{0,500}autoUsePotions: true/,
   );
   assert.match(recoveryBody, /safe-passive-health-recovered/);
+  assert.match(recoveryBody, /safeRecoveryPaceTargets\(/);
+  assert.match(
+    runner,
+    /const SAFE_RECOVERY_THREAT_SETTLE_MS = 20_000/,
+  );
+  assert.match(
+    recoveryBody,
+    /safeRecoveryThreatSettleUntil = Math\.max\([\s\S]{0,180}settleStartedAt \+ SAFE_RECOVERY_THREAT_SETTLE_MS/,
+  );
+  assert.match(
+    recoveryBody,
+    /const interiorSettling = currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,120}Date\.now\(\) < safeRecoveryThreatSettleUntil/,
+  );
+  assert.match(
+    recoveryBody,
+    /liveHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO[\s\S]{0,180}Date\.now\(\) >= safeRecoveryThreatSettleUntil/,
+  );
+  assert.match(
+    recoveryBody,
+    /navigateNear\(recoveryPaceTarget, 0,[\s\S]{0,300}autoUsePotions: false/,
+  );
+  assert.doesNotMatch(
+    recoveryBody,
+    /type:\s*["']tick["']|stage5Command|WorldCommand|MoveTo/,
+  );
   assert.match(runner, /assertSafeSupplyFundingState\(activeGoal, liveState, monsterName\)/);
   assert.match(
     runner,
@@ -2415,6 +2526,10 @@ test("combat resource strain covers navigation and combat for the whole goal", a
   assert.match(
     runner,
     /unresolvedCombatResourceStrains\(allStrains, recoveries\)/,
+  );
+  assert.match(
+    runner,
+    /const resumedPotionQuantity = healthPotionQuantity\([\s\S]{0,240}report\?\.finalState\?\.belt[\s\S]{0,240}combatMemoryRequiresSupplyRecall\(allStrains, recoveries, \{[\s\S]{0,180}currentPotionQuantity: resumedPotionQuantity[\s\S]{0,180}requiredPotionQuantity: HEALTH_POTION_DEPARTURE_STOCK[\s\S]{0,180}potionSupplyRecallRequested = true/,
   );
   assert.match(
     runner,

@@ -13,6 +13,7 @@ import {
   collisionPathHasImmediateDynamicBlock,
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
+  combatMemoryRequiresSupplyRecall,
   continuousCollisionRunAvoidsTransfers,
   dangerousHostileAvoidanceCells,
   denseAdjacentHostileCount,
@@ -43,6 +44,7 @@ import {
   retreatPointFromHostile,
   respawnCorridorAvoidanceWaypoint,
   respawnTravelAttemptBudget,
+  safeRecoveryPaceTargets,
   selectBestAvailableEquipmentUpgrade,
   selectProgressingCollisionDetour,
   shouldCaptureGoalFrame,
@@ -200,6 +202,7 @@ let potionSupplyRecallRequested = false;
 let knownHealthPotionUnitPrice = null;
 let deerFundingUnavailableUntil = 0;
 let supplyFundingShelterUntil = 0;
+let safeRecoveryThreatSettleUntil = 0;
 const fieldGroupCooldownUntil = new Map();
 const monsterCooldownUntil = new Map();
 const quarantinedMonsterUntil = new Map();
@@ -279,6 +282,9 @@ const HEALTH_POTION_RESTOCK_RADIUS = 180;
 const HEALTH_POTION_FUNDING_FIELD_RADIUS = 64;
 const SAFE_FUNDING_MIN_HEALTH_RATIO = 0.70;
 const SAFE_FUNDING_READY_HEALTH_RATIO = 0.90;
+const SAFE_RECOVERY_THREAT_SETTLE_MS = 20_000;
+const SAFE_RECOVERY_PACE_INTERVAL_MS = 3_500;
+const SAFE_RECOVERY_PACE_DISTANCE = 2;
 // GroceryStore has zero authoritative respawns and is connected to the
 // Border Village by ordinary movement portals. It is the nearest real-client
 // shelter where passive Crystal regeneration cannot be interrupted by mobs.
@@ -2418,6 +2424,20 @@ function restoreAdaptiveCombatMemory(report) {
       : []),
   ].slice(-256);
   const strains = unresolvedCombatResourceStrains(allStrains, recoveries);
+  const resumedPotionQuantity = healthPotionQuantity({
+    beltItems: Array.isArray(report?.finalState?.belt)
+      ? report.finalState.belt
+      : [],
+    inventoryItems: Array.isArray(report?.finalState?.inventory)
+      ? report.finalState.inventory
+      : [],
+  });
+  if (combatMemoryRequiresSupplyRecall(allStrains, recoveries, {
+    currentPotionQuantity: resumedPotionQuantity,
+    requiredPotionQuantity: HEALTH_POTION_DEPARTURE_STOCK,
+  })) {
+    potionSupplyRecallRequested = true;
+  }
   const now = Date.now();
   for (const record of strains) {
     const monsterKey = normalizeName(record?.monsterName);
@@ -6632,11 +6652,23 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   let shelterActive = Date.now() < supplyFundingShelterUntil;
   if (currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME && shelterActive) {
     // The field deadline exists only to keep one retreat committed to the
-    // portal. Once the ordinary map transfer succeeds, safety is established;
-    // clear the deadline and wait only for the normal >=90% HP recovery gate.
+    // portal. Once the ordinary map transfer succeeds, replace it with one
+    // short interior settlement window. Exiting immediately at full HP lets
+    // the same attacker's rendered 15-second chase window reacquire the player
+    // outside the door and can create an endless shelter loop.
+    const settleStartedAt = Date.now();
     supplyFundingShelterUntil = 0;
+    safeRecoveryThreatSettleUntil = Math.max(
+      safeRecoveryThreatSettleUntil,
+      settleStartedAt + SAFE_RECOVERY_THREAT_SETTLE_MS,
+    );
     shelterActive = false;
+    recordMilestone("safe-recovery-threat-settling", state, {
+      settleUntil: safeRecoveryThreatSettleUntil,
+    });
   }
+  const interiorSettling = currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME &&
+    Date.now() < safeRecoveryThreatSettleUntil;
   // A live attacker must be escaped through ordinary movement first. Starting
   // a long shelter route while still in its attack window only burns the
   // remaining potion reserve before the player leaves the field.
@@ -6672,10 +6704,15 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     if (retreat) {
       // A normal flee only needs separation, but a map transfer must be
       // entered. Stopping one tile from the portal leaves the player exposed
-      // and turns the shelter loop into a no-input busy wait.
+      // and turns the shelter loop into a no-input busy wait. Four attempts
+      // also let the normal navigation occupancy detector prove a repeated
+      // trap and fight exactly one adjacent, level-certified blocker through
+      // the visible combat surface; this is needed when several beginner
+      // Scarecrows occupy every open exit tile.
       await navigateNear(retreat, recoveryTransfer ? 0 : 1, {
-        maxAttempts: 2,
+        maxAttempts: 4,
         abortOnDeath: true,
+        clearTrivialOccupancy: true,
         // Preserve stock while HP is healthy, but let the normal potion
         // threshold save a critically injured character during the physical
         // retreat. With zero stock this remains a pure passive-recovery path.
@@ -6696,9 +6733,14 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   // non-lethal hit turns a safe field quest into an unbounded commute.
   if (
     !shelterActive &&
+    !interiorSettling &&
     healthPotionQuantity(state) >= HEALTH_POTION_FIELD_RESERVE
   ) return false;
-  if (healthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO && !shelterActive) return false;
+  if (
+    healthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO &&
+    !shelterActive &&
+    !interiorSettling
+  ) return false;
 
   if (currentMapFileName !== SAFE_RECOVERY_MAP_FILE_NAME) {
     console.log(
@@ -6780,6 +6822,16 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     Date.now() + 5 * 60_000,
     evidence.startedAt + maxRuntimeMs,
   );
+  const recoveryPaceAnchor = state?.player
+    ? { x: Number(state.player.x), y: Number(state.player.y) }
+    : null;
+  const recoveryPaceCandidates = safeRecoveryPaceTargets(
+    recoveryPaceAnchor,
+    SAFE_RECOVERY_PACE_DISTANCE,
+  );
+  let recoveryPaceCandidateIndex = 0;
+  let recoveryPaceReturning = false;
+  let nextRecoveryPaceAt = Date.now();
   let nextProgressLogAt = 0;
   while (Date.now() < recoveryDeadline) {
     assertRuntimeBudget("waiting for safe passive health recovery");
@@ -6792,8 +6844,16 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       // Its local shelterActive value was captured on the field, so repeat the
       // arrival acknowledgement here instead of idling at full HP until the
       // two-minute field latch naturally expires.
+      const settleStartedAt = Date.now();
       supplyFundingShelterUntil = 0;
+      safeRecoveryThreatSettleUntil = Math.max(
+        safeRecoveryThreatSettleUntil,
+        settleStartedAt + SAFE_RECOVERY_THREAT_SETTLE_MS,
+      );
       shelterActive = false;
+      recordMilestone("safe-recovery-threat-settling", state, {
+        settleUntil: safeRecoveryThreatSettleUntil,
+      });
     }
     if (state.playerDead || state.deathOverlayVisible) {
       await recoverPlayerIfNeeded(state, { autoUsePotions: false });
@@ -6805,8 +6865,10 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       : 1;
     if (
       liveHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO &&
-      Date.now() >= supplyFundingShelterUntil
+      Date.now() >= supplyFundingShelterUntil &&
+      Date.now() >= safeRecoveryThreatSettleUntil
     ) {
+      safeRecoveryThreatSettleUntil = 0;
       recordMilestone("safe-passive-health-recovered", state, {
         healthRatio: liveHealthRatio,
         potionQuantity: healthPotionQuantity(state),
@@ -6817,11 +6879,67 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       );
       return true;
     }
+    if (
+      String(state.mapFileName) === SAFE_RECOVERY_MAP_FILE_NAME &&
+      recoveryPaceAnchor &&
+      recoveryPaceCandidates.length > 0 &&
+      Date.now() >= nextRecoveryPaceAt
+    ) {
+      const recoveryPaceTarget = recoveryPaceReturning
+        ? recoveryPaceAnchor
+        : recoveryPaceCandidates[
+            recoveryPaceCandidateIndex % recoveryPaceCandidates.length
+          ];
+      const paced = await navigateNear(recoveryPaceTarget, 0, {
+        maxAttempts: 8,
+        failFastWhenCollisionPathUnavailable: true,
+        autoUsePotions: false,
+      }).then(
+        () => true,
+        (error) => {
+          console.log(
+            `  safe passive recovery pace blocked: ` +
+            `${recoveryPaceTarget.x},${recoveryPaceTarget.y} ` +
+            `${String(error?.message ?? error)}`,
+          );
+          return false;
+        },
+      );
+      const pacedState = await readAgentState(client);
+      const reachedPaceTarget = Boolean(
+        paced &&
+        String(pacedState.mapFileName) === SAFE_RECOVERY_MAP_FILE_NAME &&
+        chebyshev(pacedState.player, recoveryPaceTarget) === 0,
+      );
+      if (reachedPaceTarget) {
+        console.log(
+          `  safe passive recovery pace: ` +
+          `${state.player.x},${state.player.y}->` +
+          `${pacedState.player.x},${pacedState.player.y}`,
+        );
+        if (recoveryPaceReturning) {
+          recoveryPaceReturning = false;
+          recoveryPaceCandidateIndex =
+            (recoveryPaceCandidateIndex + 1) % recoveryPaceCandidates.length;
+        } else {
+          recoveryPaceReturning = true;
+        }
+      } else if (!recoveryPaceReturning) {
+        recoveryPaceCandidateIndex =
+          (recoveryPaceCandidateIndex + 1) % recoveryPaceCandidates.length;
+      }
+      state = pacedState;
+      nextRecoveryPaceAt = Date.now() + SAFE_RECOVERY_PACE_INTERVAL_MS;
+    }
     if (Date.now() >= nextProgressLogAt) {
       console.log(
         `  safe passive recovery waiting: ` +
         `${Number(state.playerHp ?? 0)}/${liveMaxHp} ` +
-        `shelterMs=${Math.max(0, supplyFundingShelterUntil - Date.now())}`,
+        `shelterMs=${Math.max(
+          0,
+          supplyFundingShelterUntil - Date.now(),
+          safeRecoveryThreatSettleUntil - Date.now(),
+        )}`,
       );
       nextProgressLogAt = Date.now() + 30_000;
     }
