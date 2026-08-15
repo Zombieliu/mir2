@@ -8,14 +8,20 @@ level-1-to-50 playthrough.
 
 ## Immutable anchors
 
-- Review base: PR #233 exact head
+- Source review base: PR #233 exact head
   `ef33e4764c1342620e30532fb5ffa4e784013dd2`.
-- Acceptance code freeze: `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
+- Main integration base: `f0e0bb6cdc7129fc3b183e7875603d198198bb75`
+  (current `main`, including PR #234).
+- Main-based acceptance code freeze:
+  `8423d124bf6d52d02f0c129de38227b6cfe863ff`.
+- Patch-equivalent source freeze:
+  `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak runtime revision:
   `d8bca1792708baff979460fc1f98ca1dd4bd9ddf`.
-- Remote branch: `origin/codex/autonomous-quest-agent`.
-- Code range: seven commits on top of the review base. Acceptance-document-only
-  commits may follow the tested code freeze without changing runtime code.
+- Remote clean branch: `origin/codex/autonomous-quest-agent-main`.
+- Code range: seven code/test commits plus acceptance documentation on top of
+  the main integration base. `git range-diff` matches all eight transplanted
+  source commits exactly; documentation-only commits may follow the code freeze.
 
 ## Acceptance matrix
 
@@ -52,7 +58,7 @@ cargo test -p mir2-gateway --lib
 cargo fmt --all -- --check
 ```
 
-All gates pass at the acceptance code freeze:
+Full-package gates pass on the patch-equivalent source freeze:
 
 - Quest Agent: 163 passed, 0 failed;
 - TypeScript, Node syntax, Rust formatting, and whitespace checks: passed;
@@ -60,16 +66,28 @@ All gates pass at the acceptance code freeze:
   and `zone_replay` 8/8;
 - `mir2-gateway --lib`: 451 passed, 0 failed, 1 ignored in 242.55 seconds.
 
+The main-based clean transplant was then verified independently:
+
+- all eight source commits match one-for-one under `git range-diff`;
+- Simulation, Gateway, and GameData source directories are byte-identical to
+  the full-package-tested source freeze;
+- Quest Agent 163/163, TypeScript, and Node syntax pass;
+- the PR #234 asset-release integration passes contract 8/8 and safety 15/15;
+- Simulation `security_lifecycle` passes 18/18 and `vertical_slice` passes 8/8;
+- the Gateway paid-sailor round-trip passes 1/1;
+- Rust formatting and whitespace checks pass.
+
 The first full acceptance run exposed a deterministic saved-transform
 regression introduced after the PR #233 base: a valid Bichon field position was
 tested against the starter collision window and incorrectly recovered into the
-town safe zone. PR #233 passed the same comparison test. Commit `4a8932477`
+town safe zone. PR #233 passed the same comparison test. Clean commit
+`c96a7826d`
 changes recovery to use authoritative full-map bounds and adds a regression
 test that preserves valid field positions while retaining recovery for the
 legacy mismatched-map case. The two previously failing FireBall vertical-slice
 tests and the full Simulation package pass after the fix.
 
-The Gateway paid-sailor test was also corrected in `ccaba0135` to seed its
+The Gateway paid-sailor test was also corrected in `8423d124b` to seed its
 level/gold fixture through the isolated Platinum account store and use the
 internal test transfer. It no longer depends on a production-profile-rejected
 `qa.applyNativeState` command; the production boat path itself was not changed.
