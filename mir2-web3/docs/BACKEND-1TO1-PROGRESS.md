@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> Latest staged Quest Agent backend sync: 2026-08-15 corrects StartGame legacy
+> transform recovery to use the loaded map's authoritative full collision
+> bounds. A valid field position outside the starter preload window is retained;
+> a town coordinate persisted under an incompatible field map is still
+> recovered to the configured bind map. Focused preservation/recovery tests and
+> both previously failing FireBall vertical-slice tests pass, followed by the
+> full Simulation package and Gateway library 451/451 non-ignored tests. The
+> Gateway paid-sailor fixture now seeds isolated Platinum state instead of using
+> a profile-rejected QA mutation; production transport behavior is unchanged.
+
 > Latest production-login prevention sync: 2026-08-12 closes the monitoring
 > blind spots around the remote Zone OnConnect bootstrap and World Director's
 > durable checkpoint. The Zone Host now publishes inflight, request/error, and

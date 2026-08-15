@@ -110,25 +110,40 @@ to the server.
 
 ## Current acceptance boundary
 
-As of 2026-08-14, a resumed Warrior real-client evidence chain has completed
-the Warrior-specific q1-q9 branch and common q22-q28, including ordinary
-combat, harvest-only quest drops, visible economy recovery, cross-map travel,
-Quest Diary endpoints, Brian/Peter dialogue, death recovery, and potion
-restocking. q28 first reached authoritative 10/10 through real
-SpittingSpider combat and harvesting; its final resumed segment then sold
-ordinary Venison, bought HP drugs, crossed more than 300 tiles through visible
-movement, and finished at Alchemist Samuel. That segment completed 1/1 goal in
-1,093,304 ms with 603 recorded inputs and zero shortcut violations. The final
-server snapshot reports q28 `completed` at level 15. Browser diagnostics also
-recorded unresolved item/scene raster 404s; those are a separate presentation
-finding and are not represented as a clean visual-assets certificate.
+The dated staged sign-off matrix and immutable revision anchors are maintained
+in [`QUEST-AGENT-ACCEPTANCE.md`](QUEST-AGENT-ACCEPTANCE.md).
+
+As of 2026-08-15, the complete Warrior q1-q9 functional certificate is green:
+the final run reached the required authoritative quest stages through 684
+recorded physical inputs, 18 kills, no death, and zero shortcut violations.
+That certificate still contains presentation/network diagnostics from missing
+item and scene rasters, so it is not a clean visual-assets certificate.
+
+The longer resumed Warrior chain has independently completed q22-q24, q28, and
+q29 through ordinary client actions. Its current authoritative snapshot is
+level 14 with q25 at 6/20 (`CannibalStem` 6/10 and `CannibalLeaf` 0/10), q26
+and q27 not yet unlocked in that snapshot, and q30 active at 0/1 `JadeRing`.
+The post-fix segment (`warrior-q30-r37-supervised`) ran for 489,624 ms,
+completed 5 of 9 attempted goals, recorded 5 kills and 283 physical inputs,
+advanced experience from 7,989 to 8,541, and ended with zero deaths, shortcut
+violations, critical console errors, or critical network failures. This is
+strong resume/recovery and soak evidence,
+but it is not a contiguous q1-q30 completion certificate.
+
+Across the 37 finalized local development reports through r37, the harness
+recorded 35,627,291 ms of browser-active runtime, 18,555 physical inputs, 241
+kills, 10 deaths, 9 revives, and zero shortcut violations. These reports span
+multiple runner revisions and include deliberately interrupted or failed
+diagnostic runs; the aggregate is endurance evidence, not one passing run.
+Private reports retain local account and character identifiers for resume and
+must not be published unchanged.
 
 Profile v14 now admits the q29-q34 data prerequisites and the two authoritative
 q34 boat scripts. Static route tests, simulation tests, and shared-Gateway Zone
 tests prove the visible 2,000-gold Bichon -> Prajna and Prajna -> Bichon dialog
-paths. That is implementation evidence only: q29-q34 still require sequential
-real-client certificates with zero shortcut violations before being called
-accepted.
+paths. q29 has live real-client completion evidence, while q30-q34 still
+require sequential real-client certificates with zero shortcut violations
+before being called accepted.
 
 The same profile now admits the authoritative EbonyTree quest harvest and the
 RedViper/TigerViper respawns. It also carries an audited q47 repair overlay for
@@ -219,7 +234,8 @@ explicitly allow-listed and validated against a real placement on an allowed,
 reachable map. No admin, GM, or general teleport script was admitted. Generated
 Warrior, Wizard, and Taoist routes each contain 140 level-1-to-50 quests and
 report zero blockers in all four level bands. This is static/runtime-profile
-readiness only; q29 onward still requires sequential real-client evidence.
+readiness only; q25-q27, q30 onward, and both remaining classes still require
+sequential real-client evidence.
 
 Generated blockers are test findings, not permission to skip content. The
 current generated manifests have no known blocker, but a later live run may
