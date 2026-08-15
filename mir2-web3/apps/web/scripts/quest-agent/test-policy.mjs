@@ -14,6 +14,7 @@ import {
   BICHON_Q1_Q5_ROUTE,
   BICHON_Q1_Q9_ROUTE,
   QUEST_AGENT_CONTRACT,
+  assessGrindingSourceStall,
   assessQuestCombatResourceStrain,
   auditOutgoingBrowserCommand,
   chooseImmediateMeleeTarget,
@@ -470,6 +471,49 @@ test("a near-death potion-exhausting win triggers adaptive combat preparation", 
     playerHp: 90,
     beltItems: [{ name: "(HP)DrugSmall", quantity: 5 }],
   }).severe, false);
+});
+
+test("a grind source cools down only after repeated failed goals without authoritative EXP", () => {
+  const goal = { kind: "grind", monsterName: "RakingCat" };
+  const before = { playerLevel: 14, playerExperience: 861 };
+  assert.deepEqual(
+    assessGrindingSourceStall(goal, before, {
+      playerLevel: 14,
+      playerExperience: 953,
+    }, {
+      failed: true,
+      previousStalls: 2,
+      now: 1_000,
+      cooldownMs: 5_000,
+    }),
+    {
+      tracked: true,
+      progressed: true,
+      stallCount: 0,
+      cooldownUntil: null,
+    },
+  );
+  assert.deepEqual(
+    assessGrindingSourceStall(goal, before, before, {
+      failed: true,
+      previousStalls: 2,
+      now: 1_000,
+      cooldownMs: 5_000,
+    }),
+    {
+      tracked: true,
+      progressed: false,
+      stallCount: 3,
+      cooldownUntil: 6_000,
+    },
+  );
+  assert.equal(
+    assessGrindingSourceStall(goal, before, before, {
+      failed: false,
+      previousStalls: 2,
+    }).cooldownUntil,
+    null,
+  );
 });
 
 test("offensive combat skills follow the visible F1-F8 bar without casting passive or ground skills", () => {
@@ -2124,6 +2168,20 @@ test("resource-heavy grind sources are cooled down and replanned", async () => {
   assert.match(runner, /goal\.kind === "grind"[\s\S]{0,420}grind risk memory:/);
   assert.match(
     runner,
+    /rememberGrindingSourceStall\(goal, goalRecord, before, after\)/,
+  );
+  const stallBody = runner.slice(
+    runner.indexOf("function rememberGrindingSourceStall"),
+    runner.indexOf("function restoreAdaptiveCombatMemory"),
+  );
+  assert.match(stallBody, /assessGrindingSourceStall\(goal, before, after,/);
+  assert.match(stallBody, /failed goals without EXP; cooling down source/);
+  assert.match(
+    runner,
+    /inheritedGrindingSourceStalls:[\s\S]{0,500}resumeEvidence\?\.grindingSourceStalls/,
+  );
+  assert.match(
+    runner,
     /const emergencyDeerHarvest =[\s\S]{0,220}fundingHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO[\s\S]{0,400}fundingPotionQuantity >= HEALTH_POTION_FUNDING_WORKING_STOCK[\s\S]{0,180}emergencyDeerHarvest[\s\S]{0,180}fundingHealthRatio >= 0\.75[\s\S]{0,6500}supply resource risk: Deer/,
   );
 });
@@ -2251,6 +2309,31 @@ test("combat completion accepts only target-specific death during deadline settl
     /targetResponseCount > lastTargetResponseCount[\s\S]{0,500}progressDeadline = Math\.min\([\s\S]{0,120}COMBAT_PROGRESS_WINDOW_MS/,
   );
   assert.match(killBody, /fight reached the 5m hard deadline/);
+});
+
+test("late harvest progression settles after corpse removal without another input", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const harvestBody = runner.slice(
+    runner.indexOf("async function harvestCorpse("),
+    runner.indexOf("function wsPacketNamesSince"),
+  );
+  assert.match(
+    harvestBody,
+    /!entityIsCorpse\(liveCorpse\)[\s\S]{0,1300}progressedAfterRemoval = await waitUntil\([\s\S]{0,180}progressionExpression,[\s\S]{0,100}4_000[\s\S]{0,350}completed: true, progressed: true/,
+  );
+  assert.match(
+    harvestBody,
+    /unacknowledgedPasses >= 3[\s\S]{0,500}const progressed = await waitUntil\([\s\S]{0,180}progressionExpression,[\s\S]{0,100}4_000[\s\S]{0,400}return \{ completed: progressed, progressed \}/,
+  );
+  const finalSettle = harvestBody.slice(
+    harvestBody.indexOf("if (unacknowledgedPasses >= 3)"),
+    harvestBody.indexOf("await delay(accepted ? 2_100 : 120)"),
+  );
+  assert.doesNotMatch(
+    finalSettle,
+    /pressKey|clickEntity/,
+    "the late-progress settle window must remain observation-only",
+  );
 });
 
 test("active threats preempt corpse harvesting and stationary field recovery", async () => {
