@@ -45,6 +45,7 @@ import {
   selectBestAvailableEquipmentUpgrade,
   selectProgressingCollisionDetour,
   shouldCaptureGoalFrame,
+  shouldEnforceShelterEscapeResourceBudget,
   shouldFundHealthPotions,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
@@ -6676,6 +6677,21 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       monsterName: "safe-shelter escape",
       travelLabel: `visible ${currentMapFileName}->${SAFE_RECOVERY_MAP_FILE_NAME} shelter escape`,
     };
+    const enforceShelterEscapeResourceBudget =
+      shouldEnforceShelterEscapeResourceBudget(state);
+    if (!enforceShelterEscapeResourceBudget) {
+      // The ordinary travel guard uses an absolute critical-health/depletion
+      // threshold. Reapplying it to an escape that already starts beyond that
+      // threshold rejects the first unchanged frame and makes physical retreat
+      // impossible. Keep moving toward the visible transfer; navigateNear
+      // still aborts on an authoritative death and the catch below returns to
+      // the normal TownRevive recovery lifecycle.
+      console.log(
+        `  depleted shelter escape continues to arrival/death recovery: ` +
+        `HP=${Number(state.playerHp ?? 0)}/${maxHp} ` +
+        `potions=${healthPotionQuantity(state)}`,
+      );
+    }
     try {
       state = await travelToMap(SAFE_RECOVERY_MAP_FILE_NAME, {
         // The long trip can cross a newly aggroed patrol. Emergency potion
@@ -6686,10 +6702,12 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
         // from a one-cell building pocket (live r25: 305,607). After repeated
         // physical route failure, permit the existing certified-occupancy
         // path to clear exactly one adjacent low-level blocker. This remains
-        // ordinary selected-target combat and the travel-wide strain guard
-        // aborts at the same critical-HP boundary as every other route.
+        // ordinary selected-target combat. The travel-wide strain guard still
+        // applies while an emergency reserve remains; an already depleted
+        // escape instead continues to visible arrival or normal death recovery.
         resourceBaseline: state,
         resourceAccountingGoal: shelterEscapeGoal,
+        enforceCombatResourceBudget: enforceShelterEscapeResourceBudget,
         clearTrivialOccupancy: true,
       });
     } catch (error) {

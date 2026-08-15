@@ -55,6 +55,7 @@ import {
   selectBestAvailableEquipmentUpgrade,
   selectProgressingCollisionDetour,
   shouldCaptureGoalFrame,
+  shouldEnforceShelterEscapeResourceBudget,
   shouldFundHealthPotions,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
@@ -526,6 +527,30 @@ test("a grind source cools down only after repeated failed goals without authori
     }).cooldownUntil,
     null,
   );
+});
+
+test("a critically depleted shelter escape keeps moving until arrival or normal death recovery", () => {
+  const base = {
+    playerHp: 90,
+    playerMaxHp: 135,
+    beltItems: [{ name: "(HP)DrugSmall", quantity: 5 }],
+    inventoryItems: [],
+  };
+  assert.equal(shouldEnforceShelterEscapeResourceBudget(base), true);
+  assert.equal(shouldEnforceShelterEscapeResourceBudget({
+    ...base,
+    playerHp: 9,
+    beltItems: [],
+  }), false);
+  assert.equal(shouldEnforceShelterEscapeResourceBudget({
+    ...base,
+    playerHp: 90,
+    beltItems: [],
+  }), false);
+  assert.equal(shouldEnforceShelterEscapeResourceBudget({
+    ...base,
+    playerHp: 26,
+  }), false);
 });
 
 test("a later confirmed kill resolves only older combat resource strain", () => {
@@ -1977,7 +2002,11 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
   );
   assert.match(
     recoveryBody,
-    /const shelterEscapeGoal = \{[\s\S]{0,260}kind: "travel"[\s\S]{0,500}travelToMap\(SAFE_RECOVERY_MAP_FILE_NAME,[\s\S]{0,400}autoUsePotions: true[\s\S]{0,700}resourceBaseline: state,[\s\S]{0,180}resourceAccountingGoal: shelterEscapeGoal,[\s\S]{0,180}clearTrivialOccupancy: true/,
+    /const shelterEscapeGoal = \{[\s\S]{0,260}kind: "travel"[\s\S]{0,500}shouldEnforceShelterEscapeResourceBudget\(state\)/,
+  );
+  assert.match(
+    recoveryBody,
+    /travelToMap\(SAFE_RECOVERY_MAP_FILE_NAME,[\s\S]{0,500}autoUsePotions: true[\s\S]{0,900}resourceBaseline: state,[\s\S]{0,180}resourceAccountingGoal: shelterEscapeGoal,[\s\S]{0,180}enforceCombatResourceBudget: enforceShelterEscapeResourceBudget,[\s\S]{0,180}clearTrivialOccupancy: true/,
   );
   assert.match(
     recoveryBody,
