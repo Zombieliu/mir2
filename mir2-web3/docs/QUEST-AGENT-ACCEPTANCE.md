@@ -117,15 +117,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 68 finalized development reports
-through `warrior-q30-r69-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 69 finalized development reports
+through `warrior-q30-r70-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 59,498,989 ms (16 h 31 m 39 s) browser-active runtime;
-- 31,273 recorded physical inputs;
-- 315 historical kill rows, including one r44 row now proven to repeat the
+- 61,299,699 ms (17 h 1 m 40 s) browser-active runtime;
+- 32,248 recorded physical inputs;
+- 318 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 12 deaths and 11 completed revives across intentionally interrupted and
+- 13 deaths and 12 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -327,6 +327,28 @@ therefore r69 proves the formerly stuck saved state is resumable and progressing
 but does not relabel the exact repair-clear branch as live-covered. That branch
 remains red/green unit-covered. At the finalized r69 boundary the character is
 level 14 with EXP 28,661/30,000; q25 remains 6/20 and q30 remains 0/1.
+
+r70 resumed that exact save and supplied live coverage for the shared
+non-funding travel-policy separation without misrepresenting it as the
+equipment-repair branch. Pending field combat consumed all ten HP drugs; the
+depleted shelter journey then physically cleared one RakingCat and one
+Scarecrow under the preserved non-funding accounting goal, recorded one
+authoritative death/revive, entered map 0141, and recovered. The ordinary
+client path returned to map 0, killed and visibly harvested a Deer, acquired a
+second Venison, completed two visible sales, and bought HP drugs `0 -> 5 -> 10`
+across a threat-driven safe-room settlement. It then resumed the real
+SpittingSpider journey.
+
+The finalized r70 report records 1,800,710 ms, 975 physical inputs, three kill
+rows, one death/revive, ten potion uses, two visible purchases, zero shortcut
+violations, zero target quarantines, and zero critical browser/network
+diagnostics. Its budget expired during the long field walk at map 0
+`(284,393)`, not during recovery: final state is 130/135 HP, ten HP drugs, 172
+gold, and EXP `28,865/30,000`. The two sanitized start/final frames were
+visually inspected and agree with the structured state. This closes a complete
+live recovery/restock cycle and preserves a resumable position; it remains a
+0/1 grind-goal segment and does not certify level 15, q25, or q30. Those quest
+states remain 6/20 and 0/1 respectively.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
