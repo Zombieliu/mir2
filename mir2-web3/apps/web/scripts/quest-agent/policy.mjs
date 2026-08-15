@@ -44,6 +44,74 @@ export function entityIsLiveActor(entity) {
 }
 
 /**
+ * Keep a target-specific death authoritative while the renderer still exposes
+ * the old object. Crystal may leave a corpse mounted with a lagging `dead`
+ * flag and no usable HP value; treating that object as a new monster can split
+ * one delayed EXP award across two apparent kills.
+ *
+ * An object id becomes eligible again only after it has disappeared from a
+ * complete AOI snapshot and later reappears with definite positive HP. The
+ * bounded hold is a defensive escape hatch for an object that never produces
+ * either lifecycle observation.
+ */
+export function reconcileConfirmedDeadMonsterObjects(
+  confirmedDeadObjects,
+  entities,
+  now = Date.now(),
+  maxHoldMs = 10 * 60_000,
+) {
+  const observedAt = finiteNumber(now, Date.now());
+  const holdMs = Math.max(1, finiteNumber(maxHoldMs, 10 * 60_000));
+  const currentEntities = Array.isArray(entities) ? entities : null;
+  const entityByObjectId = new Map(
+    (currentEntities ?? [])
+      .filter((entity) => entity?.objectId != null)
+      .map((entity) => [String(entity.objectId), entity]),
+  );
+  const reconciled = new Map();
+
+  for (const [rawObjectId, rawRecord] of confirmedDeadObjects instanceof Map
+    ? confirmedDeadObjects
+    : []) {
+    const objectId = String(rawObjectId);
+    const confirmedAt = finiteNumber(
+      rawRecord && typeof rawRecord === "object"
+        ? rawRecord.confirmedAt
+        : rawRecord,
+      Number.NaN,
+    );
+    if (!Number.isFinite(confirmedAt) || observedAt - confirmedAt >= holdMs) {
+      continue;
+    }
+
+    const absenceObserved = Boolean(
+      rawRecord && typeof rawRecord === "object"
+        ? rawRecord.absenceObserved
+        : false,
+    );
+    const entity = entityByObjectId.get(objectId) ?? null;
+    if (currentEntities && !entity) {
+      reconciled.set(objectId, { confirmedAt, absenceObserved: true });
+      continue;
+    }
+
+    const hp = entity?.hp == null || entity?.hp === ""
+      ? Number.NaN
+      : Number(entity.hp);
+    const definitePositiveHpRespawn = Boolean(
+      entity &&
+      entity.dead !== true &&
+      Number.isFinite(hp) &&
+      hp > 0,
+    );
+    if (absenceObserved && definitePositiveHpRespawn) continue;
+    reconciled.set(objectId, { confirmedAt, absenceObserved });
+  }
+
+  return reconciled;
+}
+
+/**
  * Resolve the same F1-F8 skill-bar choice as the visible client, but admit
  * only an immediately targetable offensive spell. Ground skills need a
  * second physical tile click and self/toggle/passive skills are not attacks,
