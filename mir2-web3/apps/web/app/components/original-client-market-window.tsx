@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
-import { originalAssetPath } from "../../lib/asset-url";
 import { CITY_CURRENCY_LABELS } from "../../lib/stage5-window-adapters";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -515,7 +515,7 @@ function priceOf(listing: MarketListing): number {
 }
 
 function iconPath(icon: number) {
-  return originalAssetPath(`/original-ui/Items/${icon}.png`);
+  return originalItemIconPath(icon);
 }
 
 function formatNumber(value: number) {

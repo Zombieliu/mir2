@@ -5727,7 +5727,7 @@ pub(super) fn start_game_static_visible_object_packets(
     map_file_name: &str,
     player_position: &Point,
     character: &CharacterRecord,
-    spawn_source: MonsterSpawnSource,
+    config: &SimulationConfig,
 ) -> Vec<ServerPacket> {
     let normalized_map = normalize_map_file_name(map_file_name);
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
@@ -5776,11 +5776,12 @@ pub(super) fn start_game_static_visible_object_packets(
     }
 
     if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
-        for respawn in &map.respawns {
+        for respawn in &config.crystal_respawns_for_map(map_file_name) {
             // In the fully-activated world the whole map is alive, so the
             // on-screen subset is the canonical full placement filtered to the
             // data range — same positions/object-ids the ECS world spawned.
-            let visible_spawns = if spawn_source == MonsterSpawnSource::CrystalWorld {
+            let visible_spawns = if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld
+            {
                 crystal_world_respawn_spawns(map_file_name, respawn)
                     .into_iter()
                     .filter(|(_, location, _)| point_in_data_range(location, player_position))
@@ -6179,6 +6180,19 @@ pub(super) fn collect_world_entities(
     }
 
     result
+}
+
+pub(super) fn collect_current_map_shared_entity_snapshots(
+    world: &World,
+) -> Vec<WorldEntitySnapshot> {
+    let inventory = world.resource::<InventoryResource>();
+    let language = world.resource::<SessionResource>().language;
+    let mut entities = collect_world_entities(world, None, language, &inventory.equipment_items)
+        .into_iter()
+        .filter(|entity| matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Npc))
+        .collect::<Vec<_>>();
+    entities.sort_by_key(|entity| entity.object_id);
+    entities
 }
 
 fn crystal_self_player_light(world: &World, equipment: &[EquipmentState]) -> u8 {

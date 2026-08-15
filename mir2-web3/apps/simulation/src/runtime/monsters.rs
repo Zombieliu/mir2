@@ -3,15 +3,18 @@ use std::collections::BTreeSet;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_monster_by_name, crystal_starter_region_respawns,
-    starter_server_data, CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
+    crystal_monster_by_name, crystal_starter_region_respawns, starter_server_data,
+    CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
 };
 use mir2_protocol::{
     MirDirection, MonsterInfo, ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo,
     ObjectSpellInfo, Point, ServerPacket, Spell,
 };
 
-use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
+use crate::config::{
+    MonsterSpawnSource, SimulationConfig, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot,
+};
 
 use super::combat::{
     combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
@@ -115,9 +118,8 @@ pub(super) fn build_crystal_current_map_spawn_table(
     }
 
     let mut next_object_id = 60_000_u32;
-    let rules = crystal_map_respawns_by_file_name(map_file_name)
-        .map(|map| map.respawns)
-        .unwrap_or_default()
+    let rules = config
+        .crystal_respawns_for_map(map_file_name)
         .into_iter()
         .filter(|respawn| config.monster_is_allowed(&respawn.monster_name))
         .take(96)
@@ -186,49 +188,47 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
         return MonsterSpawnTable { rules };
     }
 
-    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
-        for respawn in map.respawns {
-            if !config.monster_is_allowed(&respawn.monster_name) {
-                continue;
-            }
-            let visible_spawns =
-                start_game_visible_respawn_spawns(map_file_name, &respawn, player_position);
-            if visible_spawns.is_empty() {
-                continue;
-            }
+    for respawn in config.crystal_respawns_for_map(map_file_name) {
+        if !config.monster_is_allowed(&respawn.monster_name) {
+            continue;
+        }
+        let visible_spawns =
+            start_game_visible_respawn_spawns(map_file_name, &respawn, player_position);
+        if visible_spawns.is_empty() {
+            continue;
+        }
 
-            for (slot_index, spawn_position, direction) in visible_spawns {
-                let route = normalized_route_steps_for_map(config, map_file_name, &respawn.route);
-                let object_id = crystal_respawn_object_id(&respawn, slot_index);
-                rules.push(MonsterSpawnRule {
-                    name: respawn.monster_name.clone(),
-                    image: respawn.monster_image,
-                    direction,
-                    respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
-                        delay_minutes: respawn.delay_minutes,
-                        random_delay_minutes: config.monster_respawn_random_delay_minutes(
-                            &respawn.monster_name,
-                            respawn.random_delay_minutes,
-                        ),
-                    },
-                    ai: respawn.monster_ai,
-                    disposition: monster_disposition_for_ai(respawn.monster_ai),
-                    hostile_to_player: monster_targets_players(respawn.monster_ai),
-                    view_range: i32::from(respawn.monster_view_range),
-                    can_wander: crystal_respawn_can_wander(respawn.monster_hp),
-                    move_interval_ticks: crystal_speed_to_ticks(respawn.monster_move_speed),
-                    attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
-                    max_hp: respawn.monster_hp.max(1),
-                    agility: respawn.monster_agility,
-                    route,
-                    slots: vec![MonsterSpawnSlot {
-                        entity: None,
-                        object_id,
-                        spawn_position,
-                        next_respawn_tick: None,
-                    }],
-                });
-            }
+        for (slot_index, spawn_position, direction) in visible_spawns {
+            let route = normalized_route_steps_for_map(config, map_file_name, &respawn.route);
+            let object_id = crystal_respawn_object_id(&respawn, slot_index);
+            rules.push(MonsterSpawnRule {
+                name: respawn.monster_name.clone(),
+                image: respawn.monster_image,
+                direction,
+                respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
+                    delay_minutes: respawn.delay_minutes,
+                    random_delay_minutes: config.monster_respawn_random_delay_minutes(
+                        &respawn.monster_name,
+                        respawn.random_delay_minutes,
+                    ),
+                },
+                ai: respawn.monster_ai,
+                disposition: monster_disposition_for_ai(respawn.monster_ai),
+                hostile_to_player: monster_targets_players(respawn.monster_ai),
+                view_range: i32::from(respawn.monster_view_range),
+                can_wander: crystal_respawn_can_wander(respawn.monster_hp),
+                move_interval_ticks: crystal_speed_to_ticks(respawn.monster_move_speed),
+                attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
+                max_hp: respawn.monster_hp.max(1),
+                agility: respawn.monster_agility,
+                route,
+                slots: vec![MonsterSpawnSlot {
+                    entity: None,
+                    object_id,
+                    spawn_position,
+                    next_respawn_tick: None,
+                }],
+            });
         }
     }
 
@@ -313,47 +313,45 @@ pub(super) fn build_crystal_current_map_full_spawn_table(
         return MonsterSpawnTable { rules };
     }
 
-    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
-        for respawn in map.respawns {
-            if !config.monster_is_allowed(&respawn.monster_name) {
-                continue;
-            }
-            let spawns = crystal_world_respawn_spawns(map_file_name, &respawn);
-            if spawns.is_empty() {
-                continue;
-            }
-            let route = normalized_route_steps_for_map(config, map_file_name, &respawn.route);
-            for (slot_index, spawn_position, direction) in spawns {
-                let object_id = crystal_respawn_object_id(&respawn, slot_index);
-                rules.push(MonsterSpawnRule {
-                    name: respawn.monster_name.clone(),
-                    image: respawn.monster_image,
-                    direction,
-                    respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
-                        delay_minutes: respawn.delay_minutes,
-                        random_delay_minutes: config.monster_respawn_random_delay_minutes(
-                            &respawn.monster_name,
-                            respawn.random_delay_minutes,
-                        ),
-                    },
-                    ai: respawn.monster_ai,
-                    disposition: monster_disposition_for_ai(respawn.monster_ai),
-                    hostile_to_player: monster_targets_players(respawn.monster_ai),
-                    view_range: i32::from(respawn.monster_view_range),
-                    can_wander: crystal_respawn_can_wander(respawn.monster_hp),
-                    move_interval_ticks: crystal_speed_to_ticks(respawn.monster_move_speed),
-                    attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
-                    max_hp: respawn.monster_hp.max(1),
-                    agility: respawn.monster_agility,
-                    route: route.clone(),
-                    slots: vec![MonsterSpawnSlot {
-                        entity: None,
-                        object_id,
-                        spawn_position,
-                        next_respawn_tick: None,
-                    }],
-                });
-            }
+    for respawn in config.crystal_respawns_for_map(map_file_name) {
+        if !config.monster_is_allowed(&respawn.monster_name) {
+            continue;
+        }
+        let spawns = crystal_world_respawn_spawns(map_file_name, &respawn);
+        if spawns.is_empty() {
+            continue;
+        }
+        let route = normalized_route_steps_for_map(config, map_file_name, &respawn.route);
+        for (slot_index, spawn_position, direction) in spawns {
+            let object_id = crystal_respawn_object_id(&respawn, slot_index);
+            rules.push(MonsterSpawnRule {
+                name: respawn.monster_name.clone(),
+                image: respawn.monster_image,
+                direction,
+                respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
+                    delay_minutes: respawn.delay_minutes,
+                    random_delay_minutes: config.monster_respawn_random_delay_minutes(
+                        &respawn.monster_name,
+                        respawn.random_delay_minutes,
+                    ),
+                },
+                ai: respawn.monster_ai,
+                disposition: monster_disposition_for_ai(respawn.monster_ai),
+                hostile_to_player: monster_targets_players(respawn.monster_ai),
+                view_range: i32::from(respawn.monster_view_range),
+                can_wander: crystal_respawn_can_wander(respawn.monster_hp),
+                move_interval_ticks: crystal_speed_to_ticks(respawn.monster_move_speed),
+                attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
+                max_hp: respawn.monster_hp.max(1),
+                agility: respawn.monster_agility,
+                route: route.clone(),
+                slots: vec![MonsterSpawnSlot {
+                    entity: None,
+                    object_id,
+                    spawn_position,
+                    next_respawn_tick: None,
+                }],
+            });
         }
     }
     append_platinum_176_sabuk_battlefield_rules(config, map_file_name, &mut rules);
@@ -892,7 +890,11 @@ pub(super) fn initial_monster_ai_state_for_object(
 pub(super) fn initial_harvest_monster_state(ai: u8) -> Option<HarvestMonsterState> {
     let remaining_skin_count = match ai {
         2 => DEER_SKIN_COUNT,
-        1 | 7 | 9 | 28 | 35 => HARVEST_MONSTER_SKIN_COUNT,
+        // Crystal MonsterObject.GetMonster maps these AIs to HarvestMonster
+        // itself or a transitive subclass. SpittingSpider (4) and
+        // CannibalPlant (5) are important quest-item sources: their Drop()
+        // method is empty and their loot only resolves from corpse harvesting.
+        1 | 4 | 5 | 7 | 9 | 28 | 35 | 153 => HARVEST_MONSTER_SKIN_COUNT,
         _ => return None,
     };
     Some(HarvestMonsterState {
@@ -1141,6 +1143,33 @@ pub(super) fn spawn_runtime_monster(
     disposition_override: Option<WorldEntityDisposition>,
     activation_delay_ticks: u64,
 ) -> Option<Entity> {
+    spawn_runtime_monster_with_position_policy(
+        world,
+        template,
+        position,
+        direction,
+        target_entity,
+        summoned,
+        hostile_to_player_override,
+        disposition_override,
+        activation_delay_ticks,
+        false,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_runtime_monster_with_position_policy(
+    world: &mut World,
+    template: &CrystalRespawnTemplate,
+    position: Point,
+    direction: MirDirection,
+    target_entity: Option<Entity>,
+    summoned: Option<SummonedMonster>,
+    hostile_to_player_override: Option<bool>,
+    disposition_override: Option<WorldEntityDisposition>,
+    activation_delay_ticks: u64,
+    trusted_shared_position: bool,
+) -> Option<Entity> {
     let (config, current_map_file_name) = {
         let map = world.resource::<MapRuntimeResource>();
         (
@@ -1148,9 +1177,9 @@ pub(super) fn spawn_runtime_monster(
             map.current_map.file_name.clone(),
         )
     };
-    let valid_spawn_point =
-        is_static_spawnable_point_on_map(&config, &current_map_file_name, &position)
-            || (summoned.is_some() && runtime_position_exists(world, &position));
+    let valid_spawn_point = trusted_shared_position
+        || is_static_spawnable_point_on_map(&config, &current_map_file_name, &position)
+        || (summoned.is_some() && runtime_position_exists(world, &position));
     if !valid_spawn_point {
         return None;
     }
@@ -1221,6 +1250,166 @@ pub(super) fn spawn_runtime_monster(
         entity.insert(initial_yimoogi_state(tick + activation_delay_ticks));
     }
     Some(entity.id())
+}
+
+/// Materialize the compatibility mirror needed when a shared-Zone monster is
+/// visible to the client but is absent from this personal SimulationSession.
+/// The shared Zone remains authoritative for combat and position; this mirror
+/// only lets personal systems such as corpse harvesting, quest bags, and
+/// inventory transfers execute against the same public object id.
+pub(super) fn spawn_shared_monster_snapshot(
+    world: &mut World,
+    snapshot: &WorldEntitySnapshot,
+) -> Option<Entity> {
+    if snapshot.kind != WorldEntityKind::Monster {
+        return None;
+    }
+
+    let mut template = crystal_dynamic_monster_template(&snapshot.name)?;
+    if let Some(ai) = snapshot.ai {
+        template.monster_ai = ai;
+    }
+    if let Some(max_hp) = snapshot.max_hp.or(snapshot.hp).filter(|hp| *hp > 0) {
+        template.monster_hp = max_hp;
+    }
+    if let Some(image) = snapshot.sprite.as_ref().and_then(|sprite| {
+        sprite
+            .body_library
+            .strip_prefix("Monster/")
+            .and_then(|value| value.parse::<u16>().ok())
+    }) {
+        template.monster_image = image;
+    }
+
+    let hostile_to_player = snapshot.disposition == WorldEntityDisposition::Hostile;
+    let requested_position = Point {
+        x: snapshot.x,
+        y: snapshot.y,
+    };
+    // The personal map window may not currently contain the shared entity's
+    // tile. Spawn on any known in-window tile, then immediately apply the
+    // authoritative shared position; shared snapshots, not personal collision
+    // preload coverage, define the compatibility mirror's placement.
+    let bootstrap_position = if runtime_position_exists(world, &requested_position) {
+        requested_position.clone()
+    } else {
+        let bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
+        Point {
+            x: bounds.min_x,
+            y: bounds.min_y,
+        }
+    };
+    let entity = spawn_runtime_monster_with_position_policy(
+        world,
+        &template,
+        bootstrap_position,
+        snapshot.direction,
+        None,
+        None,
+        Some(hostile_to_player),
+        Some(snapshot.disposition),
+        0,
+        true,
+    )?;
+    world
+        .entity_mut(entity)
+        .insert((ObjectId(snapshot.object_id), Position(requested_position)));
+    reset_shared_monster_harvest_state(world, entity);
+    Some(entity)
+}
+
+pub(super) fn reset_shared_monster_harvest_state(world: &mut World, entity: Entity) {
+    let ai = world
+        .entity(entity)
+        .get::<MonsterAgent>()
+        .map(|agent| agent.ai)
+        .unwrap_or_default();
+    let mut entry = world.entity_mut(entity);
+    entry.remove::<PendingHarvestDrops>();
+    entry.remove::<HarvestOwnership>();
+    if let Some(state) = initial_harvest_monster_state(ai) {
+        entry.insert(state);
+    } else {
+        entry.remove::<HarvestMonsterState>();
+    }
+}
+
+/// Mirror a shared-Zone death into the personal compatibility ECS without
+/// replaying damage, drops, quest credit, or experience. The Zone is the combat
+/// authority, while the personal spawn table remains the source of Crystal's
+/// respawn schedule. Leaving this mirror alive makes the next ordinary Session
+/// snapshot immediately respawn the Zone corpse and can remove it before a
+/// player has time to harvest it.
+pub(super) fn apply_shared_monster_death_state(
+    world: &mut World,
+    entity: Entity,
+    position: Option<&Point>,
+    direction: Option<MirDirection>,
+) -> bool {
+    let (was_alive, spawn_ref) = {
+        let entry = world.entity(entity);
+        let Some(agent) = entry.get::<MonsterAgent>() else {
+            return false;
+        };
+        let hp = entry
+            .get::<MonsterVitals>()
+            .map(|vitals| vitals.hp)
+            .unwrap_or(0);
+        (!agent.dead && hp > 0, entry.get::<SpawnSlotRef>().copied())
+    };
+
+    {
+        let mut entry = world.entity_mut(entity);
+        if let Some(mut agent) = entry.get_mut::<MonsterAgent>() {
+            agent.dead = true;
+            agent.tracking_player = false;
+        }
+        if let Some(mut vitals) = entry.get_mut::<MonsterVitals>() {
+            vitals.hp = 0;
+        }
+        if let Some(position) = position {
+            entry.insert(Position(position.clone()));
+        }
+        if let Some(direction) = direction {
+            entry.insert(Facing(direction));
+        }
+    }
+
+    if was_alive {
+        if let Some(spawn_ref) = spawn_ref {
+            let current_tick = runtime_tick(world);
+            schedule_monster_respawn(world, spawn_ref, current_tick);
+        }
+    }
+    was_alive
+}
+
+/// Apply the explicit Zone incarnation boundary to the private compatibility
+/// entity. ObjectMonster alone remains a lossy appearance packet and must not
+/// revive a corpse; only ObjectRevived reaches this path.
+pub(super) fn apply_shared_monster_revive_state(world: &mut World, entity: Entity) {
+    let spawn_ref = world.entity(entity).get::<SpawnSlotRef>().copied();
+    {
+        let mut entry = world.entity_mut(entity);
+        if let Some(mut agent) = entry.get_mut::<MonsterAgent>() {
+            agent.dead = false;
+            agent.tracking_player = false;
+        }
+        if let Some(mut vitals) = entry.get_mut::<MonsterVitals>() {
+            vitals.hp = vitals.max_hp.max(1);
+        }
+    }
+    if let Some(spawn_ref) = spawn_ref {
+        let mut spawn_table = world.resource_mut::<MonsterSpawnTable>();
+        if let Some(slot) = spawn_table
+            .rules
+            .get_mut(spawn_ref.rule_index)
+            .and_then(|rule| rule.slots.get_mut(spawn_ref.slot_index))
+        {
+            slot.next_respawn_tick = None;
+        }
+    }
+    reset_shared_monster_harvest_state(world, entity);
 }
 
 pub(super) fn resolve_pending_monster_spawns(world: &mut World, current_tick: u64) {

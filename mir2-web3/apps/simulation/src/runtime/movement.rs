@@ -11,7 +11,7 @@ use super::components::{
 };
 use super::map::{
     apply_current_player_position_map_transfer, is_current_map_transfer_source,
-    relocate_player_to_map,
+    normalize_map_file_name, relocate_player_to_map,
 };
 use super::monster_ai::advance_world;
 use super::npc::dismiss_dialog;
@@ -219,10 +219,11 @@ pub(super) fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
 /// the player to `BindMapIndex`/`BindLocation`, restores HP/MP, then enqueues
 /// `S.Revived` to self and broadcasts `S.ObjectRevived { Effect = true }`.
 ///
-/// The single-session world binds to the configured spawn (its town/safe zone),
-/// so we restore vitals, teleport to spawn (Crystal's `MapChanged` becomes a
-/// same-map `UserLocation` here), and emit the same revive packets the client
-/// animates. No-op when the player is not dead (mirrors `if (!Dead) return;`).
+/// The single-session world binds to the configured map + spawn (its town/safe
+/// zone), so a field death must change both authorities. A same-map revive only
+/// needs `UserLocation`; a cross-map revive goes through the ordinary map
+/// relocation path and emits `MapInformation` before the revive packets. No-op
+/// when the player is not dead (mirrors `if (!Dead) return;`).
 pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
     if !current_player_is_dead(world) {
         return Vec::new();
@@ -243,31 +244,39 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
         *vitals
     };
 
-    // Teleport to the bind/town location (the configured spawn point).
-    let spawn = world
-        .resource::<RuntimeConfigResource>()
-        .config
-        .spawn
-        .clone();
-    world
-        .entity_mut(player)
-        .insert((Position(spawn.clone()), Facing(MirDirection::Down)));
-    {
-        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
-        runtime.player_vitals = revived_vitals;
-        runtime.player_position = spawn;
-        runtime.player_direction = MirDirection::Down;
-    }
+    let (bind_map, bind_position, current_map_file_name) = {
+        let config = &world.resource::<RuntimeConfigResource>().config;
+        let current_map = &world.resource::<MapRuntimeResource>().current_map;
+        (
+            config.map.clone(),
+            config.spawn.clone(),
+            current_map.file_name.clone(),
+        )
+    };
+    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
+
+    let changes_map = normalize_map_file_name(&current_map_file_name)
+        != normalize_map_file_name(&bind_map.file_name);
+    let mut packets = if changes_map {
+        relocate_player_to_map(world, bind_map, bind_position, MirDirection::Down, None)
+    } else {
+        world
+            .entity_mut(player)
+            .insert((Position(bind_position.clone()), Facing(MirDirection::Down)));
+        {
+            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+            runtime.player_position = bind_position;
+            runtime.player_direction = MirDirection::Down;
+        }
+        vec![ServerPacket::UserLocation {
+            location: current_location(world),
+        }]
+    };
 
     // Snap the player to the bind location, clear the dead flag (S.Revived), and
     // play the revive effect (broadcast S.ObjectRevived). ObjectHealth refreshes
     // the restored HP/MP bar.
-    let mut packets = vec![
-        ServerPacket::UserLocation {
-            location: current_location(world),
-        },
-        ServerPacket::Revived,
-    ];
+    packets.push(ServerPacket::Revived);
     if let Some(info) = object_revived_info_for_entity(world, player, true) {
         packets.push(ServerPacket::ObjectRevived { info });
     }

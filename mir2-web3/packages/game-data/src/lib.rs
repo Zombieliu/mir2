@@ -18,7 +18,13 @@ pub struct ContentProfile {
     pub boss_monsters: Vec<String>,
     pub boss_respawn_jitter_minutes: u16,
     #[serde(default)]
+    pub respawn_overrides: Vec<ContentMonsterRespawnRule>,
+    #[serde(default)]
     pub drop_overrides: Vec<ContentMonsterDropRule>,
+    #[serde(default)]
+    pub quest_prerequisite_overrides: Vec<ContentQuestPrerequisiteRule>,
+    #[serde(default)]
+    pub quest_reward_overrides: Vec<ContentQuestRewardRule>,
     pub item_whitelist: Vec<String>,
     pub skills: Vec<ContentSkillRule>,
     pub npc_script_whitelist: Vec<String>,
@@ -71,11 +77,47 @@ pub struct ContentSkillRule {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct ContentMonsterRespawnRule {
+    pub monster: String,
+    pub map_file_name: String,
+    pub position: Point,
+    pub count: u16,
+    pub spread: u16,
+    pub delay_minutes: u16,
+    pub source_quest_id: i32,
+    pub source_note: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ContentMonsterDropRule {
     pub monster: String,
+    #[serde(default)]
+    pub map_file_name: Option<String>,
     pub item: String,
     pub chance_numerator: u32,
     pub chance_denominator: u32,
+    #[serde(default)]
+    pub quest_required: bool,
+    #[serde(default)]
+    pub source_note: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentQuestPrerequisiteRule {
+    pub quest_id: i32,
+    pub required_quest_id: i32,
+    pub source_note: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentQuestRewardRule {
+    pub quest_id: i32,
+    pub item: String,
+    pub count: u16,
+    pub source_note: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -117,7 +159,10 @@ pub struct ContentProfileBundleSummary {
     pub items: usize,
     pub skills: usize,
     pub npc_scripts: usize,
+    pub respawn_overrides: usize,
     pub drop_overrides: usize,
+    pub quest_prerequisite_overrides: usize,
+    pub quest_reward_overrides: usize,
 }
 
 pub fn platinum_176_profile() -> ContentProfile {
@@ -176,6 +221,47 @@ pub fn content_profile_monster_is_boss(profile: &ContentProfile, monster_name: &
 
 pub fn platinum_176_monster_is_boss(monster_name: &str) -> bool {
     content_profile_monster_is_boss(&platinum_176_profile(), monster_name)
+}
+
+pub fn content_profile_respawn_overrides_for_map(
+    profile: &ContentProfile,
+    map_file_name: &str,
+) -> Vec<CrystalRespawnTemplate> {
+    profile
+        .respawn_overrides
+        .iter()
+        .enumerate()
+        .filter(|(_, rule)| rule.map_file_name.eq_ignore_ascii_case(map_file_name))
+        .filter_map(|(rule_index, rule)| {
+            let monster = crystal_monster_by_name(&rule.monster)?;
+            Some(CrystalRespawnTemplate {
+                monster_index: monster.monster_index,
+                location: rule.position.clone(),
+                count: rule.count,
+                spread: rule.spread,
+                delay_minutes: rule.delay_minutes,
+                direction: MirDirection::Up,
+                route_path: None,
+                random_delay_minutes: 0,
+                respawn_index: 10_000 + i32::try_from(rule_index).unwrap_or(i32::MAX - 10_000),
+                save_respawn_time: false,
+                respawn_ticks: 0,
+                monster_name: monster.name,
+                monster_image: monster.image,
+                monster_ai: monster.ai,
+                monster_view_range: monster.view_range,
+                monster_hp: monster.hp,
+                monster_attack_speed: monster.attack_speed,
+                monster_move_speed: monster.move_speed,
+                monster_can_push: monster.can_push,
+                monster_can_tame: monster.can_tame,
+                monster_auto_rev: monster.auto_rev,
+                monster_undead: monster.undead,
+                monster_agility: monster.agility,
+                route: Vec::new(),
+            })
+        })
+        .collect()
 }
 
 pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<String>> {
@@ -298,12 +384,44 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         profile.boss_monsters.iter().map(String::as_str),
         &mut errors,
     );
+    let mut respawn_override_keys = BTreeSet::new();
+    for entry in &profile.respawn_overrides {
+        let key = format!("{}/{}", entry.map_file_name, entry.monster);
+        if !respawn_override_keys.insert(key.clone()) {
+            errors.push(format!(
+                "respawnOverrides.map+monster contains duplicate value {key}"
+            ));
+        }
+    }
     let mut drop_override_keys = BTreeSet::new();
     for entry in &profile.drop_overrides {
-        let key = format!("{}/{}", entry.monster, entry.item);
+        let key = format!(
+            "{}/{}/{}",
+            entry.map_file_name.as_deref().unwrap_or("*"),
+            entry.monster,
+            entry.item
+        );
         if !drop_override_keys.insert(key.clone()) {
             errors.push(format!(
                 "dropOverrides.monster+item contains duplicate value {key}"
+            ));
+        }
+    }
+    let mut quest_prerequisite_override_ids = BTreeSet::new();
+    for entry in &profile.quest_prerequisite_overrides {
+        if !quest_prerequisite_override_ids.insert(entry.quest_id) {
+            errors.push(format!(
+                "questPrerequisiteOverrides.questId contains duplicate value {}",
+                entry.quest_id
+            ));
+        }
+    }
+    let mut quest_reward_override_keys = BTreeSet::new();
+    for entry in &profile.quest_reward_overrides {
+        let key = format!("{}/{}", entry.quest_id, entry.item);
+        if !quest_reward_override_keys.insert(key.clone()) {
+            errors.push(format!(
+                "questRewardOverrides.questId+item contains duplicate value {key}"
             ));
         }
     }
@@ -357,6 +475,11 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         .into_iter()
         .map(|monster| monster.name)
         .collect();
+    let crystal_quest_ids = crystal_quest_packet_manifest()
+        .quests
+        .into_iter()
+        .map(|quest| quest.index)
+        .collect::<BTreeSet<_>>();
     for monster in &profile.monster_whitelist {
         if !crystal_monsters.contains(monster) {
             errors.push(format!(
@@ -395,6 +518,74 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
             ));
         }
     }
+    for respawn_rule in &profile.respawn_overrides {
+        if !profile
+            .monster_whitelist
+            .iter()
+            .any(|monster| monster.eq_ignore_ascii_case(&respawn_rule.monster))
+        {
+            errors.push(format!(
+                "respawnOverrides monster {} must appear in monsterWhitelist",
+                respawn_rule.monster
+            ));
+        }
+        if !crystal_monsters.contains(&respawn_rule.monster) {
+            errors.push(format!(
+                "respawnOverrides references missing Crystal monster {}",
+                respawn_rule.monster
+            ));
+        }
+        if !profile.map_whitelist.iter().any(|map| {
+            map.file_name
+                .eq_ignore_ascii_case(&respawn_rule.map_file_name)
+        }) {
+            errors.push(format!(
+                "respawnOverrides map {} must appear in mapWhitelist",
+                respawn_rule.map_file_name
+            ));
+        }
+        let has_imported_spawn = crystal_map_manifest.maps.iter().any(|map| {
+            map.map_file_name
+                .eq_ignore_ascii_case(&respawn_rule.map_file_name)
+                && map.respawns.iter().any(|respawn| {
+                    respawn
+                        .monster_name
+                        .eq_ignore_ascii_case(&respawn_rule.monster)
+                })
+        });
+        if has_imported_spawn {
+            errors.push(format!(
+                "respawnOverrides {}/{} duplicates an existing Crystal respawn",
+                respawn_rule.map_file_name, respawn_rule.monster
+            ));
+        }
+        if respawn_rule.position.x < 0 || respawn_rule.position.y < 0 {
+            errors.push(format!(
+                "respawnOverrides {}/{} has a negative position",
+                respawn_rule.map_file_name, respawn_rule.monster
+            ));
+        }
+        if respawn_rule.count == 0 || respawn_rule.delay_minutes == 0 {
+            errors.push(format!(
+                "respawnOverrides {}/{} must have positive count and delayMinutes",
+                respawn_rule.map_file_name, respawn_rule.monster
+            ));
+        }
+        if respawn_rule.source_quest_id <= 0
+            || !crystal_quest_ids.contains(&respawn_rule.source_quest_id)
+        {
+            errors.push(format!(
+                "respawnOverrides {}/{} references missing source quest {}",
+                respawn_rule.map_file_name, respawn_rule.monster, respawn_rule.source_quest_id
+            ));
+        }
+        if respawn_rule.source_note.trim().is_empty() {
+            errors.push(format!(
+                "respawnOverrides {}/{} must include a sourceNote",
+                respawn_rule.map_file_name, respawn_rule.monster
+            ));
+        }
+    }
     for drop_rule in &profile.drop_overrides {
         if !profile
             .monster_whitelist
@@ -404,6 +595,45 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
             errors.push(format!(
                 "dropOverrides monster {} must appear in monsterWhitelist",
                 drop_rule.monster
+            ));
+        }
+        if let Some(map_file_name) = drop_rule.map_file_name.as_deref() {
+            if !profile
+                .map_whitelist
+                .iter()
+                .any(|map| map.file_name.eq_ignore_ascii_case(map_file_name))
+            {
+                errors.push(format!(
+                    "dropOverrides map {map_file_name} must appear in mapWhitelist"
+                ));
+            }
+            let has_matching_spawn = crystal_map_manifest.maps.iter().any(|map| {
+                map.map_file_name.eq_ignore_ascii_case(map_file_name)
+                    && map.respawns.iter().any(|respawn| {
+                        respawn
+                            .monster_name
+                            .eq_ignore_ascii_case(&drop_rule.monster)
+                    })
+            }) || profile.respawn_overrides.iter().any(|respawn| {
+                respawn.map_file_name.eq_ignore_ascii_case(map_file_name)
+                    && respawn.monster.eq_ignore_ascii_case(&drop_rule.monster)
+            });
+            if !has_matching_spawn {
+                errors.push(format!(
+                    "dropOverrides {map_file_name}/{} has no matching Crystal or profile respawn",
+                    drop_rule.monster
+                ));
+            }
+        }
+        if drop_rule.quest_required
+            && drop_rule
+                .source_note
+                .as_deref()
+                .is_none_or(|note| note.trim().is_empty())
+        {
+            errors.push(format!(
+                "quest-required dropOverrides {}/{} must include a sourceNote",
+                drop_rule.monster, drop_rule.item
             ));
         }
         if !profile
@@ -430,10 +660,37 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         }
     }
 
-    let allowed_maps: BTreeSet<_> = profile
+    for rule in &profile.quest_prerequisite_overrides {
+        if !crystal_quest_ids.contains(&rule.quest_id) {
+            errors.push(format!(
+                "questPrerequisiteOverrides references missing Crystal quest {}",
+                rule.quest_id
+            ));
+        }
+        if rule.required_quest_id < 0 {
+            errors.push(format!(
+                "questPrerequisiteOverrides q{} has negative requiredQuestId {}",
+                rule.quest_id, rule.required_quest_id
+            ));
+        } else if rule.required_quest_id > 0 && !crystal_quest_ids.contains(&rule.required_quest_id)
+        {
+            errors.push(format!(
+                "questPrerequisiteOverrides q{} references missing prerequisite q{}",
+                rule.quest_id, rule.required_quest_id
+            ));
+        }
+        if rule.source_note.trim().is_empty() {
+            errors.push(format!(
+                "questPrerequisiteOverrides q{} must include a sourceNote",
+                rule.quest_id
+            ));
+        }
+    }
+
+    let allowed_maps: BTreeMap<_, _> = profile
         .map_whitelist
         .iter()
-        .map(|map| map.file_name.as_str())
+        .map(|map| (map.file_name.to_ascii_lowercase(), map.file_name.as_str()))
         .collect();
     let allowed_monsters: BTreeSet<_> = profile
         .monster_whitelist
@@ -465,21 +722,31 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         .iter()
         .map(|map| (map.map_index, map.map_file_name.as_str()))
         .collect();
+    let scripted_map_transfers = content_profile_visible_npc_script_map_transfers(profile);
     let mut reachable_maps = BTreeSet::from(["0"]);
     loop {
         let before = reachable_maps.len();
         for map in &crystal_map_manifest.maps {
-            if !allowed_maps.contains(map.map_file_name.as_str())
+            if !allowed_maps.contains_key(map.map_file_name.to_ascii_lowercase().as_str())
                 || !reachable_maps.contains(map.map_file_name.as_str())
             {
                 continue;
             }
             for movement in &map.movements {
                 if let Some(destination) = map_file_name_by_index.get(&movement.map_index) {
-                    if allowed_maps.contains(destination) {
-                        reachable_maps.insert(destination);
+                    if let Some(canonical_destination) =
+                        allowed_maps.get(destination.to_ascii_lowercase().as_str())
+                    {
+                        reachable_maps.insert(*canonical_destination);
                     }
                 }
+            }
+        }
+        for (source, destination) in &scripted_map_transfers {
+            if reachable_maps.contains(source.as_str())
+                && allowed_maps.contains_key(destination.to_ascii_lowercase().as_str())
+            {
+                reachable_maps.insert(destination.as_str());
             }
         }
         if reachable_maps.len() == before {
@@ -489,7 +756,7 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     for map in &profile.map_whitelist {
         if !reachable_maps.contains(map.file_name.as_str()) {
             errors.push(format!(
-                "mapWhitelist map {} is not reachable from map 0 through whitelisted movements",
+                "mapWhitelist map {} is not reachable from map 0 through whitelisted movements or visible NPC scripts",
                 map.file_name
             ));
         }
@@ -504,6 +771,42 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         if !crystal_items.contains(item) {
             errors.push(format!(
                 "itemWhitelist references missing Crystal item {item}"
+            ));
+        }
+    }
+    for rule in &profile.quest_reward_overrides {
+        if !crystal_quest_ids.contains(&rule.quest_id) {
+            errors.push(format!(
+                "questRewardOverrides references missing Crystal quest {}",
+                rule.quest_id
+            ));
+        }
+        if rule.count == 0 {
+            errors.push(format!(
+                "questRewardOverrides q{}/{} must have positive count",
+                rule.quest_id, rule.item
+            ));
+        }
+        if !crystal_items.contains(&rule.item) {
+            errors.push(format!(
+                "questRewardOverrides q{} references missing Crystal item {}",
+                rule.quest_id, rule.item
+            ));
+        }
+        if !profile
+            .item_whitelist
+            .iter()
+            .any(|item| item.eq_ignore_ascii_case(&rule.item))
+        {
+            errors.push(format!(
+                "questRewardOverrides q{}/{} item must appear in itemWhitelist",
+                rule.quest_id, rule.item
+            ));
+        }
+        if rule.source_note.trim().is_empty() {
+            errors.push(format!(
+                "questRewardOverrides q{}/{} must include a sourceNote",
+                rule.quest_id, rule.item
             ));
         }
     }
@@ -558,6 +861,142 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     } else {
         Err(errors)
     }
+}
+
+/// Return only map transfers that a normal client can reach from an enabled
+/// NPC's visible main dialog. This is content-profile validation metadata: the
+/// runtime and autonomous client still execute the actual Crystal dialog and
+/// `MOVE` action; this helper never relocates a player.
+pub fn content_profile_visible_npc_script_map_transfers(
+    profile: &ContentProfile,
+) -> Vec<(String, String)> {
+    let allowed_maps: BTreeMap<_, _> = profile
+        .map_whitelist
+        .iter()
+        .map(|map| (map.file_name.to_ascii_lowercase(), map.file_name.as_str()))
+        .collect();
+    let allowed_scripts: BTreeSet<_> = profile
+        .npc_script_whitelist
+        .iter()
+        .map(String::as_str)
+        .collect();
+    let script_manifest = crystal_npc_manifest();
+    let npc_manifest = crystal_npc_info_manifest();
+    let mut transfers = BTreeSet::new();
+
+    for npc in &npc_manifest.npcs {
+        let Some(source_map) = npc.map_file_name.as_deref() else {
+            continue;
+        };
+        let Some(canonical_source_map) = allowed_maps.get(source_map.to_ascii_lowercase().as_str())
+        else {
+            continue;
+        };
+        if !allowed_scripts.contains(npc.script_key.as_str()) {
+            continue;
+        }
+        let Some(script) = script_manifest
+            .scripts
+            .iter()
+            .find(|script| script.script_key.eq_ignore_ascii_case(&npc.script_key))
+        else {
+            continue;
+        };
+        let reachable_sections = visible_crystal_npc_script_sections(script);
+        for section in &script.sections {
+            let label = normalize_crystal_npc_script_label(&section.label);
+            if !reachable_sections.contains(&label) {
+                continue;
+            }
+            for line in &section.lines {
+                let Some(destination_map) = crystal_npc_script_move_destination(line) else {
+                    continue;
+                };
+                if let Some(canonical_destination_map) =
+                    allowed_maps.get(destination_map.to_ascii_lowercase().as_str())
+                {
+                    transfers.insert((
+                        (*canonical_source_map).to_string(),
+                        (*canonical_destination_map).to_string(),
+                    ));
+                }
+            }
+        }
+    }
+
+    transfers.into_iter().collect()
+}
+
+fn visible_crystal_npc_script_sections(script: &CrystalNpcScript) -> BTreeSet<String> {
+    let sections_by_label: BTreeMap<_, _> = script
+        .sections
+        .iter()
+        .map(|section| (normalize_crystal_npc_script_label(&section.label), section))
+        .collect();
+    let mut reachable: BTreeSet<_> = ["@main", "main"]
+        .into_iter()
+        .map(normalize_crystal_npc_script_label)
+        .filter(|label| sections_by_label.contains_key(label))
+        .collect();
+
+    loop {
+        let before = reachable.len();
+        let current: Vec<_> = reachable.iter().cloned().collect();
+        for label in current {
+            let Some(section) = sections_by_label.get(&label) else {
+                continue;
+            };
+            for target in crystal_npc_script_section_targets(section) {
+                if sections_by_label.contains_key(&target) {
+                    reachable.insert(target);
+                }
+            }
+        }
+        if reachable.len() == before {
+            break;
+        }
+    }
+    reachable
+}
+
+fn crystal_npc_script_section_targets(section: &CrystalNpcSection) -> BTreeSet<String> {
+    let mut targets = BTreeSet::new();
+    for line in &section.lines {
+        let trimmed = line.trim();
+        let parts: Vec<_> = trimmed.split_whitespace().collect();
+        if parts.len() >= 2 && parts[0].eq_ignore_ascii_case("GOTO") {
+            targets.insert(normalize_crystal_npc_script_label(parts[1]));
+        }
+
+        let mut remainder = trimmed;
+        while let Some(offset) = remainder.find("/@") {
+            let target = &remainder[offset + 1..];
+            let end = target
+                .find(|character: char| {
+                    character.is_whitespace() || character == '>' || character == '/'
+                })
+                .unwrap_or(target.len());
+            if end > 1 {
+                targets.insert(normalize_crystal_npc_script_label(&target[..end]));
+            }
+            remainder = &target[end..];
+        }
+    }
+    targets
+}
+
+fn crystal_npc_script_move_destination(line: &str) -> Option<String> {
+    let parts: Vec<_> = line.split_whitespace().collect();
+    if parts.len() != 4 || !parts[0].eq_ignore_ascii_case("MOVE") {
+        return None;
+    }
+    parts[2].parse::<i32>().ok()?;
+    parts[3].parse::<i32>().ok()?;
+    Some(parts[1].to_string())
+}
+
+fn normalize_crystal_npc_script_label(label: &str) -> String {
+    label.trim().trim_end_matches('>').to_ascii_lowercase()
 }
 
 fn validate_unique_strings<'a>(
@@ -2390,7 +2829,8 @@ fn hex_nibble(byte: u8) -> Result<u8, String> {
 #[cfg(test)]
 mod tests {
     use super::{
-        content_profile_experience_required, crystal_base_stats_info_packet_payload,
+        content_profile_experience_required, content_profile_respawn_overrides_for_map,
+        content_profile_visible_npc_script_map_transfers, crystal_base_stats_info_packet_payload,
         crystal_base_stats_packet_manifest, crystal_buff_by_type, crystal_buff_manifest,
         crystal_drop_manifest, crystal_drop_table_by_key, crystal_drop_table_for_monster_name,
         crystal_game_shop_info_packet_payloads, crystal_game_shop_packet_manifest,
@@ -2429,7 +2869,7 @@ mod tests {
         let profile = platinum_176_profile();
 
         assert_eq!(profile.profile_id, "platinum_176");
-        assert_eq!(profile.version, 6);
+        assert_eq!(profile.version, 24);
         assert_eq!(
             profile.allowed_classes,
             [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]
@@ -2462,7 +2902,10 @@ mod tests {
         );
         assert_eq!(profile.boss_monsters.len(), 7);
         assert_eq!(profile.boss_respawn_jitter_minutes, 30);
-        assert_eq!(profile.drop_overrides.len(), 21);
+        assert_eq!(profile.respawn_overrides.len(), 2);
+        assert_eq!(profile.drop_overrides.len(), 25);
+        assert_eq!(profile.quest_prerequisite_overrides.len(), 1);
+        assert_eq!(profile.quest_reward_overrides.len(), 1);
         assert_eq!(
             profile.disabled_stage5_action_prefixes,
             [
@@ -2483,6 +2926,142 @@ mod tests {
                 && rule.chance_numerator == 1
                 && rule.chance_denominator == 3
         }));
+        assert!(profile.respawn_overrides.iter().any(|rule| {
+            rule.monster == "ChainGhoul"
+                && rule.map_file_name == "D421"
+                && rule.source_quest_id == 75
+                && rule.count == 15
+                && rule.source_note.contains("no ChainGhoul respawn")
+        }));
+        assert!(profile.respawn_overrides.iter().any(|rule| {
+            rule.monster == "RotNdZombie"
+                && rule.map_file_name == "D422"
+                && rule.source_quest_id == 78
+                && rule.source_note.contains("no RotNdZombie respawn")
+        }));
+        let d421_overrides = content_profile_respawn_overrides_for_map(&profile, "D421");
+        assert_eq!(d421_overrides.len(), 1);
+        assert_eq!(d421_overrides[0].monster_name, "ChainGhoul");
+        assert_eq!(d421_overrides[0].respawn_index, 10_000);
+        let d422_overrides = content_profile_respawn_overrides_for_map(&profile, "D422");
+        assert_eq!(d422_overrides.len(), 1);
+        assert_eq!(d422_overrides[0].monster_name, "RotNdZombie");
+        assert_eq!(d422_overrides[0].respawn_index, 10_001);
+        assert!(content_profile_visible_npc_script_map_transfers(&profile)
+            .contains(&("0".to_string(), "WhiteVillage".to_string(),)));
+        assert!(profile.drop_overrides.iter().any(|rule| {
+            rule.monster == "RotNdZombie"
+                && rule.map_file_name.as_deref() == Some("D422")
+                && rule.item == "StolenGold"
+                && rule.quest_required
+        }));
+        assert!(profile.drop_overrides.iter().any(|rule| {
+            rule.monster == "BloodyLureSpider"
+                && rule.map_file_name.as_deref() == Some("12")
+                && rule.item == "WornAxe"
+                && rule.quest_required
+                && rule
+                    .source_note
+                    .as_deref()
+                    .is_some_and(|note| note.contains("q91"))
+        }));
+        assert!(profile.drop_overrides.iter().any(|rule| {
+            rule.monster == "RedEvilApe"
+                && rule.map_file_name.as_deref() == Some("D10053")
+                && rule.item == "RedMoonChip"
+                && rule.chance_numerator == 1
+                && rule.chance_denominator == 1
+                && rule.quest_required
+                && rule
+                    .source_note
+                    .as_deref()
+                    .is_some_and(|note| note.contains("q148") && note.contains("RedMoonEvil1"))
+        }));
+        assert!(profile
+            .item_whitelist
+            .iter()
+            .any(|item| item == "GoldChestnut"));
+        for monster in ["ChestnutTree", "ChestnutTree1", "ChestnutTree2"] {
+            assert!(profile
+                .monster_whitelist
+                .iter()
+                .any(|candidate| candidate == monster));
+        }
+        for script in [
+            "MongchonProvince/WierdPillar",
+            "MongchonProvince/StrangePillar",
+            "MongchonProvince/MysteriousPillar",
+        ] {
+            assert!(profile
+                .npc_script_whitelist
+                .iter()
+                .any(|candidate| candidate == script));
+        }
+        for monster in [
+            "HungryZombie",
+            "RoninGhoul",
+            "ToxicGhoul",
+            "BoneArcher",
+            "BoneSpearman",
+            "BoneBlademan",
+        ] {
+            assert!(profile
+                .monster_whitelist
+                .iter()
+                .any(|candidate| candidate == monster));
+        }
+        for map in [
+            "1006", "B354", "D2070", "D2071", "D2072", "D2073", "D2074", "D2075",
+        ] {
+            assert!(profile
+                .map_whitelist
+                .iter()
+                .any(|candidate| candidate.file_name == map));
+        }
+        for map in [
+            "D10053", "D10054", "D10061", "HELL00", "R01", "R02", "R03", "R04", "R05", "R06",
+            "R07", "R08", "R09", "R10", "R11", "R12", "RCK",
+        ] {
+            assert!(profile
+                .map_whitelist
+                .iter()
+                .any(|candidate| candidate.file_name == map));
+        }
+        for monster in [
+            "RedEvilApe",
+            "GreyEvilApe",
+            "GhastlyLeecher",
+            "CyanoGhast",
+            "MutatedManworm",
+            "CrazyManworm",
+            "DreamDevourer",
+        ] {
+            assert!(profile
+                .monster_whitelist
+                .iter()
+                .any(|candidate| candidate == monster));
+        }
+        assert!(profile.quest_prerequisite_overrides.iter().any(|rule| {
+            rule.quest_id == 58 && rule.required_quest_id == 0 && rule.source_note.contains("q57")
+        }));
+        assert!(profile.quest_reward_overrides.iter().any(|rule| {
+            rule.quest_id == 135
+                && rule.item == "StoneHeart"
+                && rule.count == 1
+                && rule.source_note.contains("MysteriousStone")
+        }));
+        assert!(profile.drop_overrides.iter().any(|rule| {
+            rule.monster == "Skeleton"
+                && rule.map_file_name.as_deref() == Some("D001")
+                && rule.item == "OliviasRing"
+                && rule.chance_numerator == 1
+                && rule.chance_denominator == 4
+                && rule.quest_required
+                && rule
+                    .source_note
+                    .as_deref()
+                    .is_some_and(|note| !note.is_empty())
+        }));
         assert!(profile.drop_overrides.iter().any(|rule| {
             rule.monster == "EvilCentipede"
                 && rule.item == "SummonShinsu"
@@ -2500,6 +3079,29 @@ mod tests {
             Some(350_000_000)
         );
         assert_eq!(validate_content_profile(&profile), Ok(()));
+    }
+
+    #[test]
+    fn platinum_176_prajna_island_requires_the_visible_round_trip_sailor_scripts() {
+        let mut profile = platinum_176_profile();
+        assert!(profile
+            .npc_script_whitelist
+            .iter()
+            .any(|script| script == "BichonProvince/Sailor"));
+        assert!(profile
+            .npc_script_whitelist
+            .iter()
+            .any(|script| script == "PrajnaIsland/Sailor"));
+
+        profile
+            .npc_script_whitelist
+            .retain(|script| script != "BichonProvince/Sailor" && script != "PrajnaIsland/Sailor");
+        let errors = validate_content_profile(&profile)
+            .expect_err("map 5 must not be reachable after removing its visible boats");
+        assert!(errors.iter().any(|error| {
+            error.contains("mapWhitelist map 5 is not reachable")
+                && error.contains("visible NPC scripts")
+        }));
     }
 
     #[test]
@@ -2528,6 +3130,14 @@ mod tests {
             profile.npc_script_whitelist.len()
         );
         assert_eq!(bundle.summary.drop_overrides, profile.drop_overrides.len());
+        assert_eq!(
+            bundle.summary.respawn_overrides,
+            profile.respawn_overrides.len()
+        );
+        assert_eq!(
+            bundle.summary.quest_reward_overrides,
+            profile.quest_reward_overrides.len()
+        );
         assert_eq!(bundle.files.len(), 13);
     }
 

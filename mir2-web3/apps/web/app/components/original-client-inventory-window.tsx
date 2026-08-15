@@ -16,7 +16,7 @@ import {
   type InventorySortKey,
 } from "./original-client-inventory-action-panels";
 import {
-  equipmentSlotForItemKey,
+  equipmentSlotForItem,
   formatBinaryDateTimeLabel,
   originalItemIconPath,
 } from "./original-client-inventory-utils";
@@ -391,7 +391,7 @@ export function InventoryWindow({
       return;
     }
 
-    const equipSlot = equipmentSlotForItemKey(item.key);
+    const equipSlot = equipmentSlotForItem(item);
     if (equipSlot) {
       onEquipItem(
         {
@@ -509,7 +509,7 @@ export function InventoryWindow({
     };
     switch (action) {
       case "equip": {
-        const equipSlot = equipmentSlotForItemKey(item.key);
+        const equipSlot = equipmentSlotForItem(item);
         if (equipSlot) {
           onEquipItem(ref, equipSlot);
         }
@@ -790,7 +790,7 @@ export function InventoryWindow({
             item={contextMenu.item}
             x={contextMenu.x}
             y={contextMenu.y}
-            canEquip={Boolean(equipmentSlotForItemKey(contextMenu.item.key))}
+            canEquip={Boolean(equipmentSlotForItem(contextMenu.item))}
             canSplit={contextMenu.item.quantity > 1}
             onAction={(action) => runContextAction(contextMenu.item, action)}
             onClose={() => setContextMenu(null)}

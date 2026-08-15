@@ -44,6 +44,7 @@ use super::map::{
 };
 use super::monsters::deterministic_roll;
 use super::movement::{crystal_random_same_map_teleport_packets, town_teleport_packets};
+use super::npc::crystal_sell_value_for_item;
 use super::npc_script::gain_credit;
 use super::packets::{
     object_health_info_for_entity, object_mana_info_for_entity, object_revived_info_for_entity,
@@ -128,6 +129,14 @@ impl ItemState {
             description: localized_item_description(language, &self.key, &self.description),
             durability_current: self.durability_current,
             durability_max: self.durability_max,
+            sell_value: {
+                let mut unit = self.clone();
+                unit.quantity = 1;
+                crystal_sell_value_for_item(&unit)
+            },
+            equip_slot: self
+                .equip_slot
+                .or_else(|| crystal_equipment_slot_for_item_key(&self.key)),
             grade: self.grade,
             added_attack: self.added_attack,
             added_defence: self.added_defence,

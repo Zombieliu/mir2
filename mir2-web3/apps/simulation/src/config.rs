@@ -14,10 +14,11 @@ use std::os::windows::ffi::OsStrExt;
 
 use mir2_game_data::{
     content_profile_experience_required, content_profile_monster_is_boss,
-    crystal_map_respawns_by_file_name, crystal_respawn_manifest, platinum_176_profile,
-    platinum_176_profile_bundle, starter_map_collision, starter_scene, validate_content_profile,
-    ContentProfile, ContentSkillRule, DecorObjectTemplate, MapBounds, SceneBootstrap, SceneView,
-    StarterMapCollision, TerrainPatchTemplate,
+    content_profile_respawn_overrides_for_map, crystal_map_respawns_by_file_name,
+    crystal_respawn_manifest, platinum_176_profile, platinum_176_profile_bundle,
+    starter_map_collision, starter_scene, validate_content_profile, ContentProfile,
+    ContentSkillRule, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds, SceneBootstrap,
+    SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
@@ -2462,6 +2463,17 @@ impl ContentProfileRuntime {
             .any(|allowed| allowed.eq_ignore_ascii_case(monster_name))
     }
 
+    pub fn crystal_respawns_for_map(&self, map_file_name: &str) -> Vec<CrystalRespawnTemplate> {
+        let mut respawns = crystal_map_respawns_by_file_name(map_file_name)
+            .map(|map| map.respawns)
+            .unwrap_or_default();
+        respawns.extend(content_profile_respawn_overrides_for_map(
+            &self.profile,
+            map_file_name,
+        ));
+        respawns
+    }
+
     pub fn monster_respawn_random_delay_minutes(
         &self,
         monster_name: &str,
@@ -2819,6 +2831,17 @@ impl SimulationConfig {
         self.content_profile
             .as_ref()
             .is_none_or(|profile| profile.monster_is_allowed(monster_name))
+    }
+
+    pub fn crystal_respawns_for_map(&self, map_file_name: &str) -> Vec<CrystalRespawnTemplate> {
+        self.content_profile.as_ref().map_or_else(
+            || {
+                crystal_map_respawns_by_file_name(map_file_name)
+                    .map(|map| map.respawns)
+                    .unwrap_or_default()
+            },
+            |profile| profile.crystal_respawns_for_map(map_file_name),
+        )
     }
 
     pub fn monster_respawn_random_delay_minutes(
@@ -3856,6 +3879,11 @@ pub struct WorldItemSnapshot {
     pub description: String,
     pub durability_current: Option<u16>,
     pub durability_max: Option<u16>,
+    /// Authoritative value awarded for selling one unit to a compatible NPC.
+    #[serde(default)]
+    pub sell_value: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equip_slot: Option<EquipmentSlot>,
     pub grade: ItemGrade,
     pub added_attack: i32,
     pub added_defence: i32,
@@ -3928,6 +3956,15 @@ pub enum GroundDropLootSnapshot {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct QuestObjectiveSnapshot {
+    pub label: String,
+    pub current: u32,
+    pub required: u32,
+    pub done: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QuestSnapshot {
     pub quest_id: i32,
     pub title: String,
@@ -3939,6 +3976,8 @@ pub struct QuestSnapshot {
     pub current: u32,
     pub required: u32,
     pub reward_preview: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub objectives: Vec<QuestObjectiveSnapshot>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

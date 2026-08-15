@@ -273,6 +273,11 @@ impl ZoneMonsterDefense {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterKillAward {
     pub monster_object_id: u32,
+    /// Authoritative time of this monster incarnation's death. Crystal reuses
+    /// a spawn's object id after respawn, so the object id alone cannot be an
+    /// idempotency key for account/quest rewards.
+    #[serde(default)]
+    pub killed_at_ms: u64,
     pub monster_name: String,
     pub experience: u32,
     pub drops: Vec<GroundDropSnapshot>,
@@ -341,6 +346,7 @@ pub enum ZoneCommand {
     SyncSharedObjects {
         session_id: SessionId,
         packets: Vec<ServerPacket>,
+        include_owner: bool,
         now_ms: u64,
     },
     BroadcastSharedObjectPackets {
@@ -357,6 +363,11 @@ pub enum ZoneCommand {
     SpawnMonster {
         session_id: SessionId,
         monster: ZoneMonsterSpawn,
+        now_ms: u64,
+    },
+    SyncNativeMonsters {
+        session_id: SessionId,
+        monsters: Vec<ZoneMonsterSpawn>,
         now_ms: u64,
     },
     PlayerAttackObject {
@@ -687,6 +698,10 @@ pub(crate) struct ZonePlayer {
     pub next_attack_ready_at_ms: u64,
     pub next_spell_ready_at_ms: u64,
     pub magic_ready_at_ms: BTreeMap<u8, u64>,
+    #[serde(default)]
+    pub last_damaged_at_ms: u64,
+    #[serde(default)]
+    pub last_regen_at_ms: u64,
     pub chat_profile: ZoneChatProfile,
     pub combat_stats: ZonePlayerCombatStats,
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
@@ -735,6 +750,8 @@ impl ZonePlayer {
             next_attack_ready_at_ms: 0,
             next_spell_ready_at_ms: 0,
             magic_ready_at_ms: BTreeMap::new(),
+            last_damaged_at_ms: 0,
+            last_regen_at_ms: 0,
             chat_profile: join.chat_profile,
             combat_stats: join.combat_stats,
             buffs: BTreeMap::new(),

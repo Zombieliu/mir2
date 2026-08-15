@@ -1,5 +1,12 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-08-13 — Autonomous real-client quest Agent
+
+- Goal: build a reusable, auditable Agent that progresses through Mir2 quests with the same visible mouse/keyboard interactions as a human, starting with Warrior q1-q5 on the exact PR #233 head and expanding by evidence-backed bands toward three-class 1-50.
+- Contract: client state, accessible DOM geometry, text rendering, and WebSocket frames are read-only observation surfaces. Direct quest/map/GM/QA commands, DOM value mutation, and synthetic DOM clicks are forbidden and audited statically and at runtime.
+- Implemented so far: deterministic q1-q5 policy, CDP real-input driver, visible account/Warrior creation, normal navigation/NPC/dialog/combat/harvest/equip/potion/death/reconnect actions, evidence capture, and manifest/shortcut tests.
+- Current verification: `npm run test:quest-agent` passes 5/5 from `apps/web`; isolated live Gateway and browser route verification are in progress. Do not treat this entry as q1-q5 or 1-50 completion until the real-client certificate is green.
+
 ## 2026-08-06 — Repository slimming Phase 1
 
 - Goal: remove reproducible runtime binaries and run-specific QA evidence from the current Git tree without breaking local, Vercel, or itch delivery; preserve all removed evidence outside Git objects before deletion.
@@ -541,3 +548,30 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - `assets:r2:dry-run` passed for that exact manifest: 40,945 upload objects
   (40,944 assets plus the release manifest), 246,617,356 bytes, driver `r2-s3`,
   and the expected immutable object prefix. No R2 write was performed.
+
+## 2026-08-14 autonomous quest Agent q28 and full-route static closure
+
+- The resumed Warrior real-client chain now completes q1-q9 and q22-q28 with
+  visible mouse/keyboard input and no quest, map, item, GM, QA, or Stage 5
+  shortcut. The q28 objective run reached 10/10 through real SpittingSpider
+  combat/harvest and exercised death/revive, potion use, and field switching.
+  Its final resumed turn-in covered visible selling/restocking, more than 300
+  tiles of movement, and Samuel dialogue: 1/1 goal, 1,093,304 ms, 603 inputs,
+  zero shortcut violations, final q28 `completed`, level 15.
+- Profile v24 adds the physical Waste Lands/Red Cavern chain, the missing Red
+  Valley side rooms and Great Tao Tomb, imported q138/q139 monsters, and an
+  audited q148 Q-drop repair. The task text names real `RedEvilApe`, while Jev
+  binds `RedMoonChip` to unspawned `RedMoonEvil1`; the repair is scoped to a
+  real `RedEvilApe` death on `D10053` and remains inactive without q148.
+- Runtime route auditing now checks the start and finish NPC script as well as
+  its map. That exposed 44 genuine quest endpoints previously filtered by the
+  profile; all are explicitly allow-listed on their existing reachable maps.
+  No admin/GM/general teleport script was enabled.
+- Generated Warrior, Wizard, and Taoist routes each contain 140 quests through
+  level 50 with zero blockers in the 1-7, 8-21, 22-35, and 36-50 bands. This is
+  static readiness, not live three-class completion; sequential acceptance
+  resumes at q29.
+- Focused gates pass: Quest Agent 120/120, game-data 33/33, Platinum content
+  loop 3/3, q135 visible reward/script integration 1/1, respawn integration
+  2/2, Rust formatting, and diff whitespace. The q28 browser report still
+  records unresolved item/scene raster 404s as a separate presentation finding.

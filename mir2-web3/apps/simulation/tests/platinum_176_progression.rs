@@ -13,6 +13,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 const PROGRESSION_REPORT_ENV: &str = "MIR2_PLATINUM_PROGRESSION_REPORT";
 const ACCEPTANCE_DIR_ENV: &str = "MIR2_PLATINUM_ACCEPTANCE_DIR";
+const CERTIFIED_MELEE_LEVEL_GAP: u16 = 7;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -182,7 +183,16 @@ fn source_backed_hunting_routes(profile: &ContentProfile) -> BTreeMap<u16, Hunti
                         let Some(monster) = monsters.get(&respawn.monster_name) else {
                             continue;
                         };
-                        if monster.experience == 0 {
+                        // A large outdoor map can contain a late-game pocket alongside
+                        // beginner fields (Prajna Island is the first real example), and
+                        // the Red Cavern data contains level-90 monsters. Counting those
+                        // respawns for a low-level route would certify an impossible grind
+                        // merely because its theoretical XP supply is large. Keep this
+                        // certification inside the same live-proven melee gap used by the
+                        // autonomous client's combat preparation policy.
+                        if monster.experience == 0
+                            || monster.level > level.saturating_add(CERTIFIED_MELEE_LEVEL_GAP)
+                        {
                             continue;
                         }
                         // Crystal respawns use a fixed delay plus a uniformly

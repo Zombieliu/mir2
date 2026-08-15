@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
-import { originalAssetPath } from "../../lib/asset-url";
 import {
   CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX,
   CRYSTAL_GAME_SHOP_ITEMS,
 } from "../../lib/generated/crystal-game-shop-data";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import type { ItemTooltipGrade } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -399,10 +399,6 @@ function formatGameShopStock(stock: number) {
   return String(stock);
 }
 
-function originalItemIconPath(icon: number) {
-  return originalAssetPath(`/original-ui/Items/${icon}.png`);
-}
-
 /* ========================================================================= */
 /* NPC merchant shop (Buy / Sell / Repair / Special)                         */
 /*                                                                           */
@@ -604,6 +600,7 @@ export function NpcShopWindow({
             key={entry}
             type="button"
             className="npc-shop-tab"
+            data-shop-tab-key={entry}
             style={{ ...shopStyle.tab, ...(entry === tab ? shopStyle.tabOn : null) }}
             aria-pressed={entry === tab}
             onClick={() => {
@@ -650,7 +647,7 @@ export function NpcShopWindow({
         </span>
       </div>
 
-      <div style={shopStyle.list}>
+      <div className="npc-shop-list" style={shopStyle.list}>
         {rows.length ? (
           rows.map((row) => {
             const owned = row as NpcShopOwnedItem;
@@ -664,6 +661,8 @@ export function NpcShopWindow({
                 type="button"
                 className="npc-shop-row"
                 data-item-id={String(row.id)}
+                data-item-name={row.name}
+                data-unit-price={Math.max(0, Math.trunc(row.price))}
                 aria-label={row.name}
                 style={{
                   ...shopStyle.row,
@@ -841,7 +840,9 @@ const shopStyle: Record<string, CSSProperties> = {
   subTabs: { display: "flex", gap: 2, padding: "4px 6px 0" },
   subTab: {
     flex: 1,
-    border: "1px solid rgba(190, 157, 99, 0.4)",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(190, 157, 99, 0.4)",
     background: "rgba(20, 13, 7, 0.9)",
     color: "#a89568",
     padding: "2px 0",
@@ -873,7 +874,9 @@ const shopStyle: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 6,
     padding: "2px 4px",
-    border: "1px solid rgba(190, 157, 99, 0.18)",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(190, 157, 99, 0.18)",
     background: "rgba(11, 8, 5, 0.45)",
     cursor: "pointer",
     textAlign: "left",
