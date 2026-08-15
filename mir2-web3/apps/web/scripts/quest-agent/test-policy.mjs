@@ -46,6 +46,7 @@ import {
   protectedTransfersForNavigation,
   rankCombatTargetsByIsolation,
   rankRespawnFieldsForTravel,
+  reconcileConfirmedDeadMonsterObjects,
   respawnCorridorAvoidanceWaypoint,
   respawnCorridorExposure,
   respawnTerminalExposure,
@@ -125,6 +126,75 @@ test("authoritative zero HP overrides a lagging rendered death flag", () => {
   assert.equal(entityIsLiveActor({ dead: false, hp: "0" }), false);
   assert.equal(entityIsLiveActor({ dead: false, hp: 20 }), true);
   assert.equal(entityIsLiveActor({ dead: false }), true);
+});
+
+test("confirmed monster death remains excluded while a stale rendered actor persists", () => {
+  const confirmedAt = 1_000;
+  const records = new Map([
+    ["202215", { confirmedAt, absenceObserved: false }],
+  ]);
+
+  const reconciled = reconcileConfirmedDeadMonsterObjects(
+    records,
+    [{ objectId: 202215, kind: "monster", dead: false, hp: null }],
+    confirmedAt + 2_000,
+    10 * 60_000,
+  );
+
+  assert.deepEqual(reconciled.get("202215"), {
+    confirmedAt,
+    absenceObserved: false,
+  });
+});
+
+test("confirmed monster object is released only after absence and a positive-HP respawn", () => {
+  const confirmedAt = 1_000;
+  const records = new Map([
+    ["202215", { confirmedAt, absenceObserved: false }],
+  ]);
+
+  const absent = reconcileConfirmedDeadMonsterObjects(
+    records,
+    [],
+    confirmedAt + 2_000,
+    10 * 60_000,
+  );
+  assert.deepEqual(absent.get("202215"), {
+    confirmedAt,
+    absenceObserved: true,
+  });
+
+  const staleCorpse = reconcileConfirmedDeadMonsterObjects(
+    absent,
+    [{ objectId: "202215", kind: "monster", dead: false, hp: null }],
+    confirmedAt + 3_000,
+    10 * 60_000,
+  );
+  assert.equal(staleCorpse.has("202215"), true);
+
+  const respawned = reconcileConfirmedDeadMonsterObjects(
+    absent,
+    [{ objectId: "202215", kind: "monster", dead: false, hp: 80 }],
+    confirmedAt + 4_000,
+    10 * 60_000,
+  );
+  assert.equal(respawned.has("202215"), false);
+});
+
+test("confirmed monster object hold expires defensively", () => {
+  const confirmedAt = 1_000;
+  const records = new Map([
+    ["202215", { confirmedAt, absenceObserved: false }],
+  ]);
+
+  const reconciled = reconcileConfirmedDeadMonsterObjects(
+    records,
+    [{ objectId: "202215", kind: "monster", dead: false, hp: null }],
+    confirmedAt + 10 * 60_000,
+    10 * 60_000,
+  );
+
+  assert.equal(reconciled.has("202215"), false);
 });
 
 test("visible HP-drug selection ignores unrelated and distant drops", () => {
@@ -2422,6 +2492,35 @@ test("combat completion accepts only target-specific death during deadline settl
     /targetResponseCount > lastTargetResponseCount[\s\S]{0,500}progressDeadline = Math\.min\([\s\S]{0,120}COMBAT_PROGRESS_WINDOW_MS/,
   );
   assert.match(killBody, /fight reached the 5m hard deadline/);
+});
+
+test("confirmed combat deaths cannot be selected again from a stale rendered corpse", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const killBody = runner.slice(
+    runner.indexOf("async function killMonster("),
+    runner.indexOf("async function harvestCorpse("),
+  );
+  const matchingBody = runner.slice(
+    runner.indexOf("function matchingLiveMonsters"),
+    runner.indexOf("function entityIsCorpse"),
+  );
+
+  assert.equal(
+    (killBody.match(/rememberConfirmedMonsterDeath\(objectId\)/g) ?? []).length,
+    2,
+  );
+  assert.match(
+    matchingBody,
+    /reconcileConfirmedDeadMonsterObjects\([\s\S]{0,220}state\.entities[\s\S]{0,220}CONFIRMED_DEAD_OBJECT_MAX_HOLD_MS/,
+  );
+  assert.match(
+    matchingBody,
+    /!confirmedDeadMonsterObjects\.has\(String\(entry\.objectId\)\)/,
+  );
+  assert.match(
+    runner,
+    /restoreConfirmedDeadMonsterMemory\(resumeEvidence\)/,
+  );
 });
 
 test("late harvest progression settles after corpse removal without another input", async () => {

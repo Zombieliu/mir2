@@ -39,6 +39,7 @@ import {
   questState,
   rankCombatTargetsByIsolation,
   rankRespawnFieldsForTravel,
+  reconcileConfirmedDeadMonsterObjects,
   retreatPointFromHostile,
   respawnCorridorAvoidanceWaypoint,
   respawnTravelAttemptBudget,
@@ -202,6 +203,7 @@ let supplyFundingShelterUntil = 0;
 const fieldGroupCooldownUntil = new Map();
 const monsterCooldownUntil = new Map();
 const quarantinedMonsterUntil = new Map();
+let confirmedDeadMonsterObjects = new Map();
 const questMonsterDeaths = new Map();
 const questMonsterPreparationLevel = new Map();
 const questMonsterResourceStrains = new Map();
@@ -224,6 +226,7 @@ let lastRestorativeSkillInputAt = 0;
 const FAILED_APPROACH_COOLDOWN_MS = 15_000;
 const FAILED_COMBAT_COOLDOWN_MS = 30_000;
 const QUARANTINED_TARGET_COOLDOWN_MS = 120_000;
+const CONFIRMED_DEAD_OBJECT_MAX_HOLD_MS = 10 * 60_000;
 const COMBAT_PROGRESS_WINDOW_MS = 45_000;
 const COMBAT_HARD_DEADLINE_MS = 5 * 60_000;
 const STALLED_FIELD_GROUP_COOLDOWN_MS = 300_000;
@@ -2490,6 +2493,35 @@ function restoreGrindingSourceStallMemory(report) {
   }
 }
 
+function restoreConfirmedDeadMonsterMemory(report) {
+  const restored = new Map();
+  for (const record of Array.isArray(report?.kills) ? report.kills.slice(-256) : []) {
+    if (record?.objectId == null) continue;
+    const objectId = String(record.objectId);
+    const confirmedAt = Number(record.at);
+    if (!objectId || !Number.isFinite(confirmedAt)) continue;
+    const previous = restored.get(objectId);
+    if (!previous || confirmedAt > previous.confirmedAt) {
+      restored.set(objectId, { confirmedAt, absenceObserved: false });
+    }
+  }
+  confirmedDeadMonsterObjects = reconcileConfirmedDeadMonsterObjects(
+    restored,
+    null,
+    Date.now(),
+    CONFIRMED_DEAD_OBJECT_MAX_HOLD_MS,
+  );
+}
+
+function rememberConfirmedMonsterDeath(objectId, confirmedAt = Date.now()) {
+  const normalizedObjectId = String(objectId ?? "");
+  if (!normalizedObjectId) return;
+  confirmedDeadMonsterObjects.set(normalizedObjectId, {
+    confirmedAt,
+    absenceObserved: false,
+  });
+}
+
 async function collectQuestItemIfVisible(itemName, goal, waitMs) {
   const deadline = Date.now() + waitMs;
   let state = await readAgentState(client);
@@ -3992,6 +4024,7 @@ async function killMonster(
     const live = state.entities.find((entry) => String(entry.objectId) === objectId) ?? null;
     if (entityIsCorpse(live)) corpse = live;
     if (diedPacket || entityIsCorpse(live)) {
+      rememberConfirmedMonsterDeath(objectId);
       monsterCooldownUntil.delete(objectId);
       quarantinedMonsterUntil.delete(objectId);
       return { success: true, corpse: corpse ?? live ?? target };
@@ -4185,6 +4218,7 @@ async function killMonster(
       finalState.playerObjectId,
     );
     if (finalCombatEvidence.targetDied || entityIsCorpse(finalTarget)) {
+      rememberConfirmedMonsterDeath(objectId);
       monsterCooldownUntil.delete(objectId);
       quarantinedMonsterUntil.delete(objectId);
       return { success: true, corpse: finalTarget ?? target };
@@ -8228,9 +8262,16 @@ async function nearestVisibleMonsterByName(state, name, preferNearest = false) {
 function matchingLiveMonsters(state, name) {
   const wanted = normalizeName(name);
   const now = Date.now();
+  confirmedDeadMonsterObjects = reconcileConfirmedDeadMonsterObjects(
+    confirmedDeadMonsterObjects,
+    state.entities,
+    now,
+    CONFIRMED_DEAD_OBJECT_MAX_HOLD_MS,
+  );
   return state.entities.filter((entry) => (
     entry.kind === "monster" &&
     !entityIsCorpse(entry) &&
+    !confirmedDeadMonsterObjects.has(String(entry.objectId)) &&
     Number(quarantinedMonsterUntil.get(String(entry.objectId)) ?? 0) <= now &&
     (
       Number(monsterCooldownUntil.get(String(entry.objectId)) ?? 0) <= now ||
@@ -8748,6 +8789,7 @@ function slug(value) {
 
 restoreAdaptiveCombatMemory(resumeEvidence);
 restoreGrindingSourceStallMemory(resumeEvidence);
+restoreConfirmedDeadMonsterMemory(resumeEvidence);
 
 main().catch((error) => {
   console.error(error);
