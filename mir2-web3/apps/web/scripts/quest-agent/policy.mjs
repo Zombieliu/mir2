@@ -522,6 +522,61 @@ export function assessQuestCombatResourceStrain(
 }
 
 /**
+ * Distinguish a genuinely stalled grind source from a noisy goal label. Live
+ * runs can report a retryable target error after a collateral normal-client
+ * kill, so only a failed goal with no authoritative level/EXP gain advances
+ * the stall counter. A real gain immediately clears the source's history.
+ */
+export function assessGrindingSourceStall(
+  goal,
+  before,
+  after,
+  {
+    failed = false,
+    previousStalls = 0,
+    threshold = 3,
+    now = Date.now(),
+    cooldownMs = 10 * 60_000,
+  } = {},
+) {
+  if (goal?.kind !== "grind") {
+    return {
+      tracked: false,
+      progressed: false,
+      stallCount: 0,
+      cooldownUntil: null,
+    };
+  }
+  const beforeLevel = finiteNumber(before?.playerLevel, 0);
+  const afterLevel = finiteNumber(after?.playerLevel, beforeLevel);
+  const beforeExperience = finiteNumber(before?.playerExperience, 0);
+  const afterExperience = finiteNumber(after?.playerExperience, beforeExperience);
+  const progressed =
+    afterLevel > beforeLevel ||
+    (afterLevel === beforeLevel && afterExperience > beforeExperience);
+  if (progressed) {
+    return {
+      tracked: true,
+      progressed: true,
+      stallCount: 0,
+      cooldownUntil: null,
+    };
+  }
+  const stallCount = failed
+    ? Math.max(0, Math.trunc(finiteNumber(previousStalls, 0))) + 1
+    : Math.max(0, Math.trunc(finiteNumber(previousStalls, 0)));
+  const shouldCoolDown = failed && stallCount >= Math.max(1, Math.trunc(finiteNumber(threshold, 3)));
+  return {
+    tracked: true,
+    progressed: false,
+    stallCount,
+    cooldownUntil: shouldCoolDown
+      ? finiteNumber(now, Date.now()) + Math.max(0, finiteNumber(cooldownMs, 10 * 60_000))
+      : null,
+  };
+}
+
+/**
  * Build a routing halo only for monsters that are meaningfully above the
  * player's level. Ordinary field creatures still occupy their exact server
  * tile, but no longer turn a dense spawn area into one artificial wall.

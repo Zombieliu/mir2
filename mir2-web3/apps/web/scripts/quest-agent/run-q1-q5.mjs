@@ -7,6 +7,7 @@ import {
   BICHON_Q1_Q9_ROUTE,
   QUEST_AGENT_CONTRACT,
   allQ1Q9Completed,
+  assessGrindingSourceStall,
   assessQuestCombatResourceStrain,
   chooseImmediateMeleeTarget,
   collisionPathHasImmediateDynamicBlock,
@@ -137,6 +138,7 @@ const evidence = {
   kills: [],
   targetQuarantines: [],
   combatResourceStrains: [],
+  grindingSourceStalls: [],
   deaths: 0,
   revives: 0,
   potionUses: 0,
@@ -152,6 +154,14 @@ const evidence = {
       : []),
     ...(Array.isArray(resumeEvidence?.combatResourceStrains)
       ? resumeEvidence.combatResourceStrains
+      : []),
+  ].slice(-128).map((record) => ({ ...record })),
+  inheritedGrindingSourceStalls: [
+    ...(Array.isArray(resumeEvidence?.inheritedGrindingSourceStalls)
+      ? resumeEvidence.inheritedGrindingSourceStalls
+      : []),
+    ...(Array.isArray(resumeEvidence?.grindingSourceStalls)
+      ? resumeEvidence.grindingSourceStalls
       : []),
   ].slice(-128).map((record) => ({ ...record })),
 };
@@ -176,6 +186,7 @@ const questMonsterDeaths = new Map();
 const questMonsterPreparationLevel = new Map();
 const questMonsterResourceStrains = new Map();
 const grindingMonsterRiskUntil = new Map();
+const grindingMonsterStalls = new Map();
 const recordedCombatResourceStrainGoals = new WeakSet();
 const groundDropCooldownUntil = new Map();
 const navigationDetourByTarget = new Map();
@@ -196,6 +207,7 @@ const QUARANTINED_TARGET_COOLDOWN_MS = 120_000;
 const COMBAT_PROGRESS_WINDOW_MS = 45_000;
 const COMBAT_HARD_DEADLINE_MS = 5 * 60_000;
 const STALLED_FIELD_GROUP_COOLDOWN_MS = 300_000;
+const STALLED_GRIND_SOURCE_COOLDOWN_MS = 10 * 60_000;
 const OPTIONAL_DROP_UNREACHABLE_COOLDOWN_MS = 10_000;
 // A shared drop remains private to its originating session for 30 seconds.
 // The rendered client deliberately does not expose ownership, so a rejected
@@ -1120,6 +1132,7 @@ async function runQuestPolicy() {
     await delay(700);
     const after = await readAgentState(client);
     rememberQuestCombatResourceStrain(goal, before, after);
+    rememberGrindingSourceStall(goal, goalRecord, before, after);
     goalRecord.after = compactGoalState(after, goal);
     goalRecord.endedAt = Date.now();
     goalRecord.durationMs = goalRecord.endedAt - goalRecord.startedAt;
@@ -2328,6 +2341,46 @@ function rememberQuestCombatResourceStrain(goal, before, after) {
   return true;
 }
 
+function rememberGrindingSourceStall(goal, goalRecord, before, after) {
+  if (goal?.kind !== "grind") return false;
+  const monsterKey = normalizeName(goal.monsterName);
+  const decision = assessGrindingSourceStall(goal, before, after, {
+    failed: Boolean(goalRecord?.error),
+    previousStalls: Number(grindingMonsterStalls.get(monsterKey) ?? 0),
+    cooldownMs: STALLED_GRIND_SOURCE_COOLDOWN_MS,
+  });
+  if (decision.progressed) {
+    grindingMonsterStalls.delete(monsterKey);
+    return false;
+  }
+  if (!goalRecord?.error) return false;
+  grindingMonsterStalls.set(monsterKey, decision.stallCount);
+  if (!Number.isFinite(decision.cooldownUntil)) {
+    console.log(
+      `  grind stall memory: ${goal.monsterName} ` +
+      `no EXP ${decision.stallCount}/3`,
+    );
+    return false;
+  }
+  grindingMonsterStalls.delete(monsterKey);
+  grindingMonsterRiskUntil.set(monsterKey, decision.cooldownUntil);
+  const record = {
+    monsterName: String(goal.monsterName),
+    playerLevel: Number(after?.playerLevel ?? before?.playerLevel ?? 0),
+    experienceBefore: Number(before?.playerExperience ?? 0),
+    experienceAfter: Number(after?.playerExperience ?? 0),
+    consecutiveStalls: decision.stallCount,
+    riskCooldownUntil: decision.cooldownUntil,
+    at: Date.now(),
+  };
+  evidence.grindingSourceStalls.push(record);
+  console.log(
+    `  grind stall memory: ${goal.monsterName} ` +
+    `${decision.stallCount} failed goals without EXP; cooling down source`,
+  );
+  return true;
+}
+
 function restoreAdaptiveCombatMemory(report) {
   const strains = [
     ...(Array.isArray(report?.inheritedCombatResourceStrains)
@@ -2388,6 +2441,27 @@ function restoreAdaptiveCombatMemory(report) {
         ),
       );
     }
+  }
+}
+
+function restoreGrindingSourceStallMemory(report) {
+  const stalls = [
+    ...(Array.isArray(report?.inheritedGrindingSourceStalls)
+      ? report.inheritedGrindingSourceStalls
+      : []),
+    ...(Array.isArray(report?.grindingSourceStalls)
+      ? report.grindingSourceStalls
+      : []),
+  ].slice(-128);
+  const now = Date.now();
+  for (const record of stalls) {
+    const monsterKey = normalizeName(record?.monsterName);
+    const riskCooldownUntil = Number(record?.riskCooldownUntil);
+    if (!monsterKey || !Number.isFinite(riskCooldownUntil) || riskCooldownUntil <= now) continue;
+    grindingMonsterRiskUntil.set(
+      monsterKey,
+      Math.max(Number(grindingMonsterRiskUntil.get(monsterKey) ?? 0), riskCooldownUntil),
+    );
   }
 }
 
@@ -4154,6 +4228,22 @@ async function harvestCorpse(corpse, goal, objectiveBefore) {
       // Harvest evidence belongs to the monster incarnation just killed. A
       // same-name fallback can select an older, already harvested Deer corpse
       // and turn an honest no-op into a misleading retry loop.
+      // A successful final pass can remove the corpse before the quest/inventory
+      // update reaches the rendered snapshot. Settle that authoritative
+      // progression before declaring the exact lifecycle lost; live r30 q25
+      // produced ObjectRemove followed by CannibalStem 0->1 on the next policy
+      // turn.
+      const progressedAfterRemoval = await waitUntil(
+        client,
+        progressionExpression,
+        4_000,
+      );
+      if (progressedAfterRemoval) {
+        console.log(
+          `  harvest progress settled after corpse removal: ${corpse.objectId}`,
+        );
+        return { completed: true, progressed: true };
+      }
       console.log(`  harvest stopped: killed ${goal.monsterName} corpse ${corpse.objectId} left the visible world`);
       return { completed: false, progressed: false };
     }
@@ -4267,7 +4357,21 @@ async function harvestCorpse(corpse, goal, objectiveBefore) {
       console.log(
         `  harvest pass unacknowledged: packets=[${wsPacketNamesSince(harvestStartedAt).join(",")}]`,
       );
-      if (unacknowledgedPasses >= 3) return { completed: false, progressed: false };
+      if (unacknowledgedPasses >= 3) {
+        // Do not turn a late quest update into a false lifecycle failure. This
+        // is observation-only: no fourth key press is sent while settling.
+        const progressed = await waitUntil(
+          client,
+          progressionExpression,
+          4_000,
+        );
+        if (progressed) {
+          console.log(
+            `  harvest progress settled after ${unacknowledgedPasses} unacknowledged passes`,
+          );
+        }
+        return { completed: progressed, progressed };
+      }
     }
     await delay(accepted ? 2_100 : 120);
   }
@@ -8491,6 +8595,7 @@ function slug(value) {
 }
 
 restoreAdaptiveCombatMemory(resumeEvidence);
+restoreGrindingSourceStallMemory(resumeEvidence);
 
 main().catch((error) => {
   console.error(error);
