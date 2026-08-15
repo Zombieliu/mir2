@@ -10,21 +10,20 @@ level-1-to-50 playthrough.
 
 - Source review base: PR #233 exact head
   `ef33e4764c1342620e30532fb5ffa4e784013dd2`.
-- Main integration base: `f0e0bb6cdc7129fc3b183e7875603d198198bb75`
-  (current `main`, including PR #234).
-- Main-based acceptance code freeze:
-  `4d089b4bb12e1f5b6168a740ec5b8e65a620b27a`.
+- Main integration base: `aa928b99ae7346eb6816ab8ca0b3f1063dae9394`
+  (current `main`, including the squash merge of PR #235).
+- Main-based follow-up code freeze:
+  `d68674ce83f21680f4cc7546561471bd084ee216`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `a71cfce467c1ecbb88db1c13ef720e850c8a41ee` (patch-equivalent to clean
-  commit `4d089b4bb`).
-- Remote clean branch: `origin/codex/autonomous-quest-agent-main`.
-- Code range: twelve code/test commits plus six acceptance-documentation
-  commits on top of the main integration base. The original eight transplanted
-  source commits remain one-for-one matches under `git range-diff`; the later
-  scene-cache regression, grind-travel, depleted-shelter, confirmed-corpse,
-  and resumed-supply recovery fixes are clean-branch follow-ups.
+  `0256c33a95f29ad9794569dbe82b79cd79e95df7` (patch-equivalent to clean
+  commit `d68674ce8`).
+- Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
+- Integration lineage: PR #235's reviewed range is squash-merged as
+  `aa928b99a`. This follow-up adds one code/test commit plus one acceptance
+  documentation commit; source `0256c33a9` and clean `d68674ce8` have the same
+  stable patch id.
 
 ## Acceptance matrix
 
@@ -80,15 +79,17 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `4d089b4bb` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 171/171, including the
+The later Quest Agent-only follow-ups through `d68674ce8` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 172/172, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
-cross-run supply recall, and safe-room settlement regressions; Node syntax
-checks and `git diff --check` pass in both source and clean worktrees. The
-earlier full Simulation/Gateway/TypeScript results remain the backend baseline
+cross-run supply recall, safe-room settlement, full-map route fallback, and
+dense-shelter escape regressions; Node syntax checks and `git diff --check`
+pass in both source and clean worktrees. The earlier full
+Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
-#235 at this exact head also finished 20 successful remote checks, two
-conditional skips, and zero failures or pending checks.
+#235 at exact head `45192e947` finished 20 successful remote checks, two
+conditional skips, and zero failures or pending checks before squash-merging as
+`aa928b99a`; the follow-up head must be judged by its own remote check rollup.
 
 The first full acceptance run exposed a deterministic saved-transform
 regression introduced after the PR #233 base: a valid Bichon field position was
@@ -107,12 +108,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 53 finalized development reports
-through `warrior-q30-r53-supervised`:
+The private evidence directory contains 57 finalized development reports
+through `warrior-q30-r57-supervised`:
 
-- 47,298,267 ms (13 h 08 m 18 s) browser-active runtime;
-- 24,658 recorded physical inputs;
-- 273 historical kill rows, including one r44 row now proven to repeat the
+- 50,306,239 ms (13 h 58 m 26 s) browser-active runtime;
+- 26,193 recorded physical inputs;
+- 279 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 12 deaths and 11 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -198,6 +199,30 @@ browser/network diagnostics. It ended at level 14 with 115/135 HP and ten
 potions. This proves resumable recovery and continued progression, not level
 15 or q25/q30 completion.
 
+r54-r57 then exercised the same recovery chain from two deterministic failure
+states. r54 reached `(503,633)` but the old collision atlas searched only local
+margins through 240 tiles and falsely declared both GroceryStore entrances
+unreachable even though the full 700-by-700 map had a connected route around a
+wall. The first fix adds cheap local searches followed by a true full-map
+fallback on small Crystal maps and a bounded adaptive fallback on large maps.
+r55 resumed the exact state and moved for its full 20-minute slice instead of
+taking the former immediate fatal branch.
+
+r56 then reached a dense beginner field and exposed a separate no-input retry:
+the emergency shelter escape inherited `supplyFunding=true`, so mixed adjacent
+attackers caused the funding safety guard to reject every bounded clearing
+attack. The second fix classifies only that already-committed escape as normal
+travel while retaining level certification, the four-attempt cap, target
+quarantine, and ordinary combat input. r57 resumed the exact crowded state,
+escaped the field, entered the GroceryStore, recovered passively, returned to a
+visible Deer corpse, harvested Venison `1 -> 2`, sold it for gold `29 -> 279`,
+and bought HP drugs `8 -> 10` for gold `279 -> 199`. It then continued ordinary
+travel until the 1,200,000 ms slice limit. The report records 1,203,435 ms, 635
+inputs, five kills, no death, no shortcut violation, and no critical
+browser/network diagnostic; EXP advanced from 17,483 to 18,265 and the final
+state remained level 14. This closes the two exact recovery regressions, not
+level 15 or q25/q30 completion.
+
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
 summary fields; do not attach raw `report.json` files to a PR.
@@ -248,6 +273,24 @@ the safe room for 20 seconds. r52 proves both settlement cycles plus the
 sell-and-restock closure; r53 proves a later death/revive can reuse that path
 and return to successful combat. These fixes do not advance quest counters or
 grant movement, health, items, gold, or experience directly.
+
+r54 exposed a distinct static-routing boundary: the route endpoints and wall
+detour belonged to the same full-map collision component, but the largest old
+search window omitted the required northern passage. Clean commit `d68674ce8`
+(source `0256c33a9`) keeps the inexpensive 72/240-tile searches, then permits a
+full-map fallback only when the collision atlas is at most one million cells;
+larger maps receive a bounded 384-to-700-tile fallback. The synthetic wall
+regression fails at the old bound and passes at the fallback, and r55/r57 prove
+the previously disconnected saved state can keep moving and reach the supply
+area.
+
+The same commit also closes the r56 mixed-occupancy retry loop. Emergency
+shelter escape now supplies an explicit non-funding travel accounting goal to
+the existing adjacent-occupancy clearing path. It does not relax ordinary
+supply hunting or add direct movement/combat commands: the existing visible
+target requirement, level gate, attempt bound, quarantine, and mouse/keyboard
+inputs remain authoritative. r57 proves that exact crowded resume can escape,
+harvest, sell, restock, and depart without a shortcut violation.
 
 ## Sign-off wording
 

@@ -181,9 +181,28 @@ The segment ended at level 14 with 115/135 HP, ten potions, five kills, 934
 physical inputs, and zero shortcut or critical diagnostic. q25 remains 6/20
 and q30 remains 0/1.
 
-Across the 53 finalized local development reports through r53, the harness
-recorded 47,298,267 ms (13 h 08 m 18 s) of browser-active runtime, 24,658
-physical inputs, 273 historical kill rows, 12 deaths, 11 revives, and zero
+r54 then exposed a false-unreachable collision window at `(503,633)`: both
+GroceryStore entrances were in the same full-map component, but the old
+240-tile search omitted the required wall detour. Clean commit `d68674ce8`
+(source `0256c33a9`) now escalates from cheap local corridors to a full-map
+fallback only for small Crystal atlases, while bounding the large-map fallback.
+r55 resumed the exact state and kept moving for its full 20-minute slice.
+
+r56 exposed a second dense-field recovery loop where an emergency shelter
+escape inherited supply-funding accounting and rejected every bounded clearing
+attack in a mixed pack. The same commit gives only that committed escape a
+normal travel accounting goal while preserving target visibility, level
+certification, the four-attempt cap, quarantine, and physical input. r57
+resumed the crowded state, escaped, entered the GroceryStore, recovered,
+harvested visible Venison `1 -> 2`, sold it for gold `29 -> 279`, bought HP
+drugs `8 -> 10` for gold `279 -> 199`, and continued ordinary travel until its
+runtime limit. It advanced EXP from 17,483 to 18,265 with five kills, 635
+physical inputs, no death, no shortcut violation, and no critical diagnostic.
+The final state remains level 14; q25 and q30 remain open.
+
+Across the 57 finalized local development reports through r57, the harness
+recorded 50,306,239 ms (13 h 58 m 26 s) of browser-active runtime, 26,193
+physical inputs, 279 historical kill rows, 12 deaths, 11 revives, and zero
 shortcut violations. One r44 kill row is now known to duplicate another row's
 object id, so the raw historical kill-row total must not be presented as a
 unique-kill count. These reports span multiple runner revisions and include
