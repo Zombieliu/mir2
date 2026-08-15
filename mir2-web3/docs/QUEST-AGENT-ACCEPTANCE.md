@@ -38,7 +38,7 @@ level-1-to-50 playthrough.
 | Physical input and read-only observation contract | PASS | CDP mouse/keyboard/text only; static and runtime shortcut audits report zero violations. |
 | Resume, reconnect, death, potion, merchant, navigation, combat, harvest, and equipment framework | PASS for staged use | Exercised across the local development soak; failures remain explicit and resumable. |
 | Warrior q1-q9 functional route | PASS | One finalized certificate reached all required authoritative stages with 684 inputs, 18 kills, no death, and zero shortcut violations. |
-| Current extended Warrior chain | PARTIAL | The resumed character has reached level 15. q22-q24, q28, and q29 are complete; q25 is 7/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
+| Current extended Warrior chain | PARTIAL | The resumed character has reached level 15. q22-q24, q28, and q29 are complete; q25 is 8/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
 | Three-class route generation | STATIC PASS | Warrior, Wizard, and Taoist manifests each contain 140 level-1-to-50 quests and report zero generated blockers. This is not live completion. |
 | Clean visual-assets certificate | NOT ACCEPTED | The completed q1-q9 run contains missing-raster diagnostics. A later incomplete segment is diagnostics-clean, but cannot replace a complete clean run. |
 | Contiguous Warrior level 1-50 | NOT ACCEPTED | No single/resumed evidence chain has completed it. |
@@ -121,13 +121,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 71 finalized development reports
-through `warrior-q30-r72-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 72 finalized development reports
+through `warrior-q30-r73-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 63,669,842 ms (17 h 41 m 10 s) browser-active runtime;
-- 33,395 recorded physical inputs;
-- 344 historical kill rows, including one r44 row now proven to repeat the
+- 64,195,339 ms (17 h 49 m 55 s) browser-active runtime;
+- 33,657 recorded physical inputs;
+- 358 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 13 deaths and 12 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -399,8 +399,30 @@ nearby threats through ordinary combat before creating the source corpse; an
 unsafe or excess threat triggers the existing physical disengagement instead.
 The new contract was first red, then passed with the full 177/177 Quest Agent
 gate in both source and clean worktrees. This is a bounded ordering fix, not a
-claim that post-kill attacks or harvest RNG disappear; the exact r72 resume
-must still be replayed on the patched runtime.
+claim that post-kill attacks or harvest RNG disappear. The exact r72 resume was
+therefore replayed on the patched runtime as recorded below.
+
+r73 performed that exact-state replay on source `e533efbb3`. Seven of ten
+bounded q25 goals completed, compared with 3/11 in the pre-fix r72 segment.
+Spawn ordering was not controlled between runs, so this is marked live
+improvement rather than a deterministic throughput benchmark. The replay
+exercised all three new branches through ordinary client inputs: it cleared an
+already attacking Oma before source combat, safely disengaged when the bounded
+pre-harvest defence limit was reached, and twice switched to an already active
+CannibalPlant before creating a new corpse. Thirteen CannibalPlants and one Oma
+were killed; one successful quest drop advanced CannibalStem `7 -> 8`. The
+three failed goals remained explicit and retryable: one bounded preflight
+disengagement and two post-kill attacker/preemption cases outside this
+pre-combat fix.
+
+The finalized r73 report records 525,497 ms, 262 physical inputs, 14 kill rows,
+24 harvest commands, two visible gold pickups, zero death/revive, zero potion
+use, zero purchases, zero shortcuts, zero quarantines, and zero critical
+browser/network diagnostics. Its final state is map 0 `(176,169)`, level 15
+with EXP 5,681/40,000, 149/149 HP, ten HP drugs, and 1,045 gold; q25 is 8/20
+and q30 remains 0/1. The quest-progress, safe-failure, and final frames were
+visually inspected and agree with the structured report. This validates the
+patched branches in live play, but does not certify q25 or q30 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
