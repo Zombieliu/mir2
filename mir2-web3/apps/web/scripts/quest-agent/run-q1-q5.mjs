@@ -10,6 +10,7 @@ import {
   assessGrindingSourceStall,
   assessQuestCombatResourceStrain,
   chooseImmediateMeleeTarget,
+  collisionAtlasSearchMargins,
   collisionPathHasImmediateDynamicBlock,
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
@@ -5290,9 +5291,21 @@ async function collisionAtlasPathToward(
 ) {
   const entities = Array.isArray(state?.entities) ? state.entities : [];
   const distance = chebyshev(player, target);
-  const baseMargin = Math.min(160, Math.max(72, Math.ceil(distance * 0.25)));
-  for (const margin of [baseMargin, Math.min(350, Math.max(240, baseMargin * 2))]) {
-    const corridor = await collisionAtlasCorridor(mapFileName, player, target, margin);
+  const initialMargin = collisionAtlasSearchMargins(distance)[0];
+  const initialCorridor = await collisionAtlasCorridor(
+    mapFileName,
+    player,
+    target,
+    initialMargin,
+  );
+  const searchMargins = collisionAtlasSearchMargins(distance, {
+    mapWidth: initialCorridor.mapWidth,
+    mapHeight: initialCorridor.mapHeight,
+  });
+  for (const margin of searchMargins) {
+    const corridor = margin === initialMargin
+      ? initialCorridor
+      : await collisionAtlasCorridor(mapFileName, player, target, margin);
     const occupied = entities
       // Only nearby actors can still occupy their current cell when this
       // route reaches it. Treating every moving deer/chicken in AOI as a
@@ -5446,6 +5459,8 @@ async function collisionAtlasCorridor(mapFileName, start, target, margin) {
   const mapMaxY = Number.isFinite(Number(atlas.mapHeight)) ? Number(atlas.mapHeight) - 1 : requested.maxY;
   return {
     blocked: atlas.blocked,
+    mapWidth: atlas.mapWidth,
+    mapHeight: atlas.mapHeight,
     bounds: {
       minX: Math.max(0, Math.floor(requested.minX)),
       maxX: Math.min(mapMaxX, Math.ceil(requested.maxX)),
@@ -6696,6 +6711,19 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     const retreat = recoveryTransfer
       ? nearestPointInTransferBounds(state.player, recoveryTransfer)
       : retreatPointFromHostile(state, activeShelterThreat, 8);
+    // This is no longer optional funding combat: the player is already
+    // committed to an emergency shelter escape and every adjacent tile is
+    // occupied. A supplyFunding goal would reject the clearing attack merely
+    // because another mixed-field monster is also attacking, producing a
+    // no-input retry loop. The existing level certification, four-attempt
+    // bound, target quarantine, and normal combat inputs stay in force.
+    const shelterOccupancyClearGoal = {
+      kind: "travel",
+      questId: 0,
+      monsterName: "safe-shelter blocker",
+      supplyFunding: false,
+      travelLabel: "visible active-threat shelter escape",
+    };
     console.log(
       `  safe funding shelter retreat: ${activeShelterThreat.name} ` +
       `${activeShelterThreat.objectId}@${activeShelterThreat.x},${activeShelterThreat.y} ` +
@@ -6713,6 +6741,7 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
         maxAttempts: 4,
         abortOnDeath: true,
         clearTrivialOccupancy: true,
+        resourceAccountingGoal: shelterOccupancyClearGoal,
         // Preserve stock while HP is healthy, but let the normal potion
         // threshold save a critically injured character during the physical
         // retreat. With zero stock this remains a pure passive-recovery path.
