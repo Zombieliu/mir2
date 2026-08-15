@@ -5928,7 +5928,11 @@ async function travelToMap(
   if (!mapTravelGraph) throw new Error(`map travel graph is unavailable for ${targetMap}`);
   let scriptedGoldSpent = 0;
   let journeyResourceBaseline = enforceCombatResourceBudget ? resourceBaseline : null;
-  let journeyResourceGoal = enforceCombatResourceBudget ? resourceAccountingGoal : null;
+  // Budget enforcement and occupancy intent are separate controls. An urgent
+  // repair or already-depleted shelter journey can deliberately disable the
+  // before/after resource budget while still identifying a physically
+  // blocking, previously certified monster as non-funding travel combat.
+  let journeyResourceGoal = resourceAccountingGoal ?? null;
   for (let hop = 0; hop < 32; hop += 1) {
     let state = await readAgentState(client);
     const currentMap = String(state.mapFileName);
@@ -8178,7 +8182,18 @@ async function repairProgressionEquipmentIfNeeded(providedState = null) {
   const { candidate: first, route, routeKey } = selection;
   if (state.activeNpcDialog) await closeNpcDialog();
   if (String(state.mapFileName) !== String(route.mapFileName)) {
-    await travelToMap(route.mapFileName, { enforceCombatResourceBudget: false });
+    const repairTravelGoal = {
+      kind: "travel",
+      questId: 0,
+      monsterName: "equipment repair blocker",
+      supplyFunding: false,
+      travelLabel: `visible ${route.npc.label} repair journey`,
+    };
+    await travelToMap(route.mapFileName, {
+      enforceCombatResourceBudget: false,
+      clearTrivialOccupancy: true,
+      resourceAccountingGoal: repairTravelGoal,
+    });
   }
   await openNpcDialog(route.npc, "@Repair", { clearTrivialOccupancy: true });
   await clickDialogTarget("@Repair", `open-equipment-repair-${String(first.slot)}`);
