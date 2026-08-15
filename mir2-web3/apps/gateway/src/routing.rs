@@ -1046,8 +1046,8 @@ impl SharedAccountInventoryCommandEnvelope {
                 format!("ground-drop-pickup:{}", drop.object_id)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => format!(
-                "monster-kill-award:{}:{}:{}",
-                award.monster_object_id, award.monster_name, award.experience
+                "monster-kill-award:{}:{}:{}:{}",
+                award.monster_object_id, award.killed_at_ms, award.monster_name, award.experience
             ),
             SharedAccountInventoryCommand::SkillItemConsume {
                 spell, request_id, ..
@@ -2561,8 +2561,31 @@ impl SharedInProcessZoneState {
         _previous_drop_ids: BTreeSet<u32>,
     ) {
         let now_ms = shared_gateway_now_ms();
+        // `SimulationSession` still owns personal quest/inventory state and its
+        // compatibility ECS continues to tick. Once a monster has entered the
+        // shared Zone, however, that private mirror must not move or heal the
+        // public projection again. In particular, a later personal snapshot can
+        // carry a different transform while the Zone-native monster is still
+        // alive; clients then click the displayed tile and the Zone silently
+        // rejects the attack against its object at another tile.
+        //
+        // Snapshot the single-writer Zone state before borrowing the map layer,
+        // then re-apply its combat/transform fields after merging richer Crystal
+        // metadata from the personal runtime.
+        let native_monsters = self
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map(&map_file_name))
+            .into_iter()
+            .map(|monster| (monster.object_id, monster))
+            .collect::<BTreeMap<_, _>>();
         let map = self.maps.entry(map_file_name).or_default();
         for mut entity in entities {
+            let native_monster = (entity.kind == WorldEntityKind::Monster)
+                .then(|| native_monsters.get(&entity.object_id))
+                .flatten();
+            if native_monster.is_some_and(|monster| !monster.dead && monster.hp > 0) {
+                map.removed_entity_ids.remove(&entity.object_id);
+            }
             if !map.removed_entity_ids.contains(&entity.object_id) {
                 if let Some(dead) = map.dead_entity_ids.get(&entity.object_id) {
                     entity.dead = true;
@@ -2582,9 +2605,29 @@ impl SharedInProcessZoneState {
                         entity.hp = Some(max_hp);
                     }
                 }
-                let entity = merge_shared_entity_state(map.entities.get(&entity.object_id), entity);
+                let mut entity =
+                    merge_shared_entity_state(map.entities.get(&entity.object_id), entity);
+                if let Some(monster) = native_monster {
+                    reconcile_shared_entity_with_native_monster(map, &mut entity, monster);
+                }
                 map.entities.insert(entity.object_id, entity);
             }
+        }
+
+        // A personal viewport can omit an already-shared monster. Reconcile the
+        // retained map entry as well so absence from this particular snapshot
+        // cannot leave a stale client-visible transform behind.
+        for monster in native_monsters.values() {
+            if monster.dead && map.removed_entity_ids.contains(&monster.object_id) {
+                continue;
+            }
+            let Some(mut entity) = map.entities.remove(&monster.object_id) else {
+                continue;
+            };
+            if entity.kind == WorldEntityKind::Monster {
+                reconcile_shared_entity_with_native_monster(map, &mut entity, monster);
+            }
+            map.entities.insert(entity.object_id, entity);
         }
 
         for drop in ground_drops {
@@ -3054,28 +3097,45 @@ impl SharedInProcessZoneState {
         let Some(map) = self.maps.get(map_file_name) else {
             return true;
         };
-        let target = point_in_direction(
-            &Point {
-                x: picker.x,
-                y: picker.y,
-            },
-            direction,
-        );
-        let mut dead_shared_corpses = map
-            .entities
-            .values()
-            .filter(|entity| {
+        let points = shared_harvest_scan_points(picker, direction);
+        let mut found_corpse = false;
+        for point in points {
+            for entity in map.entities.values().filter(|entity| {
                 entity.kind == WorldEntityKind::Monster
-                    && entity.x == target.x
-                    && entity.y == target.y
+                    && entity.x == point.x
+                    && entity.y == point.y
                     && !map.removed_entity_ids.contains(&entity.object_id)
                     && (entity.dead || entity.hp.is_some_and(|hp| hp <= 0))
-            })
-            .peekable();
-        if dead_shared_corpses.peek().is_none() {
-            return true;
+            }) {
+                found_corpse = true;
+                if !map.harvested_entity_ids.contains(&entity.object_id) {
+                    return true;
+                }
+            }
         }
-        dead_shared_corpses.any(|entity| !map.harvested_entity_ids.contains(&entity.object_id))
+        !found_corpse
+    }
+
+    fn shared_harvest_target_snapshot(
+        &self,
+        map_file_name: &str,
+        picker: &WorldEntitySnapshot,
+        direction: MirDirection,
+    ) -> Option<WorldEntitySnapshot> {
+        let map = self.maps.get(map_file_name)?;
+        for point in shared_harvest_scan_points(picker, direction) {
+            if let Some(entity) = map.entities.values().find(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && entity.x == point.x
+                    && entity.y == point.y
+                    && !map.removed_entity_ids.contains(&entity.object_id)
+                    && !map.harvested_entity_ids.contains(&entity.object_id)
+                    && (entity.dead || entity.hp.is_some_and(|hp| hp <= 0))
+            }) {
+                return Some(entity.clone());
+            }
+        }
+        None
     }
 
     fn shared_entities(&self, map_file_name: &str) -> Vec<WorldEntitySnapshot> {
@@ -3324,7 +3384,48 @@ impl SharedInProcessZoneState {
             // players receive, otherwise a world-event monster can move next to
             // a player while targeted actions still resolve against its spawn
             // position.
-            self.apply_shared_entity_packets(&map_file_name, packets);
+            // `ObjectRemove` is overloaded by the Crystal protocol: the Zone
+            // emits it both when an object truly ceases to exist and when it
+            // merely leaves one recipient's AOI. This map layer is the global
+            // action index for the whole map, not that recipient's viewport.
+            // Keep observer-local removes out of the global tombstone set while
+            // the single-writer Zone still retains the object. Otherwise a
+            // moving monster can reappear as a legacy projection with no native
+            // combat target and soak attacks indefinitely.
+            let zone_key = ZoneKey::for_map(&map_file_name);
+            let visibility_only_remove_ids = self
+                .zone_manager
+                .zone(&zone_key)
+                .map(|zone| {
+                    packets
+                        .iter()
+                        .filter_map(|packet| match packet {
+                            ServerPacket::ObjectRemove { object_id }
+                                if zone.retains_object_id(*object_id) =>
+                            {
+                                Some(*object_id)
+                            }
+                            _ => None,
+                        })
+                        .collect::<BTreeSet<_>>()
+                })
+                .unwrap_or_default();
+            if visibility_only_remove_ids.is_empty() {
+                self.apply_shared_entity_packets(&map_file_name, packets);
+            } else {
+                let global_packets = packets
+                    .iter()
+                    .filter(|packet| {
+                        !matches!(
+                            packet,
+                            ServerPacket::ObjectRemove { object_id }
+                                if visibility_only_remove_ids.contains(object_id)
+                        )
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>();
+                self.apply_shared_entity_packets(&map_file_name, &global_packets);
+            }
         }
         for packet in packets {
             match packet {
@@ -4331,6 +4432,46 @@ fn merge_shared_entity_state(
     incoming
 }
 
+fn reconcile_shared_entity_with_native_monster(
+    map: &mut ZoneMapSnapshotLayer,
+    entity: &mut WorldEntitySnapshot,
+    monster: &ZoneNativeMonsterSnapshot,
+) {
+    let was_dead = entity.dead
+        || entity.hp.is_some_and(|hp| hp <= 0)
+        || map.dead_entity_ids.contains_key(&monster.object_id);
+    entity.x = monster.position.x;
+    entity.y = monster.position.y;
+    entity.hp = Some(monster.hp.max(0));
+    entity.max_hp = Some(monster.max_hp.max(1));
+    entity.dead = monster.dead || monster.hp <= 0;
+
+    if entity.dead {
+        entity.hp = Some(0);
+        map.revived_entity_ids.remove(&monster.object_id);
+        map.dead_entity_ids.insert(
+            monster.object_id,
+            SharedDeadEntityState {
+                location: Some(monster.position.clone()),
+                direction: Some(entity.direction),
+            },
+        );
+        return;
+    }
+
+    map.removed_entity_ids.remove(&monster.object_id);
+    map.dead_entity_ids.remove(&monster.object_id);
+    if was_dead {
+        // Normally ObjectRevived already performs these transitions. Keep the
+        // map self-healing if a snapshot is read between the single-writer
+        // state change and its fan-out packet, without treating an arbitrary
+        // legacy ObjectMonster packet as a revive.
+        map.revived_entity_ids.insert(monster.object_id);
+        map.committed_death_drop_anchors.remove(&monster.object_id);
+        map.harvested_entity_ids.remove(&monster.object_id);
+    }
+}
+
 fn simple_world_entity_sprite_snapshot(
     library_root: &str,
     image: u16,
@@ -4771,6 +4912,55 @@ fn point_in_direction(point: &Point, direction: MirDirection) -> Point {
         x: point.x + dx,
         y: point.y + dy,
     }
+}
+
+fn shared_harvest_scan_points(picker: &WorldEntitySnapshot, direction: MirDirection) -> Vec<Point> {
+    let front = point_in_direction(
+        &Point {
+            x: picker.x,
+            y: picker.y,
+        },
+        direction,
+    );
+    // Mirror SimulationSession::harvest_target_in_direction: first inspect the
+    // facing cell, then the eight cells surrounding it. Crystal's skinning
+    // reach is wider than a single exact coordinate, and the late death anchor
+    // can legitimately differ by one movement cell from the rendered corpse.
+    vec![
+        front.clone(),
+        Point {
+            x: front.x - 1,
+            y: front.y - 1,
+        },
+        Point {
+            x: front.x,
+            y: front.y - 1,
+        },
+        Point {
+            x: front.x + 1,
+            y: front.y - 1,
+        },
+        Point {
+            x: front.x - 1,
+            y: front.y,
+        },
+        Point {
+            x: front.x + 1,
+            y: front.y,
+        },
+        Point {
+            x: front.x - 1,
+            y: front.y + 1,
+        },
+        Point {
+            x: front.x,
+            y: front.y + 1,
+        },
+        Point {
+            x: front.x + 1,
+            y: front.y + 1,
+        },
+    ]
 }
 
 fn direction_toward_points(from: &Point, to: &Point) -> Option<MirDirection> {
@@ -6053,6 +6243,21 @@ impl SharedInProcessZoneSessionRuntime {
             return;
         };
         let snapshot = self.inner.world_snapshot();
+        // A private-session monster/hazard tick can deliver the Crystal self
+        // death packet before that transition is reflected in the shared Zone.
+        // The Zone's pre-death HP (often the native-combat 1 HP floor) must not
+        // silently revive the private runtime on every following world tick:
+        // that used to emit Death/ObjectDied repeatedly and made TownRevive a
+        // no-op because the packet handler observed a living player. Preserve
+        // the acknowledged private death until an explicit revive emits
+        // ObjectRevived and synchronizes both authorities below.
+        let local_player_is_acknowledged_dead = snapshot.player_hp == Some(0)
+            && snapshot
+                .player_object_id
+                .is_some_and(|object_id| self.owner_dead_entity_ids.contains(&object_id));
+        if local_player_is_acknowledged_dead && hp > 0 {
+            return;
+        }
         if snapshot.player_hp != Some(hp) || snapshot.player_mp != Some(mp) {
             self.inner
                 .force_authoritative_player_vitals(Some(hp), Some(mp));
@@ -6149,17 +6354,26 @@ impl SharedInProcessZoneSessionRuntime {
             .iter()
             .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
             .cloned();
-        let shared_entities = snapshot
-            .entities
-            .iter()
-            .filter(|entity| matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Npc))
-            .filter(|entity| !self.owner_dead_entity_ids.contains(&entity.object_id))
-            .cloned()
-            .collect::<Vec<_>>();
-        let native_monster_spawns = shared_entities
+        let mut shared_entities = self.inner.current_map_shared_entity_snapshots();
+        // Personal world snapshots intentionally contain only the player's
+        // current Crystal data range. Seed every configured NPC and native
+        // monster on the active map into the shared Zone up front so
+        // low-latency movement can reveal distant world objects through AOI
+        // without requiring an unrelated personal-session command first.
+        shared_entities.retain(|entity| !self.owner_dead_entity_ids.contains(&entity.object_id));
+        shared_entities.sort_by_key(|entity| entity.object_id);
+        shared_entities.dedup_by_key(|entity| entity.object_id);
+        let mut native_monster_spawns = shared_entities
             .iter()
             .filter(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
             .filter_map(|entity| self.inner.zone_monster_spawn_snapshot(entity.object_id))
+            .collect::<Vec<_>>();
+        native_monster_spawns.sort_by_key(|spawn| spawn.object_id);
+        native_monster_spawns.dedup_by_key(|spawn| spawn.object_id);
+        let shared_npc_spawn_packets = shared_entities
+            .iter()
+            .filter(|entity| entity.kind == WorldEntityKind::Npc)
+            .filter_map(shared_entity_spawn_packet)
             .collect::<Vec<_>>();
         let map_hazard_config = self.inner.current_map_hazard_config();
         let shared_entity_ids = shared_entities
@@ -6269,12 +6483,28 @@ impl SharedInProcessZoneSessionRuntime {
                             now_ms,
                         }),
                 );
-                for monster in &native_monster_spawns {
-                    outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SpawnMonster {
-                        session_id: session_id.clone(),
-                        monster: monster.clone(),
-                        now_ms,
-                    }));
+                if !shared_npc_spawn_packets.is_empty() {
+                    outbounds.extend(zone_state.zone_manager.handle(
+                        ZoneCommand::SyncSharedObjects {
+                            session_id: session_id.clone(),
+                            packets: shared_npc_spawn_packets.clone(),
+                            // StartGame/map-transfer already returns the owner's
+                            // initial viewport. Seed the shared Zone for later
+                            // movement and other observers without duplicating
+                            // those packets back to this client.
+                            include_owner: false,
+                            now_ms,
+                        },
+                    ));
+                }
+                if !native_monster_spawns.is_empty() {
+                    outbounds.extend(zone_state.zone_manager.handle(
+                        ZoneCommand::SyncNativeMonsters {
+                            session_id: session_id.clone(),
+                            monsters: native_monster_spawns.clone(),
+                            now_ms,
+                        },
+                    ));
                 }
                 if let Some((lightning, fire, lightning_damage, fire_damage)) = map_hazard_config {
                     outbounds.extend(zone_state.zone_manager.handle(
@@ -6355,12 +6585,28 @@ impl SharedInProcessZoneSessionRuntime {
                         now_ms,
                     }),
             );
-            for monster in &native_monster_spawns {
-                outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SpawnMonster {
-                    session_id: session_id.clone(),
-                    monster: monster.clone(),
-                    now_ms,
-                }));
+            if !shared_npc_spawn_packets.is_empty() {
+                outbounds.extend(
+                    zone_state
+                        .zone_manager
+                        .handle(ZoneCommand::SyncSharedObjects {
+                            session_id: session_id.clone(),
+                            packets: shared_npc_spawn_packets,
+                            include_owner: true,
+                            now_ms,
+                        }),
+                );
+            }
+            if !native_monster_spawns.is_empty() {
+                outbounds.extend(
+                    zone_state
+                        .zone_manager
+                        .handle(ZoneCommand::SyncNativeMonsters {
+                            session_id: session_id.clone(),
+                            monsters: native_monster_spawns,
+                            now_ms,
+                        }),
+                );
             }
             let (
                 zone_packets,
@@ -6384,6 +6630,7 @@ impl SharedInProcessZoneSessionRuntime {
             .expect("shared zone movement session mutex should not be poisoned")
             .activate(key, map_file_name, cached_map_transfers);
         self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
         packets.extend(self.apply_zone_player_damages(player_damages));
@@ -6437,6 +6684,60 @@ impl SharedInProcessZoneSessionRuntime {
     fn current_zone_session_id(&self) -> Option<SessionId> {
         self.current_presence_key()
             .map(|key| SharedInProcessZoneState::zone_session_id_for_key(&key))
+    }
+
+    fn sync_newly_active_private_monsters_to_zone(&mut self) -> Vec<ServerPacket> {
+        let Some(session_id) = self.current_zone_session_id() else {
+            return Vec::new();
+        };
+        self.inner.reconcile_current_map_monster_activation();
+        let snapshot = self.inner.world_snapshot();
+        let Some(map_file_name) = snapshot.map_file_name.as_deref() else {
+            return Vec::new();
+        };
+        let active_monsters = self
+            .inner
+            .current_map_shared_entity_snapshots()
+            .into_iter()
+            .filter(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && !entity.dead
+                    && !entity.hp.is_some_and(|hp| hp <= 0)
+                    && !self.owner_dead_entity_ids.contains(&entity.object_id)
+            })
+            .collect::<Vec<_>>();
+        let zone_key = ZoneKey::for_map(map_file_name);
+        let missing_object_ids = {
+            let zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            active_monsters
+                .iter()
+                .filter(|entity| {
+                    !zone_state
+                        .zone_manager
+                        .zone(&zone_key)
+                        .is_some_and(|zone| zone.retains_object_id(entity.object_id))
+                })
+                .map(|entity| entity.object_id)
+                .collect::<Vec<_>>()
+        };
+        let monsters = missing_object_ids
+            .into_iter()
+            .filter_map(|object_id| self.inner.zone_monster_spawn_snapshot(object_id))
+            .collect::<Vec<_>>();
+        if monsters.is_empty() {
+            return Vec::new();
+        }
+        self.dispatch_zone_player_command(
+            ZoneCommand::SyncNativeMonsters {
+                session_id,
+                monsters,
+                now_ms: Self::zone_now_ms(),
+            },
+            false,
+        )
     }
 
     fn authoritative_self_entity_for_snapshot(
@@ -6535,6 +6836,7 @@ impl SharedInProcessZoneSessionRuntime {
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
         let (claim_packets, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
@@ -6553,6 +6855,7 @@ impl SharedInProcessZoneSessionRuntime {
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
         let (claim_packets, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
@@ -6867,6 +7170,7 @@ impl SharedInProcessZoneSessionRuntime {
                 ZoneCommand::SyncSharedObjects {
                     session_id: session_id.clone(),
                     packets: seed_packets,
+                    include_owner: false,
                     now_ms: Self::zone_now_ms(),
                 },
                 false,
@@ -7246,10 +7550,11 @@ impl SharedInProcessZoneSessionRuntime {
                 })
                 .flatten();
             let direction = packet_direction.or_else(|| {
-                let self_entity = snapshot
-                    .entities
-                    .iter()
-                    .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)?;
+                // Low-latency movement advances the shared Zone before the
+                // personal Session mirror. Derive implicit melee direction
+                // from the authoritative presence, otherwise adjacent attacks
+                // can be aimed from an old tile and silently fail Zone range.
+                let self_entity = self.authoritative_self_entity_for_snapshot(&snapshot)?;
                 direction_toward_points(
                     &Point {
                         x: self_entity.x,
@@ -7549,6 +7854,22 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 
+    fn apply_shared_harvest_target_to_local(&mut self, direction: MirDirection) -> bool {
+        let snapshot = self.inner.world_snapshot();
+        let Some(map_file_name) = snapshot.map_file_name.as_deref() else {
+            return false;
+        };
+        let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
+            return false;
+        };
+        let target = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .shared_harvest_target_snapshot(map_file_name, &self_entity, direction);
+        target.is_some_and(|entity| self.inner.apply_shared_entity_snapshot(&entity))
+    }
+
     fn shared_npc_entity(&self, object_id: u32) -> Option<WorldEntitySnapshot> {
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
@@ -7754,6 +8075,7 @@ impl SharedInProcessZoneSessionRuntime {
                 self.apply_zone_transform(execution.transform);
                 let mut packets = execution.packets;
                 if matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. }) {
+                    packets.extend(self.sync_newly_active_private_monsters_to_zone());
                     packets.extend(self.apply_zone_current_position_map_transfer());
                 }
                 Some(packets)
@@ -8417,6 +8739,17 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let is_transfer_map_command = matches!(&command, WorldCommand::TransferMap { .. });
         let is_authoritative_move_to = matches!(&command, WorldCommand::MoveTo { .. });
         let is_handoff_transform = matches!(&command, WorldCommand::ApplyHandoffTransform { .. });
+        let is_town_revive = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::TownRevive)
+        );
+        // The browser can already have received the private Crystal death while
+        // the shared Zone still retains its native-combat 1 HP floor. Snapshot
+        // that presented death before any Zone reconciliation: TownRevive must
+        // execute against it instead of silently turning the player alive just
+        // before the packet handler checks `Dead`.
+        let revives_presented_private_death =
+            is_town_revive && self.inner.world_snapshot().player_hp == Some(0);
         let applies_native_state = matches!(
             &command,
             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
@@ -8488,12 +8821,26 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             &command,
             WorldCommand::PickUp { .. }
                 | WorldCommand::DropItem { .. }
+                | WorldCommand::Interact { .. }
+                | WorldCommand::SelectNpcDialog { .. }
+                | WorldCommand::SubmitNpcInput { .. }
                 | WorldCommand::ClientPacket(
                     ClientPacket::PickUp
+                        | ClientPacket::Harvest { .. }
                         | ClientPacket::DropGold { .. }
                         | ClientPacket::DropItem { .. }
+                        | ClientPacket::CallNpc { .. }
+                        | ClientPacket::NpcConfirmInput { .. }
                 )
         );
+        // Shared action gates must observe the same authoritative transform as
+        // the personal SimulationSession command they guard. Low-latency Zone
+        // movement can leave the private mirror several tiles behind; checking
+        // Harvest availability before this sync silently rejects a corpse that
+        // is directly in front of the real player.
+        if syncs_inner_position_before_session_execute {
+            self.force_inner_to_current_zone_transform();
+        }
         let shared_intelligent_creature_pickup = match &command {
             WorldCommand::ClientPacket(ClientPacket::IntelligentCreaturePickup {
                 mouse_mode,
@@ -8568,6 +8915,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             }
             _ => None,
         };
+        let shared_harvest_direction = match &command {
+            WorldCommand::ClientPacket(ClientPacket::Harvest { direction }) => Some(*direction),
+            _ => None,
+        };
         let needs_shared_action_snapshot = matches!(
             &command,
             WorldCommand::Attack { .. }
@@ -8587,7 +8938,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             packets.extend(self.apply_pending_shared_rental_packets());
             packets
         };
-        if !is_low_latency_zone_packet {
+        if !is_low_latency_zone_packet && !revives_presented_private_death {
             // Damage/heal outbounds are deltas used for client packets. The
             // shared Zone is the exact vitals authority, so reconcile after
             // consuming them; otherwise a delayed pre-revive damage delta can
@@ -8609,6 +8960,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if !unavailable_shared_target {
             if let Some(object_id) = shared_action_target_id {
                 self.apply_shared_action_target_snapshot(object_id);
+            } else if let Some(direction) = shared_harvest_direction {
+                // Harvest only needs the authoritative corpse in front of the
+                // player. Reconciling every shared monster advances the
+                // personal compatibility runtime once per entity; on a dense
+                // map that can run dozens of unrelated AI ticks (and even kill
+                // the private player) before the Harvest command executes.
+                self.apply_shared_harvest_target_to_local(direction);
             } else if needs_shared_action_snapshot {
                 self.apply_shared_current_map_monsters_to_local();
             }
@@ -8617,6 +8975,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.apply_shared_npc_saved_values_to_local();
             self.apply_shared_npc_random_seed_to_local();
         }
+        // Snapshot reconciliation can advance the private runtime while
+        // materializing a shared target. Re-assert the Zone transform at the
+        // actual command boundary as well as before the shared-action gate.
         if syncs_inner_position_before_session_execute {
             self.force_inner_to_current_zone_transform();
         }
@@ -8783,6 +9144,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         {
             self.force_next_zone_transform_sync = true;
             self.owner_dead_entity_ids.clear();
+        }
+        if is_town_revive
+            && packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::Revived))
+        {
+            self.force_next_zone_transform_sync = true;
         }
         if removes_presence {
             self.owner_dead_entity_ids.clear();
@@ -10219,6 +10587,205 @@ mod tests {
     }
 
     #[test]
+    fn observer_aoi_remove_does_not_tombstone_retained_native_monster_globally() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "aoi-remove", "Observer");
+        let identity = runtime
+            .inner
+            .active_identity()
+            .expect("started session should expose an identity");
+        let key = ZonePresenceKey::from_identity(&identity);
+
+        let mut state = zone_state.lock().expect("shared zone state should lock");
+        let native = state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .into_iter()
+            .find(|monster| !monster.dead && monster.hp > 0)
+            .expect("started shared Zone should retain a native monster");
+        assert!(state
+            .map_layer(Some("0"))
+            .and_then(|map| map.entities.get(&native.object_id).cloned())
+            .is_some());
+
+        state.apply_zone_packets_to_map_layer(
+            &key,
+            &[ServerPacket::ObjectRemove {
+                object_id: native.object_id,
+            }],
+        );
+
+        let projected = state
+            .map_layer(Some("0"))
+            .and_then(|map| map.entities.get(&native.object_id).cloned())
+            .expect("observer-local remove must not delete the zone-wide action target");
+        assert_eq!(projected.hp, Some(native.hp));
+        assert!(!projected.dead);
+        assert!(state.shared_entity_allows_action("0", native.object_id));
+    }
+
+    #[test]
+    fn shared_zone_seeds_current_map_npcs_for_later_owner_aoi_entry() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-aoi-seed", "Walker");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session");
+
+        let mut packets = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: Point { x: 324, y: 262 },
+                direction: MirDirection::UpLeft,
+            },
+            false,
+        );
+        packets.extend(runtime.sync_zone_snapshot());
+
+        assert!(
+            zone_state
+                .lock()
+                .expect("shared zone state should lock")
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .is_some_and(|zone| zone.retains_object_id(26)),
+            "static NPCs outside the StartGame viewport must remain in the Zone for later AOI entry"
+        );
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectNpc { info }
+                if info.object_id == 26
+                    && info.name == "MirGuide_Peter"
+                    && info.location == (Point { x: 328, y: 258 })
+        )));
+    }
+
+    #[test]
+    fn shared_zone_seeds_distant_current_map_monsters_for_later_owner_aoi_entry() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "monster-aoi-seed", "Walker");
+
+        let forest_yeti_group = mir2_game_data::crystal_map_respawns_by_file_name("0")
+            .expect("map 0 should have Crystal respawns")
+            .respawns
+            .into_iter()
+            .find(|respawn| {
+                respawn.monster_name == "ForestYeti"
+                    && respawn.location == (Point { x: 110, y: 425 })
+            })
+            .expect("map 0 should have the q22 ForestYeti group");
+        let target_position =
+            mir2_simulation::crystal_world_respawn_spawns("0", &forest_yeti_group)
+                .into_iter()
+                .next()
+                .map(|(_, position, _)| position)
+                .expect("q22 ForestYeti group should contain a walkable spawn");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session");
+
+        let mut packets = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: Point {
+                    x: target_position.x.saturating_sub(4),
+                    y: target_position.y.saturating_sub(4),
+                },
+                direction: MirDirection::DownRight,
+            },
+            false,
+        );
+        packets.extend(runtime.sync_newly_active_private_monsters_to_zone());
+        let forest_yeti = runtime
+            .inner
+            .current_map_shared_entity_snapshots()
+            .into_iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && entity.name == "ForestYeti"
+                    && entity.x.abs_diff(target_position.x) <= 20
+                    && entity.y.abs_diff(target_position.y) <= 20
+            })
+            .expect("moving toward q22 should activate a nearby ForestYeti in the private pool");
+
+        assert!(
+            zone_state
+                .lock()
+                .expect("shared zone state should lock")
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .is_some_and(|zone| zone.retains_object_id(forest_yeti.object_id)),
+            "a newly activated distant monster must be promoted into the shared Zone"
+        );
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.object_id == forest_yeti.object_id
+                    && info.name == "ForestYeti"
+        )));
+    }
+
+    #[test]
+    fn shared_map_sync_preserves_zone_native_monster_authority() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "native-map-authority", "Authority");
+
+        let (native, mut stale_private) = {
+            let state = zone_state.lock().expect("shared zone state should lock");
+            let native = state
+                .zone_manager
+                .native_monster_snapshots(&ZoneKey::for_map("0"))
+                .into_iter()
+                .find(|monster| !monster.dead && monster.hp > 1)
+                .expect("started shared Zone should contain a live native monster");
+            let stale_private = state
+                .maps
+                .get("0")
+                .and_then(|map| map.entities.get(&native.object_id))
+                .cloned()
+                .expect("native monster should have a shared map projection");
+            (native, stale_private)
+        };
+
+        stale_private.x = stale_private.x.saturating_add(37);
+        stale_private.y = stale_private.y.saturating_add(29);
+        stale_private.hp = Some(1);
+        stale_private.dead = false;
+        {
+            let mut state = zone_state.lock().expect("shared zone state should lock");
+            state.sync_map_layer(
+                "0".to_string(),
+                vec![stale_private],
+                BTreeSet::new(),
+                Vec::new(),
+                BTreeSet::new(),
+            );
+            let projected = state
+                .map_layer(Some("0"))
+                .and_then(|map| map.entities.get(&native.object_id).cloned())
+                .expect("native monster projection should remain present");
+            assert_eq!(
+                (projected.x, projected.y),
+                (native.position.x, native.position.y)
+            );
+            assert_eq!(projected.hp, Some(native.hp));
+            assert_eq!(projected.max_hp, Some(native.max_hp));
+            assert_eq!(projected.dead, native.dead);
+            assert!(state.shared_entity_allows_action("0", native.object_id));
+        }
+    }
+
+    #[test]
     fn zone_monster_spawn_from_shared_entity_restores_crystal_neutral_ai() {
         let mut guard = shared_monster_entity(9001);
         guard.name = "Royal_Guard".to_string();
@@ -11378,6 +11945,7 @@ mod tests {
         let drop = shared_gold_drop(9101, 329, 269, Some(current_zone_object_id), Some(100));
         let award = ZoneMonsterKillAward {
             monster_object_id: 9100,
+            killed_at_ms: 1_000,
             monster_name: "Field Wasp".to_string(),
             experience: 6,
             drops: vec![drop.clone()],
@@ -11424,6 +11992,7 @@ mod tests {
 
         let packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
             monster_object_id: 9100,
+            killed_at_ms: 1_000,
             monster_name: "Field Wasp".to_string(),
             experience: 6,
             drops: Vec::new(),
@@ -11544,6 +12113,7 @@ mod tests {
                 identity: wrong_identity,
                 command: SharedAccountInventoryCommand::MonsterKillAward(ZoneMonsterKillAward {
                     monster_object_id: 9100,
+                    killed_at_ms: 1_000,
                     monster_name: "Field Wasp".to_string(),
                     experience: 6,
                     drops: Vec::new(),
@@ -11619,6 +12189,7 @@ mod tests {
             identity: identity.clone(),
             command: SharedAccountInventoryCommand::MonsterKillAward(ZoneMonsterKillAward {
                 monster_object_id: 9100,
+                killed_at_ms: 1_000,
                 monster_name: "Field Wasp".to_string(),
                 experience: 6,
                 drops: Vec::new(),
@@ -11638,9 +12209,31 @@ mod tests {
         );
         assert_eq!(
             service.boss_reward_audits(),
-            vec![boss_audit],
+            vec![boss_audit.clone()],
             "an idempotent retry must not duplicate the Boss reward audit"
         );
+
+        let respawn_award = service.commit(
+            &mut runtime.inner,
+            SharedAccountInventoryCommandEnvelope {
+                identity: identity.clone(),
+                command: SharedAccountInventoryCommand::MonsterKillAward(ZoneMonsterKillAward {
+                    monster_object_id: 9100,
+                    killed_at_ms: 2_000,
+                    monster_name: "Field Wasp".to_string(),
+                    experience: 6,
+                    drops: Vec::new(),
+                    boss_audit: None,
+                }),
+            },
+        );
+        assert!(respawn_award.committed);
+        assert_eq!(
+            runtime.inner.world_snapshot().player_experience,
+            before_experience + 12,
+            "a respawned monster reuses its object id but is a distinct reward event"
+        );
+        assert_eq!(service.boss_reward_audits(), vec![boss_audit]);
 
         let self_entity = runtime
             .inner
@@ -11881,6 +12474,7 @@ mod tests {
 
         let award_packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
             monster_object_id: 9100,
+            killed_at_ms: 1_000,
             monster_name: "Field Wasp".to_string(),
             experience: 6,
             drops: Vec::new(),
@@ -13531,6 +14125,34 @@ mod tests {
     }
 
     #[test]
+    fn shared_zone_state_resolves_harvest_target_across_crystal_front_scan() {
+        let mut state = SharedInProcessZoneState::new();
+        let mut corpse = shared_monster_entity(77);
+        corpse.x = 330;
+        corpse.y = 270;
+        corpse.hp = Some(0);
+        corpse.dead = true;
+        let picker = shared_picker_entity(101, 328, 269);
+
+        state.sync_map_layer(
+            "0".to_string(),
+            vec![corpse],
+            BTreeSet::new(),
+            Vec::new(),
+            BTreeSet::new(),
+        );
+
+        assert!(state.shared_harvest_allows_action("0", &picker, MirDirection::Right));
+        assert_eq!(
+            state
+                .shared_harvest_target_snapshot("0", &picker, MirDirection::Right)
+                .map(|entity| entity.object_id),
+            Some(77),
+            "the gateway resolver must mirror the personal Session's 3x3 scan around the facing cell"
+        );
+    }
+
+    #[test]
     fn shared_zone_state_blocks_reharvest_when_harvest_packet_arrives_before_snapshot() {
         let mut state = SharedInProcessZoneState::new();
         let picker = shared_picker_entity(101, 328, 269);
@@ -14712,6 +15334,233 @@ mod tests {
     }
 
     #[test]
+    fn shared_harvest_syncs_private_player_to_authoritative_zone_transform() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "harvest-transform", "Harvester");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:0:285:630".to_string(),
+            })
+            .expect("harvest fixture transfer should execute");
+
+        let identity = runtime
+            .inner
+            .active_identity()
+            .expect("started session should expose an identity");
+        let key = ZonePresenceKey::from_identity(&identity);
+        let mut corpse = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .filter(|entity| entity.kind == WorldEntityKind::Monster && entity.name == "Deer")
+            .min_by_key(|entity| (entity.x - 285).abs().max((entity.y - 630).abs()))
+            .expect("harvest fixture should expose a Crystal Deer");
+        corpse.object_id = 9_500_002;
+        corpse.ai = Some(2);
+        corpse.x = 288;
+        corpse.y = 636;
+        corpse.direction = MirDirection::DownLeft;
+        corpse.hp = Some(0);
+        corpse.dead = true;
+        let mut unrelated_shared_monster = shared_monster_entity(9_500_003);
+        unrelated_shared_monster.name = "RakingCat".to_string();
+        unrelated_shared_monster.x = corpse.x + 8;
+        unrelated_shared_monster.y = corpse.y + 8;
+        let authoritative_position = Point {
+            x: corpse.x + 1,
+            y: corpse.y,
+        };
+        assert!(runtime.inner.apply_shared_entity_snapshot(&corpse));
+        runtime.inner.force_authoritative_player_transform(
+            authoritative_position.clone(),
+            MirDirection::Left,
+        );
+
+        {
+            let mut shared = zone_state.lock().expect("shared zone state should lock");
+            let session_id = shared
+                .zone_sessions
+                .get(&key)
+                .cloned()
+                .expect("harvest fixture should have joined the shared Zone");
+            let outbounds = shared
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: authoritative_position.clone(),
+                    direction: MirDirection::Left,
+                });
+            let _ = shared.dispatch_zone_outbounds(outbounds, Some(&key));
+            shared.sync_map_layer(
+                "0".to_string(),
+                vec![corpse.clone(), unrelated_shared_monster.clone()],
+                BTreeSet::new(),
+                Vec::new(),
+                BTreeSet::new(),
+            );
+        }
+
+        // Low-latency Zone movement can advance independently of the private
+        // SimulationSession. Reproduce that split by leaving the private
+        // player at its preceding coordinate before issuing Harvest.
+        runtime.inner.force_authoritative_player_transform(
+            Point {
+                x: authoritative_position.x + 8,
+                y: authoritative_position.y,
+            },
+            MirDirection::Left,
+        );
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Harvest {
+                direction: MirDirection::Left,
+            }))
+            .expect("shared harvest should execute");
+
+        assert!(
+            packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::UserLocation { location }
+                    if location.position == authoritative_position
+                        && location.direction == MirDirection::Left
+            )),
+            "Harvest must execute from the authoritative Zone transform: {packets:?}"
+        );
+        assert!(
+            packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::ObjectHarvest { .. })),
+            "the preflight gate must use the authoritative transform and permit the adjacent shared corpse: {packets:?}"
+        );
+        assert!(
+            !runtime
+                .inner
+                .world_snapshot()
+                .entities
+                .iter()
+                .any(|entity| entity.object_id == unrelated_shared_monster.object_id),
+            "Harvest must not materialize and tick unrelated shared monsters"
+        );
+
+        let mut all_packets = packets;
+        for _ in 0..6 {
+            if all_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { .. }))
+            {
+                break;
+            }
+            runtime
+                .execute(WorldCommand::Tick)
+                .expect("an interleaved client world tick should preserve the shared corpse");
+            let pass = runtime
+                .execute(WorldCommand::ClientPacket(ClientPacket::Harvest {
+                    direction: MirDirection::Left,
+                }))
+                .expect("subsequent shared harvest pass should execute");
+            assert!(
+                pass.iter()
+                    .any(|packet| matches!(packet, ServerPacket::ObjectHarvest { .. })),
+                "every accepted skinning pass must retain the shared corpse target: {pass:?}"
+            );
+            all_packets.extend(pass);
+        }
+        assert!(
+            all_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { .. })),
+            "the shared corpse must finish its multi-pass harvest lifecycle: {all_packets:?}"
+        );
+
+        let incarnation_packets = vec![
+            ServerPacket::ObjectRevived {
+                info: ObjectRevivedInfo {
+                    object_id: corpse.object_id,
+                    effect: true,
+                },
+            },
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: corpse.object_id,
+                    location: Point {
+                        x: corpse.x,
+                        y: corpse.y,
+                    },
+                    direction: corpse.direction,
+                    kind: 0,
+                },
+            },
+        ];
+        {
+            let mut shared = zone_state.lock().expect("shared zone state should lock");
+            shared.apply_shared_entity_packets("0", &incarnation_packets);
+            shared.queue_zone_packets(key, incarnation_packets.clone());
+        }
+        let pending = runtime.apply_pending_zone_packets();
+        assert!(pending.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == corpse.object_id
+        )));
+        let next_incarnation = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Harvest {
+                direction: MirDirection::Left,
+            }))
+            .expect("the respawned shared corpse should execute its first harvest pass");
+        assert!(
+            next_incarnation
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::ObjectHarvest { .. })),
+            "explicit Zone revive must reset the private compatibility harvest state: {next_incarnation:?}"
+        );
+    }
+
+    #[test]
+    fn shared_melee_direction_uses_authoritative_zone_transform() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "melee-direction", "Fighter");
+        let target = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && !entity.dead
+                    && entity.hp.is_some_and(|hp| hp > 0)
+            })
+            .expect("starter scene should expose a live monster");
+        let key = runtime
+            .current_presence_key()
+            .expect("started runtime should have a shared presence");
+        let authoritative_position = Point {
+            x: target.x + 1,
+            y: target.y,
+        };
+        zone_state
+            .lock()
+            .expect("shared zone state should lock")
+            .update_player_transform(&key, authoritative_position.clone(), MirDirection::Left);
+        runtime.inner.force_authoritative_player_transform(
+            Point {
+                x: target.x,
+                y: target.y + 8,
+            },
+            MirDirection::Up,
+        );
+
+        let prepared = runtime
+            .prepare_zone_native_player_attack(&WorldCommand::Attack {
+                object_id: target.object_id,
+            })
+            .expect("shared monster attack should resolve");
+
+        assert_eq!(prepared.direction, MirDirection::Left);
+    }
+
+    #[test]
     fn shared_in_process_registry_qa_apply_native_state_syncs_zone_transform() {
         let registry = ZoneRegistry::in_process();
         let mut session =
@@ -14760,6 +15609,90 @@ mod tests {
         assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
         assert_eq!((self_entity.x, self_entity.y), (335, 266));
         assert_eq!(self_entity.direction, MirDirection::UpRight);
+    }
+
+    #[test]
+    fn shared_in_process_registry_syncs_visible_paid_sailor_round_trip_into_zone() {
+        let registry = ZoneRegistry::in_process();
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        start_demo_character(&mut session);
+        let payload = r#"{
+            "character": {
+                "name": "BoatRouteFixture",
+                "level": 14,
+                "class": "Warrior",
+                "gender": "Male"
+            },
+            "mapFileName": "0",
+            "mapTitle": "BichonProvince",
+            "position": { "x": 251, "y": 676 },
+            "direction": "Down",
+            "hp": 85,
+            "maxHp": 85,
+            "mp": 40,
+            "maxMp": 40,
+            "experience": 0,
+            "maxExperience": 900,
+            "gold": 5000,
+            "credit": 0,
+            "inventoryItemsJson": [],
+            "beltItemsJson": [],
+            "storageItemsJson": [],
+            "equipmentItemsJson": []
+        }"#;
+        let _ = session.stage5_command("qa.applyNativeState", vec![payload.to_string()]);
+
+        let _ = session.interact(9);
+        assert!(session
+            .world_snapshot()
+            .active_npc_dialog
+            .as_ref()
+            .is_some_and(|dialog| dialog
+                .links
+                .iter()
+                .any(|link| link.target.eq_ignore_ascii_case("@brdmove"))));
+        let outbound_packets = session.select_npc_dialog_target("@brdmove");
+        assert!(outbound_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MapInformation { info } if info.file_name == "5"
+        )));
+        let outbound = session.world_snapshot();
+        let outbound_player = outbound
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("outbound player should remain in the shared Zone snapshot");
+        assert_eq!(outbound.map_file_name.as_deref(), Some("5"));
+        assert_eq!((outbound_player.x, outbound_player.y), (124, 353));
+        assert_eq!(outbound.gold, 3_000);
+
+        let _ = session.handle_packet(ClientPacket::Walk {
+            direction: MirDirection::Left,
+        });
+        let _ = session.interact(1169);
+        assert!(session
+            .world_snapshot()
+            .active_npc_dialog
+            .as_ref()
+            .is_some_and(|dialog| dialog
+                .links
+                .iter()
+                .any(|link| link.target.eq_ignore_ascii_case("@brdmove"))));
+        let return_packets = session.select_npc_dialog_target("@brdmove");
+        assert!(return_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MapInformation { info } if info.file_name == "0"
+        )));
+        let returned = session.world_snapshot();
+        let returned_player = returned
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("returned player should remain in the shared Zone snapshot");
+        assert_eq!(returned.map_file_name.as_deref(), Some("0"));
+        assert_eq!((returned_player.x, returned_player.y), (253, 673));
+        assert_eq!(returned.gold, 1_000);
     }
 
     #[test]
@@ -15310,6 +16243,250 @@ mod tests {
             ServerPacket::ObjectRevived { info } if info.object_id == player_id
         )));
         assert!(runtime.world_snapshot().player_hp.is_some_and(|hp| hp > 0));
+    }
+
+    #[test]
+    fn shared_in_process_town_revive_preserves_private_death_until_zone_sync() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "private-death-revive", "Survivor");
+        let player_id = runtime
+            .inner
+            .world_snapshot()
+            .player_object_id
+            .expect("started session should expose its local player id");
+        let bind_position = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .map(|entity| Point {
+                x: entity.x,
+                y: entity.y,
+            })
+            .expect("started session should expose its bind position");
+        let bind_map_file_name = runtime
+            .inner
+            .world_snapshot()
+            .map_file_name
+            .expect("started session should expose its bind map");
+
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:2:406:453".to_string(),
+            })
+            .expect("field transfer should execute");
+        assert_eq!(
+            runtime.inner.world_snapshot().map_file_name.as_deref(),
+            Some("2")
+        );
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started session should have a shared-zone session");
+
+        // Reproduce the production split-authority edge: a private world tick
+        // has killed the player and emitted the Crystal death markers while the
+        // shared Zone still retains its preceding positive HP value.
+        let mut death_packets = runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::Chat {
+                message: "@DIE".to_string(),
+                linked_items: Vec::new(),
+            }))
+            .expect("private death fixture should execute");
+        assert!(death_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Death { .. })));
+        runtime.filter_stale_owner_dead_entity_packets(&mut death_packets);
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
+        assert!(zone_state
+            .lock()
+            .expect("shared zone state should lock")
+            .zone_manager
+            .player_vitals(&session_id)
+            .is_some_and(|(hp, _, _)| hp > 0));
+
+        // A following personal tick must keep the acknowledged death instead
+        // of restoring the Zone's stale positive HP and emitting Death again.
+        let tick_packets = runtime
+            .execute(WorldCommand::Tick)
+            .expect("dead player tick should execute");
+        assert!(!tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Death { .. })));
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
+
+        // The self ObjectDied marker can be pruned by an intervening shared
+        // snapshot even though the browser-visible private death remains. The
+        // TownRevive command itself must still preserve that presented death
+        // across the pre-command Zone vitals reconciliation.
+        runtime.owner_dead_entity_ids.clear();
+
+        let revive_packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
+            .expect("town revive should execute");
+        assert!(revive_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Revived)));
+        assert!(revive_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == player_id
+        )));
+        assert!(revive_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MapInformation { info } if info.file_name == bind_map_file_name
+        )));
+        assert!(runtime.world_snapshot().player_hp.is_some_and(|hp| hp > 0));
+        assert_eq!(
+            runtime.world_snapshot().map_file_name.as_deref(),
+            Some(bind_map_file_name.as_str())
+        );
+        assert_eq!(
+            zone_state
+                .lock()
+                .expect("shared zone state should lock")
+                .zone_manager
+                .player_transform(&session_id)
+                .map(|(position, _)| position),
+            Some(bind_position)
+        );
+    }
+
+    #[test]
+    fn shared_gateway_dead_potion_requires_town_revive_and_logout_saves_zone_authority() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let config = GatewayConfig::default()
+            .with_crystal_world_runtime()
+            .with_platinum_176_profile();
+        let account_store = config.account_store.clone();
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner = InProcessWorldRuntime::new(config);
+        let account_id = "gateway-dead-potion-save";
+        start_new_runtime(&mut runtime, account_id, "PotionSentinel");
+        let identity = runtime
+            .inner
+            .active_identity()
+            .expect("started runtime should expose its authenticated identity");
+
+        let snapshot = runtime.inner.world_snapshot();
+        let potion_unique_id = snapshot
+            .inventory_items
+            .iter()
+            .find(|item| item.name == "(HP)DrugSmall")
+            .map(|item| item.unique_id)
+            .expect("Platinum starter inventory should contain one HP drug");
+        let start_position = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .map(|entity| Point {
+                x: entity.x,
+                y: entity.y,
+            })
+            .expect("started player should expose a position");
+
+        runtime
+            .execute(WorldCommand::ApplyHandoffTransform {
+                position: start_position.clone(),
+                direction: MirDirection::Down,
+                hp: Some(10),
+                mp: None,
+            })
+            .expect("fixture should lower authoritative HP");
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+                unique_id: potion_unique_id,
+                grid: MirGridType::Inventory,
+            }))
+            .expect("normal HP drug should queue its timed recovery");
+        runtime
+            .execute(WorldCommand::ApplyHandoffTransform {
+                position: start_position,
+                direction: MirDirection::Down,
+                hp: Some(0),
+                mp: None,
+            })
+            .expect("fixture should mark both private and Zone authorities dead");
+
+        let tick_packets = runtime
+            .execute(WorldCommand::Tick)
+            .expect("dead-player Gateway tick should execute");
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
+        assert_eq!(runtime.world_snapshot().player_hp, Some(0));
+        assert!(!tick_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Revived | ServerPacket::ObjectRevived { .. }
+        )));
+
+        let revive_packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
+            .expect("explicit TownRevive should execute through the Gateway");
+        assert!(revive_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Revived)));
+        assert!(runtime.world_snapshot().player_hp.is_some_and(|hp| hp > 0));
+
+        // Recreate the exact split that exists after low-latency Zone movement
+        // and combat: the shared Zone has the latest transform and vitals while
+        // the private compatibility runtime still holds older values. Logout
+        // must reconcile those authorities before the personal save is written.
+        let key = runtime
+            .current_presence_key()
+            .expect("revived player should retain a Zone presence");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("revived player should retain a Zone session");
+        let private_before_logout = runtime
+            .inner
+            .active_character_checkpoint()
+            .expect("active character should expose a checkpoint");
+        let desired_position = Point {
+            x: private_before_logout.position.x.saturating_add(7),
+            y: private_before_logout.position.y.saturating_add(5),
+        };
+        let saved_hp = 17;
+        let authoritative_position = {
+            let mut state = zone_state.lock().expect("shared zone state should lock");
+            let (_, max_hp, mp) = state
+                .zone_manager
+                .player_vitals(&session_id)
+                .expect("Zone should expose player vitals");
+            state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                session_id: session_id.clone(),
+                hp: saved_hp,
+                max_hp,
+                mp,
+            });
+            let outbounds = state.zone_manager.handle(ZoneCommand::SyncPlayerTransform {
+                session_id: session_id.clone(),
+                position: desired_position,
+                direction: MirDirection::Left,
+            });
+            let _ = state.dispatch_zone_outbounds(outbounds, Some(&key));
+            state
+                .zone_manager
+                .player_transform(&session_id)
+                .map(|(position, _)| position)
+                .expect("Zone should retain the authoritative transform")
+        };
+        assert_ne!(private_before_logout.hp, saved_hp);
+        assert_ne!(private_before_logout.position, authoritative_position);
+
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
+            .expect("logout should reconcile and persist Zone authority");
+        let store = account_store
+            .lock()
+            .expect("test account store should lock after logout");
+        let save = store
+            .accounts
+            .get(&identity.account_id)
+            .and_then(|account| account.saves.get(&identity.character_index))
+            .expect("logout should persist the active character");
+        assert_eq!(save.hp, saved_hp);
+        assert_eq!(save.position, authoritative_position);
+        assert_eq!(save.direction, MirDirection::Left);
     }
 
     #[test]
@@ -16194,6 +17371,59 @@ mod tests {
         )));
         assert_eq!(
             second
+                .world_snapshot()
+                .active_npc_dialog
+                .as_ref()
+                .map(|dialog| dialog.npc_object_id),
+            Some(shared_npc.object_id)
+        );
+    }
+
+    #[test]
+    fn shared_npc_interact_uses_authoritative_zone_transform_after_long_movement() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_new_runtime(&mut runtime, "npc-zone-transform", "Walker");
+        let shared_npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc)
+            .expect("shared runtime should expose an NPC");
+
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: format!(
+                    "crystal:0:{}:{}",
+                    shared_npc.x.saturating_sub(1),
+                    shared_npc.y
+                ),
+            })
+            .expect("test transfer should place the Zone player beside the NPC");
+
+        // Reproduce the real low-latency split: Zone movement has reached the
+        // NPC, while the personal compatibility Session still carries an old
+        // hunting-field transform. NPC distance checks must use the Zone
+        // position at the command boundary just like Harvest and pickup do.
+        runtime.inner.force_authoritative_player_transform(
+            Point {
+                x: shared_npc.x.saturating_add(8),
+                y: shared_npc.y.saturating_add(8),
+            },
+            MirDirection::Down,
+        );
+
+        let packets = runtime
+            .execute(WorldCommand::Interact {
+                object_id: shared_npc.object_id,
+            })
+            .expect("shared NPC interaction should execute");
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectChat { object_id, .. } if *object_id == shared_npc.object_id
+        )));
+        assert_eq!(
+            runtime
                 .world_snapshot()
                 .active_npc_dialog
                 .as_ref()

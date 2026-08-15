@@ -191,6 +191,45 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
 }
 
 #[test]
+fn synchronized_native_monsters_never_spawn_with_overlapping_hitboxes() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+
+    zone.handle(ZoneCommand::SyncNativeMonsters {
+        session_id: first,
+        monsters: vec![
+            native_monster_spawn(9_100, 336, 270),
+            native_monster_spawn(9_101, 336, 270),
+        ],
+        now_ms: 0,
+    });
+
+    let snapshots = zone.native_monster_snapshots();
+    let first_position = snapshots
+        .iter()
+        .find(|monster| monster.object_id == 9_100)
+        .expect("first synchronized monster")
+        .position
+        .clone();
+    let second_position = snapshots
+        .iter()
+        .find(|monster| monster.object_id == 9_101)
+        .expect("second synchronized monster")
+        .position
+        .clone();
+    assert_eq!(first_position, Point { x: 336, y: 270 });
+    assert_ne!(second_position, first_position);
+    assert!(
+        (second_position.x - first_position.x)
+            .abs()
+            .max((second_position.y - first_position.y).abs())
+            <= 1,
+        "overlapping source spawns should fan out to the nearest free tile"
+    );
+}
+
+#[test]
 fn zone_native_monster_preserves_crystal_move_speed_in_real_milliseconds() {
     let mut zone = zone();
     let first = session("first");
@@ -3605,6 +3644,7 @@ fn shared_object_action_uses_zone_object_aoi_not_same_map() {
     zone.handle(ZoneCommand::SyncSharedObjects {
         session_id: first.clone(),
         packets: vec![monster_spawn_packet(9001, 0, 331, 270)],
+        include_owner: false,
         now_ms: 0,
     });
 
@@ -3646,6 +3686,7 @@ fn shared_object_strike_rebases_local_self_results_to_zone_player() {
     zone.handle(ZoneCommand::SyncSharedObjects {
         session_id: first.clone(),
         packets: vec![monster_spawn_packet(9001, 0, 331, 270)],
+        include_owner: false,
         now_ms: 0,
     });
 
@@ -3698,6 +3739,7 @@ fn shared_object_health_updates_retained_state_for_late_joiner() {
     zone.handle(ZoneCommand::SyncSharedObjects {
         session_id: first.clone(),
         packets: vec![monster_spawn_packet(9001, 0, 331, 270)],
+        include_owner: false,
         now_ms: 0,
     });
     zone.handle(ZoneCommand::BroadcastSharedObjectPackets {
@@ -3855,6 +3897,22 @@ fn zone_native_monster_combat_kill_and_drop_are_authoritative() {
     assert_eq!(corpse.hp, 0);
     assert!(corpse.dead);
 
+    let mut walked_through_corpse = zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 1_300,
+    });
+    walked_through_corpse.extend(zone.tick(1_300));
+    assert!(
+        has_packet(&walked_through_corpse, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 331, y: 270 })
+        )),
+        "dead native monster must release collision: {walked_through_corpse:?}"
+    );
+
     let late = session("late");
     let late_join = zone.handle(ZoneCommand::Join(join("late", 103, "Late", 332, 271)));
     assert!(has_packet(&late_join, &late, |packet| matches!(
@@ -3888,6 +3946,153 @@ fn zone_native_monster_combat_kill_and_drop_are_authoritative() {
         ZoneOutbound::GroundDropClaimed { session_id, drop }
             if session_id == &first && drop.object_id == 9200
     )));
+}
+
+#[test]
+fn zone_native_monster_same_object_id_respawns_as_attackable_new_incarnation() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+
+    let mut initial = native_monster_spawn(9_101, 331, 270);
+    initial.drops.clear();
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: initial,
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_101,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    assert!(has_packet(&zone.tick(10), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_101
+    )));
+
+    let mut respawn = native_monster_spawn(9_101, 331, 270);
+    respawn.drops.clear();
+    let respawned = zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: respawn,
+        now_ms: 1_000,
+    });
+    assert!(has_packet(&respawned, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info }
+            if info.object_id == 9_101
+    )));
+    assert!(has_packet(&respawned, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == 9_101 && !info.dead
+    )));
+    let live = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.object_id == 9_101)
+        .expect("respawned monster should remain authoritative in the zone");
+    assert_eq!(live.hp, 20);
+    assert!(!live.dead);
+
+    let second_launch = zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_101,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 1_000,
+    });
+    assert!(has_packet(&second_launch, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 101
+    )));
+    assert!(has_packet(&zone.tick(1_000), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_101
+    )));
+}
+
+#[test]
+fn zone_native_harvestable_monster_cannot_respawn_before_object_harvested() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+
+    let initial = native_neutral_monster_spawn(9_102, "Deer", 2, 331, 270);
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: initial.clone(),
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_102,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    assert!(has_packet(&zone.tick(10), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_102
+    )));
+
+    let blocked = zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: initial.clone(),
+        now_ms: 500,
+    });
+    assert!(!has_packet(&blocked, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_102
+    )));
+    let corpse = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.object_id == 9_102)
+        .expect("unharvested Deer corpse should remain authoritative");
+    assert!(corpse.dead);
+    assert_eq!(corpse.hp, 0);
+
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first.clone(),
+        owner_local_object_id: 101,
+        packets: vec![ServerPacket::ObjectHarvested {
+            movement: ObjectMovement {
+                object_id: 9_102,
+                position: Point { x: 330, y: 270 },
+                direction: MirDirection::Right,
+            },
+        }],
+        now_ms: 600,
+    });
+    let respawned = zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: initial,
+        now_ms: 700,
+    });
+    assert!(has_packet(&respawned, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_102
+    )));
+    let live = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.object_id == 9_102)
+        .expect("harvested Deer should respawn as a new incarnation");
+    assert!(!live.dead);
+    assert!(live.hp > 0);
 }
 
 #[test]
@@ -7418,6 +7623,47 @@ fn zone_native_monster_tick_walks_toward_visible_player() {
 }
 
 #[test]
+fn living_native_monsters_do_not_walk_onto_the_same_tile() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn(9101, 332, 270),
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn(9100, 333, 270),
+        now_ms: 0,
+    });
+
+    let outbounds = zone.tick(0);
+
+    assert!(!has_packet(&outbounds, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement }
+            if movement.object_id == 9100 && movement.position == (Point { x: 332, y: 270 })
+    )));
+    let snapshots = zone.native_monster_snapshots();
+    assert_eq!(
+        snapshots
+            .iter()
+            .map(|monster| (monster.position.x, monster.position.y))
+            .collect::<BTreeSet<_>>()
+            .len(),
+        snapshots.len()
+    );
+    assert_eq!(
+        snapshots
+            .iter()
+            .find(|monster| monster.object_id == 9100)
+            .map(|monster| monster.position.clone()),
+        Some(Point { x: 333, y: 270 })
+    );
+}
+
+#[test]
 fn zone_native_neutral_guards_do_not_follow_player() {
     let mut zone = zone();
     let first = session("first");
@@ -8469,6 +8715,206 @@ fn session_applies_shared_monster_snapshot_to_local_runtime() {
 }
 
 #[test]
+fn session_materializes_missing_shared_deer_corpse_and_resets_it_on_respawn() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut shared_deer = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::Monster && entity.max_hp.is_some())
+        .expect("starter scene should expose a monster");
+    shared_deer.object_id = 9_500_001;
+    shared_deer.name = "Deer".to_string();
+    shared_deer.ai = Some(2);
+    shared_deer.max_hp = Some(25);
+    shared_deer.hp = Some(0);
+    shared_deer.dead = true;
+    shared_deer.sprite = None;
+    let corpse_position = Point {
+        x: shared_deer.x,
+        y: shared_deer.y,
+    };
+    session.force_authoritative_player_transform(
+        Point {
+            x: corpse_position.x + 1,
+            y: corpse_position.y,
+        },
+        MirDirection::Left,
+    );
+
+    assert!(session.apply_shared_entity_snapshot(&shared_deer));
+    let first = session.handle_packet(ClientPacket::Harvest {
+        direction: MirDirection::Left,
+    });
+    assert!(first.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectHarvest { movement }
+            if movement.position.x == corpse_position.x + 1
+                && movement.position.y == corpse_position.y
+    )));
+
+    let mut harvested = first;
+    for _ in 0..5 {
+        harvested.extend(session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Left,
+        }));
+    }
+    assert!(harvested.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectHarvested { movement }
+            if movement.object_id == shared_deer.object_id
+    )));
+
+    shared_deer.hp = shared_deer.max_hp.or(Some(25));
+    shared_deer.dead = false;
+    assert!(session.apply_shared_entity_snapshot(&shared_deer));
+    shared_deer.hp = Some(0);
+    shared_deer.dead = true;
+    assert!(session.apply_shared_entity_snapshot(&shared_deer));
+    let next_incarnation = session.handle_packet(ClientPacket::Harvest {
+        direction: MirDirection::Left,
+    });
+    assert!(next_incarnation
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectHarvest { .. })));
+}
+
+#[test]
+fn session_resets_shared_deer_harvest_state_on_explicit_zone_revive() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut shared_deer = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::Monster && entity.max_hp.is_some())
+        .expect("starter scene should expose a monster");
+    shared_deer.object_id = 9_500_004;
+    shared_deer.name = "Deer".to_string();
+    shared_deer.ai = Some(2);
+    shared_deer.max_hp = Some(25);
+    shared_deer.hp = Some(0);
+    shared_deer.dead = true;
+    shared_deer.sprite = None;
+    session.force_authoritative_player_transform(
+        Point {
+            x: shared_deer.x + 1,
+            y: shared_deer.y,
+        },
+        MirDirection::Left,
+    );
+
+    assert!(session.apply_shared_entity_snapshot(&shared_deer));
+    let mut first_incarnation = Vec::new();
+    for _ in 0..6 {
+        first_incarnation.extend(session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Left,
+        }));
+        if first_incarnation.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectHarvested { movement }
+                    if movement.object_id == shared_deer.object_id
+            )
+        }) {
+            break;
+        }
+    }
+    assert!(first_incarnation.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectHarvested { movement }
+            if movement.object_id == shared_deer.object_id
+    )));
+
+    session.apply_shared_monster_lifecycle_packets(&[ServerPacket::ObjectRevived {
+        info: ObjectRevivedInfo {
+            object_id: shared_deer.object_id,
+            effect: true,
+        },
+    }]);
+    assert!(session.apply_shared_entity_snapshot(&shared_deer));
+    let next_incarnation = session.handle_packet(ClientPacket::Harvest {
+        direction: MirDirection::Left,
+    });
+    assert!(next_incarnation
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectHarvest { .. })));
+}
+
+#[test]
+fn session_mirrors_zone_monster_death_until_explicit_revive() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let monster = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| {
+            entity.kind == WorldEntityKind::Monster
+                && !entity.dead
+                && entity.hp.is_some_and(|hp| hp > 0)
+        })
+        .expect("starter scene should expose a live scheduled monster");
+    let death_position = Point {
+        x: monster.x,
+        y: monster.y,
+    };
+
+    session.apply_shared_monster_lifecycle_packets(&[
+        ServerPacket::ObjectHealth {
+            info: ObjectHealthInfo {
+                object_id: monster.object_id,
+                percent: 0,
+                expire: 0,
+            },
+        },
+        ServerPacket::ObjectDied {
+            info: ObjectDiedInfo {
+                object_id: monster.object_id,
+                location: death_position.clone(),
+                direction: monster.direction,
+                kind: 0,
+            },
+        },
+    ]);
+
+    let corpse = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.object_id == monster.object_id)
+        .expect("shared death should retain the private corpse");
+    assert!(corpse.dead);
+    assert_eq!(corpse.hp, Some(0));
+    assert_eq!((corpse.x, corpse.y), (death_position.x, death_position.y));
+    assert!(
+        session
+            .zone_monster_spawn_snapshot(monster.object_id)
+            .is_none(),
+        "a normal Session snapshot must not immediately respawn a Zone corpse"
+    );
+
+    session.apply_shared_monster_lifecycle_packets(&[ServerPacket::ObjectRevived {
+        info: ObjectRevivedInfo {
+            object_id: monster.object_id,
+            effect: true,
+        },
+    }]);
+    let revived = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.object_id == monster.object_id)
+        .expect("explicit Zone revive should retain the private mirror");
+    assert!(!revived.dead);
+    assert!(revived.hp.is_some_and(|hp| hp > 0));
+    assert!(session
+        .zone_monster_spawn_snapshot(monster.object_id)
+        .is_some());
+}
+
+#[test]
 fn each_joined_player_has_unique_object_id() {
     let mut zone = zone();
     let first = session("first");
@@ -9322,6 +9768,7 @@ fn aoi_grid_relocates_moving_shared_monster_before_visibility_diff() {
     let spawned = zone.handle(ZoneCommand::SyncSharedObjects {
         session_id: source.clone(),
         packets: vec![monster_spawn_packet(9_001, 0, 2, 0)],
+        include_owner: false,
         now_ms: 0,
     });
     assert!(has_packet(&spawned, &observer, |packet| matches!(

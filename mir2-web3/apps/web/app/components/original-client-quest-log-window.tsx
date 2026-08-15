@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
-import { originalAssetPath } from "../../lib/asset-url";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -87,6 +87,9 @@ export type QuestLogWindowProps = {
   onTrackQuest?: (questId: number) => void;
   onShareQuest?: (questId: number) => void;
   onAbandonQuest?: (questId: number) => void;
+  /** Crystal Quest Diary actions for quests which are not bound to a world NPC. */
+  onAcceptQuest?: (questId: number) => void;
+  onFinishQuest?: (questId: number, selectedItemIndex?: number) => void;
   onClose: () => void;
   /**
    * Lowercase class key of the local player. Rewrites class-blind onboarding copy
@@ -118,12 +121,15 @@ export function QuestLogWindow({
   onTrackQuest,
   onShareQuest,
   onAbandonQuest,
+  onAcceptQuest,
+  onFinishQuest,
   onClose,
   playerClass,
 }: QuestLogWindowProps) {
   const [stageFilter, setStageFilter] = useState<QuestStageFilter>("all");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedRewards, setSelectedRewards] = useState<Record<number, number>>({});
 
   const filtered = useMemo(
     () => quests.filter((quest) => stageFilter === "all" || quest.stage === stageFilter),
@@ -145,6 +151,14 @@ export function QuestLogWindow({
     }
     return visible[0] ?? filtered[0] ?? null;
   }, [filtered, quests, selectedId, stageFilter, visible]);
+  const selectedRewardIndex = selected ? selectedRewards[selected.questId] : undefined;
+  const needsRewardSelection = Boolean(selected?.rewards?.selectItems?.length);
+  const canFinishSelected = Boolean(
+    selected
+      && selected.stage === "readyToTurnIn"
+      && onFinishQuest
+      && (!needsRewardSelection || selectedRewardIndex !== undefined),
+  );
 
   useEffect(() => {
     setPage(0);
@@ -309,7 +323,18 @@ export function QuestLogWindow({
 
             <div style={style.rewardLabel}>{t("ui.questReward", [], "Reward")}</div>
             {selected.rewards ? (
-              <QuestRewardView t={t} rewards={selected.rewards} fallback={selected.rewardPreview} />
+              <QuestRewardView
+                t={t}
+                rewards={selected.rewards}
+                fallback={selected.rewardPreview}
+                selectedSelectionIndex={selectedRewardIndex}
+                onSelectReward={(selectionIndex) => {
+                  setSelectedRewards((current) => ({
+                    ...current,
+                    [selected.questId]: selectionIndex,
+                  }));
+                }}
+              />
             ) : (
               <p style={style.reward}>{selected.rewardPreview || t("ui.questNoReward", [], "No reward listed.")}</p>
             )}
@@ -320,6 +345,33 @@ export function QuestLogWindow({
       </div>
 
       <div style={style.actions}>
+        {selected?.stage === "available" ? (
+          <button
+            type="button"
+            data-testid="quest-accept-button"
+            disabled={!onAcceptQuest}
+            style={{ ...style.actionButton, ...(!onAcceptQuest ? style.actionButtonDisabled : null) }}
+            onClick={() => onAcceptQuest?.(selected.questId)}
+          >
+            {t("ui.questAccept", [], "Accept")}
+          </button>
+        ) : null}
+        {selected?.stage === "readyToTurnIn" ? (
+          <button
+            type="button"
+            data-testid="quest-finish-button"
+            disabled={!canFinishSelected}
+            title={needsRewardSelection && selectedRewardIndex === undefined
+              ? t("client.YouMustSelectRewardItem", [], "Select a reward first.")
+              : undefined}
+            style={{ ...style.actionButton, ...(!canFinishSelected ? style.actionButtonDisabled : null) }}
+            onClick={() => {
+              if (canFinishSelected) onFinishQuest?.(selected.questId, selectedRewardIndex);
+            }}
+          >
+            {t("ui.questComplete", [], "Complete")}
+          </button>
+        ) : null}
         <button
           type="button"
           disabled={!selected || !onTrackQuest}
@@ -356,10 +408,14 @@ function QuestRewardView({
   t,
   rewards,
   fallback,
+  selectedSelectionIndex,
+  onSelectReward,
 }: {
   t: TranslateFn;
   rewards: QuestRewardSummary;
   fallback: string;
+  selectedSelectionIndex?: number;
+  onSelectReward?: (selectionIndex: number) => void;
 }) {
   const hasChips =
     (rewards.experience ?? 0) > 0 || (rewards.gold ?? 0) > 0 || (rewards.credit ?? 0) > 0;
@@ -390,26 +446,61 @@ function QuestRewardView({
       {selectItems.length > 0 ? (
         <>
           <div style={style.rewardSelectLabel}>{t("ui.questRewardSelect", [], "Choose one:")}</div>
-          <RewardItems items={selectItems} />
+          <RewardItems
+            items={selectItems}
+            selectedSelectionIndex={selectedSelectionIndex}
+            onSelectReward={onSelectReward}
+          />
         </>
       ) : null}
     </div>
   );
 }
 
-function RewardItems({ items }: { items: QuestRewardItem[] }) {
+function RewardItems({
+  items,
+  selectedSelectionIndex,
+  onSelectReward,
+}: {
+  items: QuestRewardItem[];
+  selectedSelectionIndex?: number;
+  onSelectReward?: (selectionIndex: number) => void;
+}) {
   return (
     <div style={style.rewardItems} role="list">
-      {items.map((item, index) => (
-        <div key={index} role="listitem" title={item.name} style={style.rewardItemCell}>
+      {items.map((item, index) => {
+        const selectionIndex = item.selectionIndex ?? index;
+        const selectable = item.selectable === true && Boolean(onSelectReward);
+        const selected = selectable && selectedSelectionIndex === selectionIndex;
+        const content = (
+          <>
           {typeof item.icon === "number" ? (
-            <img style={style.rewardItemIcon} src={originalAssetPath(`/original-ui/Items/${item.icon}.png`)} alt="" draggable={false} />
+            <img style={style.rewardItemIcon} src={originalItemIconPath(item.icon)} alt="" draggable={false} />
           ) : (
             <span style={style.rewardItemText}>{item.name.slice(0, 3)}</span>
           )}
           {item.count && item.count > 1 ? <span style={style.rewardItemCount}>{item.count}</span> : null}
-        </div>
-      ))}
+          </>
+        );
+        return selectable ? (
+          <button
+            key={index}
+            type="button"
+            role="listitem"
+            data-quest-reward-selection={selectionIndex}
+            aria-pressed={selected}
+            title={item.name}
+            style={{ ...style.rewardItemCell, ...(selected ? style.rewardItemCellSelected : null) }}
+            onClick={() => onSelectReward?.(selectionIndex)}
+          >
+            {content}
+          </button>
+        ) : (
+          <div key={index} role="listitem" title={item.name} style={style.rewardItemCell}>
+            {content}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -625,6 +716,11 @@ const style: Record<string, CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+    padding: 0,
+  },
+  rewardItemCellSelected: {
+    border: "1px solid #f2d278",
+    boxShadow: "0 0 5px rgba(242, 210, 120, 0.65)",
   },
   rewardItemIcon: { width: 24, height: 24, imageRendering: "pixelated" },
   rewardItemText: { fontSize: 9, color: "#cbb38a" },

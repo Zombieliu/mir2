@@ -14,7 +14,10 @@ export type NormalizedCrystalSceneBlueprintRequest = {
   height: number;
 };
 
-export const SCENE_BLUEPRINT_SCHEMA_VERSION = "2026-08-09-v6-scene-integrity";
+// Bump whenever the serialized SceneBlueprint shape changes. Door interaction
+// added doorIndex/closedDoor metadata to OriginalMapCell, so older disk/browser
+// snapshots must not be reused by a client that knows how to send Opendoor.
+export const SCENE_BLUEPRINT_SCHEMA_VERSION = "2026-08-14-v7-door-interaction";
 export const SCENE_BLUEPRINT_CHUNK_WIDTH = 16;
 export const SCENE_BLUEPRINT_CHUNK_HEIGHT = 17;
 export const SCENE_BLUEPRINT_WIDTH_BUCKET = 8;

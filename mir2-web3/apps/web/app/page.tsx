@@ -220,6 +220,10 @@ import type {
   BevyMapRenderState,
   SceneAssetReadiness,
 } from "./components/original-client-shell-types";
+import type {
+  DisplayNpcShopGood,
+  DisplayNpcShopService,
+} from "./components/original-client-types";
 import { OriginalClientTutorialOverlay } from "./components/original-client-tutorial-overlay";
 import { useOriginalClientDeviceProfile } from "./components/use-original-client-device-profile";
 import {
@@ -475,6 +479,7 @@ type GatewayWorldItem = {
   description: string;
   durabilityCurrent?: number | null;
   durabilityMax?: number | null;
+  sellValue?: number;
   equipSlot?: EquipmentSlot | null;
   addedAttack?: number;
   addedDefence?: number;
@@ -503,6 +508,13 @@ type GatewayQuestEntry = {
   current: number;
   required: number;
   rewardPreview: string;
+  objectives?: Array<{
+    label?: string;
+    text?: string;
+    current?: number;
+    required?: number;
+    done?: boolean;
+  }>;
 };
 
 type GatewayKnownSkill = {
@@ -1112,6 +1124,9 @@ const CRYSTAL_INPUT_CORRECTION_DELAY_MS = 400;
 const CRYSTAL_ENTITY_MOVE_ACTION_MS = CRYSTAL_MOVE_DELAY_MS;
 const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
 const CRYSTAL_SWIFT_FEET_BUFF_TYPE = 4;
+// Crystal's CheckDoorOpen throttles one Opendoor request per door attempt for
+// four seconds. Keep the same cadence so a held key cannot flood the gateway.
+const CRYSTAL_DOOR_OPEN_RETRY_MS = 4_000;
 const MOVEMENT_CONFIRM_TICK_DELAY_MS = 160;
 const COMBAT_CONFIRM_TICK_DELAY_MS = 180;
 const COMBAT_CONFIRM_FOLLOWUP_TICK_DELAY_MS = 900;
@@ -1847,6 +1862,11 @@ export default function HomePage() {
   }
   const socketRef = useRef<WebSocket | null>(null);
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  // NewQuestInfo is a static definition stream, while world snapshots contain
+  // only quests currently visible for this character. Keep definitions outside
+  // questLog so a prerequisite-locked quest can disappear and later reappear
+  // without losing selectable reward metadata or its full Crystal copy.
+  const questDefinitionByIdRef = useRef<Map<number, Partial<QuestEntry>>>(new Map());
   // Shared-zone packets address this client with its authoritative zone object
   // id, while the local Crystal-compatible snapshot keeps self at object 1000.
   // Learn that alias from the first struck packet at the self position.
@@ -1886,6 +1906,7 @@ export default function HomePage() {
     onlineOnly: false,
   });
   const pendingTransferRef = useRef<string | null>(null);
+  const doorOpenRequestUntilRef = useRef<Map<number, number>>(new Map());
   const pendingNpcInteractRef = useRef<string | null>(null);
   const lockedMonsterAttackRef = useRef<LockedMonsterAttack | null>(null);
   const lockedMonsterAttackTickRef = useRef<() => void>(() => undefined);
@@ -2109,6 +2130,9 @@ export default function HomePage() {
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
+  const [npcShopService, setNpcShopService] = useState<DisplayNpcShopService | null>(null);
+  const npcShopServiceRef = useRef<DisplayNpcShopService | null>(null);
+  const npcServiceNameRef = useRef("");
   const [npcRepairService, setNpcRepairService] = useState<"repair" | "special" | null>(null);
   const [showQuestLog, setShowQuestLog] = useState(false);
   // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
@@ -2132,9 +2156,16 @@ export default function HomePage() {
   const [showHelp, setShowHelp] = useState(false);
   const [showHotkeys, setShowHotkeys] = useState(false);
   const [showChatSettings, setShowChatSettings] = useState(false);
-  // Death → town-revive prompt: tracks that we've sent `townRevive` so the overlay
-  // button reads "Reviving…" until the server's `Revived` reply lands and clears it.
+  // Death → town-revive prompt: tracks an in-flight request so the button reads
+  // "Reviving…" until `Revived` lands. A lost/racing no-op request must not
+  // disable the only recovery action forever, so release it after one bounded
+  // response window and let the player retry through the same visible button.
   const [reviveRequested, setReviveRequested] = useState(false);
+  useEffect(() => {
+    if (!reviveRequested) return;
+    const timeout = window.setTimeout(() => setReviveRequested(false), 8_000);
+    return () => window.clearTimeout(timeout);
+  }, [reviveRequested]);
   const [debugSnapshotNotice, setDebugSnapshotNotice] = useState<DebugSnapshotUploadNotice | null>(null);
   useEffect(() => {
     let clearTimer = 0;
@@ -3161,7 +3192,14 @@ export default function HomePage() {
       movementStartedAt: movementActive ? currentEntity.movementStartedAt : undefined,
       movementUntil: movementActive ? currentEntity.movementUntil : undefined,
       attackAnimation: attackActive ? currentEntity.attackAnimation : undefined,
-      attackStartedAt: attackActive ? currentEntity.attackStartedAt : undefined,
+      // Animation lifetime and threat evidence are different clocks. Preserve
+      // the last rendered attack start across packet-first world snapshots so
+      // a read-only client policy can still recognize the attacker between
+      // swings; attackAnimation/attackUntil continue to expire normally.
+      attackStartedAt:
+        typeof currentEntity.attackStartedAt === "number"
+          ? currentEntity.attackStartedAt
+          : snapshotEntity.attackStartedAt,
       attackUntil: attackActive ? currentEntity.attackUntil : undefined,
       struckStartedAt: struckActive ? currentEntity.struckStartedAt : undefined,
       struckUntil: struckActive ? currentEntity.struckUntil : undefined,
@@ -5087,8 +5125,10 @@ export default function HomePage() {
     }
   }, [screen, wsState, world.entities, world.playerObjectId]);
 
-  // Ground-drop pickup: the player walked onto a drop they clicked from a distance — fire PickUp
-  // the moment they're standing on its tile. Same arrive-then-act shape as the NPC/mine effects.
+  // Ground-drop pickup: a targeted shared-zone claim is valid from the adjacent
+  // tile. Fire PickUp as soon as the player reaches that authoritative range so
+  // a corpse or another occupant on the drop tile cannot leave the client
+  // waiting forever for an impossible exact-tile arrival.
   useEffect(() => {
     if (screen !== "game" || wsState !== "open") return;
     const pendingPickupObjectId = pendingPickupRef.current;
@@ -5101,7 +5141,7 @@ export default function HomePage() {
       return;
     }
     const nextSelf = currentAuthoritativeSelf(world);
-    if (nextSelf && nextSelf.x === pendingDrop.x && nextSelf.y === pendingDrop.y) {
+    if (nextSelf && pointTileDistance(nextSelf, pendingDrop) <= 1) {
       pendingPickupRef.current = null;
       send({ type: "pickUp", objectId: Number(pendingPickupObjectId) });
     }
@@ -5424,6 +5464,7 @@ export default function HomePage() {
           characters: SelectCharacterEntry[];
           mapFileName: string | null;
           mapTitle: string | null;
+          mapTransfers: MapTransferArea[];
           playerObjectId: string | null;
           player: { x: number; y: number; direction?: string } | null;
           authoritativePlayer: { x: number; y: number; direction?: string } | null;
@@ -5454,6 +5495,8 @@ export default function HomePage() {
             mapFileName: string;
             cellCount: number;
             spriteCount: number;
+            doorCellCount: number;
+            closedDoorCellCount: number;
             regionBounds: OriginalMapRegion["regionBounds"];
             playBounds: OriginalMapRegion["playBounds"];
           } | null;
@@ -5531,6 +5574,9 @@ export default function HomePage() {
         },
         get mapTitle() {
           return worldRef.current.mapTitle;
+        },
+        get mapTransfers() {
+          return worldRef.current.mapTransfers;
         },
         get playerObjectId() {
           return worldRef.current.playerObjectId;
@@ -5621,6 +5667,15 @@ export default function HomePage() {
               mapFileName: world.originalMapRegion.mapFileName,
               cellCount: world.originalMapRegion.cells.length,
               spriteCount: Object.keys(world.originalMapRegion.sprites).length,
+              doorCellCount: world.originalMapRegion.cells.filter(
+                (cell) => Number.isInteger(cell.doorIndex) && Number(cell.doorIndex) > 0,
+              ).length,
+              closedDoorCellCount: world.originalMapRegion.cells.filter(
+                (cell) =>
+                  cell.closedDoor === true &&
+                  Number.isInteger(cell.doorIndex) &&
+                  Number(cell.doorIndex) > 0,
+              ).length,
               regionBounds: world.originalMapRegion.regionBounds,
               playBounds: world.originalMapRegion.playBounds,
             }
@@ -6267,6 +6322,7 @@ export default function HomePage() {
     pendingGatewayProtocolActionRef.current = null;
     gatewayProtocolReadyRef.current = false;
     pendingTransferRef.current = null;
+    doorOpenRequestUntilRef.current.clear();
     pendingNpcInteractRef.current = null;
     lockedMonsterAttackRef.current = null;
     pendingPickupRef.current = null;
@@ -6473,6 +6529,51 @@ export default function HomePage() {
       queuedMoveIntentRef.current = null;
       clearLocalSelfPrediction();
       return false;
+    }
+
+    // Match Crystal GameScene.CheckDoorOpen: a visible movement gesture toward
+    // a closed door first emits Opendoor for that map door group and leaves the
+    // same movement intent queued. The authoritative Opendoor response updates
+    // the scene cells below, after which the normal movement tick retries the
+    // user's input. This is normal-client behaviour, not a coordinate or map
+    // shortcut, and it applies equally to mouse, held-key, and discrete-key
+    // movement.
+    const closedDoorIndex = originalMapClosedDoorIndexOnMovementPath(
+      currentWorld.originalMapRegion,
+      serverSelf,
+      nextAction,
+    );
+    if (closedDoorIndex !== null) {
+      const retryAt = doorOpenRequestUntilRef.current.get(closedDoorIndex) ?? 0;
+      if (now >= retryAt) {
+        const sent = send(
+          { type: "openDoor", doorIndex: closedDoorIndex },
+          { quiet: true },
+        );
+        if (sent) {
+          doorOpenRequestUntilRef.current.set(
+            closedDoorIndex,
+            now + CRYSTAL_DOOR_OPEN_RETRY_MS,
+          );
+        }
+      }
+      scheduleMovementConfirmTick();
+      return false;
+    }
+
+    // Keyboard and held-direction movement must arm the same visible portal
+    // lifecycle as a tile click. The authoritative snapshot hook below sends
+    // TransferMap only after the accepted step places the player on the exact
+    // Crystal movement cell; no coordinate or transfer command is injected by
+    // the input handler itself.
+    const movementTransferKey = transferKeyForWorldTile(
+      currentWorld.mapTransfers,
+      currentWorld.mapFileName,
+      nextPoint.x,
+      nextPoint.y,
+    );
+    if (movementTransferKey) {
+      pendingTransferRef.current = movementTransferKey;
     }
 
     const selfMovementTraits = crystalSelfMovementTraits(currentWorld, serverSelf);
@@ -7148,6 +7249,16 @@ export default function HomePage() {
     });
   }
 
+  function buyNpcShopItem(id: number, quantity: number, panelType: number) {
+    if (!Number.isFinite(id) || !Number.isFinite(quantity) || quantity <= 0) return;
+    send({
+      type: "buyItem",
+      itemIndex: Math.trunc(id),
+      count: Math.max(1, Math.min(99, Math.trunc(quantity))),
+      panelType: Math.max(0, Math.trunc(panelType)),
+    });
+  }
+
   function dropGold(amount: number) {
     send({
       type: "dropGold",
@@ -7225,7 +7336,12 @@ export default function HomePage() {
       return;
     }
     if (skill.castKind === "target" || (!skill.castKind && skill.offensive)) {
-      const target = selectedEntity && !selectedEntity.dead ? selectedEntity : null;
+      const selectedTarget = selectedEntity && !selectedEntity.dead ? selectedEntity : null;
+      const target = skill.offensive
+        ? selectedTarget
+        : selectedTarget?.kind === "player" || selectedTarget?.kind === "selfPlayer"
+          ? selectedTarget
+          : self;
       if (!target || (skill.offensive && target.kind !== "monster")) {
         appendLog(`Select a target for ${skill.name}.`, "system");
         return;
@@ -7512,6 +7628,18 @@ export default function HomePage() {
     send({ type: "abandonQuest", questIndex: questId });
   }
 
+  function acceptQuest(questId: number) {
+    send({ type: "acceptQuest", npcIndex: 0, questIndex: questId });
+  }
+
+  function finishQuest(questId: number, selectedItemIndex?: number) {
+    send({
+      type: "finishQuest",
+      questIndex: questId,
+      selectedItemIndex: selectedItemIndex ?? -1,
+    });
+  }
+
   // Hero summon rides ClientPacket::ChangeHero, which spawns the recruited hero
   // beside the player (stage5 ChangeHero handler). There is no dedicated hero
   // "dismiss/recall" packet in the simulation yet, so onDismissHero is left
@@ -7705,12 +7833,13 @@ export default function HomePage() {
   }
 
   function pickGroundDrop(objectId: string) {
-    // Crystal only picks up an item the player is standing on. If we're not on the drop's tile yet,
-    // walk over and let the snapshot-arrival hook fire PickUp on landing (mirrors NPC approach).
+    // Targeted shared-zone pickup accepts the player on the drop tile or an
+    // adjacent tile. Walk into that range and let the snapshot-arrival hook
+    // fire PickUp; requiring an exact tile deadlocks when a corpse occupies it.
     const currentWorld = worldRef.current;
     const drop = currentWorld.groundDrops.find((entry) => entry.objectId === objectId);
     const serverSelf = currentAuthoritativeSelf(currentWorld);
-    if (drop && serverSelf && (serverSelf.x !== drop.x || serverSelf.y !== drop.y)) {
+    if (drop && serverSelf && pointTileDistance(serverSelf, drop) > 1) {
       stopOnchainMining();
       pendingPickupRef.current = objectId;
       moveToTile(drop.x, drop.y, "run");
@@ -7739,7 +7868,7 @@ export default function HomePage() {
       selectedObjectId: objectId,
     }));
 
-    if (!entity || entity.dead) {
+    if (!entity || entity.dead || entity.hp === 0) {
       cancelLockedMonsterAttack();
       return;
     }
@@ -8458,6 +8587,10 @@ export default function HomePage() {
             terrainPatches: mapChanged ? [] : current.terrainPatches,
             decorObjects: mapChanged ? [] : current.decorObjects,
             originalMapRegion: mapChanged ? null : current.originalMapRegion,
+            // MapInformation arrives before the destination world snapshot.
+            // Never expose the previous map's movement cells during that gap;
+            // the following snapshot repopulates the authoritative list.
+            mapTransfers: mapChanged ? [] : current.mapTransfers,
           };
           worldRef.current = nextWorld;
           return nextWorld;
@@ -9814,9 +9947,77 @@ export default function HomePage() {
         break;
 
       // NPC interaction surfaces ----------------------------------------------
-      case "NPCGoods":
+      case "NPCGoods": {
+        const goods = (Array.isArray(payload.list) ? payload.list : []).flatMap((value) => {
+          if (!value || typeof value !== "object") return [];
+          const item = value as Record<string, unknown>;
+          const id = Number(item.id ?? item.uniqueId ?? item.unique_id);
+          const itemIndex = Number(item.itemIndex ?? item.item_index);
+          if (!Number.isFinite(id) || !Number.isFinite(itemIndex)) return [];
+          const gradeNumber = Number(item.grade ?? 0);
+          const grade: DisplayNpcShopGood["grade"] =
+            gradeNumber >= 4
+              ? "mythical"
+              : gradeNumber === 3
+                ? "legendary"
+                : gradeNumber === 2
+                  ? "heroic"
+                  : gradeNumber === 1
+                    ? "rare"
+                    : "common";
+          return [{
+            id,
+            itemIndex,
+            name: stringOrFallback(item.name, `Item #${itemIndex}`),
+            icon: numberOrZero(item.icon),
+            price: numberOrZero(item.price),
+            count: Math.max(1, numberOrZero(item.count)),
+            grade,
+            description: stringOrFallback(item.description, ""),
+          } satisfies DisplayNpcShopGood];
+        });
+        const existing = npcShopServiceRef.current;
+        const npcName =
+          worldRef.current.activeNpcDialog?.npcName ||
+          existing?.npcName ||
+          npcServiceNameRef.current ||
+          t("ui.shopTitle", [], "Shop");
+        npcServiceNameRef.current = npcName;
+        const nextShop: DisplayNpcShopService = {
+          npcName,
+          panelType: numberOrZero(payload.panelType),
+          buyItems: goods,
+          supportsBuy: true,
+          supportsSell: existing?.supportsSell ?? false,
+        };
+        npcShopServiceRef.current = nextShop;
+        setNpcShopService(nextShop);
+        updateWorld((current) => ({ ...current, activeNpcDialog: null }));
+        setNpcRepairService(null);
+        setShowInventory(false);
+        setShowCharacter(false);
+        break;
+      }
+      case "NPCSell": {
+        const existing = npcShopServiceRef.current;
+        const npcName =
+          worldRef.current.activeNpcDialog?.npcName ||
+          existing?.npcName ||
+          npcServiceNameRef.current ||
+          t("ui.shopTitle", [], "Shop");
+        npcServiceNameRef.current = npcName;
+        const nextShop: DisplayNpcShopService = existing
+          ? { ...existing, npcName, supportsSell: true }
+          : { npcName, panelType: 0, buyItems: [], supportsBuy: false, supportsSell: true };
+        npcShopServiceRef.current = nextShop;
+        setNpcShopService(nextShop);
+        updateWorld((current) => ({ ...current, activeNpcDialog: null }));
+        setNpcRepairService(null);
+        setShowInventory(false);
+        setShowCharacter(false);
+        break;
+      }
       case "NPCPearlGoods":
-      case "NPCSell":
       case "NPCRefine":
       case "NPCReplaceWedRing":
         // Opening an NPC service panel: reuse the inventory surface used by NPCStorage.
@@ -9830,6 +10031,8 @@ export default function HomePage() {
         // Crystal repairs are NPC-driven. Surface the dedicated repair list
         // instead of the generic inventory/character windows.
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
+        npcShopServiceRef.current = null;
+        setNpcShopService(null);
         setNpcRepairService(event.packet === "NPCSRepair" ? "special" : "repair");
         setShowInventory(false);
         setShowCharacter(false);
@@ -10071,6 +10274,8 @@ export default function HomePage() {
       case "ChangeQuest": {
         const questId = numberOrUndefined(payload.questId) ?? numberOrUndefined(payload.id);
         const completed = payload.completed === true;
+        const currentProgress = numberOrUndefined(payload.current);
+        const requiredProgress = numberOrUndefined(payload.required);
         if (typeof questId === "number") {
           // B-wave-2: thread the live per-task objectives + description.
           const objectives = parseQuestObjectives(payload.objectives);
@@ -10093,6 +10298,11 @@ export default function HomePage() {
                       : {}),
                     ...(objectives ? { objectives } : {}),
                     ...(descriptionLines && descriptionLines.length > 0 ? { descriptionLines } : {}),
+                    ...(typeof currentProgress === "number" ? { current: currentProgress } : {}),
+                    ...(typeof requiredProgress === "number" ? { required: requiredProgress } : {}),
+                    ...(typeof currentProgress === "number" && typeof requiredProgress === "number"
+                      ? { progressLabel: `Progress ${currentProgress}/${requiredProgress}` }
+                      : {}),
                   }
                 : quest,
             ),
@@ -10389,28 +10599,35 @@ export default function HomePage() {
             : Array.isArray(info.taskDescription)
               ? (info.taskDescription as unknown[]).filter((line): line is string => typeof line === "string")
               : [];
+          const enrichedObjectives = parseQuestObjectives(payload.objectives);
+          const enrichedRewards = parseQuestRewards(payload.rewards);
+          const enrichedDescription = Array.isArray(payload.descriptionLines)
+            ? (payload.descriptionLines as unknown[]).filter((line): line is string => typeof line === "string")
+            : description;
+          const definition: Partial<QuestEntry> = {
+            title: name,
+            summary: description[0] ?? "",
+            objective: taskDescription[0] ?? "",
+            tracker: stringOrFallback(info.group, ""),
+            ...(enrichedDescription.length > 0 ? { descriptionLines: enrichedDescription } : {}),
+            ...(enrichedObjectives ? { objectives: enrichedObjectives } : {}),
+            ...(enrichedRewards ? { rewards: enrichedRewards } : {}),
+            ...(typeof payload.timeLimit === "string" ? { timeLimit: payload.timeLimit } : {}),
+          };
+          questDefinitionByIdRef.current.set(questId, definition);
           updateWorld((current) => {
-            // B-wave-2: structured description / objectives / rewards / time limit.
-            const enrichedObjectives = parseQuestObjectives(payload.objectives);
-            const enrichedRewards = parseQuestRewards(payload.rewards);
-            const enrichedDescription = Array.isArray(payload.descriptionLines)
-              ? (payload.descriptionLines as unknown[]).filter((line): line is string => typeof line === "string")
-              : description;
             const nextEntry: QuestEntry = {
               questId,
-              title: name,
-              summary: description[0] ?? "",
-              objective: taskDescription[0] ?? "",
+              title: definition.title ?? name,
+              summary: definition.summary ?? "",
+              objective: definition.objective ?? "",
               progressLabel: "",
-              tracker: stringOrFallback(info.group, ""),
+              tracker: definition.tracker ?? "",
               stage: "available",
               current: 0,
               required: 0,
               rewardPreview: "",
-              ...(enrichedDescription.length > 0 ? { descriptionLines: enrichedDescription } : {}),
-              ...(enrichedObjectives ? { objectives: enrichedObjectives } : {}),
-              ...(enrichedRewards ? { rewards: enrichedRewards } : {}),
-              ...(typeof payload.timeLimit === "string" ? { timeLimit: payload.timeLimit } : {}),
+              ...definition,
             };
             if (current.questLog.some((quest) => quest.questId === questId)) {
               return {
@@ -10863,13 +11080,30 @@ export default function HomePage() {
         break;
 
       // Doors ------------------------------------------------------------------
-      case "Opendoor":
+      case "Opendoor": {
         // NB: the gateway emits this as "Opendoor" (lower-case d).
+        const doorIndex = numberOrZero(payload.doorIndex) & 0x7f;
+        const closed = payload.close === true;
+        if (doorIndex > 0) {
+          doorOpenRequestUntilRef.current.delete(doorIndex);
+          updateWorld((current) => ({
+            ...current,
+            originalMapRegion: setOriginalMapDoorClosed(
+              current.originalMapRegion,
+              doorIndex,
+              closed,
+            ),
+          }));
+          if (!closed) scheduleMovementConfirmTick();
+        }
         appendLog(
-          t("ui.doorOpened", [numberOrZero(payload.doorIndex)], `Door ${numberOrZero(payload.doorIndex)} opened.`),
+          closed
+            ? `Door ${doorIndex} closed.`
+            : t("ui.doorOpened", [doorIndex], `Door ${doorIndex} opened.`),
           "system",
         );
         break;
+      }
 
       // Server notices ---------------------------------------------------------
       case "UpdateNotice": {
@@ -11370,6 +11604,7 @@ export default function HomePage() {
   function markPlayerStruck(payload: Record<string, unknown>) {
     const attackerId = stringifyId(payload.attackerId);
     const playerObjectId = worldRef.current.playerObjectId;
+    const now = Date.now();
     // Sound + hit-flash via bus; selection update stays inline.
     if (playerObjectId) {
       gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId });
@@ -11378,6 +11613,16 @@ export default function HomePage() {
       ...current,
       selectedObjectId:
         current.selectedObjectId && current.selectedObjectId !== attackerId ? current.selectedObjectId : attackerId,
+      // Struck.attackerId is stronger evidence than the short-lived attack
+      // animation: it proves this exact entity just damaged the player. Keep
+      // that timestamp on the rendered entity for bounded autonomous threat
+      // handling without inferring hostility from proximity alone.
+      entities: attackerId === "0"
+        ? current.entities
+        : patchEntityInList(current.entities, attackerId, (entity) => ({
+            ...entity,
+            attackStartedAt: now,
+          })),
     }));
   }
 
@@ -11825,6 +12070,7 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      sellValue: item.sellValue ?? 0,
       equipSlot: item.equipSlot ?? null,
       attack: item.addedAttack ?? 0,
       defence: item.addedDefence ?? 0,
@@ -11840,6 +12086,7 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      sellValue: item.sellValue ?? 0,
     }));
     const storageItems = (snapshot.storageItems ?? []).map((item) => ({
       key: item.key,
@@ -11852,6 +12099,7 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      sellValue: item.sellValue ?? 0,
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
       slot: item.slot,
@@ -11867,19 +12115,25 @@ export default function HomePage() {
     const previousQuestById = new Map(
       worldRef.current.questLog.map((quest) => [quest.questId, quest]),
     );
-    const questLog: QuestEntry[] = snapshot.questLog.map((quest) => ({
-      ...(previousQuestById.get(quest.questId) ?? {}),
-      questId: quest.questId,
-      title: quest.title,
-      summary: quest.summary,
-      objective: quest.objective,
-      progressLabel: quest.progressLabel,
-      tracker: quest.tracker,
-      stage: quest.stage,
-      current: quest.current,
-      required: quest.required,
-      rewardPreview: quest.rewardPreview,
-    }));
+    const questLog: QuestEntry[] = snapshot.questLog.map((quest) => {
+      const objectives = parseQuestObjectives(quest.objectives);
+      const definition = questDefinitionByIdRef.current.get(quest.questId);
+      return {
+        ...(definition ?? {}),
+        ...(previousQuestById.get(quest.questId) ?? {}),
+        questId: quest.questId,
+        title: quest.title,
+        summary: quest.summary,
+        objective: quest.objective,
+        progressLabel: quest.progressLabel,
+        tracker: quest.tracker,
+        stage: quest.stage,
+        current: quest.current,
+        required: quest.required,
+        rewardPreview: quest.rewardPreview,
+        ...(objectives ? { objectives } : {}),
+      };
+    });
     const knownSkills = (snapshot.knownSkills ?? []).map((skill) => ({
       key: skill.key,
       name: skill.name,
@@ -13370,7 +13624,12 @@ export default function HomePage() {
   onPrimaryTargetActionRef.current = () => {
     if (!selectedEntity) return;
     if (selectedEntity.kind === "monster") {
-      if (selectedEntity.dead) return harvestToward(directionToward(self, selectedEntity));
+      // ObjectHealth(0) and ObjectDied can cross in flight on the shared-zone
+      // route. A visible monster with authoritative zero HP is already a corpse
+      // even if the following render has not observed its `dead` bit yet.
+      if (selectedEntity.dead || selectedEntity.hp === 0) {
+        return harvestToward(directionToward(self, selectedEntity));
+      }
       return lockMonsterAttack(selectedEntity.objectId);
     }
     if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
@@ -13485,6 +13744,7 @@ export default function HomePage() {
       activeInventoryTab={activeInventoryTab}
       activeCharacterTab={activeCharacterTab}
       storageServiceOpenVersion={storageServiceOpenVersion}
+      npcShopService={npcShopService}
       npcRepairService={npcRepairService}
       onAccountIdChange={setAccountId}
       onPasswordChange={setPassword}
@@ -13519,6 +13779,7 @@ export default function HomePage() {
       onSetStoragePassword={setStoragePassword}
       onRemoveStoragePassword={removeStoragePassword}
       onSellItem={sellItem}
+      onBuyNpcShopItem={buyNpcShopItem}
       onDropGold={dropGold}
       onRepairItem={repairItem}
       onSpecialRepairItem={specialRepairItem}
@@ -13536,6 +13797,10 @@ export default function HomePage() {
       onToggleQuestLog={() => setShowQuestLog((current) => !current)}
       onCloseCharacter={() => setShowCharacter(false)}
       onCloseInventory={() => setShowInventory(false)}
+      onCloseNpcShopService={() => {
+        npcShopServiceRef.current = null;
+        setNpcShopService(null);
+      }}
       onCloseNpcRepairService={() => setNpcRepairService(null)}
       onOpenCharacterTab={openCharacter}
       onOpenInventoryTab={openInventory}
@@ -13560,7 +13825,7 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: localizedQuestLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: localizedQuestLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest, onAcceptQuest: acceptQuest, onFinishQuest: finishQuest }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
@@ -13800,14 +14065,19 @@ function questNumber(value: unknown): number | undefined {
 
 function parseQuestObjectives(
   raw: unknown,
-): Array<{ label: string; current?: number; required?: number }> | undefined {
+): Array<{ label: string; current?: number; required?: number; done?: boolean }> | undefined {
   if (!Array.isArray(raw)) return undefined;
   const list = raw.flatMap((entry) => {
     const record = (entry ?? {}) as Record<string, unknown>;
     const label =
       typeof record.text === "string" ? record.text : typeof record.label === "string" ? record.label : "";
     if (!label) return [];
-    return [{ label, current: questNumber(record.current), required: questNumber(record.required) }];
+    return [{
+      label,
+      current: questNumber(record.current),
+      required: questNumber(record.required),
+      ...(typeof record.done === "boolean" ? { done: record.done } : {}),
+    }];
   });
   return list.length > 0 ? list : undefined;
 }
@@ -14833,7 +15103,53 @@ function originalMapCellBlocksMovement(region: OriginalMapRegion | null, x: numb
     return false;
   }
   const cell = region.cells.find((entry) => entry.x === x && entry.y === y);
-  return Boolean(cell?.blocked || cell?.closedDoor);
+  // Indexed Crystal doors stay routeable exactly like the original client:
+  // CheckDoorOpen handles them immediately before sending a movement packet.
+  // A legacy packaged closedDoor without an index cannot be opened safely and
+  // therefore remains a hard blocker.
+  const indexedDoor = Number.isInteger(cell?.doorIndex) && Number(cell?.doorIndex) > 0;
+  return Boolean(cell?.blocked || (cell?.closedDoor && !indexedDoor));
+}
+
+function originalMapClosedDoorIndexOnMovementPath(
+  region: OriginalMapRegion | null,
+  source: { x: number; y: number },
+  action: { point: { x: number; y: number }; direction: string },
+) {
+  if (!region) return null;
+  const distance = Math.max(
+    Math.abs(action.point.x - source.x),
+    Math.abs(action.point.y - source.y),
+  );
+  for (let step = 1; step <= distance; step += 1) {
+    const point = pointMoveInDirection(source, action.direction, step);
+    const cell = region.cells.find((entry) => entry.x === point.x && entry.y === point.y);
+    const doorIndex = Number(cell?.doorIndex);
+    if (
+      cell?.closedDoor === true &&
+      cell.blocked !== true &&
+      Number.isInteger(doorIndex) &&
+      doorIndex > 0
+    ) {
+      return doorIndex & 0x7f;
+    }
+  }
+  return null;
+}
+
+function setOriginalMapDoorClosed(
+  region: OriginalMapRegion | null,
+  doorIndex: number,
+  closed: boolean,
+) {
+  if (!region) return region;
+  let changed = false;
+  const cells = region.cells.map((cell) => {
+    if (Number(cell.doorIndex) !== doorIndex || cell.closedDoor === closed) return cell;
+    changed = true;
+    return { ...cell, closedDoor: closed };
+  });
+  return changed ? { ...region, cells } : region;
 }
 
 function attackAnimationVariant(

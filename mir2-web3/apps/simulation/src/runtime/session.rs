@@ -18,6 +18,10 @@ use super::equipment::*;
 use super::inventory::*;
 use super::items::{item_unique_id, user_item_from_item_state, ItemState};
 use super::map::*;
+use super::monsters::{
+    apply_shared_monster_death_state, apply_shared_monster_revive_state,
+    reset_shared_monster_harvest_state, spawn_shared_monster_snapshot,
+};
 use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
@@ -398,6 +402,10 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    pub fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
+        collect_current_map_shared_entity_snapshots(self.app.world())
+    }
+
     pub fn local_player_object_id(&self) -> Option<u32> {
         let world = self.app.world();
         player_entity(world).and_then(|entity| entity_object_id(world, entity))
@@ -540,6 +548,13 @@ impl SimulationSession {
             runtime.player_direction = direction;
         }
         advance_runtime_tick(world);
+    }
+
+    pub fn reconcile_current_map_monster_activation(&mut self) {
+        if !is_in_world(self.app.world()) {
+            return;
+        }
+        reconcile_monster_activation(self.app.world_mut());
     }
 
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
@@ -714,6 +729,50 @@ impl SimulationSession {
         }
     }
 
+    /// Apply authoritative shared-Zone monster incarnation boundaries to the
+    /// personal Crystal compatibility runtime. The Zone owns combat, while the
+    /// Session retains Crystal's respawn schedule and harvest implementation.
+    /// Mirroring death prevents the still-live private entity from immediately
+    /// respawning a Zone corpse; mirroring explicit revive clears the previous
+    /// incarnation's harvest state.
+    pub fn apply_shared_monster_lifecycle_packets(&mut self, packets: &[ServerPacket]) {
+        if !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        for packet in packets {
+            let object_id = match packet {
+                ServerPacket::ObjectDied { info } => info.object_id,
+                ServerPacket::ObjectHealth { info } if info.percent == 0 => info.object_id,
+                ServerPacket::ObjectRevived { info } => info.object_id,
+                _ => continue,
+            };
+            let Some(entity) = entity_by_object_id(world, object_id) else {
+                continue;
+            };
+            if !world.entity(entity).contains::<Monster>() {
+                continue;
+            }
+            match packet {
+                ServerPacket::ObjectDied { info } => {
+                    apply_shared_monster_death_state(
+                        world,
+                        entity,
+                        Some(&info.location),
+                        Some(info.direction),
+                    );
+                }
+                ServerPacket::ObjectHealth { .. } => {
+                    apply_shared_monster_death_state(world, entity, None, None);
+                }
+                ServerPacket::ObjectRevived { .. } => {
+                    apply_shared_monster_revive_state(world, entity);
+                }
+                _ => {}
+            }
+        }
+    }
+
     fn apply_zone_player_buff_packet(&mut self, packet: &ServerPacket, zone_object_id: u32) {
         if !is_in_world(self.app.world()) {
             return;
@@ -825,8 +884,12 @@ impl SimulationSession {
             return false;
         }
         let world = self.app.world_mut();
-        let Some(entity) = entity_by_object_id(world, snapshot.object_id) else {
-            return false;
+        let entity = match entity_by_object_id(world, snapshot.object_id) {
+            Some(entity) => entity,
+            None => match spawn_shared_monster_snapshot(world, snapshot) {
+                Some(entity) => entity,
+                None => return false,
+            },
         };
         if !world.entity(entity).contains::<Monster>() {
             return false;
@@ -855,6 +918,9 @@ impl SimulationSession {
             if let Some(mut agent) = entity_mut.get_mut::<MonsterAgent>() {
                 agent.dead = snapshot.dead || snapshot.hp.is_some_and(|hp| hp <= 0);
             }
+        }
+        if !snapshot.dead && !snapshot.hp.is_some_and(|hp| hp <= 0) {
+            reset_shared_monster_harvest_state(world, entity);
         }
         advance_runtime_tick(world);
         true

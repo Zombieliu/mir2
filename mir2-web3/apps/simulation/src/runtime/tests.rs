@@ -3655,7 +3655,8 @@ fn transfer_map_updates_map_information_location_and_safe_zone() {
 
 #[test]
 fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.transfer_map("crystal:0:284:607");
@@ -3730,6 +3731,73 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
         .entities
         .iter()
         .any(|entity| { entity.kind == WorldEntityKind::Npc && entity.name == "Merchant_Ruben" }));
+}
+
+#[test]
+fn platinum_profile_visible_sailor_dialogs_complete_the_paid_prajna_round_trip() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:251:676");
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 5_000;
+
+    let _ = session.interact(9);
+    let outbound_dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("Sailor_Rupert should expose a visible boarding dialog");
+    assert!(outbound_dialog
+        .links
+        .iter()
+        .any(|link| link.target.eq_ignore_ascii_case("@brdmove")));
+
+    let outbound_packets = session.select_npc_dialog_target("@brdmove");
+    let outbound = session.world_snapshot();
+    assert!(outbound_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info } if info.file_name == "5"
+    )));
+    assert!(outbound_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 124, y: 353 })
+    )));
+    assert_eq!(outbound.map_file_name.as_deref(), Some("5"));
+    assert_eq!(outbound.gold, 3_000);
+    assert!(outbound.entities.iter().any(|entity| {
+        entity.object_id == 1169
+            && entity.kind == WorldEntityKind::Npc
+            && entity.name == "Sailor_Raymond"
+    }));
+
+    session.force_authoritative_player_transform(Point { x: 123, y: 353 }, MirDirection::Left);
+    let _ = session.interact(1169);
+    let return_dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("Sailor_Raymond should expose a visible return dialog");
+    assert!(return_dialog
+        .links
+        .iter()
+        .any(|link| link.target.eq_ignore_ascii_case("@brdmove")));
+
+    let return_packets = session.select_npc_dialog_target("@brdmove");
+    let returned = session.world_snapshot();
+    assert!(return_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info } if info.file_name == "0"
+    )));
+    assert!(return_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 253, y: 673 })
+    )));
+    assert_eq!(returned.map_file_name.as_deref(), Some("0"));
+    assert_eq!(returned.gold, 1_000);
 }
 
 #[test]
@@ -7607,8 +7675,26 @@ fn harvest_allows_owner_group_member_corpse() {
 }
 
 #[test]
-fn cave_maggot_and_toxic_ghoul_use_harvest_monster_corpse_passes() {
+fn harvest_state_matches_crystal_factory_inheritance() {
+    for ai in [1_u8, 2, 4, 5, 7, 9, 28, 35, 153] {
+        assert!(
+            super::initial_harvest_monster_state(ai).is_some(),
+            "Crystal AI {ai} should use the corpse-harvest lifecycle"
+        );
+    }
+    for ai in [0_u8, 3, 6, 8, 10, 29, 34, 36, 152, 154] {
+        assert!(
+            super::initial_harvest_monster_state(ai).is_none(),
+            "ordinary Crystal AI {ai} must not be treated as harvest-only"
+        );
+    }
+}
+
+#[test]
+fn crystal_harvest_monster_subclasses_use_corpse_passes() {
     for (object_id, template_name, ai) in [
+        (98_910_u32, "SpittingSpider", 4_u8),
+        (98_912_u32, "CannibalPlant", 5_u8),
         (98_914_u32, "CaveMaggot", 7_u8),
         (98_916_u32, "ToxicGhoul", 28_u8),
     ] {
@@ -28458,6 +28544,210 @@ fn crystal_quest_required_drop_is_suppressed_without_active_matching_quest() {
 }
 
 #[test]
+fn shared_zone_kill_award_routes_original_q_drop_to_active_quest_inventory() {
+    let config = SimulationConfig::default().with_platinum_176_profile();
+    assert!(
+        !config.item_is_allowed("GingerTea"),
+        "quest-only Q items should not need to be normal usable-item whitelist entries"
+    );
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 2),
+        QuestStage::InProgress
+    );
+    assert!(session
+        .world_snapshot()
+        .quest_log
+        .iter()
+        .any(|quest| quest.quest_id == 2 && quest.stage == QuestStage::InProgress));
+
+    let tick = super::runtime_tick(session.app.world());
+    let object_id = (206_600..206_700)
+        .find(|object_id| {
+            super::resolved_monster_drop_templates_at_tick(*object_id, "Scarecrow", tick)
+                .iter()
+                .any(|drop| {
+                    matches!(
+                        drop,
+                        super::ResolvedDropTemplate::Item {
+                            name,
+                            quest_required: true,
+                            ..
+                        } if name == "GingerTea"
+                    )
+                })
+        })
+        .expect("the deterministic 1/5 Scarecrow Q roll should hit within the probe range");
+    let receipt = session.commit_shared_monster_kill_award_transaction(object_id, "Scarecrow", 0);
+    assert!(receipt.committed);
+    assert!(receipt.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { item } if item.item_index == 1112
+    )));
+    let snapshot = session.world_snapshot();
+    let q2 = snapshot
+        .quest_log
+        .iter()
+        .find(|quest| quest.quest_id == 2)
+        .expect("q2 should remain in the quest log");
+    assert_eq!(q2.stage, QuestStage::ReadyToTurnIn);
+    assert!(snapshot
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Quest && item.name == "GingerTea" }));
+}
+
+#[test]
+fn shared_zone_kill_award_routes_q47_repair_only_for_active_oma_cave_quest() {
+    let config = SimulationConfig::default().with_platinum_176_profile();
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 14);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MapRuntimeResource>()
+        .current_map
+        .file_name = "D001".to_string();
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 47),
+        QuestStage::InProgress
+    );
+
+    let tick = super::runtime_tick(session.app.world());
+    let object_id = (206_800..206_900)
+        .find(|object_id| {
+            super::content_profile_monster_drop_templates(
+                &session
+                    .app
+                    .world()
+                    .resource::<RuntimeConfigResource>()
+                    .config,
+                Some("D001"),
+                *object_id,
+                "Skeleton",
+                tick,
+            )
+            .iter()
+            .any(|drop| {
+                matches!(
+                    drop,
+                    super::ResolvedDropTemplate::Item {
+                        name,
+                        quest_required: true,
+                        ..
+                    } if name == "OliviasRing"
+                )
+            })
+        })
+        .expect("the deterministic 1/4 q47 repair roll should hit within the probe range");
+    let receipt = session.commit_shared_monster_kill_award_transaction(object_id, "Skeleton", 0);
+
+    assert!(receipt.committed);
+    assert!(receipt.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { item } if item.item_index == 1124
+    )));
+    let snapshot = session.world_snapshot();
+    let q47 = snapshot
+        .quest_log
+        .iter()
+        .find(|quest| quest.quest_id == 47)
+        .expect("q47 should remain in the quest log");
+    assert_eq!(q47.stage, QuestStage::ReadyToTurnIn);
+    assert!(snapshot
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Quest && item.name == "OliviasRing" }));
+
+    let mut inactive =
+        SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    inactive.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    inactive
+        .app
+        .world_mut()
+        .resource_mut::<MapRuntimeResource>()
+        .current_map
+        .file_name = "D001".to_string();
+    let inactive_receipt =
+        inactive.commit_shared_monster_kill_award_transaction(object_id, "Skeleton", 0);
+    assert!(inactive_receipt.committed);
+    assert!(!inactive_receipt.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { item } if item.item_index == 1124
+    )));
+    assert!(!inactive
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.name == "OliviasRing"));
+}
+
+#[test]
+fn platinum_176_q58_ignores_only_the_disabled_q57_template_prerequisite() {
+    let mut profiled =
+        SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    profiled.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut profiled, MirClass::Warrior, MirGender::Male, 18);
+
+    assert!(!super::can_accept_quest(profiled.app.world(), 57));
+    assert!(super::can_accept_quest(profiled.app.world(), 58));
+    assert_eq!(
+        super::begin_quest(profiled.app.world_mut(), 58),
+        QuestStage::InProgress
+    );
+
+    let mut imported = SimulationSession::new(SimulationConfig::default());
+    imported.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut imported, MirClass::Warrior, MirGender::Male, 18);
+    assert!(!super::can_accept_quest(imported.app.world(), 58));
+}
+
+#[test]
+fn shared_zone_kill_award_keeps_deer_q_drop_on_corpse_harvest_path() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), 4),
+        QuestStage::InProgress
+    );
+
+    let tick = super::runtime_tick(session.app.world());
+    let object_id = (206_300..206_800)
+        .find(|object_id| {
+            super::resolved_monster_drop_templates_at_tick(*object_id, "Deer", tick)
+                .iter()
+                .any(|drop| {
+                    matches!(
+                        drop,
+                        super::ResolvedDropTemplate::Item {
+                            name,
+                            quest_required: true,
+                            ..
+                        } if name == "DeerMeat"
+                    )
+                })
+        })
+        .expect("the deterministic 1/2 Deer Q roll should hit within the probe range");
+    let receipt = session.commit_shared_monster_kill_award_transaction(object_id, "Deer", 0);
+    assert!(receipt.committed);
+    assert!(!receipt.packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { item } if item.item_index == 856
+    )));
+    let q4 = session
+        .world_snapshot()
+        .quest_log
+        .into_iter()
+        .find(|quest| quest.quest_id == 4)
+        .expect("q4 should remain active after the kill award");
+    assert_eq!(q4.stage, QuestStage::InProgress);
+    assert_eq!(q4.current, 0);
+}
+
+#[test]
 fn crystal_quest_required_drop_does_not_fall_back_when_quest_inventory_is_full() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -28800,6 +29090,54 @@ fn original_crystal_quest_structured_kill_and_item_tasks_progress() {
 }
 
 #[test]
+fn world_snapshot_restores_structured_multi_task_quest_progress() {
+    let config = SimulationConfig::default();
+    let mut first = SimulationSession::new(config.clone());
+    first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::ensure_runtime_quest(first.app.world_mut(), 5);
+    super::set_quest_stage(first.app.world_mut(), 5, QuestStage::InProgress);
+
+    for _ in 0..10 {
+        super::advance_crystal_quest_kill(first.app.world_mut(), "Deer");
+    }
+    for _ in 0..2 {
+        super::advance_crystal_quest_kill(first.app.world_mut(), "Scarecrow");
+    }
+    first.save_active_character();
+
+    let mut restored = SimulationSession::new(config);
+    restored.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let snapshot = restored.world_snapshot();
+    let quest = snapshot
+        .quest_log
+        .iter()
+        .find(|quest| quest.quest_id == 5)
+        .expect("restored q5 quest snapshot");
+
+    assert_eq!(quest.stage, QuestStage::InProgress);
+    assert_eq!((quest.current, quest.required), (12, 20));
+    assert_eq!(quest.objectives.len(), 2);
+    assert_eq!(quest.objectives[0].label, "Kill Deer");
+    assert_eq!(
+        (quest.objectives[0].current, quest.objectives[0].required),
+        (10, 10)
+    );
+    assert!(quest.objectives[0].done);
+    assert_eq!(quest.objectives[1].label, "Kill Scarecrow");
+    assert_eq!(
+        (quest.objectives[1].current, quest.objectives[1].required),
+        (2, 10)
+    );
+    assert!(!quest.objectives[1].done);
+
+    let json = serde_json::to_value(quest).expect("serialize quest snapshot");
+    assert_eq!(json["objectives"][0]["label"], "Kill Deer");
+    assert_eq!(json["objectives"][0]["current"], 10);
+    assert_eq!(json["objectives"][1]["label"], "Kill Scarecrow");
+    assert_eq!(json["objectives"][1]["current"], 2);
+}
+
+#[test]
 fn original_crystal_loaded_npc_links_accept_and_finish_quest() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -28885,6 +29223,24 @@ fn original_crystal_selected_reward_is_granted_on_finish() {
     assert!(snapshot.inventory_items.iter().any(|item| {
         item.name == selected_reward.item.name && item.quantity >= u32::from(selected_reward.count)
     }));
+}
+
+#[test]
+fn original_crystal_q23_preserves_all_selectable_reward_metadata() {
+    let info = super::crystal_quest_info_by_id(23).expect("Crystal q23 is loaded");
+    let names = info
+        .rewards_select_item
+        .iter()
+        .map(|reward| reward.item.name.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        names,
+        vec!["BronzeShortSword", "BronzeHoaSword", "ElkWoodenBow"]
+    );
+    assert!(info
+        .rewards_select_item
+        .iter()
+        .all(|reward| reward.count == 1));
 }
 
 #[test]
@@ -29266,6 +29622,64 @@ fn shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject() {
         .iter()
         .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
     assert_eq!(player_gold(&session), u32::MAX);
+}
+
+#[test]
+fn shared_ground_drop_pickup_advances_matching_crystal_item_task() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::ensure_runtime_quest(session.app.world_mut(), 25);
+    super::set_quest_stage(session.app.world_mut(), 25, QuestStage::InProgress);
+    let drop = GroundDropSnapshot {
+        object_id: 88_025,
+        name: "CannibalLeaf".to_string(),
+        name_colour_argb: -1,
+        icon: 534,
+        x: 330,
+        y: 270,
+        quantity: 1,
+        source_monster: "CannibalPlant".to_string(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::InventoryItem {
+            key: "canniballeaf".to_string(),
+            name: "CannibalLeaf".to_string(),
+            description: "".to_string(),
+            weight: 1,
+            durability_current: None,
+            durability_max: None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots: 0,
+            show_group_pickup: false,
+        },
+    };
+
+    assert!(session.can_commit_shared_ground_drop_pickup(&drop));
+    let committed = session.apply_shared_ground_drop_pickup_commit(&drop);
+    let snapshot = session.world_snapshot();
+    let quest = snapshot
+        .quest_log
+        .iter()
+        .find(|quest| quest.quest_id == 25)
+        .expect("q25 snapshot");
+
+    assert!(committed.committed);
+    assert_eq!(quest.current, 1);
+    assert_eq!(quest.objectives[1].current, 1);
+    assert!(snapshot.inventory_items.iter().any(|item| {
+        item.container == ItemContainer::Quest && item.name == "CannibalLeaf" && item.quantity == 1
+    }));
+    assert!(!snapshot
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Bag1 && item.name == "CannibalLeaf" }));
+    assert!(committed
+        .packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ChangeQuest { quest_id: 25, .. })));
 }
 
 #[test]
@@ -31072,6 +31486,16 @@ fn sell_item_packet_removes_item_and_adds_gold_without_duplication() {
             item.quantity,
         )
     };
+    assert_eq!(
+        session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .find(|item| item.key == key && item.slot == slot)
+            .map(|item| item.sell_value),
+        Some(value),
+        "the client-facing snapshot must expose the exact server sell value",
+    );
 
     let packets = session.handle_packet(ClientPacket::SellItem {
         unique_id: u64::from(slot),
@@ -60731,14 +61155,16 @@ fn platinum_176_ghoul_drop_overrides_supply_level_19_to_21_books() {
     for expected_item in ["Teleport", "SummonSkeleton", "Hiding", "MassHiding"] {
         let appeared = (60_000..60_256).any(|object_id| {
             (0..256).any(|tick| {
-                super::content_profile_monster_drop_templates(&config, object_id, "Ghoul", tick)
-                    .iter()
-                    .any(|drop| {
-                        matches!(
-                            drop,
-                            super::ResolvedDropTemplate::Item { name, .. } if name == expected_item
-                        )
-                    })
+                super::content_profile_monster_drop_templates(
+                    &config, None, object_id, "Ghoul", tick,
+                )
+                .iter()
+                .any(|drop| {
+                    matches!(
+                        drop,
+                        super::ResolvedDropTemplate::Item { name, .. } if name == expected_item
+                    )
+                })
             })
         });
         assert!(
@@ -60748,12 +61174,13 @@ fn platinum_176_ghoul_drop_overrides_supply_level_19_to_21_books() {
     }
 
     assert!(
-        super::content_profile_monster_drop_templates(&config, 118, "Zombie2", 0).is_empty(),
+        super::content_profile_monster_drop_templates(&config, None, 118, "Zombie2", 0).is_empty(),
         "Ghoul-specific overrides must not leak to ordinary monsters"
     );
     assert!(
         super::content_profile_monster_drop_templates(
             &SimulationConfig::default(),
+            None,
             118,
             "Ghoul",
             0,
@@ -60800,10 +61227,7 @@ fn platinum_176_midgame_boss_overrides_supply_level_22_to_35_books() {
             let appeared = (61_000..61_064).any(|object_id| {
                 (0..64).any(|tick| {
                     super::content_profile_monster_drop_templates(
-                        &config,
-                        object_id,
-                        monster,
-                        tick,
+                        &config, None, object_id, monster, tick,
                     )
                     .iter()
                     .any(|drop| {
@@ -60822,7 +61246,51 @@ fn platinum_176_midgame_boss_overrides_supply_level_22_to_35_books() {
     }
 
     assert!(
-        super::content_profile_monster_drop_templates(&config, 119, "Scarecrow", 0).is_empty(),
+        super::content_profile_monster_drop_templates(&config, None, 119, "Scarecrow", 0)
+            .is_empty(),
         "midgame Boss overrides must not leak to starter monsters"
     );
+}
+
+#[test]
+fn platinum_176_q47_ring_override_is_quest_only_and_oma_cave_scoped() {
+    let config = SimulationConfig::default().with_platinum_176_profile();
+    let drops = (0..128)
+        .flat_map(|tick| {
+            super::content_profile_monster_drop_templates(
+                &config,
+                Some("D001"),
+                62_000,
+                "Skeleton",
+                tick,
+            )
+        })
+        .collect::<Vec<_>>();
+
+    assert!(drops.iter().any(|drop| {
+        matches!(
+            drop,
+            super::ResolvedDropTemplate::Item {
+                name,
+                quest_required: true,
+                ..
+            } if name == "OliviasRing"
+        )
+    }));
+    assert!(super::content_profile_monster_drop_templates(
+        &config,
+        Some("D011"),
+        62_000,
+        "Skeleton",
+        0,
+    )
+    .is_empty());
+    assert!(super::content_profile_monster_drop_templates(
+        &config,
+        Some("D001"),
+        62_000,
+        "Skeleton0",
+        0,
+    )
+    .is_empty());
 }

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
-import { originalAssetPath } from "../../lib/asset-url";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -418,7 +418,7 @@ function statValue(value?: number) {
 }
 
 function creatureIconPath(icon: number) {
-  return originalAssetPath(`/original-ui/Items/${icon}.png`);
+  return originalItemIconPath(icon);
 }
 
 const style: Record<string, CSSProperties> = {

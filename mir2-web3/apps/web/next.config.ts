@@ -140,6 +140,10 @@ const nextConfig: NextConfig = {
       ...heavyPublicMediaTracingExcludes,
       ...localCrystalSourceTracingExcludes,
     ],
+    "/api/scene/collision": [
+      ...heavyPublicMediaTracingExcludes,
+      ...localCrystalSourceTracingExcludes,
+    ],
     "/api/qa/map-monster-scenes": heavyPublicMediaTracingExcludes,
     "/qa/map-monsters": [
       ...heavyPublicMediaTracingExcludes,
@@ -153,6 +157,11 @@ const nextConfig: NextConfig = {
       "./lib/generated/crystal_starter_map_collision.json",
       "./lib/generated/crystal_starter_map_region.json",
       "./lib/generated/crystal-map-library-meta/**/*.json.gz",
+      "./lib/generated/crystal-map-pack/**/*.map.gz",
+    ],
+    "/api/scene/collision": [
+      "./lib/generated/crystal_starter_map_collision.json",
+      "./lib/generated/crystal_starter_map_region.json",
       "./lib/generated/crystal-map-pack/**/*.map.gz",
     ],
     "/api/qa/map-monster-scenes": [

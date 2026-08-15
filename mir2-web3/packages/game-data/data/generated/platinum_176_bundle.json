@@ -1,21 +1,21 @@
 {
   "schema": "mir2-content-profile-bundle/1",
   "profileId": "platinum_176",
-  "profileVersion": 6,
+  "profileVersion": 24,
   "acceptanceLevel": 50,
   "source": "Crystal.Database-29.01.25/Jev with classic three-class 1.76 overrides",
   "sourceData": {
     "crystalDatabaseVersion": 117,
     "crystalDatabaseCustomVersion": 0
   },
-  "builtAt": "2026-08-07T07:37:07.457Z",
+  "builtAt": "2026-08-14T17:24:47.099Z",
   "hashAlgorithm": "sha256",
-  "contentHash": "3bbd9685bd026d434e83f9a13b431e2363921ee72b97c72bc5d8ebc222286c2a",
+  "contentHash": "9da87bbf7e23a70caf6cad4ff2eb9c6c287071e26a9dc541924f9f0eccc581de",
   "files": [
     {
       "path": "packages/game-data/data/content_profiles/platinum_176.json",
-      "bytes": 26809,
-      "sha256": "b547b8af151798a4a4b7d630bd7c4e5a23b0cd345735fb175508c057ca811cfd"
+      "bytes": 38279,
+      "sha256": "cf9497358d9644a476f766c826400afbdac99387d1f876575e57a4f174a39c9a"
     },
     {
       "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
@@ -79,11 +79,14 @@
     }
   ],
   "summary": {
-    "maps": 118,
-    "monsters": 125,
-    "items": 146,
+    "maps": 164,
+    "monsters": 174,
+    "items": 164,
     "skills": 32,
-    "npcScripts": 38,
-    "dropOverrides": 21
+    "npcScripts": 100,
+    "respawnOverrides": 2,
+    "dropOverrides": 25,
+    "questPrerequisiteOverrides": 1,
+    "questRewardOverrides": 1
   }
 }

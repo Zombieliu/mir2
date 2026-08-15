@@ -524,6 +524,7 @@ export function OriginalClientShell({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  npcShopService,
   npcRepairService,
   onLanguageChange,
   onAccountIdChange,
@@ -558,6 +559,7 @@ export function OriginalClientShell({
   onSetStoragePassword,
   onRemoveStoragePassword,
   onSellItem,
+  onBuyNpcShopItem,
   onDropGold,
   onRepairItem,
   onSpecialRepairItem,
@@ -575,6 +577,7 @@ export function OriginalClientShell({
   onToggleQuestLog,
   onCloseCharacter,
   onCloseInventory,
+  onCloseNpcShopService,
   onCloseNpcRepairService,
   onOpenCharacterTab,
   onOpenInventoryTab,
@@ -1908,21 +1911,23 @@ export function OriginalClientShell({
     BEVY_LOCAL_MOTION_REQUESTED && bevyPresentationPoseActive;
   const bevyPoseCommitActive =
     BEVY_POSE_COMMIT_REQUESTED && bevyPresentationPoseActive;
-  // In the NON-imperative path (the default — Bevy renders sprites but the self-camera
-  // scroll is folded through this React clock), the ~33 Hz cadence was measured as the
-  // dominant run "judder": the map/camera scroll only advanced every ~30 ms, so on a
-  // 120 Hz display the scroll sat still ~89 % of frames and lurched in 33 Hz steps —
-  // very visible while RUNNING (2 tiles/600 ms = a big per-step displacement), barely
-  // visible while walking. While the self-camera is actually gliding, tighten the clock
-  // to ~60 Hz so the scroll keeps up with the display; fall back to 30 Hz when idle so
-  // the scene tree is not re-created 60×/s during normal standing play (the perf win the
-  // throttle exists for). The imperative path stays at its slow expiry cadence — Bevy
-  // owns the scroll there.
+  // In the NON-imperative path, a packed map can afford a ~60 Hz camera fold while the
+  // self player is moving. The DOM-map fallback cannot: it contains roughly 500 image
+  // nodes and a development React commit can take longer than one 16 ms frame. Asking
+  // for another render before the previous one finishes builds an unbounded concurrent
+  // work backlog during long keyboard routes (eventually even CDP/real input starves).
+  // Cap that fallback at ~33 Hz. When the packed map is available the cheap path keeps
+  // the original 60 Hz cadence, and the fully imperative Bevy path remains at 10 Hz
+  // because Rust owns camera interpolation there.
   const selfCameraGliding =
     (renderPlayer?.movementUntil ?? 0) > Date.now() ||
     playerCameraMotionOffset.x !== 0 ||
     playerCameraMotionOffset.y !== 0;
-  motionClockIntervalMsRef.current = imperativeSceneMotion ? 100 : selfCameraGliding ? 16 : 30;
+  motionClockIntervalMsRef.current = imperativeSceneMotion
+    ? 100
+    : selfCameraGliding && mapAtlasUsable
+      ? 16
+      : 30;
   // In the imperative path the DOM world layers get a zero camera offset (the driver
   // pans them via a compositor transform at display Hz); otherwise they fold the React
   // `motionNow` camera offset exactly as before.
@@ -1948,13 +1953,29 @@ export function OriginalClientShell({
     shouldUseRawWebGl2EntityRenderer();
   const useGpuEntityRenderer = useBevyEntityRenderer || useWebGl2EntityAtlasRenderer;
   const useBevyEntityAtlas = useGpuEntityRenderer && bevyEntityAtlasPolicy !== "disabled";
-  const bevyEntityAtlasSources =
-    useGpuEntityRenderer && useBevyEntityAtlas
-      ? collectBevyEntityAtlasSources(viewportEntitySprites)
-      : [];
-  const bevyEntityAtlasKey = bevyEntityAtlasSources.length
-    ? bevyEntityAtlasKeyForSources(bevyEntityAtlasSources)
-    : null;
+  // Every viewport sprite contains `preloadFrames`, so the atlas source set is stable
+  // across the 100 ms animation phase tick. Rebuilding/sorting ~900 source records on
+  // every phase was pure churn and, in development builds, helped keep React's render
+  // queue permanently saturated while walking. Recompute only when the visible entity
+  // population or loaded sprite libraries change; movement/action packets replace the
+  // corresponding entity records and therefore still invalidate this memo.
+  const bevyEntityAtlasSources = useMemo(
+    () =>
+      useGpuEntityRenderer && useBevyEntityAtlas
+        ? collectBevyEntityAtlasSources(viewportEntitySprites)
+        : [],
+    // `viewportEntitySprites` also changes for animation-only frame ticks. Its complete
+    // preload-frame coverage is exactly why it is intentionally not a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [useGpuEntityRenderer, useBevyEntityAtlas, viewportEntities, sceneSpriteLibraries],
+  );
+  const bevyEntityAtlasKey = useMemo(
+    () =>
+      bevyEntityAtlasSources.length
+        ? bevyEntityAtlasKeyForSources(bevyEntityAtlasSources)
+        : null,
+    [bevyEntityAtlasSources],
+  );
   // Synchronous in-memory residency read for the active atlas, so a cached-key
   // transition shows the packed atlas in the SAME frame (acquire()'s state set
   // is a microtask later). Conversion to a snapshot only runs in the fallback
@@ -2587,10 +2608,26 @@ export function OriginalClientShell({
   }
   const showSyntheticScene = screen === "game" && !world.originalMapRegion;
   const sceneAssetUrlsRef = useRef<string[]>([]);
-  sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites, {
-    includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
-    viewportLayout,
-  });
+  sceneAssetUrlsRef.current = useMemo(
+    () =>
+      collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites, {
+        includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
+        viewportLayout,
+      }),
+    // Map/player/entity changes replace these stable inputs. Animation-only
+    // frame ticks change `viewport*Sprites`, but their preload collections are
+    // already exhaustive and must not re-sort the same URLs every 100 ms.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      renderPlayer?.x,
+      renderPlayer?.y,
+      world.originalMapRegion,
+      viewportEntities,
+      sceneSpriteLibraries,
+      hideDomEntitySpritesForBevy,
+      viewportLayout,
+    ],
+  );
 
   // Prefetch a ring of static tiles just outside the visible viewport whenever the
   // player's cell changes, so walking does not pop-in cold tiles. Idle-scheduled and
@@ -3387,6 +3424,7 @@ export function OriginalClientShell({
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
+                  npcShopService,
                   npcRepairService,
                   defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
@@ -3399,6 +3437,7 @@ export function OriginalClientShell({
                   onToggleQuestLog,
                   onCloseCharacter,
                   onCloseInventory,
+                  onCloseNpcShopService,
                   onCloseNpcRepairService,
                   onOpenCharacterTab,
                   onOpenInventoryTab,
@@ -3417,6 +3456,7 @@ export function OriginalClientShell({
                   onSetStoragePassword,
                   onRemoveStoragePassword,
                   onSellItem,
+                  onBuyNpcShopItem,
                   onDropGold,
                   onRepairItem,
                   onSpecialRepairItem,

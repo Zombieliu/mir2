@@ -378,7 +378,11 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .viewport-drop-overlay {
-  z-index: 4;
+  /* Ground-item labels must remain physically clickable even when a corpse or
+     live actor occupies the same tile. Keep the full overlay pass-through so
+     map/entity input is unchanged outside the actual marker buttons. */
+  z-index: 32762;
+  pointer-events: none;
 }
 
 .viewport-sprite-overlay {
@@ -655,6 +659,7 @@ html[data-display-mode="standalone"] .mir-client-page {
 .ground-drop-marker {
   position: absolute;
   transform: translate(-50%, -100%);
+  pointer-events: auto;
   border: 0;
   background: transparent;
   padding: 0;

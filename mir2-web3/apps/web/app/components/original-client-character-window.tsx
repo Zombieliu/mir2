@@ -3,7 +3,7 @@
 import { type CSSProperties } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
-import { originalAssetPath } from "../../lib/asset-url";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import { OriginalItemTooltip, type ItemTooltipGrade } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -369,10 +369,6 @@ const HEADER_GUILD_STYLE: CSSProperties = {
   whiteSpace: "nowrap",
   textOverflow: "ellipsis",
 };
-
-function originalItemIconPath(icon: number) {
-  return originalAssetPath(`/original-ui/Items/${icon}.png`);
-}
 
 function statCell(label: string, value: string): StatCell {
   return { label, value };

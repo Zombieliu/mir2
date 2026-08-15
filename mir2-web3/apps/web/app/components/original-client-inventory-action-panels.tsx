@@ -1,7 +1,7 @@
 import type { CSSProperties, MouseEvent } from "react";
 
 import type { DisplayItem, TranslateFn } from "./original-client-types";
-import { equipmentSlotForItemKey, originalItemIconPath } from "./original-client-inventory-utils";
+import { equipmentSlotForItem, originalItemIconPath } from "./original-client-inventory-utils";
 
 function primaryMouseAction(event: MouseEvent, action: () => void) {
   if (event.button !== 0) return;
@@ -303,7 +303,7 @@ export function inventoryItemFilterLabel(t: TranslateFn, filter: InventoryItemFi
 /** Classify an item into one of the coarse filter buckets. */
 export function inventoryItemFilterFor(item: Pick<DisplayItem, "key" | "name" | "container">): InventoryItemFilter {
   if (item.container === "quest") return "quest";
-  if (equipmentSlotForItemKey(item.key)) return "equip";
+  if (equipmentSlotForItem(item)) return "equip";
   const haystack = `${item.key} ${item.name}`;
   if (/Scroll|Book|Tome|Recall|Teleport|TownTeleport/i.test(haystack)) return "scroll";
   if (/Potion|Pill|Drug|Meat|Food|Drink|Apple|Wine|Herb|Antidote|Elixir|Cure/i.test(haystack)) return "consumable";

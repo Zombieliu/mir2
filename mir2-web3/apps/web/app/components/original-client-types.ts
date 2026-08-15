@@ -212,6 +212,8 @@ export type DisplayItem = {
   description: string;
   durabilityCurrent?: number;
   durabilityMax?: number;
+  sellValue?: number;
+  equipSlot?: EquipmentSlot | null;
 };
 
 export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;
@@ -280,6 +282,25 @@ export type DisplayNpcDialog = {
     target: string;
     prompt: string;
   } | null;
+};
+
+export type DisplayNpcShopGood = {
+  id: number;
+  itemIndex: number;
+  name: string;
+  icon: number;
+  price: number;
+  count?: number;
+  grade?: "common" | "rare" | "heroic" | "legendary" | "mythical";
+  description?: string;
+};
+
+export type DisplayNpcShopService = {
+  npcName: string;
+  panelType: number;
+  buyItems: DisplayNpcShopGood[];
+  supportsBuy: boolean;
+  supportsSell: boolean;
 };
 
 export type DisplayLogLine = {

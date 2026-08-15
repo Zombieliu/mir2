@@ -3,12 +3,13 @@ use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
 
-use crate::config::{ItemContainer, QuestSnapshot, QuestStage};
+use crate::config::{ItemContainer, QuestObjectiveSnapshot, QuestSnapshot, QuestStage};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_item_by_index, crystal_npc_info_manifest, crystal_quest_packet_manifest,
-    localized_text_or_fallback, starter_server_data, CrystalQuestItemTaskTemplate,
-    CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy, QuestTemplate,
+    crystal_item_by_index, crystal_item_by_name, crystal_npc_info_manifest,
+    crystal_quest_packet_manifest, localized_text_or_fallback, starter_server_data,
+    CrystalQuestItemTaskTemplate, CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy,
+    QuestTemplate,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatType, ClientQuestInfo, ItemInfo, MirClass,
@@ -21,10 +22,14 @@ use super::inventory::{
     add_or_increment_item, additional_slots_needed_for_item_quantity, can_gain_item_quantity,
     free_bag_slots,
 };
-use super::items::{crystal_item_key_for_template, normalize_crystal_item_key};
+use super::items::{
+    crystal_item_key_for_template, item_info_from_crystal_template, normalize_crystal_item_key,
+};
 use super::npc::{localized_npc_dialog_base_key, npc_script_for_object_id, NpcDialogLinkState};
 use super::npc_script::{NpcInteractionContext, NpcQuestDialog};
-use super::resources::{InventoryResource, PlayerRuntimeResource, QuestResource, SessionResource};
+use super::resources::{
+    InventoryResource, PlayerRuntimeResource, QuestResource, RuntimeConfigResource, SessionResource,
+};
 
 const CRYSTAL_NORMAL_QUEST_MIN_LEVEL: i32 = 1;
 const CRYSTAL_NORMAL_QUEST_MAX_LEVEL: i32 = 45;
@@ -99,8 +104,72 @@ impl QuestState {
                 self.quest_id,
                 &self.reward_preview,
             ),
+            objectives: self.objective_snapshots(),
         }
     }
+
+    fn objective_snapshots(&self) -> Vec<QuestObjectiveSnapshot> {
+        let Some(template) = crystal_quest_template_by_id(self.quest_id) else {
+            return Vec::new();
+        };
+        let mut objectives = Vec::with_capacity(
+            template.kill_tasks.len() + template.item_tasks.len() + template.flag_tasks.len(),
+        );
+        for task in &template.kill_tasks {
+            let required = task.count.max(1);
+            let current =
+                crystal_quest_task_progress(self, &crystal_kill_task_key(task.monster_index))
+                    .min(required);
+            objectives.push(QuestObjectiveSnapshot {
+                label: objective_snapshot_label(
+                    &task.message,
+                    &format!("Kill {}", task.monster_name),
+                ),
+                current,
+                required,
+                done: current >= required,
+            });
+        }
+        for task in &template.item_tasks {
+            let required = u32::from(task.count.max(1));
+            let current =
+                crystal_quest_task_progress(self, &crystal_item_task_key(task.item_index))
+                    .min(required);
+            objectives.push(QuestObjectiveSnapshot {
+                label: objective_snapshot_label(
+                    &task.message,
+                    &format!("Collect {}", task.item_name),
+                ),
+                current,
+                required,
+                done: current >= required,
+            });
+        }
+        for task in &template.flag_tasks {
+            let required = 1;
+            let current = crystal_quest_task_progress(self, &crystal_flag_task_key(task.number))
+                .min(required);
+            objectives.push(QuestObjectiveSnapshot {
+                label: objective_snapshot_label(
+                    &task.message,
+                    &format!("Activate flag {}", task.number),
+                ),
+                current,
+                required,
+                done: current >= required,
+            });
+        }
+        objectives
+    }
+}
+
+fn objective_snapshot_label(message: &str, fallback: &str) -> String {
+    let label = if message.trim().is_empty() {
+        fallback
+    } else {
+        message.trim()
+    };
+    strip_crystal_inline_colour(label).trim().to_string()
 }
 
 pub(super) fn guide_quest_template() -> QuestTemplate {
@@ -141,6 +210,54 @@ pub(super) fn crystal_quest_info_by_id(quest_id: i32) -> Option<ClientQuestInfo>
     crystal_client_quest_infos()
         .into_iter()
         .find(|info| info.index == quest_id)
+}
+
+fn effective_crystal_quest_info_by_id(world: &World, quest_id: i32) -> Option<ClientQuestInfo> {
+    let mut info = crystal_quest_info_by_id(quest_id)?;
+    apply_content_profile_quest_reward_overrides(world, &mut info);
+    Some(info)
+}
+
+fn apply_content_profile_quest_reward_overrides(world: &World, info: &mut ClientQuestInfo) {
+    let Some(profile) = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .content_profile
+        .as_ref()
+    else {
+        return;
+    };
+    for rule in profile
+        .profile
+        .quest_reward_overrides
+        .iter()
+        .filter(|rule| rule.quest_id == info.index)
+    {
+        if info
+            .rewards_fixed_item
+            .iter()
+            .any(|reward| reward.item.name.eq_ignore_ascii_case(&rule.item))
+        {
+            continue;
+        }
+        let Some(template) = crystal_item_by_name(&rule.item) else {
+            continue;
+        };
+        info.rewards_fixed_item.push(QuestItemReward {
+            item: item_info_from_crystal_template(template),
+            count: rule.count,
+        });
+    }
+}
+
+pub(super) fn effective_crystal_quest_info_packets(world: &World) -> Vec<ServerPacket> {
+    crystal_client_quest_infos()
+        .into_iter()
+        .map(|mut info| {
+            apply_content_profile_quest_reward_overrides(world, &mut info);
+            ServerPacket::NewQuestInfo { info }
+        })
+        .collect()
 }
 
 pub(super) fn crystal_quest_template_by_id(quest_id: i32) -> Option<CrystalQuestPacketTemplate> {
@@ -587,7 +704,7 @@ pub(super) fn ensure_runtime_quest(world: &mut World, quest_id: i32) -> QuestSta
             stage: QuestStage::Available,
             task_progress: BTreeMap::new(),
         }
-    } else if let Some(info) = crystal_quest_info_by_id(quest_id) {
+    } else if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
         QuestState::from_crystal_info(&info, QuestStage::Available)
     } else {
         return QuestStage::Available;
@@ -634,7 +751,7 @@ pub(super) fn begin_quest(world: &mut World, quest_id: i32) -> QuestStage {
         set_quest_stage(world, template.quest_id, QuestStage::InProgress);
         return QuestStage::InProgress;
     }
-    let Some(info) = crystal_quest_info_by_id(quest_id) else {
+    let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
         return QuestStage::Available;
     };
     let Some(template) = crystal_quest_template_by_id(quest_id) else {
@@ -683,7 +800,7 @@ pub(super) fn complete_quest_with_selection(
     quest_id: i32,
     selected_item_index: Option<i32>,
 ) -> bool {
-    if let Some(info) = crystal_quest_info_by_id(quest_id) {
+    if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
         return complete_crystal_quest(world, &info, selected_item_index);
     }
     let Some(quest) = quest_template_by_id(quest_id) else {
@@ -963,7 +1080,31 @@ pub(super) fn can_accept_crystal_quest(world: &World, info: &ClientQuestInfo) ->
     if !crystal_quest_class_matches(character.class, info.class_needed) {
         return false;
     }
-    crystal_required_quest_chain_completed(world, info.quest_needed)
+    crystal_required_quest_chain_completed(
+        world,
+        effective_crystal_required_quest_id(world, info.index, info.quest_needed),
+    )
+}
+
+fn effective_crystal_required_quest_id(
+    world: &World,
+    quest_id: i32,
+    imported_required_quest_id: i32,
+) -> i32 {
+    world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .content_profile
+        .as_ref()
+        .and_then(|profile| {
+            profile
+                .profile
+                .quest_prerequisite_overrides
+                .iter()
+                .find(|rule| rule.quest_id == quest_id)
+        })
+        .map(|rule| rule.required_quest_id)
+        .unwrap_or(imported_required_quest_id)
 }
 
 fn crystal_required_quest_chain_completed(world: &World, required_quest_id: i32) -> bool {
@@ -982,7 +1123,7 @@ fn crystal_required_quest_chain_completed(world: &World, required_quest_id: i32)
             return false;
         }
         current = crystal_quest_info_by_id(current)
-            .map(|info| info.quest_needed)
+            .map(|info| effective_crystal_required_quest_id(world, info.index, info.quest_needed))
             .unwrap_or(0);
     }
     true
@@ -1215,7 +1356,8 @@ pub(super) fn quest_log_snapshots(world: &World, language: LanguageCode) -> Vec<
         seen.insert(quest.quest_id);
         snapshots.push(quest.snapshot(language));
     }
-    for info in crystal_normal_quest_infos_1_to_45() {
+    for mut info in crystal_normal_quest_infos_1_to_45() {
+        apply_content_profile_quest_reward_overrides(world, &mut info);
         if seen.contains(&info.index) || !can_accept_crystal_quest(world, &info) {
             continue;
         }
@@ -1232,7 +1374,7 @@ pub(super) fn quest_dialog_links_for_npc(
 ) -> Vec<NpcDialogLinkState> {
     let mut links = Vec::new();
     for quest_id in quest_ids {
-        let Some(info) = crystal_quest_info_by_id(*quest_id) else {
+        let Some(info) = effective_crystal_quest_info_by_id(world, *quest_id) else {
             continue;
         };
         let stage = quest_stage(world, info.index).unwrap_or(QuestStage::Available);
@@ -1290,7 +1432,7 @@ pub(super) fn crystal_quest_dialog_for_target(
     let action = parts.next()?;
     let quest_id = parts.next()?.parse::<i32>().ok()?;
     let selected_item_index = parts.next().and_then(|value| value.parse::<i32>().ok());
-    let info = crystal_quest_info_by_id(quest_id)?;
+    let info = effective_crystal_quest_info_by_id(world, quest_id)?;
     match action.to_ascii_lowercase().as_str() {
         "accept" => Some(accept_crystal_quest_from_npc(world, npc_object_id, &info)),
         "finish" => Some(finish_crystal_quest_from_npc(

@@ -1,6 +1,7 @@
 use mir2_game_data::{
-    crystal_drop_table_for_monster_name, crystal_npc_info_manifest, crystal_npc_manifest,
-    crystal_respawn_manifest, platinum_176_profile,
+    content_profile_visible_npc_script_map_transfers, crystal_drop_table_for_monster_name,
+    crystal_npc_info_manifest, crystal_npc_manifest, crystal_respawn_manifest,
+    platinum_176_profile,
 };
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
@@ -118,6 +119,13 @@ fn platinum_176_levels_8_to_21_have_a_complete_natural_product_loop() {
         .iter()
         .map(|map| (map.map_index, map.map_file_name.as_str()))
         .collect::<BTreeMap<_, _>>();
+    let scripted_map_transfers = content_profile_visible_npc_script_map_transfers(&profile);
+    assert!(scripted_map_transfers
+        .iter()
+        .any(|(source, destination)| source == "0" && destination == "5"));
+    assert!(scripted_map_transfers
+        .iter()
+        .any(|(source, destination)| source == "5" && destination == "0"));
 
     let mut reachable = BTreeSet::from(["0"]);
     let mut queue = VecDeque::from(["0"]);
@@ -135,6 +143,14 @@ fn platinum_176_levels_8_to_21_have_a_complete_natural_product_loop() {
                 queue.push_back(destination);
             }
         }
+        for (script_source, destination) in &scripted_map_transfers {
+            if script_source == source
+                && allowed_maps.contains(destination.as_str())
+                && reachable.insert(destination.as_str())
+            {
+                queue.push_back(destination.as_str());
+            }
+        }
     }
 
     let route_rules = profile
@@ -149,7 +165,7 @@ fn platinum_176_levels_8_to_21_have_a_complete_natural_product_loop() {
     for rule in &route_rules {
         assert!(
             reachable.contains(rule.file_name.as_str()),
-            "{} must be naturally reachable from map 0",
+            "{} must be reachable from map 0 through a normal client route",
             rule.file_name
         );
     }

@@ -255,6 +255,9 @@ pub trait WorldRuntime: Send + Sync {
     }
 
     fn world_snapshot(&self) -> WorldSnapshot;
+    fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
+        Vec::new()
+    }
     fn active_identity(&self) -> Option<ActiveSessionIdentity>;
     fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
         None
@@ -481,6 +484,10 @@ impl InProcessWorldRuntime {
             .force_authoritative_player_transform(position, direction);
     }
 
+    pub fn reconcile_current_map_monster_activation(&mut self) {
+        self.session.reconcile_current_map_monster_activation();
+    }
+
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         self.session.force_authoritative_player_vitals(hp, mp);
     }
@@ -517,6 +524,10 @@ impl InProcessWorldRuntime {
     ) {
         self.session
             .apply_zone_player_buff_packets(packets, zone_object_id);
+    }
+
+    pub fn apply_shared_monster_lifecycle_packets(&mut self, packets: &[ServerPacket]) {
+        self.session.apply_shared_monster_lifecycle_packets(packets);
     }
 
     pub fn apply_shared_entity_snapshot(&mut self, entity: &WorldEntitySnapshot) -> bool {
@@ -661,6 +672,10 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn world_snapshot(&self) -> WorldSnapshot {
         self.session.world_snapshot()
+    }
+
+    fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
+        self.session.current_map_shared_entity_snapshots()
     }
 
     fn active_identity(&self) -> Option<ActiveSessionIdentity> {

@@ -9,6 +9,7 @@ import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-laye
 import type {
   DisplayEntity,
   DisplayLogLine,
+  DisplayNpcShopService,
   DisplayWorld,
   CreateCharacterDraft,
   EntityKind,
@@ -211,6 +212,7 @@ export type OriginalClientShellProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
@@ -245,6 +247,7 @@ export type OriginalClientShellProps = {
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
   onRemoveStoragePassword: (currentPassword: string) => void;
   onSellItem: (item: ItemActionRef, count: number) => void;
+  onBuyNpcShopItem: (id: number, quantity: number, panelType: number) => void;
   onDropGold: (amount: number) => void;
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
@@ -262,6 +265,7 @@ export type OriginalClientShellProps = {
   onToggleQuestLog: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseNpcShopService: () => void;
   onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;

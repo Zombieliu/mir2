@@ -8,10 +8,10 @@ import {
   type CrystalChatType as CrystalChatTypeValue,
 } from "../../lib/crystal-chat-history";
 import { ORIGINAL_UI } from "../../lib/original-ui";
-import { originalAssetPath } from "../../lib/asset-url";
 import { IS_PLATINUM_176_PROFILE } from "../../lib/content-profile";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -681,10 +681,6 @@ function matchesChatVisibility(line: DisplayLogLineLike, hiddenFilters: ChatOpti
     default:
       return true;
   }
-}
-
-function originalItemIconPath(icon: number) {
-  return originalAssetPath(`/original-ui/Items/${icon}.png`);
 }
 
 function duraIconForSlot(slot: EquipmentSlot, equipmentItems: DisplayEquipmentItemLike[]) {

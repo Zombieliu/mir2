@@ -34,6 +34,7 @@ import {
 import type {
   DisplayEntity,
   DisplayLogLine,
+  DisplayNpcShopService,
   DisplayWorld,
   EquipmentActionRef,
   EquipmentSlot,
@@ -57,6 +58,7 @@ type GameUiSceneProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
   defaultChatExpanded?: boolean;
   onChatMessageChange: (value: string) => void;
@@ -69,6 +71,7 @@ type GameUiSceneProps = {
   onToggleQuestLog: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseNpcShopService: () => void;
   onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
@@ -87,6 +90,7 @@ type GameUiSceneProps = {
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
   onRemoveStoragePassword: (currentPassword: string) => void;
   onSellItem: (item: ItemActionRef, count: number) => void;
+  onBuyNpcShopItem: (id: number, quantity: number, panelType: number) => void;
   onDropGold: (amount: number) => void;
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
@@ -117,6 +121,7 @@ function GameUiSceneInner({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  npcShopService,
   npcRepairService,
   defaultChatExpanded = true,
   onChatMessageChange,
@@ -129,6 +134,7 @@ function GameUiSceneInner({
   onToggleQuestLog,
   onCloseCharacter,
   onCloseInventory,
+  onCloseNpcShopService,
   onCloseNpcRepairService,
   onOpenCharacterTab,
   onOpenInventoryTab,
@@ -147,6 +153,7 @@ function GameUiSceneInner({
   onSetStoragePassword,
   onRemoveStoragePassword,
   onSellItem,
+  onBuyNpcShopItem,
   onDropGold,
   onRepairItem,
   onSpecialRepairItem,
@@ -406,6 +413,36 @@ function GameUiSceneInner({
           playerClass={player?.classKey ?? "warrior"}
           onBuy={onBuyGameShopItem}
           onClose={() => setShowGameShop(false)}
+        />
+      ) : null}
+      {npcShopService ? (
+        <NpcShopWindow
+          key={`${npcShopService.npcName}:${npcShopService.panelType}:${npcShopService.buyItems.map((item) => item.id).join(",")}`}
+          t={t}
+          npcName={npcShopService.npcName}
+          gold={world.gold}
+          initialTab={npcShopService.supportsBuy ? "buy" : "sell"}
+          availableTabs={[
+            ...(npcShopService.supportsBuy ? (["buy"] as const) : []),
+            ...(npcShopService.supportsSell ? (["sell"] as const) : []),
+          ]}
+          buyItems={npcShopService.buyItems}
+          sellItems={world.inventoryItems.map((item) => ({
+            id: item.uniqueId,
+            name: item.name,
+            icon: item.icon,
+            price: Math.max(0, Number(item.sellValue ?? 0)),
+            count: item.quantity,
+            description: item.description,
+          }))}
+          onBuy={(id, quantity) =>
+            onBuyNpcShopItem(Number(id), quantity, npcShopService.panelType)
+          }
+          onSell={(id, quantity) => {
+            const item = world.inventoryItems.find((entry) => entry.uniqueId === Number(id));
+            if (item) onSellItem(item, quantity);
+          }}
+          onClose={onCloseNpcShopService}
         />
       ) : null}
       {npcRepairService ? (
