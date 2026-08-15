@@ -17,7 +17,8 @@ level-1-to-50 playthrough.
   `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`, followed by
   `030cebe31806e3fb7ef79f6014d12864593c3c34` and
   `d8264b5c1d80f150e29462dec47380995cc93185` and
-  `40ffedcb55a31d5cc2da8f5007464dd21616d549`.
+  `40ffedcb55a31d5cc2da8f5007464dd21616d549` and
+  `32f5b2f9d8ea7eaa6468007f97737b6ee781f2b6`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
@@ -25,11 +26,12 @@ level-1-to-50 playthrough.
   commit `40ffedcb5`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
-  `aa928b99a`. This follow-up adds five code/test commits plus their acceptance
+  `aa928b99a`. This follow-up adds six code/test commits plus their acceptance
   documentation commits; source
-  `0256c33a9`/`0afc30449`/`1c9ac3b4`/`acd95a4b4`/`e533efbb3` and clean
-  `d68674ce8`/`e50a8fce0`/`030cebe3`/`d8264b5c1`/`40ffedcb5` have matching
-  stable patch ids respectively.
+  `0256c33a9`/`0afc30449`/`1c9ac3b4`/`acd95a4b4`/`e533efbb3`/`e8065e599`
+  and clean
+  `d68674ce8`/`e50a8fce0`/`030cebe3`/`d8264b5c1`/`40ffedcb5`/`32f5b2f9d`
+  have matching stable patch ids respectively.
 
 ## Acceptance matrix
 
@@ -85,8 +87,8 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `40ffedcb5` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 177/177, including the
+The later Quest Agent-only follow-ups through `32f5b2f9d` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 178/178, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
 cross-run supply recall, safe-room settlement, full-map route fallback, and
 dense-shelter escape plus congested-portal rotation and physical-hit-target
@@ -97,7 +99,10 @@ certified physical occupancy clearing; Node syntax checks and `git diff
 --check` pass in both source and clean worktrees. The latest regression also
 requires a harvest goal to handle at most two already attacking, certified
 nearby threats before creating the source corpse; an unsafe or excess threat
-forces physical disengagement instead. The earlier full
+forces physical disengagement instead. The newest regression keeps the
+conservative 15-second/five-attack no-response budget for quest combat, but
+lets incidental travel clearing rotate an unresponsive occupied tile after
+four seconds and two real attacks. The earlier full
 Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
 #235 at exact head `45192e947` finished 20 successful remote checks, two
@@ -121,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 73 finalized development reports
-through `warrior-q30-r74-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 74 finalized development reports
+through `warrior-q30-r75-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 65,099,847 ms (18 h 04 m 59 s) browser-active runtime;
-- 34,170 recorded physical inputs;
-- 361 historical kill rows, including one r44 row now proven to repeat the
+- 66,012,652 ms (18 h 20 m 12 s) browser-active runtime;
+- 34,633 recorded physical inputs;
+- 364 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 13 deaths and 12 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -442,6 +447,33 @@ left the character at 149/149 HP with no HP drugs, level 15 and EXP
 6,217/40,000; q25 remains 8/20 and q30 remains 0/1. Its combat and final
 screenshots were visually inspected and match the report. This is a resumable
 partial recovery trace, not a completed restock loop or quest certificate.
+
+r75 resumed the exact r74 state on the same pre-fix in-memory runtime and
+confirmed that the remaining recovery cost was not a one-run anomaly. It
+advanced from `(326,535)` to `(304,567)` toward outdoor Merchant Ruben, but
+seven different low-level occupants each consumed the old five-attack,
+15-second no-response window before quarantine. Three other occupants produced
+recorded combat completion. The normal-client merchant route was attempted but
+the dialog could not be opened before the 900-second budget expired, so the
+agent correctly held quest departure at zero HP drugs.
+
+The finalized r75 report records 912,805 ms, 463 physical inputs, 266 attack
+commands, 3 kill rows, seven target quarantines, zero death/revive, zero potion
+use, zero purchases, zero shortcuts, and zero critical browser/network
+diagnostics. Final state is map 0 `(304,567)`, 149/149 HP, level 15 with EXP
+7,485/40,000 and 1,045 gold; q25 remains 8/20 and q30 remains 0/1. The final
+frame shows the character inside the reported dense actor cluster. Together,
+r74 and r75 are consecutive counterexamples to the old incidental-combat
+no-response latency, not completed recovery or quest certificates.
+
+Source commit `e8065e599` (clean `32f5b2f9d`) separates the two audit budgets:
+ordinary quest combat still requires five real attacks over 15 seconds before
+an unresponsive target is quarantined, while incidental travel clearing can
+rotate after two real attacks over four seconds because it is only trying to
+open one occupied movement tile. No-response is still a failed clear and is
+never counted as a kill. The new unit contract was first red, then passed with
+the full 178/178 Quest Agent gate in both source and clean worktrees. An exact
+r75 patched replay remains required for live closure.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
