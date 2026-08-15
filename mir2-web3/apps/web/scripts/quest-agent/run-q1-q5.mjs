@@ -9,6 +9,7 @@ import {
   allQ1Q9Completed,
   assessGrindingSourceStall,
   assessQuestCombatResourceStrain,
+  assessRecoveryTransferProgress,
   chooseImmediateMeleeTarget,
   collisionAtlasSearchMargins,
   collisionPathHasImmediateDynamicBlock,
@@ -204,6 +205,8 @@ let knownHealthPotionUnitPrice = null;
 let deerFundingUnavailableUntil = 0;
 let supplyFundingShelterUntil = 0;
 let safeRecoveryThreatSettleUntil = 0;
+let safeRecoveryTransferProgress = null;
+const safeRecoveryTransferCongestionUntil = new Map();
 const fieldGroupCooldownUntil = new Map();
 const monsterCooldownUntil = new Map();
 const quarantinedMonsterUntil = new Map();
@@ -286,6 +289,8 @@ const SAFE_FUNDING_READY_HEALTH_RATIO = 0.90;
 const SAFE_RECOVERY_THREAT_SETTLE_MS = 20_000;
 const SAFE_RECOVERY_PACE_INTERVAL_MS = 3_500;
 const SAFE_RECOVERY_PACE_DISTANCE = 2;
+const SAFE_RECOVERY_TRANSFER_STALL_MS = 45_000;
+const SAFE_RECOVERY_TRANSFER_CONGESTION_MS = 120_000;
 // GroceryStore has zero authoritative respawns and is connected to the
 // Border Village by ordinary movement portals. It is the nearest real-client
 // shelter where passive Crystal regeneration cannot be interrupted by mobs.
@@ -4614,7 +4619,7 @@ async function navigateNear(
       // Ignore the short approach cooldown in this exact trap, but continue to
       // respect the stronger no-response quarantine and the completed-quest /
       // level certification inside nearestTrivialAdjacentHostile.
-      const blocker = nearestTrivialAdjacentHostile(
+      const blocker = await nearestPhysicallyClickableTrivialAdjacentHostile(
         state,
         null,
         quarantinedMonsterUntil,
@@ -4803,7 +4808,7 @@ async function navigateNear(
       // scene and fought (or allowed to disengage) before navigation can make
       // progress. The certification/level filter below still prevents this
       // fallback from pulling an unrelated dangerous monster.
-      const blocker = nearestTrivialAdjacentHostile(state);
+      const blocker = await nearestPhysicallyClickableTrivialAdjacentHostile(state);
       if (blocker) {
         console.log(
           `  clear trapped navigation occupant: ${blocker.name} ` +
@@ -6445,6 +6450,15 @@ function distanceToTransferBounds(point, transfer) {
   return chebyshev(point, nearestPointInTransferBounds(point, transfer));
 }
 
+function recoveryTransferIdentity(transfer) {
+  return String(
+    transfer?.key ??
+      [transfer?.minX, transfer?.maxX, transfer?.minY, transfer?.maxY]
+        .map((value) => Number(value))
+        .join(":"),
+  );
+}
+
 function nearestPointInTransferBounds(point, transfer) {
   return {
     x: Math.max(Number(transfer.minX), Math.min(Number(transfer.maxX), Number(point.x))),
@@ -6665,6 +6679,10 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   const maxHp = Number(state.playerMaxHp ?? 0);
   const healthRatio = maxHp > 0 ? Number(state.playerHp ?? 0) / maxHp : 1;
   let shelterActive = Date.now() < supplyFundingShelterUntil;
+  if (currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME) {
+    safeRecoveryTransferProgress = null;
+    safeRecoveryTransferCongestionUntil.clear();
+  }
   if (currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME && shelterActive) {
     // The field deadline exists only to keep one retreat committed to the
     // portal. Once the ordinary map transfer succeeds, replace it with one
@@ -6698,16 +6716,79 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     // visible recovery portal is a stable safe destination. Move toward its
     // rendered transfer bounds while they are available; only fall back to a
     // geometric flee vector on maps without that ordinary exit.
-    const recoveryTransfer = (state.mapTransfers ?? [])
+    const recoveryNow = Date.now();
+    for (const [transferKey, until] of safeRecoveryTransferCongestionUntil) {
+      if (until <= recoveryNow) safeRecoveryTransferCongestionUntil.delete(transferKey);
+    }
+    const preferredRecoveryTransferKey = String(
+      safeRecoveryTransferProgress?.transferKey ?? "",
+    );
+    const recoveryTransferCandidates = (state.mapTransfers ?? [])
       .filter((transfer) => (
         String(transfer.toMapFileName ?? "") === SAFE_RECOVERY_MAP_FILE_NAME &&
         [transfer.minX, transfer.maxX, transfer.minY, transfer.maxY]
           .every((value) => Number.isFinite(Number(value)))
       ))
-      .sort((left, right) => (
-        distanceToTransferBounds(state.player, left) -
-        distanceToTransferBounds(state.player, right)
-      ))[0] ?? null;
+      .sort((left, right) => {
+        const leftKey = recoveryTransferIdentity(left);
+        const rightKey = recoveryTransferIdentity(right);
+        const leftCongested = Number(
+          Number(safeRecoveryTransferCongestionUntil.get(leftKey) ?? 0) > recoveryNow,
+        );
+        const rightCongested = Number(
+          Number(safeRecoveryTransferCongestionUntil.get(rightKey) ?? 0) > recoveryNow,
+        );
+        const leftPreferred = Number(leftKey !== preferredRecoveryTransferKey);
+        const rightPreferred = Number(rightKey !== preferredRecoveryTransferKey);
+        return leftCongested - rightCongested ||
+          leftPreferred - rightPreferred ||
+          distanceToTransferBounds(state.player, left) -
+            distanceToTransferBounds(state.player, right);
+      });
+    let recoveryTransfer = recoveryTransferCandidates[0] ?? null;
+    if (recoveryTransfer) {
+      const transferKey = recoveryTransferIdentity(recoveryTransfer);
+      const transferDistance = distanceToTransferBounds(state.player, recoveryTransfer);
+      safeRecoveryTransferProgress = assessRecoveryTransferProgress({
+        transferKey,
+        distance: transferDistance,
+        now: recoveryNow,
+        previous: safeRecoveryTransferProgress,
+        stalledAfterMs: SAFE_RECOVERY_TRANSFER_STALL_MS,
+      });
+      if (safeRecoveryTransferProgress.stalled && recoveryTransferCandidates.length > 1) {
+        safeRecoveryTransferCongestionUntil.set(
+          transferKey,
+          recoveryNow + SAFE_RECOVERY_TRANSFER_CONGESTION_MS,
+        );
+        const alternate = recoveryTransferCandidates.find((candidate) => (
+          recoveryTransferIdentity(candidate) !== transferKey &&
+          Number(
+            safeRecoveryTransferCongestionUntil.get(recoveryTransferIdentity(candidate)) ?? 0,
+          ) <= recoveryNow
+        )) ?? recoveryTransferCandidates.find((candidate) => (
+          recoveryTransferIdentity(candidate) !== transferKey
+        ));
+        if (alternate) {
+          const alternateKey = recoveryTransferIdentity(alternate);
+          console.log(
+            `  rotate congested recovery transfer: ${transferKey}->${alternateKey} ` +
+            `after ${recoveryNow - safeRecoveryTransferProgress.lastProgressAt}ms ` +
+            `without improving distance ${safeRecoveryTransferProgress.bestDistance}`,
+          );
+          recoveryTransfer = alternate;
+          safeRecoveryTransferProgress = assessRecoveryTransferProgress({
+            transferKey: alternateKey,
+            distance: distanceToTransferBounds(state.player, alternate),
+            now: recoveryNow,
+            previous: safeRecoveryTransferProgress,
+            stalledAfterMs: SAFE_RECOVERY_TRANSFER_STALL_MS,
+          });
+        }
+      }
+    } else {
+      safeRecoveryTransferProgress = null;
+    }
     const retreat = recoveryTransfer
       ? nearestPointInTransferBounds(state.player, recoveryTransfer)
       : retreatPointFromHostile(state, activeShelterThreat, 8);
@@ -8606,6 +8687,8 @@ function nearestTrivialAdjacentHostile(
   state,
   requestedMonsterName = null,
   cooldownUntil = monsterCooldownUntil,
+  eligibleObjectIds = null,
+  preferredObjectId = null,
 ) {
   const playerLevel = Number(state?.playerLevel ?? 0);
   return nearestBlockingHostile(
@@ -8614,6 +8697,10 @@ function nearestTrivialAdjacentHostile(
     cooldownUntil,
     Date.now(),
     (entity) => {
+      if (
+        eligibleObjectIds instanceof Set &&
+        !eligibleObjectIds.has(String(entity?.objectId))
+      ) return false;
       const profile = grindingCatalog.find(
         (entry) => normalizeName(entry.monsterName) === normalizeName(entity?.name),
       ) ?? null;
@@ -8622,6 +8709,35 @@ function nearestTrivialAdjacentHostile(
         incidentalTravelThreatIsTrivial(profile.level, playerLevel)
       ) || completedQuestCertifiesMonster(state, entity?.name);
     },
+    preferredObjectId,
+  );
+}
+
+async function nearestPhysicallyClickableTrivialAdjacentHostile(
+  state,
+  requestedMonsterName = null,
+  cooldownUntil = monsterCooldownUntil,
+) {
+  const adjacentObjectIds = (Array.isArray(state?.entities) ? state.entities : [])
+    .filter((entity) => (
+      entity?.kind === "monster" &&
+      entity?.disposition === "hostile" &&
+      !entityIsCorpse(entity) &&
+      chebyshev(state?.player, entity) <= 1
+    ))
+    .map((entity) => String(entity.objectId));
+  const clickableObjectIds = new Set(
+    (await physicalEntityHitTargets(adjacentObjectIds))
+      .filter((target) => Number(target.clickableSamples) > 0)
+      .map((target) => String(target.objectId)),
+  );
+  if (!clickableObjectIds.size) return null;
+  return nearestTrivialAdjacentHostile(
+    state,
+    requestedMonsterName,
+    cooldownUntil,
+    clickableObjectIds,
+    state?.selectedObjectId ?? null,
   );
 }
 

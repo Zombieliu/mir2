@@ -130,6 +130,43 @@ export function safeRecoveryPaceTargets(anchor, distance = 2) {
 }
 
 /**
+ * Track net progress toward one visible recovery transfer. Dynamic actors can
+ * make every immediate movement probe fail while the static route remains
+ * connected; callers may rotate to another ordinary portal only after this
+ * bounded window expires without improving the best observed distance.
+ */
+export function assessRecoveryTransferProgress({
+  transferKey,
+  distance,
+  now = Date.now(),
+  previous = null,
+  stalledAfterMs = 45_000,
+} = {}) {
+  const key = String(transferKey ?? "");
+  const currentDistance = Math.max(0, finiteNumber(distance, Number.POSITIVE_INFINITY));
+  const currentAt = Math.max(0, finiteNumber(now, Date.now()));
+  const previousKey = String(previous?.transferKey ?? "");
+  const previousBestDistance = Number(previous?.bestDistance);
+  const previousProgressAt = Number(previous?.lastProgressAt);
+  const reset =
+    key !== previousKey ||
+    !Number.isFinite(previousBestDistance) ||
+    !Number.isFinite(previousProgressAt);
+  const progressed = !reset && currentDistance < previousBestDistance;
+  const bestDistance = reset
+    ? currentDistance
+    : Math.min(previousBestDistance, currentDistance);
+  const lastProgressAt = reset || progressed ? currentAt : previousProgressAt;
+  const stallWindow = Math.max(1, finiteNumber(stalledAfterMs, 45_000));
+  return {
+    transferKey: key,
+    bestDistance,
+    lastProgressAt,
+    stalled: Number.isFinite(currentDistance) && currentAt - lastProgressAt >= stallWindow,
+  };
+}
+
+/**
  * Resolve the same F1-F8 skill-bar choice as the visible client, but admit
  * only an immediately targetable offensive spell. Ground skills need a
  * second physical tile click and self/toggle/passive skills are not attacks,
@@ -357,6 +394,7 @@ export function nearestBlockingHostile(
   cooldownUntil = new Map(),
   now = Date.now(),
   candidateFilter = null,
+  preferredObjectId = null,
 ) {
   const player = state?.player;
   if (!player) return null;
@@ -374,6 +412,11 @@ export function nearestBlockingHostile(
       (typeof candidateFilter !== "function" || candidateFilter(entity))
     ))
     .sort((left, right) => {
+      const leftPreferred = preferredObjectId != null &&
+        String(left?.objectId ?? "") === String(preferredObjectId);
+      const rightPreferred = preferredObjectId != null &&
+        String(right?.objectId ?? "") === String(preferredObjectId);
+      if (leftPreferred !== rightPreferred) return leftPreferred ? -1 : 1;
       const rightAttack = finiteNumber(right?.attackUntil, 0);
       const leftAttack = finiteNumber(left?.attackUntil, 0);
       if (rightAttack !== leftAttack) return rightAttack - leftAttack;
