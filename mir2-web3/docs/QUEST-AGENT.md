@@ -117,7 +117,7 @@ to the server.
 The dated staged sign-off matrix and immutable revision anchors are maintained
 in [`QUEST-AGENT-ACCEPTANCE.md`](QUEST-AGENT-ACCEPTANCE.md).
 
-As of 2026-08-15, the complete Warrior q1-q9 functional certificate is green:
+As of 2026-08-16, the complete Warrior q1-q9 functional certificate is green:
 the final run reached the required authoritative quest stages through 684
 recorded physical inputs, 18 kills, no death, and zero shortcut violations.
 That certificate still contains presentation/network diagnostics from missing
@@ -159,9 +159,31 @@ zero deaths, potion uses, shortcut violations, or critical browser/network
 failures. This closes duplicate corpse accounting; level 15 and q25/q30 remain
 open.
 
-Across the 45 finalized local development reports through r45, the harness
-recorded 39,401,509 ms (10 h 56 m 41 s) of browser-active runtime, 20,572
-physical inputs, 257 historical kill rows, 10 deaths, 9 revives, and zero
+r46-r49 extended the same state through the real far-field-to-supply loop. The
+segments exposed an idle-client HP display that remained stale until the next
+authoritative bootstrap, completed visible merchant restock, and then added
+two distinct SpittingSpider kills before another severe resource strain.
+Clean commit `4d089b4bb` (source `a71cfce46`) now carries that unresolved
+strain across a supervised resume only while potion stock is below ten. It
+also holds a 20-second GroceryStore settlement window with bounded physical
+walking, preventing an immediate exit into the same rendered attack window.
+
+r50-r52 exercised the resulting death/revive, harvested-supply sale, merchant
+purchase, shelter, and return flow. The patched r52 entered the GroceryStore
+twice, paced through both settlement windows, sold Venison for gold `76 ->
+302`, bought HP drugs `5 -> 10` for gold `302 -> 102`, and continued the long
+physical route toward a far field with zero deaths, shortcut violations, or
+critical browser/network failures. r53 resumed that exact position and
+completed five of five SpittingSpider goals, advancing EXP from 15,329 to
+17,273. One dense mixed-field death was followed by one visible Town Revive,
+the same restock/settlement path, and an ordinary return to another real field.
+The segment ended at level 14 with 115/135 HP, ten potions, five kills, 934
+physical inputs, and zero shortcut or critical diagnostic. q25 remains 6/20
+and q30 remains 0/1.
+
+Across the 53 finalized local development reports through r53, the harness
+recorded 47,298,267 ms (13 h 08 m 18 s) of browser-active runtime, 24,658
+physical inputs, 273 historical kill rows, 12 deaths, 11 revives, and zero
 shortcut violations. One r44 kill row is now known to duplicate another row's
 object id, so the raw historical kill-row total must not be presented as a
 unique-kill count. These reports span multiple runner revisions and include
