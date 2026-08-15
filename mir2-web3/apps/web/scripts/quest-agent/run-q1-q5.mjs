@@ -1728,6 +1728,7 @@ async function executeHuntGoal(goal, resourceBaseline = null) {
   let harvest = null;
   let combatSettled = false;
   let wantedItemProgressBeforeLastKill = null;
+  let preHarvestDefences = 0;
   // A harvest field can contain several same-name attackers. If one begins
   // attacking while the first corpse is being processed, immediately switch
   // to that live object and finish its ordinary client combat before touching
@@ -1746,6 +1747,64 @@ async function executeHuntGoal(goal, resourceBaseline = null) {
       );
       console.log(`  cooldown strained ${goal.monsterName} field groups: ${cooledFields}`);
       throw new Error(`${goal.monsterName} search exceeded the sustainable combat resource budget`);
+    }
+    const preHarvestThreat = goal.harvest
+      ? nearestActiveHostile(stateBefore, {
+          excludeObjectId: target.objectId,
+          maxDistance: 8,
+          withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
+        })
+      : null;
+    const livePreHarvestThreat = preHarvestThreat
+      ? stateBefore.entities.find((entry) => (
+          String(entry.objectId) === String(preHarvestThreat.objectId) &&
+          !entityIsCorpse(entry)
+        )) ?? null
+      : null;
+    if (livePreHarvestThreat) {
+      if (
+        normalizeName(livePreHarvestThreat.name) ===
+        normalizeName(goal.monsterName)
+      ) {
+        console.log(
+          `  switch to active harvest source before corpse creation: ` +
+          `${livePreHarvestThreat.name} ${livePreHarvestThreat.objectId}`,
+        );
+        target = livePreHarvestThreat;
+      } else if (
+        preHarvestDefences >= 2 ||
+        !canDefendHarvestThreat(stateBefore, livePreHarvestThreat)
+      ) {
+        console.log(
+          `  pre-harvest defence limit reached: ${livePreHarvestThreat.name} ` +
+          `${livePreHarvestThreat.objectId}`,
+        );
+        await disengageFromUnsafeHarvestThreat(
+          goal,
+          stateBefore,
+          livePreHarvestThreat,
+          resourceBaseline,
+        );
+        throw new Error(
+          `${goal.monsterName} source combat deferred by active ` +
+          `${livePreHarvestThreat.name} threat`,
+        );
+      } else {
+        console.log(
+          `  pre-clear active harvest threat before source combat: ` +
+          `${livePreHarvestThreat.name} ${livePreHarvestThreat.objectId}`,
+        );
+        const cleared = await clearAdjacentTravelThreat(
+          livePreHarvestThreat,
+          goal,
+          resourceBaseline,
+        );
+        preHarvestDefences += 1;
+        if (cleared) continue;
+        // A moving attacker may have left the bounded combat radius without
+        // dying. Re-read on the next engagement before creating the corpse.
+        continue;
+      }
     }
     const questBefore = questState(stateBefore, goal.questId);
     const monsterBefore = objectiveProgress(

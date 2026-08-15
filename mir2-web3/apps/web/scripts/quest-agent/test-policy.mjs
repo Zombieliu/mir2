@@ -2926,6 +2926,32 @@ test("active threats preempt corpse harvesting and stationary field recovery", a
   );
 });
 
+test("harvest goals clear a certified active threat before creating the source corpse", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const huntBody = runner.slice(
+    runner.indexOf("async function executeHuntGoal(goal, resourceBaseline = null)"),
+    runner.indexOf("function rememberQuestCombatResourceStrain"),
+  );
+  const preflightIndex = huntBody.indexOf("pre-clear active harvest threat before source combat:");
+  const sourceKillIndex = huntBody.indexOf("const killed = await killMonster(");
+  assert.ok(
+    preflightIndex >= 0 && preflightIndex < sourceKillIndex,
+    "a recent adjacent attacker must be handled before the harvestable corpse is created",
+  );
+  assert.match(
+    huntBody,
+    /const preHarvestThreat = goal\.harvest[\s\S]{0,500}nearestActiveHostile\(stateBefore,[\s\S]{0,300}excludeObjectId: target\.objectId/,
+  );
+  assert.match(
+    huntBody,
+    /canDefendHarvestThreat\(stateBefore, livePreHarvestThreat\)[\s\S]{0,900}clearAdjacentTravelThreat\([\s\S]{0,300}preHarvestDefences \+= 1[\s\S]{0,200}continue/,
+  );
+  assert.match(
+    huntBody,
+    /pre-harvest defence limit reached[\s\S]{0,700}disengageFromUnsafeHarvestThreat/,
+  );
+});
+
 test("completed real quest combat can certify an adjacent harvest defender", async () => {
   const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
   const body = runner.slice(
