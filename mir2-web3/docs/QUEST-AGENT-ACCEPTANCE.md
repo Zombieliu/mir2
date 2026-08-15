@@ -15,18 +15,20 @@ level-1-to-50 playthrough.
 - Main-based follow-up code freezes:
   `d68674ce83f21680f4cc7546561471bd084ee216` and
   `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`, followed by
-  `030cebe31806e3fb7ef79f6014d12864593c3c34`.
+  `030cebe31806e3fb7ef79f6014d12864593c3c34` and
+  `d8264b5c1d80f150e29462dec47380995cc93185`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `1c9ac3b4224ce4ef51eebdcba0680197fb175eb3` (patch-equivalent to clean
-  commit `030cebe31`).
+  `acd95a4b40a04f1d0496d38146f83289f2513d7e` (patch-equivalent to clean
+  commit `d8264b5c1`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
-  `aa928b99a`. This follow-up adds three code/test commits plus their acceptance
-  documentation commits; source `0256c33a9`/`0afc30449`/`1c9ac3b4` and clean
-  `d68674ce8`/`e50a8fce0`/`030cebe3` have matching stable patch ids
-  respectively.
+  `aa928b99a`. This follow-up adds four code/test commits plus their acceptance
+  documentation commits; source
+  `0256c33a9`/`0afc30449`/`1c9ac3b4`/`acd95a4b4` and clean
+  `d68674ce8`/`e50a8fce0`/`030cebe3`/`d8264b5c1` have matching stable patch
+  ids respectively.
 
 ## Acceptance matrix
 
@@ -82,14 +84,16 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `030cebe31` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 175/175, including the
+The later Quest Agent-only follow-ups through `d8264b5c1` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 176/176, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
 cross-run supply recall, safe-room settlement, full-map route fallback, and
 dense-shelter escape plus congested-portal rotation and physical-hit-target
 selection, en-route reserve exhaustion, and optional hazard-waypoint
-regressions; Node syntax checks and `git diff --check` pass in both source and
-clean worktrees. The earlier full
+regressions. It also covers budget-disabled equipment-repair travel retaining
+its explicit non-funding resource accounting while independently enabling
+certified physical occupancy clearing; Node syntax checks and `git diff
+--check` pass in both source and clean worktrees. The earlier full
 Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
 #235 at exact head `45192e947` finished 20 successful remote checks, two
@@ -113,13 +117,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 66 finalized development reports
-through `warrior-q30-r67-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 68 finalized development reports
+through `warrior-q30-r69-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 56,393,728 ms (15 h 39 m 53 s) browser-active runtime;
-- 29,443 recorded physical inputs;
-- 305 historical kill rows, including one r44 row now proven to repeat the
+- 59,498,989 ms (16 h 31 m 39 s) browser-active runtime;
+- 31,273 recorded physical inputs;
+- 315 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 12 deaths and 11 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -290,8 +294,39 @@ and bought HP drugs `0 -> 5 -> 10`. r67 then finalized the persisted result:
 Merchant Whitney equipment repair before ordinary SpittingSpider travel. The
 three finalized r64/r65/r67 reports add 914,093 ms, 526 inputs, nine historical
 kill rows, zero deaths/revives, zero shortcut violations, and zero critical
-browser/network diagnostics. The current character remains level 14; q25 is
-still 6/20 and q30 remains open.
+browser/network diagnostics. At the r67 boundary the character remained level
+14; q25 was 6/20 and q30 remained open.
+
+r68 resumed that exact persisted state at map 0 `(313/314,603)`, level 14 with
+EXP 24,341/30,000, full HP, ten HP drugs, and a worn left bracelet. Equipment
+repair selected Merchant Alice on map 0141, but the transfer remained pinned by
+four adjacent low-level actors. Across 1,805,231 ms and 1,191 physical inputs it
+attempted both known transfer entrances, emitted 960 turns, and issued zero
+attacks: 0/0 goals, zero kills, zero shortcuts, and zero critical
+browser/network diagnostics. The defect was exact rather than general map
+disconnection: disabling the combat-resource budget also defaulted physical
+occupancy clearing off and discarded the explicitly supplied non-funding
+accounting goal.
+
+Source commit `acd95a4b4` (clean `d8264b5c1`) separates those policies. Repair
+travel still does not impose a funding gate, but it preserves the explicit
+resource-accounting goal and explicitly permits bounded clearing of certified,
+physically clickable trivial occupancy. A red/green regression locks this
+case, and the full Quest Agent gate passes 176/176.
+
+r69 then resumed the exact authoritative r68 save on the patched runtime and
+left the former stuck position through ordinary input. It completed 10/10
+bounded SpittingSpider goals and ten target-specific kill rows in 1,300,030 ms
+with 639 physical inputs, advancing EXP `24,341 -> 28,661` (+4,320), with zero
+death/revive, potion use, shortcut violation, target quarantine, or critical
+browser/network diagnostic. Some object ids legitimately recur only after a
+complete absence and positive-HP respawn lifecycle, so this is ten
+target-specific successes rather than a claim of ten globally unique ids. On
+bootstrap, recent nearby attackers caused the repair routine to defer safely;
+therefore r69 proves the formerly stuck saved state is resumable and progressing
+but does not relabel the exact repair-clear branch as live-covered. That branch
+remains red/green unit-covered. At the finalized r69 boundary the character is
+level 14 with EXP 28,661/30,000; q25 remains 6/20 and q30 remains 0/1.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
