@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 75 finalized development reports
-through `warrior-q30-r76-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 76 finalized development reports
+through `warrior-q30-r77-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 66,913,717 ms (18 h 35 m 13 s) browser-active runtime;
-- 35,156 recorded physical inputs;
-- 364 historical kill rows, including one r44 row now proven to repeat the
+- 67,817,253 ms (18 h 50 m 17 s) browser-active runtime;
+- 35,612 recorded physical inputs;
+- 366 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 14 deaths and 13 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -496,6 +496,24 @@ during the ordinary SpittingSpider walk at map 0 `(316,524)`, with 133/149 HP,
 ten HP drugs, 233 gold, and EXP 7,569/40,000. q25 remains 8/20 and q30 remains
 0/1. The exact start and final frames were visually inspected and match the
 report; the grind goal and quests remain incomplete.
+
+r77 resumed the safe r76 field state and completed the full physical journey
+to the selected SpittingSpider band, reducing a 336-tile initial distance to a
+visible, clickable target without a death, potion use, or supply return. Two of
+four bounded grind goals completed with two target-specific confirmed kills.
+One different spider was conservatively quarantined after the unchanged
+quest-combat five-attack/15-second no-response window, and the final goal
+expired while rotating to another real field. Authoritative EXP advanced
+`7,569 -> 8,433`; the larger delta than the two recorded kill rows is retained
+as state evidence but is not relabeled as additional confirmed kills.
+
+The finalized r77 report records 903,536 ms, 456 physical inputs, two confirmed
+kill rows, one target quarantine, zero death/revive, zero potion use, zero
+purchases, zero shortcuts, and zero critical browser/network diagnostics. It
+ends at map 0 `(506,168)`, 149/149 HP, ten HP drugs, and 233 gold. q25 remains
+8/20 and q30 remains 0/1. The confirmed-combat and final frames were visually
+inspected and agree with the report. This proves live level-16 preparation
+progress, not level 16 or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
