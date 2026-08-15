@@ -121,13 +121,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 72 finalized development reports
-through `warrior-q30-r73-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 73 finalized development reports
+through `warrior-q30-r74-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 64,195,339 ms (17 h 49 m 55 s) browser-active runtime;
-- 33,657 recorded physical inputs;
-- 358 historical kill rows, including one r44 row now proven to repeat the
+- 65,099,847 ms (18 h 04 m 59 s) browser-active runtime;
+- 34,170 recorded physical inputs;
+- 361 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 13 deaths and 12 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -423,6 +423,25 @@ with EXP 5,681/40,000, 149/149 HP, ten HP drugs, and 1,045 gold; q25 is 8/20
 and q30 remains 0/1. The quest-progress, safe-failure, and final frames were
 visually inspected and agree with the structured report. This validates the
 patched branches in live play, but does not certify q25 or q30 completion.
+
+r74 resumed that exact state and supplied a separate zero-potion recovery
+checkpoint. Its first q25 attempt hit the bounded pre-harvest defence limit,
+physically disengaged from the active Oma, and then stopped the target attempt
+when ten HP drugs had been consumed instead of sacrificing another quest
+corpse. The outer recovery loop walked from the CannibalPlant field toward the
+real map-0141 GroceryStore transfer. It confirmed three ordinary
+travel-occupancy kills (HookingCat, RakingCat, and Scarecrow), explicitly
+quarantined one different RakingCat after five attacks produced no
+target-specific response, and continued collision-routed movement until the
+run budget expired in a dense actor cluster at `(326,535)`.
+
+The finalized r74 report records 904,508 ms, 513 physical inputs, 3 kill rows,
+ten potion uses, zero death/revive, zero purchases, one target quarantine, zero
+shortcuts, and zero critical browser/network diagnostics. Passive recovery
+left the character at 149/149 HP with no HP drugs, level 15 and EXP
+6,217/40,000; q25 remains 8/20 and q30 remains 0/1. Its combat and final
+screenshots were visually inspected and match the report. This is a resumable
+partial recovery trace, not a completed restock loop or quest certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
