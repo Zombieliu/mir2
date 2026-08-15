@@ -215,6 +215,55 @@ test("safe recovery pacing stays in a bounded cardinal loop around its anchor", 
   assert.deepEqual(safeRecoveryPaceTargets(null, 2), []);
 });
 
+test("safe recovery rotates a portal only after bounded net-progress stall", async () => {
+  const policy = await import("./policy.mjs");
+  let progress = policy.assessRecoveryTransferProgress?.({
+    transferKey: "near",
+    distance: 38,
+    now: 1_000,
+  });
+  assert.deepEqual(progress, {
+    transferKey: "near",
+    bestDistance: 38,
+    lastProgressAt: 1_000,
+    stalled: false,
+  });
+
+  progress = policy.assessRecoveryTransferProgress?.({
+    transferKey: "near",
+    distance: 29,
+    now: 2_000,
+    previous: progress,
+    stalledAfterMs: 45_000,
+  });
+  assert.equal(progress.stalled, false);
+  assert.equal(progress.bestDistance, 29);
+
+  progress = policy.assessRecoveryTransferProgress?.({
+    transferKey: "near",
+    distance: 38,
+    now: 47_000,
+    previous: progress,
+    stalledAfterMs: 45_000,
+  });
+  assert.equal(progress.stalled, true);
+  assert.equal(progress.bestDistance, 29);
+
+  const alternate = policy.assessRecoveryTransferProgress?.({
+    transferKey: "alternate",
+    distance: 47,
+    now: 47_000,
+    previous: progress,
+    stalledAfterMs: 45_000,
+  });
+  assert.deepEqual(alternate, {
+    transferKey: "alternate",
+    bestDistance: 47,
+    lastProgressAt: 47_000,
+    stalled: false,
+  });
+});
+
 test("visible HP-drug selection ignores unrelated and distant drops", () => {
   const state = {
     player: { x: 100, y: 100 },
@@ -489,6 +538,28 @@ test("travel policy identifies only an adjacent non-target hostile", () => {
       (entity) => entity.objectId === "threat",
     )?.objectId,
     "threat",
+  );
+
+  state.entities.push({
+    objectId: "selected-clickable",
+    kind: "monster",
+    disposition: "hostile",
+    name: "ForestYeti",
+    x: 11,
+    y: 10,
+    attackUntil: 150,
+  });
+  assert.equal(
+    nearestBlockingHostile(
+      state,
+      "CannibalPlant",
+      new Map(),
+      100,
+      (entity) => ["threat", "selected-clickable"].includes(entity.objectId),
+      "selected-clickable",
+    )?.objectId,
+    "selected-clickable",
+    "an already selected physical hit target should clear before a newer invisible attacker",
   );
 });
 
@@ -2184,6 +2255,14 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
   );
   assert.match(
     activeShelterThreatBody,
+    /assessRecoveryTransferProgress\([\s\S]{0,900}safeRecoveryTransferProgress\.stalled/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /safeRecoveryTransferCongestionUntil\.set\([\s\S]{0,1200}rotate congested recovery transfer:/,
+  );
+  assert.match(
+    activeShelterThreatBody,
     /allowTransferToMap: recoveryTransfer[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,250}return true/,
   );
   assert.match(
@@ -2285,11 +2364,11 @@ test("supply NPC navigation clears only a repeatedly blocking trivial occupant",
   );
   assert.match(
     navigationBody,
-    /clearTrivialOccupancy && \(stagnant >= 2 \|\| signatureVisits >= 3\)[\s\S]{0,900}nearestTrivialAdjacentHostile[\s\S]{0,500}supplyFunding: true/,
+    /clearTrivialOccupancy && \(stagnant >= 2 \|\| signatureVisits >= 3\)[\s\S]{0,900}nearestPhysicallyClickableTrivialAdjacentHostile[\s\S]{0,500}supplyFunding: true/,
   );
   assert.match(
     navigationBody,
-    /const blocker = nearestTrivialAdjacentHostile\(state\);/,
+    /const blocker = await nearestPhysicallyClickableTrivialAdjacentHostile\(state\);/,
     "a same-name target occupying the only adjacent exit must remain clearable",
   );
   assert.match(
@@ -2309,8 +2388,12 @@ test("supply NPC navigation clears only a repeatedly blocking trivial occupant",
     /function nearestTrivialAdjacentHostile[\s\S]{0,900}completedQuestCertifiesMonster\(state, entity\?\.name\)/,
   );
   assert.match(
+    runner,
+    /async function nearestPhysicallyClickableTrivialAdjacentHostile[\s\S]{0,1800}physicalEntityHitTargets[\s\S]{0,800}state\?\.selectedObjectId/,
+  );
+  assert.match(
     navigationBody,
-    /denseAdjacentHostileCount\(state\) >= 3[\s\S]{0,900}nearestTrivialAdjacentHostile\([\s\S]{0,120}quarantinedMonsterUntil[\s\S]{0,900}denseOccupancyClears \+= 1/,
+    /denseAdjacentHostileCount\(state\) >= 3[\s\S]{0,900}nearestPhysicallyClickableTrivialAdjacentHostile\([\s\S]{0,120}quarantinedMonsterUntil[\s\S]{0,900}denseOccupancyClears \+= 1/,
   );
 });
 
