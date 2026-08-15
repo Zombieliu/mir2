@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> Latest StartGame transform parity note: 2026-08-15 distinguishes a real map
+> boundary from the bounded collision window used by starter rendering. Loaded
+> characters keep valid Crystal full-map coordinates even when those coordinates
+> are outside the starter window, while an impossible coordinate for the saved
+> map still recovers to the configured bind map. The regression is locked by
+> both preservation and legacy-recovery tests; full Simulation and Gateway
+> library suites pass. No client teleport, QA command, or production packet
+> surface was added.
+
 > Latest production-login observability note: 2026-08-12 changes only the
 > non-Crystal operator surface. OnConnect now has dedicated inflight,
 > request/error, and latency metrics; World Director exposes durable checkpoint
