@@ -13,16 +13,18 @@ level-1-to-50 playthrough.
 - Main integration base: `f0e0bb6cdc7129fc3b183e7875603d198198bb75`
   (current `main`, including PR #234).
 - Main-based acceptance code freeze:
-  `ab3582ed3f893143038ce138f148458980894ca1`.
+  `4e1cdaffe52eb0a5ca6e74e9fe257a6d53ce1e55`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `060f8c302` (patch-equivalent to clean commit `ab3582ed3`).
+  `85291de07e0758f16601468558acd4d3a1c7c0b2` (patch-equivalent to clean
+  commit `4e1cdaffe`).
 - Remote clean branch: `origin/codex/autonomous-quest-agent-main`.
-- Code range: nine code/test commits plus two acceptance-documentation commits
+- Code range: ten code/test commits plus three acceptance-documentation commits
   on top of the main integration base. The original eight transplanted source
   commits remain one-for-one matches under `git range-diff`; the later scene
-  cache regression and grind-travel fix are clean-branch follow-ups.
+  cache regression, grind-travel fix, and depleted-shelter recovery fix are
+  clean-branch follow-ups.
 
 ## Acceptance matrix
 
@@ -78,11 +80,12 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The current `ab3582ed3` follow-up changes only Quest Agent JavaScript and its
-unit test. The complete Quest Agent gate now passes 164/164, including the new
-long-preparation travel regression; `git diff --check` passes. The earlier
-full Simulation/Gateway/TypeScript results remain the backend baseline rather
-than being relabeled as a fresh run for this Agent-only change.
+The current `ab3582ed3` and `4e1cdaffe` follow-ups change only Quest Agent
+JavaScript and its unit tests. The complete Quest Agent gate now passes
+165/165, including the long-preparation travel and depleted-shelter recovery
+regressions; Node syntax checks and `git diff --check` pass. The earlier full
+Simulation/Gateway/TypeScript results remain the backend baseline rather than
+being relabeled as a fresh run for these Agent-only changes.
 
 The first full acceptance run exposed a deterministic saved-transform
 regression introduced after the PR #233 base: a valid Bichon field position was
@@ -101,12 +104,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 39 finalized development reports
-through `warrior-q30-r39-supervised`:
+The private evidence directory contains 43 finalized development reports
+through `warrior-q30-r43-supervised`:
 
-- 36,811,073 ms (10 h 13 m 31 s) browser-active runtime;
-- 19,159 recorded physical inputs;
-- 246 recorded kills;
+- 38,192,223 ms (10 h 36 m 32 s) browser-active runtime;
+- 19,968 recorded physical inputs;
+- 247 recorded kills;
 - 10 deaths and 9 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
@@ -120,6 +123,21 @@ the village edge to its real far-field spawn, completed two normal-client
 kills, and advanced experience from 9,017 to 9,449. Its 902,380 ms budget then
 expired during the third goal; this is an expected incomplete segment, not a
 q25 or q30 completion certificate.
+
+r40 then supplied the required counterexample to a sustained-throughput claim:
+one further SpittingSpider goal advanced experience from 9,449 to 9,881, but a
+dense-field follow-up exhausted health supplies and exposed a deterministic
+recovery abort at 9/135 HP with zero potions. After the red/green fix, r41
+continued ordinary collision-routed movement for 600,823 ms instead of taking
+that fatal branch and recovered to 134/135 HP. r42 physically reached the
+merchant district, entered the visible shelter while pursued, and returned,
+but its runtime expired before purchase. The exact r42 resume in r43 completed
+the missing closure through visible Ruben interaction: `(HP)DrugSmall` 0 -> 10
+and gold 548 -> 148. r43 was then stopped cleanly during the next grind. The
+four reports add 1,381,150 ms, 809 inputs, one kill, one shop purchase, no
+death/revive, no shortcut violation, and no critical browser/network
+diagnostic. They prove the depleted recovery and restock path, not q25/q30 or
+level-15 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
@@ -143,6 +161,15 @@ test locks the exact saved-state decision, and r39 proves the resulting far
 field is physically reachable and yields authoritative EXP. q25 remains 6/20;
 this fix improves honest progression throughput and does not skip its level-15
 combat-preparation requirement.
+
+That higher-yield field also exposed a separate recovery defect: an already
+critical, zero-potion state was passed into the ordinary combat-resource guard
+as both its before and after frame, so the shelter escape could abort before
+moving. Commit `4e1cdaffe` keeps the budget for sustainable travel but lets an
+already depleted escape proceed until visible shelter arrival or authoritative
+death/revive. Unit coverage locks healthy-stocked, zero-stock, and critical-HP
+cases. r41-r43 prove the physical escape, passive recovery, shelter transfer,
+merchant return, and visible potion purchase across resumable runtime slices.
 
 ## Sign-off wording
 

@@ -576,15 +576,15 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   2/2, Rust formatting, and diff whitespace. The q28 browser report still
   records unresolved item/scene raster 404s as a separate presentation finding.
 
-## 2026-08-15 Quest Agent staged acceptance and long-grind A/B
+## 2026-08-15 Quest Agent staged acceptance, long-grind A/B, and recovery
 
 - PR #235 remains a staged foundation plus Warrior q1-q9 acceptance candidate,
   not a Warrior/Wizard/Taoist 1-50 completion. The authoritative resumed state
   is level 14: q22-q24, q28, and q29 complete; q25 remains 6/20, q26/q27 are
   still locked in that snapshot, and q30 remains 0/1.
-- The two-day wall-clock soak contains 39 finalized development reports and
-  36,811,073 ms (10 h 13 m 31 s) of browser-active work: 19,159 physical
-  inputs, 246 kills, 10 deaths, 9 completed revives, and zero shortcut
+- The two-day wall-clock soak contains 43 finalized development reports and
+  38,192,223 ms (10 h 36 m 32 s) of browser-active work: 19,968 physical
+  inputs, 247 kills, 10 deaths, 9 completed revives, and zero shortcut
   violations. This aggregate spans revisions and is endurance evidence, not a
   contiguous passing certificate.
 - r38 established the old-policy baseline. Review then found that long grind
@@ -595,7 +595,7 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - `ab3582ed3` amortizes one physical trip over at most 20 expected kills while
   keeping the original short-grind locality rule and the completed-quest combat
   certification gate. Its new regression test failed before the patch and the
-  full Quest Agent gate passes 164/164 after it.
+  full Quest Agent gate passed 164/164 after it.
 - r39 resumed the same persisted character, selected SpittingSpider instead of
   RakingCat, walked from `(330,575)` to the real far-field spawn using ordinary
   collision-routed inputs, and completed two kills for authoritative EXP
@@ -603,3 +603,19 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   runtime budget during goal 3 with zero deaths, shortcut violations, critical
   console errors, or critical network failures. q25 remains open; this proves
   the throughput fix, not task completion.
+- r40 added the necessary sustainability counterexample: one more ordinary
+  SpittingSpider goal advanced EXP `9,449 -> 9,881`, but the next dense-field
+  approach exhausted HP drugs and exposed a deterministic shelter-escape abort
+  at 9/135 HP with zero stock.
+- `4e1cdaffe` keeps the combat-resource budget for sustainable travel but lets
+  an already depleted escape continue through ordinary movement until visible
+  shelter arrival or authoritative death/revive. The new red/green policy and
+  executable-source contracts bring the full Quest Agent gate to 165/165;
+  Node syntax and whitespace checks pass.
+- r41-r43 close that regression through resumable real-client evidence: r41
+  moved for 600,823 ms and recovered to 134/135 HP; r42 reached the merchant
+  district, entered the visible shelter while pursued, and returned; r43
+  interacted with Ruben and visibly bought 10 HP drugs, changing stock `0 ->
+  10` and gold `548 -> 148`, before a clean supervised stop during the next
+  grind. The four new reports add 1,381,150 ms, 809 inputs, one kill, one shop
+  purchase, and no shortcut violation or critical browser/network diagnostic.

@@ -127,7 +127,7 @@ The longer resumed Warrior chain has independently completed q22-q24, q28, and
 q29 through ordinary client actions. Its current authoritative snapshot is
 level 14 with q25 at 6/20 (`CannibalStem` 6/10 and `CannibalLeaf` 0/10), q26
 and q27 not yet unlocked in that snapshot, and q30 active at 0/1 `JadeRing`.
-The current A/B segment (`warrior-q30-r39-supervised`) resumed that same
+The long-grind A/B segment (`warrior-q30-r39-supervised`) resumed that same
 persisted character after a long-grind policy fix, physically crossed Bichon
 to the quest-certified SpittingSpider far field, completed 2 of 3 attempted
 goals, recorded 2 kills and 462 physical inputs, and advanced experience from
@@ -136,8 +136,18 @@ deaths, shortcut violations, critical console errors, or critical network
 failures. This is strong resume/recovery, navigation, and throughput evidence,
 but it is not a contiguous q1-q30 completion certificate.
 
-Across the 39 finalized local development reports through r39, the harness
-recorded 36,811,073 ms of browser-active runtime, 19,159 physical inputs, 246
+The follow-up r40 segment advanced experience to 9,881 but depleted to 9/135 HP
+with no potions and exposed a pre-movement shelter-escape budget abort. Commit
+`4e1cdaffe` fixes that exact state without adding any direct recovery action:
+r41 continued normal movement and recovered to 134/135 HP, r42 reached the
+merchant district and exercised the visible shelter transfer under pursuit,
+and r43 resumed beside the merchant and visibly purchased 10 HP drugs for 400
+gold. The purchase changed authoritative stock from 0 to 10 and gold from 548
+to 148; r43 was then stopped cleanly while beginning the next grind. This
+closes the depleted escape/restock regression, not the open q25/q30 objectives.
+
+Across the 43 finalized local development reports through r43, the harness
+recorded 38,192,223 ms of browser-active runtime, 19,968 physical inputs, 247
 kills, 10 deaths, 9 revives, and zero shortcut violations. These reports span
 multiple runner revisions and include deliberately interrupted or failed
 diagnostic runs; the aggregate is endurance evidence, not one passing run.
