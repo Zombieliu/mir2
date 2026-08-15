@@ -16,19 +16,20 @@ level-1-to-50 playthrough.
   `d68674ce83f21680f4cc7546561471bd084ee216` and
   `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`, followed by
   `030cebe31806e3fb7ef79f6014d12864593c3c34` and
-  `d8264b5c1d80f150e29462dec47380995cc93185`.
+  `d8264b5c1d80f150e29462dec47380995cc93185` and
+  `40ffedcb55a31d5cc2da8f5007464dd21616d549`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `acd95a4b40a04f1d0496d38146f83289f2513d7e` (patch-equivalent to clean
-  commit `d8264b5c1`).
+  `e533efbb36684888081b635859f4dbe0e81e4a4d` (patch-equivalent to clean
+  commit `40ffedcb5`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
-  `aa928b99a`. This follow-up adds four code/test commits plus their acceptance
+  `aa928b99a`. This follow-up adds five code/test commits plus their acceptance
   documentation commits; source
-  `0256c33a9`/`0afc30449`/`1c9ac3b4`/`acd95a4b4` and clean
-  `d68674ce8`/`e50a8fce0`/`030cebe3`/`d8264b5c1` have matching stable patch
-  ids respectively.
+  `0256c33a9`/`0afc30449`/`1c9ac3b4`/`acd95a4b4`/`e533efbb3` and clean
+  `d68674ce8`/`e50a8fce0`/`030cebe3`/`d8264b5c1`/`40ffedcb5` have matching
+  stable patch ids respectively.
 
 ## Acceptance matrix
 
@@ -37,7 +38,7 @@ level-1-to-50 playthrough.
 | Physical input and read-only observation contract | PASS | CDP mouse/keyboard/text only; static and runtime shortcut audits report zero violations. |
 | Resume, reconnect, death, potion, merchant, navigation, combat, harvest, and equipment framework | PASS for staged use | Exercised across the local development soak; failures remain explicit and resumable. |
 | Warrior q1-q9 functional route | PASS | One finalized certificate reached all required authoritative stages with 684 inputs, 18 kills, no death, and zero shortcut violations. |
-| Current extended Warrior chain | PARTIAL | The resumed character has reached level 15. q22-q24, q28, and q29 are complete; q25 is 6/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
+| Current extended Warrior chain | PARTIAL | The resumed character has reached level 15. q22-q24, q28, and q29 are complete; q25 is 7/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
 | Three-class route generation | STATIC PASS | Warrior, Wizard, and Taoist manifests each contain 140 level-1-to-50 quests and report zero generated blockers. This is not live completion. |
 | Clean visual-assets certificate | NOT ACCEPTED | The completed q1-q9 run contains missing-raster diagnostics. A later incomplete segment is diagnostics-clean, but cannot replace a complete clean run. |
 | Contiguous Warrior level 1-50 | NOT ACCEPTED | No single/resumed evidence chain has completed it. |
@@ -84,8 +85,8 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `d8264b5c1` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 176/176, including the
+The later Quest Agent-only follow-ups through `40ffedcb5` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 177/177, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
 cross-run supply recall, safe-room settlement, full-map route fallback, and
 dense-shelter escape plus congested-portal rotation and physical-hit-target
@@ -93,7 +94,10 @@ selection, en-route reserve exhaustion, and optional hazard-waypoint
 regressions. It also covers budget-disabled equipment-repair travel retaining
 its explicit non-funding resource accounting while independently enabling
 certified physical occupancy clearing; Node syntax checks and `git diff
---check` pass in both source and clean worktrees. The earlier full
+--check` pass in both source and clean worktrees. The latest regression also
+requires a harvest goal to handle at most two already attacking, certified
+nearby threats before creating the source corpse; an unsafe or excess threat
+forces physical disengagement instead. The earlier full
 Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
 #235 at exact head `45192e947` finished 20 successful remote checks, two
@@ -117,13 +121,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 70 finalized development reports
-through `warrior-q30-r71-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 71 finalized development reports
+through `warrior-q30-r72-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 61,864,668 ms (17 h 11 m 5 s) browser-active runtime;
-- 32,510 recorded physical inputs;
-- 330 historical kill rows, including one r44 row now proven to repeat the
+- 63,669,842 ms (17 h 41 m 10 s) browser-active runtime;
+- 33,395 recorded physical inputs;
+- 344 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 13 deaths and 12 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -370,6 +374,33 @@ route failure. The final state is map 0 `(124,214)`, level 15 with EXP
 q25 corpse frame, and final frame were visually inspected and agree with the
 structured report. This certifies the level-15 transition and live q25 route,
 not q25 or q30 completion.
+
+r72 ran the pre-fix in-memory runtime from the exact r71 state and supplied the
+bounded counterexample for dense q25 harvest timing. It killed twelve
+CannibalPlants and two incidental Omas, but only 3/11 goals completed: three
+corpses were preempted after an adjacent attacker became active and five more
+ended with an explicit incomplete harvest lifecycle. Two ordinary no-drop
+harvests and one quest-drop harvest completed. That last result advanced the
+authoritative CannibalStem objective `6 -> 7`; the normal inventory also held
+nine CannibalLeaves, five CannibalFruits, and one CannibalPoison, while the
+separate quest counter for CannibalLeaf remained 0/10.
+
+The r72 report records 1,805,174 ms, 885 physical inputs, 14 kill rows, 28
+harvest commands, three visible gold pickups, zero death/revive, zero potion
+use, zero shortcuts, zero quarantines, and zero critical browser/network
+diagnostics. It finished at map 0 `(164,238)`, level 15 with EXP 3,833/40,000,
+149/149 HP, ten HP drugs, and 751 gold. Two long alternate-field walks consumed
+most of the budget, but did not hide the exact ordering defect: the old policy
+created the quest corpse before reacting to an already attacking nearby actor.
+
+Source commit `e533efbb3` (clean `40ffedcb5`) adds a pre-combat guard for
+harvest goals. It handles at most two already attacking, quest-certified
+nearby threats through ordinary combat before creating the source corpse; an
+unsafe or excess threat triggers the existing physical disengagement instead.
+The new contract was first red, then passed with the full 177/177 Quest Agent
+gate in both source and clean worktrees. This is a bounded ordering fix, not a
+claim that post-kill attacks or harvest RNG disappear; the exact r72 resume
+must still be replayed on the patched runtime.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
