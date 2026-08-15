@@ -14,17 +14,19 @@ level-1-to-50 playthrough.
   (current `main`, including the squash merge of PR #235).
 - Main-based follow-up code freezes:
   `d68674ce83f21680f4cc7546561471bd084ee216` and
-  `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`.
+  `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`, followed by
+  `030cebe31806e3fb7ef79f6014d12864593c3c34`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `0afc30449963721c527e5992feb532d49b2b2889` (patch-equivalent to clean
-  commit `e50a8fce0`).
+  `1c9ac3b4224ce4ef51eebdcba0680197fb175eb3` (patch-equivalent to clean
+  commit `030cebe31`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
-  `aa928b99a`. This follow-up adds two code/test commits plus their acceptance
-  documentation commits; source `0256c33a9`/`0afc30449` and clean
-  `d68674ce8`/`e50a8fce0` have matching stable patch ids respectively.
+  `aa928b99a`. This follow-up adds three code/test commits plus their acceptance
+  documentation commits; source `0256c33a9`/`0afc30449`/`1c9ac3b4` and clean
+  `d68674ce8`/`e50a8fce0`/`030cebe3` have matching stable patch ids
+  respectively.
 
 ## Acceptance matrix
 
@@ -80,13 +82,14 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `e50a8fce0` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 173/173, including the
+The later Quest Agent-only follow-ups through `030cebe31` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 175/175, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
 cross-run supply recall, safe-room settlement, full-map route fallback, and
 dense-shelter escape plus congested-portal rotation and physical-hit-target
-selection regressions; Node syntax checks and `git diff --check` pass in both
-source and clean worktrees. The earlier full
+selection, en-route reserve exhaustion, and optional hazard-waypoint
+regressions; Node syntax checks and `git diff --check` pass in both source and
+clean worktrees. The earlier full
 Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
 #235 at exact head `45192e947` finished 20 successful remote checks, two
@@ -110,12 +113,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 63 finalized development reports
-through `warrior-q30-r63-supervised`:
+The private evidence directory contains 66 finalized development reports
+through `warrior-q30-r67-supervised` (r66 was an intentionally stopped live
+trace and is excluded from these report aggregates):
 
-- 55,479,635 ms (15 h 24 m 39 s) browser-active runtime;
-- 28,917 recorded physical inputs;
-- 296 historical kill rows, including one r44 row now proven to repeat the
+- 56,393,728 ms (15 h 39 m 53 s) browser-active runtime;
+- 29,443 recorded physical inputs;
+- 305 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 12 deaths and 11 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -254,8 +258,40 @@ reports add 5,173,396 ms, 2,724 inputs, 17 historical kill rows, two shop
 purchases, zero deaths/revives, zero shortcut violations, and zero critical
 browser/network diagnostics. r62 did not need to emit the new portal-rotation
 or occupancy-clear branch, so those exact branches remain unit-covered rather
-than separately live-certified. The current character is still level 14;
-q25 remains 6/20 and q30 remains open.
+than separately live-certified at that point. r65 later closes both branches.
+
+r64 completed two of two SpittingSpider goals and advanced EXP
+`22,601 -> 23,465`, but spent all ten potions during the physical retreat. The
+journey had enabled resource enforcement while two potions remained; when the
+same trip reached zero, the travel budget correctly fired but the recovery
+layer failed to re-read the new depleted state and propagated a fatal at
+80/135 HP. Source commit `1c9ac3b4` (clean `030cebe3`) treats that budget
+crossing as a resumable outer-policy transition. The next authoritative frame
+therefore chooses the existing depleted-escape rule; movement, death, revive,
+health, stock, and map transfer remain client/server authoritative.
+
+r65 resumed the exact 80-HP/zero-potion state and moved through the old fatal
+point. It naturally exercised physically clickable occupancy clearing against
+Oma, HookingCat, RakingCat, and Scarecrow targets, then emitted the bounded
+recovery-transfer rotation after 117,841 ms without net progress. That closes
+both branches that r62 had left unit-only. r65 also exposed a second error:
+`navigateNear` may return either a typed collision error or the bounded text
+form `navigation did not reach`; the optional hostile-corridor waypoint caught
+only the typed form and therefore misclassified the optional point as a failed
+portal. The same commit applies the existing retryable-navigation classifier
+inside that optional waypoint and retains the direct physical portal route.
+
+r66 was a live trace rather than a finalized report because it was stopped
+after the acceptance closure. It entered GroceryStore through an ordinary
+direction-key portal step, paced through the pursuit settlement window,
+returned to map 0, killed and visibly harvested a Deer, sold Venison twice,
+and bought HP drugs `0 -> 5 -> 10`. r67 then finalized the persisted result:
+135/135 HP, two visible five-drug belt stacks, EXP 24,341/30,000, and a visible
+Merchant Whitney equipment repair before ordinary SpittingSpider travel. The
+three finalized r64/r65/r67 reports add 914,093 ms, 526 inputs, nine historical
+kill rows, zero deaths/revives, zero shortcut violations, and zero critical
+browser/network diagnostics. The current character remains level 14; q25 is
+still 6/20 and q30 remains open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
@@ -334,8 +370,19 @@ clearing and gives the already selected clickable object priority. It also
 tracks best distance to a visible recovery portal and permits rotation only
 after a bounded 45-second stall. r62-r63 prove that the patched build resumes,
 restocks, returns to a real spawn field, and completes combat without a
-regression; the exact selector and portal-rotation branches still require a
-future naturally occurring live hit before being called live-certified.
+regression. r65 later supplies the naturally occurring live hits: several
+physically clickable occupancy clears and an explicit two-portal rotation.
+
+r64-r66 then closed two state-transition errors in that same ordinary travel
+stack. A shelter journey can cross from reserved to depleted after it starts;
+the recovery layer now yields and re-evaluates the authoritative state instead
+of treating the budget signal as fatal. An optional hostile-corridor waypoint
+also uses the same retryable-unreachable classification as the outer transfer,
+so failure of a risk-reducing elbow no longer proves the visible portal itself
+unreachable. r65 proves continuation past the old depletion fatal, while the
+r66 live trace proves ordinary portal entry, safe-room settlement, visible
+harvest/sale, and full restock. r67 confirms that state persisted across a new
+client bootstrap.
 
 ## Sign-off wording
 

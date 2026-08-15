@@ -211,12 +211,25 @@ Venison for gold `178 -> 428`, bought HP drugs `0 -> 10` for gold `428 -> 28`,
 and returned toward the real field. r63 completed one SpittingSpider goal and
 advanced EXP to 22,601 with all ten potions retained. The exact new selector
 and portal-rotation branches are unit-covered; r62 escaped through ordinary
-movement without emitting either branch, so they are not separately claimed
-as live-certified.
+movement without emitting either branch. r65 later exercised both branches
+against a naturally congested live field.
 
-Across the 63 finalized local development reports through r63, the harness
-recorded 55,479,635 ms (15 h 24 m 39 s) of browser-active runtime, 28,917
-physical inputs, 296 historical kill rows, 12 deaths, 11 revives, and zero
+r64 completed two SpittingSpider goals before a retreat crossed from two
+potions to zero and exposed an uncaught resource-budget transition. Source
+commit `1c9ac3b4` (clean `030cebe3`) yields that signal to the outer recovery
+loop, which re-reads the depleted state and resumes ordinary shelter travel.
+The same patch keeps a retryable failure of an optional hostile-corridor
+waypoint from rejecting the real visible portal. r65 moved through the old
+fatal point, performed seven normal-client occupancy clears, and emitted the
+two-portal congestion rotation. The stopped r66 live trace entered
+GroceryStore, settled, harvested and sold Venison, and bought HP drugs
+`0 -> 5 -> 10`; r67 finalized the persisted 135/135 HP, ten-drug state and a
+visible equipment repair. The complete Quest Agent gate is now 175/175.
+
+Across the 66 finalized local development reports through r67 (excluding the
+intentionally stopped r66 trace), the harness recorded 56,393,728 ms
+(15 h 39 m 53 s) of browser-active runtime, 29,443 physical inputs, 305
+historical kill rows, 12 deaths, 11 revives, and zero
 shortcut violations. One r44 kill row is now known to duplicate another row's
 object id, so the raw historical kill-row total must not be presented as a
 unique-kill count. These reports span multiple runner revisions and include
