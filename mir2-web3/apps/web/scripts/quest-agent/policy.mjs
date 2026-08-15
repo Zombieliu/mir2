@@ -464,6 +464,19 @@ export function incidentalTravelThreatIsTrivial(
 }
 
 /**
+ * A travel-clear click is only trying to open one occupied tile. If two real
+ * attacks over four seconds produce no packet for that exact object, waiting
+ * the full quest-combat window only burns recovery time while the player stays
+ * surrounded. Keep ordinary quest combat conservative because its target may
+ * legitimately have a slower first response.
+ */
+export function combatNoResponseBudget(incidentalTravelThreat = false) {
+  return incidentalTravelThreat
+    ? { minimumElapsedMs: 4_000, minimumAttackCount: 2 }
+    : { minimumElapsedMs: 15_000, minimumAttackCount: 5 };
+}
+
+/**
  * Return whether the rendered entity has performed an attack recently enough
  * to be treated as an active travel threat. Merely standing next to a hostile
  * is not sufficient: collision-aware movement can route around an idle actor,
