@@ -15,6 +15,7 @@ import {
   collisionPathHasImmediateDynamicBlock,
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
+  combatNoResponseBudget,
   combatMemoryRequiresSupplyRecall,
   continuousCollisionRunAvoidsTransfers,
   dangerousHostileAvoidanceCells,
@@ -4026,6 +4027,7 @@ async function killMonster(
   let stalledRelockCount = 0;
   let corpse = null;
   const initialState = await readAgentState(client);
+  const noResponseBudget = combatNoResponseBudget(goal.incidentalTravelThreat);
   assertSafeSupplyFundingState(goal, initialState, goal.monsterName);
   if (!goal.supplyFunding) {
     const healing = await useRestorativeSelfSkillIfNeeded(initialState);
@@ -4144,8 +4146,8 @@ async function killMonster(
       (entry) => entry.at >= since && entry.type === "attack",
     ).length;
     if (
-      Date.now() - since > 15_000 &&
-      outgoingAttackCount >= 5 &&
+      Date.now() - since > noResponseBudget.minimumElapsedMs &&
+      outgoingAttackCount >= noResponseBudget.minimumAttackCount &&
       !combatEvidence.targetResponded
     ) {
       const quarantine = {
@@ -4153,7 +4155,9 @@ async function killMonster(
         monsterName: goal.monsterName,
         objectId,
         at: Date.now(),
-        reason: "five real attacks produced no target-specific combat packet",
+        reason:
+          `${noResponseBudget.minimumAttackCount} real attacks over ` +
+          `${noResponseBudget.minimumElapsedMs}ms produced no target-specific combat packet`,
         outgoingAttackCount,
         combatEvidence,
         collateralProgress: { objectiveAdvanced, experienceAdvanced },

@@ -21,6 +21,7 @@ import {
   collisionPathHasImmediateDynamicBlock,
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
+  combatNoResponseBudget,
   continuousCollisionRunAvoidsTransfers,
   combatMemoryRequiresSupplyRecall,
   dangerousHostileAvoidanceCells,
@@ -596,6 +597,27 @@ test("incidental travel combat is limited to monsters with a real level disadvan
   assert.equal(incidentalTravelThreatIsTrivial(13, 13), false);
   assert.equal(incidentalTravelThreatIsTrivial(15, 13), false);
   assert.equal(incidentalTravelThreatIsTrivial(undefined, 13), false);
+});
+
+test("incidental travel no-response budget is shorter than quest combat", async () => {
+  assert.deepEqual(combatNoResponseBudget(true), {
+    minimumElapsedMs: 4_000,
+    minimumAttackCount: 2,
+  });
+  assert.deepEqual(combatNoResponseBudget(false), {
+    minimumElapsedMs: 15_000,
+    minimumAttackCount: 5,
+  });
+
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  assert.match(
+    runner,
+    /const noResponseBudget = combatNoResponseBudget\(goal\.incidentalTravelThreat\)/,
+  );
+  assert.match(
+    runner,
+    /Date\.now\(\) - since > noResponseBudget\.minimumElapsedMs[\s\S]{0,120}outgoingAttackCount >= noResponseBudget\.minimumAttackCount/,
+  );
 });
 
 test("a currently attacking requested monster overrides stale approach cooldown", async () => {
