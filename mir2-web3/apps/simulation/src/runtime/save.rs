@@ -9,7 +9,7 @@ use sha2::{Digest, Sha256};
 
 use bevy_ecs::prelude::World;
 use mir2_game_data::{format_localized_text, localized_text_or_fallback};
-use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket, ServerPacketId};
+use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
@@ -29,8 +29,8 @@ use super::inventory::{
 };
 use super::map::{
     clear_non_player_world_entities, rebuild_world, refresh_runtime_map_collision,
-    should_use_crystal_current_map_world, spawn_config_visible_npcs,
-    spawn_visible_world_for_current_map,
+    runtime_world_map_collision_data, should_use_crystal_current_map_world,
+    spawn_config_visible_npcs, spawn_visible_world_for_current_map,
 };
 use super::packets::*;
 use super::quests::{effective_crystal_quest_info_packets, QuestState};
@@ -1224,15 +1224,23 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
 
 /// A durable transform must belong to its durable map. Older builds could save
 /// a town-revive position while retaining the field map name, which leaves the
-/// player outside that map's collision bounds on the next StartGame. Recover
-/// only that impossible case to the configured bind map; ordinary walkable and
-/// transfer-edge positions remain untouched.
+/// player outside that map's collision bounds on the next StartGame. Validate
+/// against the authoritative full-map collision rather than the active starter
+/// window, so ordinary Bichon field positions are not mistaken for corruption.
 fn recover_out_of_bounds_loaded_transform(world: &mut World) -> bool {
     let position = world
         .resource::<PlayerRuntimeResource>()
         .player_position
         .clone();
-    let bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
+    let current_map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let Some(collision) = runtime_world_map_collision_data(&current_map_file_name) else {
+        return false;
+    };
+    let bounds = collision.collision.region_bounds;
     if super::movement::point_in_bounds(&bounds, &position) {
         return false;
     }

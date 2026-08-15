@@ -219,6 +219,51 @@ fn queued_potion_cannot_revive_a_dead_player_before_town_revive() {
 }
 
 #[test]
+fn start_game_preserves_a_valid_full_map_transform_outside_the_starter_window() {
+    let config = SimulationConfig::default();
+    let expected_map_file_name = config.map.file_name.clone();
+    let expected_position = Point { x: 340, y: 550 };
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("test account store should lock");
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("default character save should exist");
+        save.position = expected_position.clone();
+    }
+
+    let mut runtime = InProcessWorldRuntime::new(config);
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        }))
+        .expect("valid full-map save should start");
+
+    let snapshot = runtime.world_snapshot();
+    let player = snapshot
+        .player_object_id
+        .and_then(|object_id| {
+            snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == object_id)
+        })
+        .expect("loaded player should be present");
+    assert_eq!(
+        snapshot.map_file_name.as_deref(),
+        Some(expected_map_file_name.as_str())
+    );
+    assert_eq!(
+        (player.x, player.y),
+        (expected_position.x, expected_position.y)
+    );
+}
+
+#[test]
 fn start_game_recovers_an_out_of_bounds_legacy_revive_transform() {
     let config = SimulationConfig::default().with_crystal_world_runtime();
     let bind_map_file_name = config.map.file_name.clone();
