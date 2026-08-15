@@ -1531,6 +1531,39 @@ export function collisionPathNeedsPerpendicularFrontier(player, target, bounds, 
 }
 
 /**
+ * Expand a long-route collision search only after its cheap local corridors
+ * fail. Small Crystal maps can afford one true full-map fallback; larger maps
+ * retain a bounded adaptive fallback so a short route never allocates an
+ * unbounded world-sized BFS merely because a distant wall exists.
+ */
+export function collisionAtlasSearchMargins(
+  distance,
+  {
+    mapWidth = null,
+    mapHeight = null,
+    fullMapCellLimit = 1_000_000,
+    maximumFallbackMargin = 700,
+  } = {},
+) {
+  const routeDistance = Math.max(0, finiteNumber(distance, 0));
+  const baseMargin = Math.min(160, Math.max(72, Math.ceil(routeDistance * 0.25)));
+  const expandedMargin = Math.min(350, Math.max(240, baseMargin * 2));
+  const width = Math.max(0, Math.floor(finiteNumber(mapWidth, 0)));
+  const height = Math.max(0, Math.floor(finiteNumber(mapHeight, 0)));
+  const fullMapEligible = width > 0 && height > 0 &&
+    width * height <= Math.max(1, finiteNumber(fullMapCellLimit, 1_000_000));
+  const fallbackMargin = fullMapEligible
+    ? Math.max(width, height)
+    : Math.min(
+        Math.max(1, finiteNumber(maximumFallbackMargin, 700)),
+        Math.max(384, Math.ceil(routeDistance * 2)),
+      );
+  return [...new Set([baseMargin, expandedMargin, fallbackMargin])]
+    .filter((margin) => Number.isFinite(margin) && margin > 0)
+    .sort((left, right) => left - right);
+}
+
+/**
  * Find a shortest eight-direction walk over a fully observed static collision
  * rectangle. This is intentionally a pure policy helper: the browser runner
  * obtains those cells from the same map asset endpoint used by the real

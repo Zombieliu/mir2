@@ -381,6 +381,40 @@ test("global collision path goes around a wall instead of oscillating at it", ()
   assert.ok(!path.some((point) => point.x === 10 && point.y <= 25));
 });
 
+test("global collision search expands beyond a bounded false-unreachable corridor", async () => {
+  const policy = await import("./policy.mjs");
+  const margins = policy.collisionAtlasSearchMargins?.(192, {
+    mapWidth: 700,
+    mapHeight: 700,
+  });
+  assert.deepEqual(margins, [72, 240, 700]);
+  assert.deepEqual(
+    policy.collisionAtlasSearchMargins?.(192, {
+      mapWidth: 3_000,
+      mapHeight: 3_000,
+    }),
+    [72, 240, 384],
+  );
+
+  const blocked = [];
+  for (let y = 300; y < 700; y += 1) blocked.push({ x: 400, y });
+  const start = { x: 503, y: 635 };
+  const target = { x: 311, y: 631 };
+  const route = (margin) => findCollisionGridPath({
+    start,
+    target,
+    bounds: {
+      minX: Math.max(0, Math.min(start.x, target.x) - margin),
+      maxX: Math.min(699, Math.max(start.x, target.x) + margin),
+      minY: Math.max(0, Math.min(start.y, target.y) - margin),
+      maxY: Math.min(699, Math.max(start.y, target.y) + margin),
+    },
+    blocked,
+  });
+  assert.equal(route(margins[1]), null);
+  assert.ok(route(margins.at(-1)));
+});
+
 test("global collision path stops at pickup range and does not cut blocked corners", () => {
   const path = findCollisionGridPath({
     start: { x: 1, y: 1 },
@@ -2155,6 +2189,14 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
   assert.match(
     activeShelterThreatBody,
     /navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: 4,[\s\S]{0,500}clearTrivialOccupancy: true/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /const shelterOccupancyClearGoal = \{[\s\S]{0,180}kind: "travel",[\s\S]{0,180}supplyFunding: false/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,650}resourceAccountingGoal: shelterOccupancyClearGoal/,
   );
   assert.match(
     recoveryBody,
