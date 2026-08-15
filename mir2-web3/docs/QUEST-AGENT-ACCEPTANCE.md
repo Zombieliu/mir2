@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 78 finalized development reports
-through `warrior-q30-r79-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 79 finalized development reports
+through `warrior-q30-r80-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 69,229,682 ms (19 h 13 m 49 s) browser-active runtime;
-- 36,405 recorded physical inputs;
-- 376 historical kill rows, including one r44 row now proven to repeat the
+- 70,130,006 ms (19 h 28 m 50 s) browser-active runtime;
+- 36,913 recorded physical inputs;
+- 382 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 15 deaths and 14 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -553,6 +553,27 @@ HP, five HP drugs, 141 gold, and EXP 12,567/40,000. q25 remains 8/20 and q30
 remains 0/1. The high-risk combat and final resumed-travel frames were visually
 inspected and match the report. This is a complete low-funds recovery cycle and
 one preparation kill, not sustained grind throughput or quest completion.
+
+r80 resumed that exact low-funds state and directly exercised the patched
+incidental-travel no-response budget under live congestion. The character used
+ordinary movement and attacks while trying to reach a visible Deer funding
+source, confirmed six incidental low-level kills, and quarantined eleven
+different occupied-tile targets. Every quarantine carries the exact reason
+`2 real attacks over 4000ms produced no target-specific combat packet`; none is
+counted as a kill. The recovery portal also rotated after 88,510 ms without a
+distance improvement, proving that the outer route can replan independently of
+the faster per-occupant rotation.
+
+The finalized r80 report records 900,324 ms, 508 physical inputs, six confirmed
+kill rows, eleven target quarantines, zero completed goals, zero death/revive,
+zero potion use, zero purchase, zero shortcuts, and zero critical
+browser/network diagnostics. Authoritative EXP advanced independently from
+12,567 to 14,125, while q25 remains 8/20 and q30 remains 0/1. It ends on map 0
+at `(305,576)` with 149/149 HP, five HP drugs, and 141 gold. The start and final
+frames were visually inspected; the final frame shows the reported dense actor
+cluster and a live game screen rather than a disconnect or modal stall. This is
+direct live timing evidence for fast blocker rotation, not a funding closure,
+level-16 milestone, or quest completion certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
