@@ -35,6 +35,14 @@ export const QUEST_AGENT_CONTRACT = Object.freeze({
   forbiddenChatPrefixes: Object.freeze(["@MOB", "@SETQUEST", "@LEVEL", "@GIVE", "@MOVE"]),
 });
 
+/** Treat an authoritative zero-HP actor as dead even if its render flag lags. */
+export function entityIsLiveActor(entity) {
+  if (!entity || entity.dead === true) return false;
+  if (entity.hp == null || entity.hp === "") return true;
+  const hp = Number(entity.hp);
+  return !Number.isFinite(hp) || hp > 0;
+}
+
 /**
  * Resolve the same F1-F8 skill-bar choice as the visible client, but admit
  * only an immediately targetable offensive spell. Ground skills need a
@@ -270,7 +278,7 @@ export function nearestBlockingHostile(
     .filter((entity) => (
       entity?.kind === "monster" &&
       entity?.disposition === "hostile" &&
-      !entity?.dead &&
+      entityIsLiveActor(entity) &&
       String(entity?.name ?? "") !== String(requestedMonsterName ?? "") &&
       Math.max(
         Math.abs(finiteNumber(entity?.x, 0) - finiteNumber(player.x, 0)),
@@ -301,7 +309,7 @@ export function denseAdjacentHostileCount(state, radius = 1) {
       return (
         entity?.kind === "monster" &&
         entity?.disposition === "hostile" &&
-        !entity?.dead &&
+        entityIsLiveActor(entity) &&
         distance > 0 &&
         distance <= maximumDistance
       );
@@ -361,7 +369,7 @@ export function nearestActiveHostile(
     .filter((entity) => (
       entity?.kind === "monster" &&
       entity?.disposition === "hostile" &&
-      !entity?.dead &&
+      entityIsLiveActor(entity) &&
       String(entity?.objectId ?? "") !== String(excludeObjectId ?? "") &&
       distance(entity) <= Math.max(0, finiteNumber(maxDistance, 8)) &&
       entityAttackIsRecent(entity, now, withinMs)
@@ -409,7 +417,7 @@ export function rankCombatTargetsByIsolation(
   const liveMonsters = (Array.isArray(state?.entities) ? state.entities : [])
     .filter((entity) => (
       entity?.kind === "monster" &&
-      !entity?.dead &&
+      entityIsLiveActor(entity) &&
       entity?.disposition !== "friendly"
     ));
   const distanceBetween = (left, right) => Math.max(
@@ -417,6 +425,7 @@ export function rankCombatTargetsByIsolation(
     Math.abs(finiteNumber(left?.y, 0) - finiteNumber(right?.y, 0)),
   );
   const scored = (Array.isArray(candidates) ? candidates : [])
+    .filter(entityIsLiveActor)
     .map((candidate, index) => {
       const neighbours = liveMonsters.filter((entity) => (
         String(entity?.objectId ?? "") !== String(candidate?.objectId ?? "")
@@ -629,7 +638,7 @@ export function dangerousHostileAvoidanceCells(
   const cells = [];
   const seen = new Set();
   for (const entity of Array.isArray(state?.entities) ? state.entities : []) {
-    if (entity?.dead || entity?.kind !== "monster" || entity?.disposition === "friendly") continue;
+    if (!entityIsLiveActor(entity) || entity?.kind !== "monster" || entity?.disposition === "friendly") continue;
     const normalizedName = normalizePolicyName(entity?.name);
     if (certifiedSafeNames.has(normalizedName)) continue;
     const monsterLevel = levelByName.get(normalizedName);
@@ -1833,7 +1842,7 @@ function waitGoal(questId, reason) {
 function firstVisibleMonster(snapshot, names) {
   const wanted = new Map(names.map((name) => [normalizeName(name), name]));
   for (const entity of snapshot?.entities ?? []) {
-    if (entity?.dead === true || String(entity?.kind ?? "").toLowerCase() !== "monster") continue;
+    if (!entityIsLiveActor(entity) || String(entity?.kind ?? "").toLowerCase() !== "monster") continue;
     const match = wanted.get(normalizeName(entity?.name));
     if (match) return match;
   }

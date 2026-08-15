@@ -25,6 +25,7 @@ import {
   dangerousHostileAvoidanceCells,
   denseAdjacentHostileCount,
   duplicateEquippedItemsForSale,
+  entityIsLiveActor,
   entityAttackIsRecent,
   equipmentRepairCandidates,
   expandRespawnPatrolFields,
@@ -106,6 +107,7 @@ test("dense adjacent occupancy counts only live hostile monsters in the movement
       { kind: "monster", disposition: "hostile", dead: false, x: 11, y: 10 },
       { kind: "monster", disposition: "hostile", dead: false, x: 9, y: 11 },
       { kind: "monster", disposition: "hostile", dead: true, x: 10, y: 11 },
+      { kind: "monster", disposition: "hostile", dead: false, hp: 0, x: 11, y: 9 },
       { kind: "monster", disposition: "friendly", dead: false, x: 9, y: 10 },
       { kind: "npc", disposition: "hostile", dead: false, x: 10, y: 10 },
       { kind: "monster", disposition: "hostile", dead: false, x: 10, y: 10 },
@@ -115,6 +117,13 @@ test("dense adjacent occupancy counts only live hostile monsters in the movement
   assert.equal(denseAdjacentHostileCount(state), 3);
   assert.equal(denseAdjacentHostileCount(state, 2), 4);
   assert.equal(denseAdjacentHostileCount({ entities: state.entities }), 0);
+});
+
+test("authoritative zero HP overrides a lagging rendered death flag", () => {
+  assert.equal(entityIsLiveActor({ dead: false, hp: 0 }), false);
+  assert.equal(entityIsLiveActor({ dead: false, hp: "0" }), false);
+  assert.equal(entityIsLiveActor({ dead: false, hp: 20 }), true);
+  assert.equal(entityIsLiveActor({ dead: false }), true);
 });
 
 test("visible HP-drug selection ignores unrelated and distant drops", () => {
@@ -329,6 +338,7 @@ test("travel policy identifies only an adjacent non-target hostile", () => {
       { objectId: "target", kind: "monster", disposition: "hostile", name: "CannibalPlant", x: 10, y: 11 },
       { objectId: "far", kind: "monster", disposition: "hostile", name: "ForestYeti", x: 13, y: 10 },
       { objectId: "npc", kind: "npc", disposition: "hostile", name: "Guard", x: 9, y: 10 },
+      { objectId: "zero-hp", kind: "monster", disposition: "hostile", name: "ForestYeti", dead: false, hp: 0, x: 10, y: 9, attackUntil: 300 },
       { objectId: "threat", kind: "monster", disposition: "hostile", name: "ForestYeti", x: 9, y: 10, attackUntil: 200 },
     ],
   };
@@ -372,6 +382,7 @@ test("active harvest and recovery threats require rendered attack evidence", () 
     entities: [
       { objectId: "idle", kind: "monster", disposition: "hostile", x: 9, y: 10 },
       { objectId: "corpse", kind: "monster", disposition: "hostile", dead: true, x: 10, y: 11, attackUntil: 10_000 },
+      { objectId: "zero-hp", kind: "monster", disposition: "hostile", dead: false, hp: 0, x: 11, y: 10, attackUntil: 10_000 },
       { objectId: "attacker", kind: "monster", disposition: "hostile", x: 12, y: 10, attackUntil: 9_000 },
       { objectId: "far", kind: "monster", disposition: "hostile", x: 30, y: 10, attackUntil: 10_000 },
     ],
@@ -382,7 +393,7 @@ test("active harvest and recovery threats require rendered attack evidence", () 
     now: 10_000,
     withinMs: 3_500,
   })?.objectId, "attacker");
-  assert.deepEqual(retreatPointFromHostile(state, state.entities[2], 8), { x: 2, y: 10 });
+  assert.deepEqual(retreatPointFromHostile(state, state.entities[3], 8), { x: 2, y: 10 });
 });
 
 test("incidental travel combat is limited to monsters with a real level disadvantage", () => {
@@ -1716,6 +1727,14 @@ test("supply travel visibly recovers from an accidentally entered protected map"
 
 test("collision escape exhausts the bounded direction set around dynamic occupancy", async () => {
   const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const atlasBody = runner.slice(
+    runner.indexOf("async function collisionAtlasPathToward"),
+    runner.indexOf("async function collisionAtlasCorridor"),
+  );
+  const probesBody = runner.slice(
+    runner.indexOf("async function prioritizedMovementProbes"),
+    runner.indexOf("async function travelToMap"),
+  );
   assert.match(runner, /const DISCRETE_MOVEMENT_INPUT_GUARD_MS = 1_000/);
   assert.match(
     runner,
@@ -1759,6 +1778,10 @@ test("collision escape exhausts the bounded direction set around dynamic occupan
   );
   assert.match(runner, /positionVisitCount/);
   assert.match(runner, /reject cycling collision edge:/);
+  assert.match(atlasBody, /\.filter\(\(entry\) => !entityIsCorpse\(entry\)/);
+  assert.match(probesBody, /\.filter\(\(entry\) => !entityIsCorpse\(entry\)\)/);
+  assert.doesNotMatch(atlasBody, /!entry\.dead/);
+  assert.doesNotMatch(probesBody, /!entry\.dead/);
   assert.match(
     runner,
     /signatureVisits >= 3[\s\S]{0,900}collisionAtlasPathToward/,

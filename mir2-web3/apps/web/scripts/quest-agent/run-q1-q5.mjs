@@ -3160,7 +3160,7 @@ async function approachNpcViaVisibleWaypoint(
   const anchors = state.entities
     .filter((entry) => (
       entry.kind === "npc" &&
-      !entry.dead &&
+      !entityIsCorpse(entry) &&
       String(entry.objectId) !== String(targetNpc.npcIndex) &&
       chebyshev(entry, targetNpc) + 4 < startingDistance
     ))
@@ -5069,7 +5069,7 @@ async function collisionPathToward(
   );
   const occupied = new Set(
     entities
-      .filter((entry) => !entry.dead)
+      .filter((entry) => !entityIsCorpse(entry))
       .map((entry) => `${Number(entry.x)},${Number(entry.y)}`),
   );
   for (const key of navigationTransferTileKeys(mapTransfers)) blocked.add(key);
@@ -5242,7 +5242,7 @@ async function collisionAtlasPathToward(
       // Only nearby actors can still occupy their current cell when this
       // route reaches it. Treating every moving deer/chicken in AOI as a
       // permanent far obstacle makes the full path flip on every snapshot.
-      .filter((entry) => !entry.dead && chebyshev(player, entry) <= 4)
+      .filter((entry) => !entityIsCorpse(entry) && chebyshev(player, entry) <= 4)
       .map((entry) => ({ x: Number(entry.x), y: Number(entry.y) }));
     const hostileAvoidance = dangerousHostileAvoidanceCells(state, grindingCatalog, {
       radius: 2,
@@ -5779,7 +5779,7 @@ async function prioritizedMovementProbes(player, target, mapTransfers, avoidPosi
     );
     const occupied = new Set(
       state.entities
-        .filter((entry) => !entry.dead)
+        .filter((entry) => !entityIsCorpse(entry))
         .map((entry) => `${Number(entry.x)},${Number(entry.y)}`),
     );
     const openNeighbourCount = (point) => {
@@ -8247,7 +8247,7 @@ async function clickEntity(objectId, meta) {
 async function logMonsterSearch(monsterName, state, phase) {
   const wanted = normalizeName(monsterName);
   const knownEntities = state.entities
-    .filter((entry) => entry.kind === "monster" && !entry.dead && normalizeName(entry.name) === wanted)
+    .filter((entry) => entry.kind === "monster" && !entityIsCorpse(entry) && normalizeName(entry.name) === wanted)
     .slice(0, 32);
   const known = knownEntities.map((entry) => `${entry.objectId}@${entry.x},${entry.y}`);
   const knownIds = new Set(known.map((entry) => entry.split("@", 1)[0]));
@@ -8303,7 +8303,7 @@ function routeNpcEntity(state, npc, maxDistance) {
   return state.entities
     .filter((entry) => (
       entry.kind === "npc" &&
-      !entry.dead &&
+      !entityIsCorpse(entry) &&
       String(entry.objectId) === String(npc.npcIndex) &&
       chebyshev(entry, npc) <= maxDistance
     ))[0] ?? null;
@@ -8332,7 +8332,9 @@ function pointToward(from, to, maxSpan) {
 }
 
 function tileOccupied(state, point) {
-  return state.entities.some((entry) => !entry.dead && entry.x === point.x && entry.y === point.y);
+  return state.entities.some((entry) => (
+    !entityIsCorpse(entry) && entry.x === point.x && entry.y === point.y
+  ));
 }
 
 function movementProbesToward(from, to) {
