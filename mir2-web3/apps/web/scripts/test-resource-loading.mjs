@@ -167,7 +167,11 @@ const fullBichonMapDataAvailable =
     height: 34,
   });
   assert.equal(a, b, "same scene chunk and size bucket should share one blueprint cache key");
-  assert.match(a, /^2026-08-09-v6-scene-integrity-0-cx\d+-cy\d+-w40-h40-default$/);
+  assert.equal(
+    a,
+    `${sceneRequestExports.SCENE_BLUEPRINT_SCHEMA_VERSION}-0-cx21-cy16-w40-h40-default`,
+    "the cache key must use the active schema plus the normalized map, chunk, and size buckets",
+  );
 }
 
 // A degraded blueprint must never become a sticky disk/memory hit. This reproduces the
