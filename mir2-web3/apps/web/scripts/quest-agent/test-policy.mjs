@@ -2547,6 +2547,34 @@ test("ordinary map travel rotates same-destination entrances only after physical
   );
 });
 
+test("budget-disabled equipment repair travel still clears certified physical occupancy", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const travelBody = runner.slice(
+    runner.indexOf("async function travelToMap("),
+    runner.indexOf("async function ensureVisibleScriptTravelFunding("),
+  );
+  assert.match(
+    travelBody,
+    /let journeyResourceGoal = resourceAccountingGoal \?\? null/,
+    "disabling the combat budget must not discard the non-funding occupancy policy",
+  );
+
+  const repairBody = runner.slice(
+    runner.indexOf("async function repairProgressionEquipmentIfNeeded"),
+    runner.indexOf("async function usePotionIfNeeded"),
+  );
+  assert.match(
+    repairBody,
+    /const repairTravelGoal = \{[\s\S]{0,300}supplyFunding: false/,
+    "repair travel must classify a certified blocker as ordinary travel combat, not supply funding",
+  );
+  assert.match(
+    repairBody,
+    /travelToMap\(route\.mapFileName, \{[\s\S]{0,260}enforceCombatResourceBudget: false,[\s\S]{0,180}clearTrivialOccupancy: true,[\s\S]{0,180}resourceAccountingGoal: repairTravelGoal/,
+    "an urgent repair route must retain bounded real-client occupancy clearing",
+  );
+});
+
 test("safe passive recovery accepts authoritative healing completed on the approach", async () => {
   const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
   const recoveryBody = runner.slice(
