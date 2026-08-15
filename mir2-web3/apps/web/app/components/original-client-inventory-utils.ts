@@ -1,8 +1,22 @@
-import type { EquipmentSlot } from "./original-client-types";
+import type { DisplayItem, EquipmentSlot } from "./original-client-types";
 import { originalAssetPath } from "../../lib/asset-url";
+import itemLibraryMeta from "../../public/original-ui/Items/meta.json";
+
+const AVAILABLE_ORIGINAL_ITEM_ICONS = new Set(
+  itemLibraryMeta.frames.map((frame) => Number(frame.index)),
+);
+const EMPTY_ORIGINAL_ITEM_ICON =
+  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
 export function originalItemIconPath(icon: number) {
-  return originalAssetPath(`/original-ui/Items/${icon}.png`);
+  const normalizedIcon = Math.trunc(Number(icon));
+  // Crystal's Items library contains thousands of sparse/blank frame slots.
+  // The export manifest lists only frames with pixels, so do not turn a known
+  // blank slot into a browser 404. A transparent pixel preserves the original
+  // visual result while keeping genuine exported-frame failures observable.
+  return AVAILABLE_ORIGINAL_ITEM_ICONS.has(normalizedIcon)
+    ? originalAssetPath(`/original-ui/Items/${normalizedIcon}.png`)
+    : EMPTY_ORIGINAL_ITEM_ICON;
 }
 
 export function formatBinaryDateTimeLabel(locale: string, value: number, template: string) {
@@ -52,4 +66,11 @@ export function equipmentSlotForItemKey(key: string): EquipmentSlot | null {
   if (/Torch|Candle/i.test(key)) return "torch";
   if (/Horse|Mount/i.test(key)) return "mount";
   return null;
+}
+
+export function equipmentSlotForItem(
+  item: Pick<DisplayItem, "key" | "name" | "equipSlot">,
+): EquipmentSlot | null {
+  if (item.equipSlot) return item.equipSlot;
+  return equipmentSlotForItemKey(`${item.key} ${item.name}`);
 }

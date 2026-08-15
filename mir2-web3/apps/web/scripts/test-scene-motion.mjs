@@ -82,6 +82,21 @@ assert.match(
   "scene animation timing metadata must match the 100 ms invalidation cadence",
 );
 assert.match(
+  shellSource,
+  /motionClockIntervalMsRef\.current = imperativeSceneMotion[\s\S]{0,180}selfCameraGliding && mapAtlasUsable[\s\S]{0,80}\? 16[\s\S]{0,80}: 30;/,
+  "the DOM-map fallback must not enqueue 60 Hz whole-scene React renders while moving",
+);
+assert.match(
+  shellSource,
+  /const bevyEntityAtlasSources = useMemo\([\s\S]{0,900}\[useGpuEntityRenderer, useBevyEntityAtlas, viewportEntities, sceneSpriteLibraries\]/,
+  "animation-only ticks must reuse the stable Bevy entity-atlas source set",
+);
+assert.match(
+  shellSource,
+  /const bevyEntityAtlasKey = useMemo\([\s\S]{0,260}\[bevyEntityAtlasSources\]/,
+  "the stable Bevy entity-atlas source set must reuse its derived key",
+);
+assert.match(
   cameraDriverSource,
   /onLocalSelfMotionChangeRef\.current\?\.\(motion\)/,
   "the committed Bevy pose must publish its local self-motion phase",

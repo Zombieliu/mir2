@@ -652,6 +652,24 @@ function OriginalClientSceneVisualLayersInner({
         className={`viewport-drop-overlay ${screen !== "game" ? "hidden" : ""}`}
       >
         {viewportGroundDrops.map((drop) => {
+          const dropsOnTile = viewportGroundDrops.filter(
+            (candidate) => candidate.x === drop.x && candidate.y === drop.y,
+          );
+          const dropStackIndex = Math.max(
+            0,
+            dropsOnTile.findIndex((candidate) => candidate.objectId === drop.objectId),
+          );
+          const dropStackColumns = Math.min(3, dropsOnTile.length);
+          const dropStackColumn = dropStackIndex % 3;
+          const dropStackRow = Math.floor(dropStackIndex / 3);
+          // Crystal can place several independent drops on one world tile. A
+          // literal overlap makes every marker except the topmost one
+          // impossible to click with a real pointer, so fan the labels into a
+          // compact three-column stack while keeping them anchored to the
+          // authoritative tile.
+          const dropStackOffsetX =
+            (dropStackColumn - (dropStackColumns - 1) / 2) * 76;
+          const dropStackOffsetY = dropStackRow * 28;
           const showIcon =
             typeof drop.icon === "number" && drop.icon > 0 && !failedDropIcons.has(drop.icon);
           return (
@@ -660,12 +678,14 @@ function OriginalClientSceneVisualLayersInner({
               type="button"
               className="ground-drop-marker"
               style={{
-                left: `${VIEWPORT_TILE_CENTER_X + drop.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x}px`,
-                top: `${VIEWPORT_TILE_CENTER_Y + drop.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y - 12}px`,
+                left: `${VIEWPORT_TILE_CENTER_X + drop.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x + dropStackOffsetX}px`,
+                top: `${VIEWPORT_TILE_CENTER_Y + drop.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y - 12 + dropStackOffsetY}px`,
                 zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 16),
               }}
               onClick={() => onPickGroundDrop(drop.objectId)}
               data-ui-interactive="true"
+              data-object-id={drop.objectId}
+              aria-label={`${drop.name} x${drop.quantity}`}
               title={`${drop.name} x${drop.quantity}`}
             >
               {showIcon ? (

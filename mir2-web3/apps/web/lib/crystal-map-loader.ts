@@ -92,7 +92,7 @@ type CrystalMapManifestEntry = {
 
 type PackagedMapCollision = {
   blockedCells?: Array<{ x?: number; y?: number }>;
-  doors?: Array<{ x?: number; y?: number; closed?: boolean }>;
+  doors?: Array<{ x?: number; y?: number; index?: number; closed?: boolean }>;
 };
 
 type ParsedMap = {
@@ -362,6 +362,63 @@ export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {
     terrainPatches: terrainPatchesForMap(mapFileName, parsedMap, mapInfo),
     decorObjects: [],
     originalMapRegion: await exportMapRegion(parsedMap, sceneView),
+  };
+}
+
+export function loadCrystalCollisionRegion(options: {
+  mapFileName?: string | null;
+  minX?: number | null;
+  maxX?: number | null;
+  minY?: number | null;
+  maxY?: number | null;
+} = {}) {
+  const mapFileName = normalizeMapFileName(options.mapFileName ?? "0");
+  const parsedMap = loadParsedMap(mapFileName);
+  const requestedMinX = clampInt(options.minX ?? 0, 0, Math.max(parsedMap.width - 1, 0));
+  const requestedMaxX = clampInt(
+    options.maxX ?? requestedMinX,
+    0,
+    Math.max(parsedMap.width - 1, 0),
+  );
+  const requestedMinY = clampInt(options.minY ?? 0, 0, Math.max(parsedMap.height - 1, 0));
+  const requestedMaxY = clampInt(
+    options.maxY ?? requestedMinY,
+    0,
+    Math.max(parsedMap.height - 1, 0),
+  );
+  const bounds = {
+    minX: Math.min(requestedMinX, requestedMaxX),
+    maxX: Math.max(requestedMinX, requestedMaxX),
+    minY: Math.min(requestedMinY, requestedMaxY),
+    maxY: Math.max(requestedMinY, requestedMaxY),
+  };
+  const blockedCells: Array<{ x: number; y: number }> = [];
+
+  if (parsedMap.cells) {
+    for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+      for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        const cell = parsedCellAt(parsedMap, x, y);
+        if (cell && parsedCellBlocksMovement(cell)) blockedCells.push({ x, y });
+      }
+    }
+  } else if (parsedMap.fallbackOriginalMapRegion) {
+    for (const cell of parsedMap.fallbackOriginalMapRegion.cells) {
+      if (
+        (cell.blocked || cell.closedDoor) &&
+        cell.x >= bounds.minX && cell.x <= bounds.maxX &&
+        cell.y >= bounds.minY && cell.y <= bounds.maxY
+      ) {
+        blockedCells.push({ x: cell.x, y: cell.y });
+      }
+    }
+  }
+
+  return {
+    mapFileName: parsedMap.fileName,
+    mapWidth: parsedMap.width,
+    mapHeight: parsedMap.height,
+    bounds,
+    blockedCells,
   };
 }
 
@@ -812,6 +869,14 @@ async function exportMapRegion(
       if (parsedCellBlocksMovement(cell)) {
         outputCell.blocked = true;
       }
+      // Crystal's normal client keeps door cells routeable, but remembers the
+      // shared door group and starts it closed. A movement attempt into one of
+      // these cells sends Opendoor first; the server packet then flips every
+      // cell in the same group before the queued movement is retried.
+      if (cell.doorIndex > 0) {
+        outputCell.doorIndex = cell.doorIndex;
+        outputCell.closedDoor = true;
+      }
       if (cell.light > 0) {
         outputCell.light = cell.light;
       }
@@ -1107,10 +1172,15 @@ function withPackagedStarterCollision(region: OriginalMapRegion): OriginalMapReg
       if (!door.closed) continue;
       const x = Math.trunc(door.x ?? Number.NaN);
       const y = Math.trunc(door.y ?? Number.NaN);
+      const index = Math.trunc(door.index ?? Number.NaN);
       if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
       if (!pointInRegion(region.regionBounds, x, y)) continue;
       const key = `${x}:${y}`;
-      cellsByKey.set(key, { ...(cellsByKey.get(key) ?? { x, y }), closedDoor: true });
+      cellsByKey.set(key, {
+        ...(cellsByKey.get(key) ?? { x, y }),
+        ...(Number.isFinite(index) && index > 0 ? { doorIndex: index & 0x7f } : {}),
+        closedDoor: true,
+      });
     }
 
     return { ...region, cells: [...cellsByKey.values()] };

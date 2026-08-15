@@ -2394,7 +2394,8 @@ fn original_bichon_fresh_warrior_reaches_level_six_through_quests_1_to_9() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.name == "BronzeWarriorSword"));
+        .any(|item| item.name == "BronzeWarriorSword"
+            && item.equip_slot == Some(mir2_simulation::EquipmentSlot::Weapon)));
     assert!(self_player(&session).level.is_some_and(|level| level >= 4));
 
     let _ = session.transfer_map("crystal:0:283:606");

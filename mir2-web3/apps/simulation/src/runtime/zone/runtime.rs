@@ -54,6 +54,10 @@ const QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV: &str = "MIR2_QA_NATURAL_KILL_DAMAGE
 const MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER: i32 = 1_000;
 const QA_NATURAL_MOVEMENT_DELAY_MS_ENV: &str = "MIR2_QA_NATURAL_MOVEMENT_DELAY_MS";
 const ZONE_CRYSTAL_STATUS_TICK_MS: u64 = 1_000;
+// Shared Zone cadence is 300 ms, matching the personal runtime's ten-tick
+// passive vital cadence and ten-tick post-damage delay.
+const ZONE_CRYSTAL_PLAYER_REGEN_INTERVAL_MS: u64 = 3_000;
+const ZONE_CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_MS: u64 = 3_000;
 /// Crystal auto-closes doors 5000 ms after they are opened (`Map.Process`).
 const ZONE_DOOR_OPEN_MS: u64 = 5_000;
 const ZONE_CRYSTAL_GREEN_POISON_TICK_MS: u64 = 2_000;
@@ -357,6 +361,14 @@ impl ZoneRuntime {
         self.ground_drops.contains_key(&object_id)
     }
 
+    /// Whether an object still exists in the authoritative Zone even if one
+    /// observer just received `ObjectRemove` because it left that observer's
+    /// AOI. The gateway's shared map index is zone-wide, so it must not turn an
+    /// observer-local visibility removal into a global object tombstone.
+    pub fn retains_object_id(&self, object_id: u32) -> bool {
+        self.object_id_in_use(object_id)
+    }
+
     pub fn player_object_id(&self, session_id: &SessionId) -> Option<PlayerId> {
         self.players
             .get(session_id)
@@ -503,8 +515,9 @@ impl ZoneRuntime {
             ZoneCommand::SyncSharedObjects {
                 session_id,
                 packets,
+                include_owner,
                 now_ms,
-            } => self.sync_shared_objects(&session_id, &packets, now_ms),
+            } => self.sync_shared_objects(&session_id, &packets, include_owner, now_ms),
             ZoneCommand::BroadcastSharedObjectPackets {
                 session_id,
                 local_self_object_id,
@@ -526,6 +539,11 @@ impl ZoneRuntime {
                 monster,
                 now_ms,
             } => self.spawn_native_monster(&session_id, &monster, now_ms),
+            ZoneCommand::SyncNativeMonsters {
+                session_id,
+                monsters,
+                now_ms,
+            } => self.sync_native_monsters(&session_id, &monsters, now_ms),
             ZoneCommand::PlayerAttackObject {
                 session_id,
                 object_id,
@@ -787,9 +805,50 @@ impl ZoneRuntime {
         outbounds.extend(self.tick_doors(now_ms));
         outbounds.extend(self.tick_hazards(now_ms));
         outbounds.extend(self.expire_buffs(now_ms));
+        outbounds.extend(self.tick_player_vital_regen(now_ms));
         self.expire_ground_drop_ownerships(now_ms);
         outbounds.extend(self.expire_zone_objects(now_ms));
         outbounds
+    }
+
+    /// Crystal-compatible passive HP regeneration for the shared-world
+    /// authority. The personal session already has the same 3% + 1 pulse; the
+    /// Zone must own it while shared combat owns the player's live vitals.
+    fn tick_player_vital_regen(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let ready = self
+            .players
+            .iter_mut()
+            .filter_map(|(session_id, player)| {
+                if player.last_regen_at_ms == 0 {
+                    player.last_regen_at_ms = now_ms;
+                    return None;
+                }
+                if player.dead
+                    || player.hp <= 0
+                    || player.hp >= player.max_hp
+                    || now_ms
+                        < player
+                            .last_regen_at_ms
+                            .saturating_add(ZONE_CRYSTAL_PLAYER_REGEN_INTERVAL_MS)
+                    || now_ms
+                        < player
+                            .last_damaged_at_ms
+                            .saturating_add(ZONE_CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_MS)
+                {
+                    return None;
+                }
+                player.last_regen_at_ms = now_ms;
+                let amount = (player.max_hp.saturating_mul(3) / 100)
+                    .saturating_add(1)
+                    .max(1);
+                Some((session_id.clone(), amount))
+            })
+            .collect::<Vec<_>>();
+
+        ready
+            .into_iter()
+            .flat_map(|(session_id, amount)| self.apply_native_player_heal(session_id, amount))
+            .collect()
     }
 
     /// Open a shared door (Crystal `Map.OpenDoor`): unblock its cells for every
@@ -863,7 +922,13 @@ impl ZoneRuntime {
             self.hazard.next_lightning_ms =
                 now_ms.saturating_add(zone_hazard_interval_ms(strike_index, 0xA1));
             let damage = self.hazard.lightning_damage;
-            outbounds.extend(self.hazard_strike(Spell::MapLightning, damage, strike_index, 0x11));
+            outbounds.extend(self.hazard_strike(
+                Spell::MapLightning,
+                damage,
+                strike_index,
+                0x11,
+                now_ms,
+            ));
         }
         if self.hazard.fire && now_ms >= self.hazard.next_fire_ms {
             let strike_index = self.hazard.fire_strikes;
@@ -871,7 +936,13 @@ impl ZoneRuntime {
             self.hazard.next_fire_ms =
                 now_ms.saturating_add(zone_hazard_interval_ms(strike_index, 0xF1));
             let damage = self.hazard.fire_damage;
-            outbounds.extend(self.hazard_strike(Spell::MapLava, damage, strike_index, 0x22));
+            outbounds.extend(self.hazard_strike(
+                Spell::MapLava,
+                damage,
+                strike_index,
+                0x22,
+                now_ms,
+            ));
         }
         outbounds
     }
@@ -882,6 +953,7 @@ impl ZoneRuntime {
         max_damage: i32,
         strike_index: u64,
         salt: u64,
+        now_ms: u64,
     ) -> Vec<ZoneOutbound> {
         let targets: Vec<(SessionId, u32, Point)> = self
             .players
@@ -935,6 +1007,7 @@ impl ZoneRuntime {
                     max_damage,
                     strike_index,
                     salt,
+                    now_ms,
                 ));
             }
         }
@@ -948,6 +1021,7 @@ impl ZoneRuntime {
         max_damage: i32,
         strike_index: u64,
         salt: u64,
+        now_ms: u64,
     ) -> Vec<ZoneOutbound> {
         let modulo = max_damage.max(1) as u64;
         let damage = (zone_hazard_hash(strike_index, salt) % modulo) as i32;
@@ -963,6 +1037,7 @@ impl ZoneRuntime {
                 return Vec::new();
             }
             player.hp = player.hp.saturating_sub(damage).max(1);
+            player.last_damaged_at_ms = now_ms;
             (
                 player.position.clone(),
                 native_player_health_percent(player.hp, player.max_hp),
@@ -1698,6 +1773,7 @@ impl ZoneRuntime {
         &mut self,
         session_id: &SessionId,
         packets: &[ServerPacket],
+        include_owner: bool,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
         if !self.players.contains_key(session_id) {
@@ -1717,7 +1793,11 @@ impl ZoneRuntime {
             return Vec::new();
         }
         self.apply_zone_object_packets(&packets, now_ms);
-        self.diff_all_zone_object_visibility_except(session_id)
+        if include_owner {
+            self.diff_all_zone_object_visibility()
+        } else {
+            self.diff_all_zone_object_visibility_except(session_id)
+        }
     }
 
     fn sync_ground_drops(
@@ -1774,6 +1854,29 @@ impl ZoneRuntime {
         self.spawn_authoritative_monster(spawn, now_ms).1
     }
 
+    fn sync_native_monsters(
+        &mut self,
+        session_id: &SessionId,
+        spawns: &[ZoneMonsterSpawn],
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        if !self.players.contains_key(session_id) {
+            return Vec::new();
+        }
+        let mut changed = false;
+        let mut outbounds = Vec::new();
+        for spawn in spawns {
+            let (spawn_changed, spawn_outbounds) =
+                self.spawn_authoritative_monster_internal(spawn, now_ms, false);
+            changed |= spawn_changed;
+            outbounds.extend(spawn_outbounds);
+        }
+        if changed {
+            outbounds.extend(self.diff_all_zone_object_visibility());
+        }
+        outbounds
+    }
+
     /// Spawn a monster from a finalized control-plane world event without
     /// inventing a player Session. The monster enters the same native AI,
     /// combat, AOI and checkpoint state as a player-originated spawn.
@@ -1790,7 +1893,80 @@ impl ZoneRuntime {
         spawn: &ZoneMonsterSpawn,
         now_ms: u64,
     ) -> (bool, Vec<ZoneOutbound>) {
+        self.spawn_authoritative_monster_internal(spawn, now_ms, true)
+    }
+
+    fn spawn_authoritative_monster_internal(
+        &mut self,
+        spawn: &ZoneMonsterSpawn,
+        now_ms: u64,
+        emit_visibility_diff: bool,
+    ) -> (bool, Vec<ZoneOutbound>) {
         let requested_object_id = spawn.object_id;
+        let respawns_existing = self
+            .native_monsters
+            .get(&requested_object_id)
+            .is_some_and(|monster| (monster.dead || monster.hp <= 0) && spawn.hp > 0);
+        if respawns_existing {
+            let awaits_harvest = self
+                .native_monsters
+                .get(&requested_object_id)
+                .is_some_and(|monster| zone_native_monster_requires_harvest(monster.ai))
+                && !self.harvested_object_ids.contains(&requested_object_id);
+            if awaits_harvest {
+                // The private Crystal compatibility runtime supplies respawn
+                // schedules, but the shared Zone owns the public lifecycle.
+                // Its tick counter can advance quickly under real client input;
+                // never let a positive-HP resync replace a harvestable corpse
+                // before the authoritative ObjectHarvested boundary arrives.
+                return (false, Vec::new());
+            }
+            // Crystal reuses a map monster's object id after its respawn delay.
+            // A duplicate SpawnMonster for a living object is only a metadata
+            // refresh, but a positive-HP spawn replacing an authoritative corpse
+            // is a new incarnation. Rebuild every combat field, clear retained
+            // corpse state, and make existing observers receive ObjectMonster
+            // again; otherwise attacks are silently rejected forever against a
+            // client-visible `dead=false` zombie.
+            self.pending_native_hits.retain(|hit| {
+                hit.object_id != requested_object_id
+                    && hit.attacker_object_id != requested_object_id
+            });
+            self.pending_native_player_hits
+                .retain(|hit| hit.attacker_object_id != requested_object_id);
+            self.dead_object_ids.remove(&requested_object_id);
+            self.harvested_object_ids.remove(&requested_object_id);
+            self.revived_object_ids.remove(&requested_object_id);
+            self.removed_object_ids.remove(&requested_object_id);
+            for player in self.players.values_mut() {
+                player.visible_object_ids.remove(&requested_object_id);
+            }
+            let mut positioned_spawn = spawn.clone();
+            positioned_spawn.position = self.first_available_position(spawn.position.clone(), None);
+            let monster = ZoneNativeMonster::from_spawn(&positioned_spawn, requested_object_id);
+            let packet = native_monster_spawn_packet(&positioned_spawn, requested_object_id);
+            self.native_monsters.insert(requested_object_id, monster);
+            self.apply_zone_object_packets(&[packet], now_ms);
+            // ObjectMonster is also used for ordinary metadata/AOI refreshes,
+            // so downstream consumers deliberately cannot treat every live
+            // spawn packet as a new incarnation. Emit Crystal's explicit
+            // lifecycle signal first; the gateway can then clear its retained
+            // death/harvest tombstones without making late live packets revive
+            // an old corpse. The following visibility diff sends ObjectMonster
+            // only to observers whose AOI contains the respawned monster.
+            let mut outbounds = vec![ZoneOutbound::ToAll {
+                packets: vec![ServerPacket::ObjectRevived {
+                    info: ObjectRevivedInfo {
+                        object_id: requested_object_id,
+                        effect: true,
+                    },
+                }],
+            }];
+            if emit_visibility_diff {
+                outbounds.extend(self.diff_all_zone_object_visibility());
+            }
+            return (true, outbounds);
+        }
         if let Some(monster) = self.native_monsters.get_mut(&requested_object_id) {
             monster.ai = spawn.ai;
             monster.hostile_to_player = zone_native_monster_targets_players(spawn.ai);
@@ -1812,11 +1988,22 @@ impl ZoneRuntime {
         } else {
             self.unique_object_id(requested_object_id)
         };
-        let monster = ZoneNativeMonster::from_spawn(spawn, object_id);
-        let packet = native_monster_spawn_packet(spawn, object_id);
+        // Source respawn groups can produce the same sampled tile for several
+        // monsters. Resolve that only at the authoritative Zone boundary so a
+        // fresh batch never starts with overlapping hitboxes. Later movement
+        // already enforces the same occupancy invariant.
+        let mut positioned_spawn = spawn.clone();
+        positioned_spawn.position = self.first_available_position(spawn.position.clone(), None);
+        let monster = ZoneNativeMonster::from_spawn(&positioned_spawn, object_id);
+        let packet = native_monster_spawn_packet(&positioned_spawn, object_id);
         self.native_monsters.insert(object_id, monster);
         self.apply_zone_object_packets(&[packet], now_ms);
-        (true, self.diff_all_zone_object_visibility())
+        let outbounds = if emit_visibility_diff {
+            self.diff_all_zone_object_visibility()
+        } else {
+            Vec::new()
+        };
+        (true, outbounds)
     }
 
     pub fn broadcast_world_event_message(&self, message: &str) -> Vec<ZoneOutbound> {
@@ -1953,6 +2140,9 @@ impl ZoneRuntime {
             let applied_damage = resolved_damage.max(0).min(target.hp);
             target.hp = target.hp.saturating_sub(applied_damage).max(0);
             target.dead = target.hp == 0;
+            if applied_damage > 0 {
+                target.last_damaged_at_ms = now_ms;
+            }
             (
                 applied_damage,
                 target.dead,
@@ -2024,12 +2214,16 @@ impl ZoneRuntime {
         attacker_object_id: u32,
         resolved_damage: i32,
         damage_type: u8,
+        now_ms: u64,
     ) -> Option<(Vec<ServerPacket>, Vec<ZoneOutbound>)> {
         let (target, applied_damage, killed, health_percent) = {
             let target = self.players.get_mut(target_session_id)?;
             let applied_damage = resolved_damage.max(0).min(target.hp);
             target.hp = target.hp.saturating_sub(applied_damage).max(0);
             target.dead = target.hp == 0;
+            if applied_damage > 0 {
+                target.last_damaged_at_ms = now_ms;
+            }
             (
                 target.clone(),
                 applied_damage,
@@ -2282,6 +2476,7 @@ impl ZoneRuntime {
             attacker.object_id,
             resolved_damage,
             0,
+            now_ms,
         ) else {
             return Vec::new();
         };
@@ -2705,6 +2900,7 @@ impl ZoneRuntime {
                 attacker.object_id,
                 resolved_damage,
                 1,
+                now_ms,
             ) else {
                 return Vec::new();
             };
@@ -4346,6 +4542,7 @@ impl ZoneRuntime {
                     &reward_owner_session_id,
                     ZoneMonsterKillAward {
                         monster_object_id: object_id,
+                        killed_at_ms: now_ms,
                         monster_name,
                         experience,
                         drops: spawned_drops,
@@ -4677,6 +4874,7 @@ impl ZoneRuntime {
                 &reward_owner_session_id,
                 ZoneMonsterKillAward {
                     monster_object_id: hit.object_id,
+                    killed_at_ms: now_ms,
                     monster_name,
                     experience,
                     drops: spawned_drops,
@@ -4794,6 +4992,7 @@ impl ZoneRuntime {
                 return Vec::new();
             }
             target.hp = target.hp.saturating_sub(damage).max(1);
+            target.last_damaged_at_ms = now_ms;
             let poison = if let Some(status) = status {
                 if target.native_status_poison != 0 {
                     target.poison &= !target.native_status_poison;
@@ -6294,9 +6493,20 @@ impl ZoneRuntime {
         if self.collision.is_blocked(point) || self.occupancy.contains_key(&tile_key(point)) {
             return false;
         }
-        !self.objects.values().any(|object| {
+        if self.objects.values().any(|object| {
             object.object_id != object_id && retained_zone_object_blocks_tile(object, point)
-        })
+        }) {
+            return false;
+        }
+        !self
+            .native_monsters
+            .iter()
+            .any(|(other_object_id, monster)| {
+                *other_object_id != object_id
+                    && !monster.dead
+                    && monster.hp > 0
+                    && monster.position == *point
+            })
     }
 
     fn native_monster_visible_recipients(
@@ -8145,6 +8355,10 @@ impl ZoneRuntime {
     }
 }
 
+fn zone_native_monster_requires_harvest(ai: u8) -> bool {
+    matches!(ai, 1 | 2 | 7 | 9 | 28 | 35)
+}
+
 fn tile_key(point: &Point) -> (i32, i32) {
     (point.x, point.y)
 }
@@ -8488,6 +8702,77 @@ fn qa_natural_kill_damage_multiplier() -> i32 {
             .ok()
             .as_deref(),
     )
+}
+
+#[cfg(test)]
+mod player_vital_regen_tests {
+    use super::*;
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn joined_zone(hp: i32, max_hp: i32) -> (ZoneRuntime, SessionId) {
+        let session_id = SessionId::new("regen-player");
+        let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: "regen-account".to_string(),
+            character_index: 0,
+            object_id: 7,
+            name: "Regen".to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 13,
+            hp,
+            max_hp,
+            mp: 10,
+            map_file_name: "0".to_string(),
+            position: Point { x: 10, y: 10 },
+            direction: MirDirection::Down,
+            chat_profile: Default::default(),
+            combat_stats: Default::default(),
+        }));
+        (zone, session_id)
+    }
+
+    #[test]
+    fn shared_zone_regenerates_hp_on_crystal_cadence_after_combat_delay() {
+        let (mut zone, session_id) = joined_zone(40, 100);
+
+        // The first cadence observation arms the timer; it does not grant a
+        // free pulse just because the session joined a new map.
+        assert!(zone
+            .tick(1_000)
+            .iter()
+            .all(|outbound| !matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+        assert_eq!(zone.player_vitals(&session_id), Some((40, 100, 10)));
+        assert!(zone
+            .tick(3_999)
+            .iter()
+            .all(|outbound| !matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+
+        let pulse = zone.tick(4_000);
+        assert_eq!(zone.player_vitals(&session_id), Some((44, 100, 10)));
+        assert!(pulse.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::PlayerHealed {
+                session_id: healed_session_id,
+                amount: 4,
+            } if healed_session_id == &session_id
+        )));
+
+        let player = zone.players.get_mut(&session_id).expect("joined player");
+        player.hp = 30;
+        player.last_damaged_at_ms = 5_000;
+        player.last_regen_at_ms = 4_000;
+        assert!(zone
+            .tick(7_999)
+            .iter()
+            .all(|outbound| !matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+        let after_delay = zone.tick(8_000);
+        assert_eq!(zone.player_vitals(&session_id), Some((34, 100, 10)));
+        assert!(after_delay
+            .iter()
+            .any(|outbound| matches!(outbound, ZoneOutbound::PlayerHealed { amount: 4, .. })));
+    }
 }
 
 #[cfg(test)]
@@ -9789,6 +10074,7 @@ mod group_experience_tests {
     fn test_award(experience: u32) -> ZoneMonsterKillAward {
         ZoneMonsterKillAward {
             monster_object_id: 9001,
+            killed_at_ms: 1_000,
             monster_name: "Test Monster".to_string(),
             experience,
             drops: Vec::new(),

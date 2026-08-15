@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest staged Quest Agent acceptance sync: 2026-08-15 fixes the StartGame
+> saved-transform regression found by the full acceptance gate. Recovery now
+> validates a durable position against authoritative full-map collision rather
+> than the active starter window, preserving valid Bichon field coordinates
+> while still repairing the legacy mismatched-map town-revive save. Verification
+> passed the full Simulation package (`vertical_slice` 8/8), Gateway library
+> 451 passed with 1 ignored, Quest Agent 163/163, typecheck, syntax, fmt, and
+> diff checks. This supports staged acceptance of the real-client framework and
+> Warrior q1-q9 only; contiguous Warrior and three-class 1-50 remain open.
+
 > Latest production-login observability sync: 2026-08-12 adds operational
 > regression coverage for the remote Zone bootstrap and durable World Director
 > checkpoint paths without changing Crystal gameplay or packet semantics. Zone

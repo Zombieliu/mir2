@@ -5,7 +5,7 @@ use mir2_game_data::{
 };
 use mir2_protocol::{crystal_stat_label, ClientBuff, ServerPacket, UserItemStat};
 
-use super::components::{hero_entity, player_entity, PlayerVitals};
+use super::components::{current_player_is_dead, hero_entity, player_entity, PlayerVitals};
 use super::crystal_compat::*;
 use super::items::{crystal_item_stat_value, user_item_stat_total};
 use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};
@@ -417,6 +417,14 @@ pub(super) fn tick_crystal_normal_potion_restore(
     world: &mut World,
     packets: &mut Vec<ServerPacket>,
 ) {
+    // Crystal HumanObject.ProcessRegen returns immediately while Dead, before
+    // consuming PotHealthAmount/PotManaAmount. Without this guard a potion
+    // queued just before lethal damage ticks HP from 0 to 10, which silently
+    // clears the simulation's HP-derived death state and revives the player in
+    // the field without TownRevive or an ObjectRevived packet.
+    if current_player_is_dead(world) {
+        return;
+    }
     let (hp_tick, mp_tick) = {
         let mut recovery = world.resource_mut::<PotionRecoveryResource>();
         let hp_tick = recovery.pending_pot_health_amount.min(10);
@@ -450,6 +458,13 @@ pub(super) fn tick_crystal_normal_hero_potion_restore(
     let Some(hero) = hero_entity(world) else {
         return;
     };
+    if world
+        .entity(hero)
+        .get::<PlayerVitals>()
+        .is_none_or(|vitals| vitals.hp <= 0)
+    {
+        return;
+    }
     let (hp_tick, mp_tick) = {
         let mut recovery = world.resource_mut::<PotionRecoveryResource>();
         let hp_tick = recovery.hero_pending_pot_health_amount.min(10);

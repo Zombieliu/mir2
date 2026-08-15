@@ -60,6 +60,8 @@ export type OriginalMapCell = {
   lightOffsetX?: number;
   lightOffsetY?: number;
   blocked?: boolean;
+  /** Crystal map door group for this cell. Zero/absent means no door. */
+  doorIndex?: number;
   closedDoor?: boolean;
 };
 

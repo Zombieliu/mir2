@@ -1,5 +1,12 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-08-13 — Autonomous real-client quest Agent
+
+- Goal: build a reusable, auditable Agent that progresses through Mir2 quests with the same visible mouse/keyboard interactions as a human, starting with Warrior q1-q5 on the exact PR #233 head and expanding by evidence-backed bands toward three-class 1-50.
+- Contract: client state, accessible DOM geometry, text rendering, and WebSocket frames are read-only observation surfaces. Direct quest/map/GM/QA commands, DOM value mutation, and synthetic DOM clicks are forbidden and audited statically and at runtime.
+- Implemented so far: deterministic q1-q5 policy, CDP real-input driver, visible account/Warrior creation, normal navigation/NPC/dialog/combat/harvest/equip/potion/death/reconnect actions, evidence capture, and manifest/shortcut tests.
+- Current verification: `npm run test:quest-agent` passes 5/5 from `apps/web`; isolated live Gateway and browser route verification are in progress. Do not treat this entry as q1-q5 or 1-50 completion until the real-client certificate is green.
+
 ## 2026-08-06 — Repository slimming Phase 1
 
 - Goal: remove reproducible runtime binaries and run-specific QA evidence from the current Git tree without breaking local, Vercel, or itch delivery; preserve all removed evidence outside Git objects before deletion.
@@ -541,3 +548,91 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
 - `assets:r2:dry-run` passed for that exact manifest: 40,945 upload objects
   (40,944 assets plus the release manifest), 246,617,356 bytes, driver `r2-s3`,
   and the expected immutable object prefix. No R2 write was performed.
+
+## 2026-08-14 autonomous quest Agent q28 and full-route static closure
+
+- The resumed Warrior real-client chain now completes q1-q9 and q22-q28 with
+  visible mouse/keyboard input and no quest, map, item, GM, QA, or Stage 5
+  shortcut. The q28 objective run reached 10/10 through real SpittingSpider
+  combat/harvest and exercised death/revive, potion use, and field switching.
+  Its final resumed turn-in covered visible selling/restocking, more than 300
+  tiles of movement, and Samuel dialogue: 1/1 goal, 1,093,304 ms, 603 inputs,
+  zero shortcut violations, final q28 `completed`, level 15.
+- Profile v24 adds the physical Waste Lands/Red Cavern chain, the missing Red
+  Valley side rooms and Great Tao Tomb, imported q138/q139 monsters, and an
+  audited q148 Q-drop repair. The task text names real `RedEvilApe`, while Jev
+  binds `RedMoonChip` to unspawned `RedMoonEvil1`; the repair is scoped to a
+  real `RedEvilApe` death on `D10053` and remains inactive without q148.
+- Runtime route auditing now checks the start and finish NPC script as well as
+  its map. That exposed 44 genuine quest endpoints previously filtered by the
+  profile; all are explicitly allow-listed on their existing reachable maps.
+  No admin/GM/general teleport script was enabled.
+- Generated Warrior, Wizard, and Taoist routes each contain 140 quests through
+  level 50 with zero blockers in the 1-7, 8-21, 22-35, and 36-50 bands. This is
+  static readiness, not live three-class completion; sequential acceptance
+  resumes at q29.
+- Focused gates pass: Quest Agent 120/120, game-data 33/33, Platinum content
+  loop 3/3, q135 visible reward/script integration 1/1, respawn integration
+  2/2, Rust formatting, and diff whitespace. The q28 browser report still
+  records unresolved item/scene raster 404s as a separate presentation finding.
+
+## 2026-08-15 Quest Agent staged acceptance, long-grind A/B, and recovery
+
+- PR #235 remains a staged foundation plus Warrior q1-q9 acceptance candidate,
+  not a Warrior/Wizard/Taoist 1-50 completion. The authoritative resumed state
+  is level 14: q22-q24, q28, and q29 complete; q25 remains 6/20, q26/q27 are
+  still locked in that snapshot, and q30 remains 0/1.
+- The two-day wall-clock soak contains 45 finalized development reports and
+  39,401,509 ms (10 h 56 m 41 s) of browser-active work: 20,572 physical
+  inputs, 257 historical kill rows, 10 deaths, 9 completed revives, and zero
+  shortcut violations. r44 contains one proven duplicate target-id row, so the
+  raw kill-row aggregate is not a unique-kill certificate. The soak spans
+  revisions and is endurance evidence, not a contiguous passing certificate.
+- r38 established the old-policy baseline. Review then found that long grind
+  selection charged the complete same-map field walk to every future kill,
+  repeatedly preferring low-yield village-edge monsters despite more than
+  20,000 EXP remaining. The first suspected `playerLevel` field mismatch was
+  explicitly ruled out before changing code.
+- `ab3582ed3` amortizes one physical trip over at most 20 expected kills while
+  keeping the original short-grind locality rule and the completed-quest combat
+  certification gate. Its new regression test failed before the patch and the
+  full Quest Agent gate passed 164/164 after it.
+- r39 resumed the same persisted character, selected SpittingSpider instead of
+  RakingCat, walked from `(330,575)` to the real far-field spawn using ordinary
+  collision-routed inputs, and completed two kills for authoritative EXP
+  `9,017 -> 9,449`. The 902,380 ms run used 462 inputs and ended on its explicit
+  runtime budget during goal 3 with zero deaths, shortcut violations, critical
+  console errors, or critical network failures. q25 remains open; this proves
+  the throughput fix, not task completion.
+- r40 added the necessary sustainability counterexample: one more ordinary
+  SpittingSpider goal advanced EXP `9,449 -> 9,881`, but the next dense-field
+  approach exhausted HP drugs and exposed a deterministic shelter-escape abort
+  at 9/135 HP with zero stock.
+- `4e1cdaffe` keeps the combat-resource budget for sustainable travel but lets
+  an already depleted escape continue through ordinary movement until visible
+  shelter arrival or authoritative death/revive. The new red/green policy and
+  executable-source contracts bring the full Quest Agent gate to 165/165;
+  Node syntax and whitespace checks pass.
+- r41-r43 close that regression through resumable real-client evidence: r41
+  moved for 600,823 ms and recovered to 134/135 HP; r42 reached the merchant
+  district, entered the visible shelter while pursued, and returned; r43
+  interacted with Ruben and visibly bought 10 HP drugs, changing stock `0 ->
+  10` and gold `548 -> 148`, before a clean supervised stop during the next
+  grind. The four new reports add 1,381,150 ms, 809 inputs, one kill, one shop
+  purchase, and no shortcut violation or critical browser/network diagnostic.
+- r44 advanced EXP `9,881 -> 11,177`, but audit rejected its nominal four-kill
+  count because goal rows 1 and 2 both selected object id `202215`; a retained
+  stale corpse and delayed EXP split one death across two apparent goals. Its
+  honest evidence is three distinct target ids, 900,323 ms, 443 inputs, and no
+  shortcut violation or critical browser/network diagnostic.
+- `d35415c16` retains target-specifically confirmed deaths across goals and
+  resume reports. A stale actor remains ineligible until the complete AOI first
+  observes it absent and then sees the id return with definite positive HP.
+  Four red/green policy and executable-source contracts raise the complete
+  Quest Agent gate to 169/169; Node syntax and whitespace checks pass.
+- r45 replayed the exact field with old corpses `202213` and `202205` still
+  visible, skipped both, and completed six goals against six new object ids.
+  The 308,963 ms report advanced EXP `11,177 -> 13,553` with 161 physical
+  inputs, zero deaths, potion uses, shortcut violations, or critical
+  browser/network failures. This closes duplicate-corpse accounting, while
+  Warrior level 15, q25, and q30 remain open.

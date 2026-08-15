@@ -8,10 +8,8 @@ use argon2::{
 use sha2::{Digest, Sha256};
 
 use bevy_ecs::prelude::World;
-use mir2_game_data::{
-    crystal_quest_packet_payloads, format_localized_text, localized_text_or_fallback,
-};
-use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket, ServerPacketId};
+use mir2_game_data::{format_localized_text, localized_text_or_fallback};
+use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
@@ -31,11 +29,11 @@ use super::inventory::{
 };
 use super::map::{
     clear_non_player_world_entities, rebuild_world, refresh_runtime_map_collision,
-    should_use_crystal_current_map_world, spawn_config_visible_npcs,
-    spawn_visible_world_for_current_map,
+    runtime_world_map_collision_data, should_use_crystal_current_map_world,
+    spawn_config_visible_npcs, spawn_visible_world_for_current_map,
 };
 use super::packets::*;
-use super::quests::QuestState;
+use super::quests::{effective_crystal_quest_info_packets, QuestState};
 use super::resources::{
     current_language, runtime_tick, set_runtime_tick, BuffResource, HeroInventoryResource,
     InventoryResource, ItemRentalResource, MapRuntimeResource, NpcStateResource,
@@ -1224,6 +1222,39 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     world.resource_mut::<ObjectIdAllocatorResource>().reset();
 }
 
+/// A durable transform must belong to its durable map. Older builds could save
+/// a town-revive position while retaining the field map name, which leaves the
+/// player outside that map's collision bounds on the next StartGame. Validate
+/// against the authoritative full-map collision rather than the active starter
+/// window, so ordinary Bichon field positions are not mistaken for corruption.
+fn recover_out_of_bounds_loaded_transform(world: &mut World) -> bool {
+    let position = world
+        .resource::<PlayerRuntimeResource>()
+        .player_position
+        .clone();
+    let current_map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let Some(collision) = runtime_world_map_collision_data(&current_map_file_name) else {
+        return false;
+    };
+    let bounds = collision.collision.region_bounds;
+    if super::movement::point_in_bounds(&bounds, &position) {
+        return false;
+    }
+
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    world.resource_mut::<MapRuntimeResource>().current_map = config.map;
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_position = config.spawn;
+        runtime.player_direction = MirDirection::Down;
+    }
+    true
+}
+
 impl SimulationSession {
     pub fn delete_character(&mut self, character_index: i32) -> Vec<ServerPacket> {
         self.handle_packet(ClientPacket::DeleteCharacter { character_index })
@@ -1313,6 +1344,9 @@ impl SimulationSession {
             apply_character_save(self.app.world_mut(), &save);
         }
         refresh_runtime_map_collision(self.app.world_mut());
+        if recover_out_of_bounds_loaded_transform(self.app.world_mut()) {
+            refresh_runtime_map_collision(self.app.world_mut());
+        }
         refresh_storage_password_state(self.app.world_mut());
         rebuild_world(self.app.world_mut());
         if should_use_crystal_current_map_world(self.app.world()) {
@@ -1406,11 +1440,7 @@ impl SimulationSession {
                 ),
             },
         ]);
-        packets.extend(
-            crystal_quest_packet_payloads()
-                .into_iter()
-                .map(|payload| decode_crystal_payload(ServerPacketId::NewQuestInfo, payload)),
-        );
+        packets.extend(effective_crystal_quest_info_packets(self.app.world()));
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
         packets.extend(start_game_account_social_and_shop_packets());
         packets.extend(start_game_base_stats_packet(character.class));
@@ -1418,7 +1448,7 @@ impl SimulationSession {
             &map.current_map.file_name,
             &player_runtime.player_position,
             &character,
-            config.monster_spawn_source,
+            &config,
         ));
         if resources.storage_size != BASE_STORAGE_SLOTS
             || resources.has_expanded_storage

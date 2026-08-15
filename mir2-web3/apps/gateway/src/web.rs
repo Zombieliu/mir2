@@ -6482,6 +6482,48 @@ fn user_item_summary_json(item: &UserItem) -> Value {
     Value::Object(entry)
 }
 
+/// Resolves an NPC goods wire item into the browser shop contract while
+/// retaining every raw `UserItem` field for protocol diagnostics. Crystal's
+/// wire payload only carries `item_index`; the native client joins that against
+/// its item database before drawing the shop. The web client needs the same
+/// name/icon/unit-price join at the gateway boundary.
+fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
+    let mut entry = serde_json::to_value(item)
+        .ok()
+        .and_then(|value| value.as_object().cloned())
+        .unwrap_or_default();
+    entry.insert("id".into(), json!(item.unique_id));
+    entry.insert("uniqueId".into(), json!(item.unique_id));
+    entry.insert("itemIndex".into(), json!(item.item_index));
+    entry.insert("count".into(), json!(item.count));
+
+    if let Some(template) = crystal_item_by_index(item.item_index) {
+        entry.insert("name".into(), json!(template.name));
+        entry.insert("icon".into(), json!(template.image));
+        entry.insert(
+            "price".into(),
+            json!(((template.price as f32) * rate).floor() as u32),
+        );
+        entry.insert("grade".into(), json!(template.grade));
+        if let Some(description) = template.tooltip.filter(|value| !value.trim().is_empty()) {
+            entry.insert("description".into(), json!(description));
+        }
+    } else {
+        entry.insert("name".into(), json!(format!("Item #{}", item.item_index)));
+        entry.insert("icon".into(), json!(0));
+        entry.insert("price".into(), json!(0));
+    }
+    Value::Object(entry)
+}
+
+fn npc_goods_list_json(list: &[UserItem], rate: f32) -> Value {
+    Value::Array(
+        list.iter()
+            .map(|item| npc_goods_item_json(item, rate))
+            .collect(),
+    )
+}
+
 /// Maps a `Vec<Option<UserItem>>` trade payload into the contract item array,
 /// skipping the empty trade slots (Crystal `TradeItem` sends a fixed-length
 /// array with `null` holes — see `Crystal/Shared/ServerPackets.cs:1944-1972`).
@@ -6566,8 +6608,25 @@ fn quest_objective_json(line: &str) -> Value {
     if let Some((current, required)) = parse_progress_fraction(line) {
         entry.insert("current".into(), json!(current));
         entry.insert("required".into(), json!(required));
+        entry.insert("done".into(), json!(current >= required));
     }
     Value::Object(entry)
+}
+
+/// Aggregates a fully structured Crystal task list for browser clients. Some
+/// quests use prose-only task lines, so totals are only emitted when every
+/// non-empty line carries an explicit progress fraction.
+fn quest_progress_totals(task_list: &[String]) -> Option<(u32, u32)> {
+    let mut current = 0_u32;
+    let mut required = 0_u32;
+    let mut saw_progress = false;
+    for line in task_list.iter().filter(|line| !line.trim().is_empty()) {
+        let (task_current, task_required) = parse_progress_fraction(line)?;
+        current = current.saturating_add(task_current.min(task_required));
+        required = required.saturating_add(task_required);
+        saw_progress = true;
+    }
+    saw_progress.then_some((current, required))
 }
 
 /// Extracts the last `current/required` integer fraction from a task line, if
@@ -7078,7 +7137,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "type": "packet",
             "packet": "NPCGoods",
             "payload": {
-                "list": list,
+                "list": npc_goods_list_json(list, *rate),
                 "rate": rate,
                 "panelType": panel_type,
                 "hideAddedStats": hide_added_stats
@@ -8933,25 +8992,30 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             new,
             quest_state,
             track_quest,
-        } => json!({
-            "type": "packet",
-            "packet": "ChangeQuest",
-            "payload": {
-                "questId": quest_id,
-                "id": quest_id,
-                "taskList": task_list,
-                "state": quest_state,
-                "descriptionLines": task_list,
-                "objectives": Value::Array(
-                    task_list.iter().map(|line| quest_objective_json(line)).collect()
-                ),
-                "taken": taken,
-                "completed": completed,
-                "new": new,
-                "questState": quest_state,
-                "trackQuest": track_quest
-            }
-        }),
+        } => {
+            let progress = quest_progress_totals(task_list);
+            json!({
+                "type": "packet",
+                "packet": "ChangeQuest",
+                "payload": {
+                    "questId": quest_id,
+                    "id": quest_id,
+                    "taskList": task_list,
+                    "state": quest_state,
+                    "descriptionLines": task_list,
+                    "objectives": Value::Array(
+                        task_list.iter().map(|line| quest_objective_json(line)).collect()
+                    ),
+                    "current": progress.map(|(current, _)| current),
+                    "required": progress.map(|(_, required)| required),
+                    "taken": taken,
+                    "completed": completed,
+                    "new": new,
+                    "questState": quest_state,
+                    "trackQuest": track_quest
+                }
+            })
+        }
         ServerPacket::CompleteQuest { completed_quests } => json!({
             "type": "packet",
             "packet": "CompleteQuest",
@@ -9173,12 +9237,14 @@ mod tests {
     };
     use axum::extract::State;
     use axum::Json;
+    use mir2_game_data::{crystal_quest_packet_manifest, crystal_quest_packet_payloads};
     use mir2_protocol::{
-        ClientAuction, ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature,
-        ClientMail, ClientMapInfo, ClientPacket, ClientQuestInfo, GroupMember,
-        IntelligentCreatureItemFilter, IntelligentCreatureRules, MapInformation, MirClass,
-        MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, RankCharacterInfo, SelectInfo,
-        ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat, UserLocation,
+        decode_server_packet, encode_frame, ClientAuction, ClientBuff, ClientFriend,
+        ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientMapInfo, ClientPacket,
+        ClientQuestInfo, GroupMember, IntelligentCreatureItemFilter, IntelligentCreatureRules,
+        MapInformation, MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo, Point,
+        RankCharacterInfo, SelectInfo, ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
+        UserLocation,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
@@ -9212,7 +9278,7 @@ mod tests {
         assert_eq!(event["type"], "realmInfo");
         assert_eq!(event["payload"]["schema"], "mir2-realm-handshake/1");
         assert_eq!(event["payload"]["profileId"], "platinum_176");
-        assert_eq!(event["payload"]["profileVersion"], 6);
+        assert_eq!(event["payload"]["profileVersion"], 24);
         assert_eq!(event["payload"]["acceptanceLevel"], 50);
         assert_eq!(
             event["payload"]["ratePolicy"]["monsterExperienceTiers"][0]["multiplier"],
@@ -9997,8 +10063,10 @@ mod tests {
 
     #[test]
     fn npc_service_server_events_expose_crystal_payload_fields() {
+        let mut hp_drug = sample_user_item(43_122_689, 1);
+        hp_drug.item_index = 658;
         let goods = super::server_packet_to_event(&ServerPacket::NPCGoods {
-            list: Vec::new(),
+            list: vec![hp_drug],
             rate: 1.25,
             panel_type: 3,
             hide_added_stats: true,
@@ -10007,6 +10075,12 @@ mod tests {
         assert_eq!(goods["payload"]["rate"], 1.25);
         assert_eq!(goods["payload"]["panelType"], 3);
         assert_eq!(goods["payload"]["hideAddedStats"], true);
+        assert_eq!(goods["payload"]["list"][0]["id"], 43_122_689_u64);
+        assert_eq!(goods["payload"]["list"][0]["itemIndex"], 658);
+        assert_eq!(goods["payload"]["list"][0]["name"], "(HP)DrugSmall");
+        assert_eq!(goods["payload"]["list"][0]["icon"], 398);
+        assert_eq!(goods["payload"]["list"][0]["price"], 50);
+        assert_eq!(goods["payload"]["list"][0]["item_index"], 658);
 
         let repair = super::server_packet_to_event(&ServerPacket::NPCRepair { rate: 1.5 });
         assert_eq!(repair["packet"], "NPCRepair");
@@ -10664,6 +10738,26 @@ mod tests {
         assert_eq!(objective["text"], "Collect Wasp Stinger 0/1");
         assert_eq!(objective["current"], 0);
         assert_eq!(objective["required"], 1);
+        assert_eq!(objective["done"], false);
+        assert_eq!(change["payload"]["current"], 0);
+        assert_eq!(change["payload"]["required"], 1);
+
+        let multi_task = super::server_packet_to_event(&ServerPacket::ChangeQuest {
+            quest_id: 1002,
+            task_list: vec![
+                "Kill Deer 10/10".to_string(),
+                "Kill Scarecrow 9/10".to_string(),
+            ],
+            taken: true,
+            completed: false,
+            new: false,
+            quest_state: 1,
+            track_quest: false,
+        });
+        assert_eq!(multi_task["payload"]["current"], 19);
+        assert_eq!(multi_task["payload"]["required"], 20);
+        assert_eq!(multi_task["payload"]["objectives"][0]["done"], true);
+        assert_eq!(multi_task["payload"]["objectives"][1]["done"], false);
 
         let complete = super::server_packet_to_event(&ServerPacket::CompleteQuest {
             completed_quests: vec![1001],
@@ -10799,6 +10893,39 @@ mod tests {
         assert_eq!(info["payload"]["timeLimit"], "01:30");
         // npc (a name) is omitted because only NPCIndex is known here.
         assert!(info["payload"].get("npc").is_none());
+    }
+
+    #[test]
+    fn q23_quest_info_event_exposes_all_selectable_rewards() {
+        let manifest = crystal_quest_packet_manifest();
+        let payloads = crystal_quest_packet_payloads();
+        let (template, payload) = manifest
+            .quests
+            .iter()
+            .zip(payloads.iter())
+            .find(|(template, _)| template.index == 23)
+            .expect("Crystal q23 packet");
+        let frame =
+            encode_frame(ServerPacketId::NewQuestInfo as i16, payload).expect("q23 frame encodes");
+        let packet = decode_server_packet(&frame).expect("q23 frame decodes");
+        let event = super::server_packet_to_event(&packet);
+
+        assert_eq!(template.name, "!Attack Oma");
+        assert_eq!(
+            event["payload"]["rewards"]["selectItems"]
+                .as_array()
+                .expect("selectable rewards")
+                .len(),
+            3
+        );
+        assert_eq!(
+            event["payload"]["rewards"]["selectItems"][0]["name"],
+            "BronzeShortSword"
+        );
+        assert_eq!(
+            event["payload"]["rewards"]["selectItems"][0]["selectionIndex"],
+            0
+        );
     }
 
     #[test]

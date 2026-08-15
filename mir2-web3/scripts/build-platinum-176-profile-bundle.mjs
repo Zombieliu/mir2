@@ -72,7 +72,10 @@ const bundle = {
     items: profile.itemWhitelist.length,
     skills: profile.skills.length,
     npcScripts: profile.npcScriptWhitelist.length,
+    respawnOverrides: profile.respawnOverrides.length,
     dropOverrides: profile.dropOverrides.length,
+    questPrerequisiteOverrides: profile.questPrerequisiteOverrides.length,
+    questRewardOverrides: profile.questRewardOverrides.length,
   },
 };
 

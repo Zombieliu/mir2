@@ -76,16 +76,16 @@ pub(super) fn harvest_target_in_direction(
     let player_object_id = entity_object_id(world, player)?;
     let player_position = entity_position(world, player)?;
     let front = offset_point(&player_position, direction, 1);
-    let bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
     let mut owner_blocked = false;
 
     for distance in 0..=1 {
         for y in (front.y - distance)..=(front.y + distance) {
             for x in harvest_scan_x_values(front.x, front.y, y, distance) {
                 let point = Point { x, y };
-                if !point_in_bounds(&bounds, &point) || is_blocked_tile(world, &point) {
-                    continue;
-                }
+                // A shared-Zone corpse can be authoritative while its tile is
+                // outside the personal Session's collision preload (or on a
+                // blocking prop edge). Harvest the adjacent entity, not the
+                // personal terrain window; the scan itself is range-bounded.
                 for entity in harvestable_carcasses_at(world, &point) {
                     if harvest_ownership_allows(world, entity, player_object_id) {
                         return Some(HarvestTargetSelection::Target(entity));
@@ -229,6 +229,11 @@ pub(super) fn resolved_monster_drop_templates(
     monster_name: &str,
 ) -> Vec<ResolvedDropTemplate> {
     let current_tick = runtime_tick(world);
+    let current_map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
     let config = &world.resource::<RuntimeConfigResource>().config;
     let profile_drop_multiplier = config
         .content_profile
@@ -253,6 +258,7 @@ pub(super) fn resolved_monster_drop_templates(
         ));
         drops.extend(content_profile_monster_drop_templates(
             config,
+            Some(&current_map_file_name),
             monster_object_id,
             monster_name,
             sample_tick,
@@ -269,13 +275,26 @@ pub(super) fn resolved_monster_drop_templates(
         .into_iter()
         .filter(|drop| match drop {
             ResolvedDropTemplate::Gold { .. } => true,
-            ResolvedDropTemplate::Item { name, .. } => config.item_is_allowed(name),
+            // Imported Crystal `Q` drops are not normal economy loot. They are
+            // consumed by `try_gain_crystal_quest_drop`, which independently
+            // requires an active matching quest and stores the item in the
+            // quest-only container. Content profiles intentionally whitelist
+            // player-usable equipment/consumables, so filtering Q items through
+            // that list makes otherwise allowed quest chains impossible (for
+            // example platinum_176 q2 can spawn Scarecrows but GingerTea is not
+            // a usable-item whitelist entry).
+            ResolvedDropTemplate::Item {
+                name,
+                quest_required,
+                ..
+            } => *quest_required || config.item_is_allowed(name),
         })
         .collect()
 }
 
 pub(super) fn content_profile_monster_drop_templates(
     config: &SimulationConfig,
+    map_file_name: Option<&str>,
     monster_object_id: u32,
     monster_name: &str,
     current_tick: u64,
@@ -290,18 +309,29 @@ pub(super) fn content_profile_monster_drop_templates(
         .iter()
         .enumerate()
         .filter(|(_, rule)| rule.monster.eq_ignore_ascii_case(monster_name))
+        .filter(|(_, rule)| {
+            rule.map_file_name.as_deref().is_none_or(|required_map| {
+                map_file_name.is_some_and(|current_map| {
+                    normalize_map_file_name(current_map) == normalize_map_file_name(required_map)
+                })
+            })
+        })
         .filter_map(|(index, rule)| {
+            let quest_modifier = rule.quest_required.then_some("Q".to_string());
             let entry = CrystalDropEntry {
                 raw_line: format!(
-                    "{}/{} {}",
-                    rule.chance_numerator, rule.chance_denominator, rule.item
+                    "{}/{} {}{}",
+                    rule.chance_numerator,
+                    rule.chance_denominator,
+                    rule.item,
+                    if rule.quest_required { " Q" } else { "" }
                 ),
                 chance_raw: format!("{}/{}", rule.chance_numerator, rule.chance_denominator),
                 chance_numerator: Some(rule.chance_numerator),
                 chance_denominator: Some(rule.chance_denominator),
                 item_name: rule.item.clone(),
                 amount: None,
-                modifiers: Vec::new(),
+                modifiers: quest_modifier.into_iter().collect(),
                 group: None,
             };
             crystal_attempt_drop_entry(
@@ -2966,12 +2996,14 @@ impl SimulationSession {
             GroundDropLootSnapshot::Gold { amount } => {
                 can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount)
             }
-            GroundDropLootSnapshot::InventoryItem { key, .. } => can_gain_item_quantity(
-                world.resource::<InventoryResource>(),
-                ItemContainer::Bag1,
-                key,
-                drop.quantity,
-            ),
+            GroundDropLootSnapshot::InventoryItem { key, .. } => {
+                can_gain_item_quantity(
+                    world.resource::<InventoryResource>(),
+                    ItemContainer::Bag1,
+                    key,
+                    drop.quantity,
+                ) || crystal_quest_item_task_drop(world, key, &drop.name, drop.quantity).is_some()
+            }
         }
     }
 
@@ -3005,17 +3037,54 @@ impl SimulationSession {
         }
 
         let mut packets = advance_crystal_quest_kill(world, monster_name);
-        if monster_object_id == FIELD_WASP_ID && !current_map_disallows_monster_drop(world) {
-            let quest = guide_quest_template();
-            let _ = try_gain_crystal_quest_drop(
-                world,
-                &quest.quest_item.key,
-                &quest.quest_item.name,
-                quest.quest_item.quantity,
-                None,
-                None,
-                &mut packets,
-            );
+        if !current_map_disallows_monster_drop(world) {
+            if monster_object_id == FIELD_WASP_ID {
+                let quest = guide_quest_template();
+                let _ = try_gain_crystal_quest_drop(
+                    world,
+                    &quest.quest_item.key,
+                    &quest.quest_item.name,
+                    quest.quest_item.quantity,
+                    None,
+                    None,
+                    &mut packets,
+                );
+            }
+
+            let harvests_drops = crystal_monster_by_name(monster_name)
+                .and_then(|monster| initial_harvest_monster_state(monster.ai))
+                .is_some();
+            if !harvests_drops {
+                // The shared Zone owns ordinary ground drops, but Crystal `Q`
+                // death drops never become ground objects: they are routed
+                // straight into the eligible player's quest bag and advance
+                // the item task. Harvest monsters are deliberately excluded;
+                // their Q entries remain on the explicit corpse-harvest path.
+                for drop in resolved_monster_drop_templates(world, monster_object_id, monster_name)
+                {
+                    let ResolvedDropTemplate::Item {
+                        key,
+                        name,
+                        quantity,
+                        durability_current,
+                        durability_max,
+                        quest_required: true,
+                        ..
+                    } = drop
+                    else {
+                        continue;
+                    };
+                    let _ = try_gain_crystal_quest_drop(
+                        world,
+                        &key,
+                        &name,
+                        quantity,
+                        durability_current,
+                        durability_max,
+                        &mut packets,
+                    );
+                }
+            }
         }
         if experience > 0 {
             let player_level = super::leveling::player_current_level(world);
@@ -3084,6 +3153,57 @@ impl SimulationSession {
                 socket_slots,
                 show_group_pickup,
             } => {
+                // Shared Zone drops must preserve the same quest-item routing
+                // as the personal-session pickup path. An ordinary Crystal
+                // ground drop (for example CannibalLeaf) may simultaneously
+                // satisfy an active item task even though it lacks the `Q`
+                // modifier. Route that pickup into the quest bag and advance
+                // the task before considering the ordinary bag transaction.
+                if let Some(task_drop) =
+                    crystal_quest_item_task_drop(world, key, name, drop.quantity)
+                {
+                    let gained_item = add_or_increment_item_with_durability(
+                        world,
+                        ItemContainer::Quest,
+                        &task_drop.item_key,
+                        &task_drop.item_name,
+                        &task_drop.description,
+                        0,
+                        drop.quantity,
+                        task_drop.weight,
+                        *durability_current,
+                        *durability_max,
+                    );
+                    let mut packets = vec![
+                        ServerPacket::GainedItem {
+                            item: user_item_from_item_state(&gained_item),
+                        },
+                        system_message_key_args(
+                            world,
+                            "server.YouFound",
+                            [localized_item_name(
+                                current_language(world),
+                                &task_drop.item_key,
+                                &task_drop.item_name,
+                            )],
+                        ),
+                    ];
+                    if advance_crystal_quest_item_task(
+                        world,
+                        task_drop.quest_id,
+                        &task_drop.task_key,
+                        drop.quantity.min(task_drop.required).max(1),
+                    ) {
+                        if let Some(packet) = crystal_quest_update_packet(world, task_drop.quest_id)
+                        {
+                            packets.push(packet);
+                        }
+                    }
+                    return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                        true, packets,
+                    );
+                }
+
                 {
                     let resources = world.resource::<InventoryResource>();
                     if !can_gain_item_quantity(resources, ItemContainer::Bag1, key, drop.quantity) {

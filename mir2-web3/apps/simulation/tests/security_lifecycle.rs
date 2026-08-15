@@ -1,4 +1,6 @@
-use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket};
+use mir2_protocol::{
+    ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point, ServerPacket,
+};
 use mir2_simulation::{
     reset_account_password_after_recovery, validate_commercial_identity_credentials,
     validate_production_player_command, InProcessWorldRuntime, SessionId, SimulationConfig,
@@ -80,6 +82,233 @@ fn production_player_wrapper_rejects_before_runtime_execution() {
 
     assert!(error.contains("authenticated account"));
     assert!(runtime.active_identity().is_none());
+}
+
+#[test]
+fn town_revive_from_field_changes_to_the_configured_bind_map() {
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let bind_map_file_name = config.map.file_name.clone();
+    let bind_position = config.spawn.clone();
+    let mut runtime = InProcessWorldRuntime::new(config);
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        }))
+        .expect("fixture character should start");
+    runtime
+        .execute(WorldCommand::TransferMap {
+            key: "crystal:2:406:453".to_string(),
+        })
+        .expect("test fixture should enter a non-bind map");
+    assert_eq!(runtime.world_snapshot().map_file_name.as_deref(), Some("2"));
+
+    runtime
+        .execute(WorldCommand::ApplyHandoffTransform {
+            position: Point { x: 406, y: 453 },
+            direction: MirDirection::DownLeft,
+            hp: Some(0),
+            mp: None,
+        })
+        .expect("test fixture should mark the player dead");
+    let packets = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
+        .expect("TownRevive should execute");
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info } if info.file_name == bind_map_file_name
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Revived)));
+    let snapshot = runtime.world_snapshot();
+    let player = snapshot
+        .player_object_id
+        .and_then(|object_id| {
+            snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == object_id)
+        })
+        .expect("revived player should remain present");
+    assert_eq!(
+        snapshot.map_file_name.as_deref(),
+        Some(bind_map_file_name.as_str())
+    );
+    assert_eq!((player.x, player.y), (bind_position.x, bind_position.y));
+    assert!(snapshot.player_hp.is_some_and(|hp| hp > 0));
+}
+
+#[test]
+fn queued_potion_cannot_revive_a_dead_player_before_town_revive() {
+    let config = SimulationConfig::default()
+        .with_crystal_world_runtime()
+        .with_platinum_176_profile();
+    let bind_position = config.spawn.clone();
+    let mut runtime = InProcessWorldRuntime::new(config);
+    runtime
+        .execute(WorldCommand::PasskeyLogin {
+            account_id: "queued-potion-death-lifecycle".to_string(),
+        })
+        .expect("fixture account should authenticate");
+    let created = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::NewCharacter {
+            name: "PotionGuard".to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        }))
+        .expect("fixture character should be created");
+    let character_index = created
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+            _ => None,
+        })
+        .expect("new character response should include its index");
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index,
+        }))
+        .expect("fixture character should start");
+    let potion_unique_id = runtime
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .find(|item| item.name == "(HP)DrugSmall")
+        .map(|item| item.unique_id)
+        .expect("Platinum starter inventory should contain one HP drug");
+    runtime
+        .execute(WorldCommand::ApplyHandoffTransform {
+            position: bind_position.clone(),
+            direction: MirDirection::Down,
+            hp: Some(10),
+            mp: None,
+        })
+        .expect("fixture should lower player HP");
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+            unique_id: potion_unique_id,
+            grid: MirGridType::Inventory,
+        }))
+        .expect("normal HP drug should queue its timed recovery");
+    runtime
+        .execute(WorldCommand::ApplyHandoffTransform {
+            position: bind_position,
+            direction: MirDirection::Down,
+            hp: Some(0),
+            mp: None,
+        })
+        .expect("fixture should mark the player dead after the potion was queued");
+
+    let tick_packets = runtime
+        .execute(WorldCommand::Tick)
+        .expect("dead-player tick should execute");
+
+    assert_eq!(runtime.world_snapshot().player_hp, Some(0));
+    assert!(!tick_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Revived | ServerPacket::ObjectRevived { .. }
+    )));
+    let revive_packets = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
+        .expect("explicit TownRevive should still revive the player");
+    assert!(revive_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Revived)));
+    assert!(runtime.world_snapshot().player_hp.is_some_and(|hp| hp > 0));
+}
+
+#[test]
+fn start_game_preserves_a_valid_full_map_transform_outside_the_starter_window() {
+    let config = SimulationConfig::default();
+    let expected_map_file_name = config.map.file_name.clone();
+    let expected_position = Point { x: 340, y: 550 };
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("test account store should lock");
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("default character save should exist");
+        save.position = expected_position.clone();
+    }
+
+    let mut runtime = InProcessWorldRuntime::new(config);
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        }))
+        .expect("valid full-map save should start");
+
+    let snapshot = runtime.world_snapshot();
+    let player = snapshot
+        .player_object_id
+        .and_then(|object_id| {
+            snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == object_id)
+        })
+        .expect("loaded player should be present");
+    assert_eq!(
+        snapshot.map_file_name.as_deref(),
+        Some(expected_map_file_name.as_str())
+    );
+    assert_eq!(
+        (player.x, player.y),
+        (expected_position.x, expected_position.y)
+    );
+}
+
+#[test]
+fn start_game_recovers_an_out_of_bounds_legacy_revive_transform() {
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let bind_map_file_name = config.map.file_name.clone();
+    let bind_position = config.spawn.clone();
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("test account store should lock");
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("default character save should exist");
+        save.map_file_name = "2".to_string();
+        save.map_title = "SerpentValley".to_string();
+        save.position = Point { x: 288, y: 616 };
+    }
+
+    let mut runtime = InProcessWorldRuntime::new(config);
+    let packets = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        }))
+        .expect("legacy save should still start");
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info } if info.file_name == bind_map_file_name
+    )));
+    let snapshot = runtime.world_snapshot();
+    let player = snapshot
+        .player_object_id
+        .and_then(|object_id| {
+            snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.object_id == object_id)
+        })
+        .expect("recovered player should be present");
+    assert_eq!(
+        snapshot.map_file_name.as_deref(),
+        Some(bind_map_file_name.as_str())
+    );
+    assert_eq!((player.x, player.y), (bind_position.x, bind_position.y));
 }
 
 #[test]
