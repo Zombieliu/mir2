@@ -6078,7 +6078,12 @@ async function travelToMap(
               reachedSafeWaypoint = true;
               break;
             } catch (error) {
-              if (!(error instanceof NavigationUnreachableError)) throw error;
+              // navigateNear has two bounded-unreachable forms: the typed
+              // collision result and its max-attempt "navigation did not
+              // reach" result. Both describe only this optional risk-reducing
+              // waypoint, never the actual visible transfer. Reject the
+              // waypoint and retain the direct portal route in either case.
+              if (!isRetryableVisibleTransferNavigationError(error)) throw error;
               console.log(
                 `  reject unreachable hostile-corridor waypoint: ` +
                 `${corridorWaypoint.x},${corridorWaypoint.y}`,
@@ -6897,9 +6902,16 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
         clearTrivialOccupancy: true,
       });
     } catch (error) {
+      // Resource enforcement is chosen from the state at journey start. A
+      // normal emergency potion can cross that budget while the player is
+      // already travelling to the shelter (live r64: 2 -> 0 potions). Yield
+      // to the outer policy so this function re-reads the authoritative state
+      // and resumes the same visible route with the depleted-escape rule;
+      // treating the transition as fatal strands a living character outdoors.
       if (
         error instanceof NavigationInterruptedByDeathError ||
-        error instanceof SupplyFundingSafetyError
+        error instanceof SupplyFundingSafetyError ||
+        error instanceof CombatResourceBudgetError
       ) return true;
       const recoveredDuringApproach = await readAgentState(client).catch(() => null);
       const recoveredMaxHp = Number(recoveredDuringApproach?.playerMaxHp ?? 0);

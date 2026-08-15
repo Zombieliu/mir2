@@ -1184,6 +1184,22 @@ test("ordinary map transfers use progressive hostile detours and a cumulative tr
   );
 });
 
+test("an optional map hazard waypoint cannot reject an otherwise valid transfer", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const travelBody = runner.slice(
+    runner.indexOf("async function travelToMap("),
+    runner.indexOf("async function ensureVisibleScriptTravelFunding"),
+  );
+  assert.match(
+    travelBody,
+    /navigateNear\(corridorWaypoint, 2,[\s\S]{0,900}catch \(error\) \{[\s\S]{0,700}!isRetryableVisibleTransferNavigationError\(error\)[\s\S]{0,350}reject unreachable hostile-corridor waypoint/,
+  );
+  assert.match(
+    travelBody,
+    /if \(!reachedSafeWaypoint\)[\s\S]{0,300}retaining direct physical route[\s\S]{0,500}if \(!reachedDuringDetour\)[\s\S]{0,220}navigateNear\(target, 0/,
+  );
+});
+
 test("an unreachable optional hazard elbow falls back to the direct respawn field", async () => {
   const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
   assert.match(
@@ -2539,12 +2555,25 @@ test("safe passive recovery accepts authoritative healing completed on the appro
   );
   assert.match(
     recoveryBody,
-    /catch \(error\)[\s\S]{0,1000}recoveredHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO/,
+    /catch \(error\)[\s\S]{0,1500}recoveredHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO/,
   );
   assert.match(recoveryBody, /safe-passive-health-recovered-en-route/);
   assert.match(
     recoveryBody,
     /error instanceof NavigationInterruptedByDeathError \|\|[\s\S]{0,100}error instanceof SupplyFundingSafetyError/,
+  );
+});
+
+test("safe shelter travel re-evaluates a resource budget crossed en route", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const recoveryBody = runner.slice(
+    runner.indexOf("async function recoverHealthInSafeInteriorIfNeeded"),
+    runner.indexOf("async function collectVisibleHealthPotionDropIfNeeded"),
+  );
+  assert.match(
+    recoveryBody,
+    /catch \(error\)[\s\S]{0,800}error instanceof CombatResourceBudgetError[\s\S]{0,120}return true/,
+    "a shelter route that consumes its last potion must resume through the outer recovery loop",
   );
 });
 
