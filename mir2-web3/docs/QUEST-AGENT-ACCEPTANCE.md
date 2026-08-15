@@ -22,8 +22,8 @@ level-1-to-50 playthrough.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `e533efbb36684888081b635859f4dbe0e81e4a4d` (patch-equivalent to clean
-  commit `40ffedcb5`).
+  `e8065e599face64456dece9c9ca4a017433c1730` (patch-equivalent to clean
+  commit `32f5b2f9d`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
   `aa928b99a`. This follow-up adds six code/test commits plus their acceptance
@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 74 finalized development reports
-through `warrior-q30-r75-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 75 finalized development reports
+through `warrior-q30-r76-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 66,012,652 ms (18 h 20 m 12 s) browser-active runtime;
-- 34,633 recorded physical inputs;
+- 66,913,717 ms (18 h 35 m 13 s) browser-active runtime;
+- 35,156 recorded physical inputs;
 - 364 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 13 deaths and 12 completed revives across intentionally interrupted and
+- 14 deaths and 13 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -472,8 +472,30 @@ an unresponsive target is quarantined, while incidental travel clearing can
 rotate after two real attacks over four seconds because it is only trying to
 open one occupied movement tile. No-response is still a failed clear and is
 never counted as a kill. The new unit contract was first red, then passed with
-the full 178/178 Quest Agent gate in both source and clean worktrees. An exact
-r75 patched replay remains required for live closure.
+the full 178/178 Quest Agent gate in both source and clean worktrees. The exact
+r75 patched replay is recorded below.
+
+r76 loaded source `e8065e599` and resumed the exact r75 state. The character
+died normally while trying to clear the initial dense cluster, two visible
+town-revive attempts awaited authoritative acknowledgement, and the recovery
+then completed through ordinary client actions: Merchant Ruben restocked HP
+drugs `0 -> 10` for 400 gold. The agent entered map 0141 and used the visible
+repair services to restore WornIronBracelet durability `0 -> 3739` through
+Merchant Betty and OldCopperRing `778 -> 4699` through Merchant Alice. It then
+left the shelter and crossed the former r74/r75 congestion band without any
+target quarantine. Because no target reached the new four-second quarantine
+branch, this is live closure for exact-state recovery and repair, not direct
+live timing proof of that branch.
+
+The finalized r76 report records 901,065 ms, 523 physical inputs, one
+death/revive, one visible purchase, two visible repairs, zero kills, zero
+target quarantines, zero potion use, zero shortcuts, and zero critical
+browser/network diagnostics. Prior CannibalPlant resource strain correctly
+changed the next preparation goal to level 16. The remaining budget expired
+during the ordinary SpittingSpider walk at map 0 `(316,524)`, with 133/149 HP,
+ten HP drugs, 233 gold, and EXP 7,569/40,000. q25 remains 8/20 and q30 remains
+0/1. The exact start and final frames were visually inspected and match the
+report; the grind goal and quests remain incomplete.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
