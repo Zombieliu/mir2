@@ -575,3 +575,31 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   loop 3/3, q135 visible reward/script integration 1/1, respawn integration
   2/2, Rust formatting, and diff whitespace. The q28 browser report still
   records unresolved item/scene raster 404s as a separate presentation finding.
+
+## 2026-08-15 Quest Agent staged acceptance and long-grind A/B
+
+- PR #235 remains a staged foundation plus Warrior q1-q9 acceptance candidate,
+  not a Warrior/Wizard/Taoist 1-50 completion. The authoritative resumed state
+  is level 14: q22-q24, q28, and q29 complete; q25 remains 6/20, q26/q27 are
+  still locked in that snapshot, and q30 remains 0/1.
+- The two-day wall-clock soak contains 39 finalized development reports and
+  36,811,073 ms (10 h 13 m 31 s) of browser-active work: 19,159 physical
+  inputs, 246 kills, 10 deaths, 9 completed revives, and zero shortcut
+  violations. This aggregate spans revisions and is endurance evidence, not a
+  contiguous passing certificate.
+- r38 established the old-policy baseline. Review then found that long grind
+  selection charged the complete same-map field walk to every future kill,
+  repeatedly preferring low-yield village-edge monsters despite more than
+  20,000 EXP remaining. The first suspected `playerLevel` field mismatch was
+  explicitly ruled out before changing code.
+- `ab3582ed3` amortizes one physical trip over at most 20 expected kills while
+  keeping the original short-grind locality rule and the completed-quest combat
+  certification gate. Its new regression test failed before the patch and the
+  full Quest Agent gate passes 164/164 after it.
+- r39 resumed the same persisted character, selected SpittingSpider instead of
+  RakingCat, walked from `(330,575)` to the real far-field spawn using ordinary
+  collision-routed inputs, and completed two kills for authoritative EXP
+  `9,017 -> 9,449`. The 902,380 ms run used 462 inputs and ended on its explicit
+  runtime budget during goal 3 with zero deaths, shortcut violations, critical
+  console errors, or critical network failures. q25 remains open; this proves
+  the throughput fix, not task completion.

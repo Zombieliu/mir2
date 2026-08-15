@@ -47,7 +47,11 @@ are never written to the report because login frames can contain credentials.
   script are all runtime-profile allow-listed and the action is reachable from
   the rendered main dialog through a concrete click sequence.
 - `scripts/quest-agent/autonomous-policy.mjs` converts that generated route into
-  the next executable goal without skipping blocked quest scripts.
+  the next executable goal without skipping blocked quest scripts. For a long
+  level-preparation grind it can amortize one same-map field walk over a
+  bounded estimate of the remaining kills, but only after completed real quest
+  combat has certified the higher-yield monster; short grinds retain the local
+  field preference.
 - `scripts/quest-agent/run-q1-q5.mjs` owns the shared real-client runtime: visible
   account/character creation, NPC approach and dialog selection, ordinary
   movement, target selection and auto-attack, corpse harvesting, starter weapon
@@ -123,15 +127,17 @@ The longer resumed Warrior chain has independently completed q22-q24, q28, and
 q29 through ordinary client actions. Its current authoritative snapshot is
 level 14 with q25 at 6/20 (`CannibalStem` 6/10 and `CannibalLeaf` 0/10), q26
 and q27 not yet unlocked in that snapshot, and q30 active at 0/1 `JadeRing`.
-The post-fix segment (`warrior-q30-r37-supervised`) ran for 489,624 ms,
-completed 5 of 9 attempted goals, recorded 5 kills and 283 physical inputs,
-advanced experience from 7,989 to 8,541, and ended with zero deaths, shortcut
-violations, critical console errors, or critical network failures. This is
-strong resume/recovery and soak evidence,
+The current A/B segment (`warrior-q30-r39-supervised`) resumed that same
+persisted character after a long-grind policy fix, physically crossed Bichon
+to the quest-certified SpittingSpider far field, completed 2 of 3 attempted
+goals, recorded 2 kills and 462 physical inputs, and advanced experience from
+9,017 to 9,449. Its 902,380 ms budget expired during the third goal with zero
+deaths, shortcut violations, critical console errors, or critical network
+failures. This is strong resume/recovery, navigation, and throughput evidence,
 but it is not a contiguous q1-q30 completion certificate.
 
-Across the 37 finalized local development reports through r37, the harness
-recorded 35,627,291 ms of browser-active runtime, 18,555 physical inputs, 241
+Across the 39 finalized local development reports through r39, the harness
+recorded 36,811,073 ms of browser-active runtime, 19,159 physical inputs, 246
 kills, 10 deaths, 9 revives, and zero shortcut violations. These reports span
 multiple runner revisions and include deliberately interrupted or failed
 diagnostic runs; the aggregate is endurance evidence, not one passing run.

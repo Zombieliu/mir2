@@ -13,15 +13,16 @@ level-1-to-50 playthrough.
 - Main integration base: `f0e0bb6cdc7129fc3b183e7875603d198198bb75`
   (current `main`, including PR #234).
 - Main-based acceptance code freeze:
-  `8423d124bf6d52d02f0c129de38227b6cfe863ff`.
-- Patch-equivalent source freeze:
+  `ab3582ed3f893143038ce138f148458980894ca1`.
+- Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
-- Latest live-soak runtime revision:
-  `d8bca1792708baff979460fc1f98ca1dd4bd9ddf`.
+- Latest live-soak Quest Agent runtime revision:
+  `060f8c302` (patch-equivalent to clean commit `ab3582ed3`).
 - Remote clean branch: `origin/codex/autonomous-quest-agent-main`.
-- Code range: seven code/test commits plus acceptance documentation on top of
-  the main integration base. `git range-diff` matches all eight transplanted
-  source commits exactly; documentation-only commits may follow the code freeze.
+- Code range: nine code/test commits plus two acceptance-documentation commits
+  on top of the main integration base. The original eight transplanted source
+  commits remain one-for-one matches under `git range-diff`; the later scene
+  cache regression and grind-travel fix are clean-branch follow-ups.
 
 ## Acceptance matrix
 
@@ -58,7 +59,7 @@ cargo test -p mir2-gateway --lib
 cargo fmt --all -- --check
 ```
 
-Full-package gates pass on the patch-equivalent source freeze:
+Full-package gates passed on the original patch-equivalent source freeze:
 
 - Quest Agent: 163 passed, 0 failed;
 - TypeScript, Node syntax, Rust formatting, and whitespace checks: passed;
@@ -77,6 +78,12 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
+The current `ab3582ed3` follow-up changes only Quest Agent JavaScript and its
+unit test. The complete Quest Agent gate now passes 164/164, including the new
+long-preparation travel regression; `git diff --check` passes. The earlier
+full Simulation/Gateway/TypeScript results remain the backend baseline rather
+than being relabeled as a fresh run for this Agent-only change.
+
 The first full acceptance run exposed a deterministic saved-transform
 regression introduced after the PR #233 base: a valid Bichon field position was
 tested against the starter collision window and incorrectly recovered into the
@@ -94,21 +101,25 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 37 finalized development reports
-through `warrior-q30-r37-supervised`:
+The private evidence directory contains 39 finalized development reports
+through `warrior-q30-r39-supervised`:
 
-- 35,627,291 ms (9 h 53 m 47 s) browser-active runtime;
-- 18,555 recorded physical inputs;
-- 241 recorded kills;
+- 36,811,073 ms (10 h 13 m 31 s) browser-active runtime;
+- 19,159 recorded physical inputs;
+- 246 recorded kills;
 - 10 deaths and 9 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
 The aggregate spans multiple code revisions and is endurance evidence, not a
-single passing certificate. The latest finalized r37 segment is the post-fix
-clean resume/recovery smoke: 489,624 ms, 9 attempted goals, 5 successful goals,
-5 kills, 283 inputs, experience advanced from 7,989 to 8,541, no death, no
-shortcut violation, and no critical browser or network diagnostic.
+single passing certificate. The r38 baseline and r39 A/B continuation add
+1,183,782 ms, 604 inputs, and 5 kills with no death, shortcut violation, or
+critical browser/network diagnostic. In r39, the same persisted level-14
+character selected the already quest-certified `SpittingSpider`, walked from
+the village edge to its real far-field spawn, completed two normal-client
+kills, and advanced experience from 9,017 to 9,449. Its 902,380 ms budget then
+expired during the third goal; this is an expected incomplete segment, not a
+q25 or q30 completion certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
@@ -122,6 +133,16 @@ rotation. The code freeze fixes the distinct corpse bug where authoritative
 occupy collision and target-selection grids. Unit regression coverage and the
 post-fix live smoke confirm that zero-health actors are filtered, but this does
 not certify every crowded-field navigation layout.
+
+The soak also exposed a long-preparation efficiency defect: the planner charged
+the full one-time field walk to every prospective kill, so a character with
+more than 20,000 EXP remaining repeatedly chose nearby low-yield cats. Commit
+`ab3582ed3` amortizes that physical trip over at most 20 expected kills while
+retaining the original locality preference for short grinds. A red/green unit
+test locks the exact saved-state decision, and r39 proves the resulting far
+field is physically reachable and yields authoritative EXP. q25 remains 6/20;
+this fix improves honest progression throughput and does not skip its level-15
+combat-preparation requirement.
 
 ## Sign-off wording
 
