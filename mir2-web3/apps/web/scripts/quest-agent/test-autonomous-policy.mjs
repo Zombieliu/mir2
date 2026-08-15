@@ -816,6 +816,21 @@ test("a nearby sustainable grind source beats a marginally more efficient remote
   );
 });
 
+test("a long level preparation amortizes one physical trip to a proven high-yield field", () => {
+  const state = snapshot([], {
+    playerLevel: 14,
+    playerExperience: 8_487,
+    playerMaxExperience: 30_000,
+    player: { x: 329, y: 606 },
+  });
+  const goal = chooseGrindingGoal(state, grindingCatalog, 15, {
+    certifiedMonsterNames: ["RakingCat", "SpittingSpider"],
+  });
+  assert.equal(goal.monsterName, "SpittingSpider");
+  assert.equal(goal.targetMapFileName, "0");
+  assert.equal(goal.experience, 108);
+});
+
 test("unhandled flag tasks stay explicit instead of being skipped or mutated", () => {
   const flagged = route.quests.find((quest) => quest.objectives.flag.length > 0);
   assert.ok(flagged);

@@ -492,13 +492,27 @@ function grindRiskScore(monster, playerLevel, combatCertified = false) {
 function grindCandidateScore(snapshot, monster, spawn, playerLevel, combatCertified) {
   const distance = spawnDistance(snapshot, spawn);
   // Within one real map, one hundred physical tiles are worth one combat-risk
-  // point. Live r24/r26 showed why this must participate in the same score:
-  // a marginally better HP/XP source can cost an entire potion belt before a
-  // several-hundred-tile trip even reaches its field, while a same-level cat
-  // source is already visible at the village edge. Cross-map locality remains
-  // the stronger first sort key above; this term only ranks physical choices
-  // on that selected map.
-  const travelPenalty = Number.isFinite(distance) ? distance / 100 : 0;
+  // point for a one-off fight. A level-preparation run, however, pays that
+  // walk once and then replans beside the same spawn for many ordinary kills.
+  // Amortize the trip over a bounded estimate of the kills still required for
+  // the current level; otherwise every goal charges the full walk again and a
+  // multi-hour run remains trapped on low-XP village-edge monsters. Keep the
+  // bound deliberately small so a merely efficient source cannot justify an
+  // unsafe journey across an entire map. Cross-map locality remains the
+  // stronger first sort key above.
+  const currentExperience = finiteNumber(snapshot?.playerExperience, Number.NaN);
+  const maximumExperience = finiteNumber(snapshot?.playerMaxExperience, Number.NaN);
+  const monsterExperience = finiteNumber(monster?.experience, Number.NaN);
+  const remainingExperience = maximumExperience - currentExperience;
+  const expectedKills =
+    Number.isFinite(remainingExperience) && remainingExperience > 0 &&
+    Number.isFinite(monsterExperience) && monsterExperience > 0
+      ? Math.ceil(remainingExperience / monsterExperience)
+      : 1;
+  const travelAmortization = Math.max(1, Math.min(20, expectedKills));
+  const travelPenalty = Number.isFinite(distance)
+    ? distance / (100 * travelAmortization)
+    : 0;
   return grindRiskScore(monster, playerLevel, combatCertified) + travelPenalty;
 }
 
