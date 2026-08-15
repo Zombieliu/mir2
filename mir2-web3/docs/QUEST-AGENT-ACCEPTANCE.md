@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 76 finalized development reports
-through `warrior-q30-r77-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 77 finalized development reports
+through `warrior-q30-r78-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 67,817,253 ms (18 h 50 m 17 s) browser-active runtime;
-- 35,612 recorded physical inputs;
-- 366 historical kill rows, including one r44 row now proven to repeat the
+- 68,326,605 ms (18 h 58 m 46 s) browser-active runtime;
+- 35,869 recorded physical inputs;
+- 375 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 14 deaths and 13 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -514,6 +514,25 @@ ends at map 0 `(506,168)`, 149/149 HP, ten HP drugs, and 233 gold. q25 remains
 8/20 and q30 remains 0/1. The confirmed-combat and final frames were visually
 inspected and agree with the report. This proves live level-16 preparation
 progress, not level 16 or quest completion.
+
+r78 resumed inside the reached SpittingSpider region and measured the
+short-range grind throughput without paying the cross-map journey again. The
+first selected spider left AOI without target-specific death evidence and was
+correctly failed. Goals 2-10 then completed with nine distinct confirmed
+target object ids. A visible gold pickup advanced gold `233 -> 341`, while
+authoritative EXP advanced `8,433 -> 12,105`. As in r77, the EXP delta is
+reported independently and is not converted into extra unrecorded kill claims.
+
+The finalized r78 report records 509,352 ms, 257 physical inputs, 9/10
+successful goals, nine confirmed kill rows, one visible gold pickup, zero
+target quarantines, zero death/revive, zero potion use, zero shortcuts, and
+zero critical browser/network diagnostics. It ends at map 0 `(646,128)`,
+143/149 HP, ten HP drugs, and level 15. q25 remains 8/20 and q30 remains 0/1.
+The first-success and final combat frames were visually inspected. The final
+frame still showed the last target at 6/65 HP; target-specific death/EXP settled
+in the following subsecond before report finalization, so that frame is treated
+as combat-in-progress rather than a post-death visual certificate. This is
+efficient preparation progress, not level 16 or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
