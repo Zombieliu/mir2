@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 77 finalized development reports
-through `warrior-q30-r78-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 78 finalized development reports
+through `warrior-q30-r79-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 68,326,605 ms (18 h 58 m 46 s) browser-active runtime;
-- 35,869 recorded physical inputs;
-- 375 historical kill rows, including one r44 row now proven to repeat the
+- 69,229,682 ms (19 h 13 m 49 s) browser-active runtime;
+- 36,405 recorded physical inputs;
+- 376 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 14 deaths and 13 completed revives across intentionally interrupted and
+- 15 deaths and 14 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -533,6 +533,26 @@ frame still showed the last target at 6/65 HP; target-specific death/EXP settled
 in the following subsecond before report finalization, so that frame is treated
 as combat-in-progress rather than a post-death visual certificate. This is
 efficient preparation progress, not level 16 or quest completion.
+
+r79 resumed the final r78 combat region with a larger 20-goal ceiling, but a
+multi-spider overlap immediately converted the run into a recovery test. The
+first grind goal completed against object `202218`; the character then consumed
+all ten HP drugs while physically disengaging, died, revived, and returned to
+Merchant Ruben. Available gold funded a visible partial restock `0 -> 5` for
+200 gold rather than inventing the full ten-drug departure stock. The agent
+entered map 0141 for safe settlement, returned through its visible exit, and
+started toward a different lower-risk SpittingSpider field. A visible repair
+interaction emitted an item-repaired chat but produced no recorded durability
+or gold delta, so it is not counted as a completed repair.
+
+The finalized r79 report records 903,077 ms, 536 physical inputs, 1/2
+successful goals, one confirmed kill row, one death/revive, ten potion uses,
+one visible purchase, zero target quarantines, zero shortcuts, and zero
+critical browser/network diagnostics. It ends at map 0 `(284,481)`, 143/149
+HP, five HP drugs, 141 gold, and EXP 12,567/40,000. q25 remains 8/20 and q30
+remains 0/1. The high-risk combat and final resumed-travel frames were visually
+inspected and match the report. This is a complete low-funds recovery cycle and
+one preparation kill, not sustained grind throughput or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
